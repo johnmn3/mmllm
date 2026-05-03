@@ -2,6 +2,100 @@
 
 mmLLM is a new kind of "green llm" - more efficient for many things by offloading some work to disk.
 
+## Use case: lightweight CPU-bound code agents at the edge
+
+mmLLM is shaped for one specific deployment profile: **fast,
+local, fill-in-the-middle code completion that runs alongside your
+editor on a laptop, dev server, or edge device** — without
+depending on a hosted API.
+
+The architecture trades a large mmap-backed semantic memory bank
+(~5–20 GB on disk, queried sparsely per token) for tiny active
+dense weights (~10M params, ~40 MB resident). The bank gets
+faulted from disk into the OS page cache on demand, then shared
+across every concurrent editor session on the host.
+
+### Why this fits coding agents better than the alternatives
+
+**vs hosted-API completion (Copilot-style)**:
+- Round-trip + queue latency: 100-500 ms; mmLLM target after Phase 5: ~1 ms/token.
+- API costs scale linearly with users; mmLLM is one-time disk + CPU.
+- Code never leaves the device — fits enterprise dev environments
+  with privacy / data-residency constraints.
+
+**vs local dense code models (Qwen-Coder, DeepSeek-Coder, Codestral)**:
+- A 7B int8 dense model holds 7 GB resident **per editor**. Open
+  3 editors → 21 GB just for inference weights.
+- mmLLM holds **40 MB dense per editor** + one shared 4.7 GB
+  bank in the OS page cache (regardless of editor count).
+  Crossover at ~30 concurrent editor sessions per host;
+  asymptotic ~16× lower per-user RAM (see [Memory access energy](#memory-access-energy)).
+- Idle editor sessions cost ~zero RAM in mmLLM; in dense local
+  they keep their full weight set hot.
+
+**vs distillation-down-to-tiny dense models**:
+- A 100M-dense distillation has hard quality limits — it can't
+  encode the long tail of identifiers/APIs/idioms a real codebase
+  needs.
+- mmLLM's bank is the long-tail catchall: 21M entries today,
+  scalable to ~1T entries on disk (~2 TB int8) without the
+  per-user RAM cost growing.
+
+### Fill-in-the-middle is the natural attention shape
+
+The three-tier attention maps cleanly to the FIM completion task:
+
+| tier | what it does | role for code completion |
+|---|---|---|
+| **Short** (RoPE'd, in-RAM) | local positional context | the immediate prefix and suffix around the cursor |
+| **Long-cache** (set, in-RAM) | recent unbounded context | the rest of the open file + adjacent open buffers |
+| **Long-bank** (mmap-backed PKM) | cross-corpus semantic memory | "I've seen function signatures like this before; here's the typical body" — content-addressed retrieval over millions of trained code patterns |
+
+The bank's product-key lookup is `O(√N)` regardless of bank size,
+so growing it from 21M entries (current 5B run) to 1B+ entries on
+a laptop is a disk-space question, not a latency question.
+
+### Roadmap toward a Clojure assistant
+
+The eventual product target is a purpose-built Clojure code
+assistant — Clojure has a small enough community that mainstream
+tooling (Copilot, Cursor) underweights its idioms (immutable data,
+threading macros, REPL-driven workflow, namespaced keywords, EDN).
+A model trained specifically on Clojure, lightweight enough to run
+beside your editor with no API calls, fills a real gap.
+
+The path:
+
+1. **Now** — train on Pile-Github (~95 GB mixed-language code) to
+   validate the bank-as-substrate thesis at scale (active 5B
+   `ctx-add+fb` run; see Results below).
+2. **Next** — train on a Clojure-heavy corpus. Infrastructure
+   already exists: `mmllm clone-clojure` shallow-clones curated
+   Clojure-heavy upstream repos (clojure/clojure, core.async,
+   clojurescript, babashka, clj-kondo, shadow-cljs, ...);
+   `mmllm build-corpus` gathers `.clj/.cljc/.cljs/.edn` files into
+   a flat byte stream.
+3. **Multi-task** — train one shared bank simultaneously across
+   Pile-Github + Clojure corpora (`train_multi_b` in
+   `modal_app.py` already supports N corpora → 1 shared
+   mmap-backed bank). Tests whether bank-as-substrate transfers
+   general code knowledge into Clojure-specific completions
+   without catastrophic forgetting.
+4. **Edge packaging** — int8-quantize the trained bank (Phase 3
+   shipped, 4× compression) → 4.7 GB on disk. Ship as an editor
+   extension that spawns a local mmllm inference process;
+   multiple editors share the same bank file via the OS page
+   cache.
+5. **Specialized inference loops** — continuous batching for
+   multi-cursor completion, speculative decoding for 2× throughput,
+   eventual fine-tuning on Clojure-specific FIM templates and
+   REPL-driven workflows. Target: 1000 tok/sec on a modern
+   laptop CPU (see `docs/inference-optimization.md`).
+
+The overall pitch: a code assistant that respects the user's
+machine, the user's data, and the long tail of patterns specific
+to a language community that mainstream tooling doesn't prioritize.
+
 ## Architecture
 
 mmLLM is a decoder-only transformer with a hard-split three-tier attention
