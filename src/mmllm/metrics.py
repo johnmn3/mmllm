@@ -72,8 +72,8 @@ def _pue() -> float:
 
 
 class _PynvmlPoller:
-    """Background thread that polls pynvml for GPU power every second
-    and integrates Joules under the curve. Stops on close()."""
+    """Background thread that polls pynvml for GPU power + VRAM every
+    second and integrates Joules under the curve. Stops on close()."""
 
     def __init__(self, sample_hz: float = 1.0):
         self.sample_hz = sample_hz
@@ -82,6 +82,8 @@ class _PynvmlPoller:
         self.joules = 0.0
         self.samples = 0
         self.peak_w = 0.0
+        self.peak_vram_bytes = 0  # max VRAM resident across all GPUs at any sample
+        self.total_vram_bytes = 0  # total VRAM capacity across all GPUs (static)
         self._handles = []
         self._pynvml = None
 
@@ -92,6 +94,14 @@ class _PynvmlPoller:
             n = pynvml.nvmlDeviceGetCount()
             self._handles = [pynvml.nvmlDeviceGetHandleByIndex(i) for i in range(n)]
             self._pynvml = pynvml
+            # Capture total VRAM once (static per host).
+            try:
+                self.total_vram_bytes = sum(
+                    pynvml.nvmlDeviceGetMemoryInfo(h).total
+                    for h in self._handles
+                )
+            except Exception:
+                self.total_vram_bytes = 0
         except Exception:
             return False
         if not self._handles:
@@ -112,10 +122,20 @@ class _PynvmlPoller:
                 )
             except Exception:
                 w_total = 0.0
+            try:
+                # Sum used VRAM across all GPUs at this sample. Captures
+                # bank V + dense + activations + KV cache + opt state.
+                vram_used = sum(
+                    self._pynvml.nvmlDeviceGetMemoryInfo(h).used
+                    for h in self._handles
+                )
+            except Exception:
+                vram_used = 0
             now = time.time()
             dt = now - last
             self.joules += w_total * dt
             self.peak_w = max(self.peak_w, w_total)
+            self.peak_vram_bytes = max(self.peak_vram_bytes, vram_used)
             self.samples += 1
             last = now
             self._stop.wait(period)
@@ -225,14 +245,45 @@ class EnergyTracker:
         elapsed_s = max(self._t1 - self._t0, 1e-9)
         kwh = 0.0
         peak_w = 0.0
+        peak_vram_gb = 0.0
+        total_vram_gb = 0.0
         if self._backend == "codecarbon" and self._cc_tracker is not None:
             try:
                 kwh = float(self._cc_tracker.final_emissions_data.energy_consumed)
             except Exception:
                 kwh = 0.0
+            # Try to also pull VRAM info via pynvml directly even when
+            # CodeCarbon owns the energy track. CodeCarbon doesn't expose
+            # peak VRAM, and we want it for the "memory hot" claim.
+            try:
+                import pynvml  # type: ignore
+                pynvml.nvmlInit()
+                n = pynvml.nvmlDeviceGetCount()
+                cur_used = sum(
+                    pynvml.nvmlDeviceGetMemoryInfo(
+                        pynvml.nvmlDeviceGetHandleByIndex(i)
+                    ).used
+                    for i in range(n)
+                )
+                cur_total = sum(
+                    pynvml.nvmlDeviceGetMemoryInfo(
+                        pynvml.nvmlDeviceGetHandleByIndex(i)
+                    ).total
+                    for i in range(n)
+                )
+                pynvml.nvmlShutdown()
+                # End-of-run snapshot only; not a true peak (CodeCarbon
+                # doesn't poll at sample-rate). Still useful as a lower
+                # bound. For peak, use pynvml backend instead.
+                peak_vram_gb = cur_used / 1024**3
+                total_vram_gb = cur_total / 1024**3
+            except Exception:
+                pass
         elif self._backend == "pynvml" and self._poller is not None:
             kwh = self._poller.joules / 3.6e6
             peak_w = self._poller.peak_w
+            peak_vram_gb = self._poller.peak_vram_bytes / 1024**3
+            total_vram_gb = self._poller.total_vram_bytes / 1024**3
         else:
             # Wall+TDP fallback.
             kwh = self._wall_kwh_estimate
@@ -242,20 +293,29 @@ class EnergyTracker:
         joules = kwh * 3.6e6
         j_per_tok = joules / self._n_tokens if self._n_tokens > 0 else 0.0
         tok_per_s = self._n_tokens / elapsed_s if self._n_tokens > 0 else 0.0
+        # Estimated kWh attributable to keeping VRAM resident over wall
+        # time. Uses a midpoint HBM idle figure of 0.5 W/GB; specific to
+        # A100/H100-class HBM2e. NOT measured — derived from peak VRAM
+        # and elapsed wall, useful only as an order-of-magnitude proxy
+        # for the "what does it cost to keep this hot?" question.
+        vram_idle_kwh = peak_vram_gb * 0.5 * elapsed_s / 3.6e6
         return {
-            "label":       self.label,
-            "backend":     self._backend,
-            "wall_s":      round(elapsed_s, 3),
-            "kwh":         round(kwh, 6),
-            "joules":      round(joules, 1),
-            "gco2eq":      round(gco2eq, 3),
-            "n_tokens":    self._n_tokens,
-            "j_per_tok":   round(j_per_tok, 6),
-            "tok_per_s":   round(tok_per_s, 2),
-            "peak_w":      round(peak_w, 1),
-            "pue":         _pue(),
-            "grid_g_per_kwh": _grid_intensity(),
-            "warning":     self.start_warning,
+            "label":            self.label,
+            "backend":          self._backend,
+            "wall_s":           round(elapsed_s, 3),
+            "kwh":              round(kwh, 6),
+            "joules":           round(joules, 1),
+            "gco2eq":           round(gco2eq, 3),
+            "n_tokens":         self._n_tokens,
+            "j_per_tok":        round(j_per_tok, 6),
+            "tok_per_s":        round(tok_per_s, 2),
+            "peak_w":           round(peak_w, 1),
+            "peak_vram_gb":     round(peak_vram_gb, 3),
+            "total_vram_gb":    round(total_vram_gb, 3),
+            "vram_idle_kwh_estimate": round(vram_idle_kwh, 6),
+            "pue":              _pue(),
+            "grid_g_per_kwh":   _grid_intensity(),
+            "warning":          self.start_warning,
         }
 
 

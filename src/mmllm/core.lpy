@@ -1133,14 +1133,19 @@
                                (.get s "kwh") (.get s "gco2eq")
                                (.get s "j_per_tok") (.get s "n_tokens")
                                (.get s "backend")))
+              (println (format "  ── memory: peak VRAM %.2f / %.2f GB; ~%.4f kWh attributable to VRAM-resident state (estimate) ──"
+                               (.get s "peak_vram_gb") (.get s "total_vram_gb")
+                               (.get s "vram_idle_kwh_estimate")))
               (when-let [w (.get s "warning")]
                 (println (format "  ── energy WARN: %s ──" w)))
               (append-jsonl! log-path
-                             (format "{\"event\":\"training_energy\",\"backend\":\"%s\",\"wall_s\":%.1f,\"kwh\":%.6f,\"gco2eq\":%.3f,\"n_tokens\":%d,\"j_per_tok\":%.6f,\"tok_per_s\":%.2f,\"peak_w\":%.1f,\"pue\":%.3f,\"grid_g_per_kwh\":%.1f}"
+                             (format "{\"event\":\"training_energy\",\"backend\":\"%s\",\"wall_s\":%.1f,\"kwh\":%.6f,\"gco2eq\":%.3f,\"n_tokens\":%d,\"j_per_tok\":%.6f,\"tok_per_s\":%.2f,\"peak_w\":%.1f,\"peak_vram_gb\":%.3f,\"total_vram_gb\":%.3f,\"vram_idle_kwh_estimate\":%.6f,\"pue\":%.3f,\"grid_g_per_kwh\":%.1f}"
                                      (.get s "backend") (.get s "wall_s")
                                      (.get s "kwh") (.get s "gco2eq")
                                      (.get s "n_tokens") (.get s "j_per_tok")
                                      (.get s "tok_per_s") (.get s "peak_w")
+                                     (.get s "peak_vram_gb") (.get s "total_vram_gb")
+                                     (.get s "vram_idle_kwh_estimate")
                                      (.get s "pue") (.get s "grid_g_per_kwh"))))
             (catch python/Exception e
               (println (format "  ── energy: instrumentation failed: %s ──" e)))))))))
