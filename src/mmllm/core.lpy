@@ -716,7 +716,8 @@
    sources are summed inside attention."
   [m prompt n]
   (set-eval-mode! m)
-  (let [prompt-toks            (-> prompt encode (.unsqueeze 0))
+  (let [device                 (:device m)
+        prompt-toks            (-> prompt encode (.unsqueeze 0) (.to device))
         [logits short long]    (forward m prompt-toks)]
     (loop [step    0
            short-c short
@@ -724,13 +725,65 @@
            prev    logits
            toks    prompt-toks]
       (if (= step n)
-        (decode (.squeeze toks 0))
+        (decode (.to (.squeeze toks 0) "cpu"))
         (let [last-log              (.select prev 1 -1)
               probs                 (F/softmax last-log ** :dim -1)
               next-tok              (torch/multinomial probs 1)
               [new-log new-s new-l] (forward m next-tok short-c long-c)]
           (recur (inc step) new-s new-l new-log
                  (torch/cat (python/list [toks next-tok]) ** :dim 1)))))))
+
+;;; ─────────────────────── inference benchmark ───────────────────────
+
+(defn bench-inference
+  "Time the per-token inference path. Builds the model, loads dense
+   ckpt + bank mmap, runs `n-warm` warmup tokens (kernel JIT, page
+   cache priming), then times `n-time` tokens generated via `sample`.
+   Prints tok/sec and ms/tok.
+
+   Bank placement controlled by MMLLM_BANK_ON_GPU env var:
+     true  → bank V lives in cuda VRAM (fastest single-instance path)
+     false → bank V is mmap'd from disk; per-token cross-device top-K
+             gather (the multi-tenant-friendly path)."
+  [config base-path ckpt-step bank-path n-warm n-time]
+  (let [cfg    (assoc config :memory-mmap-path bank-path)
+        m      (build-model cfg)
+        device (:device m)]
+    (when ckpt-step
+      (let [path  (str base-path ".ckpts/step-" ckpt-step)
+            ;; Ckpt may have been saved on cuda; map to current device so
+            ;; CPU benches don't fail with "deserialize object on a CUDA
+            ;; device but cuda not available".
+            saved (python/list (torch/load (str path "/dense.pt")
+                                           ** :map_location device))]
+        (println (format "  loaded ckpt: %s (%d dense param tensors)" path (count saved)))
+        (doseq [[p s] (map vector (parameters m) saved)]
+          (.copy_ (.- p data) s))))
+    (set-eval-mode! m)
+    (torch/set_grad_enabled false)
+    (println (format "  device=%s  bank_on_gpu=%s  sqrt_n=%d  bank=%s"
+                     device
+                     (.lower (.get (.- os environ) "MMLLM_BANK_ON_GPU" "false"))
+                     (pick-sqrt-n config)
+                     bank-path))
+    (try
+      (let [prompt "the quick brown fox jumps over the lazy dog. "]
+        (println (format "  warmup: %d tokens …" n-warm))
+        (sample m prompt n-warm)
+        (when (= device "cuda")
+          (cuda/synchronize))
+        (println (format "  timed:  %d tokens …" n-time))
+        (let [t0  (time/time)
+              _   (sample m prompt n-time)
+              _   (when (= device "cuda") (cuda/synchronize))
+              dt  (- (time/time) t0)
+              tps (/ (python/float n-time) dt)
+              ms  (* 1000.0 (/ dt (python/float n-time)))]
+          (println)
+          (println (format "  RESULT: %d tokens in %.3fs → %.2f tok/sec  (%.3f ms/tok)"
+                           n-time dt tps ms))))
+      (finally
+        (torch/set_grad_enabled true)))))
 
 ;;; ─────────────────────── train on a real corpus ───────────────────────
 
@@ -1328,6 +1381,13 @@
                             cfg2       (if mpath (assoc cfg :memory-mmap-path mpath) cfg)]
                         (train-long cfg2 train-path val-path ckpt-dir log-path
                                     total eval-every ckpt-every)
+                        (println "done."))
+      "bench"         (let [base      (or (second args) "/data/pile-github.bin")
+                            ckpt-step (when (nth args 2 nil) (python/int (nth args 2 nil)))
+                            bank-path (or (nth args 3 nil) "/data/pile-bank-3tier")
+                            n-warm    (python/int (or (nth args 4 nil) 50))
+                            n-time    (python/int (or (nth args 5 nil) 500))]
+                        (bench-inference cfg base ckpt-step bank-path n-warm n-time)
                         (println "done."))
       "fetch-pile-github" (let [out      (or (second args) "/tmp/pile-github.bin")
                                 cap      (when (nth args 2 nil)

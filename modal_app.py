@@ -610,6 +610,96 @@ def lr_sweep(
 @app.function(
     image=image,
     volumes={"/data": volume},
+    timeout=1800,
+    gpu="H100",
+    memory=65536,
+)
+def bench_inference(
+    base: str = "/data/pile-github.bin",
+    ckpt_step: int = 305000,
+    bank: str = "/data/pile-bank-3tier",
+    n_warm: int = 50,
+    n_time: int = 500,
+    sqrt_n: int = 2048,
+    bank_on_gpu: bool = True,
+):
+    """Benchmark per-token inference speed on a trained checkpoint.
+
+    bank_on_gpu=True   : bank V loaded into cuda VRAM. Single-instance,
+                         fastest path. Bank is per-process (no sharing
+                         across parallel inference instances).
+    bank_on_gpu=False  : bank V is mmap'd from disk; per-token cross-
+                         device gather of top-K rows CPU→GPU. Slower
+                         per token but allows N parallel inference
+                         instances to share one bank via mmap pages.
+
+    Reports tok/sec and ms/tok at batch=1. Both modes use the same
+    trained dense weights from <base>.ckpts/step-<ckpt_step>/dense.pt
+    and the same bank V at <bank>.<i>.bin.
+    """
+    import os, subprocess
+    env = {**os.environ,
+           "MMLLM_DEVICE":     "cuda",
+           "MMLLM_SQRT_N":     str(sqrt_n),
+           "MMLLM_BANK_ON_GPU": "true" if bank_on_gpu else "false"}
+    print(
+        f"=== bench_inference base={base} ckpt={ckpt_step} bank={bank} "
+        f"sqrt_n={sqrt_n} bank_on_gpu={bank_on_gpu} "
+        f"n_warm={n_warm} n_time={n_time} ===",
+        flush=True,
+    )
+    subprocess.run(
+        ["mmllm", "bench", base, str(ckpt_step), bank,
+         str(n_warm), str(n_time)],
+        check=True, env=env,
+    )
+
+
+@app.function(
+    image=image,
+    volumes={"/data": volume},
+    timeout=1800,
+    cpu=8.0,
+    memory=32768,    # bank V at sqrt_n=2048 is 18.8 GB; need RAM headroom
+)
+def bench_inference_cpu(
+    base: str = "/data/pile-github.bin",
+    ckpt_step: int = 305000,
+    bank: str = "/data/pile-bank-3tier",
+    n_warm: int = 50,
+    n_time: int = 200,
+    sqrt_n: int = 2048,
+):
+    """CPU-only inference benchmark on a trained checkpoint. Many
+    end-users will run this CPU-bound (no GPU available, edge deploy,
+    laptop, etc.) — measure that path explicitly.
+
+    The bank is mmap'd from disk on CPU; the cross-device gather is a
+    no-op (everything stays on CPU). At batch=1 this measures the
+    single-conversation latency a CPU user would see.
+
+    sqrt_n=2048 means 18.8 GB bank V; container needs >=24 GB RAM.
+    """
+    import os, subprocess
+    env = {**os.environ,
+           "MMLLM_DEVICE":     "cpu",
+           "MMLLM_SQRT_N":     str(sqrt_n),
+           "MMLLM_BANK_ON_GPU": "false"}    # no GPU; bank stays mmap'd
+    print(
+        f"=== bench_inference_cpu base={base} ckpt={ckpt_step} bank={bank} "
+        f"sqrt_n={sqrt_n} n_warm={n_warm} n_time={n_time} ===",
+        flush=True,
+    )
+    subprocess.run(
+        ["mmllm", "bench", base, str(ckpt_step), bank,
+         str(n_warm), str(n_time)],
+        check=True, env=env,
+    )
+
+
+@app.function(
+    image=image,
+    volumes={"/data": volume},
     timeout=86400,
     cpu=4.0,
     memory=8192,
