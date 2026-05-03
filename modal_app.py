@@ -222,11 +222,13 @@ def _run_train_long(total_steps, eval_every, ckpt_every, device, lr,
                     batch=4, base="/data/text8", bank="/data/bank",
                     sqrt_n=None, cpu_offload=False, bank_on_gpu=True,
                     sync_every=0, volume_name="mmllm-data",
-                    lr_warmup=0, lr_min=None):
+                    lr_warmup=0, lr_min=None,
+                    bank_query_mode="plain", long_tier_mix="sum"):
     """Shared body. All knobs threaded via env vars (MMLLM_DEVICE,
     MMLLM_LR, MMLLM_BATCH, MMLLM_SQRT_N, MMLLM_CPU_OFFLOAD,
     MMLLM_BANK_ON_GPU, MMLLM_SYNC_EVERY, MMLLM_VOLUME_NAME,
-    MMLLM_LR_WARMUP, MMLLM_LR_MIN) so the basilisp CLI stays unchanged.
+    MMLLM_LR_WARMUP, MMLLM_LR_MIN, MMLLM_BANK_QUERY_MODE,
+    MMLLM_LONG_TIER_MIX) so the basilisp CLI stays unchanged.
 
     `bank_on_gpu=False` switches to the CPUPinnedEmbedding path —
     bank V lives in the mmap'd file, cross-device gather happens
@@ -243,6 +245,14 @@ def _run_train_long(total_steps, eval_every, ckpt_every, device, lr,
     0 → lr → lr_min over (warmup, total_steps - warmup) steps.
     `lr_min` defaults to lr/10 if not set. lr_warmup=0 (default)
     means constant lr — backward compat.
+
+    `bank_query_mode` selects the bank-query shaper (mmllm.bank_query):
+    'plain' (default; q_long_flat unchanged) or 'ctx-add' (additive
+    W_ctx · x with zero-init, identical to plain at step 0).
+
+    `long_tier_mix` selects how the long-tier SDPA and bank-V outputs
+    combine (mmllm.gating): 'sum' (default), 'scalar' (per-head α/β),
+    'switch' (sigmoid-gated convex mix).
     """
     import os
     import subprocess
@@ -253,7 +263,9 @@ def _run_train_long(total_steps, eval_every, ckpt_every, device, lr,
            "MMLLM_BANK_ON_GPU": "true" if bank_on_gpu else "false",
            "MMLLM_SYNC_EVERY":  str(sync_every),
            "MMLLM_VOLUME_NAME": volume_name,
-           "MMLLM_LR_WARMUP":   str(lr_warmup)}
+           "MMLLM_LR_WARMUP":   str(lr_warmup),
+           "MMLLM_BANK_QUERY_MODE": bank_query_mode,
+           "MMLLM_LONG_TIER_MIX":   long_tier_mix}
     if sqrt_n is not None:
         env["MMLLM_SQRT_N"] = str(sqrt_n)
     if cpu_offload:
@@ -265,6 +277,7 @@ def _run_train_long(total_steps, eval_every, ckpt_every, device, lr,
         f"cpu_offload={cpu_offload} bank_on_gpu={bank_on_gpu} "
         f"sync_every={sync_every} volume={volume_name} "
         f"lr_warmup={lr_warmup} lr_min={lr_min} "
+        f"bank_query_mode={bank_query_mode} long_tier_mix={long_tier_mix} "
         f"total={total_steps} eval-every={eval_every} "
         f"ckpt-every={ckpt_every} base={base} ===",
         flush=True,
@@ -299,6 +312,8 @@ def train_with_bank(
     cpu_offload: bool = False,  # CPU-offload SparseAdam state → frees ~38 GB GPU VRAM
     lr_warmup: int = 0,         # 0 = constant lr; >0 enables linear warmup + cosine decay
     lr_min: float = 0.0,        # cosine floor (0 = lr/10 by default; only used when lr_warmup > 0)
+    bank_query_mode: str = "plain",  # 'plain' | 'ctx-add' — see mmllm.bank_query
+    long_tier_mix: str = "sum",      # 'sum' | 'scalar' | 'switch' — see mmllm.gating
     base: str = "/data/text8",
     bank: str = "/data/bank",
 ):
@@ -334,6 +349,8 @@ def train_with_bank(
         cpu_offload=cpu_offload,
         lr_warmup=lr_warmup,
         lr_min=(lr_min if lr_min > 0 else None),
+        bank_query_mode=bank_query_mode,
+        long_tier_mix=long_tier_mix,
     )
 
 
@@ -721,6 +738,8 @@ def train_with_bank_worker(
     base: str = "/data/pile-github.bin",
     sync_every: int = 100,
     volume_name: str = "mmllm-data",
+    bank_query_mode: str = "plain",
+    long_tier_mix: str = "sum",
 ):
     """One worker in a Hogwild-style multi-trainer pool.
 
@@ -761,6 +780,8 @@ def train_with_bank_worker(
         bank_on_gpu=False,  # ← shared mmap bank, not per-trainer GPU copy
         sync_every=sync_every,
         volume_name=volume_name,
+        bank_query_mode=bank_query_mode,
+        long_tier_mix=long_tier_mix,
     )
 
 
@@ -775,7 +796,9 @@ def train_multi(n_trainers: int = 4,
                 bank: str = "/data/shared-bank",
                 base: str = "/data/pile-github.bin",
                 sync_every: int = 100,
-                volume_name: str = "mmllm-data"):
+                volume_name: str = "mmllm-data",
+                bank_query_mode: str = "plain",
+                long_tier_mix: str = "sum"):
     """Orchestrator: pre-init bank, fan out N parallel
     train_with_bank_worker calls all sharing the same bank file.
 
@@ -789,7 +812,9 @@ def train_multi(n_trainers: int = 4,
         instead of a single base.
     """
     print(f"=== train_multi: n_trainers={n_trainers} steps={total_steps} "
-          f"sqrt_n={sqrt_n} bank={bank} base={base} ===", flush=True)
+          f"sqrt_n={sqrt_n} bank={bank} base={base} "
+          f"bank_query_mode={bank_query_mode} long_tier_mix={long_tier_mix} ===",
+          flush=True)
     # 1. Make sure bank files exist at the right size so workers can
     #    safely open r+ (no first-write race).
     print("preparing shared bank…", flush=True)
@@ -810,6 +835,8 @@ def train_multi(n_trainers: int = 4,
             base=base,
             sync_every=sync_every,
             volume_name=volume_name,
+            bank_query_mode=bank_query_mode,
+            long_tier_mix=long_tier_mix,
         )
         handles.append((i, h))
         print(f"  worker {i} spawned: {h.object_id}", flush=True)
@@ -834,7 +861,9 @@ def train_multi_b(bases: str = "/data/text8,/data/pile-github.bin",
                   sqrt_n: int = 2048,
                   bank: str = "/data/shared-bank-b",
                   sync_every: int = 100,
-                  volume_name: str = "mmllm-data"):
+                  volume_name: str = "mmllm-data",
+                  bank_query_mode: str = "plain",
+                  long_tier_mix: str = "sum"):
     """Pattern B (multi-task): N workers, EACH on its own corpus, sharing one bank.
 
     `bases` is a comma-separated list of base paths (one per worker).
@@ -874,6 +903,8 @@ def train_multi_b(bases: str = "/data/text8,/data/pile-github.bin",
             base=base_i,
             sync_every=sync_every,
             volume_name=volume_name,
+            bank_query_mode=bank_query_mode,
+            long_tier_mix=long_tier_mix,
         )
         handles.append((i, base_i, h))
         print(f"  worker {i} ({base_i}) spawned: {h.object_id}", flush=True)
