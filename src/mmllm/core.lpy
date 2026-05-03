@@ -416,17 +416,18 @@
           (throw (python/RuntimeError
                   (format "KV cache overflow: pos=%d + T_new=%d > max_t=%d. Bump MMLLM_MAX_T."
                           pos T-new max-t))))
-        (with [_ (torch/no_grad)]
-          (.copy_ (.narrow k-buf 2 pos T-new) k-new)
-          (.copy_ (.narrow v-buf 2 pos T-new) v-new))
+        ;; Caller (bench-inference, train-step backward path) is already
+        ;; inside a no_grad context or grad-enabled training graph;
+        ;; copy_ on a regular tensor doesn't materialize a grad node.
+        (.copy_ (.narrow k-buf 2 pos T-new) k-new)
+        (.copy_ (.narrow v-buf 2 pos T-new) v-new)
         [k-buf v-buf new-pos])
       (let [k-buf (torch/zeros B n-kv max-t head-dim
                                ** :dtype (.- k-new dtype) :device (.- k-new device))
             v-buf (torch/zeros B n-kv max-t head-dim
                                ** :dtype (.- v-new dtype) :device (.- v-new device))]
-        (with [_ (torch/no_grad)]
-          (.copy_ (.narrow k-buf 2 0 T-new) k-new)
-          (.copy_ (.narrow v-buf 2 0 T-new) v-new))
+        (.copy_ (.narrow k-buf 2 0 T-new) k-new)
+        (.copy_ (.narrow v-buf 2 0 T-new) v-new)
         [k-buf v-buf T-new]))))
 
 (defn attention

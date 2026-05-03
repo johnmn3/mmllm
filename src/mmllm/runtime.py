@@ -30,22 +30,30 @@ def maybe_compile_forward(forward_callable: Callable) -> Callable:
     compilation raises. Caller invokes the result identically to the
     original forward.
 
-    Mode: `reduce-overhead` — captures CUDA graphs for batch=1 decode,
-    minimizes per-step Python dispatch. `dynamic=True` lets the
-    pre-allocated KV cache narrow position vary without recompilation.
-    `fullgraph=False` allows graph breaks on Python-level control flow
-    (the per-layer loop in `forward`); only the inner tensor ops get
-    compiled.
+    Mode: `default` — graph-level optimization without CUDA graph
+    capture. CUDA graphs (mode=`reduce-overhead`) are Phase-1d's
+    territory and conflict with the persistent pre-alloc KV buffer
+    that's intentionally reused across forward calls — graph capture
+    sees the buffer as "graph output overwritten by subsequent run"
+    and refuses. To use cudagraphs cleanly, the buffer would need
+    explicit `cudagraph_mark_step_begin()` boundaries.
+
+    `dynamic=True` lets the pre-allocated KV cache narrow position
+    vary without recompilation. `fullgraph=False` allows graph breaks
+    on Python-level control flow (the per-layer loop in `forward`);
+    only the inner tensor ops get compiled.
 
     Tunables via env:
       - MMLLM_COMPILE        — opt in (default false)
       - MMLLM_COMPILE_MODE   — passed through to torch.compile
-                               (default 'reduce-overhead')
+                               (default 'default'; pass 'reduce-overhead'
+                               only after wiring cudagraph_mark_step_begin
+                               around forward calls — see Phase-1d)
     """
     if not _opt_in("MMLLM_COMPILE"):
         return forward_callable
 
-    mode = os.environ.get("MMLLM_COMPILE_MODE", "reduce-overhead")
+    mode = os.environ.get("MMLLM_COMPILE_MODE", "default")
     try:
         compiled = torch.compile(
             forward_callable,
