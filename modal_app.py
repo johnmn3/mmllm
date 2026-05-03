@@ -145,6 +145,69 @@ def migrate_corpus_to_mmllm_data():
           f"committed to mmllm-data", flush=True)
 
 
+# ── one-shot artifact migration: trained bank + log → mmllm-data ──
+# Companion to migrate_corpus_to_mmllm_data. Run after the 5B-on-legacy
+# completes, before deleting verbum-bb-data. The trained bank is the
+# warm-start substrate for any future run that wants to inherit the
+# 5B's learned semantic content rather than start from scratch.
+@app.function(
+    image=image,
+    volumes={
+        "/src": modal.Volume.from_name("verbum-bb-data"),
+        "/dst": volume,
+    },
+    timeout=3600,
+    cpu=4.0,
+    memory=8192,
+)
+def migrate_artifacts_to_mmllm_data(bank_prefix: str = "pile-bank-3tier",
+                                    log_name: str = "pile-github.bin.log.jsonl",
+                                    n_layers: int = 5):
+    """Copy the trained bank V mmap files + training log from
+    verbum-bb-data to mmllm-data. Idempotent: skips files that
+    already exist at the expected size on the destination.
+
+    Files copied:
+      - /src/<bank_prefix>.{0..n_layers-1}.bin → /dst/<same path>
+      - /src/<log_name> → /dst/<same path>
+    """
+    import os
+    import time
+
+    files = [f"{bank_prefix}.{i}.bin" for i in range(n_layers)] + [log_name]
+    BUF = 64 * 1024 * 1024  # 64 MB
+    total = 0
+    t0 = time.time()
+    for name in files:
+        src = f"/src/{name}"
+        dst = f"/dst/{name}"
+        if not os.path.exists(src):
+            print(f"  ! missing source: {src} — skipping", flush=True)
+            continue
+        src_size = os.path.getsize(src)
+        if os.path.exists(dst) and os.path.getsize(dst) == src_size:
+            print(f"  = already present: {name} ({src_size/1e9:.2f} GB)", flush=True)
+            continue
+        print(f"  → copying {name} ({src_size/1e9:.2f} GB)…", flush=True)
+        t1 = time.time()
+        with open(src, "rb") as fin, open(dst, "wb") as fout:
+            written = 0
+            while True:
+                chunk = fin.read(BUF)
+                if not chunk:
+                    break
+                fout.write(chunk)
+                written += len(chunk)
+        dt = time.time() - t1
+        rate = (written / 1e9) / max(dt, 1e-6)
+        print(f"  ✓ {name}: {written/1e9:.2f} GB in {dt:.1f}s "
+              f"({rate:.2f} GB/s)", flush=True)
+        total += written
+    volume.commit()
+    print(f"done — copied {total/1e9:.2f} GB in {time.time()-t0:.1f}s; "
+          f"committed to mmllm-data", flush=True)
+
+
 @app.function(
     image=image,
     volumes={"/data": volume},
