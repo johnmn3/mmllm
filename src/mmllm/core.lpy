@@ -34,6 +34,7 @@
            [mmllm.memory :as mem]
            [mmllm.corpus :as corp]
            [mmllm.gating :as gate]
+           [mmllm.bank_query :as bq]
            [mmllm.optim :as vbopt]))
 
 (defn pick-device
@@ -162,6 +163,17 @@
   []
   (.get (.- os environ) "MMLLM_LONG_TIER_MIX" "sum"))
 
+(defn pick-bank-query-mode
+  "Resolve how the bank query is shaped before the product-key search.
+   Reads MMLLM_BANK_QUERY_MODE (default 'plain'). One of:
+     'plain'   — bank_query = q_long_flat (no context modulation)
+     'ctx-add' — bank_query = q_long_flat + W_ctx · x  (learned dense
+                 weights influence the query; W_ctx zero-init at step 0
+                 → identical to plain, then grows useful modulation)
+   See `mmllm.bank_query` for the implementation."
+  []
+  (.get (.- os environ) "MMLLM_BANK_QUERY_MODE" "plain"))
+
 (defn- pick-window
   "Resolve a sliding-window size from env. Returns int or nil."
   [env-key]
@@ -255,6 +267,8 @@
    :memory-top-k       16        ; final retrieved entries per query
    :memory-sub-top-k   32        ; sub-keys per half kept before re-rank
    :memory-mmap-path   nil       ; if set, V.weight is mmap-backed at <path>.<i>.bin
+   :bank-query-mode    nil       ; nil → fall back to MMLLM_BANK_QUERY_MODE env (default 'plain');
+                                  ; 'plain' / 'ctx-add' — see mmllm.bank_query
    :long-tier-mix      nil       ; nil → fall back to MMLLM_LONG_TIER_MIX env (default 'sum');
                                   ; 'sum' / 'scalar' / 'switch' — see mmllm.gating
    ;; Sliding-window eviction. nil = unbounded (cache grows linearly with
@@ -327,7 +341,8 @@
      long-cache:  nil OR [k v] each (B, n-long-kv-heads,  T_prev, head-dim)
    Returns [out new-short-cache new-long-cache]."
   [block x cos sin short-cache long-cache]
-  (let [{:keys [q-proj k-proj-s v-proj-s k-proj-l v-proj-l o-proj memory long-gate
+  (let [{:keys [q-proj k-proj-s v-proj-s k-proj-l v-proj-l o-proj memory
+                long-gate bank-query
                 n-heads n-short-heads n-long-heads
                 n-short-kv-heads n-long-kv-heads head-dim
                 short-window long-window]} block
@@ -398,7 +413,12 @@
         ;; q-long: (B, n-long-heads, T, head-dim) → (B, T, n-long-heads*head-dim)
         q-long-flat  (-> q-long (.transpose 1 2) (.contiguous)
                          (.reshape B T (* n-long-heads head-dim)))
-        mem-out      (memory q-long-flat)
+        ;; Optional context modulation: dense weights influence the bank
+        ;; query via bank_query = q_long_flat + W_ctx · x. PlainBankQuery
+        ;; returns None → bank gets q_long_flat unchanged.
+        ctx-mod      (bank-query x)
+        bank-q       (if ctx-mod (torch/add q-long-flat ctx-mod) q-long-flat)
+        mem-out      (memory bank-q)
         attn-l-mem   (-> mem-out
                          (.reshape B T n-long-heads head-dim)
                          (.transpose 1 2))
@@ -438,7 +458,7 @@
   [{:keys [d-model n-heads n-short-heads n-long-heads
            n-short-kv-heads n-long-kv-heads d-ff
            memory-top-k memory-sub-top-k
-           memory-mmap-path long-tier-mix
+           memory-mmap-path long-tier-mix bank-query-mode
            short-window long-window] :as config}
    block-idx]
   (let [head-dim  (quot d-model n-heads)
@@ -446,9 +466,10 @@
         sqrt-n    (pick-sqrt-n config)
         path      (when memory-mmap-path
                     (str memory-mmap-path "." block-idx ".bin"))
-        gate-kind (or long-tier-mix (pick-long-tier-mix))
-        sw        (or short-window (pick-short-window))
-        lw        (or long-window  (pick-long-window))]
+        gate-kind (or long-tier-mix    (pick-long-tier-mix))
+        bq-kind   (or bank-query-mode  (pick-bank-query-mode))
+        sw        (or short-window     (pick-short-window))
+        lw        (or long-window      (pick-long-window))]
     {:d-model           d-model
      :head-dim          head-dim
      :n-heads           n-heads
@@ -469,7 +490,8 @@
      :down-proj (nn/Linear d-ff    d-model ** :bias false)
      :short-window      sw
      :long-window       lw
-     :long-gate (gate/build_gate gate-kind n-long-heads head-dim)
+     :long-gate  (gate/build_gate       gate-kind n-long-heads head-dim)
+     :bank-query (bq/build_bank_query   bq-kind   d-model      q-dim)
      :memory    (mem/ProductKeyMemory q-dim sqrt-n
                                       ** :top_k     memory-top-k
                                       :sub_top_k memory-sub-top-k
@@ -483,7 +505,7 @@
    weight stays on CPU even when device='cuda' — only K_a, K_b move."
   [block device]
   (doseq [k [:norm1 :norm2 :q-proj :k-proj-s :v-proj-s :k-proj-l :v-proj-l
-             :o-proj :gate-proj :up-proj :down-proj :long-gate :memory]]
+             :o-proj :gate-proj :up-proj :down-proj :long-gate :bank-query :memory]]
     (.to (get block k) device))
   block)
 
@@ -520,7 +542,7 @@
                                  :k-proj-s :v-proj-s
                                  :k-proj-l :v-proj-l
                                  :o-proj :gate-proj :up-proj :down-proj
-                                 :long-gate])
+                                 :long-gate :bank-query])
                         ;; memory: K_a, K_b are dense; V.weight is sparse
                         (.dense_parameters (:memory b))))]
     (concat (python/list (.parameters tok-emb))
@@ -643,7 +665,7 @@
                :k-proj-s :v-proj-s
                :k-proj-l :v-proj-l
                :o-proj :gate-proj :up-proj :down-proj
-               :long-gate :memory]]
+               :long-gate :bank-query :memory]]
       (.eval (get b k)))))
 
 (defn sample

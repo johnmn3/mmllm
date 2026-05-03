@@ -447,6 +447,82 @@ def train_with_bank_cpu(
     cpu=4.0,
     memory=8192,
 )
+def spike_bank_query(
+    steps: int = 200,
+    eval_every: int = 100,
+    sqrt_n: int = 128,
+    batch: int = 4,
+):
+    """Spike: compare bank-query='plain' vs 'ctx-add' on a 200-step
+    text8 smoke. Both runs use long-tier-mix='sum' to isolate the
+    bank-query change. Reports control bpc + bank-zero Δ for each.
+
+    Pass criteria:
+      - both runs complete without error
+      - both show loss descent
+      - ctx-add starts identical to plain at step 0 (W_ctx zero-init);
+        any difference in final bpc reflects what the dense weights
+        learned to add to the bank query
+    """
+    import os, subprocess, shutil, json
+    summary = {}
+    for bq in ("plain", "ctx-add"):
+        base = f"/data/spike-bq-{bq}"
+        bank = f"/data/spike-bq-{bq}-bank"
+        for f in (
+            f"{base}.train.bin", f"{base}.val.bin", f"{base}.test.bin",
+            f"{base}.log.jsonl",
+            *[f"{bank}.{i}.bin" for i in range(5)],
+        ):
+            try: os.remove(f)
+            except FileNotFoundError: pass
+        if os.path.isdir(f"{base}.ckpts"):
+            shutil.rmtree(f"{base}.ckpts")
+        for split in ("train", "val", "test"):
+            os.symlink(f"/data/text8.{split}.bin", f"{base}.{split}.bin")
+
+        env = {**os.environ,
+               "MMLLM_DEVICE": "cpu",
+               "MMLLM_BATCH":  str(batch),
+               "MMLLM_LR":     "3e-3",
+               "MMLLM_SQRT_N": str(sqrt_n),
+               "MMLLM_LONG_TIER_MIX": "sum",
+               "MMLLM_BANK_QUERY_MODE": bq}
+        print(f"=== spike_bank_query: bank-query={bq} steps={steps} ===", flush=True)
+        subprocess.run(
+            ["mmllm", "train-long", base, bank,
+             str(steps), str(eval_every), str(steps + 1)],
+            check=True, env=env,
+        )
+        try:
+            lines = open(f"{base}.log.jsonl").read().strip().splitlines()
+            ablations = [json.loads(l) for l in lines
+                         if json.loads(l).get("event") == "ablation"]
+            if ablations:
+                a = ablations[-1]
+                summary[bq] = {
+                    "control_bpc": a["control_bpc"],
+                    "ablated_bpc": a["ablated_bpc"],
+                    "delta_bpc":   a["delta_bpc"],
+                }
+        except Exception as e:
+            print(f"  WARN: could not parse log for {bq}: {e}", flush=True)
+
+    print("\n=== spike_bank_query summary ===", flush=True)
+    print(f"  {'bq':10} {'control':>10} {'ablated':>10} {'Δ':>10}", flush=True)
+    for bq, r in summary.items():
+        print(f"  {bq:10} {r['control_bpc']:10.4f} {r['ablated_bpc']:10.4f} {r['delta_bpc']:+10.4f}",
+              flush=True)
+    print("=== spike_bank_query: done ===", flush=True)
+
+
+@app.function(
+    image=image,
+    volumes={"/data": volume},
+    timeout=3600,
+    cpu=4.0,
+    memory=8192,
+)
 def spike_long_gates(
     steps: int = 200,
     eval_every: int = 100,
