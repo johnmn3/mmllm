@@ -35,6 +35,7 @@
            [mmllm.corpus :as corp]
            [mmllm.gating :as gate]
            [mmllm.bank_query :as bq]
+           [mmllm.bank_feedback :as bfb]
            [mmllm.optim :as vbopt]))
 
 (defn pick-device
@@ -174,6 +175,17 @@
   []
   (.get (.- os environ) "MMLLM_BANK_QUERY_MODE" "plain"))
 
+(defn pick-bank-feedback-mode
+  "Resolve whether the bank's output is fed back into x before q-proj.
+   Reads MMLLM_BANK_FEEDBACK_MODE (default 'plain'). One of:
+     'plain'    — no feedback (q = q_proj(x))
+     'feedback' — q = q_proj(x + W_back · bank(W_probe · x)); W_back is
+                  zero-init so step-0 behavior is identical to plain.
+                  Adds one extra PKM lookup per layer per forward.
+   See `mmllm.bank_feedback` for the implementation."
+  []
+  (.get (.- os environ) "MMLLM_BANK_FEEDBACK_MODE" "plain"))
+
 (defn- pick-window
   "Resolve a sliding-window size from env. Returns int or nil."
   [env-key]
@@ -269,6 +281,8 @@
    :memory-mmap-path   nil       ; if set, V.weight is mmap-backed at <path>.<i>.bin
    :bank-query-mode    nil       ; nil → fall back to MMLLM_BANK_QUERY_MODE env (default 'plain');
                                   ; 'plain' / 'ctx-add' — see mmllm.bank_query
+   :bank-feedback-mode nil       ; nil → fall back to MMLLM_BANK_FEEDBACK_MODE env (default 'plain');
+                                  ; 'plain' / 'feedback' — see mmllm.bank_feedback
    :long-tier-mix      nil       ; nil → fall back to MMLLM_LONG_TIER_MIX env (default 'sum');
                                   ; 'sum' / 'scalar' / 'switch' — see mmllm.gating
    ;; Sliding-window eviction. nil = unbounded (cache grows linearly with
@@ -342,14 +356,22 @@
    Returns [out new-short-cache new-long-cache]."
   [block x cos sin short-cache long-cache]
   (let [{:keys [q-proj k-proj-s v-proj-s k-proj-l v-proj-l o-proj memory
-                long-gate bank-query
+                long-gate bank-query bank-feedback
                 n-heads n-short-heads n-long-heads
                 n-short-kv-heads n-long-kv-heads head-dim
                 short-window long-window]} block
         B            (.size x 0)
         T            (.size x 1)
+        ;; Bank → dense feedback (optional). Probes the bank with a
+        ;; cheap learned projection of x, adds the result back into x
+        ;; before q-proj. PlainFeedback returns None → x unchanged.
+        ;; Only the q-proj input is modulated; k/v projections still
+        ;; see the unmodified x (so bank-shaped semantics influence
+        ;; what the dense net asks, not what it caches as keys/values).
+        fb-delta     (bank-feedback x memory)
+        x-for-q      (if fb-delta (torch/add x fb-delta) x)
         ;; project Q, split into short/long groups along head dim
-        q-full       (-> (q-proj x) (.reshape B T n-heads head-dim))
+        q-full       (-> (q-proj x-for-q) (.reshape B T n-heads head-dim))
         q-short      (-> q-full (.narrow 2 0             n-short-heads) (.transpose 1 2))
         q-long       (-> q-full (.narrow 2 n-short-heads n-long-heads)  (.transpose 1 2))
         ;; project K, V for both tiers (separate matrices per tier)
@@ -458,7 +480,7 @@
   [{:keys [d-model n-heads n-short-heads n-long-heads
            n-short-kv-heads n-long-kv-heads d-ff
            memory-top-k memory-sub-top-k
-           memory-mmap-path long-tier-mix bank-query-mode
+           memory-mmap-path long-tier-mix bank-query-mode bank-feedback-mode
            short-window long-window] :as config}
    block-idx]
   (let [head-dim  (quot d-model n-heads)
@@ -466,10 +488,11 @@
         sqrt-n    (pick-sqrt-n config)
         path      (when memory-mmap-path
                     (str memory-mmap-path "." block-idx ".bin"))
-        gate-kind (or long-tier-mix    (pick-long-tier-mix))
-        bq-kind   (or bank-query-mode  (pick-bank-query-mode))
-        sw        (or short-window     (pick-short-window))
-        lw        (or long-window      (pick-long-window))]
+        gate-kind (or long-tier-mix       (pick-long-tier-mix))
+        bq-kind   (or bank-query-mode     (pick-bank-query-mode))
+        fb-kind   (or bank-feedback-mode  (pick-bank-feedback-mode))
+        sw        (or short-window        (pick-short-window))
+        lw        (or long-window         (pick-long-window))]
     {:d-model           d-model
      :head-dim          head-dim
      :n-heads           n-heads
@@ -490,8 +513,9 @@
      :down-proj (nn/Linear d-ff    d-model ** :bias false)
      :short-window      sw
      :long-window       lw
-     :long-gate  (gate/build_gate       gate-kind n-long-heads head-dim)
-     :bank-query (bq/build_bank_query   bq-kind   d-model      q-dim)
+     :long-gate     (gate/build_gate         gate-kind n-long-heads head-dim)
+     :bank-query    (bq/build_bank_query     bq-kind   d-model      q-dim)
+     :bank-feedback (bfb/build_bank_feedback fb-kind   d-model      q-dim)
      :memory    (mem/ProductKeyMemory q-dim sqrt-n
                                       ** :top_k     memory-top-k
                                       :sub_top_k memory-sub-top-k
@@ -505,7 +529,8 @@
    weight stays on CPU even when device='cuda' — only K_a, K_b move."
   [block device]
   (doseq [k [:norm1 :norm2 :q-proj :k-proj-s :v-proj-s :k-proj-l :v-proj-l
-             :o-proj :gate-proj :up-proj :down-proj :long-gate :bank-query :memory]]
+             :o-proj :gate-proj :up-proj :down-proj
+             :long-gate :bank-query :bank-feedback :memory]]
     (.to (get block k) device))
   block)
 
@@ -542,7 +567,7 @@
                                  :k-proj-s :v-proj-s
                                  :k-proj-l :v-proj-l
                                  :o-proj :gate-proj :up-proj :down-proj
-                                 :long-gate :bank-query])
+                                 :long-gate :bank-query :bank-feedback])
                         ;; memory: K_a, K_b are dense; V.weight is sparse
                         (.dense_parameters (:memory b))))]
     (concat (python/list (.parameters tok-emb))
@@ -665,7 +690,7 @@
                :k-proj-s :v-proj-s
                :k-proj-l :v-proj-l
                :o-proj :gate-proj :up-proj :down-proj
-               :long-gate :bank-query :memory]]
+               :long-gate :bank-query :bank-feedback :memory]]
       (.eval (get b k)))))
 
 (defn sample

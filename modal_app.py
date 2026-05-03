@@ -602,6 +602,100 @@ def spike_bank_query(
     cpu=4.0,
     memory=8192,
 )
+def spike_bank_feedback(
+    steps: int = 200,
+    eval_every: int = 100,
+    sqrt_n: int = 128,
+    batch: int = 4,
+):
+    """Spike: 4-way A/B of bank-query × bank-feedback combos at 200
+    steps, sqrt_n=128 on text8. Validates whether bidirectional
+    retrieval-augmented attention earns its keep beyond either
+    direction alone.
+
+    Combos:
+      - plain   + plain     (baseline; matches spike_bank_query's plain)
+      - ctx-add + plain     (current best per spike_bank_query)
+      - plain   + feedback  (pure bank → dense feedback)
+      - ctx-add + feedback  (both directions wired up)
+
+    Pass criteria:
+      - all four runs complete without error
+      - all four show loss descent
+      - directional signal: (ctx-add, feedback) shows non-trivial bpc
+        improvement over (ctx-add, plain). If (plain, feedback) alone
+        also improves over (plain, plain), feedback is independently
+        useful; if it doesn't, the feedback path needs ctx-add to
+        meaningfully exploit the bank.
+    """
+    import os, subprocess, shutil, json
+    summary = {}
+    combos = [
+        ("plain",   "plain"),
+        ("ctx-add", "plain"),
+        ("plain",   "feedback"),
+        ("ctx-add", "feedback"),
+    ]
+    for bq, fb in combos:
+        tag = f"bq-{bq}_fb-{fb}"
+        base = f"/data/spike-fb-{tag}"
+        bank = f"/data/spike-fb-{tag}-bank"
+        for f in (
+            f"{base}.train.bin", f"{base}.val.bin", f"{base}.test.bin",
+            f"{base}.log.jsonl",
+            *[f"{bank}.{i}.bin" for i in range(5)],
+        ):
+            try: os.remove(f)
+            except FileNotFoundError: pass
+        if os.path.isdir(f"{base}.ckpts"):
+            shutil.rmtree(f"{base}.ckpts")
+        for split in ("train", "val", "test"):
+            os.symlink(f"/data/text8.{split}.bin", f"{base}.{split}.bin")
+
+        env = {**os.environ,
+               "MMLLM_DEVICE": "cpu",
+               "MMLLM_BATCH":  str(batch),
+               "MMLLM_LR":     "3e-3",
+               "MMLLM_SQRT_N": str(sqrt_n),
+               "MMLLM_LONG_TIER_MIX":      "sum",
+               "MMLLM_BANK_QUERY_MODE":    bq,
+               "MMLLM_BANK_FEEDBACK_MODE": fb}
+        print(f"=== spike_bank_feedback: bq={bq} fb={fb} steps={steps} ===",
+              flush=True)
+        subprocess.run(
+            ["mmllm", "train-long", base, bank,
+             str(steps), str(eval_every), str(steps + 1)],
+            check=True, env=env,
+        )
+        try:
+            lines = open(f"{base}.log.jsonl").read().strip().splitlines()
+            ablations = [json.loads(l) for l in lines
+                         if json.loads(l).get("event") == "ablation"]
+            if ablations:
+                a = ablations[-1]
+                summary[tag] = {
+                    "control_bpc": a["control_bpc"],
+                    "ablated_bpc": a["ablated_bpc"],
+                    "delta_bpc":   a["delta_bpc"],
+                }
+        except Exception as e:
+            print(f"  WARN: could not parse log for {tag}: {e}", flush=True)
+
+    print("\n=== spike_bank_feedback summary ===", flush=True)
+    print(f"  {'combo':22} {'control':>10} {'ablated':>10} {'Δ':>10}", flush=True)
+    for tag, r in summary.items():
+        print(f"  {tag:22} {r['control_bpc']:10.4f} {r['ablated_bpc']:10.4f} {r['delta_bpc']:+10.4f}",
+              flush=True)
+    print("=== spike_bank_feedback: done ===", flush=True)
+
+
+@app.function(
+    image=image,
+    volumes={"/data": volume},
+    timeout=3600,
+    cpu=4.0,
+    memory=8192,
+)
 def spike_long_gates(
     steps: int = 200,
     eval_every: int = 100,
