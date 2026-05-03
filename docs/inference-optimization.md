@@ -78,6 +78,65 @@ quality* and improve the throughput.
 
 Conclusion: torch.compile in its standard form is incompatible with the bank-V architecture's hot path. Making it work would require carving out a "trace-only" subset (q/k/v projections + SDPA + FFN) excluding the bank lookup and dirty-page tracking. Deferred — the Python kernel port already captured most of the per-token dispatch overhead.
 
+## Phase 3 results (int8 bank V quantization)
+
+Shipped in commit `2aad81c`:
+
+  - `mmllm.memory.Int8ProductKeyMemory` — same product-key search,
+    V loaded as fp16 scales + int8 rows, on-the-fly dequant at gather.
+  - `quantize_fp32_bank_to_int8_shaped` — streams an fp32 raw bank
+    file in chunks, per-row symmetric int8 quantization with
+    fp16-stored scale, writes a header-prefixed file.
+  - `mmllm bank-quantize` CLI verb + Modal `quantize_bank` function.
+  - Build-block reads `MMLLM_BANK_DTYPE` env var to dispatch fp32 vs int8.
+
+Compression at sqrt_n=2048, q_dim=224 (per layer):
+
+  - fp32: ~3.76 GB
+  - int8: ~0.94 GB (header + scales + int8 rows)
+  - ratio: ~4.0×
+
+Across 5 layers: 18.8 GB → 4.7 GB (4× smaller deploy footprint).
+
+Quantization roundtrip on a synthetic small bank (sqrt_n=8, q_dim=16):
+
+  - mean abs retrieval error: 0.0011
+  - relative retrieval error: 0.59%
+  - 0 rows clamped on N(0, 0.5²) input
+
+Acceptance test on the trained 5B bank (BPC delta within +0.005)
+runs once the 5B+fb training completes and `quantize_bank` runs. The
+int8 bench numbers will then update the table at the top of this doc.
+
+## Phase 4 results (mmap layout)
+
+Shipped in commit `<TBD>` (Phase 4b):
+
+  - `_madvise_top_k_pages` helper — issues `MADV_WILLNEED` on the
+    pages containing the top-K row indices BEFORE the actual gather.
+    Kernel begins paging them in async; gather hits warm pages.
+  - Wired into `ProductKeyMemory.forward` (CPU mmap path) and
+    `Int8ProductKeyMemory.forward`. Page boundary alignment (4 KB)
+    + dedupe so we issue ~4-16 unique syscalls per layer per token.
+
+Phase 4a (hot-row consolidation) deferred:
+
+  - Reordering V's rows would require coordinated permutation of
+    K_a / K_b sub-keys (the flat row index `i_a · sqrt_n + i_b`
+    is structurally tied to the sub-key positions in the product-
+    key search). A separate permutation table + lookup adds an
+    indirection layer of its own, partially offsetting the gain.
+    The 4b prefetch alone covers the dominant cold-cache cost.
+
+Phase 4c (threaded gather) deferred:
+
+  - The premise was "16 row reads fetched sequentially in a Python
+    loop" — but our gather uses torch's advanced indexing
+    (`int8_rows[top_global]`), which is a single C++ kernel that
+    releases the GIL. Python-level threading around it doesn't
+    help. The cold-cache latency that 4c targeted is already
+    addressed by 4b's prefetch.
+
 ## Bottleneck analysis
 
 At batch=1 the H100 is at <1 % utilization. Compute is not the

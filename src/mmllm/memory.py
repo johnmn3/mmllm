@@ -571,11 +571,17 @@ class ProductKeyMemory(nn.Module):
         v_device = self.V.weight.device
         if v_device != q.device:
             top_global_v = top_global.to(v_device)
-            # Mark pages we're about to touch as dirty (they WILL get a
-            # sparse-grad update on backward). Cheap — we already have
-            # the indices on CPU after the .to(v_device) hop above for
-            # the bank lookup.
+            # Phase-4b prefetch: kernel async-starts paging the rows
+            # we're about to gather. Only meaningful when V is mmap-
+            # backed; the helper checks for ._mmap and no-ops otherwise.
             if self._storage is not None:
+                _madvise_top_k_pages(
+                    self._storage._array, top_global_v,
+                    row_stride_bytes=self.q_dim * 4,  # fp32
+                )
+                # Mark pages we're about to touch as dirty (they WILL
+                # get a sparse-grad update on backward). Cheap — we
+                # already have the indices on CPU after the .to() hop.
                 self._storage.track_dirty_rows(top_global_v)
             values_v = self.V(top_global_v)                        # (B, T, top_k, D) on V's device
             values = values_v.to(q.device)
@@ -586,6 +592,77 @@ class ProductKeyMemory(nn.Module):
 
         weights = F.softmax(top_scores, dim=-1).unsqueeze(-1)
         return (weights * values).sum(dim=-2)
+
+
+# ─────────────────────── madvise prefetch helper (Phase 4b) ───────────────────────
+
+import mmap as _mmap_module
+
+
+def _madvise_top_k_pages(
+    np_memmap: "np.memmap",
+    top_indices_cpu: torch.Tensor,
+    row_stride_bytes: int,
+    base_offset: int = 0,
+    page_size: int = 4096,
+) -> int:
+    """Issue MADV_WILLNEED on pages containing the rows in `top_indices_cpu`.
+
+    The product-key search produces top-K row IDs *before* the actual
+    gather. By the time the gather happens (~µs later for the matmul-
+    based search), the kernel has typically started paging the rows in
+    asynchronously — so the gather hits warm pages instead of cold-
+    cache page faults.
+
+    Page boundary alignment: we round each row's start down to the
+    nearest 4 KB page, then dedupe so we only issue madvise once per
+    unique page. Per-layer cost: ~16 row indices → ~4-16 unique pages
+    × ~µs per syscall ≈ small, easily worth a 2-5× win on cold-cache
+    tokens.
+
+    Args:
+      np_memmap:        the np.memmap whose ._mmap holds the OS handle
+      top_indices_cpu:  row indices, shape (..., top_k); flattened here
+      row_stride_bytes: bytes per row in the underlying file
+      base_offset:      byte offset in the file where the row data
+                        starts (e.g., int8 bank's header+scales)
+
+    Returns:
+      number of unique pages we hinted on (for stats / logging).
+    """
+    mm = getattr(np_memmap, "_mmap", None)
+    if mm is None:
+        return 0
+    if not hasattr(mm, "madvise"):
+        return 0  # platform without madvise (e.g., older Windows)
+    if not hasattr(_mmap_module, "MADV_WILLNEED"):
+        return 0  # no MADV constants on this platform
+    flat = top_indices_cpu.detach().flatten().to(dtype=torch.int64).tolist()
+    seen = set()
+    for i in flat:
+        byte_off = base_offset + i * row_stride_bytes
+        page_off = (byte_off // page_size) * page_size
+        seen.add(page_off)
+    # Issue one madvise per unique page covering at least one row.
+    # Round the length up to the next page boundary so a row that
+    # straddles a page boundary still gets both pages hinted.
+    n_hinted = 0
+    span = ((row_stride_bytes + page_size - 1) // page_size) * page_size
+    file_size = mm.size()
+    for off in seen:
+        # mmap.madvise expects (option, start, length). Length must
+        # not exceed the mapped region.
+        length = min(span, file_size - off)
+        if length <= 0:
+            continue
+        try:
+            mm.madvise(_mmap_module.MADV_WILLNEED, off, length)
+            n_hinted += 1
+        except OSError:
+            # Some kernels reject WILLNEED on certain mappings;
+            # ignore and continue — this is a hint, not a requirement.
+            pass
+    return n_hinted
 
 
 # ─────────────────────── int8 quantized bank V (Phase 3) ───────────────────────
@@ -736,14 +813,19 @@ class _MmapInt8Storage(nn.Module):
     Override _apply to keep the storage CPU-pinned regardless of any
     parent .to('cuda') call — analogous to CPUPinnedEmbedding for the
     fp32 path. The Int8ProductKeyMemory's K_a/K_b still move normally
-    because they're parameters at the parent level."""
+    because they're parameters at the parent level.
 
-    def __init__(self, scales: torch.Tensor, int8_rows: torch.Tensor):
+    Holds the underlying np.memmap as well so Phase-4b madvise prefetch
+    can reach the OS mmap handle (.scales_np._mmap)."""
+
+    def __init__(self, scales: torch.Tensor, int8_rows: torch.Tensor,
+                 scales_np: "np.memmap", int8_np: "np.memmap"):
         super().__init__()
-        # Plain attributes (not buffers/parameters) so torch's .to()
-        # doesn't traverse them. Live on CPU pinned to disk pages.
         self.scales = scales
         self.int8_rows = int8_rows
+        # Plain attributes — not registered. Used by madvise.
+        self.scales_np = scales_np
+        self.int8_np = int8_np
 
     def _apply(self, fn, recurse=True):
         return self
@@ -793,12 +875,14 @@ class Int8ProductKeyMemory(nn.Module):
 
         self._storage: _MmapInt8Storage | None = None
         if mmap_path is not None and not bank_on_gpu:
-            scales, int8_rows = self._load_or_init_int8_mmap(mmap_path, q_dim)
-            self._storage = _MmapInt8Storage(scales, int8_rows)
+            scales, int8_rows, scales_np, int8_np = (
+                self._load_or_init_int8_mmap(mmap_path, q_dim)
+            )
+            self._storage = _MmapInt8Storage(scales, int8_rows, scales_np, int8_np)
         else:
             if mmap_path is not None:
                 # mmap+on-GPU: load the int8 file once into VRAM.
-                scales, int8_rows = self._load_or_init_int8_mmap(mmap_path, q_dim)
+                scales, int8_rows, _, _ = self._load_or_init_int8_mmap(mmap_path, q_dim)
                 self.register_buffer("scales", scales.clone())
                 self.register_buffer("int8_rows", int8_rows.clone())
             else:
@@ -813,7 +897,9 @@ class Int8ProductKeyMemory(nn.Module):
 
     def _load_or_init_int8_mmap(self, path: str, q_dim: int):
         """Open an existing int8 bank file via mmap. Returns
-        (scales_tensor, int8_rows_tensor) — both views over the file.
+        (scales_tensor, int8_rows_tensor, scales_np, int8_np) — torch
+        tensors AND the underlying np.memmap arrays (the latter so
+        Phase-4b madvise can reach the OS mmap handle).
         Raises if the file doesn't exist or has bad header."""
         n_rows, file_q_dim = _read_int8_bank_header(path)
         if n_rows != self.n:
@@ -830,7 +916,10 @@ class Int8ProductKeyMemory(nn.Module):
         int8_np = np.memmap(path, dtype=np.int8, mode="r",
                             offset=INT8_BANK_HEADER_SIZE + n_rows * 2,
                             shape=(n_rows, q_dim))
-        return torch.from_numpy(scales_np), torch.from_numpy(int8_np)
+        return (
+            torch.from_numpy(scales_np), torch.from_numpy(int8_np),
+            scales_np, int8_np,
+        )
 
     def _scales(self) -> torch.Tensor:
         return self._storage.scales if self._storage is not None else self.scales
@@ -889,6 +978,14 @@ class Int8ProductKeyMemory(nn.Module):
         v_device = scales.device
         if v_device != q.device:
             top_global_v = top_global.to(v_device)
+            # Phase-4b prefetch on the int8 row data (the larger of
+            # the two regions — scales is 1/112 of int8_rows at
+            # q_dim=224, dominates cache pressure).
+            if self._storage is not None:
+                _madvise_top_k_pages(
+                    self._storage.int8_np, top_global_v,
+                    row_stride_bytes=self.q_dim,
+                )
             top_scales = scales[top_global_v].float()              # (B, T, top_k) fp32
             top_int8 = int8_rows[top_global_v].float()             # (B, T, top_k, D) fp32
             values_v = top_scales.unsqueeze(-1) * top_int8         # (B, T, top_k, D)
