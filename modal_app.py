@@ -162,19 +162,26 @@ def migrate_corpus_to_mmllm_data():
 )
 def migrate_artifacts_to_mmllm_data(bank_prefix: str = "pile-bank-3tier",
                                     log_name: str = "pile-github.bin.log.jsonl",
+                                    dense_ckpt: str = "pile-github.bin.ckpts/step-305000/dense.pt",
                                     n_layers: int = 5):
-    """Copy the trained bank V mmap files + training log from
-    verbum-bb-data to mmllm-data. Idempotent: skips files that
-    already exist at the expected size on the destination.
+    """Copy the trained bank V mmap files + training log + final dense
+    ckpt from verbum-bb-data to mmllm-data. Idempotent: skips files
+    that already exist at the expected size on the destination.
 
     Files copied:
       - /src/<bank_prefix>.{0..n_layers-1}.bin → /dst/<same path>
       - /src/<log_name> → /dst/<same path>
+      - /src/<dense_ckpt> → /dst/<same path>  (final trained dense
+        weights paired with the bank; opt-state intentionally NOT
+        copied since we won't resume this particular run)
     """
     import os
     import time
 
-    files = [f"{bank_prefix}.{i}.bin" for i in range(n_layers)] + [log_name]
+    files = (
+        [f"{bank_prefix}.{i}.bin" for i in range(n_layers)]
+        + [log_name, dense_ckpt]
+    )
     BUF = 64 * 1024 * 1024  # 64 MB
     total = 0
     t0 = time.time()
@@ -188,6 +195,8 @@ def migrate_artifacts_to_mmllm_data(bank_prefix: str = "pile-bank-3tier",
         if os.path.exists(dst) and os.path.getsize(dst) == src_size:
             print(f"  = already present: {name} ({src_size/1e9:.2f} GB)", flush=True)
             continue
+        # dense_ckpt has an intermediate ckpts/step-N/ path; ensure dir exists
+        os.makedirs(os.path.dirname(dst) or ".", exist_ok=True)
         print(f"  → copying {name} ({src_size/1e9:.2f} GB)…", flush=True)
         t1 = time.time()
         with open(src, "rb") as fin, open(dst, "wb") as fout:
