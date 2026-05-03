@@ -253,16 +253,26 @@ disambiguates "dead weight" from "still saturating" in any single run.
 Tracked training runs on Pile-Github (~95 GB byte-level), default-config
 dimensions (d_model=384, 5 layers, ~10M dense params).
 
-| run | bank size | tokens | bank-query | long-mix | feedback | control bpc | Δ bpc | notes |
-|---|---|---|---|---|---|---|---|---|
-| 5B plain | sqrt_n=2048 (~21M entries) | 5.0B | plain | sum | plain | **1.273** | **+4.77** | bank carries massive signal at scale; reference baseline |
-| 1B ctx-add | sqrt_n=2048 | 1.0B | ctx-add | sum | plain | 1.354 | +0.75 | wins matched-token bpc against plain through step 38k; smaller Δ — interpretation contested |
-| 1B ctx-add+fb | sqrt_n=2048 | 1.0B | ctx-add | sum | feedback | TBD | TBD | bidirectional retrieval-augmented attention; in flight |
+| run | tokens | bank-query | long-mix | feedback | control bpc | Δ bpc | notes |
+|---|---|---|---|---|---|---|---|
+| 5B plain | 5.0B | plain | sum | plain | **1.273** | **+4.77** | reference baseline; bank carries massive signal at scale |
+| 1B ctx-add | 1.0B | ctx-add | sum | plain | 1.354 | +0.75 | wins matched-token bpc through step 38k; smaller Δ → ctx-add lets dense weights absorb some content the bank otherwise would |
+| 1B ctx-add+fb | 1.0B | ctx-add | sum | feedback | **1.352** | **+1.44** | bidirectional retrieval-augmented attention; raw bpc tied with ctx-add+plain; **Δ is 1.93× bigger** — feedback genuinely uses the bank harder |
+| 5B ctx-add+fb | 5.0B | ctx-add | sum | feedback | (in flight) | (in flight) | sqrt_n=2048, ablate-every=5000 (60 Δ datapoints across training); CodeCarbon-instrumented for kWh/gCO2eq; ~17h on H100 |
+
+All runs use `sqrt_n=2048` (~21M bank entries × 5 layers ≈ 18.8 GB bank V).
+
+**The 1B ctx-add vs ctx-add+fb comparison is the cleanest architectural test**
+in the matrix: same compute, same dense architecture except for the addition
+of W_probe + W_back (bidirectional bank↔dense flow). At matched compute,
+feedback wins on the structural metric (Δ) by roughly 2× without losing on
+raw bpc. The 5B run scales this up to validate at compute parity with the 5B
+plain reference.
 
 Loose Pythia placement (Pile vs Pile-Github subset, byte-level vs BPE — not
 strictly comparable but a sanity reference): mmllm at ~1.3 bpc lands
 between Pythia-70M and Pythia-160M on the Pile-Github-equivalent measure,
-with ~10M active dense params and a 19 GB bank vs Pythia's 70-160M dense
+with ~10M active dense params and an 18.8 GB bank vs Pythia's 70-160M dense
 and no bank.
 
 To plot trajectories from a log:
@@ -273,7 +283,20 @@ rows = [json.loads(l) for l in open('pile-github.bin.log.jsonl') if l.strip()]
 evals     = [r for r in rows if r['event'] == 'eval']
 abl_traj  = [r for r in rows if r['event'] == 'ablation_intermediate']
 abl_final = next(r for r in rows if r['event'] == 'ablation')
+energy    = next(r for r in rows if r['event'] == 'training_energy')
 ```
+
+### Inference benchmark on the 5B-trained checkpoint
+
+| setup | tok/sec | ms/tok |
+|---|---|---|
+| H100 + bank in VRAM | **206** | 4.85 |
+| 8-vCPU + bank mmap'd disk | **107** | 9.37 |
+
+Quality preserved: BPC=1.27 with bank, ablation control vs zeroed-V Δ=+4.77.
+See `docs/inference-optimization.md` for the optimization roadmap and the
+phase-by-phase plan to push these toward ~1000 tok/sec on CPU through
+int8 quantization, hot-row layout, and speculative decoding.
 
 ## Green value
 
