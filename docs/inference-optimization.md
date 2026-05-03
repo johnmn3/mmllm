@@ -40,21 +40,43 @@ bank from disk on demand. The kernel page cache does most of the work:
 hot rows stay resident, cold rows fault in. This is the architectural
 seam we want to exploit.
 
-## Current bench (2026-05-03)
+## Current bench
 
 5B-trained checkpoint at step 305 000, sqrt_n=2048 (18.8 GB bank V
 across 5 layers), batch=1, 50-token warmup before timed run, single
 H100 / 8-vCPU container on Modal.
 
-| Setup                         | tok/sec | ms/tok |
-|-------------------------------|---------|--------|
-| H100 + bank in VRAM           | 174.2   | 5.74   |
-| H100 + bank mmap'd disk       | 149.8   | 6.68   |
-| 8-vCPU + bank mmap'd disk     | 102.3   | 9.77   |
+| Setup                                | tok/sec | ms/tok | vs initial baseline |
+|--------------------------------------|---------|--------|---------------------|
+| H100 + bank in VRAM                  | **206.1** | 4.85 | +18%                |
+| H100 + bank in VRAM, torch.compile   | 30.2    | 33.12  | -83% (broken)       |
+| 8-vCPU + bank mmap'd disk            | **106.7** | 9.37 | +5%                 |
+| 8-vCPU + bank mmap'd disk, compile   | 8.9     | 112.86 | -91% (broken)       |
+
+Initial baseline (basilisp implementation, pre-Phase-1): 174 / 150 / 102 tok/sec.
 
 Quality: BPC=1.27 on Pile-Github val, ablation Δ=+4.77 (bank carries
 71 % of useful predictive signal). The bench target is to *keep the
 quality* and improve the throughput.
+
+## Phase 1 results
+
+| sub-task | shipped | gain | notes |
+|---|---|---|---|
+| 1b: thread tuning (`MMLLM_NUM_THREADS`) | yes | ambiguous (interacts with rest) | `cpu_count` default; 1-shot at cli-main |
+| 1c: pre-alloc KV cache, 3-tuple | yes | enabled later phases | O(T²) → O(T) memory traffic; cache now `(k_buf, v_buf, pos)` |
+| 1a as planned (torch.compile) | **incompatible** | -83% / -91% | sympy `pow_by_natural` failures; recompile thrash; bank's sparse gather untraceable |
+| **1a-actual: Python kernel port** | yes | **+18% GPU, +5% CPU** | new `mmllm.attention_kernel`; basilisp shims destructure block once and forward positionally |
+| 1d: CUDA graphs | not attempted | — | requires `cudagraph_mark_step_begin` boundaries with the persistent KV buffer; deferred |
+
+`torch.compile` failure modes observed:
+
+- `Dynamo does not know how to trace pvectorc.pvector` — basilisp persistent vectors. Solved by Python-tuple caches.
+- `failed while executing pow_by_natural([VR[-12, 0], VR[-1, -1]])` — sympy shape symbolic reasoning crash on the dynamic narrow position in the pre-alloc cache.
+- `Cache line invalidated... torch._dynamo hit config.recompile_limit (8)` — cache position changes every token, dynamo specializes per-shape and exhausts compile budget.
+- `ProductKeyMemory.forward` sparse gather (`nn.Embedding(sparse=True)` content-addressed top-K) isn't cleanly traceable.
+
+Conclusion: torch.compile in its standard form is incompatible with the bank-V architecture's hot path. Making it work would require carving out a "trace-only" subset (q/k/v projections + SDPA + FFN) excluding the bank lookup and dirty-page tracking. Deferred — the Python kernel port already captured most of the per-token dispatch overhead.
 
 ## Bottleneck analysis
 
