@@ -371,6 +371,119 @@ This curve is exact and doesn't need instrumentation to verify — it's an
 architectural property of the config (`n_dense_params`, `sqrt_n`, `q_dim`,
 `n_layers`).
 
+### Memory access energy
+
+The "shared mmap bank" claim is fundamentally about avoiding the cost of
+holding parameters hot. Reference per-byte energy (Patterson 2017 "On
+Computer Architecture for the Post-Moore Era", JEDEC DDR5 spec, Samsung
+HBM2e datasheets):
+
+| storage | read energy | idle power |
+|---|---|---|
+| HBM2e (A100/H100 VRAM) | ~60 pJ/byte | ~0.5 W/GB |
+| DDR5 (host RAM / page cache) | ~240 pJ/byte | ~0.15 W/GB |
+| NVMe SSD | ~1–10 nJ/byte | ~0 W/GB idle |
+
+`EnergyTracker` records `peak_vram_gb` per run (via pynvml
+`nvmlDeviceGetMemoryInfo`), and emits `vram_idle_kwh_estimate =
+peak_vram_gb × 0.5 W/GB × wall_s` as the order-of-magnitude
+attribution of run energy to "VRAM resident state."
+
+Per-token forward-pass read traffic at fp16 (typical serving):
+
+| | mmllm (default config) | Pythia-160M dense |
+|---|---|---|
+| dense weights touched | 10M × 2 B = 20 MB | 160M × 2 B = 320 MB |
+| bank traffic per token | top_k × q_dim × 4 B × layers + key matrices ≈ 4.7 MB | n/a |
+| total per-token weight read | ~25 MB | ~320 MB |
+| memory-access energy (HBM @ 60 pJ/B) | ~1.5 mJ | ~19 mJ |
+| ratio | 1× | ~13× |
+
+This is the *moving-bytes* cost only — compute energy is hundreds of
+mJ/token and dominates the per-token budget on both architectures. The
+~13× memory advantage compounds with mmllm's smaller compute footprint
+(~16× fewer dense FLOPs/token), but the headline savings still come
+from compute, not memory access.
+
+**The big "hot RAM cost" lives in idle power.** Per-instance steady-
+state, comparing VRAM-resident state:
+
+| state | VRAM | page cache | idle power | idle kWh / 24 h |
+|---|---|---|---|---|
+| 1× Pythia-160M | 320 MB | — | 0.16 W | 3.8 Wh |
+| 1× mmllm (cold) | 20 MB | 0 (bank not faulted) | 0.01 W | 0.2 Wh |
+| 1× mmllm (steady-state, 30% bank cached) | 20 MB | ~5.6 GB | 0.85 W | 20.4 Wh |
+| 1× mmllm (all bank cached, fp32 18.8 GB) | 20 MB | 18.8 GB | 2.83 W | 67.9 Wh |
+
+A SINGLE mmllm instance with the bank fully cached pays MORE idle power
+than Pythia-160M (because the bank is bigger than the dense model). The
+mmllm advantage shows up at concurrency, when bank cache is amortized:
+
+| concurrent instances | mmllm idle (20 MB×N HBM + 18.8 GB DDR) | Pythia-160M idle (320 MB×N HBM) | mmllm advantage |
+|---|---|---|---|
+| 1 | 2.83 W | 0.16 W | -18× (mmllm worse) |
+| 10 | 2.93 W | 1.6 W | -1.8× (still worse) |
+| 100 | 3.83 W | 16 W | +4.2× |
+| 1000 | 12.8 W | 160 W | +12.5× |
+| 10,000 | 102.8 W | 1,600 W (won't fit) | +15.6× (asymptote) |
+
+Crossover at ~30 concurrent instances per host (matches the RAM crossover
+above — same physics, different units). Above ~1000 instances the bank
+amortizes to zero per-instance overhead and idle power per user
+asymptotes to dense-VRAM-only at the smaller dense size, ~16× lower
+than dense baseline.
+
+### 1T scale extrapolation
+
+The architectural premise scales: a hypothetical mmllm with sqrt_n=10^6
+(~1T entries × 250 dim ≈ 4 TB bank on disk fp32, 2 TB at fp16) and 1B
+dense params, attempting to deliver GPT-4-class quality:
+
+| | 1T dense (e.g., GPT-4 class) | 1T mmllm (1B dense + 2 TB bank on disk) |
+|---|---|---|
+| weights footprint | ~2 TB fp16 | 2 GB dense (per instance) + 2 TB on disk |
+| GPUs for weights resident | ~25× H100 (tensor-parallel) | 1× H100 per inference batch |
+| HBM idle power for weights | 25 × 80 GB × 0.5 W/GB ≈ 1,000 W | 1 × 2 GB × 0.5 W/GB ≈ 1 W |
+| Page-cache DRAM (hot working set) | n/a (all in HBM) | ~100–500 GB DDR (working set fraction) |
+| DDR idle for page cache | n/a | ~75 W (500 GB × 0.15) |
+| Active inference power | ~17.5 kW (25 GPUs at full TDP) | ~700 W (1 GPU) |
+| Disk capacity | 0 | ~2 TB NVMe (~$200) |
+| Per-instance power at saturation | 17.5 kW | 700 W → **25× lower** |
+| Per-instance idle (weights only) | 1,000 W | ~75 W → **13× lower** |
+
+Per-token energy at this scale:
+- 1T dense forward: ~2 TB read per token × 60 pJ/byte ≈ 120 J/tok memory
+  + compute ≈ another ~1–10 J/tok depending on activation tier ≈ **~120 J/tok**
+- 1T mmllm forward: ~2 GB dense + ~10 MB bank rows ≈ ~0.12 J/tok memory
+  + ~50 mJ/tok compute (1B-dense scale) ≈ **~0.17 J/tok**
+
+The ratio is **~700×** at the per-token energy budget if both could
+deliver equivalent quality. The huge gap is dominated by memory traffic,
+not compute — at 1T scale the parameters are too big to keep hot, so
+moving them dominates.
+
+Caveats on this extrapolation:
+
+- **Quality parity is unproven.** No published evidence that a sparse
+  bank of N entries equals a dense model of N parameters on language
+  benchmarks. The 5B Pile-Github runs (~21M bank entries, sub-Pythia-
+  160M-equivalent quality at byte-level) are the most recent data
+  point. Scaling laws to 1T need research.
+- **Disk bandwidth bottleneck.** Working set must fit in DRAM page
+  cache, or per-token latency drops by a factor of 100× (NVMe vs DDR).
+  Practical limit: working set ≤ ~512 GB on a single 1 TB host.
+- **Page-fault tail latency.** First-time access to a cold bank row
+  pays a 100 µs SSD read instead of a 100 ns DRAM read — multi-second
+  p99 latency on cold prompts unless the bank is pre-warmed.
+- **Numbers above use 0.5 W/GB HBM idle; real measured numbers vary
+  ~2× depending on workload, ECC, and ambient.**
+
+What this section is and isn't: this IS a case for serving 1T-class
+quality on commodity hardware via the mmap-shared-bank architecture, IF
+quality scaling holds. It is NOT a guarantee — it's the thesis the
+architecture is designed to test, and the next several orders of
+magnitude of training will tell us whether it does.
+
 ### Reading these numbers
 
 - **Training energy** alone is comparable to dense models of similar
