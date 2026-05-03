@@ -153,6 +153,21 @@
   []
   (.get (.- os environ) "MMLLM_VOLUME_NAME" "mmllm-data"))
 
+(defn pick-ablate-every
+  "Resolve interval (in training steps) between intermediate ablation
+   evals — temporarily zero V across all blocks, eval bpc, restore V.
+   Reads MMLLM_ABLATE_EVERY (default 0 = disabled).
+
+   Each ablation eval costs one extra eval-bpc pass (~30-60s wall on
+   prod hardware) plus a transient ~bank-size CPU/GPU clone for the
+   restore. Bank V is mutated in-place during the eval and restored
+   in a try/finally — safe across crashes only at process boundary.
+
+   Useful values: equal to ckpt-every (one Δ datapoint per ckpt) so
+   the trajectory aligns with the checkpoint history. 0 disables."
+  []
+  (python/int (.get (.- os environ) "MMLLM_ABLATE_EVERY" "0")))
+
 (defn pick-long-tier-mix
   "Resolve how the long-tier KV-cache SDPA path and the bank-V
    retrieval path get combined inside attention. Reads
@@ -814,6 +829,39 @@
      (finally
        (torch/set_grad_enabled true)))))
 
+;;; ─────────────────────── intermediate ablation eval ───────────────────────
+;;;
+;;; Periodic 'zero V → eval bpc → restore V' cycle, used by train-long
+;;; to plot the trajectory of Δ across training. Mutates the bank
+;;; in-place transiently; restored under try/finally.
+;;;
+;;; Note on safety with mmap-backed banks: `.zero_()` modifies the
+;;; mmap pages in place; if the process crashes between zero and
+;;; restore, the on-disk bank is corrupted. The restore copies the
+;;; saved tensor back via `.copy_`, which writes the same pages back.
+;;; No volume.commit() runs during the ablation block, so a crash
+;;; mid-ablation only damages the in-memory mmap (next run sees the
+;;; pre-ablation state from disk via fresh mmap).
+
+(defn ablation-step!
+  "Save bank V across all blocks, zero them, run eval-bpc, restore V.
+   Returns the ablated bpc (control bpc is read from the regular eval
+   that just preceded this call). Bank is bit-identical after return.
+
+   Cost: one extra eval-bpc pass + transient ~bank-size clone in RAM.
+   At sqrt_n=2048 that's ~18.8 GB transient (5 layers × 3.76 GB)."
+  [m val-data T B max-toks]
+  (let [saved (mapv #(.. (:memory %) -V -weight detach clone)
+                    (:blocks m))]
+    (try
+      (doseq [b (:blocks m)] (.zero_bank (:memory b)))
+      (let [r (eval-bpc m val-data T B max-toks)]
+        (:bpc r))
+      (finally
+        (doseq [[b s] (map vector (:blocks m) saved)]
+          (with [_ (torch/no_grad)]
+            (.copy_ (.- (.- (:memory b) V) weight) s)))))))
+
 ;;; ─────────────────────── train + eval text8 / enwik8 ───────────────────────
 
 (defn train-text8
@@ -918,8 +966,9 @@
         T          (:seq-len config)
         sqrt-n     (pick-sqrt-n config)
         bank-n     (* sqrt-n sqrt-n)
-        start-step (or (latest-checkpoint-step ckpt-dir) 0)
-        sync-every (pick-sync-every)
+        start-step   (or (latest-checkpoint-step ckpt-dir) 0)
+        sync-every   (pick-sync-every)
+        ablate-every (pick-ablate-every)
         ;; Sync only meaningful when (a) the bank is mmap-backed
         ;; (otherwise nothing to share) and (b) we have a volume
         ;; handle (otherwise commit/reload have nowhere to go).
@@ -955,7 +1004,13 @@
                          sync-every (pick-volume-name)))
         (when (pos? sync-every)
           (println (format "  sync: requested every %d steps but volume unavailable — disabled"
-                           sync-every)))))
+                           sync-every))))
+      (when (pos? ablate-every)
+        (println (format "  ablate: intermediate Δ eval every %d steps (zero V → eval → restore V)"
+                         ablate-every))
+        (when (pos? (mod ablate-every eval-every))
+          (println (format "    WARN: ablate-every (%d) is not a multiple of eval-every (%d); ablation steps that don't align with eval steps will be skipped."
+                           ablate-every eval-every)))))
     (let [t0 (time/time)]
       (loop [step start-step]
         (if (>= step total-steps)
@@ -1041,7 +1096,21 @@
               (let [r (eval-bpc m val-data T 16 50000)]
                 (append-jsonl! log-path
                                (format "{\"step\":%d,\"event\":\"eval\",\"loss\":%.4f,\"val_bpc\":%.4f,\"val_ppl\":%.4f,\"wall_s\":%.1f}"
-                                       step' loss (:bpc r) (:ppl r) (- (time/time) t0)))))
+                                       step' loss (:bpc r) (:ppl r) (- (time/time) t0)))
+                ;; Intermediate ablation Δ measurement, if requested.
+                ;; Reuses the just-computed control bpc; runs one extra
+                ;; eval-bpc with V zeroed and then restores V in-place.
+                (when (and (pos? ablate-every) (zero? (mod step' ablate-every)))
+                  (let [t-abl   (time/time)
+                        ctrl    (:bpc r)
+                        abl-bpc (ablation-step! m val-data T 16 50000)
+                        delta   (- abl-bpc ctrl)
+                        dt      (- (time/time) t-abl)]
+                    (println (format "  ── ablation Δ at step %d: ctrl=%.4f abl=%.4f Δ=%+.4f (%.1fs) ──"
+                                     step' ctrl abl-bpc delta dt))
+                    (append-jsonl! log-path
+                                   (format "{\"step\":%d,\"event\":\"ablation_intermediate\",\"control_bpc\":%.4f,\"ablated_bpc\":%.4f,\"delta_bpc\":%.4f,\"ablation_s\":%.2f,\"wall_s\":%.1f}"
+                                           step' ctrl abl-bpc delta dt (- (time/time) t0)))))))
             (when (zero? (mod step' ckpt-every))
               (save-checkpoint! m opt-dense opt-sparse ckpt-dir step')
               (println (format "  ── ckpt at step %d ──" step')))

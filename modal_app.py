@@ -358,7 +358,7 @@ def _run_train_long(total_steps, eval_every, ckpt_every, device, lr,
                     sync_every=0, volume_name="mmllm-data",
                     lr_warmup=0, lr_min=None,
                     bank_query_mode="plain", long_tier_mix="sum",
-                    bank_feedback_mode="plain"):
+                    bank_feedback_mode="plain", ablate_every=0):
     """Shared body. All knobs threaded via env vars (MMLLM_DEVICE,
     MMLLM_LR, MMLLM_BATCH, MMLLM_SQRT_N, MMLLM_CPU_OFFLOAD,
     MMLLM_BANK_ON_GPU, MMLLM_SYNC_EVERY, MMLLM_VOLUME_NAME,
@@ -408,7 +408,8 @@ def _run_train_long(total_steps, eval_every, ckpt_every, device, lr,
            "MMLLM_LR_WARMUP":   str(lr_warmup),
            "MMLLM_BANK_QUERY_MODE":    bank_query_mode,
            "MMLLM_LONG_TIER_MIX":      long_tier_mix,
-           "MMLLM_BANK_FEEDBACK_MODE": bank_feedback_mode}
+           "MMLLM_BANK_FEEDBACK_MODE": bank_feedback_mode,
+           "MMLLM_ABLATE_EVERY":       str(ablate_every)}
     if sqrt_n is not None:
         env["MMLLM_SQRT_N"] = str(sqrt_n)
     if cpu_offload:
@@ -422,6 +423,7 @@ def _run_train_long(total_steps, eval_every, ckpt_every, device, lr,
         f"lr_warmup={lr_warmup} lr_min={lr_min} "
         f"bank_query_mode={bank_query_mode} long_tier_mix={long_tier_mix} "
         f"bank_feedback_mode={bank_feedback_mode} "
+        f"ablate_every={ablate_every} "
         f"total={total_steps} eval-every={eval_every} "
         f"ckpt-every={ckpt_every} base={base} ===",
         flush=True,
@@ -459,6 +461,7 @@ def train_with_bank(
     bank_query_mode: str = "plain",      # 'plain' | 'ctx-add' — see mmllm.bank_query
     long_tier_mix: str = "sum",          # 'sum' | 'scalar' | 'switch' — see mmllm.gating
     bank_feedback_mode: str = "plain",   # 'plain' | 'feedback' — see mmllm.bank_feedback
+    ablate_every: int = 0,               # >0 = log Δ trajectory every N steps; 0 disables
     base: str = "/data/text8",
     bank: str = "/data/bank",
     corpus_base: str = "",               # if set and != base, symlink corpus splits
@@ -515,6 +518,7 @@ def train_with_bank(
         bank_query_mode=bank_query_mode,
         long_tier_mix=long_tier_mix,
         bank_feedback_mode=bank_feedback_mode,
+        ablate_every=ablate_every,
     )
 
 
