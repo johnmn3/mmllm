@@ -33,6 +33,7 @@
            [torch.optim :as optim]
            [mmllm.memory :as mem]
            [mmllm.corpus :as corp]
+           [mmllm.gating :as gate]
            [mmllm.optim :as vbopt]))
 
 (defn pick-device
@@ -150,6 +151,37 @@
   []
   (.get (.- os environ) "MMLLM_VOLUME_NAME" "mmllm-data"))
 
+(defn pick-long-tier-mix
+  "Resolve how the long-tier KV-cache SDPA path and the bank-V
+   retrieval path get combined inside attention. Reads
+   MMLLM_LONG_TIER_MIX (default 'sum'). One of:
+     'sum'    — attn_l = sdpa + mem (no learned gate; baseline)
+     'scalar' — α[h], β[h] trainable per long head; init 1, 1
+     'switch' — sigmoid(Q · w_h) gates a convex mix; init 0.5/0.5
+   See `mmllm.gating` for the implementation."
+  []
+  (.get (.- os environ) "MMLLM_LONG_TIER_MIX" "sum"))
+
+(defn- pick-window
+  "Resolve a sliding-window size from env. Returns int or nil."
+  [env-key]
+  (let [val (.get (.- os environ) env-key)]
+    (when val
+      (let [n (python/int val)]
+        (when (pos? n) n)))))
+
+(defn pick-short-window
+  "Resolve short-tier sliding-window size. Reads MMLLM_SHORT_WINDOW
+   (int, default unset = unbounded)."
+  []
+  (pick-window "MMLLM_SHORT_WINDOW"))
+
+(defn pick-long-window
+  "Resolve long-tier in-RAM sliding-window size. Reads MMLLM_LONG_WINDOW
+   (int, default unset = unbounded)."
+  []
+  (pick-window "MMLLM_LONG_WINDOW"))
+
 (defn- get-modal-volume
   "Return a modal.Volume reference for the named volume, or nil
    if modal isn't installed or the lookup fails. Lazily imported
@@ -222,7 +254,22 @@
    :memory-sqrt-n      512       ; sqrt of bank entries; bank holds sqrt-n^2 = 262 144
    :memory-top-k       16        ; final retrieved entries per query
    :memory-sub-top-k   32        ; sub-keys per half kept before re-rank
-   :memory-mmap-path   nil})     ; if set, V.weight is mmap-backed at <path>.<i>.bin
+   :memory-mmap-path   nil       ; if set, V.weight is mmap-backed at <path>.<i>.bin
+   :long-tier-mix      nil       ; nil → fall back to MMLLM_LONG_TIER_MIX env (default 'sum');
+                                  ; 'sum' / 'scalar' / 'switch' — see mmllm.gating
+   ;; Sliding-window eviction. nil = unbounded (cache grows linearly with
+   ;; conversation length — fine for training where T is fixed, a memory
+   ;; leak at inference). Set to an integer to keep only the last W tokens
+   ;; in each respective KV cache. Training is a no-op when T < window.
+   ;;   short-window: hard cutoff on the RoPE'd short cache.
+   ;;     RoPE preserves relative position under eviction (q·k depends on
+   ;;     i - j, both still rotated correctly), so eviction is safe.
+   ;;   long-window:  cutoff on the in-RAM long cache. The longcache.py
+   ;;     paged-LRU mmap layer (not yet wired into forward) is a separate
+   ;;     larger working set behind this — long-window is the IN-RAM
+   ;;     ceiling, longcache is the on-disk extension.
+   :short-window       nil
+   :long-window        nil})
 
 (def long-leaning-config
   "Long-leaning (2/10): 10 of 12 heads route through the memory bank.
@@ -280,9 +327,10 @@
      long-cache:  nil OR [k v] each (B, n-long-kv-heads,  T_prev, head-dim)
    Returns [out new-short-cache new-long-cache]."
   [block x cos sin short-cache long-cache]
-  (let [{:keys [q-proj k-proj-s v-proj-s k-proj-l v-proj-l o-proj memory
+  (let [{:keys [q-proj k-proj-s v-proj-s k-proj-l v-proj-l o-proj memory long-gate
                 n-heads n-short-heads n-long-heads
-                n-short-kv-heads n-long-kv-heads head-dim]} block
+                n-short-kv-heads n-long-kv-heads head-dim
+                short-window long-window]} block
         B            (.size x 0)
         T            (.size x 1)
         ;; project Q, split into short/long groups along head dim
@@ -305,6 +353,14 @@
           [(torch/cat (python/list [(nth short-cache 0) k-s-r]) ** :dim 2)
            (torch/cat (python/list [(nth short-cache 1) v-s])   ** :dim 2)]
           [k-s-r v-s])
+        ;; Sliding-window eviction for the short-tier KV cache. RoPE
+        ;; preserves relative position under eviction (q·k depends on
+        ;; i-j; both still rotated by their original positions).
+        T-s-full     (.size k-s-full 2)
+        [k-s-full v-s-full] (if (and short-window (> T-s-full short-window))
+                              [(.narrow k-s-full 2 (- T-s-full short-window) short-window)
+                               (.narrow v-s-full 2 (- T-s-full short-window) short-window)]
+                              [k-s-full v-s-full])
         repeat-s     (quot n-short-heads n-short-kv-heads)
         k-s-rep      (.repeat_interleave k-s-full repeat-s ** :dim 1)
         v-s-rep      (.repeat_interleave v-s-full repeat-s ** :dim 1)
@@ -324,6 +380,14 @@
           [(torch/cat (python/list [(nth long-cache 0) k-l]) ** :dim 2)
            (torch/cat (python/list [(nth long-cache 1) v-l]) ** :dim 2)]
           [k-l v-l])
+        ;; Sliding-window eviction on the long-tier in-RAM KV cache.
+        ;; The longcache.py paged-LRU mmap layer (not yet wired into
+        ;; forward) sits behind this — long-window is the in-RAM ceiling.
+        T-l-full     (.size k-l-full 2)
+        [k-l-full v-l-full] (if (and long-window (> T-l-full long-window))
+                              [(.narrow k-l-full 2 (- T-l-full long-window) long-window)
+                               (.narrow v-l-full 2 (- T-l-full long-window) long-window)]
+                              [k-l-full v-l-full])
         repeat-l     (quot n-long-heads n-long-kv-heads)
         k-l-rep      (.repeat_interleave k-l-full repeat-l ** :dim 1)
         v-l-rep      (.repeat_interleave v-l-full repeat-l ** :dim 1)
@@ -338,8 +402,10 @@
         attn-l-mem   (-> mem-out
                          (.reshape B T n-long-heads head-dim)
                          (.transpose 1 2))
-        ;; ── Sum the two long-tier sources before head-concat
-        attn-l       (torch/add attn-l-sdpa attn-l-mem)
+        ;; ── Combine the two long-tier sources via the configured gate
+        ;; (see mmllm.gating). At init: SumGate = identity sum;
+        ;; ScalarGate = sum (α=β=1); SwitchGate = 0.5 · (sdpa + mem).
+        attn-l       (long-gate q-long attn-l-sdpa attn-l-mem)
         ;; ── concat short + long head outputs, project back
         attn         (torch/cat (python/list [attn-s attn-l]) ** :dim 1)
         out          (-> attn (.transpose 1 2) (.contiguous)
@@ -372,13 +438,17 @@
   [{:keys [d-model n-heads n-short-heads n-long-heads
            n-short-kv-heads n-long-kv-heads d-ff
            memory-top-k memory-sub-top-k
-           memory-mmap-path] :as config}
+           memory-mmap-path long-tier-mix
+           short-window long-window] :as config}
    block-idx]
-  (let [head-dim (quot d-model n-heads)
-        q-dim    (* n-long-heads head-dim)
-        sqrt-n   (pick-sqrt-n config)
-        path     (when memory-mmap-path
-                   (str memory-mmap-path "." block-idx ".bin"))]
+  (let [head-dim  (quot d-model n-heads)
+        q-dim     (* n-long-heads head-dim)
+        sqrt-n    (pick-sqrt-n config)
+        path      (when memory-mmap-path
+                    (str memory-mmap-path "." block-idx ".bin"))
+        gate-kind (or long-tier-mix (pick-long-tier-mix))
+        sw        (or short-window (pick-short-window))
+        lw        (or long-window  (pick-long-window))]
     {:d-model           d-model
      :head-dim          head-dim
      :n-heads           n-heads
@@ -397,6 +467,9 @@
      :gate-proj (nn/Linear d-model d-ff ** :bias false)
      :up-proj   (nn/Linear d-model d-ff ** :bias false)
      :down-proj (nn/Linear d-ff    d-model ** :bias false)
+     :short-window      sw
+     :long-window       lw
+     :long-gate (gate/build_gate gate-kind n-long-heads head-dim)
      :memory    (mem/ProductKeyMemory q-dim sqrt-n
                                       ** :top_k     memory-top-k
                                       :sub_top_k memory-sub-top-k
@@ -410,7 +483,7 @@
    weight stays on CPU even when device='cuda' — only K_a, K_b move."
   [block device]
   (doseq [k [:norm1 :norm2 :q-proj :k-proj-s :v-proj-s :k-proj-l :v-proj-l
-             :o-proj :gate-proj :up-proj :down-proj :memory]]
+             :o-proj :gate-proj :up-proj :down-proj :long-gate :memory]]
     (.to (get block k) device))
   block)
 
@@ -446,7 +519,8 @@
                                 [:norm1 :norm2 :q-proj
                                  :k-proj-s :v-proj-s
                                  :k-proj-l :v-proj-l
-                                 :o-proj :gate-proj :up-proj :down-proj])
+                                 :o-proj :gate-proj :up-proj :down-proj
+                                 :long-gate])
                         ;; memory: K_a, K_b are dense; V.weight is sparse
                         (.dense_parameters (:memory b))))]
     (concat (python/list (.parameters tok-emb))
@@ -569,7 +643,7 @@
                :k-proj-s :v-proj-s
                :k-proj-l :v-proj-l
                :o-proj :gate-proj :up-proj :down-proj
-               :memory]]
+               :long-gate :memory]]
       (.eval (get b k)))))
 
 (defn sample

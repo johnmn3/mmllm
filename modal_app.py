@@ -443,6 +443,88 @@ def train_with_bank_cpu(
 @app.function(
     image=image,
     volumes={"/data": volume},
+    timeout=3600,
+    cpu=4.0,
+    memory=8192,
+)
+def spike_long_gates(
+    steps: int = 200,
+    eval_every: int = 100,
+    sqrt_n: int = 128,
+    batch: int = 4,
+    short_window: int = 0,   # 0 = unbounded
+    long_window: int = 0,
+):
+    """Spike: compare 'sum' / 'scalar' / 'switch' long-tier path-mixing
+    on a 200-step text8 smoke. Reports control bpc + bank-zero Δ for each.
+    Each run is a fresh model, fresh bank, same data; only the gate kind
+    differs. Runs sequentially on CPU; ~3-5 min total.
+
+    Pass criteria:
+      - all three runs complete without error
+      - all three show loss descent (final < initial)
+      - either scalar or switch should produce a different control_bpc
+        than sum (proves the gate is actually doing something)
+    """
+    import os, subprocess, shutil, json
+    summary = {}
+    for kind in ("sum", "scalar", "switch"):
+        base = f"/data/spike-{kind}"
+        bank = f"/data/spike-{kind}-bank"
+        for f in (
+            f"{base}.train.bin", f"{base}.val.bin", f"{base}.test.bin",
+            f"{base}.log.jsonl",
+            *[f"{bank}.{i}.bin" for i in range(5)],
+        ):
+            try: os.remove(f)
+            except FileNotFoundError: pass
+        if os.path.isdir(f"{base}.ckpts"):
+            shutil.rmtree(f"{base}.ckpts")
+        for split in ("train", "val", "test"):
+            os.symlink(f"/data/text8.{split}.bin", f"{base}.{split}.bin")
+
+        env = {**os.environ,
+               "MMLLM_DEVICE": "cpu",
+               "MMLLM_BATCH":  str(batch),
+               "MMLLM_LR":     "3e-3",
+               "MMLLM_SQRT_N": str(sqrt_n),
+               "MMLLM_LONG_TIER_MIX": kind}
+        if short_window > 0:
+            env["MMLLM_SHORT_WINDOW"] = str(short_window)
+        if long_window > 0:
+            env["MMLLM_LONG_WINDOW"] = str(long_window)
+        print(f"=== spike_long_gates: kind={kind} steps={steps} ===", flush=True)
+        subprocess.run(
+            ["mmllm", "train-long", base, bank,
+             str(steps), str(eval_every), str(steps + 1)],
+            check=True, env=env,
+        )
+        # Pull final ablation summary from the log
+        try:
+            lines = open(f"{base}.log.jsonl").read().strip().splitlines()
+            ablations = [json.loads(l) for l in lines
+                         if json.loads(l).get("event") == "ablation"]
+            if ablations:
+                a = ablations[-1]
+                summary[kind] = {
+                    "control_bpc": a["control_bpc"],
+                    "ablated_bpc": a["ablated_bpc"],
+                    "delta_bpc":   a["delta_bpc"],
+                }
+        except Exception as e:
+            print(f"  WARN: could not parse log for {kind}: {e}", flush=True)
+
+    print("\n=== spike_long_gates summary ===", flush=True)
+    print(f"  {'kind':10} {'control':>10} {'ablated':>10} {'Δ':>10}", flush=True)
+    for kind, r in summary.items():
+        print(f"  {kind:10} {r['control_bpc']:10.4f} {r['ablated_bpc']:10.4f} {r['delta_bpc']:+10.4f}",
+              flush=True)
+    print("=== spike_long_gates: done ===", flush=True)
+
+
+@app.function(
+    image=image,
+    volumes={"/data": volume},
     timeout=1800,
     cpu=4.0,
     memory=8192,
