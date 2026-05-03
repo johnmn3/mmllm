@@ -1,0 +1,1150 @@
+(ns mmllm.core
+  "Minimal LLM playground in basilisp. PyTorch CPU/GPU.
+
+  Hand-rolled modern decoder block with HARD-SPLIT TIERED attention
+  across THREE memory tiers:
+
+    - RMSNorm (pre-norm) + SwiGLU FFN
+    - Weight-tied LM head (head reuses tok-emb.weight)
+    - Q heads split by index: short heads + long heads
+    - SHORT tier: RoPE'd, causal SDPA, KV grows in-RAM (recent
+      working memory, single-conversation).
+    - LONG tier has TWO sources, summed inside attention:
+        (a) Set-style SDPA over a per-conversation long-tier KV
+            cache (k-proj-l, v-proj-l). Mutable, episodic, paged
+            via mmllm.longcache mmap at inference; per-instance
+            (or shared per-team) for many-parallel-inference setups.
+        (b) Product-key memory bank: sqrt-n² learned (key,value)
+            entries retrieved by product-key search — sub-linear
+            lookup regardless of N. Immutable at inference, shared
+            via mmap across many parallel inference instances.
+
+  (a) is episodic memory; (b) is semantic memory. Together with
+  the short cache, you get the three classical memory tiers in one
+  attention block — without a single cross-attention or RAG seam."
+  (:import sys
+           math
+           os
+           time
+           torch
+           [torch.cuda :as cuda]
+           [torch.nn :as nn]
+           [torch.nn.functional :as F]
+           [torch.optim :as optim]
+           [mmllm.memory :as mem]
+           [mmllm.corpus :as corp]
+           [mmllm.optim :as vbopt]))
+
+(defn pick-device
+  "Resolve the active torch device. Reads MMLLM_DEVICE
+   (cpu / cuda / auto, default auto). `auto` picks cuda if
+   `torch.cuda.is_available()`, else cpu."
+  []
+  (let [req (.get (.- os environ) "MMLLM_DEVICE" "auto")]
+    (cond
+      (= req "cpu")  "cpu"
+      (= req "cuda") (if (cuda/is_available) "cuda"
+                         (do (println "WARN: MMLLM_DEVICE=cuda but cuda not available — falling back to cpu")
+                             "cpu"))
+      :else          (if (cuda/is_available) "cuda" "cpu"))))
+
+(defn pick-lr
+  "Resolve learning rate. Reads MMLLM_LR (float string,
+   default 3e-3). Applied to BOTH AdamW (dense) and SparseAdam (V)."
+  []
+  (python/float (.get (.- os environ) "MMLLM_LR" "3e-3")))
+
+(defn pick-batch
+  "Resolve training batch size. Reads MMLLM_BATCH (int string,
+   default 4). Bigger batch = smoother gradients + better GPU
+   utilization, but linear scaling on cross-device bank gather."
+  []
+  (python/int (.get (.- os environ) "MMLLM_BATCH" "4")))
+
+(defn pick-sqrt-n
+  "Resolve memory bank's sqrt_n (i.e. side length of the bank;
+   total entries = sqrt_n²). Reads MMLLM_SQRT_N if set,
+   otherwise falls back to (:memory-sqrt-n config). Used to
+   override bank size at runtime without editing config."
+  [config]
+  (let [env-val (.get (.- os environ) "MMLLM_SQRT_N")]
+    (if env-val
+      (python/int env-val)
+      (:memory-sqrt-n config))))
+
+(defn pick-sparse-optimizer
+  "Return the class to use for the bank's optimizer.
+
+   When MMLLM_CPU_OFFLOAD=true, returns CPUOffloadSparseAdam,
+   which keeps m/v moments on host RAM (frees ~38 GB GPU VRAM at
+   sqrt_n=2048). Default: stock torch.optim.SparseAdam."
+  []
+  (if (= "true" (.lower (.get (.- os environ) "MMLLM_CPU_OFFLOAD" "false")))
+    vbopt/CPUOffloadSparseAdam
+    optim/SparseAdam))
+
+(defn pick-lr-warmup
+  "Resolve linear warmup steps. Reads MMLLM_LR_WARMUP (default 0
+   = no schedule; constant lr throughout). Standard 1000 for our
+   305k-step 5B run is ~0.3% of training, plenty for warm bring-up."
+  []
+  (python/int (.get (.- os environ) "MMLLM_LR_WARMUP" "0")))
+
+(defn pick-lr-min
+  "Resolve cosine-decay floor lr. Reads MMLLM_LR_MIN (default
+   = MMLLM_LR / 10, i.e. 10% of peak). Only used when warmup > 0."
+  []
+  (let [env-val (.get (.- os environ) "MMLLM_LR_MIN")]
+    (if env-val
+      (python/float env-val)
+      (* 0.1 (pick-lr)))))
+
+(defn lr-at-step
+  "Linear warmup + cosine decay. Returns the lr to use at step s.
+   When warmup == 0 returns max-lr (constant — backward compat).
+
+   Schedule shape:
+     0 ≤ s < warmup        : linearly ramp 0 → max-lr
+     warmup ≤ s < total    : cosine decay max-lr → min-lr
+     s ≥ total             : min-lr (defensive; loop should have exited)"
+  [s total max-lr warmup min-lr]
+  (cond
+    (zero? warmup) max-lr
+    (< s warmup)   (* max-lr (/ (python/float s) (python/float warmup)))
+    (>= s total)   min-lr
+    :else (let [progress (/ (python/float (- s warmup))
+                            (python/float (- total warmup)))
+                cos-half (* 0.5 (+ 1.0 (math/cos (* (.- math pi) progress))))]
+            (+ min-lr (* (- max-lr min-lr) cos-half)))))
+
+(defn set-opt-lr!
+  "Mutate every param group of `opt` to have lr=`lr`. Used inside
+   the train loop to apply lr-at-step results.
+
+   torch.optim.Optimizer.param_groups is a list of plain Python
+   dicts (not attribute-objects), so we use __setitem__ rather than
+   setattr."
+  [opt lr]
+  (doseq [pg (.- opt param_groups)]
+    (.__setitem__ pg "lr" lr)))
+
+(defn pick-sync-every
+  "Resolve cross-worker bank sync interval, in training steps.
+   Reads MMLLM_SYNC_EVERY (int, default 0 = sync disabled).
+
+   When > 0 and a Modal Volume is reachable, every N steps the
+   training loop calls (mem/sync_banks layers volume), which:
+     1. commits dirty bank pages to the volume,
+     2. reloads to pull other workers' commits,
+     3. remaps each layer's mmap so V.weight sees the fresh content.
+
+   Recommended values: 50-500 for multi-trainer Hogwild on Modal
+   Volumes. Lower → tighter cross-worker coupling but more
+   commit/reload overhead. 0 → single-worker training, no sync."
+  []
+  (python/int (.get (.- os environ) "MMLLM_SYNC_EVERY" "0")))
+
+(defn pick-volume-name
+  "Modal volume name for cross-worker bank sync.
+   Reads MMLLM_VOLUME_NAME (default 'mmllm-data')."
+  []
+  (.get (.- os environ) "MMLLM_VOLUME_NAME" "mmllm-data"))
+
+(defn- get-modal-volume
+  "Return a modal.Volume reference for the named volume, or nil
+   if modal isn't installed or the lookup fails. Lazily imported
+   so non-Modal users (local dev, tests) don't need modal in their
+   environment."
+  [name]
+  (try
+    (let [modal (python/__import__ "modal")]
+      (.from_name (.- modal Volume) name))
+    (catch python/ImportError _
+      (println (format "  WARN: modal not installed; bank sync disabled."))
+      nil)
+    (catch python/Exception e
+      (println (format "  WARN: modal.Volume.from_name(\"%s\") failed: %s — bank sync disabled."
+                       name e))
+      nil)))
+
+(def ^:private LN2 0.6931471805599453)
+
+;;; ─────────────────────── byte tokenizer ───────────────────────
+
+(def vocab-size 256)
+
+(defn encode
+  "string → 1-D LongTensor of UTF-8 byte codepoints."
+  [s]
+  (torch/tensor (python/list (.encode s "utf-8"))
+                ** :dtype torch/long))
+
+(defn decode
+  "1-D int tensor → string. Replaces invalid UTF-8 sequences."
+  [t]
+  (.decode (python/bytes (.tolist t))
+           "utf-8" ** :errors "replace"))
+
+;;; ─────────────────────── configs ───────────────────────
+
+(def default-config
+  "Short-leaning (5/7) — ~10 M dense params + ~1 GB mmap bank.
+
+   Dense: d-model=384 across 5 layers. Per block ≈ 1.97 M
+   (q/k/v/o + SwiGLU(384→1408→384) + 2 RMSNorm + K_a/K_b);
+   tok-emb 256×384 + final RMSNorm. 5 × 1.97 M + 0.1 M ≈ 10.0 M.
+
+   Bank: GQA 5:1 in the short tier (5 short Q-heads → 1 short
+   KV-head), leaving 7 long heads. q-dim into the bank is
+   7 × 32 = 224 fp32 per slot. Per-layer V is sqrt-n² × q-dim × 4
+   = 512² × 224 × 4 ≈ 234 MB; 5 layers ≈ 1.17 GB. Pass
+   :memory-mmap-path (or use the train-mmap CLI verb) to back V
+   on disk — sparse-grad means only touched rows page in/out."
+  {:d-model            384
+   :n-heads            12        ; total Q heads = n-short-heads + n-long-heads
+   :n-short-heads      5
+   :n-long-heads       7
+   :n-short-kv-heads   1         ; GQA 5:1 within short tier
+   :n-long-kv-heads    1         ; MQA 7:1 within long tier — minimal K/V proj cost
+   :n-layers           5
+   :seq-len            128       ; training window
+   :max-pos            1024      ; RoPE cache size
+   :d-ff               1408
+   :rope-theta         10000.0
+   ;; Long heads have TWO sources at attention time, summed:
+   ;;  (1) SDPA over the per-conversation long-tier K/V cache
+   ;;      (set-style attention; populated from k-proj-l/v-proj-l;
+   ;;      grows unbounded — paged via mmllm.longcache mmap at inference).
+   ;;  (2) Product-key retrieval from the learned bank V (below).
+   ;; (1) handles per-conversation episodic context. (2) handles
+   ;; cross-corpus learned semantic memory. Two independent pathways.
+   ;; Product-key memory bank (per-block, learned semantic memory)
+   :memory-sqrt-n      512       ; sqrt of bank entries; bank holds sqrt-n^2 = 262 144
+   :memory-top-k       16        ; final retrieved entries per query
+   :memory-sub-top-k   32        ; sub-keys per half kept before re-rank
+   :memory-mmap-path   nil})     ; if set, V.weight is mmap-backed at <path>.<i>.bin
+
+(def long-leaning-config
+  "Long-leaning (2/10): 10 of 12 heads route through the memory bank.
+   q-dim = 10 × 32 = 320 → bank ≈ 1.68 GB across 5 layers."
+  (assoc default-config
+         :n-short-heads     2
+         :n-long-heads      10
+         :n-short-kv-heads  1))
+
+;;; ─────────────────────── RoPE (used only on the short tier) ───────────────────────
+
+(defn build-rope-cache
+  "Precompute (cos, sin) tensors for max-seq-len positions.
+   Returns [cos sin] each of shape (max-seq-len, head-dim)."
+  [max-seq-len head-dim theta]
+  (let [idx        (torch/arange 0 head-dim 2 ** :dtype torch/float32)
+        log-theta  (.log (torch/tensor (python/float theta)))
+        inv-freq   (.exp (.mul (.div (.neg idx) (python/float head-dim))
+                               log-theta))
+        positions  (torch/arange max-seq-len ** :dtype torch/float32)
+        freqs      (.outer positions inv-freq)
+        cos-half   (.cos freqs)
+        sin-half   (.sin freqs)
+        cos        (torch/cat (python/list [cos-half cos-half]) ** :dim -1)
+        sin        (torch/cat (python/list [sin-half sin-half]) ** :dim -1)]
+    [cos sin]))
+
+(defn- rotate-half [x]
+  (let [last-dim (- (.dim x) 1)
+        half     (quot (.size x last-dim) 2)
+        x1       (.narrow x last-dim 0 half)
+        x2       (.narrow x last-dim half half)]
+    (torch/cat (python/list [(.neg x2) x1]) ** :dim -1)))
+
+(defn apply-rope
+  "Rotate x by RoPE. x: (..., T, head-dim); cos, sin: (T, head-dim)."
+  [x cos sin]
+  (torch/add (torch/mul x cos)
+             (torch/mul (rotate-half x) sin)))
+
+;;; ─────────────────────── attention (hard-split tiered + memory) ───────────────────────
+
+(defn attention
+  "Three-tier attention. Short heads attend to RoPE'd short cache.
+   Long heads have TWO sources, SUMMED:
+     (a) Set-style SDPA over per-conversation long K/V cache
+         (k-proj-l, v-proj-l projections; grows unbounded — paged
+         via mmllm.longcache mmap at inference).
+     (b) Product-key retrieval from learned bank V.
+
+   (a) is episodic memory; (b) is semantic memory.
+
+     x:           (B, T, d-model)
+     short-cache: nil OR [k v] each (B, n-short-kv-heads, T_prev, head-dim)
+     long-cache:  nil OR [k v] each (B, n-long-kv-heads,  T_prev, head-dim)
+   Returns [out new-short-cache new-long-cache]."
+  [block x cos sin short-cache long-cache]
+  (let [{:keys [q-proj k-proj-s v-proj-s k-proj-l v-proj-l o-proj memory
+                n-heads n-short-heads n-long-heads
+                n-short-kv-heads n-long-kv-heads head-dim]} block
+        B            (.size x 0)
+        T            (.size x 1)
+        ;; project Q, split into short/long groups along head dim
+        q-full       (-> (q-proj x) (.reshape B T n-heads head-dim))
+        q-short      (-> q-full (.narrow 2 0             n-short-heads) (.transpose 1 2))
+        q-long       (-> q-full (.narrow 2 n-short-heads n-long-heads)  (.transpose 1 2))
+        ;; project K, V for both tiers (separate matrices per tier)
+        k-s          (-> (k-proj-s x) (.reshape B T n-short-kv-heads head-dim) (.transpose 1 2))
+        v-s          (-> (v-proj-s x) (.reshape B T n-short-kv-heads head-dim) (.transpose 1 2))
+        k-l          (-> (k-proj-l x) (.reshape B T n-long-kv-heads  head-dim) (.transpose 1 2))
+        v-l          (-> (v-proj-l x) (.reshape B T n-long-kv-heads  head-dim) (.transpose 1 2))
+        ;; ── SHORT tier: RoPE on Q and K, append to cache, GQA expand, causal SDPA
+        prev-short   (if short-cache (.size (nth short-cache 0) 2) 0)
+        cos-here-s   (.narrow cos 0 prev-short T)
+        sin-here-s   (.narrow sin 0 prev-short T)
+        q-short-r    (apply-rope q-short cos-here-s sin-here-s)
+        k-s-r        (apply-rope k-s     cos-here-s sin-here-s)
+        [k-s-full v-s-full]
+        (if short-cache
+          [(torch/cat (python/list [(nth short-cache 0) k-s-r]) ** :dim 2)
+           (torch/cat (python/list [(nth short-cache 1) v-s])   ** :dim 2)]
+          [k-s-r v-s])
+        repeat-s     (quot n-short-heads n-short-kv-heads)
+        k-s-rep      (.repeat_interleave k-s-full repeat-s ** :dim 1)
+        v-s-rep      (.repeat_interleave v-s-full repeat-s ** :dim 1)
+        is-causal    (and (nil? short-cache) (> T 1))
+        attn-s       (F/scaled_dot_product_attention
+                      q-short-r k-s-rep v-s-rep ** :is_causal is-causal)
+        ;; ── LONG tier (a): SDPA over per-conversation cache. No RoPE
+        ;; (long tier is order-agnostic — set semantics at inference,
+        ;; where each step appends one token to a genuinely-past set).
+        ;; CAUSAL during the first multi-token forward (training, or
+        ;; first prompt encode) — otherwise k-l/v-l[t+1..T-1] would
+        ;; encode future tokens that the loss is trying to predict.
+        ;; T=1 incremental forwards (long-cache populated) collapse
+        ;; the causal mask to identity, so it's a no-op there.
+        [k-l-full v-l-full]
+        (if long-cache
+          [(torch/cat (python/list [(nth long-cache 0) k-l]) ** :dim 2)
+           (torch/cat (python/list [(nth long-cache 1) v-l]) ** :dim 2)]
+          [k-l v-l])
+        repeat-l     (quot n-long-heads n-long-kv-heads)
+        k-l-rep      (.repeat_interleave k-l-full repeat-l ** :dim 1)
+        v-l-rep      (.repeat_interleave v-l-full repeat-l ** :dim 1)
+        is-causal-l  (and (nil? long-cache) (> T 1))
+        attn-l-sdpa  (F/scaled_dot_product_attention
+                      q-long k-l-rep v-l-rep ** :is_causal is-causal-l)
+        ;; ── LONG tier (b): bank retrieval (learned semantic memory)
+        ;; q-long: (B, n-long-heads, T, head-dim) → (B, T, n-long-heads*head-dim)
+        q-long-flat  (-> q-long (.transpose 1 2) (.contiguous)
+                         (.reshape B T (* n-long-heads head-dim)))
+        mem-out      (memory q-long-flat)
+        attn-l-mem   (-> mem-out
+                         (.reshape B T n-long-heads head-dim)
+                         (.transpose 1 2))
+        ;; ── Sum the two long-tier sources before head-concat
+        attn-l       (torch/add attn-l-sdpa attn-l-mem)
+        ;; ── concat short + long head outputs, project back
+        attn         (torch/cat (python/list [attn-s attn-l]) ** :dim 1)
+        out          (-> attn (.transpose 1 2) (.contiguous)
+                         (.reshape B T (* n-heads head-dim)))
+        out          (o-proj out)]
+    [out [k-s-full v-s-full] [k-l-full v-l-full]]))
+
+;;; ─────────────────────── SwiGLU FFN ───────────────────────
+
+(defn swiglu-ffn
+  "down(silu(gate(x)) * up(x)) — three linears, no bias."
+  [block x]
+  (let [{:keys [gate-proj up-proj down-proj]} block]
+    (down-proj (torch/mul (F/silu (gate-proj x))
+                          (up-proj x)))))
+
+;;; ─────────────────────── decoder block ───────────────────────
+
+(defn block-forward
+  "Pre-norm block. Returns [x_out new-short-cache new-long-cache]."
+  [block x cos sin short-cache long-cache]
+  (let [{:keys [norm1 norm2]} block
+        [attn-out new-s new-l] (attention block (norm1 x) cos sin short-cache long-cache)
+        x       (torch/add x attn-out)
+        ffn-out (swiglu-ffn block (norm2 x))
+        x       (torch/add x ffn-out)]
+    [x new-s new-l]))
+
+(defn build-block
+  [{:keys [d-model n-heads n-short-heads n-long-heads
+           n-short-kv-heads n-long-kv-heads d-ff
+           memory-top-k memory-sub-top-k
+           memory-mmap-path] :as config}
+   block-idx]
+  (let [head-dim (quot d-model n-heads)
+        q-dim    (* n-long-heads head-dim)
+        sqrt-n   (pick-sqrt-n config)
+        path     (when memory-mmap-path
+                   (str memory-mmap-path "." block-idx ".bin"))]
+    {:d-model           d-model
+     :head-dim          head-dim
+     :n-heads           n-heads
+     :n-short-heads     n-short-heads
+     :n-long-heads      n-long-heads
+     :n-short-kv-heads  n-short-kv-heads
+     :n-long-kv-heads   n-long-kv-heads
+     :norm1     (nn/RMSNorm d-model)
+     :norm2     (nn/RMSNorm d-model)
+     :q-proj    (nn/Linear d-model (* n-heads          head-dim) ** :bias false)
+     :k-proj-s  (nn/Linear d-model (* n-short-kv-heads head-dim) ** :bias false)
+     :v-proj-s  (nn/Linear d-model (* n-short-kv-heads head-dim) ** :bias false)
+     :k-proj-l  (nn/Linear d-model (* n-long-kv-heads  head-dim) ** :bias false)
+     :v-proj-l  (nn/Linear d-model (* n-long-kv-heads  head-dim) ** :bias false)
+     :o-proj    (nn/Linear (* n-heads head-dim) d-model ** :bias false)
+     :gate-proj (nn/Linear d-model d-ff ** :bias false)
+     :up-proj   (nn/Linear d-model d-ff ** :bias false)
+     :down-proj (nn/Linear d-ff    d-model ** :bias false)
+     :memory    (mem/ProductKeyMemory q-dim sqrt-n
+                                      ** :top_k     memory-top-k
+                                      :sub_top_k memory-sub-top-k
+                                      :mmap_path path)}))
+
+;;; ─────────────────────── model ───────────────────────
+
+(defn- block-to-device!
+  "Move every nn.Module child of a block to `device`. ProductKeyMemory's
+   V is a CPUPinnedEmbedding whose _apply is a no-op, so its mmap-backed
+   weight stays on CPU even when device='cuda' — only K_a, K_b move."
+  [block device]
+  (doseq [k [:norm1 :norm2 :q-proj :k-proj-s :v-proj-s :k-proj-l :v-proj-l
+             :o-proj :gate-proj :up-proj :down-proj :memory]]
+    (.to (get block k) device))
+  block)
+
+(defn build-model
+  [{:keys [d-model n-heads n-short-heads n-long-heads
+           n-short-kv-heads
+           n-layers seq-len max-pos rope-theta] :as config}]
+  (assert (= n-heads (+ n-short-heads n-long-heads))
+          "n-heads must equal n-short-heads + n-long-heads")
+  (assert (zero? (mod n-short-heads n-short-kv-heads))
+          "n-short-heads must be divisible by n-short-kv-heads")
+  (let [head-dim   (quot d-model n-heads)
+        [cos sin]  (build-rope-cache (or max-pos seq-len) head-dim rope-theta)
+        device     (pick-device)]
+    {:config     config
+     :device     device
+     :tok-emb    (.to (nn/Embedding vocab-size d-model) device)
+     :blocks     (vec (map #(block-to-device! (build-block config %) device)
+                           (range n-layers)))
+     :norm-final (.to (nn/RMSNorm d-model) device)
+     :rope-cos   (.to cos device)
+     :rope-sin   (.to sin device)}))
+
+(defn parameters
+  "DENSE learnable parameters — these route to AdamW. Excludes the
+   memory bank V.weight per block (sparse — see sparse-parameters).
+   The LM head is weight-tied to tok-emb so doesn't appear separately."
+  [m]
+  (let [{:keys [tok-emb blocks norm-final]} m
+        block-params (fn [b]
+                       (concat
+                        (mapcat #(python/list (.parameters (get b %)))
+                                [:norm1 :norm2 :q-proj
+                                 :k-proj-s :v-proj-s
+                                 :k-proj-l :v-proj-l
+                                 :o-proj :gate-proj :up-proj :down-proj])
+                        ;; memory: K_a, K_b are dense; V.weight is sparse
+                        (.dense_parameters (:memory b))))]
+    (concat (python/list (.parameters tok-emb))
+            (mapcat block-params blocks)
+            (python/list (.parameters norm-final)))))
+
+(defn sparse-parameters
+  "SPARSE learnable parameters — route to SparseAdam. Backward
+   produces sparse gradients via nn.Embedding(sparse=True), so
+   only the touched rows get updated (and written back to mmap)."
+  [m]
+  (mapcat #(.sparse_parameters (:memory %)) (:blocks m)))
+
+(defn forward
+  "Run the model.
+     tokens:       (B, T) int64
+     short-caches: nil OR vector of n-layers per-layer [k v]
+     long-caches:  nil OR vector of n-layers per-layer [k v]
+   Returns [logits new-short-caches new-long-caches]."
+  ([m tokens] (forward m tokens nil nil))
+  ([m tokens short-caches] (forward m tokens short-caches nil))
+  ([m tokens short-caches long-caches]
+   (let [{:keys [tok-emb blocks norm-final rope-cos rope-sin]} m
+         n-layers     (count blocks)
+         short-caches (or short-caches (vec (repeat n-layers nil)))
+         long-caches  (or long-caches  (vec (repeat n-layers nil)))]
+     (loop [i         0
+            x         (tok-emb tokens)
+            out-short []
+            out-long  []]
+       (if (= i n-layers)
+         (let [x      (norm-final x)
+               logits (torch/matmul x (.t (.- tok-emb weight)))]
+           [logits out-short out-long])
+         (let [block      (nth blocks i)
+               sc         (nth short-caches i)
+               lc         (nth long-caches  i)
+               [x' s' l'] (block-forward block x rope-cos rope-sin sc lc)]
+           (recur (inc i) x' (conj out-short s') (conj out-long l'))))))))
+
+;;; ─────────────────────── training ───────────────────────
+
+(def ^:private toy-text
+  (str "she sells seashells by the seashore. "
+       "the shells she sells are surely seashells. "
+       "so if she sells shells on the seashore, "
+       "i'm sure she sells seashore shells. "))
+
+(defn batch
+  "Sample B random (T+1)-windows from `data`; split into x, y.
+
+   `data` may be uint8 (mmap-backed; multi-GB corpora) or int64
+   (preloaded; small corpora). We .long()-cast the sampled batch
+   so the model always sees int64 token IDs — for B=128, T=128
+   that's 132 KB per batch, trivial regardless of corpus size."
+  [data B T]
+  (let [N    (.size data 0)
+        idx  (torch/randint 0 (- N T 1) (python/tuple [B])
+                            ** :dtype torch/long)
+        rows (python/list)]
+    (doseq [i (.tolist idx)]
+      (.append rows (.narrow data 0 i (+ T 1))))
+    (let [win (.long (torch/stack rows))]
+      [(.narrow win 1 0 T)
+       (.narrow win 1 1 T)])))
+
+(defn train-step
+  [m opt-dense opt-sparse x y]
+  (let [device       (:device m)
+        x            (.to x device)
+        y            (.to y device)
+        [logits _ _] (forward m x)
+        loss         (F/cross_entropy
+                      (.reshape logits -1 vocab-size)
+                      (.reshape y -1))]
+    (.zero_grad opt-dense)
+    (.zero_grad opt-sparse)
+    (.backward loss)
+    (.step opt-dense)
+    (.step opt-sparse)
+    (.item loss)))
+
+(defn train
+  "Train on the toy corpus. Returns the trained model.
+
+   Uses TWO optimizers: AdamW for dense params (K_a, K_b, model
+   weights) and SparseAdam for the memory bank's V.weight per
+   block (sparse-grad via nn.Embedding(sparse=True))."
+  ([] (train default-config 200))
+  ([config steps]
+   (let [m          (build-model config)
+         data       (encode toy-text)
+         opt-dense  (optim/AdamW    (python/list (parameters m))        ** :lr (pick-lr))
+         opt-sparse ((pick-sparse-optimizer) (python/list (sparse-parameters m)) ** :lr (pick-lr))
+         T          (:seq-len config)
+         sqrt-n     (pick-sqrt-n config)
+         bank-n     (* sqrt-n sqrt-n)
+         mmap-note  (if (:memory-mmap-path config)
+                      (str " mmap=" (:memory-mmap-path config))
+                      " in-RAM")]
+     (println (format "training %d steps; T=%d, d=%d, layers=%d"
+                      steps T (:d-model config) (:n-layers config)))
+     (println (format "   short: %dQ / %dKV    long: %dQ → memory(%d entries × %d layers,%s)"
+                      (:n-short-heads config) (:n-short-kv-heads config)
+                      (:n-long-heads  config) bank-n (:n-layers config) mmap-note))
+     (doseq [step (range steps)]
+       (let [[x y] (batch data (pick-batch) T)
+             l     (train-step m opt-dense opt-sparse x y)]
+         (when (zero? (mod step 20))
+           (println (format "  step %4d  loss %.3f" step l)))))
+     m)))
+
+;;; ─────────────────────── sampling ───────────────────────
+
+(defn- set-eval-mode! [m]
+  (.eval (:tok-emb m))
+  (.eval (:norm-final m))
+  (doseq [b (:blocks m)]
+    (doseq [k [:norm1 :norm2 :q-proj
+               :k-proj-s :v-proj-s
+               :k-proj-l :v-proj-l
+               :o-proj :gate-proj :up-proj :down-proj
+               :memory]]
+      (.eval (get b k)))))
+
+(defn sample
+  "Generate `n` characters after `prompt`. Threads BOTH short cache
+   (RoPE'd, recent) and long cache (set-style, episodic). Long heads
+   ALSO query the bank V (semantic memory) — those two long-tier
+   sources are summed inside attention."
+  [m prompt n]
+  (set-eval-mode! m)
+  (let [prompt-toks            (-> prompt encode (.unsqueeze 0))
+        [logits short long]    (forward m prompt-toks)]
+    (loop [step    0
+           short-c short
+           long-c  long
+           prev    logits
+           toks    prompt-toks]
+      (if (= step n)
+        (decode (.squeeze toks 0))
+        (let [last-log              (.select prev 1 -1)
+              probs                 (F/softmax last-log ** :dim -1)
+              next-tok              (torch/multinomial probs 1)
+              [new-log new-s new-l] (forward m next-tok short-c long-c)]
+          (recur (inc step) new-s new-l new-log
+                 (torch/cat (python/list [toks next-tok]) ** :dim 1)))))))
+
+;;; ─────────────────────── train on a real corpus ───────────────────────
+
+(defn train-corpus
+  "Train on a binary corpus file. The file is byte tokens (each
+   octet is one token in our 256-vocab byte tokenizer). Random
+   T+1-byte windows are sampled per step, same loop as `train`
+   but the data source is the corpus rather than the toy text.
+
+   If config has :memory-mmap-path set, each block's bank V is
+   backed by <path>.<i>.bin — the V tensor is a zero-copy view
+   over the file, sparse-grad updates only touched rows, so the
+   bank can grow past RAM (the whole point of the architecture)."
+  [config steps corpus-path]
+  (let [m          (build-model config)
+        data       (corp/load-as-tensor corpus-path)
+        opt-dense  (optim/AdamW    (python/list (parameters m))         ** :lr (pick-lr))
+        opt-sparse ((pick-sparse-optimizer) (python/list (sparse-parameters m)) ** :lr (pick-lr))
+        T          (:seq-len config)
+        sqrt-n     (pick-sqrt-n config)
+        bank-n     (* sqrt-n sqrt-n)
+        N          (.size data 0)
+        mmap-note  (if (:memory-mmap-path config)
+                     (str " mmap=" (:memory-mmap-path config))
+                     " in-RAM")]
+    (println (format "train-corpus: corpus=%d bytes (%d MB); %d steps; T=%d, B=%d, d=%d, layers=%d  lr=%g"
+                     N (quot N 1048576) steps T (pick-batch) (:d-model config) (:n-layers config) (pick-lr)))
+    (println (format "   short: %dQ / %dKV    long: %dQ → memory(%d entries × %d layers,%s)"
+                     (:n-short-heads config) (:n-short-kv-heads config)
+                     (:n-long-heads  config) bank-n (:n-layers config) mmap-note))
+    (doseq [step (range steps)]
+      (let [[x y] (batch data (pick-batch) T)
+            l     (train-step m opt-dense opt-sparse x y)]
+        (when (zero? (mod step 50))
+          (println (format "  step %4d  loss %.3f" step l)))))
+    m))
+
+;;; ─────────────────────── BPC eval ───────────────────────
+;;;
+;;; Standard byte-level LM metric. Splits held-out data into
+;;; non-overlapping (B, T) windows, runs forward, sums NLL in
+;;; nats over predicted tokens, divides by token count, divides
+;;; by ln(2). The first byte of each window has no left context
+;;; from the previous window — this is the standard "non-
+;;; overlapping" convention used by text8/enwik8/wikitext papers.
+
+(defn eval-bpc
+  "Compute bytes-per-character on a held-out byte tensor. Returns
+   {:bpc :ppl :n-tokens :n-windows}. `max-tokens` caps total
+   tokens predicted so eval stays bounded on big held-out splits
+   — pass nil for the whole tensor."
+  ([m data T] (eval-bpc m data T 16 100000))
+  ([m data T B max-tokens]
+   (set-eval-mode! m)
+   (torch/set_grad_enabled false)
+   (try
+     (let [N        (.size data 0)
+           cap-toks (or max-tokens N)
+           wins-cap (quot cap-toks T)
+           n-wins   (min (quot (- N 1) T) wins-cap)
+           usable   (* n-wins T)
+           x-flat   (.narrow data 0 0 usable)
+           y-flat   (.narrow data 0 1 usable)
+           x-wins   (.reshape x-flat n-wins T)
+           y-wins   (.reshape y-flat n-wins T)]
+       (println (format "  eval-bpc: %d windows × T=%d, B=%d (cap=%d toks)"
+                        n-wins T B (* n-wins T)))
+       (loop [i      0
+              total  0.0
+              n-toks 0
+              logged 0]
+         (if (>= i n-wins)
+           (let [nll (/ total n-toks)
+                 bpc (/ nll LN2)
+                 ppl (math/exp nll)]
+             (println (format "    bpc=%.4f  ppl=%.2f  over %d tokens"
+                              bpc ppl n-toks))
+             {:bpc bpc :ppl ppl :n-tokens n-toks :n-windows n-wins})
+           (let [device    (:device m)
+                 end       (min (+ i B) n-wins)
+                 bsz       (- end i)
+                 xb        (.to (.narrow x-wins 0 i bsz) device)
+                 yb        (.to (.narrow y-wins 0 i bsz) device)
+                 [logits _ _] (forward m xb)
+                 loss      (F/cross_entropy
+                            (.reshape logits -1 vocab-size)
+                            (.reshape yb -1)
+                            ** :reduction "sum")
+                 bsz-toks  (* bsz T)
+                 total'    (+ total (.item loss))
+                 n-toks'   (+ n-toks bsz-toks)
+                 logged'   (+ logged bsz)]
+             (when (>= logged' 256)
+               (println (format "      %d/%d windows  running bpc=%.4f"
+                                end n-wins (/ (/ total' n-toks') LN2))))
+             (recur end total' n-toks' (mod logged' 256))))))
+     (finally
+       (torch/set_grad_enabled true)))))
+
+;;; ─────────────────────── train + eval text8 / enwik8 ───────────────────────
+
+(defn train-text8
+  "Train on <base>.train.bin then eval BPC on <base>.{val,test}.bin.
+   Standard 90M/5M/5M Mikolov split. Returns the trained model.
+
+   `base` is the path WITHOUT the .train.bin/.val.bin/.test.bin
+   suffix — e.g. /tmp/text8 expects /tmp/text8.{train,val,test}.bin
+   produced by `split-text8`."
+  [config steps base-path]
+  (let [train-path (str base-path ".train.bin")
+        val-path   (str base-path ".val.bin")
+        test-path  (str base-path ".test.bin")
+        T          (:seq-len config)
+        B-eval     16
+        eval-toks  100000]
+    (println (format "train-text8: base=%s steps=%d" base-path steps))
+    (let [m         (train-corpus config steps train-path)
+          val-data  (corp/load-as-tensor val-path)
+          test-data (corp/load-as-tensor test-path)]
+      (println)
+      (println (format "═══ eval on val (first %d tokens) ═══" eval-toks))
+      (eval-bpc m val-data T B-eval eval-toks)
+      (println)
+      (println (format "═══ eval on test (first %d tokens) ═══" eval-toks))
+      (eval-bpc m test-data T B-eval eval-toks)
+      m)))
+
+;;; ─────────────────────── checkpointing + long-running training ───────────────────────
+;;;
+;;; Bank V is mmap-backed and lives at <:memory-mmap-path>.<i>.bin —
+;;; persistent by construction. What's NOT persistent across process
+;;; restarts: dense parameter values (q/k/v/o/FFN/RMSNorm/embeddings)
+;;; and optimizer moments (AdamW for dense, SparseAdam for the bank's
+;;; touched-row state). Checkpointing here saves exactly those, into
+;;; <ckpt-dir>/step-<N>/{dense.pt, opt-dense.pt, opt-sparse.pt}, so a
+;;; crashed N-day run resumes within a few minutes.
+
+(defn save-checkpoint!
+  "Persist dense params + optimizer state to <ckpt-dir>/step-<step>/.
+   Bank V mmap files are NOT duplicated."
+  [m opt-dense opt-sparse ckpt-dir step]
+  (let [path (str ckpt-dir "/step-" step)]
+    (os/makedirs path ** :exist_ok true)
+    (torch/save (python/list (for [p (parameters m)]
+                               (.detach (.clone (.- p data)))))
+                (str path "/dense.pt"))
+    (torch/save (.state_dict opt-dense)  (str path "/opt-dense.pt"))
+    (torch/save (.state_dict opt-sparse) (str path "/opt-sparse.pt"))
+    (let [f (python/open (str path "/step.txt") "w")]
+      (.write f (str step))
+      (.close f))))
+
+(defn load-checkpoint!
+  "Restore dense params + optimizer state. Bank V auto-attaches via mmap."
+  [m opt-dense opt-sparse ckpt-dir step]
+  (let [path  (str ckpt-dir "/step-" step)
+        saved (python/list (torch/load (str path "/dense.pt")))]
+    (doseq [[p s] (map vector (parameters m) saved)]
+      (.copy_ (.- p data) s))
+    (.load_state_dict opt-dense  (torch/load (str path "/opt-dense.pt")))
+    (.load_state_dict opt-sparse (torch/load (str path "/opt-sparse.pt")))))
+
+(defn latest-checkpoint-step
+  "Largest N for which <ckpt-dir>/step-N/ exists, or nil. Used on
+   train-long startup to decide whether to resume."
+  [ckpt-dir]
+  (try
+    (let [items     (vec (os/listdir ckpt-dir))
+          step-dirs (filter #(.startswith % "step-") items)
+          steps     (map #(python/int (subs % 5)) step-dirs)]
+      (when (seq steps) (apply max steps)))
+    (catch Exception _ nil)))
+
+(defn- append-jsonl! [path line]
+  (let [f (python/open path "a")]
+    (.write f (str line "\n"))
+    (.close f)))
+
+(defn train-long
+  "Long-running training with periodic eval + checkpoint + resume.
+
+   Trains on <train-path> from current step (or resumed) up to
+   total-steps. Every eval-every steps: BPC eval on val-data, append
+   {step, loss, val_bpc, val_ppl, time} to <log-path>. Every
+   ckpt-every steps: save dense+optimizer state to <ckpt-dir>.
+   On startup: scans <ckpt-dir>; if any step-<N>/ exists, restores
+   from the latest. Bank V picks up via mmap.
+
+   Designed to run for hours-days under Modal/tmux/nohup. Returns
+   the trained model (mostly useful for in-process callers)."
+  [config train-path val-path ckpt-dir log-path total-steps eval-every ckpt-every]
+  (let [m          (build-model config)
+        ;; Train file may be many GB — use_mmap=True keeps it on disk
+        ;; (uint8 view, .long()-cast per batch). Pre-load val (typically
+        ;; ≤500 MB) directly as int64 so eval-bpc's repeated narrow()
+        ;; over fixed windows doesn't repeatedly cast.
+        train-data (corp/load-as-tensor train-path ** :use_mmap true)
+        val-data   (corp/load-as-tensor val-path)
+        opt-dense  (optim/AdamW    (python/list (parameters m))         ** :lr (pick-lr))
+        opt-sparse ((pick-sparse-optimizer) (python/list (sparse-parameters m)) ** :lr (pick-lr))
+        T          (:seq-len config)
+        sqrt-n     (pick-sqrt-n config)
+        bank-n     (* sqrt-n sqrt-n)
+        start-step (or (latest-checkpoint-step ckpt-dir) 0)
+        sync-every (pick-sync-every)
+        ;; Sync only meaningful when (a) the bank is mmap-backed
+        ;; (otherwise nothing to share) and (b) we have a volume
+        ;; handle (otherwise commit/reload have nowhere to go).
+        ;; Either condition false → sync is a no-op for this run.
+        volume     (when (and (pos? sync-every) (:memory-mmap-path config))
+                     (get-modal-volume (pick-volume-name)))
+        do-sync?   (and volume (pos? sync-every))]
+    (os/makedirs ckpt-dir ** :exist_ok true)
+    (when (pos? start-step)
+      (println (format "  resuming from checkpoint at step %d" start-step))
+      (load-checkpoint! m opt-dense opt-sparse ckpt-dir start-step))
+    (when (>= start-step total-steps)
+      ;; Silent skip is the bug we hit on the first sync smoke: a stale
+      ;; ckpt from a prior longer run made start-step exceed the new
+      ;; total-steps; the step loop never executed and we got the end-
+      ;; of-training ablation against the *initial* (untrained) bank.
+      ;; Warn loudly so the operator sees it before chasing ghost results.
+      (println (format "  WARN: start-step (%d) >= total-steps (%d) — step loop will not run."
+                       start-step total-steps))
+      (println (format "        Either bump --total-steps above %d, or clear the ckpt dir: %s"
+                       start-step ckpt-dir)))
+    (let [mmap-note (if (:memory-mmap-path config)
+                      (str " mmap=" (:memory-mmap-path config))
+                      " in-RAM")]
+      (println (format "train-long: %s  steps=%d→%d  B=%d  eval-every=%d  ckpt-every=%d  lr=%g  device=%s"
+                       train-path start-step total-steps (pick-batch) eval-every ckpt-every
+                       (pick-lr) (:device m)))
+      (println (format "  bank: %d entries × %d layers,%s"
+                       bank-n (:n-layers config) mmap-note))
+      (println (format "  log: %s    ckpt: %s" log-path ckpt-dir))
+      (if do-sync?
+        (println (format "  sync: every %d steps via modal.Volume(\"%s\")  (Hogwild)"
+                         sync-every (pick-volume-name)))
+        (when (pos? sync-every)
+          (println (format "  sync: requested every %d steps but volume unavailable — disabled"
+                           sync-every)))))
+    (let [t0 (time/time)]
+      (loop [step start-step]
+        (if (>= step total-steps)
+          (do
+            (save-checkpoint! m opt-dense opt-sparse ckpt-dir step)
+            (println (format "training complete at step %d" step))
+            ;; Inline bank ablation: eval (control), zero V across all blocks,
+            ;; eval (ablation), report Δ. The Δ tells us how much of the
+            ;; model's BPC depends on the trained memory bank.
+            (println "  ── eval at end (control: bank trained) ──")
+            (let [r-ctrl (eval-bpc m val-data T 16 100000)]
+              (append-jsonl! log-path
+                             (format "{\"step\":%d,\"event\":\"final\",\"val_bpc\":%.4f,\"val_ppl\":%.4f,\"wall_s\":%.1f}"
+                                     step (:bpc r-ctrl) (:ppl r-ctrl) (- (time/time) t0)))
+              ;; Persist V to disk BEFORE ablation zeroes it. Inference can
+              ;; later re-mount via CPUPinnedEmbedding + mmap (set
+              ;; MMLLM_BANK_ON_GPU=false at inf time + same memory-mmap-path).
+              (when-let [bank-path (:memory-mmap-path config)]
+                (println (format "  ── saving trained bank to %s.<i>.bin ──" bank-path))
+                (let [t-save (time/time)]
+                  (doseq [[i b] (map-indexed vector (:blocks m))]
+                    (let [path (str bank-path "." i ".bin")
+                          n    (.save_to_mmap (:memory b) path)]
+                      (println (format "    block %d → %s (%.2f GB)"
+                                       i path (/ n 1.073741824e9)))))
+                  (println (format "    bank saved in %.1fs" (- (time/time) t-save)))
+                  (append-jsonl! log-path
+                                 (format "{\"step\":%d,\"event\":\"bank_saved\",\"bank_path\":\"%s\",\"wall_s\":%.1f}"
+                                         step bank-path (- (time/time) t0)))))
+              (println "  ── ablation: zeroing bank V across all 5 blocks ──")
+              (doseq [b (:blocks m)] (.zero_bank (:memory b)))
+              (println "  ── eval at end (ablation: bank zeroed) ──")
+              (let [r-abl (eval-bpc m val-data T 16 100000)
+                    delta (- (:bpc r-abl) (:bpc r-ctrl))]
+                (println (format "  ════ ablation summary ════"))
+                (println (format "    control  bpc=%.4f ppl=%.2f" (:bpc r-ctrl) (:ppl r-ctrl)))
+                (println (format "    ablated  bpc=%.4f ppl=%.2f" (:bpc r-abl)  (:ppl r-abl)))
+                (println (format "    Δ bpc    %+.4f  (positive = bank carries signal; near 0 = bank is dead weight)"
+                                 delta))
+                (append-jsonl! log-path
+                               (format "{\"step\":%d,\"event\":\"ablation\",\"control_bpc\":%.4f,\"ablated_bpc\":%.4f,\"delta_bpc\":%.4f,\"wall_s\":%.1f}"
+                                       step (:bpc r-ctrl) (:bpc r-abl) delta (- (time/time) t0)))))
+            m)
+          (let [warmup     (pick-lr-warmup)
+                ;; Apply lr schedule (no-op when warmup == 0). Both
+                ;; AdamW (dense) and SparseAdam/CPUOffloadSparseAdam (V)
+                ;; track the same lr — sqrt-batch scaling already baked
+                ;; into MMLLM_LR.
+                _          (when (pos? warmup)
+                             (let [cur-lr (lr-at-step step total-steps
+                                                      (pick-lr) warmup
+                                                      (pick-lr-min))]
+                               (set-opt-lr! opt-dense  cur-lr)
+                               (set-opt-lr! opt-sparse cur-lr)))
+                [x y] (batch train-data (pick-batch) T)
+                loss  (train-step m opt-dense opt-sparse x y)
+                step' (inc step)]
+            (when (zero? (mod step' 50))
+              (let [cur-lr (if (pos? warmup)
+                             (lr-at-step step total-steps
+                                         (pick-lr) warmup (pick-lr-min))
+                             (pick-lr))]
+                (println (format "  step %d  loss %.3f  lr %.2e  (%.1fs)"
+                                 step' loss cur-lr (- (time/time) t0)))))
+            ;; Cross-worker bank sync. Has to happen AFTER the optimizer
+            ;; step (so dirty rows from this step are flushed) and outside
+            ;; train-step's autograd graph. We sync before eval/ckpt so
+            ;; eval-time reads see the freshest cross-worker state.
+            (when (and do-sync? (zero? (mod step' sync-every)))
+              (let [t-sync (time/time)
+                    layers (python/list (map :memory (:blocks m)))
+                    res    (mem/sync_banks layers volume)
+                    dirty  (or (.get res "total_dirty_pages") 0)
+                    nlay   (or (.get res "n_layers_synced") 0)
+                    dt     (- (time/time) t-sync)]
+                (println (format "  ── sync at step %d: %d dirty pages across %d layers in %.2fs ──"
+                                 step' dirty nlay dt))
+                (append-jsonl! log-path
+                               (format "{\"step\":%d,\"event\":\"sync\",\"dirty_pages\":%d,\"n_layers\":%d,\"sync_s\":%.2f,\"wall_s\":%.1f}"
+                                       step' dirty nlay dt (- (time/time) t0)))))
+            (when (zero? (mod step' eval-every))
+              (println (format "  ── eval at step %d ──" step'))
+              (let [r (eval-bpc m val-data T 16 50000)]
+                (append-jsonl! log-path
+                               (format "{\"step\":%d,\"event\":\"eval\",\"loss\":%.4f,\"val_bpc\":%.4f,\"val_ppl\":%.4f,\"wall_s\":%.1f}"
+                                       step' loss (:bpc r) (:ppl r) (- (time/time) t0)))))
+            (when (zero? (mod step' ckpt-every))
+              (save-checkpoint! m opt-dense opt-sparse ckpt-dir step')
+              (println (format "  ── ckpt at step %d ──" step')))
+            (recur step')))))))
+
+;;; ─────────────────────── copy-from-far probe ───────────────────────
+;;;
+;;; Synthetic task: each sequence is laid out as
+;;;   [key (k bytes)][val (v bytes)][distractor (T-2k-2v bytes)][key][val]
+;;; and the model is trained on next-token loss across the whole thing.
+;;; Probe metric: argmax accuracy on the LAST val-len positions —
+;;; can the model recall val given key after the distractor?
+
+(defn copy-batch
+  "Generate a (B, T) batch of [key val distractor key val] sequences."
+  [B T key-len val-len]
+  (let [d-len (- T (* 2 key-len) (* 2 val-len))
+        seqs  (python/list)]
+    (assert (pos? d-len) "T must be > 2*(key-len + val-len)")
+    (doseq [_ (range B)]
+      (let [k    (torch/randint 32 127 (python/tuple [key-len]) ** :dtype torch/long)
+            val  (torch/randint 32 127 (python/tuple [val-len]) ** :dtype torch/long)
+            d    (torch/randint 32 127 (python/tuple [d-len])   ** :dtype torch/long)
+            seq  (torch/cat (python/list [k val d k val]))]
+        (.append seqs seq)))
+    (torch/stack seqs)))
+
+(defn- copy-train-step
+  "Same shape as train-step but the loss is computed ONLY on the
+   last val-len target positions (the recall val). Distractor and
+   key positions are random — including them in the loss drowns
+   the learnable signal in pure entropy."
+  [m opt-dense opt-sparse x y val-len]
+  (let [[logits _ _] (forward m x)
+        L            (.size logits 1)
+        logits-tail (.narrow logits 1 (- L val-len) val-len)
+        y-tail      (.narrow y      1 (- (.size y 1) val-len) val-len)
+        loss        (F/cross_entropy (.reshape logits-tail -1 vocab-size)
+                                     (.reshape y-tail -1))]
+    (.zero_grad opt-dense)
+    (.zero_grad opt-sparse)
+    (.backward loss)
+    (.step opt-dense)
+    (.step opt-sparse)
+    (.item loss)))
+
+(defn train-copy
+  "Train on copy-from-far synthetic data. Returns trained model.
+   Loss is masked to only the last val-len positions per sequence."
+  [config steps key-len val-len]
+  (let [m          (build-model config)
+        opt-dense  (optim/AdamW    (python/list (parameters m))         ** :lr (pick-lr))
+        opt-sparse ((pick-sparse-optimizer) (python/list (sparse-parameters m)) ** :lr (pick-lr))
+        T          (:seq-len config)
+        d-len      (- T (* 2 key-len) (* 2 val-len))]
+    (println (format "train-copy: %d steps; T=%d, key=%d, val=%d, distractor=%d (loss masked to recall)"
+                     steps T key-len val-len d-len))
+    (doseq [step (range steps)]
+      (let [seqs (copy-batch 4 T key-len val-len)
+            x    (.narrow seqs 1 0 (- T 1))
+            y    (.narrow seqs 1 1 (- T 1))
+            l    (copy-train-step m opt-dense opt-sparse x y val-len)]
+        (when (zero? (mod step 50))
+          (println (format "  step %4d  loss %.3f" step l)))))
+    m))
+
+(defn probe-eval
+  "Measure recall accuracy on n-test held-out copy sequences.
+   Returns {:per-token <float> :per-seq <float>}."
+  [m n-test seq-len key-len val-len]
+  (set-eval-mode! m)
+  (let [seqs        (copy-batch n-test seq-len key-len val-len)
+        T           seq-len
+        targets     (.narrow seqs 1 (- T val-len) val-len)            ; (n_test, val_len)
+        inputs      (.narrow seqs 1 0 (- T 1))                         ; (n_test, T-1)
+        [logits _ _] (forward m inputs)
+        ;; logits[:, t, :] predicts inputs[t+1]; we want the last val_len predictions
+        pred-logits (.narrow logits 1 (- (- T 1) val-len) val-len)     ; (n_test, val_len, V)
+        pred-tokens (.argmax pred-logits ** :dim -1)
+        matches     (.eq pred-tokens targets)
+        per-tok     (.item (.mean (.float matches)))
+        per-seq     (.item (.mean (.float (.all matches ** :dim -1))))]
+    {:per-token per-tok :per-seq per-seq}))
+
+;;; ─────────────────────── CLI ───────────────────────
+
+(defn- pick-config [arg]
+  (case arg
+    "long" long-leaning-config
+    default-config))
+
+(defn cli-main []
+  (let [args (vec (rest sys/argv))
+        cmd  (first args)
+        cfg  (pick-config (second args))]
+    (case cmd
+      "train"      (do (train cfg 200) (println "done."))
+      "sample"     (let [m   (train cfg 200)
+                         out (sample m "she " 200)]
+                     (println "──────") (println out))
+      "compare"    (do
+                     (println "═══════ short-leaning  (5 short / 7 long) ═══════")
+                     (train default-config 200)
+                     (println)
+                     (println "═══════ long-leaning   (2 short / 10 long) ═══════")
+                     (train long-leaning-config 200)
+                     (println "done."))
+      "train-mmap" (let [path     (or (second args) "/tmp/mmllm-bank")
+                         mmap-cfg (assoc default-config :memory-mmap-path path)]
+                     (train mmap-cfg 200)
+                     (println "done."))
+      "probe"      (let [key-len 4
+                         val-len 4
+                         steps   2000
+                         T       (:seq-len cfg)
+                         n-test  64
+                         m       (train-copy cfg steps key-len val-len)
+                         ;; same test data for baseline & ablation runs
+                         _       (torch/manual_seed 42)
+                         acc-w   (probe-eval m n-test T key-len val-len)
+                         ;; ablate: zero every block's value bank V.weight
+                         _       (doseq [b (:blocks m)] (.zero_bank (:memory b)))
+                         _       (torch/manual_seed 42)
+                         acc-o   (probe-eval m n-test T key-len val-len)]
+                     (println)
+                     (println "═══ recall accuracy ═══")
+                     (println (format "  with bank:        per-token=%.3f  per-seq=%.3f"
+                                      (:per-token acc-w) (:per-seq acc-w)))
+                     (println (format "  bank zeroed (ablation): per-token=%.3f  per-seq=%.3f"
+                                      (:per-token acc-o) (:per-seq acc-o)))
+                     (println (format "  Δ per-seq:        %+.3f" (- (:per-seq acc-o) (:per-seq acc-w))))
+                     (println (format "  chance baseline:  %.3f" (/ 1.0 95))))
+      "build-corpus"  (let [out-path (or (second args) "/tmp/mmllm-corpus.bin")
+                            src      (or (nth args 2 nil) "/home/user/mmllm")
+                            stats    (corp/build-corpus out-path [src])]
+                        (println (format "  built: %d files, %s"
+                                         (get stats "files") (get stats "human")))
+                        (println (format "  → %s" (get stats "path"))))
+      "clone-clojure" (let [target (or (second args) "/tmp/clojure-corpus")
+                            paths  (corp/clone-repos target nil)]
+                        (println (format "  %d repos at %s" (count paths) target)))
+      "train-corpus"  (let [path  (or (second args) "/tmp/mmllm-corpus.bin")
+                            mpath (nth args 2 nil)
+                            steps (python/int (or (nth args 3 nil) 500))
+                            cfg2  (if mpath (assoc cfg :memory-mmap-path mpath) cfg)]
+                        (train-corpus cfg2 steps path)
+                        (println "done."))
+      "fetch-text8"   (let [out   (or (second args) "/tmp/text8")
+                            stats (corp/fetch-mahoney "text8" out)]
+                        (println (format "  text8: %s (%d bytes, cached=%s)"
+                                         (get stats "path") (get stats "bytes")
+                                         (get stats "cached"))))
+      "fetch-enwik8"  (let [out   (or (second args) "/tmp/enwik8")
+                            stats (corp/fetch-mahoney "enwik8" out)]
+                        (println (format "  enwik8: %s (%d bytes, cached=%s)"
+                                         (get stats "path") (get stats "bytes")
+                                         (get stats "cached"))))
+      "split-text8"   (let [in    (or (second args) "/tmp/text8")
+                            paths (corp/split-text8 in)]
+                        (println (format "  train: %s (%d bytes)"
+                                         (get paths "train") (get paths "bytes_train")))
+                        (println (format "  val:   %s (%d bytes)"
+                                         (get paths "val")   (get paths "bytes_val")))
+                        (println (format "  test:  %s (%d bytes)"
+                                         (get paths "test")  (get paths "bytes_test"))))
+      "train-text8"   (let [base  (or (second args) "/tmp/text8")
+                            mpath (nth args 2 nil)
+                            steps (python/int (or (nth args 3 nil) 500))
+                            cfg2  (if mpath (assoc cfg :memory-mmap-path mpath) cfg)]
+                        (train-text8 cfg2 steps base)
+                        (println "done."))
+      "train-long"    (let [base       (or (second args) "/tmp/text8")
+                            mpath      (nth args 2 nil)
+                            total      (python/int (or (nth args 3 nil) 10000))
+                            eval-every (python/int (or (nth args 4 nil) 1000))
+                            ckpt-every (python/int (or (nth args 5 nil) 5000))
+                            train-path (str base ".train.bin")
+                            val-path   (str base ".val.bin")
+                            ckpt-dir   (str base ".ckpts")
+                            log-path   (str base ".log.jsonl")
+                            cfg2       (if mpath (assoc cfg :memory-mmap-path mpath) cfg)]
+                        (train-long cfg2 train-path val-path ckpt-dir log-path
+                                    total eval-every ckpt-every)
+                        (println "done."))
+      "fetch-pile-github" (let [out      (or (second args) "/tmp/pile-github.bin")
+                                cap      (when (nth args 2 nil)
+                                           (python/int (nth args 2 nil)))
+                                workers  (python/int (or (nth args 3 nil) 4))
+                                stats    (if (> workers 1)
+                                           (corp/fetch-pile-github-parallel out cap workers)
+                                           (corp/fetch-pile-github out cap))]
+                            (println (format "  pile-github: %s (%d bytes, %d entries kept)"
+                                             (get stats "path")
+                                             (get stats "bytes")
+                                             (get stats "entries"))))
+      "split-pile-github" (let [in       (or (second args) "/tmp/pile-github.bin")
+                                val-cap  (python/int (or (nth args 2 nil) 100000000))
+                                test-cap (python/int (or (nth args 3 nil) 100000000))
+                                paths    (corp/split-pile-github in val-cap test-cap)]
+                            (println (format "  train: %s (%d bytes)"
+                                             (get paths "train") (get paths "bytes_train")))
+                            (println (format "  val:   %s (%d bytes)"
+                                             (get paths "val")   (get paths "bytes_val")))
+                            (println (format "  test:  %s (%d bytes)"
+                                             (get paths "test")  (get paths "bytes_test"))))
+      (do (println "usage: mmllm {train|sample|compare|train-mmap|probe")
+          (println "                  |build-corpus|clone-clojure|train-corpus")
+          (println "                  |fetch-text8|fetch-enwik8|split-text8|train-text8")
+          (println "                  |train-long} [args...]")
+          (println "  train [short|long]")
+          (println "  sample [short|long]")
+          (println "  compare")
+          (println "  train-mmap [base-path]                   (creates <path>.0.bin … <path>.N.bin)")
+          (println "  probe [short|long]                       (copy-from-far recall accuracy)")
+          (println "  build-corpus [out-path] [source-dir]     (default: mmllm → /tmp/mmllm-corpus.bin)")
+          (println "  clone-clojure [target-dir]               (shallow-clone Clojure-heavy upstream repos)")
+          (println "  train-corpus [corpus-path] [mmap-path] [steps]")
+          (println "                                           (mmap-path → <path>.<i>.bin per layer; lets bank exceed RAM)")
+          (println "  fetch-text8  [out-path]                  (download Matt Mahoney's text8 → out-path)")
+          (println "  fetch-enwik8 [out-path]                  (download Matt Mahoney's enwik8 → out-path)")
+          (println "  split-text8  [base-path]                 (90M/5M/5M Mikolov → <base>.{train,val,test}.bin)")
+          (println "  train-text8  [base-path] [mmap-path] [steps]")
+          (println "                                           (train + eval BPC on val/test; standard byte-LM benchmark)")
+          (println "  train-long   [base-path] [mmap-path] [total-steps] [eval-every] [ckpt-every]")
+          (println "                                           (long-running: periodic eval-bpc, ckpt every N, resume from")
+          (println "                                            <base>.ckpts/ on restart. Designed for Modal/long boxes.)")
+          (sys/exit 1)))))

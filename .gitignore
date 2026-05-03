@@ -1,0 +1,13 @@
+__pycache__/
+*.pyc
+.venv/
+*.egg-info/
+dist/
+build/
+.basilisp_cache/
+.DS_Store
+
+# editor / tooling caches
+.clj-kondo/.cache/
+.lsp/
+.portal/

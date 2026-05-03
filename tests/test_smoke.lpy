@@ -1,0 +1,42 @@
+(ns tests.test-smoke
+  "Smoke test — just enough to know the wiring works.
+   Run with: `basilisp test tests/`"
+  (:require [basilisp.test :as t :refer [deftest is]]
+            [mmllm.core :as v])
+  (:import torch))
+
+(deftest forward-pass-shape
+  (let [m       (v/build-model v/default-config)
+        x       (torch/zeros (python/tuple [2 16]) ** :dtype torch/long)
+        [y _ _] (v/forward m x)
+        shape   (vec (python/list (.- y shape)))]
+    (is (= [2 16 v/vocab-size] shape))))
+
+(deftest tokenizer-roundtrip
+  (let [s "she sells seashells"]
+    (is (= s (v/decode (v/encode s))))))
+
+(deftest forward-with-short-cache
+  (let [m              (v/build-model v/default-config)
+        prompt         (torch/zeros (python/tuple [1 8]) ** :dtype torch/long)
+        new-tok        (torch/zeros (python/tuple [1 1]) ** :dtype torch/long)
+        [y1 sc1 lc1]   (v/forward m prompt)
+        [y2 sc2 lc2]   (v/forward m new-tok sc1 lc1)
+        shape1         (vec (python/list (.- y1 shape)))
+        shape2         (vec (python/list (.- y2 shape)))
+        sc-len-1       (.size (nth (nth sc1 0) 0) 2)
+        sc-len-2       (.size (nth (nth sc2 0) 0) 2)
+        lc-len-1       (.size (nth (nth lc1 0) 0) 2)
+        lc-len-2       (.size (nth (nth lc2 0) 0) 2)]
+    (is (= [1 8 v/vocab-size] shape1))
+    (is (= [1 1 v/vocab-size] shape2))
+    (is (= 8 sc-len-1))
+    (is (= 9 sc-len-2))
+    (is (= 8 lc-len-1))
+    (is (= 9 lc-len-2))))
+
+(deftest both-configs-build
+  (let [m-short (v/build-model v/default-config)
+        m-long  (v/build-model v/long-leaning-config)]
+    (is (= 5 (-> m-short :blocks first :n-short-heads)))
+    (is (= 2 (-> m-long  :blocks first :n-short-heads)))))
