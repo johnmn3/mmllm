@@ -44,6 +44,7 @@ image = (
         "datasets>=2.14",  # streams Pile-uncopyrighted shards (no auth)
         "zstandard>=0.21",  # for Pile shard decompression
         "modal",            # for in-worker Volume.from_name() during bank sync
+        "codecarbon>=2.5",  # energy + CO2 instrumentation; pulls pynvml + RAPL
     )
     .add_local_dir(
         ".",

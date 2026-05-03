@@ -36,6 +36,7 @@
            [mmllm.gating :as gate]
            [mmllm.bank_query :as bq]
            [mmllm.bank_feedback :as bfb]
+           [mmllm.metrics :as metrics]
            [mmllm.optim :as vbopt]))
 
 (defn pick-device
@@ -1011,8 +1012,12 @@
         (when (pos? (mod ablate-every eval-every))
           (println (format "    WARN: ablate-every (%d) is not a multiple of eval-every (%d); ablation steps that don't align with eval steps will be skipped."
                            ablate-every eval-every)))))
-    (let [t0 (time/time)]
-      (loop [step start-step]
+    (let [t0       (time/time)
+          en-label (str "train-long:" train-path)
+          tracker  (metrics/EnergyTracker ** :label en-label :device (:device m))]
+      (.start tracker)
+      (try
+        (loop [step start-step]
         (if (>= step total-steps)
           (do
             (save-checkpoint! m opt-dense opt-sparse ckpt-dir step)
@@ -1065,8 +1070,10 @@
                                                       (pick-lr-min))]
                                (set-opt-lr! opt-dense  cur-lr)
                                (set-opt-lr! opt-sparse cur-lr)))
-                [x y] (batch train-data (pick-batch) T)
+                B-cur (pick-batch)
+                [x y] (batch train-data B-cur T)
                 loss  (train-step m opt-dense opt-sparse x y)
+                _     (.add_tokens tracker (* B-cur T))
                 step' (inc step)]
             (when (zero? (mod step' 50))
               (let [cur-lr (if (pos? warmup)
@@ -1114,7 +1121,29 @@
             (when (zero? (mod step' ckpt-every))
               (save-checkpoint! m opt-dense opt-sparse ckpt-dir step')
               (println (format "  ── ckpt at step %d ──" step')))
-            (recur step')))))))
+            (recur step'))))
+        (finally
+          ;; Stop the energy tracker and emit a single training_energy
+          ;; event with the run's totals. Wrapped in its own try/except
+          ;; so an instrumentation failure can never break a finished
+          ;; training run.
+          (try
+            (let [s (.stop tracker)]
+              (println (format "  ── energy: %.4f kWh / %.1f gCO2eq / %.5f J/tok over %s tokens (backend=%s) ──"
+                               (.get s "kwh") (.get s "gco2eq")
+                               (.get s "j_per_tok") (.get s "n_tokens")
+                               (.get s "backend")))
+              (when-let [w (.get s "warning")]
+                (println (format "  ── energy WARN: %s ──" w)))
+              (append-jsonl! log-path
+                             (format "{\"event\":\"training_energy\",\"backend\":\"%s\",\"wall_s\":%.1f,\"kwh\":%.6f,\"gco2eq\":%.3f,\"n_tokens\":%d,\"j_per_tok\":%.6f,\"tok_per_s\":%.2f,\"peak_w\":%.1f,\"pue\":%.3f,\"grid_g_per_kwh\":%.1f}"
+                                     (.get s "backend") (.get s "wall_s")
+                                     (.get s "kwh") (.get s "gco2eq")
+                                     (.get s "n_tokens") (.get s "j_per_tok")
+                                     (.get s "tok_per_s") (.get s "peak_w")
+                                     (.get s "pue") (.get s "grid_g_per_kwh"))))
+            (catch python/Exception e
+              (println (format "  ── energy: instrumentation failed: %s ──" e)))))))))
 
 ;;; ─────────────────────── copy-from-far probe ───────────────────────
 ;;;
