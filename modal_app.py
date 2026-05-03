@@ -16,9 +16,9 @@ Run from the repo root:
   modal app logs mmllm
 
   # Pull the JSONL log + checkpoints back to local for plotting / restart.
-  modal volume get mmllm-data /text8.log.jsonl ./
+  modal volume get verbum-bb-data /text8.log.jsonl ./
 
-The persistent volume `mmllm-data` holds:
+The persistent volume `verbum-bb-data` holds:
 
   /data/text8                  — raw 100 MB byte stream
   /data/text8.{train,val,test}.bin — 90M/5M/5M Mikolov split
@@ -55,12 +55,13 @@ image = (
 )
 
 volume = modal.Volume.from_name(
-    # Volume name kept as the pre-rename label until the contents
-    # (1B-trained dense ckpts + bank V mmaps + text8/pile-github
-    # splits) are migrated. Renaming to "mmllm-data" without
-    # migration would silently spin up an empty new volume and
-    # strand all the trained artifacts.
-    "mmllm-data",
+    # Pre-rename label, kept until contents (1B-trained dense ckpts,
+    # bank V mmaps, text8/pile-github splits, in-flight 5B run state)
+    # are migrated. The repo was renamed to mmllm but the deployed
+    # volume still holds all the trained artifacts under the original
+    # name; pointing this at "mmllm-data" would silently spin up an
+    # empty new volume and strand everything.
+    "verbum-bb-data",
     create_if_missing=True,
 )
 
@@ -221,7 +222,7 @@ def topup_pile_github(
 def _run_train_long(total_steps, eval_every, ckpt_every, device, lr,
                     batch=4, base="/data/text8", bank="/data/bank",
                     sqrt_n=None, cpu_offload=False, bank_on_gpu=True,
-                    sync_every=0, volume_name="mmllm-data",
+                    sync_every=0, volume_name="verbum-bb-data",
                     lr_warmup=0, lr_min=None,
                     bank_query_mode="plain", long_tier_mix="sum"):
     """Shared body. All knobs threaded via env vars (MMLLM_DEVICE,
@@ -737,7 +738,7 @@ def train_with_bank_worker(
     bank: str = "/data/shared-bank",
     base: str = "/data/pile-github.bin",
     sync_every: int = 100,
-    volume_name: str = "mmllm-data",
+    volume_name: str = "verbum-bb-data",
     bank_query_mode: str = "plain",
     long_tier_mix: str = "sum",
 ):
@@ -796,7 +797,7 @@ def train_multi(n_trainers: int = 4,
                 bank: str = "/data/shared-bank",
                 base: str = "/data/pile-github.bin",
                 sync_every: int = 100,
-                volume_name: str = "mmllm-data",
+                volume_name: str = "verbum-bb-data",
                 bank_query_mode: str = "plain",
                 long_tier_mix: str = "sum"):
     """Orchestrator: pre-init bank, fan out N parallel
@@ -861,7 +862,7 @@ def train_multi_b(bases: str = "/data/text8,/data/pile-github.bin",
                   sqrt_n: int = 2048,
                   bank: str = "/data/shared-bank-b",
                   sync_every: int = 100,
-                  volume_name: str = "mmllm-data",
+                  volume_name: str = "verbum-bb-data",
                   bank_query_mode: str = "plain",
                   long_tier_mix: str = "sum"):
     """Pattern B (multi-task): N workers, EACH on its own corpus, sharing one bank.
