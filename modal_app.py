@@ -622,6 +622,10 @@ def bench_inference(
     n_time: int = 500,
     sqrt_n: int = 2048,
     bank_on_gpu: bool = True,
+    compile_forward: bool = False,   # MMLLM_COMPILE — Phase-1a
+    dense_dtype: str = "",           # 'bf16' enables Phase-1 step C1 cast
+    num_threads: int = 0,            # 0 = container cpu_count; sets MMLLM_NUM_THREADS
+    max_t: int = 0,                  # 0 = config default (4096); sets MMLLM_MAX_T
 ):
     """Benchmark per-token inference speed on a trained checkpoint.
 
@@ -633,6 +637,13 @@ def bench_inference(
                          per token but allows N parallel inference
                          instances to share one bank via mmap pages.
 
+    Phase-1 toggles:
+      compile_forward=True → MMLLM_COMPILE=true (torch.compile of
+        the per-token forward; ~30-50% gain expected with static
+        shapes from pre-alloc KV).
+      dense_dtype='bf16'   → MMLLM_DENSE_DTYPE=bf16 (cast dense Linear
+        weights to bf16 before bench; halves dense memory bandwidth).
+
     Reports tok/sec and ms/tok at batch=1. Both modes use the same
     trained dense weights from <base>.ckpts/step-<ckpt_step>/dense.pt
     and the same bank V at <bank>.<i>.bin.
@@ -641,10 +652,19 @@ def bench_inference(
     env = {**os.environ,
            "MMLLM_DEVICE":     "cuda",
            "MMLLM_SQRT_N":     str(sqrt_n),
-           "MMLLM_BANK_ON_GPU": "true" if bank_on_gpu else "false"}
+           "MMLLM_BANK_ON_GPU": "true" if bank_on_gpu else "false",
+           "MMLLM_COMPILE":     "true" if compile_forward else "false"}
+    if dense_dtype:
+        env["MMLLM_DENSE_DTYPE"] = dense_dtype
+    if num_threads > 0:
+        env["MMLLM_NUM_THREADS"] = str(num_threads)
+    if max_t > 0:
+        env["MMLLM_MAX_T"] = str(max_t)
     print(
         f"=== bench_inference base={base} ckpt={ckpt_step} bank={bank} "
         f"sqrt_n={sqrt_n} bank_on_gpu={bank_on_gpu} "
+        f"compile_forward={compile_forward} dense_dtype={dense_dtype or 'fp32'} "
+        f"num_threads={num_threads or 'default'} max_t={max_t or 'default'} "
         f"n_warm={n_warm} n_time={n_time} ===",
         flush=True,
     )
@@ -669,6 +689,10 @@ def bench_inference_cpu(
     n_warm: int = 50,
     n_time: int = 200,
     sqrt_n: int = 2048,
+    compile_forward: bool = False,   # MMLLM_COMPILE — Phase-1a
+    dense_dtype: str = "",           # 'bf16' for Phase-1 step C1
+    num_threads: int = 0,            # 0 = container cpu_count
+    max_t: int = 0,                  # 0 = config default (4096)
 ):
     """CPU-only inference benchmark on a trained checkpoint. Many
     end-users will run this CPU-bound (no GPU available, edge deploy,
@@ -684,10 +708,20 @@ def bench_inference_cpu(
     env = {**os.environ,
            "MMLLM_DEVICE":     "cpu",
            "MMLLM_SQRT_N":     str(sqrt_n),
-           "MMLLM_BANK_ON_GPU": "false"}    # no GPU; bank stays mmap'd
+           "MMLLM_BANK_ON_GPU": "false",     # no GPU; bank stays mmap'd
+           "MMLLM_COMPILE":     "true" if compile_forward else "false"}
+    if dense_dtype:
+        env["MMLLM_DENSE_DTYPE"] = dense_dtype
+    if num_threads > 0:
+        env["MMLLM_NUM_THREADS"] = str(num_threads)
+    if max_t > 0:
+        env["MMLLM_MAX_T"] = str(max_t)
     print(
         f"=== bench_inference_cpu base={base} ckpt={ckpt_step} bank={bank} "
-        f"sqrt_n={sqrt_n} n_warm={n_warm} n_time={n_time} ===",
+        f"sqrt_n={sqrt_n} compile_forward={compile_forward} "
+        f"dense_dtype={dense_dtype or 'fp32'} "
+        f"num_threads={num_threads or 'default'} max_t={max_t or 'default'} "
+        f"n_warm={n_warm} n_time={n_time} ===",
         flush=True,
     )
     subprocess.run(
