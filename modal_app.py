@@ -285,12 +285,14 @@ def _run_train_long(total_steps, eval_every, ckpt_every, device, lr,
                     sqrt_n=None, cpu_offload=False, bank_on_gpu=True,
                     sync_every=0, volume_name="mmllm-data",
                     lr_warmup=0, lr_min=None,
-                    bank_query_mode="plain", long_tier_mix="sum"):
+                    bank_query_mode="plain", long_tier_mix="sum",
+                    bank_feedback_mode="plain"):
     """Shared body. All knobs threaded via env vars (MMLLM_DEVICE,
     MMLLM_LR, MMLLM_BATCH, MMLLM_SQRT_N, MMLLM_CPU_OFFLOAD,
     MMLLM_BANK_ON_GPU, MMLLM_SYNC_EVERY, MMLLM_VOLUME_NAME,
     MMLLM_LR_WARMUP, MMLLM_LR_MIN, MMLLM_BANK_QUERY_MODE,
-    MMLLM_LONG_TIER_MIX) so the basilisp CLI stays unchanged.
+    MMLLM_LONG_TIER_MIX, MMLLM_BANK_FEEDBACK_MODE) so the basilisp
+    CLI stays unchanged.
 
     `bank_on_gpu=False` switches to the CPUPinnedEmbedding path —
     bank V lives in the mmap'd file, cross-device gather happens
@@ -315,6 +317,12 @@ def _run_train_long(total_steps, eval_every, ckpt_every, device, lr,
     `long_tier_mix` selects how the long-tier SDPA and bank-V outputs
     combine (mmllm.gating): 'sum' (default), 'scalar' (per-head α/β),
     'switch' (sigmoid-gated convex mix).
+
+    `bank_feedback_mode` selects whether the bank's output feeds back
+    into x before q-proj (mmllm.bank_feedback): 'plain' (default; no
+    feedback) or 'feedback' (probe → bank → W_back · result added to
+    x; W_back zero-init, identical to plain at step 0; one extra PKM
+    lookup per layer per forward).
     """
     import os
     import subprocess
@@ -326,8 +334,9 @@ def _run_train_long(total_steps, eval_every, ckpt_every, device, lr,
            "MMLLM_SYNC_EVERY":  str(sync_every),
            "MMLLM_VOLUME_NAME": volume_name,
            "MMLLM_LR_WARMUP":   str(lr_warmup),
-           "MMLLM_BANK_QUERY_MODE": bank_query_mode,
-           "MMLLM_LONG_TIER_MIX":   long_tier_mix}
+           "MMLLM_BANK_QUERY_MODE":    bank_query_mode,
+           "MMLLM_LONG_TIER_MIX":      long_tier_mix,
+           "MMLLM_BANK_FEEDBACK_MODE": bank_feedback_mode}
     if sqrt_n is not None:
         env["MMLLM_SQRT_N"] = str(sqrt_n)
     if cpu_offload:
@@ -340,6 +349,7 @@ def _run_train_long(total_steps, eval_every, ckpt_every, device, lr,
         f"sync_every={sync_every} volume={volume_name} "
         f"lr_warmup={lr_warmup} lr_min={lr_min} "
         f"bank_query_mode={bank_query_mode} long_tier_mix={long_tier_mix} "
+        f"bank_feedback_mode={bank_feedback_mode} "
         f"total={total_steps} eval-every={eval_every} "
         f"ckpt-every={ckpt_every} base={base} ===",
         flush=True,
@@ -374,10 +384,14 @@ def train_with_bank(
     cpu_offload: bool = False,  # CPU-offload SparseAdam state → frees ~38 GB GPU VRAM
     lr_warmup: int = 0,         # 0 = constant lr; >0 enables linear warmup + cosine decay
     lr_min: float = 0.0,        # cosine floor (0 = lr/10 by default; only used when lr_warmup > 0)
-    bank_query_mode: str = "plain",  # 'plain' | 'ctx-add' — see mmllm.bank_query
-    long_tier_mix: str = "sum",      # 'sum' | 'scalar' | 'switch' — see mmllm.gating
+    bank_query_mode: str = "plain",      # 'plain' | 'ctx-add' — see mmllm.bank_query
+    long_tier_mix: str = "sum",          # 'sum' | 'scalar' | 'switch' — see mmllm.gating
+    bank_feedback_mode: str = "plain",   # 'plain' | 'feedback' — see mmllm.bank_feedback
     base: str = "/data/text8",
     bank: str = "/data/bank",
+    corpus_base: str = "",               # if set and != base, symlink corpus splits
+                                         # so train-long finds them at <base>.{train,val,test}.bin
+                                         # while ckpts/log/etc still write under <base>
 ):
     """Long-running training on A100-80GB + GPU-resident bank.
 
@@ -403,7 +417,22 @@ def train_with_bank(
     Pass sqrt_n=2048 for 18.8 GB bank (~20 GB target). Above
     sqrt_n≈1024 the bank V + SparseAdam state exceeds A100 40GB
     VRAM, so we pin to A100-80GB.
+
+    `corpus_base`: when set and different from `base`, symlinks
+    <corpus_base>.{train,val,test}.bin → <base>.{train,val,test}.bin
+    so train-long finds the data at <base> while ckpts/log/bank
+    write under <base>'s namespace. Useful for running multiple
+    architectural variants against the same corpus without
+    duplicating the data and without colliding outputs.
     """
+    if corpus_base and corpus_base != base:
+        import os
+        for split in ("train", "val", "test"):
+            link = f"{base}.{split}.bin"
+            target = f"{corpus_base}.{split}.bin"
+            if not os.path.lexists(link):
+                os.symlink(target, link)
+                print(f"  symlinked {link} → {target}", flush=True)
     _run_train_long(
         total_steps, eval_every, ckpt_every, "cuda", lr,
         batch=batch, base=base, bank=bank,
@@ -413,6 +442,7 @@ def train_with_bank(
         lr_min=(lr_min if lr_min > 0 else None),
         bank_query_mode=bank_query_mode,
         long_tier_mix=long_tier_mix,
+        bank_feedback_mode=bank_feedback_mode,
     )
 
 
@@ -896,6 +926,7 @@ def train_with_bank_worker(
     volume_name: str = "mmllm-data",
     bank_query_mode: str = "plain",
     long_tier_mix: str = "sum",
+    bank_feedback_mode: str = "plain",
 ):
     """One worker in a Hogwild-style multi-trainer pool.
 
@@ -938,6 +969,7 @@ def train_with_bank_worker(
         volume_name=volume_name,
         bank_query_mode=bank_query_mode,
         long_tier_mix=long_tier_mix,
+        bank_feedback_mode=bank_feedback_mode,
     )
 
 
