@@ -83,6 +83,68 @@ def prepare_data():
     print("done — volume contents committed", flush=True)
 
 
+# ── one-shot corpus migration: verbum-bb-data → mmllm-data ──
+# Throwaway helper. Mounts both volumes and server-side copies the
+# pile-github split files (~95 GB) so a fresh run on `mmllm-data`
+# can train without re-fetching from HF. Delete this function and
+# the legacy `verbum-bb-data` volume after the in-flight 5B run on
+# the legacy volume finishes.
+@app.function(
+    image=image,
+    volumes={
+        "/src": modal.Volume.from_name("verbum-bb-data"),
+        "/dst": volume,
+    },
+    timeout=7200,  # 2h ceiling; 95 GB at ~100 MB/s ≈ 16 min, +headroom
+    cpu=4.0,
+    memory=8192,
+)
+def migrate_corpus_to_mmllm_data():
+    """Copy pile-github.bin.{train,val,test}.bin from verbum-bb-data
+    to mmllm-data. Idempotent: skips files that already exist at the
+    expected size on the destination."""
+    import os
+    import shutil
+    import time
+
+    files = [
+        "pile-github.bin.train.bin",
+        "pile-github.bin.val.bin",
+        "pile-github.bin.test.bin",
+    ]
+    BUF = 64 * 1024 * 1024  # 64 MB
+    total = 0
+    t0 = time.time()
+    for name in files:
+        src = f"/src/{name}"
+        dst = f"/dst/{name}"
+        if not os.path.exists(src):
+            print(f"  ! missing source: {src} — skipping", flush=True)
+            continue
+        src_size = os.path.getsize(src)
+        if os.path.exists(dst) and os.path.getsize(dst) == src_size:
+            print(f"  = already present: {name} ({src_size/1e9:.2f} GB)", flush=True)
+            continue
+        print(f"  → copying {name} ({src_size/1e9:.2f} GB)…", flush=True)
+        t1 = time.time()
+        with open(src, "rb") as fin, open(dst, "wb") as fout:
+            written = 0
+            while True:
+                chunk = fin.read(BUF)
+                if not chunk:
+                    break
+                fout.write(chunk)
+                written += len(chunk)
+        dt = time.time() - t1
+        rate = (written / 1e9) / max(dt, 1e-6)
+        print(f"  ✓ {name}: {written/1e9:.2f} GB in {dt:.1f}s "
+              f"({rate:.2f} GB/s)", flush=True)
+        total += written
+    volume.commit()
+    print(f"done — copied {total/1e9:.2f} GB in {time.time()-t0:.1f}s; "
+          f"committed to mmllm-data", flush=True)
+
+
 @app.function(
     image=image,
     volumes={"/data": volume},
