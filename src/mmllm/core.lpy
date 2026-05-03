@@ -461,8 +461,18 @@
   (let [head-dim  (quot d-model n-heads)
         q-dim     (* n-long-heads head-dim)
         sqrt-n    (pick-sqrt-n config)
-        path      (when memory-mmap-path
-                    (str memory-mmap-path "." block-idx ".bin"))
+        ;; Phase-3: bank V can be loaded as fp32 (training + inference)
+        ;; or int8 (inference-only, ~4× smaller on disk). Selected by
+        ;; MMLLM_BANK_DTYPE env var; defaults to fp32. The int8 path
+        ;; expects files with a different suffix and a header-prefixed
+        ;; layout — see mmllm.memory for the format.
+        bank-dtype (.lower (.get (.- os environ) "MMLLM_BANK_DTYPE" "fp32"))
+        int8?      (= bank-dtype "int8")
+        path       (when memory-mmap-path
+                     (if int8?
+                       (str memory-mmap-path "." block-idx ".int8.bin")
+                       (str memory-mmap-path "." block-idx ".bin")))
+        memory-cls (if int8? mem/Int8ProductKeyMemory mem/ProductKeyMemory)
         gate-kind (or long-tier-mix       (pick-long-tier-mix))
         bq-kind   (or bank-query-mode     (pick-bank-query-mode))
         fb-kind   (or bank-feedback-mode  (pick-bank-feedback-mode))
@@ -496,10 +506,10 @@
      :long-gate     (gate/build_gate         gate-kind n-long-heads head-dim)
      :bank-query    (bq/build_bank_query     bq-kind   d-model      q-dim)
      :bank-feedback (bfb/build_bank_feedback fb-kind   d-model      q-dim)
-     :memory    (mem/ProductKeyMemory q-dim sqrt-n
-                                      ** :top_k     memory-top-k
-                                      :sub_top_k memory-sub-top-k
-                                      :mmap_path path)}))
+     :memory    (memory-cls q-dim sqrt-n
+                            ** :top_k     memory-top-k
+                            :sub_top_k memory-sub-top-k
+                            :mmap_path path)}))
 
 ;;; ─────────────────────── model ───────────────────────
 
@@ -1372,6 +1382,26 @@
                             n-warm    (python/int (or (nth args 4 nil) 50))
                             n-time    (python/int (or (nth args 5 nil) 500))]
                         (bench-inference cfg base ckpt-step bank-path n-warm n-time)
+                        (println "done."))
+      "bank-quantize" (let [in-prefix  (or (second args) "/data/pile-bank-3tier")
+                            out-prefix (or (nth args 2 nil) "/data/pile-bank-3tier-int8")
+                            n-layers   (python/int (or (nth args 3 nil) (:n-layers cfg)))
+                            sqrt-n     (pick-sqrt-n cfg)
+                            head-dim   (quot (:d-model cfg) (:n-heads cfg))
+                            q-dim      (* (:n-long-heads cfg) head-dim)]
+                        (println (format "  bank-quantize: in=%s.<i>.bin → out=%s.<i>.int8.bin"
+                                         in-prefix out-prefix))
+                        (println (format "    n-layers=%d  sqrt-n=%d  q-dim=%d  (n-rows per layer = %d)"
+                                         n-layers sqrt-n q-dim (* sqrt-n sqrt-n)))
+                        (let [results (mem/quantize_bank_files in-prefix out-prefix n-layers q-dim)]
+                          (doseq [r results]
+                            (println (format "    %s → %s   %.2f GB → %.2f GB   (ratio %.2fx, max|x|=%g, %d clamped)"
+                                             (.get r "in_path") (.get r "out_path")
+                                             (/ (.get r "in_bytes") 1.073741824e9)
+                                             (/ (.get r "out_bytes") 1.073741824e9)
+                                             (.get r "compression_ratio")
+                                             (.get r "max_abs_overall")
+                                             (.get r "n_clamped")))))
                         (println "done."))
       "fetch-pile-github" (let [out      (or (second args) "/tmp/pile-github.bin")
                                 cap      (when (nth args 2 nil)

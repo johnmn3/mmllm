@@ -39,7 +39,9 @@ where SparseAdam writes touched rows back through the mmap.
 
 from __future__ import annotations
 
+import builtins
 import os
+import struct
 
 import numpy as np
 import torch
@@ -584,3 +586,337 @@ class ProductKeyMemory(nn.Module):
 
         weights = F.softmax(top_scores, dim=-1).unsqueeze(-1)
         return (weights * values).sum(dim=-2)
+
+
+# ─────────────────────── int8 quantized bank V (Phase 3) ───────────────────────
+
+INT8_BANK_MAGIC = 0x49_4E_54_38  # b'INT8' as little-endian u32 ← 0x38544E49 in LE bytes
+INT8_BANK_VERSION = 1
+INT8_BANK_HEADER_SIZE = 16  # bytes: magic(4) + version(4) + n_rows(4) + q_dim(4)
+
+
+def quantize_fp32_bank_to_int8(in_path: str, out_path: str) -> dict:
+    """Convert one fp32 bank V file to int8 + per-row fp16 scale.
+
+    Reads the fp32 bank from `in_path` (raw fp32 array, n_rows × q_dim).
+    Writes the int8 quantized version to `out_path` with this layout:
+
+        [INT8_BANK_HEADER_SIZE bytes header]
+            magic    u32  0x494E5438 (b'INT8')
+            version  u32  1
+            n_rows   u32
+            q_dim    u32
+        [n_rows × 2 bytes : fp16 per-row scales]
+        [n_rows × q_dim bytes : int8 row data]
+
+    Quantization: per-row symmetric int8.
+        scale = max(|row|) / 127
+        int8 = round(row / scale).clip(-127, 127)
+
+    Decode: fp32_row = scale * int8_row.
+
+    Returns a stats dict with file sizes and quantization summary.
+    """
+    if not os.path.exists(in_path):
+        raise FileNotFoundError(f"input bank not found: {in_path}")
+    file_bytes = os.path.getsize(in_path)
+    if file_bytes % 4 != 0:
+        raise ValueError(f"input file size {file_bytes} not divisible by 4 (fp32)")
+    # We don't know n_rows/q_dim from the file alone — caller must
+    # know. For our case the caller (CLI) knows from the trained model
+    # config. We infer n_rows × q_dim = file_bytes / 4 and require the
+    # caller to pass q_dim implicitly via the dense ckpt's K_a shape.
+    # Simpler interface: read the file as a flat fp32, infer shape from
+    # the file_path's trained-config implicit q_dim.
+    raise NotImplementedError(
+        "use quantize_fp32_bank_to_int8_shaped() — q_dim is needed to "
+        "infer the row count from raw bytes"
+    )
+
+
+def quantize_fp32_bank_to_int8_shaped(in_path: str, out_path: str,
+                                       q_dim: int,
+                                       chunk_rows: int = 16384) -> dict:
+    """Like quantize_fp32_bank_to_int8 but with explicit `q_dim` so we
+    can stream the file in chunks instead of mapping the whole thing
+    into RAM. At sqrt_n=2048 + q_dim=224, the input is 18.8 GB —
+    chunking keeps peak RAM bounded.
+    """
+    if not os.path.exists(in_path):
+        raise FileNotFoundError(f"input bank not found: {in_path}")
+    elem_bytes = 4  # fp32
+    file_bytes = os.path.getsize(in_path)
+    if file_bytes % (q_dim * elem_bytes) != 0:
+        raise ValueError(
+            f"input file size {file_bytes} not divisible by q_dim*4={q_dim*elem_bytes}; "
+            f"q_dim mismatch?"
+        )
+    n_rows = file_bytes // (q_dim * elem_bytes)
+    out_bytes = INT8_BANK_HEADER_SIZE + n_rows * 2 + n_rows * q_dim
+    os.makedirs(os.path.dirname(out_path) or ".", exist_ok=True)
+
+    src = np.memmap(in_path, dtype=np.float32, mode="r", shape=(n_rows, q_dim))
+    # Pre-allocate output file at full size so we can mmap regions.
+    with builtins.open(out_path, "wb") as f:
+        f.truncate(out_bytes)
+    # Header
+    header = struct.pack("<IIII",
+                         INT8_BANK_MAGIC, INT8_BANK_VERSION, n_rows, q_dim)
+    out_handle = builtins.open(out_path, "r+b")
+    out_handle.seek(0)
+    out_handle.write(header)
+    out_handle.flush()
+    # Memmap the scale + int8 regions of the output file
+    scales = np.memmap(out_path, dtype=np.float16, mode="r+",
+                       offset=INT8_BANK_HEADER_SIZE, shape=(n_rows,))
+    int8_rows = np.memmap(out_path, dtype=np.int8, mode="r+",
+                          offset=INT8_BANK_HEADER_SIZE + n_rows * 2,
+                          shape=(n_rows, q_dim))
+
+    # Stream chunks from src → quantize → write to scales + int8_rows
+    max_abs_overall = 0.0
+    n_clamped = 0
+    for i in range(0, n_rows, chunk_rows):
+        end = min(i + chunk_rows, n_rows)
+        chunk = src[i:end].astype(np.float32, copy=False)
+        # Per-row max abs; floor at tiny epsilon to avoid div-by-zero
+        max_abs = np.maximum(np.abs(chunk).max(axis=1), 1e-12)
+        scale = max_abs / 127.0
+        # Quantize: round and clamp
+        q = np.round(chunk / scale[:, None])
+        n_clamped += int(((q > 127) | (q < -127)).sum())
+        q_clipped = np.clip(q, -127, 127).astype(np.int8)
+        # Write
+        scales[i:end] = scale.astype(np.float16)
+        int8_rows[i:end] = q_clipped
+        max_abs_overall = max(max_abs_overall, float(max_abs.max()))
+
+    scales.flush()
+    int8_rows.flush()
+    del scales
+    del int8_rows
+    del src
+    out_handle.close()
+
+    return {
+        "in_path": in_path,
+        "out_path": out_path,
+        "n_rows": n_rows,
+        "q_dim": q_dim,
+        "in_bytes": file_bytes,
+        "out_bytes": out_bytes,
+        "compression_ratio": file_bytes / out_bytes,
+        "max_abs_overall": max_abs_overall,
+        "n_clamped": n_clamped,
+    }
+
+
+def _read_int8_bank_header(path: str) -> tuple[int, int]:
+    """Open `path`, validate header magic+version, return (n_rows, q_dim)."""
+    with builtins.open(path, "rb") as f:
+        header = f.read(INT8_BANK_HEADER_SIZE)
+    if len(header) != INT8_BANK_HEADER_SIZE:
+        raise ValueError(f"int8 bank file too short: {path}")
+    magic, version, n_rows, q_dim = struct.unpack("<IIII", header)
+    if magic != INT8_BANK_MAGIC:
+        raise ValueError(
+            f"bad magic 0x{magic:08x} in int8 bank file {path} "
+            f"(expected 0x{INT8_BANK_MAGIC:08x})"
+        )
+    if version != INT8_BANK_VERSION:
+        raise ValueError(
+            f"unsupported int8 bank version {version} in {path} "
+            f"(this build expects {INT8_BANK_VERSION})"
+        )
+    return n_rows, q_dim
+
+
+class _MmapInt8Storage(nn.Module):
+    """Wraps the scales + int8_rows tensors of an mmap-backed int8 bank.
+    Override _apply to keep the storage CPU-pinned regardless of any
+    parent .to('cuda') call — analogous to CPUPinnedEmbedding for the
+    fp32 path. The Int8ProductKeyMemory's K_a/K_b still move normally
+    because they're parameters at the parent level."""
+
+    def __init__(self, scales: torch.Tensor, int8_rows: torch.Tensor):
+        super().__init__()
+        # Plain attributes (not buffers/parameters) so torch's .to()
+        # doesn't traverse them. Live on CPU pinned to disk pages.
+        self.scales = scales
+        self.int8_rows = int8_rows
+
+    def _apply(self, fn, recurse=True):
+        return self
+
+
+class Int8ProductKeyMemory(nn.Module):
+    """Inference-only int8-quantized product-key memory.
+
+    Same K_a, K_b sub-keys (fp32 parameters), same product-key search,
+    same softmax-weighted retrieval. Difference: V is stored as
+    per-row int8 + per-row fp16 scale. ~4× smaller on disk and in RAM
+    than fp32, with negligible BPC drift in practice (target +0.005).
+
+    NOT trainable — `sparse_parameters()` returns []. Use the fp32
+    `ProductKeyMemory` for training; quantize once after training via
+    `mmllm bank-quantize`.
+
+    File layout per layer (`<bank_path>.<i>.int8.bin`):
+        16-byte header (magic 'INT8', version, n_rows, q_dim)
+        n_rows × 2 bytes : fp16 per-row scales
+        n_rows × q_dim bytes : int8 row data
+    """
+
+    def __init__(self, q_dim: int, sqrt_n: int,
+                 top_k: int = 16, sub_top_k: int = 32,
+                 mmap_path: str | None = None):
+        super().__init__()
+        assert q_dim % 2 == 0, "q_dim must be even"
+        self.q_dim = q_dim
+        self.sub_dim = q_dim // 2
+        self.sqrt_n = sqrt_n
+        self.n = sqrt_n * sqrt_n
+        self.top_k = top_k
+        self.sub_top_k = min(sub_top_k, sqrt_n)
+        self.mmap_path = mmap_path
+
+        # Sub-key matrices — same as fp32 path
+        self.K_a = nn.Parameter(torch.randn(sqrt_n, self.sub_dim) * 0.02)
+        self.K_b = nn.Parameter(torch.randn(sqrt_n, self.sub_dim) * 0.02)
+
+        # Storage placement matches MMLLM_BANK_ON_GPU. When mmap-backed
+        # and not on GPU, scales + int8 stay CPU-pinned; cross-device
+        # gather happens in forward() per query (same pattern as fp32).
+        bank_on_gpu = os.environ.get(
+            "MMLLM_BANK_ON_GPU", "true",
+        ).lower() in ("1", "true", "yes")
+
+        self._storage: _MmapInt8Storage | None = None
+        if mmap_path is not None and not bank_on_gpu:
+            scales, int8_rows = self._load_or_init_int8_mmap(mmap_path, q_dim)
+            self._storage = _MmapInt8Storage(scales, int8_rows)
+        else:
+            if mmap_path is not None:
+                # mmap+on-GPU: load the int8 file once into VRAM.
+                scales, int8_rows = self._load_or_init_int8_mmap(mmap_path, q_dim)
+                self.register_buffer("scales", scales.clone())
+                self.register_buffer("int8_rows", int8_rows.clone())
+            else:
+                # No mmap_path: zero-init buffers (testing only — real
+                # int8 banks come from quantize_fp32_bank_to_int8_shaped).
+                self.register_buffer(
+                    "scales", torch.zeros(self.n, dtype=torch.float16),
+                )
+                self.register_buffer(
+                    "int8_rows", torch.zeros(self.n, q_dim, dtype=torch.int8),
+                )
+
+    def _load_or_init_int8_mmap(self, path: str, q_dim: int):
+        """Open an existing int8 bank file via mmap. Returns
+        (scales_tensor, int8_rows_tensor) — both views over the file.
+        Raises if the file doesn't exist or has bad header."""
+        n_rows, file_q_dim = _read_int8_bank_header(path)
+        if n_rows != self.n:
+            raise ValueError(
+                f"int8 bank {path} has n_rows={n_rows} but model expects "
+                f"sqrt_n²={self.n}"
+            )
+        if file_q_dim != q_dim:
+            raise ValueError(
+                f"int8 bank {path} has q_dim={file_q_dim} but model expects {q_dim}"
+            )
+        scales_np = np.memmap(path, dtype=np.float16, mode="r",
+                              offset=INT8_BANK_HEADER_SIZE, shape=(n_rows,))
+        int8_np = np.memmap(path, dtype=np.int8, mode="r",
+                            offset=INT8_BANK_HEADER_SIZE + n_rows * 2,
+                            shape=(n_rows, q_dim))
+        return torch.from_numpy(scales_np), torch.from_numpy(int8_np)
+
+    def _scales(self) -> torch.Tensor:
+        return self._storage.scales if self._storage is not None else self.scales
+
+    def _int8_rows(self) -> torch.Tensor:
+        return self._storage.int8_rows if self._storage is not None else self.int8_rows
+
+    def dense_parameters(self):
+        return [self.K_a, self.K_b]
+
+    def sparse_parameters(self):
+        # int8 bank is read-only: no gradient flows back into the rows.
+        return []
+
+    def zero_bank(self) -> None:
+        """Zero the int8 rows + scales (ablation utility)."""
+        with torch.no_grad():
+            scales = self._scales()
+            int8_rows = self._int8_rows()
+            # Mmap-backed views are read-only; can't zero them in place.
+            # For ablation we'd swap a separate zero buffer in. For now,
+            # emit a clear error so callers know int8 bank ablation
+            # needs more work.
+            if self._storage is not None:
+                raise NotImplementedError(
+                    "Int8ProductKeyMemory.zero_bank not implemented for "
+                    "mmap-backed banks (read-only mmap). Run ablation on "
+                    "the fp32 bank and quantize separately."
+                )
+            scales.zero_()
+            int8_rows.zero_()
+
+    def forward(self, q: torch.Tensor) -> torch.Tensor:
+        """q: (B, T, q_dim) → (B, T, q_dim) softmax-weighted retrieval,
+        identical math to ProductKeyMemory.forward but with on-the-fly
+        int8 → fp32 dequantization at the gather step.
+        """
+        B, T, D = q.shape
+        q_a = q[..., :self.sub_dim]
+        q_b = q[..., self.sub_dim:]
+
+        # Sub-key search — same as fp32
+        scores_a = q_a @ self.K_a.T
+        scores_b = q_b @ self.K_b.T
+        top_a_s, top_a_i = scores_a.topk(self.sub_top_k, dim=-1)
+        top_b_s, top_b_i = scores_b.topk(self.sub_top_k, dim=-1)
+        combined_scores = (top_a_s.unsqueeze(-1) + top_b_s.unsqueeze(-2)).flatten(-2)
+        idx_a = top_a_i.unsqueeze(-1).expand(-1, -1, -1, self.sub_top_k)
+        idx_b = top_b_i.unsqueeze(-2).expand(-1, -1, self.sub_top_k, -1)
+        combined_idx = (idx_a * self.sqrt_n + idx_b).flatten(-2)
+        top_scores, top_local = combined_scores.topk(self.top_k, dim=-1)
+        top_global = combined_idx.gather(-1, top_local)            # (B, T, top_k)
+
+        scales = self._scales()
+        int8_rows = self._int8_rows()
+        v_device = scales.device
+        if v_device != q.device:
+            top_global_v = top_global.to(v_device)
+            top_scales = scales[top_global_v].float()              # (B, T, top_k) fp32
+            top_int8 = int8_rows[top_global_v].float()             # (B, T, top_k, D) fp32
+            values_v = top_scales.unsqueeze(-1) * top_int8         # (B, T, top_k, D)
+            values = values_v.to(q.device)
+        else:
+            top_scales = scales[top_global].float()
+            top_int8 = int8_rows[top_global].float()
+            values = top_scales.unsqueeze(-1) * top_int8
+
+        weights = F.softmax(top_scores, dim=-1).unsqueeze(-1)
+        return (weights * values).sum(dim=-2)
+
+
+def quantize_bank_files(in_prefix: str, out_prefix: str,
+                        n_layers: int, q_dim: int) -> list[dict]:
+    """Bulk-quantize a multi-layer bank, file-per-layer:
+
+        <in_prefix>.<i>.bin       (fp32, raw)
+        →
+        <out_prefix>.<i>.int8.bin (int8 + scales + header)
+
+    Returns a list of per-layer stats dicts (see
+    quantize_fp32_bank_to_int8_shaped).
+    """
+    out = []
+    for i in range(n_layers):
+        in_path = f"{in_prefix}.{i}.bin"
+        out_path = f"{out_prefix}.{i}.int8.bin"
+        stats = quantize_fp32_bank_to_int8_shaped(in_path, out_path, q_dim)
+        out.append(stats)
+    return out

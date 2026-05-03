@@ -610,6 +610,43 @@ def lr_sweep(
 @app.function(
     image=image,
     volumes={"/data": volume},
+    timeout=3600,
+    cpu=4.0,
+    memory=16384,
+)
+def quantize_bank(
+    in_prefix: str = "/data/pile-bank-3tier",
+    out_prefix: str = "/data/pile-bank-3tier-int8",
+    n_layers: int = 5,
+    q_dim: int = 224,         # default-config: 7 long heads × 32 head_dim
+):
+    """Convert a trained fp32 bank V (per-layer raw arrays) into the
+    int8 quantized format. Phase 3 of the inference optimization plan.
+
+    Reads /data/<in_prefix>.<i>.bin (fp32 bank from train-long
+    `bank_saved` event). Writes /data/<out_prefix>.<i>.int8.bin
+    (header + fp16 scales + int8 rows; ~4× smaller).
+
+    Quantization is per-row symmetric int8 with fp16-stored scale.
+    See mmllm.memory.quantize_fp32_bank_to_int8_shaped for the math.
+    """
+    import subprocess
+    print(
+        f"=== quantize_bank in={in_prefix}.<i>.bin → out={out_prefix}.<i>.int8.bin "
+        f"n_layers={n_layers} q_dim={q_dim} ===",
+        flush=True,
+    )
+    subprocess.run(
+        ["mmllm", "bank-quantize", in_prefix, out_prefix, str(n_layers)],
+        check=True,
+    )
+    volume.commit()
+    print(f"done — int8 bank committed to {out_prefix}.<i>.int8.bin", flush=True)
+
+
+@app.function(
+    image=image,
+    volumes={"/data": volume},
     timeout=1800,
     gpu="H100",
     memory=65536,
