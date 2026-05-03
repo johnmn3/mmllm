@@ -91,6 +91,14 @@ Whether quality scaling holds at that bank size is the open
 research question the project is set up to answer; the energy
 math is straightforward.
 
+If you'd like to help push the green-LLM thesis forward — paying
+for the next batch of training runs, the inference benches that
+will produce real measured kWh/gCO2 numbers, or just the disk
+storage these large banks live on — consider donating via the
+**Buy Me a Coffee** button at the top-right of [the GitHub
+repo](https://github.com/johnmn3/mmllm). Every cup keeps a future
+GPU spinning a few minutes longer.
+
 ### Roadmap toward a Clojure assistant
 
 The eventual product target is a purpose-built Clojure code
