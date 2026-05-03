@@ -69,11 +69,74 @@ private conversation history. The short-tier cache is always per-instance.
 | Long-tier KV cache (episodic) | ~10–100 MB on disk | per-instance or per-team |
 | Short-tier KV cache (recent) | few MB in RAM | always per-instance |
 
+### Knobs
+
+Three orthogonal architectural axes, all defaulting to baseline behavior:
+
+| axis | values | env var | what | params added |
+|---|---|---|---|---|
+| `bank-query-mode` | `plain` (def) / `ctx-add` | `MMLLM_BANK_QUERY_MODE` | dense → bank: shapes the query sent to the bank. `ctx-add` adds `W_ctx · x` (zero-init) before lookup | 0 / +d_model·q_dim per layer (~86k × n_layers) |
+| `long-tier-mix` | `sum` (def) / `scalar` / `switch` | `MMLLM_LONG_TIER_MIX` | how long-head SDPA path and bank path combine. `scalar` = α[h]·sdpa + β[h]·mem (init 1,1). `switch` = sigmoid(Q·w_h) convex mix (init 0.5/0.5) | 0 / +2n_long_heads / +n_long_heads·head_dim |
+| `bank-feedback-mode` | `plain` (def) / `feedback` | `MMLLM_BANK_FEEDBACK_MODE` | bank → dense: lets bank output prime x before q-proj. `feedback` adds `W_back · bank(W_probe · x)` (W_back zero-init) | 0 / +2·d_model·q_dim per layer (~170k × n_layers) |
+
+Each lives in its own module alongside `mmllm.memory`: `mmllm.gating`,
+`mmllm.bank_query`, `mmllm.bank_feedback`. Each defines a small `build_*`
+factory that returns the chosen variant; the attention block holds it
+under `:long-gate`, `:bank-query`, `:bank-feedback`.
+
+Operational env vars:
+
+| env var | default | what |
+|---|---|---|
+| `MMLLM_DEVICE` | `auto` | `cpu` / `cuda` / `auto` |
+| `MMLLM_LR` | `3e-3` | peak lr (both AdamW and SparseAdam) |
+| `MMLLM_BATCH` | `4` | batch size |
+| `MMLLM_SQRT_N` | (config) | bank side length; total entries = sqrt_n² |
+| `MMLLM_LR_WARMUP` | `0` | linear-warmup steps; >0 enables cosine decay to lr/10 over remaining steps |
+| `MMLLM_LR_MIN` | `lr/10` | cosine floor when warmup > 0 |
+| `MMLLM_BANK_ON_GPU` | `true` | bank V on GPU vs mmap-backed CPU (see Storage modes) |
+| `MMLLM_CPU_OFFLOAD` | `false` | SparseAdam state on CPU instead of GPU |
+| `MMLLM_SHORT_WINDOW` | unset | sliding-window cap on short-tier KV cache (RoPE-safe) |
+| `MMLLM_LONG_WINDOW` | unset | sliding-window cap on long-tier in-RAM KV cache |
+| `MMLLM_ABLATE_EVERY` | `0` | log Δ trajectory every N steps; must be a multiple of eval-every |
+| `MMLLM_SYNC_EVERY` | `0` | multi-trainer Hogwild bank-sync interval; 0 disables |
+| `MMLLM_VOLUME_NAME` | `mmllm-data` | Modal volume for cross-worker bank sync |
+
+### Storage modes
+
+The bank V and its SparseAdam state are the largest tensors in the model;
+where they live determines what hardware the run can target.
+
+| mode | bank V | SparseAdam state | per-step cost | bank size ceiling | use when |
+|---|---|---|---|---|---|
+| GPU + GPU | VRAM | VRAM | fast — no PCIe in the bank path | ~30 GB on A100-80GB after dense + activations + opt | bank fits VRAM, single-process |
+| GPU + CPU-offload | VRAM | host RAM | + 1 PCIe round-trip per step (touched-row delta only) | bank V up to ~50 GB on A100-80GB; opt-state limited by host RAM | bank fits VRAM but moments push past combined ceiling |
+| Mmap + CPU | disk + page cache | CPU | per-query top-K gather CPU→GPU, ~10× slower vs in-VRAM at B=64 | unbounded by VRAM; bounded by disk | bank too big for VRAM, or multi-trainer Hogwild |
+
+Toggle via `MMLLM_BANK_ON_GPU` and `MMLLM_CPU_OFFLOAD`.
+
+The long-tier KV cache has the same axis at smaller scale:
+
+| mode | location | sharing | for |
+|---|---|---|---|
+| in-RAM | per-process tensors | per-conversation | training, short conversations |
+| paged-LRU mmap (`longcache.py`) | disk + page cache | per-conversation or per-team via shared file | inference with conversation history that grows past RAM |
+
+The short-tier cache is always per-process in-RAM — small (recent tokens
+only) and per-conversation by definition.
+
+Multi-trainer Hogwild: when `MMLLM_SYNC_EVERY > 0` and the bank is
+mmap-backed, N workers each write to the same bank file via Modal Volume.
+`mem/sync_banks` handles the close → commit → reload → rebind dance every N
+training steps; last-writer-wins on per-page conflicts is accepted as
+Hogwild noise.
+
 ### Training
 
 Two optimizers run in parallel:
 
-- **AdamW** for dense params (Q/K/V projections, FFN, norms, `K_a`/`K_b`)
+- **AdamW** for dense params (Q/K/V projections, FFN, norms, `K_a`/`K_b`,
+  any of the new gating/query/feedback modules' learned weights)
 - **SparseAdam** for bank V — only updates touched rows each step
 
 For large banks (`sqrt_n=2048`, ~19 GB/layer), `CPUOffloadSparseAdam` keeps
@@ -133,6 +196,81 @@ mmllm train-corpus [corpus-path] [mmap-path] [steps]
 mmllm train-mmap [base-path]                 # train with mmap-backed bank (creates <path>.0.bin … <path>.N.bin)
 mmllm train-long [base-path] [mmap-path] [total-steps] [eval-every] [ckpt-every]
                                              # periodic eval-BPC + checkpoints; resumes from <base>.ckpts/
+```
+
+## Metrics
+
+`train-long` emits one JSON-per-line event stream to `<base>.log.jsonl`.
+
+| event | when | fields | how to read |
+|---|---|---|---|
+| `eval` | every `eval-every` steps during training | `step, loss, val_bpc, val_ppl, wall_s` | per-step learning curve. `val_bpc` here is capped at 50k tokens for speed — slightly pessimistic vs the full eval below |
+| `ablation_intermediate` | every `ablate-every` steps if `MMLLM_ABLATE_EVERY > 0` | `step, control_bpc, ablated_bpc, delta_bpc, ablation_s, wall_s` | trajectory of "how load-bearing is the bank?" across training. Δ growing = bank's role expanding; flat or shrinking = dense weights absorbing more |
+| `final` | once at end of training | `step, val_bpc, val_ppl, wall_s` | authoritative end-of-training bpc on full 100k-token val slice. ~0.05–0.10 lower than the periodic 50k-cap evals on the same checkpoint |
+| `bank_saved` | once after `final`, when bank is mmap-backed | `step, bank_path, wall_s` | bank V dumped to `<path>.<i>.bin` mmap files; usable for warm-starting future runs |
+| `ablation` | once after `bank_saved` | `step, control_bpc, ablated_bpc, delta_bpc, wall_s` | end-of-training Δ. See "interpreting Δ" below |
+| `sync` | every `sync-every` steps under Hogwild | `step, dirty_pages, n_layers, sync_s, wall_s` | per-worker Modal Volume commit/reload telemetry |
+
+### Interpreting Δ
+
+Δ = `ablated_bpc - control_bpc`, measured by zeroing V across all blocks
+and re-running eval. Positive Δ = the bank carries learned signal that
+dense weights can't immediately reproduce.
+
+Δ alone doesn't disambiguate "bank is dead weight" from "bank trained
+slowly because it has more parameters than dense and got fewer SGD updates
+per element." With sqrt_n=2048 and ~10M dense, the bank holds ~21M sparse-
+trained entries vs ~10M densely-trained params — bank training rate per
+element is ~470× slower. Expected behavior:
+
+- **Early training**: small Δ regardless of architecture (bank not yet
+  saturated; dense covers the patterns it can).
+- **Mid-training**: Δ grows as bank rows accumulate enough updates to
+  encode patterns dense can't.
+- **Late training**: with `bank-query-mode=plain`, Δ continues to grow
+  (bank becomes the long-tail catchall). With `ctx-add`, Δ may plateau
+  lower — interpretation contested (see Results).
+
+Use `MMLLM_ABLATE_EVERY` to log Δ across training; the trajectory
+disambiguates "dead weight" from "still saturating" in any single run.
+
+### Caveats
+
+- 50k-cap periodic evals are systematically pessimistic vs the 100k
+  `final` eval. Plan on a ~0.05–0.10 bpc drop between the last `eval`
+  event and `final` on the same checkpoint.
+- Seed noise at small scale is large: ~±0.1 bpc at 200-step / sqrt_n=128
+  spike, dropping to ~±0.02 at 1B-token / sqrt_n=2048 prod scale. Don't
+  read spike-scale comparisons as architectural rulings.
+- Δ is confounded by total bank-update steps. A 5B-step plain run has had
+  5× more bank-update steps than a 1B-step run; some of its larger Δ is
+  bank-training-time, not architecture.
+
+## Results
+
+Tracked training runs on Pile-Github (~95 GB byte-level), default-config
+dimensions (d_model=384, 5 layers, ~10M dense params).
+
+| run | bank size | tokens | bank-query | long-mix | feedback | control bpc | Δ bpc | notes |
+|---|---|---|---|---|---|---|---|---|
+| 5B plain | sqrt_n=2048 (~21M entries) | 5.0B | plain | sum | plain | **1.273** | **+4.77** | bank carries massive signal at scale; reference baseline |
+| 1B ctx-add | sqrt_n=2048 | 1.0B | ctx-add | sum | plain | 1.354 | +0.75 | wins matched-token bpc against plain through step 38k; smaller Δ — interpretation contested |
+| 1B ctx-add+fb | sqrt_n=2048 | 1.0B | ctx-add | sum | feedback | TBD | TBD | bidirectional retrieval-augmented attention; in flight |
+
+Loose Pythia placement (Pile vs Pile-Github subset, byte-level vs BPE — not
+strictly comparable but a sanity reference): mmllm at ~1.3 bpc lands
+between Pythia-70M and Pythia-160M on the Pile-Github-equivalent measure,
+with ~10M active dense params and a 19 GB bank vs Pythia's 70-160M dense
+and no bank.
+
+To plot trajectories from a log:
+
+```python
+import json
+rows = [json.loads(l) for l in open('pile-github.bin.log.jsonl') if l.strip()]
+evals     = [r for r in rows if r['event'] == 'eval']
+abl_traj  = [r for r in rows if r['event'] == 'ablation_intermediate']
+abl_final = next(r for r in rows if r['event'] == 'ablation')
 ```
 
 ## Hack
