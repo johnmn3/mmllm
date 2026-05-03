@@ -273,6 +273,142 @@ abl_traj  = [r for r in rows if r['event'] == 'ablation_intermediate']
 abl_final = next(r for r in rows if r['event'] == 'ablation')
 ```
 
+## Green value
+
+mmllm's architectural pitch is that a small dense network plus a large
+mmap-shared sparse bank uses dramatically less RAM and power per
+concurrent serving instance than a fully-dense model of comparable
+quality. This section defines the units we measure, the formulas that
+combine them, and the worked numbers we can cite today.
+
+### Units
+
+We use the same vocabulary as the green-AI literature so cross-comparison
+is direct.
+
+| metric | unit | reference |
+|---|---|---|
+| Joules per output token | `J/tok` | TokenPowerBench (arXiv 2512.03024); EuroMLSys 2025 ("Advocating Energy-per-Token in LLM Inference") |
+| Tokens per Joule | `tok/J = 1 / J/tok` | MLPerf Power v5.1; ML.ENERGY (arXiv 2505.06371) |
+| Training energy | `kWh` | CodeCarbon, pynvml; Patterson 2021 (arXiv 2104.10350) |
+| CO2 emissions | `gCO2eq = kWh × PUE × grid_intensity` | Lacoste 2019 (arXiv 1910.09700); ML CO2 Impact Calculator |
+| Per-instance VRAM at serving | `MB` | architectural; static |
+| Reference grid intensity | 475 gCO2eq/kWh (global avg); range 20 (Quebec) to 736 (Iowa) | ML CO2 Impact |
+| Reference PUE | 1.15 hyperscale; 1.5–1.8 enterprise | Uptime Institute |
+
+`train-long` emits a `training_energy` event per run with `kwh`, `gco2eq`,
+`j_per_tok`, `tok_per_s`, `peak_w`, `pue`, `grid_g_per_kwh` (see
+`mmllm.metrics.EnergyTracker`). Backend auto-selects: CodeCarbon →
+pynvml-only polling → wall+TDP fallback. The `backend` field tells you
+which one ran. Override defaults via `MMLLM_GRID_INTENSITY` and `MMLLM_PUE`
+env vars when you know your region/datacenter.
+
+### Green-value formula
+
+```
+green_value = w_t · E_train_savings  +  w_i · E_inf_savings  +  w_m · M_density_advantage
+```
+
+Each component is independently measurable; pick weights based on your
+deployment profile (heavy-training vs heavy-serving). All three are
+unitless ratios in [0, 1].
+
+#### 1. Training energy savings
+
+```
+E_train_savings = 1 - (kWh_mmllm / kWh_dense_baseline)
+```
+
+`kWh_mmllm` comes from the `training_energy` event. `kWh_dense_baseline`
+is the kWh a dense model with comparable bpc would consume — estimated
+via `gpu_hours × avg_power × PUE` from a published recipe (Patterson 2021
+formula). At the FLOPs-per-token level, mmllm and a dense baseline of
+similar parameter count are roughly comparable per training step; the
+savings here are mostly from converging in fewer tokens (bank acts as a
+larger effective parameter budget without the dense-FLOP cost).
+
+#### 2. Inference energy savings (per concurrent user)
+
+```
+E_inf_savings = 1 - (J/tok_mmllm / J/tok_dense_baseline)
+```
+
+Reference dense numbers: Llama-3.3-70B FP8 on H100 ≈ 0.39 J/tok; Llama-65B
+on A100 ≈ 3–4 J/tok; ~3 Wh/query at typical query lengths. mmllm at the
+same hardware: TBD until the inference bench lands; expected to be
+competitive at single-instance serving and dominant at multi-instance.
+
+#### 3. Memory-density advantage (the mmllm-specific argument)
+
+```
+RAM_per_user_mmllm  = dense_bytes_per_instance + (bank_bytes / n_instances)
+RAM_per_user_dense  = full_model_bytes_per_instance
+M_density_advantage = 1 - (RAM_per_user_mmllm / RAM_per_user_dense)
+```
+
+The bank is shared via mmap — the OS page cache holds it once on a host
+regardless of how many inference instances run. Per-instance dense weights
+still scale linearly with concurrency. As `n_instances → ∞`, mmllm's
+per-user RAM cost asymptotes to `dense_bytes_per_instance` alone (the
+bank amortizes to zero).
+
+Worked example with current architecture (10M dense fp32 = 40 MB,
+18.8 GB bank at sqrt_n=2048) vs Pythia-160M (640 MB):
+
+| concurrent users | mmllm VRAM | Pythia-160M VRAM | M_density |
+|---|---|---|---|
+| 1 | 40 MB + 18.8 GB = 18.84 GB | 640 MB | -28× (mmllm worse — bank dominates at low concurrency) |
+| 10 | 400 MB + 18.8 GB = 19.2 GB | 6.4 GB | -3× (still worse) |
+| 50 | 2.0 GB + 18.8 GB = 20.8 GB | 32 GB | +35% |
+| 100 | 4.0 GB + 18.8 GB = 22.8 GB | 64 GB | +64% |
+| 1000 | 40 GB + 18.8 GB = 58.8 GB | 640 GB (won't fit) | +91% |
+
+Crossover around 30 concurrent users. Below that, dense Pythia-160M is
+more memory-efficient because the bank is overhead. Above it, mmllm wins
+asymptotically by ~16× (the per-instance dense ratio).
+
+This curve is exact and doesn't need instrumentation to verify — it's an
+architectural property of the config (`n_dense_params`, `sqrt_n`, `q_dim`,
+`n_layers`).
+
+### Reading these numbers
+
+- **Training energy** alone is comparable to dense models of similar
+  active param count. mmllm doesn't fundamentally save energy per training
+  step; it saves it per achieved-bpc (bigger effective param budget at
+  similar dense FLOPs).
+- **Single-instance inference** is also roughly comparable. The bank-side
+  PKM lookup is sub-linear (O(√N)) but per-token compute is dominated by
+  attention and FFN, both shared with dense.
+- **Multi-instance serving** is where the architecture earns its "green"
+  pitch. Above ~30 concurrent users on the current config, per-user RAM
+  drops fast; above 100 users, mmllm fits on a single GPU what would need
+  a multi-GPU dense deployment.
+
+The strongest honest claim today: **at high serving concurrency, mmllm
+delivers 60–90% lower per-user VRAM** than a dense model of comparable
+serving quality. Power savings track memory savings closely (idle GPU
+power scales sub-linearly with VRAM, but DRAM refresh + replicated KV
+caches on dense scale linearly with users). BLOOM (Luccioni 2023, arXiv
+2211.02001) explicitly broke out idle GPU power as ~22% of dynamic — a
+useful upper bound on the multi-instance savings ceiling.
+
+### Caveats
+
+- Training kWh from the `training_energy` event is real when the backend
+  is `codecarbon` or `pynvml`. If `backend = wall`, the value is a TDP
+  fallback estimate — order-of-magnitude only, do not cite as a measured
+  number.
+- We don't yet have a production inference path; J/tok numbers here are
+  TBD until the inference bench lands. Memory-density is exact today.
+- The crossover concurrency depends on the bank size — at sqrt_n=512
+  (default config) the bank is only 1.17 GB and crossover happens at ~2
+  users. The "high-concurrency advantage" only matters at sqrt_n=2048+
+  scale where the bank is large.
+- Numbers above are byte-level / Pile-Github specific. BPE-tokenized
+  models have different J/tok and bpc relationships; cross-tokenizer
+  energy comparisons should normalize on tokens-per-byte.
+
 ## Hack
 
 Everything lives in `src/mmllm/core.lpy` — tokenizer, model, training loop,
