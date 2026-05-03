@@ -626,6 +626,9 @@ def bench_inference(
     dense_dtype: str = "",           # 'bf16' enables Phase-1 step C1 cast
     num_threads: int = 0,            # 0 = container cpu_count; sets MMLLM_NUM_THREADS
     max_t: int = 0,                  # 0 = config default (4096); sets MMLLM_MAX_T
+    bank_query_mode: str = "plain",  # MUST match the trained ckpt's mode
+    long_tier_mix:   str = "sum",    # MUST match the trained ckpt's mode
+    bank_feedback_mode: str = "plain",  # MUST match the trained ckpt's mode
 ):
     """Benchmark per-token inference speed on a trained checkpoint.
 
@@ -644,16 +647,24 @@ def bench_inference(
       dense_dtype='bf16'   → MMLLM_DENSE_DTYPE=bf16 (cast dense Linear
         weights to bf16 before bench; halves dense memory bandwidth).
 
+    Architectural mode flags MUST match what the checkpoint was trained
+    with — bench-inference loads dense.pt by parameter order, so a
+    feedback-trained ckpt loaded into a plain-built model will fail
+    on parameter-count mismatch (extra W_probe/W_back tensors).
+
     Reports tok/sec and ms/tok at batch=1. Both modes use the same
     trained dense weights from <base>.ckpts/step-<ckpt_step>/dense.pt
     and the same bank V at <bank>.<i>.bin.
     """
     import os, subprocess
     env = {**os.environ,
-           "MMLLM_DEVICE":     "cuda",
-           "MMLLM_SQRT_N":     str(sqrt_n),
-           "MMLLM_BANK_ON_GPU": "true" if bank_on_gpu else "false",
-           "MMLLM_COMPILE":     "true" if compile_forward else "false"}
+           "MMLLM_DEVICE":            "cuda",
+           "MMLLM_SQRT_N":            str(sqrt_n),
+           "MMLLM_BANK_ON_GPU":       "true" if bank_on_gpu else "false",
+           "MMLLM_COMPILE":           "true" if compile_forward else "false",
+           "MMLLM_BANK_QUERY_MODE":   bank_query_mode,
+           "MMLLM_LONG_TIER_MIX":     long_tier_mix,
+           "MMLLM_BANK_FEEDBACK_MODE": bank_feedback_mode}
     if dense_dtype:
         env["MMLLM_DENSE_DTYPE"] = dense_dtype
     if num_threads > 0:
@@ -665,6 +676,7 @@ def bench_inference(
         f"sqrt_n={sqrt_n} bank_on_gpu={bank_on_gpu} "
         f"compile_forward={compile_forward} dense_dtype={dense_dtype or 'fp32'} "
         f"num_threads={num_threads or 'default'} max_t={max_t or 'default'} "
+        f"bq={bank_query_mode} ltm={long_tier_mix} fb={bank_feedback_mode} "
         f"n_warm={n_warm} n_time={n_time} ===",
         flush=True,
     )
@@ -693,6 +705,9 @@ def bench_inference_cpu(
     dense_dtype: str = "",           # 'bf16' for Phase-1 step C1
     num_threads: int = 0,            # 0 = container cpu_count
     max_t: int = 0,                  # 0 = config default (4096)
+    bank_query_mode: str = "plain",  # MUST match the trained ckpt's mode
+    long_tier_mix:   str = "sum",    # MUST match the trained ckpt's mode
+    bank_feedback_mode: str = "plain",  # MUST match the trained ckpt's mode
 ):
     """CPU-only inference benchmark on a trained checkpoint. Many
     end-users will run this CPU-bound (no GPU available, edge deploy,
@@ -703,13 +718,19 @@ def bench_inference_cpu(
     single-conversation latency a CPU user would see.
 
     sqrt_n=2048 means 18.8 GB bank V; container needs >=24 GB RAM.
+
+    Architectural mode flags MUST match what the checkpoint was trained
+    with — see bench_inference docstring.
     """
     import os, subprocess
     env = {**os.environ,
-           "MMLLM_DEVICE":     "cpu",
-           "MMLLM_SQRT_N":     str(sqrt_n),
-           "MMLLM_BANK_ON_GPU": "false",     # no GPU; bank stays mmap'd
-           "MMLLM_COMPILE":     "true" if compile_forward else "false"}
+           "MMLLM_DEVICE":            "cpu",
+           "MMLLM_SQRT_N":            str(sqrt_n),
+           "MMLLM_BANK_ON_GPU":       "false",     # no GPU; bank stays mmap'd
+           "MMLLM_COMPILE":           "true" if compile_forward else "false",
+           "MMLLM_BANK_QUERY_MODE":   bank_query_mode,
+           "MMLLM_LONG_TIER_MIX":     long_tier_mix,
+           "MMLLM_BANK_FEEDBACK_MODE": bank_feedback_mode}
     if dense_dtype:
         env["MMLLM_DENSE_DTYPE"] = dense_dtype
     if num_threads > 0:
@@ -721,6 +742,7 @@ def bench_inference_cpu(
         f"sqrt_n={sqrt_n} compile_forward={compile_forward} "
         f"dense_dtype={dense_dtype or 'fp32'} "
         f"num_threads={num_threads or 'default'} max_t={max_t or 'default'} "
+        f"bq={bank_query_mode} ltm={long_tier_mix} fb={bank_feedback_mode} "
         f"n_warm={n_warm} n_time={n_time} ===",
         flush=True,
     )
