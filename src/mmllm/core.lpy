@@ -37,6 +37,7 @@
            [mmllm.bank_query :as bq]
            [mmllm.bank_feedback :as bfb]
            [mmllm.metrics :as metrics]
+           [mmllm.runtime :as rt]
            [mmllm.optim :as vbopt]))
 
 (defn pick-device
@@ -797,25 +798,30 @@
   "Generate `n` characters after `prompt`. Threads BOTH short cache
    (RoPE'd, recent) and long cache (set-style, episodic). Long heads
    ALSO query the bank V (semantic memory) — those two long-tier
-   sources are summed inside attention."
-  [m prompt n]
-  (set-eval-mode! m)
-  (let [device                 (:device m)
-        prompt-toks            (-> prompt encode (.unsqueeze 0) (.to device))
-        [logits short long]    (forward m prompt-toks)]
-    (loop [step    0
-           short-c short
-           long-c  long
-           prev    logits
-           toks    prompt-toks]
-      (if (= step n)
-        (decode (.to (.squeeze toks 0) "cpu"))
-        (let [last-log              (.select prev 1 -1)
-              probs                 (F/softmax last-log ** :dim -1)
-              next-tok              (torch/multinomial probs 1)
-              [new-log new-s new-l] (forward m next-tok short-c long-c)]
-          (recur (inc step) new-s new-l new-log
-                 (torch/cat (python/list [toks next-tok]) ** :dim 1)))))))
+   sources are summed inside attention.
+
+   `forward-fn` (optional) overrides the forward callable — used by
+   bench-inference to swap in a torch.compile-wrapped forward
+   (Phase-1a). Defaults to the eager `forward` defn."
+  ([m prompt n] (sample m prompt n forward))
+  ([m prompt n forward-fn]
+   (set-eval-mode! m)
+   (let [device                 (:device m)
+         prompt-toks            (-> prompt encode (.unsqueeze 0) (.to device))
+         [logits short long]    (forward-fn m prompt-toks nil nil)]
+     (loop [step    0
+            short-c short
+            long-c  long
+            prev    logits
+            toks    prompt-toks]
+       (if (= step n)
+         (decode (.to (.squeeze toks 0) "cpu"))
+         (let [last-log              (.select prev 1 -1)
+               probs                 (F/softmax last-log ** :dim -1)
+               next-tok              (torch/multinomial probs 1)
+               [new-log new-s new-l] (forward-fn m next-tok short-c long-c)]
+           (recur (inc step) new-s new-l new-log
+                  (torch/cat (python/list [toks next-tok]) ** :dim 1))))))))
 
 ;;; ─────────────────────── inference benchmark ───────────────────────
 
@@ -845,29 +851,35 @@
           (.copy_ (.- p data) s))))
     (set-eval-mode! m)
     (torch/set_grad_enabled false)
-    (println (format "  device=%s  bank_on_gpu=%s  sqrt_n=%d  bank=%s"
-                     device
-                     (.lower (.get (.- os environ) "MMLLM_BANK_ON_GPU" "false"))
-                     (pick-sqrt-n config)
-                     bank-path))
-    (try
-      (let [prompt "the quick brown fox jumps over the lazy dog. "]
-        (println (format "  warmup: %d tokens …" n-warm))
-        (sample m prompt n-warm)
-        (when (= device "cuda")
-          (cuda/synchronize))
-        (println (format "  timed:  %d tokens …" n-time))
-        (let [t0  (time/time)
-              _   (sample m prompt n-time)
-              _   (when (= device "cuda") (cuda/synchronize))
-              dt  (- (time/time) t0)
-              tps (/ (python/float n-time) dt)
-              ms  (* 1000.0 (/ dt (python/float n-time)))]
-          (println)
-          (println (format "  RESULT: %d tokens in %.3fs → %.2f tok/sec  (%.3f ms/tok)"
-                           n-time dt tps ms))))
-      (finally
-        (torch/set_grad_enabled true)))))
+    ;; Phase-1a: opt-in torch.compile of forward. maybe_compile_forward
+    ;; reads MMLLM_COMPILE; returns the original forward when disabled
+    ;; or on compile failure. The compiled wrapper is plug-compatible
+    ;; with the eager forward — sample threads it through identically.
+    (rt/maybe_cast_dense_bf16 m)
+    (let [forward-fn (rt/maybe_compile_forward forward)]
+      (println (format "  device=%s  bank_on_gpu=%s  sqrt_n=%d  bank=%s"
+                       device
+                       (.lower (.get (.- os environ) "MMLLM_BANK_ON_GPU" "false"))
+                       (pick-sqrt-n config)
+                       bank-path))
+      (try
+        (let [prompt "the quick brown fox jumps over the lazy dog. "]
+          (println (format "  warmup: %d tokens …" n-warm))
+          (sample m prompt n-warm forward-fn)
+          (when (= device "cuda")
+            (cuda/synchronize))
+          (println (format "  timed:  %d tokens …" n-time))
+          (let [t0  (time/time)
+                _   (sample m prompt n-time forward-fn)
+                _   (when (= device "cuda") (cuda/synchronize))
+                dt  (- (time/time) t0)
+                tps (/ (python/float n-time) dt)
+                ms  (* 1000.0 (/ dt (python/float n-time)))]
+            (println)
+            (println (format "  RESULT: %d tokens in %.3fs → %.2f tok/sec  (%.3f ms/tok)"
+                             n-time dt tps ms))))
+        (finally
+          (torch/set_grad_enabled true))))))
 
 ;;; ─────────────────────── train on a real corpus ───────────────────────
 
