@@ -55,6 +55,42 @@ The bank's product-key lookup is `O(√N)` regardless of bank size,
 so growing it from 21M entries (current 5B run) to 1B+ entries on
 a laptop is a disk-space question, not a latency question.
 
+### Green concerns are now developer concerns
+
+LLM training and inference energy footprints have become a
+first-order concern for the developer community. The cost of a
+GPT-4-class model is on the order of 1,287 MWh just for the
+training run (Patterson 2021), and a high-traffic Copilot-style
+deployment burns through GPU-hours at a rate the same teams that
+sweat their AWS bills are increasingly unwilling to accept. There's
+real demand for "AI infrastructure that respects power budgets" —
+both for laptops where battery life matters and for data centers
+where every kilowatt is metered.
+
+mmLLM is built around this constraint from the architecture up.
+Concrete near-term wins (numbers in the [Green value](#green-value)
+section, derived from the architecture, not aspirational):
+
+- **At-scale serving**: ~16× lower per-user RAM than a dense model
+  of comparable quality, asymptotically. At 100 concurrent users
+  per host: ~10× lower idle power per user. At 1000+ users per
+  host: ~36× lower.
+- **Per-token energy**: comparable to dense at single-instance,
+  but ~700× lower at a hypothetical 1T-class scale because the
+  bank avoids loading 2 TB of weights into HBM (worked numbers in
+  [1T scale extrapolation](#1t-scale-extrapolation)).
+
+**Long-term goal: enable 1T-parameter-class models in under
+1,000 watts of total system power**, by holding only the active
+dense network in fast memory and paging the bank from local
+NVMe on demand. A 1T dense model today demands 25 GPUs at full
+TDP (~17.5 kW); the same effective parameter budget as a sparse
+mmap-backed bank can run on a single 700 W GPU + ~75 W of DDR
+page-cache RAM, because nothing is hot that doesn't need to be.
+Whether quality scaling holds at that bank size is the open
+research question the project is set up to answer; the energy
+math is straightforward.
+
 ### Roadmap toward a Clojure assistant
 
 The eventual product target is a purpose-built Clojure code
