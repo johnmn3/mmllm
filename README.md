@@ -1,5 +1,7 @@
 # mmLLM - Memory Mapped LLM
 
+mmLLM is a new kind of "green llm" - more efficient for many things by offloading some work to disk.
+
 ## Architecture
 
 mmLLM is a decoder-only transformer with a hard-split three-tier attention
