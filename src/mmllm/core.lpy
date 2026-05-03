@@ -52,6 +52,29 @@
                              "cpu"))
       :else          (if (cuda/is_available) "cuda" "cpu"))))
 
+(defn setup-threads!
+  "Tune intra-op + inter-op CPU thread counts for the active process.
+   Reads MMLLM_NUM_THREADS (default = os.cpu_count()). Sets:
+     - torch.set_num_threads        (matmul / SDPA workers)
+     - torch.set_num_interop_threads (graph-level parallelism, max 1/4 of intra)
+     - OMP_NUM_THREADS, MKL_NUM_THREADS, MKL_DYNAMIC=FALSE, OMP_DYNAMIC=FALSE
+       (so BLAS / OpenMP backends honor the choice)
+   Idempotent. No-op effect on CUDA hot path; meaningful win on CPU
+   inference where intra-op threads drive matmul throughput.
+
+   Phase-1b of the inference optimization plan."
+  []
+  (let [n      (python/int (.get (.- os environ) "MMLLM_NUM_THREADS"
+                                 (str (or (os/cpu_count) 4))))
+        interop (max 1 (quot n 4))]
+    (torch/set_num_threads n)
+    (torch/set_num_interop_threads interop)
+    (.__setitem__ (.- os environ) "OMP_NUM_THREADS"  (str n))
+    (.__setitem__ (.- os environ) "MKL_NUM_THREADS"  (str n))
+    (.__setitem__ (.- os environ) "OMP_DYNAMIC"      "FALSE")
+    (.__setitem__ (.- os environ) "MKL_DYNAMIC"      "FALSE")
+    {:n-threads n :n-interop interop}))
+
 (defn pick-lr
   "Resolve learning rate. Reads MMLLM_LR (float string,
    default 3e-3). Applied to BOTH AdamW (dense) and SparseAdam (V)."
@@ -201,6 +224,21 @@
    See `mmllm.bank_feedback` for the implementation."
   []
   (.get (.- os environ) "MMLLM_BANK_FEEDBACK_MODE" "plain"))
+
+(defn pick-max-t
+  "Resolve the pre-allocated KV cache buffer length (max sequence
+   length the cache will hold). Reads MMLLM_MAX_T (default 4096).
+
+   Phase-1c of the inference optimization plan: rather than
+   rebuilding the cache via torch.cat on every token (O(T²) memory
+   traffic across a generation), pre-allocate a (B, n_kv, MAX_T,
+   head_dim) buffer once and write each token into its slot.
+
+   Bound on generation length per conversation. Larger = higher
+   one-time RAM cost for the buffer; smaller = sooner we hit the
+   ceiling on long generations."
+  []
+  (python/int (.get (.- os environ) "MMLLM_MAX_T" "4096")))
 
 (defn- pick-window
   "Resolve a sliding-window size from env. Returns int or nil."
@@ -356,6 +394,40 @@
 
 ;;; ─────────────────────── attention (hard-split tiered + memory) ───────────────────────
 
+(defn- append-kv-to-buffer!
+  "Append (B, n_kv, T_new, head_dim) k-new and v-new into a pre-
+   allocated KV cache buffer pair. Returns [k-buf v-buf new-pos] —
+   a 3-tuple that becomes the new cache to thread to the next
+   forward. Allocates fresh buffers on the first call (cache=nil).
+
+   Memory traffic per call: 2 × T_new × n_kv × head_dim × bytes
+   (just the slot write), regardless of total cache length —
+   compared to the prior torch.cat path which rewrote the entire
+   cache on every token (O(T²) across a generation)."
+  [cache k-new v-new B n-kv max-t head-dim]
+  (let [T-new (.size k-new 2)]
+    (if cache
+      (let [k-buf   (nth cache 0)
+            v-buf   (nth cache 1)
+            pos     (nth cache 2)
+            new-pos (+ pos T-new)]
+        (when (> new-pos max-t)
+          (throw (python/RuntimeError
+                  (format "KV cache overflow: pos=%d + T_new=%d > max_t=%d. Bump MMLLM_MAX_T."
+                          pos T-new max-t))))
+        (with [_ (torch/no_grad)]
+          (.copy_ (.narrow k-buf 2 pos T-new) k-new)
+          (.copy_ (.narrow v-buf 2 pos T-new) v-new))
+        [k-buf v-buf new-pos])
+      (let [k-buf (torch/zeros B n-kv max-t head-dim
+                               ** :dtype (.- k-new dtype) :device (.- k-new device))
+            v-buf (torch/zeros B n-kv max-t head-dim
+                               ** :dtype (.- v-new dtype) :device (.- v-new device))]
+        (with [_ (torch/no_grad)]
+          (.copy_ (.narrow k-buf 2 0 T-new) k-new)
+          (.copy_ (.narrow v-buf 2 0 T-new) v-new))
+        [k-buf v-buf T-new]))))
+
 (defn attention
   "Three-tier attention. Short heads attend to RoPE'd short cache.
    Long heads have TWO sources, SUMMED:
@@ -367,14 +439,15 @@
    (a) is episodic memory; (b) is semantic memory.
 
      x:           (B, T, d-model)
-     short-cache: nil OR [k v] each (B, n-short-kv-heads, T_prev, head-dim)
-     long-cache:  nil OR [k v] each (B, n-long-kv-heads,  T_prev, head-dim)
-   Returns [out new-short-cache new-long-cache]."
+     short-cache: nil OR [k-buf v-buf pos]; k-buf/v-buf shape
+                  (B, n-short-kv-heads, max-t, head-dim) pre-alloc
+     long-cache:  nil OR [k-buf v-buf pos]; same shape pattern
+   Returns [out new-short-cache new-long-cache] (each 3-tuple)."
   [block x cos sin short-cache long-cache]
   (let [{:keys [q-proj k-proj-s v-proj-s k-proj-l v-proj-l o-proj memory
                 long-gate bank-query bank-feedback
                 n-heads n-short-heads n-long-heads
-                n-short-kv-heads n-long-kv-heads head-dim
+                n-short-kv-heads n-long-kv-heads head-dim max-t
                 short-window long-window]} block
         B            (.size x 0)
         T            (.size x 1)
@@ -395,24 +468,31 @@
         v-s          (-> (v-proj-s x) (.reshape B T n-short-kv-heads head-dim) (.transpose 1 2))
         k-l          (-> (k-proj-l x) (.reshape B T n-long-kv-heads  head-dim) (.transpose 1 2))
         v-l          (-> (v-proj-l x) (.reshape B T n-long-kv-heads  head-dim) (.transpose 1 2))
-        ;; ── SHORT tier: RoPE on Q and K, append to cache, GQA expand, causal SDPA
-        prev-short   (if short-cache (.size (nth short-cache 0) 2) 0)
+        ;; ── SHORT tier: RoPE on Q and K, append to pre-alloc cache,
+        ;; GQA expand, causal SDPA
+        prev-short   (if short-cache (nth short-cache 2) 0)
         cos-here-s   (.narrow cos 0 prev-short T)
         sin-here-s   (.narrow sin 0 prev-short T)
         q-short-r    (apply-rope q-short cos-here-s sin-here-s)
         k-s-r        (apply-rope k-s     cos-here-s sin-here-s)
-        [k-s-full v-s-full]
-        (if short-cache
-          [(torch/cat (python/list [(nth short-cache 0) k-s-r]) ** :dim 2)
-           (torch/cat (python/list [(nth short-cache 1) v-s])   ** :dim 2)]
-          [k-s-r v-s])
+        ;; Phase-1c pre-alloc cache: one in-place slot write instead
+        ;; of torch.cat. new-short-cache is a 3-tuple [k-buf v-buf pos].
+        new-short-cache (append-kv-to-buffer! short-cache k-s-r v-s
+                                              B n-short-kv-heads max-t head-dim)
+        new-pos-s    (nth new-short-cache 2)
+        ;; Narrowed views over the pre-alloc'd buffer for SDPA. The
+        ;; buffer beyond new-pos-s holds zero-padding (or stale data)
+        ;; — narrow ensures attention only sees populated positions.
+        k-s-full     (.narrow (nth new-short-cache 0) 2 0 new-pos-s)
+        v-s-full     (.narrow (nth new-short-cache 1) 2 0 new-pos-s)
         ;; Sliding-window eviction for the short-tier KV cache. RoPE
         ;; preserves relative position under eviction (q·k depends on
         ;; i-j; both still rotated by their original positions).
-        T-s-full     (.size k-s-full 2)
-        [k-s-full v-s-full] (if (and short-window (> T-s-full short-window))
-                              [(.narrow k-s-full 2 (- T-s-full short-window) short-window)
-                               (.narrow v-s-full 2 (- T-s-full short-window) short-window)]
+        ;; The buffer keeps growing (we just narrow further at attention
+        ;; time); proper ring recycling is a future-phase concern.
+        [k-s-full v-s-full] (if (and short-window (> new-pos-s short-window))
+                              [(.narrow k-s-full 2 (- new-pos-s short-window) short-window)
+                               (.narrow v-s-full 2 (- new-pos-s short-window) short-window)]
                               [k-s-full v-s-full])
         repeat-s     (quot n-short-heads n-short-kv-heads)
         k-s-rep      (.repeat_interleave k-s-full repeat-s ** :dim 1)
@@ -428,18 +508,17 @@
         ;; encode future tokens that the loss is trying to predict.
         ;; T=1 incremental forwards (long-cache populated) collapse
         ;; the causal mask to identity, so it's a no-op there.
-        [k-l-full v-l-full]
-        (if long-cache
-          [(torch/cat (python/list [(nth long-cache 0) k-l]) ** :dim 2)
-           (torch/cat (python/list [(nth long-cache 1) v-l]) ** :dim 2)]
-          [k-l v-l])
+        new-long-cache (append-kv-to-buffer! long-cache k-l v-l
+                                             B n-long-kv-heads max-t head-dim)
+        new-pos-l    (nth new-long-cache 2)
+        k-l-full     (.narrow (nth new-long-cache 0) 2 0 new-pos-l)
+        v-l-full     (.narrow (nth new-long-cache 1) 2 0 new-pos-l)
         ;; Sliding-window eviction on the long-tier in-RAM KV cache.
         ;; The longcache.py paged-LRU mmap layer (not yet wired into
         ;; forward) sits behind this — long-window is the in-RAM ceiling.
-        T-l-full     (.size k-l-full 2)
-        [k-l-full v-l-full] (if (and long-window (> T-l-full long-window))
-                              [(.narrow k-l-full 2 (- T-l-full long-window) long-window)
-                               (.narrow v-l-full 2 (- T-l-full long-window) long-window)]
+        [k-l-full v-l-full] (if (and long-window (> new-pos-l long-window))
+                              [(.narrow k-l-full 2 (- new-pos-l long-window) long-window)
+                               (.narrow v-l-full 2 (- new-pos-l long-window) long-window)]
                               [k-l-full v-l-full])
         repeat-l     (quot n-long-heads n-long-kv-heads)
         k-l-rep      (.repeat_interleave k-l-full repeat-l ** :dim 1)
@@ -469,7 +548,7 @@
         out          (-> attn (.transpose 1 2) (.contiguous)
                          (.reshape B T (* n-heads head-dim)))
         out          (o-proj out)]
-    [out [k-s-full v-s-full] [k-l-full v-l-full]]))
+    [out new-short-cache new-long-cache]))
 
 ;;; ─────────────────────── SwiGLU FFN ───────────────────────
 
@@ -508,9 +587,14 @@
         bq-kind   (or bank-query-mode     (pick-bank-query-mode))
         fb-kind   (or bank-feedback-mode  (pick-bank-feedback-mode))
         sw        (or short-window        (pick-short-window))
-        lw        (or long-window         (pick-long-window))]
+        lw        (or long-window         (pick-long-window))
+        ;; Phase-1c: pre-allocated KV cache buffer length. Bound on
+        ;; max generation per conversation; bigger buffers cost RAM
+        ;; once at first call but eliminate per-token reallocation.
+        mt        (pick-max-t)]
     {:d-model           d-model
      :head-dim          head-dim
+     :max-t             mt
      :n-heads           n-heads
      :n-short-heads     n-short-heads
      :n-long-heads      n-long-heads
@@ -1290,6 +1374,15 @@
     default-config))
 
 (defn cli-main []
+  ;; Tune CPU thread counts before any torch op runs (set_num_interop_threads
+  ;; is one-shot per process). Wrapped in try because it raises if any
+  ;; parallel torch work has already happened — e.g., on basilisp re-bootstrap.
+  (try
+    (let [r (setup-threads!)]
+      (println (format "  threads: %d intra-op / %d inter-op (set MMLLM_NUM_THREADS to override)"
+                       (:n-threads r) (:n-interop r))))
+    (catch python/Exception e
+      (println (format "  threads: setup skipped (%s)" e))))
   (let [args (vec (rest sys/argv))
         cmd  (first args)
         cfg  (pick-config (second args))]
