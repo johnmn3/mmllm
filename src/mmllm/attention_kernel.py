@@ -46,6 +46,30 @@ def apply_rope(x: torch.Tensor, cos: torch.Tensor, sin: torch.Tensor) -> torch.T
     return x * cos + _rotate_half(x) * sin
 
 
+# ── speculative-verify mask (Phase-5) ──
+
+def _verify_mask(T: int, total_t: int, dtype, device) -> torch.Tensor:
+    """Mask for speculative-decoding verify-K SDPA: K query positions
+    over (prev_pos + K) key positions, where prev_pos = total_t - T.
+
+    Query i (logical position prev_pos+i) attends to keys at positions
+    0..prev_pos+i — sees the prior cache plus its own and earlier
+    draft tokens, but not later draft tokens. Standard auto-regressive
+    causal masking restricted to the K-batch suffix.
+
+    Returns (T, total_t) additive mask: 0 where allowed, -inf where
+    masked. Cheap to build per-call (~µs); not cached so the dtype/
+    device are guaranteed correct without a global LRU.
+    """
+    prev_pos = total_t - T
+    qi = torch.arange(T, device=device).unsqueeze(1)        # (T, 1)
+    kj = torch.arange(total_t, device=device).unsqueeze(0)  # (1, total_t)
+    masked = kj > (prev_pos + qi)                           # (T, total_t) bool
+    out = torch.zeros(T, total_t, dtype=dtype, device=device)
+    out.masked_fill_(masked, float("-inf"))
+    return out
+
+
 # ── KV cache append (Phase-1c, native tuple form) ──
 
 def append_kv_to_buffer(
@@ -95,11 +119,22 @@ def attention(
     # tensor inputs
     x: torch.Tensor, cos: torch.Tensor, sin: torch.Tensor,
     short_cache: Optional[tuple], long_cache: Optional[tuple],
+    *,
+    skip_bank: bool = False,
 ) -> tuple:
     """Three-tier attention with hard-split Q heads.
 
     Returns (out, new_short_cache, new_long_cache) where each cache is
     a Python tuple (k_buf, v_buf, pos) — torch.compile-friendly.
+
+    `skip_bank=True` (Phase-5 draft mode): bypass the PKM lookup
+    entirely. attn_l_mem becomes 0; long_gate sees only the SDPA path.
+    With SumGate / ScalarGate this gives a faithful "bank-zeroed"
+    forward at ~17% lower FLOPs per layer (bank's K_a/K_b matmuls +
+    top-k + gather are skipped). For SwitchGate the gating still
+    multiplies the SDPA path by sigmoid(Q·w), so output is
+    `gate · attn_l_sdpa` instead of `gate · attn_l_sdpa + (1-gate) · 0`,
+    which is the same thing.
     """
     B = x.size(0)
     T = x.size(1)
@@ -140,10 +175,23 @@ def attention(
     repeat_s = n_short_heads // n_short_kv_heads
     k_s_rep = k_s_full.repeat_interleave(repeat_s, dim=1)
     v_s_rep = v_s_full.repeat_interleave(repeat_s, dim=1)
-    is_causal_s = short_cache is None and T > 1
-    attn_s = F.scaled_dot_product_attention(
-        q_short_r, k_s_rep, v_s_rep, is_causal=is_causal_s,
-    )
+    # Three SDPA cases:
+    #   T==1 decode:               no mask (single query attends to all)
+    #   T>1 prefill (no cache):    is_causal=True (square triangular)
+    #   T>1 verify (cache+K-batch): custom mask — query i attends to
+    #                              keys [0..prev_short+i]; this is the
+    #                              speculative-decoding case (Phase-5)
+    if short_cache is None and T > 1:
+        attn_s = F.scaled_dot_product_attention(
+            q_short_r, k_s_rep, v_s_rep, is_causal=True,
+        )
+    elif short_cache is not None and T > 1:
+        attn_s = F.scaled_dot_product_attention(
+            q_short_r, k_s_rep, v_s_rep,
+            attn_mask=_verify_mask(T, k_s_rep.size(2), q_short_r.dtype, q_short_r.device),
+        )
+    else:
+        attn_s = F.scaled_dot_product_attention(q_short_r, k_s_rep, v_s_rep)
 
     # LONG tier (a): set-style SDPA over per-conversation cache (no RoPE)
     new_long_cache = append_kv_to_buffer(
@@ -160,24 +208,36 @@ def attention(
     repeat_l = n_long_heads // n_long_kv_heads
     k_l_rep = k_l_full.repeat_interleave(repeat_l, dim=1)
     v_l_rep = v_l_full.repeat_interleave(repeat_l, dim=1)
-    is_causal_l = long_cache is None and T > 1
-    attn_l_sdpa = F.scaled_dot_product_attention(
-        q_long, k_l_rep, v_l_rep, is_causal=is_causal_l,
-    )
+    if long_cache is None and T > 1:
+        attn_l_sdpa = F.scaled_dot_product_attention(
+            q_long, k_l_rep, v_l_rep, is_causal=True,
+        )
+    elif long_cache is not None and T > 1:
+        attn_l_sdpa = F.scaled_dot_product_attention(
+            q_long, k_l_rep, v_l_rep,
+            attn_mask=_verify_mask(T, k_l_rep.size(2), q_long.dtype, q_long.device),
+        )
+    else:
+        attn_l_sdpa = F.scaled_dot_product_attention(q_long, k_l_rep, v_l_rep)
 
-    # LONG tier (b): bank retrieval (semantic memory)
-    q_long_flat = (
-        q_long.transpose(1, 2)
-              .contiguous()
-              .reshape(B, T, n_long_heads * head_dim)
-    )
-    ctx_mod = bank_query(x)
-    bank_q = q_long_flat + ctx_mod if ctx_mod is not None else q_long_flat
-    mem_out = memory(bank_q)
-    attn_l_mem = mem_out.reshape(B, T, n_long_heads, head_dim).transpose(1, 2)
-
-    # Combine the two long-tier sources via the configured gate
-    attn_l = long_gate(q_long, attn_l_sdpa, attn_l_mem)
+    # LONG tier (b): bank retrieval (semantic memory). Phase-5 draft
+    # mode skips this entirely — saves the bank's K_a/K_b matmuls,
+    # top-K, and gather. Required for SwitchGate's gate(1-gate)
+    # combiner to produce only the SDPA contribution.
+    if skip_bank:
+        attn_l = attn_l_sdpa
+    else:
+        q_long_flat = (
+            q_long.transpose(1, 2)
+                  .contiguous()
+                  .reshape(B, T, n_long_heads * head_dim)
+        )
+        ctx_mod = bank_query(x)
+        bank_q = q_long_flat + ctx_mod if ctx_mod is not None else q_long_flat
+        mem_out = memory(bank_q)
+        attn_l_mem = mem_out.reshape(B, T, n_long_heads, head_dim).transpose(1, 2)
+        # Combine the two long-tier sources via the configured gate
+        attn_l = long_gate(q_long, attn_l_sdpa, attn_l_mem)
 
     # Concat short + long head outputs, project
     attn = torch.cat([attn_s, attn_l], dim=1)
@@ -200,8 +260,12 @@ def block_forward(
     short_window: Optional[int], long_window: Optional[int],
     x: torch.Tensor, cos: torch.Tensor, sin: torch.Tensor,
     short_cache: Optional[tuple], long_cache: Optional[tuple],
+    skip_bank: bool = False,
 ) -> tuple:
-    """Pre-norm decoder block with three-tier attention + SwiGLU FFN."""
+    """Pre-norm decoder block with three-tier attention + SwiGLU FFN.
+
+    `skip_bank=True` (Phase-5 draft mode) routes through to the
+    attention kernel; bank PKM lookup is skipped."""
     attn_out, new_s, new_l = attention(
         q_proj, k_proj_s, v_proj_s, k_proj_l, v_proj_l, o_proj,
         memory, long_gate, bank_query, bank_feedback,
@@ -209,6 +273,7 @@ def block_forward(
         n_short_kv_heads, n_long_kv_heads, head_dim, max_t,
         short_window, long_window,
         norm1(x), cos, sin, short_cache, long_cache,
+        skip_bank=skip_bank,
     )
     x = x + attn_out
     x_norm = norm2(x)
