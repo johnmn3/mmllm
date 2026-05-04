@@ -1958,7 +1958,12 @@
                          n-samples  (python/int (or (nth args 6 nil) 50))
                          gen-len    (python/int (or (nth args 7 nil) 512))
                          log-path   (or (nth args 8 nil) (str base ".eval.jsonl"))]
-                     (eval-agent long-leaning-config base ckpt bank eval-path
+                     ;; cfg matches what train-long uses (default-config when
+                     ;; second-arg-of-`mmllm` isn't 'long'). Critical: eval
+                     ;; loads the trained dense.pt into a freshly-built
+                     ;; model — if the configs disagree on q-dim / n-heads
+                     ;; the .copy_ in the param-loader hits a shape mismatch.
+                     (eval-agent cfg base ckpt bank eval-path
                                  eval-name n-samples gen-len log-path))
       "eval-bpc-on-path" (let [base       (or (second args) "/tmp/agent")
                                ckpt       (when (nth args 2 nil)
@@ -1967,7 +1972,8 @@
                                eval-path  (or (nth args 4 nil) "/tmp/eval.test.bin")
                                eval-name  (or (nth args 5 nil) "bpc")
                                log-path   (or (nth args 6 nil) (str base ".eval.jsonl"))]
-                           (eval-bpc-on-path long-leaning-config base ckpt bank
+                           ;; Same config-match invariant as eval-agent.
+                           (eval-bpc-on-path cfg base ckpt bank
                                              eval-path eval-name log-path))
       (do (println "usage: mmllm {train|sample|compare|train-mmap|probe")
           (println "                  |build-corpus|clone-clojure|train-corpus")

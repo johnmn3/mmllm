@@ -76,12 +76,17 @@ def split_transcript(transcript: str,
 
 def iter_eval_samples(eval_path: str,
                       tpl: ChatTemplate = DEFAULT_TEMPLATE,
-                      record_sep: bytes = b"\n\n",
                       max_samples: int = 100,
                       max_prompt_bytes: int = 8192,
                       ) -> Iterable[EvalSample]:
-    """Read a `.test.bin` (concatenated transcripts joined by `\\n\\n`),
-    split each at the asst boundary, yield up to `max_samples`.
+    """Read a `.test.bin`, partition into transcripts via the `<|sys|>`
+    marker, yield up to `max_samples` (prompt, gold) pairs.
+
+    A naive byte-separator split (e.g., `\\n\\n`) breaks because the
+    SAME byte pattern occurs inside transcripts — markdown code blocks
+    routinely have blank lines, JSON values can have escaped newlines,
+    etc. Structural partitioning on `<|sys|>` is unambiguous because
+    every formatter in `mmllm.datasets` starts records with that marker.
 
     Records longer than max_prompt_bytes (after split) are skipped —
     mmllm has a fixed seq-len cap per forward, and we don't want to
@@ -94,12 +99,30 @@ def iter_eval_samples(eval_path: str,
         raw = f.read()
     text = raw.decode("utf-8", errors="replace")
 
+    # Locate every <|sys|> position. Each record is the slice from one
+    # marker up to the next (or end of buffer for the last). Bytes
+    # before the first marker — possible if test.bin starts mid-record
+    # because it's the tail of a larger corpus — are ignored.
+    sys_marker = tpl.sys_open
+    starts = []
+    i = 0
+    while True:
+        j = text.find(sys_marker, i)
+        if j < 0:
+            break
+        starts.append(j)
+        i = j + 1
+
     n = 0
-    for chunk in text.split(record_sep.decode("utf-8")):
+    for k, s in enumerate(starts):
         if n >= max_samples:
             break
-        chunk = chunk.strip()
-        if not chunk:
+        end = starts[k + 1] if k + 1 < len(starts) else len(text)
+        # No rstrip: tpl.end = "\n<|end|>\n" (trailing \n is part of
+        # the marker), and split_transcript looks for the literal
+        # marker. Stripping the trailing \n breaks the match.
+        chunk = text[s:end]
+        if not chunk.strip():
             continue
         sample = split_transcript(chunk, tpl)
         if sample is None:
