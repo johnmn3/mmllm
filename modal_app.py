@@ -649,6 +649,67 @@ def quantize_bank(
     volumes={"/data": volume},
     timeout=1800,
     gpu="H100",
+    memory=131072,    # 128 GB — at sqrt_n=2048 fp32, bank in VRAM is 18.8 GB,
+                       # plus per-sequence KV caches scale with B (~21 MB/seq)
+)
+def bench_inference_batch(
+    base: str = "/data/pile-github.bin",
+    ckpt_step: int = 305000,
+    bank: str = "/data/pile-bank-3tier",
+    n_warm: int = 10,
+    n_time: int = 50,
+    sqrt_n: int = 2048,
+    bank_on_gpu: bool = True,
+    bank_dtype: str = "fp32",        # fp32 (use the .bin bank) or int8 (.int8.bin)
+    B: int = 32,                     # synchronized batch size
+    bank_query_mode: str = "plain",
+    long_tier_mix:   str = "sum",
+    bank_feedback_mode: str = "plain",
+):
+    """Phase-2 continuous-batching bench on H100 (single GPU).
+
+    Decodes n_time tokens in parallel for B sequences and reports
+    aggregate throughput. Same architectural premise as the local
+    CPU bench (mmllm bench-batch) but on a much higher-throughput
+    matmul backend.
+
+    For multi-GPU aggregate throughput: each H100 in a DGX runs an
+    independent server process serving its own B sequences with its
+    own dense weights; the bank can be shared via a node-level
+    networked filesystem with mmap, or each GPU loads its own copy
+    in VRAM. Linear scaling with GPU count once interconnect cost
+    is amortized over the batch.
+    """
+    import os, subprocess
+    env = {**os.environ,
+           "MMLLM_DEVICE":            "cuda",
+           "MMLLM_SQRT_N":            str(sqrt_n),
+           "MMLLM_BANK_ON_GPU":       "true" if bank_on_gpu else "false",
+           "MMLLM_BANK_DTYPE":        bank_dtype,
+           "MMLLM_BANK_QUERY_MODE":   bank_query_mode,
+           "MMLLM_LONG_TIER_MIX":     long_tier_mix,
+           "MMLLM_BANK_FEEDBACK_MODE": bank_feedback_mode}
+    bank_arg = (bank if bank_dtype != "int8"
+                else bank.replace("/data/pile-bank-3tier",
+                                  "/data/pile-bank-3tier-int8"))
+    print(
+        f"=== bench_inference_batch base={base} ckpt={ckpt_step} bank={bank_arg} "
+        f"sqrt_n={sqrt_n} bank_on_gpu={bank_on_gpu} bank_dtype={bank_dtype} "
+        f"B={B} n_warm={n_warm} n_time={n_time} ===",
+        flush=True,
+    )
+    subprocess.run(
+        ["mmllm", "bench-batch", base, str(ckpt_step), bank_arg,
+         str(n_warm), str(n_time), str(B)],
+        check=True, env=env,
+    )
+
+
+@app.function(
+    image=image,
+    volumes={"/data": volume},
+    timeout=1800,
+    gpu="H100",
     memory=65536,
 )
 def bench_inference(
