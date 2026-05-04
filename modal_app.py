@@ -1818,6 +1818,182 @@ def inspect_dataset_remote(path: str, n_chars: int = 4000):
                    check=True)
 
 
+# ─────────────────────── prepare-for-prod (parallel staging) ───────────────────────
+#
+# One-shot orchestrator that spawns parallel HF prep jobs for every
+# public dataset in DATASET_REGISTRY at production caps. Each prep
+# runs in its own Modal container; this function blocks until they
+# all return and then sets up the base.{train,val,test}.bin symlinks
+# train-long expects.
+#
+# Cost: ~$1-3 of CPU container time across ~11 parallel preps + the
+# orchestrator's wait time (~$0.01).  Runtime: 30-90 min wall clock
+# (longest leg = open-web-math / fineweb-edu streaming at HF
+# unauthenticated rate limits).
+
+
+# Per-dataset byte caps for production. Differentiated by kind:
+#
+#   SFT-style           — small enough that we cover most of the dataset
+#                         at these caps (commitpackft slices total ~3 GB,
+#                         magicoder ~250 MB).
+#   Pretraining-style   — 5 GB cap on the very large ones (fineweb-edu,
+#                         open-web-math, cosmopedia all stream lazily,
+#                         so we just stop at the cap).
+#   Specialty           — full or near-full coverage of the smaller ones
+#                         (theorem-qa is <100 MB total, code-contests
+#                         ~1-2 GB at the python slice).
+#
+# Total ~30-35 GB on volume after all preps complete. Tweak as needed.
+PROD_CAPS = {
+    "commitpackft-py":   2_000_000_000,
+    "commitpackft-md":   1_000_000_000,
+    "commitpackft-sh":   1_000_000_000,
+    "commitpackft-js":   1_000_000_000,
+    "magicoder":           500_000_000,
+    "cosmopedia":        5_000_000_000,
+    "fineweb-edu":       5_000_000_000,
+    "open-web-math":     5_000_000_000,
+    "algebraic-stack":   2_000_000_000,
+    "code-contests":     1_000_000_000,
+    "theorem-qa":          100_000_000,
+}
+
+
+@app.function(
+    image=image,
+    volumes={"/data": volume},
+    timeout=14400,    # 4h cap — orchestrator just waits, longest leg is HF stream
+    cpu=1.0,
+    memory=2048,
+)
+def prepare_for_prod(
+    out_dir:         str  = "/data/agent-corpus-v2",
+    base_for_eval:   str  = "/data/agent-corpus-v2.bin",
+    primary:         str  = "fineweb-edu",   # source for base.{train,val,test}.bin symlinks
+    skip_existing:   bool = True,
+):
+    """Spawn parallel HF prep for every entry in PROD_CAPS, wait for all,
+    then set up the symlinks train-long needs.
+
+    Output layout per dataset:
+      <out_dir>/<key>.bin
+      <out_dir>/<key>.bin.train.bin
+      <out_dir>/<key>.bin.val.bin
+      <out_dir>/<key>.bin.test.bin
+
+    Symlinks set up after preps complete:
+      <base_for_eval>.train.bin → <out_dir>/<primary>.bin.train.bin
+      <base_for_eval>.val.bin   → <out_dir>/<primary>.bin.val.bin
+      <base_for_eval>.test.bin  → <out_dir>/<primary>.bin.test.bin
+
+    train-long uses base.val.bin to drive in-training eval-bpc; the
+    train.bin symlink is a no-op when MMLLM_MIX is set (which it will
+    be for prod) but still needs to exist for the no-mix code path's
+    initial open() call.
+
+    `primary` picks which dataset's val/test become the in-training
+    eval-bpc set. Default fineweb-edu — generic web text, decent
+    proxy for "is the model still general?" Can be changed later by
+    re-running this function with a different `primary`.
+
+    Per-dataset failures are reported in the summary; the orchestrator
+    doesn't block training launch, but the operator should `inspect_dataset_remote`
+    any that come back empty before kicking off a real session.
+
+    Idempotent if skip_existing=True (default): existing .train.bin
+    files trigger a skip. Useful when re-running after a partial
+    failure or after adding new dataset keys to PROD_CAPS.
+    """
+    import os
+    import time
+    from pathlib import Path
+
+    Path(out_dir).mkdir(parents=True, exist_ok=True)
+    print(f"=== prepare_for_prod: out_dir={out_dir} primary={primary} ===",
+          flush=True)
+    print(f"  caps: " + ", ".join(f"{k}={v/1e9:.1f}GB"
+                                   for k, v in PROD_CAPS.items()),
+          flush=True)
+
+    handles = []
+    skipped = []
+    for key, cap in PROD_CAPS.items():
+        out_path = f"{out_dir}/{key}.bin"
+        train_p = Path(f"{out_path}.train.bin")
+        if skip_existing and train_p.exists() and train_p.stat().st_size > 0:
+            sz = sum(Path(f"{out_path}.{s}.bin").stat().st_size
+                     for s in ("train", "val", "test")
+                     if Path(f"{out_path}.{s}.bin").exists())
+            print(f"  = [{key}] cached on volume ({sz/1e9:.2f} GB) — skipping",
+                  flush=True)
+            skipped.append(key)
+            continue
+        h = prepare_hf_dataset.spawn(
+            dataset_key=key,
+            out_path=out_path,
+            max_bytes=cap,
+            val_bytes=20_000_000,
+            test_bytes=20_000_000,
+        )
+        handles.append((key, h, cap))
+        print(f"  → [{key}] spawned (cap={cap/1e9:.1f} GB)", flush=True)
+
+    if handles:
+        print(f"\nwaiting for {len(handles)} parallel preps to finish "
+              f"({len(skipped)} cached) ...\n", flush=True)
+    successes = list(skipped)
+    failures  = []
+    t0 = time.time()
+    for key, h, cap in handles:
+        try:
+            h.get()
+            successes.append(key)
+            print(f"  ✓ [{key}]  ({(time.time() - t0)/60:.1f} min into wait)",
+                  flush=True)
+        except Exception as e:
+            failures.append((key, f"{type(e).__name__}: {e}"))
+            print(f"  ✗ [{key}]: {type(e).__name__}: {e}", flush=True)
+
+    # Set up base.{train,val,test}.bin symlinks for train-long.
+    if primary in successes:
+        primary_path = f"{out_dir}/{primary}.bin"
+        for split in ("train", "val", "test"):
+            link   = Path(f"{base_for_eval}.{split}.bin")
+            target = Path(f"{primary_path}.{split}.bin")
+            if not target.exists():
+                print(f"  ! cannot symlink {link} — target missing: {target}",
+                      flush=True)
+                continue
+            if link.exists() or link.is_symlink():
+                link.unlink()
+            link.symlink_to(target)
+            print(f"  → symlinked {link}.{split}.bin → "
+                  f"{target.name}",
+                  flush=True)
+    else:
+        print(f"  ! primary={primary} did not prep successfully — "
+              f"can't set up symlinks. Fix the failure and re-run, or pass "
+              f"--primary <other-key>.",
+              flush=True)
+
+    volume.commit()
+    print(f"\n=== prep summary ===", flush=True)
+    print(f"  ok ({len(successes)}): {successes}", flush=True)
+    if failures:
+        print(f"  failed ({len(failures)}):", flush=True)
+        for k, e in failures:
+            print(f"    [{k}] {e}", flush=True)
+    print(f"  base for training: {base_for_eval}", flush=True)
+    print(f"  total wall time: {(time.time() - t0)/60:.1f} min", flush=True)
+    return {
+        "ok":     successes,
+        "failed": failures,
+        "base":   base_for_eval,
+        "out_dir": out_dir,
+    }
+
+
 # ─────────────────────── eval battery (Phase 0) ───────────────────────
 #
 # Run the full eval battery against a single ckpt step. Combines

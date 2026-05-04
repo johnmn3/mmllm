@@ -62,26 +62,60 @@ comparable training-volume territory.
 steps/hour number we can calibrate against. Use `progress_report`
 to read it back.
 
+## One-time prod prep
+
+Before the first paid training session, stage all the public datasets
+on the Modal Volume at production caps (~30 GB total). Single command:
+
+```bash
+modal run --detach modal_app.py::prepare_for_prod
+```
+
+What it does:
+- Spawns 11 parallel HF prep jobs (one per public dataset key in
+  `mmllm.datasets.DATASET_REGISTRY`), each on its own Modal CPU
+  container.
+- Caps per `PROD_CAPS` in `modal_app.py`: SFT-style at 0.5-2 GB each,
+  pretraining-style at 5 GB each. Tweak there if you want a different
+  shape.
+- Sets up symlinks `/data/agent-corpus-v2.bin.{train,val,test}.bin` →
+  `/data/agent-corpus-v2/<primary>.bin.{train,val,test}.bin` (default
+  primary is `fineweb-edu`) so `train-long` has a `<base>.val.bin` to
+  drive in-training eval-bpc.
+
+Cost: ~$1-3 of CPU container time. Wall time: 30-90 min.
+Idempotent — re-running skips already-prepped datasets.
+
+After it completes, smoke-check a few:
+
+```bash
+modal run modal_app.py::inspect_dataset_remote --path /data/agent-corpus-v2/code-contests.bin
+modal run modal_app.py::inspect_dataset_remote --path /data/agent-corpus-v2/open-web-math.bin
+```
+
 ## Per-session knobs
 
-Recommended settings for a slow-walk session:
+Recommended settings for a slow-walk session against the prod-prepped
+corpora:
 
 ```bash
 modal run --detach modal_app.py::train_with_bank \
-  --base   /data/agent-corpus \
-  --bank   /data/agent-bank \
+  --base   /data/agent-corpus-v2.bin \
+  --bank   /data/agent-bank-v2 \
   --total-steps 1000000 \
   --max-hours    8           \
   --eval-every   2500        \
   --ckpt-every   2500        \
   --batch        128         \
   --sqrt-n       2048        \
+  --cpu-offload              \
   --lr           1.4e-3      \
   --lr-warmup    3000        \
   --bank-query-mode    ctx-add  \
   --bank-feedback-mode feedback \
   --ablate-every 5000        \
-  --mix          "/data/the-stack-v2-py.train.bin:30,/data/fineweb-edu.train.bin:20,/data/cosmopedia.train.bin:15,/data/the-stack-v2-md.train.bin:10,/data/commitpackft.train.bin:8,/data/the-stack-v2-sh.train.bin:7,/data/magicoder.train.bin:5,/data/xlam.train.bin:5"
+  --publish-after            \
+  --mix "/data/agent-corpus-v2/commitpackft-py.bin.train.bin:20,/data/agent-corpus-v2/cosmopedia.bin.train.bin:15,/data/agent-corpus-v2/fineweb-edu.bin.train.bin:12,/data/agent-corpus-v2/open-web-math.bin.train.bin:10,/data/agent-corpus-v2/algebraic-stack.bin.train.bin:8,/data/agent-corpus-v2/code-contests.bin.train.bin:8,/data/agent-corpus-v2/commitpackft-md.bin.train.bin:7,/data/agent-corpus-v2/magicoder.bin.train.bin:6,/data/agent-corpus-v2/commitpackft-sh.bin.train.bin:4,/data/agent-corpus-v2/commitpackft-js.bin.train.bin:2,/data/agent-corpus-v2/theorem-qa.bin.train.bin:2"
 ```
 
 Notes:
@@ -130,40 +164,107 @@ all sources are prepped. If you want training to start earlier and
 don't mind the early sessions being a different distribution, start
 small and grow the mix.
 
-## Eval workflow between sessions
+## Auto-eval against checkpoints during the run
 
-Local CPU evals (laptop or sandbox) — no Modal cost:
+Run `eval_watcher` in parallel with the training session — cheap A10G
+container that polls `<base>.ckpts/` for new `step-<N>` directories
+and runs the full eval battery (BPC + agentic) on each. Output goes
+to the same `<base>.eval.jsonl` that `train-long` writes, so the
+metrics plot on the same step axis as the in-training events.
+
+Launch in a second terminal (or detached) right after kicking off
+the training session:
 
 ```bash
-# Pull the latest ckpt + bank int8 from GitHub release (one-time).
-mmllm fetch-artifacts /tmp/agent-bench
-
-# Or, if you have Modal access:
-modal volume get mmllm-data /agent-corpus.ckpts/step-30000/dense.pt ./
-modal volume get mmllm-data /agent-bank-int8.<i>.bin ./
-
-# Run BPC evals on the prepared test splits (cheap; CPU-friendly).
-mmllm eval-bpc-on-path  ./agent-corpus  30000  ./agent-bank-int8 \
-    /data/cosmopedia.test.bin   cosmopedia    /tmp/agent.eval.jsonl
-mmllm eval-bpc-on-path  ./agent-corpus  30000  ./agent-bank-int8 \
-    /data/fineweb-edu.test.bin  fineweb-edu   /tmp/agent.eval.jsonl
-
-# Run agentic evals (generates JSON tool calls; CPU is slow but doable).
-mmllm eval-agent ./agent-corpus 30000 ./agent-bank-int8 \
-    /data/commitpackft.test.bin  commitpackft  20  256 \
-    /tmp/agent.eval.jsonl
-mmllm eval-agent ./agent-corpus 30000 ./agent-bank-int8 \
-    /data/xlam.test.bin          xlam          20  256 \
-    /tmp/agent.eval.jsonl
+modal run --detach modal_app.py::eval_watcher \
+  --base /data/agent-corpus-v2.bin \
+  --bank /data/agent-bank-v2 \
+  --sqrt-n 2048 \
+  --bank-on-gpu true \
+  --bank-query-mode ctx-add \
+  --bank-feedback-mode feedback \
+  --bpc-evals "fineweb-edu:/data/agent-corpus-v2/fineweb-edu.bin.test.bin,cosmopedia:/data/agent-corpus-v2/cosmopedia.bin.test.bin,open-web-math:/data/agent-corpus-v2/open-web-math.bin.test.bin,algebraic-stack:/data/agent-corpus-v2/algebraic-stack.bin.test.bin,code-contests:/data/agent-corpus-v2/code-contests.bin.test.bin,theorem-qa:/data/agent-corpus-v2/theorem-qa.bin.test.bin" \
+  --agent-evals "commitpackft-py:/data/agent-corpus-v2/commitpackft-py.bin.test.bin,commitpackft-md:/data/agent-corpus-v2/commitpackft-md.bin.test.bin,commitpackft-sh:/data/agent-corpus-v2/commitpackft-sh.bin.test.bin,magicoder:/data/agent-corpus-v2/magicoder.bin.test.bin" \
+  --n-samples 30 \
+  --gen-len 256 \
+  --poll-seconds 300
 ```
 
-Fewer samples (`20` vs the Modal default `50`) and shorter generation
-(`256` vs `512`) keep CPU eval under a minute per (ckpt × dataset).
+Watcher behavior:
+- Polls every 5 min for new `step-<N>` ckpts.
+- Runs BPC eval on the 6 pretraining-style splits — pure perplexity
+  measurement, fast.
+- Runs agentic eval on the 4 SFT-style splits — generates 30 samples
+  per dataset, scores `format_validity` / `tool_name_match` /
+  `tool_args_match` / `exact_match`.
+- Idempotent: keeps a `<base>.eval.jsonl.seen.txt` of already-evaled
+  steps, so a watcher restart picks up where it left off.
+- Cost: ~$1/h A10G; eval per ckpt typically <2 min so the watcher is
+  mostly idle.  Killing it stops billing immediately.
+
+## Local eval against published ckpts (no Modal cost)
+
+The `eval_watcher` runs evals on Modal as ckpts arrive (cheap A10G).
+This section is the parallel laptop/sandbox path — pull a published
+ckpt over HTTPS, run the same eval verbs locally on CPU. Free, useful
+for sanity-checking what the published ckpts actually do without
+spinning up a Modal container.
+
+Prerequisite: the training session was launched with `--publish-after`
+and the `github-token` Modal Secret is set up. Each session ends with
+a release at `agent-step-<N>` (immutable) + `agent-latest`
+(force-replaced).
+
+```bash
+# Pull the latest published ckpt to a local dir.
+MMLLM_ARTIFACTS_URL=https://github.com/johnmn3/mmllm/releases/download/agent-latest \
+  mmllm fetch-artifacts /tmp/agent-bench
+
+# Pull the held-out test splits (each ~20 MB) — one-time, reuse across
+# many ckpts. From your dev box if you have Modal access:
+modal volume get mmllm-data /agent-corpus-v2/cosmopedia.bin.test.bin /tmp/agent-bench/
+modal volume get mmllm-data /agent-corpus-v2/fineweb-edu.bin.test.bin /tmp/agent-bench/
+modal volume get mmllm-data /agent-corpus-v2/commitpackft-py.bin.test.bin /tmp/agent-bench/
+modal volume get mmllm-data /agent-corpus-v2/code-contests.bin.test.bin /tmp/agent-bench/
+modal volume get mmllm-data /agent-corpus-v2/open-web-math.bin.test.bin /tmp/agent-bench/
+
+# Run BPC evals on the prepared test splits (cheap; CPU-friendly).
+# Args: <base> <ckpt-step> <bank-prefix> <test.bin> <name> <log.jsonl>
+mmllm eval-bpc-on-path  /tmp/agent-bench/pile-github.bin  $STEP \
+    /tmp/agent-bench/pile-bank-3tier-int8 \
+    /tmp/agent-bench/cosmopedia.bin.test.bin   cosmopedia \
+    /tmp/agent-bench/local.eval.jsonl
+mmllm eval-bpc-on-path  /tmp/agent-bench/pile-github.bin  $STEP \
+    /tmp/agent-bench/pile-bank-3tier-int8 \
+    /tmp/agent-bench/fineweb-edu.bin.test.bin  fineweb-edu \
+    /tmp/agent-bench/local.eval.jsonl
+
+# Run agentic evals (generates JSON tool calls; CPU is slow but works).
+# Args: <base> <ckpt-step> <bank-prefix> <test.bin> <name> <n-samples> <gen-len> <log.jsonl>
+mmllm eval-agent /tmp/agent-bench/pile-github.bin  $STEP \
+    /tmp/agent-bench/pile-bank-3tier-int8 \
+    /tmp/agent-bench/commitpackft-py.bin.test.bin  commitpackft-py \
+    20  256 \
+    /tmp/agent-bench/local.eval.jsonl
+```
+
+Settings tuned for laptop CPU (vs the watcher's A10G defaults):
+- `n_samples=20` (vs watcher's 30) keeps CPU eval under a minute per
+  (ckpt × dataset).
+- `gen-len=256` (vs watcher's 256-512). Lower → faster, but trims long
+  tool-call payloads.
+- Set `MMLLM_BANK_DTYPE=int8 MMLLM_BANK_ON_GPU=false MMLLM_SQRT_N=2048`
+  in env before running so the int8 quantized bank gets loaded
+  correctly via mmap (matches the v0.1-bench laptop runbook).
+
+Local eval results land in `local.eval.jsonl` in the same shape as
+the Modal-side eval log, so you can paste the rows together for
+plotting.
 
 ## Progress check
 
 ```bash
-modal run modal_app.py::progress_report --base /data/agent-corpus
+modal run modal_app.py::progress_report --base /data/agent-corpus-v2.bin
 ```
 
 Prints sessions completed, total wall hours, est $ spent (defaults
