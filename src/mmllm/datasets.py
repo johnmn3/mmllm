@@ -562,12 +562,23 @@ def _iter_hf(hf_name: str, hf_config: "str | None", split: str
 
     We use streaming=True so a 25B-token corpus doesn't get materialized
     locally — `prepare_hf_dataset` consumes records lazily and stops
-    when it hits the byte cap."""
+    when it hits the byte cap.
+
+    `trust_remote_code=True` is required for datasets that ship a
+    Python loading script (e.g., `bigcode/commitpackft` per-language
+    configs, `EleutherAI/proof-pile-2` algebraic-stack, others).
+    Modern parquet-only datasets ignore it. We pass True
+    unconditionally — the security implication is "this dataset's
+    loader runs in our container," which on a sandboxed Modal CPU
+    container is acceptable for the public datasets we use.
+    """
     from datasets import load_dataset
     if hf_config:
-        ds = load_dataset(hf_name, hf_config, split=split, streaming=True)
+        ds = load_dataset(hf_name, hf_config, split=split,
+                           streaming=True, trust_remote_code=True)
     else:
-        ds = load_dataset(hf_name, split=split, streaming=True)
+        ds = load_dataset(hf_name, split=split,
+                           streaming=True, trust_remote_code=True)
     yield from ds
 
 

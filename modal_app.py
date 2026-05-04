@@ -47,6 +47,11 @@ image = (
                                 # several other widely-used datasets) still
                                 # ship as scripts. Modern parquet-only
                                 # datasets work fine in 3.x too.
+        "Pillow>=10.0",         # required by datasets to decode Image-typed
+                                # columns (e.g., TheoremQA's `Picture` field).
+                                # We don't read the image bytes ourselves but
+                                # datasets validates the schema column on
+                                # iteration regardless.
         "zstandard>=0.21",  # for Pile shard decompression
         "modal",            # for in-worker Volume.from_name() during bank sync
         "codecarbon>=2.5",  # energy + CO2 instrumentation; pulls pynvml + RAPL
@@ -1832,31 +1837,30 @@ def inspect_dataset_remote(path: str, n_chars: int = 4000):
 # unauthenticated rate limits).
 
 
-# Per-dataset byte caps for production. Differentiated by kind:
+# Per-dataset (max_bytes, val_bytes, test_bytes) for production.
+# val/test are sized per-dataset because some sources are tiny:
+#   - theorem-qa is ~5 MB total; default 20MB val + 20MB test would
+#     make split_pile_github raise "corpus too small" (needs total >
+#     val + test + 256). Pass small val+test for it.
+# Categorization:
+#   SFT-style    — small datasets, near-full coverage at these caps
+#   Pretraining  — large datasets, 5 GB cap (stream + stop)
+#   Specialty    — smaller datasets, full or near-full coverage
 #
-#   SFT-style           — small enough that we cover most of the dataset
-#                         at these caps (commitpackft slices total ~3 GB,
-#                         magicoder ~250 MB).
-#   Pretraining-style   — 5 GB cap on the very large ones (fineweb-edu,
-#                         open-web-math, cosmopedia all stream lazily,
-#                         so we just stop at the cap).
-#   Specialty           — full or near-full coverage of the smaller ones
-#                         (theorem-qa is <100 MB total, code-contests
-#                         ~1-2 GB at the python slice).
-#
-# Total ~30-35 GB on volume after all preps complete. Tweak as needed.
+# Total ~30-35 GB on volume after all preps complete.
 PROD_CAPS = {
-    "commitpackft-py":   2_000_000_000,
-    "commitpackft-md":   1_000_000_000,
-    "commitpackft-sh":   1_000_000_000,
-    "commitpackft-js":   1_000_000_000,
-    "magicoder":           500_000_000,
-    "cosmopedia":        5_000_000_000,
-    "fineweb-edu":       5_000_000_000,
-    "open-web-math":     5_000_000_000,
-    "algebraic-stack":   2_000_000_000,
-    "code-contests":     1_000_000_000,
-    "theorem-qa":          100_000_000,
+    # key                  max_bytes        val_bytes   test_bytes
+    "commitpackft-py":  (2_000_000_000,    20_000_000, 20_000_000),
+    "commitpackft-md":  (1_000_000_000,    20_000_000, 20_000_000),
+    "commitpackft-sh":  (1_000_000_000,    20_000_000, 20_000_000),
+    "commitpackft-js":  (1_000_000_000,    20_000_000, 20_000_000),
+    "magicoder":         ( 500_000_000,    10_000_000, 10_000_000),
+    "cosmopedia":        (5_000_000_000,    20_000_000, 20_000_000),
+    "fineweb-edu":       (5_000_000_000,    20_000_000, 20_000_000),
+    "open-web-math":     (5_000_000_000,    20_000_000, 20_000_000),
+    "algebraic-stack":   (2_000_000_000,    20_000_000, 20_000_000),
+    "code-contests":     (1_000_000_000,    20_000_000, 20_000_000),
+    "theorem-qa":        ( 100_000_000,       200_000,    200_000),  # ~5 MB total
 }
 
 
@@ -1912,13 +1916,13 @@ def prepare_for_prod(
     Path(out_dir).mkdir(parents=True, exist_ok=True)
     print(f"=== prepare_for_prod: out_dir={out_dir} primary={primary} ===",
           flush=True)
-    print(f"  caps: " + ", ".join(f"{k}={v/1e9:.1f}GB"
+    print(f"  caps: " + ", ".join(f"{k}={v[0]/1e9:.1f}GB"
                                    for k, v in PROD_CAPS.items()),
           flush=True)
 
     handles = []
     skipped = []
-    for key, cap in PROD_CAPS.items():
+    for key, (max_bytes, val_bytes, test_bytes) in PROD_CAPS.items():
         out_path = f"{out_dir}/{key}.bin"
         train_p = Path(f"{out_path}.train.bin")
         if skip_existing and train_p.exists() and train_p.stat().st_size > 0:
@@ -1932,12 +1936,14 @@ def prepare_for_prod(
         h = prepare_hf_dataset.spawn(
             dataset_key=key,
             out_path=out_path,
-            max_bytes=cap,
-            val_bytes=20_000_000,
-            test_bytes=20_000_000,
+            max_bytes=max_bytes,
+            val_bytes=val_bytes,
+            test_bytes=test_bytes,
         )
-        handles.append((key, h, cap))
-        print(f"  → [{key}] spawned (cap={cap/1e9:.1f} GB)", flush=True)
+        handles.append((key, h, max_bytes))
+        print(f"  → [{key}] spawned (max={max_bytes/1e9:.1f} GB, "
+              f"val+test={(val_bytes + test_bytes)/1e6:.1f} MB)",
+              flush=True)
 
     if handles:
         print(f"\nwaiting for {len(handles)} parallel preps to finish "
@@ -1955,6 +1961,12 @@ def prepare_for_prod(
             failures.append((key, f"{type(e).__name__}: {e}"))
             print(f"  ✗ [{key}]: {type(e).__name__}: {e}", flush=True)
 
+    # Pull the spawned containers' volume writes back into our orchestrator's
+    # view. Without this, `target.exists()` below returns False even for
+    # files that ARE on the volume — same eventual-consistency lesson as
+    # the smoke pipeline (see commit a4332ed).
+    volume.reload()
+
     # Set up base.{train,val,test}.bin symlinks for train-long.
     if primary in successes:
         primary_path = f"{out_dir}/{primary}.bin"
@@ -1968,9 +1980,7 @@ def prepare_for_prod(
             if link.exists() or link.is_symlink():
                 link.unlink()
             link.symlink_to(target)
-            print(f"  → symlinked {link}.{split}.bin → "
-                  f"{target.name}",
-                  flush=True)
+            print(f"  → symlinked {link} → {target}", flush=True)
     else:
         print(f"  ! primary={primary} did not prep successfully — "
               f"can't set up symlinks. Fix the failure and re-run, or pass "
