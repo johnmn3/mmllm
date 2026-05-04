@@ -257,6 +257,142 @@ def fmt_the_stack_v2(rec: dict, max_file_bytes: int = 32768) -> "str | None":
     return content
 
 
+def fmt_open_web_math(rec: dict) -> "str | None":
+    """OpenWebMath (open-web-math/open-web-math).
+
+    14.7B-token corpus of mathematical text scraped from the web —
+    proofs, derivations, math.SE answers, lecture notes. Pretraining-
+    style: just the `text` field. Carries the formal-reasoning signal
+    we want present throughout training, not just at the end."""
+    txt = rec.get("text")
+    if not txt:
+        return None
+    return txt
+
+
+def fmt_algebraic_stack(rec: dict) -> "str | None":
+    """AlgebraicStack — math+code from arXiv (Lean, Coq, Isabelle proofs +
+    algorithmic implementations). Available as a config of
+    `EleutherAI/proof-pile-2`. Pretraining-style; just emit `text`.
+
+    Why we want this: the formal-proof traces (Lean tactic scripts,
+    Coq tactics, Isabelle Isar proofs) expose the model to the
+    'softness vs hardness' boundary you can see when a tactic
+    succeeds vs gets stuck. Different signal shape from raw code."""
+    txt = rec.get("text")
+    if not txt:
+        return None
+    return txt
+
+
+def fmt_theorem_qa(rec: dict, tpl: ChatTemplate = DEFAULT_TEMPLATE
+                   ) -> "str | None":
+    """TheoremQA (TIGER-Lab/TheoremQA).
+
+    Theorem statements + answers (numerical or formula). Chat-template
+    wrap as Q → A so the model sees the structure. Subject field
+    (Calculus, Topology, Number Theory, …) goes in the system message
+    so it acts as a topic prior."""
+    q = rec.get("Question") or rec.get("question")
+    a = rec.get("Answer")  or rec.get("answer")
+    if not q or a is None:
+        return None
+    subject = rec.get("Subject") or rec.get("subject") or ""
+    sys_msg = "You are a mathematics assistant."
+    if subject:
+        sys_msg += f" Topic: {subject}."
+    return (
+        tpl.system(sys_msg)
+        + tpl.user(str(q))
+        + tpl.assistant(str(a))
+    )
+
+
+# DeepMind's code_contests language code → human-readable name. Schema
+# stores `solutions.language` as a parallel int array; UNKNOWN_LANGUAGE
+# is 0 in their proto.
+_CC_LANG_NAMES = {0: "Unknown", 1: "Python2", 2: "C++", 3: "Python", 4: "Java"}
+
+
+def fmt_code_contests(rec: dict, tpl: ChatTemplate = DEFAULT_TEMPLATE,
+                      n_accepted: int = 2, n_rejected: int = 2,
+                      max_code_bytes: int = 8000) -> "str | None":
+    """DeepMind code_contests (deepmind/code_contests).
+
+    Competitive-programming problems with BOTH accepted and rejected
+    solutions. The rejected ones are the interesting bit — the model
+    sees the boundary between code that works and code that doesn't,
+    paired with the same problem statement.
+
+    Returns a string of up to (n_accepted + n_rejected) chat-wrapped
+    records concatenated; iter_eval_samples partitions on `<|sys|>`
+    so each (problem, solution, verdict) triple is one record.
+
+    Schema (DeepMind's parquet export):
+      name, description, cf_rating (int), difficulty (int),
+      solutions = {language: [int,...], solution: [str,...]}     (accepted)
+      incorrect_solutions = same shape                            (rejected)
+
+    Each emitted record is:
+
+      <|sys|>You are solving a competitive programming problem.
+             [Codeforces rating: N.]
+      <|user|># {name}\\n\\n{description}
+      <|asst|>{code}
+      <|tool|>{"verdict": "Accepted"|"Rejected", "language": "Python"|...}
+
+    Python solutions are preferred (lang_id=3) to align with our
+    coding-agent target language. Falls back to other languages if
+    no Python solution exists."""
+    desc = rec.get("description")
+    if not desc:
+        return None
+    name = rec.get("name") or "Unnamed problem"
+    cf_rating = rec.get("cf_rating") or 0
+
+    sys_msg = "You are solving a competitive programming problem."
+    if cf_rating:
+        sys_msg += f" Codeforces rating: {cf_rating}."
+    user_msg = f"# {name}\n\n{desc}"
+
+    def _pairs(field):
+        """Return list of (lang_id, code) tuples from either the
+        dict-of-lists or list-of-dicts representation."""
+        if isinstance(field, dict):
+            langs = field.get("language", []) or []
+            sols  = field.get("solution", []) or []
+            return list(zip(langs, sols))
+        if isinstance(field, list):
+            return [(x.get("language"), x.get("solution"))
+                    for x in field if isinstance(x, dict)]
+        return []
+
+    def _records(pairs, verdict, cap):
+        # Prefer Python (lang_id=3); fall back to others.
+        py    = [(l, s) for (l, s) in pairs if l == 3]
+        other = [(l, s) for (l, s) in pairs if l != 3]
+        out = []
+        for lang, code in (py + other)[:cap]:
+            if not code or len(code) > max_code_bytes:
+                continue
+            lang_name = _CC_LANG_NAMES.get(lang, "Unknown")
+            tool_payload = json.dumps({"verdict": verdict,
+                                        "language": lang_name})
+            out.append(
+                tpl.system(sys_msg)
+                + tpl.user(user_msg)
+                + tpl.assistant(code)
+                + tpl.tool(tool_payload)
+            )
+        return out
+
+    accepted = _records(_pairs(rec.get("solutions")),          "Accepted",  n_accepted)
+    rejected = _records(_pairs(rec.get("incorrect_solutions")), "Rejected", n_rejected)
+    if not accepted and not rejected:
+        return None
+    return "\n".join(accepted + rejected)
+
+
 # Registry: dataset key → (HF name, config, split, formatter)
 # Add more here as we expand the mix.
 DATASET_REGISTRY = {
@@ -362,6 +498,49 @@ DATASET_REGISTRY = {
         "formatter": fmt_the_stack_v2,
         "kind":      "pretrain",
         "notes":     "Shell subset of The Stack v2 dedup",
+    },
+    # Math + formal reasoning. These don't teach JSON tool calls, but
+    # they teach the polynomial-hierarchy-softness/hardness intuition
+    # the v2 thesis bets on (formal proofs that succeed vs proofs that
+    # don't go through, programs that run vs programs that TLE).
+    # Mixed in throughout slow-walk training — not phased.
+    "open-web-math": {
+        "hf_name":   "open-web-math/open-web-math",
+        "hf_config": None,
+        "split":     "train",
+        "formatter": fmt_open_web_math,
+        "kind":      "pretrain",
+        "notes":     "14.7B tokens of mathematical web text (proofs, derivations, math.SE)",
+    },
+    "algebraic-stack": {
+        "hf_name":   "EleutherAI/proof-pile-2",
+        "hf_config": "algebraic-stack",
+        "split":     "train",
+        "formatter": fmt_algebraic_stack,
+        "kind":      "pretrain",
+        "notes":     "Math+code from arXiv: Lean, Coq, Isabelle proofs + algorithmic impls",
+    },
+    "code-contests": {
+        "hf_name":   "deepmind/code_contests",
+        "hf_config": None,
+        "split":     "train",
+        "formatter": fmt_code_contests,
+        # 'pretrain' for eval-routing: agentic eval expects JSON tool
+        # calls in the assistant turn but code-contests assistant turns
+        # are *code*, so format-validity would always be 0.0. BPC eval
+        # over the held-out split is the meaningful metric. Training
+        # still benefits from chat-template wrapping (problem→solution
+        # structure) regardless of eval routing.
+        "kind":      "pretrain",
+        "notes":     "Competitive-programming problems with accepted + rejected solutions (verdict-tagged)",
+    },
+    "theorem-qa": {
+        "hf_name":   "TIGER-Lab/TheoremQA",
+        "hf_config": None,
+        "split":     "test",   # TheoremQA only ships a 'test' split publicly
+        "formatter": fmt_theorem_qa,
+        "kind":      "pretrain",
+        "notes":     "Theorem statements + answers across math subjects (Calc, Topology, NT, ...)",
     },
 }
 

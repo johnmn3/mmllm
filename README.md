@@ -176,23 +176,36 @@ all-at-once with the smoke runbook below.
 | `magicoder` | `ise-uiuc/Magicoder-Evol-Instruct-110K` | Code instruction-following scaffolding | ~250 MB |
 | `cosmopedia` | `HuggingFaceTB/cosmopedia-v2` | Synthetic textbook-quality general text — distillation flavor without doing the distillation | up to 25 GB |
 | `fineweb-edu` | `HuggingFaceFW/fineweb-edu` (10BT sample) | Curated educational web text — general world knowledge | up to 30 GB |
+| `open-web-math` | `open-web-math/open-web-math` | 14.7B tokens of mathematical web text (proofs, derivations, math.SE). Formal-reasoning signal. | up to 50 GB |
+| `algebraic-stack` | `EleutherAI/proof-pile-2` (algebraic-stack) | Math + code from arXiv: Lean, Coq, Isabelle proofs + algorithmic implementations. The "successful proof tactic" trail. | up to 10 GB |
+| `code-contests` | `deepmind/code_contests` | Competitive programming problems paired with **both accepted and rejected solutions**. Each chat-wrapped record is `(problem, code, verdict)` so the model sees the boundary between code that works and code that doesn't. | ~5 GB |
+| `theorem-qa` | `TIGER-Lab/TheoremQA` | Theorem statements + answers across Calculus, Topology, Number Theory, etc. Compact formal-reasoning Q&A. | <100 MB |
 | `xlam` (gated) | `Salesforce/xlam-function-calling-60k` | Native JSON function-call traces; teaches the canonical tool-call shape. Requires HF token. | ~150 MB |
 | `the-stack-v2-{py,md,sh}` (gated) | `bigcode/the-stack-v2-dedup` | Code corpus for general-language fluency. Requires HF token + license click-through. | TB-scale, capped per slice |
 
 **Default mix proportions** for a slow-walk session (operator sets via
-`--mix "<path1>:<weight>,..."`; see [`docs/slow-walk-budget-plan.md`](./docs/slow-walk-budget-plan.md)):
+`--mix "<path1>:<weight>,..."`; see [`docs/slow-walk-budget-plan.md`](./docs/slow-walk-budget-plan.md)).
+Math + code-with-failure-modes are weighted in **from the first session**,
+not phased — code-as-reasoning-substrate is hypothesized to lift general
+capability throughout training, not just at fine-tune time.
 
 ```
-30%  commitpackft-py    file-edit signal (primary)
-25%  cosmopedia         synthetic textbook
-20%  fineweb-edu        general web text
-10%  commitpackft-md    markdown editing
- 8%  magicoder          instruction-following scaffold
- 4%  commitpackft-sh    shell scripting
- 3%  commitpackft-js    JavaScript
+20%  commitpackft-py     file-edit signal (primary)
+15%  cosmopedia          synthetic textbook (already math-heavy)
+12%  fineweb-edu         general web text
+10%  open-web-math       formal math + proofs
+ 8%  algebraic-stack     math + Lean/Coq + arXiv code
+ 8%  code-contests       successful + failing competitive solutions ← polynomial-hierarchy boundary
+ 7%  commitpackft-md     markdown editing
+ 6%  magicoder           instruction-following scaffold
+ 4%  commitpackft-sh     shell scripting
+ 2%  commitpackft-js     JavaScript
+ 2%  theorem-qa          formal Q&A
 ```
 
-(xLAM + the-stack-v2 added when the HF token is configured.)
+That's ~30% math/CS-theory + ~35% code (with failure boundary signal) +
+~35% general/SFT — code+math heavy from the start. xLAM + the-stack-v2
+added when the HF token is configured.
 
 ### Architecture knobs (v2 vs v1)
 
