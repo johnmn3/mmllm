@@ -1012,3 +1012,17 @@ mmllm/
     ├── __init__.py
     └── test_smoke.lpy       # forward-pass shape + cache checks
 ```
+
+## License
+
+mmLLM is released under the [BSD Zero Clause License (0BSD)](./LICENSE) —
+a permissive, public-domain-equivalent license. You can use, modify,
+redistribute, and ship the code (and any models trained with it) for
+any purpose, commercial or otherwise, with no attribution requirement.
+
+Why 0BSD specifically: the project's pitch is that AI infrastructure
+should be cheap to deploy alongside your editor / on edge devices /
+in privacy-constrained environments. Permissive licensing on the
+training rig + inference code keeps that promise — anyone can fork,
+specialize, and ship without a legal review cycle. Trained checkpoint
+artifacts published to GitHub Releases inherit the same terms.

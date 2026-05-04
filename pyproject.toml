@@ -4,7 +4,8 @@ version = "0.0.1"
 description = "mmLLM - Memory Mapped LLM"
 readme = "README.md"
 requires-python = ">=3.10"
-license = { text = "0BSD" }
+license = "0BSD"
+license-files = ["LICENSE"]
 dependencies = [
     "basilisp >= 0.3",
     "torch >= 2.0",
