@@ -43,7 +43,9 @@
            [mmllm.runtime :as rt]
            [mmllm.attention_kernel :as kernel]
            [mmllm.spec_decode :as spec]
-           [mmllm.optim :as vbopt]))
+           [mmllm.optim :as vbopt]
+           [mmllm.evals :as ev]
+           [mmllm.datasets :as ds]))
 
 (defn- mps-available? []
   (try
@@ -972,6 +974,74 @@
       (finally
         (torch/set_grad_enabled true)))))
 
+;;; ─────────────────────── agentic eval against a ckpt ───────────────────────
+
+(defn eval-agent
+  "Run agentic evals against a ckpt: load model + bank, then for each
+   held-out SFT transcript feed the prompt prefix, generate `gen-len`
+   chars, score the produced assistant turn against gold via
+   `mmllm.evals.score_predictions`.
+
+   Writes one JSONL row to log-path per call (same shape as the
+   training-loop eval events so the timelines plot together).
+
+   `eval-test-path` is a `.test.bin` produced by
+   `mmllm.datasets.prepare_hf_dataset` against an SFT-style dataset
+   (commitpackft, xlam, ...). Uses the default chat template — if you
+   re-prep with different delimiters, the prompt/gold split here will
+   be wrong (silently mis-scored). Lock the template before running."
+  [config base-path ckpt-step bank-path eval-test-path eval-name
+   n-samples gen-len log-path]
+  (let [cfg    (assoc config :memory-mmap-path bank-path)
+        m      (build-model cfg)
+        device (:device m)]
+    (when ckpt-step
+      (let [path  (str base-path ".ckpts/step-" ckpt-step)
+            saved (python/list (torch/load (str path "/dense.pt")
+                                           ** :map_location device))]
+        (println (format "  loaded ckpt: %s (%d dense param tensors)"
+                         path (count saved)))
+        (doseq [[p s] (map vector (parameters m) saved)]
+          (.copy_ (.- p data) s))))
+    (set-eval-mode! m)
+    (torch/set_grad_enabled false)
+    (println (format "  eval-agent[%s]: ckpt=%s test=%s n=%d gen=%d"
+                     eval-name (or ckpt-step "init") eval-test-path
+                     n-samples gen-len))
+    (let [samples (python/list (ev/iter_eval_samples eval-test-path
+                                                     ** :max_samples n-samples))]
+      (if (zero? (count samples))
+        (println "  no samples in eval set — skipping")
+        (let [t0          (time/time)
+              predictions (python/list)
+              golds       (python/list)
+              end-mark    (.- ds/DEFAULT_TEMPLATE end)]
+          (doseq [s samples]
+            (let [prompt    (.- s prompt)
+                  gold      (.- s gold)
+                  raw       (sample m prompt gen-len)
+                  ;; sample decodes prompt+generation; strip prefix.
+                  gen-only  (if (.startswith raw prompt)
+                              (subs raw (count prompt))
+                              raw)
+                  ;; Cut at first <|end|> if model emitted it.
+                  end-idx   (.find gen-only end-mark)
+                  pred      (if (>= end-idx 0)
+                              (subs gen-only 0 end-idx)
+                              gen-only)]
+              (.append predictions pred)
+              (.append golds gold)))
+          (let [results (ev/score_predictions predictions golds)
+                dt      (- (time/time) t0)]
+            (println (format "  → format=%.3f  name=%.3f  args=%.3f  exact=%.3f  (%.1fs)"
+                             (.get results "format_validity")
+                             (.get results "tool_name_match")
+                             (.get results "tool_args_match")
+                             (.get results "exact_match")
+                             dt))
+            (ev/append_eval_log log-path
+                                (or ckpt-step 0) eval-name results)))))))
+
 ;;; ─────────────────────── train on a real corpus ───────────────────────
 
 (defn train-corpus
@@ -1727,13 +1797,48 @@
                                              (get paths "val")   (get paths "bytes_val")))
                             (println (format "  test:  %s (%d bytes)"
                                              (get paths "test")  (get paths "bytes_test"))))
+      "prepare-hf-dataset" (let [key       (or (second args) "")
+                                 out       (or (nth args 2 nil) "")
+                                 max-bytes (python/int (or (nth args 3 nil) 5000000000))
+                                 val-bytes (python/int (or (nth args 4 nil) 50000000))
+                                 test-bytes (python/int (or (nth args 5 nil) 50000000))]
+                             (when (or (zero? (count key)) (zero? (count out)))
+                               (println "  prepare-hf-dataset needs <dataset-key> <out-path>")
+                               (sys/exit 1))
+                             (let [stats (ds/prepare_hf_dataset
+                                           key out
+                                           ** :max_bytes max-bytes
+                                              :val_bytes val-bytes
+                                              :test_bytes test-bytes)]
+                               (println (format "  done — %d records / %d bytes (skipped %d)"
+                                                (.get stats "n_records")
+                                                (.get stats "bytes")
+                                                (.get stats "n_skipped")))))
+      "inspect-dataset" (let [path (or (second args) "")
+                              n    (python/int (or (nth args 2 nil) 4000))]
+                          (when (zero? (count path))
+                            (println "  inspect-dataset needs <bin-path>")
+                            (sys/exit 1))
+                          (println (ds/inspect_dataset path n)))
+      "eval-agent" (let [base       (or (second args) "/tmp/agent")
+                         ckpt       (when (nth args 2 nil)
+                                      (python/int (nth args 2 nil)))
+                         bank       (or (nth args 3 nil) "/tmp/bank")
+                         eval-path  (or (nth args 4 nil) "/tmp/eval.test.bin")
+                         eval-name  (or (nth args 5 nil) "agent")
+                         n-samples  (python/int (or (nth args 6 nil) 50))
+                         gen-len    (python/int (or (nth args 7 nil) 512))
+                         log-path   (or (nth args 8 nil) (str base ".eval.jsonl"))]
+                     (eval-agent long-leaning-config base ckpt bank eval-path
+                                 eval-name n-samples gen-len log-path))
       (do (println "usage: mmllm {train|sample|compare|train-mmap|probe")
           (println "                  |build-corpus|clone-clojure|train-corpus")
           (println "                  |fetch-text8|fetch-enwik8|split-text8|train-text8")
           (println "                  |train-long")
           (println "                  |bench|bench-batch|bench-spec")
           (println "                  |fetch-artifacts|bank-quantize")
-          (println "                  |fetch-pile-github|split-pile-github} [args...]")
+          (println "                  |fetch-pile-github|split-pile-github")
+          (println "                  |prepare-hf-dataset|inspect-dataset|eval-agent} [args...]")
           (println "  train [short|long]")
           (println "  sample [short|long]")
           (println "  compare")
@@ -1764,4 +1869,12 @@
           (println "                                           (download Pile-Github corpus, parallel streaming)")
           (println "  split-pile-github [in-path] [val-bytes] [test-bytes]")
           (println "                                           (split into train/val/test)")
+          (println "  prepare-hf-dataset <dataset-key> <out-path> [max-bytes] [val-bytes] [test-bytes]")
+          (println "                                           (HF dataset → uint8 byte stream + train/val/test split.")
+          (println "                                            Keys: commitpackft|xlam|magicoder|cosmopedia|fineweb-edu")
+          (println "                                                  |the-stack-v2-{py,md,sh}.  See mmllm.datasets.)")
+          (println "  inspect-dataset <bin-path> [n-bytes]     (decode first N bytes of a prepared .bin and print)")
+          (println "  eval-agent <base> <ckpt-step> <bank-path> <eval-test.bin> <eval-name> [n-samples] [gen-len] [log-path]")
+          (println "                                           (load ckpt, generate against held-out SFT prompts,")
+          (println "                                            score JSON tool-call validity / name-match / args-match)")
           (sys/exit 1)))))

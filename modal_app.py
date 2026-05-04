@@ -1428,6 +1428,321 @@ def train_multi_b(bases: str = "/data/text8,/data/pile-github.bin",
     print("all workers complete.", flush=True)
 
 
+# ─────────────────────── HF dataset prep (Phase 0) ───────────────────────
+#
+# Stages a HuggingFace dataset onto the volume in mmllm's standard byte-bin
+# shape (uint8 stream + train/val/test split). The basilisp side
+# (`mmllm prepare-hf-dataset`) does the actual work; this wrapper just
+# threads Modal arguments through and commits the volume.
+
+
+@app.function(
+    image=image,
+    volumes={"/data": volume},
+    timeout=86400,         # 24 h — large pretraining-style sources stream slow
+    cpu=4.0,
+    memory=32768,          # 32 GB — formatter buffers + records held in flight
+)
+def prepare_hf_dataset(
+    dataset_key: str,
+    out_path:    str       = "",      # default: /data/<key>.bin
+    max_bytes:   int       = 5_000_000_000,
+    val_bytes:   int       = 50_000_000,
+    test_bytes:  int       = 50_000_000,
+):
+    """Stream a HuggingFace dataset → uint8 byte stream on the volume.
+
+    Output layout (mirrors `prepare_pile_github`):
+      <out_path>            flat bytes
+      <out_path>.train.bin
+      <out_path>.val.bin
+      <out_path>.test.bin
+
+    Pass `out_path=""` to default to `/data/<dataset_key>.bin`.
+    `dataset_key` selects from `mmllm.datasets.DATASET_REGISTRY` —
+    currently:
+      commitpackft | xlam | magicoder      (SFT-style, chat-template wrapped)
+      cosmopedia | fineweb-edu             (pretraining-style, raw text)
+      the-stack-v2-{py,md,sh}              (code subsets)
+
+    SFT-style datasets are tiny (<5 GB at full size) so default cap
+    is fine; pretraining-style sources need a much higher cap (e.g.,
+    50 GB cosmopedia, 100 GB fineweb-edu sample).
+    """
+    import subprocess
+    final_out = out_path or f"/data/{dataset_key}.bin"
+    print(f"=== prepare_hf_dataset key={dataset_key} → {final_out} "
+          f"max={max_bytes/1e9:.1f} GB ===", flush=True)
+    subprocess.run(
+        ["mmllm", "prepare-hf-dataset",
+         dataset_key, final_out,
+         str(max_bytes), str(val_bytes), str(test_bytes)],
+        check=True,
+    )
+    volume.commit()
+    print(f"done — staged on volume: {final_out}", flush=True)
+
+
+@app.function(
+    image=image,
+    volumes={"/data": volume},
+    timeout=600,
+    cpu=1.0,
+    memory=2048,
+)
+def inspect_dataset_remote(path: str, n_chars: int = 4000):
+    """Print first n_chars bytes of a prepared `.bin` from the volume.
+    Useful smoke check after a prepare_hf_dataset run before launching
+    a multi-day training job on a malformed corpus."""
+    import subprocess
+    subprocess.run(["mmllm", "inspect-dataset", path, str(n_chars)],
+                   check=True)
+
+
+# ─────────────────────── eval battery (Phase 0) ───────────────────────
+#
+# Run the full eval battery against a single ckpt step. Combines
+# eval-bpc on pretraining-style test splits with eval-agent on
+# SFT-style test splits. Writes one JSONL log per (ckpt_step, eval_name).
+# `eval_watcher` polls the volume for new step-N dirs and runs this
+# automatically as training produces ckpts.
+
+
+def _run_eval_agent(base, ckpt_step, bank, test_path, name,
+                    n_samples, gen_len, log_path):
+    """Subprocess wrapper for the basilisp eval-agent CLI verb.
+    Threaded via subprocess so a single Python failure in basilisp
+    doesn't kill the whole Modal worker — the watcher catches and
+    keeps going."""
+    import subprocess
+    subprocess.run(
+        ["mmllm", "eval-agent",
+         base, str(ckpt_step) if ckpt_step is not None else "",
+         bank, test_path, name,
+         str(n_samples), str(gen_len), log_path],
+        check=True,
+    )
+
+
+def _do_eval_battery(base, ckpt_step, bank, log_path,
+                     sqrt_n, bank_on_gpu, bank_dtype,
+                     bpc_evals, agent_evals, n_samples, gen_len):
+    """Body of the eval battery — factored so eval_watcher can call it
+    directly (no nested-Modal-function dispatch). Returns the resolved
+    ckpt_step (since callers may pass 0 = latest)."""
+    import os
+    import re
+    import subprocess
+
+    log_p = log_path or f"{base}.eval.jsonl"
+
+    # Resolve ckpt_step=0 → latest step-N under <base>.ckpts/
+    if ckpt_step <= 0:
+        ckpts_dir = f"{base}.ckpts"
+        if not os.path.isdir(ckpts_dir):
+            print(f"  no ckpts dir at {ckpts_dir} — nothing to eval", flush=True)
+            return ckpt_step
+        steps = []
+        for d in os.listdir(ckpts_dir):
+            m = re.match(r"step-(\d+)$", d)
+            if m:
+                steps.append(int(m.group(1)))
+        if not steps:
+            print(f"  no step-<N> dirs in {ckpts_dir}", flush=True)
+            return ckpt_step
+        ckpt_step = max(steps)
+        print(f"  resolved ckpt_step=latest → {ckpt_step}", flush=True)
+
+    env = os.environ.copy()
+    env["MMLLM_DEVICE"]      = "cuda"
+    env["MMLLM_SQRT_N"]      = str(sqrt_n)
+    env["MMLLM_BANK_ON_GPU"] = "true" if bank_on_gpu else "false"
+    env["MMLLM_BANK_DTYPE"]  = bank_dtype
+
+    print(f"=== eval battery base={base} ckpt={ckpt_step} log={log_p} ===",
+          flush=True)
+
+    # BPC evals (cheap; generation-free) — basilisp `eval-bpc-on-path`
+    # verb is a follow-up; for now this loop logs a skip note so the
+    # watcher schema stays stable. Agentic evals run below regardless.
+    for entry in bpc_evals.split(","):
+        entry = entry.strip()
+        if not entry:
+            continue
+        name, _, test_path = entry.partition(":")
+        if not os.path.exists(test_path):
+            print(f"  skip bpc[{name}]: missing {test_path}", flush=True)
+            continue
+        print(f"  → bpc[{name}] @ {test_path}  (eval-bpc-on-path verb TBD)",
+              flush=True)
+
+    # Agentic evals (generation + scoring).
+    for entry in agent_evals.split(","):
+        entry = entry.strip()
+        if not entry:
+            continue
+        name, _, test_path = entry.partition(":")
+        if not os.path.exists(test_path):
+            print(f"  skip agent[{name}]: missing {test_path}", flush=True)
+            continue
+        print(f"  → agent[{name}] @ {test_path}", flush=True)
+        try:
+            subprocess.run(
+                ["mmllm", "eval-agent",
+                 base, str(ckpt_step), bank,
+                 test_path, name,
+                 str(n_samples), str(gen_len), log_p],
+                env=env,
+                check=True,
+            )
+        except subprocess.CalledProcessError as e:
+            # One bad eval shouldn't kill the others.
+            print(f"    WARN: agent[{name}] eval failed: {e}", flush=True)
+
+    volume.commit()
+    print(f"done — eval battery for ckpt {ckpt_step} → {log_p}", flush=True)
+    return ckpt_step
+
+
+@app.function(
+    image=image,
+    volumes={"/data": volume},
+    timeout=7200,          # 2 h cap per battery run
+    gpu="A10G",            # cheap GPU for eval; bigger GPUs reserved for training
+    memory=32768,
+)
+def run_eval_battery(
+    base:        str  = "/data/agent-corpus",
+    ckpt_step:   int  = 0,                         # 0 = use latest under <base>.ckpts/
+    bank:        str  = "/data/agent-bank",
+    log_path:    str  = "",                        # default: <base>.eval.jsonl
+    sqrt_n:      int  = 2048,
+    bank_on_gpu: bool = True,
+    bank_dtype:  str  = "fp32",
+    bpc_evals:   str  = ("cosmopedia:/data/cosmopedia.test.bin,"
+                          "fineweb-edu:/data/fineweb-edu.test.bin,"
+                          "the-stack-v2-py:/data/the-stack-v2-py.test.bin"),
+    agent_evals: str  = ("commitpackft:/data/commitpackft.test.bin,"
+                          "xlam:/data/xlam.test.bin"),
+    n_samples:   int  = 50,
+    gen_len:     int  = 512,
+):
+    """Run the full eval battery against a single ckpt.
+
+    Skips evals whose test_path doesn't exist (so the battery pays
+    off the moment any one corpus is staged). Writes one JSONL row
+    per eval to log_path (default `<base>.eval.jsonl`). Same shape
+    as train-long's eval events so plots align on the step axis.
+    """
+    _do_eval_battery(
+        base, ckpt_step, bank, log_path,
+        sqrt_n, bank_on_gpu, bank_dtype,
+        bpc_evals, agent_evals, n_samples, gen_len,
+    )
+
+
+@app.function(
+    image=image,
+    volumes={"/data": volume},
+    timeout=86400 * 7,     # up to a week; long training runs are 1-2 weeks
+    gpu="A10G",
+    memory=32768,
+)
+def eval_watcher(
+    base:        str  = "/data/agent-corpus",
+    bank:        str  = "/data/agent-bank",
+    log_path:    str  = "",
+    poll_seconds: int = 300,                       # 5 min between scans
+    sqrt_n:      int  = 2048,
+    bank_on_gpu: bool = True,
+    bank_dtype:  str  = "fp32",
+    bpc_evals:   str  = ("cosmopedia:/data/cosmopedia.test.bin,"
+                          "fineweb-edu:/data/fineweb-edu.test.bin,"
+                          "the-stack-v2-py:/data/the-stack-v2-py.test.bin"),
+    agent_evals: str  = ("commitpackft:/data/commitpackft.test.bin,"
+                          "xlam:/data/xlam.test.bin"),
+    n_samples:   int  = 50,
+    gen_len:     int  = 512,
+    max_idle_polls: int = 0,                       # 0 = infinite; else stop after N empty polls
+):
+    """Poll <base>.ckpts/ for new step-<N> dirs and eval each one.
+
+    Idempotent — keeps a `<log_path>.seen.txt` set of already-evaluated
+    ckpt_steps so a watcher restart doesn't re-eval everything.
+
+    Run alongside `train_with_bank` to get continuous quality-by-step
+    metrics in the same JSONL the training run writes to. The watcher
+    runs on cheap A10G (eval workload is small), so the H100 keeps
+    burning training tokens uninterrupted.
+    """
+    import os
+    import re
+    import time
+
+    log_p   = log_path or f"{base}.eval.jsonl"
+    seen_p  = f"{log_p}.seen.txt"
+    seen    = set()
+    if os.path.exists(seen_p):
+        with open(seen_p) as f:
+            for line in f:
+                line = line.strip()
+                if line:
+                    seen.add(int(line))
+        print(f"  watcher: resumed with {len(seen)} already-evaled steps",
+              flush=True)
+
+    ckpts_dir = f"{base}.ckpts"
+    idle_count = 0
+
+    print(f"=== eval_watcher base={base} every={poll_seconds}s ===",
+          flush=True)
+
+    while True:
+        volume.reload()  # pick up new ckpt dirs the trainer wrote
+        if not os.path.isdir(ckpts_dir):
+            print(f"  watcher: no ckpts dir yet at {ckpts_dir}", flush=True)
+            time.sleep(poll_seconds)
+            continue
+
+        # Find ckpt steps not yet evaluated.
+        steps = []
+        for d in os.listdir(ckpts_dir):
+            m = re.match(r"step-(\d+)$", d)
+            if m:
+                s = int(m.group(1))
+                if s not in seen:
+                    steps.append(s)
+        steps.sort()
+
+        if not steps:
+            idle_count += 1
+            if max_idle_polls and idle_count >= max_idle_polls:
+                print(f"  watcher: {max_idle_polls} idle polls — exiting",
+                      flush=True)
+                return
+            time.sleep(poll_seconds)
+            continue
+
+        idle_count = 0
+        for s in steps:
+            print(f"  watcher: → eval ckpt step {s}", flush=True)
+            try:
+                _do_eval_battery(
+                    base, s, bank, log_p,
+                    sqrt_n, bank_on_gpu, bank_dtype,
+                    bpc_evals, agent_evals, n_samples, gen_len,
+                )
+            except Exception as e:
+                print(f"    WARN: ckpt {s} eval errored: {e} — skipping",
+                      flush=True)
+            # Mark seen either way so we don't infinite-loop on a broken
+            # ckpt. The trainer will produce the next one shortly.
+            seen.add(s)
+            with open(seen_p, "a") as f:
+                f.write(f"{s}\n")
+            volume.commit()
+
+
 @app.local_entrypoint()
 def main(
     steps: int = 100000,
