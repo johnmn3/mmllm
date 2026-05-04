@@ -285,6 +285,35 @@ def fmt_algebraic_stack(rec: dict) -> "str | None":
     return txt
 
 
+def fmt_humaneval_clj(rec: dict, tpl: ChatTemplate = DEFAULT_TEMPLATE
+                      ) -> "str | None":
+    """MultiPL-E humaneval-clj (nuprl/MultiPL-E config='humaneval-clj').
+
+    HumanEval ported to Clojure — 161 problems with prompts + tests.
+    Schema: prompt, tests, name, doctests, language ('clj'),
+    stop_tokens, prompt_terminology, original.
+
+    Used as eval-only (kind='pretrain' so the eval battery routes
+    BPC-style; agentic eval against this would also work but the
+    'pass-the-tests' variant requires a Clojure runtime which we
+    don't have wired). For training, the prompt+tests text is on-
+    target Clojure code so harmless if cycled in — but at 175 KB
+    total it's too small to materially shift training and is more
+    useful held out for measuring Clojure code-gen ability."""
+    prompt = rec.get("prompt")
+    tests  = rec.get("tests") or ""
+    name   = rec.get("name")  or ""
+    if not prompt:
+        return None
+    # Emit prompt + tests joined; the prompt typically ends with a
+    # function signature ready for completion, and the tests are the
+    # canonical spec.
+    body = prompt
+    if tests:
+        body += "\n\n;; Tests:\n" + tests
+    return body
+
+
 def fmt_theorem_qa(rec: dict, tpl: ChatTemplate = DEFAULT_TEMPLATE
                    ) -> "str | None":
     """TheoremQA (TIGER-Lab/TheoremQA).
@@ -587,6 +616,20 @@ DATASET_REGISTRY = {
         "formatter": fmt_theorem_qa,
         "kind":      "pretrain",
         "notes":     "Theorem statements + answers across math subjects (Calc, Topology, NT, ...)",
+    },
+    "humaneval-clj": {
+        # MultiPL-E (nuprl/MultiPL-E) HumanEval ported to Clojure —
+        # 161 problems × ~1 KB each = ~175 KB total. Eval-only by
+        # convention: it's a benchmark, including in training would
+        # corrupt the eval. PROD_CAPS sizes it tiny; operator does
+        # NOT include in --mix; eval_watcher includes it in agent_evals
+        # to measure the model's Clojure code-gen ability per ckpt.
+        "hf_name":   "nuprl/MultiPL-E",
+        "hf_config": "humaneval-clj",
+        "split":     "test",      # MultiPL-E ships only a test split
+        "formatter": fmt_humaneval_clj,
+        "kind":      "pretrain",  # routes to BPC eval; agentic-test variant TBD
+        "notes":     "HumanEval-Clojure (eval-only, 161 problems / ~175 KB)",
     },
 }
 

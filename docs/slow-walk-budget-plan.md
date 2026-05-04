@@ -104,6 +104,35 @@ Secret exists. So:
 | Only `github-token` | Public datasets only; publish works |
 | Both | Full feature set |
 
+## Clojure-specific corpus prep (separate from prepare_for_prod)
+
+mmllm's eventual product target is a Clojure assistant, so the v2
+warmup is biased Clojure-heavy. Three Clojure-specific Modal functions
+run independently of `prepare_for_prod`:
+
+```bash
+# 1. mfikes/coal-mine: 4Clojure submissions, ~100 MB, polynomial-
+#    hierarchy "many solutions per problem" goldmine. EPL-1.0.
+modal run --detach modal_app.py::prepare_coal_mine
+
+# 2. Clojars permissively-licensed libs: walks the Clojars feed,
+#    license-filters, downloads source jars, extracts .clj files.
+#    Multi-GB of real-world Clojure code. ~$0.20-0.50 to run.
+modal run --detach modal_app.py::prepare_clojars_permissive
+
+# 3. (When you're ready) the-stack-dedup (v1) Clojure config —
+#    has actual `content` (unlike v2-dedup metadata-only). Needs the
+#    HF license click-through at huggingface.co/datasets/bigcode/the-stack-dedup.
+#    Then: edit DATASET_REGISTRY's the-stack-v2-clj entry to point at
+#    the-stack-dedup with the-stack v1 schema, and re-run prepare_for_prod.
+```
+
+`humaneval-clj` (MultiPL-E HumanEval ported to Clojure, 161 problems)
+is staged as part of `prepare_for_prod` but **eval-only** by convention
+— it's the held-out benchmark for Clojure code-gen ability. Operator
+does NOT include it in `--mix` for training; eval_watcher includes it
+in `agent_evals` to score per-ckpt Clojure capability.
+
 ## One-time prod prep
 
 Before the first paid training session, stage all the public datasets
@@ -134,6 +163,41 @@ After it completes, smoke-check a few:
 modal run modal_app.py::inspect_dataset_remote --path /data/agent-corpus-v2/code-contests.bin
 modal run modal_app.py::inspect_dataset_remote --path /data/agent-corpus-v2/open-web-math.bin
 ```
+
+## Curriculum: Clojure warmup → full v2 mix
+
+The v2 architecture's product target is a Clojure assistant. The
+slow-walk's session-boundary model lets us front-load Clojure
+exposure during the first session ("born thinking in lambda
+calculus through Clojure code") so the early gradients shape the
+dense weights and bank toward S-expression / functional-style
+substrate before the broader mix kicks in.
+
+**Session 1 — Clojure-heavy warmup** (~30k steps, ~$18, ~2h H100):
+
+```bash
+modal run --detach modal_app.py::train_with_bank \
+  --base /data/agent-corpus-v2.bin --bank /data/agent-bank-v2 \
+  --total-steps 1000000 --max-hours 2.0 \
+  --eval-every 2500 --ckpt-every 2500 --ablate-every 5000 \
+  --batch 128 --sqrt-n 2048 --cpu-offload \
+  --lr 1.4e-3 --lr-warmup 3000 \
+  --bank-query-mode ctx-add --bank-feedback-mode feedback \
+  --publish-after \
+  --mix "/data/agent-corpus-v2/coal-mine.bin.train.bin:40,/data/agent-corpus-v2/clojars-permissive.bin.train.bin:25,/data/agent-corpus-v2/commitpackft-clj.bin.train.bin:15,/data/agent-corpus-v2/algebraic-stack.bin.train.bin:20"
+```
+
+40% coal-mine (multi-solution-per-problem signal) + 25% clojars
+(raw Clojure scale) + 15% commitpackft-clj (file-edit signal) +
+20% algebraic-stack (lambda-calculus reinforcement via Lean/Coq
+proofs). The model spends ~500 M tokens in this Clojure-functional
+substrate before broadening.
+
+**Session 2+ — full v2 mix** (each ~$24 / 8 h):
+
+The model resumes from session 1's ckpt with all the Clojure-shaped
+weights and bank state intact; the broader mix from here on expands
+its repertoire on top of that foundation.
 
 ## Per-session knobs
 

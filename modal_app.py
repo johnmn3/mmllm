@@ -1897,6 +1897,11 @@ PROD_CAPS = {
     "algebraic-stack":    (2_000_000_000,    20_000_000, 20_000_000),  # via hoskinson-center/proof-pile
     "code-contests":      (1_000_000_000,    20_000_000, 20_000_000),
     "theorem-qa":         ( 100_000_000,        50_000,     50_000),  # ~232 KB total
+    # Eval-only — MultiPL-E HumanEval-Clojure (~175 KB / 161 problems).
+    # PROD_CAPS includes it just to stage train/val/test files; operator
+    # does NOT include in --mix (it's a benchmark). eval_watcher routes
+    # it via agent_evals to measure Clojure code-gen ability per ckpt.
+    "humaneval-clj":      (    200_000,         50_000,     50_000),  # ~175 KB total
     # Gated (HF token required) — only prep when 'huggingface-secret' or
     # 'huggingface-token' Modal Secret is configured. prep_for_prod will
     # attempt them and fail gracefully (per-dataset error capture) if
@@ -2042,6 +2047,314 @@ def prepare_for_prod(
         "failed": failures,
         "base":   base_for_eval,
         "out_dir": out_dir,
+    }
+
+
+# ─────────────────────── Clojure-specific corpora ───────────────────────
+#
+# Two non-HF prep paths for Clojure substrate beyond commitpackft-clj:
+#
+#   prepare_coal_mine
+#     mfikes/coal-mine — 4Clojure submissions from top-1000 users.
+#     368k LOC, 50k tests, 195k assertions, MANY user-submitted
+#     solutions per problem. The polynomial-hierarchy "many-ways-to-
+#     solve" signal in dense Clojure form. EPL-1.0.
+#
+#   prepare_clojars_permissive
+#     Clojars feed walk → license filter → source-jar extract.
+#     Multi-GB of permissively-licensed real-world Clojure libraries.
+#     The bulk Clojure substrate.
+#
+# Both write to /data/agent-corpus-v2/<name>.bin in the standard
+# byte-stream + train/val/test split shape, so train-long's mix
+# sampler can include them like any other corpus.
+
+
+@app.function(
+    image=image,
+    volumes={"/data": volume},
+    timeout=3600,         # 1 h cap — git clone + file walk is fast
+    cpu=2.0,
+    memory=4096,
+)
+def prepare_coal_mine(
+    out_path:    str = "/data/agent-corpus-v2/coal-mine.bin",
+    val_bytes:   int = 5_000_000,
+    test_bytes:  int = 5_000_000,
+):
+    """Clone mfikes/coal-mine, walk src/coal_mine/problem_*.cljc, concat
+    each into a flat byte stream.
+
+    Each problem file is a Clojure namespace containing many
+    `(defcheck solution-XXXX (fn [...] ...))` blocks — multiple user-
+    submitted solutions to the same 4Clojure problem. Emitting them
+    as raw bytes (with a `;;; problem N` header per file) preserves
+    the multi-solution-per-problem signal without needing chat-template
+    wrapping; the model sees consecutive blocks of "different solutions
+    to the same implicit problem" — the polynomial-hierarchy
+    softness/hardness boundary in Clojure form.
+
+    Output: ~100 MB raw, split per the val_bytes / test_bytes args.
+    """
+    import glob
+    import os
+    import subprocess
+    from pathlib import Path
+    from mmllm.corpus import split_pile_github
+
+    repo_dir = "/tmp/coal-mine"
+    if not os.path.isdir(repo_dir):
+        print(f"  cloning mfikes/coal-mine → {repo_dir}", flush=True)
+        subprocess.run(
+            ["git", "clone", "--depth", "1",
+             "https://github.com/mfikes/coal-mine.git", repo_dir],
+            check=True, capture_output=True,
+        )
+
+    problems = sorted(glob.glob(f"{repo_dir}/src/coal_mine/problem_*.cljc"))
+    print(f"  found {len(problems)} problem files", flush=True)
+
+    Path(out_path).parent.mkdir(parents=True, exist_ok=True)
+    written = 0
+    n_files = 0
+    with open(out_path, "wb") as fout:
+        for path in problems:
+            with open(path, "rb") as src:
+                content = src.read()
+            num = (os.path.basename(path)
+                   .replace("problem_", "").replace(".cljc", ""))
+            header = f";;; coal-mine: problem {num}\n".encode("utf-8")
+            fout.write(header)
+            fout.write(content)
+            fout.write(b"\n\n")
+            written += len(header) + len(content) + 2
+            n_files += 1
+            if n_files % 25 == 0:
+                print(f"    {n_files} problems  {written/1e6:.1f} MB written",
+                      flush=True)
+
+    print(f"  done: {n_files} problems / {written/1e6:.1f} MB total",
+          flush=True)
+
+    print(f"  splitting into train/val/test (val={val_bytes/1e6:.1f} MB, "
+          f"test={test_bytes/1e6:.1f} MB)", flush=True)
+    split_pile_github(out_path, val_bytes, test_bytes)
+    volume.commit()
+    return {"path": out_path, "bytes": written, "n_problems": n_files}
+
+
+# Permissive licenses we accept from Clojars. Match is substring on the
+# lowercased POM <license><name>...</name> field, so e.g. "Eclipse Public
+# License - v 1.0" matches "eclipse public license".
+_PERMISSIVE_LICENSE_PATTERNS = (
+    "eclipse public license",
+    "epl-1.0", "epl-2.0", "epl 1.0", "epl 2.0", "epl",
+    "mit license", "the mit license", "mit",
+    "bsd-2-clause", "bsd-3-clause", "bsd 2-clause", "bsd 3-clause",
+    "bsd",
+    "apache license, version 2",
+    "apache license 2", "apache 2.0", "apache-2.0",
+    "isc license", "isc",
+    "creative commons",  # CC0 / CC-BY are arguably permissive enough
+    "cc0", "unlicense", "wtfpl",
+)
+
+
+@app.function(
+    image=image,
+    volumes={"/data": volume},
+    timeout=14400,        # 4 h cap — fetch jars from Clojars
+    cpu=4.0,
+    memory=8192,
+)
+def prepare_clojars_permissive(
+    out_path:       str = "/data/agent-corpus-v2/clojars-permissive.bin",
+    max_bytes:      int = 2_000_000_000,
+    val_bytes:      int = 20_000_000,
+    test_bytes:     int = 20_000_000,
+    max_artifacts:  int = 5000,
+    max_file_bytes: int = 65536,    # skip giant generated files
+):
+    """Walk Clojars' feed.clj.gz, filter to permissively-licensed
+    artifacts, download source/main jars, extract .clj/.cljs/.cljc/.edn,
+    concat into a byte stream.
+
+    Yields multi-GB of permissively-licensed real-world Clojure source
+    — the bulk Clojure substrate that complements coal-mine's curated
+    problem-solving and commitpackft's file-edit signal.
+
+    Filter chain per artifact:
+      1. Latest version only (skip historical versions)
+      2. POM <license><name>...</name> matches a permissive pattern
+      3. Source jar exists (fallback: main jar)
+      4. Each extracted file ≤ max_file_bytes (skips auto-generated bloat)
+
+    Cost: ~$0.20-0.50 of CPU container time depending on cap settings.
+    Wall time: minutes-to-hour depending on Clojars CDN throughput.
+    """
+    import gzip
+    import io
+    import os
+    import re
+    import time
+    import urllib.error
+    import urllib.request
+    import xml.etree.ElementTree as ET
+    import zipfile
+    from pathlib import Path
+    from mmllm.corpus import split_pile_github
+
+    Path(out_path).parent.mkdir(parents=True, exist_ok=True)
+
+    def _http_get(url: str, timeout: int = 60) -> "bytes | None":
+        """GET url; return body or None on any error."""
+        try:
+            req = urllib.request.Request(
+                url, headers={"User-Agent": "mmllm/0.1 clojars-prep"})
+            with urllib.request.urlopen(req, timeout=timeout) as r:
+                return r.read()
+        except (urllib.error.URLError, TimeoutError, ConnectionError):
+            return None
+
+    def _is_permissive(license_text: str) -> bool:
+        s = (license_text or "").lower().strip()
+        return any(pat in s for pat in _PERMISSIVE_LICENSE_PATTERNS)
+
+    def _parse_pom_license(pom_bytes: bytes) -> "str | None":
+        try:
+            root = ET.fromstring(pom_bytes)
+        except ET.ParseError:
+            return None
+        # POMs use the Maven 4.0.0 namespace. We look for any <license>
+        # element regardless of namespace.
+        for el in root.iter():
+            tag = el.tag.split("}", 1)[-1] if "}" in el.tag else el.tag
+            if tag != "license":
+                continue
+            for child in el.iter():
+                ctag = (child.tag.split("}", 1)[-1]
+                        if "}" in child.tag else child.tag)
+                if ctag == "name" and child.text:
+                    return child.text
+        return None
+
+    print(f"  fetching Clojars feed.clj.gz ...", flush=True)
+    feed_compressed = _http_get(
+        "https://clojars.org/repo/feed.clj.gz", timeout=120)
+    if feed_compressed is None:
+        raise RuntimeError("failed to fetch Clojars feed.clj.gz")
+    feed_text = gzip.decompress(feed_compressed).decode("utf-8",
+                                                          errors="replace")
+
+    # Each entry looks like:
+    #   {:group-id "g" :artifact-id "a" :description "d" :scm "s" :versions ["v1" "v2"]}
+    # The order of keys / presence of optional keys varies; use a tolerant
+    # regex that captures group-id + artifact-id + the FIRST quoted version
+    # in the :versions vector (taken to mean the latest).
+    artifact_re = re.compile(
+        r':group-id\s+"([^"]+)".*?'
+        r':artifact-id\s+"([^"]+)".*?'
+        r':versions\s+\[\s*"([^"]+)"',
+        re.DOTALL,
+    )
+    artifacts = []
+    for m in artifact_re.finditer(feed_text):
+        group, artifact, latest_version = m.groups()
+        artifacts.append((group, artifact, latest_version))
+    print(f"  feed parsed: {len(artifacts)} unique artifacts", flush=True)
+
+    written       = 0
+    n_processed   = 0
+    n_permissive  = 0
+    n_files       = 0
+    t0 = time.time()
+    seen_paths = set()        # dedupe identical (group/artifact, internal-path) pairs
+
+    with open(out_path, "wb") as fout:
+        for group, artifact, version in artifacts:
+            if written >= max_bytes:
+                break
+            if n_processed >= max_artifacts:
+                break
+            n_processed += 1
+
+            group_path = group.replace(".", "/")
+            base_url = (f"https://repo.clojars.org/{group_path}/"
+                        f"{artifact}/{version}/{artifact}-{version}")
+            pom_bytes = _http_get(base_url + ".pom", timeout=30)
+            if pom_bytes is None:
+                continue
+            license_text = _parse_pom_license(pom_bytes)
+            if not _is_permissive(license_text or ""):
+                continue
+            n_permissive += 1
+
+            # Try sources jar first; fall back to main jar.
+            jar_bytes = _http_get(base_url + "-sources.jar", timeout=120)
+            if jar_bytes is None:
+                jar_bytes = _http_get(base_url + ".jar", timeout=120)
+            if jar_bytes is None:
+                continue
+
+            try:
+                zf = zipfile.ZipFile(io.BytesIO(jar_bytes))
+            except zipfile.BadZipFile:
+                continue
+
+            try:
+                for name in zf.namelist():
+                    if not name.endswith((".clj", ".cljs", ".cljc", ".edn")):
+                        continue
+                    info = zf.getinfo(name)
+                    if info.file_size > max_file_bytes:
+                        continue
+                    dedupe_key = (artifact, name)
+                    if dedupe_key in seen_paths:
+                        continue
+                    seen_paths.add(dedupe_key)
+                    try:
+                        content = zf.read(name)
+                    except (KeyError, RuntimeError):
+                        continue
+                    header = (f";;; clojars: {group}/{artifact}-"
+                              f"{version} :: {name}\n").encode("utf-8")
+                    fout.write(header)
+                    fout.write(content)
+                    fout.write(b"\n\n")
+                    written += len(header) + len(content) + 2
+                    n_files += 1
+                    if written >= max_bytes:
+                        break
+            finally:
+                zf.close()
+
+            if n_processed % 100 == 0:
+                dt = time.time() - t0
+                print(f"    [{n_processed:>4}/{max_artifacts}] "
+                      f"permissive={n_permissive} files={n_files} "
+                      f"{written/1e6:.1f} MB / {dt:.0f}s "
+                      f"(license: {(license_text or 'unknown')[:50]})",
+                      flush=True)
+
+    print(f"  done: processed={n_processed} permissive={n_permissive} "
+          f"files={n_files} bytes={written/1e6:.1f} MB",
+          flush=True)
+    if written == 0:
+        print(f"  ! no files extracted — Clojars feed parse may have"
+              f" failed; check the regex against current feed format",
+              flush=True)
+        raise RuntimeError("clojars prep wrote 0 bytes")
+
+    print(f"  splitting into train/val/test (val={val_bytes/1e6:.1f} MB, "
+          f"test={test_bytes/1e6:.1f} MB)", flush=True)
+    split_pile_github(out_path, val_bytes, test_bytes)
+    volume.commit()
+    return {
+        "path":          out_path,
+        "bytes":         written,
+        "n_processed":   n_processed,
+        "n_permissive":  n_permissive,
+        "n_files":       n_files,
     }
 
 
