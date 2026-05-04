@@ -77,7 +77,13 @@ def split_transcript(transcript: str,
 def iter_eval_samples(eval_path: str,
                       tpl: ChatTemplate = DEFAULT_TEMPLATE,
                       max_samples: int = 100,
-                      max_prompt_bytes: int = 8192,
+                      # Default sized for the v2 architecture's max_pos=1024
+                      # (see default-config in core.lpy) minus typical
+                      # gen_len=128 → ~896-byte ceiling on the prompt the
+                      # model can attend over without overflowing the RoPE
+                      # cache. 768 leaves headroom. Bump if you ever
+                      # increase max_pos.
+                      max_prompt_bytes: int = 768,
                       ) -> Iterable[EvalSample]:
     """Read a `.test.bin`, partition into transcripts via the `<|sys|>`
     marker, yield up to `max_samples` (prompt, gold) pairs.

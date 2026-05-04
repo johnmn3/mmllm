@@ -261,13 +261,45 @@ def fmt_the_stack_v2(rec: dict, max_file_bytes: int = 32768) -> "str | None":
 # Add more here as we expand the mix.
 DATASET_REGISTRY = {
     # SFT-style (chat-template wrapped)
-    "commitpackft": {
+    #
+    # CommitPackFT ships as a per-language dataset script — `load_dataset
+    # ("bigcode/commitpackft")` without a config raises "Config name is
+    # missing" with the full 277-language list. We expose just a few
+    # high-value-for-coding-agent slices (python, markdown, shell,
+    # javascript). Add more by appending entries with the same shape;
+    # see the language list in the error message or
+    # https://huggingface.co/datasets/bigcode/commitpackft.
+    "commitpackft-py": {
         "hf_name":   "bigcode/commitpackft",
-        "hf_config": None,
+        "hf_config": "python",
         "split":     "train",
         "formatter": fmt_commitpackft,
         "kind":      "sft",
-        "notes":     "742k file-edit examples → JSON Edit tool calls",
+        "notes":     "Python-language file-edit commits → JSON Edit tool calls",
+    },
+    "commitpackft-md": {
+        "hf_name":   "bigcode/commitpackft",
+        "hf_config": "markdown",
+        "split":     "train",
+        "formatter": fmt_commitpackft,
+        "kind":      "sft",
+        "notes":     "Markdown-language file-edit commits → JSON Edit tool calls",
+    },
+    "commitpackft-sh": {
+        "hf_name":   "bigcode/commitpackft",
+        "hf_config": "shell",
+        "split":     "train",
+        "formatter": fmt_commitpackft,
+        "kind":      "sft",
+        "notes":     "Shell-language file-edit commits → JSON Edit tool calls",
+    },
+    "commitpackft-js": {
+        "hf_name":   "bigcode/commitpackft",
+        "hf_config": "javascript",
+        "split":     "train",
+        "formatter": fmt_commitpackft,
+        "kind":      "sft",
+        "notes":     "JavaScript-language file-edit commits → JSON Edit tool calls",
     },
     "xlam": {
         "hf_name":   "Salesforce/xlam-function-calling-60k",
@@ -287,8 +319,13 @@ DATASET_REGISTRY = {
     },
     # Pretraining-style (raw text, \\n\\n joined)
     "cosmopedia": {
+        # The HF repo `HuggingFaceTB/cosmopedia-v2` ships with multiple
+        # configs (cosmopedia-v2, fineweb-edu-dedup, python-edu) — the
+        # bare dataset name without an explicit config raises
+        # "ValueError: Config name is missing". Pick cosmopedia-v2
+        # (the synthetic-textbook one) explicitly.
         "hf_name":   "HuggingFaceTB/cosmopedia-v2",
-        "hf_config": None,
+        "hf_config": "cosmopedia-v2",
         "split":     "train",
         "formatter": fmt_cosmopedia,
         "kind":      "pretrain",

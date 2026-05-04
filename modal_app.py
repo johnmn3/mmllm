@@ -41,7 +41,12 @@ image = (
         "torch>=2.0",
         "numpy>=1.24",
         "basilisp>=0.3",
-        "datasets>=2.14",  # streams Pile-uncopyrighted shards (no auth)
+        "datasets>=2.14,<4.0",  # streams Pile-uncopyrighted shards (no auth).
+                                # Pinned <4.0 because HF deprecated dataset
+                                # scripts in 4.x — bigcode/commitpackft (and
+                                # several other widely-used datasets) still
+                                # ship as scripts. Modern parquet-only
+                                # datasets work fine in 3.x too.
         "zstandard>=0.21",  # for Pile shard decompression
         "modal",            # for in-worker Volume.from_name() during bank sync
         "codecarbon>=2.5",  # energy + CO2 instrumentation; pulls pynvml + RAPL
@@ -88,6 +93,41 @@ publish_image = (
         "apt-get install -qq -y gh",
     )
 )
+
+
+def _maybe_secret(name: str) -> list:
+    """Return [Secret.from_name(name)] if the Secret exists in the
+    current Modal env, else []. Modal validates Secret references at
+    app-init time, so a missing Secret on ANY function decorator
+    blocks the WHOLE app from running — even functions that never
+    reference that Secret. This helper makes a Secret optional:
+    publish-style functions still work (the Secret gets injected as
+    env vars at call time IF present), but other functions in the
+    same app can run even when the Secret hasn't been created.
+
+    Detection: shell out to `modal secret list` (cheap, cached by the
+    Modal CLI). If `name` is in the listing, return a real
+    Secret.from_name; otherwise return []. The publish function
+    raises a clear error at call time if GITHUB_TOKEN ends up unset
+    in env, so users who try to publish without setting up the Secret
+    get a meaningful message rather than a silent failure."""
+    import subprocess
+    try:
+        r = subprocess.run(
+            ["modal", "secret", "list"],
+            capture_output=True, text=True, timeout=10, check=False,
+        )
+        if r.returncode == 0 and name in (r.stdout or ""):
+            return [modal.Secret.from_name(name, required_keys=["GITHUB_TOKEN"])]
+    except Exception:
+        pass
+    return []
+
+
+# Resolved at module-import time. If the user later creates the
+# Secret, they need to re-run their `modal run` command — Modal
+# re-imports the file and picks up the new Secret.
+_PUBLISH_SECRETS = _maybe_secret("github-token")
 
 
 @app.function(
@@ -729,7 +769,11 @@ def quantize_bank(
 @app.function(
     image=publish_image,
     volumes={"/data": volume},
-    secrets=[modal.Secret.from_name("github-token", required_keys=["GITHUB_TOKEN"])],
+    # Conditional Secret reference — see `_maybe_secret` above. If the
+    # 'github-token' Secret is missing the app still loads, but calling
+    # this function will raise a clear "GITHUB_TOKEN not set" error at
+    # the os.environ.get() check in the body.
+    secrets=_PUBLISH_SECRETS,
     timeout=3600,         # 1 h cap — quantize + upload of 5+1 GB total
     cpu=4.0,
     memory=16384,
@@ -1801,7 +1845,10 @@ def _run_eval_agent(base, ckpt_step, bank, test_path, name,
 
 def _do_eval_battery(base, ckpt_step, bank, log_path,
                      sqrt_n, bank_on_gpu, bank_dtype,
-                     bpc_evals, agent_evals, n_samples, gen_len):
+                     bpc_evals, agent_evals, n_samples, gen_len,
+                     bank_query_mode="plain",
+                     bank_feedback_mode="plain",
+                     long_tier_mix="sum"):
     """Body of the eval battery — factored so eval_watcher can call it
     directly (no nested-Modal-function dispatch). Returns the resolved
     ckpt_step (since callers may pass 0 = latest)."""
@@ -1829,10 +1876,18 @@ def _do_eval_battery(base, ckpt_step, bank, log_path,
         print(f"  resolved ckpt_step=latest → {ckpt_step}", flush=True)
 
     env = os.environ.copy()
-    env["MMLLM_DEVICE"]      = "cuda"
-    env["MMLLM_SQRT_N"]      = str(sqrt_n)
-    env["MMLLM_BANK_ON_GPU"] = "true" if bank_on_gpu else "false"
-    env["MMLLM_BANK_DTYPE"]  = bank_dtype
+    env["MMLLM_DEVICE"]             = "cuda"
+    env["MMLLM_SQRT_N"]             = str(sqrt_n)
+    env["MMLLM_BANK_ON_GPU"]        = "true" if bank_on_gpu else "false"
+    env["MMLLM_BANK_DTYPE"]         = bank_dtype
+    # The training-time architectural knobs MUST match at eval time —
+    # ctx-add adds W_ctx per block, feedback adds W_back. If the eval
+    # container builds a model with the wrong knobs, the dense ckpt
+    # load hits a tensor-shape mismatch (82 trained tensors don't fit
+    # into 67 model params, etc).
+    env["MMLLM_BANK_QUERY_MODE"]    = bank_query_mode
+    env["MMLLM_BANK_FEEDBACK_MODE"] = bank_feedback_mode
+    env["MMLLM_LONG_TIER_MIX"]      = long_tier_mix
 
     print(f"=== eval battery base={base} ckpt={ckpt_step} log={log_p} ===",
           flush=True)
@@ -1901,11 +1956,18 @@ def run_eval_battery(
     sqrt_n:      int  = 2048,
     bank_on_gpu: bool = True,
     bank_dtype:  str  = "fp32",
+    # Architectural knobs MUST match what training used — see
+    # _do_eval_battery's MMLLM_BANK_QUERY_MODE / MMLLM_BANK_FEEDBACK_MODE
+    # comment for why. Defaults match the recommended v2 setup
+    # (ctx-add + feedback). Override to 'plain' for v1-style baselines.
+    bank_query_mode:    str = "ctx-add",
+    bank_feedback_mode: str = "feedback",
+    long_tier_mix:      str = "sum",
     bpc_evals:   str  = ("cosmopedia:/data/cosmopedia.test.bin,"
                           "fineweb-edu:/data/fineweb-edu.test.bin,"
                           "the-stack-v2-py:/data/the-stack-v2-py.test.bin"),
-    agent_evals: str  = ("commitpackft:/data/commitpackft.test.bin,"
-                          "xlam:/data/xlam.test.bin"),
+    agent_evals: str  = ("commitpackft-py:/data/commitpackft-py.test.bin,"
+                          "magicoder:/data/magicoder.test.bin"),
     n_samples:   int  = 50,
     gen_len:     int  = 512,
 ):
@@ -1920,13 +1982,18 @@ def run_eval_battery(
         base, ckpt_step, bank, log_path,
         sqrt_n, bank_on_gpu, bank_dtype,
         bpc_evals, agent_evals, n_samples, gen_len,
+        bank_query_mode=bank_query_mode,
+        bank_feedback_mode=bank_feedback_mode,
+        long_tier_mix=long_tier_mix,
     )
 
 
 @app.function(
     image=image,
     volumes={"/data": volume},
-    timeout=86400 * 7,     # up to a week; long training runs are 1-2 weeks
+    timeout=86400,         # Modal caps at 24 h per invocation; the watcher's
+                           # outer loop is idempotent (`<log_path>.seen.txt`)
+                           # so just relaunch it daily for multi-day runs.
     gpu="A10G",
     memory=32768,
 )
@@ -1938,11 +2005,14 @@ def eval_watcher(
     sqrt_n:      int  = 2048,
     bank_on_gpu: bool = True,
     bank_dtype:  str  = "fp32",
+    bank_query_mode:    str = "ctx-add",
+    bank_feedback_mode: str = "feedback",
+    long_tier_mix:      str = "sum",
     bpc_evals:   str  = ("cosmopedia:/data/cosmopedia.test.bin,"
                           "fineweb-edu:/data/fineweb-edu.test.bin,"
                           "the-stack-v2-py:/data/the-stack-v2-py.test.bin"),
-    agent_evals: str  = ("commitpackft:/data/commitpackft.test.bin,"
-                          "xlam:/data/xlam.test.bin"),
+    agent_evals: str  = ("commitpackft-py:/data/commitpackft-py.test.bin,"
+                          "magicoder:/data/magicoder.test.bin"),
     n_samples:   int  = 50,
     gen_len:     int  = 512,
     max_idle_polls: int = 0,                       # 0 = infinite; else stop after N empty polls
@@ -2013,6 +2083,9 @@ def eval_watcher(
                     base, s, bank, log_p,
                     sqrt_n, bank_on_gpu, bank_dtype,
                     bpc_evals, agent_evals, n_samples, gen_len,
+                    bank_query_mode=bank_query_mode,
+                    bank_feedback_mode=bank_feedback_mode,
+                    long_tier_mix=long_tier_mix,
                 )
             except Exception as e:
                 print(f"    WARN: ckpt {s} eval errored: {e} — skipping",
@@ -2191,9 +2264,15 @@ def smoke_pipeline_modal(
     from mmllm.datasets import (DATASET_REGISTRY, inspect_dataset,
                                 prepare_hf_dataset)
 
-    # bigcode/the-stack-v2-dedup requires HF auth + license click-through.
-    # Other datasets in the registry are public.
-    GATED = {"the-stack-v2-py", "the-stack-v2-md", "the-stack-v2-sh"}
+    # Datasets that require HF auth (license click-through or explicit
+    # access grant). Smoke skips these by default; pass --include-gated
+    # to attempt them (also requires HF_TOKEN env / Modal Secret).
+    #   - bigcode/the-stack-v2-dedup: license + auth
+    #   - Salesforce/xlam-function-calling-60k: gated (Salesforce-style
+    #     "click to accept terms" gate; needs HF auth even for public
+    #     read)
+    GATED = {"the-stack-v2-py", "the-stack-v2-md", "the-stack-v2-sh",
+             "xlam"}
 
     Path(smoke_base).mkdir(parents=True, exist_ok=True)
 
@@ -2277,6 +2356,12 @@ def smoke_pipeline_modal(
                 if link.exists() or link.is_symlink():
                     link.unlink()
                 link.symlink_to(target.resolve())
+            # Modal Volumes are eventually consistent across containers —
+            # train_with_bank.remote() spawns a new container that mounts
+            # the same volume, so we have to commit() the symlinks here
+            # or the new container will hit FileNotFoundError on
+            # <train_base>.val.bin.
+            volume.commit()
 
             print(f"  mix: {len(successes)} corpora "
                   f"(uniform 1/{len(successes)} weight each)", flush=True)
@@ -2297,6 +2382,12 @@ def smoke_pipeline_modal(
                     mix=mix,
                     publish_after=False,       # phase 4 below handles publish
                 )
+                # Pull in any volume writes the training container made
+                # (ckpts, log, bank-latest). Without this, listdir() on
+                # ckpts_dir returns the smoke container's stale view —
+                # we'd see no step-<N> dirs even though the training
+                # container wrote several.
+                volume.reload()
                 ckpts_dir = Path(f"{train_base}.ckpts")
                 if ckpts_dir.is_dir():
                     steps = [int(m.group(1))
@@ -2339,6 +2430,12 @@ def smoke_pipeline_modal(
                     log_path=f"{train_base}.eval.jsonl",
                     sqrt_n=64,
                     bank_on_gpu=True,
+                    # Mirror the architectural knobs the smoke training
+                    # used (see phase-2 train_with_bank.remote call) — the
+                    # eval container must build a model with matching
+                    # shape or dense ckpt load fails.
+                    bank_query_mode="ctx-add",
+                    bank_feedback_mode="feedback",
                     bpc_evals=bpc_evals,
                     agent_evals=agent_evals,
                     n_samples=3,
