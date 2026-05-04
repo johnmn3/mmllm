@@ -723,6 +723,45 @@
            (recur (inc step) new-s new-l new-log
                   (torch/cat (python/list [toks next-tok]) ** :dim 1))))))))
 
+(defn sample-batch
+  "Phase-2 continuous-batching decoder. Decodes `n` tokens in
+   parallel for B independent sequences, all kicked off from the
+   same prompt (synchronized batching: every forward processes a
+   (B, 1) batch). Measures pure batched-matmul throughput without
+   ragged-batch padding/masking complications.
+
+   Dense Linear matmuls become (B, in)·(in, out) GEMMs with
+   substantially better throughput per FLOP than B independent
+   (1, in)·(in, out) calls. Bank K_a/K_b matmuls batch the same
+   way; bank V row gather is per-batch-row (each sequence has its
+   own top-K).
+
+   Per-sequence KV cache: ~21 MB at MAX_T=4096 + 5 layers + (k+v)
+   for both short and long tiers. At B=64 → ~1.3 GB cache RAM.
+   Bank itself is shared (one mmap regardless of B).
+
+   Returns nil — this is a throughput bench, not a real generator.
+   A production server would interleave per-user prompts with an
+   attention mask + per-sequence positions; deferred."
+  [m prompt n B]
+  (set-eval-mode! m)
+  (let [device                 (:device m)
+        prompt-1               (-> prompt encode (.unsqueeze 0) (.to device))
+        T-prompt               (.size prompt-1 1)
+        prompt-toks            (.contiguous (.expand prompt-1 B T-prompt))
+        [logits short long]    (forward m prompt-toks)]
+    (loop [step    0
+           short-c short
+           long-c  long
+           prev    logits]
+      (if (= step n)
+        nil
+        (let [last-log              (.select prev 1 -1)
+              probs                 (F/softmax last-log ** :dim -1)
+              next-tok              (torch/multinomial probs 1)
+              [new-log new-s new-l] (forward m next-tok short-c long-c)]
+          (recur (inc step) new-s new-l new-log))))))
+
 ;;; ─────────────────────── inference benchmark ───────────────────────
 
 (defn bench-inference
@@ -851,6 +890,55 @@
                            (.get stats "n_outer_iters")
                            (.get stats "n_resampled")
                            (.get stats "avg_tokens_per_iter")))))
+      (finally
+        (torch/set_grad_enabled true)))))
+
+(defn bench-inference-batch
+  "Phase-2 continuous-batching bench. Decodes n_time tokens for B
+   parallel sequences via `sample-batch`. Reports per-sequence
+   tok/sec and aggregate (B × per-sequence) tok/sec.
+
+   At B=1 should match `bench-inference`. At B=4-64 the aggregate
+   should grow with batched-matmul throughput up to a saturation
+   point (typically B ≈ 32-64 on a few-core CPU)."
+  [config base-path ckpt-step bank-path n-warm n-time B]
+  (let [cfg    (assoc config :memory-mmap-path bank-path)
+        m      (build-model cfg)
+        device (:device m)]
+    (when ckpt-step
+      (let [path  (str base-path ".ckpts/step-" ckpt-step)
+            saved (python/list (torch/load (str path "/dense.pt")
+                                           ** :map_location device))]
+        (println (format "  loaded ckpt: %s (%d dense param tensors)" path (count saved)))
+        (doseq [[p s] (map vector (parameters m) saved)]
+          (.copy_ (.- p data) s))))
+    (set-eval-mode! m)
+    (torch/set_grad_enabled false)
+    (println (format "  device=%s  bank_on_gpu=%s  sqrt_n=%d  bank=%s  B=%d"
+                     device
+                     (.lower (.get (.- os environ) "MMLLM_BANK_ON_GPU" "false"))
+                     (pick-sqrt-n config)
+                     bank-path B))
+    (try
+      (let [prompt "the quick brown fox jumps over the lazy dog. "]
+        (println (format "  warmup: %d tokens × B=%d …" n-warm B))
+        (sample-batch m prompt n-warm B)
+        (when (= device "cuda") (cuda/synchronize))
+        (println (format "  timed:  %d tokens × B=%d …" n-time B))
+        (let [t0  (time/time)
+              _   (sample-batch m prompt n-time B)
+              _   (when (= device "cuda") (cuda/synchronize))
+              dt  (- (time/time) t0)
+              per-seq-tps (/ (python/float n-time) dt)
+              agg-tps     (* B per-seq-tps)
+              ms          (* 1000.0 (/ dt (python/float n-time)))]
+          (println)
+          (println (format "  RESULT batch B=%d: %d tokens/seq in %.3fs"
+                           B n-time dt))
+          (println (format "    per-sequence: %.2f tok/sec  (%.3f ms/tok)"
+                           per-seq-tps ms))
+          (println (format "    aggregate:    %.2f tok/sec  (%d × per-seq)"
+                           agg-tps B))))
       (finally
         (torch/set_grad_enabled true)))))
 
@@ -1474,6 +1562,14 @@
                             n-time    (python/int (or (nth args 5 nil) 200))
                             K         (python/int (or (nth args 6 nil) 4))]
                         (bench-inference-spec cfg base ckpt-step bank-path n-warm n-time K)
+                        (println "done."))
+      "bench-batch"   (let [base      (or (second args) "/data/pile-github.bin")
+                            ckpt-step (when (nth args 2 nil) (python/int (nth args 2 nil)))
+                            bank-path (or (nth args 3 nil) "/data/pile-bank-3tier")
+                            n-warm    (python/int (or (nth args 4 nil) 20))
+                            n-time    (python/int (or (nth args 5 nil) 100))
+                            B         (python/int (or (nth args 6 nil) 16))]
+                        (bench-inference-batch cfg base ckpt-step bank-path n-warm n-time B)
                         (println "done."))
       "bank-quantize" (let [in-prefix  (or (second args) "/data/pile-bank-3tier")
                             out-prefix (or (nth args 2 nil) "/data/pile-bank-3tier-int8")
