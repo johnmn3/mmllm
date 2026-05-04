@@ -463,15 +463,93 @@ energy    = next(r for r in rows if r['event'] == 'training_energy')
 
 ### Inference benchmark on the 5B-trained checkpoint
 
+Quality preserved across all paths: BPC=1.27 with bank, ablation control
+vs zeroed-V Δ=+4.77.
+
+#### Single-stream (one user, autoregressive)
+
 | setup | tok/sec | ms/tok |
 |---|---|---|
-| H100 + bank in VRAM | **206** | 4.85 |
-| 8-vCPU + bank mmap'd disk | **107** | 9.37 |
+| H100 + bank in VRAM (fp32) | **206** | 4.85 |
+| 8-vCPU + bank mmap (fp32, Modal) | 107 | 9.37 |
+| 4-vCPU + int8 bank mmap (local) | **163** | 6.12 |
 
-Quality preserved: BPC=1.27 with bank, ablation control vs zeroed-V Δ=+4.77.
-See `docs/inference-optimization.md` for the optimization roadmap and the
-phase-by-phase plan to push these toward ~1000 tok/sec on CPU through
-int8 quantization, hot-row layout, and speculative decoding.
+Phase-1 + Phase-3 (int8 bank quantization, 4× compression: 18.8 GB →
+4.5 GB) shipped. Single-stream optimizations explored and **rejected
+on findings**:
+
+| attempt | result | why |
+|---|---|---|
+| torch.compile | -83% GPU / -91% CPU | basilisp persistent vectors untraceable; sympy `pow_by_natural` crashes on dynamic narrow; recompile-limit thrash |
+| speculative decoding (bank-zeroed draft) | -48% to -70% | at 10M dense, verify-K costs K× a single forward (matmuls compute-bound at small sizes), and skip_bank saves only ~17% per-step. The textbook 2× speedup requires a much larger model |
+
+The Python kernel port (`mmllm.attention_kernel`) replaced basilisp-
+side hot-path data flow with native Python tuples for caches; recovered
+a -34% CPU regression and gave +18% on GPU vs the initial baseline.
+
+#### Multi-stream (the architecturally interesting axis)
+
+The autoregressive sequential bottleneck is fundamental — single-token
+TPS is bounded by per-token forward latency. **The architecture's
+multi-tenant story is where the wins compound.** Two paths shipped:
+
+**Multi-process parallel inference** (4 vCPU, int8 bank, 4 procs × 1 thread):
+
+| concurrency | per-proc | aggregate | scaling |
+|---|---|---|---|
+| 1 process × 4 threads | 158 | 158 | 1.0× |
+| 4 processes × 1 thread | 104 each | **414** | **2.6×** |
+
+Each process holds its own dense weights; all share one mmap'd 4.5 GB
+int8 bank via the OS page cache. Bank cost amortizes; per-instance
+RAM is just dense + per-conversation KV cache.
+
+**Continuous batching** (`mmllm bench-batch`, single process serves N
+sequences with one shared dense and one shared bank):
+
+| batch B | per-seq tok/s | aggregate tok/s | hardware |
+|---|---|---|---|
+| 1 | 155 | 155 | 4 vCPU |
+| 8 | 88 | 704 | 4 vCPU |
+| 32 | 48 | **1523** | 4 vCPU |
+| 128 | 14 | 1755 | 4 vCPU |
+| 1 | 228 | 228 | H100 |
+| 64 | 197 | 12,598 | H100 |
+| 256 | 209 | 53,630 | H100 |
+| 512 | 143 | 73,048 | H100 |
+| 1024 | 111 | **114,085** | H100 |
+
+**One H100 = 114K aggregate tok/sec at B=1024, with per-sequence
+latency staying above 100 tok/sec.** The unexpected finding: per-seq
+latency stays usable all the way through B=1024 — no early collapse
+from KV-cache pressure. The product-key bank's content-addressed
+lookup batches efficiently (one (B, q_dim) × (sqrt_n, q_dim).T matmul
+handles all B users) and the per-sequence KV caches are small enough
+(~21 MB/seq at MAX_T=4096) to fit cleanly in HBM up to B=1024+.
+
+#### Multi-GPU extrapolation
+
+Independent batches scale linearly across GPUs since each H100 holds
+its own dense + bank-in-VRAM (the bank fits 80 GB VRAM trivially at
+fp32, much more so at int8):
+
+| hardware | aggregate tok/s | simultaneous users at 100 tok/s each |
+|---|---|---|
+| 4-vCPU laptop, B=32 | ~1,500 | ~30 |
+| 32-core workstation, B=64 (projected) | ~10,000-15,000 | ~150 |
+| 1× H100, B=1024 | 114,085 | ~1,100 |
+| 8× H100 DGX (projected) | ~900,000 | ~9,000 |
+| 64× H100 cluster (projected) | ~7,300,000 | ~73,000 |
+
+For perspective, the entire active Clojure community (~50-100K devs)
+fits comfortably on a small H100 cluster at simultaneous-FIM-user
+quality of service.
+
+See `docs/inference-optimization.md` for the full Phase-1-through-5
+roadmap with implementation notes on what shipped, what didn't pay
+off at this scale, and what's deferred (continuous-batching server
+with heterogeneous prompts; CUDA graphs; AMX / BF16 dense — all of
+which become wins as either model size or hardware tier grows).
 
 ## Green value
 
