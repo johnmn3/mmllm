@@ -367,12 +367,40 @@ mmllm train-corpus [corpus-path] [mmap-path] [steps]
                                              # train on any binary corpus file
 ```
 
+### Pile-Github corpus
+
+```
+mmllm fetch-pile-github [out-path] [max-bytes] [workers]
+                                             # download Pile-Github corpus (parallel streaming)
+mmllm split-pile-github [in-path] [val-bytes] [test-bytes]
+                                             # split into train/val/test
+```
+
 ### mmap / long-running
 
 ```
 mmllm train-mmap [base-path]                 # train with mmap-backed bank (creates <path>.0.bin … <path>.N.bin)
 mmllm train-long [base-path] [mmap-path] [total-steps] [eval-every] [ckpt-every]
                                              # periodic eval-BPC + checkpoints; resumes from <base>.ckpts/
+```
+
+### Inference benchmarking
+
+```
+mmllm bench       [base] [ckpt-step] [bank-path] [n-warm] [n-time]
+                                             # B=1 single-sequence tok/sec
+mmllm bench-batch [base] [ckpt-step] [bank-path] [n-warm] [n-time] [B]
+                                             # B parallel sequences; reports per-seq and aggregate tok/sec
+mmllm bench-spec  [base] [ckpt-step] [bank-path] [n-warm] [n-time] [K]
+                                             # speculative decoding: draft K, verify in parallel
+```
+
+### Artifacts & quantization
+
+```
+mmllm fetch-artifacts [out-dir] [url]        # download release artifacts from GitHub
+mmllm bank-quantize [in-prefix] [out-prefix] [n-layers]
+                                             # fp32 bank → int8 + per-row fp16 scale (~4× compression)
 ```
 
 ## Metrics
@@ -830,14 +858,26 @@ in `core.lpy`.
 mmllm/
 ├── pyproject.toml
 ├── modal_app.py             # Modal cloud training (text8, Pile-Github, Hogwild)
+├── scripts/
+│   └── release-artifacts.sh # publish trained artifacts to GitHub Releases
+├── docs/
+│   └── inference-optimization.md  # phased inference optimization roadmap
 ├── src/mmllm/
 │   ├── __init__.py
 │   ├── _entry.py            # python shim → basilisp bootstrap + torch polyfills
 │   ├── core.lpy             # model, training loop, CLI — all of it
-│   ├── memory.py            # ProductKeyMemory, CPUPinnedEmbedding, PagedMmapStorage
+│   ├── memory.py            # ProductKeyMemory, Int8ProductKeyMemory, PagedMmapStorage
 │   ├── longcache.py         # paged LRU mmap KV cache (long-tier episodic store)
 │   ├── corpus.py            # text8, enwik8, Pile-Github, Clojure corpus loaders
-│   └── optim.py             # CPUOffloadSparseAdam
+│   ├── optim.py             # CPUOffloadSparseAdam
+│   ├── gating.py            # SumGate, ScalarGate, SwitchGate (long-tier path mixing)
+│   ├── bank_query.py        # PlainBankQuery, CtxAddBankQuery (dense→bank query shaping)
+│   ├── bank_feedback.py     # bank→dense feedback path (bidirectional retrieval)
+│   ├── metrics.py           # EnergyTracker (kWh, gCO2eq, J/tok instrumentation)
+│   ├── artifacts.py         # fetch-artifacts: download release bundles from GitHub
+│   ├── attention_kernel.py  # custom attention kernels
+│   ├── runtime.py           # inference runtime helpers (torch.compile wrapper)
+│   └── spec_decode.py       # speculative decoding
 └── tests/
     ├── __init__.py
     └── test_smoke.lpy       # forward-pass shape + cache checks
