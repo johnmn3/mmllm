@@ -171,6 +171,44 @@ to $3/hr), latest training step, latest val bpc, and the last 10
 ckpt step numbers on the volume. Use it to confirm a session ran the
 expected duration before paying for the next one.
 
+## Pre-flight smoke tests
+
+**Local CPU smoke** — free, ~45-90s, runs the full pipeline against
+synthetic data:
+
+```bash
+python scripts/smoke_phase0.py
+```
+
+Exercises ChatTemplate, formatters, mix sampler, max-hours session
+timeout branch, save-checkpoint! → bank-latest writes, eval-bpc-on-path,
+eval-agent. Catches integration bugs that would otherwise burn Modal $.
+
+**Modal smoke** — exercises every dataset formatter against real HF
+sources + (optionally) training, eval, and publish:
+
+```bash
+# Default: prep + inspect every public dataset (~$0.05-0.15)
+modal run modal_app.py::smoke_pipeline_modal
+
+# Add a 3-min training session on H100 (+ ~$0.15)
+modal run modal_app.py::smoke_pipeline_modal --include-train
+
+# Add the eval battery on A10G (+ ~$0.10)
+modal run modal_app.py::smoke_pipeline_modal --include-train --include-eval
+
+# Add the GitHub Release publish (+ ~$0.02; needs github-token Secret)
+modal run modal_app.py::smoke_pipeline_modal \
+    --include-train --include-eval --include-publish
+
+# Include gated bigcode/the-stack-v2-dedup datasets (needs HF token setup)
+modal run modal_app.py::smoke_pipeline_modal --include-gated
+```
+
+Default cost ~$0.10. Everything-on ~$0.40. Per-dataset failures are
+captured in the summary rather than aborting the whole smoke. Run
+this before the first real session to confirm the cloud paths work.
+
 ## Auto-publishing ckpts to GitHub Release
 
 Each session's output (dense.pt + int8-quantized bank V) can be

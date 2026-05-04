@@ -2112,6 +2112,303 @@ def progress_report(base: str = "/data/agent-corpus",
         print(f"    ... ({len(ckpt_steps) - 10} earlier)", flush=True)
 
 
+# ─────────────────────── Modal-side pipeline smoke ───────────────────────
+#
+# End-to-end Modal smoke: preps a small slice of every registered
+# dataset, optionally trains for ~3 min on H100, optionally runs the
+# eval battery, optionally publishes to GitHub Release. Each phase is
+# behind an --include-* flag so the operator controls cost.
+#
+# Cost budget (single H100 ≈ $3/hr, A10G ≈ $1.10/hr, CPU ≈ $0.05/hr):
+#
+#   default (prep + inspect only):                     ~$0.05-0.15
+#   + --include-train (3 min H100):                    + ~$0.15
+#   + --include-eval (5 min A10G):                     + ~$0.10
+#   + --include-publish (CPU upload to GH Release):    + ~$0.02
+#
+# Total at "everything enabled": ~$0.30-0.45.
+#
+# Auth requirements (degrade gracefully if absent):
+#   - HF_TOKEN env (Modal Secret 'huggingface-token' if you want the
+#     gated bigcode/the-stack-v2-dedup datasets — pass --include-gated).
+#     Smoke currently doesn't auto-load it; set up via:
+#       modal secret create huggingface-token HF_TOKEN=hf_xxx
+#     then add `secrets=[Secret.from_name("huggingface-token")]` to
+#     this function's decorator. Without it, gated datasets fail with
+#     a clear WARN and the smoke continues with the public ones.
+#   - GITHUB_TOKEN — needed only for --include-publish. Set up via the
+#     existing 'github-token' Modal Secret (see publish_ckpt_to_github).
+
+
+@app.function(
+    image=publish_image,        # has gh CLI for the optional publish phase
+    volumes={"/data": volume},
+    timeout=14400,              # 4 h cap (worst case: 8 datasets × HF stream)
+    cpu=4.0,
+    memory=32768,
+)
+def smoke_pipeline_modal(
+    smoke_base:        str  = "/data/_smoke",
+    cap_bytes:         int  = 50_000_000,    # 50 MB per dataset
+    val_bytes:         int  = 500_000,
+    test_bytes:        int  = 500_000,
+    skip_existing:     bool = True,          # idempotent re-runs
+    include_gated:     bool = False,         # try bigcode/the-stack-v2-dedup
+    include_train:     bool = False,         # spawn ~3-min H100 session (~$0.15)
+    include_eval:      bool = False,         # spawn eval battery on A10G (~$0.10)
+    include_publish:   bool = False,         # publish ckpt to GH Release (~$0.02)
+    publish_tag_prefix: str = "agent-smoke", # keep separate from real run tags
+    publish_gh_repo:    str = "johnmn3/mmllm",
+    cleanup_after:      bool = False,        # remove /data/_smoke* on success
+):
+    """End-to-end Modal pipeline smoke against small slices of every
+    registered dataset.
+
+    Phases (all gated behind --include-* flags except prep+inspect):
+
+      1. prep + inspect          — for each dataset key in DATASET_REGISTRY
+                                    (skips gated ones unless --include-gated)
+      2. training (--include-train) — 3-min H100 session over a small mix
+                                       of whatever just prepped successfully
+      3. eval battery (--include-eval) — bpc + agentic against held-out splits
+      4. publish (--include-publish) — int8-quantize bank + upload to a
+                                        <tag-prefix>-step-<N> GH Release
+
+    Smoke artifacts land at <smoke_base>/<dataset-key>.bin (+ .train/.val/.test).
+    Pass --cleanup-after to remove them on success.
+
+    Per-dataset failures are captured + reported in the final summary
+    rather than aborting the whole smoke (so a single flaky HF dataset
+    or a missing Secret doesn't poison the rest).
+    """
+    import os
+    import re
+    import shutil
+    import time
+    import traceback
+    from pathlib import Path
+
+    from mmllm.datasets import (DATASET_REGISTRY, inspect_dataset,
+                                prepare_hf_dataset)
+
+    # bigcode/the-stack-v2-dedup requires HF auth + license click-through.
+    # Other datasets in the registry are public.
+    GATED = {"the-stack-v2-py", "the-stack-v2-md", "the-stack-v2-sh"}
+
+    Path(smoke_base).mkdir(parents=True, exist_ok=True)
+
+    keys = sorted(DATASET_REGISTRY.keys())
+    if not include_gated:
+        keys = [k for k in keys if k not in GATED]
+
+    # ── phase 1: prep + inspect ──
+    print(f"=== smoke phase 1: prep + inspect {len(keys)} datasets ===",
+          flush=True)
+    print(f"  cap={cap_bytes/1e6:.0f} MB per dataset, base={smoke_base}",
+          flush=True)
+    if not include_gated:
+        print(f"  (skipping gated: {sorted(GATED)} — pass --include-gated + "
+              f"set up huggingface-token Secret to enable)",
+              flush=True)
+    successes_sft  = []
+    successes_ptr  = []   # pretraining-style
+    failures       = []
+    for key in keys:
+        spec = DATASET_REGISTRY[key]
+        out_path = f"{smoke_base}/{key}.bin"
+        train_p = Path(f"{out_path}.train.bin")
+
+        if skip_existing and train_p.exists() and train_p.stat().st_size > 0:
+            sz = sum(Path(f"{out_path}.{s}.bin").stat().st_size
+                     for s in ("train", "val", "test")
+                     if Path(f"{out_path}.{s}.bin").exists())
+            print(f"  ✓ [{key}] cached on volume ({sz/1e6:.1f} MB total) — skipping",
+                  flush=True)
+            (successes_sft if spec["kind"] == "sft" else successes_ptr).append(key)
+            continue
+
+        print(f"  → [{key}] preparing ({spec['hf_name']}, "
+              f"{'sft' if spec['kind'] == 'sft' else 'pretrain'})",
+              flush=True)
+        try:
+            t0 = time.time()
+            stats = prepare_hf_dataset(
+                key, out_path,
+                max_bytes=cap_bytes,
+                val_bytes=val_bytes, test_bytes=test_bytes,
+            )
+            head = inspect_dataset(out_path, 400)
+            dt = time.time() - t0
+            print(f"  ✓ [{key}] {stats['n_records']} records / "
+                  f"{stats['bytes']/1e6:.1f} MB in {dt:.1f}s",
+                  flush=True)
+            head_oneline = head[:200].replace("\n", " ⏎ ")
+            print(f"    head: {head_oneline}…", flush=True)
+            (successes_sft if spec["kind"] == "sft" else successes_ptr).append(key)
+        except Exception as e:
+            print(f"  ✗ [{key}] failed: {type(e).__name__}: {e}", flush=True)
+            failures.append((key, f"{type(e).__name__}: {e}"))
+    volume.commit()
+    successes = successes_sft + successes_ptr
+    print(f"  → phase 1 done: {len(successes)} ok, {len(failures)} failed",
+          flush=True)
+
+    train_step = None
+    train_base = f"{smoke_base}/_train"
+    train_bank = f"{smoke_base}/_bank"
+
+    # ── phase 2: training (optional) ──
+    if include_train:
+        print(f"\n=== smoke phase 2: ~3-min training session ===", flush=True)
+        if not successes:
+            print(f"  no datasets prepared — skipping training", flush=True)
+        else:
+            mix_parts = [f"{smoke_base}/{k}.bin.train.bin:1" for k in successes]
+            mix = ",".join(mix_parts)
+
+            # train-long needs <base>.{train,val,test}.bin to exist. Symlink
+            # them to the first successful prep so val drives eval-bpc; the
+            # train link is unused when MMLLM_MIX is set but train-long still
+            # opens it on the no-mix path before checking the env var.
+            first = successes[0]
+            for split in ("train", "val", "test"):
+                link = Path(f"{train_base}.{split}.bin")
+                target = Path(f"{smoke_base}/{first}.bin.{split}.bin")
+                if link.exists() or link.is_symlink():
+                    link.unlink()
+                link.symlink_to(target.resolve())
+
+            print(f"  mix: {len(successes)} corpora "
+                  f"(uniform 1/{len(successes)} weight each)", flush=True)
+            print(f"  H100 cap: 3 min (max_hours=0.05) → ~$0.15", flush=True)
+            try:
+                train_with_bank.remote(
+                    base=train_base, bank=train_bank,
+                    total_steps=100000,        # well above what we'd hit in 3 min
+                    eval_every=200,
+                    ckpt_every=100,
+                    max_hours=0.05,            # ~3 min cap
+                    batch=4,
+                    sqrt_n=64,                 # tiny bank for fast iter
+                    lr=1e-3,
+                    bank_query_mode="ctx-add",
+                    bank_feedback_mode="feedback",
+                    ablate_every=0,            # skip ablation in smoke
+                    mix=mix,
+                    publish_after=False,       # phase 4 below handles publish
+                )
+                ckpts_dir = Path(f"{train_base}.ckpts")
+                if ckpts_dir.is_dir():
+                    steps = [int(m.group(1))
+                             for m in (re.match(r"step-(\d+)$", d.name)
+                                       for d in ckpts_dir.iterdir())
+                             if m]
+                    if steps:
+                        train_step = max(steps)
+                        print(f"  ✓ training: latest ckpt at step-{train_step}",
+                              flush=True)
+                if train_step is None:
+                    print(f"  ✗ training completed but no ckpt found at "
+                          f"{ckpts_dir} — session may have aborted before "
+                          f"first ckpt-every boundary",
+                          flush=True)
+            except Exception as e:
+                print(f"  ✗ training failed: {type(e).__name__}: {e}", flush=True)
+                traceback.print_exc()
+
+    # ── phase 3: eval battery (optional) ──
+    if include_eval:
+        print(f"\n=== smoke phase 3: eval battery ===", flush=True)
+        if train_step is None:
+            print(f"  no ckpt available — skipping eval battery (need "
+                  f"--include-train to produce one)",
+                  flush=True)
+        else:
+            agent_evals = ",".join(
+                f"{k}:{smoke_base}/{k}.bin.test.bin" for k in successes_sft)
+            bpc_evals = ",".join(
+                f"{k}:{smoke_base}/{k}.bin.test.bin" for k in successes_ptr)
+            print(f"  bpc evals: {len(successes_ptr)}  agent evals: "
+                  f"{len(successes_sft)}",
+                  flush=True)
+            try:
+                run_eval_battery.remote(
+                    base=train_base,
+                    ckpt_step=train_step,
+                    bank=train_bank,
+                    log_path=f"{train_base}.eval.jsonl",
+                    sqrt_n=64,
+                    bank_on_gpu=True,
+                    bpc_evals=bpc_evals,
+                    agent_evals=agent_evals,
+                    n_samples=3,
+                    gen_len=128,
+                )
+                print(f"  ✓ eval battery completed", flush=True)
+            except Exception as e:
+                print(f"  ✗ eval failed: {type(e).__name__}: {e}", flush=True)
+
+    # ── phase 4: publish (optional) ──
+    if include_publish:
+        print(f"\n=== smoke phase 4: publish ckpt to GH Release ===", flush=True)
+        if train_step is None:
+            print(f"  no ckpt available — skipping publish "
+                  f"(need --include-train)",
+                  flush=True)
+        else:
+            try:
+                publish_result = publish_ckpt_to_github.remote(
+                    base=train_base, ckpt_step=0,
+                    gh_repo=publish_gh_repo,
+                    tag_prefix=publish_tag_prefix,
+                    n_layers=5, q_dim=224,
+                    update_latest=True,
+                    notes=f"Smoke run ({publish_tag_prefix}). DELETE after validation.",
+                )
+                print(f"  ✓ published: {publish_result.get('release_url')}",
+                      flush=True)
+            except Exception as e:
+                print(f"  ✗ publish failed: {type(e).__name__}: {e}\n"
+                      f"    (most likely cause: 'github-token' Modal Secret "
+                      f"missing or PAT lacks repo:write scope)",
+                      flush=True)
+
+    # ── cleanup ──
+    if cleanup_after:
+        print(f"\n=== cleanup: removing {smoke_base}* ===", flush=True)
+        try:
+            for p in Path("/data").glob("_smoke*"):
+                if p.is_dir():
+                    shutil.rmtree(p)
+                else:
+                    p.unlink()
+            volume.commit()
+            print(f"  ✓ cleaned", flush=True)
+        except Exception as e:
+            print(f"  ✗ cleanup failed: {e}", flush=True)
+
+    # ── summary ──
+    print(f"\n=== smoke summary ===", flush=True)
+    print(f"  prep ok ({len(successes)}): {successes}", flush=True)
+    if failures:
+        print(f"  prep failed ({len(failures)}):", flush=True)
+        for k, e in failures:
+            print(f"    [{k}] {e}", flush=True)
+    if include_train:
+        print(f"  training: {'step ' + str(train_step) if train_step else 'no ckpt'}",
+              flush=True)
+    print(f"  artifacts: {smoke_base}/<key>.bin (+ .train/.val/.test) "
+          f"{'(cleaned)' if cleanup_after else '(retained — pass --cleanup-after to clear)'}",
+          flush=True)
+
+    return {
+        "prep_ok":     successes,
+        "prep_fail":   failures,
+        "train_step":  train_step,
+        "smoke_base":  smoke_base,
+    }
+
+
 @app.local_entrypoint()
 def main(
     steps: int = 100000,
