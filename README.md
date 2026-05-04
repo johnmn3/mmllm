@@ -173,6 +173,7 @@ all-at-once with the smoke runbook below.
 | `commitpackft-md` | `bigcode/commitpackft` (markdown) | Markdown editing | ~700 MB |
 | `commitpackft-sh` | `bigcode/commitpackft` (shell) | Shell script editing | ~600 MB |
 | `commitpackft-js` | `bigcode/commitpackft` (javascript) | JavaScript editing | ~700 MB |
+| `commitpackft-clj` | `bigcode/commitpackft` (clojure) | Clojure file-edit signal — fast path to the eventual Clojure-assistant target | ~150 MB |
 | `magicoder` | `ise-uiuc/Magicoder-Evol-Instruct-110K` | Code instruction-following scaffolding | ~250 MB |
 | `cosmopedia` | `HuggingFaceTB/cosmopedia-v2` | Synthetic textbook-quality general text — distillation flavor without doing the distillation | up to 25 GB |
 | `fineweb-edu` | `HuggingFaceFW/fineweb-edu` (10BT sample) | Curated educational web text — general world knowledge | up to 30 GB |
@@ -181,7 +182,7 @@ all-at-once with the smoke runbook below.
 | `code-contests` | `deepmind/code_contests` | Competitive programming problems paired with **both accepted and rejected solutions**. Each chat-wrapped record is `(problem, code, verdict)` so the model sees the boundary between code that works and code that doesn't. | ~5 GB |
 | `theorem-qa` | `TIGER-Lab/TheoremQA` | Theorem statements + answers across Calculus, Topology, Number Theory, etc. Compact formal-reasoning Q&A. | <100 MB |
 | `xlam` (gated) | `Salesforce/xlam-function-calling-60k` | Native JSON function-call traces; teaches the canonical tool-call shape. Requires HF token. | ~150 MB |
-| `the-stack-v2-{py,md,sh}` (gated) | `bigcode/the-stack-v2-dedup` | Code corpus for general-language fluency. Requires HF token + license click-through. | TB-scale, capped per slice |
+| `the-stack-v2-{py,md,sh,clj}` (gated) | `bigcode/the-stack-v2-dedup` | Per-language code subsets — Python, Markdown, Shell, **Clojure**. Requires HF token + license click-through. | TB-scale, capped per slice |
 
 **Default mix proportions** for a slow-walk session (operator sets via
 `--mix "<path1>:<weight>,..."`; see [`docs/slow-walk-budget-plan.md`](./docs/slow-walk-budget-plan.md)).

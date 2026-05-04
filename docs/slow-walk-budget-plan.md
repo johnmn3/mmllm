@@ -62,6 +62,48 @@ comparable training-volume territory.
 steps/hour number we can calibrate against. Use `progress_report`
 to read it back.
 
+## One-time Modal Secret setup
+
+Two Modal Secrets unlock optional features. Both are conditional —
+the app loads fine without them, you just lose the corresponding
+features. Set them up once via the `modal` CLI from your terminal
+(NOT in chat — pasting a token in chat triggers GitHub's auto-revoke):
+
+```bash
+# (a) HuggingFace token — unlocks gated datasets:
+#       bigcode/the-stack-v2-dedup (Python/Markdown/Shell/Clojure subsets)
+#       Salesforce/xlam-function-calling-60k
+#     Get from huggingface.co/settings/tokens (read-only is fine).
+#     Also click the license-acknowledgement on each gated dataset's HF page.
+modal secret create huggingface-secret HF_TOKEN=hf_xxxxxxxxxxxx
+
+# (b) GitHub token — unlocks --publish-after for train_with_bank.
+#     Each session ends with the bank quantized to int8 + uploaded to a
+#     `agent-step-<N>` (immutable) + `agent-latest` (force-replaced) GitHub
+#     release. Get a fine-grained PAT from
+#     github.com/settings/personal-access-tokens with `Contents: Read+Write`
+#     scope on the johnmn3/mmllm repo.
+modal secret create github-token GITHUB_TOKEN=ghp_xxxxxxxxxxxx
+```
+
+Verify:
+
+```bash
+modal secret list
+```
+
+Both Secret refs in `modal_app.py` are conditional via `_maybe_secret`
++ `_hf_secret` helpers — they probe `modal secret list` at module-import
+time and only inject the Secret into function decorators when the named
+Secret exists. So:
+
+| Secret state | Behavior |
+|---|---|
+| Neither set up | Public datasets prep fine; gated datasets fail with clear "DatasetNotFoundError" warn; `--publish-after` fails clearly post-training |
+| Only `huggingface-secret` | Gated dataset preps work; publish skipped |
+| Only `github-token` | Public datasets only; publish works |
+| Both | Full feature set |
+
 ## One-time prod prep
 
 Before the first paid training session, stage all the public datasets

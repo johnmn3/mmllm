@@ -134,6 +134,35 @@ def _maybe_secret(name: str) -> list:
 # re-imports the file and picks up the new Secret.
 _PUBLISH_SECRETS = _maybe_secret("github-token")
 
+# HF token for gated datasets (bigcode/the-stack-v2-dedup,
+# Salesforce/xlam-function-calling-60k, etc.). Same conditional
+# pattern: if the Secret exists in the Modal env, prepare_hf_dataset
+# (and any other function that calls into mmllm.datasets) gets
+# HF_TOKEN injected and the gated streams work; if not, gated dataset
+# preps fail with a clear "DatasetNotFoundError: gated repo" error
+# and the public datasets continue to work.
+def _hf_secret():
+    """Look up Modal's standard 'huggingface-secret' name first
+    (Modal's recommended convention exposes HF_TOKEN), then fall
+    back to a user-created 'huggingface-token'. Returns the first
+    one that exists, or [] if neither does."""
+    import subprocess
+    try:
+        r = subprocess.run(
+            ["modal", "secret", "list"],
+            capture_output=True, text=True, timeout=10, check=False,
+        )
+        out = r.stdout or ""
+        for name in ("huggingface-secret", "huggingface-token"):
+            if name in out:
+                return [modal.Secret.from_name(name, required_keys=["HF_TOKEN"])]
+    except Exception:
+        pass
+    return []
+
+
+_HF_SECRETS = _hf_secret()
+
 
 @app.function(
     image=image,
@@ -1763,6 +1792,9 @@ def train_multi_b(bases: str = "/data/text8,/data/pile-github.bin",
 @app.function(
     image=image,
     volumes={"/data": volume},
+    secrets=_HF_SECRETS,   # injects HF_TOKEN if 'huggingface-secret' or
+                           # 'huggingface-token' Modal Secret exists; gated
+                           # datasets (the-stack-v2-*, xlam, ...) need this
     timeout=86400,         # 24 h — large pretraining-style sources stream slow
     cpu=4.0,
     memory=32768,          # 32 GB — formatter buffers + records held in flight
@@ -1852,18 +1884,24 @@ def inspect_dataset_remote(path: str, n_chars: int = 4000):
 #
 # Total ~24 GB on volume after all preps complete.
 PROD_CAPS = {
-    # key                  max_bytes        val_bytes   test_bytes
-    "commitpackft-py":  (2_000_000_000,    20_000_000, 20_000_000),
-    "commitpackft-md":  (1_000_000_000,    20_000_000, 20_000_000),
-    "commitpackft-sh":  (1_000_000_000,    20_000_000, 20_000_000),
-    "commitpackft-js":  (1_000_000_000,    20_000_000, 20_000_000),
-    "magicoder":         ( 500_000_000,    10_000_000, 10_000_000),
-    "cosmopedia":        (5_000_000_000,    20_000_000, 20_000_000),
-    "fineweb-edu":       (5_000_000_000,    20_000_000, 20_000_000),
-    "open-web-math":     (5_000_000_000,    20_000_000, 20_000_000),
-    "algebraic-stack":   (2_000_000_000,    20_000_000, 20_000_000),  # via hoskinson-center/proof-pile
-    "code-contests":     (1_000_000_000,    20_000_000, 20_000_000),
-    "theorem-qa":        ( 100_000_000,        50_000,     50_000),  # ~232 KB total
+    # key                   max_bytes        val_bytes   test_bytes
+    "commitpackft-py":   (2_000_000_000,    20_000_000, 20_000_000),
+    "commitpackft-md":   (1_000_000_000,    20_000_000, 20_000_000),
+    "commitpackft-sh":   (1_000_000_000,    20_000_000, 20_000_000),
+    "commitpackft-js":   (1_000_000_000,    20_000_000, 20_000_000),
+    "commitpackft-clj":  ( 500_000_000,     5_000_000,  5_000_000),  # Clojure: less GH volume
+    "magicoder":          ( 500_000_000,    10_000_000, 10_000_000),
+    "cosmopedia":         (5_000_000_000,    20_000_000, 20_000_000),
+    "fineweb-edu":        (5_000_000_000,    20_000_000, 20_000_000),
+    "open-web-math":      (5_000_000_000,    20_000_000, 20_000_000),
+    "algebraic-stack":    (2_000_000_000,    20_000_000, 20_000_000),  # via hoskinson-center/proof-pile
+    "code-contests":      (1_000_000_000,    20_000_000, 20_000_000),
+    "theorem-qa":         ( 100_000_000,        50_000,     50_000),  # ~232 KB total
+    # Gated (HF token required) — only prep when 'huggingface-secret' or
+    # 'huggingface-token' Modal Secret is configured. prep_for_prod will
+    # attempt them and fail gracefully (per-dataset error capture) if
+    # the token is missing.
+    "the-stack-v2-clj":   (2_000_000_000,    20_000_000, 20_000_000),  # GATED
 }
 
 
@@ -2405,6 +2443,7 @@ def progress_report(base: str = "/data/agent-corpus",
 @app.function(
     image=publish_image,        # has gh CLI for the optional publish phase
     volumes={"/data": volume},
+    secrets=_HF_SECRETS,        # for --include-gated dataset preps; harmless if absent
     timeout=14400,              # 4 h cap (worst case: 8 datasets × HF stream)
     cpu=4.0,
     memory=32768,
@@ -2461,7 +2500,7 @@ def smoke_pipeline_modal(
     #     "click to accept terms" gate; needs HF auth even for public
     #     read)
     GATED = {"the-stack-v2-py", "the-stack-v2-md", "the-stack-v2-sh",
-             "xlam"}
+             "the-stack-v2-clj", "xlam"}
 
     Path(smoke_base).mkdir(parents=True, exist_ok=True)
 

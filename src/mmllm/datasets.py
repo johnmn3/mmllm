@@ -437,6 +437,20 @@ DATASET_REGISTRY = {
         "kind":      "sft",
         "notes":     "JavaScript-language file-edit commits → JSON Edit tool calls",
     },
+    "commitpackft-clj": {
+        # Clojure file-edit commits — public, no HF auth needed (just
+        # like the other commitpackft slices). Cap is small because
+        # Clojure has way less GitHub volume than Python; expect
+        # ~50-200 MB raw, even less after the formatter's 16KB
+        # max_file_bytes filter. This is the fast path to Clojure-
+        # specific edit signal for the eventual product target.
+        "hf_name":   "bigcode/commitpackft",
+        "hf_config": "clojure",
+        "split":     "train",
+        "formatter": fmt_commitpackft,
+        "kind":      "sft",
+        "notes":     "Clojure file-edit commits → JSON Edit tool calls",
+    },
     "xlam": {
         "hf_name":   "Salesforce/xlam-function-calling-60k",
         "hf_config": None,
@@ -498,6 +512,21 @@ DATASET_REGISTRY = {
         "formatter": fmt_the_stack_v2,
         "kind":      "pretrain",
         "notes":     "Shell subset of The Stack v2 dedup",
+    },
+    "the-stack-v2-clj": {
+        # Clojure subset of The Stack v2. The biggest publicly-available
+        # Clojure code corpus; gated like the other the-stack-v2-* slices
+        # — needs a HF token Modal Secret + license click-through at
+        # huggingface.co/datasets/bigcode/the-stack-v2-dedup. Cap at 2 GB
+        # in PROD_CAPS (~hundreds of thousands of files post dedup +
+        # max_file_bytes filter); plenty of substrate for an eventual
+        # Clojure-specialized fine-tune.
+        "hf_name":   "bigcode/the-stack-v2-dedup",
+        "hf_config": "Clojure",
+        "split":     "train",
+        "formatter": fmt_the_stack_v2,
+        "kind":      "pretrain",
+        "notes":     "Clojure subset of The Stack v2 dedup (gated)",
     },
     # Math + formal reasoning. These don't teach JSON tool calls, but
     # they teach the polynomial-hierarchy-softness/hardness intuition
