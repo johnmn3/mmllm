@@ -98,6 +98,38 @@ Notes:
   (`MMLLM_MIX` env var). Drop it (or pass `""`) to fall back to a
   single train-path.
 
+### "Rolling" mix between sessions
+
+The `--mix` argument is a **static string** at session launch — it
+isn't auto-discovered, isn't auto-updated. Between sessions you (or
+a script you keep) edit the `--mix` arg to add newly-staged datasets.
+Concretely, what slow-walk looks like in the first weeks:
+
+```
+session 1:  only commitpackft + xlam + magicoder are staged (small,
+            fast prep) →
+            --mix "/data/commitpackft.train.bin:30,/data/xlam.train.bin:20,/data/magicoder.train.bin:50"
+
+session 2:  cosmopedia finished its background prep →
+            --mix "/data/cosmopedia.train.bin:40,/data/commitpackft.train.bin:25,/data/xlam.train.bin:15,/data/magicoder.train.bin:20"
+
+session 3:  the-stack-v2-py finished →
+            --mix "/data/the-stack-v2-py.train.bin:30,/data/cosmopedia.train.bin:30,/data/commitpackft.train.bin:15,..."
+```
+
+This produces a **distribution shift mid-training** — early steps see
+a smaller, more SFT-heavy mix; later steps see the full pretraining-
+style mix. For a slow walk this is acceptable (each step samples
+whatever the current mix says; gradient direction adapts). The
+alternative is "wait until everything is staged before starting,"
+which means burning weeks of wall time on data prep with no training
+progress.
+
+If you want clean stationarity, hold off launching session 1 until
+all sources are prepped. If you want training to start earlier and
+don't mind the early sessions being a different distribution, start
+small and grow the mix.
+
 ## Eval workflow between sessions
 
 Local CPU evals (laptop or sandbox) — no Modal cost:
@@ -139,6 +171,76 @@ to $3/hr), latest training step, latest val bpc, and the last 10
 ckpt step numbers on the volume. Use it to confirm a session ran the
 expected duration before paying for the next one.
 
+## Auto-publishing ckpts to GitHub Release
+
+Each session's output (dense.pt + int8-quantized bank V) can be
+auto-uploaded to a GitHub Release after training, so any machine
+can pull the latest ckpt without Modal access.
+
+### One-time setup
+
+1. Create a GitHub Personal Access Token with `repo` + `write:packages`
+   scope on `johnmn3/mmllm`. (Settings → Developer settings → Personal
+   access tokens → Fine-grained.)
+2. Stash it as a Modal Secret:
+   ```bash
+   modal secret create github-token GITHUB_TOKEN=ghp_xxxxxxxxxxxx
+   ```
+
+### Per-session: auto-publish at end
+
+Pass `--publish-after` to `train_with_bank`. After training exits
+cleanly, Modal spawns `publish_ckpt_to_github` on a separate
+container (with `gh` CLI installed) which:
+
+1. Quantizes `bank-latest.<i>.bin` → `bank-publish-int8.<i>.int8.bin`
+   (~18.8 GB → ~4.7 GB total, fits GitHub's 2 GB-per-file limit per
+   layer).
+2. Creates a per-step release `agent-step-<N>` (immutable; idempotent
+   if it already exists).
+3. Force-replaces the moving `agent-latest` release with the same
+   bundle so external pullers always have a fixed URL.
+
+```bash
+modal run --detach modal_app.py::train_with_bank \
+  --base /data/agent-corpus --bank /data/agent-bank \
+  --max-hours 8 \
+  --publish-after \
+  --tag-prefix agent \
+  ...other knobs...
+```
+
+### Manual publish (for re-runs or out-of-band)
+
+```bash
+modal run modal_app.py::publish_ckpt_to_github \
+  --base /data/agent-corpus \
+  --tag-prefix agent
+  # ckpt-step defaults to 0 = latest on disk
+```
+
+### Pulling published ckpts (from any non-Modal box)
+
+```bash
+# Latest (force-replaced each session).
+MMLLM_ARTIFACTS_URL=https://github.com/johnmn3/mmllm/releases/download/agent-latest \
+  mmllm fetch-artifacts /tmp/agent-bench
+
+# Specific step (immutable, citable).
+MMLLM_ARTIFACTS_URL=https://github.com/johnmn3/mmllm/releases/download/agent-step-30000 \
+  mmllm fetch-artifacts /tmp/agent-bench
+```
+
+### Constraint to watch
+
+`bank-latest.<i>.bin` is overwritten on every save-checkpoint! call.
+`publish_ckpt_to_github` therefore only supports publishing the
+**latest** ckpt — passing an older `--ckpt-step` errors out with
+"bank state was overwritten." If you forget to publish a session
+before starting the next one, the prior step's bank V is gone (only
+its dense.pt remains in `step-<N>/`). Fix: enable `--publish-after`
+so every session publishes automatically.
+
 ## Donation routing
 
 The README has a Buy-Me-a-Coffee link. As contributions land:
@@ -175,11 +277,13 @@ constant.
 
 1. **First-session calibration**: actual steps/hour. Will refine the
    above estimates after one short session lands a number.
-2. **Bank int8 distribution via GH Release**: the existing
-   `scripts/release-artifacts.sh` flow from v1 needs to be re-run
-   per-ckpt as the v2 trajectory unfolds. Worth scripting "after
-   each session, publish the latest ckpt to a rolling release tag."
-3. **Free local eval cadence**: laptop CPU can run BPC + a small
+2. **Free local eval cadence**: laptop CPU can run BPC + a small
    agentic eval suite in ~5 min per ckpt. With `ckpt-every 2500`,
    that's ~12 ckpts/session — manageable. If it becomes annoying,
    run evals only on every 4th ckpt.
+3. **GH Release storage**: each `agent-step-<N>` release stores
+   ~5 GB. After ~50 sessions that's ~250 GB on the public release
+   storage. GitHub doesn't bill on public release size for normal
+   usage, but if you want to tidy up, manually delete older
+   `agent-step-<N>` tags via `gh release delete`. The latest tag
+   always points at the most recent.

@@ -66,6 +66,30 @@ volume = modal.Volume.from_name(
 )
 
 
+# Image variant with the GitHub CLI installed — used by
+# `publish_ckpt_to_github` to upload release artifacts. The `gh`
+# binary handles auth/upload-URL/multipart-asset details we'd
+# otherwise have to reinvent in stdlib `urllib`. Kept as a separate
+# image layer so training/eval functions don't pay for the apt
+# install.
+publish_image = (
+    image
+    .run_commands(
+        "apt-get update -qq",
+        "apt-get install -qq -y curl ca-certificates gnupg",
+        "curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | "
+        "dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg",
+        "chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg",
+        'echo "deb [arch=$(dpkg --print-architecture) '
+        'signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] '
+        'https://cli.github.com/packages stable main" '
+        '> /etc/apt/sources.list.d/github-cli.list',
+        "apt-get update -qq",
+        "apt-get install -qq -y gh",
+    )
+)
+
+
 @app.function(
     image=image,
     volumes={"/data": volume},
@@ -481,6 +505,12 @@ def train_with_bank(
                                          # sampler. Format: 'p1:w1,p2:w2,...'. When set,
                                          # `base` arg is ignored for sampling — only
                                          # base.val.bin still drives eval-bpc.
+    publish_after: bool = False,         # if True, after the session ends successfully,
+                                         # auto-spawn publish_ckpt_to_github with the resolved
+                                         # latest ckpt step. Requires `github-token` Modal
+                                         # Secret set. See publish_ckpt_to_github docstring.
+    gh_repo: str = "johnmn3/mmllm",      # GH repo for publish_after target.
+    tag_prefix: str = "agent",           # tag namespace for publish_after.
 ):
     """Long-running training on A100-80GB + GPU-resident bank.
 
@@ -536,6 +566,27 @@ def train_with_bank(
         max_hours=max_hours,
         mix=mix,
     )
+    if publish_after:
+        # Spawn publish on its own container (uses publish_image w/ gh CLI).
+        # .remote() blocks; the user gets one final "published" log line
+        # when the upload completes. Wrapped so a publish failure doesn't
+        # mask a successful training session in the operator's eye.
+        try:
+            print(f"  → publishing latest ckpt to {gh_repo} ({tag_prefix}-step-N + "
+                  f"{tag_prefix}-latest)", flush=True)
+            result = publish_ckpt_to_github.remote(
+                base=base, ckpt_step=0,
+                gh_repo=gh_repo, tag_prefix=tag_prefix,
+            )
+            print(f"  ✓ published: {result.get('release_url') if result else '(no result)'}",
+                  flush=True)
+        except Exception as e:
+            print(f"  ✗ publish_after failed: {e}\n"
+                  f"    Training session succeeded; ckpt is on volume at "
+                  f"{base}.ckpts/. Re-publish manually with:\n"
+                  f"    modal run modal_app.py::publish_ckpt_to_github "
+                  f"--base {base} --gh-repo {gh_repo} --tag-prefix {tag_prefix}",
+                  flush=True)
 
 
 @app.function(
@@ -657,6 +708,215 @@ def quantize_bank(
     )
     volume.commit()
     print(f"done — int8 bank committed to {out_prefix}.<i>.int8.bin", flush=True)
+
+
+# ─────────────────────── publish ckpt → GitHub Release ───────────────────────
+#
+# Auto-publish the latest slow-walk ckpt (dense.pt + int8-quantized bank V)
+# to a GitHub Release. Per-step tag is immutable; a moving "<prefix>-latest"
+# tag is force-replaced each call so the laptop pull command can always
+# point at the same URL.
+#
+# Constraint inherited from save-checkpoint!: bank-latest.<i>.bin is
+# overwritten on every save, so this function publishes whatever bank
+# state is CURRENTLY on volume — paired with the resolved ckpt_step's
+# dense.pt. If you ckpt at step 30k, train another session to step 32.5k,
+# then call publish for ckpt_step=30000, the bank would be the step-32500
+# state — mismatched. Guard: we only support ckpt_step=0 (auto-resolves to
+# latest) or ckpt_step=<latest step on disk>; any older value errors.
+
+
+@app.function(
+    image=publish_image,
+    volumes={"/data": volume},
+    secrets=[modal.Secret.from_name("github-token", required_keys=["GITHUB_TOKEN"])],
+    timeout=3600,         # 1 h cap — quantize + upload of 5+1 GB total
+    cpu=4.0,
+    memory=16384,
+)
+def publish_ckpt_to_github(
+    base:          str  = "/data/agent-corpus",
+    ckpt_step:     int  = 0,                # 0 = auto-resolve to latest on disk
+    gh_repo:       str  = "johnmn3/mmllm",
+    tag_prefix:    str  = "agent",
+    n_layers:      int  = 5,
+    q_dim:         int  = 224,
+    update_latest: bool = True,
+    notes:         str  = "",                # optional addendum to the release body
+):
+    """Quantize bank V → int8, upload (dense.pt + 5 × bank.int8.bin) to
+    a GitHub Release.
+
+    Per-step release: <tag_prefix>-step-<N>     (immutable; idempotent
+                                                  re-publish skips if
+                                                  already present)
+    Latest release:   <tag_prefix>-latest        (force-replaced each call
+                                                  if update_latest=True)
+
+    Requires a Modal Secret named `github-token` with GITHUB_TOKEN set
+    to a PAT that has `repo` + `write:packages` scope on `gh_repo`.
+    Set up once via:
+
+        modal secret create github-token GITHUB_TOKEN=ghp_xxx
+    """
+    import os
+    import re
+    import subprocess
+    from pathlib import Path
+
+    ckpts_dir = f"{base}.ckpts"
+    if not os.path.isdir(ckpts_dir):
+        raise FileNotFoundError(f"no ckpts dir at {ckpts_dir}")
+
+    # Resolve latest step on disk.
+    on_disk = []
+    for d in os.listdir(ckpts_dir):
+        m = re.match(r"step-(\d+)$", d)
+        if m:
+            on_disk.append(int(m.group(1)))
+    if not on_disk:
+        raise FileNotFoundError(f"no step-<N> dirs under {ckpts_dir}")
+    latest_step = max(on_disk)
+
+    if ckpt_step <= 0:
+        ckpt_step = latest_step
+        print(f"  resolved ckpt_step=latest → {ckpt_step}", flush=True)
+    elif ckpt_step != latest_step:
+        # bank-latest.<i>.bin reflects the most-recent save-checkpoint!
+        # call. Pairing it with an older dense.pt would publish
+        # mismatched state.
+        raise ValueError(
+            f"ckpt_step={ckpt_step} != latest_on_disk={latest_step}; "
+            f"bank-latest.<i>.bin was overwritten at step {latest_step}, "
+            f"so publishing step {ckpt_step}'s dense with the current "
+            f"bank state would be incoherent. Use ckpt_step=0 (auto-latest) "
+            f"or republish step {latest_step}.",
+        )
+
+    dense_pt = f"{ckpts_dir}/step-{ckpt_step}/dense.pt"
+    if not os.path.exists(dense_pt):
+        raise FileNotFoundError(dense_pt)
+    bank_files_fp32 = [f"{ckpts_dir}/bank-latest.{i}.bin"
+                       for i in range(n_layers)]
+    for bf in bank_files_fp32:
+        if not os.path.exists(bf):
+            raise FileNotFoundError(bf)
+
+    token = os.environ.get("GITHUB_TOKEN")
+    if not token:
+        raise RuntimeError(
+            "GITHUB_TOKEN not in env — Modal Secret 'github-token' missing or "
+            "doesn't expose GITHUB_TOKEN. Run "
+            "`modal secret create github-token GITHUB_TOKEN=<your_pat>`.",
+        )
+    env = {**os.environ, "GH_TOKEN": token}
+
+    # Quantize bank → int8. Output goes alongside the fp32 bank-latest
+    # files so we don't have to manage another path. Cleanup at the end.
+    int8_prefix = f"{ckpts_dir}/bank-publish-int8"
+    print(f"  quantize: {ckpts_dir}/bank-latest.<i>.bin → "
+          f"{int8_prefix}.<i>.int8.bin", flush=True)
+    subprocess.run(
+        ["mmllm", "bank-quantize",
+         f"{ckpts_dir}/bank-latest", int8_prefix, str(n_layers)],
+        check=True,
+    )
+    int8_files = [f"{int8_prefix}.{i}.int8.bin" for i in range(n_layers)]
+    for bf in int8_files:
+        if not os.path.exists(bf):
+            raise FileNotFoundError(f"quantize did not produce {bf}")
+
+    step_tag = f"{tag_prefix}-step-{ckpt_step}"
+    latest_tag = f"{tag_prefix}-latest"
+
+    # Per-step release body.
+    body = (
+        f"mmllm slow-walk ckpt at step {ckpt_step}\n\n"
+        f"Bundle:\n"
+        f"- `dense.pt` — trained dense weights\n"
+        f"- `bank-publish-int8.{{0..{n_layers-1}}}.int8.bin` — int8 quantized "
+        f"bank V (per-row symmetric, fp16 scale; "
+        f"~4× compression vs fp32)\n\n"
+        f"Pull on a laptop / non-Modal box:\n"
+        f"```\n"
+        f"MMLLM_ARTIFACTS_URL=https://github.com/{gh_repo}/releases/download/"
+        f"{step_tag} \\\n"
+        f"  mmllm fetch-artifacts /tmp/agent-bench\n"
+        f"```\n"
+    )
+    if notes:
+        body += f"\n---\n\n{notes}\n"
+
+    # Per-step tag — idempotent (skip if exists). We never force-replace
+    # a step tag (immutable per-ckpt artifact).
+    existing = subprocess.run(
+        ["gh", "release", "view", step_tag, "--repo", gh_repo],
+        env=env, capture_output=True,
+    )
+    if existing.returncode == 0:
+        print(f"  release {step_tag} already exists — skipping per-step "
+              f"upload (use a different tag-prefix to re-publish)",
+              flush=True)
+    else:
+        print(f"  → publishing {step_tag} ({1 + n_layers} files, "
+              f"~{0.2 + n_layers * 0.94:.1f} GB)", flush=True)
+        subprocess.run(
+            ["gh", "release", "create", step_tag,
+             "--repo", gh_repo,
+             "--title", f"mmllm agent ckpt step-{ckpt_step}",
+             "--notes", body,
+             dense_pt, *int8_files],
+            env=env,
+            check=True,
+        )
+
+    # Latest tag — force-replace each call so a fixed URL points at
+    # current state.
+    if update_latest:
+        # Delete the old latest release (and tag — --cleanup-tag on gh
+        # 2.32+). Ignore failure if it didn't exist.
+        del_result = subprocess.run(
+            ["gh", "release", "delete", latest_tag, "--yes",
+             "--cleanup-tag", "--repo", gh_repo],
+            env=env, capture_output=True,
+        )
+        if del_result.returncode == 0:
+            print(f"  removed previous {latest_tag}", flush=True)
+
+        latest_body = (
+            f"Latest mmllm slow-walk ckpt — currently step {ckpt_step} "
+            f"(immutable mirror at {step_tag}).\n\n"
+            f"This tag is force-replaced after each training session. "
+            f"Pin to a specific step via `{step_tag}` for reproducibility.\n\n"
+            + body
+        )
+        print(f"  → force-replacing {latest_tag} → step {ckpt_step}", flush=True)
+        subprocess.run(
+            ["gh", "release", "create", latest_tag,
+             "--repo", gh_repo,
+             "--title", f"mmllm agent latest (step-{ckpt_step})",
+             "--notes", latest_body,
+             dense_pt, *int8_files],
+            env=env,
+            check=True,
+        )
+
+    # Cleanup the temp int8 files. Saves ~5 GB on volume between sessions.
+    for f in int8_files:
+        try:
+            os.unlink(f)
+        except OSError:
+            pass
+    volume.commit()
+
+    print(f"  done — published step {ckpt_step} to {gh_repo}", flush=True)
+    return {
+        "step":          ckpt_step,
+        "step_tag":      step_tag,
+        "latest_tag":    latest_tag if update_latest else None,
+        "gh_repo":       gh_repo,
+        "release_url":   f"https://github.com/{gh_repo}/releases/tag/{step_tag}",
+    }
 
 
 @app.function(
