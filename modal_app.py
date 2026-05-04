@@ -661,7 +661,7 @@ def bench_inference_batch(
     sqrt_n: int = 2048,
     bank_on_gpu: bool = True,
     bank_dtype: str = "fp32",        # fp32 (use the .bin bank) or int8 (.int8.bin)
-    B: int = 32,                     # synchronized batch size
+    batch: int = 32,                 # synchronized batch size
     bank_query_mode: str = "plain",
     long_tier_mix:   str = "sum",
     bank_feedback_mode: str = "plain",
@@ -695,12 +695,12 @@ def bench_inference_batch(
     print(
         f"=== bench_inference_batch base={base} ckpt={ckpt_step} bank={bank_arg} "
         f"sqrt_n={sqrt_n} bank_on_gpu={bank_on_gpu} bank_dtype={bank_dtype} "
-        f"B={B} n_warm={n_warm} n_time={n_time} ===",
+        f"batch={batch} n_warm={n_warm} n_time={n_time} ===",
         flush=True,
     )
     subprocess.run(
         ["mmllm", "bench-batch", base, str(ckpt_step), bank_arg,
-         str(n_warm), str(n_time), str(B)],
+         str(n_warm), str(n_time), str(batch)],
         check=True, env=env,
     )
 
