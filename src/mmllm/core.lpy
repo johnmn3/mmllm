@@ -230,6 +230,20 @@
   []
   (python/int (.get (.- os environ) "MMLLM_ABLATE_EVERY" "0")))
 
+(defn pick-max-hours
+  "Resolve session wall-time cap, in hours. Reads MMLLM_MAX_HOURS
+   (float, default 0 = no cap). When > 0, train-long checkpoints
+   and exits cleanly after this many hours, even if total-steps
+   isn't reached.
+
+   Use case: budget-bounded slow-walk training. Each Modal session
+   costs $/hr × hours; setting MMLLM_MAX_HOURS=8 makes a session
+   self-terminate at the budget boundary instead of running out mid-
+   step. train-long auto-resumes from the latest ckpt next session,
+   so this is purely a clean-shutdown convenience."
+  []
+  (python/float (.get (.- os environ) "MMLLM_MAX_HOURS" "0")))
+
 (defn pick-long-tier-mix
   "Resolve how the long-tier KV-cache SDPA path and the bank-V
    retrieval path get combined inside attention. Reads
@@ -1491,13 +1505,19 @@
         (when (pos? (mod ablate-every eval-every))
           (println (format "    WARN: ablate-every (%d) is not a multiple of eval-every (%d); ablation steps that don't align with eval steps will be skipped."
                            ablate-every eval-every)))))
-    (let [t0       (time/time)
-          en-label (str "train-long:" train-path)
-          tracker  (metrics/EnergyTracker ** :label en-label :device (:device m))]
+    (let [t0          (time/time)
+          en-label    (str "train-long:" train-path)
+          tracker     (metrics/EnergyTracker ** :label en-label :device (:device m))
+          max-hours   (pick-max-hours)
+          max-seconds (when (pos? max-hours) (* max-hours 3600.0))]
+      (when (pos? max-hours)
+        (println (format "  session cap: %.2f h (MMLLM_MAX_HOURS) — will checkpoint and exit cleanly when reached"
+                         max-hours)))
       (.start tracker)
       (try
         (loop [step start-step]
-        (if (>= step total-steps)
+        (cond
+          (>= step total-steps)
           (do
             (save-checkpoint! m opt-dense opt-sparse ckpt-dir step volume)
             (println (format "training complete at step %d" step))
@@ -1538,6 +1558,21 @@
                                (format "{\"step\":%d,\"event\":\"ablation\",\"control_bpc\":%.4f,\"ablated_bpc\":%.4f,\"delta_bpc\":%.4f,\"wall_s\":%.1f}"
                                        step (:bpc r-ctrl) (:bpc r-abl) delta (- (time/time) t0)))))
             m)
+          ;; Session-timeout branch: budget-bounded slow-walk training.
+          ;; Save ckpt and exit cleanly so the next session resumes from
+          ;; here. Skip the end-of-training ablation (we're not done, just
+          ;; out of time).
+          (and max-seconds (>= (- (time/time) t0) max-seconds))
+          (do
+            (save-checkpoint! m opt-dense opt-sparse ckpt-dir step volume)
+            (let [hrs (/ (- (time/time) t0) 3600.0)]
+              (println (format "  ── session timeout at %.2f h / step %d — checkpointed and exiting ──"
+                               hrs step))
+              (append-jsonl! log-path
+                             (format "{\"step\":%d,\"event\":\"session_end\",\"reason\":\"max_hours\",\"hours\":%.3f,\"wall_s\":%.1f}"
+                                     step hrs (- (time/time) t0))))
+            m)
+          :else
           (let [warmup     (pick-lr-warmup)
                 ;; Apply lr schedule (no-op when warmup == 0). Both
                 ;; AdamW (dense) and SparseAdam/CPUOffloadSparseAdam (V)

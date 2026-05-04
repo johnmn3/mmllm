@@ -359,7 +359,8 @@ def _run_train_long(total_steps, eval_every, ckpt_every, device, lr,
                     sync_every=0, volume_name="mmllm-data",
                     lr_warmup=0, lr_min=None,
                     bank_query_mode="plain", long_tier_mix="sum",
-                    bank_feedback_mode="plain", ablate_every=0):
+                    bank_feedback_mode="plain", ablate_every=0,
+                    max_hours=0.0, mix=""):
     """Shared body. All knobs threaded via env vars (MMLLM_DEVICE,
     MMLLM_LR, MMLLM_BATCH, MMLLM_SQRT_N, MMLLM_CPU_OFFLOAD,
     MMLLM_BANK_ON_GPU, MMLLM_SYNC_EVERY, MMLLM_VOLUME_NAME,
@@ -417,6 +418,10 @@ def _run_train_long(total_steps, eval_every, ckpt_every, device, lr,
         env["MMLLM_CPU_OFFLOAD"] = "true"
     if lr_min is not None:
         env["MMLLM_LR_MIN"] = str(lr_min)
+    if max_hours and max_hours > 0:
+        env["MMLLM_MAX_HOURS"] = str(max_hours)
+    if mix:
+        env["MMLLM_MIX"] = mix
     print(
         f"=== train-long device={device} B={batch} lr={lr} sqrt_n={sqrt_n} "
         f"cpu_offload={cpu_offload} bank_on_gpu={bank_on_gpu} "
@@ -424,7 +429,8 @@ def _run_train_long(total_steps, eval_every, ckpt_every, device, lr,
         f"lr_warmup={lr_warmup} lr_min={lr_min} "
         f"bank_query_mode={bank_query_mode} long_tier_mix={long_tier_mix} "
         f"bank_feedback_mode={bank_feedback_mode} "
-        f"ablate_every={ablate_every} "
+        f"ablate_every={ablate_every} max_hours={max_hours} "
+        f"mix={'(set)' if mix else '(none)'} "
         f"total={total_steps} eval-every={eval_every} "
         f"ckpt-every={ckpt_every} base={base} ===",
         flush=True,
@@ -468,6 +474,13 @@ def train_with_bank(
     corpus_base: str = "",               # if set and != base, symlink corpus splits
                                          # so train-long finds them at <base>.{train,val,test}.bin
                                          # while ckpts/log/etc still write under <base>
+    max_hours: float = 0.0,              # 0 = no cap. >0 = clean shutdown after N hours
+                                         # (slow-walk budget bounding). Resumes next session
+                                         # from latest ckpt.
+    mix: str = "",                       # MMLLM_MIX passthrough — multi-corpus weighted
+                                         # sampler. Format: 'p1:w1,p2:w2,...'. When set,
+                                         # `base` arg is ignored for sampling — only
+                                         # base.val.bin still drives eval-bpc.
 ):
     """Long-running training on A100-80GB + GPU-resident bank.
 
@@ -520,6 +533,8 @@ def train_with_bank(
         long_tier_mix=long_tier_mix,
         bank_feedback_mode=bank_feedback_mode,
         ablate_every=ablate_every,
+        max_hours=max_hours,
+        mix=mix,
     )
 
 
@@ -1748,6 +1763,93 @@ def eval_watcher(
             with open(seen_p, "a") as f:
                 f.write(f"{s}\n")
             volume.commit()
+
+
+# ─────────────────────── slow-walk progress report ───────────────────────
+
+
+@app.function(
+    image=image,
+    volumes={"/data": volume},
+    timeout=120,
+    cpu=1.0,
+    memory=2048,
+)
+def progress_report(base: str = "/data/agent-corpus",
+                    h100_dollars_per_hour: float = 3.00):
+    """Aggregate a run's training_energy + session_end events to show:
+       total wall hours, est $ spent, latest step, ckpt history.
+
+    Lightweight — reads <base>.log.jsonl + lists <base>.ckpts/.
+    No GPU. Cheap to call between sessions to see "where we are."
+    """
+    import json
+    import os
+    import re
+
+    log_path = f"{base}.log.jsonl"
+    ckpts_dir = f"{base}.ckpts"
+
+    print(f"=== progress_report base={base} ===", flush=True)
+
+    # Walk the log for training_energy + session_end events.
+    total_wall_s = 0.0
+    n_sessions   = 0
+    last_step    = 0
+    last_loss    = None
+    last_eval    = None
+    if os.path.exists(log_path):
+        with open(log_path) as f:
+            for line in f:
+                try:
+                    row = json.loads(line)
+                except json.JSONDecodeError:
+                    continue
+                ev = row.get("event", "")
+                if ev == "training_energy":
+                    total_wall_s += float(row.get("wall_s", 0))
+                    n_sessions   += 1
+                elif ev == "session_end":
+                    pass  # already captured by training_energy
+                elif ev == "eval":
+                    last_step = max(last_step, int(row.get("step", 0)))
+                    last_eval = row
+                elif ev == "ablation_intermediate":
+                    last_eval = row
+                if "step" in row:
+                    last_step = max(last_step, int(row.get("step", 0)))
+                if "loss" in row:
+                    last_loss = row.get("loss")
+    else:
+        print(f"  no log at {log_path} — has training started?", flush=True)
+
+    total_h    = total_wall_s / 3600.0
+    est_cost   = total_h * h100_dollars_per_hour
+
+    # List ckpts on disk.
+    ckpt_steps = []
+    if os.path.isdir(ckpts_dir):
+        for d in os.listdir(ckpts_dir):
+            m = re.match(r"step-(\d+)$", d)
+            if m:
+                ckpt_steps.append(int(m.group(1)))
+    ckpt_steps.sort()
+
+    print(f"  sessions completed:   {n_sessions}", flush=True)
+    print(f"  total wall time:      {total_h:.2f} h", flush=True)
+    print(f"  est cost (@${h100_dollars_per_hour}/h):  ${est_cost:.2f}", flush=True)
+    print(f"  latest training step: {last_step:,}", flush=True)
+    if last_loss is not None:
+        print(f"  latest training loss: {last_loss:.3f}", flush=True)
+    if last_eval:
+        bpc = last_eval.get("val_bpc")
+        if bpc:
+            print(f"  latest val bpc:       {bpc:.4f}", flush=True)
+    print(f"  ckpts on volume ({len(ckpt_steps)}):", flush=True)
+    for s in ckpt_steps[-10:]:
+        print(f"    step-{s}", flush=True)
+    if len(ckpt_steps) > 10:
+        print(f"    ... ({len(ckpt_steps) - 10} earlier)", flush=True)
 
 
 @app.local_entrypoint()
