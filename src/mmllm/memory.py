@@ -517,6 +517,14 @@ class ProductKeyMemory(nn.Module):
         re-mount via CPUPinnedEmbedding + mmap and run with the bank
         page-faulted from disk.
 
+        Also called from train-long's save-checkpoint! per-ckpt to
+        capture in-VRAM bank state to disk — without this, a
+        crash+resume loses V because checkpoints don't otherwise
+        persist nn.Embedding contents (only the optimizer's m, v
+        moments). The path passed by save-checkpoint! is fixed (one
+        file per layer, overwritten each ckpt) so the on-disk cost
+        is bounded to ~bank size, not per-step accumulating.
+
         Returns total bytes written.
         """
         n, dim = self.V.weight.shape
@@ -530,6 +538,40 @@ class ProductKeyMemory(nn.Module):
             end = min(i + chunk_rows, n)
             arr[i:end] = weight_cpu[i:end]
         arr.flush()
+        del arr
+        return expected_bytes
+
+    def load_from_mmap(self, path: str) -> int:
+        """Restore V.weight from a numpy float32 memmap at `path`,
+        the inverse of save_to_mmap. Used by train-long's
+        load-checkpoint! to recover in-VRAM bank state on resume.
+
+        Idempotent on shape: errors if the file size doesn't match
+        (n × q_dim × 4 bytes), so a stale or wrong-config bank file
+        fails loud rather than silently corrupting V.
+
+        Returns total bytes read.
+        """
+        n, dim = self.V.weight.shape
+        expected_bytes = n * dim * 4  # float32
+        if not os.path.exists(path):
+            raise FileNotFoundError(f"bank checkpoint not found: {path}")
+        actual_bytes = os.path.getsize(path)
+        if actual_bytes != expected_bytes:
+            raise ValueError(
+                f"bank checkpoint {path} has {actual_bytes} bytes; "
+                f"expected {expected_bytes} for shape ({n}, {dim}). "
+                f"sqrt_n / q_dim mismatch with the model config?"
+            )
+        # Stream via memmap → np.array (CPU copy) → torch.from_numpy →
+        # .copy_ into V.weight.data. The intermediate np.array is
+        # necessary because torch.from_numpy on a memmap returns a
+        # non-writable view, and we want a writable owning tensor for
+        # the cross-device .copy_ that follows.
+        arr = np.memmap(path, dtype=np.float32, mode="r", shape=(n, dim))
+        with torch.no_grad():
+            src = torch.from_numpy(np.asarray(arr))
+            self.V.weight.data.copy_(src.to(self.V.weight.device))
         del arr
         return expected_bytes
 

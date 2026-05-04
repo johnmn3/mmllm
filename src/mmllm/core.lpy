@@ -1142,8 +1142,28 @@
 ;;; crashed N-day run resumes within a few minutes.
 
 (defn save-checkpoint!
-  "Persist dense params + optimizer state to <ckpt-dir>/step-<step>/.
-   Bank V mmap files are NOT duplicated."
+  "Persist dense params + optimizer state + bank V to disk.
+
+   Per-step ckpt dir holds dense + opt state (small, can accumulate):
+     <ckpt-dir>/step-<step>/dense.pt
+     <ckpt-dir>/step-<step>/opt-dense.pt
+     <ckpt-dir>/step-<step>/opt-sparse.pt
+     <ckpt-dir>/step-<step>/step.txt
+
+   Bank V is large (~18.8 GB at sqrt_n=2048) so we save only the
+   LATEST copy, overwriting in place at:
+     <ckpt-dir>/bank-latest.<i>.bin   (one per layer)
+
+   Without this V save, a crash + resume that reads dense.pt and
+   the opt-state but rebuilds V via build-model would get a fresh
+   N(0, 0.02) random V — collapsing the bank's training to zero.
+   The opt-state's m, v moments would then push on a random V,
+   forcing a partial relearn. (We hit this on the 5B+fb run and it
+   cost us ~80k steps of effective bank progress.)
+
+   For mmap-backed V (bank_on_gpu=False), this still runs but
+   produces the same content the in-flight mmap already has; it's
+   redundant but harmless."
   [m opt-dense opt-sparse ckpt-dir step]
   (let [path (str ckpt-dir "/step-" step)]
     (os/makedirs path ** :exist_ok true)
@@ -1152,19 +1172,54 @@
                 (str path "/dense.pt"))
     (torch/save (.state_dict opt-dense)  (str path "/opt-dense.pt"))
     (torch/save (.state_dict opt-sparse) (str path "/opt-sparse.pt"))
+    ;; Save bank V to a fixed per-layer path (overwrite in place).
+    ;; Skip on errors so a bank-save hiccup doesn't lose the dense
+    ;; ckpt — but log loudly because the resume will be bad.
+    (try
+      (doseq [[i b] (map-indexed vector (:blocks m))]
+        (.save_to_mmap (:memory b)
+                       (str ckpt-dir "/bank-latest." i ".bin")))
+      (catch python/Exception e
+        (println (format "  WARN: bank V save failed at step %d: %s — "
+                         step e))
+        (println (format "        resume from this ckpt will get random V."))))
     (let [f (python/open (str path "/step.txt") "w")]
       (.write f (str step))
       (.close f))))
 
 (defn load-checkpoint!
-  "Restore dense params + optimizer state. Bank V auto-attaches via mmap."
+  "Restore dense params + optimizer state + bank V state.
+
+   Reads dense.pt / opt-dense.pt / opt-sparse.pt from the per-step
+   ckpt dir, and bank-latest.<i>.bin (one per layer) from the
+   parent ckpt-dir.
+
+   If bank-latest files are missing (older ckpts pre-this-fix, or
+   first-ever save aborted), V stays at whatever build-model
+   initialized it to and emits a loud warning — this is the failure
+   mode that cost us 80k steps of bank training on the 5B+fb run."
   [m opt-dense opt-sparse ckpt-dir step]
   (let [path  (str ckpt-dir "/step-" step)
         saved (python/list (torch/load (str path "/dense.pt")))]
     (doseq [[p s] (map vector (parameters m) saved)]
       (.copy_ (.- p data) s))
     (.load_state_dict opt-dense  (torch/load (str path "/opt-dense.pt")))
-    (.load_state_dict opt-sparse (torch/load (str path "/opt-sparse.pt")))))
+    (.load_state_dict opt-sparse (torch/load (str path "/opt-sparse.pt")))
+    ;; Restore bank V if the bank-latest files exist. If they don't,
+    ;; warn loudly — this is silent-data-loss territory otherwise.
+    (let [bank-files (vec
+                       (for [i (range (count (:blocks m)))]
+                         (str ckpt-dir "/bank-latest." i ".bin")))
+          all-present? (every? #(os.path/exists %) bank-files)]
+      (if all-present?
+        (do
+          (doseq [[i b] (map-indexed vector (:blocks m))]
+            (.load_from_mmap (:memory b)
+                             (str ckpt-dir "/bank-latest." i ".bin")))
+          (println (format "  bank V restored from %s/bank-latest.{0..%d}.bin"
+                           ckpt-dir (dec (count (:blocks m))))))
+        (println (format "  WARN: bank V files missing in %s — V stays at random init.\n        Bank will need to retrain from scratch (the opt-state's m, v will\n        push it forward, but dense will see a useless bank for thousands of steps)."
+                         ckpt-dir))))))
 
 (defn latest-checkpoint-step
   "Largest N for which <ckpt-dir>/step-N/ exists, or nil. Used on
