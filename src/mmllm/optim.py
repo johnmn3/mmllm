@@ -46,6 +46,28 @@ class CPUOffloadSparseAdam(torch.optim.Optimizer):
         defaults = dict(lr=lr, betas=betas, eps=eps)
         super().__init__(params, defaults)
 
+    def load_state_dict(self, state_dict):
+        """Restore optimizer state, then force m / v moments back to
+        CPU.
+
+        torch.optim.Optimizer.load_state_dict auto-moves loaded state
+        tensors to the corresponding parameter's device — which is the
+        right default for in-VRAM optimizers but defeats the whole
+        point of CPU-offloading. The ckpt was saved with m / v on CPU
+        (`CPUOffloadSparseAdam` keeps them there during training);
+        without this override the loaded state lands on CUDA, causing
+        a device-mismatch crash on the next .step() call mixing
+        CUDA m_old with CPU values_cpu.
+        """
+        super().load_state_dict(state_dict)
+        for group in self.param_groups:
+            for p in group["params"]:
+                state = self.state.get(p, {})
+                for key in ("m", "v"):
+                    t = state.get(key)
+                    if t is not None and t.device.type != "cpu":
+                        state[key] = t.to("cpu")
+
     @torch.no_grad()
     def step(self, closure=None):
         loss = None
