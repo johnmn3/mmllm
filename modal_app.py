@@ -1839,15 +1839,18 @@ def inspect_dataset_remote(path: str, n_chars: int = 4000):
 
 # Per-dataset (max_bytes, val_bytes, test_bytes) for production.
 # val/test are sized per-dataset because some sources are tiny:
-#   - theorem-qa is ~5 MB total; default 20MB val + 20MB test would
-#     make split_pile_github raise "corpus too small" (needs total >
-#     val + test + 256). Pass small val+test for it.
+#   - theorem-qa is ~232 KB total (just the test split from
+#     TIGER-Lab/TheoremQA — no train/val splits exist publicly).
+#     val + test must sum to less than that, hence 50K/50K.
+#   - algebraic-stack now points at hoskinson-center/proof-pile
+#     (parquet-based, no zstd shards). 2 GB cap covers a healthy
+#     mix of formal proofs + arXiv math + math.SE.
 # Categorization:
 #   SFT-style    — small datasets, near-full coverage at these caps
 #   Pretraining  — large datasets, 5 GB cap (stream + stop)
 #   Specialty    — smaller datasets, full or near-full coverage
 #
-# Total ~30-35 GB on volume after all preps complete.
+# Total ~24 GB on volume after all preps complete.
 PROD_CAPS = {
     # key                  max_bytes        val_bytes   test_bytes
     "commitpackft-py":  (2_000_000_000,    20_000_000, 20_000_000),
@@ -1858,9 +1861,9 @@ PROD_CAPS = {
     "cosmopedia":        (5_000_000_000,    20_000_000, 20_000_000),
     "fineweb-edu":       (5_000_000_000,    20_000_000, 20_000_000),
     "open-web-math":     (5_000_000_000,    20_000_000, 20_000_000),
-    "algebraic-stack":   (2_000_000_000,    20_000_000, 20_000_000),
+    "algebraic-stack":   (2_000_000_000,    20_000_000, 20_000_000),  # via hoskinson-center/proof-pile
     "code-contests":     (1_000_000_000,    20_000_000, 20_000_000),
-    "theorem-qa":        ( 100_000_000,       200_000,    200_000),  # ~5 MB total
+    "theorem-qa":        ( 100_000_000,        50_000,     50_000),  # ~232 KB total
 }
 
 

@@ -513,12 +513,29 @@ DATASET_REGISTRY = {
         "notes":     "14.7B tokens of mathematical web text (proofs, derivations, math.SE)",
     },
     "algebraic-stack": {
-        "hf_name":   "EleutherAI/proof-pile-2",
-        "hf_config": "algebraic-stack",
+        # Originally pointed at EleutherAI/proof-pile-2 algebraic-stack
+        # config but that dataset's compressed shards trip a
+        # `zstandard.ZstdError: Unknown frame descriptor` somewhere
+        # mid-stream — a zstandard library / shard format mismatch
+        # we couldn't quickly resolve.
+        #
+        # Switched to the predecessor `hoskinson-center/proof-pile`
+        # — parquet-based, no loading script, no zstd shards. Same
+        # role: formal-proof + math signal for the polynomial-
+        # hierarchy thesis. Schema is `{text, meta}` — formatter
+        # reads the bare text field, content includes:
+        #   - arXiv math papers (LaTeX source)
+        #   - Lean/Coq/Isabelle/HOL proof scripts (the "formal"
+        #     subset; meta.config="formal")
+        #   - math StackExchange Q&A
+        #   - math textbooks + mathoverflow + math wiki
+        # — all on-thesis for "softness/hardness boundary" exposure.
+        "hf_name":   "hoskinson-center/proof-pile",
+        "hf_config": None,
         "split":     "train",
         "formatter": fmt_algebraic_stack,
         "kind":      "pretrain",
-        "notes":     "Math+code from arXiv: Lean, Coq, Isabelle proofs + algorithmic impls",
+        "notes":     "Formal proofs (Lean/Coq/Isabelle/HOL) + arXiv math + math.SE",
     },
     "code-contests": {
         "hf_name":   "deepmind/code_contests",
