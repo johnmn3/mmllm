@@ -140,6 +140,123 @@ The overall pitch: a code assistant that respects the user's
 machine, the user's data, and the long tail of patterns specific
 to a language community that mainstream tooling doesn't prioritize.
 
+## Current training mission (v2): agentic file editing
+
+The v1 series (5B-plain on Pile-Github, results below) validated
+the bank-as-substrate thesis for free-form code continuation. The
+v2 series targets a **byte-level model that emits JSON tool calls
+to edit files** — a small agentic LLM that can act on common text
+files and source code from the command line.
+
+**Output schema (locked!)** — every assistant turn is a JSON object
+in the canonical OpenAI-/Anthropic-style tool-call shape:
+
+```json
+{"tool_calls": [{"name": "Edit", "args": {"old_str": "...", "new_str": "..."}}]}
+```
+
+The model learns this format end-to-end from the byte stream — no
+tokenizer hacks, no constrained decoding at inference. Same vocab
+(256 bytes), same architecture, just a chat-template-wrapped corpus.
+
+### Corpus mix (curated public HF datasets)
+
+Every formatter and HF source is wired into `mmllm.datasets.DATASET_REGISTRY`
+and stages onto the volume in the standard `<base>.{train,val,test}.bin`
+shape that `train-long` consumes. Pull each one independently with
+`modal run modal_app.py::prepare_hf_dataset --dataset-key <key>` or
+all-at-once with the smoke runbook below.
+
+| key | HF source | role | ~size at full prep |
+|---|---|---|---|
+| `commitpackft-py` | `bigcode/commitpackft` (python) | Python file-edit signal — the primary corpus for "given source + edit instruction, emit Edit tool call" | ~1 GB |
+| `commitpackft-md` | `bigcode/commitpackft` (markdown) | Markdown editing | ~700 MB |
+| `commitpackft-sh` | `bigcode/commitpackft` (shell) | Shell script editing | ~600 MB |
+| `commitpackft-js` | `bigcode/commitpackft` (javascript) | JavaScript editing | ~700 MB |
+| `magicoder` | `ise-uiuc/Magicoder-Evol-Instruct-110K` | Code instruction-following scaffolding | ~250 MB |
+| `cosmopedia` | `HuggingFaceTB/cosmopedia-v2` | Synthetic textbook-quality general text — distillation flavor without doing the distillation | up to 25 GB |
+| `fineweb-edu` | `HuggingFaceFW/fineweb-edu` (10BT sample) | Curated educational web text — general world knowledge | up to 30 GB |
+| `xlam` (gated) | `Salesforce/xlam-function-calling-60k` | Native JSON function-call traces; teaches the canonical tool-call shape. Requires HF token. | ~150 MB |
+| `the-stack-v2-{py,md,sh}` (gated) | `bigcode/the-stack-v2-dedup` | Code corpus for general-language fluency. Requires HF token + license click-through. | TB-scale, capped per slice |
+
+**Default mix proportions** for a slow-walk session (operator sets via
+`--mix "<path1>:<weight>,..."`; see [`docs/slow-walk-budget-plan.md`](./docs/slow-walk-budget-plan.md)):
+
+```
+30%  commitpackft-py    file-edit signal (primary)
+25%  cosmopedia         synthetic textbook
+20%  fineweb-edu        general web text
+10%  commitpackft-md    markdown editing
+ 8%  magicoder          instruction-following scaffold
+ 4%  commitpackft-sh    shell scripting
+ 3%  commitpackft-js    JavaScript
+```
+
+(xLAM + the-stack-v2 added when the HF token is configured.)
+
+### Architecture knobs (v2 vs v1)
+
+| | v1 (5B-plain, completed) | v2 (slow-walk, in progress) |
+|---|---|---|
+| `bank_query_mode` | `plain` | `ctx-add` (additive `W_ctx · x`) |
+| `bank_feedback_mode` | `plain` (no feedback) | `feedback` (probe→bank→`W_back`) |
+| Bank | `sqrt_n=2048` fp32 (18.8 GB) | same |
+| Output | free-form continuation | JSON tool calls |
+| Corpus | Pile-Github (~95 GB) | curated HF mix (~50-100 GB) |
+
+### Slow-walk training (budget-bounded sessions)
+
+Training proceeds in many short sessions that resume from the
+latest ckpt. Each session is bounded by `--max-hours <N>` so the
+operator caps spend per launch. Real H100 throughput at production
+config: **~6 steps/sec → ~22k steps/hour → ~7,300 steps per $1**.
+That puts v1-comparable scale (305k steps) at ~14 hours / ~$42 of
+H100, achievable in 3 weeks of $14/wk pace.
+
+Auto-publish to GitHub Release: each session optionally
+quantizes the bank to int8 and uploads to `agent-step-<N>`
+(immutable per-step) + `agent-latest` (force-replaced moving tag)
+so external machines can pull ckpts via `mmllm fetch-artifacts`
+without Modal access. See [`docs/slow-walk-budget-plan.md`](./docs/slow-walk-budget-plan.md)
+for the full runbook.
+
+### Per-ckpt eval harness
+
+Two metric families run automatically against each ckpt as it
+lands (via `eval_watcher` on a cheap A10G alongside the H100
+training session):
+
+- **BPC evals** on pretraining-style splits (cosmopedia, fineweb-edu,
+  the-stack-v2-py) — straightforward bits-per-byte.
+- **Agentic evals** on SFT splits (commitpackft-{py,md,sh,js},
+  magicoder, xlam) — generation-driven scoring of
+  `format_validity` (fraction emitting valid JSON), `tool_name_match`,
+  `tool_args_match`, `exact_match`. The first metric crawls off
+  zero once the model has seen enough format-tagged training data;
+  the others lag.
+
+All metrics land in the same `<base>.eval.jsonl` as `train-long`'s
+in-training events so they plot on the same step axis.
+
+### Pre-flight smoke tests
+
+Two smokes verify the rig before any paid training:
+
+```bash
+# Local CPU smoke (free, ~45-90s) — synthetic data, full pipeline:
+python scripts/smoke_phase0.py
+
+# Modal smoke (~$0.10-0.40) — real HF prep + optional H100 train + eval:
+modal run modal_app.py::smoke_pipeline_modal                          # prep+inspect only
+modal run modal_app.py::smoke_pipeline_modal --include-train          # +3-min H100
+modal run modal_app.py::smoke_pipeline_modal --include-train --include-eval
+modal run modal_app.py::smoke_pipeline_modal --include-train --include-eval --include-publish
+```
+
+Per-dataset failures are captured + reported in the summary
+rather than aborting the whole smoke. Run before launching any
+real session.
+
 ## Architecture
 
 mmLLM is a decoder-only transformer with a hard-split three-tier attention
