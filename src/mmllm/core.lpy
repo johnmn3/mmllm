@@ -35,6 +35,7 @@
            [torch.optim :as optim]
            [mmllm.memory :as mem]
            [mmllm.corpus :as corp]
+           [mmllm.artifacts :as art]
            [mmllm.gating :as gate]
            [mmllm.bank_query :as bq]
            [mmllm.bank_feedback :as bfb]
@@ -44,10 +45,34 @@
            [mmllm.spec_decode :as spec]
            [mmllm.optim :as vbopt]))
 
+(defn- mps-available? []
+  (try
+    (and (hasattr torch/backends "mps")
+         (.is_available (.- torch/backends mps)))
+    (catch python/Exception _ false)))
+
+(defn- sync-device!
+  "Block until pending GPU work finishes — needed before timing on
+   accelerator backends (cuda, mps) since their submissions are
+   asynchronous. No-op on cpu."
+  [device]
+  (cond
+    (= device "cuda") (cuda/synchronize)
+    (= device "mps")  (try (.synchronize (.- torch mps))
+                           (catch python/Exception _ nil))
+    :else             nil))
+
 (defn pick-device
-  "Resolve the active torch device. Reads MMLLM_DEVICE
-   (cpu / cuda / auto, default auto). `auto` picks cuda if
-   `torch.cuda.is_available()`, else cpu."
+  "Resolve the active torch device. Reads MMLLM_DEVICE — one of
+   cpu / cuda / mps / auto (default auto).
+
+     'auto' prefers cuda → mps → cpu in that order
+     'mps'  is Apple Silicon's Metal Performance Shaders backend
+            (M-series SoC GPU); requires torch with MPS support and
+            macOS. Bank V stays on CPU mmap (Int8/PKM cross-device
+            gather pattern handles the MPS↔CPU hop per query).
+     'cuda' is NVIDIA GPU
+     'cpu'  is the always-available fallback"
   []
   (let [req (.get (.- os environ) "MMLLM_DEVICE" "auto")]
     (cond
@@ -55,7 +80,13 @@
       (= req "cuda") (if (cuda/is_available) "cuda"
                          (do (println "WARN: MMLLM_DEVICE=cuda but cuda not available — falling back to cpu")
                              "cpu"))
-      :else          (if (cuda/is_available) "cuda" "cpu"))))
+      (= req "mps")  (if (mps-available?) "mps"
+                         (do (println "WARN: MMLLM_DEVICE=mps but MPS not available — falling back to cpu")
+                             "cpu"))
+      :else          (cond
+                       (cuda/is_available) "cuda"
+                       (mps-available?)    "mps"
+                       :else               "cpu"))))
 
 (defn setup-threads!
   "Tune intra-op + inter-op CPU thread counts for the active process.
@@ -827,12 +858,11 @@
             (let [prompt "the quick brown fox jumps over the lazy dog. "]
               (println (format "  warmup: %d tokens …" n-warm))
               (sample m prompt n-warm forward-fn)
-              (when (= device "cuda")
-                (cuda/synchronize))
+              (sync-device! device)
               (println (format "  timed:  %d tokens …" n-time))
               (let [t0  (time/time)
                     _   (sample m prompt n-time forward-fn)
-                    _   (when (= device "cuda") (cuda/synchronize))
+                    _   (sync-device! device)
                     dt  (- (time/time) t0)
                     tps (/ (python/float n-time) dt)
                     ms  (* 1000.0 (/ dt (python/float n-time)))]
@@ -923,11 +953,11 @@
       (let [prompt "the quick brown fox jumps over the lazy dog. "]
         (println (format "  warmup: %d tokens × B=%d …" n-warm B))
         (sample-batch m prompt n-warm B)
-        (when (= device "cuda") (cuda/synchronize))
+        (sync-device! device)
         (println (format "  timed:  %d tokens × B=%d …" n-time B))
         (let [t0  (time/time)
               _   (sample-batch m prompt n-time B)
-              _   (when (= device "cuda") (cuda/synchronize))
+              _   (sync-device! device)
               dt  (- (time/time) t0)
               per-seq-tps (/ (python/float n-time) dt)
               agg-tps     (* B per-seq-tps)
@@ -1571,6 +1601,14 @@
                             B         (python/int (or (nth args 6 nil) 16))]
                         (bench-inference-batch cfg base ckpt-step bank-path n-warm n-time B)
                         (println "done."))
+      "fetch-artifacts" (let [out-dir (or (second args) "./mmllm-artifacts")
+                              base    (nth args 2 nil)]
+                          (let [stats (art/fetch_artifacts out-dir base)]
+                            (println (format "  fetched %d files, %d cached, %s total"
+                                             (.get stats "n_fetched")
+                                             (.get stats "n_cached")
+                                             (.get stats "total_human"))))
+                          (println "done."))
       "bank-quantize" (let [in-prefix  (or (second args) "/data/pile-bank-3tier")
                             out-prefix (or (nth args 2 nil) "/data/pile-bank-3tier-int8")
                             n-layers   (python/int (or (nth args 3 nil) (:n-layers cfg)))

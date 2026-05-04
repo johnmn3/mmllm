@@ -300,6 +300,43 @@ Installs `basilisp`, `torch` (CPU), and `numpy`.
 > 2.4+. A polyfill is included in `_entry.py` so local CPU runs work out of the
 > box. GPU runs (Modal, Linux) get the real implementation.
 
+### Laptop quickstart (no Modal account needed)
+
+To run a local bench / generation against a pre-trained checkpoint
+on your laptop without provisioning Modal:
+
+```bash
+# 1. Install
+pip install -e .
+
+# 2. Fetch the public artifact bundle from a GitHub Release
+#    (~4.5 GB: int8 bank + dense.pt; ~5 min on a 100 Mbps link)
+mmllm fetch-artifacts ./mmllm-artifacts
+
+# 3. Point the bench at the local copy
+MMLLM_DEVICE=auto \
+MMLLM_BANK_DTYPE=int8 \
+MMLLM_BANK_ON_GPU=false \
+MMLLM_SQRT_N=2048 \
+mmllm bench-batch ./mmllm-artifacts/pile-github.bin 305000 \
+                  ./mmllm-artifacts/pile-bank-3tier-int8 20 100 16
+```
+
+`MMLLM_DEVICE=auto` picks the best available backend in order
+**cuda → mps → cpu**. On Apple Silicon laptops this routes the
+dense matmuls through Metal Performance Shaders (the M-series
+SoC GPU); the bank stays on CPU mmap and per-token top-K rows
+are gathered+dequantized on CPU before being shipped back to the
+GPU. Same pattern as our cuda + mmap-bank Modal benches.
+
+Override the artifact source with `MMLLM_ARTIFACTS_URL` or pass
+the URL as the second arg to `mmllm fetch-artifacts`.
+
+To **publish** a release of artifacts you've trained yourself,
+`scripts/release-artifacts.sh` wraps `gh release create` with the
+right file labeling. Run it from any machine where the artifacts
+are cached locally (e.g., after `modal volume get`).
+
 ## Commands
 
 ### Quick start (toy corpus)
