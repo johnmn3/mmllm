@@ -26,7 +26,9 @@
            math
            os
            time
+           contextlib
            torch
+           [torch.amp :as amp]
            [torch.cuda :as cuda]
            [torch.nn :as nn]
            [torch.nn.functional :as F]
@@ -740,35 +742,57 @@
           (.copy_ (.- p data) s))))
     (set-eval-mode! m)
     (torch/set_grad_enabled false)
-    ;; Phase-1a: opt-in torch.compile of forward. maybe_compile_forward
-    ;; reads MMLLM_COMPILE; returns the original forward when disabled
-    ;; or on compile failure. The compiled wrapper is plug-compatible
-    ;; with the eager forward — sample threads it through identically.
-    (rt/maybe_cast_dense_bf16 m)
-    (let [forward-fn (rt/maybe_compile_forward forward)]
-      (println (format "  device=%s  bank_on_gpu=%s  sqrt_n=%d  bank=%s"
-                       device
-                       (.lower (.get (.- os environ) "MMLLM_BANK_ON_GPU" "false"))
-                       (pick-sqrt-n config)
-                       bank-path))
-      (try
-        (let [prompt "the quick brown fox jumps over the lazy dog. "]
-          (println (format "  warmup: %d tokens …" n-warm))
-          (sample m prompt n-warm forward-fn)
-          (when (= device "cuda")
-            (cuda/synchronize))
-          (println (format "  timed:  %d tokens …" n-time))
-          (let [t0  (time/time)
-                _   (sample m prompt n-time forward-fn)
-                _   (when (= device "cuda") (cuda/synchronize))
-                dt  (- (time/time) t0)
-                tps (/ (python/float n-time) dt)
-                ms  (* 1000.0 (/ dt (python/float n-time)))]
-            (println)
-            (println (format "  RESULT: %d tokens in %.3fs → %.2f tok/sec  (%.3f ms/tok)"
-                             n-time dt tps ms))))
-        (finally
-          (torch/set_grad_enabled true))))))
+    ;; Phase-1 step C1: optional bf16 cast of dense weights. Engages
+    ;; AMX matmul on Intel Sapphire Rapids+ / AVX-512 BF16 on Zen4+ /
+    ;; Apple M-series neon BF16. Bank V (the trained content) and the
+    ;; bank's K_a/K_b sub-keys stay at their native dtype; the
+    ;; surrounding torch.amp.autocast (below) handles dtype mixing at
+    ;; the bank-query boundary so the bf16/fp32 hop costs one cast per
+    ;; bank lookup, not per-token-everywhere.
+    (let [bf16? (= "bf16" (.lower (.get (.- os environ) "MMLLM_DENSE_DTYPE" "")))]
+      (when bf16?
+        (.to (:tok-emb m) torch/bfloat16)
+        (.to (:norm-final m) torch/bfloat16)
+        (doseq [b (:blocks m)]
+          (doseq [k [:norm1 :norm2 :q-proj :k-proj-s :v-proj-s :k-proj-l :v-proj-l
+                     :o-proj :gate-proj :up-proj :down-proj
+                     :long-gate :bank-query :bank-feedback]]
+            (.to (get b k) torch/bfloat16)))
+        (println "  dense weights cast to bfloat16 (bank stays at native dtype; autocast bridges)"))
+      (let [forward-fn (rt/maybe_compile_forward forward)
+            ;; When bf16 is enabled, wrap the inference loop in CPU
+            ;; bf16 autocast so matmuls between bf16 weights and any
+            ;; lingering fp32 tensors (notably K_a/K_b inside the
+            ;; bank) get cast at-op, hitting the AMX matmul path on
+            ;; Intel SPR+. Otherwise use a no-op nullcontext so the
+            ;; control flow stays the same.
+            autocast-ctx (if bf16?
+                           (amp/autocast ** :device_type "cpu" :dtype torch/bfloat16)
+                           (contextlib/nullcontext))]
+        (println (format "  device=%s  bank_on_gpu=%s  sqrt_n=%d  bank=%s"
+                         device
+                         (.lower (.get (.- os environ) "MMLLM_BANK_ON_GPU" "false"))
+                         (pick-sqrt-n config)
+                         bank-path))
+        (try
+          (with [_ autocast-ctx]
+            (let [prompt "the quick brown fox jumps over the lazy dog. "]
+              (println (format "  warmup: %d tokens …" n-warm))
+              (sample m prompt n-warm forward-fn)
+              (when (= device "cuda")
+                (cuda/synchronize))
+              (println (format "  timed:  %d tokens …" n-time))
+              (let [t0  (time/time)
+                    _   (sample m prompt n-time forward-fn)
+                    _   (when (= device "cuda") (cuda/synchronize))
+                    dt  (- (time/time) t0)
+                    tps (/ (python/float n-time) dt)
+                    ms  (* 1000.0 (/ dt (python/float n-time)))]
+                (println)
+                (println (format "  RESULT: %d tokens in %.3fs → %.2f tok/sec  (%.3f ms/tok)"
+                                 n-time dt tps ms)))))
+          (finally
+            (torch/set_grad_enabled true)))))))
 
 ;;; ─────────────────────── train on a real corpus ───────────────────────
 
