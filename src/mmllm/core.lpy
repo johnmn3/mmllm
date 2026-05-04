@@ -306,10 +306,10 @@
     (let [modal (python/__import__ "modal")]
       (.from_name (.- modal Volume) name))
     (catch python/ImportError _
-      (println (format "  WARN: modal not installed; bank sync disabled."))
+      (println (format "  WARN: modal not installed; volume features (bank sync + ckpt commits) disabled."))
       nil)
     (catch python/Exception e
-      (println (format "  WARN: modal.Volume.from_name(\"%s\") failed: %s — bank sync disabled."
+      (println (format "  WARN: modal.Volume.from_name(\"%s\") failed: %s — volume features (bank sync + ckpt commits) disabled."
                        name e))
       nil)))
 
@@ -1161,31 +1161,52 @@
    forcing a partial relearn. (We hit this on the 5B+fb run and it
    cost us ~80k steps of effective bank progress.)
 
-   For mmap-backed V (bank_on_gpu=False), this still runs but
+   For mmap-backed V (bank_on_gpu=False), the V save still runs but
    produces the same content the in-flight mmap already has; it's
-   redundant but harmless."
-  [m opt-dense opt-sparse ckpt-dir step]
-  (let [path (str ckpt-dir "/step-" step)]
-    (os/makedirs path ** :exist_ok true)
-    (torch/save (python/list (for [p (parameters m)]
-                               (.detach (.clone (.- p data)))))
-                (str path "/dense.pt"))
-    (torch/save (.state_dict opt-dense)  (str path "/opt-dense.pt"))
-    (torch/save (.state_dict opt-sparse) (str path "/opt-sparse.pt"))
-    ;; Save bank V to a fixed per-layer path (overwrite in place).
-    ;; Skip on errors so a bank-save hiccup doesn't lose the dense
-    ;; ckpt — but log loudly because the resume will be bad.
-    (try
-      (doseq [[i b] (map-indexed vector (:blocks m))]
-        (.save_to_mmap (:memory b)
-                       (str ckpt-dir "/bank-latest." i ".bin")))
-      (catch python/Exception e
-        (println (format "  WARN: bank V save failed at step %d: %s — "
-                         step e))
-        (println (format "        resume from this ckpt will get random V."))))
-    (let [f (python/open (str path "/step.txt") "w")]
-      (.write f (str step))
-      (.close f))))
+   redundant but harmless.
+
+   `volume` (optional) is a Modal Volume (or any object with a
+   .commit() method). When provided, called after the writes so the
+   ckpt is durably persisted before training continues. Without
+   this, Modal Volumes only auto-commit at clean function exit; a
+   crash mid-run loses any writes since the last commit. If `volume`
+   is nil (non-Modal env or local dev), the commit step is skipped."
+  ([m opt-dense opt-sparse ckpt-dir step]
+   (save-checkpoint! m opt-dense opt-sparse ckpt-dir step nil))
+  ([m opt-dense opt-sparse ckpt-dir step volume]
+   (let [path (str ckpt-dir "/step-" step)]
+     (os/makedirs path ** :exist_ok true)
+     (torch/save (python/list (for [p (parameters m)]
+                                (.detach (.clone (.- p data)))))
+                 (str path "/dense.pt"))
+     (torch/save (.state_dict opt-dense)  (str path "/opt-dense.pt"))
+     (torch/save (.state_dict opt-sparse) (str path "/opt-sparse.pt"))
+     ;; Save bank V to a fixed per-layer path (overwrite in place).
+     ;; Skip on errors so a bank-save hiccup doesn't lose the dense
+     ;; ckpt — but log loudly because the resume will be bad.
+     (try
+       (doseq [[i b] (map-indexed vector (:blocks m))]
+         (.save_to_mmap (:memory b)
+                        (str ckpt-dir "/bank-latest." i ".bin")))
+       (catch python/Exception e
+         (println (format "  WARN: bank V save failed at step %d: %s — "
+                          step e))
+         (println (format "        resume from this ckpt will get random V."))))
+     (let [f (python/open (str path "/step.txt") "w")]
+       (.write f (str step))
+       (.close f))
+     ;; Modal Volume durable commit. Pushes all dirty bytes since
+     ;; the last commit (≈ bank-latest size on the V-rewrite path).
+     ;; Wrapped because some Volume backends raise if there are open
+     ;; file handles; we don't want to lose the local ckpt over a
+     ;; commit hiccup, just warn.
+     (when volume
+       (try
+         (.commit volume)
+         (catch python/Exception e
+           (println (format "  WARN: volume.commit at step %d failed: %s"
+                            step e))
+           (println (format "        ckpt files exist on container but may not survive a crash."))))))))
 
 (defn load-checkpoint!
   "Restore dense params + optimizer state + bank V state.
@@ -1265,13 +1286,14 @@
         start-step   (or (latest-checkpoint-step ckpt-dir) 0)
         sync-every   (pick-sync-every)
         ablate-every (pick-ablate-every)
-        ;; Sync only meaningful when (a) the bank is mmap-backed
-        ;; (otherwise nothing to share) and (b) we have a volume
-        ;; handle (otherwise commit/reload have nowhere to go).
-        ;; Either condition false → sync is a no-op for this run.
-        volume     (when (and (pos? sync-every) (:memory-mmap-path config))
-                     (get-modal-volume (pick-volume-name)))
-        do-sync?   (and volume (pos? sync-every))]
+        ;; Grab the Modal Volume reference unconditionally — used
+        ;; for both (a) Hogwild bank sync (gated by sync-every and
+        ;; mmap-backed bank) AND (b) durable ckpt commits (always-
+        ;; on, so bank-V writes survive a crash). On non-Modal
+        ;; envs, get-modal-volume returns nil and both features
+        ;; gracefully no-op.
+        volume     (get-modal-volume (pick-volume-name))
+        do-sync?   (and volume (pos? sync-every) (:memory-mmap-path config))]
     (os/makedirs ckpt-dir ** :exist_ok true)
     (when (pos? start-step)
       (println (format "  resuming from checkpoint at step %d" start-step))
@@ -1315,7 +1337,7 @@
         (loop [step start-step]
         (if (>= step total-steps)
           (do
-            (save-checkpoint! m opt-dense opt-sparse ckpt-dir step)
+            (save-checkpoint! m opt-dense opt-sparse ckpt-dir step volume)
             (println (format "training complete at step %d" step))
             ;; Inline bank ablation: eval (control), zero V across all blocks,
             ;; eval (ablation), report Δ. The Δ tells us how much of the
@@ -1414,7 +1436,7 @@
                                    (format "{\"step\":%d,\"event\":\"ablation_intermediate\",\"control_bpc\":%.4f,\"ablated_bpc\":%.4f,\"delta_bpc\":%.4f,\"ablation_s\":%.2f,\"wall_s\":%.1f}"
                                            step' ctrl abl-bpc delta dt (- (time/time) t0)))))))
             (when (zero? (mod step' ckpt-every))
-              (save-checkpoint! m opt-dense opt-sparse ckpt-dir step')
+              (save-checkpoint! m opt-dense opt-sparse ckpt-dir step' volume)
               (println (format "  ── ckpt at step %d ──" step')))
             (recur step'))))
         (finally
