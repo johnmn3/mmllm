@@ -1562,9 +1562,7 @@ def _do_eval_battery(base, ckpt_step, bank, log_path,
     print(f"=== eval battery base={base} ckpt={ckpt_step} log={log_p} ===",
           flush=True)
 
-    # BPC evals (cheap; generation-free) — basilisp `eval-bpc-on-path`
-    # verb is a follow-up; for now this loop logs a skip note so the
-    # watcher schema stays stable. Agentic evals run below regardless.
+    # BPC evals (cheap; generation-free).
     for entry in bpc_evals.split(","):
         entry = entry.strip()
         if not entry:
@@ -1573,8 +1571,17 @@ def _do_eval_battery(base, ckpt_step, bank, log_path,
         if not os.path.exists(test_path):
             print(f"  skip bpc[{name}]: missing {test_path}", flush=True)
             continue
-        print(f"  → bpc[{name}] @ {test_path}  (eval-bpc-on-path verb TBD)",
-              flush=True)
+        print(f"  → bpc[{name}] @ {test_path}", flush=True)
+        try:
+            subprocess.run(
+                ["mmllm", "eval-bpc-on-path",
+                 base, str(ckpt_step), bank,
+                 test_path, name, log_p],
+                env=env,
+                check=True,
+            )
+        except subprocess.CalledProcessError as e:
+            print(f"    WARN: bpc[{name}] eval failed: {e}", flush=True)
 
     # Agentic evals (generation + scoring).
     for entry in agent_evals.split(","):

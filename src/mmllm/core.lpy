@@ -1042,6 +1042,44 @@
             (ev/append_eval_log log-path
                                 (or ckpt-step 0) eval-name results)))))))
 
+;;; ─────────────────────── multi-corpus mix sampler ───────────────────────
+
+(defn pick-mix
+  "Parse MMLLM_MIX env var into [[tensor weight] ...] or nil.
+
+   Format: 'path1:w1,path2:w2,…' — weights don't need to sum to 1
+   (we normalize at sample time via torch/multinomial). Each path
+   is loaded mmap'd (uint8), so the working-set memory is bounded
+   by sampled batches not corpus size, no matter how many sources
+   you mix. Empty / unset env var → nil (caller falls back to the
+   single train-path mode)."
+  []
+  (let [v (.strip (.get (.- os environ) "MMLLM_MIX" ""))]
+    (when (pos? (count v))
+      (python/list
+        (for [entry (.split v ",")
+              :let  [entry (.strip entry)]
+              :when (pos? (count entry))]
+          (let [colon (.rfind entry ":")
+                path  (.strip (subs entry 0 colon))
+                w-str (.strip (subs entry (inc colon)))
+                ten   (corp/load-as-tensor path ** :use_mmap true)]
+            [ten (python/float w-str)]))))))
+
+
+(defn mix-batch
+  "One (x y) batch drawn from the weighted mix. Picks ONE corpus per
+   batch (chunky mixing — proportions hold across many batches).
+
+   `mix-tensors`: list of 1-D byte tensors (mmap'd).
+   `mix-weights-t`: 1-D fp32 tensor of weights, same length as
+   mix-tensors. Pre-built once at train-long startup so the hot
+   loop only does the multinomial draw."
+  [mix-tensors mix-weights-t B T]
+  (let [idx (.item (torch/multinomial mix-weights-t 1))
+        ten (nth mix-tensors idx)]
+    (batch ten B T)))
+
 ;;; ─────────────────────── train on a real corpus ───────────────────────
 
 (defn train-corpus
@@ -1139,6 +1177,45 @@
              (recur end total' n-toks' (mod logged' 256))))))
      (finally
        (torch/set_grad_enabled true)))))
+
+(defn eval-bpc-on-path
+  "Run eval-bpc against an arbitrary held-out byte tensor at <test-path>,
+   log result via `mmllm.evals.append_eval_log` so it lives in the same
+   JSONL as the agentic-eval rows.
+
+   Cheap (no generation), so the eval-watcher can run BPC across all
+   the pretraining-style splits (cosmopedia.test.bin, fineweb-edu.test.bin,
+   the-stack-v2-py.test.bin, etc.) in seconds-to-minutes per ckpt."
+  [config base-path ckpt-step bank-path test-path eval-name log-path]
+  (let [cfg    (assoc config :memory-mmap-path bank-path)
+        m      (build-model cfg)
+        device (:device m)]
+    (when ckpt-step
+      (let [path  (str base-path ".ckpts/step-" ckpt-step)
+            saved (python/list (torch/load (str path "/dense.pt")
+                                           ** :map_location device))]
+        (println (format "  loaded ckpt: %s (%d dense param tensors)"
+                         path (count saved)))
+        (doseq [[p s] (map vector (parameters m) saved)]
+          (.copy_ (.- p data) s))))
+    (set-eval-mode! m)
+    (torch/set_grad_enabled false)
+    (println (format "  eval-bpc-on-path[%s]: ckpt=%s test=%s"
+                     eval-name (or ckpt-step "init") test-path))
+    (let [data     (corp/load-as-tensor test-path)
+          T-seq    (:seq-len cfg)
+          results  (eval-bpc m data T-seq 16 100000)
+          bpc      (:bpc results)
+          ppl      (:ppl results)
+          n-toks   (:n-tokens results)
+          row      (python/dict)]
+      (.update row {"bpc"      bpc
+                    "ppl"      ppl
+                    "n_tokens" n-toks
+                    "kind"     "bpc"})
+      (println (format "  bpc[%s]=%.4f ppl=%.2f n_tokens=%d"
+                       eval-name bpc ppl n-toks))
+      (ev/append_eval_log log-path (or ckpt-step 0) eval-name row))))
 
 ;;; ─────────────────────── intermediate ablation eval ───────────────────────
 ;;;
@@ -1342,11 +1419,20 @@
    the trained model (mostly useful for in-process callers)."
   [config train-path val-path ckpt-dir log-path total-steps eval-every ckpt-every]
   (let [m          (build-model config)
+        ;; MMLLM_MIX (optional) → multi-corpus weighted sampler.
+        ;; Format: 'path1:w1,path2:w2,…'.  When set, `train-path` is
+        ;; ignored for sampling — only val-path drives eval-bpc.
+        mix          (pick-mix)
+        mix-tensors  (when mix (python/list (map first  mix)))
+        mix-weights-t (when mix
+                         (torch/tensor (python/list (map second mix))
+                                       ** :dtype torch/float))
         ;; Train file may be many GB — use_mmap=True keeps it on disk
         ;; (uint8 view, .long()-cast per batch). Pre-load val (typically
         ;; ≤500 MB) directly as int64 so eval-bpc's repeated narrow()
         ;; over fixed windows doesn't repeatedly cast.
-        train-data (corp/load-as-tensor train-path ** :use_mmap true)
+        train-data (when (nil? mix)
+                     (corp/load-as-tensor train-path ** :use_mmap true))
         val-data   (corp/load-as-tensor val-path)
         opt-dense  (optim/AdamW    (python/list (parameters m))         ** :lr (pick-lr))
         opt-sparse ((pick-sparse-optimizer) (python/list (sparse-parameters m)) ** :lr (pick-lr))
@@ -1386,6 +1472,12 @@
                        (pick-lr) (:device m)))
       (println (format "  bank: %d entries × %d layers,%s"
                        bank-n (:n-layers config) mmap-note))
+      (when mix
+        (println (format "  mix: %d corpora (MMLLM_MIX) — train-path arg ignored" (count mix)))
+        (let [total-w (.item (.sum mix-weights-t))]
+          (doseq [[i [_ w]] (map-indexed vector mix)]
+            (println (format "    [%d] weight=%.3f (%.1f%%)"
+                             i w (* 100.0 (/ w total-w)))))))
       (println (format "  log: %s    ckpt: %s" log-path ckpt-dir))
       (if do-sync?
         (println (format "  sync: every %d steps via modal.Volume(\"%s\")  (Hogwild)"
@@ -1458,7 +1550,9 @@
                                (set-opt-lr! opt-dense  cur-lr)
                                (set-opt-lr! opt-sparse cur-lr)))
                 B-cur (pick-batch)
-                [x y] (batch train-data B-cur T)
+                [x y] (if mix
+                        (mix-batch mix-tensors mix-weights-t B-cur T)
+                        (batch train-data B-cur T))
                 loss  (train-step m opt-dense opt-sparse x y)
                 _     (.add_tokens tracker (* B-cur T))
                 step' (inc step)]
@@ -1831,6 +1925,15 @@
                          log-path   (or (nth args 8 nil) (str base ".eval.jsonl"))]
                      (eval-agent long-leaning-config base ckpt bank eval-path
                                  eval-name n-samples gen-len log-path))
+      "eval-bpc-on-path" (let [base       (or (second args) "/tmp/agent")
+                               ckpt       (when (nth args 2 nil)
+                                            (python/int (nth args 2 nil)))
+                               bank       (or (nth args 3 nil) "/tmp/bank")
+                               eval-path  (or (nth args 4 nil) "/tmp/eval.test.bin")
+                               eval-name  (or (nth args 5 nil) "bpc")
+                               log-path   (or (nth args 6 nil) (str base ".eval.jsonl"))]
+                           (eval-bpc-on-path long-leaning-config base ckpt bank
+                                             eval-path eval-name log-path))
       (do (println "usage: mmllm {train|sample|compare|train-mmap|probe")
           (println "                  |build-corpus|clone-clojure|train-corpus")
           (println "                  |fetch-text8|fetch-enwik8|split-text8|train-text8")
@@ -1877,4 +1980,7 @@
           (println "  eval-agent <base> <ckpt-step> <bank-path> <eval-test.bin> <eval-name> [n-samples] [gen-len] [log-path]")
           (println "                                           (load ckpt, generate against held-out SFT prompts,")
           (println "                                            score JSON tool-call validity / name-match / args-match)")
+          (println "  eval-bpc-on-path <base> <ckpt-step> <bank-path> <test.bin> <eval-name> [log-path]")
+          (println "                                           (load ckpt, run BPC on arbitrary held-out byte tensor —")
+          (println "                                            cheap, no generation. Pretraining-style metric.)")
           (sys/exit 1)))))
