@@ -2177,6 +2177,57 @@ _PERMISSIVE_LICENSE_PATTERNS = (
 @app.function(
     image=image,
     volumes={"/data": volume},
+    timeout=3600,         # generation is CPU-bound, ~10k rec/s; 200k = ~20 s
+    cpu=4.0,
+    memory=8192,
+)
+def prepare_aesop_capstone(
+    out_path:    str = "/data/agent-corpus-v3/aesop-capstone.bin",
+    n_records:   int = 200_000,
+    seed:        int = 0,
+    val_bytes:   int = 5_000_000,
+    test_bytes:  int = 5_000_000,
+):
+    """Generate the aesop-capstone synthetic corpus on the volume.
+
+    Calls into mmllm.aesop.generate.generate_corpus, which procedurally
+    builds (story → Clojure code → tool-call) triples across 10 fables
+    × 31 chapter variants. Every record's math is verified by evaluating
+    the underlying Expr tree — no hallucinated arithmetic in the corpus.
+
+    Output layout matches all other prepared corpora:
+      <out_path>            flat byte stream
+      <out_path>.train.bin
+      <out_path>.val.bin
+      <out_path>.test.bin
+
+    Throughput: ~10k records/s on CPU. 200k records ≈ 130-150 MB total
+    + ~20s wall.
+    """
+    from pathlib import Path
+    from mmllm.aesop.generate import generate_corpus
+
+    Path(out_path).parent.mkdir(parents=True, exist_ok=True)
+    print(f"  prepare_aesop_capstone → {out_path}  "
+          f"(n={n_records}, seed={seed})", flush=True)
+    stats = generate_corpus(
+        out_path=out_path,
+        n_records=n_records,
+        seed=seed,
+        val_bytes=val_bytes,
+        test_bytes=test_bytes,
+        do_split=True,
+        verbose=True,
+    )
+    volume.commit()
+    print(f"  committed: {stats['n_records']} records / "
+          f"{stats['bytes']/1e6:.1f} MB", flush=True)
+    return stats
+
+
+@app.function(
+    image=image,
+    volumes={"/data": volume},
     timeout=14400,        # 4 h cap — fetch jars from Clojars
     cpu=4.0,
     memory=8192,
