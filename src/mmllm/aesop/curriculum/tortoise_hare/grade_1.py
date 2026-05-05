@@ -70,10 +70,14 @@ The crowd waited to see who would correctly write the form to submit."""),
 
     # 5. The race-pause template — hare pauses mid-race, tortoise catches up
     #    via careful evaluation.
+    #    NOTE: uses {hare} (the name) instead of {hare_he_she_cap} for the
+    #    "called it impossible" sentence — for gender="n" characters,
+    #    "They called it impossible." reads as plural-subject right after
+    #    a singular "Pip the hare stopped" introduction.
     SubplotTemplate("""\
 Halfway through the race, {hare_phrase} stopped {place} and refused to
 continue until someone could prove what the form {form_display}
-evaluated to. {hare_he_she_cap} called it impossible.
+evaluated to. {hare} called it impossible.
 {tortoise_phrase}, walking up at her usual pace, simply said: "Submit
 {concept_phrase} to the REPL. Whatever comes back is the answer.\""""),
 
@@ -138,7 +142,7 @@ G1_01 = SubjectCurriculum(
         _ex("42",                  42,    "the value 42",
             "the value of 42"),
         _ex("0",                   0,     "the value 0",
-            "the value of the form 0"),
+            "the value of 0"),
         _ex("(+ 1 2)",             3,     "the form (+ 1 2)",
             "the result of (+ 1 2)"),
         _ex("(* 4 5)",             20,    "the form (* 4 5)",
@@ -188,13 +192,13 @@ G1_03 = SubjectCurriculum(
         _ex("1/2",   "1/2", "the ratio 1/2",   "the value of the ratio 1/2"),
         _ex("3/4",   "3/4", "the ratio 3/4",   "the value of three-quarters"),
         _ex("(+ 1/2 1/4)", "3/4",
-            "the sum 1/2 + 1/4",
+            "the form (+ 1/2 1/4)",
             "the value of (+ 1/2 1/4)"),
         _ex("(* 2 1/2)", 1,
-            "the product of 2 and 1/2",
+            "the form (* 2 1/2)",
             "the value of (* 2 1/2)"),
         _ex("(- 1 1/3)", "2/3",
-            "1 minus 1/3",
+            "the form (- 1 1/3)",
             "the value of (- 1 1/3)"),
     ],
     subplots=_SHARED_SUBPLOTS,

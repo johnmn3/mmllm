@@ -12,7 +12,7 @@
     question_what=`the value of 42`
   - ex1: form=`0` expected=`0`
     concept=`the value 0`
-    question_what=`the value of the form 0`
+    question_what=`the value of 0`
   - ex2: form=`(+ 1 2)` expected=`3`
     concept=`the form (+ 1 2)`
     question_what=`the result of (+ 1 2)`
@@ -37,9 +37,9 @@
 ```
 The Hare and the Tortoise had argued for as long as anyone could remember about who was truly the swifter. It happened in the garden.
 
-"There is no need to evaluate that," Hopper the hare said, puffed up with pride.
+"There is no need to evaluate that," Hopper the hare said, with great whoops of laughter.
 "Anyone can see what the value 42 comes to." Slowpoke the tortoise, who
-by the garden had grown used to such claims, asked him to actually
+near the garden had grown used to such claims, asked him to actually
 write the form `42` and submit it to the REPL — just to be
 sure.
 
@@ -57,12 +57,13 @@ I express the form as Clojure source.
 ```
 In that part of the forest, no one ever expected the Tortoise to outrun the Hare — yet today the question would be settled. This was at the edge of the meadow.
 
-A small audience of forest creatures had gathered across the meadow to watch
-Hopper the hare attempt to outwit Slowpoke the tortoise at reading the REPL.
-Slowpoke read aloud the value 0: the form was `0`.
-The crowd waited to see who would correctly write the form to submit.
+A wooden sign nailed to a tree by the meadow carried a puzzle. The riddle
+was simple: it asked the reader to evaluate `0`. Hopper
+laughed, swaggering through the underbrush, and declared it too easy. Slowpoke said
+patiently that the only way to be sure of the value 0 was to put
+it in the REPL.
 
-Write a Clojure expression that computes the value of the form 0.
+Write a Clojure expression that computes the value of 0.
 
 ---
 
@@ -154,19 +155,19 @@ I let the REPL do the evaluation.
 ### Record 1 (form: `7`)
 
 ```
-There was once a Hare whose pride was as quick as her feet, and a Tortoise who said nothing about either. This was at the edge of the woods.
+There was once a Hare whose pride was as quick as her feet, and a Tortoise who said nothing about either. All this took place by the woods.
 
-A wooden sign nailed to a tree in the woods carried a puzzle. The riddle
-was simple: it asked the reader to evaluate `7`. Pip
-laughed, as if the race were already won, and declared it too easy. Mossback said
-patiently that the only way to be sure of the integer 7 was to put
-it in the REPL.
+Pip the hare and Mossback the tortoise stopped in the woods where someone had
+written the integer 7 on a flat stone. Pip, swaggering through the underbrush, declared
+that they could see the answer at a glance. Mossback,
+her eyes always on the path, suggested they actually evaluate the form `7`
+in the REPL and read off whatever it returned.
 
-Write a Clojure expression that computes the value of the integer 7.
+Question: write a Clojure expression for the value of the integer 7.
 
 ---
 
-Let me compute that.
+I express the form as Clojure source.
 
 {"tool_calls":[{"name":"eval","args":{"form":"7"}}]}
 ```
@@ -174,16 +175,19 @@ Let me compute that.
 ### Record 2 (form: `-3`)
 
 ```
-It was well known among the animals that the Hare boasted of his speed at every chance. All this took place in the forest.
+The Hare loved nothing better than the sound of his own boasts; the Tortoise, nothing better than a long quiet walk. It happened by the orchard.
 
-A small audience of forest creatures had gathered in the forest to watch
-Hopper the hare attempt to outwit Shelly the tortoise at reading the REPL.
-Shelly read aloud the integer -3: the form was `-3`.
-The crowd waited to see who would correctly write the form to submit.
+Shelly the tortoise had been keeping a small leather notebook of every
+form she had successfully evaluated. Today by the orchard, the
+next entry was the integer -3. Whisker the hare peered over
+her shoulder at the form `-3` and asked what
+it would come out to.
 
 Question: write a Clojure expression for the value of the integer -3.
 
 ---
+
+I let the REPL do the evaluation.
 
 {"tool_calls":[{"name":"eval","args":{"form":"-3"}}]}
 ```
@@ -191,19 +195,17 @@ Question: write a Clojure expression for the value of the integer -3.
 ### Record 3 (form: `0`)
 
 ```
-There was once a Hare whose pride was as quick as her feet, and a Tortoise who said nothing about either.
+In that part of the forest, no one ever expected the Tortoise to outrun the Hare — yet today the question would be settled.
 
-At a moss-covered milestone in the woods, Hopper the hare drew a wager in the
+At a moss-covered milestone near the meadow, Whisker the hare drew a wager in the
 dust: whoever guessed the result of `0` first would win the
-right to set the next race. Slowpoke the tortoise, without complaint, said it
+right to set the next race. Slowpoke the tortoise, stepping deliberately, said it
 was simpler to type the form into the REPL than to argue about
 the integer 0.
 
-Question: write a Clojure expression for the value of zero.
+Write a Clojure expression that computes the value of zero.
 
 ---
-
-I submit the form to the REPL via the eval tool.
 
 {"tool_calls":[{"name":"eval","args":{"form":"0"}}]}
 ```
@@ -213,15 +215,17 @@ I submit the form to the REPL via the eval tool.
 ```
 It was well known among the animals that the Hare boasted of his speed at every chance.
 
-At a moss-covered milestone near the meadow, Whisker the hare drew a wager in the
+At a moss-covered milestone in the woods, Hopper the hare drew a wager in the
 dust: whoever guessed the result of `100` first would win the
-right to set the next race. Mossback the tortoise, without complaint, said it
+right to set the next race. Shelly the tortoise, without complaint, said it
 was simpler to type the form into the REPL than to argue about
 the integer 100.
 
-Write a form whose evaluation gives the value of one hundred.
+Question: write a Clojure expression for the value of one hundred.
 
 ---
+
+I submit the form to the REPL via the eval tool.
 
 {"tool_calls":[{"name":"eval","args":{"form":"100"}}]}
 ```
@@ -229,15 +233,15 @@ Write a form whose evaluation gives the value of one hundred.
 ### Record 5 (form: `-25`)
 
 ```
-In that part of the forest, no one ever expected the Tortoise to outrun the Hare — yet today the question would be settled. It happened near the forest.
+The Hare and the Tortoise had argued for as long as anyone could remember about who was truly the swifter. All this took place at the edge of the orchard.
 
-At a moss-covered milestone by the forest, Pip the hare drew a wager in the
-dust: whoever guessed the result of `-25` first would win the
-right to set the next race. Mossback the tortoise, without complaint, said it
-was simpler to type the form into the REPL than to argue about
-the integer -25.
+Mossback the tortoise had been keeping a small leather notebook of every
+form he had successfully evaluated. Today near the orchard, the
+next entry was the integer -25. Whisker the hare peered over
+his shoulder at the form `-25` and asked what
+it would come out to.
 
-What Clojure form computes the value of negative twenty-five? Submit it via `eval`.
+Write a Clojure expression that computes the value of negative twenty-five.
 
 ---
 
@@ -303,7 +307,7 @@ Write a form whose evaluation gives the value of three-quarters.
 ```
 The Hare and the Tortoise had argued for as long as anyone could remember about who was truly the swifter.
 
-Halfway through the race, Hopper the hare stopped in the road and refused to
+Halfway through the race, Hopper the hare stopped on the road and refused to
 continue until someone could prove what the form `(+ 1/2 1/4)`
 evaluated to. He called it impossible.
 Slowpoke the tortoise, walking up at her usual pace, simply said: "Submit
@@ -319,19 +323,19 @@ Write a form whose evaluation gives the value of (+ 1/2 1/4).
 ### Record 4 (form: `(* 2 1/2)`)
 
 ```
-The Hare and the Tortoise had argued for as long as anyone could remember about who was truly the swifter. This was across the woods.
+The Hare and the Tortoise had argued for as long as anyone could remember about who was truly the swifter. It happened by the woods.
 
-Bramble the hare and Mossback the tortoise stopped by the woods where someone had
-written the product of 2 and 1/2 on a flat stone. Bramble, as if the race were already won, declared
-that she could see the answer at a glance. Mossback,
-untroubled by what others thought, suggested they actually evaluate the form `(* 2 1/2)`
-in the REPL and read off whatever it returned.
+Mossback the tortoise had been keeping a small leather notebook of every
+form he had successfully evaluated. Today at the edge of the woods, the
+next entry was the product of 2 and 1/2. Bramble the hare peered over
+his shoulder at the form `(* 2 1/2)` and asked what
+it would come out to.
 
-Write a form whose evaluation gives the value of (* 2 1/2).
+Question: write a Clojure expression for the value of (* 2 1/2).
 
 ---
 
-I express the form as Clojure source.
+I submit the form to the REPL via the eval tool.
 
 {"tool_calls":[{"name":"eval","args":{"form":"(* 2 1/2)"}}]}
 ```
@@ -339,15 +343,15 @@ I express the form as Clojure source.
 ### Record 5 (form: `(- 1 1/3)`)
 
 ```
-It was well known among the animals that the Hare boasted of his speed at every chance.
+It was well known among the animals that the Hare boasted of his speed at every chance. It happened near the road.
 
-"There is no need to evaluate that," Bramble the hare said, with great whoops of laughter.
-"Anyone can see what 1 minus 1/3 comes to." Mossback the tortoise, who
-near the hilltop had grown used to such claims, asked her to actually
-write the form `(- 1 1/3)` and submit it to the REPL — just to be
-sure.
+Whisker the hare and Mossback the tortoise stopped on the road where someone had
+written 1 minus 1/3 on a flat stone. Whisker, with great whoops of laughter, declared
+that he could see the answer at a glance. Mossback,
+saying very little, suggested they actually evaluate the form `(- 1 1/3)`
+in the REPL and read off whatever it returned.
 
-Write a form whose evaluation gives the value of (- 1 1/3).
+What Clojure form computes the value of (- 1 1/3)? Submit it via `eval`.
 
 ---
 
@@ -380,7 +384,7 @@ In that part of the forest, no one ever expected the Tortoise to outrun the Hare
 
 "There is no need to evaluate that," Pip the hare said, puffed up with pride.
 "Anyone can see what the string "hello" comes to." Mossback the tortoise, who
-near the road had grown used to such claims, asked them to actually
+on the road had grown used to such claims, asked them to actually
 write the form `"hello"` and submit it to the REPL — just to be
 sure.
 
@@ -454,7 +458,7 @@ Question: write a Clojure expression for the value of the empty string.
 ### Record 5 (form: `"42"`)
 
 ```
-It was well known among the animals that the Hare boasted of his speed at every chance. All this took place across the meadow.
+It was well known among the animals that the Hare boasted of his speed at every chance. All this took place by the meadow.
 
 A small audience of forest creatures had gathered in the meadow to watch
 Pip the hare attempt to outwit Shelly the tortoise at reading the REPL.
@@ -497,7 +501,7 @@ I let the REPL do the evaluation.
 ```
 The Hare loved nothing better than the sound of his own boasts; the Tortoise, nothing better than a long quiet walk.
 
-At a moss-covered milestone in the hilltop, Pip the hare drew a wager in the
+At a moss-covered milestone on the hilltop, Pip the hare drew a wager in the
 dust: whoever guessed the result of `true` first would win the
 right to set the next race. Slowpoke the tortoise, her eyes always on the path, said it
 was simpler to type the form into the REPL than to argue about
@@ -515,11 +519,11 @@ Question: write a Clojure expression for the value of true.
 ```
 The Hare and the Tortoise had argued for as long as anyone could remember about who was truly the swifter. It happened near the woods.
 
-Hopper the hare and Slowpoke the tortoise stopped at the edge of the woods where someone had
-written the literal false on a flat stone. Hopper, swaggering through the underbrush, declared
-that he could see the answer at a glance. Slowpoke,
-her eyes always on the path, suggested they actually evaluate the form `false`
-in the REPL and read off whatever it returned.
+Halfway through the race, Hopper the hare stopped at the edge of the woods and refused to
+continue until someone could prove what the form `false`
+evaluated to. He called it impossible.
+Slowpoke the tortoise, walking up at her usual pace, simply said: "Submit
+the literal false to the REPL. Whatever comes back is the answer."
 
 Write a Clojure expression that computes the value of false.
 
@@ -531,19 +535,17 @@ Write a Clojure expression that computes the value of false.
 ### Record 3 (form: `(= 1 1)`)
 
 ```
-In that part of the forest, no one ever expected the Tortoise to outrun the Hare — yet today the question would be settled. This was near the garden.
+In that part of the forest, no one ever expected the Tortoise to outrun the Hare — yet today the question would be settled. All this took place at the edge of the garden.
 
-A wooden sign nailed to a tree by the garden carried a puzzle. The riddle
-was simple: it asked the reader to evaluate `(= 1 1)`. Hopper
-laughed, puffed up with pride, and declared it too easy. Shelly said
-patiently that the only way to be sure of the equality (= 1 1) was to put
-it in the REPL.
+Halfway through the race, Hopper the hare stopped in the garden and refused to
+continue until someone could prove what the form `(= 1 1)`
+evaluated to. He called it impossible.
+Shelly the tortoise, walking up at her usual pace, simply said: "Submit
+the equality (= 1 1) to the REPL. Whatever comes back is the answer."
 
-Write a form whose evaluation gives the value of (= 1 1).
+Write a Clojure expression that computes the value of (= 1 1).
 
 ---
-
-I write the form and let the REPL evaluate it.
 
 {"tool_calls":[{"name":"eval","args":{"form":"(= 1 1)"}}]}
 ```
@@ -571,15 +573,17 @@ What Clojure form computes the value of (= 1 2)? Submit it via `eval`.
 ```
 It was well known among the animals that the Hare boasted of his speed at every chance. All this took place at the edge of the woods.
 
-Halfway through the race, Pip the hare stopped by the woods and refused to
+Halfway through the race, Pip the hare stopped near the woods and refused to
 continue until someone could prove what the form `(< 3 5)`
 evaluated to. They called it impossible.
 Mossback the tortoise, walking up at her usual pace, simply said: "Submit
 the comparison (< 3 5) to the REPL. Whatever comes back is the answer."
 
-Question: write a Clojure expression for the value of (< 3 5).
+Write a Clojure expression that computes the value of (< 3 5).
 
 ---
+
+I write the form and let the REPL evaluate it.
 
 {"tool_calls":[{"name":"eval","args":{"form":"(< 3 5)"}}]}
 ```
@@ -609,7 +613,7 @@ Question: write a Clojure expression for the value of (< 3 5).
 The Hare and the Tortoise had argued for as long as anyone could remember about who was truly the swifter.
 
 Slowpoke the tortoise had been keeping a small leather notebook of every
-form he had successfully evaluated. Today near the hilltop, the
+form he had successfully evaluated. Today atop the hilltop, the
 next entry was the literal nil. Bramble the hare peered over
 his shoulder at the form `nil` and asked what
 it would come out to.
@@ -626,13 +630,13 @@ Write a form whose evaluation gives the value of nil.
 ```
 It was well known among the animals that the Hare boasted of his speed at every chance.
 
-"There is no need to evaluate that," Hopper the hare said, with a smug grin.
+"There is no need to evaluate that," Hopper the hare said, as if the race were already won.
 "Anyone can see what the predicate (nil? nil) comes to." Mossback the tortoise, who
-by the woods had grown used to such claims, asked him to actually
+in the woods had grown used to such claims, asked him to actually
 write the form `(nil? nil)` and submit it to the REPL — just to be
 sure.
 
-Write a Clojure expression that computes whether nil is nil.
+What Clojure form computes whether nil is nil? Submit it via `eval`.
 
 ---
 
@@ -642,17 +646,19 @@ Write a Clojure expression that computes whether nil is nil.
 ### Record 3 (form: `(nil? 0)`)
 
 ```
-There was once a Hare whose pride was as quick as her feet, and a Tortoise who said nothing about either. All this took place by the road.
+The Hare and the Tortoise had argued for as long as anyone could remember about who was truly the swifter.
 
-A wooden sign nailed to a tree at the edge of the road carried a puzzle. The riddle
-was simple: it asked the reader to evaluate `(nil? 0)`. Pip
-laughed, with great whoops of laughter, and declared it too easy. Shelly said
-patiently that the only way to be sure of the predicate (nil? 0) was to put
-it in the REPL.
+"There is no need to evaluate that," Hopper the hare said, swaggering through the underbrush.
+"Anyone can see what the predicate (nil? 0) comes to." Slowpoke the tortoise, who
+by the woods had grown used to such claims, asked him to actually
+write the form `(nil? 0)` and submit it to the REPL — just to be
+sure.
 
-Write a Clojure expression that computes whether 0 is nil.
+What Clojure form computes whether 0 is nil? Submit it via `eval`.
 
 ---
+
+Time to write the form.
 
 {"tool_calls":[{"name":"eval","args":{"form":"(nil? 0)"}}]}
 ```
@@ -660,15 +666,15 @@ Write a Clojure expression that computes whether 0 is nil.
 ### Record 4 (form: `(nil? false)`)
 
 ```
-The Hare loved nothing better than the sound of his own boasts; the Tortoise, nothing better than a long quiet walk.
+The Hare and the Tortoise had argued for as long as anyone could remember about who was truly the swifter.
 
-A wooden sign nailed to a tree across the garden carried a puzzle. The riddle
-was simple: it asked the reader to evaluate `(nil? false)`. Bramble
-laughed, swaggering through the underbrush, and declared it too easy. Mossback said
-patiently that the only way to be sure of the predicate (nil? false) was to put
-it in the REPL.
+Mossback the tortoise had been keeping a small leather notebook of every
+form he had successfully evaluated. Today near the orchard, the
+next entry was the predicate (nil? false). Pip the hare peered over
+his shoulder at the form `(nil? false)` and asked what
+it would come out to.
 
-Write a form whose evaluation gives whether false is nil.
+What Clojure form computes whether false is nil? Submit it via `eval`.
 
 ---
 
@@ -680,16 +686,19 @@ I let the REPL do the evaluation.
 ### Record 5 (form: `(= nil nil)`)
 
 ```
-There was once a Hare whose pride was as quick as her feet, and a Tortoise who said nothing about either.
+The Hare loved nothing better than the sound of his own boasts; the Tortoise, nothing better than a long quiet walk.
 
-A small audience of forest creatures had gathered near the garden to watch
-Bramble the hare attempt to outwit Slowpoke the tortoise at reading the REPL.
-Slowpoke read aloud the equality (= nil nil): the form was `(= nil nil)`.
-The crowd waited to see who would correctly write the form to submit.
+At a moss-covered milestone near the forest, Bramble the hare drew a wager in the
+dust: whoever guessed the result of `(= nil nil)` first would win the
+right to set the next race. Slowpoke the tortoise, stepping deliberately, said it
+was simpler to type the form into the REPL than to argue about
+the equality (= nil nil).
 
 Write a form whose evaluation gives the value of (= nil nil).
 
 ---
+
+Let me compute that.
 
 {"tool_calls":[{"name":"eval","args":{"form":"(= nil nil)"}}]}
 ```
@@ -738,11 +747,11 @@ Let me compute that.
 ```
 There was once a Hare whose pride was as quick as her feet, and a Tortoise who said nothing about either. It happened at the edge of the forest.
 
-At a moss-covered milestone at the edge of the forest, Whisker the hare drew a wager in the
-dust: whoever guessed the result of `:tortoise` first would win the
-right to set the next race. Slowpoke the tortoise, without complaint, said it
-was simpler to type the form into the REPL than to argue about
-the keyword :tortoise.
+Halfway through the race, Whisker the hare stopped at the edge of the forest and refused to
+continue until someone could prove what the form `:tortoise`
+evaluated to. He called it impossible.
+Slowpoke the tortoise, walking up at her usual pace, simply said: "Submit
+the keyword :tortoise to the REPL. Whatever comes back is the answer."
 
 Write a Clojure expression that computes the value of :tortoise.
 
@@ -774,19 +783,19 @@ Write a form whose evaluation gives the value of :winner.
 ### Record 4 (form: `(keyword? :hare)`)
 
 ```
-The Hare and the Tortoise had argued for as long as anyone could remember about who was truly the swifter. This was near the hilltop.
+The Hare and the Tortoise had argued for as long as anyone could remember about who was truly the swifter. All this took place near the hilltop.
 
-Halfway through the race, Pip the hare stopped in the hilltop and refused to
-continue until someone could prove what the form `(keyword? :hare)`
-evaluated to. They called it impossible.
-Mossback the tortoise, walking up at her usual pace, simply said: "Submit
-the predicate (keyword? :hare) to the REPL. Whatever comes back is the answer."
+Mossback the tortoise had been trying to teach Pip the hare how the REPL
+works. "Look here," he said, pointing to
+the predicate (keyword? :hare). "You hand the form `(keyword? :hare)` to the runtime, and
+the runtime hands you back what it evaluates to." Pip, lulled by the gentle wind,
+agreed to try.
 
-What Clojure form computes whether :hare is a keyword? Submit it via `eval`.
+Write a Clojure expression that computes whether :hare is a keyword.
 
 ---
 
-Let me work that out.
+I write the form and let the REPL evaluate it.
 
 {"tool_calls":[{"name":"eval","args":{"form":"(keyword? :hare)"}}]}
 ```
@@ -796,7 +805,7 @@ Let me work that out.
 ```
 The Hare and the Tortoise had argued for as long as anyone could remember about who was truly the swifter.
 
-A small audience of forest creatures had gathered across the garden to watch
+A small audience of forest creatures had gathered by the garden to watch
 Whisker the hare attempt to outwit Slowpoke the tortoise at reading the REPL.
 Slowpoke read aloud the equality of two :hare keywords: the form was `(= :hare :hare)`.
 The crowd waited to see who would correctly write the form to submit.
@@ -851,9 +860,9 @@ I let the REPL do the evaluation.
 ```
 There was once a Hare whose pride was as quick as her feet, and a Tortoise who said nothing about either.
 
-At a moss-covered milestone by the road, Hopper the hare drew a wager in the
+At a moss-covered milestone near the road, Hopper the hare drew a wager in the
 dust: whoever guessed the result of `\space` first would win the
-right to set the next race. Shelly the tortoise, saying very little, said it
+right to set the next race. Shelly the tortoise, her eyes always on the path, said it
 was simpler to type the form into the REPL than to argue about
 the character \space.
 
@@ -872,7 +881,7 @@ I express the form as Clojure source.
 There was once a Hare whose pride was as quick as her feet, and a Tortoise who said nothing about either.
 
 Slowpoke the tortoise had been keeping a small leather notebook of every
-form he had successfully evaluated. Today across the orchard, the
+form he had successfully evaluated. Today by the orchard, the
 next entry was the character \T. Bramble the hare peered over
 his shoulder at the form `\T` and asked what
 it would come out to.
@@ -889,15 +898,17 @@ Write a form whose evaluation gives the value of \T.
 ```
 In that part of the forest, no one ever expected the Tortoise to outrun the Hare — yet today the question would be settled. It happened in the orchard.
 
-Whisker the hare and Slowpoke the tortoise stopped by the orchard where someone had
-written the predicate (char? \h) on a flat stone. Whisker, as if the race were already won, declared
+Whisker the hare and Slowpoke the tortoise stopped at the edge of the orchard where someone had
+written the predicate (char? \h) on a flat stone. Whisker, with great whoops of laughter, declared
 that he could see the answer at a glance. Slowpoke,
-her eyes always on the path, suggested they actually evaluate the form `(char? \h)`
+untroubled by what others thought, suggested they actually evaluate the form `(char? \h)`
 in the REPL and read off whatever it returned.
 
 Write a form whose evaluation gives whether \h is a character.
 
 ---
+
+I let the REPL do the evaluation.
 
 {"tool_calls":[{"name":"eval","args":{"form":"(char? \\h)"}}]}
 ```
@@ -943,7 +954,7 @@ I submit the form to the REPL via the eval tool.
 ```
 There was once a Hare whose pride was as quick as her feet, and a Tortoise who said nothing about either.
 
-A small audience of forest creatures had gathered across the garden to watch
+A small audience of forest creatures had gathered by the garden to watch
 Bramble the hare attempt to outwit Slowpoke the tortoise at reading the REPL.
 Slowpoke read aloud the predicate (symbol? 'hare): the form was `(symbol? 'hare)`.
 The crowd waited to see who would correctly write the form to submit.
@@ -962,13 +973,13 @@ I submit the form to the REPL via the eval tool.
 ```
 The Hare loved nothing better than the sound of his own boasts; the Tortoise, nothing better than a long quiet walk. It happened near the forest.
 
-A wooden sign nailed to a tree by the forest carried a puzzle. The riddle
-was simple: it asked the reader to evaluate `(symbol? 42)`. Bramble
-laughed, swaggering through the underbrush, and declared it too easy. Mossback said
-patiently that the only way to be sure of the predicate (symbol? 42) was to put
-it in the REPL.
+"There is no need to evaluate that," Bramble the hare said, with great whoops of laughter.
+"Anyone can see what the predicate (symbol? 42) comes to." Mossback the tortoise, who
+in the forest had grown used to such claims, asked her to actually
+write the form `(symbol? 42)` and submit it to the REPL — just to be
+sure.
 
-Question: write a Clojure expression for whether 42 is a symbol.
+What Clojure form computes whether 42 is a symbol? Submit it via `eval`.
 
 ---
 
@@ -978,16 +989,19 @@ Question: write a Clojure expression for whether 42 is a symbol.
 ### Record 3 (form: `'hare`)
 
 ```
-There was once a Hare whose pride was as quick as her feet, and a Tortoise who said nothing about either. This was in the road.
+It was well known among the animals that the Hare boasted of his speed at every chance. All this took place at the edge of the garden.
 
-A small audience of forest creatures had gathered near the road to watch
-Bramble the hare attempt to outwit Shelly the tortoise at reading the REPL.
-Shelly read aloud the quoted symbol 'hare: the form was `'hare`.
-The crowd waited to see who would correctly write the form to submit.
+Bramble the hare and Slowpoke the tortoise stopped in the garden where someone had
+written the quoted symbol 'hare on a flat stone. Bramble, with a smug grin, declared
+that she could see the answer at a glance. Slowpoke,
+untroubled by what others thought, suggested they actually evaluate the form `'hare`
+in the REPL and read off whatever it returned.
 
-Write a Clojure expression that computes the value of 'hare.
+Write a form whose evaluation gives the value of 'hare.
 
 ---
+
+I express the form as Clojure source.
 
 {"tool_calls":[{"name":"eval","args":{"form":"'hare"}}]}
 ```
@@ -997,15 +1011,17 @@ Write a Clojure expression that computes the value of 'hare.
 ```
 The Hare and the Tortoise had argued for as long as anyone could remember about who was truly the swifter.
 
-Mossback the tortoise had been trying to teach Whisker the hare how the REPL
-works. "Look here," he said, pointing to
-the equality of two 'hare symbols. "You hand the form `(= 'hare 'hare)` to the runtime, and
-the runtime hands you back what it evaluates to." Whisker, drowsy from the warm sun,
-agreed to try.
+Slowpoke the tortoise had been keeping a small leather notebook of every
+form he had successfully evaluated. Today in the meadow, the
+next entry was the equality of two 'hare symbols. Pip the hare peered over
+his shoulder at the form `(= 'hare 'hare)` and asked what
+it would come out to.
 
-Write a form whose evaluation gives whether 'hare equals 'hare.
+Question: write a Clojure expression for whether 'hare equals 'hare.
 
 ---
+
+Let me compute that.
 
 {"tool_calls":[{"name":"eval","args":{"form":"(= 'hare 'hare)"}}]}
 ```
@@ -1013,13 +1029,13 @@ Write a form whose evaluation gives whether 'hare equals 'hare.
 ### Record 5 (form: `(symbol? 'hare)`)
 
 ```
-The Hare loved nothing better than the sound of his own boasts; the Tortoise, nothing better than a long quiet walk. It happened across the meadow.
+The Hare loved nothing better than the sound of his own boasts; the Tortoise, nothing better than a long quiet walk. All this took place near the meadow.
 
-Shelly the tortoise had been keeping a small leather notebook of every
-form she had successfully evaluated. Today at the edge of the meadow, the
-next entry was the predicate (symbol? 'hare). Bramble the hare peered over
-her shoulder at the form `(symbol? 'hare)` and asked what
-it would come out to.
+At a moss-covered milestone by the meadow, Bramble the hare drew a wager in the
+dust: whoever guessed the result of `(symbol? 'hare)` first would win the
+right to set the next race. Shelly the tortoise, saying very little, said it
+was simpler to type the form into the REPL than to argue about
+the predicate (symbol? 'hare).
 
 Question: write a Clojure expression for whether 'hare is a symbol.
 
@@ -1043,13 +1059,12 @@ Let me compute that.
 ### Record 1 (form: `(+ 1 2) ; sum of one and two`)
 
 ```
-There was once a Hare whose pride was as quick as her feet, and a Tortoise who said nothing about either. It happened by the woods.
+There was once a Hare whose pride was as quick as her feet, and a Tortoise who said nothing about either. It happened at the edge of the woods.
 
-At a moss-covered milestone across the woods, Pip the hare drew a wager in the
-dust: whoever guessed the result of `(+ 1 2) ; sum of one and two` first would win the
-right to set the next race. Slowpoke the tortoise, untroubled by what others thought, said it
-was simpler to type the form into the REPL than to argue about
-the form (+ 1 2) followed by a comment.
+A small audience of forest creatures had gathered by the woods to watch
+Pip the hare attempt to outwit Slowpoke the tortoise at reading the REPL.
+Slowpoke read aloud the form (+ 1 2) followed by a comment: the form was `(+ 1 2) ; sum of one and two`.
+The crowd waited to see who would correctly write the form to submit.
 
 Question: write a Clojure expression for the result of (+ 1 2) ignoring the comment.
 
@@ -1061,17 +1076,19 @@ Question: write a Clojure expression for the result of (+ 1 2) ignoring the comm
 ### Record 2 (form: `42 ;; the answer`)
 
 ```
-The Hare and the Tortoise had argued for as long as anyone could remember about who was truly the swifter. This was by the road.
+The Hare and the Tortoise had argued for as long as anyone could remember about who was truly the swifter. All this took place near the road.
 
-Halfway through the race, Whisker the hare stopped in the road and refused to
-continue until someone could prove what the form `42 ;; the answer`
-evaluated to. He called it impossible.
-Shelly the tortoise, walking up at her usual pace, simply said: "Submit
-the literal 42 with a trailing comment to the REPL. Whatever comes back is the answer."
+At a moss-covered milestone near the road, Whisker the hare drew a wager in the
+dust: whoever guessed the result of `42 ;; the answer` first would win the
+right to set the next race. Shelly the tortoise, stepping deliberately, said it
+was simpler to type the form into the REPL than to argue about
+the literal 42 with a trailing comment.
 
-Question: write a Clojure expression for the value of 42.
+What Clojure form computes the value of 42? Submit it via `eval`.
 
 ---
+
+Let me compute that.
 
 {"tool_calls":[{"name":"eval","args":{"form":"42 ;; the answer"}}]}
 ```
@@ -1148,9 +1165,9 @@ Here's the calculation.
 ### Record 1 (form: `(+    1    2)`)
 
 ```
-In that part of the forest, no one ever expected the Tortoise to outrun the Hare — yet today the question would be settled. It happened near the hilltop.
+In that part of the forest, no one ever expected the Tortoise to outrun the Hare — yet today the question would be settled. It happened atop the hilltop.
 
-A small audience of forest creatures had gathered across the hilltop to watch
+A small audience of forest creatures had gathered at the edge of the hilltop to watch
 Hopper the hare attempt to outwit Shelly the tortoise at reading the REPL.
 Shelly read aloud the form (+ 1 2) with extra spaces: the form was `(+    1    2)`.
 The crowd waited to see who would correctly write the form to submit.
@@ -1169,19 +1186,17 @@ Write a Clojure expression that computes the result of the form.
 ```
 The Hare and the Tortoise had argued for as long as anyone could remember about who was truly the swifter. It happened at the edge of the forest.
 
-"There is no need to evaluate that," Hopper the hare said, puffed up with pride.
-"Anyone can see what the form (+ 1 2) split across lines comes to." Shelly the tortoise, who
-across the forest had grown used to such claims, asked him to actually
-write the form `(+
+Shelly the tortoise had been keeping a small leather notebook of every
+form she had successfully evaluated. Today at the edge of the forest, the
+next entry was the form (+ 1 2) split across lines. Hopper the hare peered over
+her shoulder at the form `(+
   1
-  2)` and submit it to the REPL — just to be
-sure.
+  2)` and asked what
+it would come out to.
 
-What Clojure form computes the result of the form? Submit it via `eval`.
+Write a form whose evaluation gives the result of the form.
 
 ---
-
-I write the form and let the REPL evaluate it.
 
 {"tool_calls":[{"name":"eval","args":{"form":"(+\n  1\n  2)"}}]}
 ```
@@ -1211,15 +1226,15 @@ Question: write a Clojure expression for the result of the form.
 ```
 The Hare and the Tortoise had argued for as long as anyone could remember about who was truly the swifter.
 
-"There is no need to evaluate that," Whisker the hare said, as if the race were already won.
+"There is no need to evaluate that," Whisker the hare said, puffed up with pride.
 "Anyone can see what the form (+ 1 2) split across lines comes to." Mossback the tortoise, who
-by the hilltop had grown used to such claims, asked him to actually
+near the hilltop had grown used to such claims, asked him to actually
 write the form `(+
   1
   2)` and submit it to the REPL — just to be
 sure.
 
-What Clojure form computes the result of the form? Submit it via `eval`.
+Question: write a Clojure expression for the result of the form.
 
 ---
 
@@ -1257,15 +1272,15 @@ What Clojure form computes the result of the form? Submit it via `eval`.
 ### Record 1 (form: `(+ 2 3)`)
 
 ```
-The Hare loved nothing better than the sound of his own boasts; the Tortoise, nothing better than a long quiet walk. All this took place at the edge of the meadow.
+The Hare loved nothing better than the sound of his own boasts; the Tortoise, nothing better than a long quiet walk. All this took place near the meadow.
 
-At a moss-covered milestone at the edge of the meadow, Whisker the hare drew a wager in the
-dust: whoever guessed the result of `(+ 2 3)` first would win the
-right to set the next race. Mossback the tortoise, with steady, careful steps, said it
-was simpler to type the form into the REPL than to argue about
-the form (+ 2 3).
+Mossback the tortoise had been trying to teach Whisker the hare how the REPL
+works. "Look here," he said, pointing to
+the form (+ 2 3). "You hand the form `(+ 2 3)` to the runtime, and
+the runtime hands you back what it evaluates to." Whisker, lulled by the gentle wind,
+agreed to try.
 
-What Clojure form computes the result of (+ 2 3)? Submit it via `eval`.
+Write a Clojure expression that computes the result of (+ 2 3).
 
 ---
 
@@ -1275,17 +1290,19 @@ What Clojure form computes the result of (+ 2 3)? Submit it via `eval`.
 ### Record 2 (form: `(* (+ 1 2) 3)`)
 
 ```
-The Hare loved nothing better than the sound of his own boasts; the Tortoise, nothing better than a long quiet walk.
+The Hare and the Tortoise had argued for as long as anyone could remember about who was truly the swifter.
 
-A wooden sign nailed to a tree near the meadow carried a puzzle. The riddle
-was simple: it asked the reader to evaluate `(* (+ 1 2) 3)`. Bramble
-laughed, with a smug grin, and declared it too easy. Slowpoke said
+A wooden sign nailed to a tree in the orchard carried a puzzle. The riddle
+was simple: it asked the reader to evaluate `(* (+ 1 2) 3)`. Whisker
+laughed, boasting at every turn, and declared it too easy. Mossback said
 patiently that the only way to be sure of the form (* (+ 1 2) 3) was to put
 it in the REPL.
 
-Question: write a Clojure expression for the result of (* (+ 1 2) 3).
+Write a Clojure expression that computes the result of (* (+ 1 2) 3).
 
 ---
+
+I write the form and let the REPL evaluate it.
 
 {"tool_calls":[{"name":"eval","args":{"form":"(* (+ 1 2) 3)"}}]}
 ```
@@ -1295,7 +1312,7 @@ Question: write a Clojure expression for the result of (* (+ 1 2) 3).
 ```
 In that part of the forest, no one ever expected the Tortoise to outrun the Hare — yet today the question would be settled.
 
-Hopper the hare and Mossback the tortoise stopped across the forest where someone had
+Hopper the hare and Mossback the tortoise stopped by the forest where someone had
 written the form (+ 2 3) on a flat stone. Hopper, with a smug grin, declared
 that he could see the answer at a glance. Mossback,
 stepping deliberately, suggested they actually evaluate the form `(+ 2 3)`
@@ -1313,7 +1330,7 @@ Write a form whose evaluation gives the result of (+ 2 3).
 ```
 The Hare and the Tortoise had argued for as long as anyone could remember about who was truly the swifter.
 
-A wooden sign nailed to a tree in the road carried a puzzle. The riddle
+A wooden sign nailed to a tree on the road carried a puzzle. The riddle
 was simple: it asked the reader to evaluate `(* (+ 1 2) 3)`. Pip
 laughed, swaggering through the underbrush, and declared it too easy. Mossback said
 patiently that the only way to be sure of the form (* (+ 1 2) 3) was to put
@@ -1331,9 +1348,9 @@ Write a form whose evaluation gives the result of (* (+ 1 2) 3).
 ```
 There was once a Hare whose pride was as quick as her feet, and a Tortoise who said nothing about either.
 
-A wooden sign nailed to a tree by the forest carried a puzzle. The riddle
+A wooden sign nailed to a tree near the forest carried a puzzle. The riddle
 was simple: it asked the reader to evaluate `(+ 2 3)`. Hopper
-laughed, boasting at every turn, and declared it too easy. Mossback said
+laughed, swaggering through the underbrush, and declared it too easy. Mossback said
 patiently that the only way to be sure of the form (+ 2 3) was to put
 it in the REPL.
 
@@ -1373,7 +1390,7 @@ Let me work that out.
 ```
 It was well known among the animals that the Hare boasted of his speed at every chance.
 
-Halfway through the race, Hopper the hare stopped near the hilltop and refused to
+Halfway through the race, Hopper the hare stopped atop the hilltop and refused to
 continue until someone could prove what the form `(+ 1 2)`
 evaluated to. He called it impossible.
 Slowpoke the tortoise, walking up at her usual pace, simply said: "Submit
@@ -1394,7 +1411,7 @@ I write the form and let the REPL evaluate it.
 The Hare and the Tortoise had argued for as long as anyone could remember about who was truly the swifter. It happened at the edge of the forest.
 
 Slowpoke the tortoise had been keeping a small leather notebook of every
-form he had successfully evaluated. Today across the forest, the
+form he had successfully evaluated. Today by the forest, the
 next entry was the form (- 5 3). Pip the hare peered over
 his shoulder at the form `(- 5 3)` and asked what
 it would come out to.
@@ -1411,9 +1428,9 @@ I write the form and let the REPL evaluate it.
 ### Record 3 (form: `(* 4 5)`)
 
 ```
-There was once a Hare whose pride was as quick as her feet, and a Tortoise who said nothing about either. It happened at the edge of the road.
+There was once a Hare whose pride was as quick as her feet, and a Tortoise who said nothing about either. It happened along the road.
 
-A wooden sign nailed to a tree at the edge of the road carried a puzzle. The riddle
+A wooden sign nailed to a tree along the road carried a puzzle. The riddle
 was simple: it asked the reader to evaluate `(* 4 5)`. Bramble
 laughed, swaggering through the underbrush, and declared it too easy. Mossback said
 patiently that the only way to be sure of the form (* 4 5) was to put
@@ -1433,7 +1450,7 @@ Time to write the form.
 ```
 There was once a Hare whose pride was as quick as her feet, and a Tortoise who said nothing about either.
 
-A small audience of forest creatures had gathered near the hilltop to watch
+A small audience of forest creatures had gathered atop the hilltop to watch
 Bramble the hare attempt to outwit Shelly the tortoise at reading the REPL.
 Shelly read aloud the form (/ 10 2): the form was `(/ 10 2)`.
 The crowd waited to see who would correctly write the form to submit.
@@ -1450,14 +1467,15 @@ Let me work that out.
 ### Record 5 (form: `(+ 7 8)`)
 
 ```
-There was once a Hare whose pride was as quick as her feet, and a Tortoise who said nothing about either. It happened by the garden.
+There was once a Hare whose pride was as quick as her feet, and a Tortoise who said nothing about either. It happened in the garden.
 
-A small audience of forest creatures had gathered near the garden to watch
-Hopper the hare attempt to outwit Mossback the tortoise at reading the REPL.
-Mossback read aloud the form (+ 7 8): the form was `(+ 7 8)`.
-The crowd waited to see who would correctly write the form to submit.
+A wooden sign nailed to a tree in the garden carried a puzzle. The riddle
+was simple: it asked the reader to evaluate `(+ 7 8)`. Hopper
+laughed, with a smug grin, and declared it too easy. Mossback said
+patiently that the only way to be sure of the form (+ 7 8) was to put
+it in the REPL.
 
-Write a Clojure expression that computes the result of (+ 7 8).
+What Clojure form computes the result of (+ 7 8)? Submit it via `eval`.
 
 ---
 
@@ -1485,7 +1503,7 @@ Write a Clojure expression that computes the result of (+ 7 8).
 ```
 In that part of the forest, no one ever expected the Tortoise to outrun the Hare — yet today the question would be settled.
 
-A small audience of forest creatures had gathered near the hilltop to watch
+A small audience of forest creatures had gathered atop the hilltop to watch
 Hopper the hare attempt to outwit Slowpoke the tortoise at reading the REPL.
 Slowpoke read aloud the nested form (+ 1 (* 2 3)): the form was `(+ 1 (* 2 3))`.
 The crowd waited to see who would correctly write the form to submit.
@@ -1505,7 +1523,7 @@ Let me compute that.
 The Hare and the Tortoise had argued for as long as anyone could remember about who was truly the swifter.
 
 Shelly the tortoise had been keeping a small leather notebook of every
-form she had successfully evaluated. Today across the road, the
+form she had successfully evaluated. Today along the road, the
 next entry was the nested form (* (+ 1 2) (+ 3 4)). Whisker the hare peered over
 her shoulder at the form `(* (+ 1 2) (+ 3 4))` and asked what
 it would come out to.
@@ -1542,13 +1560,13 @@ Let me work that out.
 ```
 The Hare loved nothing better than the sound of his own boasts; the Tortoise, nothing better than a long quiet walk.
 
-Hopper the hare and Shelly the tortoise stopped by the hilltop where someone had
-written the sum of two products on a flat stone. Hopper, with great whoops of laughter, declared
+Hopper the hare and Shelly the tortoise stopped at the edge of the hilltop where someone had
+written the sum of two products on a flat stone. Hopper, boasting at every turn, declared
 that he could see the answer at a glance. Shelly,
-untroubled by what others thought, suggested they actually evaluate the form `(+ (* 2 3) (* 4 5))`
+her eyes always on the path, suggested they actually evaluate the form `(+ (* 2 3) (* 4 5))`
 in the REPL and read off whatever it returned.
 
-Write a form whose evaluation gives the result of (+ (* 2 3) (* 4 5)).
+What Clojure form computes the result of (+ (* 2 3) (* 4 5))? Submit it via `eval`.
 
 ---
 
@@ -1622,7 +1640,7 @@ I submit the form to the REPL via the eval tool.
 ```
 In that part of the forest, no one ever expected the Tortoise to outrun the Hare — yet today the question would be settled.
 
-Hopper the hare and Mossback the tortoise stopped in the hilltop where someone had
+Hopper the hare and Mossback the tortoise stopped on the hilltop where someone had
 written the equality (= 1 2) on a flat stone. Hopper, boasting at every turn, declared
 that he could see the answer at a glance. Mossback,
 with steady, careful steps, suggested they actually evaluate the form `(= 1 2)`
@@ -1721,13 +1739,13 @@ I'll express the answer as a Clojure form.
 ### Record 1 (form: `(zero? 0)`)
 
 ```
-The Hare loved nothing better than the sound of his own boasts; the Tortoise, nothing better than a long quiet walk. It happened across the meadow.
+The Hare loved nothing better than the sound of his own boasts; the Tortoise, nothing better than a long quiet walk. All this took place near the meadow.
 
-Shelly the tortoise had been keeping a small leather notebook of every
-form she had successfully evaluated. Today at the edge of the meadow, the
-next entry was the predicate (zero? 0). Bramble the hare peered over
-her shoulder at the form `(zero? 0)` and asked what
-it would come out to.
+At a moss-covered milestone by the meadow, Bramble the hare drew a wager in the
+dust: whoever guessed the result of `(zero? 0)` first would win the
+right to set the next race. Shelly the tortoise, saying very little, said it
+was simpler to type the form into the REPL than to argue about
+the predicate (zero? 0).
 
 Question: write a Clojure expression for whether 0 is zero.
 
@@ -1759,15 +1777,15 @@ What Clojure form computes whether 5 is zero? Submit it via `eval`.
 ### Record 3 (form: `(pos? 7)`)
 
 ```
-In that part of the forest, no one ever expected the Tortoise to outrun the Hare — yet today the question would be settled. All this took place across the meadow.
+In that part of the forest, no one ever expected the Tortoise to outrun the Hare — yet today the question would be settled. It happened by the meadow.
 
-Mossback the tortoise had been keeping a small leather notebook of every
-form he had successfully evaluated. Today near the meadow, the
-next entry was the predicate (pos? 7). Bramble the hare peered over
-his shoulder at the form `(pos? 7)` and asked what
-it would come out to.
+"There is no need to evaluate that," Bramble the hare said, swaggering through the underbrush.
+"Anyone can see what the predicate (pos? 7) comes to." Mossback the tortoise, who
+at the edge of the meadow had grown used to such claims, asked her to actually
+write the form `(pos? 7)` and submit it to the REPL — just to be
+sure.
 
-Write a form whose evaluation gives whether 7 is positive.
+Write a Clojure expression that computes whether 7 is positive.
 
 ---
 
@@ -1781,15 +1799,17 @@ I write the form and let the REPL evaluate it.
 ```
 The Hare loved nothing better than the sound of his own boasts; the Tortoise, nothing better than a long quiet walk. This was at the edge of the woods.
 
-A wooden sign nailed to a tree across the woods carried a puzzle. The riddle
-was simple: it asked the reader to evaluate `(pos? -2)`. Bramble
-laughed, boasting at every turn, and declared it too easy. Mossback said
-patiently that the only way to be sure of the predicate (pos? -2) was to put
-it in the REPL.
+Halfway through the race, Bramble the hare stopped at the edge of the woods and refused to
+continue until someone could prove what the form `(pos? -2)`
+evaluated to. She called it impossible.
+Mossback the tortoise, walking up at her usual pace, simply said: "Submit
+the predicate (pos? -2) to the REPL. Whatever comes back is the answer."
 
-Write a form whose evaluation gives whether -2 is positive.
+Write a Clojure expression that computes whether -2 is positive.
 
 ---
+
+I express the form as Clojure source.
 
 {"tool_calls":[{"name":"eval","args":{"form":"(pos? -2)"}}]}
 ```
@@ -1797,19 +1817,17 @@ Write a form whose evaluation gives whether -2 is positive.
 ### Record 5 (form: `(neg? -3)`)
 
 ```
-In that part of the forest, no one ever expected the Tortoise to outrun the Hare — yet today the question would be settled. It happened by the road.
+In that part of the forest, no one ever expected the Tortoise to outrun the Hare — yet today the question would be settled.
 
-A wooden sign nailed to a tree near the road carried a puzzle. The riddle
-was simple: it asked the reader to evaluate `(neg? -3)`. Whisker
-laughed, with great whoops of laughter, and declared it too easy. Mossback said
-patiently that the only way to be sure of the predicate (neg? -3) was to put
-it in the REPL.
+Whisker the hare and Slowpoke the tortoise stopped by the forest where someone had
+written the predicate (neg? -3) on a flat stone. Whisker, with great whoops of laughter, declared
+that he could see the answer at a glance. Slowpoke,
+without complaint, suggested they actually evaluate the form `(neg? -3)`
+in the REPL and read off whatever it returned.
 
-Question: write a Clojure expression for whether -3 is negative.
+Write a form whose evaluation gives whether -3 is negative.
 
 ---
-
-Let me work that out.
 
 {"tool_calls":[{"name":"eval","args":{"form":"(neg? -3)"}}]}
 ```
@@ -1884,7 +1902,7 @@ Here's the calculation.
 ### Record 4 (form: `(+ 1 2)`)
 
 ```
-It was well known among the animals that the Hare boasted of his speed at every chance. It happened across the orchard.
+It was well known among the animals that the Hare boasted of his speed at every chance. It happened by the orchard.
 
 Shelly the tortoise had been trying to teach Pip the hare how the REPL
 works. "Look here," she said, pointing to
@@ -1902,19 +1920,17 @@ Write a form whose evaluation gives the result of (+ 1 2).
 ### Record 5 (form: `42`)
 
 ```
-It was well known among the animals that the Hare boasted of his speed at every chance. All this took place in the road.
+It was well known among the animals that the Hare boasted of his speed at every chance. It happened near the road.
 
-Slowpoke the tortoise had been keeping a small leather notebook of every
-form he had successfully evaluated. Today by the road, the
-next entry was the value 42. Pip the hare peered over
-his shoulder at the form `42` and asked what
-it would come out to.
+Halfway through the race, Pip the hare stopped on the road and refused to
+continue until someone could prove what the form `42`
+evaluated to. They called it impossible.
+Slowpoke the tortoise, walking up at her usual pace, simply said: "Submit
+the value 42 to the REPL. Whatever comes back is the answer."
 
 What Clojure form computes the value of 42? Submit it via `eval`.
 
 ---
-
-Here's the calculation.
 
 {"tool_calls":[{"name":"eval","args":{"form":"42"}}]}
 ```
@@ -1952,13 +1968,13 @@ Question: write a Clojure expression for the result of (+ 1 2).
 ```
 The Hare and the Tortoise had argued for as long as anyone could remember about who was truly the swifter.
 
-"There is no need to evaluate that," Whisker the hare said, as if the race were already won.
+"There is no need to evaluate that," Whisker the hare said, puffed up with pride.
 "Anyone can see what the form (* 7 6) comes to." Mossback the tortoise, who
-by the hilltop had grown used to such claims, asked him to actually
+near the hilltop had grown used to such claims, asked him to actually
 write the form `(* 7 6)` and submit it to the REPL — just to be
 sure.
 
-What Clojure form computes the result of (* 7 6)? Submit it via `eval`.
+Question: write a Clojure expression for the result of (* 7 6).
 
 ---
 
@@ -1988,9 +2004,9 @@ What Clojure form computes the result of (+ 1 2)? Submit it via `eval`.
 ```
 It was well known among the animals that the Hare boasted of his speed at every chance.
 
-"There is no need to evaluate that," Pip the hare said, with a smug grin.
+"There is no need to evaluate that," Pip the hare said, with great whoops of laughter.
 "Anyone can see what the form (* 7 6) comes to." Slowpoke the tortoise, who
-by the orchard had grown used to such claims, asked them to actually
+in the orchard had grown used to such claims, asked them to actually
 write the form `(* 7 6)` and submit it to the REPL — just to be
 sure.
 
@@ -2006,13 +2022,13 @@ I submit the form to the REPL via the eval tool.
 ### Record 5 (form: `(+ 1 2)`)
 
 ```
-It was well known among the animals that the Hare boasted of his speed at every chance. All this took place in the garden.
+It was well known among the animals that the Hare boasted of his speed at every chance. All this took place at the edge of the garden.
 
-"There is no need to evaluate that," Hopper the hare said, swaggering through the underbrush.
-"Anyone can see what the form (+ 1 2) comes to." Slowpoke the tortoise, who
-at the edge of the garden had grown used to such claims, asked him to actually
-write the form `(+ 1 2)` and submit it to the REPL — just to be
-sure.
+Slowpoke the tortoise had been trying to teach Hopper the hare how the REPL
+works. "Look here," he said, pointing to
+the form (+ 1 2). "You hand the form `(+ 1 2)` to the runtime, and
+the runtime hands you back what it evaluates to." Hopper, drowsy from the warm sun,
+agreed to try.
 
 What Clojure form computes the result of (+ 1 2)? Submit it via `eval`.
 

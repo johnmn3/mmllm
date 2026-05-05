@@ -453,14 +453,35 @@ def time_phrase(scene: "Scene") -> str:
 
 
 def place_phrase(scene: "Scene", location: ont.Location) -> str:
-    """Short setting clause: 'in the meadow', 'at the edge of the forest', …"""
+    """Short setting clause — uses location-appropriate prepositions.
+
+    Different topographies take different prepositions in English:
+      - hilltops: 'on / atop / near / at the edge of'
+      - roads:    'on / along / near'
+      - beaches:  'on / near / by'
+      - others (meadow, forest, woods, garden, orchard, etc.):
+                  'in / near / at the edge of / by'
+
+    'across' is dropped from the default pool because it produces
+    awkward verb-preposition pairings ('stopped across the forest')
+    in subplot prose.
+    """
     if location.indoor:
         prep = scene.rng.choice(("inside", "in", "deep inside"))
         return f"{prep} {location.article} {location.name}"
-    prep = scene.rng.choice((
-        "in", "near", "at the edge of", "across", "by",
-    ))
-    return f"{prep} {location.article} {location.name}"
+
+    name = location.name
+    if name == "hilltop":
+        prep = scene.rng.choice(("on", "atop", "near", "at the edge of"))
+    elif name == "road":
+        prep = scene.rng.choice(("on", "along", "near"))
+    elif name == "beach":
+        prep = scene.rng.choice(("on", "near", "by"))
+    elif name == "river bank":
+        prep = scene.rng.choice(("on", "near", "by", "along"))
+    else:
+        prep = scene.rng.choice(("in", "near", "at the edge of", "by"))
+    return f"{prep} {location.article} {name}"
 
 
 def atmosphere(scene: "Scene", location: ont.Location) -> str:

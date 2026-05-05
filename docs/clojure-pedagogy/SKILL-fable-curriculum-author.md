@@ -491,6 +491,77 @@ Simplify question_whats to direct value-descriptions:
 - `"the value of nil"` instead of `"the value of the form nil"`
 - `"the result of (+ 1 2)"` instead of `"the result of (+ 1 2) (the REPL returns its result)"`
 
+### 17. Place-preposition mismatches
+
+Locations differ in their natural prepositions in English:
+
+- **hilltop** takes "on" or "atop", NOT "in":
+  > "in the hilltop" ← wrong  •  "on the hilltop" ← right
+- **road** takes "on" or "along", NOT "in":
+  > "in the road" ← suggests being IN traffic  •  "on the road" ← right
+- **beach** takes "on" or "by", NOT "in":
+  > "in the beach" ← wrong  •  "on the beach" ← right
+- **river bank** takes "on" / "along" / "near":
+  > "in the river bank" ← wrong  •  "on the river bank" ← right
+- **meadow / forest / woods / garden / orchard** take "in" / "near" /
+  "at the edge of": all natural English.
+
+The `place_phrase()` helper now does location-appropriate preposition
+selection. If you add new locations to the ontology, check the
+location's article + name against the prep pool to ensure the
+combinations read naturally.
+
+The audit harness flags `BAD_PLACE_PREP` for known bad combos:
+"in the hilltop", "in the road", "in the beach".
+
+### 18. Verb-preposition mismatches: "stopped across X"
+
+`place_phrase()` previously included "across" as a preposition, which
+produces awkward prose when the verb is "stopped":
+
+> "Halfway through the race, Pip stopped across the forest..." ← wrong
+
+`stopped` doesn't take "across". Removed "across" from the default
+prep pool; locations no longer produce this.
+
+The audit harness flags `BAD_VERB_PREP` for `stopped across X`.
+
+### 19. Singular-they pronoun reads as plural after singular setup
+
+For characters with `gender="n"`, the pronoun is "they/them/their":
+
+> "Pip the hare stopped... **They called it impossible**."
+
+After a singular subject ("Pip the hare stopped"), "They called it"
+reads as plural-subject ambiguity. The fix is to use the character's
+NAME directly in the second sentence rather than the pronoun:
+
+> "Pip the hare stopped... **Pip called it impossible**."
+
+In subplot 5 (race-pause), this was the change: `{hare_he_she_cap}
+called it impossible.` → `{hare} called it impossible.`
+
+This pattern applies whenever a sentence in a subplot has just one
+clear subject AND the pronoun would be a singular-they. Default to
+the name.
+
+### 20. Concept_phrase that reads as raw math instead of a form
+
+Concept_phrases like `"1 minus 1/3"` (for form `(- 1 1/3)`) read as
+mathematical expressions rather than as the Clojure form being
+referred to. When the subplot says "Submit 1 minus 1/3 to the REPL",
+the reader has to mentally translate "1 minus 1/3" back to `(- 1 1/3)`.
+
+Prefer `concept_phrase = "the form (- 1 1/3)"` — keep the form text
+visible so the narrative directly references the Clojure source the
+student is being asked to write.
+
+The audit harness can't easily detect this (the concept_phrase
+"1 minus 1/3" is grammatical English; the issue is the intent
+mismatch). Spot-check: if you find yourself writing concept_phrases
+that look like math/English translations of the form, prefer the
+explicit form-text wrap.
+
 ### 16. Question_what containing extra whitespace from the form
 
 For G1-11 (whitespace-doesn't-matter) and similar, putting the literal

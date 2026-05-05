@@ -100,6 +100,25 @@ def check_record(rec, sub, example):
     if re.search(r"from \w+ing from a recent", user.lower()):
         issues.append(("DOUBLE_FROM", "'from X-ing from a recent sprint' duplication"))
 
+    # Meta-meta question_what: "the value of the form X" inside
+    # "Write a form whose evaluation gives X" wrapping → meta-meta.
+    if re.search(r"the value of the form \S", example.question_what):
+        issues.append(("META_META",
+                        "question_what 'the value of the form X' creates meta-meta wrap"))
+
+    # Bad place-preposition combos: "in the hilltop" (should be "on/atop"),
+    # "in the road" (should be "on the road"), etc.
+    for bad in ("in the hilltop", "in the road", "in the beach"):
+        if bad in user:
+            issues.append(("BAD_PLACE_PREP", f"'{bad}' (wrong preposition)"))
+            break
+
+    # Verb-preposition mismatch: "stopped across X" — you don't "stop
+    # across" a place.
+    if "stopped across " in user:
+        issues.append(("BAD_VERB_PREP",
+                        "'stopped across X' (verb+prep mismatch)"))
+
     return issues
 
 
