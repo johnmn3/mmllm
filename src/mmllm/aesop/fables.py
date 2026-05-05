@@ -24,10 +24,52 @@ from mmllm.aesop.expr import (
     emit_clojure, evaluate,
 )
 from mmllm.aesop.template import (
-    Record, Scene,
-    article, assemble_assistant_msg, cap, n_unit, render_code,
-    render_tool_calls, species_phrase, the_subject_phrase, unit,
+    ANSWER_AND_EVAL, ANSWER_ONLY, Record, Scene,
+    article, assemble_assistant_msg, build_tool_calls, cap, n_unit,
+    render_code, render_tool_calls, smart_pronoun, smart_possessive,
+    species_phrase, system_prompt, the_subject_phrase, unit,
 )
+
+
+# ─────────────────────── _finalize helper ───────────────────────
+
+
+def _finalize(scene: Scene, *,
+              user_msg:    str,
+              narrative:   str,
+              code_block:  str,
+              result_text: str,
+              value,
+              expr,
+              fable:   str,
+              chapter: str) -> Record:
+    """Bundle a chapter's prose + math into a Record. Picks tool-call
+    pattern (single answer vs eval+answer chain) via the scene RNG, builds
+    the system prompt with the matching catalog, assembles the assistant
+    turn, and returns a verifiable Record."""
+    use_eval = scene.use_eval_chain()
+    code_str = emit_clojure(expr)
+    calls    = build_tool_calls(value, code_str, use_eval=use_eval)
+    catalog  = ANSWER_AND_EVAL if use_eval else ANSWER_ONLY
+    sys_msg  = system_prompt(use_eval=use_eval)
+    asst     = assemble_assistant_msg(
+        preface_style=scene.preface_style(),
+        narrative=narrative,
+        code_block=code_block,
+        result_text=result_text,
+        tool_call_line=render_tool_calls(calls),
+    )
+    return Record(
+        system_msg=sys_msg,
+        user_msg=user_msg,
+        assistant_msg=asst,
+        tool_calls=calls,
+        expected=value,
+        code_str=code_str,
+        fable=fable,
+        chapter=chapter,
+        catalog=catalog,
+    )
 
 
 # ─────────────────────── 1. Tortoise and the Hare ───────────────────────
@@ -48,7 +90,7 @@ def _th_nap_overtake(scene: Scene) -> Record:
     """During the hare's nap, did the tortoise pass him?"""
     hare = scene.pick_character(role_classes=("racer", "fast"))
     tortoise = scene.pick_character(role_classes=("racer", "slow"), not_=hare)
-    location = scene.pick_location(tags_any=("nature",), indoor=False)
+    location = scene.pick_location(tags_any=("path",), indoor=False)
 
     # Numbers — simple range; this chapter wants overtake outcome to be ~50/50.
     hare_lead = scene.pick_int(3, 12)         # how far ahead hare is when napping
@@ -74,8 +116,9 @@ def _th_nap_overtake(scene: Scene) -> Record:
         f"Once upon a time, {species_phrase(hare)} challenged "
         f"{species_phrase(tortoise)} to a race through "
         f"{location.article} {location.name}. "
-        f"{cap(hare.he_she)} bragged about being the fastest, "
-        f"while {tortoise.he_she} just kept a steady pace.\n\n"
+        f"{cap(smart_pronoun(hare, [tortoise]))} bragged about being the "
+        f"fastest, while {smart_pronoun(tortoise, [hare])} just kept a "
+        f"steady pace.\n\n"
         f"After running {n_unit(hare_lead, 'mile')} ahead, {hare.name} "
         f"grew tired and decided to take a nap. Meanwhile, {tortoise.name} "
         f"kept walking at {tortoise_speed} {unit(tortoise_speed, 'mile')} "
@@ -92,25 +135,14 @@ def _th_nap_overtake(scene: Scene) -> Record:
         f"with {hare.name}'s lead."
     )
 
-    calls = _build_tool_calls(scene, primary={"winner": answer},
-                              secondary_lookups=[("compare-positions",
-                                                  {"a": hare_lead,
-                                                   "b": tortoise_speed * nap_hours})])
-    asst = assemble_assistant_msg(
-        preface_style=scene.preface_style(),
+    return _finalize(
+        scene,
+        user_msg=user_msg,
         narrative=narrative,
         code_block=code_block,
         result_text=result_text,
-        tool_call_line=render_tool_calls(calls),
-    )
-
-    return Record(
-        system_msg="You are a friendly tutor. Solve story problems with Clojure code, then answer with a tool call.",
-        user_msg=user_msg,
-        assistant_msg=asst,
-        tool_calls=calls,
-        expected=answer,
-        code_str=emit_clojure(expr),
+        value=answer,
+        expr=expr,
         fable="tortoise-hare",
         chapter="nap-overtake",
     )
@@ -120,7 +152,7 @@ def _th_speed_comparison(scene: Scene) -> Record:
     """Both move steadily; over T hours, who's ahead?"""
     hare     = scene.pick_character(role_classes=("racer", "fast"))
     tortoise = scene.pick_character(role_classes=("racer", "slow"), not_=hare)
-    location = scene.pick_location(tags_any=("nature",), indoor=False)
+    location = scene.pick_location(tags_any=("path",), indoor=False)
 
     hare_speed     = scene.pick_int(4, 10)
     tortoise_speed = scene.pick_int(1, 3)
@@ -140,11 +172,11 @@ def _th_speed_comparison(scene: Scene) -> Record:
 
     user_msg = (
         f"{species_phrase(hare)} and {species_phrase(tortoise)} agreed to a "
-        f"steady race across {location.article} {location.name}. "
-        f"{cap(hare.he_she)} ran at {hare_speed} "
+        f"steady race through {location.article} {location.name}. "
+        f"{cap(smart_pronoun(hare, [tortoise]))} ran at {hare_speed} "
         f"{unit(hare_speed, 'mile')} per hour, while {tortoise.name} "
-        f"plodded at {tortoise_speed} {unit(tortoise_speed, 'mile')} "
-        f"per hour. They both ran for exactly {n_unit(hours, 'hour')}.\n\n"
+        f"kept a steady {tortoise_speed} {unit(tortoise_speed, 'mile')} "
+        f"per hour. Both ran for exactly {n_unit(hours, 'hour')}.\n\n"
         f"Question: How many miles ahead is {hare.name} after "
         f"{n_unit(hours, 'hour')}?"
     )
@@ -155,22 +187,14 @@ def _th_speed_comparison(scene: Scene) -> Record:
         f"I'll compute each runner's distance by multiplying speed by time, "
         f"then subtract."
     )
-    calls = _build_tool_calls(scene, primary={"miles_ahead": answer})
-
-    asst = assemble_assistant_msg(
-        preface_style=scene.preface_style(),
+    return _finalize(
+        scene,
+        user_msg=user_msg,
         narrative=narrative,
         code_block=code_block,
         result_text=result_text,
-        tool_call_line=render_tool_calls(calls),
-    )
-    return Record(
-        system_msg="You are a friendly tutor. Solve story problems with Clojure code, then answer with a tool call.",
-        user_msg=user_msg,
-        assistant_msg=asst,
-        tool_calls=calls,
-        expected=answer,
-        code_str=emit_clojure(expr),
+        value=answer,
+        expr=expr,
         fable="tortoise-hare",
         chapter="speed-comparison",
     )
@@ -180,7 +204,7 @@ def _th_distance_remaining(scene: Scene) -> Record:
     """How much further must the tortoise walk to finish?"""
     tortoise = scene.pick_character(role_classes=("racer", "slow"))
     hare     = scene.pick_character(role_classes=("racer", "fast"), not_=tortoise)
-    location = scene.pick_location(tags_any=("nature",), indoor=False)
+    location = scene.pick_location(tags_any=("path",), indoor=False)
 
     total       = scene.pick_int(10, 25)
     walked      = scene.pick_int(2, total - 1)
@@ -218,21 +242,14 @@ def _th_distance_remaining(scene: Scene) -> Record:
         f"what remains, then divide by {tortoise.name}'s speed."
     )
 
-    calls = _build_tool_calls(scene, primary={"hours_remaining": answer})
-    asst = assemble_assistant_msg(
-        preface_style=scene.preface_style(),
+    return _finalize(
+        scene,
+        user_msg=user_msg,
         narrative=narrative,
         code_block=code_block,
         result_text=result_text,
-        tool_call_line=render_tool_calls(calls),
-    )
-    return Record(
-        system_msg="You are a friendly tutor. Solve story problems with Clojure code, then answer with a tool call.",
-        user_msg=user_msg,
-        assistant_msg=asst,
-        tool_calls=calls,
-        expected=answer,
-        code_str=emit_clojure(expr),
+        value=answer,
+        expr=expr,
         fable="tortoise-hare",
         chapter="distance-remaining",
     )
@@ -294,21 +311,14 @@ def _cp_stones_needed(scene: Scene) -> Record:
         f"I find the gap between target and start, then divide by "
         f"the rise per stone (rounding up by adding rise-per-stone-1 first)."
     )
-    calls = _build_tool_calls(scene, primary={"stones": answer})
-    asst = assemble_assistant_msg(
-        preface_style=scene.preface_style(),
+    return _finalize(
+        scene,
+        user_msg=user_msg,
         narrative=narrative,
         code_block=code_block,
         result_text=result_text,
-        tool_call_line=render_tool_calls(calls),
-    )
-    return Record(
-        system_msg="You are a friendly tutor. Solve story problems with Clojure code, then answer with a tool call.",
-        user_msg=user_msg,
-        assistant_msg=asst,
-        tool_calls=calls,
-        expected=answer,
-        code_str=emit_clojure(expr),
+        value=answer,
+        expr=expr,
         fable="crow-pitcher",
         chapter="stones-needed",
     )
@@ -350,21 +360,14 @@ def _cp_water_rise(scene: Scene) -> Record:
         f"I multiply the number of {stone.plural} by the rise per "
         f"{stone.name} and add the starting level."
     )
-    calls = _build_tool_calls(scene, primary={"water_level_cm": answer})
-    asst = assemble_assistant_msg(
-        preface_style=scene.preface_style(),
+    return _finalize(
+        scene,
+        user_msg=user_msg,
         narrative=narrative,
         code_block=code_block,
         result_text=result_text,
-        tool_call_line=render_tool_calls(calls),
-    )
-    return Record(
-        system_msg="You are a friendly tutor. Solve story problems with Clojure code, then answer with a tool call.",
-        user_msg=user_msg,
-        assistant_msg=asst,
-        tool_calls=calls,
-        expected=answer,
-        code_str=emit_clojure(expr),
+        value=answer,
+        expr=expr,
         fable="crow-pitcher",
         chapter="water-rise",
     )
@@ -411,21 +414,14 @@ def _cp_enough_stones(scene: Scene) -> Record:
         f"I compute the reachable water level with the available "
         f"{stone.plural} and compare with the target."
     )
-    calls = _build_tool_calls(scene, primary={"can_drink": answer_str})
-    asst = assemble_assistant_msg(
-        preface_style=scene.preface_style(),
+    return _finalize(
+        scene,
+        user_msg=user_msg,
         narrative=narrative,
         code_block=code_block,
         result_text=result_text,
-        tool_call_line=render_tool_calls(calls),
-    )
-    return Record(
-        system_msg="You are a friendly tutor. Solve story problems with Clojure code, then answer with a tool call.",
-        user_msg=user_msg,
-        assistant_msg=asst,
-        tool_calls=calls,
-        expected=answer,
-        code_str=emit_clojure(expr),
+        value=answer,
+        expr=expr,
         fable="crow-pitcher",
         chapter="enough-stones",
     )
@@ -472,21 +468,14 @@ def _ge_total_yield(scene: Scene) -> Record:
     code_block  = render_code(expr, form=scene.code_form(), value=answer)
     result_text = f"The total is {answer} eggs."
     narrative   = "I multiply the eggs per day by the number of days."
-    calls = _build_tool_calls(scene, primary={"total_eggs": answer})
-    asst = assemble_assistant_msg(
-        preface_style=scene.preface_style(),
+    return _finalize(
+        scene,
+        user_msg=user_msg,
         narrative=narrative,
         code_block=code_block,
         result_text=result_text,
-        tool_call_line=render_tool_calls(calls),
-    )
-    return Record(
-        system_msg="You are a friendly tutor. Solve story problems with Clojure code, then answer with a tool call.",
-        user_msg=user_msg,
-        assistant_msg=asst,
-        tool_calls=calls,
-        expected=answer,
-        code_str=emit_clojure(expr),
+        value=answer,
+        expr=expr,
         fable="goose-eggs",
         chapter="total-yield",
     )
@@ -528,21 +517,14 @@ def _ge_value_yield(scene: Scene) -> Record:
         "I find total eggs first (per-day × days), then multiply by the "
         "per-egg coin value."
     )
-    calls = _build_tool_calls(scene, primary={"total_coins": answer})
-    asst = assemble_assistant_msg(
-        preface_style=scene.preface_style(),
+    return _finalize(
+        scene,
+        user_msg=user_msg,
         narrative=narrative,
         code_block=code_block,
         result_text=result_text,
-        tool_call_line=render_tool_calls(calls),
-    )
-    return Record(
-        system_msg="You are a friendly tutor. Solve story problems with Clojure code, then answer with a tool call.",
-        user_msg=user_msg,
-        assistant_msg=asst,
-        tool_calls=calls,
-        expected=answer,
-        code_str=emit_clojure(expr),
+        value=answer,
+        expr=expr,
         fable="goose-eggs",
         chapter="value-yield",
     )
@@ -577,21 +559,14 @@ def _ge_compounded(scene: Scene) -> Record:
     narrative   = (
         "I use reduce with + to sum the daily yields starting from 0."
     )
-    calls = _build_tool_calls(scene, primary={"total_eggs": answer})
-    asst = assemble_assistant_msg(
-        preface_style=scene.preface_style(),
+    return _finalize(
+        scene,
+        user_msg=user_msg,
         narrative=narrative,
         code_block=code_block,
         result_text=result_text,
-        tool_call_line=render_tool_calls(calls),
-    )
-    return Record(
-        system_msg="You are a friendly tutor. Solve story problems with Clojure code, then answer with a tool call.",
-        user_msg=user_msg,
-        assistant_msg=asst,
-        tool_calls=calls,
-        expected=answer,
-        code_str=emit_clojure(expr),
+        value=answer,
+        expr=expr,
         fable="goose-eggs",
         chapter="compounded",
     )
@@ -642,21 +617,14 @@ def _ge_average(scene: Scene) -> Record:
         "I compute the total with reduce, divide by the count, taking "
         "integer quotient."
     )
-    calls = _build_tool_calls(scene, primary={"avg_eggs_per_day": answer})
-    asst = assemble_assistant_msg(
-        preface_style=scene.preface_style(),
+    return _finalize(
+        scene,
+        user_msg=user_msg,
         narrative=narrative,
         code_block=code_block,
         result_text=result_text,
-        tool_call_line=render_tool_calls(calls),
-    )
-    return Record(
-        system_msg="You are a friendly tutor. Solve story problems with Clojure code, then answer with a tool call.",
-        user_msg=user_msg,
-        assistant_msg=asst,
-        tool_calls=calls,
-        expected=answer,
-        code_str=emit_clojure(expr),
+        value=answer,
+        expr=expr,
         fable="goose-eggs",
         chapter="average",
     )
@@ -706,21 +674,14 @@ def _bw_false_alarms(scene: Scene) -> Record:
     code_block  = render_code(expr, form=scene.code_form(), value=answer)
     result_text = f"The villagers wasted {answer} minutes in total."
     narrative   = "I multiply villagers × alarms × minutes per trip."
-    calls = _build_tool_calls(scene, primary={"total_minutes": answer})
-    asst = assemble_assistant_msg(
-        preface_style=scene.preface_style(),
+    return _finalize(
+        scene,
+        user_msg=user_msg,
         narrative=narrative,
         code_block=code_block,
         result_text=result_text,
-        tool_call_line=render_tool_calls(calls),
-    )
-    return Record(
-        system_msg="You are a friendly tutor. Solve story problems with Clojure code, then answer with a tool call.",
-        user_msg=user_msg,
-        assistant_msg=asst,
-        tool_calls=calls,
-        expected=answer,
-        code_str=emit_clojure(expr),
+        value=answer,
+        expr=expr,
         fable="boy-wolf",
         chapter="false-alarms",
     )
@@ -749,21 +710,14 @@ def _bw_sheep_eaten(scene: Scene) -> Record:
     code_block  = render_code(expr, form=scene.code_form(), value=answer)
     result_text = f"{boy.name} has {answer} sheep left."
     narrative   = "I subtract the eaten sheep from the original flock."
-    calls = _build_tool_calls(scene, primary={"sheep_remaining": answer})
-    asst = assemble_assistant_msg(
-        preface_style=scene.preface_style(),
+    return _finalize(
+        scene,
+        user_msg=user_msg,
         narrative=narrative,
         code_block=code_block,
         result_text=result_text,
-        tool_call_line=render_tool_calls(calls),
-    )
-    return Record(
-        system_msg="You are a friendly tutor. Solve story problems with Clojure code, then answer with a tool call.",
-        user_msg=user_msg,
-        assistant_msg=asst,
-        tool_calls=calls,
-        expected=answer,
-        code_str=emit_clojure(expr),
+        value=answer,
+        expr=expr,
         fable="boy-wolf",
         chapter="sheep-eaten",
     )
@@ -801,21 +755,14 @@ def _bw_trust_threshold(scene: Scene) -> Record:
         "I compare alarms-so-far against the threshold; if below, "
         "villagers still come."
     )
-    calls = _build_tool_calls(scene, primary={"villagers_come": answer})
-    asst = assemble_assistant_msg(
-        preface_style=scene.preface_style(),
+    return _finalize(
+        scene,
+        user_msg=user_msg,
         narrative=narrative,
         code_block=code_block,
         result_text=result_text,
-        tool_call_line=render_tool_calls(calls),
-    )
-    return Record(
-        system_msg="You are a friendly tutor. Solve story problems with Clojure code, then answer with a tool call.",
-        user_msg=user_msg,
-        assistant_msg=asst,
-        tool_calls=calls,
-        expected=answer,
-        code_str=emit_clojure(expr),
+        value=answer,
+        expr=expr,
         fable="boy-wolf",
         chapter="trust-threshold",
     )
@@ -858,21 +805,14 @@ def _ag_summer_stockpile(scene: Scene) -> Record:
     code_block  = render_code(expr, form=scene.code_form(), value=answer)
     result_text = f"{ant.name} collected {n_unit(answer, 'grain')}."
     narrative   = "I multiply the daily collection rate by the number of days."
-    calls = _build_tool_calls(scene, primary={"total_grains": answer})
-    asst = assemble_assistant_msg(
-        preface_style=scene.preface_style(),
+    return _finalize(
+        scene,
+        user_msg=user_msg,
         narrative=narrative,
         code_block=code_block,
         result_text=result_text,
-        tool_call_line=render_tool_calls(calls),
-    )
-    return Record(
-        system_msg="You are a friendly tutor. Solve story problems with Clojure code, then answer with a tool call.",
-        user_msg=user_msg,
-        assistant_msg=asst,
-        tool_calls=calls,
-        expected=answer,
-        code_str=emit_clojure(expr),
+        value=answer,
+        expr=expr,
         fable="ant-grasshopper",
         chapter="summer-stockpile",
     )
@@ -902,21 +842,14 @@ def _ag_winter_consumption(scene: Scene) -> Record:
     code_block  = render_code(expr, form=scene.code_form(), value=answer)
     result_text = f"The stockpile lasts {n_unit(answer, 'day')}."
     narrative   = "I divide the stockpile by daily consumption (integer quotient)."
-    calls = _build_tool_calls(scene, primary={"days_lasting": answer})
-    asst = assemble_assistant_msg(
-        preface_style=scene.preface_style(),
+    return _finalize(
+        scene,
+        user_msg=user_msg,
         narrative=narrative,
         code_block=code_block,
         result_text=result_text,
-        tool_call_line=render_tool_calls(calls),
-    )
-    return Record(
-        system_msg="You are a friendly tutor. Solve story problems with Clojure code, then answer with a tool call.",
-        user_msg=user_msg,
-        assistant_msg=asst,
-        tool_calls=calls,
-        expected=answer,
-        code_str=emit_clojure(expr),
+        value=answer,
+        expr=expr,
         fable="ant-grasshopper",
         chapter="winter-consumption",
     )
@@ -967,21 +900,14 @@ def _ag_comparison_survival(scene: Scene) -> Record:
         f"I compute leftover for {ant.name} (initial - days × rate), then "
         "clamp to 0 if negative using max."
     )
-    calls = _build_tool_calls(scene, primary={"ant_grains_left": answer})
-    asst = assemble_assistant_msg(
-        preface_style=scene.preface_style(),
+    return _finalize(
+        scene,
+        user_msg=user_msg,
         narrative=narrative,
         code_block=code_block,
         result_text=result_text,
-        tool_call_line=render_tool_calls(calls),
-    )
-    return Record(
-        system_msg="You are a friendly tutor. Solve story problems with Clojure code, then answer with a tool call.",
-        user_msg=user_msg,
-        assistant_msg=asst,
-        tool_calls=calls,
-        expected=answer,
-        code_str=emit_clojure(expr),
+        value=answer,
+        expr=expr,
         fable="ant-grasshopper",
         chapter="comparison-survival",
     )
@@ -1037,21 +963,14 @@ def _mm_egg_to_coin_chain(scene: Scene) -> Record:
         "I multiply eggs × eggs-per-hen-per-year × coins-per-egg "
         "to get the total."
     )
-    calls = _build_tool_calls(scene, primary={"total_coins": answer})
-    asst = assemble_assistant_msg(
-        preface_style=scene.preface_style(),
+    return _finalize(
+        scene,
+        user_msg=user_msg,
         narrative=narrative,
         code_block=code_block,
         result_text=result_text,
-        tool_call_line=render_tool_calls(calls),
-    )
-    return Record(
-        system_msg="You are a friendly tutor. Solve story problems with Clojure code, then answer with a tool call.",
-        user_msg=user_msg,
-        assistant_msg=asst,
-        tool_calls=calls,
-        expected=answer,
-        code_str=emit_clojure(expr),
+        value=answer,
+        expr=expr,
         fable="milkmaid",
         chapter="egg-to-coin-chain",
     )
@@ -1093,21 +1012,14 @@ def _mm_investment_return(scene: Scene) -> Record:
         "I find daily revenue (cups × coin-per-cup), then ceiling-divide "
         "the cow's cost by that revenue."
     )
-    calls = _build_tool_calls(scene, primary={"days_to_break_even": answer})
-    asst = assemble_assistant_msg(
-        preface_style=scene.preface_style(),
+    return _finalize(
+        scene,
+        user_msg=user_msg,
         narrative=narrative,
         code_block=code_block,
         result_text=result_text,
-        tool_call_line=render_tool_calls(calls),
-    )
-    return Record(
-        system_msg="You are a friendly tutor. Solve story problems with Clojure code, then answer with a tool call.",
-        user_msg=user_msg,
-        assistant_msg=asst,
-        tool_calls=calls,
-        expected=answer,
-        code_str=emit_clojure(expr),
+        value=answer,
+        expr=expr,
         fable="milkmaid",
         chapter="investment-return",
     )
@@ -1141,21 +1053,14 @@ def _mm_spilled_milk(scene: Scene) -> Record:
     code_block  = render_code(expr, form=scene.code_form(), value=answer)
     result_text = f"{maid.name} lost {n_unit(answer, 'coin')}."
     narrative   = "I multiply the spilled cups by the price per cup."
-    calls = _build_tool_calls(scene, primary={"coins_lost": answer})
-    asst = assemble_assistant_msg(
-        preface_style=scene.preface_style(),
+    return _finalize(
+        scene,
+        user_msg=user_msg,
         narrative=narrative,
         code_block=code_block,
         result_text=result_text,
-        tool_call_line=render_tool_calls(calls),
-    )
-    return Record(
-        system_msg="You are a friendly tutor. Solve story problems with Clojure code, then answer with a tool call.",
-        user_msg=user_msg,
-        assistant_msg=asst,
-        tool_calls=calls,
-        expected=answer,
-        code_str=emit_clojure(expr),
+        value=answer,
+        expr=expr,
         fable="milkmaid",
         chapter="spilled-milk",
     )
@@ -1198,21 +1103,14 @@ def _fg_max_reach(scene: Scene) -> Record:
     code_block  = render_code(expr, form=scene.code_form(), value=answer)
     result_text = f"{fox.name} can reach {n_unit(answer, 'foot', 'feet')} high."
     narrative   = "I add the body-stand height and the jump height."
-    calls = _build_tool_calls(scene, primary={"max_reach_feet": answer})
-    asst = assemble_assistant_msg(
-        preface_style=scene.preface_style(),
+    return _finalize(
+        scene,
+        user_msg=user_msg,
         narrative=narrative,
         code_block=code_block,
         result_text=result_text,
-        tool_call_line=render_tool_calls(calls),
-    )
-    return Record(
-        system_msg="You are a friendly tutor. Solve story problems with Clojure code, then answer with a tool call.",
-        user_msg=user_msg,
-        assistant_msg=asst,
-        tool_calls=calls,
-        expected=answer,
-        code_str=emit_clojure(expr),
+        value=answer,
+        expr=expr,
         fable="fox-grapes",
         chapter="max-reach",
     )
@@ -1251,21 +1149,14 @@ def _fg_jumps_needed(scene: Scene) -> Record:
         "I ceiling-divide grape-height by per-jump (add per-jump-1 "
         "before quot)."
     )
-    calls = _build_tool_calls(scene, primary={"jumps": answer})
-    asst = assemble_assistant_msg(
-        preface_style=scene.preface_style(),
+    return _finalize(
+        scene,
+        user_msg=user_msg,
         narrative=narrative,
         code_block=code_block,
         result_text=result_text,
-        tool_call_line=render_tool_calls(calls),
-    )
-    return Record(
-        system_msg="You are a friendly tutor. Solve story problems with Clojure code, then answer with a tool call.",
-        user_msg=user_msg,
-        assistant_msg=asst,
-        tool_calls=calls,
-        expected=answer,
-        code_str=emit_clojure(expr),
+        value=answer,
+        expr=expr,
         fable="fox-grapes",
         chapter="jumps-needed",
     )
@@ -1296,21 +1187,14 @@ def _fg_give_up(scene: Scene) -> Record:
     code_block  = render_code(expr, form=scene.code_form(), value=answer)
     result_text = f"The answer is {answer}."
     narrative   = "I check whether tried is still below the threshold."
-    calls = _build_tool_calls(scene, primary={"try_again": answer})
-    asst = assemble_assistant_msg(
-        preface_style=scene.preface_style(),
+    return _finalize(
+        scene,
+        user_msg=user_msg,
         narrative=narrative,
         code_block=code_block,
         result_text=result_text,
-        tool_call_line=render_tool_calls(calls),
-    )
-    return Record(
-        system_msg="You are a friendly tutor. Solve story problems with Clojure code, then answer with a tool call.",
-        user_msg=user_msg,
-        assistant_msg=asst,
-        tool_calls=calls,
-        expected=answer,
-        code_str=emit_clojure(expr),
+        value=answer,
+        expr=expr,
         fable="fox-grapes",
         chapter="give-up",
     )
@@ -1346,9 +1230,9 @@ def _tm_food_comparison(scene: Scene) -> Record:
     answer = evaluate(expr)
 
     user_msg = (
-        f"{species_phrase(country)} of the countryside had "
+        f"{species_phrase(country)} lived in the countryside and had "
         f"{n_unit(a, food.name, food.plural)}, while "
-        f"{species_phrase(city)} of the city had "
+        f"{species_phrase(city)} lived in the city and had "
         f"{n_unit(b, food.name, food.plural)}.\n\n"
         f"Question: What is the absolute difference in {food.plural} "
         f"between the two mice?"
@@ -1357,21 +1241,14 @@ def _tm_food_comparison(scene: Scene) -> Record:
     code_block  = render_code(expr, form=scene.code_form(), value=answer)
     result_text = f"The difference is {n_unit(answer, food.name, food.plural)}."
     narrative   = "I take the absolute value of the difference."
-    calls = _build_tool_calls(scene, primary={"difference": answer})
-    asst = assemble_assistant_msg(
-        preface_style=scene.preface_style(),
+    return _finalize(
+        scene,
+        user_msg=user_msg,
         narrative=narrative,
         code_block=code_block,
         result_text=result_text,
-        tool_call_line=render_tool_calls(calls),
-    )
-    return Record(
-        system_msg="You are a friendly tutor. Solve story problems with Clojure code, then answer with a tool call.",
-        user_msg=user_msg,
-        assistant_msg=asst,
-        tool_calls=calls,
-        expected=answer,
-        code_str=emit_clojure(expr),
+        value=answer,
+        expr=expr,
         fable="two-mice",
         chapter="food-comparison",
     )
@@ -1405,21 +1282,14 @@ def _tm_shared_meal(scene: Scene) -> Record:
     code_block  = render_code(expr, form=scene.code_form(), value=answer)
     result_text = f"Each mouse gets {n_unit(answer, food.name, food.plural)}."
     narrative   = "I integer-divide the total by the number of mice."
-    calls = _build_tool_calls(scene, primary={"per_mouse": answer})
-    asst = assemble_assistant_msg(
-        preface_style=scene.preface_style(),
+    return _finalize(
+        scene,
+        user_msg=user_msg,
         narrative=narrative,
         code_block=code_block,
         result_text=result_text,
-        tool_call_line=render_tool_calls(calls),
-    )
-    return Record(
-        system_msg="You are a friendly tutor. Solve story problems with Clojure code, then answer with a tool call.",
-        user_msg=user_msg,
-        assistant_msg=asst,
-        tool_calls=calls,
-        expected=answer,
-        code_str=emit_clojure(expr),
+        value=answer,
+        expr=expr,
         fable="two-mice",
         chapter="shared-meal",
     )
@@ -1453,21 +1323,14 @@ def _tm_trip_budget(scene: Scene) -> Record:
     code_block  = render_code(expr, form=scene.code_form(), value=answer)
     result_text = f"{mouse.name} has {n_unit(answer, 'coin')} remaining."
     narrative   = "I subtract travel and food from the starting coins."
-    calls = _build_tool_calls(scene, primary={"coins_remaining": answer})
-    asst = assemble_assistant_msg(
-        preface_style=scene.preface_style(),
+    return _finalize(
+        scene,
+        user_msg=user_msg,
         narrative=narrative,
         code_block=code_block,
         result_text=result_text,
-        tool_call_line=render_tool_calls(calls),
-    )
-    return Record(
-        system_msg="You are a friendly tutor. Solve story problems with Clojure code, then answer with a tool call.",
-        user_msg=user_msg,
-        assistant_msg=asst,
-        tool_calls=calls,
-        expected=answer,
-        code_str=emit_clojure(expr),
+        value=answer,
+        expr=expr,
         fable="two-mice",
         chapter="trip-budget",
     )
@@ -1509,21 +1372,14 @@ def _ds_double_loss(scene: Scene) -> Record:
     code_block  = render_code(expr, form=scene.code_form(), value=answer)
     result_text = f"{dog.name} has {n_unit(answer, 'bone')} left."
     narrative   = "I subtract 1 (the dropped bone) from the original count."
-    calls = _build_tool_calls(scene, primary={"bones_remaining": answer})
-    asst = assemble_assistant_msg(
-        preface_style=scene.preface_style(),
+    return _finalize(
+        scene,
+        user_msg=user_msg,
         narrative=narrative,
         code_block=code_block,
         result_text=result_text,
-        tool_call_line=render_tool_calls(calls),
-    )
-    return Record(
-        system_msg="You are a friendly tutor. Solve story problems with Clojure code, then answer with a tool call.",
-        user_msg=user_msg,
-        assistant_msg=asst,
-        tool_calls=calls,
-        expected=answer,
-        code_str=emit_clojure(expr),
+        value=answer,
+        expr=expr,
         fable="dog-shadow",
         chapter="double-loss",
     )
@@ -1552,21 +1408,14 @@ def _ds_regret(scene: Scene) -> Record:
     code_block  = render_code(expr, form=scene.code_form(), value=answer)
     result_text = f"{dog.name} fell short by {n_unit(answer, 'bone')}."
     narrative   = "I compute expected-actual where actual is expected-1."
-    calls = _build_tool_calls(scene, primary={"shortfall": answer})
-    asst = assemble_assistant_msg(
-        preface_style=scene.preface_style(),
+    return _finalize(
+        scene,
+        user_msg=user_msg,
         narrative=narrative,
         code_block=code_block,
         result_text=result_text,
-        tool_call_line=render_tool_calls(calls),
-    )
-    return Record(
-        system_msg="You are a friendly tutor. Solve story problems with Clojure code, then answer with a tool call.",
-        user_msg=user_msg,
-        assistant_msg=asst,
-        tool_calls=calls,
-        expected=answer,
-        code_str=emit_clojure(expr),
+        value=answer,
+        expr=expr,
         fable="dog-shadow",
         chapter="regret",
     )
@@ -1601,21 +1450,14 @@ def _ds_exchange_loss(scene: Scene) -> Record:
     code_block  = render_code(expr, form=scene.code_form(), value=answer)
     result_text = f"{dog.name} ends with {n_unit(answer, 'bone')}."
     narrative   = "I subtract given, then add received back to the start."
-    calls = _build_tool_calls(scene, primary={"final_bones": answer})
-    asst = assemble_assistant_msg(
-        preface_style=scene.preface_style(),
+    return _finalize(
+        scene,
+        user_msg=user_msg,
         narrative=narrative,
         code_block=code_block,
         result_text=result_text,
-        tool_call_line=render_tool_calls(calls),
-    )
-    return Record(
-        system_msg="You are a friendly tutor. Solve story problems with Clojure code, then answer with a tool call.",
-        user_msg=user_msg,
-        assistant_msg=asst,
-        tool_calls=calls,
-        expected=answer,
-        code_str=emit_clojure(expr),
+        value=answer,
+        expr=expr,
         fable="dog-shadow",
         chapter="exchange-loss",
     )
@@ -1658,21 +1500,14 @@ def _lb_days_to_defeat(scene: Scene) -> Record:
     code_block  = render_code(expr, form=scene.code_form(), value=answer)
     result_text = f"{lion.name} needs {n_unit(answer, 'day')}."
     narrative   = "I multiply the number of bulls by the days needed for each."
-    calls = _build_tool_calls(scene, primary={"total_days": answer})
-    asst = assemble_assistant_msg(
-        preface_style=scene.preface_style(),
+    return _finalize(
+        scene,
+        user_msg=user_msg,
         narrative=narrative,
         code_block=code_block,
         result_text=result_text,
-        tool_call_line=render_tool_calls(calls),
-    )
-    return Record(
-        system_msg="You are a friendly tutor. Solve story problems with Clojure code, then answer with a tool call.",
-        user_msg=user_msg,
-        assistant_msg=asst,
-        tool_calls=calls,
-        expected=answer,
-        code_str=emit_clojure(expr),
+        value=answer,
+        expr=expr,
         fable="lion-bulls",
         chapter="days-to-defeat",
     )
@@ -1701,21 +1536,14 @@ def _lb_remaining_after_k(scene: Scene) -> Record:
     code_block  = render_code(expr, form=scene.code_form(), value=answer)
     result_text = f"{n_unit(answer, 'bull')} remain."
     narrative   = "I subtract the defeated from the original count."
-    calls = _build_tool_calls(scene, primary={"bulls_remaining": answer})
-    asst = assemble_assistant_msg(
-        preface_style=scene.preface_style(),
+    return _finalize(
+        scene,
+        user_msg=user_msg,
         narrative=narrative,
         code_block=code_block,
         result_text=result_text,
-        tool_call_line=render_tool_calls(calls),
-    )
-    return Record(
-        system_msg="You are a friendly tutor. Solve story problems with Clojure code, then answer with a tool call.",
-        user_msg=user_msg,
-        assistant_msg=asst,
-        tool_calls=calls,
-        expected=answer,
-        code_str=emit_clojure(expr),
+        value=answer,
+        expr=expr,
         fable="lion-bulls",
         chapter="remaining-after-k",
     )
@@ -1760,21 +1588,14 @@ def _lb_divide_conquer_bool(scene: Scene) -> Record:
         "I check both: lion > one bull (alone wins) AND lion < "
         "combined-strength (together loses)."
     )
-    calls = _build_tool_calls(scene, primary={"divide_required": answer_str})
-    asst = assemble_assistant_msg(
-        preface_style=scene.preface_style(),
+    return _finalize(
+        scene,
+        user_msg=user_msg,
         narrative=narrative,
         code_block=code_block,
         result_text=result_text,
-        tool_call_line=render_tool_calls(calls),
-    )
-    return Record(
-        system_msg="You are a friendly tutor. Solve story problems with Clojure code, then answer with a tool call.",
-        user_msg=user_msg,
-        assistant_msg=asst,
-        tool_calls=calls,
-        expected=answer,
-        code_str=emit_clojure(expr),
+        value=answer,
+        expr=expr,
         fable="lion-bulls",
         chapter="divide-conquer-bool",
     )
@@ -1783,26 +1604,6 @@ def _lb_divide_conquer_bool(scene: Scene) -> Record:
 def And_clauses(*clauses):
     """Helper: emit `(and a b ...)` as App."""
     return App("and", list(clauses))
-
-
-# ─────────────────────── tool-call helpers ───────────────────────
-
-
-def _build_tool_calls(scene: Scene, *,
-                      primary: dict,
-                      secondary_lookups: list[tuple[str, dict]] | None = None
-                      ) -> list[dict]:
-    """Build a tool_calls list. Single-call most of the time; multi-call
-    occasionally, with the primary 'answer' call always last."""
-    n = scene.n_tool_calls()
-    if n == 1 or not secondary_lookups:
-        return [{"name": "answer", "args": primary}]
-    # Multi-call: precede the answer with 1-2 lookup-style helper calls.
-    calls = []
-    for k, args in (secondary_lookups[: n - 1] if secondary_lookups else []):
-        calls.append({"name": k, "args": args})
-    calls.append({"name": "answer", "args": primary})
-    return calls
 
 
 # ─────────────────────── registry ───────────────────────

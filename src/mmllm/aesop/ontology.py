@@ -343,18 +343,20 @@ class Location:
 
 
 LOCATIONS: tuple[Location, ...] = (
-    # outdoor
-    Location("meadow",    "the", False, ("nature",)),
-    Location("forest",    "the", False, ("nature",)),
-    Location("woods",     "the", False, ("nature",)),
+    # outdoor — path-like (can host a race / travel scenario)
+    Location("meadow",    "the", False, ("nature", "path")),
+    Location("forest",    "the", False, ("nature", "path")),
+    Location("woods",     "the", False, ("nature", "path")),
+    Location("garden",    "the", False, ("nature", "path")),
+    Location("orchard",   "the", False, ("nature", "path", "food")),
+    Location("hilltop",   "the", False, ("nature", "path")),
+    Location("road",      "the", False, ("path",)),
+    Location("beach",     "the", False, ("nature", "water", "path")),
+
+    # outdoor — water / static (NOT path-like)
     Location("river bank","the", False, ("nature", "water")),
     Location("pond",      "the", False, ("nature", "water")),
-    Location("garden",    "the", False, ("nature",)),
-    Location("orchard",   "the", False, ("nature", "food")),
-    Location("hilltop",   "the", False, ("nature",)),
     Location("desert",    "the", False, ("nature",)),
-    Location("beach",     "the", False, ("nature", "water")),
-    Location("road",      "the", False, ("path",)),
     Location("market",    "the", False, ("village",)),
     Location("village",   "the", False, ("village",)),
     Location("farm",      "the", False, ("village",)),

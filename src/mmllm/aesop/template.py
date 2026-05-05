@@ -11,7 +11,19 @@ There's no parser — Python's syntax is the host language.
 
 Diversity knobs live on the Record / fable side: each fable function
 flips coins to choose code form (inline vs block), preface style
-(no-preface / fixed-short / NL-narrative), single-call vs multi-tool-call.
+(no-preface / fixed-short / NL-narrative), and tool-call pattern (single
+`answer` call vs `eval`+`answer` chain).
+
+Tool-call surface (universal across fables):
+  answer(value)  — submit final answer; value is any Clojure-shaped JSON
+                   value (literal numbers/strings/lists are themselves;
+                   string-encoded forms get evaluated by the runtime).
+  eval(form)     — evaluate a Clojure-source string and return result.
+                   Used in compositional pattern: eval(form) → answer(value).
+
+The system prompt declares this catalog on every record so that arg
+names + tool names appear verbatim in the input — model never has to
+guess template-internal keys.
 """
 from __future__ import annotations
 
@@ -19,10 +31,81 @@ import json
 import random
 import re
 from dataclasses import dataclass, field
-from typing import Iterable
+from typing import Any, Iterable
 
 from mmllm.aesop import ontology as ont
 from mmllm.aesop.expr  import Expr, evaluate, emit_clojure
+
+
+# ─────────────────────── Tool catalog ───────────────────────
+
+
+# Single-tool catalog (used for ~75% of records).
+ANSWER_ONLY: tuple[dict, ...] = (
+    {
+        "name": "answer",
+        "params": ({"name": "value", "type": "any"},),
+        "description": "submit the final answer (literal value or "
+                       "Clojure-source string that the runtime will eval)",
+    },
+)
+
+# Two-tool catalog (used for ~25% of records, paired with eval+answer chain).
+ANSWER_AND_EVAL: tuple[dict, ...] = (
+    {
+        "name": "eval",
+        "params": ({"name": "form", "type": "string"},),
+        "description": "evaluate a Clojure-source string and return the result",
+    },
+    {
+        "name": "answer",
+        "params": ({"name": "value", "type": "any"},),
+        "description": "submit the final answer",
+    },
+)
+
+
+def render_tool_catalog(catalog: tuple[dict, ...] | list[dict]) -> str:
+    """Format a tool catalog as the bullet list that goes in the system
+    prompt. Output is deterministic for a given catalog tuple."""
+    lines = ["Available tools:"]
+    for t in catalog:
+        params = ", ".join(f"{p['name']}: {p['type']}" for p in t["params"])
+        line = f"- {t['name']}({params})"
+        if t.get("description"):
+            line += f" — {t['description']}"
+        lines.append(line)
+    return "\n".join(lines)
+
+
+def system_prompt(use_eval: bool) -> str:
+    """Canonical system prompt declaring the tool catalog. Two variants:
+    answer-only (most records) or answer+eval (when the assistant uses a
+    real eval-then-answer chain)."""
+    catalog = ANSWER_AND_EVAL if use_eval else ANSWER_ONLY
+    return (
+        "You are a tool-using assistant. Solve the problem with Clojure code, "
+        "then submit your answer as a tool call.\n\n"
+        + render_tool_catalog(catalog)
+    )
+
+
+def build_tool_calls(value: Any, code_str: str, *, use_eval: bool) -> list[dict]:
+    """Build the tool-call list. Two patterns:
+
+      Pattern A (single):  [{name: answer, args: {value}}]
+      Pattern C (chain):   [{name: eval, args: {form}}, {name: answer, args: {value}}]
+
+    Pattern B (form-as-answer-string) was rejected — JSON-native values
+    handle literals cleanly; the form-string variant overlaps with
+    pattern C and adds no signal.
+    """
+    if use_eval:
+        return [
+            {"name": "eval",   "args": {"form": code_str}},
+            {"name": "answer", "args": {"value": value}},
+        ]
+    return [{"name": "answer", "args": {"value": value}}]
 
 
 # ─────────────────────── Record ───────────────────────
@@ -34,12 +117,13 @@ class Record:
     via ChatTemplate into the byte-bin training corpus."""
     system_msg:    str
     user_msg:      str
-    assistant_msg: str               # full assistant turn body (narrative + code + result_text + tool_call_json)
+    assistant_msg: str               # full assistant turn body
     tool_calls:    list[dict]        # canonical: [{"name": "...", "args": {...}}]
     expected:      object             # ground-truth answer for verifier
     code_str:      str               # the Clojure source as embedded
     fable:         str               # which fable generated it (for stats)
     chapter:       str               # which chapter / variant
+    catalog:       tuple[dict, ...]  # tool catalog declared in system_msg
 
 
 # ─────────────────────── Scene ───────────────────────
@@ -217,9 +301,9 @@ class Scene:
             weights=[0.25, 0.4, 0.35],
         )[0]
 
-    def n_tool_calls(self) -> int:
-        """1 (most), 2, or 3 — multi-call probability lower than single."""
-        return self.rng.choices([1, 2, 3], weights=[0.6, 0.3, 0.1])[0]
+    def use_eval_chain(self) -> bool:
+        """Should this record emit eval(form) + answer(value), or just answer(value)?"""
+        return self.coin(0.25)
 
 
 # ─────────────────────── prose helpers ───────────────────────
@@ -249,6 +333,29 @@ def the_subject_phrase(c: ont.Character) -> str:
     return f"the {c.species}"
 
 
+def smart_pronoun(c: ont.Character, others: Iterable[ont.Character]) -> str:
+    """If any character in `others` shares c's pronoun, return c.name to
+    disambiguate. Otherwise return the pronoun. Avoids "He bragged while
+    he plodded" two-male-character ambiguity."""
+    for o in others:
+        if o is c:
+            continue
+        if o.he_she == c.he_she:
+            return c.name
+    return c.he_she
+
+
+def smart_possessive(c: ont.Character, others: Iterable[ont.Character]) -> str:
+    """Like smart_pronoun but for `his`/`her`/`their`. If ambiguous,
+    returns `<name>'s` instead."""
+    for o in others:
+        if o is c:
+            continue
+        if o.his_her == c.his_her:
+            return f"{c.name}'s"
+    return c.his_her
+
+
 def maybe_plural(item: ont.Item, n: int) -> str:
     return item.plural if n != 1 else item.name
 
@@ -272,37 +379,30 @@ def n_unit(n: int, singular: str, plural: str | None = None) -> str:
 def render_code(expr: Expr, *, form: str, value) -> str:
     """Render a Clojure expression block in either 'inline' or 'block' form.
 
-    inline:
-      ```clojure
-      (let [a 3 b 2] (+ a b))
-      ;=> 5
-      ```
-
-    block:
-      ```clojure
-      (def a 3)
-      (def b 2)
-      (+ a b)
-      ;; a + b = 5
-      ```
-    """
+    Annotation is unified to `;=> N` (single semicolon, no leading space,
+    space after `=>`) — canonical Clojure REPL style. Both inline and
+    block use the same annotation; they differ in how the bindings are
+    laid out."""
     src = emit_clojure(expr)
     fence_open  = "```clojure\n"
     fence_close = "\n```"
+
     if form == "inline":
         return f"{fence_open}{src}\n;=> {_emit_lit(value)}{fence_close}"
-    # block form: pull let bindings out as defs, body becomes the trailing form
-    if hasattr(expr, "bindings") and hasattr(expr, "body"):
-        from mmllm.aesop.expr import Let, Do
-        if isinstance(expr, Let):
-            lines = []
-            for k, v in expr.bindings:
-                lines.append(f"(def {k} {emit_clojure(v)})")
-            body_src = emit_clojure(expr.body) if not isinstance(expr.body, list) \
-                       else "\n".join(emit_clojure(e) for e in expr.body)
-            lines.append(body_src)
-            full = "\n".join(lines)
-            return f"{fence_open}{full}\n;; => {_emit_lit(value)}{fence_close}"
+
+    # block form: pull let bindings out as defs, body trails. Only Let
+    # exprs get the def-rewrite; other shapes fall back to inline.
+    from mmllm.aesop.expr import Let
+    if isinstance(expr, Let):
+        lines = []
+        for k, v in expr.bindings:
+            lines.append(f"(def {k} {emit_clojure(v)})")
+        body_src = (emit_clojure(expr.body) if not isinstance(expr.body, list)
+                    else "\n".join(emit_clojure(e) for e in expr.body))
+        lines.append(body_src)
+        full = "\n".join(lines)
+        return f"{fence_open}{full}\n;=> {_emit_lit(value)}{fence_close}"
+
     # Fallback: same as inline.
     return f"{fence_open}{src}\n;=> {_emit_lit(value)}{fence_close}"
 
@@ -324,8 +424,10 @@ def _emit_lit(v) -> str:
 
 
 def render_tool_calls(calls: list[dict]) -> str:
-    """Single canonical line: `{"tool_calls":[...]}`."""
-    return json.dumps({"tool_calls": calls}, ensure_ascii=False, separators=(",", ":"))
+    """Single canonical line: `{"tool_calls":[...]}`. Compact JSON, no
+    spaces after separators — matches what the eval extractor parses."""
+    return json.dumps({"tool_calls": calls},
+                      ensure_ascii=False, separators=(",", ":"))
 
 
 def assemble_assistant_msg(*,
@@ -374,6 +476,26 @@ def smoke_test() -> None:
     assert article("apple") == "an"
     assert article("ball")  == "a"
     assert species_phrase(hare).startswith(hare.name)
+
+    # tool catalog
+    sp_eval = system_prompt(use_eval=True)
+    assert "eval" in sp_eval and "answer" in sp_eval
+    sp_no = system_prompt(use_eval=False)
+    assert "eval(" not in sp_no and "answer" in sp_no
+
+    calls_a = build_tool_calls(15, "(+ 7 8)", use_eval=False)
+    assert calls_a == [{"name": "answer", "args": {"value": 15}}]
+    calls_c = build_tool_calls(15, "(+ 7 8)", use_eval=True)
+    assert calls_c[0]["name"] == "eval" and calls_c[1]["name"] == "answer"
+
+    # disambiguation
+    bob   = next(c for c in ont.CHARACTERS if c.name == "Bob")
+    alice = next(c for c in ont.CHARACTERS if c.name == "Alice")
+    char  = next(c for c in ont.CHARACTERS if c.name == "Charlie")
+    assert smart_pronoun(bob,   [alice]) == "he"     # different pronouns
+    assert smart_pronoun(bob,   [char])  == "Bob"    # both 'he' → name
+    assert smart_pronoun(alice, [bob])   == "she"    # different pronouns
+
     print(
         f"template smoke OK: hare={hare.name} tortoise={tortoise.name} "
         f"item={item.name} container={container.name} n={n}"
