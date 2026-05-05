@@ -1006,17 +1006,32 @@
    be wrong (silently mis-scored). Lock the template before running."
   [config base-path ckpt-step bank-path eval-test-path eval-name
    n-samples gen-len log-path]
-  (let [cfg    (assoc config :memory-mmap-path bank-path)
-        m      (build-model cfg)
-        device (:device m)]
+  (let [cfg      (assoc config :memory-mmap-path bank-path)
+        m        (build-model cfg)
+        device   (:device m)
+        ckpt-dir (str base-path ".ckpts")]
     (when ckpt-step
-      (let [path  (str base-path ".ckpts/step-" ckpt-step)
+      (let [path  (str ckpt-dir "/step-" ckpt-step)
             saved (python/list (torch/load (str path "/dense.pt")
                                            ** :map_location device))]
         (println (format "  loaded ckpt: %s (%d dense param tensors)"
                          path (count saved)))
         (doseq [[p s] (map vector (parameters m) saved)]
-          (.copy_ (.- p data) s))))
+          (.copy_ (.- p data) s))
+        ;; Restore bank V from <ckpt-dir>/bank-latest.<i>.bin — same
+        ;; fix as eval-bpc-on-path. Without this the model generates
+        ;; with random bank V (when MMLLM_BANK_ON_GPU=true) which
+        ;; trashes the agent eval entirely. See eval-bpc-on-path
+        ;; comment for full diagnosis.
+        (doseq [[i b] (map-indexed vector (:blocks m))]
+          (try
+            (.load_from_mmap (:memory b)
+                             (str ckpt-dir "/bank-latest." i ".bin"))
+            (catch python/Exception e
+              (println (format "  WARN: bank V layer %d load failed (%s) — using random init"
+                               i e)))))
+        (println (format "  bank V load attempted from %s/bank-latest.{0..%d}.bin"
+                         ckpt-dir (dec (count (:blocks m)))))))
     (set-eval-mode! m)
     (torch/set_grad_enabled false)
     (println (format "  eval-agent[%s]: ckpt=%s test=%s n=%d gen=%d"
@@ -1201,17 +1216,38 @@
    the pretraining-style splits (cosmopedia.test.bin, fineweb-edu.test.bin,
    the-stack-v2-py.test.bin, etc.) in seconds-to-minutes per ckpt."
   [config base-path ckpt-step bank-path test-path eval-name log-path]
-  (let [cfg    (assoc config :memory-mmap-path bank-path)
-        m      (build-model cfg)
-        device (:device m)]
+  (let [cfg      (assoc config :memory-mmap-path bank-path)
+        m        (build-model cfg)
+        device   (:device m)
+        ckpt-dir (str base-path ".ckpts")]
     (when ckpt-step
-      (let [path  (str base-path ".ckpts/step-" ckpt-step)
+      (let [path  (str ckpt-dir "/step-" ckpt-step)
             saved (python/list (torch/load (str path "/dense.pt")
                                            ** :map_location device))]
         (println (format "  loaded ckpt: %s (%d dense param tensors)"
                          path (count saved)))
         (doseq [[p s] (map vector (parameters m) saved)]
-          (.copy_ (.- p data) s))))
+          (.copy_ (.- p data) s))
+        ;; Restore bank V from the ckpt-dir's bank-latest.<i>.bin files.
+        ;; Without this, when MMLLM_BANK_ON_GPU=true the bank V stays
+        ;; at random init (the mmap_path arg is ignored) and we silently
+        ;; measure dense-only quality (== ablated bpc), not the full
+        ;; model. Caught by comparing watcher's bpc to train-long's
+        ;; in-session val_bpc + ablation Δ on session 2 — they matched
+        ;; the gap exactly. bank-latest is overwrite-in-place per
+        ;; save-checkpoint!, so it reflects the LATEST training state,
+        ;; not necessarily ckpt-step's state — for ckpts published at
+        ;; session-end this is exact; for in-flight intermediate ckpts
+        ;; it's the closest available bank state.
+        (doseq [[i b] (map-indexed vector (:blocks m))]
+          (try
+            (.load_from_mmap (:memory b)
+                             (str ckpt-dir "/bank-latest." i ".bin"))
+            (catch python/Exception e
+              (println (format "  WARN: bank V layer %d load failed (%s) — using random init"
+                               i e)))))
+        (println (format "  bank V load attempted from %s/bank-latest.{0..%d}.bin"
+                         ckpt-dir (dec (count (:blocks m)))))))
     (set-eval-mode! m)
     (torch/set_grad_enabled false)
     (println (format "  eval-bpc-on-path[%s]: ckpt=%s test=%s"
