@@ -84,18 +84,32 @@ volume = modal.Volume.from_name(
 # install.
 publish_image = (
     image
+    # Direct-tarball install of the gh CLI. The apt-repo path
+    # (curl GPG keyring → /etc/apt/sources.list.d/ → apt update → apt
+    # install) kept flaking on the GPG keyring fetch step ("Connection
+    # reset by peer" from cli.github.com), which blew up the whole
+    # image build and prevented any function in this app from
+    # launching — even functions that don't use publish_image. The
+    # tarball path is a single file download from the GitHub releases
+    # CDN; falls back across two URLs and retries up to 3× before
+    # giving up.
     .run_commands(
-        "apt-get update -qq",
-        "apt-get install -qq -y curl ca-certificates gnupg",
-        "curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | "
-        "dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg",
-        "chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg",
-        'echo "deb [arch=$(dpkg --print-architecture) '
-        'signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] '
-        'https://cli.github.com/packages stable main" '
-        '> /etc/apt/sources.list.d/github-cli.list',
-        "apt-get update -qq",
-        "apt-get install -qq -y gh",
+        "apt-get update -qq && apt-get install -qq -y curl ca-certificates",
+        "set -e; "
+        "GH_VERSION=2.62.0; "
+        "for url in "
+        "  https://github.com/cli/cli/releases/download/v${GH_VERSION}/gh_${GH_VERSION}_linux_amd64.tar.gz "
+        "  https://github.com/cli/cli/releases/download/v${GH_VERSION}/gh_${GH_VERSION}_linux_amd64.tar.gz "
+        "  https://github.com/cli/cli/releases/download/v${GH_VERSION}/gh_${GH_VERSION}_linux_amd64.tar.gz "
+        "; do "
+        "  if curl -fsSL --retry 3 --retry-delay 5 -o /tmp/gh.tar.gz \"$url\"; then break; fi; "
+        "  echo \"download from $url failed; retrying...\"; "
+        "  sleep 5; "
+        "done; "
+        "tar -xzf /tmp/gh.tar.gz -C /tmp/ && "
+        "mv /tmp/gh_${GH_VERSION}_linux_amd64/bin/gh /usr/local/bin/gh && "
+        "rm -rf /tmp/gh.tar.gz /tmp/gh_${GH_VERSION}_linux_amd64 && "
+        "gh --version",
     )
 )
 
@@ -2509,7 +2523,7 @@ def run_eval_battery(
     agent_evals: str  = ("commitpackft-py:/data/commitpackft-py.test.bin,"
                           "magicoder:/data/magicoder.test.bin"),
     n_samples:   int  = 50,
-    gen_len:     int  = 512,
+    gen_len:     int  = 256,    # default 256 fits max_pos=1024 + max_prompt_bytes=768 with margin
 ):
     """Run the full eval battery against a single ckpt.
 
@@ -2554,7 +2568,7 @@ def eval_watcher(
     agent_evals: str  = ("commitpackft-py:/data/commitpackft-py.test.bin,"
                           "magicoder:/data/magicoder.test.bin"),
     n_samples:   int  = 50,
-    gen_len:     int  = 512,
+    gen_len:     int  = 256,    # default 256 fits max_pos=1024 + max_prompt_bytes=768 with margin
     max_idle_polls: int = 0,                       # 0 = infinite; else stop after N empty polls
 ):
     """Poll <base>.ckpts/ for new step-<N> dirs and eval each one.
