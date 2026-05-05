@@ -117,10 +117,10 @@ G5_10 = SubjectCurriculum(grade=5, subject_id="G5-10",
     subject_title="map", fable="tortoise-hare",
     examples=[
         _ex("(map inc [1 2 3])", [2,3,4],
-            "mapping increment over a vector", "[1 2 3] each incremented",
+            "mapping increment over a vector", "the sequence produced by mapping inc over the vector containing 1, 2, and 3",
             goal="apply inc to each element of the vector containing 1, 2, and 3, returning a sequence"),
         _ex("(map #(* % %) [1 2 3 4])", [1,4,9,16],
-            "mapping a squaring operation over a vector", "[1 2 3 4] each squared",
+            "mapping a squaring operation over a vector", "the sequence produced by mapping a lambda that squares its argument over the vector containing 1, 2, 3, and 4",
             goal="apply a squaring operation to each element of the vector containing 1, 2, 3, and 4, returning a sequence"),
     ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G5)
 
@@ -129,10 +129,10 @@ G5_11 = SubjectCurriculum(grade=5, subject_id="G5-11",
     subject_title="filter", fable="tortoise-hare",
     examples=[
         _ex("(filter even? [1 2 3 4])", [2,4],
-            "filtering even elements from a vector", "the even numbers from [1 2 3 4]",
+            "filtering even elements from a vector", "the sequence produced by filtering even? over the vector containing 1, 2, 3, and 4",
             goal="keep the even elements from the vector containing 1, 2, 3, and 4"),
         _ex("(filter pos? [-2 -1 0 1 2])", [1,2],
-            "filtering positive elements from a vector", "the positive numbers",
+            "filtering positive elements from a vector", "the sequence produced by filtering pos? over the vector containing -2, -1, 0, 1, and 2",
             goal="keep the positive elements from the vector containing -2, -1, 0, 1, and 2"),
     ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G5)
 
@@ -140,12 +140,12 @@ G5_11 = SubjectCurriculum(grade=5, subject_id="G5-11",
 G5_12 = SubjectCurriculum(grade=5, subject_id="G5-12",
     subject_title="reduce", fable="tortoise-hare",
     examples=[
-        _ex("(reduce + [1 2 3 4])",   10, "the fold operation", "the sum",
+        _ex("(reduce + [1 2 3 4])",   10, "the fold operation", "the sum produced by reducing + over the vector containing 1, 2, 3, and 4",
             goal="fold + over the vector containing 1, 2, 3, and 4, summing them"),
-        _ex("(reduce * [1 2 3 4 5])", 120,"the fold operation", "5!",
+        _ex("(reduce * [1 2 3 4 5])", 120,"the fold operation", "the product produced by reducing * over the vector containing 1, 2, 3, 4, and 5",
             goal="fold * over the vector containing 1, 2, 3, 4, and 5, computing their product"),
         _ex("(reduce max [3 1 4 1 5 9 2 6])", 9,
-            "the fold operation", "the maximum",
+            "the fold operation", "the maximum produced by reducing max over the vector containing 3, 1, 4, 1, 5, 9, 2, and 6",
             goal="fold max over the vector containing 3, 1, 4, 1, 5, 9, 2, and 6, finding the maximum"),
     ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G5)
 
@@ -154,10 +154,10 @@ G5_13 = SubjectCurriculum(grade=5, subject_id="G5-13",
     subject_title="reduce with init", fable="tortoise-hare",
     examples=[
         _ex("(reduce + 100 [1 2 3])", 106,
-            "the fold with initial value", "the sum starting from 100",
+            "the fold with initial value", "the sum produced by reducing + over the vector containing 1, 2, and 3 with an initial value of 100",
             goal="fold + over the vector containing 1, 2, 3 starting from an initial accumulator of 100"),
         _ex("(reduce + 0 [])", 0,
-            "the fold with initial value over empty sequence", "the value when reducing over empty seq with init 0",
+            "the fold with initial value over empty sequence", "the result of reducing + over an empty vector with an initial value of 0",
             goal="fold + over an empty sequence starting from an initial accumulator of 0"),
     ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G5)
 
@@ -166,10 +166,10 @@ G5_14 = SubjectCurriculum(grade=5, subject_id="G5-14",
     subject_title="apply", fable="tortoise-hare",
     examples=[
         _ex("(apply + [1 2 3 4])", 10,
-            "applying + to vector elements", "the sum via apply",
+            "applying + to vector elements", "the result of applying + to the elements of the vector containing 1, 2, 3, and 4",
             goal="apply + to the elements of the vector containing 1, 2, 3, and 4"),
         _ex("(apply max [3 1 4 1 5])", 5,
-            "applying max to vector elements", "max of the vector via apply",
+            "applying max to vector elements", "the result of applying max to the elements of the vector containing 3, 1, 4, 1, and 5",
             goal="apply max to the elements of the vector containing 3, 1, 4, 1, and 5"),
     ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G5)
 
@@ -178,10 +178,10 @@ G5_15 = SubjectCurriculum(grade=5, subject_id="G5-15",
     subject_title="comp", fable="tortoise-hare",
     examples=[
         _ex("((comp inc inc) 5)", 7,
-            "composing inc twice", "inc applied twice to 5",
+            "composing inc twice", "the result of applying the composition of inc and inc to 5",
             goal="compose two inc functions and apply them to 5"),
         _ex("((comp str inc) 9)", "10",
-            "composing str and inc", "the string representation of 9 incremented",
+            "composing str and inc", "the result of applying the composition of str and inc to 9",
             goal="compose str and inc functions and apply them to 9"),
     ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G5)
 
@@ -190,10 +190,10 @@ G5_16 = SubjectCurriculum(grade=5, subject_id="G5-16",
     subject_title="partial", fable="tortoise-hare",
     examples=[
         _ex("((partial + 10) 5)", 15,
-            "partial application of +", "10 + 5",
+            "partial application of +", "the result of applying a partially applied + function with first argument 10 to 5",
             goal="apply + with 10 as the first argument and 5 as the second"),
         _ex("(map (partial * 3) [1 2 3])", [3,6,9],
-            "mapping partial multiplication over a vector", "each element times 3",
+            "mapping partial multiplication over a vector", "the sequence produced by mapping a partially applied multiplication function with first argument 3 over the vector containing 1, 2, and 3",
             goal="apply a partially applied multiplication to each element of the vector containing 1, 2, and 3"),
     ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G5)
 
@@ -202,7 +202,7 @@ G5_17 = SubjectCurriculum(grade=5, subject_id="G5-17",
     subject_title="juxt", fable="tortoise-hare",
     examples=[
         _ex("((juxt inc dec) 5)", [6,4],
-            "juxtaposing inc and dec", "inc and dec of 5 in parallel",
+            "juxtaposing inc and dec", "the vector produced by applying juxt to inc and dec with argument 5",
             goal="apply both inc and dec functions to 5 and return both results as a vector"),
     ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G5)
 
@@ -211,10 +211,10 @@ G5_18 = SubjectCurriculum(grade=5, subject_id="G5-18",
     subject_title="some", fable="tortoise-hare",
     examples=[
         _ex("(some even? [1 3 5 8 7])", True,
-            "checking if any element satisfies a predicate", "whether any element is even",
+            "checking if any element satisfies a predicate", "the result of applying some with even? to the vector containing 1, 3, 5, 8, and 7",
             goal="check if any element in the vector containing 1, 3, 5, 8, and 7 is even"),
         _ex("(some neg? [1 2 3])", None,
-            "checking if any element satisfies a predicate", "the value when no element is negative",
+            "checking if any element satisfies a predicate", "the result of applying some with neg? to the vector containing 1, 2, and 3",
             goal="check if any element in the vector containing 1, 2, and 3 is negative"),
     ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G5)
 
@@ -222,9 +222,9 @@ G5_18 = SubjectCurriculum(grade=5, subject_id="G5-18",
 G5_19 = SubjectCurriculum(grade=5, subject_id="G5-19",
     subject_title="every?", fable="tortoise-hare",
     examples=[
-        _ex("(every? pos? [1 2 3])", True, "checking if all elements satisfy a predicate", "whether all are positive",
+        _ex("(every? pos? [1 2 3])", True, "checking if all elements satisfy a predicate", "the result of applying every? with pos? to the vector containing 1, 2, and 3",
             goal="check if all elements in the vector containing 1, 2, and 3 are positive"),
-        _ex("(every? even? [1 2 3])", False, "checking if all elements satisfy a predicate", "whether all are even",
+        _ex("(every? even? [1 2 3])", False, "checking if all elements satisfy a predicate", "the result of applying every? with even? to the vector containing 1, 2, and 3",
             goal="check if all elements in the vector containing 1, 2, and 3 are even"),
     ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G5)
 
@@ -233,10 +233,10 @@ G5_20 = SubjectCurriculum(grade=5, subject_id="G5-20",
     subject_title="take and drop", fable="tortoise-hare",
     examples=[
         _ex("(take 3 [10 20 30 40 50])", [10,20,30],
-            "taking elements from a sequence", "the first three elements",
+            "taking elements from a sequence", "the sequence produced by taking 3 elements from the vector containing 10, 20, 30, 40, and 50",
             goal="take the first 3 elements from the vector containing 10, 20, 30, 40, and 50"),
         _ex("(drop 2 [10 20 30 40 50])", [30,40,50],
-            "dropping elements from a sequence", "all but the first two",
+            "dropping elements from a sequence", "the sequence produced by dropping 2 elements from the vector containing 10, 20, 30, 40, and 50",
             goal="drop the first 2 elements from the vector containing 10, 20, 30, 40, and 50"),
     ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G5)
 
@@ -245,10 +245,10 @@ G5_21 = SubjectCurriculum(grade=5, subject_id="G5-21",
     subject_title="distinct and sort", fable="tortoise-hare",
     examples=[
         _ex("(distinct [1 1 2 3 3 4])", [1,2,3,4],
-            "removing duplicates from a sequence", "the deduplicated seq",
+            "removing duplicates from a sequence", "the sequence produced by applying distinct to the vector containing 1, 1, 2, 3, 3, and 4",
             goal="remove duplicate elements from the vector containing 1, 1, 2, 3, 3, and 4"),
         _ex("(sort [3 1 2])", [1,2,3],
-            "sorting a sequence", "the sorted seq",
+            "sorting a sequence", "the sequence produced by applying sort to the vector containing 3, 1, and 2",
             goal="sort the vector containing 3, 1, and 2 in ascending order"),
     ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G5)
 

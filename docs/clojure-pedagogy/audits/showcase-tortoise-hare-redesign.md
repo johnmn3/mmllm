@@ -15,8 +15,12 @@ to end. Two kinds of subject coexist:
 
 Each row below is one record sampled at a per-subject seed,
 so successive rows pick different subplot templates from the
-8-template `_GOAL_SUBPLOTS` (or 8-template `_SHARED_SUBPLOTS`
+12-template `_GOAL_SUBPLOTS` (or 8-template `_SHARED_SUBPLOTS`
 for atoms) — to show that the same subject renders many ways.
+Four of the 12 goal templates carry actual fable beats: Hare
+hurries and stumbles; Tortoise writes the form patiently and
+the REPL returns the value the steady way. The lesson lands
+inside the prompt rather than being a backdrop to it.
 
 ---
 
@@ -27,18 +31,17 @@ _L1 atom — a literal evaluates to itself_  •  **atom** — form-display inte
 **form**: `42`  •  **expected**: `42`
 
 ````text
-In that part of the forest, no one ever expected the Tortoise to outrun the Hare — yet today the question would be settled.
+The Hare loved nothing better than the sound of his own boasts; the Tortoise, nothing better than a long quiet walk.
 
-Pip the hare chalked a wager on a flat stone at the edge of the forest: whoever
-predicted the result of `42` would set the next race's
-distance. Shelly the tortoise, without complaint, said it would be simpler
-to type the form into the REPL than to bicker about the value 42.
+A small audience of forest creatures had gathered at the edge of the meadow to watch
+Whisker the hare attempt to outwit Mossback the tortoise at reading the REPL.
+Mossback pointed to the value 42 and read out the form aloud:
+`42`. The crowd waited to see who would correctly write
+the form to submit.
 
-What Clojure form computes the value of 42? Submit it via `eval`.
+Write a form whose evaluation gives the value of 42.
 
 ---
-
-Here's the calculation.
 
 {"tool_calls":[{"name":"eval","args":{"form":"42"}}]}
 ````
@@ -52,19 +55,17 @@ _L1 atom — a keyword evaluates to itself_  •  **atom** — form-display inte
 **form**: `:hare`  •  **expected**: `':hare'`
 
 ````text
-The Hare and the Tortoise had argued for as long as anyone could remember about who was truly the swifter.
+There was once a Hare whose pride was as quick as her feet, and a Tortoise who said nothing about either.
 
-"There is no need to evaluate that," Bramble the hare said, as if the race were already won.
-"Anyone can see what the keyword :hare comes to." Mossback the tortoise, who
-atop the hilltop had grown used to such claims, asked her to actually
-write the form `:hare` and submit it to the REPL — just to be
-sure.
+Shelly the tortoise had been trying to teach Bramble the hare how the REPL
+works. "Look here," she said, pointing to
+the keyword :hare. "You hand the form `:hare` to the runtime, and
+the runtime hands you back what it evaluates to." Bramble, weary from the morning's effort,
+agreed to try.
 
 Write a Clojure expression that computes the value of :hare.
 
 ---
-
-I'll express the answer as a Clojure form.
 
 {"tool_calls":[{"name":"eval","args":{"form":":hare"}}]}
 ````
@@ -78,18 +79,19 @@ _first non-atom: predicate/equality on quoted symbols_  •  **goal** — no for
 **form**: `(symbol? 'hare)`  •  **expected**: `True`
 
 ````text
-The Hare and the Tortoise had argued for as long as anyone could remember about who was truly the swifter.
+In that part of the forest, no one ever expected the Tortoise to outrun the Hare — yet today the question would be settled.
 
-Slowpoke the tortoise had been teaching Whisker the hare how to translate a
-goal into a Clojure form. "If you want to ask whether a quoted name is a symbol, using the symbol? predicate," he
-said, "you write the symbol-predicate on a quoted name and submit it; the REPL hands you
-back the value." Whisker, lulled by the gentle wind, agreed to try writing it.
+"There is no challenge here," Hopper the hare said, with great whoops of laughter.
+"Anyone could ask whether a quoted name is a symbol, using the symbol? predicate without thinking." Mossback the tortoise,
+who by the orchard had grown used to such claims, asked him to
+actually write the symbol-predicate on a quoted name, then submit it to the REPL —
+just to be sure.
 
-Write a form whose evaluation gives whether a quoted name is a symbol.
+Question: write a Clojure expression for whether a quoted name is a symbol.
 
 ---
 
-I express the form as Clojure source.
+I write the form and let the REPL evaluate it.
 
 {"tool_calls":[{"name":"eval","args":{"form":"(symbol? 'hare)"}}]}
 ````
@@ -105,17 +107,15 @@ _L2 application — first arithmetic call_  •  **goal** — no form leak
 ````text
 The Hare and the Tortoise had argued for as long as anyone could remember about who was truly the swifter.
 
-Halfway through the race, Bramble the hare stopped by the garden and refused
-to continue until someone could write a form to add 1 and 2.
-Bramble called the goal impossible. Slowpoke the tortoise, walking up at
-his usual pace, simply said: "Write the addition
-and submit it. Whatever comes back is the answer."
+Shelly the tortoise kept a small leather notebook of every goal
+she had translated into a Clojure form. Today near the woods,
+the next entry was a goal: add 1 and 2. Shelly sat with pen in
+hand, ready to compose the addition, then let the REPL
+confirm the value.
 
-What Clojure form computes the sum of 1 and 2? Submit it via `eval`.
+Write a form whose evaluation gives the sum of 1 and 2.
 
 ---
-
-Let me work that out.
 
 {"tool_calls":[{"name":"eval","args":{"form":"(+ 1 2)"}}]}
 ````
@@ -129,19 +129,22 @@ _L2 application — nested evaluation_  •  **goal** — no form leak
 **form**: `(+ 1 (* 2 3))`  •  **expected**: `7`
 
 ````text
-In that part of the forest, no one ever expected the Tortoise to outrun the Hare — yet today the question would be settled. It happened by the garden.
+The Hare loved nothing better than the sound of his own boasts; the Tortoise, nothing better than a long quiet walk. All this took place at the edge of the meadow.
 
-Pip the hare and Mossback the tortoise stopped near the garden to settle a small
-puzzle. Pip wanted to add 1 to the product of 2 and 3. Pip, swaggering through the underbrush, declared
-that they could write the form for it without thinking.
-Mossback, saying very little, suggested they actually write
-the nested computation carefully and let the REPL confirm what it returned.
+"You always insist on writing it out," Pip the hare complained,
+puffed up with pride. "I can see the answer from here." Shelly the tortoise
+shook her head slowly. "To add 1 to the product of 2 and 3, the eye is
+no help — only the form is. Watch." She wrote
+the nested computation in careful strokes, submitted it to the REPL,
+and let the returned value speak for itself. Pip, with legs heavy from sprinting,
+admitted that this time, again, the patient way had carried the
+day.
 
-Question: write a Clojure expression for the sum of 1 with the product of 2 and 3.
+Write a form whose evaluation gives the sum of 1 with the product of 2 and 3.
 
 ---
 
-I let the REPL do the evaluation.
+I write the form and let the REPL evaluate it.
 
 {"tool_calls":[{"name":"eval","args":{"form":"(+ 1 (* 2 3))"}}]}
 ````
@@ -155,19 +158,20 @@ _multi-arg arithmetic_  •  **goal** — no form leak
 **form**: `(+ 1 2 3 4)`  •  **expected**: `10`
 
 ````text
-There was once a Hare whose pride was as quick as her feet, and a Tortoise who said nothing about either.
+In that part of the forest, no one ever expected the Tortoise to outrun the Hare — yet today the question would be settled.
 
-A small audience of forest creatures had gathered in the orchard to watch
-Bramble the hare attempt to outwit Mossback the tortoise at writing the
-right form. The challenge: add 1, 2, 3, and 4. Mossback reminded the
-crowd that what mattered was the multi-arg sum, written carefully
-and submitted to the REPL.
+"You always insist on writing it out," Whisker the hare complained,
+puffed up with pride. "I can see the answer from here." Shelly the tortoise
+shook her head slowly. "To add 1, 2, 3, and 4, the eye is
+no help — only the form is. Watch." She wrote
+the multi-arg sum in careful strokes, submitted it to the REPL,
+and let the returned value speak for itself. Whisker, lulled by the gentle wind,
+admitted that this time, again, the patient way had carried the
+day.
 
-Write a Clojure expression that computes the sum of 1, 2, 3, and 4.
+Write a form whose evaluation gives the sum of 1, 2, 3, and 4.
 
 ---
-
-I'll express the answer as a Clojure form.
 
 {"tool_calls":[{"name":"eval","args":{"form":"(+ 1 2 3 4)"}}]}
 ````
@@ -181,17 +185,19 @@ _and/or short-circuit, return values_  •  **goal** — no form leak
 **form**: `(and true true)`  •  **expected**: `True`
 
 ````text
-In that part of the forest, no one ever expected the Tortoise to outrun the Hare — yet today the question would be settled.
+The Hare loved nothing better than the sound of his own boasts; the Tortoise, nothing better than a long quiet walk.
 
-"There is no challenge here," Hopper the hare said, with great whoops of laughter.
-"To test true and true with the and operator is something anyone could write." Mossback the tortoise,
-who near the road had grown used to such claims, asked him to
-actually write the logical and and submit it to the REPL — just to
-be sure.
+Halfway through the race, Hopper the hare stopped in the woods and refused
+to continue until someone could test true and true with the and operator with a Clojure form.
+Hopper called the goal impossible. Shelly the tortoise, walking up at
+her usual pace, simply said: "Compose the logical and;
+submit it. Whatever comes back is the answer."
 
-Write a form whose evaluation gives the result of true and true.
+Write a Clojure expression that computes the result of using and on true and true.
 
 ---
+
+I let the REPL do the evaluation.
 
 {"tool_calls":[{"name":"eval","args":{"form":"(and true true)"}}]}
 ````
@@ -205,17 +211,20 @@ _falsey rule (only false and nil are falsey)_  •  **goal** — no form leak
 **form**: `(if 0 1 0)`  •  **expected**: `1`
 
 ````text
-There was once a Hare whose pride was as quick as her feet, and a Tortoise who said nothing about either.
+It was well known among the animals that the Hare boasted of his speed at every chance. It happened near the hilltop.
 
-Halfway through the race, Pip the hare stopped at the edge of the orchard and refused
-to continue until someone could write a form to write an if where the condition is 0, the then-branch is 1, and the else-branch is 0.
-Pip called the goal impossible. Slowpoke the tortoise, walking up at
-his usual pace, simply said: "Write the if conditional with zero as condition
-and submit it. Whatever comes back is the answer."
+A small audience of forest creatures had gathered at the edge of the hilltop to watch
+Bramble the hare attempt to outwit Shelly the tortoise at writing the
+right form. The challenge: use if to return 1 when the condition is 0 (then-branch) and 0 otherwise (else-branch). Shelly reminded the
+crowd that what mattered was writing the if conditional with zero as condition carefully,
+then submitting it to the REPL — not guessing aloud at the
+answer.
 
-Write a form whose evaluation gives which branch the if takes when the condition is 0.
+What Clojure form computes the result of if with condition 0, then-branch 1, else-branch 0? Submit it via `eval`.
 
 ---
+
+Let me work that out.
 
 {"tool_calls":[{"name":"eval","args":{"form":"(if 0 1 0)"}}]}
 ````
@@ -229,19 +238,17 @@ _string length and substring_  •  **goal** — no form leak
 **form**: `(count "tortoise")`  •  **expected**: `8`
 
 ````text
-The Hare loved nothing better than the sound of his own boasts; the Tortoise, nothing better than a long quiet walk.
+There was once a Hare whose pride was as quick as her feet, and a Tortoise who said nothing about either.
 
-Halfway through the race, Bramble the hare stopped atop the hilltop and refused
-to continue until someone could write a form to count the characters in the string tortoise.
-Bramble called the goal impossible. Slowpoke the tortoise, walking up at
-his usual pace, simply said: "Write the count of characters in a string
-and submit it. Whatever comes back is the answer."
+Shelly the tortoise had been teaching Pip the hare how to translate a
+goal into a Clojure form. "If you want to count the characters in the string tortoise," she
+said, "you write the count of characters in a string; submit that to the REPL, and it
+hands you back the value." Pip, yawning at the soft moss, agreed to try
+writing it.
 
-Write a Clojure expression that computes the length of an eight-letter string.
+Write a form whose evaluation gives the result of using count on the string tortoise.
 
 ---
-
-I write the form and let the REPL evaluate it.
 
 {"tool_calls":[{"name":"eval","args":{"form":"(count \"tortoise\")"}}]}
 ````
@@ -255,19 +262,16 @@ _let local binding_  •  **goal** — no form leak
 **form**: `(let [x 3] (+ x 1))`  •  **expected**: `4`
 
 ````text
-It was well known among the animals that the Hare boasted of his speed at every chance.
+There was once a Hare whose pride was as quick as her feet, and a Tortoise who said nothing about either.
 
-A small audience of forest creatures had gathered at the edge of the orchard to watch
-Pip the hare attempt to outwit Shelly the tortoise at writing the
-right form. The challenge: bind x to 3 and add 1 to it. Shelly reminded the
-crowd that what mattered was the local binding and addition, written carefully
-and submitted to the REPL.
+Shelly the tortoise kept a small ledger in the garden where every meaningful
+quantity got its own name. She pointed to today's
+entry, which required bind x to 3 and add 1 to it. She would write
+the local binding and addition and let the REPL confirm.
 
-What Clojure form computes the result of adding 1 to the bound x? Submit it via `eval`.
+Write a form whose evaluation gives adding 1 to x after binding x locally to 3 via let.
 
 ---
-
-Time to write the form.
 
 {"tool_calls":[{"name":"eval","args":{"form":"(let [x 3] (+ x 1))"}}]}
 ````
@@ -281,19 +285,19 @@ _assoc — map update_  •  **goal** — no form leak
 **form**: `(assoc {:a 1} :b 2)`  •  **expected**: `{':a': 1, ':b': 2}`
 
 ````text
-In that part of the forest, no one ever expected the Tortoise to outrun the Hare — yet today the question would be settled.
+The Hare and the Tortoise had argued for as long as anyone could remember about who was truly the swifter. All this took place by the woods.
 
-Halfway through the race, Pip the hare stopped by the forest and refused
-to continue until someone could write a form to associate the key :b with value 2 onto a map binding :a to 1.
-Pip called the goal impossible. Mossback the tortoise, walking up at
-his usual pace, simply said: "Write the assoc operation
-and submit it. Whatever comes back is the answer."
+Halfway through the race, Bramble the hare stopped by the woods and refused
+to continue until someone could associate the key :b with value 2 onto a map binding :a to 1 with a Clojure form.
+Bramble called the goal impossible. Slowpoke the tortoise, walking up at
+his usual pace, simply said: "Compose the assoc operation;
+submit it. Whatever comes back is the answer."
 
-Write a form whose evaluation gives the map after update.
+Question: write a Clojure expression for the map after using assoc to add the key :b with value 2.
 
 ---
 
-Here's the calculation.
+I submit the form to the REPL via the eval tool.
 
 {"tool_calls":[{"name":"eval","args":{"form":"(assoc {:a 1} :b 2)"}}]}
 ````
@@ -307,19 +311,17 @@ _reduce — fold over a sequence_  •  **goal** — no form leak
 **form**: `(reduce + [1 2 3 4])`  •  **expected**: `10`
 
 ````text
-There was once a Hare whose pride was as quick as her feet, and a Tortoise who said nothing about either. All this took place in the forest.
+In that part of the forest, no one ever expected the Tortoise to outrun the Hare — yet today the question would be settled.
 
-A wooden sign nailed to a tree in the forest carried a small puzzle. The
-challenge was simple: fold + over the vector containing 1, 2, 3, and 4, summing them. Whisker laughed, with a smug grin, and
-declared it too easy. Mossback said patiently that the only way to
-be sure of the fold operation was to write the form and put it in the
-REPL.
+Mossback the tortoise had been teaching Pip the hare how to translate a
+goal into a Clojure form. "If you want to fold + over the vector containing 1, 2, 3, and 4, summing them," he
+said, "you write the fold operation; submit that to the REPL, and it
+hands you back the value." Pip, with legs heavy from sprinting, agreed to try
+writing it.
 
-What Clojure form computes the sum? Submit it via `eval`.
+Write a form whose evaluation gives the sum produced by reducing + over the vector containing 1, 2, 3, and 4.
 
 ---
-
-Here's the calculation.
 
 {"tool_calls":[{"name":"eval","args":{"form":"(reduce + [1 2 3 4])"}}]}
 ````
@@ -333,18 +335,20 @@ _require — pulling code in_  •  **goal** — no form leak
 **form**: `(clojure.string/upper-case "hare")`  •  **expected**: `'HARE'`
 
 ````text
-There was once a Hare whose pride was as quick as her feet, and a Tortoise who said nothing about either. This was by the garden.
+The Hare and the Tortoise had argued for as long as anyone could remember about who was truly the swifter. This was near the hilltop.
 
-Mossback the tortoise kept a small leather notebook of every goal
-he had translated into a Clojure form. Today at the edge of the garden,
-the next entry was a goal: call the uppercasing function from clojure.string on a test string. Mossback sat with pen in
-hand, ready to write calling a fully-qualified string function and let the REPL confirm.
+Hopper the hare and Slowpoke the tortoise stopped at the edge of the hilltop to settle a small
+puzzle. Hopper wanted to call the uppercasing function from clojure.string on a test string. Hopper, puffed up with pride, declared
+that he could write the form for it without thinking.
+Slowpoke, with eyes always on the path, suggested he actually write
+calling a fully-qualified string function carefully — and then let the REPL confirm what
+the value really was.
 
-Question: write a Clojure expression for the result of calling a string transformation function.
+Write a Clojure expression that computes the uppercase form of the string hare produced by clojure.string/upper-case.
 
 ---
 
-Let me work that out.
+I use the fully-qualified name to reach the var.
 
 {"tool_calls":[{"name":"eval","args":{"form":"(clojure.string/upper-case \"hare\")"}}]}
 ````
@@ -355,22 +359,25 @@ Let me work that out.
 
 _try / catch_  •  **goal** — no form leak
 
-**form**: `(try (/ 1 0) (catch Exception e :caught))`  •  **expected**: `':caught'`
+**form**: `(try (/ 1 0) (catch Exception e -1))`  •  **expected**: `-1`
 
 ````text
-The Hare loved nothing better than the sound of his own boasts; the Tortoise, nothing better than a long quiet walk.
+The Hare and the Tortoise had argued for as long as anyone could remember about who was truly the swifter.
 
-Halfway through the race, Hopper the hare stopped by the forest and refused
-to continue until someone could write a form to divide 1 by 0 and catch the resulting exception, returning a keyword.
-Hopper called the goal impossible. Shelly the tortoise, walking up at
-her usual pace, simply said: "Write the handler for a division-by-zero error
-and submit it. Whatever comes back is the answer."
+Hopper the hare and Shelly the tortoise stopped by the woods to settle a small
+puzzle. Hopper wanted to divide 1 by 0, catch the resulting ArithmeticException, return a numeric code. Hopper, with great whoops of laughter, declared
+that he could write the form for it without thinking.
+Shelly, with eyes always on the path, suggested he actually write
+the handler for a division-by-zero error carefully — and then let the REPL confirm what
+the value really was.
 
-Write a Clojure expression that computes what the handler returns when division by zero occurs.
+What Clojure form computes what the catch clause returns when ArithmeticException is caught? Submit it via `eval`.
 
 ---
 
-{"tool_calls":[{"name":"eval","args":{"form":"(try (/ 1 0) (catch Exception e :caught))"}}]}
+I write the literal value as Clojure source.
+
+{"tool_calls":[{"name":"eval","args":{"form":"(try (/ 1 0) (catch Exception e -1))"}}]}
 ````
 
 ---
@@ -382,15 +389,15 @@ _Protocol definition_  •  **goal** — no form leak
 **form**: `(do (defprotocol Pace (speed [this])) (some? Pace))`  •  **expected**: `True`
 
 ````text
-In that part of the forest, no one ever expected the Tortoise to outrun the Hare — yet today the question would be settled. It happened at the edge of the forest.
+In that part of the forest, no one ever expected the Tortoise to outrun the Hare — yet today the question would be settled.
 
-Hopper the hare and Mossback the tortoise stopped near the forest to settle a small
-puzzle. Hopper wanted to define a protocol named Pace with one method speed that takes a single argument this. Hopper, swaggering through the underbrush, declared
-that he could write the form for it without thinking.
-Mossback, without complaint, suggested he actually write
-a protocol definition carefully and let the REPL confirm what it returned.
+Slowpoke the tortoise kept a small leather notebook of every goal
+he had translated into a Clojure form. Today on the hilltop,
+the next entry was a goal: define a protocol named Pace with one method speed that takes a single argument this. Slowpoke sat with pen in
+hand, ready to compose a protocol definition, then let the REPL
+confirm the value.
 
-Question: write a Clojure expression for whether it was established.
+Write a Clojure expression that computes whether the protocol var Pace is truthy after defining a protocol named Pace with one method speed taking a single argument this.
 
 ---
 
@@ -406,19 +413,17 @@ _Atom — coordinated mutable state_  •  **goal** — no form leak
 **form**: `(do (def a (atom 0)) (swap! a inc) @a)`  •  **expected**: `1`
 
 ````text
-There was once a Hare whose pride was as quick as her feet, and a Tortoise who said nothing about either.
+In that part of the forest, no one ever expected the Tortoise to outrun the Hare — yet today the question would be settled.
 
-A wooden sign nailed to a tree in the orchard carried a small puzzle. The
-challenge was simple: construct an atom holding 0, atomically swap it by applying inc, and dereference the result. Bramble laughed, swaggering through the underbrush, and
-declared it too easy. Mossback said patiently that the only way to
-be sure of constructing an atom holding 0, atomically swapping by applying inc, and dereferencing was to write the form and put it in the
-REPL.
+Halfway through the race, Whisker the hare stopped along the road and refused
+to continue until someone could construct an atom holding 0, atomically swap it by applying inc, and dereference the result with a Clojure form.
+Whisker called the goal impossible. Mossback the tortoise, walking up at
+his usual pace, simply said: "Compose atom, swap, and deref;
+submit it. Whatever comes back is the answer."
 
-Question: write a Clojure expression for the value after atomically swapping a by applying inc.
+What Clojure form computes the value returned by dereferencing a after defining a as an atom holding 0 and swapping it via inc? Submit it via `eval`.
 
 ---
-
-Let me compute that.
 
 {"tool_calls":[{"name":"eval","args":{"form":"(do (def a (atom 0)) (swap! a inc) @a)"}}]}
 ````
@@ -429,21 +434,22 @@ Let me compute that.
 
 _defmacro introduction_  •  **goal** — no form leak
 
-**form**: `(do (defmacro my-when [t & body] `(if ~t (do ~@body))) (my-when true 1 2 3))`  •  **expected**: `3`
+**form**: `` (do (defmacro my-when [t & body] `(if ~t (do ~@body))) (my-when true 1 2 3)) ``  •  **expected**: `3`
 
 ````text
-In that part of the forest, no one ever expected the Tortoise to outrun the Hare — yet today the question would be settled.
+The Hare loved nothing better than the sound of his own boasts; the Tortoise, nothing better than a long quiet walk. All this took place by the forest.
 
-Shelly the tortoise had been teaching Whisker the hare how to translate a
-goal into a Clojure form. "If you want to define a macro named my-when that takes a test and body expressions, then invoke it," she
-said, "you write defining a conditional macro and invoking it and submit it; the REPL hands you
-back the value." Whisker, drowsy from the warm sun, agreed to try writing it.
+Bramble the hare insisted at the edge of the forest that macros were the same as functions.
+Shelly the tortoise, untroubled by what others thought, sketched defining a conditional macro and invoking it on a
+strip of bark. "The difference," she said, "is in what
+we're trying to accomplish: define a macro named my-when that takes a test and body expressions, then invoke it. Write the form and let the
+runtime tell us exactly what it does."
 
-Write a form whose evaluation gives the value produced by calling the macro.
+What Clojure form computes the value returned when my-when expands to an if-do block that runs the body with test true? Submit it via `eval`.
 
 ---
 
-I'll express the answer as a Clojure form.
+I write the macro form and let the runtime evaluate or expand it.
 
 {"tool_calls":[{"name":"eval","args":{"form":"(do (defmacro my-when [t & body] `(if ~t (do ~@body))) (my-when true 1 2 3))"}}]}
 ````
@@ -457,16 +463,19 @@ _Method call syntax_  •  **goal** — no form leak
 **form**: `(.toUpperCase "abc")`  •  **expected**: `'ABC'`
 
 ````text
-The Hare loved nothing better than the sound of his own boasts; the Tortoise, nothing better than a long quiet walk.
+The Hare loved nothing better than the sound of his own boasts; the Tortoise, nothing better than a long quiet walk. This was near the woods.
 
-Mossback the tortoise had been teaching Whisker the hare how to translate a
-goal into a Clojure form. "If you want to call the host method toUpperCase on the string abc," he
-said, "you write the host method toUpperCase and submit it; the REPL hands you
-back the value." Whisker, drowsy from the warm sun, agreed to try writing it.
+A wooden sign nailed to a tree by the woods carried a small puzzle. The
+challenge was simple: call the host method toUpperCase on the string abc. Bramble laughed, puffed up with pride, and
+declared it too easy. Mossback said patiently that the only way
+to be sure of the host method toUpperCase was to write the form and put it
+in the REPL — not to guess at the value from the goal alone.
 
-Write a form whose evaluation gives the uppercased result.
+What Clojure form computes the uppercase form of the string abc produced by the host method toUpperCase via dot-prefix syntax? Submit it via `eval`.
 
 ---
+
+I use the dot or slash form for the host method, then submit.
 
 {"tool_calls":[{"name":"eval","args":{"form":"(.toUpperCase \"abc\")"}}]}
 ````
@@ -480,19 +489,23 @@ _Transducers introduction_  •  **goal** — no form leak
 **form**: `(into [] (map inc) [1 2 3])`  •  **expected**: `[2, 3, 4]`
 
 ````text
-The Hare loved nothing better than the sound of his own boasts; the Tortoise, nothing better than a long quiet walk. This was near the hilltop.
+There was once a Hare whose pride was as quick as her feet, and a Tortoise who said nothing about either. This was along the road.
 
-Halfway through the race, Whisker the hare stopped at the edge of the hilltop and refused
-to continue until someone could write a form to use the map-inc transducer with into to increment the vector containing 1, 2, 3.
-Whisker called the goal impossible. Mossback the tortoise, walking up at
-his usual pace, simply said: "Write the map-inc transducer applied via into
-and submit it. Whatever comes back is the answer."
+"This is nothing," Pip the hare scoffed, swaggering through the underbrush. "I can
+use the map-inc transducer with into to increment the vector containing 1, 2, 3 in my sleep." Pip grabbed a stick and dashed off a
+few characters in the dust — but a paren went missing, an operand
+fell out of place, and the form did not even read as Clojure.
+Slowpoke the tortoise, with eyes always on the path, had already written
+the map-inc transducer applied via into on a flat stone, neat and unhurried, and
+submitted it to the REPL. The value came back as quietly as
+he had written. The hares of the meadow looked
+between the two slates: only his had run.
 
-Write a form whose evaluation gives the result of incrementing elements from the vector.
+What Clojure form computes the vector produced by reifying the map-inc transducer into an empty vector via into, applied to the vector containing 1, 2, 3? Submit it via `eval`.
 
 ---
 
-Let me compute that.
+I let the REPL do the evaluation.
 
 {"tool_calls":[{"name":"eval","args":{"form":"(into [] (map inc) [1 2 3])"}}]}
 ````

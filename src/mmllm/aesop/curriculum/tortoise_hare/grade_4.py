@@ -118,10 +118,10 @@ G4_08 = SubjectCurriculum(grade=4, subject_id="G4-08",
     subject_title="assoc — map update", fable="tortoise-hare",
     examples=[
         _ex("(assoc {:a 1} :b 2)", {":a": 1, ":b": 2},
-            "the assoc operation", "the map after update",
+            "the assoc operation", "the map after using assoc to add the key :b with value 2",
             goal="associate the key :b with value 2 onto a map binding :a to 1"),
         _ex("(assoc {:a 1} :a 99)", {":a": 99},
-            "the assoc operation", "the map after update",
+            "the assoc operation", "the map after using assoc to change the key :a to value 99",
             goal="update the key :a to value 99 in a map that binds :a to 1"),
     ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G4)
 
@@ -130,7 +130,7 @@ G4_09 = SubjectCurriculum(grade=4, subject_id="G4-09",
     subject_title="dissoc — map remove key", fable="tortoise-hare",
     examples=[
         _ex("(dissoc {:a 1 :b 2} :a)", {":b": 2},
-            "the dissoc operation", "the map without the key",
+            "the dissoc operation", "the map after using dissoc to remove a key",
             goal="remove the key :a from a map binding :a to 1 and :b to 2"),
     ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G4)
 
@@ -157,9 +157,9 @@ G4_11 = SubjectCurriculum(grade=4, subject_id="G4-11",
 G4_12 = SubjectCurriculum(grade=4, subject_id="G4-12",
     subject_title="Set membership", fable="tortoise-hare",
     examples=[
-        _ex("(contains? #{1 2 3} 2)", True, "testing set membership", "whether 2 is in the set",
+        _ex("(contains? #{1 2 3} 2)", True, "testing set membership", "whether an element is in the set using contains?",
             goal="check whether 2 is a member of a set containing 1, 2, and 3"),
-        _ex("(contains? #{1 2 3} 4)", False, "testing set membership", "whether 4 is in the set",
+        _ex("(contains? #{1 2 3} 4)", False, "testing set membership", "whether an element is in the set using contains?",
             goal="check whether 4 is a member of a set containing 1, 2, and 3"),
     ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G4)
 
@@ -167,13 +167,13 @@ G4_12 = SubjectCurriculum(grade=4, subject_id="G4-12",
 G4_13 = SubjectCurriculum(grade=4, subject_id="G4-13",
     subject_title="count — universal", fable="tortoise-hare",
     examples=[
-        _ex("(count [1 2 3 4 5])", 5, "the count of a collection", "the count",
+        _ex("(count [1 2 3 4 5])", 5, "the count of a collection", "the number of elements in the collection",
             goal="count the elements in a vector containing 1, 2, 3, 4, and 5"),
-        _ex("(count {:a 1 :b 2})", 2, "the count of a collection", "the count",
+        _ex("(count {:a 1 :b 2})", 2, "the count of a collection", "the number of entries in the collection",
             goal="count the key-value pairs in a map"),
-        _ex("(count #{:a :b :c})", 3, "the count of a collection", "the count",
+        _ex("(count #{:a :b :c})", 3, "the count of a collection", "the number of elements in the collection",
             goal="count the elements in a set containing the keywords :a, :b, and :c"),
-        _ex("(count \"tortoise\")", 8, "the length of a string", "the string length",
+        _ex("(count \"tortoise\")", 8, "the length of a string", "the number of characters in the string",
             goal="count the characters in the string tortoise"),
     ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G4)
 
@@ -181,11 +181,11 @@ G4_13 = SubjectCurriculum(grade=4, subject_id="G4-13",
 G4_14 = SubjectCurriculum(grade=4, subject_id="G4-14",
     subject_title="empty?", fable="tortoise-hare",
     examples=[
-        _ex("(empty? [])",   True,  "checking if a collection is empty",   "whether the vector is empty",
+        _ex("(empty? [])",   True,  "checking if a collection is empty",   "whether the collection is empty",
             goal="test whether an empty vector is empty"),
-        _ex("(empty? [1])",  False, "checking if a collection is empty",  "whether the vector is empty",
+        _ex("(empty? [1])",  False, "checking if a collection is empty",  "whether the collection is empty",
             goal="test whether a vector containing 1 is empty"),
-        _ex("(empty? \"\")", True,  "checking if a string is empty", "whether the string is empty",
+        _ex("(empty? \"\")", True,  "checking if a string is empty", "whether the string is empty using empty?",
             goal="test whether an empty string is empty"),
     ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G4)
 

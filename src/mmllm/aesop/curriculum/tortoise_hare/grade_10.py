@@ -136,11 +136,11 @@ G10_03 = SubjectCurriculum(
         _ex("(do (defmacro my-when [t & body] `(if ~t (do ~@body))) "
             "(my-when true 1 2 3))", 3,
             "defining a conditional macro and invoking it",
-            "the value produced by calling the macro",
+            "the value returned when my-when expands to an if-do block that runs the body with test true",
             goal="define a macro named my-when that takes a test and body expressions, then invoke it"),
         _ex("(do (defmacro twice [x] `(do ~x ~x)) (twice 7))", 7,
             "defining a macro that repeats its argument",
-            "the result after the macro expands and evaluates",
+            "the value returned by twice expanding to a do-block with the unquoted argument repeated",
             goal="define a macro named twice that emits its argument twice in a do block, then call it"),
     ],
     subplots=_MACRO_SUBPLOTS, plan_pool=_PLAN_G10,
@@ -242,11 +242,11 @@ G10_08 = SubjectCurriculum(
         # A function evaluates its args; a macro receives unevaluated forms.
         _ex("(do (defn add-fn [a b] (+ a b)) (add-fn 3 4))", 7,
             "calling a plain function that adds two numbers",
-            "the sum returned by the function",
+            "the sum returned by calling add-fn with arguments 3 and 4",
             goal="define a function add-fn and call it to add 3 and 4"),
         _ex("(do (defmacro add-mac [a b] `(+ ~a ~b)) (add-mac 3 4))", 7,
             "calling a macro that emits an addition form",
-            "the result after the macro expands and evaluates",
+            "the sum returned when add-mac expands to an addition of the unquoted arguments",
             goal="define a macro add-mac and call it to add 3 and 4"),
     ],
     subplots=_MACRO_SUBPLOTS, plan_pool=_PLAN_G10,
@@ -285,7 +285,7 @@ G10_10 = SubjectCurriculum(
             "`(if-let ~bind ~then ~else)) "
             "(safe-if-let [x 5] (* x 2) 0))", 10,
             "defining and calling a hygienic if-let macro",
-            "the result when the binding succeeds",
+            "the result returned when safe-if-let expands to if-let with binding [x 5] and then-branch (* x 2)",
             goal="define a safe-if-let macro and call it with x bound to 5"),
         _ex("(if-let [x 7] (* x x) 0)", 49,
             "using the built-in if-let with an explicit binding",
@@ -413,13 +413,13 @@ G10_16 = SubjectCurriculum(
             "`(let [pace# :slow-and-steady] ~@body)) "
             "(with-tortoise-pace 42))", 42,
             "defining and using a with-X macro pattern",
-            "the value from the body expression",
+            "the value returned when with-tortoise-pace expands to a let binding with the unquoted body",
             goal="define a with-tortoise-pace macro and call it to execute a body"),
         # A `def-X-thing` style: macro that defs a named thing.
         _ex("(do (defmacro def-pace [name v] `(def ~name ~v)) "
             "(def-pace race-pace :slow) race-pace)", ":slow",
             "defining and using a def-X-thing macro pattern",
-            "the value of the defined symbol",
+            "the value of the symbol defined by def-pace when expanded with the given name and keyword value",
             goal="define a def-pace macro and use it to define and retrieve a value"),
     ],
     subplots=_MACRO_SUBPLOTS, plan_pool=_PLAN_G10,

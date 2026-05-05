@@ -161,67 +161,133 @@ _PLAN_POOL: tuple[str, ...] = (
 _GOAL_SUBPLOTS: list[SubplotTemplate] = [
 
     # 1. The argument template — characters debate; goal-driven.
+    #    Fix: comma after concept_phrase to break "and" stutter when
+    #    concept_phrase ends in "and"/"or"/"not".
     SubplotTemplate("""\
 {hare_phrase} and {tortoise_phrase} stopped {place} to settle a small
 puzzle. {hare} wanted to {goal_text}. {hare}, {emo_proud}, declared
 that {hare_he_she} could write the form for it without thinking.
 {tortoise}, {emo_patient}, suggested {hare_he_she} actually write
-{concept_phrase} carefully and let the REPL confirm what it returned."""),
+{concept_phrase} carefully — and then let the REPL confirm what
+the value really was."""),
 
     # 2. The wager template — bet on writing the right form.
+    #    Fix: drop "write a form to" verb-on-verb collision; use
+    #    "produce a form whose evaluation would" (noun-clause framing).
     SubplotTemplate("""\
 At a moss-covered milestone {place}, {hare_phrase} sketched a small
-wager into the path: whoever could correctly write a form to
-{goal_text} first would win the right to set the next race.
-{tortoise_phrase}, {emo_patient}, said it was simpler to write
-{concept_phrase} carefully than to guess at it."""),
+wager into the path: whoever could produce a form whose evaluation
+would {goal_text} ahead of the other would win the right to set
+the next race. {tortoise_phrase}, {emo_patient}, said it was
+simpler to write {concept_phrase} carefully than to guess at the
+answer."""),
 
     # 3. The teacher template — Tortoise teaches goal → form.
+    #    Fix: "; submit that to the REPL" instead of "and submit it".
     SubplotTemplate("""\
 {tortoise_phrase} had been teaching {hare_phrase} how to translate a
 goal into a Clojure form. "If you want to {goal_text}," {tortoise_he_she}
-said, "you write {concept_phrase} and submit it; the REPL hands you
-back the value." {hare}, {emo_tired}, agreed to try writing it."""),
+said, "you write {concept_phrase}; submit that to the REPL, and it
+hands you back the value." {hare}, {emo_tired}, agreed to try
+writing it."""),
 
     # 4. The audience template — onlookers wait to see the form written.
     SubplotTemplate("""\
 A small audience of forest creatures had gathered {place} to watch
 {hare_phrase} attempt to outwit {tortoise_phrase} at writing the
 right form. The challenge: {goal_text}. {tortoise} reminded the
-crowd that what mattered was {concept_phrase}, written carefully
-and submitted to the REPL."""),
+crowd that what mattered was writing {concept_phrase} carefully,
+then submitting it to the REPL — not guessing aloud at the
+answer."""),
 
     # 5. The race-pause template — pause mid-race for a goal-write.
+    #    Fix: drop "write a form to {goal_text}"; reframe as
+    #    "until someone could {goal_text} with a Clojure form".
     SubplotTemplate("""\
 Halfway through the race, {hare_phrase} stopped {place} and refused
-to continue until someone could write a form to {goal_text}.
+to continue until someone could {goal_text} with a Clojure form.
 {hare} called the goal impossible. {tortoise_phrase}, walking up at
-{tortoise_his_her} usual pace, simply said: "Write {concept_phrase}
-and submit it. Whatever comes back is the answer.\""""),
+{tortoise_his_her} usual pace, simply said: "Compose {concept_phrase};
+submit it. Whatever comes back is the answer.\""""),
 
     # 6. The notebook template — Tortoise records goal/form pairs.
     SubplotTemplate("""\
 {tortoise_phrase} kept a small leather notebook of every goal
 {tortoise_he_she} had translated into a Clojure form. Today {place},
 the next entry was a goal: {goal_text}. {tortoise} sat with pen in
-hand, ready to write {concept_phrase} and let the REPL confirm."""),
+hand, ready to compose {concept_phrase}, then let the REPL
+confirm the value."""),
 
     # 7. The boast-and-rebuke template — Hare boasts; Tortoise asks
-    #    for the actual form.
+    #    for the actual form. Fix: "To X is something anyone could
+    #    write" → "anyone could do that" (drops verb-collision when
+    #    goal_text starts with a "write/compose" verb).
     SubplotTemplate("""\
 "There is no challenge here," {hare_phrase} said, {emo_proud}.
-"To {goal_text} is something anyone could write." {tortoise_phrase},
+"Anyone could {goal_text} without thinking." {tortoise_phrase},
 who {place} had grown used to such claims, asked {hare_him_her} to
-actually write {concept_phrase} and submit it to the REPL — just to
-be sure."""),
+actually write {concept_phrase}, then submit it to the REPL —
+just to be sure."""),
 
     # 8. The puzzle-on-the-path template — a sign poses the goal.
     SubplotTemplate("""\
 A wooden sign nailed to a tree {place} carried a small puzzle. The
 challenge was simple: {goal_text}. {hare} laughed, {emo_proud}, and
-declared it too easy. {tortoise} said patiently that the only way to
-be sure of {concept_phrase} was to write the form and put it in the
-REPL."""),
+declared it too easy. {tortoise} said patiently that the only way
+to be sure of {concept_phrase} was to write the form and put it
+in the REPL — not to guess at the value from the goal alone."""),
+
+    # 9. The Hare-stumbles template — Hare's hurry betrays him; the
+    #    Tortoise's careful form returns the value first. Delivers
+    #    the fable's moral (vanity vs. steadiness) directly.
+    SubplotTemplate("""\
+"This is nothing," {hare_phrase} scoffed, {emo_proud}. "I can
+{goal_text} in my sleep." {hare} grabbed a stick and dashed off a
+few characters in the dust — but a paren went missing, an operand
+fell out of place, and the form did not even read as Clojure.
+{tortoise_phrase}, {emo_patient}, had already written
+{concept_phrase} on a flat stone, neat and unhurried, and
+submitted it to the REPL. The value came back as quietly as
+{tortoise_he_she} had written. The hares of the meadow looked
+between the two slates: only {tortoise_his_her} had run."""),
+
+    # 10. The race-against-the-REPL template — wager on speed-of-
+    #     answering, Tortoise's careful path wins. Moral lands.
+    SubplotTemplate("""\
+The wager was set {place}: produce the value before the breeze had
+turned the next leaf. {hare_phrase} bolted into a flurry of
+guesses, calling out numbers and second-guessing {hare_him_her}self
+about whether the goal was to {goal_text} or something close to it.
+{tortoise_phrase}, who had simply walked to the slate and begun to
+write {concept_phrase}, finished the form, submitted it, and read
+the value off the REPL while {hare} was still arguing with the
+breeze. The race, like every other, went to the steady hand."""),
+
+    # 11. The wrong-guess-then-form template — Hare blurts a guess at
+    #     the answer (deliberately abstract — no actual value leaks),
+    #     Tortoise patiently writes the form. The point: the form
+    #     beats the guess.
+    SubplotTemplate("""\
+{hare_phrase} squinted at the goal — to {goal_text} — and blurted
+out a confident guess, {emo_proud}, as though loudness were the
+same as correctness. {tortoise_phrase} did not argue.
+{tortoise_he_she_cap} simply wrote {concept_phrase} on the path,
+submitted it to the REPL, and held up the value the runtime
+returned. The crowd compared the two, and the hare's guess was
+found wanting against the form that had actually run."""),
+
+    # 12. The patient-explanation template — Tortoise teaches, Hare
+    #     resists, the lesson takes hold by the end. Slower beat,
+    #     longer narrative; lets the moral breathe.
+    SubplotTemplate("""\
+"You always insist on writing it out," {hare_phrase} complained,
+{emo_proud}. "I can see the answer from here." {tortoise_phrase}
+shook {tortoise_his_her} head slowly. "To {goal_text}, the eye is
+no help — only the form is. Watch." {tortoise_he_she_cap} wrote
+{concept_phrase} in careful strokes, submitted it to the REPL,
+and let the returned value speak for itself. {hare}, {emo_tired},
+admitted that this time, again, the patient way had carried the
+day."""),
 ]
 
 
