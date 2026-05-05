@@ -1,7 +1,15 @@
-"""Audit the tortoise-hare K-12 curriculum (FIXED — match record to its example)."""
+"""Audit a fable's K-12 curriculum (FIXED — match record to its example).
+
+Default fable: tortoise-hare. Override with `--fable <name>` (or env var
+`FABLE_PKG`) to audit, e.g., crow-pitcher's curriculum:
+
+    python3 audit-harness.py --fable crow_pitcher
+"""
 from __future__ import annotations
 
+import argparse
 import importlib
+import os
 import re
 import sys
 from collections import Counter
@@ -11,9 +19,23 @@ sys.path.insert(0, "/home/user/mmllm/src")
 
 from mmllm.aesop.curriculum.generator import generate_subject
 
+
+# Resolve which fable's curriculum to audit. CLI > env var > default.
+_parser = argparse.ArgumentParser(add_help=False)
+_parser.add_argument("--fable", default=None,
+                      help="package name under mmllm.aesop.curriculum "
+                            "(e.g. tortoise_hare, crow_pitcher)")
+_args, _ = _parser.parse_known_args()
+FABLE_PKG = (_args.fable
+             or os.environ.get("FABLE_PKG")
+             or "tortoise_hare")
+# Hyphenated form for the audit-output filename ("tortoise_hare" → "tortoise-hare").
+FABLE_HYPHEN = FABLE_PKG.replace("_", "-")
+
 GRADE_MODULES = []
 for n in range(1, 13):
-    mod = importlib.import_module(f"mmllm.aesop.curriculum.tortoise_hare.grade_{n}")
+    mod = importlib.import_module(
+        f"mmllm.aesop.curriculum.{FABLE_PKG}.grade_{n}")
     GRADE_MODULES.append(mod)
 
 
@@ -138,7 +160,8 @@ def per_example_records(sub, example, n: int, seed: int):
 
 
 def main():
-    out = Path("/home/user/mmllm/docs/clojure-pedagogy/audits/tortoise-hare-audit.md")
+    out = Path(f"/home/user/mmllm/docs/clojure-pedagogy/audits/"
+               f"{FABLE_HYPHEN}-audit.md")
     out.parent.mkdir(parents=True, exist_ok=True)
 
     summary = Counter()
@@ -146,7 +169,7 @@ def main():
     per_grade_stats: dict[int, dict] = {}
 
     with open(out, "w") as f:
-        f.write("# Tortoise-hare curriculum audit (corrected)\n\n")
+        f.write(f"# {FABLE_HYPHEN.title()} curriculum audit (corrected)\n\n")
         f.write("Auto-generated audit — each subject's examples checked at "
                 "3 records per example, properly matched.\n\n")
         f.write("---\n\n")

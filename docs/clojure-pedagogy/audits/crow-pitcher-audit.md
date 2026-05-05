@@ -1,4 +1,4 @@
-# Tortoise-Hare curriculum audit (corrected)
+# Crow-Pitcher curriculum audit (corrected)
 
 Auto-generated audit — each subject's examples checked at 3 records per example, properly matched.
 
