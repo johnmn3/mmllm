@@ -78,33 +78,49 @@ def render_tool_catalog(catalog: tuple[dict, ...] | list[dict]) -> str:
     return "\n".join(lines)
 
 
-def system_prompt(use_eval: bool) -> str:
-    """Canonical system prompt declaring the tool catalog. Two variants:
-    answer-only (most records) or answer+eval (when the assistant uses a
-    real eval-then-answer chain)."""
-    catalog = ANSWER_AND_EVAL if use_eval else ANSWER_ONLY
+def system_prompt(use_eval: bool = True) -> str:
+    """Eval-first system prompt. When the user asks a question, the
+    model writes a Clojure expression whose evaluation produces the
+    answer, and submits it via the `eval` tool. `answer(value)` is
+    reserved for simple yes/no/string verdicts that aren't naturally
+    expressed as a form.
+
+    `use_eval=False` falls back to the answer-only catalog — used for
+    chapters whose natural output is a yes/no string answer.
+    """
+    if use_eval:
+        return (
+            "You are a tool-using assistant with access to a Clojure "
+            "evaluator. When asked a question, write a Clojure expression "
+            "whose evaluation gives the answer, and submit it via the "
+            "`eval` tool. Use `answer(value)` only for yes/no or "
+            "string verdicts that aren't naturally a form.\n\n"
+            + render_tool_catalog(ANSWER_AND_EVAL)
+        )
     return (
-        "You are a tool-using assistant. Solve the problem with Clojure code, "
-        "then submit your answer as a tool call.\n\n"
-        + render_tool_catalog(catalog)
+        "You are a tool-using assistant. Submit your final answer "
+        "directly with `answer(value)`.\n\n"
+        + render_tool_catalog(ANSWER_ONLY)
     )
 
 
-def build_tool_calls(value: Any, code_str: str, *, use_eval: bool) -> list[dict]:
-    """Build the tool-call list. Two patterns:
+def build_tool_calls(*,
+                     value:        Any,
+                     form_str:     str,
+                     prefer_eval:  bool,
+                     ) -> list[dict]:
+    """Eval-first tool-call builder. Two patterns:
 
-      Pattern A (single):  [{name: answer, args: {value}}]
-      Pattern C (chain):   [{name: eval, args: {form}}, {name: answer, args: {value}}]
-
-    Pattern B (form-as-answer-string) was rejected — JSON-native values
-    handle literals cleanly; the form-string variant overlaps with
-    pattern C and adds no signal.
+      - eval(form):  the standard pattern. The form is the Clojure
+                     expression that, when evaluated, produces the
+                     answer. Used for ~85%+ of records.
+      - answer(value): the verdict pattern. Used when the natural answer
+                       is a literal yes/no or a short string that the
+                       chapter's narrative makes more sensible to submit
+                       directly than to re-encode as a form.
     """
-    if use_eval:
-        return [
-            {"name": "eval",   "args": {"form": code_str}},
-            {"name": "answer", "args": {"value": value}},
-        ]
+    if prefer_eval:
+        return [{"name": "eval", "args": {"form": form_str}}]
     return [{"name": "answer", "args": {"value": value}}]
 
 
@@ -323,8 +339,15 @@ class Scene:
         )[0]
 
     def use_eval_chain(self) -> bool:
-        """Should this record emit eval(form) + answer(value), or just answer(value)?"""
+        """LEGACY (kept for any leftover callers). Eval-first design has
+        deprecated this — use prefer_eval / answer-only chapters instead."""
         return self.coin(0.25)
+
+    def show_reasoning(self) -> bool:
+        """Should the assistant include a short plan-only preface before
+        the tool call? About 50% of records have a one-sentence plan; the
+        rest emit just the eval call."""
+        return self.coin(0.5)
 
 
 # ─────────────────────── prose helpers ───────────────────────
@@ -352,6 +375,27 @@ def the_subject_phrase(c: ont.Character) -> str:
     if c.species == "human":
         return c.name
     return f"the {c.species}"
+
+
+def verb_for(c: ont.Character, base: str) -> str:
+    """Conjugate a verb for character `c`'s pronoun. 'eat' → 'eats' for
+    he/she, but 'eat' (plural) for they/them. Same for 'walk', 'run',
+    etc. Special-cases 'is' / 'has' irregulars."""
+    if c.gender == "n":
+        # they/them — plural agreement, base form
+        if base == "is":   return "are"
+        if base == "has":  return "have"
+        if base == "was":  return "were"
+        return base
+    # he/she — third-person singular: append 's' or 'es'
+    if base == "is":   return "is"
+    if base == "has":  return "has"
+    if base == "was":  return "was"
+    if base.endswith(("s", "x", "z", "ch", "sh")):
+        return base + "es"
+    if base.endswith("y") and len(base) > 1 and base[-2] not in "aeiou":
+        return base[:-1] + "ies"
+    return base + "s"
 
 
 def smart_pronoun(c: ont.Character, others: Iterable[ont.Character]) -> str:
@@ -392,6 +436,78 @@ def unit(n: int, singular: str, plural: str | None = None) -> str:
 def n_unit(n: int, singular: str, plural: str | None = None) -> str:
     """`n_unit(1, 'mile') -> '1 mile'`, `n_unit(3, 'mile') -> '3 miles'`."""
     return f"{n} {unit(n, singular, plural)}"
+
+
+# ─────────────────────── narrative scaffolding ───────────────────────
+
+
+def time_phrase(scene: "Scene") -> str:
+    """Atmospheric time-of-day / season opener."""
+    return scene.rng.choice((
+        "One bright morning,", "Late one summer afternoon,",
+        "Just before dawn,", "On a cold autumn day,",
+        "As the sun was setting,", "Under a wide blue sky,",
+        "On a quiet spring morning,", "On a windy day,",
+        "One foggy morning,", "After a long night of rain,",
+    ))
+
+
+def place_phrase(scene: "Scene", location: ont.Location) -> str:
+    """Short setting clause: 'in the meadow', 'at the edge of the forest', …"""
+    if location.indoor:
+        prep = scene.rng.choice(("inside", "in", "deep inside"))
+        return f"{prep} {location.article} {location.name}"
+    prep = scene.rng.choice((
+        "in", "near", "at the edge of", "across", "by",
+    ))
+    return f"{prep} {location.article} {location.name}"
+
+
+def atmosphere(scene: "Scene", location: ont.Location) -> str:
+    """One-sentence opening atmosphere — time + place + sensory detail.
+    Use as the first sentence of a chapter narrative."""
+    when = time_phrase(scene)
+    where = place_phrase(scene, location)
+    detail = scene.rng.choice((
+        f"the air was still {where}",
+        f"the wind moved softly {where}",
+        f"all was quiet {where}",
+        f"birds called overhead {where}",
+        f"long shadows stretched {where}",
+        f"sunlight filtered through the trees {where}",
+        f"a gentle breeze moved {where}",
+        f"the smell of wet earth hung {where}",
+    ))
+    return f"{when} {detail}."
+
+
+def char_intro(scene: "Scene", c: ont.Character, role_hint: str = "") -> str:
+    """One-sentence character introduction. Tries to capture flavor —
+    species/role/manner — without dictating action."""
+    if c.species == "human":
+        if role_hint:
+            return f"{c.name}, {role_hint}, was thinking carefully."
+        manner = scene.rng.choice((
+            "stepped along the path",
+            "stopped to look around",
+            "set out on errand",
+            "walked under the open sky",
+        ))
+        return f"{c.name} {manner}."
+    adj = scene.rng.choice((
+        "clever", "patient", "thoughtful", "quick", "curious",
+        "wary", "weary", "hungry", "watchful",
+    ))
+    return f"{adj.capitalize()} {c.name} the {c.species} was nearby."
+
+
+def question_phrase(scene: "Scene", what: str) -> str:
+    """Phrase the closing challenge. Half the time uses an explicit
+    'write a Clojure form' framing, half the time uses a plain question
+    — the model learns both map onto the same eval-call output."""
+    if scene.coin(0.5):
+        return f"Write a Clojure expression that computes {what}."
+    return f"Question: {what}?"
 
 
 # ─────────────────────── render helpers ───────────────────────
@@ -476,78 +592,54 @@ def render_tool_calls(calls: list[dict]) -> str:
                       ensure_ascii=False, separators=(",", ":"))
 
 
-# Synonym pool: short generic prefaces for the 'fixed' preface style.
-# The 'narrative' style uses a chapter-specific explanation instead.
-FIXED_PREFACES: tuple[str, ...] = (
-    "Let me work this out.",
-    "Let me solve this step by step.",
-    "Here's how I'd compute it.",
-    "Let me trace through the math.",
-    "Working through this carefully.",
-    "I'll figure this out.",
-    "Time to compute the answer.",
-    "Stepping through the calculation.",
-    "Let me think through this.",
-)
-
-
-# Optional opener prefix glued in front of the chapter's result_text.
-# Some entries are empty strings — about half the time the result reads
-# straight without an opener. Keeps surface variation without rewriting
-# the chapter's specific result phrasing.
-RESULT_OPENERS: tuple[str, ...] = (
-    "", "", "", "",                       # 4× blank → ~50% no-opener
-    "So ", "Therefore, ", "Thus, ", "Then ", "After all that, ",
+# Plan-only prefaces (NEVER reveal the numeric answer). One of these
+# may appear before the tool call when scene.show_reasoning() is true.
+# The rest of each record carries the math purely inside the eval form.
+GENERIC_PREFACES: tuple[str, ...] = (
+    "Let me work that out.",
+    "I'll express the answer as a Clojure form.",
+    "Time to write the form.",
+    "Let me compute that.",
+    "Here's the calculation.",
 )
 
 
 def assemble_assistant_msg(*,
                            preface:        str,
-                           code_block:     str,
-                           result_text:    str,
                            tool_call_line: str) -> str:
-    """Compose the assistant turn body. The preface is already resolved
-    by the caller (could be empty, a fixed-pool pick, or a chapter
-    narrative). Tool call line is always last."""
+    """Compose the assistant turn body — preface (optional) + tool call.
+
+    Eval-first design: the form inside the eval call IS the work. We
+    do NOT print a code block or a result-text line, because those leak
+    the answer to the model during training. The tool call's `form`
+    arg is the only place the math materializes; the runtime evaluating
+    it is what produces the answer.
+    """
     parts = []
     if preface:
         parts.append(preface)
-    parts.append(code_block)
-    if result_text:
-        parts.append(result_text)
     parts.append(tool_call_line)
     return "\n\n".join(p for p in parts if p)
 
 
-def resolve_preface(scene: "Scene", chapter_narrative: str) -> str:
-    """Pick the preface text based on scene's preface_style choice:
-      - 'none'      → empty
-      - 'fixed'     → random pick from FIXED_PREFACES
-      - 'narrative' → the chapter-specific narrative passed in
+def resolve_preface(scene: "Scene", plan: str) -> str:
+    """Pick the preface text. Three modes:
+
+      - empty (~50%): no preface; assistant emits just the tool call
+      - plan-only (~25%): chapter-supplied plan describing how the
+        computation is structured (NEVER the answer value)
+      - generic (~25%): a generic 'Let me compute' style line from
+        GENERIC_PREFACES
+
+    The plan supplied by the chapter must be answer-free — describes
+    *how* not *what*. Verifier enforces this for chapters that opt in
+    via verify_no_answer_in_msg().
     """
-    style = scene.preface_style()
-    if style == "fixed":
-        return scene.rng.choice(FIXED_PREFACES)
-    if style == "narrative":
-        return chapter_narrative
-    return ""
-
-
-def resolve_result_text(scene: "Scene", chapter_result: str) -> str:
-    """Apply a random opener prefix; sometimes drop result entirely
-    (15% of the time) so the JSON tool call carries the answer alone —
-    teaches the model that result-text-before-tool-call is optional."""
-    if not chapter_result:
+    if not scene.show_reasoning():
         return ""
-    if scene.coin(0.15):
-        return ""
-    opener = scene.rng.choice(RESULT_OPENERS)
-    if opener and chapter_result and chapter_result[0].isupper() and opener[-1] == " ":
-        # If we're prepending an opener, lowercase the first letter of
-        # the result text (e.g., "After all that, the stockpile lasts
-        # 21 days." instead of "After all that, The stockpile lasts…").
-        return opener + chapter_result[0].lower() + chapter_result[1:]
-    return opener + chapter_result
+    if plan and scene.coin(0.55):
+        return plan
+    return scene.rng.choice(GENERIC_PREFACES)
 
 
 # ─────────────────────── Self-test ───────────────────────
@@ -581,10 +673,10 @@ def smoke_test() -> None:
     sp_no = system_prompt(use_eval=False)
     assert "eval(" not in sp_no and "answer" in sp_no
 
-    calls_a = build_tool_calls(15, "(+ 7 8)", use_eval=False)
-    assert calls_a == [{"name": "answer", "args": {"value": 15}}]
-    calls_c = build_tool_calls(15, "(+ 7 8)", use_eval=True)
-    assert calls_c[0]["name"] == "eval" and calls_c[1]["name"] == "answer"
+    calls_eval = build_tool_calls(value=15, form_str="(+ 7 8)", prefer_eval=True)
+    assert calls_eval == [{"name": "eval", "args": {"form": "(+ 7 8)"}}]
+    calls_ans = build_tool_calls(value="yes", form_str="(= 1 1)", prefer_eval=False)
+    assert calls_ans == [{"name": "answer", "args": {"value": "yes"}}]
 
     # disambiguation
     bob   = next(c for c in ont.CHARACTERS if c.name == "Bob")

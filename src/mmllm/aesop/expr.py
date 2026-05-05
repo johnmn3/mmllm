@@ -639,6 +639,13 @@ def emit_clojure(expr: Expr) -> str:
     return expr.emit(0)
 
 
+def emit_clojure_inline(expr: Expr) -> str:
+    """Single-line Clojure rendering — collapses multi-line layouts so
+    the form fits cleanly inside a JSON-encoded `eval(form: …)` arg."""
+    import re
+    return re.sub(r"\s*\n\s*", " ", expr.emit(0))
+
+
 # ─────────────────────── Self-test ───────────────────────
 
 

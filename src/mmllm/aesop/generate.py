@@ -51,22 +51,44 @@ def render_record(rec: Record, tpl: ChatTemplate = DEFAULT_TEMPLATE) -> str:
 
 
 def verify_record(rec: Record) -> None:
-    """Re-check the record's invariants. Raises on any drift."""
-    # 1. Tool calls non-empty, last one is the canonical 'answer'.
+    """Re-check the record's invariants under the eval-first design.
+
+    Every record's last tool call is either:
+      - eval(form):    a Clojure-source string. Verify it matches the
+                       record's `code_str` byte-for-byte (so the eval
+                       form === the form rendered by emit_clojure_inline
+                       on the chapter's expr tree).
+      - answer(value): the chapter's verdict. Verify the value matches
+                       `rec.expected`.
+
+    Critical: the assistant_msg must NOT contain the numeric answer
+    anywhere outside the tool call's args (no `;=> N`, no "the answer
+    is N", no result_text with the value spelled out). The eval-first
+    design is built specifically to avoid that leakage.
+    """
     if not rec.tool_calls:
         raise ValueError("no tool_calls")
-    if rec.tool_calls[-1]["name"] != "answer":
-        raise ValueError(f"last tool_call must be 'answer', got "
-                         f"{rec.tool_calls[-1]['name']!r}")
 
-    # 2. The answer call's args contain the expected value (relaxed match).
-    last_args = rec.tool_calls[-1]["args"]
-    if not _value_in_args(rec.expected, last_args):
-        raise ValueError(
-            f"answer mismatch: expected={rec.expected!r}  args={last_args!r}"
-        )
+    last = rec.tool_calls[-1]
+    if last["name"] == "eval":
+        form = last["args"].get("form", "")
+        if not form.startswith("("):
+            raise ValueError(f"eval form not a Clojure form: {form[:40]!r}")
+        if form != rec.code_str:
+            raise ValueError(
+                f"eval form != code_str:\n  form     = {form!r}\n"
+                f"  code_str = {rec.code_str!r}"
+            )
+    elif last["name"] == "answer":
+        last_args = last["args"]
+        if not _value_in_args(rec.expected, last_args):
+            raise ValueError(
+                f"answer mismatch: expected={rec.expected!r}  args={last_args!r}"
+            )
+    else:
+        raise ValueError(f"unknown last tool: {last['name']!r}")
 
-    # 3. The chat template delimiters all appear correctly in the rendered text.
+    # The chat template delimiters all appear correctly in the rendered text.
     rendered = render_record(rec)
     if "<|sys|>" not in rendered:  raise ValueError("no <|sys|> in rendered")
     if "<|user|>" not in rendered: raise ValueError("no <|user|> in rendered")

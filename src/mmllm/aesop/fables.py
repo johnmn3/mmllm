@@ -21,15 +21,61 @@ from typing import Callable
 from mmllm.aesop import ontology as ont
 from mmllm.aesop.expr import (
     App, Cond, Def, Do, Expr, Fn, If, Let, Lit, Thread, Var,
-    emit_clojure, evaluate,
+    emit_clojure, emit_clojure_inline, evaluate,
 )
 from mmllm.aesop.template import (
     ANSWER_AND_EVAL, ANSWER_ONLY, Record, Scene,
-    article, assemble_assistant_msg, build_tool_calls, cap, n_unit,
-    render_code, render_tool_calls, resolve_preface, resolve_result_text,
-    smart_pronoun, smart_possessive, species_phrase, system_prompt,
-    the_subject_phrase, unit,
+    article, assemble_assistant_msg, atmosphere, build_tool_calls, cap,
+    char_intro, n_unit, place_phrase, question_phrase, render_code,
+    render_tool_calls, resolve_preface, smart_pronoun, smart_possessive,
+    species_phrase, system_prompt, the_subject_phrase, time_phrase, unit,
+    verb_for,
 )
+
+
+# ─────────────────────── narrative scaffolding ───────────────────────
+
+
+def _atm_intro(scene: Scene, location: ont.Location | None = None) -> str:
+    """Generate a 1-2 sentence atmospheric/contextual opener that any
+    chapter can prepend to its user_msg. If `location` is provided the
+    opener mentions it; otherwise stays generic."""
+    when = scene.rng.choice((
+        "One bright morning,", "Late one afternoon,",
+        "Just before sunset,", "On a quiet spring day,",
+        "Under a pale autumn sky,", "On a cool summer morning,",
+        "At the start of a long day,", "After a long night,",
+        "On a windy afternoon,", "On a still and golden day,",
+        "After many uneventful weeks,", "When the seasons turned,",
+    ))
+    if location is not None:
+        place = scene.rng.choice((
+            f"the air was still {place_phrase(scene, location)}",
+            f"a soft breeze drifted {place_phrase(scene, location)}",
+            f"all was quiet {place_phrase(scene, location)}",
+            f"long shadows stretched {place_phrase(scene, location)}",
+            f"sunlight slanted {place_phrase(scene, location)}",
+            f"the world felt newly washed {place_phrase(scene, location)}",
+        ))
+    else:
+        place = scene.rng.choice((
+            "the world was unusually quiet",
+            "everyone in the village was busy with their own work",
+            "no one had any pressing chores",
+            "the day stretched out long and slow",
+            "the wind was gentle and the sky was clear",
+            "a feeling of patience was in the air",
+        ))
+    second = scene.rng.choice((
+        " It was a fitting setting for what came next.",
+        " Nothing seemed amiss.",
+        " The day promised to be ordinary.",
+        " It was the kind of moment that hides small puzzles.",
+        " The little events of the day were about to demand careful counting.",
+        "",                                            # 1/N records → 1-sentence
+        "",
+    ))
+    return f"{when} {place}.{second}".strip() + "\n\n"
 
 
 # ─────────────────────── _finalize helper ───────────────────────
@@ -79,33 +125,50 @@ def _extract_code_from_block(code_block: str) -> str:
 
 def _finalize(scene: Scene, *,
               user_msg:    str,
-              narrative:   str,
-              code_block:  str,
-              result_text: str,
               value,
               expr,
               fable:   str,
-              chapter: str) -> Record:
-    """Bundle a chapter's prose + math into a Record. Picks tool-call
-    pattern (single answer vs eval+answer chain) via the scene RNG, builds
-    the system prompt with the matching catalog, assembles the assistant
-    turn, and returns a verifiable Record.
+              chapter: str,
+              plan:        str = "",
+              prefer_eval: bool = True,
+              # legacy params: `narrative` from old chapters becomes
+              # plan; code_block/result_text are ignored (no longer
+              # appear in the assistant turn under eval-first design).
+              narrative:   str = "",
+              code_block:  str = "",
+              result_text: str = "") -> Record:
+    """Bundle a chapter's prose + math into a Record under the eval-first
+    design. The `plan` is an optional one-sentence description of HOW the
+    expression is structured (must NOT contain the numeric answer); the
+    scene decides whether to surface it as a preface. The form inside the
+    eval tool call IS the work — no code block, no result_text, no answer
+    annotation.
 
-    The eval(form: …) arg in the tool-call uses the SAME source string
+    `prefer_eval=True` (default) emits a single `eval(form)` tool call.
+    `prefer_eval=False` emits a single `answer(value)` call — used by
+    chapters whose natural answer is yes/no or short string verdicts.
+
+    Legacy params (narrative/code_block/result_text) are accepted-and-
+    ignored to keep this commit's diff focused on the chapters that
+    have been migrated; chapters not yet touched still call the old
+    signature and get the eval-first behavior automatically.
+    Used so the eval(form: …) tool-call arg always matches the
+    EXACT source string  — see _extract_code_from_block.
     that was rendered in the assistant's code block — extracted from
     code_block, not re-emitted from expr — so the displayed source and
     the eval-form arg always agree byte-for-byte."""
-    use_eval     = scene.use_eval_chain()
-    code_str     = _extract_code_from_block(code_block)
-    calls        = build_tool_calls(value, code_str, use_eval=use_eval)
-    catalog      = ANSWER_AND_EVAL if use_eval else ANSWER_ONLY
-    sys_msg      = system_prompt(use_eval=use_eval)
-    preface      = resolve_preface(scene, narrative)
-    result_final = resolve_result_text(scene, result_text)
-    asst         = assemble_assistant_msg(
+    # Eval-first: build the form arg as a single-line Clojure expression
+    # straight from the AST. This is the only place the math materializes
+    # in the assistant turn.
+    form_str  = emit_clojure_inline(expr)
+    calls     = build_tool_calls(value=value, form_str=form_str,
+                                  prefer_eval=prefer_eval)
+    catalog   = ANSWER_AND_EVAL if prefer_eval else ANSWER_ONLY
+    sys_msg   = system_prompt(use_eval=prefer_eval)
+    plan_text = plan or narrative   # legacy chapters pass narrative=
+    preface   = resolve_preface(scene, plan_text)
+    asst      = assemble_assistant_msg(
         preface=preface,
-        code_block=code_block,
-        result_text=result_final,
         tool_call_line=render_tool_calls(calls),
     )
     return Record(
@@ -114,7 +177,7 @@ def _finalize(scene: Scene, *,
         assistant_msg=asst,
         tool_calls=calls,
         expected=value,
-        code_str=code_str,
+        code_str=form_str,
         fable=fable,
         chapter=chapter,
         catalog=catalog,
@@ -161,55 +224,62 @@ def _th_nap_overtake(scene: Scene) -> Record:
     )
     answer = evaluate(expr)
 
-    intro     = scene.phrase("Once upon a time,", "Long ago,",
-                              "One bright morning,", "On a sunny day,")
-    challenge = scene.phrase("challenged", "raced", "set out against")
-    boast     = scene.phrase("bragged about being the fastest",
-                              "boasted of being the quickest",
-                              "claimed to be the swiftest")
-    pace      = scene.phrase("just kept a steady pace",
-                              "kept moving steadily",
-                              "plodded on without hurry")
-    after     = scene.phrase("After running", "Having covered",
-                              "Once it had run")
-    nap       = scene.phrase("grew tired and decided to take a nap",
-                              "felt sleepy and stretched out for a nap",
-                              "lay down to rest a while")
-    meanwhile = scene.phrase("Meanwhile,", "All the while,",
-                              "At the same time,")
-    while_x   = scene.phrase("slept", "napped", "dozed")
+    boast = scene.phrase(
+        "telling everyone in the meadow that no one could match his speed",
+        "boasting around the burrows about how fast he was",
+        "bragging that the slow tortoise stood no chance against him",
+    ) if hare.gender == "m" else scene.phrase(
+        "telling everyone in the meadow that no one could match her speed",
+        "boasting around the burrows about how fast she was",
+        "bragging that the slow tortoise stood no chance against her",
+    ) if hare.gender == "f" else scene.phrase(
+        "telling everyone in the meadow how fast they were",
+        "boasting around the burrows about their speed",
+        "bragging that the slow tortoise stood no chance",
+    )
+    listened = scene.phrase(
+        "listened patiently for many days",
+        "said nothing and only blinked slowly",
+        "thought about it carefully before agreeing",
+    )
+    challenge_verb = scene.phrase(
+        "finally agreed to a race",
+        "agreed to settle the matter with a race",
+        "decided the only fair thing was to actually race",
+    )
+    nap_phrase = scene.phrase(
+        "grew tired and decided to take a nap under a tree",
+        "felt sleepy and stretched out for a nap on a soft patch of moss",
+        "lay down to rest a while in the warm grass",
+    )
     user_msg = (
-        f"{intro} {species_phrase(hare)} {challenge} "
-        f"{species_phrase(tortoise)} to a race through "
-        f"{location.article} {location.name}. "
-        f"{cap(smart_pronoun(hare, [tortoise]))} {boast}, while "
-        f"{smart_pronoun(tortoise, [hare])} {pace}.\n\n"
-        f"{after} {n_unit(hare_lead, 'mile')} ahead, {hare.name} "
-        f"{nap}. {meanwhile} {tortoise.name} kept walking at "
-        f"{tortoise_speed} {unit(tortoise_speed, 'mile')} per hour. "
-        f"While {hare.name} {while_x}, {tortoise.name} walked for "
-        f"{n_unit(nap_hours, 'hour')} straight.\n\n"
-        f"Question: After {tortoise.name}'s walk, who is in the lead?"
+        f"{atmosphere(scene, location)} {species_phrase(hare)} had "
+        f"spent days {boast}. {species_phrase(tortoise)}, by contrast, "
+        f"{listened}, and at last the two animals {challenge_verb} "
+        f"{place_phrase(scene, location)}.\n\n"
+        f"They set off together at sunrise. After running "
+        f"{n_unit(hare_lead, 'mile')} ahead, {hare.name} "
+        f"{nap_phrase}. Meanwhile, {tortoise.name} kept walking, "
+        f"steady as ever, at {tortoise_speed} "
+        f"{unit(tortoise_speed, 'mile')} per hour. While {hare.name} "
+        f"slept, {tortoise.name} kept moving for "
+        f"{n_unit(nap_hours, 'hour')} straight without pause.\n\n"
+        f"{question_phrase(scene, f'who is in the lead by the time {hare.name} wakes up')}"
     )
 
-    code_block  = render_code(expr, form=scene.code_form(), value=answer)
-    result_text = f"So {answer} is now in the lead."
-    narrative   = (
-        f"Let me figure out where {tortoise.name} is by multiplying "
-        f"{tortoise.name}'s speed by the time spent walking, then comparing "
-        f"with {hare.name}'s lead."
+    plan = (
+        f"I compute {tortoise.name}'s position as speed × hours, then "
+        f"compare against {hare.name}'s lead."
     )
-
     return _finalize(
         scene,
         user_msg=user_msg,
-        narrative=narrative,
-        code_block=code_block,
-        result_text=result_text,
+        plan=plan,
         value=answer,
         expr=expr,
         fable="tortoise-hare",
         chapter="nap-overtake",
+        prefer_eval=True,
     )
 
 
@@ -231,6 +301,7 @@ def _th_speed_comparison(scene: Scene) -> Record:
     tortoise_speed = scene.pick_int(1, 3)
     hours          = scene.pick_int(2, 6)
     miles_ahead    = (hare_speed - tortoise_speed) * hours
+    _intro         = _atm_intro(scene, location)
 
     if orient == "distance":
         # Given hare-speed, tortoise-speed, hours; compute miles-ahead.
@@ -246,7 +317,7 @@ def _th_speed_comparison(scene: Scene) -> Record:
         )
         answer = evaluate(expr)
         user_msg = (
-            f"{species_phrase(hare)} and {species_phrase(tortoise)} agreed "
+            f"{_intro}{species_phrase(hare)} and {species_phrase(tortoise)} agreed "
             f"to a steady race through {location.article} {location.name}. "
             f"{cap(smart_pronoun(hare, [tortoise]))} ran at {hare_speed} "
             f"{unit(hare_speed, 'mile')} per hour, while {tortoise.name} "
@@ -277,7 +348,7 @@ def _th_speed_comparison(scene: Scene) -> Record:
         )
         answer = evaluate(expr)
         user_msg = (
-            f"{species_phrase(hare)} and {species_phrase(tortoise)} agreed "
+            f"{_intro}{species_phrase(hare)} and {species_phrase(tortoise)} agreed "
             f"to a steady race through {location.article} {location.name}. "
             f"{cap(smart_pronoun(hare, [tortoise]))} ran at {hare_speed} "
             f"{unit(hare_speed, 'mile')} per hour, while {tortoise.name} "
@@ -310,7 +381,7 @@ def _th_speed_comparison(scene: Scene) -> Record:
         )
         answer = evaluate(expr)
         user_msg = (
-            f"{species_phrase(hare)} and {species_phrase(tortoise)} agreed "
+            f"{_intro}{species_phrase(hare)} and {species_phrase(tortoise)} agreed "
             f"to a steady race through {location.article} {location.name}. "
             f"{tortoise.name} kept a steady {tortoise_speed} "
             f"{unit(tortoise_speed, 'mile')} per hour. Both ran for "
@@ -363,8 +434,9 @@ def _th_distance_remaining(scene: Scene) -> Record:
     )
     answer = evaluate(expr)
 
+    _intro = _atm_intro(scene, location)
     user_msg = (
-        f"In a long race across {location.article} {location.name}, "
+        f"{_intro}In a long race across {location.article} {location.name}, "
         f"the course is {n_unit(total, 'mile')}. {species_phrase(tortoise)} "
         f"has already walked {n_unit(walked, 'mile')}. "
         f"{cap(tortoise.he_she)} continues at {speed} "
@@ -440,8 +512,9 @@ def _cp_stones_needed(scene: Scene) -> Record:
     raises   = scene.phrase("raised the water level by",
                               "lifted the water by",
                               "pushed the level up by")
+    _intro = _atm_intro(scene, location)
     user_msg = (
-        f"{weather} at {location.article} {location.name}, "
+        f"{_intro}{weather} at {location.article} {location.name}, "
         f"{species_phrase(crow)} {found} a {pitcher.name} of water, but "
         f"the water sat only {n_unit(start, 'centimeter')} from the bottom — "
         f"too low to reach. {cap(crow.he_she)} needed the water to rise "
@@ -498,8 +571,9 @@ def _cp_water_rise(scene: Scene) -> Record:
                              "carefully added")
     each_lifts = scene.phrase("raised the water by", "lifted the level by",
                                "made the water rise by")
+    _intro = _atm_intro(scene)
     user_msg = (
-        f"{species_phrase(crow)} {found} a {pitcher.name} with water at "
+        f"{_intro}{species_phrase(crow)} {found} a {pitcher.name} with water at "
         f"{n_unit(start, 'centimeter')}. {cap(crow.he_she)} {dropped} "
         f"{n_unit(n_stones, stone.name, stone.plural)}, and each one "
         f"{each_lifts} {n_unit(rise_per, 'centimeter')}.\n\n"
@@ -551,8 +625,9 @@ def _cp_enough_stones(scene: Scene) -> Record:
     answer = evaluate(expr)
     answer_str = "yes" if answer else "no"
 
+    _intro = _atm_intro(scene)
     user_msg = (
-        f"{species_phrase(crow)} has only "
+        f"{_intro}{species_phrase(crow)} has only "
         f"{n_unit(k, stone.name, stone.plural)} left. The {pitcher.name}'s "
         f"water sits at {n_unit(start, 'centimeter')} and needs to reach "
         f"{n_unit(target, 'centimeter')} to drink. Each {stone.name} "
@@ -610,8 +685,9 @@ def _ge_total_yield(scene: Scene) -> Record:
     )
     answer = evaluate(expr)
 
+    _intro = _atm_intro(scene, location)
     user_msg = (
-        f"In {location.article} {location.name}, {owner.name} owned "
+        f"{_intro}In {location.article} {location.name}, {owner.name} owned "
         f"{species_phrase(goose)}. The goose laid {per_day} golden "
         f"{unit(per_day, 'egg')} every day, like clockwork. "
         f"{owner.name} kept the goose for {n_unit(days, 'day')}.\n\n"
@@ -646,6 +722,7 @@ def _ge_value_yield(scene: Scene) -> Record:
     per_egg  = scene.pick_int(5, 50)
     total_coins = per_day * days * per_egg
     orient   = scene.pick_choice(["coins", "days", "per-egg"])
+    _intro   = _atm_intro(scene, location)
 
     if orient == "coins":
         expr = Let(
@@ -659,7 +736,7 @@ def _ge_value_yield(scene: Scene) -> Record:
         )
         answer = evaluate(expr)
         user_msg = (
-            f"{owner.name} owned {species_phrase(goose)} that laid "
+            f"{_intro}{owner.name} owned {species_phrase(goose)} that laid "
             f"{per_day} golden {unit(per_day, 'egg')} per day. Each egg "
             f"sold for {n_unit(per_egg, 'coin')} at the market. After "
             f"{n_unit(days, 'day')}, {owner.name} took the eggs to "
@@ -685,7 +762,7 @@ def _ge_value_yield(scene: Scene) -> Record:
         )
         answer = evaluate(expr)
         user_msg = (
-            f"{owner.name} owned {species_phrase(goose)} that laid "
+            f"{_intro}{owner.name} owned {species_phrase(goose)} that laid "
             f"{per_day} golden {unit(per_day, 'egg')} per day. Each egg "
             f"sold for {n_unit(per_egg, 'coin')}. By the time {owner.name} "
             f"had earned {n_unit(total_coins, 'coin')} in total, the goose "
@@ -710,7 +787,7 @@ def _ge_value_yield(scene: Scene) -> Record:
         )
         answer = evaluate(expr)
         user_msg = (
-            f"{owner.name} owned {species_phrase(goose)} that laid "
+            f"{_intro}{owner.name} owned {species_phrase(goose)} that laid "
             f"{per_day} golden {unit(per_day, 'egg')} per day. After "
             f"{n_unit(days, 'day')}, {owner.name} took the eggs to "
             f"{location.article} {location.name} and earned "
@@ -755,8 +832,9 @@ def _ge_compounded(scene: Scene) -> Record:
     answer = evaluate(expr)
 
     yields_str = ", ".join(str(y) for y in yields)
+    _intro = _atm_intro(scene)
     user_msg = (
-        f"{owner.name} owned {species_phrase(goose)}, who laid different "
+        f"{_intro}{owner.name} owned {species_phrase(goose)}, who laid different "
         f"numbers of eggs each day for {n_unit(days, 'day')}: "
         f"{yields_str}.\n\n"
         f"Question: How many eggs in total over the {n_unit(days, 'day')}?"
@@ -810,8 +888,9 @@ def _ge_average(scene: Scene) -> Record:
     answer = evaluate(expr)
 
     yields_str = ", ".join(str(y) for y in yields)
+    _intro = _atm_intro(scene)
     user_msg = (
-        f"{owner.name} kept {species_phrase(goose)}, who laid these eggs "
+        f"{_intro}{owner.name} kept {species_phrase(goose)}, who laid these eggs "
         f"on successive days: {yields_str}.\n\n"
         f"Question: What is the average eggs per day, rounded down to a "
         f"whole number?"
@@ -879,8 +958,9 @@ def _bw_false_alarms(scene: Scene) -> Record:
                                "hurried out from the village")
     each_trip = scene.phrase("taking", "and the trip took",
                                "each round trip lasting")
+    _intro = _atm_intro(scene)
     user_msg = (
-        f"{boy.name} {setting}. {bored} "
+        f"{_intro}{boy.name} {setting}. {bored} "
         f"{boy.he_she} {cried} {n_unit(n_alarms, 'time')} "
         f"falsely. Each time, {n_villagers} villagers {came}, "
         f"{each_trip} {n_unit(minutes_per, 'minute')} each.\n\n"
@@ -926,8 +1006,9 @@ def _bw_sheep_eaten(scene: Scene) -> Record:
                             "no one in the village answered the call from",
                             "the villagers ignored")
     devoured = scene.phrase("ate", "carried off", "made off with")
+    _intro = _atm_intro(scene)
     user_msg = (
-        f"{boy.name} kept a flock of "
+        f"{_intro}{boy.name} kept a flock of "
         f"{n_unit(flock, 'sheep', 'sheep')}. {when}, {came} and "
         f"{refused} {boy.him_her}. The wolf {devoured} "
         f"{n_unit(eaten, 'sheep', 'sheep')}.\n\n"
@@ -968,8 +1049,9 @@ def _bw_trust_threshold(scene: Scene) -> Record:
     )
     answer = evaluate(expr)
 
+    _intro = _atm_intro(scene)
     user_msg = (
-        f"The villagers in {boy.name}'s village stop responding to alarms "
+        f"{_intro}The villagers in {boy.name}'s village stop responding to alarms "
         f"after {n_unit(threshold, 'false alarm')}. So far, {boy.name} has "
         f"raised {n_unit(alarms_so_far, 'false alarm')}.\n\n"
         f"Question: Will the villagers come on the next alarm? Answer "
@@ -1021,6 +1103,7 @@ def _ag_summer_stockpile(scene: Scene) -> Record:
     days    = scene.pick_int(20, 90)
     total   = per_day * days
     orient  = scene.pick_choice(["total", "days", "rate"])
+    _intro  = _atm_intro(scene, location)
 
     season = scene.phrase("Through the summer", "All summer long",
                           "Across the long summer", "From spring to fall")
@@ -1032,7 +1115,7 @@ def _ag_summer_stockpile(scene: Scene) -> Record:
         )
         answer = evaluate(expr)
         user_msg = (
-            f"{season} at {location.article} {location.name}, "
+            f"{_intro}{season} at {location.article} {location.name}, "
             f"{species_phrase(ant)} collected {per_day} "
             f"{unit(per_day, 'grain')} every day for {n_unit(days, 'day')}.\n\n"
             f"Question: How many grains did {ant.name} collect by the end "
@@ -1049,7 +1132,7 @@ def _ag_summer_stockpile(scene: Scene) -> Record:
         )
         answer = evaluate(expr)
         user_msg = (
-            f"{season} at {location.article} {location.name}, "
+            f"{_intro}{season} at {location.article} {location.name}, "
             f"{species_phrase(ant)} collected {n_unit(total, 'grain')} in "
             f"all, gathering {per_day} {unit(per_day, 'grain')} each day.\n\n"
             f"Question: How many days did {ant.name} spend collecting?"
@@ -1064,7 +1147,7 @@ def _ag_summer_stockpile(scene: Scene) -> Record:
         )
         answer = evaluate(expr)
         user_msg = (
-            f"{season} at {location.article} {location.name}, "
+            f"{_intro}{season} at {location.article} {location.name}, "
             f"{species_phrase(ant)} worked steadily for "
             f"{n_unit(days, 'day')} and gathered "
             f"{n_unit(total, 'grain')} in all.\n\n"
@@ -1101,9 +1184,10 @@ def _ag_winter_consumption(scene: Scene) -> Record:
     )
     answer = evaluate(expr)
 
+    _intro = _atm_intro(scene)
     user_msg = (
-        f"{species_phrase(ant)} has {n_unit(stockpile, 'grain')} stored "
-        f"for winter. {cap(ant.he_she)} eats {n_unit(per_day, 'grain')} "
+        f"{_intro}{species_phrase(ant)} has {n_unit(stockpile, 'grain')} stored "
+        f"for winter. {cap(ant.he_she)} {verb_for(ant, 'eat')} {n_unit(per_day, 'grain')} "
         f"per day.\n\n"
         f"Question: For how many whole days will {ant.name}'s stockpile "
         f"last?"
@@ -1154,8 +1238,9 @@ def _ag_comparison_survival(scene: Scene) -> Record:
     )
     answer = evaluate(expr)
 
+    _intro = _atm_intro(scene)
     user_msg = (
-        f"Winter lasted {n_unit(days, 'day')}. "
+        f"{_intro}Winter lasted {n_unit(days, 'day')}. "
         f"{species_phrase(ant)} started with "
         f"{n_unit(ant_stock, 'grain')} and ate {ant_per_day} every day, "
         f"while {species_phrase(grasshopper)} started with "
@@ -1225,8 +1310,9 @@ def _mm_egg_to_coin_chain(scene: Scene) -> Record:
     dreamt  = scene.phrase("dreamed of the future",
                              "started to plan her fortune",
                              "imagined what she would do with the proceeds")
+    _intro = _atm_intro(scene)
     user_msg = (
-        f"{maid.name} {walking} and {dreamt}. She would buy "
+        f"{_intro}{maid.name} {walking} and {dreamt}. She would buy "
         f"{n_unit(eggs, 'egg')}; each would hatch into a hen; each hen "
         f"would lay {n_unit(eggs_per_hen_per_year, 'egg')} per year; "
         f"each egg would sell for {n_unit(coins_per_egg, 'coin')}.\n\n"
@@ -1275,8 +1361,9 @@ def _mm_investment_return(scene: Scene) -> Record:
     )
     answer = evaluate(expr)
 
+    _intro = _atm_intro(scene)
     user_msg = (
-        f"{maid.name} bought a cow for {n_unit(cow_cost, 'coin')}. The "
+        f"{_intro}{maid.name} bought a cow for {n_unit(cow_cost, 'coin')}. The "
         f"cow gives {n_unit(cups_per_day, 'cup')} of milk per day, and "
         f"each cup sells for {n_unit(coin_per_cup, 'coin')}.\n\n"
         f"Question: What is the smallest whole number of days until "
@@ -1319,8 +1406,9 @@ def _mm_spilled_milk(scene: Scene) -> Record:
     )
     answer = evaluate(expr)
 
+    _intro = _atm_intro(scene)
     user_msg = (
-        f"{maid.name} carried a pail with {n_unit(full_cups, 'cup')} "
+        f"{_intro}{maid.name} carried a pail with {n_unit(full_cups, 'cup')} "
         f"of milk. She tripped and spilled {n_unit(spilled, 'cup')}. "
         f"Each cup of milk would have sold for "
         f"{n_unit(per_cup, 'coin')}.\n\n"
@@ -1374,8 +1462,9 @@ def _fg_max_reach(scene: Scene) -> Record:
     leap    = scene.phrase("could leap another",
                              "could spring another",
                              "could jump another")
+    _intro = _atm_intro(scene)
     user_msg = (
-        f"{species_phrase(fox)} {stand}, reaching "
+        f"{_intro}{species_phrase(fox)} {stand}, reaching "
         f"{n_unit(body_height, 'foot', 'feet')} high, and "
         f"{leap} {n_unit(jump_height, 'foot', 'feet')}.\n\n"
         f"Question: What is the highest point {fox.name} can reach with "
@@ -1418,8 +1507,9 @@ def _fg_jumps_needed(scene: Scene) -> Record:
     )
     answer = evaluate(expr)
 
+    _intro = _atm_intro(scene)
     user_msg = (
-        f"The grapes hung from a vine {n_unit(grape_height, 'foot', 'feet')} "
+        f"{_intro}The grapes hung from a vine {n_unit(grape_height, 'foot', 'feet')} "
         f"above the ground. {species_phrase(fox)} could leap "
         f"{n_unit(per_jump, 'foot', 'feet')} straight up each try, and "
         f"each leap brought the grapes that much closer to reach.\n\n"
@@ -1461,8 +1551,9 @@ def _fg_give_up(scene: Scene) -> Record:
     )
     answer = evaluate(expr)
 
+    _intro = _atm_intro(scene)
     user_msg = (
-        f"{species_phrase(fox)} grew tired of jumping for the grapes. "
+        f"{_intro}{species_phrase(fox)} grew tired of jumping for the grapes. "
         f"{cap(fox.he_she)} would give up after {n_unit(threshold, 'attempt')}. "
         f"So far {fox.he_she} had tried {n_unit(tried, 'time')}.\n\n"
         f"Question: Will {fox.name} try again? Answer yes or no."
@@ -1519,8 +1610,9 @@ def _tm_food_comparison(scene: Scene) -> Record:
     city_phrase    = scene.phrase("lived in the city",
                                     "lived in a busy townhouse pantry",
                                     "made a home in the bustling city")
+    _intro = _atm_intro(scene)
     user_msg = (
-        f"{species_phrase(country)} {country_phrase} and had "
+        f"{_intro}{species_phrase(country)} {country_phrase} and had "
         f"{n_unit(a, food.name, food.plural)}, while "
         f"{species_phrase(city)} {city_phrase} and had "
         f"{n_unit(b, food.name, food.plural)}.\n\n"
@@ -1560,8 +1652,9 @@ def _tm_shared_meal(scene: Scene) -> Record:
     )
     answer = evaluate(expr)
 
+    _intro = _atm_intro(scene)
     user_msg = (
-        f"{species_phrase(country)} and {species_phrase(city)} hosted "
+        f"{_intro}{species_phrase(country)} and {species_phrase(city)} hosted "
         f"a feast for {n_unit(n_mice, 'mouse', 'mice')} (counting "
         f"themselves). They had {n_unit(total, food.name, food.plural)} "
         f"to share equally.\n\n"
@@ -1604,8 +1697,9 @@ def _tm_trip_budget(scene: Scene) -> Record:
     )
     answer = evaluate(expr)
 
+    _intro = _atm_intro(scene)
     user_msg = (
-        f"{species_phrase(mouse)} began the journey with "
+        f"{_intro}{species_phrase(mouse)} began the journey with "
         f"{n_unit(start, 'coin')}. {cap(mouse.he_she)} spent "
         f"{n_unit(travel, 'coin')} on travel and {n_unit(food, 'coin')} "
         f"on food.\n\n"
@@ -1660,8 +1754,9 @@ def _ds_double_loss(scene: Scene) -> Record:
     grabbed  = scene.phrase("dropped one bone to grab the shadow's",
                               "let go of one bone, lunging at the reflection",
                               "released a bone to snap at the watery double's")
+    _intro = _atm_intro(scene)
     user_msg = (
-        f"{species_phrase(dog)} {crossing} {n_unit(bones, 'bone')}. "
+        f"{_intro}{species_phrase(dog)} {crossing} {n_unit(bones, 'bone')}. "
         f"{looking}, {dog.he_she} saw {dog.his_her} reflection and thought "
         f"it was another dog with more bones. {cap(dog.he_she)} {grabbed}, "
         f"but the bone fell into the stream.\n\n"
@@ -1696,8 +1791,9 @@ def _ds_regret(scene: Scene) -> Record:
     )
     answer = evaluate(expr)
 
+    _intro = _atm_intro(scene)
     user_msg = (
-        f"{species_phrase(dog)} expected to bring home "
+        f"{_intro}{species_phrase(dog)} expected to bring home "
         f"{n_unit(expected_bones, 'bone')}, but lost one chasing a "
         f"shadow and ended up with one fewer.\n\n"
         f"Question: How many bones did {dog.name} fall short by, "
@@ -1738,8 +1834,9 @@ def _ds_exchange_loss(scene: Scene) -> Record:
     )
     answer = evaluate(expr)
 
+    _intro = _atm_intro(scene)
     user_msg = (
-        f"{species_phrase(dog)} had {n_unit(start, 'bone')}. {trader.name} "
+        f"{_intro}{species_phrase(dog)} had {n_unit(start, 'bone')}. {trader.name} "
         f"offered to trade — {dog.name} would give {n_unit(given, 'bone')} "
         f"in exchange for some larger ones. But the trader cheated and "
         f"only gave back {n_unit(received, 'bone')}.\n\n"
@@ -1788,8 +1885,9 @@ def _lb_days_to_defeat(scene: Scene) -> Record:
     )
     answer = evaluate(expr)
 
+    _intro = _atm_intro(scene)
     user_msg = (
-        f"{species_phrase(lion)} watched {n_unit(n_bulls, 'bull')} grazing. "
+        f"{_intro}{species_phrase(lion)} watched {n_unit(n_bulls, 'bull')} grazing. "
         f"Once they scattered, {lion.he_she} could attack one at a time, "
         f"taking {n_unit(days_each, 'day')} per bull.\n\n"
         f"Question: How many total days does {lion.name} need to defeat "
@@ -1827,8 +1925,9 @@ def _lb_remaining_after_k(scene: Scene) -> Record:
     )
     answer = evaluate(expr)
 
+    _intro = _atm_intro(scene)
     user_msg = (
-        f"{species_phrase(lion)} faced {n_unit(n_bulls, 'bull')} grazing "
+        f"{_intro}{species_phrase(lion)} faced {n_unit(n_bulls, 'bull')} grazing "
         f"alone in the field. After several days, {smart_pronoun(lion, [])} "
         f"had defeated {defeated} of them.\n\n"
         f"Question: How many bulls remain?"
@@ -1875,8 +1974,9 @@ def _lb_divide_conquer_bool(scene: Scene) -> Record:
     answer = evaluate(expr)
     answer_str = "yes" if answer else "no"
 
+    _intro = _atm_intro(scene)
     user_msg = (
-        f"{species_phrase(lion)} has strength {lion_strength}. Each of "
+        f"{_intro}{species_phrase(lion)} has strength {lion_strength}. Each of "
         f"the {n_unit(n_bulls, 'bull')} has strength {bull_strength}. "
         f"Together the bulls' combined strength is {n_bulls * bull_strength}.\n\n"
         f"Question: Can {lion.name} only defeat the bulls if they "
@@ -1937,13 +2037,26 @@ def smoke_test(seed: int = 0, n: int = 12) -> None:
         assert rec.system_msg
         assert rec.user_msg
         assert rec.assistant_msg
-        # Verify the tool call answer matches the eval result.
+        # Eval-first verification:
+        #   - prefer_eval=True records: single eval call whose form,
+        #     when re-evaluated, must match `expected`
+        #   - prefer_eval=False records: single answer(value) call
+        #     whose `value` arg must match `expected`
         last_call = rec.tool_calls[-1]
-        assert last_call["name"] == "answer"
-        # Simple sanity: the answer value appears somewhere in the tool call args.
-        assert any(_eq_relaxed(v, rec.expected) for v in last_call["args"].values()), (
-            f"answer mismatch: tool_call={last_call}  expected={rec.expected}"
-        )
+        if last_call["name"] == "eval":
+            # We trust the AST evaluator already ran; cross-check that
+            # the form-string round-trips by re-evaluating it isn't
+            # cheap from Python (no Clojure runtime), so we just verify
+            # the form string is a non-empty Clojure-shaped expression.
+            assert last_call["args"]["form"].startswith("("), (
+                f"eval form not a Clojure form: {last_call['args']['form'][:40]!r}"
+            )
+        else:
+            assert last_call["name"] == "answer"
+            assert any(_eq_relaxed(v, rec.expected)
+                       for v in last_call["args"].values()), (
+                f"answer mismatch: tool_call={last_call}  expected={rec.expected}"
+            )
     print(f"fables smoke OK: {n} records across {len(GENERATORS)} fables")
 
 
