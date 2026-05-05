@@ -89,11 +89,11 @@ G8_02 = SubjectCurriculum(
     examples=[
         _ex("(do (deftype Pebble [color]) (.-color (Pebble. \"grey\")))",
             "grey",
-            "a deftype Pebble with a color field, then read color of an instance",
+            "the Pebble deftype's color field",
             "the color field of a Pebble instance"),
         _ex("(do (deftype Stone [weight]) (.-weight (Stone. 7)))",
             7,
-            "a deftype Stone with a weight field, then read its weight",
+            "the Stone deftype's weight field",
             "the weight of a Stone constructed with 7"),
     ],
     subplots=_SUBPLOTS,
@@ -109,7 +109,7 @@ G8_03 = SubjectCurriculum(
     examples=[
         _ex("(do (defrecord Runner [name pace]) (:pace (->Runner \"grasshopper\" :swift)))",
             ":swift",
-            "a defrecord Runner with name and pace fields, get :pace",
+            "the Runner record's :pace value",
             "the :pace value of the Runner record"),
         _ex("(do (defrecord Runner [name pace]) (:name (->Runner \"ant\" :steady)))",
             "ant",
@@ -175,16 +175,16 @@ G8_06 = SubjectCurriculum(
     examples=[
         _ex("(do (defprotocol Pace (speed [this]))"
             " (extend-protocol Pace"
-            "   java.lang.String (speed [_] :string-pace)"
-            "   java.lang.Long   (speed [_] :long-pace))"
+            " java.lang.String (speed [_] :string-pace)"
+            " java.lang.Long (speed [_] :long-pace))"
             " (speed 42))",
             ":long-pace",
-            "Pace dispatched on the class of its argument; called with 42",
+            "Pace dispatched on the integer 42's class",
             "the keyword speed returns for the integer 42"),
         _ex("(do (defprotocol Pace (speed [this]))"
             " (extend-protocol Pace"
-            "   java.lang.String (speed [_] :string-pace)"
-            "   java.lang.Long   (speed [_] :long-pace))"
+            " java.lang.String (speed [_] :string-pace)"
+            " java.lang.Long (speed [_] :long-pace))"
             " (speed \"x\"))",
             ":string-pace",
             "Pace dispatched on a string argument",
@@ -254,7 +254,7 @@ G8_09 = SubjectCurriculum(
             " (defmethod pace :ant [_] :steady)"
             " (pace {:species :ant}))",
             ":steady",
-            "two defmethod entries on pace, called with :ant",
+            "the two-method pace dispatch on an ant species",
             "what pace returns for {:species :ant}"),
         _ex("(do (defmulti pace :species)"
             " (defmethod pace :grasshopper [_] :swift)"
@@ -262,7 +262,7 @@ G8_09 = SubjectCurriculum(
             " (defmethod pace :default [_] :unknown)"
             " (pace {:species :owl}))",
             ":unknown",
-            "a :default fallback method on pace, called with an unknown species",
+            "the :default fallback for an unknown species",
             "what pace returns for {:species :owl} when :default falls through"),
     ],
     subplots=_SUBPLOTS,
@@ -326,7 +326,7 @@ G8_12 = SubjectCurriculum(
             " (extend-type java.lang.Long Pace (speed [_] :number-pace))"
             " (speed 5))",
             ":number-pace",
-            "extend-type used to attach Pace to Long, called with 5",
+            "the Pace extension on Long applied to 5",
             "the keyword speed returns for 5"),
         _ex("(do (defprotocol Pace (speed [this]))"
             " (extend-type java.lang.String Pace (speed [_] :string-pace))"
@@ -424,7 +424,7 @@ G8_16 = SubjectCurriculum(
             " (defrecord Ant [] Move (step [_] :plod))"
             " (mapv step [(->Grasshopper) (->Ant)]))",
             [":leap", ":plod"],
-            "a Move protocol with two record implementations, mapped over instances",
+            "the Move protocol mapped over Grasshopper and Ant",
             "the pair of step results for a Grasshopper and an Ant"),
         _ex("(do (defprotocol Sound (cry [this]))"
             " (defrecord Grasshopper [] Sound (cry [_] :chirp))"

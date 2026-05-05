@@ -131,7 +131,7 @@ G5_12 = SubjectCurriculum(grade=5, subject_id="G5-12",
     subject_title="reduce", fable="ant-grasshopper",
     examples=[
         _ex("(reduce + [1 2 3 4])",   10, "the form (reduce + [1 2 3 4])", "the sum"),
-        _ex("(reduce * [1 2 3 4 5])", 120,"the form (reduce * [1 2 3 4 5])", "5!"),
+        _ex("(reduce * [1 2 3 4 5])", 120,"the form (reduce * [1 2 3 4 5])", "the factorial of 5"),
         _ex("(reduce max [3 1 4 1 5 9 2 6])", 9,
             "the form (reduce max [...])", "the maximum"),
     ], subplots=_HOF_SUBPLOTS, plan_pool=_PLAN_G5)
@@ -229,7 +229,7 @@ G5_22 = SubjectCurriculum(grade=5, subject_id="G5-22",
     examples=[
         _ex("(loop [n 5 acc 1] (if (zero? n) acc (recur (dec n) (* acc n))))", 120,
             "a loop computing factorial of 5 via recur",
-            "5! computed via loop/recur"),
+            "the factorial of 5 via loop/recur"),
     ], subplots=_HOF_SUBPLOTS, plan_pool=_PLAN_G5)
 
 

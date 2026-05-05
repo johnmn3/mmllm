@@ -17,8 +17,11 @@ from mmllm.aesop.curriculum.ant_grasshopper.grade_1 import _SHARED_SUBPLOTS as _
 _ERR_SUBPLOTS: list[SubplotTemplate] = list(_G1_SUBPLOTS) + [
 
     # Ant tries the form, catches the error, retries.
+    # NOTE: keep {place} mid-sentence (not right after a period) so it
+    # doesn't render "...first reading. near the meadow, she typed..."
+    # — pitfall LOWER_PLACE_AFTER_PERIOD.
     SubplotTemplate("""\
-{ant_phrase} had learned not to trust a form on first reading.
+{ant_phrase} had learned not to trust a form on first reading; sitting
 {place}, {ant_he_she} typed {form_display} carefully, ready to catch
 whatever the REPL might throw back. {grasshopper_phrase}, {emo_proud},
 laughed and said no error would ever come — but {ant} insisted on
@@ -90,11 +93,11 @@ G7_03 = SubjectCurriculum(grade=7, subject_id="G7-03",
     examples=[
         _ex("(try 7 (finally :cleanup))", 7,
             "a try whose finally clause runs but doesn't change the value",
-            "the value 7 from the body (finally is for side effects)"),
+            "the value the try body returns"),
         _ex("(try (try (/ 1 0) (finally :ran)) (catch Exception e :caught))",
             ":caught",
             "a finally that runs before the outer catch fires",
-            "the keyword :caught (the outer catch handles the divide-by-zero)"),
+            "the keyword the outer catch returns"),
     ], subplots=_ERR_SUBPLOTS, plan_pool=_PLAN_G7)
 
 
@@ -121,14 +124,14 @@ G7_05 = SubjectCurriculum(grade=7, subject_id="G7-05",
             "the predicate (some? nil)",
             "whether nil counts as some?"),
         _ex("(some? 0)", True,
-            "the predicate (some? 0) — 0 is not nil",
+            "the predicate (some? 0)",
             "whether 0 counts as some?"),
         _ex("(first nil)", None,
             "calling first on nil",
-            "the value of (first nil), which is nil"),
+            "the value (first nil) returns"),
         _ex("(count nil)", 0,
             "counting a nil collection",
-            "the count of nil, which is 0"),
+            "the count of nil"),
     ], subplots=_ERR_SUBPLOTS, plan_pool=_PLAN_G7)
 
 
@@ -194,7 +197,7 @@ G7_10 = SubjectCurriculum(grade=7, subject_id="G7-10",
     subject_title="doc and source", fable="ant-grasshopper",
     examples=[
         _ex("(:doc (meta '^{:doc \"adds two\"} plus))", "adds two",
-            "the :doc metadata on a symbol — what doc would print",
+            "the :doc metadata on a symbol",
             "the string \"adds two\" from the metadata"),
     ], subplots=_ERR_SUBPLOTS, plan_pool=_PLAN_G7)
 
@@ -227,7 +230,7 @@ G7_12 = SubjectCurriculum(grade=7, subject_id="G7-12",
             "the count of characters in \"grasshopper\\nant\\n\""),
         _ex("(clojure.string/split \"a\\nb\\nc\" #\"\\n\")", ["a", "b", "c"],
             "splitting a slurped-style string on newlines",
-            "the vector [\"a\" \"b\"\"c\"] of three lines"),
+            "the vector of three split lines"),
     ], subplots=_ERR_SUBPLOTS, plan_pool=_PLAN_G7)
 
 
@@ -296,7 +299,7 @@ G7_17 = SubjectCurriculum(grade=7, subject_id="G7-17",
     examples=[
         _ex("(clojure.edn/read-string (pr-str {:a 1 :b 2}))",
             {":a": 1, ":b": 2},
-            "writing then reading back a small map (edn-shaped roundtrip)",
+            "a roundtripped edn map",
             "the map {:a 1 :b 2} after the roundtrip"),
         _ex("(clojure.edn/read-string (pr-str [1 2 3]))", [1, 2, 3],
             "round-tripping a vector through pr-str then edn/read-string",

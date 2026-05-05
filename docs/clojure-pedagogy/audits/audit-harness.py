@@ -124,16 +124,38 @@ def check_record(rec, sub, example):
 
     # "said EMO_PROUD" without comma (subplot template bug — EMO entries
     # that are participles don't fit "said X" without comma).
-    bad_said = ["said boasting", "said puffed", "said swaggering",
-                 "said with a smug grin"]
+    # Extended to cover other speaking verbs (declared, cried) — same
+    # pitfall, different head verb. The audit caught a bare
+    # "declared puffed up with pride" in ant-grasshopper grade 2.
+    bad_said = [
+        "said boasting", "said puffed", "said swaggering",
+        "said with a smug grin",
+        "declared boasting", "declared puffed", "declared swaggering",
+        "declared with a smug grin",
+        "cried boasting", "cried puffed", "cried swaggering",
+        "cried with a smug grin",
+    ]
     for p in bad_said:
         if p in user.lower():
-            issues.append(("SAID_PARTICIPLE", f"'{p}' (missing comma after 'said')"))
+            issues.append(("SAID_PARTICIPLE", f"'{p}' (missing comma after speech-verb)"))
             break
 
-    # Double "from" in teacher subplot.
-    if re.search(r"from \w+ing from a recent", user.lower()):
-        issues.append(("DOUBLE_FROM", "'from X-ing from a recent sprint' duplication"))
+    # Double "from" / generalized DOUBLE_OF check.
+    # Pitfall #13: when EMO_TIRED already terminates with "from X" (or
+    # "at X", "of X"), a template-supplied tail like "from a recent
+    # sprint", "of the lecture", or "from a season of song" duplicates
+    # the preposition.
+    double_tail_re = re.compile(
+        r"(from \w+ing|weary from \w+|drowsy from \w+|"
+        r"yawning at [a-z ]+?|legs heavy from \w+) "
+        r"(from|of|at) (a |the )"
+    )
+    if double_tail_re.search(user.lower()):
+        issues.append(("DOUBLE_FROM",
+                        "EMO_TIRED tail duplicates an already-terminated prep "
+                        "phrase (e.g., 'from sprinting from a recent sprint', "
+                        "'her legs heavy from sprinting of the lecture', "
+                        "'weary from the morning's effort from a season of song')"))
 
     # Meta-meta question_what: "the value of the form X" inside
     # "Write a form whose evaluation gives X" wrapping → meta-meta.
@@ -142,8 +164,12 @@ def check_record(rec, sub, example):
                         "question_what 'the value of the form X' creates meta-meta wrap"))
 
     # Bad place-preposition combos: "in the hilltop" (should be "on/atop"),
-    # "in the road" (should be "on the road"), etc.
-    for bad in ("in the hilltop", "in the road", "in the beach"):
+    # "in the road" (should be "on the road"), "in the farm" (should
+    # be "on/at the farm" — pitfall #22, ant-grasshopper introduced
+    # `farm` and the ant-grasshopper hand-audit caught the regression
+    # in 6+ records per grade), etc.
+    for bad in ("in the hilltop", "in the road", "in the beach",
+                 "in the farm"):
         if bad in user:
             issues.append(("BAD_PLACE_PREP", f"'{bad}' (wrong preposition)"))
             break
@@ -155,9 +181,9 @@ def check_record(rec, sub, example):
                         "'stopped across X' (verb+prep mismatch)"))
 
     # ─────────────────────── deep-audit additions ───────────────────────
-    # Checks added after the goose-eggs hand-audit surfaced patterns the
-    # original structural rules missed. Each was found in ≥1 grade by the
-    # 12 reader sub-agents.
+    # Checks added after the goose-eggs and ant-grasshopper hand-audits
+    # surfaced patterns the original structural rules missed. Each was
+    # found in ≥1 grade by the 12 reader sub-agents.
 
     # DOUBLE_PREP — verb's preposition + place_phrase's preposition.
     # `place_phrase()` returns a string that ALREADY starts with a

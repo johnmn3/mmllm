@@ -37,9 +37,14 @@ settled the moment the form was evaluated."""),
 
     # 10. The wager-with-stakes template — increases the dramatic stakes
     #     when the form is more interesting (e.g., min/max, mod).
+    #     NOTE: comma after "declared" before {emo_proud} so participle
+    #     EMO entries ("boasting at every turn", "puffed up with pride")
+    #     parse as adverbial — same pitfall #12 logic that applies to
+    #     "said". The audit harness now flags `declared boasting`
+    #     without comma alongside `said boasting`.
     SubplotTemplate("""\
-"Whatever {form_display} comes to," {grasshopper_phrase} declared
-{emo_proud} {place}, "I'll wager I know it without typing it."
+"Whatever {form_display} comes to," {grasshopper_phrase} declared,
+{emo_proud}, {place}, "I'll wager I know it without typing it."
 {ant_phrase}, {emo_patient}, picked up a stick and drew
 {concept_phrase} in the dust. "Then write the form," {ant_he_she}
 said. "The REPL will have the last word.\""""),
@@ -65,7 +70,7 @@ G2_01 = SubjectCurriculum(
         _ex("(- 100 1 2 3)", 94,      "the chain (- 100 1 2 3)",  "the result of (- 100 1 2 3)"),
         _ex("(+ 1 2 3 4 5 6 7 8 9 10)", 55,
             "the sum 1+2+...+10",       "the sum of integers 1 through 10"),
-        _ex("(* 1 2 3 4 5)", 120,     "the product 1*2*3*4*5",    "the product of 1 through 5 (5!)"),
+        _ex("(* 1 2 3 4 5)", 120,     "the product 1*2*3*4*5",    "the product of 1 through 5"),
         _ex("(+ 10 20 30)", 60,       "the sum (+ 10 20 30)",     "the sum of 10, 20, and 30"),
     ],
     subplots=_SHARED_SUBPLOTS, plan_pool=_PLAN_POOL,
@@ -191,9 +196,9 @@ G2_10 = SubjectCurriculum(
     subject_title="Power by repeated multiplication",
     fable="ant-grasshopper",
     examples=[
-        _ex("(* 2 2 2)",     8,    "the form (* 2 2 2) — 2^3 by repeated multiplication", "the result of two cubed"),
-        _ex("(* 3 3 3 3)",   81,   "the form (* 3 3 3 3) — 3^4",                          "the result of three to the fourth"),
-        _ex("(* 5 5)",       25,   "the form (* 5 5) — 5 squared",                        "the result of five squared"),
+        _ex("(* 2 2 2)",     8,    "the cubed product (* 2 2 2)", "the result of two cubed"),
+        _ex("(* 3 3 3 3)",   81,   "the fourth-power product (* 3 3 3 3)",                          "the result of three to the fourth"),
+        _ex("(* 5 5)",       25,   "the squared product (* 5 5)",                        "the result of five squared"),
     ],
     subplots=_SHARED_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
@@ -251,7 +256,7 @@ G2_14 = SubjectCurriculum(
         _ex("(not true)",  False, "the form (not true)",  "the negation of true"),
         _ex("(not false)", True,  "the form (not false)", "the negation of false"),
         _ex("(not nil)",   True,  "the form (not nil)",   "the negation of nil"),
-        _ex("(not 0)",     False, "the form (not 0) — 0 is truthy", "the negation of 0"),
+        _ex("(not 0)",     False, "the form (not 0)", "the negation of 0"),
     ],
     subplots=_SHARED_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
@@ -276,7 +281,7 @@ G2_16 = SubjectCurriculum(
     subject_title="Coercion pitfalls in if",
     fable="ant-grasshopper",
     examples=[
-        _ex("(if 0 :a :b)", ":a", "the form (if 0 :a :b) — 0 is truthy in Clojure", "which branch (if 0 ...) takes"),
+        _ex("(if 0 :a :b)", ":a", "the if form on 0", "which branch (if 0 ...) takes"),
         _ex("(if \"\" :a :b)", ":a", "the form (if \"\" :a :b)", "which branch the empty string takes"),
         _ex("(if nil :a :b)", ":b", "the form (if nil :a :b)", "which branch nil takes"),
     ],
@@ -306,10 +311,10 @@ G2_18 = SubjectCurriculum(
     fable="ant-grasshopper",
     examples=[
         _ex("(do (def grain 5) grain)", 5,
-            "binding grain to 5, then referring to grain",
+            "the form (do (def grain 5) grain)",
             "the value the symbol grain evaluates to"),
         _ex("(do (def winter :coming) winter)", ":coming",
-            "binding winter to :coming, then referring to winter",
+            "the form (do (def winter :coming) winter)",
             "the value the symbol winter evaluates to"),
     ],
     subplots=_SHARED_SUBPLOTS, plan_pool=_PLAN_POOL,
@@ -323,7 +328,7 @@ G2_19 = SubjectCurriculum(
     examples=[
         _ex("'ant", "ant", "the quoted symbol 'ant", "the quoted symbol's value"),
         _ex("(quote grain)", "grain", "the form (quote grain)", "the value of (quote grain)"),
-        _ex("'(1 2 3)", [1, 2, 3], "the quoted list '(1 2 3)", "the unevaluated list as a value"),
+        _ex("'(1 2 3)", [1, 2, 3], "the quoted list '(1 2 3)", "the list as a value"),
     ],
     subplots=_SHARED_SUBPLOTS, plan_pool=_PLAN_POOL,
 )

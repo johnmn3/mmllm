@@ -58,7 +58,7 @@ G6_01 = SubjectCurriculum(grade=6, subject_id="G6-01",
     subject_title="Namespace as file", fable="ant-grasshopper",
     examples=[
         _ex("(name 'foo.bar)", "foo.bar",
-            "the symbol foo.bar standing in for a namespace name",
+            "the symbol foo.bar",
             "the string form of the namespace symbol foo.bar"),
         _ex("(name 'clojure.string)", "clojure.string",
             "the namespace symbol clojure.string",
@@ -139,8 +139,8 @@ G6_06 = SubjectCurriculum(grade=6, subject_id="G6-06",
             "the :private flag on metadata of '^:private x",
             "whether the :private metadata is true"),
         _ex("(:private (meta 'x))", None,
-            "the :private flag on plain metadata of 'x (none set)",
-            "the value of (:private (meta 'x)), which is nil"),
+            "the :private flag on plain metadata of 'x",
+            "the value (:private (meta 'x)) returns"),
     ], subplots=_NS_SUBPLOTS, plan_pool=_PLAN_G6)
 
 
@@ -165,10 +165,10 @@ G6_08 = SubjectCurriculum(grade=6, subject_id="G6-08",
     subject_title="Circular dependencies", fable="ant-grasshopper",
     examples=[
         _ex("(clojure.string/upper-case \"a\")", "A",
-            "a single-direction call from one namespace to clojure.string",
-            "the upper-cased string \"A\""),
+            "the safe non-circular call to clojure.string",
+            "the upper-cased string when no circular dependency exists"),
         _ex("(= 'a.b 'a.b)", True,
-            "whether two references to the same namespace symbol agree",
+            "the equality of two namespace symbols",
             "the value of (= 'a.b 'a.b)"),
     ], subplots=_NS_SUBPLOTS, plan_pool=_PLAN_G6)
 
@@ -274,10 +274,10 @@ G6_16 = SubjectCurriculum(grade=6, subject_id="G6-16",
     subject_title="Cleaning up requires", fable="ant-grasshopper",
     examples=[
         _ex("(contains? #{'clojure.string} 'clojure.string)", True,
-            "whether the require list still contains 'clojure.string",
+            "whether the set of required namespaces contains 'clojure.string",
             "the value of (contains? #{'clojure.string} 'clojure.string)"),
         _ex("(contains? #{'clojure.string} 'clojure.set)", False,
-            "whether the require list contains an unused 'clojure.set",
+            "whether the set of required namespaces contains 'clojure.set",
             "the value of (contains? #{'clojure.string} 'clojure.set)"),
     ], subplots=_NS_SUBPLOTS, plan_pool=_PLAN_G6)
 

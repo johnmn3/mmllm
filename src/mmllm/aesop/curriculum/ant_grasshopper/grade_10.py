@@ -58,9 +58,8 @@ exactly what it does.\""""),
     SubplotTemplate("""\
 A small notebook lay open {place} where the Ant had been studying
 syntax-quote. The page showed {concept_phrase}, with the form
-{form_display} circled in pencil. {grasshopper_phrase}, {emo_tired} of
-the lecture, agreed to write the form to settle once and for all
-what it produced."""),
+{form_display} circled in pencil. {grasshopper_phrase}, {emo_tired},
+agreed to write the form to settle once and for all what it produced."""),
 
     SubplotTemplate("""\
 At a stone tablet {place}, {ant_phrase} was teaching {grasshopper_phrase}
@@ -94,7 +93,7 @@ G10_01 = SubjectCurriculum(
     examples=[
         _ex("(quote (+ 1 2))", ["+", 1, 2],
             "the quoted form (quote (+ 1 2))",
-            "the value of (quote (+ 1 2)) — the unevaluated list"),
+            "the list (quote (+ 1 2)) yields"),
         _ex("'(1 2 3)", [1, 2, 3],
             "the quoted list '(1 2 3)",
             "the value of '(1 2 3)"),
@@ -226,10 +225,10 @@ G10_08 = SubjectCurriculum(
         # A function evaluates its args; a macro receives unevaluated forms.
         _ex("(do (defn add-fn [a b] (+ a b)) (add-fn 3 4))", 7,
             "a plain function adding two numbers",
-            "the result of calling a function (args evaluated)"),
+            "the result of calling a function"),
         _ex("(do (defmacro add-mac [a b] `(+ ~a ~b)) (add-mac 3 4))", 7,
             "a macro that emits the same addition form",
-            "the result the macro yields after expansion + eval"),
+            "the result the macro yields"),
     ],
     subplots=_MACRO_SUBPLOTS, plan_pool=_PLAN_G10,
 )
@@ -247,7 +246,7 @@ G10_09 = SubjectCurriculum(
             "whether (gensym) returns a symbol"),
         _ex("(let [a (gensym \"x_\") b (gensym \"x_\")] (= a b))", False,
             "two distinct gensyms with the same prefix",
-            "whether two fresh gensyms are equal (they aren't)"),
+            "whether two fresh gensyms are equal"),
     ],
     subplots=_MACRO_SUBPLOTS, plan_pool=_PLAN_G10,
 )
@@ -289,7 +288,7 @@ G10_11 = SubjectCurriculum(
             "what (#(* % %) 6) returns"),
         _ex("[1 #_ 2 3]", [1, 3],
             "the #_ form-skip reader macro",
-            "what [1 #_ 2 3] reads as (the 2 is dropped)"),
+            "what [1 #_ 2 3] reads as after the form-skip"),
     ],
     subplots=_MACRO_SUBPLOTS, plan_pool=_PLAN_G10,
 )

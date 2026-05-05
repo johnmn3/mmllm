@@ -1,4 +1,4 @@
-# Ant-grasshopper curriculum audit
+# ant-grasshopper curriculum audit
 
 Auto-generated audit — each subject's examples checked at 3 records per example, properly matched.
 

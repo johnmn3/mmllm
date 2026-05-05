@@ -120,7 +120,7 @@ G4_10 = SubjectCurriculum(grade=4, subject_id="G4-10",
     subject_title="keys and vals", fable="ant-grasshopper",
     examples=[
         _ex("(count (keys {:a 1 :b 2 :c 3}))", 3,
-            "the form (count (keys ...))", "the number of keys in the map"),
+            "the count of map keys", "the number of keys in the map"),
     ], subplots=_COLL_SUBPLOTS, plan_pool=_PLAN_G4)
 
 
@@ -128,7 +128,7 @@ G4_11 = SubjectCurriculum(grade=4, subject_id="G4-11",
     subject_title="Set literal", fable="ant-grasshopper",
     examples=[
         _ex("(count #{1 2 3})", 3, "the count of #{1 2 3}", "the size of the set"),
-        _ex("(count #{1 1 1})", 1, "the count of #{1 1 1} (dedup'd)", "the size of the set"),
+        _ex("(count #{1 1 1})", 1, "the count of the deduped set #{1 1 1}", "the size of the set"),
     ], subplots=_COLL_SUBPLOTS, plan_pool=_PLAN_G4)
 
 
@@ -164,7 +164,7 @@ G4_15 = SubjectCurriculum(grade=4, subject_id="G4-15",
     examples=[
         _ex("(first [10 20 30])", 10, "the first of the vector", "the first element"),
         _ex("(last  [10 20 30])", 30, "the last of the vector",  "the last element"),
-        _ex("(count (rest [10 20 30]))", 2, "the rest of [10 20 30] (count)", "the count after removing first"),
+        _ex("(count (rest [10 20 30]))", 2, "the count of the rest of [10 20 30]", "the count after removing first"),
     ], subplots=_COLL_SUBPLOTS, plan_pool=_PLAN_G4)
 
 
@@ -182,7 +182,7 @@ G4_17 = SubjectCurriculum(grade=4, subject_id="G4-17",
     subject_title="Immutability — assoc returns new", fable="ant-grasshopper",
     examples=[
         _ex("(let [m {:a 1}] (assoc m :a 99) m)", {":a": 1},
-            "the form showing assoc returns a new map", "the original map after assoc"),
+            "the form (let [m {:a 1}] (assoc m :a 99) m)", "the original map after assoc"),
     ], subplots=_COLL_SUBPLOTS, plan_pool=_PLAN_G4)
 
 

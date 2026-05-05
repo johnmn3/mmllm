@@ -1053,3 +1053,104 @@ SUBJECTS = {s.subject_id: s for s in (G1_01, G1_02, ..., G1_18)}
 
 That's the whole pattern. Repeat 12 times (one per grade), with
 appropriate-difficulty examples and subplots. Done.
+
+### 22. `farm` is a workplace, not an enclosure — `place_phrase` must use `on/at/by`, not `in`
+
+When a fable adds a new outdoor location, double-check its English
+preposition with the existing `place_phrase()` pool. The
+ant-grasshopper hand-audit caught `in the farm` rendered in 6+ records
+per grade (every grade hit it). A farm in English is a workplace —
+"on the farm", "at the farm", "by the farm" — not an enclosure. "In
+the farm" wrongly suggests being inside the farmhouse.
+
+Patched `place_phrase()` in `template.py` to map `farm` →
+`(on, at, by, near)` (no `in`). The audit harness `BAD_PLACE_PREP`
+list extended to include `in the farm`.
+
+When you add a new location to the fable's location pool, update both
+`place_phrase()` AND `BAD_PLACE_PREP` if its idiomatic preposition
+differs from the default `in/near/at the edge of/by` set. Spot-check
+the 4-5 prepositions of any new location in 3-5 sample renders before
+landing.
+
+### 23. SAID_PARTICIPLE applies to all speech-verbs, not just `said`
+
+The original SAID_PARTICIPLE check caught `said boasting`, `said
+puffed`, etc. — but the same parse problem occurs with other
+speech-verbs:
+
+```
+{grasshopper} declared {emo_proud}    ← "declared boasting at every turn" ✗
+{grasshopper} cried {emo_proud}       ← "cried swaggering through the underbrush" ✗
+```
+
+The pitfall #12 fix (comma-bracketing the EMO phrase) applies the
+same way:
+
+```
+{grasshopper} declared, {emo_proud},    ← reads correctly
+```
+
+The audit harness now flags `(said|declared|cried) (boasting|puffed|
+swaggering|with a smug grin)` — same regex shape, broader speech-verb
+allow-list.
+
+Discovered by the ant-grasshopper hand-audit when `declared {emo_proud}`
+turned up uncommad in grade-2's wager-with-stakes subplot — the
+pattern was the same as #12 but the existing audit only checked
+`said`.
+
+### 24. DOUBLE_FROM applies to other verb-tail trailers, not just "from a recent X"
+
+Pitfall #13 (DOUBLE_FROM) originally caught `from X-ing from a recent
+sprint` — an EMO_TIRED entry that ends with "from sprinting" /
+"from the morning's effort" followed by a template-supplied tail
+that adds another "from".
+
+The same bug pattern fires with OTHER trailers added by other fables:
+
+- ant-grasshopper grade 10 teacher subplot: `{emo_tired} of the lecture`
+  → "her legs heavy from sprinting **of the lecture**" — extra "of"
+  duplicates the EMO's terminal preposition.
+- ant-grasshopper grade 12 retrospective subplot: `{emo_tired} from
+  a season of song` → "weary from the morning's effort **from a
+  season of song**" — "from … from" stutter.
+- (also surviving in tortoise-hare grade 12: `{emo_tired} from a
+  season of races` — same pattern, same fix.)
+
+The audit harness DOUBLE_FROM regex now catches the generalized
+shape: `(from \w+ing|weary from \w+|drowsy from \w+|yawning at \w+|
+legs heavy from \w+) (from|of|at) (a |the )` — covers any
+EMO_TIRED entry that already terminates a prep phrase paired with a
+template tail that adds another preposition.
+
+When you write a new teacher / retrospective / character-fatigue
+subplot, the safe shape is `..., {emo_tired},` (comma-bracketed,
+no trailing prep) — let the EMO phrase carry all the prepositional
+content.
+
+### 25. DOUBLE_PREP also applies to noun-prefix phrases that carry a preposition
+
+Pitfall #21 (DOUBLE_PREP) caught the verb-prefix variant: `Halfway to
+{place}` → "Halfway to in the meadow". The ant-grasshopper hand-audit
+caught a NOUN-prefix variant from the same family:
+
+- `At the edge of a stockpile {place}` → "At the edge of a stockpile
+  **at the edge of the orchard**" / "**by the orchard**".
+
+The leading "At the edge of" supplies its own preposition phrase; when
+followed by `{place}` (which ALSO carries one), the result stutters.
+
+The audit harness now catches both shapes: a leading preposition-bearing
+clause (verb-or-noun phrase) followed by a place_phrase output. Safe
+fixes:
+
+- Drop the leading preposition: `At the edge of a stockpile` →
+  `Beside a small stockpile` (no prep before the noun).
+- Or use raw `{location.article} {location.name}` instead of
+  `{place}`: `At the edge of a stockpile by {location.article}
+  {location.name}` (controlled prep stack).
+
+Discovered by the ant-grasshopper hand-audit; 114 stockpile-prefix
+hits across the n=222 sample, all repaired by switching to "Beside
+a small stockpile". Patched in ant-grasshopper/grade_1.py.

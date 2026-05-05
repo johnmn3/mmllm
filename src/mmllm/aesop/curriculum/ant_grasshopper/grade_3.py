@@ -173,7 +173,7 @@ G3_12 = SubjectCurriculum(grade=3, subject_id="G3-12",
     subject_title="Scope vs namespace", fable="ant-grasshopper",
     examples=[
         _ex("(do (def g 5) (let [g 99] (+ g 1)))", 100,
-            "an inner let masking the outer def g",
+            "the let-shadowed form (do (def g 5) (let [g 99] (+ g 1)))",
             "the value computed inside the inner scope"),
     ], subplots=_NAMING_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
 
@@ -182,7 +182,7 @@ G3_13 = SubjectCurriculum(grade=3, subject_id="G3-13",
     subject_title="fn body returns last form", fable="ant-grasshopper",
     examples=[
         _ex("((fn [x] x x x 99) 1)", 99,
-            "a fn whose body has multiple forms; only the last is returned",
+            "the multi-form fn body",
             "the value of a fn body that ends with 99"),
     ], subplots=_NAMING_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
 
@@ -194,7 +194,7 @@ G3_14 = SubjectCurriculum(grade=3, subject_id="G3-14",
             "the do form (do 1 2 3)",
             "the value of (do 1 2 3)"),
         _ex("(do (+ 1 1) (+ 2 2) (+ 3 3))", 6,
-            "a do with three forms — last wins",
+            "a do with three forms",
             "the value of (do (+ 1 1) (+ 2 2) (+ 3 3))"),
     ], subplots=_NAMING_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
 
@@ -212,7 +212,7 @@ G3_16 = SubjectCurriculum(grade=3, subject_id="G3-16",
     subject_title="Name collision: namespace vs let", fable="ant-grasshopper",
     examples=[
         _ex("(let [+ 99] +)", 99,
-            "a let that shadows the + function",
+            "the let-shadowed form (let [+ 99] +)",
             "the value bound to the (locally shadowed) +"),
     ], subplots=_NAMING_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
 

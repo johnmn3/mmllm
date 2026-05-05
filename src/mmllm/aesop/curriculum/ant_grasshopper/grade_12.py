@@ -34,10 +34,10 @@ nodded — for once {emo_tired} enough to listen."""),
 
     SubplotTemplate("""\
 {ant_phrase} had filled an entire notebook over the long summer with
-tools and patterns: transducers, channels, specs, tests. {place}, the
-next entry was {concept_phrase}, and the form was {form_display}.
-{grasshopper_phrase}, {emo_proud} but more reflective than usual,
-agreed to write the form into the REPL."""),
+tools and patterns: transducers, channels, specs, tests. Today
+{place}, the next entry was {concept_phrase}, and the form was
+{form_display}. {grasshopper_phrase}, {emo_proud} but more reflective
+than usual, agreed to write the form into the REPL."""),
 
     SubplotTemplate("""\
 "This isn't a song trick," {ant} said {place}, {emo_patient}. "It's a
@@ -53,10 +53,10 @@ said the form to remember was {form_display}; {grasshopper_phrase}
 agreed to submit it."""),
 
     SubplotTemplate("""\
-{grasshopper_phrase}, {emo_tired} from a season of song, was finally
-willing to study patterns. {ant_phrase} pointed {place} at
-{concept_phrase}. The form {form_display} was the canonical example;
-the REPL would confirm what it produced."""),
+{grasshopper_phrase}, {emo_tired}, was finally willing to study
+patterns. {ant_phrase} pointed {place} at {concept_phrase}. The form
+{form_display} was the canonical example; the REPL would confirm what
+it produced."""),
 
     SubplotTemplate("""\
 A banquet at the end of the season {place} brought together every
@@ -183,11 +183,11 @@ G12_06 = SubjectCurriculum(
         # We can run small spec predicates portably.
         _ex("(do (require '[clojure.spec.alpha :as s]) "
             "(s/valid? int? 42))", True,
-            "(s/valid? int? 42) — a basic spec check",
+            "the spec check (s/valid? int? 42)",
             "whether 42 conforms to the int? spec"),
         _ex("(do (require '[clojure.spec.alpha :as s]) "
             "(s/valid? string? 42))", False,
-            "(s/valid? string? 42) — a failing spec check",
+            "the failing spec check (s/valid? string? 42)",
             "whether 42 conforms to the string? spec"),
     ],
     subplots=_REAL_SUBPLOTS, plan_pool=_PLAN_G12,

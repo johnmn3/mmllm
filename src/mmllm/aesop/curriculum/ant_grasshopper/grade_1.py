@@ -55,8 +55,13 @@ declared that {grasshopper_he_she} could see the answer at a glance.
     # 2. The wager / stockpile-tally template — variants of the same
     #    "wager etched / chalked / scratched" beat so the wager doesn't
     #    always read identically.
+    #    NOTE: avoid the prefix "at the edge of a stockpile {place}" —
+    #    {place} carries its own preposition, producing pitfall-#21
+    #    DOUBLE_PREP stacks like "at the edge of a stockpile at the
+    #    edge of the orchard". "Beside a small stockpile" lets {place}
+    #    stand alone without competing prepositions.
     SubplotTemplate("""\
-At the edge of a stockpile {place}, {grasshopper_phrase} sketched a
+Beside a small stockpile {place}, {grasshopper_phrase} sketched a
 small wager into the dust: whoever guessed the result of {form_display}
 first would win the right to set the next day's count.
 {ant_phrase}, {emo_patient}, said it was simpler to type the form into
@@ -93,7 +98,7 @@ try."""),
     SubplotTemplate("""\
 A small audience of meadow creatures had gathered {place} to watch
 {grasshopper_phrase} attempt to outwit {ant_phrase} at reading the
-REPL. {ant} pointed to {concept_phrase} and read out the form aloud:
+REPL. {ant} pointed to {concept_phrase} and read the form aloud:
 {form_display}. The crowd waited to see who would correctly write the
 form to submit."""),
 
@@ -392,10 +397,10 @@ G1_10 = SubjectCurriculum(
     fable="ant-grasshopper",
     examples=[
         _ex("(+ 1 2) ; sum of one and two", 3,
-            "the form (+ 1 2) followed by a comment",
+            "the form with a trailing comment",
             "the result of (+ 1 2) ignoring the comment"),
         _ex("42 ;; the answer", 42,
-            "the literal 42 with a trailing comment",
+            "the literal with a trailing comment",
             "the value of 42"),
     ],
     subplots=_SHARED_SUBPLOTS,
@@ -410,10 +415,10 @@ G1_11 = SubjectCurriculum(
     fable="ant-grasshopper",
     examples=[
         _ex("(+    1    2)", 3,
-            "the form (+ 1 2) with extra spaces",
+            "the spaced-out form",
             "the result of the form"),
         _ex("(+\n  1\n  2)", 3,
-            "the form (+ 1 2) split across lines",
+            "the line-broken form",
             "the result of the form"),
     ],
     subplots=_SHARED_SUBPLOTS,

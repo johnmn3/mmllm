@@ -459,6 +459,7 @@ def place_phrase(scene: "Scene", location: ont.Location) -> str:
       - hilltops: 'on / atop / near / at the edge of'
       - roads:    'on / along / near'
       - beaches:  'on / near / by'
+      - farms:    'on / at / by / near'  — workspace location, not interior
       - others (meadow, forest, woods, garden, orchard, etc.):
                   'in / near / at the edge of / by'
 
@@ -481,9 +482,10 @@ def place_phrase(scene: "Scene", location: ont.Location) -> str:
         prep = scene.rng.choice(("on", "near", "by", "along"))
     elif name == "farm":
         # "in the farm" reads as inside a building. Idiomatic English
-        # is "on the farm" / "at the farm" / "near the farm". Caught by
-        # the deep-audit pass that ran after grades 2-12 surfaced
-        # repeated `BAD_PLACE_PREP` for "in the farm". Pitfall #17 family.
+        # is "on the farm" / "at the farm" / "near the farm" — farm is
+        # a workspace, not an enclosure. Caught independently by the
+        # ant-grasshopper deep-audit (which introduced `farm`) and the
+        # goose-eggs deep-audit; pitfall-#22 family.
         prep = scene.rng.choice(("on", "at", "near", "by"))
     else:
         prep = scene.rng.choice(("in", "near", "at the edge of", "by"))
