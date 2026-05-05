@@ -483,7 +483,10 @@ def _th_speed_comparison(scene: Scene) -> Record:
     tortoise_speed = scene.pick_int(1, 3)
     hours          = scene.pick_int(2, 6)
     miles_ahead    = (hare_speed - tortoise_speed) * hours
-    _intro         = _aesopian_intro(scene, "tortoise-hare", location)
+
+    _intro  = _aesopian_intro(scene, "tortoise-hare", location)
+    proud   = scene.rng.choice(EMO_PROUD)
+    patient = scene.rng.choice(EMO_PATIENT)
 
     if orient == "distance":
         # Given hare-speed, tortoise-speed, hours; compute miles-ahead.
@@ -498,21 +501,88 @@ def _th_speed_comparison(scene: Scene) -> Record:
             body=App("-", [Var("hare-distance"), Var("tortoise-distance")]),
         )
         answer = evaluate(expr)
-        user_msg = (
-            f"{_intro}{species_phrase(hare)} and {species_phrase(tortoise)} agreed "
-            f"to a steady race through {location.article} {location.name}. "
-            f"{cap(smart_pronoun(hare, [tortoise]))} ran at {hare_speed} "
+
+        # Six narrative subplots — same arithmetic (hare_dist - tortoise_dist
+        # over `hours`) but each grounds the abstract speeds in a small
+        # roadside drama. Both run for the same `hours` along the same path;
+        # the gap is what we're asked to find.
+        speed_distance_subplots = [
+            # 1) classic agreement at the starting stump
+            f"{hare.name} the hare and {tortoise.name} the tortoise had "
+            f"at last agreed to a fair test along the path. "
+            f"{cap(hare.he_she)} set off {proud} at {hare_speed} "
+            f"{unit(hare_speed, 'mile')} per hour, certain the matter would "
+            f"be settled before lunch. {tortoise.name} kept a quiet "
+            f"{tortoise_speed} {unit(tortoise_speed, 'mile')} per hour, "
+            f"{patient}, and never glanced sideways. They had agreed to "
+            f"run for exactly {n_unit(hours, 'hour')} and then measure the "
+            f"distance between them.",
+
+            # 2) sun-warmed lane after market
+            f"On a sun-warmed lane leading away from the village, "
+            f"{hare.name} bounded out {proud} at {hare_speed} "
             f"{unit(hare_speed, 'mile')} per hour, while {tortoise.name} "
-            f"kept a steady {tortoise_speed} "
-            f"{unit(tortoise_speed, 'mile')} per hour. Both ran for "
-            f"exactly {n_unit(hours, 'hour')}.\n\n"
-            f"Question: How many miles ahead is {hare.name} after "
-            f"{n_unit(hours, 'hour')}?"
+            f"set off behind at a deliberate {tortoise_speed} "
+            f"{unit(tortoise_speed, 'mile')} per hour. The animals of the "
+            f"meadow had agreed to call time after {n_unit(hours, 'hour')} "
+            f"of running, then walk out and see how far apart the two had "
+            f"ended up. {tortoise.name} pressed on {patient}, eyes never "
+            f"leaving the road.",
+
+            # 3) hare's swagger out of the gate
+            f"{hare.name} swaggered to the line {proud} while "
+            f"{tortoise.name} stood quietly waiting. At the call, "
+            f"{hare.name} took off at {hare_speed} "
+            f"{unit(hare_speed, 'mile')} per hour, kicking up small clouds "
+            f"of dust, and {tortoise.name} began plodding forward at "
+            f"{tortoise_speed} {unit(tortoise_speed, 'mile')} per hour. "
+            f"Each had pledged to keep that pace without rest for "
+            f"{n_unit(hours, 'hour')} — only then would the spectators "
+            f"measure the gap.",
+
+            # 4) two paces beneath the elms
+            f"Beneath the row of elms that lined the racing path, two "
+            f"very different paces fell into rhythm. {hare.name}, "
+            f"{proud}, sprang ahead at {hare_speed} "
+            f"{unit(hare_speed, 'mile')} per hour. {tortoise.name}, "
+            f"{patient}, set down each foot in turn at exactly "
+            f"{tortoise_speed} {unit(tortoise_speed, 'mile')} per hour and "
+            f"refused to be hurried. The pact was straightforward: keep "
+            f"those paces for {n_unit(hours, 'hour')}, then let the lead "
+            f"speak for itself.",
+
+            # 5) old judge with a sundial
+            f"An old badger had been chosen as judge, and produced a "
+            f"sundial to mark the time. At his nod, {hare.name} bolted "
+            f"forward {proud} at {hare_speed} "
+            f"{unit(hare_speed, 'mile')} per hour, certain that "
+            f"{tortoise.name} could never close any gap. {tortoise.name}, "
+            f"{patient}, walked steadily at {tortoise_speed} "
+            f"{unit(tortoise_speed, 'mile')} per hour. The badger had said "
+            f"plainly: after {n_unit(hours, 'hour')} of pace-keeping, "
+            f"he would measure the lead and call it.",
+
+            # 6) leisurely course along the brook
+            f"The course wound beside a chuckling brook, and the morning "
+            f"was already growing warm. {hare.name}, {proud}, leapt away "
+            f"at a confident {hare_speed} {unit(hare_speed, 'mile')} per "
+            f"hour. {tortoise.name} followed {patient}, holding to "
+            f"{tortoise_speed} {unit(tortoise_speed, 'mile')} per hour as "
+            f"if it were a heartbeat. They had each promised to run for "
+            f"{n_unit(hours, 'hour')}, no more and no less, before "
+            f"comparing where they stood.",
+        ]
+
+        body = _render_subplot(scene, speed_distance_subplots)
+        what_q = (f"how many miles ahead {hare.name} is after "
+                  f"{n_unit(hours, 'hour')}")
+        user_msg = (
+            f"{intro}{body}\n\n"
+            f"{question_phrase(scene, what_q)}"
         )
-        result_text = f"{hare.name} is {answer} miles ahead."
-        narrative   = (
-            f"I'll compute each runner's distance by multiplying speed by "
-            f"time, then subtract."
+        plan = (
+            f"I multiply each runner's speed by the shared hours to get "
+            f"their distances, then subtract."
         )
         chapter_name = "speed-comparison-distance"
     elif orient == "hours":
@@ -1040,9 +1110,10 @@ def _cp_enough_stones(scene: Scene) -> Record:
     ]
 
     body = _render_subplot(scene, enough_stones_subplots)
+    stones_with_count = n_unit(k, stone.name, stone.plural)
     user_msg = (
         f"{intro}{body}\n\n"
-        f"{question_phrase(scene, f'whether the water level reaches the target after {crow.name} drops in all {k} {stone.plural} (true if it does, false otherwise)')}"
+        f"{question_phrase(scene, f'whether the water level reaches the target after {crow.name} drops in all {stones_with_count} (true if it does, false otherwise)')}"
     )
 
     plan = (
@@ -1168,9 +1239,10 @@ def _ge_total_yield(scene: Scene) -> Record:
     ]
 
     body = _render_subplot(scene, total_yield_subplots)
+    days_phrase = n_unit(days, "day")
     user_msg = (
         f"{intro}{body}\n\n"
-        f"{question_phrase(scene, f'how many eggs the goose laid in total over those {n_unit(days, 'day')}')}"
+        f"{question_phrase(scene, f'how many eggs the goose laid in total over those {days_phrase}')}"
     )
 
     plan = "I multiply the eggs per day by the number of days."
@@ -2048,28 +2120,100 @@ def _fg_jumps_needed(scene: Scene) -> Record:
     )
     answer = evaluate(expr)
 
-    _intro = _aesopian_intro(scene, "fox-grapes")
+    intro = _aesopian_intro(scene, "fox-grapes")
+    hungry    = scene.rng.choice(EMO_HUNGRY)
+    desperate = scene.rng.choice(EMO_DESPERATE)
+    regretful = scene.rng.choice(EMO_REGRETFUL)
+
+    # Six narrative subplots — same arithmetic (ceil(grape-height /
+    # per-jump)) but each varies the fruit, the holder, and the
+    # setting. The fox's mood ranges from hungry hope through frantic
+    # leaping to dignified rationalization.
+    jumps_needed_subplots = [
+        # 1) classic — purple grapes on an arbor in the orchard
+        f"In the corner of an orchard {fox.name} the fox stopped beneath "
+        f"a low arbor where a heavy bunch of purple grapes hung "
+        f"{n_unit(grape_height, 'foot', 'feet')} above the trodden grass. "
+        f"{cap(fox.he_she)} was {hungry}, and the dusty bloom on each "
+        f"grape made {fox.his_her} mouth water. A trial spring carried "
+        f"{fox.him_her} {n_unit(per_jump, 'foot', 'feet')} into the air, "
+        f"and {fox.he_she} reasoned that each leap, if {fox.he_she} could "
+        f"somehow build upon the last, would bring the prize "
+        f"{per_jump} {unit(per_jump, 'foot', 'feet')} closer.",
+
+        # 2) ripe apples just out of reach in a farmer's yard
+        f"A farmer's apple tree leaned over the low fence of the yard, "
+        f"its lowest red apple dangling exactly "
+        f"{n_unit(grape_height, 'foot', 'feet')} above the packed earth. "
+        f"{cap(species_phrase(fox))}, {desperate} after a day without "
+        f"food, padded to a stop and crouched. {cap(fox.he_she)} found "
+        f"that {fox.his_her} hardest spring lifted {fox.him_her} "
+        f"{n_unit(per_jump, 'foot', 'feet')} skyward — no more. In "
+        f"{fox.his_her} mind {fox.he_she} began tallying how many such "
+        f"bounds, taken in dreamlike succession, would close the gap "
+        f"between paws and apple.",
+
+        # 3) blackberries trailing over a wooden cart
+        f"At the edge of a country lane stood a high-sided wooden cart, "
+        f"and over its rim spilled long blackberry canes a passing child "
+        f"had laid there to dry. The darkest berry hung "
+        f"{n_unit(grape_height, 'foot', 'feet')} above the rutted road. "
+        f"{fox.name}, {hungry}, circled the cart twice. {cap(fox.he_she)} "
+        f"tested {fox.his_her} jump and found it good for "
+        f"{n_unit(per_jump, 'foot', 'feet')} of clean lift. {cap(fox.he_she)} "
+        f"settled into the dust to count exactly how many such springs, "
+        f"each adding cleanly to the last, would carry {fox.him_her} to "
+        f"the berry.",
+
+        # 4) pears on a trellis in the kitchen garden
+        f"Beyond the kitchen garden's hedge, a tall trellis held up a "
+        f"pear tree's heaviest bough; from it the lowest golden pear "
+        f"swung {n_unit(grape_height, 'foot', 'feet')} above the gravel "
+        f"path. {fox.name}, {hungry}, took {fox.his_her} measure with a "
+        f"single trial leap — a tidy {n_unit(per_jump, 'foot', 'feet')} "
+        f"of upward bound, no more — and crouched to think. If each "
+        f"successive jump could be stacked on the gain of the last, how "
+        f"many would {fox.he_she} need before {fox.his_her} teeth could "
+        f"close on the pear's freckled skin?",
+
+        # 5) plums on a high market display in the square
+        f"The market square was almost empty in the late hour when "
+        f"{fox.name} slipped between the wooden stalls. A merchant had "
+        f"strung up clusters of dark plums on a high display, and the "
+        f"lowest swung {n_unit(grape_height, 'foot', 'feet')} above the "
+        f"flagstones. {cap(species_phrase(fox))}, {desperate}, eyed the "
+        f"shadowed fruit and tested a leap — {fox.his_her} best effort "
+        f"lifted {fox.him_her} only {n_unit(per_jump, 'foot', 'feet')} "
+        f"into the dusty air. Quietly, in the half-light, {fox.he_she} "
+        f"counted the leaps it would take, each one a clean step closer.",
+
+        # 6) figs above a vineyard wall — and a touch of regret
+        f"Along the white stone wall that ringed an old vineyard, a fig "
+        f"tree had grown over the top and dropped its fruit on the wrong "
+        f"side. The lowest dark fig hung {n_unit(grape_height, 'foot', 'feet')} "
+        f"above the dusty lane where {fox.name} the fox now stood, "
+        f"{regretful} that the climb up the slope had cost {fox.him_her} "
+        f"so much breath for so little gain. {cap(fox.he_she)} sprang "
+        f"once to test {fox.him_her}self: the bound carried {fox.him_her} "
+        f"{n_unit(per_jump, 'foot', 'feet')} aloft. {cap(fox.he_she)} "
+        f"settled to count how many such efforts, each lifting "
+        f"{per_jump} {unit(per_jump, 'foot', 'feet')}, would suffice.",
+    ]
+
+    body = _render_subplot(scene, jumps_needed_subplots)
     user_msg = (
-        f"{_intro}The grapes hung from a vine {n_unit(grape_height, 'foot', 'feet')} "
-        f"above the ground. {species_phrase(fox)} could leap "
-        f"{n_unit(per_jump, 'foot', 'feet')} straight up each try, and "
-        f"each leap brought the grapes that much closer to reach.\n\n"
-        f"Question: What is the smallest number of leaps {fox.name} needs "
-        f"to reach the grapes?"
+        f"{intro}{body}\n\n"
+        f"{question_phrase(scene, f'the smallest number of leaps {fox.name} needs to reach the fruit')}"
     )
 
-    code_block  = render_code(expr, form=scene.code_form(), value=answer)
-    result_text = f"{fox.name} needs {n_unit(answer, 'jump')}."
-    narrative   = (
-        "I ceiling-divide grape-height by per-jump (add per-jump-1 "
-        "before quot)."
+    plan = (
+        "I ceiling-divide the fruit's height by the per-jump height "
+        "(adding per-jump minus one before quot)."
     )
     return _finalize(
         scene,
         user_msg=user_msg,
-        narrative=narrative,
-        code_block=code_block,
-        result_text=result_text,
+        plan=plan,
         value=answer,
         expr=expr,
         fable="fox-grapes",
@@ -2416,6 +2560,7 @@ def gen_lion_bulls(scene: Scene) -> Record:
 def _lb_days_to_defeat(scene: Scene) -> Record:
     """Lion takes D days per bull. There are N bulls. Total days?"""
     lion = scene.pick_character(role_classes=("predator",), species="lion", gender=scene.pick_choice(["m", "f"]))
+    location = scene.pick_location(tags_any=("path",), indoor=False)
     n_bulls    = scene.pick_int(3, 6)
     days_each  = scene.pick_int(1, 4)
 
@@ -2426,24 +2571,104 @@ def _lb_days_to_defeat(scene: Scene) -> Record:
     )
     answer = evaluate(expr)
 
-    _intro = _aesopian_intro(scene, "lion-bulls")
+    intro     = _aesopian_intro(scene, "lion-bulls", location)
+    patient   = scene.rng.choice(EMO_PATIENT)
+    desperate = scene.rng.choice(EMO_DESPERATE)
+
+    # Six narrative subplots — same arithmetic (bulls × days-per-bull =
+    # total days). Each grounds the count in a distinct setting and
+    # captures the lion's patient strategy and the bulls' growing
+    # isolation as their unity dissolves.
+    days_to_defeat_subplots = [
+        # 1) open meadow — herd's old grazing ground after the quarrel
+        f"For many seasons, {n_unit(n_bulls, 'bull')} had stood "
+        f"shoulder to shoulder in an open meadow, and no predator had "
+        f"dared approach. Then a quarrel split them, and they wandered "
+        f"separately into the long grass. {species_phrase(lion)} "
+        f"watched from a fold in the land {patient}, knowing each bull "
+        f"on its own was no longer the same problem as the herd "
+        f"together. {cap(lion.he_she)} reckoned that, hunting alone, "
+        f"{lion.he_she} would need a careful "
+        f"{n_unit(days_each, 'day')} of stalking and waiting for every "
+        f"single bull. {lion.name} settled in to count the days the "
+        f"whole undertaking would cost.",
+
+        # 2) hilltop pasture at dawn, herd dispersed
+        f"On a wide hilltop pasture, {n_unit(n_bulls, 'bull')} had "
+        f"been grazing under the morning sun until petty rivalries "
+        f"pulled them apart. Thorn moved north of the spring, Boulder "
+        f"south, and the rest scattered to lower slopes. "
+        f"{species_phrase(lion)} crouched among the scrub at the ridge "
+        f"{patient}, taking the long view. {cap(lion.he_she)} had "
+        f"learned, after one bruising failure, that a single bull on "
+        f"open ground took {lion.him_her} a measured "
+        f"{n_unit(days_each, 'day')} to bring down. With the herd now "
+        f"broken, {lion.name} began to figure how many days the "
+        f"entire hunt would consume.",
+
+        # 3) valley grassland by a slow stream
+        f"In a valley grassland threaded by a slow stream, "
+        f"{n_unit(n_bulls, 'bull')} that had once watered together "
+        f"now drank at separate bends. {species_phrase(lion)} moved "
+        f"through the reeds {patient}, never pressing, never showing "
+        f"more than a flick of tail. From the heron-haunted bank, "
+        f"{lion.he_she} watched Gale wade in alone, far from the "
+        f"others. {cap(lion.he_she)} counted on "
+        f"{n_unit(days_each, 'day')} per bull to do the work properly "
+        f"— no rushing, no warning bellows carrying across the water. "
+        f"{lion.name} sat back to total what those days, multiplied "
+        f"across the broken herd, would come to.",
+
+        # 4) fence-line they no longer respect
+        f"There had once been an old fence-line that the {n_bulls} "
+        f"{unit(n_bulls, 'bull')} had walked together every evening, "
+        f"horns clacking against the rails. Now they drifted past it "
+        f"singly, paying it no mind, and the fence stood as a reminder "
+        f"of a trust that had broken. {species_phrase(lion)}, "
+        f"{patient}, padded along the far side. {cap(lion.he_she)} "
+        f"counted on a measured {n_unit(days_each, 'day')} for each "
+        f"of the {n_bulls} {unit(n_bulls, 'bull')}, hunted one at a "
+        f"time. The lion sat in the shade of the rails and worked out "
+        f"how many days in all that patient labor would take.",
+
+        # 5) clearing surrounded by tall grass
+        f"At the center of a wide clearing rimmed in shoulder-high "
+        f"grass, {n_unit(n_bulls, 'bull')} had been grazing in a "
+        f"loose, suspicious ring — no longer a single mass. "
+        f"{species_phrase(lion)} circled the perimeter {patient}, the "
+        f"grass swallowing every footfall. From a tussock, "
+        f"{lion.he_she} watched a young bull turn its back and wander "
+        f"deeper into the green. The lion knew from long practice that "
+        f"solitary prey meant {n_unit(days_each, 'day')} of patient "
+        f"work for each kill. As {desperate} bellows sometimes drifted "
+        f"through the clearing at dusk, {lion.name} sat down to tally "
+        f"what the whole campaign would cost in days.",
+
+        # 6) edge of the forest where bulls graze
+        f"At the edge of the forest, where the trees gave way to a "
+        f"grazing strip, {n_unit(n_bulls, 'bull')} had wandered out "
+        f"one by one rather than as the close-pressed mass they used "
+        f"to be. {species_phrase(lion)} watched from the deeper shade "
+        f"{patient}, ears half-folded, tail quiet. {cap(lion.he_she)} "
+        f"knew the terrain well enough to be certain of "
+        f"{lion.his_her} timing — {n_unit(days_each, 'day')} of "
+        f"stalking and one sudden lunge, no more, no less, for each "
+        f"bull alone. With the herd's old solidarity in shreds, "
+        f"{lion.name} began to add up how many days of careful hunting "
+        f"lay ahead.",
+    ]
+
+    body = _render_subplot(scene, days_to_defeat_subplots)
     user_msg = (
-        f"{_intro}{species_phrase(lion)} watched {n_unit(n_bulls, 'bull')} grazing. "
-        f"Once they scattered, {lion.he_she} could attack one at a time, "
-        f"taking {n_unit(days_each, 'day')} per bull.\n\n"
-        f"Question: How many total days does {lion.name} need to defeat "
-        f"all {n_bulls} bulls?"
+        f"{intro}{body}\n\n"
+        f"{question_phrase(scene, f'how many total days {lion.name} will need to defeat all {n_bulls} bulls')}"
     )
 
-    code_block  = render_code(expr, form=scene.code_form(), value=answer)
-    result_text = f"{lion.name} needs {n_unit(answer, 'day')}."
-    narrative   = "I multiply the number of bulls by the days needed for each."
+    plan = "I multiply the number of bulls by the days needed for each."
     return _finalize(
         scene,
         user_msg=user_msg,
-        narrative=narrative,
-        code_block=code_block,
-        result_text=result_text,
+        plan=plan,
         value=answer,
         expr=expr,
         fable="lion-bulls",
