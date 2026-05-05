@@ -2442,6 +2442,7 @@ def _do_eval_battery(base, ckpt_step, bank, log_path,
     env["MMLLM_BANK_QUERY_MODE"]    = bank_query_mode
     env["MMLLM_BANK_FEEDBACK_MODE"] = bank_feedback_mode
     env["MMLLM_LONG_TIER_MIX"]      = long_tier_mix
+    env["PYTORCH_CUDA_ALLOC_CONF"]  = "expandable_segments:True"
 
     print(f"=== eval battery base={base} ckpt={ckpt_step} log={log_p} ===",
           flush=True)

@@ -1380,17 +1380,24 @@
     (println (format "  battery: %d bpc + %d agent evals on ckpt %s"
                      (count bpc-specs) (count agent-specs)
                      (or ckpt-step "init")))
-    (let [t0 (time/time)]
+    (let [t0           (time/time)
+          empty-cache! (fn []
+                         (try
+                           (when (.is_available torch/cuda)
+                             (.empty_cache torch/cuda))
+                           (catch python/Exception _ nil)))]
       (doseq [[name path] bpc-specs]
         (try
           (run-bpc-on-loaded m cfg ckpt-step path name log-path)
           (catch python/Exception e
-            (println (format "  WARN: bpc[%s] failed: %s" name e)))))
+            (println (format "  WARN: bpc[%s] failed: %s" name e))))
+        (empty-cache!))
       (doseq [[name path] agent-specs]
         (try
           (run-agent-on-loaded m ckpt-step path name n-samples gen-len log-path)
           (catch python/Exception e
-            (println (format "  WARN: agent[%s] failed: %s" name e)))))
+            (println (format "  WARN: agent[%s] failed: %s" name e))))
+        (empty-cache!))
       (println (format "  battery done in %.1fs" (- (time/time) t0))))))
 
 ;;; ─────────────────────── intermediate ablation eval ───────────────────────
