@@ -139,7 +139,7 @@ G7_06 = SubjectCurriculum(grade=7, subject_id="G7-06",
     examples=[
         _ex("((fn [x] {:pre [(pos? x)]} (* x 2)) 5)", 10,
             "a fn with a :pre condition that is satisfied",
-            "the value 10 returned when the precondition holds"),
+            "the value returned when the precondition holds and 5 is doubled"),
         _ex("(try ((fn [x] {:pre [(pos? x)]} x) -1) (catch Exception e :pre-failed))",
             ":pre-failed",
             "a :pre condition that fails, caught by surrounding try",

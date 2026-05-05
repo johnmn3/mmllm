@@ -176,6 +176,9 @@ def _build_placeholders(scene: Scene,
         "tortoise_he_she_cap": cap(tortoise.he_she),
         "hare_his_her":    hare.his_her,
         "tortoise_his_her": tortoise.his_her,
+        # Object-case pronouns (for "asked X to ...", "told X that ...")
+        "hare_him_her":     hare.him_her,
+        "tortoise_him_her": tortoise.him_her,
 
         # place
         "place":           place_phrase(scene, location),

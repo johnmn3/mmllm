@@ -253,25 +253,203 @@ of the form.
 
 ## Common mistakes (anti-patterns to avoid)
 
-- **Hard-coding values in subplots.** A template like
-  `"{hare} pointed to the form (+ 1 2)..."` only works for ONE
-  example. Use `{form_display}` and `{concept_phrase}`.
-- **Revealing the answer in narrative.** A subplot that says
-  "the result is 3" leaks the answer. Always have the subplot
-  describe the form, not its value.
-- **Subplots that don't grammatically fit small concept_phrases.**
-  Test with concept_phrases like `"the value 0"`, `"the integer 7"`,
-  AND with longer ones like `"the nested form (- 100 (* 5 5))"`.
-  Templates must read well in both cases.
-- **Single-shot variety.** Generating 222 records but only seeing
-  20 unique surface forms means subplot pool too small or character
-  pool too narrow. Aim for variety_score = unique_user_msg / total
-  ≥ 0.95.
-- **Genericizing the fable away.** The whole point is that the
-  reader feels they're inside YOUR fable. Use the fable's
-  characters, settings, props, and moral dynamic. Don't write
-  generic "a clever student approached the problem" subplots —
-  use the named characters constantly.
+These are bugs the tortoise-hare reference implementation found and
+fixed during its own audit pass. Apply the lessons up front.
+
+### 1. Pronoun case bugs (subjective vs objective)
+
+A template like `"asked {hare_he_she} to actually..."` produces
+ungrammatical text when the character has gender="n":
+
+> "asked **they** to actually..."   ← wrong, should be "asked them to"
+
+`{hare_he_she}` returns *subjective-case* pronouns ("he"/"she"/"they")
+which only fit subject position. For object position use
+`{hare_him_her}` ("him"/"her"/"them"). The placeholder set in
+`generator.py`'s `_build_placeholders` exposes both:
+
+| Position | Placeholder | Renders as |
+|---|---|---|
+| Subject  | `{hare_he_she}` | he / she / they |
+| Object   | `{hare_him_her}` | him / her / them |
+| Possess  | `{hare_his_her}` | his / her / their |
+
+If you write a template with a character in OBJECT position, ALWAYS
+use the `_him_her` form. Audit fix tier-1.
+
+### 2. Answer-leak in question_what or concept_phrase
+
+The eval-first design's whole point is that the answer never appears
+in the user_msg or assistant_msg outside the eval form. Common
+violations:
+
+- `question_what="the value 10 returned when ..."` — leaks 10.
+- `concept_phrase="the form (* 7 6) (a correct form among many possible
+  attempts)"` — meta-commentary that includes the answer 42 by
+  coincidence ("possible **attempts**" → "**42** possible..."): not
+  caught by simple integer checks.
+
+Rule: `concept_phrase` and `question_what` must NOT contain the
+answer's literal value. Reference the operation: `"the value when 5
+is doubled"` instead of `"the value 10 returned"`. Audit fix tier-1.
+
+### 3. Concept_phrase too long / contains meta-commentary
+
+Concept_phrases work well when they're short, factual, noun-phrase
+descriptors of the form. They fail when they include instructional
+asides:
+
+> BAD: `"the form (+ 1 2) (a correct form; not all guesses are correct,
+>        but mistakes in the REPL are recoverable)"`
+> GOOD: `"the form (+ 1 2)"`
+
+The instructional aside leaks into the user_msg awkwardly because the
+subplot may interpolate concept_phrase mid-sentence: "...drew {concept}
+on a stone" becomes a 100-char run-on with parenthetical. Keep
+concept_phrase under 60 chars; put pedagogical commentary in the
+subject's lesson_plan section, not in the example's concept_phrase.
+
+### 4. Concept_phrase that duplicates the form's literal text
+
+If `concept_phrase = "the form (assoc {:a 1} :b 2)"` AND the same
+subplot also interpolates `{form_display}` (the form rendered as
+`` `(assoc {:a 1} :b 2)` ``), the rendered user_msg contains the form
+TWICE, once with backticks and once without:
+
+> "...whoever guessed the result of `(assoc {:a 1} :b 2)` first..."
+> "...than to argue about **the form (assoc {:a 1} :b 2)**."
+
+Both refer to the same thing; the second feels redundant. Prefer
+abstract concept_phrases (`"the assoc form"`, `"the predicate"`,
+`"the multi-arity sum"`) over phrases that re-emit the literal form.
+
+### 5. `generate_subject(sub, n_per_example=N)` returns N × len(examples) records
+
+A common pitfall when writing audit code: the return value is
+**N records per example**, not N records total. If the subject has 6
+examples and you call with `n_per_example=10`, you get 60 records
+covering all 6 examples — not 10 records of one example.
+
+To run a check tied to ONE example's expected value, filter:
+
+```python
+recs = generate_subject(sub, n_per_example=N, seed=...)
+target = [r for r in recs if r.code_str == example.form]
+```
+
+This bug bit the first cut of the audit harness — early reports of
+"175 issues" turned out to be 169 false positives caused by checking
+records of example A against example B's expected value.
+
+### 6. Form stripping requires escape-aware regex when checking asst_msg
+
+The assistant message contains the JSON tool call:
+
+```json
+{"tool_calls":[{"name":"eval","args":{"form":"(do (println \"hi\") 42)"}}]}
+```
+
+If you want to check whether the answer "42" appears in the asst
+OUTSIDE the form arg, a naive regex like `r'"form":"[^"]*"'` won't
+strip the form correctly because the form string can contain escaped
+quotes (`\"hi\"`). The correct strip:
+
+```python
+re.sub(r'"form":"(?:[^"\\]|\\.)*"', '', asst)
+```
+
+Otherwise the regex stops at the first internal `\"` and leaves the
+rest of the form (including any digits) in the "outside" text, causing
+spurious leak reports.
+
+### 7. Runtime-feature requirements (basilisp / Clojure compatibility)
+
+Forms in grade 6+ may rely on runtime features:
+
+- **Java interop** (`(.toUpperCase "abc")`, `(Math/sqrt 2.0)`) — works
+  on JVM Clojure, doesn't on basilisp (Python host).
+- **clojure.string** — usable on JVM Clojure with `(:require
+  [clojure.string :as s])`; on basilisp, namespace must be requireable.
+- **Exceptions** (`(try ... (catch Exception e ...))`) — Java
+  Exception class on JVM, Python `Exception` on basilisp. The form
+  works syntactically on both but the catch-class differs.
+- **defprotocol / extend-type / defmulti** — all supported but
+  semantics differ slightly between hosts.
+
+When writing examples for grades 6+, prefer:
+- forms that work on BOTH JVM-Clojure and basilisp (e.g. wrapping
+  exceptions in a `do` so any error catches), OR
+- mark the example with a `tags=("jvm-only",)` or `tags=("basilisp-only",)`
+  and let the corpus prep filter accordingly.
+
+### 8. Hard-coded literals in subplot text
+
+A subplot that says `"...wrote the form (+ 1 2) on a stone..."`
+hard-codes the form. It only works for one example. Always use
+`{form_display}` and `{concept_phrase}`. Lint your subplot pool by
+running every example through every subplot and inspecting outputs.
+
+### 9. Variety drops below 0.95
+
+Generating 222 records but only seeing ~50 unique surface forms means
+the subplot pool is too small relative to the example count. The
+tortoise-hare reference uses 8 base subplots + 2 grade-flavored ≈ 10
+templates × ~7 hares × 3 tortoises × 7 path-locations × 5 openers ≈
+~7,000 distinct combinations. With this combinatoric, n=222 yields
+~221 unique user_msgs.
+
+If your variety drops below 0.95, the probable cause is one of:
+- Subplot pool < 6 templates (insufficient narrative breadth)
+- Character pool < 4 characters per role (e.g., only 2 hares to pick from)
+- Location pool < 5 locations
+- Opener pool < 4
+
+### 10. Genericizing the fable away
+
+The whole point is that the reader feels they're inside YOUR fable.
+Use the fable's characters, settings, props, and moral dynamic. Don't
+write generic "a clever student approached the problem" subplots —
+use the named characters constantly. The Aesopian opener at the top
++ named characters in subplots is what gives each fable its distinct
+narrative voice.
+
+## Recommended audit harness
+
+Every fable-curriculum should ship with a smoke + variety + answer-leak
+audit. Reuse the harness at:
+
+```
+/tmp/audit_curriculum.py     (in the tortoise-hare repo state)
+docs/clojure-pedagogy/audits/<your-fable>-audit.md  (output)
+```
+
+The harness checks:
+1. **Variety per subject**: generates 50 records, counts unique user_msgs,
+   flags subjects below 0.95.
+2. **Singular-they verb agreement**: regex for `\bthey\s+eats\b` etc.
+3. **Un-substituted placeholders**: detects `{form_display}`, `{place}`
+   leaking into rendered output (would mean a placeholder rename
+   wasn't propagated).
+4. **Answer leakage**: integer answers > 5 that appear in user_msg or
+   asst_msg outside the eval form.
+5. **Multi-line forms paired with on-stone subplots**: cosmetic flag.
+6. **Long concept_phrases** (> 80 chars).
+7. **Nested 'computes' in question_what**.
+
+Run after every grade is written. Fix issues immediately while the
+context is fresh.
+
+### Form-correctness check (optional but recommended)
+
+For grades 1-5 (atoms / arithmetic / naming / collections / control),
+forms can be evaluated via basilisp to verify `expected` matches
+runtime behavior. The `/tmp/form_eval_check.py` harness samples
+forms-per-grade, sends them to basilisp in one batched script, and
+compares results.
+
+For grades 6+ (interop / requires / exceptions), basilisp may not
+support all forms. Skip those when running the form-correctness check;
+they should be tested against actual JVM Clojure if available.
 
 ## Hand-off check
 

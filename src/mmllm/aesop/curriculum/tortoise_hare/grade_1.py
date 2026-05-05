@@ -83,10 +83,11 @@ next entry was {concept_phrase}. {hare_phrase} peered over
 it would come out to.""".replace("{place_idx}", "Today {place}")),
 
     # 7. The boast-and-rebuke template — Hare claims to know without checking.
+    #    NOTE: uses {hare_him_her} (object case) for "asked X to ...".
     SubplotTemplate("""\
 "There is no need to evaluate that," {hare_phrase} said {emo_proud}.
 "Anyone can see what {concept_phrase} comes to." {tortoise_phrase}, who
-{place} had grown used to such claims, asked {hare_he_she} to actually
+{place} had grown used to such claims, asked {hare_him_her} to actually
 write the form {form_display} and submit it to the REPL — just to be
 sure."""),
 
@@ -514,11 +515,10 @@ G1_18 = SubjectCurriculum(
     fable="tortoise-hare",
     examples=[
         _ex("(+ 1 2)", 3,
-            "the form (+ 1 2) (a correct form; not all guesses are correct, "
-            "but mistakes in the REPL are recoverable)",
+            "the form (+ 1 2)",
             "the result of (+ 1 2)"),
         _ex("(* 7 6)", 42,
-            "the form (* 7 6) (a correct form among many possible attempts)",
+            "the form (* 7 6)",
             "the result of (* 7 6)"),
     ],
     subplots=_SHARED_SUBPLOTS,
