@@ -36,46 +36,117 @@ from mmllm.aesop.template import (
 # ─────────────────────── narrative scaffolding ───────────────────────
 
 
-def _atm_intro(scene: Scene, location: ont.Location | None = None) -> str:
-    """Generate a 1-2 sentence atmospheric/contextual opener that any
-    chapter can prepend to its user_msg. If `location` is provided the
-    opener mentions it; otherwise stays generic."""
+# Per-fable opener pools. Each entry is 1-2 sentences capturing that
+# fable's specific narrative dynamic — vanity vs steadiness, greed vs
+# patience, lying vs trust, etc. — rather than generic weather/atmosphere.
+# The openers establish the moral tension before the chapter's
+# specific quantitative situation introduces itself.
+FABLE_OPENERS: dict[str, tuple[str, ...]] = {
+    "tortoise-hare": (
+        "It was well known among the animals that the Hare boasted of his speed at every chance.",
+        "The Hare and the Tortoise had argued for as long as anyone could remember about who was truly the swifter.",
+        "There was once a Hare whose pride was as quick as her feet, and a Tortoise who said nothing about either.",
+        "In that part of the forest, no one ever expected the Tortoise to outrun the Hare — yet today the question would be settled.",
+        "The Hare loved nothing better than the sound of his own boasts; the Tortoise, nothing better than a long quiet walk.",
+    ),
+    "crow-pitcher": (
+        "A thirsty Crow had been searching all afternoon for water and was nearly ready to give up.",
+        "Hunger and thirst had driven the Crow far from her usual perch.",
+        "The Crow knew that water in the world is sometimes hidden where only the patient can reach it.",
+        "It is said that wit, more than strength, is the friend of the thirsty Crow.",
+    ),
+    "goose-eggs": (
+        "A farmer once kept a goose who laid a golden egg every morning, plain and ordinary in every other way.",
+        "The villagers all envied the household with the golden-egg goose, though only its owner knew the careful work of patience.",
+        "There was once an extraordinary goose whose every morning gift was a single egg of pure gold.",
+        "Greed and patience, as everyone knows, do not sit at the same table — and a golden-egg goose tests them both.",
+    ),
+    "boy-wolf": (
+        "Every shepherd in the valley knew the danger of crying wolf for sport.",
+        "A young shepherd had been left alone with the flock far too often, and boredom had taken root.",
+        "The boy on the hill thought the trick clever the first time he played it.",
+        "It is hard to be believed twice when you have lied even once — a lesson every shepherd must one day learn.",
+    ),
+    "ant-grasshopper": (
+        "All summer long, the Ant worked while the Grasshopper sang.",
+        "Two creatures of the meadow approached the coming winter very differently.",
+        "It is the way of the Ant to gather, and the way of the Grasshopper to play.",
+        "Among the small folk of the meadow, no two neighbors lived more differently than the Ant and the Grasshopper.",
+    ),
+    "milkmaid": (
+        "A young milkmaid was returning home with her milk pail balanced on her head, dreaming of the fortune it would bring.",
+        "The Milkmaid liked to imagine, each morning on her way to market, what her milk would buy.",
+        "Pride goes before a fall, especially when a Milkmaid begins to plan her wealth too eagerly.",
+        "There was once a Milkmaid whose dreams ran ahead of her pail.",
+    ),
+    "fox-grapes": (
+        "A hungry Fox came upon a vine of grapes hanging just out of reach.",
+        "It is told that many an animal has stood beneath fruit it could not reach and walked away calling it sour.",
+        "The Fox crept through the orchard and found himself eyeing a tempting cluster of grapes.",
+        "Hunger sharpens the eye but does not always lengthen the leap.",
+    ),
+    "two-mice": (
+        "Once a Country Mouse invited her City cousin to dine at her humble home.",
+        "The City Mouse and the Country Mouse had very different ideas of a good meal — and very different stockpiles to draw on.",
+        "It is said that a meal among friends is sweeter than feasting alone, and easier to count.",
+        "Two mice — one of the city, one of the countryside — had a habit of comparing what little they had.",
+    ),
+    "dog-shadow": (
+        "A Dog was crossing a stream with a fine bone in his mouth, and was very pleased with himself.",
+        "What the Dog thought he saw beneath the water turned out to be his own reflection.",
+        "Greed has cost more than one creature what they already had.",
+        "It is said that the foolish Dog will trade what is real for what is only an image.",
+    ),
+    "lion-bulls": (
+        "Three Bulls had grazed and fought together for so long that no Lion dared trouble them.",
+        "There was once a band of Bulls so unified that they made the great Lion uneasy.",
+        "Strength shared is strength multiplied — a truth the Lion knew well, and worked patiently to undo.",
+        "The Lion stalked the field where the Bulls had grazed in peace for many seasons.",
+    ),
+}
+
+
+def _aesopian_intro(scene: Scene, fable: str,
+                    location: ont.Location | None = None) -> str:
+    """Pick a fable-specific opener from FABLE_OPENERS. Optional `location`
+    adds a single setting clause to anchor the scene physically.
+    Output ends with `\\n\\n` so chapters can directly prepend it via
+    `f"{_intro}{...rest of user_msg...}"`.
+    """
+    pool = FABLE_OPENERS.get(fable, ())
+    if not pool:
+        # Fallback: shouldn't happen if every fable is registered.
+        return ""
+    opener = scene.rng.choice(pool)
+    if location is not None and scene.coin(0.4):
+        # Anchor with a location-mention. Half the time we drop this so
+        # the opener reads as standalone Aesopian narration without
+        # geographical pinning (matches the timeless feel of Aesop).
+        place = scene.rng.choice((
+            f"It happened {place_phrase(scene, location)}.",
+            f"This was {place_phrase(scene, location)}.",
+            f"All this took place {place_phrase(scene, location)}.",
+        ))
+        return f"{opener} {place}\n\n"
+    return f"{opener}\n\n"
+
+
+# Legacy alias — old code path called `_atm_intro`, kept so the auto-
+# generated chapter rewrites still work. The new fable-aware variant
+# is preferred.
+def _atm_intro(scene: Scene, location: ont.Location | None = None,
+               fable: str = "") -> str:
+    """Legacy entry point. If `fable` is given, dispatches to the new
+    Aesopian opener; otherwise falls back to a generic atmospheric
+    line (the old behavior, kept for any chapter not yet migrated)."""
+    if fable:
+        return _aesopian_intro(scene, fable, location)
+    # generic fallback (used to be the only path; now rare)
     when = scene.rng.choice((
         "One bright morning,", "Late one afternoon,",
-        "Just before sunset,", "On a quiet spring day,",
-        "Under a pale autumn sky,", "On a cool summer morning,",
-        "At the start of a long day,", "After a long night,",
-        "On a windy afternoon,", "On a still and golden day,",
-        "After many uneventful weeks,", "When the seasons turned,",
+        "On a quiet spring day,", "Under a pale sky,",
     ))
-    if location is not None:
-        place = scene.rng.choice((
-            f"the air was still {place_phrase(scene, location)}",
-            f"a soft breeze drifted {place_phrase(scene, location)}",
-            f"all was quiet {place_phrase(scene, location)}",
-            f"long shadows stretched {place_phrase(scene, location)}",
-            f"sunlight slanted {place_phrase(scene, location)}",
-            f"the world felt newly washed {place_phrase(scene, location)}",
-        ))
-    else:
-        place = scene.rng.choice((
-            "the world was unusually quiet",
-            "everyone in the village was busy with their own work",
-            "no one had any pressing chores",
-            "the day stretched out long and slow",
-            "the wind was gentle and the sky was clear",
-            "a feeling of patience was in the air",
-        ))
-    second = scene.rng.choice((
-        " It was a fitting setting for what came next.",
-        " Nothing seemed amiss.",
-        " The day promised to be ordinary.",
-        " It was the kind of moment that hides small puzzles.",
-        " The little events of the day were about to demand careful counting.",
-        "",                                            # 1/N records → 1-sentence
-        "",
-    ))
-    return f"{when} {place}.{second}".strip() + "\n\n"
+    return f"{when} something extraordinary was about to happen.\n\n"
 
 
 # ─────────────────────── _finalize helper ───────────────────────
@@ -301,7 +372,7 @@ def _th_speed_comparison(scene: Scene) -> Record:
     tortoise_speed = scene.pick_int(1, 3)
     hours          = scene.pick_int(2, 6)
     miles_ahead    = (hare_speed - tortoise_speed) * hours
-    _intro         = _atm_intro(scene, location)
+    _intro         = _aesopian_intro(scene, "tortoise-hare", location)
 
     if orient == "distance":
         # Given hare-speed, tortoise-speed, hours; compute miles-ahead.
@@ -434,7 +505,7 @@ def _th_distance_remaining(scene: Scene) -> Record:
     )
     answer = evaluate(expr)
 
-    _intro = _atm_intro(scene, location)
+    _intro = _aesopian_intro(scene, "tortoise-hare", location)
     user_msg = (
         f"{_intro}In a long race across {location.article} {location.name}, "
         f"the course is {n_unit(total, 'mile')}. {species_phrase(tortoise)} "
@@ -512,7 +583,7 @@ def _cp_stones_needed(scene: Scene) -> Record:
     raises   = scene.phrase("raised the water level by",
                               "lifted the water by",
                               "pushed the level up by")
-    _intro = _atm_intro(scene, location)
+    _intro = _aesopian_intro(scene, "crow-pitcher", location)
     user_msg = (
         f"{_intro}{weather} at {location.article} {location.name}, "
         f"{species_phrase(crow)} {found} a {pitcher.name} of water, but "
@@ -571,7 +642,7 @@ def _cp_water_rise(scene: Scene) -> Record:
                              "carefully added")
     each_lifts = scene.phrase("raised the water by", "lifted the level by",
                                "made the water rise by")
-    _intro = _atm_intro(scene)
+    _intro = _aesopian_intro(scene, "crow-pitcher")
     user_msg = (
         f"{_intro}{species_phrase(crow)} {found} a {pitcher.name} with water at "
         f"{n_unit(start, 'centimeter')}. {cap(crow.he_she)} {dropped} "
@@ -625,7 +696,7 @@ def _cp_enough_stones(scene: Scene) -> Record:
     answer = evaluate(expr)
     answer_str = "yes" if answer else "no"
 
-    _intro = _atm_intro(scene)
+    _intro = _aesopian_intro(scene, "crow-pitcher")
     user_msg = (
         f"{_intro}{species_phrase(crow)} has only "
         f"{n_unit(k, stone.name, stone.plural)} left. The {pitcher.name}'s "
@@ -685,7 +756,7 @@ def _ge_total_yield(scene: Scene) -> Record:
     )
     answer = evaluate(expr)
 
-    _intro = _atm_intro(scene, location)
+    _intro = _aesopian_intro(scene, "goose-eggs", location)
     user_msg = (
         f"{_intro}In {location.article} {location.name}, {owner.name} owned "
         f"{species_phrase(goose)}. The goose laid {per_day} golden "
@@ -722,7 +793,7 @@ def _ge_value_yield(scene: Scene) -> Record:
     per_egg  = scene.pick_int(5, 50)
     total_coins = per_day * days * per_egg
     orient   = scene.pick_choice(["coins", "days", "per-egg"])
-    _intro   = _atm_intro(scene, location)
+    _intro   = _aesopian_intro(scene, "goose-eggs", location)
 
     if orient == "coins":
         expr = Let(
@@ -832,7 +903,7 @@ def _ge_compounded(scene: Scene) -> Record:
     answer = evaluate(expr)
 
     yields_str = ", ".join(str(y) for y in yields)
-    _intro = _atm_intro(scene)
+    _intro = _aesopian_intro(scene, "goose-eggs")
     user_msg = (
         f"{_intro}{owner.name} owned {species_phrase(goose)}, who laid different "
         f"numbers of eggs each day for {n_unit(days, 'day')}: "
@@ -888,7 +959,7 @@ def _ge_average(scene: Scene) -> Record:
     answer = evaluate(expr)
 
     yields_str = ", ".join(str(y) for y in yields)
-    _intro = _atm_intro(scene)
+    _intro = _aesopian_intro(scene, "goose-eggs")
     user_msg = (
         f"{_intro}{owner.name} kept {species_phrase(goose)}, who laid these eggs "
         f"on successive days: {yields_str}.\n\n"
@@ -958,7 +1029,7 @@ def _bw_false_alarms(scene: Scene) -> Record:
                                "hurried out from the village")
     each_trip = scene.phrase("taking", "and the trip took",
                                "each round trip lasting")
-    _intro = _atm_intro(scene)
+    _intro = _aesopian_intro(scene, "boy-wolf")
     user_msg = (
         f"{_intro}{boy.name} {setting}. {bored} "
         f"{boy.he_she} {cried} {n_unit(n_alarms, 'time')} "
@@ -1006,7 +1077,7 @@ def _bw_sheep_eaten(scene: Scene) -> Record:
                             "no one in the village answered the call from",
                             "the villagers ignored")
     devoured = scene.phrase("ate", "carried off", "made off with")
-    _intro = _atm_intro(scene)
+    _intro = _aesopian_intro(scene, "boy-wolf")
     user_msg = (
         f"{_intro}{boy.name} kept a flock of "
         f"{n_unit(flock, 'sheep', 'sheep')}. {when}, {came} and "
@@ -1049,7 +1120,7 @@ def _bw_trust_threshold(scene: Scene) -> Record:
     )
     answer = evaluate(expr)
 
-    _intro = _atm_intro(scene)
+    _intro = _aesopian_intro(scene, "boy-wolf")
     user_msg = (
         f"{_intro}The villagers in {boy.name}'s village stop responding to alarms "
         f"after {n_unit(threshold, 'false alarm')}. So far, {boy.name} has "
@@ -1103,7 +1174,7 @@ def _ag_summer_stockpile(scene: Scene) -> Record:
     days    = scene.pick_int(20, 90)
     total   = per_day * days
     orient  = scene.pick_choice(["total", "days", "rate"])
-    _intro  = _atm_intro(scene, location)
+    _intro  = _aesopian_intro(scene, "ant-grasshopper", location)
 
     season = scene.phrase("Through the summer", "All summer long",
                           "Across the long summer", "From spring to fall")
@@ -1184,7 +1255,7 @@ def _ag_winter_consumption(scene: Scene) -> Record:
     )
     answer = evaluate(expr)
 
-    _intro = _atm_intro(scene)
+    _intro = _aesopian_intro(scene, "ant-grasshopper")
     user_msg = (
         f"{_intro}{species_phrase(ant)} has {n_unit(stockpile, 'grain')} stored "
         f"for winter. {cap(ant.he_she)} {verb_for(ant, 'eat')} {n_unit(per_day, 'grain')} "
@@ -1238,7 +1309,7 @@ def _ag_comparison_survival(scene: Scene) -> Record:
     )
     answer = evaluate(expr)
 
-    _intro = _atm_intro(scene)
+    _intro = _aesopian_intro(scene, "ant-grasshopper")
     user_msg = (
         f"{_intro}Winter lasted {n_unit(days, 'day')}. "
         f"{species_phrase(ant)} started with "
@@ -1310,7 +1381,7 @@ def _mm_egg_to_coin_chain(scene: Scene) -> Record:
     dreamt  = scene.phrase("dreamed of the future",
                              "started to plan her fortune",
                              "imagined what she would do with the proceeds")
-    _intro = _atm_intro(scene)
+    _intro = _aesopian_intro(scene, "milkmaid")
     user_msg = (
         f"{_intro}{maid.name} {walking} and {dreamt}. She would buy "
         f"{n_unit(eggs, 'egg')}; each would hatch into a hen; each hen "
@@ -1361,7 +1432,7 @@ def _mm_investment_return(scene: Scene) -> Record:
     )
     answer = evaluate(expr)
 
-    _intro = _atm_intro(scene)
+    _intro = _aesopian_intro(scene, "milkmaid")
     user_msg = (
         f"{_intro}{maid.name} bought a cow for {n_unit(cow_cost, 'coin')}. The "
         f"cow gives {n_unit(cups_per_day, 'cup')} of milk per day, and "
@@ -1406,7 +1477,7 @@ def _mm_spilled_milk(scene: Scene) -> Record:
     )
     answer = evaluate(expr)
 
-    _intro = _atm_intro(scene)
+    _intro = _aesopian_intro(scene, "milkmaid")
     user_msg = (
         f"{_intro}{maid.name} carried a pail with {n_unit(full_cups, 'cup')} "
         f"of milk. She tripped and spilled {n_unit(spilled, 'cup')}. "
@@ -1462,7 +1533,7 @@ def _fg_max_reach(scene: Scene) -> Record:
     leap    = scene.phrase("could leap another",
                              "could spring another",
                              "could jump another")
-    _intro = _atm_intro(scene)
+    _intro = _aesopian_intro(scene, "fox-grapes")
     user_msg = (
         f"{_intro}{species_phrase(fox)} {stand}, reaching "
         f"{n_unit(body_height, 'foot', 'feet')} high, and "
@@ -1507,7 +1578,7 @@ def _fg_jumps_needed(scene: Scene) -> Record:
     )
     answer = evaluate(expr)
 
-    _intro = _atm_intro(scene)
+    _intro = _aesopian_intro(scene, "fox-grapes")
     user_msg = (
         f"{_intro}The grapes hung from a vine {n_unit(grape_height, 'foot', 'feet')} "
         f"above the ground. {species_phrase(fox)} could leap "
@@ -1551,7 +1622,7 @@ def _fg_give_up(scene: Scene) -> Record:
     )
     answer = evaluate(expr)
 
-    _intro = _atm_intro(scene)
+    _intro = _aesopian_intro(scene, "fox-grapes")
     user_msg = (
         f"{_intro}{species_phrase(fox)} grew tired of jumping for the grapes. "
         f"{cap(fox.he_she)} would give up after {n_unit(threshold, 'attempt')}. "
@@ -1610,7 +1681,7 @@ def _tm_food_comparison(scene: Scene) -> Record:
     city_phrase    = scene.phrase("lived in the city",
                                     "lived in a busy townhouse pantry",
                                     "made a home in the bustling city")
-    _intro = _atm_intro(scene)
+    _intro = _aesopian_intro(scene, "two-mice")
     user_msg = (
         f"{_intro}{species_phrase(country)} {country_phrase} and had "
         f"{n_unit(a, food.name, food.plural)}, while "
@@ -1652,7 +1723,7 @@ def _tm_shared_meal(scene: Scene) -> Record:
     )
     answer = evaluate(expr)
 
-    _intro = _atm_intro(scene)
+    _intro = _aesopian_intro(scene, "two-mice")
     user_msg = (
         f"{_intro}{species_phrase(country)} and {species_phrase(city)} hosted "
         f"a feast for {n_unit(n_mice, 'mouse', 'mice')} (counting "
@@ -1697,7 +1768,7 @@ def _tm_trip_budget(scene: Scene) -> Record:
     )
     answer = evaluate(expr)
 
-    _intro = _atm_intro(scene)
+    _intro = _aesopian_intro(scene, "two-mice")
     user_msg = (
         f"{_intro}{species_phrase(mouse)} began the journey with "
         f"{n_unit(start, 'coin')}. {cap(mouse.he_she)} spent "
@@ -1754,7 +1825,7 @@ def _ds_double_loss(scene: Scene) -> Record:
     grabbed  = scene.phrase("dropped one bone to grab the shadow's",
                               "let go of one bone, lunging at the reflection",
                               "released a bone to snap at the watery double's")
-    _intro = _atm_intro(scene)
+    _intro = _aesopian_intro(scene, "dog-shadow")
     user_msg = (
         f"{_intro}{species_phrase(dog)} {crossing} {n_unit(bones, 'bone')}. "
         f"{looking}, {dog.he_she} saw {dog.his_her} reflection and thought "
@@ -1791,7 +1862,7 @@ def _ds_regret(scene: Scene) -> Record:
     )
     answer = evaluate(expr)
 
-    _intro = _atm_intro(scene)
+    _intro = _aesopian_intro(scene, "dog-shadow")
     user_msg = (
         f"{_intro}{species_phrase(dog)} expected to bring home "
         f"{n_unit(expected_bones, 'bone')}, but lost one chasing a "
@@ -1834,7 +1905,7 @@ def _ds_exchange_loss(scene: Scene) -> Record:
     )
     answer = evaluate(expr)
 
-    _intro = _atm_intro(scene)
+    _intro = _aesopian_intro(scene, "dog-shadow")
     user_msg = (
         f"{_intro}{species_phrase(dog)} had {n_unit(start, 'bone')}. {trader.name} "
         f"offered to trade — {dog.name} would give {n_unit(given, 'bone')} "
@@ -1885,7 +1956,7 @@ def _lb_days_to_defeat(scene: Scene) -> Record:
     )
     answer = evaluate(expr)
 
-    _intro = _atm_intro(scene)
+    _intro = _aesopian_intro(scene, "lion-bulls")
     user_msg = (
         f"{_intro}{species_phrase(lion)} watched {n_unit(n_bulls, 'bull')} grazing. "
         f"Once they scattered, {lion.he_she} could attack one at a time, "
@@ -1925,7 +1996,7 @@ def _lb_remaining_after_k(scene: Scene) -> Record:
     )
     answer = evaluate(expr)
 
-    _intro = _atm_intro(scene)
+    _intro = _aesopian_intro(scene, "lion-bulls")
     user_msg = (
         f"{_intro}{species_phrase(lion)} faced {n_unit(n_bulls, 'bull')} grazing "
         f"alone in the field. After several days, {smart_pronoun(lion, [])} "
@@ -1974,7 +2045,7 @@ def _lb_divide_conquer_bool(scene: Scene) -> Record:
     answer = evaluate(expr)
     answer_str = "yes" if answer else "no"
 
-    _intro = _atm_intro(scene)
+    _intro = _aesopian_intro(scene, "lion-bulls")
     user_msg = (
         f"{_intro}{species_phrase(lion)} has strength {lion_strength}. Each of "
         f"the {n_unit(n_bulls, 'bull')} has strength {bull_strength}. "
