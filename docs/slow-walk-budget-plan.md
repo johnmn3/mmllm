@@ -286,7 +286,7 @@ modal run --detach modal_app.py::eval_watcher \
   --base /data/agent-corpus-v2.bin \
   --bank /data/agent-bank-v2 \
   --sqrt-n 2048 \
-  --bank-on-gpu true \
+  --bank-on-gpu \
   --bank-query-mode ctx-add \
   --bank-feedback-mode feedback \
   --bpc-evals "fineweb-edu:/data/agent-corpus-v2/fineweb-edu.bin.test.bin,cosmopedia:/data/agent-corpus-v2/cosmopedia.bin.test.bin,open-web-math:/data/agent-corpus-v2/open-web-math.bin.test.bin,algebraic-stack:/data/agent-corpus-v2/algebraic-stack.bin.test.bin,code-contests:/data/agent-corpus-v2/code-contests.bin.test.bin,theorem-qa:/data/agent-corpus-v2/theorem-qa.bin.test.bin" \
