@@ -545,6 +545,59 @@ This pattern applies whenever a sentence in a subplot has just one
 clear subject AND the pronoun would be a singular-they. Default to
 the name.
 
+### 21. `{place}` carries its own preposition — don't pair it with verbs that need one
+
+The `place_phrase()` helper produces strings that ALREADY include a
+preposition: `in the meadow`, `near the forest`, `on the hilltop`,
+`deep inside the cellar`, etc.
+
+So a subplot template like:
+
+```
+"Halfway to {place}, ..."
+```
+
+renders ungrammatically:
+
+> "Halfway to **in the meadow**..."   ← wrong, double preposition
+> "Halfway to **deep inside the cellar**..." ← wrong, redundant prep
+
+The bare `{place}` works correctly with verbs that don't take a
+preposition (or where `{place}` IS the preposition phrase):
+
+```
+{hare} stopped {place}      ← "stopped in the meadow" ✓
+{hare} paused {place}       ← "paused near the forest" ✓
+At a milestone {place}, ... ← "At a milestone in the meadow, ..." ✓
+{tortoise} settled {place}  ← "settled on the hilltop" ✓
+```
+
+But it breaks with:
+
+```
+{hare} ran to {place}       ← "ran to in the meadow" ✗
+{tortoise} came from {place}  ← "came from near the forest" ✗ (sometimes ok)
+{hare} arrived at {place}   ← "arrived at on the hilltop" ✗
+```
+
+When the verb wants its own preposition, either:
+- Use `{location.name}` and `{location.article}` separately and supply
+  the preposition you want:
+  `{hare} ran to {location.article} {location.name}` →
+  "ran to the meadow" ✓
+- Or restructure the template to use a verb that doesn't take a
+  preposition:
+  `{hare} arrived {place}` → "arrived in the meadow" ✓
+
+The audit harness flags the most common breakages with the
+`DOUBLE_PREP` check (catches `to/at/from/with + (in|near|on|atop|by|
+along|inside|deep inside|at the edge of) the X`).
+
+Discovered by the goose-eggs author when subplot 5 used "Halfway to
+{place}" and the place_phrase output already supplied "to" via "to
+in the meadow". Patched in goose-eggs/grade_1.py, but worth catching
+universally — the harness now does.
+
 ### 20. Concept_phrase that reads as raw math instead of a form
 
 Concept_phrases like `"1 minus 1/3"` (for form `(- 1 1/3)`) read as
