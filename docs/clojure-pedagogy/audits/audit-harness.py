@@ -1,7 +1,14 @@
-"""Audit the tortoise-hare K-12 curriculum (FIXED — match record to its example)."""
+"""Audit a fable's K-12 curriculum (FIXED — match record to its example).
+
+Usage:
+    python3 audit-harness.py                    # default: tortoise-hare
+    python3 audit-harness.py fox-grapes         # any registered fable
+    AUDIT_FABLE=fox-grapes python3 audit-harness.py
+"""
 from __future__ import annotations
 
 import importlib
+import os
 import re
 import sys
 from collections import Counter
@@ -11,9 +18,17 @@ sys.path.insert(0, "/home/user/mmllm/src")
 
 from mmllm.aesop.curriculum.generator import generate_subject
 
+
+# Fable selection — CLI arg, env var, or default to tortoise-hare.
+FABLE = (
+    sys.argv[1] if len(sys.argv) > 1
+    else os.environ.get("AUDIT_FABLE", "tortoise-hare")
+)
+PKG = FABLE.replace("-", "_")    # "fox-grapes" → "fox_grapes"
+
 GRADE_MODULES = []
 for n in range(1, 13):
-    mod = importlib.import_module(f"mmllm.aesop.curriculum.tortoise_hare.grade_{n}")
+    mod = importlib.import_module(f"mmllm.aesop.curriculum.{PKG}.grade_{n}")
     GRADE_MODULES.append(mod)
 
 
@@ -138,7 +153,7 @@ def per_example_records(sub, example, n: int, seed: int):
 
 
 def main():
-    out = Path("/home/user/mmllm/docs/clojure-pedagogy/audits/tortoise-hare-audit.md")
+    out = Path(f"/home/user/mmllm/docs/clojure-pedagogy/audits/{FABLE}-audit.md")
     out.parent.mkdir(parents=True, exist_ok=True)
 
     summary = Counter()
@@ -146,7 +161,7 @@ def main():
     per_grade_stats: dict[int, dict] = {}
 
     with open(out, "w") as f:
-        f.write("# Tortoise-hare curriculum audit (corrected)\n\n")
+        f.write(f"# {FABLE.replace('-', ' ').title()} curriculum audit (corrected)\n\n")
         f.write("Auto-generated audit — each subject's examples checked at "
                 "3 records per example, properly matched.\n\n")
         f.write("---\n\n")

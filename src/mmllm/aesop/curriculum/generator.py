@@ -129,9 +129,19 @@ def _hares() -> tuple[ont.Character, ...]:
 def _tortoises() -> tuple[ont.Character, ...]:
     return tuple(c for c in ont.CHARACTERS if c.species == "tortoise")
 
+def _foxes() -> tuple[ont.Character, ...]:
+    return tuple(c for c in ont.CHARACTERS if c.species == "fox")
+
 # Other fables would supply their own pickers; tortoise-hare uses these.
 TORTOISE_HARE_LOCATIONS = ("meadow", "forest", "woods", "garden",
                             "orchard", "hilltop", "road")
+
+# Fox-grapes pool — orchards / vineyards / kitchen gardens / market / farms.
+# Mirrors the canonical chapter settings (purple grapes on a vine, apples in
+# a farmyard, blackberries over a fence, pears in a kitchen garden, plums
+# at the market, figs over a vineyard wall).
+FOX_GRAPES_LOCATIONS = ("orchard", "garden", "farm", "market",
+                         "meadow", "woods", "forest")
 
 
 def _pick_th_chars(scene: Scene) -> tuple[ont.Character, ont.Character]:
@@ -231,6 +241,44 @@ GE_EMO_REGRETFUL = (
 )
 
 
+# ─────────────────────── fox-grapes pickers ───────────────────────
+
+
+def _pick_fg_chars(scene: Scene) -> tuple[ont.Character, ont.Character]:
+    """Pick a fresh (hasty_fox, patient_fox) pair — two DISTINCT foxes.
+
+    Fox-grapes is a solo-protagonist fable in spirit; we introduce a
+    second fox of the opposite archetype so the eval-first dialectic
+    has two named voices (the "rationalizer" and the "disciplined
+    evaluator"). With 3 foxes in the ontology (Renard m, Vix f, Sly n),
+    we always have at least two distinct names to pick from.
+    """
+    foxes = list(_foxes())
+    a = scene.rng.choice(foxes)
+    rest = [f for f in foxes if f.name != a.name]
+    b = scene.rng.choice(rest) if rest else a
+    return a, b
+
+
+def _pick_fg_location(scene: Scene) -> ont.Location:
+    """Pick a fox-grapes-natural outdoor setting (orchard / garden / market…)."""
+    cands = [l for l in ont.LOCATIONS
+             if l.name in FOX_GRAPES_LOCATIONS]
+    return scene.rng.choice(cands) if cands else scene.rng.choice(
+        [l for l in ont.LOCATIONS if not l.indoor]
+    )
+
+
+# Fable → (char_picker, location_picker). Default falls back to tortoise-hare
+# pickers, preserving existing tortoise-hare behavior unchanged. Goose-eggs
+# isn't in this table because it picks THREE characters with a different
+# placeholder builder; it's dispatched specially in `generate_one_record`.
+_FABLE_PICKERS: dict[str, tuple[Callable, Callable]] = {
+    "tortoise-hare": (_pick_th_chars, _pick_th_location),
+    "fox-grapes":    (_pick_fg_chars, _pick_fg_location),
+}
+
+
 # ─────────────────────── render helpers ───────────────────────
 
 
@@ -245,7 +293,16 @@ def _build_placeholders(scene: Scene,
                         tortoise: ont.Character,
                         location: ont.Location,
                         example: SubjectExample) -> dict:
-    """Assemble the {placeholder: value} dict that subplot templates use."""
+    """Assemble the {placeholder: value} dict that subplot templates use.
+
+    Parameter names `hare`/`tortoise` are local labels for the two
+    primary characters — the actual species depends on the fable
+    picker (e.g., for fox-grapes both are foxes). The dict exposes
+    BOTH the {hare}/{tortoise} keys (used by tortoise-hare templates)
+    AND fable-specific aliases (e.g., {hasty_fox}/{patient_fox} for
+    fox-grapes templates) that point to the same character objects.
+    Templates pick whichever names suit their fable's narrative voice.
+    """
     return {
         # characters
         "hare":            hare.name,
@@ -261,6 +318,25 @@ def _build_placeholders(scene: Scene,
         # Object-case pronouns (for "asked X to ...", "told X that ...")
         "hare_him_her":     hare.him_her,
         "tortoise_him_her": tortoise.him_her,
+
+        # ─── fox-grapes aliases (Option A — two foxes of opposite archetype) ───
+        # The "hasty fox" is the original Aesop voice — the rationalizer
+        # who, after one failed reach, declares the grapes sour. The
+        # "patient fox" is the corrective voice — the disciplined
+        # evaluator who keeps trying jumps, counts attempts, and either
+        # reaches the prize or admits the limit honestly.
+        "hasty_fox":             hare.name,
+        "patient_fox":           tortoise.name,
+        "hasty_fox_phrase":      species_phrase(hare),
+        "patient_fox_phrase":    species_phrase(tortoise),
+        "hasty_fox_he_she":      hare.he_she,
+        "patient_fox_he_she":    tortoise.he_she,
+        "hasty_fox_he_she_cap":  cap(hare.he_she),
+        "patient_fox_he_she_cap": cap(tortoise.he_she),
+        "hasty_fox_his_her":     hare.his_her,
+        "patient_fox_his_her":   tortoise.his_her,
+        "hasty_fox_him_her":     hare.him_her,
+        "patient_fox_him_her":   tortoise.him_her,
 
         # place
         "place":           place_phrase(scene, location),
@@ -369,6 +445,9 @@ def generate_one_record(scene: Scene,
                         example: SubjectExample) -> Record:
     """Produce a single Record by:
        1. Picking characters + a location appropriate to the fable
+          (goose-eggs picks 3 chars with a custom placeholder builder;
+          other fables go through the `_FABLE_PICKERS` dispatch table,
+          defaulting to tortoise-hare's pickers).
        2. Picking an aesopian opener
        3. Picking a subplot template
        4. Filling placeholders + rendering question
@@ -380,8 +459,11 @@ def generate_one_record(scene: Scene,
         placeholders_fn = lambda ex: _build_ge_placeholders(
             scene, owner, visitor, goose, location, ex)
     else:
-        hare, tortoise = _pick_th_chars(scene)
-        location = _pick_th_location(scene)
+        char_picker, loc_picker = _FABLE_PICKERS.get(
+            sub.fable, (_pick_th_chars, _pick_th_location)
+        )
+        hare, tortoise = char_picker(scene)
+        location = loc_picker(scene)
         placeholders_fn = lambda ex: _build_placeholders(
             scene, hare, tortoise, location, ex)
 
