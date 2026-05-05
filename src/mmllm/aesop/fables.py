@@ -668,8 +668,16 @@ def _cp_stones_needed(scene: Scene) -> Record:
     """Each stone raises water by R cm. Start water S; need T. How many stones?"""
     crow = scene.pick_character(role_classes=("cunning",), species="crow")
     location = scene.pick_location(tags_any=("nature",), indoor=False)
-    pitcher = next(c for c in ont.CONTAINERS if c.name == "pitcher")
-    stone   = next(i for i in ont.ITEMS if i.name == "pebble")
+    # Vary the vessel (pitcher / jar / pot) and the dropped item
+    # (pebble / marble / bead / acorn / nut) — every story still
+    # has the same arithmetic. Items are all small enough to fit.
+    vessel = scene.rng.choice([
+        c for c in ont.CONTAINERS if c.name in ("pitcher", "jar", "pot")
+    ])
+    stone = scene.rng.choice([
+        i for i in ont.ITEMS
+        if i.name in ("pebble", "marble", "bead", "acorn", "nut")
+    ])
 
     rise_per = scene.pick_int(1, 3)
     start    = scene.pick_int(2, 6)
@@ -688,38 +696,101 @@ def _cp_stones_needed(scene: Scene) -> Record:
     )
     answer = evaluate(expr)
 
-    weather  = scene.phrase("On a hot afternoon", "On a thirsty summer day",
-                              "One dry morning", "After a long flight")
-    found    = scene.phrase("found", "came upon", "discovered")
-    raises   = scene.phrase("raised the water level by",
-                              "lifted the water by",
-                              "pushed the level up by")
-    _intro = _aesopian_intro(scene, "crow-pitcher", location)
+    intro = _aesopian_intro(scene, "crow-pitcher", location)
+    thirsty   = scene.rng.choice(EMO_THIRSTY)
+    desperate = scene.rng.choice(EMO_DESPERATE)
+
+    # Six narrative subplots — same arithmetic (gap = target - start;
+    # answer = ceil(gap / rise-per-stone)) but each grounds it in a
+    # different small drama: a parched flight, a sun-baked yard, a
+    # shimmer of water glimpsed at the bottom of the vessel.
+    stones_needed_subplots = [
+        # 1) classic pitcher in a sunlit garden
+        f"After hours of fruitless searching, {crow.name} the crow "
+        f"glided down to a quiet garden, {thirsty}. There on a low wall "
+        f"stood a {vessel.name}, and from above {crow.he_she} could see "
+        f"a thin glimmer of water at the bottom — only "
+        f"{n_unit(start, 'centimeter')} deep, and {crow.his_her} beak "
+        f"could not reach unless the surface rose to "
+        f"{n_unit(target, 'centimeter')}. A scattering of {stone.plural} "
+        f"lay along the path. Each {stone.name}, when dropped in, would "
+        f"push the water up by {n_unit(rise_per, 'centimeter')}. "
+        f"{cap(crow.he_she)} began to count what {crow.he_she} would need.",
+
+        # 2) parched afternoon by the orchard
+        f"The afternoon sun beat down hard, and {crow.name}, "
+        f"{thirsty}, settled at the edge of an orchard where a stout "
+        f"{vessel.name} had been left out. The water inside lay "
+        f"{n_unit(start, 'centimeter')} from the bottom — far below "
+        f"the {n_unit(target, 'centimeter')} mark {crow.he_she} needed "
+        f"to drink. Beneath a nearby tree {crow.he_she} found a small "
+        f"heap of {stone.plural}. {cap(crow.he_she)} weighed one in "
+        f"{crow.his_her} beak: it would lift the surface by exactly "
+        f"{n_unit(rise_per, 'centimeter')}. Now it was only a matter "
+        f"of working out how many {crow.he_she} would have to drop.",
+
+        # 3) flock-watched, desperate
+        f"A small crowd of finches watched as {crow.name} alighted "
+        f"{desperate} beside a tall {vessel.name}. {cap(crow.he_she)} "
+        f"could see the dark shimmer of water sitting "
+        f"{n_unit(start, 'centimeter')} from the bottom — well short "
+        f"of the {n_unit(target, 'centimeter')} {crow.he_she} required. "
+        f"By the foot of the {vessel.name} lay a scatter of dry "
+        f"{stone.plural}. {cap(crow.he_she)} dropped one in: a soft "
+        f"plink, and the water climbed by {n_unit(rise_per, 'centimeter')}. "
+        f"The finches leaned closer. {cap(crow.he_she)} began the steady "
+        f"work of figuring exactly how many more would do the trick.",
+
+        # 4) old farmyard at dusk
+        f"At the edge of an old farmyard, {crow.name} the crow, "
+        f"{thirsty}, came to rest on the rim of a cracked {vessel.name}. "
+        f"The water below was only {n_unit(start, 'centimeter')} deep "
+        f"and needed to climb to {n_unit(target, 'centimeter')} before "
+        f"{crow.he_she} could so much as wet {crow.his_her} tongue. "
+        f"Around the yard lay countless {stone.plural} of just the right "
+        f"size, and a quick test showed each one would raise the water "
+        f"by {n_unit(rise_per, 'centimeter')}. The trick now was simply "
+        f"to count.",
+
+        # 5) dry stone wall, careful pebbles
+        f"{cap(species_phrase(crow))}, {thirsty}, found a {vessel.name} "
+        f"set on a dry stone wall. The sound of water sloshing softly "
+        f"inside was almost cruel — for the surface lay only "
+        f"{n_unit(start, 'centimeter')} from the bottom, and "
+        f"{crow.his_her} beak required it to reach "
+        f"{n_unit(target, 'centimeter')}. Tiny {stone.plural} were "
+        f"wedged among the wall's cracks; {crow.he_she} pried one loose "
+        f"and let it fall. A clear chime, and the level rose by "
+        f"{n_unit(rise_per, 'centimeter')}. {cap(crow.he_she)} settled "
+        f"onto the rim and counted carefully.",
+
+        # 6) quiet courtyard, last hope
+        f"In a quiet courtyard {crow.name} alighted {desperate} on "
+        f"the lip of a {vessel.name}. Below, a sliver of water at "
+        f"{n_unit(start, 'centimeter')} caught the last of the daylight "
+        f"— but {crow.his_her} beak could only reach down to "
+        f"{n_unit(target, 'centimeter')}, no further. A handful of "
+        f"smooth {stone.plural} had been left near the doorway. "
+        f"{cap(crow.he_she)} tested one: a single {stone.name} pushed "
+        f"the water up by {n_unit(rise_per, 'centimeter')}. "
+        f"{cap(crow.he_she)} began calculating how many it would take "
+        f"to bring the surface within reach.",
+    ]
+
+    body = _render_subplot(scene, stones_needed_subplots)
     user_msg = (
-        f"{_intro}{weather} at {location.article} {location.name}, "
-        f"{species_phrase(crow)} {found} a {pitcher.name} of water, but "
-        f"the water sat only {n_unit(start, 'centimeter')} from the bottom — "
-        f"too low to reach. {cap(crow.he_she)} needed the water to rise "
-        f"to {n_unit(target, 'centimeter')} before {crow.he_she} could "
-        f"drink. {cap(crow.he_she)} began dropping {stone.plural} into "
-        f"the {pitcher.name}, and each {stone.name} {raises} "
-        f"{n_unit(rise_per, 'centimeter')}.\n\n"
-        f"Question: What is the smallest number of {stone.plural} "
-        f"{crow.name} needs to drop in to reach the target water level?"
+        f"{intro}{body}\n\n"
+        f"{question_phrase(scene, f'the smallest number of {stone.plural} {crow.name} needs to drop in to reach the target water level')}"
     )
 
-    code_block  = render_code(expr, form=scene.code_form(), value=answer)
-    result_text = f"{crow.name} needs {answer} {stone.plural if answer != 1 else stone.name}."
-    narrative   = (
+    plan = (
         f"I find the gap between target and start, then divide by "
         f"the rise per stone (rounding up by adding rise-per-stone-1 first)."
     )
     return _finalize(
         scene,
         user_msg=user_msg,
-        narrative=narrative,
-        code_block=code_block,
-        result_text=result_text,
+        plan=plan,
         value=answer,
         expr=expr,
         fable="crow-pitcher",
@@ -730,8 +801,16 @@ def _cp_stones_needed(scene: Scene) -> Record:
 def _cp_water_rise(scene: Scene) -> Record:
     """N stones dropped × R cm each + start = final water level."""
     crow = scene.pick_character(role_classes=("cunning",), species="crow")
-    pitcher = next(c for c in ont.CONTAINERS if c.name == "pitcher")
-    stone   = next(i for i in ont.ITEMS if i.name == "pebble")
+    location = scene.pick_location(tags_any=("nature",), indoor=False)
+    # Vary the vessel and the dropped item; each subplot keeps the
+    # same arithmetic but reaches it through a different small drama.
+    vessel = scene.rng.choice([
+        c for c in ont.CONTAINERS if c.name in ("pitcher", "jar", "pot")
+    ])
+    stone = scene.rng.choice([
+        i for i in ont.ITEMS
+        if i.name in ("pebble", "marble", "bead", "acorn", "nut")
+    ])
 
     rise_per = scene.pick_int(1, 3)
     start    = scene.pick_int(1, 5)
@@ -748,33 +827,99 @@ def _cp_water_rise(scene: Scene) -> Record:
     )
     answer = evaluate(expr)
 
-    found    = scene.phrase("found", "came upon", "spotted")
-    dropped  = scene.phrase("dropped in", "tossed in",
-                             "carefully added")
-    each_lifts = scene.phrase("raised the water by", "lifted the level by",
-                               "made the water rise by")
-    _intro = _aesopian_intro(scene, "crow-pitcher")
+    intro = _aesopian_intro(scene, "crow-pitcher", location)
+    thirsty   = scene.rng.choice(EMO_THIRSTY)
+    desperate = scene.rng.choice(EMO_DESPERATE)
+
+    # Six narrative subplots — same arithmetic (final = start + n × rise),
+    # each grounding it in a distinct sensory beat: a hot afternoon, the
+    # plink of falling stones, the slow climb of water against the
+    # vessel's wall.
+    water_rise_subplots = [
+        # 1) classic — quiet garden, methodical drops
+        f"{crow.name} the crow, {thirsty}, alighted on the lip of "
+        f"a cool {vessel.name} half-hidden in shadow. The water inside "
+        f"sat at {n_unit(start, 'centimeter')} from the bottom — too "
+        f"deep for {crow.his_her} beak. Around the base lay a scatter "
+        f"of small {stone.plural}, and {crow.he_she} began to drop "
+        f"them in one by one. {cap(crow.he_she)} counted: "
+        f"{n_unit(n_stones, stone.name, stone.plural)} in all. With "
+        f"each soft plink, the surface climbed a careful "
+        f"{n_unit(rise_per, 'centimeter')} higher.",
+
+        # 2) sun-baked yard — heat shimmer, slow patient work
+        f"The afternoon was hot enough to crack a leaf, and {crow.name}, "
+        f"{thirsty}, settled at the rim of an old {vessel.name} that "
+        f"someone had left in the sun. The water at the bottom — only "
+        f"{n_unit(start, 'centimeter')} deep — shimmered just out of "
+        f"reach. A pile of dry {stone.plural} sat nearby. One by one "
+        f"{crow.he_she} ferried them up and let them fall, "
+        f"{n_unit(n_stones, stone.name, stone.plural)} altogether, "
+        f"each one shouldering the surface up by another "
+        f"{n_unit(rise_per, 'centimeter')}.",
+
+        # 3) sparrows watching — a small audience for cleverness
+        f"A pair of sparrows tilted their heads to watch as {crow.name} "
+        f"{desperate} circled a stout {vessel.name} on a low garden "
+        f"wall. The water within stood at {n_unit(start, 'centimeter')} "
+        f"— a depth no beak in {crow.his_her} family had ever managed. "
+        f"From a tray nearby {crow.he_she} fetched "
+        f"{n_unit(n_stones, stone.name, stone.plural)} in turn, "
+        f"dropping each with a soft chime. Every {stone.name} that "
+        f"sank lifted the surface by exactly "
+        f"{n_unit(rise_per, 'centimeter')}, and the sparrows watched "
+        f"the water climb.",
+
+        # 4) farmhouse stoop, dusk
+        f"At dusk by a farmhouse stoop, {crow.name} the crow paused "
+        f"beside a chipped {vessel.name}. The water inside, only "
+        f"{n_unit(start, 'centimeter')} deep, sent up a thin reflection "
+        f"of the sky. {cap(crow.he_she)} was {thirsty}, and so "
+        f"{crow.he_she} did what every clever crow knows to do: "
+        f"{crow.he_she} gathered "
+        f"{n_unit(n_stones, stone.name, stone.plural)} from the gravel "
+        f"along the path and dropped them in, one after another. Each "
+        f"{stone.name} shouldered the water up by "
+        f"{n_unit(rise_per, 'centimeter')}, and {crow.he_she} kept count.",
+
+        # 5) cool stone courtyard — sound of falling stones
+        f"In a cool stone courtyard {crow.name}, {thirsty}, found a "
+        f"narrow {vessel.name} at the foot of a column. The water "
+        f"sloshed faintly within at {n_unit(start, 'centimeter')}, far "
+        f"out of reach. {cap(crow.he_she)} set to work. From a corner "
+        f"where {stone.plural} had been swept into a small heap "
+        f"{crow.he_she} lifted them, one after another — "
+        f"{n_unit(n_stones, stone.name, stone.plural)} in total — and "
+        f"let each fall with a soft chime. Each chime pushed the surface "
+        f"up by another {n_unit(rise_per, 'centimeter')}.",
+
+        # 6) orchard well — last light of day
+        f"By an orchard well, {crow.name} the crow flexed "
+        f"{crow.his_her} tired wings and looked into a {vessel.name} "
+        f"someone had set out for travelers. Water lay "
+        f"{n_unit(start, 'centimeter')} deep at the bottom. "
+        f"{cap(crow.he_she)} was {thirsty}, but {crow.he_she} was also "
+        f"clever. Beneath an apple tree {crow.he_she} found "
+        f"{n_unit(n_stones, stone.name, stone.plural)} of reasonable "
+        f"weight. One at a time {crow.he_she} carried each to the rim "
+        f"and dropped it in, every {stone.name} lifting the water by "
+        f"another {n_unit(rise_per, 'centimeter')}.",
+    ]
+
+    body = _render_subplot(scene, water_rise_subplots)
     user_msg = (
-        f"{_intro}{species_phrase(crow)} {found} a {pitcher.name} with water at "
-        f"{n_unit(start, 'centimeter')}. {cap(crow.he_she)} {dropped} "
-        f"{n_unit(n_stones, stone.name, stone.plural)}, and each one "
-        f"{each_lifts} {n_unit(rise_per, 'centimeter')}.\n\n"
-        f"Question: After dropping all {n_stones} {stone.plural}, what "
-        f"is the new water level in centimeters?"
+        f"{intro}{body}\n\n"
+        f"{question_phrase(scene, f'the new water level in the {vessel.name} (in centimeters) after all {n_stones} {stone.plural} have been dropped in')}"
     )
 
-    code_block  = render_code(expr, form=scene.code_form(), value=answer)
-    result_text = f"The water level rises to {answer} centimeters."
-    narrative   = (
+    plan = (
         f"I multiply the number of {stone.plural} by the rise per "
         f"{stone.name} and add the starting level."
     )
     return _finalize(
         scene,
         user_msg=user_msg,
-        narrative=narrative,
-        code_block=code_block,
-        result_text=result_text,
+        plan=plan,
         value=answer,
         expr=expr,
         fable="crow-pitcher",
@@ -785,8 +930,16 @@ def _cp_water_rise(scene: Scene) -> Record:
 def _cp_enough_stones(scene: Scene) -> Record:
     """Crow has K stones in pouch. Will K × R + start ≥ T?"""
     crow = scene.pick_character(role_classes=("cunning",), species="crow")
-    pitcher = next(c for c in ont.CONTAINERS if c.name == "pitcher")
-    stone   = next(i for i in ont.ITEMS if i.name == "pebble")
+    location = scene.pick_location(tags_any=("nature",), indoor=False)
+    # Vary the vessel and the dropped item across subplots; the math
+    # (start + k × rise ≥ target) is the same in every story.
+    vessel = scene.rng.choice([
+        c for c in ont.CONTAINERS if c.name in ("pitcher", "jar", "pot")
+    ])
+    stone = scene.rng.choice([
+        i for i in ont.ITEMS
+        if i.name in ("pebble", "marble", "bead", "acorn", "nut")
+    ])
 
     rise_per = scene.pick_int(1, 2)
     start    = scene.pick_int(2, 5)
@@ -805,31 +958,101 @@ def _cp_enough_stones(scene: Scene) -> Record:
         body=App(">=", [Var("reachable"), Var("target-cm")]),
     )
     answer = evaluate(expr)
-    answer_str = "yes" if answer else "no"
 
-    _intro = _aesopian_intro(scene, "crow-pitcher")
+    intro = _aesopian_intro(scene, "crow-pitcher", location)
+    thirsty   = scene.rng.choice(EMO_THIRSTY)
+    desperate = scene.rng.choice(EMO_DESPERATE)
+
+    # Six narrative subplots — same arithmetic (does start + k × rise
+    # reach target?) grounded in different small dramas: a pouch
+    # carefully counted, the last few stones, the question of whether
+    # this small store of cleverness will be enough.
+    enough_stones_subplots = [
+        # 1) classic — last few pebbles at the rim
+        f"After a long flight, {crow.name} the crow alighted "
+        f"{thirsty} on the rim of a {vessel.name}. The water within "
+        f"sat only {n_unit(start, 'centimeter')} from the bottom and "
+        f"needed to reach {n_unit(target, 'centimeter')} before "
+        f"{crow.his_her} beak could drink. {cap(crow.he_she)} had "
+        f"gathered {n_unit(k, stone.name, stone.plural)} on the way — "
+        f"no more. {cap(crow.he_she)} weighed one in {crow.his_her} "
+        f"beak: each {stone.name} would lift the surface by "
+        f"{n_unit(rise_per, 'centimeter')}. The question was whether "
+        f"this small store would be enough.",
+
+        # 2) pouch counted out on the wall
+        f"On a low garden wall {crow.name} laid out the contents of "
+        f"a small pouch — {n_unit(k, stone.name, stone.plural)}, all "
+        f"that remained. Beside the wall stood a {vessel.name}, water "
+        f"glinting at {n_unit(start, 'centimeter')} and needing to "
+        f"climb to {n_unit(target, 'centimeter')} before {crow.he_she} "
+        f"could drink. {cap(crow.he_she)} was {thirsty}, and a quick "
+        f"test showed each {stone.name} raised the water by exactly "
+        f"{n_unit(rise_per, 'centimeter')}. {cap(crow.he_she)} began "
+        f"to count whether so few would do.",
+
+        # 3) sun-baked stoop — desperate calculation
+        f"The stoop was hot enough to scorch {crow.his_her} feet, "
+        f"and {crow.name}, {desperate}, peered down into a {vessel.name} "
+        f"set against the wall. The water lay "
+        f"{n_unit(start, 'centimeter')} deep — far short of the "
+        f"{n_unit(target, 'centimeter')} {crow.he_she} required. From "
+        f"a fold in {crow.his_her} feathers {crow.he_she} produced "
+        f"{n_unit(k, stone.name, stone.plural)}, gathered carefully on "
+        f"the long road. Each one, dropped in, would lift the surface "
+        f"by {n_unit(rise_per, 'centimeter')}. Would it be enough?",
+
+        # 4) sparrows watching, doubt
+        f"Two sparrows perched nearby as {crow.name} the crow, "
+        f"{thirsty}, hopped to the rim of a {vessel.name}. The water "
+        f"glimmered far below at {n_unit(start, 'centimeter')}, and "
+        f"{crow.his_her} beak could only drink if it climbed to "
+        f"{n_unit(target, 'centimeter')}. From a careful pile beside "
+        f"{crow.his_her} foot {crow.he_she} counted "
+        f"{n_unit(k, stone.name, stone.plural)} — that was all. A "
+        f"trial drop showed each {stone.name} pushed the surface up "
+        f"by {n_unit(rise_per, 'centimeter')}. The sparrows watched, "
+        f"unconvinced.",
+
+        # 5) twilight orchard, last hope
+        f"Twilight settled over the orchard as {crow.name}, "
+        f"{thirsty}, found a {vessel.name} forgotten beneath a tree. "
+        f"The water sat {n_unit(start, 'centimeter')} from the bottom; "
+        f"to drink, {crow.he_she} needed it at "
+        f"{n_unit(target, 'centimeter')}. Tucked in a curl of bark "
+        f"{crow.he_she} had been keeping "
+        f"{n_unit(k, stone.name, stone.plural)} for just such a "
+        f"moment. A first {stone.name} fell with a soft chime — the "
+        f"water rose by {n_unit(rise_per, 'centimeter')}. "
+        f"{cap(crow.he_she)} paused to think before dropping the rest.",
+
+        # 6) old courtyard, careful counting
+        f"In an old courtyard {crow.name} the crow tilted "
+        f"{crow.his_her} head over a {vessel.name} on a stone bench. "
+        f"Water at {n_unit(start, 'centimeter')} sloshed quietly within, "
+        f"unreachable until it climbed to "
+        f"{n_unit(target, 'centimeter')}. {cap(crow.he_she)} was "
+        f"{thirsty} and held only "
+        f"{n_unit(k, stone.name, stone.plural)} — every one counted. "
+        f"Dropping a single {stone.name} lifted the surface by "
+        f"{n_unit(rise_per, 'centimeter')}. {cap(crow.he_she)} "
+        f"weighed the question carefully.",
+    ]
+
+    body = _render_subplot(scene, enough_stones_subplots)
     user_msg = (
-        f"{_intro}{species_phrase(crow)} has only "
-        f"{n_unit(k, stone.name, stone.plural)} left. The {pitcher.name}'s "
-        f"water sits at {n_unit(start, 'centimeter')} and needs to reach "
-        f"{n_unit(target, 'centimeter')} to drink. Each {stone.name} "
-        f"raises the water by {n_unit(rise_per, 'centimeter')}.\n\n"
-        f"Question: Can {crow.name} drink with the {stone.plural} "
-        f"{crow.he_she} has? Answer with yes or no."
+        f"{intro}{body}\n\n"
+        f"{question_phrase(scene, f'whether the water level reaches the target after {crow.name} drops in all {k} {stone.plural} (true if it does, false otherwise)')}"
     )
 
-    code_block  = render_code(expr, form=scene.code_form(), value=answer)
-    result_text = f"The answer is {answer_str}."
-    narrative   = (
+    plan = (
         f"I compute the reachable water level with the available "
         f"{stone.plural} and compare with the target."
     )
     return _finalize(
         scene,
         user_msg=user_msg,
-        narrative=narrative,
-        code_block=code_block,
-        result_text=result_text,
+        plan=plan,
         value=answer,
         expr=expr,
         fable="crow-pitcher",
@@ -867,24 +1090,94 @@ def _ge_total_yield(scene: Scene) -> Record:
     )
     answer = evaluate(expr)
 
-    _intro = _aesopian_intro(scene, "goose-eggs", location)
+    intro    = _aesopian_intro(scene, "goose-eggs", location)
+    greedy   = scene.rng.choice(EMO_GREEDY)
+    content  = scene.rng.choice(EMO_CONTENT)
+    regretful = scene.rng.choice(EMO_REGRETFUL)
+
+    # Six narrative subplots — same arithmetic (per-day × days = total)
+    # but each grounds it in a different small drama: the morning ritual,
+    # the creaking table where eggs are tallied, the silver-egg variant,
+    # the temptation to keep counting more.
+    total_yield_subplots = [
+        # 1) classic — daily golden ritual at the farm
+        f"{owner.name} kept {species_phrase(goose)} on a quiet farm at "
+        f"the edge of {location.article} {location.name}. Every morning, "
+        f"without fail, the goose laid {per_day} golden "
+        f"{unit(per_day, 'egg')} in the same straw nest. {cap(owner.he_she)} "
+        f"would lift each egg with both hands, {content}, and place it "
+        f"in a wooden basket beside the door. The ritual went on for "
+        f"{n_unit(days, 'day')} — sun, wind, or rain — and {owner.name} "
+        f"began to wonder how many golden eggs had passed through "
+        f"{owner.his_her} hands by the end of that long stretch.",
+
+        # 2) creaking table, evening tally
+        f"Each evening at {location.article} {location.name}, "
+        f"{owner.name} sat at a creaking table and laid out the day's "
+        f"haul: {per_day} golden {unit(per_day, 'egg')} from the goose, "
+        f"warm and shining like little suns. {cap(owner.he_she)} kept a "
+        f"chalk mark on a beam for every egg, {greedy}, watching the "
+        f"row of marks lengthen. After {n_unit(days, 'day')} of marks, "
+        f"the beam was nearly full, and {owner.name} squinted up at it "
+        f"trying to count exactly how many eggs in all the goose had laid.",
+
+        # 3) silver-egg variant — village gossip
+        f"In {location.article} {location.name} the neighbors swore "
+        f"{owner.name}'s goose laid silver eggs as well as golden, but "
+        f"the truth was simpler: {per_day} ordinary-shaped "
+        f"{unit(per_day, 'egg')} of pure gold, every single morning. "
+        f"{cap(owner.he_she)} carried each egg from the barn in a folded "
+        f"apron, {content}, and slid it into a clay jar by the hearth. "
+        f"For {n_unit(days, 'day')} the jar grew heavier. {owner.name} "
+        f"set out one quiet evening to count what the goose had given "
+        f"in all that time.",
+
+        # 4) market temptation, daily restraint
+        f"At first {owner.name} had thought of taking the eggs to the "
+        f"market straight away, but {owner.he_she} held back. The goose "
+        f"laid {per_day} golden {unit(per_day, 'egg')} each dawn, calm "
+        f"as ever, and {owner.name} let them pile up in a little chest "
+        f"beneath the bed, {greedy} at the thought of one great trip "
+        f"to {location.name} when the time was right. After "
+        f"{n_unit(days, 'day')} of steady laying, the chest was so "
+        f"heavy {owner.he_she} could barely drag it. The first task was "
+        f"to count how many eggs lay inside.",
+
+        # 5) farmhand witness — quiet morning ritual
+        f"A young farmhand at {location.article} {location.name} liked "
+        f"to come round at sunrise just to watch {owner.name} collect "
+        f"from the goose. The bird would settle, ruffle, and stand, "
+        f"leaving {per_day} golden {unit(per_day, 'egg')} in the straw — "
+        f"never more, never fewer. {owner.name} would gather them "
+        f"{content}, smiling at the boy, and tuck them into a folded "
+        f"cloth. {cap(owner.he_she)} kept up the routine for "
+        f"{n_unit(days, 'day')}, and at the end the boy asked, eyes "
+        f"wide, just how many golden eggs the goose had given altogether.",
+
+        # 6) the temptation thought, kept at bay
+        f"More than once, {owner.name} had heard a sly voice in "
+        f"{owner.his_her} own head whisper that one swift cut would "
+        f"bring all the gold at once. But every morning the goose laid "
+        f"{per_day} golden {unit(per_day, 'egg')} into the warm straw, "
+        f"and every morning {owner.name} chose patience, {regretful} "
+        f"only of the day {owner.he_she} had ever entertained the "
+        f"thought. After {n_unit(days, 'day')} of steady gifts, "
+        f"{owner.he_she} sat by the hearth at {location.article} "
+        f"{location.name} and tried to reckon the total of what "
+        f"patience had won {owner.him_her}.",
+    ]
+
+    body = _render_subplot(scene, total_yield_subplots)
     user_msg = (
-        f"{_intro}In {location.article} {location.name}, {owner.name} owned "
-        f"{species_phrase(goose)}. The goose laid {per_day} golden "
-        f"{unit(per_day, 'egg')} every day, like clockwork. "
-        f"{owner.name} kept the goose for {n_unit(days, 'day')}.\n\n"
-        f"Question: How many eggs did the goose lay in total?"
+        f"{intro}{body}\n\n"
+        f"{question_phrase(scene, f'how many eggs the goose laid in total over those {n_unit(days, 'day')}')}"
     )
 
-    code_block  = render_code(expr, form=scene.code_form(), value=answer)
-    result_text = f"The total is {answer} eggs."
-    narrative   = "I multiply the eggs per day by the number of days."
+    plan = "I multiply the eggs per day by the number of days."
     return _finalize(
         scene,
         user_msg=user_msg,
-        narrative=narrative,
-        code_block=code_block,
-        result_text=result_text,
+        plan=plan,
         value=answer,
         expr=expr,
         fable="goose-eggs",
@@ -1639,29 +1932,95 @@ def _fg_max_reach(scene: Scene) -> Record:
     )
     answer = evaluate(expr)
 
-    stand   = scene.phrase("stood on hind legs", "rose up on hind legs",
-                             "stretched up on hind paws")
-    leap    = scene.phrase("could leap another",
-                             "could spring another",
-                             "could jump another")
-    _intro = _aesopian_intro(scene, "fox-grapes")
+    intro = _aesopian_intro(scene, "fox-grapes")
+    hungry    = scene.rng.choice(EMO_HUNGRY)
+    desperate = scene.rng.choice(EMO_DESPERATE)
+    regretful = scene.rng.choice(EMO_REGRETFUL)
+
+    # Six narrative subplots — same arithmetic (body-stand + jump-height)
+    # but each grounds it in a different fruit + setting + sensory hook.
+    # The fox's mood ranges from hungry hope to dignified frustration.
+    max_reach_subplots = [
+        # 1) classic — purple grapes on a vine in the orchard
+        f"{species_phrase(fox)} crept beneath an orchard vine, {hungry}, "
+        f"and stopped before a heavy cluster of purple grapes. {cap(fox.he_she)} "
+        f"rose up on {fox.his_her} hind legs, nose lifted, the tips of "
+        f"{fox.his_her} ears just brushing the lowest leaves at "
+        f"{n_unit(body_height, 'foot', 'feet')} above the dust. From "
+        f"that stretch {fox.he_she} judged {fox.he_she} could spring "
+        f"another {n_unit(jump_height, 'foot', 'feet')} cleanly into the "
+        f"air. The grapes shone in the late sun, dusty-bloomed and "
+        f"impossibly round, and {fox.name} measured the height between "
+        f"{fox.his_her} paws and the prize.",
+
+        # 2) ripe apples on a low branch in a farmyard
+        f"In the corner of a farmer's yard, where a crooked apple tree "
+        f"leaned over the fence, {fox.name} the fox padded to a halt, "
+        f"{hungry}. Three ripe apples hung from a low branch, fat and "
+        f"red. {cap(fox.he_she)} stretched up on {fox.his_her} hind "
+        f"paws — that gave {fox.him_her} {n_unit(body_height, 'foot', 'feet')} "
+        f"of reach — and reckoned {fox.he_she} could leap another "
+        f"{n_unit(jump_height, 'foot', 'feet')} besides. A hen scratched "
+        f"in the dirt, indifferent. {fox.name} eyed the lowest apple and "
+        f"weighed {fox.his_her} chances.",
+
+        # 3) blackberries trailing over a garden fence
+        f"A tangle of blackberry canes spilled over the top of a garden "
+        f"fence, dotted with fat dark berries. {fox.name}, {desperate}, "
+        f"circled below and at last reared up on {fox.his_her} hind legs. "
+        f"The crown of {fox.his_her} head reached "
+        f"{n_unit(body_height, 'foot', 'feet')} from the trampled grass, "
+        f"and a strong push of the haunches added another "
+        f"{n_unit(jump_height, 'foot', 'feet')} to the upward bound. The "
+        f"juice-stained leaves trembled. {cap(fox.he_she)} eyed the "
+        f"darkest berry and gathered {fox.him_her}self for the spring.",
+
+        # 4) pears from an arbor in the kitchen garden
+        f"At the back of a kitchen garden, {fox.name} the fox slipped "
+        f"under an arbor where ripe pears hung in golden bunches, "
+        f"{hungry}. {cap(fox.he_she)} drew {fox.him_her}self up on hind "
+        f"legs, stretching {fox.his_her} long body until {fox.his_her} "
+        f"snout was {n_unit(body_height, 'foot', 'feet')} above the "
+        f"path of crushed shells. From there, a hard jump would carry "
+        f"{fox.him_her} another {n_unit(jump_height, 'foot', 'feet')} "
+        f"upward — no more. {cap(fox.he_she)} stared at the swaying "
+        f"pears, calculating where {fox.his_her} reach would end.",
+
+        # 5) plums on a high market display
+        f"The market square smelled of dust and overripe fruit when "
+        f"{fox.name} slunk between the stalls, {hungry}. A merchant's "
+        f"high display hung clusters of dark plums above the heads of "
+        f"the passing crowd. {cap(fox.he_she)} chose a moment when no "
+        f"one was watching and rose up on hind paws — a stretch of "
+        f"{n_unit(body_height, 'foot', 'feet')} — and judged that a leap "
+        f"could lift {fox.him_her} another {n_unit(jump_height, 'foot', 'feet')} "
+        f"into the laden air. The plums swung lazily, and {fox.name} "
+        f"thought hard about how high {fox.he_she} could truly reach.",
+
+        # 6) figs hanging just above a wall in the vineyard
+        f"Along the edge of a sunbaked vineyard, an old fig tree had "
+        f"grown over the top of a low stone wall, dropping its fruit on "
+        f"the wrong side. {fox.name}, {regretful} of having strayed so "
+        f"far for a meal, padded to the foot of the wall. {cap(fox.he_she)} "
+        f"reared up: the tips of {fox.his_her} ears reached "
+        f"{n_unit(body_height, 'foot', 'feet')} above the gravel, and "
+        f"experience told {fox.him_her} {fox.he_she} could spring no "
+        f"more than {n_unit(jump_height, 'foot', 'feet')} above that. "
+        f"The figs hung there, lazy and purple. {cap(fox.he_she)} stared "
+        f"and measured.",
+    ]
+
+    body = _render_subplot(scene, max_reach_subplots)
     user_msg = (
-        f"{_intro}{species_phrase(fox)} {stand}, reaching "
-        f"{n_unit(body_height, 'foot', 'feet')} high, and "
-        f"{leap} {n_unit(jump_height, 'foot', 'feet')}.\n\n"
-        f"Question: What is the highest point {fox.name} can reach with "
-        f"a single leap?"
+        f"{intro}{body}\n\n"
+        f"{question_phrase(scene, f'the highest point {fox.name} can reach with a single leap')}"
     )
 
-    code_block  = render_code(expr, form=scene.code_form(), value=answer)
-    result_text = f"{fox.name} can reach {n_unit(answer, 'foot', 'feet')} high."
-    narrative   = "I add the body-stand height and the jump height."
+    plan = "I add the body-stand height and the jump height."
     return _finalize(
         scene,
         user_msg=user_msg,
-        narrative=narrative,
-        code_block=code_block,
-        result_text=result_text,
+        plan=plan,
         value=answer,
         expr=expr,
         fable="fox-grapes",
