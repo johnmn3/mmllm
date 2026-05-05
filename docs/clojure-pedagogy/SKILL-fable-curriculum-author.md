@@ -1,0 +1,331 @@
+# Skill: authoring a fable-curriculum
+
+This document teaches another agent how to take ONE Aesop's fable
+and produce the complete K-12 Clojure curriculum re-cast through
+that fable's narrative lens. The work was first done end-to-end for
+**tortoise-hare** at `src/mmllm/aesop/curriculum/tortoise_hare/`;
+the patterns below are the codified recipe.
+
+## Goal
+
+For your fable F, produce ~215 `SubjectCurriculum` definitions —
+one per subject in the K-12 framework
+(`docs/clojure-pedagogy/framework.md`) — each generating ≥ 222
+unique narrative variants per example.
+
+Total output for one fable:
+   ~215 subjects × ~5 examples avg × 222 variants
+   ≈ 240,000 training records.
+
+## Inputs you need
+
+1. **The K-12 framework**: `docs/clojure-pedagogy/framework.md`
+   — lists every subject ID and title.
+2. **Your fable's character pool**: characters whose `species`
+   matches your fable in `src/mmllm/aesop/ontology.py`. For example,
+   crow-pitcher uses crows; goose-eggs uses geese + their human owners.
+3. **Your fable's narrative dynamic**: read
+   `src/mmllm/aesop/fables.py` `FABLE_OPENERS[<fable>]` to internalize
+   the moral tension. For tortoise-hare it's vanity vs. steadiness;
+   for crow-pitcher it's cleverness in adversity; etc.
+4. **The exemplar**: `src/mmllm/aesop/curriculum/tortoise_hare/grade_1.py`
+   is the canonical reference. Mirror its shape.
+
+## Output structure
+
+```
+src/mmllm/aesop/curriculum/<your_fable>/
+    __init__.py
+    grade_1.py     # 18 subjects
+    grade_2.py     # 22 subjects
+    ...
+    grade_12.py    # 18 subjects
+```
+
+Each `grade_N.py` exports a `SUBJECTS: dict[str, SubjectCurriculum]`
+mapping subject id (`"G1-01"`) to its curriculum definition. Plus a
+`smoke_test()` that generates one record per subject and verifies shape.
+
+## The shape of a subject
+
+```python
+SUBJECT = SubjectCurriculum(
+    grade=1,
+    subject_id="G1-01",
+    subject_title="Eval as substitution",
+    fable="<your fable>",
+    examples=[
+        SubjectExample(
+            form="(+ 1 2)",                        # the Clojure source
+            expected=3,                            # what the form evaluates to
+            concept_phrase="the form (+ 1 2)",     # noun-phrase for narrative
+            question_what="the result of (+ 1 2)", # noun-phrase for question
+        ),
+        # ... 4-10 examples per subject ...
+    ],
+    subplots=[SubplotTemplate(template="""..."""), ...],   # 6+ templates
+    plan_pool=("I write the form...", ...),       # 4-6 plan-only prefaces
+)
+```
+
+## Writing examples
+
+Each example pins down what Clojure form the model should write and
+what value it produces.
+
+- `form`: the Clojure source. Single-line preferred; multi-line OK
+  if the form is genuinely multi-line (e.g., a `let` with several
+  bindings).
+- `expected`: the value evaluating the form produces. NEVER appears
+  in user_msg or assistant_msg — used only by the verifier.
+- `concept_phrase`: a noun-phrase the subplot weaves in:
+  > "Bramble pointed to **the form `(+ 1 2)`** etched into a stone."
+  Should make grammatical sense in any subplot context.
+- `question_what`: a noun-phrase the closing question wraps around:
+  > "Write a Clojure expression that computes **the result of (+ 1 2)**."
+
+### Example coverage per subject
+
+5-10 examples per subject is the sweet spot.
+- Atoms-style subjects (G1-02 integers, G1-04 strings): 5-6 examples
+  spanning the value-space (positive, negative, zero, boundary cases).
+- Operator subjects (G1-13 first-arithmetic): 6-8 examples covering
+  +/-/*/, with diverse operands.
+- Predicate subjects (G1-15 equality, G1-16 numeric-predicates):
+  6-8 examples covering both `true` and `false` outcomes.
+- Higher-grade subjects scale similarly.
+
+## Writing subplots
+
+A subplot is a Python format string with named placeholders. The
+generator fills these from (character pool × location pool ×
+emotion pool × example).
+
+### Required placeholders
+- `{form_display}` — the form, backtick-wrapped: `` `42` ``
+- `{concept_phrase}` — example.concept_phrase
+- `{place}` — "near the hilltop", "in the meadow"
+- Two character placeholders specific to your fable. For
+  tortoise-hare: `{hare}` / `{tortoise}` and their phrases /
+  pronouns. For your fable: pick the two main characters and
+  expose them analogously. See `_build_placeholders` in
+  `generator.py` to extend.
+
+### Optional placeholders
+- `{emo_proud}`, `{emo_patient}`, `{emo_tired}`, etc. — single
+  picks from `EMO_*` pools. Use to add character-flavored manner.
+
+### Subplot pool size: 6-8 templates
+
+Each template should embody a different narrative beat:
+1. The **argument** — characters disagree about the answer; the
+   form is what they should evaluate to settle it.
+2. The **wager / bet** — one character bets they know what the
+   form returns.
+3. The **teacher** — one character explains to the other how the
+   REPL works using this form.
+4. The **audience** — onlookers watch the demonstration.
+5. The **race-pause** / **action-interrupt** — the fable's central
+   action pauses for a quick REPL question.
+6. The **notebook / ledger** — a character keeps a written record
+   of forms they've evaluated.
+7. The **boast-and-rebuke** — one character claims to know without
+   evaluating; the other insists they actually evaluate.
+8. The **puzzle-on-the-path** — a sign / engraving / scrap of
+   parchment poses the form as a riddle.
+
+These 8 are the patterns that worked for tortoise-hare. Other
+fables will have natural-fitting variants:
+- **Crow-pitcher**: the "thirsty calculation" pattern (the crow uses
+  a form to estimate how many stones it needs), the "stone-by-stone
+  ledger" pattern.
+- **Goose-eggs**: the "ledger" patterns (counting eggs/coins),
+  "market-tally" patterns.
+- **Boy-wolf**: the "village-tally" pattern (counting alarms).
+
+You don't need to use the same 8 patterns as tortoise-hare. Pick
+patterns that flow naturally from your fable's setting and props.
+
+### Subplot constraints
+
+- **Never reveal the answer** in the subplot. The form may appear,
+  the noun-phrase may appear, but the numeric/string answer must
+  not appear in narrative prose. This is the eval-first principle:
+  the model produces the form; the runtime computes the answer.
+- **Subplots must work for ALL examples in the subject.** Don't
+  hard-code "the integer 7" in a subplot — use `{form_display}`
+  and `{concept_phrase}` so the same template renders correctly
+  for `42`, `"hello"`, `(+ 1 2)`, etc. If a particular template
+  only fits some examples, mark it with `fits_tags=("arithmetic",)`
+  and tag the relevant examples.
+
+## Plan pool
+
+A short list of plan-only prefaces — single sentences describing
+HOW the model approaches the problem (never the answer). Example
+for grade 1:
+
+```python
+PLAN_POOL = (
+    "I write the form and let the REPL evaluate it.",
+    "I submit the form to the REPL via the eval tool.",
+    "I let the REPL do the evaluation.",
+    "I express the form as Clojure source.",
+)
+```
+
+For higher grades these get more specific:
+- G3 (let / def): "I bind the inputs in a let, then compute."
+- G5 (reduce): "I reduce + over the sequence."
+- G10 (macros): "I expand the macro with macroexpand."
+
+50% of records emit no preface; the other 50% pick from this pool
+or from a chapter-specific plan. Keep entries SHORT (one sentence)
+and ABSTRACT (don't reference specific values).
+
+## Sharing infrastructure
+
+The shared `_SHARED_SUBPLOTS` list in
+`tortoise_hare/grade_1.py` is reused across all 18 grade-1 subjects.
+This is the right pattern: write 6-8 subplots ONCE per grade
+(or per layer), and have all subjects within that grade reference
+the shared list.
+
+For grade-specific narrative beats (e.g., grade 4 "the tortoise
+sorts pebbles into a vector"), introduce a grade-specific subplot
+list that supplements the shared one.
+
+## Validating output
+
+```python
+from mmllm.aesop.curriculum.<your_fable>.grade_1 import smoke_test
+smoke_test()
+```
+
+Plus a stronger check: generate 222 records of one example and
+confirm at least 200 are unique:
+
+```python
+from mmllm.aesop.curriculum.generator import generate_subject
+recs = generate_subject(SUBJECTS["G1-01"], n_per_example=222, seed=0)
+assert len({r.user_msg for r in recs[:222]}) >= 200, "low variety"
+```
+
+If variety is low: enlarge subplot pool, vary location pool, add
+emotion-pool placements.
+
+## Grade-by-grade subject lists
+
+Use `docs/clojure-pedagogy/framework.md` as the source of truth.
+Subject IDs follow `G<grade>-<two-digit-index>` zero-padded.
+
+### Working through a grade
+
+For each subject:
+1. Write 5-10 `SubjectExample` entries covering the concept's
+   value-space.
+2. Verify the subplot pool's templates work with those examples
+   (re-run smoke).
+3. Add subject-specific subplot variants if the shared pool reads
+   awkwardly for that subject (e.g., G1-15 equality wants an
+   "argument settled by checking" beat that the shared pool
+   already supports — but G3 might want a "naming ceremony" beat).
+
+### Higher-grade subjects: math vs. structural
+
+Grades 1-2 are pure value-and-arithmetic.
+Grades 3-5 introduce binding, collections, and higher-order. Subplots
+need to grow in scope:
+- G3 subplots can frame the form as a small recipe ("Bramble called
+  for `(let [...] ...)` to settle the question").
+- G4 subplots feature collections of objects ("a basket of pebbles
+  Bramble had been counting").
+- G5 subplots feature decisions and repetitions ("at every milestone,
+  Shelly checked …").
+
+Grades 6-12 deal with code organization, errors, polymorphism,
+concurrency, macros, interop, and real-world libraries. The fable's
+narrative scaffolding still applies, but the subjects are mostly
+about Clojure machinery, not arithmetic. Subplots focus on the
+form being submitted; the narrative becomes more about the
+characters' attitudes toward the form than about the arithmetic
+of the form.
+
+## Common mistakes (anti-patterns to avoid)
+
+- **Hard-coding values in subplots.** A template like
+  `"{hare} pointed to the form (+ 1 2)..."` only works for ONE
+  example. Use `{form_display}` and `{concept_phrase}`.
+- **Revealing the answer in narrative.** A subplot that says
+  "the result is 3" leaks the answer. Always have the subplot
+  describe the form, not its value.
+- **Subplots that don't grammatically fit small concept_phrases.**
+  Test with concept_phrases like `"the value 0"`, `"the integer 7"`,
+  AND with longer ones like `"the nested form (- 100 (* 5 5))"`.
+  Templates must read well in both cases.
+- **Single-shot variety.** Generating 222 records but only seeing
+  20 unique surface forms means subplot pool too small or character
+  pool too narrow. Aim for variety_score = unique_user_msg / total
+  ≥ 0.95.
+- **Genericizing the fable away.** The whole point is that the
+  reader feels they're inside YOUR fable. Use the fable's
+  characters, settings, props, and moral dynamic. Don't write
+  generic "a clever student approached the problem" subplots —
+  use the named characters constantly.
+
+## Hand-off check
+
+You're done when:
+1. All 12 `grade_N.py` files exist and pass their smoke tests.
+2. Cumulative subject count is in the 200-220 range across all grades.
+3. A spot-check of 5 random records per grade reads as natural
+   variations of YOUR fable, not generic Aesopiana.
+4. `docs/clojure-pedagogy/fable-curricula/<your-fable>/README.md`
+   has a one-paragraph summary of how your fable's character pool
+   and moral dynamic are mapped onto the curriculum.
+
+## Coordinating with other fable-curriculum agents
+
+Other agents are doing the same work for the other 9 fables. To
+avoid stepping on each other:
+- Each fable's curriculum lives in its OWN directory:
+  `src/mmllm/aesop/curriculum/<fable>/`. No file conflicts.
+- Each fable's curriculum docs live in:
+  `docs/clojure-pedagogy/fable-curricula/<fable>/`.
+- The shared infrastructure (`generator.py`,
+  `framework.md`, `subject-template.md`) is read-only; if you find
+  a bug, file a note in your README and let the human author fix it
+  centrally.
+
+## Example: end-to-end
+
+A complete grade-1 implementation lives in
+`src/mmllm/aesop/curriculum/tortoise_hare/grade_1.py`. Read it.
+The pattern is:
+
+```python
+_SHARED_SUBPLOTS = [SubplotTemplate("..."), ...]
+_PLAN_POOL = ("I write the form...", ...)
+
+def _ex(form, expected, concept, what):
+    return SubjectExample(form=form, expected=expected,
+                          concept_phrase=concept, question_what=what)
+
+G1_01 = SubjectCurriculum(
+    grade=1, subject_id="G1-01",
+    subject_title="Eval as substitution",
+    fable="tortoise-hare",
+    examples=[
+        _ex("42", 42, "the value 42", "the value the form 42 evaluates to"),
+        # ...
+    ],
+    subplots=_SHARED_SUBPLOTS,
+    plan_pool=_PLAN_POOL,
+)
+# ... 17 more subjects ...
+
+SUBJECTS = {s.subject_id: s for s in (G1_01, G1_02, ..., G1_18)}
+```
+
+That's the whole pattern. Repeat 12 times (one per grade), with
+appropriate-difficulty examples and subplots. Done.
