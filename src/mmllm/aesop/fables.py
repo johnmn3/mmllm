@@ -25,8 +25,8 @@ from mmllm.aesop.expr import (
 )
 from mmllm.aesop.template import (
     Record, Scene,
-    article, assemble_assistant_msg, cap, render_code, render_tool_calls,
-    species_phrase, the_subject_phrase,
+    article, assemble_assistant_msg, cap, n_unit, render_code,
+    render_tool_calls, species_phrase, the_subject_phrase, unit,
 )
 
 
@@ -76,10 +76,11 @@ def _th_nap_overtake(scene: Scene) -> Record:
         f"{location.article} {location.name}. "
         f"{cap(hare.he_she)} bragged about being the fastest, "
         f"while {tortoise.he_she} just kept a steady pace.\n\n"
-        f"After running {hare_lead} miles ahead, {hare.name} grew tired and "
-        f"decided to take a nap. Meanwhile, {tortoise.name} kept walking at "
-        f"{tortoise_speed} miles per hour. While {hare.name} slept, "
-        f"{tortoise.name} walked for {nap_hours} hours straight.\n\n"
+        f"After running {n_unit(hare_lead, 'mile')} ahead, {hare.name} "
+        f"grew tired and decided to take a nap. Meanwhile, {tortoise.name} "
+        f"kept walking at {tortoise_speed} {unit(tortoise_speed, 'mile')} "
+        f"per hour. While {hare.name} slept, {tortoise.name} walked for "
+        f"{n_unit(nap_hours, 'hour')} straight.\n\n"
         f"Question: After {tortoise.name}'s walk, who is in the lead?"
     )
 
@@ -140,10 +141,12 @@ def _th_speed_comparison(scene: Scene) -> Record:
     user_msg = (
         f"{species_phrase(hare)} and {species_phrase(tortoise)} agreed to a "
         f"steady race across {location.article} {location.name}. "
-        f"{cap(hare.he_she)} ran at {hare_speed} miles per hour, while "
-        f"{tortoise.name} plodded at {tortoise_speed} miles per hour. "
-        f"They both ran for exactly {hours} hours.\n\n"
-        f"Question: How many miles ahead is {hare.name} after {hours} hours?"
+        f"{cap(hare.he_she)} ran at {hare_speed} "
+        f"{unit(hare_speed, 'mile')} per hour, while {tortoise.name} "
+        f"plodded at {tortoise_speed} {unit(tortoise_speed, 'mile')} "
+        f"per hour. They both ran for exactly {n_unit(hours, 'hour')}.\n\n"
+        f"Question: How many miles ahead is {hare.name} after "
+        f"{n_unit(hours, 'hour')}?"
     )
 
     code_block = render_code(expr, form=scene.code_form(), value=answer)
@@ -196,15 +199,20 @@ def _th_distance_remaining(scene: Scene) -> Record:
 
     user_msg = (
         f"In a long race across {location.article} {location.name}, "
-        f"the course is {total} miles. {species_phrase(tortoise)} has "
-        f"already walked {walked} miles. {cap(tortoise.he_she)} continues "
-        f"at {speed} miles per hour.\n\n"
+        f"the course is {n_unit(total, 'mile')}. {species_phrase(tortoise)} "
+        f"has already walked {n_unit(walked, 'mile')}. "
+        f"{cap(tortoise.he_she)} continues at {speed} "
+        f"{unit(speed, 'mile')} per hour.\n\n"
         f"Question: How many more whole hours of walking does "
         f"{tortoise.name} need to reach the finish line?"
     )
 
     code_block  = render_code(expr, form=scene.code_form(), value=answer)
-    result_text = f"{tortoise.name} needs {answer} more hours of walking."
+    result_text = (
+        f"{tortoise.name} needs {n_unit(answer, 'more hour')} of walking."
+        if answer != 1 else
+        f"{tortoise.name} needs 1 more hour of walking."
+    )
     narrative   = (
         f"I subtract the distance already walked from the total to find "
         f"what remains, then divide by {tortoise.name}'s speed."
@@ -270,12 +278,12 @@ def _cp_stones_needed(scene: Scene) -> Record:
     user_msg = (
         f"On a hot afternoon at {location.article} {location.name}, "
         f"{species_phrase(crow)} found a {pitcher.name} of water but the "
-        f"water sat only {start} centimeters from the bottom — too low to "
-        f"reach. {cap(crow.he_she)} needed the water to rise to "
-        f"{target} centimeters before {crow.he_she} could drink. "
-        f"{cap(crow.he_she)} started dropping {stone.plural} into the "
-        f"{pitcher.name}, and each {stone.name} raised the water level by "
-        f"{rise_per} centimeter{'s' if rise_per != 1 else ''}.\n\n"
+        f"water sat only {n_unit(start, 'centimeter')} from the bottom — "
+        f"too low to reach. {cap(crow.he_she)} needed the water to rise "
+        f"to {n_unit(target, 'centimeter')} before {crow.he_she} could "
+        f"drink. {cap(crow.he_she)} started dropping {stone.plural} into "
+        f"the {pitcher.name}, and each {stone.name} raised the water level "
+        f"by {n_unit(rise_per, 'centimeter')}.\n\n"
         f"Question: What is the smallest number of {stone.plural} "
         f"{crow.name} needs to drop in to reach the target water level?"
     )
@@ -329,11 +337,11 @@ def _cp_water_rise(scene: Scene) -> Record:
 
     user_msg = (
         f"{species_phrase(crow)} found a {pitcher.name} with water at "
-        f"{start} centimeters. {cap(crow.he_she)} dropped in {n_stones} "
-        f"{stone.plural}, and each one raised the water by {rise_per} "
-        f"centimeter{'s' if rise_per != 1 else ''}.\n\n"
-        f"Question: After dropping all {n_stones} {stone.plural}, what is "
-        f"the new water level in centimeters?"
+        f"{n_unit(start, 'centimeter')}. {cap(crow.he_she)} dropped in "
+        f"{n_unit(n_stones, stone.name, stone.plural)}, and each one "
+        f"raised the water by {n_unit(rise_per, 'centimeter')}.\n\n"
+        f"Question: After dropping all {n_stones} {stone.plural}, what "
+        f"is the new water level in centimeters?"
     )
 
     code_block  = render_code(expr, form=scene.code_form(), value=answer)
@@ -388,10 +396,11 @@ def _cp_enough_stones(scene: Scene) -> Record:
     answer_str = "yes" if answer else "no"
 
     user_msg = (
-        f"{species_phrase(crow)} has only {k} {stone.plural} left. The "
-        f"{pitcher.name}'s water sits at {start} centimeters and needs to "
-        f"reach {target} to drink. Each {stone.name} raises the water by "
-        f"{rise_per} centimeter{'s' if rise_per != 1 else ''}.\n\n"
+        f"{species_phrase(crow)} has only "
+        f"{n_unit(k, stone.name, stone.plural)} left. The {pitcher.name}'s "
+        f"water sits at {n_unit(start, 'centimeter')} and needs to reach "
+        f"{n_unit(target, 'centimeter')} to drink. Each {stone.name} "
+        f"raises the water by {n_unit(rise_per, 'centimeter')}.\n\n"
         f"Question: Can {crow.name} drink with the {stone.plural} "
         f"{crow.he_she} has? Answer with yes or no."
     )
@@ -455,8 +464,8 @@ def _ge_total_yield(scene: Scene) -> Record:
     user_msg = (
         f"In {location.article} {location.name}, {owner.name} owned "
         f"{species_phrase(goose)}. The goose laid {per_day} golden "
-        f"egg{'s' if per_day != 1 else ''} every day, like clockwork. "
-        f"{owner.name} kept the goose for {days} days.\n\n"
+        f"{unit(per_day, 'egg')} every day, like clockwork. "
+        f"{owner.name} kept the goose for {n_unit(days, 'day')}.\n\n"
         f"Question: How many eggs did the goose lay in total?"
     )
 
@@ -506,10 +515,10 @@ def _ge_value_yield(scene: Scene) -> Record:
 
     user_msg = (
         f"{owner.name} owned {species_phrase(goose)} that laid {per_day} "
-        f"golden egg{'s' if per_day != 1 else ''} per day. Each egg sold "
-        f"for {per_egg} coins at the market. After {days} days, "
-        f"{owner.name} took the eggs to {location.article} {location.name} "
-        f"to sell.\n\n"
+        f"golden {unit(per_day, 'egg')} per day. Each egg sold for "
+        f"{n_unit(per_egg, 'coin')} at the market. After "
+        f"{n_unit(days, 'day')}, {owner.name} took the eggs to "
+        f"{location.article} {location.name} to sell.\n\n"
         f"Question: How many coins did {owner.name} earn in total?"
     )
 
@@ -559,8 +568,8 @@ def _ge_compounded(scene: Scene) -> Record:
     yields_str = ", ".join(str(y) for y in yields)
     user_msg = (
         f"{owner.name}'s {species_phrase(goose)} laid different numbers "
-        f"of eggs each day for {days} days: {yields_str}.\n\n"
-        f"Question: How many eggs in total over the {days} days?"
+        f"of eggs each day for {n_unit(days, 'day')}: {yields_str}.\n\n"
+        f"Question: How many eggs in total over the {n_unit(days, 'day')}?"
     )
 
     code_block  = render_code(expr, form="inline", value=answer)

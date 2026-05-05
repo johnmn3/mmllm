@@ -253,6 +253,19 @@ def maybe_plural(item: ont.Item, n: int) -> str:
     return item.plural if n != 1 else item.name
 
 
+def unit(n: int, singular: str, plural: str | None = None) -> str:
+    """`unit(1, 'mile') -> 'mile'`, `unit(3, 'mile') -> 'miles'`. For
+    irregular plurals (e.g., 'foot' / 'feet'), pass plural explicitly."""
+    if n == 1:
+        return singular
+    return plural if plural is not None else singular + "s"
+
+
+def n_unit(n: int, singular: str, plural: str | None = None) -> str:
+    """`n_unit(1, 'mile') -> '1 mile'`, `n_unit(3, 'mile') -> '3 miles'`."""
+    return f"{n} {unit(n, singular, plural)}"
+
+
 # ─────────────────────── render helpers ───────────────────────
 
 
