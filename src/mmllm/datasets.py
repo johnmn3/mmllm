@@ -542,20 +542,24 @@ DATASET_REGISTRY = {
         "kind":      "pretrain",
         "notes":     "Shell subset of The Stack v2 dedup",
     },
-    "the-stack-v2-clj": {
-        # Clojure subset of The Stack v2. The biggest publicly-available
-        # Clojure code corpus; gated like the other the-stack-v2-* slices
-        # — needs a HF token Modal Secret + license click-through at
-        # huggingface.co/datasets/bigcode/the-stack-v2-dedup. Cap at 2 GB
-        # in PROD_CAPS (~hundreds of thousands of files post dedup +
-        # max_file_bytes filter); plenty of substrate for an eventual
-        # Clojure-specialized fine-tune.
-        "hf_name":   "bigcode/the-stack-v2-dedup",
-        "hf_config": "Clojure",
-        "split":     "train",
-        "formatter": fmt_the_stack_v2,
-        "kind":      "pretrain",
-        "notes":     "Clojure subset of The Stack v2 dedup (gated)",
+    "the-stack-clj": {
+        # Originally tried bigcode/the-stack-v2-dedup but that dataset
+        # is metadata-only by design — records have blob_id but no
+        # `content` field; actual code lives on Software Heritage S3.
+        # Switched to v1 (bigcode/the-stack-dedup) which has content
+        # baked in. Gated; needs HF license click-through at
+        # https://huggingface.co/datasets/bigcode/the-stack-dedup .
+        #
+        # v1 ships as a single 'default' config; per-language slices
+        # are addressed via `data_dir="data/<language>"` rather than
+        # an HF config name. Hence hf_config=None + hf_data_dir set.
+        "hf_name":     "bigcode/the-stack-dedup",
+        "hf_config":   None,
+        "hf_data_dir": "data/clojure",
+        "split":       "train",
+        "formatter":   fmt_the_stack_v2,  # same content-field formatter works
+        "kind":        "pretrain",
+        "notes":       "Clojure subset of The Stack v1 dedup (gated; has content)",
     },
     # Math + formal reasoning. These don't teach JSON tool calls, but
     # they teach the polynomial-hierarchy-softness/hardness intuition
@@ -645,8 +649,8 @@ def _human_bytes(n: float) -> str:
     return f"{n:.1f} PB"
 
 
-def _iter_hf(hf_name: str, hf_config: "str | None", split: str
-             ) -> Iterator[dict]:
+def _iter_hf(hf_name: str, hf_config: "str | None", split: str,
+             hf_data_dir: "str | None" = None) -> Iterator[dict]:
     """Stream records from HF without materializing the whole dataset.
 
     We use streaming=True so a 25B-token corpus doesn't get materialized
@@ -660,14 +664,19 @@ def _iter_hf(hf_name: str, hf_config: "str | None", split: str
     unconditionally — the security implication is "this dataset's
     loader runs in our container," which on a sandboxed Modal CPU
     container is acceptable for the public datasets we use.
+
+    `hf_data_dir` (optional) — for datasets that ship a single
+    'default' config but partition language slices by directory
+    (e.g., bigcode/the-stack-dedup uses data_dir='data/clojure').
     """
     from datasets import load_dataset
+    kwargs = dict(split=split, streaming=True, trust_remote_code=True)
+    if hf_data_dir:
+        kwargs["data_dir"] = hf_data_dir
     if hf_config:
-        ds = load_dataset(hf_name, hf_config, split=split,
-                           streaming=True, trust_remote_code=True)
+        ds = load_dataset(hf_name, hf_config, **kwargs)
     else:
-        ds = load_dataset(hf_name, split=split,
-                           streaming=True, trust_remote_code=True)
+        ds = load_dataset(hf_name, **kwargs)
     yield from ds
 
 
@@ -714,7 +723,9 @@ def prepare_hf_dataset(
           flush=True)
 
     with open(out, "wb") as fout:
-        for rec in _iter_hf(spec["hf_name"], spec["hf_config"], spec["split"]):
+        for rec in _iter_hf(spec["hf_name"], spec["hf_config"],
+                             spec["split"],
+                             hf_data_dir=spec.get("hf_data_dir")):
             try:
                 formatted = fmt(rec)
             except Exception as e:

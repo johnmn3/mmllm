@@ -1902,11 +1902,11 @@ PROD_CAPS = {
     # does NOT include in --mix (it's a benchmark). eval_watcher routes
     # it via agent_evals to measure Clojure code-gen ability per ckpt.
     "humaneval-clj":      (    200_000,         50_000,     50_000),  # ~175 KB total
-    # Gated (HF token required) — only prep when 'huggingface-secret' or
-    # 'huggingface-token' Modal Secret is configured. prep_for_prod will
-    # attempt them and fail gracefully (per-dataset error capture) if
-    # the token is missing.
-    "the-stack-v2-clj":   (2_000_000_000,    20_000_000, 20_000_000),  # GATED
+    # Gated (HF token required + per-dataset license click-through).
+    # prepare_for_prod attempts them and fails gracefully (per-dataset
+    # error capture) if the token is missing or license unaccepted.
+    "xlam":               ( 200_000_000,    10_000_000, 10_000_000),  # GATED — Salesforce/xlam-function-calling-60k
+    "the-stack-clj":      (2_000_000_000,    20_000_000, 20_000_000),  # GATED — bigcode/the-stack-dedup (v1) clojure
 }
 
 
@@ -2813,7 +2813,7 @@ def smoke_pipeline_modal(
     #     "click to accept terms" gate; needs HF auth even for public
     #     read)
     GATED = {"the-stack-v2-py", "the-stack-v2-md", "the-stack-v2-sh",
-             "the-stack-v2-clj", "xlam"}
+             "the-stack-clj", "xlam"}
 
     Path(smoke_base).mkdir(parents=True, exist_ok=True)
 
