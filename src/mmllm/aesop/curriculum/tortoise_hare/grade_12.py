@@ -52,7 +52,7 @@ and said the form to remember was {form_display}; {hare_phrase}
 agreed to submit it."""),
 
     SubplotTemplate("""\
-{hare_phrase}, {emo_tired} from a season of races, was finally willing
+{hare_phrase}, {emo_tired}, was finally willing
 to study patterns. {tortoise_phrase} pointed {place} at
 {concept_phrase}. The form {form_display} was the canonical example;
 the REPL would confirm what it produced."""),

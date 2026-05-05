@@ -37,7 +37,7 @@ be settled the moment the form was evaluated."""),
     # 10. The wager-with-stakes template — increases the dramatic stakes
     #     when the form is more interesting (e.g., min/max, mod).
     SubplotTemplate("""\
-"Whatever {form_display} comes to," {hare_phrase} declared {emo_proud}
+"Whatever {form_display} comes to," {hare_phrase} declared, {emo_proud},
 {place}, "I'll wager I know it without typing it." {tortoise_phrase},
 {emo_patient}, picked up a stick and drew {concept_phrase} in the
 dust. "Then write the form," {tortoise_he_she} said. "The REPL will

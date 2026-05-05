@@ -1054,7 +1054,7 @@ SUBJECTS = {s.subject_id: s for s in (G1_01, G1_02, ..., G1_18)}
 That's the whole pattern. Repeat 12 times (one per grade), with
 appropriate-difficulty examples and subplots. Done.
 
-### 22. `farm` is a workplace, not an enclosure — `place_phrase` must use `on/at/by`, not `in`
+### 27. `farm` is a workplace, not an enclosure — `place_phrase` must use `on/at/by`, not `in`
 
 When a fable adds a new outdoor location, double-check its English
 preposition with the existing `place_phrase()` pool. The
@@ -1073,7 +1073,7 @@ differs from the default `in/near/at the edge of/by` set. Spot-check
 the 4-5 prepositions of any new location in 3-5 sample renders before
 landing.
 
-### 23. SAID_PARTICIPLE applies to all speech-verbs, not just `said`
+### 28. SAID_PARTICIPLE applies to all speech-verbs, not just `said`
 
 The original SAID_PARTICIPLE check caught `said boasting`, `said
 puffed`, etc. — but the same parse problem occurs with other
@@ -1100,7 +1100,7 @@ turned up uncommad in grade-2's wager-with-stakes subplot — the
 pattern was the same as #12 but the existing audit only checked
 `said`.
 
-### 24. DOUBLE_FROM applies to other verb-tail trailers, not just "from a recent X"
+### 29. DOUBLE_FROM applies to other verb-tail trailers, not just "from a recent X"
 
 Pitfall #13 (DOUBLE_FROM) originally caught `from X-ing from a recent
 sprint` — an EMO_TIRED entry that ends with "from sprinting" /
@@ -1129,7 +1129,7 @@ subplot, the safe shape is `..., {emo_tired},` (comma-bracketed,
 no trailing prep) — let the EMO phrase carry all the prepositional
 content.
 
-### 25. DOUBLE_PREP also applies to noun-prefix phrases that carry a preposition
+### 30. DOUBLE_PREP also applies to noun-prefix phrases that carry a preposition
 
 Pitfall #21 (DOUBLE_PREP) caught the verb-prefix variant: `Halfway to
 {place}` → "Halfway to in the meadow". The ant-grasshopper hand-audit
