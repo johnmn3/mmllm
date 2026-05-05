@@ -2471,34 +2471,97 @@ def _mm_egg_to_coin_chain(scene: Scene) -> Record:
     )
     answer = evaluate(expr)
 
-    walking = scene.phrase("carried a pail of milk to market",
-                             "walked to market with her milk pail",
-                             "set off for the market with a pail of milk")
-    dreamt  = scene.phrase("dreamed of the future",
-                             "started to plan her fortune",
-                             "imagined what she would do with the proceeds")
-    _intro = _aesopian_intro(scene, "milkmaid")
-    user_msg = (
-        f"{_intro}{maid.name} {walking} and {dreamt}. She would buy "
+    intro = _aesopian_intro(scene, "milkmaid")
+    greedy    = scene.rng.choice(EMO_GREEDY)
+    regretful = scene.rng.choice(EMO_REGRETFUL)
+
+    # Six narrative subplots — same arithmetic (eggs × eggs-per-hen ×
+    # coins-per-egg) but each grounds the daydream in a different
+    # container, item, and sensory setting. The Milkmaid's mood swings
+    # between hopeful imagining and the small flickers of regret that
+    # warn she may be counting too far ahead.
+    egg_chain_subplots = [
+        # 1) classic — wooden pail of milk balanced on her head
+        f"{maid.name} walked the long road to market with her wooden "
+        f"pail balanced upon her head, the milk inside slopping gently "
+        f"with every step. {cap(greedy)}, she began to count out her "
+        f"coming fortune. The milk would buy {n_unit(eggs, 'egg')} from "
+        f"the poultry stall; each would hatch into a fine hen; each hen "
+        f"would lay {n_unit(eggs_per_hen_per_year, 'egg')} in the course "
+        f"of a year; and every one of those eggs would fetch "
+        f"{n_unit(coins_per_egg, 'coin')} at market. She walked faster, "
+        f"smiling to herself.",
+
+        # 2) duck eggs in a willow basket, returning from the henhouse
+        f"Carrying a willow basket of duck eggs from the henhouse to the "
+        f"kitchen door, {maid.name} let her thoughts run further than "
+        f"her feet. {cap(greedy)}, she traced out the chain on her "
+        f"fingers. The coins from the morning's eggs would buy "
+        f"{n_unit(eggs, 'egg')} more; each would warm and hatch under a "
+        f"good broody hen; each grown hen would give "
+        f"{n_unit(eggs_per_hen_per_year, 'egg')} a year; and at market "
+        f"each of those would sell for {n_unit(coins_per_egg, 'coin')}. "
+        f"The basket creaked. She did not feel its weight at all.",
+
+        # 3) butter pats in a pot beside the kitchen fire, planning
+        f"Beside the kitchen fire one cool evening, {maid.name} stirred "
+        f"butter into pats in a clay pot and let her mind wander. "
+        f"{cap(greedy)}, she planned the future of her small earnings. "
+        f"From the butter sales she would buy {n_unit(eggs, 'egg')}; "
+        f"each would hatch; each hen, once grown, would lay "
+        f"{n_unit(eggs_per_hen_per_year, 'egg')} across a year; and at "
+        f"the village market each egg would bring "
+        f"{n_unit(coins_per_egg, 'coin')}. She stirred more slowly, "
+        f"already imagining the coins clinking in her apron pouch.",
+
+        # 4) ribbons she would buy with the proceeds — pure daydream
+        f"All the way to the village fair, {maid.name} planned which "
+        f"ribbons she would buy when her fortune came in. {cap(greedy)}, "
+        f"she did the sums under her breath. First she would purchase "
+        f"{n_unit(eggs, 'egg')} from the poultry-woman; each egg would "
+        f"hatch; each hen would lay {n_unit(eggs_per_hen_per_year, 'egg')} "
+        f"in a year; every egg would sell for "
+        f"{n_unit(coins_per_egg, 'coin')}. She could already see herself "
+        f"in a new hair-ribbon the colour of plums, the envy of every "
+        f"girl in the parish.",
+
+        # 5) cheese rounds at market, half-distracted by the daydream
+        f"At the market stall where she sold her small cheese rounds, "
+        f"{maid.name} stood between a cart of turnips and a knot of "
+        f"buyers and let herself dream. {cap(greedy)}, she worked the "
+        f"plan through. With the cheese-money she would buy "
         f"{n_unit(eggs, 'egg')}; each would hatch into a hen; each hen "
-        f"would lay {n_unit(eggs_per_hen_per_year, 'egg')} per year; "
-        f"each egg would sell for {n_unit(coins_per_egg, 'coin')}.\n\n"
-        f"Question: If everything went perfectly, how many coins would "
-        f"{maid.name} earn after one year?"
+        f"would lay {n_unit(eggs_per_hen_per_year, 'egg')} in a year; "
+        f"and every egg, in turn, would sell here for "
+        f"{n_unit(coins_per_egg, 'coin')}. A buyer asked her price "
+        f"twice before she heard him.",
+
+        # 6) cream in a jar — jar nearly tipped, dream wavering
+        f"{maid.name} carried a heavy jar of cream home from the dairy, "
+        f"and the morning light made the future seem easy. {cap(greedy)}, "
+        f"she counted her wealth before she had it. The cream would sell "
+        f"for enough to buy {n_unit(eggs, 'egg')}; each would hatch into "
+        f"a hen; each hen would give "
+        f"{n_unit(eggs_per_hen_per_year, 'egg')} in a year; and every "
+        f"egg would fetch {n_unit(coins_per_egg, 'coin')} at market. The "
+        f"jar tilted in her hands. For an instant she paused, "
+        f"{regretful}, then steadied it and walked on.",
+    ]
+
+    body = _render_subplot(scene, egg_chain_subplots)
+    user_msg = (
+        f"{intro}{body}\n\n"
+        f"{question_phrase(scene, f'how many coins {maid.name} would earn after one year if everything went perfectly')}"
     )
 
-    code_block  = render_code(expr, form=scene.code_form(), value=answer)
-    result_text = f"{maid.name} would earn {n_unit(answer, 'coin')} in a year."
-    narrative   = (
+    plan = (
         "I multiply eggs × eggs-per-hen-per-year × coins-per-egg "
-        "to get the total."
+        "to chain the daydream into a single total."
     )
     return _finalize(
         scene,
         user_msg=user_msg,
-        narrative=narrative,
-        code_block=code_block,
-        result_text=result_text,
+        plan=plan,
         value=answer,
         expr=expr,
         fable="milkmaid",
@@ -2528,27 +2591,91 @@ def _mm_investment_return(scene: Scene) -> Record:
     )
     answer = evaluate(expr)
 
-    _intro = _aesopian_intro(scene, "milkmaid")
+    intro = _aesopian_intro(scene, "milkmaid")
+    greedy    = scene.rng.choice(EMO_GREEDY)
+    regretful = scene.rng.choice(EMO_REGRETFUL)
+
+    # Six narrative subplots — same arithmetic (cow-cost ceiling-divided
+    # by cups-per-day × coin-per-cup) but each grounds it in a different
+    # container, item, or market setting. The Milkmaid's mood ranges
+    # from eager investment to nervous arithmetic and a flicker of
+    # second-guessing as she stakes her savings on the cow.
+    investment_subplots = [
+        # 1) classic — cow bought, milk pail counted day after day
+        f"{maid.name} had spent {n_unit(cow_cost, 'coin')} on a fine "
+        f"brown cow, and {greedy}, she sat down to plan the days ahead. "
+        f"Each morning her wooden pail would fill with "
+        f"{n_unit(cups_per_day, 'cup')} of warm milk; each cup, taken to "
+        f"market, would fetch {n_unit(coin_per_cup, 'coin')}. She marked "
+        f"a tally on the inside of her cottage door, telling herself she "
+        f"would make a notch every evening until the cow had paid for "
+        f"itself.",
+
+        # 2) cart trips with milk to market, calculating the climb back
+        f"{maid.name} loaded her small cart with the day's milk and set "
+        f"off down the lane to market, the cow's price of "
+        f"{n_unit(cow_cost, 'coin')} still heavy on her mind. The cow "
+        f"gave {n_unit(cups_per_day, 'cup')} a day; at the village "
+        f"square each cup sold steadily for {n_unit(coin_per_cup, 'coin')}. "
+        f"{cap(greedy)}, she did the sum on her fingers as the cart "
+        f"creaked, working out how many such trips she would need before "
+        f"the debt was clear.",
+
+        # 3) coins in a leather pouch by the kitchen fire
+        f"By the kitchen fire each evening, {maid.name} emptied her "
+        f"day's earnings from a leather pouch and counted them out on "
+        f"the hearthstone. The cow had cost her {n_unit(cow_cost, 'coin')} "
+        f"— a sum that had emptied her savings. Now the cow gave "
+        f"{n_unit(cups_per_day, 'cup')} a day; each cup brought home "
+        f"{n_unit(coin_per_cup, 'coin')}. {cap(greedy)}, she stacked the "
+        f"coins into little piles and watched the pouch grow no faster "
+        f"than the days went by.",
+
+        # 4) jars of milk lined up at the market stall, cautious mood
+        f"At her market stall, {maid.name} arranged her milk-jars in a "
+        f"neat row and tried not to think too hard about the "
+        f"{n_unit(cow_cost, 'coin')} she had handed to the cattle-trader. "
+        f"The new cow gave {n_unit(cups_per_day, 'cup')} a day; each cup "
+        f"sold for {n_unit(coin_per_cup, 'coin')} to whichever neighbour "
+        f"came first. {cap(regretful)}, she wondered for a moment "
+        f"whether she had been too quick to spend; then she squared her "
+        f"shoulders and waited for buyers.",
+
+        # 5) cream pail tipped — sober calculation despite the mishap
+        f"{maid.name} sat on the milking-stool with her pail steaming "
+        f"between her knees, weighing the bargain she had struck. The "
+        f"cow had cost {n_unit(cow_cost, 'coin')}, every spare bit she "
+        f"owned. From the pail came {n_unit(cups_per_day, 'cup')} of "
+        f"good milk a day; at market each cup brought "
+        f"{n_unit(coin_per_cup, 'coin')}. A breath of wind tipped a "
+        f"little cream over the rim, and {regretful}, she remembered "
+        f"how thin her margin was.",
+
+        # 6) ribbons window in the village — the dream beyond break-even
+        f"Walking past the ribbon-seller's window in the village, "
+        f"{maid.name} touched a soft length of yellow silk and tried to "
+        f"read the price. The cow had cost her {n_unit(cow_cost, 'coin')}, "
+        f"and she could not buy a thread of ribbon until that sum had "
+        f"come back. The cow gave {n_unit(cups_per_day, 'cup')} a day; "
+        f"each cup sold for {n_unit(coin_per_cup, 'coin')}. {cap(greedy)}, "
+        f"she counted the days under her breath, eyes still on the "
+        f"yellow silk in the glass.",
+    ]
+
+    body = _render_subplot(scene, investment_subplots)
     user_msg = (
-        f"{_intro}{maid.name} bought a cow for {n_unit(cow_cost, 'coin')}. The "
-        f"cow gives {n_unit(cups_per_day, 'cup')} of milk per day, and "
-        f"each cup sells for {n_unit(coin_per_cup, 'coin')}.\n\n"
-        f"Question: What is the smallest whole number of days until "
-        f"{maid.name} fully recovers the cost of the cow?"
+        f"{intro}{body}\n\n"
+        f"{question_phrase(scene, f'the smallest whole number of days until {maid.name} fully recovers the cost of the cow')}"
     )
 
-    code_block  = render_code(expr, form=scene.code_form(), value=answer)
-    result_text = f"It takes {n_unit(answer, 'day')} to break even."
-    narrative   = (
+    plan = (
         "I find daily revenue (cups × coin-per-cup), then ceiling-divide "
         "the cow's cost by that revenue."
     )
     return _finalize(
         scene,
         user_msg=user_msg,
-        narrative=narrative,
-        code_block=code_block,
-        result_text=result_text,
+        plan=plan,
         value=answer,
         expr=expr,
         fable="milkmaid",
@@ -2573,24 +2700,87 @@ def _mm_spilled_milk(scene: Scene) -> Record:
     )
     answer = evaluate(expr)
 
-    _intro = _aesopian_intro(scene, "milkmaid")
+    intro = _aesopian_intro(scene, "milkmaid")
+    greedy    = scene.rng.choice(EMO_GREEDY)
+    regretful = scene.rng.choice(EMO_REGRETFUL)
+
+    # Six narrative subplots — same arithmetic (spilled × per-cup) but
+    # each grounds the loss in a different container, setting, and
+    # small disaster. The Milkmaid's mood begins greedy or hopeful and
+    # falls hard into regret as the milk hits the ground.
+    spilled_subplots = [
+        # 1) classic — pail on the head, dream broken on the road to market
+        f"{maid.name} balanced her wooden pail on her head and walked "
+        f"the road to market with {n_unit(full_cups, 'cup')} of fresh "
+        f"milk swaying gently above her. {cap(greedy)}, she was halfway "
+        f"through her daydream when her foot caught a stone and the "
+        f"pail tipped. {n_unit(spilled, 'cup')} splashed down into the "
+        f"dust. Each of those cups would have sold for "
+        f"{n_unit(per_cup, 'coin')} at the stalls. {cap(regretful)}, "
+        f"she stared at the pale pool darkening the road.",
+
+        # 2) jar of cream knocked from the kitchen table
+        f"In her kitchen, {maid.name} set a tall jar holding "
+        f"{n_unit(full_cups, 'cup')} of cream on the table while she "
+        f"swept the hearth. {cap(greedy)}, she was already counting the "
+        f"profit when her elbow caught the jar's lip. It tilted, "
+        f"steadied, and then went over. {n_unit(spilled, 'cup')} ran "
+        f"across the boards and dripped through the cracks. Each spilled "
+        f"cup of cream would have fetched {n_unit(per_cup, 'coin')} at "
+        f"market. {cap(regretful)}, she watched the white pool widen.",
+
+        # 3) basket of milk-flasks tipping off the cart
+        f"{maid.name} drove her cart to the village fair with a basket "
+        f"of milk-flasks holding {n_unit(full_cups, 'cup')} between her "
+        f"feet. The wheel struck a rut; the basket pitched; and "
+        f"{n_unit(spilled, 'cup')} of milk soaked into the straw before "
+        f"she could right it. Each of those cups would have brought "
+        f"{n_unit(per_cup, 'coin')} from the townspeople queueing at her "
+        f"stall. {cap(regretful)}, she pulled the cart to a halt and "
+        f"sat very still for a moment in the road.",
+
+        # 4) pot at the market — bumped by a passing customer
+        f"At the market, {maid.name} ladled milk from a clay pot of "
+        f"{n_unit(full_cups, 'cup')} into the jugs of customers, "
+        f"{greedy}. A man with a heavy basket pushed past her stall and "
+        f"the pot rocked off its trivet. {n_unit(spilled, 'cup')} ran "
+        f"across the boards and over the edge into the gutter. Each "
+        f"lost cup had been promised at {n_unit(per_cup, 'coin')}. "
+        f"{cap(regretful)}, she set the pot upright with hands that "
+        f"would not quite stop trembling.",
+
+        # 5) pouch of curds in a leather flask, dropped on the path
+        f"Returning from the dairy with a leather flask of "
+        f"{n_unit(full_cups, 'cup')} of buttermilk, {maid.name} stepped "
+        f"over a fallen branch and the flask slipped from her arm. The "
+        f"stopper popped free and {n_unit(spilled, 'cup')} poured into "
+        f"the bracken before she could right it. Each of those cups "
+        f"would have sold for {n_unit(per_cup, 'coin')} to the inn at "
+        f"the crossroads. {cap(regretful)}, she stood on the path and "
+        f"counted the loss in her head.",
+
+        # 6) pail at the milking stool, kicked over by a restless cow
+        f"{maid.name} sat on her milking-stool with her pail brimming "
+        f"to {n_unit(full_cups, 'cup')}, her eyes already on the wealth "
+        f"the morning would bring. {cap(greedy)}, she did not see the "
+        f"cow shift its weight. A hoof clipped the rim and the pail "
+        f"toppled; {n_unit(spilled, 'cup')} pulsed across the byre "
+        f"floor. Each cup, sold at market, would have brought "
+        f"{n_unit(per_cup, 'coin')}. {cap(regretful)}, she pressed her "
+        f"forehead against the cow's warm flank and said nothing.",
+    ]
+
+    body = _render_subplot(scene, spilled_subplots)
     user_msg = (
-        f"{_intro}{maid.name} carried a pail with {n_unit(full_cups, 'cup')} "
-        f"of milk. She tripped and spilled {n_unit(spilled, 'cup')}. "
-        f"Each cup of milk would have sold for "
-        f"{n_unit(per_cup, 'coin')}.\n\n"
-        f"Question: How many coins did {maid.name} lose by spilling?"
+        f"{intro}{body}\n\n"
+        f"{question_phrase(scene, f'how many coins {maid.name} lost by spilling')}"
     )
 
-    code_block  = render_code(expr, form=scene.code_form(), value=answer)
-    result_text = f"{maid.name} lost {n_unit(answer, 'coin')}."
-    narrative   = "I multiply the spilled cups by the price per cup."
+    plan = "I multiply the spilled cups by the price per cup."
     return _finalize(
         scene,
         user_msg=user_msg,
-        narrative=narrative,
-        code_block=code_block,
-        result_text=result_text,
+        plan=plan,
         value=answer,
         expr=expr,
         fable="milkmaid",
