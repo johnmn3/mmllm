@@ -1457,13 +1457,16 @@ def _ge_value_yield(scene: Scene) -> Record:
     goose = scene.pick_character(role="yielder", species="goose")
     owner = scene.pick_character(role_classes=("trader",))
     location = scene.pick_location(tag="village")
+    market   = next(l for l in ont.LOCATIONS if l.name == "market")
 
     per_day  = scene.pick_int(1, 2)
     days     = scene.pick_int(7, 30)
     per_egg  = scene.pick_int(5, 50)
     total_coins = per_day * days * per_egg
     orient   = scene.pick_choice(["coins", "days", "per-egg"])
-    _intro   = _aesopian_intro(scene, "goose-eggs", location)
+    intro    = _aesopian_intro(scene, "goose-eggs", location)
+    greedy   = scene.rng.choice(EMO_GREEDY)
+    content  = scene.rng.choice(EMO_CONTENT)
 
     if orient == "coins":
         expr = Let(
@@ -1476,20 +1479,21 @@ def _ge_value_yield(scene: Scene) -> Record:
             body=App("*", [Var("total-eggs"), Var("per-egg-coins")]),
         )
         answer = evaluate(expr)
-        user_msg = (
-            f"{_intro}{owner.name} owned {species_phrase(goose)} that laid "
-            f"{per_day} golden {unit(per_day, 'egg')} per day. Each egg "
-            f"sold for {n_unit(per_egg, 'coin')} at the market. After "
-            f"{n_unit(days, 'day')}, {owner.name} took the eggs to "
-            f"{location.article} {location.name} to sell.\n\n"
-            f"Question: How many coins did {owner.name} earn in total?"
+        givens = (
+            f"The goose laid {per_day} golden {unit(per_day, 'egg')} a "
+            f"day, and at the {market.name} each egg fetched "
+            f"{n_unit(per_egg, 'coin')}. After {n_unit(days, 'day')} of "
+            f"steady laying, "
         )
-        result_text = f"{owner.name} earned {n_unit(answer, 'coin')}."
-        narrative   = (
+        question = (
+            f"how many coins {owner.name} had earned in all from the "
+            f"goose's eggs"
+        )
+        chapter_name = "value-yield-coins"
+        plan = (
             "I find total eggs first (per-day × days), then multiply by "
             "the per-egg coin value."
         )
-        chapter_name = "value-yield-coins"
     elif orient == "days":
         expr = Let(
             bindings=[
@@ -1502,20 +1506,19 @@ def _ge_value_yield(scene: Scene) -> Record:
             body=App("quot", [Var("total-coins"), Var("coins-per-day")]),
         )
         answer = evaluate(expr)
-        user_msg = (
-            f"{_intro}{owner.name} owned {species_phrase(goose)} that laid "
-            f"{per_day} golden {unit(per_day, 'egg')} per day. Each egg "
-            f"sold for {n_unit(per_egg, 'coin')}. By the time {owner.name} "
-            f"had earned {n_unit(total_coins, 'coin')} in total, the goose "
-            f"had been laying for some number of days.\n\n"
-            f"Question: How many days had the goose been laying?"
+        givens = (
+            f"The goose laid {per_day} golden {unit(per_day, 'egg')} a "
+            f"day, and at the {market.name} each egg fetched "
+            f"{n_unit(per_egg, 'coin')}. By the time the small chest of "
+            f"coins beside the hearth held {n_unit(total_coins, 'coin')} "
+            f"in all, "
         )
-        result_text = f"The goose had been laying for {n_unit(answer, 'day')}."
-        narrative   = (
+        question = "for how many days the goose had been laying"
+        chapter_name = "value-yield-days"
+        plan = (
             "Daily revenue is per-day eggs × per-egg coins; days = "
             "total-coins / coins-per-day."
         )
-        chapter_name = "value-yield-days"
     else:
         expr = Let(
             bindings=[
@@ -1527,28 +1530,87 @@ def _ge_value_yield(scene: Scene) -> Record:
             body=App("quot", [Var("total-coins"), Var("total-eggs")]),
         )
         answer = evaluate(expr)
-        user_msg = (
-            f"{_intro}{owner.name} owned {species_phrase(goose)} that laid "
-            f"{per_day} golden {unit(per_day, 'egg')} per day. After "
-            f"{n_unit(days, 'day')}, {owner.name} took the eggs to "
-            f"{location.article} {location.name} and earned "
-            f"{n_unit(total_coins, 'coin')} in all.\n\n"
-            f"Question: At what price (in coins) did each egg sell?"
+        givens = (
+            f"The goose laid {per_day} golden {unit(per_day, 'egg')} a "
+            f"day for {n_unit(days, 'day')}, and when the eggs were "
+            f"finally carried in their basket to the {market.name} they "
+            f"fetched {n_unit(total_coins, 'coin')} in all. "
         )
-        result_text = f"Each egg sold for {n_unit(answer, 'coin')}."
-        narrative   = (
+        question = "the price in coins at which each single egg had sold"
+        chapter_name = "value-yield-per-egg"
+        plan = (
             "Total eggs is per-day × days; per-egg price = total-coins / "
             "total-eggs."
         )
-        chapter_name = "value-yield-per-egg"
 
-    code_block = render_code(expr, form=scene.code_form(), value=answer)
+    # Six narrative subplots — same arithmetic skeleton (a daily golden-
+    # egg routine that culminates in a market trip), each grounded in a
+    # different small drama. The orient-specific `givens` clause carries
+    # the numbers the question hides, so the 6 templates serve all three
+    # branches.
+    value_yield_subplots = [
+        # 1) classic — willow basket, dawn at the market
+        f"{owner.name} kept {species_phrase(goose)} on a small holding "
+        f"at the edge of {location.article} {location.name}, where the "
+        f"goose had a habit of settling on the same patch of straw each "
+        f"morning. {givens}{owner.he_she} had grown into a quiet ritual "
+        f"of carrying the eggs to the {market.name} in a willow basket, "
+        f"{content}, where bread and cheese smelled thick in the dawn "
+        f"air and traders haggled over each shining egg.",
+
+        # 2) creaking table, evening tally with the chest
+        f"There was a creaking table by the window of {owner.name}'s "
+        f"cottage where {owner.he_she} liked to count out the day's "
+        f"earnings each evening. {givens}{owner.he_she} would tip the "
+        f"coins from the leather purse and let them clink across the "
+        f"wood, {greedy} at the steady glint, then pour them into a "
+        f"small iron-bound chest beneath the bed.",
+
+        # 3) the regular customer at the stall
+        f"At the {market.name} stall, a thin merchant in a green coat "
+        f"had taken to buying every one of {owner.name}'s eggs, paying "
+        f"in clean stamped coins each time. {givens}the merchant always "
+        f"weighed the gold against a tiny brass scale before handing "
+        f"it over. {owner.name} watched the routine, {content}, while "
+        f"the smell of warm bread drifted from the next stall.",
+
+        # 4) farmhand witness — chalk marks on the barn beam
+        f"A young farmhand at {location.article} {location.name} kept "
+        f"a chalk tally on a beam in the barn — one mark for each egg "
+        f"the goose laid, one cross for each coin paid at the "
+        f"{market.name}. {givens}the boy stood and stared up at the "
+        f"marks, while {owner.name} sat by the door of the barn, "
+        f"{content}, listening to the goose ruffle her feathers.",
+
+        # 5) silver-egg rumor in the village
+        f"In {location.article} {location.name} the rumor went that "
+        f"{owner.name}'s goose laid silver as well as golden eggs, but "
+        f"{owner.he_she} only smiled and said nothing of the kind. "
+        f"{givens}each morning {owner.he_she} carried the eggs to the "
+        f"{market.name} folded inside a cloth, {greedy} at the soft "
+        f"weight against {owner.his_her} hip, and listened to the coins "
+        f"jingle home each evening.",
+
+        # 6) the temptation kept at bay
+        f"More than once {owner.name} had heard a sly voice whisper "
+        f"that the goose was wasted on slow daily laying. But "
+        f"{owner.he_she} swallowed the thought each time, fed the bird, "
+        f"and let the gold come at its own pace. {givens}{owner.he_she} "
+        f"sat by the hearth, {content}, and looked at the worn ledger "
+        f"where every egg, every coin, every trip to the {market.name} "
+        f"had been written down in a careful hand.",
+    ]
+
+    body = _render_subplot(scene, value_yield_subplots)
+    user_msg = (
+        f"{intro}{body}\n\n"
+        f"{question_phrase(scene, question)}"
+    )
+
     return _finalize(
         scene,
         user_msg=user_msg,
-        narrative=narrative,
-        code_block=code_block,
-        result_text=result_text,
+        plan=plan,
         value=answer,
         expr=expr,
         fable="goose-eggs",
@@ -1573,25 +1635,85 @@ def _ge_compounded(scene: Scene) -> Record:
     answer = evaluate(expr)
 
     yields_str = ", ".join(str(y) for y in yields)
-    _intro = _aesopian_intro(scene, "goose-eggs")
+    intro    = _aesopian_intro(scene, "goose-eggs")
+    greedy   = scene.rng.choice(EMO_GREEDY)
+    content  = scene.rng.choice(EMO_CONTENT)
+
+    # Six narrative subplots — same arithmetic (sum of daily yields), but
+    # each grounds the day-by-day list in a different small drama: a
+    # diary, a barn ledger, a string of ribbons, a kitchen-window tally.
+    # The yields_str carries the actual numbers so the model still must
+    # reduce them.
+    compounded_subplots = [
+        # 1) classic — diary kept by lamplight
+        f"{owner.name} kept a leather-bound diary by the lamp on the "
+        f"kitchen table, and each evening would write down the day's "
+        f"yield from {species_phrase(goose)} in {owner.his_her} careful "
+        f"hand. Over {n_unit(days, 'day')}, the count came out — day "
+        f"after day — as {yields_str}. Some mornings the goose laid "
+        f"more than {owner.he_she} expected, and {owner.name} would "
+        f"linger in the barn, {greedy} at the warm gold; other days "
+        f"only one or two, and {owner.he_she} simply nodded and closed "
+        f"the door.",
+
+        # 2) barn ledger, chalk on a beam
+        f"On a beam in the barn {owner.name} kept a chalk ledger, one "
+        f"row per day, one mark per egg. After {n_unit(days, 'day')} "
+        f"the row read in order: {yields_str}. {cap(owner.he_she)} would "
+        f"stand at the foot of the ladder and look up at the marks in "
+        f"the lamplight, {content}, listening to {species_phrase(goose)} "
+        f"settle for the night in her straw, never the same number of "
+        f"eggs twice in a row but always something.",
+
+        # 3) ribbon-on-a-string daily count
+        f"The children of {owner.name}'s household had taken to threading "
+        f"colored ribbons onto a string by the hearth — one ribbon for "
+        f"each egg {species_phrase(goose)} laid that morning. Over "
+        f"{n_unit(days, 'day')} the ribbons formed a record of the daily "
+        f"yields: {yields_str}. {owner.name} watched the string lengthen, "
+        f"{content}, never quite ready to count the whole until the "
+        f"week was through.",
+
+        # 4) market trader noting yields in a tally book
+        f"A trader from the next village had asked {owner.name} to "
+        f"keep a careful record of {species_phrase(goose)}'s daily yield, "
+        f"hoping to buy eggs in bulk. So {owner.name} jotted each "
+        f"morning's count into a tally book by the window. The "
+        f"{n_unit(days, 'day')}' worth came to: {yields_str}. The trader "
+        f"would arrive at week's end, and {owner.name} sat by the "
+        f"hearth, {greedy} at the thought of the coin, totaling each "
+        f"line.",
+
+        # 5) farmhand witness — pebbles in a jar
+        f"A young farmhand at {owner.name}'s farm kept a small clay "
+        f"jar in the kitchen, and each morning dropped in one pebble "
+        f"for every egg {species_phrase(goose)} had laid. After "
+        f"{n_unit(days, 'day')}, the daily counts had come out as "
+        f"{yields_str}. The boy would bring the jar to {owner.name} "
+        f"each evening and they would peer into it together, "
+        f"{content}, while the bird ruffled in her straw outside.",
+
+        # 6) the long week of varied days
+        f"It had been a strange week at the farm: some mornings the "
+        f"goose laid generously, others almost grudgingly. Over the "
+        f"course of {n_unit(days, 'day')}, {owner.name} had carefully "
+        f"noted each day's tally — {yields_str} — onto a strip of paper "
+        f"pinned to the kitchen door. {cap(owner.he_she)} stood looking "
+        f"at the paper now, {content}, working out what the goose had "
+        f"given altogether across all those days.",
+    ]
+
+    body = _render_subplot(scene, compounded_subplots)
     user_msg = (
-        f"{_intro}{owner.name} owned {species_phrase(goose)}, who laid different "
-        f"numbers of eggs each day for {n_unit(days, 'day')}: "
-        f"{yields_str}.\n\n"
-        f"Question: How many eggs in total over the {n_unit(days, 'day')}?"
+        f"{intro}{body}\n\n"
+        f"{question_phrase(scene, 'how many eggs in total were laid over those days')}"
     )
 
-    code_block  = render_code(expr, form="inline", value=answer)
-    result_text = f"The total is {answer} eggs."
-    narrative   = (
-        "I use reduce with + to sum the daily yields starting from 0."
-    )
+    plan = "I sum the daily yields with reduce."
     return _finalize(
         scene,
         user_msg=user_msg,
-        narrative=narrative,
-        code_block=code_block,
-        result_text=result_text,
+        plan=plan,
         value=answer,
         expr=expr,
         fable="goose-eggs",
@@ -1844,10 +1966,19 @@ def _ag_summer_stockpile(scene: Scene) -> Record:
     days    = scene.pick_int(20, 90)
     total   = per_day * days
     orient  = scene.pick_choice(["total", "days", "rate"])
-    _intro  = _aesopian_intro(scene, "ant-grasshopper", location)
 
-    season = scene.phrase("Through the summer", "All summer long",
-                          "Across the long summer", "From spring to fall")
+    # Item / container diversity — the ant doesn't only ever hoard grain.
+    # Pick a small edible item the ant might gather and a small storage
+    # container or burrow space. Subplots reference (item, container)
+    # directly so each retelling feels like a different harvest season.
+    item = scene.rng.choice([
+        i for i in ont.ITEMS
+        if i.name in ("grain", "seed", "crumb", "nut", "acorn", "biscuit")
+    ])
+    container = scene.rng.choice([
+        c for c in ont.CONTAINERS
+        if c.name in ("pouch", "jar", "bag", "basket", "hole")
+    ])
 
     if orient == "total":
         expr = Let(
@@ -1855,15 +1986,15 @@ def _ag_summer_stockpile(scene: Scene) -> Record:
             body=App("*", [Var("per-day"), Var("days")]),
         )
         answer = evaluate(expr)
-        user_msg = (
-            f"{_intro}{season} at {location.article} {location.name}, "
-            f"{species_phrase(ant)} collected {per_day} "
-            f"{unit(per_day, 'grain')} every day for {n_unit(days, 'day')}.\n\n"
-            f"Question: How many grains did {ant.name} collect by the end "
-            f"of summer?"
+        # facts: per_day + days exposed; total is the answer (don't reveal)
+        facts = (
+            f"every day {ant.name} carried {n_unit(per_day, item.name, item.plural)} "
+            f"home, and the work went on for {n_unit(days, 'day')} without pause"
         )
-        result_text = f"{ant.name} collected {n_unit(answer, 'grain')}."
-        narrative   = "I multiply the daily rate by the number of days."
+        question_what = (
+            f"how many {item.plural} {ant.name} has gathered by summer's end"
+        )
+        plan = "I multiply the daily rate by the number of days."
         chapter_name = "summer-stockpile-total"
     elif orient == "days":
         expr = Let(
@@ -1872,14 +2003,16 @@ def _ag_summer_stockpile(scene: Scene) -> Record:
             body=App("quot", [Var("total"), Var("per-day")]),
         )
         answer = evaluate(expr)
-        user_msg = (
-            f"{_intro}{season} at {location.article} {location.name}, "
-            f"{species_phrase(ant)} collected {n_unit(total, 'grain')} in "
-            f"all, gathering {per_day} {unit(per_day, 'grain')} each day.\n\n"
-            f"Question: How many days did {ant.name} spend collecting?"
+        # facts: per_day + total exposed; days is the answer
+        facts = (
+            f"by the close of summer {ant.name} had gathered "
+            f"{n_unit(total, item.name, item.plural)} in all, carrying "
+            f"{n_unit(per_day, item.name, item.plural)} home each day"
         )
-        result_text = f"{ant.name} spent {n_unit(answer, 'day')} collecting."
-        narrative   = "I divide the total by the daily rate."
+        question_what = (
+            f"how many days {ant.name} spent at the gathering"
+        )
+        plan = "I divide the total by the daily rate."
         chapter_name = "summer-stockpile-days"
     else:
         expr = Let(
@@ -1887,24 +2020,86 @@ def _ag_summer_stockpile(scene: Scene) -> Record:
             body=App("quot", [Var("total"), Var("days")]),
         )
         answer = evaluate(expr)
-        user_msg = (
-            f"{_intro}{season} at {location.article} {location.name}, "
-            f"{species_phrase(ant)} worked steadily for "
-            f"{n_unit(days, 'day')} and gathered "
-            f"{n_unit(total, 'grain')} in all.\n\n"
-            f"Question: How many grains did {ant.name} collect each day?"
+        # facts: days + total exposed; per_day is the answer
+        facts = (
+            f"{ant.name} worked the whole {n_unit(days, 'day')} of summer "
+            f"and finished with {n_unit(total, item.name, item.plural)} stored away"
         )
-        result_text = f"{ant.name} collected {answer} {unit(answer, 'grain')} per day."
-        narrative   = "I divide the total by the number of days."
+        question_what = (
+            f"how many {item.plural} {ant.name} carried home each day"
+        )
+        plan = "I divide the total by the number of days."
         chapter_name = "summer-stockpile-rate"
 
-    code_block = render_code(expr, form=scene.code_form(), value=answer)
+    intro    = _aesopian_intro(scene, "ant-grasshopper", location)
+    content  = scene.rng.choice(EMO_CONTENT)
+    proud    = scene.rng.choice(EMO_PROUD)
+    regret   = scene.rng.choice(EMO_REGRETFUL)
+
+    # Six narrative subplots — each grounds the same arithmetic in a
+    # distinct small drama with a distinct (item, container) pairing.
+    # `facts` carries the orientation-specific quantitative beat; the
+    # surrounding prose varies with each retelling.
+    summer_subplots = [
+        # 1) classic — ant at the meadow's edge, container by container
+        f"At {location.article} {location.name}, {species_phrase(ant)} bent low "
+        f"over the warm earth, collecting one {item.name} at a time and lining "
+        f"the {container.name} that sat half-buried by the burrow's mouth. "
+        f"While the Grasshopper fiddled in the long grass nearby, {ant.name} "
+        f"worked {content}, knowing the cold months would come whether or not "
+        f"anyone sang for them. So {facts}.",
+
+        # 2) midsummer haul — pride in the larder
+        f"Halfway through summer, {ant.name} stood {proud} beside a "
+        f"{container.name} that was already heavier than {ant.he_she} could "
+        f"easily drag. Each {item.name} had been chosen, weighed in two "
+        f"feelers, and tucked carefully in. The Grasshopper passed by humming "
+        f"a tune and laughed at the trouble {ant.name} took over so small "
+        f"a thing. {cap(ant.he_she)} only kept on; {facts}.",
+
+        # 3) dawn-and-dusk routine — patient repetition
+        f"At {location.article} {location.name}, the days began with "
+        f"{ant.name} setting out before the sun and ended with {ant.him_her} "
+        f"hauling another load of {item.plural} into the {container.name} "
+        f"hidden under the roots. The Grasshopper watched lazily from a stalk "
+        f"of grass, certain summer would last forever. But {ant.name} kept a "
+        f"quieter count: {facts}. The {container.name} grew fuller by the day.",
+
+        # 4) thunderstorm interlude — work even in rain
+        f"A storm rolled across {location.article} {location.name} one "
+        f"afternoon, and the Grasshopper darted under a leaf to wait it out. "
+        f"{ant.name}, however, only paused long enough to shake the rain from "
+        f"{ant.his_her} back before trundling another {item.name} into the "
+        f"{container.name} {ant.he_she} kept beside the back wall of the "
+        f"burrow. By the season's end {facts}.",
+
+        # 5) Grasshopper's idle visit — the ant explains
+        f"\"Why bother?\" sang the Grasshopper one bright noon, lounging at "
+        f"the lip of {ant.name}'s burrow. {ant.name} did not stop, only "
+        f"set another {item.name} into the {container.name} with the small "
+        f"satisfaction of one {content}. \"Because winter,\" {ant.he_she} said "
+        f"simply. And so it was that {facts} — even as the Grasshopper "
+        f"laughed and chirped the long afternoons away.",
+
+        # 6) the grasshopper begins to suspect — too late hint
+        f"By late summer the Grasshopper had begun to glance, {regret}, "
+        f"at {ant.name}'s steady marching to and from the {container.name} "
+        f"by the burrow's mouth. Each trip brought another {item.name} to "
+        f"the store. The fields of {location.article} {location.name} were "
+        f"already turning gold; soon the wind would change. Inside that "
+        f"quiet {container.name}, the count was honest: {facts}.",
+    ]
+
+    body = _render_subplot(scene, summer_subplots)
+    user_msg = (
+        f"{intro}{body}\n\n"
+        f"{question_phrase(scene, question_what)}"
+    )
+
     return _finalize(
         scene,
         user_msg=user_msg,
-        narrative=narrative,
-        code_block=code_block,
-        result_text=result_text,
+        plan=plan,
         value=answer,
         expr=expr,
         fable="ant-grasshopper",
@@ -2325,13 +2520,14 @@ def _fg_jumps_needed(scene: Scene) -> Record:
     # leaping to dignified rationalization.
     jumps_needed_subplots = [
         # 1) classic — purple grapes on an arbor in the orchard
-        f"In the corner of an orchard {fox.name} the fox stopped beneath "
+        f"In the corner of an orchard {species_phrase(fox)} stopped beneath "
         f"a low arbor where a heavy bunch of purple grapes hung "
         f"{n_unit(grape_height, 'foot', 'feet')} above the trodden grass. "
-        f"{cap(fox.he_she)} was {hungry}, and the dusty bloom on each "
-        f"grape made {fox.his_her} mouth water. A trial spring carried "
-        f"{fox.him_her} {n_unit(per_jump, 'foot', 'feet')} into the air, "
-        f"and {fox.he_she} reasoned that each leap, if {fox.he_she} could "
+        f"{fox.name}, {hungry}, paused there with "
+        f"{fox.his_her} mouth watering at the dusty bloom on each grape. "
+        f"A trial spring carried {fox.him_her} "
+        f"{n_unit(per_jump, 'foot', 'feet')} into the air, and "
+        f"{fox.he_she} reasoned that each leap, if {fox.he_she} could "
         f"somehow build upon the last, would bring the prize "
         f"{per_jump} {unit(per_jump, 'foot', 'feet')} closer.",
 
@@ -2548,7 +2744,6 @@ def _tm_food_comparison(scene: Scene) -> Record:
     country = scene.pick_character(role_classes=("prey",), species="mouse")
     city    = scene.pick_character(role_classes=("prey",), species="mouse",
                                     not_=country)
-    food    = scene.pick_item(edible=True, countable=True, size_max=2)
     a = scene.pick_int(1, 30)
     b = scene.pick_int(1, 30)
 
@@ -2559,31 +2754,96 @@ def _tm_food_comparison(scene: Scene) -> Record:
     )
     answer = evaluate(expr)
 
-    country_phrase = scene.phrase("lived in the countryside",
-                                    "lived in a quiet country burrow",
-                                    "made a home out in the meadows")
-    city_phrase    = scene.phrase("lived in the city",
-                                    "lived in a busy townhouse pantry",
-                                    "made a home in the bustling city")
-    _intro = _aesopian_intro(scene, "two-mice")
+    intro = _aesopian_intro(scene, "two-mice")
+    content   = scene.rng.choice(EMO_CONTENT)
+    greedy    = scene.rng.choice(EMO_GREEDY)
+    regretful = scene.rng.choice(EMO_REGRETFUL)
+
+    # Six narrative subplots — same arithmetic (|city - country|), each
+    # grounding the count in a different item / container / setting.
+    # The country mouse's modest store contrasts with the city mouse's
+    # uneasy hoard; the difference is what the question asks about.
+    food_comparison_subplots = [
+        # 1) cheese rinds in a country pouch vs cake crumbs in a city drawer
+        f"{country.name} the country mouse opened {country.his_her} "
+        f"little leather pouch by the hearth of a hollow stump, "
+        f"{content}: inside lay {n_unit(a, 'cheese rind', 'cheese rinds')} "
+        f"saved from a farmer's table. Far away, in a wallpapered "
+        f"drawer behind a townhouse skirting board, {city.name} the "
+        f"city mouse counted {n_unit(b, 'cake crumb', 'cake crumbs')} "
+        f"swept from a kitchen tray, {greedy}. Each mouse looked at "
+        f"the other's tally and wondered, in {country.his_her} own way, "
+        f"who had truly more.",
+
+        # 2) hazelnuts in a burrow vs raisins in a kitchen jar
+        f"Beneath a tangle of hedge roots, {country.name} kept "
+        f"{n_unit(a, 'hazelnut')} tucked into a small acorn-cup, "
+        f"{content} with {country.his_her} quiet hoard. In a porcelain "
+        f"jar high on a city pantry shelf, {city.name} hunched over "
+        f"{n_unit(b, 'raisin')} pinched from a baker's mixing bowl, "
+        f"{greedy} and listening for footsteps. They had argued before "
+        f"about whose home was richer; tonight the question was simply "
+        f"how far apart their two counts ran.",
+
+        # 3) acorns under the floor vs butter pats in a city cellar
+        f"{country.name} stored {n_unit(a, 'acorn')} under a loose "
+        f"floorboard of {country.his_her} burrow, {content} that the "
+        f"oak above would drop more in autumn. Down in a cool city "
+        f"cellar, {city.name} brooded over "
+        f"{n_unit(b, 'butter pat', 'butter pats')} stolen one by one "
+        f"from a dairy crock, {greedy} and watchful of the cat. Neither "
+        f"could quite agree on whose larder was larger, only that the "
+        f"gap between them mattered.",
+
+        # 4) berries in a basket vs gouda wedges in a sideboard
+        f"On the lip of a meadow, {country.name} carried home a small "
+        f"woven basket holding {n_unit(a, 'berry', 'berries')}, "
+        f"{content} after a morning's foraging. In a velvet-lined "
+        f"sideboard drawer in the city, {city.name} guarded "
+        f"{n_unit(b, 'gouda wedge', 'gouda wedges')} pilfered from a "
+        f"merchant's plate, {greedy} and unable to sleep for fear of "
+        f"thieves. The two mice met to compare, as they often did, "
+        f"and the difference between their stocks was the talking point.",
+
+        # 5) walnuts in a pouch vs swiss-cheese chunks in a hole pantry
+        f"By a moss-cushioned fireplace in the country, {country.name} "
+        f"poured {n_unit(a, 'walnut')} from {country.his_her} "
+        f"mouse-sized pouch onto the hearth-stone, {content}. Across "
+        f"the long road, in a hole-in-the-wall pantry tucked behind a "
+        f"city kitchen, {city.name} stacked "
+        f"{n_unit(b, 'swiss-cheese chunk', 'swiss-cheese chunks')} into "
+        f"a precarious pile, {greedy} and forever rearranging. Whichever "
+        f"of them had more, the gap was real and worth measuring.",
+
+        # 6) breadcrumbs in a thimble vs cheddar slices in a city sack
+        f"{country.name} sat on a flat stone outside {country.his_her} "
+        f"burrow with {n_unit(a, 'breadcrumb')} gathered in a thimble, "
+        f"{content} with the meal that lay ahead. Meanwhile, {city.name} "
+        f"hunched in a damp city sack behind a tavern door, counting "
+        f"{n_unit(b, 'cheddar slice', 'cheddar slices')} again and "
+        f"again, {regretful} of having strayed so far from the quiet "
+        f"fields. Yet still the city mouse could not stop tallying — "
+        f"and the difference between the two stores was plain.",
+    ]
+
+    body = _render_subplot(scene, food_comparison_subplots)
+    diff_target = (
+        f"the absolute difference between {country.name} "
+        f"and {city.name}'s food counts"
+    )
     user_msg = (
-        f"{_intro}{species_phrase(country)} {country_phrase} and had "
-        f"{n_unit(a, food.name, food.plural)}, while "
-        f"{species_phrase(city)} {city_phrase} and had "
-        f"{n_unit(b, food.name, food.plural)}.\n\n"
-        f"Question: What is the absolute difference in {food.plural} "
-        f"between the two mice?"
+        f"{intro}{body}\n\n"
+        f"{question_phrase(scene, diff_target)}"
     )
 
-    code_block  = render_code(expr, form=scene.code_form(), value=answer)
-    result_text = f"The difference is {n_unit(answer, food.name, food.plural)}."
-    narrative   = "I take the absolute value of the difference."
+    plan = (
+        "I subtract the country mouse's count from the city mouse's "
+        "count and take the absolute value."
+    )
     return _finalize(
         scene,
         user_msg=user_msg,
-        narrative=narrative,
-        code_block=code_block,
-        result_text=result_text,
+        plan=plan,
         value=answer,
         expr=expr,
         fable="two-mice",
@@ -2701,32 +2961,103 @@ def _ds_double_loss(scene: Scene) -> Record:
     )
     answer = evaluate(expr)
 
-    crossing = scene.phrase("crossed a stream carrying",
-                              "trotted over a bridge with",
-                              "padded across a brook holding")
-    looking  = scene.phrase("Looking down", "Glancing into the water",
-                              "Peering at the surface")
-    grabbed  = scene.phrase("dropped one bone to grab the shadow's",
-                              "let go of one bone, lunging at the reflection",
-                              "released a bone to snap at the watery double's")
-    _intro = _aesopian_intro(scene, "dog-shadow")
+    intro    = _aesopian_intro(scene, "dog-shadow")
+    greedy   = scene.rng.choice(EMO_GREEDY)
+    regretful = scene.rng.choice(EMO_REGRETFUL)
+
+    # Six narrative subplots — same arithmetic (start-bones decremented by 1)
+    # but each grounds it in a different load + crossing + sensory hook.
+    # Item per subplot is varied: bones, biscuits, sticks, scraps of meat,
+    # marrow-bones, soft bread chunks. The narrative item changes; the
+    # underlying expression keeps the `start-bones` name (math invariant).
+    # Each entry is (subplot_text, item_singular, item_plural).
+    double_loss_subplots = [
+        # 1) classic — bones across a stream
+        (f"{species_phrase(dog)} trotted across a low stone footbridge with "
+         f"{n_unit(bones, 'bone')} clamped firmly between {dog.his_her} jaws, "
+         f"feeling very pleased with the morning's prize. Halfway over, "
+         f"{dog.he_she} glanced down at the slow brown water and saw — "
+         f"{greedy} — what looked like another dog below, with the very "
+         f"same load. {cap(dog.he_she)} opened {dog.his_her} mouth to "
+         f"snatch at that other dog's bone, but of course the moment "
+         f"{dog.his_her} jaws parted a single bone tumbled away into the "
+         f"stream and was gone. {cap(dog.he_she)} stood blinking, "
+         f"{regretful}.",
+         "bone", "bones"),
+
+        # 2) biscuits in a soft cloth bundle
+        (f"{species_phrase(dog)} had been given {n_unit(bones, 'biscuit')} "
+         f"by the baker's wife, who tied them into a soft little cloth "
+         f"bundle that {dog.he_she} carried gently in {dog.his_her} mouth. "
+         f"On the plank bridge over the brook the bundle dipped down "
+         f"toward the water, and there in the ripples {dog.he_she} saw a "
+         f"second dog with what looked like a fatter bundle. {cap(greedy)}, "
+         f"{dog.he_she} lunged — and one biscuit slipped out of the "
+         f"loose corner of the cloth and dropped, lost in the current.",
+         "biscuit", "biscuits"),
+
+        # 3) sticks for fetch — by a pond
+        (f"{species_phrase(dog)} had been collecting {n_unit(bones, 'stick')} "
+         f"all afternoon along the path that ran beside the pond, holding "
+         f"the bundle proudly in a wide grip across {dog.his_her} jaws. "
+         f"As {dog.he_she} skirted the bank, the still water caught a "
+         f"clear picture of {dog.him_her} below. {cap(dog.he_she)} saw, or "
+         f"thought {dog.he_she} saw, another dog with a thicker bunch of "
+         f"sticks, and {greedy}, {dog.he_she} barked at the rival. The "
+         f"bark let one stick fall, plop, into the pond.",
+         "stick", "sticks"),
+
+        # 4) scraps of meat from a butcher — over a stream
+        (f"{species_phrase(dog)} was carrying home {n_unit(bones, 'scrap')} "
+         f"of meat from the butcher, soft and savory and twisted in a bit "
+         f"of brown paper held lightly between {dog.his_her} teeth. At "
+         f"the shallow stream {dog.he_she} stepped out onto the stepping-"
+         f"stones, and the water below showed a phantom dog with what "
+         f"seemed a richer parcel. {cap(dog.he_she)} could not help "
+         f"{dog.him_her}self — {greedy}, {dog.he_she} snapped — and a "
+         f"single scrap fluttered free, swept off downstream before "
+         f"{dog.he_she} could lift a paw.",
+         "scrap of meat", "scraps of meat"),
+
+        # 5) marrow-bones over a footbridge
+        (f"It was a fine cold day, and {species_phrase(dog)} had "
+         f"{n_unit(bones, 'marrow-bone')} from the kitchen, big and pale "
+         f"and worth a long quiet afternoon's chewing. The footbridge "
+         f"over the river was old and creaky. As {dog.he_she} crossed, "
+         f"{dog.he_she} caught sight of {dog.his_her} reflection in the "
+         f"deep water and mistook it for a stranger with even better "
+         f"marrow-bones. {cap(dog.he_she)} growled, {greedy}, and the "
+         f"growl shook one marrow-bone loose from {dog.his_her} jaws. "
+         f"It plunged in with a heavy splash, and {dog.he_she} stood "
+         f"there {regretful}.",
+         "marrow-bone", "marrow-bones"),
+
+        # 6) soft bread chunks from the kitchen — over a brook
+        (f"{species_phrase(dog)} had stolen {n_unit(bones, 'bread chunk')} "
+         f"from the kitchen table while no one was looking and was now "
+         f"trotting back to {dog.his_her} hiding place across the brook. "
+         f"On the slick wet stones in the middle of the crossing, "
+         f"{dog.he_she} looked down and saw, beneath the moving water, "
+         f"another dog whose mouth seemed somehow fuller. {cap(greedy)}, "
+         f"{dog.he_she} dipped {dog.his_her} head to challenge the "
+         f"creature — and one soft bread chunk fell straight from "
+         f"{dog.his_her} mouth into the brook, where it dissolved at "
+         f"once into mush.",
+         "bread chunk", "bread chunks"),
+    ]
+
+    idx = scene.rng.randrange(len(double_loss_subplots))
+    body, _item_s, item_p = double_loss_subplots[idx]
     user_msg = (
-        f"{_intro}{species_phrase(dog)} {crossing} {n_unit(bones, 'bone')}. "
-        f"{looking}, {dog.he_she} saw {dog.his_her} reflection and thought "
-        f"it was another dog with more bones. {cap(dog.he_she)} {grabbed}, "
-        f"but the bone fell into the stream.\n\n"
-        f"Question: How many bones does {dog.name} have now?"
+        f"{intro}{body}\n\n"
+        f"{question_phrase(scene, f'how many {item_p} {dog.name} has now')}"
     )
 
-    code_block  = render_code(expr, form=scene.code_form(), value=answer)
-    result_text = f"{dog.name} has {n_unit(answer, 'bone')} left."
-    narrative   = "I subtract 1 (the dropped bone) from the original count."
+    plan = "I decrement the starting count by one (the dropped piece)."
     return _finalize(
         scene,
         user_msg=user_msg,
-        narrative=narrative,
-        code_block=code_block,
-        result_text=result_text,
+        plan=plan,
         value=answer,
         expr=expr,
         fable="dog-shadow",
@@ -2746,24 +3077,103 @@ def _ds_regret(scene: Scene) -> Record:
     )
     answer = evaluate(expr)
 
-    _intro = _aesopian_intro(scene, "dog-shadow")
+    intro    = _aesopian_intro(scene, "dog-shadow")
+    greedy   = scene.rng.choice(EMO_GREEDY)
+    regretful = scene.rng.choice(EMO_REGRETFUL)
+
+    # Six narrative subplots — same arithmetic (expected-bones minus
+    # actual-bones, where actual = expected - 1, giving a regret of 1).
+    # Each subplot uses a different item the dog set out to bring home,
+    # frames the loss as a concrete moment, and ends on the dog wishing
+    # things had gone differently. The math is invariant; the items vary.
+    # Each entry is (subplot_text, item_singular, item_plural).
+    regret_subplots = [
+        # 1) classic — bones meant for a buried hoard
+        (f"{species_phrase(dog)} had set out that morning meaning to bring "
+         f"home {n_unit(expected_bones, 'bone')} for {dog.his_her} secret "
+         f"corner under the rose bush. Crossing the stream on the way back, "
+         f"{dog.he_she} saw {dog.his_her} reflection — {greedy} — and "
+         f"snatched at the shadow's bone. One bone spun away into the "
+         f"current, and {dog.he_she} arrived home with one fewer than "
+         f"the count {dog.he_she} had been so proud of. {cap(dog.he_she)} "
+         f"sat by the rose bush, {regretful}, comparing what {dog.he_she} "
+         f"meant to have brought against what was actually in the pile.",
+         "bone", "bones"),
+
+        # 2) biscuits the kitchen-girl had counted out
+        (f"The kitchen-girl had counted out {n_unit(expected_bones, 'biscuit')} "
+         f"into a cloth and sent {species_phrase(dog)} off with them, "
+         f"saying not to lose a single one. On the bridge over the brook "
+         f"{dog.he_she} caught sight of another dog in the water with "
+         f"what seemed an even fuller cloth, and {greedy}, snapped at "
+         f"the rival. One biscuit slipped free and was swallowed by the "
+         f"brown water. When {dog.he_she} came back to the kitchen, "
+         f"{regretful}, the count was short by exactly the difference "
+         f"between what had been promised and what actually arrived.",
+         "biscuit", "biscuits"),
+
+        # 3) sticks gathered for the master's fire
+        (f"The master had asked {dog.name} to fetch {n_unit(expected_bones, 'stick')} "
+         f"for the evening fire, and {dog.name} had gathered them all "
+         f"along the path beside the pond. Halfway home, the still water "
+         f"showed a dog with what looked like a thicker bunch, and "
+         f"{dog.he_she} lunged at it, {greedy}. One stick clattered "
+         f"down to the bank and rolled into the pond. {cap(dog.he_she)} "
+         f"reached the cottage with one fewer than the master had "
+         f"requested, and the gap between expected and delivered "
+         f"sticks lay plainly between {dog.him_her} and the hearth.",
+         "stick", "sticks"),
+
+        # 4) scraps of meat tallied by the butcher
+        (f"The butcher had tied up {n_unit(expected_bones, 'scrap')} of "
+         f"meat in a paper for {species_phrase(dog)} to carry home, and "
+         f"the count had been said aloud, both of them nodding. On the "
+         f"footbridge over the river the paper sagged near the water; "
+         f"{dog.he_she} saw a phantom dog with a richer parcel and, "
+         f"{greedy}, snapped — losing one scrap to the river. By "
+         f"evening, when the cook checked the parcel against the "
+         f"butcher's tally, the actual count fell short of the expected "
+         f"by exactly that single greedy moment.",
+         "scrap of meat", "scraps of meat"),
+
+        # 5) marrow-bones for a long winter afternoon
+        (f"{species_phrase(dog)} had hoped to chew through "
+         f"{n_unit(expected_bones, 'marrow-bone')} all afternoon, the way "
+         f"{dog.he_she} had planned it that morning, lined up neatly in "
+         f"a row by the fire. But on the way back across the stream "
+         f"{dog.he_she} growled at {dog.his_her} own reflection — "
+         f"{greedy} — and a single marrow-bone tumbled in. By dusk, "
+         f"as {dog.he_she} laid out the row, {regretful}, the line "
+         f"was shorter than it should have been. The difference between "
+         f"the imagined row and the real one was the day's small lesson.",
+         "marrow-bone", "marrow-bones"),
+
+        # 6) soft bread chunks from a careful loaf
+        (f"{cap(species_phrase(dog))} had been allowed exactly "
+         f"{n_unit(expected_bones, 'bread chunk')} from the morning loaf "
+         f"by the baker's wife, who had arranged them carefully on a low "
+         f"plank for {dog.him_her} to carry home. On the brook crossing "
+         f"the water mirrored {dog.him_her}, and {greedy}, {dog.he_she} "
+         f"lunged at the seeming rival's mouthful. One soft chunk fell "
+         f"into the brook and dissolved at once. {cap(dog.he_she)} "
+         f"reached the doorstep, {regretful}, and the loaf-keeper saw "
+         f"plainly the gap between the careful count and the count that "
+         f"actually arrived.",
+         "bread chunk", "bread chunks"),
+    ]
+
+    idx = scene.rng.randrange(len(regret_subplots))
+    body, _item_s, item_p = regret_subplots[idx]
     user_msg = (
-        f"{_intro}{species_phrase(dog)} expected to bring home "
-        f"{n_unit(expected_bones, 'bone')}, but lost one chasing a "
-        f"shadow and ended up with one fewer.\n\n"
-        f"Question: How many bones did {dog.name} fall short by, "
-        f"compared to what {dog.he_she} expected?"
+        f"{intro}{body}\n\n"
+        f"{question_phrase(scene, f'how many {item_p} {dog.name} fell short by, compared to what {dog.he_she} expected to bring home')}"
     )
 
-    code_block  = render_code(expr, form=scene.code_form(), value=answer)
-    result_text = f"{dog.name} fell short by {n_unit(answer, 'bone')}."
-    narrative   = "I compute expected-actual where actual is expected-1."
+    plan = "I subtract the actual count (one fewer) from the expected count to find the gap."
     return _finalize(
         scene,
         user_msg=user_msg,
-        narrative=narrative,
-        code_block=code_block,
-        result_text=result_text,
+        plan=plan,
         value=answer,
         expr=expr,
         fable="dog-shadow",
@@ -2789,24 +3199,104 @@ def _ds_exchange_loss(scene: Scene) -> Record:
     )
     answer = evaluate(expr)
 
-    _intro = _aesopian_intro(scene, "dog-shadow")
+    intro    = _aesopian_intro(scene, "dog-shadow")
+    greedy   = scene.rng.choice(EMO_GREEDY)
+    regretful = scene.rng.choice(EMO_REGRETFUL)
+
+    # Six narrative subplots — same arithmetic (start - given + received)
+    # but each grounds the bad trade in a different item + setting.
+    # The dog's greedy hope at the trade ("bigger ones!") is undone by the
+    # trader's cheat. Math invariant; items and tone vary.
+    # Each entry is (subplot_text, item_singular, item_plural).
+    exchange_loss_subplots = [
+        # 1) classic — bones traded for "bigger" bones
+        (f"{species_phrase(dog)} arrived at {trader.name}'s back gate with "
+         f"{n_unit(start, 'bone')} stacked carefully in a small basket. "
+         f"{trader.name} eyed the pile and offered a deal: hand over "
+         f"{n_unit(given, 'bone')} of those plain bones, and "
+         f"{trader.he_she} would give back the same number of much "
+         f"bigger ones from a sack in the shed. {cap(dog.he_she)} agreed, "
+         f"{greedy}. But when {trader.name} returned, only "
+         f"{n_unit(received, 'bone')} dropped from the sack into the "
+         f"basket — fewer than promised, and {trader.name} shrugged as "
+         f"if {dog.he_she} ought to be grateful.",
+         "bone", "bones"),
+
+        # 2) biscuits traded for "bakery seconds"
+        (f"By the side of the road {trader.name} had set up a little "
+         f"folding stall, and {species_phrase(dog)} stopped there with "
+         f"{n_unit(start, 'biscuit')} that the kitchen-girl had spared "
+         f"{dog.him_her}. {trader.name} promised that if {dog.he_she} "
+         f"handed over {n_unit(given, 'biscuit')}, {trader.he_she} "
+         f"would put back the same count of finer bakery seconds, butter-"
+         f"glazed and twice the size. {cap(dog.he_she)} pushed the "
+         f"biscuits across, {greedy}. {trader.name} returned only "
+         f"{n_unit(received, 'biscuit')}, claiming the rest had broken "
+         f"in the box.",
+         "biscuit", "biscuits"),
+
+        # 3) sticks for "seasoned hardwood"
+        (f"{species_phrase(dog)} had collected {n_unit(start, 'stick')} "
+         f"by the riverbank when {trader.name} came along leading a "
+         f"small handcart. {cap(trader.he_she)} offered {dog.him_her} a "
+         f"trade: {n_unit(given, 'stick')} of those green sticks for "
+         f"the same number of seasoned hardwood pieces from the cart, "
+         f"which (so {trader.he_she} swore) burned twice as long. "
+         f"{cap(dog.he_she)} pushed the sticks over, {greedy}. From "
+         f"the cart {trader.name} drew only {n_unit(received, 'stick')} "
+         f"and rolled the cart away whistling.",
+         "stick", "sticks"),
+
+        # 4) scraps of meat for "fresher butchery"
+        (f"At the corner of the market square {species_phrase(dog)} met "
+         f"{trader.name}, who looked over the {n_unit(start, 'scrap')} "
+         f"of meat in {dog.his_her} cloth and made a generous-sounding "
+         f"offer: hand over {n_unit(given, 'scrap')}, and {trader.he_she} "
+         f"would give back the same count of fresh trimmings from "
+         f"{trader.his_her} own butcher's cousin in the village. "
+         f"{cap(dog.he_she)} agreed, {greedy}. The bag {trader.name} "
+         f"opened in return held only {n_unit(received, 'scrap')}, and "
+         f"{dog.he_she} stood blinking at it, {regretful}.",
+         "scrap of meat", "scraps of meat"),
+
+        # 5) marrow-bones for "kitchen-grade"
+        (f"{species_phrase(dog)} had {n_unit(start, 'marrow-bone')} "
+         f"saved up in a corner of the barn when {trader.name} stopped "
+         f"by, sniffing at the heap with practiced interest. "
+         f"{cap(trader.he_she)} proposed a swap: "
+         f"{n_unit(given, 'marrow-bone')} for the same number of "
+         f"kitchen-grade ones — pale, fat, twice the chewing. "
+         f"{cap(dog.he_she)} parted with the lot, {greedy}, and watched "
+         f"{trader.name} reach into a sack and produce only "
+         f"{n_unit(received, 'marrow-bone')}, smiling as though "
+         f"this were how every honest deal ended.",
+         "marrow-bone", "marrow-bones"),
+
+        # 6) bread chunks for "soft loaf-ends"
+        (f"{cap(trader.name)} stopped {species_phrase(dog)} at the gate "
+         f"of the cottage and admired the {n_unit(start, 'bread chunk')} "
+         f"that {dog.he_she} carried. {cap(trader.he_she)} proposed a "
+         f"trade — {n_unit(given, 'bread chunk')} for the same number of "
+         f"soft loaf-ends from the bakery, the sort that went quickest "
+         f"down the throat. {cap(dog.he_she)} pushed the chunks across, "
+         f"{greedy}. From {trader.his_her} bag came back only "
+         f"{n_unit(received, 'bread chunk')}, and {trader.name} was "
+         f"already walking briskly off down the lane.",
+         "bread chunk", "bread chunks"),
+    ]
+
+    idx = scene.rng.randrange(len(exchange_loss_subplots))
+    body, _item_s, item_p = exchange_loss_subplots[idx]
     user_msg = (
-        f"{_intro}{species_phrase(dog)} had {n_unit(start, 'bone')}. {trader.name} "
-        f"offered to trade — {dog.name} would give {n_unit(given, 'bone')} "
-        f"in exchange for some larger ones. But the trader cheated and "
-        f"only gave back {n_unit(received, 'bone')}.\n\n"
-        f"Question: How many bones does {dog.name} have after the trade?"
+        f"{intro}{body}\n\n"
+        f"{question_phrase(scene, f'how many {item_p} {dog.name} has after the trade')}"
     )
 
-    code_block  = render_code(expr, form=scene.code_form(), value=answer)
-    result_text = f"{dog.name} ends with {n_unit(answer, 'bone')}."
-    narrative   = "I subtract given, then add received back to the start."
+    plan = "I subtract what was given away from the start, then add back what was received."
     return _finalize(
         scene,
         user_msg=user_msg,
-        narrative=narrative,
-        code_block=code_block,
-        result_text=result_text,
+        plan=plan,
         value=answer,
         expr=expr,
         fable="dog-shadow",
