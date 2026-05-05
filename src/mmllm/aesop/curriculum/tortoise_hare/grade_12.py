@@ -12,7 +12,7 @@ from mmllm.aesop.curriculum.generator import (
     SubjectCurriculum, SubjectExample, SubplotTemplate,
 )
 from mmllm.aesop.curriculum.tortoise_hare.grade_1 import (
-    _SHARED_SUBPLOTS as _G1_SUBPLOTS, _PLAN_POOL,
+    _SHARED_SUBPLOTS as _G1_SUBPLOTS, _GOAL_SUBPLOTS, _PLAN_POOL,
 )
 
 
@@ -66,9 +66,10 @@ agreed to read it into the REPL."""),
 ]
 
 
-def _ex(form, expected, concept, what):
+def _ex(form, expected, concept, what, goal="", tags=()):
     return SubjectExample(form=form, expected=expected,
-                          concept_phrase=concept, question_what=what)
+                          concept_phrase=concept, question_what=what,
+                          goal_text=goal, tags=tags)
 
 
 _PLAN_G12 = _PLAN_POOL + (
@@ -89,13 +90,15 @@ G12_01 = SubjectCurriculum(
     examples=[
         # Use the transducer-arity functions through `into` / `transduce`.
         _ex("(into [] (map inc) [1 2 3])", [2, 3, 4],
-            "the transducer (map inc) used via into",
-            "[1 2 3] each incremented through a transducer"),
+            "the map-inc transducer applied via into",
+            "the result of incrementing elements from the vector",
+            goal="use the map-inc transducer with into to increment the vector containing 1, 2, 3"),
         _ex("(into [] (filter even?) [1 2 3 4 5])", [2, 4],
-            "the transducer (filter even?) used via into",
-            "the even elements via a filter transducer"),
+            "the filter-even transducer applied via into",
+            "the even elements filtered via a transducer",
+            goal="use the filter-even transducer with into to keep only the even numbers from the vector containing 1, 2, 3, 4, 5"),
     ],
-    subplots=_REAL_SUBPLOTS, plan_pool=_PLAN_G12,
+    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G12,
 )
 
 
@@ -106,14 +109,16 @@ G12_02 = SubjectCurriculum(
     fable="tortoise-hare",
     examples=[
         _ex("(into [] (comp (map inc) (filter even?)) [1 2 3 4])", [2, 4],
-            "the composed transducer (comp (map inc) (filter even?))",
-            "the result of inc-then-keep-evens via a composed transducer"),
+            "the composed transducer pipeline of map-inc then filter-even",
+            "the result of incrementing then filtering even elements",
+            goal="compose map-inc and filter-even into a transducer pipeline, then apply it with into to the vector containing 1, 2, 3, 4"),
         _ex("(transduce (comp (map inc) (filter even?)) + 0 [1 2 3 4 5])",
             12,
-            "transduce with a composed transducer summing the kept items",
-            "the sum after inc-then-keep-evens via transduce"),
+            "the composed transducer summing the incremented-then-filtered elements",
+            "the sum of elements after the composed pipeline",
+            goal="compose map-inc and filter-even, then use transduce to sum the kept elements from the vector containing 1, 2, 3, 4, 5, starting from 0"),
     ],
-    subplots=_REAL_SUBPLOTS, plan_pool=_PLAN_G12,
+    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G12,
 )
 
 
@@ -124,13 +129,15 @@ G12_03 = SubjectCurriculum(
     fable="tortoise-hare",
     examples=[
         _ex("(into #{} (map inc) [1 2 3])", {2, 3, 4},
-            "into a set with the (map inc) transducer",
-            "the set produced by mapping inc into an empty set"),
+            "the transducer-powered construction of a set from incremented elements",
+            "the set result of the transducer operation",
+            goal="use the map-inc transducer with into to create a set from the incremented elements of the vector containing 1, 2, 3"),
         _ex("(into [] (take 3) (range 100))", [0, 1, 2],
-            "into [] with the (take 3) transducer over (range 100)",
-            "the first three items collected through a transducer"),
+            "the transducer-powered collection of the first few elements",
+            "the vector result of taking elements through a transducer",
+            goal="use the take-3 transducer with into to collect the first three elements from a range of 100 numbers"),
     ],
-    subplots=_REAL_SUBPLOTS, plan_pool=_PLAN_G12,
+    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G12,
 )
 
 
@@ -143,14 +150,16 @@ G12_04 = SubjectCurriculum(
         # core.async pulls in heavy machinery; describe the topic via marker.
         _ex('(do "(chan), (go ...), (<! ...), (>! ...) form the core.async core" :studied)',
             ":studied",
-            "the core.async primitives chan/go/<!/>!",
-            "the marker for the core.async lesson"),
+            "the core.async channel and block primitives",
+            "the keyword marking the core.async lesson",
+            goal="study the core.async primitives that form the foundation for async patterns"),
         _ex('(do "go-blocks let you write async code as if it were synchronous" :async)',
             ":async",
-            "what go blocks give you",
-            "the marker keyword for go-blocks"),
+            "the synchronous-style pattern that go-blocks enable",
+            "the keyword marking the go-block pattern lesson",
+            goal="learn how go-blocks let you write asynchronous code in a synchronous style"),
     ],
-    subplots=_REAL_SUBPLOTS, plan_pool=_PLAN_G12,
+    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G12,
 )
 
 
@@ -162,14 +171,16 @@ G12_05 = SubjectCurriculum(
     examples=[
         _ex('(do "pipe, mult, mix, pipeline-async route values across channels" :studied)',
             ":studied",
-            "the pipeline operators in core.async",
-            "the marker for the channel-pipeline lesson"),
+            "the composition operators for building async pipelines",
+            "the keyword marking the async pipeline lesson",
+            goal="study how pipe, mult, mix, and pipeline-async route values across channels"),
         _ex('(do "pipelines transform streams of values channel-to-channel" :pipelines)',
             ":pipelines",
-            "the role of pipelines in async code",
-            "the marker keyword for pipelines"),
+            "the stream-transformation capability of pipelines",
+            "the keyword marking the pipeline transformation lesson",
+            goal="understand how pipelines transform streams of values flowing between channels"),
     ],
-    subplots=_REAL_SUBPLOTS, plan_pool=_PLAN_G12,
+    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G12,
 )
 
 
@@ -182,14 +193,16 @@ G12_06 = SubjectCurriculum(
         # We can run small spec predicates portably.
         _ex("(do (require '[clojure.spec.alpha :as s]) "
             "(s/valid? int? 42))", True,
-            "(s/valid? int? 42)",
-            "whether 42 conforms to the int? spec"),
+            "the spec validation check for int? against 42",
+            "the result of validating 42 against the int? spec",
+            goal="use spec to validate that 42 conforms to the int? predicate"),
         _ex("(do (require '[clojure.spec.alpha :as s]) "
             "(s/valid? string? 42))", False,
-            "(s/valid? string? 42)",
-            "whether 42 conforms to the string? spec"),
+            "the spec validation check for string? against 42",
+            "the result of validating 42 against the string? spec",
+            goal="use spec to validate that 42 conforms to the string? predicate"),
     ],
-    subplots=_REAL_SUBPLOTS, plan_pool=_PLAN_G12,
+    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G12,
 )
 
 
@@ -201,14 +214,16 @@ G12_07 = SubjectCurriculum(
     examples=[
         _ex('(do "s/exercise produces sample inputs for a spec" :studied)',
             ":studied",
-            "what s/exercise does",
-            "the marker for the spec-generators lesson"),
+            "the sample-generation capability of s/exercise",
+            "the keyword marking the spec-generator lesson",
+            goal="study how s/exercise produces sample inputs from a spec"),
         _ex('(do "spec generators turn specs into property-based test inputs" :gens)',
             ":gens",
-            "the role of spec generators",
-            "the marker keyword for spec generators"),
+            "the generation mechanism that converts specs to test data",
+            "the keyword marking the test-input generation lesson",
+            goal="understand how spec generators turn specs into property-based test inputs"),
     ],
-    subplots=_REAL_SUBPLOTS, plan_pool=_PLAN_G12,
+    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G12,
 )
 
 
@@ -220,14 +235,16 @@ G12_08 = SubjectCurriculum(
     examples=[
         # We can demonstrate the boolean essence of an assertion via =.
         _ex("(= (+ 1 2) 3)", True,
-            "(= (+ 1 2) 3) — what an `is` would test",
-            "the truth value an `is` assertion would record"),
+            "the equality assertion at the heart of test checking",
+            "the truth value showing the assertion passes",
+            goal="test whether the sum of 1 and 2 equals 3 using equality"),
         _ex('(do "(deftest …), (is …), (testing …) are the core test forms" :studied)',
             ":studied",
-            "the clojure.test core forms",
-            "the marker for the clojure.test lesson"),
+            "the fundamental test definition and assertion forms",
+            "the keyword marking the clojure.test lesson",
+            goal="study the core test forms: deftest, is, and testing"),
     ],
-    subplots=_REAL_SUBPLOTS, plan_pool=_PLAN_G12,
+    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G12,
 )
 
 
@@ -239,14 +256,16 @@ G12_09 = SubjectCurriculum(
     examples=[
         _ex('(do "(use-fixtures :each f) wraps every deftest in setup/teardown" :studied)',
             ":studied",
-            "use-fixtures and the fixture pattern",
-            "the marker for the fixtures lesson"),
+            "the fixture pattern for test setup and teardown",
+            "the keyword marking the test fixtures lesson",
+            goal="study how use-fixtures wraps every deftest in setup and teardown"),
         _ex('(do "fixtures provide setup/teardown around deftests" :fixtures)',
             ":fixtures",
-            "the purpose of fixtures",
-            "the marker keyword for the fixture lesson"),
+            "the environment-preparation role of fixtures in testing",
+            "the keyword marking the fixture-purpose lesson",
+            goal="understand how fixtures provide setup and teardown around tests"),
     ],
-    subplots=_REAL_SUBPLOTS, plan_pool=_PLAN_G12,
+    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G12,
 )
 
 
@@ -259,14 +278,16 @@ G12_10 = SubjectCurriculum(
         # A property: reverse of reverse equals identity. We check it once
         # to model what a property test would do generically.
         _ex("(= (reverse (reverse [1 2 3])) [1 2 3])", True,
-            "the property that double-reverse is identity",
-            "the truth value of the double-reverse property on [1 2 3]"),
+            "the property that reversing twice restores the original",
+            "the result of checking the double-reverse property",
+            goal="verify the property that reversing a vector twice returns the original vector"),
         _ex('(do "test.check generates inputs and checks properties hold" :studied)',
             ":studied",
-            "what test.check does",
-            "the marker for property-based testing"),
+            "the property-checking library and its capabilities",
+            "the keyword marking the property-based testing lesson",
+            goal="study how test.check generates inputs and verifies that properties hold"),
     ],
-    subplots=_REAL_SUBPLOTS, plan_pool=_PLAN_G12,
+    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G12,
 )
 
 
@@ -278,14 +299,16 @@ G12_11 = SubjectCurriculum(
     examples=[
         _ex('(do "project.clj declares :dependencies, :main, :profiles for Leiningen" :studied)',
             ":studied",
-            "the project.clj manifest for Leiningen",
-            "the marker for the project.clj lesson"),
+            "the project configuration manifest for Leiningen",
+            "the keyword marking the project.clj lesson",
+            goal="study the project.clj file and how it declares dependencies, main entry points, and profiles for Leiningen"),
         _ex('(do "Leiningen reads project.clj at the project root" :lein)',
             ":lein",
-            "where Leiningen finds project.clj",
-            "the marker keyword for the Leiningen lesson"),
+            "the project root configuration discovery mechanism",
+            "the keyword marking the Leiningen configuration lesson",
+            goal="understand how Leiningen reads project.clj from the project root"),
     ],
-    subplots=_REAL_SUBPLOTS, plan_pool=_PLAN_G12,
+    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G12,
 )
 
 
@@ -297,14 +320,16 @@ G12_12 = SubjectCurriculum(
     examples=[
         _ex('(do "deps.edn declares :deps and :aliases for the Clojure CLI" :studied)',
             ":studied",
-            "the deps.edn manifest for the Clojure CLI",
-            "the marker for the deps.edn lesson"),
+            "the deps.edn configuration manifest for the Clojure CLI",
+            "the keyword marking the deps.edn lesson",
+            goal="study the deps.edn file and how it declares dependencies and aliases for the Clojure CLI"),
         _ex('(do "deps.edn is read by the official `clj`/`clojure` tools" :deps)',
             ":deps",
-            "who reads deps.edn",
-            "the marker keyword for the deps.edn lesson"),
+            "the tools that interpret the deps.edn configuration",
+            "the keyword marking the CLI tools lesson",
+            goal="understand how the official clj and clojure CLI tools read deps.edn"),
     ],
-    subplots=_REAL_SUBPLOTS, plan_pool=_PLAN_G12,
+    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G12,
 )
 
 
@@ -316,14 +341,16 @@ G12_13 = SubjectCurriculum(
     examples=[
         _ex('(do "`clj -M:test` runs the :test alias from deps.edn" :studied)',
             ":studied",
-            "the alias-execution pattern with the Clojure CLI",
-            "the marker for the aliases lesson"),
+            "the alias execution mechanism in the Clojure CLI",
+            "the keyword marking the alias usage lesson",
+            goal="study how the clj command with -M flag runs aliases defined in deps.edn"),
         _ex('(do "aliases compose extra paths, deps, and main opts" :aliases)',
             ":aliases",
-            "what aliases let you compose",
-            "the marker keyword for the aliases lesson"),
+            "the composition of paths, dependencies, and options via aliases",
+            "the keyword marking the alias composition lesson",
+            goal="understand how aliases compose extra classpath entries, dependencies, and JVM options"),
     ],
-    subplots=_REAL_SUBPLOTS, plan_pool=_PLAN_G12,
+    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G12,
 )
 
 
@@ -335,14 +362,16 @@ G12_14 = SubjectCurriculum(
     examples=[
         _ex('(do "Ring models HTTP as request-map -> response-map" :studied)',
             ":studied",
-            "the Ring HTTP-as-data abstraction",
-            "the marker for the Ring lesson"),
+            "the HTTP-as-data abstraction that Ring provides",
+            "the keyword marking the Ring foundation lesson",
+            goal="study how Ring models HTTP requests and responses as Clojure maps"),
         _ex('(do "Pedestal layers interceptors over Ring for richer pipelines" :web)',
             ":web",
-            "the Pedestal interceptor model",
-            "the marker keyword for the Pedestal lesson"),
+            "the interceptor architecture that Pedestal builds on Ring",
+            "the keyword marking the Pedestal pattern lesson",
+            goal="understand how Pedestal layers interceptors over Ring to create rich request-processing pipelines"),
     ],
-    subplots=_REAL_SUBPLOTS, plan_pool=_PLAN_G12,
+    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G12,
 )
 
 
@@ -354,14 +383,16 @@ G12_15 = SubjectCurriculum(
     examples=[
         _ex('(do "Datomic and XTDB are immutable, time-aware datalog DBs" :studied)',
             ":studied",
-            "the Datomic / XTDB family",
-            "the marker for the datalog-DB lesson"),
+            "the family of immutable, time-aware datalog databases",
+            "the keyword marking the datalog database lesson",
+            goal="study Datomic and XTDB as immutable, time-aware database systems using datalog"),
         _ex('(do "queries are written in datalog over EDN-shaped data" :datalog)',
             ":datalog",
-            "how queries look in these databases",
-            "the marker keyword for datalog queries"),
+            "the query language and data shape used in datalog databases",
+            "the keyword marking the datalog query lesson",
+            goal="learn how queries are written in datalog over EDN-structured data"),
     ],
-    subplots=_REAL_SUBPLOTS, plan_pool=_PLAN_G12,
+    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G12,
 )
 
 
@@ -373,14 +404,16 @@ G12_16 = SubjectCurriculum(
     examples=[
         _ex('(do "Reagent wraps React with Hiccup-shaped Clojure data" :studied)',
             ":studied",
-            "the Reagent wrapper around React",
-            "the marker for the Reagent lesson"),
+            "the Reagent library as a Clojure wrapper around React",
+            "the keyword marking the Reagent foundation lesson",
+            goal="study how Reagent wraps React with Hiccup-shaped Clojure data structures"),
         _ex('(do "components are functions returning Hiccup vectors" :reagent)',
             ":reagent",
-            "how Reagent components are written",
-            "the marker keyword for Reagent components"),
+            "the function-based component model in Reagent",
+            "the keyword marking the Reagent component lesson",
+            goal="learn how Reagent components are functions that return Hiccup vectors"),
     ],
-    subplots=_REAL_SUBPLOTS, plan_pool=_PLAN_G12,
+    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G12,
 )
 
 
@@ -392,17 +425,20 @@ G12_17 = SubjectCurriculum(
     examples=[
         _ex('(do "good libraries expose data, then functions, then macros sparingly" :studied)',
             ":studied",
-            "the Clojure library-design hierarchy",
-            "the marker for the library-design lesson"),
+            "the library-design hierarchy from data through functions to macros",
+            "the keyword marking the design-hierarchy lesson",
+            goal="study the library-design principle that good APIs expose data first, functions second, macros sparingly"),
         _ex('(do "small public API surface, plain data inputs, return values" :design)',
             ":design",
-            "the conventional Clojure API shape",
-            "the marker keyword for the API-shape lesson"),
+            "the minimal API surface and data-centric design pattern",
+            "the keyword marking the API design lesson",
+            goal="understand the Clojure convention of a small public API surface with plain data inputs and outputs"),
         _ex("(= [1 2 3] (vec '(1 2 3)))", True,
-            "a tiny example of a data-first conversion at the API edge",
-            "whether the vector and the converted seq are equal"),
+            "the type-conversion behavior between sequences and vectors",
+            "the result of comparing a vector to its converted seq counterpart",
+            goal="verify that converting a seq to a vector produces the same data structure"),
     ],
-    subplots=_REAL_SUBPLOTS, plan_pool=_PLAN_G12,
+    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G12,
 )
 
 
@@ -414,14 +450,16 @@ G12_18 = SubjectCurriculum(
     examples=[
         _ex('(do "kebab-case names, two-space indent, threading for deep nests" :studied)',
             ":studied",
-            "the community-style basics",
-            "the marker for the style-guide lesson"),
+            "the community formatting and nesting conventions",
+            "the keyword marking the basic style lesson",
+            goal="study the Clojure style guide basics: kebab-case naming, two-space indentation, and threading macros for nesting"),
         _ex('(do "prefer pure functions, name predicates with ?, danger! ops with !" :style)',
             ":style",
-            "two naming conventions from the style guide",
-            "the marker keyword for the naming-conventions lesson"),
+            "the naming conventions for functions and predicates in idiomatic Clojure",
+            "the keyword marking the naming-conventions lesson",
+            goal="learn the Clojure naming conventions: pure function preference, question-mark suffixes for predicates, exclamation marks for side-effectful operations"),
     ],
-    subplots=_REAL_SUBPLOTS, plan_pool=_PLAN_G12,
+    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G12,
 )
 
 

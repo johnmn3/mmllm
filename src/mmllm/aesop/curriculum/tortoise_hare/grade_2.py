@@ -18,6 +18,7 @@ from mmllm.aesop.curriculum.generator import (
 )
 from mmllm.aesop.curriculum.tortoise_hare.grade_1 import (
     _SHARED_SUBPLOTS as _G1_SHARED_SUBPLOTS,
+    _GOAL_SUBPLOTS,
     _PLAN_POOL,
 )
 
@@ -45,10 +46,10 @@ have the last word.\""""),
 ]
 
 
-def _ex(form, expected, concept, what, tags=()):
+def _ex(form, expected, concept, what, goal="", tags=()):
     return SubjectExample(form=form, expected=expected,
                           concept_phrase=concept, question_what=what,
-                          tags=tags)
+                          goal_text=goal, tags=tags)
 
 
 # ─────────────────────── 22 grade-2 subjects ───────────────────────
@@ -59,15 +60,21 @@ G2_01 = SubjectCurriculum(
     subject_title="Multi-arg arithmetic",
     fable="tortoise-hare",
     examples=[
-        _ex("(+ 1 2 3 4)", 10,        "the sum (+ 1 2 3 4)",      "the result of (+ 1 2 3 4)"),
-        _ex("(* 2 3 4)", 24,          "the product (* 2 3 4)",    "the result of (* 2 3 4)"),
-        _ex("(- 100 1 2 3)", 94,      "the chain (- 100 1 2 3)",  "the result of (- 100 1 2 3)"),
+        _ex("(+ 1 2 3 4)", 10,        "the multi-arg sum",      "the sum of 1, 2, 3, and 4",
+            goal="add 1, 2, 3, and 4"),
+        _ex("(* 2 3 4)", 24,          "the multi-arg product",    "the product of 2, 3, and 4",
+            goal="multiply 2, 3, and 4"),
+        _ex("(- 100 1 2 3)", 94,      "the multi-arg subtraction",  "100 minus 1, 2, and 3",
+            goal="subtract 1, 2, and 3 from 100"),
         _ex("(+ 1 2 3 4 5 6 7 8 9 10)", 55,
-            "the sum 1+2+...+10",       "the sum of integers 1 through 10"),
-        _ex("(* 1 2 3 4 5)", 120,     "the product 1*2*3*4*5",    "the product of 1 through 5"),
-        _ex("(+ 10 20 30)", 60,       "the sum (+ 10 20 30)",     "the sum of 10, 20, and 30"),
+            "the sum of ten numbers",       "the sum of integers 1 through 10",
+            goal="add the integers 1 through 10"),
+        _ex("(* 1 2 3 4 5)", 120,     "the multi-arg product",    "the product of 1 through 5",
+            goal="multiply the integers 1 through 5"),
+        _ex("(+ 10 20 30)", 60,       "the sum of three numbers",     "the sum of 10, 20, and 30",
+            goal="add 10, 20, and 30"),
     ],
-    subplots=_SHARED_SUBPLOTS, plan_pool=_PLAN_POOL,
+    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
 
 
@@ -76,17 +83,22 @@ G2_02 = SubjectCurriculum(
     subject_title="Comparison chains",
     fable="tortoise-hare",
     examples=[
-        _ex("(< 1 2 3)",  True,  "the chain (< 1 2 3)",  "whether 1 < 2 < 3"),
-        _ex("(< 3 2 1)",  False, "the chain (< 3 2 1)",  "whether 3 < 2 < 1"),
-        _ex("(<= 1 1 2)", True,  "the chain (<= 1 1 2)", "whether 1 ≤ 1 ≤ 2"),
+        _ex("(< 1 2 3)",  True,  "the less-than chain",  "whether 1 < 2 < 3",
+            goal="test whether 1 is less than 2 and 2 is less than 3"),
+        _ex("(< 3 2 1)",  False, "the less-than chain",  "whether 3 < 2 < 1",
+            goal="test whether 3 is less than 2 and 2 is less than 1"),
+        _ex("(<= 1 1 2)", True,  "the less-than-or-equal chain", "whether 1 ≤ 1 ≤ 2",
+            goal="test whether 1 is less than or equal to 1 and 1 is less than or equal to 2"),
         _ex("(> 5 4 3 2 1)", True,
-            "the chain (> 5 4 3 2 1)",
-            "whether the numbers 5,4,3,2,1 are strictly decreasing"),
+            "the greater-than chain",
+            "whether the numbers are strictly decreasing",
+            goal="test whether 5 > 4 > 3 > 2 > 1"),
         _ex("(>= 3 3 2)", True,
-            "the chain (>= 3 3 2)",
-            "whether 3 ≥ 3 ≥ 2"),
+            "the greater-than-or-equal chain",
+            "whether 3 ≥ 3 ≥ 2",
+            goal="test whether 3 is greater than or equal to 3 and 3 is greater than or equal to 2"),
     ],
-    subplots=_SHARED_SUBPLOTS, plan_pool=_PLAN_POOL,
+    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
 
 
@@ -95,13 +107,18 @@ G2_03 = SubjectCurriculum(
     subject_title="not= and = with multiple args",
     fable="tortoise-hare",
     examples=[
-        _ex("(not= 1 2)",   True,  "the form (not= 1 2)",   "whether 1 differs from 2"),
-        _ex("(not= 1 1)",   False, "the form (not= 1 1)",   "whether 1 differs from 1"),
-        _ex("(= 1 1 1)",    True,  "the form (= 1 1 1)",    "whether all of 1,1,1 are equal"),
-        _ex("(= 1 1 2)",    False, "the form (= 1 1 2)",    "whether 1,1,2 are all equal"),
-        _ex("(not= 1 1 2)", True,  "the form (not= 1 1 2)", "whether at least one of 1,1,2 differs"),
+        _ex("(not= 1 2)",   True,  "the inequality check",   "whether 1 differs from 2",
+            goal="test whether 1 and 2 are not equal"),
+        _ex("(not= 1 1)",   False, "the inequality check",   "whether 1 differs from itself",
+            goal="test whether 1 and 1 are not equal"),
+        _ex("(= 1 1 1)",    True,  "the equality check",    "whether all three are equal",
+            goal="test whether 1, 1, and 1 are all equal"),
+        _ex("(= 1 1 2)",    False, "the equality check",    "whether all three are equal",
+            goal="test whether 1, 1, and 2 are all equal"),
+        _ex("(not= 1 1 2)", True,  "the inequality check", "whether at least one differs",
+            goal="test whether at least one of 1, 1, and 2 is not equal to the others"),
     ],
-    subplots=_SHARED_SUBPLOTS, plan_pool=_PLAN_POOL,
+    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
 
 
@@ -110,13 +127,18 @@ G2_04 = SubjectCurriculum(
     subject_title="min and max",
     fable="tortoise-hare",
     examples=[
-        _ex("(min 1 2 3)",  1, "the form (min 1 2 3)",  "the minimum of 1, 2, 3"),
-        _ex("(max 1 2 3)",  3, "the form (max 1 2 3)",  "the maximum of 1, 2, 3"),
-        _ex("(min 7 3 9 1 5)", 1, "the form (min 7 3 9 1 5)", "the minimum of 7, 3, 9, 1, 5"),
-        _ex("(max 7 3 9 1 5)", 9, "the form (max 7 3 9 1 5)", "the maximum of 7, 3, 9, 1, 5"),
-        _ex("(min -3 -1 -5)", -5, "the form (min -3 -1 -5)", "the minimum of -3, -1, -5"),
+        _ex("(min 1 2 3)",  1, "the minimum of three numbers",  "the smallest of 1, 2, and 3",
+            goal="find the minimum of 1, 2, and 3"),
+        _ex("(max 1 2 3)",  3, "the maximum of three numbers",  "the largest of 1, 2, and 3",
+            goal="find the maximum of 1, 2, and 3"),
+        _ex("(min 7 3 9 1 5)", 1, "the minimum of five numbers", "the smallest of 7, 3, 9, 1, and 5",
+            goal="find the minimum of 7, 3, 9, 1, and 5"),
+        _ex("(max 7 3 9 1 5)", 9, "the maximum of five numbers", "the largest of 7, 3, 9, 1, and 5",
+            goal="find the maximum of 7, 3, 9, 1, and 5"),
+        _ex("(min -3 -1 -5)", -5, "the minimum of three numbers", "the smallest of -3, -1, and -5",
+            goal="find the minimum of -3, -1, and -5"),
     ],
-    subplots=_SHARED_SUBPLOTS, plan_pool=_PLAN_POOL,
+    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
 
 
@@ -125,14 +147,20 @@ G2_05 = SubjectCurriculum(
     subject_title="quot, rem, mod",
     fable="tortoise-hare",
     examples=[
-        _ex("(quot 17 5)", 3, "the integer quotient of 17 and 5", "the result of (quot 17 5)"),
-        _ex("(rem 17 5)",  2, "the remainder of 17 divided by 5", "the result of (rem 17 5)"),
-        _ex("(mod 17 5)",  2, "17 mod 5",                          "the result of (mod 17 5)"),
-        _ex("(quot 100 7)", 14, "the integer quotient of 100 and 7", "the result of (quot 100 7)"),
-        _ex("(rem 100 7)",  2, "the remainder of 100 divided by 7", "the result of (rem 100 7)"),
-        _ex("(mod -7 3)",   2, "the form (mod -7 3)",              "the result of (mod -7 3)"),
+        _ex("(quot 17 5)", 3, "the integer quotient", "17 divided by 5, without remainder",
+            goal="find the integer quotient of 17 divided by 5"),
+        _ex("(rem 17 5)",  2, "the remainder", "the remainder when 17 is divided by 5",
+            goal="find the remainder when 17 is divided by 5"),
+        _ex("(mod 17 5)",  2, "the modulo operation",                          "17 mod 5",
+            goal="find 17 modulo 5"),
+        _ex("(quot 100 7)", 14, "the integer quotient", "100 divided by 7, without remainder",
+            goal="find the integer quotient of 100 divided by 7"),
+        _ex("(rem 100 7)",  2, "the remainder", "the remainder when 100 is divided by 7",
+            goal="find the remainder when 100 is divided by 7"),
+        _ex("(mod -7 3)",   2, "the modulo operation",              "negative seven mod 3",
+            goal="find negative 7 modulo 3"),
     ],
-    subplots=_SHARED_SUBPLOTS, plan_pool=_PLAN_POOL,
+    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
 
 
@@ -141,13 +169,18 @@ G2_06 = SubjectCurriculum(
     subject_title="inc and dec",
     fable="tortoise-hare",
     examples=[
-        _ex("(inc 5)",  6, "the form (inc 5)",  "5 plus 1"),
-        _ex("(dec 5)",  4, "the form (dec 5)",  "5 minus 1"),
-        _ex("(inc 0)",  1, "the form (inc 0)",  "the successor of 0"),
-        _ex("(dec 0)", -1, "the form (dec 0)",  "the predecessor of 0"),
-        _ex("(inc -1)", 0, "the form (inc -1)", "the successor of -1"),
+        _ex("(inc 5)",  6, "the increment operation",  "5 plus 1",
+            goal="increment 5 by 1"),
+        _ex("(dec 5)",  4, "the decrement operation",  "5 minus 1",
+            goal="decrement 5 by 1"),
+        _ex("(inc 0)",  1, "the increment operation",  "0 plus 1",
+            goal="increment 0"),
+        _ex("(dec 0)", -1, "the decrement operation",  "-1",
+            goal="decrement 0"),
+        _ex("(inc -1)", 0, "the increment operation", "negative 1 plus 1",
+            goal="increment negative 1"),
     ],
-    subplots=_SHARED_SUBPLOTS, plan_pool=_PLAN_POOL,
+    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
 
 
@@ -156,14 +189,18 @@ G2_07 = SubjectCurriculum(
     subject_title="Absolute value",
     fable="tortoise-hare",
     examples=[
-        _ex("(abs 5)",   5, "the form (abs 5)",   "the absolute value of 5"),
-        _ex("(abs -5)",  5, "the form (abs -5)",  "the absolute value of -5"),
-        _ex("(abs 0)",   0, "the form (abs 0)",   "the absolute value of 0"),
+        _ex("(abs 5)",   5, "the absolute value",   "the absolute value of 5",
+            goal="find the absolute value of 5"),
+        _ex("(abs -5)",  5, "the absolute value",  "the absolute value of negative 5",
+            goal="find the absolute value of negative 5"),
+        _ex("(abs 0)",   0, "the absolute value",   "the absolute value of 0",
+            goal="find the absolute value of 0"),
         _ex("(abs (- 3 8))", 5,
-            "the form (abs (- 3 8))",
-            "the absolute value of 3 minus 8"),
+            "the absolute value",
+            "the absolute value of the difference between 3 and 8",
+            goal="find the absolute value of 3 minus 8"),
     ],
-    subplots=_SHARED_SUBPLOTS, plan_pool=_PLAN_POOL,
+    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
 
 
@@ -173,13 +210,16 @@ G2_08 = SubjectCurriculum(
     fable="tortoise-hare",
     examples=[
         _ex("(+ 1/2 1/4)", "3/4",
-            "the sum 1/2 + 1/4",       "the value of (+ 1/2 1/4)"),
+            "the sum of two ratios",       "the sum of one-half and one-quarter",
+            goal="add one-half and one-quarter"),
         _ex("(* 2/3 3/4)", "1/2",
-            "the product 2/3 × 3/4",   "the value of (* 2/3 3/4)"),
+            "the product of two ratios",   "the product of two-thirds and three-quarters",
+            goal="multiply two-thirds by three-quarters"),
         _ex("(- 1 1/3)", "2/3",
-            "1 minus 1/3",             "the value of (- 1 1/3)"),
+            "the difference of a whole and a ratio",             "1 minus one-third",
+            goal="subtract one-third from 1"),
     ],
-    subplots=_SHARED_SUBPLOTS, plan_pool=_PLAN_POOL,
+    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
 
 
@@ -188,14 +228,17 @@ G2_09 = SubjectCurriculum(
     subject_title="Floats vs ints (the / operator)",
     fable="tortoise-hare",
     examples=[
-        _ex("(/ 10 2)", 5,    "the integer division 10 ÷ 2",
-            "the value of (/ 10 2)"),
-        _ex("(/ 10 3)", "10/3", "the form (/ 10 3)",
-            "the exact rational result of (/ 10 3)"),
-        _ex("(/ 1.0 2)", 0.5, "the float division 1.0 ÷ 2",
-            "the value of (/ 1.0 2)"),
+        _ex("(/ 10 2)", 5,    "the division operation",
+            "the result of 10 divided by 2",
+            goal="divide 10 by 2"),
+        _ex("(/ 10 3)", "10/3", "the division operation",
+            "the exact rational result of 10 divided by 3",
+            goal="divide 10 by 3"),
+        _ex("(/ 1.0 2)", 0.5, "the division operation",
+            "the result of 1.0 divided by 2",
+            goal="divide 1.0 by 2"),
     ],
-    subplots=_SHARED_SUBPLOTS, plan_pool=_PLAN_POOL,
+    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
 
 
@@ -204,12 +247,16 @@ G2_10 = SubjectCurriculum(
     subject_title="Powers via repeated multiplication",
     fable="tortoise-hare",
     examples=[
-        _ex("(* 2 2 2)", 8,        "two cubed", "2 to the third power"),
-        _ex("(* 5 5)",   25,       "five squared", "5 squared"),
-        _ex("(* 3 3 3 3)", 81,     "three to the fourth", "3 to the fourth power"),
-        _ex("(* 10 10)", 100,      "ten squared", "10 squared"),
+        _ex("(* 2 2 2)", 8,        "repeated multiplication", "2 to the third power",
+            goal="multiply 2 by itself three times"),
+        _ex("(* 5 5)",   25,       "repeated multiplication", "5 to the second power",
+            goal="multiply 5 by itself"),
+        _ex("(* 3 3 3 3)", 81,     "repeated multiplication", "3 to the fourth power",
+            goal="multiply 3 by itself four times"),
+        _ex("(* 10 10)", 100,      "repeated multiplication", "10 to the second power",
+            goal="multiply 10 by itself"),
     ],
-    subplots=_SHARED_SUBPLOTS, plan_pool=_PLAN_POOL,
+    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
 
 
@@ -218,16 +265,24 @@ G2_11 = SubjectCurriculum(
     subject_title="String concatenation with str",
     fable="tortoise-hare",
     examples=[
-        _ex('(str "tor" "toise")', "tortoise",
-            'the form (str "tor" "toise")', 'the joined string "tortoise"'),
-        _ex('(str "race")', "race",
-            'the form (str "race")', 'the value of (str "race")'),
-        _ex('(str "x" "y" "z")', "xyz",
-            'the form (str "x" "y" "z")', 'the joined string "xyz"'),
+        _ex('(str "ab" "cd")', "abcd",
+            'the string concatenation',
+            'the result of joining two two-letter strings',
+            goal='use str to join the two-letter strings "ab" and "cd"'),
+        _ex('(str 42)', "42",
+            'the string coercion of an integer',
+            'the result of coercing an integer to a string',
+            goal='use str to coerce the integer 42 to its string representation'),
+        _ex('(str "p" "q" "r")', "pqr",
+            'the three-arg string concatenation',
+            'the result of joining three single-character strings',
+            goal='use str to join the three single-character strings "p", "q", and "r"'),
         _ex('(str 1 "+" 2 "=" 3)', "1+2=3",
-            'the form (str 1 "+" 2 "=" 3)', 'the joined string "1+2=3"'),
+            'the mixed string concatenation',
+            'the joined string with numbers and operators',
+            goal='use str to join the integer 1, the plus sign, the integer 2, the equals sign, and the integer 3'),
     ],
-    subplots=_SHARED_SUBPLOTS, plan_pool=_PLAN_POOL,
+    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
 
 
@@ -240,13 +295,15 @@ G2_12 = SubjectCurriculum(
         # we ask for has the value nil; the model writes println
         # and the runtime returns nil.
         _ex('(println "hello")', None,
-            'the form (println "hello")',
-            'the return value of (println "hello")'),
+            'the print-line call',
+            'the return value of printing hello',
+            goal='print the string "hello" with a newline'),
         _ex('(print "x")', None,
-            'the form (print "x")',
-            'the return value of (print "x")'),
+            'the print call',
+            'the return value of printing x',
+            goal='print the string "x" without a newline'),
     ],
-    subplots=_SHARED_SUBPLOTS, plan_pool=_PLAN_POOL,
+    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
 
 
@@ -255,20 +312,26 @@ G2_13 = SubjectCurriculum(
     subject_title="and / or — short circuit, return values",
     fable="tortoise-hare",
     examples=[
-        _ex("(and true true)",   True,   "the form (and true true)",
-            "the value of (and true true)"),
-        _ex("(and true false)",  False,  "the form (and true false)",
-            "the value of (and true false)"),
-        _ex("(or false true)",   True,   "the form (or false true)",
-            "the value of (or false true)"),
-        _ex("(or false false)",  False,  "the form (or false false)",
-            "the value of (or false false)"),
-        _ex("(and 1 2 3)",       3,      "the form (and 1 2 3)",
-            "the value of (and 1 2 3)"),
-        _ex("(or nil false 5)",  5,      "the form (or nil false 5)",
-            "the value of (or nil false 5)"),
+        _ex("(and true true)",   True,   "the logical and",
+            "the result of true and true",
+            goal="test true and true with the and operator"),
+        _ex("(and true false)",  False,  "the logical and",
+            "the result of true and false",
+            goal="test true and false with the and operator"),
+        _ex("(or false true)",   True,   "the logical or",
+            "the result of false or true",
+            goal="test false or true with the or operator"),
+        _ex("(or false false)",  False,  "the logical or",
+            "the result of false or false",
+            goal="test false or false with the or operator"),
+        _ex("(and 1 2 3)",       3,      "the logical and",
+            "the result of and applied to three truthy values",
+            goal="apply and to 1, 2, and 3"),
+        _ex("(or nil false 5)",  5,      "the logical or",
+            "the result of or applied to nil, false, and 5",
+            goal="apply or to nil, false, and 5"),
     ],
-    subplots=_SHARED_SUBPLOTS, plan_pool=_PLAN_POOL,
+    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
 
 
@@ -277,13 +340,18 @@ G2_14 = SubjectCurriculum(
     subject_title="not — turning truthy to false",
     fable="tortoise-hare",
     examples=[
-        _ex("(not true)",  False, "the form (not true)",  "the value of (not true)"),
-        _ex("(not false)", True,  "the form (not false)", "the value of (not false)"),
-        _ex("(not nil)",   True,  "the form (not nil)",   "the value of (not nil)"),
-        _ex("(not 0)",     False, "the form (not 0)",     "the value of (not 0)"),
-        _ex("(not \"\")",  False, "the form (not \"\")",  "the value of (not \"\")"),
+        _ex("(not true)",  False, "the logical not",  "the negation of true",
+            goal="negate the value true"),
+        _ex("(not false)", True,  "the logical not", "the negation of false",
+            goal="negate the value false"),
+        _ex("(not nil)",   True,  "the logical not",   "the negation of nil",
+            goal="negate the value nil"),
+        _ex("(not 0)",     False, "the logical not",     "the negation of zero",
+            goal="negate the value 0"),
+        _ex("(not \"\")",  False, "the logical not",  "the negation of the empty string",
+            goal="negate the empty string"),
     ],
-    subplots=_SHARED_SUBPLOTS, plan_pool=_PLAN_POOL,
+    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
 
 
@@ -292,16 +360,20 @@ G2_15 = SubjectCurriculum(
     subject_title="Falsey values: only false and nil",
     fable="tortoise-hare",
     examples=[
-        _ex("(if 0 :truthy :falsey)",   ":truthy", "the form (if 0 :truthy :falsey)",
-            "which keyword (if 0 :truthy :falsey) returns"),
-        _ex("(if \"\" :truthy :falsey)", ":truthy", "the form (if \"\" :truthy :falsey)",
-            "which keyword (if \"\" :truthy :falsey) returns"),
-        _ex("(if nil :truthy :falsey)", ":falsey", "the form (if nil :truthy :falsey)",
-            "which keyword (if nil :truthy :falsey) returns"),
-        _ex("(if false :truthy :falsey)", ":falsey", "the form (if false :truthy :falsey)",
-            "which keyword (if false :truthy :falsey) returns"),
+        _ex("(if 0 1 0)",   1, "the if conditional with zero as condition",
+            "which branch the if takes when the condition is 0",
+            goal="write an if where the condition is 0, the then-branch is 1, and the else-branch is 0"),
+        _ex("(if \"\" 1 0)", 1, "the if conditional with empty string as condition",
+            "which branch the if takes when the condition is an empty string",
+            goal="write an if where the condition is the empty string, the then-branch is 1, and the else-branch is 0"),
+        _ex("(if nil 1 0)", 0, "the if conditional with nil as condition",
+            "which branch the if takes when the condition is nil",
+            goal="write an if where the condition is nil, the then-branch is 1, and the else-branch is 0"),
+        _ex("(if false 1 0)", 0, "the if conditional with false as condition",
+            "which branch the if takes when the condition is false",
+            goal="write an if where the condition is false, the then-branch is 1, and the else-branch is 0"),
     ],
-    subplots=_SHARED_SUBPLOTS, plan_pool=_PLAN_POOL,
+    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
 
 
@@ -310,12 +382,16 @@ G2_16 = SubjectCurriculum(
     subject_title="Truthy 0 and empty string",
     fable="tortoise-hare",
     examples=[
-        _ex("(boolean 0)",   True,  "the form (boolean 0)",  "the truthiness of 0"),
-        _ex("(boolean \"\")", True, "the form (boolean \"\")", "the truthiness of the empty string"),
-        _ex("(boolean nil)", False, "the form (boolean nil)", "the truthiness of nil"),
-        _ex("(boolean false)", False, "the form (boolean false)", "the truthiness of false"),
+        _ex("(boolean 0)",   True,  "the boolean conversion",  "whether 0 is truthy",
+            goal="convert 0 to a boolean"),
+        _ex("(boolean \"\")", True, "the boolean conversion", "whether the empty string is truthy",
+            goal="convert the empty string to a boolean"),
+        _ex("(boolean nil)", False, "the boolean conversion", "whether nil is truthy",
+            goal="convert nil to a boolean"),
+        _ex("(boolean false)", False, "the boolean conversion", "whether false is truthy",
+            goal="convert false to a boolean"),
     ],
-    subplots=_SHARED_SUBPLOTS, plan_pool=_PLAN_POOL,
+    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
 
 
@@ -325,16 +401,19 @@ G2_17 = SubjectCurriculum(
     fable="tortoise-hare",
     examples=[
         _ex("(:hare {:hare 1 :tortoise 2})", 1,
-            "the form (:hare {:hare 1 :tortoise 2})",
-            "the value (:hare {:hare 1 :tortoise 2}) returns"),
+            "the keyword lookup",
+            "the value of looking up :hare in a map",
+            goal="use the keyword :hare to look up a value in the map with keys :hare and :tortoise"),
         _ex("(:tortoise {:hare 1 :tortoise 2})", 2,
-            "the form (:tortoise {:hare 1 :tortoise 2})",
-            "the value (:tortoise {:hare 1 :tortoise 2}) returns"),
+            "the keyword lookup",
+            "the value of looking up :tortoise in a map",
+            goal="use the keyword :tortoise to look up a value in the map with keys :hare and :tortoise"),
         _ex("(:missing {:hare 1})", None,
-            "the form (:missing {:hare 1})",
-            "the value when a missing keyword is looked up"),
+            "the keyword lookup",
+            "the value when a missing keyword is looked up",
+            goal="use the keyword :missing to look up a value in a map that does not contain :missing"),
     ],
-    subplots=_SHARED_SUBPLOTS, plan_pool=_PLAN_POOL,
+    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
 
 
@@ -343,14 +422,20 @@ G2_18 = SubjectCurriculum(
     subject_title="Quoting symbols",
     fable="tortoise-hare",
     examples=[
-        _ex("(quote hare)", "hare", "the quoted symbol (quote hare)",
-            "the value of (quote hare)"),
-        _ex("'tortoise", "tortoise", "the quoted symbol 'tortoise",
-            "the value of 'tortoise"),
-        _ex("'(1 2 3)", [1, 2, 3], "the quoted list '(1 2 3)",
-            "the value of '(1 2 3)"),
+        _ex("(symbol? (quote hare))", True,
+            "the symbol-predicate applied to a long-form-quoted name",
+            "whether long-form quoting produces a symbol",
+            goal="ask whether long-form quoting of the name hare produces a symbol, using symbol?"),
+        _ex("(= (quote tortoise) 'tortoise)", True,
+            "the equality of long-form and short-form quoting",
+            "whether long-form and short-form quoting produce equal values",
+            goal="compare the result of long-form quoting of tortoise against the apostrophe-shorthand quoting of the same name, using ="),
+        _ex("(count '(1 2 3))", 3,
+            "the element count of a quoted list",
+            "the number of elements in a quoted list",
+            goal="count the elements in a quoted list of the integers 1, 2, and 3"),
     ],
-    subplots=_SHARED_SUBPLOTS, plan_pool=_PLAN_POOL,
+    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
 
 
@@ -360,13 +445,15 @@ G2_19 = SubjectCurriculum(
     fable="tortoise-hare",
     examples=[
         _ex("(* 1000000 1000000)", 1000000000000,
-            "the form (* 1000000 1000000)",
-            "the result of one million times one million"),
+            "the large multiplication",
+            "the product of one million and one million",
+            goal="multiply one million by one million"),
         _ex("(+ 99999999999 1)", 100000000000,
-            "the form (+ 99999999999 1)",
-            "the result of 99999999999 plus 1"),
+            "the large addition",
+            "the sum of 99999999999 and 1",
+            goal="add 1 to 99999999999"),
     ],
-    subplots=_SHARED_SUBPLOTS, plan_pool=_PLAN_POOL,
+    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
 
 
@@ -375,14 +462,17 @@ G2_20 = SubjectCurriculum(
     subject_title="Counting",
     fable="tortoise-hare",
     examples=[
-        _ex("(count [1 2 3])",       3, "the count of [1 2 3]",
-            "the count of the vector [1 2 3]"),
-        _ex("(count \"hello\")",     5, "the count of \"hello\"",
-            "the length of the string \"hello\""),
-        _ex("(count [])",            0, "the count of an empty vector",
-            "the count of an empty vector"),
+        _ex("(count [1 2 3])",       3, "the count operation",
+            "the number of elements in a vector",
+            goal="count the elements in the vector containing 1, 2, and 3"),
+        _ex("(count \"hello\")",     5, "the count operation",
+            "the length of a string",
+            goal="count the characters in the string hello"),
+        _ex("(count [])",            0, "the count operation",
+            "the count of an empty collection",
+            goal="count the elements in an empty vector"),
     ],
-    subplots=_SHARED_SUBPLOTS, plan_pool=_PLAN_POOL,
+    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
 
 
@@ -391,15 +481,18 @@ G2_21 = SubjectCurriculum(
     subject_title="String length and substring",
     fable="tortoise-hare",
     examples=[
-        _ex("(count \"tortoise\")", 8,  "the length of \"tortoise\"",
-            "the length of the string \"tortoise\""),
-        _ex("(count \"hare\")",     4,  "the length of \"hare\"",
-            "the length of the string \"hare\""),
-        _ex("(subs \"tortoise\" 0 3)", "tor",
-            "the form (subs \"tortoise\" 0 3)",
-            "the first three characters of \"tortoise\""),
+        _ex("(count \"tortoise\")", 8,  "the count of characters in a string",
+            "the length of an eight-letter string",
+            goal="count the characters in the string tortoise"),
+        _ex("(count \"hare\")",     4,  "the count of characters in a string",
+            "the length of a four-letter string",
+            goal="count the characters in the string hare"),
+        _ex("(count (subs \"tortoise\" 0 3))", 3,
+            "the count of characters in a leading substring",
+            "the length of a three-character leading slice of an eight-letter string",
+            goal="extract the leading three characters from the string tortoise using subs from index 0 to 3, then count them"),
     ],
-    subplots=_SHARED_SUBPLOTS, plan_pool=_PLAN_POOL,
+    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
 
 
@@ -410,16 +503,19 @@ G2_22 = SubjectCurriculum(
     examples=[
         # A simple distance: speed × time, then minus a head-start.
         _ex("(- (* 5 4) 7)", 13,
-            "the form (- (* 5 4) 7)",
-            "5 mph for 4 hours, minus a 7-mile head start"),
+            "the nested arithmetic",
+            "the distance after 5 mph for 4 hours minus a 7-mile head start",
+            goal="compute 5 times 4, then subtract 7"),
         _ex("(+ (* 3 8) (* 2 4))", 32,
+            "the sum of products",
             "the sum of two products",
-            "3*8 + 2*4"),
+            goal="compute the product of 3 and 8, add the product of 2 and 4"),
         _ex("(quot (+ 100 50) 5)", 30,
-            "the form (quot (+ 100 50) 5)",
-            "150 divided by 5"),
+            "the nested quotient",
+            "the quotient of a sum divided by 5",
+            goal="add 100 and 50, then divide by 5"),
     ],
-    subplots=_SHARED_SUBPLOTS, plan_pool=_PLAN_POOL,
+    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
 
 

@@ -180,6 +180,35 @@ def check_record(rec, sub, example):
         issues.append(("BAD_VERB_PREP",
                         "'stopped across X' (verb+prep mismatch)"))
 
+    # FORM_LEAK — for non-atom subjects (those with goal_text), the
+    # literal form must NOT appear in user_msg. If it does, the model
+    # is being trained to copy the form from the prompt instead of
+    # producing it from the goal description. Atom subjects (G1-01..08-
+    # style; goal_text empty) are exempt because for them the form IS
+    # the answer.
+    if getattr(example, "goal_text", "") and example.form:
+        # Normalize whitespace in form before searching (since the form
+        # may have been re-flowed in the user_msg).
+        form_norm = re.sub(r"\s+", " ", example.form).strip()
+        user_norm = re.sub(r"\s+", " ", user)
+        # Only flag forms ≥ 5 chars to avoid trivial substring noise
+        # (single-char operators / digits will appear naturally).
+        if len(form_norm) >= 5 and form_norm in user_norm:
+            issues.append(("FORM_LEAK",
+                f"form {form_norm!r} appears in user_msg of a goal-style subject"))
+
+    # Also catch string/keyword answer leaks in non-atom subjects:
+    # if expected is a string or keyword, the literal value must NOT
+    # appear in user_msg (e.g., "HARE" for upper-case form, ":caught"
+    # for catch branch).
+    if getattr(example, "goal_text", "") and isinstance(example.expected, str):
+        ans = example.expected
+        # Skip very short answers (<= 2 chars) and bool-ish strings
+        if len(ans) >= 3 and ans not in ("yes", "no"):
+            if ans in user:
+                issues.append(("ANSWER_LEAK_STRING",
+                    f"answer string {ans!r} appears in user_msg"))
+
     # ─────────────────────── deep-audit additions ───────────────────────
     # Checks added after the goose-eggs and ant-grasshopper hand-audits
     # surfaced patterns the original structural rules missed. Each was

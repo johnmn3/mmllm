@@ -147,20 +147,101 @@ _PLAN_POOL: tuple[str, ...] = (
 )
 
 
+# ─────────────────────── goal-style subplots ───────────────────────
+#
+# Used by NON-ATOM subjects (G1-09 onward + G2..G12). These templates
+# describe the GOAL of the form ({goal_text}) and reference the
+# operation abstractly via {concept_phrase}, but NEVER show the literal
+# form. The model must produce the form from the goal — it cannot
+# copy-from-prompt because the form isn't there.
+#
+# Atom subjects (G1-01..08) keep using _SHARED_SUBPLOTS, which DO show
+# the form via {form_display}, because for atoms the form IS the
+# answer (a literal evaluates to itself); copying-it-out IS the lesson.
+_GOAL_SUBPLOTS: list[SubplotTemplate] = [
+
+    # 1. The argument template — characters debate; goal-driven.
+    SubplotTemplate("""\
+{hare_phrase} and {tortoise_phrase} stopped {place} to settle a small
+puzzle. {hare} wanted to {goal_text}. {hare}, {emo_proud}, declared
+that {hare_he_she} could write the form for it without thinking.
+{tortoise}, {emo_patient}, suggested {hare_he_she} actually write
+{concept_phrase} carefully and let the REPL confirm what it returned."""),
+
+    # 2. The wager template — bet on writing the right form.
+    SubplotTemplate("""\
+At a moss-covered milestone {place}, {hare_phrase} sketched a small
+wager into the path: whoever could correctly write a form to
+{goal_text} first would win the right to set the next race.
+{tortoise_phrase}, {emo_patient}, said it was simpler to write
+{concept_phrase} carefully than to guess at it."""),
+
+    # 3. The teacher template — Tortoise teaches goal → form.
+    SubplotTemplate("""\
+{tortoise_phrase} had been teaching {hare_phrase} how to translate a
+goal into a Clojure form. "If you want to {goal_text}," {tortoise_he_she}
+said, "you write {concept_phrase} and submit it; the REPL hands you
+back the value." {hare}, {emo_tired}, agreed to try writing it."""),
+
+    # 4. The audience template — onlookers wait to see the form written.
+    SubplotTemplate("""\
+A small audience of forest creatures had gathered {place} to watch
+{hare_phrase} attempt to outwit {tortoise_phrase} at writing the
+right form. The challenge: {goal_text}. {tortoise} reminded the
+crowd that what mattered was {concept_phrase}, written carefully
+and submitted to the REPL."""),
+
+    # 5. The race-pause template — pause mid-race for a goal-write.
+    SubplotTemplate("""\
+Halfway through the race, {hare_phrase} stopped {place} and refused
+to continue until someone could write a form to {goal_text}.
+{hare} called the goal impossible. {tortoise_phrase}, walking up at
+{tortoise_his_her} usual pace, simply said: "Write {concept_phrase}
+and submit it. Whatever comes back is the answer.\""""),
+
+    # 6. The notebook template — Tortoise records goal/form pairs.
+    SubplotTemplate("""\
+{tortoise_phrase} kept a small leather notebook of every goal
+{tortoise_he_she} had translated into a Clojure form. Today {place},
+the next entry was a goal: {goal_text}. {tortoise} sat with pen in
+hand, ready to write {concept_phrase} and let the REPL confirm."""),
+
+    # 7. The boast-and-rebuke template — Hare boasts; Tortoise asks
+    #    for the actual form.
+    SubplotTemplate("""\
+"There is no challenge here," {hare_phrase} said, {emo_proud}.
+"To {goal_text} is something anyone could write." {tortoise_phrase},
+who {place} had grown used to such claims, asked {hare_him_her} to
+actually write {concept_phrase} and submit it to the REPL — just to
+be sure."""),
+
+    # 8. The puzzle-on-the-path template — a sign poses the goal.
+    SubplotTemplate("""\
+A wooden sign nailed to a tree {place} carried a small puzzle. The
+challenge was simple: {goal_text}. {hare} laughed, {emo_proud}, and
+declared it too easy. {tortoise} said patiently that the only way to
+be sure of {concept_phrase} was to write the form and put it in the
+REPL."""),
+]
+
+
 # ─────────────────────── helpers for examples ───────────────────────
 
 
 def _ex(form: str, expected, concept: str, what: str,
+        goal: str = "",
         tags: tuple[str, ...] = ()) -> SubjectExample:
     return SubjectExample(form=form, expected=expected,
                           concept_phrase=concept, question_what=what,
-                          tags=tags)
+                          goal_text=goal, tags=tags)
 
 
 # ─────────────────────── 18 grade-1 subjects ───────────────────────
 
 
-# G1-01 — Eval as substitution
+# G1-01 — Eval as substitution. ATOM SUBJECT: form IS the answer; the
+# lesson is "values evaluate to themselves." Trimmed application
+# examples — those live in G1-13 (first arithmetic) and G1-14 (nested).
 G1_01 = SubjectCurriculum(
     grade=1, subject_id="G1-01",
     subject_title="Eval as substitution",
@@ -170,14 +251,6 @@ G1_01 = SubjectCurriculum(
             "the value of 42"),
         _ex("0",                   0,     "the value 0",
             "the value of 0"),
-        _ex("(+ 1 2)",             3,     "the form (+ 1 2)",
-            "the result of (+ 1 2)"),
-        _ex("(* 4 5)",             20,    "the form (* 4 5)",
-            "the result of (* 4 5)"),
-        _ex("(- 10 (+ 2 3))",      5,     "the nested form (- 10 (+ 2 3))",
-            "the result of (- 10 (+ 2 3))"),
-        _ex("(+ 1 (* 2 3))",       7,     "the form (+ 1 (* 2 3))",
-            "the result of (+ 1 (* 2 3))"),
         _ex("\"hello\"",          "hello","the string \"hello\"",
             "the value of \"hello\""),
         _ex("nil",                None,   "the literal nil",
@@ -354,44 +427,50 @@ G1_08 = SubjectCurriculum(
 
 
 # G1-09 — Symbols vs values
+# (NON-ATOM: uses _GOAL_SUBPLOTS — model writes the form from the goal.)
 G1_09 = SubjectCurriculum(
     grade=1, subject_id="G1-09",
     subject_title="Symbols vs values",
     fable="tortoise-hare",
     examples=[
         _ex("(symbol? 'hare)", True,
-            "the predicate (symbol? 'hare)",
-            "whether 'hare is a symbol"),
+            "the symbol-predicate on a quoted name",
+            "whether a quoted name is a symbol",
+            goal="ask whether a quoted name is a symbol, using the symbol? predicate"),
         _ex("(symbol? 42)", False,
-            "the predicate (symbol? 42)",
-            "whether 42 is a symbol"),
-        _ex("'hare", "hare",
-            "the quoted symbol 'hare",
-            "the value of 'hare"),
+            "the symbol-predicate on an integer",
+            "whether an integer is a symbol",
+            goal="ask whether the integer 42 is a symbol, using the symbol? predicate"),
+        _ex('(symbol? "tortoise")', False,
+            "the symbol-predicate on a string",
+            "whether a string is a symbol",
+            goal="ask whether a string of letters is a symbol, using the symbol? predicate"),
         _ex("(= 'hare 'hare)", True,
-            "the equality of two 'hare symbols",
-            "whether 'hare equals 'hare"),
+            "the equality of two quoted names",
+            "whether two quoted names are equal",
+            goal="compare two quoted names for equality, using the = predicate"),
     ],
-    subplots=_SHARED_SUBPLOTS,
+    subplots=_GOAL_SUBPLOTS,
     plan_pool=_PLAN_POOL,
 )
 
 
-# G1-10 — Comments (no eval — but we can ask "what does the non-comment evaluate to")
+# G1-10 — Comments
 G1_10 = SubjectCurriculum(
     grade=1, subject_id="G1-10",
     subject_title="Comments",
     fable="tortoise-hare",
     examples=[
-        # Comments are stripped by the reader; what remains evaluates.
         _ex("(+ 1 2) ; sum of one and two", 3,
-            "the form (+ 1 2) followed by a comment",
-            "the result of (+ 1 2) ignoring the comment"),
+            "the addition with a trailing comment",
+            "the result, ignoring the comment",
+            goal="add 1 and 2, with a single-semicolon trailing comment"),
         _ex("42 ;; the answer", 42,
-            "the literal 42 with a trailing comment",
-            "the value of 42"),
+            "the literal with a trailing comment",
+            "the literal value, ignoring the comment",
+            goal="submit the integer 42 with a double-semicolon trailing comment"),
     ],
-    subplots=_SHARED_SUBPLOTS,
+    subplots=_GOAL_SUBPLOTS,
     plan_pool=_PLAN_POOL,
 )
 
@@ -403,31 +482,34 @@ G1_11 = SubjectCurriculum(
     fable="tortoise-hare",
     examples=[
         _ex("(+    1    2)", 3,
-            "the form (+ 1 2) with extra spaces",
-            "the result of the form"),
+            "the addition with extra spacing",
+            "the result of an addition formatted with extra spaces",
+            goal="add 1 and 2 in a form with extra spaces between tokens"),
         _ex("(+\n  1\n  2)", 3,
-            "the form (+ 1 2) split across lines",
-            "the result of the form"),
+            "the addition split across lines",
+            "the result of an addition formatted across multiple lines",
+            goal="add 1 and 2 in a form whose arguments are on separate lines"),
     ],
-    subplots=_SHARED_SUBPLOTS,
+    subplots=_GOAL_SUBPLOTS,
     plan_pool=_PLAN_POOL,
 )
 
 
-# G1-12 — Parens as syntax
+# G1-12 — Parens group; they don't multiply
 G1_12 = SubjectCurriculum(
     grade=1, subject_id="G1-12",
     subject_title="Parens group; they don't multiply",
     fable="tortoise-hare",
     examples=[
         _ex("(+ 2 3)", 5,
-            "the form (+ 2 3)",
-            "the result of (+ 2 3)"),
+            "the simple addition", "the result of adding 2 and 3",
+            goal="add 2 and 3"),
         _ex("(* (+ 1 2) 3)", 9,
-            "the form (* (+ 1 2) 3)",
-            "the result of (* (+ 1 2) 3)"),
+            "the nested multiplication",
+            "the result of multiplying a nested sum by 3",
+            goal="multiply the sum of 1 and 2 by 3"),
     ],
-    subplots=_SHARED_SUBPLOTS,
+    subplots=_GOAL_SUBPLOTS,
     plan_pool=_PLAN_POOL,
 )
 
@@ -438,14 +520,26 @@ G1_13 = SubjectCurriculum(
     subject_title="First arithmetic call",
     fable="tortoise-hare",
     examples=[
-        _ex("(+ 1 2)",  3,    "the form (+ 1 2)",    "the result of (+ 1 2)"),
-        _ex("(- 5 3)",  2,    "the form (- 5 3)",    "the result of (- 5 3)"),
-        _ex("(* 4 5)",  20,   "the form (* 4 5)",    "the result of (* 4 5)"),
-        _ex("(/ 10 2)", 5,    "the form (/ 10 2)",   "the result of (/ 10 2)"),
-        _ex("(+ 7 8)",  15,   "the form (+ 7 8)",    "the result of (+ 7 8)"),
-        _ex("(- 20 7)", 13,   "the form (- 20 7)",   "the result of (- 20 7)"),
+        _ex("(+ 1 2)",  3,
+            "the addition", "the sum of 1 and 2",
+            goal="add 1 and 2"),
+        _ex("(- 5 3)",  2,
+            "the subtraction", "the difference of 5 and 3",
+            goal="subtract 3 from 5"),
+        _ex("(* 4 5)",  20,
+            "the multiplication", "the product of 4 and 5",
+            goal="multiply 4 by 5"),
+        _ex("(/ 10 2)", 5,
+            "the division", "the quotient of 10 and 2",
+            goal="divide 10 by 2"),
+        _ex("(+ 7 8)",  15,
+            "the addition", "the sum of 7 and 8",
+            goal="add 7 and 8"),
+        _ex("(- 20 7)", 13,
+            "the subtraction", "the difference of 20 and 7",
+            goal="subtract 7 from 20"),
     ],
-    subplots=_SHARED_SUBPLOTS,
+    subplots=_GOAL_SUBPLOTS,
     plan_pool=_PLAN_POOL,
 )
 
@@ -456,20 +550,24 @@ G1_14 = SubjectCurriculum(
     subject_title="Nested call evaluation",
     fable="tortoise-hare",
     examples=[
-        _ex("(+ 1 (* 2 3))",       7,
-            "the nested form (+ 1 (* 2 3))",
-            "the result of (+ 1 (* 2 3))"),
+        _ex("(+ 1 (* 2 3))", 7,
+            "the nested computation",
+            "the sum of 1 with the product of 2 and 3",
+            goal="add 1 to the product of 2 and 3"),
         _ex("(* (+ 1 2) (+ 3 4))", 21,
-            "the nested form (* (+ 1 2) (+ 3 4))",
-            "the result of (* (+ 1 2) (+ 3 4))"),
-        _ex("(- 100 (* 5 5))",     75,
-            "the nested form (- 100 (* 5 5))",
-            "the result of (- 100 (* 5 5))"),
+            "the nested product of sums",
+            "the product of two nested sums",
+            goal="multiply the sum of 1 and 2 by the sum of 3 and 4"),
+        _ex("(- 100 (* 5 5))", 75,
+            "the nested subtraction",
+            "100 minus a nested product",
+            goal="subtract the product of 5 and 5 from 100"),
         _ex("(+ (* 2 3) (* 4 5))", 26,
             "the sum of two products",
-            "the result of (+ (* 2 3) (* 4 5))"),
+            "the sum of two nested products",
+            goal="add the product of 2 and 3 to the product of 4 and 5"),
     ],
-    subplots=_SHARED_SUBPLOTS,
+    subplots=_GOAL_SUBPLOTS,
     plan_pool=_PLAN_POOL,
 )
 
@@ -480,22 +578,26 @@ G1_15 = SubjectCurriculum(
     subject_title="Equality",
     fable="tortoise-hare",
     examples=[
-        _ex("(= 1 1)",          True,  "the equality (= 1 1)",
-            "the value of (= 1 1)"),
-        _ex("(= 1 2)",          False, "the equality (= 1 2)",
-            "the value of (= 1 2)"),
-        _ex("(= \"a\" \"a\")",  True,  "the equality (= \"a\" \"a\")",
-            "the value of (= \"a\" \"a\")"),
-        _ex("(= :hare :hare)",  True,  "the equality (= :hare :hare)",
-            "the value of (= :hare :hare)"),
+        _ex("(= 1 1)", True,
+            "the equality check", "whether 1 equals 1",
+            goal="test whether 1 equals 1 with ="),
+        _ex("(= 1 2)", False,
+            "the equality check", "whether 1 equals 2",
+            goal="test whether 1 equals 2 with ="),
+        _ex("(= \"a\" \"a\")", True,
+            "the string equality", "whether two equal strings are equal",
+            goal="test whether the string \"a\" equals itself with ="),
+        _ex("(= :hare :hare)", True,
+            "the keyword equality", "whether two equal keywords are equal",
+            goal="test whether the keyword :hare equals itself with ="),
         _ex("(= :hare :tortoise)", False,
-            "the equality (= :hare :tortoise)",
-            "the value of (= :hare :tortoise)"),
-        _ex("(= 1 1 1 1)",      True,
-            "the multi-arg equality (= 1 1 1 1)",
-            "the value of (= 1 1 1 1)"),
+            "the keyword equality", "whether two different keywords are equal",
+            goal="test whether :hare equals :tortoise with ="),
+        _ex("(= 1 1 1 1)", True,
+            "the multi-arg equality", "whether four 1s are all equal",
+            goal="test with = whether four 1s are all equal"),
     ],
-    subplots=_SHARED_SUBPLOTS,
+    subplots=_GOAL_SUBPLOTS,
     plan_pool=_PLAN_POOL,
 )
 
@@ -506,60 +608,62 @@ G1_16 = SubjectCurriculum(
     subject_title="Numeric predicates",
     fable="tortoise-hare",
     examples=[
-        _ex("(zero? 0)",  True,  "the predicate (zero? 0)",
-            "whether 0 is zero"),
-        _ex("(zero? 5)",  False, "the predicate (zero? 5)",
-            "whether 5 is zero"),
-        _ex("(pos? 7)",   True,  "the predicate (pos? 7)",
-            "whether 7 is positive"),
-        _ex("(pos? -2)",  False, "the predicate (pos? -2)",
-            "whether -2 is positive"),
-        _ex("(neg? -3)",  True,  "the predicate (neg? -3)",
-            "whether -3 is negative"),
-        _ex("(neg? 4)",   False, "the predicate (neg? 4)",
-            "whether 4 is negative"),
+        _ex("(zero? 0)", True,
+            "the zero check", "whether 0 is zero",
+            goal="check whether 0 is zero using zero?"),
+        _ex("(zero? 5)", False,
+            "the zero check", "whether 5 is zero",
+            goal="check whether 5 is zero using zero?"),
+        _ex("(pos? 7)", True,
+            "the positive check", "whether 7 is positive",
+            goal="check whether 7 is positive using pos?"),
+        _ex("(pos? -2)", False,
+            "the positive check", "whether -2 is positive",
+            goal="check whether -2 is positive using pos?"),
+        _ex("(neg? -3)", True,
+            "the negative check", "whether -3 is negative",
+            goal="check whether -3 is negative using neg?"),
+        _ex("(neg? 4)", False,
+            "the negative check", "whether 4 is negative",
+            goal="check whether 4 is negative using neg?"),
     ],
-    subplots=_SHARED_SUBPLOTS,
+    subplots=_GOAL_SUBPLOTS,
     plan_pool=_PLAN_POOL,
 )
 
 
 # G1-17 — Printing vs returning
-# (We can only express this via forms whose return value is what eval reports.
-# The "prints to stdout" aspect is acknowledged in the concept, but the eval
-# result is what matters for our tool-call training.)
 G1_17 = SubjectCurriculum(
     grade=1, subject_id="G1-17",
     subject_title="Printing vs returning",
     fable="tortoise-hare",
     examples=[
         _ex("42", 42,
-            "the value 42",
-            "the value of 42"),
+            "the literal 42", "the value 42 returned by the REPL",
+            goal="submit the integer 42 so the REPL returns it"),
         _ex("(+ 1 2)", 3,
-            "the form (+ 1 2)",
-            "the result of (+ 1 2)"),
+            "the addition", "the value returned by adding 1 and 2",
+            goal="add 1 and 2 so the REPL returns the result"),
     ],
-    subplots=_SHARED_SUBPLOTS,
+    subplots=_GOAL_SUBPLOTS,
     plan_pool=_PLAN_POOL,
 )
 
 
 # G1-18 — Errors are safe in the REPL
-# (We pose forms that succeed; the lesson is in the surrounding narrative.)
 G1_18 = SubjectCurriculum(
     grade=1, subject_id="G1-18",
     subject_title="Errors are safe in the REPL",
     fable="tortoise-hare",
     examples=[
         _ex("(+ 1 2)", 3,
-            "the form (+ 1 2)",
-            "the result of (+ 1 2)"),
+            "the addition", "the result of adding 1 and 2",
+            goal="add 1 and 2"),
         _ex("(* 7 6)", 42,
-            "the form (* 7 6)",
-            "the result of (* 7 6)"),
+            "the multiplication", "the product of 7 and 6",
+            goal="multiply 7 by 6"),
     ],
-    subplots=_SHARED_SUBPLOTS,
+    subplots=_GOAL_SUBPLOTS,
     plan_pool=_PLAN_POOL,
 )
 

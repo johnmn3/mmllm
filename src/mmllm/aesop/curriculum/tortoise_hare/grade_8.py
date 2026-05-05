@@ -11,7 +11,7 @@ from mmllm.aesop.curriculum.generator import (
     SubjectCurriculum, SubjectExample, SubplotTemplate,
 )
 from mmllm.aesop.curriculum.tortoise_hare.grade_1 import (
-    _SHARED_SUBPLOTS as _G1_SUBPLOTS, _PLAN_POOL,
+    _SHARED_SUBPLOTS as _G1_SUBPLOTS, _GOAL_SUBPLOTS, _PLAN_POOL,
 )
 
 
@@ -22,31 +22,13 @@ from mmllm.aesop.curriculum.tortoise_hare.grade_1 import (
 # with two beats that lean into that — a meeting-of-species and a
 # protocol-as-decree.
 
-_SUBPLOTS: list[SubplotTemplate] = list(_G1_SUBPLOTS) + [
-
-    # 9. The meeting-of-species template — different creatures respond
-    #    to the same call in their own way.
-    SubplotTemplate("""\
-{place_idx}, {tortoise_phrase} explained to {hare_phrase} that one named
-operation could mean different things for different kinds of creatures
-— a hare's pace was not a tortoise's pace, yet both could be asked the
-same question. The form {form_display} captured {concept_phrase}, and
-{tortoise} suggested they hand it to the REPL.""".replace(
-        "{place_idx}", "Today {place}")),
-
-    # 10. The protocol-as-decree template — a written rule of behavior
-    #     that several creatures must obey.
-    SubplotTemplate("""\
-A scrap of parchment, pinned to a tree {place}, set out a rule that all
-creatures of the woodland would have to abide by. {hare}, {emo_proud},
-read it aloud: it was {concept_phrase}. {tortoise_phrase} said only the
-REPL could confirm what {form_display} actually decided."""),
-]
+_SUBPLOTS: list[SubplotTemplate] = _GOAL_SUBPLOTS
 
 
-def _ex(form, expected, concept, what):
+def _ex(form, expected, concept, what, goal="", tags=()):
     return SubjectExample(form=form, expected=expected,
-                          concept_phrase=concept, question_what=what)
+                          concept_phrase=concept, question_what=what,
+                          goal_text=goal, tags=tags)
 
 
 _PLAN_POOL_G8: tuple[str, ...] = _PLAN_POOL + (
@@ -69,12 +51,14 @@ G8_01 = SubjectCurriculum(
         # rough equivalent. We illustrate "many shapes, one operation."
         _ex("(defn speak [k] (cond (= k :hare) \"swift\" (= k :tortoise) \"steady\" :else \"silent\"))",
             None,
-            "a function speak that returns different strings for :hare vs :tortoise",
-            "the form that defines speak via cond"),
+            "conditional dispatch on a tag",
+            "the function definition",
+            goal="define a function speak that returns different strings depending on whether its argument is :hare or :tortoise"),
         _ex("(let [speak (fn [k] (cond (= k :hare) \"swift\" (= k :tortoise) \"steady\"))] (speak :tortoise))",
             "steady",
-            "speak applied to :tortoise via cond-dispatch",
-            "what speak returns for :tortoise"),
+            "the result of dispatching speak on :tortoise",
+            "the value returned",
+            goal="call speak with :tortoise to see what it returns when dispatched"),
     ],
     subplots=_SUBPLOTS,
     plan_pool=_PLAN_POOL_G8,
@@ -89,12 +73,14 @@ G8_02 = SubjectCurriculum(
     examples=[
         _ex("(do (deftype Pebble [color]) (.-color (Pebble. \"grey\")))",
             "grey",
-            "a deftype Pebble with a color field, then read color of an instance",
-            "the color field of a Pebble instance"),
+            "reading the color field of a Pebble instance",
+            "the value",
+            goal="define a type Pebble with a color field and then read the color field from an instance"),
         _ex("(do (deftype Stone [weight]) (.-weight (Stone. 7)))",
             7,
-            "a deftype Stone with a weight field, then read its weight",
-            "the weight of a Stone constructed with 7"),
+            "reading the weight field of a Stone instance",
+            "the value",
+            goal="define a type Stone with a weight field and then read the weight field from an instance"),
     ],
     subplots=_SUBPLOTS,
     plan_pool=_PLAN_POOL_G8,
@@ -107,14 +93,16 @@ G8_03 = SubjectCurriculum(
     subject_title="defrecord introduction",
     fable="tortoise-hare",
     examples=[
-        _ex("(do (defrecord Runner [name pace]) (:pace (->Runner \"hare\" :swift)))",
-            ":swift",
-            "a defrecord Runner with name and pace fields, get :pace",
-            "the :pace value of the Runner record"),
-        _ex("(do (defrecord Runner [name pace]) (:name (->Runner \"tortoise\" :steady)))",
-            "tortoise",
-            "the :name field of a Runner record",
-            "the :name value of the Runner constructed with \"tortoise\""),
+        _ex("(do (defrecord Runner [name pace]) (:pace (->Runner \"Alice\" :slow)))",
+            ":slow",
+            "reading the pace field from a Runner record",
+            "the value",
+            goal="define a record type named Runner with two fields, then retrieve one field from an instance"),
+        _ex("(do (defrecord Runner [name pace]) (:name (->Runner \"Bob\" :moderate)))",
+            "Bob",
+            "reading the name field from a Runner record",
+            "the value",
+            goal="define a record type named Runner with two fields, then retrieve another field from an instance"),
     ],
     subplots=_SUBPLOTS,
     plan_pool=_PLAN_POOL_G8,
@@ -131,12 +119,14 @@ G8_04 = SubjectCurriculum(
         # ancillary call that demonstrates it was defined.
         _ex("(do (defprotocol Pace (speed [this])) (some? Pace))",
             True,
-            "a defprotocol Pace with a single method speed",
-            "whether the Pace protocol was defined (a non-nil truthy value)"),
+            "a protocol definition",
+            "whether it was established",
+            goal="define a protocol named Pace with one method speed that takes a single argument this"),
         _ex("(do (defprotocol Greet (hail [this])) (some? Greet))",
             True,
-            "a defprotocol Greet with one method hail",
-            "whether Greet has been established"),
+            "a protocol definition",
+            "whether it was established",
+            goal="define a protocol named Greet with one method hail that takes a single argument this"),
     ],
     subplots=_SUBPLOTS,
     plan_pool=_PLAN_POOL_G8,
@@ -153,14 +143,16 @@ G8_05 = SubjectCurriculum(
             " (extend-protocol Pace java.lang.String (speed [_] \"swift\"))"
             " (speed \"hare\"))",
             "swift",
-            "a Pace protocol extended to String, then call speed on a string",
-            "what speed returns when applied to \"hare\""),
+            "calling a protocol method on a string",
+            "the value returned",
+            goal="define a protocol named Pace with one method speed, extend it to String type with an implementation, then call speed on a string"),
         _ex("(do (defprotocol Greet (hail [this]))"
             " (extend-protocol Greet java.lang.Long (hail [_] :number))"
             " (hail 7))",
             ":number",
-            "a Greet protocol extended to Long, then call hail on 7",
-            "the keyword hail returns for the number 7"),
+            "calling a protocol method on a number",
+            "the value returned",
+            goal="define a protocol named Greet with one method hail, extend it to Long type with an implementation, then call hail on a number"),
     ],
     subplots=_SUBPLOTS,
     plan_pool=_PLAN_POOL_G8,
@@ -179,16 +171,18 @@ G8_06 = SubjectCurriculum(
             "   java.lang.Long   (speed [_] :long-pace))"
             " (speed 42))",
             ":long-pace",
-            "Pace dispatched on the class of its argument; called with 42",
-            "the keyword speed returns for the integer 42"),
+            "protocol dispatch on an integer",
+            "the value returned",
+            goal="define a protocol Pace with method speed, extend it to both String and Long types with different implementations, then call speed on the number 42"),
         _ex("(do (defprotocol Pace (speed [this]))"
             " (extend-protocol Pace"
             "   java.lang.String (speed [_] :string-pace)"
             "   java.lang.Long   (speed [_] :long-pace))"
             " (speed \"x\"))",
             ":string-pace",
-            "Pace dispatched on a string argument",
-            "the keyword speed returns for the string \"x\""),
+            "protocol dispatch on a string",
+            "the value returned",
+            goal="define a protocol Pace with method speed, extend it to both String and Long types with different implementations, then call speed on a string"),
     ],
     subplots=_SUBPLOTS,
     plan_pool=_PLAN_POOL_G8,
@@ -205,14 +199,16 @@ G8_07 = SubjectCurriculum(
             " (defrecord Hare [name] Pace (speed [_] :swift))"
             " (speed (->Hare \"Pip\")))",
             ":swift",
-            "a defrecord Hare that implements Pace with speed -> :swift",
-            "the keyword speed returns for a Hare record"),
+            "calling a protocol method on a record instance",
+            "the value returned",
+            goal="define a protocol Pace with method speed, define a record Hare that implements Pace, then call speed on a Hare instance"),
         _ex("(do (defprotocol Pace (speed [this]))"
             " (defrecord Tortoise [name] Pace (speed [_] :steady))"
             " (speed (->Tortoise \"Shelly\")))",
             ":steady",
-            "a Tortoise record implementing Pace with speed -> :steady",
-            "the keyword speed returns for a Tortoise record"),
+            "calling a protocol method on a record instance",
+            "the value returned",
+            goal="define a protocol Pace with method speed, define a record Tortoise that implements Pace, then call speed on a Tortoise instance"),
     ],
     subplots=_SUBPLOTS,
     plan_pool=_PLAN_POOL_G8,
@@ -229,14 +225,16 @@ G8_08 = SubjectCurriculum(
             " (defmethod pace :hare [_] :swift)"
             " (pace {:species :hare}))",
             ":swift",
-            "a defmulti pace that dispatches on :species, called with :hare",
-            "what pace returns for {:species :hare}"),
+            "calling a multimethod with a specific dispatch value",
+            "the value returned",
+            goal="define a multimethod pace that dispatches on the :species key, add a method for :hare, then call pace with a map"),
         _ex("(do (defmulti tag :kind)"
             " (defmethod tag :stone [_] :hard)"
             " (tag {:kind :stone}))",
             ":hard",
-            "a defmulti tag dispatching on :kind",
-            "what tag returns for {:kind :stone}"),
+            "calling a multimethod with a specific dispatch value",
+            "the value returned",
+            goal="define a multimethod tag that dispatches on the :kind key, add a method for :stone, then call tag with a map"),
     ],
     subplots=_SUBPLOTS,
     plan_pool=_PLAN_POOL_G8,
@@ -254,16 +252,18 @@ G8_09 = SubjectCurriculum(
             " (defmethod pace :tortoise [_] :steady)"
             " (pace {:species :tortoise}))",
             ":steady",
-            "two defmethod entries on pace, called with :tortoise",
-            "what pace returns for {:species :tortoise}"),
+            "calling a multimethod with multiple methods",
+            "the value returned",
+            goal="define a multimethod pace that dispatches on :species with methods for both :hare and :tortoise, then call pace with {:species :tortoise}"),
         _ex("(do (defmulti pace :species)"
             " (defmethod pace :hare [_] :swift)"
             " (defmethod pace :tortoise [_] :steady)"
             " (defmethod pace :default [_] :unknown)"
             " (pace {:species :owl}))",
             ":unknown",
-            "a :default fallback method on pace, called with an unknown species",
-            "what pace returns for {:species :owl} when :default falls through"),
+            "calling a multimethod with a default fallback",
+            "the value returned",
+            goal="define a multimethod pace with methods for :hare and :tortoise plus a :default fallback, then call pace with a dispatch value that doesn't match"),
     ],
     subplots=_SUBPLOTS,
     plan_pool=_PLAN_POOL_G8,
@@ -278,17 +278,19 @@ G8_10 = SubjectCurriculum(
     examples=[
         # Both can implement the same dispatching idea.
         _ex("(do (defmulti show identity)"
-            " (defmethod show :hare [_] \"swift\")"
-            " (show :hare))",
-            "swift",
-            "a defmulti dispatching on identity, with one method for :hare",
-            "the string show returns for :hare"),
+            " (defmethod show :rabbit [_] \"quick\")"
+            " (show :rabbit))",
+            "quick",
+            "dispatching via multimethod",
+            "the value returned",
+            goal="define a multimethod show that dispatches on identity with a method for one specific value, then call it"),
         _ex("(do (defprotocol Show (show [this]))"
             " (extend-protocol Show java.lang.String (show [s] (str \"str-\" s)))"
             " (show \"hare\"))",
             "str-hare",
-            "a Show protocol extended to String, called with \"hare\"",
-            "the string show returns for \"hare\" via protocol"),
+            "dispatching via protocol",
+            "the value returned",
+            goal="define a protocol Show with method show, extend it to String type, then call show on a string"),
     ],
     subplots=_SUBPLOTS,
     plan_pool=_PLAN_POOL_G8,
@@ -308,8 +310,9 @@ G8_11 = SubjectCurriculum(
             " (extend-protocol IPace java.lang.String (run [_] :ran))"
             " (run \"hare\"))",
             ":ran",
-            "an IPace protocol (Clojure analogue of a Java interface) extended to String",
-            "the keyword run returns for \"hare\" via the protocol"),
+            "calling a protocol method on a string",
+            "the value returned",
+            goal="define a protocol IPace with method run, extend it to String type, then call run on a string"),
     ],
     subplots=_SUBPLOTS,
     plan_pool=_PLAN_POOL_G8,
@@ -326,14 +329,16 @@ G8_12 = SubjectCurriculum(
             " (extend-type java.lang.Long Pace (speed [_] :number-pace))"
             " (speed 5))",
             ":number-pace",
-            "extend-type used to attach Pace to Long, called with 5",
-            "the keyword speed returns for 5"),
+            "attaching a protocol to a built-in type via extend-type",
+            "the value returned",
+            goal="define a protocol Pace with method speed, use extend-type to attach it to Long type, then call speed on a number"),
         _ex("(do (defprotocol Pace (speed [this]))"
             " (extend-type java.lang.String Pace (speed [_] :string-pace))"
             " (speed \"hare\"))",
             ":string-pace",
-            "extend-type attaching Pace to String",
-            "the keyword speed returns for \"hare\" via extend-type"),
+            "attaching a protocol to a built-in type via extend-type",
+            "the value returned",
+            goal="define a protocol Pace with method speed, use extend-type to attach it to String type, then call speed on a string"),
     ],
     subplots=_SUBPLOTS,
     plan_pool=_PLAN_POOL_G8,
@@ -350,16 +355,18 @@ G8_13 = SubjectCurriculum(
         # bodies — illustrate by capturing the field via this.
         _ex("(do (defprotocol Named (name-of [this]))"
             " (defrecord Hare [n] Named (name-of [this] (:n this)))"
-            " (name-of (->Hare \"Pip\")))",
-            "Pip",
-            "a protocol method using this to read a field",
-            "the name returned by name-of for a Hare record"),
+            " (name-of (->Hare \"Zephyr\")))",
+            "Zephyr",
+            "using this to access a field in a protocol method",
+            "the value returned",
+            goal="define a protocol Named with method name-of, define a record that uses this to access a field, then call the method"),
         _ex("(do (defprotocol Tagged (tag-of [this]))"
             " (defrecord Stone [t] Tagged (tag-of [this] (:t this)))"
             " (tag-of (->Stone :grey)))",
             ":grey",
-            "a Tagged protocol method that pulls :t off this",
-            "the :t value via tag-of for a Stone"),
+            "using this to access a field in a protocol method",
+            "the value returned",
+            goal="define a protocol Tagged with method tag-of, define a record Stone that implements it by accessing a field via this, then call the method"),
     ],
     subplots=_SUBPLOTS,
     plan_pool=_PLAN_POOL_G8,
@@ -380,8 +387,9 @@ G8_14 = SubjectCurriculum(
             " (extend-protocol B java.lang.String (b-op [_] :b-impl))"
             " [(a-op \"x\") (b-op \"x\")])",
             [":a-impl", ":b-impl"],
-            "two independent protocols A and B both extended to String",
-            "the pair [a-op b-op] when each protocol is used independently"),
+            "calling methods from two independent protocols",
+            "the vector of results",
+            goal="define two protocols A and B, each with a method, extend both to String type independently, then call both methods"),
     ],
     subplots=_SUBPLOTS,
     plan_pool=_PLAN_POOL_G8,
@@ -396,16 +404,19 @@ G8_15 = SubjectCurriculum(
     examples=[
         _ex("(do (derive ::hare ::runner) (isa? ::hare ::runner))",
             True,
-            "deriving ::hare from ::runner and asking isa?",
-            "whether ::hare isa? ::runner after derive"),
+            "checking type hierarchy after derive",
+            "whether the hierarchy holds",
+            goal="establish a type relationship where ::hare is a type of ::runner, then check it"),
         _ex("(isa? java.lang.Long java.lang.Number)",
             True,
-            "the predicate (isa? Long Number)",
-            "whether Long isa? Number"),
+            "checking Java type hierarchy",
+            "whether the type relationship holds",
+            goal="check whether Long is a type of Number in Java's type system"),
         _ex("(isa? java.lang.String java.lang.Number)",
             False,
-            "the predicate (isa? String Number)",
-            "whether String isa? Number"),
+            "checking Java type hierarchy",
+            "whether the type relationship holds",
+            goal="check whether String is a type of Number in Java's type system"),
     ],
     subplots=_SUBPLOTS,
     plan_pool=_PLAN_POOL_G8,
@@ -424,15 +435,17 @@ G8_16 = SubjectCurriculum(
             " (defrecord Tortoise [] Move (step [_] :plod))"
             " (mapv step [(->Hare) (->Tortoise)]))",
             [":leap", ":plod"],
-            "a Move protocol with two record implementations, mapped over instances",
-            "the pair of step results for a Hare and a Tortoise"),
+            "calling a polymorphic method on multiple record types",
+            "the vector of results",
+            goal="define a protocol Move with method step, define two record types Hare and Tortoise that each implement it, then call the method on both instances"),
         _ex("(do (defprotocol Sound (cry [this]))"
             " (defrecord Hare [] Sound (cry [_] :thump))"
             " (defrecord Tortoise [] Sound (cry [_] :hiss))"
             " (cry (->Tortoise)))",
             ":hiss",
-            "a Sound protocol with two implementations, called on a Tortoise",
-            "the keyword cry returns for a Tortoise"),
+            "calling a polymorphic method on a record instance",
+            "the value returned",
+            goal="define a protocol Sound with method cry, define two record types that implement it, then call the method on a Tortoise instance"),
     ],
     subplots=_SUBPLOTS,
     plan_pool=_PLAN_POOL_G8,

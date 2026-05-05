@@ -11,7 +11,9 @@ from __future__ import annotations
 from mmllm.aesop.curriculum.generator import (
     SubjectCurriculum, SubjectExample, SubplotTemplate,
 )
-from mmllm.aesop.curriculum.tortoise_hare.grade_1 import _SHARED_SUBPLOTS as _G1_SUBPLOTS, _PLAN_POOL
+from mmllm.aesop.curriculum.tortoise_hare.grade_1 import (
+    _GOAL_SUBPLOTS, _SHARED_SUBPLOTS as _G1_SUBPLOTS, _PLAN_POOL
+)
 
 
 _NS_SUBPLOTS: list[SubplotTemplate] = list(_G1_SUBPLOTS) + [
@@ -36,9 +38,10 @@ shared path."""),
 ]
 
 
-def _ex(form, expected, concept, what):
+def _ex(form, expected, concept, what, goal="", tags=()):
     return SubjectExample(form=form, expected=expected,
-                          concept_phrase=concept, question_what=what)
+                          concept_phrase=concept, question_what=what,
+                          goal_text=goal, tags=tags)
 
 
 _PLAN_G6 = _PLAN_POOL + (
@@ -52,21 +55,24 @@ _PLAN_G6 = _PLAN_POOL + (
 
 
 # G6-01 — Namespace as file
-# A namespace's name is itself a symbol; we use `(name 'foo.bar)` to
-# show the path-like string the namespace corresponds to.
+# A namespace's name is itself a symbol; we extract the string form
+# to show the path-like string the namespace corresponds to.
 G6_01 = SubjectCurriculum(grade=6, subject_id="G6-01",
     subject_title="Namespace as file", fable="tortoise-hare",
     examples=[
         _ex("(name 'foo.bar)", "foo.bar",
-            "the symbol foo.bar standing in for a namespace name",
-            "the string form of the namespace symbol foo.bar"),
+            "extracting the string form of a namespace symbol",
+            "the string form of a quoted namespace symbol",
+            goal="extract the string form of a quoted namespace symbol"),
         _ex("(name 'clojure.string)", "clojure.string",
-            "the namespace symbol clojure.string",
-            "the string \"clojure.string\""),
+            "extracting the string form of a namespace symbol",
+            "the string form of a quoted namespace symbol",
+            goal="extract the string form of a quoted namespace symbol"),
         _ex("(symbol? 'tortoise.race)", True,
-            "whether tortoise.race is a symbol",
-            "the value of (symbol? 'tortoise.race)"),
-    ], subplots=_NS_SUBPLOTS, plan_pool=_PLAN_G6)
+            "checking whether a value is a symbol",
+            "whether a value is a symbol",
+            goal="test whether a quoted namespace-like value is a symbol"),
+    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G6)
 
 
 # G6-02 — ns form (we exercise via `name *ns*` style introspection)
@@ -74,12 +80,14 @@ G6_02 = SubjectCurriculum(grade=6, subject_id="G6-02",
     subject_title="ns form", fable="tortoise-hare",
     examples=[
         _ex("(name 'race.tortoise)", "race.tortoise",
-            "the namespace name 'race.tortoise as a string",
-            "the string \"race.tortoise\""),
+            "extracting the string form of a namespace symbol",
+            "the string form of a quoted namespace symbol",
+            goal="extract the string form of a quoted namespace symbol"),
         _ex("(= 'race.tortoise 'race.tortoise)", True,
-            "two identical namespace symbols",
-            "whether the two namespace symbols are equal"),
-    ], subplots=_NS_SUBPLOTS, plan_pool=_PLAN_G6)
+            "checking equality of two namespace symbols",
+            "whether two identical namespace symbols are equal",
+            goal="test whether two identical namespace symbols are equal"),
+    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G6)
 
 
 # G6-03 — require — fully qualified usage (require already loaded
@@ -89,12 +97,14 @@ G6_03 = SubjectCurriculum(grade=6, subject_id="G6-03",
     subject_title="require", fable="tortoise-hare",
     examples=[
         _ex("(clojure.string/upper-case \"hare\")", "HARE",
-            "the form using clojure.string/upper-case on \"hare\"",
-            "the upper-cased string \"HARE\""),
-        _ex("(clojure.string/lower-case \"HARE\")", "hare",
-            "the form using clojure.string/lower-case",
-            "the lower-cased string \"hare\""),
-    ], subplots=_NS_SUBPLOTS, plan_pool=_PLAN_G6)
+            "calling a fully-qualified string function",
+            "the result of calling a string transformation function",
+            goal="call the uppercasing function from clojure.string on a test string"),
+        _ex("(clojure.string/lower-case \"ZEBRA\")", "zebra",
+            "calling a fully-qualified string function",
+            "the result of calling a string transformation function",
+            goal="call the lowercasing function from clojure.string on a test string"),
+    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G6)
 
 
 # G6-04 — refer-and-use (we exercise the effect: a referred name
@@ -105,28 +115,33 @@ G6_04 = SubjectCurriculum(grade=6, subject_id="G6-04",
     examples=[
         _ex("(= (clojure.string/upper-case \"x\") (clojure.string/upper-case \"x\"))",
             True,
-            "whether two calls to the same fully-qualified function agree",
-            "the value of (= (clojure.string/upper-case \"x\") (clojure.string/upper-case \"x\"))"),
-    ], subplots=_NS_SUBPLOTS, plan_pool=_PLAN_G6)
+            "testing equality of two identical function calls",
+            "whether two calls to the same function with the same argument produce the same result",
+            goal="test whether two calls to the fully-qualified string uppercasing function with the same argument are equal"),
+    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G6)
 
 
 # G6-05 — Fully qualified names
 G6_05 = SubjectCurriculum(grade=6, subject_id="G6-05",
     subject_title="Fully qualified names", fable="tortoise-hare",
     examples=[
-        _ex("(clojure.string/upper-case \"tortoise\")", "TORTOISE",
-            "clojure.string/upper-case applied to \"tortoise\"",
-            "the upper-cased string \"TORTOISE\""),
-        _ex("(clojure.string/reverse \"hare\")", "erah",
-            "clojure.string/reverse applied to \"hare\"",
-            "the reversed string \"erah\""),
-        _ex("(namespace :race/tortoise)", "race",
-            "the namespace portion of the keyword :race/tortoise",
-            "the string \"race\""),
-        _ex("(name :race/tortoise)", "tortoise",
-            "the name portion of the keyword :race/tortoise",
-            "the string \"tortoise\""),
-    ], subplots=_NS_SUBPLOTS, plan_pool=_PLAN_G6)
+        _ex("(clojure.string/upper-case \"hello\")", "HELLO",
+            "calling a fully-qualified string function",
+            "the result of calling a string transformation function",
+            goal="call the uppercasing function from clojure.string on a test string"),
+        _ex("(clojure.string/reverse \"abc\")", "cba",
+            "calling a fully-qualified string function",
+            "the result of calling a string transformation function",
+            goal="call the reversing function from clojure.string on a test string"),
+        _ex("(namespace :owner/item)", "owner",
+            "extracting the namespace portion of a keyword",
+            "the namespace part of a qualified keyword",
+            goal="extract the namespace portion of a qualified keyword"),
+        _ex("(name :owner/item)", "item",
+            "extracting the name portion of a keyword",
+            "the name part of a qualified keyword",
+            goal="extract the name local portion of a qualified keyword"),
+    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G6)
 
 
 # G6-06 — Private defs (we can't test ^:private effect with eval, but
@@ -136,12 +151,14 @@ G6_06 = SubjectCurriculum(grade=6, subject_id="G6-06",
     examples=[
         # The :private flag is queryable as metadata on the symbol.
         _ex("(:private (meta '^:private x))", True,
-            "the :private flag on metadata of '^:private x",
-            "whether the :private metadata is true"),
+            "accessing the :private flag from metadata",
+            "whether the :private metadata is set on a symbol",
+            goal="check whether the :private flag is present in the metadata of a symbol with :private marker"),
         _ex("(:private (meta 'x))", None,
-            "the :private flag on plain metadata of 'x",
-            "the value of (:private (meta 'x))"),
-    ], subplots=_NS_SUBPLOTS, plan_pool=_PLAN_G6)
+            "accessing the :private flag from metadata",
+            "whether the :private metadata is set on a plain symbol",
+            goal="check whether the :private flag is present in the metadata of a plain symbol without markers"),
+    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G6)
 
 
 # G6-07 — Public vs private API (design decision; we exercise via
@@ -150,12 +167,14 @@ G6_07 = SubjectCurriculum(grade=6, subject_id="G6-07",
     subject_title="Public vs private API", fable="tortoise-hare",
     examples=[
         _ex("(boolean (:private (meta '^:private hidden)))", True,
-            "whether the symbol 'hidden carries the :private flag",
-            "the boolean of (:private (meta '^:private hidden))"),
+            "converting the :private metadata to a boolean",
+            "whether a symbol with :private marker evaluates to true when converted to boolean",
+            goal="convert the :private metadata flag of a symbol marked with :private to a boolean"),
         _ex("(boolean (:private (meta 'public)))", False,
-            "whether 'public carries the :private flag",
-            "the boolean of (:private (meta 'public))"),
-    ], subplots=_NS_SUBPLOTS, plan_pool=_PLAN_G6)
+            "converting the :private metadata to a boolean",
+            "whether a symbol without :private marker evaluates to false when converted to boolean",
+            goal="convert the :private metadata flag of a plain symbol to a boolean"),
+    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G6)
 
 
 # G6-08 — Circular dependencies (we exercise via a plain form that
@@ -165,12 +184,14 @@ G6_08 = SubjectCurriculum(grade=6, subject_id="G6-08",
     subject_title="Circular dependencies", fable="tortoise-hare",
     examples=[
         _ex("(clojure.string/upper-case \"a\")", "A",
-            "a single-direction call from one namespace to clojure.string",
-            "the upper-cased string \"A\""),
+            "calling a function from a required namespace",
+            "the result of uppercasing a single character",
+            goal="call the string uppercasing function from clojure.string on the character a"),
         _ex("(= 'a.b 'a.b)", True,
-            "whether two references to the same namespace symbol agree",
-            "the value of (= 'a.b 'a.b)"),
-    ], subplots=_NS_SUBPLOTS, plan_pool=_PLAN_G6)
+            "testing equality of two namespace symbols",
+            "whether two identical namespace symbols are equal",
+            goal="test whether two references to the same namespace symbol are equal"),
+    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G6)
 
 
 # G6-09 — Loading order (we exercise via straightforward sequence of
@@ -179,12 +200,14 @@ G6_09 = SubjectCurriculum(grade=6, subject_id="G6-09",
     subject_title="Loading order", fable="tortoise-hare",
     examples=[
         _ex("(do (def step1 1) (def step2 (+ step1 1)) step2)", 2,
-            "two defs evaluated in order, the second using the first",
-            "the final value step2 after sequential loading"),
+            "evaluating definitions in sequence to establish dependency order",
+            "the value of the second variable after both definitions are loaded in order",
+            goal="define step1 as 1, then define step2 as step1 plus 1, then return step2"),
         _ex("(let [a 1 b (+ a 1)] (+ a b))", 3,
-            "an in-expression analogue of file-loading order via let",
-            "the value of (+ a b) given a=1 b=(+ a 1)"),
-    ], subplots=_NS_SUBPLOTS, plan_pool=_PLAN_G6)
+            "establishing local bindings with dependent values",
+            "the sum of two variables with the second depending on the first",
+            goal="bind a to 1, bind b to a plus 1, then return the sum of a and b"),
+    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G6)
 
 
 # G6-10 — leiningen / deps.edn (project setup; we exercise via reading
@@ -193,12 +216,14 @@ G6_10 = SubjectCurriculum(grade=6, subject_id="G6-10",
     subject_title="Leiningen and deps.edn", fable="tortoise-hare",
     examples=[
         _ex("(:deps {:deps {:a 1 :b 2}})", {":a": 1, ":b": 2},
-            "the :deps key from a small deps-map literal",
-            "the value at :deps in {:deps {:a 1 :b 2}}"),
+            "accessing a key from a nested map structure",
+            "the value at the :deps key in a deps-style map",
+            goal="extract the value at the :deps key from a nested map"),
         _ex("(get-in {:paths [\"src\"]} [:paths 0])", "src",
-            "the first :paths entry from a tiny deps-style map",
-            "the string \"src\" at [:paths 0]"),
-    ], subplots=_NS_SUBPLOTS, plan_pool=_PLAN_G6)
+            "accessing a nested value in a map using a path vector",
+            "the first element from a :paths vector in a deps-style map",
+            goal="extract the first entry from the :paths vector in a deps-style map"),
+    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G6)
 
 
 # G6-11 — Classpath (we use a tiny path-string operation as the
@@ -207,12 +232,14 @@ G6_11 = SubjectCurriculum(grade=6, subject_id="G6-11",
     subject_title="Classpath", fable="tortoise-hare",
     examples=[
         _ex("(clojure.string/split \"src:test\" #\":\")", ["src", "test"],
-            "splitting a colon-separated classpath-like string",
-            "the vector [\"src\" \"test\"]"),
+            "splitting a string by a delimiter",
+            "the vector of parts after splitting a colon-separated path string",
+            goal="split a colon-separated classpath-like string into its individual entries"),
         _ex("(count [\"src\" \"test\" \"resources\"])", 3,
+            "counting the number of elements in a vector",
             "the number of entries in a classpath-like vector",
-            "the count of three classpath entries"),
-    ], subplots=_NS_SUBPLOTS, plan_pool=_PLAN_G6)
+            goal="count the number of entries in a vector of classpath directories"),
+    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G6)
 
 
 # G6-12 — Multiple files, one project (we exercise via a vector
@@ -221,12 +248,14 @@ G6_12 = SubjectCurriculum(grade=6, subject_id="G6-12",
     subject_title="Multiple files in one project", fable="tortoise-hare",
     examples=[
         _ex("(count ['race.tortoise 'race.hare 'race.shared])", 3,
+            "counting the number of namespace symbols in a project",
             "the number of namespaces in a small project",
-            "the count of namespace symbols in the vector"),
+            goal="count the number of namespace symbols in a vector of three namespaces"),
         _ex("(map name ['race.tortoise 'race.hare])", ["race.tortoise", "race.hare"],
-            "the names of two namespaces as strings",
-            "the vector of namespace name strings"),
-    ], subplots=_NS_SUBPLOTS, plan_pool=_PLAN_G6)
+            "extracting string names from namespace symbols",
+            "the vector of namespace names as strings",
+            goal="extract the string form of each namespace symbol in a vector of two namespaces"),
+    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G6)
 
 
 # G6-13 — Aliasing conventions (we exercise via a tiny alias-style
@@ -235,9 +264,10 @@ G6_13 = SubjectCurriculum(grade=6, subject_id="G6-13",
     subject_title="Aliasing conventions", fable="tortoise-hare",
     examples=[
         _ex("(let [s clojure.string/upper-case] (s \"hare\"))", "HARE",
-            "binding the function clojure.string/upper-case to a local s",
-            "the value (s \"hare\") where s is upper-case"),
-    ], subplots=_NS_SUBPLOTS, plan_pool=_PLAN_G6)
+            "aliasing a fully-qualified function and calling it through the alias",
+            "the result of calling an aliased function",
+            goal="bind the fully-qualified string uppercasing function to a local alias s and call it on hare"),
+    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G6)
 
 
 # G6-14 — Import for Java classes (basilisp targets Python; we use a
@@ -245,13 +275,15 @@ G6_13 = SubjectCurriculum(grade=6, subject_id="G6-13",
 G6_14 = SubjectCurriculum(grade=6, subject_id="G6-14",
     subject_title="Import for host classes", fable="tortoise-hare",
     examples=[
-        _ex("(symbol? 'java.util.Date)", True,
-            "whether 'java.util.Date is a symbol",
-            "the value of (symbol? 'java.util.Date)"),
-        _ex("(name 'java.util.Date)", "java.util.Date",
-            "the dotted-class symbol's name",
-            "the string \"java.util.Date\""),
-    ], subplots=_NS_SUBPLOTS, plan_pool=_PLAN_G6)
+        _ex("(symbol? 'java.util.List)", True,
+            "testing whether a value is a symbol",
+            "whether a dotted Java class name is a symbol",
+            goal="test whether a Java class name written as a quoted symbol is a symbol"),
+        _ex("(name 'java.util.Map)", "java.util.Map",
+            "extracting the string form of a class symbol",
+            "the string form of a Java class symbol",
+            goal="extract the string form of a Java class symbol"),
+    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G6)
 
 
 # G6-15 — Namespace meta (we exercise the metadata mechanism on a
@@ -260,12 +292,14 @@ G6_15 = SubjectCurriculum(grade=6, subject_id="G6-15",
     subject_title="Namespace meta", fable="tortoise-hare",
     examples=[
         _ex("(:doc (meta '^{:doc \"steady wins\"} race))", "steady wins",
-            "the :doc metadata attached to the symbol 'race",
-            "the docstring \"steady wins\" from the metadata"),
+            "accessing the :doc metadata from a symbol",
+            "the docstring value from a symbol's metadata",
+            goal="extract the :doc metadata value from a symbol with a docstring"),
         _ex("(:author (meta '^{:author \"Aesop\"} race))", "Aesop",
-            "the :author metadata on 'race",
-            "the string \"Aesop\""),
-    ], subplots=_NS_SUBPLOTS, plan_pool=_PLAN_G6)
+            "accessing the :author metadata from a symbol",
+            "the author value from a symbol's metadata",
+            goal="extract the :author metadata value from a symbol with an author tag"),
+    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G6)
 
 
 # G6-16 — Cleaning up requires (we exercise via a simple "is this name
@@ -274,12 +308,14 @@ G6_16 = SubjectCurriculum(grade=6, subject_id="G6-16",
     subject_title="Cleaning up requires", fable="tortoise-hare",
     examples=[
         _ex("(contains? #{'clojure.string} 'clojure.string)", True,
-            "whether the require list still contains 'clojure.string",
-            "the value of (contains? #{'clojure.string} 'clojure.string)"),
+            "testing membership in a set of namespaces",
+            "whether a namespace is in the set of required namespaces",
+            goal="test whether the clojure.string namespace is in the set of required namespaces"),
         _ex("(contains? #{'clojure.string} 'clojure.set)", False,
-            "whether the require list contains an unused 'clojure.set",
-            "the value of (contains? #{'clojure.string} 'clojure.set)"),
-    ], subplots=_NS_SUBPLOTS, plan_pool=_PLAN_G6)
+            "testing membership in a set of namespaces",
+            "whether a different namespace is in the set of required namespaces",
+            goal="test whether the clojure.set namespace is in the set of required namespaces"),
+    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G6)
 
 
 # ─────────────────────── registry ───────────────────────

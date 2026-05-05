@@ -11,7 +11,7 @@ from mmllm.aesop.curriculum.generator import (
     SubjectCurriculum, SubjectExample, SubplotTemplate,
 )
 from mmllm.aesop.curriculum.tortoise_hare.grade_1 import (
-    _SHARED_SUBPLOTS as _G1_SUBPLOTS, _PLAN_POOL,
+    _SHARED_SUBPLOTS as _G1_SUBPLOTS, _GOAL_SUBPLOTS, _PLAN_POOL,
 )
 
 
@@ -22,55 +22,56 @@ from mmllm.aesop.curriculum.tortoise_hare.grade_1 import (
 # just guess what the macro returns. Each template lets the form
 # carry the technical detail while the fable carries the manner.
 
-_MACRO_SUBPLOTS: list[SubplotTemplate] = list(_G1_SUBPLOTS) + [
+_MACRO_SUBPLOTS: list[SubplotTemplate] = list(_GOAL_SUBPLOTS) + [
 
     SubplotTemplate("""\
 {tortoise_phrase} had spent the morning {place} sketching a tiny
 language of {tortoise_his_her} own — a notebook of macros that wrote
-other forms. The next entry was {concept_phrase}, and the form
-{form_display} was what {tortoise} wanted {hare_phrase} to submit so
-the REPL could show what code it produced or what value it returned."""),
+other forms. The next entry was {concept_phrase}. {hare_phrase} wanted to
+{goal_text}. {tortoise} asked {hare_him_her} to write the form carefully
+and submit it so the REPL could show what code it produced or what value it returned."""),
 
     SubplotTemplate("""\
 "A macro is just a function that runs at compile time," {tortoise}
 explained {place}, {emo_patient}. {hare}, {emo_proud}, said
-{hare_he_she} could already see what {concept_phrase} meant.
-{tortoise_phrase} insisted they actually evaluate {form_display} and
-read what the runtime reported, expansion or value."""),
+{hare_he_she} could already understand what {concept_phrase} meant.
+{tortoise_phrase} insisted they actually write a form to {goal_text}
+and read what the runtime reported, expansion or value."""),
 
     SubplotTemplate("""\
 The path {place} was littered with old macro definitions someone had
 carved into bark. {hare_phrase} found one shaped like
-{concept_phrase} and dared {tortoise_phrase} to predict its expansion.
-{tortoise} only smiled and asked {hare_him_her} to write {form_display}
+{concept_phrase} and dared {tortoise_phrase} to write the form that could {goal_text}.
+{tortoise} only smiled and asked {hare_him_her} to submit it carefully
 into the REPL — that, after all, was the whole point of having a
 macroexpander."""),
 
     SubplotTemplate("""\
 {hare_phrase} insisted {place} that macros were the same as functions.
-{tortoise_phrase}, {emo_patient}, drew the form {form_display} on a
-strip of bark. "The difference," {tortoise_he_she} said, "is in
-{concept_phrase}. Submit the form and let the runtime tell us
-exactly what it does.\""""),
+{tortoise_phrase}, {emo_patient}, sketched {concept_phrase} on a
+strip of bark. "The difference," {tortoise_he_she} said, "is in what
+we're trying to accomplish: {goal_text}. Write the form and let the
+runtime tell us exactly what it does.\""""),
 
     SubplotTemplate("""\
 A small notebook lay open {place} where the Tortoise had been studying
-syntax-quote. The page showed {concept_phrase}, with the form
-{form_display} circled in pencil. {hare_phrase}, {emo_tired} of
-the lecture, agreed to write the form to settle once and for all
-what it produced."""),
+syntax-quote. The page showed {concept_phrase}, and a goal written in
+pencil: {goal_text}. {hare_phrase}, {emo_tired}, reluctantly
+agreed to write the form to settle once and for all what it produced."""),
 
     SubplotTemplate("""\
 At a stone tablet {place}, {tortoise_phrase} was teaching
 {hare_phrase} the discipline of expansion: never trust your eyes, only
-the macroexpander. The day's example was {concept_phrase}. The form
-{form_display} had to be submitted; nothing else would do."""),
+the macroexpander. The day's challenge was simple: {goal_text}. The
+form that accomplishes {concept_phrase} had to be submitted; nothing
+else would do."""),
 ]
 
 
-def _ex(form, expected, concept, what):
+def _ex(form, expected, concept, what, goal="", tags=()):
     return SubjectExample(form=form, expected=expected,
-                          concept_phrase=concept, question_what=what)
+                          concept_phrase=concept, question_what=what,
+                          goal_text=goal, tags=tags)
 
 
 _PLAN_G10 = _PLAN_POOL + (
@@ -91,14 +92,17 @@ G10_01 = SubjectCurriculum(
     fable="tortoise-hare",
     examples=[
         _ex("(quote (+ 1 2))", ["+", 1, 2],
-            "the quoted form (quote (+ 1 2))",
-            "the value of (quote (+ 1 2))"),
+            "quoting an addition form",
+            "what you get when you quote an addition form",
+            goal="quote an addition form so it evaluates to a list without computing"),
         _ex("'(1 2 3)", [1, 2, 3],
-            "the quoted list '(1 2 3)",
-            "the value of '(1 2 3)"),
+            "the quoted list with three numbers",
+            "the result of quoting a three-element list",
+            goal="quote a list of three numbers so it returns the form itself"),
         _ex("(let [x 5] `(a ~x b))", ["a", 5, "b"],
-            "a syntax-quoted list with one unquote",
-            "the result of `(a ~x b) when x is 5"),
+            "a syntax-quoted form with the variable unquoted",
+            "what you get when unquoting x inside a syntax-quoted form",
+            goal="create a form that when x is 5 produces a list containing the value of x"),
     ],
     subplots=_MACRO_SUBPLOTS, plan_pool=_PLAN_G10,
 )
@@ -111,11 +115,13 @@ G10_02 = SubjectCurriculum(
     fable="tortoise-hare",
     examples=[
         _ex("(let [x 10] `(+ ~x ~x))", ["+", 10, 10],
-            "a syntax-quoted addition with x unquoted twice",
-            "the form produced by `(+ ~x ~x) when x is 10"),
+            "building a form by unquoting a variable twice inside syntax-quote",
+            "the form produced when x is 10 and unquoted twice",
+            goal="build a form where a variable is inserted twice into an addition form"),
         _ex("(let [xs [1 2 3]] `(list ~@xs))", ["list", 1, 2, 3],
-            "a syntax-quoted list with unquote-splice",
-            "the form produced by `(list ~@xs) when xs is [1 2 3]"),
+            "building a form by splicing a vector into syntax-quote",
+            "the form produced when splicing a three-element vector",
+            goal="build a form that inserts all elements of a vector into a list call"),
     ],
     subplots=_MACRO_SUBPLOTS, plan_pool=_PLAN_G10,
 )
@@ -129,11 +135,13 @@ G10_03 = SubjectCurriculum(
     examples=[
         _ex("(do (defmacro my-when [t & body] `(if ~t (do ~@body))) "
             "(my-when true 1 2 3))", 3,
-            "a tiny when-style macro and a call to it",
-            "what (my-when true 1 2 3) returns"),
+            "defining a conditional macro and invoking it",
+            "the value produced by calling the macro",
+            goal="define a macro named my-when that takes a test and body expressions, then invoke it"),
         _ex("(do (defmacro twice [x] `(do ~x ~x)) (twice 7))", 7,
-            "a macro that emits its argument twice in a do",
-            "what (twice 7) returns"),
+            "defining a macro that repeats its argument",
+            "the result after the macro expands and evaluates",
+            goal="define a macro named twice that emits its argument twice in a do block, then call it"),
     ],
     subplots=_MACRO_SUBPLOTS, plan_pool=_PLAN_G10,
 )
@@ -146,13 +154,15 @@ G10_04 = SubjectCurriculum(
     fable="tortoise-hare",
     examples=[
         _ex("(macroexpand-1 '(when true 1))", ["if", True, ["do", 1]],
-            "the one-step expansion of (when true 1)",
-            "what macroexpand-1 returns for (when true 1)"),
+            "the one-step expansion of the when-macro call",
+            "the expanded form after one level of macro expansion",
+            goal="expand a when-macro call one step to see what code it produces"),
         _ex("(macroexpand-1 '(or a b))",
             ["let*", ["or__1__auto__", "a"],
              ["if", "or__1__auto__", "or__1__auto__", ["clojure.core/or", "b"]]],
-            "the one-step expansion of (or a b)",
-            "what macroexpand-1 returns for (or a b)"),
+            "the one-step expansion of the or-macro call",
+            "the intermediate form after expanding the macro once",
+            goal="expand an or-macro call one step to reveal its internal structure"),
     ],
     subplots=_MACRO_SUBPLOTS, plan_pool=_PLAN_G10,
 )
@@ -165,11 +175,13 @@ G10_05 = SubjectCurriculum(
     fable="tortoise-hare",
     examples=[
         _ex("(macroexpand '(when true 1))", ["if", True, ["do", 1]],
-            "the full expansion of (when true 1)",
-            "what macroexpand returns for (when true 1)"),
+            "the complete expansion of the when-macro call",
+            "the fully expanded form after all macro passes",
+            goal="fully expand a when-macro call to reveal the if-form it becomes"),
         _ex("(macroexpand '(-> 1 inc inc))", ["inc", ["inc", 1]],
-            "the full expansion of (-> 1 inc inc)",
-            "what macroexpand returns for the threading form"),
+            "the complete expansion of the thread-first call",
+            "the final form after threading the value through all steps",
+            goal="fully expand a thread-first macro call to see how the value threads through"),
     ],
     subplots=_MACRO_SUBPLOTS, plan_pool=_PLAN_G10,
 )
@@ -182,14 +194,17 @@ G10_06 = SubjectCurriculum(
     fable="tortoise-hare",
     examples=[
         _ex("(when true 1 2 3)", 3,
-            "the form (when true 1 2 3)",
-            "what (when true 1 2 3) returns"),
+            "executing multiple expressions when a condition is true",
+            "the result of the last expression when the condition holds",
+            goal="execute three expressions and return the value of the last when the condition is true"),
         _ex("(when false 1 2 3)", None,
-            "the form (when false 1 2 3)",
-            "what (when false 1 2 3) returns"),
+            "executing expressions when a condition is false",
+            "the result when the condition does not hold",
+            goal="evaluate a when-form where the condition is false"),
         _ex("(when-not false :ok)", ":ok",
-            "the form (when-not false :ok)",
-            "what (when-not false :ok) returns"),
+            "executing an expression when a negated condition is true",
+            "the result when using when-not with a false condition",
+            goal="use when-not to execute an expression when the condition is false"),
     ],
     subplots=_MACRO_SUBPLOTS, plan_pool=_PLAN_G10,
 )
@@ -202,14 +217,17 @@ G10_07 = SubjectCurriculum(
     fable="tortoise-hare",
     examples=[
         _ex("(-> 5 inc inc inc)", 8,
-            "the thread-first form (-> 5 inc inc inc)",
-            "what (-> 5 inc inc inc) returns"),
+            "threading a value through multiple functions in sequence",
+            "the result of threading 5 through three increments",
+            goal="thread the value 5 through inc three times using thread-first"),
         _ex("(->> [1 2 3 4] (filter even?) (map inc) (reduce +))", 8,
-            "a thread-last pipeline over [1 2 3 4]",
-            "what the ->> pipeline returns"),
+            "threading a vector through filter, map, and reduce as the last argument",
+            "the sum of mapped values after filtering even numbers",
+            goal="thread a vector through filter, map, and reduce using thread-last"),
         _ex("(macroexpand '(-> x f g))", ["g", ["f", "x"]],
-            "the expansion of (-> x f g)",
-            "what macroexpand produces for the threading form"),
+            "the expanded form of a thread-first call",
+            "the nested function calls after expansion",
+            goal="expand a thread-first macro to see how functions compose"),
     ],
     subplots=_MACRO_SUBPLOTS, plan_pool=_PLAN_G10,
 )
@@ -223,11 +241,13 @@ G10_08 = SubjectCurriculum(
     examples=[
         # A function evaluates its args; a macro receives unevaluated forms.
         _ex("(do (defn add-fn [a b] (+ a b)) (add-fn 3 4))", 7,
-            "a plain function adding two numbers",
-            "the result of calling a function"),
+            "calling a plain function that adds two numbers",
+            "the sum returned by the function",
+            goal="define a function add-fn and call it to add 3 and 4"),
         _ex("(do (defmacro add-mac [a b] `(+ ~a ~b)) (add-mac 3 4))", 7,
-            "a macro that emits the same addition form",
-            "the result the macro yields after expansion + eval"),
+            "calling a macro that emits an addition form",
+            "the result after the macro expands and evaluates",
+            goal="define a macro add-mac and call it to add 3 and 4"),
     ],
     subplots=_MACRO_SUBPLOTS, plan_pool=_PLAN_G10,
 )
@@ -241,11 +261,13 @@ G10_09 = SubjectCurriculum(
     examples=[
         # gensym always returns a fresh symbol; we test symbol? predicate.
         _ex("(symbol? (gensym))", True,
-            "the predicate (symbol? (gensym))",
-            "whether (gensym) returns a symbol"),
+            "testing whether gensym produces a symbol",
+            "whether a generated symbol is of type symbol",
+            goal="test that gensym returns a symbol"),
         _ex("(let [a (gensym \"x_\") b (gensym \"x_\")] (= a b))", False,
-            "two distinct gensyms with the same prefix",
-            "whether two fresh gensyms are equal"),
+            "comparing two gensyms created with the same prefix",
+            "whether two fresh gensyms are identical",
+            goal="generate two gensyms with the same prefix and check if they are equal"),
     ],
     subplots=_MACRO_SUBPLOTS, plan_pool=_PLAN_G10,
 )
@@ -262,11 +284,13 @@ G10_10 = SubjectCurriculum(
         _ex("(do (defmacro safe-if-let [bind then else] "
             "`(if-let ~bind ~then ~else)) "
             "(safe-if-let [x 5] (* x 2) 0))", 10,
-            "a hygienic if-let style macro avoiding anaphoric injection",
-            "what the hygienic if-let macro returns"),
+            "defining and calling a hygienic if-let macro",
+            "the result when the binding succeeds",
+            goal="define a safe-if-let macro and call it with x bound to 5"),
         _ex("(if-let [x 7] (* x x) 0)", 49,
-            "the built-in if-let, which binds explicitly (not anaphorically)",
-            "what (if-let [x 7] (* x x) 0) returns"),
+            "using the built-in if-let with an explicit binding",
+            "the result of the then-branch when the binding succeeds",
+            goal="use if-let to bind x to 7 and return the square of x"),
     ],
     subplots=_MACRO_SUBPLOTS, plan_pool=_PLAN_G10,
 )
@@ -280,14 +304,17 @@ G10_11 = SubjectCurriculum(
     examples=[
         # Reader macros: ', `, ~, #(...), #_, etc. Test what they read to.
         _ex("'(1 2 3)", [1, 2, 3],
-            "the quote reader macro 'foo",
-            "what '(1 2 3) reads as"),
+            "using the quote reader macro",
+            "the form read by the quote reader",
+            goal="use the quote reader macro to read a list of three numbers"),
         _ex("(#(* % %) 6)", 36,
-            "the #(...) reader macro for an anonymous fn",
-            "what (#(* % %) 6) returns"),
+            "using the anonymous-function reader macro",
+            "the result of calling the generated function",
+            goal="use the #(...) reader macro to create a function that squares its argument"),
         _ex("[1 #_ 2 3]", [1, 3],
-            "the #_ form-skip reader macro",
-            "what [1 #_ 2 3] reads as"),
+            "using the discard reader macro to skip an element",
+            "the vector after the middle element is discarded",
+            goal="use the #_ reader macro to skip an element in a vector"),
     ],
     subplots=_MACRO_SUBPLOTS, plan_pool=_PLAN_G10,
 )
@@ -301,11 +328,13 @@ G10_12 = SubjectCurriculum(
     examples=[
         # Tagged literals are read into typed values. Test predicates on them.
         _ex("(inst? #inst \"2024-01-01\")", True,
-            "the predicate (inst? #inst \"2024-01-01\")",
-            "whether the #inst tagged literal reads to an inst"),
+            "testing whether a tagged literal reads as an instant",
+            "whether the inst? predicate returns true",
+            goal="test that a tagged literal with #inst reads as an instant"),
         _ex("(uuid? #uuid \"00000000-0000-0000-0000-000000000000\")", True,
-            "the predicate on a #uuid tagged literal",
-            "whether the #uuid tagged literal reads to a uuid"),
+            "testing whether a tagged literal reads as a uuid",
+            "whether the uuid? predicate returns true",
+            goal="test that a tagged literal with #uuid reads as a uuid"),
     ],
     subplots=_MACRO_SUBPLOTS, plan_pool=_PLAN_G10,
 )
@@ -319,11 +348,13 @@ G10_13 = SubjectCurriculum(
     examples=[
         # EDN read-string with a default tag handler.
         _ex("(clojure.edn/read-string \"42\")", 42,
-            "edn read-string of \"42\"",
-            "what edn/read-string returns for the source \"42\""),
+            "parsing a number string with edn/read-string",
+            "the parsed value from the EDN source",
+            goal="use edn/read-string to parse a number from a string"),
         _ex("(clojure.edn/read-string \"[:a :b :c]\")", [":a", ":b", ":c"],
-            "edn read-string of a vector source",
-            "what edn/read-string returns for \"[:a :b :c]\""),
+            "parsing a vector string with edn/read-string",
+            "the parsed vector from the EDN source",
+            goal="use edn/read-string to parse a vector of keywords from a string"),
     ],
     subplots=_MACRO_SUBPLOTS, plan_pool=_PLAN_G10,
 )
@@ -336,11 +367,13 @@ G10_14 = SubjectCurriculum(
     fable="tortoise-hare",
     examples=[
         _ex("(eval '(+ 1 2 3))", 6,
-            "the form (eval '(+ 1 2 3))",
-            "what eval returns for the quoted (+ 1 2 3)"),
+            "evaluating a quoted form at runtime",
+            "the result of evaluating the quoted addition",
+            goal="evaluate a quoted addition form at runtime"),
         _ex("(eval (list '+ 4 5))", 9,
-            "eval applied to a constructed list",
-            "what eval returns when handed (list '+ 4 5)"),
+            "evaluating a dynamically constructed form",
+            "the result of evaluating the constructed list",
+            goal="construct a list that represents addition and evaluate it"),
     ],
     subplots=_MACRO_SUBPLOTS, plan_pool=_PLAN_G10,
 )
@@ -356,12 +389,14 @@ G10_15 = SubjectCurriculum(
         # a function would do.
         _ex("(do \"a function suffices when no syntax shaping is needed\" "
             "((fn [x y] (+ x y)) 3 4))", 7,
-            "a function call where no macro is justified",
-            "what the plain function call returns"),
+            "calling an anonymous function to add two arguments",
+            "the sum of 3 and 4",
+            goal="use an anonymous function to add two numbers"),
         _ex("(do \"prefer fn unless you must shape syntax\" "
             "(map inc [1 2 3]))", [2, 3, 4],
-            "map applied to inc — no macro needed",
-            "the result of mapping inc"),
+            "applying a function to each element of a collection",
+            "the incremented values",
+            goal="use map to increment each element of a list"),
     ],
     subplots=_MACRO_SUBPLOTS, plan_pool=_PLAN_G10,
 )
@@ -377,13 +412,15 @@ G10_16 = SubjectCurriculum(
         _ex("(do (defmacro with-tortoise-pace [& body] "
             "`(let [pace# :slow-and-steady] ~@body)) "
             "(with-tortoise-pace 42))", 42,
-            "a with-X macro pattern that binds a local and runs body",
-            "what the with- macro yields"),
+            "defining and using a with-X macro pattern",
+            "the value from the body expression",
+            goal="define a with-tortoise-pace macro and call it to execute a body"),
         # A `def-X-thing` style: macro that defs a named thing.
         _ex("(do (defmacro def-pace [name v] `(def ~name ~v)) "
             "(def-pace race-pace :slow) race-pace)", ":slow",
-            "a def-X-thing macro that introduces a named binding",
-            "the value of the symbol the macro defined"),
+            "defining and using a def-X-thing macro pattern",
+            "the value of the defined symbol",
+            goal="define a def-pace macro and use it to define and retrieve a value"),
     ],
     subplots=_MACRO_SUBPLOTS, plan_pool=_PLAN_G10,
 )

@@ -11,42 +11,23 @@ from mmllm.aesop.curriculum.generator import (
     SubjectCurriculum, SubjectExample, SubplotTemplate,
 )
 from mmllm.aesop.curriculum.tortoise_hare.grade_1 import (
-    _SHARED_SUBPLOTS as _G1_SUBPLOTS, _PLAN_POOL,
+    _SHARED_SUBPLOTS as _G1_SUBPLOTS, _GOAL_SUBPLOTS, _PLAN_POOL,
 )
 
 
-# ─────────────────────── grade-9 subplot extensions ───────────────────────
+# ─────────────────────── grade-9 subplot pool ───────────────────────
 #
-# State + concurrency = "things that change over time." We extend the
-# shared pool with two beats: the careful-ledger (Tortoise's
-# transactional update) and the racing-update (Hare's uncoordinated
-# mutation that the REPL must arbitrate).
+# Use goal-style subplots exclusively for grade 9. State and concurrency
+# primitives require the model to write the form from the goal, not copy
+# from prompt — this prevents form-leak training pathology.
 
-_SUBPLOTS: list[SubplotTemplate] = list(_G1_SUBPLOTS) + [
-
-    # 9. The careful-ledger template — Tortoise updates a counter the
-    #    right way; Hare watches impatiently.
-    SubplotTemplate("""\
-{tortoise_phrase} kept a small ledger of state {place} — a value that
-might change as the race went on. {tortoise_he_she_cap} explained that
-the form {form_display} captured {concept_phrase}: a careful, ordered
-update. {hare_phrase}, {emo_proud}, asked the REPL to confirm the final
-value."""),
-
-    # 10. The racing-update template — Hare wants to update without
-    #     coordinating; Tortoise insists on the right primitive.
-    SubplotTemplate("""\
-"Why bother with all this?" {hare_phrase} demanded {place}.
-"{hare_he_she_cap} could just write the new value!" {tortoise_phrase},
-{emo_patient}, sketched out {concept_phrase} instead and showed the form
-{form_display}: the proper way for the runtime to manage change. They
-agreed to submit it to the REPL."""),
-]
+_SUBPLOTS: list[SubplotTemplate] = _GOAL_SUBPLOTS
 
 
-def _ex(form, expected, concept, what):
+def _ex(form, expected, concept, what, goal="", tags=()):
     return SubjectExample(form=form, expected=expected,
-                          concept_phrase=concept, question_what=what)
+                          concept_phrase=concept, question_what=what,
+                          goal_text=goal, tags=tags)
 
 
 _PLAN_POOL_G9: tuple[str, ...] = _PLAN_POOL + (
@@ -68,12 +49,14 @@ G9_01 = SubjectCurriculum(
         # `assoc` returns a new map; the original is unchanged.
         _ex("(let [m {:a 1}] (assoc m :b 2) m)",
             {":a": 1},
-            "binding m, calling (assoc m :b 2), then returning m unchanged",
-            "the original map after a non-mutating assoc"),
+            "binding a map, adding an entry to a new map, and returning the original",
+            "the original map after assoc returns a new map",
+            goal="bind a map m, call assoc to add :b 2 to a new map, then return the unchanged m"),
         _ex("(let [v [1 2 3]] (conj v 4) v)",
             [1, 2, 3],
-            "binding v, calling (conj v 4), then returning v unchanged",
-            "the original vector after conj"),
+            "binding a vector, conjoining a new element to a new vector, and returning the original",
+            "the original vector after conj returns a new vector",
+            goal="bind a vector v, call conj to add 4 to a new vector, then return the unchanged v"),
     ],
     subplots=_SUBPLOTS,
     plan_pool=_PLAN_POOL_G9,
@@ -89,12 +72,14 @@ G9_02 = SubjectCurriculum(
         # The minimal "place that needs identity over time" example.
         _ex("(do (def counter (atom 0)) (swap! counter inc) @counter)",
             1,
-            "an atom counter, incremented once, then read",
-            "the value of counter after one swap! inc"),
+            "binding an atom to counter, atomically incrementing it, and dereferencing the result",
+            "the value after atomically swapping counter with inc and dereferencing",
+            goal="construct an atom holding 0 as counter, atomically swap it by applying inc, and dereference the result"),
         _ex("(do (def progress (atom :idle)) (reset! progress :running) @progress)",
             ":running",
-            "a progress atom reset to :running",
-            "the value of progress after reset!"),
+            "binding an atom to progress, atomically resetting it to a new value, and dereferencing the result",
+            "the value after atomically resetting progress and dereferencing",
+            goal="construct an atom holding an idle value as progress, atomically reset it to running, and dereference the result"),
     ],
     subplots=_SUBPLOTS,
     plan_pool=_PLAN_POOL_G9,
@@ -109,16 +94,19 @@ G9_03 = SubjectCurriculum(
     examples=[
         _ex("(do (def a (atom 0)) (swap! a inc) @a)",
             1,
-            "an atom starting at 0, incremented once via swap!",
-            "the value of the atom after one swap! inc"),
+            "constructing an atom holding 0, atomically swapping by applying inc, and dereferencing",
+            "the value after atomically swapping a by applying inc",
+            goal="construct an atom holding 0, atomically swap it by applying inc, and dereference the result"),
         _ex("(do (def a (atom 10)) (swap! a + 5) @a)",
             15,
-            "an atom starting at 10, with (swap! a + 5)",
-            "the value of the atom after swap! + 5"),
+            "constructing an atom holding 10, atomically swapping by applying + 5, and dereferencing",
+            "the value after atomically swapping a by applying + 5",
+            goal="construct an atom holding 10, atomically swap it by applying + to 5, and dereference the result"),
         _ex("(do (def a (atom :start)) (reset! a :done) @a)",
             ":done",
-            "an atom reset! from :start to :done",
-            "the value of the atom after reset!"),
+            "constructing an atom holding a start value, atomically resetting it to a completion value, and dereferencing",
+            "the value after atomically resetting the atom to a completion state",
+            goal="construct an atom holding a start keyword, atomically reset it to a done keyword, and dereference the result"),
     ],
     subplots=_SUBPLOTS,
     plan_pool=_PLAN_POOL_G9,
@@ -134,12 +122,14 @@ G9_04 = SubjectCurriculum(
         # `compare-and-set!` succeeds when current matches expected.
         _ex("(do (def a (atom 0)) (compare-and-set! a 0 1) @a)",
             1,
-            "compare-and-set! on an atom: expected 0, set to 1",
-            "the value of the atom after a successful CAS"),
+            "constructing an atom, performing a compare-and-set when the current value matches, and dereferencing",
+            "the value after a successful compare-and-set",
+            goal="construct an atom holding 0, perform a compare-and-set checking for 0 and setting to 1, and dereference"),
         _ex("(do (def a (atom 5)) (compare-and-set! a 0 99) @a)",
             5,
-            "compare-and-set! when the expected value doesn't match (no change)",
-            "the value of the atom after a CAS that does not fire"),
+            "constructing an atom, performing a compare-and-set when the current value does not match, and dereferencing",
+            "the value after a compare-and-set that does not succeed",
+            goal="construct an atom holding 5, perform a compare-and-set checking for 0 and setting to 99, and dereference"),
     ],
     subplots=_SUBPLOTS,
     plan_pool=_PLAN_POOL_G9,
@@ -160,8 +150,9 @@ G9_05 = SubjectCurriculum(
             " (swap! a inc)"
             " @log)",
             [1],
-            "an atom with a watch that appends each new value to a log",
-            "the contents of the log after one swap"),
+            "setting up an atom with a watch callback that records each new value to a log",
+            "the values recorded in the log after one update to the watched atom",
+            goal="construct an atom a, construct a log atom, add a watch to a that conjoins new values to the log, swap a, and dereference the log"),
     ],
     subplots=_SUBPLOTS,
     plan_pool=_PLAN_POOL_G9,
@@ -180,8 +171,9 @@ G9_06 = SubjectCurriculum(
             " (swap! a inc)"
             " @a)",
             1,
-            "an atom with a number? validator, incremented once",
-            "the value of the atom after a valid update"),
+            "setting up an atom with a validator, performing a valid update, and dereferencing",
+            "the value after a valid update passes the validator",
+            goal="construct an atom holding 0, set a number? validator on it, atomically swap by applying inc, and dereference"),
     ],
     subplots=_SUBPLOTS,
     plan_pool=_PLAN_POOL_G9,
@@ -197,12 +189,14 @@ G9_07 = SubjectCurriculum(
         # Refs require dosync to update.
         _ex("(do (def r (ref 0)) (dosync (alter r inc)) @r)",
             1,
-            "a ref incremented inside a dosync transaction",
-            "the value of the ref after dosync alter inc"),
+            "constructing a ref, altering it inside a transaction, and dereferencing",
+            "the value after a transactional alter inside dosync",
+            goal="construct a ref holding 0, perform a transactional alter by applying inc inside dosync, and dereference"),
         _ex("(do (def r (ref 100)) (dosync (ref-set r 7)) @r)",
             7,
-            "a ref ref-set to 7 inside dosync",
-            "the value of the ref after ref-set 7"),
+            "constructing a ref, setting it to a new value inside a transaction, and dereferencing",
+            "the value after a transactional ref-set inside dosync",
+            goal="construct a ref holding 100, perform a transactional ref-set to 7 inside dosync, and dereference"),
     ],
     subplots=_SUBPLOTS,
     plan_pool=_PLAN_POOL_G9,
@@ -220,12 +214,14 @@ G9_08 = SubjectCurriculum(
             " (dosync (alter a inc) (alter b inc))"
             " [@a @b])",
             [2, 3],
-            "two refs each incremented inside a single dosync",
-            "the pair [a b] after the coordinated transaction"),
+            "constructing two refs and altering both inside a single transaction",
+            "the pair of final values after a coordinated transaction altering both refs",
+            goal="construct refs a and b, perform a coordinated transaction that alters both by applying inc, and dereference both"),
         _ex("(do (def r (ref 10)) (dosync (alter r + 5)) @r)",
             15,
-            "a ref altered by + 5 inside dosync",
-            "the value of the ref after alter + 5"),
+            "constructing a ref and altering it inside a transaction",
+            "the value after a transactional alter that applies + 5",
+            goal="construct a ref holding 10, perform a transactional alter by applying + with 5 inside dosync, and dereference"),
     ],
     subplots=_SUBPLOTS,
     plan_pool=_PLAN_POOL_G9,
@@ -241,12 +237,14 @@ G9_09 = SubjectCurriculum(
         # The same operation expressed both ways.
         _ex("(do (def a (atom 0)) (swap! a inc) @a)",
             1,
-            "an atom updated via swap!",
-            "the value of the atom after one swap! inc"),
+            "constructing an atom and updating it via swap! with inc",
+            "the value after atomically swapping an atom with inc",
+            goal="construct an atom holding 0, atomically swap it by applying inc, and dereference"),
         _ex("(do (def r (ref 0)) (dosync (alter r inc)) @r)",
             1,
-            "a ref updated via alter inside dosync",
-            "the value of the ref after one dosync alter inc"),
+            "constructing a ref and updating it via alter with inc inside dosync",
+            "the value after a transactional alter with inc",
+            goal="construct a ref holding 0, perform a transactional alter by applying inc inside dosync, and dereference"),
     ],
     subplots=_SUBPLOTS,
     plan_pool=_PLAN_POOL_G9,
@@ -262,12 +260,14 @@ G9_10 = SubjectCurriculum(
         # send is async — we await before reading.
         _ex("(do (def ag (agent 0)) (send ag inc) (await ag) @ag)",
             1,
-            "an agent sent inc and awaited",
-            "the value of the agent after send inc and await"),
+            "constructing an agent, asynchronously sending a function to it, waiting for completion, and dereferencing",
+            "the value after asynchronously sending inc to an agent and awaiting the result",
+            goal="construct an agent holding 0, asynchronously send inc to it, await its completion, and dereference"),
         _ex("(do (def ag (agent 5)) (send ag + 10) (await ag) @ag)",
             15,
-            "an agent sent (+ 10) and awaited",
-            "the value of the agent after send + 10 and await"),
+            "constructing an agent, asynchronously sending a function with an argument to it, waiting for completion, and dereferencing",
+            "the value after asynchronously sending + 10 to an agent and awaiting the result",
+            goal="construct an agent holding 5, asynchronously send + with 10 to it, await its completion, and dereference"),
     ],
     subplots=_SUBPLOTS,
     plan_pool=_PLAN_POOL_G9,
@@ -282,12 +282,14 @@ G9_11 = SubjectCurriculum(
     examples=[
         _ex("(do (def ag (agent 0)) (send ag inc) (await ag) @ag)",
             1,
-            "send used on an agent, then awaited",
-            "the agent's value after send inc"),
+            "constructing an agent, using send to dispatch a function to a thread pool, awaiting, and dereferencing",
+            "the value after using send with inc on an agent",
+            goal="construct an agent holding 0, use send to asynchronously apply inc, await its completion, and dereference"),
         _ex("(do (def ag (agent 0)) (send-off ag inc) (await ag) @ag)",
             1,
-            "send-off used on an agent, then awaited",
-            "the agent's value after send-off inc"),
+            "constructing an agent, using send-off to dispatch a function to a larger thread pool, awaiting, and dereferencing",
+            "the value after using send-off with inc on an agent",
+            goal="construct an agent holding 0, use send-off to asynchronously apply inc, await its completion, and dereference"),
     ],
     subplots=_SUBPLOTS,
     plan_pool=_PLAN_POOL_G9,
@@ -302,8 +304,9 @@ G9_12 = SubjectCurriculum(
     examples=[
         _ex("(do (def ag (agent 0)) (send ag inc) (send ag inc) (await ag) @ag)",
             2,
-            "two send inc calls then await before deref",
-            "the agent's value after two sends and await"),
+            "constructing an agent, sending multiple functions to it, synchronizing with await, and dereferencing",
+            "the value after two asynchronous operations and synchronization via await",
+            goal="construct an agent holding 0, asynchronously send inc twice, synchronize with await, and dereference"),
     ],
     subplots=_SUBPLOTS,
     plan_pool=_PLAN_POOL_G9,
@@ -318,12 +321,14 @@ G9_13 = SubjectCurriculum(
     examples=[
         _ex("@(future (+ 1 2))",
             3,
-            "a future computing (+ 1 2), dereferenced",
-            "the value of the future for (+ 1 2)"),
+            "constructing a future to run a computation asynchronously and dereferencing the result",
+            "the value produced by dereferencing a future that adds 1 and 2",
+            goal="construct a future that adds 1 and 2, and dereference it"),
         _ex("@(future (* 6 7))",
             42,
-            "a future computing (* 6 7), dereferenced",
-            "the value of the future for (* 6 7)"),
+            "constructing a future to run a multiplication asynchronously and dereferencing the result",
+            "the value produced by dereferencing a future that multiplies 6 and 7",
+            goal="construct a future that multiplies 6 and 7, and dereference it"),
     ],
     subplots=_SUBPLOTS,
     plan_pool=_PLAN_POOL_G9,
@@ -338,12 +343,14 @@ G9_14 = SubjectCurriculum(
     examples=[
         _ex("(do (def a (atom 7)) @a)",
             7,
-            "deref via @ on an atom holding 7",
-            "the value of the atom via @"),
+            "constructing an atom and extracting its value using the @ shorthand",
+            "the value extracted from an atom using @",
+            goal="construct an atom holding 7 and dereference it using @"),
         _ex("(do (def a (atom 7)) (deref a))",
             7,
-            "deref via the function form on an atom",
-            "the value of the atom via the deref function"),
+            "constructing an atom and extracting its value using the deref function",
+            "the value extracted from an atom using the deref function",
+            goal="construct an atom holding 7 and dereference it using the deref function"),
     ],
     subplots=_SUBPLOTS,
     plan_pool=_PLAN_POOL_G9,
@@ -358,12 +365,14 @@ G9_15 = SubjectCurriculum(
     examples=[
         _ex("(do (def p (promise)) (deliver p :done) @p)",
             ":done",
-            "a promise delivered with :done, then dereffed",
-            "the value of the promise after deliver"),
+            "constructing a promise, delivering a keyword value to it, and dereferencing to retrieve the delivered value",
+            "the value that was delivered to a promise when dereferenced",
+            goal="construct a promise, deliver a completion keyword to it, and dereference to get the delivered value"),
         _ex("(do (def p (promise)) (deliver p 42) @p)",
             42,
-            "a promise delivered with 42",
-            "the value of the promise after deliver 42"),
+            "constructing a promise, delivering a numeric value to it, and dereferencing to retrieve the delivered value",
+            "the value that was delivered to a promise when dereferenced",
+            goal="construct a promise, deliver 42 to it, and dereference to get the delivered value"),
     ],
     subplots=_SUBPLOTS,
     plan_pool=_PLAN_POOL_G9,
@@ -378,12 +387,14 @@ G9_16 = SubjectCurriculum(
     examples=[
         _ex("(do (def v (volatile! 0)) (vswap! v inc) @v)",
             1,
-            "a volatile! incremented via vswap!",
-            "the value of the volatile after one vswap! inc"),
+            "constructing a volatile, performing a non-transactional swap, and dereferencing",
+            "the value after a non-transactional swap by applying inc",
+            goal="construct a volatile holding 0, perform a non-transactional swap by applying inc, and dereference"),
         _ex("(do (def v (volatile! 5)) (vreset! v 99) @v)",
             99,
-            "a volatile! reset via vreset!",
-            "the value of the volatile after vreset! 99"),
+            "constructing a volatile, performing a non-transactional reset, and dereferencing",
+            "the value after a non-transactional reset to 99",
+            goal="construct a volatile holding 5, perform a non-transactional reset to 99, and dereference"),
     ],
     subplots=_SUBPLOTS,
     plan_pool=_PLAN_POOL_G9,
@@ -398,12 +409,14 @@ G9_17 = SubjectCurriculum(
     examples=[
         _ex("(do (def ^:dynamic *p* 1) (binding [*p* 99] *p*))",
             99,
-            "a dynamic var *p* rebound to 99 inside binding",
-            "the value of *p* inside the binding form"),
+            "defining a dynamic var and temporarily rebinding it to a new value inside a binding form",
+            "the value of the dynamic var inside the binding form",
+            goal="define a dynamic var *p* as 1, use binding to rebind it to 99, and read its value inside"),
         _ex("(do (def ^:dynamic *p* 1) (binding [*p* 99] *p*) *p*)",
             1,
-            "the value of *p* AFTER the binding form exits",
-            "the original value of *p* once binding has unwound"),
+            "defining a dynamic var, temporarily rebinding it inside binding, and reading its value after binding exits",
+            "the value of the dynamic var after the binding form has unwound",
+            goal="define a dynamic var *p* as 1, use binding to rebind it to 99 inside, and read its value after binding exits"),
     ],
     subplots=_SUBPLOTS,
     plan_pool=_PLAN_POOL_G9,
@@ -419,12 +432,14 @@ G9_18 = SubjectCurriculum(
         # `locking` takes a monitor and a body; we use a simple body.
         _ex("(do (def lock (Object.)) (locking lock (+ 1 2)))",
             3,
-            "a locking form around (+ 1 2) using a fresh Object as monitor",
-            "the result of the body inside locking"),
+            "acquiring a lock on a monitor and evaluating an expression inside the critical section",
+            "the value produced by evaluating an arithmetic expression inside a lock",
+            goal="create an object to use as a monitor, acquire the lock, and evaluate an addition inside"),
         _ex("(do (def lock (Object.)) (locking lock 42))",
             42,
-            "a locking form whose body is just the literal 42",
-            "the value the locking form returns"),
+            "acquiring a lock on a monitor and evaluating a literal value inside the critical section",
+            "the value produced by evaluating a literal inside a lock",
+            goal="create an object to use as a monitor, acquire the lock, and evaluate a literal inside"),
     ],
     subplots=_SUBPLOTS,
     plan_pool=_PLAN_POOL_G9,

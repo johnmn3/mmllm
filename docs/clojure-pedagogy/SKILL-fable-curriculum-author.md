@@ -1154,3 +1154,80 @@ fixes:
 Discovered by the ant-grasshopper hand-audit; 114 stockpile-prefix
 hits across the n=222 sample, all repaired by switching to "Beside
 a small stockpile". Patched in ant-grasshopper/grade_1.py.
+
+### 31. FORM_LEAK: showing the form in user_msg trains copy-from-prompt
+
+This is the most consequential pitfall in the whole skill. Discovered
+late in tortoise-hare's lifecycle and forced a redesign of every
+non-atom subject across all three completed fables.
+
+**The bug**: subplot templates that interpolate `{form_display}` print
+the literal Clojure form into the user_msg. The model's tool call uses
+that same form. So the model trains on:
+
+> user: "...write `(+ 1 2)` and submit it..."
+> tool_use: `(eval-clj "(+ 1 2)")`
+
+The model learns "find the backticked form in the prompt; copy it into
+the eval call." That's not a Clojure skill; it's a copy-from-prompt
+shortcut. At ~700K records across 3 fables, this is a structural
+training-signal flaw, not a paper cut.
+
+**Why atom subjects (G1-01..08) are exempt**: for an atom like `42` or
+`:hare`, the form IS the answer (a literal evaluates to itself). The
+"skill" being taught is "submit the literal value the question shows"
+— copy-from-prompt is the lesson. Keep `{form_display}` for atoms.
+
+**Why every other subject is affected**: for `(+ 1 2)`, the skill is
+"produce the form `(+ 1 2)` from the goal of adding 1 and 2." If the
+prompt says "write `(+ 1 2)`," the goal description is unused.
+
+**The fix**: a parallel pool of `_GOAL_SUBPLOTS` that uses
+`{goal_text}` and `{concept_phrase}` but NEVER `{form_display}`. The
+`SubjectExample` dataclass gets a `goal_text` field. Every non-atom
+example carries a plain-English description of the operation, e.g.:
+
+```python
+_ex("(+ 1 2)",  3,
+    "the addition", "the sum of 1 and 2",
+    goal="add 1 and 2"),                      # ← new
+```
+
+Templates use `{goal_text}` in place of `{form_display}`:
+
+```python
+SubplotTemplate(\"\"\"\\
+{hare_phrase} wanted to {goal_text}.
+{tortoise} suggested {hare_he_she} actually
+write {concept_phrase} carefully and submit it.\"\"\"),
+```
+
+The audit harness gained two checks:
+- **FORM_LEAK** — for any example with `goal_text`, the literal form
+  must NOT appear (case-folded, whitespace-normalized) in user_msg.
+- **ANSWER_LEAK_STRING** — for non-atom examples whose expected value
+  is a string ≥3 chars (and not "yes"/"no"), the answer must not
+  appear in user_msg.
+
+**Authoring rules** for new subjects:
+1. Atom subjects (a single literal evaluates to itself): use
+   `_SHARED_SUBPLOTS`, no `goal_text`.
+2. Every other subject: use `_GOAL_SUBPLOTS`, every example needs
+   `goal_text`.
+3. `concept_phrase` and `question_what` must NOT contain the literal
+   form. Phrase them abstractly ("the multi-arg sum", "the protocol
+   definition") so they reference the operation, not its syntax.
+4. `goal_text` describes the operation in plain English using
+   ordinary words — operator names ("plus", "fold"), argument
+   literals ("1", "2"), and identifiers being defined are fine, but
+   parenthesized Clojure forms are forbidden.
+5. After authoring a grade, run the audit harness. Both FORM_LEAK and
+   ANSWER_LEAK_STRING must be zero before the grade ships.
+
+This pitfall is the mirror image of the eval-first design's whole
+point. It took a hand-spotted example from the user (G4-08 assoc and
+G2-13 and/or, where "write a Clojure expression that..." is followed
+by the expression itself) to surface the structural pattern. Once
+seen, it's everywhere — and unlike most pitfalls, it can't be fixed
+by tuning subplot prose. It needs the dataclass change, the parallel
+subplot pool, and a re-author of every non-atom example.

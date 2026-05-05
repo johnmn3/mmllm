@@ -16,7 +16,7 @@ from mmllm.aesop.curriculum.generator import (
     SubjectCurriculum, SubjectExample, SubplotTemplate,
 )
 from mmllm.aesop.curriculum.tortoise_hare.grade_1 import (
-    _SHARED_SUBPLOTS as _G1_SUBPLOTS, _PLAN_POOL,
+    _GOAL_SUBPLOTS, _PLAN_POOL,
 )
 
 
@@ -27,7 +27,7 @@ from mmllm.aesop.curriculum.tortoise_hare.grade_1 import (
 # his usual style; the Tortoise treats every interop call as a small
 # act of diplomacy.
 
-_INTEROP_SUBPLOTS: list[SubplotTemplate] = list(_G1_SUBPLOTS) + [
+_INTEROP_SUBPLOTS: list[SubplotTemplate] = list(_GOAL_SUBPLOTS) + [
 
     SubplotTemplate("""\
 {tortoise_phrase} and {hare_phrase} had wandered {place} into territory
@@ -71,9 +71,10 @@ trusting a translation."""),
 ]
 
 
-def _ex(form, expected, concept, what):
+def _ex(form, expected, concept, what, goal="", tags=()):
     return SubjectExample(form=form, expected=expected,
-                          concept_phrase=concept, question_what=what)
+                          concept_phrase=concept, question_what=what,
+                          goal_text=goal, tags=tags)
 
 
 _PLAN_G11 = _PLAN_POOL + (
@@ -95,14 +96,16 @@ G11_01 = SubjectCurriculum(
         # Overview subject — narrative does the educational work.
         _ex('(do "Clojure runs on multiple hosts: JVM, CLR, JS, Python" :studied)',
             ":studied",
-            "the idea that Clojure has multiple host runtimes",
-            "the marker value when the host overview has been studied"),
+            "understanding host runtimes",
+            "the marker value when the host overview has been studied",
+            goal="understand that Clojure runs on multiple hosts"),
         _ex('(do "JVM: Clojure; CLR: ClojureCLR; JS: ClojureScript; Python: basilisp" :hosts)',
             ":hosts",
-            "the family of Clojure host runtimes",
-            "the marker keyword for the host family"),
+            "the host runtime variants",
+            "the marker keyword for the host family",
+            goal="name the Clojure implementations for different hosts"),
     ],
-    subplots=_INTEROP_SUBPLOTS, plan_pool=_PLAN_G11,
+    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G11,
 )
 
 
@@ -113,16 +116,19 @@ G11_02 = SubjectCurriculum(
     fable="tortoise-hare",
     examples=[
         _ex('(.toUpperCase "abc")', "ABC",
-            'the method call (.toUpperCase "abc")',
-            "the uppercased string returned by the method"),
+            'the host method toUpperCase',
+            "the uppercased result",
+            goal="call the host method toUpperCase on the string abc"),
         _ex('(.startsWith "hare-tortoise" "hare")', True,
-            "a method call (.startsWith ...) returning a boolean",
-            "whether the string starts with the prefix"),
+            "the host method startsWith checking a string prefix",
+            "whether the string begins with the prefix",
+            goal="call the host method startsWith on a string to check for a prefix"),
         _ex('(. "abc" toUpperCase)', "ABC",
-            'the alternate dot form (. obj method)',
-            "the uppercased result via the longer dot syntax"),
+            'the alternate dot form for a host method',
+            "the uppercased result",
+            goal="call the host method toUpperCase using the alternate dot form"),
     ],
-    subplots=_INTEROP_SUBPLOTS, plan_pool=_PLAN_G11,
+    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G11,
 )
 
 
@@ -134,13 +140,15 @@ G11_03 = SubjectCurriculum(
     examples=[
         # Math/abs is available across hosts as a static-style call.
         _ex("(Math/abs -7)", 7,
-            "the static call (Math/abs -7)",
-            "the absolute value of -7 via the static method"),
+            "the static host method Math/abs",
+            "the absolute value",
+            goal="call the static host method Math/abs with the argument -7"),
         _ex("(Math/max 3 9)", 9,
-            "the static call (Math/max 3 9)",
-            "the larger of 3 and 9 via the static method"),
+            "the static host method Math/max",
+            "the maximum value",
+            goal="call the static host method Math/max to find the larger of two numbers"),
     ],
-    subplots=_INTEROP_SUBPLOTS, plan_pool=_PLAN_G11,
+    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G11,
 )
 
 
@@ -154,13 +162,15 @@ G11_04 = SubjectCurriculum(
         # depending on host. We use a portable example using the
         # `.length` style on a string-like host where applicable.
         _ex('(count "tortoise")', 8,
-            'the count of "tortoise"',
-            'the length of "tortoise"'),
+            'the count of a sequence',
+            'the length of a string',
+            goal="count the characters in a string"),
         _ex('(count "hare")', 4,
-            'the count of "hare"',
-            'the length of "hare"'),
+            'the count of a sequence',
+            'the length of a string',
+            goal="count the characters in another string"),
     ],
-    subplots=_INTEROP_SUBPLOTS, plan_pool=_PLAN_G11,
+    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G11,
 )
 
 
@@ -173,14 +183,16 @@ G11_05 = SubjectCurriculum(
         # Overview-ish: the form is what one would write at the top of a file.
         _ex('(do "(:import (java.util Date)) imports a host class" :imported)',
             ":imported",
-            "the (:import ...) ns clause for host classes",
-            "the marker for the import-form lesson"),
+            "importing a host class",
+            "the marker for the import-form lesson",
+            goal="understand how to import a host class into a namespace"),
         _ex('(do "import is a top-of-file ns clause" :studied)',
             ":studied",
-            "the role of import in a Clojure file",
-            "the marker for studying import"),
+            "import as a namespace clause",
+            "the marker for studying import",
+            goal="understand where import forms go in a file"),
     ],
-    subplots=_INTEROP_SUBPLOTS, plan_pool=_PLAN_G11,
+    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G11,
 )
 
 
@@ -193,13 +205,15 @@ G11_06 = SubjectCurriculum(
         # Construct a host class via Class. or (new Class). String. is
         # portable across JVM and basilisp.
         _ex('(String. "hello")', "hello",
-            'the constructor call (String. "hello")',
-            'the string built by the dot-construct'),
+            'constructing a String via the dot-construct form',
+            'the new string instance',
+            goal="construct a host String object with the dot-construct syntax"),
         _ex('(new String "world")', "world",
-            'the (new String "world") form',
-            'the string built by (new ...)'),
+            'constructing a String via the new form',
+            'the new string instance',
+            goal="construct a host String object using the new keyword"),
     ],
-    subplots=_INTEROP_SUBPLOTS, plan_pool=_PLAN_G11,
+    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G11,
 )
 
 
@@ -211,13 +225,15 @@ G11_07 = SubjectCurriculum(
     examples=[
         # int-array / aget are the canonical interop calls.
         _ex("(let [a (int-array [10 20 30])] (aget a 1))", 20,
-            "indexing into an int-array via aget",
-            "the value at index 1 of the array"),
+            "indexing into a host array",
+            "the value at the specified index",
+            goal="access an element in a host array by index"),
         _ex("(let [a (int-array [1 2 3])] (alength a))", 3,
-            "the length of an int-array via alength",
-            "the length of the array"),
+            "getting the length of a host array",
+            "the length of the array",
+            goal="get the length of a host array"),
     ],
-    subplots=_INTEROP_SUBPLOTS, plan_pool=_PLAN_G11,
+    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G11,
 )
 
 
@@ -229,14 +245,16 @@ G11_08 = SubjectCurriculum(
     examples=[
         # Type hints don't change the value; they hint the compiler.
         _ex('(let [^String s "abc"] (.toUpperCase s))', "ABC",
-            "a let-binding with a ^String type hint",
-            "the uppercased string after a type-hinted binding"),
+            "using a type hint in a binding",
+            "the result of calling a method on a type-hinted binding",
+            goal="add a type hint to a binding and call a method on the typed value"),
         _ex('(do "type hints are metadata that guide compilation" :studied)',
             ":studied",
-            "the role of ^Type metadata as a hint",
-            "the marker keyword for the type-hint lesson"),
+            "the purpose of type hints in Clojure",
+            "the marker keyword for the type-hint lesson",
+            goal="understand that type hints guide compilation"),
     ],
-    subplots=_INTEROP_SUBPLOTS, plan_pool=_PLAN_G11,
+    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G11,
 )
 
 
@@ -251,14 +269,16 @@ G11_09 = SubjectCurriculum(
         # primitive level. Use a value-space form for the eval, narrate
         # the distinction.
         _ex("(+ 1 2)", 3,
-            "the form (+ 1 2) under default checked math",
-            "the result of (+ 1 2) under the default math regime"),
+            "basic addition under the default checked math regime",
+            "the sum of two numbers",
+            goal="add two numbers with the default math behavior"),
         _ex('(do "*unchecked-math* turns off overflow checking on prims" :studied)',
             ":studied",
-            "the *unchecked-math* dynamic var",
-            "the marker for the checked/unchecked lesson"),
+            "overflow checking in Clojure arithmetic",
+            "the marker for the checked/unchecked lesson",
+            goal="understand how to disable overflow checking"),
     ],
-    subplots=_INTEROP_SUBPLOTS, plan_pool=_PLAN_G11,
+    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G11,
 )
 
 
@@ -270,14 +290,16 @@ G11_10 = SubjectCurriculum(
     examples=[
         _ex('(do "ClojureScript compiles to JavaScript via the Closure compiler" :studied)',
             ":studied",
-            "the ClojureScript host overview",
-            "the marker for studying the cljs host"),
+            "the ClojureScript compilation process",
+            "the marker for studying the cljs host",
+            goal="understand how ClojureScript compiles to JavaScript"),
         _ex('(do "cljs runs in browsers and Node, with JS interop syntax" :cljs)',
             ":cljs",
-            "where ClojureScript runs and how interop looks",
-            "the marker for the cljs-runtime lesson"),
+            "where ClojureScript runs",
+            "the marker for the cljs-runtime lesson",
+            goal="learn where ClojureScript executes"),
     ],
-    subplots=_INTEROP_SUBPLOTS, plan_pool=_PLAN_G11,
+    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G11,
 )
 
 
@@ -289,14 +311,16 @@ G11_11 = SubjectCurriculum(
     examples=[
         _ex('(do "(js/console.log x) calls a JS global; (.-foo o) reads a JS field" :studied)',
             ":studied",
-            "the cljs-to-js interop syntax",
-            "the marker for the cljs-js interop lesson"),
+            "ClojureScript to JavaScript interop",
+            "the marker for the cljs-js interop lesson",
+            goal="understand how ClojureScript calls JavaScript globals and reads fields"),
         _ex('(do "js/<name> namespaces JS globals; .- prefix marks field access" :cljs-interop)',
             ":cljs-interop",
-            "two key cljs-js interop conventions",
-            "the marker keyword for the conventions"),
+            "ClojureScript interop conventions",
+            "the marker keyword for the conventions",
+            goal="learn the conventions for ClojureScript-JavaScript interop"),
     ],
-    subplots=_INTEROP_SUBPLOTS, plan_pool=_PLAN_G11,
+    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G11,
 )
 
 
@@ -308,14 +332,16 @@ G11_12 = SubjectCurriculum(
     examples=[
         _ex('(do "basilisp is a Clojure-like Lisp implemented on Python" :studied)',
             ":studied",
-            "the basilisp host overview",
-            "the marker for studying basilisp"),
+            "the basilisp implementation",
+            "the marker for studying basilisp",
+            goal="understand that basilisp is Clojure on Python"),
         _ex('(do "basilisp interops with Python via the same dot-syntax conventions" :basilisp)',
             ":basilisp",
-            "how basilisp does Python interop",
-            "the marker keyword for basilisp interop"),
+            "basilisp Python interop",
+            "the marker keyword for basilisp interop",
+            goal="learn how basilisp calls Python code"),
     ],
-    subplots=_INTEROP_SUBPLOTS, plan_pool=_PLAN_G11,
+    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G11,
 )
 
 
@@ -327,14 +353,16 @@ G11_13 = SubjectCurriculum(
     examples=[
         _ex('(do "#?(:clj … :cljs …) selects a form per host at read time" :studied)',
             ":studied",
-            "the reader-conditional #?(...) form",
-            "the marker for the reader-conditional lesson"),
+            "selecting code by host at read time",
+            "the marker for the reader-conditional lesson",
+            goal="learn how reader-conditionals choose code per host"),
         _ex('(do ".cljc files share code across multiple hosts" :cljc)',
             ":cljc",
-            "the role of .cljc files",
-            "the marker keyword for the .cljc lesson"),
+            "files that work on multiple Clojure hosts",
+            "the marker keyword for the .cljc lesson",
+            goal="understand the role of .cljc files"),
     ],
-    subplots=_INTEROP_SUBPLOTS, plan_pool=_PLAN_G11,
+    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G11,
 )
 
 
@@ -346,13 +374,15 @@ G11_14 = SubjectCurriculum(
     examples=[
         _ex('(do "host stack traces leak through interop; learn to read them" :studied)',
             ":studied",
-            "the topic of debugging host-runtime leaks",
-            "the marker for the host-leaks lesson"),
+            "debugging host-runtime errors",
+            "the marker for the host-leaks lesson",
+            goal="learn to read and debug host runtime errors"),
         _ex('(try (Math/sqrt 4) (catch Exception _ :err))', 2.0,
-            "wrapping a host call in try/catch in case it leaks",
-            "the result when the host call succeeds"),
+            "catching exceptions from a host method call",
+            "the result when the host call succeeds",
+            goal="wrap a static host method call in error handling"),
     ],
-    subplots=_INTEROP_SUBPLOTS, plan_pool=_PLAN_G11,
+    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G11,
 )
 
 

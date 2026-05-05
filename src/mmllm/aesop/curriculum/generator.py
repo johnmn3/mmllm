@@ -71,11 +71,21 @@ class SubjectExample:
     `question_what` is the noun-phrase the question wraps around: e.g.,
     "this form evaluates to" or "the result of this expression". The
     subplot ends with "Write a Clojure expression that computes {what}".
+
+    `goal_text` (optional) — a one-sentence imperative describing WHAT
+    the form should do, without showing the form itself. Used by
+    "goal-style" subplots that describe the goal and ask the model to
+    produce the form, rather than showing the form and asking the
+    model to copy-evaluate it. Example: form `(+ 1 2)` → goal_text
+    `"add 1 and 2"`. When empty, subjects use atom-style subplots
+    that show the form (legitimate for L1 atom subjects where the form
+    IS the answer; copy-from-prompt is the lesson).
     """
     form:           str
     expected:       object
     concept_phrase: str
     question_what:  str
+    goal_text:      str = ""
     # tags used for filtering / weighting (optional)
     tags:           tuple[str, ...] = ()
 
@@ -298,6 +308,7 @@ def _build_placeholders(scene: Scene,
         "form_display":    _format_form_display(example.form),
         "concept_phrase":  example.concept_phrase,
         "what":            example.question_what,
+        "goal_text":       example.goal_text,
 
         # emotions — single picks. The pool covers ant-grasshopper's
         # natural emotional palette (content/proud/regretful/tired/hungry)
@@ -391,6 +402,7 @@ def _build_ge_placeholders(scene: Scene,
         "form_display":    _format_form_display(example.form),
         "concept_phrase":  example.concept_phrase,
         "what":            example.question_what,
+        "goal_text":       example.goal_text,
 
         # emotions (pronoun-neutral pools so any character gender works)
         "emo_proud":       scene.rng.choice(EMO_PROUD),

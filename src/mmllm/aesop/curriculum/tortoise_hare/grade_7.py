@@ -11,7 +11,9 @@ from __future__ import annotations
 from mmllm.aesop.curriculum.generator import (
     SubjectCurriculum, SubjectExample, SubplotTemplate,
 )
-from mmllm.aesop.curriculum.tortoise_hare.grade_1 import _SHARED_SUBPLOTS as _G1_SUBPLOTS, _PLAN_POOL
+from mmllm.aesop.curriculum.tortoise_hare.grade_1 import (
+    _SHARED_SUBPLOTS as _G1_SUBPLOTS, _GOAL_SUBPLOTS, _PLAN_POOL
+)
 
 
 _ERR_SUBPLOTS: list[SubplotTemplate] = list(_G1_SUBPLOTS) + [
@@ -47,9 +49,10 @@ rest of the way."""),
 ]
 
 
-def _ex(form, expected, concept, what):
+def _ex(form, expected, concept, what, goal="", tags=()):
     return SubjectExample(form=form, expected=expected,
-                          concept_phrase=concept, question_what=what)
+                          concept_phrase=concept, question_what=what,
+                          goal_text=goal, tags=tags)
 
 
 _PLAN_G7 = _PLAN_POOL + (
@@ -70,9 +73,10 @@ G7_01 = SubjectCurriculum(grade=7, subject_id="G7-01",
     examples=[
         _ex("(try (throw (Exception. \"bad\")) (catch Exception e :thrown))",
             ":thrown",
-            "throwing an exception that is then caught",
-            "the keyword :thrown returned after the throw is caught"),
-    ], subplots=_ERR_SUBPLOTS, plan_pool=_PLAN_G7)
+            "the exception handler returning a keyword",
+            "what keyword the exception handler returns",
+            goal="throw an Exception and catch it, returning a keyword"),
+    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G7)
 
 
 # G7-02 — try/catch
@@ -80,12 +84,14 @@ G7_02 = SubjectCurriculum(grade=7, subject_id="G7-02",
     subject_title="try / catch", fable="tortoise-hare",
     examples=[
         _ex("(try (/ 1 0) (catch Exception e :caught))", ":caught",
-            "a division by zero wrapped in try/catch",
-            "the keyword :caught returned by the catch branch"),
+            "the handler for a division-by-zero error",
+            "what the handler returns when division by zero occurs",
+            goal="divide 1 by 0 and catch the resulting exception, returning a keyword"),
         _ex("(try 42 (catch Exception e :caught))", 42,
-            "a try with no error — the body's value is returned",
-            "the value 42 from the no-error branch"),
-    ], subplots=_ERR_SUBPLOTS, plan_pool=_PLAN_G7)
+            "a try block with no error",
+            "what the try block returns when no error occurs",
+            goal="evaluate a number in a try block when no error is thrown"),
+    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G7)
 
 
 # G7-03 — try/finally
@@ -93,13 +99,15 @@ G7_03 = SubjectCurriculum(grade=7, subject_id="G7-03",
     subject_title="try / finally", fable="tortoise-hare",
     examples=[
         _ex("(try 7 (finally :cleanup))", 7,
-            "a try whose finally clause runs but doesn't change the value",
-            "the value 7 from the body (finally is for side effects)"),
+            "a try block with a finally clause that performs cleanup",
+            "what the try block returns when finally runs",
+            goal="evaluate a number in a try block, then run a finally clause for cleanup"),
         _ex("(try (try (/ 1 0) (finally :ran)) (catch Exception e :caught))",
             ":caught",
-            "a finally that runs before the outer catch fires",
-            "the keyword :caught (the outer catch handles the divide-by-zero)"),
-    ], subplots=_ERR_SUBPLOTS, plan_pool=_PLAN_G7)
+            "a finally clause running before an outer catch handler",
+            "what the outer catch handler returns after the inner finally runs",
+            goal="evaluate a division by zero with an inner finally clause, caught by an outer handler"),
+    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G7)
 
 
 # G7-04 — ex-info
@@ -108,13 +116,15 @@ G7_04 = SubjectCurriculum(grade=7, subject_id="G7-04",
     examples=[
         _ex("(try (throw (ex-info \"bad\" {:a 1})) (catch Exception e (ex-data e)))",
             {":a": 1},
-            "throwing an ex-info with attached data, then reading it back",
-            "the data map {:a 1} pulled from the caught ex-info"),
+            "the data map from a caught ex-info",
+            "what data map is attached to the ex-info",
+            goal="throw an ex-info with attached data and extract the data map from the caught exception"),
         _ex("(try (throw (ex-info \"x\" {:k :v})) (catch Exception e (:k (ex-data e))))",
             ":v",
-            "extracting a single key from the caught ex-info's data",
-            "the value :v at key :k in the ex-data"),
-    ], subplots=_ERR_SUBPLOTS, plan_pool=_PLAN_G7)
+            "a single value extracted from the caught ex-info's data",
+            "what value is at a specific key in the ex-info's data",
+            goal="throw an ex-info with data, catch it, and extract the value at key :k"),
+    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G7)
 
 
 # G7-05 — nil punning
@@ -122,18 +132,22 @@ G7_05 = SubjectCurriculum(grade=7, subject_id="G7-05",
     subject_title="nil punning", fable="tortoise-hare",
     examples=[
         _ex("(some? nil)", False,
-            "the predicate (some? nil)",
-            "whether nil counts as some?"),
+            "whether nil is considered some",
+            "the result of testing if nil is some",
+            goal="test whether nil is considered some"),
         _ex("(some? 0)", True,
-            "the predicate (some? 0)",
-            "whether 0 counts as some?"),
+            "whether 0 is considered some",
+            "the result of testing if 0 is some",
+            goal="test whether the number 0 is considered some"),
         _ex("(first nil)", None,
-            "calling first on nil",
-            "the value of (first nil)"),
+            "the first element of nil",
+            "what the first element of nil is",
+            goal="get the first element of nil"),
         _ex("(count nil)", 0,
-            "counting a nil collection",
-            "the count of nil, which is 0"),
-    ], subplots=_ERR_SUBPLOTS, plan_pool=_PLAN_G7)
+            "the number of elements in nil",
+            "how many elements nil contains",
+            goal="count the number of elements in nil"),
+    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G7)
 
 
 # G7-06 — pre/post conditions (we exercise via the {:pre [...]} on
@@ -142,13 +156,15 @@ G7_06 = SubjectCurriculum(grade=7, subject_id="G7-06",
     subject_title="pre and post conditions", fable="tortoise-hare",
     examples=[
         _ex("((fn [x] {:pre [(pos? x)]} (* x 2)) 5)", 10,
-            "a fn with a :pre condition that is satisfied",
-            "the value returned when the precondition holds and 5 is doubled"),
+            "the result of a function call that satisfies its precondition",
+            "what the function returns when the precondition holds",
+            goal="call a function with a positive precondition on a positive number, doubling it"),
         _ex("(try ((fn [x] {:pre [(pos? x)]} x) -1) (catch Exception e :pre-failed))",
             ":pre-failed",
-            "a :pre condition that fails, caught by surrounding try",
-            "the keyword :pre-failed when the pre-check rejects -1"),
-    ], subplots=_ERR_SUBPLOTS, plan_pool=_PLAN_G7)
+            "the result when a precondition is violated and caught",
+            "what the catch handler returns when a precondition fails",
+            goal="call a function with a positive precondition on a negative number, catching the failure"),
+    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G7)
 
 
 # G7-07 — assert
@@ -156,13 +172,15 @@ G7_07 = SubjectCurriculum(grade=7, subject_id="G7-07",
     subject_title="assert", fable="tortoise-hare",
     examples=[
         _ex("(do (assert (= 1 1)) :ok)", ":ok",
-            "an assert that passes, followed by a return value",
-            "the keyword :ok returned after the assert succeeds"),
+            "the result when an assertion passes",
+            "what is returned when the assertion succeeds",
+            goal="assert that 1 equals 1, then return a keyword"),
         _ex("(try (assert (= 1 2)) (catch Throwable e :asserted))",
             ":asserted",
-            "an assert that fails, caught by surrounding try",
-            "the keyword :asserted when the assertion rejects (= 1 2)"),
-    ], subplots=_ERR_SUBPLOTS, plan_pool=_PLAN_G7)
+            "the result when an assertion fails and is caught",
+            "what the catch handler returns when the assertion fails",
+            goal="assert that 1 equals 2, catch the failure, and return a keyword"),
+    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G7)
 
 
 # G7-08 — prn / pprint (these side-effect to *out*; we use with-out-str
@@ -171,12 +189,14 @@ G7_08 = SubjectCurriculum(grade=7, subject_id="G7-08",
     subject_title="prn and pprint", fable="tortoise-hare",
     examples=[
         _ex("(with-out-str (prn 42))", "42\n",
-            "capturing the output of (prn 42)",
-            "the string \"42\\n\" produced by prn"),
+            "the output captured from printing a number",
+            "what string is produced when printing the number 42",
+            goal="print the number 42 and capture the output string"),
         _ex("(with-out-str (prn :hare))", ":hare\n",
-            "capturing prn applied to the keyword :hare",
-            "the string \":hare\\n\" produced by prn"),
-    ], subplots=_ERR_SUBPLOTS, plan_pool=_PLAN_G7)
+            "the output captured from printing a keyword",
+            "what string is produced when printing a keyword",
+            goal="print the keyword :hare and capture the output string"),
+    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G7)
 
 
 # G7-09 — tap> (returns true; we exercise that effect).
@@ -184,12 +204,14 @@ G7_09 = SubjectCurriculum(grade=7, subject_id="G7-09",
     subject_title="tap>", fable="tortoise-hare",
     examples=[
         _ex("(tap> :hello)", True,
-            "tapping a value into the tap pool",
-            "the boolean true returned by tap>"),
+            "the result of tapping a keyword into the tap pool",
+            "what tap> returns when sending a value",
+            goal="send a keyword into the tap pool"),
         _ex("(tap> 42)", True,
-            "tapping the number 42 into the tap pool",
-            "the boolean true (tap> always returns true on send)"),
-    ], subplots=_ERR_SUBPLOTS, plan_pool=_PLAN_G7)
+            "the result of tapping a number into the tap pool",
+            "what tap> returns when sending a number",
+            goal="send a number into the tap pool"),
+    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G7)
 
 
 # G7-10 — doc / source (REPL helpers; we exercise via a metadata
@@ -198,9 +220,10 @@ G7_10 = SubjectCurriculum(grade=7, subject_id="G7-10",
     subject_title="doc and source", fable="tortoise-hare",
     examples=[
         _ex("(:doc (meta '^{:doc \"adds two\"} plus))", "adds two",
-            "the :doc metadata on a symbol",
-            "the string \"adds two\" from the metadata"),
-    ], subplots=_ERR_SUBPLOTS, plan_pool=_PLAN_G7)
+            "the documentation string from a symbol's metadata",
+            "what documentation string is attached to a symbol",
+            goal="extract the :doc metadata value from a symbol"),
+    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G7)
 
 
 # G7-11 — Reading stack traces (we exercise via inspecting the message
@@ -210,13 +233,15 @@ G7_11 = SubjectCurriculum(grade=7, subject_id="G7-11",
     examples=[
         _ex("(try (throw (Exception. \"oops\")) (catch Exception e (.getMessage e)))",
             "oops",
-            "extracting the message from a caught exception",
-            "the string \"oops\" from the caught Exception"),
+            "the message extracted from a caught Exception",
+            "what message is inside the caught Exception",
+            goal="throw an Exception with a message and extract the message from the caught exception"),
         _ex("(try (throw (ex-info \"trouble\" {})) (catch Exception e (.getMessage e)))",
             "trouble",
-            "the message of a caught ex-info",
-            "the string \"trouble\""),
-    ], subplots=_ERR_SUBPLOTS, plan_pool=_PLAN_G7)
+            "the message extracted from a caught ex-info",
+            "what message is inside the caught ex-info",
+            goal="throw an ex-info with a message and extract the message from the caught exception"),
+    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G7)
 
 
 # G7-12 — slurp / spit (file IO; we exercise the inverse-of-spit:
@@ -227,12 +252,14 @@ G7_12 = SubjectCurriculum(grade=7, subject_id="G7-12",
         # An in-memory analogue: build a string, then read it back via
         # split / count, the way slurp-then-process works in practice.
         _ex("(count \"hare\\ntortoise\\n\")", 14,
-            "the length of a multi-line string (as if read by slurp)",
-            "the count of characters in \"hare\\ntortoise\\n\""),
+            "the character count of a multi-line string",
+            "how many characters are in the multi-line string",
+            goal="count the characters in a multi-line string"),
         _ex("(clojure.string/split \"a\\nb\\nc\" #\"\\n\")", ["a", "b", "c"],
-            "splitting a slurped-style string on newlines",
-            "the vector [\"a\" \"b\" \"c\"] of three lines"),
-    ], subplots=_ERR_SUBPLOTS, plan_pool=_PLAN_G7)
+            "the vector of lines from splitting a string",
+            "what lines result from splitting a string on newlines",
+            goal="split a multi-line string on newlines"),
+    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G7)
 
 
 # G7-13 — line-seq (we exercise via the in-memory equivalent: a vector
@@ -241,13 +268,15 @@ G7_13 = SubjectCurriculum(grade=7, subject_id="G7-13",
     subject_title="line-seq", fable="tortoise-hare",
     examples=[
         _ex("(count (clojure.string/split-lines \"a\\nb\\nc\"))", 3,
-            "the number of lines in a small text",
-            "the count of lines in \"a\\nb\\nc\""),
+            "the number of lines in a multi-line string",
+            "how many lines are in the text",
+            goal="count the lines in a multi-line string"),
         _ex("(first (clojure.string/split-lines \"first\\nsecond\"))",
             "first",
-            "the first line of a small text",
-            "the string \"first\""),
-    ], subplots=_ERR_SUBPLOTS, plan_pool=_PLAN_G7)
+            "the initial line from splitting a multi-line string",
+            "what the initial line is",
+            goal="get the initial line from splitting a multi-line string"),
+    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G7)
 
 
 # G7-14 — with-open (we exercise the macro-shape via with-out-str,
@@ -256,9 +285,10 @@ G7_14 = SubjectCurriculum(grade=7, subject_id="G7-14",
     subject_title="with-open", fable="tortoise-hare",
     examples=[
         _ex("(with-out-str (println \"hare\"))", "hare\n",
-            "a resource-scoped capture of println output",
-            "the string \"hare\\n\" from the scoped block"),
-    ], subplots=_ERR_SUBPLOTS, plan_pool=_PLAN_G7)
+            "the output captured from a resource-scoped block",
+            "what output is captured within the scope",
+            goal="capture the output of printing within a resource-scoped block"),
+    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G7)
 
 
 # G7-15 — *in* / *out* (we exercise *out* via with-out-str; *in* is
@@ -267,12 +297,14 @@ G7_15 = SubjectCurriculum(grade=7, subject_id="G7-15",
     subject_title="*in* and *out*", fable="tortoise-hare",
     examples=[
         _ex("(with-out-str (print \"x\"))", "x",
-            "redirecting *out* via with-out-str and printing",
-            "the string \"x\" captured from *out*"),
+            "the output captured by redirecting the output stream",
+            "what is captured when output is redirected",
+            goal="redirect the output stream and capture what is printed"),
         _ex("(with-out-str (println))", "\n",
-            "a bare println redirected through *out*",
-            "the string \"\\n\""),
-    ], subplots=_ERR_SUBPLOTS, plan_pool=_PLAN_G7)
+            "the output captured from a bare print-line call",
+            "what is captured when a bare println is redirected",
+            goal="redirect the output stream and capture what a bare println produces"),
+    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G7)
 
 
 # G7-16 — edn read
@@ -280,16 +312,19 @@ G7_16 = SubjectCurriculum(grade=7, subject_id="G7-16",
     subject_title="edn read", fable="tortoise-hare",
     examples=[
         _ex("(clojure.edn/read-string \"42\")", 42,
-            "reading an edn integer from a string",
-            "the integer 42 read from \"42\""),
+            "the integer parsed from an edn string",
+            "what integer is read from the string",
+            goal="parse an edn integer from a string"),
         _ex("(clojure.edn/read-string \"{:a 1}\")", {":a": 1},
-            "reading an edn map from a string",
-            "the map {:a 1} read from \"{:a 1}\""),
+            "the map parsed from an edn string",
+            "what map is read from the string",
+            goal="parse an edn map from a string"),
         _ex("(clojure.edn/read-string \"[:hare :tortoise]\")",
             [":hare", ":tortoise"],
-            "reading an edn vector of keywords",
-            "the vector [:hare :tortoise]"),
-    ], subplots=_ERR_SUBPLOTS, plan_pool=_PLAN_G7)
+            "the vector parsed from an edn string",
+            "what vector is read from the string",
+            goal="parse an edn vector of keywords from a string"),
+    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G7)
 
 
 # G7-17 — JSON roundtrip (we exercise via edn-shaped data; the actual
@@ -300,12 +335,14 @@ G7_17 = SubjectCurriculum(grade=7, subject_id="G7-17",
     examples=[
         _ex("(clojure.edn/read-string (pr-str {:a 1 :b 2}))",
             {":a": 1, ":b": 2},
-            "writing then reading back a small map (edn-shaped roundtrip)",
-            "the map {:a 1 :b 2} after the roundtrip"),
+            "the map after writing and reading back via edn",
+            "what map is recovered from the roundtrip",
+            goal="write a map to a string and parse it back"),
         _ex("(clojure.edn/read-string (pr-str [1 2 3]))", [1, 2, 3],
-            "round-tripping a vector through pr-str then edn/read-string",
-            "the vector [1 2 3]"),
-    ], subplots=_ERR_SUBPLOTS, plan_pool=_PLAN_G7)
+            "the vector after writing and reading back via edn",
+            "what vector is recovered from the roundtrip",
+            goal="write a vector to a string and parse it back"),
+    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G7)
 
 
 # G7-18 — Shell command (host-specific; we exercise via a non-shell
@@ -315,13 +352,15 @@ G7_18 = SubjectCurriculum(grade=7, subject_id="G7-18",
     subject_title="Shell command", fable="tortoise-hare",
     examples=[
         _ex("(:cmd {:cmd \"ls\" :args [\"-l\"]})", "ls",
-            "the :cmd portion of a shell-call descriptor map",
-            "the string \"ls\""),
+            "the command string from a shell-call descriptor",
+            "what command string is in the descriptor",
+            goal="extract the command name from a shell-call descriptor map"),
         _ex("(count (:args {:cmd \"echo\" :args [\"hello\" \"world\"]}))",
             2,
-            "the number of args in a shell-call descriptor",
-            "the count of args, which is 2"),
-    ], subplots=_ERR_SUBPLOTS, plan_pool=_PLAN_G7)
+            "the number of arguments in a shell-call descriptor",
+            "how many arguments are in the descriptor",
+            goal="count the number of arguments in a shell-call descriptor map"),
+    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G7)
 
 
 # ─────────────────────── registry ───────────────────────
