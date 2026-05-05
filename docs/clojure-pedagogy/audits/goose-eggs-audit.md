@@ -1,4 +1,4 @@
-# tortoise-hare curriculum audit
+# goose-eggs curriculum audit
 
 Auto-generated audit — each subject's examples checked at 3 records per example, properly matched.
 

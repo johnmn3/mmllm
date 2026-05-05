@@ -182,20 +182,104 @@ def _pick_cp_location(scene: Scene) -> ont.Location:
 
 
 def _pick_chars(scene: Scene, fable: str) -> tuple[ont.Character, ont.Character]:
-    """Dispatch character picking based on fable. Additive — defaults
-    to tortoise-hare's picker for any unrecognized fable so existing
-    callers keep working unchanged."""
+    """Dispatch character picking for two-character fables. Defaults
+    to tortoise-hare's picker for any unrecognized fable. NOTE:
+    goose-eggs uses its own 3-character picker (`_pick_ge_chars`)
+    wired directly in `generate_one_record`; this helper only covers
+    two-character fables."""
     if fable == "crow-pitcher":
         return _pick_cp_chars(scene)
     return _pick_th_chars(scene)
 
 
 def _pick_location(scene: Scene, fable: str) -> ont.Location:
-    """Dispatch location picking based on fable. Additive — defaults
-    to tortoise-hare's picker for any unrecognized fable."""
+    """Dispatch location picking based on fable. Defaults to
+    tortoise-hare's picker for any unrecognized fable."""
     if fable == "crow-pitcher":
         return _pick_cp_location(scene)
     return _pick_th_location(scene)
+
+
+# Goose-eggs uses two human "trader" characters (an impatient {visitor}
+# and a patient {owner}) plus a goose. Locations are the village +
+# household places where the fable plays out. Excludes characters whose
+# role_classes belong to other fables (shepherd, dreamer, racer, etc.)
+# even though they're tagged "trader" by accident.
+GOOSE_EGGS_LOCATIONS = ("farm", "village", "market", "barn", "cottage",
+                         "kitchen", "cellar", "orchard", "meadow")
+
+
+def _ge_owners() -> tuple[ont.Character, ...]:
+    """Human trader characters suitable for goose-eggs roles."""
+    blocked = {"shepherd", "dreamer", "liar", "counter"}
+    return tuple(
+        c for c in ont.CHARACTERS
+        if c.species == "human"
+        and "trader" in c.role_classes
+        and not (set(c.role_classes) & blocked)
+    )
+
+
+def _ge_geese() -> tuple[ont.Character, ...]:
+    return tuple(c for c in ont.CHARACTERS if c.species == "goose")
+
+
+def _pick_ge_chars(scene: Scene) -> tuple[ont.Character,
+                                          ont.Character,
+                                          ont.Character]:
+    """Pick (owner, visitor, goose) for a goose-eggs record.
+
+    `owner` is the patient eval-trusting character (tortoise-analog).
+    `visitor` is the impatient guesser who wants the answer without
+    submitting the form (hare-analog).
+    `goose` is the value-yielding bird whose one-egg-per-morning routine
+    parallels the REPL's one-form-at-a-time evaluation.
+    """
+    pool = _ge_owners()
+    owner = scene.rng.choice(pool)
+    # ensure visitor is a different name than owner
+    visitor_pool = [c for c in pool if c.name != owner.name]
+    visitor = scene.rng.choice(visitor_pool)
+    goose = scene.rng.choice(_ge_geese())
+    return owner, visitor, goose
+
+
+def _pick_ge_location(scene: Scene) -> ont.Location:
+    """Pick from village + household locations natural for goose-eggs."""
+    cands = [l for l in ont.LOCATIONS if l.name in GOOSE_EGGS_LOCATIONS]
+    return scene.rng.choice(cands)
+
+
+# Pronoun-neutral emotion pools. The fables.py EMO_GREEDY/EMO_CONTENT/
+# EMO_REGRETFUL pools hard-code "his/her", which produces ungrammatical
+# text when the assigned character has a different gender. These pools
+# read naturally regardless of the surrounding character's pronoun.
+GE_EMO_GREEDY = (
+    "with a hungry gleam in the eye",
+    "imagining all that might be gained",
+    "thoughts already on more",
+    "with hands itching to count more",
+    "eyeing the next morning's gift",
+    "tempted by the thought of plenty",
+    "calculating in silence",
+    "with a glint of impatience",
+)
+GE_EMO_CONTENT = (
+    "happy with the day's small gift",
+    "pleased with the steady fortune",
+    "grateful for every coin",
+    "content with the quiet life",
+    "settled and unhurried",
+    "untroubled by the village gossip",
+    "calm in the morning routine",
+)
+GE_EMO_REGRETFUL = (
+    "wishing for more careful counting",
+    "regretting the hasty thought",
+    "wondering how the temptation had risen",
+    "shaking off a careless idea",
+    "thinking better of the rash impulse",
+)
 
 
 # ─────────────────────── render helpers ───────────────────────
@@ -280,6 +364,77 @@ def _build_placeholders(scene: Scene,
     return placeholders
 
 
+def _build_ge_placeholders(scene: Scene,
+                           owner:    ont.Character,
+                           visitor:  ont.Character,
+                           goose:    ont.Character,
+                           location: ont.Location,
+                           example:  SubjectExample) -> dict:
+    """Goose-eggs placeholder dict.
+
+    Provides BOTH the goose-eggs-specific keys (`{owner}`, `{visitor}`,
+    `{goose}` and their phrase / pronoun variants) AND the tortoise-hare
+    `{hare}` / `{tortoise}` aliases so the shared subplot templates from
+    `tortoise_hare/grade_1.py:_SHARED_SUBPLOTS` still render. The mapping
+    is: visitor → hare-analog (impatient guesser), owner → tortoise-analog
+    (patient evaluator). This is the additive part of the SKILL doc's
+    "extend `_build_placeholders`" recipe.
+    """
+    return {
+        # tortoise-hare-style aliases (so shared subplots from
+        # tortoise_hare/grade_1.py render naturally without rewrites)
+        "hare":            visitor.name,
+        "tortoise":        owner.name,
+        "hare_phrase":     species_phrase(visitor),
+        "tortoise_phrase": species_phrase(owner),
+        "hare_he_she":     visitor.he_she,
+        "tortoise_he_she": owner.he_she,
+        "hare_he_she_cap": cap(visitor.he_she),
+        "tortoise_he_she_cap": cap(owner.he_she),
+        "hare_his_her":    visitor.his_her,
+        "tortoise_his_her": owner.his_her,
+        "hare_him_her":    visitor.him_her,
+        "tortoise_him_her": owner.him_her,
+
+        # Goose-eggs cast
+        "owner":           owner.name,
+        "owner_phrase":    species_phrase(owner),
+        "owner_he_she":    owner.he_she,
+        "owner_he_she_cap": cap(owner.he_she),
+        "owner_his_her":   owner.his_her,
+        "owner_him_her":   owner.him_her,
+        "visitor":         visitor.name,
+        "visitor_phrase":  species_phrase(visitor),
+        "visitor_he_she":  visitor.he_she,
+        "visitor_he_she_cap": cap(visitor.he_she),
+        "visitor_his_her": visitor.his_her,
+        "visitor_him_her": visitor.him_her,
+        "goose":           goose.name,
+        "goose_phrase":    species_phrase(goose),
+        "goose_he_she":    goose.he_she,
+        "goose_he_she_cap": cap(goose.he_she),
+        "goose_his_her":   goose.his_her,
+        "goose_him_her":   goose.him_her,
+
+        # place
+        "place":           place_phrase(scene, location),
+        "location":        location.name,
+
+        # the example
+        "form_display":    _format_form_display(example.form),
+        "concept_phrase":  example.concept_phrase,
+        "what":            example.question_what,
+
+        # emotions (pronoun-neutral pools so any character gender works)
+        "emo_proud":       scene.rng.choice(EMO_PROUD),
+        "emo_patient":     scene.rng.choice(EMO_PATIENT),
+        "emo_tired":       scene.rng.choice(EMO_TIRED),
+        "emo_greedy":      scene.rng.choice(GE_EMO_GREEDY),
+        "emo_content":     scene.rng.choice(GE_EMO_CONTENT),
+        "emo_regretful":   scene.rng.choice(GE_EMO_REGRETFUL),
+    }
+
+
 def _render_question(scene: Scene, example: SubjectExample) -> str:
     """The closing line of the user_msg. Always asks the student to
     write a Clojure expression that produces the answer."""
@@ -299,14 +454,22 @@ def generate_one_record(scene: Scene,
                         sub: SubjectCurriculum,
                         example: SubjectExample) -> Record:
     """Produce a single Record by:
-       1. Picking a (hare, tortoise, location) for narrative
+       1. Picking characters + a location appropriate to the fable
        2. Picking an aesopian opener
        3. Picking a subplot template
        4. Filling placeholders + rendering question
        5. Building the eval(form) tool call
     """
-    hare, tortoise = _pick_chars(scene, sub.fable)
-    location = _pick_location(scene, sub.fable)
+    if sub.fable == "goose-eggs":
+        owner, visitor, goose = _pick_ge_chars(scene)
+        location = _pick_ge_location(scene)
+        placeholders_fn = lambda ex: _build_ge_placeholders(
+            scene, owner, visitor, goose, location, ex)
+    else:
+        hare, tortoise = _pick_chars(scene, sub.fable)
+        location = _pick_location(scene, sub.fable)
+        placeholders_fn = lambda ex: _build_placeholders(
+            scene, hare, tortoise, location, ex, sub.fable)
 
     intro = _aesopian_intro(scene, sub.fable, location)
 
@@ -321,8 +484,7 @@ def generate_one_record(scene: Scene,
     weights = [s.weight for s in candidate_subplots]
     subplot = scene.rng.choices(candidate_subplots, weights=weights)[0]
 
-    placeholders = _build_placeholders(scene, hare, tortoise, location,
-                                        example, sub.fable)
+    placeholders = placeholders_fn(example)
     body = subplot.template.format(**placeholders).strip()
     question = _render_question(scene, example)
 
