@@ -1329,7 +1329,7 @@
             predictions (python/list)
             golds       (python/list)
             end-mark    (.- ds/DEFAULT_TEMPLATE end)]
-        (doseq [s samples]
+        (doseq [[idx s] (map-indexed vector samples)]
           (let [prompt   (.- s prompt)
                 gold     (.- s gold)
                 ;; Greedy decode (temp=0). See sample's docstring: at
@@ -1343,6 +1343,19 @@
                 pred     (if (>= end-idx 0)
                            (subs gen-only 0 end-idx)
                            gen-only)]
+            ;; Observability: dump the first 2 predictions per dataset so
+            ;; we can see what the model is actually emitting greedily.
+            ;; Cheap (2 short prints per agent eval) and lets us tell the
+            ;; difference between "model emits garbage" vs "model emits
+            ;; almost-JSON" vs "model emits valid JSON with wrong content".
+            (when (< idx 2)
+              (let [prompt-tail (subs prompt (max 0 (- (count prompt) 80)))
+                    pred-head   (subs pred 0 (min 200 (count pred)))
+                    gold-head   (subs gold 0 (min 120 (count gold)))]
+                (println (format "    [%s sample %d]" eval-name idx))
+                (println (format "      prompt-tail: ...%s" (.replace prompt-tail "\n" "\\n")))
+                (println (format "      pred:        %s" (.replace pred-head "\n" "\\n")))
+                (println (format "      gold:        %s" (.replace gold-head "\n" "\\n")))))
             (.append predictions pred)
             (.append golds gold)))
         (let [results (ev/score_predictions predictions golds)
