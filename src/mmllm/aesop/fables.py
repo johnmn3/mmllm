@@ -1534,7 +1534,7 @@ def _ge_value_yield(scene: Scene) -> Record:
             f"The goose laid {per_day} golden {unit(per_day, 'egg')} a "
             f"day for {n_unit(days, 'day')}, and when the eggs were "
             f"finally carried in their basket to the {market.name} they "
-            f"fetched {n_unit(total_coins, 'coin')} in all. "
+            f"fetched {n_unit(total_coins, 'coin')} in all — "
         )
         question = "the price in coins at which each single egg had sold"
         chapter_name = "value-yield-per-egg"
@@ -1586,10 +1586,10 @@ def _ge_value_yield(scene: Scene) -> Record:
         f"In {location.article} {location.name} the rumor went that "
         f"{owner.name}'s goose laid silver as well as golden eggs, but "
         f"{owner.he_she} only smiled and said nothing of the kind. "
-        f"{givens}each morning {owner.he_she} carried the eggs to the "
-        f"{market.name} folded inside a cloth, {greedy} at the soft "
-        f"weight against {owner.his_her} hip, and listened to the coins "
-        f"jingle home each evening.",
+        f"{givens}every morning {owner.he_she} would carry the eggs to "
+        f"the {market.name} folded inside a cloth, {greedy} at the "
+        f"soft weight against {owner.his_her} hip, listening to the "
+        f"coins jingle home each evening.",
 
         # 6) the temptation kept at bay
         f"More than once {owner.name} had heard a sly voice whisper "
@@ -2127,7 +2127,7 @@ def _ag_summer_stockpile(scene: Scene) -> Record:
         f"{ant.name}, however, only paused long enough to shake the rain from "
         f"{ant.his_her} back before trundling another {item.name} into the "
         f"{container.name} {ant.he_she} kept beside the back wall of the "
-        f"burrow. By the season's end {facts}.",
+        f"burrow. The work did not stop for weather; {facts}.",
 
         # 5) Grasshopper's idle visit — the ant explains
         f"\"Why bother?\" sang the Grasshopper one bright noon, lounging at "
@@ -2303,30 +2303,132 @@ def _ag_comparison_survival(scene: Scene) -> Record:
     )
     answer = evaluate(expr)
 
-    _intro = _aesopian_intro(scene, "ant-grasshopper")
+    # Item / container diversity — share a single food kind across both
+    # characters (the meadow's harvest), but pair the diligent Ant with a
+    # proper storage container and the late-realizing Grasshopper with a
+    # smaller one (or with empty pockets). The contrast in containers is
+    # part of the moral.
+    item = scene.rng.choice([
+        i for i in ont.ITEMS
+        if i.name in ("grain", "seed", "crumb", "nut", "acorn", "biscuit")
+    ])
+    ant_container = scene.rng.choice([
+        c for c in ont.CONTAINERS
+        if c.name in ("jar", "basket", "bag", "hole")
+    ])
+    gh_container = scene.rng.choice([
+        c for c in ont.CONTAINERS
+        if c.name in ("pouch", "jar", "bag", "basket")
+    ])
+
+    intro     = _aesopian_intro(scene, "ant-grasshopper")
+    content   = scene.rng.choice(EMO_CONTENT)
+    proud     = scene.rng.choice(EMO_PROUD)
+    regret    = scene.rng.choice(EMO_REGRETFUL)
+    hungry    = scene.rng.choice(EMO_HUNGRY)
+    desperate = scene.rng.choice(EMO_DESPERATE)
+
+    # Six narrative subplots — same arithmetic (ant-left clamped to 0).
+    # Each grounds the contrast between provident Ant and improvident
+    # Grasshopper in a different small drama. Both have a stash and a
+    # daily-eating rule; the question targets the Ant's leftover after
+    # `days` days of winter. The clamp-at-0 hint stays explicit so the
+    # model knows to use max with 0.
+    survival_subplots = [
+        # 1) classic side-by-side larders
+        f"Winter had come at last to the meadow, and lasted "
+        f"{n_unit(days, 'day')} from first frost to first thaw. In {ant.name} "
+        f"the ant's neat {ant_container.name} sat "
+        f"{n_unit(ant_stock, item.name, item.plural)}, gathered in the bright "
+        f"weeks of summer; {ant.name} ate {n_unit(ant_per_day, item.name, item.plural)} "
+        f"each day, no more, {content}. In {grasshopper.name} the grasshopper's "
+        f"thin {gh_container.name} sat only {n_unit(gh_stock, item.name, item.plural)}, "
+        f"and {grasshopper.he_she} too ate "
+        f"{n_unit(gh_per_day, item.name, item.plural)} a day, {regret}. "
+        f"If a stockpile runs out, the count cannot go below zero.",
+
+        # 2) the grasshopper at the door, contrasting tallies
+        f"On the first hard morning of winter — a season that would last "
+        f"{n_unit(days, 'day')} in all — {grasshopper.name} the grasshopper "
+        f"came scratching at {ant.name}'s burrow, {hungry}. Inside the "
+        f"burrow, {ant.name} sat beside a {ant_container.name} of "
+        f"{n_unit(ant_stock, item.name, item.plural)} and ate "
+        f"{n_unit(ant_per_day, item.name, item.plural)} each day. The "
+        f"Grasshopper had only {n_unit(gh_stock, item.name, item.plural)} "
+        f"in {article(gh_container.name)} {gh_container.name}, and ate "
+        f"{n_unit(gh_per_day, item.name, item.plural)} "
+        f"a day. (No stockpile can drop below zero.)",
+
+        # 3) a long winter, two diaries
+        f"That year the cold months stretched {n_unit(days, 'day')} from "
+        f"first snow to last frost. {ant.name} kept a careful tally: "
+        f"{n_unit(ant_stock, item.name, item.plural)} in the {ant_container.name} "
+        f"by the wall at the start, and {ant.he_she} drew "
+        f"{n_unit(ant_per_day, item.name, item.plural)} from it every morning, "
+        f"{proud} of {ant.his_her} planning. {grasshopper.name}, hidden in "
+        f"the dry stalks, had begun the winter with only "
+        f"{n_unit(gh_stock, item.name, item.plural)} in "
+        f"{grasshopper.his_her} {gh_container.name}, and chewed through "
+        f"{n_unit(gh_per_day, item.name, item.plural)} a day. The count, "
+        f"of course, cannot go below zero for either of them.",
+
+        # 4) the meadow at midwinter — short ledgers
+        f"Midway through a winter that ran {n_unit(days, 'day')} from end to "
+        f"end, two ledgers told two stories. {species_phrase(ant)} had "
+        f"begun with {n_unit(ant_stock, item.name, item.plural)} stored "
+        f"snugly in the {ant_container.name} at the back of the burrow, "
+        f"and ate exactly {n_unit(ant_per_day, item.name, item.plural)} "
+        f"per day. {species_phrase(grasshopper)} had begun with only "
+        f"{n_unit(gh_stock, item.name, item.plural)} in {grasshopper.his_her} "
+        f"thin {gh_container.name}, and {grasshopper.he_she} too went through "
+        f"{n_unit(gh_per_day, item.name, item.plural)} per day, {desperate}. "
+        f"Whichever stockpile emptied first, the count would simply rest at zero.",
+
+        # 5) the village of small folk weighs in
+        f"The small folk of the meadow whispered, on the longest night, "
+        f"about how the two neighbors were faring. Winter, all said, would "
+        f"last {n_unit(days, 'day')} in all. {ant.name} the ant, "
+        f"{content}, had laid in {n_unit(ant_stock, item.name, item.plural)} "
+        f"in the {ant_container.name} at the back of the burrow and ate "
+        f"only {n_unit(ant_per_day, item.name, item.plural)} a day. "
+        f"{grasshopper.name} the grasshopper had managed only "
+        f"{n_unit(gh_stock, item.name, item.plural)} in "
+        f"{grasshopper.his_her} {gh_container.name}, and ate "
+        f"{n_unit(gh_per_day, item.name, item.plural)} a day, {regret}. "
+        f"Neither stockpile could carry a count below zero.",
+
+        # 6) cold spring's eve — final accounting
+        f"On the eve of the first spring thaw — at the end of "
+        f"{n_unit(days, 'day')} of winter — the two neighbors sat very "
+        f"differently. In a {ant_container.name} at the heart of the "
+        f"burrow, {ant.name} had begun winter with "
+        f"{n_unit(ant_stock, item.name, item.plural)}, and across the cold "
+        f"weeks {ant.he_she} had taken only "
+        f"{n_unit(ant_per_day, item.name, item.plural)} a day. "
+        f"{grasshopper.name}, in {grasshopper.his_her} thin "
+        f"{gh_container.name}, had begun with only "
+        f"{n_unit(gh_stock, item.name, item.plural)}, and ate "
+        f"{n_unit(gh_per_day, item.name, item.plural)} per day, {hungry}. "
+        f"A stockpile, once it runs out, cannot go below zero.",
+    ]
+
+    body = _render_subplot(scene, survival_subplots)
+    question_what = (
+        f"how many {item.plural} {ant.name} has left at the end of winter"
+    )
     user_msg = (
-        f"{_intro}Winter lasted {n_unit(days, 'day')}. "
-        f"{species_phrase(ant)} started with "
-        f"{n_unit(ant_stock, 'grain')} and ate {ant_per_day} every day, "
-        f"while {species_phrase(grasshopper)} started with "
-        f"{n_unit(gh_stock, 'grain')} and ate {gh_per_day} every day. "
-        f"If a stockpile runs out, the count cannot go below zero.\n\n"
-        f"Question: How many grains does {ant.name} have left at the end "
-        f"of winter?"
+        f"{intro}{body}\n\n"
+        f"{question_phrase(scene, question_what)}"
     )
 
-    code_block  = render_code(expr, form="inline", value=answer)
-    result_text = f"{ant.name} has {answer} grains left."
-    narrative   = (
-        f"I compute leftover for {ant.name} (initial - days × rate), then "
-        "clamp to 0 if negative using max."
+    plan = (
+        f"I compute leftover for {ant.name} as initial minus days times rate, "
+        f"then clamp to 0 if negative using max."
     )
     return _finalize(
         scene,
         user_msg=user_msg,
-        narrative=narrative,
-        code_block=code_block,
-        result_text=result_text,
+        plan=plan,
         value=answer,
         expr=expr,
         fable="ant-grasshopper",
@@ -3568,6 +3670,7 @@ def _lb_days_to_defeat(scene: Scene) -> Record:
 def _lb_remaining_after_k(scene: Scene) -> Record:
     """N bulls, K already defeated (K < N). Remaining?"""
     lion = scene.pick_character(role_classes=("predator",), species="lion", gender=scene.pick_choice(["m", "f"]))
+    location = scene.pick_location(tags_any=("path",), indoor=False)
     n_bulls = scene.pick_int(4, 10)
     # K < N: there's always at least 1 bull left (avoids the trivial
     # "0 remain" narrative).
@@ -3580,24 +3683,98 @@ def _lb_remaining_after_k(scene: Scene) -> Record:
     )
     answer = evaluate(expr)
 
-    _intro = _aesopian_intro(scene, "lion-bulls")
+    intro     = _aesopian_intro(scene, "lion-bulls", location)
+    patient   = scene.rng.choice(EMO_PATIENT)
+    desperate = scene.rng.choice(EMO_DESPERATE)
+
+    # Six narrative subplots — same arithmetic (n-bulls minus
+    # bulls-defeated = remaining). Each subplot grounds the loss
+    # in a distinct setting, and the bulls' shrinking number
+    # makes the survivors' isolation increasingly desperate.
+    remaining_after_k_subplots = [
+        # 1) open meadow — counting heads at sunrise
+        f"At sunrise, {species_phrase(lion)} surveyed the open meadow "
+        f"where {n_unit(n_bulls, 'bull')} had once grazed in a tight "
+        f"crescent. Many seasons of patient hunting had passed since "
+        f"the herd first quarreled. {cap(lion.he_she)} counted the "
+        f"still shapes hidden in the long grass — {defeated} of the "
+        f"bulls had already fallen, one at a time, on separate days. "
+        f"The survivors stood scattered, {desperate}, each alone in a "
+        f"pocket of dew-soaked clover. The lion sat back on "
+        f"{lion.his_her} haunches {patient} and tried to count how "
+        f"many of the original {n_bulls} bulls were still upright in "
+        f"the meadow.",
+
+        # 2) hilltop pasture — wind carrying news of losses
+        f"On a high hilltop pasture, where the wind carried the "
+        f"smell of broken grass for miles, the {n_bulls} "
+        f"{unit(n_bulls, 'bull')} had once been impossible to "
+        f"approach. Now {species_phrase(lion)} crossed the bald slope "
+        f"openly. Over the long, slow campaign, {lion.he_she} had "
+        f"brought down {defeated} of them, never two on the same "
+        f"week. The remaining bulls watched from far ridges, "
+        f"{desperate}, no longer trusting the wind. {cap(lion.he_she)} "
+        f"paused {patient} on a flat stone and reckoned how many of "
+        f"the herd were still standing.",
+
+        # 3) valley grassland — survivors near the stream
+        f"In the valley grassland by the slow stream, where "
+        f"{n_unit(n_bulls, 'bull')} had once drunk together at the "
+        f"same bend, only a few survivors now picked their way "
+        f"between the reeds. {species_phrase(lion)} had taken "
+        f"{defeated} of the herd already over many quiet weeks, and "
+        f"the bulls left alive {desperate} would not even stand near "
+        f"each other to drink. From a willow shadow, the lion "
+        f"watched {patient}. {cap(lion.he_she)} began to count, on "
+        f"the soft pads of {lion.his_her} paws, how many bulls of "
+        f"the original number remained.",
+
+        # 4) fence-line they no longer respect
+        f"Along the broken fence-line that the herd had once walked "
+        f"together at evening, {species_phrase(lion)} stalked at a "
+        f"slow trot. The {n_bulls} {unit(n_bulls, 'bull')} had been "
+        f"a tight shoulder-to-shoulder column then; now the fence "
+        f"divided them, and they no longer minded. The lion had "
+        f"taken {defeated} bulls from this stretch alone, picking "
+        f"off whichever wandered to the rails by itself. The few "
+        f"survivors paced {desperate} in the far field. The lion "
+        f"sat against a fence-post {patient} and worked out how many "
+        f"of the original herd were still alive.",
+
+        # 5) clearing surrounded by tall grass
+        f"In a wide clearing rimmed by tall, bristling grass, what "
+        f"had once been {n_unit(n_bulls, 'bull')} grazing in a loose "
+        f"ring was now a scattered remnant. {species_phrase(lion)} "
+        f"had taken {defeated} of them through the long campaign — "
+        f"each one alone, each one on a different day. The bulls "
+        f"that remained stood {desperate} at separate corners of the "
+        f"clearing, refusing to look at one another. "
+        f"{cap(lion.he_she)} crouched in the shadow of a stump "
+        f"{patient} and totaled how many bulls were still standing.",
+
+        # 6) flat plain at dusk — silhouettes of the survivors
+        f"At dusk on a flat plain, the silhouettes of the surviving "
+        f"bulls were spread far across the grass. There had been "
+        f"{n_unit(n_bulls, 'bull')} at the start of the long season, "
+        f"and {species_phrase(lion)} had taken {defeated} since then, "
+        f"one by one. The remaining shapes stood {desperate}, each "
+        f"in its own patch of fading light. {cap(lion.he_she)} "
+        f"watched the long shadows lean across the plain {patient} "
+        f"and counted how many bulls of the original herd were still "
+        f"left to take.",
+    ]
+
+    body = _render_subplot(scene, remaining_after_k_subplots)
     user_msg = (
-        f"{_intro}{species_phrase(lion)} faced {n_unit(n_bulls, 'bull')} grazing "
-        f"alone in the field. After several days, {smart_pronoun(lion, [])} "
-        f"had defeated {defeated} of them.\n\n"
-        f"Question: How many bulls remain?"
+        f"{intro}{body}\n\n"
+        f"{question_phrase(scene, 'how many bulls remain')}"
     )
 
-    code_block  = render_code(expr, form=scene.code_form(), value=answer)
-    result_text = (f"There is {answer} bull left." if answer == 1
-                   else f"There are {answer} bulls left.")
-    narrative   = "I subtract the defeated from the original count."
+    plan = "I subtract the defeated count from the original number of bulls."
     return _finalize(
         scene,
         user_msg=user_msg,
-        narrative=narrative,
-        code_block=code_block,
-        result_text=result_text,
+        plan=plan,
         value=answer,
         expr=expr,
         fable="lion-bulls",
