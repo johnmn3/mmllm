@@ -34,6 +34,48 @@ from mmllm.aesop.template import (
 # ─────────────────────── _finalize helper ───────────────────────
 
 
+def _sum_expr(scene: Scene, xs: Expr) -> Expr:
+    """Pick one of three idiomatic Clojure sum forms over `xs`. Used to
+    teach the model that these are interchangeable:
+
+      (reduce + xs)                              # idiomatic short
+      (apply + xs)                               # also idiomatic
+      (reduce (fn [a b] (+ a b)) 0 xs)           # verbose long form
+    """
+    pick = scene.rng.choices(
+        ["reduce-+", "apply-+", "reduce-fn"],
+        weights=[0.45, 0.30, 0.25],
+    )[0]
+    if pick == "reduce-+":
+        # `(reduce + xs)` — represented with a special "+" Var since our
+        # AST doesn't have a "function reference" node.
+        return App("reduce", [Var("+"), xs])
+    if pick == "apply-+":
+        return App("apply", [Var("+"), xs])
+    # verbose
+    return App("reduce",
+               [Fn(["a", "b"], App("+", [Var("a"), Var("b")])),
+                Lit(0),
+                xs])
+
+
+def _extract_code_from_block(code_block: str) -> str:
+    """Pull the Clojure source out of a fenced ```clojure ... ;=> N ```
+    block. Used so the eval(form: …) tool-call arg always matches the
+    EXACT source displayed in the assistant turn — not a re-emit from
+    the AST that might disagree (e.g., let vs def-chain block form)."""
+    text = code_block
+    if text.startswith("```clojure\n"):
+        text = text[len("```clojure\n"):]
+    if text.endswith("\n```"):
+        text = text[:-len("\n```")]
+    lines = text.split("\n")
+    while lines and (lines[-1].lstrip().startswith(";=>")
+                     or lines[-1].lstrip().startswith(";; =>")):
+        lines.pop()
+    return "\n".join(lines).rstrip()
+
+
 def _finalize(scene: Scene, *,
               user_msg:    str,
               narrative:   str,
@@ -46,9 +88,14 @@ def _finalize(scene: Scene, *,
     """Bundle a chapter's prose + math into a Record. Picks tool-call
     pattern (single answer vs eval+answer chain) via the scene RNG, builds
     the system prompt with the matching catalog, assembles the assistant
-    turn, and returns a verifiable Record."""
+    turn, and returns a verifiable Record.
+
+    The eval(form: …) arg in the tool-call uses the SAME source string
+    that was rendered in the assistant's code block — extracted from
+    code_block, not re-emitted from expr — so the displayed source and
+    the eval-form arg always agree byte-for-byte."""
     use_eval = scene.use_eval_chain()
-    code_str = emit_clojure(expr)
+    code_str = _extract_code_from_block(code_block)
     calls    = build_tool_calls(value, code_str, use_eval=use_eval)
     catalog  = ANSWER_AND_EVAL if use_eval else ANSWER_ONLY
     sys_msg  = system_prompt(use_eval=use_eval)
@@ -386,12 +433,12 @@ def _cp_enough_stones(scene: Scene) -> Record:
 
     expr = Let(
         bindings=[
-            ("k",         Lit(k)),
+            ("n-stones",  Lit(k)),
             ("rise-per",  Lit(rise_per)),
             ("start-cm",  Lit(start)),
             ("target-cm", Lit(target)),
             ("reachable", App("+", [Var("start-cm"),
-                                     App("*", [Var("k"), Var("rise-per")])])),
+                                     App("*", [Var("n-stones"), Var("rise-per")])])),
         ],
         body=App(">=", [Var("reachable"), Var("target-cm")]),
     )
@@ -531,7 +578,9 @@ def _ge_value_yield(scene: Scene) -> Record:
 
 
 def _ge_compounded(scene: Scene) -> Record:
-    """Daily yields, then sum across days using `reduce`."""
+    """Daily yields, then sum across days. Picks one of three idiomatic
+    Clojure forms for the sum: `(reduce + xs)`, `(apply + xs)`, or the
+    verbose `(reduce (fn [a b] (+ a b)) 0 xs)`."""
     goose = scene.pick_character(role="yielder", species="goose")
     owner = scene.pick_character(role_classes=("trader",))
 
@@ -540,10 +589,7 @@ def _ge_compounded(scene: Scene) -> Record:
 
     expr = Let(
         bindings=[("daily-yields", Lit(list(yields)))],
-        body=App("reduce",
-                 [Fn(["a", "b"], App("+", [Var("a"), Var("b")])),
-                  Lit(0),
-                  Var("daily-yields")]),
+        body=_sum_expr(scene, Var("daily-yields")),
     )
     answer = evaluate(expr)
 
@@ -594,11 +640,8 @@ def _ge_average(scene: Scene) -> Record:
     expr = Let(
         bindings=[
             ("daily-yields", Lit(list(yields))),
-            ("total", App("reduce",
-                          [Fn(["a", "b"], App("+", [Var("a"), Var("b")])),
-                           Lit(0),
-                           Var("daily-yields")])),
-            ("days", App("count", [Var("daily-yields")])),
+            ("total", _sum_expr(scene, Var("daily-yields"))),
+            ("days",  App("count", [Var("daily-yields")])),
         ],
         body=App("quot", [Var("total"), Var("days")]),
     )
@@ -646,7 +689,7 @@ def gen_boy_wolf(scene: Scene) -> Record:
 def _bw_false_alarms(scene: Scene) -> Record:
     """Boy cries wolf F times falsely. After each, villagers came in T mins.
     Total minutes wasted by villagers running to the field?"""
-    boy   = scene.pick_character(role_classes=("liar", "shepherd"))
+    boy   = scene.pick_character(role_classes=("liar", "shepherd"), gender=scene.pick_choice(["m", "f"]))
     n_villagers = scene.pick_int(3, 10)
     n_alarms    = scene.pick_int(2, 6)
     minutes_per = scene.pick_int(5, 20)
@@ -689,7 +732,7 @@ def _bw_false_alarms(scene: Scene) -> Record:
 
 def _bw_sheep_eaten(scene: Scene) -> Record:
     """Real wolf comes; villagers don't believe; wolf eats S sheep."""
-    boy = scene.pick_character(role_classes=("liar", "shepherd"))
+    boy = scene.pick_character(role_classes=("liar", "shepherd"), gender=scene.pick_choice(["m", "f"]))
     flock = scene.pick_int(20, 80)
     eaten = scene.pick_int(3, min(flock - 1, 15))
 
@@ -725,7 +768,7 @@ def _bw_sheep_eaten(scene: Scene) -> Record:
 
 def _bw_trust_threshold(scene: Scene) -> Record:
     """Villagers stop coming after K false alarms. Will they come on alarm N?"""
-    boy = scene.pick_character(role_classes=("liar", "shepherd"))
+    boy = scene.pick_character(role_classes=("liar", "shepherd"), gender=scene.pick_choice(["m", "f"]))
     threshold = scene.pick_int(3, 5)
     alarms_so_far = scene.pick_int(0, 7)
 
@@ -885,13 +928,14 @@ def _ag_comparison_survival(scene: Scene) -> Record:
     answer = evaluate(expr)
 
     user_msg = (
-        f"After {n_unit(days, 'day')} of winter, {species_phrase(ant)} "
-        f"started with {n_unit(ant_stock, 'grain')} and ate "
-        f"{ant_per_day} per day. Meanwhile {species_phrase(grasshopper)} "
-        f"started with {n_unit(gh_stock, 'grain')} and ate {gh_per_day} "
-        f"per day.\n\n"
-        f"Question: How many grains does {ant.name} have left after "
-        f"winter? (Use 0 if {ant.he_she} ran out.)"
+        f"Winter lasted {n_unit(days, 'day')}. "
+        f"{species_phrase(ant)} started with "
+        f"{n_unit(ant_stock, 'grain')} and ate {ant_per_day} every day, "
+        f"while {species_phrase(grasshopper)} started with "
+        f"{n_unit(gh_stock, 'grain')} and ate {gh_per_day} every day. "
+        f"If a stockpile runs out, the count cannot go below zero.\n\n"
+        f"Question: How many grains does {ant.name} have left at the end "
+        f"of winter?"
     )
 
     code_block  = render_code(expr, form="inline", value=answer)
@@ -1002,8 +1046,8 @@ def _mm_investment_return(scene: Scene) -> Record:
         f"{maid.name} bought a cow for {n_unit(cow_cost, 'coin')}. The "
         f"cow gives {n_unit(cups_per_day, 'cup')} of milk per day, and "
         f"each cup sells for {n_unit(coin_per_cup, 'coin')}.\n\n"
-        f"Question: How many whole days until {maid.name} recovers the "
-        f"cost of the cow? (Round up.)"
+        f"Question: What is the smallest whole number of days until "
+        f"{maid.name} fully recovers the cost of the cow?"
     )
 
     code_block  = render_code(expr, form=scene.code_form(), value=answer)
@@ -1081,7 +1125,7 @@ def gen_fox_grapes(scene: Scene) -> Record:
 def _fg_max_reach(scene: Scene) -> Record:
     """Fox can jump J feet. Grapes are G feet up. How high can fox reach?"""
     fox = scene.pick_character(role_classes=("cunning", "hungry"),
-                                species="fox")
+                                species="fox", gender=scene.pick_choice(["m", "f"]))
     body_height = scene.pick_int(2, 4)
     jump_height = scene.pick_int(1, 4)
 
@@ -1120,7 +1164,7 @@ def _fg_jumps_needed(scene: Scene) -> Record:
     """Each jump goes up J feet. Grapes are G feet. Min jumps to reach grapes
     (assume re-stack progress; hypothetical/dream scenario)."""
     fox = scene.pick_character(role_classes=("cunning", "hungry"),
-                                species="fox")
+                                species="fox", gender=scene.pick_choice(["m", "f"]))
     grape_height = scene.pick_int(4, 12)
     per_jump     = scene.pick_int(1, 3)
 
@@ -1137,10 +1181,12 @@ def _fg_jumps_needed(scene: Scene) -> Record:
     answer = evaluate(expr)
 
     user_msg = (
-        f"{species_phrase(fox)} dreamed of climbing a magical tree where "
-        f"each jump lifted {fox.him_her} {n_unit(per_jump, 'foot', 'feet')} "
-        f"higher. The grapes hung at {n_unit(grape_height, 'foot', 'feet')}.\n\n"
-        f"Question: What is the smallest number of jumps to reach the grapes?"
+        f"The grapes hung from a vine {n_unit(grape_height, 'foot', 'feet')} "
+        f"above the ground. {species_phrase(fox)} could leap "
+        f"{n_unit(per_jump, 'foot', 'feet')} straight up each try, and "
+        f"each leap brought the grapes that much closer to reach.\n\n"
+        f"Question: What is the smallest number of leaps {fox.name} needs "
+        f"to reach the grapes?"
     )
 
     code_block  = render_code(expr, form=scene.code_form(), value=answer)
@@ -1165,7 +1211,7 @@ def _fg_jumps_needed(scene: Scene) -> Record:
 def _fg_give_up(scene: Scene) -> Record:
     """Fox gives up after K attempts. Has tried T already. Will fox try again?"""
     fox = scene.pick_character(role_classes=("cunning", "hungry"),
-                                species="fox")
+                                species="fox", gender=scene.pick_choice(["m", "f"]))
     threshold = scene.pick_int(3, 8)
     tried     = scene.pick_int(0, 10)
 
@@ -1275,8 +1321,8 @@ def _tm_shared_meal(scene: Scene) -> Record:
         f"a feast for {n_unit(n_mice, 'mouse', 'mice')} (counting "
         f"themselves). They had {n_unit(total, food.name, food.plural)} "
         f"to share equally.\n\n"
-        f"Question: How many {food.plural} does each mouse get? "
-        f"(Use integer division.)"
+        f"Question: How many whole {food.plural} does each mouse get if "
+        f"any leftover is set aside?"
     )
 
     code_block  = render_code(expr, form=scene.code_form(), value=answer)
@@ -1351,7 +1397,7 @@ def gen_dog_shadow(scene: Scene) -> Record:
 def _ds_double_loss(scene: Scene) -> Record:
     """Dog had B bones. Saw shadow with 'extra' bone. Drops one for shadow,
     loses it. Now has B-1."""
-    dog = scene.pick_character(role_classes=("everyman",), species="dog")
+    dog = scene.pick_character(role_classes=("everyman",), species="dog", gender=scene.pick_choice(["m", "f"]))
     bones = scene.pick_int(2, 8)
 
     expr = Let(
@@ -1387,7 +1433,7 @@ def _ds_double_loss(scene: Scene) -> Record:
 
 def _ds_regret(scene: Scene) -> Record:
     """If dog hadn't dropped, would've had B. Now has B-1. Difference."""
-    dog = scene.pick_character(role_classes=("everyman",), species="dog")
+    dog = scene.pick_character(role_classes=("everyman",), species="dog", gender=scene.pick_choice(["m", "f"]))
     expected_bones = scene.pick_int(3, 12)
 
     expr = Let(
@@ -1424,11 +1470,11 @@ def _ds_regret(scene: Scene) -> Record:
 def _ds_exchange_loss(scene: Scene) -> Record:
     """Dog had B bones. Trader offered N bones for M of dog's. Dog accepted but
     trader cheated — gave only K. Net change?"""
-    dog    = scene.pick_character(role_classes=("everyman",), species="dog")
+    dog    = scene.pick_character(role_classes=("everyman",), species="dog", gender=scene.pick_choice(["m", "f"]))
     trader = scene.pick_character(role_classes=("trader",))
     start  = scene.pick_int(5, 15)
     given  = scene.pick_int(2, start - 1)
-    received = scene.pick_int(0, given - 1)  # cheated: less than given
+    received = scene.pick_int(1, given - 1)  # cheated: less than given but at least 1
 
     expr = Let(
         bindings=[("start",    Lit(start)),
@@ -1478,7 +1524,7 @@ def gen_lion_bulls(scene: Scene) -> Record:
 
 def _lb_days_to_defeat(scene: Scene) -> Record:
     """Lion takes D days per bull. There are N bulls. Total days?"""
-    lion = scene.pick_character(role_classes=("predator",), species="lion")
+    lion = scene.pick_character(role_classes=("predator",), species="lion", gender=scene.pick_choice(["m", "f"]))
     n_bulls    = scene.pick_int(3, 6)
     days_each  = scene.pick_int(1, 4)
 
@@ -1514,10 +1560,12 @@ def _lb_days_to_defeat(scene: Scene) -> Record:
 
 
 def _lb_remaining_after_k(scene: Scene) -> Record:
-    """N bulls, K already defeated. Remaining?"""
-    lion = scene.pick_character(role_classes=("predator",), species="lion")
-    n_bulls = scene.pick_int(3, 8)
-    defeated = scene.pick_int(0, n_bulls)
+    """N bulls, K already defeated (K < N). Remaining?"""
+    lion = scene.pick_character(role_classes=("predator",), species="lion", gender=scene.pick_choice(["m", "f"]))
+    n_bulls = scene.pick_int(4, 10)
+    # K < N: there's always at least 1 bull left (avoids the trivial
+    # "0 remain" narrative).
+    defeated = scene.pick_int(1, n_bulls - 1)
 
     expr = Let(
         bindings=[("bulls",    Lit(n_bulls)),
@@ -1528,13 +1576,14 @@ def _lb_remaining_after_k(scene: Scene) -> Record:
 
     user_msg = (
         f"{species_phrase(lion)} faced {n_unit(n_bulls, 'bull')} grazing "
-        f"alone in the field. After several days, {lion.he_she} had "
-        f"defeated {n_unit(defeated, 'of them', 'of them')}.\n\n"
+        f"alone in the field. After several days, {smart_pronoun(lion, [])} "
+        f"had defeated {defeated} of them.\n\n"
         f"Question: How many bulls remain?"
     )
 
     code_block  = render_code(expr, form=scene.code_form(), value=answer)
-    result_text = f"{n_unit(answer, 'bull')} remain."
+    result_text = (f"There is {answer} bull left." if answer == 1
+                   else f"There are {answer} bulls left.")
     narrative   = "I subtract the defeated from the original count."
     return _finalize(
         scene,
@@ -1553,7 +1602,7 @@ def _lb_divide_conquer_bool(scene: Scene) -> Record:
     """Lion needs S strength to defeat all bulls together. Has L. Together
     bulls > L. Alone, bulls have B each (B*N == total). Can lion defeat
     them one at a time?"""
-    lion = scene.pick_character(role_classes=("predator",), species="lion")
+    lion = scene.pick_character(role_classes=("predator",), species="lion", gender=scene.pick_choice(["m", "f"]))
     lion_strength = scene.pick_int(5, 15)
     n_bulls       = scene.pick_int(3, 5)
     bull_strength = scene.pick_int(2, lion_strength)  # individually beatable

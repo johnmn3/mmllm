@@ -312,6 +312,8 @@ ANIMALS: tuple[Character, ...] = (
     Character("Tom",   "human", "m", ("liar", "shepherd")),
     Character("Will",  "human", "m", ("liar", "shepherd")),
     Character("Pat",   "human", "n", ("liar", "shepherd")),
+    Character("Jess",  "human", "f", ("liar", "shepherd")),
+    Character("Lou",   "human", "f", ("liar", "shepherd")),
 
     # milkmaids
     Character("Margery","human", "f", ("counter", "dreamer")),

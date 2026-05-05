@@ -77,11 +77,18 @@ class Lit(Expr):
 
 @dataclass
 class Var(Expr):
-    """Variable reference."""
+    """Variable reference. Also resolves to a Python callable wrapping
+    the op-table when the name matches a known op — this lets
+    `(reduce + xs)` and `(apply + xs)` work without registering each
+    op as a closure in the env."""
     name: str
     def eval(self, env: dict) -> Any:
         if self.name in env:
             return env[self.name]
+        op = OPS.get(self.name)
+        if op is not None:
+            # Wrap into the (args, env) → result calling convention.
+            return lambda args, _env=env, _op=op: _op(list(args), _env)
         raise NameError(f"unbound symbol: {self.name}")
     def emit(self, indent: int = 0) -> str:
         return self.name
