@@ -1,9 +1,9 @@
-"""Audit a fable's K-12 curriculum (FIXED — match record to its example).
+"""Audit any per-fable K-12 curriculum (set FABLE env var to switch).
 
 Usage:
-    python3 audit-harness.py                    # default: tortoise-hare
-    python3 audit-harness.py fox-grapes         # any registered fable
-    AUDIT_FABLE=fox-grapes python3 audit-harness.py
+    python3 audit-harness.py            # audits tortoise-hare (default)
+    FABLE=goose_eggs python3 ...        # audits a different fable
+    FABLE_ALL=1 python3 ...             # audits every curriculum found
 """
 from __future__ import annotations
 
@@ -19,17 +19,37 @@ sys.path.insert(0, "/home/user/mmllm/src")
 from mmllm.aesop.curriculum.generator import generate_subject
 
 
-# Fable selection — CLI arg, env var, or default to tortoise-hare.
-FABLE = (
-    sys.argv[1] if len(sys.argv) > 1
-    else os.environ.get("AUDIT_FABLE", "tortoise-hare")
-)
-PKG = FABLE.replace("-", "_")    # "fox-grapes" → "fox_grapes"
+CURRICULUM_ROOT = Path("/home/user/mmllm/src/mmllm/aesop/curriculum")
 
-GRADE_MODULES = []
-for n in range(1, 13):
-    mod = importlib.import_module(f"mmllm.aesop.curriculum.{PKG}.grade_{n}")
-    GRADE_MODULES.append(mod)
+
+def _discover_fables():
+    """All sub-packages with grade_N.py files."""
+    out = []
+    for p in CURRICULUM_ROOT.iterdir():
+        if p.is_dir() and p.name not in ("__pycache__",):
+            if (p / "grade_1.py").exists():
+                out.append(p.name)
+    return sorted(out)
+
+
+def _load_grade_modules(fable: str):
+    mods = []
+    for n in range(1, 13):
+        try:
+            mods.append(importlib.import_module(
+                f"mmllm.aesop.curriculum.{fable}.grade_{n}"))
+        except ModuleNotFoundError:
+            break
+    return mods
+
+
+if os.environ.get("FABLE_ALL"):
+    FABLES_TO_AUDIT = _discover_fables()
+else:
+    FABLES_TO_AUDIT = [os.environ.get("FABLE", "tortoise_hare")]
+
+# Single fable mode: legacy GRADE_MODULES still works.
+GRADE_MODULES = _load_grade_modules(FABLES_TO_AUDIT[0])
 
 
 def check_record(rec, sub, example):
@@ -153,7 +173,11 @@ def per_example_records(sub, example, n: int, seed: int):
 
 
 def main():
-    out = Path(f"/home/user/mmllm/docs/clojure-pedagogy/audits/{FABLE}-audit.md")
+    fable = FABLES_TO_AUDIT[0]
+    fable_dash = fable.replace("_", "-")
+    out = Path(
+        f"/home/user/mmllm/docs/clojure-pedagogy/audits/{fable_dash}-audit.md"
+    )
     out.parent.mkdir(parents=True, exist_ok=True)
 
     summary = Counter()
@@ -161,7 +185,7 @@ def main():
     per_grade_stats: dict[int, dict] = {}
 
     with open(out, "w") as f:
-        f.write(f"# {FABLE.replace('-', ' ').title()} curriculum audit (corrected)\n\n")
+        f.write(f"# {fable_dash} curriculum audit\n\n")
         f.write("Auto-generated audit — each subject's examples checked at "
                 "3 records per example, properly matched.\n\n")
         f.write("---\n\n")
