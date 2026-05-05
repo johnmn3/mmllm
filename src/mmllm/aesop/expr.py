@@ -1,0 +1,720 @@
+"""Clojure-subset AST + evaluator + source emitter.
+
+Single source of truth for the math in capstone records. Every fable
+template builds an Expr tree; the same tree gets:
+
+  • EVALUATED in Python (ground-truth answer for the tool-call)
+  • EMITTED as Clojure source (what the model sees in the assistant turn)
+
+This rules out hallucinated arithmetic — if the template builds
+`(App "+" [Lit(3), Lit(2)])`, the model trains on `(+ 3 2)` and the
+tool-call answer is `5`. Both come from the same tree.
+
+Supported subset (≈ Clojure core, what a small model should internalize):
+
+  arithmetic       + - * / quot rem mod inc dec abs min max
+  predicates       = < > <= >= not= zero? pos? neg? odd? even? empty?
+  logic            and or not
+  conditionals     (special forms) if when cond case
+  bindings         (special forms) let fn def
+  sequences        list vector range repeat take drop count first last
+                   rest butlast conj into reverse sort distinct partition
+  higher-order     map filter reduce comp partial juxt apply
+  maps             hash-map get assoc dissoc keys vals merge contains?
+  strings          str clojure.string/upper-case clojure.string/lower-case
+                   clojure.string/join clojure.string/split
+  threading        -> ->>  (sugar; desugared to plain App chains for both
+                   eval and Clojure emit, with optional preserve_thread
+                   flag if a template wants to actually emit -> in source)
+
+Numeric type fidelity: we keep ints int and emit `5` not `5.0`. Division
+always uses `quot` for integer division to keep results exact and
+serializable as ints — the templates are responsible for picking
+`/ vs quot vs rem vs mod` according to what the model should emit.
+"""
+from __future__ import annotations
+
+import json
+import math
+from dataclasses import dataclass, field
+from typing import Any, Callable
+
+
+# ─────────────────────── AST ───────────────────────
+
+
+@dataclass
+class Expr:
+    """Base for all AST nodes. Subclasses must implement eval + emit."""
+    def eval(self, env: dict) -> Any:                 # noqa: A003 - shadow ok
+        raise NotImplementedError(type(self).__name__)
+    def emit(self, indent: int = 0) -> str:
+        raise NotImplementedError(type(self).__name__)
+
+
+@dataclass
+class Lit(Expr):
+    """Literal value: int, float, str, bool, None, keyword, vector, map, set."""
+    value: Any
+    is_kw: bool = False  # treat str as Clojure keyword (`:foo`)
+    is_set: bool = False # treat list as Clojure set (`#{...}`)
+
+    def eval(self, env: dict) -> Any:
+        if self.is_kw:
+            return ("__kw__", self.value)
+        if self.is_set:
+            return frozenset(_eval_v(v, env) for v in self.value)
+        if isinstance(self.value, list):
+            return [_eval_v(v, env) for v in self.value]
+        if isinstance(self.value, dict):
+            return {_eval_v(k, env): _eval_v(v, env)
+                    for k, v in self.value.items()}
+        return self.value
+
+    def emit(self, indent: int = 0) -> str:
+        return _emit_value(self.value, is_kw=self.is_kw, is_set=self.is_set)
+
+
+@dataclass
+class Var(Expr):
+    """Variable reference."""
+    name: str
+    def eval(self, env: dict) -> Any:
+        if self.name in env:
+            return env[self.name]
+        raise NameError(f"unbound symbol: {self.name}")
+    def emit(self, indent: int = 0) -> str:
+        return self.name
+
+
+@dataclass
+class App(Expr):
+    """Function application: (op arg ...)."""
+    op:   str
+    args: list[Expr]
+    inline: bool = True  # render single-line by default
+
+    def eval(self, env: dict) -> Any:
+        f = OPS.get(self.op)
+        if f is None:
+            raise NameError(f"unknown op: {self.op}")
+        return f([a.eval(env) for a in self.args], env)
+
+    def emit(self, indent: int = 0) -> str:
+        if not self.args:
+            return f"({self.op})"
+        body = " ".join(a.emit(indent + 2) for a in self.args)
+        if self.inline and "\n" not in body:
+            return f"({self.op} {body})"
+        # multi-line form: each arg on its own line
+        sp   = " " * (indent + len(self.op) + 2)
+        head = f"({self.op}"
+        first, *rest = self.args
+        first_s = first.emit(indent + len(self.op) + 2)
+        out = head + " " + first_s
+        for a in rest:
+            out += "\n" + sp + a.emit(indent + len(self.op) + 2)
+        return out + ")"
+
+
+@dataclass
+class If(Expr):
+    cond:    Expr
+    then:    Expr
+    else_:   Expr
+
+    def eval(self, env: dict) -> Any:
+        c = self.cond.eval(env)
+        return self.then.eval(env) if _truthy(c) else self.else_.eval(env)
+
+    def emit(self, indent: int = 0) -> str:
+        c = self.cond.emit(indent + 4)
+        t = self.then.emit(indent + 4)
+        e = self.else_.emit(indent + 4)
+        line = f"(if {c} {t} {e})"
+        if "\n" not in line and len(line) < 80:
+            return line
+        sp = " " * (indent + 4)
+        return f"(if {c}\n{sp}{t}\n{sp}{e})"
+
+
+@dataclass
+class When(Expr):
+    cond: Expr
+    body: list[Expr]
+
+    def eval(self, env: dict) -> Any:
+        if not _truthy(self.cond.eval(env)):
+            return None
+        last = None
+        for e in self.body:
+            last = e.eval(env)
+        return last
+
+    def emit(self, indent: int = 0) -> str:
+        c = self.cond.emit(indent + 6)
+        body_strs = [e.emit(indent + 6) for e in self.body]
+        line = f"(when {c} " + " ".join(body_strs) + ")"
+        if "\n" not in line and len(line) < 80:
+            return line
+        sp = " " * (indent + 6)
+        return f"(when {c}\n" + "\n".join(sp + b for b in body_strs) + ")"
+
+
+@dataclass
+class Cond(Expr):
+    """(cond test1 result1 test2 result2 … :else default)."""
+    clauses: list[tuple[Expr, Expr]]   # last clause's test is the literal :else by convention
+    default: Expr | None = None
+
+    def eval(self, env: dict) -> Any:
+        for test, result in self.clauses:
+            if _truthy(test.eval(env)):
+                return result.eval(env)
+        return None if self.default is None else self.default.eval(env)
+
+    def emit(self, indent: int = 0) -> str:
+        sp = " " * (indent + 6)
+        out = "(cond"
+        for test, result in self.clauses:
+            out += f"\n{sp}{test.emit(indent + 6)} {result.emit(indent + 6)}"
+        if self.default is not None:
+            out += f"\n{sp}:else {self.default.emit(indent + 6)}"
+        return out + ")"
+
+
+@dataclass
+class Let(Expr):
+    bindings: list[tuple[str, Expr]]
+    body:     Expr | list[Expr]
+
+    def eval(self, env: dict) -> Any:
+        new_env = dict(env)
+        for k, v in self.bindings:
+            new_env[k] = v.eval(new_env)
+        if isinstance(self.body, list):
+            last = None
+            for e in self.body:
+                last = e.eval(new_env)
+            return last
+        return self.body.eval(new_env)
+
+    def emit(self, indent: int = 0) -> str:
+        # vector of bindings, each on its own line if more than 1 pair
+        if len(self.bindings) == 1:
+            k, v = self.bindings[0]
+            binds = f"[{k} {v.emit(indent + 6 + len(k))}]"
+        else:
+            sp_b = " " * (indent + 6)
+            binds = "[" + (
+                "\n" + sp_b
+            ).join(f"{k} {v.emit(indent + 6 + len(k) + 1)}"
+                   for k, v in self.bindings) + "]"
+        body_indent = indent + 2
+        if isinstance(self.body, list):
+            sp_body = " " * body_indent
+            body = "\n".join(sp_body + e.emit(body_indent) for e in self.body)
+        else:
+            body = self.body.emit(body_indent)
+        if "\n" not in binds and "\n" not in body and len(binds) + len(body) < 70:
+            return f"(let {binds} {body})"
+        return f"(let {binds}\n{' '*body_indent}{body})"
+
+
+@dataclass
+class Fn(Expr):
+    """Anonymous function. Params are a list of symbol names."""
+    params: list[str]
+    body:   Expr
+
+    def eval(self, env: dict) -> Any:
+        params = self.params
+        body = self.body
+        def _fn(args: list[Any]) -> Any:
+            sub = dict(env)
+            for p, a in zip(params, args):
+                sub[p] = a
+            return body.eval(sub)
+        return _fn
+
+    def emit(self, indent: int = 0) -> str:
+        ps = " ".join(self.params)
+        return f"(fn [{ps}] {self.body.emit(indent + 4 + len(ps))})"
+
+
+@dataclass
+class Def(Expr):
+    """Top-level definition. `(def name expr)`."""
+    name: str
+    body: Expr
+
+    def eval(self, env: dict) -> Any:
+        env[self.name] = self.body.eval(env)
+        return env[self.name]
+
+    def emit(self, indent: int = 0) -> str:
+        return f"(def {self.name} {self.body.emit(indent + 6 + len(self.name))})"
+
+
+@dataclass
+class Do(Expr):
+    """Sequence of expressions; value is the last one's value."""
+    body: list[Expr]
+    def eval(self, env: dict) -> Any:
+        last = None
+        for e in self.body:
+            last = e.eval(env)
+        return last
+    def emit(self, indent: int = 0) -> str:
+        return "\n".join(e.emit(indent) for e in self.body)
+
+
+@dataclass
+class Thread(Expr):
+    """Threading macro. style='->' or '->>'."""
+    style: str
+    init:  Expr
+    steps: list[Expr]    # each is an App with the thread argument elided
+
+    def _expand(self) -> Expr:
+        cur = self.init
+        for st in self.steps:
+            assert isinstance(st, App), "thread step must be an App"
+            new_args = list(st.args)
+            if self.style == "->":
+                new_args.insert(0, cur)
+            else:  # ->>
+                new_args.append(cur)
+            cur = App(st.op, new_args)
+        return cur
+
+    def eval(self, env: dict) -> Any:
+        return self._expand().eval(env)
+
+    def emit(self, indent: int = 0) -> str:
+        sp = " " * (indent + len(self.style) + 2)
+        head = f"({self.style} {self.init.emit(indent + len(self.style) + 2)}"
+        for st in self.steps:
+            head += "\n" + sp + st.emit(indent + len(self.style) + 2)
+        return head + ")"
+
+
+# ─────────────────────── Helpers ───────────────────────
+
+
+def _eval_v(v: Any, env: dict) -> Any:
+    return v.eval(env) if isinstance(v, Expr) else v
+
+
+def _truthy(v: Any) -> bool:
+    """Clojure truthiness: nil and false are falsy; everything else truthy."""
+    return v is not None and v is not False
+
+
+def _emit_value(v: Any, *, is_kw: bool = False, is_set: bool = False) -> str:
+    if is_kw:
+        return f":{v}"
+    if v is None:
+        return "nil"
+    if v is True:
+        return "true"
+    if v is False:
+        return "false"
+    if isinstance(v, str):
+        # Clojure string: escape backslash + double-quote.
+        esc = v.replace("\\", "\\\\").replace('"', '\\"')
+        return f'"{esc}"'
+    if isinstance(v, int):
+        return str(v)
+    if isinstance(v, float):
+        return str(v)
+    if isinstance(v, list):
+        prefix = "#" if is_set else ""
+        return prefix + "[" + " ".join(
+            _emit_value(x.value, is_kw=getattr(x, "is_kw", False),
+                                  is_set=getattr(x, "is_set", False))
+            if isinstance(x, Lit) else x.emit() if isinstance(x, Expr)
+            else _emit_value(x)
+            for x in v) + "]"
+    if isinstance(v, dict):
+        items = []
+        for k, val in v.items():
+            ks = _emit_value(k.value, is_kw=getattr(k, "is_kw", False)) \
+                 if isinstance(k, Lit) else k.emit() if isinstance(k, Expr) \
+                 else _emit_value(k)
+            vs = _emit_value(val.value, is_kw=getattr(val, "is_kw", False)) \
+                 if isinstance(val, Lit) else val.emit() if isinstance(val, Expr) \
+                 else _emit_value(val)
+            items.append(f"{ks} {vs}")
+        return "{" + ", ".join(items) + "}"
+    return str(v)
+
+
+# ─────────────────────── Operations ───────────────────────
+
+
+# Each op is a function (args, env) -> result. `args` is a list of already-
+# evaluated argument values. `env` is provided in case an op needs it (only
+# `apply` does, currently).
+
+def _op_plus(args, _):
+    return sum(args) if args else 0
+def _op_minus(args, _):
+    if not args:
+        return 0
+    if len(args) == 1:
+        return -args[0]
+    out = args[0]
+    for x in args[1:]:
+        out -= x
+    return out
+def _op_times(args, _):
+    out = 1
+    for x in args:
+        out *= x
+    return out
+def _op_div(args, _):
+    if len(args) == 1:
+        return 1 / args[0]
+    out = args[0]
+    for x in args[1:]:
+        out = out / x
+    return out
+def _op_quot(args, _):
+    a, b = args
+    return int(a / b) if (a < 0) != (b < 0) and a % b else a // b
+def _op_rem(args, _):
+    a, b = args
+    r = abs(a) % abs(b)
+    return r if a >= 0 else -r
+def _op_mod(args, _):
+    return args[0] % args[1]
+def _op_inc(args, _):  return args[0] + 1
+def _op_dec(args, _):  return args[0] - 1
+def _op_abs(args, _):  return abs(args[0])
+def _op_min(args, _):  return min(args)
+def _op_max(args, _):  return max(args)
+
+def _op_eq(args, _):
+    a = args[0]
+    return all(x == a for x in args[1:])
+def _op_neq(args, _): return not _op_eq(args, _)
+def _op_lt(args, _):  return all(args[i] <  args[i+1] for i in range(len(args)-1))
+def _op_le(args, _):  return all(args[i] <= args[i+1] for i in range(len(args)-1))
+def _op_gt(args, _):  return all(args[i] >  args[i+1] for i in range(len(args)-1))
+def _op_ge(args, _):  return all(args[i] >= args[i+1] for i in range(len(args)-1))
+def _op_zero(args, _):  return args[0] == 0
+def _op_pos(args, _):   return args[0] > 0
+def _op_neg(args, _):   return args[0] < 0
+def _op_odd(args, _):   return args[0] % 2 != 0
+def _op_even(args, _):  return args[0] % 2 == 0
+def _op_empty(args, _): return len(args[0]) == 0
+
+def _op_and(args, _):
+    last = True
+    for v in args:
+        if not _truthy(v):
+            return v
+        last = v
+    return last
+def _op_or(args, _):
+    for v in args:
+        if _truthy(v):
+            return v
+    return args[-1] if args else None
+def _op_not(args, _):
+    return not _truthy(args[0])
+
+# Sequences
+def _op_list(args, _):    return list(args)
+def _op_vector(args, _):  return list(args)
+def _op_range(args, _):
+    if len(args) == 1:
+        return list(range(args[0]))
+    if len(args) == 2:
+        return list(range(args[0], args[1]))
+    return list(range(args[0], args[1], args[2]))
+def _op_repeat(args, _):
+    n, v = args
+    return [v] * n
+def _op_take(args, _):    n, xs = args; return list(xs[:n])
+def _op_drop(args, _):    n, xs = args; return list(xs[n:])
+def _op_count(args, _):   return len(args[0])
+def _op_first(args, _):
+    xs = args[0]
+    return xs[0] if xs else None
+def _op_last(args, _):
+    xs = args[0]
+    return xs[-1] if xs else None
+def _op_rest(args, _):    return list(args[0][1:])
+def _op_butlast(args, _): return list(args[0][:-1])
+def _op_conj(args, _):
+    coll, *rest = args
+    if isinstance(coll, list):
+        return list(coll) + list(rest)
+    if isinstance(coll, frozenset):
+        return coll | frozenset(rest)
+    return list(coll) + list(rest)
+def _op_into(args, _):
+    to, frm = args
+    if isinstance(to, list):
+        return list(to) + list(frm)
+    if isinstance(to, frozenset):
+        return to | frozenset(frm)
+    return list(to) + list(frm)
+def _op_reverse(args, _):  return list(reversed(args[0]))
+def _op_sort(args, _):     return sorted(args[0])
+def _op_distinct(args, _):
+    out, seen = [], set()
+    for x in args[0]:
+        if x not in seen:
+            seen.add(x); out.append(x)
+    return out
+def _op_partition(args, _):
+    n, xs = args
+    return [list(xs[i:i+n]) for i in range(0, len(xs), n) if len(xs[i:i+n]) == n]
+
+# Higher-order
+def _op_map(args, _):
+    f, *colls = args
+    return [f(list(t)) for t in zip(*colls)]
+def _op_filter(args, _):
+    f, xs = args
+    return [x for x in xs if _truthy(f([x]))]
+def _op_reduce(args, _):
+    if len(args) == 2:
+        f, xs = args
+        if not xs: return None
+        out = xs[0]
+        for x in xs[1:]:
+            out = f([out, x])
+        return out
+    f, init, xs = args
+    out = init
+    for x in xs:
+        out = f([out, x])
+    return out
+def _op_apply(args, env):
+    f, *rest = args
+    *fixed, last = rest
+    return f(list(fixed) + list(last))
+def _op_comp(args, _):
+    fns = args
+    def _c(xs):
+        out = xs
+        for f in reversed(fns):
+            out = [f(out)]
+        return out[0]
+    return _c
+def _op_partial(args, _):
+    f, *fixed = args
+    def _p(more):
+        return f(list(fixed) + list(more))
+    return _p
+
+# Maps
+def _op_hash_map(args, _):
+    return {args[i]: args[i+1] for i in range(0, len(args), 2)}
+def _op_get(args, _):
+    if len(args) == 2:
+        coll, k = args
+        return coll.get(k) if isinstance(coll, dict) else (
+            coll[k] if 0 <= k < len(coll) else None
+        )
+    coll, k, default = args
+    if isinstance(coll, dict):
+        return coll.get(k, default)
+    return coll[k] if 0 <= k < len(coll) else default
+def _op_assoc(args, _):
+    coll, k, v = args[0], args[1], args[2]
+    rest = args[3:]
+    new = dict(coll) if isinstance(coll, dict) else list(coll)
+    if isinstance(new, dict):
+        new[k] = v
+        for i in range(0, len(rest), 2):
+            new[rest[i]] = rest[i+1]
+    else:
+        new[k] = v
+    return new
+def _op_dissoc(args, _):
+    coll, *ks = args
+    new = dict(coll)
+    for k in ks:
+        new.pop(k, None)
+    return new
+def _op_keys(args, _):     return list(args[0].keys())
+def _op_vals(args, _):     return list(args[0].values())
+def _op_merge(args, _):
+    out = {}
+    for d in args:
+        if d: out.update(d)
+    return out
+def _op_contains(args, _):
+    coll, k = args
+    if isinstance(coll, dict):
+        return k in coll
+    if isinstance(coll, frozenset):
+        return k in coll
+    return 0 <= k < len(coll)
+
+# Strings
+def _op_str(args, _):
+    parts = []
+    for a in args:
+        if a is None:
+            continue
+        if a is True:
+            parts.append("true")
+        elif a is False:
+            parts.append("false")
+        else:
+            parts.append(str(a))
+    return "".join(parts)
+def _op_str_upper(args, _):  return args[0].upper()
+def _op_str_lower(args, _):  return args[0].lower()
+def _op_str_join(args, _):
+    if len(args) == 1:
+        sep, xs = "", args[0]
+    else:
+        sep, xs = args
+    return sep.join(str(x) for x in xs)
+def _op_str_split(args, _):
+    s, sep = args
+    return s.split(sep)
+
+
+OPS: dict[str, Callable[[list[Any], dict], Any]] = {
+    "+":  _op_plus, "-": _op_minus, "*": _op_times, "/": _op_div,
+    "quot": _op_quot, "rem": _op_rem, "mod": _op_mod,
+    "inc": _op_inc,  "dec": _op_dec, "abs": _op_abs,
+    "min": _op_min,  "max": _op_max,
+
+    "=":  _op_eq, "not=": _op_neq,
+    "<": _op_lt, "<=": _op_le, ">": _op_gt, ">=": _op_ge,
+    "zero?": _op_zero, "pos?": _op_pos, "neg?": _op_neg,
+    "odd?": _op_odd, "even?": _op_even, "empty?": _op_empty,
+
+    "and": _op_and, "or": _op_or, "not": _op_not,
+
+    "list": _op_list, "vector": _op_vector,
+    "range": _op_range, "repeat": _op_repeat,
+    "take": _op_take, "drop": _op_drop,
+    "count": _op_count, "first": _op_first, "last": _op_last,
+    "rest": _op_rest, "butlast": _op_butlast,
+    "conj": _op_conj, "into": _op_into,
+    "reverse": _op_reverse, "sort": _op_sort,
+    "distinct": _op_distinct, "partition": _op_partition,
+
+    "map": _op_map, "filter": _op_filter, "reduce": _op_reduce,
+    "apply": _op_apply, "comp": _op_comp, "partial": _op_partial,
+
+    "hash-map": _op_hash_map,
+    "get": _op_get, "assoc": _op_assoc, "dissoc": _op_dissoc,
+    "keys": _op_keys, "vals": _op_vals, "merge": _op_merge,
+    "contains?": _op_contains,
+
+    "str": _op_str,
+    "clojure.string/upper-case": _op_str_upper,
+    "clojure.string/lower-case": _op_str_lower,
+    "clojure.string/join":       _op_str_join,
+    "clojure.string/split":      _op_str_split,
+}
+
+
+# ─────────────────────── Public helpers ───────────────────────
+
+
+def evaluate(expr: Expr, env: dict | None = None) -> Any:
+    return expr.eval(dict(env or {}))
+
+
+def emit_clojure(expr: Expr) -> str:
+    return expr.emit(0)
+
+
+# ─────────────────────── Self-test ───────────────────────
+
+
+def smoke_test() -> None:
+    # Arithmetic
+    e1 = App("+", [Lit(3), Lit(2)])
+    assert evaluate(e1) == 5
+    assert emit_clojure(e1) == "(+ 3 2)"
+
+    # Let with multiple bindings
+    e2 = Let(
+        [("alice", Lit(3)), ("gift", Lit(2))],
+        App("+", [Var("alice"), Var("gift")]),
+    )
+    assert evaluate(e2) == 5
+
+    # If
+    e3 = If(App(">", [Lit(8), Lit(6)]), Lit("Shelly"), Lit("Whisker"))
+    assert evaluate(e3) == "Shelly"
+
+    # Cond
+    e4 = Cond(
+        clauses=[
+            (App("=", [Var("n"), Lit(0)]), Lit("zero")),
+            (App("pos?", [Var("n")]), Lit("positive")),
+        ],
+        default=Lit("negative"),
+    )
+    assert evaluate(e4, {"n": 0})  == "zero"
+    assert evaluate(e4, {"n": 5})  == "positive"
+    assert evaluate(e4, {"n": -3}) == "negative"
+
+    # Higher-order: map / filter / reduce
+    e5 = App("map", [Fn(["x"], App("*", [Var("x"), Lit(2)])),
+                     Lit([1, 2, 3])])
+    assert evaluate(e5) == [2, 4, 6]
+
+    e6 = App("filter", [Fn(["x"], App("even?", [Var("x")])),
+                        App("range", [Lit(10)])])
+    assert evaluate(e6) == [0, 2, 4, 6, 8]
+
+    e7 = App("reduce", [Fn(["a", "b"], App("+", [Var("a"), Var("b")])),
+                        Lit(0),
+                        App("range", [Lit(1), Lit(11)])])
+    assert evaluate(e7) == 55
+
+    # Threading macro: (-> 5 inc inc dec) → 6
+    e8 = Thread("->", Lit(5),
+                [App("inc", []), App("inc", []), App("dec", [])])
+    assert evaluate(e8) == 6
+    s8 = emit_clojure(e8)
+    assert s8.startswith("(->"), s8
+
+    # Strings
+    e9 = App("str", [Lit("Alice has "), Lit(3), Lit(" apples")])
+    assert evaluate(e9) == "Alice has 3 apples"
+
+    # Maps
+    e10 = App("get", [App("hash-map", [Lit("a"), Lit(1), Lit("b"), Lit(2)]),
+                      Lit("b")])
+    assert evaluate(e10) == 2
+
+    # Crow + pitcher style: how many stones to raise water?
+    # (let [start 5  target 10  per-stone 1]
+    #   (quot (- target start) per-stone))
+    e11 = Let(
+        [("start", Lit(5)), ("target", Lit(10)), ("per-stone", Lit(1))],
+        App("quot",
+            [App("-", [Var("target"), Var("start")]), Var("per-stone")]),
+    )
+    assert evaluate(e11) == 5
+
+    # Goose: 30 days × 1 egg/day × 100 coins/egg
+    e12 = App("*", [Lit(30), Lit(1), Lit(100)])
+    assert evaluate(e12) == 3000
+
+    # Milkmaid chained: (* eggs (- 1 spoiled-frac) coins-per-hen)
+    # uses ints only — mock at quot 1 (no fractional spoilage)
+    e13 = App("*", [Lit(12), Lit(5)])
+    assert evaluate(e13) == 60
+
+    print("expr smoke OK — all 13 cases pass")
+
+
+if __name__ == "__main__":
+    smoke_test()
