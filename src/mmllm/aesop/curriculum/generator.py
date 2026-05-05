@@ -149,6 +149,8 @@ def _pick_th_location(scene: Scene) -> ont.Location:
     return scene.rng.choice(cands)
 
 
+# ─── goose-eggs character / location pools ───
+#
 # Goose-eggs uses two human "trader" characters (an impatient {visitor}
 # and a patient {owner}) plus a goose. Locations are the village +
 # household places where the fable plays out. Excludes characters whose
@@ -231,6 +233,58 @@ GE_EMO_REGRETFUL = (
 )
 
 
+# ─── boy-wolf character / location pools ───
+#
+# Boy-wolf cast model: ONE shepherd (the negative moral example — cries
+# wolf) + ONE elder/villager (the corrective voice). The shepherd plays
+# the Hare-equivalent role (boastful, hasty); the elder/villager plays
+# the Tortoise-equivalent role (careful, evaluator-of-record). Unlike
+# tortoise-hare where Tortoise is itself a model character, in boy-wolf
+# the SHEPHERD is the cautionary one, and the corrective discipline lives
+# in the surrounding villagers / elders / a careful neighbouring shepherd.
+
+def _shepherds() -> tuple[ont.Character, ...]:
+    """Tom (m), Will (m), Pat (n), Jess (f), Lou (f) — all role
+    ('liar', 'shepherd'). These are the boy-who-cried-wolf cast."""
+    return tuple(c for c in ont.CHARACTERS if "shepherd" in c.role_classes)
+
+
+def _bw_villagers() -> tuple[ont.Character, ...]:
+    """Pool of village-folk who play the corrective voice in boy-wolf
+    subplots. Drawn from the human characters with role 'everyman' —
+    Bob, Frank, George, Oliver, Carol, Grace, Alex, Sam, Robin, Morgan
+    (and Alice, who carries 'everyman' as a third role). Mixed-gender
+    so the same shepherd can be paired with same- or different-gender
+    villager across runs for variety."""
+    return tuple(c for c in ont.CHARACTERS
+                 if c.species == "human" and "everyman" in c.role_classes)
+
+
+# Pastoral / village locations natural for boy-wolf. We exclude indoor
+# spaces and water-anchored ones; the action happens between hill,
+# meadow, and village square.
+BOY_WOLF_LOCATIONS = ("meadow", "forest", "hilltop", "village", "farm",
+                      "road", "woods", "orchard")
+
+
+def _pick_bw_chars(scene: Scene) -> tuple[ont.Character, ont.Character]:
+    """Pick a fresh (shepherd, elder) pair for a boy-wolf record."""
+    shepherd = scene.rng.choice(_shepherds())
+    # Avoid name collision (different name pools, but defensive guard
+    # in case the ontology grows).
+    cands = [c for c in _bw_villagers() if c.name != shepherd.name]
+    elder = scene.rng.choice(cands)
+    return shepherd, elder
+
+
+def _pick_bw_location(scene: Scene) -> ont.Location:
+    """Pick a pastoral / village location natural for boy-wolf."""
+    cands = [l for l in ont.LOCATIONS
+             if l.name in BOY_WOLF_LOCATIONS]
+    return scene.rng.choice(cands)
+
+
+
 # ─────────────────────── render helpers ───────────────────────
 
 
@@ -244,9 +298,20 @@ def _build_placeholders(scene: Scene,
                         hare: ont.Character,
                         tortoise: ont.Character,
                         location: ont.Location,
-                        example: SubjectExample) -> dict:
-    """Assemble the {placeholder: value} dict that subplot templates use."""
-    return {
+                        example: SubjectExample,
+                        fable: str = "tortoise-hare") -> dict:
+    """Assemble the {placeholder: value} dict that subplot templates use.
+
+    The two character slots are named `hare` / `tortoise` for historical
+    reasons — they were introduced for the tortoise-hare reference
+    curriculum. Other fables receive *aliases* under the names natural
+    to their cast (e.g. `shepherd` / `elder` for boy-wolf), so a fable's
+    subplot templates can use idiomatic placeholder names while the
+    underlying character objects live in the same two slots.
+
+    `fable` controls which alias set gets emitted. Default tortoise-hare.
+    """
+    base = {
         # characters
         "hare":            hare.name,
         "tortoise":        tortoise.name,
@@ -271,11 +336,57 @@ def _build_placeholders(scene: Scene,
         "concept_phrase":  example.concept_phrase,
         "what":            example.question_what,
 
-        # emotions (single picks)
+        # emotions (single picks). Fables that need other emotion pools
+        # (regretful, desperate, content, ...) can extend this dict in
+        # their per-fable alias section below.
         "emo_proud":       scene.rng.choice(EMO_PROUD),
         "emo_patient":     scene.rng.choice(EMO_PATIENT),
         "emo_tired":       scene.rng.choice(EMO_TIRED),
     }
+
+    # ─── Per-fable additive aliases ───
+    #
+    # These are pure aliases pointing at the SAME two character objects
+    # already exposed under hare/tortoise. They let each fable's subplot
+    # templates use placeholder names natural to the fable's cast without
+    # the templates having to talk about hares and tortoises.
+
+    if fable == "boy-wolf":
+        # Slot A (hare) → the SHEPHERD (the boy who cries wolf — the
+        # cautionary character). Slot B (tortoise) → the ELDER /
+        # VILLAGER (the corrective voice).
+        base.update({
+            "shepherd":             hare.name,
+            "shepherd_phrase":      species_phrase(hare),
+            "shepherd_he_she":      hare.he_she,
+            "shepherd_he_she_cap":  cap(hare.he_she),
+            "shepherd_his_her":     hare.his_her,
+            "shepherd_him_her":     hare.him_her,
+
+            "elder":                tortoise.name,
+            "elder_phrase":         species_phrase(tortoise),
+            "elder_he_she":         tortoise.he_she,
+            "elder_he_she_cap":     cap(tortoise.he_she),
+            "elder_his_her":        tortoise.his_her,
+            "elder_him_her":        tortoise.him_her,
+
+            # 'villager' is an alias for elder used in some templates
+            # where 'elder' would feel too age-specific.
+            "villager":             tortoise.name,
+            "villager_phrase":      species_phrase(tortoise),
+            "villager_he_she":      tortoise.he_she,
+            "villager_he_she_cap":  cap(tortoise.he_she),
+            "villager_his_her":     tortoise.his_her,
+            "villager_him_her":     tortoise.him_her,
+
+            # Boy-wolf-specific emotion picks. The fable's own narrative
+            # uses regretful (the village counting the cost) and
+            # desperate (the shepherd shouting in earnest) heavily.
+            "emo_regretful":   scene.rng.choice(EMO_REGRETFUL),
+            "emo_desperate":   scene.rng.choice(EMO_DESPERATE),
+        })
+
+    return base
 
 
 def _build_ge_placeholders(scene: Scene,
@@ -374,16 +485,27 @@ def generate_one_record(scene: Scene,
        4. Filling placeholders + rendering question
        5. Building the eval(form) tool call
     """
+    # Per-fable character / location picker dispatch. Each fable that
+    # diverges from the default tortoise-hare cast has its own picker
+    # branch and supplies a `placeholders_fn` that builds the placeholder
+    # dict for its templates. The default branch (tortoise-hare and any
+    # fable that maps cleanly onto a two-character cast) uses the
+    # standard `_build_placeholders` with a `fable=` parameter.
     if sub.fable == "goose-eggs":
         owner, visitor, goose = _pick_ge_chars(scene)
         location = _pick_ge_location(scene)
         placeholders_fn = lambda ex: _build_ge_placeholders(
             scene, owner, visitor, goose, location, ex)
+    elif sub.fable == "boy-wolf":
+        slot_a, slot_b = _pick_bw_chars(scene)
+        location = _pick_bw_location(scene)
+        placeholders_fn = lambda ex: _build_placeholders(
+            scene, slot_a, slot_b, location, ex, fable=sub.fable)
     else:
-        hare, tortoise = _pick_th_chars(scene)
+        slot_a, slot_b = _pick_th_chars(scene)
         location = _pick_th_location(scene)
         placeholders_fn = lambda ex: _build_placeholders(
-            scene, hare, tortoise, location, ex)
+            scene, slot_a, slot_b, location, ex, fable=sub.fable)
 
     intro = _aesopian_intro(scene, sub.fable, location)
 
