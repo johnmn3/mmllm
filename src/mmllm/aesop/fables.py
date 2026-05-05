@@ -1751,26 +1751,82 @@ def _ge_average(scene: Scene) -> Record:
     answer = evaluate(expr)
 
     yields_str = ", ".join(str(y) for y in yields)
-    _intro = _aesopian_intro(scene, "goose-eggs")
+    intro     = _aesopian_intro(scene, "goose-eggs")
+    greedy    = scene.rng.choice(EMO_GREEDY)
+    content   = scene.rng.choice(EMO_CONTENT)
+    regretful = scene.rng.choice(EMO_REGRETFUL)
+
+    # Six narrative subplots — same arithmetic (sum / count quot), but
+    # each frames the average-eggs-per-day question through a different
+    # small drama: a buyer wanting a typical-day estimate, a tax man,
+    # a child's curiosity, the farmer's own bookkeeping. The yields_str
+    # carries the actual numbers so the model still sums and divides.
+    average_subplots = [
+        # 1) classic — village bookkeeper sets a typical-day baseline
+        f"At the end of {n_unit(days, 'day')}, {owner.name} sat at the "
+        f"kitchen table and laid the week's tally before {owner.him_her}: "
+        f"{yields_str}. The village bookkeeper had asked for a single "
+        f"\"typical-day\" figure for the goose's yield, rounded down to "
+        f"a whole number, and {owner.name} began to work it out, "
+        f"{content}, while {species_phrase(goose)} settled outside in "
+        f"the warm dusk.",
+
+        # 2) buyer wants a daily estimate before agreeing on a price
+        f"A grain merchant from the next valley had offered to buy "
+        f"{owner.name}'s eggs in advance, but only at a price tied to "
+        f"the goose's typical daily yield. {owner.name} pulled out the "
+        f"week's notes — {yields_str} over {n_unit(days, 'day')} — and "
+        f"set about computing the rounded-down average, {greedy} at the "
+        f"thought of what a fair number would be worth.",
+
+        # 3) child's curiosity at the kitchen window
+        f"A small child had taken to standing at the kitchen window each "
+        f"morning to count the eggs as {species_phrase(goose)} laid them. "
+        f"After {n_unit(days, 'day')} the child had recorded {yields_str} "
+        f"and now tugged at {owner.name}'s sleeve, asking how many the "
+        f"bird laid \"on a usual day.\" {cap(owner.he_she)} smiled, "
+        f"{content}, and sat down with the child to figure out the "
+        f"whole-number average.",
+
+        # 4) tax collector demanding a typical day
+        f"The village tax collector wanted to know the goose's typical "
+        f"yield, and would not be put off by talk of varying days. "
+        f"{owner.name} laid out the {n_unit(days, 'day')}' counts on a "
+        f"slate — {yields_str} — and set to working out the rounded-down "
+        f"average, {regretful} of the day {owner.he_she} had ever "
+        f"mentioned the bird in the village square.",
+
+        # 5) the farmer's own ledger, pondering at sundown
+        f"In the lull after sundown, {owner.name} liked to pull out the "
+        f"farm ledger and look at how the week had gone for "
+        f"{species_phrase(goose)}. The {n_unit(days, 'day')}' counts read "
+        f"{yields_str}. {cap(owner.he_she)} stared at the column, "
+        f"{content}, working out a single steady-day figure — rounded "
+        f"down to a whole egg — for the bird's average yield.",
+
+        # 6) the temptation kept at bay — what is she really worth?
+        f"{owner.name} had heard a sly voice whisper that perhaps the "
+        f"goose was no longer earning her keep, that one bad week proved "
+        f"it. So {owner.he_she} laid out the {n_unit(days, 'day')}' "
+        f"yields — {yields_str} — and set to compute the typical, "
+        f"rounded-down daily count, {regretful} of having entertained "
+        f"the doubt at all.",
+    ]
+
+    body = _render_subplot(scene, average_subplots)
     user_msg = (
-        f"{_intro}{owner.name} kept {species_phrase(goose)}, who laid these eggs "
-        f"on successive days: {yields_str}.\n\n"
-        f"Question: What is the average eggs per day, rounded down to a "
-        f"whole number?"
+        f"{intro}{body}\n\n"
+        f"{question_phrase(scene, 'the average eggs per day, rounded down to a whole number')}"
     )
 
-    code_block  = render_code(expr, form="inline", value=answer)
-    result_text = f"The average is {answer} eggs per day."
-    narrative   = (
-        "I compute the total with reduce, divide by the count, taking "
+    plan = (
+        "I sum the yields, divide by the count of days, and take the "
         "integer quotient."
     )
     return _finalize(
         scene,
         user_msg=user_msg,
-        narrative=narrative,
-        code_block=code_block,
-        result_text=result_text,
+        plan=plan,
         value=answer,
         expr=expr,
         fable="goose-eggs",
@@ -2120,24 +2176,97 @@ def _ag_winter_consumption(scene: Scene) -> Record:
     )
     answer = evaluate(expr)
 
-    _intro = _aesopian_intro(scene, "ant-grasshopper")
+    # Item / container diversity — vary what the ant has hoarded against
+    # the long winter, and where it is stored.
+    item = scene.rng.choice([
+        i for i in ont.ITEMS
+        if i.name in ("grain", "seed", "crumb", "nut", "acorn", "biscuit")
+    ])
+    container = scene.rng.choice([
+        c for c in ont.CONTAINERS
+        if c.name in ("pouch", "jar", "bag", "basket", "hole")
+    ])
+
+    intro    = _aesopian_intro(scene, "ant-grasshopper")
+    content  = scene.rng.choice(EMO_CONTENT)
+    proud    = scene.rng.choice(EMO_PROUD)
+
+    # Six narrative subplots — same arithmetic (stockpile quot per_day =
+    # whole days the food lasts). Each grounds the count in a different
+    # winter scene with a distinct (item, container) pairing. The Ant is
+    # mostly content / proud here — winter is the season of vindication.
+    winter_subplots = [
+        # 1) classic snow-covered burrow, careful tally at dawn
+        f"Snow had drifted high over the meadow grass, and inside the warm "
+        f"burrow {species_phrase(ant)} sat beside a {container.name} of "
+        f"{item.plural} that {ant.he_she} had hauled in all summer. "
+        f"{cap(ant.he_she)} counted them out: {n_unit(stockpile, item.name, item.plural)} "
+        f"in all. By {ant.his_her} careful rule {ant.he_she} would eat just "
+        f"{n_unit(per_day, item.name, item.plural)} each day, no more, no less. "
+        f"The wind howled outside and {ant.name} sat {content}, working out "
+        f"how long the {container.name} would carry {ant.him_her}.",
+
+        # 2) the grasshopper at the door, half a sentence away
+        f"There came a thin scratching at the burrow's mouth — the Grasshopper, "
+        f"thinner now and shivering, asking for shelter. {ant.name} did not yet "
+        f"answer; {ant.he_she} was busy counting the {item.plural} in the "
+        f"{container.name} by the wall. {n_unit(stockpile, item.name, item.plural)} "
+        f"sat in their orderly rows, and {ant.name}'s rule for the cold months "
+        f"was steady: only {n_unit(per_day, item.name, item.plural)} per day, "
+        f"taken at evening, no matter what.",
+
+        # 3) silent winter afternoon, lamp light, careful arithmetic
+        f"In the long blue hour after noon, with snow piled to the rafters, "
+        f"{ant.name} sat by a small lamp and went over the inventory once "
+        f"again. The {container.name} that held the winter's food contained "
+        f"exactly {n_unit(stockpile, item.name, item.plural)}. "
+        f"{cap(ant.he_she)} measured out {n_unit(per_day, item.name, item.plural)} "
+        f"as a single day's portion — that was the rule {ant.he_she} had set "
+        f"for {ant.himself_herself} when summer was bright. Now {ant.he_she} "
+        f"only had to work out how many days the supply would carry {ant.him_her}.",
+
+        # 4) winter solstice — short days, smaller portions
+        f"On the shortest day of the year, {ant.name} sat {proud} by the "
+        f"{container.name} of stored food and took stock. "
+        f"{n_unit(stockpile, item.name, item.plural)} remained — gathered, sorted, "
+        f"and laid in during the long bright weeks. {cap(ant.he_she)} ate "
+        f"sparely now: only {n_unit(per_day, item.name, item.plural)} a day, "
+        f"and never went over. The Grasshopper, somewhere outside, was no "
+        f"longer singing.",
+
+        # 5) the cellar by candlelight, ledger-style
+        f"Inside the burrow, candlelight fell on {ant.name}'s little ledger. "
+        f"In the cellar beyond, a {container.name} stood crammed with "
+        f"{n_unit(stockpile, item.name, item.plural)} — every one carried home "
+        f"on {ant.his_her} own back across the long summer. "
+        f"{cap(ant.he_she)} would take only {n_unit(per_day, item.name, item.plural)} "
+        f"each morning, and the ledger would tally them off one by one. "
+        f"How many entries the ledger would hold before the {container.name} "
+        f"ran empty, that was the question.",
+
+        # 6) blizzard outside, calm planning inside
+        f"A blizzard rattled the dry stalks of the meadow, and far below, "
+        f"in the close warmth of the burrow, {ant.name} ran a feeler over "
+        f"the smooth side of the {container.name} where the winter's stores "
+        f"sat. {n_unit(stockpile, item.name, item.plural)} in all. The plan, "
+        f"settled long before the first snow, was unbroken: "
+        f"{n_unit(per_day, item.name, item.plural)} per day, eaten at the "
+        f"same hour, with the same {content} care. {cap(ant.he_she)} began "
+        f"to figure how long the {container.name} could carry {ant.him_her}.",
+    ]
+
+    body = _render_subplot(scene, winter_subplots)
+    question_what = f"how many whole days {ant.name}'s stockpile will last"
     user_msg = (
-        f"{_intro}{species_phrase(ant)} has {n_unit(stockpile, 'grain')} stored "
-        f"for winter. {cap(ant.he_she)} {verb_for(ant, 'eat')} {n_unit(per_day, 'grain')} "
-        f"per day.\n\n"
-        f"Question: For how many whole days will {ant.name}'s stockpile "
-        f"last?"
+        f"{intro}{body}\n\n"
+        f"{question_phrase(scene, question_what)}"
     )
 
-    code_block  = render_code(expr, form=scene.code_form(), value=answer)
-    result_text = f"The stockpile lasts {n_unit(answer, 'day')}."
-    narrative   = "I divide the stockpile by daily consumption (integer quotient)."
+    plan = "I divide the stockpile by daily consumption (integer quotient)."
     return _finalize(
         scene,
         user_msg=user_msg,
-        narrative=narrative,
-        code_block=code_block,
-        result_text=result_text,
+        plan=plan,
         value=answer,
         expr=expr,
         fable="ant-grasshopper",
