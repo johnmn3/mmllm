@@ -284,6 +284,94 @@ You're done when:
    has a one-paragraph summary of how your fable's character pool
    and moral dynamic are mapped onto the curriculum.
 
+## Lessons from tortoise-hare (the reference implementation)
+
+These are findings from authoring tortoise-hare end-to-end. Apply
+them when authoring your fable-curriculum.
+
+### Subjects that don't fit eval-form testing
+
+Several subjects in middle and high school don't naturally produce
+"write a form, see a value." Examples:
+
+- **G6 namespace machinery** (`ns`, `require`, `refer`, circular
+  deps, classpath, lein/deps.edn): namespaces are loaded by side
+  effect, not evaluated.
+- **G7 IO** (`slurp`, `spit`, `with-open`, `*in*`, shell): touches
+  the filesystem.
+- **G11 host overviews** (JVM/CLR/JS/Python intro, ClojureScript
+  overview, basilisp overview, .cljc reader conditionals).
+- **G12 library briefs** (pedestal/ring, datomic/xtdb, reagent).
+- **G12-04 core.async introduction**: channels and go-blocks
+  don't fit single-form eval.
+
+Two adaptation strategies the tortoise-hare curriculum used:
+
+1. **Surrogate forms**: an evaluable proxy that exercises the
+   *naming* aspect of the concept, even if the runtime aspect
+   isn't directly testable. E.g., G6-02 `ns` form: instead of
+   evaluating `(ns foo.bar)` (which has filesystem side effects),
+   evaluate `(name 'foo.bar)` to teach symbol-name introspection.
+   E.g., G7 IO subjects use `with-out-str` and string manipulation
+   instead of touching files.
+
+2. **Placeholder + narrative-carries-the-content**: form is
+   `(do "subject-overview-string" :studied)` with `expected=":studied"`.
+   The narrative subplot does the educational work; the eval call
+   just confirms the shape "I read the overview and submit my
+   marker."
+
+Pick (1) over (2) where possible — surrogates train more useful
+muscle. (2) is acceptable for pure-overview subjects.
+
+### Subplot placeholders that work
+
+The standard placeholders (`{form_display}`, `{concept_phrase}`,
+`{place}`, plus `{hare}/{tortoise}` analogues for your fable) are
+sufficient for ~90% of templates. For grade-flavored variation,
+you can extend `_build_placeholders` in `generator.py` (e.g., add
+`{emo_content}`, `{emo_thirsty}` if your fable uses those EMO_*
+pools heavily).
+
+### Variety per example
+
+The standard cross-product (8-10 subplots × 7+ characters × 7+
+locations × 4-5 openers) yields >2,000 distinct surface forms.
+At n=222 records per example, expect 220-222 unique user_msg
+(variety score near 1.00). If your variety drops below 0.95,
+the subplot pool is too small or the character/location pool is
+too narrow.
+
+### Per-grade subplot extensions
+
+Reusing `_G1_SHARED_SUBPLOTS` across all grades is the right base.
+Each grade then adds 1-3 grade-flavored subplots:
+- G3: a "naming ceremony" or "ledger of bindings" subplot
+- G4: a "collection of pebbles / milestones / paw-prints" subplot
+- G5: a "same operation repeated cleverly" subplot
+- G6: characters working in different namespaces / cottages
+- G7: tortoise tries / catches / retries
+- G8: different species (creatures) responding to the same call
+- G9: tortoise's careful transactional updates vs hare's racing
+- G10: the tortoise designs a small language
+- G11: the tortoise crosses into a foreign land
+- G12: the long race finally ends — tools-at-the-finish-line
+
+Don't try to invent NEW subplots for every grade — the shared
+8 from G1 cover most subjects fine. Add 1-2 grade-specific ones
+where the grade's theme genuinely calls for new framing.
+
+### Examples per subject
+
+3-5 examples per subject is the sweet spot. Less than 3 = the
+subject under-covers its value space. More than 5 = the variant
+generator is doing the diversity work anyway.
+
+For boundary subjects (G1-02 integers spanning positive/negative/
+zero/large), 5-6 examples cover the value space well. For
+operator subjects (G2-05 quot/rem/mod), one example per operator
+is enough. For overview-style subjects, 2-3 examples is plenty.
+
 ## Coordinating with other fable-curriculum agents
 
 Other agents are doing the same work for the other 9 fables. To
