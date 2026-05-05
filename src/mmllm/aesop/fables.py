@@ -484,7 +484,7 @@ def _th_speed_comparison(scene: Scene) -> Record:
     hours          = scene.pick_int(2, 6)
     miles_ahead    = (hare_speed - tortoise_speed) * hours
 
-    _intro  = _aesopian_intro(scene, "tortoise-hare", location)
+    intro   = _aesopian_intro(scene, "tortoise-hare", location)
     proud   = scene.rng.choice(EMO_PROUD)
     patient = scene.rng.choice(EMO_PATIENT)
 
@@ -599,20 +599,84 @@ def _th_speed_comparison(scene: Scene) -> Record:
             body=App("quot", [Var("miles-ahead"), Var("gap-per-hour")]),
         )
         answer = evaluate(expr)
+
+        # Six subplots — given speeds and a known final gap, find how
+        # long they had been running. The lead has already opened up; the
+        # narrator notices it and asks the listener to work backwards.
+        speed_hours_subplots = [
+            # 1) racing pair, gap-by-noon
+            f"{hare.name} the hare and {tortoise.name} the tortoise had "
+            f"set out together at sunrise, {hare.name} {proud} at "
+            f"{hare_speed} {unit(hare_speed, 'mile')} per hour and "
+            f"{tortoise.name} {patient} at {tortoise_speed} "
+            f"{unit(tortoise_speed, 'mile')} per hour. By the time the "
+            f"forest folk came to check on them, {hare.name} stood "
+            f"exactly {n_unit(miles_ahead, 'mile')} farther down the path "
+            f"than {tortoise.name}. The animals knew both speeds and the "
+            f"distance between them — only the running time was missing.",
+
+            # 2) farmer notices the gap
+            f"A farmer leaning on his fence watched the racers go past. "
+            f"{hare.name} flew by {proud} at {hare_speed} "
+            f"{unit(hare_speed, 'mile')} per hour; {tortoise.name} came "
+            f"behind at a calm {tortoise_speed} "
+            f"{unit(tortoise_speed, 'mile')} per hour, {patient}. Some "
+            f"while later the farmer wandered down the road and found "
+            f"{hare.name} a clear {n_unit(miles_ahead, 'mile')} ahead of "
+            f"{tortoise.name}. He scratched his beard and tried to work "
+            f"out how long they had been running.",
+
+            # 3) badger judge with a worn sundial
+            f"The badger judge tracked the race from a low knoll. "
+            f"{hare.name} kept up an unbroken {hare_speed} "
+            f"{unit(hare_speed, 'mile')} per hour, {proud}, and "
+            f"{tortoise.name} held a steady {tortoise_speed} "
+            f"{unit(tortoise_speed, 'mile')} per hour, {patient}. The "
+            f"badger looked up from his sundial when the gap between them "
+            f"reached exactly {n_unit(miles_ahead, 'mile')}. Knowing both "
+            f"paces, he sat down to figure how many hours had passed since "
+            f"the start.",
+
+            # 4) crowd at the half-way ridge
+            f"A small crowd had gathered at the half-way ridge to watch. "
+            f"{hare.name}, {proud}, ran past at {hare_speed} "
+            f"{unit(hare_speed, 'mile')} per hour, and {tortoise.name} "
+            f"plodded along {patient} at {tortoise_speed} "
+            f"{unit(tortoise_speed, 'mile')} per hour. By the time the "
+            f"sun had moved a fair way across the sky, the lead had grown "
+            f"to {n_unit(miles_ahead, 'mile')} between them. From the two "
+            f"speeds and the present gap, the spectators wanted to "
+            f"reconstruct how long the race had been running.",
+
+            # 5) postmaster glancing at the gap
+            f"The village postmaster, walking the road, met "
+            f"{tortoise.name} plodding along {patient} at {tortoise_speed} "
+            f"{unit(tortoise_speed, 'mile')} per hour. Far ahead he could "
+            f"just make out {hare.name}, {proud}, holding {hare_speed} "
+            f"{unit(hare_speed, 'mile')} per hour. The postmaster paced "
+            f"out the distance and counted exactly "
+            f"{n_unit(miles_ahead, 'mile')} between the two runners. "
+            f"Knowing what he knew of their paces, he tried to deduce "
+            f"how long the contest had run.",
+
+            # 6) two paces under the elms, gap measured
+            f"Under a row of elms, {hare.name} held a steady {hare_speed} "
+            f"{unit(hare_speed, 'mile')} per hour, {proud}, while "
+            f"{tortoise.name}, {patient}, kept {tortoise_speed} "
+            f"{unit(tortoise_speed, 'mile')} per hour without flagging. "
+            f"At one moment a passing finch noted the gap had reached "
+            f"exactly {n_unit(miles_ahead, 'mile')}. Given those two "
+            f"unwavering paces, the question was simply how long they "
+            f"had been at it.",
+        ]
+
+        body = _render_subplot(scene, speed_hours_subplots)
         user_msg = (
-            f"{_intro}{species_phrase(hare)} and {species_phrase(tortoise)} agreed "
-            f"to a steady race through {location.article} {location.name}. "
-            f"{cap(smart_pronoun(hare, [tortoise]))} ran at {hare_speed} "
-            f"{unit(hare_speed, 'mile')} per hour, while {tortoise.name} "
-            f"plodded at {tortoise_speed} "
-            f"{unit(tortoise_speed, 'mile')} per hour. After some time, "
-            f"{hare.name} was exactly {n_unit(miles_ahead, 'mile')} "
-            f"ahead.\n\n"
-            f"Question: How many hours had they been running?"
+            f"{intro}{body}\n\n"
+            f"{question_phrase(scene, 'how many whole hours they had been running')}"
         )
-        result_text = f"They had been running for {n_unit(answer, 'hour')}."
-        narrative   = (
-            f"The gap grows by (hare-speed minus tortoise-speed) per hour, "
+        plan = (
+            f"The gap grows by (hare-speed minus tortoise-speed) each hour, "
             f"so I divide miles-ahead by that gap rate."
         )
         chapter_name = "speed-comparison-hours"
@@ -632,32 +696,94 @@ def _th_speed_comparison(scene: Scene) -> Record:
             body=App("quot", [Var("hare-distance"), Var("hours")]),
         )
         answer = evaluate(expr)
+
+        # Six subplots — given the tortoise's known steady pace, the run
+        # duration, and the final lead, work out the hare's speed. The
+        # hare's pride is the moral hook; the missing number is how fast
+        # he was actually going.
+        speed_speed_subplots = [
+            # 1) post-race stump-side debate
+            f"After the race, the animals gathered at the finishing stump "
+            f"to talk it over. {tortoise.name} had walked {patient} at a "
+            f"known {tortoise_speed} {unit(tortoise_speed, 'mile')} per "
+            f"hour for the full {n_unit(hours, 'hour')}. {hare.name}, "
+            f"{proud}, had refused to say how fast {hare.he_she} had "
+            f"actually run, but everyone could see {hare.he_she} had "
+            f"finished {n_unit(miles_ahead, 'mile')} ahead of "
+            f"{tortoise.name}. The badger judge set out to compute "
+            f"{hare.name}'s real pace.",
+
+            # 2) sundial-judged race, hare's swagger
+            f"The badger judge timed the race with a sundial: a clean "
+            f"{n_unit(hours, 'hour')} from start to call. {tortoise.name}, "
+            f"{patient}, had held a measured {tortoise_speed} "
+            f"{unit(tortoise_speed, 'mile')} per hour throughout. "
+            f"{hare.name}, {proud}, would only say that {hare.he_she} had "
+            f"\"run as a Hare ought,\" finishing "
+            f"{n_unit(miles_ahead, 'mile')} in front of {tortoise.name}. "
+            f"The badger pulled out his slate to work out {hare.name}'s "
+            f"actual speed.",
+
+            # 3) finch reporters at the post
+            f"Two finches who had been reporting the race quarrelled "
+            f"over the result. {tortoise.name}, {patient}, had walked a "
+            f"known {tortoise_speed} {unit(tortoise_speed, 'mile')} per "
+            f"hour for the agreed {n_unit(hours, 'hour')}. {hare.name}, "
+            f"{proud}, had crossed the finish line "
+            f"{n_unit(miles_ahead, 'mile')} ahead. Neither finch had "
+            f"thought to clock {hare.name}'s actual pace, but with a "
+            f"little arithmetic the speed could still be recovered.",
+
+            # 4) farmer at the gate, end-of-race
+            f"The farmer at the gate watched the contestants come past "
+            f"in sequence. {tortoise.name}, {patient}, had managed "
+            f"exactly {tortoise_speed} {unit(tortoise_speed, 'mile')} "
+            f"per hour for {n_unit(hours, 'hour')} without break. "
+            f"{hare.name}, {proud}, finished {n_unit(miles_ahead, 'mile')} "
+            f"farther down the lane. The farmer leaned on his rake and "
+            f"tried to work out, from those numbers alone, how fast "
+            f"{hare.name} had truly been running.",
+
+            # 5) elder hedgehog reconstructs the pace
+            f"At sundown the elder hedgehog gathered the small crowd "
+            f"around to settle the question. {tortoise.name} had kept "
+            f"{patient} to {tortoise_speed} "
+            f"{unit(tortoise_speed, 'mile')} per hour for the agreed "
+            f"{n_unit(hours, 'hour')}. {hare.name}, {proud}, had crossed "
+            f"{n_unit(miles_ahead, 'mile')} ahead. The hedgehog said the "
+            f"answer was simple: combine {tortoise.name}'s distance with "
+            f"the lead, then divide by the time, and {hare.name}'s real "
+            f"pace would emerge.",
+
+            # 6) traveller asking about the morning's race
+            f"A traveller passing through stopped to ask about the "
+            f"morning's race. He was told that {tortoise.name}, "
+            f"{patient}, had walked a steady {tortoise_speed} "
+            f"{unit(tortoise_speed, 'mile')} per hour for "
+            f"{n_unit(hours, 'hour')}, and that {hare.name}, {proud}, "
+            f"had finished {n_unit(miles_ahead, 'mile')} ahead. "
+            f"\"And how fast was the Hare?\" he asked, but no one had "
+            f"clocked {hare.name} directly — only the math could supply "
+            f"the answer.",
+        ]
+
+        body = _render_subplot(scene, speed_speed_subplots)
+        what_q = f"{hare.name}'s speed in miles per hour"
         user_msg = (
-            f"{_intro}{species_phrase(hare)} and {species_phrase(tortoise)} agreed "
-            f"to a steady race through {location.article} {location.name}. "
-            f"{tortoise.name} kept a steady {tortoise_speed} "
-            f"{unit(tortoise_speed, 'mile')} per hour. Both ran for "
-            f"exactly {n_unit(hours, 'hour')}, by the end of which "
-            f"{hare.name} was {n_unit(miles_ahead, 'mile')} ahead.\n\n"
-            f"Question: What was {hare.name}'s speed in miles per hour?"
+            f"{intro}{body}\n\n"
+            f"{question_phrase(scene, what_q)}"
         )
-        result_text = (
-            f"{hare.name}'s speed was {answer} "
-            f"{unit(answer, 'mile')} per hour."
-        )
-        narrative   = (
-            f"{hare.name}'s total distance is "
-            f"miles-ahead + tortoise-distance; speed = total / hours."
+        plan = (
+            f"{hare.name}'s total distance equals the lead plus "
+            f"{tortoise.name}'s distance; speed equals that total divided "
+            f"by hours."
         )
         chapter_name = "speed-comparison-speed"
 
-    code_block = render_code(expr, form=scene.code_form(), value=answer)
     return _finalize(
         scene,
         user_msg=user_msg,
-        narrative=narrative,
-        code_block=code_block,
-        result_text=result_text,
+        plan=plan,
         value=answer,
         expr=expr,
         fable="tortoise-hare",
@@ -686,34 +812,96 @@ def _th_distance_remaining(scene: Scene) -> Record:
     )
     answer = evaluate(expr)
 
-    _intro = _aesopian_intro(scene, "tortoise-hare", location)
-    user_msg = (
-        f"{_intro}In a long race across {location.article} {location.name}, "
-        f"the course is {n_unit(total, 'mile')}. {species_phrase(tortoise)} "
-        f"has already walked {n_unit(walked, 'mile')}. "
-        f"{cap(tortoise.he_she)} continues at {speed} "
-        f"{unit(speed, 'mile')} per hour.\n\n"
-        f"Question: How many more whole hours of walking does "
-        f"{tortoise.name} need to reach the finish line?"
-    )
+    intro   = _aesopian_intro(scene, "tortoise-hare", location)
+    proud   = scene.rng.choice(EMO_PROUD)
+    patient = scene.rng.choice(EMO_PATIENT)
+    tired   = scene.rng.choice(EMO_TIRED)
 
-    code_block  = render_code(expr, form=scene.code_form(), value=answer)
-    result_text = (
-        f"{tortoise.name} needs {n_unit(answer, 'more hour')} of walking."
-        if answer != 1 else
-        f"{tortoise.name} needs 1 more hour of walking."
+    # Six narrative subplots — same arithmetic (total - walked, divided
+    # by speed) but each frames the unfinished course in a different
+    # small drama. The hare is somewhere off-stage in each: napping,
+    # boasting, or already finished — leaving the patient tortoise to
+    # finish the remaining stretch step by careful step.
+    distance_remaining_subplots = [
+        # 1) classic — tortoise pauses to look back at distance walked
+        f"The course was {n_unit(total, 'mile')} long, and "
+        f"{tortoise.name} the tortoise had already covered "
+        f"{n_unit(walked, 'mile')} of it {patient}, footstep by "
+        f"footstep. Far ahead, {hare.name} the hare was {tired} under "
+        f"some tree, having declared the race already won. "
+        f"{cap(tortoise.he_she)} paused only briefly to look back at "
+        f"the path {tortoise.he_she} had crossed, then resumed at "
+        f"{speed} {unit(speed, 'mile')} per hour, intending to finish.",
+
+        # 2) midday milestone, marker stones at the trail
+        f"A row of small marker stones counted out the "
+        f"{n_unit(total, 'mile')} of the agreed course. "
+        f"{tortoise.name}, walking {patient}, had passed the stone "
+        f"reading {n_unit(walked, 'mile')} just before noon. "
+        f"{hare.name} was somewhere up ahead, dozing {tired} where "
+        f"{hare.he_she} had dropped after sprinting too hard. "
+        f"{tortoise.name} held to {speed} "
+        f"{unit(speed, 'mile')} per hour with no sign of slowing.",
+
+        # 3) curious badger asks how far is left
+        f"A curious old badger met {tortoise.name} on the path and "
+        f"asked how the race was going. \"The course is "
+        f"{n_unit(total, 'mile')},\" said {tortoise.name} {patient}, "
+        f"\"and I have walked {n_unit(walked, 'mile')} so far.\" "
+        f"Behind him, {hare.name} could just be made out, {proud} but "
+        f"{tired}, lounging by a stump. {tortoise.name} added that "
+        f"{tortoise.he_she} kept a steady {speed} "
+        f"{unit(speed, 'mile')} per hour and meant to finish before "
+        f"sundown.",
+
+        # 4) river crossing, halfway behind
+        f"The race ran past a slow brown river that cut the "
+        f"{n_unit(total, 'mile')} course nearly in two. {tortoise.name} "
+        f"had crossed it long ago and now had {n_unit(walked, 'mile')} "
+        f"behind {tortoise.him_her}, walking {patient} at {speed} "
+        f"{unit(speed, 'mile')} per hour. Down the lane, {hare.name} "
+        f"sat against a fence post, {tired}, telling no one in "
+        f"particular how the race had been won twice over. "
+        f"{tortoise.name} did not stop to listen.",
+
+        # 5) sunset deadline, finish before dark
+        f"They had agreed to finish before sundown. The course was "
+        f"{n_unit(total, 'mile')}; {tortoise.name} had already walked "
+        f"{n_unit(walked, 'mile')} {patient}, never quickening, never "
+        f"slowing. {hare.name}, {proud} but now {tired}, had given up "
+        f"on running entirely and was instead arguing with a passing "
+        f"squirrel about who deserved the prize. {tortoise.name} "
+        f"continued at {speed} {unit(speed, 'mile')} per hour, eyes on "
+        f"the lengthening shadows.",
+
+        # 6) old shepherd, marker stake at the meadow
+        f"An old shepherd had driven a stake at the {n_unit(total, 'mile')} "
+        f"mark to call the finish line. {tortoise.name} had passed "
+        f"{n_unit(walked, 'mile')} of those miles, plodding {patient} "
+        f"without complaint. {hare.name} was nowhere in sight — "
+        f"asleep, the shepherd guessed, {tired} from too many "
+        f"shortcuts. {tortoise.name} pressed forward at {speed} "
+        f"{unit(speed, 'mile')} per hour, certain only that "
+        f"{tortoise.he_she} would arrive when {tortoise.he_she} "
+        f"arrived.",
+    ]
+
+    body = _render_subplot(scene, distance_remaining_subplots)
+    what_q = (f"how many more whole hours of walking {tortoise.name} "
+              f"needs to reach the finish line")
+    user_msg = (
+        f"{intro}{body}\n\n"
+        f"{question_phrase(scene, what_q)}"
     )
-    narrative   = (
-        f"I subtract the distance already walked from the total to find "
-        f"what remains, then divide by {tortoise.name}'s speed."
+    plan = (
+        f"I subtract the distance already walked from the total to "
+        f"find what remains, then divide by {tortoise.name}'s speed."
     )
 
     return _finalize(
         scene,
         user_msg=user_msg,
-        narrative=narrative,
-        code_block=code_block,
-        result_text=result_text,
+        plan=plan,
         value=answer,
         expr=expr,
         fable="tortoise-hare",
@@ -1259,7 +1447,13 @@ def _ge_total_yield(scene: Scene) -> Record:
 
 def _ge_value_yield(scene: Scene) -> Record:
     """Lays N eggs/day × D days × C coins/egg = total coins. Three orientation
-    variants (one of {coins, days, per-egg-coins} unknown)."""
+    variants (one of {coins, days, per-egg-coins} unknown).
+
+    The 6 narrative subplots share a skeleton (golden-egg routine + market
+    trip + tally beat) and use a per-orient `givens` clause to state the
+    facts the question hides — so each branch still gets 6 distinct beats
+    without an 18-template explosion.
+    """
     goose = scene.pick_character(role="yielder", species="goose")
     owner = scene.pick_character(role_classes=("trader",))
     location = scene.pick_location(tag="village")
@@ -2236,23 +2430,99 @@ def _fg_give_up(scene: Scene) -> Record:
     )
     answer = evaluate(expr)
 
-    _intro = _aesopian_intro(scene, "fox-grapes")
+    intro = _aesopian_intro(scene, "fox-grapes")
+    hungry    = scene.rng.choice(EMO_HUNGRY)
+    desperate = scene.rng.choice(EMO_DESPERATE)
+    regretful = scene.rng.choice(EMO_REGRETFUL)
+
+    # Six narrative subplots — same arithmetic (tries-so-far <
+    # threshold => "yes") but each grounds the give-up moment in a
+    # different fruit and setting. The early subplots lean desperate;
+    # the later ones lean toward the famous sour-grapes rationalization.
+    give_up_subplots = [
+        # 1) classic — purple grapes on a vineyard vine
+        f"Beneath a low vine in an old vineyard {fox.name} the fox had "
+        f"been leaping at a heavy cluster of ripe purple grapes for the "
+        f"better part of an hour. {cap(fox.he_she)}, {hungry}, had "
+        f"resolved before starting that {n_unit(threshold, 'attempt')} "
+        f"would be {fox.his_her} limit — beyond that, {fox.he_she} would "
+        f"call the grapes sour and walk away. So far {fox.he_she} had "
+        f"sprung {n_unit(tried, 'time')}, paws scrabbling at the leaves, "
+        f"and now {fox.he_she} stood panting in the dust to weigh "
+        f"whether the next jump was worth its breath.",
+
+        # 2) ripe apples in a quiet farmyard
+        f"In a farmer's quiet yard, where ripe apples hung from a low "
+        f"branch above the dust, {fox.name} had been working "
+        f"{fox.him_her}self into a fine sweat. {cap(fox.he_she)} had "
+        f"sworn — out loud, to the indifferent hens — that "
+        f"{n_unit(threshold, 'attempt')} were all {fox.he_she} would "
+        f"grant the apples; after that, {fox.he_she} would name them "
+        f"underripe and slink off with what dignity remained. "
+        f"{cap(fox.he_she)} had already tried {n_unit(tried, 'time')}, "
+        f"each spring shorter than the last, and stood {desperate} "
+        f"beneath the lowest apple, deciding.",
+
+        # 3) blackberries spilling over a garden trellis
+        f"A garden trellis at the edge of the lane was hung with the "
+        f"darkest blackberries {fox.name} the fox had ever seen. "
+        f"{cap(species_phrase(fox))}, {hungry}, had set "
+        f"{n_unit(threshold, 'attempt')} as the limit of {fox.his_her} "
+        f"patience; one more than that and the berries would simply be "
+        f"sour, no better than weeds. So far {fox.he_she} had bounded "
+        f"upward {n_unit(tried, 'time')}, juice-stained leaves "
+        f"trembling each time {fox.his_her} claws caught and slipped. "
+        f"Now {fox.he_she} circled below, considering whether to gather "
+        f"{fox.him_her}self for another spring.",
+
+        # 4) pears on the arbor of a kitchen garden
+        f"Beneath the arbor of a kitchen garden the air was thick with "
+        f"the scent of ripening pears. {fox.name}, {desperate} after a "
+        f"long morning without food, had agreed with {fox.him_her}self "
+        f"on a strict allowance: {n_unit(threshold, 'attempt')} and not "
+        f"one leap more. After that, the pears would obviously be hard "
+        f"and bitter, and a self-respecting fox would walk away. "
+        f"{cap(fox.he_she)} had tried {n_unit(tried, 'time')} so far, "
+        f"each landing a little heavier than the last, and now stood "
+        f"eyeing the swaying fruit, calculating.",
+
+        # 5) plums on a market square display
+        f"The market square was nearly deserted when {fox.name} slipped "
+        f"between the stalls and stopped beneath a high display of dark "
+        f"plums. {cap(fox.he_she)}, {hungry}, had told {fox.him_her}self "
+        f"firmly: {n_unit(threshold, 'attempt')} only — beyond that the "
+        f"plums were certainly half-rotten and beneath {fox.his_her} "
+        f"notice. {cap(fox.he_she)} had already sprung "
+        f"{n_unit(tried, 'time')}, paws clattering on the flagstones, "
+        f"and now stood with whiskers twitching, weighing whether to "
+        f"gather {fox.him_her}self for one more leap.",
+
+        # 6) figs over a vineyard wall — sour-grapes near at hand
+        f"At the edge of a sunbaked vineyard a fig tree had grown over "
+        f"a low stone wall, dropping its fruit on the wrong side. "
+        f"{fox.name} the fox stood beneath, {regretful} of the long walk "
+        f"that had brought {fox.him_her} here, and had set "
+        f"{n_unit(threshold, 'attempt')} as the absolute limit of "
+        f"{fox.his_her} effort. Past that and the figs would be sour, "
+        f"shrivelled, fit only for crows. So far {fox.he_she} had jumped "
+        f"{n_unit(tried, 'time')}, each landing a touch less proud than "
+        f"the last, and now considered the matter from the dust.",
+    ]
+
+    body = _render_subplot(scene, give_up_subplots)
     user_msg = (
-        f"{_intro}{species_phrase(fox)} grew tired of jumping for the grapes. "
-        f"{cap(fox.he_she)} would give up after {n_unit(threshold, 'attempt')}. "
-        f"So far {fox.he_she} had tried {n_unit(tried, 'time')}.\n\n"
-        f"Question: Will {fox.name} try again? Answer yes or no."
+        f"{intro}{body}\n\n"
+        f"{question_phrase(scene, f'whether {fox.name} will try again — answer yes or no')}"
     )
 
-    code_block  = render_code(expr, form=scene.code_form(), value=answer)
-    result_text = f"The answer is {answer}."
-    narrative   = "I check whether tried is still below the threshold."
+    plan = (
+        "I check whether tries-so-far is still below the threshold; "
+        "if so the answer is yes, otherwise no."
+    )
     return _finalize(
         scene,
         user_msg=user_msg,
-        narrative=narrative,
-        code_block=code_block,
-        result_text=result_text,
+        plan=plan,
         value=answer,
         expr=expr,
         fable="fox-grapes",
@@ -2278,7 +2548,7 @@ def _tm_food_comparison(scene: Scene) -> Record:
     country = scene.pick_character(role_classes=("prey",), species="mouse")
     city    = scene.pick_character(role_classes=("prey",), species="mouse",
                                     not_=country)
-    food = scene.pick_item(edible=True, size_max=2)
+    food    = scene.pick_item(edible=True, countable=True, size_max=2)
     a = scene.pick_int(1, 30)
     b = scene.pick_int(1, 30)
 
