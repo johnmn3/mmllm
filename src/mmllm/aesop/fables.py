@@ -3087,7 +3087,6 @@ def _tm_shared_meal(scene: Scene) -> Record:
     country = scene.pick_character(role_classes=("prey",), species="mouse")
     city    = scene.pick_character(role_classes=("prey",), species="mouse",
                                     not_=country)
-    food    = scene.pick_item(edible=True, countable=True, size_max=2)
     n_mice  = scene.pick_int(2, 5)
     total   = scene.pick_int(n_mice, n_mice * 10)
 
@@ -3098,25 +3097,92 @@ def _tm_shared_meal(scene: Scene) -> Record:
     )
     answer = evaluate(expr)
 
-    _intro = _aesopian_intro(scene, "two-mice")
+    intro = _aesopian_intro(scene, "two-mice")
+    content = scene.rng.choice(EMO_CONTENT)
+    greedy  = scene.rng.choice(EMO_GREEDY)
+
+    # Six narrative subplots — same arithmetic (total // n-mice). Each
+    # frames the shared feast around a different country/city food and
+    # a different vessel: the country mouse hosts plainly, the city
+    # mouse hosts grandly, but the meal is divided the same way.
+    shared_meal_subplots = [
+        # 1) cheese rinds in the country burrow's central pouch
+        f"In the warm hollow of an old oak, {country.name} the country "
+        f"mouse spread a worn pouch open on the moss floor. Inside lay "
+        f"{n_unit(total, 'cheese rind', 'cheese rinds')}, "
+        f"saved scrap by scrap from a farmer's broken plate. "
+        f"{n_unit(n_mice, 'mouse', 'mice')} had gathered for the meal "
+        f"— including {country.name} and {city.name}, the city visitor "
+        f"— and they sat in a careful ring, {content}. The host counted "
+        f"out portions slowly, leaving any remainder for the next day's "
+        f"breakfast.",
+
+        # 2) hazelnuts in a basket in the meadow clearing
+        f"On a flat stone in a meadow clearing, {country.name} placed a "
+        f"woven basket holding {n_unit(total, 'hazelnut')}, gathered "
+        f"under the autumn trees. {n_unit(n_mice, 'mouse', 'mice')} had "
+        f"come for the feast — {city.name} among them, eyeing the "
+        f"basket {greedy} and remembering richer fare. Yet the country "
+        f"mouse insisted the meal be divided fairly, whole nuts only, "
+        f"with whatever leftover was set aside for the squirrels. The "
+        f"share each mouse received was the same.",
+
+        # 3) cake crumbs spread on a velvet napkin in the city pantry
+        f"In a city pantry, beneath a tall sideboard, {city.name} laid "
+        f"out a velvet napkin and tipped onto it "
+        f"{n_unit(total, 'cake crumb', 'cake crumbs')} pinched from a "
+        f"baker's window-tray. {n_unit(n_mice, 'mouse', 'mice')} sat "
+        f"around the napkin — including the visiting {country.name}, "
+        f"who watched the city mouse heap and rearrange the crumbs "
+        f"{greedy}. Still, the meal must be split equally, whole crumbs "
+        f"each, the remainder swept aside for tomorrow.",
+
+        # 4) raisins in a tiny clay pot under the kitchen step
+        f"{city.name} the city mouse had carried home a tiny clay pot "
+        f"holding {n_unit(total, 'raisin')} stolen from a kitchen "
+        f"counter, and tonight {country.name} and the others were "
+        f"invited to share. {n_unit(n_mice, 'mouse', 'mice')} clustered "
+        f"around the pot beneath the kitchen step. {city.name} sorted "
+        f"with hungry, fussy paws, {greedy}; {country.name} sat "
+        f"{content} and waited. Each mouse would get the same whole "
+        f"share, no more.",
+
+        # 5) acorns under the floorboard in the country burrow
+        f"{country.name} pried up a loose floorboard in {country.his_her} "
+        f"burrow to reveal {n_unit(total, 'acorn')} stored against the "
+        f"frost. {n_unit(n_mice, 'mouse', 'mice')} were dining tonight, "
+        f"counting {country.name}, the visiting {city.name}, and the "
+        f"neighbors from down the lane. The country mouse, {content}, "
+        f"announced that the acorns would be split evenly — whole nuts "
+        f"only — and any uneven leftover set carefully back beneath "
+        f"the board.",
+
+        # 6) butter pats on a saucer in the city cellar
+        f"On a chipped saucer in the corner of a damp city cellar, "
+        f"{city.name} arranged "
+        f"{n_unit(total, 'butter pat', 'butter pats')} freshly stolen "
+        f"from a dairy. {n_unit(n_mice, 'mouse', 'mice')} sat around "
+        f"the saucer in flickering candlelight, including the country "
+        f"guest. {city.name}, {greedy}, fretted over the arrangement; "
+        f"{country.name} simply waited, {content}, ready to accept "
+        f"whichever share fell out of an honest split. Whole pats each, "
+        f"leftover set aside.",
+    ]
+
+    body = _render_subplot(scene, shared_meal_subplots)
     user_msg = (
-        f"{_intro}{species_phrase(country)} and {species_phrase(city)} hosted "
-        f"a feast for {n_unit(n_mice, 'mouse', 'mice')} (counting "
-        f"themselves). They had {n_unit(total, food.name, food.plural)} "
-        f"to share equally.\n\n"
-        f"Question: How many whole {food.plural} does each mouse get if "
-        f"any leftover is set aside?"
+        f"{intro}{body}\n\n"
+        f"{question_phrase(scene, 'how many whole pieces of food each mouse receives if any leftover is set aside')}"
     )
 
-    code_block  = render_code(expr, form=scene.code_form(), value=answer)
-    result_text = f"Each mouse gets {n_unit(answer, food.name, food.plural)}."
-    narrative   = "I integer-divide the total by the number of mice."
+    plan = (
+        "I integer-divide the total food by the number of mice and "
+        "ignore the remainder."
+    )
     return _finalize(
         scene,
         user_msg=user_msg,
-        narrative=narrative,
-        code_block=code_block,
-        result_text=result_text,
+        plan=plan,
         value=answer,
         expr=expr,
         fable="two-mice",
@@ -3787,6 +3853,7 @@ def _lb_divide_conquer_bool(scene: Scene) -> Record:
     bulls > L. Alone, bulls have B each (B*N == total). Can lion defeat
     them one at a time?"""
     lion = scene.pick_character(role_classes=("predator",), species="lion", gender=scene.pick_choice(["m", "f"]))
+    location = scene.pick_location(tags_any=("path",), indoor=False)
     lion_strength = scene.pick_int(5, 15)
     n_bulls       = scene.pick_int(3, 5)
     bull_strength = scene.pick_int(2, lion_strength)  # individually beatable
@@ -3804,30 +3871,106 @@ def _lb_divide_conquer_bool(scene: Scene) -> Record:
         ),
     )
     answer = evaluate(expr)
-    answer_str = "yes" if answer else "no"
+    combined = n_bulls * bull_strength
 
-    _intro = _aesopian_intro(scene, "lion-bulls")
+    intro     = _aesopian_intro(scene, "lion-bulls", location)
+    patient   = scene.rng.choice(EMO_PATIENT)
+    desperate = scene.rng.choice(EMO_DESPERATE)
+
+    # Six narrative subplots — same boolean (lion > one-bull AND lion <
+    # combined). Each subplot makes the math feel like a real measuring
+    # contest: the lion's confident-against-one strength on one side, the
+    # bulls' fragile-but-formidable union on the other. Settings vary;
+    # the boolean asks whether divide-and-conquer is the lion's only
+    # winning path.
+    divide_conquer_subplots = [
+        # 1) open meadow — old herd-test
+        f"In the heart of an open meadow stood {n_unit(n_bulls, 'bull')}, "
+        f"each tested at the spring tournament to be of strength "
+        f"{bull_strength}. {species_phrase(lion)} watched from the long "
+        f"grass {patient}, {lion.his_her} own measured strength known to "
+        f"be {lion_strength}. Bull by bull, {lion.he_she} could outmatch "
+        f"any one of them one-on-one. But when the bulls had stood "
+        f"shoulder to shoulder, their unified strength came to "
+        f"{combined} — too great for any single lion. The question now "
+        f"was simply whether the lion's only winning path lay through "
+        f"dividing the herd.",
+
+        # 2) hilltop pasture — measured in spring tests
+        f"On a hilltop pasture, each of the {n_unit(n_bulls, 'bull')} "
+        f"had been weighed and trial-tested by the elder bulls in "
+        f"younger years, and each carried strength {bull_strength}. "
+        f"{species_phrase(lion)}, with strength {lion_strength}, paced "
+        f"the ridge {patient}. Alone, a bull would not stand against "
+        f"{lion.him_her}; but pressed together, the herd's combined "
+        f"strength rose to {combined}, beyond anything one cat could "
+        f"meet. The bulls already paced apart, {desperate}, no longer "
+        f"sure of one another. Whether the lion needed them divided to "
+        f"win was the only remaining question.",
+
+        # 3) valley grassland — by the slow stream
+        f"In the valley grassland, {species_phrase(lion)} crouched at "
+        f"the reed-line {patient}, watching {n_unit(n_bulls, 'bull')} "
+        f"drink at separate bends of the slow stream. Each bull had "
+        f"strength {bull_strength}; the lion's own strength was "
+        f"{lion_strength}. Solo, no bull at the water could withstand "
+        f"{lion.him_her}; together at the bend they had once held "
+        f"{combined} between them, more than enough to chase a lion off. "
+        f"The math of the situation was clear, and the only thing left "
+        f"to settle was the boolean: did the lion's chance depend on "
+        f"keeping the bulls divided?",
+
+        # 4) fence-line they no longer respect
+        f"Along an old fence-line that the herd had once walked together "
+        f"each evening, {n_unit(n_bulls, 'bull')} now drifted past the "
+        f"rails singly. Every bull had a measured strength of "
+        f"{bull_strength}, and {species_phrase(lion)}, at "
+        f"{lion_strength}, padded the far side {patient}. One bull at "
+        f"the fence was no contest for {lion.him_her}; the herd at full "
+        f"muster, however, mounted a combined strength of {combined}, "
+        f"which would have flung the lion clean off the rails. The "
+        f"bulls' unease left them {desperate}, drifting further apart "
+        f"each night. The remaining question was a yes-or-no.",
+
+        # 5) clearing surrounded by tall grass
+        f"In a wide clearing rimmed by tall grass, {n_unit(n_bulls, 'bull')} "
+        f"stood at suspicious distances, each of strength "
+        f"{bull_strength}. {species_phrase(lion)} crossed the clearing "
+        f"{patient}, knowing {lion.his_her} own strength to be "
+        f"{lion_strength}. Single-handedly against a single bull, the "
+        f"lion held the upper paw; but if the herd closed ranks the "
+        f"combined strength of {combined} would have made short work of "
+        f"{lion.him_her}. The lion sat in the long shadow at the edge "
+        f"and considered: did victory depend strictly on keeping them "
+        f"apart?",
+
+        # 6) flat plain at dusk — final reckoning
+        f"At dusk on a flat plain, the silhouettes of "
+        f"{n_unit(n_bulls, 'bull')} stood widely scattered, each carrying "
+        f"the same well-known strength {bull_strength}. "
+        f"{species_phrase(lion)}, of strength {lion_strength}, watched "
+        f"the long shadows lean across the grass {patient}. The lion "
+        f"could meet any one of those silhouettes alone; the herd's "
+        f"combined strength of {combined}, however, would simply "
+        f"trample {lion.him_her}. The bulls themselves shifted "
+        f"{desperate} at every distant snap of grass. All that remained "
+        f"was the boolean: did the lion truly need them divided to win?",
+    ]
+
+    body = _render_subplot(scene, divide_conquer_subplots)
     user_msg = (
-        f"{_intro}{species_phrase(lion)} has strength {lion_strength}. Each of "
-        f"the {n_unit(n_bulls, 'bull')} has strength {bull_strength}. "
-        f"Together the bulls' combined strength is {n_bulls * bull_strength}.\n\n"
-        f"Question: Can {lion.name} only defeat the bulls if they "
-        f"separate? Answer yes if alone-the-lion-wins-but-together-they-do-not, "
-        f"otherwise no."
+        f"{intro}{body}\n\n"
+        f"{question_phrase(scene, f'whether {lion.name} can defeat each bull alone (lion-strength > bull-strength) yet would lose against the herd combined (lion-strength < combined-strength)')}"
     )
 
-    code_block  = render_code(expr, form="inline", value=answer)
-    result_text = f"The answer is {answer_str}."
-    narrative   = (
-        "I check both: lion > one bull (alone wins) AND lion < "
-        "combined-strength (together loses)."
+    plan = (
+        "I check both: lion-strength > one bull's strength (alone wins) "
+        "AND lion-strength < combined-strength (together the herd wins)."
     )
     return _finalize(
         scene,
         user_msg=user_msg,
-        narrative=narrative,
-        code_block=code_block,
-        result_text=result_text,
+        plan=plan,
         value=answer,
         expr=expr,
         fable="lion-bulls",
