@@ -159,17 +159,33 @@ def _th_nap_overtake(scene: Scene) -> Record:
     )
     answer = evaluate(expr)
 
+    intro     = scene.phrase("Once upon a time,", "Long ago,",
+                              "One bright morning,", "On a sunny day,")
+    challenge = scene.phrase("challenged", "raced", "set out against")
+    boast     = scene.phrase("bragged about being the fastest",
+                              "boasted of being the quickest",
+                              "claimed to be the swiftest")
+    pace      = scene.phrase("just kept a steady pace",
+                              "kept moving steadily",
+                              "plodded on without hurry")
+    after     = scene.phrase("After running", "Having covered",
+                              "Once it had run")
+    nap       = scene.phrase("grew tired and decided to take a nap",
+                              "felt sleepy and stretched out for a nap",
+                              "lay down to rest a while")
+    meanwhile = scene.phrase("Meanwhile,", "All the while,",
+                              "At the same time,")
+    while_x   = scene.phrase("slept", "napped", "dozed")
     user_msg = (
-        f"Once upon a time, {species_phrase(hare)} challenged "
+        f"{intro} {species_phrase(hare)} {challenge} "
         f"{species_phrase(tortoise)} to a race through "
         f"{location.article} {location.name}. "
-        f"{cap(smart_pronoun(hare, [tortoise]))} bragged about being the "
-        f"fastest, while {smart_pronoun(tortoise, [hare])} just kept a "
-        f"steady pace.\n\n"
-        f"After running {n_unit(hare_lead, 'mile')} ahead, {hare.name} "
-        f"grew tired and decided to take a nap. Meanwhile, {tortoise.name} "
-        f"kept walking at {tortoise_speed} {unit(tortoise_speed, 'mile')} "
-        f"per hour. While {hare.name} slept, {tortoise.name} walked for "
+        f"{cap(smart_pronoun(hare, [tortoise]))} {boast}, while "
+        f"{smart_pronoun(tortoise, [hare])} {pace}.\n\n"
+        f"{after} {n_unit(hare_lead, 'mile')} ahead, {hare.name} "
+        f"{nap}. {meanwhile} {tortoise.name} kept walking at "
+        f"{tortoise_speed} {unit(tortoise_speed, 'mile')} per hour. "
+        f"While {hare.name} {while_x}, {tortoise.name} walked for "
         f"{n_unit(nap_hours, 'hour')} straight.\n\n"
         f"Question: After {tortoise.name}'s walk, who is in the lead?"
     )
@@ -196,44 +212,121 @@ def _th_nap_overtake(scene: Scene) -> Record:
 
 
 def _th_speed_comparison(scene: Scene) -> Record:
-    """Both move steadily; over T hours, who's ahead?"""
+    """Both move steadily. Three orientation variants of the same arithmetic
+    (speed × time = distance):
+
+      - distance-unknown: given speeds + hours, how many miles ahead?
+      - hours-unknown:    given speeds + miles-ahead, for how long?
+      - speed-unknown:    given tortoise-speed + hours + miles-ahead,
+                          what was the hare's speed?
+    """
     hare     = scene.pick_character(role_classes=("racer", "fast"))
     tortoise = scene.pick_character(role_classes=("racer", "slow"), not_=hare)
     location = scene.pick_location(tags_any=("path",), indoor=False)
+    orient   = scene.pick_choice(["distance", "hours", "speed"])
 
     hare_speed     = scene.pick_int(4, 10)
     tortoise_speed = scene.pick_int(1, 3)
     hours          = scene.pick_int(2, 6)
+    miles_ahead    = (hare_speed - tortoise_speed) * hours
 
-    expr = Let(
-        bindings=[
-            ("hare-speed",     Lit(hare_speed)),
-            ("tortoise-speed", Lit(tortoise_speed)),
-            ("hours",          Lit(hours)),
-            ("hare-distance",     App("*", [Var("hare-speed"), Var("hours")])),
-            ("tortoise-distance", App("*", [Var("tortoise-speed"), Var("hours")])),
-        ],
-        body=App("-", [Var("hare-distance"), Var("tortoise-distance")]),
-    )
-    answer = evaluate(expr)
-
-    user_msg = (
-        f"{species_phrase(hare)} and {species_phrase(tortoise)} agreed to a "
-        f"steady race through {location.article} {location.name}. "
-        f"{cap(smart_pronoun(hare, [tortoise]))} ran at {hare_speed} "
-        f"{unit(hare_speed, 'mile')} per hour, while {tortoise.name} "
-        f"kept a steady {tortoise_speed} {unit(tortoise_speed, 'mile')} "
-        f"per hour. Both ran for exactly {n_unit(hours, 'hour')}.\n\n"
-        f"Question: How many miles ahead is {hare.name} after "
-        f"{n_unit(hours, 'hour')}?"
-    )
+    if orient == "distance":
+        # Given hare-speed, tortoise-speed, hours; compute miles-ahead.
+        expr = Let(
+            bindings=[
+                ("hare-speed",        Lit(hare_speed)),
+                ("tortoise-speed",    Lit(tortoise_speed)),
+                ("hours",             Lit(hours)),
+                ("hare-distance",     App("*", [Var("hare-speed"), Var("hours")])),
+                ("tortoise-distance", App("*", [Var("tortoise-speed"), Var("hours")])),
+            ],
+            body=App("-", [Var("hare-distance"), Var("tortoise-distance")]),
+        )
+        answer = evaluate(expr)
+        user_msg = (
+            f"{species_phrase(hare)} and {species_phrase(tortoise)} agreed "
+            f"to a steady race through {location.article} {location.name}. "
+            f"{cap(smart_pronoun(hare, [tortoise]))} ran at {hare_speed} "
+            f"{unit(hare_speed, 'mile')} per hour, while {tortoise.name} "
+            f"kept a steady {tortoise_speed} "
+            f"{unit(tortoise_speed, 'mile')} per hour. Both ran for "
+            f"exactly {n_unit(hours, 'hour')}.\n\n"
+            f"Question: How many miles ahead is {hare.name} after "
+            f"{n_unit(hours, 'hour')}?"
+        )
+        result_text = f"{hare.name} is {answer} miles ahead."
+        narrative   = (
+            f"I'll compute each runner's distance by multiplying speed by "
+            f"time, then subtract."
+        )
+        chapter_name = "speed-comparison-distance"
+    elif orient == "hours":
+        # Given hare-speed, tortoise-speed, miles-ahead; compute hours.
+        # gap-per-hour = hare-speed - tortoise-speed; hours = miles-ahead / gap.
+        expr = Let(
+            bindings=[
+                ("hare-speed",     Lit(hare_speed)),
+                ("tortoise-speed", Lit(tortoise_speed)),
+                ("miles-ahead",    Lit(miles_ahead)),
+                ("gap-per-hour",   App("-", [Var("hare-speed"),
+                                              Var("tortoise-speed")])),
+            ],
+            body=App("quot", [Var("miles-ahead"), Var("gap-per-hour")]),
+        )
+        answer = evaluate(expr)
+        user_msg = (
+            f"{species_phrase(hare)} and {species_phrase(tortoise)} agreed "
+            f"to a steady race through {location.article} {location.name}. "
+            f"{cap(smart_pronoun(hare, [tortoise]))} ran at {hare_speed} "
+            f"{unit(hare_speed, 'mile')} per hour, while {tortoise.name} "
+            f"plodded at {tortoise_speed} "
+            f"{unit(tortoise_speed, 'mile')} per hour. After some time, "
+            f"{hare.name} was exactly {n_unit(miles_ahead, 'mile')} "
+            f"ahead.\n\n"
+            f"Question: How many hours had they been running?"
+        )
+        result_text = f"They had been running for {n_unit(answer, 'hour')}."
+        narrative   = (
+            f"The gap grows by (hare-speed minus tortoise-speed) per hour, "
+            f"so I divide miles-ahead by that gap rate."
+        )
+        chapter_name = "speed-comparison-hours"
+    else:
+        # Given tortoise-speed, hours, miles-ahead; compute hare-speed.
+        # hare-speed = (miles-ahead + tortoise-speed*hours) / hours
+        expr = Let(
+            bindings=[
+                ("tortoise-speed", Lit(tortoise_speed)),
+                ("hours",          Lit(hours)),
+                ("miles-ahead",    Lit(miles_ahead)),
+                ("tortoise-distance",
+                 App("*", [Var("tortoise-speed"), Var("hours")])),
+                ("hare-distance",
+                 App("+", [Var("miles-ahead"), Var("tortoise-distance")])),
+            ],
+            body=App("quot", [Var("hare-distance"), Var("hours")]),
+        )
+        answer = evaluate(expr)
+        user_msg = (
+            f"{species_phrase(hare)} and {species_phrase(tortoise)} agreed "
+            f"to a steady race through {location.article} {location.name}. "
+            f"{tortoise.name} kept a steady {tortoise_speed} "
+            f"{unit(tortoise_speed, 'mile')} per hour. Both ran for "
+            f"exactly {n_unit(hours, 'hour')}, by the end of which "
+            f"{hare.name} was {n_unit(miles_ahead, 'mile')} ahead.\n\n"
+            f"Question: What was {hare.name}'s speed in miles per hour?"
+        )
+        result_text = (
+            f"{hare.name}'s speed was {answer} "
+            f"{unit(answer, 'mile')} per hour."
+        )
+        narrative   = (
+            f"{hare.name}'s total distance is "
+            f"miles-ahead + tortoise-distance; speed = total / hours."
+        )
+        chapter_name = "speed-comparison-speed"
 
     code_block = render_code(expr, form=scene.code_form(), value=answer)
-    result_text = f"{hare.name} is {answer} miles ahead."
-    narrative   = (
-        f"I'll compute each runner's distance by multiplying speed by time, "
-        f"then subtract."
-    )
     return _finalize(
         scene,
         user_msg=user_msg,
@@ -243,7 +336,7 @@ def _th_speed_comparison(scene: Scene) -> Record:
         value=answer,
         expr=expr,
         fable="tortoise-hare",
-        chapter="speed-comparison",
+        chapter=chapter_name,
     )
 
 
@@ -260,11 +353,11 @@ def _th_distance_remaining(scene: Scene) -> Record:
     expr = Let(
         bindings=[
             ("total",  Lit(total)),
-            ("walked", Lit(walked)),
-            ("speed",  Lit(speed)),
-            ("remaining", App("-", [Var("total"), Var("walked")])),
+            ("miles-walked", Lit(walked)),
+            ("walk-speed",  Lit(speed)),
+            ("miles-remaining", App("-", [Var("total"), Var("miles-walked")])),
         ],
-        body=App("quot", [Var("remaining"), Var("speed")]),
+        body=App("quot", [Var("miles-remaining"), Var("walk-speed")]),
     )
     answer = evaluate(expr)
 
@@ -331,9 +424,9 @@ def _cp_stones_needed(scene: Scene) -> Record:
             ("rise-per-stone", Lit(rise_per)),
             ("start-cm",       Lit(start)),
             ("target-cm",      Lit(target)),
-            ("gap",            App("-", [Var("target-cm"), Var("start-cm")])),
+            ("level-gap",            App("-", [Var("target-cm"), Var("start-cm")])),
         ],
-        body=App("quot", [App("+", [Var("gap"),
+        body=App("quot", [App("+", [Var("level-gap"),
                                      App("dec", [Var("rise-per-stone")])]),
                           Var("rise-per-stone")]),
     )
@@ -392,11 +485,16 @@ def _cp_water_rise(scene: Scene) -> Record:
     )
     answer = evaluate(expr)
 
+    found    = scene.phrase("found", "came upon", "spotted")
+    dropped  = scene.phrase("dropped in", "tossed in",
+                             "carefully added")
+    each_lifts = scene.phrase("raised the water by", "lifted the level by",
+                               "made the water rise by")
     user_msg = (
-        f"{species_phrase(crow)} found a {pitcher.name} with water at "
-        f"{n_unit(start, 'centimeter')}. {cap(crow.he_she)} dropped in "
+        f"{species_phrase(crow)} {found} a {pitcher.name} with water at "
+        f"{n_unit(start, 'centimeter')}. {cap(crow.he_she)} {dropped} "
         f"{n_unit(n_stones, stone.name, stone.plural)}, and each one "
-        f"raised the water by {n_unit(rise_per, 'centimeter')}.\n\n"
+        f"{each_lifts} {n_unit(rise_per, 'centimeter')}.\n\n"
         f"Question: After dropping all {n_stones} {stone.plural}, what "
         f"is the new water level in centimeters?"
     )
@@ -595,8 +693,9 @@ def _ge_compounded(scene: Scene) -> Record:
 
     yields_str = ", ".join(str(y) for y in yields)
     user_msg = (
-        f"{owner.name}'s {species_phrase(goose)} laid different numbers "
-        f"of eggs each day for {n_unit(days, 'day')}: {yields_str}.\n\n"
+        f"{owner.name} owned {species_phrase(goose)}, who laid different "
+        f"numbers of eggs each day for {n_unit(days, 'day')}: "
+        f"{yields_str}.\n\n"
         f"Question: How many eggs in total over the {n_unit(days, 'day')}?"
     )
 
@@ -649,9 +748,10 @@ def _ge_average(scene: Scene) -> Record:
 
     yields_str = ", ".join(str(y) for y in yields)
     user_msg = (
-        f"{owner.name}'s {species_phrase(goose)} laid these eggs on "
-        f"successive days: {yields_str}.\n\n"
-        f"Question: What is the average (integer quotient) eggs per day?"
+        f"{owner.name} kept {species_phrase(goose)}, who laid these eggs "
+        f"on successive days: {yields_str}.\n\n"
+        f"Question: What is the average eggs per day, rounded down to a "
+        f"whole number?"
     )
 
     code_block  = render_code(expr, form="inline", value=answer)
@@ -698,18 +798,29 @@ def _bw_false_alarms(scene: Scene) -> Record:
         bindings=[
             ("villagers", Lit(n_villagers)),
             ("alarms",    Lit(n_alarms)),
-            ("each",      Lit(minutes_per)),
+            ("minutes-per-trip",      Lit(minutes_per)),
         ],
-        body=App("*", [Var("villagers"), Var("alarms"), Var("each")]),
+        body=App("*", [Var("villagers"), Var("alarms"), Var("minutes-per-trip")]),
     )
     answer = evaluate(expr)
 
+    setting   = scene.phrase("watched sheep on the hill",
+                               "tended the flock at the edge of the woods",
+                               "kept watch over the sheep in the meadow")
+    bored     = scene.phrase("Bored,", "Out of mischief,",
+                               "Looking for some fun,")
+    cried     = scene.phrase("cried 'Wolf!'", "shouted 'Wolf!'",
+                               "yelled the alarm")
+    came      = scene.phrase("ran from the village to the field",
+                               "rushed up the hill",
+                               "hurried out from the village")
+    each_trip = scene.phrase("taking", "and the trip took",
+                               "each round trip lasting")
     user_msg = (
-        f"{boy.name} watched sheep on the hill. Bored, "
-        f"{boy.he_she} cried 'Wolf!' {n_unit(n_alarms, 'time')} "
-        f"falsely. Each time, {n_villagers} villagers ran from "
-        f"the village to the field, taking {n_unit(minutes_per, 'minute')} "
-        f"each.\n\n"
+        f"{boy.name} {setting}. {bored} "
+        f"{boy.he_she} {cried} {n_unit(n_alarms, 'time')} "
+        f"falsely. Each time, {n_villagers} villagers {came}, "
+        f"{each_trip} {n_unit(minutes_per, 'minute')} each.\n\n"
         f"Question: How many total minutes did the villagers waste "
         f"running to {n_unit(n_alarms, 'false alarm')}?"
     )
@@ -737,8 +848,8 @@ def _bw_sheep_eaten(scene: Scene) -> Record:
     eaten = scene.pick_int(3, min(flock - 1, 15))
 
     expr = Let(
-        bindings=[("flock", Lit(flock)), ("eaten", Lit(eaten))],
-        body=App("-", [Var("flock"), Var("eaten")]),
+        bindings=[("flock-size", Lit(flock)), ("sheep-eaten", Lit(eaten))],
+        body=App("-", [Var("flock-size"), Var("sheep-eaten")]),
     )
     answer = evaluate(expr)
 
@@ -1217,8 +1328,8 @@ def _fg_give_up(scene: Scene) -> Record:
 
     expr = Let(
         bindings=[("threshold", Lit(threshold)),
-                  ("tried",     Lit(tried))],
-        body=If(App("<", [Var("tried"), Var("threshold")]),
+                  ("tries-so-far",     Lit(tried))],
+        body=If(App("<", [Var("tries-so-far"), Var("threshold")]),
                 Lit("yes"), Lit("no")),
     )
     answer = evaluate(expr)
@@ -1350,11 +1461,11 @@ def _tm_trip_budget(scene: Scene) -> Record:
 
     expr = Let(
         bindings=[
-            ("start",  Lit(start)),
-            ("travel", Lit(travel)),
-            ("food",   Lit(food)),
+            ("start-bones",  Lit(start)),
+            ("travel-cost", Lit(travel)),
+            ("food-cost",   Lit(food)),
         ],
-        body=App("-", [Var("start"), Var("travel"), Var("food")]),
+        body=App("-", [Var("start-bones"), Var("travel-cost"), Var("food-cost")]),
     )
     answer = evaluate(expr)
 
@@ -1401,8 +1512,8 @@ def _ds_double_loss(scene: Scene) -> Record:
     bones = scene.pick_int(2, 8)
 
     expr = Let(
-        bindings=[("bones", Lit(bones))],
-        body=App("dec", [Var("bones")]),
+        bindings=[("start-bones", Lit(bones))],
+        body=App("dec", [Var("start-bones")]),
     )
     answer = evaluate(expr)
 
@@ -1437,9 +1548,9 @@ def _ds_regret(scene: Scene) -> Record:
     expected_bones = scene.pick_int(3, 12)
 
     expr = Let(
-        bindings=[("expected", Lit(expected_bones)),
-                  ("actual",   App("dec", [Var("expected")]))],
-        body=App("-", [Var("expected"), Var("actual")]),
+        bindings=[("expected-bones", Lit(expected_bones)),
+                  ("actual-bones",   App("dec", [Var("expected-bones")]))],
+        body=App("-", [Var("expected-bones"), Var("actual-bones")]),
     )
     answer = evaluate(expr)
 
@@ -1477,11 +1588,11 @@ def _ds_exchange_loss(scene: Scene) -> Record:
     received = scene.pick_int(1, given - 1)  # cheated: less than given but at least 1
 
     expr = Let(
-        bindings=[("start",    Lit(start)),
-                  ("given",    Lit(given)),
-                  ("received", Lit(received))],
-        body=App("+", [App("-", [Var("start"), Var("given")]),
-                       Var("received")]),
+        bindings=[("start-bones",    Lit(start)),
+                  ("bones-given",    Lit(given)),
+                  ("bones-received", Lit(received))],
+        body=App("+", [App("-", [Var("start-bones"), Var("bones-given")]),
+                       Var("bones-received")]),
     )
     answer = evaluate(expr)
 
@@ -1530,8 +1641,8 @@ def _lb_days_to_defeat(scene: Scene) -> Record:
 
     expr = Let(
         bindings=[("bulls",     Lit(n_bulls)),
-                  ("days-each", Lit(days_each))],
-        body=App("*", [Var("bulls"), Var("days-each")]),
+                  ("days-per-bull", Lit(days_each))],
+        body=App("*", [Var("bulls"), Var("days-per-bull")]),
     )
     answer = evaluate(expr)
 
@@ -1569,8 +1680,8 @@ def _lb_remaining_after_k(scene: Scene) -> Record:
 
     expr = Let(
         bindings=[("bulls",    Lit(n_bulls)),
-                  ("defeated", Lit(defeated))],
-        body=App("-", [Var("bulls"), Var("defeated")]),
+                  ("bulls-defeated", Lit(defeated))],
+        body=App("-", [Var("bulls"), Var("bulls-defeated")]),
     )
     answer = evaluate(expr)
 
@@ -1612,11 +1723,11 @@ def _lb_divide_conquer_bool(scene: Scene) -> Record:
             ("lion-strength",  Lit(lion_strength)),
             ("bulls",          Lit(n_bulls)),
             ("bull-strength",  Lit(bull_strength)),
-            ("together",       App("*", [Var("bulls"), Var("bull-strength")])),
+            ("combined-strength",       App("*", [Var("bulls"), Var("bull-strength")])),
         ],
         body=And_clauses(  # workaround: 'and' is not a special form in our AST
             App(">", [Var("lion-strength"), Var("bull-strength")]),
-            App("<", [Var("lion-strength"), Var("together")]),
+            App("<", [Var("lion-strength"), Var("combined-strength")]),
         ),
     )
     answer = evaluate(expr)

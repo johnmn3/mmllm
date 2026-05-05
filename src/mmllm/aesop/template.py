@@ -291,8 +291,29 @@ class Scene:
         )[0]
 
     def code_form(self) -> str:
-        """'inline' or 'block'."""
-        return "inline" if self.coin(0.6) else "block"
+        """'inline', 'block', or 'block-mixed'.
+
+        - inline: full Let tree as one expression with Clojure-formatted
+          bindings (the default, most common).
+        - block: every Let binding pulled out as `(def ...)` lines
+          followed by the body.
+        - block-mixed: first 1-2 bindings as `(def ...)` (top-level
+          definitions), remaining bindings inside an inner `let` —
+          closer to idiomatic Clojure (defs for constants, let for
+          local computation).
+        """
+        return self.rng.choices(
+            ["inline", "block", "block-mixed"],
+            weights=[0.55, 0.20, 0.25],
+        )[0]
+
+    def phrase(self, *options: str) -> str:
+        """Pick one of the given phrasings. Used inside narratives to
+        avoid template-formula feel:
+            phrase(scene, "started off", "began", "first")
+        Each call is independent — same context can produce different
+        renderings across records."""
+        return self.rng.choice(options)
 
     def preface_style(self) -> str:
         """'none', 'fixed', or 'narrative'."""
@@ -390,16 +411,41 @@ def render_code(expr: Expr, *, form: str, value) -> str:
     if form == "inline":
         return f"{fence_open}{src}\n;=> {_emit_lit(value)}{fence_close}"
 
-    # block form: pull let bindings out as defs, body trails. Only Let
-    # exprs get the def-rewrite; other shapes fall back to inline.
     from mmllm.aesop.expr import Let
-    if isinstance(expr, Let):
+
+    # block form: every binding pulled out as (def …) lines, body trails.
+    if form == "block" and isinstance(expr, Let):
         lines = []
         for k, v in expr.bindings:
             lines.append(f"(def {k} {emit_clojure(v)})")
         body_src = (emit_clojure(expr.body) if not isinstance(expr.body, list)
                     else "\n".join(emit_clojure(e) for e in expr.body))
         lines.append(body_src)
+        full = "\n".join(lines)
+        return f"{fence_open}{full}\n;=> {_emit_lit(value)}{fence_close}"
+
+    # block-mixed: first 1-2 bindings as top-level defs, rest in inner let.
+    if form == "block-mixed" and isinstance(expr, Let) and len(expr.bindings) >= 3:
+        # Pull leading literal-bindings as defs (only Lits — defs of
+        # computed expressions tied to inner names look weird at top
+        # level). Stop at the first non-literal binding.
+        from mmllm.aesop.expr import Lit
+        n_def = 0
+        for k, v in expr.bindings:
+            if isinstance(v, Lit):
+                n_def += 1
+            else:
+                break
+        n_def = max(1, min(n_def, 2))   # at least 1, at most 2
+        if n_def == 0 or n_def == len(expr.bindings):
+            # Nothing useful to split out — fall back to plain block.
+            return render_code(expr, form="block", value=value)
+        lines = []
+        for k, v in expr.bindings[:n_def]:
+            lines.append(f"(def {k} {emit_clojure(v)})")
+        # Build inner Let with remaining bindings, same body
+        inner = Let(bindings=expr.bindings[n_def:], body=expr.body)
+        lines.append(emit_clojure(inner))
         full = "\n".join(lines)
         return f"{fence_open}{full}\n;=> {_emit_lit(value)}{fence_close}"
 

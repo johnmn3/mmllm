@@ -1,6 +1,6 @@
 # Aesop capstone — sample records
 
-31 unique chapters across 10 fables. 24 single-call, 7 eval+answer chain.
+33 unique chapters across 10 fables. 22 single-call, 11 eval+answer chain.
 
 Each record below is the raw rendered output as it would land in the byte-bin training corpus. Quad-backtick fences are used so the embedded triple-backtick clojure blocks render correctly.
 
@@ -9,7 +9,7 @@ Each record below is the raw rendered output as it would land in the byte-bin tr
 ## Example 1: ant-grasshopper / comparison-survival
 
 - code form: inline
-- preface:   none
+- preface:   fixed
 - tool-call: 2-call (eval+answer)
 
 ````text
@@ -21,26 +21,28 @@ Available tools:
 - answer(value: any) — submit the final answer
 <|end|>
 <|user|>
-Winter lasted 34 days. Bit the ant started with 264 grains and ate 1 every day, while Skip the grasshopper started with 16 grains and ate 1 every day. If a stockpile runs out, the count cannot go below zero.
+Winter lasted 42 days. Tic the ant started with 151 grains and ate 1 every day, while Skip the grasshopper started with 2 grains and ate 3 every day. If a stockpile runs out, the count cannot go below zero.
 
-Question: How many grains does Bit have left at the end of winter?
+Question: How many grains does Tic have left at the end of winter?
 <|end|>
 <|asst|>
+Let me work this out.
+
 ```clojure
-(let [ant-stock 264
+(let [ant-stock 151
       ant-rate 1
-      gh-stock 16
-      gh-rate 1
-      days 34
+      gh-stock 2
+      gh-rate 3
+      days 42
       ant-left (- ant-stock (* ant-rate days))
       gh-left (- gh-stock (* gh-rate days))]
   (max ant-left 0))
-;=> 230
+;=> 109
 ```
 
-Bit has 230 grains left.
+Tic has 109 grains left.
 
-{"tool_calls":[{"name":"eval","args":{"form":"(let [ant-stock 264\n      ant-rate 1\n      gh-stock 16\n      gh-rate 1\n      days 34\n      ant-left (- ant-stock (* ant-rate days))\n      gh-left (- gh-stock (* gh-rate days))]\n  (max ant-left 0))"}},{"name":"answer","args":{"value":230}}]}
+{"tool_calls":[{"name":"eval","args":{"form":"(let [ant-stock 151\n      ant-rate 1\n      gh-stock 2\n      gh-rate 3\n      days 42\n      ant-left (- ant-stock (* ant-rate days))\n      gh-left (- gh-stock (* gh-rate days))]\n  (max ant-left 0))"}},{"name":"answer","args":{"value":109}}]}
 <|end|>
 
 ````
@@ -49,6 +51,42 @@ Bit has 230 grains left.
 
 - code form: inline
 - preface:   narrative
+- tool-call: 2-call (eval+answer)
+
+````text
+<|sys|>
+You are a tool-using assistant. Solve the problem with Clojure code, then submit your answer as a tool call.
+
+Available tools:
+- eval(form: string) — evaluate a Clojure-source string and return the result
+- answer(value: any) — submit the final answer
+<|end|>
+<|user|>
+Through the summer at the pond, Bit the ant collected 8 grains every day for 64 days.
+
+Question: How many grains did Bit collect by the end of summer?
+<|end|>
+<|asst|>
+I multiply the daily collection rate by the number of days.
+
+```clojure
+(let [per-day 8
+      days 64]
+  (* per-day days))
+;=> 512
+```
+
+Bit collected 512 grains.
+
+{"tool_calls":[{"name":"eval","args":{"form":"(let [per-day 8\n      days 64]\n  (* per-day days))"}},{"name":"answer","args":{"value":512}}]}
+<|end|>
+
+````
+
+## Example 3: ant-grasshopper / winter-consumption
+
+- code form: inline
+- preface:   none
 - tool-call: 1-call (answer)
 
 ````text
@@ -59,28 +97,26 @@ Available tools:
 - answer(value: any) — submit the final answer (literal value or Clojure-source string that the runtime will eval)
 <|end|>
 <|user|>
-Through the summer at the river bank, Bit the ant collected 7 grains every day for 42 days.
+Toc the ant has 160 grains stored for winter. She eats 2 grains per day.
 
-Question: How many grains did Bit collect by the end of summer?
+Question: For how many whole days will Toc's stockpile last?
 <|end|>
 <|asst|>
-I multiply the daily collection rate by the number of days.
-
 ```clojure
-(let [per-day 7
-      days 42]
-  (* per-day days))
-;=> 294
+(let [stockpile 160
+      per-day 2]
+  (quot stockpile per-day))
+;=> 80
 ```
 
-Bit collected 294 grains.
+The stockpile lasts 80 days.
 
-{"tool_calls":[{"name":"answer","args":{"value":294}}]}
+{"tool_calls":[{"name":"answer","args":{"value":80}}]}
 <|end|>
 
 ````
 
-## Example 3: ant-grasshopper / winter-consumption
+## Example 4: boy-wolf / false-alarms
 
 - code form: block
 - preface:   narrative
@@ -95,42 +131,7 @@ Available tools:
 - answer(value: any) — submit the final answer
 <|end|>
 <|user|>
-Toc the ant has 115 grains stored for winter. She eats 5 grains per day.
-
-Question: For how many whole days will Toc's stockpile last?
-<|end|>
-<|asst|>
-I divide the stockpile by daily consumption (integer quotient).
-
-```clojure
-(def stockpile 115)
-(def per-day 5)
-(quot stockpile per-day)
-;=> 23
-```
-
-The stockpile lasts 23 days.
-
-{"tool_calls":[{"name":"eval","args":{"form":"(def stockpile 115)\n(def per-day 5)\n(quot stockpile per-day)"}},{"name":"answer","args":{"value":23}}]}
-<|end|>
-
-````
-
-## Example 4: boy-wolf / false-alarms
-
-- code form: inline
-- preface:   narrative
-- tool-call: 1-call (answer)
-
-````text
-<|sys|>
-You are a tool-using assistant. Solve the problem with Clojure code, then submit your answer as a tool call.
-
-Available tools:
-- answer(value: any) — submit the final answer (literal value or Clojure-source string that the runtime will eval)
-<|end|>
-<|user|>
-Tom watched sheep on the hill. Bored, he cried 'Wolf!' 3 times falsely. Each time, 4 villagers ran from the village to the field, taking 8 minutes each.
+Tom tended the flock at the edge of the woods. Bored, he shouted 'Wolf!' 3 times falsely. Each time, 4 villagers ran from the village to the field, taking 8 minutes each.
 
 Question: How many total minutes did the villagers waste running to 3 false alarms?
 <|end|>
@@ -138,16 +139,16 @@ Question: How many total minutes did the villagers waste running to 3 false alar
 I multiply villagers × alarms × minutes per trip.
 
 ```clojure
-(let [villagers 4
-      alarms 3
-      each 8]
-  (* villagers alarms each))
+(def villagers 4)
+(def alarms 3)
+(def minutes-per-trip 8)
+(* villagers alarms minutes-per-trip)
 ;=> 96
 ```
 
 The villagers wasted 96 minutes in total.
 
-{"tool_calls":[{"name":"answer","args":{"value":96}}]}
+{"tool_calls":[{"name":"eval","args":{"form":"(def villagers 4)\n(def alarms 3)\n(def minutes-per-trip 8)\n(* villagers alarms minutes-per-trip)"}},{"name":"answer","args":{"value":96}}]}
 <|end|>
 
 ````
@@ -166,23 +167,23 @@ Available tools:
 - answer(value: any) — submit the final answer (literal value or Clojure-source string that the runtime will eval)
 <|end|>
 <|user|>
-Jess had a flock of 28 sheep. After many false alarms, a real wolf came and the villagers did not believe her. The wolf ate 5 sheep.
+Lou had a flock of 25 sheep. After many false alarms, a real wolf came and the villagers did not believe her. The wolf ate 5 sheep.
 
-Question: How many sheep does Jess have left?
+Question: How many sheep does Lou have left?
 <|end|>
 <|asst|>
 Let me work this out.
 
 ```clojure
-(let [flock 28
-      eaten 5]
-  (- flock eaten))
-;=> 23
+(let [flock-size 25
+      sheep-eaten 5]
+  (- flock-size sheep-eaten))
+;=> 20
 ```
 
-Jess has 23 sheep left.
+Lou has 20 sheep left.
 
-{"tool_calls":[{"name":"answer","args":{"value":23}}]}
+{"tool_calls":[{"name":"answer","args":{"value":20}}]}
 <|end|>
 
 ````
@@ -261,6 +262,75 @@ The answer is no.
 ## Example 8: crow-pitcher / stones-needed
 
 - code form: block
+- preface:   none
+- tool-call: 1-call (answer)
+
+````text
+<|sys|>
+You are a tool-using assistant. Solve the problem with Clojure code, then submit your answer as a tool call.
+
+Available tools:
+- answer(value: any) — submit the final answer (literal value or Clojure-source string that the runtime will eval)
+<|end|>
+<|user|>
+On a hot afternoon at the river bank, Korvus the crow found a pitcher of water but the water sat only 2 centimeters from the bottom — too low to reach. He needed the water to rise to 20 centimeters before he could drink. He started dropping pebbles into the pitcher, and each pebble raised the water level by 2 centimeters.
+
+Question: What is the smallest number of pebbles Korvus needs to drop in to reach the target water level?
+<|end|>
+<|asst|>
+```clojure
+(def rise-per-stone 2)
+(def start-cm 2)
+(def target-cm 20)
+(def level-gap (- target-cm start-cm))
+(quot (+ level-gap (dec rise-per-stone)) rise-per-stone)
+;=> 9
+```
+
+Korvus needs 9 pebbles.
+
+{"tool_calls":[{"name":"answer","args":{"value":9}}]}
+<|end|>
+
+````
+
+## Example 9: crow-pitcher / water-rise
+
+- code form: block
+- preface:   none
+- tool-call: 1-call (answer)
+
+````text
+<|sys|>
+You are a tool-using assistant. Solve the problem with Clojure code, then submit your answer as a tool call.
+
+Available tools:
+- answer(value: any) — submit the final answer (literal value or Clojure-source string that the runtime will eval)
+<|end|>
+<|user|>
+Korvus the crow found a pitcher with water at 1 centimeter. He carefully added 12 pebbles, and each one lifted the level by 3 centimeters.
+
+Question: After dropping all 12 pebbles, what is the new water level in centimeters?
+<|end|>
+<|asst|>
+```clojure
+(def rise-per-stone 3)
+(def start-cm 1)
+(def n-stones 12)
+(+ start-cm (* n-stones rise-per-stone))
+;=> 37
+```
+
+The water level rises to 37 centimeters.
+
+{"tool_calls":[{"name":"answer","args":{"value":37}}]}
+<|end|>
+
+````
+
+## Example 10: dog-shadow / double-loss
+
+- code form: inline
 - preface:   fixed
 - tool-call: 2-call (eval+answer)
 
@@ -273,102 +343,28 @@ Available tools:
 - answer(value: any) — submit the final answer
 <|end|>
 <|user|>
-On a hot afternoon at the meadow, Sable the crow found a pitcher of water but the water sat only 5 centimeters from the bottom — too low to reach. They needed the water to rise to 32 centimeters before they could drink. They started dropping pebbles into the pitcher, and each pebble raised the water level by 3 centimeters.
-
-Question: What is the smallest number of pebbles Sable needs to drop in to reach the target water level?
-<|end|>
-<|asst|>
-Let me work this out.
-
-```clojure
-(def rise-per-stone 3)
-(def start-cm 5)
-(def target-cm 32)
-(def gap (- target-cm start-cm))
-(quot (+ gap (dec rise-per-stone)) rise-per-stone)
-;=> 9
-```
-
-Sable needs 9 pebbles.
-
-{"tool_calls":[{"name":"eval","args":{"form":"(def rise-per-stone 3)\n(def start-cm 5)\n(def target-cm 32)\n(def gap (- target-cm start-cm))\n(quot (+ gap (dec rise-per-stone)) rise-per-stone)"}},{"name":"answer","args":{"value":9}}]}
-<|end|>
-
-````
-
-## Example 9: crow-pitcher / water-rise
-
-- code form: inline
-- preface:   fixed
-- tool-call: 1-call (answer)
-
-````text
-<|sys|>
-You are a tool-using assistant. Solve the problem with Clojure code, then submit your answer as a tool call.
-
-Available tools:
-- answer(value: any) — submit the final answer (literal value or Clojure-source string that the runtime will eval)
-<|end|>
-<|user|>
-Sable the crow found a pitcher with water at 5 centimeters. They dropped in 6 pebbles, and each one raised the water by 1 centimeter.
-
-Question: After dropping all 6 pebbles, what is the new water level in centimeters?
-<|end|>
-<|asst|>
-Let me work this out.
-
-```clojure
-(let [rise-per-stone 1
-      start-cm 5
-      n-stones 6]
-  (+ start-cm (* n-stones rise-per-stone)))
-;=> 11
-```
-
-The water level rises to 11 centimeters.
-
-{"tool_calls":[{"name":"answer","args":{"value":11}}]}
-<|end|>
-
-````
-
-## Example 10: dog-shadow / double-loss
-
-- code form: block
-- preface:   narrative
-- tool-call: 1-call (answer)
-
-````text
-<|sys|>
-You are a tool-using assistant. Solve the problem with Clojure code, then submit your answer as a tool call.
-
-Available tools:
-- answer(value: any) — submit the final answer (literal value or Clojure-source string that the runtime will eval)
-<|end|>
-<|user|>
-Rex the dog crossed a stream carrying 5 bones. Looking down, he saw his reflection and thought it was another dog with more bones. He dropped one bone to grab the shadow's, but the bone fell into the stream.
+Rex the dog crossed a stream carrying 6 bones. Looking down, he saw his reflection and thought it was another dog with more bones. He dropped one bone to grab the shadow's, but the bone fell into the stream.
 
 Question: How many bones does Rex have now?
 <|end|>
 <|asst|>
-I subtract 1 (the dropped bone) from the original count.
+Let me work this out.
 
 ```clojure
-(def bones 5)
-(dec bones)
-;=> 4
+(let [start-bones 6] (dec start-bones))
+;=> 5
 ```
 
-Rex has 4 bones left.
+Rex has 5 bones left.
 
-{"tool_calls":[{"name":"answer","args":{"value":4}}]}
+{"tool_calls":[{"name":"eval","args":{"form":"(let [start-bones 6] (dec start-bones))"}},{"name":"answer","args":{"value":5}}]}
 <|end|>
 
 ````
 
 ## Example 11: dog-shadow / exchange-loss
 
-- code form: inline
+- code form: block
 - preface:   fixed
 - tool-call: 1-call (answer)
 
@@ -388,10 +384,10 @@ Question: How many bones does Rex have after the trade?
 Let me work this out.
 
 ```clojure
-(let [start 6
-      given 4
-      received 2]
-  (+ (- start given) received))
+(def start-bones 6)
+(def bones-given 4)
+(def bones-received 2)
+(+ (- start-bones bones-given) bones-received)
 ;=> 4
 ```
 
@@ -416,21 +412,21 @@ Available tools:
 - answer(value: any) — submit the final answer (literal value or Clojure-source string that the runtime will eval)
 <|end|>
 <|user|>
-Rex the dog expected to bring home 4 bones, but lost one chasing a shadow and ended up with one fewer.
+Bell the dog expected to bring home 7 bones, but lost one chasing a shadow and ended up with one fewer.
 
-Question: How many bones did Rex fall short by, compared to what he expected?
+Question: How many bones did Bell fall short by, compared to what she expected?
 <|end|>
 <|asst|>
 Let me work this out.
 
 ```clojure
-(let [expected 4
-      actual (dec expected)]
-  (- expected actual))
+(let [expected-bones 7
+      actual-bones (dec expected-bones)]
+  (- expected-bones actual-bones))
 ;=> 1
 ```
 
-Rex fell short by 1 bone.
+Bell fell short by 1 bone.
 
 {"tool_calls":[{"name":"answer","args":{"value":1}}]}
 <|end|>
@@ -440,7 +436,7 @@ Rex fell short by 1 bone.
 ## Example 13: fox-grapes / give-up
 
 - code form: block
-- preface:   narrative
+- preface:   fixed
 - tool-call: 1-call (answer)
 
 ````text
@@ -451,23 +447,23 @@ Available tools:
 - answer(value: any) — submit the final answer (literal value or Clojure-source string that the runtime will eval)
 <|end|>
 <|user|>
-Vix the fox grew tired of jumping for the grapes. She would give up after 6 attempts. So far she had tried 10 times.
+Renard the fox grew tired of jumping for the grapes. He would give up after 8 attempts. So far he had tried 0 times.
 
-Question: Will Vix try again? Answer yes or no.
+Question: Will Renard try again? Answer yes or no.
 <|end|>
 <|asst|>
-I check whether tried is still below the threshold.
+Let me work this out.
 
 ```clojure
-(def threshold 6)
-(def tried 10)
-(if (< tried threshold) "yes" "no")
-;=> "no"
+(def threshold 8)
+(def tries-so-far 0)
+(if (< tries-so-far threshold) "yes" "no")
+;=> "yes"
 ```
 
-The answer is no.
+The answer is yes.
 
-{"tool_calls":[{"name":"answer","args":{"value":"no"}}]}
+{"tool_calls":[{"name":"answer","args":{"value":"yes"}}]}
 <|end|>
 
 ````
@@ -510,43 +506,7 @@ Renard needs 6 jumps.
 ## Example 15: fox-grapes / max-reach
 
 - code form: inline
-- preface:   narrative
-- tool-call: 2-call (eval+answer)
-
-````text
-<|sys|>
-You are a tool-using assistant. Solve the problem with Clojure code, then submit your answer as a tool call.
-
-Available tools:
-- eval(form: string) — evaluate a Clojure-source string and return the result
-- answer(value: any) — submit the final answer
-<|end|>
-<|user|>
-Vix the fox stood on hind legs, reaching 4 feet high, and could leap another 1 foot.
-
-Question: What is the highest point Vix can reach with a single leap?
-<|end|>
-<|asst|>
-I add the body-stand height and the jump height.
-
-```clojure
-(let [body-height 4
-      jump-height 1]
-  (+ body-height jump-height))
-;=> 5
-```
-
-Vix can reach 5 feet high.
-
-{"tool_calls":[{"name":"eval","args":{"form":"(let [body-height 4\n      jump-height 1]\n  (+ body-height jump-height))"}},{"name":"answer","args":{"value":5}}]}
-<|end|>
-
-````
-
-## Example 16: goose-eggs / average
-
-- code form: inline
-- preface:   fixed
+- preface:   none
 - tool-call: 1-call (answer)
 
 ````text
@@ -557,16 +517,49 @@ Available tools:
 - answer(value: any) — submit the final answer (literal value or Clojure-source string that the runtime will eval)
 <|end|>
 <|user|>
-Casey's Honk the goose laid these eggs on successive days: 1, 2, 3, 2, 2.
+Vix the fox stood on hind legs, reaching 4 feet high, and could leap another 4 feet.
 
-Question: What is the average (integer quotient) eggs per day?
+Question: What is the highest point Vix can reach with a single leap?
 <|end|>
 <|asst|>
-Let me work this out.
+```clojure
+(let [body-height 4
+      jump-height 4]
+  (+ body-height jump-height))
+;=> 8
+```
+
+Vix can reach 8 feet high.
+
+{"tool_calls":[{"name":"answer","args":{"value":8}}]}
+<|end|>
+
+````
+
+## Example 16: goose-eggs / average
+
+- code form: inline
+- preface:   narrative
+- tool-call: 1-call (answer)
+
+````text
+<|sys|>
+You are a tool-using assistant. Solve the problem with Clojure code, then submit your answer as a tool call.
+
+Available tools:
+- answer(value: any) — submit the final answer (literal value or Clojure-source string that the runtime will eval)
+<|end|>
+<|user|>
+Helen kept Plume the goose, who laid these eggs on successive days: 2, 2, 2.
+
+Question: What is the average eggs per day, rounded down to a whole number?
+<|end|>
+<|asst|>
+I compute the total with reduce, divide by the count, taking integer quotient.
 
 ```clojure
-(let [daily-yields [1 2 3 2 2]
-      total (apply + daily-yields)
+(let [daily-yields [2 2 2]
+      total (reduce + daily-yields)
       days (count daily-yields)]
   (quot total days))
 ;=> 2
@@ -583,17 +576,18 @@ The average is 2 eggs per day.
 
 - code form: inline
 - preface:   fixed
-- tool-call: 1-call (answer)
+- tool-call: 2-call (eval+answer)
 
 ````text
 <|sys|>
 You are a tool-using assistant. Solve the problem with Clojure code, then submit your answer as a tool call.
 
 Available tools:
-- answer(value: any) — submit the final answer (literal value or Clojure-source string that the runtime will eval)
+- eval(form: string) — evaluate a Clojure-source string and return the result
+- answer(value: any) — submit the final answer
 <|end|>
 <|user|>
-Beatrice's Quill the goose laid different numbers of eggs each day for 3 days: 2, 1, 4.
+Fiona owned Honk the goose, who laid different numbers of eggs each day for 3 days: 2, 1, 4.
 
 Question: How many eggs in total over the 3 days?
 <|end|>
@@ -601,21 +595,21 @@ Question: How many eggs in total over the 3 days?
 Let me work this out.
 
 ```clojure
-(let [daily-yields [2 1 4]] (apply + daily-yields))
+(let [daily-yields [2 1 4]] (reduce + daily-yields))
 ;=> 7
 ```
 
 The total is 7 eggs.
 
-{"tool_calls":[{"name":"answer","args":{"value":7}}]}
+{"tool_calls":[{"name":"eval","args":{"form":"(let [daily-yields [2 1 4]] (reduce + daily-yields))"}},{"name":"answer","args":{"value":7}}]}
 <|end|>
 
 ````
 
 ## Example 18: goose-eggs / total-yield
 
-- code form: block
-- preface:   fixed
+- code form: inline
+- preface:   none
 - tool-call: 1-call (answer)
 
 ````text
@@ -626,23 +620,21 @@ Available tools:
 - answer(value: any) — submit the final answer (literal value or Clojure-source string that the runtime will eval)
 <|end|>
 <|user|>
-In the market, Grace owned Plume the goose. The goose laid 3 golden eggs every day, like clockwork. Grace kept the goose for 8 days.
+In the market, Emily owned Honk the goose. The goose laid 1 golden egg every day, like clockwork. Emily kept the goose for 13 days.
 
 Question: How many eggs did the goose lay in total?
 <|end|>
 <|asst|>
-Let me work this out.
-
 ```clojure
-(def per-day 3)
-(def days 8)
-(* per-day days)
-;=> 24
+(let [per-day 1
+      days 13]
+  (* per-day days))
+;=> 13
 ```
 
-The total is 24 eggs.
+The total is 13 eggs.
 
-{"tool_calls":[{"name":"answer","args":{"value":24}}]}
+{"tool_calls":[{"name":"answer","args":{"value":13}}]}
 <|end|>
 
 ````
@@ -706,8 +698,8 @@ Let me work this out.
 
 ```clojure
 (let [bulls 6
-      days-each 1]
-  (* bulls days-each))
+      days-per-bull 1]
+  (* bulls days-per-bull))
 ;=> 6
 ```
 
@@ -741,8 +733,8 @@ Question: Can Mane only defeat the bulls if they separate? Answer yes if alone-t
 (let [lion-strength 6
       bulls 5
       bull-strength 5
-      together (* bulls bull-strength)]
-  (and (> lion-strength bull-strength) (< lion-strength together)))
+      combined-strength (* bulls bull-strength)]
+  (and (> lion-strength bull-strength) (< lion-strength combined-strength)))
 ;=> true
 ```
 
@@ -756,7 +748,7 @@ The answer is yes.
 ## Example 22: lion-bulls / remaining-after-k
 
 - code form: inline
-- preface:   narrative
+- preface:   none
 - tool-call: 1-call (answer)
 
 ````text
@@ -767,30 +759,28 @@ Available tools:
 - answer(value: any) — submit the final answer (literal value or Clojure-source string that the runtime will eval)
 <|end|>
 <|user|>
-Mane the lion faced 9 bulls grazing alone in the field. After several days, she had defeated 5 of them.
+Roar the lion faced 5 bulls grazing alone in the field. After several days, he had defeated 2 of them.
 
 Question: How many bulls remain?
 <|end|>
 <|asst|>
-I subtract the defeated from the original count.
-
 ```clojure
-(let [bulls 9
-      defeated 5]
-  (- bulls defeated))
-;=> 4
+(let [bulls 5
+      bulls-defeated 2]
+  (- bulls bulls-defeated))
+;=> 3
 ```
 
-There are 4 bulls left.
+There are 3 bulls left.
 
-{"tool_calls":[{"name":"answer","args":{"value":4}}]}
+{"tool_calls":[{"name":"answer","args":{"value":3}}]}
 <|end|>
 
 ````
 
 ## Example 23: milkmaid / egg-to-coin-chain
 
-- code form: inline
+- code form: block
 - preface:   none
 - tool-call: 1-call (answer)
 
@@ -808,10 +798,10 @@ Question: If everything went perfectly, how many coins would Lila earn after one
 <|end|>
 <|asst|>
 ```clojure
-(let [eggs 12
-      eggs-per-hen 79
-      coins-per-egg 4]
-  (* eggs eggs-per-hen coins-per-egg))
+(def eggs 12)
+(def eggs-per-hen 79)
+(def coins-per-egg 4)
+(* eggs eggs-per-hen coins-per-egg)
 ;=> 3792
 ```
 
@@ -824,44 +814,45 @@ Lila would earn 3792 coins in a year.
 
 ## Example 24: milkmaid / investment-return
 
-- code form: block
-- preface:   fixed
-- tool-call: 1-call (answer)
+- code form: inline
+- preface:   narrative
+- tool-call: 2-call (eval+answer)
 
 ````text
 <|sys|>
 You are a tool-using assistant. Solve the problem with Clojure code, then submit your answer as a tool call.
 
 Available tools:
-- answer(value: any) — submit the final answer (literal value or Clojure-source string that the runtime will eval)
+- eval(form: string) — evaluate a Clojure-source string and return the result
+- answer(value: any) — submit the final answer
 <|end|>
 <|user|>
-Margery bought a cow for 176 coins. The cow gives 7 cups of milk per day, and each cup sells for 4 coins.
+Margery bought a cow for 136 coins. The cow gives 8 cups of milk per day, and each cup sells for 1 coin.
 
 Question: What is the smallest whole number of days until Margery fully recovers the cost of the cow?
 <|end|>
 <|asst|>
-Let me work this out.
+I find daily revenue (cups × coin-per-cup), then ceiling-divide the cow's cost by that revenue.
 
 ```clojure
-(def cow-cost 176)
-(def cups-per-day 7)
-(def coin-per-cup 4)
-(def daily-revenue (* cups-per-day coin-per-cup))
-(quot (+ cow-cost (dec daily-revenue)) daily-revenue)
-;=> 7
+(let [cow-cost 136
+      cups-per-day 8
+      coin-per-cup 1
+      daily-revenue (* cups-per-day coin-per-cup)]
+  (quot (+ cow-cost (dec daily-revenue)) daily-revenue))
+;=> 17
 ```
 
-It takes 7 days to break even.
+It takes 17 days to break even.
 
-{"tool_calls":[{"name":"answer","args":{"value":7}}]}
+{"tool_calls":[{"name":"eval","args":{"form":"(let [cow-cost 136\n      cups-per-day 8\n      coin-per-cup 1\n      daily-revenue (* cups-per-day coin-per-cup)]\n  (quot (+ cow-cost (dec daily-revenue)) daily-revenue))"}},{"name":"answer","args":{"value":17}}]}
 <|end|>
 
 ````
 
 ## Example 25: milkmaid / spilled-milk
 
-- code form: inline
+- code form: block
 - preface:   narrative
 - tool-call: 1-call (answer)
 
@@ -881,9 +872,9 @@ Question: How many coins did Lila lose by spilling?
 I multiply the spilled cups by the price per cup.
 
 ```clojure
-(let [spilled 17
-      per-cup 1]
-  (* spilled per-cup))
+(def spilled 17)
+(def per-cup 1)
+(* spilled per-cup)
 ;=> 17
 ```
 
@@ -918,23 +909,23 @@ I subtract the distance already walked from the total to find what remains, then
 
 ```clojure
 (let [total 21
-      walked 7
-      speed 2
-      remaining (- total walked)]
-  (quot remaining speed))
+      miles-walked 7
+      walk-speed 2
+      miles-remaining (- total miles-walked)]
+  (quot miles-remaining walk-speed))
 ;=> 7
 ```
 
 Slowpoke needs 7 more hours of walking.
 
-{"tool_calls":[{"name":"eval","args":{"form":"(let [total 21\n      walked 7\n      speed 2\n      remaining (- total walked)]\n  (quot remaining speed))"}},{"name":"answer","args":{"value":7}}]}
+{"tool_calls":[{"name":"eval","args":{"form":"(let [total 21\n      miles-walked 7\n      walk-speed 2\n      miles-remaining (- total miles-walked)]\n  (quot miles-remaining walk-speed))"}},{"name":"answer","args":{"value":7}}]}
 <|end|>
 
 ````
 
 ## Example 27: tortoise-hare / nap-overtake
 
-- code form: inline
+- code form: block
 - preface:   narrative
 - tool-call: 1-call (answer)
 
@@ -946,9 +937,9 @@ Available tools:
 - answer(value: any) — submit the final answer (literal value or Clojure-source string that the runtime will eval)
 <|end|>
 <|user|>
-Once upon a time, Pip the hare challenged Mossback the tortoise to a race through the orchard. They bragged about being the fastest, while he just kept a steady pace.
+Long ago, Pip the hare set out against Mossback the tortoise to a race through the orchard. They claimed to be the swiftest, while he kept moving steadily.
 
-After running 11 miles ahead, Pip grew tired and decided to take a nap. Meanwhile, Mossback kept walking at 2 miles per hour. While Pip slept, Mossback walked for 8 hours straight.
+Once it had run 11 miles ahead, Pip felt sleepy and stretched out for a nap. All the while, Mossback kept walking at 2 miles per hour. While Pip napped, Mossback walked for 8 hours straight.
 
 Question: After Mossback's walk, who is in the lead?
 <|end|>
@@ -956,11 +947,11 @@ Question: After Mossback's walk, who is in the lead?
 Let me figure out where Mossback is by multiplying Mossback's speed by the time spent walking, then comparing with Pip's lead.
 
 ```clojure
-(let [hare-lead 11
-      tortoise-rate 2
-      nap-hours 8
-      tortoise-pos (* tortoise-rate nap-hours)]
-  (if (> tortoise-pos hare-lead) "Mossback" "Pip"))
+(def hare-lead 11)
+(def tortoise-rate 2)
+(def nap-hours 8)
+(def tortoise-pos (* tortoise-rate nap-hours))
+(if (> tortoise-pos hare-lead) "Mossback" "Pip")
 ;=> "Mossback"
 ```
 
@@ -971,10 +962,10 @@ So Mossback is now in the lead.
 
 ````
 
-## Example 28: tortoise-hare / speed-comparison
+## Example 28: tortoise-hare / speed-comparison-distance
 
-- code form: inline
-- preface:   none
+- code form: block
+- preface:   fixed
 - tool-call: 1-call (answer)
 
 ````text
@@ -985,31 +976,110 @@ Available tools:
 - answer(value: any) — submit the final answer (literal value or Clojure-source string that the runtime will eval)
 <|end|>
 <|user|>
-Bramble the hare and Shelly the tortoise agreed to a steady race through the meadow. Bramble ran at 10 miles per hour, while Shelly kept a steady 1 mile per hour. Both ran for exactly 4 hours.
+Whisker the hare and Slowpoke the tortoise agreed to a steady race through the woods. Whisker ran at 4 miles per hour, while Slowpoke kept a steady 3 miles per hour. Both ran for exactly 3 hours.
 
-Question: How many miles ahead is Bramble after 4 hours?
+Question: How many miles ahead is Whisker after 3 hours?
 <|end|>
 <|asst|>
+Let me work this out.
+
 ```clojure
-(let [hare-speed 10
-      tortoise-speed 1
-      hours 4
+(def hare-speed 4)
+(def tortoise-speed 3)
+(let [hours 3
       hare-distance (* hare-speed hours)
       tortoise-distance (* tortoise-speed hours)]
   (- hare-distance tortoise-distance))
-;=> 36
+;=> 3
 ```
 
-Bramble is 36 miles ahead.
+Whisker is 3 miles ahead.
 
-{"tool_calls":[{"name":"answer","args":{"value":36}}]}
+{"tool_calls":[{"name":"answer","args":{"value":3}}]}
 <|end|>
 
 ````
 
-## Example 29: two-mice / food-comparison
+## Example 29: tortoise-hare / speed-comparison-hours
 
-- code form: block
+- code form: inline
+- preface:   narrative
+- tool-call: 2-call (eval+answer)
+
+````text
+<|sys|>
+You are a tool-using assistant. Solve the problem with Clojure code, then submit your answer as a tool call.
+
+Available tools:
+- eval(form: string) — evaluate a Clojure-source string and return the result
+- answer(value: any) — submit the final answer
+<|end|>
+<|user|>
+Hopper the hare and Mossback the tortoise agreed to a steady race through the forest. Hopper ran at 7 miles per hour, while Mossback plodded at 2 miles per hour. After some time, Hopper was exactly 20 miles ahead.
+
+Question: How many hours had they been running?
+<|end|>
+<|asst|>
+The gap grows by (hare-speed minus tortoise-speed) per hour, so I divide miles-ahead by that gap rate.
+
+```clojure
+(let [hare-speed 7
+      tortoise-speed 2
+      miles-ahead 20
+      gap-per-hour (- hare-speed tortoise-speed)]
+  (quot miles-ahead gap-per-hour))
+;=> 4
+```
+
+They had been running for 4 hours.
+
+{"tool_calls":[{"name":"eval","args":{"form":"(let [hare-speed 7\n      tortoise-speed 2\n      miles-ahead 20\n      gap-per-hour (- hare-speed tortoise-speed)]\n  (quot miles-ahead gap-per-hour))"}},{"name":"answer","args":{"value":4}}]}
+<|end|>
+
+````
+
+## Example 30: tortoise-hare / speed-comparison-speed
+
+- code form: inline
+- preface:   narrative
+- tool-call: 2-call (eval+answer)
+
+````text
+<|sys|>
+You are a tool-using assistant. Solve the problem with Clojure code, then submit your answer as a tool call.
+
+Available tools:
+- eval(form: string) — evaluate a Clojure-source string and return the result
+- answer(value: any) — submit the final answer
+<|end|>
+<|user|>
+Whisker the hare and Slowpoke the tortoise agreed to a steady race through the orchard. Slowpoke kept a steady 2 miles per hour. Both ran for exactly 3 hours, by the end of which Whisker was 9 miles ahead.
+
+Question: What was Whisker's speed in miles per hour?
+<|end|>
+<|asst|>
+Whisker's total distance is miles-ahead + tortoise-distance; speed = total / hours.
+
+```clojure
+(let [tortoise-speed 2
+      hours 3
+      miles-ahead 9
+      tortoise-distance (* tortoise-speed hours)
+      hare-distance (+ miles-ahead tortoise-distance)]
+  (quot hare-distance hours))
+;=> 5
+```
+
+Whisker's speed was 5 miles per hour.
+
+{"tool_calls":[{"name":"eval","args":{"form":"(let [tortoise-speed 2\n      hours 3\n      miles-ahead 9\n      tortoise-distance (* tortoise-speed hours)\n      hare-distance (+ miles-ahead tortoise-distance)]\n  (quot hare-distance hours))"}},{"name":"answer","args":{"value":5}}]}
+<|end|>
+
+````
+
+## Example 31: two-mice / food-comparison
+
+- code form: inline
 - preface:   narrative
 - tool-call: 1-call (answer)
 
@@ -1029,9 +1099,9 @@ Question: What is the absolute difference in seeds between the two mice?
 I take the absolute value of the difference.
 
 ```clojure
-(def country-amt 18)
-(def city-amt 11)
-(abs (- city-amt country-amt))
+(let [country-amt 18
+      city-amt 11]
+  (abs (- city-amt country-amt)))
 ;=> 7
 ```
 
@@ -1042,7 +1112,7 @@ The difference is 7 seeds.
 
 ````
 
-## Example 30: two-mice / shared-meal
+## Example 32: two-mice / shared-meal
 
 - code form: inline
 - preface:   narrative
@@ -1078,10 +1148,10 @@ Each mouse gets 4 acorns.
 
 ````
 
-## Example 31: two-mice / trip-budget
+## Example 33: two-mice / trip-budget
 
 - code form: block
-- preface:   fixed
+- preface:   none
 - tool-call: 1-call (answer)
 
 ````text
@@ -1092,24 +1162,21 @@ Available tools:
 - answer(value: any) — submit the final answer (literal value or Clojure-source string that the runtime will eval)
 <|end|>
 <|user|>
-Squeak the mouse began the journey with 46 coins. He spent 2 coins on travel and 13 coins on food.
+Whisk the mouse began the journey with 26 coins. She spent 13 coins on travel and 7 coins on food.
 
-Question: How many coins does Squeak have left?
+Question: How many coins does Whisk have left?
 <|end|>
 <|asst|>
-Let me work this out.
-
 ```clojure
-(def start 46)
-(def travel 2)
-(def food 13)
-(- start travel food)
-;=> 31
+(def start-bones 26)
+(def travel-cost 13)
+(let [food-cost 7] (- start-bones travel-cost food-cost))
+;=> 6
 ```
 
-Squeak has 31 coins remaining.
+Whisk has 6 coins remaining.
 
-{"tool_calls":[{"name":"answer","args":{"value":31}}]}
+{"tool_calls":[{"name":"answer","args":{"value":6}}]}
 <|end|>
 
 ````
