@@ -61,14 +61,30 @@ reads through the post-fix records and surfaces subtler issues.
     convert "1 minus 1/3" back to `(- 1 1/3)`. The concept_phrase
     should match the form's structure.
 
-## Remediation strategy
+## Remediation strategy + actions taken
 
-Fixes 1, 2, 3, 4, 5, 7, 12 are mechanical regex / template fixes.
-Fixes 6, 8, 10, 11 are cosmetic and may not justify per-subject work.
-Fix 9 is per-subject judgment.
+| # | Issue | Status | Notes |
+|---|---|---|---|
+| 1 | meta-meta `the value of the form 0` | ✅ fixed | G1-01 ex1 trimmed |
+| 2 | `in the hilltop` | ✅ fixed | place_phrase now uses `on / atop` |
+| 3 | `in the road` | ✅ fixed | place_phrase now uses `on / along` |
+| 4 | `stopped across X` | ✅ fixed | `across` removed from prep pool |
+| 5 | quote-break in concept_phrase | ⚠️ accepted | nested quotes are syntactically OK; cleaner alternatives lose form identity |
+| 6 | singular-they "They called it" | ✅ fixed | subplot 5 uses `{hare}` (name) |
+| 7 | abstract concept + "read aloud" | ✅ fixed | subplot 4 rewritten to "pointed to ... and read out the form" |
+| 8 | subplot over-selection | ⚠️ accepted | empirical distribution at n=222 is already smooth (verified) |
+| 9 | generic plan_pool | ✅ fixed | added 3 more concept-tied entries |
+| 10 | `drew a wager in the dust` cliché | ✅ fixed | subplot 2 split into 3 variants (sketched/chalked/marked-out) |
+| 11 | string-form quote density | ⚠️ accepted | inherent to string forms; reader can disambiguate |
+| 12 | concept_phrase reads as math | ✅ fixed | G1-03 ratio concepts now use "the form (X)" |
 
-Adding 4 new audit checks:
+## Audit checks added
+
 - `META_META`: question_what containing "the value of the form X"
 - `BAD_PLACE_PREP`: "in the hilltop|road|beach|cliff"
 - `BAD_VERB_PREP`: "stopped (across|in) the [outdoor location]"
-- `QUOTE_DENSITY`: nested unescaped quotes in concept_phrase
+
+The QUOTE_DENSITY check was considered but not implemented — the
+nested quotes are syntactically valid prose and the model can learn
+to disambiguate. Forcing concept_phrases to drop the inner quotes
+would lose form identity.

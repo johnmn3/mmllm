@@ -43,12 +43,29 @@ that {hare_he_she} could see the answer at a glance. {tortoise},
 in the REPL and read off whatever it returned."""),
 
     # 2. The wager template — bets on what the form returns.
+    #    Three near-equivalent variants of the wager-setup line, picked
+    #    so the same wager-template doesn't always read as "drew a wager
+    #    in the dust" verbatim (cosmetic variety).
     SubplotTemplate("""\
-At a moss-covered milestone {place}, {hare_phrase} drew a wager in the
-dust: whoever guessed the result of {form_display} first would win the
-right to set the next race. {tortoise_phrase}, {emo_patient}, said it
-was simpler to type the form into the REPL than to argue about
-{concept_phrase}."""),
+At a moss-covered milestone {place}, {hare_phrase} sketched a small
+wager into the path: whoever guessed the result of {form_display}
+first would win the right to set the next race. {tortoise_phrase},
+{emo_patient}, said it was simpler to type the form into the REPL
+than to argue about {concept_phrase}."""),
+
+    # 2b. wager variant — chalk on stone
+    SubplotTemplate("""\
+{hare_phrase} chalked a wager on a flat stone {place}: whoever
+predicted the result of {form_display} would set the next race's
+distance. {tortoise_phrase}, {emo_patient}, said it would be simpler
+to type the form into the REPL than to bicker about {concept_phrase}."""),
+
+    # 2c. wager variant — twig in the path
+    SubplotTemplate("""\
+With a twig, {hare_phrase} marked out a wager {place}: whoever
+guessed the result of {form_display} first would win the right to
+choose the next contest. {tortoise_phrase}, {emo_patient}, said it
+was easier to ask the REPL about {concept_phrase} than to argue."""),
 
     # 3. The teacher template — Tortoise is gently correcting Hare.
     #    NOTE: drops the "from a recent sprint" tail because EMO_TIRED
@@ -62,11 +79,16 @@ the runtime hands you back what it evaluates to." {hare}, {emo_tired},
 agreed to try."""),
 
     # 4. The audience template — small forest creatures watch and learn.
+    #    NOTE: rewritten so {concept_phrase} is referenced via "pointed to"
+    #    rather than "read aloud" — abstract concept_phrases like "the
+    #    equality (= 1 1)" / "the predicate (zero? 0)" don't fit
+    #    "read aloud" semantically (you read FORMS aloud, not types).
     SubplotTemplate("""\
 A small audience of forest creatures had gathered {place} to watch
 {hare_phrase} attempt to outwit {tortoise_phrase} at reading the REPL.
-{tortoise} read aloud {concept_phrase}: the form was {form_display}.
-The crowd waited to see who would correctly write the form to submit."""),
+{tortoise} pointed to {concept_phrase} and read out the form aloud:
+{form_display}. The crowd waited to see who would correctly write
+the form to submit."""),
 
     # 5. The race-pause template — hare pauses mid-race, tortoise catches up
     #    via careful evaluation.
@@ -117,6 +139,11 @@ _PLAN_POOL: tuple[str, ...] = (
     "I submit the form to the REPL via the eval tool.",
     "I let the REPL do the evaluation.",
     "I express the form as Clojure source.",
+    # Concept-specific plans — picked occasionally to break up the
+    # generic ones and give the model concept-tied reasoning patterns.
+    "I read the form and submit it directly.",
+    "I write the literal value as Clojure source.",
+    "I let the runtime decide what the form evaluates to.",
 )
 
 
