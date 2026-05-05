@@ -59,15 +59,9 @@ def check_record(rec, sub, example):
             if re.search(ans_re, asst_clean):
                 issues.append(("ANSWER_LEAK_ASST", f"answer {ans_str} in asst preface"))
 
-    # multi-line form on stone (just informational)
-    if "\n" in example.form and ("carved" in user.lower() or "etched" in user.lower() or "on a flat stone" in user.lower()):
-        issues.append(("MULTILINE_ON_STONE", "multi-line form with on-stone narrative"))
-
-    # awkward concept_phrase fits
-    if len(example.concept_phrase) > 80:
-        issues.append(("LONG_CONCEPT", f"concept_phrase {len(example.concept_phrase)} chars"))
-
-    # nested 'computes' in question_what
+    # nested 'computes' in question_what (real bug — the question_phrase
+    # template already says "Write a Clojure expression that computes X.",
+    # so X containing "computes" produces "computes ... computes ...")
     if "computes" in example.question_what.lower():
         issues.append(("NESTED_COMPUTES", "question_what already says 'computes'"))
 

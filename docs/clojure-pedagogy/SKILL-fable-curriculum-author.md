@@ -404,6 +404,44 @@ If your variety drops below 0.95, the probable cause is one of:
 - Location pool < 5 locations
 - Opener pool < 4
 
+### 11. Subplot template + concept_phrase duplication (the form-form pattern)
+
+A subplot template that says:
+
+```
+"The form {form_display} described {concept_phrase}, and ..."
+```
+
+renders awkwardly when `concept_phrase` itself starts with "the form X":
+
+> "The form `(into [] '(1 2 3))` described **the form (into [] '(1 2 3))**, and..."
+
+The form appears twice — once with backticks (form_display) and once
+without (concept_phrase) — within five words. The duplication isn't
+strictly wrong, but reads as repetitive prose.
+
+Two ways to avoid it:
+
+**Option A — write subplot templates that don't co-locate form_display
+and concept_phrase**: structure the template so each placeholder appears
+in a different sentence or with intervening prose. The G4 collection
+subplots were rewritten this way — they no longer say "form X described
+form Y".
+
+**Option B — use semantic noun-phrase concept_phrases instead of
+"the form X"**: for example, `"an indexed access"` (G4-02) or
+`"an addition"` (G1-13) instead of `"the form (nth [10 20 30] 0)"` /
+`"the form (+ 1 2)"`. This requires the noun-phrase to read naturally
+in subplot prose like "wrote {concept_phrase} on a stone" — which
+"an indexed access" does, awkwardly. So this option is harder to
+get right. Option A is preferred.
+
+The audit harness can't catch this issue automatically (it's prose
+quality, not structural). Manual spot-check the rendered output for
+each new subplot template, sampling examples with both short forms
+("(+ 1 2)") and longer forms ("(let [a 1 b 2] (+ a b))") to see
+whether the prose flows.
+
 ### 10. Genericizing the fable away
 
 The whole point is that the reader feels they're inside YOUR fable.

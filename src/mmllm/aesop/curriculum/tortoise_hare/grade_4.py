@@ -12,17 +12,21 @@ from mmllm.aesop.curriculum.tortoise_hare.grade_1 import _SHARED_SUBPLOTS as _G1
 
 
 _COLL_SUBPLOTS: list[SubplotTemplate] = list(_G1_SUBPLOTS) + [
+    # NOTE: these two templates avoid putting both {form_display} AND a
+    # "the form X" {concept_phrase} in close proximity (the duplication
+    # produces ungrammatical "the form X described the form X" prose
+    # when concept_phrase is "the form X" verbatim — see SKILL doc #11).
     SubplotTemplate("""\
 {tortoise_phrase} had been laying out a small collection {place} —
-pebbles, milestones, paw-prints, whatever the day produced. The form
-{form_display} described {concept_phrase}, and {tortoise} wanted
-{hare_phrase} to write the form so the REPL could confirm."""),
+pebbles, milestones, paw-prints, whatever the day produced. {tortoise}
+wrote {form_display} on a slate and asked {hare_phrase} to write the
+form into the REPL so they could confirm it together."""),
 
     SubplotTemplate("""\
 {hare_phrase}, {emo_proud}, declared the collection plain. {tortoise_phrase}
-wrote the form {form_display} on a slate {place}, calmly. "It's not
-about plain or fancy," {tortoise_he_she} said. "It's about whether
-{concept_phrase} is what we think it is.\""""),
+wrote {form_display} on a slate {place}, calmly. "It's not about plain
+or fancy," {tortoise_he_she} said. "It's about whether the runtime
+agrees with what we think we're describing.\""""),
 ]
 
 
@@ -204,7 +208,7 @@ G4_20 = SubjectCurriculum(grade=4, subject_id="G4-20",
         _ex("(count (seq [1 2 3]))", 3,
             "the form (count (seq [1 2 3]))", "the count of seq over a vector"),
         _ex("(seq [])", None,
-            "the form (seq []) (returns nil for empty)", "what (seq []) returns"),
+            "the form (seq [])", "what (seq []) returns"),
     ], subplots=_COLL_SUBPLOTS, plan_pool=_PLAN_G4)
 
 
