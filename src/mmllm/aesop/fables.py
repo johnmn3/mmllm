@@ -3209,24 +3209,97 @@ def _tm_trip_budget(scene: Scene) -> Record:
     )
     answer = evaluate(expr)
 
-    _intro = _aesopian_intro(scene, "two-mice")
+    intro = _aesopian_intro(scene, "two-mice")
+    content   = scene.rng.choice(EMO_CONTENT)
+    greedy    = scene.rng.choice(EMO_GREEDY)
+    regretful = scene.rng.choice(EMO_REGRETFUL)
+
+    # Six narrative subplots — same arithmetic (start - travel - food).
+    # The items here are coins; what varies is the container the mouse
+    # carries them in (pouch, purse, rolled-up leaf, thimble, etc.) and
+    # the road or city errand that drains them.
+    trip_budget_subplots = [
+        # 1) tiny leather pouch on the country road
+        f"{species_phrase(mouse)} set out for the city before dawn with "
+        f"{n_unit(start, 'coin')} jingling in a tiny leather pouch tied "
+        f"at {mouse.his_her} belt, {content} that {mouse.he_she} had "
+        f"saved enough at last. Along the road {mouse.he_she} paid "
+        f"{n_unit(travel, 'coin')} for a ride on the back of a passing "
+        f"cart, and at a roadside inn {mouse.he_she} laid out "
+        f"{n_unit(food, 'coin')} for a crust of bread and a thimble of "
+        f"milk. After both transactions the pouch felt much lighter "
+        f"against {mouse.his_her} side.",
+
+        # 2) small embroidered purse to a city festival
+        f"{cap(species_phrase(mouse))} buttoned a small embroidered "
+        f"purse holding {n_unit(start, 'coin')} into a hidden inner "
+        f"pocket, {greedy} at the thought of a festival in the city. "
+        f"The carriage fare came to {n_unit(travel, 'coin')}, paid "
+        f"reluctantly to a tall driver who bowed to no one. At a "
+        f"market stall, {mouse.name} parted with another "
+        f"{n_unit(food, 'coin')} for a wedge of cheese and a slice of "
+        f"plum cake. The purse, once heavy, was much thinner now.",
+
+        # 3) coins folded into a rolled-up leaf
+        f"With {n_unit(start, 'coin')} carefully folded into a rolled-up "
+        f"oak leaf and tucked beneath {mouse.his_her} cloak, {mouse.name} "
+        f"left the meadow at first light. {cap(mouse.he_she)} paid "
+        f"{n_unit(travel, 'coin')} to a kindly hedgehog driver who "
+        f"carried {mouse.him_her} most of the way, and {n_unit(food, 'coin')} "
+        f"at a noisy bakery stall for two warm rolls. By the time "
+        f"{mouse.he_she} reached the city gate, the leaf-bundle felt "
+        f"thin between {mouse.his_her} paws — yet the journey was real, "
+        f"and so was the spending.",
+
+        # 4) a thimble carried inside a knapsack
+        f"{cap(species_phrase(mouse))} packed {n_unit(start, 'coin')} "
+        f"into a battered tin thimble and slid the thimble deep into "
+        f"{mouse.his_her} knapsack. The road tolls along the river "
+        f"path swallowed {n_unit(travel, 'coin')} between the country "
+        f"crossing and the gates of the city. Hunger drove {mouse.him_her} "
+        f"to a corner stall where a city baker took {n_unit(food, 'coin')} "
+        f"for hot biscuits. {cap(mouse.he_she)} sat on a curb to count "
+        f"what remained in the thimble, {regretful} of how quickly it "
+        f"had drained.",
+
+        # 5) coins in a hollow walnut shell
+        f"For travel-money, {mouse.name} the mouse used a trick of the "
+        f"old burrow folk: {mouse.he_she} hid {n_unit(start, 'coin')} "
+        f"inside a hollow walnut shell, sealed with a smear of beeswax. "
+        f"On the way to the market town, {n_unit(travel, 'coin')} was "
+        f"spent on stage-fares and a copper for the bridge-toll. At a "
+        f"vendor's cart {mouse.he_she} traded another "
+        f"{n_unit(food, 'coin')} for fresh raisins and a sliver of "
+        f"butter. The walnut shell, when {mouse.he_she} pried it open "
+        f"again, sounded much quieter than before.",
+
+        # 6) a small drawstring sack into the bustle of the city
+        f"A small drawstring sack of {n_unit(start, 'coin')} swung at "
+        f"{mouse.name}'s side as {mouse.he_she} stepped onto the city's "
+        f"crowded paving stones, {greedy} for the wonders {mouse.he_she} "
+        f"had heard described. The trolley-mouse charged "
+        f"{n_unit(travel, 'coin')} for the long ride from the country "
+        f"gate to the central square; a vendor of cheese-rinds took "
+        f"another {n_unit(food, 'coin')} for a paper twist of "
+        f"crumbles. {cap(mouse.he_she)} paused at a fountain, untied "
+        f"the sack, and weighed what remained against the long road "
+        f"home.",
+    ]
+
+    body = _render_subplot(scene, trip_budget_subplots)
     user_msg = (
-        f"{_intro}{species_phrase(mouse)} began the journey with "
-        f"{n_unit(start, 'coin')}. {cap(mouse.he_she)} spent "
-        f"{n_unit(travel, 'coin')} on travel and {n_unit(food, 'coin')} "
-        f"on food.\n\n"
-        f"Question: How many coins does {mouse.name} have left?"
+        f"{intro}{body}\n\n"
+        f"{question_phrase(scene, f'how many coins {mouse.name} has left after the trip')}"
     )
 
-    code_block  = render_code(expr, form=scene.code_form(), value=answer)
-    result_text = f"{mouse.name} has {n_unit(answer, 'coin')} remaining."
-    narrative   = "I subtract travel and food from the starting coins."
+    plan = (
+        "I subtract the travel cost and the food cost from the "
+        "starting coins."
+    )
     return _finalize(
         scene,
         user_msg=user_msg,
-        narrative=narrative,
-        code_block=code_block,
-        result_text=result_text,
+        plan=plan,
         value=answer,
         expr=expr,
         fable="two-mice",
