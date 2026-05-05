@@ -54,7 +54,7 @@ way {goose_phrase} has the last word on the morning's count.\""""),
     # 11. The ledger-of-coins template — ledger entries become
     #     multi-step calculations that resolve to one value at a time.
     SubplotTemplate("""\
-A row of small coins lay on the kitchen table {place}, one for each
+A row of small coins lay on a wooden table {place}, one for each
 operand in the day's reckoning. {owner_phrase} had written
 {form_display} at the top of the ledger — the next entry, just below
 yesterday's egg-count. {visitor_phrase} pointed at the coins and
@@ -93,7 +93,7 @@ G2_01 = SubjectCurriculum(
         _ex("(- 100 1 2 3)", 94,      "the chain (- 100 1 2 3)",  "the result of (- 100 1 2 3)"),
         _ex("(+ 1 2 3 4 5 6 7 8 9 10)", 55,
             "the sum 1+2+...+10",       "the sum of integers 1 through 10"),
-        _ex("(* 1 2 3 4 5)", 120,     "the product 1*2*3*4*5",    "the product of 1 through 5 (5!)"),
+        _ex("(* 1 2 3 4 5)", 120,     "the product 1*2*3*4*5",    "the product of 1 through 5"),
         _ex("(+ 10 20 30)", 60,       "the sum (+ 10 20 30)",     "the sum of 10, 20, and 30"),
     ],
     subplots=_SHARED_SUBPLOTS, plan_pool=_PLAN_POOL,
@@ -270,10 +270,10 @@ G2_12 = SubjectCurriculum(
         # and the runtime returns nil.
         _ex('(println "hello")', None,
             'the form (println "hello")',
-            'the return value of (println "hello") (it is nil)'),
+            'the return value of (println "hello")'),
         _ex('(print "x")', None,
             'the form (print "x")',
-            'the return value of (print "x") (it is nil)'),
+            'the return value of (print "x")'),
     ],
     subplots=_SHARED_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
@@ -377,7 +377,7 @@ G2_18 = SubjectCurriculum(
         _ex("'tortoise", "tortoise", "the quoted symbol 'tortoise",
             "the value of 'tortoise"),
         _ex("'(1 2 3)", [1, 2, 3], "the quoted list '(1 2 3)",
-            "the value of '(1 2 3) (a list, not a function call)"),
+            "the value of '(1 2 3)"),
     ],
     subplots=_SHARED_SUBPLOTS, plan_pool=_PLAN_POOL,
 )

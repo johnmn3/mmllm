@@ -184,12 +184,12 @@ EMO_PROUD: tuple[str, ...] = (
 )
 EMO_PATIENT: tuple[str, ...] = (
     "without complaint", "saying very little",
-    "with steady, careful steps", "her eyes always on the path",
+    "with steady, careful steps", "with eyes always on the path",
     "untroubled by what others thought", "stepping deliberately",
 )
 EMO_TIRED: tuple[str, ...] = (
     "drowsy from the warm sun", "weary from the morning's effort",
-    "lulled by the gentle wind", "her legs heavy from sprinting",
+    "lulled by the gentle wind", "with legs heavy from sprinting",
     "yawning at the soft moss",
 )
 EMO_THIRSTY: tuple[str, ...] = (

@@ -39,14 +39,18 @@ to compare notes, {owner} read aloud {concept_phrase} and asked,
 REPL reached across the shared path between the stalls."""),
 
     # The barn-and-kitchen beat: forms labeled in separate rooms.
+    # NOTE: dropped hardcoded "in the kitchen" before {place} — when
+    # {place} resolved to "deep inside the kitchen" or "in the cellar"
+    # the result was "another slate in the kitchen deep inside the
+    # kitchen" or "another slate in the kitchen in the cellar"
+    # (DOUBLED_PLACE bug, audit-flagged).
     SubplotTemplate("""\
 {owner_phrase} wrote forms on a slate in the barn while
-{visitor_phrase} kept another slate in the kitchen {place}. Each
-slate carried its own labels, and {goose_phrase} laid one egg per
-morning regardless of which room counted it. {owner}, {emo_patient},
-read out {concept_phrase} and asked the REPL to return what
-{form_display} resolved to when the right slate's labels were in
-view."""),
+{visitor_phrase} kept a parallel slate {place}. Each slate carried
+its own labels, and {goose_phrase} laid one egg per morning
+regardless of which room counted it. {owner}, {emo_patient}, read
+out {concept_phrase} and asked the REPL to return what {form_display}
+resolved to when the right slate's labels were in view."""),
 ]
 
 
@@ -154,8 +158,8 @@ G6_06 = SubjectCurriculum(grade=6, subject_id="G6-06",
             "the :private flag on metadata of '^:private x",
             "whether the :private metadata is true"),
         _ex("(:private (meta 'x))", None,
-            "the :private flag on plain metadata of 'x (none set)",
-            "the value of (:private (meta 'x)), which is nil"),
+            "the :private flag on plain metadata of 'x",
+            "the value of (:private (meta 'x))"),
     ], subplots=_NS_SUBPLOTS, plan_pool=_PLAN_G6)
 
 

@@ -33,10 +33,10 @@ nodded — for once {emo_tired} enough to listen."""),
 
     SubplotTemplate("""\
 {tortoise_phrase} had filled an entire notebook over the long race
-with tools and patterns: transducers, channels, specs, tests.
-{place}, the next entry was {concept_phrase}, and the form was
-{form_display}. {hare_phrase}, {emo_proud} but more reflective than
-usual, agreed to write the form into the REPL."""),
+with tools and patterns — transducers, channels, specs, tests —
+and {place} the next entry was {concept_phrase}, with the form
+written as {form_display}. {hare_phrase}, {emo_proud} but more
+reflective than usual, agreed to write the form into the REPL."""),
 
     SubplotTemplate("""\
 "This isn't a sprint trick," {tortoise} said {place}, {emo_patient}.
@@ -182,11 +182,11 @@ G12_06 = SubjectCurriculum(
         # We can run small spec predicates portably.
         _ex("(do (require '[clojure.spec.alpha :as s]) "
             "(s/valid? int? 42))", True,
-            "(s/valid? int? 42) — a basic spec check",
+            "(s/valid? int? 42)",
             "whether 42 conforms to the int? spec"),
         _ex("(do (require '[clojure.spec.alpha :as s]) "
             "(s/valid? string? 42))", False,
-            "(s/valid? string? 42) — a failing spec check",
+            "(s/valid? string? 42)",
             "whether 42 conforms to the string? spec"),
     ],
     subplots=_REAL_SUBPLOTS, plan_pool=_PLAN_G12,

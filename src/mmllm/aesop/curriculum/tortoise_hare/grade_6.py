@@ -139,8 +139,8 @@ G6_06 = SubjectCurriculum(grade=6, subject_id="G6-06",
             "the :private flag on metadata of '^:private x",
             "whether the :private metadata is true"),
         _ex("(:private (meta 'x))", None,
-            "the :private flag on plain metadata of 'x (none set)",
-            "the value of (:private (meta 'x)), which is nil"),
+            "the :private flag on plain metadata of 'x",
+            "the value of (:private (meta 'x))"),
     ], subplots=_NS_SUBPLOTS, plan_pool=_PLAN_G6)
 
 

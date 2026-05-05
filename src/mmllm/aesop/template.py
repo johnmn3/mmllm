@@ -479,6 +479,12 @@ def place_phrase(scene: "Scene", location: ont.Location) -> str:
         prep = scene.rng.choice(("on", "near", "by"))
     elif name == "river bank":
         prep = scene.rng.choice(("on", "near", "by", "along"))
+    elif name == "farm":
+        # "in the farm" reads as inside a building. Idiomatic English
+        # is "on the farm" / "at the farm" / "near the farm". Caught by
+        # the deep-audit pass that ran after grades 2-12 surfaced
+        # repeated `BAD_PLACE_PREP` for "in the farm". Pitfall #17 family.
+        prep = scene.rng.choice(("on", "at", "near", "by"))
     else:
         prep = scene.rng.choice(("in", "near", "at the edge of", "by"))
     return f"{prep} {location.article} {name}"

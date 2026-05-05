@@ -545,6 +545,204 @@ This pattern applies whenever a sentence in a subplot has just one
 clear subject AND the pronoun would be a singular-they. Default to
 the name.
 
+### 26. Plan-pool entries should be tagged by subject
+
+Plan-pool entries that name a specific Clojure operation
+("I let the polymorphic dispatch pick the right implementation",
+"I count each coin into the chest before reading the running
+total", "I expand the macro with macroexpand and read the produced
+form", "I write the interop form using the host's convention")
+fire on every record in the grade by default. They misfire when
+the example doesn't match — e.g., "I expand the macro" applied to
+`'(1 2 3)` (a plain quoted list, no macro), or "I count each coin
+into the chest" applied to `@(future (+ 1 2))` (a future, no
+counter, no chest).
+
+Each plan-pool entry should be either:
+
+1. **Subject-neutral** — applies to any form ("I write the form
+   and let the REPL evaluate it.", "I submit the form to the
+   REPL via the eval tool.").
+2. **Per-subject** — split the plan_pool into a generic shared
+   pool plus a subject-specific override on each `SubjectCurriculum`
+   that needs one.
+3. **Tag-gated** — add `fits_tags` to plan entries (the same
+   mechanism that's already on subplot templates), and tag
+   examples accordingly. The generator's plan picker filters by
+   tag, falling back to subject-neutral entries when no tagged
+   plan fits.
+
+The deep-audit pass that ran after grade-12 surfaced this in
+8 of 12 grades; G7 plan "I wrap the form in try/catch" fired on
+edn-read examples, G9 plan "I count each coin into the chest"
+fired on futures/promises/immutability subjects, G10 plan "I
+expand the macro" fired on plain quoted lists, etc. Apply
+discipline to plan_pool when authoring a new fable-curriculum.
+
+### 25. Hardcoded location in template collides with `{place}`
+
+A subplot template like:
+
+```
+"... slate in the kitchen {place} ..."
+"At the kitchen table {place}, ..."
+"... stood in the farm where someone had ..."
+```
+
+renders as a stutter when `{place}` resolves to the same or a
+nearby location:
+
+> "another slate **in the kitchen deep inside the kitchen**"
+> "another slate **in the kitchen in the cellar**" (different
+>   rooms but still puts the slate in two places)
+> "**kitchen table inside the kitchen**"
+> "**stood in the farm at the edge of the farm**"
+
+The audit harness flags this with `DOUBLED_PLACE` (regex looks
+for `<location>` followed within 40 chars by `(in|near|on|...|at
+the edge of)\s+(the|a)\s+<same-or-nearby-location>`).
+
+Fix: use a generic prop noun that composes with any `{place}`
+resolution:
+- "kitchen table {place}" → "wooden table {place}"
+- "slate in the kitchen {place}" → "parallel slate {place}"
+- "stood in the farm {place}" → "stood {place}" (drop the
+  hardcoded location)
+
+The point of `{place}` is to vary the scene; if the template
+needs the kitchen specifically, drop `{place}` and use a fixed
+location instead.
+
+### 24. `{place}` rendered after sentence-ending period — lowercase sentence start
+
+`place_phrase()` returns strings that ALWAYS start with a
+lowercase preposition: `in the meadow`, `near the village`, `on
+the hilltop`, `deep inside the cellar`, `at the edge of the
+orchard`. Most templates interpolate `{place}` mid-sentence
+(`stopped {place}`), where lowercase is correct.
+
+But some templates put `{place}` at a sentence start, after a
+period:
+
+```
+"X had learned not to trust a form on first reading.
+{place}, X typed Y carefully ..."
+
+"X had filled an entire notebook with tools and patterns.
+{place}, the next entry was Y ..."
+```
+
+This renders as:
+
+> "...on first reading. **near the meadow**, X typed Y carefully..."
+> "...with tools and patterns. **deep inside the cellar**, the next entry..."
+
+The second sentence starts with a lowercase word ("near", "deep")
+because place_phrase doesn't capitalize. Two fixes:
+
+- **Restructure** so `{place}` is mid-sentence:
+  `"...first reading, and {place} X typed Y carefully ..."`
+  → "...first reading, and near the meadow X typed Y carefully ..."
+- **Capitalize** via a helper. Either expose `{place_cap}`
+  (capitalized version of `{place}`) in `_build_placeholders`,
+  or wrap the `{place}` insertion at template-render time.
+
+Restructure is preferred — the template reads more naturally
+and avoids a `place_cap` placeholder proliferation.
+
+The audit harness flags this with `LOWER_PLACE_AFTER_PERIOD`
+(regex looks for `\.\s+(in|near|on|...)\s+(the|a)\s+[a-z]`).
+
+Found in tortoise-hare grade_7 and grade_12 (ERR and real-world
+subplot extensions) and goose-eggs grade_7 / grade_12 / grade_5
+/ grade_10 — fixes landed in `goose_eggs/grade_7.py:_ERR_SUBPLOTS`
+and `tortoise_hare/grade_12.py:_REAL_SUBPLOTS` (and corresponding
+goose-eggs) on the polish branch.
+
+### 23. Object-case pronoun in subject position
+
+`{X_him_her}` returns object-case pronouns ("him" / "her" /
+"them"). It belongs in object position only:
+
+```
+"... asked {X_him_her} to ..."     ← right (object of asked)
+"... told {X_him_her} that ..."    ← right
+"... handed {X_him_her} the slate" ← right
+```
+
+A template that places `{X_him_her}` in subject position renders
+ungrammatically:
+
+```
+"... agreed to wait while {X_him_her} submitted the form ..."
+                              ↓
+"... agreed to wait while **her** submitted the form ..."  ← wrong
+"... agreed to wait while **him** submitted the form ..."  ← wrong
+"... agreed to wait while **them** submitted the form ..." ← wrong
+```
+
+Fix: in subject position, use either the subject-case pronoun
+`{X_he_she}` ("he" / "she" / "they") or — when the antecedent
+might be ambiguous to a reader (singular-they after a singular
+setup, see pitfall #19) — the bare name `{X}`.
+
+The audit harness flags this with `OBJECT_AS_SUBJECT` (regex
+looks for `\b(while|so|as|after|before|until|when)\s+(her|him)\s+
+<verb>\b`).
+
+Found in goose-eggs grade_9 subplot 11 (market-trip ledger);
+fixed by changing `{owner_him_her}` to `{owner}` (bare name) in
+`goose_eggs/grade_9.py` on the polish branch.
+
+### 22. Hardcoded gendered possessive in EMO_* phrases
+
+EMO_* pool entries that contain a possessive pronoun tied to a
+specific gender ("her eyes always on the path", "her legs heavy
+from sprinting", "his stomach hollow with hunger", "his eyes
+greedy with want", "her belly aching for food") get applied
+uniformly across all characters by the placeholder builder. When
+the EMO lands on a character whose pronoun differs, the result
+is a flat gender error:
+
+> "Frank, **her eyes always on the path**, said it would be simpler..."
+> "Bramble, **his shoulder** at the basket..." (Bramble is female)
+
+Two ways to fix:
+
+1. **Strip the possessive** — replace gendered phrases with
+   gender-neutral forms:
+   - "her eyes always on the path" → "with eyes always on the path"
+   - "her legs heavy from sprinting" → "with legs heavy from sprinting"
+   - "his stomach hollow with hunger" → "with a hollow stomach"
+   - "his eyes greedy with want" → "with greedy eyes" / "eyeing it greedily"
+
+2. **Filter at selection** — extend `_build_placeholders` to
+   only draw from EMO entries whose hardcoded pronoun matches
+   the selected character's gender. More work; keeps the
+   evocative possessives ("her beak cracked with thirst" reads
+   stronger than "with a cracked beak").
+
+Fix (1) is preferred for new fables — it's mechanical and
+keeps the EMO pool gender-neutral. Fix (2) is acceptable for
+fables that lean heavily on a specific character (e.g., crow-
+pitcher's `EMO_THIRSTY` is bird-specific anyway).
+
+The audit harness flags this with `GENDERED_EMO`. To avoid
+false positives ("Bramble peered over Slowpoke's shoulder"
+where the possessive refers to a different character), the
+regex requires the pronoun to be in **apposition** to the name
+— `{name}, {pronoun} {body_part}`, optionally separated by
+"the {species}" or a dialogue verb ("said", "declared").
+
+Fixed in `mmllm/aesop/fables.py` on the polish branch:
+EMO_PATIENT and EMO_TIRED have their gendered entries
+neutralized. EMO_GREEDY / EMO_CONTENT / EMO_REGRETFUL /
+EMO_HUNGRY / EMO_THIRSTY / EMO_DESPERATE remain gendered for
+now; they're either fable-specific (THIRSTY = crow-pitcher,
+DESPERATE = boy-wolf) or have neutralized variants in the
+goose-eggs `GE_EMO_*` pools that the goose-eggs placeholder
+builder uses instead.
+
 ### 21. `{place}` carries its own preposition — don't pair it with verbs that need one
 
 The `place_phrase()` helper produces strings that ALREADY include a

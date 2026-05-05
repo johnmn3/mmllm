@@ -214,7 +214,7 @@ G3_14 = SubjectCurriculum(grade=3, subject_id="G3-14",
             "the do form (do 1 2 3)",
             "the value of (do 1 2 3)"),
         _ex("(do (+ 1 1) (+ 2 2) (+ 3 3))", 6,
-            "a do with three forms — last wins",
+            "a do with three forms",
             "the value of (do (+ 1 1) (+ 2 2) (+ 3 3))"),
     ], subplots=_NAMING_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
 
