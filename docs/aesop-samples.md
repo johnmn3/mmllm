@@ -23,12 +23,14 @@ Available tools:
 <|user|>
 All summer long, the Ant worked while the Grasshopper sang.
 
-Winter lasted 87 days. Bit the ant started with 97 grains and ate 2 every day, while Hum the grasshopper started with 3 grains and ate 3 every day. If a stockpile runs out, the count cannot go below zero.
+That year the cold months stretched 60 days from first snow to last frost. Tic kept a careful tally: 278 grains in the jar by the wall at the start, and he drew 2 grains from it every morning, puffed up with pride of his planning. Chirp, hidden in the dry stalks, had begun the winter with only 20 grains in his jar, and chewed through 1 grain a day. The count, of course, cannot go below zero for either of them.
 
-Question: How many grains does Bit have left at the end of winter?
+Question: how many grains Tic has left at the end of winter?
 <|end|>
 <|asst|>
-{"tool_calls":[{"name":"eval","args":{"form":"(let [ant-stock 97 ant-rate 2 gh-stock 3 gh-rate 3 days 87 ant-left (- ant-stock (* ant-rate days)) gh-left (- gh-stock (* gh-rate days))] (max ant-left 0))"}}]}
+I compute leftover for Tic as initial minus days times rate, then clamp to 0 if negative using max.
+
+{"tool_calls":[{"name":"eval","args":{"form":"(let [ant-stock 278 ant-rate 2 gh-stock 20 gh-rate 1 days 60 ant-left (- ant-stock (* ant-rate days)) gh-left (- gh-stock (* gh-rate days))] (max ant-left 0))"}}]}
 <|end|>
 
 ````
@@ -36,7 +38,7 @@ Question: How many grains does Bit have left at the end of winter?
 ## Example 2: ant-grasshopper / summer-stockpile-days
 
 - code form: inline
-- preface:   narrative
+- preface:   fixed
 - tool-call: 1-call (answer)
 
 ````text
@@ -48,14 +50,16 @@ Available tools:
 - answer(value: any) — submit the final answer
 <|end|>
 <|user|>
-Two creatures of the meadow approached the coming winter very differently.
+All summer long, the Ant worked while the Grasshopper sang. This was near the beach.
 
-Across the long summer at the woods, Bit the ant collected 222 grains in all, gathering 6 grains each day.
+By late summer the Grasshopper had begun to glance, regretting every careless step, at Bit's steady marching to and from the jar by the burrow's mouth. Each trip brought another crumb to the store. The fields of the beach were already turning gold; soon the wind would change. Inside that quiet jar, the count was honest: by the close of summer Bit had gathered 308 crumbs in all, carrying 7 crumbs home each day.
 
-Question: How many days did Bit spend collecting?
+Write a Clojure expression that computes how many days Bit spent at the gathering.
 <|end|>
 <|asst|>
-{"tool_calls":[{"name":"eval","args":{"form":"(let [total 222 per-day 6] (quot total per-day))"}}]}
+Let me work that out.
+
+{"tool_calls":[{"name":"eval","args":{"form":"(let [total 308 per-day 7] (quot total per-day))"}}]}
 <|end|>
 
 ````
@@ -75,14 +79,14 @@ Available tools:
 - answer(value: any) — submit the final answer
 <|end|>
 <|user|>
-Two creatures of the meadow approached the coming winter very differently. It happened across the desert.
+Among the small folk of the meadow, no two neighbors lived more differently than the Ant and the Grasshopper.
 
-Through the summer at the desert, Toc the ant worked steadily for 27 days and gathered 162 grains in all.
+"Why bother?" sang the Grasshopper one bright noon, lounging at the lip of Toc's burrow. Toc did not stop, only set another crumb into the jar with the small satisfaction of one pleased with her small fortune. "Because winter," she said simply. And so it was that Toc worked the whole 80 days of summer and finished with 400 crumbs stored away — even as the Grasshopper laughed and chirped the long afternoons away.
 
-Question: How many grains did Toc collect each day?
+Question: how many crumbs Toc carried home each day?
 <|end|>
 <|asst|>
-{"tool_calls":[{"name":"eval","args":{"form":"(let [total 162 days 27] (quot total days))"}}]}
+{"tool_calls":[{"name":"eval","args":{"form":"(let [total 400 days 80] (quot total days))"}}]}
 <|end|>
 
 ````
@@ -104,14 +108,14 @@ Available tools:
 <|user|>
 Among the small folk of the meadow, no two neighbors lived more differently than the Ant and the Grasshopper.
 
-Through the summer at the forest, Toc the ant collected 6 grains every day for 77 days.
+"Why bother?" sang the Grasshopper one bright noon, lounging at the lip of Bit's burrow. Bit did not stop, only set another grain into the hole with the small satisfaction of one happy with what she had. "Because winter," they said simply. And so it was that every day Bit carried 6 grains home, and the work went on for 47 days without pause — even as the Grasshopper laughed and chirped the long afternoons away.
 
-Question: How many grains did Toc collect by the end of summer?
+Write a Clojure expression that computes how many grains Bit has gathered by summer's end.
 <|end|>
 <|asst|>
-Let me compute that.
+I multiply the daily rate by the number of days.
 
-{"tool_calls":[{"name":"eval","args":{"form":"(let [per-day 6 days 77] (* per-day days))"}}]}
+{"tool_calls":[{"name":"eval","args":{"form":"(let [per-day 6 days 47] (* per-day days))"}}]}
 <|end|>
 
 ````
@@ -133,14 +137,14 @@ Available tools:
 <|user|>
 Among the small folk of the meadow, no two neighbors lived more differently than the Ant and the Grasshopper.
 
-Toc the ant has 66 grains stored for winter. She eats 1 grain per day.
+In the long blue hour after noon, with snow piled to the rafters, Toc sat by a small lamp and went over the inventory once again. The pouch that held the winter's food contained exactly 96 grains. She measured out 4 grains as a single day's portion — that was the rule she had set for herself when summer was bright. Now she only had to work out how many days the supply would carry her.
 
-Question: For how many whole days will Toc's stockpile last?
+Write a Clojure expression that computes how many whole days Toc's stockpile will last.
 <|end|>
 <|asst|>
-I'll express the answer as a Clojure form.
+I divide the stockpile by daily consumption (integer quotient).
 
-{"tool_calls":[{"name":"eval","args":{"form":"(let [stockpile 66 per-day 1] (quot stockpile per-day))"}}]}
+{"tool_calls":[{"name":"eval","args":{"form":"(let [stockpile 96 per-day 4] (quot stockpile per-day))"}}]}
 <|end|>
 
 ````
@@ -162,12 +166,14 @@ Available tools:
 <|user|>
 Every shepherd in the valley knew the danger of crying wolf for sport.
 
-Jess watched sheep on the hill. Out of mischief, she yelled the alarm 4 times falsely. Each time, 4 villagers rushed up the hill, each round trip lasting 20 minutes each.
+In the cold months, even a short run took its toll. Lou watched the flock at the edge of the snow-frosted meadow and, perhaps to fight off boredom, called for help when there was none — 5 times in all. On every alarm, 10 villagers pulled on their coats and hurried out, the round trip to the meadow taking 16 minutes apiece.
 
-Question: How many total minutes did the villagers waste running to 4 false alarms?
+Question: how many total minutes the villagers spent answering the 5 false alarms?
 <|end|>
 <|asst|>
-{"tool_calls":[{"name":"eval","args":{"form":"(let [villagers 4 alarms 4 minutes-per-trip 20] (* villagers alarms minutes-per-trip))"}}]}
+I multiply villagers × alarms × minutes-per-trip.
+
+{"tool_calls":[{"name":"eval","args":{"form":"(let [villagers 10 alarms 5 minutes-per-trip 16] (* villagers alarms minutes-per-trip))"}}]}
 <|end|>
 
 ````
@@ -187,14 +193,14 @@ Available tools:
 - answer(value: any) — submit the final answer
 <|end|>
 <|user|>
-It is hard to be believed twice when you have lied even once — a lesson every shepherd must one day learn.
+A young shepherd had been left alone with the flock far too often, and boredom had taken root.
 
-Lou kept a flock of 51 sheep. After many false alarms, an actual wolf appeared and no one in the village answered the call from her. The wolf ate 13 sheep.
+The shepherd's flock numbered 54 sheep at sundown when a thin grey wolf slipped from the trees and set the meadow into a panic. Will cried out for help, shouting until her voice cracked, but the villagers — long since out of trust for that voice — did not stir from the village. By the time the wolf gave up and returned to the woods, 12 sheep had run off into the dusk and were not seen again that night.
 
-Question: How many sheep does Lou have left?
+Question: how many sheep Will has left in the flock?
 <|end|>
 <|asst|>
-{"tool_calls":[{"name":"eval","args":{"form":"(let [flock-size 51 sheep-eaten 13] (- flock-size sheep-eaten))"}}]}
+{"tool_calls":[{"name":"eval","args":{"form":"(let [flock-size 54 sheep-eaten 12] (- flock-size sheep-eaten))"}}]}
 <|end|>
 
 ````
@@ -214,16 +220,16 @@ Available tools:
 - answer(value: any) — submit the final answer
 <|end|>
 <|user|>
-It is hard to be believed twice when you have lied even once — a lesson every shepherd must one day learn.
+Every shepherd in the valley knew the danger of crying wolf for sport.
 
-The villagers in Tom's village stop responding to alarms after 3 false alarms. So far, Tom has raised 6 false alarms.
+After many seasons of false cries from the hill, an old village elder set a rule that the people held to: the villagers would answer no more than 5 false alarms from a single shepherd. Lou had so far raised 4 false alarms. Whether they would come the next time depended on a simple comparison.
 
-Question: Will the villagers come on the next alarm? Answer yes or no.
+Question: whether the villagers will come on the next alarm (return the string "yes" or "no")?
 <|end|>
 <|asst|>
 Let me work that out.
 
-{"tool_calls":[{"name":"eval","args":{"form":"(let [threshold 3 alarms-so-far 6] (if (< alarms-so-far threshold) \"yes\" \"no\"))"}}]}
+{"tool_calls":[{"name":"eval","args":{"form":"(let [threshold 5 alarms-so-far 4] (if (< alarms-so-far threshold) \"yes\" \"no\"))"}}]}
 <|end|>
 
 ````
@@ -245,12 +251,14 @@ Available tools:
 <|user|>
 Hunger and thirst had driven the Crow far from her usual perch.
 
-Sable the crow has only 4 pebbles left. The pitcher's water sits at 4 centimeters and needs to reach 15 centimeters to drink. Each pebble raises the water by 2 centimeters.
+On a low garden wall Korvus laid out the contents of a small pouch — 5 beads, all that remained. Beside the wall stood a pitcher, water glinting at 5 centimeters and needing to climb to 14 centimeters before he could drink. He was parched from the long flight, and a quick test showed each bead raised the water by exactly 1 centimeter. He began to count whether so few would do.
 
-Question: Can Sable drink with the pebbles they has? Answer with yes or no.
+Write a Clojure expression that computes whether the water level reaches the target after Korvus drops in all 5 beads (true if it does, false otherwise).
 <|end|>
 <|asst|>
-{"tool_calls":[{"name":"eval","args":{"form":"(let [n-stones 4 rise-per 2 start-cm 4 target-cm 15 reachable (+ start-cm (* n-stones rise-per))] (>= reachable target-cm))"}}]}
+I compute the reachable water level with the available beads and compare with the target.
+
+{"tool_calls":[{"name":"eval","args":{"form":"(let [n-stones 5 rise-per 1 start-cm 5 target-cm 14 reachable (+ start-cm (* n-stones rise-per))] (>= reachable target-cm))"}}]}
 <|end|>
 
 ````
@@ -270,14 +278,14 @@ Available tools:
 - answer(value: any) — submit the final answer
 <|end|>
 <|user|>
-It is said that wit, more than strength, is the friend of the thirsty Crow. This was near the meadow.
+It is said that wit, more than strength, is the friend of the thirsty Crow.
 
-On a hot afternoon at the meadow, Sable the crow came upon a pitcher of water, but the water sat only 3 centimeters from the bottom — too low to reach. They needed the water to rise to 6 centimeters before they could drink. They began dropping pebbles into the pitcher, and each pebble raised the water level by 1 centimeter.
+After hours of fruitless searching, Sable the crow glided down to a quiet garden, with a thirst that hurt to bear. There on a low wall stood a pitcher, and from above they could see a thin glimmer of water at the bottom — only 3 centimeters deep, and their beak could not reach unless the surface rose to 11 centimeters. A scattering of beads lay along the path. Each bead, when dropped in, would push the water up by 1 centimeter. They began to count what they would need.
 
-Question: What is the smallest number of pebbles Sable needs to drop in to reach the target water level?
+Write a Clojure expression that computes the smallest number of beads Sable needs to drop in to reach the target water level.
 <|end|>
 <|asst|>
-{"tool_calls":[{"name":"eval","args":{"form":"(let [rise-per-stone 1 start-cm 3 target-cm 6 level-gap (- target-cm start-cm)] (quot (+ level-gap (dec rise-per-stone)) rise-per-stone))"}}]}
+{"tool_calls":[{"name":"eval","args":{"form":"(let [rise-per-stone 1 start-cm 3 target-cm 11 level-gap (- target-cm start-cm)] (quot (+ level-gap (dec rise-per-stone)) rise-per-stone))"}}]}
 <|end|>
 
 ````
@@ -297,14 +305,14 @@ Available tools:
 - answer(value: any) — submit the final answer
 <|end|>
 <|user|>
-The Crow knew that water in the world is sometimes hidden where only the patient can reach it.
+The Crow knew that water in the world is sometimes hidden where only the patient can reach it. This was at the edge of the meadow.
 
-Caw the crow came upon a pitcher with water at 1 centimeter. She tossed in 2 pebbles, and each one raised the water by 3 centimeters.
+In a cool stone courtyard Korvus, parched from the long flight, found a narrow jar at the foot of a column. The water sloshed faintly within at 5 centimeters, far out of reach. He set to work. From a corner where acorns had been swept into a small heap he lifted them, one after another — 3 acorns in total — and let each fall with a soft chime. Each chime pushed the surface up by another 2 centimeters.
 
-Question: After dropping all 2 pebbles, what is the new water level in centimeters?
+Write a Clojure expression that computes the new water level in the jar (in centimeters) after all 3 acorns have been dropped in.
 <|end|>
 <|asst|>
-{"tool_calls":[{"name":"eval","args":{"form":"(let [rise-per-stone 3 start-cm 1 n-stones 2] (+ start-cm (* n-stones rise-per-stone)))"}}]}
+{"tool_calls":[{"name":"eval","args":{"form":"(let [rise-per-stone 2 start-cm 5 n-stones 3] (+ start-cm (* n-stones rise-per-stone)))"}}]}
 <|end|>
 
 ````
@@ -326,14 +334,12 @@ Available tools:
 <|user|>
 What the Dog thought he saw beneath the water turned out to be his own reflection.
 
-Bell the dog padded across a brook holding 2 bones. Glancing into the water, she saw her reflection and thought it was another dog with more bones. She let go of one bone, lunging at the reflection, but the bone fell into the stream.
+Bell the dog had been given 5 biscuits by the baker's wife, who tied them into a soft little cloth bundle that she carried gently in her mouth. On the plank bridge over the brook the bundle dipped down toward the water, and there in the ripples she saw a second dog with what looked like a fatter bundle. His eyes greedy with want, she lunged — and one biscuit slipped out of the loose corner of the cloth and dropped, lost in the current.
 
-Question: How many bones does Bell have now?
+Question: how many biscuits Bell has now?
 <|end|>
 <|asst|>
-I subtract 1 (the dropped bone) from the original count.
-
-{"tool_calls":[{"name":"eval","args":{"form":"(let [start-bones 2] (dec start-bones))"}}]}
+{"tool_calls":[{"name":"eval","args":{"form":"(let [start-bones 5] (dec start-bones))"}}]}
 <|end|>
 
 ````
@@ -353,14 +359,16 @@ Available tools:
 - answer(value: any) — submit the final answer
 <|end|>
 <|user|>
-Greed has cost more than one creature what they already had.
+What the Dog thought he saw beneath the water turned out to be his own reflection.
 
-Rex the dog had 14 bones. Edward offered to trade — Rex would give 12 bones in exchange for some larger ones. But the trader cheated and only gave back 4 bones.
+By the side of the road David had set up a little folding stall, and Bell the dog stopped there with 14 biscuits that the kitchen-girl had spared her. David promised that if she handed over 8 biscuits, he would put back the same count of finer bakery seconds, butter-glazed and twice the size. She pushed the biscuits across, imagining all that he might gain. David returned only 3 biscuits, claiming the rest had broken in the box.
 
-Question: How many bones does Rex have after the trade?
+Question: how many biscuits Bell has after the trade?
 <|end|>
 <|asst|>
-{"tool_calls":[{"name":"eval","args":{"form":"(let [start-bones 14 bones-given 12 bones-received 4] (+ (- start-bones bones-given) bones-received))"}}]}
+Time to write the form.
+
+{"tool_calls":[{"name":"eval","args":{"form":"(let [start-bones 14 bones-given 8 bones-received 3] (+ (- start-bones bones-given) bones-received))"}}]}
 <|end|>
 
 ````
@@ -380,15 +388,13 @@ Available tools:
 - answer(value: any) — submit the final answer
 <|end|>
 <|user|>
-What the Dog thought he saw beneath the water turned out to be his own reflection.
+Greed has cost more than one creature what they already had.
 
-Bell the dog expected to bring home 7 bones, but lost one chasing a shadow and ended up with one fewer.
+The butcher had tied up 7 scraps of meat in a paper for Rex the dog to carry home, and the count had been said aloud, both of them nodding. On the footbridge over the river the paper sagged near the water; he saw a phantom dog with a richer parcel and, his eyes greedy with want, snapped — losing one scrap to the river. By evening, when the cook checked the parcel against the butcher's tally, the actual count fell short of the expected by exactly that single greedy moment.
 
-Question: How many bones did Bell fall short by, compared to what she expected?
+Question: how many scraps of meat Rex fell short by, compared to what he expected to bring home?
 <|end|>
 <|asst|>
-Time to write the form.
-
 {"tool_calls":[{"name":"eval","args":{"form":"(let [expected-bones 7 actual-bones (dec expected-bones)] (- expected-bones actual-bones))"}}]}
 <|end|>
 
@@ -411,12 +417,14 @@ Available tools:
 <|user|>
 The Fox crept through the orchard and found himself eyeing a tempting cluster of grapes.
 
-Vix the fox grew tired of jumping for the grapes. She would give up after 6 attempts. So far she had tried 10 times.
+The market square was nearly deserted when Renard slipped between the stalls and stopped beneath a high display of dark plums. He, her belly aching for food, had told himself firmly: 6 attempts only — beyond that the plums were certainly half-rotten and beneath his notice. He had already sprung 1 time, paws clattering on the flagstones, and now stood with whiskers twitching, weighing whether to gather himself for one more leap.
 
-Question: Will Vix try again? Answer yes or no.
+Question: whether Renard will try again — answer yes or no?
 <|end|>
 <|asst|>
-{"tool_calls":[{"name":"eval","args":{"form":"(let [threshold 6 tries-so-far 10] (if (< tries-so-far threshold) \"yes\" \"no\"))"}}]}
+I check whether tries-so-far is still below the threshold; if so the answer is yes, otherwise no.
+
+{"tool_calls":[{"name":"eval","args":{"form":"(let [threshold 6 tries-so-far 1] (if (< tries-so-far threshold) \"yes\" \"no\"))"}}]}
 <|end|>
 
 ````
@@ -438,11 +446,13 @@ Available tools:
 <|user|>
 Hunger sharpens the eye but does not always lengthen the leap.
 
-The grapes hung from a vine 12 feet above the ground. Renard the fox could leap 2 feet straight up each try, and each leap brought the grapes that much closer to reach.
+The market square was almost empty in the late hour when Renard slipped between the wooden stalls. A merchant had strung up clusters of dark plums on a high display, and the lowest swung 12 feet above the flagstones. Renard the fox, shouting until her voice cracked, eyed the shadowed fruit and tested a leap — his best effort lifted him only 2 feet into the dusty air. Quietly, in the half-light, he counted the leaps it would take, each one a clean step closer.
 
-Question: What is the smallest number of leaps Renard needs to reach the grapes?
+Question: the smallest number of leaps Renard needs to reach the fruit?
 <|end|>
 <|asst|>
+I ceiling-divide the fruit's height by the per-jump height (adding per-jump minus one before quot).
+
 {"tool_calls":[{"name":"eval","args":{"form":"(let [grape-height 12 per-jump 2] (quot (+ grape-height (dec per-jump)) per-jump))"}}]}
 <|end|>
 
@@ -463,14 +473,16 @@ Available tools:
 - answer(value: any) — submit the final answer
 <|end|>
 <|user|>
-A hungry Fox came upon a vine of grapes hanging just out of reach.
+It is told that many an animal has stood beneath fruit it could not reach and walked away calling it sour.
 
-Vix the fox stood on hind legs, reaching 4 feet high, and could spring another 3 feet.
+In the corner of a farmer's yard, where a crooked apple tree leaned over the fence, Vix the fox padded to a halt, her belly aching for food. Three ripe apples hung from a low branch, fat and red. She stretched up on her hind paws — that gave her 4 feet of reach — and reckoned she could leap another 4 feet besides. A hen scratched in the dirt, indifferent. Vix eyed the lowest apple and weighed her chances.
 
-Question: What is the highest point Vix can reach with a single leap?
+Write a Clojure expression that computes the highest point Vix can reach with a single leap.
 <|end|>
 <|asst|>
-{"tool_calls":[{"name":"eval","args":{"form":"(let [body-height 4 jump-height 3] (+ body-height jump-height))"}}]}
+Let me compute that.
+
+{"tool_calls":[{"name":"eval","args":{"form":"(let [body-height 4 jump-height 4] (+ body-height jump-height))"}}]}
 <|end|>
 
 ````
@@ -490,16 +502,14 @@ Available tools:
 - answer(value: any) — submit the final answer
 <|end|>
 <|user|>
-Greed and patience, as everyone knows, do not sit at the same table — and a golden-egg goose tests them both.
+There was once an extraordinary goose whose every morning gift was a single egg of pure gold.
 
-Helen kept Plume the goose, who laid these eggs on successive days: 2, 2, 2.
+The village tax collector wanted to know the goose's typical yield, and would not be put off by talk of varying days. Robin laid out the 5 days' counts on a slate — 5, 3, 4, 4, 4 — and set to working out the rounded-down average, wishing she had been more careful of the day they had ever mentioned the bird in the village square.
 
-Question: What is the average eggs per day, rounded down to a whole number?
+Question: the average eggs per day, rounded down to a whole number?
 <|end|>
 <|asst|>
-Let me compute that.
-
-{"tool_calls":[{"name":"eval","args":{"form":"(let [daily-yields [2 2 2] total (reduce + daily-yields) days (count daily-yields)] (quot total days))"}}]}
+{"tool_calls":[{"name":"eval","args":{"form":"(let [daily-yields [5 3 4 4 4] total (reduce (fn [a b] (+ a b)) 0 daily-yields) days (count daily-yields)] (quot total days))"}}]}
 <|end|>
 
 ````
@@ -507,7 +517,7 @@ Let me compute that.
 ## Example 19: goose-eggs / compounded
 
 - code form: inline
-- preface:   narrative
+- preface:   fixed
 - tool-call: 1-call (answer)
 
 ````text
@@ -521,14 +531,14 @@ Available tools:
 <|user|>
 A farmer once kept a goose who laid a golden egg every morning, plain and ordinary in every other way.
 
-Charlie owned Honk the goose, who laid different numbers of eggs each day for 3 days: 2, 2, 1.
+On a beam in the barn Casey kept a chalk ledger, one row per day, one mark per egg. After 6 days the row read in order: 4, 2, 4, 4, 3, 4. They would stand at the foot of the ladder and look up at the marks in the lamplight, grateful for every bite, listening to Honk the goose settle for the night in her straw, never the same number of eggs twice in a row but always something.
 
-Question: How many eggs in total over the 3 days?
+Question: how many eggs in total were laid over those days?
 <|end|>
 <|asst|>
-Here's the calculation.
+Let me work that out.
 
-{"tool_calls":[{"name":"eval","args":{"form":"(let [daily-yields [2 2 1]] (reduce (fn [a b] (+ a b)) 0 daily-yields))"}}]}
+{"tool_calls":[{"name":"eval","args":{"form":"(let [daily-yields [4 2 4 4 3 4]] (apply + daily-yields))"}}]}
 <|end|>
 
 ````
@@ -548,14 +558,14 @@ Available tools:
 - answer(value: any) — submit the final answer
 <|end|>
 <|user|>
-There was once an extraordinary goose whose every morning gift was a single egg of pure gold.
+A farmer once kept a goose who laid a golden egg every morning, plain and ordinary in every other way.
 
-In the farm, Diana owned Quill the goose. The goose laid 2 golden eggs every day, like clockwork. Diana kept the goose for 14 days.
+In the village the neighbors swore Alice's goose laid silver eggs as well as golden, but the truth was simpler: 2 ordinary-shaped eggs of pure gold, every single morning. She carried each egg from the barn in a folded apron, content in her quiet life, and slid it into a clay jar by the hearth. For 8 days the jar grew heavier. Alice set out one quiet evening to count what the goose had given in all that time.
 
-Question: How many eggs did the goose lay in total?
+Write a Clojure expression that computes how many eggs the goose laid in total over those 8 days.
 <|end|>
 <|asst|>
-{"tool_calls":[{"name":"eval","args":{"form":"(let [per-day 2 days 14] (* per-day days))"}}]}
+{"tool_calls":[{"name":"eval","args":{"form":"(let [per-day 2 days 8] (* per-day days))"}}]}
 <|end|>
 
 ````
@@ -575,14 +585,16 @@ Available tools:
 - answer(value: any) — submit the final answer
 <|end|>
 <|user|>
-The villagers all envied the household with the golden-egg goose, though only its owner knew the careful work of patience.
+Greed and patience, as everyone knows, do not sit at the same table — and a golden-egg goose tests them both.
 
-Carol owned Quill the goose that laid 1 golden egg per day. Each egg sold for 6 coins at the market. After 14 days, Carol took the eggs to the village to sell.
+More than once Charlie had heard a sly voice whisper that the goose was wasted on slow daily laying. But he swallowed the thought each time, fed the bird, and let the gold come at its own pace. The goose laid 2 golden eggs a day, and at the market each egg fetched 49 coins. After 29 days of steady laying, he sat by the hearth, happy with what she had, and looked at the worn ledger where every egg, every coin, every trip to the market had been written down in a careful hand.
 
-Question: How many coins did Carol earn in total?
+Write a Clojure expression that computes how many coins Charlie had earned in all from the goose's eggs.
 <|end|>
 <|asst|>
-{"tool_calls":[{"name":"eval","args":{"form":"(let [per-day 1 days 14 per-egg-coins 6 total-eggs (* per-day days)] (* total-eggs per-egg-coins))"}}]}
+Time to write the form.
+
+{"tool_calls":[{"name":"eval","args":{"form":"(let [per-day 2 days 29 per-egg-coins 49 total-eggs (* per-day days)] (* total-eggs per-egg-coins))"}}]}
 <|end|>
 
 ````
@@ -602,16 +614,16 @@ Available tools:
 - answer(value: any) — submit the final answer
 <|end|>
 <|user|>
-There was once an extraordinary goose whose every morning gift was a single egg of pure gold. All this took place in the barn.
+Greed and patience, as everyone knows, do not sit at the same table — and a golden-egg goose tests them both.
 
-Edward owned Quill the goose that laid 1 golden egg per day. Each egg sold for 45 coins. By the time Edward had earned 360 coins in total, the goose had been laying for some number of days.
+A young farmhand at the village kept a chalk tally on a beam in the barn — one mark for each egg the goose laid, one cross for each coin paid at the market. The goose laid 1 golden egg a day, and at the market each egg fetched 23 coins. By the time the small chest of coins beside the hearth held 276 coins in all, the boy stood and stared up at the marks, while Alex sat by the door of the barn, happy with what she had, listening to the goose ruffle her feathers.
 
-Question: How many days had the goose been laying?
+Write a Clojure expression that computes for how many days the goose had been laying.
 <|end|>
 <|asst|>
-Here's the calculation.
+Daily revenue is per-day eggs × per-egg coins; days = total-coins / coins-per-day.
 
-{"tool_calls":[{"name":"eval","args":{"form":"(let [per-day 1 per-egg-coins 45 total-coins 360 coins-per-day (* per-day per-egg-coins)] (quot total-coins coins-per-day))"}}]}
+{"tool_calls":[{"name":"eval","args":{"form":"(let [per-day 1 per-egg-coins 23 total-coins 276 coins-per-day (* per-day per-egg-coins)] (quot total-coins coins-per-day))"}}]}
 <|end|>
 
 ````
@@ -631,16 +643,14 @@ Available tools:
 - answer(value: any) — submit the final answer
 <|end|>
 <|user|>
-Greed and patience, as everyone knows, do not sit at the same table — and a golden-egg goose tests them both. All this took place in the barn.
+Greed and patience, as everyone knows, do not sit at the same table — and a golden-egg goose tests them both.
 
-Casey owned Quill the goose that laid 2 golden eggs per day. After 29 days, Casey took the eggs to the barn and earned 2784 coins in all.
+Helen kept Quill the goose on a small holding at the edge of the market, where the goose had a habit of settling on the same patch of straw each morning. The goose laid 1 golden egg a day for 24 days, and when the eggs were finally carried in their basket to the market they fetched 1176 coins in all — she had grown into a quiet ritual of carrying the eggs to the market in a willow basket, happy with what she had, where bread and cheese smelled thick in the dawn air and traders haggled over each shining egg.
 
-Question: At what price (in coins) did each egg sell?
+Question: the price in coins at which each single egg had sold?
 <|end|>
 <|asst|>
-Total eggs is per-day × days; per-egg price = total-coins / total-eggs.
-
-{"tool_calls":[{"name":"eval","args":{"form":"(let [per-day 2 days 29 total-coins 2784 total-eggs (* per-day days)] (quot total-coins total-eggs))"}}]}
+{"tool_calls":[{"name":"eval","args":{"form":"(let [per-day 1 days 24 total-coins 1176 total-eggs (* per-day days)] (quot total-coins total-eggs))"}}]}
 <|end|>
 
 ````
@@ -648,7 +658,7 @@ Total eggs is per-day × days; per-egg price = total-coins / total-eggs.
 ## Example 24: lion-bulls / days-to-defeat
 
 - code form: inline
-- preface:   fixed
+- preface:   narrative
 - tool-call: 1-call (answer)
 
 ````text
@@ -660,16 +670,14 @@ Available tools:
 - answer(value: any) — submit the final answer
 <|end|>
 <|user|>
-Three Bulls had grazed and fought together for so long that no Lion dared trouble them.
+There was once a band of Bulls so unified that they made the great Lion uneasy. It happened by the meadow.
 
-Mane the lion watched 5 bulls grazing. Once they scattered, she could attack one at a time, taking 1 day per bull.
+At the edge of the forest, where the trees gave way to a grazing strip, 6 bulls had wandered out one by one rather than as the close-pressed mass they used to be. Mane the lion watched from the deeper shade without complaint, ears half-folded, tail quiet. She knew the terrain well enough to be certain of her timing — 4 days of stalking and one sudden lunge, no more, no less, for each bull alone. With the herd's old solidarity in shreds, Mane began to add up how many days of careful hunting lay ahead.
 
-Question: How many total days does Mane need to defeat all 5 bulls?
+Write a Clojure expression that computes how many total days Mane will need to defeat all 6 bulls.
 <|end|>
 <|asst|>
-Let me work that out.
-
-{"tool_calls":[{"name":"eval","args":{"form":"(let [bulls 5 days-per-bull 1] (* bulls days-per-bull))"}}]}
+{"tool_calls":[{"name":"eval","args":{"form":"(let [bulls 6 days-per-bull 4] (* bulls days-per-bull))"}}]}
 <|end|>
 
 ````
@@ -691,12 +699,14 @@ Available tools:
 <|user|>
 There was once a band of Bulls so unified that they made the great Lion uneasy.
 
-Mane the lion has strength 6. Each of the 3 bulls has strength 3. Together the bulls' combined strength is 9.
+In the valley grassland, Mane the lion crouched at the reed-line without complaint, watching 4 bulls drink at separate bends of the slow stream. Each bull had strength 6; the lion's own strength was 9. Solo, no bull at the water could withstand her; together at the bend they had once held 24 between them, more than enough to chase a lion off. The math of the situation was clear, and the only thing left to settle was the boolean: did the lion's chance depend on keeping the bulls divided?
 
-Question: Can Mane only defeat the bulls if they separate? Answer yes if alone-the-lion-wins-but-together-they-do-not, otherwise no.
+Write a Clojure expression that computes whether Mane can defeat each bull alone (lion-strength > bull-strength) yet would lose against the herd combined (lion-strength < combined-strength).
 <|end|>
 <|asst|>
-{"tool_calls":[{"name":"eval","args":{"form":"(let [lion-strength 6 bulls 3 bull-strength 3 combined-strength (* bulls bull-strength)] (and (> lion-strength bull-strength) (< lion-strength combined-strength)))"}}]}
+I check both: lion-strength > one bull's strength (alone wins) AND lion-strength < combined-strength (together the herd wins).
+
+{"tool_calls":[{"name":"eval","args":{"form":"(let [lion-strength 9 bulls 4 bull-strength 6 combined-strength (* bulls bull-strength)] (and (> lion-strength bull-strength) (< lion-strength combined-strength)))"}}]}
 <|end|>
 
 ````
@@ -716,16 +726,16 @@ Available tools:
 - answer(value: any) — submit the final answer
 <|end|>
 <|user|>
-Strength shared is strength multiplied — a truth the Lion knew well, and worked patiently to undo.
+There was once a band of Bulls so unified that they made the great Lion uneasy.
 
-Roar the lion faced 6 bulls grazing alone in the field. After several days, he had defeated 1 of them.
+On a high hilltop pasture, where the wind carried the smell of broken grass for miles, the 9 bulls had once been impossible to approach. Now Mane the lion crossed the bald slope openly. Over the long, slow campaign, she had brought down 2 of them, never two on the same week. The remaining bulls watched from far ridges, wide-eyed with fear, no longer trusting the wind. She paused saying very little on a flat stone and reckoned how many of the herd were still standing.
 
-Question: How many bulls remain?
+Question: how many bulls remain?
 <|end|>
 <|asst|>
-Let me compute that.
+I subtract the defeated count from the original number of bulls.
 
-{"tool_calls":[{"name":"eval","args":{"form":"(let [bulls 6 bulls-defeated 1] (- bulls bulls-defeated))"}}]}
+{"tool_calls":[{"name":"eval","args":{"form":"(let [bulls 9 bulls-defeated 2] (- bulls bulls-defeated))"}}]}
 <|end|>
 
 ````
@@ -745,14 +755,14 @@ Available tools:
 - answer(value: any) — submit the final answer
 <|end|>
 <|user|>
-Pride goes before a fall, especially when a Milkmaid begins to plan her wealth too eagerly.
+A young milkmaid was returning home with her milk pail balanced on her head, dreaming of the fortune it would bring.
 
-Margery carried a pail of milk to market and dreamed of the future. She would buy 7 eggs; each would hatch into a hen; each hen would lay 54 eggs per year; each egg would sell for 1 coin.
+At the market stall where she sold her small cheese rounds, Margery stood between a cart of turnips and a knot of buyers and let herself dream. With a hungry gleam in his eye, she worked the plan through. With the cheese-money she would buy 3 eggs; each would hatch into a hen; each hen would lay 50 eggs in a year; and every egg, in turn, would sell here for 5 coins. A buyer asked her price twice before she heard him.
 
-Question: If everything went perfectly, how many coins would Margery earn after one year?
+Question: how many coins Margery would earn after one year if everything went perfectly?
 <|end|>
 <|asst|>
-{"tool_calls":[{"name":"eval","args":{"form":"(let [eggs 7 eggs-per-hen 54 coins-per-egg 1] (* eggs eggs-per-hen coins-per-egg))"}}]}
+{"tool_calls":[{"name":"eval","args":{"form":"(let [eggs 3 eggs-per-hen 50 coins-per-egg 5] (* eggs eggs-per-hen coins-per-egg))"}}]}
 <|end|>
 
 ````
@@ -774,14 +784,14 @@ Available tools:
 <|user|>
 The Milkmaid liked to imagine, each morning on her way to market, what her milk would buy.
 
-Margery bought a cow for 140 coins. The cow gives 5 cups of milk per day, and each cup sells for 3 coins.
+Walking past the ribbon-seller's window in the village, Lila touched a soft length of yellow silk and tried to read the price. The cow had cost her 62 coins, and she could not buy a thread of ribbon until that sum had come back. The cow gave 8 cups a day; each cup sold for 4 coins. His mouth watering at the thought of more, she counted the days under her breath, eyes still on the yellow silk in the glass.
 
-Question: What is the smallest whole number of days until Margery fully recovers the cost of the cow?
+Write a Clojure expression that computes the smallest whole number of days until Lila fully recovers the cost of the cow.
 <|end|>
 <|asst|>
-Time to write the form.
+Let me compute that.
 
-{"tool_calls":[{"name":"eval","args":{"form":"(let [cow-cost 140 cups-per-day 5 coin-per-cup 3 daily-revenue (* cups-per-day coin-per-cup)] (quot (+ cow-cost (dec daily-revenue)) daily-revenue))"}}]}
+{"tool_calls":[{"name":"eval","args":{"form":"(let [cow-cost 62 cups-per-day 8 coin-per-cup 4 daily-revenue (* cups-per-day coin-per-cup)] (quot (+ cow-cost (dec daily-revenue)) daily-revenue))"}}]}
 <|end|>
 
 ````
@@ -803,14 +813,12 @@ Available tools:
 <|user|>
 Pride goes before a fall, especially when a Milkmaid begins to plan her wealth too eagerly.
 
-Margery carried a pail with 10 cups of milk. She tripped and spilled 9 cups. Each cup of milk would have sold for 2 coins.
+Returning from the dairy with a leather flask of 11 cups of buttermilk, Lila stepped over a fallen branch and the flask slipped from her arm. The stopper popped free and 5 cups poured into the bracken before she could right it. Each of those cups would have sold for 5 coins to the inn at the crossroads. Regretting every careless step, she stood on the path and counted the loss in her head.
 
-Question: How many coins did Margery lose by spilling?
+Write a Clojure expression that computes how many coins Lila lost by spilling.
 <|end|>
 <|asst|>
-Time to write the form.
-
-{"tool_calls":[{"name":"eval","args":{"form":"(let [spilled 9 per-cup 2] (* spilled per-cup))"}}]}
+{"tool_calls":[{"name":"eval","args":{"form":"(let [spilled 5 per-cup 5] (* spilled per-cup))"}}]}
 <|end|>
 
 ````
@@ -830,16 +838,14 @@ Available tools:
 - answer(value: any) — submit the final answer
 <|end|>
 <|user|>
-The Hare and the Tortoise had argued for as long as anyone could remember about who was truly the swifter.
+In that part of the forest, no one ever expected the Tortoise to outrun the Hare — yet today the question would be settled.
 
-In a long race across the road, the course is 10 miles. Shelly the tortoise has already walked 9 miles. She continues at 2 miles per hour.
+The course was 21 miles long, and Slowpoke the tortoise had already covered 7 miles of it saying very little, footstep by footstep. Far ahead, Whisker the hare was weary from the morning's effort under some tree, having declared the race already won. He paused only briefly to look back at the path he had crossed, then resumed at 2 miles per hour, intending to finish.
 
-Question: How many more whole hours of walking does Shelly need to reach the finish line?
+Question: how many more whole hours of walking Slowpoke needs to reach the finish line?
 <|end|>
 <|asst|>
-I'll express the answer as a Clojure form.
-
-{"tool_calls":[{"name":"eval","args":{"form":"(let [total 10 miles-walked 9 walk-speed 2 miles-remaining (- total miles-walked)] (quot miles-remaining walk-speed))"}}]}
+{"tool_calls":[{"name":"eval","args":{"form":"(let [total 21 miles-walked 7 walk-speed 2 miles-remaining (- total miles-walked)] (quot miles-remaining walk-speed))"}}]}
 <|end|>
 
 ````
@@ -859,16 +865,14 @@ Available tools:
 - answer(value: any) — submit the final answer
 <|end|>
 <|user|>
-One bright morning, all was quiet at the edge of the hilltop. Hopper the hare had spent days telling everyone in the meadow that no one could match his speed. Slowpoke the tortoise, by contrast, said nothing and only blinked slowly, and at last the two animals decided the only fair thing was to actually race near the hilltop.
+It was well known among the animals that the Hare boasted of his speed at every chance.
 
-They set off together at sunrise. After running 8 miles ahead, Hopper grew tired and decided to take a nap under a tree. Meanwhile, Slowpoke kept walking, steady as ever, at 3 miles per hour. While Hopper slept, Slowpoke kept moving for 7 hours straight without pause.
+By the time Pip had run 7 miles ahead, the sun was high and they was drowsy from the warm sun. A cool stream ran beside the path, and they stopped to drink and stretch out on the mossy bank. The water sounded so peaceful that they fell asleep there. Mossback, never slowed by heat, kept walking untroubled by what others thought at 1 mile per hour for 7 hours straight.
 
-Question: who is in the lead by the time Hopper wakes up?
+Question: who is in the lead by the time Pip wakes up?
 <|end|>
 <|asst|>
-I compute Slowpoke's position as speed × hours, then compare against Hopper's lead.
-
-{"tool_calls":[{"name":"eval","args":{"form":"(let [hare-lead 8 tortoise-rate 3 nap-hours 7 tortoise-pos (* tortoise-rate nap-hours)] (if (> tortoise-pos hare-lead) \"Slowpoke\" \"Hopper\"))"}}]}
+{"tool_calls":[{"name":"eval","args":{"form":"(let [hare-lead 7 tortoise-rate 1 nap-hours 7 tortoise-pos (* tortoise-rate nap-hours)] (if (> tortoise-pos hare-lead) \"Mossback\" \"Pip\"))"}}]}
 <|end|>
 
 ````
@@ -888,14 +892,14 @@ Available tools:
 - answer(value: any) — submit the final answer
 <|end|>
 <|user|>
-There was once a Hare whose pride was as quick as her feet, and a Tortoise who said nothing about either. This was in the woods.
+It was well known among the animals that the Hare boasted of his speed at every chance. It happened in the woods.
 
-Pip the hare and Mossback the tortoise agreed to a steady race through the woods. They ran at 4 miles per hour, while Mossback kept a steady 3 miles per hour. Both ran for exactly 4 hours.
+Bramble the hare and Mossback the tortoise had at last agreed to a fair test along the path. She set off with great whoops of laughter at 9 miles per hour, certain the matter would be settled before lunch. Mossback kept a quiet 3 miles per hour, without complaint, and never glanced sideways. They had agreed to run for exactly 5 hours and then measure the distance between them.
 
-Question: How many miles ahead is Pip after 4 hours?
+Write a Clojure expression that computes how many miles ahead Bramble is after 5 hours.
 <|end|>
 <|asst|>
-{"tool_calls":[{"name":"eval","args":{"form":"(let [hare-speed 4 tortoise-speed 3 hours 4 hare-distance (* hare-speed hours) tortoise-distance (* tortoise-speed hours)] (- hare-distance tortoise-distance))"}}]}
+{"tool_calls":[{"name":"eval","args":{"form":"(let [hare-speed 9 tortoise-speed 3 hours 5 hare-distance (* hare-speed hours) tortoise-distance (* tortoise-speed hours)] (- hare-distance tortoise-distance))"}}]}
 <|end|>
 
 ````
@@ -915,16 +919,14 @@ Available tools:
 - answer(value: any) — submit the final answer
 <|end|>
 <|user|>
-The Hare and the Tortoise had argued for as long as anyone could remember about who was truly the swifter.
+The Hare loved nothing better than the sound of his own boasts; the Tortoise, nothing better than a long quiet walk.
 
-Pip the hare and Shelly the tortoise agreed to a steady race through the orchard. They ran at 9 miles per hour, while Shelly plodded at 1 mile per hour. After some time, Pip was exactly 48 miles ahead.
+Hopper the hare and Slowpoke the tortoise had set out together at sunrise, Hopper with a smug grin at 10 miles per hour and Slowpoke stepping deliberately at 1 mile per hour. By the time the forest folk came to check on them, Hopper stood exactly 27 miles farther down the path than Slowpoke. The animals knew both speeds and the distance between them — only the running time was missing.
 
-Question: How many hours had they been running?
+Question: how many whole hours they had been running?
 <|end|>
 <|asst|>
-The gap grows by (hare-speed minus tortoise-speed) per hour, so I divide miles-ahead by that gap rate.
-
-{"tool_calls":[{"name":"eval","args":{"form":"(let [hare-speed 9 tortoise-speed 1 miles-ahead 48 gap-per-hour (- hare-speed tortoise-speed)] (quot miles-ahead gap-per-hour))"}}]}
+{"tool_calls":[{"name":"eval","args":{"form":"(let [hare-speed 10 tortoise-speed 1 miles-ahead 27 gap-per-hour (- hare-speed tortoise-speed)] (quot miles-ahead gap-per-hour))"}}]}
 <|end|>
 
 ````
@@ -944,14 +946,16 @@ Available tools:
 - answer(value: any) — submit the final answer
 <|end|>
 <|user|>
-In that part of the forest, no one ever expected the Tortoise to outrun the Hare — yet today the question would be settled. It happened in the meadow.
+The Hare and the Tortoise had argued for as long as anyone could remember about who was truly the swifter.
 
-Pip the hare and Slowpoke the tortoise agreed to a steady race through the meadow. Slowpoke kept a steady 3 miles per hour. Both ran for exactly 2 hours, by the end of which Pip was 2 miles ahead.
+A traveller passing through stopped to ask about the morning's race. He was told that Shelly, with steady, careful steps, had walked a steady 3 miles per hour for 4 hours, and that Hopper, with great whoops of laughter, had finished 4 miles ahead. "And how fast was the Hare?" he asked, but no one had clocked Hopper directly — only the math could supply the answer.
 
-Question: What was Pip's speed in miles per hour?
+Question: Hopper's speed in miles per hour?
 <|end|>
 <|asst|>
-{"tool_calls":[{"name":"eval","args":{"form":"(let [tortoise-speed 3 hours 2 miles-ahead 2 tortoise-distance (* tortoise-speed hours) hare-distance (+ miles-ahead tortoise-distance)] (quot hare-distance hours))"}}]}
+Time to write the form.
+
+{"tool_calls":[{"name":"eval","args":{"form":"(let [tortoise-speed 3 hours 4 miles-ahead 4 tortoise-distance (* tortoise-speed hours) hare-distance (+ miles-ahead tortoise-distance)] (quot hare-distance hours))"}}]}
 <|end|>
 
 ````
@@ -973,14 +977,12 @@ Available tools:
 <|user|>
 Once a Country Mouse invited her City cousin to dine at her humble home.
 
-Nibble the mouse lived in a quiet country burrow and had 1 biscuit, while Squeak the mouse made a home in the bustling city and had 18 biscuits.
+Squeak sat on a flat stone outside his burrow with 29 breadcrumbs gathered in a thimble, happy with what she had with the meal that lay ahead. Meanwhile, Whisk hunched in a damp city sack behind a tavern door, counting 5 cheddar slices again and again, wondering how it had come to this of having strayed so far from the quiet fields. Yet still the city mouse could not stop tallying — and the difference between the two stores was plain.
 
-Question: What is the absolute difference in biscuits between the two mice?
+Question: the absolute difference between Squeak and Whisk's food counts?
 <|end|>
 <|asst|>
-I take the absolute value of the difference.
-
-{"tool_calls":[{"name":"eval","args":{"form":"(let [country-amt 1 city-amt 18] (abs (- city-amt country-amt)))"}}]}
+{"tool_calls":[{"name":"eval","args":{"form":"(let [country-amt 29 city-amt 5] (abs (- city-amt country-amt)))"}}]}
 <|end|>
 
 ````
@@ -1000,14 +1002,16 @@ Available tools:
 - answer(value: any) — submit the final answer
 <|end|>
 <|user|>
-The City Mouse and the Country Mouse had very different ideas of a good meal — and very different stockpiles to draw on.
+It is said that a meal among friends is sweeter than feasting alone, and easier to count.
 
-Nibble the mouse and Squeak the mouse hosted a feast for 3 mice (counting themselves). They had 12 acorns to share equally.
+Nibble pried up a loose floorboard in their burrow to reveal 10 acorns stored against the frost. 5 mice were dining tonight, counting Nibble, the visiting Squeak, and the neighbors from down the lane. The country mouse, pleased with her small fortune, announced that the acorns would be split evenly — whole nuts only — and any uneven leftover set carefully back beneath the board.
 
-Question: How many whole acorns does each mouse get if any leftover is set aside?
+Question: how many whole pieces of food each mouse receives if any leftover is set aside?
 <|end|>
 <|asst|>
-{"tool_calls":[{"name":"eval","args":{"form":"(let [total 12 n-mice 3] (quot total n-mice))"}}]}
+I integer-divide the total food by the number of mice and ignore the remainder.
+
+{"tool_calls":[{"name":"eval","args":{"form":"(let [total 10 n-mice 5] (quot total n-mice))"}}]}
 <|end|>
 
 ````
@@ -1015,7 +1019,7 @@ Question: How many whole acorns does each mouse get if any leftover is set aside
 ## Example 37: two-mice / trip-budget
 
 - code form: inline
-- preface:   narrative
+- preface:   fixed
 - tool-call: 1-call (answer)
 
 ````text
@@ -1027,16 +1031,16 @@ Available tools:
 - answer(value: any) — submit the final answer
 <|end|>
 <|user|>
-The City Mouse and the Country Mouse had very different ideas of a good meal — and very different stockpiles to draw on.
+It is said that a meal among friends is sweeter than feasting alone, and easier to count.
 
-Nibble the mouse began the journey with 62 coins. They spent 28 coins on travel and 7 coins on food.
+Nibble the mouse packed 30 coins into a battered tin thimble and slid the thimble deep into their knapsack. The road tolls along the river path swallowed 11 coins between the country crossing and the gates of the city. Hunger drove them to a corner stall where a city baker took 3 coins for hot biscuits. They sat on a curb to count what remained in the thimble, wondering how it had come to this of how quickly it had drained.
 
-Question: How many coins does Nibble have left?
+Write a Clojure expression that computes how many coins Nibble has left after the trip.
 <|end|>
 <|asst|>
-Time to write the form.
+Let me work that out.
 
-{"tool_calls":[{"name":"eval","args":{"form":"(let [start-coins 62 travel-cost 28 food-cost 7] (- start-coins travel-cost food-cost))"}}]}
+{"tool_calls":[{"name":"eval","args":{"form":"(let [start-coins 30 travel-cost 11 food-cost 3] (- start-coins travel-cost food-cost))"}}]}
 <|end|>
 
 ````

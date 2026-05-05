@@ -1848,54 +1848,104 @@ def gen_boy_wolf(scene: Scene) -> Record:
 
 
 def _bw_false_alarms(scene: Scene) -> Record:
-    """Boy cries wolf F times falsely. After each, villagers came in T mins.
-    Total minutes wasted by villagers running to the field?"""
-    boy   = scene.pick_character(role_classes=("liar", "shepherd"), gender=scene.pick_choice(["m", "f"]))
+    """Boy raises F false alarms. Villagers run T minutes each time. Total
+    minutes wasted = villagers × alarms × minutes-per-trip."""
+    boy   = scene.pick_character(role_classes=("liar", "shepherd"),
+                                  gender=scene.pick_choice(["m", "f"]))
     n_villagers = scene.pick_int(3, 10)
     n_alarms    = scene.pick_int(2, 6)
     minutes_per = scene.pick_int(5, 20)
 
     expr = Let(
         bindings=[
-            ("villagers", Lit(n_villagers)),
-            ("alarms",    Lit(n_alarms)),
-            ("minutes-per-trip",      Lit(minutes_per)),
+            ("villagers",        Lit(n_villagers)),
+            ("alarms",           Lit(n_alarms)),
+            ("minutes-per-trip", Lit(minutes_per)),
         ],
-        body=App("*", [Var("villagers"), Var("alarms"), Var("minutes-per-trip")]),
+        body=App("*", [Var("villagers"), Var("alarms"),
+                       Var("minutes-per-trip")]),
     )
     answer = evaluate(expr)
 
-    setting   = scene.phrase("watched sheep on the hill",
-                               "tended the flock at the edge of the woods",
-                               "kept watch over the sheep in the meadow")
-    bored     = scene.phrase("Bored,", "Out of mischief,",
-                               "Looking for some fun,")
-    cried     = scene.phrase("cried 'Wolf!'", "shouted 'Wolf!'",
-                               "yelled the alarm")
-    came      = scene.phrase("ran from the village to the field",
-                               "rushed up the hill",
-                               "hurried out from the village")
-    each_trip = scene.phrase("taking", "and the trip took",
-                               "each round trip lasting")
-    _intro = _aesopian_intro(scene, "boy-wolf")
+    intro = _aesopian_intro(scene, "boy-wolf")
+    desperate = scene.rng.choice(EMO_DESPERATE)
+    regretful = scene.rng.choice(EMO_REGRETFUL)
+
+    # Six narrative subplots — same arithmetic (villagers × alarms ×
+    # minutes), grounded in different small dramas about the cost of
+    # crying-out-without-cause.
+    false_alarms_subplots = [
+        # 1) classic — boy on the hill at midday
+        f"On the slope above the village, {boy.name} kept watch over a "
+        f"small flock and grew restless in the long noon. Just to see "
+        f"what would happen, {boy.he_she} sang out the alarm — and "
+        f"{n_villagers} villagers dropped their tools and hurried up "
+        f"the path. {boy.name} did this {n_unit(n_alarms, 'time')} "
+        f"in all, each rush taking {n_unit(minutes_per, 'minute')} of "
+        f"climbing and walking back down. The villagers, "
+        f"{regretful}, returned to their work each time without a word.",
+
+        # 2) market interruption
+        f"On market days the villagers gathered to trade, and "
+        f"{boy.name}, watching the flock from a high stone, learned "
+        f"that a single shout would empty the market square. So "
+        f"{boy.he_she} shouted — falsely — {n_unit(n_alarms, 'time')}. "
+        f"On each occasion, {n_villagers} of the busiest villagers ran "
+        f"out from their stalls to help, {desperate}, and the round "
+        f"trip back cost each of them "
+        f"{n_unit(minutes_per, 'minute')}.",
+
+        # 3) hot afternoon — villagers irritable
+        f"The afternoon was hot, and the villagers had been working in "
+        f"the fields all day. {boy.name}, on the hill alone with the "
+        f"sheep, raised the alarm without reason "
+        f"{n_unit(n_alarms, 'time')}. Each time, {n_villagers} villagers "
+        f"left their work and made the long walk up to the meadow and "
+        f"back, a trip that took {n_unit(minutes_per, 'minute')} from "
+        f"start to finish. They returned each time hotter and more "
+        f"weary than before.",
+
+        # 4) winter — villagers in coats
+        f"In the cold months, even a short run took its toll. "
+        f"{boy.name} watched the flock at the edge of the snow-frosted "
+        f"meadow and, perhaps to fight off boredom, called for help "
+        f"when there was none — {n_unit(n_alarms, 'time')} in all. On "
+        f"every alarm, {n_villagers} villagers pulled on their coats "
+        f"and hurried out, the round trip to the meadow taking "
+        f"{n_unit(minutes_per, 'minute')} apiece.",
+
+        # 5) elder counts the time
+        f"An old village elder, who kept careful track of how the "
+        f"hours of the village were spent, watched {boy.name} raise "
+        f"the alarm {n_unit(n_alarms, 'time')} without cause. On each "
+        f"occasion, {n_villagers} villagers made the climb to the "
+        f"meadow, and the round trip took every one of them "
+        f"{n_unit(minutes_per, 'minute')}. The elder kept tallying "
+        f"the time on a slate, {regretful}, and waited for a lesson "
+        f"to settle in.",
+
+        # 6) season's end — pattern recognized
+        f"By the end of the season, the village had a saying about "
+        f"{boy.name} on the hill. The young shepherd had given the "
+        f"alarm without cause {n_unit(n_alarms, 'time')}, and on each "
+        f"of those days {n_villagers} villagers had hurried out to "
+        f"help — a round trip that took {n_unit(minutes_per, 'minute')} "
+        f"each. They counted the cost of trust, slowly, and "
+        f"determined the time had not been spent well.",
+    ]
+
+    body = _render_subplot(scene, false_alarms_subplots)
+    alarms_str = n_unit(n_alarms, "false alarm")
     user_msg = (
-        f"{_intro}{boy.name} {setting}. {bored} "
-        f"{boy.he_she} {cried} {n_unit(n_alarms, 'time')} "
-        f"falsely. Each time, {n_villagers} villagers {came}, "
-        f"{each_trip} {n_unit(minutes_per, 'minute')} each.\n\n"
-        f"Question: How many total minutes did the villagers waste "
-        f"running to {n_unit(n_alarms, 'false alarm')}?"
+        f"{intro}{body}\n\n"
+        f"{question_phrase(scene, f'how many total minutes the villagers spent answering the {alarms_str}')}"
     )
 
-    code_block  = render_code(expr, form=scene.code_form(), value=answer)
-    result_text = f"The villagers wasted {answer} minutes in total."
-    narrative   = "I multiply villagers × alarms × minutes per trip."
+    plan = "I multiply villagers × alarms × minutes-per-trip."
     return _finalize(
         scene,
         user_msg=user_msg,
-        narrative=narrative,
-        code_block=code_block,
-        result_text=result_text,
+        plan=plan,
         value=answer,
         expr=expr,
         fable="boy-wolf",
@@ -1904,45 +1954,100 @@ def _bw_false_alarms(scene: Scene) -> Record:
 
 
 def _bw_sheep_eaten(scene: Scene) -> Record:
-    """Real wolf comes; villagers don't believe; wolf eats S sheep."""
-    boy = scene.pick_character(role_classes=("liar", "shepherd"), gender=scene.pick_choice(["m", "f"]))
+    """A wolf appears; villagers no longer believe the boy; the wolf
+    chases off S sheep before help arrives. Remaining sheep = flock − S."""
+    boy = scene.pick_character(role_classes=("liar", "shepherd"),
+                                gender=scene.pick_choice(["m", "f"]))
     flock = scene.pick_int(20, 80)
     eaten = scene.pick_int(3, min(flock - 1, 15))
 
     expr = Let(
-        bindings=[("flock-size", Lit(flock)), ("sheep-eaten", Lit(eaten))],
+        bindings=[("flock-size",  Lit(flock)),
+                  ("sheep-eaten", Lit(eaten))],
         body=App("-", [Var("flock-size"), Var("sheep-eaten")]),
     )
     answer = evaluate(expr)
 
-    when    = scene.phrase("After many false alarms",
-                            "After crying wolf one too many times",
-                            "Once the villagers had stopped believing")
-    came    = scene.phrase("a real wolf came",
-                            "an actual wolf appeared",
-                            "a hungry wolf showed up")
-    refused = scene.phrase("the villagers did not believe",
-                            "no one in the village answered the call from",
-                            "the villagers ignored")
-    devoured = scene.phrase("ate", "carried off", "made off with")
-    _intro = _aesopian_intro(scene, "boy-wolf")
+    intro = _aesopian_intro(scene, "boy-wolf")
+    desperate = scene.rng.choice(EMO_DESPERATE)
+    regretful = scene.rng.choice(EMO_REGRETFUL)
+
+    # Six narrative subplots — same arithmetic (flock − missing-sheep),
+    # grounded in different small dramas about a flock that scattered
+    # while help did not come.
+    sheep_eaten_subplots = [
+        # 1) wolf at the meadow's edge — villagers don't come
+        f"The shepherd's flock numbered {n_unit(flock, 'sheep', 'sheep')} "
+        f"at sundown when a thin grey wolf slipped from the trees and "
+        f"set the meadow into a panic. {boy.name} cried out for help, "
+        f"{desperate}, but the villagers — long since out of trust for "
+        f"that voice — did not stir from the village. By the time the "
+        f"wolf gave up and returned to the woods, "
+        f"{n_unit(eaten, 'sheep', 'sheep')} had run off into the dusk "
+        f"and were not seen again that night.",
+
+        # 2) misty morning — wolf comes through fog
+        f"On a misty morning {boy.name} stood at the head of a flock "
+        f"of {n_unit(flock, 'sheep', 'sheep')}, watching the white "
+        f"shapes shift among the trees. A wolf moved through the fog, "
+        f"and the boy shouted for the village. No one came. By the "
+        f"time the mist lifted and a worried neighbour finally walked "
+        f"up the path, {n_unit(eaten, 'sheep', 'sheep')} had bolted "
+        f"in fright and could not be recovered. {boy.name} sat on the "
+        f"stone, {regretful}.",
+
+        # 3) old shepherd arrives too late
+        f"The flock that morning held {n_unit(flock, 'sheep', 'sheep')}. "
+        f"When a wolf came down from the ridge, {boy.name} ran to the "
+        f"village edge calling for help, {desperate}, but the doors "
+        f"stayed shut. By the time the old shepherd at the far end of "
+        f"the village heard the noise and walked up, the wolf was "
+        f"gone and {n_unit(eaten, 'sheep', 'sheep')} had vanished into "
+        f"the gullies — too far now to gather back.",
+
+        # 4) winter snow — wolf tracks left behind
+        f"It was a hard winter morning, and {boy.name} had counted "
+        f"{n_unit(flock, 'sheep', 'sheep')} into the meadow at dawn. "
+        f"A grey wolf appeared by the snow-line, and the boy shouted "
+        f"for help. The villagers, weary of such cries, did not come. "
+        f"After the wolf had retreated into the trees and the flock "
+        f"settled, the boy walked the perimeter and found "
+        f"{n_unit(eaten, 'sheep', 'sheep')} missing — gone with the "
+        f"tracks that led off into the snow.",
+
+        # 5) festival day — village preoccupied
+        f"It was festival day in the village, and the streets were "
+        f"full of music and bunting. {boy.name} watched a flock of "
+        f"{n_unit(flock, 'sheep', 'sheep')} on the hill alone. When a "
+        f"wolf slipped from the brush, the boy raised the alarm — but "
+        f"the village, long since deaf to those cries and busy with "
+        f"the festival besides, did not come. By the time the music "
+        f"stopped and a few villagers wandered up, "
+        f"{n_unit(eaten, 'sheep', 'sheep')} had been lost to the "
+        f"chase.",
+
+        # 6) old grandfather counts the loss at dusk
+        f"At dusk, the boy's grandfather walked up to the meadow and "
+        f"helped count the flock. There had been "
+        f"{n_unit(flock, 'sheep', 'sheep')} that morning. A wolf had "
+        f"come at midday, and {boy.name} had shouted for help — "
+        f"{desperate}, but no help came. The grandfather, "
+        f"{regretful}, walked the line of the flock and found "
+        f"{n_unit(eaten, 'sheep', 'sheep')} were missing, scattered "
+        f"to the gullies and the woods.",
+    ]
+
+    body = _render_subplot(scene, sheep_eaten_subplots)
     user_msg = (
-        f"{_intro}{boy.name} kept a flock of "
-        f"{n_unit(flock, 'sheep', 'sheep')}. {when}, {came} and "
-        f"{refused} {boy.him_her}. The wolf {devoured} "
-        f"{n_unit(eaten, 'sheep', 'sheep')}.\n\n"
-        f"Question: How many sheep does {boy.name} have left?"
+        f"{intro}{body}\n\n"
+        f"{question_phrase(scene, f'how many sheep {boy.name} has left in the flock')}"
     )
 
-    code_block  = render_code(expr, form=scene.code_form(), value=answer)
-    result_text = f"{boy.name} has {answer} sheep left."
-    narrative   = "I subtract the eaten sheep from the original flock."
+    plan = "I subtract the missing sheep from the original flock size."
     return _finalize(
         scene,
         user_msg=user_msg,
-        narrative=narrative,
-        code_block=code_block,
-        result_text=result_text,
+        plan=plan,
         value=answer,
         expr=expr,
         fable="boy-wolf",
@@ -1951,8 +2056,11 @@ def _bw_sheep_eaten(scene: Scene) -> Record:
 
 
 def _bw_trust_threshold(scene: Scene) -> Record:
-    """Villagers stop coming after K false alarms. Will they come on alarm N?"""
-    boy = scene.pick_character(role_classes=("liar", "shepherd"), gender=scene.pick_choice(["m", "f"]))
+    """Villagers stop responding after K false alarms. Given how many
+    false alarms the shepherd has raised so far, will the villagers
+    answer the next call? Returns 'yes' or 'no'."""
+    boy = scene.pick_character(role_classes=("liar", "shepherd"),
+                                gender=scene.pick_choice(["m", "f"]))
     threshold = scene.pick_int(3, 5)
     alarms_so_far = scene.pick_int(0, 7)
 
@@ -1962,33 +2070,88 @@ def _bw_trust_threshold(scene: Scene) -> Record:
         Lit("no"),
     )
     expr = Let(
-        bindings=[("threshold", Lit(threshold)),
+        bindings=[("threshold",     Lit(threshold)),
                   ("alarms-so-far", Lit(alarms_so_far))],
         body=expr,
     )
     answer = evaluate(expr)
 
-    _intro = _aesopian_intro(scene, "boy-wolf")
+    intro = _aesopian_intro(scene, "boy-wolf")
+    regretful = scene.rng.choice(EMO_REGRETFUL)
+
+    # Six narrative subplots — same boolean arithmetic (alarms-so-far
+    # < threshold ?), grounded in different small dramas about
+    # village patience nearing its limit.
+    trust_threshold_subplots = [
+        # 1) elder sets the rule
+        f"After many seasons of false cries from the hill, an old "
+        f"village elder set a rule that the people held to: the "
+        f"villagers would answer no more than {n_unit(threshold, 'false alarm')} "
+        f"from a single shepherd. {boy.name} had so far raised "
+        f"{n_unit(alarms_so_far, 'false alarm')}. Whether they would "
+        f"come the next time depended on a simple comparison.",
+
+        # 2) tally on the village hall door
+        f"On the door of the village hall hung a small slate where the "
+        f"reeve marked false alarms with a chalked stroke. The rule "
+        f"was plain: more than {n_unit(threshold, 'mark')} on the slate "
+        f"and the village no longer turned out. {boy.name}'s slate "
+        f"showed {n_unit(alarms_so_far, 'mark')} so far, and the "
+        f"shepherd, {regretful}, looked at it on the way home each "
+        f"evening.",
+
+        # 3) gentle reminder from the boy's mother
+        f"At supper, the boy's mother quietly explained the village's "
+        f"patience: the neighbours would come for any alarm, but only "
+        f"up to {n_unit(threshold, 'false call')}. After that, the "
+        f"village considered the well dry. {boy.name} had so far "
+        f"raised {n_unit(alarms_so_far, 'false alarm')}, and could "
+        f"work out, simply by counting, whether the next call would "
+        f"draw any answer at all.",
+
+        # 4) the new shepherd asks the rule
+        f"A new shepherd, recently come to the village, asked aloud "
+        f"how many warnings the neighbours would tolerate before they "
+        f"stopped answering at all. The reeve answered honestly: the "
+        f"limit was {n_unit(threshold, 'false alarm')}. {boy.name}'s "
+        f"recent record stood at {n_unit(alarms_so_far, 'false alarm')}, "
+        f"and the new shepherd worked out, by simple comparison, "
+        f"whether help would come the next time.",
+
+        # 5) end-of-week reckoning
+        f"Each Saturday the village reeve walked up to the meadow and "
+        f"reviewed the week's alarms. The custom long ago set the "
+        f"limit at {n_unit(threshold, 'false alarm')}; beyond that, "
+        f"the village considered itself excused from coming. "
+        f"{boy.name}'s tally for the week stood at "
+        f"{n_unit(alarms_so_far, 'false alarm')} when the reeve "
+        f"opened {boy.his_her} ledger.",
+
+        # 6) the boy himself counting on his fingers
+        f"That evening, sitting on a stone above the meadow, "
+        f"{boy.name} counted on {boy.his_her} fingers what the village "
+        f"would tolerate: at most {n_unit(threshold, 'false alarm')}. "
+        f"So far, {boy.he_she} had cried out without cause "
+        f"{n_unit(alarms_so_far, 'time')}. The boy worked out, with "
+        f"some unease, whether tomorrow's call would still bring help.",
+    ]
+
+    body = _render_subplot(scene, trust_threshold_subplots)
+    q = ("whether the villagers will come on the next alarm "
+         '(return the string "yes" or "no")')
     user_msg = (
-        f"{_intro}The villagers in {boy.name}'s village stop responding to alarms "
-        f"after {n_unit(threshold, 'false alarm')}. So far, {boy.name} has "
-        f"raised {n_unit(alarms_so_far, 'false alarm')}.\n\n"
-        f"Question: Will the villagers come on the next alarm? Answer "
-        f"yes or no."
+        f"{intro}{body}\n\n"
+        f"{question_phrase(scene, q)}"
     )
 
-    code_block  = render_code(expr, form=scene.code_form(), value=answer)
-    result_text = f"The answer is {answer}."
-    narrative   = (
-        "I compare alarms-so-far against the threshold; if below, "
-        "villagers still come."
+    plan = (
+        "I compare alarms-so-far against the threshold and return "
+        "'yes' if below, 'no' otherwise."
     )
     return _finalize(
         scene,
         user_msg=user_msg,
-        narrative=narrative,
-        code_block=code_block,
-        result_text=result_text,
+        plan=plan,
         value=answer,
         expr=expr,
         fable="boy-wolf",
