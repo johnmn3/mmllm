@@ -476,26 +476,78 @@ def render_tool_calls(calls: list[dict]) -> str:
                       ensure_ascii=False, separators=(",", ":"))
 
 
+# Synonym pool: short generic prefaces for the 'fixed' preface style.
+# The 'narrative' style uses a chapter-specific explanation instead.
+FIXED_PREFACES: tuple[str, ...] = (
+    "Let me work this out.",
+    "Let me solve this step by step.",
+    "Here's how I'd compute it.",
+    "Let me trace through the math.",
+    "Working through this carefully.",
+    "I'll figure this out.",
+    "Time to compute the answer.",
+    "Stepping through the calculation.",
+    "Let me think through this.",
+)
+
+
+# Optional opener prefix glued in front of the chapter's result_text.
+# Some entries are empty strings — about half the time the result reads
+# straight without an opener. Keeps surface variation without rewriting
+# the chapter's specific result phrasing.
+RESULT_OPENERS: tuple[str, ...] = (
+    "", "", "", "",                       # 4× blank → ~50% no-opener
+    "So ", "Therefore, ", "Thus, ", "Then ", "After all that, ",
+)
+
+
 def assemble_assistant_msg(*,
-                           preface_style: str,
-                           narrative: str,
-                           code_block: str,
-                           result_text: str,
+                           preface:        str,
+                           code_block:     str,
+                           result_text:    str,
                            tool_call_line: str) -> str:
-    """Compose the assistant turn body. Preface choice + result text +
-    optional NL bridge + tool call. The tool call line ALWAYS ends the
-    turn (the last `<|end|>` boundary the eval extractor looks at)."""
+    """Compose the assistant turn body. The preface is already resolved
+    by the caller (could be empty, a fixed-pool pick, or a chapter
+    narrative). Tool call line is always last."""
     parts = []
-    if preface_style == "fixed":
-        parts.append("Let me work this out.")
-    elif preface_style == "narrative":
-        parts.append(narrative)
-    # 'none' adds nothing
+    if preface:
+        parts.append(preface)
     parts.append(code_block)
     if result_text:
         parts.append(result_text)
     parts.append(tool_call_line)
     return "\n\n".join(p for p in parts if p)
+
+
+def resolve_preface(scene: "Scene", chapter_narrative: str) -> str:
+    """Pick the preface text based on scene's preface_style choice:
+      - 'none'      → empty
+      - 'fixed'     → random pick from FIXED_PREFACES
+      - 'narrative' → the chapter-specific narrative passed in
+    """
+    style = scene.preface_style()
+    if style == "fixed":
+        return scene.rng.choice(FIXED_PREFACES)
+    if style == "narrative":
+        return chapter_narrative
+    return ""
+
+
+def resolve_result_text(scene: "Scene", chapter_result: str) -> str:
+    """Apply a random opener prefix; sometimes drop result entirely
+    (15% of the time) so the JSON tool call carries the answer alone —
+    teaches the model that result-text-before-tool-call is optional."""
+    if not chapter_result:
+        return ""
+    if scene.coin(0.15):
+        return ""
+    opener = scene.rng.choice(RESULT_OPENERS)
+    if opener and chapter_result and chapter_result[0].isupper() and opener[-1] == " ":
+        # If we're prepending an opener, lowercase the first letter of
+        # the result text (e.g., "After all that, the stockpile lasts
+        # 21 days." instead of "After all that, The stockpile lasts…").
+        return opener + chapter_result[0].lower() + chapter_result[1:]
+    return opener + chapter_result
 
 
 # ─────────────────────── Self-test ───────────────────────

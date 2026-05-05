@@ -26,8 +26,9 @@ from mmllm.aesop.expr import (
 from mmllm.aesop.template import (
     ANSWER_AND_EVAL, ANSWER_ONLY, Record, Scene,
     article, assemble_assistant_msg, build_tool_calls, cap, n_unit,
-    render_code, render_tool_calls, smart_pronoun, smart_possessive,
-    species_phrase, system_prompt, the_subject_phrase, unit,
+    render_code, render_tool_calls, resolve_preface, resolve_result_text,
+    smart_pronoun, smart_possessive, species_phrase, system_prompt,
+    the_subject_phrase, unit,
 )
 
 
@@ -94,16 +95,17 @@ def _finalize(scene: Scene, *,
     that was rendered in the assistant's code block — extracted from
     code_block, not re-emitted from expr — so the displayed source and
     the eval-form arg always agree byte-for-byte."""
-    use_eval = scene.use_eval_chain()
-    code_str = _extract_code_from_block(code_block)
-    calls    = build_tool_calls(value, code_str, use_eval=use_eval)
-    catalog  = ANSWER_AND_EVAL if use_eval else ANSWER_ONLY
-    sys_msg  = system_prompt(use_eval=use_eval)
-    asst     = assemble_assistant_msg(
-        preface_style=scene.preface_style(),
-        narrative=narrative,
+    use_eval     = scene.use_eval_chain()
+    code_str     = _extract_code_from_block(code_block)
+    calls        = build_tool_calls(value, code_str, use_eval=use_eval)
+    catalog      = ANSWER_AND_EVAL if use_eval else ANSWER_ONLY
+    sys_msg      = system_prompt(use_eval=use_eval)
+    preface      = resolve_preface(scene, narrative)
+    result_final = resolve_result_text(scene, result_text)
+    asst         = assemble_assistant_msg(
+        preface=preface,
         code_block=code_block,
-        result_text=result_text,
+        result_text=result_final,
         tool_call_line=render_tool_calls(calls),
     )
     return Record(
@@ -432,15 +434,21 @@ def _cp_stones_needed(scene: Scene) -> Record:
     )
     answer = evaluate(expr)
 
+    weather  = scene.phrase("On a hot afternoon", "On a thirsty summer day",
+                              "One dry morning", "After a long flight")
+    found    = scene.phrase("found", "came upon", "discovered")
+    raises   = scene.phrase("raised the water level by",
+                              "lifted the water by",
+                              "pushed the level up by")
     user_msg = (
-        f"On a hot afternoon at {location.article} {location.name}, "
-        f"{species_phrase(crow)} found a {pitcher.name} of water but the "
-        f"water sat only {n_unit(start, 'centimeter')} from the bottom — "
+        f"{weather} at {location.article} {location.name}, "
+        f"{species_phrase(crow)} {found} a {pitcher.name} of water, but "
+        f"the water sat only {n_unit(start, 'centimeter')} from the bottom — "
         f"too low to reach. {cap(crow.he_she)} needed the water to rise "
         f"to {n_unit(target, 'centimeter')} before {crow.he_she} could "
-        f"drink. {cap(crow.he_she)} started dropping {stone.plural} into "
-        f"the {pitcher.name}, and each {stone.name} raised the water level "
-        f"by {n_unit(rise_per, 'centimeter')}.\n\n"
+        f"drink. {cap(crow.he_she)} began dropping {stone.plural} into "
+        f"the {pitcher.name}, and each {stone.name} {raises} "
+        f"{n_unit(rise_per, 'centimeter')}.\n\n"
         f"Question: What is the smallest number of {stone.plural} "
         f"{crow.name} needs to drop in to reach the target water level?"
     )
@@ -627,7 +635,8 @@ def _ge_total_yield(scene: Scene) -> Record:
 
 
 def _ge_value_yield(scene: Scene) -> Record:
-    """Lays N eggs/day for D days, each worth C coins. Total coins?"""
+    """Lays N eggs/day × D days × C coins/egg = total coins. Three orientation
+    variants (one of {coins, days, per-egg-coins} unknown)."""
     goose = scene.pick_character(role="yielder", species="goose")
     owner = scene.pick_character(role_classes=("trader",))
     location = scene.pick_location(tag="village")
@@ -635,33 +644,87 @@ def _ge_value_yield(scene: Scene) -> Record:
     per_day  = scene.pick_int(1, 2)
     days     = scene.pick_int(7, 30)
     per_egg  = scene.pick_int(5, 50)
+    total_coins = per_day * days * per_egg
+    orient   = scene.pick_choice(["coins", "days", "per-egg"])
 
-    expr = Let(
-        bindings=[
-            ("per-day", Lit(per_day)),
-            ("days",    Lit(days)),
-            ("per-egg-coins", Lit(per_egg)),
-            ("total-eggs",    App("*", [Var("per-day"), Var("days")])),
-        ],
-        body=App("*", [Var("total-eggs"), Var("per-egg-coins")]),
-    )
-    answer = evaluate(expr)
+    if orient == "coins":
+        expr = Let(
+            bindings=[
+                ("per-day", Lit(per_day)),
+                ("days",    Lit(days)),
+                ("per-egg-coins", Lit(per_egg)),
+                ("total-eggs",    App("*", [Var("per-day"), Var("days")])),
+            ],
+            body=App("*", [Var("total-eggs"), Var("per-egg-coins")]),
+        )
+        answer = evaluate(expr)
+        user_msg = (
+            f"{owner.name} owned {species_phrase(goose)} that laid "
+            f"{per_day} golden {unit(per_day, 'egg')} per day. Each egg "
+            f"sold for {n_unit(per_egg, 'coin')} at the market. After "
+            f"{n_unit(days, 'day')}, {owner.name} took the eggs to "
+            f"{location.article} {location.name} to sell.\n\n"
+            f"Question: How many coins did {owner.name} earn in total?"
+        )
+        result_text = f"{owner.name} earned {n_unit(answer, 'coin')}."
+        narrative   = (
+            "I find total eggs first (per-day × days), then multiply by "
+            "the per-egg coin value."
+        )
+        chapter_name = "value-yield-coins"
+    elif orient == "days":
+        expr = Let(
+            bindings=[
+                ("per-day",        Lit(per_day)),
+                ("per-egg-coins",  Lit(per_egg)),
+                ("total-coins",    Lit(total_coins)),
+                ("coins-per-day",
+                 App("*", [Var("per-day"), Var("per-egg-coins")])),
+            ],
+            body=App("quot", [Var("total-coins"), Var("coins-per-day")]),
+        )
+        answer = evaluate(expr)
+        user_msg = (
+            f"{owner.name} owned {species_phrase(goose)} that laid "
+            f"{per_day} golden {unit(per_day, 'egg')} per day. Each egg "
+            f"sold for {n_unit(per_egg, 'coin')}. By the time {owner.name} "
+            f"had earned {n_unit(total_coins, 'coin')} in total, the goose "
+            f"had been laying for some number of days.\n\n"
+            f"Question: How many days had the goose been laying?"
+        )
+        result_text = f"The goose had been laying for {n_unit(answer, 'day')}."
+        narrative   = (
+            "Daily revenue is per-day eggs × per-egg coins; days = "
+            "total-coins / coins-per-day."
+        )
+        chapter_name = "value-yield-days"
+    else:
+        expr = Let(
+            bindings=[
+                ("per-day",     Lit(per_day)),
+                ("days",        Lit(days)),
+                ("total-coins", Lit(total_coins)),
+                ("total-eggs",  App("*", [Var("per-day"), Var("days")])),
+            ],
+            body=App("quot", [Var("total-coins"), Var("total-eggs")]),
+        )
+        answer = evaluate(expr)
+        user_msg = (
+            f"{owner.name} owned {species_phrase(goose)} that laid "
+            f"{per_day} golden {unit(per_day, 'egg')} per day. After "
+            f"{n_unit(days, 'day')}, {owner.name} took the eggs to "
+            f"{location.article} {location.name} and earned "
+            f"{n_unit(total_coins, 'coin')} in all.\n\n"
+            f"Question: At what price (in coins) did each egg sell?"
+        )
+        result_text = f"Each egg sold for {n_unit(answer, 'coin')}."
+        narrative   = (
+            "Total eggs is per-day × days; per-egg price = total-coins / "
+            "total-eggs."
+        )
+        chapter_name = "value-yield-per-egg"
 
-    user_msg = (
-        f"{owner.name} owned {species_phrase(goose)} that laid {per_day} "
-        f"golden {unit(per_day, 'egg')} per day. Each egg sold for "
-        f"{n_unit(per_egg, 'coin')} at the market. After "
-        f"{n_unit(days, 'day')}, {owner.name} took the eggs to "
-        f"{location.article} {location.name} to sell.\n\n"
-        f"Question: How many coins did {owner.name} earn in total?"
-    )
-
-    code_block  = render_code(expr, form=scene.code_form(), value=answer)
-    result_text = f"{owner.name} earned {answer} coins."
-    narrative   = (
-        "I find total eggs first (per-day × days), then multiply by the "
-        "per-egg coin value."
-    )
+    code_block = render_code(expr, form=scene.code_form(), value=answer)
     return _finalize(
         scene,
         user_msg=user_msg,
@@ -671,7 +734,7 @@ def _ge_value_yield(scene: Scene) -> Record:
         value=answer,
         expr=expr,
         fable="goose-eggs",
-        chapter="value-yield",
+        chapter=chapter_name,
     )
 
 
@@ -853,10 +916,20 @@ def _bw_sheep_eaten(scene: Scene) -> Record:
     )
     answer = evaluate(expr)
 
+    when    = scene.phrase("After many false alarms",
+                            "After crying wolf one too many times",
+                            "Once the villagers had stopped believing")
+    came    = scene.phrase("a real wolf came",
+                            "an actual wolf appeared",
+                            "a hungry wolf showed up")
+    refused = scene.phrase("the villagers did not believe",
+                            "no one in the village answered the call from",
+                            "the villagers ignored")
+    devoured = scene.phrase("ate", "carried off", "made off with")
     user_msg = (
-        f"{boy.name} had a flock of {n_unit(flock, 'sheep', 'sheep')}. "
-        f"After many false alarms, a real wolf came and the villagers "
-        f"did not believe {boy.him_her}. The wolf ate "
+        f"{boy.name} kept a flock of "
+        f"{n_unit(flock, 'sheep', 'sheep')}. {when}, {came} and "
+        f"{refused} {boy.him_her}. The wolf {devoured} "
         f"{n_unit(eaten, 'sheep', 'sheep')}.\n\n"
         f"Question: How many sheep does {boy.name} have left?"
     )
@@ -936,29 +1009,72 @@ def gen_ant_grasshopper(scene: Scene) -> Record:
 
 
 def _ag_summer_stockpile(scene: Scene) -> Record:
-    """Ant collects G grains/day for D days. Total grains?"""
+    """Ant collects G grains/day for D days = total. Three orientation
+    variants (same product = total):
+      total-unknown: given per-day + days, compute total
+      days-unknown:  given per-day + total, compute days
+      rate-unknown:  given days + total, compute per-day
+    """
     ant = scene.pick_character(role_classes=("saver",), species="ant")
     location = scene.pick_location(tags_any=("nature",), indoor=False)
     per_day = scene.pick_int(2, 8)
     days    = scene.pick_int(20, 90)
+    total   = per_day * days
+    orient  = scene.pick_choice(["total", "days", "rate"])
 
-    expr = Let(
-        bindings=[("per-day", Lit(per_day)), ("days", Lit(days))],
-        body=App("*", [Var("per-day"), Var("days")]),
-    )
-    answer = evaluate(expr)
+    season = scene.phrase("Through the summer", "All summer long",
+                          "Across the long summer", "From spring to fall")
 
-    user_msg = (
-        f"Through the summer at {location.article} {location.name}, "
-        f"{species_phrase(ant)} collected {per_day} "
-        f"{unit(per_day, 'grain')} every day for {n_unit(days, 'day')}.\n\n"
-        f"Question: How many grains did {ant.name} collect by the end "
-        f"of summer?"
-    )
+    if orient == "total":
+        expr = Let(
+            bindings=[("per-day", Lit(per_day)), ("days", Lit(days))],
+            body=App("*", [Var("per-day"), Var("days")]),
+        )
+        answer = evaluate(expr)
+        user_msg = (
+            f"{season} at {location.article} {location.name}, "
+            f"{species_phrase(ant)} collected {per_day} "
+            f"{unit(per_day, 'grain')} every day for {n_unit(days, 'day')}.\n\n"
+            f"Question: How many grains did {ant.name} collect by the end "
+            f"of summer?"
+        )
+        result_text = f"{ant.name} collected {n_unit(answer, 'grain')}."
+        narrative   = "I multiply the daily rate by the number of days."
+        chapter_name = "summer-stockpile-total"
+    elif orient == "days":
+        expr = Let(
+            bindings=[("total",   Lit(total)),
+                      ("per-day", Lit(per_day))],
+            body=App("quot", [Var("total"), Var("per-day")]),
+        )
+        answer = evaluate(expr)
+        user_msg = (
+            f"{season} at {location.article} {location.name}, "
+            f"{species_phrase(ant)} collected {n_unit(total, 'grain')} in "
+            f"all, gathering {per_day} {unit(per_day, 'grain')} each day.\n\n"
+            f"Question: How many days did {ant.name} spend collecting?"
+        )
+        result_text = f"{ant.name} spent {n_unit(answer, 'day')} collecting."
+        narrative   = "I divide the total by the daily rate."
+        chapter_name = "summer-stockpile-days"
+    else:
+        expr = Let(
+            bindings=[("total", Lit(total)), ("days", Lit(days))],
+            body=App("quot", [Var("total"), Var("days")]),
+        )
+        answer = evaluate(expr)
+        user_msg = (
+            f"{season} at {location.article} {location.name}, "
+            f"{species_phrase(ant)} worked steadily for "
+            f"{n_unit(days, 'day')} and gathered "
+            f"{n_unit(total, 'grain')} in all.\n\n"
+            f"Question: How many grains did {ant.name} collect each day?"
+        )
+        result_text = f"{ant.name} collected {answer} {unit(answer, 'grain')} per day."
+        narrative   = "I divide the total by the number of days."
+        chapter_name = "summer-stockpile-rate"
 
-    code_block  = render_code(expr, form=scene.code_form(), value=answer)
-    result_text = f"{ant.name} collected {n_unit(answer, 'grain')}."
-    narrative   = "I multiply the daily collection rate by the number of days."
+    code_block = render_code(expr, form=scene.code_form(), value=answer)
     return _finalize(
         scene,
         user_msg=user_msg,
@@ -968,7 +1084,7 @@ def _ag_summer_stockpile(scene: Scene) -> Record:
         value=answer,
         expr=expr,
         fable="ant-grasshopper",
-        chapter="summer-stockpile",
+        chapter=chapter_name,
     )
 
 
@@ -1103,11 +1219,17 @@ def _mm_egg_to_coin_chain(scene: Scene) -> Record:
     )
     answer = evaluate(expr)
 
+    walking = scene.phrase("carried a pail of milk to market",
+                             "walked to market with her milk pail",
+                             "set off for the market with a pail of milk")
+    dreamt  = scene.phrase("dreamed of the future",
+                             "started to plan her fortune",
+                             "imagined what she would do with the proceeds")
     user_msg = (
-        f"{maid.name} carried a pail of milk to market and dreamed of "
-        f"the future. She would buy {n_unit(eggs, 'egg')}; each would "
-        f"hatch into a hen; each hen would lay {n_unit(eggs_per_hen_per_year, 'egg')} "
-        f"per year; each egg would sell for {n_unit(coins_per_egg, 'coin')}.\n\n"
+        f"{maid.name} {walking} and {dreamt}. She would buy "
+        f"{n_unit(eggs, 'egg')}; each would hatch into a hen; each hen "
+        f"would lay {n_unit(eggs_per_hen_per_year, 'egg')} per year; "
+        f"each egg would sell for {n_unit(coins_per_egg, 'coin')}.\n\n"
         f"Question: If everything went perfectly, how many coins would "
         f"{maid.name} earn after one year?"
     )
@@ -1247,10 +1369,15 @@ def _fg_max_reach(scene: Scene) -> Record:
     )
     answer = evaluate(expr)
 
+    stand   = scene.phrase("stood on hind legs", "rose up on hind legs",
+                             "stretched up on hind paws")
+    leap    = scene.phrase("could leap another",
+                             "could spring another",
+                             "could jump another")
     user_msg = (
-        f"{species_phrase(fox)} stood on hind legs, reaching "
-        f"{n_unit(body_height, 'foot', 'feet')} high, and could leap "
-        f"another {n_unit(jump_height, 'foot', 'feet')}.\n\n"
+        f"{species_phrase(fox)} {stand}, reaching "
+        f"{n_unit(body_height, 'foot', 'feet')} high, and "
+        f"{leap} {n_unit(jump_height, 'foot', 'feet')}.\n\n"
         f"Question: What is the highest point {fox.name} can reach with "
         f"a single leap?"
     )
@@ -1386,10 +1513,16 @@ def _tm_food_comparison(scene: Scene) -> Record:
     )
     answer = evaluate(expr)
 
+    country_phrase = scene.phrase("lived in the countryside",
+                                    "lived in a quiet country burrow",
+                                    "made a home out in the meadows")
+    city_phrase    = scene.phrase("lived in the city",
+                                    "lived in a busy townhouse pantry",
+                                    "made a home in the bustling city")
     user_msg = (
-        f"{species_phrase(country)} lived in the countryside and had "
+        f"{species_phrase(country)} {country_phrase} and had "
         f"{n_unit(a, food.name, food.plural)}, while "
-        f"{species_phrase(city)} lived in the city and had "
+        f"{species_phrase(city)} {city_phrase} and had "
         f"{n_unit(b, food.name, food.plural)}.\n\n"
         f"Question: What is the absolute difference in {food.plural} "
         f"between the two mice?"
@@ -1461,11 +1594,13 @@ def _tm_trip_budget(scene: Scene) -> Record:
 
     expr = Let(
         bindings=[
-            ("start-bones",  Lit(start)),
+            ("start-coins", Lit(start)),
             ("travel-cost", Lit(travel)),
             ("food-cost",   Lit(food)),
         ],
-        body=App("-", [Var("start-bones"), Var("travel-cost"), Var("food-cost")]),
+        body=App("-", [Var("start-coins"),
+                       Var("travel-cost"),
+                       Var("food-cost")]),
     )
     answer = evaluate(expr)
 
@@ -1517,12 +1652,19 @@ def _ds_double_loss(scene: Scene) -> Record:
     )
     answer = evaluate(expr)
 
+    crossing = scene.phrase("crossed a stream carrying",
+                              "trotted over a bridge with",
+                              "padded across a brook holding")
+    looking  = scene.phrase("Looking down", "Glancing into the water",
+                              "Peering at the surface")
+    grabbed  = scene.phrase("dropped one bone to grab the shadow's",
+                              "let go of one bone, lunging at the reflection",
+                              "released a bone to snap at the watery double's")
     user_msg = (
-        f"{species_phrase(dog)} crossed a stream carrying "
-        f"{n_unit(bones, 'bone')}. Looking down, {dog.he_she} saw "
-        f"{dog.his_her} reflection and thought it was another dog with "
-        f"more bones. {cap(dog.he_she)} dropped one bone to grab the "
-        f"shadow's, but the bone fell into the stream.\n\n"
+        f"{species_phrase(dog)} {crossing} {n_unit(bones, 'bone')}. "
+        f"{looking}, {dog.he_she} saw {dog.his_her} reflection and thought "
+        f"it was another dog with more bones. {cap(dog.he_she)} {grabbed}, "
+        f"but the bone fell into the stream.\n\n"
         f"Question: How many bones does {dog.name} have now?"
     )
 
