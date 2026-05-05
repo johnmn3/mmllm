@@ -42,7 +42,7 @@ read what the runtime reported, expansion or value."""),
 The path {place} was littered with old macro definitions someone had
 carved into bark. {hare_phrase} found one shaped like
 {concept_phrase} and dared {tortoise_phrase} to predict its expansion.
-{tortoise} only smiled and asked {hare_he_she} to write {form_display}
+{tortoise} only smiled and asked {hare_him_her} to write {form_display}
 into the REPL — that, after all, was the whole point of having a
 macroexpander."""),
 
