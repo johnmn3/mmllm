@@ -2446,49 +2446,46 @@ def _do_eval_battery(base, ckpt_step, bank, log_path,
     print(f"=== eval battery base={base} ckpt={ckpt_step} log={log_p} ===",
           flush=True)
 
-    # BPC evals (cheap; generation-free).
-    for entry in bpc_evals.split(","):
-        entry = entry.strip()
-        if not entry:
-            continue
-        name, _, test_path = entry.partition(":")
-        if not os.path.exists(test_path):
-            print(f"  skip bpc[{name}]: missing {test_path}", flush=True)
-            continue
-        print(f"  → bpc[{name}] @ {test_path}", flush=True)
-        try:
-            subprocess.run(
-                ["mmllm", "eval-bpc-on-path",
-                 base, str(ckpt_step), bank,
-                 test_path, name, log_p],
-                env=env,
-                check=True,
-            )
-        except subprocess.CalledProcessError as e:
-            print(f"    WARN: bpc[{name}] eval failed: {e}", flush=True)
+    # Filter the spec strings to only entries whose test_path actually
+    # exists on volume — `eval-battery-on-ckpt` (basilisp side) doesn't
+    # check, so we pre-filter here. Skipped entries get a print line
+    # for visibility.
+    def _existing(entries_str, label):
+        kept = []
+        for entry in (entries_str or "").split(","):
+            entry = entry.strip()
+            if not entry:
+                continue
+            name, _, test_path = entry.partition(":")
+            if not os.path.exists(test_path):
+                print(f"  skip {label}[{name}]: missing {test_path}",
+                      flush=True)
+                continue
+            kept.append(entry)
+        return ",".join(kept)
 
-    # Agentic evals (generation + scoring).
-    for entry in agent_evals.split(","):
-        entry = entry.strip()
-        if not entry:
-            continue
-        name, _, test_path = entry.partition(":")
-        if not os.path.exists(test_path):
-            print(f"  skip agent[{name}]: missing {test_path}", flush=True)
-            continue
-        print(f"  → agent[{name}] @ {test_path}", flush=True)
-        try:
-            subprocess.run(
-                ["mmllm", "eval-agent",
-                 base, str(ckpt_step), bank,
-                 test_path, name,
-                 str(n_samples), str(gen_len), log_p],
-                env=env,
-                check=True,
-            )
-        except subprocess.CalledProcessError as e:
-            # One bad eval shouldn't kill the others.
-            print(f"    WARN: agent[{name}] eval failed: {e}", flush=True)
+    bpc_kept   = _existing(bpc_evals,   "bpc")
+    agent_kept = _existing(agent_evals, "agent")
+
+    # ONE basilisp invocation: builds model + loads dense + bank V
+    # ONCE, then iterates all eval targets in-process. Replaces the
+    # prior pattern of N+M independent subprocess calls (each of which
+    # redundantly reloaded the 17.5 GB bank V from disk — ~10-20 min
+    # of wasted I/O per ckpt at sqrt_n=2048 fp32).
+    try:
+        subprocess.run(
+            ["mmllm", "eval-battery-on-ckpt",
+             base, str(ckpt_step), bank,
+             bpc_kept, agent_kept,
+             str(n_samples), str(gen_len), log_p],
+            env=env,
+            check=True,
+        )
+    except subprocess.CalledProcessError as e:
+        # If the whole battery dies, log + continue — the watcher will
+        # mark this ckpt as seen anyway and move on.
+        print(f"    WARN: eval-battery-on-ckpt at step {ckpt_step} failed: {e}",
+              flush=True)
 
     volume.commit()
     print(f"done — eval battery for ckpt {ckpt_step} → {log_p}", flush=True)

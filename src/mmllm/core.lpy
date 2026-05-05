@@ -1267,6 +1267,132 @@
                        eval-name bpc ppl n-toks))
       (ev/append_eval_log log-path (or ckpt-step 0) eval-name row))))
 
+(defn- run-bpc-on-loaded
+  "Helper: run eval-bpc against test-path on an already-loaded model.
+   Used by eval-battery-on-ckpt to avoid re-loading the model + bank V
+   per eval target. Logs a kind='bpc' row to log-path."
+  [m cfg ckpt-step test-path eval-name log-path]
+  (let [data    (corp/load-as-tensor test-path)
+        T-seq   (:seq-len cfg)
+        results (eval-bpc m data T-seq 16 100000)
+        bpc     (:bpc results)
+        ppl     (:ppl results)
+        n-toks  (:n-tokens results)
+        row     (python/dict)]
+    (.update row {"bpc"      bpc
+                  "ppl"      ppl
+                  "n_tokens" n-toks
+                  "kind"     "bpc"})
+    (println (format "  bpc[%s]=%.4f ppl=%.2f n_tokens=%d"
+                     eval-name bpc ppl n-toks))
+    (ev/append_eval_log log-path (or ckpt-step 0) eval-name row)))
+
+(defn- run-agent-on-loaded
+  "Helper: run agentic eval against test-path on an already-loaded model.
+   Used by eval-battery-on-ckpt. Logs format_validity / tool_name_match /
+   tool_args_match / exact_match to log-path."
+  [m ckpt-step test-path eval-name n-samples gen-len log-path]
+  (println (format "  eval-agent[%s]: ckpt=%s test=%s n=%d gen=%d"
+                   eval-name (or ckpt-step "init") test-path
+                   n-samples gen-len))
+  (let [samples (python/list (ev/iter_eval_samples test-path
+                                                   ** :max_samples n-samples))]
+    (if (zero? (count samples))
+      (println "  no samples in eval set — skipping")
+      (let [t0          (time/time)
+            predictions (python/list)
+            golds       (python/list)
+            end-mark    (.- ds/DEFAULT_TEMPLATE end)]
+        (doseq [s samples]
+          (let [prompt   (.- s prompt)
+                gold     (.- s gold)
+                raw      (sample m prompt gen-len)
+                gen-only (if (.startswith raw prompt)
+                           (subs raw (count prompt))
+                           raw)
+                end-idx  (.find gen-only end-mark)
+                pred     (if (>= end-idx 0)
+                           (subs gen-only 0 end-idx)
+                           gen-only)]
+            (.append predictions pred)
+            (.append golds gold)))
+        (let [results (ev/score_predictions predictions golds)
+              dt      (- (time/time) t0)]
+          (println (format "  → format=%.3f  name=%.3f  args=%.3f  exact=%.3f  (%.1fs)"
+                           (.get results "format_validity")
+                           (.get results "tool_name_match")
+                           (.get results "tool_args_match")
+                           (.get results "exact_match")
+                           dt))
+          (ev/append_eval_log log-path
+                              (or ckpt-step 0) eval-name results))))))
+
+(defn eval-battery-on-ckpt
+  "Run BPC + agent evals against multiple test sets in ONE process.
+
+   Replaces the prior watcher pattern of N+M independent subprocess
+   invocations of `mmllm eval-bpc-on-path` / `mmllm eval-agent` per
+   ckpt — each of which redundantly built the model and reloaded the
+   17.5 GB bank V from disk. With sqrt_n=2048 fp32 that bank-V load
+   was ~35-90s per eval × 15 evals = ~10-20 min wasted per ckpt before
+   any actual eval work. This batched verb loads model + dense + bank V
+   ONCE, then iterates through every test set against the already-
+   loaded state. ~5-10× speedup on the eval-watcher loop.
+
+   `bpc-evals-str` and `agent-evals-str` are comma-separated
+   'name:test_path' specs (same shape as the watcher's CLI args).
+   Each eval's failure is caught + warned so a single bad eval
+   doesn't abort the whole battery."
+  [config base-path ckpt-step bank-path
+   bpc-evals-str agent-evals-str n-samples gen-len log-path]
+  (let [parse-spec (fn [s]
+                     (vec
+                       (for [entry (.split (or s "") ",")
+                             :let  [entry (.strip entry)]
+                             :when (pos? (count entry))]
+                         (let [parts (.split entry ":" 1)]
+                           [(aget parts 0) (aget parts 1)]))))
+        bpc-specs   (parse-spec bpc-evals-str)
+        agent-specs (parse-spec agent-evals-str)
+        cfg         (assoc config :memory-mmap-path bank-path)
+        m           (build-model cfg)
+        device      (:device m)
+        ckpt-dir    (str base-path ".ckpts")]
+    (when ckpt-step
+      (let [path  (str ckpt-dir "/step-" ckpt-step)
+            saved (python/list (torch/load (str path "/dense.pt")
+                                           ** :map_location device))]
+        (println (format "  loaded ckpt: %s (%d dense param tensors)"
+                         path (count saved)))
+        (doseq [[p s] (map vector (parameters m) saved)]
+          (.copy_ (.- p data) s))
+        (doseq [[i b] (map-indexed vector (:blocks m))]
+          (try
+            (.load_from_mmap (:memory b)
+                             (str ckpt-dir "/bank-latest." i ".bin"))
+            (catch python/Exception e
+              (println (format "  WARN: bank V layer %d load failed (%s) — using random init"
+                               i e)))))
+        (println (format "  bank V load attempted from %s/bank-latest.{0..%d}.bin"
+                         ckpt-dir (dec (count (:blocks m)))))))
+    (set-eval-mode! m)
+    (torch/set_grad_enabled false)
+    (println (format "  battery: %d bpc + %d agent evals on ckpt %s"
+                     (count bpc-specs) (count agent-specs)
+                     (or ckpt-step "init")))
+    (let [t0 (time/time)]
+      (doseq [[name path] bpc-specs]
+        (try
+          (run-bpc-on-loaded m cfg ckpt-step path name log-path)
+          (catch python/Exception e
+            (println (format "  WARN: bpc[%s] failed: %s" name e)))))
+      (doseq [[name path] agent-specs]
+        (try
+          (run-agent-on-loaded m ckpt-step path name n-samples gen-len log-path)
+          (catch python/Exception e
+            (println (format "  WARN: agent[%s] failed: %s" name e)))))
+      (println (format "  battery done in %.1fs" (- (time/time) t0))))))
+
 ;;; ─────────────────────── intermediate ablation eval ───────────────────────
 ;;;
 ;;; Periodic 'zero V → eval bpc → restore V' cycle, used by train-long
@@ -2011,6 +2137,22 @@
                            ;; Same config-match invariant as eval-agent.
                            (eval-bpc-on-path cfg base ckpt bank
                                              eval-path eval-name log-path))
+      "eval-battery-on-ckpt" (let [base        (or (second args) "/tmp/agent")
+                                   ckpt        (when (nth args 2 nil)
+                                                 (python/int (nth args 2 nil)))
+                                   bank        (or (nth args 3 nil) "/tmp/bank")
+                                   bpc-evals   (or (nth args 4 nil) "")
+                                   agent-evals (or (nth args 5 nil) "")
+                                   n-samples   (python/int (or (nth args 6 nil) 50))
+                                   gen-len     (python/int (or (nth args 7 nil) 256))
+                                   log-path    (or (nth args 8 nil) (str base ".eval.jsonl"))]
+                               ;; One basilisp process per ckpt — model + bank
+                               ;; load once, then iterate all eval targets.
+                               ;; ~5-10× faster than the per-eval-subprocess
+                               ;; pattern this replaces.
+                               (eval-battery-on-ckpt cfg base ckpt bank
+                                                     bpc-evals agent-evals
+                                                     n-samples gen-len log-path))
       (do (println "usage: mmllm {train|sample|compare|train-mmap|probe")
           (println "                  |build-corpus|clone-clojure|train-corpus")
           (println "                  |fetch-text8|fetch-enwik8|split-text8|train-text8")
