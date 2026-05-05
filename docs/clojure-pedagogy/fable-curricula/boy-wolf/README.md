@@ -166,12 +166,13 @@ Same general adaptations as tortoise-hare:
 Run after any change:
 
 ```bash
-python3 docs/clojure-pedagogy/audits/boy-wolf-audit-harness.py
+FABLE=boy_wolf python3 docs/clojure-pedagogy/audits/audit-harness.py
 ```
 
-The harness checks variety, singular-they verb agreement, answer
-leaks, place-preposition mismatches, said-participle issues, and
-length bounds — same checks as `audit-harness.py` for tortoise-hare,
-adapted to load `mmllm.aesop.curriculum.boy_wolf.grade_<N>`.
+The harness is a per-fable router — `FABLE=boy_wolf` loads
+`mmllm.aesop.curriculum.boy_wolf.grade_<N>` and writes
+`boy-wolf-audit.md`. Same checks as the tortoise-hare default:
+variety, singular-they verb agreement, answer leaks, place-preposition
+mismatches, said-participle issues, length bounds, DOUBLE_PREP, etc.
 
 Goal: 0 issues across all subjects.
