@@ -22,10 +22,10 @@ from mmllm.aesop.curriculum.crow_pitcher.grade_1 import (
 
 # ─────────────────────── grade-11 subplot extensions ───────────────────────
 #
-# The two crows have flown past their usual orchard into a foreign country
-# whose REPL hosts another runtime. The hasty crow wants to barge ahead
-# in his usual style; the clever crow treats every interop call as a
-# small act of diplomacy.
+# The two crows have flown past their usual orchard into a foreign
+# country whose REPL hosts another runtime. The hasty crow wants to
+# barge ahead in his usual style; the clever crow treats every interop
+# call as a small act of diplomacy with the local conventions.
 
 _INTEROP_SUBPLOTS: list[SubplotTemplate] = list(_G1_SUBPLOTS) + [
 
