@@ -153,7 +153,7 @@ G6_07 = SubjectCurriculum(grade=6, subject_id="G6-07",
             "whether the symbol 'hidden carries the :private flag",
             "the boolean of (:private (meta '^:private hidden))"),
         _ex("(boolean (:private (meta 'public)))", False,
-            "whether 'public carries the :private flag (it doesn't)",
+            "whether 'public carries the :private flag",
             "the boolean of (:private (meta 'public))"),
     ], subplots=_NS_SUBPLOTS, plan_pool=_PLAN_G6)
 

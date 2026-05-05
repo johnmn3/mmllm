@@ -143,7 +143,7 @@ G5_13 = SubjectCurriculum(grade=5, subject_id="G5-13",
         _ex("(reduce + 100 [1 2 3])", 106,
             "the form (reduce + 100 [1 2 3])", "100 + sum of [1 2 3]"),
         _ex("(reduce + 0 [])", 0,
-            "the form (reduce + 0 []) — empty seq returns init",
+            "the form (reduce + 0 [])",
             "the value when reducing over empty seq with init 0"),
     ], subplots=_HOF_SUBPLOTS, plan_pool=_PLAN_G5)
 

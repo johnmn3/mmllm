@@ -65,6 +65,41 @@ def check_record(rec, sub, example):
     if "computes" in example.question_what.lower():
         issues.append(("NESTED_COMPUTES", "question_what already says 'computes'"))
 
+    # Targeted commentary-paren check: only flag specific pedagogical-aside
+    # patterns ("(note ...)", "(it isn't)", "(the REPL ...)", "(returns ...)",
+    # "(an addition ...)", "(it does ...)"). Avoids false positives on
+    # Clojure source forms which legitimately contain parens.
+    aside_re = re.compile(
+        r"\((?:note(?:\:|\s)|it isn'?t|the REPL\s|returns\s|the return\s|"
+        r"first truthy|empty string|the comment\s|integer quotient|it does|it doesn'?t)"
+    )
+    for label, val in (("concept_phrase", example.concept_phrase),
+                        ("question_what",  example.question_what)):
+        if aside_re.search(val):
+            issues.append(("ASIDE_PAREN",
+                            f"{label} has pedagogical-aside parenthetical"))
+
+    # Em-dash commentary: e.g., "X — note: ...", "X — first truthy".
+    # The em-dash is followed by lowercase commentary, not part of a
+    # legitimate noun-phrase title.
+    emdash_re = re.compile(r" — (?:note|first|empty|returns|integer)")
+    if emdash_re.search(example.question_what) or emdash_re.search(example.concept_phrase):
+        issues.append(("EMDASH_COMMENTARY",
+                        "concept_phrase or question_what has em-dash commentary"))
+
+    # "said EMO_PROUD" without comma (subplot template bug — EMO entries
+    # that are participles don't fit "said X" without comma).
+    bad_said = ["said boasting", "said puffed", "said swaggering",
+                 "said with a smug grin"]
+    for p in bad_said:
+        if p in user.lower():
+            issues.append(("SAID_PARTICIPLE", f"'{p}' (missing comma after 'said')"))
+            break
+
+    # Double "from" in teacher subplot.
+    if re.search(r"from \w+ing from a recent", user.lower()):
+        issues.append(("DOUBLE_FROM", "'from X-ing from a recent sprint' duplication"))
+
     return issues
 
 

@@ -405,7 +405,7 @@ G8_15 = SubjectCurriculum(
         _ex("(isa? java.lang.String java.lang.Number)",
             False,
             "the predicate (isa? String Number)",
-            "whether String isa? Number (it doesn't)"),
+            "whether String isa? Number"),
     ],
     subplots=_SUBPLOTS,
     plan_pool=_PLAN_POOL_G8,

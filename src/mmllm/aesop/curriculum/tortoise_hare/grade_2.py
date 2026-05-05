@@ -240,7 +240,7 @@ G2_12 = SubjectCurriculum(
         # we ask for has the value nil; the model writes println
         # and the runtime returns nil.
         _ex('(println "hello")', None,
-            'the form (println "hello") (note: it prints, but returns nil)',
+            'the form (println "hello")',
             'the return value of (println "hello") (it is nil)'),
         _ex('(print "x")', None,
             'the form (print "x")',
@@ -263,9 +263,9 @@ G2_13 = SubjectCurriculum(
             "the value of (or false true)"),
         _ex("(or false false)",  False,  "the form (or false false)",
             "the value of (or false false)"),
-        _ex("(and 1 2 3)",       3,      "the form (and 1 2 3) — note: returns last truthy",
+        _ex("(and 1 2 3)",       3,      "the form (and 1 2 3)",
             "the value of (and 1 2 3)"),
-        _ex("(or nil false 5)",  5,      "the form (or nil false 5) — first truthy",
+        _ex("(or nil false 5)",  5,      "the form (or nil false 5)",
             "the value of (or nil false 5)"),
     ],
     subplots=_SHARED_SUBPLOTS, plan_pool=_PLAN_POOL,
@@ -281,7 +281,7 @@ G2_14 = SubjectCurriculum(
         _ex("(not false)", True,  "the form (not false)", "the value of (not false)"),
         _ex("(not nil)",   True,  "the form (not nil)",   "the value of (not nil)"),
         _ex("(not 0)",     False, "the form (not 0)",     "the value of (not 0)"),
-        _ex("(not \"\")",  False, "the form (not \"\")",  "the value of (not \"\") — empty string is truthy"),
+        _ex("(not \"\")",  False, "the form (not \"\")",  "the value of (not \"\")"),
     ],
     subplots=_SHARED_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
@@ -417,7 +417,7 @@ G2_22 = SubjectCurriculum(
             "3*8 + 2*4"),
         _ex("(quot (+ 100 50) 5)", 30,
             "the form (quot (+ 100 50) 5)",
-            "150 divided by 5 (integer quotient)"),
+            "150 divided by 5"),
     ],
     subplots=_SHARED_SUBPLOTS, plan_pool=_PLAN_POOL,
 )

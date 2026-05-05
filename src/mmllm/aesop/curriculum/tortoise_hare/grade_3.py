@@ -190,7 +190,7 @@ G3_14 = SubjectCurriculum(grade=3, subject_id="G3-14",
     subject_title="do form", fable="tortoise-hare",
     examples=[
         _ex("(do 1 2 3)", 3,
-            "the do form (do 1 2 3) — returns the last form",
+            "the do form (do 1 2 3)",
             "the value of (do 1 2 3)"),
         _ex("(do (+ 1 1) (+ 2 2) (+ 3 3))", 6,
             "a do with three forms — last wins",

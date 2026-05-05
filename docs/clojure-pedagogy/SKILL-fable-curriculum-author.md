@@ -404,6 +404,104 @@ If your variety drops below 0.95, the probable cause is one of:
 - Location pool < 5 locations
 - Opener pool < 4
 
+### 12. Participle-after-"said" needs a comma
+
+A subplot template like:
+
+```
+"There is no need to evaluate that," {hare_phrase} said {emo_proud}.
+```
+
+reads ungrammatically when EMO_PROUD is a participle phrase:
+
+> "...said boasting at every turn."     ← wrong
+> "...said puffed up with pride."       ← wrong
+> "...said swaggering through the underbrush."  ← wrong
+
+These need a comma to parse the participle as adverbial:
+
+> "...said, boasting at every turn,"    ← right
+
+EMO pools mix prepositional phrases ("with a smug grin") with
+participle phrases ("boasting at every turn"). The prep phrases work
+without commas; the participles don't. The safe template change is to
+ALWAYS comma-bracket the EMO phrase:
+
+```
+"...," {hare_phrase} said, {emo_proud}.
+```
+
+The audit harness flags `said\s+(boasting|puffed|swaggering|with a smug grin)`
+in user_msg as `SAID_PARTICIPLE`. A test on 1600 records confirms 0
+remaining occurrences after the comma fix.
+
+### 13. Double-"from" in tired-hare templates
+
+A teacher subplot like:
+
+```
+{hare}, {emo_tired} from a recent sprint, agreed to try.
+```
+
+duplicates the preposition when EMO_TIRED entries already include "from
+X":
+
+- `"her legs heavy from sprinting"` → "from sprinting from a recent sprint" ← duplicate
+- `"weary from the morning's effort"` → "from the morning's effort from a recent sprint" ← duplicate
+- `"drowsy from the warm sun"` → "drowsy from the warm sun from a recent sprint" ← awkward but not strictly wrong
+
+Fix: drop the "from a recent sprint" tail in the template. The fatigue
+is conveyed by EMO_TIRED itself.
+
+The audit harness flags `from \w+ing from a recent` in user_msg as
+`DOUBLE_FROM`.
+
+### 14. Trailing parenthetical or em-dash commentary in question_what / concept_phrase
+
+A concept_phrase or question_what like:
+
+> `"the value of the string \"42\" (note: not the number 42)"`
+> `"whether 0 is nil (it isn't)"`
+> `"the form (and 1 2 3) — note: returns last truthy"`
+> `"the value 42 (the REPL returns it; doesn't 'print' it)"`
+
+carries pedagogical commentary that bloats the rendered text without
+adding training signal. The instructional intent ("it isn't",
+"returns last truthy") belongs in the subject's `## Common mistakes`
+section of the lesson plan, not in the example's data.
+
+The audit harness flags these as `ASIDE_PAREN` (parenthetical) and
+`EMDASH_COMMENTARY` (em-dash followed by `note|first|empty|returns|integer`).
+The `noise-sweep.py` script applies regex rewrites to strip them
+mechanically.
+
+### 15. Meta-meta question_what
+
+A question_what like `"the value the form 42 evaluates to"` wraps
+inside the question template `"Write a form whose evaluation gives X"`
+and produces:
+
+> "Write a form whose evaluation gives the value the form 42 evaluates to."
+
+The "form ... evaluates to ... evaluates to" loop is meta-meta — the
+question is referring to the form referring to its own evaluation.
+Simplify question_whats to direct value-descriptions:
+
+- `"the value of 42"` instead of `"the value the form 42 evaluates to"`
+- `"the value of nil"` instead of `"the value of the form nil"`
+- `"the result of (+ 1 2)"` instead of `"the result of (+ 1 2) (the REPL returns its result)"`
+
+### 16. Question_what containing extra whitespace from the form
+
+For G1-11 (whitespace-doesn't-matter) and similar, putting the literal
+spaced form in question_what produces:
+
+> "the result of (+    1    2)"  → "Write a form whose evaluation gives the result of (+    1    2)."
+
+The extra spaces leak into prose. Use a simpler question_what like
+`"the result of the form"` and let `form_display` carry the visual
+spacing.
+
 ### 11. Subplot template + concept_phrase duplication (the form-form pattern)
 
 A subplot template that says:

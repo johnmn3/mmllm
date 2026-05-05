@@ -51,12 +51,15 @@ was simpler to type the form into the REPL than to argue about
 {concept_phrase}."""),
 
     # 3. The teacher template — Tortoise is gently correcting Hare.
+    #    NOTE: drops the "from a recent sprint" tail because EMO_TIRED
+    #    entries already supply their own "from X" clause; doubling
+    #    produced "from sprinting from a recent sprint" awkwardness.
     SubplotTemplate("""\
 {tortoise_phrase} had been trying to teach {hare_phrase} how the REPL
 works. "Look here," {tortoise_he_she} said, pointing to
 {concept_phrase}. "You hand the form {form_display} to the runtime, and
-the runtime hands you back what it evaluates to." {hare}, {emo_tired}
-from a recent sprint, agreed to try."""),
+the runtime hands you back what it evaluates to." {hare}, {emo_tired},
+agreed to try."""),
 
     # 4. The audience template — small forest creatures watch and learn.
     SubplotTemplate("""\
@@ -83,9 +86,13 @@ next entry was {concept_phrase}. {hare_phrase} peered over
 it would come out to.""".replace("{place_idx}", "Today {place}")),
 
     # 7. The boast-and-rebuke template — Hare claims to know without checking.
-    #    NOTE: uses {hare_him_her} (object case) for "asked X to ...".
+    #    NOTE: uses {hare_him_her} (object case) for "asked X to ..."; uses
+    #    comma after "said" so participle-phrase EMO_PROUD entries
+    #    ("boasting at every turn", "swaggering through the underbrush")
+    #    parse as adverbial — without the comma, "said boasting" reads
+    #    as agrammatical.
     SubplotTemplate("""\
-"There is no need to evaluate that," {hare_phrase} said {emo_proud}.
+"There is no need to evaluate that," {hare_phrase} said, {emo_proud}.
 "Anyone can see what {concept_phrase} comes to." {tortoise_phrase}, who
 {place} had grown used to such claims, asked {hare_him_her} to actually
 write the form {form_display} and submit it to the REPL — just to be
@@ -141,9 +148,9 @@ G1_01 = SubjectCurriculum(
         _ex("(+ 1 (* 2 3))",       7,     "the form (+ 1 (* 2 3))",
             "the result of (+ 1 (* 2 3))"),
         _ex("\"hello\"",          "hello","the string \"hello\"",
-            "the string the form \"hello\" evaluates to"),
+            "the value of \"hello\""),
         _ex("nil",                None,   "the literal nil",
-            "the value of the form nil"),
+            "the value of nil"),
     ],
     subplots=_SHARED_SUBPLOTS,
     plan_pool=_PLAN_POOL,
@@ -211,7 +218,7 @@ G1_04 = SubjectCurriculum(
         _ex('""',         "",         'the empty string',
             'the value of the empty string'),
         _ex('"42"',       "42",       'the string "42"',
-            'the value of the string "42" (note: not the number 42)'),
+            'the value of the string "42"'),
     ],
     subplots=_SHARED_SUBPLOTS,
     plan_pool=_PLAN_POOL,
@@ -257,10 +264,10 @@ G1_06 = SubjectCurriculum(
             "whether nil is nil"),
         _ex("(nil? 0)", False,
             "the predicate (nil? 0)",
-            "whether 0 is nil (it isn't)"),
+            "whether 0 is nil"),
         _ex("(nil? false)", False,
             "the predicate (nil? false)",
-            "whether false is nil (it isn't)"),
+            "whether false is nil"),
         _ex("(= nil nil)", True,
             "the equality (= nil nil)",
             "the value of (= nil nil)"),
@@ -366,10 +373,10 @@ G1_11 = SubjectCurriculum(
     examples=[
         _ex("(+    1    2)", 3,
             "the form (+ 1 2) with extra spaces",
-            "the result of (+    1    2)"),
+            "the result of the form"),
         _ex("(+\n  1\n  2)", 3,
             "the form (+ 1 2) split across lines",
-            "the result of the same sum laid out vertically"),
+            "the result of the form"),
     ],
     subplots=_SHARED_SUBPLOTS,
     plan_pool=_PLAN_POOL,
@@ -384,7 +391,7 @@ G1_12 = SubjectCurriculum(
     examples=[
         _ex("(+ 2 3)", 5,
             "the form (+ 2 3)",
-            "the result of (+ 2 3) — note the parens are syntax, not multiplication"),
+            "the result of (+ 2 3)"),
         _ex("(* (+ 1 2) 3)", 9,
             "the form (* (+ 1 2) 3)",
             "the result of (* (+ 1 2) 3)"),
@@ -496,11 +503,11 @@ G1_17 = SubjectCurriculum(
     fable="tortoise-hare",
     examples=[
         _ex("42", 42,
-            "the value 42 (the REPL returns it; doesn't 'print' it)",
-            "what 42 evaluates to (the return value, what the REPL displays)"),
+            "the value 42",
+            "the value of 42"),
         _ex("(+ 1 2)", 3,
             "the form (+ 1 2)",
-            "what the REPL returns from (+ 1 2)"),
+            "the result of (+ 1 2)"),
     ],
     subplots=_SHARED_SUBPLOTS,
     plan_pool=_PLAN_POOL,
