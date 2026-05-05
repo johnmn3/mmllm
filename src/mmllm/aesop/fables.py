@@ -149,6 +149,77 @@ def _atm_intro(scene: Scene, location: ont.Location | None = None,
     return f"{when} something extraordinary was about to happen.\n\n"
 
 
+# ─────────────────────── subplot infrastructure ───────────────────────
+
+
+def _smooth_opener(opener: str, named_protagonist: ont.Character | None) -> str:
+    """If the opener uses an abstract 'a Hare' / 'the Hare' form and a named
+    protagonist follows, drop the trailing newlines so the subplot can pick
+    up directly. Caller is responsible for inserting `\\n\\n` between
+    opener and subplot — this just normalizes whitespace.
+    """
+    return opener.rstrip() + "\n\n"
+
+
+def _render_subplot(scene: Scene, subplots: list[str], **params) -> str:
+    """Pick one of `subplots` (str templates) and format it with `params`.
+    Each template uses Python format syntax, and is expected to be
+    parameterized over the chapter's character/item/container/number
+    bindings. Subplot templates are 60-120 words each — enough to add
+    real narrative texture without inflating token count to ridiculous
+    sizes.
+    """
+    template = scene.rng.choice(subplots)
+    return template.format(**params).strip()
+
+
+# Per-character emotional pools — used to ground quantities in feeling
+# rather than naked numbers. Picks differ by character archetype where
+# possible, so a "boastful" hare's emotional vocabulary differs from
+# a "patient" tortoise's.
+EMO_PROUD: tuple[str, ...] = (
+    "with a smug grin", "puffed up with pride",
+    "as if the race were already won", "with great whoops of laughter",
+    "boasting at every turn", "swaggering through the underbrush",
+)
+EMO_PATIENT: tuple[str, ...] = (
+    "without complaint", "saying very little",
+    "with steady, careful steps", "her eyes always on the path",
+    "untroubled by what others thought", "stepping deliberately",
+)
+EMO_TIRED: tuple[str, ...] = (
+    "drowsy from the warm sun", "weary from the morning's effort",
+    "lulled by the gentle wind", "her legs heavy from sprinting",
+    "yawning at the soft moss",
+)
+EMO_THIRSTY: tuple[str, ...] = (
+    "dry-throated and desperate", "parched from the long flight",
+    "her beak cracked with thirst", "near to giving up the search for water",
+    "with a thirst that hurt to bear",
+)
+EMO_HUNGRY: tuple[str, ...] = (
+    "his stomach hollow with hunger", "her belly aching for food",
+    "weak with hunger", "dreaming of the next meal",
+)
+EMO_GREEDY: tuple[str, ...] = (
+    "his eyes greedy with want", "with a hungry gleam in his eye",
+    "imagining all that he might gain", "his thoughts already on more",
+    "his mouth watering at the thought of more",
+)
+EMO_CONTENT: tuple[str, ...] = (
+    "happy with what she had", "pleased with her small fortune",
+    "grateful for every bite", "content in her quiet life",
+)
+EMO_REGRETFUL: tuple[str, ...] = (
+    "his heart sinking", "wishing she had been more careful",
+    "regretting every careless step", "wondering how it had come to this",
+)
+EMO_DESPERATE: tuple[str, ...] = (
+    "with growing alarm", "wide-eyed with fear", "in a panic",
+    "shouting until her voice cracked", "her hands trembling",
+)
+
+
 # ─────────────────────── _finalize helper ───────────────────────
 
 
@@ -295,46 +366,86 @@ def _th_nap_overtake(scene: Scene) -> Record:
     )
     answer = evaluate(expr)
 
-    boast = scene.phrase(
-        "telling everyone in the meadow that no one could match his speed",
-        "boasting around the burrows about how fast he was",
-        "bragging that the slow tortoise stood no chance against him",
-    ) if hare.gender == "m" else scene.phrase(
-        "telling everyone in the meadow that no one could match her speed",
-        "boasting around the burrows about how fast she was",
-        "bragging that the slow tortoise stood no chance against her",
-    ) if hare.gender == "f" else scene.phrase(
-        "telling everyone in the meadow how fast they were",
-        "boasting around the burrows about their speed",
-        "bragging that the slow tortoise stood no chance",
-    )
-    listened = scene.phrase(
-        "listened patiently for many days",
-        "said nothing and only blinked slowly",
-        "thought about it carefully before agreeing",
-    )
-    challenge_verb = scene.phrase(
-        "finally agreed to a race",
-        "agreed to settle the matter with a race",
-        "decided the only fair thing was to actually race",
-    )
-    nap_phrase = scene.phrase(
-        "grew tired and decided to take a nap under a tree",
-        "felt sleepy and stretched out for a nap on a soft patch of moss",
-        "lay down to rest a while in the warm grass",
-    )
+    intro = _aesopian_intro(scene, "tortoise-hare", location)
+    proud  = scene.rng.choice(EMO_PROUD)
+    patient = scene.rng.choice(EMO_PATIENT)
+    tired  = scene.rng.choice(EMO_TIRED)
+
+    # Six narrative subplots — same arithmetic, very different stories.
+    # Each grounds the abstract numbers (lead, speed, hours) in a small
+    # situational drama and a specific sensory setting.
+    nap_overtake_subplots = [
+        # 1) classic — boast then nap under tree
+        f"{hare.name} the hare bounded down the path {proud}, "
+        f"sure that {hare.he_she} would win without effort. By the time "
+        f"{hare.he_she} had run {n_unit(hare_lead, 'mile')} ahead, "
+        f"{hare.he_she} could no longer see {tortoise.name} behind. "
+        f"{cap(hare.he_she)} was {tired}, and curled up under an old oak "
+        f"to rest. {tortoise.name} the tortoise, far behind, kept on "
+        f"{patient} at a steady {tortoise_speed} "
+        f"{unit(tortoise_speed, 'mile')} per hour. {cap(hare.he_she)} "
+        f"slept while {tortoise.name} walked for "
+        f"{n_unit(nap_hours, 'hour')} without pause.",
+
+        # 2) sweet clover patch + drowsy
+        f"{hare.name} sprinted out of the gate {proud}, and "
+        f"after {n_unit(hare_lead, 'mile')} {hare.he_she} found a sweet "
+        f"patch of clover by the roadside that {hare.he_she} could not "
+        f"resist. {cap(hare.he_she)} ate {hare.his_her} fill, grew {tired}, "
+        f"and fell into a heavy sleep. {tortoise.name}, who had been "
+        f"plodding along {patient}, kept moving at {tortoise_speed} "
+        f"{unit(tortoise_speed, 'mile')} per hour for the next "
+        f"{n_unit(nap_hours, 'hour')}.",
+
+        # 3) butterfly distraction → nap
+        f"After tearing {n_unit(hare_lead, 'mile')} ahead of "
+        f"{tortoise.name}, {hare.name} stopped to chase a bright butterfly "
+        f"that flickered above the path. The chase tired {hare.him_her} "
+        f"more than the running had, and {hare.he_she} flopped down in "
+        f"the long grass, asleep within moments. {tortoise.name}, "
+        f"{patient}, did not stop or look up — only walked steadily at "
+        f"{tortoise_speed} {unit(tortoise_speed, 'mile')} per hour for "
+        f"the {n_unit(nap_hours, 'hour')} that followed.",
+
+        # 4) crowd encounter → bragging stop
+        f"{n_unit(hare_lead, 'mile')} ahead of {tortoise.name}, "
+        f"{hare.name} came upon a small crowd of forest animals who had "
+        f"gathered to watch. {cap(hare.he_she)} could not resist a chance "
+        f"to boast, and stayed to tell the story of {hare.his_her} "
+        f"victory before it was even won. The telling was so long that "
+        f"{hare.he_she} dozed off mid-sentence on a tree stump. "
+        f"Meanwhile {tortoise.name} kept up a quiet "
+        f"{tortoise_speed}-{unit(tortoise_speed, 'mile')}-per-hour pace "
+        f"for {n_unit(nap_hours, 'hour')}.",
+
+        # 5) summer heat + cool stream → nap
+        f"By the time {hare.name} had run {n_unit(hare_lead, 'mile')} "
+        f"ahead, the sun was high and {hare.he_she} was {tired}. A cool "
+        f"stream ran beside the path, and {hare.he_she} stopped to drink "
+        f"and stretch out on the mossy bank. The water sounded so "
+        f"peaceful that {hare.he_she} fell asleep there. "
+        f"{tortoise.name}, never slowed by heat, kept walking "
+        f"{patient} at {tortoise_speed} {unit(tortoise_speed, 'mile')} "
+        f"per hour for {n_unit(nap_hours, 'hour')} straight.",
+
+        # 6) overconfidence → leisurely walk → nap
+        f"{hare.name}, having opened a {n_unit(hare_lead, 'mile')} lead "
+        f"{proud}, decided {hare.he_she} no longer needed to run at "
+        f"all. {cap(hare.he_she)} began to amble — then to dawdle — "
+        f"then to lie down for what {hare.he_she} called \"a strategic "
+        f"nap.\" {tortoise.name} pressed on at {tortoise_speed} "
+        f"{unit(tortoise_speed, 'mile')} per hour, never once "
+        f"considering rest. For {n_unit(nap_hours, 'hour')}, "
+        f"{tortoise.name} closed the gap step by patient step.",
+    ]
+
+    body = _render_subplot(scene, nap_overtake_subplots,
+                           # all subplots use only locally-bound names;
+                           # no .format substitutions needed since we
+                           # built the strings inline. Pass-through.
+                           )
     user_msg = (
-        f"{atmosphere(scene, location)} {species_phrase(hare)} had "
-        f"spent days {boast}. {species_phrase(tortoise)}, by contrast, "
-        f"{listened}, and at last the two animals {challenge_verb} "
-        f"{place_phrase(scene, location)}.\n\n"
-        f"They set off together at sunrise. After running "
-        f"{n_unit(hare_lead, 'mile')} ahead, {hare.name} "
-        f"{nap_phrase}. Meanwhile, {tortoise.name} kept walking, "
-        f"steady as ever, at {tortoise_speed} "
-        f"{unit(tortoise_speed, 'mile')} per hour. While {hare.name} "
-        f"slept, {tortoise.name} kept moving for "
-        f"{n_unit(nap_hours, 'hour')} straight without pause.\n\n"
+        f"{intro}{body}\n\n"
         f"{question_phrase(scene, f'who is in the lead by the time {hare.name} wakes up')}"
     )
 
