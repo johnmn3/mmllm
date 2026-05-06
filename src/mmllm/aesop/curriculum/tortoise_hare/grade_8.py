@@ -491,25 +491,21 @@ G8_07 = SubjectCurriculum(
             question_what="the value returned after defining protocol Pace with method speed, defining record Hare with one field name that implements Pace, then calling speed on a Hare instance",
             goal_text="define a protocol Pace with method speed, define a record Hare that implements Pace, then call speed on a Hare instance",
             scenario=(
-                "Mossback the tortoise decided to build a labeled "
-                "carrying-case for a hare runner — a `Hare` record with "
-                "a `name` compartment — and have that case sign the Pace "
-                "guild's book directly inside the `defrecord` declaration."
+                "Mossback the tortoise built a carrying-case — a `Hare` "
+                "record with a `name` compartment — and signed it into the "
+                "Pace guild directly inside `defrecord`."
             ),
             need=(
-                "She needed to call `speed` on a newly constructed Hare "
-                "case to confirm that a record can implement a protocol "
-                "at definition time, not as a separate step."
+                "She needed to call `speed` on a Hare instance to confirm "
+                "that a record can implement a protocol at definition time."
             ),
             mapping=(
-                "`defrecord Hare [name] Pace (speed …)` declares the "
-                "case and implements the guild routine in one declaration. "
-                "Calling `speed` on a Hare instance dispatches to the "
-                "inline implementation."
+                "`defrecord Hare [name] Pace (speed …)` declares the case "
+                "and implements the routine inline. Calling `speed` on a "
+                "Hare instance dispatches to that implementation."
             ),
             resolution=(
-                "the call dispatched to the Hare record's inline "
-                "implementation and returned the hare's pace keyword."
+                "the dispatch returned the hare's pace keyword."
             ),
             tags=("story",),
         ),
@@ -597,25 +593,22 @@ G8_08 = SubjectCurriculum(
             question_what="the value returned after defining multimethod tag that dispatches on :kind, adding a method for :stone, then calling tag with a map",
             goal_text="define a multimethod tag that dispatches on the :kind key, add a method for :stone, then call tag with a map",
             scenario=(
-                "Pip the hare found a smooth stone on the trail and "
-                "carried it to Mossback's sorting-table. The table read "
-                "each item's `:kind` stamp; an arm existed only for "
-                "the `:stone` stamp so far."
+                "Pip the hare carried a smooth stone to Mossback's "
+                "sorting-table. The table read each item's `:kind` stamp; "
+                "an arm existed only for the `:stone` stamp."
             ),
             need=(
                 "Pip needed to send the stone map through the table and "
-                "see which keyword the `:stone` arm returned, to verify "
-                "the table routed it correctly."
+                "confirm the dispatch routed to the `:stone` arm."
             ),
             mapping=(
-                "`defmulti tag :kind` sets the table to read the `:kind` "
-                "stamp. `defmethod tag :stone` adds the arm for that "
-                "stamp. Calling `tag` on a map with `:kind :stone` routes "
-                "to that arm and returns its value."
+                "`defmulti tag :kind` sets the table to read `:kind`. "
+                "`defmethod tag :stone` adds the arm for that stamp. Calling "
+                "`tag` on a map with `:kind :stone` routes to that arm."
             ),
             resolution=(
-                "the table read the `:stone` stamp, sent the map to the "
-                "matching arm, and returned that arm's keyword."
+                "the dispatch sent the map to the matching arm and returned "
+                "its keyword."
             ),
             tags=("story",),
         ),
@@ -790,27 +783,20 @@ G8_11 = SubjectCurriculum(
             question_what="the value returned after defining protocol IPace with method run, extending it to String with an implementation, then calling run on a string",
             goal_text="define a protocol IPace with method run, extend it to String type, then call run on a string",
             scenario=(
-                "Mossback the tortoise explained to Pip that the meadow "
-                "had its own guild system — written entirely in Clojure "
-                "— that worked like the host world's signed ledger but "
-                "without needing to enter the host's territory. She "
-                "founded a guild named `IPace` to demonstrate."
+                "Mossback the tortoise founded a guild named `IPace` — a "
+                "Clojure-side guild working like the host world's interface."
             ),
             need=(
-                "She needed to extend `IPace` to String and call `run` "
-                "on a String runner, to show that the Clojure-side guild "
-                "dispatches in the same way a host-side ledger would."
+                "She needed to extend `IPace` to String and call `run` on "
+                "a String runner to show the guild works like a Java interface."
             ),
             mapping=(
-                "`defprotocol IPace (run [this])` is the meadow's own "
-                "guild — analogous to a Java interface but authored "
-                "entirely in Clojure. `extend-protocol` signs String in; "
-                "calling `run` dispatches through the guild."
+                "`defprotocol IPace (run [this])` creates the guild. "
+                "`extend-protocol` signs String in, so calling `run` dispatches "
+                "through the guild."
             ),
             resolution=(
-                "the guild dispatched to the String arm and returned the "
-                "completion keyword, demonstrating the Clojure-side guild "
-                "works like its host-side counterpart."
+                "the guild dispatched to the String arm and returned the keyword."
             ),
             tags=("story",),
         ),
@@ -905,25 +891,22 @@ G8_13 = SubjectCurriculum(
             question_what="the value returned after defining protocol Named with method name-of, defining record Hare with field n that uses this to access the field in the implementation, then calling name-of on a Hare instance",
             goal_text="define a protocol Named with method name-of, define a record that uses this to access a field, then call the method",
             scenario=(
-                "Mossback the tortoise built a Hare carrying-case with "
-                "a single field `n`. Inside the `name-of` routine she "
-                "used `this` — the case itself — to look up what was "
-                "stored in field `n`, rather than ignoring the receiver."
+                "Mossback built a Hare carrying-case with a single "
+                "field `n`. The `name-of` routine used `this` — the "
+                "case itself — to read field `n`."
             ),
             need=(
-                "She needed to call `name-of` on a Hare instance and "
-                "confirm the method could introspect the case's own "
-                "contents through `this`, returning the stored name."
+                "She needed to call `name-of` on the Hare and confirm "
+                "the method retrieved the stored name through `this`."
             ),
             mapping=(
-                "The protocol method signature `[this]` binds the "
-                "receiver. Inside the body, `(:n this)` reads the `n` "
-                "field from that receiver — the case inspects itself. "
-                "The returned value comes from the case's own compartment."
+                "`[this]` in the method signature binds the receiver. "
+                "`(:n this)` reads the `n` field from that receiver — "
+                "the case introspects itself."
             ),
             resolution=(
-                "the method read the `n` field through `this` and "
-                "returned the name stored inside the carrying-case."
+                "the method read field `n` through `this` and returned "
+                "the name stored in the case."
             ),
             tags=("story",),
         ),
@@ -936,26 +919,22 @@ G8_13 = SubjectCurriculum(
             question_what="the value returned after defining protocol Tagged with method tag-of, defining record Stone with field t that uses this to access the field in the implementation, then calling tag-of on a Stone instance",
             goal_text="define a protocol Tagged with method tag-of, define a record Stone that implements it by accessing a field via this, then call the method",
             scenario=(
-                "Pip the hare found a pebble and placed it in a Stone "
-                "carrying-case with a single field `t` for its tag. "
-                "The Tagged guild required a `tag-of` routine that "
-                "read back that stored tag through `this`."
+                "Pip placed a pebble in a Stone case with field `t` "
+                "for its tag. The Tagged guild's `tag-of` routine "
+                "read that tag back through `this`."
             ),
             need=(
-                "Pip needed to call `tag-of` on the Stone case and "
-                "confirm the `this`-style implementation correctly "
-                "retrieved the tag stored in the `t` field."
+                "Pip needed to call `tag-of` on the Stone and confirm "
+                "the `this`-style implementation retrieved the `t` field."
             ),
             mapping=(
                 "`defrecord Stone [t] Tagged (tag-of [this] (:t this))` "
-                "implements the routine by reading field `t` from the "
-                "receiver. The case introspects itself rather than "
-                "returning a constant."
+                "reads field `t` from the receiver. The case introspects "
+                "itself rather than returning a constant."
             ),
             resolution=(
-                "the method looked up field `t` through `this` and "
-                "returned the tag that had been placed in the case at "
-                "construction."
+                "the method looked up `t` through `this` and returned "
+                "the tag placed in the case at construction."
             ),
             tags=("story",),
         ),
@@ -1132,24 +1111,21 @@ G8_16 = SubjectCurriculum(
             goal_text="define a protocol Move with method step, define two record types Hare and Tortoise that each implement it, then call the method on both instances",
             scenario=(
                 "Race day at the meadow. Mossback the tortoise founded "
-                "the Move guild, requiring every member to implement a "
-                "`step` routine. Both a Hare record and a Tortoise record "
-                "signed the guild's book with their own `step`."
+                "the Move guild. Both a Hare and a Tortoise record signed "
+                "with their own `step` implementations."
             ),
             need=(
-                "She needed to call `step` on each runner in sequence "
-                "and collect both results, to show one call dispatching "
-                "to two different implementations."
+                "She needed to call `step` on each runner and collect both "
+                "results to show one call dispatching to different implementations."
             ),
             mapping=(
-                "`mapv step` applies `step` to each element in the "
-                "vector. The runtime dispatches to each record's own "
-                "implementation, returning a different value per type "
-                "— polymorphism at work."
+                "`mapv step` applies `step` to each element. The runtime "
+                "dispatches to each record's implementation, returning a "
+                "different value per type."
             ),
             resolution=(
-                "the vector held each runner's own result in order, "
-                "confirming one call produced two distinct answers."
+                "the vector held each runner's result, confirming one call "
+                "produced two distinct answers."
             ),
             tags=("story",),
         ),
