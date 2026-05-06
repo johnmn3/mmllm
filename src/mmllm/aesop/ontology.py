@@ -315,9 +315,19 @@ ANIMALS: tuple[Character, ...] = (
     Character("Jess",  "human", "f", ("liar", "shepherd")),
     Character("Lou",   "human", "f", ("liar", "shepherd")),
 
-    # milkmaids
+    # milkmaids (dreamers — hare/grasshopper analog)
     Character("Margery","human", "f", ("counter", "dreamer")),
     Character("Lila",   "human", "f", ("counter", "dreamer")),
+    Character("Clara",  "human", "f", ("counter", "dreamer")),
+    Character("Nan",    "human", "f", ("counter", "dreamer")),
+    Character("Bess",   "human", "f", ("counter", "dreamer")),
+
+    # farmers / market-wise elders (patient evaluators — tortoise/ant analog)
+    Character("Godfrey","human", "m", ("farmer", "wise_elder")),
+    Character("Aldric", "human", "m", ("farmer", "wise_elder")),
+    Character("Mabel",  "human", "f", ("farmer", "wise_elder")),
+    Character("Rowan",  "human", "n", ("farmer", "wise_elder")),
+    Character("Edna",   "human", "f", ("farmer", "wise_elder")),
 )
 
 CHARACTERS: tuple[Character, ...] = HUMANS + ANIMALS
