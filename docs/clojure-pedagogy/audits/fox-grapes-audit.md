@@ -11,7 +11,17 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 - examples: 6
 - variety @ n=50: 0.94
 
+### G1-14: Nested call evaluation
+
+- examples: 4
+- variety @ n=50: 0.94
+
 ### G1-15: Equality
+
+- examples: 6
+- variety @ n=50: 0.93
+
+### G1-16: Numeric predicates
 
 - examples: 6
 - variety @ n=50: 0.93
@@ -21,26 +31,41 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 ### G2-01: Multi-arg arithmetic
 
 - examples: 6
-- variety @ n=50: 0.91
+- variety @ n=50: 0.90
 
 ### G2-02: Comparison chains
 
 - examples: 5
-- variety @ n=50: 0.92
+- variety @ n=50: 0.90
 
 ### G2-04: min and max
 
 - examples: 5
-- variety @ n=50: 0.91
+- variety @ n=50: 0.89
 
 ### G2-05: quot, rem, mod
 
 - examples: 6
-- variety @ n=50: 0.94
+- variety @ n=50: 0.92
 
 ### G2-06: inc and dec
 
 - examples: 5
+- variety @ n=50: 0.92
+
+### G2-07: Absolute value
+
+- examples: 4
+- variety @ n=50: 0.94
+
+### G2-09: Floats vs ints (the / operator)
+
+- examples: 3
+- variety @ n=50: 0.95
+
+### G2-10: Powers via repeated multiplication
+
+- examples: 4
 - variety @ n=50: 0.93
 
 ### G2-13: and / or — short circuit, return values
@@ -51,12 +76,17 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 ### G2-14: not — turning truthy to false
 
 - examples: 5
-- variety @ n=50: 0.93
+- variety @ n=50: 0.92
+
+### G2-15: Falsey values: only false and nil
+
+- examples: 4
+- variety @ n=50: 0.94
 
 ### G2-16: Truthy 0 and empty string
 
 - examples: 4
-- variety @ n=50: 0.94
+- variety @ n=50: 0.93
 
 ### G2-21: String length and substring
 
@@ -66,31 +96,36 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 ### G2-22: Compose pure arithmetic (multi-step calculation)
 
 - examples: 3
-- variety @ n=50: 0.95
+- variety @ n=50: 0.94
 
 ## Grade 3
 
 ### G3-04: let — multi-binding
 
 - examples: 3
-- variety @ n=50: 0.93
+- variety @ n=50: 0.92
 
 ### G3-09: defn — shorthand
 
 - examples: 2
-- variety @ n=50: 0.94
+- variety @ n=50: 0.93
 
 ### G3-10: anonymous shorthand #()
 
 - examples: 2
-- variety @ n=50: 0.92
+- variety @ n=50: 0.91
 
 ## Grade 4
 
 ### G4-04: List literal
 
 - examples: 2
-- variety @ n=50: 0.94
+- variety @ n=50: 0.92
+
+### G4-15: first, rest, last
+
+- examples: 3
+- variety @ n=50: 0.95
 
 ## Grade 5
 
@@ -99,17 +134,22 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 - examples: 1
 - variety @ n=50: 0.92
 
-### G5-12: reduce
-
-- examples: 3
-- variety @ n=50: 0.94
-
 ### G5-15: comp
 
 - examples: 2
-- variety @ n=50: 0.92
+- variety @ n=50: 0.90
 
 ### G5-16: partial
+
+- examples: 2
+- variety @ n=50: 0.94
+
+### G5-19: every?
+
+- examples: 2
+- variety @ n=50: 0.94
+
+### G5-21: distinct and sort
 
 - examples: 2
 - variety @ n=50: 0.94
@@ -123,12 +163,17 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 ## Grade 7
 
+### G7-18: Shell command
+
+- examples: 2
+- variety @ n=50: 0.94
+
 ## Grade 8
 
 ### G8-04: Protocol definition
 
 - examples: 2
-- variety @ n=50: 0.92
+- variety @ n=50: 0.91
 
 ### G8-15: derive and isa? — multimethod hierarchy
 
@@ -145,12 +190,22 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 ### G9-03: Atom introduction
 
 - examples: 3
-- variety @ n=50: 0.94
+- variety @ n=50: 0.93
 
 ### G9-04: Atom CAS semantics
 
 - examples: 2
-- variety @ n=50: 0.92
+- variety @ n=50: 0.91
+
+### G9-09: Ref vs atom
+
+- examples: 2
+- variety @ n=50: 0.94
+
+### G9-15: promise — deliver and deref
+
+- examples: 2
+- variety @ n=50: 0.94
 
 ### G9-16: volatile — when STM is too heavy
 
@@ -162,24 +217,29 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 ### G10-01: quote, unquote, unquote-splice
 
 - examples: 3
-- variety @ n=50: 0.92
+- variety @ n=50: 0.95
 
-### G10-02: syntax-quote
+### G10-07: Threading macros revisited
+
+- examples: 3
+- variety @ n=50: 0.94
+
+### G10-15: When not to write a macro
 
 - examples: 2
-- variety @ n=50: 0.92
+- variety @ n=50: 0.93
 
 ## Grade 11
 
 ### G11-02: Method call syntax
 
 - examples: 3
-- variety @ n=50: 0.93
+- variety @ n=50: 0.91
 
 ### G11-04: Field access
 
 - examples: 2
-- variety @ n=50: 0.92
+- variety @ n=50: 0.91
 
 ## Grade 12
 
@@ -194,17 +254,17 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 | Grade | Subjects | Examples | Issues | Low-variety |
 |---|---|---|---|---|
-| 1 | 18 | 80 | 0 | G1-13(0.94); G1-15(0.93) |
-| 2 | 22 | 88 | 0 | G2-01(0.91); G2-02(0.92); G2-04(0.91) |
-| 3 | 18 | 31 | 0 | G3-04(0.93); G3-09(0.94); G3-10(0.92) |
-| 4 | 20 | 39 | 0 | G4-04(0.94) |
-| 5 | 22 | 39 | 0 | G5-04(0.92); G5-12(0.94); G5-15(0.92) |
+| 1 | 18 | 80 | 0 | G1-13(0.94); G1-14(0.94); G1-15(0.93) |
+| 2 | 22 | 88 | 0 | G2-01(0.90); G2-02(0.90); G2-04(0.89) |
+| 3 | 18 | 31 | 0 | G3-04(0.92); G3-09(0.93); G3-10(0.91) |
+| 4 | 20 | 39 | 0 | G4-04(0.92); G4-15(0.95) |
+| 5 | 22 | 39 | 0 | G5-04(0.92); G5-15(0.90); G5-16(0.94) |
 | 6 | 16 | 33 | 0 | G6-04(0.90) |
-| 7 | 18 | 36 | 0 | — |
-| 8 | 16 | 31 | 0 | G8-04(0.92); G8-15(0.95); G8-16(0.93) |
-| 9 | 18 | 34 | 0 | G9-03(0.94); G9-04(0.92); G9-16(0.93) |
-| 10 | 16 | 36 | 0 | G10-01(0.92); G10-02(0.92) |
-| 11 | 14 | 29 | 0 | G11-02(0.93); G11-04(0.92) |
+| 7 | 18 | 36 | 0 | G7-18(0.94) |
+| 8 | 16 | 31 | 0 | G8-04(0.91); G8-15(0.95); G8-16(0.93) |
+| 9 | 18 | 34 | 0 | G9-03(0.93); G9-04(0.91); G9-09(0.94) |
+| 10 | 16 | 36 | 0 | G10-01(0.95); G10-07(0.94); G10-15(0.93) |
+| 11 | 14 | 29 | 0 | G11-02(0.91); G11-04(0.91) |
 | 12 | 18 | 37 | 0 | — |
 
 ### Sample issues by severity
