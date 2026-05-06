@@ -97,8 +97,8 @@ G6_01 = SubjectCurriculum(grade=6, subject_id="G6-01",
             question_what="the string form of a quoted namespace symbol",
             goal_text="extract the string form of a quoted namespace symbol",
             scenario=(
-                'Further upstream, Patch found another stone marker with a longer '
-                'path scratched in — clojure.string — a well-known location where '
+                'Further upstream, Patch found another stone marker with a longer, '
+                'multi-segment path scratched in — a well-known location where '
                 'other dogs had cached their scrolls.'
             ),
             need=(
@@ -110,8 +110,8 @@ G6_01 = SubjectCurriculum(grade=6, subject_id="G6-01",
                 'function traces the same characters and returns them as plain text.'
             ),
             resolution=(
-                'The REPL extracted the string clojure.string from the symbol '
-                'and handed it back — a plain text path any dog could follow.'
+                'The REPL extracted the plain-text path from the symbol and handed '
+                'it back — a path any dog could follow upstream.'
             ),
             tags=("story",),
         ),
@@ -651,9 +651,7 @@ G6_10 = SubjectCurriculum(grade=6, subject_id="G6-10",
             question_what="the value at the :deps key in a deps-style map",
             goal_text="extract the value at the :deps key from a nested map",
             scenario=(
-                'Bell the hound found a hollow-log cache {place} divided into nested '
-                'compartments, each labeled with a keyword. The outer label read :deps, and '
-                'inside that compartment lay another set of bones labeled :a and :b.'
+                "Bell the hound found a hollow-log cache at the stream's edge divided into nested compartments, each labeled with a keyword. The outer label read :deps, and inside that compartment lay another set of bones labeled :a and :b."
             ),
             need=(
                 'She wanted to reach into the outer compartment and pull out what lay there — '
@@ -708,9 +706,7 @@ G6_11 = SubjectCurriculum(grade=6, subject_id="G6-11",
             question_what="the vector of parts after splitting a colon-separated path string",
             goal_text="split a colon-separated classpath-like string into its individual entries",
             scenario=(
-                'Rex the hound found a scratch-mark {place} that listed two paths bound together '
-                'with a colon: "src:test". The path was a single long text, but it held two '
-                'separate locations.'
+                'Rex the hound found a scratch-mark at the stream\'s edge that listed two paths bound together with a colon: "src:test". The path was a single long text, but it held two separate locations.'
             ),
             need=(
                 'He needed to split the mark at the colon and separate it into two distinct '
@@ -889,7 +885,7 @@ G6_14 = SubjectCurriculum(grade=6, subject_id="G6-14",
             goal_text="extract the string form of a Java class symbol",
             scenario=(
                 'Patch returned to the kennel-master\'s shed where another tool hung on a peg — '
-                'this one labeled with a long Java class name: java.util.Map. She wanted to '
+                'this one labeled with a long, dotted Java class name. She wanted to '
                 'extract the plain text of that host-side label and read it aloud.'
             ),
             need=(
@@ -901,8 +897,8 @@ G6_14 = SubjectCurriculum(grade=6, subject_id="G6-14",
                 'extracts the string text that the mark carries.'
             ),
             resolution=(
-                'The REPL traced the label and handed back the string java.util.Map — the '
-                'plain text path to the host tool.'
+                'The REPL traced the label and handed back the plain-text class path the '
+                'kennel-master had used.'
             ),
             tags=("story",),
         ),
@@ -984,9 +980,7 @@ G6_16 = SubjectCurriculum(grade=6, subject_id="G6-16",
             question_what="whether a namespace is in the set of required namespaces",
             goal_text="test whether the clojure.string namespace is in the set of required namespaces",
             scenario=(
-                'Bell the hound kept a set of borrowed scrolls {place} — marker stones scratched '
-                'with the names of libraries she had drawn from the shelf. One stone bore the name '
-                'clojure.string. She wanted to check: was this library truly in her borrowed set?'
+                "Bell the hound kept a set of borrowed scrolls at the stream's edge — marker stones scratched with the names of libraries she had drawn from the shelf. One stone bore the name clojure.string. She wanted to check: was this library truly in her borrowed set?"
             ),
             need=(
                 'She would test the membership to confirm the clojure.string library was among the '

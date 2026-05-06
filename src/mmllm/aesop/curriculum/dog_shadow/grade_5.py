@@ -312,10 +312,7 @@ G5_06 = SubjectCurriculum(grade=5, subject_id="G5-06",
             question_what="the matched branch",
             goal_text="match the value 2 against clauses and return the corresponding value",
             scenario=(
-                'At the stream {place}, Rex held a bone marked with the number 2. '
-                'Three marker-stones lay before him, each carved with a number: 1, 2, '
-                'and 3. Beside each marker was a value. The case-form would match his '
-                'bone against the markers and hand back the paired value.'
+                "At the stream at the stream's edge, Rex held a bone marked with the number 2. Three marker-stones lay before him, each carved with a number: 1, 2, and 3. Beside each marker was a value. The case-form would match his bone against the markers and hand back the paired value."
             ),
             need=(
                 'He wanted to find the marker that matched his bone and return the '
@@ -1003,10 +1000,7 @@ G5_18 = SubjectCurriculum(grade=5, subject_id="G5-18",
             question_what="whether any pebble in 1, 3, 5, 8, 7 passes the even? sieve",
             goal_text="check if any element in the vector containing 1, 3, 5, 8, and 7 is even",
             scenario=(
-                'Rex the hound held a pile of bones marked 1, 3, 5, 8, 7 at the '
-                'stream {place}. A gap-sieve before him had a rule: only even-marked '
-                'bones can pass through. He wanted to know: does any bone in this pile '
-                'fit through?'
+                "Rex the hound held a pile of bones marked 1, 3, 5, 8, 7 at the stream at the stream's edge. A gap-sieve before him had a rule: only even-marked bones can pass through. He wanted to know: does any bone in this pile fit through?"
             ),
             need=(
                 'He needed to find whether at least one bone would pass the even? sieve. '

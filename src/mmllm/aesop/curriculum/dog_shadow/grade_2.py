@@ -375,9 +375,7 @@ G2_03 = SubjectCurriculum(
             question_what="whether 1 differs from 2",
             goal_text="test whether 1 and 2 are not equal",
             scenario=(
-                'Patch the hound held two bones {place} — one carved with '
-                'the mark 1, the other with the mark 2. They looked like bones '
-                'from different catches.'
+                "Patch the hound held two bones at the stream's edge — one carved with the mark 1, the other with the mark 2. They looked like bones from different catches."
             ),
             need=(
                 'They wondered whether the marks were truly different. The '
@@ -801,9 +799,7 @@ G2_06 = SubjectCurriculum(
             question_what="5 plus 1",
             goal_text="increment 5 by 1",
             scenario=(
-                'Patch the hound stood {place} holding five marked pebbles in '
-                'a line. A sixth pebble sat just beyond the row, waiting to be '
-                'counted in.'
+                "Patch the hound stood at the stream's edge holding five marked pebbles in a line. A sixth pebble sat just beyond the row, waiting to be counted in."
             ),
             need=(
                 'They wanted to know what came next — what the running total '
@@ -850,8 +846,7 @@ G2_06 = SubjectCurriculum(
             question_what="0 plus 1",
             goal_text="increment 0",
             scenario=(
-                'Patch the hound stood {place} holding no bones — zero in their count. '
-                'A single extra bone sat waiting to be added to the empty pile.'
+                "Patch the hound stood at the stream's edge holding no bones — zero in their count. A single extra bone sat waiting to be added to the empty pile."
             ),
             need=(
                 'They wanted to know what zero plus one would be. The increment would '
@@ -1122,9 +1117,7 @@ G2_09 = SubjectCurriculum(
             question_what="the result of using / on 10 and 2",
             goal_text="divide 10 by 2",
             scenario=(
-                'Patch the hound held ten fish bones {place} and wanted to split '
-                'them evenly into two piles. The division would tell them how '
-                'many landed in each.'
+                "Patch the hound held ten fish bones at the stream's edge and wanted to split them evenly into two piles. The division would tell them how many landed in each."
             ),
             need=(
                 'They needed to know what ten divided by two would give — the '
@@ -1148,9 +1141,7 @@ G2_09 = SubjectCurriculum(
             question_what="the exact rational result of using / on 10 and 3",
             goal_text="divide 10 by 3",
             scenario=(
-                'Rex the hound held ten fish bones {place} and wanted to split them '
-                'evenly into three piles. The division would tell what each pile held '
-                'exactly.'
+                "Rex the hound held ten fish bones at the stream's edge and wanted to split them evenly into three piles. The division would tell what each pile held exactly."
             ),
             need=(
                 'He needed to know what ten divided by three would yield — the exact '
@@ -1364,9 +1355,7 @@ G2_12 = SubjectCurriculum(
             question_what='the return value of using println on the string "hello"',
             goal_text='print the string "hello" with a newline',
             scenario=(
-                'Rex the hound picked up a piece of bark {place} and scratched '
-                'the word hello into its surface. He wanted the mark to be seen '
-                'and recorded.'
+                "Rex the hound picked up a piece of bark at the stream's edge and scratched the word hello into its surface. He wanted the mark to be seen and recorded."
             ),
             need=(
                 'He needed the scratch-marks left on the bark as a side effect, '
@@ -1710,9 +1699,7 @@ G2_15 = SubjectCurriculum(
             question_what="the result of if with condition 0, then-branch 1, else-branch 0",
             goal_text="use if to return 1 when the condition is 0 (then-branch) and 0 otherwise (else-branch)",
             scenario=(
-                'Rex the hound stood at a fork in the path {place}. A stone '
-                'marked 0 sat at the junction. If the condition checked zero as '
-                'truthy, one path opened; if falsey, another.'
+                "Rex the hound stood at a fork in the path at the stream's edge. A stone marked 0 sat at the junction. If the condition checked zero as truthy, one path opened; if falsey, another."
             ),
             need=(
                 'He needed to know which path to take when the test condition '
@@ -1972,9 +1959,7 @@ G2_18 = SubjectCurriculum(
             question_what="whether long-form quoting produces a symbol",
             goal_text="ask whether long-form quoting of the name hare produces a symbol, using symbol?",
             scenario=(
-                'Patch the hound found a bone scratch on bark {place} that read '
-                'hare. They wondered — was this mark the same as the animal, '
-                'or just a name-mark that stood for it?'
+                "Patch the hound found a bone scratch on bark at the stream's edge that read hare. They wondered — was this mark the same as the animal, or just a name-mark that stood for it?"
             ),
             need=(
                 'They needed to know if the quoted name was truly a symbol — a '
@@ -1999,9 +1984,7 @@ G2_18 = SubjectCurriculum(
             question_what="whether long-form and short-form quoting produce equal values",
             goal_text="compare the result of long-form quoting of tortoise against the apostrophe-shorthand quoting of the same name, using =",
             scenario=(
-                'Bell the hound found two bones {place} scratched with the same mark. One '
-                'bore the long scratch of the full word tortoise, the other a quick mark '
-                'that meant the same thing. She wanted to know if they matched.'
+                "Bell the hound found two bones at the stream's edge scratched with the same mark. One bore the long scratch of the full word tortoise, the other a quick mark that meant the same thing. She wanted to know if they matched."
             ),
             need=(
                 'She needed to test if the two different ways of marking — long and short — '

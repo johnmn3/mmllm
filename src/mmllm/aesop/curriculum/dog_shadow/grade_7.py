@@ -81,10 +81,7 @@ G7_01 = SubjectCurriculum(grade=7, subject_id="G7-01",
             question_what="what the catch clause returns after catching the Exception",
             goal_text="throw an Exception and catch it, returning a numeric code",
             scenario=(
-                'Rex the hound approached the log-bridge {place}, testing it '
-                'carefully before crossing. He tapped once, and a crack split '
-                'the wood—a bad break. But he had prepared for trouble.'
-            ),
+                "Rex the hound approached the log-bridge at the stream's edge, testing it carefully before crossing. He tapped once, and a crack split the wood—a bad break. But he had prepared for trouble."           ),
             need=(
                 'He needed to know what the REPL would give back if the timber '
                 'failed. The answer would be a code—a mark he could read—not '
@@ -176,10 +173,7 @@ G7_03 = SubjectCurriculum(grade=7, subject_id="G7-03",
             question_what="what the try block returns when finally runs",
             goal_text="evaluate a number in a try block, then run a finally clause for cleanup",
             scenario=(
-                'Rex had carried 7 bones down from the high bank {place}, '
-                'crossing the shallow ford. The crossing had worked. Yet there '
-                'was always a finally—a cleanup that must come after, no '
-                "matter the crossing's result."
+                "Rex had carried 7 bones down from the high bank at the stream's edge, crossing the shallow ford. The crossing had worked. Yet there was always a finally—a cleanup that must come after, no matter the crossing's result."
             ),
             need=(
                 'He needed the count 7 to come back safe, and he also needed '
@@ -299,9 +293,7 @@ G7_05 = SubjectCurriculum(grade=7, subject_id="G7-05",
             question_what="the result of testing if nil is some",
             goal_text="test whether nil is considered some",
             scenario=(
-                'Patch the hound stood at an empty spot {place} where a bone '
-                'should have been. Nothing. The REPL called it nil. The test '
-                'would ask: is nothing "some"?'
+                'Patch the hound stood at an empty spot at the stream\'s edge where a bone should have been. Nothing. The REPL called it nil. The test would ask: is nothing "some"?'
             ),
             need=(
                 'Patch wanted to know if nil counted as something real. The '
@@ -352,8 +344,7 @@ G7_05 = SubjectCurriculum(grade=7, subject_id="G7-05",
             question_what="what the first element of nil is",
             goal_text="get the first element of nil",
             scenario=(
-                'Bell stood at the empty cache {place}. No bones lay in the '
-                'hollow log. She asked the REPL: what is the first bone here?'
+                "Bell stood at the empty cache at the stream's edge. No bones lay in the hollow log. She asked the REPL: what is the first bone here?"
             ),
             need=(
                 'She wanted to know what the first element would be from an '
@@ -559,9 +550,7 @@ G7_08 = SubjectCurriculum(grade=7, subject_id="G7-08",
             question_what="what string is produced when printing a keyword",
             goal_text="print the keyword :hare and capture the output string",
             scenario=(
-                'Patch held a message-bone {place} with a keyword scratched on '
-                'it: :hare. She wanted to print it and capture the exact scratches '
-                'as a carried message.'
+                "Patch held a message-bone at the stream's edge with a keyword scratched on it: :hare. She wanted to print it and capture the exact scratches as a carried message."
             ),
             need=(
                 'She needed to know what the scratches would be when prn wrote '
@@ -593,10 +582,7 @@ G7_09 = SubjectCurriculum(grade=7, subject_id="G7-09",
             question_what="what tap> returns when sending a value",
             goal_text="send a keyword into the tap pool",
             scenario=(
-                "Rex stood at the stream's edge {place}, holding a message-bone. "
-                'The keyword :hello was scratched on it. He wanted to tap it into '
-                'the pool—send it for inspection.'
-            ),
+                "Rex stood at the stream's edge at the stream's edge, holding a message-bone. The keyword :hello was scratched on it. He wanted to tap it into the pool—send it for inspection."           ),
             need=(
                 'He needed to know if the tap> would succeed. The REPL would '
                 'confirm true—the message reached the pool.'
@@ -652,19 +638,17 @@ G7_10 = SubjectCurriculum(grade=7, subject_id="G7-10",
             question_what="what documentation string is attached to a symbol",
             goal_text="extract the :doc metadata value from a symbol",
             scenario=(
-                'Patch found a message-bone marked "plus" at the stone {place}. '
-                'The bone carried metadata—extra scratch-marks that said what the '
-                'symbol meant: "adds two". She wanted to read that documentation.'
+                'Patch found a message-bone marked "plus" at the stone at the stream\'s edge. The bone carried metadata—extra scratch-marks that said what the symbol meant. She wanted to read that documentation.'
             ),
             need=(
                 "She needed to extract the doc-string from the symbol's metadata. "
-                'The REPL would sniff the scratch-marks and hand back the meaning: '
-                '"adds two".'
+                'The REPL would sniff the scratch-marks and hand back the recorded '
+                'meaning.'
             ),
             mapping=(
                 'The message-bone is the symbol, the metadata is the extra '
                 'scratch-marks, the :doc key is the label for the explanation, '
-                'and "adds two" is the documentation she sought.'
+                'and the doc value is the documentation she sought.'
             ),
             resolution=(
                 'The REPL read the metadata, found the :doc mark, and returned '
@@ -687,21 +671,21 @@ G7_11 = SubjectCurriculum(grade=7, subject_id="G7-11",
             question_what="what message is inside the caught Exception",
             goal_text="throw an Exception with a message and extract the message from the caught exception",
             scenario=(
-                'Rex found a broken log-bridge with a message bone attached: '
-                '"oops". He prepared to catch it and sniff the message.'
+                'Rex found a broken log-bridge with a message bone attached at '
+                'the stream. He prepared to catch it and sniff the message.'
             ),
             need=(
                 'He wanted to throw the bone and catch it, then read the message '
-                'that was written on the bone—the word "oops" itself.'
+                'that was written on the bone — whatever the carved word was.'
             ),
             mapping=(
                 'The broken log is the Exception, the message bone is the error '
-                'object, "oops" is the mark on the bone, and .getMessage is the '
-                'sniff that reads the mark.'
+                'object, the carved word is the mark on the bone, and .getMessage '
+                'is the sniff that reads the mark.'
             ),
             resolution=(
                 'The REPL threw the bone, Rex caught it, and his sniff extracted '
-                'the message: "oops".'
+                'the message the bone had carried.'
             ),
             tags=("story",),
         ),
@@ -774,9 +758,7 @@ G7_12 = SubjectCurriculum(grade=7, subject_id="G7-12",
             question_what="what lines result from splitting a string on newlines",
             goal_text="split a multi-line string on newlines",
             scenario=(
-                'Rex found a message-bone {place} carved with three letters '
-                'separated by newline-marks: "a\\nb\\nc". He wanted to split the '
-                'message at each newline and read the pieces.'
+                'Rex found a message-bone at the stream\'s edge carved with three letters separated by newline-marks: "a\\nb\\nc". He wanted to split the message at each newline and read the pieces.'
             ),
             need=(
                 'He needed to break the message into individual lines. The split '
@@ -836,21 +818,21 @@ G7_13 = SubjectCurriculum(grade=7, subject_id="G7-13",
             goal_text="get the initial line from splitting a multi-line string",
             scenario=(
                 'Patch found a message-bone with two lines carved on it. She split '
-                'it into separate line-bones and wanted to take the first piece to '
-                'read it.'
+                'it into separate line-bones and wanted to take the opening piece '
+                'to read it.'
             ),
             need=(
                 'She needed the initial line from the vector of lines. The REPL '
-                'would split the message and hand back the first piece: "first".'
+                'would split the message and hand back the opening line.'
             ),
             mapping=(
                 'The message-bone is the multi-line string, split-lines is the '
-                'cutting action, the first line-bone is what she seeks, and the '
-                'result is the mark on that first piece.'
+                'cutting action, the leading line-bone is what she seeks, and the '
+                'result is the mark on that opening piece.'
             ),
             resolution=(
-                'The REPL split the message into lines and gave Patch the first: '
-                '"first". She could now read the opening.'
+                'The REPL split the message into lines and handed Patch the '
+                'opening line. She could now read it.'
             ),
             tags=("story",),
         ),
@@ -869,10 +851,7 @@ G7_14 = SubjectCurriculum(grade=7, subject_id="G7-14",
             question_what="what output is captured within the scope",
             goal_text="capture the output of printing within a resource-scoped block",
             scenario=(
-                'Rex held a message-bone {place} and wanted to send a word to '
-                'the far bank. He would carve "hare" into the bone and send it, '
-                'but first he needed to capture the exact scratches it would '
-                'produce.'
+                'Rex held a message-bone at the stream\'s edge and wanted to send a word to the far bank. He would carve "hare" into the bone and send it, but first he needed to capture the exact scratches it would produce.'
             ),
             need=(
                 'He wanted to write the word and collect the marks it made—the '
@@ -935,9 +914,7 @@ G7_15 = SubjectCurriculum(grade=7, subject_id="G7-15",
             question_what="what is captured when a bare println is redirected",
             goal_text="redirect the output stream and capture what a bare println produces",
             scenario=(
-                'Patch stood at the bank {place} with a bare println form. No '
-                'word, no number—just the bare line-ending mark. She redirected '
-                'the output to see what the bare println would produce.'
+                "Patch stood at the bank at the stream's edge with a bare println form. No word, no number—just the bare line-ending mark. She redirected the output to see what the bare println would produce."
             ),
             need=(
                 'She needed to capture what println gives when called with no '
@@ -996,9 +973,7 @@ G7_16 = SubjectCurriculum(grade=7, subject_id="G7-16",
             question_what="what map is read from the string",
             goal_text="parse an edn map from a string",
             scenario=(
-                'Bell held a message-bone {place} carved with the marks for a '
-                'map: {:a 1}. The bone had the scratches, but she needed the '
-                'REPL to parse them into a living map she could use.'
+                "Bell held a message-bone at the stream's edge carved with the marks for a map: {:a 1}. The bone had the scratches, but she needed the REPL to parse them into a living map she could use."
             ),
             need=(
                 'She wanted to turn the message-string into structured data. The '
@@ -1086,9 +1061,7 @@ G7_17 = SubjectCurriculum(grade=7, subject_id="G7-17",
             question_what="what vector is recovered from the roundtrip",
             goal_text="serialize a vector to a string with pr-str and read it back into data with clojure.edn/read-string",
             scenario=(
-                'Bell held a vector of numbers {place} and wanted to carry it '
-                'across the stream. She would write it to a message-bone with '
-                'pr-str, then parse it back on the far side.'
+                "Bell held a vector of numbers at the stream's edge and wanted to carry it across the stream. She would write it to a message-bone with pr-str, then parse it back on the far side."
             ),
             need=(
                 'She needed to turn the vector into scratches that could travel, '

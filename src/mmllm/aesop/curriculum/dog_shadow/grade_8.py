@@ -346,8 +346,8 @@ G8_05 = SubjectCurriculum(
             goal_text="define a protocol named Pace with one method speed, extend it to String type with an implementation, then call speed on a string",
             scenario=(
                 'Bell set up the Pace guild and pressed its mark onto the '
-                'text-pack. Any text at the speed call would answer with the '
-                'swift-word.'
+                'text-pack. Any text at the speed call would answer with its '
+                'own characteristic word.'
             ),
             need=(
                 'When text arrived, the guild mark would route to the String '
@@ -355,7 +355,7 @@ G8_05 = SubjectCurriculum(
             ),
             mapping=(
                 'The guild is the defprotocol, the text-pack is the marked '
-                'type, and the swift-answer is the method.'
+                'type, and the method is what answers the call.'
             ),
             resolution=(
                 'The REPL marked the text-pack and called speed on text. The '
@@ -510,7 +510,7 @@ G8_07 = SubjectCurriculum(
             resolution=(
                 'The REPL built the record case with the guild mark, then '
                 'called speed on a Hare. The guild routed to the Hare\'s '
-                'implementation, and the swift-answer came back.'
+                'implementation, and the breed\'s word came back.'
             ),
             tags=("story",),
         ),
@@ -714,22 +714,22 @@ G8_10 = SubjectCurriculum(
             scenario=(
                 'Bell the hound built a sorting-stone using identity as the '
                 'dispatch rule — every value would be routed by what it is, '
-                'exactly. She added one pile for the :rabbit tag with the '
-                'quick-word.'
+                'exactly. She added one pile for the :rabbit tag with that '
+                'pile\'s own characteristic word.'
             ),
             need=(
                 'When the :rabbit value arrived, the stone would recognize '
-                'it and hand back the quick-answer from the matching pile.'
+                'it and hand back that matching pile\'s answer.'
             ),
             mapping=(
                 'The sorting-stone is the defmulti, the dispatch rule is '
-                'identity, the pile is the defmethod, and the quick-word is '
-                'what returns.'
+                'identity, the pile is the defmethod, and the pile\'s word '
+                'is what the runtime returns.'
             ),
             resolution=(
                 'The REPL set the stone and the :rabbit pile, then routed '
                 'the :rabbit value through. The stone recognized the exact '
-                'value and handed back the quick-word.'
+                'value and handed back the matching pile\'s word.'
             ),
             tags=("story",),
         ),
@@ -946,10 +946,10 @@ G8_13 = SubjectCurriculum(
                 'record instance, and the field value is what returns.'
             ),
             resolution=(
-                'The REPL built a Stone with :grey in the t field, then '
-                'called tag-of. The guild routed to the Stone\'s body, where '
-                'this let the implementation read the t field, and the '
-                'grey-tag came back.'
+                'The REPL built a Stone with the chosen tag in the t field, '
+                'then called tag-of. The guild routed to the Stone\'s body, '
+                'where this let the implementation read the t field, and the '
+                'stored tag came back.'
             ),
             tags=("story",),
         ),

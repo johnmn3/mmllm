@@ -57,9 +57,7 @@ G4_01 = SubjectCurriculum(grade=4, subject_id="G4-01",
             question_what="the vector",
             goal_text="create a vector containing 1, 2, and 3",
             scenario=(
-                'Rex the hound arrived at the hollow log cache {place} '
-                'and laid out three bones in a neat row — one, then two, '
-                'then three. The log could hold them arranged this way.'
+                "Rex the hound arrived at the hollow log cache at the stream's edge and laid out three bones in a neat row — one, then two, then three. The log could hold them arranged this way."
             ),
             need=(
                 'He wanted the row fixed in the hollow log so any dog could '
@@ -1045,10 +1043,7 @@ G4_18 = SubjectCurriculum(grade=4, subject_id="G4-18",
             question_what="whether vector and list are equal",
             goal_text="test whether a vector with elements 1, 2, 3 equals a list with the same elements",
             scenario=(
-                'Rex the hound held two different bone-shapes {place}: one was a '
-                'rigid row in a hollow log [1 2 3], the other a linked chain '
-                "'(1 2 3) with the same bones but a different build. They looked "
-                'the same at first glance.'
+                "Rex the hound held two different bone-shapes at the stream's edge: one was a rigid row in a hollow log [1 2 3], the other a linked chain '(1 2 3) with the same bones but a different build. They looked the same at first glance."
             ),
             need=(
                 'He wanted to know if the REPL would say the two shapes held equal '

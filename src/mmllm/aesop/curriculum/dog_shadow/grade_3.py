@@ -355,12 +355,7 @@ G3_05 = SubjectCurriculum(grade=3, subject_id="G3-05",
             question_what="the value of x inside the let scope where it shadows the def binding",
             goal_text="define x at the top level, then shadow it locally and return the inner value",
             scenario=(
-                'Bell the hound had long marked a stone {place} with the name '
-                'x, recording a weight of 10 beside it for all to read. But '
-                'one day, she picked up a much larger bone and held it in her '
-                'jaws for a single crossing. "For just this form," she said '
-                'around the grip, "x will mean what I hold — not what\'s carved '
-                'in the stone."'
+                'Bell the hound had long marked a stone at the stream\'s edge with the name x, recording a weight of 10 beside it for all to read. But one day, she picked up a much larger bone and held it in her jaws for a single crossing. "For just this form," she said around the grip, "x will mean what I hold — not what\'s carved in the stone."'
             ),
             need=(
                 'The form needed to see the bone in her mouth when it asked for '
@@ -526,11 +521,7 @@ G3_07 = SubjectCurriculum(grade=3, subject_id="G3-07",
             question_what="the result of applying an anonymous fn with two parameters that multiplies them to 3 and 4",
             goal_text="create an anonymous function that multiplies its two arguments and apply it to 3 and 4",
             scenario=(
-                'Patch the hound laid out a quick nose-trail {place} — a path '
-                'of sniffs that said: take whatever comes in, take what comes '
-                'next, and hand back their product. "This trail is nameless," '
-                'Patch said, breathing along the scent-marks. "I will walk it '
-                'once with two counts and throw it away."'
+                'Patch the hound laid out a quick nose-trail at the stream\'s edge — a path of sniffs that said: take whatever comes in, take what comes next, and hand back their product. "This trail is nameless," Patch said, breathing along the scent-marks. "I will walk it once with two counts and throw it away."'
             ),
             need=(
                 'The form needed a procedure for two inputs that had no name '
@@ -563,11 +554,7 @@ G3_08 = SubjectCurriculum(grade=3, subject_id="G3-08",
             question_what="the result of applying an anonymous fn with three parameters that adds them to 1, 2, and 3",
             goal_text="create an anonymous function with three parameters that adds them and apply it to 1, 2, and 3",
             scenario=(
-                'Rex the hound drew out three sniffing-steps {place}, a path '
-                'that asked for three separate counts. "Take the first, then '
-                'the second, then the third," he said, tracing the marks, '
-                '"and carry back their sum. This trail has no name — I design '
-                'it just for this walk."'
+                'Rex the hound drew out three sniffing-steps at the stream\'s edge, a path that asked for three separate counts. "Take the first, then the second, then the third," he said, tracing the marks, "and carry back their sum. This trail has no name — I design it just for this walk."'
             ),
             need=(
                 'The form required a three-step trail with no name to keep. '
@@ -629,11 +616,7 @@ G3_09 = SubjectCurriculum(grade=3, subject_id="G3-09",
             question_what="the result of calling the function add3, defined via defn to add three arguments, with 1, 2, and 3",
             goal_text="define a function add3 that adds three arguments, then call it with 1, 2, and 3",
             scenario=(
-                'Patch the hound laid out a three-step sniffing-trail {place} '
-                'and scratched its name — add3 — into a marker stone beside '
-                'the path. "This trail takes three counts and gives back their '
-                'sum," Patch said. "I name it so I can call it whenever I need '
-                'to add three together."'
+                'Patch the hound laid out a three-step sniffing-trail at the stream\'s edge and scratched its name — add3 — into a marker stone beside the path. "This trail takes three counts and gives back their sum," Patch said. "I name it so I can call it whenever I need to add three together."'
             ),
             need=(
                 'The form defined the named trail once, then proved it worked '
@@ -696,10 +679,7 @@ G3_10 = SubjectCurriculum(grade=3, subject_id="G3-10",
             question_what="the result of using the #() shorthand to create a function that multiplies two arguments and applying it to 3 and 4",
             goal_text="use the shorthand syntax to create a function that multiplies two arguments and apply it to 3 and 4",
             scenario=(
-                'Bell the hound drew a bare-minimum sniffing-path {place} — so '
-                'short and terse it had almost no form at all. "%1 and %2, then '
-                'multiply," the marks said in one quick sequence. The trail was '
-                'so fleeting Bell never carved its name in stone.'
+                'Bell the hound drew a bare-minimum sniffing-path at the stream\'s edge — so short and terse it had almost no form at all. "%1 and %2, then multiply," the marks said in one quick sequence. The trail was so fleeting Bell never carved its name in stone.'
             ),
             need=(
                 'The form required a quick two-step procedure that would be '
@@ -731,9 +711,7 @@ G3_11 = SubjectCurriculum(grade=3, subject_id="G3-11",
             question_what="the result of adding a to itself after binding a locally to 7 via let",
             goal_text="bind a to 7 and add a to itself",
             scenario=(
-                'Patch the hound held a bone {place} between his jaws — a count '
-                'of 7. "I will call this grip a," he said, "and I need to know '
-                'what a plus a makes. The name a means 7, so I will add 7 to 7."'
+                'Patch the hound held a bone at the stream\'s edge between his jaws — a count of 7. "I will call this grip a," he said, "and I need to know what a plus a makes. The name a means 7, so I will add 7 to 7."'
             ),
             need=(
                 'The form referenced the same name twice, and the REPL would '
