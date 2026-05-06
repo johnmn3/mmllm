@@ -240,11 +240,10 @@ G5_04 = SubjectCurriculum(grade=5, subject_id="G5-04",
             question_what="the value of the first arm whose stone reads true",
             goal_text="walk three condition-stones in order, taking the arm whose stone first reads true",
             scenario=(
-                'Patch approached a complicated fork {place}. Three condition-stones '
-                'lay in a row, each paired with an arm. The first stone read false — '
-                '1 equals 2? No. The second stone read true — 1 equals 1? Yes. There '
-                'was a third stone marked :else, the fallback, but Patch need not '
-                'reach it.'
+                'Patch approached a fork by the stream. Three condition-stones lay in a '
+                'row, each paired with an arm. The first stone read false — 1 equals 2? '
+                'No. The second read true — 1 equals 1? Yes. A third stone marked :else '
+                'was the fallback, but unneeded.'
             ),
             need=(
                 'To walk the stone-row in order and take the first arm whose stone '
@@ -517,26 +516,24 @@ G5_10 = SubjectCurriculum(grade=5, subject_id="G5-10",
             question_what="the sequence produced by passing the vector containing 1, 2, and 3 through the inc-sieve",
             goal_text="pour the vector containing 1, 2, 3 through a sieve whose rule is inc, collecting each transformed element",
             scenario=(
-                'Rex held a pile of bones marked 1, 2, 3 at the stream {place}. Above '
-                'the water lay a log with a gap shaped like the inc-rule: take one bone, '
-                'add 1 to it, drop the new count on the far bank. The map-form would pour '
-                'all three bones through the gap-sieve, one at a time.'
+                'Rex held a pile of bones marked 1, 2, 3 at the stream. Above the water '
+                'lay a log with a gap shaped like the inc-rule: take one bone, add 1 to '
+                'it, drop the new count on the far bank. Map would pour all three through '
+                'the gap, one at a time.'
             ),
             need=(
                 'He wanted to transform each bone through the same rule and collect all '
-                'the results. Map is the sieve: pour in one stream, collect the transformed '
-                'stream on the far bank. Every bone goes through; every result is kept.'
+                'results. Map is the sieve: pour in one stream, collect the transformed '
+                'stream on the far bank.'
             ),
             mapping=(
-                'The map-form is the sieve-pour. The pile of bones is the input sequence. '
-                'The gap-rule is the function inc. The far bank collects every transformed '
-                'bone. Map walks every bone through the gap and gathers the results.'
+                'The map-form is the sieve-pour. The bones are the input sequence. The '
+                'gap-rule is inc. The far bank collects every transformed bone. Map walks '
+                'every bone through the gap and gathers the results.'
             ),
             resolution=(
-                'The REPL poured bone 1 through the gap, got 2, dropped it on the far '
-                'bank, poured bone 2, got 3, dropped it, poured bone 3, got 4, dropped '
-                'it. The collected pile on the far bank held 2, 3, 4. The sieve-pour '
-                'was complete.'
+                'The REPL poured bone 1 through (got 2), poured 2 (got 3), poured 3 '
+                '(got 4). The far bank held 2, 3, 4. The sieve-pour was complete.'
             ),
             tags=("story",),
         ),
@@ -547,25 +544,24 @@ G5_10 = SubjectCurriculum(grade=5, subject_id="G5-10",
             question_what="the sequence produced by mapping a squaring rule over the vector containing 1, 2, 3, and 4",
             goal_text="apply a squaring operation to each element of the vector containing 1, 2, 3, and 4, returning a sequence",
             scenario=(
-                'Patch had a pile of bones marked 1, 2, 3, 4 by the river bank. Above '
-                'the water lay a different sieve — one shaped like the squaring rule: take '
-                'one bone, multiply it by itself, drop the product on the far bank. Map '
-                'would pour all four bones through this specialized gap.'
+                'Patch had a pile of bones marked 1, 2, 3, 4 by the river bank. A sieve '
+                'lay above the water, shaped like the squaring rule: take one bone, '
+                'multiply it by itself, drop the product on the far bank. Map would pour '
+                'all four through this specialized gap.'
             ),
             need=(
                 'She wanted each bone squared and all results gathered. Map applies the '
-                "same rule to every bone in the pile, regardless of the rule's complexity, "
-                'and collects every output.'
+                'same rule to every bone and collects every output.'
             ),
             mapping=(
-                'The map-form is the sieve-pour. The pile is the sequence 1, 2, 3, 4. '
-                'The gap-rule is the squaring function. The far bank collects the squared '
-                'values. Map works with any function and any pile.'
+                'The map-form is the sieve-pour. The pile is 1, 2, 3, 4. The gap-rule '
+                'is the squaring function. The far bank collects the squared values. Map '
+                'works with any function and any pile.'
             ),
             resolution=(
-                'The REPL poured bone 1 through the gap, got 1, poured 2, got 4, poured '
-                '3, got 9, poured 4, got 16. The collected pile on the far bank held '
-                '1, 4, 9, 16. The sieve-pour was complete.'
+                'The REPL poured bone 1 (got 1), poured 2 (got 4), poured 3 (got 9), '
+                'poured 4 (got 16). The far bank held 1, 4, 9, 16. The sieve-pour was '
+                'complete.'
             ),
             tags=("story",),
         ),
@@ -582,25 +578,23 @@ G5_11 = SubjectCurriculum(grade=5, subject_id="G5-11",
             question_what="the sequence produced by filtering even? over the vector containing 1, 2, 3, and 4",
             goal_text="keep the even elements from the vector containing 1, 2, 3, and 4",
             scenario=(
-                'Bell the hound gathered four bones marked 1, 2, 3, 4 at the '
-                'stream {place}. Above the water lay a special log with a gap '
-                'that let through only the even-marked bones. She would pour '
-                'all four through and collect what passed.'
+                'Bell the hound gathered four bones marked 1, 2, 3, 4 at the stream. '
+                'A log above the water held a gap that let through only even-marked '
+                'bones. She would pour all four through and collect what passed.'
             ),
             need=(
-                'She wanted to sieve out just the even bones from the pile, '
-                'keeping only those that fit the even?-rule. Filter is the '
-                'sieve: some bones pass, some are held back.'
+                'She wanted to sieve out just the even bones, keeping only those that '
+                'fit the even?-rule. Filter is the sieve: some pass, some are held back.'
             ),
             mapping=(
-                'The filter-form is the sieve-gap. The input bones are 1, 2, '
-                '3, 4. The gap-rule is even?. Only bones that satisfy the rule '
-                'pass through to the far bank. The rest are held back.'
+                'The filter-form is the sieve-gap. The bones are 1, 2, 3, 4. The rule '
+                'is even?. Only bones that satisfy the rule pass through to the far '
+                'bank.'
             ),
             resolution=(
-                'The REPL poured bone 1 at the gap and held it back, poured 2 '
-                'and let it pass, held 3, let 4 pass. The far bank caught 2 '
-                'and 4. The filtered sieve-pour was complete.'
+                'The REPL poured bone 1 and held it back, poured 2 and let it pass, '
+                'held 3, let 4 pass. The far bank caught 2 and 4. The sieve-pour was '
+                'complete.'
             ),
             tags=("story",),
         ),
@@ -1109,7 +1103,7 @@ G5_19 = SubjectCurriculum(grade=5, subject_id="G5-19",
             question_what="whether every pebble in 1, 2, 3 passes the even? sieve",
             goal_text="check if all elements in the vector containing 1, 2, and 3 are even",
             scenario=(
-                'Bell the hound held a pile of bones marked 1, 2, 3 {place}. A '
+                'Bell the hound held a pile of bones marked 1, 2, 3 by the river. A '
                 'gap-sieve had a rule: only even-marked bones can pass. She wanted to '
                 'know: will every bone fit through?'
             ),
@@ -1231,9 +1225,9 @@ G5_21 = SubjectCurriculum(grade=5, subject_id="G5-21",
             question_what="the sequence produced by sorting the row of 3, 1, 2 into ascending order",
             goal_text="sort the vector containing 3, 1, and 2 in ascending order",
             scenario=(
-                'Bell the hound held a pile of bones marked 3, 1, 2 {place}. The bones '
-                'were out of order. A gap-sieve with a sorting rule would rearrange them '
-                'in ascending order as they passed through.'
+                'Bell the hound held a pile of bones marked 3, 1, 2 at the stream. The '
+                'bones were out of order. A gap-sieve with a sorting rule would rearrange '
+                'them in ascending order as they passed through.'
             ),
             need=(
                 'She wanted the bones in ascending order. Sort is the arranging-sieve: it '
