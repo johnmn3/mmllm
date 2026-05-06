@@ -481,7 +481,33 @@ G1_09 = SubjectCurriculum(
     examples=[
         _ex("(symbol? 'wolf)", True,
             "the predicate (symbol? 'wolf)",
-            "whether 'wolf is a symbol"),
+            "whether 'wolf is a symbol",
+            scenario=(
+                "Tom had chalked the word `wolf` on the watchhouse slate "
+                "as a label for the south-flock pen. Carol stood beside "
+                "him with a carved tag from a sheep tagged `wolf` — the "
+                "actual animal the chalk mark named."
+            ),
+            need=(
+                "The argument that morning was about which `wolf` the "
+                "village should pay attention to. Without distinguishing "
+                "the chalk mark from the sheep it pointed at, the "
+                "village's notes would mix names with the things named."
+            ),
+            mapping=(
+                "`symbol?` asks whether something is a chalk mark — a "
+                "name standing in for a value — rather than the value "
+                "itself. The quoted `'wolf` is the chalk mark; the "
+                "actual sheep would be a different value."
+            ),
+            resolution=(
+                "the predicate confirmed the chalk mark for what it was "
+                "— a name, not a sheep — and the village's records "
+                "stayed straight."
+            )),
+        _ex("(symbol? 42)", False,
+            "the predicate (symbol? 42)",
+            "whether 42 is a symbol"),
         _ex("(symbol? 42)", False,
             "the predicate (symbol? 42)",
             "whether 42 is a symbol"),
@@ -506,7 +532,32 @@ G1_10 = SubjectCurriculum(
         # Comments are stripped by the reader; what remains evaluates.
         _ex("(+ 1 2) ; sum of one and two", 3,
             "the form (+ 1 2) followed by a comment",
-            "the result of (+ 1 2) ignoring the comment"),
+            "the result of (+ 1 2) ignoring the comment",
+            scenario=(
+                "Carol kept the watchhouse slate. Today she had chalked "
+                "an addition on it, and to the right of the form she had "
+                "drawn a single dashed line followed by `sum of one and "
+                "two` in smaller chalk — annotation only, for the next "
+                "shepherd's eye."
+            ),
+            need=(
+                "Tom had been writing notes between forms and worried "
+                "the runtime might somehow mix the annotations into the "
+                "calculation. He needed to know which marks the runtime "
+                "honored and which it skipped."
+            ),
+            mapping=(
+                "A single semicolon `;` is the slate's ignore-from-here "
+                "mark. Everything to the right of it is annotation — "
+                "the reader skips it; the runtime never sees it. The "
+                "form's value comes from what stays on the slate before "
+                "the dash."
+            ),
+            resolution=(
+                "the value came back as if the dashed annotation weren't "
+                "there at all — exactly as the slate's conventions "
+                "promised."
+            )),
         _ex("42 ;; the answer", 42,
             "the literal 42 with a trailing comment",
             "the value of 42"),
@@ -558,7 +609,29 @@ G1_13 = SubjectCurriculum(
     subject_title="First arithmetic call",
     fable="boy-wolf",
     examples=[
-        _ex("(+ 1 2)",  3,    "the form (+ 1 2)",    "the result of (+ 1 2)"),
+        _ex("(+ 1 2)",  3,    "the form (+ 1 2)",    "the result of (+ 1 2)",
+            scenario=(
+                "At dawn, Tom had brought 1 lamb back from the south "
+                "pasture and Carol had brought 2 from the north. They "
+                "stood at the fold counting together, the village's "
+                "morning record waiting on them."
+            ),
+            need=(
+                "The combined morning tally needed to settle correctly "
+                "before the day's work could begin — the village's "
+                "records depended on exact arithmetic, no boasting and "
+                "no fudging."
+            ),
+            mapping=(
+                "`+` adds its operands one after another and gives back "
+                "the running total. With 1 lamb from one side and 2 "
+                "from the other, the runtime carries the sum exactly — "
+                "no shouting required."
+            ),
+            resolution=(
+                "the count came back as 3 lambs — the morning's flock "
+                "confirmed by the runtime, not by Tom's memory."
+            )),
         _ex("(- 5 3)",  2,    "the form (- 5 3)",    "the result of (- 5 3)"),
         _ex("(* 4 5)",  20,   "the form (* 4 5)",    "the result of (* 4 5)"),
         _ex("(/ 10 2)", 5,    "the form (/ 10 2)",   "the result of (/ 10 2)"),
@@ -604,7 +677,30 @@ G1_15 = SubjectCurriculum(
     fable="boy-wolf",
     examples=[
         _ex("(= 1 1)",          True,  "the equality (= 1 1)",
-            "the value of (= 1 1)"),
+            "the value of (= 1 1)",
+            scenario=(
+                "At the first fold-gate of the morning, Carol had two "
+                "tally-marks carved into the post: one from yesterday's "
+                "evening count, one from this morning's. Tom claimed "
+                "the two had to differ — sheep, after all, never sat "
+                "still."
+            ),
+            need=(
+                "Before the flock could pass through the gate and begin "
+                "the day's grazing, the gate had to confirm whether the "
+                "two marks agreed. A mistaken pass would corrupt the "
+                "village ledger."
+            ),
+            mapping=(
+                "`=` compares its operands and answers whether they are "
+                "the same. With both marks reading 1, the gate's "
+                "predicate carries the comparison and returns the "
+                "verdict — no opinion required."
+            ),
+            resolution=(
+                "the gate opened — `=` returned true — and the village's "
+                "count for the morning held without dispute."
+            )),
         _ex("(= 1 2)",          False, "the equality (= 1 2)",
             "the value of (= 1 2)"),
         _ex("(= \"a\" \"a\")",  True,  "the equality (= \"a\" \"a\")",
@@ -673,7 +769,30 @@ G1_18 = SubjectCurriculum(
     examples=[
         _ex("(+ 1 2)", 3,
             "the form (+ 1 2)",
-            "the result of (+ 1 2)"),
+            "the result of (+ 1 2)",
+            scenario=(
+                "Tom hesitated at the practice-pen behind the watchhouse "
+                "— the small enclosure where new shepherds drilled the "
+                "alarm-protocol. Carol had set out a slate and a piece "
+                "of chalk, ready to demonstrate."
+            ),
+            need=(
+                "Tom was anxious about writing a wrong form. Carol "
+                "explained that this pen was for that exact purpose: to "
+                "make a careless try cost nothing, so the shepherd could "
+                "experiment before the day's real watch began."
+            ),
+            mapping=(
+                "The REPL acts the way the practice-pen acts. A wrong "
+                "form, a typo, a missing paren — anything tried inside "
+                "is safely walked back. The runtime catches mistakes "
+                "instead of letting them spill out into the village."
+            ),
+            resolution=(
+                "Tom wrote the form, the runtime returned its value "
+                "cleanly, and Carol nodded — the pen had served its "
+                "purpose; he could try again any time."
+            )),
         _ex("(* 7 6)", 42,
             "the form (* 7 6)",
             "the result of (* 7 6)"),

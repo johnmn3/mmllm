@@ -244,7 +244,31 @@ G2_11 = SubjectCurriculum(
     fable="boy-wolf",
     examples=[
         _ex('(str "wa" "tch")', "watch",
-            'the form (str "wa" "tch")', 'the joined string "watch"'),
+            'the form (str "wa" "tch")', 'the joined string "watch"',
+            scenario=(
+                "Carol the elder pulled out her knotted tally-cord — a "
+                "long cord with knots tied at intervals, each section "
+                "carrying its own labeled bead. The cord lay on the slate "
+                "in two pieces: `wa` knotted at one end, `tch` knotted at "
+                "the other."
+            ),
+            need=(
+                "The full word the village wanted on the slate was the "
+                "two pieces spliced together as one cord. Tom guessed at "
+                "the result; Carol insisted on letting the runtime "
+                "splice the cord properly."
+            ),
+            mapping=(
+                "`str` is the splice — it takes pieces of bead-string "
+                "and ties them end-to-end into a single cord. Each "
+                "argument becomes the next stretch of beads; the result "
+                "is one continuous string."
+            ),
+            resolution=(
+                "the runtime returned the spliced cord and the village's "
+                "slate carried the full word, exactly as the two pieces "
+                "had promised."
+            )),
         _ex('(str "flock")', "flock",
             'the form (str "flock")', 'the value of (str "flock")'),
         _ex('(str "x" "y" "z")', "xyz",
@@ -351,7 +375,29 @@ G2_17 = SubjectCurriculum(
     examples=[
         _ex("(:wolf {:wolf 1 :flock 2})", 1,
             "the form (:wolf {:wolf 1 :flock 2})",
-            "the value (:wolf {:wolf 1 :flock 2}) returns"),
+            "the value (:wolf {:wolf 1 :flock 2}) returns",
+            scenario=(
+                "Carol's wool-basket sat by the watchhouse. It had two "
+                "stitched pouches inside: one labeled `:wolf` holding 1 "
+                "fleece from the south pasture, the other `:flock` "
+                "holding 2 from the north's morning shearing."
+            ),
+            need=(
+                "Tom needed the count from the wolf-pouch alone. Reaching "
+                "in and counting by hand risked spilling the basket; the "
+                "village wanted a one-step lookup that named the pouch "
+                "and got back its contents."
+            ),
+            mapping=(
+                "A keyword used as a function reaches into the basket "
+                "and returns whatever is in the pouch labeled with that "
+                "keyword. `:wolf` names the pouch; the basket gives "
+                "back the count it holds."
+            ),
+            resolution=(
+                "the lookup returned 1 — the wolf-pouch's fleece count "
+                "— without disturbing the rest of the basket."
+            )),
         _ex("(:flock {:wolf 1 :flock 2})", 2,
             "the form (:flock {:wolf 1 :flock 2})",
             "the value (:flock {:wolf 1 :flock 2}) returns"),
@@ -401,7 +447,29 @@ G2_20 = SubjectCurriculum(
     fable="boy-wolf",
     examples=[
         _ex("(count [1 2 3])",       3, "the count of [1 2 3]",
-            "the count of the vector [1 2 3]"),
+            "the count of the vector [1 2 3]",
+            scenario=(
+                "Carol stood at the fold-gate with her wooden tally-stick "
+                "in hand, ready for the morning's pass-through. A small "
+                "row of three lambs waited by the post — the south "
+                "flock's morning return."
+            ),
+            need=(
+                "The village's morning record needed the count of the "
+                "row. Tom offered to estimate; Carol preferred to walk "
+                "the line with her stick, notching once per lamb so the "
+                "count would settle exactly."
+            ),
+            mapping=(
+                "`count` walks the row and notches the tally-stick once "
+                "per item. With three lambs in the row, the stick gains "
+                "three notches — the running total grows knot by knot "
+                "as the runtime steps through."
+            ),
+            resolution=(
+                "the stick carried 3 notches at the end of the walk — "
+                "the morning's exact count, ready for the slate."
+            )),
         _ex("(count \"hello\")",     5, "the count of \"hello\"",
             "the length of the string \"hello\""),
         _ex("(count [])",            0, "the count of an empty vector",

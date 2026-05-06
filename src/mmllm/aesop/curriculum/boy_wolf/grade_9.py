@@ -107,7 +107,31 @@ G9_02 = SubjectCurriculum(
         _ex("(do (def counter (atom 0)) (swap! counter inc) @counter)",
             1,
             "an atom counter, incremented once, then read",
-            "the value of counter after one swap! inc"),
+            "the value of counter after one swap! inc",
+            scenario=(
+                "The watchhouse slate sat on its stand inside the "
+                "watchhouse, open for any shepherd to read. Carol had "
+                "chalked a single tally at the top — 0 honest evaluations "
+                "for the morning so far — and stepped back to begin the "
+                "day's count."
+            ),
+            need=(
+                "Each time a form was honestly evaluated, the slate's "
+                "tally needed to step up by one — and only one shepherd "
+                "could be writing at a time, so the village's running "
+                "count would never be lost or doubled."
+            ),
+                mapping=(
+                "An atom is exactly the watchhouse slate: a single shared "
+                "tally that any shepherd can read or update, with the "
+                "REPL guaranteeing the read-modify-write step is "
+                "atomic. `swap!` is `read the page, apply the change, "
+                "write it back`, all as one motion."
+            ),
+            resolution=(
+                "the slate now read 1 — the morning's first honest "
+                "evaluation safely tallied, ready for the next."
+            )),
         _ex("(do (def progress (atom :idle)) (reset! progress :running) @progress)",
             ":running",
             "a progress atom reset to :running",
@@ -280,7 +304,31 @@ G9_10 = SubjectCurriculum(
         _ex("(do (def ag (agent 0)) (send ag inc) (await ag) @ag)",
             1,
             "an agent sent inc and awaited",
-            "the value of the agent after send inc and await"),
+            "the value of the agent after send inc and await",
+            scenario=(
+                "Carol called the smallest of the village children to "
+                "the watchhouse step. She handed the child a folded "
+                "message with a single instruction: take it to the "
+                "elder at the far cottage, wait for the reply, and "
+                "bring back what the elder said."
+            ),
+            need=(
+                "The instruction couldn't be answered immediately — the "
+                "child had to run, deliver, and return. The village "
+                "needed to keep its work going meanwhile, then collect "
+                "the runner's answer when it was ready."
+            ),
+                mapping=(
+                "An agent is the dispatched runner. `send` hands off "
+                "the message and lets the runner go; `await` waits "
+                "until the runner is back at the watchhouse step; "
+                "`@` reads the answer the runner brought."
+            ),
+            resolution=(
+                "the runner returned with the elder's reply tallied "
+                "into the message — 1 step further than the start, "
+                "honestly delivered."
+            )),
         _ex("(do (def ag (agent 5)) (send ag + 10) (await ag) @ag)",
             15,
             "an agent sent (+ 10) and awaited",

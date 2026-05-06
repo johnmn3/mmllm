@@ -146,7 +146,32 @@ G10_03 = SubjectCurriculum(
         _ex("(do (defmacro my-when [t & body] `(if ~t (do ~@body))) "
             "(my-when true 1 2 3))", 3,
             "a tiny when-style macro and a call to it",
-            "what (my-when true 1 2 3) returns"),
+            "what (my-when true 1 2 3) returns",
+            scenario=(
+                "Tom had taken to writing shorthand drill-cards on the "
+                "watchhouse wall — one-line abbreviations for routines "
+                "the village ran every day. Carol watched, holding a "
+                "fresh card and a stick of chalk."
+            ),
+            need=(
+                "The shorthand was easy to write but the village's "
+                "runner needed the full sequence. Carol's job was to "
+                "rewrite each shorthand card into the spelled-out drill "
+                "before runtime — the runner only ever saw the full "
+                "sequence."
+            ),
+                mapping=(
+                "`defmacro` registers the elder's rewrite rule. When "
+                "the shorthand `my-when` appears, Carol — at compile "
+                "time, before the runtime ever sees the form — rewrites "
+                "it into the spelled-out `if` plus `do` body. The "
+                "runtime then evaluates the rewritten form."
+            ),
+            resolution=(
+                "the rewrite landed correctly: the shorthand expanded "
+                "to its full drill, and the runtime returned the value "
+                "the spelled-out form produced."
+            )),
         _ex("(do (defmacro twice [x] `(do ~x ~x)) (twice 7))", 7,
             "a macro that emits its argument twice in a do",
             "what (twice 7) returns"),

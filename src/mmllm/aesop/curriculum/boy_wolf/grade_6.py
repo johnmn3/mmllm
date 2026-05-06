@@ -289,7 +289,31 @@ G6_14 = SubjectCurriculum(grade=6, subject_id="G6-14",
     examples=[
         _ex("(symbol? 'java.util.Date)", True,
             "whether 'java.util.Date is a symbol",
-            "the value of (symbol? 'java.util.Date)"),
+            "the value of (symbol? 'java.util.Date)",
+            scenario=(
+                "Carol led Tom past the fold and toward the village "
+                "smithy — a foreign workshop with its own tools and "
+                "naming conventions. On the smithy's lintel was a "
+                "dotted name written in the smith's host language: "
+                "`java.util.Date`."
+            ),
+            need=(
+                "Tom wanted to know whether the smithy's marker was a "
+                "name they could refer to, or some other kind of object "
+                "altogether. Borrowing across the toolshed boundary "
+                "required knowing what the foreign label was."
+            ),
+            mapping=(
+                "`symbol?` asks whether the dotted-class label is a "
+                "symbol — a name the runtime can reach across to. "
+                "Quoted names from the foreign smithy are still names; "
+                "the predicate confirms it without invoking anything."
+            ),
+            resolution=(
+                "the predicate confirmed the label as a symbol — a "
+                "borrowable name — and Tom understood the boundary "
+                "could be crossed by name, not by guessing."
+            )),
         _ex("(name 'java.util.Date)", "java.util.Date",
             "the dotted-class symbol's name",
             "the string \"java.util.Date\""),
@@ -304,7 +328,32 @@ G6_15 = SubjectCurriculum(grade=6, subject_id="G6-15",
         _ex("(:doc (meta '^{:doc \"trust the runtime\"} village))",
             "trust the runtime",
             "the :doc metadata attached to the symbol 'village",
-            "the docstring \"trust the runtime\" from the metadata"),
+            "the docstring \"trust the runtime\" from the metadata",
+            scenario=(
+                "Carol kept the village log-book on a stand inside the "
+                "watchhouse — leather-bound, with marginalia in the "
+                "elder's hand. Today's entry sat open: a symbol named "
+                "`village`, with a small note in its margin reading "
+                "`trust the runtime`."
+            ),
+            need=(
+                "Tom wanted to read just the marginalia — the note "
+                "carol had pinned to the symbol — without reading the "
+                "symbol's value. The village's habit was to consult the "
+                "annotation when an entry's intent needed clarifying."
+            ),
+                mapping=(
+                "`meta` opens the scroll's marginalia — the metadata "
+                "map attached to the symbol. `:doc` then reads the "
+                "specific note labeled `:doc` from that map, the way "
+                "you'd read a single line of marginalia from the side "
+                "of a log entry."
+            ),
+            resolution=(
+                "the log-book returned the marginalia exactly as Carol "
+                "had pinned it — the elder's note, ready for whoever "
+                "consulted the entry next."
+            )),
         _ex("(:author (meta '^{:author \"Aesop\"} village))", "Aesop",
             "the :author metadata on 'village",
             "the string \"Aesop\""),

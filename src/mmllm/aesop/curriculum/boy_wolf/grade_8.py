@@ -88,7 +88,32 @@ G8_01 = SubjectCurriculum(
         _ex("(defn speak [k] (cond (= k :wolf) \"howl\" (= k :flock) \"bleat\" :else \"silent\"))",
             None,
             "a function speak that returns different strings for :wolf vs :flock",
-            "the form that defines speak via cond"),
+            "the form that defines speak via cond",
+            scenario=(
+                "Carol had called a meeting of the shepherds' fellowship "
+                "on the village green — sheep-shepherd, goat-shepherd, "
+                "geese-keeper, all gathered. Each kind of keeper had "
+                "their own way of raising an alarm: a horn, a bell, a "
+                "smoke-signal."
+            ),
+            need=(
+                "The fellowship needed a single named call — `speak` — "
+                "that any keeper could be asked. Each kind of keeper "
+                "would answer in their own way, but the call would mean "
+                "the same thing to all of them."
+            ),
+                mapping=(
+                "Polymorphism by `cond` is the fellowship pattern in "
+                "miniature: one named function, many internal arms — "
+                "one for each kind of caller. The runtime checks the "
+                "tag and runs the matching arm; the call site doesn't "
+                "have to know which keeper showed up."
+            ),
+            resolution=(
+                "the function was posted to the fellowship roll — a "
+                "single name the village could call, with each kind of "
+                "keeper answering in their own honest voice."
+            )),
         _ex("(let [speak (fn [k] (cond (= k :wolf) \"howl\" (= k :flock) \"bleat\"))] (speak :flock))",
             "bleat",
             "speak applied to :flock via cond-dispatch",
@@ -108,7 +133,31 @@ G8_02 = SubjectCurriculum(
         _ex("(do (deftype Lantern [color]) (.-color (Lantern. \"amber\")))",
             "amber",
             "a deftype Lantern with a color field, then read color of an instance",
-            "the color field of a Lantern instance"),
+            "the color field of a Lantern instance",
+            scenario=(
+                "Carol had ordered a small wooden tally-box from the "
+                "village cooper — pigeon-holes inside for tallying "
+                "different kinds of equipment. The first kind to track "
+                "was lanterns, with one slot per box for the lantern's "
+                "color."
+            ),
+            need=(
+                "The village wanted a uniform tally-box shape so any "
+                "shepherd could lift the lid, find the same labeled "
+                "slots in the same order, and read off the values "
+                "without having to learn each box's quirks."
+            ),
+                mapping=(
+                "`deftype` is the cooper's plan for a tally-box: a name "
+                "and a list of labeled slots. `Lantern.` constructs an "
+                "instance with values in those slots; `.-color` reaches "
+                "into the slot named `color` and reads it back."
+            ),
+            resolution=(
+                "the tally-box yielded the lantern's color cleanly — "
+                "the cooper's plan and the village's uniform readout, "
+                "exactly as designed."
+            )),
         _ex("(do (deftype Crook [length]) (.-length (Crook. 7)))",
             7,
             "a deftype Crook with a length field, then read its length",
@@ -248,7 +297,31 @@ G8_08 = SubjectCurriculum(
             " (reply {:role :shepherd}))",
             ":cry",
             "a defmulti reply that dispatches on :role, called with :shepherd",
-            "what reply returns for {:role :shepherd}"),
+            "what reply returns for {:role :shepherd}",
+            scenario=(
+                "At the fold-gate, Carol had set up a brand-sorting "
+                "gate. Each animal that arrived wore a brand on its ear "
+                "— `:shepherd` for the village's working sheep, "
+                "`:lantern-bearer` for the night-watch goats — and the "
+                "gate routed each to the right pen."
+            ),
+            need=(
+                "Tom needed a uniform call — `reply` — that worked for "
+                "any branded animal, with the gate doing the routing. "
+                "Branding was the dispatch key; the right pen was the "
+                "method."
+            ),
+                mapping=(
+                "`defmulti` posts the dispatch rule (here, look at "
+                "`:role` on the arriving map) and `defmethod` registers "
+                "what to do for each brand. The gate reads the brand "
+                "and routes to the matching method."
+            ),
+            resolution=(
+                "the gate read the brand, called the right method, and "
+                "the runtime returned the verdict — `:cry` for the "
+                "shepherd-branded entry — the routing complete."
+            )),
         _ex("(do (defmulti tag :kind)"
             " (defmethod tag :lantern [_] :bright)"
             " (tag {:kind :lantern}))",

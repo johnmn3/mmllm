@@ -195,7 +195,29 @@ G4_16 = SubjectCurriculum(grade=4, subject_id="G4-16",
     subject_title="into and conj on collections", fable="boy-wolf",
     examples=[
         _ex("(into [] '(1 2 3))", [1,2,3],
-            "the form (into [] '(1 2 3))", "the vector built from a list"),
+            "the form (into [] '(1 2 3))", "the vector built from a list",
+            scenario=(
+                "Carol set up the fleece-comb at the watchhouse, an empty "
+                "wool-basket beneath it. Three fleeces arrived from the "
+                "morning shearing, threaded onto a rough cord ready to "
+                "be fed through the comb."
+            ),
+            need=(
+                "The village wanted the fleeces moved into the basket in "
+                "the order they came in, no rule applied — just a "
+                "wholesale transfer from one container shape to another."
+            ),
+                mapping=(
+                "`into` pours the source through into the destination "
+                "one item at a time. With an empty vector as the basket "
+                "below and a list as the cord above, the runtime carries "
+                "each fleece across, preserving the order."
+            ),
+            resolution=(
+                "the basket caught all three fleeces in the same order "
+                "they had arrived — the morning's shearing settled into "
+                "the day's container."
+            )),
         _ex("(into #{} [1 2 2 3])", [1,2,3],
             "the form (into #{} [1 2 2 3])", "the set built from a vector (dups removed)"),
     ], subplots=_SIEVE_SUBPLOTS, plan_pool=_PLAN_G4)

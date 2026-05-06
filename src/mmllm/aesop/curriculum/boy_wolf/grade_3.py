@@ -68,7 +68,28 @@ G3_01 = SubjectCurriculum(grade=3, subject_id="G3-01",
     subject_title="def — top-level binding", fable="boy-wolf",
     examples=[
         _ex("(do (def x 42) x)", 42, "the binding (def x 42) followed by x",
-            "the value bound to x after (def x 42)"),
+            "the value bound to x after (def x 42)",
+            scenario=(
+                "Carol the elder stood at the village notice-post at the "
+                "crossroads. She took her chalk and wrote the name x on the "
+                "post, posting 42 sheep's worth of head-count beneath it for "
+                "anyone walking past to see."
+            ),
+            need=(
+                "Every shepherd on the path needed that name and its count "
+                "to mean the same thing all morning. Without the posted "
+                "notice, x would have meant nothing the moment a different "
+                "voice claimed otherwise."
+            ),
+            mapping=(
+                "`def` posts the name x on the notice-post alongside its "
+                "bound count. The second expression looks the post up and "
+                "reads back whatever was posted under that name — here, 42."
+            ),
+            resolution=(
+                "the post returned exactly the count Carol had chalked, "
+                "and the morning's record stood on village authority."
+            )),
         _ex("(do (def y 7) y)",  7,  "the binding (def y 7)",
             "the value bound to y"),
     ], subplots=_ROADSIGN_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
@@ -86,7 +107,30 @@ G3_03 = SubjectCurriculum(grade=3, subject_id="G3-03",
     subject_title="let — local binding", fable="boy-wolf",
     examples=[
         _ex("(let [x 3] (+ x 1))", 4, "the form (let [x 3] (+ x 1))",
-            "the result of (let [x 3] (+ x 1))"),
+            "the result of (let [x 3] (+ x 1))",
+            scenario=(
+                "Carol the elder had been counting along a stretch of "
+                "fence-line at dawn. She slipped a tally-token worth 3 "
+                "lambs into the small leather belt-pouch at her hip and "
+                "gave the pouch's contents the local name x for that "
+                "stretch of watch."
+            ),
+            need=(
+                "By the next fence-post she would want the running total "
+                "— what x plus one more lamb came to. Past that post, "
+                "the pouch would empty and x would mean nothing again."
+            ),
+            mapping=(
+                "`let` binds a value into a pouch named locally for the "
+                "stretch of one form. Inside `(+ x 1)`, x means 3; "
+                "outside the form, x is empty and unknown again. The "
+                "binding is in force only for the form's stretch."
+            ),
+            resolution=(
+                "the pouch yielded 3, the +1 added a fourth lamb, and "
+                "the running total stood at 4 — exactly what the next "
+                "fence-post called for."
+            )),
         _ex("(let [n 10] (* n n))", 100, "the form (let [n 10] (* n n))",
             "the square of n where n is bound to 10"),
         _ex("(let [a 5] a)", 5, "the form (let [a 5] a)",
@@ -138,7 +182,31 @@ G3_07 = SubjectCurriculum(grade=3, subject_id="G3-07",
     examples=[
         _ex("((fn [x] (+ x 1)) 4)", 5,
             "an anonymous function applied to 4",
-            "the result of applying (fn [x] (+ x 1)) to 4"),
+            "the result of applying (fn [x] (+ x 1)) to 4",
+            scenario=(
+                "On the watchhouse wall, Carol the elder had pinned a "
+                "small drill-card with no name at the top — just the "
+                "steps for what to do once an unnamed quantity arrived. "
+                "Tom waited beside her with 4 strays the south flock had "
+                "produced that morning."
+            ),
+            need=(
+                "The strays needed to be added to the running tally, "
+                "but the village wanted a one-shot routine for it — no "
+                "name to remember, no card to file, just the steps run "
+                "this once."
+            ),
+            mapping=(
+                "An anonymous `fn` is exactly that: a drill-card with no "
+                "posted name. It takes the quantity (the parameter), runs "
+                "the listed step, and serves whatever the last step "
+                "produces. The 4 strays go in; the routine adds one for "
+                "the count adjustment."
+            ),
+            resolution=(
+                "the card ran end-to-end and returned 5 — the adjusted "
+                "count Carol would carry to the slate, no naming needed."
+            )),
         _ex("((fn [a b] (* a b)) 3 4)", 12,
             "a two-arg anonymous function",
             "the result of applying (fn [a b] (* a b)) to 3 and 4"),

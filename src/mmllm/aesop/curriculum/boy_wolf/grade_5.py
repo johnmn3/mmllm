@@ -61,7 +61,31 @@ _PLAN_G5 = _PLAN_POOL + (
 G5_01 = SubjectCurriculum(grade=5, subject_id="G5-01",
     subject_title="if", fable="boy-wolf",
     examples=[
-        _ex("(if true :a :b)",  ":a", "the form (if true :a :b)",  "which of :a or :b is returned"),
+        _ex("(if true :a :b)",  ":a", "the form (if true :a :b)",  "which of :a or :b is returned",
+            scenario=(
+                "Tom stood at the path-fork on the lookout — three paths "
+                "fanning out below, one to the village, one to the fold, "
+                "one back to the pasture. Carol had set a small "
+                "condition-stone at the fork: the day's question for the "
+                "morning's runner."
+            ),
+            need=(
+                "The runner needed to take exactly one path. Tom wanted "
+                "to shout both directions at once; Carol insisted the "
+                "fork would settle which arm to take based on the "
+                "condition's verdict."
+            ),
+            mapping=(
+                "`if` evaluates the condition and takes one of two "
+                "arms. With the condition true, the fork's left arm "
+                "is taken; the right arm's value is never produced. "
+                "The runtime walks one path; the other simply isn't."
+            ),
+            resolution=(
+                "the runner went left — `:a` was the value the fork "
+                "carried back — and the morning's question settled "
+                "without the second arm ever being walked."
+            )),
         _ex("(if false :a :b)", ":b", "the form (if false :a :b)", "which of :a or :b is returned"),
         _ex("(if (> 5 3) :a :b)", ":a", "the form (if (> 5 3) :a :b)", "the if's branch"),
     ], subplots=_FORK_SUBPLOTS, plan_pool=_PLAN_G5)
@@ -254,7 +278,30 @@ G5_22 = SubjectCurriculum(grade=5, subject_id="G5-22",
     examples=[
         _ex("(loop [n 5 acc 1] (if (zero? n) acc (recur (dec n) (* acc n))))", 120,
             "a loop computing factorial of 5 via recur",
-            "5! computed via loop/recur"),
+            "5! computed via loop/recur",
+            scenario=(
+                "At dawn, Tom set out to walk the fence-line that ringed "
+                "the south pasture — the same circuit he walked every "
+                "morning. Carol watched from the lookout, ready to read "
+                "the count when he came back round."
+            ),
+            need=(
+                "The walk had to cover the whole circuit and return to "
+                "the start carrying the running count, without leaving a "
+                "growing trail of footprints behind. The village wanted "
+                "the morning's tally, no matter how long the loop was."
+            ),
+                mapping=(
+                "`recur` takes a step forward on the same fence-walk "
+                "without growing the trail behind it — each step "
+                "replaces the last. The base case ends the walk; "
+                "everywhere else, the loop steps and continues."
+            ),
+            resolution=(
+                "the walk completed the circuit and the loop returned "
+                "the running tally — 120 — without leaving a single "
+                "extra footprint along the fence-line."
+            )),
     ], subplots=_CIRCUIT_SUBPLOTS, plan_pool=_PLAN_G5)
 
 
