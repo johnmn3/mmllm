@@ -641,25 +641,22 @@ G8_09 = SubjectCurriculum(
             question_what="the value returned after defining multimethod pace that dispatches on :species with methods for both :hare and :tortoise, then calling pace with a map",
             goal_text="define a multimethod pace that dispatches on :species with methods for both :hare and :tortoise, then call pace with {:species :tortoise}",
             scenario=(
-                "Mossback the tortoise extended the sorting-table with "
-                "two arms: one for the `:hare` stamp and one for the "
-                "`:tortoise` stamp. A tortoise runner arrived at the "
-                "table carrying a `:species :tortoise` stamp."
+                "Mossback extended the sorting-table with two arms: "
+                "one for `:hare` and one for `:tortoise`. A tortoise "
+                "runner arrived."
             ),
             need=(
-                "She needed to route the tortoise runner through the "
-                "table to confirm the `:tortoise` arm fired — not the "
-                "`:hare` arm — returning the correct pace keyword."
+                "She needed to route the tortoise runner and confirm "
+                "the `:tortoise` arm fired, not the `:hare` arm."
             ),
             mapping=(
-                "Two `defmethod` calls add arms for each species stamp. "
-                "Calling `pace` with the tortoise map causes the table "
-                "to read `:species`, match `:tortoise`, and dispatch "
-                "to that arm."
+                "Two `defmethod` calls add an arm for each stamp. "
+                "Calling `pace` with the tortoise map matches `:tortoise` "
+                "and dispatches to that arm."
             ),
             resolution=(
                 "the table chose the tortoise arm and returned the "
-                "tortoise's own pace keyword, distinct from the hare's."
+                "tortoise's own pace keyword."
             ),
             tags=("story",),
         ),
@@ -674,26 +671,22 @@ G8_09 = SubjectCurriculum(
             question_what="the value returned after defining multimethod pace with methods for :hare, :tortoise, and :default, then calling pace with a dispatch value that doesn't match",
             goal_text="define a multimethod pace with methods for :hare and :tortoise plus a :default fallback, then call pace with a dispatch value that doesn't match",
             scenario=(
-                "An owl arrived at Mossback's sorting-table, but the "
-                "table had no arm for owls. Mossback had added a "
-                "`:default` fallback arm for exactly this situation — "
-                "any stamp without a dedicated arm would land there."
+                "An owl arrived at Mossback's sorting-table. No arm "
+                "existed for owls. Mossback had added a `:default` "
+                "arm to catch any stamp without a dedicated route."
             ),
             need=(
-                "She needed to route the owl runner through the table "
-                "and confirm the `:default` arm caught it, returning "
-                "a keyword indicating an unrecognized species."
+                "She needed to route the owl and confirm the `:default` "
+                "arm caught it."
             ),
             mapping=(
-                "`defmethod pace :default` adds the catch-all arm. When "
-                "the table reads a stamp that matches no dedicated arm, "
-                "it falls through to `:default` and returns that arm's "
-                "value."
+                "`defmethod pace :default` is the catch-all arm. When "
+                "no dedicated arm matches, the table falls through to "
+                "`:default` and returns that arm's value."
             ),
             resolution=(
-                "the table found no matching arm for the owl stamp, "
-                "fell through to `:default`, and returned the fallback "
-                "keyword."
+                "no arm matched the owl stamp; the table fell through "
+                "to `:default` and returned the fallback keyword."
             ),
             tags=("story",),
         ),
@@ -842,25 +835,22 @@ G8_12 = SubjectCurriculum(
             question_what="the value returned after defining protocol Pace with method speed, using extend-type to attach it to Long type with an implementation, then calling speed on a number",
             goal_text="define a protocol Pace with method speed, use extend-type to attach it to Long type, then call speed on a number",
             scenario=(
-                "Mossback the tortoise wanted to teach a Long runner "
-                "— an existing type from the host world — a new call "
-                "from the Pace guild. `extend-type` would let her sign "
-                "the Long type in without touching its original definition."
+                "Mossback wanted to teach a Long runner — from the host "
+                "world — a new guild call. `extend-type` could sign the "
+                "Long type in without touching its definition."
             ),
             need=(
-                "She needed to attach the Pace guild's `speed` routine "
-                "to Long and then call `speed` on an integer to confirm "
-                "the extension took effect."
+                "She needed to attach `speed` to Long and call it on "
+                "an integer to confirm the extension took effect."
             ),
             mapping=(
-                "`extend-type java.lang.Long Pace (speed …)` signs the "
-                "Long type into the Pace guild after the fact. Calling "
-                "`speed` on a Long value then dispatches to this new "
-                "implementation."
+                "`extend-type java.lang.Long Pace (speed …)` signs Long "
+                "into the guild retroactively. Calling `speed` on a Long "
+                "dispatches to this new implementation."
             ),
             resolution=(
                 "the dispatch found the Long extension and returned the "
-                "keyword registered for numeric runners."
+                "keyword for numeric runners."
             ),
             tags=("story",),
         ),
@@ -873,25 +863,22 @@ G8_12 = SubjectCurriculum(
             question_what="the value returned after defining protocol Pace with method speed, using extend-type to attach it to String type with an implementation, then calling speed on a string",
             goal_text="define a protocol Pace with method speed, use extend-type to attach it to String type, then call speed on a string",
             scenario=(
-                "Pip the hare wanted to join the Pace guild too, but he "
-                "was a String runner. Mossback showed him that "
-                "`extend-type` could sign String into Pace after the "
-                "guild was founded, without rewriting the guild charter."
+                "Pip wanted to join the Pace guild as a String runner. "
+                "Mossback showed him `extend-type` could sign String in "
+                "after the guild was founded."
             ),
             need=(
-                "After extending String into the guild, Pip needed to "
-                "call `speed` on a String runner to confirm the new "
-                "extension was in effect and returned the String arm's "
-                "keyword."
+                "After extending String, Pip needed to call `speed` "
+                "on a String runner to confirm the extension was live."
             ),
             mapping=(
                 "`extend-type java.lang.String Pace (speed …)` signs "
-                "String into the guild retroactively. Calling `speed` on "
-                "a String dispatches to this extension, not the Long one."
+                "String in retroactively. Calling `speed` on a String "
+                "dispatches to this extension, not the Long one."
             ),
             resolution=(
                 "the dispatch selected the String extension and returned "
-                "the keyword registered for string runners."
+                "the keyword for string runners."
             ),
             tags=("story",),
         ),
