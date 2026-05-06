@@ -104,9 +104,16 @@ def check_record(rec, sub, example):
     # patterns ("(note ...)", "(it isn't)", "(the REPL ...)", "(returns ...)",
     # "(an addition ...)", "(it does ...)"). Avoids false positives on
     # Clojure source forms which legitimately contain parens.
+    #
+    # Boy-wolf hand-audit added new aside patterns: "(no change)",
+    # "(none set)", "(as if read by slurp)", "(edn-shaped roundtrip)",
+    # "(dedup'd)", "(count)", "(finally is for side effects)",
+    # "(tap> always returns true on send)", "(it is)" / "(it isn't)".
     aside_re = re.compile(
-        r"\((?:note(?:\:|\s)|it isn'?t|the REPL\s|returns\s|the return\s|"
-        r"first truthy|empty string|the comment\s|integer quotient|it does|it doesn'?t)"
+        r"\((?:note(?:\:|\s)|it isn'?t|it is\)|the REPL\s|returns\s|the return\s|"
+        r"first truthy|empty string|the comment\s|integer quotient|"
+        r"it does|it doesn'?t|no change|none set|as if read|"
+        r"edn-shaped|dedup'?d|count\)|finally is|tap>\s)"
     )
     for label, val in (("concept_phrase", example.concept_phrase),
                         ("question_what",  example.question_what)):
@@ -117,10 +124,26 @@ def check_record(rec, sub, example):
     # Em-dash commentary: e.g., "X — note: ...", "X — first truthy".
     # The em-dash is followed by lowercase commentary, not part of a
     # legitimate noun-phrase title.
-    emdash_re = re.compile(r" — (?:note|first|empty|returns|integer)")
+    #
+    # Boy-wolf hand-audit added: "— what doc would print",
+    # "— host-portable length", "— a basic spec check", "— the unevaluated
+    # list", "— 0 is not nil".
+    emdash_re = re.compile(
+        r" — (?:note|first|empty|returns|integer|"
+        r"what doc|host-portable|a basic|a failing|the unevaluated|"
+        r"0 is not|the keyword|the integer)"
+    )
     if emdash_re.search(example.question_what) or emdash_re.search(example.concept_phrase):
         issues.append(("EMDASH_COMMENTARY",
                         "concept_phrase or question_what has em-dash commentary"))
+
+    # Boy-wolf hand-audit pitfall: ", which is X" trailing answer leak
+    # in question_what — "the value of (first nil), which is nil",
+    # "the count of nil, which is 0". The aside states the answer, which
+    # the eval-first design forbids.
+    if re.search(r",\s+which is\s+\S+", example.question_what):
+        issues.append(("WHICH_IS_LEAK",
+                        "question_what '..., which is X' leaks the answer in narrative"))
 
     # "said EMO_PROUD" without comma (subplot template bug — EMO entries
     # that are participles don't fit "said X" without comma).
@@ -142,9 +165,7 @@ def check_record(rec, sub, example):
 
     # Double "from" / generalized DOUBLE_OF check.
     # Pitfall #13: when EMO_TIRED already terminates with "from X" (or
-    # "at X", "of X"), a template-supplied tail like "from a recent
-    # sprint", "of the lecture", or "from a season of song" duplicates
-    # the preposition.
+    # "at X", "of X"), a template-supplied tail duplicates the preposition.
     double_tail_re = re.compile(
         r"(from \w+ing|weary from \w+|drowsy from \w+|"
         r"yawning at [a-z ]+?|legs heavy from \w+) "
@@ -154,7 +175,6 @@ def check_record(rec, sub, example):
         issues.append(("DOUBLE_FROM",
                         "EMO_TIRED tail duplicates an already-terminated prep "
                         "phrase (e.g., 'from sprinting from a recent sprint', "
-                        "'her legs heavy from sprinting of the lecture', "
                         "'weary from the morning's effort from a season of song')"))
 
     # Meta-meta question_what: "the value of the form X" inside
@@ -165,9 +185,7 @@ def check_record(rec, sub, example):
 
     # Bad place-preposition combos: "in the hilltop" (should be "on/atop"),
     # "in the road" (should be "on the road"), "in the farm" (should
-    # be "on/at the farm" — pitfall #22, ant-grasshopper introduced
-    # `farm` and the ant-grasshopper hand-audit caught the regression
-    # in 6+ records per grade), etc.
+    # be "on/at the farm"), etc. Pitfall #22 family.
     for bad in ("in the hilltop", "in the road", "in the beach",
                  "in the farm"):
         # Use word-boundary check so "in the farmyard" doesn't false-positive
@@ -461,6 +479,30 @@ def check_record(rec, sub, example):
         issues.append(("ANSWER_LEAK_PHRASE",
                        "concept_phrase or question_what leaks the "
                        "literal answer 'nil'"))
+    # Unclosed dialogue quote — odd number of `"` in user_msg means a
+    # subplot template opened a dialogue quote without closing it.
+    if user.count('"') % 2 != 0:
+        issues.append(("UNCLOSED_DIALOGUE_QUOTE",
+                        "user_msg has an odd number of dialogue quotes "
+                        "(subplot opened a `\"` but did not close it)"))
+
+    # `who, {participial-phrase},` — relative-clause `who` immediately
+    # followed by a participial phrase; the `who` expects a finite verb.
+    if re.search(
+        r",\s+who,\s+(?:[a-z]+ \w+|drowsy|weary|lulled|yawning|"
+        r"her|his|their)\s",
+        user,
+    ):
+        issues.append(("WHO_PARTICIPLE",
+                        "subplot template has 'who,' immediately followed by a "
+                        "participial phrase (drop the redundant 'who,')"))
+
+    # "X insisted they already knew" — singular-they ambiguity after a
+    # named singular subject; use the name instead of the pronoun.
+    if re.search(r"\b\w+ insisted they already knew\b", user):
+        issues.append(("INSISTED_THEY",
+                        "boast subplot 'X insisted they already knew' reads as "
+                        "plural after singular-named subject (pitfall #19)"))
 
     return issues
 

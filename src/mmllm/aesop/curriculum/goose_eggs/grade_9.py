@@ -153,7 +153,7 @@ G9_04 = SubjectCurriculum(
             "the value of the atom after a successful CAS"),
         _ex("(do (def a (atom 5)) (compare-and-set! a 0 99) @a)",
             5,
-            "compare-and-set! when the expected value doesn't match (no change)",
+            "compare-and-set! when the expected value doesn't match",
             "the value of the atom after a CAS that does not fire"),
     ],
     subplots=_SUBPLOTS,

@@ -100,7 +100,7 @@ G7_03 = SubjectCurriculum(grade=7, subject_id="G7-03",
     examples=[
         _ex("(try 7 (finally :cleanup))", 7,
             "a try whose finally clause runs but doesn't change the value",
-            "the value 7 from the body (finally is for side effects)"),
+            "the value 7 from the body"),
         _ex("(try (try (/ 1 0) (finally :ran)) (catch Exception e :caught))",
             ":caught",
             "a finally that runs before the outer catch fires",
@@ -138,7 +138,7 @@ G7_05 = SubjectCurriculum(grade=7, subject_id="G7-05",
             "the value of (first nil)"),
         _ex("(count nil)", 0,
             "counting a nil collection",
-            "the count of nil, which is 0"),
+            "the count of nil"),
     ], subplots=_ERR_SUBPLOTS, plan_pool=_PLAN_G7)
 
 
@@ -194,7 +194,7 @@ G7_09 = SubjectCurriculum(grade=7, subject_id="G7-09",
             "the boolean true returned by tap>"),
         _ex("(tap> 42)", True,
             "tapping the number 42 into the tap pool",
-            "the boolean true (tap> always returns true on send)"),
+            "the boolean true returned by tap>"),
     ], subplots=_ERR_SUBPLOTS, plan_pool=_PLAN_G7)
 
 
@@ -233,7 +233,7 @@ G7_12 = SubjectCurriculum(grade=7, subject_id="G7-12",
         # An in-memory analogue: build a string, then read it back via
         # split / count, the way slurp-then-process works in practice.
         _ex("(count \"hare\\ntortoise\\n\")", 14,
-            "the length of a multi-line string (as if read by slurp)",
+            "the length of a multi-line string",
             "the count of characters in \"hare\\ntortoise\\n\""),
         _ex("(clojure.string/split \"a\\nb\\nc\" #\"\\n\")", ["a", "b", "c"],
             "splitting a slurped-style string on newlines",
@@ -306,7 +306,7 @@ G7_17 = SubjectCurriculum(grade=7, subject_id="G7-17",
     examples=[
         _ex("(clojure.edn/read-string (pr-str {:a 1 :b 2}))",
             {":a": 1, ":b": 2},
-            "writing then reading back a small map (edn-shaped roundtrip)",
+            "writing then reading back a small map",
             "the map {:a 1 :b 2} after the roundtrip"),
         _ex("(clojure.edn/read-string (pr-str [1 2 3]))", [1, 2, 3],
             "round-tripping a vector through pr-str then edn/read-string",
@@ -326,7 +326,7 @@ G7_18 = SubjectCurriculum(grade=7, subject_id="G7-18",
         _ex("(count (:args {:cmd \"echo\" :args [\"hello\" \"world\"]}))",
             2,
             "the number of args in a shell-call descriptor",
-            "the count of args, which is 2"),
+            "the count of args"),
     ], subplots=_ERR_SUBPLOTS, plan_pool=_PLAN_G7)
 
 

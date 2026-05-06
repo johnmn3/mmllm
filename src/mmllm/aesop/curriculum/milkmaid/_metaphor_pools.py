@@ -255,7 +255,7 @@ That is atomic."
     SubplotTemplate("""\
 {milkmaid} guessed, "I'll just change the count whenever I feel like it!" But {farmer_he_she} showed
 {milkmaid} the slate: two farmers had erased at the same time, and now the count was a scribble,
-unreadable. "{farmer_he_she_cap} said quietly, "To {goal_text}, produce a form that changes the tally-slate
+unreadable. {farmer_he_she_cap} said quietly, "To {goal_text}, produce a form that changes the tally-slate
 atomically. The form must say: 'Read the slate, apply {concept_phrase}, write the result — in one
 unbreakable motion.' If two farmers arrive together, the form ensures only one updates at a time."
 """),

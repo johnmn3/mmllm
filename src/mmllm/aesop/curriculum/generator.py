@@ -224,6 +224,7 @@ def _pick_ag_location(scene: Scene) -> ont.Location:
     return scene.rng.choice(cands)
 
 
+
 # Goose-eggs uses two human "trader" characters (an impatient {visitor}
 # and a patient {owner}) plus a goose. Locations are the village +
 # household places where the fable plays out. Excludes characters whose
@@ -526,6 +527,58 @@ GE_EMO_REGRETFUL = (
 )
 
 
+# ─── boy-wolf character / location pools ───
+#
+# Boy-wolf cast model: ONE shepherd (the negative moral example — cries
+# wolf) + ONE elder/villager (the corrective voice). The shepherd plays
+# the Hare-equivalent role (boastful, hasty); the elder/villager plays
+# the Tortoise-equivalent role (careful, evaluator-of-record). Unlike
+# tortoise-hare where Tortoise is itself a model character, in boy-wolf
+# the SHEPHERD is the cautionary one, and the corrective discipline lives
+# in the surrounding villagers / elders / a careful neighbouring shepherd.
+
+def _shepherds() -> tuple[ont.Character, ...]:
+    """Tom (m), Will (m), Pat (n), Jess (f), Lou (f) — all role
+    ('liar', 'shepherd'). These are the boy-who-cried-wolf cast."""
+    return tuple(c for c in ont.CHARACTERS if "shepherd" in c.role_classes)
+
+
+def _bw_villagers() -> tuple[ont.Character, ...]:
+    """Pool of village-folk who play the corrective voice in boy-wolf
+    subplots. Drawn from the human characters with role 'everyman' —
+    Bob, Frank, George, Oliver, Carol, Grace, Alex, Sam, Robin, Morgan
+    (and Alice, who carries 'everyman' as a third role). Mixed-gender
+    so the same shepherd can be paired with same- or different-gender
+    villager across runs for variety."""
+    return tuple(c for c in ont.CHARACTERS
+                 if c.species == "human" and "everyman" in c.role_classes)
+
+
+# Pastoral / village locations natural for boy-wolf. We exclude indoor
+# spaces and water-anchored ones; the action happens between hill,
+# meadow, and village square.
+BOY_WOLF_LOCATIONS = ("meadow", "forest", "hilltop", "village", "farm",
+                      "road", "woods", "orchard")
+
+
+def _pick_bw_chars(scene: Scene) -> tuple[ont.Character, ont.Character]:
+    """Pick a fresh (shepherd, elder) pair for a boy-wolf record."""
+    shepherd = scene.rng.choice(_shepherds())
+    # Avoid name collision (different name pools, but defensive guard
+    # in case the ontology grows).
+    cands = [c for c in _bw_villagers() if c.name != shepherd.name]
+    elder = scene.rng.choice(cands)
+    return shepherd, elder
+
+
+def _pick_bw_location(scene: Scene) -> ont.Location:
+    """Pick a pastoral / village location natural for boy-wolf."""
+    cands = [l for l in ont.LOCATIONS
+             if l.name in BOY_WOLF_LOCATIONS]
+    return scene.rng.choice(cands)
+
+
+
 # ─────────────────────── render helpers ───────────────────────
 
 
@@ -603,6 +656,50 @@ def _build_placeholders(scene: Scene,
         base[f"{role}_he_she_cap"]  = cap(char.he_she)
         base[f"{role}_his_her"]     = char.his_her
         base[f"{role}_him_her"]     = char.him_her
+
+    if fable == "boy-wolf":
+        # Slot A (primary) → the SHEPHERD (the boy who cries wolf — the
+        # cautionary character). Slot B (secondary) → the ELDER /
+        # VILLAGER (the corrective voice).
+        #
+        # Boy-wolf overrides the EMO pools with gender-neutral
+        # fable-flavored variants (BW_EMO_*) to avoid race imagery and
+        # gendered phrases from the shared pool that don't fit the
+        # boy-wolf valley setting.
+        from mmllm.aesop.curriculum.boy_wolf.grade_1 import (
+            BW_EMO_PROUD, BW_EMO_PATIENT, BW_EMO_TIRED,
+            BW_EMO_REGRETFUL, BW_EMO_DESPERATE,
+        )
+        base.update({
+            "shepherd":             primary.name,
+            "shepherd_phrase":      species_phrase(primary),
+            "shepherd_he_she":      primary.he_she,
+            "shepherd_he_she_cap":  cap(primary.he_she),
+            "shepherd_his_her":     primary.his_her,
+            "shepherd_him_her":     primary.him_her,
+
+            "elder":                secondary.name,
+            "elder_phrase":         species_phrase(secondary),
+            "elder_he_she":         secondary.he_she,
+            "elder_he_she_cap":     cap(secondary.he_she),
+            "elder_his_her":        secondary.his_her,
+            "elder_him_her":        secondary.him_her,
+
+            "villager":             secondary.name,
+            "villager_phrase":      species_phrase(secondary),
+            "villager_he_she":      secondary.he_she,
+            "villager_he_she_cap":  cap(secondary.he_she),
+            "villager_his_her":     secondary.his_her,
+            "villager_him_her":     secondary.him_her,
+
+            # Override the shared EMO_* picks with gender-neutral
+            # boy-wolf-specific pools.
+            "emo_proud":       scene.rng.choice(BW_EMO_PROUD),
+            "emo_patient":     scene.rng.choice(BW_EMO_PATIENT),
+            "emo_tired":       scene.rng.choice(BW_EMO_TIRED),
+            "emo_regretful":   scene.rng.choice(BW_EMO_REGRETFUL),
+            "emo_desperate":   scene.rng.choice(BW_EMO_DESPERATE),
+        })
 
     return base
 
@@ -710,6 +807,12 @@ def generate_one_record(scene: Scene,
        4. Filling placeholders + rendering question
        5. Building the eval(form) tool call
     """
+    # Per-fable character / location picker dispatch. Each fable that
+    # diverges from the default tortoise-hare cast has its own picker
+    # branch and supplies a `placeholders_fn` that builds the placeholder
+    # dict for its templates. The default branch (tortoise-hare and any
+    # fable that maps cleanly onto a two-character cast) uses the
+    # standard `_build_placeholders` with a `fable=` parameter.
     if sub.fable == "goose-eggs":
         owner, visitor, goose = _pick_ge_chars(scene)
         location = _pick_ge_location(scene)
@@ -730,6 +833,11 @@ def generate_one_record(scene: Scene,
         location = _pick_mm_location(scene)
         placeholders_fn = lambda ex: _build_mm_placeholders(
             scene, milkmaid, farmer, location, ex)
+    elif sub.fable == "boy-wolf":
+        primary, secondary = _pick_bw_chars(scene)
+        location = _pick_bw_location(scene)
+        placeholders_fn = lambda ex: _build_placeholders(
+            scene, primary, secondary, location, ex, fable=sub.fable)
     else:
         # tortoise-hare default
         hare, tortoise = _pick_th_chars(scene)
