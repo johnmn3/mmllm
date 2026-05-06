@@ -44,7 +44,7 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 | Grade | Subjects | Examples | Issues | Low-variety |
 |---|---|---|---|---|
-| 1 | 18 | 81 | 0 | — |
+| 1 | 18 | 80 | 0 | — |
 | 2 | 22 | 88 | 0 | — |
 | 3 | 18 | 31 | 0 | — |
 | 4 | 20 | 39 | 0 | G4-10(0.94) |
@@ -54,7 +54,7 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 | 8 | 16 | 31 | 0 | — |
 | 9 | 18 | 34 | 0 | — |
 | 10 | 16 | 36 | 0 | — |
-| 11 | 14 | 29 | 0 | — |
+| 11 | 14 | 58 | 0 | — |
 | 12 | 18 | 37 | 0 | — |
 
 ### Sample issues by severity

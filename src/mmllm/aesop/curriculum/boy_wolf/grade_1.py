@@ -483,40 +483,89 @@ G1_09 = SubjectCurriculum(
             "the predicate (symbol? 'wolf)",
             "whether 'wolf is a symbol",
             scenario=(
-                "Tom had chalked the word `wolf` on the watchhouse slate "
-                "as a label for the south-flock pen. Carol stood beside "
-                "him with a carved tag from a sheep tagged `wolf` — the "
-                "actual animal the chalk mark named."
+                "Tom had chalked a label on the slate for a flock pen. "
+                "Carol stood with a carved tag from the live sheep itself."
             ),
             need=(
-                "The argument that morning was about which `wolf` the "
-                "village should pay attention to. Without distinguishing "
-                "the chalk mark from the sheep it pointed at, the "
-                "village's notes would mix names with the things named."
+                "The village's notes must not mix chalk marks with the "
+                "things they name. Tom had to tell them apart."
             ),
             mapping=(
                 "`symbol?` asks whether something is a chalk mark — a "
-                "name standing in for a value — rather than the value "
-                "itself. The quoted `'wolf` is the chalk mark; the "
-                "actual sheep would be a different value."
+                "name standing in for a value. The quoted form is the mark."
             ),
             resolution=(
-                "the predicate confirmed the chalk mark for what it was "
-                "— a name, not a sheep — and the village's records "
-                "stayed straight."
+                "the predicate returned true — it was a chalk mark, a name, "
+                "not the thing itself. The records stayed straight."
             )),
         _ex("(symbol? 42)", False,
             "the predicate (symbol? 42)",
-            "whether 42 is a symbol"),
-        _ex("(symbol? 42)", False,
-            "the predicate (symbol? 42)",
-            "whether 42 is a symbol"),
+            "whether 42 is a symbol",
+            scenario=(
+                "Carol had chalked a tally-mark on the watchhouse slate — "
+                "the number 42. Tom held a wooden tally-stick carved with "
+                "notches. 'Are they the same thing?' he asked."
+            ),
+            need=(
+                "The village's count book must stay clear: marks on the "
+                "slate versus the carved sticks must not be confused. "
+                "Tom needed to know whether a mark and a stick were the "
+                "same thing."
+            ),
+            mapping=(
+                "`symbol?` returns false for numbers. The chalk mark "
+                "'42 is a name, a symbol; but the number 42 itself is "
+                "the actual count. The predicate draws that line — mark "
+                "versus meaning."
+            ),
+            resolution=(
+                "the predicate said no — the number and the name were "
+                "not the same, keeping the village's records straight."
+            )),
         _ex("'wolf", "wolf",
             "the quoted symbol 'wolf",
-            "the value of 'wolf"),
+            "the value of 'wolf",
+            scenario=(
+                "At the fold-gate, Carol pointed to a chalk mark on the "
+                "slate — a name for a pen. Tom carried a sheep tagged for "
+                "that pen."
+            ),
+            need=(
+                "The shepherds must trust which is the name and which is "
+                "the thing named. Tom had to confirm that the quoted mark "
+                "gave back the symbol itself."
+            ),
+            mapping=(
+                "The quote `'` stops substitution: the runtime sees the "
+                "chalk mark as a symbol — a name — rather than trying to "
+                "look up what that name refers to."
+            ),
+            resolution=(
+                "the runtime returned the symbol itself, exactly the chalk "
+                "mark, with no further substitution."
+            )),
         _ex("(= 'wolf 'wolf)", True,
             "the equality of two 'wolf symbols",
-            "whether 'wolf equals 'wolf"),
+            "whether 'wolf equals 'wolf",
+            scenario=(
+                "Carol had written `wolf` twice on the watchhouse slate "
+                "— once in the morning tally, once in the evening. Tom "
+                "wondered if the two marks were the same."
+            ),
+            need=(
+                "The village's morning and evening counts must agree on "
+                "which pen is which. Clarity on symbol equality keeps the "
+                "ledger sound."
+            ),
+            mapping=(
+                "`=` compares symbols by their chalk-mark form. Two "
+                "identical marks written in the same hand are equal — "
+                "the symbol `wolf` equals the symbol `wolf` exactly."
+            ),
+            resolution=(
+                "the predicate returned true — the two marks on the "
+                "slate were the same chalk line, nothing more nor less."
+            )),
     ],
     subplots=_CHALKMARK_SUBPLOTS,
     plan_pool=_PLAN_POOL,
@@ -534,33 +583,46 @@ G1_10 = SubjectCurriculum(
             "the form (+ 1 2) followed by a comment",
             "the result of (+ 1 2) ignoring the comment",
             scenario=(
-                "Carol kept the watchhouse slate. Today she had chalked "
-                "an addition on it, and to the right of the form she had "
-                "drawn a single dashed line followed by `sum of one and "
-                "two` in smaller chalk — annotation only, for the next "
-                "shepherd's eye."
+                "Carol had chalked an addition on the slate with a dashed "
+                "line and notes in smaller chalk to the right — annotation "
+                "only, for the next shepherd's eye."
             ),
             need=(
-                "Tom had been writing notes between forms and worried "
-                "the runtime might somehow mix the annotations into the "
+                "Tom worried the runtime might mix annotations into the "
                 "calculation. He needed to know which marks the runtime "
                 "honored and which it skipped."
             ),
             mapping=(
                 "A single semicolon `;` is the slate's ignore-from-here "
-                "mark. Everything to the right of it is annotation — "
-                "the reader skips it; the runtime never sees it. The "
-                "form's value comes from what stays on the slate before "
-                "the dash."
+                "mark. Everything to the right is annotation — the reader "
+                "skips it; the runtime never sees it."
             ),
             resolution=(
                 "the value came back as if the dashed annotation weren't "
-                "there at all — exactly as the slate's conventions "
-                "promised."
+                "there at all — exactly as the slate's conventions promised."
             )),
         _ex("42 ;; the answer", 42,
             "the literal 42 with a trailing comment",
-            "the value of 42"),
+            "the value of 42",
+            scenario=(
+                "Carol had written a value on the slate, then added a double "
+                "dash and human words to explain it. Tom peered at the full "
+                "line, confused about what the runtime would see."
+            ),
+            need=(
+                "Tom had to trust the slate's convention: only the form "
+                "matters to the runtime, never the human marks that follow "
+                "the dash."
+            ),
+            mapping=(
+                "A double semicolon `;;` marks everything after it as "
+                "reader-ignored — true annotation. The runtime sees only "
+                "what comes before; the dash-mark seals off the rest."
+            ),
+            resolution=(
+                "the value came back — the runtime had skipped the dashed "
+                "remark entirely, honoring the slate's reading rule."
+            )),
     ],
     subplots=_SCRIBE_SUBPLOTS,
     plan_pool=_PLAN_POOL,
@@ -575,10 +637,52 @@ G1_11 = SubjectCurriculum(
     examples=[
         _ex("(+    1    2)", 3,
             "the form (+ 1 2) with extra spaces",
-            "the result of the form"),
+            "the result of the form",
+            scenario=(
+                "Carol had written the form on the slate with extra space "
+                "between the symbols — to give Tom room to read each part "
+                "carefully. Tom worried the gaps might break the form."
+            ),
+            need=(
+                "The shepherd's eye must trust the blank spaces: they guide "
+                "reading but mean nothing to the runtime."
+            ),
+            mapping=(
+                "The reader strips whitespace — spaces, tabs, blank lines — "
+                "before the runtime sees the form. Extra gaps are chalk "
+                "marks for the human reader only; the runtime sees the "
+                "structure, not the formatting."
+            ),
+            resolution=(
+                "the form evaluated to the sum, indifferent to the spacing "
+                "— the runtime had seen only the operator and operands, "
+                "nothing more."
+            )),
         _ex("(+\n  1\n  2)", 3,
             "the form (+ 1 2) split across lines",
-            "the result of the form"),
+            "the result of the form",
+            scenario=(
+                "Carol had chalk-written an addition in a tall column on the "
+                "slate — operator at the top, each operand below on its own "
+                "row. Tom asked if splitting it into rows might change the "
+                "meaning."
+            ),
+            need=(
+                "The form must stay readable on a narrow slate. Tom had to "
+                "trust that line breaks, like spaces, left the form's "
+                "meaning untouched."
+            ),
+            mapping=(
+                "Newlines are whitespace: the reader strips them before "
+                "sending the form to the runtime. A column layout and a "
+                "line layout express the same arithmetic — the structure "
+                "is what counts, not the layout."
+            ),
+            resolution=(
+                "the form returned its sum, exact as if written in a single "
+                "line — the slate's vertical layout had been invisible to "
+                "the runtime."
+            )),
     ],
     subplots=_SCRIBE_SUBPLOTS,
     plan_pool=_PLAN_POOL,
@@ -593,10 +697,52 @@ G1_12 = SubjectCurriculum(
     examples=[
         _ex("(+ 2 3)", 5,
             "the form (+ 2 3)",
-            "the result of (+ 2 3)"),
+            "the result of (+ 2 3)",
+            scenario=(
+                "Carol had written parentheses on the watchhouse slate — "
+                "an outer pair with the arithmetic operators inside. Tom "
+                "watched and asked what the curved brackets meant."
+            ),
+            need=(
+                "Tom needed to know that parentheses are only syntax — "
+                "grouping marks, not a multiplication signal."
+            ),
+            mapping=(
+                "Parentheses `( )` tell the reader and runtime how to "
+                "parse the form. They group the operator with its "
+                "operands. The first element inside becomes the function; "
+                "the rest become arguments. No implicit multiplication."
+            ),
+            resolution=(
+                "the form returned the sum — the runtime had grouped the "
+                "symbols correctly without treating the parens as an "
+                "operation themselves."
+            )),
         _ex("(* (+ 1 2) 3)", 9,
             "the form (* (+ 1 2) 3)",
-            "the result of (* (+ 1 2) 3)"),
+            "the result of (* (+ 1 2) 3)",
+            scenario=(
+                "Carol had nested parentheses on the slate — one pair of "
+                "brackets holding an addition, the whole thing an argument "
+                "to a multiplication. Tom squinted at the layers."
+            ),
+            need=(
+                "Nested parentheses must be resolved from inside out. Tom "
+                "had to trust the runtime's careful unpacking of the "
+                "brackets."
+            ),
+            mapping=(
+                "When parentheses nest, the runtime evaluates the innermost "
+                "first — the inner sum becomes a single value, then that "
+                "value multiplies with the outer argument. Parens are "
+                "grouping brackets only; nesting shows order, never "
+                "multiplication."
+            ),
+            resolution=(
+                "the runtime returned the product — it had evaluated the "
+                "inner form first, then used that result in the outer "
+                "multiplication. Parens had grouped, not multiplied."
+            )),
     ],
     subplots=_SCRIBE_SUBPLOTS,
     plan_pool=_PLAN_POOL,
@@ -611,8 +757,8 @@ G1_13 = SubjectCurriculum(
     examples=[
         _ex("(+ 1 2)",  3,    "the form (+ 1 2)",    "the result of (+ 1 2)",
             scenario=(
-                "At dawn, Tom had brought 1 lamb back from the south "
-                "pasture and Carol had brought 2 from the north. They "
+                "At dawn, Tom had brought lambs back from the south "
+                "pasture and Carol had brought lambs from the north. They "
                 "stood at the fold counting together, the village's "
                 "morning record waiting on them."
             ),
@@ -624,19 +770,105 @@ G1_13 = SubjectCurriculum(
             ),
             mapping=(
                 "`+` adds its operands one after another and gives back "
-                "the running total. With 1 lamb from one side and 2 "
-                "from the other, the runtime carries the sum exactly — "
-                "no shouting required."
+                "the running total. The runtime carries the sum exactly "
+                "— no shouting required."
             ),
             resolution=(
-                "the count came back as 3 lambs — the morning's flock "
-                "confirmed by the runtime, not by Tom's memory."
+                "the count came back — the morning's flock confirmed by "
+                "the runtime, not by Tom's memory."
             )),
-        _ex("(- 5 3)",  2,    "the form (- 5 3)",    "the result of (- 5 3)"),
-        _ex("(* 4 5)",  20,   "the form (* 4 5)",    "the result of (* 4 5)"),
-        _ex("(/ 10 2)", 5,    "the form (/ 10 2)",   "the result of (/ 10 2)"),
-        _ex("(+ 7 8)",  15,   "the form (+ 7 8)",    "the result of (+ 7 8)"),
-        _ex("(- 20 7)", 13,   "the form (- 20 7)",   "the result of (- 20 7)"),
+        _ex("(- 5 3)",  2,    "the form (- 5 3)",    "the result of (- 5 3)",
+            scenario=(
+                "Tom had watched some sheep leave the fold that morning and "
+                "some return by noon. Carol chalked the question on the "
+                "slate: how many were still grazing?"
+            ),
+            need=(
+                "The village's grazing count had to be exact before the "
+                "afternoon watch. No guessing on the flock."
+            ),
+            mapping=(
+                "`-` subtracts: the starting count minus those returned "
+                "gives the sheep still away. The runtime computes the exact "
+                "remainder."
+            ),
+            resolution=(
+                "the result came back — the exact number of sheep still "
+                "grazing, confirmed by arithmetic not by Tom's memory."
+            )),
+        _ex("(* 4 5)",  20,   "the form (* 4 5)",    "the result of (* 4 5)",
+            scenario=(
+                "Carol had several small baskets of wool, each holding the "
+                "same count of fleeces. Tom tried to count them all at once "
+                "but lost track. Carol chalked the multiplication."
+            ),
+            need=(
+                "The village's morning wool-tally had to be final. Tom's "
+                "eyeball count could not match the ledger."
+            ),
+            mapping=(
+                "`*` multiplies: groups of items, combined. The runtime "
+                "compounds the count exactly, no fumbling."
+            ),
+            resolution=(
+                "the result came back — the total fleeces, exact as any "
+                "careful basket count would yield."
+            )),
+        _ex("(/ 10 2)", 5,    "the form (/ 10 2)",   "the result of (/ 10 2)",
+            scenario=(
+                "Carol had coins paid for wool. She and Tom had agreed to "
+                "split them evenly. Carol wrote the division on the slate."
+            ),
+            need=(
+                "The split had to be fair and final, no haggling once the "
+                "slate was written."
+            ),
+            mapping=(
+                "`/` divides: the total coins split into equal shares. The "
+                "runtime computes each shepherd's fair portion exactly."
+            ),
+            resolution=(
+                "the result came back — each shepherd's coins, arithmetic "
+                "settling what trust could not."
+            )),
+        _ex("(+ 7 8)",  15,   "the form (+ 7 8)",    "the result of (+ 7 8)",
+            scenario=(
+                "Tom brought lambs from the north pen, Carol brought lambs "
+                "from the south. Together they needed the total for the "
+                "morning record."
+            ),
+            need=(
+                "The day's first count had to lock in before the flock "
+                "left for pasture. Arithmetic, not eyeballing."
+            ),
+            mapping=(
+                "`+` adds: the operands combined, the morning tally. The "
+                "runtime carries each number faithfully and returns the "
+                "sum."
+            ),
+            resolution=(
+                "the count came back — the morning's full flock, confirmed "
+                "by the runtime and entered in the ledger."
+            )),
+        _ex("(- 20 7)", 13,   "the form (- 20 7)",   "the result of (- 20 7)",
+            scenario=(
+                "Carol had many fleeces sorted for the week's market. By "
+                "noon some had been claimed by shepherds. She wrote the "
+                "subtraction to see what remained."
+            ),
+            need=(
+                "The unsold count had to be ready before the market-runner "
+                "came by. No penciling and erasing on the real ledger."
+            ),
+            mapping=(
+                "`-` removes: the original count minus those claimed, "
+                "equals what stays. The runtime computes the remaining "
+                "tally exactly."
+            ),
+            resolution=(
+                "the result came back — the fleeces still waiting, exact "
+                "and ready for the market count."
+            )),
     ],
     subplots=_ACORN_SUBPLOTS,
     plan_pool=_PLAN_POOL,
@@ -651,16 +883,90 @@ G1_14 = SubjectCurriculum(
     examples=[
         _ex("(+ 1 (* 2 3))",       7,
             "the nested form (+ 1 (* 2 3))",
-            "the result of (+ 1 (* 2 3))"),
+            "the result of (+ 1 (* 2 3))",
+            scenario=(
+                "Carol had written a nested form on the slate showing the "
+                "morning count: some from one pen, plus groups from "
+                "another pen. Tom squinted at the nested layers."
+            ),
+            need=(
+                "The morning's full count had to be exact. Nested "
+                "arithmetic had to be unpacked in the right order."
+            ),
+            mapping=(
+                "The runtime works from the inside out: the inner "
+                "multiplication resolves first, becoming a single value, "
+                "then that value adds to the outer operand. Inner forms "
+                "resolve first; their results feed the outer operation."
+            ),
+            resolution=(
+                "the result came back — the runtime had nested the "
+                "arithmetic perfectly, giving the total flock for the ledger."
+            )),
         _ex("(* (+ 1 2) (+ 3 4))", 21,
             "the nested form (* (+ 1 2) (+ 3 4))",
-            "the result of (* (+ 1 2) (+ 3 4))"),
+            "the result of (* (+ 1 2) (+ 3 4))",
+            scenario=(
+                "Carol had chalked two addition problems side by side, then "
+                "asked what it would mean to multiply them together."
+            ),
+            need=(
+                "Tom had to trust that each inner sum would be calculated "
+                "first, then the two results multiplied for the final tally."
+            ),
+            mapping=(
+                "Both inner forms evaluate first, each becoming a single "
+                "value. Then those two results become arguments to `*`. "
+                "Inside resolves before outside."
+            ),
+            resolution=(
+                "the form returned the product — the runtime had nested the "
+                "order perfectly, each sum resolved before the "
+                "multiplication."
+            )),
         _ex("(- 100 (* 5 5))",     75,
             "the nested form (- 100 (* 5 5))",
-            "the result of (- 100 (* 5 5))"),
+            "the result of (- 100 (* 5 5))",
+            scenario=(
+                "Carol had a tally of coins. Tom wondered how many "
+                "would remain after paying shepherds equally by weight. "
+                "Carol chalked the nested form."
+            ),
+            need=(
+                "The payment calculation had to be exact: first the total "
+                "owed, then the remainder. Nesting made it clear."
+            ),
+            mapping=(
+                "The inner form multiplies to give the total owed. Then "
+                "the outer subtraction subtracts that total from the "
+                "starting amount. Inside evaluates first."
+            ),
+            resolution=(
+                "the result came back — the coins left after the payment, "
+                "the nesting having clarified the order."
+            )),
         _ex("(+ (* 2 3) (* 4 5))", 26,
             "the sum of two products",
-            "the result of (+ (* 2 3) (* 4 5))"),
+            "the result of (+ (* 2 3) (* 4 5))",
+            scenario=(
+                "Carol had two groups of fleeces: several baskets with the "
+                "same count in each group. She chalked both products side "
+                "by side, then their sum."
+            ),
+            need=(
+                "The village's fleece inventory had to account for both "
+                "groups. Nested nesting showed the full picture."
+            ),
+            mapping=(
+                "Each multiplication resolves first, becoming a single value. "
+                "Then those two values become arguments to `+`. Inner forms "
+                "resolve first; their results feed the outer addition."
+            ),
+            resolution=(
+                "the result came back — the total fleeces from both groups, "
+                "nesting having kept each count separate until the final "
+                "tally."
+            )),
     ],
     subplots=_ACORN_SUBPLOTS,
     plan_pool=_PLAN_POOL,
@@ -702,17 +1008,111 @@ G1_15 = SubjectCurriculum(
                 "count for the morning held without dispute."
             )),
         _ex("(= 1 2)",          False, "the equality (= 1 2)",
-            "the value of (= 1 2)"),
+            "the value of (= 1 2)",
+            scenario=(
+                "Carol had two tally-marks on a stone by the fold: one "
+                "from the morning count, one from midday. Tom claimed they "
+                "must differ because sheep move. Carol wrote them side by "
+                "side to test."
+            ),
+            need=(
+                "Before the afternoon watch, the fold's gate needed to "
+                "know: are the counts the same or different? The gate "
+                "depends on that answer."
+            ),
+            mapping=(
+                "`=` compares each operand: does 1 equal 2? No. The "
+                "runtime's verdict is false — they are not the same."
+            ),
+            resolution=(
+                "the gate returned false — the counts differed, and the "
+                "village would note which pen had gained or lost sheep."
+            )),
         _ex("(= \"a\" \"a\")",  True,  "the equality (= \"a\" \"a\")",
-            "the value of (= \"a\" \"a\")"),
+            "the value of (= \"a\" \"a\")",
+            scenario=(
+                "Carol had written the letter `a` on the slate twice — "
+                "once in the morning lesson, once in the afternoon. Tom "
+                "wondered if the two marks were truly the same mark."
+            ),
+            need=(
+                "The elder's teaching depended on stable symbols. Carol "
+                "had to show that the same chalk mark, written twice, was "
+                "indeed the same mark."
+            ),
+            mapping=(
+                "`=` compares strings: does \"a\" equal \"a\"? Yes. The "
+                "runtime returns true — both are the same string."
+            ),
+            resolution=(
+                "the predicate returned true — the chalk marks matched "
+                "letter for letter, confirming Carol's careful writing."
+            )),
         _ex("(= :wolf :wolf)",  True,  "the equality (= :wolf :wolf)",
-            "the value of (= :wolf :wolf)"),
+            "the value of (= :wolf :wolf)",
+            scenario=(
+                "The watchhouse had two drill-cards, each marked `:wolf` "
+                "at the top — the name of the alarm to sound when a wolf "
+                "was spotted. Tom wanted to be sure both cards named the "
+                "same alarm."
+            ),
+            need=(
+                "The alarm system depends on all shepherds hearing the "
+                "same name. Tom had to trust that the keyword :wolf meant "
+                "the same thing on both cards."
+            ),
+            mapping=(
+                "`=` compares keywords: does :wolf equal :wolf? Yes. The "
+                "runtime returns true — the same keyword appears twice."
+            ),
+            resolution=(
+                "the predicate returned true — both cards carried the same "
+                "alarm-name, and the system stayed consistent."
+            )),
         _ex("(= :wolf :flock)", False,
             "the equality (= :wolf :flock)",
-            "the value of (= :wolf :flock)"),
+            "the value of (= :wolf :flock)",
+            scenario=(
+                "Carol had written :wolf and :flock on two separate slate "
+                "tiles — one naming the alarm for danger, one naming the "
+                "call to gather. Tom had to be sure the runtime could tell "
+                "them apart."
+            ),
+            need=(
+                "The shepherds' signals must not be confused. One false "
+                "equivalence and the village would be in chaos."
+            ),
+            mapping=(
+                "`=` compares keywords: does :wolf equal :flock? No. The "
+                "runtime returns false — they are different names."
+            ),
+            resolution=(
+                "the predicate returned false — the two keywords were "
+                "distinct, keeping the alarm system clear and separate."
+            )),
         _ex("(= 1 1 1 1)",      True,
             "the multi-arg equality (= 1 1 1 1)",
-            "the value of (= 1 1 1 1)"),
+            "the value of (= 1 1 1 1)",
+            scenario=(
+                "Carol had four stones at the fold, each notched once — "
+                "the morning count from four separate shepherds. They all "
+                "agreed on the same tally. Carol wrote the multi-arg "
+                "equality test."
+            ),
+            need=(
+                "Before the day's work began, all four counts had to agree. "
+                "If they matched, the flock was accounted for and the "
+                "village could proceed."
+            ),
+            mapping=(
+                "`=` with multiple arguments checks if all are the same. "
+                "Does 1 equal 1? And does that 1 equal the next 1? And so "
+                "on? Yes to all. The runtime returns true."
+            ),
+            resolution=(
+                "the predicate returned true — all four counts agreed, "
+                "and the morning's record locked in with the village ledger."
+            )),
     ],
     subplots=_GATE_SUBPLOTS,
     plan_pool=_PLAN_POOL,
@@ -726,17 +1126,119 @@ G1_16 = SubjectCurriculum(
     fable="boy-wolf",
     examples=[
         _ex("(zero? 0)",  True,  "the predicate (zero? 0)",
-            "whether 0 is zero"),
+            "whether 0 is zero",
+            scenario=(
+                "At the fold-gate, Carol had a tally-mark: 0. Tom asked "
+                "if the gates should stay open for no sheep, as though "
+                "no sheep had come."
+            ),
+            need=(
+                "The gate's logic had to distinguish zero (no sheep) from "
+                "any other count. Clarity on what zero meant kept the "
+                "system fair."
+            ),
+            mapping=(
+                "`zero?` tests whether the number is exactly zero. On 0, "
+                "the predicate returns true — confirming that zero means "
+                "nothing at the fold."
+            ),
+            resolution=(
+                "the predicate returned true — the count was zero, and the "
+                "gate's rule for an empty flock was confirmed."
+            )),
         _ex("(zero? 5)",  False, "the predicate (zero? 5)",
-            "whether 5 is zero"),
+            "whether 5 is zero",
+            scenario=(
+                "Carol pointed to a tally of 5 sheep. Tom wondered if the "
+                "predicate `zero?` would mistake the count for nothing. "
+                "Carol wrote the test."
+            ),
+            need=(
+                "Tom had to trust that `zero?` would correctly reject any "
+                "count that was not zero."
+            ),
+            mapping=(
+                "`zero?` tests whether the number is exactly zero. On 5, "
+                "the predicate returns false — 5 is not zero."
+            ),
+            resolution=(
+                "the predicate returned false — the count was real, and "
+                "the fold's gate would open for the 5 sheep to pass."
+            )),
         _ex("(pos? 7)",   True,  "the predicate (pos? 7)",
-            "whether 7 is positive"),
+            "whether 7 is positive",
+            scenario=(
+                "Carol had tracked the flock's change from morning to "
+                "afternoon: +7 sheep had returned. Tom asked if the "
+                "predicate could confirm that the change was positive."
+            ),
+            need=(
+                "The village's ledger recorded gains and losses. `pos?` "
+                "had to show that the flock had grown."
+            ),
+            mapping=(
+                "`pos?` tests whether a number is greater than zero. On 7, "
+                "the predicate returns true — a gain of 7 sheep is positive."
+            ),
+            resolution=(
+                "the predicate returned true — the change was confirmed as "
+                "positive, and the afternoon's gain was entered in the ledger."
+            )),
         _ex("(pos? -2)",  False, "the predicate (pos? -2)",
-            "whether -2 is positive"),
+            "whether -2 is positive",
+            scenario=(
+                "Tom had counted 2 fewer sheep at the afternoon fold than "
+                "at morning. Carol wanted the predicate to confirm that -2 "
+                "was not a positive change."
+            ),
+            need=(
+                "The village had to track losses as losses. `pos?` had to "
+                "reject negative numbers clearly."
+            ),
+            mapping=(
+                "`pos?` tests whether a number is greater than zero. On -2, "
+                "the predicate returns false — a loss is not positive."
+            ),
+            resolution=(
+                "the predicate returned false — the change was confirmed as "
+                "negative, and the loss was recorded as such."
+            )),
         _ex("(neg? -3)",  True,  "the predicate (neg? -3)",
-            "whether -3 is negative"),
+            "whether -3 is negative",
+            scenario=(
+                "Carol had a record: -3 fleeces sold this week (a shortage). "
+                "Tom wondered if `neg?` would confirm the negative change."
+            ),
+            need=(
+                "The wool-ledger had to mark shortages clearly. `neg?` had "
+                "to confirm that -3 was indeed negative."
+            ),
+            mapping=(
+                "`neg?` tests whether a number is less than zero. On -3, "
+                "the predicate returns true — the shortage is negative."
+            ),
+            resolution=(
+                "the predicate returned true — the shortage was confirmed "
+                "as negative, and the village would plan accordingly."
+            )),
         _ex("(neg? 4)",   False, "the predicate (neg? 4)",
-            "whether 4 is negative"),
+            "whether 4 is negative",
+            scenario=(
+                "Carol had tallied a gain of 4 fleeces. Tom asked if `neg?` "
+                "would mistakenly mark the gain as negative."
+            ),
+            need=(
+                "Gains and losses had to stay distinct. Tom had to trust "
+                "that `neg?` would correctly reject positive numbers."
+            ),
+            mapping=(
+                "`neg?` tests whether a number is less than zero. On 4, "
+                "the predicate returns false — a gain is not negative."
+            ),
+            resolution=(
+                "the predicate returned false — the gain was not negative, "
+                "and the wool-ledger would show a positive entry."
+            )),
     ],
     subplots=_ACORN_SUBPLOTS,
     plan_pool=_PLAN_POOL,
@@ -751,10 +1253,48 @@ G1_17 = SubjectCurriculum(
     examples=[
         _ex("42", 42,
             "the value 42",
-            "the value of 42"),
+            "the value of 42",
+            scenario=(
+                "Carol had chalked a number on the watchhouse slate. Tom "
+                "peered at it and asked whether that mark on the stone was "
+                "the value itself or just a record."
+            ),
+            need=(
+                "Tom had to understand that the runtime's return value is "
+                "separate from any mark on the slate. The chalk mark shows "
+                "the form; the REPL's response is the value."
+            ),
+            mapping=(
+                "When the form is a literal number, the REPL evaluates it "
+                "and returns that number. The value is what the runtime "
+                "gives back — not a mark on the slate, but the answer itself."
+            ),
+            resolution=(
+                "the REPL returned the value — not a mark, but the answer. "
+                "Tom could carry that forward; the slate was just a record."
+            )),
         _ex("(+ 1 2)", 3,
             "the form (+ 1 2)",
-            "the result of (+ 1 2)"),
+            "the result of (+ 1 2)",
+            scenario=(
+                "Carol had chalked an addition on the slate and asked Tom "
+                "to read what the REPL would return. Tom confused the chalk "
+                "mark for the answer."
+            ),
+            need=(
+                "Tom had to separate the form written from the result the "
+                "REPL computes. Chalk on slate, value in return — two "
+                "different things."
+            ),
+            mapping=(
+                "When the form is an addition, the REPL evaluates it and "
+                "returns the sum. The returned value is the arithmetic "
+                "result, not the form itself."
+            ),
+            resolution=(
+                "the REPL returned the sum — the computed result, not the "
+                "form that had been written. Tom had learned the distinction."
+            )),
     ],
     subplots=_SCRIBE_SUBPLOTS,
     plan_pool=_PLAN_POOL,
@@ -771,31 +1311,40 @@ G1_18 = SubjectCurriculum(
             "the form (+ 1 2)",
             "the result of (+ 1 2)",
             scenario=(
-                "Tom hesitated at the practice-pen behind the watchhouse "
-                "— the small enclosure where new shepherds drilled the "
-                "alarm-protocol. Carol had set out a slate and a piece "
-                "of chalk, ready to demonstrate."
+                "Tom hesitated at the practice-pen behind the watchhouse. "
+                "Carol had set out a slate and chalk to demonstrate."
             ),
             need=(
-                "Tom was anxious about writing a wrong form. Carol "
-                "explained that this pen was for that exact purpose: to "
-                "make a careless try cost nothing, so the shepherd could "
-                "experiment before the day's real watch began."
+                "Tom was anxious about errors. Carol explained the pen "
+                "made careless tries cost nothing — a place to experiment."
             ),
             mapping=(
-                "The REPL acts the way the practice-pen acts. A wrong "
-                "form, a typo, a missing paren — anything tried inside "
-                "is safely walked back. The runtime catches mistakes "
-                "instead of letting them spill out into the village."
+                "The REPL in the practice-pen is safe. A wrong form, "
+                "a typo, anything tried inside is safely walked back."
             ),
             resolution=(
                 "Tom wrote the form, the runtime returned its value "
-                "cleanly, and Carol nodded — the pen had served its "
-                "purpose; he could try again any time."
+                "cleanly, and the pen had served its purpose."
             )),
         _ex("(* 7 6)", 42,
             "the form (* 7 6)",
-            "the result of (* 7 6)"),
+            "the result of (* 7 6)",
+            scenario=(
+                "Tom was trying again inside the practice-pen — a "
+                "multiplication this time. Carol watched as Tom wrote the form."
+            ),
+            need=(
+                "The pen's purpose was to let Tom experiment without fear. "
+                "Any form would either work or fail safely, no cost to either."
+            ),
+            mapping=(
+                "The REPL in the practice-pen works just as in the real watch. "
+                "The runtime returns the answer or an error that teaches."
+            ),
+            resolution=(
+                "the form returned the product — the pen had served its "
+                "purpose as a safe place to try and learn."
+            )),
     ],
     subplots=_SAFETYNET_SUBPLOTS,
     plan_pool=_PLAN_POOL,
