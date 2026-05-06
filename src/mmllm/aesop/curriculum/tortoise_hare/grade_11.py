@@ -18,6 +18,9 @@ from mmllm.aesop.curriculum.generator import (
 from mmllm.aesop.curriculum.tortoise_hare.grade_1 import (
     _GOAL_SUBPLOTS, _PLAN_POOL,
 )
+from mmllm.aesop.curriculum.tortoise_hare._metaphor_pools import (
+    _ACORN_SUBPLOTS, _TOOLSHED_SUBPLOTS,
+)
 
 
 # ─────────────────────── grade-11 subplot extensions ───────────────────────
@@ -128,7 +131,7 @@ G11_02 = SubjectCurriculum(
             "the uppercase form of the string abc produced by the host method toUpperCase via the alternate dot syntax",
             goal="call the host method toUpperCase using the alternate dot form"),
     ],
-    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G11,
+    subplots=_TOOLSHED_SUBPLOTS, plan_pool=_PLAN_G11,
 )
 
 
@@ -148,7 +151,7 @@ G11_03 = SubjectCurriculum(
             "the maximum value of the integers 3 and 9 produced by calling the static host method Math/max via slash notation",
             goal="call the static host method Math/max to find the larger of two numbers"),
     ],
-    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G11,
+    subplots=_TOOLSHED_SUBPLOTS, plan_pool=_PLAN_G11,
 )
 
 
@@ -170,7 +173,7 @@ G11_04 = SubjectCurriculum(
             'the number of characters in the string hare via the count function',
             goal="count the characters in another string"),
     ],
-    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G11,
+    subplots=_TOOLSHED_SUBPLOTS, plan_pool=_PLAN_G11,
 )
 
 
@@ -213,7 +216,7 @@ G11_06 = SubjectCurriculum(
             'the newly constructed String object created from a text argument via the new keyword',
             goal="construct a host String object using the new keyword"),
     ],
-    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G11,
+    subplots=_TOOLSHED_SUBPLOTS, plan_pool=_PLAN_G11,
 )
 
 
@@ -233,7 +236,7 @@ G11_07 = SubjectCurriculum(
             "the length of the int-array [1 2 3] via the alength function",
             goal="get the length of a host array"),
     ],
-    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G11,
+    subplots=_TOOLSHED_SUBPLOTS, plan_pool=_PLAN_G11,
 )
 
 
@@ -254,7 +257,7 @@ G11_08 = SubjectCurriculum(
             "the marker keyword for the type-hint lesson",
             goal="understand that type hints guide compilation"),
     ],
-    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G11,
+    subplots=_TOOLSHED_SUBPLOTS, plan_pool=_PLAN_G11,
 )
 
 
@@ -278,7 +281,7 @@ G11_09 = SubjectCurriculum(
             "the marker for the checked/unchecked lesson",
             goal="understand how to disable overflow checking"),
     ],
-    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G11,
+    subplots=_ACORN_SUBPLOTS, plan_pool=_PLAN_G11,
 )
 
 
@@ -382,7 +385,7 @@ G11_14 = SubjectCurriculum(
             "the square root of 4 produced by the static host method Math/sqrt via slash notation when the call succeeds",
             goal="wrap a static host method call in error handling"),
     ],
-    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G11,
+    subplots=_TOOLSHED_SUBPLOTS, plan_pool=_PLAN_G11,
 )
 
 

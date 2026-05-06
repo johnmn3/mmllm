@@ -13,6 +13,9 @@ from mmllm.aesop.curriculum.generator import (
 from mmllm.aesop.curriculum.tortoise_hare.grade_1 import (
     _SHARED_SUBPLOTS as _G1_SUBPLOTS, _GOAL_SUBPLOTS, _PLAN_POOL,
 )
+from mmllm.aesop.curriculum.tortoise_hare._metaphor_pools import (
+    _CARRYINGCASE_SUBPLOTS, _GUILD_SUBPLOTS, _SORTINGTABLE_SUBPLOTS,
+)
 
 
 # ─────────────────────── grade-8 subplot extensions ───────────────────────
@@ -60,7 +63,7 @@ G8_01 = SubjectCurriculum(
             "the value returned",
             goal="call speak with :tortoise to see what it returns when dispatched"),
     ],
-    subplots=_SUBPLOTS,
+    subplots=_GUILD_SUBPLOTS,
     plan_pool=_PLAN_POOL_G8,
 )
 
@@ -82,7 +85,7 @@ G8_02 = SubjectCurriculum(
             "the weight field value after defining a type Stone with one field weight, then constructing an instance and reading the field",
             goal="define a type Stone with a weight field and then read the weight field from an instance"),
     ],
-    subplots=_SUBPLOTS,
+    subplots=_CARRYINGCASE_SUBPLOTS,
     plan_pool=_PLAN_POOL_G8,
 )
 
@@ -104,7 +107,7 @@ G8_03 = SubjectCurriculum(
             "the name field value after defining a record Runner with two fields name and pace, then creating an instance and reading the name field",
             goal="define a record type named Runner with two fields, then retrieve another field from an instance"),
     ],
-    subplots=_SUBPLOTS,
+    subplots=_CARRYINGCASE_SUBPLOTS,
     plan_pool=_PLAN_POOL_G8,
 )
 
@@ -128,7 +131,7 @@ G8_04 = SubjectCurriculum(
             "whether the protocol var Greet is truthy after defining a protocol named Greet with one method hail taking a single argument this",
             goal="define a protocol named Greet with one method hail that takes a single argument this"),
     ],
-    subplots=_SUBPLOTS,
+    subplots=_GUILD_SUBPLOTS,
     plan_pool=_PLAN_POOL_G8,
 )
 
@@ -154,7 +157,7 @@ G8_05 = SubjectCurriculum(
             "the value returned after defining protocol Greet with method hail, extending it to Long with an implementation, then calling hail on a number",
             goal="define a protocol named Greet with one method hail, extend it to Long type with an implementation, then call hail on a number"),
     ],
-    subplots=_SUBPLOTS,
+    subplots=_GUILD_SUBPLOTS,
     plan_pool=_PLAN_POOL_G8,
 )
 
@@ -184,7 +187,7 @@ G8_06 = SubjectCurriculum(
             "the value returned after defining protocol Pace with method speed, extending it to both String and Long types with different implementations, then calling speed on a string",
             goal="define a protocol Pace with method speed, extend it to both String and Long types with different implementations, then call speed on a string"),
     ],
-    subplots=_SUBPLOTS,
+    subplots=_GUILD_SUBPLOTS,
     plan_pool=_PLAN_POOL_G8,
 )
 
@@ -210,7 +213,7 @@ G8_07 = SubjectCurriculum(
             "the value returned after defining protocol Pace with method speed, defining record Tortoise with one field name that implements Pace, then calling speed on a Tortoise instance",
             goal="define a protocol Pace with method speed, define a record Tortoise that implements Pace, then call speed on a Tortoise instance"),
     ],
-    subplots=_SUBPLOTS,
+    subplots=_GUILD_SUBPLOTS,
     plan_pool=_PLAN_POOL_G8,
 )
 
@@ -236,7 +239,7 @@ G8_08 = SubjectCurriculum(
             "the value returned after defining multimethod tag that dispatches on :kind, adding a method for :stone, then calling tag with a map",
             goal="define a multimethod tag that dispatches on the :kind key, add a method for :stone, then call tag with a map"),
     ],
-    subplots=_SUBPLOTS,
+    subplots=_SORTINGTABLE_SUBPLOTS,
     plan_pool=_PLAN_POOL_G8,
 )
 
@@ -265,7 +268,7 @@ G8_09 = SubjectCurriculum(
             "the value returned after defining multimethod pace with methods for :hare, :tortoise, and :default, then calling pace with a dispatch value that doesn't match",
             goal="define a multimethod pace with methods for :hare and :tortoise plus a :default fallback, then call pace with a dispatch value that doesn't match"),
     ],
-    subplots=_SUBPLOTS,
+    subplots=_SORTINGTABLE_SUBPLOTS,
     plan_pool=_PLAN_POOL_G8,
 )
 
@@ -292,7 +295,7 @@ G8_10 = SubjectCurriculum(
             "the value returned after defining protocol Show with method show, extending it to String with an implementation, then calling show on a string",
             goal="define a protocol Show with method show, extend it to String type, then call show on a string"),
     ],
-    subplots=_SUBPLOTS,
+    subplots=_SORTINGTABLE_SUBPLOTS,
     plan_pool=_PLAN_POOL_G8,
 )
 
@@ -314,7 +317,7 @@ G8_11 = SubjectCurriculum(
             "the value returned after defining protocol IPace with method run, extending it to String with an implementation, then calling run on a string",
             goal="define a protocol IPace with method run, extend it to String type, then call run on a string"),
     ],
-    subplots=_SUBPLOTS,
+    subplots=_GUILD_SUBPLOTS,
     plan_pool=_PLAN_POOL_G8,
 )
 
@@ -340,7 +343,7 @@ G8_12 = SubjectCurriculum(
             "the value returned after defining protocol Pace with method speed, using extend-type to attach it to String type with an implementation, then calling speed on a string",
             goal="define a protocol Pace with method speed, use extend-type to attach it to String type, then call speed on a string"),
     ],
-    subplots=_SUBPLOTS,
+    subplots=_SORTINGTABLE_SUBPLOTS,
     plan_pool=_PLAN_POOL_G8,
 )
 
@@ -368,7 +371,7 @@ G8_13 = SubjectCurriculum(
             "the value returned after defining protocol Tagged with method tag-of, defining record Stone with field t that uses this to access the field in the implementation, then calling tag-of on a Stone instance",
             goal="define a protocol Tagged with method tag-of, define a record Stone that implements it by accessing a field via this, then call the method"),
     ],
-    subplots=_SUBPLOTS,
+    subplots=_GUILD_SUBPLOTS,
     plan_pool=_PLAN_POOL_G8,
 )
 
@@ -391,7 +394,7 @@ G8_14 = SubjectCurriculum(
             "the vector of results after defining protocols A and B with methods a-op and b-op, extending both to String independently, then calling both methods on the string \"x\"",
             goal="define two protocols A and B, each with a method, extend both to String type independently, then call both methods"),
     ],
-    subplots=_SUBPLOTS,
+    subplots=_GUILD_SUBPLOTS,
     plan_pool=_PLAN_POOL_G8,
 )
 
@@ -418,7 +421,7 @@ G8_15 = SubjectCurriculum(
             "whether String is a type of Number in Java's type hierarchy",
             goal="check whether String is a type of Number in Java's type system"),
     ],
-    subplots=_SUBPLOTS,
+    subplots=_SORTINGTABLE_SUBPLOTS,
     plan_pool=_PLAN_POOL_G8,
 )
 
@@ -447,7 +450,7 @@ G8_16 = SubjectCurriculum(
             "the value returned after defining protocol Sound with method cry, defining records Hare and Tortoise that both implement Sound, then calling cry on a Tortoise instance",
             goal="define a protocol Sound with method cry, define two record types that implement it, then call the method on a Tortoise instance"),
     ],
-    subplots=_SUBPLOTS,
+    subplots=_GUILD_SUBPLOTS,
     plan_pool=_PLAN_POOL_G8,
 )
 

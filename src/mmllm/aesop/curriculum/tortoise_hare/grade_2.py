@@ -21,6 +21,9 @@ from mmllm.aesop.curriculum.tortoise_hare.grade_1 import (
     _GOAL_SUBPLOTS,
     _PLAN_POOL,
 )
+from mmllm.aesop.curriculum.tortoise_hare._metaphor_pools import (
+    _ACORN_SUBPLOTS, _BASKET_SUBPLOTS, _BEADSTRING_SUBPLOTS, _CHALKMARK_SUBPLOTS, _GATE_SUBPLOTS, _SCRIBE_SUBPLOTS, _TALLYWALK_SUBPLOTS,
+)
 
 
 # Extend grade-1's shared pool with two grade-2-specific subplots
@@ -74,7 +77,7 @@ G2_01 = SubjectCurriculum(
         _ex("(+ 10 20 30)", 60,       "the sum of three numbers",     "the sum of 10, 20, and 30",
             goal="add 10, 20, and 30"),
     ],
-    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_POOL,
+    subplots=_ACORN_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
 
 
@@ -98,7 +101,7 @@ G2_02 = SubjectCurriculum(
             "whether 3 ≥ 3 ≥ 2",
             goal="test whether 3 is greater than or equal to 3 and 3 is greater than or equal to 2"),
     ],
-    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_POOL,
+    subplots=_ACORN_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
 
 
@@ -118,7 +121,7 @@ G2_03 = SubjectCurriculum(
         _ex("(not= 1 1 2)", True,  "the inequality check", "whether at least one differs",
             goal="test whether at least one of 1, 1, and 2 is not equal to the others"),
     ],
-    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_POOL,
+    subplots=_ACORN_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
 
 
@@ -138,7 +141,7 @@ G2_04 = SubjectCurriculum(
         _ex("(min -3 -1 -5)", -5, "the minimum of three numbers", "the smallest of -3, -1, and -5",
             goal="find the minimum of -3, -1, and -5"),
     ],
-    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_POOL,
+    subplots=_ACORN_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
 
 
@@ -160,7 +163,7 @@ G2_05 = SubjectCurriculum(
         _ex("(mod -7 3)",   2, "the modulo operation",              "negative seven mod 3",
             goal="find negative 7 modulo 3"),
     ],
-    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_POOL,
+    subplots=_ACORN_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
 
 
@@ -180,7 +183,7 @@ G2_06 = SubjectCurriculum(
         _ex("(inc -1)", 0, "the increment operation", "negative 1 plus 1",
             goal="increment negative 1"),
     ],
-    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_POOL,
+    subplots=_ACORN_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
 
 
@@ -200,7 +203,7 @@ G2_07 = SubjectCurriculum(
             "the absolute value of the difference between 3 and 8",
             goal="find the absolute value of 3 minus 8"),
     ],
-    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_POOL,
+    subplots=_ACORN_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
 
 
@@ -219,7 +222,7 @@ G2_08 = SubjectCurriculum(
             "the difference of a whole and a ratio",             "1 minus one-third",
             goal="subtract one-third from 1"),
     ],
-    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_POOL,
+    subplots=_ACORN_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
 
 
@@ -238,7 +241,7 @@ G2_09 = SubjectCurriculum(
             "the result of 1.0 divided by 2",
             goal="divide 1.0 by 2"),
     ],
-    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_POOL,
+    subplots=_ACORN_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
 
 
@@ -256,7 +259,7 @@ G2_10 = SubjectCurriculum(
         _ex("(* 10 10)", 100,      "repeated multiplication", "10 to the second power",
             goal="multiply 10 by itself"),
     ],
-    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_POOL,
+    subplots=_ACORN_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
 
 
@@ -282,7 +285,7 @@ G2_11 = SubjectCurriculum(
             'the result of using str to join 1, "+", 2, "=", and 3',
             goal='use str to join the integer 1, the plus sign, the integer 2, the equals sign, and the integer 3'),
     ],
-    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_POOL,
+    subplots=_BEADSTRING_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
 
 
@@ -303,7 +306,7 @@ G2_12 = SubjectCurriculum(
             'the return value of using print on the string "x"',
             goal='print the string "x" without a newline'),
     ],
-    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_POOL,
+    subplots=_SCRIBE_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
 
 
@@ -331,7 +334,7 @@ G2_13 = SubjectCurriculum(
             "the result of using or on nil, false, and 5",
             goal="apply or to nil, false, and 5"),
     ],
-    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_POOL,
+    subplots=_GATE_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
 
 
@@ -351,7 +354,7 @@ G2_14 = SubjectCurriculum(
         _ex("(not \"\")",  False, "the logical not",  "the result of using not on the empty string",
             goal="negate the empty string"),
     ],
-    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_POOL,
+    subplots=_GATE_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
 
 
@@ -373,7 +376,7 @@ G2_15 = SubjectCurriculum(
             "the result of if with condition false, then-branch 1, else-branch 0",
             goal="use if to return 1 when the condition is false (then-branch) and 0 otherwise (else-branch)"),
     ],
-    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_POOL,
+    subplots=_GATE_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
 
 
@@ -391,7 +394,7 @@ G2_16 = SubjectCurriculum(
         _ex("(boolean false)", False, "the boolean conversion", "the result of using boolean on false",
             goal="convert false to a boolean"),
     ],
-    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_POOL,
+    subplots=_GATE_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
 
 
@@ -413,7 +416,7 @@ G2_17 = SubjectCurriculum(
             "the result of using the keyword :missing as a function on the map {:hare 1}",
             goal="use the keyword :missing to look up a value in a map that does not contain :missing"),
     ],
-    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_POOL,
+    subplots=_BASKET_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
 
 
@@ -435,7 +438,7 @@ G2_18 = SubjectCurriculum(
             "the number of elements in a quoted list",
             goal="count the elements in a quoted list of the integers 1, 2, and 3"),
     ],
-    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_POOL,
+    subplots=_CHALKMARK_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
 
 
@@ -453,7 +456,7 @@ G2_19 = SubjectCurriculum(
             "the sum of 99999999999 and 1",
             goal="add 1 to 99999999999"),
     ],
-    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_POOL,
+    subplots=_ACORN_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
 
 
@@ -472,7 +475,7 @@ G2_20 = SubjectCurriculum(
             "the result of using count on the empty vector",
             goal="count the elements in an empty vector"),
     ],
-    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_POOL,
+    subplots=_TALLYWALK_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
 
 
@@ -492,7 +495,7 @@ G2_21 = SubjectCurriculum(
             "the count of the substring from index 0 to 3 of the string tortoise",
             goal="extract the leading three characters from the string tortoise using subs from index 0 to 3, then count them"),
     ],
-    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_POOL,
+    subplots=_BEADSTRING_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
 
 
@@ -515,7 +518,7 @@ G2_22 = SubjectCurriculum(
             "the integer quotient of the sum of 100 and 50 divided by 5",
             goal="add 100 and 50, then divide by 5"),
     ],
-    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_POOL,
+    subplots=_ACORN_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
 
 

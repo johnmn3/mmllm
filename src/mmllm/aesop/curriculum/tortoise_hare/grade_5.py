@@ -10,7 +10,7 @@ from mmllm.aesop.curriculum.tortoise_hare.grade_1 import (
     _PLAN_POOL,
 )
 from mmllm.aesop.curriculum.tortoise_hare._metaphor_pools import (
-    _RECIPE_SUBPLOTS, _SIEVE_SUBPLOTS,
+    _CIRCUIT_SUBPLOTS, _FORK_SUBPLOTS, _GATE_SUBPLOTS, _RECIPE_SUBPLOTS, _SIEVE_SUBPLOTS, _TALLYWALK_SUBPLOTS,
 )
 
 
@@ -37,7 +37,7 @@ G5_01 = SubjectCurriculum(grade=5, subject_id="G5-01",
             goal="choose between :a and :b based on a false condition"),
         _ex("(if (> 5 3) :a :b)", ":a", "the conditional", "the if's branch",
             goal="choose between :a and :b based on whether 5 is greater than 3"),
-    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G5)
+    ], subplots=_FORK_SUBPLOTS, plan_pool=_PLAN_G5)
 
 
 G5_02 = SubjectCurriculum(grade=5, subject_id="G5-02",
@@ -46,7 +46,7 @@ G5_02 = SubjectCurriculum(grade=5, subject_id="G5-02",
         _ex("(+ 1 (if true 10 20))", 11,
             "the arithmetic expression with conditional", "the result of adding 1 to the conditional value",
             goal="add 1 to the result of choosing between 10 and 20 based on a true condition"),
-    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G5)
+    ], subplots=_FORK_SUBPLOTS, plan_pool=_PLAN_G5)
 
 
 G5_03 = SubjectCurriculum(grade=5, subject_id="G5-03",
@@ -56,7 +56,7 @@ G5_03 = SubjectCurriculum(grade=5, subject_id="G5-03",
             goal="evaluate a when form with a true condition"),
         _ex("(when false :yes)", None, "the when conditional", "the value when the condition is false",
             goal="evaluate a when form with a false condition"),
-    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G5)
+    ], subplots=_FORK_SUBPLOTS, plan_pool=_PLAN_G5)
 
 
 G5_04 = SubjectCurriculum(grade=5, subject_id="G5-04",
@@ -65,7 +65,7 @@ G5_04 = SubjectCurriculum(grade=5, subject_id="G5-04",
         _ex("(cond (= 1 2) :a (= 1 1) :b :else :c)", ":b",
             "the multi-clause conditional", "which clause of the cond fires",
             goal="evaluate multiple conditions in sequence and return the value from the first true clause"),
-    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G5)
+    ], subplots=_FORK_SUBPLOTS, plan_pool=_PLAN_G5)
 
 
 G5_05 = SubjectCurriculum(grade=5, subject_id="G5-05",
@@ -74,7 +74,7 @@ G5_05 = SubjectCurriculum(grade=5, subject_id="G5-05",
         _ex("(cond false :a false :b :else :c)", ":c",
             "the cond with default clause", "the default value when no clauses match",
             goal="fall through all false conditions and return the default value"),
-    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G5)
+    ], subplots=_FORK_SUBPLOTS, plan_pool=_PLAN_G5)
 
 
 G5_06 = SubjectCurriculum(grade=5, subject_id="G5-06",
@@ -86,7 +86,7 @@ G5_06 = SubjectCurriculum(grade=5, subject_id="G5-06",
         _ex("(case 99 1 :one 2 :two :default)", ":default",
             "the case statement with default", "the default branch",
             goal="match the value 99 against clauses and return the default when no match is found"),
-    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G5)
+    ], subplots=_FORK_SUBPLOTS, plan_pool=_PLAN_G5)
 
 
 G5_07 = SubjectCurriculum(grade=5, subject_id="G5-07",
@@ -96,7 +96,7 @@ G5_07 = SubjectCurriculum(grade=5, subject_id="G5-07",
             goal="return the last value when all values are truthy"),
         _ex("(or nil false :found)", ":found", "the or disjunction", "the first truthy value",
             goal="return the first truthy value from a sequence of values"),
-    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G5)
+    ], subplots=_GATE_SUBPLOTS, plan_pool=_PLAN_G5)
 
 
 G5_08 = SubjectCurriculum(grade=5, subject_id="G5-08",
@@ -104,7 +104,7 @@ G5_08 = SubjectCurriculum(grade=5, subject_id="G5-08",
     examples=[
         _ex("(not (> 1 2))", True, "the negation", "the negated comparison",
             goal="negate the result of checking whether 1 is greater than 2"),
-    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G5)
+    ], subplots=_GATE_SUBPLOTS, plan_pool=_PLAN_G5)
 
 
 G5_09 = SubjectCurriculum(grade=5, subject_id="G5-09",
@@ -150,7 +150,7 @@ G5_12 = SubjectCurriculum(grade=5, subject_id="G5-12",
         _ex("(reduce max [3 1 4 1 5 9 2 6])", 9,
             "the fold operation", "the maximum produced by reducing max over the vector containing 3, 1, 4, 1, 5, 9, 2, and 6",
             goal="fold max over the vector containing 3, 1, 4, 1, 5, 9, 2, and 6, finding the maximum"),
-    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G5)
+    ], subplots=_TALLYWALK_SUBPLOTS, plan_pool=_PLAN_G5)
 
 
 G5_13 = SubjectCurriculum(grade=5, subject_id="G5-13",
@@ -162,7 +162,7 @@ G5_13 = SubjectCurriculum(grade=5, subject_id="G5-13",
         _ex("(reduce + 0 [])", 0,
             "the fold with initial value over empty sequence", "the result of reducing + over an empty vector with an initial value of 0",
             goal="fold + over an empty sequence starting from an initial accumulator of 0"),
-    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G5)
+    ], subplots=_TALLYWALK_SUBPLOTS, plan_pool=_PLAN_G5)
 
 
 G5_14 = SubjectCurriculum(grade=5, subject_id="G5-14",
@@ -263,7 +263,7 @@ G5_22 = SubjectCurriculum(grade=5, subject_id="G5-22",
             "a factorial computation via loop and recur",
             "5! computed via loop/recur",
             goal="compute the factorial of 5 using a loop and tail recursion"),
-    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G5)
+    ], subplots=_CIRCUIT_SUBPLOTS, plan_pool=_PLAN_G5)
 
 
 SUBJECTS = {s.subject_id: s for s in (

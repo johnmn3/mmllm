@@ -25,7 +25,22 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 ## Grade 8
 
+### G8-02: deftype introduction
+
+- examples: 2
+- variety @ n=50: 0.93
+
+### G8-13: this-style vs fn-style
+
+- examples: 2
+- variety @ n=50: 0.94
+
 ## Grade 9
+
+### G9-13: future introduction
+
+- examples: 2
+- variety @ n=50: 0.94
 
 ## Grade 10
 
@@ -51,8 +66,8 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 | 5 | 22 | 39 | 0 | — |
 | 6 | 16 | 33 | 0 | — |
 | 7 | 18 | 36 | 0 | — |
-| 8 | 16 | 31 | 0 | — |
-| 9 | 18 | 34 | 0 | — |
+| 8 | 16 | 31 | 0 | G8-02(0.93); G8-13(0.94) |
+| 9 | 18 | 34 | 0 | G9-13(0.94) |
 | 10 | 16 | 36 | 0 | — |
 | 11 | 14 | 29 | 0 | — |
 | 12 | 18 | 37 | 0 | — |

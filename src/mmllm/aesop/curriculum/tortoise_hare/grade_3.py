@@ -13,7 +13,7 @@ from mmllm.aesop.curriculum.tortoise_hare.grade_1 import (
     _GOAL_SUBPLOTS, _PLAN_POOL,
 )
 from mmllm.aesop.curriculum.tortoise_hare._metaphor_pools import (
-    _POUCH_SUBPLOTS, _RECIPE_SUBPLOTS,
+    _POUCH_SUBPLOTS, _RECIPE_SUBPLOTS, _ROADSIGN_SUBPLOTS, _SCRIBE_SUBPLOTS,
 )
 
 # Add naming-themed subplots: a character names a value, then references it.
@@ -54,7 +54,7 @@ G3_01 = SubjectCurriculum(grade=3, subject_id="G3-01",
         _ex("(do (def y 7) y)",  7,  "the top-level binding",
             "the value of y after using def to bind y to 7",
             goal="bind y to 7 and return it"),
-    ], subplots=_NAMING_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
+    ], subplots=_ROADSIGN_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
 
 
 G3_02 = SubjectCurriculum(grade=3, subject_id="G3-02",
@@ -64,7 +64,7 @@ G3_02 = SubjectCurriculum(grade=3, subject_id="G3-02",
             "the redefined binding",
             "the value of x after redefining it with def from 1 to 99",
             goal="bind x to 1, then redefine it as 99 and return it"),
-    ], subplots=_NAMING_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
+    ], subplots=_ROADSIGN_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
 
 
 G3_03 = SubjectCurriculum(grade=3, subject_id="G3-03",
@@ -201,7 +201,7 @@ G3_12 = SubjectCurriculum(grade=3, subject_id="G3-12",
             "the scope shadowing and computation",
             "the result of adding 1 to g, computed inside a let where g is locally bound to 99, shadowing the top-level def",
             goal="define g at the top level, shadow it in a let with a different value, and compute g+1 inside the let"),
-    ], subplots=_NAMING_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
+    ], subplots=_ROADSIGN_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
 
 
 G3_13 = SubjectCurriculum(grade=3, subject_id="G3-13",
@@ -225,7 +225,7 @@ G3_14 = SubjectCurriculum(grade=3, subject_id="G3-14",
             "the do form with multiple expressions",
             "the final result evaluated by do from the sequence of expressions",
             goal="evaluate three arithmetic expressions in sequence and return the result of the last one"),
-    ], subplots=_NAMING_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
+    ], subplots=_SCRIBE_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
 
 
 G3_15 = SubjectCurriculum(grade=3, subject_id="G3-15",
@@ -255,7 +255,7 @@ G3_17 = SubjectCurriculum(grade=3, subject_id="G3-17",
             "the kebab-case naming and subtraction",
             "the result of subtracting tortoise-speed from hare-speed after binding both via let",
             goal="bind hare-speed to 4 and tortoise-speed to 1, then compute their difference"),
-    ], subplots=_NAMING_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
+    ], subplots=_ROADSIGN_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
 
 
 G3_18 = SubjectCurriculum(grade=3, subject_id="G3-18",

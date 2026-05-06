@@ -14,6 +14,9 @@ from mmllm.aesop.curriculum.generator import (
 from mmllm.aesop.curriculum.tortoise_hare.grade_1 import (
     _SHARED_SUBPLOTS as _G1_SUBPLOTS, _GOAL_SUBPLOTS, _PLAN_POOL
 )
+from mmllm.aesop.curriculum.tortoise_hare._metaphor_pools import (
+    _SAFETYNET_SUBPLOTS, _SCROLL_SUBPLOTS, _TOOLSHED_SUBPLOTS,
+)
 
 
 _ERR_SUBPLOTS: list[SubplotTemplate] = list(_G1_SUBPLOTS) + [
@@ -76,7 +79,7 @@ G7_01 = SubjectCurriculum(grade=7, subject_id="G7-01",
             "the exception handler returning a value after catching",
             "what the catch clause returns after catching the Exception",
             goal="throw an Exception and catch it, returning a numeric code"),
-    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G7)
+    ], subplots=_SAFETYNET_SUBPLOTS, plan_pool=_PLAN_G7)
 
 
 # G7-02 — try/catch
@@ -91,7 +94,7 @@ G7_02 = SubjectCurriculum(grade=7, subject_id="G7-02",
             "a try block with no error",
             "what the try block returns when no error occurs",
             goal="evaluate a number in a try block when no error is thrown"),
-    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G7)
+    ], subplots=_SAFETYNET_SUBPLOTS, plan_pool=_PLAN_G7)
 
 
 # G7-03 — try/finally
@@ -107,7 +110,7 @@ G7_03 = SubjectCurriculum(grade=7, subject_id="G7-03",
             "a finally clause running before an outer catch handler",
             "what the outer catch handler returns after the inner finally runs",
             goal="evaluate a division by zero with an inner finally clause, caught by an outer handler"),
-    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G7)
+    ], subplots=_SAFETYNET_SUBPLOTS, plan_pool=_PLAN_G7)
 
 
 # G7-04 — ex-info
@@ -124,7 +127,7 @@ G7_04 = SubjectCurriculum(grade=7, subject_id="G7-04",
             "a single value extracted from the caught ex-info's data",
             "what value is at a specific key in the ex-info's data",
             goal="throw an ex-info with data, catch it, and extract the value at key :k"),
-    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G7)
+    ], subplots=_SAFETYNET_SUBPLOTS, plan_pool=_PLAN_G7)
 
 
 # G7-05 — nil punning
@@ -147,7 +150,7 @@ G7_05 = SubjectCurriculum(grade=7, subject_id="G7-05",
             "the number of elements in nil",
             "how many elements nil contains",
             goal="count the number of elements in nil"),
-    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G7)
+    ], subplots=_SAFETYNET_SUBPLOTS, plan_pool=_PLAN_G7)
 
 
 # G7-06 — pre/post conditions (we exercise via the {:pre [...]} on
@@ -164,7 +167,7 @@ G7_06 = SubjectCurriculum(grade=7, subject_id="G7-06",
             "the result when a precondition is violated and caught",
             "what the catch handler returns when the precondition fails",
             goal="call a function with a positive precondition on a negative number, catching the failure"),
-    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G7)
+    ], subplots=_SAFETYNET_SUBPLOTS, plan_pool=_PLAN_G7)
 
 
 # G7-07 — assert
@@ -180,7 +183,7 @@ G7_07 = SubjectCurriculum(grade=7, subject_id="G7-07",
             "the result when an assertion fails and is caught",
             "what the catch handler returns when the assertion fails",
             goal="assert that 1 equals 2, catch the failure, and return a numeric code"),
-    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G7)
+    ], subplots=_SAFETYNET_SUBPLOTS, plan_pool=_PLAN_G7)
 
 
 # G7-08 — prn / pprint (these side-effect to *out*; we use with-out-str
@@ -196,7 +199,7 @@ G7_08 = SubjectCurriculum(grade=7, subject_id="G7-08",
             "the output captured from printing a keyword",
             "what string is produced when printing a keyword",
             goal="print the keyword :hare and capture the output string"),
-    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G7)
+    ], subplots=_SCROLL_SUBPLOTS, plan_pool=_PLAN_G7)
 
 
 # G7-09 — tap> (returns true; we exercise that effect).
@@ -211,7 +214,7 @@ G7_09 = SubjectCurriculum(grade=7, subject_id="G7-09",
             "the result of tapping a number into the tap pool",
             "what tap> returns when sending a number",
             goal="send a number into the tap pool"),
-    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G7)
+    ], subplots=_SCROLL_SUBPLOTS, plan_pool=_PLAN_G7)
 
 
 # G7-10 — doc / source (REPL helpers; we exercise via a metadata
@@ -223,7 +226,7 @@ G7_10 = SubjectCurriculum(grade=7, subject_id="G7-10",
             "the documentation string from a symbol's metadata",
             "what documentation string is attached to a symbol",
             goal="extract the :doc metadata value from a symbol"),
-    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G7)
+    ], subplots=_SCROLL_SUBPLOTS, plan_pool=_PLAN_G7)
 
 
 # G7-11 — Reading stack traces (we exercise via inspecting the message
@@ -241,7 +244,7 @@ G7_11 = SubjectCurriculum(grade=7, subject_id="G7-11",
             "the message extracted from a caught ex-info",
             "what message is inside the caught ex-info",
             goal="throw an ex-info with a message and extract the message from the caught exception"),
-    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G7)
+    ], subplots=_SAFETYNET_SUBPLOTS, plan_pool=_PLAN_G7)
 
 
 # G7-12 — slurp / spit (file IO; we exercise the inverse-of-spit:
@@ -259,7 +262,7 @@ G7_12 = SubjectCurriculum(grade=7, subject_id="G7-12",
             "the vector of lines from splitting a string",
             "what lines result from splitting a string on newlines",
             goal="split a multi-line string on newlines"),
-    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G7)
+    ], subplots=_SCROLL_SUBPLOTS, plan_pool=_PLAN_G7)
 
 
 # G7-13 — line-seq (we exercise via the in-memory equivalent: a vector
@@ -276,7 +279,7 @@ G7_13 = SubjectCurriculum(grade=7, subject_id="G7-13",
             "the initial line from splitting a multi-line string",
             "what the initial line is",
             goal="get the initial line from splitting a multi-line string"),
-    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G7)
+    ], subplots=_SCROLL_SUBPLOTS, plan_pool=_PLAN_G7)
 
 
 # G7-14 — with-open (we exercise the macro-shape via with-out-str,
@@ -288,7 +291,7 @@ G7_14 = SubjectCurriculum(grade=7, subject_id="G7-14",
             "the output captured from a resource-scoped block",
             "what output is captured within the scope",
             goal="capture the output of printing within a resource-scoped block"),
-    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G7)
+    ], subplots=_SCROLL_SUBPLOTS, plan_pool=_PLAN_G7)
 
 
 # G7-15 — *in* / *out* (we exercise *out* via with-out-str; *in* is
@@ -304,7 +307,7 @@ G7_15 = SubjectCurriculum(grade=7, subject_id="G7-15",
             "the output captured from a bare print-line call",
             "what is captured when a bare println is redirected",
             goal="redirect the output stream and capture what a bare println produces"),
-    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G7)
+    ], subplots=_SCROLL_SUBPLOTS, plan_pool=_PLAN_G7)
 
 
 # G7-16 — edn read
@@ -324,7 +327,7 @@ G7_16 = SubjectCurriculum(grade=7, subject_id="G7-16",
             "the vector parsed from an edn string",
             "what vector is read from the string",
             goal="parse an edn vector of keywords from a string"),
-    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G7)
+    ], subplots=_SCROLL_SUBPLOTS, plan_pool=_PLAN_G7)
 
 
 # G7-17 — JSON roundtrip (we exercise via edn-shaped data; the actual
@@ -342,7 +345,7 @@ G7_17 = SubjectCurriculum(grade=7, subject_id="G7-17",
             "the vector after writing and reading back via edn",
             "what vector is recovered from the roundtrip",
             goal="serialize a vector to a string with pr-str and read it back into data with clojure.edn/read-string"),
-    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G7)
+    ], subplots=_SCROLL_SUBPLOTS, plan_pool=_PLAN_G7)
 
 
 # G7-18 — Shell command (host-specific; we exercise via a non-shell
@@ -360,7 +363,7 @@ G7_18 = SubjectCurriculum(grade=7, subject_id="G7-18",
             "the number of arguments in a shell-call descriptor",
             "how many arguments are in the descriptor",
             goal="count the number of arguments in a shell-call descriptor map"),
-    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G7)
+    ], subplots=_TOOLSHED_SUBPLOTS, plan_pool=_PLAN_G7)
 
 
 # ─────────────────────── registry ───────────────────────

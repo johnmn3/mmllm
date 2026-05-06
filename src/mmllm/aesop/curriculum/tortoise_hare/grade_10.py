@@ -14,7 +14,7 @@ from mmllm.aesop.curriculum.tortoise_hare.grade_1 import (
     _SHARED_SUBPLOTS as _G1_SUBPLOTS, _GOAL_SUBPLOTS, _PLAN_POOL,
 )
 from mmllm.aesop.curriculum.tortoise_hare._metaphor_pools import (
-    _RECIPE_SUBPLOTS,
+    _CHALKMARK_SUBPLOTS, _RECIPE_SUBPLOTS, _REWRITERULE_SUBPLOTS, _SCRIBE_SUBPLOTS,
 )
 
 
@@ -107,7 +107,7 @@ G10_01 = SubjectCurriculum(
             "what you get when unquoting x inside a syntax-quoted form",
             goal="create a form that when x is 5 produces a list containing the value of x"),
     ],
-    subplots=_MACRO_SUBPLOTS, plan_pool=_PLAN_G10,
+    subplots=_CHALKMARK_SUBPLOTS, plan_pool=_PLAN_G10,
 )
 
 
@@ -126,7 +126,7 @@ G10_02 = SubjectCurriculum(
             "the form produced when splicing a three-element vector",
             goal="build a form that inserts all elements of a vector into a list call"),
     ],
-    subplots=_MACRO_SUBPLOTS, plan_pool=_PLAN_G10,
+    subplots=_CHALKMARK_SUBPLOTS, plan_pool=_PLAN_G10,
 )
 
 
@@ -146,7 +146,7 @@ G10_03 = SubjectCurriculum(
             "the value returned by twice expanding to a do-block with the unquoted argument repeated",
             goal="define a macro named twice that emits its argument twice in a do block, then call it"),
     ],
-    subplots=_MACRO_SUBPLOTS, plan_pool=_PLAN_G10,
+    subplots=_REWRITERULE_SUBPLOTS, plan_pool=_PLAN_G10,
 )
 
 
@@ -167,7 +167,7 @@ G10_04 = SubjectCurriculum(
             "the intermediate form after expanding the macro once",
             goal="expand an or-macro call one step to reveal its internal structure"),
     ],
-    subplots=_MACRO_SUBPLOTS, plan_pool=_PLAN_G10,
+    subplots=_REWRITERULE_SUBPLOTS, plan_pool=_PLAN_G10,
 )
 
 
@@ -186,7 +186,7 @@ G10_05 = SubjectCurriculum(
             "the final form after threading the value through all steps",
             goal="fully expand a thread-first macro call to see how the value threads through"),
     ],
-    subplots=_MACRO_SUBPLOTS, plan_pool=_PLAN_G10,
+    subplots=_REWRITERULE_SUBPLOTS, plan_pool=_PLAN_G10,
 )
 
 
@@ -209,7 +209,7 @@ G10_06 = SubjectCurriculum(
             "the result when using when-not with a false condition",
             goal="use when-not to execute an expression when the condition is false"),
     ],
-    subplots=_MACRO_SUBPLOTS, plan_pool=_PLAN_G10,
+    subplots=_REWRITERULE_SUBPLOTS, plan_pool=_PLAN_G10,
 )
 
 
@@ -252,7 +252,7 @@ G10_08 = SubjectCurriculum(
             "the sum returned when add-mac expands to an addition of the unquoted arguments",
             goal="define a macro add-mac and call it to add 3 and 4"),
     ],
-    subplots=_MACRO_SUBPLOTS, plan_pool=_PLAN_G10,
+    subplots=_REWRITERULE_SUBPLOTS, plan_pool=_PLAN_G10,
 )
 
 
@@ -272,7 +272,7 @@ G10_09 = SubjectCurriculum(
             "whether two fresh gensyms are identical",
             goal="generate two gensyms with the same prefix and check if they are equal"),
     ],
-    subplots=_MACRO_SUBPLOTS, plan_pool=_PLAN_G10,
+    subplots=_REWRITERULE_SUBPLOTS, plan_pool=_PLAN_G10,
 )
 
 
@@ -295,7 +295,7 @@ G10_10 = SubjectCurriculum(
             "the result of the then-branch when the binding succeeds",
             goal="use if-let to bind x to 7 and return the square of x"),
     ],
-    subplots=_MACRO_SUBPLOTS, plan_pool=_PLAN_G10,
+    subplots=_REWRITERULE_SUBPLOTS, plan_pool=_PLAN_G10,
 )
 
 
@@ -319,7 +319,7 @@ G10_11 = SubjectCurriculum(
             "the vector after the middle element is discarded",
             goal="use the #_ reader macro to skip an element in a vector"),
     ],
-    subplots=_MACRO_SUBPLOTS, plan_pool=_PLAN_G10,
+    subplots=_SCRIBE_SUBPLOTS, plan_pool=_PLAN_G10,
 )
 
 
@@ -339,7 +339,7 @@ G10_12 = SubjectCurriculum(
             "whether the uuid? predicate returns true",
             goal="test that a tagged literal with #uuid reads as a uuid"),
     ],
-    subplots=_MACRO_SUBPLOTS, plan_pool=_PLAN_G10,
+    subplots=_SCRIBE_SUBPLOTS, plan_pool=_PLAN_G10,
 )
 
 
@@ -359,7 +359,7 @@ G10_13 = SubjectCurriculum(
             "the parsed vector from the EDN source",
             goal="use edn/read-string to parse a vector of keywords from a string"),
     ],
-    subplots=_MACRO_SUBPLOTS, plan_pool=_PLAN_G10,
+    subplots=_SCRIBE_SUBPLOTS, plan_pool=_PLAN_G10,
 )
 
 
@@ -378,7 +378,7 @@ G10_14 = SubjectCurriculum(
             "the result of evaluating the constructed list",
             goal="construct a list that represents addition and evaluate it"),
     ],
-    subplots=_MACRO_SUBPLOTS, plan_pool=_PLAN_G10,
+    subplots=_REWRITERULE_SUBPLOTS, plan_pool=_PLAN_G10,
 )
 
 
@@ -401,7 +401,7 @@ G10_15 = SubjectCurriculum(
             "the incremented values",
             goal="use map to increment each element of a list"),
     ],
-    subplots=_MACRO_SUBPLOTS, plan_pool=_PLAN_G10,
+    subplots=_REWRITERULE_SUBPLOTS, plan_pool=_PLAN_G10,
 )
 
 
@@ -425,7 +425,7 @@ G10_16 = SubjectCurriculum(
             "the value of the symbol defined by def-pace when expanded with the given name and keyword value",
             goal="define a def-pace macro and use it to define and retrieve a value"),
     ],
-    subplots=_MACRO_SUBPLOTS, plan_pool=_PLAN_G10,
+    subplots=_REWRITERULE_SUBPLOTS, plan_pool=_PLAN_G10,
 )
 
 

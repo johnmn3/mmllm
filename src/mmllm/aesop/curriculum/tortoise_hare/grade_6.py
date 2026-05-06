@@ -14,6 +14,9 @@ from mmllm.aesop.curriculum.generator import (
 from mmllm.aesop.curriculum.tortoise_hare.grade_1 import (
     _GOAL_SUBPLOTS, _SHARED_SUBPLOTS as _G1_SUBPLOTS, _PLAN_POOL
 )
+from mmllm.aesop.curriculum.tortoise_hare._metaphor_pools import (
+    _ROADSIGN_SUBPLOTS, _SCROLL_SUBPLOTS, _TOOLSHED_SUBPLOTS,
+)
 
 
 _NS_SUBPLOTS: list[SubplotTemplate] = list(_G1_SUBPLOTS) + [
@@ -72,7 +75,7 @@ G6_01 = SubjectCurriculum(grade=6, subject_id="G6-01",
             "checking whether a value is a symbol",
             "whether a value is a symbol",
             goal="test whether a quoted namespace-like value is a symbol"),
-    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G6)
+    ], subplots=_ROADSIGN_SUBPLOTS, plan_pool=_PLAN_G6)
 
 
 # G6-02 — ns form (we exercise via `name *ns*` style introspection)
@@ -87,7 +90,7 @@ G6_02 = SubjectCurriculum(grade=6, subject_id="G6-02",
             "checking equality of two namespace symbols",
             "whether two identical namespace symbols are equal",
             goal="test whether two identical namespace symbols are equal"),
-    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G6)
+    ], subplots=_ROADSIGN_SUBPLOTS, plan_pool=_PLAN_G6)
 
 
 # G6-03 — require — fully qualified usage (require already loaded
@@ -104,7 +107,7 @@ G6_03 = SubjectCurriculum(grade=6, subject_id="G6-03",
             "calling a fully-qualified string function",
             "the lowercase form of the string ZEBRA produced by clojure.string/lower-case",
             goal="call the lowercasing function from clojure.string on a test string"),
-    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G6)
+    ], subplots=_ROADSIGN_SUBPLOTS, plan_pool=_PLAN_G6)
 
 
 # G6-04 — refer-and-use (we exercise the effect: a referred name
@@ -118,7 +121,7 @@ G6_04 = SubjectCurriculum(grade=6, subject_id="G6-04",
             "testing equality of two identical function calls",
             "whether two calls to the same function with the same argument produce the same result",
             goal="test whether two calls to the fully-qualified string uppercasing function with the same argument are equal"),
-    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G6)
+    ], subplots=_ROADSIGN_SUBPLOTS, plan_pool=_PLAN_G6)
 
 
 # G6-05 — Fully qualified names
@@ -141,7 +144,7 @@ G6_05 = SubjectCurriculum(grade=6, subject_id="G6-05",
             "extracting the name portion of a keyword",
             "the name part of a qualified keyword",
             goal="extract the name local portion of a qualified keyword"),
-    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G6)
+    ], subplots=_ROADSIGN_SUBPLOTS, plan_pool=_PLAN_G6)
 
 
 # G6-06 — Private defs (we can't test ^:private effect with eval, but
@@ -158,7 +161,7 @@ G6_06 = SubjectCurriculum(grade=6, subject_id="G6-06",
             "accessing the :private flag from metadata",
             "whether the :private metadata is set on a plain symbol",
             goal="check whether the :private flag is present in the metadata of a plain symbol without markers"),
-    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G6)
+    ], subplots=_ROADSIGN_SUBPLOTS, plan_pool=_PLAN_G6)
 
 
 # G6-07 — Public vs private API (design decision; we exercise via
@@ -174,7 +177,7 @@ G6_07 = SubjectCurriculum(grade=6, subject_id="G6-07",
             "converting the :private metadata to a boolean",
             "whether a symbol without :private marker evaluates to false when converted to boolean",
             goal="convert the :private metadata flag of a plain symbol to a boolean"),
-    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G6)
+    ], subplots=_ROADSIGN_SUBPLOTS, plan_pool=_PLAN_G6)
 
 
 # G6-08 — Circular dependencies (we exercise via a plain form that
@@ -191,7 +194,7 @@ G6_08 = SubjectCurriculum(grade=6, subject_id="G6-08",
             "testing equality of two namespace symbols",
             "whether two identical namespace symbols are equal",
             goal="test whether two references to the same namespace symbol are equal"),
-    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G6)
+    ], subplots=_ROADSIGN_SUBPLOTS, plan_pool=_PLAN_G6)
 
 
 # G6-09 — Loading order (we exercise via straightforward sequence of
@@ -207,7 +210,7 @@ G6_09 = SubjectCurriculum(grade=6, subject_id="G6-09",
             "establishing local bindings with dependent values",
             "the sum of two variables with the second depending on the first",
             goal="bind a to 1, bind b to a plus 1, then return the sum of a and b"),
-    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G6)
+    ], subplots=_ROADSIGN_SUBPLOTS, plan_pool=_PLAN_G6)
 
 
 # G6-10 — leiningen / deps.edn (project setup; we exercise via reading
@@ -255,7 +258,7 @@ G6_12 = SubjectCurriculum(grade=6, subject_id="G6-12",
             "extracting string names from namespace symbols",
             "the vector of namespace names as strings",
             goal="extract the string form of each namespace symbol in a vector of two namespaces"),
-    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G6)
+    ], subplots=_ROADSIGN_SUBPLOTS, plan_pool=_PLAN_G6)
 
 
 # G6-13 — Aliasing conventions (we exercise via a tiny alias-style
@@ -267,7 +270,7 @@ G6_13 = SubjectCurriculum(grade=6, subject_id="G6-13",
             "aliasing a fully-qualified function and calling it through the alias",
             "the uppercase form of the string hare when clojure.string/upper-case is called through a local alias",
             goal="bind the fully-qualified string uppercasing function to a local alias s and call it on hare"),
-    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G6)
+    ], subplots=_ROADSIGN_SUBPLOTS, plan_pool=_PLAN_G6)
 
 
 # G6-14 — Import for Java classes (basilisp targets Python; we use a
@@ -283,7 +286,7 @@ G6_14 = SubjectCurriculum(grade=6, subject_id="G6-14",
             "extracting the string form of a class symbol",
             "the string form of a Java class symbol",
             goal="extract the string form of a Java class symbol"),
-    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G6)
+    ], subplots=_TOOLSHED_SUBPLOTS, plan_pool=_PLAN_G6)
 
 
 # G6-15 — Namespace meta (we exercise the metadata mechanism on a
@@ -299,7 +302,7 @@ G6_15 = SubjectCurriculum(grade=6, subject_id="G6-15",
             "accessing the :author metadata from a symbol",
             "the author value from a symbol's metadata",
             goal="extract the :author metadata value from a symbol with an author tag"),
-    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G6)
+    ], subplots=_SCROLL_SUBPLOTS, plan_pool=_PLAN_G6)
 
 
 # G6-16 — Cleaning up requires (we exercise via a simple "is this name
@@ -315,7 +318,7 @@ G6_16 = SubjectCurriculum(grade=6, subject_id="G6-16",
             "testing membership in a set of namespaces",
             "whether a different namespace is in the set of required namespaces",
             goal="test whether the clojure.set namespace is in the set of required namespaces"),
-    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G6)
+    ], subplots=_ROADSIGN_SUBPLOTS, plan_pool=_PLAN_G6)
 
 
 # ─────────────────────── registry ───────────────────────

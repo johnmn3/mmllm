@@ -159,6 +159,211 @@ patterns that flow naturally from your fable's setting and props.
   only fits some examples, mark it with `fits_tags=("arithmetic",)`
   and tag the relevant examples.
 
+## Metaphor families — the narrative MUST illuminate the idiom
+
+**This is the most important authoring principle in this whole
+document. Read it carefully and apply it everywhere.**
+
+A `let`-binding is structurally "putting things in temporary
+buckets so you can use them later." A model trained on a thousand
+goal-style records about `let` should *also* be trained on a thousand
+records where the **narrative itself** carries the bucket metaphor —
+where the Tortoise tucks values into a pouch tied at his hip, walks
+the stretch of road where they're needed, then opens the pouch
+empty at the next milestone. The metaphor mirrors `let`-binding
+scope. The model learns the abstraction *and* a concrete image to
+hang it on.
+
+The default `_GOAL_SUBPLOTS` is a generic Hare-vs-Tortoise frame
+("Hare boasts → Tortoise writes the form"). It's correct as a
+fallback for subjects that genuinely don't have an everyday-life
+analog (host platforms, build tools, library overviews). For
+**every other** subject, the narrative MUST carry an
+operation-specific fable metaphor.
+
+**Don't drop the metaphor on the ground.** When you're writing a
+subject for `let`, `defn`, `assoc`, `reduce`, `map`, `filter`,
+`atom`, `try/catch`, `if`, `cond`, `defprotocol`, `defmulti`,
+`defmacro`, etc., **find the metaphor family it belongs to and
+import that pool**. If no family fits, design a new one
+(see below).
+
+### The architecture: family pools
+
+A **metaphor family** is a `list[SubplotTemplate]` (5 templates is
+the standard size) that bakes one specific metaphor into the
+narrative. Templates within a family must be **type-neutral within
+the family** so that any subject in the family renders honestly
+regardless of which template the seed picks.
+
+For tortoise-hare, family pools live in
+`tortoise_hare/_metaphor_pools.py`. Other fables put theirs in
+`<fable>/_metaphor_pools.py` with character names substituted.
+
+```python
+# tortoise_hare/_metaphor_pools.py
+_POUCH_SUBPLOTS: list[SubplotTemplate] = [
+    SubplotTemplate("""\
+{tortoise_phrase} reached for the small leather pouch tied at
+{tortoise_his_her} hip. "When I want to {goal_text}," ...
+{tortoise_he_she_cap} composed {concept_phrase}, the binding
+tucked away inside, and submitted the form to the REPL. ..."""),
+    # ... 4 more pouch templates
+]
+```
+
+A subject opts in by setting `subplots=_POUCH_SUBPLOTS` in its
+`SubjectCurriculum(...)`.
+
+### Established family catalog (23 families)
+
+The reference implementation in tortoise-hare has shipped these.
+**Other fables should mirror the same family names with their own
+characters' voice** — that way cross-fable learning reinforces
+the idiom-to-metaphor mapping consistently across all ~700K records.
+
+| Family                       | Metaphor                                                        | Idioms covered                                  |
+| ---------------------------- | --------------------------------------------------------------- | ----------------------------------------------- |
+| `_POUCH_SUBPLOTS`            | small leather pouch tied at the hip; held for one stretch of road | `let`, multi-binding, shadowing, substitution |
+| `_RECIPE_SUBPLOTS`           | recipe-card on the road; paw-step routine                       | `fn`, `defn`, `comp`, `partial`, `apply`, threading |
+| `_BASKET_SUBPLOTS`           | basket on the path; original sits untouched                     | vectors, lists, maps, sets, immutability        |
+| `_SIEVE_SUBPLOTS`            | sieve over an empty basket; rule decides what passes            | `map`, `filter`, `take`, `drop`, `into`, transducers |
+| `_NOTEBOOK_SUBPLOTS`         | notebook on a tree stump in the meadow                          | `atom`, `ref`, `swap!`, `dosync`, `compare-and-set!`, watch, validator, binding, locking |
+| `_ACORN_SUBPLOTS`            | counting / adding / dividing acorns                             | arithmetic, comparisons, multi-arg ops          |
+| `_GATE_SUBPLOTS`             | gates on a trail; first closed gate stops the chain             | `and`/`or` short-circuit, `not`, falsey, equality |
+| `_FORK_SUBPLOTS`             | fork at a crossroads; condition decides the path                | `if`, `cond`, `case`, `when`                    |
+| `_ROADSIGN_SUBPLOTS`         | posted sign on the road; library of scrolls                     | `def`, redefinition, namespaces, `require`, refer, aliases |
+| `_SAFETYNET_SUBPLOTS`        | net under the leap; practice-meadow stumbles cost nothing       | `try`/`catch`, `throw`, `ex-info`, assert, REPL safety |
+| `_SCROLL_SUBPLOTS`           | scrolls written and read; marginalia (metadata)                 | `prn`, `slurp`, `spit`, `with-open`, edn, JSON, `*in*`/`*out*`, doc, namespace meta |
+| `_GUILD_SUBPLOTS`            | guild any species can join; same call, species-specific behavior | protocols, `extend-protocol`, `extend-type`, abstract design |
+| `_SORTINGTABLE_SUBPLOTS`     | sorting-table that routes by what's stamped on the runner       | multimethods, `defmulti`/`defmethod`, derive/`isa?` |
+| `_CARRYINGCASE_SUBPLOTS`     | custom or labeled carrying-case                                 | `deftype`, `defrecord`                          |
+| `_TOOLSHED_SUBPLOTS`         | borrowing a tool from another toolshed (host)                   | `.method`, `Class/static`, `new`, type hints, host arrays |
+| `_RUNNERAHEAD_SUBPLOTS`      | sending a runner down the road; come back later for the result | `agent`, `future`, `promise`, `await`, `send`   |
+| `_REWRITERULE_SUBPLOTS`      | scribe with the power to rewrite the recipe before the runtime sees it | `defmacro`, `macroexpand`, `eval`, hygiene, anaphoric |
+| `_SCRIBE_SUBPLOTS`           | scribe's reading conventions; shorthand for the form            | comments, whitespace, parens, `do`, reader macros, tagged literals |
+| `_CHALKMARK_SUBPLOTS`        | chalk mark on bark vs the acorn it names                        | `quote`, `'`, syntax-quote, symbols vs values   |
+| `_TALLYWALK_SUBPLOTS`        | walking the row carrying a running tally                        | `reduce`, `count`                                |
+| `_BEADSTRING_SUBPLOTS`       | strings as strings of beads                                     | `str` concat, `subs`, string length              |
+| `_CIRCUIT_SUBPLOTS`          | looping back without growing the trail                          | `recur`, `loop`                                  |
+| `_GOAL_SUBPLOTS` (fallback)  | generic Hare-vs-Tortoise; *no metaphor*                          | tooling, host platforms, library overviews, abstract concepts |
+
+**The honest fallback line.** `_GOAL_SUBPLOTS` (the generic pool) is
+the right choice for subjects where forcing a forest metaphor would
+be cargo-cult: `clojure.test`, `core.async`, `Leiningen`,
+`deps.edn`, `Pedestal`, `Datomic`, `Reagent`, ClojureScript-host
+overview, library-design patterns, style guide. About 36 of 216
+tortoise-hare subjects fall here. Don't try to give Datomic a forest
+metaphor; the fable doesn't have datalog databases.
+
+### Authoring rules for new templates
+
+Follow these religiously. They're the difference between a metaphor
+that lands and one that breaks.
+
+1. **Name the metaphor concretely in every template.** "small
+   leather pouch", "recipe-card", "tree stump", "basket of pouches".
+   Repeated imagery is *the lesson*; don't replace with abstract
+   nouns.
+
+2. **Type-neutral within the family.** If your family covers
+   `vectors`, `lists`, `maps`, AND `sets`, no template can claim
+   "Sets are like this..." because the seed will pick that template
+   for an `assoc` (map) example and the model will learn that
+   `assoc` makes false claims about sets. Make claims about
+   "baskets" generically; let `goal_text`/`concept_phrase` say
+   which specific operation.
+
+3. **`{goal_text}` + `{concept_phrase}`, NEVER `{form_display}`.**
+   The form-leak design (pitfall #31) demands this. Atom subjects
+   are the exception; all other subjects' templates are goal-style.
+
+4. **Pronoun case at sentence starts.** Use `{tortoise_he_she_cap}`,
+   `{hare_he_she_cap}` after a period or quoted-line close.
+   Lowercase pronouns mid-sentence only.
+
+5. **No "and" right after `{concept_phrase}`.** If
+   `concept_phrase = "the logical and"`, then "{concept_phrase} and
+   submit it" renders "the logical and and submit it" — a stutter.
+   Use ", then submit", "; submit that to the REPL", "—then let
+   the REPL ...", etc.
+
+6. **No "write a form to {goal_text}" stutter.** If a goal_text
+   starts with "write" (rare but possible), this collides. Reframe
+   templates as "to {goal_text}, ..." (noun-clause) or "produce a
+   form whose evaluation would {goal_text}", and audit your
+   goal_texts to start with verbs like "compute", "compose",
+   "evaluate", "use", "construct", "extract", not "write".
+
+7. **Lean into Hare/Tortoise's roles.** Hare boasts, hurries,
+   guesses; Tortoise writes carefully, lets the REPL decide.
+   At least 2 of every family's 5 templates should carry an actual
+   fable beat (Hare stumbles → Tortoise's careful form wins; Hare
+   shortcuts → REPL returns the only answer that would do).
+
+8. **Check audit clean** after every family addition:
+   `FABLE=<fable> python3 docs/clojure-pedagogy/audits/audit-harness.py`.
+   Especially watch for ANSWER_LEAK_STRING (stray words in your
+   templates that match an example's expected answer — words like
+   "first", "next", "true", "ok" can trigger leaks).
+
+### Designing a new metaphor family
+
+If you encounter an idiom that doesn't fit any of the 23 above, add
+a new family:
+
+1. Pick a daily-life image from the fable's world (forest, farm,
+   tortoise-hare, whatever). The image should *structurally mirror*
+   the idiom.
+2. Author 5 templates following rules above. Type-neutral within
+   the family.
+3. Add the pool to `_metaphor_pools.py` with a section header.
+4. Update the family catalog table in this skill doc with one row.
+5. Retag the relevant subjects' `subplots=` field.
+6. Audit, smoke-test, regenerate the showcase.
+
+### Sharing across fables
+
+The family **names** and **what idioms they cover** are constant
+across fables. The family **templates** differ per fable because
+the characters' voice and the imagery details are fable-specific.
+
+For a new fable's metaphor pools, the recommended approach:
+1. Use the **same family names**: `_POUCH_SUBPLOTS`,
+   `_RECIPE_SUBPLOTS`, etc. Subjects in grade-3 of the new fable
+   import `_POUCH_SUBPLOTS` from the new fable's
+   `_metaphor_pools.py` — same family name, fable-specific
+   templates inside.
+2. Use the **same metaphor**, translated into the fable's world.
+   The Goose-and-Golden-Eggs equivalent of "pouch" might be a small
+   linen apron-pocket the goosegirl wears; the Ant-and-Grasshopper
+   equivalent might be a small grain-pouch the ant carries. Same
+   *idea* (temporary scope), different *imagery*.
+3. **Cross-fable consistency boosts the model's metaphor learning.**
+   When G3-03 in tortoise-hare uses the pouch, G3-03 in goose-eggs
+   uses the apron-pocket, and G3-03 in ant-grasshopper uses the
+   grain-pouch — the model triangulates that "let-binding is *some
+   kind of temporary container*" across all three.
+
+### Don't drop the metaphor on the ground
+
+The most common failure mode for fable-curriculum agents is to
+fall back to `_GOAL_SUBPLOTS` (the generic) for subjects that
+*do* have a fable-natural metaphor. The audit harness can't catch
+this — there's no FORM_LEAK or ANSWER_LEAK_STRING for "narrative
+is generic when it could be metaphorical." It's a quality
+discipline, not a mechanical check.
+
+Therefore, when you implement a grade file:
+
+- Look up each subject in this doc's family catalog.
+- Import the right pool from `_metaphor_pools.py`.
+- Set `subplots=_FAMILY_SUBPLOTS` for that subject.
+- Only use `_GOAL_SUBPLOTS` for ABSTRACT-by-nature subjects (host
+  platforms, build tools, library overviews).
+- If you find an idiom without a family: design one and add it.
+  Don't fall back. **The metaphor is the lesson.**
+
 ## Plan pool
 
 A short list of plan-only prefaces — single sentences describing

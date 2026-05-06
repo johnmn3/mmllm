@@ -19,6 +19,9 @@ from __future__ import annotations
 from mmllm.aesop.curriculum.generator import (
     SubjectCurriculum, SubjectExample, SubplotTemplate,
 )
+from mmllm.aesop.curriculum.tortoise_hare._metaphor_pools import (
+    _ACORN_SUBPLOTS, _CHALKMARK_SUBPLOTS, _GATE_SUBPLOTS, _SAFETYNET_SUBPLOTS, _SCRIBE_SUBPLOTS,
+)
 
 
 # ─────────────────────── shared subplot pool ───────────────────────
@@ -516,7 +519,7 @@ G1_09 = SubjectCurriculum(
             "whether two quoted names are equal",
             goal="compare two quoted names for equality, using the = predicate"),
     ],
-    subplots=_GOAL_SUBPLOTS,
+    subplots=_CHALKMARK_SUBPLOTS,
     plan_pool=_PLAN_POOL,
 )
 
@@ -536,7 +539,7 @@ G1_10 = SubjectCurriculum(
             "the literal value, ignoring the comment",
             goal="submit the integer 42 with a double-semicolon trailing comment"),
     ],
-    subplots=_GOAL_SUBPLOTS,
+    subplots=_SCRIBE_SUBPLOTS,
     plan_pool=_PLAN_POOL,
 )
 
@@ -556,7 +559,7 @@ G1_11 = SubjectCurriculum(
             "the result of an addition formatted across multiple lines",
             goal="add 1 and 2 in a form whose arguments are on separate lines"),
     ],
-    subplots=_GOAL_SUBPLOTS,
+    subplots=_SCRIBE_SUBPLOTS,
     plan_pool=_PLAN_POOL,
 )
 
@@ -575,7 +578,7 @@ G1_12 = SubjectCurriculum(
             "the result of multiplying a nested sum by 3",
             goal="multiply the sum of 1 and 2 by 3"),
     ],
-    subplots=_GOAL_SUBPLOTS,
+    subplots=_SCRIBE_SUBPLOTS,
     plan_pool=_PLAN_POOL,
 )
 
@@ -605,7 +608,7 @@ G1_13 = SubjectCurriculum(
             "the subtraction", "the difference of 20 and 7",
             goal="subtract 7 from 20"),
     ],
-    subplots=_GOAL_SUBPLOTS,
+    subplots=_ACORN_SUBPLOTS,
     plan_pool=_PLAN_POOL,
 )
 
@@ -633,7 +636,7 @@ G1_14 = SubjectCurriculum(
             "the sum of two nested products",
             goal="add the product of 2 and 3 to the product of 4 and 5"),
     ],
-    subplots=_GOAL_SUBPLOTS,
+    subplots=_ACORN_SUBPLOTS,
     plan_pool=_PLAN_POOL,
 )
 
@@ -663,7 +666,7 @@ G1_15 = SubjectCurriculum(
             "the multi-arg equality", "whether four 1s are all equal",
             goal="test with = whether four 1s are all equal"),
     ],
-    subplots=_GOAL_SUBPLOTS,
+    subplots=_GATE_SUBPLOTS,
     plan_pool=_PLAN_POOL,
 )
 
@@ -693,7 +696,7 @@ G1_16 = SubjectCurriculum(
             "the negative check", "whether 4 is negative",
             goal="check whether 4 is negative using neg?"),
     ],
-    subplots=_GOAL_SUBPLOTS,
+    subplots=_ACORN_SUBPLOTS,
     plan_pool=_PLAN_POOL,
 )
 
@@ -711,7 +714,7 @@ G1_17 = SubjectCurriculum(
             "the addition", "the value returned by adding 1 and 2",
             goal="add 1 and 2 so the REPL returns the result"),
     ],
-    subplots=_GOAL_SUBPLOTS,
+    subplots=_SCRIBE_SUBPLOTS,
     plan_pool=_PLAN_POOL,
 )
 
@@ -729,7 +732,7 @@ G1_18 = SubjectCurriculum(
             "the multiplication", "the product of 7 and 6",
             goal="multiply 7 by 6"),
     ],
-    subplots=_GOAL_SUBPLOTS,
+    subplots=_SAFETYNET_SUBPLOTS,
     plan_pool=_PLAN_POOL,
 )
 

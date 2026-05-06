@@ -14,7 +14,7 @@ from mmllm.aesop.curriculum.tortoise_hare.grade_1 import (
     _SHARED_SUBPLOTS as _G1_SUBPLOTS, _GOAL_SUBPLOTS, _PLAN_POOL,
 )
 from mmllm.aesop.curriculum.tortoise_hare._metaphor_pools import (
-    _BASKET_SUBPLOTS, _NOTEBOOK_SUBPLOTS,
+    _BASKET_SUBPLOTS, _NOTEBOOK_SUBPLOTS, _RUNNERAHEAD_SUBPLOTS,
 )
 
 
@@ -272,7 +272,7 @@ G9_10 = SubjectCurriculum(
             "the value returned by dereferencing ag after defining an agent holding 5, sending + 10 asynchronously, awaiting, and dereferencing",
             goal="construct an agent holding 5, asynchronously send + with 10 to it, await its completion, and dereference"),
     ],
-    subplots=_SUBPLOTS,
+    subplots=_RUNNERAHEAD_SUBPLOTS,
     plan_pool=_PLAN_POOL_G9,
 )
 
@@ -294,7 +294,7 @@ G9_11 = SubjectCurriculum(
             "the value returned by dereferencing ag after defining an agent holding 0, using send-off to dispatch inc, awaiting, and dereferencing",
             goal="construct an agent holding 0, use send-off to asynchronously apply inc, await its completion, and dereference"),
     ],
-    subplots=_SUBPLOTS,
+    subplots=_RUNNERAHEAD_SUBPLOTS,
     plan_pool=_PLAN_POOL_G9,
 )
 
@@ -311,7 +311,7 @@ G9_12 = SubjectCurriculum(
             "the value returned by dereferencing ag after defining an agent holding 0, sending inc twice asynchronously, awaiting, and dereferencing",
             goal="construct an agent holding 0, asynchronously send inc twice, synchronize with await, and dereference"),
     ],
-    subplots=_SUBPLOTS,
+    subplots=_RUNNERAHEAD_SUBPLOTS,
     plan_pool=_PLAN_POOL_G9,
 )
 
@@ -333,7 +333,7 @@ G9_13 = SubjectCurriculum(
             "the value returned by dereferencing a future that multiplies 6 and 7",
             goal="construct a future that multiplies 6 and 7, and dereference it"),
     ],
-    subplots=_SUBPLOTS,
+    subplots=_RUNNERAHEAD_SUBPLOTS,
     plan_pool=_PLAN_POOL_G9,
 )
 
@@ -377,7 +377,7 @@ G9_15 = SubjectCurriculum(
             "the value returned by dereferencing a promise after defining it, delivering a number to it, and dereferencing",
             goal="construct a promise, deliver 42 to it, and dereference to get the delivered value"),
     ],
-    subplots=_SUBPLOTS,
+    subplots=_RUNNERAHEAD_SUBPLOTS,
     plan_pool=_PLAN_POOL_G9,
 )
 
