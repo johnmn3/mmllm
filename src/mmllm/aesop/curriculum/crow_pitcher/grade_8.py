@@ -955,6 +955,26 @@ G8_15 = SubjectCurriculum(
             concept_phrase="checking type hierarchy after derive",
             question_what="whether the relationship holds after establishing with derive that ::hare is a type of ::runner, then checking with isa?",
             goal_text="establish a type relationship where ::hare is a type of ::runner, then check it",
+
+            scenario=(
+                "Korvus scratched a lineage mark on the sorting-lip at the "
+                "orchard: ::hare is a kind of ::runner. He talon-pressed the "
+                "relationship into the hierarchy stone, then queried whether "
+                "::hare counted as ::runner."
+            ),
+            need=(
+                "He needed to confirm the derived relationship was recorded "
+                "and that `isa?` could read it back."
+            ),
+            mapping=(
+                "`derive` writes the parent-child relationship into the global "
+                "hierarchy. `isa?` checks that hierarchy, walking upward if "
+                "needed, and returns whether the relationship holds."
+            ),
+            resolution=(
+                "The hierarchy stone confirmed the derived relationship was present."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(isa? java.lang.Long java.lang.Number)",
@@ -962,6 +982,25 @@ G8_15 = SubjectCurriculum(
             concept_phrase="checking Java type hierarchy",
             question_what="whether Long is a type of Number in Java's type hierarchy",
             goal_text="check whether Long is a type of Number in Java's type system",
+
+            scenario=(
+                "Caw inspected the Java lineage stones on the pitcher's rim "
+                "at the meadow. She asked the hierarchy whether a Long-marked "
+                "stone counted as a Number-marked stone in the built-in family tree."
+            ),
+            need=(
+                "She needed `isa?` to walk the Java type tree and confirm "
+                "Long's parentage without any explicit `derive` call."
+            ),
+            mapping=(
+                "`isa?` reads both Clojure's derived hierarchy and Java's "
+                "built-in class tree. Long extends Number in Java, so the "
+                "relationship is already present."
+            ),
+            resolution=(
+                "The hierarchy confirmed Long descends from Number in the built-in tree."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(isa? java.lang.String java.lang.Number)",
@@ -969,6 +1008,26 @@ G8_15 = SubjectCurriculum(
             concept_phrase="checking Java type hierarchy",
             question_what="whether String is a type of Number in Java's type hierarchy",
             goal_text="check whether String is a type of Number in Java's type system",
+
+            scenario=(
+                "Sable inspected the Java lineage stones at the farm's edge, "
+                "asking whether a text-stone marked String could count as a "
+                "Number-type stone. She dropped the query into the pitcher "
+                "and waited."
+            ),
+            need=(
+                "She needed `isa?` to search the Java type tree and report "
+                "whether String and Number are related at all."
+            ),
+            mapping=(
+                "`isa?` walks the full Java type hierarchy. String and Number "
+                "share no ancestor except Object, so no parent-child path "
+                "connects them and the relationship is absent."
+            ),
+            resolution=(
+                "The pitcher returned no — the type tree held no path between them."
+            ),
+            tags=("story",),
         ),
     ],
     subplots=_SORTINGTABLE_SUBPLOTS,
@@ -992,6 +1051,26 @@ G8_16 = SubjectCurriculum(
             concept_phrase="calling a polymorphic method on multiple record types",
             question_what="the vector of results after defining protocol Move with method step, defining records Hare and Tortoise that both implement Move, then calling step via mapv on both instances",
             goal_text="define a protocol Move with method step, define two record types Hare and Tortoise that each implement it, then call the method on both instances",
+
+            scenario=(
+                "Sable posted the Move guild charter on the pitcher's rim at "
+                "the village. Two pouches — Hare and Tortoise — each pledged "
+                "the guild with their own `step` response. She lined both up "
+                "and called `step` across the row."
+            ),
+            need=(
+                "She needed each pouch to answer `step` with its own response "
+                "and both results collected into a single row."
+            ),
+            mapping=(
+                "One `defprotocol`, two `defrecord` types each pledging it. "
+                "`mapv` sends `step` to each instance in turn; the runtime "
+                "dispatches to each type's own method, collecting the results."
+            ),
+            resolution=(
+                "The pitcher returned a pair — each pouch's own `step` response in order."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form=("(do (defprotocol Sound (cry [this]))"
@@ -1002,6 +1081,26 @@ G8_16 = SubjectCurriculum(
             concept_phrase="calling a polymorphic method on a record instance",
             question_what="the value returned after defining protocol Sound with method cry, defining records Hare and Tortoise that both implement Sound, then calling cry on a Tortoise instance",
             goal_text="define a protocol Sound with method cry, define two record types that implement it, then call the method on a Tortoise instance",
+
+            scenario=(
+                "Korvus posted the Sound guild charter on the pitcher at the "
+                "garden. Two pouches — Hare and Tortoise — pledged the guild "
+                "with separate `cry` responses. He picked up the Tortoise "
+                "pouch and called `cry` on it alone."
+            ),
+            need=(
+                "He needed only the Tortoise pouch's own `cry` response, "
+                "not the Hare's, despite both being guild members."
+            ),
+            mapping=(
+                "Both types are guild members, but dispatch is per-instance. "
+                "Calling `cry` on a Tortoise instance routes only to the "
+                "Tortoise method, returning its registered response."
+            ),
+            resolution=(
+                "The Tortoise pouch's `cry` response returned, the Hare's untouched."
+            ),
+            tags=("story",),
         ),
     ],
     subplots=_GUILD_SUBPLOTS,

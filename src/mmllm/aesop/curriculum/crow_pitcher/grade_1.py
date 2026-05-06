@@ -646,7 +646,7 @@ G1_10 = SubjectCurriculum(
                 "semicolon enters the pitcher and drops as a stone."
             ),
             resolution=(
-                "3 — the sum arrived unchanged, the marginal note never "
+                "The sum arrived unchanged, the marginal note never "
                 "entering the water, exactly as the scribe intended."
             ),
             tags=("story",),
@@ -844,8 +844,8 @@ G1_13 = SubjectCurriculum(
                 "runtime calculates and returns as the water-level."
             ),
             resolution=(
-                "3 — the two handfuls combined, the water rising to the "
-                "third notch at beak-reach."
+                "The two handfuls combined, the water rising to the "
+                "expected notch at beak-reach."
             ),
             tags=("story",),
         ),

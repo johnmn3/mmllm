@@ -143,6 +143,25 @@ G7_02 = SubjectCurriculum(grade=7, subject_id="G7-02",
             concept_phrase="a try block with no error",
             question_what="what the try block returns when no error occurs",
             goal_text="evaluate a number in a try block when no error is thrown",
+            scenario=(
+                "Sable dropped a smooth numbered stone into the pitcher under "
+                "the moss pad at the garden. The stone landed cleanly — no "
+                "crack, no splash, nothing for the moss to catch."
+            ),
+            need=(
+                "Sable needed to confirm the try body's value surfaces "
+                "unchanged when no error is thrown at all."
+            ),
+            mapping=(
+                "When `try` runs without an exception, the `catch` arm is "
+                "never reached. The body's value — the numbered stone — "
+                "simply rises to the rim as-is."
+            ),
+            resolution=(
+                "No error came; the try body's stone rose to the rim "
+                "untouched by the moss."
+            ),
+            tags=("story",),
         ),
     ], subplots=_SAFETYNET_SUBPLOTS, plan_pool=_PLAN_G7)
 
@@ -1085,6 +1104,25 @@ G7_18 = SubjectCurriculum(grade=7, subject_id="G7-18",
             concept_phrase="the command string from a shell-call descriptor",
             question_what="what command string is in the descriptor",
             goal_text="extract the command name from a shell-call descriptor map",
+            scenario=(
+                "Caw borrowed a toolshed descriptor stone from the market "
+                "pitcher — a map with a command slot and an arguments slot "
+                "carved on its face. She reached for only the command slot."
+            ),
+            need=(
+                "She needed to pull the command name from the descriptor stone "
+                "without touching the arguments slot beside it."
+            ),
+            mapping=(
+                "The descriptor map is the toolshed borrowing note. `:cmd` is "
+                "the slot that names which tool to fetch. Applying the key "
+                "extracts just the tool name inscribed there."
+            ),
+            resolution=(
+                "The command name inscribed in the descriptor slot rose "
+                "to Caw's beak."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(count (:args {:cmd \"echo\" :args [\"hello\" \"world\"]}))",
@@ -1092,6 +1130,25 @@ G7_18 = SubjectCurriculum(grade=7, subject_id="G7-18",
             concept_phrase="the number of arguments in a shell-call descriptor",
             question_what="how many arguments are in the descriptor",
             goal_text="count the number of arguments in a shell-call descriptor map",
+            scenario=(
+                "Sable pulled a toolshed descriptor stone from the farm "
+                "pitcher and looked at the arguments slot — a small bracket "
+                "of engraved labels. The count of labels was what mattered."
+            ),
+            need=(
+                "Sable needed to tally how many argument labels were engraved "
+                "in the descriptor stone's args slot."
+            ),
+            mapping=(
+                "`:args` extracts the argument vector from the descriptor map. "
+                "`count` tallies the engraved labels inside that bracket — each "
+                "argument is one mark in the tally."
+            ),
+            resolution=(
+                "The argument labels were tallied and the count rose "
+                "to Sable's beak."
+            ),
+            tags=("story",),
         ),
     ], subplots=_TOOLSHED_SUBPLOTS, plan_pool=_PLAN_G7)
 

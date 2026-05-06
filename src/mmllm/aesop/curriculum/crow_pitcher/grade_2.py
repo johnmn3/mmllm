@@ -519,14 +519,106 @@ G2_04 = SubjectCurriculum(
             ),
             tags=("story",),
         ),
-        _ex("(max 1 2 3)",  3, "the maximum of three numbers",  "the largest of 1, 2, and 3",
-            goal="find the maximum of 1, 2, and 3"),
-        _ex("(min 7 3 9 1 5)", 1, "the minimum of five numbers", "the smallest of 7, 3, 9, 1, and 5",
-            goal="find the minimum of 7, 3, 9, 1, and 5"),
-        _ex("(max 7 3 9 1 5)", 9, "the maximum of five numbers", "the largest of 7, 3, 9, 1, and 5",
-            goal="find the maximum of 7, 3, 9, 1, and 5"),
-        _ex("(min -3 -1 -5)", -5, "the minimum of three numbers", "the smallest of -3, -1, and -5",
-            goal="find the minimum of -3, -1, and -5"),
+        SubjectExample(
+            form="(max 1 2 3)", expected=3,
+            concept_phrase="the maximum of three numbers",
+            question_what="the largest of 1, 2, and 3",
+            goal_text="find the maximum of 1, 2, and 3",
+
+            scenario=(
+                "Caw had three stones of increasing size on the hilltop pitcher: "
+                "a small one, a medium one, and a large one. She wanted the "
+                "heaviest identified without lifting each in turn."
+            ),
+            need=(
+                "She needed the single largest stone named outright, "
+                "without sorting the entire set first."
+            ),
+            mapping=(
+                "`max` scans left to right, retaining the heaviest seen so far "
+                "and discarding any lighter candidate. The last surviving "
+                "stone is the maximum when the scan ends."
+            ),
+            resolution=(
+                "The heaviest stone was named and the expected count settled in the pitcher."
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form="(min 7 3 9 1 5)", expected=1,
+            concept_phrase="the minimum of five numbers",
+            question_what="the smallest of 7, 3, 9, 1, and 5",
+            goal_text="find the minimum of 7, 3, 9, 1, and 5",
+
+            scenario=(
+                "Sable scattered five stones of mixed sizes along the garden "
+                "pitcher's rim in no particular order. She needed the lightest "
+                "one picked out, however jumbled the rest."
+            ),
+            need=(
+                "She needed the smallest stone identified from the unsorted "
+                "lineup without ordering all five by hand."
+            ),
+            mapping=(
+                "`min` tracks the lightest stone seen across any order. Even "
+                "if the lightest arrives late in the scan, it displaces the "
+                "running minimum when it appears."
+            ),
+            resolution=(
+                "The lightest stone was found in the jumble and the expected count arrived."
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form="(max 7 3 9 1 5)", expected=9,
+            concept_phrase="the maximum of five numbers",
+            question_what="the largest of 7, 3, 9, 1, and 5",
+            goal_text="find the maximum of 7, 3, 9, 1, and 5",
+
+            scenario=(
+                "Korvus laid five unsorted stones beside the market pitcher: "
+                "seven, three, nine, one, and five. He wanted the heaviest "
+                "stone identified from the pile."
+            ),
+            need=(
+                "He needed the single heaviest stone named without sorting "
+                "all five or picking up each one in sequence."
+            ),
+            mapping=(
+                "`max` retains the heaviest candidate as it scans left to right. "
+                "When the nine appears it displaces every prior maximum; "
+                "nothing heavier follows, so nine wins."
+            ),
+            resolution=(
+                "The heaviest stone emerged and the expected maximum returned from the pitcher."
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form="(min -3 -1 -5)", expected=-5,
+            concept_phrase="the minimum of three numbers",
+            question_what="the smallest of -3, -1, and -5",
+            goal_text="find the minimum of -3, -1, and -5",
+
+            scenario=(
+                "Caw set three stones on the road pitcher, each marked with "
+                "a deficit score — negative three, negative one, negative five. "
+                "She wanted the lowest deficit of the three."
+            ),
+            need=(
+                "She needed to know which deficit was deepest — the most "
+                "negative value among the three marked stones."
+            ),
+            mapping=(
+                "`min` uses numeric ordering, not magnitude. Negative five "
+                "lies below negative three and negative one on the number line, "
+                "so it is the minimum even though its magnitude is largest."
+            ),
+            resolution=(
+                "The deepest deficit was found and the expected minimum returned."
+            ),
+            tags=("story",),
+        ),
     ],
     subplots=_ACORN_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
