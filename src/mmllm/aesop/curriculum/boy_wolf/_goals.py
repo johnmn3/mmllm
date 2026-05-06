@@ -1,13 +1,10 @@
 """Form -> (concept_phrase, question_what, goal_text) mapping.
 
-Authoritative cross-fable bones for boy-wolf examples whose forms
-match tortoise-hare. The operation is the same; the bones are
-fable-neutral. Story slots (scenario/need/mapping/resolution) are
-fable-specific and authored separately in grade files.
-
-Forms not in GOALS get the concept_phrase/question_what/goal_text
-passed positionally to _ex(); these are atom subjects or boy-wolf-
-specific forms that need bones authored in Phase 7.
+Authoritative cross-fable bones for boy-wolf metaphor-rich examples.
+Forms used by atom subjects (G1-01..08) are deliberately excluded —
+atom subjects show the form via {form_display} (the lesson is copy-
+from-prompt), so they MUST keep goal_text="" or the FORM_LEAK check
+will fire when the same form happens to appear in a metaphor subject.
 """
 
 GOALS: dict[str, dict[str, str]] = {
@@ -136,11 +133,6 @@ GOALS: dict[str, dict[str, str]] = {
         "what":    '3 to the fourth power',
         "goal":    'multiply 3 by itself four times',
     },
-    '(* 4 5)': {
-        "concept": 'the multiplication',
-        "what":    'the product of 4 and 5',
-        "goal":    'multiply 4 by 5',
-    },
     '(* 5 5 5)': {
         "concept": 'the inline multiplication without binding',
         "what":    'the result of multiplying 5 by itself three times without any binding',
@@ -176,11 +168,6 @@ GOALS: dict[str, dict[str, str]] = {
         "what":    'the result of adding the product of 3 and 8 to the product of 2 and 4',
         "goal":    'compute the product of 3 and 8, add the product of 2 and 4',
     },
-    '(+ 1 (* 2 3))': {
-        "concept": 'the nested computation',
-        "what":    'the sum of 1 with the product of 2 and 3',
-        "goal":    'add 1 to the product of 2 and 3',
-    },
     '(+ 1 (if true 10 20))': {
         "concept": 'the arithmetic expression with conditional',
         "what":    'the result of adding 1 to the conditional value',
@@ -196,20 +183,10 @@ GOALS: dict[str, dict[str, str]] = {
         "what":    'the sum of 1, 2, 3, and 4',
         "goal":    'add 1, 2, 3, and 4',
     },
-    '(+ 1 2)': {
-        "concept": 'basic addition under the default checked math regime',
-        "what":    'the sum of two numbers',
-        "goal":    'add two numbers with the default math behavior',
-    },
     '(+ 1 2) ; sum of one and two': {
         "concept": 'the addition with a trailing comment',
         "what":    'the result, ignoring the comment',
         "goal":    'add 1 and 2, with a single-semicolon trailing comment',
-    },
-    '(+ 1/2 1/4)': {
-        "concept": 'the sum of two ratios',
-        "what":    'the sum of one-half and one-quarter',
-        "goal":    'add one-half and one-quarter',
     },
     '(+ 10 20 30)': {
         "concept": 'the sum of three numbers',
@@ -235,11 +212,6 @@ GOALS: dict[str, dict[str, str]] = {
         "concept": 'the nested arithmetic',
         "what":    'the result of multiplying 5 and 4, then subtracting 7',
         "goal":    'compute 5 times 4, then subtract 7',
-    },
-    '(- 1 1/3)': {
-        "concept": 'the difference of a whole and a ratio',
-        "what":    '1 minus one-third',
-        "goal":    'subtract one-third from 1',
     },
     '(- 100 (* 5 5))': {
         "concept": 'the nested subtraction',
@@ -375,16 +347,6 @@ GOALS: dict[str, dict[str, str]] = {
         "concept": 'the equality check',
         "what":    'whether all three are equal',
         "goal":    'test whether 1, 1, and 2 are all equal',
-    },
-    '(= 1 1)': {
-        "concept": 'the equality check',
-        "what":    'whether 1 equals 1',
-        "goal":    'test whether 1 equals 1 with =',
-    },
-    '(= 1 2)': {
-        "concept": 'the equality check',
-        "what":    'whether 1 equals 2',
-        "goal":    'test whether 1 equals 2 with =',
     },
     "(= [1 2 3] '(1 2 3))": {
         "concept": 'testing equality of different collection types',
@@ -1201,11 +1163,6 @@ GOALS: dict[str, dict[str, str]] = {
         "what":    'the sequence produced by filtering pos? over the vector containing -2, -1, 0, 1, and 2',
         "goal":    'keep the positive elements from the vector containing -2, -1, 0, 1, and 2',
     },
-    '(first (clojure.string/split-lines "first\\nsecond"))': {
-        "concept": 'the initial line from splitting a multi-line string',
-        "what":    'what the initial line is',
-        "goal":    'get the initial line from splitting a multi-line string',
-    },
     '(first (range 1 100))': {
         "concept": 'getting the first element of a range',
         "what":    'the first of range 1..99',
@@ -1830,11 +1787,6 @@ GOALS: dict[str, dict[str, str]] = {
         "concept": 'the zero check',
         "what":    'whether 5 is zero',
         "goal":    'check whether 5 is zero using zero?',
-    },
-    '42': {
-        "concept": 'the literal 42',
-        "what":    'the value 42 returned by the REPL',
-        "goal":    'submit the integer 42 so the REPL returns it',
     },
     '42 ;; the answer': {
         "concept": 'the literal with a trailing comment',

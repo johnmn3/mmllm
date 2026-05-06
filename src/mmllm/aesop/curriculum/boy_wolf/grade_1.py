@@ -263,11 +263,20 @@ _PLAN_POOL: tuple[str, ...] = (
 # ─────────────────────── helpers for examples ───────────────────────
 
 
-def _ex(form: str, expected, concept: str, what: str,
-        tags: tuple[str, ...] = ()) -> SubjectExample:
-    return SubjectExample(form=form, expected=expected,
-                          concept_phrase=concept, question_what=what,
-                          tags=tags)
+def _ex(form, expected, concept, what, goal=None,
+        scenario="", need="", mapping="", resolution="",
+        tags=()):
+    canon = GOALS.get(form, {})
+    if all([scenario, need, mapping, resolution]) and "story" not in tags:
+        tags = tuple(tags) + ("story",)
+    return SubjectExample(
+        form=form, expected=expected,
+        concept_phrase=canon.get("concept", concept),
+        question_what=canon.get("what", what),
+        goal_text=goal if goal is not None else canon.get("goal", ""),
+        scenario=scenario, need=need, mapping=mapping, resolution=resolution,
+        tags=tags,
+    )
 
 
 # ─────────────────────── 18 grade-1 subjects ───────────────────────

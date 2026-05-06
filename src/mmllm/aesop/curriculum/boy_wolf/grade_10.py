@@ -75,17 +75,20 @@ macroexpander. The day's example was {concept_phrase}. The form
 ]
 
 
-def _ex(form, expected, concept, what, goal=None, tags=()):
+def _ex(form, expected, concept, what, goal=None,
+        scenario="", need="", mapping="", resolution="",
+        tags=()):
     canon = GOALS.get(form, {})
+    if all([scenario, need, mapping, resolution]) and "story" not in tags:
+        tags = tuple(tags) + ("story",)
     return SubjectExample(
         form=form, expected=expected,
         concept_phrase=canon.get("concept", concept),
         question_what=canon.get("what", what),
         goal_text=goal if goal is not None else canon.get("goal", ""),
+        scenario=scenario, need=need, mapping=mapping, resolution=resolution,
         tags=tags,
     )
-
-
 _PLAN_G10 = _PLAN_POOL + (
     "I write the form and let the macroexpander or REPL show the result.",
     "I expand the macro with macroexpand and read the produced form.",

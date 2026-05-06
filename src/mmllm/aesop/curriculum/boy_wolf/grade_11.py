@@ -75,17 +75,20 @@ before trusting a translation."""),
 ]
 
 
-def _ex(form, expected, concept, what, goal=None, tags=()):
+def _ex(form, expected, concept, what, goal=None,
+        scenario="", need="", mapping="", resolution="",
+        tags=()):
     canon = GOALS.get(form, {})
+    if all([scenario, need, mapping, resolution]) and "story" not in tags:
+        tags = tuple(tags) + ("story",)
     return SubjectExample(
         form=form, expected=expected,
         concept_phrase=canon.get("concept", concept),
         question_what=canon.get("what", what),
         goal_text=goal if goal is not None else canon.get("goal", ""),
+        scenario=scenario, need=need, mapping=mapping, resolution=resolution,
         tags=tags,
     )
-
-
 _PLAN_G11 = _PLAN_POOL + (
     "I write the interop form using the host's convention.",
     "I use the dot or slash form for the host method, then submit.",
