@@ -407,15 +407,14 @@ G5_07 = SubjectCurriculum(grade=5, subject_id="G5-07",
             question_what="the first truthy value",
             goal_text="return the first truthy value from a sequence of values",
             scenario=(
-                'Rex stood at a fork by the stream, facing a row of gates. Three '
-                'gates in sequence: the first held nil (closed), the second held '
-                'false (also closed), the third held a keyword (open). The or-form '
-                'would test each gate and stop at the first open one.'
+                'Rex stood at a fork by the stream facing gates. Three gates in '
+                'sequence: the first held nil (closed), the second held false (closed), '
+                'the third held a keyword (open). The or-form would test each and '
+                'stop at the first open one.'
             ),
             need=(
-                'He wanted to find the first truthy gate in the row. The or-form is '
-                'simpler than and: it stops at the first truthy value and returns it, '
-                'never checking the rest.'
+                'He wanted the first truthy gate. The or-form is simpler than and: '
+                'it stops at the first truthy value and returns it, never checking rest.'
             ),
             mapping=(
                 'The or-form is the gate-walk for disjunction. Each value is a gate. '
@@ -516,24 +515,22 @@ G5_10 = SubjectCurriculum(grade=5, subject_id="G5-10",
             question_what="the sequence produced by passing the vector containing 1, 2, and 3 through the inc-sieve",
             goal_text="pour the vector containing 1, 2, 3 through a sieve whose rule is inc, collecting each transformed element",
             scenario=(
-                'Rex held a pile of bones marked 1, 2, 3 at the stream. Above the water '
-                'lay a log with a gap shaped like the inc-rule: take one bone, add 1 to '
-                'it, drop the new count on the far bank. Map would pour all three through '
-                'the gap, one at a time.'
+                'Rex held bones marked 1, 2, 3 at the stream. A log above held a gap '
+                'shaped like inc: take a bone, add 1, drop the result on the far bank. '
+                'Map would pour all three through, one at a time.'
             ),
             need=(
-                'He wanted to transform each bone through the same rule and collect all '
-                'results. Map is the sieve: pour in one stream, collect the transformed '
-                'stream on the far bank.'
+                'He wanted each bone transformed and all results collected. Map is the '
+                'sieve: pour input bones, collect transformed ones.'
             ),
             mapping=(
-                'The map-form is the sieve-pour. The bones are the input sequence. The '
-                'gap-rule is inc. The far bank collects every transformed bone. Map walks '
-                'every bone through the gap and gathers the results.'
+                'The map-form is the sieve-pour. The bones are the input. The rule is '
+                'inc. The far bank collects every result. Map feeds each bone through '
+                'and gathers output.'
             ),
             resolution=(
-                'The REPL poured bone 1 through (got 2), poured 2 (got 3), poured 3 '
-                '(got 4). The far bank held 2, 3, 4. The sieve-pour was complete.'
+                'The REPL poured bone 1 (got 2), poured 2 (got 3), poured 3 (got 4). '
+                'The far bank held 2, 3, 4.'
             ),
             tags=("story",),
         ),
@@ -544,24 +541,22 @@ G5_10 = SubjectCurriculum(grade=5, subject_id="G5-10",
             question_what="the sequence produced by mapping a squaring rule over the vector containing 1, 2, 3, and 4",
             goal_text="apply a squaring operation to each element of the vector containing 1, 2, 3, and 4, returning a sequence",
             scenario=(
-                'Patch had a pile of bones marked 1, 2, 3, 4 by the river bank. A sieve '
-                'lay above the water, shaped like the squaring rule: take one bone, '
-                'multiply it by itself, drop the product on the far bank. Map would pour '
-                'all four through this specialized gap.'
+                'Patch had bones marked 1, 2, 3, 4 by the river. A sieve lay above, '
+                'shaped like squaring: take a bone, multiply by itself, drop the '
+                'product on the far bank. Map would pour all four through.'
             ),
             need=(
                 'She wanted each bone squared and all results gathered. Map applies the '
-                'same rule to every bone and collects every output.'
+                'same rule to each bone and collects all output.'
             ),
             mapping=(
-                'The map-form is the sieve-pour. The pile is 1, 2, 3, 4. The gap-rule '
-                'is the squaring function. The far bank collects the squared values. Map '
-                'works with any function and any pile.'
+                'The map-form is the sieve-pour. The pile is 1, 2, 3, 4. The rule is '
+                'squaring. The far bank collects the squared values. Map works with any '
+                'function.'
             ),
             resolution=(
                 'The REPL poured bone 1 (got 1), poured 2 (got 4), poured 3 (got 9), '
-                'poured 4 (got 16). The far bank held 1, 4, 9, 16. The sieve-pour was '
-                'complete.'
+                'poured 4 (got 16). The far bank held 1, 4, 9, 16.'
             ),
             tags=("story",),
         ),
@@ -578,13 +573,13 @@ G5_11 = SubjectCurriculum(grade=5, subject_id="G5-11",
             question_what="the sequence produced by filtering even? over the vector containing 1, 2, 3, and 4",
             goal_text="keep the even elements from the vector containing 1, 2, 3, and 4",
             scenario=(
-                'Bell the hound gathered four bones marked 1, 2, 3, 4 at the stream. '
-                'A log above the water held a gap that let through only even-marked '
-                'bones. She would pour all four through and collect what passed.'
+                'Bell gathered bones marked 1, 2, 3, 4 at the stream. A log above '
+                'held a gap that let through only even bones. She would pour all four '
+                'through and collect what passed.'
             ),
             need=(
-                'She wanted to sieve out just the even bones, keeping only those that '
-                'fit the even?-rule. Filter is the sieve: some pass, some are held back.'
+                'She wanted only the even bones. Filter is the sieve: some bones pass, '
+                'some held back.'
             ),
             mapping=(
                 'The filter-form is the sieve-gap. The bones are 1, 2, 3, 4. The rule '
@@ -695,13 +690,12 @@ G5_12 = SubjectCurriculum(grade=5, subject_id="G5-12",
             question_what="the largest pebble found by walking 3, 1, 4, 1, 5, 9, 2, 6 with max as the combine step",
             goal_text="fold max over the vector containing 3, 1, 4, 1, 5, 9, 2, and 6, finding the maximum",
             scenario=(
-                'Rex the hound faced a long row of pebbles: 3, 1, 4, 1, 5, 9, 2, '
-                '6. He would walk the row, carrying the largest pebble seen so '
-                'far, updating it whenever he found a bigger one.'
+                'Rex faced a long row: 3, 1, 4, 1, 5, 9, 2, 6. He would walk it, '
+                'carrying the largest seen so far, updating whenever he found a bigger.'
             ),
             need=(
-                'He wanted the largest pebble without guessing. Reduce with max walks '
-                'the row, keeping the largest seen as it goes.'
+                'He wanted the largest without guessing. Reduce with max walks the row, '
+                'keeping the largest seen.'
             ),
             mapping=(
                 'The reduce-form is the tally-walk. The pebbles are 3, 1, 4, 1, 5, 9, '
@@ -820,9 +814,9 @@ G5_14 = SubjectCurriculum(grade=5, subject_id="G5-14",
             question_what="the largest count found after spreading the basket of 3, 1, 4, 1, 5 into max",
             goal_text="apply max to the elements of the vector containing 3, 1, 4, 1, and 5",
             scenario=(
-                'Bell the hound carried a basket of bones marked 3, 1, 4, 1, 5 at '
-                'the stream. A nose-trail lay ahead — the max recipe. The apply-form '
-                'would unpack the basket and feed all bones to the recipe at once.'
+                'Bell carried a basket of bones marked 3, 1, 4, 1, 5 at the stream. A '
+                'nose-trail lay ahead — the max recipe. Apply would unpack the basket '
+                'and feed all bones to the recipe at once.'
             ),
             need=(
                 'She wanted to apply max to all basket bones together. Apply spreads '

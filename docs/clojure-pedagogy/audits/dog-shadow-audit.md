@@ -105,21 +105,6 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 - issues: {'HIGH_LENGTH': 1}
     - [HIGH_LENGTH] form=`(cond false :a false :b :else :c)` — user_msg 213 words
 
-### G5-07: and / or as control flow
-
-- examples: 2
-- variety @ n=50: 0.97
-- issues: {'HIGH_LENGTH': 1}
-    - [HIGH_LENGTH] form=`(or nil false :found)` — user_msg 210 words
-
-### G5-10: map
-
-- examples: 2
-- variety @ n=50: 0.99
-- issues: {'HIGH_LENGTH': 2}
-    - [HIGH_LENGTH] form=`(map inc [1 2 3])` — user_msg 224 words
-    - [HIGH_LENGTH] form=`(map inc [1 2 3])` — user_msg 224 words
-
 ### G5-11: filter
 
 - examples: 2
@@ -369,7 +354,7 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 ### Issue counts (across all examples × 3 records)
 
-- **HIGH_LENGTH**: 42
+- **HIGH_LENGTH**: 39
 - **UNFILLED_PLACEHOLDER**: 12
 - **ANSWER_LEAK_STRING**: 12
 
@@ -381,7 +366,7 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 | 2 | 22 | 88 | 0 | G2-20(0.95) |
 | 3 | 18 | 31 | 18 | — |
 | 4 | 20 | 39 | 0 | — |
-| 5 | 22 | 39 | 9 | — |
+| 5 | 22 | 39 | 6 | — |
 | 6 | 16 | 33 | 3 | — |
 | 7 | 18 | 36 | 12 | — |
 | 8 | 16 | 31 | 8 | — |
