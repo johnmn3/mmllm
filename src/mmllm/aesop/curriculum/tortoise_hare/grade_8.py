@@ -212,8 +212,8 @@ G8_03 = SubjectCurriculum(
             ),
             mapping=(
                 "`defrecord` declares the case-shape: stamp `Runner`, "
-                "compartments [name pace]. `(->Runner \"Alice\" :slow)` "
-                "constructs a case filling the compartments in order. "
+                "compartments [name pace]. The constructor fills both "
+                "compartments in order from its arguments. "
                 "`(:pace …)` reads the named compartment by its keyword."
             ),
             resolution=(
