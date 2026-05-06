@@ -605,25 +605,23 @@ G5_11 = SubjectCurriculum(grade=5, subject_id="G5-11",
             question_what="the sequence produced by filtering pos? over the vector containing -2, -1, 0, 1, and 2",
             goal_text="keep the positive elements from the vector containing -2, -1, 0, 1, and 2",
             scenario=(
-                'Rex the hound found five bones marked -2, -1, 0, 1, 2 by the '
-                'river bank. A log above the water held a special gap — one that '
-                'let through only positive-marked bones. He would pour all five '
-                'through in order.'
+                'Rex the hound found five bones marked -2, -1, 0, 1, 2 by the river. '
+                'A log above the water held a gap that let through only positive-marked '
+                'bones. He would pour all five through in order.'
             ),
             need=(
-                'He wanted just the positive-marked bones from the pile. Filter '
-                'with the pos? rule would sieve out the rest. No guessing — the '
-                'gap does the work.'
+                'He wanted to sieve out just the positive bones. Filter with the pos? '
+                'rule would sieve out the rest — the gap does the work.'
             ),
             mapping=(
-                'The filter-form is the sieve. The input bones are -2, -1, 0, '
-                '1, 2. The gap-rule is pos?. Positive bones pass through; '
-                'negative and zero bones are held back by the gap.'
+                'The filter-form is the sieve. The bones are -2, -1, 0, 1, 2. The rule '
+                'is pos?. Positive bones pass through; negative and zero bones are held '
+                'back.'
             ),
             resolution=(
-                'The REPL poured bone -2 and held it back, poured -1 and held '
-                'it back, poured 0 and held it back, let 1 pass, let 2 pass. '
-                'The far bank caught 1 and 2. The sieve was complete.'
+                'The REPL poured bone -2 and held it back, poured -1 and held it back, '
+                'poured 0 and held it back, let 1 pass, let 2 pass. The far bank caught '
+                '1 and 2. The sieve was complete.'
             ),
             tags=("story",),
         ),
