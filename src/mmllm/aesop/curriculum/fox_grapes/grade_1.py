@@ -154,6 +154,99 @@ easy. {patient_fox} said patiently that the only way to be sure of
 ]
 
 
+# Goal-driven mirror of _SHARED_SUBPLOTS: same 8 fox-grapes beats
+# (post, wager×3, teacher, audience, rationalize-and-rebuke, ledger,
+# boast-and-rebuke, puzzle-on-gate), but uses {goal_text} instead of
+# {form_display} so the form is NOT shown — the model translates the
+# goal into a Clojure form. Used by abstract subjects (G11-01,
+# G12-12, etc.) whose form is a placeholder `(do "..." :studied)` and
+# whose narrative carries the lesson.
+_GOAL_SUBPLOTS: list[SubplotTemplate] = [
+
+    # 1. The post-and-debate template — goal-driven argument.
+    SubplotTemplate("""\
+{hasty_fox_phrase} and {patient_fox_phrase} stopped {place} where a
+goal had been chalked on a wooden post: to {goal_text}. {hasty_fox},
+{emo_proud}, declared {hasty_fox_he_she} could shout the answer
+without bothering to write a form. {patient_fox}, {emo_patient},
+suggested {hasty_fox_he_she} actually compose {concept_phrase} and
+let the REPL confirm what the value really was."""),
+
+    # 2. Wager — dirt.
+    SubplotTemplate("""\
+{hasty_fox_phrase} sketched a small wager into the dirt {place}:
+whoever could compose a Clojure form whose evaluation would
+{goal_text} ahead of the other would claim the next cluster of
+grapes. {patient_fox_phrase}, {emo_patient}, said it was simpler to
+write {concept_phrase} carefully than to guess at the answer."""),
+
+    # 2b. Wager — board.
+    SubplotTemplate("""\
+{hasty_fox_phrase} chalked a wager on a flat board {place}: whoever
+could produce a form whose evaluation would {goal_text} would set
+the next ration of fruit. {patient_fox_phrase}, {emo_patient}, said
+it would be simpler to write {concept_phrase} carefully than to
+bicker over the value."""),
+
+    # 2c. Wager — twig.
+    SubplotTemplate("""\
+With a twig, {hasty_fox_phrase} marked out a wager {place}: whoever
+could write a form to {goal_text} first would win the right to
+choose the next vine to inspect. {patient_fox_phrase}, {emo_patient},
+said it was easier to compose {concept_phrase} than to argue."""),
+
+    # 3. The teacher template — patient fox teaches goal → form.
+    SubplotTemplate("""\
+{patient_fox_phrase} had been teaching {hasty_fox_phrase} how to
+translate a goal into a Clojure form. "If you want to {goal_text},"
+{patient_fox_he_she} said, "you compose {concept_phrase}; submit
+that to the REPL, and it hands you back the value." {hasty_fox}
+agreed, this once, to try writing it."""),
+
+    # 4. The audience template — orchard creatures watch.
+    SubplotTemplate("""\
+A small audience of orchard creatures had gathered {place} to watch
+{hasty_fox_phrase} attempt to outwit {patient_fox_phrase} at writing
+the right form. The challenge: to {goal_text}. {patient_fox} reminded
+the crowd that what mattered was composing {concept_phrase} carefully,
+then submitting it to the REPL — not guessing at the answer."""),
+
+    # 5. The rationalize-and-rebuke template — canonical Aesop beat.
+    SubplotTemplate("""\
+Halfway across a kitchen garden, {hasty_fox_phrase} stopped {place}
+and refused to write a form for the goal at all — the answer,
+{hasty_fox} insisted, was probably sour anyway. {patient_fox_phrase},
+padding up at a steady pace, simply said: "To {goal_text}, compose
+{concept_phrase}; submit it. Whatever comes back is the honest
+answer.\""""),
+
+    # 6. The ledger template — patient fox's record.
+    SubplotTemplate("""\
+{patient_fox_phrase} had been keeping a small leather notebook of
+every goal {patient_fox_he_she} had translated into a Clojure form.
+Today {place}, the next entry was a goal: to {goal_text}.
+{patient_fox} sat with pen in hand, ready to compose {concept_phrase}
+and let the REPL confirm the value."""),
+
+    # 7. The boast-and-rebuke template — hasty fox dismisses; patient
+    #    asks for the actual form.
+    SubplotTemplate("""\
+"There is no challenge here," {hasty_fox_phrase} said, {emo_proud}.
+"Anyone could {goal_text} without thinking." {patient_fox_phrase},
+who {place} had grown used to such claims, asked {hasty_fox_him_her}
+to actually compose {concept_phrase}, then submit it to the REPL —
+just to be sure."""),
+
+    # 8. The puzzle-on-the-gate template — sign poses the goal.
+    SubplotTemplate("""\
+A wooden sign nailed to an orchard gate {place} carried a small
+puzzle. The challenge was simple: to {goal_text}. {hasty_fox}
+laughed, {emo_proud}, and declared it too easy. {patient_fox} said
+patiently that the only way to be sure of the answer was to compose
+{concept_phrase} and put it in the REPL."""),
+]
+
+
 _PLAN_POOL: tuple[str, ...] = (
     "I write the form and let the REPL evaluate it.",
     "I submit the form to the REPL via the eval tool.",
