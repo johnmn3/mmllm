@@ -158,6 +158,28 @@ G10_03 = SubjectCurriculum(
             concept_phrase="defining a conditional macro and invoking it",
             question_what="the value the rewritten if-do form returns when the test is true and the body has three expressions",
             goal_text="define a rule named my-when that rewrites (my-when t body...) into (if t (do body...)); then invoke it with the test true and a three-expression body",
+            scenario=(
+                "Before the milkmaid could nod and spill the pail, the farmer "
+                "rewrote her daydream: 'I will give you a shorthand, `my-when`, "
+                "that expands into `if` before the runtime ever reads it.'"
+            ),
+            need=(
+                "She needed a rule that would rewrite `(my-when true 1 2 3)` into "
+                "`(if true (do 1 2 3))` at read-time — a template stamp, not a "
+                "function call."
+            ),
+            mapping=(
+                "`defmacro` is the farmer's rewrite rule: it intercepts the form "
+                "before evaluation, expands the shorthand into the full idiom, and "
+                "hands the expanded form to the runtime. The runtime sees `if`, "
+                "never `my-when`."
+            ),
+            resolution=(
+                "the REPL evaluated the expanded form and returned the last body "
+                "expression — the rewrite had run silently before the runtime "
+                "arrived, and the result came back cleanly."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(do (defmacro twice [x] `(do ~x ~x)) (twice 7))",

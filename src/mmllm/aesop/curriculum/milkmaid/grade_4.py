@@ -56,6 +56,27 @@ G4_01 = SubjectCurriculum(grade=4, subject_id="G4-01",
             concept_phrase="a vector of three numbers",
             question_what="the vector",
             goal_text="create a vector containing 1, 2, and 3",
+            scenario=(
+                "The milkmaid set out a market-basket with three numbered compartments "
+                "— each slot labeled to carry a different grade of dairy to market "
+                "without mixing."
+            ),
+            need=(
+                "She needed a literal sequence: three ordered slots holding the "
+                "numbers 1, 2, and 3, ready to be carried as a single bundle "
+                "without any slot bleeding into the next."
+            ),
+            mapping=(
+                "A vector is the market-basket: `[1 2 3]` is three compartments in "
+                "order, each holding exactly what was placed there. The runtime "
+                "hands it back intact — no rearranging, no combining."
+            ),
+            resolution=(
+                "the REPL handed back the three-compartment basket, items sitting "
+                "exactly where placed — the market-basket arriving at the buyer's "
+                "door unopened."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="[]",
@@ -363,6 +384,27 @@ G4_16 = SubjectCurriculum(grade=4, subject_id="G4-16",
             concept_phrase="building a vector from a list",
             question_what="the vector built from a list",
             goal_text="convert a list containing 1, 2, and 3 into a vector",
+            scenario=(
+                "The milkmaid set the milk-strainer over a fresh pail and poured the "
+                "contents of a market list — three elements in order — through the "
+                "strainer's mesh into a fresh vector-shaped container."
+            ),
+            need=(
+                "She needed to pass the list through the strainer rule into a fresh "
+                "vector — each element flowing through in sequence, nothing lost, "
+                "nothing added."
+            ),
+            mapping=(
+                "`into` is the milk-strainer over the pail: it pours each element of "
+                "the source collection through the rule and collects them into the "
+                "target container in order."
+            ),
+            resolution=(
+                "the REPL returned the fresh vector with all three elements — the "
+                "list had passed through the strainer and arrived in its new shape, "
+                "intact."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(into #{} [1 2 2 3])",

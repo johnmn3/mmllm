@@ -65,6 +65,27 @@ G8_01 = SubjectCurriculum(
             concept_phrase="the result of dispatching speak on :tortoise",
             question_what="the value returned",
             goal_text="call speak with :tortoise to see what it returns when dispatched",
+            scenario=(
+                "At the dairy guild, the guild-master had a single window for all "
+                "comers. She called out to each farmer in turn: 'What is your pace?' "
+                "The hare's guild-card answered one way; the tortoise's answered "
+                "another."
+            ),
+            need=(
+                "The farmer needed a single dispatch window — one function name, "
+                "`speak`, that routed each caller to the right answer based on their "
+                "guild-card stamp."
+            ),
+            mapping=(
+                "The `cond` dispatch is the guild roll-call: it reads the caller's "
+                "stamp in order, tests each case, and returns the paired answer when "
+                "the stamp matches. No caller walks through the wrong door."
+            ),
+            resolution=(
+                "the REPL returned the answer belonging to the tortoise's guild-card "
+                "— the dispatch had routed correctly to the right paired keyword."
+            ),
+            tags=("story",),
         ),
     ],
     subplots=_GUILD_SUBPLOTS,
@@ -84,6 +105,26 @@ G8_02 = SubjectCurriculum(
             concept_phrase="reading the color field of a Pebble instance",
             question_what="the color field value after defining a type Pebble with one field color, then constructing an instance and reading the field",
             goal_text="define a type Pebble with a color field and then read the color field from an instance",
+            scenario=(
+                "The farmer designed a custom pail called Pebble — a single-slot "
+                "container meant to carry one attribute, color, to market. She then "
+                "hammered a Pebble pail into shape and filled the color slot."
+            ),
+            need=(
+                "She needed to define the pail's shape (`deftype Pebble [color]`), "
+                "build a concrete pail, then read back what was in the color slot "
+                "— not guess what she put in."
+            ),
+            mapping=(
+                "`deftype` is the pail mold: it names the container and its labeled "
+                "slot. `Pebble.` stamps the mold into a real pail. `.-color` is the "
+                "slot-reader that reaches in and retrieves the value."
+            ),
+            resolution=(
+                "the REPL handed back the contents of the color slot — exactly what "
+                "the farmer had placed there when she hammered the pail."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(do (deftype Stone [weight]) (.-weight (Stone. 7)))",
@@ -258,6 +299,29 @@ G8_08 = SubjectCurriculum(
             concept_phrase="the multimethod and its first arm",
             question_what="the pace returned for a runner stamped :hare after the table routes to its arm",
             goal_text="declare a sorting-table named pace that reads each runner's :species stamp; add an arm for the :hare stamp returning the swift-pace keyword; then route a runner stamped :hare through the table",
+            scenario=(
+                "The dairy had a sorting table: each pail arrived stamped with a "
+                "species-tag. The table-master had a rule: read the `:species` stamp, "
+                "route the pail to the correct shelf. She nailed a placard for "
+                "`:hare` to one shelf."
+            ),
+            need=(
+                "She needed to define the table's dispatch rule (`defmulti` reading "
+                "`:species`) and attach one arm (`defmethod` for `:hare`), then "
+                "route a stamped pail and read where it landed."
+            ),
+            mapping=(
+                "`defmulti` carves the sorting table, naming `pace` as the router "
+                "and `:species` as the stamp to read. `defmethod` pins a placard to "
+                "the `:hare` shelf. Calling `pace` with a stamped map routes the "
+                "pail to the matching arm."
+            ),
+            resolution=(
+                "the REPL returned the value the `:hare` arm had posted on its shelf "
+                "— the sort had routed correctly, the pail landing exactly where "
+                "the placard said."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form=("(do (defmulti tag :kind)"

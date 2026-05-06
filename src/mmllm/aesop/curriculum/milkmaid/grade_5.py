@@ -37,6 +37,25 @@ G5_01 = SubjectCurriculum(grade=5, subject_id="G5-01",
             concept_phrase="the conditional",
             question_what="which of :a or :b is returned",
             goal_text="choose between :a and :b based on a true condition",
+            scenario=(
+                "On the road to market, the milkmaid reached a fork: the left lane "
+                "led to the dairy buyer, the right lane to the grain merchant. "
+                "The pail could only go one way."
+            ),
+            need=(
+                "She needed a condition to read the sign and send the pail down the "
+                "correct lane — only one branch walked, the other left untouched."
+            ),
+            mapping=(
+                "`if` is the road fork: the form reads the condition, picks one "
+                "branch, and the REPL walks only that branch. The other branch is "
+                "never visited; the pail never splits."
+            ),
+            resolution=(
+                "the REPL walked the left branch — the condition was true, the pail "
+                "rolled down the chosen lane, and the other lane was never entered."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(if false :a :b)",
@@ -176,6 +195,26 @@ G5_09 = SubjectCurriculum(grade=5, subject_id="G5-09",
             concept_phrase="applying a function twice",
             question_what="the result of inc applied twice",
             goal_text="apply the inc function twice to 5",
+            scenario=(
+                "The farmer wrote a pail-steps card: 'apply the morning routine "
+                "twice to the day's count.' She passed the `inc` instruction-slip "
+                "and the starting count of 5 to the unnamed routine card."
+            ),
+            need=(
+                "The milkmaid needed to follow the card's two-step recipe — apply "
+                "`inc` to 5, then apply `inc` to the result — without inventing a "
+                "new function or naming the card."
+            ),
+            mapping=(
+                "`fn` is the nameless pail-steps card: it takes a routine slip `f` "
+                "and a count `x`, and runs `f` twice in order. The card has no name "
+                "on the wall; it is handed directly to the caller and used once."
+            ),
+            resolution=(
+                "the REPL returned the count after two applications of `inc` — two "
+                "steps of the recipe card run in sequence, exactly as written."
+            ),
+            tags=("story",),
         ),
     ], subplots=_RECIPE_SUBPLOTS, plan_pool=_PLAN_G5)
 
@@ -429,6 +468,27 @@ G5_22 = SubjectCurriculum(grade=5, subject_id="G5-22",
             concept_phrase="a factorial computation via loop and recur",
             question_what="the factorial of 5 computed by walking a circuit",
             goal_text="walk a small circuit five times, multiplying a running tally by the current step each lap, until the step counter reaches zero",
+            scenario=(
+                "The milkmaid walked the daily milking circuit: five stations along "
+                "the same path, starting with a tally of 1. At each station she "
+                "multiplied the running tally by the station count, then moved one "
+                "step closer to done."
+            ),
+            need=(
+                "She needed to walk the circuit without adding new ground — the same "
+                "loop, five laps, each time stepping the tally forward and the "
+                "counter down, until the counter reached zero."
+            ),
+            mapping=(
+                "`loop/recur` is the daily milking round: `n` is the station-counter "
+                "that shrinks each lap, `acc` is the running product, and `recur` "
+                "sends her back to the circuit's start without growing the path."
+            ),
+            resolution=(
+                "the REPL returned the accumulated product of all five laps — the "
+                "tally the milkmaid had built one station at a time."
+            ),
+            tags=("story",),
         ),
     ], subplots=_CIRCUIT_SUBPLOTS, plan_pool=_PLAN_G5)
 

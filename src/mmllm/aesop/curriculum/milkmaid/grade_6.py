@@ -69,6 +69,26 @@ G6_01 = SubjectCurriculum(grade=6, subject_id="G6-01",
             concept_phrase="extracting the string form of a namespace symbol",
             question_what="the string form of a quoted namespace symbol",
             goal_text="extract the string form of a quoted namespace symbol",
+            scenario=(
+                "The milkmaid arrived at the market-board in the village square — a "
+                "board nailed with names and namespaces of all the registered vendors. "
+                "She wanted to read the string name from one of the posted symbols."
+            ),
+            need=(
+                "She needed to extract the board-entry as a readable string — not a "
+                "symbol, but the text the symbol stands for, as it would appear "
+                "written on the market-board."
+            ),
+            mapping=(
+                "`name` is the market-board reader: it takes a quoted namespace symbol "
+                "and returns the string the board has posted — the human-readable "
+                "market address, not the runtime name-object."
+            ),
+            resolution=(
+                "the REPL returned the string the market-board carried — the dotted "
+                "vendor address, readable and ready to hand to a buyer."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(name 'clojure.string)",
@@ -373,6 +393,26 @@ G6_15 = SubjectCurriculum(grade=6, subject_id="G6-15",
             concept_phrase="accessing the :doc metadata from a symbol",
             question_what="the docstring value from a symbol's metadata",
             goal_text="extract the :doc metadata value from a symbol with a docstring",
+            scenario=(
+                "The farmer had annotated a symbol called `race` with a slip of paper "
+                "tucked into its metadata: a docstring recording the dairy's guiding "
+                "principle. She needed to read that annotation back from the slip."
+            ),
+            need=(
+                "She needed to unwrap the market order — reach into the symbol's "
+                "metadata, find the `:doc` key, and return the value written on "
+                "the slip."
+            ),
+            mapping=(
+                "`meta` opens the order-slip envelope tied to the symbol; the `:doc` "
+                "keyword reads the line on the slip labeled doc. The form retrieves "
+                "the annotation, not the symbol itself."
+            ),
+            resolution=(
+                "the REPL returned the docstring the farmer had tucked into the slip "
+                "— the principle she had recorded for the day's dairy run."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form='(:author (meta \'\\{:author "Aesop"\\} race))',

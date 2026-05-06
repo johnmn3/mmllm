@@ -83,6 +83,27 @@ G9_02 = SubjectCurriculum(
             concept_phrase="binding an atom to counter, atomically incrementing it, and dereferencing the result",
             question_what="the value after atomically swapping counter with inc and dereferencing",
             goal_text="construct an atom holding 0 as counter, atomically swap it by applying inc, and dereference the result",
+            scenario=(
+                "The milkmaid hung a fresh tally-slate by the dairy door with the "
+                "number 0 chalked at the top — the starting count for the day's "
+                "deliveries. The first pail went out; the slate needed updating."
+            ),
+            need=(
+                "She needed to erase the old mark and chalk a new one — not replace "
+                "the slate, but update it in place, as if the dairy door itself "
+                "remembered."
+            ),
+            mapping=(
+                "`atom` is the tally-slate; `swap!` is the chalk-update: it reads "
+                "the current mark, applies `inc` to get the next count, and chalks "
+                "the new number without replacing the slate. `@` reads what the "
+                "slate says now."
+            ),
+            resolution=(
+                "the REPL read the slate and returned 1 — one delivery tallied, the "
+                "slate faithfully updated after the first pail left the door."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(do (def progress (atom :idle)) (reset! progress :running) @progress)",
@@ -307,6 +328,28 @@ G9_10 = SubjectCurriculum(
             concept_phrase="agent, send, await, deref",
             question_what="the value returned by dereferencing ag after defining an agent holding 0, sending inc asynchronously, awaiting, and dereferencing",
             goal_text="construct an agent holding 0, asynchronously send inc to it, await its completion, and dereference",
+            scenario=(
+                "The farmer sent a swift runner ahead to the buyer's stall with a "
+                "message: 'increment the day's count when you arrive.' She didn't "
+                "wait for the runner to return — she kept milking while the runner "
+                "moved."
+            ),
+            need=(
+                "She needed the runner to carry `inc` to the agent ahead; she needed "
+                "to carry on with her chores; and then, when the sun reached its "
+                "peak, she needed to read the runner's final answer."
+            ),
+            mapping=(
+                "`agent` is the runner; `send` dispatches the runner with the `inc` "
+                "message; `await` waits at the gate for the runner to return; `@` "
+                "reads the answer the runner brought back."
+            ),
+            resolution=(
+                "the REPL read the agent's final tally — the runner had arrived, "
+                "applied `inc`, and the count was waiting when the milkmaid came "
+                "to collect it."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(do (def ag (agent 5)) (send ag + 10) (await ag) @ag)",

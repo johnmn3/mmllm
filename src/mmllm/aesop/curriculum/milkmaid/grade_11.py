@@ -124,6 +124,29 @@ G11_02 = SubjectCurriculum(
             concept_phrase='the host method toUpperCase',
             question_what="the capitalized result the host's toUpperCase returns on the three-letter string abc",
             goal_text="call the host's toUpperCase routine on the three-letter string abc using the dot-prefix calling convention",
+            scenario=(
+                "The milkmaid needed to borrow the neighbor's milking stool — a "
+                "well-made host method called `toUpperCase` — rather than build one "
+                "herself. She had the string 'abc' in her pail and needed it "
+                "returned in its capitalized form."
+            ),
+            need=(
+                "She needed to call the neighbor's host method directly — borrow the "
+                "tool by its true name, pass the string, and receive what the method "
+                "was built to return."
+            ),
+            mapping=(
+                "The dot-prefix `(.toUpperCase ...)` is the borrowed milking stool: "
+                "the dot names the neighbor's convention, `toUpperCase` is the "
+                "stool's use, and the string is placed on it. The milkmaid does not "
+                "rebuild the method — she borrows it by name."
+            ),
+            resolution=(
+                "the REPL returned the host method's answer — the string in the form "
+                "the method was designed to produce, exactly as the neighbor's "
+                "tool was built to deliver."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form='(.startsWith "hare-tortoise" "hare")',

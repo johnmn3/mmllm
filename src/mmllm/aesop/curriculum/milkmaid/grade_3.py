@@ -87,6 +87,25 @@ G3_03 = SubjectCurriculum(grade=3, subject_id="G3-03",
             concept_phrase="the local binding and addition",
             question_what="the running total after binding x to 3 and adding 1",
             goal_text="bind a value of 3 to a local name x for one stretch, then return that value plus one",
+            scenario=(
+                "The milkmaid tucked the number 3 into her apron-pocket at the start "
+                "of one stretch of the road — a private count, good only for this "
+                "leg of the journey to market."
+            ),
+            need=(
+                "She needed to reach into the pocket at the next step and add 1 to "
+                "the count, then let the pocket empty when the form ended."
+            ),
+            mapping=(
+                "`let` is the apron-pocket: it tucks `x = 3` into the pocket for the "
+                "duration of the body. `(+ x 1)` draws from the pocket and adds 1. "
+                "When the body ends, the pocket is put away and `x` ceases to exist."
+            ),
+            resolution=(
+                "the REPL returned 4 — the count from the pocket incremented by one, "
+                "the pocket now set aside at the road's end."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(let [n 10] (* n n))",

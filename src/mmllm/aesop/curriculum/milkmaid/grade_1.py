@@ -508,6 +508,25 @@ G1_09 = SubjectCurriculum(
             concept_phrase="the symbol-predicate on a quoted name",
             question_what="whether a quoted name is a symbol",
             goal_text="ask whether a quoted name is a symbol, using the symbol? predicate",
+            scenario=(
+                "The milkmaid had chalked the word 'hare' on the outside of a pail — "
+                "a name, not the milk inside. The farmer asked: is that chalk mark "
+                "a symbol, a name-thing, or something else?"
+            ),
+            need=(
+                "She needed a predicate that would read the chalk mark and say plainly "
+                "whether it was a name or a value."
+            ),
+            mapping=(
+                "`symbol?` is the farmer's chalk-inspector: it reads the quoted name "
+                "and answers `true` if the mark is a symbol — a written label — "
+                "rather than a computed value."
+            ),
+            resolution=(
+                "the REPL answered `true` — the chalk mark was a name, not the milk "
+                "inside the pail, and the inspector confirmed it."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(symbol? 42)",
@@ -548,6 +567,25 @@ G1_10 = SubjectCurriculum(
             concept_phrase="the addition with a trailing comment",
             question_what="the result, ignoring the comment",
             goal_text="add 1 and 2, with a single-semicolon trailing comment",
+            scenario=(
+                "Beside the dairy tally, the milkmaid had chalked a note: "
+                "'; sum of one and two.' The note was for her own reference — "
+                "the dairy buyer at market would never see the chalk wall."
+            ),
+            need=(
+                "She needed a way to leave a human-readable reminder beside the form "
+                "without it affecting what the REPL computed or returned."
+            ),
+            mapping=(
+                "The semicolon `;` is the chalk mark: everything after it on the same "
+                "line is scribe's shorthand, visible to the milkmaid but invisible to "
+                "the runtime. The runtime reads only the form before the mark."
+            ),
+            resolution=(
+                "the REPL computed the form and returned the sum — the chalk note on "
+                "the wall never crossed the dairy door, and the runtime never read it."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="42 ;; the answer",
@@ -626,6 +664,26 @@ G1_13 = SubjectCurriculum(
             concept_phrase="the addition",
             question_what="the sum of 1 and 2",
             goal_text="add 1 and 2",
+            scenario=(
+                "The farmer set two small coin-piles on the tally table: one pile of "
+                "a single copper, and another of two. She needed the total before she "
+                "could mark the day's earnings on the tally-slate."
+            ),
+            need=(
+                "She needed a form that added the two piles together — not guessing, "
+                "not daydreaming, but submitting the sum to the REPL and reading "
+                "what came back."
+            ),
+            mapping=(
+                "`+` is the farmer's tally rule: it stacks all the given coin-piles "
+                "into one and hands back the total. No pail-nodding, no guesswork — "
+                "just the arithmetic result."
+            ),
+            resolution=(
+                "the REPL returned the total the farmer had tallied — three coins, "
+                "exactly as the two piles combined."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(- 5 3)",
@@ -720,6 +778,25 @@ G1_15 = SubjectCurriculum(
             concept_phrase="the equality check",
             question_what="whether 1 equals 1",
             goal_text="test whether 1 equals 1 with =",
+            scenario=(
+                "The milkmaid stood at the farmyard gate with a penny in each hand, "
+                "wondering whether both coins were the same denomination. The gate "
+                "opened only when both sides agreed."
+            ),
+            need=(
+                "She needed the gate rule — a check that compared both sides and "
+                "opened the gate when they matched, kept it shut when they did not."
+            ),
+            mapping=(
+                "`=` is the gate rule: it compares both arguments and swings the gate "
+                "open (`true`) when they are equal, holds it shut (`false`) when "
+                "they differ."
+            ),
+            resolution=(
+                "the REPL swung the gate open — both pennies matched, the condition "
+                "was met, and `true` came back."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(= 1 2)",
@@ -854,6 +931,26 @@ G1_18 = SubjectCurriculum(
             concept_phrase="the addition",
             question_what="the result of adding 1 and 2",
             goal_text="add 1 and 2",
+            scenario=(
+                "The milkmaid had once stumbled on the road and learned her lesson: "
+                "a steady, careful walk is the safety net. A spilled pail is a "
+                "lesson — the journey still continues."
+            ),
+            need=(
+                "She needed to know that a form submitted to the REPL — even a wrong "
+                "one — does not end the session. The REPL waits, patient, for the "
+                "next submission."
+            ),
+            mapping=(
+                "The careful walk is the safety net: each form is one step; if the "
+                "step stumbles, the REPL shows the error and holds steady. The pail "
+                "may tip, but the milkmaid picks it up and walks on."
+            ),
+            resolution=(
+                "the REPL returned the result — the step landed correctly, the pail "
+                "stayed balanced, and the walk continued to market without crisis."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(* 7 6)",

@@ -313,6 +313,25 @@ G2_11 = SubjectCurriculum(
             concept_phrase='the string concatenation',
             question_what='the result of using str to splice "ab" and "cd"',
             goal_text='use str to splice the two-letter strings "ab" and "cd" into a single thread',
+            scenario=(
+                'The milkmaid had two short lengths of cheesecloth: one labeled "ab" '
+                'and one labeled "cd." She needed to stitch them together end-to-end '
+                "into one unbroken cloth for straining the morning milk."
+            ),
+            need=(
+                "She needed a braiding operation — join both lengths in order, left "
+                "to right, with no gap or overlap between the two pieces."
+            ),
+            mapping=(
+                "`str` is the braiding peg: it takes the cloth-lengths in order and "
+                "weaves them into one continuous thread. The first length leads; "
+                "the second follows without pause."
+            ),
+            resolution=(
+                "the REPL returned the joined cloth — four characters woven together "
+                "in the order given, the seam invisible."
+            ),
+            tags=("story",),
         ),
         _ex('(str 42)', "42",
             'the string coercion of an integer',
@@ -532,6 +551,26 @@ G2_20 = SubjectCurriculum(
             concept_phrase="the count operation",
             question_what="the result of using count on the vector containing 1, 2, and 3",
             goal_text="count the elements in the vector containing 1, 2, and 3",
+            scenario=(
+                "The farmer walked to market counting pails: one step per pail, one "
+                "coin per step. She held a vector of three pails in her basket and "
+                "needed the total count before she could enter the market gate."
+            ),
+            need=(
+                "She needed a tally that walked through the basket, counting one "
+                "element per step, and returned the final number when the walk "
+                "was done."
+            ),
+            mapping=(
+                "`count` is the tally-walk: it steps through every element in the "
+                "collection exactly once, tallying one per step, and returns the "
+                "total at the end of the path."
+            ),
+            resolution=(
+                "the REPL returned the final tally — one count per element, the walk "
+                "complete, the total ready to show at the market gate."
+            ),
+            tags=("story",),
         ),
         _ex("(count \"hello\")",     5, "the count operation",
             "the result of using count on the string hello",
