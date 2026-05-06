@@ -87,27 +87,21 @@ G9_01 = SubjectCurriculum(
             question_what="the original vector after conj returns a new vector",
             goal_text="bind a vector v, call conj to add 4 to a new vector, then return the unchanged v",
             scenario=(
-                'Rex the hound lined up three bones by the stream bank — '
-                'the tally for the morning\'s finds. He considered calling '
-                'conj to add a fourth bone to the row, but first he needed '
-                'to know if the original line would hold steady.'
+                'Rex the hound lined up three bones by the stream bank. He '
+                'considered adding a fourth, but wondered if the original '
+                'would hold steady.'
             ),
             need=(
-                'He wanted the certainty that conj would leave his ordered '
-                'bones untouched while building a new row elsewhere, not '
-                'rearranging what he had just set in place.'
+                'He wanted conj to leave his bones untouched while building a '
+                'new row elsewhere.'
             ),
             mapping=(
-                'The row of bones is the vector, each bone\'s position is '
-                'an index, conj is the motion of appending to a fresh copy '
-                'of the row, and asking for v at the end is what shows the '
-                'original stayed put.'
+                'The row of bones is the vector, conj appends to a fresh copy, '
+                'and asking for v shows the original stayed put.'
             ),
             resolution=(
-                'The REPL returned the original row of three bones — the '
-                'fourth had been joined to a copy, not to the row Rex held. '
-                'The immutability of data meant the original cache remained '
-                'as it was.'
+                'The REPL returned the original row of three bones. The fourth '
+                'had been conjoined to a copy, not to the row Rex held.'
             ),
             tags=("story",),
         ),
@@ -309,26 +303,20 @@ G9_04 = SubjectCurriculum(
             question_what="the value returned by dereferencing a after defining a as an atom holding 0 and performing a successful compare-and-set to 1",
             goal_text="construct an atom holding 0, perform a compare-and-set checking for 0 and setting to 1, and dereference",
             scenario=(
-                'Bell the hound scratched a tally-mark for zero bones on a '
-                'flat stone. She wanted to update the count to one, but only '
-                'if the stone still held the zero she expected — if another '
-                'dog had written first, she would refuse to change it.'
+                'Bell the hound scratched a tally for zero on a stone. She '
+                'wanted to update to one, but only if the stone still held zero.'
             ),
             need=(
                 'She needed a compare-and-set: a guarded atomic update that '
-                'checked the old value before committing the new one. If the '
-                'check passed, one would replace zero. If the stone had been '
-                'altered by another hound, the operation would fail silently.'
+                'checked the old value before committing the new one.'
             ),
             mapping=(
-                'The stone is the atom, the expected value is zero, the new '
-                'value is one, and compare-and-set! is the guarded swap that '
-                'only succeeds if the current value matches the expected one.'
+                'The stone is the atom, the expected value is zero, the new value '
+                'is one, and compare-and-set! is the guarded swap.'
             ),
             resolution=(
-                'The REPL checked the stone, found zero as expected, and '
-                'swapped it to one atomically. The dereference showed the new '
-                'count, confirming the guarded write had succeeded.'
+                'The REPL checked the stone, found zero, and swapped it to one '
+                'atomically. The dereference showed the new count.'
             ),
             tags=("story",),
         ),
@@ -339,28 +327,21 @@ G9_04 = SubjectCurriculum(
             question_what="the value returned by dereferencing a after defining a as an atom holding 5 and attempting a compare-and-set that fails",
             goal_text="construct an atom holding 5, perform a compare-and-set checking for 0 and setting to 99, and dereference",
             scenario=(
-                'Rex the hound read a tally-stone at the stream\'s edge, '
-                'expecting it to hold zero. He prepared a compare-and-set to '
-                'change it to 99. But when the operation checked the stone, '
-                'another dog had already scratched it — the count now showed 5.'
+                'Rex read a tally-stone expecting zero. He prepared a '
+                'compare-and-set to change it to 99. But another dog had '
+                'scratched it — the count now showed 5.'
             ),
             need=(
-                'The compare-and-set would compare the current value 5 '
-                'against the expected zero, find them mismatched, and refuse '
-                'to write. The stone would stay at its actual value, not the '
-                'one the old write intended.'
+                'The compare-and-set would find the mismatch and refuse to '
+                'write. The stone would stay at its actual value.'
             ),
             mapping=(
                 'The stone is the atom at 5, the expected value is zero, the '
-                'new value is 99, and compare-and-set! is the guarded swap '
-                'that fails when the stone holds something other than what '
-                'was expected.'
+                'new value is 99, and compare-and-set! fails when they mismatch.'
             ),
             resolution=(
-                'The REPL checked the stone, found 5 instead of zero, and '
-                'refused the swap. The dereference showed the stone still '
-                'held its original value, unchanged by the failed guarded '
-                'write.'
+                'The REPL checked the stone, found 5 not zero, and refused the '
+                'swap. The stone remained unchanged.'
             ),
             tags=("story",),
         ),
@@ -391,29 +372,20 @@ G9_05 = SubjectCurriculum(
             question_what="the log vector after defining an atom a, defining a log atom, adding a watch that records each new value, swapping a, and dereferencing the log",
             goal_text="construct an atom a, construct a log atom, add a watch to a that conjoins new values to the log, swap a, and dereference the log",
             scenario=(
-                'Bell the hound kept a tally-stone and also a separate log '
-                'bone-row by the bank to record each time the tally shifted. '
-                'She attached a watch to the stone — an instruction left in '
-                'the sand — so that whenever the tally changed, the log would '
-                'automatically record the new value.'
+                'Bell kept a tally-stone and a log bone-row by the bank. She '
+                'attached a watch so the log would record each tally change.'
             ),
             need=(
-                'Every change to the main tally-stone would trigger the watch '
-                'to append the new value to the log vector. After the tally '
-                'was swapped, the log would hold a record of what the stone '
-                'had become.'
+                'Every change would trigger the watch to append the new value to '
+                'the log. After the swap, the log would hold a record.'
             ),
             mapping=(
                 'The tally-stone is the atom a, the log bone-row is the atom '
-                'holding a vector, add-watch sets a watcher-function that '
-                'fires whenever a changes, and conj appends the new value to '
-                'the log.'
+                'holding a vector, add-watch sets a function that fires on change.'
             ),
             resolution=(
-                'The REPL attached the watch, then swapped the tally from '
-                'zero to one. The watch fired and appended one to the log. '
-                'Dereferencing the log showed the record of what the stone '
-                'had become.'
+                'The REPL attached the watch, then swapped the tally. The watch '
+                'fired and appended the new value. The log showed the record.'
             ),
             tags=("story",),
         ),
@@ -568,29 +540,20 @@ G9_08 = SubjectCurriculum(
             question_what="the pair of values returned by dereferencing both a and b after defining them as refs, coordinating their alters inside dosync, and dereferencing",
             goal_text="construct refs a and b, perform a coordinated transaction that alters both by applying inc, and dereference both",
             scenario=(
-                'Rex the hound kept two ref notebooks at the stream\'s edge — '
-                'one with the count of found bones at one, another with the '
-                'count of cached bones at two. When a new bone was buried, '
-                'both counts needed to step up together, neither advancing '
-                'without the other.'
+                'Rex kept two ref notebooks at the stream\'s edge — one at one, '
+                'another at two. Both counts needed to step up together.'
             ),
             need=(
-                'He would enter a dosync transaction fence and alter both '
-                'pages inside the same fence, applying inc to each. If '
-                'anything went wrong, both changes would retry together, '
-                'keeping the two counts always in sync.'
+                'He would enter a dosync fence and alter both pages, applying inc '
+                'to each. Both changes would retry together if needed.'
             ),
             mapping=(
-                'The two ref notebooks are the identity values a and b, '
-                'dosync is the fence that coordinates both changes as one '
-                'atomic unit, alter applies inc to each page, and '
-                'dereferencing both shows the result.'
+                'The notebooks are refs a and b, dosync is the fence that '
+                'coordinates both changes, alter applies inc to each page.'
             ),
             resolution=(
-                'The REPL opened the dosync fence, altered both pages by '
-                'applying inc, and committed both changes together. The pair '
-                'of derefs showed two and three — both advanced safely inside '
-                'the transaction.'
+                'The REPL opened the dosync, altered both pages, and committed '
+                'together. Both values advanced safely inside the transaction.'
             ),
             tags=("story",),
         ),
@@ -933,27 +896,20 @@ G9_13 = SubjectCurriculum(
             question_what="the value returned by dereferencing a future that multiplies 6 and 7",
             goal_text="construct a future that multiplies 6 and 7, and dereference it",
             scenario=(
-                'Rex the hound needed the product of six and seven computed '
-                'quickly. He dispatched a scout-dog ahead with the task to '
-                'multiply those two numbers. The scout raced forward while Rex '
-                'stayed behind arranging the next part of the forage.'
+                'Rex needed the product of six and seven computed quickly. He '
+                'dispatched a scout ahead with the task.'
             ),
             need=(
-                'Rex could not call out the result until the scout returned with '
-                'the answer. He would wait for the runner to complete the work, '
-                'then ask for the message — the product the scout carried back.'
+                'Rex would wait for the scout to complete, then ask for the '
+                'product the scout carried back.'
             ),
             mapping=(
-                'The scout is the future, the multiplication task is the work '
-                'sent ahead, the scout\'s racing forward is the asynchronous '
-                'computation, and dereferencing the future is asking the scout '
-                'for the result.'
+                'The scout is the future, the multiplication task is the work, '
+                'and dereferencing the future is asking for the result.'
             ),
             resolution=(
-                'The REPL sent the runner to compute six times seven. The scout '
-                'multiplied the numbers as it ran. When Rex dereferenced the '
-                'future, the scout delivered the verdict: the product of '
-                'forty-two.'
+                'The REPL sent the scout to compute six times seven. When Rex '
+                'dereferenced the future, the scout delivered forty-two.'
             ),
             tags=("story",),
         ),
@@ -976,26 +932,19 @@ G9_14 = SubjectCurriculum(
             question_what="the value extracted from an atom using @",
             goal_text="construct an atom holding 7 and dereference it using @",
             scenario=(
-                'Bell the hound carved a tally-stone at the stream\'s edge and '
-                'scratched the count seven into its surface. Later, when she '
-                'needed to know what the stone held, she would use the quickest '
-                'glance — the @ shorthand — to read the current value.'
+                'Bell carved a tally-stone at the stream\'s edge with count seven. '
+                'She would use the @ shorthand to read the current value.'
             ),
             need=(
-                'She wanted the most terse way to look at what the stone held, '
-                'a single mark that meant "give me the value this atom carries '
-                'right now."'
+                'She wanted the quickest way to look at what the stone held.'
             ),
             mapping=(
-                'The tally-stone is the atom holding seven, the @ shorthand is '
-                'the swift glance at the stone, and dereferencing is the act of '
-                'reading what the stone says.'
+                'The tally-stone is the atom holding seven, the @ shorthand is the '
+                'swift glance, and dereferencing is reading what the stone says.'
             ),
             resolution=(
-                'The REPL created the atom and marked the stone with seven. When '
-                'Bell used @, the REPL handed back the value the stone carried. '
-                'The @ shorthand was the quickest way to see what the stone '
-                'held.'
+                'The REPL created the atom. When Bell used @, it handed back the '
+                'value the stone carried.'
             ),
             tags=("story",),
         ),
@@ -1006,28 +955,20 @@ G9_14 = SubjectCurriculum(
             question_what="the value extracted from an atom using the deref function",
             goal_text="construct an atom holding 7 and dereference it using the deref function",
             scenario=(
-                'Patch the hound marked a fresh tally-stone with the count seven '
-                'and set it by the pond. When the time came to learn what the '
-                'stone held, Patch would call out the deref instruction by name '
-                '— a more formal, deliberate way to read the stone\'s value.'
+                'Patch marked a fresh tally-stone with seven and set it by the '
+                'pond. He would call out the deref instruction by name.'
             ),
             need=(
-                'Patch preferred the full deref form for clarity when reading the '
-                'stone\'s value. Though both @ and deref mean the same thing, '
-                'the named function made the intent more visible to any watching '
-                'pack member.'
+                'Patch preferred the full deref form for clarity. Both @ and deref '
+                'mean the same thing, but the named function makes intent clearer.'
             ),
             mapping=(
-                'The tally-stone is the atom holding seven, the deref function '
-                'is the formal instruction to read the stone, and calling deref '
-                'is what happens when the form looks up the stone\'s value by '
-                'name.'
+                'The tally-stone is the atom holding seven, the deref function is '
+                'the formal instruction to read the stone.'
             ),
             resolution=(
-                'The REPL created the atom and marked the stone with seven. When '
-                'Patch called deref, the REPL returned the value the stone '
-                'carried. The deref function was the named, formal way to see '
-                'what the stone held.'
+                'The REPL created the atom. When Patch called deref, it returned '
+                'the value the stone carried.'
             ),
             tags=("story",),
         ),
@@ -1050,27 +991,20 @@ G9_15 = SubjectCurriculum(
             question_what="the value returned by dereferencing a promise after defining it, delivering a keyword to it, and dereferencing",
             goal_text="construct a promise, deliver a completion keyword to it, and dereference to get the delivered value",
             scenario=(
-                'Bell the hound sent a scout-dog far down the bank with a task '
-                'that might take time. She created a promise — an empty satchel '
-                '— that would hold the scout\'s answer when the scout eventually '
-                'returned with a message from the far shore.'
+                'Bell sent a scout-dog with a task. She created a promise — an '
+                'empty satchel for the scout\'s answer.'
             ),
             need=(
-                'The scout would race ahead, do the work, and when finished, '
-                'deliver the message-bone to the promise. Bell would wait, and '
-                'once the promise held the answer, she could dereference it to '
-                'read what the scout had sent.'
+                'The scout would race ahead, do the work, then deliver the answer '
+                'to the promise. Bell would wait and dereference it.'
             ),
             mapping=(
-                'The promise is the empty satchel waiting for a message, the '
-                'deliver is the scout placing the answer-bone into the satchel, '
-                'and dereferencing is Bell reading what the scout brought back.'
+                'The promise is the empty satchel, deliver places the answer in, '
+                'and dereferencing reads what came back.'
             ),
             resolution=(
-                'The REPL created the empty promise. The scout finished its work '
-                'and delivered the completion keyword :done. When Bell '
-                'dereferenced the promise, she received what the scout had sent '
-                '— the verdict that the work was done.'
+                'The REPL created the promise. The scout finished and delivered '
+                ':done. When Bell dereferenced, she got the answer.'
             ),
             tags=("story",),
         ),
@@ -1081,26 +1015,20 @@ G9_15 = SubjectCurriculum(
             question_what="the value returned by dereferencing a promise after defining it, delivering a number to it, and dereferencing",
             goal_text="construct a promise, deliver 42 to it, and dereference to get the delivered value",
             scenario=(
-                'Rex the hound created a promise — a waiting satchel — and sent '
-                'a scout-dog to count the bones in a distant cache. The scout '
-                'would run far and eventually deliver a message-bone with the '
-                'total count scratched into it.'
+                'Rex created a promise — a satchel — and sent a scout to count '
+                'bones in a distant cache.'
             ),
             need=(
-                'Rex could not read the count until the scout brought the answer '
-                'back. Once the scout delivered the number to the promise, Rex '
-                'would dereference to read what the scout had found.'
+                'Rex could not read the count until the scout brought the answer. '
+                'Once delivered, Rex would dereference to read it.'
             ),
             mapping=(
-                'The promise is the empty satchel waiting for the scout\'s count, '
-                'deliver is the scout placing the answer with forty-two scratched '
-                'in, and dereferencing is Rex reading the count the scout brought.'
+                'The promise is the satchel, deliver places the answer in, '
+                'dereferencing is Rex reading the count.'
             ),
             resolution=(
-                'The REPL created the promise. The scout ran ahead, counted the '
-                'bones, and delivered the number forty-two to the promise. When '
-                'Rex dereferenced, he received the verdict the scout had counted: '
-                'forty-two bones in the cache.'
+                'The REPL created the promise. The scout ran, counted, and '
+                'delivered the number. When Rex dereferenced, he got the count.'
             ),
             tags=("story",),
         ),
@@ -1123,25 +1051,20 @@ G9_16 = SubjectCurriculum(
             question_what="the value returned by dereferencing v after defining a volatile holding 0, performing a non-transactional swap via inc, and dereferencing",
             goal_text="construct a volatile holding 0, perform a non-transactional swap by applying inc, and dereference",
             scenario=(
-                'Bell the hound scratched a quick tally-mark on a bark-strip at '
-                'the stream\'s edge — a volatile counter that did not need the '
-                'heaviness of transactions. The mark held zero. She wanted to '
-                'step it up by one, fast, without any guards.'
+                'Bell scratched a quick tally-mark on a bark-strip at the stream. '
+                'A volatile counter that needed no transactional heaviness.'
             ),
             need=(
-                'A volatile swap was lighter than an atom swap — no retries, no '
-                'compare-and-set logic, just a raw read-modify-write. Bell would '
-                'vswap the mark by applying inc and immediately read the result.'
+                'A volatile swap was lighter than atom swap — just a raw '
+                'read-modify-write. Bell would vswap by inc and read instantly.'
             ),
             mapping=(
-                'The bark-strip is the volatile, the scratch-mark is its value, '
-                'vswap! is the non-transactional read-compute-write, and '
-                'dereferencing reads what the mark now says.'
+                'The bark-strip is the volatile, the mark is its value, vswap! '
+                'is non-transactional read-compute-write.'
             ),
             resolution=(
-                'The REPL vswapped the zero to one in a single, unguarded stroke. '
-                'The bark-strip held the new tally. The volatile was the lightest '
-                'way to hold a mutable value when transactions were not needed.'
+                'The REPL vswapped zero to one. The volatile was the lightest '
+                'way to hold a mutable value.'
             ),
             tags=("story",),
         ),
@@ -1152,26 +1075,20 @@ G9_16 = SubjectCurriculum(
             question_what="the value returned by dereferencing v after defining a volatile holding 5, performing a non-transactional reset to 99, and dereferencing",
             goal_text="construct a volatile holding 5, perform a non-transactional reset to 99, and dereference",
             scenario=(
-                'Patch the hound marked a volatile bark-strip with the count five '
-                'from an earlier round. Now a new tally had arrived, and the mark '
-                'needed to be overwritten outright with ninety-nine. Vreset would '
-                'erase the old mark without any transactional ceremony.'
+                'Patch marked a volatile bark-strip with count five. A new tally '
+                'arrived and needed to overwrite it with ninety-nine.'
             ),
             need=(
-                'A lightweight reset was needed — not an atom reset with retries, '
-                'but a raw, non-transactional overwrite. Patch would vreset! the '
-                'volatile from five to ninety-nine and see the change instantly.'
+                'A lightweight reset was needed — raw, non-transactional. Patch '
+                'would vreset the volatile instantly.'
             ),
             mapping=(
-                'The volatile bark-strip holds the old count five, vreset! is the '
-                'unconditional non-transactional write that replaces it with '
-                'ninety-nine, and dereferencing shows the new mark.'
+                'The volatile holds five, vreset! is the non-transactional write '
+                'that replaces it with ninety-nine.'
             ),
             resolution=(
-                'The REPL vreset the mark from five to ninety-nine in one raw '
-                'stroke. The bark-strip held the new count. The volatile reset '
-                'was the fastest way to replace a value when no coordination was '
-                'needed.'
+                'The REPL vreset five to ninety-nine in one stroke. The volatile '
+                'was the fastest way.'
             ),
             tags=("story",),
         ),
@@ -1194,28 +1111,20 @@ G9_17 = SubjectCurriculum(
             question_what="the value of the dynamic var when read inside the binding form after defining it and rebinding",
             goal_text="define a dynamic var *p* as 1, use binding to rebind it to 99, and read its value inside",
             scenario=(
-                'Bell the hound carved a thread-local scent-mark into the bank '
-                'with the name *p*, set to one for the main trail. But for one '
-                'brief crossing — a single form — she would temporarily bind the '
-                'scent to a different value, ninety-nine, just for her own nose.'
+                'Bell carved a scent-mark *p* set to one. For one crossing, she '
+                'would temporarily bind it to ninety-nine.'
             ),
             need=(
-                'Inside that form, when she sniffed for *p*, she would smell '
-                'ninety-nine — the temporary binding shadowing the original scent '
-                'carved at the bank. Outside that form, the original scent would '
-                'return.'
+                'Inside the form, *p* would smell like ninety-nine. Outside, the '
+                'original scent would return.'
             ),
             mapping=(
-                'The scent-mark carved at the bank is the dynamic var *p*, the '
-                'binding form is the temporary rebind to ninety-nine, and '
-                'reading *p* inside the form shows what the nose detects: the '
-                'bound value.'
+                'The scent-mark is the dynamic var *p*, binding is the temporary '
+                'rebind, reading shows the bound value.'
             ),
             resolution=(
-                'The REPL set the original scent to one at the bank. Inside the '
-                'binding, *p* smelled like ninety-nine to the hound. When the '
-                'form ended, the temporary binding faded and the original scent '
-                'would return.'
+                'Inside binding, *p* was ninety-nine. When the form ended, the '
+                'original scent returned.'
             ),
             tags=("story",),
         ),
@@ -1226,28 +1135,21 @@ G9_17 = SubjectCurriculum(
             question_what="the value of the dynamic var when read after the binding form unwound",
             goal_text="define a dynamic var *p* as 1, use binding to rebind it to 99 inside, and read its value after binding exits",
             scenario=(
-                'Patch the hound carved a scent-mark at the bank with the name '
-                '*p*, set to one — a dynamic var that any thread along the bank '
-                'could sense. For one brief crossing, the hound would bind *p* '
-                'to ninety-nine. After the form ended, the hound would ask: what '
-                'does *p* smell like now?'
+                'Patch carved a scent-mark *p* set to one. For one crossing, he '
+                'would bind *p* to ninety-nine. After, he would ask: what does '
+                '*p* smell like?'
             ),
             need=(
-                'Inside the binding form, *p* would smell like ninety-nine. But '
-                'when the form completed, the temporary scent would fade and the '
-                'original carved mark at the bank would be all that remained.'
+                'Inside binding, *p* would smell ninety-nine. When done, the '
+                'temporary scent faded and the original mark remained.'
             ),
             mapping=(
-                'The permanent scent-mark at the bank is the dynamic var *p* '
-                'bound to one, the binding form is the temporary rebind to '
-                'ninety-nine, and the second read of *p* shows the original '
-                'scent has returned.'
+                'The scent-mark is the dynamic var *p* bound to one, binding '
+                'resets it to ninety-nine, the second read shows original returned.'
             ),
             resolution=(
-                'The REPL set the permanent scent to one at the bank. Inside the '
-                'binding, *p* smelled like ninety-nine. When the form unwound, '
-                'the temporary scent faded. The second read of *p* caught the '
-                'original scent again: one.'
+                'The REPL set permanent scent to one. Inside binding, *p* was '
+                'ninety-nine. When unwound, the second read caught the original.'
             ),
             tags=("story",),
         ),

@@ -241,25 +241,20 @@ G5_04 = SubjectCurriculum(grade=5, subject_id="G5-04",
             goal_text="walk three condition-stones in order, taking the arm whose stone first reads true",
             scenario=(
                 'Patch approached a fork by the stream. Three condition-stones lay in a '
-                'row, each paired with an arm. The first stone read false — 1 equals 2? '
-                'No. The second read true — 1 equals 1? Yes. A third stone marked :else '
-                'was the fallback, but unneeded.'
+                'row. The first read false, the second true. A third marked :else as '
+                'fallback.'
             ),
             need=(
-                'To walk the stone-row in order and take the first arm whose stone '
-                'read true. This was cond: a sequence of tests, each with a paired arm, '
-                'taken in order until one test held.'
+                'Walk the stone-row in order and take the first arm whose stone reads '
+                'true.'
             ),
             mapping=(
-                'The cond-form is the stone-row walk. Each condition-test is a stone; '
-                'each arm is the value paired with it. The REPL walks the stones left '
-                'to right, reads each one, and takes the first arm whose stone says true. '
-                ':else is the final fallback if all earlier stones read false.'
+                'The cond-form is the stone-row walk. Each test is a stone; each arm '
+                'is the paired value. :else is the final fallback if all stones read false.'
             ),
             resolution=(
                 'The REPL walked the first stone, found it false, moved to the second, '
-                'found it true, and took its arm without looking at the rest. The stone-row '
-                'walk stopped there, handing back the value. No further stones were read.'
+                'found it true, and took its arm. The walk stopped there.'
             ),
             tags=("story",),
         ),
@@ -277,25 +272,20 @@ G5_05 = SubjectCurriculum(grade=5, subject_id="G5-05",
             goal_text="fall through all false conditions and return the default value",
             scenario=(
                 'Bell walked a row of condition-stones by the river bank. The first '
-                'stone read false. The second stone read false as well. Neither arm '
-                "could be taken. A third marker — :else — stood at the row's end as "
-                'the final sanctuary.'
+                'read false, the second false. A third marker — :else — stood at the '
+                "row's end."
             ),
             need=(
-                'She needed a fallback arm when all the earlier tests failed. The :else '
-                'clause is not read as a condition but as the guaranteed default: if you '
-                'reach it, you take that arm.'
+                'A fallback arm when all earlier tests failed. :else is the guaranteed '
+                'default.'
             ),
             mapping=(
-                'The cond-form walks the stone-row. Each stone is a test; each arm is '
-                'paired with it. :else is special: it is not a stone to be tested but a '
-                'safe harbor when all stones have read false. Reach :else, and that arm '
-                'is yours.'
+                'The cond-form walks the stone-row. :else is special: not a test but a '
+                'safe harbor when all stones read false.'
             ),
             resolution=(
-                'The REPL walked the first stone, found it false, walked the second, '
-                'found it false, reached the :else marker, and took its arm without further '
-                'testing. The fallback had caught her. The answer came back.'
+                'The REPL walked the first stone, found false, walked the second, found '
+                'false, reached :else, and took its arm.'
             ),
             tags=("story",),
         ),

@@ -838,25 +838,20 @@ G3_14 = SubjectCurriculum(grade=3, subject_id="G3-14",
             question_what="the final result evaluated by do from the sequence of expressions",
             goal_text="evaluate three arithmetic expressions in sequence and return the result of the last one",
             scenario=(
-                'Rex the hound left three sets of paw-prints at the stream\'s '
-                'edge, one trail after another. "I walk each trail in turn," he '
-                'said, pressing the last print deep into the stone, "and whatever '
-                'the final trail brings me is what I carry back."'
+                'Rex the hound left three paw-prints at the stream\'s edge. '
+                '"I walk each trail in turn," he said. "What the final trail brings '
+                'me is what I carry back."'
             ),
             need=(
-                'He needed to compute each result in the sequence but keep only '
-                'the final verdict — the earlier sums would matter for reading, '
-                'but not for the answer that came back.'
+                'He needed to compute each result but keep only the final verdict.'
             ),
             mapping=(
-                'The paw-trails are the three forms, walking each in sequence is '
-                'what the runtime does, and the value returned is always what the '
-                'last form had computed.'
+                'The paw-trails are the three forms, the value returned is what the '
+                'last form computed.'
             ),
             resolution=(
-                'The REPL walked each trail, computed the sums, but returned only '
-                'the verdict of the final step. The earlier answers had served '
-                'their purpose and faded.'
+                'The REPL walked each trail and computed the sums, but returned only '
+                'the verdict of the final step.'
             ),
             tags=("story",),
         ),
@@ -943,26 +938,20 @@ G3_17 = SubjectCurriculum(grade=3, subject_id="G3-17",
             question_what="the result of subtracting tortoise-speed from hare-speed after binding both via let",
             goal_text="bind hare-speed to 4 and tortoise-speed to 1, then compute their difference",
             scenario=(
-                'Rex the hound held two bones at the meadow: one he would carry at '
-                'a fast pace, one at a steady slow pace. "I name the first hare-speed '
-                'and the second tortoise-speed," he said through the dual grip. "The '
-                'names use dashes between the words — a naming rule the pack all '
-                'follow."'
+                'Rex the hound held two bones at the meadow: one for fast pace, '
+                'one for slow pace. "I name them hare-speed and tortoise-speed," '
+                'he said through the dual grip. "Dashes separate the words."'
             ),
             need=(
-                'The form required careful naming: each name had to match the pack\'s '
-                'convention of dashes separating words, so the binding would be clear '
-                'and easy for any dog to read.'
+                'Each name had to match the pack\'s convention of dashes '
+                'separating words.'
             ),
             mapping=(
-                'The two bones gripped are the named bindings, the dashed names are '
-                'what the pack agrees to call them, and the difference is what comes '
-                'back when one is taken from the other.'
+                'The two bones are the bindings, the dashed names are what the pack '
+                'calls them, and the difference comes back.'
             ),
             resolution=(
-                'The REPL read the dashed names as the binding directed and computed '
-                'the difference — the naming convention had served its purpose, making '
-                'the form\'s intent clear to anyone who would read the markers.'
+                'The REPL read the dashed names and computed the difference.'
             ),
             tags=("story",),
         ),

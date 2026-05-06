@@ -188,27 +188,20 @@ G11_02 = SubjectCurriculum(
             question_what="the uppercase form of the string abc produced by the host method toUpperCase via the alternate dot syntax",
             goal_text="call the host method toUpperCase using the alternate dot form",
             scenario=(
-                'Patch the hound discovered that the kennel-master\'s shed '
-                'offered two ways to call the same tools: the usual dot-prefix '
-                'form, and an alternate arrangement. At the stream\'s edge, '
-                'Patch found letters that needed the same transformation.'
+                'Patch discovered the shed offered two ways to call tools: the '
+                'dot-prefix form and an alternate arrangement.'
             ),
             need=(
-                'To prove both forms worked, Patch needed to call toUpperCase '
-                'using the alternate syntax: dot first, then the string, then '
-                'the method name. This foreign tongue had its own grammar.'
+                'Patch needed to call toUpperCase using the alternate syntax: '
+                'dot first, then the string, then method name.'
             ),
             mapping=(
-                'The string "abc" is what needs transformation, the method '
-                'toUpperCase is the host\'s rule for the change, and the '
-                'alternate dot form is the dialect — a different arrangement '
-                'that says the same thing to the runtime.'
+                'The string "abc" needs transformation, the alternate dot form '
+                'is a different arrangement that says the same thing.'
             ),
             resolution=(
-                'The REPL understood the alternate syntax just as readily. It '
-                'called the host method and returned the uppercase result. Both '
-                'the dot-prefix and dot-alternate forms were faithful paths '
-                'through the kennel-master\'s shed.'
+                'The REPL understood the alternate syntax. Both forms were '
+                'faithful paths.'
             ),
             tags=("story",),
         ),
@@ -535,25 +528,20 @@ G11_08 = SubjectCurriculum(
             question_what="the uppercase form of the type-hinted string abc produced by calling the host method toUpperCase on the binding",
             goal_text="add a type hint to a binding and call a method on the typed value",
             scenario=(
-                'Bell the hound held a text string in the forest: the letters "abc." '
-                'To call the host\'s toUpperCase on it, she wanted to give the '
-                'compiler a hint about what kind of value she was holding.'
+                'Bell held a text string "abc" and wanted to give the compiler a '
+                'hint about what kind of value she was holding.'
             ),
             need=(
-                'Type hints are like scratching a mark beside a bone to say what '
-                'you know: this is a String. The caret and type name help the '
-                'compiler choose the right path into the host.'
+                'Type hints like scratching a mark to say: this is a String. The '
+                'caret and type name help the compiler choose the right path.'
             ),
             mapping=(
-                'The caret (^) marks the hint, String is the type being declared, '
-                's is the binding that carries the hint, and the type hint guides '
-                'how the runtime calls the host method.'
+                'The caret (^) marks the hint, String is the type, s is the binding, '
+                'and the hint guides how the runtime calls the method.'
             ),
             resolution=(
-                'The REPL read the hint and understood that s was a String. When '
-                'it called .toUpperCase, it took the direct path the hint had marked. '
-                'The method returned the capitalized text. Type hints bridge the '
-                'hound\'s knowledge and the foreign compiler\'s choice.'
+                'The REPL read the hint. When it called .toUpperCase, it took the '
+                'direct path. The method returned the capitalized text.'
             ),
             tags=("story",),
         ),
@@ -717,27 +705,20 @@ G11_14 = SubjectCurriculum(
             question_what="the square root of 4 produced by the static host method Math/sqrt via slash notation when the call succeeds",
             goal_text="wrap a static host method call in error handling",
             scenario=(
-                'Rex the hound crossed the boundary into the kennel-master\'s shed '
-                'to use the Math/sqrt tool on the number 4. But the boundary was '
-                'fragile — if an error leaked through from the host world, it '
-                'would be chaos.'
+                'Rex crossed into the kennel-master\'s shed to use Math/sqrt on 4. '
+                'The boundary was fragile — an error could leak through.'
             ),
             need=(
-                'He needed a log-bridge test: a safe wrapper that would catch '
-                'any exceptions the foreign tool might throw, and hold them before '
-                'they could crash the dogs\' side. The try form was his safety net.'
+                'He needed a safe wrapper to catch any exceptions the foreign tool '
+                'might throw. The try form was his safety net.'
             ),
             mapping=(
-                'The try begins the tested crossing, Math/sqrt is the host tool '
-                'being called, the argument 4 is the value sent across the boundary, '
-                'and catch is the safety net that holds any exceptions that return.'
+                'The try begins the crossing, Math/sqrt is the host tool, the '
+                'argument 4 is the value, and catch is the safety net.'
             ),
             resolution=(
-                'The REPL tested the boundary and called Math/sqrt safely. The '
-                'method computed and returned 2.0 — the call succeeded. The try '
-                'form caught nothing because nothing had gone wrong. Rex learned '
-                'that crossing into the host world required always testing the '
-                'bridge first.'
+                'The REPL tested the boundary and called Math/sqrt safely. It '
+                'returned 2.0. The try form caught nothing because nothing went wrong.'
             ),
             tags=("story",),
         ),

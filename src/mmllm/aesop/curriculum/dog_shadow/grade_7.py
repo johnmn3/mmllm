@@ -259,22 +259,22 @@ G7_04 = SubjectCurriculum(grade=7, subject_id="G7-04",
             question_what="what value is at a specific key in the ex-info's data",
             goal_text="throw an ex-info with data, catch it, and extract the value at key :k",
             scenario=(
-                'Bell had a message-bone marked "x", with a small pouch '
-                'attached: {:k :v}. She needed to catch it, sniff the pouch, '
+                'Bell had a message-bone marked "x", with a small bag '
+                'attached: {:k :v}. She needed to catch it, sniff the bag, '
                 'then find the item stored at key :k.'
             ),
             need=(
                 'She wanted to throw the marked bone and catch it, then reach '
-                'into the pouch and pull out the value at :k. That value :v '
+                'into the bag and pull out the value at :k. That value :v '
                 'was what she sought.'
             ),
             mapping=(
-                'The message-bone is the ex-info, its pouch is the data map, '
-                'the key :k is a slot in the pouch, the value :v is what lies '
+                'The message-bone is the ex-info, its bag is the data map, '
+                'the key :k is a slot in the bag, the value :v is what lies '
                 'there, and the catch extracts and reads it.'
             ),
             resolution=(
-                'The REPL threw the bone, Bell caught it, opened the pouch, '
+                'The REPL threw the bone, Bell caught it, opened the bag, '
                 'and found :v at the key she wanted.'
             ),
             tags=("story",),

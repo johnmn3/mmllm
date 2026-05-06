@@ -204,8 +204,8 @@ G8_03 = SubjectCurriculum(
             question_what="the value in the pace compartment of a freshly-built Runner case for Alice",
             goal_text="define a Runner case with two named compartments, name and pace; build a Runner case for Alice with a deliberate-pace keyword; then read the pace compartment",
             scenario=(
-                'Bell the hound crafted a labeled kennel-pouch for tracking '
-                'runners. The pouch had two named compartments — one for a '
+                'Bell the hound crafted a labeled kennel-bag for tracking '
+                'runners. The bag had two named compartments — one for a '
                 'runner\'s name, one for the runner\'s pace-style. She '
                 'slipped "Alice" and :slow into the slots and sealed it '
                 'with the case-type Runner.'
@@ -216,13 +216,13 @@ G8_03 = SubjectCurriculum(
                 'fetch the second slot cleanly.'
             ),
             mapping=(
-                'The pouch is the defrecord, its two slots are the fields, '
+                'The bag is the defrecord, its two slots are the fields, '
                 'the type-marker is the case name, and the pace-value is '
                 'what the second field holds.'
             ),
             resolution=(
-                'The REPL built the pouch, read the named compartment, and '
-                'handed back the pace-style. The pouch kept both slots '
+                'The REPL built the bag, read the named compartment, and '
+                'handed back the pace-style. The bag kept both slots '
                 'intact — pulling one didn\'t disturb the other.'
             ),
             tags=("story",),
@@ -234,7 +234,7 @@ G8_03 = SubjectCurriculum(
             question_what="the name field value after defining a record Runner with two fields name and pace, then creating an instance and reading the name field",
             goal_text="define a record type named Runner with two fields, then retrieve another field from an instance",
             scenario=(
-                'Bell the hound made a second pouch with two labeled slots '
+                'Bell the hound made a second bag with two labeled slots '
                 '— one for a runner\'s name, one for pace-style. She '
                 'packed "Bob" and :moderate into the compartments and '
                 'sealed it with the Runner marker.'
@@ -245,12 +245,12 @@ G8_03 = SubjectCurriculum(
                 'pace-style undisturbed in its slot.'
             ),
             mapping=(
-                'The pouch is the defrecord, its two compartments are the '
+                'The bag is the defrecord, its two compartments are the '
                 'fields, the name is the first slot\'s value, and reading '
                 'by name is how the runtime fetches the right compartment.'
             ),
             resolution=(
-                'The REPL built the pouch, read the name-slot by its label, '
+                'The REPL built the bag, read the name-slot by its label, '
                 'and handed back the name. The second slot stood ready for '
                 'later reads.'
             ),
@@ -372,25 +372,20 @@ G8_05 = SubjectCurriculum(
             question_what="the value returned after defining protocol Greet with method hail, extending it to Long with an implementation, then calling hail on a number",
             goal_text="define a protocol named Greet with one method hail, extend it to Long type with an implementation, then call hail on a number",
             scenario=(
-                'Rex the hound had founded the Greet guild and set the hail '
-                'requirement. Now he pressed the guild\'s mark onto the Long '
-                'number-pack — any number arriving at the hail call would '
-                'answer with a number-voice.'
+                'Rex the hound founded the Greet guild and pressed its mark onto the '
+                'number-pack.'
             ),
             need=(
-                'When a number met the hail call, the runtime would '
-                'recognize the guild-mark on the number-type and route to '
-                'the implementation Rex had prepared.'
+                'When a number met the hail call, the runtime would recognize the '
+                'guild-mark and route to the implementation.'
             ),
             mapping=(
-                'The guild agreement is the defprotocol, the number-pack is '
-                'the type being extended, the mark is the extend-protocol, '
-                'and the number-voice is the method body.'
+                'The guild is the defprotocol, the number-pack is the type, the mark '
+                'is the extend-protocol, and the number-voice is the method.'
             ),
             resolution=(
-                'The REPL stamped the guild mark on the number-type, then '
-                'dispatched a number to the hail call. The number answered '
-                'in its own voice, proving the extension was live.'
+                'The REPL stamped the mark on the number-type, then dispatched a '
+                'number to hail. The number answered in its own voice.'
             ),
             tags=("story",),
         ),
@@ -494,7 +489,7 @@ G8_07 = SubjectCurriculum(
             scenario=(
                 'Bell the hound set up a guild called Pace with a speed '
                 'requirement. She then made a record case for the Hare breed '
-                '— a pouch with a name slot — and marked it to honor the '
+                '— a bag with a name slot — and marked it to honor the '
                 'guild agreement.'
             ),
             need=(
@@ -503,7 +498,7 @@ G8_07 = SubjectCurriculum(
                 'the Hare\'s speed-answer.'
             ),
             mapping=(
-                'The guild is the defprotocol, the pouch-case is the '
+                'The guild is the defprotocol, the bag-case is the '
                 'defrecord, the guild mark is the protocol implementation, '
                 'and the speed-word is what the record returns.'
             ),
@@ -523,25 +518,20 @@ G8_07 = SubjectCurriculum(
             question_what="the value returned after defining protocol Pace with method speed, defining record Tortoise with one field name that implements Pace, then calling speed on a Tortoise instance",
             goal_text="define a protocol Pace with method speed, define a record Tortoise that implements Pace, then call speed on a Tortoise instance",
             scenario=(
-                'Rex the hound created the same Pace guild with a speed '
-                'requirement. He built a second record case for the Tortoise '
-                'breed — a pouch with a name slot — and sealed it with the '
-                'guild mark.'
+                'Rex the hound created the Pace guild. He built a record case for '
+                'Tortoise and sealed it with the guild mark.'
             ),
             need=(
-                'When a Tortoise instance arrived at the speed call, the '
-                'runtime would check the guild mark and route to the '
-                'Tortoise\'s answer.'
+                'When a Tortoise arrived at the speed call, the runtime would route '
+                'to the answer.'
             ),
             mapping=(
-                'The guild is the defprotocol, the Tortoise pouch is the '
-                'defrecord, the guild agreement is the protocol '
-                'implementation, and the answer is the steady-word.'
+                'The guild is the defprotocol, the Tortoise bag is the defrecord, '
+                'the mark is the protocol implementation.'
             ),
             resolution=(
-                'The REPL built the Tortoise case with the mark, then '
-                'called speed on a Tortoise. The guild routed correctly, and '
-                'the steady-answer came back.'
+                'The REPL built the Tortoise case with the mark, then called speed. '
+                'The steady-answer came back.'
             ),
             tags=("story",),
         ),
@@ -930,26 +920,20 @@ G8_13 = SubjectCurriculum(
             question_what="the value returned after defining protocol Tagged with method tag-of, defining record Stone with field t that uses this to access the field in the implementation, then calling tag-of on a Stone instance",
             goal_text="define a protocol Tagged with method tag-of, define a record Stone that implements it by accessing a field via this, then call the method",
             scenario=(
-                'Bell the hound founded a guild called Tagged with a tag-of '
-                'requirement. She made a record case for stones with a single '
-                't field, and in the implementation she used the this-word to '
-                'read that field directly from the record being marked.'
+                'Bell founded a guild called Tagged with a tag-of requirement. '
+                'She made a record case for stones with a t field.'
             ),
             need=(
-                'When a Stone instance arrived at tag-of, the guild would '
-                'route to the record\'s body, where this referred to the '
-                'stone itself, and the t field could be fetched from it.'
+                'When a Stone arrived at tag-of, the guild would route to the '
+                'record\'s body, where this was the stone itself.'
             ),
             mapping=(
-                'The guild is the defprotocol, the Stone pouch is the '
-                'defrecord, the this-word is a reference to the current '
-                'record instance, and the field value is what returns.'
+                'The guild is the defprotocol, the Stone bag is the defrecord, '
+                'this is a reference to the current record instance.'
             ),
             resolution=(
-                'The REPL built a Stone with the chosen tag in the t field, '
-                'then called tag-of. The guild routed to the Stone\'s body, '
-                'where this let the implementation read the t field, and the '
-                'stored tag came back.'
+                'The REPL built a Stone with a tag in the t field, then called '
+                'tag-of. The guild routed to the body and returned the stored tag.'
             ),
             tags=("story",),
         ),
@@ -1147,24 +1131,20 @@ G8_16 = SubjectCurriculum(
             question_what="the value returned after defining protocol Sound with method cry, defining records Hare and Tortoise that both implement Sound, then calling cry on a Tortoise instance",
             goal_text="define a protocol Sound with method cry, define two record types that implement it, then call the method on a Tortoise instance",
             scenario=(
-                'Bell the hound carved a second guild called Sound with a cry '
-                'requirement. She built two record cases — one for the Hare '
-                'breed with a thump-sound, one for the Tortoise breed with a '
-                'hiss-sound. Both marked the same guild.'
+                'Bell carved a guild called Sound. She built two record cases: '
+                'Hare with thump-sound, Tortoise with hiss-sound.'
             ),
             need=(
                 'When a Tortoise arrived at cry, the guild would route to the '
-                'Tortoise case\'s sound-answer.'
+                'Tortoise case\'s answer.'
             ),
             mapping=(
-                'The guild is the defprotocol, the two record cases are the '
-                'defrecords, the guild marks are the implementations, and '
-                'each breed\'s sound is what returns.'
+                'The guild is the defprotocol, the record cases are defrecords, '
+                'and each breed\'s sound is what returns.'
             ),
             resolution=(
-                'The REPL set the guild and both record cases, then called '
-                'cry on a Tortoise. The guild routed to the Tortoise case\'s '
-                'implementation, and the hiss-sound came back.'
+                'The REPL set the guild and both cases, then called cry on '
+                'Tortoise. The hiss-sound came back.'
             ),
             tags=("story",),
         ),
