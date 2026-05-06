@@ -60,12 +60,12 @@ the form {form_display} on a strip of bark from the kitchen kindling.
 the form and let the runtime tell us exactly what it does.\""""),
 
     SubplotTemplate("""\
-A small ledger-notebook lay open on the kitchen table {place} where
+A small ledger-notebook lay open on a wooden table {place} where
 {owner_phrase} had been studying syntax-quote, the morning's eggs
 counted in a column beside it. The page showed {concept_phrase}, with
 the form {form_display} circled in pencil. {visitor_phrase},
-{emo_greedy} of the lecture, agreed to write the form to settle once
-and for all what it produced."""),
+{emo_greedy}, agreed to write the form to settle once and for all
+what it produced."""),
 
     SubplotTemplate("""\
 At a stone tablet by the goose-pen {place}, {owner_phrase} was
@@ -81,8 +81,8 @@ else would do."""),
 each one expanded into. Today's row was {concept_phrase}.
 {visitor_phrase}, {emo_greedy}, peered over {owner_his_her} shoulder
 and demanded the answer at once. {owner} pointed only to
-{form_display} — submit it, and the macroexpander would write the row
-{owner_him_her}self."""),
+{form_display} — submit it, and the macroexpander would write the
+row in {owner_his_her} stead."""),
 ]
 
 
@@ -110,7 +110,7 @@ G10_01 = SubjectCurriculum(
     examples=[
         _ex("(quote (+ 1 2))", ["+", 1, 2],
             "the quoted form (quote (+ 1 2))",
-            "the value of (quote (+ 1 2)) — the unevaluated list"),
+            "the value of (quote (+ 1 2))"),
         _ex("'(1 2 3)", [1, 2, 3],
             "the quoted list '(1 2 3)",
             "the value of '(1 2 3)"),
@@ -242,7 +242,7 @@ G10_08 = SubjectCurriculum(
         # A function evaluates its args; a macro receives unevaluated forms.
         _ex("(do (defn add-fn [a b] (+ a b)) (add-fn 3 4))", 7,
             "a plain function adding two numbers",
-            "the result of calling a function (args evaluated)"),
+            "the result of calling a function"),
         _ex("(do (defmacro add-mac [a b] `(+ ~a ~b)) (add-mac 3 4))", 7,
             "a macro that emits the same addition form",
             "the result the macro yields after expansion + eval"),
@@ -263,7 +263,7 @@ G10_09 = SubjectCurriculum(
             "whether (gensym) returns a symbol"),
         _ex("(let [a (gensym \"x_\") b (gensym \"x_\")] (= a b))", False,
             "two distinct gensyms with the same prefix",
-            "whether two fresh gensyms are equal (they aren't)"),
+            "whether two fresh gensyms are equal"),
     ],
     subplots=_MACRO_SUBPLOTS, plan_pool=_PLAN_G10,
 )
@@ -305,7 +305,7 @@ G10_11 = SubjectCurriculum(
             "what (#(* % %) 6) returns"),
         _ex("[1 #_ 2 3]", [1, 3],
             "the #_ form-skip reader macro",
-            "what [1 #_ 2 3] reads as (the 2 is dropped)"),
+            "what [1 #_ 2 3] reads as"),
     ],
     subplots=_MACRO_SUBPLOTS, plan_pool=_PLAN_G10,
 )

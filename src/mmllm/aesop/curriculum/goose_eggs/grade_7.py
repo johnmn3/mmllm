@@ -19,11 +19,15 @@ from mmllm.aesop.curriculum.goose_eggs.grade_1 import (
 _ERR_SUBPLOTS: list[SubplotTemplate] = list(_G1_SUBPLOTS) + [
 
     # Owner notices a missing egg, sets a careful trap, catches the cause.
+    # NOTE: {place} comma-bracketed mid-sentence (was period+place before
+    # the deep-audit's LOWER_PLACE_AFTER_PERIOD check, which produced
+    # "...first glance. near the market,..." with sentence breaking
+    # mid-prep).
     SubplotTemplate("""\
 {owner_phrase} had learned not to trust the morning basket on first
-glance. {place}, {owner_he_she} typed {form_display} carefully, ready
-to catch whatever the REPL might throw back, the way one sets a quiet
-trap for whatever takes an egg in the night. {visitor_phrase},
+glance, and {place} {owner_he_she} typed {form_display} carefully,
+ready to catch whatever the REPL might throw back, the way one sets
+a quiet trap for whatever takes an egg in the night. {visitor_phrase},
 {emo_greedy}, laughed and said no error would ever come — but {owner}
 insisted on letting the runtime decide, then reading {concept_phrase}
 from whatever it returned."""),
@@ -127,11 +131,11 @@ G7_05 = SubjectCurriculum(grade=7, subject_id="G7-05",
             "the predicate (some? nil)",
             "whether nil counts as some?"),
         _ex("(some? 0)", True,
-            "the predicate (some? 0) — 0 is not nil",
+            "the predicate (some? 0)",
             "whether 0 counts as some?"),
         _ex("(first nil)", None,
             "calling first on nil",
-            "the value of (first nil), which is nil"),
+            "the value of (first nil)"),
         _ex("(count nil)", 0,
             "counting a nil collection",
             "the count of nil, which is 0"),
@@ -200,7 +204,7 @@ G7_10 = SubjectCurriculum(grade=7, subject_id="G7-10",
     subject_title="doc and source", fable="goose-eggs",
     examples=[
         _ex("(:doc (meta '^{:doc \"adds two\"} plus))", "adds two",
-            "the :doc metadata on a symbol — what doc would print",
+            "the :doc metadata on a symbol",
             "the string \"adds two\" from the metadata"),
     ], subplots=_ERR_SUBPLOTS, plan_pool=_PLAN_G7)
 
@@ -233,7 +237,7 @@ G7_12 = SubjectCurriculum(grade=7, subject_id="G7-12",
             "the count of characters in \"hare\\ntortoise\\n\""),
         _ex("(clojure.string/split \"a\\nb\\nc\" #\"\\n\")", ["a", "b", "c"],
             "splitting a slurped-style string on newlines",
-            "the vector [\"a\" \"b\"\"c\"] of three lines"),
+            "the vector [\"a\" \"b\" \"c\"] of three lines"),
     ], subplots=_ERR_SUBPLOTS, plan_pool=_PLAN_G7)
 
 

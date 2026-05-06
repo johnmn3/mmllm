@@ -39,12 +39,12 @@ nearby."""),
 
     SubplotTemplate("""\
 {owner_phrase} had filled an entire leather ledger over the long
-season with tools and patterns: transducers for the egg-counts,
+season with tools and patterns — transducers for the egg-counts,
 channels between barn and kitchen, specs for what counted as a good
-egg, tests for the routines. {place}, the next entry was
-{concept_phrase}, and the form was {form_display}. {visitor_phrase},
-{emo_proud} but more reflective than usual, agreed to write the form
-into the REPL while {goose_phrase} watched."""),
+egg, tests for the routines — and {place} the next entry was
+{concept_phrase}, with the form written as {form_display}.
+{visitor_phrase}, {emo_proud} but more reflective than usual, agreed
+to write the form into the REPL while {goose_phrase} watched."""),
 
     SubplotTemplate("""\
 "This isn't a market trick to fool the buyers," {owner} said {place},
@@ -56,7 +56,7 @@ the runtime could speak for itself, the way {goose_phrase} let each
 egg speak for the morning."""),
 
     SubplotTemplate("""\
-At the kitchen table {place}, a row of small carved tokens
+At a long wooden table {place}, a row of small carved tokens
 commemorated the libraries the farm had learned along the season.
 The newest one honoured {concept_phrase}. {owner_phrase} touched it
 with a careful finger and said the form to remember was {form_display};
@@ -77,8 +77,8 @@ A small banquet at the close of the season {place} brought together
 every neighbour who'd traded with the farm. The day's discussion was
 {concept_phrase}. {owner} wrote the form {form_display} on a square
 of parchment and passed it across the table; {visitor}, {emo_content}
-but pleased, agreed to read it into the REPL — {goose_phrase} watched
-from the corner, untroubled by the long talk."""),
+and reflective, agreed to read it into the REPL — {goose_phrase}
+watched from the corner, untroubled by the long talk."""),
 ]
 
 
@@ -198,11 +198,11 @@ G12_06 = SubjectCurriculum(
         # We can run small spec predicates portably.
         _ex("(do (require '[clojure.spec.alpha :as s]) "
             "(s/valid? int? 42))", True,
-            "(s/valid? int? 42) — a basic spec check",
+            "(s/valid? int? 42)",
             "whether 42 conforms to the int? spec"),
         _ex("(do (require '[clojure.spec.alpha :as s]) "
             "(s/valid? string? 42))", False,
-            "(s/valid? string? 42) — a failing spec check",
+            "(s/valid? string? 42)",
             "whether 42 conforms to the string? spec"),
     ],
     subplots=_REAL_SUBPLOTS, plan_pool=_PLAN_G12,

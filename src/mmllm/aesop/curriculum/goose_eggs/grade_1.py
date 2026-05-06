@@ -58,9 +58,13 @@ was easier to type the form into the REPL than to argue about
 {concept_phrase} — {goose_phrase} was about to lay another egg
 anyway, and the morning would not wait for guessing."""),
 
-    # 2b. Wager variant — coins on the kitchen table.
+    # 2b. Wager variant — coins on a wooden table.
+    # NOTE: was "the kitchen table" — when {place} resolved to
+    # "in the kitchen" / "deep inside the kitchen" the rendered text
+    # read "kitchen table in the kitchen" (DOUBLED_PLACE bug).
+    # "Wooden table" composes with any {place} resolution.
     SubplotTemplate("""\
-A row of three coins sat on the kitchen table {place}, set out as a
+A row of three coins sat on a wooden table {place}, set out as a
 wager between {visitor_phrase} and {owner_phrase}. The bet was
 simple: predict what {form_display} would return. {visitor},
 {emo_greedy}, was certain about the answer. {owner_phrase} asked

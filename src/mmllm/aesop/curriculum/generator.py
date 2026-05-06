@@ -34,7 +34,7 @@ from __future__ import annotations
 import json
 import random
 from dataclasses import dataclass, field
-from typing import Callable, Iterable
+from typing import Iterable
 
 from mmllm.aesop import ontology as ont
 from mmllm.aesop.fables import (
@@ -71,12 +71,60 @@ class SubjectExample:
     `question_what` is the noun-phrase the question wraps around: e.g.,
     "this form evaluates to" or "the result of this expression". The
     subplot ends with "Write a Clojure expression that computes {what}".
+
+    `goal_text` (optional) — a one-sentence imperative describing WHAT
+    the form should do, without showing the form itself. Used by
+    "goal-style" subplots that describe the goal and ask the model to
+    produce the form, rather than showing the form and asking the
+    model to copy-evaluate it. Example: form `(+ 1 2)` → goal_text
+    `"add 1 and 2"`. When empty, subjects use atom-style subplots
+    that show the form (legitimate for L1 atom subjects where the form
+    IS the answer; copy-from-prompt is the lesson).
+
+    Story-scaffold slots (optional, all four together) — when an
+    example is authored with a grounded fable story, these four
+    slots compose a 5-act narrative that templates can render
+    directly. Templates that reference these placeholders should be
+    tagged with `fits_tags=("story",)` so they only fire for
+    examples that include "story" in their tags.
+
+      `scenario`   (act 1 — SETUP)     — a concrete situation in the
+                                         meadow that *exists*. Names
+                                         characters, place, and the
+                                         current state of the world.
+                                         1-3 sentences.
+      `need`       (act 2 — NEED)      — what's needed; the question
+                                         the operation answers.
+                                         Without the operation,
+                                         something fails. 1-2
+                                         sentences.
+      `mapping`    (act 3 — MAPPING)   — how the metaphor's elements
+                                         map 1:1 to the operation's
+                                         parts. The pedagogical core.
+                                         1-2 sentences.
+      `resolution` (act 5 — RESOLUTION)— what the REPL's value means
+                                         in the story; closes the
+                                         loop with the need. 1
+                                         sentence.
+
+    Act 4 (ACTION) is supplied by the template — the character
+    composes `{concept_phrase}` and submits.
     """
     form:           str
     expected:       object
     concept_phrase: str
     question_what:  str
-    # tags used for filtering / weighting (optional)
+    goal_text:      str = ""
+    # Story-scaffold slots (Phase C). All four authored together,
+    # with the example's tags including "story" so story-aware
+    # subplot templates can match via fits_tags.
+    scenario:       str = ""
+    need:           str = ""
+    mapping:        str = ""
+    resolution:     str = ""
+    # tags used for filtering / weighting (optional). Examples with
+    # all four story slots filled should also include "story" in
+    # their tags so story-templates fire.
     tags:           tuple[str, ...] = ()
 
 
@@ -132,16 +180,23 @@ def _tortoises() -> tuple[ont.Character, ...]:
 def _foxes() -> tuple[ont.Character, ...]:
     return tuple(c for c in ont.CHARACTERS if c.species == "fox")
 
+def _ants() -> tuple[ont.Character, ...]:
+    return tuple(c for c in ont.CHARACTERS if c.species == "ant")
+
+def _grasshoppers() -> tuple[ont.Character, ...]:
+    return tuple(c for c in ont.CHARACTERS if c.species == "grasshopper")
+
 # Other fables would supply their own pickers; tortoise-hare uses these.
 TORTOISE_HARE_LOCATIONS = ("meadow", "forest", "woods", "garden",
                             "orchard", "hilltop", "road")
 
 # Fox-grapes pool — orchards / vineyards / kitchen gardens / market / farms.
-# Mirrors the canonical chapter settings (purple grapes on a vine, apples in
-# a farmyard, blackberries over a fence, pears in a kitchen garden, plums
-# at the market, figs over a vineyard wall).
 FOX_GRAPES_LOCATIONS = ("orchard", "garden", "farm", "market",
                          "meadow", "woods", "forest")
+
+# Ant-grasshopper natural locations: meadow and adjacent outdoor settings.
+ANT_GRASSHOPPER_LOCATIONS = ("meadow", "forest", "woods", "garden",
+                              "orchard", "hilltop", "farm")
 
 
 def _pick_th_chars(scene: Scene) -> tuple[ont.Character, ont.Character]:
@@ -156,6 +211,20 @@ def _pick_th_location(scene: Scene) -> ont.Location:
     """Pick from the path-like outdoor locations natural for tortoise-hare."""
     cands = [l for l in ont.LOCATIONS
              if l.name in TORTOISE_HARE_LOCATIONS]
+    return scene.rng.choice(cands)
+
+
+def _pick_ag_chars(scene: Scene) -> tuple[ont.Character, ont.Character]:
+    """Pick a fresh (ant, grasshopper) pair for a record."""
+    ant = scene.rng.choice(_ants())
+    grasshopper = scene.rng.choice(_grasshoppers())
+    return ant, grasshopper
+
+
+def _pick_ag_location(scene: Scene) -> ont.Location:
+    """Pick from outdoor meadow-adjacent locations natural for ant-grasshopper."""
+    cands = [l for l in ont.LOCATIONS
+             if l.name in ANT_GRASSHOPPER_LOCATIONS]
     return scene.rng.choice(cands)
 
 
@@ -269,16 +338,6 @@ def _pick_fg_location(scene: Scene) -> ont.Location:
     )
 
 
-# Fable → (char_picker, location_picker). Default falls back to tortoise-hare
-# pickers, preserving existing tortoise-hare behavior unchanged. Goose-eggs
-# isn't in this table because it picks THREE characters with a different
-# placeholder builder; it's dispatched specially in `generate_one_record`.
-_FABLE_PICKERS: dict[str, tuple[Callable, Callable]] = {
-    "tortoise-hare": (_pick_th_chars, _pick_th_location),
-    "fox-grapes":    (_pick_fg_chars, _pick_fg_location),
-}
-
-
 # ─────────────────────── render helpers ───────────────────────
 
 
@@ -289,55 +348,28 @@ def _format_form_display(form: str) -> str:
 
 
 def _build_placeholders(scene: Scene,
-                        hare: ont.Character,
-                        tortoise: ont.Character,
+                        primary: ont.Character,
+                        secondary: ont.Character,
                         location: ont.Location,
-                        example: SubjectExample) -> dict:
+                        example: SubjectExample,
+                        fable: str = "tortoise-hare") -> dict:
     """Assemble the {placeholder: value} dict that subplot templates use.
 
-    Parameter names `hare`/`tortoise` are local labels for the two
-    primary characters — the actual species depends on the fable
-    picker (e.g., for fox-grapes both are foxes). The dict exposes
-    BOTH the {hare}/{tortoise} keys (used by tortoise-hare templates)
-    AND fable-specific aliases (e.g., {hasty_fox}/{patient_fox} for
-    fox-grapes templates) that point to the same character objects.
-    Templates pick whichever names suit their fable's narrative voice.
+    Characters are exposed under fable-specific role names:
+    - tortoise-hare:   `hare` / `tortoise`
+    - ant-grasshopper: `ant` / `grasshopper`
+    - fox-grapes:      `hasty_fox` / `patient_fox`
+    Each role exposes the standard suffix family.
     """
-    return {
-        # characters
-        "hare":            hare.name,
-        "tortoise":        tortoise.name,
-        "hare_phrase":     species_phrase(hare),
-        "tortoise_phrase": species_phrase(tortoise),
-        "hare_he_she":     hare.he_she,
-        "tortoise_he_she": tortoise.he_she,
-        "hare_he_she_cap": cap(hare.he_she),
-        "tortoise_he_she_cap": cap(tortoise.he_she),
-        "hare_his_her":    hare.his_her,
-        "tortoise_his_her": tortoise.his_her,
-        # Object-case pronouns (for "asked X to ...", "told X that ...")
-        "hare_him_her":     hare.him_her,
-        "tortoise_him_her": tortoise.him_her,
+    if fable == "ant-grasshopper":
+        primary_role, secondary_role = "ant", "grasshopper"
+    elif fable == "fox-grapes":
+        primary_role, secondary_role = "hasty_fox", "patient_fox"
+    else:
+        # tortoise-hare default — preserves the existing call shape.
+        primary_role, secondary_role = "hare", "tortoise"
 
-        # ─── fox-grapes aliases (Option A — two foxes of opposite archetype) ───
-        # The "hasty fox" is the original Aesop voice — the rationalizer
-        # who, after one failed reach, declares the grapes sour. The
-        # "patient fox" is the corrective voice — the disciplined
-        # evaluator who keeps trying jumps, counts attempts, and either
-        # reaches the prize or admits the limit honestly.
-        "hasty_fox":             hare.name,
-        "patient_fox":           tortoise.name,
-        "hasty_fox_phrase":      species_phrase(hare),
-        "patient_fox_phrase":    species_phrase(tortoise),
-        "hasty_fox_he_she":      hare.he_she,
-        "patient_fox_he_she":    tortoise.he_she,
-        "hasty_fox_he_she_cap":  cap(hare.he_she),
-        "patient_fox_he_she_cap": cap(tortoise.he_she),
-        "hasty_fox_his_her":     hare.his_her,
-        "patient_fox_his_her":   tortoise.his_her,
-        "hasty_fox_him_her":     hare.him_her,
-        "patient_fox_him_her":   tortoise.him_her,
-
+    base: dict = {
         # place
         "place":           place_phrase(scene, location),
         "location":        location.name,
@@ -346,12 +378,45 @@ def _build_placeholders(scene: Scene,
         "form_display":    _format_form_display(example.form),
         "concept_phrase":  example.concept_phrase,
         "what":            example.question_what,
+        "goal_text":       example.goal_text,
+        # story-scaffold slots (Phase C). Empty when the example
+        # has no story authored; templates that use them should
+        # be tagged fits_tags=("story",).
+        "scenario":        example.scenario,
+        "need":            example.need,
+        "mapping":         example.mapping,
+        "resolution":      example.resolution,
 
-        # emotions (single picks)
+        # emotions — single picks. The pool covers ant-grasshopper's
+        # natural emotional palette (content/proud/regretful/tired/hungry)
+        # plus tortoise-hare's (proud/patient/tired). Adding extra keys
+        # is harmless — Python format() ignores unused keys.
         "emo_proud":       scene.rng.choice(EMO_PROUD),
         "emo_patient":     scene.rng.choice(EMO_PATIENT),
         "emo_tired":       scene.rng.choice(EMO_TIRED),
+        "emo_content":     scene.rng.choice(EMO_CONTENT),
+        "emo_regretful":   scene.rng.choice(EMO_REGRETFUL),
+        "emo_hungry":      scene.rng.choice(EMO_HUNGRY),
     }
+
+    # Expose each character under its fable-specific role name with the
+    # standard suffix family. `primary` is conventionally the
+    # protagonist of the fable's moral (the one who gets it right —
+    # tortoise / ant); `secondary` is the foil (hare / grasshopper).
+    # NOTE: tortoise-hare passed (hare, tortoise) historically, so the
+    # primary/secondary naming is generic but the roles map correctly:
+    # for tortoise-hare, primary=hare and secondary=tortoise; this is
+    # preserved exactly to keep all existing tortoise-hare templates
+    # rendering identically.
+    for role, char in ((primary_role, primary), (secondary_role, secondary)):
+        base[role]                  = char.name
+        base[f"{role}_phrase"]      = species_phrase(char)
+        base[f"{role}_he_she"]      = char.he_she
+        base[f"{role}_he_she_cap"]  = cap(char.he_she)
+        base[f"{role}_his_her"]     = char.his_her
+        base[f"{role}_him_her"]     = char.him_her
+
+    return base
 
 
 def _build_ge_placeholders(scene: Scene,
@@ -414,6 +479,13 @@ def _build_ge_placeholders(scene: Scene,
         "form_display":    _format_form_display(example.form),
         "concept_phrase":  example.concept_phrase,
         "what":            example.question_what,
+        "goal_text":       example.goal_text,
+        # story-scaffold slots (Phase C); see the same block in
+        # the tortoise-hare branch above.
+        "scenario":        example.scenario,
+        "need":            example.need,
+        "mapping":         example.mapping,
+        "resolution":      example.resolution,
 
         # emotions (pronoun-neutral pools so any character gender works)
         "emo_proud":       scene.rng.choice(EMO_PROUD),
@@ -445,9 +517,9 @@ def generate_one_record(scene: Scene,
                         example: SubjectExample) -> Record:
     """Produce a single Record by:
        1. Picking characters + a location appropriate to the fable
-          (goose-eggs picks 3 chars with a custom placeholder builder;
-          other fables go through the `_FABLE_PICKERS` dispatch table,
-          defaulting to tortoise-hare's pickers).
+          (goose-eggs uses _build_ge_placeholders; fox-grapes and
+          ant-grasshopper have their own pickers; tortoise-hare is
+          the default).
        2. Picking an aesopian opener
        3. Picking a subplot template
        4. Filling placeholders + rendering question
@@ -458,12 +530,20 @@ def generate_one_record(scene: Scene,
         location = _pick_ge_location(scene)
         placeholders_fn = lambda ex: _build_ge_placeholders(
             scene, owner, visitor, goose, location, ex)
+    elif sub.fable == "ant-grasshopper":
+        primary, secondary = _pick_ag_chars(scene)
+        location = _pick_ag_location(scene)
+        placeholders_fn = lambda ex: _build_placeholders(
+            scene, primary, secondary, location, ex, sub.fable)
+    elif sub.fable == "fox-grapes":
+        primary, secondary = _pick_fg_chars(scene)
+        location = _pick_fg_location(scene)
+        placeholders_fn = lambda ex: _build_placeholders(
+            scene, primary, secondary, location, ex, sub.fable)
     else:
-        char_picker, loc_picker = _FABLE_PICKERS.get(
-            sub.fable, (_pick_th_chars, _pick_th_location)
-        )
-        hare, tortoise = char_picker(scene)
-        location = loc_picker(scene)
+        # tortoise-hare default
+        hare, tortoise = _pick_th_chars(scene)
+        location = _pick_th_location(scene)
         placeholders_fn = lambda ex: _build_placeholders(
             scene, hare, tortoise, location, ex)
 

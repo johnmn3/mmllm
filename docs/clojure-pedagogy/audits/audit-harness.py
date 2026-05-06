@@ -124,16 +124,38 @@ def check_record(rec, sub, example):
 
     # "said EMO_PROUD" without comma (subplot template bug — EMO entries
     # that are participles don't fit "said X" without comma).
-    bad_said = ["said boasting", "said puffed", "said swaggering",
-                 "said with a smug grin"]
+    # Extended to cover other speaking verbs (declared, cried) — same
+    # pitfall, different head verb. The audit caught a bare
+    # "declared puffed up with pride" in ant-grasshopper grade 2.
+    bad_said = [
+        "said boasting", "said puffed", "said swaggering",
+        "said with a smug grin",
+        "declared boasting", "declared puffed", "declared swaggering",
+        "declared with a smug grin",
+        "cried boasting", "cried puffed", "cried swaggering",
+        "cried with a smug grin",
+    ]
     for p in bad_said:
         if p in user.lower():
-            issues.append(("SAID_PARTICIPLE", f"'{p}' (missing comma after 'said')"))
+            issues.append(("SAID_PARTICIPLE", f"'{p}' (missing comma after speech-verb)"))
             break
 
-    # Double "from" in teacher subplot.
-    if re.search(r"from \w+ing from a recent", user.lower()):
-        issues.append(("DOUBLE_FROM", "'from X-ing from a recent sprint' duplication"))
+    # Double "from" / generalized DOUBLE_OF check.
+    # Pitfall #13: when EMO_TIRED already terminates with "from X" (or
+    # "at X", "of X"), a template-supplied tail like "from a recent
+    # sprint", "of the lecture", or "from a season of song" duplicates
+    # the preposition.
+    double_tail_re = re.compile(
+        r"(from \w+ing|weary from \w+|drowsy from \w+|"
+        r"yawning at [a-z ]+?|legs heavy from \w+) "
+        r"(from|of|at) (a |the )"
+    )
+    if double_tail_re.search(user.lower()):
+        issues.append(("DOUBLE_FROM",
+                        "EMO_TIRED tail duplicates an already-terminated prep "
+                        "phrase (e.g., 'from sprinting from a recent sprint', "
+                        "'her legs heavy from sprinting of the lecture', "
+                        "'weary from the morning's effort from a season of song')"))
 
     # Meta-meta question_what: "the value of the form X" inside
     # "Write a form whose evaluation gives X" wrapping → meta-meta.
@@ -142,8 +164,12 @@ def check_record(rec, sub, example):
                         "question_what 'the value of the form X' creates meta-meta wrap"))
 
     # Bad place-preposition combos: "in the hilltop" (should be "on/atop"),
-    # "in the road" (should be "on the road"), etc.
-    for bad in ("in the hilltop", "in the road", "in the beach"):
+    # "in the road" (should be "on the road"), "in the farm" (should
+    # be "on/at the farm" — pitfall #22, ant-grasshopper introduced
+    # `farm` and the ant-grasshopper hand-audit caught the regression
+    # in 6+ records per grade), etc.
+    for bad in ("in the hilltop", "in the road", "in the beach",
+                 "in the farm"):
         if bad in user:
             issues.append(("BAD_PLACE_PREP", f"'{bad}' (wrong preposition)"))
             break
@@ -153,6 +179,285 @@ def check_record(rec, sub, example):
     if "stopped across " in user:
         issues.append(("BAD_VERB_PREP",
                         "'stopped across X' (verb+prep mismatch)"))
+
+    # FORM_LEAK — for non-atom subjects (those with goal_text), the
+    # literal form must NOT appear in user_msg. If it does, the model
+    # is being trained to copy the form from the prompt instead of
+    # producing it from the goal description. Atom subjects (G1-01..08-
+    # style; goal_text empty) are exempt because for them the form IS
+    # the answer.
+    if getattr(example, "goal_text", "") and example.form:
+        # Normalize whitespace in form before searching (since the form
+        # may have been re-flowed in the user_msg).
+        form_norm = re.sub(r"\s+", " ", example.form).strip()
+        user_norm = re.sub(r"\s+", " ", user)
+        # Only flag forms ≥ 5 chars to avoid trivial substring noise
+        # (single-char operators / digits will appear naturally).
+        if len(form_norm) >= 5 and form_norm in user_norm:
+            issues.append(("FORM_LEAK",
+                f"form {form_norm!r} appears in user_msg of a goal-style subject"))
+
+    # Also catch string/keyword answer leaks in non-atom subjects:
+    # if expected is a string or keyword, the literal value must NOT
+    # appear in user_msg (e.g., "HARE" for upper-case form, ":caught"
+    # for catch branch).
+    if getattr(example, "goal_text", "") and isinstance(example.expected, str):
+        ans = example.expected
+        # Skip very short answers (<= 2 chars) and bool-ish strings
+        if len(ans) >= 3 and ans not in ("yes", "no"):
+            if ans in user:
+                issues.append(("ANSWER_LEAK_STRING",
+                    f"answer string {ans!r} appears in user_msg"))
+
+    # STORY_TAG_MISMATCH — examples with the "story" tag should have
+    # all four story slots filled (scenario / need / mapping /
+    # resolution). Conversely, examples with all four slots filled
+    # should declare tags=("story",) so story-scaffold templates fire.
+    has_story_tag = "story" in getattr(example, "tags", ())
+    has_all_slots = all(
+        getattr(example, slot, "")
+        for slot in ("scenario", "need", "mapping", "resolution")
+    )
+    has_any_slot = any(
+        getattr(example, slot, "")
+        for slot in ("scenario", "need", "mapping", "resolution")
+    )
+    if has_story_tag and not has_all_slots:
+        issues.append(("STORY_TAG_MISMATCH",
+                       'example tagged "story" but is missing one or '
+                       'more of scenario/need/mapping/resolution slots'))
+    elif has_any_slot and not has_all_slots:
+        issues.append(("STORY_TAG_MISMATCH",
+                       "example has some story slots filled but not "
+                       "all four; either fill all four or remove all"))
+    elif has_all_slots and not has_story_tag:
+        issues.append(("STORY_TAG_MISMATCH",
+                       "example has all four story slots filled but "
+                       'is not tagged "story"; story-scaffold '
+                       "template will not fire"))
+
+    # ─────────────────────── deep-audit additions ───────────────────────
+    # Checks added after the goose-eggs and ant-grasshopper hand-audits
+    # surfaced patterns the original structural rules missed. Each was
+    # found in ≥1 grade by the 12 reader sub-agents.
+
+    # DOUBLE_PREP — verb's preposition + place_phrase's preposition.
+    # `place_phrase()` returns a string that ALREADY starts with a
+    # preposition ("in the meadow", "deep inside the cellar", "on the
+    # hilltop"), so verbs that need their own preposition stack two
+    # prepositions: "Halfway to in the meadow", "On the way to market
+    # near the market". Pitfall #21 in the SKILL doc.
+    if re.search(
+        r"\b(?:to|at|from|with|onto|into|toward|towards|past|outside|beneath)"
+        r"\s+(?:in the|near the|on the|atop the|by the|along the|"
+        r"inside the|deep inside the|at the edge of the|inside a|"
+        r"deep inside a|atop a|by a|near a|in a)\b",
+        user,
+    ):
+        issues.append(("DOUBLE_PREP",
+                       "verb+preposition followed by {place} which "
+                       "already carries its own preposition"))
+
+    # BAD_PLACE_PREP_FARM — "in the farm" reads as inside a building;
+    # idiomatic English: "on the farm" / "at the farm". Same family as
+    # the existing "in the hilltop / road / beach" check but the original
+    # didn't enumerate "farm".
+    if "in the farm" in user.lower() and "into the farm" not in user.lower():
+        issues.append(("BAD_PLACE_PREP",
+                       "'in the farm' (use 'on the farm' / 'at the farm')"))
+
+    # GENDERED_EMO — possessive pronoun in EMO_* phrase ("her eyes",
+    # "his shoulder", "her legs", "her hands") attached to a clearly-
+    # opposite-gender named character. Catches the
+    # "her eyes always on the path" / "his hands itching" leakage.
+    # Heuristic: a male-coded name within 60 chars BEFORE "her <body>",
+    # or a female-coded name within 60 chars BEFORE "his <body>".
+    male_names = (
+        # Humans
+        "Bob", "Charlie", "David", "Edward", "Frank", "George", "Henry",
+        "Oliver", "Tom", "Will",
+        # Hares (tortoise-hare)
+        "Whisker", "Hopper",
+        # Tortoises
+        "Slowpoke", "Mossback",
+        # Geese (goose-eggs)
+        "Quill",
+        # Other animals (used by other fables but harness shared)
+        "Korvus", "Renard", "Squeak", "Roar", "Greyfang", "Rex",
+        "Stilt", "Thorn", "Boulder", "Tic", "Chirp",
+    )
+    female_names = (
+        # Humans
+        "Alice", "Beatrice", "Carol", "Diana", "Emily", "Fiona", "Grace",
+        "Helen", "Margery", "Lila", "Jess", "Lou",
+        # Hares
+        "Bramble",
+        # Tortoises
+        "Shelly",
+        # Geese
+        "Honk",
+        # Other
+        "Caw", "Vix", "Whisk", "Mane", "Howl", "Bell", "Reeda", "Gale",
+        "Toc", "Skip",
+    )
+    body_parts_re = r"\b(eyes|legs|hands|shoulders?|grin|stride|gaze|"\
+                    r"stomach|belly|mouth|beak|heart|voice|thoughts?)\b"
+    # Tighter pattern: require the pronoun to be in APPOSITION to the
+    # name (i.e., right after `{name}, ` or `{name} the {species}, ` or
+    # in a `said,` clause). The original loose proximity check produced
+    # false positives like "Bramble peered over his shoulder" — where
+    # "his" refers to the tortoise mentioned earlier, not to Bramble.
+    # Apposition templates we care about:
+    #   "{name}, her eyes always on the path"
+    #   "{name} the hare, her legs heavy"
+    #   "{name} said, her eyes ..."
+    for fem_name in female_names:
+        # female name + male possessive in apposition
+        if re.search(
+            rf"\b{fem_name}\b(?:\s+the\s+\w+)?(?:\s+(?:said|declared|"
+            rf"explained|laughed|insisted|asked|nodded))?,\s+"
+            rf"his\s+{body_parts_re}",
+            user,
+        ):
+            issues.append(("GENDERED_EMO",
+                           f"'{fem_name}' followed in apposition by "
+                           f"'his <body>' — EMO has hardcoded male "
+                           f"possessive"))
+    for masc_name in male_names:
+        if re.search(
+            rf"\b{masc_name}\b(?:\s+the\s+\w+)?(?:\s+(?:said|declared|"
+            rf"explained|laughed|insisted|asked|nodded))?,\s+"
+            rf"her\s+{body_parts_re}",
+            user,
+        ):
+            issues.append(("GENDERED_EMO",
+                           f"'{masc_name}' followed in apposition by "
+                           f"'her <body>' — EMO has hardcoded female "
+                           f"possessive"))
+
+    # OBJECT_AS_SUBJECT — object-case pronoun used in subject position.
+    # E.g., "agreed to wait while {owner_him_her} submitted the form"
+    # renders as "while her submitted" / "while him submitted" /
+    # "while them submitted" — all ungrammatical.
+    if re.search(
+        r"\b(?:while|so|as|after|before|until|when)\s+(?:her|him)\s+"
+        r"(?:submitted|asked|wrote|said|chalked|drew|read|typed|"
+        r"explained|insisted|agreed|added|counted|tallied|peered|"
+        r"pointed|sketched|laid)\b",
+        user,
+    ):
+        issues.append(("OBJECT_AS_SUBJECT",
+                       "object-case pronoun (her/him) used in subject "
+                       "position — should be subjective case or the name"))
+
+    # LOWER_PLACE_AFTER_PERIOD — "{place}" rendered after a sentence-
+    # ending period, where {place} starts with a lowercase preposition.
+    # E.g., "...on first glance. near the market, he typed..." should be
+    # "Near the market" or restructured. Bug surfaces in grade-5/7/10/12
+    # extension subplots.
+    if re.search(
+        r"\.\s+(?:in the|near the|on the|atop the|by the|along the|"
+        r"inside the|deep inside the|at the edge of the|inside a|"
+        r"deep inside a|atop a|by a|near a|in a)\s+[a-z]",
+        user,
+    ):
+        issues.append(("LOWER_PLACE_AFTER_PERIOD",
+                       "{place} renders lowercase right after a period — "
+                       "sentence starts mid-prep"))
+
+    # DOUBLED_PLACE — a hardcoded location in the template followed by
+    # {place} that resolves to the SAME or NEARBY location, producing
+    # "in the kitchen deep inside the kitchen" / "kitchen table in the
+    # kitchen" / "stood in the farm at the edge of the farm".
+    doubled_place_re = re.compile(
+        r"\b(?:kitchen|cellar|barn|cottage|farm|orchard|meadow|"
+        r"village|market)\b[^.]{0,40}?\b(?:in|near|on|atop|by|along|"
+        r"inside|deep inside|at the edge of)\s+(?:the|a)\s+"
+        r"(?:kitchen|cellar|barn|cottage|farm|orchard|meadow|"
+        r"village|market)\b"
+    )
+    for m in doubled_place_re.finditer(user):
+        # Skip false positives where the two locations are genuinely
+        # different (e.g., "kitchen table in the cellar" — table-in-
+        # cellar is implausible but is actually flagged correctly).
+        if m.group(0).count("kitchen") >= 2 or m.group(0).count(
+                "farm") >= 2 or m.group(0).count("cellar") >= 2:
+            issues.append(("DOUBLED_PLACE",
+                           f"location stutter: '{m.group(0)[:60]}...'"))
+            break
+
+    # BUT_PLEASED_TAUTOLOGY — banquet template appends "but pleased"
+    # after EMO_CONTENT, but EMO_CONTENT entries are positive ("happy
+    # with the day's small gift", "pleased with the steady fortune"),
+    # so "but" reads as a wrong contrast. Also "pleased ... but pleased"
+    # is duplicate.
+    if re.search(
+        r"(?:happy|pleased|grateful|content|calm|settled|untroubled|"
+        r"unhurried)\s+[^,.]{0,60}?\bbut pleased\b",
+        user,
+    ):
+        issues.append(("BUT_PLEASED_TAUTOLOGY",
+                       "'but pleased' appended to already-positive EMO "
+                       "phrase (banquet template tautology)"))
+
+    # OF_THE_LECTURE — trailing genitive glued onto an EMO phrase in
+    # the grade-10 ledger-notebook subplot. Renders "with hands itching
+    # to count more of the lecture", "tempted by the thought of plenty
+    # of the lecture", etc.
+    if " of the lecture" in user:
+        issues.append(("OF_THE_LECTURE",
+                       "'of the lecture' tail attached to EMO phrase — "
+                       "produces ungrammatical run-on"))
+
+    # MISSING_SPACE_QUOTES — concept_phrase with adjacent quoted strings
+    # missing inter-quote space, e.g., `["a" "b""c"]` (G7-12 ex1 typo).
+    if re.search(r'""[a-zA-Z]', example.concept_phrase + " " +
+                  example.question_what):
+        issues.append(("MISSING_SPACE_QUOTES",
+                       "concept_phrase or question_what has \"X\"\"Y\" "
+                       "(missing space between adjacent quoted strings)"))
+
+    # EMDASH_COMMENTARY_EXTENDED — extends the original EMDASH check
+    # (note|first|empty|returns|integer) to catch additional commentary
+    # patterns the goose-eggs audit found.
+    emdash_ext_re = re.compile(
+        r" — (?:host-portable|a basic spec check|a failing spec check|"
+        r"what doc would print|0 is not nil|last wins|the unevaluated|"
+        r"args evaluated|the 2 is dropped|they aren'?t|after expansion|"
+        r"finally is for)"
+    )
+    if emdash_ext_re.search(example.question_what) or \
+       emdash_ext_re.search(example.concept_phrase):
+        issues.append(("EMDASH_COMMENTARY",
+                       "concept_phrase or question_what has em-dash "
+                       "commentary (extended pattern)"))
+
+    # ASIDE_PAREN_EXTENDED — extends the original ASIDE_PAREN check to
+    # catch additional pedagogical-aside parentheticals goose-eggs found.
+    aside_ext_re = re.compile(
+        r"\((?:it is nil|none set|the 2 is dropped|args evaluated|"
+        r"they aren'?t|a list, not a function call|5!|dedup'?d|count\)|"
+        r"a correct form)"
+    )
+    for label, val in (("concept_phrase", example.concept_phrase),
+                        ("question_what",  example.question_what)):
+        if aside_ext_re.search(val):
+            issues.append(("ASIDE_PAREN",
+                           f"{label} has pedagogical-aside (extended)"))
+            break
+
+    # ANSWER_LEAK_PHRASE — concept_phrase or question_what contains the
+    # literal answer when the answer is "nil" / "true" / "false". The
+    # original ANSWER_LEAK only handles integers > 5; goose-eggs G6-06
+    # ex1 leaks "nil" via "which is nil" and G2-12 leaks "nil" via "(it
+    # is nil)" — both grammatically caught by ASIDE_PAREN, but
+    # belt-and-suspenders.
+    if example.expected is None and \
+       re.search(r"\b(?:which is|it is|returns)\s+nil\b",
+                  example.question_what + " " + example.concept_phrase):
+        issues.append(("ANSWER_LEAK_PHRASE",
+                       "concept_phrase or question_what leaks the "
+                       "literal answer 'nil'"))
 
     return issues
 

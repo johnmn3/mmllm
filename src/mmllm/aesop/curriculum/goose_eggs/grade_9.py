@@ -54,7 +54,7 @@ the day's coin take against the eggs sold from {goose_phrase}'s basket.
 The form {form_display} captured {concept_phrase} — the ordered update
 {owner_he_she} preferred to any hasty tally. {visitor_phrase},
 {emo_greedy}, wanted the total at once, but agreed to wait while
-{owner_him_her} submitted the form to the REPL."""),
+{owner} submitted the form to the REPL."""),
 ]
 
 

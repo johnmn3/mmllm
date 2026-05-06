@@ -44,8 +44,8 @@ from mmllm.aesop.template import (
 FABLE_OPENERS: dict[str, tuple[str, ...]] = {
     "tortoise-hare": (
         "It was well known among the animals that the Hare boasted of his speed at every chance.",
-        "The Hare and the Tortoise had argued for as long as anyone could remember about who was truly the swifter.",
-        "There was once a Hare whose pride was as quick as her feet, and a Tortoise who said nothing about either.",
+        "The Hare and the Tortoise had argued for as long as anyone could remember about who was truly the faster.",
+        "There was once a Hare whose pride matched her feet in speed, and a Tortoise who said nothing about either.",
         "In that part of the forest, no one ever expected the Tortoise to outrun the Hare — yet today the question would be settled.",
         "The Hare loved nothing better than the sound of his own boasts; the Tortoise, nothing better than a long quiet walk.",
     ),
@@ -184,12 +184,12 @@ EMO_PROUD: tuple[str, ...] = (
 )
 EMO_PATIENT: tuple[str, ...] = (
     "without complaint", "saying very little",
-    "with steady, careful steps", "her eyes always on the path",
+    "with steady, careful steps", "with eyes always on the path",
     "untroubled by what others thought", "stepping deliberately",
 )
 EMO_TIRED: tuple[str, ...] = (
     "drowsy from the warm sun", "weary from the morning's effort",
-    "lulled by the gentle wind", "her legs heavy from sprinting",
+    "lulled by the gentle wind", "with legs heavy from sprinting",
     "yawning at the soft moss",
 )
 EMO_THIRSTY: tuple[str, ...] = (
