@@ -117,6 +117,26 @@ G6_02 = SubjectCurriculum(grade=6, subject_id="G6-02",
             concept_phrase="extracting the string form of a namespace symbol",
             question_what="the string form of a quoted namespace symbol",
             goal_text="extract the string form of a quoted namespace symbol",
+            scenario=(
+                "The market-board in the village square had a posted symbol for the "
+                "racing league's namespace. The milkmaid needed to read the string "
+                "the board displayed, not handle the raw symbol object."
+            ),
+            need=(
+                "She needed to pull the printed text off the board's entry — the "
+                "dotted string that named the namespace section — so she could copy "
+                "it onto her order slip."
+            ),
+            mapping=(
+                "`name` reads the board entry: given the quoted namespace symbol, it "
+                "returns the string the board has posted — the readable market "
+                "address rather than the symbol itself."
+            ),
+            resolution=(
+                "the REPL returned the dotted string the board carried — the "
+                "namespace address she could write down and hand to the next vendor."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(= 'race.tortoise 'race.tortoise)",
@@ -124,6 +144,27 @@ G6_02 = SubjectCurriculum(grade=6, subject_id="G6-02",
             concept_phrase="checking equality of two namespace symbols",
             question_what="whether two identical namespace symbols are equal",
             goal_text="test whether two identical namespace symbols are equal",
+            scenario=(
+                "Two entries on the market-board appeared identical — the same dotted "
+                "vendor name posted on opposite sides of the panel. The farmer "
+                "challenged the milkmaid to confirm whether the board truly listed "
+                "the same namespace twice."
+            ),
+            need=(
+                "She needed to compare the two posted symbols and settle the question "
+                "before the vendor stall opened — the board could not have two "
+                "conflicting names for the same section."
+            ),
+            mapping=(
+                "`=` reads both entries off the board and compares them; identical "
+                "namespace symbols on the board resolve to the same runtime object, "
+                "so equality holds."
+            ),
+            resolution=(
+                "the REPL confirmed the two board entries matched — the same namespace "
+                "was indeed posted on both sides of the panel."
+            ),
+            tags=("story",),
         ),
     ], subplots=_ROADSIGN_SUBPLOTS, plan_pool=_PLAN_G6)
 
@@ -140,6 +181,27 @@ G6_03 = SubjectCurriculum(grade=6, subject_id="G6-03",
             concept_phrase="calling a fully-qualified string function",
             question_what="the capitalized form returned by the upper-case routine on the scroll",
             goal_text="call the upper-case routine on the clojure.string scroll, applied to the four-letter string hare",
+            scenario=(
+                "The market-board in the village square listed the clojure.string "
+                "vendor's section. The milkmaid had a word written in small letters "
+                "and needed to use the board's registered uppercasing service to "
+                "produce the full-capitals version."
+            ),
+            need=(
+                "She needed to consult the board, locate the vendor's section, and "
+                "call the uppercasing routine — without that board entry she could "
+                "not reach the function by its full qualified name."
+            ),
+            mapping=(
+                "The board's namespace section is `clojure.string`; the vendor's "
+                "listed routine is `upper-case`. Reading the board entry and calling "
+                "it produces the transformed output."
+            ),
+            resolution=(
+                "the REPL returned the all-capitals version of the word, confirming "
+                "the board-listed routine had been reached and applied correctly."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form='(clojure.string/lower-case "ZEBRA")',
@@ -147,6 +209,27 @@ G6_03 = SubjectCurriculum(grade=6, subject_id="G6-03",
             concept_phrase="calling a fully-qualified string function",
             question_what="the lowercase form of the string ZEBRA produced by clojure.string/lower-case",
             goal_text="call the lowercasing function from clojure.string on a test string",
+            scenario=(
+                "A word had arrived at the dairy door in all-capitals lettering, "
+                "posted from a distant market. The milkmaid checked the village "
+                "square board for the clojure.string section and located the "
+                "lowercasing service registered there."
+            ),
+            need=(
+                "She needed to convert the all-capitals word to its lowercase form "
+                "by consulting the board's registered routine — the board's entry "
+                "was the only way to reach the service by its full name."
+            ),
+            mapping=(
+                "The board's namespace section `clojure.string` names the vendor; "
+                "`lower-case` is the routine posted on that section. Calling the "
+                "fully-qualified name on the board delivers the lowercased result."
+            ),
+            resolution=(
+                "the REPL returned the all-lowercase version of the word, proving "
+                "the board-listed lowercasing service had been found and applied."
+            ),
+            tags=("story",),
         ),
     ], subplots=_ROADSIGN_SUBPLOTS, plan_pool=_PLAN_G6)
 
@@ -163,6 +246,26 @@ G6_04 = SubjectCurriculum(grade=6, subject_id="G6-04",
             concept_phrase="testing equality of two identical function calls",
             question_what="whether two calls to the same function with the same argument produce the same result",
             goal_text="test whether two calls to the fully-qualified string uppercasing function with the same argument are equal",
+            scenario=(
+                "The farmer had posted the clojure.string section on the market-board "
+                "and the milkmaid called the same board-listed routine twice in a row "
+                "on the same letter, once from each side of the stall."
+            ),
+            need=(
+                "She needed to confirm that referring to the same board entry twice "
+                "with the same input always produced the same output — proving the "
+                "board's function was deterministic."
+            ),
+            mapping=(
+                "Both sides of the `=` form consult the same board entry — the "
+                "namespace section and routine name are identical — so equality holds "
+                "when the routine is pure."
+            ),
+            resolution=(
+                "the REPL returned that both calls produced the same result, "
+                "confirming the board-listed function behaves consistently."
+            ),
+            tags=("story",),
         ),
     ], subplots=_ROADSIGN_SUBPLOTS, plan_pool=_PLAN_G6)
 
@@ -177,6 +280,27 @@ G6_05 = SubjectCurriculum(grade=6, subject_id="G6-05",
             concept_phrase="calling a fully-qualified string function",
             question_what="the uppercase form of the string hello produced by clojure.string/upper-case",
             goal_text="call the uppercasing function from clojure.string on a test string",
+            scenario=(
+                "The market-board's clojure.string section listed an uppercasing "
+                "service. The milkmaid had a greeting written in small letters on a "
+                "slip of paper and wanted to transform it using the board's registered "
+                "routine."
+            ),
+            need=(
+                "She needed the fully-qualified name from the board to reach the "
+                "routine — without the namespace section she could not distinguish "
+                "this vendor's service from any other."
+            ),
+            mapping=(
+                "`clojure.string` names the board's section; `upper-case` is the "
+                "routine posted there. Writing the fully-qualified name reads the "
+                "board entry and invokes the posted service."
+            ),
+            resolution=(
+                "the REPL returned the all-capitals greeting, confirming the board "
+                "entry had been found and the uppercasing service applied."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form='(clojure.string/reverse "abc")',
@@ -184,6 +308,26 @@ G6_05 = SubjectCurriculum(grade=6, subject_id="G6-05",
             concept_phrase="calling a fully-qualified string function",
             question_what="the reversed form of the string abc produced by clojure.string/reverse",
             goal_text="call the reversing function from clojure.string on a test string",
+            scenario=(
+                "The vendor's board section for clojure.string also listed a reversing "
+                "service. The milkmaid had written a short label on her pail and "
+                "needed to read it back in reverse order to satisfy a delivery note."
+            ),
+            need=(
+                "She needed to reach the board's reverse routine by its full namespace "
+                "address — consulting the correct section prevented her from calling "
+                "the wrong vendor's tool."
+            ),
+            mapping=(
+                "The board's namespace section `clojure.string` combined with the "
+                "posted routine `reverse` forms the fully-qualified name. Calling it "
+                "reverses the characters in the string."
+            ),
+            resolution=(
+                "the REPL returned the reversed string, confirming the board's "
+                "reversing service had been located and applied correctly."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(namespace :owner/item)",
@@ -191,6 +335,27 @@ G6_05 = SubjectCurriculum(grade=6, subject_id="G6-05",
             concept_phrase="extracting the namespace portion of a keyword",
             question_what="the namespace part of a qualified keyword",
             goal_text="extract the namespace portion of a qualified keyword",
+            scenario=(
+                "A qualified keyword appeared on the board — a compound entry of the "
+                "form section/name. The farmer asked the milkmaid to read just the "
+                "board section — the left-hand part that named which vendor's area "
+                "the keyword belonged to."
+            ),
+            need=(
+                "She needed to separate the board section from the entry name so she "
+                "could route the keyword to the correct vendor's stall without "
+                "carrying the full compound label."
+            ),
+            mapping=(
+                "`namespace` reads the board-section half of a qualified keyword — "
+                "it returns the string naming the section, ignoring the entry name "
+                "after the slash."
+            ),
+            resolution=(
+                "the REPL returned the section string — the left-hand portion of the "
+                "compound keyword, identifying which vendor's board the entry belonged to."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(name :owner/item)",
@@ -198,6 +363,27 @@ G6_05 = SubjectCurriculum(grade=6, subject_id="G6-05",
             concept_phrase="extracting the name portion of a keyword",
             question_what="the name part of a qualified keyword",
             goal_text="extract the name local portion of a qualified keyword",
+            scenario=(
+                "The same qualified keyword sat on the board, section-slash-name. "
+                "This time the milkmaid needed only the right-hand portion — the "
+                "local entry name after the slash — to label the product in the "
+                "delivery pail."
+            ),
+            need=(
+                "She needed to strip away the board section and read just the entry's "
+                "local name, so the label on the pail carried only the product "
+                "identifier without the vendor prefix."
+            ),
+            mapping=(
+                "`name` reads the local-name half of a qualified keyword — it returns "
+                "the string after the slash, the entry's own identifier within its "
+                "board section."
+            ),
+            resolution=(
+                "the REPL returned the local name string — just the right-hand "
+                "portion of the keyword, ready to write on the pail's label."
+            ),
+            tags=("story",),
         ),
     ], subplots=_ROADSIGN_SUBPLOTS, plan_pool=_PLAN_G6)
 
@@ -213,6 +399,27 @@ G6_06 = SubjectCurriculum(grade=6, subject_id="G6-06",
             concept_phrase="accessing the :private flag from metadata",
             question_what="whether the :private metadata is set on a symbol",
             goal_text="check whether the :private flag is present in the metadata of a symbol with :private marker",
+            scenario=(
+                "The farmer had posted a vendor entry on the village-square board "
+                "and tucked a private-access slip behind the name-plate, marking the "
+                "stall as restricted. The milkmaid needed to read whether the board "
+                "entry carried that restriction marker."
+            ),
+            need=(
+                "She needed to reach into the board entry's attached slip and read "
+                "the `:private` field — confirming the restriction before allowing "
+                "any outsider to consult the stall."
+            ),
+            mapping=(
+                "`meta` opens the annotation slip behind the board entry; the "
+                "`:private` keyword reads the restriction field from that slip. "
+                "A symbol annotated with `^:private` carries the flag set to true."
+            ),
+            resolution=(
+                "the REPL returned the value the slip carried for the restriction "
+                "field, confirming the board entry was marked as private."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(:private (meta 'x))",
@@ -220,6 +427,27 @@ G6_06 = SubjectCurriculum(grade=6, subject_id="G6-06",
             concept_phrase="accessing the :private flag from metadata",
             question_what="whether the :private metadata is set on a plain symbol",
             goal_text="check whether the :private flag is present in the metadata of a plain symbol without markers",
+            scenario=(
+                "A plain name appeared on the market-board with no annotation slip "
+                "attached — just the bare vendor entry. The milkmaid checked behind "
+                "the name-plate looking for a restriction marker, but the entry had "
+                "no metadata tucked behind it."
+            ),
+            need=(
+                "She needed to confirm that a board entry with no annotation slip "
+                "carried no private restriction — so she could route buyers to that "
+                "stall freely."
+            ),
+            mapping=(
+                "`meta` reaches behind the board entry for its slip; with no slip "
+                "present the `:private` lookup returns nothing — the entry carries "
+                "no restriction field."
+            ),
+            resolution=(
+                "the REPL returned nothing for the restriction field, confirming "
+                "the plain board entry had no private marker attached."
+            ),
+            tags=("story",),
         ),
     ], subplots=_ROADSIGN_SUBPLOTS, plan_pool=_PLAN_G6)
 
@@ -235,6 +463,27 @@ G6_07 = SubjectCurriculum(grade=6, subject_id="G6-07",
             concept_phrase="converting the :private metadata to a boolean",
             question_what="whether a symbol with :private marker evaluates to true when converted to boolean",
             goal_text="convert the :private metadata flag of a symbol marked with :private to a boolean",
+            scenario=(
+                "The farmer had posted a hidden stall on the village-square board "
+                "with a restriction slip tucked behind its name-plate. The milkmaid "
+                "needed to read that slip and convert the restriction flag into a "
+                "clear yes-or-no answer for the gatekeeper."
+            ),
+            need=(
+                "She needed to produce a definite true-or-false signal — the "
+                "gatekeeper at the dairy door would only accept a boolean, not the "
+                "raw flag value from the annotation slip."
+            ),
+            mapping=(
+                "`meta` opens the annotation slip; `:private` reads the restriction "
+                "field; `boolean` converts whatever the slip holds into a clean "
+                "boolean — truthy flag becomes true, absent value becomes false."
+            ),
+            resolution=(
+                "the REPL returned the boolean equivalent of the restriction flag, "
+                "giving the gatekeeper a clear access decision for the hidden stall."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(boolean (:private (meta 'public)))",
@@ -242,6 +491,27 @@ G6_07 = SubjectCurriculum(grade=6, subject_id="G6-07",
             concept_phrase="converting the :private metadata to a boolean",
             question_what="whether a symbol without :private marker evaluates to false when converted to boolean",
             goal_text="convert the :private metadata flag of a plain symbol to a boolean",
+            scenario=(
+                "A stall posted on the market-board under the name `public` had no "
+                "annotation slip behind it at all. The milkmaid tried to read the "
+                "restriction field and convert it to a boolean for the gatekeeper "
+                "at the dairy door."
+            ),
+            need=(
+                "She needed to confirm that an entry with no restriction slip "
+                "converted cleanly to a negative boolean — so the gatekeeper "
+                "could wave buyers through without hesitation."
+            ),
+            mapping=(
+                "`meta` finds no slip; `:private` returns nothing; `boolean` "
+                "converts the absent value to false — an unmarked board entry "
+                "is treated as openly accessible."
+            ),
+            resolution=(
+                "the REPL returned the boolean for an absent restriction flag, "
+                "confirming the unmarked stall was openly accessible."
+            ),
+            tags=("story",),
         ),
     ], subplots=_ROADSIGN_SUBPLOTS, plan_pool=_PLAN_G6)
 
@@ -258,6 +528,28 @@ G6_08 = SubjectCurriculum(grade=6, subject_id="G6-08",
             concept_phrase="calling a function from a required namespace",
             question_what="the uppercase form of the character a produced by clojure.string/upper-case",
             goal_text="call the string uppercasing function from clojure.string on the character a",
+            scenario=(
+                "Two vendor sections on the village-square board had once pointed "
+                "to the same stall, creating a circular dependency that froze the "
+                "market. The farmer resolved the tangle and re-posted the board "
+                "entries cleanly, then asked the milkmaid to confirm a routine still "
+                "worked."
+            ),
+            need=(
+                "She needed to call the board-listed uppercasing service on a single "
+                "character to prove the namespace was reachable again without any "
+                "circular reference blocking the path."
+            ),
+            mapping=(
+                "The board's `clojure.string` section lists `upper-case`; calling "
+                "the fully-qualified name reaches the vendor's routine directly — "
+                "no circular reference intervenes when the dependency is resolved."
+            ),
+            resolution=(
+                "the REPL returned the uppercased character, confirming the "
+                "board-listed namespace was reachable and the circular tangle cleared."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(= 'a.b 'a.b)",
@@ -265,6 +557,27 @@ G6_08 = SubjectCurriculum(grade=6, subject_id="G6-08",
             concept_phrase="testing equality of two namespace symbols",
             question_what="whether two identical namespace symbols are equal",
             goal_text="test whether two references to the same namespace symbol are equal",
+            scenario=(
+                "After the market-board was re-posted, the same namespace symbol "
+                "appeared on two separate vendor entries. The farmer pointed to both "
+                "entries and asked the milkmaid to confirm they referred to the same "
+                "board section."
+            ),
+            need=(
+                "She needed to compare the two posted namespace symbols and settle "
+                "whether they were truly the same — any mismatch would mean the "
+                "circular dependency had merely been disguised, not resolved."
+            ),
+            mapping=(
+                "`=` reads both board entries and compares them; identical namespace "
+                "symbols on the market-board resolve to the same runtime object, "
+                "so the equality check returns a clear result."
+            ),
+            resolution=(
+                "the REPL confirmed the two board entries matched, proving the "
+                "namespace symbols were identical and the dependency graph was clean."
+            ),
+            tags=("story",),
         ),
     ], subplots=_ROADSIGN_SUBPLOTS, plan_pool=_PLAN_G6)
 
@@ -280,6 +593,27 @@ G6_09 = SubjectCurriculum(grade=6, subject_id="G6-09",
             concept_phrase="evaluating definitions in sequence to establish dependency order",
             question_what="the value of the second variable after both definitions are loaded in order",
             goal_text="define step1 as 1, then define step2 as step1 plus 1, then return step2",
+            scenario=(
+                "The farmer had posted the vendor names on the market-board in a "
+                "deliberate order — each stall's entry depended on the one posted "
+                "before it. The milkmaid needed to follow that order exactly when "
+                "reading the board to fill her pail correctly."
+            ),
+            need=(
+                "She needed to define each board entry in sequence so the later "
+                "ones could safely refer to the earlier ones — posting out of order "
+                "would leave a stall with an undefined predecessor."
+            ),
+            mapping=(
+                "`do` evaluates the definitions in the order posted: `step1` is "
+                "written to the board first, then `step2` reads it to compute its "
+                "own value. The final expression returns the last entry's value."
+            ),
+            resolution=(
+                "the REPL returned the value of the last board entry after both "
+                "definitions were posted in order, confirming the sequence was sound."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(let [a 1 b (+ a 1)] (+ a b))",
@@ -287,6 +621,27 @@ G6_09 = SubjectCurriculum(grade=6, subject_id="G6-09",
             concept_phrase="establishing local bindings with dependent values",
             question_what="the sum of two variables with the second depending on the first",
             goal_text="bind a to 1, bind b to a plus 1, then return the sum of a and b",
+            scenario=(
+                "At a small corner of the market-board the farmer chalked two local "
+                "entries in sequence — the second entry's value was computed from "
+                "the first. The milkmaid read them off in order to tally the total "
+                "for the morning's delivery."
+            ),
+            need=(
+                "She needed both local entries to be bound in the right order before "
+                "she could add them together — the second entry had to read the first "
+                "to know its own value."
+            ),
+            mapping=(
+                "`let` binds entries in left-to-right order on the board: `a` is "
+                "chalked first, then `b` reads `a` to set its own value. The body "
+                "sums both entries to produce the total."
+            ),
+            resolution=(
+                "the REPL returned the sum of the two local board entries, "
+                "confirming the dependent binding order was respected."
+            ),
+            tags=("story",),
         ),
     ], subplots=_ROADSIGN_SUBPLOTS, plan_pool=_PLAN_G6)
 
@@ -334,6 +689,27 @@ G6_12 = SubjectCurriculum(grade=6, subject_id="G6-12",
             concept_phrase="counting the number of namespace symbols in a project",
             question_what="the number of namespaces in a small project",
             goal_text="count the number of namespace symbols in a vector of three namespaces",
+            scenario=(
+                "The farmer had posted three vendor sections on the village-square "
+                "board — one for each file in the project. Before opening the "
+                "market, the milkmaid needed to tally the board entries to make "
+                "sure all sections were accounted for."
+            ),
+            need=(
+                "She needed a count of the posted namespace entries so she could "
+                "confirm that no file had been left off the board before the "
+                "morning's trading began."
+            ),
+            mapping=(
+                "`count` tallies the namespace symbols posted in the vector — each "
+                "symbol stands for one board entry, and the total tells her how "
+                "many vendor sections the project board carries."
+            ),
+            resolution=(
+                "the REPL returned the number of namespace entries on the board, "
+                "confirming all the project's files were represented."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(map name ['race.tortoise 'race.hare])",
@@ -341,6 +717,26 @@ G6_12 = SubjectCurriculum(grade=6, subject_id="G6-12",
             concept_phrase="extracting string names from namespace symbols",
             question_what="the vector of namespace names as strings",
             goal_text="extract the string form of each namespace symbol in a vector of two namespaces",
+            scenario=(
+                "The market-board carried two namespace symbols for the project's "
+                "vendor sections. The milkmaid needed to copy the string name off "
+                "each entry so she could write them legibly on the delivery slip."
+            ),
+            need=(
+                "She needed the readable string text from each board entry — not "
+                "the symbol objects themselves but the printed names that would "
+                "appear on the slip handed to the next courier."
+            ),
+            mapping=(
+                "`map` applies `name` to each namespace symbol in the board's "
+                "section list, reading the string the board has posted for each "
+                "entry in turn and collecting the results."
+            ),
+            resolution=(
+                "the REPL returned the sequence of string names, one per board "
+                "entry, ready to be written onto the delivery slip."
+            ),
+            tags=("story",),
         ),
     ], subplots=_ROADSIGN_SUBPLOTS, plan_pool=_PLAN_G6)
 
@@ -356,6 +752,27 @@ G6_13 = SubjectCurriculum(grade=6, subject_id="G6-13",
             concept_phrase="aliasing a fully-qualified function and calling it through the alias",
             question_what="the uppercase form of the string hare when clojure.string/upper-case is called through a local alias",
             goal_text="bind the fully-qualified string uppercasing function to a local alias s and call it on hare",
+            scenario=(
+                "The market-board's clojure.string section was posted with a long "
+                "vendor name that would tire a customer to repeat. The milkmaid "
+                "chalked a short alias on her pail so she could call the board's "
+                "uppercasing service by a compact local name."
+            ),
+            need=(
+                "She needed to bind the board's fully-qualified routine to a brief "
+                "alias and call it on a word — confirming the alias reached the "
+                "same vendor entry as the full board path."
+            ),
+            mapping=(
+                "`let` writes the alias `s` pointing to the fully-qualified board "
+                "entry `clojure.string/upper-case`; calling `s` consults the same "
+                "posted routine as the full namespace path would."
+            ),
+            resolution=(
+                "the REPL returned the uppercased word, confirming the alias "
+                "reached the board-listed routine just as the full name would."
+            ),
+            tags=("story",),
         ),
     ], subplots=_ROADSIGN_SUBPLOTS, plan_pool=_PLAN_G6)
 
@@ -371,6 +788,27 @@ G6_14 = SubjectCurriculum(grade=6, subject_id="G6-14",
             concept_phrase="testing whether a value is a symbol",
             question_what="whether a dotted Java class name is a symbol",
             goal_text="test whether a Java class name written as a quoted symbol is a symbol",
+            scenario=(
+                "The neighbor's toolshed held a milking stool labeled with a "
+                "dotted Java class name — a borrowed tool from the adjacent farm. "
+                "The milkmaid needed to confirm the label on the stool was a "
+                "proper symbol before she could carry it to her dairy."
+            ),
+            need=(
+                "She needed to verify that the borrowed tool's dotted class name "
+                "was recognized as a symbol — the dairy door would only accept "
+                "tools whose labels passed the symbol check."
+            ),
+            mapping=(
+                "`symbol?` examines the borrowed tool's label — a quoted dotted "
+                "class name — and confirms it is a symbol, just as it would be "
+                "for any other qualified name on the neighbor's rack."
+            ),
+            resolution=(
+                "the REPL confirmed the dotted class name was indeed a symbol, "
+                "clearing the borrowed tool for use at the dairy."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(name 'java.util.Map)",
@@ -378,6 +816,27 @@ G6_14 = SubjectCurriculum(grade=6, subject_id="G6-14",
             concept_phrase="extracting the string form of a class symbol",
             question_what="the string form of a Java class symbol",
             goal_text="extract the string form of a Java class symbol",
+            scenario=(
+                "A tool borrowed from the neighbor's farm bore a class name stamped "
+                "in dotted notation on its handle. The milkmaid needed to read that "
+                "name as a plain string so she could copy it onto the delivery slip "
+                "for the dairy ledger."
+            ),
+            need=(
+                "She needed to extract the string text from the borrowed tool's "
+                "class symbol — the ledger required a readable string, not the "
+                "raw symbol object from the neighbor's toolshed."
+            ),
+            mapping=(
+                "`name` reads the string off the borrowed tool's symbol handle — "
+                "it returns the dotted class name as printed text, the same "
+                "technique used for any namespace symbol on the market-board."
+            ),
+            resolution=(
+                "the REPL returned the dotted string name from the class symbol, "
+                "ready to be written into the dairy ledger."
+            ),
+            tags=("story",),
         ),
     ], subplots=_TOOLSHED_SUBPLOTS, plan_pool=_PLAN_G6)
 
@@ -420,6 +879,27 @@ G6_15 = SubjectCurriculum(grade=6, subject_id="G6-15",
             concept_phrase="accessing the :author metadata from a symbol",
             question_what="the author value from a symbol's metadata",
             goal_text="extract the :author metadata value from a symbol with an author tag",
+            scenario=(
+                "A market order on a slip of paper had been tucked into the `race` "
+                "symbol's metadata pocket, recording who had commissioned the order. "
+                "The milkmaid needed to pull the author's name off the slip to "
+                "complete the ledger entry."
+            ),
+            need=(
+                "She needed to open the metadata envelope tied to the symbol and "
+                "read the `:author` field on the slip — the ledger required the "
+                "commissioner's name before the order could be filed."
+            ),
+            mapping=(
+                "`meta` opens the order-slip envelope; the `:author` keyword reads "
+                "the line on the slip labeled author. The form retrieves the "
+                "name written there, not the symbol itself."
+            ),
+            resolution=(
+                "the REPL returned the author name the farmer had tucked into "
+                "the slip, completing the ledger entry for the commissioned order."
+            ),
+            tags=("story",),
         ),
     ], subplots=_SCROLL_SUBPLOTS, plan_pool=_PLAN_G6)
 
@@ -435,6 +915,27 @@ G6_16 = SubjectCurriculum(grade=6, subject_id="G6-16",
             concept_phrase="testing membership in a set of namespaces",
             question_what="whether a namespace is in the set of required namespaces",
             goal_text="test whether the clojure.string namespace is in the set of required namespaces",
+            scenario=(
+                "The farmer was clearing stale vendor entries off the market-board "
+                "and maintaining a list of board sections she still needed. The "
+                "milkmaid needed to check whether a particular namespace was still "
+                "on that active list before deciding to keep or remove it."
+            ),
+            need=(
+                "She needed to confirm the clojure.string section was in the "
+                "maintained set of required board entries — removing a section "
+                "still in use would break the next vendor's route."
+            ),
+            mapping=(
+                "`contains?` checks whether the namespace symbol appears in the "
+                "set of required board sections; a present entry means the board "
+                "listing is still active and should not be removed."
+            ),
+            resolution=(
+                "the REPL confirmed the namespace was in the required set, "
+                "telling the milkmaid to leave that board entry in place."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(contains? #{'clojure.string} 'clojure.set)",
@@ -442,6 +943,27 @@ G6_16 = SubjectCurriculum(grade=6, subject_id="G6-16",
             concept_phrase="testing membership in a set of namespaces",
             question_what="whether a different namespace is in the set of required namespaces",
             goal_text="test whether the clojure.set namespace is in the set of required namespaces",
+            scenario=(
+                "While still clearing the market-board, the milkmaid checked a "
+                "second vendor section against the maintained active list. This "
+                "board entry was for clojure.set, which nobody had recently "
+                "required from the village square."
+            ),
+            need=(
+                "She needed to confirm whether the clojure.set section was still "
+                "needed — if it was absent from the active set the board entry "
+                "could safely be removed without breaking anything."
+            ),
+            mapping=(
+                "`contains?` checks the active-section set for the clojure.set "
+                "namespace symbol; its absence from the set means no vendor has "
+                "required it and the board entry is a stale listing."
+            ),
+            resolution=(
+                "the REPL returned a negative result, confirming the namespace "
+                "was not in the required set and could be removed from the board."
+            ),
+            tags=("story",),
         ),
     ], subplots=_ROADSIGN_SUBPLOTS, plan_pool=_PLAN_G6)
 

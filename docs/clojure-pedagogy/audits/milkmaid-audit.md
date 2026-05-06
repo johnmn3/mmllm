@@ -8,6 +8,11 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 ## Grade 2
 
+### G2-18: Quoting symbols
+
+- examples: 3
+- variety @ n=50: 0.95
+
 ## Grade 3
 
 ## Grade 4
@@ -18,22 +23,17 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 ## Grade 7
 
+### G7-01: throw
+
+- examples: 1
+- variety @ n=50: 0.92
+
 ## Grade 8
 
-### G8-01: Why polymorphism
+### G8-14: Protocols don't inherit
 
-- examples: 2
-- variety @ n=50: 0.93
-
-### G8-04: Protocol definition
-
-- examples: 2
+- examples: 1
 - variety @ n=50: 0.94
-
-### G8-06: Protocol method dispatch
-
-- examples: 2
-- variety @ n=50: 0.93
 
 ## Grade 9
 
@@ -55,13 +55,13 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 | Grade | Subjects | Examples | Issues | Low-variety |
 |---|---|---|---|---|
 | 1 | 18 | 76 | 0 | — |
-| 2 | 22 | 88 | 0 | — |
+| 2 | 22 | 88 | 0 | G2-18(0.95) |
 | 3 | 18 | 31 | 0 | — |
 | 4 | 20 | 39 | 0 | — |
 | 5 | 22 | 39 | 0 | — |
 | 6 | 16 | 33 | 0 | — |
-| 7 | 18 | 36 | 0 | — |
-| 8 | 16 | 31 | 0 | G8-01(0.93); G8-04(0.94); G8-06(0.93) |
+| 7 | 18 | 36 | 0 | G7-01(0.92) |
+| 8 | 16 | 31 | 0 | G8-14(0.94) |
 | 9 | 18 | 34 | 0 | — |
 | 10 | 16 | 36 | 0 | — |
 | 11 | 14 | 29 | 0 | — |

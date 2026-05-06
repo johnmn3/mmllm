@@ -534,6 +534,25 @@ G1_09 = SubjectCurriculum(
             concept_phrase="the symbol-predicate on an integer",
             question_what="whether an integer is a symbol",
             goal_text="ask whether the integer 42 is a symbol, using the symbol? predicate",
+            scenario=(
+                "The farmer held up a pail with a chalk mark written on its side. "
+                "Below the mark sat actual coins — the real milk money. She asked the "
+                "milkmaid: is that mark itself a symbol, a name for something, "
+                "or is it a computed value?"
+            ),
+            need=(
+                "She needed the chalk-inspector to read the mark and answer clearly "
+                "whether it was a symbol or a value."
+            ),
+            mapping=(
+                "`symbol?` is the farmer's chalk-inspector. "
+                "When it reads a quoted name, it answers `true`. "
+                "When it reads a number, it answers `false`."
+            ),
+            resolution=(
+                "the REPL answered `false` — the mark was not a symbol but a value."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form='(symbol? "tortoise")',
@@ -541,6 +560,25 @@ G1_09 = SubjectCurriculum(
             concept_phrase="the symbol-predicate on a string",
             question_what="whether a string is a symbol",
             goal_text="ask whether a string of letters is a symbol, using the symbol? predicate",
+            scenario=(
+                "The milkmaid had written 'tortoise' in quotes on a pail — letters "
+                "between marks, meaning text, not a bare name. The farmer pointed at "
+                "the marked text and asked: is that a symbol, a name thing, or something else?"
+            ),
+            need=(
+                "She needed to know whether the quoted string was a symbol or a different "
+                "kind of value altogether."
+            ),
+            mapping=(
+                "`symbol?` reads the quoted text. A quoted name like 'hare is a symbol; "
+                "but a string in quotes like \"tortoise\" is not a symbol — it is text, "
+                "a string value. The inspector answers `false`."
+            ),
+            resolution=(
+                "the REPL answered `false` — the quoted text is a string, not a symbol, "
+                "and the inspector confirmed the distinction."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(= 'hare 'hare)",
@@ -548,6 +586,25 @@ G1_09 = SubjectCurriculum(
             concept_phrase="the equality of two quoted names",
             question_what="whether two quoted names are equal",
             goal_text="compare two quoted names for equality, using the = predicate",
+            scenario=(
+                "Two chalk marks were written on the dairy wall: 'hare' and 'hare'. "
+                "The milkmaid nodded, guessing they were the same. The farmer asked: "
+                "but are those symbols truly equal? Let us read them through the predicate."
+            ),
+            need=(
+                "She needed to check whether the two chalk marks — two quoted names — "
+                "were truly the same symbol or different ones."
+            ),
+            mapping=(
+                "`=` is the farmer's gate rule for comparing chalk marks. When both sides "
+                "are the same symbol, the gate swings open and `true` is returned. "
+                "When they differ, the gate stays shut."
+            ),
+            resolution=(
+                "the REPL confirmed `true` — both chalk marks were the same symbol, "
+                "'hare' equals 'hare'."
+            ),
+            tags=("story",),
         ),
     ],
     subplots=_CHALKMARK_SUBPLOTS,
@@ -593,6 +650,25 @@ G1_10 = SubjectCurriculum(
             concept_phrase="the literal with a trailing comment",
             question_what="the literal value, ignoring the comment",
             goal_text="submit the integer 42 with a double-semicolon trailing comment",
+            scenario=(
+                "On the dairy wall, the milkmaid chalked the number 42 with a note: "
+                ";; the answer. She worried aloud: does that second semicolon mean "
+                "the note is different from the first? Does it change what the REPL sees?"
+            ),
+            need=(
+                "She needed to know whether a double-semicolon comment behaves the same "
+                "as a single-semicolon one — invisible to the runtime."
+            ),
+            mapping=(
+                "Both `;` and `;;` are chalk marks from the scribe. Whether one semicolon "
+                "or two, the rest of the line is shorthand for the milkmaid's eyes only. "
+                "The runtime reads through them as if they were never written."
+            ),
+            resolution=(
+                "the REPL returned the number, 42 — the double-semicolon note on the "
+                "wall never reached the runtime at all."
+            ),
+            tags=("story",),
         ),
     ],
     subplots=_SCRIBE_SUBPLOTS,
@@ -612,6 +688,26 @@ G1_11 = SubjectCurriculum(
             concept_phrase="the addition with extra spacing",
             question_what="the result of an addition formatted with extra spaces",
             goal_text="add 1 and 2 in a form with extra spaces between tokens",
+            scenario=(
+                "The milkmaid chalked the sum with extra spaces between the tokens — "
+                "for readability, she said, spreading the marks out on the slate. "
+                "The farmer looked at the wide spacing and asked: will the REPL mind "
+                "the room between the tokens?"
+            ),
+            need=(
+                "She needed to know whether extra whitespace changes how the form is "
+                "read or what it evaluates to."
+            ),
+            mapping=(
+                "The chalk marks are separate tokens. Extra space between them is like "
+                "extra air in the farmyard — the REPL reads the form, not the space. "
+                "It ignores the gaps and evaluates the form the same way."
+            ),
+            resolution=(
+                "the REPL returned the sum — the extra spaces on the slate mattered "
+                "not at all, only the tokens themselves."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(+\n  1\n  2)",
@@ -619,6 +715,25 @@ G1_11 = SubjectCurriculum(
             concept_phrase="the addition split across lines",
             question_what="the result of an addition formatted across multiple lines",
             goal_text="add 1 and 2 in a form whose arguments are on separate lines",
+            scenario=(
+                "The milkmaid chalked the sum across three lines of the dairy wall, each "
+                "token on its own row, for clarity. The farmer watched her work and asked: "
+                "does the line-break matter to the REPL, or is it invisible like the spaces?"
+            ),
+            need=(
+                "She needed to know whether line breaks inside the form would cause the "
+                "REPL to read it differently."
+            ),
+            mapping=(
+                "Whitespace — spaces, tabs, line breaks — are all scribe's marks on the "
+                "dairy wall. The REPL reads the tokens, not the whitespace between them. "
+                "Line breaks are as invisible as spaces."
+            ),
+            resolution=(
+                "the REPL returned the sum — the form split across three lines still "
+                "meant the same thing, and the answer came back unchanged."
+            ),
+            tags=("story",),
         ),
     ],
     subplots=_SCRIBE_SUBPLOTS,
@@ -638,6 +753,26 @@ G1_12 = SubjectCurriculum(
             concept_phrase="the simple addition",
             question_what="the result of adding 2 and 3",
             goal_text="add 2 and 3",
+            scenario=(
+                "The farmer set out two coin-piles on the tally table: two coins and "
+                "three coins. She chalked a form on the slate: (+ 2 3). The milkmaid "
+                "asked aloud: does the form mean we add them, or does the (+ ) somehow "
+                "multiply the count?"
+            ),
+            need=(
+                "She needed to know that parentheses are groupers, not multipliers — "
+                "that (+ 2 3) means 'add 2 and 3,' not 'do something to them twice.'"
+            ),
+            mapping=(
+                "The parens are the farmer's way of grouping the tokens together: "
+                "they say 'this is one complete form, one instruction to the REPL.' "
+                "The parens group; they do not change the count."
+            ),
+            resolution=(
+                "the REPL returned five coins — the parens grouped the tokens but "
+                "did not double or change the arithmetic."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(* (+ 1 2) 3)",
@@ -645,6 +780,26 @@ G1_12 = SubjectCurriculum(
             concept_phrase="the nested multiplication",
             question_what="the result of multiplying a nested sum by 3",
             goal_text="multiply the sum of 1 and 2 by 3",
+            scenario=(
+                "A more complex form was chalked on the slate: (+ 1 2) inside (* ...3). "
+                "The milkmaid squinted at the nested parens and worried: does the outer "
+                "paren mean something different from the inner? Do the parens multiply "
+                "the nesting?"
+            ),
+            need=(
+                "She needed to understand that nested parens still group — each one is "
+                "its own form, and the outer parens do not multiply or amplify the inner."
+            ),
+            mapping=(
+                "Each paren-pair is a grouping: the inner (+ 1 2) is a form that the "
+                "REPL reads and evaluates first. Then the outer (* ... 3) takes that "
+                "result and multiplies. Nesting groups; it does not create extra copies."
+            ),
+            resolution=(
+                "the REPL evaluated the inner form first, then the outer multiplication — "
+                "the nested parens grouped the work but did not change the count of operations."
+            ),
+            tags=("story",),
         ),
     ],
     subplots=_SCRIBE_SUBPLOTS,
@@ -691,6 +846,24 @@ G1_13 = SubjectCurriculum(
             concept_phrase="the subtraction",
             question_what="the difference of 5 and 3",
             goal_text="subtract 3 from 5",
+            scenario=(
+                "The farmer placed five coins on one side of the tally table and three "
+                "on the other. She chalked a form to find what remained when three were "
+                "taken away. The milkmaid watched, ready to guess before the REPL answered."
+            ),
+            need=(
+                "She needed a form to subtract the three coins from the five, step by step "
+                "at the tally table, and read back what the REPL returned."
+            ),
+            mapping=(
+                "`-` is the farmer's subtraction tally rule: it removes one pile from "
+                "another and hands back what is left. No guessing — just the tally result."
+            ),
+            resolution=(
+                "the REPL returned the difference — two coins remained when three were "
+                "taken from five."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(* 4 5)",
@@ -698,6 +871,25 @@ G1_13 = SubjectCurriculum(
             concept_phrase="the multiplication",
             question_what="the product of 4 and 5",
             goal_text="multiply 4 by 5",
+            scenario=(
+                "The farmer had four piles of milk coins, each pile holding five coins. "
+                "She chalked a form to tally all of them at once. The milkmaid glanced "
+                "and nodded confidently — she thought she knew what it would be. But the "
+                "farmer insisted on the REPL."
+            ),
+            need=(
+                "She needed a form to multiply the two numbers together — not a guess, "
+                "but a submission to the REPL to read and confirm."
+            ),
+            mapping=(
+                "`*` is the farmer's multiplication rule: it stacks the piles together "
+                "and counts them all. The REPL does the work, not the milkmaid's eyes."
+            ),
+            resolution=(
+                "the REPL returned the total — all four piles of five coins tallied "
+                "together in one answer."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(/ 10 2)",
@@ -705,6 +897,26 @@ G1_13 = SubjectCurriculum(
             concept_phrase="the division",
             question_what="the quotient of 10 and 2",
             goal_text="divide 10 by 2",
+            scenario=(
+                "Ten coins sat on the tally table. The farmer needed to split them evenly "
+                "into two equal piles. She chalked a form to divide them. The milkmaid "
+                "guessed aloud, but the farmer asked: let us ask the REPL, and see what "
+                "each pile will hold."
+            ),
+            need=(
+                "She needed a form to divide the ten coins by two — a fair split, "
+                "checked by the REPL, not by guesswork."
+            ),
+            mapping=(
+                "`/` is the farmer's division rule: it cuts one pile into equal smaller "
+                "pieces and returns how many each piece holds. The REPL does the fair "
+                "division."
+            ),
+            resolution=(
+                "the REPL returned the quotient — ten coins split by two gave five coins "
+                "per pile."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(+ 7 8)",
@@ -712,6 +924,24 @@ G1_13 = SubjectCurriculum(
             concept_phrase="the addition",
             question_what="the sum of 7 and 8",
             goal_text="add 7 and 8",
+            scenario=(
+                "Seven coins and eight coins — two more piles for the tally. The milkmaid "
+                "started to count on her fingers, but the farmer stopped her. 'No guessing. "
+                "Write the form and let the REPL count for you,' she said."
+            ),
+            need=(
+                "She needed a form to add seven and eight together, submitted to the REPL "
+                "for a reliable answer."
+            ),
+            mapping=(
+                "`+` stacks the coin-piles: seven and eight combined into one tally. "
+                "The farmer's rule hands back the total without fail."
+            ),
+            resolution=(
+                "the REPL returned the sum — seven and eight coins tallied together "
+                "in one answer."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(- 20 7)",
@@ -719,6 +949,24 @@ G1_13 = SubjectCurriculum(
             concept_phrase="the subtraction",
             question_what="the difference of 20 and 7",
             goal_text="subtract 7 from 20",
+            scenario=(
+                "Twenty coins were counted out. Seven were sold at market. The farmer "
+                "chalked a form to find what remained — a larger subtraction, testing "
+                "whether the milkmaid would guess or let the REPL answer."
+            ),
+            need=(
+                "She needed a form to subtract seven from twenty, then read the REPL's "
+                "answer without second-guessing."
+            ),
+            mapping=(
+                "`-` removes one pile from another: twenty coins minus seven yields what "
+                "remains. The farmer's tally rule gives the answer directly."
+            ),
+            resolution=(
+                "the REPL returned the difference — what was left after seven coins "
+                "were taken from the original twenty."
+            ),
+            tags=("story",),
         ),
     ],
     subplots=_ACORN_SUBPLOTS,
@@ -738,6 +986,26 @@ G1_14 = SubjectCurriculum(
             concept_phrase="the nested computation",
             question_what="the sum of 1 with the product of 2 and 3",
             goal_text="add 1 to the product of 2 and 3",
+            scenario=(
+                "The farmer chalked a nested form: add one coin to the product of two and "
+                "three coins. The inner form, (* 2 3), was itself a tally. The milkmaid "
+                "looked at the nested parens and asked: does the REPL know which part to "
+                "do first?"
+            ),
+            need=(
+                "She needed to trust that the REPL would evaluate the nested form correctly — "
+                "the inner multiplication first, then add one to its result."
+            ),
+            mapping=(
+                "The nested parens show order: the REPL reads the inner form (* 2 3), "
+                "evaluates it, then uses that result in the outer tally. Nesting controls "
+                "the order of work."
+            ),
+            resolution=(
+                "the REPL evaluated the inner product, then added one — the nested form "
+                "computed step by step, exactly as the parens ordered."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(* (+ 1 2) (+ 3 4))",
@@ -745,6 +1013,26 @@ G1_14 = SubjectCurriculum(
             concept_phrase="the nested product of sums",
             question_what="the product of two nested sums",
             goal_text="multiply the sum of 1 and 2 by the sum of 3 and 4",
+            scenario=(
+                "Two groups of coins needed to be multiplied. The first group: 1 + 2 coins. "
+                "The second: 3 + 4 coins. The farmer chalked a form with two inner tallies "
+                "nested inside an outer multiplication. The milkmaid looked confused: which "
+                "parens matter first?"
+            ),
+            need=(
+                "She needed to know that the REPL would sum each inner group first, "
+                "then multiply those sums together."
+            ),
+            mapping=(
+                "Each pair of parens is its own tally: (+ 1 2) and (+ 3 4) are summed "
+                "separately. Then the outer parens tell the REPL to multiply those two "
+                "results. Nesting orders the work: innermost tallies first."
+            ),
+            resolution=(
+                "the REPL evaluated both inner sums first, then multiplied them — the "
+                "nested form computed in the right order, exactly as the parens directed."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(- 100 (* 5 5))",
@@ -752,6 +1040,24 @@ G1_14 = SubjectCurriculum(
             concept_phrase="the nested subtraction",
             question_what="100 minus a nested product",
             goal_text="subtract the product of 5 and 5 from 100",
+            scenario=(
+                "The farmer had one hundred coins on the tally table. Five coins sat in one pile, "
+                "another five sat beside it. She chalked a form to find what remained when those two "
+                "groups were multiplied together and subtracted from the hundred."
+            ),
+            need=(
+                "She needed a form to multiply the two groups, then subtract that product from one "
+                "hundred — a nested tally checked by the REPL."
+            ),
+            mapping=(
+                "The inner (* 5 5) is a multiplication coin-pile; the outer (- 100 ...) subtracts "
+                "that total. Nesting controls the order: the REPL multiplies first, then subtracts."
+            ),
+            resolution=(
+                "the REPL evaluated the nested product, then subtracted it — the form computed "
+                "in the right order."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(+ (* 2 3) (* 4 5))",
@@ -759,6 +1065,24 @@ G1_14 = SubjectCurriculum(
             concept_phrase="the sum of two products",
             question_what="the sum of two nested products",
             goal_text="add the product of 2 and 3 to the product of 4 and 5",
+            scenario=(
+                "Two groups of coin-piles needed to be counted: one group held 2 piles of 3 coins "
+                "each, the other held 4 piles of 5 coins each. The farmer chalked a form to multiply "
+                "each group, then add the two totals together."
+            ),
+            need=(
+                "She needed a form to multiply both groups and sum their products — a double tally, "
+                "submitted to the REPL for the final count."
+            ),
+            mapping=(
+                "Each inner (* ...) is a multiplication pile; the outer (+  ...) adds those two "
+                "results. Nesting orders the work: multiply both, then add the sums."
+            ),
+            resolution=(
+                "the REPL evaluated both products, then added them — the nested form computed "
+                "in the right order, yielding the total."
+            ),
+            tags=("story",),
         ),
     ],
     subplots=_ACORN_SUBPLOTS,
@@ -804,6 +1128,23 @@ G1_15 = SubjectCurriculum(
             concept_phrase="the equality check",
             question_what="whether 1 equals 2",
             goal_text="test whether 1 equals 2 with =",
+            scenario=(
+                "The farmer placed two pennies on the tally table: one coin and two coins. "
+                "The milkmaid guessed they were equal, but the farmer chalked a form to check "
+                "whether they truly matched."
+            ),
+            need=(
+                "She needed the gate rule to compare the two amounts and answer plainly: "
+                "matched or not."
+            ),
+            mapping=(
+                "`=` is the gate rule: it reads both amounts. When one coin and two coins are "
+                "compared, the gate stays shut — they are not equal — and `false` is returned."
+            ),
+            resolution=(
+                "the REPL held the gate shut — one and two are not the same, and `false` came back."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form='(= "a" "a")',
@@ -811,6 +1152,24 @@ G1_15 = SubjectCurriculum(
             concept_phrase="the string equality",
             question_what="whether two equal strings are equal",
             goal_text='test whether the string "a" equals itself with =',
+            scenario=(
+                "The farmer had chalked a single letter on the dairy wall twice: 'a' and 'a'. "
+                "The milkmaid looked at both chalk marks and declared them the same. But the "
+                "farmer asked: does the gate rule agree?"
+            ),
+            need=(
+                "She needed the gate rule to test whether two identical chalk-marked strings "
+                "were truly equal."
+            ),
+            mapping=(
+                "`=` reads both chalk marks. When both are the same letter, the gate swings open "
+                "and `true` is returned. The gate rule compares the marks themselves, not what "
+                "they might mean."
+            ),
+            resolution=(
+                "the REPL swung the gate open — both chalk marks were the same string, 'a' equals 'a'."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(= :hare :hare)",
@@ -818,6 +1177,23 @@ G1_15 = SubjectCurriculum(
             concept_phrase="the keyword equality",
             question_what="whether two equal keywords are equal",
             goal_text="test whether the keyword :hare equals itself with =",
+            scenario=(
+                "The farmer had written :hare on two pails with chalk. The milkmaid nodded, "
+                "guessing both marks were the same. The farmer chalked a gate rule to verify "
+                "whether the two marked names truly matched."
+            ),
+            need=(
+                "She needed the gate rule to check whether two identical keyword marks "
+                "were truly equal."
+            ),
+            mapping=(
+                "`=` is the gate rule: it compares both chalk-marked keywords. When both "
+                "are the same keyword, the gate swings open and `true` is returned."
+            ),
+            resolution=(
+                "the REPL swung the gate open — both keywords matched, :hare equals :hare."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(= :hare :tortoise)",
@@ -825,6 +1201,23 @@ G1_15 = SubjectCurriculum(
             concept_phrase="the keyword equality",
             question_what="whether two different keywords are equal",
             goal_text="test whether :hare equals :tortoise with =",
+            scenario=(
+                "Two pails sat on the tally table: one marked :hare, the other :tortoise. "
+                "The milkmaid, hurrying, thought they were the same. The farmer chalked a "
+                "gate rule to test whether the two different marks were equal."
+            ),
+            need=(
+                "She needed the gate rule to compare the two different keyword marks "
+                "and answer plainly: matched or not."
+            ),
+            mapping=(
+                "`=` reads both keywords. When :hare and :tortoise are compared, the gate "
+                "stays shut — they are different — and `false` is returned."
+            ),
+            resolution=(
+                "the REPL held the gate shut — the two keywords were different, and `false` came back."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(= 1 1 1 1)",
@@ -832,6 +1225,25 @@ G1_15 = SubjectCurriculum(
             concept_phrase="the multi-arg equality",
             question_what="whether four 1s are all equal",
             goal_text="test with = whether four 1s are all equal",
+            scenario=(
+                "The farmer arranged four coins on the tally table, each coin a single copper. "
+                "The milkmaid looked and guessed they were all the same. The farmer chalked a "
+                "more complex gate rule: does the rule open when all four pennies match?"
+            ),
+            need=(
+                "She needed a gate rule that could check more than two items at once — "
+                "all four coins against each other."
+            ),
+            mapping=(
+                "`=` with four arguments checks all four pennies. If every one matches every "
+                "other one, the gate swings open and `true` is returned. Only when all are "
+                "equal does the gate fully open."
+            ),
+            resolution=(
+                "the REPL checked all four coins and swung the gate wide open — all four "
+                "were equal, and `true` came back."
+            ),
+            tags=("story",),
         ),
     ],
     subplots=_GATE_SUBPLOTS,
@@ -851,6 +1263,24 @@ G1_16 = SubjectCurriculum(
             concept_phrase="the zero check",
             question_what="whether 0 is zero",
             goal_text="check whether 0 is zero using zero?",
+            scenario=(
+                "The farmer counted coins on the tally table, moving them into piles by type. "
+                "A pile sat empty — no coins at all. She chalked a form to ask the REPL: "
+                "is this empty pile truly zero?"
+            ),
+            need=(
+                "She needed a predicate that would read the empty pile and answer plainly "
+                "whether it held zero coins."
+            ),
+            mapping=(
+                "`zero?` is the farmer's coin-counter: it reads a pile and answers `true` "
+                "if the pile is empty — zero — or `false` if it holds coins."
+            ),
+            resolution=(
+                "the REPL answered `true` — the empty pile was indeed zero, "
+                "and the predicate confirmed it."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(zero? 5)",
@@ -858,6 +1288,24 @@ G1_16 = SubjectCurriculum(
             concept_phrase="the zero check",
             question_what="whether 5 is zero",
             goal_text="check whether 5 is zero using zero?",
+            scenario=(
+                "Another pile sat on the table: five copper coins, jingling and bright. "
+                "The farmer chalked a form to test whether this full pile was zero."
+            ),
+            need=(
+                "She needed the coin-counter predicate to read this pile and answer: "
+                "empty or not empty?"
+            ),
+            mapping=(
+                "`zero?` reads the pile of five coins and answers `false` — this pile is not "
+                "empty; it holds something. The predicate works on any pile, testing whether "
+                "it is truly zero."
+            ),
+            resolution=(
+                "the REPL answered `false` — the pile held five coins, not zero, "
+                "and the predicate confirmed it."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(pos? 7)",
@@ -865,6 +1313,25 @@ G1_16 = SubjectCurriculum(
             concept_phrase="the positive check",
             question_what="whether 7 is positive",
             goal_text="check whether 7 is positive using pos?",
+            scenario=(
+                "The farmer held a pile of seven gold coins on the sunny side of the table. "
+                "The coins caught the light. She chalked a form to ask: is this pile on the "
+                "plus side — positive?"
+            ),
+            need=(
+                "She needed a predicate that would read a pile and answer whether it belonged "
+                "on the positive side or the other way."
+            ),
+            mapping=(
+                "`pos?` is the farmer's light-test: it reads a pile of coins and answers `true` "
+                "if the pile is positive — greater than zero — or `false` if it is zero or "
+                "in the dark (negative)."
+            ),
+            resolution=(
+                "the REPL answered `true` — seven coins sat on the positive side, "
+                "and the predicate confirmed it."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(pos? -2)",
@@ -872,6 +1339,24 @@ G1_16 = SubjectCurriculum(
             concept_phrase="the positive check",
             question_what="whether -2 is positive",
             goal_text="check whether -2 is positive using pos?",
+            scenario=(
+                "The farmer chalked a debt on the slate: minus two coins — owed to the dairy. "
+                "She chalked a form to test whether this negative amount was on the positive side."
+            ),
+            need=(
+                "She needed the light-test predicate to read the debt and answer: "
+                "positive side or not?"
+            ),
+            mapping=(
+                "`pos?` reads the negative pile and answers `false` — a debt, a negative "
+                "amount, does not sit on the positive side. The predicate sorts piles by "
+                "their sign."
+            ),
+            resolution=(
+                "the REPL answered `false` — minus two was not positive, and the predicate "
+                "confirmed it."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(neg? -3)",
@@ -879,6 +1364,24 @@ G1_16 = SubjectCurriculum(
             concept_phrase="the negative check",
             question_what="whether -3 is negative",
             goal_text="check whether -3 is negative using neg?",
+            scenario=(
+                "The farmer chalked a debt: minus three coins owed to the market. "
+                "She chalked a form to ask: is this amount truly on the dark side — negative?"
+            ),
+            need=(
+                "She needed a predicate that would read a pile or debt and answer whether "
+                "it belonged on the negative side."
+            ),
+            mapping=(
+                "`neg?` is the farmer's dark-test: it reads a pile and answers `true` if "
+                "the pile is negative — less than zero — or `false` if it is zero or on "
+                "the positive side."
+            ),
+            resolution=(
+                "the REPL answered `true` — minus three sat on the dark side, "
+                "and the predicate confirmed it."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(neg? 4)",
@@ -886,6 +1389,23 @@ G1_16 = SubjectCurriculum(
             concept_phrase="the negative check",
             question_what="whether 4 is negative",
             goal_text="check whether 4 is negative using neg?",
+            scenario=(
+                "The farmer held a pile of four coins on the light side of the table. "
+                "She chalked a form to test whether this bright pile was on the dark side — negative."
+            ),
+            need=(
+                "She needed the dark-test predicate to read the pile and answer: "
+                "negative side or not?"
+            ),
+            mapping=(
+                "`neg?` reads the positive pile and answers `false` — four coins sit on the "
+                "light side, not the dark. The predicate tests whether an amount is truly negative."
+            ),
+            resolution=(
+                "the REPL answered `false` — four was not negative, and the predicate "
+                "confirmed it."
+            ),
+            tags=("story",),
         ),
     ],
     subplots=_ACORN_SUBPLOTS,
@@ -958,6 +1478,25 @@ G1_18 = SubjectCurriculum(
             concept_phrase="the multiplication",
             question_what="the product of 7 and 6",
             goal_text="multiply 7 by 6",
+            scenario=(
+                "Another morning brought a new coin-counting challenge: seven piles "
+                "of six coins each needed to be tallied. The farmer chalked the form "
+                "carefully on the slate."
+            ),
+            need=(
+                "She needed a form to multiply the two numbers — a careful step on the "
+                "steady walk to market."
+            ),
+            mapping=(
+                "Each form is one step on the steady walk: the REPL reads it and returns "
+                "what it finds. The safety net catches errors, but this step was sure — "
+                "the form would land correctly."
+            ),
+            resolution=(
+                "the REPL returned the product — the step held firm, the pail stayed balanced, "
+                "and the walk continued safely to market."
+            ),
+            tags=("story",),
         ),
     ],
     subplots=_SAFETYNET_SUBPLOTS,

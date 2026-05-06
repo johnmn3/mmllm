@@ -991,7 +991,7 @@ made from the pieces you braided. Each strand in its place, woven tight."
     SubplotTemplate("""\
 {milkmaid} asked, "Can I take a piece of the braided cloth?" {farmer_he_she} showed {milkmaid} the braid and
 said, "Yes. If the braid says 'morning-walk-to-dairy,' and you want only the 'walk' part, {concept_phrase}
-lets you cut it out. You say: start at position 8, take 4 characters. The result is 'walk' — a piece of the
+lets you cut it out. You say: start at position 6, take 4 characters. The result is 'walk' — a piece of the
 whole braid. The original braid remains intact, and you have a sub-braid in hand."
 """),
 
@@ -1030,5 +1030,210 @@ looped back to the first cow to milk it again. "The form does not climb a hill o
 morning round — the same steps, no height gained. To {goal_text}, use {concept_phrase} and the form will loop
 without growing the call stack."
 """),
+]
+
+
+# ─────────────────────── Phase C: story-scaffold templates ───────────────────────────────
+#
+# Each SubjectExample that has all four story-scaffold slots
+# (scenario / need / mapping / resolution) plus tags=("story",)
+# will trigger one of these templates via fits_tags matching.
+#
+# The 5-act structure:
+#   Act 1 (SETUP):       {scenario}
+#   Act 2 (NEED):        {need}
+#   Act 3 (MAPPING):     {mapping}
+#   Act 4 (ACTION):      family connective prose + {concept_phrase}
+#   Act 5 (RESOLUTION):  {resolution}
+
+
+def _story(connective_prose: str) -> SubplotTemplate:
+    """Build a story-scaffold template for a milkmaid family.
+
+    The family differentiates itself only via the connective prose around
+    the composed/submitted action — using the family's verb and imagery.
+    """
+    return SubplotTemplate(f"""\
+{{scenario}}
+
+{{need}}
+
+{{mapping}}
+
+{connective_prose}
+
+{{resolution}}""", fits_tags=("story",))
+
+
+_POUCH_SUBPLOTS = _POUCH_SUBPLOTS + [
+    _story(
+        "To {goal_text}, {farmer_he_she_cap} composed {concept_phrase} "
+        "with the value tucked into the apron-pocket and submitted the "
+        "form. The REPL reached into the pocket as the form directed:"
+    ),
+]
+
+_RECIPE_SUBPLOTS = _RECIPE_SUBPLOTS + [
+    _story(
+        "To {goal_text}, {farmer_he_she_cap} wrote out {concept_phrase} "
+        "on the pail-steps card and submitted the form. The REPL ran the "
+        "steps end to end:"
+    ),
+]
+
+_BASKET_SUBPLOTS = _BASKET_SUBPLOTS + [
+    _story(
+        "To {goal_text}, {farmer_he_she_cap} composed {concept_phrase} "
+        "for the market-basket and submitted the form. The REPL handed "
+        "back the arrangement:"
+    ),
+]
+
+_SIEVE_SUBPLOTS = _SIEVE_SUBPLOTS + [
+    _story(
+        "To {goal_text}, {farmer_he_she_cap} composed {concept_phrase} "
+        "as the strainer's rule, poured the input through, and submitted "
+        "the form. The REPL caught what passed the sieve:"
+    ),
+]
+
+_NOTEBOOK_SUBPLOTS = _NOTEBOOK_SUBPLOTS + [
+    _story(
+        "To {goal_text}, {farmer_he_she_cap} composed {concept_phrase} "
+        "for the tally-slate and submitted the form. The REPL chalked the "
+        "update on the slate:"
+    ),
+]
+
+_ACORN_SUBPLOTS = _ACORN_SUBPLOTS + [
+    _story(
+        "To {goal_text}, {farmer_he_she_cap} composed {concept_phrase} "
+        "and submitted the form. The REPL counted out the coins:"
+    ),
+]
+
+_GATE_SUBPLOTS = _GATE_SUBPLOTS + [
+    _story(
+        "To {goal_text}, {farmer_he_she_cap} composed {concept_phrase} "
+        "and submitted the form. The REPL let the gate decide:"
+    ),
+]
+
+_FORK_SUBPLOTS = _FORK_SUBPLOTS + [
+    _story(
+        "To {goal_text}, {farmer_he_she_cap} composed {concept_phrase} "
+        "and submitted the form. The REPL took the right lane:"
+    ),
+]
+
+_ROADSIGN_SUBPLOTS = _ROADSIGN_SUBPLOTS + [
+    _story(
+        "To {goal_text}, {farmer_he_she_cap} composed {concept_phrase} "
+        "and submitted the form. The REPL read the market-board and "
+        "replied:"
+    ),
+]
+
+_SAFETYNET_SUBPLOTS = _SAFETYNET_SUBPLOTS + [
+    _story(
+        "To {goal_text}, {farmer_he_she_cap} composed {concept_phrase} "
+        "and submitted the form. The REPL — pail balanced, walk steady "
+        "— handed back the value:"
+    ),
+]
+
+_SCROLL_SUBPLOTS = _SCROLL_SUBPLOTS + [
+    _story(
+        "To {goal_text}, {farmer_he_she_cap} composed {concept_phrase} "
+        "and submitted the form. The REPL — slip in hand — completed the "
+        "market order:"
+    ),
+]
+
+_GUILD_SUBPLOTS = _GUILD_SUBPLOTS + [
+    _story(
+        "To {goal_text}, {farmer_he_she_cap} composed {concept_phrase} "
+        "and submitted the form. The REPL — checking the guild roll — "
+        "dispatched to the right member:"
+    ),
+]
+
+_SORTINGTABLE_SUBPLOTS = _SORTINGTABLE_SUBPLOTS + [
+    _story(
+        "To {goal_text}, {farmer_he_she_cap} composed {concept_phrase} "
+        "and submitted the form. The REPL routed the pail through the "
+        "sorting table:"
+    ),
+]
+
+_CARRYINGCASE_SUBPLOTS = _CARRYINGCASE_SUBPLOTS + [
+    _story(
+        "To {goal_text}, {farmer_he_she_cap} composed {concept_phrase} "
+        "and submitted the form. The REPL stamped the pail into shape:"
+    ),
+]
+
+_TOOLSHED_SUBPLOTS = _TOOLSHED_SUBPLOTS + [
+    _story(
+        "To {goal_text}, {farmer_he_she_cap} composed {concept_phrase} "
+        "and submitted the form. The REPL — borrowing the neighbor's "
+        "stool — returned:"
+    ),
+]
+
+_RUNNERAHEAD_SUBPLOTS = _RUNNERAHEAD_SUBPLOTS + [
+    _story(
+        "To {goal_text}, {farmer_he_she_cap} composed {concept_phrase} "
+        "and submitted the form. The REPL waited at the gate for the "
+        "runner to return:"
+    ),
+]
+
+_REWRITERULE_SUBPLOTS = _REWRITERULE_SUBPLOTS + [
+    _story(
+        "To {goal_text}, {farmer_he_she_cap} composed {concept_phrase} "
+        "and submitted the form. The REPL — expanding the rewrite first, "
+        "then evaluating — returned:"
+    ),
+]
+
+_SCRIBE_SUBPLOTS = _SCRIBE_SUBPLOTS + [
+    _story(
+        "To {goal_text}, {farmer_he_she_cap} composed {concept_phrase} "
+        "and submitted the form. The REPL read past the chalk marks and "
+        "returned:"
+    ),
+]
+
+_CHALKMARK_SUBPLOTS = _CHALKMARK_SUBPLOTS + [
+    _story(
+        "To {goal_text}, {farmer_he_she_cap} composed {concept_phrase} "
+        "and submitted the form. The REPL — reading the pail, not the "
+        "chalk — returned:"
+    ),
+]
+
+_TALLYWALK_SUBPLOTS = _TALLYWALK_SUBPLOTS + [
+    _story(
+        "To {goal_text}, {farmer_he_she_cap} composed {concept_phrase} "
+        "and submitted the form. The REPL walked the collection carrying "
+        "the tally:"
+    ),
+]
+
+_BEADSTRING_SUBPLOTS = _BEADSTRING_SUBPLOTS + [
+    _story(
+        "To {goal_text}, {farmer_he_she_cap} composed {concept_phrase} "
+        "and submitted the form. The REPL braided the cheesecloth as "
+        "the form said:"
+    ),
+]
+
+_CIRCUIT_SUBPLOTS = _CIRCUIT_SUBPLOTS + [
+    _story(
+        "To {goal_text}, {farmer_he_she_cap} composed {concept_phrase} "
+        "and submitted the form. The REPL looped the round without "
+        "growing the trail:"
+    ),
 ]
 

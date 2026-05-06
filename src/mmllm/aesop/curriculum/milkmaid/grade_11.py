@@ -154,6 +154,25 @@ G11_02 = SubjectCurriculum(
             concept_phrase="the host method startsWith checking a string prefix",
             question_what="whether the string hare-tortoise starts with the prefix hare via the host method startsWith",
             goal_text="call the host method startsWith on a string to check for a prefix",
+            scenario=(
+                "The milkmaid had a string 'hare-tortoise' and wondered if it began with "
+                "'hare'. Rather than inspect it by hand, she sought the neighbor's tool — "
+                "the startsWith method — which was designed to answer just such a question."
+            ),
+            need=(
+                "She needed to call the host method directly using the dot-prefix convention, "
+                "passing the string and the prefix she wanted to check."
+            ),
+            mapping=(
+                "The dot-prefix `(.startsWith ...)` borrows the neighbor's tool; the string "
+                "and the prefix are what she placed in the method's hands. The tool returns "
+                "a verdict: true if the string begins with the prefix, false otherwise."
+            ),
+            resolution=(
+                "the REPL returned the method's verdict — a boolean answer the host method "
+                "was built to deliver."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form='(. "abc" toUpperCase)',
@@ -161,6 +180,25 @@ G11_02 = SubjectCurriculum(
             concept_phrase='the alternate dot form for a host method',
             question_what="the uppercase form of the string abc produced by the host method toUpperCase via the alternate dot syntax",
             goal_text="call the host method toUpperCase using the alternate dot form",
+            scenario=(
+                "The milkmaid had another string 'abc' and wished to borrow the same "
+                "neighbor's tool — toUpperCase — but this time using the alternate dot form, "
+                "which places the object before the method name."
+            ),
+            need=(
+                "She needed to learn that the neighbor's method could be called in a second way, "
+                "with the string object positioned differently in the form."
+            ),
+            mapping=(
+                "The alternate dot form `(. \"abc\" toUpperCase)` still borrows the neighbor's "
+                "tool; only the order changes. The string comes first, then the method name; "
+                "both conventions work — the neighbor's well-made stool delivers the same result."
+            ),
+            resolution=(
+                "the REPL returned the host method's answer — the string capitalized, "
+                "exactly as the first dot form had delivered."
+            ),
+            tags=("story",),
         ),
     ],
     subplots=_TOOLSHED_SUBPLOTS, plan_pool=_PLAN_G11,
@@ -180,6 +218,25 @@ G11_03 = SubjectCurriculum(
             concept_phrase="the static host method Math/abs",
             question_what="the absolute value of the integer -7 produced by calling the static host method Math/abs via slash notation",
             goal_text="call the static host method Math/abs with the argument -7",
+            scenario=(
+                "The milkmaid had counted a debt of negative seven coins — a loss in the tally. "
+                "She needed to borrow the neighbor's tallying tool, Math/abs, which strips away "
+                "the sign and leaves only the magnitude."
+            ),
+            need=(
+                "She needed to call the static method using the slash convention — a borrowed "
+                "tool from the host's Math library, not from any object."
+            ),
+            mapping=(
+                "The slash form `(Math/abs ...)` borrows a tool from the Math library itself; "
+                "the slash names the library and the tool within it. The integer is tallied, "
+                "and the absolute value is returned — the coin count stripped of its sign."
+            ),
+            resolution=(
+                "the REPL returned the magnitude — the debt tallied as a positive number, "
+                "exactly the absolute value the neighbor's tallying tool was built to produce."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(Math/max 3 9)",
@@ -187,6 +244,25 @@ G11_03 = SubjectCurriculum(
             concept_phrase="the static host method Math/max",
             question_what="the maximum value of the integers 3 and 9 produced by calling the static host method Math/max via slash notation",
             goal_text="call the static host method Math/max to find the larger of two numbers",
+            scenario=(
+                "The milkmaid had two coin tallies — 3 and 9 — and needed to count which was "
+                "the larger sum. She borrowed the neighbor's tool, Math/max, which compares "
+                "numbers and returns the bigger one."
+            ),
+            need=(
+                "She needed to call the static method from the Math library using the slash "
+                "convention, passing both numbers for comparison."
+            ),
+            mapping=(
+                "The slash form `(Math/max 3 9)` borrows another tallying tool from the Math "
+                "library. The two coin counts are compared, and the greater is returned. "
+                "The slash notation is the borrowing convention for library tools."
+            ),
+            resolution=(
+                "the REPL returned the larger tally — the maximum of the two numbers, "
+                "exactly what the neighbor's comparison tool was built to deliver."
+            ),
+            tags=("story",),
         ),
     ],
     subplots=_TOOLSHED_SUBPLOTS, plan_pool=_PLAN_G11,
@@ -208,6 +284,25 @@ G11_04 = SubjectCurriculum(
             concept_phrase='the count of a sequence',
             question_what='the number of characters in the string tortoise via the count function',
             goal_text="count the characters in a string",
+            scenario=(
+                "The milkmaid had the name 'tortoise' written on a scroll and needed to tally "
+                "how many letters it held. She borrowed the neighbor's counting tool — a method "
+                "from the host that traverses strings and returns their length."
+            ),
+            need=(
+                "She needed to call the host's length-counting function, passing the string "
+                "to be measured."
+            ),
+            mapping=(
+                "The count function borrows the host's ability to measure strings. The string "
+                "'tortoise' is placed in the function, and it returns the tally of characters — "
+                "a precise count the host delivers."
+            ),
+            resolution=(
+                "the REPL returned the character count — the number of letters in the string, "
+                "exactly as the host's counting tool was built to produce."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form='(count "hare")',
@@ -215,6 +310,25 @@ G11_04 = SubjectCurriculum(
             concept_phrase='the count of a sequence',
             question_what='the number of characters in the string hare via the count function',
             goal_text="count the characters in another string",
+            scenario=(
+                "The milkmaid had another name — 'hare' — and again needed a tally of its "
+                "letters. She called the same neighbor's tool, the count function, which was "
+                "as reliable for short strings as for long ones."
+            ),
+            need=(
+                "She needed to call the host's counting function again, this time on a "
+                "different string."
+            ),
+            mapping=(
+                "The count function works the same way each time: the string 'hare' is "
+                "measured, and the host returns its length. The borrowing convention is "
+                "unchanged — the tool works on any string placed before it."
+            ),
+            resolution=(
+                "the REPL returned the character count — a smaller tally than before, "
+                "exactly what the host's counting tool was built to deliver."
+            ),
+            tags=("story",),
         ),
     ],
     subplots=_TOOLSHED_SUBPLOTS, plan_pool=_PLAN_G11,
@@ -257,13 +371,53 @@ G11_06 = SubjectCurriculum(
             concept_phrase='constructing a String via the dot-construct form',
             question_what='the newly constructed String object created from a text argument via the dot-construct syntax',
             goal_text="construct a host String object with the dot-construct syntax",
+            scenario=(
+                "The milkmaid needed to craft a new String using the neighbor's forge — the "
+                "host String constructor. Rather than build a string from scratch, she borrowed "
+                "the neighbor's tool, which had been built to take text and forge it into a "
+                "proper String object."
+            ),
+            need=(
+                "She needed to call the host's constructor using the dot-construct convention, "
+                "passing the text she wished to forge."
+            ),
+            mapping=(
+                "The dot-construct `(String. \"go\")` borrows the neighbor's forge; the dot "
+                "names the constructor, and the text is placed in its hands. A new String object "
+                "is forged and returned — the same text, now properly shaped by the host."
+            ),
+            resolution=(
+                "the REPL returned the newly constructed String — a host object built from "
+                "the text, exactly as the neighbor's forge was designed to deliver."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
-            form='(new String "jump")',
-            expected="jump",
+            form='(new String "leap")',
+            expected="leap",
             concept_phrase='constructing a String via the new form',
             question_what='the newly constructed String object created from a text argument via the new keyword',
             goal_text="construct a host String object using the new keyword",
+            scenario=(
+                "The milkmaid had another short word to forge, and this time tried the "
+                "neighbor's alternate form: the new keyword. The forge was the same; only "
+                "the borrowing convention differed."
+            ),
+            need=(
+                "She needed to call the host's constructor using the new keyword form, "
+                "passing the text she wished to shape."
+            ),
+            mapping=(
+                "The new form is another path to the same forge. "
+                "The new keyword names the constructor, the String class is specified, and "
+                "the text is forged. Both conventions — dot-construct and new — work; both "
+                "are borrowing customs from the host."
+            ),
+            resolution=(
+                "the REPL returned the newly constructed String — a host object built from "
+                "the text, exactly as the neighbor's forge delivers the same result."
+            ),
+            tags=("story",),
         ),
     ],
     subplots=_TOOLSHED_SUBPLOTS, plan_pool=_PLAN_G11,
@@ -281,8 +435,23 @@ G11_07 = SubjectCurriculum(
             form="(let [a (int-array [10 20 30])] (aget a 1))",
             expected=20,
             concept_phrase="indexing into a host array",
-            question_what="the element at index 1 of the int-array [10 20 30] via the aget function",
+            question_what="the element at index 1 of the array",
             goal_text="access an element in a host array by index",
+            scenario=(
+                "The milkmaid had borrowed the neighbor's pail — a host array holding three "
+                "coin counts. She needed to fetch the value at index 1 from the pail."
+            ),
+            need=(
+                "She needed to call the host's array-access function, passing the array and index."
+            ),
+            mapping=(
+                "The aget function reaches into arrays and returns the value at the requested index — "
+                "the borrowing convention for accessing a host array's contents."
+            ),
+            resolution=(
+                "the REPL returned the element at index 1, exactly as the host's tool was built to deliver."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(let [a (int-array [1 2 3])] (alength a))",
@@ -290,6 +459,26 @@ G11_07 = SubjectCurriculum(
             concept_phrase="getting the length of a host array",
             question_what="the length of the int-array [1 2 3] via the alength function",
             goal_text="get the length of a host array",
+            scenario=(
+                "The milkmaid had another pail from the neighbor — a host array holding three "
+                "coin counts: 1, 2, 3. She needed to know how many coins were in the pail. "
+                "She called the neighbor's alength tool, which was built to count the slots "
+                "in any array."
+            ),
+            need=(
+                "She needed to call the host's array-length function, passing the array to "
+                "be measured."
+            ),
+            mapping=(
+                "The alength function borrows the host's ability to measure arrays. The array "
+                "is placed in the function, and it counts the slots and returns the length — "
+                "the borrowing convention for measuring a host array's size."
+            ),
+            resolution=(
+                "the REPL returned the array length — the number of slots in the pail, "
+                "exactly as the host's array-measurement tool was built to deliver."
+            ),
+            tags=("story",),
         ),
     ],
     subplots=_TOOLSHED_SUBPLOTS, plan_pool=_PLAN_G11,
@@ -307,14 +496,54 @@ G11_08 = SubjectCurriculum(
             form='(let [^String s "abc"] (.toUpperCase s))',
             expected="ABC",
             concept_phrase="using a type hint in a binding",
-            question_what="the uppercase form of the type-hinted string abc produced by calling the host method toUpperCase on the binding",
+            question_what="the uppercase form of the hinted string produced by calling toUpperCase",
             goal_text="add a type hint to a binding and call a method on the typed value",
+            scenario=(
+                "The milkmaid had a string and wanted to tell the compiler its type — a String. "
+                "She added a type hint on the binding to guide the compiler, then called toUpperCase."
+            ),
+            need=(
+                "She needed to annotate the binding with a type hint, then call the host method."
+            ),
+            mapping=(
+                "The caret is a type hint — a mark telling the compiler the binding's type. "
+                "The host method is then called, and the compiler optimizes the call. "
+                "The hint does not change the value; it guides the compiler."
+            ),
+            resolution=(
+                "the REPL returned the capitalized string — the host method's answer, optimized by type guidance."
+            ),
+            tags=("story",),
         ),
-        _ex('(do "type hints are metadata that guide compilation" :studied)',
-            ":studied",
-            "the purpose of type hints in Clojure",
-            "the marker keyword for the type-hint lesson",
-            goal="understand that type hints guide compilation"),
+        SubjectExample(
+            form='(do "type hints are metadata that guide compilation" :studied)',
+            expected=":studied",
+            concept_phrase="the purpose of type hints in Clojure",
+            question_what="the marker keyword for the type-hint lesson",
+            goal_text="understand that type hints guide compilation",
+            scenario=(
+                "The milkmaid and farmer discussed the nature of type hints as they walked "
+                "past the compiler's post. The farmer explained that hints were whispers to "
+                "the compiler, not commands to the runtime — they shaped how code was "
+                "optimized before it ran."
+            ),
+            need=(
+                "She needed to understand that type hints guide compilation, not alter the "
+                "value returned."
+            ),
+            mapping=(
+                "Type hints are metadata — markers attached to bindings and declarations. "
+                "They whisper to the compiler: this value will be of this type. The compiler "
+                "listens and optimizes accordingly. The hints are scaffolding for the compiler, "
+                "not for the runtime."
+            ),
+            resolution=(
+                "the REPL returned the marker — a keyword confirming the lesson was absorbed. "
+                "Type hints had been understood as compiler guidance, exactly as the farmer "
+                "had explained."
+            ),
+            tags=("story",),
+        ),
     ],
     subplots=_TOOLSHED_SUBPLOTS, plan_pool=_PLAN_G11,
 )
@@ -336,12 +565,56 @@ G11_09 = SubjectCurriculum(
             concept_phrase="basic addition under the default checked math regime",
             question_what="the sum of two numbers",
             goal_text="add two numbers with the default math behavior",
+            scenario=(
+                "The milkmaid was tallying coins at the neighbor's farm. She had one coin and "
+                "added two more. The tally was kept with the default checked arithmetic — the "
+                "host's way of guarding against overflow."
+            ),
+            need=(
+                "She needed to add the two tallies using the plain addition operator and let "
+                "the default checked arithmetic do its work."
+            ),
+            mapping=(
+                "The addition `(+ 1 2)` tallies two coin counts. The result is a sum. Under the "
+                "default checked regime, the host watches for overflow — if the numbers grew so "
+                "large they spilled past the primitive's capacity, the host would warn. The farmer "
+                "trusts the host's guard; the milkmaid adds without fear."
+            ),
+            resolution=(
+                "the REPL returned the sum — the tally tallied under the default checked math, "
+                "exactly as the host's arithmetic was built to deliver."
+            ),
+            tags=("story",),
         ),
-        _ex('(do "*unchecked-math* turns off overflow checking on prims" :studied)',
-            ":studied",
-            "overflow checking in Clojure arithmetic",
-            "the marker for the checked/unchecked lesson",
-            goal="understand how to disable overflow checking"),
+        SubjectExample(
+            form='(do "*unchecked-math* turns off overflow checking on prims" :studied)',
+            expected=":studied",
+            concept_phrase="overflow checking in Clojure arithmetic",
+            question_what="the marker for the checked/unchecked lesson",
+            goal_text="understand how to disable overflow checking",
+            scenario=(
+                "The farmer was teaching the milkmaid about overflow — what happens when a tally "
+                "grows so large it overflows the primitive's boundaries. He explained that "
+                "*unchecked-math* was a switch the farmer could throw to turn off the guard and "
+                "let arithmetic overflow without complaint."
+            ),
+            need=(
+                "She needed to understand that overflow checking is the default, and that "
+                "*unchecked-math* disables it for performance when the farmer accepts the risk."
+            ),
+            mapping=(
+                "*unchecked-math* is a flag — a switch on the neighbor's farm. When it is true, "
+                "the host's overflow guard is silenced. Arithmetic runs faster because no one is "
+                "watching for spills. The milkmaid learns that the farmer sometimes trades safety "
+                "for speed; this is the trade-off *unchecked-math* embodies."
+            ),
+            resolution=(
+                "the REPL returned the marker — a keyword confirming the lesson was understood. "
+                "Overflow checking had been grasped as the default, *unchecked-math* as the "
+                "switch to disable it."
+            ),
+            tags=("story",),
+        ),
     ],
     subplots=_ACORN_SUBPLOTS, plan_pool=_PLAN_G11,
 )
@@ -437,17 +710,62 @@ G11_14 = SubjectCurriculum(
     subject_title="Debugging host leaks",
     fable="milkmaid",
     examples=[
-        _ex('(do "host stack traces leak through interop; learn to read them" :studied)',
-            ":studied",
-            "debugging host-runtime errors",
-            "the marker for the host-leaks lesson",
-            goal="learn to read and debug host runtime errors"),
+        SubjectExample(
+            form='(do "host stack traces leak through interop; learn to read them" :studied)',
+            expected=":studied",
+            concept_phrase="debugging host-runtime errors",
+            question_what="the marker for the host-leaks lesson",
+            goal_text="learn to read and debug host runtime errors",
+            scenario=(
+                "The milkmaid had borrowed a tool from the host that went wrong. An error "
+                "erupted — a stack trace from the host runtime leaked through the Clojure REPL "
+                "like flood water breaching a dam. The farmer explained that such leaks were "
+                "common when borrowing from the host and that learning to read them was crucial."
+            ),
+            need=(
+                "She needed to understand that host errors sometimes spill into the REPL and "
+                "that reading those traces is part of debugging interop code."
+            ),
+            mapping=(
+                "Host stack traces are the host's voice crying out when something goes wrong. "
+                "They leak through interop because the REPL and the host are neighbors sharing "
+                "a boundary. The farmer teaches: read the trace as a message from the host. "
+                "Understand its conventions, and you'll know what went wrong."
+            ),
+            resolution=(
+                "the REPL returned the marker — a keyword confirming the lesson was grasped. "
+                "Host leaks had been understood as debugging tools, not obstacles."
+            ),
+            tags=("story",),
+        ),
         SubjectExample(
             form='(try (Math/sqrt 4) (catch Exception _ :err))',
             expected=2.0,
             concept_phrase="catching exceptions from a host method call",
             question_what="the square root of 4 produced by the static host method Math/sqrt via slash notation when the call succeeds",
             goal_text="wrap a static host method call in error handling",
+            scenario=(
+                "The milkmaid was trying to borrow the neighbor's Math tool — the square root "
+                "function — to measure the side of a square field that held 4 coin-stacks. But "
+                "the farmer insisted on wrapping the call in error handling, in case the host "
+                "threw an exception that would crash their calculation."
+            ),
+            need=(
+                "She needed to call the host's Math/sqrt method while guarding against exceptions "
+                "the host might throw."
+            ),
+            mapping=(
+                "The try-catch form wraps the borrowed tool. The try block holds the Math/sqrt "
+                "call; if the host succeeds, the result is returned. If the host throws an "
+                "exception, the catch block silently returns an error marker, :err. The farmer "
+                "teaches: borrowing from the host is safe when you prepare for the host's warnings."
+            ),
+            resolution=(
+                "the REPL returned the square root — the host method's answer when it succeeded. "
+                "No exception was thrown; the borrowed tool worked as designed, and the farmer's "
+                "caution proved unnecessary but wise."
+            ),
+            tags=("story",),
         ),
     ],
     subplots=_TOOLSHED_SUBPLOTS, plan_pool=_PLAN_G11,
