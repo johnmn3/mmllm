@@ -158,6 +158,28 @@ G10_03 = SubjectCurriculum(
             concept_phrase="defining a conditional macro and invoking it",
             question_what="the value the rewritten if-do form returns when the test is true and the body has three expressions",
             goal_text="define a rule named my-when that rewrites (my-when t body...) into (if t (do body...)); then invoke it with the test true and a three-expression body",
+            scenario=(
+                "Caw scratched a master revision rule on the pitcher's rim "
+                "at the village: `my-when` — whenever this pattern appeared "
+                "in a form, the talon would rewrite it before the REPL ever "
+                "saw the body. The rule expanded it to an `if`."
+            ),
+            need=(
+                "She wanted to call `(my-when true 1 2 3)` and see the "
+                "rewritten form evaluated — the `if` expansion running and "
+                "returning the last body expression."
+            ),
+            mapping=(
+                "`defmacro` installs the rewrite-rule. When the REPL "
+                "encounters `my-when`, it runs the macro first and produces "
+                "the expansion. The expansion is what evaluates — the macro's "
+                "return is code, not a value."
+            ),
+            resolution=(
+                "3 — the rewrite ran, the `if` expanded, the last body form "
+                "evaluated and dropped into the pitcher."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(do (defmacro twice [x] `(do ~x ~x)) (twice 7))",

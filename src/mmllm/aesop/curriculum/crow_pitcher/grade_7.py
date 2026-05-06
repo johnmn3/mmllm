@@ -94,6 +94,28 @@ G7_02 = SubjectCurriculum(grade=7, subject_id="G7-02",
             concept_phrase="the handler for a division-by-zero error",
             question_what="the value the catch arm returns when the divide-by-zero throw is caught",
             goal_text="attempt to divide 1 by 0; when the runtime throws, catch the Exception and return -1 from the catch arm",
+
+            scenario=(
+                "Caw leaned over the pitcher with a risky stone in her talon "
+                "— a division of one stone across zero, a form the REPL would "
+                "refuse. Korvus had laid a soft moss pad below to catch "
+                "any falling stone safely."
+            ),
+            need=(
+                "She wanted the risky form tried; if the stone fell badly, "
+                "she needed the moss to return -1 instead of letting the "
+                "crash stand unresolved."
+            ),
+            mapping=(
+                "`try` attempts the body. If an exception is thrown, `catch` "
+                "intercepts it — the moss catches the stone — and the handler "
+                "returns the fallback. The crash is absorbed; the fallback surfaces."
+            ),
+            resolution=(
+                "-1 — the division failed, the moss caught it, and the "
+                "handler's fallback stone rose to beak-reach."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(try 42 (catch Exception e :caught))",
@@ -325,6 +347,28 @@ G7_12 = SubjectCurriculum(grade=7, subject_id="G7-12",
             concept_phrase="the vector of lines from splitting a string",
             question_what="what lines result from splitting a string on newlines",
             goal_text="split a multi-line string on newlines",
+            scenario=(
+                "Korvus had a flat stone in the meadow with three short marks "
+                "scratched in rows — a, then a newline-groove, b, then another "
+                "groove, c. The scroll was complete; he needed to read "
+                "the rows apart."
+            ),
+            need=(
+                "He wanted to split the inscribed stone's content at each "
+                "line-groove, lifting each row as a separate pebble in a "
+                "new sequence."
+            ),
+            mapping=(
+                "`clojure.string/split` reads the inscription and divides it "
+                "wherever the pattern matches — here `#\"\\n\"`, the newline "
+                "mark. Each stretch between grooves becomes its own pebble "
+                "in the returned vector."
+            ),
+            resolution=(
+                '[\"a\" \"b\" \"c\"] — three pebbles lifted, each row of the '
+                "inscription a separate bead in the result."
+            ),
+            tags=("story",),
         ),
     ], subplots=_SCROLL_SUBPLOTS, plan_pool=_PLAN_G7)
 

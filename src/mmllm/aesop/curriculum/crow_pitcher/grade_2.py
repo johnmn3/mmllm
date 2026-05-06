@@ -313,6 +313,27 @@ G2_11 = SubjectCurriculum(
             concept_phrase='the string concatenation',
             question_what='the result of using str to splice "ab" and "cd"',
             goal_text='use str to splice the two-letter strings "ab" and "cd" into a single thread',
+
+            scenario=(
+                "Korvus had two short pebble-strings woven on separate vines "
+                "in the garden: one threaded a-b, the other c-d. He needed "
+                "a single vine stringing all four pebbles in sequence."
+            ),
+            need=(
+                "He wanted to join the two vines end-to-end into one "
+                "continuous pebble-string, the second starting exactly "
+                "where the first left off."
+            ),
+            mapping=(
+                "`str` joins any number of string values into one, "
+                "concatenating left to right. Each vine is appended to "
+                "the previous; the result is one pebble-string in order."
+            ),
+            resolution=(
+                "a single vine carrying all four pebbles in sequence, "
+                "the join seamless, the pebble-string complete at beak-reach."
+            ),
+            tags=("story",),
         ),
         _ex('(str 42)', "42",
             'the string coercion of an integer',
@@ -464,6 +485,26 @@ G2_17 = SubjectCurriculum(
             concept_phrase="the keyword lookup",
             question_what="the result of using the keyword :hare as a function on the map {:hare 1 :tortoise 2}",
             goal_text="use the keyword :hare to look up a value in the map with keys :hare and :tortoise",
+
+            scenario=(
+                "Sable arranged two pebbles on the pitcher's rim near the "
+                "hilltop: one marked :hare carrying the count 1, another "
+                "marked :tortoise carrying 2. The pile sat in order, side by side."
+            ),
+            need=(
+                "She wanted only the count beneath the :hare stone without "
+                "lifting or moving the :tortoise stone at all."
+            ),
+            mapping=(
+                "A map is a labelled stone-pile. Using :hare as a function "
+                "reaches into the pile and pulls only the value under that label, "
+                "leaving every other stone exactly in place."
+            ),
+            resolution=(
+                "1 — the :hare stone's count, lifted cleanly from the pile "
+                "without disturbing its neighbour."
+            ),
+            tags=("story",),
         ),
         _ex("(:tortoise {:hare 1 :tortoise 2})", 2,
             "the keyword lookup",
@@ -532,6 +573,27 @@ G2_20 = SubjectCurriculum(
             concept_phrase="the count operation",
             question_what="the result of using count on the vector containing 1, 2, and 3",
             goal_text="count the elements in the vector containing 1, 2, and 3",
+
+            scenario=(
+                "Sable walked the pitcher's rim in the village, three smooth "
+                "stones set in a row along the clay ledge: 1, 2, 3. She "
+                "carried her running tally in one talon, marking each stone "
+                "as she passed."
+            ),
+            need=(
+                "She needed the total count of the row — how many pebbles "
+                "sat along the rim before she dropped them."
+            ),
+            mapping=(
+                "`count` walks the collection talon-mark by talon-mark, "
+                "incrementing the running tally at each element. When the "
+                "last stone is passed, the final tally is the return value."
+            ),
+            resolution=(
+                "3 — three passes made, three stones counted, the tally "
+                "settling as the answer."
+            ),
+            tags=("story",),
         ),
         _ex("(count \"hello\")",     5, "the count operation",
             "the result of using count on the string hello",

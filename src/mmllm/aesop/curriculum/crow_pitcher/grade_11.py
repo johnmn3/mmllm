@@ -124,6 +124,29 @@ G11_02 = SubjectCurriculum(
             concept_phrase='the host method toUpperCase',
             question_what="the capitalized result the host's toUpperCase returns on the three-letter string abc",
             goal_text="call the host's toUpperCase routine on the three-letter string abc using the dot-prefix calling convention",
+
+            scenario=(
+                "Korvus borrowed a smooth earthenware vessel at the road's "
+                "edge — a tool fired by the Java potter, not the Clojure one. "
+                "The vessel had a method scratched on its side: toUpperCase, "
+                "ready for any letter-stone."
+            ),
+            need=(
+                "He needed to pass the letter-stone 'abc' through the "
+                "Java vessel's method and read back what the human "
+                "potter's tool returned."
+            ),
+            mapping=(
+                "The dot-call syntax borrows a Java method. The first "
+                "argument is the object whose method is called; the runtime "
+                "reaches into the Java side and applies it. The result comes "
+                "back to the Clojure pitcher as a value."
+            ),
+            resolution=(
+                "'ABC' — the borrowed vessel's method returned the "
+                "uppercased string, settling at beak-reach."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form='(.startsWith "hare-tortoise" "hare")',

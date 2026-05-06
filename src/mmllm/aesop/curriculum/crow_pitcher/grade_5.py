@@ -37,6 +37,27 @@ G5_01 = SubjectCurriculum(grade=5, subject_id="G5-01",
             concept_phrase="the conditional",
             question_what="which of :a or :b is returned",
             goal_text="choose between :a and :b based on a true condition",
+
+            scenario=(
+                "Sable perched above the pitcher's mouth at the orchard's "
+                "edge, the fork-path clear below: one branch drops a stone "
+                "marked :a, the other drops one marked :b. She tested "
+                "the condition first."
+            ),
+            need=(
+                "The condition was `true` — already settled. She needed to "
+                "know which branch would release its stone into the pitcher."
+            ),
+            mapping=(
+                "`if` reads the condition first: if truthy, the then-branch "
+                "releases; if falsy, the else-branch releases. `true` is "
+                "unmistakably truthy — the :a branch releases, :b stays back."
+            ),
+            resolution=(
+                ":a — the then-branch released its stone, the :b stone "
+                "resting where it was, the water rising one mark."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(if false :a :b)",
@@ -209,6 +230,26 @@ G5_11 = SubjectCurriculum(grade=5, subject_id="G5-11",
             concept_phrase="filtering even elements from a vector",
             question_what="the sequence produced by filtering even? over the vector containing 1, 2, 3, and 4",
             goal_text="keep the even elements from the vector containing 1, 2, 3, and 4",
+
+            scenario=(
+                "Korvus held four numbered stones over the pitcher's "
+                "sorting-perch in the meadow: 1, 2, 3, 4. He would pass "
+                "each stone over the test-groove before deciding which dropped."
+            ),
+            need=(
+                "He wanted only even-numbered stones to fall into the "
+                "pitcher — odd ones should stay on the rim, even ones pass through."
+            ),
+            mapping=(
+                "`filter` applies a predicate — here `even?` — to each "
+                "element in turn. Stones that pass the test drop; stones that "
+                "fail remain. The result holds only the passing stones, in order."
+            ),
+            resolution=(
+                "[2 4] — the two even stones fell through, the odd-numbered "
+                "ones resting on the rim untouched."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(filter pos? [-2 -1 0 1 2])",
@@ -429,6 +470,28 @@ G5_22 = SubjectCurriculum(grade=5, subject_id="G5-22",
             concept_phrase="a factorial computation via loop and recur",
             question_what="the factorial of 5 computed by walking a circuit",
             goal_text="walk a small circuit five times, multiplying a running tally by the current step each lap, until the step counter reaches zero",
+
+            scenario=(
+                "Caw stood at the pitcher's rim in the hilltop field, a "
+                "circuit chalked beneath her feet: start with n=5 and "
+                "accumulator=1. Each lap, multiply the accumulator by n, "
+                "step n down by one — loop without lifting from the rim."
+            ),
+            need=(
+                "She needed to run the circuit until n hit zero, then read "
+                "the final accumulated count as the answer."
+            ),
+            mapping=(
+                "`loop` opens the circuit with initial bindings. `recur` "
+                "loops back to the top without growing the call stack — no "
+                "new flight, just another lap. When the zero-check passes "
+                "`acc` is returned as the result."
+            ),
+            resolution=(
+                "120 — five laps, the accumulator multiplied each pass, "
+                "the final product surfacing when n hit zero."
+            ),
+            tags=("story",),
         ),
     ], subplots=_CIRCUIT_SUBPLOTS, plan_pool=_PLAN_G5)
 

@@ -110,6 +110,28 @@ G8_03 = SubjectCurriculum(
             concept_phrase="reading the pace compartment of a Runner case",
             question_what="the value in the pace compartment of a freshly-built Runner case for Alice",
             goal_text="define a Runner case with two named compartments, name and pace; build a Runner case for Alice with a deliberate-pace keyword; then read the pace compartment",
+
+            scenario=(
+                "Caw wove a bark-and-vine carrying-pouch with two named slots: "
+                "one for a name-stone, one for a pace-stone. She stitched "
+                "the shape onto the rim once, then packed an instance: "
+                "name='Alice', pace=:slow."
+            ),
+            need=(
+                "She needed to read back the pace slot from the packed pouch "
+                "without unsealing the name slot."
+            ),
+            mapping=(
+                "`defrecord` stitches the pouch's shape — named fields. "
+                "`->Runner` packs an instance with values in order. "
+                "`:pace` used as a function reaches into the correct slot "
+                "and lifts the value without touching the others."
+            ),
+            resolution=(
+                ":slow — the pace slot answered, the other slot undisturbed, "
+                "the carrying-pouch intact on the rim."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(do (defrecord Runner [name pace]) (:name (->Runner \"Bob\" :moderate)))",
@@ -166,6 +188,27 @@ G8_05 = SubjectCurriculum(
             concept_phrase="calling a protocol method on a string",
             question_what="the value returned after defining protocol Pace with method speed, extending it to String with an implementation, then calling speed on a string",
             goal_text="define a protocol named Pace with one method speed, extend it to String type with an implementation, then call speed on a string",
+            scenario=(
+                "Sable posted the guild ledger on the pitcher's rim at the "
+                "hilltop: any stone that answered the `speed` call must return "
+                "a pace. She registered String-marked stones as the first "
+                "type, giving them a response of :swift."
+            ),
+            need=(
+                "She wanted to drop a text-stone ('hare') and have it "
+                "answered by the pace registered for String-type stones."
+            ),
+            mapping=(
+                "`defprotocol` posts the guild's call. `extend-protocol` "
+                "registers which type responds and how. When `speed` is "
+                "called with a String, the runtime checks its type and "
+                "dispatches to the registered method."
+            ),
+            resolution=(
+                ":swift — the String arm of the guild answered, the right "
+                "pace returning for the text stone."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form=("(do (defprotocol Greet (hail [this]))"
@@ -258,6 +301,26 @@ G8_08 = SubjectCurriculum(
             concept_phrase="the multimethod and its first arm",
             question_what="the pace returned for a runner stamped :hare after the table routes to its arm",
             goal_text="declare a sorting-table named pace that reads each runner's :species stamp; add an arm for the :hare stamp returning the swift-pace keyword; then route a runner stamped :hare through the table",
+
+            scenario=(
+                "Korvus set the sorting-lip on the pitcher's mouth at the "
+                "farm's edge: stones bearing a :species mark would be routed "
+                "by the matching chute. He registered a chute for the :hare stamp."
+            ),
+            need=(
+                "He wanted to drop a stone stamped {:species :hare} and "
+                "watch the lip route it automatically."
+            ),
+            mapping=(
+                "`defmulti` installs the reading-rule — here it reads "
+                ":species. `defmethod` registers what happens per reading. "
+                "The dispatch is automatic at call time."
+            ),
+            resolution=(
+                "the lip read :hare, opened the matching chute, and the "
+                "registered value dropped into the pitcher."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form=("(do (defmulti tag :kind)"

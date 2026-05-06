@@ -54,6 +54,26 @@ G3_01 = SubjectCurriculum(grade=3, subject_id="G3-01",
             concept_phrase="the top-level binding and lookup",
             question_what="the value of x after using def to bind x to 42",
             goal_text="bind x to 42 and return it",
+
+            scenario=(
+                "Korvus pressed his talon to the pitcher's clay rim in the "
+                "garden and carved the name x deep into the clay, then "
+                "filled that groove with a count: 42, now permanently named."
+            ),
+            need=(
+                "Once the carving was set, he wanted to read the count "
+                "back from the rim — to confirm x would answer when called."
+            ),
+            mapping=(
+                "`def` carves a name into the namespace rim and fills it "
+                "with a value. The name persists as long as the rim stands. "
+                "Evaluating x reads from the groove and returns what was carved."
+            ),
+            resolution=(
+                "42 — the rim answered, the count intact in the groove "
+                "where the talon had pressed it."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(do (def y 7) y)",
@@ -87,6 +107,28 @@ G3_03 = SubjectCurriculum(grade=3, subject_id="G3-03",
             concept_phrase="the local binding and addition",
             question_what="the running total after binding x to 3 and adding 1",
             goal_text="bind a value of 3 to a local name x for one stretch, then return that value plus one",
+
+            scenario=(
+                "Korvus arrived at the tall clay pitcher in the orchard, "
+                "three smooth stones from the morning's count in mind. Before "
+                "dropping any, he tucked the count of three under his left "
+                "wing, close and named: x, holding three."
+            ),
+            need=(
+                "He needed to know how far the water would rise if he added "
+                "one more stone to whatever was tucked under his wing."
+            ),
+            mapping=(
+                "`let` gives a name to a tucked value: x binds 3 for the "
+                "span of the form. Inside that stretch, `(+ x 1)` reaches "
+                "under the wing and adds one. When the form ends the wing "
+                "opens; the binding dissolves."
+            ),
+            resolution=(
+                "4 — the tucked count of three, plus the one stone added "
+                "while the wing held it firm."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(let [n 10] (* n n))",
@@ -181,6 +223,27 @@ G3_07 = SubjectCurriculum(grade=3, subject_id="G3-07",
             concept_phrase="the anonymous function call",
             question_what="the result of applying an anonymous fn that adds 1 to its argument to the value 4",
             goal_text="create an anonymous function that adds 1 to its argument and apply it to 4",
+
+            scenario=(
+                "Caw perched at the pitcher's rim in the garden and scratched "
+                "a small drop-order into the clay with her talon: accept a "
+                "count named x, then add one stone to it. No name carved — "
+                "just the pattern, ready at the rim."
+            ),
+            need=(
+                "She wanted to apply the recipe at once, feeding it the "
+                "count of four, and see how high the water rose."
+            ),
+            mapping=(
+                "`fn` scratches an anonymous recipe: it declares the argument "
+                "x and specifies the body `(+ x 1)`. Wrapping the recipe with "
+                "4 applies it immediately — the argument fills x, the body runs."
+            ),
+            resolution=(
+                "5 — the recipe added one stone to the count of four, "
+                "the water clearing the fifth notch."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="((fn [a b] (* a b)) 3 4)",

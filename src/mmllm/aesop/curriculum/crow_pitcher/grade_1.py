@@ -508,6 +508,27 @@ G1_09 = SubjectCurriculum(
             concept_phrase="the symbol-predicate on a quoted name",
             question_what="whether a quoted name is a symbol",
             goal_text="ask whether a quoted name is a symbol, using the symbol? predicate",
+
+            scenario=(
+                "Caw held up a chalk-scratched mark — the name 'hare — and "
+                "pointed first at the chalk on her talon, then at an actual hare "
+                "bounding across the meadow. She set the chalk mark beside "
+                "the pitcher's rim."
+            ),
+            need=(
+                "She wanted to know whether the runtime would confirm the "
+                "chalk mark as a name-thing — a symbol — not the bounding hare."
+            ),
+            mapping=(
+                "Quoting (the leading apostrophe) wraps the name as a chalk "
+                "mark, preventing evaluation. `symbol?` asks the runtime: "
+                "is this a name-mark? A quoted name is a symbol — chalk, not hare."
+            ),
+            resolution=(
+                "true — the runtime confirmed: 'hare is a chalk mark, "
+                "a symbol, not the bounding creature the name might refer to."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(symbol? 42)",
@@ -548,6 +569,27 @@ G1_10 = SubjectCurriculum(
             concept_phrase="the addition with a trailing comment",
             question_what="the result, ignoring the comment",
             goal_text="add 1 and 2, with a single-semicolon trailing comment",
+
+            scenario=(
+                "Korvus scratched a stone-drop form onto the pitcher's rim "
+                "in the garden: `(+ 1 2)`. Beside it he pressed the finest "
+                "tip of his talon to the clay and added a marginal note: "
+                "`; sum of one and two` — a reader-note, not part of the drop."
+            ),
+            need=(
+                "He wanted the form to evaluate as usual, the marginal note "
+                "silent, the REPL reading only the form to the semicolon's left."
+            ),
+            mapping=(
+                "The semicolon marks everything to its right as a scribe-note: "
+                "the reader ignores it completely. Only the form before the "
+                "semicolon enters the pitcher and drops as a stone."
+            ),
+            resolution=(
+                "3 — the sum arrived unchanged, the marginal note never "
+                "entering the water, exactly as the scribe intended."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="42 ;; the answer",
@@ -626,6 +668,26 @@ G1_13 = SubjectCurriculum(
             concept_phrase="the addition",
             question_what="the sum of 1 and 2",
             goal_text="add 1 and 2",
+
+            scenario=(
+                "Korvus crouched at the tall clay pitcher's rim at the farm's "
+                "yard, two handfuls of smooth stones — one stone in his left "
+                "talon, two in his right."
+            ),
+            need=(
+                "He wanted to count the total stones in both talons to know "
+                "how far the water would rise when both handfuls dropped together."
+            ),
+            mapping=(
+                "`+` is the stone-count call: it totals the numbers it receives, "
+                "left to right. One stone plus two stones gives a total the "
+                "runtime calculates and returns as the water-level."
+            ),
+            resolution=(
+                "3 — the two handfuls combined, the water rising to the "
+                "third notch at beak-reach."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(- 5 3)",
@@ -720,6 +782,26 @@ G1_15 = SubjectCurriculum(
             concept_phrase="the equality check",
             question_what="whether 1 equals 1",
             goal_text="test whether 1 equals 1 with =",
+
+            scenario=(
+                "Caw held two unmarked stones up at the pitcher's mouth in "
+                "the village, one in each talon, both carrying the count 1. "
+                "She set them side by side at the dual-gate check."
+            ),
+            need=(
+                "Only if both gate-arms confirmed the same count would the "
+                "form return true and the beak dip to drink."
+            ),
+            mapping=(
+                "`=` checks whether all its arguments are equal. Both gate-arms "
+                "read 1; both close together. With both gates cleared the "
+                "runtime returns the confirmation: true."
+            ),
+            resolution=(
+                "true — both gates closed in agreement, the counts identical, "
+                "the confirmation dropping into the pitcher."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(= 1 2)",

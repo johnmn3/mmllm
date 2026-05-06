@@ -109,6 +109,28 @@ G9_03 = SubjectCurriculum(
             concept_phrase="atom, swap, and deref",
             question_what="the running tally on the page after one foraging contribution",
             goal_text="set up a shared notebook starting at 0, atomically add one to its page, then read the page",
+
+            scenario=(
+                "Caw scratched a fresh tally line into the pitcher's clay face "
+                "at the village, starting at zero. The mark was the notebook "
+                "— any crow at the pitcher could read or update it, and "
+                "the mark would persist."
+            ),
+            need=(
+                "She needed to nudge the tally up by one and then read back "
+                "the new count scratched into the clay face."
+            ),
+            mapping=(
+                "`atom` creates a mutable tally on the pitcher's face. "
+                "`swap!` applies a function to the current value and "
+                "writes the new mark. `@` dereferences the atom — reads "
+                "the current tally from the clay."
+            ),
+            resolution=(
+                "1 — the tally, incremented once by the swap, read back "
+                "from the clay face."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(do (def a (atom 10)) (swap! a + 5) @a)",
@@ -307,6 +329,27 @@ G9_10 = SubjectCurriculum(
             concept_phrase="agent, send, await, deref",
             question_what="the value returned by dereferencing ag after defining an agent holding 0, sending inc asynchronously, awaiting, and dereferencing",
             goal_text="construct an agent holding 0, asynchronously send inc to it, await its completion, and dereference",
+
+            scenario=(
+                "Sable set a scout-crow carrying a tally of zero on the road "
+                "to the far orchard. She sent the scout ahead with one "
+                "instruction: increment the tally by one. Then she waited "
+                "at the pitcher for the scout's return."
+            ),
+            need=(
+                "Once the scout had done its work she wanted to read the "
+                "tally the scout carried back and see how the water stood."
+            ),
+            mapping=(
+                "`agent` creates the scout carrying a value. `send` dispatches "
+                "the function asynchronously. `await` blocks until the scout "
+                "returns. `@` dereferences the final tally from the agent."
+            ),
+            resolution=(
+                "1 — the scout returned with the incremented count, the "
+                "tally settling into the pitcher's depth."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(do (def ag (agent 5)) (send ag + 10) (await ag) @ag)",
