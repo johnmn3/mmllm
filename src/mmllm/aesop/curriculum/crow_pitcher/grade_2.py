@@ -1673,14 +1673,106 @@ G2_14 = SubjectCurriculum(
             ),
             tags=("story",),
         ),
-        _ex("(not false)", True,  "the logical not", "the result of using not on false",
-            goal="negate the value false"),
-        _ex("(not nil)",   True,  "the logical not",   "the result of using not on nil",
-            goal="negate the value nil"),
-        _ex("(not 0)",     False, "the logical not",     "the result of using not on 0",
-            goal="negate the value 0"),
-        _ex("(not \"\")",  False, "the logical not",  "the result of using not on the empty string",
-            goal="negate the empty string"),
+        SubjectExample(
+            form="(not false)", expected=True,
+            concept_phrase="the logical not",
+            question_what="the result of using not on false",
+            goal_text="negate the value false",
+
+            scenario=(
+                "Korvus found the gate-arm above the road pitcher fully lowered "
+                "shut — the value was false. He asked the pitcher what "
+                "the opposite of that closed state would be."
+            ),
+            need=(
+                "He needed the inverted reading: the closed arm flipped to "
+                "an open arm, the falsey value turned truthy."
+            ),
+            mapping=(
+                "`not` inverts any value to strict true or false. False is "
+                "falsey; flipping it yields true. The arm rises, the gate "
+                "opens, and `not` returns true."
+            ),
+            resolution=(
+                "The gate was flipped open and the expected true value arrived."
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form="(not nil)", expected=True,
+            concept_phrase="the logical not",
+            question_what="the result of using not on nil",
+            goal_text="negate the value nil",
+
+            scenario=(
+                "Caw discovered nil hanging at the orchard pitcher's gate — "
+                "an empty arm, no value at all. She asked the pitcher "
+                "what the opposite of nothing would be."
+            ),
+            need=(
+                "She needed to know whether nil, the absent value, would "
+                "flip to true when negated."
+            ),
+            mapping=(
+                "`not` treats nil as falsey — the same as false for this "
+                "purpose. Flipping nil yields true; absence of value "
+                "negated is presence of truth."
+            ),
+            resolution=(
+                "Nil was flipped and the expected true value returned from the pitcher."
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form="(not 0)", expected=False,
+            concept_phrase="the logical not",
+            question_what="the result of using not on 0",
+            goal_text="negate the value 0",
+
+            scenario=(
+                "Sable placed a stone marked zero at the hilltop pitcher gate — "
+                "a common value that many crows assume to be falsey. "
+                "She wanted to know what `not` returned for it."
+            ),
+            need=(
+                "She needed to confirm whether zero, when negated, would "
+                "yield true or false — a test of Clojure's truthy rules."
+            ),
+            mapping=(
+                "`not` returns true only for false and nil. Zero is truthy "
+                "in Clojure; negating a truthy value always yields false, "
+                "regardless of what the value is."
+            ),
+            resolution=(
+                "Zero proved truthy and `not` returned the expected false value."
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form='(not "")', expected=False,
+            concept_phrase="the logical not",
+            question_what="the result of using not on the empty string",
+            goal_text="negate the empty string",
+
+            scenario=(
+                "Korvus found an empty vine strung on the village pitcher — "
+                "no beads at all, the empty string. He wanted to know "
+                "what `not` would say about an empty pebble-string."
+            ),
+            need=(
+                "He needed to know whether the empty string counted as falsey "
+                "and would flip to true under `not`."
+            ),
+            mapping=(
+                "The empty string is truthy in Clojure — only false and nil "
+                "are falsey. `not` of a truthy value is always false; "
+                "even an empty vine is still a vine."
+            ),
+            resolution=(
+                "The empty vine proved truthy and the expected false value returned."
+            ),
+            tags=("story",),
+        ),
     ],
     subplots=_GATE_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
@@ -1716,15 +1808,81 @@ G2_15 = SubjectCurriculum(
             ),
             tags=("story",),
         ),
-        _ex("(if \"\" 1 0)", 1, "the if conditional with empty string as condition",
-            "the result of if with condition the empty string, then-branch 1, else-branch 0",
-            goal="use if to return 1 when the condition is the empty string (then-branch) and 0 otherwise (else-branch)"),
-        _ex("(if nil 1 0)", 0, "the if conditional with nil as condition",
-            "the result of if with condition nil, then-branch 1, else-branch 0",
-            goal="use if to return 1 when the condition is nil (then-branch) and 0 otherwise (else-branch)"),
-        _ex("(if false 1 0)", 0, "the if conditional with false as condition",
-            "the result of if with condition false, then-branch 1, else-branch 0",
-            goal="use if to return 1 when the condition is false (then-branch) and 0 otherwise (else-branch)"),
+        SubjectExample(
+            form='(if "" 1 0)', expected=1,
+            concept_phrase="the if conditional with empty string as condition",
+            question_what="the result of if with condition the empty string, then-branch 1, else-branch 0",
+            goal_text="use if to return 1 when the condition is the empty string (then-branch) and 0 otherwise (else-branch)",
+
+            scenario=(
+                "Caw placed an empty pebble-string at the fork above the "
+                "orchard pitcher. The then-path held one stone; the else-path "
+                "held zero. She wanted to know which path opened."
+            ),
+            need=(
+                "She needed to know whether the empty string was truthy enough "
+                "to open the then-gate or whether the else-path would fire."
+            ),
+            mapping=(
+                "The empty string is truthy in Clojure. `if` opens the "
+                "then-gate for any truthy condition; even an empty vine "
+                "is not false or nil, so the then-branch fires."
+            ),
+            resolution=(
+                "The then-branch opened and the expected then-value returned."
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form="(if nil 1 0)", expected=0,
+            concept_phrase="the if conditional with nil as condition",
+            question_what="the result of if with condition nil, then-branch 1, else-branch 0",
+            goal_text="use if to return 1 when the condition is nil (then-branch) and 0 otherwise (else-branch)",
+
+            scenario=(
+                "Sable placed nil — the absent value — at the fork above the "
+                "road pitcher. The then-path held one stone; the else-path "
+                "held zero. She wanted to know which path was chosen."
+            ),
+            need=(
+                "She needed to confirm that nil, the absent value, would "
+                "close the then-gate and send the pitcher down the else-path."
+            ),
+            mapping=(
+                "Nil is one of only two falsey values in Clojure. `if` closes "
+                "the then-gate for nil and opens the else-gate instead, "
+                "returning the else-branch value."
+            ),
+            resolution=(
+                "The else-branch opened and the expected else-value returned."
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form="(if false 1 0)", expected=0,
+            concept_phrase="the if conditional with false as condition",
+            question_what="the result of if with condition false, then-branch 1, else-branch 0",
+            goal_text="use if to return 1 when the condition is false (then-branch) and 0 otherwise (else-branch)",
+
+            scenario=(
+                "Korvus placed the value false at the fork above the hilltop "
+                "pitcher. The then-path held one stone; the else-path held "
+                "zero. He wanted to know which fork the pitcher would take."
+            ),
+            need=(
+                "He needed to confirm that false would close the then-gate "
+                "and route the pitcher to the else-path."
+            ),
+            mapping=(
+                "False is the other falsey value alongside nil. `if` closes "
+                "the then-gate for false and routes to the else-branch, "
+                "returning that branch's value."
+            ),
+            resolution=(
+                "The else-branch opened and the expected else-value returned."
+            ),
+            tags=("story",),
+        ),
     ],
     subplots=_GATE_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
@@ -1760,12 +1918,81 @@ G2_16 = SubjectCurriculum(
             ),
             tags=("story",),
         ),
-        _ex("(boolean \"\")", True, "the boolean conversion", "the result of using boolean on the empty string",
-            goal="convert the empty string to a boolean"),
-        _ex("(boolean nil)", False, "the boolean conversion", "the result of using boolean on nil",
-            goal="convert nil to a boolean"),
-        _ex("(boolean false)", False, "the boolean conversion", "the result of using boolean on false",
-            goal="convert false to a boolean"),
+        SubjectExample(
+            form='(boolean "")', expected=True,
+            concept_phrase="the boolean conversion",
+            question_what="the result of using boolean on the empty string",
+            goal_text="convert the empty string to a boolean",
+
+            scenario=(
+                "Caw placed an empty pebble-string vine at the garden pitcher "
+                "and asked for its strict boolean reading. She wondered if "
+                "nothing on the vine would count as false."
+            ),
+            need=(
+                "She needed the strict true-or-false value for an empty vine, "
+                "not a guess based on other languages' rules."
+            ),
+            mapping=(
+                "`boolean` converts the empty string to true because it is "
+                "neither false nor nil. An empty vine is still a vine; "
+                "presence of the string type makes it truthy."
+            ),
+            resolution=(
+                "The empty vine registered as truthy and the expected true value arrived."
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form="(boolean nil)", expected=False,
+            concept_phrase="the boolean conversion",
+            question_what="the result of using boolean on nil",
+            goal_text="convert nil to a boolean",
+
+            scenario=(
+                "Sable brought the absent value nil to the meadow pitcher and "
+                "asked for its strict boolean reading. Nil represents the "
+                "total absence of a value."
+            ),
+            need=(
+                "She needed to know which gate nil belonged to when cast "
+                "explicitly to true or false."
+            ),
+            mapping=(
+                "`boolean` on nil returns false because nil is one of the two "
+                "falsey values. Total absence maps to the closed gate — "
+                "the only strict false among non-boolean values."
+            ),
+            resolution=(
+                "Nil mapped to the closed gate and the expected false value returned."
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form="(boolean false)", expected=False,
+            concept_phrase="the boolean conversion",
+            question_what="the result of using boolean on false",
+            goal_text="convert false to a boolean",
+
+            scenario=(
+                "Korvus presented false itself to the road pitcher and asked "
+                "for its strict boolean conversion — casting a boolean into "
+                "a boolean as a sanity check."
+            ),
+            need=(
+                "He needed confirmation that false, already a boolean, would "
+                "convert to false without any surprise."
+            ),
+            mapping=(
+                "`boolean` on false returns false. The value is already its "
+                "own boolean; the conversion is the identity for a value "
+                "that is already strict true or false."
+            ),
+            resolution=(
+                "False converted to itself and the expected false value returned unchanged."
+            ),
+            tags=("story",),
+        ),
     ],
     subplots=_GATE_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
