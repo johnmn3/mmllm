@@ -59,25 +59,26 @@ G8_01 = SubjectCurriculum(
             question_what="the function definition",
             goal_text="define a function speak that returns different strings depending on whether its argument is :hare or :tortoise",
             scenario=(
-                "At the meadow's starting line, Mossback the tortoise "
-                "noticed that hares and tortoises answered the same "
-                "question — 'how do you run?' — with completely different "
-                "words. Pip the hare had not yet arrived, so Mossback "
-                "worked alone."
+                'Bell the hound scratched a small set of pack-signals into '
+                'a flat stone near the pond: every breed in the pack would '
+                'honor the same call but answer in its own voice. She named '
+                'the call speak.'
             ),
             need=(
-                "She wanted a single function that, given a species tag, "
-                "returned the right description — without the caller "
-                "knowing which species would show up."
+                'When the call went out, the runtime would dispatch by the '
+                "dog's breed — :hare or :tortoise — and each breed would "
+                'give back its own characteristic phrase, no two alike.'
             ),
             mapping=(
-                "`defn` names the function; `cond` tests each species tag "
-                "in turn and returns the matching description. One call, "
-                "many possible answers — the essence of dispatch."
+                "The pack agreement is the function's shape, the call's "
+                "name is speak, the dog's breed is the dispatch key, and "
+                "each breed's voice is the answer associated with its key."
             ),
             resolution=(
-                "the function was defined and ready to answer any "
-                "species tag with its own distinct description."
+                'The REPL set the agreement on the bank and the function '
+                'value came back. Any later call to speak with a known '
+                "breed would now produce that breed's characteristic "
+                'phrase.'
             ),
             tags=("story",),
         ),
@@ -87,28 +88,6 @@ G8_01 = SubjectCurriculum(
             concept_phrase="the result of dispatching speak on :tortoise",
             question_what="the value returned",
             goal_text="call speak with :tortoise to see what it returns when dispatched",
-            scenario=(
-                "Mossback the tortoise had built a small dispatch function "
-                "inside a `let` block, binding it to the name `speak`. "
-                "Pip the hare watched, certain the answer would be the "
-                "same for any species."
-            ),
-            need=(
-                "Mossback needed to call the function with the tortoise "
-                "tag and see which description came back — proving that "
-                "the tortoise branch fired correctly."
-            ),
-            mapping=(
-                "`let` binds the anonymous function to `speak`. Calling "
-                "`speak` with the tortoise tag triggers the matching "
-                "`cond` branch and returns that branch's description."
-            ),
-            resolution=(
-                "the dispatch returned the tortoise's own description, "
-                "confirming that different tags produce different answers "
-                "from a single call."
-            ),
-            tags=("story",),
         ),
     ],
     subplots=_GUILD_SUBPLOTS,
@@ -129,25 +108,27 @@ G8_02 = SubjectCurriculum(
             question_what="the color field value after defining a type Pebble with one field color, then constructing an instance and reading the field",
             goal_text="define a type Pebble with a color field and then read the color field from an instance",
             scenario=(
-                "Mossback the tortoise shaped a plain wooden carrying-case "
-                "called a Pebble — no labels, just a single bare slot inside "
-                "for color. She placed a pebble of a particular shade into "
-                "the slot and sealed the case."
+                'Bell the hound carved a small kennel-bag with a single '
+                'labeled compartment — one slot, marked color — and slipped '
+                "a stone of a particular shade into the slot. The bag's "
+                'outside bore the kind-stamp Pebble.'
             ),
             need=(
-                "She needed to reach inside the case and retrieve the color "
-                "stored in its lone slot, to confirm the case held what she "
-                "had put there."
+                "She wanted to read the slot's contents back — exactly the "
+                "shade the stone bore — by the slot's name, with the "
+                'runtime fetching the field cleanly from the bag she had '
+                'just constructed.'
             ),
             mapping=(
-                "`deftype` declares the bare case shape with its one field. "
-                "The constructor fills the field when the case is built. "
-                "`.-color` reaches directly into the slot by field-name "
-                "and pulls the value out."
+                'The bag is the deftype, its labeled compartment is the '
+                'field, the kind-stamp is the type name, and field-access '
+                'is asking the bag for the slot by name.'
             ),
             resolution=(
-                "the field access returned the exact shade that had been "
-                "placed in the case at construction time."
+                'The REPL constructed the bag, fetched the named '
+                'compartment, and handed back the shade the stone had '
+                'borne. The bag itself kept its kind-stamp on the outside '
+                'for any later read.'
             ),
             tags=("story",),
         ),
@@ -157,27 +138,6 @@ G8_02 = SubjectCurriculum(
             concept_phrase="reading the weight field of a Stone instance",
             question_what="the weight field value after defining a type Stone with one field weight, then constructing an instance and reading the field",
             goal_text="define a type Stone with a weight field and then read the weight field from an instance",
-            scenario=(
-                "Pip the hare found a smooth stone on the path and wanted "
-                "to record its weight in a bare carrying-case. Mossback "
-                "showed him that `deftype` could shape a case with a "
-                "single weight slot — no labels, just direct field access."
-            ),
-            need=(
-                "After placing the stone's weight in the slot, Pip needed "
-                "to read it back using the field-access syntax, to verify "
-                "the case had stored it correctly."
-            ),
-            mapping=(
-                "`deftype` declares the plain case. The constructor sets "
-                "the `weight` field. `.-weight` reaches into the slot and "
-                "returns the stored value directly."
-            ),
-            resolution=(
-                "the field access returned the weight that had been placed "
-                "in the slot, confirming the bare case held it faithfully."
-            ),
-            tags=("story",),
         ),
     ],
     subplots=_CARRYINGCASE_SUBPLOTS,
@@ -197,31 +157,6 @@ G8_03 = SubjectCurriculum(
             concept_phrase="reading the pace compartment of a Runner case",
             question_what="the value in the pace compartment of a freshly-built Runner case for Alice",
             goal_text="define a Runner case with two named compartments, name and pace; build a Runner case for Alice with a deliberate-pace keyword; then read the pace compartment",
-            scenario=(
-                "Mossback the tortoise was outfitting the meadow's "
-                "runners with carrying-cases — small wooden cases with "
-                "two named compartments inside, one labeled `name` and "
-                "one labeled `pace`. The case-stamp on the outside "
-                "would read `Runner`."
-            ),
-            need=(
-                "She wanted to define the Runner case-shape, then "
-                "build one such case for a tortoise named Alice "
-                "carrying a deliberate-pace keyword, and finally read "
-                "what was in the pace compartment."
-            ),
-            mapping=(
-                "`defrecord` declares the case-shape: stamp `Runner`, "
-                "compartments [name pace]. The constructor fills both "
-                "compartments in order from its arguments. "
-                "`(:pace …)` reads the named compartment by its keyword."
-            ),
-            resolution=(
-                "the case held the runner's name and the pace keyword "
-                "in their compartments; reading the pace compartment "
-                "returned exactly what the case had been built with."
-            ),
-            tags=("story",),
         ),
         SubjectExample(
             form="(do (defrecord Runner [name pace]) (:name (->Runner \"Bob\" :moderate)))",
@@ -229,27 +164,6 @@ G8_03 = SubjectCurriculum(
             concept_phrase="reading the name compartment of a Runner case",
             question_what="the name field value after defining a record Runner with two fields name and pace, then creating an instance and reading the name field",
             goal_text="define a record type named Runner with two fields, then retrieve another field from an instance",
-            scenario=(
-                "Mossback the tortoise built a second Runner carrying-case, "
-                "this time filling the name compartment for a hare and "
-                "the pace compartment with a moderate-pace keyword. She "
-                "wanted to prove that `defrecord` cases also act like maps."
-            ),
-            need=(
-                "She needed to read back what was in the name compartment "
-                "using keyword access — the same way she would read a "
-                "key from any map — to confirm the record acted like one."
-            ),
-            mapping=(
-                "`defrecord` creates a case that doubles as a map. "
-                "Using `(:name …)` retrieves the name compartment's "
-                "contents exactly as a keyword key-lookup would on a plain map."
-            ),
-            resolution=(
-                "the keyword lookup returned the name stored in that "
-                "compartment, confirming the carrying-case behaves like a map."
-            ),
-            tags=("story",),
         ),
     ],
     subplots=_CARRYINGCASE_SUBPLOTS,
@@ -271,25 +185,6 @@ G8_04 = SubjectCurriculum(
             concept_phrase="a protocol definition",
             question_what="whether the Runners' guild named Pace is real after the founding",
             goal_text="found a Runners' guild named Pace whose only requirement is a method speed taking the runner as its single argument; then check whether the guild's name is now a real thing in the runtime",
-            scenario=(
-                "Mossback wanted to found a Runners' guild named "
-                "`Pace`. Members would have to perform `speed`, taking "
-                "the runner as its argument."
-            ),
-            need=(
-                "Before any species could sign, the guild had to be "
-                "founded — and Mossback wanted to confirm the name was "
-                "now real to the runtime."
-            ),
-            mapping=(
-                "`defprotocol Pace (speed [this])` founds the guild. "
-                "`(some? Pace)` then asks whether the name is non-nil."
-            ),
-            resolution=(
-                "the runtime confirmed the guild was real — `some?` "
-                "returned true."
-            ),
-            tags=("story",),
         ),
         SubjectExample(
             form="(do (defprotocol Greet (hail [this])) (some? Greet))",
@@ -297,27 +192,6 @@ G8_04 = SubjectCurriculum(
             concept_phrase="a protocol definition",
             question_what="whether the protocol var Greet is truthy after defining a protocol named Greet with one method hail taking a single argument this",
             goal_text="define a protocol named Greet with one method hail that takes a single argument this",
-            scenario=(
-                "Pip the hare wanted to found a second guild at the meadow "
-                "— one called `Greet`, where members must perform a `hail` "
-                "routine whenever another runner approached. The guild did "
-                "not yet exist."
-            ),
-            need=(
-                "Before any runner could sign the book, the guild had to "
-                "be chartered. Pip needed to confirm the runtime recognized "
-                "the name as real after the founding call."
-            ),
-            mapping=(
-                "`defprotocol Greet (hail [this])` charters the guild and "
-                "declares its one required routine. `(some? Greet)` asks "
-                "the runtime whether the name resolves to a non-nil value."
-            ),
-            resolution=(
-                "the runtime confirmed the guild existed — the name was "
-                "non-nil and the charter was in force."
-            ),
-            tags=("story",),
         ),
     ],
     subplots=_GUILD_SUBPLOTS,
@@ -339,28 +213,6 @@ G8_05 = SubjectCurriculum(
             concept_phrase="calling a protocol method on a string",
             question_what="the value returned after defining protocol Pace with method speed, extending it to String with an implementation, then calling speed on a string",
             goal_text="define a protocol named Pace with one method speed, extend it to String type with an implementation, then call speed on a string",
-            scenario=(
-                "Mossback the tortoise had founded the Pace guild. Now she "
-                "needed to sign up String runners — any String value would "
-                "be treated as a hare-type runner with its own answer to "
-                "the `speed` routine."
-            ),
-            need=(
-                "She needed to extend the Pace guild to cover the String "
-                "type and then call `speed` on a String runner to verify "
-                "the extension was in effect."
-            ),
-            mapping=(
-                "`extend-protocol` signs the String type into the Pace "
-                "guild, providing its `speed` implementation. Calling "
-                "`speed` on a String dispatches to that implementation "
-                "and returns its value."
-            ),
-            resolution=(
-                "the guild dispatch reached the String arm and returned "
-                "the description registered for that type."
-            ),
-            tags=("story",),
         ),
         SubjectExample(
             form=("(do (defprotocol Greet (hail [this]))"
@@ -370,27 +222,6 @@ G8_05 = SubjectCurriculum(
             concept_phrase="calling a protocol method on a number",
             question_what="the value returned after defining protocol Greet with method hail, extending it to Long with an implementation, then calling hail on a number",
             goal_text="define a protocol named Greet with one method hail, extend it to Long type with an implementation, then call hail on a number",
-            scenario=(
-                "Pip the hare founded the Greet guild and then wondered: "
-                "could a number ever sign the book? Mossback showed him "
-                "that `extend-protocol` could enroll the Long type, giving "
-                "it its own `hail` routine."
-            ),
-            need=(
-                "After enrolling the Long type, Pip needed to call `hail` "
-                "on an integer to see which keyword the Long branch "
-                "returned, confirming the dispatch worked."
-            ),
-            mapping=(
-                "`extend-protocol Greet java.lang.Long` signs the Long "
-                "type into the guild. Calling `hail` on an integer "
-                "dispatches to the Long branch and returns its keyword."
-            ),
-            resolution=(
-                "the dispatch reached the Long branch and returned the "
-                "keyword registered for numeric runners."
-            ),
-            tags=("story",),
         ),
     ],
     subplots=_GUILD_SUBPLOTS,
@@ -414,28 +245,6 @@ G8_06 = SubjectCurriculum(
             concept_phrase="protocol dispatch on an integer",
             question_what="the value returned after defining protocol Pace with method speed, extending it to both String and Long types with different implementations, then calling speed on the number 42",
             goal_text="define a protocol Pace with method speed, extend it to both String and Long types with different implementations, then call speed on the number 42",
-            scenario=(
-                "Mossback the tortoise had signed both String runners "
-                "and Long runners into the Pace guild, each with its own "
-                "`speed` implementation. An integer runner arrived at "
-                "the starting line."
-            ),
-            need=(
-                "She needed to call `speed` on the integer and see which "
-                "branch the guild chose — proving that the runtime "
-                "dispatches to the correct type's implementation."
-            ),
-            mapping=(
-                "`extend-protocol` registers a separate `speed` arm for "
-                "each type. Calling `speed` on an integer value causes "
-                "the runtime to match the Long branch and return that "
-                "branch's keyword."
-            ),
-            resolution=(
-                "the dispatch selected the Long arm and returned the "
-                "keyword registered for integer runners."
-            ),
-            tags=("story",),
         ),
         SubjectExample(
             form=("(do (defprotocol Pace (speed [this]))"
@@ -447,28 +256,6 @@ G8_06 = SubjectCurriculum(
             concept_phrase="protocol dispatch on a string",
             question_what="the value returned after defining protocol Pace with method speed, extending it to both String and Long types with different implementations, then calling speed on a string",
             goal_text="define a protocol Pace with method speed, extend it to both String and Long types with different implementations, then call speed on a string",
-            scenario=(
-                "After the integer runner cleared the guild's gate, a "
-                "String runner arrived. Both types had signed the Pace "
-                "guild's book, each with a different `speed` entry. "
-                "Pip the hare watched to see which branch would fire."
-            ),
-            need=(
-                "Mossback needed to call `speed` on the String runner "
-                "to confirm the dispatch selected the String branch "
-                "rather than the Long one."
-            ),
-            mapping=(
-                "Same `extend-protocol` as before, but now the argument "
-                "is a String value, so the runtime matches the String "
-                "arm and returns its keyword rather than the Long one."
-            ),
-            resolution=(
-                "the dispatch selected the String arm and returned the "
-                "keyword registered for string runners — different from "
-                "the integer result."
-            ),
-            tags=("story",),
         ),
     ],
     subplots=_GUILD_SUBPLOTS,
@@ -490,24 +277,6 @@ G8_07 = SubjectCurriculum(
             concept_phrase="calling a protocol method on a record instance",
             question_what="the value returned after defining protocol Pace with method speed, defining record Hare with one field name that implements Pace, then calling speed on a Hare instance",
             goal_text="define a protocol Pace with method speed, define a record Hare that implements Pace, then call speed on a Hare instance",
-            scenario=(
-                "Mossback the tortoise built a carrying-case — a `Hare` "
-                "record with a `name` compartment — and signed it into the "
-                "Pace guild directly inside `defrecord`."
-            ),
-            need=(
-                "She needed to call `speed` on a Hare instance to confirm "
-                "that a record can implement a protocol at definition time."
-            ),
-            mapping=(
-                "`defrecord Hare [name] Pace (speed …)` declares the case "
-                "and implements the routine inline. Calling `speed` on a "
-                "Hare instance dispatches to that implementation."
-            ),
-            resolution=(
-                "the dispatch returned the hare's pace keyword."
-            ),
-            tags=("story",),
         ),
         SubjectExample(
             form=("(do (defprotocol Pace (speed [this]))"
@@ -517,29 +286,6 @@ G8_07 = SubjectCurriculum(
             concept_phrase="calling a protocol method on a record instance",
             question_what="the value returned after defining protocol Pace with method speed, defining record Tortoise with one field name that implements Pace, then calling speed on a Tortoise instance",
             goal_text="define a protocol Pace with method speed, define a record Tortoise that implements Pace, then call speed on a Tortoise instance",
-            scenario=(
-                "Mossback the tortoise repeated the experiment for her "
-                "own kind — a `Tortoise` record with a `name` compartment "
-                "that implements the Pace guild inline. Pip the hare "
-                "watched, curious whether the tortoise's answer would "
-                "differ from the hare's."
-            ),
-            need=(
-                "She needed to call `speed` on a Tortoise instance and "
-                "confirm the dispatch selected the tortoise's own "
-                "implementation, not the hare's."
-            ),
-            mapping=(
-                "Same pattern: `defrecord Tortoise [name] Pace (speed …)` "
-                "embeds the guild routine in the record. The runtime "
-                "dispatches `speed` to the Tortoise arm, not the Hare's."
-            ),
-            resolution=(
-                "the call dispatched to the Tortoise record's "
-                "implementation and returned the tortoise's distinct "
-                "pace keyword."
-            ),
-            tags=("story",),
         ),
     ],
     subplots=_GUILD_SUBPLOTS,
@@ -560,22 +306,24 @@ G8_08 = SubjectCurriculum(
             question_what="the pace returned for a runner stamped :hare after the table routes to its arm",
             goal_text="declare a sorting-table named pace that reads each runner's :species stamp; add an arm for the :hare stamp returning the swift-pace keyword; then route a runner stamped :hare through the table",
             scenario=(
-                "Mossback set up a sorting-table at the meadow's edge. "
-                "Runners walked up and the table read each one's "
-                ":species stamp to route them."
+                'A flat stone sat at the bank near the pond. Bell the hound '
+                'chose the species stamp as the dispatch key and added one '
+                'pile for the hare breed with its own pace-word.'
             ),
             need=(
-                "She added a :hare arm returning the swift-pace keyword. "
-                "The first runner arrived stamped :hare."
+                'When a runner of a known breed arrived, the stone would '
+                "route the runner to the matching pile and that pile's "
+                'pace-word would come back.'
             ),
             mapping=(
-                "`defmulti` declares the table and its dispatch key "
-                "(`:species`). `defmethod` adds an arm for `:hare`. "
-                "Calling `pace` reads the stamp and routes to that arm."
+                'The sorting-stone is the multimethod, the species stamp is '
+                "the dispatch key, each breed's pile is a defmethod, and "
+                'the pace-word is what the runtime returns.'
             ),
             resolution=(
-                "the table read the :hare stamp and returned the "
-                "swift-pace keyword."
+                'The REPL read the species, picked the matching pile, and '
+                'handed back its pace-word. The stone stood ready for any '
+                'later breed.'
             ),
             tags=("story",),
         ),
@@ -587,25 +335,6 @@ G8_08 = SubjectCurriculum(
             concept_phrase="calling a multimethod with a specific dispatch value",
             question_what="the value returned after defining multimethod tag that dispatches on :kind, adding a method for :stone, then calling tag with a map",
             goal_text="define a multimethod tag that dispatches on the :kind key, add a method for :stone, then call tag with a map",
-            scenario=(
-                "Pip the hare carried a smooth stone to Mossback's "
-                "sorting-table. The table read each item's `:kind` stamp; "
-                "an arm existed only for the `:stone` stamp."
-            ),
-            need=(
-                "Pip needed to send the stone map through the table and "
-                "confirm the dispatch routed to the `:stone` arm."
-            ),
-            mapping=(
-                "`defmulti tag :kind` sets the table to read `:kind`. "
-                "`defmethod tag :stone` adds the arm for that stamp. Calling "
-                "`tag` on a map with `:kind :stone` routes to that arm."
-            ),
-            resolution=(
-                "the dispatch sent the map to the matching arm and returned "
-                "its keyword."
-            ),
-            tags=("story",),
         ),
     ],
     subplots=_SORTINGTABLE_SUBPLOTS,
@@ -628,25 +357,6 @@ G8_09 = SubjectCurriculum(
             concept_phrase="calling a multimethod with multiple methods",
             question_what="the value returned after defining multimethod pace that dispatches on :species with methods for both :hare and :tortoise, then calling pace with a map",
             goal_text="define a multimethod pace that dispatches on :species with methods for both :hare and :tortoise, then call pace with {:species :tortoise}",
-            scenario=(
-                "Mossback extended the sorting-table with two arms: "
-                "one for `:hare` and one for `:tortoise`. A tortoise "
-                "runner arrived."
-            ),
-            need=(
-                "She needed to route the tortoise runner and confirm "
-                "the `:tortoise` arm fired, not the `:hare` arm."
-            ),
-            mapping=(
-                "Two `defmethod` calls add an arm for each stamp. "
-                "Calling `pace` with the tortoise map matches `:tortoise` "
-                "and dispatches to that arm."
-            ),
-            resolution=(
-                "the table chose the tortoise arm and returned the "
-                "tortoise's own pace keyword."
-            ),
-            tags=("story",),
         ),
         SubjectExample(
             form=("(do (defmulti pace :species)"
@@ -658,25 +368,6 @@ G8_09 = SubjectCurriculum(
             concept_phrase="calling a multimethod with a default fallback",
             question_what="the value returned after defining multimethod pace with methods for :hare, :tortoise, and :default, then calling pace with a dispatch value that doesn't match",
             goal_text="define a multimethod pace with methods for :hare and :tortoise plus a :default fallback, then call pace with a dispatch value that doesn't match",
-            scenario=(
-                "An owl arrived at Mossback's sorting-table. No arm "
-                "existed for owls. Mossback had added a `:default` "
-                "arm to catch any stamp without a dedicated route."
-            ),
-            need=(
-                "She needed to route the owl and confirm the `:default` "
-                "arm caught it."
-            ),
-            mapping=(
-                "`defmethod pace :default` is the catch-all arm. When "
-                "no dedicated arm matches, the table falls through to "
-                "`:default` and returns that arm's value."
-            ),
-            resolution=(
-                "no arm matched the owl stamp; the table fell through "
-                "to `:default` and returned the fallback keyword."
-            ),
-            tags=("story",),
         ),
     ],
     subplots=_SORTINGTABLE_SUBPLOTS,
@@ -699,28 +390,6 @@ G8_10 = SubjectCurriculum(
             concept_phrase="dispatching via multimethod",
             question_what="the value returned after defining multimethod show that dispatches on identity, adding a method for :rabbit, then calling show with :rabbit",
             goal_text="define a multimethod show that dispatches on identity with a method for one specific value, then call it",
-            scenario=(
-                "Mossback the tortoise set up a sorting-table called "
-                "`show` that reads the value itself as its own stamp "
-                "— using `identity` as the dispatch function. She added "
-                "one arm for the `:rabbit` stamp."
-            ),
-            need=(
-                "She needed to send `:rabbit` through the table and see "
-                "whether the identity-dispatch found the matching arm "
-                "and returned the right string."
-            ),
-            mapping=(
-                "`defmulti show identity` makes the table use the "
-                "argument itself as the stamp. `defmethod show :rabbit` "
-                "adds the matching arm. Calling `show` with `:rabbit` "
-                "routes to that arm."
-            ),
-            resolution=(
-                "the table dispatched correctly through identity and "
-                "returned the string registered for the `:rabbit` stamp."
-            ),
-            tags=("story",),
         ),
         SubjectExample(
             form=("(do (defprotocol Show (show [this]))"
@@ -730,29 +399,6 @@ G8_10 = SubjectCurriculum(
             concept_phrase="dispatching via protocol",
             question_what="the value returned after defining protocol Show with method show, extending it to String with an implementation, then calling show on a string",
             goal_text="define a protocol Show with method show, extend it to String type, then call show on a string",
-            scenario=(
-                "Pip the hare tried a guild instead of a sorting-table: "
-                "he founded the Show guild, signed the String type in "
-                "with its own `show` implementation, then called `show` "
-                "on a string runner to see the dispatch at work."
-            ),
-            need=(
-                "He needed to confirm that calling `show` on a String "
-                "dispatched to the String arm — not to an arm added "
-                "by the sorting-table approach."
-            ),
-            mapping=(
-                "`defprotocol Show` founds the guild. `extend-protocol` "
-                "signs String in with a `show` that prefixes the value. "
-                "Calling `show` on a String dispatches to that arm via "
-                "the guild, not a table."
-            ),
-            resolution=(
-                "the guild dispatch returned a prefixed string, "
-                "confirming the protocol arm fired and produced its "
-                "own distinct result."
-            ),
-            tags=("story",),
         ),
     ],
     subplots=_SORTINGTABLE_SUBPLOTS,
@@ -777,23 +423,6 @@ G8_11 = SubjectCurriculum(
             concept_phrase="calling a protocol method on a string",
             question_what="the value returned after defining protocol IPace with method run, extending it to String with an implementation, then calling run on a string",
             goal_text="define a protocol IPace with method run, extend it to String type, then call run on a string",
-            scenario=(
-                "Mossback the tortoise founded a guild named `IPace` — a "
-                "Clojure-side guild working like the host world's interface."
-            ),
-            need=(
-                "She needed to extend `IPace` to String and call `run` on "
-                "a String runner to show the guild works like a Java interface."
-            ),
-            mapping=(
-                "`defprotocol IPace (run [this])` creates the guild. "
-                "`extend-protocol` signs String in, so calling `run` dispatches "
-                "through the guild."
-            ),
-            resolution=(
-                "the guild dispatched to the String arm and returned the keyword."
-            ),
-            tags=("story",),
         ),
     ],
     subplots=_GUILD_SUBPLOTS,
@@ -815,25 +444,6 @@ G8_12 = SubjectCurriculum(
             concept_phrase="attaching a protocol to a built-in type via extend-type",
             question_what="the value returned after defining protocol Pace with method speed, using extend-type to attach it to Long type with an implementation, then calling speed on a number",
             goal_text="define a protocol Pace with method speed, use extend-type to attach it to Long type, then call speed on a number",
-            scenario=(
-                "Mossback wanted to teach a Long runner — from the host "
-                "world — a new guild call. `extend-type` could sign the "
-                "Long type in without touching its definition."
-            ),
-            need=(
-                "She needed to attach `speed` to Long and call it on "
-                "an integer to confirm the extension took effect."
-            ),
-            mapping=(
-                "`extend-type java.lang.Long Pace (speed …)` signs Long "
-                "into the guild retroactively. Calling `speed` on a Long "
-                "dispatches to this new implementation."
-            ),
-            resolution=(
-                "the dispatch found the Long extension and returned the "
-                "keyword for numeric runners."
-            ),
-            tags=("story",),
         ),
         SubjectExample(
             form=("(do (defprotocol Pace (speed [this]))"
@@ -843,25 +453,6 @@ G8_12 = SubjectCurriculum(
             concept_phrase="attaching a protocol to a built-in type via extend-type",
             question_what="the value returned after defining protocol Pace with method speed, using extend-type to attach it to String type with an implementation, then calling speed on a string",
             goal_text="define a protocol Pace with method speed, use extend-type to attach it to String type, then call speed on a string",
-            scenario=(
-                "Pip wanted to join the Pace guild as a String runner. "
-                "Mossback showed him `extend-type` could sign String in "
-                "after the guild was founded."
-            ),
-            need=(
-                "After extending String, Pip needed to call `speed` "
-                "on a String runner to confirm the extension was live."
-            ),
-            mapping=(
-                "`extend-type java.lang.String Pace (speed …)` signs "
-                "String in retroactively. Calling `speed` on a String "
-                "dispatches to this extension, not the Long one."
-            ),
-            resolution=(
-                "the dispatch selected the String extension and returned "
-                "the keyword for string runners."
-            ),
-            tags=("story",),
         ),
     ],
     subplots=_SORTINGTABLE_SUBPLOTS,
@@ -885,25 +476,6 @@ G8_13 = SubjectCurriculum(
             concept_phrase="using this to access a field in a protocol method",
             question_what="the value returned after defining protocol Named with method name-of, defining record Hare with field n that uses this to access the field in the implementation, then calling name-of on a Hare instance",
             goal_text="define a protocol Named with method name-of, define a record that uses this to access a field, then call the method",
-            scenario=(
-                "Mossback built a Hare carrying-case with a single "
-                "field `n`. The `name-of` routine used `this` — the "
-                "case itself — to read field `n`."
-            ),
-            need=(
-                "She needed to call `name-of` on the Hare and confirm "
-                "the method retrieved the stored name through `this`."
-            ),
-            mapping=(
-                "`[this]` in the method signature binds the receiver. "
-                "`(:n this)` reads the `n` field from that receiver — "
-                "the case introspects itself."
-            ),
-            resolution=(
-                "the method read field `n` through `this` and returned "
-                "the name stored in the case."
-            ),
-            tags=("story",),
         ),
         SubjectExample(
             form=("(do (defprotocol Tagged (tag-of [this]))"
@@ -913,25 +485,6 @@ G8_13 = SubjectCurriculum(
             concept_phrase="using this to access a field in a protocol method",
             question_what="the value returned after defining protocol Tagged with method tag-of, defining record Stone with field t that uses this to access the field in the implementation, then calling tag-of on a Stone instance",
             goal_text="define a protocol Tagged with method tag-of, define a record Stone that implements it by accessing a field via this, then call the method",
-            scenario=(
-                "Pip placed a pebble in a Stone case with field `t` "
-                "for its tag. The Tagged guild's `tag-of` routine "
-                "read that tag back through `this`."
-            ),
-            need=(
-                "Pip needed to call `tag-of` on the Stone and confirm "
-                "the `this`-style implementation retrieved the `t` field."
-            ),
-            mapping=(
-                "`defrecord Stone [t] Tagged (tag-of [this] (:t this))` "
-                "reads field `t` from the receiver. The case introspects "
-                "itself rather than returning a constant."
-            ),
-            resolution=(
-                "the method looked up `t` through `this` and returned "
-                "the tag placed in the case at construction."
-            ),
-            tags=("story",),
         ),
     ],
     subplots=_GUILD_SUBPLOTS,
@@ -957,30 +510,6 @@ G8_14 = SubjectCurriculum(
             concept_phrase="calling methods from two independent protocols",
             question_what="the vector of results after defining protocols A and B with methods a-op and b-op, extending both to String independently, then calling both methods on the string \"x\"",
             goal_text="define two protocols A and B, each with a method, extend both to String type independently, then call both methods",
-            scenario=(
-                "Mossback the tortoise founded two separate guilds — A "
-                "and B — each with its own routine. She signed the "
-                "String type into both guilds independently, giving "
-                "each its own implementation. Joining guild A carried "
-                "no automatic membership in guild B."
-            ),
-            need=(
-                "She needed to call both `a-op` and `b-op` on the same "
-                "String runner and collect the results, to prove the two "
-                "guilds dispatch independently and don't inherit from "
-                "each other."
-            ),
-            mapping=(
-                "Each `extend-protocol` call signs String into one guild "
-                "only. Calling `a-op` dispatches through guild A; calling "
-                "`b-op` dispatches through guild B. The results come from "
-                "separate implementations, not a shared inheritance."
-            ),
-            resolution=(
-                "both calls returned their own keywords, one from each "
-                "guild, confirming the protocols are fully independent."
-            ),
-            tags=("story",),
         ),
     ],
     subplots=_GUILD_SUBPLOTS,
@@ -1000,28 +529,6 @@ G8_15 = SubjectCurriculum(
             concept_phrase="checking type hierarchy after derive",
             question_what="whether the relationship holds after establishing with derive that ::hare is a type of ::runner, then checking with isa?",
             goal_text="establish a type relationship where ::hare is a type of ::runner, then check it",
-            scenario=(
-                "Mossback the tortoise kept a hierarchy of stamps at "
-                "the sorting-table edge. She wanted to declare that the "
-                "`:hare` stamp was also a kind of `:runner` stamp — so "
-                "the table could route hare-stamped runners to any arm "
-                "that accepted runner-stamped ones."
-            ),
-            need=(
-                "She needed to register the relationship with `derive` "
-                "and then verify it held using `isa?`, so the table "
-                "would recognize the parent-child stamp relationship."
-            ),
-            mapping=(
-                "`derive` records the hierarchy: `:hare` is a child "
-                "of `:runner`. `isa?` then queries the hierarchy and "
-                "returns true if the child-parent relationship exists."
-            ),
-            resolution=(
-                "the hierarchy confirmed the relationship — the hare "
-                "stamp was recognized as a kind of runner stamp."
-            ),
-            tags=("story",),
         ),
         SubjectExample(
             form="(isa? java.lang.Long java.lang.Number)",
@@ -1029,29 +536,6 @@ G8_15 = SubjectCurriculum(
             concept_phrase="checking Java type hierarchy",
             question_what="whether Long is a type of Number in Java's type hierarchy",
             goal_text="check whether Long is a type of Number in Java's type system",
-            scenario=(
-                "Pip the hare wondered whether the host world's own "
-                "stamp hierarchy was visible at the sorting-table. "
-                "Mossback showed him that `isa?` could also query the "
-                "Java type hierarchy, not just the meadow's hand-made "
-                "hierarchy."
-            ),
-            need=(
-                "They needed to ask whether the Long stamp was a child "
-                "of the Number stamp in the host hierarchy, to see if "
-                "`isa?` worked across both worlds."
-            ),
-            mapping=(
-                "`isa?` with two Java class names checks the host "
-                "type hierarchy. Long extends Number in Java, so the "
-                "parent-child relationship holds and `isa?` returns "
-                "the affirmative."
-            ),
-            resolution=(
-                "the hierarchy check confirmed Long is indeed a kind "
-                "of Number in the host world's own stamp system."
-            ),
-            tags=("story",),
         ),
         SubjectExample(
             form="(isa? java.lang.String java.lang.Number)",
@@ -1059,28 +543,6 @@ G8_15 = SubjectCurriculum(
             concept_phrase="checking Java type hierarchy",
             question_what="whether String is a type of Number in Java's type hierarchy",
             goal_text="check whether String is a type of Number in Java's type system",
-            scenario=(
-                "Mossback the tortoise put the same question to the "
-                "host hierarchy but swapped the types. String and Number "
-                "live in different branches of the host stamp tree — "
-                "no derivation connects them."
-            ),
-            need=(
-                "She needed to ask whether the String stamp was a child "
-                "of Number, to confirm `isa?` correctly returns the "
-                "negative when no relationship exists."
-            ),
-            mapping=(
-                "`isa?` with String and Number checks whether Java "
-                "defines String as a subtype of Number. Because no such "
-                "relationship exists in the host hierarchy, the check "
-                "returns the negative result."
-            ),
-            resolution=(
-                "the hierarchy confirmed no relationship — String is "
-                "not a kind of Number, and the check returned accordingly."
-            ),
-            tags=("story",),
         ),
     ],
     subplots=_SORTINGTABLE_SUBPLOTS,
@@ -1104,25 +566,6 @@ G8_16 = SubjectCurriculum(
             concept_phrase="calling a polymorphic method on multiple record types",
             question_what="the vector of results after defining protocol Move with method step, defining records Hare and Tortoise that both implement Move, then calling step via mapv on both instances",
             goal_text="define a protocol Move with method step, define two record types Hare and Tortoise that each implement it, then call the method on both instances",
-            scenario=(
-                "Race day at the meadow. Mossback the tortoise founded "
-                "the Move guild. Both a Hare and a Tortoise record signed "
-                "with their own `step` implementations."
-            ),
-            need=(
-                "She needed to call `step` on each runner and collect both "
-                "results to show one call dispatching to different implementations."
-            ),
-            mapping=(
-                "`mapv step` applies `step` to each element. The runtime "
-                "dispatches to each record's implementation, returning a "
-                "different value per type."
-            ),
-            resolution=(
-                "the vector held each runner's result, confirming one call "
-                "produced two distinct answers."
-            ),
-            tags=("story",),
         ),
         SubjectExample(
             form=("(do (defprotocol Sound (cry [this]))"
@@ -1133,28 +576,6 @@ G8_16 = SubjectCurriculum(
             concept_phrase="calling a polymorphic method on a record instance",
             question_what="the value returned after defining protocol Sound with method cry, defining records Hare and Tortoise that both implement Sound, then calling cry on a Tortoise instance",
             goal_text="define a protocol Sound with method cry, define two record types that implement it, then call the method on a Tortoise instance",
-            scenario=(
-                "Pip the hare and Mossback the tortoise both joined the "
-                "Sound guild, each with a different `cry` routine. A "
-                "single Tortoise instance waited at the gate, ready to "
-                "answer when `cry` was called."
-            ),
-            need=(
-                "The caller needed to invoke `cry` on the Tortoise "
-                "instance alone and confirm the dispatch chose the "
-                "Tortoise's implementation, not the Hare's."
-            ),
-            mapping=(
-                "Both records implement Sound but with different bodies. "
-                "Calling `cry` on a Tortoise instance dispatches to the "
-                "Tortoise arm of the guild, ignoring the Hare's arm "
-                "entirely."
-            ),
-            resolution=(
-                "the dispatch selected the Tortoise arm and returned "
-                "the keyword registered for tortoise runners."
-            ),
-            tags=("story",),
         ),
     ],
     subplots=_GUILD_SUBPLOTS,

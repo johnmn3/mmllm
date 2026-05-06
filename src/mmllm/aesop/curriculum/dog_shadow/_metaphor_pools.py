@@ -33,7 +33,7 @@ Imagery anchors (see also
   - _CHALKMARK_SUBPLOTS     — "bone" scratch vs. real bone (quote)
   - _RUNNERAHEAD_SUBPLOTS   — scout-dog sent ahead (agent / future)
   - _SORTINGTABLE_SUBPLOTS  — sorting bones by origin (multimethods)
-  - _CARRYINGCASE_SUBPLOTS  — labeled kennel-pouch (deftype / defrecord)
+  - _CARRYINGCASE_SUBPLOTS  — labeled kennel-bag (deftype / defrecord)
   - _TALLYWALK_SUBPLOTS     — walking the bone-row (reduce / count)
   - _BEADSTRING_SUBPLOTS    — string of scratch-marks (str concat)
   - _CIRCUIT_SUBPLOTS       — pacing the bank (recur / loop)
@@ -80,7 +80,7 @@ had already let {dog_his_her} jaws fall open at a passing
 reflection — but the form, which still carried the value, came
 back with the answer."""),
 
-    # 2. Mouth-as-pouch: whatever's gripped is in force only while the
+    # 2. Closed-jaws-as-binding: whatever's gripped is in force only while the
     #    jaws are closed. Type-neutral framing.
     SubplotTemplate("""\
 {hound_phrase} tightened {hound_his_her} grip on the bone.
@@ -1043,7 +1043,7 @@ value at the right time."""),
 
     # 5. The Dog-doesn't-wait template — Dog grabs before scout returns.
     SubplotTemplate("""\
-{dog_phrase}, {emo_greedy}, lunged for the scout's pouch before
+{dog_phrase}, {emo_greedy}, lunged for the scout's satchel before
 the scout had even returned from the far bank. {hound_phrase}
 held {dog_him_her} back: a scout sent ahead must be allowed to
 finish. To {goal_text}, {hound_he_she} composed
@@ -1110,36 +1110,36 @@ returned the value from the correct pile."""),
 ]
 
 
-# ─────────────────────── kennel-pouch (deftype / defrecord) ───────────
+# ─────────────────────── kennel-bag (deftype / defrecord) ────────────
 
 
 _CARRYINGCASE_SUBPLOTS: list[SubplotTemplate] = [
 
     # 1. The labeled-compartments template — defrecord.
     SubplotTemplate("""\
-{hound_phrase} held up a small kennel-pouch {place}, its inside
+{hound_phrase} held up a small kennel-bag {place}, its inside
 divided into labeled compartments — one for the bone's date,
-one for its size, one for its source. "Defrecord makes a pouch
+one for its size, one for its source. "Defrecord makes a bag
 like this," {hound_he_she} said: "named compartments holding
 specific things; a stamp on the outside saying what kind of
-pouch it is." To {goal_text}, {hound_he_she_cap} composed
+bag it is." To {goal_text}, {hound_he_she_cap} composed
 {concept_phrase}, submitted the form, and the REPL —
-constructing the pouch, filling its compartments — returned the
-value the pouch held or carried."""),
+constructing the bag, filling its compartments — returned the
+value the bag held or carried."""),
 
-    # 2. The bare-pouch template — deftype.
+    # 2. The bare-bag template — deftype.
     SubplotTemplate("""\
-"A deftype is a barer pouch," {hound_phrase} said. "Compartments,
+"A deftype is a barer bag," {hound_phrase} said. "Compartments,
 a stamp — no map-like behavior unless you ask for it. Faster,
 more focused, less convenient." To {goal_text},
 {hound_he_she_cap} composed {concept_phrase}, submitted the
-form, and the REPL — constructing the bare pouch as specified —
+form, and the REPL — constructing the bare bag as specified —
 returned the value inside."""),
 
     # 3. The reaching-into-the-compartment template — field access.
     SubplotTemplate("""\
 "To reach into a labeled compartment," {hound_phrase} said,
-"you ask for it by name. The pouch knows where each compartment
+"you ask for it by name. The bag knows where each compartment
 is; the runtime fetches it cleanly." To {goal_text},
 {hound_he_she_cap} composed {concept_phrase}, submitted the
 form, and the REPL — opening the right compartment — returned
@@ -1275,7 +1275,7 @@ stopping — returned the value cleanly."""),
 # to render with the existing family templates as before.
 #
 # Each family's story template differs only in the metaphor-vocabulary
-# of its connective prose around the {concept_phrase} action — pouch
+# of its connective prose around the {concept_phrase} action — let
 # is "gripped between the teeth", basket is "for the bone-cache",
 # sieve is "as the gap's rule", etc. The slots provide the specifics.
 
@@ -1407,7 +1407,7 @@ _SORTINGTABLE_SUBPLOTS = _SORTINGTABLE_SUBPLOTS + [
 _CARRYINGCASE_SUBPLOTS = _CARRYINGCASE_SUBPLOTS + [
     _story(
         "To {goal_text}, {hound_he_she_cap} composed {concept_phrase} "
-        "and submitted the form. The REPL constructed the kennel-pouch:"
+        "and submitted the form. The REPL constructed the kennel-bag:"
     ),
 ]
 
