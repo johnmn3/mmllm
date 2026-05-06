@@ -224,13 +224,14 @@ G8_03 = SubjectCurriculum(
             question_what="the name field value after defining a record Runner with two fields name and pace, then creating an instance and reading the name field",
             goal_text="define a record type named Runner with two fields, then retrieve another field from an instance",
             scenario=(
-                "The farmer stamped a Runner pail for Bob using the same two-slot mold — "
+                "The farmer stamped a second Runner pail using the same two-slot mold — "
                 "name and pace side by side. She wanted to confirm that the name slot "
                 "held exactly what she had pressed in when she shaped the pail."
             ),
             need=(
-                "She needed to build a Runner pail for Bob and then reach into the name "
-                "slot to read back its contents — the farmer's record, not a guess."
+                "She needed to build a Runner pail with a name and then reach into "
+                "the name slot to read back its contents — the farmer's record, "
+                "not a guess."
             ),
             mapping=(
                 "`defrecord` defines the pail mold with its labeled slots. `->Runner` "
@@ -238,7 +239,7 @@ G8_03 = SubjectCurriculum(
                 "reaches into the name compartment and retrieves the stored value."
             ),
             resolution=(
-                "the REPL returned the string sitting in the name slot — the name "
+                "the REPL returned the string sitting in the name slot — whatever "
                 "the farmer had placed there when she hammered the pail into shape."
             ),
             tags=("story",),
