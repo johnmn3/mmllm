@@ -973,6 +973,106 @@ useful upper bound on the multi-instance savings ceiling.
   models have different J/tok and bpc relationships; cross-tokenizer
   energy comparisons should normalize on tokens-per-byte.
 
+## mmllm-moe: disk-offload inference for stock HuggingFace MoE models
+
+`mmllm-moe` is a companion CLI that takes any HuggingFace Mixture-of-Experts
+checkpoint (Qwen3, DeepSeek V4, Gemma 4, Mixtral, OLMoE, Granite, ...) and
+converts it to a disk-offloaded mmap layout for inference on consumer GPUs
+that can't fit the full model in VRAM.
+
+The idea: keep only the **router + attention + embeddings resident on GPU**
+(~3 GB for a 30B model), store the **expert weights on disk as int8**, and
+page them into a **workload-adaptive LRU cache** in VRAM on demand. The
+cache converges to the actually-routed experts for the running prompt —
+no wasted VRAM on experts the router never selects.
+
+### Quick start
+
+```bash
+pip install mmllm[moe]
+
+# One-shot convert (downloads from HF, writes mmap layout to ~/.cache/mmllm-moe/)
+mmllm-moe convert Qwen/Qwen3-30B-A3B --quant int8
+
+# Generate
+mmllm-moe gen Qwen/Qwen3-30B-A3B "Write a Fibonacci function in Python" \
+  --hot-experts 64 --n-tokens 200
+
+# Interactive chat
+mmllm-moe chat Qwen/Qwen3-30B-A3B --hot-experts 64
+
+# OpenAI-compatible server
+mmllm-moe serve Qwen/Qwen3-30B-A3B --hot-experts 64 --port 8080
+
+# Status
+mmllm-moe info Qwen/Qwen3-30B-A3B
+```
+
+### Results: L4 (24 GB, $1/hr)
+
+Two models, same hardware, same pipeline:
+
+| Model | Total / active params | Experts | Throughput | On-disk | $/M tokens |
+|---|---|---|---|---|---|
+| **Qwen3-30B-A3B** | 30B / 3B | 128 × top-8, 48 layers | **5.66 tok/sec** | 27 GB int8 | $0.049 |
+| **DeepSeek V4 Flash** | 284B / 13B | 256 × top-8, 43 layers | **1.12 tok/sec** | 258 GB fp8 | $0.25 |
+
+Qwen3-30B-A3B at bf16 is ~60 GB — it doesn't fit on any consumer GPU.
+`mmllm-moe` runs it at chat-usable throughput on a $1/hr L4 by keeping
+3 GB resident and paging experts from disk.
+
+DeepSeek V4 Flash is 284B parameters. At fp8 the raw weights are ~284 GB
+— it normally needs a data-center GPU (≥80 GB) or multi-GPU. `mmllm-moe`
+runs it coherently on the same $1/hr 24 GB GPU at >1 tok/sec.
+
+### Cross-GPU results (Qwen3-30B-A3B, int8 + LRU)
+
+| GPU | VRAM | $/hr | Best tok/sec | Budget | $/M tokens |
+|---|---|---|---|---|---|
+| T4 | 16 GB | $0.50 | 2.14 | h_e=48 | $0.065 |
+| **L4** | **24 GB** | **$1.00** | **5.66** | **h_e=96** | **$0.049** |
+| H100 | 80 GB | $5.00 | 14.08 | h_e=128 | $0.099 |
+
+The L4 is the cost-performance sweet spot. The H100 is faster in absolute
+terms but costs nearly 2× more per token.
+
+### Optimization stack
+
+Each layer stacks on the previous. Numbers are Qwen3-30B-A3B on H100:
+
+| Optimization | h_e=0 | h_e=16 | h_e=32 | h_e=64 | h_e=128 |
+|---|---|---|---|---|---|
+| Static pinning [0..N) | 1.33 | 1.50 | 1.71 | 2.28 | 9.11 |
+| LRU expert cache | 1.25 | 2.27 | 2.76 | 5.06 | 7.42 |
+| LRU + `grouped_mm` | 1.75 | 3.07 | 4.23 | 9.39 | 16.38 |
+| LRU + grouped_mm + int8 | 3.18 | 4.95 | 6.38 | **10.64** | 14.08 |
+
+At the consumer-GPU budget (h_e=64): **2.28 → 10.64 tok/sec (4.7×)**.
+
+### What didn't work
+
+- **Global static pinning** — ranking experts by aggregate hits across
+  layers and pinning the top-K globally. Throughput *regressed* monotonically.
+  Each MoE layer specializes to different experts; global ranking wastes
+  slots in every layer. Per-layer LRU is the correct architecture.
+
+- **Speculative decoding** — disk-offload MoE breaks the amortization
+  assumption. K-token verification activates proportionally more unique
+  experts, scaling PCIe traffic linearly with K. 32% slowdown vs baseline.
+
+### Tested checkpoints
+
+No manual config needed — the converter auto-detects the MoE layout:
+
+- `Qwen/Qwen3-30B-A3B` (128 × 48, deepseek-stacked)
+- `deepseek-ai/DeepSeek-V4-Flash` (256 × 43, deepseek-stacked, fp8)
+- `google/gemma-4-26B-A4B` (128 × 30, gemma4-stacked)
+- `ibm-granite/granite-3.0-1b-a400m-base` (32 × 24, granite-stacked)
+- `allenai/OLMoE-1B-7B-0924` (64 × 16, per-expert)
+- `mistralai/Mixtral-8x7B-v0.1` (8 × 32, per-expert)
+- `Qwen/Qwen1.5-MoE-A2.7B` (60 × 24, per-expert)
+- `deepseek-ai/DeepSeek-V2-Lite` (66 × 26, per-expert)
+
 ## Hack
 
 Everything lives in `src/mmllm/core.lpy` — tokenizer, model, training loop,
@@ -1008,10 +1108,19 @@ mmllm/
 │   ├── artifacts.py         # fetch-artifacts: download release bundles from GitHub
 │   ├── attention_kernel.py  # custom attention kernels
 │   ├── runtime.py           # inference runtime helpers (torch.compile wrapper)
-│   └── spec_decode.py       # speculative decoding
+│   ├── spec_decode.py       # speculative decoding
+│   ├── moe.py               # MMapExpert, mmap tensor I/O, int8/fp8 quantization
+│   ├── moe_cli.py           # mmllm-moe CLI (convert, gen, chat, serve, info)
+│   ├── moe_loader.py        # HF checkpoint → mmap converter, LRU expert cache,
+│   │                        #   cross-device forward, grouped_mm, self-contained loader
+│   └── moe_server.py        # OpenAI-compatible HTTP server for mmap'd MoE models
+├── docs/
+│   ├── inference-optimization.md  # phased inference optimization roadmap
+│   └── qwen3-30b-disk-offload-result.md  # full L4/T4/H100 benchmark results
 └── tests/
     ├── __init__.py
-    └── test_smoke.lpy       # forward-pass shape + cache checks
+    ├── test_smoke.lpy       # forward-pass shape + cache checks
+    └── test_moe_synthetic.py  # MoE mmap round-trip + forward correctness
 ```
 
 ## License
