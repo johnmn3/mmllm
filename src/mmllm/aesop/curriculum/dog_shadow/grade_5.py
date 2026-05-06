@@ -676,25 +676,23 @@ G5_12 = SubjectCurriculum(grade=5, subject_id="G5-12",
             question_what="the product produced by walking 1, 2, 3, 4, 5 with * as the combine step",
             goal_text="fold * over the vector containing 1, 2, 3, 4, and 5, computing their product",
             scenario=(
-                'Bell the hound stood at a different stretch of the bank {place}, '
-                'facing a row of pebbles marked 1, 2, 3, 4, 5. She would walk the '
-                'row, carrying a product-tally, multiplying each pebble into the '
-                'tally as she passed. The final product would be hers.'
+                'Bell the hound faced a row of pebbles marked 1, 2, 3, 4, 5 at '
+                'the stream. She would walk the row, carrying a product-tally, '
+                'multiplying each pebble into the running count as she passed.'
             ),
             need=(
-                'She wanted the product of all five pebbles in the row. Reduce '
-                'with the * rule walks the row, combining each pebble by '
-                'multiplication into a running tally.'
+                'She wanted the product of all five pebbles. Reduce with the * rule '
+                'walks the row, combining each pebble by multiplication.'
             ),
             mapping=(
-                'The reduce-form is the tally-walk. The pebbles are 1, 2, 3, 4, '
-                '5. The combination-rule is *. Each step multiplies the current '
-                'pebble with the tally. The final product is what reduce returns.'
+                'The reduce-form is the tally-walk. The pebbles are 1, 2, 3, 4, 5. '
+                'The rule is *. Each step multiplies the current pebble with the '
+                'running tally.'
             ),
             resolution=(
                 'The REPL began with 1 and pebble 1 (tally=1), multiplied by 2 '
-                '(tally=2), by 3 (tally=6), by 4 (tally=24), by 5 '
-                '(tally=120). The final product came back.'
+                '(tally=2), by 3 (tally=6), by 4 (tally=24), by 5. The final '
+                'product came back.'
             ),
             tags=("story",),
         ),
@@ -706,25 +704,22 @@ G5_12 = SubjectCurriculum(grade=5, subject_id="G5-12",
             goal_text="fold max over the vector containing 3, 1, 4, 1, 5, 9, 2, and 6, finding the maximum",
             scenario=(
                 'Rex the hound faced a long row of pebbles: 3, 1, 4, 1, 5, 9, 2, '
-                '6. He would walk the row, carrying a tally of the largest '
-                'pebble seen so far, updating it when he found a bigger one. The '
-                'final tally would be the maximum.'
+                '6. He would walk the row, carrying the largest pebble seen so '
+                'far, updating it whenever he found a bigger one.'
             ),
             need=(
-                'He wanted the largest pebble in the row without guessing. Reduce '
-                'with the max rule walks the row, keeping the largest seen as it '
-                'goes.'
+                'He wanted the largest pebble without guessing. Reduce with max walks '
+                'the row, keeping the largest seen as it goes.'
             ),
             mapping=(
-                'The reduce-form is the tally-walk. The pebbles are 3, 1, 4, 1, '
-                '5, 9, 2, 6. The combination-rule is max. Each step compares the '
-                'current pebble with the tally and keeps the larger one. The '
-                'final maximum is what reduce returns.'
+                'The reduce-form is the tally-walk. The pebbles are 3, 1, 4, 1, 5, 9, '
+                '2, 6. The rule is max. Each step compares the current pebble with the '
+                'running maximum and keeps the larger one.'
             ),
             resolution=(
                 'The REPL walked the row: 3 (tally=3), 1 (stays 3), 4 (tally=4), '
                 '1 (stays 4), 5 (tally=5), 9 (tally=9), 2 (stays 9), 6 (stays 9). '
-                'The maximum value came back.'
+                'The maximum came back.'
             ),
             tags=("story",),
         ),
@@ -833,24 +828,23 @@ G5_14 = SubjectCurriculum(grade=5, subject_id="G5-14",
             question_what="the largest count found after spreading the basket of 3, 1, 4, 1, 5 into max",
             goal_text="apply max to the elements of the vector containing 3, 1, 4, 1, and 5",
             scenario=(
-                'Bell the hound carried a basket of bones marked 3, 1, 4, 1, 5 {place}. '
-                'A different nose-trail lay ahead — the max recipe. The apply-form '
-                'would unpack the basket and feed all the bones to the max recipe at '
-                'once.'
+                'Bell the hound carried a basket of bones marked 3, 1, 4, 1, 5 at '
+                'the stream. A nose-trail lay ahead — the max recipe. The apply-form '
+                'would unpack the basket and feed all bones to the recipe at once.'
             ),
             need=(
-                'She wanted to apply the max recipe to all basket bones at once. '
-                'Apply spreads the basket contents as separate arguments to the recipe.'
+                'She wanted to apply max to all basket bones together. Apply spreads '
+                'the basket contents as separate arguments to the recipe.'
             ),
             mapping=(
                 'The apply-form spreads the ingredients. The basket is 3, 1, 4, 1, 5. '
-                'The recipe is max. Apply opens the basket and passes each bone as an '
-                'argument to the recipe in order.'
+                'The recipe is max. Apply opens the basket and passes each bone as '
+                'an argument to the recipe.'
             ),
             resolution=(
                 'The REPL unpacked the basket, took all five bones as arguments, '
-                'followed the max recipe to find the largest, and handed back the '
-                'maximum. The applied recipe was complete.'
+                'followed the max recipe, and handed back the largest. The applied '
+                'recipe was complete.'
             ),
             tags=("story",),
         ),
@@ -896,24 +890,24 @@ G5_15 = SubjectCurriculum(grade=5, subject_id="G5-15",
             question_what="the result of chaining the str and inc recipe-cards and applying them to 9",
             goal_text="compose str and inc functions and apply them to 9",
             scenario=(
-                'Bell the hound laid down two different nose-trails end to end '
-                '{place}. The first trail was inc, the second was str. She would '
-                'chain them: the first trail would increment the bone count, then '
-                'the second would turn the result into a scratch-mark on bark.'
+                'Bell the hound laid down two nose-trails end to end by the stream. '
+                'The first trail was inc, the second was str. She would chain them: '
+                'the first would increment the bone count, then the second would '
+                'turn the result into a bark-mark.'
             ),
             need=(
                 'She wanted to increment a bone and then turn the result into a '
-                'message-mark. Comp chains recipes so they flow one into the next.'
+                'mark. Comp chains recipes so they flow one into the next.'
             ),
             mapping=(
-                'The comp-form chains the trails. The first trail is inc, the '
-                'second is str. The input bone is 9. Comp feeds the first output '
-                'into the second trail.'
+                'The comp-form chains the trails. The first is inc, the second is '
+                'str. The input bone is 9. Comp feeds the first output into the '
+                'second trail.'
             ),
             resolution=(
-                'The REPL composed the trails, then followed the chain with input '
-                '9: the inc trail turned 9 into 10, then the str trail turned 10 '
-                'into the text "10". The final mark came back.'
+                'The REPL composed the trails and followed the chain with input 9: '
+                'inc incremented it, then str turned the result into a text mark. '
+                'The final mark came back.'
             ),
             tags=("story",),
         ),
@@ -959,23 +953,22 @@ G5_16 = SubjectCurriculum(grade=5, subject_id="G5-16",
             goal_text="apply a partially applied multiplication to each element of the vector containing 1, 2, and 3",
             scenario=(
                 'Bell the hound wanted to multiply a pile of bones by 3. She would use '
-                'partial to pre-load the * recipe with 3, creating a new trail that '
-                'waited for each bone. Then map would pour the pile through that '
-                'specialized trail.'
+                'partial to pre-load the * recipe, creating a new trail that waited for '
+                'each bone. Then map would pour the pile through that trail.'
             ),
             need=(
-                'She wanted to multiply each bone in the pile by 3. Partial freezes 3 '
-                'into the * recipe, and map feeds each bone through that trail.'
+                'She wanted to multiply each bone by 3. Partial freezes 3 into the * '
+                'recipe, and map feeds each bone through that trail.'
             ),
             mapping=(
-                'The map-form is the sieve, and the partial-form is the gap-rule. '
-                'Partial pre-loads * with 3, returning a new trail. Map pours bones '
-                '1, 2, 3 through that pre-loaded trail one at a time.'
+                'The map-form is the sieve, and partial is the gap-rule. Partial '
+                'pre-loads * with 3. Map pours bones 1, 2, 3 through the pre-loaded '
+                'trail one at a time.'
             ),
             resolution=(
-                'The REPL created the partial trail with * and 3. Then map poured bone '
-                '1 (got 3), poured 2 (got 6), poured 3 (got 9). The far bank caught '
-                '3, 6, 9. The sieve-pour was complete.'
+                'The REPL created the partial trail, then map poured bone 1 (got 3), '
+                'poured 2 (got 6), poured 3 (got 9). The far bank caught the results. '
+                'The sieve-pour was complete.'
             ),
             tags=("story",),
         ),
@@ -993,23 +986,22 @@ G5_17 = SubjectCurriculum(grade=5, subject_id="G5-17",
             goal_text="apply both inc and dec functions to 5 and return both results as a vector",
             scenario=(
                 'Patch the hound held one bone marked 5 and two nose-trails. The '
-                'first trail was inc, the second was dec. Juxt would ask both trails '
-                'about the bone at the same time and collect both answers in a bone-cache.'
+                'first was inc, the second was dec. Juxt would ask both trails about '
+                'the bone and collect both answers together.'
             ),
             need=(
-                'She wanted to ask both recipes about the same bone and get both '
-                'answers back. Juxt applies multiple recipes to one input and '
-                'collects all the results.'
+                'She wanted both recipes to run on the same bone and get both answers '
+                'back. Juxt applies multiple recipes to one input and collects all '
+                'results.'
             ),
             mapping=(
-                'The juxt-form asks multiple trails. The input bone is 5. The first '
-                'trail is inc, the second is dec. Juxt feeds the bone through both '
-                'trails and gathers both answers into a pile.'
+                'The juxt-form asks multiple trails. The input bone is 5. The trails '
+                'are inc and dec. Juxt feeds the bone through both and gathers both '
+                'answers into a cache.'
             ),
             resolution=(
-                'The REPL applied inc to 5 (got 6) and applied dec to 5 (got 4). '
-                'Both results were collected into a bone-cache holding 6 and 4. The '
-                'juxtaposed answers came back.'
+                'The REPL applied inc to 5 (got 6) and dec to 5 (got 4). Both were '
+                'collected into a cache. The juxtaposed answers came back.'
             ),
             tags=("story",),
         ),

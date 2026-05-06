@@ -159,8 +159,8 @@ G2_01 = SubjectCurriculum(
                 'them all, and the final sum holds the answer for the whole row.'
             ),
             resolution=(
-                'The REPL added all ten in sequence — 1 plus 2 plus 3 plus all the '
-                'way to 10 — and handed back 55. The total was exact.'
+                'The REPL added all ten in sequence — one plus two plus three all the '
+                'way through ten — and handed back the running total. The sum was exact.'
             ),
             tags=("story",),
         ),
@@ -184,9 +184,9 @@ G2_01 = SubjectCurriculum(
                 'together, and the final product grows until it settles on the answer.'
             ),
             resolution=(
-                'The REPL multiplied 1 by 2 to get 2, then by 3 to get 6, then by 4 '
-                'to get 24, then by 5 to get 120. The factorial-like product was '
-                'exact.'
+                'The REPL multiplied one by two to get two, then by three to get six, '
+                'then by four to get twenty-four, then by five to get the final '
+                'factorial-like product. The result was exact.'
             ),
             tags=("story",),
         ),
@@ -666,9 +666,9 @@ G2_05 = SubjectCurriculum(
             question_what="the remainder when 17 is divided by 5",
             goal_text="find the remainder when 17 is divided by 5",
             scenario=(
-                'Patch the hound held seventeen bones and wanted to share them into '
-                'groups of five {place}. Some bones would be left over — strays that '
-                'did not fill a complete group.'
+                'Patch the hound held seventeen bones by the meadow and wanted to '
+                'share them into groups of five. Some bones would be left over — '
+                'strays that did not fill a complete group.'
             ),
             need=(
                 'They wanted to know how many bones remained after making as many '
@@ -2270,14 +2270,54 @@ G2_22 = SubjectCurriculum(
             ),
             tags=("story",),
         ),
-        _ex("(+ (* 3 8) (* 2 4))", 32,
-            "the sum of products",
-            "the result of adding the product of 3 and 8 to the product of 2 and 4",
-            goal="compute the product of 3 and 8, add the product of 2 and 4"),
-        _ex("(quot (+ 100 50) 5)", 30,
-            "the nested quotient",
-            "the integer quotient of the sum of 100 and 50 divided by 5",
-            goal="add 100 and 50, then divide by 5"),
+        SubjectExample(
+            form="(+ (* 3 8) (* 2 4))", expected=32,
+            concept_phrase="the sum of products",
+            question_what="the result of adding the product of 3 and 8 to the product of 2 and 4",
+            goal_text="compute the product of 3 and 8, add the product of 2 and 4",
+            scenario=(
+                'Bell the hound had two tasks near the pond. First, she needed to multiply '
+                '3 and 8 to get one pile. Then, she would multiply 2 and 4 to get another '
+                'pile. Finally, she would add them together.'
+            ),
+            need=(
+                'She needed the sum of those two products. The nested arithmetic would '
+                'compute both multiplications first, then combine the results.'
+            ),
+            mapping=(
+                '3 and 8 are one pair whose product is computed, 2 and 4 are another pair, '
+                'their products are added together, and the final sum is the answer.'
+            ),
+            resolution=(
+                'The REPL multiplied 3 by 8 to get 24, then 2 by 4 to get 8. Then it added '
+                'them to get 32. The sum of products was exact.'
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form="(quot (+ 100 50) 5)", expected=30,
+            concept_phrase="the nested quotient",
+            question_what="the integer quotient of the sum of 100 and 50 divided by 5",
+            goal_text="add 100 and 50, then divide by 5",
+            scenario=(
+                'Patch the hound had two tasks at the meadow. First, they needed to add 100 '
+                'and 50 to get a grand total. Then, they would divide that by 5 to find how '
+                'many groups could be made.'
+            ),
+            need=(
+                'They needed the integer quotient when the sum was divided by 5. The nested '
+                'arithmetic would add first, then divide without remainder.'
+            ),
+            mapping=(
+                '100 and 50 are the numbers to add first, their sum is the dividend, 5 is '
+                'the divisor, and the quotient is the integer groups formed.'
+            ),
+            resolution=(
+                'The REPL added 100 and 50 to get 150. Then it divided 150 by 5 to get 30. '
+                'The integer quotient was exact, no remainder.'
+            ),
+            tags=("story",),
+        ),
     ],
     subplots=_ACORN_SUBPLOTS, plan_pool=_PLAN_POOL,
 )

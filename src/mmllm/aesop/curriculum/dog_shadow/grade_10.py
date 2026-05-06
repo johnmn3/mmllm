@@ -899,25 +899,23 @@ G10_11 = SubjectCurriculum(
             goal_text="use the quote reader macro to read a list of three numbers",
             scenario=(
                 'Patch the hound stood at the scribe\'s stone where reading-marks '
-                'were inscribed. The apostrophe-mark meant: read this as written, '
-                'do not evaluate. The list (1 2 3) was scratched beneath it, and '
-                'the hound wanted to see what the reader would return.'
+                'were inscribed. The apostrophe meant: read this as written, do '
+                'not evaluate. The list was scratched beneath it.'
             ),
             need=(
                 'When the reader saw the quote-mark, it would take the list as '
-                'data, not as a form to evaluate. The three numbers would come '
-                'back in the order scratched — a sequence, not a computation.'
+                'data, not as a form to evaluate. The numbers would come '
+                'back in order — a sequence, not a computation.'
             ),
             mapping=(
                 'The quote-mark is the reading convention. The list is the form. '
-                'The reader looks at the mark and treats the form as data. No '
-                'evaluation happens — just reading.'
+                'The reader looks at the mark and treats it as data. No '
+                'evaluation — just reading.'
             ),
             resolution=(
-                'The REPL read the quote-mark and returned the list untouched: '
-                '[1, 2, 3]. The three numbers came back in sequence, exactly as '
-                'the scratch had held them. The quote had told the reader to '
-                'preserve the form.'
+                'The REPL read the quote-mark and returned the list untouched. '
+                'The numbers came back in sequence, exactly as scratched. The '
+                'quote had told the reader to preserve the form.'
             ),
             tags=("story",),
         ),
@@ -957,25 +955,24 @@ G10_11 = SubjectCurriculum(
             question_what="the vector after the middle element is discarded",
             goal_text="use the #_ reader macro to skip an element in a vector",
             scenario=(
-                'Rex the hound scratched a vector with three bones marked 1, 2, 3. '
-                'But the middle bone was problematic — he did not want it. So he '
-                'placed the discard-mark #_ just before the 2. The reader would '
-                'skip over it entirely.'
+                'Rex the hound scratched a vector with three bones. But the middle '
+                'bone was problematic — he did not want it. So he placed the '
+                'discard-mark #_ just before it. The reader would skip it entirely.'
             ),
             need=(
                 'When the reader saw the #_ mark, it would consume the form '
-                'immediately following and discard it. The 2 would be removed, '
-                'leaving only the 1 and the 3 in the vector.'
+                'immediately following and discard it. That element would be '
+                'removed, leaving the others in the vector.'
             ),
             mapping=(
-                'The #_ mark is the discard convention. The 2 is the form to skip. '
-                'The reader looks at the mark, takes the next form, and throws it '
-                'away. The rest of the vector remains.'
+                'The #_ mark is the discard convention. The form after it is the '
+                'one to skip. The reader takes it and throws it away. The rest '
+                'of the vector remains.'
             ),
             resolution=(
                 'The REPL read the vector and saw the discard-mark. It consumed the '
-                '2 and removed it from the result. The final vector came back with '
-                'only [1, 3] — the middle bone had been skipped entirely.'
+                'marked element and removed it. The final vector came back with the '
+                'unwanted element skipped.'
             ),
             tags=("story",),
         ),
@@ -1168,23 +1165,23 @@ G10_14 = SubjectCurriculum(
             goal_text="construct a list that represents addition and evaluate it",
             scenario=(
                 'Rex the hound built a form dynamically by assembling pieces: the '
-                'quoted + symbol, the number 4, and the number 5. The list function '
-                'joined them into a form (+ 4 5). Now he wanted eval to run the form.'
+                'quoted + symbol and two numbers. The list function joined them '
+                'into a form. Now he wanted eval to run it.'
             ),
             need=(
-                'The dynamically constructed form (+ 4 5) would be passed to eval. '
-                'The eval function would ask the runtime to evaluate it as an '
-                'addition and return the sum.'
+                'The dynamically constructed form would be passed to eval. The eval '
+                'function would ask the runtime to evaluate it as an addition and '
+                'return the result.'
             ),
             mapping=(
                 'The list function builds the form. The quoted + is the operator. '
                 'The numbers are the operands. Eval triggers the runtime to '
-                'evaluate the constructed form.'
+                'evaluate the form.'
             ),
             resolution=(
                 'The REPL constructed the list dynamically, then passed it to eval. '
-                'The eval function asked the runtime to compute the addition 4 + 5, '
-                'which yielded 9. The dynamic form had been evaluated on demand.'
+                'The eval function asked the runtime to compute the operation. The '
+                'dynamic form had been evaluated on demand.'
             ),
             tags=("story",),
         ),
@@ -1239,24 +1236,23 @@ G10_15 = SubjectCurriculum(
             question_what="the incremented values",
             goal_text="use map to increment each element of a list",
             scenario=(
-                'Bell the hound had a vector of three bones: [1 2 3]. She wanted to '
-                'increment each one. The map function would walk the nose-trail inc '
-                'over every bone in the sequence, applying inc to each in turn.'
+                'Bell the hound had a vector of bones. She wanted to increment each '
+                'one. The map function would walk the nose-trail inc over every '
+                'bone, applying inc to each in turn.'
             ),
             need=(
                 'The map function would pair with inc and process each element. Each '
-                'bone would be incremented by one, producing a new sequence of three '
-                'values: [2 3 4].'
+                'bone would be incremented, producing a new sequence of values.'
             ),
             mapping=(
                 'The map is the function applicator. The inc is the nose-trail to '
                 'follow. The vector is the bones to process. The result is a new '
-                'sequence with the trail applied to each bone.'
+                'sequence with the trail applied to each.'
             ),
             resolution=(
                 'The REPL applied map with inc to the vector. Each bone was passed '
-                'through the inc trail in order. The result came back as [2 3 4] — '
-                'each element incremented. No macros needed — a function sufficed.'
+                'through the inc trail in order. The result came back with each '
+                'element incremented. No macros needed — a function sufficed.'
             ),
             tags=("story",),
         ),
@@ -1314,27 +1310,21 @@ G10_16 = SubjectCurriculum(
             question_what="the value of the symbol defined by def-pace when expanded with the given name and keyword value",
             goal_text="define a def-pace macro and use it to define and retrieve a value",
             scenario=(
-                'Patch the hound carved another macro-pattern: def-pace. This pattern '
-                'would define named values on the global stone. When called with a name '
-                'and a value, the macro would rewrite it into a def-form and set the '
-                'binding.'
+                'Patch the hound carved another macro-pattern that would '
+                'define named values. The macro would rewrite calls into def-forms.'
             ),
             need=(
-                'When def-pace race-pace :slow was called, the macro would expand to '
-                '(def race-pace :slow). This would bind the name race-pace to the value '
-                ':slow on the global marker stone. A later lookup of race-pace would '
-                'return the value.'
+                'When called with a name and value, the macro would expand to def. '
+                'This would bind the name to the value globally.'
             ),
             mapping=(
-                'The defmacro sets the pattern. The name parameter is the symbol to '
-                'bind. The v parameter is the value. The backtick and unquoting build '
-                'the def-form. The def sets the binding globally.'
+                'The defmacro sets the pattern. The name is the symbol to bind. '
+                'The v is the value. The backtick builds the def-form.'
             ),
             resolution=(
-                'The REPL set the macro, then called def-pace race-pace :slow. The '
-                'macro expanded to (def race-pace :slow) and set the binding. When '
-                'race-pace was looked up, it returned :slow. The pattern had defined '
-                'and retrieved the value.'
+                'The REPL set the macro, then called it. The macro expanded to def '
+                'and set the binding. A lookup returned the value. The pattern '
+                'worked.'
             ),
             tags=("story",),
         ),
