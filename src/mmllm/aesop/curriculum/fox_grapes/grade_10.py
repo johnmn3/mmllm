@@ -97,7 +97,7 @@ G10_01 = SubjectCurriculum(
     examples=[
         _ex("(quote (+ 1 2))", ["+", 1, 2],
             "the quoted form (quote (+ 1 2))",
-            "the value of (quote (+ 1 2)) — the unevaluated list"),
+            "the value of (quote (+ 1 2))"),
         _ex("'(1 2 3)", [1, 2, 3],
             "the quoted list '(1 2 3)",
             "the value of '(1 2 3)"),
@@ -229,10 +229,10 @@ G10_08 = SubjectCurriculum(
         # A function evaluates its args; a macro receives unevaluated forms.
         _ex("(do (defn add-fn [a b] (+ a b)) (add-fn 3 4))", 7,
             "a plain function adding two numbers",
-            "the result of calling a function (args evaluated)"),
+            "the result of calling a plain function with evaluated args"),
         _ex("(do (defmacro add-mac [a b] `(+ ~a ~b)) (add-mac 3 4))", 7,
             "a macro that emits the same addition form",
-            "the result the macro yields after expansion + eval"),
+            "the result the macro yields after expansion and eval"),
     ],
     subplots=_MACRO_SUBPLOTS, plan_pool=_PLAN_G10,
 )
@@ -250,7 +250,7 @@ G10_09 = SubjectCurriculum(
             "whether (gensym) returns a symbol"),
         _ex("(let [a (gensym \"x_\") b (gensym \"x_\")] (= a b))", False,
             "two distinct gensyms with the same prefix",
-            "whether two fresh gensyms are equal (they aren't)"),
+            "whether two fresh gensyms with the same prefix are equal"),
     ],
     subplots=_MACRO_SUBPLOTS, plan_pool=_PLAN_G10,
 )
@@ -292,7 +292,7 @@ G10_11 = SubjectCurriculum(
             "what (#(* % %) 6) returns"),
         _ex("[1 #_ 2 3]", [1, 3],
             "the #_ form-skip reader macro",
-            "what [1 #_ 2 3] reads as (the 2 is dropped)"),
+            "the result of this reader-comment form"),
     ],
     subplots=_MACRO_SUBPLOTS, plan_pool=_PLAN_G10,
 )

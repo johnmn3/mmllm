@@ -65,7 +65,7 @@ G2_01 = SubjectCurriculum(
         _ex("(- 100 1 2 3)", 94,      "the chain (- 100 1 2 3)",  "the result of (- 100 1 2 3)"),
         _ex("(+ 1 2 3 4 5 6 7 8 9 10)", 55,
             "the sum 1+2+...+10",       "the sum of integers 1 through 10"),
-        _ex("(* 1 2 3 4 5)", 120,     "the product 1*2*3*4*5",    "the product of 1 through 5 (5!)"),
+        _ex("(* 1 2 3 4 5)", 120,     "the product 1*2*3*4*5",    "the product of 1 through 5"),
         _ex("(+ 10 20 30)", 60,       "the sum (+ 10 20 30)",     "the sum of 10, 20, and 30"),
     ],
     subplots=_SHARED_SUBPLOTS, plan_pool=_PLAN_POOL,
@@ -242,10 +242,10 @@ G2_12 = SubjectCurriculum(
         # and the runtime returns nil.
         _ex('(println "hello")', None,
             'the form (println "hello")',
-            'the return value of (println "hello") (it is nil)'),
+            'the return value of calling println'),
         _ex('(print "x")', None,
             'the form (print "x")',
-            'the return value of (print "x") (it is nil)'),
+            'the return value of calling print'),
     ],
     subplots=_SHARED_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
@@ -349,7 +349,7 @@ G2_18 = SubjectCurriculum(
         _ex("'grapes", "grapes", "the quoted symbol 'grapes",
             "the value of 'grapes"),
         _ex("'(1 2 3)", [1, 2, 3], "the quoted list '(1 2 3)",
-            "the value of '(1 2 3) (a list, not a function call)"),
+            "the value of the quoted list '(1 2 3)"),
     ],
     subplots=_SHARED_SUBPLOTS, plan_pool=_PLAN_POOL,
 )

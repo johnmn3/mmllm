@@ -160,7 +160,7 @@ G11_04 = SubjectCurriculum(
         # depending on host. We use a portable example using the
         # `.length` style on a string-like host where applicable.
         _ex('(count "tortoise")', 8,
-            'the count of "tortoise" — host-portable length',
+            'the host-portable length of "tortoise" via count',
             'the length of "tortoise"'),
         _ex('(count "hare")', 4,
             'the count of "hare"',

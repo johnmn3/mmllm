@@ -133,7 +133,7 @@ G4_11 = SubjectCurriculum(grade=4, subject_id="G4-11",
     subject_title="Set literal", fable="fox-grapes",
     examples=[
         _ex("(count #{1 2 3})", 3, "the count of #{1 2 3}", "the size of the set"),
-        _ex("(count #{1 1 1})", 1, "the count of #{1 1 1} (dedup'd)", "the size of the set"),
+        _ex("(count #{1 1 1})", 1, "the count of #{1 1 1}", "the size of the set"),
     ], subplots=_COLL_SUBPLOTS, plan_pool=_PLAN_G4)
 
 
@@ -169,7 +169,7 @@ G4_15 = SubjectCurriculum(grade=4, subject_id="G4-15",
     examples=[
         _ex("(first [10 20 30])", 10, "the first of the vector", "the first element"),
         _ex("(last  [10 20 30])", 30, "the last of the vector",  "the last element"),
-        _ex("(count (rest [10 20 30]))", 2, "the rest of [10 20 30] (count)", "the count after removing first"),
+        _ex("(count (rest [10 20 30]))", 2, "the rest of [10 20 30]", "the count after removing first"),
     ], subplots=_COLL_SUBPLOTS, plan_pool=_PLAN_G4)
 
 

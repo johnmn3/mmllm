@@ -39,7 +39,7 @@ willing to listen instead of declare the cluster sour."""),
     SubplotTemplate("""\
 {patient_fox_phrase} had filled an entire notebook over the long
 season with tools and patterns: transducers, channels, specs, tests.
-{place}, the next entry was {concept_phrase}, and the form was
+Now {place} the next entry was {concept_phrase}, and the form was
 {form_display}. {hasty_fox_phrase}, {emo_proud} but more reflective
 than usual, agreed to write the form into the REPL instead of
 dismissing it."""),
@@ -190,11 +190,11 @@ G12_06 = SubjectCurriculum(
         # We can run small spec predicates portably.
         _ex("(do (require '[clojure.spec.alpha :as s]) "
             "(s/valid? int? 42))", True,
-            "(s/valid? int? 42) — a basic spec check",
+            "the basic spec check (s/valid? int? 42)",
             "whether 42 conforms to the int? spec"),
         _ex("(do (require '[clojure.spec.alpha :as s]) "
             "(s/valid? string? 42))", False,
-            "(s/valid? string? 42) — a failing spec check",
+            "the failing spec check (s/valid? string? 42)",
             "whether 42 conforms to the string? spec"),
     ],
     subplots=_REAL_SUBPLOTS, plan_pool=_PLAN_G12,

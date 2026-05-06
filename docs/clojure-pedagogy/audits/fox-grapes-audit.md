@@ -1,4 +1,4 @@
-# Fox Grapes curriculum audit (corrected)
+# fox-grapes curriculum audit
 
 Auto-generated audit — each subject's examples checked at 3 records per example, properly matched.
 
