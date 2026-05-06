@@ -46,9 +46,9 @@ on the ground; let the runtime, {elder_he_she} insisted, declare what
     SubplotTemplate("""\
 A wooden border-post {place} marked the edge of the host runtime's
 territory. The form written on it — {form_display} — captured
-{concept_phrase}. {shepherd}, {emo_tired} from a morning of false
-calls, agreed for once that crossing into foreign syntax called for
-actual evaluation, not guessing."""),
+{concept_phrase}. {shepherd}, {emo_tired}, agreed for once that
+crossing into foreign syntax called for actual evaluation, not
+guessing."""),
 
     SubplotTemplate("""\
 {shepherd_phrase} insisted the foreign-runtime forms were "just like
@@ -154,7 +154,7 @@ G11_04 = SubjectCurriculum(
         # depending on host. We use a portable example using the
         # `.length` style on a string-like host where applicable.
         _ex('(count "shepherd")', 8,
-            'the count of "shepherd" — host-portable length',
+            'the count of "shepherd"',
             'the length of "shepherd"'),
         _ex('(count "flock")', 5,
             'the count of "flock"',

@@ -95,7 +95,7 @@ G10_01 = SubjectCurriculum(
     examples=[
         _ex("(quote (+ 1 2))", ["+", 1, 2],
             "the quoted form (quote (+ 1 2))",
-            "the value of (quote (+ 1 2)) — the unevaluated list"),
+            "the value of (quote (+ 1 2))"),
         _ex("'(1 2 3)", [1, 2, 3],
             "the quoted list '(1 2 3)",
             "the value of '(1 2 3)"),
@@ -227,7 +227,7 @@ G10_08 = SubjectCurriculum(
         # A function evaluates its args; a macro receives unevaluated forms.
         _ex("(do (defn add-fn [a b] (+ a b)) (add-fn 3 4))", 7,
             "a plain function adding two numbers",
-            "the result of calling a function (args evaluated)"),
+            "the result of calling a function"),
         _ex("(do (defmacro add-mac [a b] `(+ ~a ~b)) (add-mac 3 4))", 7,
             "a macro that emits the same addition form",
             "the result the macro yields after expansion + eval"),

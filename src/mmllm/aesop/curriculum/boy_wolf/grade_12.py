@@ -33,9 +33,13 @@ the dust. "We've come a long way," {elder_he_she} said. "The form
 {form_display} is the kind of thing we'd reach for now." {shepherd}
 nodded — for once {emo_tired} enough to listen."""),
 
+    # NOTE (boy-wolf polish, hand-audit pass): "...specs, tests.
+    # {place}, the next entry was..." rendered as a lowercase {place}
+    # starting a new sentence after the period. Replaced the period
+    # with a semicolon so {place} stays mid-sentence.
     SubplotTemplate("""\
 {elder_phrase} had filled an entire notebook over the long season with
-tools and patterns: transducers, channels, specs, tests. {place}, the
+tools and patterns: transducers, channels, specs, tests; {place}, the
 next entry was {concept_phrase}, and the form was {form_display}.
 {shepherd_phrase}, {emo_regretful} but more reflective than usual,
 agreed to write the form into the REPL."""),
@@ -55,10 +59,10 @@ said the form to remember was {form_display}; {shepherd_phrase}
 agreed to submit it."""),
 
     SubplotTemplate("""\
-{shepherd_phrase}, {emo_tired} from a season of false alarms long
-since outgrown, was finally willing to study patterns. {elder_phrase}
-pointed {place} at {concept_phrase}. The form {form_display} was the
-canonical example; the REPL would confirm what it produced."""),
+{shepherd_phrase}, {emo_tired}, was finally willing to study patterns.
+{elder_phrase} pointed {place} at {concept_phrase}. The form
+{form_display} was the canonical example; the REPL would confirm what
+it produced."""),
 
     SubplotTemplate("""\
 A harvest gathering at the end of the season {place} brought together
@@ -185,11 +189,11 @@ G12_06 = SubjectCurriculum(
         # We can run small spec predicates portably.
         _ex("(do (require '[clojure.spec.alpha :as s]) "
             "(s/valid? int? 42))", True,
-            "(s/valid? int? 42) — a basic spec check",
+            "(s/valid? int? 42)",
             "whether 42 conforms to the int? spec"),
         _ex("(do (require '[clojure.spec.alpha :as s]) "
             "(s/valid? string? 42))", False,
-            "(s/valid? string? 42) — a failing spec check",
+            "(s/valid? string? 42)",
             "whether 42 conforms to the string? spec"),
     ],
     subplots=_REAL_SUBPLOTS, plan_pool=_PLAN_G12,

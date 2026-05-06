@@ -30,11 +30,13 @@ day produced. {elder} wrote {form_display} on a flat board and asked
 {shepherd_phrase} to write the form into the REPL so the village could
 confirm it together."""),
 
+    # NOTE (boy-wolf polish, hand-audit pass): the second quoted
+    # utterance was missing its closing `\"`. Closed below.
     SubplotTemplate("""\
 {shepherd_phrase}, {emo_proud}, declared the collection plain.
 {elder_phrase} wrote {form_display} on a slate {place}, calmly. "It's
 not about plain or fancy," {elder_he_she} said. "It's about whether
-the runtime agrees with what we think we're describing."""),
+the runtime agrees with what we think we're describing.\""""),
 ]
 
 
@@ -136,7 +138,7 @@ G4_11 = SubjectCurriculum(grade=4, subject_id="G4-11",
     subject_title="Set literal", fable="boy-wolf",
     examples=[
         _ex("(count #{1 2 3})", 3, "the count of #{1 2 3}", "the size of the set"),
-        _ex("(count #{1 1 1})", 1, "the count of #{1 1 1} (dedup'd)", "the size of the set"),
+        _ex("(count #{1 1 1})", 1, "the count of #{1 1 1}", "the size of the set"),
     ], subplots=_COLL_SUBPLOTS, plan_pool=_PLAN_G4)
 
 
@@ -172,7 +174,7 @@ G4_15 = SubjectCurriculum(grade=4, subject_id="G4-15",
     examples=[
         _ex("(first [10 20 30])", 10, "the first of the vector", "the first element"),
         _ex("(last  [10 20 30])", 30, "the last of the vector",  "the last element"),
-        _ex("(count (rest [10 20 30]))", 2, "the rest of [10 20 30] (count)", "the count after removing first"),
+        _ex("(count (rest [10 20 30]))", 2, "the count of (rest [10 20 30])", "the count after removing first"),
     ], subplots=_COLL_SUBPLOTS, plan_pool=_PLAN_G4)
 
 

@@ -438,7 +438,18 @@ def _build_placeholders(scene: Scene,
         base[f"{role}_him_her"]     = char.him_her
 
     if fable == "boy-wolf":
-        # Slot A (primary) → SHEPHERD (cautionary). Slot B (secondary) → ELDER/VILLAGER.
+        # Slot A (primary) → the SHEPHERD (the boy who cries wolf — the
+        # cautionary character). Slot B (secondary) → the ELDER /
+        # VILLAGER (the corrective voice).
+        #
+        # Boy-wolf overrides the EMO pools with gender-neutral
+        # fable-flavored variants (BW_EMO_*) to avoid race imagery and
+        # gendered phrases from the shared pool that don't fit the
+        # boy-wolf valley setting.
+        from mmllm.aesop.curriculum.boy_wolf.grade_1 import (
+            BW_EMO_PROUD, BW_EMO_PATIENT, BW_EMO_TIRED,
+            BW_EMO_REGRETFUL, BW_EMO_DESPERATE,
+        )
         base.update({
             "shepherd":             primary.name,
             "shepherd_phrase":      species_phrase(primary),
@@ -460,6 +471,14 @@ def _build_placeholders(scene: Scene,
             "villager_he_she_cap":  cap(secondary.he_she),
             "villager_his_her":     secondary.his_her,
             "villager_him_her":     secondary.him_her,
+
+            # Override the shared EMO_* picks with gender-neutral
+            # boy-wolf-specific pools.
+            "emo_proud":       scene.rng.choice(BW_EMO_PROUD),
+            "emo_patient":     scene.rng.choice(BW_EMO_PATIENT),
+            "emo_tired":       scene.rng.choice(BW_EMO_TIRED),
+            "emo_regretful":   scene.rng.choice(BW_EMO_REGRETFUL),
+            "emo_desperate":   scene.rng.choice(BW_EMO_DESPERATE),
         })
 
     return base

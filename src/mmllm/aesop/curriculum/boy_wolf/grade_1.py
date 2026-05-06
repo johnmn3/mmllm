@@ -20,11 +20,82 @@ Other grade modules import `_SHARED_SUBPLOTS` and `_PLAN_POOL` from this
 file as their base, then layer on grade-specific extensions where
 needed (e.g., a "ledger of bindings" beat for G3, a "trust-as-namespace"
 beat for G6).
+
+This module also exports boy-wolf-specific BW_EMO_* pools that the
+generator uses in place of `mmllm.aesop.fables.EMO_*` whenever
+fable="boy-wolf". The shared fables.EMO pools have hard-coded gender
+pronouns ("her legs heavy from sprinting", "her eyes always on the
+path", "his heart sinking", "her hands trembling") that produce
+ungrammatical text when the bound character is male / gender-neutral
+(boy-wolf shepherds Tom and Will are male; Pat is gender-neutral).
+The shared pool also carries tortoise-hare race imagery ("as if the
+race were already won", "swaggering through the underbrush", "her
+legs heavy from sprinting") that doesn't fit the boy-wolf valley
+setting where the dramatic action is shouting alarms, not running
+races. The BW_EMO_* pools below are gender-neutral and fable-flavored.
 """
 from __future__ import annotations
 
 from mmllm.aesop.curriculum.generator import (
     SubjectCurriculum, SubjectExample, SubplotTemplate,
+)
+
+
+# ─────────────────────── boy-wolf-specific EMO pools ───────────────────────
+#
+# Gender-neutral (no possessive "her"/"his"/"their" baked in). Imagery
+# fits the boy-wolf valley setting (shouting from the hill, the village
+# slate, false alarms, the elder's patience) — no race / sprint /
+# underbrush leakage from tortoise-hare.
+
+BW_EMO_PROUD: tuple[str, ...] = (
+    "with a smug grin",
+    "puffed up with pride",
+    "as if the village would always believe",
+    "with great whoops of laughter",
+    "boasting at every turn",
+    "with the swagger of an unrepentant fibber",
+    "sounding sure of every word",
+    "talking past the elder's warning",
+)
+
+BW_EMO_PATIENT: tuple[str, ...] = (
+    "without complaint",
+    "saying very little",
+    "with steady, careful steps",
+    "with eyes always on the slate",
+    "untroubled by what others thought",
+    "stepping deliberately",
+    "letting the runtime have the last word",
+    "with the calm of a long watch well kept",
+)
+
+BW_EMO_TIRED: tuple[str, ...] = (
+    "drowsy from the warm sun",
+    "weary from the morning's effort",
+    "lulled by the gentle wind",
+    "weary from the long watch",
+    "yawning at the soft moss",
+    "tired from a season of misplaced cries",
+    "worn from too many false starts",
+)
+
+BW_EMO_REGRETFUL: tuple[str, ...] = (
+    "with the heart of someone who had cried wolf once too often",
+    "wishing for more careful counting",
+    "regretting every careless step",
+    "wondering how it had come to this",
+    "remembering a season of false alarms",
+    "carrying the weight of yesterday's wrong claims",
+)
+
+BW_EMO_DESPERATE: tuple[str, ...] = (
+    "with growing alarm",
+    "wide-eyed with fear",
+    "in a panic",
+    "voice still hoarse from yesterday's false alarm",
+    "calling out without confidence anyone would come",
+    "with the fear of a watch that no one trusts",
 )
 
 
@@ -109,26 +180,45 @@ unimpressed, to see who would submit the form properly."""),
 
     # 5. The waiting-for-help template — the fable's signature beat
     #    repurposed: the shepherd's claim hangs in the air; nobody
-    #    answers until the form is actually evaluated. Uses
-    #    {shepherd} (the name) for the second sentence to avoid
-    #    singular-they ambiguity for gender="n" shepherds.
+    #    answers until the form is actually evaluated.
+    #
+    #    NOTE (boy-wolf polish, hand-audit pass): the original template
+    #    had three issues that hand-audit caught: (a) "refusing to
+    #    descend" presumes elevation, but {place} ranges over flat
+    #    locations (meadow / road / orchard) — replaced with "refusing
+    #    to come back to the flock"; (b) "{shepherd} insisted
+    #    {shepherd_he_she} already knew the answer" rendered "Pat
+    #    insisted they already knew" for n-gender shepherds (pitfall
+    #    #19) — replaced with name-only construction; (c) "Submit
+    #    {concept_phrase} to the REPL" failed for abstract concept
+    #    phrases ("Submit the cond form to the REPL") — replaced with
+    #    "Submit the form" plus {form_display}.
     SubplotTemplate("""\
 Halfway through the morning watch, {shepherd_phrase} called out
 {place}, demanding a verdict on the form {form_display} and refusing
-to descend until somebody confirmed it. {shepherd} insisted
-{shepherd_he_she} already knew the answer. {elder_phrase}, walking up
-at an unhurried pace, simply said: "Submit {concept_phrase} to the
-REPL. Whatever comes back is the answer.\""""),
+to come back to the flock until somebody confirmed it. {shepherd} was
+sure of the answer already. {elder_phrase}, walking up at an unhurried
+pace, simply said: "Submit the form. Whatever comes back is the
+answer.\""""),
 
     # 6. The reckoning-at-week's-end template — the reeve walks the
     #    meadow on Saturday and reviews the week's forms. Boy-wolf
     #    "end-of-week reckoning" beat from the fable.
+    #
+    #    NOTE (boy-wolf polish, hand-audit pass): the original closing
+    #    "{shepherd_phrase}, who, {emo_tired}, agreed..." had a
+    #    redundant relative-clause `who,` followed by a participial
+    #    phrase from EMO_TIRED — `who` opens a relative clause
+    #    expecting a finite verb, but the participle isn't one, so the
+    #    sentence reads "Tom, who, weary from sprinting, agreed" — a
+    #    broken double-comma sequence. Drop the `who,` to leave a clean
+    #    appositive participle.
     SubplotTemplate("""\
 Each Saturday, the reeve walked up to the meadow and reviewed which
 forms the shepherds had actually submitted to the REPL during the week.
 This week, the next form on the page was {form_display}, and the line
 above it read {concept_phrase}. {elder_phrase} handed the page to
-{shepherd_phrase}, who, {emo_tired}, agreed to write it out properly."""),
+{shepherd_phrase}, {emo_tired}, who agreed to write it out properly."""),
 
     # 7. The boast-and-rebuke template — shepherd claims the answer
     #    without checking; villager insists on actual evaluation. Uses

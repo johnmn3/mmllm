@@ -49,12 +49,18 @@ authority, to the other side of the village."""),
 
     # Cross-namespace fully-qualified beat — when the shepherd's
     # claim from one cottage has to be referred to from the other.
+    #
+    # NOTE (boy-wolf polish, hand-audit pass): the closing "X was,
+    # after all, the line in question" had a singular verb that
+    # broke when {concept_phrase} was a plural NP (e.g., "two
+    # identical namespace symbols"). Rewritten with a number-agnostic
+    # frame: "the question on that line came down to {concept_phrase}".
     SubplotTemplate("""\
 {shepherd_phrase} had shouted a claim from one side of the village
 {place}. {elder_phrase} insisted that, before the answer could be
 relied on by anyone in the other cottage, the form {form_display} would
 need to be evaluated under its proper name. {shepherd}, {emo_tired},
-agreed — {concept_phrase} was, after all, the line in question."""),
+agreed; the question on that line came down to {concept_phrase}."""),
 ]
 
 
@@ -161,8 +167,8 @@ G6_06 = SubjectCurriculum(grade=6, subject_id="G6-06",
             "the :private flag on metadata of '^:private x",
             "whether the :private metadata is true"),
         _ex("(:private (meta 'x))", None,
-            "the :private flag on plain metadata of 'x (none set)",
-            "the value of (:private (meta 'x)), which is nil"),
+            "the :private flag on plain metadata of 'x",
+            "the value of (:private (meta 'x))"),
     ], subplots=_NS_SUBPLOTS, plan_pool=_PLAN_G6)
 
 

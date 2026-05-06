@@ -43,12 +43,18 @@ settled the moment the form was evaluated."""),
     # 10. The stick-in-the-dust template — shepherd boasts they know
     #     without typing it; elder picks up a stick and insists on the
     #     REPL. Comma after "said" handles participle-style EMO_PATIENT.
+    #
+    #     NOTE (boy-wolf polish, hand-audit pass): the closing
+    #     "The REPL will have the last word." was originally written
+    #     as a second quoted utterance but the closing `\"` was
+    #     forgotten, leaving 12+ records with an unclosed dialogue
+    #     quote. Closed below.
     SubplotTemplate("""\
 "Whatever {form_display} comes to," {shepherd_phrase} declared,
 {emo_proud}, {place}, "anyone could see it without typing a thing."
 {elder_phrase}, {emo_patient}, picked up a stick and drew
 {concept_phrase} in the dust. "Then write the form," {elder_he_she}
-said. "The REPL will have the last word."""),
+said. "The REPL will have the last word.\""""),
 ]
 
 
@@ -71,7 +77,7 @@ G2_01 = SubjectCurriculum(
         _ex("(- 100 1 2 3)", 94,      "the chain (- 100 1 2 3)",  "the result of (- 100 1 2 3)"),
         _ex("(+ 1 2 3 4 5 6 7 8 9 10)", 55,
             "the sum 1+2+...+10",       "the sum of integers 1 through 10"),
-        _ex("(* 1 2 3 4 5)", 120,     "the product 1*2*3*4*5",    "the product of 1 through 5 (5!)"),
+        _ex("(* 1 2 3 4 5)", 120,     "the product 1*2*3*4*5",    "the product of 1 through 5"),
         _ex("(+ 10 20 30)", 60,       "the sum (+ 10 20 30)",     "the sum of 10, 20, and 30"),
     ],
     subplots=_SHARED_SUBPLOTS, plan_pool=_PLAN_POOL,
