@@ -261,24 +261,20 @@ G12_03 = SubjectCurriculum(
             question_what="the vector produced by reifying the take-3 transducer into an empty vector via into, applied to the range of 100 numbers",
             goal_text="use the take-3 transducer with into to collect the first three elements from a range of 100 numbers",
             scenario=(
-                'Patch the hound arrived at a vast stream with an endless flood — '
-                'a range of one hundred bones. A gap at the bank was sized to stop '
-                'after only three had passed.'
+                'Patch arrived at a vast stream — an endless flood, a range of '
+                'one hundred bones. A gap at the bank stopped after three passed.'
             ),
             need=(
                 'The hound wanted the gap to let through just the first three bones '
-                'and place them into an empty row. The form would take what it '
-                'needed and stop.'
+                'into an empty row. The form would stop when it had what it needed.'
             ),
             mapping=(
-                'The gap is the take-3 rule, the endless stream is the range, '
-                'each bone is an element, and the empty row is the collecting '
-                'vessel.'
+                'The gap is the take-3 rule, the flood is the range, each bone is '
+                'an element, and the row is the collecting vessel.'
             ),
             resolution=(
-                'The REPL sent bones through the gap: 0 passed, 1 passed, 2 '
-                'passed — and the gap closed. The row caught the first three from '
-                'the endless stream.'
+                'The REPL sent bones through the gap: 0, 1, 2 passed — and the gap '
+                'closed. The row caught the first three from the endless stream.'
             ),
             tags=("story",),
         ),

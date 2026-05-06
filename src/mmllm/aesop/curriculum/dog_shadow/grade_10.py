@@ -614,24 +614,23 @@ G10_07 = SubjectCurriculum(
             scenario=(
                 'Rex the hound had a vector of four bones and a multi-step '
                 'sniffing-trail. Thread-last would pass the bones as the final '
-                'argument to each step — first filtering for even counts, then '
-                'incrementing each, then summing the result.'
+                'argument to each step.'
             ),
             need=(
-                'The vector enters the filter, keeping only even-counted bones. '
-                'The filtered bones go to map inc, each incremented. The mapped '
-                'bones then go to reduce +, producing the sum.'
+                'The vector enters the filter for even counts. The filtered bones '
+                'go to map inc, each incremented. The mapped bones then go to reduce '
+                'with addition, producing a running total.'
             ),
             mapping=(
                 'The thread-last arrow is the trail for last-argument threading. '
-                'The bones move from step to step, each one feeding into the next '
-                'as the final argument. The trail ends with a running total.'
+                'The bones move from step to step, each feeding as the final '
+                'argument. The trail ends with a sum.'
             ),
             resolution=(
-                'The REPL followed the thread-last trail: filtered to [2, 4], '
-                'mapped to [3, 5], then reduced to 8 (3+5). The threading had '
-                'transformed the bones step by step, each function reading the '
-                'result from the one before.'
+                'The REPL followed the thread-last trail through each step. The '
+                'filtering removed odd bones. The mapping incremented the rest. The '
+                'reduce accumulated them. The threading had transformed the bones '
+                'step by step.'
             ),
             tags=("story",),
         ),
@@ -685,24 +684,23 @@ G10_08 = SubjectCurriculum(
             goal_text="define a function add-fn and call it to add 3 and 4",
             scenario=(
                 'Bell the hound set a sniffing-trail rule named add-fn. When a '
-                'dog followed the trail with bones 3 and 4, the trail would '
-                'evaluate the bones first, then add them. The function takes '
-                'pre-computed values.'
+                'dog followed the trail with bones, the trail would evaluate them '
+                'first, then add them. The function takes computed values.'
             ),
             need=(
-                'When add-fn is called with 3 and 4, both arguments are computed '
-                'before the function sees them. The function receives the values '
-                'and returns their sum.'
+                'When add-fn is called, both arguments are computed before the '
+                'function sees them. The function receives the values and combines '
+                'them.'
             ),
             mapping=(
                 'A function is a nose-trail that expects computed values. The '
-                'bones come in as numbers, not as marked positions. The trail '
-                'adds them and yields the total.'
+                'bones come in as numbers. The trail adds them and yields the '
+                'running total.'
             ),
             resolution=(
-                'The REPL called add-fn with 3 and 4, evaluated both arguments, '
-                'then walked the trail. The trail took the values and produced '
-                '7. A plain function had done the work straightforwardly.'
+                'The REPL called add-fn, evaluated the arguments, then walked the '
+                'trail. The trail took the values and produced the result. A plain '
+                'function had done the work straightforwardly.'
             ),
             tags=("story",),
         ),
@@ -830,25 +828,24 @@ G10_10 = SubjectCurriculum(
             goal_text="define a safe-if-let macro and call it with x bound to 5",
             scenario=(
                 'Bell the hound sketched a careful macro-rule on bark. Instead '
-                'of letting the binding name sneak in unseen (an anaphoric trick), '
-                'she made the caller provide the binding explicitly. The rule would '
+                'of letting the binding sneak in unseen (anaphoric), '
+                'she made the caller provide it explicitly. The rule would '
                 'expand to if-let with the binding passed in.'
             ),
             need=(
-                'When the macro was called with [x 5] as the binding, it should '
-                'expand to if-let and evaluate the then-branch with x bound. The '
-                'value x at 5 would be used in the multiplication, yielding the '
-                'running total.'
+                'When the macro was called with an explicit binding, it should '
+                'expand to if-let and evaluate the then-branch. The value '
+                'would be used in the multiplication, yielding a result.'
             ),
             mapping=(
                 'The defmacro is the rule. The binding parameter receives the '
-                'explicit [x 5]. The unquoting splices the binding and branches '
-                'into the if-let form. The macro does the rewriting hygienically.'
+                'explicit binding. The unquoting splices it and the branches '
+                'into the if-let form. The macro rewrites hygienically.'
             ),
             resolution=(
                 'The REPL set the macro-rule, then called it with the binding. '
-                'The rule expanded to if-let, binding x to 5. The then-branch '
-                'ran and produced 10 (5 * 2). The explicit binding prevented '
+                'The rule expanded to if-let. The then-branch '
+                'ran and produced a result. The explicit binding prevented '
                 'any confusion.'
             ),
             tags=("story",),

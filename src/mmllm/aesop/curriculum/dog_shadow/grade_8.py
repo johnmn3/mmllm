@@ -345,25 +345,21 @@ G8_05 = SubjectCurriculum(
             question_what="the value returned after defining protocol Pace with method speed, extending it to String with an implementation, then calling speed on a string",
             goal_text="define a protocol named Pace with one method speed, extend it to String type with an implementation, then call speed on a string",
             scenario=(
-                'Bell the hound set up the Pace guild with its speed '
-                'requirement, then pressed the guild\'s mark onto the '
-                'text-pack. Any text arriving at the speed call would now '
-                'answer with the swift-word.'
+                'Bell set up the Pace guild and pressed its mark onto the '
+                'text-pack. Any text at the speed call would answer with the '
+                'swift-word.'
             ),
             need=(
-                'When a text-pack came to the speed call, the guild mark '
-                'would route it to the String implementation the hound had '
-                'prepared.'
+                'When text arrived, the guild mark would route to the String '
+                'implementation.'
             ),
             mapping=(
-                'The guild is the defprotocol, the text-pack is the type '
-                'being marked, the mark is the extend-protocol, and the '
-                'swift-answer is the method body.'
+                'The guild is the defprotocol, the text-pack is the marked '
+                'type, and the swift-answer is the method.'
             ),
             resolution=(
-                'The REPL set the guild and marked the text-pack, then '
-                'called speed on a text. The text answered with the swift-word, '
-                'proving the extension was live.'
+                'The REPL marked the text-pack and called speed on text. The '
+                'text answered, proving the extension was live.'
             ),
             tags=("story",),
         ),
@@ -907,23 +903,21 @@ G8_13 = SubjectCurriculum(
             question_what="the value returned after defining protocol Named with method name-of, defining record Hare with field n that uses this to access the field in the implementation, then calling name-of on a Hare instance",
             goal_text="define a protocol Named with method name-of, define a record that uses this to access a field, then call the method",
             scenario=(
-                'Rex the hound carved a guild called Named with a name-of '
-                'requirement. He built a record case for runners with one '
-                'field, n, and sealed it with the guild mark.'
+                'Rex carved a Named guild with a record case for runners. The '
+                'case had one field, n, and bore the guild mark.'
             ),
             need=(
-                'When a runner arrived at name-of, the guild would route to '
-                'the record\'s body, where this would refer to the runner itself.'
+                'When a runner arrived at name-of, the guild routed to the '
+                'record\'s body, where this meant the runner itself.'
             ),
             mapping=(
                 'The guild is the defprotocol, the record is the defrecord, '
-                'the this-word points to the current record, and the field '
-                'value is what returns.'
+                'this points to the current record, and the field value '
+                'returns.'
             ),
             resolution=(
-                'The REPL built a Hare with "Zephyr" in the n field, called '
-                'name-of, and the this-bound method read the field from the '
-                'record. The name came back.'
+                'The REPL built the Hare, called name-of, and this let the '
+                'method read the n field from the record. The name came back.'
             ),
             tags=("story",),
         ),
@@ -1125,23 +1119,21 @@ G8_16 = SubjectCurriculum(
             question_what="the vector of results after defining protocol Move with method step, defining records Hare and Tortoise that both implement Move, then calling step via mapv on both instances",
             goal_text="define a protocol Move with method step, define two record types Hare and Tortoise that each implement it, then call the method on both instances",
             scenario=(
-                'Patch the hound carved a guild called Move with a step '
-                'requirement. He built two record cases — one for swift '
-                'runners, one for steady — each marking the guild.'
+                'Patch carved a Move guild and built two record cases — one '
+                'for swift runners, one for steady — each marking the guild.'
             ),
             need=(
-                'When both runners passed the step call, each would answer '
-                'by its own movement. A vector of their answers would come back.'
+                'When both runners met the step call, each would answer by its '
+                'own movement.'
             ),
             mapping=(
-                'The guild is the defprotocol, the record cases are the '
-                'defrecords, the marks are the implementations, and each '
-                'breed\'s movement is what step returns.'
+                'The guild is the defprotocol, the records are the defrecords, '
+                'the marks are implementations, and each breed\'s movement is '
+                'what step returns.'
             ),
             resolution=(
                 'The REPL set the guild and both records, called step on both '
-                'via mapv. The guild routed each to its implementation, and '
-                'the vector of movements came back.'
+                'via mapv. The guild routed each to its implementation.'
             ),
             tags=("story",),
         ),

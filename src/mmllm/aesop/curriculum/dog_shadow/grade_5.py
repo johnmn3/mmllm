@@ -408,9 +408,9 @@ G5_07 = SubjectCurriculum(grade=5, subject_id="G5-07",
             question_what="the first truthy value",
             goal_text="return the first truthy value from a sequence of values",
             scenario=(
-                'Rex stood at a different fork {place}, facing a row of gates. Three '
-                'gates in sequence: the first held nil (a closed gate), the second held '
-                'false (also closed), the third held :found (an open gate). The or-form '
+                'Rex stood at a fork by the stream, facing a row of gates. Three '
+                'gates in sequence: the first held nil (closed), the second held '
+                'false (also closed), the third held a keyword (open). The or-form '
                 'would test each gate and stop at the first open one.'
             ),
             need=(
@@ -445,10 +445,10 @@ G5_08 = SubjectCurriculum(grade=5, subject_id="G5-08",
             question_what="the negated comparison",
             goal_text="negate the result of checking whether 1 is greater than 2",
             scenario=(
-                'Patch stood at the stream crossing {place}, reading a comparison '
-                'stone: is 1 greater than 2? The stone read false. But the not-form '
-                'would flip the answer — false becomes true, true becomes false. Patch '
-                "wanted the negation of the stone's verdict."
+                'Patch stood at the stream crossing by the pond, reading a '
+                'comparison stone: is 1 greater than 2? The stone read false. But '
+                'the not-form would flip the answer — false becomes true, true becomes '
+                'false. Patch wanted the inverted verdict.'
             ),
             need=(
                 'To flip a falsey gate to truthy, or a truthy gate to falsey. The '
@@ -612,9 +612,9 @@ G5_11 = SubjectCurriculum(grade=5, subject_id="G5-11",
             goal_text="keep the positive elements from the vector containing -2, -1, 0, 1, and 2",
             scenario=(
                 'Rex the hound found five bones marked -2, -1, 0, 1, 2 by the '
-                'river bank. A special log above the water held a different gap '
-                '— one that let through only bones marked positive. He would '
-                'pour the five through in order.'
+                'river bank. A log above the water held a special gap — one that '
+                'let through only positive-marked bones. He would pour all five '
+                'through in order.'
             ),
             need=(
                 'He wanted just the positive-marked bones from the pile. Filter '

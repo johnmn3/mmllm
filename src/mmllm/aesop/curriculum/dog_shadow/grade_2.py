@@ -1840,12 +1840,77 @@ G2_16 = SubjectCurriculum(
             ),
             tags=("story",),
         ),
-        _ex("(boolean \"\")", True, "the boolean conversion", "the result of using boolean on the empty string",
-            goal="convert the empty string to a boolean"),
-        _ex("(boolean nil)", False, "the boolean conversion", "the result of using boolean on nil",
-            goal="convert nil to a boolean"),
-        _ex("(boolean false)", False, "the boolean conversion", "the result of using boolean on false",
-            goal="convert false to a boolean"),
+        SubjectExample(
+            form='(boolean "")', expected=True,
+            concept_phrase="the boolean conversion",
+            question_what="the result of using boolean on the empty string",
+            goal_text="convert the empty string to a boolean",
+            scenario=(
+                'Patch the hound held a blank bark-strip near the forest. They wanted to '
+                'convert it to a boolean state — to ask if empty was true or false in the '
+                'REPL\'s eyes.'
+            ),
+            need=(
+                'They needed to convert the empty string to a clear true-or-false answer. '
+                'The boolean function would strip away the string and leave only the '
+                'verdict.'
+            ),
+            mapping=(
+                'The empty string is the input value, the boolean conversion tests '
+                'truthiness, and the result is the pure true-or-false state.'
+            ),
+            resolution=(
+                'The REPL converted the empty string to a boolean. Since empty is not false '
+                'and not nil, it counts as truthy. True was returned.'
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form="(boolean nil)", expected=False,
+            concept_phrase="the boolean conversion",
+            question_what="the result of using boolean on nil",
+            goal_text="convert nil to a boolean",
+            scenario=(
+                'Bell the hound held nothing at the pond — nil in her paw. She wanted to '
+                'convert it to a boolean state to know its truth value.'
+            ),
+            need=(
+                'She needed to know if nil was true or false. The boolean function would '
+                'answer with certainty.'
+            ),
+            mapping=(
+                'Nil is the input value, the boolean conversion tests truthiness, and the '
+                'result is the pure boolean state.'
+            ),
+            resolution=(
+                'The REPL converted nil to a boolean. Since nil is falsey, the answer came '
+                'back false. Nothing was indeed false.'
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form="(boolean false)", expected=False,
+            concept_phrase="the boolean conversion",
+            question_what="the result of using boolean on false",
+            goal_text="convert false to a boolean",
+            scenario=(
+                'Rex the hound held a stone marked false at the meadow. He wanted to convert '
+                'it to a boolean state to confirm its truthiness.'
+            ),
+            need=(
+                'He needed to know if false was true or false. The boolean function would '
+                'return the verdict.'
+            ),
+            mapping=(
+                'False is the input value, the boolean conversion tests truthiness, and the '
+                'result is the pure boolean state.'
+            ),
+            resolution=(
+                'The REPL converted false to a boolean. False is falsey, so the answer came '
+                'back false. The verdict was certain.'
+            ),
+            tags=("story",),
+        ),
     ],
     subplots=_GATE_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
@@ -1928,14 +1993,54 @@ G2_18 = SubjectCurriculum(
             ),
             tags=("story",),
         ),
-        _ex("(= (quote tortoise) 'tortoise)", True,
-            "the equality of long-form and short-form quoting",
-            "whether long-form and short-form quoting produce equal values",
-            goal="compare the result of long-form quoting of tortoise against the apostrophe-shorthand quoting of the same name, using ="),
-        _ex("(count '(1 2 3))", 3,
-            "the element count of a quoted list",
-            "the number of elements in a quoted list",
-            goal="count the elements in a quoted list of the integers 1, 2, and 3"),
+        SubjectExample(
+            form="(= (quote tortoise) 'tortoise)", expected=True,
+            concept_phrase="the equality of long-form and short-form quoting",
+            question_what="whether long-form and short-form quoting produce equal values",
+            goal_text="compare the result of long-form quoting of tortoise against the apostrophe-shorthand quoting of the same name, using =",
+            scenario=(
+                'Bell the hound found two bones {place} scratched with the same mark. One '
+                'bore the long scratch of the full word tortoise, the other a quick mark '
+                'that meant the same thing. She wanted to know if they matched.'
+            ),
+            need=(
+                'She needed to test if the two different ways of marking — long and short — '
+                'produced the same symbol. The equality test would settle whether they '
+                'matched.'
+            ),
+            mapping=(
+                'The long scratch is the quote form, the short mark is the apostrophe '
+                'shorthand, and the equality test asks if both produce the same symbol.'
+            ),
+            resolution=(
+                'The REPL tested both forms and found they were equal — both produced the '
+                'symbol tortoise. The different paths led to the same name.'
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form="(count '(1 2 3))", expected=3,
+            concept_phrase="the element count of a quoted list",
+            question_what="the number of elements in a quoted list",
+            goal_text="count the elements in a quoted list of the integers 1, 2, and 3",
+            scenario=(
+                'Patch the hound held a quoted list near the meadow — a frozen row of three '
+                'marks: 1, 2, 3. They wanted to count how many marks lay in that frozen row.'
+            ),
+            need=(
+                'They needed to know how many elements were in the quoted list. The count '
+                'would walk the frozen row and tally each mark.'
+            ),
+            mapping=(
+                'The quoted list is the frozen row, each mark is one element, and the count '
+                'is the tally of all elements in the list.'
+            ),
+            resolution=(
+                'The REPL counted the elements in the quoted list — 1, 2, 3 — and returned '
+                '3. The count was exact, the frozen row was measured.'
+            ),
+            tags=("story",),
+        ),
     ],
     subplots=_CHALKMARK_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
@@ -1974,10 +2079,30 @@ G2_19 = SubjectCurriculum(
             ),
             tags=("story",),
         ),
-        _ex("(+ 99999999999 1)", 100000000000,
-            "the large addition",
-            "the sum of 99999999999 and 1",
-            goal="add 1 to 99999999999"),
+        SubjectExample(
+            form="(+ 99999999999 1)", expected=100000000000,
+            concept_phrase="the large addition",
+            question_what="the sum of 99999999999 and 1",
+            goal_text="add 1 to 99999999999",
+            scenario=(
+                'Rex the hound held an enormous pile of 99 billion, 999 million bones at '
+                'the river bank. A single extra bone sat beside the pile. He wanted to know '
+                'the total.'
+            ),
+            need=(
+                'He needed the exact sum when one bone was added to that vast pile. The '
+                'number would be enormous, and the REPL would handle it without flinching.'
+            ),
+            mapping=(
+                'The great pile of 99999999999 bones is the first addend, the single bone '
+                'is the second, and the sum is the result of combining them.'
+            ),
+            resolution=(
+                'The REPL added one to the vast number and handed back one hundred billion. '
+                'The sum was so large the integer container grew, but the answer was exact.'
+            ),
+            tags=("story",),
+        ),
     ],
     subplots=_ACORN_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
@@ -2060,13 +2185,54 @@ G2_21 = SubjectCurriculum(
             ),
             tags=("story",),
         ),
-        _ex("(count \"hare\")",     4,  "the count of characters in a string",
-            "the result of using count on the string hare",
-            goal="count the characters in the string hare"),
-        _ex("(count (subs \"tortoise\" 0 3))", 3,
-            "the count of characters in a leading substring",
-            "the count of the substring from index 0 to 3 of the string tortoise",
-            goal="extract the leading three characters from the string tortoise using subs from index 0 to 3, then count them"),
+        SubjectExample(
+            form='(count "hare")', expected=4,
+            concept_phrase="the count of characters in a string",
+            question_what='the result of using count on the string hare',
+            goal_text='count the characters in the string hare',
+            scenario=(
+                'Patch the hound held a bark-strip with the message hare scratched onto it. '
+                'Each scratch was one character, and they wanted to know the total marks in '
+                'the row.'
+            ),
+            need=(
+                'They needed the precise count of the characters without counting on their '
+                'paws. The count operation would walk the strip and tally each mark.'
+            ),
+            mapping=(
+                'The bark-strip is the string, each scratch is one character, and the '
+                'running count is the answer.'
+            ),
+            resolution=(
+                'The REPL walked the bark-strip from end to end, tallying each scratch. The '
+                'message hare held four characters, and the count came back 4.'
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form='(count (subs "tortoise" 0 3))', expected=3,
+            concept_phrase="the count of characters in a leading substring",
+            question_what='the count of the substring from index 0 to 3 of the string tortoise',
+            goal_text='extract the leading three characters from the string tortoise using subs from index 0 to 3, then count them',
+            scenario=(
+                'Bell the hound held a long bark-strip with tortoise scratched across it. '
+                'She wanted to extract just the first three marks and count them.'
+            ),
+            need=(
+                'She needed to slice the first three characters from the message and count '
+                'how many that was. The subs would extract the substring, then count would '
+                'tally it.'
+            ),
+            mapping=(
+                'The bark-strip is the string, subs extracts a slice from index 0 to 3, the '
+                'slice becomes a new substring, and count tallies its characters.'
+            ),
+            resolution=(
+                'The REPL extracted the leading three characters (tor) from tortoise and '
+                'counted them. The result was 3, exact and certain.'
+            ),
+            tags=("story",),
+        ),
     ],
     subplots=_BEADSTRING_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
