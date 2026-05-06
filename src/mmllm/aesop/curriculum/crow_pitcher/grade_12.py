@@ -98,27 +98,6 @@ G12_01 = SubjectCurriculum(
             concept_phrase="the map-inc transducer applied via into",
             question_what="the vector produced by reifying the map-inc transducer into an empty vector via into, applied to the vector containing 1, 2, 3",
             goal_text="use the map-inc transducer with into to increment the vector containing 1, 2, 3",
-            scenario=(
-                "Mossback had found a pebble-rule on the path — written "
-                "on bark, it read 'increment each count by one.' The rule "
-                "was separated from any basket or row, ready to be reused."
-            ),
-            need=(
-                "With three gathered pebbles counted 1, 2, 3, the tortoise "
-                "wanted to apply the separated rule and collect the "
-                "incremented row in a fresh basket."
-            ),
-            mapping=(
-                "A transducer is a separated sieve-rule. Here `(map inc)` "
-                "is detached from source and destination. The `into` tells "
-                "the REPL: apply this rule to the input and collect what "
-                "falls into an empty vector."
-            ),
-            resolution=(
-                "each pebble emerged incremented by one, and the vector "
-                "caught the result: counts of 2, 3, and 4."
-            ),
-            tags=("story",),
         ),
         SubjectExample(
             form="(into [] (filter even?) [1 2 3 4 5])",
@@ -126,26 +105,6 @@ G12_01 = SubjectCurriculum(
             concept_phrase="the filter-even transducer applied via into",
             question_what="the vector of even elements reified via into with the filter-even transducer applied to the vector containing 1, 2, 3, 4, 5",
             goal_text="use the filter-even transducer with into to keep only the even numbers from the vector containing 1, 2, 3, 4, 5",
-            scenario=(
-                "Another rule lay on the stones — 'keep only the even "
-                "counts; drop the odd ones.' This rule was separated from "
-                "any basket or stream."
-            ),
-            need=(
-                "Bramble arrived with five pebbles — counts 1, 2, 3, 4, 5. "
-                "Mossback wanted to apply the even-keeping rule and return "
-                "only those that passed through."
-            ),
-            mapping=(
-                "`(filter even?)` is a separated transducer-rule. Unlike "
-                "`filter`, this rule stands alone. `into` pairs it with an "
-                "empty vector and the input pebbles."
-            ),
-            resolution=(
-                "the rule kept the even counts — 2 and 4 — and dropped the "
-                "odd ones. The vector caught the filtered row."
-            ),
-            tags=("story",),
         ),
     ],
     subplots=_SIEVE_SUBPLOTS, plan_pool=_PLAN_G12,
@@ -164,28 +123,6 @@ G12_02 = SubjectCurriculum(
             concept_phrase="the composed transducer pipeline of map-inc then filter-even",
             question_what="the vector result of reifying the composed transducer via into, applying map-inc then filter-even to the vector containing 1, 2, 3, 4",
             goal_text="compose map-inc and filter-even into a transducer pipeline, then apply it with into to the vector containing 1, 2, 3, 4",
-            scenario=(
-                "Mossback had two separated sieve-rules from the path: "
-                "one incremented, another kept only even ones. At the "
-                "finish line, she imagined stacking the sieves one above "
-                "the other."
-            ),
-            need=(
-                "She wanted a single composed rule — both sieves working "
-                "in sequence — so one pour would increment and select at once."
-            ),
-            mapping=(
-                "`comp` stacks transducers into one rule. The row enters "
-                "the first sieve (increment), then through the second "
-                "(filter for even). The combined rule is still separated "
-                "from the basket — a reusable pipeline."
-            ),
-            resolution=(
-                "the pipeline transformed the row: each pebble incremented "
-                "first, then only evens passed the second sieve. The vector "
-                "caught what emerged."
-            ),
-            tags=("story",),
         ),
         SubjectExample(
             form="(transduce (comp (map inc) (filter even?)) + 0 [1 2 3 4 5])",
@@ -193,26 +130,6 @@ G12_02 = SubjectCurriculum(
             concept_phrase="the composed transducer summing the incremented-then-filtered elements",
             question_what="the sum accumulated via transduce using the composed transducer of map-inc then filter-even, starting from 0, applied to the vector containing 1, 2, 3, 4, 5",
             goal_text="compose map-inc and filter-even, then use transduce to sum the kept elements from the vector containing 1, 2, 3, 4, 5, starting from 0",
-            scenario=(
-                "At day's end, the stacked-sieve rule was ready: increment "
-                "first, then keep even. But this time, she wanted to tally "
-                "the surviving counts into a running sum."
-            ),
-            need=(
-                "Mossback needed to apply the stacked rule, feed the results "
-                "into a counting-up operation, and gather the final tally."
-            ),
-            mapping=(
-                "`transduce` applies a composed rule and feeds the results "
-                "into a reduction — here, `+` starting from 0. The pipeline "
-                "increments and filters; the `+` tallies what passes through."
-            ),
-            resolution=(
-                "the stacked rule transformed the row — increment, then "
-                "filter even — and the tally summed what survived: a single "
-                "count representing the final result."
-            ),
-            tags=("story",),
         ),
     ],
     subplots=_SIEVE_SUBPLOTS, plan_pool=_PLAN_G12,
@@ -231,26 +148,6 @@ G12_03 = SubjectCurriculum(
             concept_phrase="the transducer-powered construction of a set from incremented elements",
             question_what="the set produced by reifying the map-inc transducer into an empty set via into, applied to the vector containing 1, 2, 3",
             goal_text="use the map-inc transducer with into to create a set from the incremented elements of the vector containing 1, 2, 3",
-            scenario=(
-                "The same increment-rule waited on a stone. But today "
-                "instead of a row-basket, Mossback wanted a unique-only "
-                "basket — a set that would hold each count only once."
-            ),
-            need=(
-                "With three pebbles counted 1, 2, 3, she wanted to apply "
-                "the rule and catch the result in a set-basket."
-            ),
-            mapping=(
-                "The transducer `(map inc)` is a separated rule. The "
-                "receiver can be any kind — vector, set, or bag. The rule "
-                "doesn't know what waits; `into` pairs the rule with a "
-                "specific receiver — here, an empty set."
-            ),
-            resolution=(
-                "the incremented counts fell into the set-basket, which "
-                "kept only unique values."
-            ),
-            tags=("story",),
         ),
         SubjectExample(
             form="(into [] (take 3) (range 100))",
@@ -258,25 +155,6 @@ G12_03 = SubjectCurriculum(
             concept_phrase="the transducer-powered collection of the first few elements",
             question_what="the vector produced by reifying the take-3 transducer into an empty vector via into, applied to the range of 100 numbers",
             goal_text="use the take-3 transducer with into to collect the first three elements from a range of 100 numbers",
-            scenario=(
-                "A stream of 100 pebbles emerged from the river, each "
-                "numbered from 0 onward. A separated rule lay ready — "
-                "'take only the first three'."
-            ),
-            need=(
-                "Mossback wanted to apply the selective rule and gather "
-                "only the first three, stopping after three had passed."
-            ),
-            mapping=(
-                "`(take 3)` closes the gate after three pebbles pass. "
-                "It's a separated rule — the `into` applies it to the "
-                "range-stream and collects what falls into a vector."
-            ),
-            resolution=(
-                "the take-rule stopped the stream after three. The vector "
-                "held the first three from the hundred-count stream."
-            ),
-            tags=("story",),
         ),
     ],
     subplots=_SIEVE_SUBPLOTS, plan_pool=_PLAN_G12,
