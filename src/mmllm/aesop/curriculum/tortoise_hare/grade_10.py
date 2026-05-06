@@ -1183,16 +1183,68 @@ G10_15 = SubjectCurriculum(
     examples=[
         # Most of the time, a function suffices. Test forms that show
         # a function would do.
-        _ex("(do \"a function suffices when no syntax shaping is needed\" "
-            "((fn [x y] (+ x y)) 3 4))", 7,
-            "calling an anonymous function to add two arguments",
-            "the sum of 3 and 4",
-            goal="use an anonymous function to add two numbers"),
-        _ex("(do \"prefer fn unless you must shape syntax\" "
-            "(map inc [1 2 3]))", [2, 3, 4],
-            "applying a function to each element of a collection",
-            "the incremented values",
-            goal="use map to increment each element of a list"),
+        SubjectExample(
+            form="(do \"a function suffices when no syntax shaping is needed\" "
+                 "((fn [x y] (+ x y)) 3 4))",
+            expected=7,
+            concept_phrase="calling an anonymous function to add two arguments",
+            question_what="the sum of 3 and 4",
+            goal_text="use an anonymous function to add two numbers",
+            scenario=(
+                "Bramble had considered writing a macro to add two "
+                "numbers, but Mossback stopped her. When no syntax "
+                "shaping was needed, the scribe's rewrite machinery "
+                "was more trouble than it was worth."
+            ),
+            need=(
+                "Mossback needed to show that a plain anonymous function "
+                "received evaluated arguments and computed the sum "
+                "without any rewrite rule involved."
+            ),
+            mapping=(
+                "A `fn` receives values the runtime has already "
+                "evaluated; no scribe rewrite is needed when the goal "
+                "is just combining two numbers — the recipe approach "
+                "suffices."
+            ),
+            resolution=(
+                "the REPL returned the sum — the anonymous function "
+                "had done the job cleanly, with no macro rewriting "
+                "required."
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form="(do \"prefer fn unless you must shape syntax\" "
+                 "(map inc [1 2 3]))",
+            expected=[2, 3, 4],
+            concept_phrase="applying a function to each element of a collection",
+            question_what="the incremented values",
+            goal_text="use map to increment each element of a list",
+            scenario=(
+                "Mossback pointed out another case where a macro was "
+                "unnecessary: mapping a function over a collection. "
+                "The runtime's higher-order tools handled it perfectly "
+                "without any rewrite rule."
+            ),
+            need=(
+                "She needed `map` and a plain function to process each "
+                "element — no macro was needed because `map` already "
+                "accepted a function as a first-class value."
+            ),
+            mapping=(
+                "A function passed to `map` is a value the runtime "
+                "uses directly; the scribe's rewrite machinery would "
+                "add nothing here — prefer a function unless syntax "
+                "shaping is genuinely required."
+            ),
+            resolution=(
+                "the REPL returned the incremented collection — the "
+                "plain function approach had worked, and no macro "
+                "rewrite had been needed."
+            ),
+            tags=("story",),
+        ),
     ],
     subplots=_REWRITERULE_SUBPLOTS, plan_pool=_PLAN_G10,
 )
@@ -1205,18 +1257,68 @@ G10_16 = SubjectCurriculum(
     fable="tortoise-hare",
     examples=[
         # A `with-` style macro that binds and ensures cleanup conceptually.
-        _ex("(do (defmacro with-tortoise-pace [& body] "
-            "`(let [pace# :slow-and-steady] ~@body)) "
-            "(with-tortoise-pace 42))", 42,
-            "defining and using a with-X macro pattern",
-            "the value returned when with-tortoise-pace expands to a let binding with the unquoted body",
-            goal="define a with-tortoise-pace macro and call it to execute a body"),
+        SubjectExample(
+            form="(do (defmacro with-tortoise-pace [& body] "
+                 "`(let [pace# :slow-and-steady] ~@body)) "
+                 "(with-tortoise-pace 42))",
+            expected=42,
+            concept_phrase="defining and using a with-X macro pattern",
+            question_what="the value returned when with-tortoise-pace expands to a let-block and runs the body",
+            goal_text="define a with-tortoise-pace macro and call it to execute a body",
+            scenario=(
+                "Mossback wanted to demonstrate the `with-X` pattern: "
+                "a macro that established a context binding and spliced "
+                "the caller's body into a `let` block automatically."
+            ),
+            need=(
+                "She needed `defmacro` so the call would expand into "
+                "a `let` with the pace binding and the body spliced in, "
+                "all before the runtime evaluated anything."
+            ),
+            mapping=(
+                "The `with-X` macro rewrites its call into a `let` that "
+                "establishes context; the scribe splices the body with "
+                "`~@body` before the runtime sees the expanded form."
+            ),
+            resolution=(
+                "the REPL returned the body's value — the `with-X` "
+                "rewrite had established the binding and run the body."
+            ),
+            tags=("story",),
+        ),
         # A `def-X-thing` style: macro that defs a named thing.
-        _ex("(do (defmacro def-pace [name v] `(def ~name ~v)) "
-            "(def-pace race-pace :slow) race-pace)", ":slow",
-            "defining and using a def-X-thing macro pattern",
-            "the value of the symbol defined by def-pace when expanded with the given name and keyword value",
-            goal="define a def-pace macro and use it to define and retrieve a value"),
+        SubjectExample(
+            form="(do (defmacro def-pace [name v] `(def ~name ~v)) "
+                 "(def-pace race-pace :slow) race-pace)",
+            expected=":slow",
+            concept_phrase="defining and using a def-X-thing macro pattern",
+            question_what="the value of the symbol defined by def-pace when expanded with the given name and keyword value",
+            goal_text="define a def-pace macro and use it to define and retrieve a value",
+            scenario=(
+                "Bramble wanted to see the `def-X-thing` pattern: a "
+                "macro that emitted a `def` form, letting callers "
+                "define named values with a domain-specific shorthand "
+                "rather than writing `def` by hand."
+            ),
+            need=(
+                "She needed `defmacro` to define a rewrite rule that "
+                "received a name and a value and emitted `(def name "
+                "value)` — the scribe's rewrite firing before the "
+                "runtime created the binding."
+            ),
+            mapping=(
+                "The `def-X-thing` macro pattern rewrites its call into "
+                "a `def` form with the caller's name and value unquoted; "
+                "the scribe emits the definition before the runtime "
+                "creates the global binding."
+            ),
+            resolution=(
+                "the REPL returned the keyword — the rewrite had emitted "
+                "the `def` form, the runtime had created the binding, "
+                "and the value was retrievable by name."
+            ),
+            tags=("story",),
+        ),
     ],
     subplots=_REWRITERULE_SUBPLOTS, plan_pool=_PLAN_G10,
 )

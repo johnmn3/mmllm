@@ -247,25 +247,24 @@ G7_04 = SubjectCurriculum(grade=7, subject_id="G7-04",
             question_what="what data map is attached to the ex-info",
             goal_text="throw an ex-info with attached data and extract the data map from the caught exception",
             scenario=(
-                "When Mossback's alarm horn sounded during a leap, she "
-                "wanted more than just the sound — she wanted a slip of "
-                "paper tied to the horn describing exactly what went "
-                "wrong. She threaded a data map onto the throw."
+                "Mossback's alarm horn carried a data-map slip for "
+                "extra context — not just a sound but a note describing "
+                "what went wrong. She needed to recover that note "
+                "after the catch-arm caught the alarm."
             ),
             need=(
-                "After the catch-arm caught the alarm, she needed to "
-                "peel the slip of paper off and read the data — the "
-                "error message alone was not enough."
+                "The slip had to come off the horn intact so she "
+                "could read the data rather than guessing from "
+                "the message alone."
             ),
             mapping=(
                 "`ex-info` attaches a data map to the exception like a "
-                "slip of paper on the alarm horn. `ex-data` in the "
-                "catch-arm peels the slip off and returns the map."
+                "slip on the horn. `ex-data` in the catch-arm "
+                "peels the slip off and returns the map."
             ),
             resolution=(
-                "the catch-arm returned the data map — the slip's "
-                "contents — giving Mossback exactly the context she "
-                "had packed into the throw."
+                "the data map came back — the slip's contents — "
+                "giving Mossback the context she had packed."
             ),
             tags=("story",),
         ),
@@ -901,14 +900,15 @@ G7_13 = SubjectCurriculum(grade=7, subject_id="G7-13",
                 "unrolling the entire scroll."
             ),
             need=(
-                "She wanted just the header string — the first line — "
-                "so she could check it before deciding whether to "
-                "read further."
+                "She wanted just the header string — the opening "
+                "entry — so she could check it before deciding "
+                "whether to read further."
             ),
             mapping=(
                 "`split-lines` breaks the string into a sequence; "
-                "`first` takes the opening element of that sequence "
-                "without materialising the rest — lazy scroll-reading."
+                "the head-taking function pulls only the leading "
+                "element from that sequence without materialising "
+                "the rest — lazy scroll-reading."
             ),
             resolution=(
                 "the header string came back — Mossback had the "

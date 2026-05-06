@@ -44,8 +44,8 @@ from mmllm.aesop.template import (
 FABLE_OPENERS: dict[str, tuple[str, ...]] = {
     "tortoise-hare": (
         "It was well known among the animals that the Hare boasted of his speed at every chance.",
-        "The Hare and the Tortoise had argued for as long as anyone could remember about who was truly the swifter.",
-        "There was once a Hare whose pride was as quick as her feet, and a Tortoise who said nothing about either.",
+        "The Hare and the Tortoise had argued for as long as anyone could remember about who was truly the faster.",
+        "There was once a Hare whose pride matched her feet in speed, and a Tortoise who said nothing about either.",
         "In that part of the forest, no one ever expected the Tortoise to outrun the Hare — yet today the question would be settled.",
         "The Hare loved nothing better than the sound of his own boasts; the Tortoise, nothing better than a long quiet walk.",
     ),
