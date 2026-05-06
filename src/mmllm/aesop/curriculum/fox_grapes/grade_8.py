@@ -16,6 +16,7 @@ from mmllm.aesop.curriculum.generator import (
 from mmllm.aesop.curriculum.fox_grapes.grade_1 import (
     _SHARED_SUBPLOTS as _G1_SUBPLOTS, _PLAN_POOL,
 )
+from mmllm.aesop.curriculum.fox_grapes._metaphor_pools import _CARRYINGCASE_SUBPLOTS, _GUILD_SUBPLOTS, _SORTINGTABLE_SUBPLOTS
 
 
 # ─────────────────────── grade-8 subplot extensions ───────────────────────
@@ -79,7 +80,7 @@ G8_01 = SubjectCurriculum(
             "speak applied to :tortoise via cond-dispatch",
             "what speak returns for :tortoise"),
     ],
-    subplots=_SUBPLOTS,
+    subplots=_GUILD_SUBPLOTS,
     plan_pool=_PLAN_POOL_G8,
 )
 
@@ -99,7 +100,7 @@ G8_02 = SubjectCurriculum(
             "a deftype Stone with a weight field, then read its weight",
             "the weight of a Stone constructed with 7"),
     ],
-    subplots=_SUBPLOTS,
+    subplots=_CARRYINGCASE_SUBPLOTS,
     plan_pool=_PLAN_POOL_G8,
 )
 
@@ -119,7 +120,7 @@ G8_03 = SubjectCurriculum(
             "the :name field of a Runner record",
             "the :name value of the Runner constructed with \"tortoise\""),
     ],
-    subplots=_SUBPLOTS,
+    subplots=_CARRYINGCASE_SUBPLOTS,
     plan_pool=_PLAN_POOL_G8,
 )
 
@@ -141,7 +142,7 @@ G8_04 = SubjectCurriculum(
             "a defprotocol Greet with one method hail",
             "whether Greet has been established"),
     ],
-    subplots=_SUBPLOTS,
+    subplots=_GUILD_SUBPLOTS,
     plan_pool=_PLAN_POOL_G8,
 )
 
@@ -165,7 +166,7 @@ G8_05 = SubjectCurriculum(
             "a Greet protocol extended to Long, then call hail on 7",
             "the keyword hail returns for the number 7"),
     ],
-    subplots=_SUBPLOTS,
+    subplots=_GUILD_SUBPLOTS,
     plan_pool=_PLAN_POOL_G8,
 )
 
@@ -193,7 +194,7 @@ G8_06 = SubjectCurriculum(
             "Pace dispatched on a string argument",
             "the keyword speed returns for the string \"x\""),
     ],
-    subplots=_SUBPLOTS,
+    subplots=_GUILD_SUBPLOTS,
     plan_pool=_PLAN_POOL_G8,
 )
 
@@ -217,7 +218,7 @@ G8_07 = SubjectCurriculum(
             "a Tortoise record implementing Pace with speed -> :steady",
             "the keyword speed returns for a Tortoise record"),
     ],
-    subplots=_SUBPLOTS,
+    subplots=_GUILD_SUBPLOTS,
     plan_pool=_PLAN_POOL_G8,
 )
 
@@ -241,7 +242,7 @@ G8_08 = SubjectCurriculum(
             "a defmulti tag dispatching on :kind",
             "what tag returns for {:kind :stone}"),
     ],
-    subplots=_SUBPLOTS,
+    subplots=_SORTINGTABLE_SUBPLOTS,
     plan_pool=_PLAN_POOL_G8,
 )
 
@@ -268,7 +269,7 @@ G8_09 = SubjectCurriculum(
             "a :default fallback method on pace, called with an unknown species",
             "what pace returns for {:species :owl} when :default falls through"),
     ],
-    subplots=_SUBPLOTS,
+    subplots=_SORTINGTABLE_SUBPLOTS,
     plan_pool=_PLAN_POOL_G8,
 )
 
@@ -293,7 +294,7 @@ G8_10 = SubjectCurriculum(
             "a Show protocol extended to String, called with \"hare\"",
             "the string show returns for \"hare\" via protocol"),
     ],
-    subplots=_SUBPLOTS,
+    subplots=_SORTINGTABLE_SUBPLOTS,
     plan_pool=_PLAN_POOL_G8,
 )
 
@@ -314,7 +315,7 @@ G8_11 = SubjectCurriculum(
             "an IPace protocol (Clojure analogue of a Java interface) extended to String",
             "the keyword run returns for \"hare\" via the protocol"),
     ],
-    subplots=_SUBPLOTS,
+    subplots=_GUILD_SUBPLOTS,
     plan_pool=_PLAN_POOL_G8,
 )
 
@@ -338,7 +339,7 @@ G8_12 = SubjectCurriculum(
             "extend-type attaching Pace to String",
             "the keyword speed returns for \"hare\" via extend-type"),
     ],
-    subplots=_SUBPLOTS,
+    subplots=_SORTINGTABLE_SUBPLOTS,
     plan_pool=_PLAN_POOL_G8,
 )
 
@@ -364,7 +365,7 @@ G8_13 = SubjectCurriculum(
             "a Tagged protocol method that pulls :t off this",
             "the :t value via tag-of for a Stone"),
     ],
-    subplots=_SUBPLOTS,
+    subplots=_GUILD_SUBPLOTS,
     plan_pool=_PLAN_POOL_G8,
 )
 
@@ -386,7 +387,7 @@ G8_14 = SubjectCurriculum(
             "two independent protocols A and B both extended to String",
             "the pair [a-op b-op] when each protocol is used independently"),
     ],
-    subplots=_SUBPLOTS,
+    subplots=_GUILD_SUBPLOTS,
     plan_pool=_PLAN_POOL_G8,
 )
 
@@ -410,7 +411,7 @@ G8_15 = SubjectCurriculum(
             "the predicate (isa? String Number)",
             "whether String isa? Number"),
     ],
-    subplots=_SUBPLOTS,
+    subplots=_SORTINGTABLE_SUBPLOTS,
     plan_pool=_PLAN_POOL_G8,
 )
 
@@ -437,7 +438,7 @@ G8_16 = SubjectCurriculum(
             "a Sound protocol with two implementations, called on a Tortoise",
             "the keyword cry returns for a Tortoise"),
     ],
-    subplots=_SUBPLOTS,
+    subplots=_GUILD_SUBPLOTS,
     plan_pool=_PLAN_POOL_G8,
 )
 

@@ -21,6 +21,15 @@ from mmllm.aesop.curriculum.fox_grapes.grade_1 import (
     _SHARED_SUBPLOTS as _G1_SHARED_SUBPLOTS,
     _PLAN_POOL,
 )
+from mmllm.aesop.curriculum.fox_grapes._metaphor_pools import (
+    _ACORN_SUBPLOTS,
+    _BASKET_SUBPLOTS,
+    _BEADSTRING_SUBPLOTS,
+    _CHALKMARK_SUBPLOTS,
+    _GATE_SUBPLOTS,
+    _SCRIBE_SUBPLOTS,
+    _TALLYWALK_SUBPLOTS,
+)
 
 
 # Extend grade-1's shared pool with two grade-2-specific subplots
@@ -68,7 +77,7 @@ G2_01 = SubjectCurriculum(
         _ex("(* 1 2 3 4 5)", 120,     "the product 1*2*3*4*5",    "the product of 1 through 5"),
         _ex("(+ 10 20 30)", 60,       "the sum (+ 10 20 30)",     "the sum of 10, 20, and 30"),
     ],
-    subplots=_SHARED_SUBPLOTS, plan_pool=_PLAN_POOL,
+    subplots=_ACORN_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
 
 
@@ -87,7 +96,7 @@ G2_02 = SubjectCurriculum(
             "the chain (>= 3 3 2)",
             "whether 3 ≥ 3 ≥ 2"),
     ],
-    subplots=_SHARED_SUBPLOTS, plan_pool=_PLAN_POOL,
+    subplots=_ACORN_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
 
 
@@ -102,7 +111,7 @@ G2_03 = SubjectCurriculum(
         _ex("(= 1 1 2)",    False, "the form (= 1 1 2)",    "whether 1,1,2 are all equal"),
         _ex("(not= 1 1 2)", True,  "the form (not= 1 1 2)", "whether at least one of 1,1,2 differs"),
     ],
-    subplots=_SHARED_SUBPLOTS, plan_pool=_PLAN_POOL,
+    subplots=_ACORN_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
 
 
@@ -117,7 +126,7 @@ G2_04 = SubjectCurriculum(
         _ex("(max 7 3 9 1 5)", 9, "the form (max 7 3 9 1 5)", "the maximum of 7, 3, 9, 1, 5"),
         _ex("(min -3 -1 -5)", -5, "the form (min -3 -1 -5)", "the minimum of -3, -1, -5"),
     ],
-    subplots=_SHARED_SUBPLOTS, plan_pool=_PLAN_POOL,
+    subplots=_ACORN_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
 
 
@@ -133,7 +142,7 @@ G2_05 = SubjectCurriculum(
         _ex("(rem 100 7)",  2, "the remainder of 100 divided by 7", "the result of (rem 100 7)"),
         _ex("(mod -7 3)",   2, "the form (mod -7 3)",              "the result of (mod -7 3)"),
     ],
-    subplots=_SHARED_SUBPLOTS, plan_pool=_PLAN_POOL,
+    subplots=_ACORN_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
 
 
@@ -148,7 +157,7 @@ G2_06 = SubjectCurriculum(
         _ex("(dec 0)", -1, "the form (dec 0)",  "the predecessor of 0"),
         _ex("(inc -1)", 0, "the form (inc -1)", "the successor of -1"),
     ],
-    subplots=_SHARED_SUBPLOTS, plan_pool=_PLAN_POOL,
+    subplots=_ACORN_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
 
 
@@ -164,7 +173,7 @@ G2_07 = SubjectCurriculum(
             "the form (abs (- 3 8))",
             "the absolute value of 3 minus 8"),
     ],
-    subplots=_SHARED_SUBPLOTS, plan_pool=_PLAN_POOL,
+    subplots=_ACORN_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
 
 
@@ -180,7 +189,7 @@ G2_08 = SubjectCurriculum(
         _ex("(- 1 1/3)", "2/3",
             "1 minus 1/3",             "the value of (- 1 1/3)"),
     ],
-    subplots=_SHARED_SUBPLOTS, plan_pool=_PLAN_POOL,
+    subplots=_ACORN_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
 
 
@@ -196,7 +205,7 @@ G2_09 = SubjectCurriculum(
         _ex("(/ 1.0 2)", 0.5, "the float division 1.0 ÷ 2",
             "the value of (/ 1.0 2)"),
     ],
-    subplots=_SHARED_SUBPLOTS, plan_pool=_PLAN_POOL,
+    subplots=_ACORN_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
 
 
@@ -210,7 +219,7 @@ G2_10 = SubjectCurriculum(
         _ex("(* 3 3 3 3)", 81,     "three to the fourth", "3 to the fourth power"),
         _ex("(* 10 10)", 100,      "ten squared", "10 squared"),
     ],
-    subplots=_SHARED_SUBPLOTS, plan_pool=_PLAN_POOL,
+    subplots=_ACORN_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
 
 
@@ -228,7 +237,7 @@ G2_11 = SubjectCurriculum(
         _ex('(str 1 "+" 2 "=" 3)', "1+2=3",
             'the form (str 1 "+" 2 "=" 3)', 'the joined string "1+2=3"'),
     ],
-    subplots=_SHARED_SUBPLOTS, plan_pool=_PLAN_POOL,
+    subplots=_BEADSTRING_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
 
 
@@ -247,7 +256,7 @@ G2_12 = SubjectCurriculum(
             'the form (print "x")',
             'the return value of calling print'),
     ],
-    subplots=_SHARED_SUBPLOTS, plan_pool=_PLAN_POOL,
+    subplots=_SCRIBE_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
 
 
@@ -269,7 +278,7 @@ G2_13 = SubjectCurriculum(
         _ex("(or nil false 5)",  5,      "the form (or nil false 5)",
             "the value of (or nil false 5)"),
     ],
-    subplots=_SHARED_SUBPLOTS, plan_pool=_PLAN_POOL,
+    subplots=_GATE_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
 
 
@@ -284,7 +293,7 @@ G2_14 = SubjectCurriculum(
         _ex("(not 0)",     False, "the form (not 0)",     "the value of (not 0)"),
         _ex("(not \"\")",  False, "the form (not \"\")",  "the value of (not \"\")"),
     ],
-    subplots=_SHARED_SUBPLOTS, plan_pool=_PLAN_POOL,
+    subplots=_GATE_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
 
 
@@ -302,7 +311,7 @@ G2_15 = SubjectCurriculum(
         _ex("(if false :truthy :falsey)", ":falsey", "the form (if false :truthy :falsey)",
             "which keyword (if false :truthy :falsey) returns"),
     ],
-    subplots=_SHARED_SUBPLOTS, plan_pool=_PLAN_POOL,
+    subplots=_GATE_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
 
 
@@ -316,7 +325,7 @@ G2_16 = SubjectCurriculum(
         _ex("(boolean nil)", False, "the form (boolean nil)", "the truthiness of nil"),
         _ex("(boolean false)", False, "the form (boolean false)", "the truthiness of false"),
     ],
-    subplots=_SHARED_SUBPLOTS, plan_pool=_PLAN_POOL,
+    subplots=_GATE_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
 
 
@@ -335,7 +344,7 @@ G2_17 = SubjectCurriculum(
             "the form (:missing {:fox 1})",
             "the value when a missing keyword is looked up"),
     ],
-    subplots=_SHARED_SUBPLOTS, plan_pool=_PLAN_POOL,
+    subplots=_BASKET_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
 
 
@@ -351,7 +360,7 @@ G2_18 = SubjectCurriculum(
         _ex("'(1 2 3)", [1, 2, 3], "the quoted list '(1 2 3)",
             "the value of the quoted list '(1 2 3)"),
     ],
-    subplots=_SHARED_SUBPLOTS, plan_pool=_PLAN_POOL,
+    subplots=_CHALKMARK_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
 
 
@@ -367,7 +376,7 @@ G2_19 = SubjectCurriculum(
             "the form (+ 99999999999 1)",
             "the result of 99999999999 plus 1"),
     ],
-    subplots=_SHARED_SUBPLOTS, plan_pool=_PLAN_POOL,
+    subplots=_ACORN_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
 
 
@@ -383,7 +392,7 @@ G2_20 = SubjectCurriculum(
         _ex("(count [])",            0, "the count of an empty vector",
             "the count of an empty vector"),
     ],
-    subplots=_SHARED_SUBPLOTS, plan_pool=_PLAN_POOL,
+    subplots=_TALLYWALK_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
 
 
@@ -400,7 +409,7 @@ G2_21 = SubjectCurriculum(
             "the form (subs \"grapes\" 0 3)",
             "the first three characters of \"grapes\""),
     ],
-    subplots=_SHARED_SUBPLOTS, plan_pool=_PLAN_POOL,
+    subplots=_BEADSTRING_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
 
 
@@ -420,7 +429,7 @@ G2_22 = SubjectCurriculum(
             "the form (quot (+ 100 50) 5)",
             "150 divided by 5"),
     ],
-    subplots=_SHARED_SUBPLOTS, plan_pool=_PLAN_POOL,
+    subplots=_ACORN_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
 
 

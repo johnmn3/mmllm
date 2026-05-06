@@ -16,6 +16,7 @@ from mmllm.aesop.curriculum.generator import (
 from mmllm.aesop.curriculum.fox_grapes.grade_1 import (
     _SHARED_SUBPLOTS as _G1_SUBPLOTS, _PLAN_POOL,
 )
+from mmllm.aesop.curriculum.fox_grapes._metaphor_pools import _BASKET_SUBPLOTS, _NOTEBOOK_SUBPLOTS, _RUNNERAHEAD_SUBPLOTS
 
 
 # ─────────────────────── grade-9 subplot extensions ───────────────────────
@@ -78,7 +79,7 @@ G9_01 = SubjectCurriculum(
             "binding v, calling (conj v 4), then returning v unchanged",
             "the original vector after conj"),
     ],
-    subplots=_SUBPLOTS,
+    subplots=_BASKET_SUBPLOTS,
     plan_pool=_PLAN_POOL_G9,
 )
 
@@ -99,7 +100,7 @@ G9_02 = SubjectCurriculum(
             "a progress atom reset to :running",
             "the value of progress after reset!"),
     ],
-    subplots=_SUBPLOTS,
+    subplots=_NOTEBOOK_SUBPLOTS,
     plan_pool=_PLAN_POOL_G9,
 )
 
@@ -123,7 +124,7 @@ G9_03 = SubjectCurriculum(
             "an atom reset! from :start to :done",
             "the value of the atom after reset!"),
     ],
-    subplots=_SUBPLOTS,
+    subplots=_NOTEBOOK_SUBPLOTS,
     plan_pool=_PLAN_POOL_G9,
 )
 
@@ -144,7 +145,7 @@ G9_04 = SubjectCurriculum(
             "compare-and-set! when the expected value doesn't match (no change)",
             "the value of the atom after a CAS that does not fire"),
     ],
-    subplots=_SUBPLOTS,
+    subplots=_NOTEBOOK_SUBPLOTS,
     plan_pool=_PLAN_POOL_G9,
 )
 
@@ -166,7 +167,7 @@ G9_05 = SubjectCurriculum(
             "an atom with a watch that appends each new value to a log",
             "the contents of the log after one swap"),
     ],
-    subplots=_SUBPLOTS,
+    subplots=_NOTEBOOK_SUBPLOTS,
     plan_pool=_PLAN_POOL_G9,
 )
 
@@ -186,7 +187,7 @@ G9_06 = SubjectCurriculum(
             "an atom with a number? validator, incremented once",
             "the value of the atom after a valid update"),
     ],
-    subplots=_SUBPLOTS,
+    subplots=_NOTEBOOK_SUBPLOTS,
     plan_pool=_PLAN_POOL_G9,
 )
 
@@ -207,7 +208,7 @@ G9_07 = SubjectCurriculum(
             "a ref ref-set to 7 inside dosync",
             "the value of the ref after ref-set 7"),
     ],
-    subplots=_SUBPLOTS,
+    subplots=_NOTEBOOK_SUBPLOTS,
     plan_pool=_PLAN_POOL_G9,
 )
 
@@ -230,7 +231,7 @@ G9_08 = SubjectCurriculum(
             "a ref altered by + 5 inside dosync",
             "the value of the ref after alter + 5"),
     ],
-    subplots=_SUBPLOTS,
+    subplots=_NOTEBOOK_SUBPLOTS,
     plan_pool=_PLAN_POOL_G9,
 )
 
@@ -251,7 +252,7 @@ G9_09 = SubjectCurriculum(
             "a ref updated via alter inside dosync",
             "the value of the ref after one dosync alter inc"),
     ],
-    subplots=_SUBPLOTS,
+    subplots=_NOTEBOOK_SUBPLOTS,
     plan_pool=_PLAN_POOL_G9,
 )
 
@@ -272,7 +273,7 @@ G9_10 = SubjectCurriculum(
             "an agent sent (+ 10) and awaited",
             "the value of the agent after send + 10 and await"),
     ],
-    subplots=_SUBPLOTS,
+    subplots=_RUNNERAHEAD_SUBPLOTS,
     plan_pool=_PLAN_POOL_G9,
 )
 
@@ -292,7 +293,7 @@ G9_11 = SubjectCurriculum(
             "send-off used on an agent, then awaited",
             "the agent's value after send-off inc"),
     ],
-    subplots=_SUBPLOTS,
+    subplots=_RUNNERAHEAD_SUBPLOTS,
     plan_pool=_PLAN_POOL_G9,
 )
 
@@ -308,7 +309,7 @@ G9_12 = SubjectCurriculum(
             "two send inc calls then await before deref",
             "the agent's value after two sends and await"),
     ],
-    subplots=_SUBPLOTS,
+    subplots=_RUNNERAHEAD_SUBPLOTS,
     plan_pool=_PLAN_POOL_G9,
 )
 
@@ -328,7 +329,7 @@ G9_13 = SubjectCurriculum(
             "a future computing (* 6 7), dereferenced",
             "the value of the future for (* 6 7)"),
     ],
-    subplots=_SUBPLOTS,
+    subplots=_RUNNERAHEAD_SUBPLOTS,
     plan_pool=_PLAN_POOL_G9,
 )
 
@@ -348,7 +349,7 @@ G9_14 = SubjectCurriculum(
             "deref via the function form on an atom",
             "the value of the atom via the deref function"),
     ],
-    subplots=_SUBPLOTS,
+    subplots=_NOTEBOOK_SUBPLOTS,
     plan_pool=_PLAN_POOL_G9,
 )
 
@@ -368,7 +369,7 @@ G9_15 = SubjectCurriculum(
             "a promise delivered with 42",
             "the value of the promise after deliver 42"),
     ],
-    subplots=_SUBPLOTS,
+    subplots=_RUNNERAHEAD_SUBPLOTS,
     plan_pool=_PLAN_POOL_G9,
 )
 
@@ -388,7 +389,7 @@ G9_16 = SubjectCurriculum(
             "a volatile! reset via vreset!",
             "the value of the volatile after vreset! 99"),
     ],
-    subplots=_SUBPLOTS,
+    subplots=_NOTEBOOK_SUBPLOTS,
     plan_pool=_PLAN_POOL_G9,
 )
 
@@ -408,7 +409,7 @@ G9_17 = SubjectCurriculum(
             "the value of *p* AFTER the binding form exits",
             "the original value of *p* once binding has unwound"),
     ],
-    subplots=_SUBPLOTS,
+    subplots=_NOTEBOOK_SUBPLOTS,
     plan_pool=_PLAN_POOL_G9,
 )
 
@@ -429,7 +430,7 @@ G9_18 = SubjectCurriculum(
             "a locking form whose body is just the literal 42",
             "the value the locking form returns"),
     ],
-    subplots=_SUBPLOTS,
+    subplots=_NOTEBOOK_SUBPLOTS,
     plan_pool=_PLAN_POOL_G9,
 )
 

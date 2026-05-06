@@ -11,6 +11,14 @@ from mmllm.aesop.curriculum.generator import (
     SubjectCurriculum, SubjectExample, SubplotTemplate,
 )
 from mmllm.aesop.curriculum.fox_grapes.grade_1 import _SHARED_SUBPLOTS as _G1_SUBPLOTS, _PLAN_POOL
+from mmllm.aesop.curriculum.fox_grapes._metaphor_pools import (
+    _CIRCUIT_SUBPLOTS,
+    _FORK_SUBPLOTS,
+    _GATE_SUBPLOTS,
+    _RECIPE_SUBPLOTS,
+    _SIEVE_SUBPLOTS,
+    _TALLYWALK_SUBPLOTS,
+)
 
 
 _HOF_SUBPLOTS: list[SubplotTemplate] = list(_G1_SUBPLOTS) + [
@@ -46,7 +54,7 @@ G5_01 = SubjectCurriculum(grade=5, subject_id="G5-01",
         _ex("(if true :a :b)",  ":a", "the form (if true :a :b)",  "which of :a or :b is returned"),
         _ex("(if false :a :b)", ":b", "the form (if false :a :b)", "which of :a or :b is returned"),
         _ex("(if (> 5 3) :a :b)", ":a", "the form (if (> 5 3) :a :b)", "the if's branch"),
-    ], subplots=_HOF_SUBPLOTS, plan_pool=_PLAN_G5)
+    ], subplots=_FORK_SUBPLOTS, plan_pool=_PLAN_G5)
 
 
 G5_02 = SubjectCurriculum(grade=5, subject_id="G5-02",
@@ -54,7 +62,7 @@ G5_02 = SubjectCurriculum(grade=5, subject_id="G5-02",
     examples=[
         _ex("(+ 1 (if true 10 20))", 11,
             "the form (+ 1 (if true 10 20))", "the result of adding 1 to the if expression"),
-    ], subplots=_HOF_SUBPLOTS, plan_pool=_PLAN_G5)
+    ], subplots=_FORK_SUBPLOTS, plan_pool=_PLAN_G5)
 
 
 G5_03 = SubjectCurriculum(grade=5, subject_id="G5-03",
@@ -62,7 +70,7 @@ G5_03 = SubjectCurriculum(grade=5, subject_id="G5-03",
     examples=[
         _ex("(when true :yes)", ":yes", "the form (when true :yes)", "the value of (when true :yes)"),
         _ex("(when false :yes)", None, "the form (when false :yes)", "the value of (when false :yes)"),
-    ], subplots=_HOF_SUBPLOTS, plan_pool=_PLAN_G5)
+    ], subplots=_FORK_SUBPLOTS, plan_pool=_PLAN_G5)
 
 
 G5_04 = SubjectCurriculum(grade=5, subject_id="G5-04",
@@ -70,7 +78,7 @@ G5_04 = SubjectCurriculum(grade=5, subject_id="G5-04",
     examples=[
         _ex("(cond (= 1 2) :a (= 1 1) :b :else :c)", ":b",
             "the cond form", "which clause of the cond fires"),
-    ], subplots=_HOF_SUBPLOTS, plan_pool=_PLAN_G5)
+    ], subplots=_FORK_SUBPLOTS, plan_pool=_PLAN_G5)
 
 
 G5_05 = SubjectCurriculum(grade=5, subject_id="G5-05",
@@ -78,7 +86,7 @@ G5_05 = SubjectCurriculum(grade=5, subject_id="G5-05",
     examples=[
         _ex("(cond false :a false :b :else :c)", ":c",
             "the cond falling through to :else", "the :else value"),
-    ], subplots=_HOF_SUBPLOTS, plan_pool=_PLAN_G5)
+    ], subplots=_FORK_SUBPLOTS, plan_pool=_PLAN_G5)
 
 
 G5_06 = SubjectCurriculum(grade=5, subject_id="G5-06",
@@ -88,7 +96,7 @@ G5_06 = SubjectCurriculum(grade=5, subject_id="G5-06",
             "the case form", "the matched branch"),
         _ex("(case 99 1 :one 2 :two :default)", ":default",
             "case falling through to default", "the default branch"),
-    ], subplots=_HOF_SUBPLOTS, plan_pool=_PLAN_G5)
+    ], subplots=_FORK_SUBPLOTS, plan_pool=_PLAN_G5)
 
 
 G5_07 = SubjectCurriculum(grade=5, subject_id="G5-07",
@@ -96,14 +104,14 @@ G5_07 = SubjectCurriculum(grade=5, subject_id="G5-07",
     examples=[
         _ex("(and 1 2 3)", 3, "the form (and 1 2 3) returns last truthy", "the last truthy value"),
         _ex("(or nil false :found)", ":found", "the form (or nil false :found)", "the first truthy value"),
-    ], subplots=_HOF_SUBPLOTS, plan_pool=_PLAN_G5)
+    ], subplots=_GATE_SUBPLOTS, plan_pool=_PLAN_G5)
 
 
 G5_08 = SubjectCurriculum(grade=5, subject_id="G5-08",
     subject_title="not", fable="fox-grapes",
     examples=[
         _ex("(not (> 1 2))", True, "the form (not (> 1 2))", "the negated comparison"),
-    ], subplots=_HOF_SUBPLOTS, plan_pool=_PLAN_G5)
+    ], subplots=_GATE_SUBPLOTS, plan_pool=_PLAN_G5)
 
 
 G5_09 = SubjectCurriculum(grade=5, subject_id="G5-09",
@@ -111,7 +119,7 @@ G5_09 = SubjectCurriculum(grade=5, subject_id="G5-09",
     examples=[
         _ex("((fn [f x] (f (f x))) inc 5)", 7,
             "applying f twice to x where f is inc", "the result of inc applied twice"),
-    ], subplots=_HOF_SUBPLOTS, plan_pool=_PLAN_G5)
+    ], subplots=_RECIPE_SUBPLOTS, plan_pool=_PLAN_G5)
 
 
 G5_10 = SubjectCurriculum(grade=5, subject_id="G5-10",
@@ -121,7 +129,7 @@ G5_10 = SubjectCurriculum(grade=5, subject_id="G5-10",
             "the form (map inc [1 2 3])", "[1 2 3] each incremented"),
         _ex("(map #(* % %) [1 2 3 4])", [1,4,9,16],
             "the form (map #(* % %) [1 2 3 4])", "[1 2 3 4] each squared"),
-    ], subplots=_HOF_SUBPLOTS, plan_pool=_PLAN_G5)
+    ], subplots=_SIEVE_SUBPLOTS, plan_pool=_PLAN_G5)
 
 
 G5_11 = SubjectCurriculum(grade=5, subject_id="G5-11",
@@ -131,7 +139,7 @@ G5_11 = SubjectCurriculum(grade=5, subject_id="G5-11",
             "the form (filter even? [1 2 3 4])", "the even numbers from [1 2 3 4]"),
         _ex("(filter pos? [-2 -1 0 1 2])", [1,2],
             "the form (filter pos? ...)", "the positive numbers"),
-    ], subplots=_HOF_SUBPLOTS, plan_pool=_PLAN_G5)
+    ], subplots=_SIEVE_SUBPLOTS, plan_pool=_PLAN_G5)
 
 
 G5_12 = SubjectCurriculum(grade=5, subject_id="G5-12",
@@ -141,7 +149,7 @@ G5_12 = SubjectCurriculum(grade=5, subject_id="G5-12",
         _ex("(reduce * [1 2 3 4 5])", 120,"the form (reduce * [1 2 3 4 5])", "5!"),
         _ex("(reduce max [3 1 4 1 5 9 2 6])", 9,
             "the form (reduce max [...])", "the maximum"),
-    ], subplots=_HOF_SUBPLOTS, plan_pool=_PLAN_G5)
+    ], subplots=_TALLYWALK_SUBPLOTS, plan_pool=_PLAN_G5)
 
 
 G5_13 = SubjectCurriculum(grade=5, subject_id="G5-13",
@@ -152,7 +160,7 @@ G5_13 = SubjectCurriculum(grade=5, subject_id="G5-13",
         _ex("(reduce + 0 [])", 0,
             "the form (reduce + 0 [])",
             "the value when reducing over empty seq with init 0"),
-    ], subplots=_HOF_SUBPLOTS, plan_pool=_PLAN_G5)
+    ], subplots=_TALLYWALK_SUBPLOTS, plan_pool=_PLAN_G5)
 
 
 G5_14 = SubjectCurriculum(grade=5, subject_id="G5-14",
@@ -162,7 +170,7 @@ G5_14 = SubjectCurriculum(grade=5, subject_id="G5-14",
             "the form (apply + [1 2 3 4])", "+ applied to the elements of the vector"),
         _ex("(apply max [3 1 4 1 5])", 5,
             "the form (apply max ...)", "max of the vector via apply"),
-    ], subplots=_HOF_SUBPLOTS, plan_pool=_PLAN_G5)
+    ], subplots=_RECIPE_SUBPLOTS, plan_pool=_PLAN_G5)
 
 
 G5_15 = SubjectCurriculum(grade=5, subject_id="G5-15",
@@ -172,7 +180,7 @@ G5_15 = SubjectCurriculum(grade=5, subject_id="G5-15",
             "the form ((comp inc inc) 5)", "inc twice applied to 5"),
         _ex("((comp str inc) 9)", "10",
             "the form ((comp str inc) 9)", "inc then str of 9"),
-    ], subplots=_HOF_SUBPLOTS, plan_pool=_PLAN_G5)
+    ], subplots=_RECIPE_SUBPLOTS, plan_pool=_PLAN_G5)
 
 
 G5_16 = SubjectCurriculum(grade=5, subject_id="G5-16",
@@ -182,7 +190,7 @@ G5_16 = SubjectCurriculum(grade=5, subject_id="G5-16",
             "the form ((partial + 10) 5)", "10 + 5"),
         _ex("(map (partial * 3) [1 2 3])", [3,6,9],
             "(partial * 3) mapped over [1 2 3]", "each element times 3"),
-    ], subplots=_HOF_SUBPLOTS, plan_pool=_PLAN_G5)
+    ], subplots=_RECIPE_SUBPLOTS, plan_pool=_PLAN_G5)
 
 
 G5_17 = SubjectCurriculum(grade=5, subject_id="G5-17",
@@ -190,7 +198,7 @@ G5_17 = SubjectCurriculum(grade=5, subject_id="G5-17",
     examples=[
         _ex("((juxt inc dec) 5)", [6,4],
             "the form ((juxt inc dec) 5)", "inc and dec of 5 in parallel"),
-    ], subplots=_HOF_SUBPLOTS, plan_pool=_PLAN_G5)
+    ], subplots=_RECIPE_SUBPLOTS, plan_pool=_PLAN_G5)
 
 
 G5_18 = SubjectCurriculum(grade=5, subject_id="G5-18",
@@ -200,7 +208,7 @@ G5_18 = SubjectCurriculum(grade=5, subject_id="G5-18",
             "the form (some even? [...])", "whether any element is even"),
         _ex("(some neg? [1 2 3])", None,
             "the form (some neg? [1 2 3])", "the value when no element is negative (it's nil)"),
-    ], subplots=_HOF_SUBPLOTS, plan_pool=_PLAN_G5)
+    ], subplots=_SIEVE_SUBPLOTS, plan_pool=_PLAN_G5)
 
 
 G5_19 = SubjectCurriculum(grade=5, subject_id="G5-19",
@@ -208,7 +216,7 @@ G5_19 = SubjectCurriculum(grade=5, subject_id="G5-19",
     examples=[
         _ex("(every? pos? [1 2 3])", True, "the form (every? pos? [1 2 3])", "whether all are positive"),
         _ex("(every? even? [1 2 3])", False, "the form (every? even? [1 2 3])", "whether all are even"),
-    ], subplots=_HOF_SUBPLOTS, plan_pool=_PLAN_G5)
+    ], subplots=_SIEVE_SUBPLOTS, plan_pool=_PLAN_G5)
 
 
 G5_20 = SubjectCurriculum(grade=5, subject_id="G5-20",
@@ -218,7 +226,7 @@ G5_20 = SubjectCurriculum(grade=5, subject_id="G5-20",
             "the form (take 3 ...)", "the first three elements"),
         _ex("(drop 2 [10 20 30 40 50])", [30,40,50],
             "the form (drop 2 ...)", "all but the first two"),
-    ], subplots=_HOF_SUBPLOTS, plan_pool=_PLAN_G5)
+    ], subplots=_SIEVE_SUBPLOTS, plan_pool=_PLAN_G5)
 
 
 G5_21 = SubjectCurriculum(grade=5, subject_id="G5-21",
@@ -228,7 +236,7 @@ G5_21 = SubjectCurriculum(grade=5, subject_id="G5-21",
             "the form (distinct [1 1 2 3 3 4])", "the deduplicated seq"),
         _ex("(sort [3 1 2])", [1,2,3],
             "the form (sort [3 1 2])", "the sorted seq"),
-    ], subplots=_HOF_SUBPLOTS, plan_pool=_PLAN_G5)
+    ], subplots=_SIEVE_SUBPLOTS, plan_pool=_PLAN_G5)
 
 
 G5_22 = SubjectCurriculum(grade=5, subject_id="G5-22",
@@ -237,7 +245,7 @@ G5_22 = SubjectCurriculum(grade=5, subject_id="G5-22",
         _ex("(loop [n 5 acc 1] (if (zero? n) acc (recur (dec n) (* acc n))))", 120,
             "a loop computing factorial of 5 via recur",
             "5! computed via loop/recur"),
-    ], subplots=_HOF_SUBPLOTS, plan_pool=_PLAN_G5)
+    ], subplots=_CIRCUIT_SUBPLOTS, plan_pool=_PLAN_G5)
 
 
 SUBJECTS = {s.subject_id: s for s in (

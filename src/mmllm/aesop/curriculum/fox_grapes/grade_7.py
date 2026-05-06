@@ -16,6 +16,7 @@ from mmllm.aesop.curriculum.generator import (
     SubjectCurriculum, SubjectExample, SubplotTemplate,
 )
 from mmllm.aesop.curriculum.fox_grapes.grade_1 import _SHARED_SUBPLOTS as _G1_SUBPLOTS, _PLAN_POOL
+from mmllm.aesop.curriculum.fox_grapes._metaphor_pools import _SAFETYNET_SUBPLOTS, _SCROLL_SUBPLOTS, _TOOLSHED_SUBPLOTS
 
 
 _ERR_SUBPLOTS: list[SubplotTemplate] = list(_G1_SUBPLOTS) + [
@@ -73,7 +74,7 @@ G7_01 = SubjectCurriculum(grade=7, subject_id="G7-01",
             ":thrown",
             "throwing an exception that is then caught",
             "the keyword :thrown returned after the throw is caught"),
-    ], subplots=_ERR_SUBPLOTS, plan_pool=_PLAN_G7)
+    ], subplots=_SAFETYNET_SUBPLOTS, plan_pool=_PLAN_G7)
 
 
 # G7-02 — try/catch
@@ -86,7 +87,7 @@ G7_02 = SubjectCurriculum(grade=7, subject_id="G7-02",
         _ex("(try 42 (catch Exception e :caught))", 42,
             "a try with no error — the body's value is returned",
             "the value 42 from the no-error branch"),
-    ], subplots=_ERR_SUBPLOTS, plan_pool=_PLAN_G7)
+    ], subplots=_SAFETYNET_SUBPLOTS, plan_pool=_PLAN_G7)
 
 
 # G7-03 — try/finally
@@ -100,7 +101,7 @@ G7_03 = SubjectCurriculum(grade=7, subject_id="G7-03",
             ":caught",
             "a finally that runs before the outer catch fires",
             "the keyword :caught (the outer catch handles the divide-by-zero)"),
-    ], subplots=_ERR_SUBPLOTS, plan_pool=_PLAN_G7)
+    ], subplots=_SAFETYNET_SUBPLOTS, plan_pool=_PLAN_G7)
 
 
 # G7-04 — ex-info
@@ -115,7 +116,7 @@ G7_04 = SubjectCurriculum(grade=7, subject_id="G7-04",
             ":v",
             "extracting a single key from the caught ex-info's data",
             "the value :v at key :k in the ex-data"),
-    ], subplots=_ERR_SUBPLOTS, plan_pool=_PLAN_G7)
+    ], subplots=_SAFETYNET_SUBPLOTS, plan_pool=_PLAN_G7)
 
 
 # G7-05 — nil punning
@@ -134,7 +135,7 @@ G7_05 = SubjectCurriculum(grade=7, subject_id="G7-05",
         _ex("(count nil)", 0,
             "counting a nil collection",
             "the count of nil, which is 0"),
-    ], subplots=_ERR_SUBPLOTS, plan_pool=_PLAN_G7)
+    ], subplots=_SAFETYNET_SUBPLOTS, plan_pool=_PLAN_G7)
 
 
 # G7-06 — pre/post conditions (we exercise via the {:pre [...]} on
@@ -149,7 +150,7 @@ G7_06 = SubjectCurriculum(grade=7, subject_id="G7-06",
             ":pre-failed",
             "a :pre condition that fails, caught by surrounding try",
             "the keyword :pre-failed when the pre-check rejects -1"),
-    ], subplots=_ERR_SUBPLOTS, plan_pool=_PLAN_G7)
+    ], subplots=_SAFETYNET_SUBPLOTS, plan_pool=_PLAN_G7)
 
 
 # G7-07 — assert
@@ -163,7 +164,7 @@ G7_07 = SubjectCurriculum(grade=7, subject_id="G7-07",
             ":asserted",
             "an assert that fails, caught by surrounding try",
             "the keyword :asserted when the assertion rejects (= 1 2)"),
-    ], subplots=_ERR_SUBPLOTS, plan_pool=_PLAN_G7)
+    ], subplots=_SAFETYNET_SUBPLOTS, plan_pool=_PLAN_G7)
 
 
 # G7-08 — prn / pprint (these side-effect to *out*; we use with-out-str
@@ -177,7 +178,7 @@ G7_08 = SubjectCurriculum(grade=7, subject_id="G7-08",
         _ex("(with-out-str (prn :fox))", ":fox\n",
             "capturing prn applied to the keyword :fox",
             "the string \":fox\\n\" produced by prn"),
-    ], subplots=_ERR_SUBPLOTS, plan_pool=_PLAN_G7)
+    ], subplots=_SCROLL_SUBPLOTS, plan_pool=_PLAN_G7)
 
 
 # G7-09 — tap> (returns true; we exercise that effect).
@@ -190,7 +191,7 @@ G7_09 = SubjectCurriculum(grade=7, subject_id="G7-09",
         _ex("(tap> 42)", True,
             "tapping the number 42 into the tap pool",
             "the boolean true (tap> always returns true on send)"),
-    ], subplots=_ERR_SUBPLOTS, plan_pool=_PLAN_G7)
+    ], subplots=_SCROLL_SUBPLOTS, plan_pool=_PLAN_G7)
 
 
 # G7-10 — doc / source (REPL helpers; we exercise via a metadata
@@ -201,7 +202,7 @@ G7_10 = SubjectCurriculum(grade=7, subject_id="G7-10",
         _ex("(:doc (meta '^{:doc \"adds two\"} plus))", "adds two",
             "the :doc metadata on a symbol",
             "the string \"adds two\" from the metadata"),
-    ], subplots=_ERR_SUBPLOTS, plan_pool=_PLAN_G7)
+    ], subplots=_SCROLL_SUBPLOTS, plan_pool=_PLAN_G7)
 
 
 # G7-11 — Reading stack traces (we exercise via inspecting the message
@@ -217,7 +218,7 @@ G7_11 = SubjectCurriculum(grade=7, subject_id="G7-11",
             "trouble",
             "the message of a caught ex-info",
             "the string \"trouble\""),
-    ], subplots=_ERR_SUBPLOTS, plan_pool=_PLAN_G7)
+    ], subplots=_SAFETYNET_SUBPLOTS, plan_pool=_PLAN_G7)
 
 
 # G7-12 — slurp / spit (file IO; we exercise the inverse-of-spit:
@@ -233,7 +234,7 @@ G7_12 = SubjectCurriculum(grade=7, subject_id="G7-12",
         _ex("(clojure.string/split \"a\\nb\\nc\" #\"\\n\")", ["a", "b", "c"],
             "splitting a slurped-style string on newlines",
             "the vector [\"a\" \"b\" \"c\"] of three lines"),
-    ], subplots=_ERR_SUBPLOTS, plan_pool=_PLAN_G7)
+    ], subplots=_SCROLL_SUBPLOTS, plan_pool=_PLAN_G7)
 
 
 # G7-13 — line-seq (we exercise via the in-memory equivalent: a vector
@@ -248,7 +249,7 @@ G7_13 = SubjectCurriculum(grade=7, subject_id="G7-13",
             "first",
             "the first line of a small text",
             "the string \"first\""),
-    ], subplots=_ERR_SUBPLOTS, plan_pool=_PLAN_G7)
+    ], subplots=_SCROLL_SUBPLOTS, plan_pool=_PLAN_G7)
 
 
 # G7-14 — with-open (we exercise the macro-shape via with-out-str,
@@ -259,7 +260,7 @@ G7_14 = SubjectCurriculum(grade=7, subject_id="G7-14",
         _ex("(with-out-str (println \"fox\"))", "fox\n",
             "a resource-scoped capture of println output",
             "the string \"fox\\n\" from the scoped block"),
-    ], subplots=_ERR_SUBPLOTS, plan_pool=_PLAN_G7)
+    ], subplots=_SCROLL_SUBPLOTS, plan_pool=_PLAN_G7)
 
 
 # G7-15 — *in* / *out* (we exercise *out* via with-out-str; *in* is
@@ -273,7 +274,7 @@ G7_15 = SubjectCurriculum(grade=7, subject_id="G7-15",
         _ex("(with-out-str (println))", "\n",
             "a bare println redirected through *out*",
             "the string \"\\n\""),
-    ], subplots=_ERR_SUBPLOTS, plan_pool=_PLAN_G7)
+    ], subplots=_SCROLL_SUBPLOTS, plan_pool=_PLAN_G7)
 
 
 # G7-16 — edn read
@@ -290,7 +291,7 @@ G7_16 = SubjectCurriculum(grade=7, subject_id="G7-16",
             [":fox", ":grapes"],
             "reading an edn vector of keywords",
             "the vector [:fox :grapes]"),
-    ], subplots=_ERR_SUBPLOTS, plan_pool=_PLAN_G7)
+    ], subplots=_SCROLL_SUBPLOTS, plan_pool=_PLAN_G7)
 
 
 # G7-17 — JSON roundtrip (we exercise via edn-shaped data; the actual
@@ -306,7 +307,7 @@ G7_17 = SubjectCurriculum(grade=7, subject_id="G7-17",
         _ex("(clojure.edn/read-string (pr-str [1 2 3]))", [1, 2, 3],
             "round-tripping a vector through pr-str then edn/read-string",
             "the vector [1 2 3]"),
-    ], subplots=_ERR_SUBPLOTS, plan_pool=_PLAN_G7)
+    ], subplots=_SCROLL_SUBPLOTS, plan_pool=_PLAN_G7)
 
 
 # G7-18 — Shell command (host-specific; we exercise via a non-shell
@@ -322,7 +323,7 @@ G7_18 = SubjectCurriculum(grade=7, subject_id="G7-18",
             2,
             "the number of args in a shell-call descriptor",
             "the count of args, which is 2"),
-    ], subplots=_ERR_SUBPLOTS, plan_pool=_PLAN_G7)
+    ], subplots=_TOOLSHED_SUBPLOTS, plan_pool=_PLAN_G7)
 
 
 # ─────────────────────── registry ───────────────────────

@@ -22,6 +22,13 @@ from __future__ import annotations
 from mmllm.aesop.curriculum.generator import (
     SubjectCurriculum, SubjectExample, SubplotTemplate,
 )
+from mmllm.aesop.curriculum.fox_grapes._metaphor_pools import (
+    _ACORN_SUBPLOTS,
+    _CHALKMARK_SUBPLOTS,
+    _GATE_SUBPLOTS,
+    _SAFETYNET_SUBPLOTS,
+    _SCRIBE_SUBPLOTS,
+)
 
 
 # ─────────────────────── shared subplot pool ───────────────────────
@@ -479,7 +486,7 @@ G1_09 = SubjectCurriculum(
             "the equality of two 'fox symbols",
             "whether 'fox equals 'fox"),
     ],
-    subplots=_SHARED_SUBPLOTS,
+    subplots=_CHALKMARK_SUBPLOTS,
     plan_pool=_PLAN_POOL,
 )
 
@@ -497,7 +504,7 @@ G1_10 = SubjectCurriculum(
             "the literal 42 with a trailing comment",
             "the value of 42"),
     ],
-    subplots=_SHARED_SUBPLOTS,
+    subplots=_SCRIBE_SUBPLOTS,
     plan_pool=_PLAN_POOL,
 )
 
@@ -515,7 +522,7 @@ G1_11 = SubjectCurriculum(
             "the form (+ 1 2) split across lines",
             "the result of the form"),
     ],
-    subplots=_SHARED_SUBPLOTS,
+    subplots=_SCRIBE_SUBPLOTS,
     plan_pool=_PLAN_POOL,
 )
 
@@ -533,7 +540,7 @@ G1_12 = SubjectCurriculum(
             "the form (* (+ 1 2) 3)",
             "the result of (* (+ 1 2) 3)"),
     ],
-    subplots=_SHARED_SUBPLOTS,
+    subplots=_SCRIBE_SUBPLOTS,
     plan_pool=_PLAN_POOL,
 )
 
@@ -555,7 +562,7 @@ G1_13 = SubjectCurriculum(
         _ex("(+ 7 8)",  15,   "the form (+ 7 8)",    "the result of (+ 7 8)"),
         _ex("(- 20 7)", 13,   "the form (- 20 7)",   "the result of (- 20 7)"),
     ],
-    subplots=_SHARED_SUBPLOTS,
+    subplots=_ACORN_SUBPLOTS,
     plan_pool=_PLAN_POOL,
 )
 
@@ -579,7 +586,7 @@ G1_14 = SubjectCurriculum(
             "the sum of two products",
             "the result of (+ (* 2 3) (* 4 5))"),
     ],
-    subplots=_SHARED_SUBPLOTS,
+    subplots=_ACORN_SUBPLOTS,
     plan_pool=_PLAN_POOL,
 )
 
@@ -605,7 +612,7 @@ G1_15 = SubjectCurriculum(
             "the multi-arg equality (= 1 1 1 1)",
             "the value of (= 1 1 1 1)"),
     ],
-    subplots=_SHARED_SUBPLOTS,
+    subplots=_GATE_SUBPLOTS,
     plan_pool=_PLAN_POOL,
 )
 
@@ -629,7 +636,7 @@ G1_16 = SubjectCurriculum(
         _ex("(neg? 4)",   False, "the predicate (neg? 4)",
             "whether 4 is negative"),
     ],
-    subplots=_SHARED_SUBPLOTS,
+    subplots=_ACORN_SUBPLOTS,
     plan_pool=_PLAN_POOL,
 )
 
@@ -647,7 +654,7 @@ G1_17 = SubjectCurriculum(
             "the form (+ 1 2)",
             "the result of (+ 1 2)"),
     ],
-    subplots=_SHARED_SUBPLOTS,
+    subplots=_SCRIBE_SUBPLOTS,
     plan_pool=_PLAN_POOL,
 )
 
@@ -665,7 +672,7 @@ G1_18 = SubjectCurriculum(
             "the form (* 7 6)",
             "the result of (* 7 6)"),
     ],
-    subplots=_SHARED_SUBPLOTS,
+    subplots=_SAFETYNET_SUBPLOTS,
     plan_pool=_PLAN_POOL,
 )
 

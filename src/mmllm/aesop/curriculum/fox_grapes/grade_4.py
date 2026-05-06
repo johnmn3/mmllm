@@ -12,6 +12,7 @@ from mmllm.aesop.curriculum.generator import (
     SubjectCurriculum, SubjectExample, SubplotTemplate,
 )
 from mmllm.aesop.curriculum.fox_grapes.grade_1 import _SHARED_SUBPLOTS as _G1_SUBPLOTS, _PLAN_POOL
+from mmllm.aesop.curriculum.fox_grapes._metaphor_pools import _BASKET_SUBPLOTS, _SIEVE_SUBPLOTS
 
 
 _COLL_SUBPLOTS: list[SubplotTemplate] = list(_G1_SUBPLOTS) + [
@@ -52,7 +53,7 @@ G4_01 = SubjectCurriculum(grade=4, subject_id="G4-01",
         _ex("[1 2 3]", [1,2,3],   "the vector [1 2 3]",   "the value [1 2 3]"),
         _ex("[]",      [],         "the empty vector []",  "the empty vector"),
         _ex("[\"a\" \"b\"]", ["a","b"], "the vector of strings", "the vector [\"a\" \"b\"]"),
-    ], subplots=_COLL_SUBPLOTS, plan_pool=_PLAN_G4)
+    ], subplots=_BASKET_SUBPLOTS, plan_pool=_PLAN_G4)
 
 
 G4_02 = SubjectCurriculum(grade=4, subject_id="G4-02",
@@ -60,7 +61,7 @@ G4_02 = SubjectCurriculum(grade=4, subject_id="G4-02",
     examples=[
         _ex("(nth [10 20 30] 0)", 10, "the form (nth [10 20 30] 0)", "the value at index 0"),
         _ex("(nth [10 20 30] 2)", 30, "the form (nth [10 20 30] 2)", "the value at index 2"),
-    ], subplots=_COLL_SUBPLOTS, plan_pool=_PLAN_G4)
+    ], subplots=_BASKET_SUBPLOTS, plan_pool=_PLAN_G4)
 
 
 G4_03 = SubjectCurriculum(grade=4, subject_id="G4-03",
@@ -68,7 +69,7 @@ G4_03 = SubjectCurriculum(grade=4, subject_id="G4-03",
     examples=[
         _ex("(conj [1 2] 3)",       [1,2,3],   "the form (conj [1 2] 3)",      "[1 2] with 3 conjed"),
         _ex("(conj [] :fox)",       [":fox"],  "the form (conj [] :fox)",      "the empty vector with :fox conjed"),
-    ], subplots=_COLL_SUBPLOTS, plan_pool=_PLAN_G4)
+    ], subplots=_BASKET_SUBPLOTS, plan_pool=_PLAN_G4)
 
 
 G4_04 = SubjectCurriculum(grade=4, subject_id="G4-04",
@@ -76,14 +77,14 @@ G4_04 = SubjectCurriculum(grade=4, subject_id="G4-04",
     examples=[
         _ex("'(1 2 3)", [1,2,3], "the list '(1 2 3)", "the list of three numbers"),
         _ex("'()",      [],       "the empty list",     "the empty list"),
-    ], subplots=_COLL_SUBPLOTS, plan_pool=_PLAN_G4)
+    ], subplots=_BASKET_SUBPLOTS, plan_pool=_PLAN_G4)
 
 
 G4_05 = SubjectCurriculum(grade=4, subject_id="G4-05",
     subject_title="cons — prepend to seq", fable="fox-grapes",
     examples=[
         _ex("(cons 0 '(1 2 3))", [0,1,2,3], "the form (cons 0 '(1 2 3))", "the seq with 0 cons'd at the front"),
-    ], subplots=_COLL_SUBPLOTS, plan_pool=_PLAN_G4)
+    ], subplots=_BASKET_SUBPLOTS, plan_pool=_PLAN_G4)
 
 
 G4_06 = SubjectCurriculum(grade=4, subject_id="G4-06",
@@ -91,7 +92,7 @@ G4_06 = SubjectCurriculum(grade=4, subject_id="G4-06",
     examples=[
         _ex("{:fox 1 :grapes 2}", {":fox": 1, ":grapes": 2},
             "the map {:fox 1 :grapes 2}", "the map with two entries"),
-    ], subplots=_COLL_SUBPLOTS, plan_pool=_PLAN_G4)
+    ], subplots=_BASKET_SUBPLOTS, plan_pool=_PLAN_G4)
 
 
 G4_07 = SubjectCurriculum(grade=4, subject_id="G4-07",
@@ -100,7 +101,7 @@ G4_07 = SubjectCurriculum(grade=4, subject_id="G4-07",
         _ex("(get {:a 1 :b 2} :a)", 1, "the form (get {:a 1 :b 2} :a)", "the value at :a"),
         _ex("(get {:a 1} :missing :default)", ":default",
             "the form (get {:a 1} :missing :default)", "the default value when key missing"),
-    ], subplots=_COLL_SUBPLOTS, plan_pool=_PLAN_G4)
+    ], subplots=_BASKET_SUBPLOTS, plan_pool=_PLAN_G4)
 
 
 G4_08 = SubjectCurriculum(grade=4, subject_id="G4-08",
@@ -110,7 +111,7 @@ G4_08 = SubjectCurriculum(grade=4, subject_id="G4-08",
             "the form (assoc {:a 1} :b 2)", "the map after assoc'ing :b 2"),
         _ex("(assoc {:a 1} :a 99)", {":a": 99},
             "the form (assoc {:a 1} :a 99)", "the map after updating :a to 99"),
-    ], subplots=_COLL_SUBPLOTS, plan_pool=_PLAN_G4)
+    ], subplots=_BASKET_SUBPLOTS, plan_pool=_PLAN_G4)
 
 
 G4_09 = SubjectCurriculum(grade=4, subject_id="G4-09",
@@ -118,7 +119,7 @@ G4_09 = SubjectCurriculum(grade=4, subject_id="G4-09",
     examples=[
         _ex("(dissoc {:a 1 :b 2} :a)", {":b": 2},
             "the form (dissoc {:a 1 :b 2} :a)", "the map without :a"),
-    ], subplots=_COLL_SUBPLOTS, plan_pool=_PLAN_G4)
+    ], subplots=_BASKET_SUBPLOTS, plan_pool=_PLAN_G4)
 
 
 G4_10 = SubjectCurriculum(grade=4, subject_id="G4-10",
@@ -126,7 +127,7 @@ G4_10 = SubjectCurriculum(grade=4, subject_id="G4-10",
     examples=[
         _ex("(count (keys {:a 1 :b 2 :c 3}))", 3,
             "the form (count (keys ...))", "the number of keys in the map"),
-    ], subplots=_COLL_SUBPLOTS, plan_pool=_PLAN_G4)
+    ], subplots=_BASKET_SUBPLOTS, plan_pool=_PLAN_G4)
 
 
 G4_11 = SubjectCurriculum(grade=4, subject_id="G4-11",
@@ -134,7 +135,7 @@ G4_11 = SubjectCurriculum(grade=4, subject_id="G4-11",
     examples=[
         _ex("(count #{1 2 3})", 3, "the count of #{1 2 3}", "the size of the set"),
         _ex("(count #{1 1 1})", 1, "the count of #{1 1 1}", "the size of the set"),
-    ], subplots=_COLL_SUBPLOTS, plan_pool=_PLAN_G4)
+    ], subplots=_BASKET_SUBPLOTS, plan_pool=_PLAN_G4)
 
 
 G4_12 = SubjectCurriculum(grade=4, subject_id="G4-12",
@@ -142,7 +143,7 @@ G4_12 = SubjectCurriculum(grade=4, subject_id="G4-12",
     examples=[
         _ex("(contains? #{1 2 3} 2)", True, "the form (contains? #{1 2 3} 2)", "whether 2 is in the set"),
         _ex("(contains? #{1 2 3} 4)", False, "the form (contains? #{1 2 3} 4)", "whether 4 is in the set"),
-    ], subplots=_COLL_SUBPLOTS, plan_pool=_PLAN_G4)
+    ], subplots=_BASKET_SUBPLOTS, plan_pool=_PLAN_G4)
 
 
 G4_13 = SubjectCurriculum(grade=4, subject_id="G4-13",
@@ -152,7 +153,7 @@ G4_13 = SubjectCurriculum(grade=4, subject_id="G4-13",
         _ex("(count {:a 1 :b 2})", 2, "the count of a 2-key map", "the count"),
         _ex("(count #{:a :b :c})", 3, "the count of a 3-element set", "the count"),
         _ex("(count \"grapes\")", 6, "the count of \"grapes\"", "the string length"),
-    ], subplots=_COLL_SUBPLOTS, plan_pool=_PLAN_G4)
+    ], subplots=_BASKET_SUBPLOTS, plan_pool=_PLAN_G4)
 
 
 G4_14 = SubjectCurriculum(grade=4, subject_id="G4-14",
@@ -161,7 +162,7 @@ G4_14 = SubjectCurriculum(grade=4, subject_id="G4-14",
         _ex("(empty? [])",   True,  "the form (empty? [])",   "whether [] is empty"),
         _ex("(empty? [1])",  False, "the form (empty? [1])",  "whether [1] is empty"),
         _ex("(empty? \"\")", True,  "the form (empty? \"\")", "whether the empty string is empty"),
-    ], subplots=_COLL_SUBPLOTS, plan_pool=_PLAN_G4)
+    ], subplots=_BASKET_SUBPLOTS, plan_pool=_PLAN_G4)
 
 
 G4_15 = SubjectCurriculum(grade=4, subject_id="G4-15",
@@ -170,7 +171,7 @@ G4_15 = SubjectCurriculum(grade=4, subject_id="G4-15",
         _ex("(first [10 20 30])", 10, "the first of the vector", "the first element"),
         _ex("(last  [10 20 30])", 30, "the last of the vector",  "the last element"),
         _ex("(count (rest [10 20 30]))", 2, "the rest of [10 20 30]", "the count after removing first"),
-    ], subplots=_COLL_SUBPLOTS, plan_pool=_PLAN_G4)
+    ], subplots=_BASKET_SUBPLOTS, plan_pool=_PLAN_G4)
 
 
 G4_16 = SubjectCurriculum(grade=4, subject_id="G4-16",
@@ -180,7 +181,7 @@ G4_16 = SubjectCurriculum(grade=4, subject_id="G4-16",
             "the form (into [] '(1 2 3))", "the vector built from a list"),
         _ex("(into #{} [1 2 2 3])", [1,2,3],
             "the form (into #{} [1 2 2 3])", "the set built from a vector (dups removed)"),
-    ], subplots=_COLL_SUBPLOTS, plan_pool=_PLAN_G4)
+    ], subplots=_SIEVE_SUBPLOTS, plan_pool=_PLAN_G4)
 
 
 G4_17 = SubjectCurriculum(grade=4, subject_id="G4-17",
@@ -188,7 +189,7 @@ G4_17 = SubjectCurriculum(grade=4, subject_id="G4-17",
     examples=[
         _ex("(let [m {:a 1}] (assoc m :a 99) m)", {":a": 1},
             "the form showing assoc returns a new map", "the original map after assoc"),
-    ], subplots=_COLL_SUBPLOTS, plan_pool=_PLAN_G4)
+    ], subplots=_BASKET_SUBPLOTS, plan_pool=_PLAN_G4)
 
 
 G4_18 = SubjectCurriculum(grade=4, subject_id="G4-18",
@@ -196,7 +197,7 @@ G4_18 = SubjectCurriculum(grade=4, subject_id="G4-18",
     examples=[
         _ex("(= [1 2 3] '(1 2 3))", True,
             "the form (= [1 2 3] '(1 2 3))", "whether vector and list with same elements are equal"),
-    ], subplots=_COLL_SUBPLOTS, plan_pool=_PLAN_G4)
+    ], subplots=_BASKET_SUBPLOTS, plan_pool=_PLAN_G4)
 
 
 G4_19 = SubjectCurriculum(grade=4, subject_id="G4-19",
@@ -204,7 +205,7 @@ G4_19 = SubjectCurriculum(grade=4, subject_id="G4-19",
     examples=[
         _ex("(count (range 5))", 5, "the count of (range 5)", "the count of range 0..4"),
         _ex("(first (range 1 100))", 1, "the first of (range 1 100)", "the first of range 1..99"),
-    ], subplots=_COLL_SUBPLOTS, plan_pool=_PLAN_G4)
+    ], subplots=_BASKET_SUBPLOTS, plan_pool=_PLAN_G4)
 
 
 G4_20 = SubjectCurriculum(grade=4, subject_id="G4-20",
@@ -214,7 +215,7 @@ G4_20 = SubjectCurriculum(grade=4, subject_id="G4-20",
             "the form (count (seq [1 2 3]))", "the count of seq over a vector"),
         _ex("(seq [])", None,
             "the form (seq [])", "what (seq []) returns"),
-    ], subplots=_COLL_SUBPLOTS, plan_pool=_PLAN_G4)
+    ], subplots=_BASKET_SUBPLOTS, plan_pool=_PLAN_G4)
 
 
 SUBJECTS = {s.subject_id: s for s in (

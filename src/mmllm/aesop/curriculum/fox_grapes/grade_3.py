@@ -16,6 +16,7 @@ from mmllm.aesop.curriculum.generator import (
 from mmllm.aesop.curriculum.fox_grapes.grade_1 import (
     _SHARED_SUBPLOTS as _G1_SUBPLOTS, _PLAN_POOL,
 )
+from mmllm.aesop.curriculum.fox_grapes._metaphor_pools import _POUCH_SUBPLOTS, _RECIPE_SUBPLOTS, _ROADSIGN_SUBPLOTS, _SCRIBE_SUBPLOTS
 
 # Add naming-themed subplots: a character names a value, then references it.
 _NAMING_SUBPLOTS: list[SubplotTemplate] = list(_G1_SUBPLOTS) + [
@@ -53,7 +54,7 @@ G3_01 = SubjectCurriculum(grade=3, subject_id="G3-01",
             "the value bound to x after (def x 42)"),
         _ex("(do (def y 7) y)",  7,  "the binding (def y 7)",
             "the value bound to y"),
-    ], subplots=_NAMING_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
+    ], subplots=_ROADSIGN_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
 
 
 G3_02 = SubjectCurriculum(grade=3, subject_id="G3-02",
@@ -61,7 +62,7 @@ G3_02 = SubjectCurriculum(grade=3, subject_id="G3-02",
     examples=[
         _ex("(do (def x 1) (def x 99) x)", 99,
             "the redefined x", "the value of x after redefinition"),
-    ], subplots=_NAMING_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
+    ], subplots=_ROADSIGN_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
 
 
 G3_03 = SubjectCurriculum(grade=3, subject_id="G3-03",
@@ -73,7 +74,7 @@ G3_03 = SubjectCurriculum(grade=3, subject_id="G3-03",
             "the square of n where n is bound to 10"),
         _ex("(let [a 5] a)", 5, "the form (let [a 5] a)",
             "the value of (let [a 5] a)"),
-    ], subplots=_NAMING_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
+    ], subplots=_POUCH_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
 
 
 G3_04 = SubjectCurriculum(grade=3, subject_id="G3-04",
@@ -88,7 +89,7 @@ G3_04 = SubjectCurriculum(grade=3, subject_id="G3-04",
         _ex("(let [a 2 b 3 c 4] (+ a b c))", 9,
             "a let with three bindings",
             "the sum of a, b, c when a=2, b=3, c=4"),
-    ], subplots=_NAMING_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
+    ], subplots=_POUCH_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
 
 
 G3_05 = SubjectCurriculum(grade=3, subject_id="G3-05",
@@ -100,7 +101,7 @@ G3_05 = SubjectCurriculum(grade=3, subject_id="G3-05",
         _ex("(do (def x 10) (let [x 99] x) x)", 10,
             "the outer x after the inner let returns",
             "the outer x after the let scope ends"),
-    ], subplots=_NAMING_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
+    ], subplots=_POUCH_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
 
 
 G3_06 = SubjectCurriculum(grade=3, subject_id="G3-06",
@@ -112,7 +113,7 @@ G3_06 = SubjectCurriculum(grade=3, subject_id="G3-06",
         _ex("(let [a 3 b (+ a 1) c (* b 2)] c)", 8,
             "a let with sequential bindings",
             "the result of the chained binding c"),
-    ], subplots=_NAMING_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
+    ], subplots=_POUCH_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
 
 
 G3_07 = SubjectCurriculum(grade=3, subject_id="G3-07",
@@ -124,7 +125,7 @@ G3_07 = SubjectCurriculum(grade=3, subject_id="G3-07",
         _ex("((fn [a b] (* a b)) 3 4)", 12,
             "a two-arg anonymous function",
             "the result of applying (fn [a b] (* a b)) to 3 and 4"),
-    ], subplots=_NAMING_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
+    ], subplots=_RECIPE_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
 
 
 G3_08 = SubjectCurriculum(grade=3, subject_id="G3-08",
@@ -133,7 +134,7 @@ G3_08 = SubjectCurriculum(grade=3, subject_id="G3-08",
         _ex("((fn [a b c] (+ a b c)) 1 2 3)", 6,
             "a three-arg anonymous function",
             "the sum of a, b, c"),
-    ], subplots=_NAMING_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
+    ], subplots=_RECIPE_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
 
 
 G3_09 = SubjectCurriculum(grade=3, subject_id="G3-09",
@@ -145,7 +146,7 @@ G3_09 = SubjectCurriculum(grade=3, subject_id="G3-09",
         _ex("(do (defn add3 [a b c] (+ a b c)) (add3 1 2 3))", 6,
             "a defn with three args",
             "the result of (add3 1 2 3)"),
-    ], subplots=_NAMING_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
+    ], subplots=_RECIPE_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
 
 
 G3_10 = SubjectCurriculum(grade=3, subject_id="G3-10",
@@ -157,7 +158,7 @@ G3_10 = SubjectCurriculum(grade=3, subject_id="G3-10",
         _ex("(#(* %1 %2) 3 4)", 12,
             "the shorthand #(* %1 %2) applied to 3 and 4",
             "the result of (#(* %1 %2) 3 4)"),
-    ], subplots=_NAMING_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
+    ], subplots=_RECIPE_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
 
 
 G3_11 = SubjectCurriculum(grade=3, subject_id="G3-11",
@@ -169,7 +170,7 @@ G3_11 = SubjectCurriculum(grade=3, subject_id="G3-11",
         _ex("((fn [x] (* x x)) 6)", 36,
             "applying square to 6",
             "the square of 6"),
-    ], subplots=_NAMING_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
+    ], subplots=_POUCH_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
 
 
 G3_12 = SubjectCurriculum(grade=3, subject_id="G3-12",
@@ -178,7 +179,7 @@ G3_12 = SubjectCurriculum(grade=3, subject_id="G3-12",
         _ex("(do (def g 5) (let [g 99] (+ g 1)))", 100,
             "an inner let masking the outer def g",
             "the value computed inside the inner scope"),
-    ], subplots=_NAMING_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
+    ], subplots=_ROADSIGN_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
 
 
 G3_13 = SubjectCurriculum(grade=3, subject_id="G3-13",
@@ -187,7 +188,7 @@ G3_13 = SubjectCurriculum(grade=3, subject_id="G3-13",
         _ex("((fn [x] x x x 99) 1)", 99,
             "a fn whose body has multiple forms; only the last is returned",
             "the value of a fn body that ends with 99"),
-    ], subplots=_NAMING_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
+    ], subplots=_RECIPE_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
 
 
 G3_14 = SubjectCurriculum(grade=3, subject_id="G3-14",
@@ -199,7 +200,7 @@ G3_14 = SubjectCurriculum(grade=3, subject_id="G3-14",
         _ex("(do (+ 1 1) (+ 2 2) (+ 3 3))", 6,
             "a do with three forms",
             "the value of (do (+ 1 1) (+ 2 2) (+ 3 3))"),
-    ], subplots=_NAMING_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
+    ], subplots=_SCRIBE_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
 
 
 G3_15 = SubjectCurriculum(grade=3, subject_id="G3-15",
@@ -208,7 +209,7 @@ G3_15 = SubjectCurriculum(grade=3, subject_id="G3-15",
         _ex("(do (println \"hi\") 42)", 42,
             "the form (do (println \"hi\") 42)",
             "the return value of the do (the println side-effects, but the do returns 42)"),
-    ], subplots=_NAMING_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
+    ], subplots=_RECIPE_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
 
 
 G3_16 = SubjectCurriculum(grade=3, subject_id="G3-16",
@@ -217,7 +218,7 @@ G3_16 = SubjectCurriculum(grade=3, subject_id="G3-16",
         _ex("(let [+ 99] +)", 99,
             "a let that shadows the + function",
             "the value bound to the (locally shadowed) +"),
-    ], subplots=_NAMING_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
+    ], subplots=_POUCH_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
 
 
 G3_17 = SubjectCurriculum(grade=3, subject_id="G3-17",
@@ -226,7 +227,7 @@ G3_17 = SubjectCurriculum(grade=3, subject_id="G3-17",
         _ex("(let [hasty-rate 4 patient-rate 1] (- hasty-rate patient-rate))", 3,
             "a let with kebab-case names",
             "the difference of the two rates"),
-    ], subplots=_NAMING_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
+    ], subplots=_ROADSIGN_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
 
 
 G3_18 = SubjectCurriculum(grade=3, subject_id="G3-18",
@@ -238,7 +239,7 @@ G3_18 = SubjectCurriculum(grade=3, subject_id="G3-18",
         _ex("(* 5 5 5)", 125,
             "the inline form (* 5 5 5)",
             "5 cubed (without binding)"),
-    ], subplots=_NAMING_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
+    ], subplots=_POUCH_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
 
 
 SUBJECTS: dict[str, SubjectCurriculum] = {
