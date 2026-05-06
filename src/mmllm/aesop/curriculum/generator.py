@@ -274,6 +274,104 @@ def _pick_ge_location(scene: Scene) -> ont.Location:
     return scene.rng.choice(cands)
 
 
+# Dog-shadow uses two dogs: a wise hound (tortoise-analog) and a greedy
+# dog (hare-analog, the protagonist who drops the real bone for its
+# reflection). Locations are streamside / waterside settings where the
+# reflection metaphor plays out.
+DOG_SHADOW_LOCATIONS = ("river bank", "pond", "beach", "meadow",
+                         "forest", "village", "road")
+
+
+def _dogs() -> tuple[ont.Character, ...]:
+    return tuple(c for c in ont.CHARACTERS if c.species == "dog")
+
+
+def _pick_ds_chars(scene: Scene) -> tuple[ont.Character, ont.Character]:
+    """Pick (hound, dog) — wise evaluator + greedy grabber — for dog-shadow.
+
+    `hound` is the patient, wise character (tortoise-analog). `dog` is the
+    hasty, greedy one who drops the real bone chasing a reflection
+    (hare-analog).
+    """
+    pool = _dogs()
+    hound = scene.rng.choice(pool)
+    dog_pool = [c for c in pool if c.name != hound.name]
+    dog = scene.rng.choice(dog_pool)
+    return hound, dog
+
+
+def _pick_ds_location(scene: Scene) -> ont.Location:
+    """Pick from streamside + outdoor locations natural for dog-shadow."""
+    cands = [l for l in ont.LOCATIONS if l.name in DOG_SHADOW_LOCATIONS]
+    return scene.rng.choice(cands)
+
+
+def _build_ds_placeholders(scene: Scene,
+                            hound:    ont.Character,
+                            dog:      ont.Character,
+                            location: ont.Location,
+                            example:  SubjectExample) -> dict:
+    """Dog-shadow placeholder dict.
+
+    Exposes `{dog}` / `{hound}` and pronoun variants, plus `{hare}` /
+    `{tortoise}` aliases so shared subplot templates from
+    `_SHARED_SUBPLOTS` (which still use the tortoise-hare names) render
+    without modification. Mapping: greedy dog → hare-analog; wise hound →
+    tortoise-analog.
+    """
+    return {
+        # tortoise-hare aliases for shared subplot template compatibility
+        "hare":              dog.name,
+        "tortoise":          hound.name,
+        "hare_phrase":       species_phrase(dog),
+        "tortoise_phrase":   species_phrase(hound),
+        "hare_he_she":       dog.he_she,
+        "tortoise_he_she":   hound.he_she,
+        "hare_he_she_cap":   cap(dog.he_she),
+        "tortoise_he_she_cap": cap(hound.he_she),
+        "hare_his_her":      dog.his_her,
+        "tortoise_his_her":  hound.his_her,
+        "hare_him_her":      dog.him_her,
+        "tortoise_him_her":  hound.him_her,
+
+        # dog-shadow cast
+        "dog":               dog.name,
+        "dog_phrase":        species_phrase(dog),
+        "dog_he_she":        dog.he_she,
+        "dog_he_she_cap":    cap(dog.he_she),
+        "dog_his_her":       dog.his_her,
+        "dog_him_her":       dog.him_her,
+        "hound":             hound.name,
+        "hound_phrase":      species_phrase(hound),
+        "hound_he_she":      hound.he_she,
+        "hound_he_she_cap":  cap(hound.he_she),
+        "hound_his_her":     hound.his_her,
+        "hound_him_her":     hound.him_her,
+
+        # place
+        "place":             place_phrase(scene, location),
+        "location":          location.name,
+
+        # example
+        "form_display":      _format_form_display(example.form),
+        "concept_phrase":    example.concept_phrase,
+        "what":              example.question_what,
+        "goal_text":         example.goal_text,
+        "scenario":          example.scenario,
+        "need":              example.need,
+        "mapping":           example.mapping,
+        "resolution":        example.resolution,
+
+        # emotions — pronoun-neutral pools
+        "emo_proud":         scene.rng.choice(EMO_PROUD),
+        "emo_patient":       scene.rng.choice(EMO_PATIENT),
+        "emo_tired":         scene.rng.choice(EMO_TIRED),
+        "emo_greedy":        scene.rng.choice(GE_EMO_GREEDY),
+        "emo_content":       scene.rng.choice(GE_EMO_CONTENT),
+        "emo_regretful":     scene.rng.choice(GE_EMO_REGRETFUL),
+    }
+
+
 # Pronoun-neutral emotion pools. The fables.py EMO_GREEDY/EMO_CONTENT/
 # EMO_REGRETFUL pools hard-code "his/her", which produces ungrammatical
 # text when the assigned character has a different gender. These pools
@@ -500,6 +598,11 @@ def generate_one_record(scene: Scene,
         location = _pick_ag_location(scene)
         placeholders_fn = lambda ex: _build_placeholders(
             scene, primary, secondary, location, ex, sub.fable)
+    elif sub.fable == "dog-shadow":
+        hound, dog = _pick_ds_chars(scene)
+        location = _pick_ds_location(scene)
+        placeholders_fn = lambda ex: _build_ds_placeholders(
+            scene, hound, dog, location, ex)
     else:
         # tortoise-hare default
         hare, tortoise = _pick_th_chars(scene)
