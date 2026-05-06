@@ -58,6 +58,25 @@ G8_01 = SubjectCurriculum(
             concept_phrase="conditional dispatch on a tag",
             question_what="the function definition",
             goal_text="define a function speak that returns different strings depending on whether its argument is :hare or :tortoise",
+
+            scenario=(
+                "Sable talon-scratched a routing rule on the pitcher's rim at the "
+                "hilltop: a stone marked :hare gets one word, :tortoise gets another, "
+                "everything else gets 'silent'. The rule was scratched — not yet called."
+            ),
+            need=(
+                "She needed to record the routing rule so any stone could be "
+                "handed to it later without re-scratching."
+            ),
+            mapping=(
+                "`defn` scratches the rule permanently onto the rim. "
+                "The `cond` branches encode each stone's tag and its matching word. "
+                "No stone is dropped yet — the rule is simply registered."
+            ),
+            resolution=(
+                "The pitcher acknowledged the rule was scratched and the var was registered."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(let [speak (fn [k] (cond (= k :hare) \"swift\" (= k :tortoise) \"steady\"))] (speak :tortoise))",

@@ -654,16 +654,131 @@ G2_05 = SubjectCurriculum(
             ),
             tags=("story",),
         ),
-        _ex("(rem 17 5)",  2, "the remainder", "the remainder when 17 is divided by 5",
-            goal="find the remainder when 17 is divided by 5"),
-        _ex("(mod 17 5)",  2, "the modulo operation",                          "17 mod 5",
-            goal="find 17 modulo 5"),
-        _ex("(quot 100 7)", 14, "the integer quotient", "100 divided by 7, without remainder",
-            goal="find the integer quotient of 100 divided by 7"),
-        _ex("(rem 100 7)",  2, "the remainder", "the remainder when 100 is divided by 7",
-            goal="find the remainder when 100 is divided by 7"),
-        _ex("(mod -7 3)",   2, "the modulo operation",              "negative seven mod 3",
-            goal="find negative 7 modulo 3"),
+        SubjectExample(
+            form="(rem 17 5)", expected=2,
+            concept_phrase="the remainder",
+            question_what="the remainder when 17 is divided by 5",
+            goal_text="find the remainder when 17 is divided by 5",
+
+            scenario=(
+                "Sable had seventeen acorns at the village and pouches of five. "
+                "After filling as many pouches as possible she wanted to know "
+                "how many acorns spilled out as the leftover."
+            ),
+            need=(
+                "She needed the exact leftover count after complete pouches "
+                "were formed — the portion that could not fill another group."
+            ),
+            mapping=(
+                "`rem` subtracts complete groups and returns what is left. "
+                "Seventeen minus three complete groups of five leaves a "
+                "remainder that `rem` returns directly."
+            ),
+            resolution=(
+                "The leftover count arrived and the expected remainder settled at the rim."
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form="(mod 17 5)", expected=2,
+            concept_phrase="the modulo operation",
+            question_what="17 mod 5",
+            goal_text="find 17 modulo 5",
+
+            scenario=(
+                "Korvus counted seventeen stones at the garden and sorted them "
+                "into groups of five. He wanted the modulo — the cyclic "
+                "position of the count within the group size."
+            ),
+            need=(
+                "He needed the position within the repeating cycle of five, "
+                "not just the leftover from integer division."
+            ),
+            mapping=(
+                "`mod` like `rem` finds the remainder, but adjusts the sign "
+                "to match the divisor. For positive inputs, `mod` and `rem` "
+                "agree; the cyclic position is returned."
+            ),
+            resolution=(
+                "The cyclic position within the group arrived as the expected value."
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form="(quot 100 7)", expected=14,
+            concept_phrase="the integer quotient",
+            question_what="100 divided by 7, without remainder",
+            goal_text="find the integer quotient of 100 divided by 7",
+
+            scenario=(
+                "Caw had a hundred stones at the meadow and baskets that held "
+                "seven each. She wanted to know how many full baskets she "
+                "could fill before running short."
+            ),
+            need=(
+                "She needed the count of completely filled baskets, ignoring "
+                "any stones left over that could not fill another."
+            ),
+            mapping=(
+                "`quot` divides and truncates toward zero. One hundred stones "
+                "yield a certain number of full baskets of seven; the truncated "
+                "whole-number count is what `quot` returns."
+            ),
+            resolution=(
+                "The full-basket count arrived and the expected quotient settled in the pitcher."
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form="(rem 100 7)", expected=2,
+            concept_phrase="the remainder",
+            question_what="the remainder when 100 is divided by 7",
+            goal_text="find the remainder when 100 is divided by 7",
+
+            scenario=(
+                "Sable continued from Caw's basket count at the hilltop pitcher. "
+                "After filling all complete baskets of seven from a hundred "
+                "stones, she wanted the leftover count."
+            ),
+            need=(
+                "She needed to know how many stones remained after every "
+                "complete basket was filled, the portion that could not fit."
+            ),
+            mapping=(
+                "`rem` subtracts every complete group of seven from one hundred "
+                "and returns what remains. The surplus after full groups is "
+                "the remainder."
+            ),
+            resolution=(
+                "The surplus stones were counted and the expected remainder returned."
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form="(mod -7 3)", expected=2,
+            concept_phrase="the modulo operation",
+            question_what="negative seven mod 3",
+            goal_text="find negative 7 modulo 3",
+
+            scenario=(
+                "Korvus had a deficit of seven at the orchard pitcher and "
+                "groups of three. He wanted the modulo position — adjusted "
+                "to stay within the positive cycle, not follow the deficit sign."
+            ),
+            need=(
+                "He needed the cyclic position within a group of three, "
+                "even though the starting count was negative."
+            ),
+            mapping=(
+                "`mod` adjusts its result to share the sign of the divisor. "
+                "With a positive divisor of three, the result is always "
+                "non-negative, differing from `rem` for negative inputs."
+            ),
+            resolution=(
+                "The sign-adjusted cyclic position arrived as the expected value."
+            ),
+            tags=("story",),
+        ),
     ],
     subplots=_ACORN_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
