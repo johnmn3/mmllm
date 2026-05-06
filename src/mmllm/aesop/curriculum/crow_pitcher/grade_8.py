@@ -863,22 +863,20 @@ G8_13 = SubjectCurriculum(
             goal_text="define a protocol Named with method name-of, define a record that uses this to access a field, then call the method",
 
             scenario=(
-                "Caw posted the Named guild charter on the pitcher's rim at the "
-                "garden. She wove a Hare pouch with an 'n' slot that pledged "
-                "the guild — its method reaching into the pouch via `this` "
-                "to read the n slot. She packed a name-stone inside and called `name-of`."
+                "Caw posted the Named guild charter at the garden pitcher. "
+                "She wove a Hare pouch with an 'n' slot pledging the guild — "
+                "its method using `this` to read the slot."
             ),
             need=(
-                "She needed the method to use `this` to reach into its own "
-                "pouch and return the value in the n slot."
+                "She needed `this` to reach into the pouch and return "
+                "the n slot's value."
             ),
             mapping=(
-                "Inside the method body, `this` refers to the instance itself. "
-                "`:n` used on `this` reaches into the pouch's slot directly, "
-                "returning whatever value was packed there."
+                "Inside the method, `this` binds to the instance. "
+                "`:n` on `this` lifts the slot value directly."
             ),
             resolution=(
-                "The n slot answered through `this`, returning the packed name."
+                "The slot answered through `this` with the packed name."
             ),
             tags=("story",),
         ),
@@ -892,22 +890,20 @@ G8_13 = SubjectCurriculum(
             goal_text="define a protocol Tagged with method tag-of, define a record Stone that implements it by accessing a field via this, then call the method",
 
             scenario=(
-                "Korvus posted the Tagged guild charter on the pitcher at the "
-                "hilltop. He wove a Stone pouch with a 't' slot pledging the "
-                "guild inline — the method reaches into the pouch via `this` "
-                "to read the t slot. He packed a color-mark and called `tag-of`."
+                "Korvus posted the Tagged guild charter at the hilltop "
+                "pitcher. He wove a Stone pouch with a 't' slot pledging "
+                "the guild — its method using `this` to read the slot."
             ),
             need=(
-                "He needed the method to reach through `this` into the Stone "
-                "pouch and return the color-mark in the t slot."
+                "He needed `this` to reach through into the Stone pouch "
+                "and return the t slot's value."
             ),
             mapping=(
-                "`this` binds to the Stone instance inside the method body. "
-                "`:t` applied to `this` lifts the value from the slot, "
-                "working exactly as it would on a plain map."
+                "`this` binds to the Stone inside the method. "
+                "`:t` on `this` lifts the slot value, just like on a map."
             ),
             resolution=(
-                "The t slot answered through `this` with the packed color-mark."
+                "The slot answered through `this` with the packed mark."
             ),
             tags=("story",),
         ),

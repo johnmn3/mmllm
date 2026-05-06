@@ -2029,14 +2029,56 @@ G2_17 = SubjectCurriculum(
             ),
             tags=("story",),
         ),
-        _ex("(:tortoise {:hare 1 :tortoise 2})", 2,
-            "the keyword lookup",
-            "the result of using the keyword :tortoise as a function on the map {:hare 1 :tortoise 2}",
-            goal="use the keyword :tortoise to look up a value in the map with keys :hare and :tortoise"),
-        _ex("(:missing {:hare 1})", None,
-            "the keyword lookup",
-            "the result of using the keyword :missing as a function on the map {:hare 1}",
-            goal="use the keyword :missing to look up a value in a map that does not contain :missing"),
+        SubjectExample(
+            form="(:tortoise {:hare 1 :tortoise 2})", expected=2,
+            concept_phrase="the keyword lookup",
+            question_what="the result of using the keyword :tortoise as a function on the map {:hare 1 :tortoise 2}",
+            goal_text="use the keyword :tortoise to look up a value in the map with keys :hare and :tortoise",
+
+            scenario=(
+                "Korvus returned to the same stone-pile at the hilltop pitcher: "
+                "a :hare stone carrying one, and a :tortoise stone carrying two. "
+                "This time he needed the count under :tortoise."
+            ),
+            need=(
+                "He needed the value stored under the :tortoise label, "
+                "leaving the :hare stone undisturbed."
+            ),
+            mapping=(
+                ":tortoise used as a function reaches into the stone-pile "
+                "and pulls the value stored beneath that label. Labels "
+                "are independent; :tortoise retrieves its own value."
+            ),
+            resolution=(
+                "The :tortoise count was lifted and the expected value returned."
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form="(:missing {:hare 1})", expected=None,
+            concept_phrase="the keyword lookup",
+            question_what="the result of using the keyword :missing as a function on the map {:hare 1}",
+            goal_text="use the keyword :missing to look up a value in a map that does not contain :missing",
+
+            scenario=(
+                "Caw reached into a stone-pile at the orchard pitcher marked "
+                "only with :hare and asked for the count under :missing — "
+                "a label that did not exist in the pile."
+            ),
+            need=(
+                "She needed to know what the pitcher returned when a label "
+                "was absent from the stone-pile entirely."
+            ),
+            mapping=(
+                "Keyword lookup returns nil when the label is not in the map. "
+                "No :missing stone exists in the pile; the pitcher finds "
+                "nothing under that label and returns the absent value."
+            ),
+            resolution=(
+                "The absent label returned nil, the expected absent value."
+            ),
+            tags=("story",),
+        ),
     ],
     subplots=_BASKET_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
@@ -2072,14 +2114,56 @@ G2_18 = SubjectCurriculum(
             ),
             tags=("story",),
         ),
-        _ex("(= (quote tortoise) 'tortoise)", True,
-            "the equality of long-form and short-form quoting",
-            "whether long-form and short-form quoting produce equal values",
-            goal="compare the result of long-form quoting of tortoise against the apostrophe-shorthand quoting of the same name, using ="),
-        _ex("(count '(1 2 3))", 3,
-            "the element count of a quoted list",
-            "the number of elements in a quoted list",
-            goal="count the elements in a quoted list of the integers 1, 2, and 3"),
+        SubjectExample(
+            form="(= (quote tortoise) 'tortoise)", expected=True,
+            concept_phrase="the equality of long-form and short-form quoting",
+            question_what="whether long-form and short-form quoting produce equal values",
+            goal_text="compare the result of long-form quoting of tortoise against the apostrophe-shorthand quoting of the same name, using =",
+
+            scenario=(
+                "Sable scratched the name tortoise on two separate stones at "
+                "the meadow pitcher — once using the long `quote` word, once "
+                "using the apostrophe shorthand. She wondered if they matched."
+            ),
+            need=(
+                "She needed to confirm both notations produced the same "
+                "chalk-mark shape and that the pitcher saw them as equal."
+            ),
+            mapping=(
+                "`quote` and the apostrophe `'` are two spellings of the same "
+                "quoting operation. Both produce the symbol `tortoise`; `=` "
+                "compares the two chalk-marks and finds them identical."
+            ),
+            resolution=(
+                "Both marks matched and the expected true value came back from the pitcher."
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form="(count '(1 2 3))", expected=3,
+            concept_phrase="the element count of a quoted list",
+            question_what="the number of elements in a quoted list",
+            goal_text="count the elements in a quoted list of the integers 1, 2, and 3",
+
+            scenario=(
+                "Korvus scratched a quoted list of three integers on the "
+                "village pitcher's rim using the apostrophe shorthand. He "
+                "wanted the count of chalk-marks in the list, not their sum."
+            ),
+            need=(
+                "He needed the number of elements in the list-as-data, "
+                "not any evaluation of the numbers inside."
+            ),
+            mapping=(
+                "The apostrophe suppresses evaluation; `count` then walks "
+                "the resulting list as a chalk-mark structure. Three marks "
+                "are in the list, so the count is three."
+            ),
+            resolution=(
+                "The list was counted as data and the expected element count arrived."
+            ),
+            tags=("story",),
+        ),
     ],
     subplots=_CHALKMARK_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
@@ -2115,10 +2199,31 @@ G2_19 = SubjectCurriculum(
             ),
             tags=("story",),
         ),
-        _ex("(+ 99999999999 1)", 100000000000,
-            "the large addition",
-            "the sum of 99999999999 and 1",
-            goal="add 1 to 99999999999"),
+        SubjectExample(
+            form="(+ 99999999999 1)", expected=100000000000,
+            concept_phrase="the large addition",
+            question_what="the sum of 99999999999 and 1",
+            goal_text="add 1 to 99999999999",
+
+            scenario=(
+                "Caw had a vast pile of stones at the farm pitcher — nearly "
+                "one hundred billion — and wanted to add one final stone "
+                "without any digit dropping off the end."
+            ),
+            need=(
+                "She needed the exact result even if the sum crossed a "
+                "boundary that would overflow a regular integer counter."
+            ),
+            mapping=(
+                "Clojure promotes the result to bigint automatically when the "
+                "sum exceeds the regular integer range. The pitcher widens "
+                "its capacity and holds the full exact count."
+            ),
+            resolution=(
+                "The promotion happened silently and the exact sum arrived without truncation."
+            ),
+            tags=("story",),
+        ),
     ],
     subplots=_ACORN_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
@@ -2156,12 +2261,56 @@ G2_20 = SubjectCurriculum(
             ),
             tags=("story",),
         ),
-        _ex("(count \"hello\")",     5, "the count operation",
-            "the result of using count on the string hello",
-            goal="count the characters in the string hello"),
-        _ex("(count [])",            0, "the count operation",
-            "the result of using count on the empty vector",
-            goal="count the elements in an empty vector"),
+        SubjectExample(
+            form='(count "hello")', expected=5,
+            concept_phrase="the count operation",
+            question_what="the result of using count on the string hello",
+            goal_text="count the characters in the string hello",
+
+            scenario=(
+                "Korvus had a vine strung with the pebbles spelling \"hello\" "
+                "at the village pitcher. He wanted to tally each bead as he "
+                "walked the vine from left to right."
+            ),
+            need=(
+                "He needed the exact bead count so he could compare it against "
+                "other vine lengths without unthreading them."
+            ),
+            mapping=(
+                "`count` on a string walks each character as a talon-step, "
+                "incrementing the tally with every bead. The running tally "
+                "at the final step is the character count."
+            ),
+            resolution=(
+                "The vine was walked completely and the expected bead count returned."
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form="(count [])", expected=0,
+            concept_phrase="the count operation",
+            question_what="the result of using count on the empty vector",
+            goal_text="count the elements in an empty vector",
+
+            scenario=(
+                "Caw found an empty bracket-holder at the road pitcher — "
+                "a vector with no stones inside at all. She walked the "
+                "rim but found nothing to count."
+            ),
+            need=(
+                "She needed confirmation that `count` on an empty collection "
+                "would return zero and not raise an error."
+            ),
+            mapping=(
+                "`count` of an empty collection takes zero talon-steps. No "
+                "elements exist to tally; the running count never advances "
+                "and the pitcher returns zero."
+            ),
+            resolution=(
+                "The empty collection yielded zero steps and the expected count of zero returned."
+            ),
+            tags=("story",),
+        ),
     ],
     subplots=_TALLYWALK_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
@@ -2197,13 +2346,56 @@ G2_21 = SubjectCurriculum(
             ),
             tags=("story",),
         ),
-        _ex("(count \"hare\")",     4,  "the count of characters in a string",
-            "the result of using count on the string hare",
-            goal="count the characters in the string hare"),
-        _ex("(count (subs \"tortoise\" 0 3))", 3,
-            "the count of characters in a leading substring",
-            "the count of the substring from index 0 to 3 of the string tortoise",
-            goal="extract the leading three characters from the string tortoise using subs from index 0 to 3, then count them"),
+        SubjectExample(
+            form='(count "hare")', expected=4,
+            concept_phrase="the count of characters in a string",
+            question_what="the result of using count on the string hare",
+            goal_text="count the characters in the string hare",
+
+            scenario=(
+                "Sable held a vine strung with the pebbles spelling \"hare\" "
+                "at the meadow pitcher. She wanted to compare its length to "
+                "the longer \"tortoise\" vine she had measured earlier."
+            ),
+            need=(
+                "She needed the exact bead count of the shorter vine to "
+                "compare lengths without holding both at once."
+            ),
+            mapping=(
+                "`count` on \"hare\" walks four beads: h, a, r, e. "
+                "Each is a talon-step; the tally at the end is the "
+                "number of beads on that vine."
+            ),
+            resolution=(
+                "The four beads were tallied and the expected character count returned."
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form='(count (subs "tortoise" 0 3))', expected=3,
+            concept_phrase="the count of characters in a leading substring",
+            question_what="the count of the substring from index 0 to 3 of the string tortoise",
+            goal_text="extract the leading three characters from the string tortoise using subs from index 0 to 3, then count them",
+
+            scenario=(
+                "Korvus wanted only the first three beads of the \"tortoise\" vine "
+                "at the garden pitcher. He clipped the vine using `subs` from "
+                "position zero to three, then counted what remained."
+            ),
+            need=(
+                "He needed the bead count of just the leading segment, "
+                "after trimming the vine to the first three characters."
+            ),
+            mapping=(
+                "`subs` snips a sub-vine from index 0 up to but not including "
+                "index 3. `count` then walks that shorter vine, "
+                "tallying each bead in the clipped segment."
+            ),
+            resolution=(
+                "The clipped vine was counted and the expected character count arrived."
+            ),
+            tags=("story",),
+        ),
     ],
     subplots=_BEADSTRING_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
@@ -2239,14 +2431,56 @@ G2_22 = SubjectCurriculum(
             ),
             tags=("story",),
         ),
-        _ex("(+ (* 3 8) (* 2 4))", 32,
-            "the sum of products",
-            "the result of adding the product of 3 and 8 to the product of 2 and 4",
-            goal="compute the product of 3 and 8, add the product of 2 and 4"),
-        _ex("(quot (+ 100 50) 5)", 30,
-            "the nested quotient",
-            "the integer quotient of the sum of 100 and 50 divided by 5",
-            goal="add 100 and 50, then divide by 5"),
+        SubjectExample(
+            form="(+ (* 3 8) (* 2 4))", expected=32,
+            concept_phrase="the sum of products",
+            question_what="the result of adding the product of 3 and 8 to the product of 2 and 4",
+            goal_text="compute the product of 3 and 8, add the product of 2 and 4",
+
+            scenario=(
+                "Sable had two separate piles at the village pitcher: one from "
+                "three groups of eight, another from two groups of four. She "
+                "needed the combined total of both products."
+            ),
+            need=(
+                "She needed both products computed first, then summed "
+                "together — all in one form without intermediate steps."
+            ),
+            mapping=(
+                "Two nested `*` forms each resolve to a wing-cache value; the "
+                "outer `+` then sums those two sub-results. Each inner "
+                "form runs to completion before the outer one begins."
+            ),
+            resolution=(
+                "Both inner products resolved and their sum arrived as the expected total."
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form="(quot (+ 100 50) 5)", expected=30,
+            concept_phrase="the nested quotient",
+            question_what="the integer quotient of the sum of 100 and 50 divided by 5",
+            goal_text="add 100 and 50, then divide by 5",
+
+            scenario=(
+                "Korvus gathered a hundred and fifty stones at the farm pitcher "
+                "by combining two piles of one hundred and fifty. He then "
+                "needed to share them equally among five baskets."
+            ),
+            need=(
+                "He needed the combined pile summed first, then the whole-basket "
+                "count from dividing that total by five."
+            ),
+            mapping=(
+                "The inner `(+ 100 50)` resolves to the combined sum first. "
+                "`quot` then divides that sum by five, truncating to the "
+                "whole-basket count without any fractional remainder."
+            ),
+            resolution=(
+                "The sum resolved and the whole-basket quotient arrived as expected."
+            ),
+            tags=("story",),
+        ),
     ],
     subplots=_ACORN_SUBPLOTS, plan_pool=_PLAN_POOL,
 )

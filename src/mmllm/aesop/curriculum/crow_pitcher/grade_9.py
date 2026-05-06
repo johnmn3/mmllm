@@ -157,12 +157,12 @@ G9_02 = SubjectCurriculum(
             scenario=(
                 "Sable scratched `:idle` into the pitcher's clay face at "
                 "the meadow to mark the flock's state. When the foraging "
-                "run began, Sable wiped the mark away and pressed `:running` "
-                "into the clay in its place."
+                "run began, Sable wiped the mark away and pressed a fresh "
+                "active-state keyword into the clay in its place."
             ),
             need=(
                 "Sable needed to confirm the clay face now showed the "
-                "running state after the reset."
+                "fresh state after the reset took effect."
             ),
             mapping=(
                 "`atom` holds the current state label on the clay. "
@@ -570,7 +570,7 @@ G9_08 = SubjectCurriculum(
             mapping=(
                 "`dosync` opens the transaction; `alter` with `+ 5` adds "
                 "to the current mark and writes the result atomically. "
-                "`@r` reads the committed total from inside the safe-box."
+                "`@r` reads the committed total held by the safe-box."
             ),
             resolution=(
                 "The pitcher returned the combined tally from the safe-box, "
@@ -1201,8 +1201,8 @@ G9_18 = SubjectCurriculum(
                 "the body. The result of the body is returned on release."
             ),
             resolution=(
-                "The pitcher returned the sum from inside the gate — "
-                "the addition completed safely within the locked section."
+                "The pitcher returned the sum produced within the gate — "
+                "the addition completed safely behind the locked section."
             ),
             tags=("story",),
         ),
@@ -1221,7 +1221,7 @@ G9_18 = SubjectCurriculum(
             ),
             need=(
                 "He needed to confirm the tally literal was returned "
-                "from inside the locked section after the gate reopened."
+                "by the locked section after the gate reopened."
             ),
             mapping=(
                 "`locking` acquires the monitor and evaluates its body. "

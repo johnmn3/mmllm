@@ -561,24 +561,22 @@ G3_09 = SubjectCurriculum(grade=3, subject_id="G3-09",
             goal_text="define a recipe named dbl that takes a quantity and serves twice that, then call dbl on 5 pinches",
 
             scenario=(
-                "Caw carved the name dbl into the pitcher's rim at the "
-                "market, then scratched the recipe beneath it: accept x, "
-                "serve twice x. The name and the recipe were pressed "
-                "together in one talon-stroke."
+                "Caw carved dbl into the market pitcher's rim and "
+                "scratched the recipe beneath: accept x, serve twice x — "
+                "all in one talon-stroke."
             ),
             need=(
-                "She wanted to call that named recipe with a count of five "
-                "and read the water level, confirming dbl would double "
-                "whatever count she offered."
+                "She wanted to call the named recipe with five and read "
+                "back the water level."
             ),
             mapping=(
-                "`defn` carves both a name and a recipe onto the rim in "
-                "one form — shorthand for `def` plus `fn`. Calling `(dbl 5)` "
-                "fills the slot with 5 and runs the doubling body."
+                "`defn` carves a named recipe onto the rim in one form — "
+                "shorthand for `def` plus `fn`. `(dbl 5)` fills x and "
+                "runs the doubling body."
             ),
             resolution=(
                 "The water rose to the expected mark — the named recipe "
-                "doubled the count of five, the rim delivering the result."
+                "doubled the count and the rim delivered."
             ),
             tags=("story",),
         ),
@@ -590,24 +588,21 @@ G3_09 = SubjectCurriculum(grade=3, subject_id="G3-09",
             goal_text="define a function add3 that adds three arguments, then call it with 1, 2, and 3",
 
             scenario=(
-                "Sable pressed the name add3 into the village pitcher's "
-                "rim alongside a three-slot recipe: accept a, b, and c, "
-                "then sum them. The carving was deep and permanent, "
-                "ready to be called whenever three counts needed summing."
+                "Sable pressed add3 into the village pitcher's rim "
+                "alongside a three-slot recipe: accept a, b, c, then "
+                "sum them — carved deep and permanent."
             ),
             need=(
-                "Sable needed to confirm the named recipe worked by "
-                "calling add3 with the counts one, two, and three — "
-                "checking the water level matched the expected sum."
+                "Sable wanted to call add3 with one, two, three and "
+                "watch the water reach the expected sum."
             ),
             mapping=(
-                "`defn` carves add3 as a permanent named recipe with "
-                "three parameter slots. Calling `(add3 1 2 3)` fills "
-                "a, b, c and runs `(+ a b c)`, the rim delivering the sum."
+                "`defn` carves add3 as a named recipe with three slots. "
+                "`(add3 1 2 3)` fills a, b, c and runs `(+ a b c)`."
             ),
             resolution=(
                 "The water rose to the expected mark — add3 filled its "
-                "three slots and summed them, the carving proving useful."
+                "slots and summed them cleanly."
             ),
             tags=("story",),
         ),
@@ -690,24 +685,21 @@ G3_11 = SubjectCurriculum(grade=3, subject_id="G3-11",
 
             scenario=(
                 "Sable tucked seven stones under one wing at the hilltop "
-                "pitcher, naming the count a. Then, without adding more "
-                "stones, Sable referenced a twice — as if the same tucked "
-                "bundle could be drawn from two sides at once."
+                "pitcher, naming the count a — then referenced a twice "
+                "without adding more stones."
             ),
             need=(
-                "Sable needed to know whether using a twice in the body "
-                "added the count to itself correctly, or whether the "
-                "second reference found the wing already empty."
+                "Sable needed to confirm the wing held firm for both "
+                "draws and the body added the count to itself."
             ),
             mapping=(
-                "A `let`-bound name can be used any number of times "
-                "in the body — each reference substitutes the same "
-                "tucked value. `(+ a a)` draws 7 twice, the wing never "
-                "emptying between uses."
+                "A `let`-bound name may be used any number of times — "
+                "each reference substitutes the same tucked value. "
+                "`(+ a a)` draws 7 twice."
             ),
             resolution=(
                 "The water rose to the expected mark — the tucked count "
-                "substituted twice, the wing holding firm for both draws."
+                "substituted twice for both draws."
             ),
             tags=("story",),
         ),
@@ -754,25 +746,22 @@ G3_12 = SubjectCurriculum(grade=3, subject_id="G3-12",
             goal_text="define g at the top level, shadow it in a let with a different value, and compute g+1 inside the let",
 
             scenario=(
-                "Caw carved g into the orchard pitcher's rim and filled "
-                "the groove with five. Then she tucked a very different "
-                "count under her wing — ninety-nine — and also named it g, "
-                "a shadow hiding the rim groove while the wing stayed shut."
+                "Caw carved g into the orchard pitcher's rim with five, "
+                "then tucked ninety-nine under her wing also named g — "
+                "shadowing the rim groove."
             ),
             need=(
-                "Inside the shadow-span she needed to add one to g, but "
-                "first had to know which g the REPL would read — the "
-                "rim groove or the wing-tucked count."
+                "Inside the shadow-span she had to know which g the "
+                "REPL would read — rim groove or wing-tucked count."
             ),
             mapping=(
-                "Inside a `let`, the local binding for g outranks the "
-                "namespace groove. The wing-tucked 99 shadows the carved "
-                "5. `(+ g 1)` reads the wing-count, not the rim, "
-                "and adds one to the shadow value."
+                "Inside a `let`, the local binding outranks the "
+                "namespace groove. The wing-tucked count shadows the "
+                "carved one. `(+ g 1)` reads the wing-count."
             ),
             resolution=(
                 "The water rose to the expected mark — the wing-tucked "
-                "g answered, one added to the shadow count inside the let."
+                "g answered, one added to the shadow."
             ),
             tags=("story",),
         ),
@@ -791,24 +780,21 @@ G3_13 = SubjectCurriculum(grade=3, subject_id="G3-13",
 
             scenario=(
                 "Sable scratched a multi-line recipe onto the market "
-                "pitcher's rim: the body listed several expressions in "
-                "a row, the last one being a fixed count of ninety-nine. "
-                "Sable fed the recipe a single stone and stepped back."
+                "pitcher's rim: several expressions in a row, the last "
+                "a fixed count of ninety-nine."
             ),
             need=(
-                "Sable needed to confirm that only the final expression "
-                "in the recipe body determined the water level — the "
-                "earlier expressions running but their results discarded."
+                "Sable needed to confirm only the final expression "
+                "set the water level — earlier ones silently discarded."
             ),
             mapping=(
-                "An `fn` body evaluates all its expressions in order but "
-                "returns only the last one's value. The earlier x references "
-                "ran and were dropped; only 99, the final form, reached "
-                "the water."
+                "An `fn` body evaluates all expressions in order but "
+                "returns only the last one's value. The earlier x's "
+                "ran and were dropped."
             ),
             resolution=(
-                "The water rose to the expected mark — the last expression "
-                "alone set the level, the earlier ones silent beneath it."
+                "The water rose to the expected mark — the last "
+                "expression alone set the level."
             ),
             tags=("story",),
         ),

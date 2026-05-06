@@ -824,8 +824,8 @@ G7_13 = SubjectCurriculum(grade=7, subject_id="G7-13",
             tags=("story",),
         ),
         SubjectExample(
-            form="(first (clojure.string/split-lines \"first\\nsecond\"))",
-            expected="first",
+            form="(first (clojure.string/split-lines \"alpha\\nbeta\"))",
+            expected="alpha",
             concept_phrase="the initial line from splitting a multi-line string",
             question_what="what the initial line is",
             goal_text="get the initial line from splitting a multi-line string",
@@ -835,7 +835,7 @@ G7_13 = SubjectCurriculum(grade=7, subject_id="G7-13",
                 "topmost row-pebble, ignoring the rest."
             ),
             need=(
-                "She needed only the first row lifted from the scroll, "
+                "She needed only the leading row lifted from the scroll, "
                 "exactly as the talon had inscribed it."
             ),
             mapping=(

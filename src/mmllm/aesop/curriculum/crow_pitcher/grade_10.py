@@ -1269,25 +1269,21 @@ G10_16 = SubjectCurriculum(
             question_what="the value of the symbol defined by def-pace when expanded with the given name and keyword value",
             goal_text="define a def-pace macro and use it to define and retrieve a value",
             scenario=(
-                "Korvus scratched a `def-` rewrite-rule on the village pitcher: "
-                "`def-pace` — a pattern that rewrote its call to a `def` form, "
-                "posting a named mark on the road-sign before the REPL ever "
-                "evaluated the binding."
+                "Korvus scratched a `def-` rewrite-rule at the village "
+                "pitcher: a pattern rewriting its call to a `def` form."
             ),
             need=(
-                "He needed to confirm that calling the pattern posted the "
-                "named mark correctly and that reading it back returned the "
-                "stored keyword-value — the rewrite-rule doing the def work."
+                "He needed to confirm the pattern posted the binding "
+                "and reading the name returned its bound value."
             ),
             mapping=(
-                "`def-` macros are rewrite-rules that expand to `def` forms, "
-                "posting road-sign bindings. `def-pace` rewrites to `(def "
-                "race-pace :slow)`; the REPL evaluates the expanded def, "
-                "then `race-pace` resolves to the posted value."
+                "`def-` macros expand to `def` forms posting road-sign "
+                "bindings. The REPL evaluates the expansion, then the "
+                "symbol resolves to its bound value."
             ),
             resolution=(
-                "The def-pattern expansion posted the binding; reading the "
-                "symbol returned the keyword value from the pitcher."
+                "The rewrite-pattern posted the binding; reading "
+                "the symbol returned its bound value."
             ),
             tags=("story",),
         ),
