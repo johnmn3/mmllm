@@ -170,7 +170,9 @@ def check_record(rec, sub, example):
     # in 6+ records per grade), etc.
     for bad in ("in the hilltop", "in the road", "in the beach",
                  "in the farm"):
-        if bad in user:
+        # Use word-boundary check so "in the farmyard" doesn't false-positive
+        # on the "in the farm" pattern.
+        if re.search(re.escape(bad) + r"(?!\w)", user):
             issues.append(("BAD_PLACE_PREP", f"'{bad}' (wrong preposition)"))
             break
 
@@ -262,7 +264,8 @@ def check_record(rec, sub, example):
     # idiomatic English: "on the farm" / "at the farm". Same family as
     # the existing "in the hilltop / road / beach" check but the original
     # didn't enumerate "farm".
-    if "in the farm" in user.lower() and "into the farm" not in user.lower():
+    if (re.search(r"in the farm(?!\w)", user, re.IGNORECASE)
+            and "into the farm" not in user.lower()):
         issues.append(("BAD_PLACE_PREP",
                        "'in the farm' (use 'on the farm' / 'at the farm')"))
 

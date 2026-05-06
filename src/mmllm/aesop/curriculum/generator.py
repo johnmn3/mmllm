@@ -392,6 +392,108 @@ def _build_cp_placeholders(scene: Scene,
     return base
 
 
+# ── Milkmaid fable ─────────────────────────────────────────────────────
+# The milkmaid carries her pail to market while dreaming of the wealth
+# it will bring. The {milkmaid} is the dreamer/guesser (hare-analog);
+# the {farmer} is the patient evaluator who insists on submitting the
+# form first (tortoise-analog).
+MILKMAID_LOCATIONS = ("road", "meadow", "hilltop",
+                      "farm", "market", "orchard", "village")
+
+
+def _mm_milkmaids() -> tuple[ont.Character, ...]:
+    return tuple(c for c in ont.CHARACTERS
+                 if c.species == "human" and "dreamer" in c.role_classes)
+
+
+def _mm_farmers() -> tuple[ont.Character, ...]:
+    return tuple(c for c in ont.CHARACTERS
+                 if c.species == "human" and "farmer" in c.role_classes)
+
+
+def _pick_mm_chars(scene: Scene) -> tuple[ont.Character, ont.Character]:
+    """Pick a fresh (milkmaid, farmer) pair for a milkmaid record.
+
+    `milkmaid` is the dreamer/guesser (hare-analog).
+    `farmer` is the patient evaluator (tortoise-analog).
+    """
+    milkmaid = scene.rng.choice(_mm_milkmaids())
+    farmer   = scene.rng.choice(_mm_farmers())
+    return milkmaid, farmer
+
+
+def _pick_mm_location(scene: Scene) -> ont.Location:
+    """Pick from road / market / countryside locations natural for milkmaid."""
+    cands = [l for l in ont.LOCATIONS if l.name in MILKMAID_LOCATIONS]
+    return scene.rng.choice(cands)
+
+
+def _build_mm_placeholders(scene: Scene,
+                           milkmaid: ont.Character,
+                           farmer:   ont.Character,
+                           location: ont.Location,
+                           example:  SubjectExample) -> dict:
+    """Milkmaid placeholder dict.
+
+    Provides both milkmaid-specific keys ({milkmaid}, {farmer} + variants)
+    AND tortoise-hare aliases ({hare}, {tortoise} + variants) so shared
+    subplot templates still render. Mapping: milkmaid → hare-analog
+    (dreamer/guesser), farmer → tortoise-analog (patient evaluator).
+    """
+    return {
+        # tortoise-hare aliases
+        "hare":                 milkmaid.name,
+        "tortoise":             farmer.name,
+        "hare_phrase":          species_phrase(milkmaid),
+        "tortoise_phrase":      species_phrase(farmer),
+        "hare_he_she":          milkmaid.he_she,
+        "tortoise_he_she":      farmer.he_she,
+        "hare_he_she_cap":      cap(milkmaid.he_she),
+        "tortoise_he_she_cap":  cap(farmer.he_she),
+        "hare_his_her":         milkmaid.his_her,
+        "tortoise_his_her":     farmer.his_her,
+        "hare_him_her":         milkmaid.him_her,
+        "tortoise_him_her":     farmer.him_her,
+
+        # milkmaid-specific role names
+        "milkmaid":             milkmaid.name,
+        "milkmaid_phrase":      species_phrase(milkmaid),
+        "milkmaid_he_she":      milkmaid.he_she,
+        "milkmaid_he_she_cap":  cap(milkmaid.he_she),
+        "milkmaid_his_her":     milkmaid.his_her,
+        "milkmaid_him_her":     milkmaid.him_her,
+        "farmer":               farmer.name,
+        "farmer_phrase":        species_phrase(farmer),
+        "farmer_he_she":        farmer.he_she,
+        "farmer_he_she_cap":    cap(farmer.he_she),
+        "farmer_his_her":       farmer.his_her,
+        "farmer_him_her":       farmer.him_her,
+
+        # place
+        "place":                place_phrase(scene, location),
+        "location":             location.name,
+
+        # the example
+        "form_display":         _format_form_display(example.form),
+        "concept_phrase":       example.concept_phrase,
+        "what":                 example.question_what,
+        "goal_text":            example.goal_text,
+        "scenario":             example.scenario,
+        "need":                 example.need,
+        "mapping":              example.mapping,
+        "resolution":           example.resolution,
+
+        # emotions (use existing gender-neutral pools where available)
+        "emo_proud":            scene.rng.choice(EMO_PROUD),
+        "emo_patient":          scene.rng.choice(EMO_PATIENT),
+        "emo_tired":            scene.rng.choice(EMO_TIRED),
+        "emo_content":          scene.rng.choice(EMO_CONTENT),
+        "emo_regretful":        scene.rng.choice(EMO_REGRETFUL),
+        "emo_hungry":           scene.rng.choice(EMO_HUNGRY),
+        "emo_greedy":           scene.rng.choice(GE_EMO_GREEDY),
+    }
+
+
 # Pronoun-neutral emotion pools. The fables.py EMO_GREEDY/EMO_CONTENT/
 # EMO_REGRETFUL pools hard-code "his/her", which produces ungrammatical
 # text when the assigned character has a different gender. These pools
@@ -623,6 +725,11 @@ def generate_one_record(scene: Scene,
         location = _pick_cp_location(scene)
         placeholders_fn = lambda ex: _build_cp_placeholders(
             scene, clever, hasty, location, ex)
+    elif sub.fable == "milkmaid":
+        milkmaid, farmer = _pick_mm_chars(scene)
+        location = _pick_mm_location(scene)
+        placeholders_fn = lambda ex: _build_mm_placeholders(
+            scene, milkmaid, farmer, location, ex)
     else:
         # tortoise-hare default
         hare, tortoise = _pick_th_chars(scene)
