@@ -550,9 +550,8 @@ G6_07 = SubjectCurriculum(grade=6, subject_id="G6-07",
                 "gating stone lands on the internal shelf."
             ),
             resolution=(
-                "The pitcher returned true — the marginal mark firmed "
-                "into a clean boolean, the symbol routed to the "
-                "internal shelf."
+                "The pitcher returned true — the private mark firmed "
+                "into a clean boolean, the internal shelf confirmed."
             ),
             tags=("story",),
         ),
@@ -672,26 +671,24 @@ G6_09 = SubjectCurriculum(grade=6, subject_id="G6-09",
 
             scenario=(
                 "Caw placed two stones on the pitcher's rim at the "
-                "village in order: the first stone named and counted, "
-                "the second stone's count depending on the first. "
-                "She would read the second stone's count after both "
-                "were placed."
+                "village in order: the first named and counted, the "
+                "second's count depending on the first. She would read "
+                "the second stone's count after both were set."
             ),
             need=(
                 "She needed the second definition to find the first "
-                "already on the rim when it was evaluated — drop them "
-                "out of order and the second stone would find nothing."
+                "already on the rim — out of order, the second stone "
+                "would find nothing."
             ),
             mapping=(
-                "`do` executes forms left to right in the order given. "
-                "`def step1` carves the first name before `def step2` "
-                "is reached. When step2 looks for step1, it is already "
-                "on the rim. The last form's value is returned."
+                "`do` executes forms left to right. `def step1` carves "
+                "its name before `def step2` is reached. When step2 "
+                "looks for step1, it is already on the rim. The last "
+                "form's value is returned."
             ),
             resolution=(
-                "The pitcher returned the second stone's count — the "
-                "loading order preserved, each name found before it "
-                "was needed."
+                "The pitcher returned the second stone's count — "
+                "each name found before it was needed."
             ),
             tags=("story",),
         ),
@@ -720,9 +717,8 @@ G6_09 = SubjectCurriculum(grade=6, subject_id="G6-09",
                 "The sum uses both tucked values."
             ),
             resolution=(
-                "The pitcher returned the total of both tucked values "
-                "— the ordered bindings resolved cleanly, each found "
-                "before it was needed."
+                "The pitcher returned the sum — ordered bindings "
+                "resolved cleanly, each tuck found before it was needed."
             ),
             tags=("story",),
         ),
@@ -760,8 +756,7 @@ G6_10 = SubjectCurriculum(grade=6, subject_id="G6-10",
             ),
             resolution=(
                 "The pitcher returned the inner dependency map — "
-                "the nested contents at the :deps key, the outer "
-                "shell peeled away."
+                "the nested contents at :deps, the outer shell gone."
             ),
             tags=("story",),
         ),
@@ -791,8 +786,7 @@ G6_10 = SubjectCurriculum(grade=6, subject_id="G6-10",
             ),
             resolution=(
                 "The pitcher returned the first directory name — "
-                "the two-step path descending cleanly to the value "
-                "at the bottom."
+                "the two-step path reaching the value cleanly."
             ),
             tags=("story",),
         ),

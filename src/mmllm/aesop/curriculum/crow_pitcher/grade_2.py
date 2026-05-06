@@ -814,14 +814,106 @@ G2_06 = SubjectCurriculum(
             ),
             tags=("story",),
         ),
-        _ex("(dec 5)",  4, "the decrement operation",  "5 minus 1",
-            goal="decrement 5 by 1"),
-        _ex("(inc 0)",  1, "the increment operation",  "0 plus 1",
-            goal="increment 0"),
-        _ex("(dec 0)", -1, "the decrement operation",  "0 minus 1",
-            goal="decrement 0"),
-        _ex("(inc -1)", 0, "the increment operation", "negative 1 plus 1",
-            goal="increment negative 1"),
+        SubjectExample(
+            form="(dec 5)", expected=4,
+            concept_phrase="the decrement operation",
+            question_what="5 minus 1",
+            goal_text="decrement 5 by 1",
+
+            scenario=(
+                "Caw had five stones stacked beside the market pitcher. "
+                "She removed one from the top and needed to know the "
+                "new stack height without counting the whole pile again."
+            ),
+            need=(
+                "She needed the count after removing exactly one stone, "
+                "the minimal step backward from five."
+            ),
+            mapping=(
+                "`dec` subtracts exactly one from any integer, retreating "
+                "the tally by a single unit. One stone removed, the "
+                "count moves back by one, and `dec` returns that value."
+            ),
+            resolution=(
+                "The tally retreated by one and the expected new count arrived."
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form="(inc 0)", expected=1,
+            concept_phrase="the increment operation",
+            question_what="0 plus 1",
+            goal_text="increment 0",
+
+            scenario=(
+                "Sable stood at the empty road pitcher with no stones inside. "
+                "She held a single stone in her talon and wanted to know the "
+                "new count after her first drop."
+            ),
+            need=(
+                "She needed the count after dropping one stone into an "
+                "empty pitcher — moving from zero to the first step."
+            ),
+            mapping=(
+                "`inc` advances any integer by one. Starting from zero, "
+                "a single increment step produces the smallest positive count, "
+                "the first foothold above the empty baseline."
+            ),
+            resolution=(
+                "The first stone was added and the expected count of one returned."
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form="(dec 0)", expected=-1,
+            concept_phrase="the decrement operation",
+            question_what="0 minus 1",
+            goal_text="decrement 0",
+
+            scenario=(
+                "Korvus had an empty pitcher at the garden — zero stones inside. "
+                "He removed one imaginary stone below the baseline and wanted "
+                "to know what count the pitcher showed."
+            ),
+            need=(
+                "He needed the count after stepping backward from zero, "
+                "crossing into negative territory."
+            ),
+            mapping=(
+                "`dec` moves below zero without stopping. Decrementing zero "
+                "yields a negative count — the pitcher's tally crosses the "
+                "empty baseline and continues downward."
+            ),
+            resolution=(
+                "The tally crossed below zero and the expected negative count arrived."
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form="(inc -1)", expected=0,
+            concept_phrase="the increment operation",
+            question_what="negative 1 plus 1",
+            goal_text="increment negative 1",
+
+            scenario=(
+                "Caw had a deficit of one at the village pitcher — one below "
+                "empty. She added a single stone and wanted to know whether "
+                "the count climbed back to zero."
+            ),
+            need=(
+                "She needed to know whether adding one stone to a negative-one "
+                "deficit returned the count to neutral."
+            ),
+            mapping=(
+                "`inc` adds one regardless of sign. Incrementing negative one "
+                "cancels the deficit exactly, returning the tally to zero — "
+                "the neutral baseline of the pitcher."
+            ),
+            resolution=(
+                "The deficit was cancelled and the expected neutral count returned."
+            ),
+            tags=("story",),
+        ),
     ],
     subplots=_ACORN_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
@@ -857,14 +949,81 @@ G2_07 = SubjectCurriculum(
             ),
             tags=("story",),
         ),
-        _ex("(abs -5)",  5, "the absolute value",  "the absolute value of negative 5",
-            goal="find the absolute value of negative 5"),
-        _ex("(abs 0)",   0, "the absolute value",   "the absolute value of 0",
-            goal="find the absolute value of 0"),
-        _ex("(abs (- 3 8))", 5,
-            "the absolute value",
-            "the absolute value of the difference between 3 and 8",
-            goal="find the absolute value of 3 minus 8"),
+        SubjectExample(
+            form="(abs -5)", expected=5,
+            concept_phrase="the absolute value",
+            question_what="the absolute value of negative 5",
+            goal_text="find the absolute value of negative 5",
+
+            scenario=(
+                "Sable had a deficit of five at the orchard pitcher — five "
+                "below the baseline. She needed to know the magnitude of "
+                "that gap without the sign."
+            ),
+            need=(
+                "She needed the distance from zero as a positive count, "
+                "the sign stripped away completely."
+            ),
+            mapping=(
+                "`abs` reflects any negative count across zero, yielding "
+                "its positive mirror. A deficit of five is five units from "
+                "zero, so `abs` returns five."
+            ),
+            resolution=(
+                "The deficit was reflected and the expected positive distance arrived."
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form="(abs 0)", expected=0,
+            concept_phrase="the absolute value",
+            question_what="the absolute value of 0",
+            goal_text="find the absolute value of 0",
+
+            scenario=(
+                "Korvus stood at the empty road pitcher with exactly zero "
+                "stones inside. He asked the pitcher the distance from zero "
+                "to zero — a question of pure baseline."
+            ),
+            need=(
+                "He needed confirmation that zero has no distance from itself "
+                "and that `abs` would return the neutral baseline."
+            ),
+            mapping=(
+                "`abs` of zero is zero — the empty baseline is already its "
+                "own reflection. No sign to strip, no distance to measure; "
+                "the pitcher returns the neutral count unchanged."
+            ),
+            resolution=(
+                "The neutral count returned unchanged and the expected zero arrived."
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form="(abs (- 3 8))", expected=5,
+            concept_phrase="the absolute value",
+            question_what="the absolute value of the difference between 3 and 8",
+            goal_text="find the absolute value of 3 minus 8",
+
+            scenario=(
+                "Caw scratched the subtraction of three from eight on the "
+                "hilltop pitcher's rim, producing a negative difference. "
+                "She then asked the pitcher for the magnitude of that gap."
+            ),
+            need=(
+                "She needed the size of the gap between three and eight, "
+                "regardless of which was larger."
+            ),
+            mapping=(
+                "The inner form `(- 3 8)` resolves to a negative value first; "
+                "`abs` then strips the sign, returning the pure unsigned "
+                "distance between the two counts."
+            ),
+            resolution=(
+                "The gap was measured and the expected unsigned distance returned."
+            ),
+            tags=("story",),
+        ),
     ],
     subplots=_ACORN_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
@@ -900,12 +1059,56 @@ G2_08 = SubjectCurriculum(
             ),
             tags=("story",),
         ),
-        _ex("(* 2/3 3/4)", "1/2",
-            "the product of two ratios",   "the product of two-thirds and three-quarters",
-            goal="multiply two-thirds by three-quarters"),
-        _ex("(- 1 1/3)", "2/3",
-            "the difference of a whole and a ratio",             "1 minus one-third",
-            goal="subtract one-third from 1"),
+        SubjectExample(
+            form="(* 2/3 3/4)", expected="1/2",
+            concept_phrase="the product of two ratios",
+            question_what="the product of two-thirds and three-quarters",
+            goal_text="multiply two-thirds by three-quarters",
+
+            scenario=(
+                "Sable had a stone split into thirds and took two of those "
+                "thirds at the meadow pitcher. She then kept three-quarters "
+                "of what she held and needed the exact fraction remaining."
+            ),
+            need=(
+                "She needed the precise fractional product without any rounding, "
+                "the exact portion after both cuts."
+            ),
+            mapping=(
+                "`*` on ratios multiplies numerator by numerator and denominator "
+                "by denominator, then reduces. Both fractions stay exact; "
+                "the product is a simplified fraction."
+            ),
+            resolution=(
+                "The exact fractional product arrived in simplified form from the pitcher."
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form="(- 1 1/3)", expected="2/3",
+            concept_phrase="the difference of a whole and a ratio",
+            question_what="1 minus one-third",
+            goal_text="subtract one-third from 1",
+
+            scenario=(
+                "Korvus held a whole stone at the farm pitcher and gave away "
+                "one-third of it. He needed to know the exact fractional "
+                "portion remaining after the gift."
+            ),
+            need=(
+                "He needed the exact fraction left after removing one-third "
+                "from a whole, with no rounding introduced."
+            ),
+            mapping=(
+                "`-` treats 1 as a ratio 1/1 and finds a common denominator "
+                "with 1/3. The subtraction stays exact throughout, returning "
+                "the precise remaining fraction."
+            ),
+            resolution=(
+                "The exact remaining fraction arrived and the pitcher returned it without loss."
+            ),
+            tags=("story",),
+        ),
     ],
     subplots=_ACORN_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
@@ -941,12 +1144,56 @@ G2_09 = SubjectCurriculum(
             ),
             tags=("story",),
         ),
-        _ex("(/ 10 3)", "10/3", "the division operation",
-            "the exact rational result of using / on 10 and 3",
-            goal="divide 10 by 3"),
-        _ex("(/ 1.0 2)", 0.5, "the division operation",
-            "the result of 1.0 divided by 2",
-            goal="divide 1.0 by 2"),
+        SubjectExample(
+            form="(/ 10 3)", expected="10/3",
+            concept_phrase="the division operation",
+            question_what="the exact rational result of using / on 10 and 3",
+            goal_text="divide 10 by 3",
+
+            scenario=(
+                "Caw tried to split ten stones into three equal groups at "
+                "the orchard pitcher. The division did not come out whole "
+                "and she needed the exact result, not an approximation."
+            ),
+            need=(
+                "She needed the precise fractional result rather than a "
+                "rounded decimal, preserving the full division exactly."
+            ),
+            mapping=(
+                "`/` on integers returns a ratio when the division is not exact. "
+                "Ten does not divide evenly by three; the pitcher hands back "
+                "the exact rational form rather than approximating."
+            ),
+            resolution=(
+                "The exact rational result arrived in fraction form from the pitcher."
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form="(/ 1.0 2)", expected=0.5,
+            concept_phrase="the division operation",
+            question_what="the result of 1.0 divided by 2",
+            goal_text="divide 1.0 by 2",
+
+            scenario=(
+                "Sable dropped one float-stone marked 1.0 into the road pitcher "
+                "and asked for it split in half. She expected a decimal result, "
+                "not a rational fraction."
+            ),
+            need=(
+                "She needed the floating-point half rather than the exact "
+                "ratio, since the input was already a float."
+            ),
+            mapping=(
+                "When either operand is a float, `/` promotes the result to "
+                "floating-point. One-point-zero divided by two yields a "
+                "decimal value, not the exact ratio one-half."
+            ),
+            resolution=(
+                "The float result arrived and the pitcher returned the expected decimal value."
+            ),
+            tags=("story",),
+        ),
     ],
     subplots=_ACORN_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
@@ -982,12 +1229,81 @@ G2_10 = SubjectCurriculum(
             ),
             tags=("story",),
         ),
-        _ex("(* 5 5)",   25,       "repeated multiplication", "5 to the second power",
-            goal="multiply 5 by itself"),
-        _ex("(* 3 3 3 3)", 81,     "repeated multiplication", "3 to the fourth power",
-            goal="multiply 3 by itself four times"),
-        _ex("(* 10 10)", 100,      "repeated multiplication", "10 to the second power",
-            goal="multiply 10 by itself"),
+        SubjectExample(
+            form="(* 5 5)", expected=25,
+            concept_phrase="repeated multiplication",
+            question_what="5 to the second power",
+            goal_text="multiply 5 by itself",
+
+            scenario=(
+                "Caw arranged five rows of five stones each on the meadow "
+                "pitcher's rim. She wanted the total from multiplying one "
+                "dimension by itself — a square count."
+            ),
+            need=(
+                "She needed the square of five: the count from pairing "
+                "each row with each position, in one form."
+            ),
+            mapping=(
+                "`*` with two identical arguments computes the square. "
+                "Five rows of five is the simplest repeated multiplication, "
+                "the product of the number with itself."
+            ),
+            resolution=(
+                "The square count settled and the expected product arrived from the pitcher."
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form="(* 3 3 3 3)", expected=81,
+            concept_phrase="repeated multiplication",
+            question_what="3 to the fourth power",
+            goal_text="multiply 3 by itself four times",
+
+            scenario=(
+                "Sable scratched four tallies of three onto the village pitcher's "
+                "rim, each layer compounding the last. She wanted the final "
+                "product of all four self-multiplications."
+            ),
+            need=(
+                "She needed three raised to the fourth power — the product "
+                "of multiplying three by itself four times over."
+            ),
+            mapping=(
+                "`*` with four identical arguments multiplies left to right, "
+                "compounding each layer: three by three, then by three again, "
+                "then by three a final time."
+            ),
+            resolution=(
+                "The four-layer product settled and the expected count filled the pitcher."
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form="(* 10 10)", expected=100,
+            concept_phrase="repeated multiplication",
+            question_what="10 to the second power",
+            goal_text="multiply 10 by itself",
+
+            scenario=(
+                "Korvus lined ten rows of ten stones along the farm pitcher's "
+                "rim, filling a square arrangement. He needed the total count "
+                "of all stones in the square."
+            ),
+            need=(
+                "He needed ten squared — the count that fills a ten-by-ten "
+                "arrangement — returned in one form."
+            ),
+            mapping=(
+                "`*` with two tens computes their product in one step. "
+                "Ten rows of ten yields the square, "
+                "the simplest square of a round number."
+            ),
+            resolution=(
+                "The square was computed and the expected round total arrived."
+            ),
+            tags=("story",),
+        ),
     ],
     subplots=_ACORN_SUBPLOTS, plan_pool=_PLAN_POOL,
 )

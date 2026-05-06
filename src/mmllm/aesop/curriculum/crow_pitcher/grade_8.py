@@ -125,8 +125,8 @@ G8_02 = SubjectCurriculum(
 
             scenario=(
                 "Caw wove a bark-and-vine pouch at the orchard with a single "
-                "slot called color. She packed one pebble in, marking the slot "
-                "with a talon-scratch for 'grey', then held the pouch to the light."
+                "slot called color. She packed one pebble in, marking the color "
+                "slot with a talon-scratch, then held the pouch to the light."
             ),
             need=(
                 "She needed to reach into the color slot and lift the "
@@ -218,8 +218,8 @@ G8_03 = SubjectCurriculum(
 
             scenario=(
                 "Korvus stitched a Runner pouch on the pitcher's rim at the market "
-                "with two slots: name and pace. He packed a new instance — "
-                "name='Bob', pace=:moderate — and reached for the name slot."
+                "with two slots: name and pace. He packed a new instance with a "
+                "name-stone and a moderate pace, then reached for the name slot."
             ),
             need=(
                 "He needed to lift only the name slot's value from the packed "
@@ -866,7 +866,7 @@ G8_13 = SubjectCurriculum(
                 "Caw posted the Named guild charter on the pitcher's rim at the "
                 "garden. She wove a Hare pouch with an 'n' slot that pledged "
                 "the guild — its method reaching into the pouch via `this` "
-                "to read the n slot. She packed 'Zephyr' and called `name-of`."
+                "to read the n slot. She packed a name-stone inside and called `name-of`."
             ),
             need=(
                 "She needed the method to use `this` to reach into its own "
