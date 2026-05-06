@@ -15,43 +15,6 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 ## Grade 3
 
-### G3-01: def — top-level binding
-
-- examples: 2
-- variety @ n=50: 0.99
-- issues: {'HIGH_LENGTH': 1}
-    - [HIGH_LENGTH] form=`(do (def y 7) y)` — user_msg 213 words
-
-### G3-04: let — multi-binding
-
-- examples: 3
-- variety @ n=50: 0.99
-- issues: {'HIGH_LENGTH': 2}
-    - [HIGH_LENGTH] form=`(let [a 1 b 2] (+ a b))` — user_msg 205 words
-    - [HIGH_LENGTH] form=`(let [a 2 b 3 c 4] (+ a b c))` — user_msg 207 words
-
-### G3-05: let — shadowing outer def
-
-- examples: 2
-- variety @ n=50: 0.99
-- issues: {'HIGH_LENGTH': 2}
-    - [HIGH_LENGTH] form=`(do (def x 10) (let [x 99] x))` — user_msg 258 words
-    - [HIGH_LENGTH] form=`(do (def x 10) (let [x 99] x) x)` — user_msg 248 words
-
-### G3-07: fn — anonymous function
-
-- examples: 2
-- variety @ n=50: 0.98
-- issues: {'HIGH_LENGTH': 1}
-    - [HIGH_LENGTH] form=`((fn [a b] (* a b)) 3 4)` — user_msg 228 words
-
-### G3-08: fn — multi-arg
-
-- examples: 1
-- variety @ n=50: 0.98
-- issues: {'HIGH_LENGTH': 1}
-    - [HIGH_LENGTH] form=`((fn [a b c] (+ a b c)) 1 2 3)` — user_msg 225 words
-
 ### G3-10: anonymous shorthand #()
 
 - examples: 2
@@ -236,7 +199,7 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 ### Issue counts (across all examples × 3 records)
 
-- **HIGH_LENGTH**: 35
+- **HIGH_LENGTH**: 28
 
 ### Per-grade summary
 
@@ -244,7 +207,7 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 |---|---|---|---|---|
 | 1 | 18 | 76 | 0 | — |
 | 2 | 22 | 88 | 0 | G2-20(0.95) |
-| 3 | 18 | 31 | 13 | — |
+| 3 | 18 | 31 | 6 | — |
 | 4 | 20 | 39 | 0 | — |
 | 5 | 22 | 39 | 2 | — |
 | 6 | 16 | 33 | 0 | — |
@@ -259,34 +222,36 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 #### HIGH_LENGTH
 
-- `G3-01` (form `(do (def y 7) y)`): user_msg 213 words
-    ```
-    What the Dog thought he saw beneath the water turned out to be his own reflection. All this took place by the forest.
-
-Rex the hound discovered a worn stone at the stream's edge and began carving a fresh name into its face — y. "When I cut a name deep into the marker," he said, pressing the stone's ...
-    ```
-- `G3-04` (form `(let [a 1 b 2] (+ a b))`): user_msg 205 words
-    ```
-    Greed has cost more than one creature what they already had. It happened along the road.
-
-Patch the hound arrived at the crossing with two bones — one small, one larger. "I will know these two by separate names for the span of this form," Patch said, holding both between the jaws. "The names a and b...
-    ```
-- `G3-04` (form `(let [a 2 b 3 c 4] (+ a b c))`): user_msg 207 words
-    ```
-    Greed has cost more than one creature what they already had.
-
-Rex the hound gathered three bones at the stream's edge and clenched them all between his jaws — a light grip, a medium one, and a heavy one. "I will hold these as a, b, and c for one stretch," he said, naming each as his teeth settled. "...
-    ```
-- `G3-05` (form `(do (def x 10) (let [x 99] x))`): user_msg 258 words
+- `G3-10` (form `(#(+ % 1) 5)`): user_msg 220 words
     ```
     What the Dog thought he saw beneath the water turned out to be his own reflection.
 
-Bell the hound had long marked a stone at the stream's edge with the name x, recording a weight of 10 beside it for all to read. But one day, she picked up a much larger bone and held it in her jaws for a single cros...
+Rex the hound caught a whiff of the bank near the meadow and traced a quick, terse sniffing-path — so brief it had almost no name at all. "Add one more bone to whatever you find," the marks said. He did not carve a m...
     ```
-- `G3-05` (form `(do (def x 10) (let [x 99] x) x)`): user_msg 248 words
+- `G3-10` (form `(#(+ % 1) 5)`): user_msg 220 words
     ```
-    A Dog was crossing a stream with a fine bone in his mouth, and was very pleased with himself.
+    Greed has cost more than one creature what they already had. It happened near the road.
 
-Patch the hound had carved a marker stone by the forest, scratching the name x deep into it and pressing a weight of 10 beside it. One crossing later, Patch picked up a larger bone and held it in the jaws ...
+Rex the hound caught a whiff of the bank near the meadow and traced a quick, terse sniffing-path — so brief it had almost no name at all. "Add one more bone to whatever you find," the marks said. He did not carv...
+    ```
+- `G3-11` (form `(let [a 7] (+ a a))`): user_msg 216 words
+    ```
+    What the Dog thought he saw beneath the water turned out to be his own reflection. All this took place by the forest.
+
+Patch the hound held a bone at the stream's edge between his jaws — a count of 7. "I will call this grip a," he said, "and I need to know what a plus a makes. The name a means 7, so...
+    ```
+- `G3-11` (form `(let [a 7] (+ a a))`): user_msg 204 words
+    ```
+    Greed has cost more than one creature what they already had.
+
+Patch the hound held a bone at the stream's edge between his jaws — a count of 7. "I will call this grip a," he said, "and I need to know what a plus a makes. The name a means 7, so I will add 7 to 7."
+
+The form referenced the same name t...
+    ```
+- `G3-14` (form `(do (+ 1 1) (+ 2 2) (+ 3 3))`): user_msg 203 words
+    ```
+    What the Dog thought he saw beneath the water turned out to be his own reflection. It happened on the road.
+
+Rex the hound left three sets of paw-prints at the stream's edge, one trail after another. "I walk each trail in turn," he said, pressing the last print deep into the stone, "and whatever the...
     ```
 

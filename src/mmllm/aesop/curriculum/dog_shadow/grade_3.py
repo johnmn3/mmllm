@@ -87,27 +87,20 @@ G3_01 = SubjectCurriculum(grade=3, subject_id="G3-01",
             question_what="the value of y after using def to bind y to 7",
             goal_text="bind y to 7 and return it",
             scenario=(
-                'Rex the hound discovered a worn stone at the stream\'s edge '
-                'and began carving a fresh name into its face — y. "When I '
-                'cut a name deep into the marker," he said, pressing the '
-                'stone\'s value alongside, "any dog who passes will recognize '
-                'it and find what lies beneath."'
+                'Rex the hound carved a name — y — into a stone at the '
+                'stream\'s edge, pressing the value 7 alongside.'
             ),
             need=(
-                'He would need to prove the marker worked — that walking past '
-                'it and calling out the name would return the same value, '
-                'without doubt or guessing.'
+                'He needed the marker to work: calling the name would return '
+                'the value it held.'
             ),
             mapping=(
-                'The marker stone is the def, the name y is carved into its '
-                'face, the value 7 is the weight pressed beside it, and '
-                'calling on the runtime is what the hound does to read the '
-                'stone.'
+                'The marker stone is the def, the name y is the carving, and '
+                'the value 7 is pressed beside it.'
             ),
             resolution=(
-                'The REPL read the carved marker as the form requested and '
-                'handed back the bound value. The stone stood firm — any dog '
-                'who looked for y would find what Rex had named there.'
+                'The REPL read the marker and returned the bound value. Any dog '
+                'who looked for y would find what Rex had named.'
             ),
             tags=("story",),
         ),
@@ -262,25 +255,21 @@ G3_04 = SubjectCurriculum(grade=3, subject_id="G3-04",
             question_what="adding a and b after binding both via let to 1 and 2",
             goal_text="bind a to 1 and b to 2, then add them",
             scenario=(
-                'Patch the hound arrived at the crossing with two bones — one '
-                'small, one larger. "I will know these two by separate names '
-                'for the span of this form," Patch said, holding both between '
-                'the jaws. "The names a and b, gripped together until I reach '
-                'the far bank."'
+                'Patch the hound held two bones between the jaws: one small '
+                'named a, one larger named b. "For this crossing, I grip '
+                'them by these names."'
             ),
             need=(
-                'The form required them to be known by those names so the '
-                'mouth could combine them — adding them into a single verdict '
-                'before release.'
+                'The form needed them known by those names so the mouth could '
+                'combine them.'
             ),
             mapping=(
-                'The pair of bones in the mouth is the multi-binding, the '
-                'names a and b are what the throat holds, the two weights are '
-                'what\'s gripped, and the sum is the product of combining them.'
+                'The bones in the mouth are the multi-binding; the names a and b '
+                'are the throat\'s hold; the values are what\'s gripped.'
             ),
             resolution=(
-                'The REPL read the dual grip and added the bound values, '
-                'handing back the total. Patch released the crossing.'
+                'The REPL added the bound values and handed back the total. '
+                'Patch released the crossing.'
             ),
             tags=("story",),
         ),
@@ -321,24 +310,20 @@ G3_04 = SubjectCurriculum(grade=3, subject_id="G3-04",
             goal_text="bind a to 2, b to 3, c to 4, and add them",
             scenario=(
                 'Rex the hound gathered three bones at the stream\'s edge and '
-                'clenched them all between his jaws — a light grip, a medium '
-                'one, and a heavy one. "I will hold these as a, b, and c for '
-                'one stretch," he said, naming each as his teeth settled. "The '
-                'binding lives only while I cross."'
+                'clenched them between his jaws — light, medium, heavy. "I hold '
+                'these as a, b, and c."'
             ),
             need=(
-                'The form needed all three known by separate names so the '
-                'mouth could add them together into a single tally before '
-                'release.'
+                'The form needed all three known by names so the mouth could add '
+                'them.'
             ),
             mapping=(
-                'The three bones in the jaws are the three-binding, the names '
-                'a, b, and c are what the throat holds tight, the counts are '
-                'the gripped values, and the sum is what comes back.'
+                'The three bones are the three-binding; the names a, b, and c are '
+                'the throat\'s hold; the sum is what comes back.'
             ),
             resolution=(
-                'The REPL read all three grips and added the bound values, '
-                'returning the total. Rex dropped the bones on the far bank.'
+                'The REPL added the bound values and returned the total. Rex '
+                'dropped the bones on the far bank.'
             ),
             tags=("story",),
         ),
@@ -355,23 +340,22 @@ G3_05 = SubjectCurriculum(grade=3, subject_id="G3-05",
             question_what="the value of x inside the let scope where it shadows the def binding",
             goal_text="define x at the top level, then shadow it locally and return the inner value",
             scenario=(
-                'Bell the hound had long marked a stone at the stream\'s edge with the name x, recording a weight of 10 beside it for all to read. But one day, she picked up a much larger bone and held it in her jaws for a single crossing. "For just this form," she said around the grip, "x will mean what I hold — not what\'s carved in the stone."'
+                'Bell the hound marked a stone with the name x and value 10. One day, '
+                'she picked up a larger bone and held it in her jaws. "For this form, x '
+                'means what I hold — not what\'s on the stone."'
             ),
             need=(
-                'The form needed to see the bone in her mouth when it asked for '
-                'x — the local grip hiding the marker stone\'s record — only '
-                'for that stretch.'
+                'The form needed x to mean the bone in her mouth, the local grip hiding '
+                'the stone\'s record.'
             ),
             mapping=(
-                'The stone is the def at the top level, the bone in the mouth '
-                'is the let-binding that shadows it, the local name x hides '
-                'the stone\'s x while the jaws are closed, and the form\'s '
-                'span is the only place the shadow holds.'
+                'The stone is the top-level def; the bone in the mouth is the let-binding '
+                'that shadows it. The local x hides the stone\'s x while the jaws are '
+                'closed.'
             ),
             resolution=(
-                'The REPL read the jaws first — and found x meant the grip, '
-                'not the stone. The shadow held only while the form breathed. '
-                'Bell released the bone and the shadow faded.'
+                'The REPL read the jaws first and found x meant the grip, not the stone. '
+                'The shadow held only while the form ran. Bell released the bone.'
             ),
             tags=("story",),
         ),
@@ -382,27 +366,20 @@ G3_05 = SubjectCurriculum(grade=3, subject_id="G3-05",
             question_what="the value of x in the outer scope after the let scope ends",
             goal_text="define x, shadow it in a let, then look up x again in the outer scope",
             scenario=(
-                'Patch the hound had carved a marker stone by the forest, '
-                'scratching the name x deep into it and pressing a weight of '
-                '10 beside it. One crossing later, Patch picked up a larger '
-                'bone and held it in the jaws for one form: "This grip will '
-                'hide the stone\'s mark, but only for this stretch."'
+                'Patch the hound marked a stone with x and 10. Later, he held a bone in '
+                'his jaws for one form: "This grip hides the stone, but only for this stretch."'
             ),
             need=(
-                'After the crossing, when Patch asked for x again, the stone '
-                'would speak — not the grip that had faded. The scope would '
-                'return to the namespace the moment the form ended.'
+                'After the form, when Patch asked for x again, the stone would speak, not '
+                'the grip that had faded.'
             ),
             mapping=(
-                'The stone is the def in the top-level namespace, the bone '
-                'in the jaws is the let that shadows it, and the second lookup '
-                'of x reads the stone again — the marker outlasts the grip.'
+                'The stone is the top-level def; the bone is the let that shadows it. The '
+                'second lookup of x reads the stone again.'
             ),
             resolution=(
-                'The REPL saw the jaws first and returned the grip for that '
-                'form. When the form ended, Patch released the bone. The second '
-                'lookup of x found the stone\'s carved value — the binding '
-                'endured beyond the form.'
+                'The REPL read the jaws first and returned the grip. When the form ended, '
+                'the second lookup found the stone\'s value. The binding endured beyond the form.'
             ),
             tags=("story",),
         ),
@@ -521,23 +498,19 @@ G3_07 = SubjectCurriculum(grade=3, subject_id="G3-07",
             question_what="the result of applying an anonymous fn with two parameters that multiplies them to 3 and 4",
             goal_text="create an anonymous function that multiplies its two arguments and apply it to 3 and 4",
             scenario=(
-                'Patch the hound laid out a quick nose-trail at the stream\'s edge — a path of sniffs that said: take whatever comes in, take what comes next, and hand back their product. "This trail is nameless," Patch said, breathing along the scent-marks. "I will walk it once with two counts and throw it away."'
+                'Patch the hound laid a nose-trail at the stream\'s edge: take two inputs and '
+                'hand back their product. "This trail is nameless," he said. "I walk it once and throw it away."'
             ),
             need=(
-                'The form needed a procedure for two inputs that had no name '
-                'to remember afterward — a trail drawn just for this walk.'
+                'The form needed a procedure for two inputs with no name to remember.'
             ),
             mapping=(
-                'The scent-marks laid on the bank are the anonymous fn, the '
-                'two inputs carried in are a and b, the computation along the '
-                'trail is the multiplication, and what comes back is the '
-                'product.'
+                'The scent-marks are the anonymous fn; the inputs a and b are carried in; the '
+                'computation is the multiplication; the product comes back.'
             ),
             resolution=(
-                'The REPL walked the unnamed trail with 3 and 4, multiplied '
-                'them as the sniffs directed, and handed back the answer. The '
-                'trail faded into the bank — Patch had no use for its name '
-                'again.'
+                'The REPL walked the trail with 3 and 4, multiplied them as directed, and handed '
+                'back the answer. The trail faded.'
             ),
             tags=("story",),
         ),
@@ -554,23 +527,19 @@ G3_08 = SubjectCurriculum(grade=3, subject_id="G3-08",
             question_what="the result of applying an anonymous fn with three parameters that adds them to 1, 2, and 3",
             goal_text="create an anonymous function with three parameters that adds them and apply it to 1, 2, and 3",
             scenario=(
-                'Rex the hound drew out three sniffing-steps at the stream\'s edge, a path that asked for three separate counts. "Take the first, then the second, then the third," he said, tracing the marks, "and carry back their sum. This trail has no name — I design it just for this walk."'
+                'Rex the hound drew three sniffing-steps: take three counts and carry back their sum. '
+                '"This trail has no name — I design it for this walk."'
             ),
             need=(
-                'The form required a three-step trail with no name to keep. '
-                'The procedure would be used once, then forgotten.'
+                'The form needed a three-step trail with no name to keep. The procedure would be used once.'
             ),
             mapping=(
-                'The three sniff-marks are the three parameters a, b, and c, '
-                'the path they form is the anonymous fn, the three values '
-                'passed in are carried along each step, and the sum is what '
-                'the nose finds at the end.'
+                'The sniff-marks are the three parameters a, b, and c; the path is the anonymous fn; the '
+                'values are carried along each step; the sum is what the nose finds.'
             ),
             resolution=(
-                'The REPL walked the unnamed three-step trail with the counts '
-                '1, 2, and 3, adding them as the sniffs showed, and brought '
-                'back the total. The trail had done its work and vanished into '
-                'the bank.'
+                'The REPL walked the trail with counts 1, 2, and 3, adding them as shown, and brought back '
+                'the total. The trail vanished.'
             ),
             tags=("story",),
         ),
@@ -649,26 +618,21 @@ G3_10 = SubjectCurriculum(grade=3, subject_id="G3-10",
             question_what="the result of using the #() shorthand to create a function that adds 1 to its argument and applying it to 5",
             goal_text="use the shorthand syntax to create a function that adds 1 to its argument and apply it to 5",
             scenario=(
-                'Rex the hound caught a whiff of the bank near the meadow and '
-                'traced a quick, terse sniffing-path — so brief it had almost '
-                'no name at all. "Add one more bone to whatever you find," the '
-                'marks said. He did not carve a marker stone for this fleeting '
+                'Rex the hound traced a quick sniffing-path at the bank near the '
+                'meadow. The marks said "Add one." He did not name this fleeting '
                 'trail.'
             ),
             need=(
-                'The form needed a one-use procedure, so compact it barely '
-                'counted as a trail — just enough scent to say "add one" and '
-                'nothing more.'
+                'The form needed a one-use procedure so compact it barely counted '
+                'as a trail.'
             ),
             mapping=(
-                'The shorthand marks are the compact trail, the % stands for '
-                'whatever scent comes in, the operation is addition, and the '
-                'result is what comes back from the abbreviated path.'
+                'The shorthand marks are the compact trail, % is the input, '
+                'addition is the operation, and the result comes back.'
             ),
             resolution=(
-                'The REPL read the shorthand marks, walked the terse trail '
-                'with 5, added one as the scent showed, and returned the '
-                'verdict. The trail had no name to remember.'
+                'The REPL read the marks, walked the trail with 5, added one, '
+                'and returned the verdict.'
             ),
             tags=("story",),
         ),
@@ -711,22 +675,20 @@ G3_11 = SubjectCurriculum(grade=3, subject_id="G3-11",
             question_what="the result of adding a to itself after binding a locally to 7 via let",
             goal_text="bind a to 7 and add a to itself",
             scenario=(
-                'Patch the hound held a bone at the stream\'s edge between his jaws — a count of 7. "I will call this grip a," he said, "and I need to know what a plus a makes. The name a means 7, so I will add 7 to 7."'
+                'Patch the hound held a bone at the stream\'s edge — a count of 7. '
+                '"I call this grip a," he said. "What does a plus a make?"'
             ),
             need=(
-                'The form referenced the same name twice, and the REPL would '
-                'substitute the grip\'s value into both places, adding the '
-                'result to itself.'
+                'The form referenced the same name twice, so the REPL would '
+                'substitute the value into both places.'
             ),
             mapping=(
-                'The bone gripped as a is the value 7, each mention of a in '
-                'the form is a reference to that grip, and the addition is what '
-                'happens when a stands for its value twice.'
+                'The bone gripped as a is 7, each mention of a is a reference, '
+                'and addition happens when a stands for its value twice.'
             ),
             resolution=(
-                'The REPL read the grip, substituted 7 for each a, and added '
-                '7 to 7, handing back the sum. The binding faded as Patch '
-                'released the crossing.'
+                'The REPL substituted 7 for each a and added 7 to 7, handing back '
+                'the sum.'
             ),
             tags=("story",),
         ),
