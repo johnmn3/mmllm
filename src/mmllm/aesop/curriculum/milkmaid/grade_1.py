@@ -1,0 +1,899 @@
+"""Grade 1 — atoms + first eval, taught through the Farmer-and-Milkmaid fable.
+
+Each subject defines:
+  - examples: a list of Clojure exercises (form + expected + concept_phrase)
+  - subplots: 6+ narrative templates that wrap any example in fable scenery
+  - plan_pool: optional plan-only prefaces (never reveal the answer)
+
+Coverage per subject (per fable):
+   examples × narrative variants ≈ 5-15 × 200-2000 distinct records.
+
+The fable's moral dynamic — vanity vs. steadiness — informs the
+characters' attitudes toward each form: Milkmaid is the boastful, hasty
+guesser; Farmer is the patient evaluator. Subjects bring this out
+differently (e.g., G1-15 equality is an argument the two settle by
+reading the form; G1-13 first-arithmetic is a wager about the answer).
+"""
+from __future__ import annotations
+
+from mmllm.aesop.curriculum.generator import (
+    SubjectCurriculum, SubjectExample, SubplotTemplate,
+)
+from mmllm.aesop.curriculum.milkmaid._metaphor_pools import (
+    _ACORN_SUBPLOTS, _CHALKMARK_SUBPLOTS, _GATE_SUBPLOTS, _SAFETYNET_SUBPLOTS, _SCRIBE_SUBPLOTS,
+)
+
+
+# ─────────────────────── shared subplot pool ───────────────────────
+#
+# These 8 templates work across most grade-1 subjects. Each subject
+# either uses this pool directly or extends it with subject-specific
+# templates (e.g., G1-15 equality has its own "argument" templates).
+#
+# Templates use `{form_display}` for the literal form being evaluated,
+# `{concept_phrase}` for the noun-phrase ("the value 42"), and
+# fable placeholders for character/location/emotion variation.
+
+_SHARED_SUBPLOTS: list[SubplotTemplate] = [
+
+    # 1. The argument template — Milkmaid boasts an answer, Farmer insists
+    #    they evaluate it carefully. The student writes the form.
+    SubplotTemplate("""\
+{milkmaid_phrase} and {farmer_phrase} stopped {place} where someone had
+written {concept_phrase} on a flat stone. {milkmaid}, {emo_proud}, declared
+that {milkmaid_he_she} could see the answer at a glance. {farmer},
+{emo_patient}, suggested they actually evaluate the form {form_display}
+in the REPL and read off whatever it returned."""),
+
+    # 2. The wager template — bets on what the form returns.
+    #    Three near-equivalent variants of the wager-setup line, picked
+    #    so the same wager-template doesn't always read as "drew a wager
+    #    in the dust" verbatim (cosmetic variety).
+    SubplotTemplate("""\
+At a moss-covered milestone {place}, {milkmaid_phrase} sketched a small
+wager into the path: whoever guessed the result of {form_display}
+first would win the right to set the next race. {farmer_phrase},
+{emo_patient}, said it was simpler to type the form into the REPL
+than to argue about {concept_phrase}."""),
+
+    # 2b. wager variant — chalk on stone
+    SubplotTemplate("""\
+{milkmaid_phrase} chalked a wager on a flat stone {place}: whoever
+predicted the result of {form_display} would set the next race's
+distance. {farmer_phrase}, {emo_patient}, said it would be simpler
+to type the form into the REPL than to bicker about {concept_phrase}."""),
+
+    # 2c. wager variant — twig in the path
+    SubplotTemplate("""\
+With a twig, {milkmaid_phrase} marked out a wager {place}: whoever
+guessed the result of {form_display} first would win the right to
+choose the next contest. {farmer_phrase}, {emo_patient}, said it
+was easier to ask the REPL about {concept_phrase} than to argue."""),
+
+    # 3. The teacher template — Farmer is gently correcting Milkmaid.
+    #    NOTE: drops the "from a recent sprint" tail because EMO_TIRED
+    #    entries already supply their own "from X" clause; doubling
+    #    produced "from sprinting from a recent sprint" awkwardness.
+    SubplotTemplate("""\
+{farmer_phrase} had been trying to teach {milkmaid_phrase} how the REPL
+works. "Look here," {farmer_he_she} said, pointing to
+{concept_phrase}. "You hand the form {form_display} to the runtime, and
+the runtime hands you back what it evaluates to." {milkmaid}, {emo_tired},
+agreed to try."""),
+
+    # 4. The audience template — small forest creatures watch and learn.
+    #    NOTE: rewritten so {concept_phrase} is referenced via "pointed to"
+    #    rather than "read aloud" — abstract concept_phrases like "the
+    #    equality (= 1 1)" / "the predicate (zero? 0)" don't fit
+    #    "read aloud" semantically (you read FORMS aloud, not types).
+    SubplotTemplate("""\
+A small audience of forest creatures had gathered {place} to watch
+{milkmaid_phrase} attempt to outwit {farmer_phrase} at reading the REPL.
+{farmer} pointed to {concept_phrase} and read out the form aloud:
+{form_display}. The crowd waited to see who would correctly write
+the form to submit."""),
+
+    # 5. The race-pause template — hare pauses mid-race, tortoise catches up
+    #    via careful evaluation.
+    #    NOTE: uses {milkmaid} (the name) instead of {milkmaid_he_she_cap} for the
+    #    "called it impossible" sentence — for gender="n" characters,
+    #    "They called it impossible." reads as plural-subject right after
+    #    a singular "Pip the hare stopped" introduction.
+    SubplotTemplate("""\
+Halfway through the race, {milkmaid_phrase} stopped {place} and refused to
+continue until someone could prove what the form {form_display}
+evaluated to. {milkmaid} called it impossible.
+{farmer_phrase}, walking up at her usual pace, simply said: "Submit
+{concept_phrase} to the REPL. Whatever comes back is the answer.\""""),
+
+    # 6. The notebook template — the tortoise keeps a careful ledger.
+    SubplotTemplate("""\
+{farmer_phrase} had been keeping a small leather notebook of every
+form {farmer_he_she} had successfully evaluated. {place_idx}, the
+next entry was {concept_phrase}. {milkmaid_phrase} peered over
+{farmer_his_her} shoulder at the form {form_display} and asked what
+it would come out to.""".replace("{place_idx}", "Today {place}")),
+
+    # 7. The boast-and-rebuke template — Milkmaid claims to know without checking.
+    #    NOTE: uses {milkmaid_him_her} (object case) for "asked X to ..."; uses
+    #    comma after "said" so participle-phrase EMO_PROUD entries
+    #    ("boasting at every turn", "swaggering through the underbrush")
+    #    parse as adverbial — without the comma, "said boasting" reads
+    #    as agrammatical.
+    SubplotTemplate("""\
+"There is no need to evaluate that," {milkmaid_phrase} said, {emo_proud}.
+"Anyone can see what {concept_phrase} comes to." {farmer_phrase}, who
+{place} had grown used to such claims, asked {milkmaid_him_her} to actually
+write the form {form_display} and submit it to the REPL — just to be
+sure."""),
+
+    # 8. The puzzle-on-the-path template — they find a riddle on a sign.
+    SubplotTemplate("""\
+A wooden sign nailed to a tree {place} carried a puzzle. The riddle
+was simple: it asked the reader to evaluate {form_display}. {milkmaid}
+laughed, {emo_proud}, and declared it too easy. {farmer} said
+patiently that the only way to be sure of {concept_phrase} was to put
+it in the REPL."""),
+]
+
+
+_PLAN_POOL: tuple[str, ...] = (
+    "I write the form and let the REPL evaluate it.",
+    "I submit the form to the REPL via the eval tool.",
+    "I let the REPL do the evaluation.",
+    "I express the form as Clojure source.",
+    # Concept-specific plans — picked occasionally to break up the
+    # generic ones and give the model concept-tied reasoning patterns.
+    "I read the form and submit it directly.",
+    "I write the literal value as Clojure source.",
+    "I let the runtime decide what the form evaluates to.",
+)
+
+
+# ─────────────────────── goal-style subplots ───────────────────────
+#
+# Used by NON-ATOM subjects (G1-09 onward + G2..G12). These templates
+# describe the GOAL of the form ({goal_text}) and reference the
+# operation abstractly via {concept_phrase}, but NEVER show the literal
+# form. The model must produce the form from the goal — it cannot
+# copy-from-prompt because the form isn't there.
+#
+# Atom subjects (G1-01..08) keep using _SHARED_SUBPLOTS, which DO show
+# the form via {form_display}, because for atoms the form IS the
+# answer (a literal evaluates to itself); copying-it-out IS the lesson.
+_GOAL_SUBPLOTS: list[SubplotTemplate] = [
+
+    # 1. The argument template — characters debate; goal-driven.
+    #    Fix: comma after concept_phrase to break "and" stutter when
+    #    concept_phrase ends in "and"/"or"/"not".
+    SubplotTemplate("""\
+{milkmaid_phrase} and {farmer_phrase} stopped {place} to settle a small
+puzzle. {milkmaid} wanted to {goal_text}. {milkmaid}, {emo_proud}, declared
+that {milkmaid_he_she} could write the form for it without thinking.
+{farmer}, {emo_patient}, suggested {milkmaid_he_she} actually write
+{concept_phrase} carefully — and then let the REPL confirm what
+the value really was."""),
+
+    # 2. The wager template — bet on writing the right form.
+    #    Fix: drop "write a form to" verb-on-verb collision; use
+    #    "produce a form whose evaluation would" (noun-clause framing).
+    SubplotTemplate("""\
+At a moss-covered milestone {place}, {milkmaid_phrase} sketched a small
+wager into the path: whoever could produce a form whose evaluation
+would {goal_text} ahead of the other would win the right to set
+the next race. {farmer_phrase}, {emo_patient}, said it was
+simpler to write {concept_phrase} carefully than to guess at the
+answer."""),
+
+    # 3. The teacher template — Farmer teaches goal → form.
+    #    Fix: "; submit that to the REPL" instead of "and submit it".
+    SubplotTemplate("""\
+{farmer_phrase} had been teaching {milkmaid_phrase} how to translate a
+goal into a Clojure form. "If you want to {goal_text}," {farmer_he_she}
+said, "you write {concept_phrase}; submit that to the REPL, and it
+hands you back the value." {milkmaid}, {emo_tired}, agreed to try
+writing it."""),
+
+    # 4. The audience template — onlookers wait to see the form written.
+    SubplotTemplate("""\
+A small audience of forest creatures had gathered {place} to watch
+{milkmaid_phrase} attempt to outwit {farmer_phrase} at writing the
+right form. The challenge: {goal_text}. {farmer} reminded the
+crowd that what mattered was writing {concept_phrase} carefully,
+then submitting it to the REPL — not guessing aloud at the
+answer."""),
+
+    # 5. The race-pause template — pause mid-race for a goal-write.
+    #    Fix: drop "write a form to {goal_text}"; reframe as
+    #    "until someone could {goal_text} with a Clojure form".
+    SubplotTemplate("""\
+Halfway through the race, {milkmaid_phrase} stopped {place} and refused
+to continue until someone could {goal_text} with a Clojure form.
+{milkmaid} called the goal impossible. {farmer_phrase}, walking up at
+{farmer_his_her} usual pace, simply said: "Compose {concept_phrase};
+submit it. Whatever comes back is the answer.\""""),
+
+    # 6. The notebook template — Farmer records goal/form pairs.
+    SubplotTemplate("""\
+{farmer_phrase} kept a small leather notebook of every goal
+{farmer_he_she} had translated into a Clojure form. Today {place},
+the next entry was a goal: {goal_text}. {farmer} sat with pen in
+hand, ready to compose {concept_phrase}, then let the REPL
+confirm the value."""),
+
+    # 7. The boast-and-rebuke template — Milkmaid boasts; Farmer asks
+    #    for the actual form. Fix: "To X is something anyone could
+    #    write" → "anyone could do that" (drops verb-collision when
+    #    goal_text starts with a "write/compose" verb).
+    SubplotTemplate("""\
+"There is no challenge here," {milkmaid_phrase} said, {emo_proud}.
+"Anyone could {goal_text} without thinking." {farmer_phrase},
+who {place} had grown used to such claims, asked {milkmaid_him_her} to
+actually write {concept_phrase}, then submit it to the REPL —
+just to be sure."""),
+
+    # 8. The puzzle-on-the-path template — a sign poses the goal.
+    SubplotTemplate("""\
+A wooden sign nailed to a tree {place} carried a small puzzle. The
+challenge was simple: {goal_text}. {milkmaid} laughed, {emo_proud}, and
+declared it too easy. {farmer} said patiently that the only way
+to be sure of {concept_phrase} was to write the form and put it
+in the REPL — not to guess at the value from the goal alone."""),
+
+    # 9. The Milkmaid-stumbles template — Milkmaid's hurry betrays him; the
+    #    Farmer's careful form returns the value first. Delivers
+    #    the fable's moral (vanity vs. steadiness) directly.
+    SubplotTemplate("""\
+"This is nothing," {milkmaid_phrase} scoffed, {emo_proud}. "I can
+{goal_text} in my sleep." {milkmaid} grabbed a stick and dashed off a
+few characters in the dust — but a paren went missing, an operand
+fell out of place, and the form did not even read as Clojure.
+{farmer_phrase}, {emo_patient}, had already written
+{concept_phrase} on a flat stone, neat and unhurried, and
+submitted it to the REPL. The value came back as quietly as
+{farmer_he_she} had written. The hares of the meadow looked
+between the two slates: only {farmer_his_her} had run."""),
+
+    # 10. The race-against-the-REPL template — wager on speed-of-
+    #     answering, Farmer's careful path wins. Moral lands.
+    SubplotTemplate("""\
+The wager was set {place}: produce the value before the breeze had
+turned the next leaf. {milkmaid_phrase} bolted into a flurry of
+guesses, calling out numbers and second-guessing {milkmaid_him_her}self
+about whether the goal was to {goal_text} or something close to it.
+{farmer_phrase}, who had simply walked to the slate and begun to
+write {concept_phrase}, finished the form, submitted it, and read
+the value off the REPL while {milkmaid} was still arguing with the
+breeze. The race, like every other, went to the steady hand."""),
+
+    # 11. The wrong-guess-then-form template — Milkmaid blurts a guess at
+    #     the answer (deliberately abstract — no actual value leaks),
+    #     Farmer patiently writes the form. The point: the form
+    #     beats the guess.
+    SubplotTemplate("""\
+{milkmaid_phrase} squinted at the goal — to {goal_text} — and blurted
+out a confident guess, {emo_proud}, as though loudness were the
+same as correctness. {farmer_phrase} did not argue.
+{farmer_he_she_cap} simply wrote {concept_phrase} on the path,
+submitted it to the REPL, and held up the value the runtime
+returned. The crowd compared the two, and the hare's guess was
+found wanting against the form that had actually run."""),
+
+    # 12. The patient-explanation template — Farmer teaches, Milkmaid
+    #     resists, the lesson takes hold by the end. Slower beat,
+    #     longer narrative; lets the moral breathe.
+    SubplotTemplate("""\
+"You always insist on writing it out," {milkmaid_phrase} complained,
+{emo_proud}. "I can see the answer from here." {farmer_phrase}
+shook {farmer_his_her} head slowly. "To {goal_text}, the eye is
+no help — only the form is. Watch." {farmer_he_she_cap} wrote
+{concept_phrase} in careful strokes, submitted it to the REPL,
+and let the returned value speak for itself. {milkmaid}, {emo_tired},
+admitted that this time, again, the patient way had carried the
+day."""),
+]
+
+
+# ─────────────────────── helpers for examples ───────────────────────
+
+
+def _ex(form: str, expected, concept: str, what: str,
+        goal: str = "",
+        tags: tuple[str, ...] = ()) -> SubjectExample:
+    return SubjectExample(form=form, expected=expected,
+                          concept_phrase=concept, question_what=what,
+                          goal_text=goal)
+
+
+# ─────────────────────── 18 grade-1 subjects ───────────────────────
+
+
+# G1-01 — Eval as substitution. ATOM SUBJECT: form IS the answer; the
+# lesson is "values evaluate to themselves." Trimmed application
+# examples — those live in G1-13 (first arithmetic) and G1-14 (nested).
+G1_01 = SubjectCurriculum(
+    grade=1, subject_id="G1-01",
+    subject_title="Eval as substitution",
+    fable="milkmaid",
+    examples=[
+        _ex("42",                  42,    "the value 42",
+            "the value of 42"),
+        _ex("0",                   0,     "the value 0",
+            "the value of 0"),
+        _ex("\"hello\"",          "hello","the string \"hello\"",
+            "the value of \"hello\""),
+        _ex("nil",                None,   "the literal nil",
+            "the value of nil"),
+    ],
+    subplots=_SHARED_SUBPLOTS,
+    plan_pool=_PLAN_POOL,
+)
+
+
+# G1-02 — Numbers (integers)
+G1_02 = SubjectCurriculum(
+    grade=1, subject_id="G1-02",
+    subject_title="Integer numbers",
+    fable="milkmaid",
+    examples=[
+        _ex("7",     7,    "the integer 7",       "the value of the integer 7"),
+        _ex("-3",   -3,    "the integer -3",      "the value of the integer -3"),
+        _ex("0",     0,    "the integer 0",       "the value of zero"),
+        _ex("100",   100,  "the integer 100",     "the value of one hundred"),
+        _ex("-25",  -25,   "the integer -25",     "the value of negative twenty-five"),
+        _ex("12345", 12345,"the integer 12345",   "the value of 12345"),
+    ],
+    subplots=_SHARED_SUBPLOTS,
+    plan_pool=_PLAN_POOL,
+)
+
+
+# G1-03 — Numbers (ratios)
+G1_03 = SubjectCurriculum(
+    grade=1, subject_id="G1-03",
+    subject_title="Ratios",
+    fable="milkmaid",
+    examples=[
+        # Note: ratios like 1/2 evaluate to themselves in Clojure (exact rational).
+        # In Python expected we represent as the form string since basilisp's
+        # eval result is the canonical ratio. For training, the model writes
+        # the literal form and the runtime reproduces it.
+        _ex("1/2",   "1/2", "the ratio 1/2",   "the value of the ratio 1/2"),
+        _ex("3/4",   "3/4", "the ratio 3/4",   "the value of three-quarters"),
+        _ex("(+ 1/2 1/4)", "3/4",
+            "the form (+ 1/2 1/4)",
+            "the value of (+ 1/2 1/4)"),
+        _ex("(* 2 1/2)", 1,
+            "the form (* 2 1/2)",
+            "the value of (* 2 1/2)"),
+        _ex("(- 1 1/3)", "2/3",
+            "the form (- 1 1/3)",
+            "the value of (- 1 1/3)"),
+    ],
+    subplots=_SHARED_SUBPLOTS,
+    plan_pool=_PLAN_POOL,
+)
+
+
+# G1-04 — Strings
+G1_04 = SubjectCurriculum(
+    grade=1, subject_id="G1-04",
+    subject_title="Strings",
+    fable="milkmaid",
+    examples=[
+        _ex('"hello"',    "hello",    'the string "hello"',
+            'the value of "hello"'),
+        _ex('"race"',     "race",     'the string "race"',
+            'the value of "race"'),
+        _ex('"slow and steady"', "slow and steady",
+            'the string "slow and steady"',
+            'the value of "slow and steady"'),
+        _ex('""',         "",         'the empty string',
+            'the value of the empty string'),
+        _ex('"42"',       "42",       'the string "42"',
+            'the value of the string "42"'),
+    ],
+    subplots=_SHARED_SUBPLOTS,
+    plan_pool=_PLAN_POOL,
+)
+
+
+# G1-05 — Booleans
+G1_05 = SubjectCurriculum(
+    grade=1, subject_id="G1-05",
+    subject_title="Booleans",
+    fable="milkmaid",
+    examples=[
+        _ex("true",  True,  "the literal true",  "the value of true"),
+        _ex("false", False, "the literal false", "the value of false"),
+        _ex("(= 1 1)", True,
+            "the equality (= 1 1)",
+            "the value of (= 1 1)"),
+        _ex("(= 1 2)", False,
+            "the equality (= 1 2)",
+            "the value of (= 1 2)"),
+        _ex("(< 3 5)", True,
+            "the comparison (< 3 5)",
+            "the value of (< 3 5)"),
+        _ex("(> 3 5)", False,
+            "the comparison (> 3 5)",
+            "the value of (> 3 5)"),
+    ],
+    subplots=_SHARED_SUBPLOTS,
+    plan_pool=_PLAN_POOL,
+)
+
+
+# G1-06 — nil
+G1_06 = SubjectCurriculum(
+    grade=1, subject_id="G1-06",
+    subject_title="nil",
+    fable="milkmaid",
+    examples=[
+        _ex("nil", None, "the literal nil",
+            "the value of nil"),
+        _ex("(nil? nil)", True,
+            "the predicate (nil? nil)",
+            "whether nil is nil"),
+        _ex("(nil? 0)", False,
+            "the predicate (nil? 0)",
+            "whether 0 is nil"),
+        _ex("(nil? false)", False,
+            "the predicate (nil? false)",
+            "whether false is nil"),
+        _ex("(= nil nil)", True,
+            "the equality (= nil nil)",
+            "the value of (= nil nil)"),
+    ],
+    subplots=_SHARED_SUBPLOTS,
+    plan_pool=_PLAN_POOL,
+)
+
+
+# G1-07 — Keywords
+G1_07 = SubjectCurriculum(
+    grade=1, subject_id="G1-07",
+    subject_title="Keywords",
+    fable="milkmaid",
+    examples=[
+        _ex(":hare",    ":hare",    "the keyword :hare",
+            "the value of :hare"),
+        _ex(":tortoise",":tortoise", "the keyword :tortoise",
+            "the value of :tortoise"),
+        _ex(":winner",   ":winner", "the keyword :winner",
+            "the value of :winner"),
+        _ex("(keyword? :hare)", True,
+            "the predicate (keyword? :hare)",
+            "whether :hare is a keyword"),
+        _ex("(= :hare :hare)", True,
+            "the equality of two :hare keywords",
+            "whether :hare equals :hare"),
+    ],
+    subplots=_SHARED_SUBPLOTS,
+    plan_pool=_PLAN_POOL,
+)
+
+
+# G1-08 — Characters
+G1_08 = SubjectCurriculum(
+    grade=1, subject_id="G1-08",
+    subject_title="Characters",
+    fable="milkmaid",
+    examples=[
+        _ex("\\h",      "h",     "the character \\h",
+            "the value of \\h"),
+        _ex("\\space",  " ",     "the character \\space",
+            "the value of \\space"),
+        _ex("\\T",      "T",     "the character \\T",
+            "the value of \\T"),
+        _ex("(char? \\h)", True,
+            "the predicate (char? \\h)",
+            "whether \\h is a character"),
+    ],
+    subplots=_SHARED_SUBPLOTS,
+    plan_pool=_PLAN_POOL,
+)
+
+
+# G1-09 — Symbols vs values
+# (NON-ATOM: uses _GOAL_SUBPLOTS — model writes the form from the goal.)
+G1_09 = SubjectCurriculum(
+    grade=1, subject_id="G1-09",
+    subject_title="Symbols vs values",
+    fable="milkmaid",
+    examples=[
+        SubjectExample(
+            form="(symbol? 'hare)",
+            expected=True,
+            concept_phrase="the symbol-predicate on a quoted name",
+            question_what="whether a quoted name is a symbol",
+            goal_text="ask whether a quoted name is a symbol, using the symbol? predicate",
+        ),
+        SubjectExample(
+            form="(symbol? 42)",
+            expected=False,
+            concept_phrase="the symbol-predicate on an integer",
+            question_what="whether an integer is a symbol",
+            goal_text="ask whether the integer 42 is a symbol, using the symbol? predicate",
+        ),
+        SubjectExample(
+            form='(symbol? "tortoise")',
+            expected=False,
+            concept_phrase="the symbol-predicate on a string",
+            question_what="whether a string is a symbol",
+            goal_text="ask whether a string of letters is a symbol, using the symbol? predicate",
+        ),
+        SubjectExample(
+            form="(= 'hare 'hare)",
+            expected=True,
+            concept_phrase="the equality of two quoted names",
+            question_what="whether two quoted names are equal",
+            goal_text="compare two quoted names for equality, using the = predicate",
+        ),
+    ],
+    subplots=_CHALKMARK_SUBPLOTS,
+    plan_pool=_PLAN_POOL,
+)
+
+
+# G1-10 — Comments
+G1_10 = SubjectCurriculum(
+    grade=1, subject_id="G1-10",
+    subject_title="Comments",
+    fable="milkmaid",
+    examples=[
+        SubjectExample(
+            form="(+ 1 2) ; sum of one and two",
+            expected=3,
+            concept_phrase="the addition with a trailing comment",
+            question_what="the result, ignoring the comment",
+            goal_text="add 1 and 2, with a single-semicolon trailing comment",
+        ),
+        SubjectExample(
+            form="42 ;; the answer",
+            expected=42,
+            concept_phrase="the literal with a trailing comment",
+            question_what="the literal value, ignoring the comment",
+            goal_text="submit the integer 42 with a double-semicolon trailing comment",
+        ),
+    ],
+    subplots=_SCRIBE_SUBPLOTS,
+    plan_pool=_PLAN_POOL,
+)
+
+
+# G1-11 — Whitespace
+G1_11 = SubjectCurriculum(
+    grade=1, subject_id="G1-11",
+    subject_title="Whitespace doesn't matter",
+    fable="milkmaid",
+    examples=[
+        SubjectExample(
+            form="(+    1    2)",
+            expected=3,
+            concept_phrase="the addition with extra spacing",
+            question_what="the result of an addition formatted with extra spaces",
+            goal_text="add 1 and 2 in a form with extra spaces between tokens",
+        ),
+        SubjectExample(
+            form="(+\n  1\n  2)",
+            expected=3,
+            concept_phrase="the addition split across lines",
+            question_what="the result of an addition formatted across multiple lines",
+            goal_text="add 1 and 2 in a form whose arguments are on separate lines",
+        ),
+    ],
+    subplots=_SCRIBE_SUBPLOTS,
+    plan_pool=_PLAN_POOL,
+)
+
+
+# G1-12 — Parens group; they don't multiply
+G1_12 = SubjectCurriculum(
+    grade=1, subject_id="G1-12",
+    subject_title="Parens group; they don't multiply",
+    fable="milkmaid",
+    examples=[
+        SubjectExample(
+            form="(+ 2 3)",
+            expected=5,
+            concept_phrase="the simple addition",
+            question_what="the result of adding 2 and 3",
+            goal_text="add 2 and 3",
+        ),
+        SubjectExample(
+            form="(* (+ 1 2) 3)",
+            expected=9,
+            concept_phrase="the nested multiplication",
+            question_what="the result of multiplying a nested sum by 3",
+            goal_text="multiply the sum of 1 and 2 by 3",
+        ),
+    ],
+    subplots=_SCRIBE_SUBPLOTS,
+    plan_pool=_PLAN_POOL,
+)
+
+
+# G1-13 — First arithmetic call
+G1_13 = SubjectCurriculum(
+    grade=1, subject_id="G1-13",
+    subject_title="First arithmetic call",
+    fable="milkmaid",
+    examples=[
+        SubjectExample(
+            form="(+ 1 2)",
+            expected=3,
+            concept_phrase="the addition",
+            question_what="the sum of 1 and 2",
+            goal_text="add 1 and 2",
+        ),
+        SubjectExample(
+            form="(- 5 3)",
+            expected=2,
+            concept_phrase="the subtraction",
+            question_what="the difference of 5 and 3",
+            goal_text="subtract 3 from 5",
+        ),
+        SubjectExample(
+            form="(* 4 5)",
+            expected=20,
+            concept_phrase="the multiplication",
+            question_what="the product of 4 and 5",
+            goal_text="multiply 4 by 5",
+        ),
+        SubjectExample(
+            form="(/ 10 2)",
+            expected=5,
+            concept_phrase="the division",
+            question_what="the quotient of 10 and 2",
+            goal_text="divide 10 by 2",
+        ),
+        SubjectExample(
+            form="(+ 7 8)",
+            expected=15,
+            concept_phrase="the addition",
+            question_what="the sum of 7 and 8",
+            goal_text="add 7 and 8",
+        ),
+        SubjectExample(
+            form="(- 20 7)",
+            expected=13,
+            concept_phrase="the subtraction",
+            question_what="the difference of 20 and 7",
+            goal_text="subtract 7 from 20",
+        ),
+    ],
+    subplots=_ACORN_SUBPLOTS,
+    plan_pool=_PLAN_POOL,
+)
+
+
+# G1-14 — Nested call evaluation
+G1_14 = SubjectCurriculum(
+    grade=1, subject_id="G1-14",
+    subject_title="Nested call evaluation",
+    fable="milkmaid",
+    examples=[
+        SubjectExample(
+            form="(+ 1 (* 2 3))",
+            expected=7,
+            concept_phrase="the nested computation",
+            question_what="the sum of 1 with the product of 2 and 3",
+            goal_text="add 1 to the product of 2 and 3",
+        ),
+        SubjectExample(
+            form="(* (+ 1 2) (+ 3 4))",
+            expected=21,
+            concept_phrase="the nested product of sums",
+            question_what="the product of two nested sums",
+            goal_text="multiply the sum of 1 and 2 by the sum of 3 and 4",
+        ),
+        SubjectExample(
+            form="(- 100 (* 5 5))",
+            expected=75,
+            concept_phrase="the nested subtraction",
+            question_what="100 minus a nested product",
+            goal_text="subtract the product of 5 and 5 from 100",
+        ),
+        SubjectExample(
+            form="(+ (* 2 3) (* 4 5))",
+            expected=26,
+            concept_phrase="the sum of two products",
+            question_what="the sum of two nested products",
+            goal_text="add the product of 2 and 3 to the product of 4 and 5",
+        ),
+    ],
+    subplots=_ACORN_SUBPLOTS,
+    plan_pool=_PLAN_POOL,
+)
+
+
+# G1-15 — Equality
+G1_15 = SubjectCurriculum(
+    grade=1, subject_id="G1-15",
+    subject_title="Equality",
+    fable="milkmaid",
+    examples=[
+        SubjectExample(
+            form="(= 1 1)",
+            expected=True,
+            concept_phrase="the equality check",
+            question_what="whether 1 equals 1",
+            goal_text="test whether 1 equals 1 with =",
+        ),
+        SubjectExample(
+            form="(= 1 2)",
+            expected=False,
+            concept_phrase="the equality check",
+            question_what="whether 1 equals 2",
+            goal_text="test whether 1 equals 2 with =",
+        ),
+        SubjectExample(
+            form='(= "a" "a")',
+            expected=True,
+            concept_phrase="the string equality",
+            question_what="whether two equal strings are equal",
+            goal_text='test whether the string "a" equals itself with =',
+        ),
+        SubjectExample(
+            form="(= :hare :hare)",
+            expected=True,
+            concept_phrase="the keyword equality",
+            question_what="whether two equal keywords are equal",
+            goal_text="test whether the keyword :hare equals itself with =",
+        ),
+        SubjectExample(
+            form="(= :hare :tortoise)",
+            expected=False,
+            concept_phrase="the keyword equality",
+            question_what="whether two different keywords are equal",
+            goal_text="test whether :hare equals :tortoise with =",
+        ),
+        SubjectExample(
+            form="(= 1 1 1 1)",
+            expected=True,
+            concept_phrase="the multi-arg equality",
+            question_what="whether four 1s are all equal",
+            goal_text="test with = whether four 1s are all equal",
+        ),
+    ],
+    subplots=_GATE_SUBPLOTS,
+    plan_pool=_PLAN_POOL,
+)
+
+
+# G1-16 — Numeric predicates
+G1_16 = SubjectCurriculum(
+    grade=1, subject_id="G1-16",
+    subject_title="Numeric predicates",
+    fable="milkmaid",
+    examples=[
+        SubjectExample(
+            form="(zero? 0)",
+            expected=True,
+            concept_phrase="the zero check",
+            question_what="whether 0 is zero",
+            goal_text="check whether 0 is zero using zero?",
+        ),
+        SubjectExample(
+            form="(zero? 5)",
+            expected=False,
+            concept_phrase="the zero check",
+            question_what="whether 5 is zero",
+            goal_text="check whether 5 is zero using zero?",
+        ),
+        SubjectExample(
+            form="(pos? 7)",
+            expected=True,
+            concept_phrase="the positive check",
+            question_what="whether 7 is positive",
+            goal_text="check whether 7 is positive using pos?",
+        ),
+        SubjectExample(
+            form="(pos? -2)",
+            expected=False,
+            concept_phrase="the positive check",
+            question_what="whether -2 is positive",
+            goal_text="check whether -2 is positive using pos?",
+        ),
+        SubjectExample(
+            form="(neg? -3)",
+            expected=True,
+            concept_phrase="the negative check",
+            question_what="whether -3 is negative",
+            goal_text="check whether -3 is negative using neg?",
+        ),
+        SubjectExample(
+            form="(neg? 4)",
+            expected=False,
+            concept_phrase="the negative check",
+            question_what="whether 4 is negative",
+            goal_text="check whether 4 is negative using neg?",
+        ),
+    ],
+    subplots=_ACORN_SUBPLOTS,
+    plan_pool=_PLAN_POOL,
+)
+
+
+# G1-17 — Printing vs returning
+G1_17 = SubjectCurriculum(
+    grade=1, subject_id="G1-17",
+    subject_title="Printing vs returning",
+    fable="milkmaid",
+    examples=[
+        SubjectExample(
+            form="42",
+            expected=42,
+            concept_phrase="the literal 42",
+            question_what="the value 42 returned by the REPL",
+            goal_text="submit the integer 42 so the REPL returns it",
+        ),
+        SubjectExample(
+            form="(+ 1 2)",
+            expected=3,
+            concept_phrase="the addition",
+            question_what="the value returned by adding 1 and 2",
+            goal_text="add 1 and 2 so the REPL returns the result",
+        ),
+    ],
+    subplots=_SCRIBE_SUBPLOTS,
+    plan_pool=_PLAN_POOL,
+)
+
+
+# G1-18 — Errors are safe in the REPL
+G1_18 = SubjectCurriculum(
+    grade=1, subject_id="G1-18",
+    subject_title="Errors are safe in the REPL",
+    fable="milkmaid",
+    examples=[
+        SubjectExample(
+            form="(+ 1 2)",
+            expected=3,
+            concept_phrase="the addition",
+            question_what="the result of adding 1 and 2",
+            goal_text="add 1 and 2",
+        ),
+        SubjectExample(
+            form="(* 7 6)",
+            expected=42,
+            concept_phrase="the multiplication",
+            question_what="the product of 7 and 6",
+            goal_text="multiply 7 by 6",
+        ),
+    ],
+    subplots=_SAFETYNET_SUBPLOTS,
+    plan_pool=_PLAN_POOL,
+)
+
+
+# ─────────────────────── registry ───────────────────────
+
+
+SUBJECTS: dict[str, SubjectCurriculum] = {
+    s.subject_id: s for s in (
+        G1_01, G1_02, G1_03, G1_04, G1_05, G1_06, G1_07, G1_08, G1_09,
+        G1_10, G1_11, G1_12, G1_13, G1_14, G1_15, G1_16, G1_17, G1_18,
+    )
+}
+
+
+def smoke_test() -> None:
+    """Generate one record from each subject; verify shape."""
+    from mmllm.aesop.curriculum.generator import generate_subject
+
+    for sid, sub in SUBJECTS.items():
+        recs = generate_subject(sub, n_per_example=1, seed=0)
+        assert recs, f"no records for {sid}"
+        for r in recs:
+            assert r.tool_calls, f"no tool_calls for {sid}"
+            assert r.tool_calls[0]["name"] == "eval"
+            assert r.user_msg
+            assert r.assistant_msg
+    print(f"grade-1 tortoise-hare smoke OK: {len(SUBJECTS)} subjects, "
+          f"{sum(len(s.examples) for s in SUBJECTS.values())} examples total")
+
+
+if __name__ == "__main__":
+    smoke_test()
