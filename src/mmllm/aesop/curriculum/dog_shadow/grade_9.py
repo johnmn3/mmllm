@@ -56,6 +56,29 @@ G9_01 = SubjectCurriculum(
             concept_phrase="binding a map, adding an entry to a new map, and returning the original",
             question_what="the original map after assoc returns a new map",
             goal_text="bind a map m, call assoc to add :b 2 to a new map, then return the unchanged m",
+            scenario=(
+                'Bell the hound kept a bone-cache in a hollow log, with a '
+                'slot marked :a holding one bone. She fetched the cache, '
+                'considered adding another slot :b with two bones, but '
+                'paused — what would the original cache say?'
+            ),
+            need=(
+                'She wanted to know whether calling assoc would change the '
+                'cache she had in jaw, or whether the old cache would sit '
+                'untouched while a new one was created beside it.'
+            ),
+            mapping=(
+                'The hollow-log cache is the map, the named slots are the '
+                'keys, the bones in each slot are the values, assoc is the '
+                'motion of adding a new slot to a fresh copy, and returning '
+                'the original cache is what happens when you ask for m again.'
+            ),
+            resolution=(
+                'The REPL showed the original cache unchanged — still just '
+                'the :a slot with one bone. The new slot :b had been added '
+                'to a copy in the REPL\'s paw, not to the cache Bell held.'
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(let [v [1 2 3]] (conj v 4) v)",
@@ -63,6 +86,30 @@ G9_01 = SubjectCurriculum(
             concept_phrase="binding a vector, conjoining a new element to a new vector, and returning the original",
             question_what="the original vector after conj returns a new vector",
             goal_text="bind a vector v, call conj to add 4 to a new vector, then return the unchanged v",
+            scenario=(
+                'Rex the hound lined up three bones by the stream bank — '
+                'the tally for the morning\'s finds. He considered calling '
+                'conj to add a fourth bone to the row, but first he needed '
+                'to know if the original line would hold steady.'
+            ),
+            need=(
+                'He wanted the certainty that conj would leave his ordered '
+                'bones untouched while building a new row elsewhere, not '
+                'rearranging what he had just set in place.'
+            ),
+            mapping=(
+                'The row of bones is the vector, each bone\'s position is '
+                'an index, conj is the motion of appending to a fresh copy '
+                'of the row, and asking for v at the end is what shows the '
+                'original stayed put.'
+            ),
+            resolution=(
+                'The REPL returned the original row of three bones — the '
+                'fourth had been joined to a copy, not to the row Rex held. '
+                'The immutability of data meant the original cache remained '
+                'as it was.'
+            ),
+            tags=("story",),
         ),
     ],
     subplots=_BASKET_SUBPLOTS,
@@ -115,6 +162,29 @@ G9_02 = SubjectCurriculum(
             concept_phrase="binding an atom to progress, atomically resetting it to a new value, and dereferencing the result",
             question_what="the value after atomically resetting progress and dereferencing",
             goal_text="construct an atom holding an idle value as progress, atomically reset it to running, and dereference the result",
+            scenario=(
+                'Patch the hound maintained a tally-scratch on a flat stone '
+                'by the bank, marked with the keyword idle at the start of '
+                'the day. When the foraging party was ready to begin, the '
+                'hound reset the stone\'s value outright to running.'
+            ),
+            need=(
+                'The status needed to shift from idle to running in one '
+                'atomic motion — no partial state, no half-updates — so any '
+                'watching dog would see either the old value or the new one, '
+                'never a blur between.'
+            ),
+            mapping=(
+                'The stone is the atom, the scratched keyword is its value, '
+                'reset! is the unconditional write in one atomic stroke, and '
+                'dereferencing asks the stone for what it now says.'
+            ),
+            resolution=(
+                'The REPL reset the stone from idle to running and handed '
+                'back the new keyword. The running status was now clear to '
+                'any pack member who read the bank.'
+            ),
+            tags=("story",),
         ),
     ],
     subplots=_NOTEBOOK_SUBPLOTS,
@@ -134,6 +204,30 @@ G9_03 = SubjectCurriculum(
             concept_phrase="atom, swap, and deref",
             question_what="the running tally on the page after one foraging contribution",
             goal_text="set up a shared notebook starting at 0, atomically add one to its page, then read the page",
+            scenario=(
+                'Bell the hound opened the shared notebook at the stream\'s '
+                'edge and scratched a fresh zero onto the first page. This '
+                'tally-stone would record how many bones the pack had '
+                'gathered as the day unfolded.'
+            ),
+            need=(
+                'When a bone was found and brought to the cache, the tally '
+                'would need to step up by one — atomically, in one '
+                'read-compute-write moment — so no two dogs could garble the '
+                'count by writing at once.'
+            ),
+            mapping=(
+                'The page is the atom, the scratched number is its current '
+                'value, swap! is the atomic read-and-write dance that '
+                'applies inc to what the stone holds, and dereferencing '
+                'reads what the stone now says.'
+            ),
+            resolution=(
+                'The REPL swapped the zero to one in a single stroke, and '
+                'the page showed the new tally. Each bone added would '
+                'increment the count further, safely, one at a time.'
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(do (def a (atom 10)) (swap! a + 5) @a)",
@@ -141,6 +235,29 @@ G9_03 = SubjectCurriculum(
             concept_phrase="atom, swap, deref",
             question_what="the value returned by dereferencing a after defining a as an atom holding 10 and swapping it via + 5",
             goal_text="construct an atom holding 10, atomically swap it by applying + to 5, and dereference the result",
+            scenario=(
+                'Rex the hound carried a running tally on a flat stone by '
+                'the bank, already marked with the count 10 from the '
+                'previous round. Now the pack had five more bones to add to '
+                'the total from this stretch.'
+            ),
+            need=(
+                'He would apply the + function to add five to what the stone '
+                'held, doing it atomically in one swap so the tally would '
+                'jump cleanly from old to new without any watcher seeing a '
+                'partial number.'
+            ),
+            mapping=(
+                'The stone is the atom holding 10, swap! reads that value '
+                'and applies + with 5 to it, all in one atomic move, and '
+                'the deref at the end confirms the result of the addition.'
+            ),
+            resolution=(
+                'The REPL swapped the 10 to 15 by applying plus-five, and '
+                'the stone showed the new running total. The count was now '
+                'accurate and safe from any race.'
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(do (def a (atom :start)) (reset! a :done) @a)",
@@ -148,6 +265,29 @@ G9_03 = SubjectCurriculum(
             concept_phrase="atom, reset, deref",
             question_what="the value returned by dereferencing a after defining a as an atom holding a start keyword and resetting it to done",
             goal_text="construct an atom holding a start keyword, atomically reset it to a done keyword, and dereference the result",
+            scenario=(
+                'Patch the hound marked the phase-stone near the pond with '
+                'the status keyword :start, signaling that the forage was '
+                'beginning. When the pack had gathered enough bones and '
+                'were ready to rest, the status would need to flip.'
+            ),
+            need=(
+                'The reset would replace the status keyword entirely and '
+                'atomically — no slow transition, just a sharp flip from '
+                'start to done so every watcher would instantly know the '
+                'phase had changed.'
+            ),
+            mapping=(
+                'The stone is the atom, the keyword is its value, reset! is '
+                'the unconditional atomic replacement with the new keyword, '
+                'and dereferencing shows what the stone now holds.'
+            ),
+            resolution=(
+                'The REPL reset the stone to :done in one atomic pulse, and '
+                'the page showed the new status. The pack could read the '
+                'change clearly and move to their rest.'
+            ),
+            tags=("story",),
         ),
     ],
     subplots=_NOTEBOOK_SUBPLOTS,
@@ -168,6 +308,29 @@ G9_04 = SubjectCurriculum(
             concept_phrase="atom, CAS, deref",
             question_what="the value returned by dereferencing a after defining a as an atom holding 0 and performing a successful compare-and-set to 1",
             goal_text="construct an atom holding 0, perform a compare-and-set checking for 0 and setting to 1, and dereference",
+            scenario=(
+                'Bell the hound scratched a tally-mark for zero bones on a '
+                'flat stone. She wanted to update the count to one, but only '
+                'if the stone still held the zero she expected — if another '
+                'dog had written first, she would refuse to change it.'
+            ),
+            need=(
+                'She needed a compare-and-set: a guarded atomic update that '
+                'checked the old value before committing the new one. If the '
+                'check passed, one would replace zero. If the stone had been '
+                'altered by another hound, the operation would fail silently.'
+            ),
+            mapping=(
+                'The stone is the atom, the expected value is zero, the new '
+                'value is one, and compare-and-set! is the guarded swap that '
+                'only succeeds if the current value matches the expected one.'
+            ),
+            resolution=(
+                'The REPL checked the stone, found zero as expected, and '
+                'swapped it to one atomically. The dereference showed the new '
+                'count, confirming the guarded write had succeeded.'
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(do (def a (atom 5)) (compare-and-set! a 0 99) @a)",
@@ -175,6 +338,31 @@ G9_04 = SubjectCurriculum(
             concept_phrase="atom, failed CAS, deref",
             question_what="the value returned by dereferencing a after defining a as an atom holding 5 and attempting a compare-and-set that fails",
             goal_text="construct an atom holding 5, perform a compare-and-set checking for 0 and setting to 99, and dereference",
+            scenario=(
+                'Rex the hound read a tally-stone at the stream\'s edge, '
+                'expecting it to hold zero. He prepared a compare-and-set to '
+                'change it to 99. But when the operation checked the stone, '
+                'another dog had already scratched it — the count now showed 5.'
+            ),
+            need=(
+                'The compare-and-set would compare the current value 5 '
+                'against the expected zero, find them mismatched, and refuse '
+                'to write. The stone would stay at its actual value, not the '
+                'one the old write intended.'
+            ),
+            mapping=(
+                'The stone is the atom at 5, the expected value is zero, the '
+                'new value is 99, and compare-and-set! is the guarded swap '
+                'that fails when the stone holds something other than what '
+                'was expected.'
+            ),
+            resolution=(
+                'The REPL checked the stone, found 5 instead of zero, and '
+                'refused the swap. The dereference showed the stone still '
+                'held its original value, unchanged by the failed guarded '
+                'write.'
+            ),
+            tags=("story",),
         ),
     ],
     subplots=_NOTEBOOK_SUBPLOTS,
@@ -202,6 +390,32 @@ G9_05 = SubjectCurriculum(
             concept_phrase="atom with watch",
             question_what="the log vector after defining an atom a, defining a log atom, adding a watch that records each new value, swapping a, and dereferencing the log",
             goal_text="construct an atom a, construct a log atom, add a watch to a that conjoins new values to the log, swap a, and dereference the log",
+            scenario=(
+                'Bell the hound kept a tally-stone and also a separate log '
+                'bone-row by the bank to record each time the tally shifted. '
+                'She attached a watch to the stone — an instruction left in '
+                'the sand — so that whenever the tally changed, the log would '
+                'automatically record the new value.'
+            ),
+            need=(
+                'Every change to the main tally-stone would trigger the watch '
+                'to append the new value to the log vector. After the tally '
+                'was swapped, the log would hold a record of what the stone '
+                'had become.'
+            ),
+            mapping=(
+                'The tally-stone is the atom a, the log bone-row is the atom '
+                'holding a vector, add-watch sets a watcher-function that '
+                'fires whenever a changes, and conj appends the new value to '
+                'the log.'
+            ),
+            resolution=(
+                'The REPL attached the watch, then swapped the tally from '
+                'zero to one. The watch fired and appended one to the log. '
+                'Dereferencing the log showed the record of what the stone '
+                'had become.'
+            ),
+            tags=("story",),
         ),
     ],
     subplots=_NOTEBOOK_SUBPLOTS,
@@ -227,6 +441,31 @@ G9_06 = SubjectCurriculum(
             concept_phrase="atom with validator",
             question_what="the value returned by dereferencing a after defining an atom, setting a number? validator, swapping by applying inc, and dereferencing",
             goal_text="construct an atom holding 0, set a number? validator on it, atomically swap by applying inc, and dereference",
+            scenario=(
+                'Patch the hound scratched a tally-stone at the stream\'s '
+                'edge and wanted to ensure only numbers would ever be written '
+                'to it. They attached a guardian rule: number? — a check that '
+                'would block any word-value or bad symbol from ever being '
+                'scratched there.'
+            ),
+            need=(
+                'When inc was applied to the zero on the stone, the result '
+                'would be checked against the number? guard. Since one is a '
+                'number, the swap would succeed, and the stone would show the '
+                'new count.'
+            ),
+            mapping=(
+                'The stone is the atom, the guardian rule is the number? '
+                'validator, and swap! performs a guarded update that fires '
+                'the validator before committing the new value.'
+            ),
+            resolution=(
+                'The REPL set the validator, then swapped the stone by '
+                'applying inc. The guard checked the result — one is a number '
+                '— and the swap succeeded. The dereference showed the stone '
+                'held the count, protected by the rule.'
+            ),
+            tags=("story",),
         ),
     ],
     subplots=_NOTEBOOK_SUBPLOTS,
@@ -247,6 +486,32 @@ G9_07 = SubjectCurriculum(
             concept_phrase="ref, dosync, alter, deref",
             question_what="the value returned by dereferencing r after defining a ref holding 0, performing a transactional alter via inc, and dereferencing",
             goal_text="construct a ref holding 0, perform a transactional alter by applying inc inside dosync, and dereference",
+            scenario=(
+                'Bell the hound kept a ref notebook at the stream\'s edge, a '
+                'page marked with zero for the day\'s beginning. Unlike the '
+                'atom tally-stone, this ref would require a full transaction '
+                'to change it — a dosync fence to guard the update.'
+            ),
+            need=(
+                'She would enter the transaction fence, read the page and '
+                'apply inc to step it up, and only then commit the change. If '
+                'any conflict arose, the entire transaction would retry, '
+                'never leaving a partial state on the page.'
+            ),
+            mapping=(
+                'The ref notebook is the identity that holds a value across '
+                'transactions, dosync is the fence that bounds the '
+                'transaction, alter reads the page and applies inc, and '
+                'dereferencing shows the result after the transaction '
+                'commits.'
+            ),
+            resolution=(
+                'The REPL opened the dosync fence, altered the page from '
+                'zero to one inside the transaction, committed the change, '
+                'and handed back what the page now held. The zero became one '
+                'safely within the fence.'
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(do (def r (ref 100)) (dosync (ref-set r 7)) @r)",
@@ -302,6 +567,32 @@ G9_08 = SubjectCurriculum(
             concept_phrase="two refs, coordinated alter",
             question_what="the pair of values returned by dereferencing both a and b after defining them as refs, coordinating their alters inside dosync, and dereferencing",
             goal_text="construct refs a and b, perform a coordinated transaction that alters both by applying inc, and dereference both",
+            scenario=(
+                'Rex the hound kept two ref notebooks at the stream\'s edge — '
+                'one with the count of found bones at one, another with the '
+                'count of cached bones at two. When a new bone was buried, '
+                'both counts needed to step up together, neither advancing '
+                'without the other.'
+            ),
+            need=(
+                'He would enter a dosync transaction fence and alter both '
+                'pages inside the same fence, applying inc to each. If '
+                'anything went wrong, both changes would retry together, '
+                'keeping the two counts always in sync.'
+            ),
+            mapping=(
+                'The two ref notebooks are the identity values a and b, '
+                'dosync is the fence that coordinates both changes as one '
+                'atomic unit, alter applies inc to each page, and '
+                'dereferencing both shows the result.'
+            ),
+            resolution=(
+                'The REPL opened the dosync fence, altered both pages by '
+                'applying inc, and committed both changes together. The pair '
+                'of derefs showed two and three — both advanced safely inside '
+                'the transaction.'
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(do (def r (ref 10)) (dosync (alter r + 5)) @r)",
@@ -309,6 +600,29 @@ G9_08 = SubjectCurriculum(
             concept_phrase="ref, dosync, alter, deref",
             question_what="the value returned by dereferencing r after defining a ref holding 10, performing a transactional alter via + 5, and dereferencing",
             goal_text="construct a ref holding 10, perform a transactional alter by applying + with 5 inside dosync, and dereference",
+            scenario=(
+                'Patch the hound held a ref notebook showing a tally of ten '
+                'bones from the previous round. Now five more bones had been '
+                'gathered, and the page needed to be updated within a full '
+                'transaction to maintain consistency.'
+            ),
+            need=(
+                'Inside a dosync fence, the page would be altered by applying '
+                'plus-five to its value. The fence ensured that if any '
+                'conflict arose during the update, the whole operation would '
+                'retry cleanly.'
+            ),
+            mapping=(
+                'The ref notebook holds ten, dosync opens the transaction '
+                'fence, alter reads the page and applies plus-five, and '
+                'dereferencing shows the result.'
+            ),
+            resolution=(
+                'The REPL opened the dosync, altered the page from ten to '
+                'fifteen by adding five, committed the change, and handed '
+                'back the new count. The transaction was complete and safe.'
+            ),
+            tags=("story",),
         ),
     ],
     subplots=_NOTEBOOK_SUBPLOTS,
@@ -329,6 +643,28 @@ G9_09 = SubjectCurriculum(
             concept_phrase="atom, swap, deref",
             question_what="the value returned by dereferencing a after defining an atom holding 0, swapping it via inc, and dereferencing",
             goal_text="construct an atom holding 0, atomically swap it by applying inc, and dereference",
+            scenario=(
+                'Bell the hound kept an atom tally-stone at the stream\'s '
+                'edge, marked with zero at the start of the day. The stone '
+                'would track a simple, independent count — when a bone was '
+                'found, the count would step up by one.'
+            ),
+            need=(
+                'She would atomically swap the stone by applying inc, doing '
+                'the read-and-write in one go without a fence, since this '
+                'count had no dependency on any other state.'
+            ),
+            mapping=(
+                'The atom is the lightweight tally-stone, swap! is the '
+                'atomic read-compute-write that applies inc, and '
+                'dereferencing shows the result.'
+            ),
+            resolution=(
+                'The REPL swapped the stone from zero to one atomically, and '
+                'the dereference showed the new count. The atom was simple, '
+                'fast, and safe for a standalone tally.'
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(do (def r (ref 0)) (dosync (alter r inc)) @r)",
@@ -336,6 +672,29 @@ G9_09 = SubjectCurriculum(
             concept_phrase="ref, dosync, alter, deref",
             question_what="the value returned by dereferencing r after defining a ref holding 0, altering it via inc inside dosync, and dereferencing",
             goal_text="construct a ref holding 0, perform a transactional alter by applying inc inside dosync, and dereference",
+            scenario=(
+                'Rex the hound kept a ref notebook at the stream\'s edge, '
+                'marked with zero. This notebook might be coordinated with '
+                'other pages in future transactions, so he required the full '
+                'dosync fence from the start.'
+            ),
+            need=(
+                'He would enter a dosync transaction and alter the page inside '
+                'the fence by applying inc. Even for a single ref, the dosync '
+                'ensured the operation could coordinate with others later if '
+                'needed.'
+            ),
+            mapping=(
+                'The ref is the notebook that may join future transactions, '
+                'dosync is the fence, alter reads and applies inc inside the '
+                'fence, and dereferencing shows the result.'
+            ),
+            resolution=(
+                'The REPL opened the dosync, altered the page from zero to '
+                'one inside the fence, and handed back the result. The ref '
+                'was ready for coordinated transactions anytime.'
+            ),
+            tags=("story",),
         ),
     ],
     subplots=_NOTEBOOK_SUBPLOTS,
@@ -385,6 +744,30 @@ G9_10 = SubjectCurriculum(
             concept_phrase="agent, send, await, deref",
             question_what="the value returned by dereferencing ag after defining an agent holding 5, sending + 10 asynchronously, awaiting, and dereferencing",
             goal_text="construct an agent holding 5, asynchronously send + with 10 to it, await its completion, and dereference",
+            scenario=(
+                'Patch the hound dispatched a young scout-dog along the bank '
+                'near the pond with an instruction to add 10 to a starting '
+                'tally of 5. The scout ran ahead while Patch stayed back, '
+                'knowing the work would finish in the scout\'s own time.'
+            ),
+            need=(
+                'Patch would wait for the scout to return — await would '
+                'synchronize on the agent\'s completion — and only then ask '
+                'for the result. The scout carried the final tally back: '
+                'fifteen.'
+            ),
+            mapping=(
+                'The agent is the scout-dog carrying out the work in parallel, '
+                'send is the instruction to add ten, await is the '
+                'synchronization that lets the pack wait for the scout\'s '
+                'return, and dereference gets the result.'
+            ),
+            resolution=(
+                'The REPL sent the instruction, the scout worked asynchronously '
+                'adding 10 to 5, await brought Patch back into sync with the '
+                'result, and the dereference showed the final tally of fifteen.'
+            ),
+            tags=("story",),
         ),
     ],
     subplots=_RUNNERAHEAD_SUBPLOTS,
@@ -404,6 +787,28 @@ G9_11 = SubjectCurriculum(
             concept_phrase="agent, send, await, deref",
             question_what="the value returned by dereferencing ag after defining an agent holding 0, using send to dispatch inc, awaiting, and dereferencing",
             goal_text="construct an agent holding 0, use send to asynchronously apply inc, await its completion, and dereference",
+            scenario=(
+                'Bell the hound dispatched a scout-dog with the quick-step '
+                'instruction inc, starting from zero. Send uses a thread from '
+                'the standard pool — fast for light work — and the scout ran '
+                'ahead while Bell stayed at the bank.'
+            ),
+            need=(
+                'She would wait with await for the scout to return, then ask '
+                'for the final tally. The dereference would show one — the '
+                'result of the scout\'s single step.'
+            ),
+            mapping=(
+                'The agent is the scout running with send\'s quick thread '
+                'pool, send dispatches the inc instruction, await '
+                'synchronizes, and dereference gets the result.'
+            ),
+            resolution=(
+                'The REPL sent the instruction on a quick thread, the scout '
+                'applied inc to zero, await brought synchronization, and the '
+                'dereference returned one.'
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(do (def ag (agent 0)) (send-off ag inc) (await ag) @ag)",
@@ -411,6 +816,28 @@ G9_11 = SubjectCurriculum(
             concept_phrase="agent, send-off, await, deref",
             question_what="the value returned by dereferencing ag after defining an agent holding 0, using send-off to dispatch inc, awaiting, and dereferencing",
             goal_text="construct an agent holding 0, use send-off to asynchronously apply inc, await its completion, and dereference",
+            scenario=(
+                'Rex the hound dispatched a scout-dog with the inc instruction '
+                'starting from zero. Send-off uses a separate thread pool — '
+                'better for blocking operations — and the scout went ahead '
+                'while Rex stayed put.'
+            ),
+            need=(
+                'He would wait with await for the scout to complete its work, '
+                'then dereference to see the result. Even using the blocking '
+                'thread pool, the answer would be one.'
+            ),
+            mapping=(
+                'The agent is the scout running with send-off\'s blocking '
+                'thread pool, send-off dispatches inc, await synchronizes, '
+                'and dereference gets the result.'
+            ),
+            resolution=(
+                'The REPL sent the instruction on a blocking thread, the '
+                'scout applied inc to zero, await brought synchronization, '
+                'and the dereference returned one.'
+            ),
+            tags=("story",),
         ),
     ],
     subplots=_RUNNERAHEAD_SUBPLOTS,
@@ -430,6 +857,31 @@ G9_12 = SubjectCurriculum(
             concept_phrase="agent, double send, await, deref",
             question_what="the value returned by dereferencing ag after defining an agent holding 0, sending inc twice asynchronously, awaiting, and dereferencing",
             goal_text="construct an agent holding 0, asynchronously send inc twice, synchronize with await, and dereference",
+            scenario=(
+                'Patch the hound dispatched a scout-dog with two inc instructions '
+                'queued one after another. The scout started at zero and would '
+                'run both steps in sequence — the first step would bring it to '
+                'one, the second to two.'
+            ),
+            need=(
+                'Patch could not dereference the agent\'s value until both '
+                'steps had completed. Await would synchronize on the agent, '
+                'blocking until all queued work finished, then Patch could '
+                'read the final tally.'
+            ),
+            mapping=(
+                'The agent is the scout executing both inc instructions in '
+                'sequence, the two sends queue the work, await synchronizes '
+                'until both steps are done, and dereference returns the final '
+                'result.'
+            ),
+            resolution=(
+                'The REPL queued both inc instructions on the agent, the '
+                'scout ran through both steps asynchronously, await brought '
+                'synchronization when both finished, and the dereference '
+                'showed two.'
+            ),
+            tags=("story",),
         ),
     ],
     subplots=_RUNNERAHEAD_SUBPLOTS,
@@ -449,6 +901,30 @@ G9_13 = SubjectCurriculum(
             concept_phrase="future, add, deref",
             question_what="the value the messenger returns from adding 1 and 2",
             goal_text="dispatch a runner to compute the sum of 1 and 2; later, ask the runner for the answer",
+            scenario=(
+                'Bell the hound stood at the stream\'s edge and sent a scout-dog '
+                'racing ahead along the bank carrying a single task: add one and '
+                'two together and bring back the answer. The scout ran at full '
+                'speed while Bell remained at the bank waiting.'
+            ),
+            need=(
+                'She could not know the result until the scout returned. Bell '
+                'would wait for the runner to complete the computation, then ask '
+                'for the message the scout carried back.'
+            ),
+            mapping=(
+                'The scout-dog is the future, the task of adding one and two is '
+                'the work dispatched, the scout\'s running ahead is the '
+                'asynchronous execution, and dereferencing asks for the result '
+                'the scout brings back.'
+            ),
+            resolution=(
+                'The REPL sent the runner with the addition task. The scout '
+                'computed one plus two as it raced forward. When Bell '
+                'dereferenced the future, she received the result the scout had '
+                'gathered: the running total of three.'
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="@(future (* 6 7))",
@@ -456,6 +932,30 @@ G9_13 = SubjectCurriculum(
             concept_phrase="future, multiply, deref",
             question_what="the value returned by dereferencing a future that multiplies 6 and 7",
             goal_text="construct a future that multiplies 6 and 7, and dereference it",
+            scenario=(
+                'Rex the hound needed the product of six and seven computed '
+                'quickly. He dispatched a scout-dog ahead with the task to '
+                'multiply those two numbers. The scout raced forward while Rex '
+                'stayed behind arranging the next part of the forage.'
+            ),
+            need=(
+                'Rex could not call out the result until the scout returned with '
+                'the answer. He would wait for the runner to complete the work, '
+                'then ask for the message — the product the scout carried back.'
+            ),
+            mapping=(
+                'The scout is the future, the multiplication task is the work '
+                'sent ahead, the scout\'s racing forward is the asynchronous '
+                'computation, and dereferencing the future is asking the scout '
+                'for the result.'
+            ),
+            resolution=(
+                'The REPL sent the runner to compute six times seven. The scout '
+                'multiplied the numbers as it ran. When Rex dereferenced the '
+                'future, the scout delivered the verdict: the product of '
+                'forty-two.'
+            ),
+            tags=("story",),
         ),
     ],
     subplots=_RUNNERAHEAD_SUBPLOTS,
@@ -475,6 +975,29 @@ G9_14 = SubjectCurriculum(
             concept_phrase="constructing an atom and extracting its value using the @ shorthand",
             question_what="the value extracted from an atom using @",
             goal_text="construct an atom holding 7 and dereference it using @",
+            scenario=(
+                'Bell the hound carved a tally-stone at the stream\'s edge and '
+                'scratched the count seven into its surface. Later, when she '
+                'needed to know what the stone held, she would use the quickest '
+                'glance — the @ shorthand — to read the current value.'
+            ),
+            need=(
+                'She wanted the most terse way to look at what the stone held, '
+                'a single mark that meant "give me the value this atom carries '
+                'right now."'
+            ),
+            mapping=(
+                'The tally-stone is the atom holding seven, the @ shorthand is '
+                'the swift glance at the stone, and dereferencing is the act of '
+                'reading what the stone says.'
+            ),
+            resolution=(
+                'The REPL created the atom and marked the stone with seven. When '
+                'Bell used @, the REPL handed back the value the stone carried. '
+                'The @ shorthand was the quickest way to see what the stone '
+                'held.'
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(do (def a (atom 7)) (deref a))",
@@ -482,6 +1005,31 @@ G9_14 = SubjectCurriculum(
             concept_phrase="constructing an atom and extracting its value using the deref function",
             question_what="the value extracted from an atom using the deref function",
             goal_text="construct an atom holding 7 and dereference it using the deref function",
+            scenario=(
+                'Patch the hound marked a fresh tally-stone with the count seven '
+                'and set it by the pond. When the time came to learn what the '
+                'stone held, Patch would call out the deref instruction by name '
+                '— a more formal, deliberate way to read the stone\'s value.'
+            ),
+            need=(
+                'Patch preferred the full deref form for clarity when reading the '
+                'stone\'s value. Though both @ and deref mean the same thing, '
+                'the named function made the intent more visible to any watching '
+                'pack member.'
+            ),
+            mapping=(
+                'The tally-stone is the atom holding seven, the deref function '
+                'is the formal instruction to read the stone, and calling deref '
+                'is what happens when the form looks up the stone\'s value by '
+                'name.'
+            ),
+            resolution=(
+                'The REPL created the atom and marked the stone with seven. When '
+                'Patch called deref, the REPL returned the value the stone '
+                'carried. The deref function was the named, formal way to see '
+                'what the stone held.'
+            ),
+            tags=("story",),
         ),
     ],
     subplots=_NOTEBOOK_SUBPLOTS,
@@ -501,6 +1049,30 @@ G9_15 = SubjectCurriculum(
             concept_phrase="promise, deliver, deref",
             question_what="the value returned by dereferencing a promise after defining it, delivering a keyword to it, and dereferencing",
             goal_text="construct a promise, deliver a completion keyword to it, and dereference to get the delivered value",
+            scenario=(
+                'Bell the hound sent a scout-dog far down the bank with a task '
+                'that might take time. She created a promise — an empty satchel '
+                '— that would hold the scout\'s answer when the scout eventually '
+                'returned with a message from the far shore.'
+            ),
+            need=(
+                'The scout would race ahead, do the work, and when finished, '
+                'deliver the message-bone to the promise. Bell would wait, and '
+                'once the promise held the answer, she could dereference it to '
+                'read what the scout had sent.'
+            ),
+            mapping=(
+                'The promise is the empty satchel waiting for a message, the '
+                'deliver is the scout placing the answer-bone into the satchel, '
+                'and dereferencing is Bell reading what the scout brought back.'
+            ),
+            resolution=(
+                'The REPL created the empty promise. The scout finished its work '
+                'and delivered the completion keyword :done. When Bell '
+                'dereferenced the promise, she received what the scout had sent '
+                '— the verdict that the work was done.'
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(do (def p (promise)) (deliver p 42) @p)",
@@ -508,6 +1080,29 @@ G9_15 = SubjectCurriculum(
             concept_phrase="promise, deliver, deref",
             question_what="the value returned by dereferencing a promise after defining it, delivering a number to it, and dereferencing",
             goal_text="construct a promise, deliver 42 to it, and dereference to get the delivered value",
+            scenario=(
+                'Rex the hound created a promise — a waiting satchel — and sent '
+                'a scout-dog to count the bones in a distant cache. The scout '
+                'would run far and eventually deliver a message-bone with the '
+                'total count scratched into it.'
+            ),
+            need=(
+                'Rex could not read the count until the scout brought the answer '
+                'back. Once the scout delivered the number to the promise, Rex '
+                'would dereference to read what the scout had found.'
+            ),
+            mapping=(
+                'The promise is the empty satchel waiting for the scout\'s count, '
+                'deliver is the scout placing the answer with forty-two scratched '
+                'in, and dereferencing is Rex reading the count the scout brought.'
+            ),
+            resolution=(
+                'The REPL created the promise. The scout ran ahead, counted the '
+                'bones, and delivered the number forty-two to the promise. When '
+                'Rex dereferenced, he received the verdict the scout had counted: '
+                'forty-two bones in the cache.'
+            ),
+            tags=("story",),
         ),
     ],
     subplots=_RUNNERAHEAD_SUBPLOTS,
@@ -527,6 +1122,28 @@ G9_16 = SubjectCurriculum(
             concept_phrase="volatile, vswap, deref",
             question_what="the value returned by dereferencing v after defining a volatile holding 0, performing a non-transactional swap via inc, and dereferencing",
             goal_text="construct a volatile holding 0, perform a non-transactional swap by applying inc, and dereference",
+            scenario=(
+                'Bell the hound scratched a quick tally-mark on a bark-strip at '
+                'the stream\'s edge — a volatile counter that did not need the '
+                'heaviness of transactions. The mark held zero. She wanted to '
+                'step it up by one, fast, without any guards.'
+            ),
+            need=(
+                'A volatile swap was lighter than an atom swap — no retries, no '
+                'compare-and-set logic, just a raw read-modify-write. Bell would '
+                'vswap the mark by applying inc and immediately read the result.'
+            ),
+            mapping=(
+                'The bark-strip is the volatile, the scratch-mark is its value, '
+                'vswap! is the non-transactional read-compute-write, and '
+                'dereferencing reads what the mark now says.'
+            ),
+            resolution=(
+                'The REPL vswapped the zero to one in a single, unguarded stroke. '
+                'The bark-strip held the new tally. The volatile was the lightest '
+                'way to hold a mutable value when transactions were not needed.'
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(do (def v (volatile! 5)) (vreset! v 99) @v)",
@@ -534,6 +1151,29 @@ G9_16 = SubjectCurriculum(
             concept_phrase="volatile, vreset, deref",
             question_what="the value returned by dereferencing v after defining a volatile holding 5, performing a non-transactional reset to 99, and dereferencing",
             goal_text="construct a volatile holding 5, perform a non-transactional reset to 99, and dereference",
+            scenario=(
+                'Patch the hound marked a volatile bark-strip with the count five '
+                'from an earlier round. Now a new tally had arrived, and the mark '
+                'needed to be overwritten outright with ninety-nine. Vreset would '
+                'erase the old mark without any transactional ceremony.'
+            ),
+            need=(
+                'A lightweight reset was needed — not an atom reset with retries, '
+                'but a raw, non-transactional overwrite. Patch would vreset! the '
+                'volatile from five to ninety-nine and see the change instantly.'
+            ),
+            mapping=(
+                'The volatile bark-strip holds the old count five, vreset! is the '
+                'unconditional non-transactional write that replaces it with '
+                'ninety-nine, and dereferencing shows the new mark.'
+            ),
+            resolution=(
+                'The REPL vreset the mark from five to ninety-nine in one raw '
+                'stroke. The bark-strip held the new count. The volatile reset '
+                'was the fastest way to replace a value when no coordination was '
+                'needed.'
+            ),
+            tags=("story",),
         ),
     ],
     subplots=_NOTEBOOK_SUBPLOTS,
@@ -553,6 +1193,31 @@ G9_17 = SubjectCurriculum(
             concept_phrase="dynamic var, binding, read",
             question_what="the value of the dynamic var when read inside the binding form after defining it and rebinding",
             goal_text="define a dynamic var *p* as 1, use binding to rebind it to 99, and read its value inside",
+            scenario=(
+                'Bell the hound carved a thread-local scent-mark into the bank '
+                'with the name *p*, set to one for the main trail. But for one '
+                'brief crossing — a single form — she would temporarily bind the '
+                'scent to a different value, ninety-nine, just for her own nose.'
+            ),
+            need=(
+                'Inside that form, when she sniffed for *p*, she would smell '
+                'ninety-nine — the temporary binding shadowing the original scent '
+                'carved at the bank. Outside that form, the original scent would '
+                'return.'
+            ),
+            mapping=(
+                'The scent-mark carved at the bank is the dynamic var *p*, the '
+                'binding form is the temporary rebind to ninety-nine, and '
+                'reading *p* inside the form shows what the nose detects: the '
+                'bound value.'
+            ),
+            resolution=(
+                'The REPL set the original scent to one at the bank. Inside the '
+                'binding, *p* smelled like ninety-nine to the hound. When the '
+                'form ended, the temporary binding faded and the original scent '
+                'would return.'
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(do (def ^:dynamic *p* 1) (binding [*p* 99] *p*) *p*)",
@@ -560,6 +1225,31 @@ G9_17 = SubjectCurriculum(
             concept_phrase="dynamic var, binding, read after",
             question_what="the value of the dynamic var when read after the binding form unwound",
             goal_text="define a dynamic var *p* as 1, use binding to rebind it to 99 inside, and read its value after binding exits",
+            scenario=(
+                'Patch the hound carved a scent-mark at the bank with the name '
+                '*p*, set to one — a dynamic var that any thread along the bank '
+                'could sense. For one brief crossing, the hound would bind *p* '
+                'to ninety-nine. After the form ended, the hound would ask: what '
+                'does *p* smell like now?'
+            ),
+            need=(
+                'Inside the binding form, *p* would smell like ninety-nine. But '
+                'when the form completed, the temporary scent would fade and the '
+                'original carved mark at the bank would be all that remained.'
+            ),
+            mapping=(
+                'The permanent scent-mark at the bank is the dynamic var *p* '
+                'bound to one, the binding form is the temporary rebind to '
+                'ninety-nine, and the second read of *p* shows the original '
+                'scent has returned.'
+            ),
+            resolution=(
+                'The REPL set the permanent scent to one at the bank. Inside the '
+                'binding, *p* smelled like ninety-nine. When the form unwound, '
+                'the temporary scent faded. The second read of *p* caught the '
+                'original scent again: one.'
+            ),
+            tags=("story",),
         ),
     ],
     subplots=_NOTEBOOK_SUBPLOTS,
@@ -580,6 +1270,29 @@ G9_18 = SubjectCurriculum(
             concept_phrase="lock, locking, arithmetic",
             question_what="the value returned by evaluating an addition inside a locked critical section after creating a monitor and acquiring the lock",
             goal_text="create an object to use as a monitor, acquire the lock, and evaluate an addition inside",
+            scenario=(
+                'Bell the hound carried a single pebble — a monitor stone — and '
+                'held it tight to block any other dog from entering the sacred '
+                'crossing until she finished her work. While she held the lock, '
+                'she would add one and two together in safety.'
+            ),
+            need=(
+                'The critical section had to be guarded so no two dogs could '
+                'interfere with the arithmetic at the same time. The locking '
+                'form would acquire the monitor stone, do the work inside, and '
+                'release it when done.'
+            ),
+            mapping=(
+                'The monitor stone is the lock object, locking is the motion of '
+                'acquiring the monitor to guard the critical section, and the '
+                'addition is the work that happens only while the lock is held.'
+            ),
+            resolution=(
+                'The REPL acquired the monitor stone, held it while adding one '
+                'and two together, and released it when the work was done. The '
+                'arithmetic was safe from any concurrent access.'
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(do (def lock (Object.)) (locking lock 42))",
@@ -587,6 +1300,30 @@ G9_18 = SubjectCurriculum(
             concept_phrase="lock, locking, literal",
             question_what="the literal value returned by evaluating it inside a locked critical section after creating a monitor and acquiring the lock",
             goal_text="create an object to use as a monitor, acquire the lock, and evaluate a literal inside",
+            scenario=(
+                'Rex the hound created a monitor stone — a pebble to guard a '
+                'critical section. He would hold the lock while evaluating a '
+                'simple literal value, forty-two, under the protection of the '
+                'exclusive access the monitor granted.'
+            ),
+            need=(
+                'Even a trivial value needed to be read inside the locking form '
+                'to ensure no other dog could access the monitor stone at the '
+                'same time. The lock would guarantee mutual exclusion for '
+                'whatever work happened inside.'
+            ),
+            mapping=(
+                'The pebble is the lock monitor, locking acquires exclusive '
+                'access to the critical section, and the literal forty-two is the '
+                'value evaluated while no other dog can interfere.'
+            ),
+            resolution=(
+                'The REPL created the monitor and acquired the lock. Inside the '
+                'locked form, the literal forty-two was evaluated safely. When '
+                'the locking completed, the monitor was released and other dogs '
+                'could proceed.'
+            ),
+            tags=("story",),
         ),
     ],
     subplots=_NOTEBOOK_SUBPLOTS,

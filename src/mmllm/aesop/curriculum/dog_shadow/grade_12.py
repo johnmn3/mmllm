@@ -98,6 +98,29 @@ G12_01 = SubjectCurriculum(
             concept_phrase="the map-inc transducer applied via into",
             question_what="the vector produced by reifying the map-inc transducer into an empty vector via into, applied to the vector containing 1, 2, 3",
             goal_text="use the map-inc transducer with into to increment the vector containing 1, 2, 3",
+            scenario=(
+                "Bell the hound found a log with a gap at the stream\'s edge, "
+                "the opening shaped to add one bone\'s weight to any bone that "
+                'passed through. Laid before it lay a row of light bones — 1, 2, 3 — '
+                'waiting on the near bank.'
+            ),
+            need=(
+                'She wanted to run each bone through the gap, watch the rule '
+                'transform each one, and catch what fell through into an empty row '
+                'on the far bank. The final result would show the cumulative '
+                'increment.'
+            ),
+            mapping=(
+                'The gap is the map-inc rule, the row of input bones is the '
+                'vector, each passing bone is an element, and the empty row '
+                'where the changed bones land is the into-vessel.'
+            ),
+            resolution=(
+                'The REPL threaded each bone through the gap, applied the '
+                'increment, and collected the result into the empty vector. What '
+                'fell through was the vector of incremented bones: 2, 3, 4.'
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(into [] (filter even?) [1 2 3 4 5])",
@@ -105,6 +128,23 @@ G12_01 = SubjectCurriculum(
             concept_phrase="the filter-even transducer applied via into",
             question_what="the vector of even elements reified via into with the filter-even transducer applied to the vector containing 1, 2, 3, 4, 5",
             goal_text="use the filter-even transducer with into to keep only the even numbers from the vector containing 1, 2, 3, 4, 5",
+            scenario=(
+                'Rex the hound stood at a log with a gap — wide for even bones but '
+                'too narrow for odd ones. Before the gap lay bones 1, 2, 3, 4, 5.'
+            ),
+            need=(
+                'He wanted each bone through the gap, let it decide which would '
+                'pass, and catch survivors. Only even bones would make it.'
+            ),
+            mapping=(
+                'The gap is the filter-even rule, the input heap is the vector, '
+                'each bone is an element, and into collects the survivors.'
+            ),
+            resolution=(
+                'The REPL tested each: 1 stuck, 2 passed, 3 stuck, 4 passed, 5 '
+                'stuck. The vessel held the ones that fit: 2 and 4.'
+            ),
+            tags=("story",),
         ),
     ],
     subplots=_SIEVE_SUBPLOTS, plan_pool=_PLAN_G12,
@@ -123,6 +163,30 @@ G12_02 = SubjectCurriculum(
             concept_phrase="the composed transducer pipeline of map-inc then filter-even",
             question_what="the vector result of reifying the composed transducer via into, applying map-inc then filter-even to the vector containing 1, 2, 3, 4",
             goal_text="compose map-inc and filter-even into a transducer pipeline, then apply it with into to the vector containing 1, 2, 3, 4",
+            scenario=(
+                'Patch the hound arrived at the river bank and saw two logs '
+                'stacked side by side — one gap shaped to add weight, the second '
+                'gap shaped to filter. "I can stack these," Patch said. Bones lay '
+                'on the near bank: 1, 2, 3, 4.'
+            ),
+            need=(
+                'The hound wanted to send each bone through the first gap to add '
+                'weight, catch the result, feed it through the second gap to '
+                'filter, and catch the final survivors in an empty row on the far '
+                'bank.'
+            ),
+            mapping=(
+                'The stacked gaps are the composed transducer, the pipeline moves '
+                'through both rules in order, each input bone is an element, and '
+                'the empty row is the final collecting vessel.'
+            ),
+            resolution=(
+                'The REPL threaded 1, 2, 3, 4 through the composed pipeline: '
+                'first they gained weight (to 2, 3, 4, 5), then the filter kept '
+                'only the even ones. What landed in the final vessel was the '
+                'precise count: 2 and 4.'
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(transduce (comp (map inc) (filter even?)) + 0 [1 2 3 4 5])",
@@ -130,6 +194,31 @@ G12_02 = SubjectCurriculum(
             concept_phrase="the composed transducer summing the incremented-then-filtered elements",
             question_what="the sum accumulated via transduce using the composed transducer of map-inc then filter-even, starting from 0, applied to the vector containing 1, 2, 3, 4, 5",
             goal_text="compose map-inc and filter-even, then use transduce to sum the kept elements from the vector containing 1, 2, 3, 4, 5, starting from 0",
+            scenario=(
+                'Bell the hound found two stacked logs at the stream, the first '
+                'gap shaped to add weight, the second to filter by evenness. But '
+                'this time her receiver was not an empty row — it was a counting-'
+                'stick at her paws. Bones 1 through 5 waited to pass through.'
+            ),
+            need=(
+                'She wanted each bone to pass through both gaps, and instead of '
+                'collecting them as a row, she wanted their total weight summed '
+                'together, starting from zero, using the transducer to do all the '
+                'work.'
+            ),
+            mapping=(
+                'The stacked gaps are the composed transducer, the reduction '
+                "function is the addition that adds each kept bone\'s weight, the "
+                'running total is the accumulation, and transduce connects the '
+                'pipeline to the sum.'
+            ),
+            resolution=(
+                'The REPL applied the composed pipeline to each bone and summed '
+                'the survivors: 1 became 2 (kept), 2 became 3 (kept), 3 became 4 '
+                '(kept), 4 became 5 (rejected), 5 became 6 (rejected). The kept '
+                'bones summed to the running total: 2 + 4 + 6 = 12.'
+            ),
+            tags=("story",),
         ),
     ],
     subplots=_SIEVE_SUBPLOTS, plan_pool=_PLAN_G12,
@@ -148,6 +237,28 @@ G12_03 = SubjectCurriculum(
             concept_phrase="the transducer-powered construction of a set from incremented elements",
             question_what="the set produced by reifying the map-inc transducer into an empty set via into, applied to the vector containing 1, 2, 3",
             goal_text="use the map-inc transducer with into to create a set from the incremented elements of the vector containing 1, 2, 3",
+            scenario=(
+                "Rex the hound stood at the stream\'s edge with two kinds of "
+                'receivers: an empty row and an empty pile. He had a gap that '
+                'added weight, and bones 1, 2, 3 lay ready. "The gap is the same '
+                'rule," he said. "But the receiver matters."'
+            ),
+            need=(
+                'He wanted to run each bone through the increment gap, catch the '
+                'result, and this time pour them into an empty pile instead of a '
+                'row — to keep only unique weights with no duplicates.'
+            ),
+            mapping=(
+                'The gap is the map-inc rule, the input bones are the elements, '
+                'the changed bones fall through the gap, and the empty pile is the '
+                'set-shaped receiver that into fills.'
+            ),
+            resolution=(
+                'The REPL threaded each bone through the gap and poured the '
+                'incremented weights into the pile instead of the row. The unique '
+                'pile held 2, 3, and 4 — one of each.'
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(into [] (take 3) (range 100))",
@@ -155,6 +266,28 @@ G12_03 = SubjectCurriculum(
             concept_phrase="the transducer-powered collection of the first few elements",
             question_what="the vector produced by reifying the take-3 transducer into an empty vector via into, applied to the range of 100 numbers",
             goal_text="use the take-3 transducer with into to collect the first three elements from a range of 100 numbers",
+            scenario=(
+                'Patch the hound arrived at a vast stream with an endless flood of '
+                'bones flowing past — a range of one hundred from beginning to end. '
+                'A small gap stood at the bank, sized to stop after only three had '
+                'passed.'
+            ),
+            need=(
+                'The hound wanted to catch what the gap let through — just the '
+                'first three bones from the endless stream — and place them into an '
+                'empty row. The form would take what it needed and stop.'
+            ),
+            mapping=(
+                'The gap that stops after three is the take-3 rule, the stream of '
+                'one hundred bones is the range, each bone passing the threshold is '
+                'an element, and the empty row is the collecting vessel.'
+            ),
+            resolution=(
+                'The REPL sent the bones through the gap: 0 passed, 1 passed, 2 '
+                'passed — and the gap closed. The row caught the first three from '
+                'the endless stream, bringing the long race to a halt.'
+            ),
+            tags=("story",),
         ),
     ],
     subplots=_SIEVE_SUBPLOTS, plan_pool=_PLAN_G12,

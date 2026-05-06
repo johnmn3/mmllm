@@ -68,18 +68,152 @@ G2_01 = SubjectCurriculum(
             concept_phrase="the multi-arg sum",
             question_what="the sum of 1, 2, 3, and 4",
             goal_text="add 1, 2, 3, and 4",
+            scenario=(
+                'Rex the hound stood at the stream\'s edge, arranging four '
+                'small bones in a row on a flat stone. The bones were marked '
+                '1, 2, 3, and 4.'
+            ),
+            need=(
+                'He needed the running total — what all four bones counted '
+                'to when stacked together. The REPL would tally them for him '
+                'in one breath.'
+            ),
+            mapping=(
+                'Each bone is one operand, their sum is the result, and the '
+                'plus operator is the paw-stroke that gathers them all into '
+                'one count.'
+            ),
+            resolution=(
+                'The REPL brought the four bones into a single pile and '
+                'handed back the total. The answer settled the wager at once.'
+            ),
+            tags=("story",),
         ),
-        _ex("(* 2 3 4)", 24,          "the multi-arg product",    "the product of 2, 3, and 4",
-            goal="multiply 2, 3, and 4"),
-        _ex("(- 100 1 2 3)", 94,      "the multi-arg subtraction",  "100 minus 1, 2, and 3",
-            goal="subtract 1, 2, and 3 from 100"),
-        _ex("(+ 1 2 3 4 5 6 7 8 9 10)", 55,
-            "the sum of ten numbers",       "the sum of integers 1 through 10",
-            goal="add the integers 1 through 10"),
-        _ex("(* 1 2 3 4 5)", 120,     "the multi-arg product",    "the product of 1 through 5",
-            goal="multiply the integers 1 through 5"),
-        _ex("(+ 10 20 30)", 60,       "the sum of three numbers",     "the sum of 10, 20, and 30",
-            goal="add 10, 20, and 30"),
+        SubjectExample(
+            form="(* 2 3 4)", expected=24,
+            concept_phrase="the multi-arg product",
+            question_what="the product of 2, 3, and 4",
+            goal_text="multiply 2, 3, and 4",
+            scenario=(
+                'Patch the hound gathered three separate piles of bones near the '
+                'meadow — each pile marked with a number. Two bones in the first, '
+                'three in the second, four in the third.'
+            ),
+            need=(
+                'They wanted the total if each pile was multiplied together — what '
+                'two times three times four would come to in one compounded count.'
+            ),
+            mapping=(
+                'Each pile is one factor, the multiplication chains them, and the '
+                'running product grows at each step until the final answer holds all.'
+            ),
+            resolution=(
+                'The REPL multiplied two by three to get six, then six by four to '
+                'get twenty-four. The compounded total was exact, handed back with '
+                'certainty.'
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form="(- 100 1 2 3)", expected=94,
+            concept_phrase="the multi-arg subtraction",
+            question_what="100 minus 1, 2, and 3",
+            goal_text="subtract 1, 2, and 3 from 100",
+            scenario=(
+                'Bell the hound held a great pile of one hundred bones by the river '
+                'bank. Then came three separate losses — one bone, then two more, '
+                'then three more taken away in turn.'
+            ),
+            need=(
+                'She wanted to know how many remained after each subtraction. The '
+                'chain of losses would leave a final count that told the story.'
+            ),
+            mapping=(
+                'One hundred is the starting pile, each subtraction removes a '
+                'portion, and the running remainder shrinks with each step until '
+                'the answer settles.'
+            ),
+            resolution=(
+                'The REPL subtracted one from one hundred to get ninety-nine, '
+                'then two more to get ninety-seven, then three to get ninety-four. '
+                'The final tally was returned.'
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form="(+ 1 2 3 4 5 6 7 8 9 10)", expected=55,
+            concept_phrase="the sum of ten numbers",
+            question_what="the sum of integers 1 through 10",
+            goal_text="add the integers 1 through 10",
+            scenario=(
+                'Rex the hound arranged ten marked stones in a line at the stream\'s '
+                'edge, each one numbered from 1 to 10. He wanted the grand tally of '
+                'all of them stacked together.'
+            ),
+            need=(
+                'He needed the running total when all ten were gathered — the sum '
+                'that would tell him the exact count of the entire sequence.'
+            ),
+            mapping=(
+                'Each stone is one number in the sequence, the addition combines '
+                'them all, and the final sum holds the answer for the whole row.'
+            ),
+            resolution=(
+                'The REPL added all ten in sequence — 1 plus 2 plus 3 plus all the '
+                'way to 10 — and handed back 55. The total was exact.'
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form="(* 1 2 3 4 5)", expected=120,
+            concept_phrase="the multi-arg product",
+            question_what="the product of 1 through 5",
+            goal_text="multiply the integers 1 through 5",
+            scenario=(
+                'Patch the hound laid five bones in a row near the forest, each one '
+                'carved with the numbers 1, 2, 3, 4, and 5. They wanted to multiply '
+                'them all together to see what the chain would yield.'
+            ),
+            need=(
+                'They needed the product when all five were multiplied in sequence. '
+                'The running total would grow with each multiplication until the '
+                'final answer held the compounded count.'
+            ),
+            mapping=(
+                'Each bone is one factor in the chain, the multiplication links them '
+                'together, and the final product grows until it settles on the answer.'
+            ),
+            resolution=(
+                'The REPL multiplied 1 by 2 to get 2, then by 3 to get 6, then by 4 '
+                'to get 24, then by 5 to get 120. The factorial-like product was '
+                'exact.'
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form="(+ 10 20 30)", expected=60,
+            concept_phrase="the sum of three numbers",
+            question_what="the sum of 10, 20, and 30",
+            goal_text="add 10, 20, and 30",
+            scenario=(
+                'Bell the hound carried three bundles of bones to the pond — one '
+                'held ten, the second twenty, the third thirty. She wanted to stack '
+                'them all into one count.'
+            ),
+            need=(
+                'She needed the total when all three bundles were joined. The '
+                'running sum would tell her the grand tally without confusion.'
+            ),
+            mapping=(
+                'Each bundle is one addend, the addition combines them, and the '
+                'final sum holds the answer for all three together.'
+            ),
+            resolution=(
+                'The REPL added ten and twenty to get thirty, then thirty to get '
+                'sixty. The total was returned with certainty.'
+            ),
+            tags=("story",),
+        ),
     ],
     subplots=_ACORN_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
@@ -95,19 +229,136 @@ G2_02 = SubjectCurriculum(
             concept_phrase="the less-than chain",
             question_what="whether 1 < 2 < 3",
             goal_text="test whether 1 is less than 2 and 2 is less than 3",
+            scenario=(
+                'Bell the hound laid three smooth pebbles near the pond, each '
+                'one marked with a number: 1, then 2, then 3. The sizes of '
+                'the pebbles did not matter — only their marks.'
+            ),
+            need=(
+                'She needed to know if the marks form a chain where each one '
+                'was strictly smaller than the next. The verdict would tell '
+                'whether the pattern held all the way across.'
+            ),
+            mapping=(
+                'Each pebble is one value in the chain, the less-than operator '
+                'is the test of order, and the verdict passes only if every '
+                'comparison returns true.'
+            ),
+            resolution=(
+                'The REPL tested each pair in turn — was 1 less than 2? Yes. '
+                'Was 2 less than 3? Yes. The chain held fast, and the answer '
+                'came back true.'
+            ),
+            tags=("story",),
         ),
-        _ex("(< 3 2 1)",  False, "the less-than chain",  "whether 3 < 2 < 1",
-            goal="test whether 3 is less than 2 and 2 is less than 1"),
-        _ex("(<= 1 1 2)", True,  "the less-than-or-equal chain", "whether 1 ≤ 1 ≤ 2",
-            goal="test whether 1 is less than or equal to 1 and 1 is less than or equal to 2"),
-        _ex("(> 5 4 3 2 1)", True,
-            "the greater-than chain",
-            "whether the numbers are strictly decreasing",
-            goal="test whether 5 > 4 > 3 > 2 > 1"),
-        _ex("(>= 3 3 2)", True,
-            "the greater-than-or-equal chain",
-            "whether 3 ≥ 3 ≥ 2",
-            goal="test whether 3 is greater than or equal to 3 and 3 is greater than or equal to 2"),
+        SubjectExample(
+            form="(< 3 2 1)", expected=False,
+            concept_phrase="the less-than chain",
+            question_what="whether 3 < 2 < 1",
+            goal_text="test whether 3 is less than 2 and 2 is less than 1",
+            scenario=(
+                'Rex the hound laid three marked pebbles in a line by the river '
+                'bank — 3, then 2, then 1. He wanted to test if each was smaller '
+                'than the one before it.'
+            ),
+            need=(
+                'He needed to know if the chain held — if each pebble\'s mark was '
+                'strictly less than the mark before it. The verdict would settle '
+                'whether the pattern reversed.'
+            ),
+            mapping=(
+                'The pebbles are the values in the chain, the less-than operator '
+                'tests each pair, and the verdict returns true only if every link '
+                'holds.'
+            ),
+            resolution=(
+                'The REPL tested if 3 is less than 2 — it is not. The chain broke '
+                'at the first link, and false was handed back. The marks did not '
+                'decrease.'
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form="(<= 1 1 2)", expected=True,
+            concept_phrase="the less-than-or-equal chain",
+            question_what="whether 1 ≤ 1 ≤ 2",
+            goal_text="test whether 1 is less than or equal to 1 and 1 is less than or equal to 2",
+            scenario=(
+                'Patch the hound placed three stones near the meadow, each carved: '
+                '1, then 1 again, then 2. They wanted to know if the marks formed '
+                'a non-strict chain — each equal or less than the next.'
+            ),
+            need=(
+                'They needed to test whether each stone\'s mark was less than or '
+                'equal to the one that followed it. The verdict would show if the '
+                'gentle slope held all the way.'
+            ),
+            mapping=(
+                'The stones are the values, the less-than-or-equal operator tests '
+                'each pair allowing equality, and the verdict is true when every '
+                'link permits passage.'
+            ),
+            resolution=(
+                'The REPL tested 1 ≤ 1, which is true, then 1 ≤ 2, which is also '
+                'true. The chain held with the gentle slope, and true was returned. '
+                'The pattern was settled.'
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form="(> 5 4 3 2 1)", expected=True,
+            concept_phrase="the greater-than chain",
+            question_what="whether the numbers are strictly decreasing",
+            goal_text="test whether 5 > 4 > 3 > 2 > 1",
+            scenario=(
+                'Bell the hound arranged five marked stones in a row at the stream\'s '
+                'edge — 5, 4, 3, 2, and 1 — in strict descent. She wanted to test '
+                'if they formed a perfect downward chain.'
+            ),
+            need=(
+                'She needed to know if each mark was strictly greater than the next. '
+                'The verdict would confirm whether the descent was unbroken and '
+                'exact all the way across.'
+            ),
+            mapping=(
+                'Each stone is one value in the chain, the greater-than operator '
+                'tests each pair, and true returns only when every link is strictly '
+                'greater.'
+            ),
+            resolution=(
+                'The REPL tested 5 > 4, 4 > 3, 3 > 2, and 2 > 1 — all passed. The '
+                'perfect descent held, and true was returned. Every step went down as '
+                'expected.'
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form="(>= 3 3 2)", expected=True,
+            concept_phrase="the greater-than-or-equal chain",
+            question_what="whether 3 ≥ 3 ≥ 2",
+            goal_text="test whether 3 is greater than or equal to 3 and 3 is greater than or equal to 2",
+            scenario=(
+                'Rex the hound laid three pebbles near the forest — 3, then 3 '
+                'again, then 2. He wanted to test a gentle downward chain that '
+                'allowed the marks to hold steady or drop.'
+            ),
+            need=(
+                'He needed to know if the marks formed a non-strict descent — each '
+                'greater than or equal to the next. The verdict would show whether '
+                'the soft slope held.'
+            ),
+            mapping=(
+                'The pebbles are the values, the greater-than-or-equal operator '
+                'tests each pair with equality allowed, and true returns when every '
+                'link permits the soft descent.'
+            ),
+            resolution=(
+                'The REPL tested 3 ≥ 3, which held, then 3 ≥ 2, which also held. '
+                'The gentle chain remained true throughout, and the verdict was '
+                'returned.'
+            ),
+            tags=("story",),
+        ),
     ],
     subplots=_ACORN_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
@@ -123,15 +374,121 @@ G2_03 = SubjectCurriculum(
             concept_phrase="the inequality check",
             question_what="whether 1 differs from 2",
             goal_text="test whether 1 and 2 are not equal",
+            scenario=(
+                'Patch the hound held two bones {place} — one carved with '
+                'the mark 1, the other with the mark 2. They looked like bones '
+                'from different catches.'
+            ),
+            need=(
+                'They wondered whether the marks were truly different. The '
+                'inequality test would settle whether these two were '
+                'mismatched.'
+            ),
+            mapping=(
+                'Each bone is one value, the not= operator checks whether they '
+                'are distinct, and a true verdict means the marks do not match.'
+            ),
+            resolution=(
+                'The REPL compared the marks — 1 is not equal to 2 — and '
+                'handed back true. The bones were indeed different, and the '
+                'question was answered.'
+            ),
+            tags=("story",),
         ),
-        _ex("(not= 1 1)",   False, "the inequality check",   "whether 1 differs from itself",
-            goal="test whether 1 and 1 are not equal"),
-        _ex("(= 1 1 1)",    True,  "the equality check",    "whether all three are equal",
-            goal="test whether 1, 1, and 1 are all equal"),
-        _ex("(= 1 1 2)",    False, "the equality check",    "whether all three are equal",
-            goal="test whether 1, 1, and 2 are all equal"),
-        _ex("(not= 1 1 2)", True,  "the inequality check", "whether at least one differs",
-            goal="test whether at least one of 1, 1, and 2 is not equal to the others"),
+        SubjectExample(
+            form="(not= 1 1)", expected=False,
+            concept_phrase="the inequality check",
+            question_what="whether 1 differs from itself",
+            goal_text="test whether 1 and 1 are not equal",
+            scenario=(
+                'Patch the hound held two bones carved with the same mark — 1 and '
+                '1. They wanted to test if the marks were different from each other.'
+            ),
+            need=(
+                'They needed to know if the two marks were distinct. The inequality '
+                'test would settle whether they matched or differed.'
+            ),
+            mapping=(
+                'Each bone is one value, the not= operator checks if they differ, '
+                'and the verdict is false when the marks are the same.'
+            ),
+            resolution=(
+                'The REPL compared the marks — 1 is equal to 1 — and returned false. '
+                'The bones bore identical marks, so they were not different.'
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form="(= 1 1 1)", expected=True,
+            concept_phrase="the equality check",
+            question_what="whether all three are equal",
+            goal_text="test whether 1, 1, and 1 are all equal",
+            scenario=(
+                'Bell the hound gathered three bones near the pond, each carved with '
+                'the same mark: 1. She wanted to test if all three matched each other.'
+            ),
+            need=(
+                'She needed to know if all three marks were identical. The equality '
+                'test would confirm whether they held the same value without '
+                'variation.'
+            ),
+            mapping=(
+                'Each bone is one value being checked, the equality operator tests '
+                'all pairs, and the verdict is true only when every mark matches.'
+            ),
+            resolution=(
+                'The REPL compared all three — 1 equals 1 equals 1 — and returned '
+                'true. All three marks were identical, and the verdict was certain.'
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form="(= 1 1 2)", expected=False,
+            concept_phrase="the equality check",
+            question_what="whether all three are equal",
+            goal_text="test whether 1, 1, and 2 are all equal",
+            scenario=(
+                'Rex the hound held three bones by the river bank — two marked with 1 '
+                'and one marked with 2. He wanted to test if they all matched.'
+            ),
+            need=(
+                'He needed to know if all three matched or if one broke the pattern. '
+                'The equality test would return true only if every mark was the same.'
+            ),
+            mapping=(
+                'Each bone is one value, the equality operator checks all pairs, and '
+                'the verdict requires every mark to match for true to hold.'
+            ),
+            resolution=(
+                'The REPL compared the marks — 1 equals 1, but 1 does not equal 2. '
+                'The chain broke, and false was returned. Not all were the same.'
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form="(not= 1 1 2)", expected=True,
+            concept_phrase="the inequality check",
+            question_what="whether at least one differs",
+            goal_text="test whether at least one of 1, 1, and 2 is not equal to the others",
+            scenario=(
+                'Patch the hound held three bones near the meadow — two marked 1 and '
+                'one marked 2. They wanted to test if at least one differed from the '
+                'rest.'
+            ),
+            need=(
+                'They needed to know if any mark stood apart from the others. The '
+                'inequality test would return true if any mismatch existed.'
+            ),
+            mapping=(
+                'Each bone is one value, the not= operator checks for differences, '
+                'and true returns when at least one mark differs from another.'
+            ),
+            resolution=(
+                'The REPL compared the marks — two are 1, but one is 2. The '
+                'difference was found, and true was returned. The mismatch was clear.'
+            ),
+            tags=("story",),
+        ),
     ],
     subplots=_ACORN_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
@@ -148,15 +505,124 @@ G2_04 = SubjectCurriculum(
             concept_phrase="the minimum of three numbers",
             question_what="the smallest of 1, 2, and 3",
             goal_text="find the minimum of 1, 2, and 3",
+            scenario=(
+                'Bell the hound laid three marked stones by the river bank — '
+                'one labeled 1, one 2, one 3. They seemed almost the same '
+                'size, but the marks told the story.'
+            ),
+            need=(
+                'She wanted to know which mark was the smallest — which bone '
+                'would come back if the REPL were asked to pick the least one '
+                'from the three.'
+            ),
+            mapping=(
+                'Each stone is one value being compared, the minimum '
+                'operation is the scan that finds the least among them, and '
+                'the answer is the winning mark.'
+            ),
+            resolution=(
+                'The REPL scanned all three — 1, 2, 3 — and returned 1. The '
+                'smallest had been found, and the verdict rested in Bell\'s paw.'
+            ),
+            tags=("story",),
         ),
-        _ex("(max 1 2 3)",  3, "the maximum of three numbers",  "the largest of 1, 2, and 3",
-            goal="find the maximum of 1, 2, and 3"),
-        _ex("(min 7 3 9 1 5)", 1, "the minimum of five numbers", "the smallest of 7, 3, 9, 1, and 5",
-            goal="find the minimum of 7, 3, 9, 1, and 5"),
-        _ex("(max 7 3 9 1 5)", 9, "the maximum of five numbers", "the largest of 7, 3, 9, 1, and 5",
-            goal="find the maximum of 7, 3, 9, 1, and 5"),
-        _ex("(min -3 -1 -5)", -5, "the minimum of three numbers", "the smallest of -3, -1, and -5",
-            goal="find the minimum of -3, -1, and -5"),
+        SubjectExample(
+            form="(max 1 2 3)", expected=3,
+            concept_phrase="the maximum of three numbers",
+            question_what="the largest of 1, 2, and 3",
+            goal_text="find the maximum of 1, 2, and 3",
+            scenario=(
+                'Rex the hound laid three marked pebbles at the stream\'s edge — one '
+                'labeled 1, one 2, one 3. He wanted to pick out the largest mark from '
+                'the group.'
+            ),
+            need=(
+                'He needed to know which pebble held the greatest mark — the one that '
+                'would be chosen if the REPL had to pick the maximum.'
+            ),
+            mapping=(
+                'Each pebble is one value being compared, the maximum operation scans '
+                'for the greatest, and the answer is the winning mark.'
+            ),
+            resolution=(
+                'The REPL scanned all three — 1, 2, 3 — and returned 3. The largest '
+                'had been found, and the verdict rested clear.'
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form="(min 7 3 9 1 5)", expected=1,
+            concept_phrase="the minimum of five numbers",
+            question_what="the smallest of 7, 3, 9, 1, and 5",
+            goal_text="find the minimum of 7, 3, 9, 1, and 5",
+            scenario=(
+                'Patch the hound gathered five marked stones near the meadow — 7, 3, '
+                '9, 1, and 5 — scattered in no particular order. They wanted the one '
+                'with the smallest mark.'
+            ),
+            need=(
+                'They needed to know which stone held the least value. The minimum '
+                'operation would scan all five and return the tiniest mark.'
+            ),
+            mapping=(
+                'Each stone is one value in the group, the minimum operation finds '
+                'the least, and the answer is the smallest mark.'
+            ),
+            resolution=(
+                'The REPL scanned all five and found that 1 was the least. The '
+                'smallest had been identified, and the verdict was handed back with '
+                'certainty.'
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form="(max 7 3 9 1 5)", expected=9,
+            concept_phrase="the maximum of five numbers",
+            question_what="the largest of 7, 3, 9, 1, and 5",
+            goal_text="find the maximum of 7, 3, 9, 1, and 5",
+            scenario=(
+                'Bell the hound held five pebbles by the river bank — marked 7, 3, 9, '
+                '1, and 5 — mixed together without order. She wanted to find the one '
+                'with the greatest mark.'
+            ),
+            need=(
+                'She needed the pebble with the highest value — the maximum among all '
+                'five. The scan would settle which held the grandest mark.'
+            ),
+            mapping=(
+                'Each pebble is one value, the maximum operation searches for the '
+                'greatest, and the answer is the largest mark.'
+            ),
+            resolution=(
+                'The REPL scanned all five and found 9 was the greatest. The maximum '
+                'had been located, and the verdict came back clear and certain.'
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form="(min -3 -1 -5)", expected=-5,
+            concept_phrase="the minimum of three numbers",
+            question_what="the smallest of -3, -1, and -5",
+            goal_text="find the minimum of -3, -1, and -5",
+            scenario=(
+                'Rex the hound held three stones at the pond, each carved with a '
+                'negative mark: -3, -1, and -5. He wanted the one with the least '
+                'value — the most negative.'
+            ),
+            need=(
+                'He needed to know which held the smallest value — the most deeply '
+                'negative mark among the three. The minimum would settle it.'
+            ),
+            mapping=(
+                'Each stone is one negative value, the minimum operation finds the '
+                'least, and the answer is the mark that reaches deepest.'
+            ),
+            resolution=(
+                'The REPL scanned the three negatives — -3, -1, -5 — and returned -5. '
+                'It was the smallest, and the verdict was clear.'
+            ),
+            tags=("story",),
+        ),
     ],
     subplots=_ACORN_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
@@ -172,17 +638,153 @@ G2_05 = SubjectCurriculum(
             concept_phrase="the integer quotient",
             question_what="17 divided by 5, without remainder",
             goal_text="find the integer quotient of 17 divided by 5",
+            scenario=(
+                'Rex the hound gathered seventeen bones in a pile at the pond '
+                'and marked a line in the sand. He wanted to share them into '
+                'groups of five, no splits.'
+            ),
+            need=(
+                'He needed to know how many whole groups of five he could make '
+                'from the seventeen — the integer count of groups without '
+                'worrying about strays left over.'
+            ),
+            mapping=(
+                'The pile of seventeen bones is the dividend, five is the '
+                'divisor, the integer quotient is the number of complete '
+                'groups, and any remainder is dropped.'
+            ),
+            resolution=(
+                'The REPL divided seventeen by five and handed back 3 — three '
+                'whole groups, with two bones left over that didn\'t matter '
+                'for the quotient.'
+            ),
+            tags=("story",),
         ),
-        _ex("(rem 17 5)",  2, "the remainder", "the remainder when 17 is divided by 5",
-            goal="find the remainder when 17 is divided by 5"),
-        _ex("(mod 17 5)",  2, "the modulo operation",                          "17 mod 5",
-            goal="find 17 modulo 5"),
-        _ex("(quot 100 7)", 14, "the integer quotient", "100 divided by 7, without remainder",
-            goal="find the integer quotient of 100 divided by 7"),
-        _ex("(rem 100 7)",  2, "the remainder", "the remainder when 100 is divided by 7",
-            goal="find the remainder when 100 is divided by 7"),
-        _ex("(mod -7 3)",   2, "the modulo operation",              "negative seven mod 3",
-            goal="find negative 7 modulo 3"),
+        SubjectExample(
+            form="(rem 17 5)", expected=2,
+            concept_phrase="the remainder",
+            question_what="the remainder when 17 is divided by 5",
+            goal_text="find the remainder when 17 is divided by 5",
+            scenario=(
+                'Patch the hound held seventeen bones and wanted to share them into '
+                'groups of five {place}. Some bones would be left over — strays that '
+                'did not fill a complete group.'
+            ),
+            need=(
+                'They wanted to know how many bones remained after making as many '
+                'complete groups as possible. The leftover count was the remainder.'
+            ),
+            mapping=(
+                'Seventeen is the total, five is the size of each group, the complete '
+                'groups do not matter for the remainder, and the leftover is what '
+                'stays.'
+            ),
+            resolution=(
+                'The REPL divided and found three complete groups with two bones left '
+                'over. The remainder of 2 was handed back and held the answer.'
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form="(mod 17 5)", expected=2,
+            concept_phrase="the modulo operation",
+            question_what="17 mod 5",
+            goal_text="find 17 modulo 5",
+            scenario=(
+                'Bell the hound gathered seventeen pebbles at the stream\'s edge and '
+                'wanted to know what was left after grouping them by fives. The modulo '
+                'operation would tell her the remainder.'
+            ),
+            need=(
+                'She needed the leftover count — how many pebbles did not fit into a '
+                'group of five. The modulo would settle this without showing the '
+                'groups themselves.'
+            ),
+            mapping=(
+                'Seventeen is the dividend, five is the divisor, the modulo operation '
+                'returns only the remainder, and the answer is what\'s left over.'
+            ),
+            resolution=(
+                'The REPL applied modulo to seventeen and five, and returned 2. The '
+                'remainder was exact, and the answer held what did not fit.'
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form="(quot 100 7)", expected=14,
+            concept_phrase="the integer quotient",
+            question_what="100 divided by 7, without remainder",
+            goal_text="find the integer quotient of 100 divided by 7",
+            scenario=(
+                'Rex the hound held one hundred bones and wanted to divide them evenly '
+                'into groups of seven. He cared only about how many complete groups he '
+                'could make, not what was left.'
+            ),
+            need=(
+                'He needed to know how many whole groups of seven he could form. The '
+                'integer quotient would give him that count without the strays.'
+            ),
+            mapping=(
+                'One hundred is the dividend, seven is the divisor, the quotient is '
+                'the number of complete groups, and remainder is ignored.'
+            ),
+            resolution=(
+                'The REPL divided one hundred by seven and returned 14 — fourteen '
+                'complete groups. The quotient was exact, and the remainder did not '
+                'matter.'
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form="(rem 100 7)", expected=2,
+            concept_phrase="the remainder",
+            question_what="the remainder when 100 is divided by 7",
+            goal_text="find the remainder when 100 is divided by 7",
+            scenario=(
+                'Patch the hound had one hundred bones and wanted to see how many '
+                'strays would be left after making groups of seven. The remainder was '
+                'what mattered most to them.'
+            ),
+            need=(
+                'They needed to know how many bones did not fit into a complete group. '
+                'The remainder operation would return exactly that count.'
+            ),
+            mapping=(
+                'One hundred is the total pile, seven is the group size, the complete '
+                'groups are not returned, and only the leftover is the answer.'
+            ),
+            resolution=(
+                'The REPL divided and found that 100 divided by 7 left a remainder of '
+                '2. The leftover count was returned and held the final answer.'
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form="(mod -7 3)", expected=2,
+            concept_phrase="the modulo operation",
+            question_what="negative seven mod 3",
+            goal_text="find negative 7 modulo 3",
+            scenario=(
+                'Bell the hound stood by the river bank holding a negative value — '
+                'negative seven — and wanted to find its modulo against three. '
+                'Negative numbers in modulo work in their own way.'
+            ),
+            need=(
+                'She needed to know what remained when a negative value was taken '
+                'modulo a positive divisor. The modulo would settle this without '
+                'confusion about the sign.'
+            ),
+            mapping=(
+                'Negative 7 is the dividend, 3 is the divisor, the modulo operation '
+                'returns the remainder adjusted for the modulo, and the answer follows '
+                'the rules of modular arithmetic.'
+            ),
+            resolution=(
+                'The REPL applied modulo to negative 7 and 3, and returned 2. The '
+                'result followed modular arithmetic rules, and the answer was certain.'
+            ),
+            tags=("story",),
+        ),
     ],
     subplots=_ACORN_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
@@ -198,15 +800,119 @@ G2_06 = SubjectCurriculum(
             concept_phrase="the increment operation",
             question_what="5 plus 1",
             goal_text="increment 5 by 1",
+            scenario=(
+                'Patch the hound stood {place} holding five marked pebbles in '
+                'a line. A sixth pebble sat just beyond the row, waiting to be '
+                'counted in.'
+            ),
+            need=(
+                'They wanted to know what came next — what the running total '
+                'would be if they added just one more. The increment would '
+                'settle it without confusion.'
+            ),
+            mapping=(
+                'The five pebbles are the input, the single extra pebble is '
+                'the increment of one, and the running total is the answer.'
+            ),
+            resolution=(
+                'The REPL added one to five and handed back six. The path '
+                'forward was clear — one more bone, one more mark in the tally.'
+            ),
+            tags=("story",),
         ),
-        _ex("(dec 5)",  4, "the decrement operation",  "5 minus 1",
-            goal="decrement 5 by 1"),
-        _ex("(inc 0)",  1, "the increment operation",  "0 plus 1",
-            goal="increment 0"),
-        _ex("(dec 0)", -1, "the decrement operation",  "0 minus 1",
-            goal="decrement 0"),
-        _ex("(inc -1)", 0, "the increment operation", "negative 1 plus 1",
-            goal="increment negative 1"),
+        SubjectExample(
+            form="(dec 5)", expected=4,
+            concept_phrase="the decrement operation",
+            question_what="5 minus 1",
+            goal_text="decrement 5 by 1",
+            scenario=(
+                'Rex the hound held five marked pebbles in a line at the meadow. One '
+                'pebble sat at the end, set aside. He wanted to know what came before '
+                'this count.'
+            ),
+            need=(
+                'He needed to subtract one from five and know the new total. The '
+                'decrement would tell him exactly what one less came to.'
+            ),
+            mapping=(
+                'The five pebbles are the input, the single removed pebble is the '
+                'decrement, and the remaining count is the answer.'
+            ),
+            resolution=(
+                'The REPL subtracted one from five and handed back four. The path '
+                'backward was clear — one fewer mark, one less in the tally.'
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form="(inc 0)", expected=1,
+            concept_phrase="the increment operation",
+            question_what="0 plus 1",
+            goal_text="increment 0",
+            scenario=(
+                'Patch the hound stood {place} holding no bones — zero in their count. '
+                'A single extra bone sat waiting to be added to the empty pile.'
+            ),
+            need=(
+                'They wanted to know what zero plus one would be. The increment would '
+                'show them the very first step from nothing.'
+            ),
+            mapping=(
+                'Zero is the starting count, the single new bone is the increment, '
+                'and the result is the first number.'
+            ),
+            resolution=(
+                'The REPL added one to zero and handed back one. From nothing came '
+                'the first count, and the answer was certain.'
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form="(dec 0)", expected=-1,
+            concept_phrase="the decrement operation",
+            question_what="0 minus 1",
+            goal_text="decrement 0",
+            scenario=(
+                'Bell the hound stood at the stream\'s edge with zero bones — an empty '
+                'paw. She wanted to know what came before zero, to go below it.'
+            ),
+            need=(
+                'She needed to subtract one from zero and cross into the negative '
+                'numbers. The decrement would show her the path backward past zero.'
+            ),
+            mapping=(
+                'Zero is the starting point, the decrement takes one away, and the '
+                'result is the first negative number.'
+            ),
+            resolution=(
+                'The REPL subtracted one from zero and handed back negative one. The '
+                'path into negative numbers was opened, and the answer was clear.'
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form="(inc -1)", expected=0,
+            concept_phrase="the increment operation",
+            question_what="negative 1 plus 1",
+            goal_text="increment negative 1",
+            scenario=(
+                'Rex the hound held a stone carved with negative 1 near the forest. He '
+                'wanted to add one and see if it would reach zero.'
+            ),
+            need=(
+                'He needed to increment negative one and know if it would cross back '
+                'to zero. The addition would settle where it led.'
+            ),
+            mapping=(
+                'Negative 1 is the starting value, the increment of one is the added '
+                'amount, and the result reaches zero.'
+            ),
+            resolution=(
+                'The REPL added one to negative one and handed back zero. The path '
+                'forward had reached the neutral point, the answer exact.'
+            ),
+            tags=("story",),
+        ),
     ],
     subplots=_ACORN_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
@@ -222,15 +928,100 @@ G2_07 = SubjectCurriculum(
             concept_phrase="the absolute value",
             question_what="the absolute value of 5",
             goal_text="find the absolute value of 5",
+            scenario=(
+                'Bell the hound stood near the forest and held a marked stone '
+                'engraved with the number 5. She knew some numbers could be '
+                'negative, but this one was not.'
+            ),
+            need=(
+                'She wanted the distance from zero, the pure measure without '
+                'any sign attached. The absolute value would give her the '
+                'magnitude alone.'
+            ),
+            mapping=(
+                'The marked stone is the input, its distance from zero is the '
+                'absolute value, and the sign (if any) is stripped away.'
+            ),
+            resolution=(
+                'The REPL stripped away the sign and measured the distance — '
+                '5 had no negative sign, so the answer was 5. The magnitude '
+                'was returned unchanged.'
+            ),
+            tags=("story",),
         ),
-        _ex("(abs -5)",  5, "the absolute value",  "the absolute value of negative 5",
-            goal="find the absolute value of negative 5"),
-        _ex("(abs 0)",   0, "the absolute value",   "the absolute value of 0",
-            goal="find the absolute value of 0"),
-        _ex("(abs (- 3 8))", 5,
-            "the absolute value",
-            "the absolute value of the difference between 3 and 8",
-            goal="find the absolute value of 3 minus 8"),
+        SubjectExample(
+            form="(abs -5)", expected=5,
+            concept_phrase="the absolute value",
+            question_what="the absolute value of negative 5",
+            goal_text="find the absolute value of negative 5",
+            scenario=(
+                'Patch the hound held a marked stone carved with negative 5. They '
+                'wanted to know the distance from zero, ignoring the negative sign '
+                'entirely.'
+            ),
+            need=(
+                'They needed the magnitude — the pure measure of how far from zero, '
+                'without any sign attached. The absolute value would strip the sign '
+                'away.'
+            ),
+            mapping=(
+                'The marked stone holds a negative number, the absolute value removes '
+                'the sign, and the distance from zero is what remains.'
+            ),
+            resolution=(
+                'The REPL stripped away the negative sign and measured the distance — '
+                'negative 5 became 5. The magnitude was returned unchanged.'
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form="(abs 0)", expected=0,
+            concept_phrase="the absolute value",
+            question_what="the absolute value of 0",
+            goal_text="find the absolute value of 0",
+            scenario=(
+                'Bell the hound held a stone marked with zero near the pond. She '
+                'wanted the absolute value — the distance from zero itself.'
+            ),
+            need=(
+                'She needed to know the magnitude of zero. The absolute value of '
+                'zero would still be zero, for it lies at the center.'
+            ),
+            mapping=(
+                'Zero is the input value, the absolute value removes the sign (though '
+                'there is none), and the result is zero.'
+            ),
+            resolution=(
+                'The REPL applied absolute value to zero and returned zero. The '
+                'distance at the center was itself, and the answer was clear.'
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form="(abs (- 3 8))", expected=5,
+            concept_phrase="the absolute value",
+            question_what="the absolute value of the difference between 3 and 8",
+            goal_text="find the absolute value of 3 minus 8",
+            scenario=(
+                'Rex the hound wanted to find the distance between two marks — 3 and '
+                '8 — on a stone. First, he subtracted 3 from 8, then wanted the '
+                'magnitude of that difference.'
+            ),
+            need=(
+                'He needed the gap between the two marks, no matter which came first. '
+                'The absolute value would give the pure distance without regard to '
+                'sign.'
+            ),
+            mapping=(
+                'Three and eight are the two points, their difference is computed '
+                'first, and the absolute value strips the sign to show the distance.'
+            ),
+            resolution=(
+                'The REPL subtracted three from eight to get five, then applied '
+                'absolute value. The distance was five, exact and unsigned.'
+            ),
+            tags=("story",),
+        ),
     ],
     subplots=_ACORN_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
@@ -246,13 +1037,75 @@ G2_08 = SubjectCurriculum(
             concept_phrase="the sum of two ratios",
             question_what="the sum of one-half and one-quarter",
             goal_text="add one-half and one-quarter",
+            scenario=(
+                'Rex the hound broke two bones into pieces near the meadow. One '
+                'bone yielded one-half, the other one-quarter. He wanted to '
+                'know the combined measure.'
+            ),
+            need=(
+                'He needed the total when the two fractions were joined — the '
+                'sum that would tell him the exact portion when both pieces '
+                'were stacked.'
+            ),
+            mapping=(
+                'Each piece is a rational fraction, the addition is the '
+                'combining, and the result is the exact portion expressed as '
+                'a ratio.'
+            ),
+            resolution=(
+                'The REPL added one-half and one-quarter with precision and '
+                'handed back three-quarters. The combined measure was exact, '
+                'a true rational sum.'
+            ),
+            tags=("story",),
         ),
-        _ex("(* 2/3 3/4)", "1/2",
-            "the product of two ratios",   "the product of two-thirds and three-quarters",
-            goal="multiply two-thirds by three-quarters"),
-        _ex("(- 1 1/3)", "2/3",
-            "the difference of a whole and a ratio",             "1 minus one-third",
-            goal="subtract one-third from 1"),
+        SubjectExample(
+            form="(* 2/3 3/4)", expected="1/2",
+            concept_phrase="the product of two ratios",
+            question_what="the product of two-thirds and three-quarters",
+            goal_text="multiply two-thirds by three-quarters",
+            scenario=(
+                'Patch the hound broke a bone into two-thirds near the meadow and '
+                'another into three-quarters. They wanted the product when the two '
+                'fractions were multiplied together.'
+            ),
+            need=(
+                'They needed to know what two-thirds times three-quarters would come '
+                'to — the exact portion expressed as a ratio when combined.'
+            ),
+            mapping=(
+                'Each fraction is one factor, the multiplication combines them, and '
+                'the result is the exact product expressed as a ratio.'
+            ),
+            resolution=(
+                'The REPL multiplied two-thirds by three-quarters with precision and '
+                'returned one-half. The product was exact, a true rational result.'
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form="(- 1 1/3)", expected="2/3",
+            concept_phrase="the difference of a whole and a ratio",
+            question_what="1 minus one-third",
+            goal_text="subtract one-third from 1",
+            scenario=(
+                'Bell the hound held one whole bone at the stream\'s edge and removed '
+                'one-third of it. She wanted to know what fraction remained.'
+            ),
+            need=(
+                'She needed the remainder when one-third was taken from one whole. '
+                'The subtraction would return the exact portion left over.'
+            ),
+            mapping=(
+                'One whole is the starting value, one-third is the piece removed, and '
+                'the difference is the exact fraction that remains.'
+            ),
+            resolution=(
+                'The REPL subtracted one-third from one whole and returned two-thirds. '
+                'The remainder was exact, a true rational difference.'
+            ),
+            tags=("story",),
+        ),
     ],
     subplots=_ACORN_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
@@ -268,13 +1121,75 @@ G2_09 = SubjectCurriculum(
             concept_phrase="the division operation",
             question_what="the result of using / on 10 and 2",
             goal_text="divide 10 by 2",
+            scenario=(
+                'Patch the hound held ten fish bones {place} and wanted to split '
+                'them evenly into two piles. The division would tell them how '
+                'many landed in each.'
+            ),
+            need=(
+                'They needed to know what ten divided by two would give — the '
+                'exact share per pile. The result would either be a whole '
+                'number or a precise fraction.'
+            ),
+            mapping=(
+                'Ten bones make the numerator, two piles make the divisor, and '
+                'the division operation yields the exact answer.'
+            ),
+            resolution=(
+                'The REPL divided ten by two and handed back five. Since the '
+                'division was clean, five whole bones went to each pile, and '
+                'no remainder lingered.'
+            ),
+            tags=("story",),
         ),
-        _ex("(/ 10 3)", "10/3", "the division operation",
-            "the exact rational result of using / on 10 and 3",
-            goal="divide 10 by 3"),
-        _ex("(/ 1.0 2)", 0.5, "the division operation",
-            "the result of 1.0 divided by 2",
-            goal="divide 1.0 by 2"),
+        SubjectExample(
+            form="(/ 10 3)", expected="10/3",
+            concept_phrase="the division operation",
+            question_what="the exact rational result of using / on 10 and 3",
+            goal_text="divide 10 by 3",
+            scenario=(
+                'Rex the hound held ten fish bones {place} and wanted to split them '
+                'evenly into three piles. The division would tell what each pile held '
+                'exactly.'
+            ),
+            need=(
+                'He needed to know what ten divided by three would yield — the exact '
+                'share per pile. The result would be a precise rational fraction.'
+            ),
+            mapping=(
+                'Ten bones make the numerator, three piles make the divisor, and the '
+                'division operation yields the exact rational answer.'
+            ),
+            resolution=(
+                'The REPL divided ten by three and handed back the exact ratio '
+                'ten-thirds. The answer was rational and precise, not a flat number.'
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form="(/ 1.0 2)", expected=0.5,
+            concept_phrase="the division operation",
+            question_what="the result of 1.0 divided by 2",
+            goal_text="divide 1.0 by 2",
+            scenario=(
+                'Patch the hound held a floating-point bone marked 1.0 at the meadow '
+                'and wanted to divide it by 2. The result would be expressed as a '
+                'decimal.'
+            ),
+            need=(
+                'They needed one-point-zero split evenly in two. The division would '
+                'return the exact decimal share.'
+            ),
+            mapping=(
+                'One-point-zero is the numerator, 2 is the divisor, and the division '
+                'yields the exact decimal result.'
+            ),
+            resolution=(
+                'The REPL divided one-point-zero by 2 and returned zero-point-five. '
+                'The floating-point answer was exact.'
+            ),
+            tags=("story",),
+        ),
     ],
     subplots=_ACORN_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
@@ -290,6 +1205,27 @@ G2_10 = SubjectCurriculum(
             concept_phrase="repeated multiplication",
             question_what="2 to the third power",
             goal_text="multiply 2 by itself three times",
+            scenario=(
+                'Bell the hound stood at the beach with three marked pebbles, '
+                'each carved with the number 2. She wanted to multiply them '
+                'all together in order.'
+            ),
+            need=(
+                'She needed the result of taking two and multiplying it by '
+                'itself, twice over. The compounding would tell her the final '
+                'answer.'
+            ),
+            mapping=(
+                'Each pebble marked 2 is one factor in the multiplication, '
+                'repeating it three times makes the power, and the running '
+                'product is the answer.'
+            ),
+            resolution=(
+                'The REPL multiplied two by two, got four, then multiplied '
+                'that by two again to get eight. The power was exact, and the '
+                'answer was handed back at once.'
+            ),
+            tags=("story",),
         ),
         _ex("(* 5 5)",   25,       "repeated multiplication", "5 to the second power",
             goal="multiply 5 by itself"),
@@ -360,6 +1296,27 @@ G2_12 = SubjectCurriculum(
             concept_phrase='the print-line call',
             question_what='the return value of using println on the string "hello"',
             goal_text='print the string "hello" with a newline',
+            scenario=(
+                'Rex the hound picked up a piece of bark {place} and scratched '
+                'the word hello into its surface. He wanted the mark to be seen '
+                'and recorded.'
+            ),
+            need=(
+                'He needed the scratch-marks left on the bark as a side effect, '
+                'a visible record. The return value itself was less important '
+                'than the act of marking.'
+            ),
+            mapping=(
+                'The string "hello" is the message, println is the paw-stroke '
+                'that writes and breaks to a new line, and the return is nil — '
+                'just the void of marking done.'
+            ),
+            resolution=(
+                'The REPL scratched hello onto the bark with a line-break and '
+                'handed back nil. The message was written for all to read, and '
+                'nothing else was needed.'
+            ),
+            tags=("story",),
         ),
         _ex('(print "x")', None,
             'the print call',
@@ -381,6 +1338,27 @@ G2_13 = SubjectCurriculum(
             concept_phrase="the logical and",
             question_what="the result of passing true and true through the and-chain of gates",
             goal_text="test whether two trues both pass through an and-chain of gates",
+            scenario=(
+                'Bell the hound stood at the stream bank, facing two test gates '
+                'placed one after the other. Each gate bore a mark: true, then '
+                'true.'
+            ),
+            need=(
+                'She wanted to cross if both gates would let her pass. The and '
+                'would test each one in turn — if either blocked her, the '
+                'chain would fail.'
+            ),
+            mapping=(
+                'Each gate is one condition, the and is the chain that checks '
+                'them in sequence, and the verdict is true only if all pass her '
+                'through.'
+            ),
+            resolution=(
+                'The REPL tested true at the first gate — it opened. True at '
+                'the second gate — it opened too. Both conditions held, and the '
+                'verdict came back true. She could cross.'
+            ),
+            tags=("story",),
         ),
         _ex("(and true false)",  False,  "the logical and",
             "the result of using and on true and false",
@@ -412,6 +1390,25 @@ G2_14 = SubjectCurriculum(
             concept_phrase="the logical not",
             question_what="the result of using not on true",
             goal_text="negate the value true",
+            scenario=(
+                'Patch the hound held a stone marked true near the forest. They '
+                'wanted to flip its meaning — to ask what the opposite would be '
+                'if taken from the other side.'
+            ),
+            need=(
+                'They needed the negation of true — the inverse verdict that '
+                'would tell them the opposite path. The not operation would '
+                'turn it around.'
+            ),
+            mapping=(
+                'The true value is the input, the not operator is the flip, '
+                'and the result is the negated verdict.'
+            ),
+            resolution=(
+                'The REPL negated true and handed back false. The opposite was '
+                'clear, and the verdict was reversed. One side became the other.'
+            ),
+            tags=("story",),
         ),
         _ex("(not false)", True,  "the logical not", "the result of using not on false",
             goal="negate the value false"),
@@ -436,6 +1433,27 @@ G2_15 = SubjectCurriculum(
             concept_phrase="the if conditional with zero as condition",
             question_what="the result of if with condition 0, then-branch 1, else-branch 0",
             goal_text="use if to return 1 when the condition is 0 (then-branch) and 0 otherwise (else-branch)",
+            scenario=(
+                'Rex the hound stood at a fork in the path {place}. A stone '
+                'marked 0 sat at the junction. If the condition checked zero as '
+                'truthy, one path opened; if falsey, another.'
+            ),
+            need=(
+                'He needed to know which path to take when the test condition '
+                'was zero. The if would read the value and branch to one of '
+                'two destinations.'
+            ),
+            mapping=(
+                'Zero is the test condition, the then-branch returns 1, the '
+                'else-branch returns 0, and the if decides which fork leads '
+                'home.'
+            ),
+            resolution=(
+                'The REPL tested zero — which is not false and not nil, so it '
+                'counts as truthy. The then-branch opened, and 1 was handed back. '
+                'The right path was taken.'
+            ),
+            tags=("story",),
         ),
         _ex("(if \"\" 1 0)", 1, "the if conditional with empty string as condition",
             "the result of if with condition the empty string, then-branch 1, else-branch 0",
@@ -461,6 +1479,27 @@ G2_16 = SubjectCurriculum(
             concept_phrase="the boolean conversion",
             question_what="the result of using boolean on 0",
             goal_text="convert 0 to a boolean",
+            scenario=(
+                'Bell the hound held a stone carved with 0 near the meadow. She '
+                'wanted to know what boolean state this number held — was it '
+                'true or false in the eyes of the REPL?'
+            ),
+            need=(
+                'She needed to convert the number to a clear true-or-false '
+                'answer. The boolean function would strip away the number and '
+                'leave only the verdict.'
+            ),
+            mapping=(
+                'The zero is the input value, the boolean conversion is the '
+                'test for truthiness, and the result is the pure true-or-false '
+                'state.'
+            ),
+            resolution=(
+                'The REPL converted zero to a boolean. Since zero is not false '
+                'and not nil, it counts as truthy. The answer came back true — '
+                'the zero was a true value in boolean terms.'
+            ),
+            tags=("story",),
         ),
         _ex("(boolean \"\")", True, "the boolean conversion", "the result of using boolean on the empty string",
             goal="convert the empty string to a boolean"),
@@ -528,6 +1567,27 @@ G2_18 = SubjectCurriculum(
             concept_phrase="the symbol-predicate applied to a long-form-quoted name",
             question_what="whether long-form quoting produces a symbol",
             goal_text="ask whether long-form quoting of the name hare produces a symbol, using symbol?",
+            scenario=(
+                'Patch the hound found a bone scratch on bark {place} that read '
+                'hare. They wondered — was this mark the same as the animal, '
+                'or just a name-mark that stood for it?'
+            ),
+            need=(
+                'They needed to know if the quoted name was truly a symbol — a '
+                'mark that names something rather than the thing itself. The '
+                'symbol? predicate would settle it.'
+            ),
+            mapping=(
+                'The bark-scratch is the symbol, quoting it freezes it as a '
+                'name-mark, and the symbol? test asks if what remains is a '
+                'symbol or something else.'
+            ),
+            resolution=(
+                'The REPL quoted the name hare and then tested whether it was a '
+                'symbol. Yes — a quoted name is a symbol, not the animal. The '
+                'answer came back true. The mark was what it appeared to be.'
+            ),
+            tags=("story",),
         ),
         _ex("(= (quote tortoise) 'tortoise)", True,
             "the equality of long-form and short-form quoting",
@@ -552,6 +1612,28 @@ G2_19 = SubjectCurriculum(
             concept_phrase="the large multiplication",
             question_what="the product of one million and one million",
             goal_text="multiply one million by one million",
+            scenario=(
+                'Rex the hound stood by the river bank with two enormous piles '
+                'of bones. Each pile held one million bones. He wanted to know '
+                'the result if he multiplied them together.'
+            ),
+            need=(
+                'He needed the exact product of one million times one million. '
+                'The number would be vast, but the REPL would handle it without '
+                'flinching.'
+            ),
+            mapping=(
+                'Each pile of one million bones is a factor, the '
+                'multiplication combines them, and the result is the colossal '
+                'number that emerges from such a joining.'
+            ),
+            resolution=(
+                'The REPL multiplied one million by one million and handed back '
+                'one trillion. The number was so large it spilled beyond the '
+                'ordinary integer bounds, but the REPL grew the container to '
+                'hold it. The answer was exact.'
+            ),
+            tags=("story",),
         ),
         _ex("(+ 99999999999 1)", 100000000000,
             "the large addition",
@@ -618,6 +1700,26 @@ G2_21 = SubjectCurriculum(
             concept_phrase="the count of characters in a string",
             question_what="the result of using count on the string tortoise",
             goal_text="count the characters in the string tortoise",
+            scenario=(
+                'Bell the hound held a bark-strip with a long message scratched '
+                'onto it: tortoise. Each scratch was one character, and she '
+                'wanted to know how many marks lay in the row.'
+            ),
+            need=(
+                'She needed the precise count of the characters without having '
+                'to count on her paws. The count operation would walk the strip '
+                'and tally each mark.'
+            ),
+            mapping=(
+                'The bark-strip is the string, each scratch is one character, '
+                'and the running count is the answer.'
+            ),
+            resolution=(
+                'The REPL walked the bark-strip from end to end, tallying each '
+                'scratch. The message tortoise held eight characters, and the '
+                'count came back 8. The row was measured exactly.'
+            ),
+            tags=("story",),
         ),
         _ex("(count \"hare\")",     4,  "the count of characters in a string",
             "the result of using count on the string hare",
@@ -641,6 +1743,27 @@ G2_22 = SubjectCurriculum(
             concept_phrase="the nested arithmetic",
             question_what="the result of multiplying 5 and 4, then subtracting 7",
             goal_text="compute 5 times 4, then subtract 7",
+            scenario=(
+                'Patch the hound had two tasks near the forest. First, they '
+                'needed to gather four piles of five bones each — five fours. '
+                'Then, they would subtract seven bones from that pile.'
+            ),
+            need=(
+                'They wanted to know what remained after both operations. The '
+                'first answer would feed into the second, and the final count '
+                'would tell them the rest.'
+            ),
+            mapping=(
+                'Five and four are the first inputs whose product is computed, '
+                'seven is subtracted from that result, and the final remainder '
+                'is the answer.'
+            ),
+            resolution=(
+                'The REPL first multiplied five and four to get twenty. Then it '
+                'subtracted seven, leaving thirteen. The nested arithmetic was '
+                'exact, the final count handed back without doubt.'
+            ),
+            tags=("story",),
         ),
         _ex("(+ (* 3 8) (* 2 4))", 32,
             "the sum of products",

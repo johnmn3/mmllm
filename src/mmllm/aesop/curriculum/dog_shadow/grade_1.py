@@ -539,6 +539,29 @@ G1_09 = SubjectCurriculum(
             concept_phrase="the symbol-predicate on an integer",
             question_what="whether an integer is a symbol",
             goal_text="ask whether the integer 42 is a symbol, using the symbol? predicate",
+            scenario=(
+                'Patch the hound stood at the stream\'s edge, holding two '
+                'objects side by side: a scratch-mark on bark and a smooth '
+                'stone bearing the number 42. "This one is the symbol," '
+                'Patch said, tapping the bark. "This one is the number. '
+                'They are not the same kind of thing."'
+            ),
+            need=(
+                'Patch wanted the runtime\'s verdict on the second object: '
+                'was it a symbol name, or just a number the dogs might count '
+                'with? The distinction mattered for reading the bark correctly.'
+            ),
+            mapping=(
+                'The scratch is a symbol; the number is a literal value. The '
+                'predicate asks only which kind of thing the form is, not what '
+                'it might point to. The verdict settles the kind.'
+            ),
+            resolution=(
+                'The REPL examined the integer and returned false. It was not '
+                'a symbol name, only a countable number. The distinction Patch '
+                'had drawn held exactly — scratch and stone stayed two kinds.'
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form='(symbol? "tortoise")',
@@ -546,6 +569,26 @@ G1_09 = SubjectCurriculum(
             concept_phrase="the symbol-predicate on a string",
             question_what="whether a string is a symbol",
             goal_text="ask whether a string of letters is a symbol, using the symbol? predicate",
+            scenario=(
+                'Patch the hound held a message scratched on bark — not a name '
+                'to pass around, but a strand of letters. "The reader will treat '
+                'this as text, not as a symbol the dogs can quote," Patch said, '
+                'laying it beside a carved name-mark.'
+            ),
+            need=(
+                'Patch wanted the runtime\'s clear judgment: was this string-text '
+                'or symbol-name? The difference would matter for the next step.'
+            ),
+            mapping=(
+                'The carved name is a symbol; the text on bark is a string. The '
+                'predicate asks which kind of thing the form is. The REPL knows '
+                'the difference between mark and message.'
+            ),
+            resolution=(
+                'The REPL tested the string and returned false. It was not a '
+                'symbol, only text. Patch nodded — the verdict had settled the kind.'
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(= 'hare 'hare)",
@@ -553,6 +596,28 @@ G1_09 = SubjectCurriculum(
             concept_phrase="the equality of two quoted names",
             question_what="whether two quoted names are equal",
             goal_text="compare two quoted names for equality, using the = predicate",
+            scenario=(
+                'Rex the hound laid two scratch-marks side by side on bark '
+                'near the forest. Both marks said the same thing: hare, hare. '
+                '"Are these two scratches the same name?" Rex asked. "Both '
+                'point to the same word — but are they equal?"'
+            ),
+            need=(
+                'He wanted the runtime to check the two names directly and say '
+                'whether they were the same symbol. No guessing from the scratch '
+                '— the REPL would read and compare them exactly.'
+            ),
+            mapping=(
+                'Each quoted name is a symbol the dog can compare. The = predicate '
+                'is the judgment of whether two symbols are identical. The verdict '
+                'is true if the names match, false if they differ.'
+            ),
+            resolution=(
+                'The REPL compared the two symbols and returned true. Both marks '
+                'were the same name. The runtime had settled it perfectly — two '
+                'equal scratches, and the verdict to prove it.'
+            ),
+            tags=("story",),
         ),
     ],
     subplots=_CHALKMARK_SUBPLOTS,
@@ -567,33 +632,30 @@ G1_10 = SubjectCurriculum(
     fable="dog-shadow",
     examples=[
         SubjectExample(
-            form="(+ 1 2) ; sum of one and two",
+            form="(+ 1 2) ;; sum of one and two",
             expected=3,
             concept_phrase="the addition with a trailing comment",
             question_what="the result, ignoring the comment",
-            goal_text="add 1 and 2, with a single-semicolon trailing comment",
+            goal_text="add 1 and 2, with a double-semicolon trailing comment",
             scenario=(
-                'Bell the hound scratched a clean strip of bark at the bank '
-                'near the pond: a small arithmetic form, then a '
-                'single-semicolon mark, then a short note in plain prose '
-                'meant only for later dogs to read.'
+                'Bell the hound wrote a form on a clean strip of bark near the pond, '
+                'then added a double-semicolon mark followed by a note in plain words. '
+                '"The note is only for other dogs to read," she said. "The REPL will '
+                'stop at the semicolon."'
             ),
             need=(
-                'She wanted the runtime to ignore the prose entirely — to '
-                'read only the form before the semicolon and hand back its '
-                'value — while still leaving the note legible on the bark '
-                'for the pack.'
+                'She wanted the runtime to ignore the trailing prose and hand back the '
+                'value before the comment-sign. The note was pack knowledge, not code.'
             ),
             mapping=(
-                'The form is what the runtime evaluates, the '
-                'semicolon-and-after is what the reader skips, and the note '
-                'is for later dogs only. The form-as-read and the '
-                'form-as-written are the same up to the semicolon.'
+                'The arithmetic form is what the runtime evaluates. The double-semicolon '
+                'marks where the comment begins. What comes after is skipped entirely by '
+                'the reader — kept on the bark for later dogs only.'
             ),
             resolution=(
-                'The REPL read the marks up to the semicolon, evaluated the '
-                'form, and handed back the value. The trailing prose stayed '
-                'on the bark, untouched, for any later dog to read.'
+                'The REPL read the marks up to the comment-sign, evaluated the form, and '
+                'handed back its value. The note stayed on the bark, untouched, waiting '
+                'for the pack.'
             ),
             tags=("story",),
         ),
@@ -603,6 +665,28 @@ G1_10 = SubjectCurriculum(
             concept_phrase="the literal with a trailing comment",
             question_what="the literal value, ignoring the comment",
             goal_text="submit the integer 42 with a double-semicolon trailing comment",
+            scenario=(
+                'Patch the hound scratched a number on clean bark near the pond: '
+                '42, followed by a double-slash, then a short note in plain words. '
+                '"The note is only for other dogs to read," Patch said. "The '
+                'runtime will not see it."'
+            ),
+            need=(
+                'Patch wanted the runtime to ignore the trailing prose and hand '
+                'back the value before the double-semicolon. The note was pack '
+                'knowledge, not code.'
+            ),
+            mapping=(
+                'The number is what the runtime evaluates. The double-semicolon '
+                'marks where the comment begins. What comes after is skipped '
+                'entirely by the reader — kept on the bark for later dogs.'
+            ),
+            resolution=(
+                'The REPL read the marks up to the comment-sign, evaluated the '
+                'number, and handed back its value. The note stayed on the bark, '
+                'untouched, waiting for the pack.'
+            ),
+            tags=("story",),
         ),
     ],
     subplots=_SCRIBE_SUBPLOTS,
@@ -622,6 +706,28 @@ G1_11 = SubjectCurriculum(
             concept_phrase="the addition with extra spacing",
             question_what="the result of an addition formatted with extra spaces",
             goal_text="add 1 and 2 in a form with extra spaces between tokens",
+            scenario=(
+                'Bell the hound scratched a form on bark near the meadow, but with '
+                'wide gaps between the tokens where the reader normally saw them '
+                'close together. "Does the spacing change what the form means?" '
+                'someone asked. Bell shook her head.'
+            ),
+            need=(
+                'She wanted the runtime to read the form the same way, gaps or not. '
+                'Extra whitespace between tokens should not alter the value the REPL '
+                'handed back.'
+            ),
+            mapping=(
+                'The operator and operands are the same regardless of spacing. The '
+                'reader skips over gaps between tokens. The runtime sees only the '
+                'form\'s structure, not the marks between marks.'
+            ),
+            resolution=(
+                'The REPL read the form, ignored the extra whitespace, and handed '
+                'back the running total. The spacing had no effect — the form meant '
+                'the same thing to the reader.'
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(+\n  1\n  2)",
@@ -629,6 +735,28 @@ G1_11 = SubjectCurriculum(
             concept_phrase="the addition split across lines",
             question_what="the result of an addition formatted across multiple lines",
             goal_text="add 1 and 2 in a form whose arguments are on separate lines",
+            scenario=(
+                'Patch the hound marked a form on a long bark-strip at the stream\'s '
+                'edge but spread the tokens across many lines, each indented neatly. '
+                '"Does the layout change what the form says?" his packmate asked. '
+                'Patch tapped the bark with his paw.'
+            ),
+            need=(
+                'He wanted the runtime to read the form from top to bottom and '
+                'return the same answer as if it were on one line. Line-breaks and '
+                'indentation were just spacing.'
+            ),
+            mapping=(
+                'The tokens stay the same whether on one line or spread across many. '
+                'The reader follows the marks in order. The runtime reads the '
+                'structure, not the layout.'
+            ),
+            resolution=(
+                'The REPL traced the form across its lines, saw the addition, and '
+                'handed back the running total. The layout had changed nothing — the '
+                'form meant exactly the same.'
+            ),
+            tags=("story",),
         ),
     ],
     subplots=_SCRIBE_SUBPLOTS,
@@ -648,6 +776,28 @@ G1_12 = SubjectCurriculum(
             concept_phrase="the simple addition",
             question_what="the result of adding 2 and 3",
             goal_text="add 2 and 3",
+            scenario=(
+                'Rex the hound stood at the river bank and scratched a simple form on '
+                'bark. The parentheses held the operator and two operands. "These marks '
+                'group the tokens," he said. "They don\'t multiply anything — they just '
+                'tell the reader what goes together."'
+            ),
+            need=(
+                'He wanted the runtime to read the grouped form and return what the '
+                'grouped operation produced. No hidden multiplication — the parens '
+                'merely bundled the instruction.'
+            ),
+            mapping=(
+                'The parentheses bundle the form into a procedure. The operator is '
+                'the action. The operands are the inputs. The grouped structure is '
+                'what the runtime evaluates.'
+            ),
+            resolution=(
+                'The REPL read the grouped form, applied the addition, and handed '
+                'back the running total. The parens had bundled the instruction '
+                'exactly — nothing multiplied, only added.'
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(* (+ 1 2) 3)",
@@ -655,6 +805,28 @@ G1_12 = SubjectCurriculum(
             concept_phrase="the nested multiplication",
             question_what="the result of multiplying a nested sum by 3",
             goal_text="multiply the sum of 1 and 2 by 3",
+            scenario=(
+                'Patch the hound marked a nested form on a flat stone near the bank, '
+                'with one grouped form tucked inside another. "The inner group runs '
+                'first," Patch said. "Its value becomes the input to the outer group. '
+                'Two operations, but they are bundled in order."'
+            ),
+            need=(
+                'Patch wanted the runtime to evaluate the inner form, take its answer, '
+                'and use it as input to the outer form. The nesting had to be read in '
+                'the correct order.'
+            ),
+            mapping=(
+                'The inner parentheses group the addition. The outer group uses that '
+                'result as its first operand. The runtime evaluates inner-first by '
+                'structure, not by writing order.'
+            ),
+            resolution=(
+                'The REPL read the nested form, evaluated the inner addition, then '
+                'multiplied its result by three. The answer came back correctly — the '
+                'nesting had been honored exactly.'
+            ),
+            tags=("story",),
         ),
     ],
     subplots=_SCRIBE_SUBPLOTS,
@@ -703,6 +875,27 @@ G1_13 = SubjectCurriculum(
             concept_phrase="the subtraction",
             question_what="the difference of 5 and 3",
             goal_text="subtract 3 from 5",
+            scenario=(
+                'Rex the hound laid out five bones on a flat stone, then moved three '
+                'to another pile. "How many are left?" he asked his packmate. "I could '
+                'count the remainder, or I could let the runtime do it exactly."'
+            ),
+            need=(
+                'He wanted the REPL to take the first heap, remove the second, and '
+                'hand back the precise count without any eyeballing. The difference '
+                'must be exact.'
+            ),
+            mapping=(
+                'The bones in the first pile are the minuend. The bones in the second '
+                'are the subtrahend. The subtraction operation is the taking-away. The '
+                'REPL gives the exact count of what remains.'
+            ),
+            resolution=(
+                'The REPL performed the subtraction and handed back the precise count. '
+                'No counting by paw was needed — the runtime had settled the difference '
+                'the patient way.'
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(* 4 5)",
@@ -710,6 +903,28 @@ G1_13 = SubjectCurriculum(
             concept_phrase="the multiplication",
             question_what="the product of 4 and 5",
             goal_text="multiply 4 by 5",
+            scenario=(
+                'Bell the hound arranged four piles of bones, each pile holding five '
+                'bones. "How many bones altogether?" she asked. "I could count every '
+                'one, or I could let the runtime multiply them for me — one operation, '
+                'exact answer."'
+            ),
+            need=(
+                'She wanted the REPL to take the four piles of five and return the '
+                'total count. The multiplication had to be exact, with no room for '
+                'mis-counting.'
+            ),
+            mapping=(
+                'The four piles are the multiplicand. The five bones per pile are the '
+                'multiplier. The multiplication is the combining of equal groups. The '
+                'REPL gives the precise heap-size that results.'
+            ),
+            resolution=(
+                'The REPL performed the multiplication and handed back the precise count. '
+                'The four piles had been combined exactly right — the runtime had not '
+                'fumbled the counting.'
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(/ 10 2)",
@@ -717,6 +932,26 @@ G1_13 = SubjectCurriculum(
             concept_phrase="the division",
             question_what="the quotient of 10 and 2",
             goal_text="divide 10 by 2",
+            scenario=(
+                'Patch the hound looked at a heap of ten bones and measured them into '
+                'two equal piles. "How many bones in each pile?" asked a younger dog. '
+                '"The runtime can tell us exactly by dividing."'
+            ),
+            need=(
+                'Patch wanted the REPL to split the heap fairly and hand back the count '
+                'per pile. The division had to be exact, with no bones left over in this '
+                'case.'
+            ),
+            mapping=(
+                'The ten bones are the dividend. The two piles are the divisor. The '
+                'division is the fair splitting. The REPL gives the count per pile — the '
+                'quotient.'
+            ),
+            resolution=(
+                'The REPL performed the division and handed back the precise count. Each '
+                'pile had been measured exactly right — the runtime had split fairly.'
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(+ 7 8)",
@@ -724,6 +959,26 @@ G1_13 = SubjectCurriculum(
             concept_phrase="the addition",
             question_what="the sum of 7 and 8",
             goal_text="add 7 and 8",
+            scenario=(
+                'Rex the hound gathered seven bones from one bank and eight from '
+                'another. "Should I count them all?" he asked. "Let the runtime add '
+                'them together. It will give the exact total."'
+            ),
+            need=(
+                'He wanted the REPL to combine the two heaps and hand back the precise '
+                'count. No paw-counting needed — the runtime would settle it rightly.'
+            ),
+            mapping=(
+                'The first heap of seven is the first addend. The second heap of eight '
+                'is the second addend. The addition is their combining. The REPL gives '
+                'the precise count of the combined heap.'
+            ),
+            resolution=(
+                'The REPL added the two heaps and handed back the running total. The '
+                'bones had been combined exactly right — the runtime\'s answer was the '
+                'one that mattered.'
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(- 20 7)",
@@ -731,6 +986,26 @@ G1_13 = SubjectCurriculum(
             concept_phrase="the subtraction",
             question_what="the difference of 20 and 7",
             goal_text="subtract 7 from 20",
+            scenario=(
+                'Bell the hound laid out twenty bones in a careful row and moved seven '
+                'to a separate pile. "The difference between the heaps is what matters," '
+                'she said. "Let the runtime tell us exactly."'
+            ),
+            need=(
+                'She wanted the REPL to perform the subtraction and hand back the '
+                'precise count of what was left. The difference must be exact, with no '
+                'mis-count.'
+            ),
+            mapping=(
+                'The twenty bones are the minuend. The seven bones moved away are the '
+                'subtrahend. The subtraction is the taking-away. The REPL gives the '
+                'exact count remaining.'
+            ),
+            resolution=(
+                'The REPL performed the subtraction and handed back the precise count. '
+                'The difference had been settled exactly — the runtime had not wavered.'
+            ),
+            tags=("story",),
         ),
     ],
     subplots=_ACORN_SUBPLOTS,
@@ -750,6 +1025,27 @@ G1_14 = SubjectCurriculum(
             concept_phrase="the nested computation",
             question_what="the sum of 1 with the product of 2 and 3",
             goal_text="add 1 to the product of 2 and 3",
+            scenario=(
+                'Patch the hound marked a nested form on bark near the river bank. '
+                'Inside the outer addition lived a multiplication. "The inner form runs '
+                'first," Patch said. "Its answer becomes food for the outer form."'
+            ),
+            need=(
+                'Patch wanted the REPL to multiply first, then use that answer as one '
+                'of the inputs to the addition. The nesting had to be read in the right '
+                'order for the answer to be correct.'
+            ),
+            mapping=(
+                'The nested multiplication is evaluated first, producing an intermediate '
+                'result. That result becomes the second operand of the outer addition. '
+                'The structure itself tells the runtime what to do and in what order.'
+            ),
+            resolution=(
+                'The REPL read the nested form, multiplied two by three in the inner '
+                'form, then added one to that answer. The running total came back '
+                'exactly right — nesting honored, answer correct.'
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(* (+ 1 2) (+ 3 4))",
@@ -757,6 +1053,29 @@ G1_14 = SubjectCurriculum(
             concept_phrase="the nested product of sums",
             question_what="the product of two nested sums",
             goal_text="multiply the sum of 1 and 2 by the sum of 3 and 4",
+            scenario=(
+                'Rex the hound marked two nested forms side by side on a flat stone. '
+                'The left nested form was an addition; the right was another. "Both '
+                'run first," Rex said. "Then their two answers become the operands of '
+                'the multiplication."'
+            ),
+            need=(
+                'He wanted the REPL to evaluate both inner forms, get their two answers, '
+                'and then multiply them together. The nested structure had to be honored '
+                'perfectly.'
+            ),
+            mapping=(
+                'The two nested additions are evaluated first, producing two intermediate '
+                'results. Those two results become the operands of the outer '
+                'multiplication. The runtime evaluates all nested forms before any outer '
+                'form.'
+            ),
+            resolution=(
+                'The REPL read the nested form, evaluated both inner additions, then '
+                'multiplied their answers. The running total came back exactly right — '
+                'all nested forms honored, no steps skipped.'
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(- 100 (* 5 5))",
@@ -764,6 +1083,28 @@ G1_14 = SubjectCurriculum(
             concept_phrase="the nested subtraction",
             question_what="100 minus a nested product",
             goal_text="subtract the product of 5 and 5 from 100",
+            scenario=(
+                'Bell the hound held a heap of one hundred bones on one stone and '
+                'watched a nested form on another. The nested multiplication would '
+                'produce a heap to subtract. "The inner form gives me the count to '
+                'take away," she said.'
+            ),
+            need=(
+                'She wanted the REPL to multiply first, then use that answer as what '
+                'to subtract from the hundred. The nesting had to be read in the right '
+                'order.'
+            ),
+            mapping=(
+                'The nested multiplication is evaluated first, producing the count of '
+                'bones to remove. That count becomes the subtrahend of the outer '
+                'subtraction. The structure itself orders the evaluation.'
+            ),
+            resolution=(
+                'The REPL read the nested form, multiplied five by five in the inner '
+                'form, then subtracted that from the hundred. The precise count of '
+                'remaining bones came back exactly right — nesting honored.'
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(+ (* 2 3) (* 4 5))",
@@ -771,6 +1112,26 @@ G1_14 = SubjectCurriculum(
             concept_phrase="the sum of two products",
             question_what="the sum of two nested products",
             goal_text="add the product of 2 and 3 to the product of 4 and 5",
+            scenario=(
+                'Patch the hound marked a form on bark with two nested multiplications '
+                'waiting to be combined. "Each inner form produces a heap," Patch said. '
+                '"The outer form adds the two heaps together."'
+            ),
+            need=(
+                'Patch wanted the REPL to evaluate both multiplications, then add their '
+                'two results. The nesting had to be honored completely.'
+            ),
+            mapping=(
+                'The two nested multiplications are evaluated first, each producing an '
+                'intermediate heap. Those two heaps become the operands of the outer '
+                'addition. The runtime evaluates nested forms before outer ones.'
+            ),
+            resolution=(
+                'The REPL read the nested form, multiplied two by three and four by '
+                'five separately, then added their answers. The running total came back '
+                'exactly right — all nested forms honored, answer precise.'
+            ),
+            tags=("story",),
         ),
     ],
     subplots=_ACORN_SUBPLOTS,
@@ -819,6 +1180,25 @@ G1_15 = SubjectCurriculum(
             concept_phrase="the equality check",
             question_what="whether 1 equals 2",
             goal_text="test whether 1 equals 2 with =",
+            scenario=(
+                'Rex the hound held two pebbles at the stream\'s edge — one marked with '
+                'the number one, the other with the number two. "Are these two pebbles '
+                'the same?" he asked. "The runtime can tell me for certain."'
+            ),
+            need=(
+                'He wanted the REPL to compare the two numbers directly and deliver the '
+                'verdict without guessing. The comparison had to be exact.'
+            ),
+            mapping=(
+                'The crossing-condition is =. The two pebbles are the operands. The '
+                'verdict — true or false — is what swings the way open or closed for '
+                'the next step.'
+            ),
+            resolution=(
+                'The REPL checked the two values, saw they were not equal, and returned '
+                'false. The verdict was clear — the pebbles marked different numbers.'
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form='(= "a" "a")',
@@ -826,6 +1206,24 @@ G1_15 = SubjectCurriculum(
             concept_phrase="the string equality",
             question_what="whether two equal strings are equal",
             goal_text='test whether the string "a" equals itself with =',
+            scenario=(
+                'Bell the hound marked two identical letters on two stones at the bank '
+                'near the pond. "Are these two letters the same?" she asked. "The '
+                'runtime can read them and settle it rightly."'
+            ),
+            need=(
+                'She wanted the REPL to compare the two strings directly and return the '
+                'verdict. The comparison had to be exact.'
+            ),
+            mapping=(
+                'The crossing-condition is =. The two letter-strings are the operands. '
+                'The verdict — true or false — is what the conditions decide.'
+            ),
+            resolution=(
+                'The REPL checked the two strings, saw they were identical, and returned '
+                'true. The verdict was clear — both stones bore the same letter exactly.'
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(= :hare :hare)",
@@ -833,6 +1231,24 @@ G1_15 = SubjectCurriculum(
             concept_phrase="the keyword equality",
             question_what="whether two equal keywords are equal",
             goal_text="test whether the keyword :hare equals itself with =",
+            scenario=(
+                'Patch the hound scratched the same keyword on two pieces of bark. Both '
+                'read :hare. "Are these two keywords the same?" Patch asked. "The '
+                'runtime knows the answer without any guess."'
+            ),
+            need=(
+                'Patch wanted the REPL to compare the two keywords and hand back the '
+                'verdict directly. The comparison had to be exact.'
+            ),
+            mapping=(
+                'The crossing-condition is =. The two keywords are the operands. The '
+                'verdict — true or false — is what the conditions return.'
+            ),
+            resolution=(
+                'The REPL checked the two keywords, saw they were identical, and returned '
+                'true. The verdict was clear — both scratches bore the same symbol.'
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(= :hare :tortoise)",
@@ -840,6 +1256,24 @@ G1_15 = SubjectCurriculum(
             concept_phrase="the keyword equality",
             question_what="whether two different keywords are equal",
             goal_text="test whether :hare equals :tortoise with =",
+            scenario=(
+                'Rex the hound held two scratches side by side near the meadow — one '
+                'naming :hare, the other naming :tortoise. "Are these two keywords the '
+                'same?" he asked his packmate. "Let the runtime tell us."'
+            ),
+            need=(
+                'He wanted the REPL to compare the two different keywords and return the '
+                'verdict. The comparison had to be exact.'
+            ),
+            mapping=(
+                'The crossing-condition is =. The two keywords are the operands. The '
+                'verdict — true or false — is what the conditions decide.'
+            ),
+            resolution=(
+                'The REPL checked the two keywords, saw they were different, and returned '
+                'false. The verdict was clear — the two scratches named different symbols.'
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(= 1 1 1 1)",
@@ -847,6 +1281,26 @@ G1_15 = SubjectCurriculum(
             concept_phrase="the multi-arg equality",
             question_what="whether four 1s are all equal",
             goal_text="test with = whether four 1s are all equal",
+            scenario=(
+                'Bell the hound laid four pebbles in a row at the stream\'s edge, each '
+                'marked with the number one. "Are all four of these pebbles the same?" '
+                'she asked. "The runtime can check them all at once."'
+            ),
+            need=(
+                'She wanted the REPL to compare all four numbers and return the verdict '
+                'on whether they were all equal. The comparison had to be exact.'
+            ),
+            mapping=(
+                'The crossing-condition is =. The four numbers are the operands. The '
+                'verdict — true if all match, false if any differs — is what the '
+                'conditions return.'
+            ),
+            resolution=(
+                'The REPL checked all four numbers, saw they were all identical, and '
+                'returned true. The verdict was clear — all four pebbles bore the same '
+                'mark.'
+            ),
+            tags=("story",),
         ),
     ],
     subplots=_GATE_SUBPLOTS,
@@ -866,6 +1320,25 @@ G1_16 = SubjectCurriculum(
             concept_phrase="the zero check",
             question_what="whether 0 is zero",
             goal_text="check whether 0 is zero using zero?",
+            scenario=(
+                'Patch the hound held a bone at the stream\'s edge, then laid it down '
+                'on an empty stone. "Is this count zero?" Patch asked. "The runtime can '
+                'tell me for certain."'
+            ),
+            need=(
+                'Patch wanted the REPL to test the number and return the verdict: was it '
+                'zero or not? The check had to be exact.'
+            ),
+            mapping=(
+                'The number is the operand. The zero? predicate is the test. The verdict '
+                '— true if the number is exactly zero, false otherwise — is what the '
+                'REPL hands back.'
+            ),
+            resolution=(
+                'The REPL tested the number, saw it was zero, and returned true. The '
+                'verdict was clear — the count was settled exactly.'
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(zero? 5)",
@@ -873,6 +1346,24 @@ G1_16 = SubjectCurriculum(
             concept_phrase="the zero check",
             question_what="whether 5 is zero",
             goal_text="check whether 5 is zero using zero?",
+            scenario=(
+                'Bell the hound held five bones at the stream\'s edge and laid them '
+                'on a flat stone. "Is this count zero?" she asked. "The runtime can '
+                'tell me for certain."'
+            ),
+            need=(
+                'She wanted the REPL to test the number and return the verdict: was it '
+                'zero or not? The check had to be exact.'
+            ),
+            mapping=(
+                'The bones are the number. The zero? predicate is the test. The '
+                'verdict — true if zero, false if not — is what the REPL hands back.'
+            ),
+            resolution=(
+                'The REPL tested the count, saw it was not zero, and returned false. '
+                'The verdict was clear — the bones had weight, not emptiness.'
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(pos? 7)",
@@ -880,6 +1371,25 @@ G1_16 = SubjectCurriculum(
             concept_phrase="the positive check",
             question_what="whether 7 is positive",
             goal_text="check whether 7 is positive using pos?",
+            scenario=(
+                'Rex the hound marked the number seven on bark near the meadow and '
+                'asked his packmate: "Is this count moving forward, or backward?" '
+                '"The runtime can tell," his packmate said.'
+            ),
+            need=(
+                'He wanted the REPL to test the number and return the verdict: was it '
+                'positive or not? The test had to be exact.'
+            ),
+            mapping=(
+                'The number is the value. The pos? predicate is the question of which '
+                'direction. The verdict — true if moving forward, false if not — is '
+                'what the REPL returns.'
+            ),
+            resolution=(
+                'The REPL tested the number, saw it moved forward, and returned true. '
+                'The verdict was clear — the count was positive.'
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(pos? -2)",
@@ -887,6 +1397,25 @@ G1_16 = SubjectCurriculum(
             concept_phrase="the positive check",
             question_what="whether -2 is positive",
             goal_text="check whether -2 is positive using pos?",
+            scenario=(
+                'Patch the hound held a negative number on bark near the forest and '
+                'asked: "Is this count moving forward from the marker stone?" '
+                '"Let the runtime check," someone said.'
+            ),
+            need=(
+                'Patch wanted the REPL to test the number and hand back the verdict: '
+                'was it positive or backward? The test had to be exact.'
+            ),
+            mapping=(
+                'The negative number is the value. The pos? predicate asks the '
+                'direction. The verdict — true if forward, false if backward — is '
+                'what the runtime returns.'
+            ),
+            resolution=(
+                'The REPL tested the negative number, saw it moved backward, and '
+                'returned false. The verdict was clear — the count was negative.'
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(neg? -3)",
@@ -894,6 +1423,25 @@ G1_16 = SubjectCurriculum(
             concept_phrase="the negative check",
             question_what="whether -3 is negative",
             goal_text="check whether -3 is negative using neg?",
+            scenario=(
+                'Bell the hound marked a negative number on flat bark at the pond and '
+                'asked: "Is this count moving backward from the starting point?" '
+                '"The runtime can check," her packmate said.'
+            ),
+            need=(
+                'She wanted the REPL to test the number and return the verdict: was it '
+                'negative or positive? The test had to be exact.'
+            ),
+            mapping=(
+                'The negative number is the value. The neg? predicate asks the '
+                'direction. The verdict — true if backward, false if forward — is '
+                'what the REPL returns.'
+            ),
+            resolution=(
+                'The REPL tested the number, saw it moved backward, and returned true. '
+                'The verdict was clear — the count was negative.'
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(neg? 4)",
@@ -901,6 +1449,25 @@ G1_16 = SubjectCurriculum(
             concept_phrase="the negative check",
             question_what="whether 4 is negative",
             goal_text="check whether 4 is negative using neg?",
+            scenario=(
+                'Rex the hound scratched the number four on bark near the river and '
+                'asked: "Is this count moving backward?" "Let the runtime tell," '
+                'said Patch.'
+            ),
+            need=(
+                'He wanted the REPL to test the number and hand back the verdict: was '
+                'it negative or forward-moving? The test had to be exact.'
+            ),
+            mapping=(
+                'The positive number is the value. The neg? predicate asks the '
+                'direction. The verdict — true if backward, false if forward — is '
+                'what the runtime returns.'
+            ),
+            resolution=(
+                'The REPL tested the number, saw it moved forward, and returned false. '
+                'The verdict was clear — the count was positive.'
+            ),
+            tags=("story",),
         ),
     ],
     subplots=_ACORN_SUBPLOTS,
@@ -920,6 +1487,24 @@ G1_17 = SubjectCurriculum(
             concept_phrase="the literal 42",
             question_what="the value 42 returned by the REPL",
             goal_text="submit the integer 42 so the REPL returns it",
+            scenario=(
+                'Bell the hound scratched the number 42 on clean bark at the stream\'s '
+                'edge. "When the REPL reads this," she said, "it will return what I '
+                'wrote — the value itself, not a computation."'
+            ),
+            need=(
+                'She wanted the runtime to read the bare value and hand it back '
+                'unchanged. No operation needed — the literal evaluates to itself.'
+            ),
+            mapping=(
+                'The mark on the bark is the literal form. The reader sees the number. '
+                'The REPL returns exactly what the form says.'
+            ),
+            resolution=(
+                'The REPL read the literal and handed back the value. The number '
+                'had evaluated to itself — no guessing needed.'
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(+ 1 2)",
@@ -927,6 +1512,24 @@ G1_17 = SubjectCurriculum(
             concept_phrase="the addition",
             question_what="the value returned by adding 1 and 2",
             goal_text="add 1 and 2 so the REPL returns the result",
+            scenario=(
+                'Patch the hound marked a form on bark near the meadow: (+ 1 2). '
+                '"When the REPL reads this," Patch said, "it will evaluate the form '
+                'and return the result — not the form itself, but what it computes to."'
+            ),
+            need=(
+                'He wanted the runtime to evaluate the form and hand back the running '
+                'total. The operation mattered — the form would compute to something.'
+            ),
+            mapping=(
+                'The marks on bark are the form. The REPL sees the operator and '
+                'operands. The runtime evaluates and returns the result.'
+            ),
+            resolution=(
+                'The REPL read the form, performed the addition, and handed back the '
+                'running total. The computation had been settled by the runtime.'
+            ),
+            tags=("story",),
         ),
     ],
     subplots=_SCRIBE_SUBPLOTS,
@@ -976,6 +1579,27 @@ G1_18 = SubjectCurriculum(
             concept_phrase="the multiplication",
             question_what="the product of 7 and 6",
             goal_text="multiply 7 by 6",
+            scenario=(
+                'Rex the hound stood at the edge of a small log spanning the stream '
+                'near the meadow. He tested the log\'s hold paw by paw: a slip would '
+                'not end the day, only bend it. "The form is safe to try," he said.'
+            ),
+            need=(
+                'He wanted the running total of two factors — multiplied on the '
+                'practice bank where a stumble cost nothing — knowing the runtime '
+                'would catch any error before it crossed.'
+            ),
+            mapping=(
+                'The log-bridge test is the safety design of the REPL itself. The '
+                'form is the step taken on the practice bank. What the REPL hands '
+                'back is the value the careful step earned.'
+            ),
+            resolution=(
+                'The REPL — net in place — handed back the precise product. Rex '
+                'crossed safely, the arithmetic settled by the patient method, with '
+                'no daring needed.'
+            ),
+            tags=("story",),
         ),
     ],
     subplots=_SAFETYNET_SUBPLOTS,

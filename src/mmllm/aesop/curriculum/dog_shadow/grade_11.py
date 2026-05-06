@@ -124,6 +124,31 @@ G11_02 = SubjectCurriculum(
             concept_phrase='the host method toUpperCase',
             question_what="the capitalized result the host's toUpperCase returns on the three-letter string abc",
             goal_text="call the host's toUpperCase routine on the three-letter string abc using the dot-prefix calling convention",
+            scenario=(
+                'Rex the hound visited the kennel-master\'s shed near the '
+                'stream and found a peculiar tool for transforming text — a '
+                'capitalizer that worked on the foreign host. "This tool '
+                'belongs to the other world," Rex said, holding the device '
+                'carefully.'
+            ),
+            need=(
+                'He had three letters — abc — and needed to learn the '
+                'kennel-master\'s calling convention: how to ask the tool to '
+                'transform them into their uppercase form.'
+            ),
+            mapping=(
+                'The tool itself is the host method, the three letters are '
+                'the argument passed to the tool, and the dot-prefix form is '
+                'how the hound speaks to the foreign device from Clojure\'s '
+                'side.'
+            ),
+            resolution=(
+                'The REPL called the host\'s toUpperCase by its dot name, '
+                'passing the string abc. The foreign method returned the '
+                'transformed result, and Rex saw the kennel-master\'s tools '
+                'could be trusted to do their work faithfully.'
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form='(.startsWith "hare-tortoise" "hare")',
@@ -131,6 +156,30 @@ G11_02 = SubjectCurriculum(
             concept_phrase="the host method startsWith checking a string prefix",
             question_what="whether the string hare-tortoise starts with the prefix hare via the host method startsWith",
             goal_text="call the host method startsWith on a string to check for a prefix",
+            scenario=(
+                'Bell the hound came upon a scroll carved in the host language '
+                'near the pond, marked with the text "hare-tortoise." She needed '
+                'to know whether it began with a familiar name.'
+            ),
+            need=(
+                'The kennel-master\'s tool for checking prefixes was the only '
+                'way to answer truly. She would need to learn how to call it '
+                'correctly — using the dot convention on the string she '
+                'possessed.'
+            ),
+            mapping=(
+                'The string "hare-tortoise" is the text to examine, "hare" is '
+                'the prefix sought, and the host method startsWith is the tool '
+                'that does the checking. The dot-prefix form bridges between '
+                'Clojure and the foreign method.'
+            ),
+            resolution=(
+                'The REPL invoked the host\'s startsWith, passing both the text '
+                'and the prefix. The method returned true, confirming that the '
+                'scroll\'s beginning matched what Bell sought. The crossing into '
+                'the host\'s territory had yielded the verdict.'
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form='(. "abc" toUpperCase)',
@@ -138,6 +187,30 @@ G11_02 = SubjectCurriculum(
             concept_phrase='the alternate dot form for a host method',
             question_what="the uppercase form of the string abc produced by the host method toUpperCase via the alternate dot syntax",
             goal_text="call the host method toUpperCase using the alternate dot form",
+            scenario=(
+                'Patch the hound discovered that the kennel-master\'s shed '
+                'offered two ways to call the same tools: the usual dot-prefix '
+                'form, and an alternate arrangement. At the stream\'s edge, '
+                'Patch found letters that needed the same transformation.'
+            ),
+            need=(
+                'To prove both forms worked, Patch needed to call toUpperCase '
+                'using the alternate syntax: dot first, then the string, then '
+                'the method name. This foreign tongue had its own grammar.'
+            ),
+            mapping=(
+                'The string "abc" is what needs transformation, the method '
+                'toUpperCase is the host\'s rule for the change, and the '
+                'alternate dot form is the dialect — a different arrangement '
+                'that says the same thing to the runtime.'
+            ),
+            resolution=(
+                'The REPL understood the alternate syntax just as readily. It '
+                'called the host method and returned the uppercase result. Both '
+                'the dot-prefix and dot-alternate forms were faithful paths '
+                'through the kennel-master\'s shed.'
+            ),
+            tags=("story",),
         ),
     ],
     subplots=_TOOLSHED_SUBPLOTS, plan_pool=_PLAN_G11,
@@ -157,6 +230,30 @@ G11_03 = SubjectCurriculum(
             concept_phrase="the static host method Math/abs",
             question_what="the absolute value of the integer -7 produced by calling the static host method Math/abs via slash notation",
             goal_text="call the static host method Math/abs with the argument -7",
+            scenario=(
+                'Rex the hound padded into the kennel-master\'s shed near the '
+                'forest and found the Math class — a tool-cabinet shared by all '
+                'the dogs, not belonging to any single one. "These are the '
+                'standard tools," Rex said, running a paw along the labels.'
+            ),
+            need=(
+                'He held a number marked with a backward sign: -7. He needed '
+                'the shed\'s absolute-distance tool to tell him the true '
+                'measure, removing the sign and leaving only the magnitude.'
+            ),
+            mapping=(
+                'The Math cabinet is the static source, abs is its tool for '
+                'absolute distance, -7 is the number to measure, and the slash '
+                'notation Math/abs is how Clojure names a tool from a shared '
+                'cabinet.'
+            ),
+            resolution=(
+                'The REPL called Math/abs with the negative number. The static '
+                'method computed and returned the absolute value as the true '
+                'measure. Rex learned that slash-notation opened the standard '
+                'tools when the dot would not fit.'
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(Math/max 3 9)",
@@ -164,6 +261,28 @@ G11_03 = SubjectCurriculum(
             concept_phrase="the static host method Math/max",
             question_what="the maximum value of the integers 3 and 9 produced by calling the static host method Math/max via slash notation",
             goal_text="call the static host method Math/max to find the larger of two numbers",
+            scenario=(
+                'Bell the hound stood at the stream\'s edge with two bones '
+                'before her — one marked 3, one marked 9 — and needed to '
+                'know which was the prize. The kennel-master\'s shed held '
+                'a tool for such comparisons.'
+            ),
+            need=(
+                'Using the Math cabinet\'s max tool, Bell could ask which of '
+                'the two bones was larger without guessing. The slash notation '
+                'would speak the foreign language correctly.'
+            ),
+            mapping=(
+                'The two numbers 3 and 9 are the bones to compare, Math/max is '
+                'the static tool for finding the greater value, and the result '
+                'the tool returns is the larger of the pair.'
+            ),
+            resolution=(
+                'The REPL called the static method Math/max, passing both '
+                'numbers. The method evaluated and returned 9 — the true maximum. '
+                'Bell had learned another path through the kennel-master\'s shed.'
+            ),
+            tags=("story",),
         ),
     ],
     subplots=_TOOLSHED_SUBPLOTS, plan_pool=_PLAN_G11,
@@ -185,6 +304,27 @@ G11_04 = SubjectCurriculum(
             concept_phrase='the count of a sequence',
             question_what='the number of characters in the string tortoise via the count function',
             goal_text="count the characters in a string",
+            scenario=(
+                'Patch the hound came to the stream with a carved message: the '
+                'word "tortoise" scratched onto bark. To pass the ford, Patch '
+                'needed to know the exact number of marks in the message.'
+            ),
+            need=(
+                'Clojure\'s count function could reach into the host\'s string '
+                'and measure its length. The hound would apply the function to '
+                'find the true measure without counting by paw.'
+            ),
+            mapping=(
+                'The string "tortoise" is the sequence to measure, the count '
+                'function is the tool for finding its length, and the number '
+                'returned is the precise tally of characters.'
+            ),
+            resolution=(
+                'The REPL applied count to the string and returned the exact '
+                'number of marks. Patch now knew the measure and could cross, '
+                'confident in the reckoning.'
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form='(count "hare")',
@@ -192,6 +332,27 @@ G11_04 = SubjectCurriculum(
             concept_phrase='the count of a sequence',
             question_what='the number of characters in the string hare via the count function',
             goal_text="count the characters in another string",
+            scenario=(
+                'Bell the hound found a shorter message by the bank — the word '
+                '"hare" marked on a stone — and needed to know its length. The '
+                'same Clojure tool that had helped before would serve again.'
+            ),
+            need=(
+                'She would use the count function to measure this message just '
+                'as Patch had measured the longer one. The tool works the same '
+                'way whether the text is long or brief.'
+            ),
+            mapping=(
+                'The string "hare" is the new sequence to measure, the count '
+                'function is the reliable tool, and what it returns is the '
+                'tally of marks in the shorter word.'
+            ),
+            resolution=(
+                'The REPL applied count and returned the number. Bell confirmed '
+                'that the shorter message held four marks, and the count '
+                'function proved itself consistent across both texts.'
+            ),
+            tags=("story",),
         ),
     ],
     subplots=_TOOLSHED_SUBPLOTS, plan_pool=_PLAN_G11,
@@ -234,6 +395,29 @@ G11_06 = SubjectCurriculum(
             concept_phrase='constructing a String via the dot-construct form',
             question_what='the newly constructed String object created from a text argument via the dot-construct syntax',
             goal_text="construct a host String object with the dot-construct syntax",
+            scenario=(
+                'Rex the hound entered the kennel-master\'s shed near the meadow '
+                'and found a String tool — a factory for building new text objects. '
+                '"I can make fresh strings," Rex said, "by speaking to the tool '
+                'with the right form."'
+            ),
+            need=(
+                'He needed to call the String constructor using the dot-construct '
+                'form, passing the text "go" as an instruction for the new string '
+                'to carry.'
+            ),
+            mapping=(
+                'The String class is the tool-factory, the dot after its name '
+                'is Clojure\'s way of speaking to a constructor, and the text '
+                '"go" is the seed for the newly created string.'
+            ),
+            resolution=(
+                'The REPL invoked the String constructor via dot-construct. It '
+                'built a new String object holding the text and returned it. Rex '
+                'learned that constructors could be called this way in the '
+                'foreign land.'
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form='(new String "jump")',
@@ -241,6 +425,28 @@ G11_06 = SubjectCurriculum(
             concept_phrase='constructing a String via the new form',
             question_what='the newly constructed String object created from a text argument via the new keyword',
             goal_text="construct a host String object using the new keyword",
+            scenario=(
+                'Bell the hound discovered another path through the same String '
+                'factory. The "new" keyword was an older, more formal way to '
+                'speak to a constructor — still honored in the foreign language.'
+            ),
+            need=(
+                'To prove both forms worked, Bell called String using the new '
+                'keyword form, passing the text "jump" as the seed for a fresh '
+                'string object.'
+            ),
+            mapping=(
+                'The new keyword is the formal constructor-call ceremony, String '
+                'is the class being built, and "jump" is the text the new string '
+                'will carry from its creation.'
+            ),
+            resolution=(
+                'The REPL understood the new keyword form just as readily. It '
+                'created a String object and returned it. Bell saw that both '
+                'the dot-construct and the new keyword were paths to the same '
+                'outcome.'
+            ),
+            tags=("story",),
         ),
     ],
     subplots=_TOOLSHED_SUBPLOTS, plan_pool=_PLAN_G11,
@@ -260,6 +466,27 @@ G11_07 = SubjectCurriculum(
             concept_phrase="indexing into a host array",
             question_what="the element at index 1 of the int-array [10 20 30] via the aget function",
             goal_text="access an element in a host array by index",
+            scenario=(
+                'Patch the hound found a numbered row of bones in the kennel-master\'s '
+                'shed — a host array holding three weights: 10, 20, and 30. "Arrays '
+                'are like bone-rows," Patch said, "each bone in its place."'
+            ),
+            need=(
+                'To reach the second bone in the row, Patch needed to use the aget '
+                'function, which knows how to index into arrays the foreign way. '
+                'The position numbered 1 would find the second bone.'
+            ),
+            mapping=(
+                'The int-array is the host\'s ordered bone-row, the index 1 is '
+                'the position to reach, and aget is the function that crosses '
+                'the boundary to fetch from the foreign array.'
+            ),
+            resolution=(
+                'The REPL applied aget to the array, asking for the element at '
+                'position 1. It returned the second bone\'s weight: 20. Patch '
+                'learned how to reach into host arrays by their numbered positions.'
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(let [a (int-array [1 2 3])] (alength a))",
@@ -267,6 +494,27 @@ G11_07 = SubjectCurriculum(
             concept_phrase="getting the length of a host array",
             question_what="the length of the int-array [1 2 3] via the alength function",
             goal_text="get the length of a host array",
+            scenario=(
+                'Rex the hound came to the stream with a smaller array from the '
+                'kennel-master\'s shed — three bones lined up: 1, 2, and 3. He '
+                'needed to know the exact count of bones in the row.'
+            ),
+            need=(
+                'The alength function would measure any host array without guessing. '
+                'It reaches into the foreign structure and returns the precise tally '
+                'of how many positions the array holds.'
+            ),
+            mapping=(
+                'The int-array [1 2 3] is the bone-row to measure, alength is the '
+                'function that fetches the array\'s length from the host side, and '
+                'the result is the true count of positions.'
+            ),
+            resolution=(
+                'The REPL called alength and returned the exact count: 3. Rex '
+                'confirmed that the array held three positions, and alength proved '
+                'itself a trustworthy path into host array properties.'
+            ),
+            tags=("story",),
         ),
     ],
     subplots=_TOOLSHED_SUBPLOTS, plan_pool=_PLAN_G11,
@@ -286,6 +534,28 @@ G11_08 = SubjectCurriculum(
             concept_phrase="using a type hint in a binding",
             question_what="the uppercase form of the type-hinted string abc produced by calling the host method toUpperCase on the binding",
             goal_text="add a type hint to a binding and call a method on the typed value",
+            scenario=(
+                'Bell the hound held a text string in the forest: the letters "abc." '
+                'To call the host\'s toUpperCase on it, she wanted to give the '
+                'compiler a hint about what kind of value she was holding.'
+            ),
+            need=(
+                'Type hints are like scratching a mark beside a bone to say what '
+                'you know: this is a String. The caret and type name help the '
+                'compiler choose the right path into the host.'
+            ),
+            mapping=(
+                'The caret (^) marks the hint, String is the type being declared, '
+                's is the binding that carries the hint, and the type hint guides '
+                'how the runtime calls the host method.'
+            ),
+            resolution=(
+                'The REPL read the hint and understood that s was a String. When '
+                'it called .toUpperCase, it took the direct path the hint had marked. '
+                'The method returned the capitalized text. Type hints bridge the '
+                'hound\'s knowledge and the foreign compiler\'s choice.'
+            ),
+            tags=("story",),
         ),
         _ex('(do "type hints are metadata that guide compilation" :studied)',
             ":studied",
@@ -313,6 +583,27 @@ G11_09 = SubjectCurriculum(
             concept_phrase="basic addition under the default checked math regime",
             question_what="the sum of two numbers",
             goal_text="add two numbers with the default math behavior",
+            scenario=(
+                'Patch the hound arranged two small bone-piles on a flat stone by '
+                'the pond: one holding a single bone, the other holding two. "I '
+                'will combine these," Patch said carefully.'
+            ),
+            need=(
+                'The addition would be checked by default — the runtime watching '
+                'for overflow, protecting the count against mistakes. This was the '
+                'safe way: careful arithmetic that catches errors.'
+            ),
+            mapping=(
+                'The two piles of bones are the addends (1 and 2), the plus sign '
+                'is the combination rule, and the sum is the running total the '
+                'runtime computes with care.'
+            ),
+            resolution=(
+                'The REPL applied the addition with its watchful gaze. It returned '
+                'the sum: 3 bones. Patch learned that ordinary arithmetic in Clojure '
+                'runs in checked mode by default, guarding against silent overflow.'
+            ),
+            tags=("story",),
         ),
         _ex('(do "*unchecked-math* turns off overflow checking on prims" :studied)',
             ":studied",
@@ -425,6 +716,30 @@ G11_14 = SubjectCurriculum(
             concept_phrase="catching exceptions from a host method call",
             question_what="the square root of 4 produced by the static host method Math/sqrt via slash notation when the call succeeds",
             goal_text="wrap a static host method call in error handling",
+            scenario=(
+                'Rex the hound crossed the boundary into the kennel-master\'s shed '
+                'to use the Math/sqrt tool on the number 4. But the boundary was '
+                'fragile — if an error leaked through from the host world, it '
+                'would be chaos.'
+            ),
+            need=(
+                'He needed a log-bridge test: a safe wrapper that would catch '
+                'any exceptions the foreign tool might throw, and hold them before '
+                'they could crash the dogs\' side. The try form was his safety net.'
+            ),
+            mapping=(
+                'The try begins the tested crossing, Math/sqrt is the host tool '
+                'being called, the argument 4 is the value sent across the boundary, '
+                'and catch is the safety net that holds any exceptions that return.'
+            ),
+            resolution=(
+                'The REPL tested the boundary and called Math/sqrt safely. The '
+                'method computed and returned 2.0 — the call succeeded. The try '
+                'form caught nothing because nothing had gone wrong. Rex learned '
+                'that crossing into the host world required always testing the '
+                'bridge first.'
+            ),
+            tags=("story",),
         ),
     ],
     subplots=_TOOLSHED_SUBPLOTS, plan_pool=_PLAN_G11,

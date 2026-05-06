@@ -69,6 +69,26 @@ G6_01 = SubjectCurriculum(grade=6, subject_id="G6-01",
             concept_phrase="extracting the string form of a namespace symbol",
             question_what="the string form of a quoted namespace symbol",
             goal_text="extract the string form of a quoted namespace symbol",
+            scenario=(
+                'Patch the hound examined a marker stone at the stream\'s edge '
+                'with a strange dotted path scratched into it — foo.bar. '
+                '{hound_he_she} wanted to read what the scratch said without '
+                'using the path itself as a name.'
+            ),
+            need=(
+                'Could {hound_he_she} pull the string text from the symbol, '
+                'so any other dog could read the plain characters that made it?'
+            ),
+            mapping=(
+                'The symbol is the scratch on the stone, the string extraction '
+                'is the reading of what was marked there, and the name function '
+                'is the act of tracing the characters in order.'
+            ),
+            resolution=(
+                'The REPL read the scratch and handed back the plain string '
+                'that foo.bar spelled out, without any symbolic wrapping left.'
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(name 'clojure.string)",
@@ -76,6 +96,24 @@ G6_01 = SubjectCurriculum(grade=6, subject_id="G6-01",
             concept_phrase="extracting the string form of a namespace symbol",
             question_what="the string form of a quoted namespace symbol",
             goal_text="extract the string form of a quoted namespace symbol",
+            scenario=(
+                'Further upstream, Patch found another stone marker with a longer '
+                'path scratched in — clojure.string — a well-known location where '
+                'other dogs had cached their scrolls.'
+            ),
+            need=(
+                'She wanted to extract the plain string name that the marker '
+                'spelled, to read where the cache lay.'
+            ),
+            mapping=(
+                'Like the first stone, this marker holds a symbol; the name '
+                'function traces the same characters and returns them as plain text.'
+            ),
+            resolution=(
+                'The REPL extracted the string clojure.string from the symbol '
+                'and handed it back — a plain text path any dog could follow.'
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(symbol? 'tortoise.race)",
@@ -83,6 +121,26 @@ G6_01 = SubjectCurriculum(grade=6, subject_id="G6-01",
             concept_phrase="checking whether a value is a symbol",
             question_what="whether a value is a symbol",
             goal_text="test whether a quoted namespace-like value is a symbol",
+            scenario=(
+                'Bell the hound stood at the bank and studied a new scratch on a '
+                'nearby stone — tortoise.race, marked with the faint paw-print of '
+                'a stranger. She needed to know: was this a proper symbol that '
+                'named a location, or something else entirely?'
+            ),
+            need=(
+                'She wanted the runtime\'s word on whether this mark was truly a '
+                'symbol that could serve as a name.'
+            ),
+            mapping=(
+                'The scratch on the stone is the quoted value, the symbol-predicate '
+                'is the verification, and the verdict is whether it qualifies as a '
+                'proper name the pack could use.'
+            ),
+            resolution=(
+                'The REPL checked the mark and returned true — the stone\'s scratch '
+                'was indeed a symbol, and the location it named was real.'
+            ),
+            tags=("story",),
         ),
     ], subplots=_ROADSIGN_SUBPLOTS, plan_pool=_PLAN_G6)
 
@@ -97,6 +155,26 @@ G6_02 = SubjectCurriculum(grade=6, subject_id="G6-02",
             concept_phrase="extracting the string form of a namespace symbol",
             question_what="the string form of a quoted namespace symbol",
             goal_text="extract the string form of a quoted namespace symbol",
+            scenario=(
+                'Rex the hound approached a stone marker near the meadow that carried '
+                'a familiar symbol scratched into its face — race.tortoise. It was a '
+                'place he had visited many times, but today he wanted the plain text '
+                'of its name laid bare.'
+            ),
+            need=(
+                'He needed to pull the string name from the symbol so he could speak '
+                'it aloud to another dog without any marks or wrappings.'
+            ),
+            mapping=(
+                'The symbol on the stone is the form, the act of extracting text is '
+                'what the name function does, and the result is the pure string that '
+                'the symbol names.'
+            ),
+            resolution=(
+                'The REPL traced the symbol and handed back race.tortoise as plain '
+                'text — the unmarked name any dog could read.'
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(= 'race.tortoise 'race.tortoise)",
@@ -104,6 +182,25 @@ G6_02 = SubjectCurriculum(grade=6, subject_id="G6-02",
             concept_phrase="checking equality of two namespace symbols",
             question_what="whether two identical namespace symbols are equal",
             goal_text="test whether two identical namespace symbols are equal",
+            scenario=(
+                'Later, Rex stood before the same marker and saw the symbol '
+                'race.tortoise scratched twice on adjacent stones. Were these two '
+                'scratches truly the same, or had the second dog marked something '
+                'slightly different?'
+            ),
+            need=(
+                'He wanted the runtime\'s word on whether both stones bore the exact '
+                'same mark.'
+            ),
+            mapping=(
+                'The two symbol-markers are the operands of the test, and the equality '
+                'predicate asks: do these two scratches match perfectly?'
+            ),
+            resolution=(
+                'The REPL compared the marks and returned true — both stones carried '
+                'the identical symbol, and the locations they named were the same.'
+            ),
+            tags=("story",),
         ),
     ], subplots=_ROADSIGN_SUBPLOTS, plan_pool=_PLAN_G6)
 
@@ -120,6 +217,25 @@ G6_03 = SubjectCurriculum(grade=6, subject_id="G6-03",
             concept_phrase="calling a fully-qualified string function",
             question_what="the capitalized form returned by the upper-case routine on the scroll",
             goal_text="call the upper-case routine on the clojure.string scroll, applied to the four-letter string hare",
+            scenario=(
+                'Bell the hound found a scroll in the riverbank cache bearing the name '
+                'clojure.string. A routine written there was called upper-case. She wanted '
+                'to send the text "hare" through that routine and see what came back in '
+                'a different form.'
+            ),
+            need=(
+                'She needed to call the fully-qualified routine, naming both the scroll '
+                'and the function, so the runtime could find the right tool.'
+            ),
+            mapping=(
+                'The scroll clojure.string is the library, the upper-case function is the '
+                'routine written there, and the text "hare" is the message to be transformed.'
+            ),
+            resolution=(
+                'The REPL reached into the scroll, found the routine, and applied it to the '
+                'text, handing back the result in capitalized form.'
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form='(clojure.string/lower-case "ZEBRA")',
@@ -127,6 +243,24 @@ G6_03 = SubjectCurriculum(grade=6, subject_id="G6-03",
             concept_phrase="calling a fully-qualified string function",
             question_what="the lowercase form of the string ZEBRA produced by clojure.string/lower-case",
             goal_text="call the lowercasing function from clojure.string on a test string",
+            scenario=(
+                'Nearby, another scroll lay open with a lower-case routine marked in its '
+                'margin. Bell wanted to send the text "ZEBRA" through that transformation, '
+                'also reaching into the clojure.string scroll to find the function.'
+            ),
+            need=(
+                'Using the fully-qualified path again, she would invoke the lowercasing '
+                'routine and see what form the text would take.'
+            ),
+            mapping=(
+                'Like the first example, this uses the same library and its routines — the '
+                'scroll clojure.string, the function lower-case, and the input text "ZEBRA".'
+            ),
+            resolution=(
+                'The REPL applied the lowercasing function and returned the text in plain '
+                'lowercase form.'
+            ),
+            tags=("story",),
         ),
     ], subplots=_ROADSIGN_SUBPLOTS, plan_pool=_PLAN_G6)
 
@@ -143,6 +277,24 @@ G6_04 = SubjectCurriculum(grade=6, subject_id="G6-04",
             concept_phrase="testing equality of two identical function calls",
             question_what="whether two calls to the same function with the same argument produce the same result",
             goal_text="test whether two calls to the fully-qualified string uppercasing function with the same argument are equal",
+            scenario=(
+                'Rex stood at the stream bank and performed an experiment: he called the '
+                'same fully-qualified function twice with the same input — the single '
+                'character "x" — and watched what came back both times.'
+            ),
+            need=(
+                'Would the two applications produce identical results, or would the '
+                'runtime give different answers?'
+            ),
+            mapping=(
+                'Each call to clojure.string/upper-case with "x" is a separate invocation, '
+                'and the equality test compares what both applications returned.'
+            ),
+            resolution=(
+                'The REPL executed both calls, received the same result from each, and '
+                'returned true — proving the routine was consistent and reliable.'
+            ),
+            tags=("story",),
         ),
     ], subplots=_ROADSIGN_SUBPLOTS, plan_pool=_PLAN_G6)
 
@@ -157,6 +309,24 @@ G6_05 = SubjectCurriculum(grade=6, subject_id="G6-05",
             concept_phrase="calling a fully-qualified string function",
             question_what="the uppercase form of the string hello produced by clojure.string/upper-case",
             goal_text="call the uppercasing function from clojure.string on a test string",
+            scenario=(
+                'Patch the hound found another scroll in the bank cache carrying the '
+                'upper-case routine. She wanted to send the greeting "hello" through that '
+                'transformation, using the complete name clojure.string/upper-case.'
+            ),
+            need=(
+                'She needed to call the fully-qualified routine, giving both the scroll '
+                'and the function name so the runtime could find and apply it.'
+            ),
+            mapping=(
+                'The scroll clojure.string holds the library, the upper-case function is '
+                'the tool there, and "hello" is the text to be changed.'
+            ),
+            resolution=(
+                'The REPL found the routine in the scroll and applied it, returning the '
+                'greeting in capitalized form.'
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form='(clojure.string/reverse "abc")',
@@ -164,6 +334,24 @@ G6_05 = SubjectCurriculum(grade=6, subject_id="G6-05",
             concept_phrase="calling a fully-qualified string function",
             question_what="the reversed form of the string abc produced by clojure.string/reverse",
             goal_text="call the reversing function from clojure.string on a test string",
+            scenario=(
+                'Continuing her search of the scrolls, Patch found another routine in the '
+                'clojure.string cache — a reverse function. She wanted to send the sequence '
+                '"abc" through it, again using the full path to reach the tool.'
+            ),
+            need=(
+                'Using the fully-qualified name, she would reverse the text and see the '
+                'result the routine produced.'
+            ),
+            mapping=(
+                'Like the first example, the scroll and function are fully named, the input '
+                'is the text "abc", and the runtime will apply the transformation.'
+            ),
+            resolution=(
+                'The REPL executed the reverse function and returned the sequence in '
+                'opposite order.'
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(namespace :owner/item)",
@@ -171,6 +359,24 @@ G6_05 = SubjectCurriculum(grade=6, subject_id="G6-05",
             concept_phrase="extracting the namespace portion of a keyword",
             question_what="the namespace part of a qualified keyword",
             goal_text="extract the namespace portion of a qualified keyword",
+            scenario=(
+                'At the forest edge, Bell found a marker with a qualified keyword written '
+                'there — :owner/item. The mark had two parts separated by a slash, and she '
+                'wondered what lay before the separator.'
+            ),
+            need=(
+                'She wanted to extract just the namespace portion — the first part — so '
+                'she could identify whose cache this belonged to.'
+            ),
+            mapping=(
+                'The qualified keyword :owner/item has two slots: the namespace before the '
+                'slash and the name after it. The namespace function reads just the first part.'
+            ),
+            resolution=(
+                'The REPL extracted the namespace portion and handed back owner, showing '
+                'which part of the cache this marker belonged to.'
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(name :owner/item)",
@@ -178,6 +384,22 @@ G6_05 = SubjectCurriculum(grade=6, subject_id="G6-05",
             concept_phrase="extracting the name portion of a keyword",
             question_what="the name part of a qualified keyword",
             goal_text="extract the name local portion of a qualified keyword",
+            scenario=(
+                'Looking at the same marker :owner/item, Bell now wanted the other half — '
+                'the local name after the slash, to see what kind of thing the owner had stored.'
+            ),
+            need=(
+                'She wanted to pull the name portion from the qualified keyword.'
+            ),
+            mapping=(
+                'While the namespace function reads the first part, the name function reads '
+                'the second part — the local name that follows the slash.'
+            ),
+            resolution=(
+                'The REPL extracted the name portion and handed back item, the final part '
+                'of the qualified mark.'
+            ),
+            tags=("story",),
         ),
     ], subplots=_ROADSIGN_SUBPLOTS, plan_pool=_PLAN_G6)
 
@@ -193,6 +415,26 @@ G6_06 = SubjectCurriculum(grade=6, subject_id="G6-06",
             concept_phrase="accessing the :private flag from metadata",
             question_what="whether the :private metadata is set on a symbol",
             goal_text="check whether the :private flag is present in the metadata of a symbol with :private marker",
+            scenario=(
+                'Rex the hound found a bone marked with symbols scratched along its length. '
+                'The first symbol bore a special rope attached to it marked :private — a sign '
+                'that this symbol was meant only for dogs who knew the cache. {hound_he_she} wanted '
+                'to check the metadata and confirm the flag was there.'
+            ),
+            need=(
+                'He needed to extract the metadata from the marked symbol and see if the '
+                ':private flag had been set.'
+            ),
+            mapping=(
+                'The symbol with its attached rope is the input, the meta function reads the '
+                'attached markers, and looking up the :private key tells whether the symbol is '
+                'restricted.'
+            ),
+            resolution=(
+                'The REPL checked the metadata and returned true — the :private flag was '
+                'indeed attached, marking this symbol as private.'
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(:private (meta 'x))",
@@ -233,6 +475,24 @@ G6_07 = SubjectCurriculum(grade=6, subject_id="G6-07",
             concept_phrase="converting the :private metadata to a boolean",
             question_what="whether a symbol with :private marker evaluates to true when converted to boolean",
             goal_text="convert the :private metadata flag of a symbol marked with :private to a boolean",
+            scenario=(
+                'Bell stood at the pond edge with a bone marked with a private symbol — one '
+                'with the :private rope tied tight. She wanted to test whether that flag, when '
+                'extracted and converted to a simple yes-or-no answer, would tell her true.'
+            ),
+            need=(
+                'Using the boolean conversion, she needed to see if the :private flag would '
+                'become true when evaluated as a single verdict.'
+            ),
+            mapping=(
+                'The symbol with its private rope carries the metadata, the extraction pulls '
+                'the flag, and the boolean conversion gives a clear true-or-false answer.'
+            ),
+            resolution=(
+                'The REPL extracted the flag, converted it to a boolean, and returned true — '
+                'confirming the symbol was indeed marked as private.'
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(boolean (:private (meta 'public)))",
@@ -272,6 +532,25 @@ G6_08 = SubjectCurriculum(grade=6, subject_id="G6-08",
             concept_phrase="calling a function from a required namespace",
             question_what="the uppercase form of the character a produced by clojure.string/upper-case",
             goal_text="call the string uppercasing function from clojure.string on the character a",
+            scenario=(
+                'Patch approached a familiar scroll at the forest edge — the clojure.string '
+                'cache that had served many dogs. She wanted to use the upper-case routine one '
+                'more time, this time on a single character "a".'
+            ),
+            need=(
+                'She would reach fully-qualified across to the scroll and apply the routine, '
+                'trusting the libraries were loaded in the right order.'
+            ),
+            mapping=(
+                'The clojure.string scroll and its upper-case function stand ready, the '
+                'dependency graph is sound, and the fully-qualified call reaches through with '
+                'confidence.'
+            ),
+            resolution=(
+                'The REPL found the routine, applied it to "a", and returned the uppercase '
+                'result — proof the dependencies were in order.'
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(= 'a.b 'a.b)",
@@ -279,6 +558,24 @@ G6_08 = SubjectCurriculum(grade=6, subject_id="G6-08",
             concept_phrase="testing equality of two namespace symbols",
             question_what="whether two identical namespace symbols are equal",
             goal_text="test whether two references to the same namespace symbol are equal",
+            scenario=(
+                'Rex found two marker stones side by side, both bearing the same scratched '
+                'symbol — a.b. He wanted to verify that both marks were truly identical, that '
+                'neither had been altered or miswritten.'
+            ),
+            need=(
+                'The equality test would give him the runtime\'s verdict on whether the two '
+                'symbols matched perfectly.'
+            ),
+            mapping=(
+                'The two marker stones hold the symbol a.b, and the equality predicate checks '
+                'whether the scratches are the same.'
+            ),
+            resolution=(
+                'The REPL compared the symbols and returned true — both stones bore the exact '
+                'same mark, and the locations they named were truly identical.'
+            ),
+            tags=("story",),
         ),
     ], subplots=_ROADSIGN_SUBPLOTS, plan_pool=_PLAN_G6)
 
@@ -294,6 +591,24 @@ G6_09 = SubjectCurriculum(grade=6, subject_id="G6-09",
             concept_phrase="evaluating definitions in sequence to establish dependency order",
             question_what="the value of the second variable after both definitions are loaded in order",
             goal_text="define step1 as 1, then define step2 as step1 plus 1, then return step2",
+            scenario=(
+                'Bell stood at the stream with a plan: first she would scratch a marker stone '
+                'and name it step1, giving it the value 1. Then she would scratch a second stone, '
+                'step2, whose value would depend on the first stone — step1 plus 1.'
+            ),
+            need=(
+                'The stones had to be marked in order, so that when step2\'s value was '
+                'calculated, step1 would already be there to use.'
+            ),
+            mapping=(
+                'The first def is the first marker scratched, the second def uses the first '
+                'marker\'s value, and the sequence ensures loading order is respected.'
+            ),
+            resolution=(
+                'The REPL marked the first stone, then marked the second using the first\'s '
+                'value, and returned the second marker\'s value — the running total.'
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(let [a 1 b (+ a 1)] (+ a b))",
@@ -301,6 +616,25 @@ G6_09 = SubjectCurriculum(grade=6, subject_id="G6-09",
             concept_phrase="establishing local bindings with dependent values",
             question_what="the sum of two variables with the second depending on the first",
             goal_text="bind a to 1, bind b to a plus 1, then return the sum of a and b",
+            scenario=(
+                'Patch picked up two small bones by the pond, ready to bind them to local names. '
+                'The first bone she gripped and named a, holding its value of 1 between her teeth. '
+                'The second bone she would call b, but its value would depend on a — she would add '
+                '1 to whatever a held.'
+            ),
+            need=(
+                'Both bones had to be gripped in the right order, so that when b\'s value was '
+                'calculated, a would already be held.'
+            ),
+            mapping=(
+                'The mouth holds both bones in sequence, the first binding a is set first, then '
+                'the second binding b depends on a, and the form adds them together at the end.'
+            ),
+            resolution=(
+                'The REPL gripped a at 1, then gripped b at a plus 1, and finally added both '
+                'together, returning the running total.'
+            ),
+            tags=("story",),
         ),
     ], subplots=_ROADSIGN_SUBPLOTS, plan_pool=_PLAN_G6)
 
@@ -310,14 +644,55 @@ G6_09 = SubjectCurriculum(grade=6, subject_id="G6-09",
 G6_10 = SubjectCurriculum(grade=6, subject_id="G6-10",
     subject_title="Leiningen and deps.edn", fable="dog-shadow",
     examples=[
-        _ex("(:deps {:deps {:a 1 :b 2}})", {":a": 1, ":b": 2},
-            "accessing a key from a nested map structure",
-            "the value at the :deps key in a deps-style map",
-            goal="extract the value at the :deps key from a nested map"),
-        _ex("(get-in {:paths [\"src\"]} [:paths 0])", "src",
-            "accessing a nested value in a map using a path vector",
-            "the first element from a :paths vector in a deps-style map",
-            goal="extract the first entry from the :paths vector in a deps-style map"),
+        SubjectExample(
+            form="(:deps {:deps {:a 1 :b 2}})",
+            expected={":a": 1, ":b": 2},
+            concept_phrase="accessing a key from a nested map structure",
+            question_what="the value at the :deps key in a deps-style map",
+            goal_text="extract the value at the :deps key from a nested map",
+            scenario=(
+                'Bell the hound found a hollow-log cache {place} divided into nested '
+                'compartments, each labeled with a keyword. The outer label read :deps, and '
+                'inside that compartment lay another set of bones labeled :a and :b.'
+            ),
+            need=(
+                'She wanted to reach into the outer compartment and pull out what lay there — '
+                'the inner cache with all its labeled bones.'
+            ),
+            mapping=(
+                'The hollow-log cache is the outer map, the :deps key opens the first '
+                'compartment, and what\'s stored there is a smaller cache with its own bones.'
+            ),
+            resolution=(
+                'The REPL opened the outer compartment, reached in, and handed back the inner '
+                'cache — still holding the bones labeled :a and :b.'
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form='(get-in {:paths ["src"]} [:paths 0])',
+            expected="src",
+            concept_phrase="accessing a nested value in a map using a path vector",
+            question_what="the first element from a :paths vector in a deps-style map",
+            goal_text="extract the first entry from the :paths vector in a deps-style map",
+            scenario=(
+                'Patch the hound examined a cache with a :paths label, inside which lay a vector '
+                'of text entries pointing to directories. She wanted the first entry only.'
+            ),
+            need=(
+                'Using a path vector — first the key :paths, then the index 0 — she would dig '
+                'down to the exact bone she sought.'
+            ),
+            mapping=(
+                'The cache holds a vector under the :paths key, the path vector is the digging '
+                'sequence, and the first element is what the index 0 reaches.'
+            ),
+            resolution=(
+                'The REPL followed the path down through both layers and handed back the first '
+                'entry — the string "src".'
+            ),
+            tags=("story",),
+        ),
     ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G6)
 
 
@@ -326,14 +701,56 @@ G6_10 = SubjectCurriculum(grade=6, subject_id="G6-10",
 G6_11 = SubjectCurriculum(grade=6, subject_id="G6-11",
     subject_title="Classpath", fable="dog-shadow",
     examples=[
-        _ex("(clojure.string/split \"src:test\" #\":\")", ["src", "test"],
-            "splitting a string by a delimiter",
-            "the vector of parts after splitting a colon-separated path string",
-            goal="split a colon-separated classpath-like string into its individual entries"),
-        _ex("(count [\"src\" \"test\" \"resources\"])", 3,
-            "counting the number of elements in a vector",
-            "the number of entries in a classpath-like vector",
-            goal="count the number of entries in a vector of classpath directories"),
+        SubjectExample(
+            form='(clojure.string/split "src:test" #":")',
+            expected=["src", "test"],
+            concept_phrase="splitting a string by a delimiter",
+            question_what="the vector of parts after splitting a colon-separated path string",
+            goal_text="split a colon-separated classpath-like string into its individual entries",
+            scenario=(
+                'Rex the hound found a scratch-mark {place} that listed two paths bound together '
+                'with a colon: "src:test". The path was a single long text, but it held two '
+                'separate locations.'
+            ),
+            need=(
+                'He needed to split the mark at the colon and separate it into two distinct '
+                'paths so he could visit each location.'
+            ),
+            mapping=(
+                'The scratch-mark is the string to be split, the colon is the boundary, and the '
+                'split function from clojure.string is the knife that cuts at that boundary.'
+            ),
+            resolution=(
+                'The REPL took the mark and cut it apart at the colon, handing back a vector of '
+                'two separate paths.'
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form='(count ["src" "test" "resources"])',
+            expected=3,
+            concept_phrase="counting the number of elements in a vector",
+            question_what="the number of entries in a classpath-like vector",
+            goal_text="count the number of entries in a vector of classpath directories",
+            scenario=(
+                'Patch stood at the river bank and saw three paths scratched on a stone vector: '
+                '"src", "test", and "resources". She needed to know: how many locations were '
+                'listed there?'
+            ),
+            need=(
+                'She would tally the paths in the vector to know how many directories were part '
+                'of the classpath.'
+            ),
+            mapping=(
+                'The vector holds three paths lined up, the count function walks the row, and the '
+                'running tally tells how many entries lay inside.'
+            ),
+            resolution=(
+                'The REPL counted the entries and returned the total — three directories on the '
+                'classpath.'
+            ),
+            tags=("story",),
+        ),
     ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G6)
 
 
@@ -348,6 +765,24 @@ G6_12 = SubjectCurriculum(grade=6, subject_id="G6-12",
             concept_phrase="counting the number of namespace symbols in a project",
             question_what="the number of namespaces in a small project",
             goal_text="count the number of namespace symbols in a vector of three namespaces",
+            scenario=(
+                'Bell the hound found a list of three locations scratched on a flat stone near '
+                'the meadow — race.tortoise, race.hare, and race.shared. These three places '
+                'were part of a single project, and she needed to count how many there were.'
+            ),
+            need=(
+                'She wanted the precise count of the locations in the vector, so she would '
+                'know how many files this project contained.'
+            ),
+            mapping=(
+                'The vector holds the namespace symbols, and the count function tallies how '
+                'many are there, giving the number of namespaces in the project.'
+            ),
+            resolution=(
+                'The REPL counted the markers and returned the tally — three namespaces in '
+                'this small project.'
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(map name ['race.tortoise 'race.hare])",
@@ -355,6 +790,24 @@ G6_12 = SubjectCurriculum(grade=6, subject_id="G6-12",
             concept_phrase="extracting string names from namespace symbols",
             question_what="the vector of namespace names as strings",
             goal_text="extract the string form of each namespace symbol in a vector of two namespaces",
+            scenario=(
+                'Moving along the bank, Patch found a shorter list with just two namespace '
+                'symbols — race.tortoise and race.hare. She wanted to extract the plain string '
+                'form of each symbol in the vector.'
+            ),
+            need=(
+                'She needed to transform the vector of symbols into a vector of their string '
+                'names, so she could speak the paths aloud.'
+            ),
+            mapping=(
+                'The map function applies the name extraction to each symbol in turn, creating '
+                'a new vector of the extracted string forms.'
+            ),
+            resolution=(
+                'The REPL mapped the name function over the symbols and returned a vector of '
+                'strings — the plain text paths of both namespaces.'
+            ),
+            tags=("story",),
         ),
     ], subplots=_ROADSIGN_SUBPLOTS, plan_pool=_PLAN_G6)
 
@@ -370,6 +823,25 @@ G6_13 = SubjectCurriculum(grade=6, subject_id="G6-13",
             concept_phrase="aliasing a fully-qualified function and calling it through the alias",
             question_what="the uppercase form of the string hare when clojure.string/upper-case is called through a local alias",
             goal_text="bind the fully-qualified string uppercasing function to a local alias s and call it on hare",
+            scenario=(
+                'Rex the hound found the fully-qualified path to the clojure.string/upper-case '
+                'function, but the long name was cumbersome for the next stretch of work. He '
+                'gripped the function itself and gave it a short local alias — s — so he could '
+                'call it quickly.'
+            ),
+            need=(
+                'Using the short alias, he would apply the function to the text "hare" and '
+                'get the result without writing out the full qualified name each time.'
+            ),
+            mapping=(
+                'The binding grips the function from the scroll, the short name s is the alias '
+                'held in the mouth, and calling s is the same as calling the original function.'
+            ),
+            resolution=(
+                'The REPL bound the function to s, then applied it to "hare" through the '
+                'alias, returning the uppercase result.'
+            ),
+            tags=("story",),
         ),
     ], subplots=_ROADSIGN_SUBPLOTS, plan_pool=_PLAN_G6)
 
@@ -415,6 +887,24 @@ G6_14 = SubjectCurriculum(grade=6, subject_id="G6-14",
             concept_phrase="extracting the string form of a class symbol",
             question_what="the string form of a Java class symbol",
             goal_text="extract the string form of a Java class symbol",
+            scenario=(
+                'Patch returned to the kennel-master\'s shed where another tool hung on a peg — '
+                'this one labeled with a long Java class name: java.util.Map. She wanted to '
+                'extract the plain text of that host-side label and read it aloud.'
+            ),
+            need=(
+                'She would pull the string form from the quoted class name so she could speak '
+                'the exact path the kennel-master used.'
+            ),
+            mapping=(
+                'The Java class symbol is a mark the kennel-master left, and the name function '
+                'extracts the string text that the mark carries.'
+            ),
+            resolution=(
+                'The REPL traced the label and handed back the string java.util.Map — the '
+                'plain text path to the host tool.'
+            ),
+            tags=("story",),
         ),
     ], subplots=_TOOLSHED_SUBPLOTS, plan_pool=_PLAN_G6)
 
@@ -493,6 +983,24 @@ G6_16 = SubjectCurriculum(grade=6, subject_id="G6-16",
             concept_phrase="testing membership in a set of namespaces",
             question_what="whether a namespace is in the set of required namespaces",
             goal_text="test whether the clojure.string namespace is in the set of required namespaces",
+            scenario=(
+                'Bell the hound kept a set of borrowed scrolls {place} — marker stones scratched '
+                'with the names of libraries she had drawn from the shelf. One stone bore the name '
+                'clojure.string. She wanted to check: was this library truly in her borrowed set?'
+            ),
+            need=(
+                'She would test the membership to confirm the clojure.string library was among the '
+                'scrolls she had actually taken.'
+            ),
+            mapping=(
+                'The set holds the names of all borrowed scrolls, and the contains? test asks: is '
+                'this name in the collection?'
+            ),
+            resolution=(
+                'The REPL checked the set and returned true — clojure.string was indeed there, '
+                'among the scrolls she had required.'
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(contains? #{'clojure.string} 'clojure.set)",
@@ -501,18 +1009,21 @@ G6_16 = SubjectCurriculum(grade=6, subject_id="G6-16",
             question_what="whether a different namespace is in the set of required namespaces",
             goal_text="test whether the clojure.set namespace is in the set of required namespaces",
             scenario=(
-                "Still holding the same set #{'clojure.string}, she now asked: "
-                "is clojure.set in this set? Had she borrowed that scroll?"
+                'Still holding the same set with clojure.string, Patch now wondered about a '
+                'different library — had she also borrowed clojure.set from the shelf? She held '
+                'both names and tested whether the second was in the set.'
             ),
             need=(
-                "She wanted to know whether clojure.set had been taken from the shelf."
+                'The contains? test would tell her whether clojure.set had been taken along '
+                'with clojure.string.'
             ),
             mapping=(
-                "The set holds only the scrolls in it. `(contains? ...)` checks whether "
-                "a name is there — and if it's not in the basket, the answer is false."
+                'The set holds only the scrolls that were actually borrowed; contains? checks '
+                'membership, and if a name is not there, the answer is false.'
             ),
             resolution=(
-                "the runtime returned false — clojure.set was not in the set she had borrowed."
+                'The REPL checked the set and returned false — clojure.set was not among the '
+                'scrolls she had borrowed.'
             ),
             tags=("story",),
         ),

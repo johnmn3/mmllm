@@ -100,6 +100,28 @@ G10_01 = SubjectCurriculum(
             concept_phrase="quoting an addition form",
             question_what="what you get when you quote an addition form",
             goal_text="quote an addition form so it evaluates to a list without computing",
+            scenario=(
+                'Bell the hound stood at the stream bank and scratched a '
+                'pattern into the bark: the shape of an addition, a plus '
+                'sign, two numbers. "This scratch is just the scratch," she '
+                'said, "not the sum itself."'
+            ),
+            need=(
+                'She wanted to send the form itself downriver without the '
+                'runtime computing what it meant. The form needed to come '
+                'back as the list of symbols and numbers, not as their sum.'
+            ),
+            mapping=(
+                'The quote is the instruction to read the scratch literally. '
+                'The form under quote is the exact scratch the dog wants to '
+                'read — not to evaluate it, but to see the shape it holds.'
+            ),
+            resolution=(
+                'The REPL read the quote and returned the form untouched: the '
+                'three symbols in order, the computation never invoked. The '
+                'scratch had stayed a scratch.'
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="'(1 2 3)",
@@ -107,6 +129,28 @@ G10_01 = SubjectCurriculum(
             concept_phrase="the quoted list with three numbers",
             question_what="the result of quoting a three-element list",
             goal_text="quote a list of three numbers so it returns the form itself",
+            scenario=(
+                'Rex the hound wanted to mark three stones by the pond — '
+                'one marked 1, one marked 2, one marked 3. Instead of counting '
+                'them, he made a single scratch-mark that spelled the list '
+                'shape itself.'
+            ),
+            need=(
+                'The scratch had to return the list of three numbers, not their '
+                'count or product. The form had to come back as the ordered '
+                'sequence he had scratched.'
+            ),
+            mapping=(
+                'The quote reader-mark is the instruction: keep this shape '
+                'as data. The list is the form held as a sequence of values, '
+                'and the quote says "read the list, do not evaluate."'
+            ),
+            resolution=(
+                'The REPL read the quote and returned the three numbers in the '
+                'order the scratch had marked. The form came back intact — three '
+                'elements, untouched by evaluation.'
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(let [x 5] `(a ~x b))",
@@ -114,6 +158,29 @@ G10_01 = SubjectCurriculum(
             concept_phrase="a syntax-quoted form with the variable unquoted",
             question_what="what you get when unquoting x inside a syntax-quoted form",
             goal_text="create a form that when x is 5 produces a list containing the value of x",
+            scenario=(
+                'Patch the hound held the bone gripped at 5 and wanted to build '
+                'a marked form that would name the bone in the middle — the '
+                'symbol a before it, the symbol b after. Inside the syntax-quote, '
+                'the tilde would tell the runtime: uncover the value here.'
+            ),
+            need=(
+                'When the binding held x at 5, unquoting inside the form should '
+                'splice in the value 5 itself. The result should be a list where '
+                '5 appears in the middle — not x, but 5.'
+            ),
+            mapping=(
+                'The let-jaws grip x at 5. The backtick is the syntax-quote: '
+                '"build this form by rule." The tilde says "unquote this one '
+                'spot" — substitute the value here, not the symbol.'
+            ),
+            resolution=(
+                'The REPL built the form according to the tilde: the value 5 '
+                'replaced x in the output. The list came back with the bone '
+                '(5) nested between the two symbol-marks, exactly as the scratch '
+                'had intended.'
+            ),
+            tags=("story",),
         ),
     ],
     subplots=_CHALKMARK_SUBPLOTS, plan_pool=_PLAN_G10,
@@ -132,6 +199,30 @@ G10_02 = SubjectCurriculum(
             concept_phrase="building a form by unquoting a variable twice inside syntax-quote",
             question_what="the form produced when x is 10 and unquoted twice",
             goal_text="build a form where a variable is inserted twice into an addition form",
+            scenario=(
+                'Bell the hound held the bone at 10 and scratched a pattern on '
+                'bark: a plus sign, then a tilde-mark to show where the value '
+                'would go, then another tilde. She was building a new form, '
+                'one that would plug the value in at two spots.'
+            ),
+            need=(
+                'When the let bound x to 10, the syntax-quote should build a '
+                'form with the value 10 inserted at both tilde-marks. The result '
+                'should be a list: addition with 10 and 10 as arguments.'
+            ),
+            mapping=(
+                'The backtick tells the runtime to construct a form by the '
+                'scratch. Each tilde says "insert the value here." The entire '
+                'form is built as data, with unquoting substituting the value '
+                'where the tildes point.'
+            ),
+            resolution=(
+                'The REPL built the form, scanning each tilde and inserting 10 '
+                'at both marks. The finished form came back with the addition '
+                'operator and two copies of the value — exactly what the scratch '
+                'had promised.'
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(let [xs [1 2 3]] `(list ~@xs))",
@@ -139,6 +230,29 @@ G10_02 = SubjectCurriculum(
             concept_phrase="building a form by splicing a vector into syntax-quote",
             question_what="the form produced when splicing a three-element vector",
             goal_text="build a form that inserts all elements of a vector into a list call",
+            scenario=(
+                'Rex the hound had cached three bones — marked 1, 2, 3 — in a '
+                'vector. He scratched a new form with the word "list" and then '
+                'a tilde-at sign — meaning: unwrap the vector and splice all '
+                'the bones into this spot.'
+            ),
+            need=(
+                'The splicing had to unpack the vector and spread each bone '
+                'into the form. The result should be a list with the word "list" '
+                'first, then the three bone values flattened out.'
+            ),
+            mapping=(
+                'The backtick constructs the form. The tilde-at says "splice: '
+                'unwrap the vector and put each element here, not the vector '
+                'itself." The form is assembled with the elements laid flat.'
+            ),
+            resolution=(
+                'The REPL built the form, saw the tilde-at, and spliced the '
+                'three bones into the spot. The finished form had the list '
+                'operator with all three values as arguments, no nesting — '
+                'exactly the shape the splice had spelled.'
+            ),
+            tags=("story",),
         ),
     ],
     subplots=_CHALKMARK_SUBPLOTS, plan_pool=_PLAN_G10,
@@ -189,6 +303,31 @@ G10_03 = SubjectCurriculum(
             concept_phrase="defining a macro that repeats its argument",
             question_what="the value returned by twice expanding to a do-block with the unquoted argument repeated",
             goal_text="define a macro named twice that emits its argument twice in a do block, then call it",
+            scenario=(
+                'Patch the hound scratched a rule on bark: the pattern twice '
+                'would expand to a do-block where the argument was unquoted '
+                'and repeated. Twice meant "play this bone twice and take the '
+                'result from the second play."'
+            ),
+            need=(
+                'When any later form called twice with an argument, the macro '
+                'would rewrite it before the runtime ever evaluated it. The call '
+                'twice 7 should expand to a do-block with 7 twice, and the '
+                'second 7 would be what came back.'
+            ),
+            mapping=(
+                'The defmacro sets the rule on the bark. The macro name is '
+                'twice, the pattern is the syntax-quoted form with the tilde '
+                'showing where 7 goes. When invoked, the rule rewrites the call '
+                'into the expanded form.'
+            ),
+            resolution=(
+                'The REPL set the rule, then when twice 7 was called, it '
+                'rewrote the call into (do 7 7). The do-block executed 7 twice '
+                'and returned the second value. The macro had done the rewriting '
+                'work once; every use benefited.'
+            ),
+            tags=("story",),
         ),
     ],
     subplots=_REWRITERULE_SUBPLOTS, plan_pool=_PLAN_G10,
@@ -207,6 +346,30 @@ G10_04 = SubjectCurriculum(
             concept_phrase="the one-step expansion of the when-macro call",
             question_what="the expanded form after one level of macro expansion",
             goal_text="expand a when-macro call one step to see what code it produces",
+            scenario=(
+                'Bell the hound found an old scratch-mark on bark: when. She '
+                'wanted to see what scratch-mark it would be rewritten into — '
+                'not to run the form yet, but to watch the rewrite happen once.'
+            ),
+            need=(
+                'Macroexpand-1 would take the scratch-mark as written and show '
+                'what it became after one pass of the rewriter. The form '
+                '"(when true 1)" would be rewritten into the if-form it '
+                'abbreviates, but no further.'
+            ),
+            mapping=(
+                'Macroexpand-1 is the magnifying glass. The scratch-mark is '
+                'the original form, and the rewritten form is what the magnifier '
+                'shows after one layer of rewriting. No evaluation yet — just '
+                'the rewrite revealed.'
+            ),
+            resolution=(
+                'The REPL looked through the magnifier and saw the when scratch '
+                'become an if-form with a do-block. The intermediate form was '
+                'shown — one step of rewriting, nothing computed, nothing '
+                'evaluated. The scratch-mark itself had been read out.'
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(macroexpand-1 '(or a b))",
@@ -215,6 +378,30 @@ G10_04 = SubjectCurriculum(
             concept_phrase="the one-step expansion of the or-macro call",
             question_what="the intermediate form after expanding the macro once",
             goal_text="expand an or-macro call one step to reveal its internal structure",
+            scenario=(
+                'Rex the hound studied a complex scratch-mark at the stream: or. '
+                'He did not want to know what it evaluated to — he wanted to see '
+                'the intermediate form it would be rewritten into, the one step '
+                'that would happen before evaluation.'
+            ),
+            need=(
+                'Macroexpand-1 with the or-form would reveal the inner rewrite: '
+                'the let*-binding and the if-form it produced. One pass only — '
+                'the form was not to be evaluated, just rewritten and revealed.'
+            ),
+            mapping=(
+                'The or scratch-mark is the macro call. Macroexpand-1 is the '
+                'device that shows what one rewrite produces. The complex form '
+                'with let* and if is the intermediate step — the form that '
+                'exists after the macro rewrites but before evaluation.'
+            ),
+            resolution=(
+                'The REPL expanded once and showed the form beneath the scratch: '
+                'a let*-binding with a safe copy of the argument, then an if that '
+                'checked the value. The rewrite was bare — not evaluated, just '
+                'shown. Rex could read the intermediate structure clearly.'
+            ),
+            tags=("story",),
         ),
     ],
     subplots=_REWRITERULE_SUBPLOTS, plan_pool=_PLAN_G10,
@@ -233,6 +420,29 @@ G10_05 = SubjectCurriculum(
             concept_phrase="the complete expansion of the when-macro call",
             question_what="the fully expanded form after all macro passes",
             goal_text="fully expand a when-macro call to reveal the if-form it becomes",
+            scenario=(
+                'Patch the hound came to the bank with a scratched form: when. '
+                'This time, the hound wanted to see the final form — not one '
+                'rewrite step, but all the way through. How many layers of '
+                'rewriting would it take?'
+            ),
+            need=(
+                'Macroexpand — with no limit — would keep rewriting until no '
+                'more macros remained. The when-form would be fully unwound into '
+                'the innermost form that no macro could touch.'
+            ),
+            mapping=(
+                'Macroexpand is the full-passage view. The when-mark is the '
+                'original scratch, and the final if-form is what it becomes when '
+                'all rewrites are done. Every layer of nesting is unwound.'
+            ),
+            resolution=(
+                'The REPL expanded fully and showed the complete form: the '
+                'when had become an if with a do-block inside. No more macros '
+                'remained to rewrite. The final form was bare — evaluation-ready, '
+                'though not yet evaluated.'
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(macroexpand '(-> 1 inc inc))",
@@ -240,6 +450,29 @@ G10_05 = SubjectCurriculum(
             concept_phrase="the complete expansion of the thread-first call",
             question_what="the final form after threading the value through all steps",
             goal_text="fully expand a thread-first macro call to see how the value threads through",
+            scenario=(
+                'Bell the hound picked up the bone marked 1 and studied the '
+                'threading scratch-mark at the bank: arrow-right inc inc. She '
+                'wanted to see the full path the bone would take through each '
+                'step — how the form would be rewritten from start to finish.'
+            ),
+            need=(
+                'The thread-first macro would rewrite the arrow-form to show '
+                'how the value threads through each function. The final expanded '
+                'form would show the nested function calls in their true order.'
+            ),
+            mapping=(
+                'The thread-first scratch-mark is the shorthand. Macroexpand '
+                'reveals the full path by unfolding how each function nests '
+                'around the value. The threading is made visible as nested calls.'
+            ),
+            resolution=(
+                'The REPL expanded the arrow-form fully. The value 1 was shown '
+                'threaded first through inc, then the result through inc again. '
+                'The final nested form made the path clear: inc(inc(1)). The '
+                'shorthand had expanded to show the full journey.'
+            ),
+            tags=("story",),
         ),
     ],
     subplots=_REWRITERULE_SUBPLOTS, plan_pool=_PLAN_G10,
@@ -258,6 +491,30 @@ G10_06 = SubjectCurriculum(
             concept_phrase="executing multiple expressions when a condition is true",
             question_what="the result of the last expression when the condition holds",
             goal_text="execute three expressions and return the value of the last when the condition is true",
+            scenario=(
+                'Rex the hound stood at the fork near the stream. The path ahead '
+                'was clear (true). He had three tasks to do before crossing. He '
+                'scratched the when-form: if the condition held, do all three '
+                'and return the last result.'
+            ),
+            need=(
+                'When the condition was true, all three expressions should run '
+                'in order, and the final value (3) should come back. If the '
+                'condition had been false, the entire block would be skipped.'
+            ),
+            mapping=(
+                'The when-form is the rule at the fork. The condition true is '
+                'the path-check. The three expressions are the tasks to do only '
+                'if the check passes. The final result is what the last task '
+                'produces.'
+            ),
+            resolution=(
+                'The REPL checked the condition (true), found the path clear, '
+                'and ran all three tasks in order. The last task produced 3, '
+                'which came back as the verdict. The fork had sent the hound '
+                'down the right path.'
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(when false 1 2 3)",
@@ -265,6 +522,30 @@ G10_06 = SubjectCurriculum(
             concept_phrase="executing expressions when a condition is false",
             question_what="the result when the condition does not hold",
             goal_text="evaluate a when-form where the condition is false",
+            scenario=(
+                'Patch the hound came to the fork by the river bank. The path '
+                'ahead was blocked (false). The when-form was set: do these '
+                'three tasks only if the path is clear. Since it was not, the '
+                'entire block should be skipped.'
+            ),
+            need=(
+                'When the condition was false, none of the three expressions '
+                'should run. The form should return nil — no verdict, no value. '
+                'The fork had blocked the way.'
+            ),
+            mapping=(
+                'The when-form is the rule. The condition false is the blocked '
+                'path. The three expressions are the tasks that must be skipped '
+                'entirely because the gate is shut. The nil response means: '
+                '"not done."'
+            ),
+            resolution=(
+                'The REPL checked the condition (false), found the path blocked, '
+                'and skipped all three tasks entirely. No expressions ran. The '
+                'form returned nil — the hound waited at the blocked fork, '
+                'unable to proceed.'
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(when-not false :ok)",
@@ -272,6 +553,27 @@ G10_06 = SubjectCurriculum(
             concept_phrase="executing an expression when a negated condition is true",
             question_what="the result when using when-not with a false condition",
             goal_text="use when-not to execute an expression when the condition is false",
+            scenario=(
+                'Bell the hound wanted the opposite check: run the expression only '
+                'if the condition was false. She scratched when-not false and the '
+                'keyword :ok. "If danger is NOT present, say all is well."'
+            ),
+            need=(
+                'When-not negates the condition. With false as input, the negation '
+                'is true, so the expression :ok should execute and come back.'
+            ),
+            mapping=(
+                'The when-not-form reverses the gate. The false condition is '
+                'negated to true (no danger is present). The keyword :ok is the '
+                'all-clear signal. When the gate is open via negation, the signal '
+                'comes back.'
+            ),
+            resolution=(
+                'The REPL negated the condition (false → true), found the gate '
+                'open, and returned :ok. The all-clear signal came back, proving '
+                'the hound could proceed without danger.'
+            ),
+            tags=("story",),
         ),
     ],
     subplots=_REWRITERULE_SUBPLOTS, plan_pool=_PLAN_G10,
@@ -290,6 +592,30 @@ G10_07 = SubjectCurriculum(
             concept_phrase="threading a value through multiple functions in sequence",
             question_what="the result of threading 5 through three increments",
             goal_text="thread the value 5 through inc three times using thread-first",
+            scenario=(
+                'Bell the hound held the bone marked 5 and laid out a sniffing '
+                'trail with three increments in order. "Watch the bone pass from '
+                'sniff to sniff," she said. "Each step takes the previous result '
+                'as the first argument."'
+            ),
+            need=(
+                'The bone starts at 5. After the first sniff (inc), it becomes '
+                '6. The second sniff takes 6 and produces 7. The third takes 7 '
+                'and produces 8. The final result is what the last sniff yields.'
+            ),
+            mapping=(
+                'The thread-first arrow is the trail guide. The bone is the value '
+                'passed from sniff to sniff. Each sniff (function) takes the bone '
+                'and produces a new value. The last sniff is what gets carried '
+                'home.'
+            ),
+            resolution=(
+                'The REPL followed the sniffing-trail, passing the bone through '
+                'each step. At the end, the bone had become 8 — three increments '
+                'complete. The trail had threaded it perfectly to the final '
+                'result.'
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(->> [1 2 3 4] (filter even?) (map inc) (reduce +))",
@@ -297,6 +623,29 @@ G10_07 = SubjectCurriculum(
             concept_phrase="threading a vector through filter, map, and reduce as the last argument",
             question_what="the sum of mapped values after filtering even numbers",
             goal_text="thread a vector through filter, map, and reduce using thread-last",
+            scenario=(
+                'Rex the hound had a vector of four bones and a multi-step '
+                'sniffing-trail. Thread-last would pass the bones as the final '
+                'argument to each step — first filtering for even counts, then '
+                'incrementing each, then summing the result.'
+            ),
+            need=(
+                'The vector enters the filter, keeping only even-counted bones. '
+                'The filtered bones go to map inc, each incremented. The mapped '
+                'bones then go to reduce +, producing the sum.'
+            ),
+            mapping=(
+                'The thread-last arrow is the trail for last-argument threading. '
+                'The bones move from step to step, each one feeding into the next '
+                'as the final argument. The trail ends with a running total.'
+            ),
+            resolution=(
+                'The REPL followed the thread-last trail: filtered to [2, 4], '
+                'mapped to [3, 5], then reduced to 8 (3+5). The threading had '
+                'transformed the bones step by step, each function reading the '
+                'result from the one before.'
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(macroexpand '(-> x f g))",
@@ -304,6 +653,29 @@ G10_07 = SubjectCurriculum(
             concept_phrase="the expanded form of a thread-first call",
             question_what="the nested function calls after expansion",
             goal_text="expand a thread-first macro to see how functions compose",
+            scenario=(
+                'Patch the hound wanted to see the full sniffing-trail laid out '
+                'in bare form. The arrow-mark x f g was the shorthand, but how '
+                'would it look when expanded? The nested calls would show the '
+                'true composition.'
+            ),
+            need=(
+                'When expanded, the thread-first form should show x threaded '
+                'first through f, then the result threaded through g. The nesting '
+                'would reveal: g(f(x)).'
+            ),
+            mapping=(
+                'The arrow-form is the shorthand trail. Macroexpand reveals the '
+                'bare function composition: g as the outer call wrapping f as the '
+                'inner call wrapping x. The nesting is the true structure.'
+            ),
+            resolution=(
+                'The REPL expanded the arrow-form and showed the nested calls: '
+                'g with f(x) inside. The thread-first had been unpacked to bare '
+                'function application. Patch could see exactly how the bone would '
+                'pass from f into g.'
+            ),
+            tags=("story",),
         ),
     ],
     subplots=_RECIPE_SUBPLOTS, plan_pool=_PLAN_G10,
@@ -323,6 +695,28 @@ G10_08 = SubjectCurriculum(
             concept_phrase="calling a plain function that adds two numbers",
             question_what="the sum returned by calling add-fn with arguments 3 and 4",
             goal_text="define a function add-fn and call it to add 3 and 4",
+            scenario=(
+                'Bell the hound set a sniffing-trail rule named add-fn. When a '
+                'dog followed the trail with bones 3 and 4, the trail would '
+                'evaluate the bones first, then add them. The function takes '
+                'pre-computed values.'
+            ),
+            need=(
+                'When add-fn is called with 3 and 4, both arguments are computed '
+                'before the function sees them. The function receives the values '
+                'and returns their sum.'
+            ),
+            mapping=(
+                'A function is a nose-trail that expects computed values. The '
+                'bones come in as numbers, not as marked positions. The trail '
+                'adds them and yields the total.'
+            ),
+            resolution=(
+                'The REPL called add-fn with 3 and 4, evaluated both arguments, '
+                'then walked the trail. The trail took the values and produced '
+                '7. A plain function had done the work straightforwardly.'
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(do (defmacro add-mac [a b] `(+ ~a ~b)) (add-mac 3 4))",
@@ -330,6 +724,29 @@ G10_08 = SubjectCurriculum(
             concept_phrase="calling a macro that emits an addition form",
             question_what="the sum returned when add-mac expands to an addition of the unquoted arguments",
             goal_text="define a macro add-mac and call it to add 3 and 4",
+            scenario=(
+                'Rex the hound set a rewrite-rule named add-mac. Unlike the '
+                'function, the macro would rewrite the call first — before any '
+                'evaluation. It would receive the unevaluated marks 3 and 4, '
+                'then build a new form.'
+            ),
+            need=(
+                'When add-mac is called with 3 and 4, the macro receives the '
+                'marks themselves, not computed values. It rewrites them into an '
+                'addition form, which is then evaluated.'
+            ),
+            mapping=(
+                'A macro is a rewrite-rule. It takes unevaluated forms as input '
+                'and produces a new form as output. The unquoting splices the '
+                'arguments into the generated form.'
+            ),
+            resolution=(
+                'The REPL called add-mac, which rewrote the call into (+ 3 4). '
+                'The rewritten form was then evaluated to produce 7. The macro '
+                'had done the rewriting work; the result was the same but the '
+                'path was different.'
+            ),
+            tags=("story",),
         ),
     ],
     subplots=_REWRITERULE_SUBPLOTS, plan_pool=_PLAN_G10,
@@ -349,6 +766,28 @@ G10_09 = SubjectCurriculum(
             concept_phrase="testing whether gensym produces a symbol",
             question_what="whether a generated symbol is of type symbol",
             goal_text="test that gensym returns a symbol",
+            scenario=(
+                'Patch the hound wanted to scratch a fresh mark on bark — one '
+                'that had never been used before. Gensym would generate a brand '
+                'new symbol each time. But was it truly a symbol, or just a '
+                'peculiar mark?'
+            ),
+            need=(
+                'The symbol? predicate would test whether the gensym result was '
+                'a genuine symbol. If true, the mark was legitimate and could be '
+                'used as a binding.'
+            ),
+            mapping=(
+                'Gensym is the mark-generator. The symbol? test is the '
+                'verification. A true result means the mark is a valid symbol '
+                'that can be used in the language.'
+            ),
+            resolution=(
+                'The REPL called gensym and got a fresh mark. The symbol? test '
+                'confirmed it was a proper symbol. Patch could use it as a '
+                'binding without fear of collision.'
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(let [a (gensym \"x_\") b (gensym \"x_\")] (= a b))",
@@ -356,6 +795,29 @@ G10_09 = SubjectCurriculum(
             concept_phrase="comparing two gensyms created with the same prefix",
             question_what="whether two fresh gensyms are identical",
             goal_text="generate two gensyms with the same prefix and check if they are equal",
+            scenario=(
+                'Bell the hound generated two fresh marks, both prefixed "x_". '
+                'But each gensym call produced a unique symbol — even with the '
+                'same prefix, the two marks would be different. She bound them '
+                'in a let and tested whether they were equal.'
+            ),
+            need=(
+                'The two gensyms should be distinct. Even though they share the '
+                'prefix "x_", each fresh symbol carries a unique identifier. The '
+                'equality test should return false.'
+            ),
+            mapping=(
+                'Each gensym call is a new mark. The prefix is just a label — '
+                'it does not make two gensyms identical. The let binds two '
+                'different marks. The equality test reveals the difference.'
+            ),
+            resolution=(
+                'The REPL generated two fresh marks with the same prefix but '
+                'different serial numbers. The equality test returned false — '
+                'they were not equal. Fresh marks, even with the same label, '
+                'remain distinct.'
+            ),
+            tags=("story",),
         ),
     ],
     subplots=_REWRITERULE_SUBPLOTS, plan_pool=_PLAN_G10,
@@ -378,6 +840,30 @@ G10_10 = SubjectCurriculum(
             concept_phrase="defining and calling a hygienic if-let macro",
             question_what="the result returned when safe-if-let expands to if-let with binding [x 5] and then-branch (* x 2)",
             goal_text="define a safe-if-let macro and call it with x bound to 5",
+            scenario=(
+                'Bell the hound sketched a careful macro-rule on bark. Instead '
+                'of letting the binding name sneak in unseen (an anaphoric trick), '
+                'she made the caller provide the binding explicitly. The rule would '
+                'expand to if-let with the binding passed in.'
+            ),
+            need=(
+                'When the macro was called with [x 5] as the binding, it should '
+                'expand to if-let and evaluate the then-branch with x bound. The '
+                'value x at 5 would be used in the multiplication, yielding the '
+                'running total.'
+            ),
+            mapping=(
+                'The defmacro is the rule. The binding parameter receives the '
+                'explicit [x 5]. The unquoting splices the binding and branches '
+                'into the if-let form. The macro does the rewriting hygienically.'
+            ),
+            resolution=(
+                'The REPL set the macro-rule, then called it with the binding. '
+                'The rule expanded to if-let, binding x to 5. The then-branch '
+                'ran and produced 10 (5 * 2). The explicit binding prevented '
+                'any confusion.'
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(if-let [x 7] (* x x) 0)",
@@ -385,6 +871,28 @@ G10_10 = SubjectCurriculum(
             concept_phrase="using the built-in if-let with an explicit binding",
             question_what="the result of the then-branch when the binding succeeds",
             goal_text="use if-let to bind x to 7 and return the square of x",
+            scenario=(
+                'Rex the hound found the if-let rule carved on the bank. It would '
+                'bind x to a value — 7 in this case — and test whether the binding '
+                'succeeded. If it did, the then-branch would run with x in scope.'
+            ),
+            need=(
+                'When the binding x to 7 succeeded, the then-branch (* x x) would '
+                'execute with x at 7. The multiplication would produce the square '
+                'of 7, which is 49.'
+            ),
+            mapping=(
+                'The if-let is the conditional binding. The binding [x 7] is the '
+                'test and scope. The then-branch is the code that runs when the '
+                'binding succeeds. The x is available within that branch.'
+            ),
+            resolution=(
+                'The REPL executed if-let, bound x to 7 successfully, and ran the '
+                'then-branch. The multiplication (* x x) with x at 7 produced 49. '
+                'The binding had worked, the condition had held, and the verdict '
+                'came back.'
+            ),
+            tags=("story",),
         ),
     ],
     subplots=_REWRITERULE_SUBPLOTS, plan_pool=_PLAN_G10,
@@ -404,6 +912,29 @@ G10_11 = SubjectCurriculum(
             concept_phrase="using the quote reader macro",
             question_what="the form read by the quote reader",
             goal_text="use the quote reader macro to read a list of three numbers",
+            scenario=(
+                'Patch the hound stood at the scribe\'s stone where reading-marks '
+                'were inscribed. The apostrophe-mark meant: read this as written, '
+                'do not evaluate. The list (1 2 3) was scratched beneath it, and '
+                'the hound wanted to see what the reader would return.'
+            ),
+            need=(
+                'When the reader saw the quote-mark, it would take the list as '
+                'data, not as a form to evaluate. The three numbers would come '
+                'back in the order scratched — a sequence, not a computation.'
+            ),
+            mapping=(
+                'The quote-mark is the reading convention. The list is the form. '
+                'The reader looks at the mark and treats the form as data. No '
+                'evaluation happens — just reading.'
+            ),
+            resolution=(
+                'The REPL read the quote-mark and returned the list untouched: '
+                '[1, 2, 3]. The three numbers came back in sequence, exactly as '
+                'the scratch had held them. The quote had told the reader to '
+                'preserve the form.'
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(#(* % %) 6)",
@@ -411,6 +942,28 @@ G10_11 = SubjectCurriculum(
             concept_phrase="using the anonymous-function reader macro",
             question_what="the result of calling the generated function",
             goal_text="use the #(...) reader macro to create a function that squares its argument",
+            scenario=(
+                'Bell the hound found a shorthand reading-mark on bark: #(* % %). '
+                'This was the scribe\'s way of saying "make a quick function where '
+                '%  is the argument." The function would take 6 and square it. No '
+                'need for a named function — the shorthand did the work.'
+            ),
+            need=(
+                'The reader-mark would expand the shorthand into a proper function '
+                'that takes one argument. When 6 was passed in, the multiplication '
+                'would happen with % replaced by 6, yielding the product.'
+            ),
+            mapping=(
+                'The #(...) mark is the reader convention for anonymous functions. '
+                'The % is the argument placeholder. The * is the operation. The '
+                'reader converts the shorthand into a function ready to call.'
+            ),
+            resolution=(
+                'The REPL read the shorthand and built a function. When called '
+                'with 6, the function computed (* 6 6), which gave 36. The reader '
+                'macro had turned the compact scratch into a working function.'
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="[1 #_ 2 3]",
@@ -418,6 +971,28 @@ G10_11 = SubjectCurriculum(
             concept_phrase="using the discard reader macro to skip an element",
             question_what="the vector after the middle element is discarded",
             goal_text="use the #_ reader macro to skip an element in a vector",
+            scenario=(
+                'Rex the hound scratched a vector with three bones marked 1, 2, 3. '
+                'But the middle bone was problematic — he did not want it. So he '
+                'placed the discard-mark #_ just before the 2. The reader would '
+                'skip over it entirely.'
+            ),
+            need=(
+                'When the reader saw the #_ mark, it would consume the form '
+                'immediately following and discard it. The 2 would be removed, '
+                'leaving only the 1 and the 3 in the vector.'
+            ),
+            mapping=(
+                'The #_ mark is the discard convention. The 2 is the form to skip. '
+                'The reader looks at the mark, takes the next form, and throws it '
+                'away. The rest of the vector remains.'
+            ),
+            resolution=(
+                'The REPL read the vector and saw the discard-mark. It consumed the '
+                '2 and removed it from the result. The final vector came back with '
+                'only [1, 3] — the middle bone had been skipped entirely.'
+            ),
+            tags=("story",),
         ),
     ],
     subplots=_SCRIBE_SUBPLOTS, plan_pool=_PLAN_G10,
@@ -437,6 +1012,29 @@ G10_12 = SubjectCurriculum(
             concept_phrase="testing whether a tagged literal reads as an instant",
             question_what="whether the inst? predicate returns true",
             goal_text="test that a tagged literal with #inst reads as an instant",
+            scenario=(
+                'Patch the hound found a tagged scratch-mark on the bank: #inst. '
+                'This was the scribe\'s way of saying "read this string as a moment '
+                'in time, not just text." The string "2024-01-01" was inscribed '
+                'beneath the tag.'
+            ),
+            need=(
+                'The reader would see the #inst tag and convert the string into a '
+                'proper instant (a time value). The inst? predicate would test '
+                'whether the result was truly an instant.'
+            ),
+            mapping=(
+                'The #inst tag is the reading convention. The string is the data '
+                'to be tagged. The reader converts the string into an instant. The '
+                'inst? test confirms the type.'
+            ),
+            resolution=(
+                'The REPL read the tagged literal and converted "2024-01-01" into '
+                'an instant. The inst? predicate returned true — the value was '
+                'indeed an instant. The tag had told the reader how to interpret '
+                'the string.'
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(uuid? #uuid \"00000000-0000-0000-0000-000000000000\")",
@@ -444,6 +1042,27 @@ G10_12 = SubjectCurriculum(
             concept_phrase="testing whether a tagged literal reads as a uuid",
             question_what="whether the uuid? predicate returns true",
             goal_text="test that a tagged literal with #uuid reads as a uuid",
+            scenario=(
+                'Bell the hound discovered another tag on the scribe\'s stone: #uuid. '
+                'This meant "read the string as a unique identifier, not plain text." '
+                'The string was a long sequence of zeros and dashes, a classic marker '
+                'for a universally unique bone.'
+            ),
+            need=(
+                'The reader would convert the string into a proper UUID value. The '
+                'uuid? predicate would confirm whether the result was truly a UUID.'
+            ),
+            mapping=(
+                'The #uuid tag is the reading convention. The string is the UUID '
+                'data to be parsed. The reader interprets the format and creates a '
+                'UUID object. The uuid? test verifies the type.'
+            ),
+            resolution=(
+                'The REPL read the tagged literal and converted the string into a '
+                'UUID. The uuid? predicate returned true — the value was a proper '
+                'UUID. The tag had guided the reader to parse correctly.'
+            ),
+            tags=("story",),
         ),
     ],
     subplots=_SCRIBE_SUBPLOTS, plan_pool=_PLAN_G10,
@@ -463,6 +1082,28 @@ G10_13 = SubjectCurriculum(
             concept_phrase="parsing a number string with edn/read-string",
             question_what="the parsed value from the EDN source",
             goal_text="use edn/read-string to parse a number from a string",
+            scenario=(
+                'Rex the hound held a message-bone scratched with the text "42". '
+                'It was not a number yet — it was just a string of characters. He '
+                'used edn/read-string to ask the reader to parse the message as '
+                'Clojure data.'
+            ),
+            need=(
+                'The edn/read-string function would read the string following the '
+                'EDN conventions and convert it into a proper number. The string '
+                '"42" would become the integer 42.'
+            ),
+            mapping=(
+                'The message-bone is the string. The edn/read-string is the '
+                'parsing function. The EDN format tells the reader how to interpret '
+                'the scratches. The result is a parsed value.'
+            ),
+            resolution=(
+                'The REPL passed the string to edn/read-string. The parser read the '
+                'characters and recognized a number. The string was converted into '
+                'the integer 42. The bone\'s message had been decoded.'
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(clojure.edn/read-string \"[:a :b :c]\")",
@@ -470,6 +1111,29 @@ G10_13 = SubjectCurriculum(
             concept_phrase="parsing a vector string with edn/read-string",
             question_what="the parsed vector from the EDN source",
             goal_text="use edn/read-string to parse a vector of keywords from a string",
+            scenario=(
+                'Patch the hound carried a message-bone scratched with "[:a :b :c]". '
+                'The scratch looked like a vector of keywords, but it was still just '
+                'text on the bone. Edn/read-string would parse the message and turn '
+                'it into real data.'
+            ),
+            need=(
+                'The edn/read-string function would read the string and recognize the '
+                'vector notation with three keyword symbols inside. The string would '
+                'become a parsed vector with three keyword values.'
+            ),
+            mapping=(
+                'The message-bone is the string. The edn/read-string is the parser. '
+                'The vector brackets and colons tell the reader what structure to '
+                'build. The result is a parsed sequence of keywords.'
+            ),
+            resolution=(
+                'The REPL passed the string to edn/read-string. The parser read the '
+                'characters, recognized the vector with three keywords, and built the '
+                'data structure. The message-bone was decoded into a vector of three '
+                'keyword symbols.'
+            ),
+            tags=("story",),
         ),
     ],
     subplots=_SCRIBE_SUBPLOTS, plan_pool=_PLAN_G10,
@@ -488,6 +1152,28 @@ G10_14 = SubjectCurriculum(
             concept_phrase="evaluating a quoted form at runtime",
             question_what="the result of evaluating the quoted addition",
             goal_text="evaluate a quoted addition form at runtime",
+            scenario=(
+                'Bell the hound had a quoted form scratched on bark: (+ 1 2 3). '
+                'The quote kept it as a form, not evaluated. But she wanted to ask '
+                'the runtime to evaluate it later — not at read-time, but when she '
+                'called eval explicitly.'
+            ),
+            need=(
+                'The eval function would take the quoted form and ask the runtime '
+                'to evaluate it right then. The addition would be computed, and the '
+                'sum would come back as the result.'
+            ),
+            mapping=(
+                'The quoted form is the data. The eval is the function that asks the '
+                'runtime to evaluate the form. The runtime computes the addition and '
+                'returns the running total.'
+            ),
+            resolution=(
+                'The REPL called eval with the quoted form. The runtime evaluated it '
+                'as an addition, computed 1 + 2 + 3, and returned 6. The quote had '
+                'delayed evaluation; eval had triggered it.'
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(eval (list '+ 4 5))",
@@ -495,6 +1181,27 @@ G10_14 = SubjectCurriculum(
             concept_phrase="evaluating a dynamically constructed form",
             question_what="the result of evaluating the constructed list",
             goal_text="construct a list that represents addition and evaluate it",
+            scenario=(
+                'Rex the hound built a form dynamically by assembling pieces: the '
+                'quoted + symbol, the number 4, and the number 5. The list function '
+                'joined them into a form (+ 4 5). Now he wanted eval to run the form.'
+            ),
+            need=(
+                'The dynamically constructed form (+ 4 5) would be passed to eval. '
+                'The eval function would ask the runtime to evaluate it as an '
+                'addition and return the sum.'
+            ),
+            mapping=(
+                'The list function builds the form. The quoted + is the operator. '
+                'The numbers are the operands. Eval triggers the runtime to '
+                'evaluate the constructed form.'
+            ),
+            resolution=(
+                'The REPL constructed the list dynamically, then passed it to eval. '
+                'The eval function asked the runtime to compute the addition 4 + 5, '
+                'which yielded 9. The dynamic form had been evaluated on demand.'
+            ),
+            tags=("story",),
         ),
     ],
     subplots=_REWRITERULE_SUBPLOTS, plan_pool=_PLAN_G10,
@@ -516,6 +1223,28 @@ G10_15 = SubjectCurriculum(
             concept_phrase="calling an anonymous function to add two arguments",
             question_what="the sum of 3 and 4",
             goal_text="use an anonymous function to add two numbers",
+            scenario=(
+                'Patch the hound defined a quick function right there on the trail: '
+                '(fn [x y] (+ x y)). No macro tricks, no rewriting — just a nose-trail '
+                'that takes two arguments and returns their sum. The function was '
+                'unnamed but ready to use.'
+            ),
+            need=(
+                'When called immediately with 3 and 4, the function would receive '
+                'the computed values, add them, and return the running total. No '
+                'syntax shaping was needed — a plain function would do the work.'
+            ),
+            mapping=(
+                'The anonymous function is the nose-trail. The parameters x and y '
+                'are the bones passed in. The addition is the computation. The '
+                'function is called directly with the values.'
+            ),
+            resolution=(
+                'The REPL created the function, called it with 3 and 4, and the '
+                'function returned their sum: 7. No macros, no rewriting — just a '
+                'straightforward function call. Simple sufficed.'
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(do \"prefer fn unless you must shape syntax\" "
@@ -524,6 +1253,27 @@ G10_15 = SubjectCurriculum(
             concept_phrase="applying a function to each element of a collection",
             question_what="the incremented values",
             goal_text="use map to increment each element of a list",
+            scenario=(
+                'Bell the hound had a vector of three bones: [1 2 3]. She wanted to '
+                'increment each one. The map function would walk the nose-trail inc '
+                'over every bone in the sequence, applying inc to each in turn.'
+            ),
+            need=(
+                'The map function would pair with inc and process each element. Each '
+                'bone would be incremented by one, producing a new sequence of three '
+                'values: [2 3 4].'
+            ),
+            mapping=(
+                'The map is the function applicator. The inc is the nose-trail to '
+                'follow. The vector is the bones to process. The result is a new '
+                'sequence with the trail applied to each bone.'
+            ),
+            resolution=(
+                'The REPL applied map with inc to the vector. Each bone was passed '
+                'through the inc trail in order. The result came back as [2 3 4] — '
+                'each element incremented. No macros needed — a function sufficed.'
+            ),
+            tags=("story",),
         ),
     ],
     subplots=_REWRITERULE_SUBPLOTS, plan_pool=_PLAN_G10,
@@ -545,6 +1295,30 @@ G10_16 = SubjectCurriculum(
             concept_phrase="defining and using a with-X macro pattern",
             question_what="the value returned when with-tortoise-pace expands to a let-block and runs the body",
             goal_text="define a with-tortoise-pace macro and call it to execute a body",
+            scenario=(
+                'Rex the hound carved a macro-pattern on bark called with-tortoise-pace. '
+                'The pattern would capture the dog\'s steady, deliberate approach. When '
+                'the macro was called, it would bind a pace variable and run the body '
+                'within that context.'
+            ),
+            need=(
+                'When with-tortoise-pace was called with the body form 42, the macro '
+                'would expand to a let-block that bound pace to :slow-and-steady, then '
+                'spliced in and executed the body. The body would run within that '
+                'binding.'
+            ),
+            mapping=(
+                'The defmacro sets the pattern on bark. The & body captures all the '
+                'arguments. The backtick builds the let-form. The gensym pace# ensures '
+                'a fresh variable. The ~@body splices the body into the let.'
+            ),
+            resolution=(
+                'The REPL set the macro-pattern, then called with-tortoise-pace with 42. '
+                'The macro expanded to (let [pace# :slow-and-steady] 42). The let ran, '
+                'binding pace, then the body executed and returned 42. The pattern had '
+                'worked.'
+            ),
+            tags=("story",),
         ),
         # A `def-X-thing` style: macro that defs a named thing.
         SubjectExample(
@@ -554,6 +1328,30 @@ G10_16 = SubjectCurriculum(
             concept_phrase="defining and using a def-X-thing macro pattern",
             question_what="the value of the symbol defined by def-pace when expanded with the given name and keyword value",
             goal_text="define a def-pace macro and use it to define and retrieve a value",
+            scenario=(
+                'Patch the hound carved another macro-pattern: def-pace. This pattern '
+                'would define named values on the global stone. When called with a name '
+                'and a value, the macro would rewrite it into a def-form and set the '
+                'binding.'
+            ),
+            need=(
+                'When def-pace race-pace :slow was called, the macro would expand to '
+                '(def race-pace :slow). This would bind the name race-pace to the value '
+                ':slow on the global marker stone. A later lookup of race-pace would '
+                'return the value.'
+            ),
+            mapping=(
+                'The defmacro sets the pattern. The name parameter is the symbol to '
+                'bind. The v parameter is the value. The backtick and unquoting build '
+                'the def-form. The def sets the binding globally.'
+            ),
+            resolution=(
+                'The REPL set the macro, then called def-pace race-pace :slow. The '
+                'macro expanded to (def race-pace :slow) and set the binding. When '
+                'race-pace was looked up, it returned :slow. The pattern had defined '
+                'and retrieved the value.'
+            ),
+            tags=("story",),
         ),
     ],
     subplots=_REWRITERULE_SUBPLOTS, plan_pool=_PLAN_G10,
