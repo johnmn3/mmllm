@@ -532,18 +532,90 @@ G1_09 = SubjectCurriculum(
             ),
             tags=("story",),
         ),
-        _ex("(symbol? 42)", False,
-            "the symbol-predicate on an integer",
-            "whether an integer is a symbol",
-            goal="ask whether the integer 42 is a symbol, using the symbol? predicate"),
-        _ex('(symbol? "tortoise")', False,
-            "the symbol-predicate on a string",
-            "whether a string is a symbol",
-            goal="ask whether a string of letters is a symbol, using the symbol? predicate"),
-        _ex("(= 'hare 'hare)", True,
-            "the equality of two quoted names",
-            "whether two quoted names are equal",
-            goal="compare two quoted names for equality, using the = predicate"),
+        SubjectExample(
+            form="(symbol? 42)",
+            expected=False,
+            concept_phrase="the symbol-predicate on an integer",
+            question_what="whether an integer is a symbol",
+            goal_text="ask whether the integer 42 is a symbol, using the symbol? predicate",
+            scenario=(
+                "Pip the hare picked up a stone with the number 42 "
+                "scratched into it and held it beside a bark-strip "
+                "labelled 'count. Shelly the tortoise needed to know "
+                "which of the two was a name and which was a value."
+            ),
+            need=(
+                "Without asking the runtime, the two risked arguing all "
+                "afternoon — the stone needed to be tested, not debated."
+            ),
+            mapping=(
+                "`symbol?` tests whether the runtime sees a chalk-mark "
+                "name or the actual value it might stand for. An integer "
+                "is a value — never a name — so the predicate returns "
+                "the falsey verdict."
+            ),
+            resolution=(
+                "the runtime confirmed that 42 is not a symbol: the "
+                "integer is a value, not a name scratched on bark."
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form='(symbol? "tortoise")',
+            expected=False,
+            concept_phrase="the symbol-predicate on a string",
+            question_what="whether a string is a symbol",
+            goal_text="ask whether a string of letters is a symbol, using the symbol? predicate",
+            scenario=(
+                "Mossback had laid two things side by side on a flat "
+                "stone: a chalk mark that read 'tortoise, and a piece "
+                "of bark bearing the word \"tortoise\" pressed in ink — "
+                "a proper string, not a symbol."
+            ),
+            need=(
+                "She needed the runtime to settle which kind each was, "
+                "because the two look alike to the eye yet behave "
+                "entirely differently under evaluation."
+            ),
+            mapping=(
+                "A string in double quotes is a value — a sequence of "
+                "characters — not a name. `symbol?` checks for the "
+                "chalk-mark kind; a string returns the falsey answer."
+            ),
+            resolution=(
+                "the runtime distinguished them cleanly: the string was "
+                "not a symbol, so the falsey verdict came back."
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form="(= 'hare 'hare)",
+            expected=True,
+            concept_phrase="the equality of two quoted names",
+            question_what="whether two quoted names are equal",
+            goal_text="compare two quoted names for equality, using the = predicate",
+            scenario=(
+                "Mossback had chalk-marked the name 'hare on two "
+                "separate pieces of bark. Pip insisted the two marks "
+                "were the same name; Hopper the hare said they might "
+                "not be, since each came from a different piece of bark."
+            ),
+            need=(
+                "The argument could only be settled by asking the "
+                "runtime whether the two chalk-marked names were equal "
+                "— eye-reading alone was not enough."
+            ),
+            mapping=(
+                "Quoting preserves both as symbols — names — rather "
+                "than trying to look them up. `=` then tests whether "
+                "the two names are the same name."
+            ),
+            resolution=(
+                "the runtime confirmed that the two quoted names are "
+                "identical, so the truthy verdict came back."
+            ),
+            tags=("story",),
+        ),
     ],
     subplots=_CHALKMARK_SUBPLOTS,
     plan_pool=_PLAN_POOL,
@@ -556,14 +628,64 @@ G1_10 = SubjectCurriculum(
     subject_title="Comments",
     fable="tortoise-hare",
     examples=[
-        _ex("(+ 1 2) ; sum of one and two", 3,
-            "the addition with a trailing comment",
-            "the result, ignoring the comment",
-            goal="add 1 and 2, with a single-semicolon trailing comment"),
-        _ex("42 ;; the answer", 42,
-            "the literal with a trailing comment",
-            "the literal value, ignoring the comment",
-            goal="submit the integer 42 with a double-semicolon trailing comment"),
+        SubjectExample(
+            form="(+ 1 2) ; sum of one and two",
+            expected=3,
+            concept_phrase="the addition with a trailing comment",
+            question_what="the result, ignoring the comment",
+            goal_text="add 1 and 2, with a single-semicolon trailing comment",
+            scenario=(
+                "Slowpoke the tortoise had scratched an addition on "
+                "the trail-stone and, beside it, added a small note "
+                "after a semicolon explaining what the form computed — "
+                "a scribe's marginal gloss."
+            ),
+            need=(
+                "Pip the hare needed to know what the form returned, "
+                "not what the note said — the note was for the reader, "
+                "not the runtime."
+            ),
+            mapping=(
+                "The scribe's convention: everything after a semicolon "
+                "on the same line is a comment — the runtime skips it "
+                "entirely and evaluates only what comes before."
+            ),
+            resolution=(
+                "the runtime skipped the note and returned the sum of "
+                "the two numbers, just as the form before the semicolon "
+                "asked."
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form="42 ;; the answer",
+            expected=42,
+            concept_phrase="the literal with a trailing comment",
+            question_what="the literal value, ignoring the comment",
+            goal_text="submit the integer 42 with a double-semicolon trailing comment",
+            scenario=(
+                "Mossback had etched a number on a flat stone and "
+                "after a double semicolon had written a scribe's "
+                "note naming what the number meant — a second style "
+                "of marginal annotation the scribe used for emphasis."
+            ),
+            need=(
+                "Bramble the hare needed the value the runtime would "
+                "hand back, separate from the annotation the scribe "
+                "had left alongside it."
+            ),
+            mapping=(
+                "A double semicolon works the same way as a single "
+                "one: both mark the start of a comment the runtime "
+                "ignores. Only the token before the double semicolon "
+                "is evaluated."
+            ),
+            resolution=(
+                "the runtime ignored the annotation and returned the "
+                "integer the stone had been etched with."
+            ),
+            tags=("story",),
+        ),
     ],
     subplots=_SCRIBE_SUBPLOTS,
     plan_pool=_PLAN_POOL,
@@ -576,14 +698,66 @@ G1_11 = SubjectCurriculum(
     subject_title="Whitespace doesn't matter",
     fable="tortoise-hare",
     examples=[
-        _ex("(+    1    2)", 3,
-            "the addition with extra spacing",
-            "the result of an addition formatted with extra spaces",
-            goal="add 1 and 2 in a form with extra spaces between tokens"),
-        _ex("(+\n  1\n  2)", 3,
-            "the addition split across lines",
-            "the result of an addition formatted across multiple lines",
-            goal="add 1 and 2 in a form whose arguments are on separate lines"),
+        SubjectExample(
+            form="(+    1    2)",
+            expected=3,
+            concept_phrase="the addition with extra spacing",
+            question_what="the result of an addition formatted with extra spaces",
+            goal_text="add 1 and 2 in a form with extra spaces between tokens",
+            scenario=(
+                "Pip the hare had written an addition on the path-stone "
+                "with wide gaps between the tokens — extra spaces where "
+                "the chalk had skipped. Mossback looked it over and "
+                "said the form was still readable."
+            ),
+            need=(
+                "Pip needed to know whether the extra whitespace changed "
+                "what the runtime would compute or whether spacing was "
+                "invisible to the scribe."
+            ),
+            mapping=(
+                "The scribe reads tokens, not gaps. Extra spaces between "
+                "operator and arguments are ignored; the runtime sees "
+                "the same addition regardless of how much air sits "
+                "between the marks."
+            ),
+            resolution=(
+                "the runtime returned the same sum as if the tokens had "
+                "been written with a single space each — the gaps had "
+                "changed nothing."
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form="(+\n  1\n  2)",
+            expected=3,
+            concept_phrase="the addition split across lines",
+            question_what="the result of an addition formatted across multiple lines",
+            goal_text="add 1 and 2 in a form whose arguments are on separate lines",
+            scenario=(
+                "Shelly the tortoise had written a form across three "
+                "lines on a broad leaf — the operator on the first, "
+                "each argument indented on its own line below. Hopper "
+                "the hare wondered whether the line-breaks would confuse "
+                "the reader."
+            ),
+            need=(
+                "Hopper needed to know whether the runtime read forms "
+                "line by line or saw through the newlines just as it "
+                "saw through extra spaces."
+            ),
+            mapping=(
+                "The scribe treats a newline the same as a space: it "
+                "separates tokens but carries no meaning. The runtime "
+                "sees the same three-token call no matter how many "
+                "lines the form spans."
+            ),
+            resolution=(
+                "the runtime returned the sum of the two numbers — the "
+                "line-breaks had not altered the form's meaning at all."
+            ),
+            tags=("story",),
+        ),
     ],
     subplots=_SCRIBE_SUBPLOTS,
     plan_pool=_PLAN_POOL,
@@ -625,10 +799,38 @@ G1_12 = SubjectCurriculum(
             ),
             tags=("story",),
         ),
-        _ex("(* (+ 1 2) 3)", 9,
-            "the nested multiplication",
-            "the result of multiplying a nested sum by 3",
-            goal="multiply the sum of 1 and 2 by 3"),
+        SubjectExample(
+            form="(* (+ 1 2) 3)",
+            expected=9,
+            concept_phrase="the nested multiplication",
+            question_what="the result of multiplying a nested sum by 3",
+            goal_text="multiply the sum of 1 and 2 by 3",
+            scenario=(
+                "Mossback chalked two nested fences on the path: an "
+                "inner fence holding the plus-mark, 1, and 2, and an "
+                "outer fence holding the star-mark, the inner fence, "
+                "and 3. Pip counted the parens and declared the result "
+                "must be enormous."
+            ),
+            need=(
+                "Mossback needed to show that each set of parens is "
+                "its own fence-post group — the inner one resolves "
+                "first, then the outer one takes that result as its "
+                "argument."
+            ),
+            mapping=(
+                "Inner parens group first: `(+ 1 2)` resolves to its "
+                "sum. The outer parens then group `*`, that sum, and 3 "
+                "— multiplying them together. The fence-posts mark "
+                "order, not multiplication."
+            ),
+            resolution=(
+                "the runtime resolved the inner group first, then "
+                "applied the outer operator, returning the final "
+                "product — exactly what the nested fences prescribed."
+            ),
+            tags=("story",),
+        ),
     ],
     subplots=_SCRIBE_SUBPLOTS,
     plan_pool=_PLAN_POOL,
@@ -641,24 +843,163 @@ G1_13 = SubjectCurriculum(
     subject_title="First arithmetic call",
     fable="tortoise-hare",
     examples=[
-        _ex("(+ 1 2)",  3,
-            "the addition", "the sum of 1 and 2",
-            goal="add 1 and 2"),
-        _ex("(- 5 3)",  2,
-            "the subtraction", "the difference of 5 and 3",
-            goal="subtract 3 from 5"),
-        _ex("(* 4 5)",  20,
-            "the multiplication", "the product of 4 and 5",
-            goal="multiply 4 by 5"),
-        _ex("(/ 10 2)", 5,
-            "the division", "the quotient of 10 and 2",
-            goal="divide 10 by 2"),
-        _ex("(+ 7 8)",  15,
-            "the addition", "the sum of 7 and 8",
-            goal="add 7 and 8"),
-        _ex("(- 20 7)", 13,
-            "the subtraction", "the difference of 20 and 7",
-            goal="subtract 7 from 20"),
+        SubjectExample(
+            form="(+ 1 2)",
+            expected=3,
+            concept_phrase="the addition",
+            question_what="the sum of 1 and 2",
+            goal_text="add 1 and 2",
+            scenario=(
+                "Mossback had sorted this morning's acorns into two "
+                "small heaps beside the trail — one heap of 1 and "
+                "another of 2."
+            ),
+            need=(
+                "She needed the running total before deciding whether "
+                "to carry them all or leave some behind."
+            ),
+            mapping=(
+                "`+` is the counting-together operator: the two heap "
+                "sizes are its arguments, and the runtime combines "
+                "them into a single count."
+            ),
+            resolution=(
+                "the runtime returned the combined count — the two "
+                "heaps tallied into one."
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form="(- 5 3)",
+            expected=2,
+            concept_phrase="the subtraction",
+            question_what="the difference of 5 and 3",
+            goal_text="subtract 3 from 5",
+            scenario=(
+                "Pip the hare had counted 5 acorns set aside for the "
+                "midday rest. Hopper had already taken 3 to his side "
+                "of the log before Pip noticed."
+            ),
+            need=(
+                "Pip needed to know how many remained so he could "
+                "decide whether the rest was worth stopping for."
+            ),
+            mapping=(
+                "`-` takes the starting heap and removes the given "
+                "count; the result is what remains after the "
+                "subtraction."
+            ),
+            resolution=(
+                "the runtime returned the remainder — the acorns left "
+                "after Hopper's share had been removed."
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form="(* 4 5)",
+            expected=20,
+            concept_phrase="the multiplication",
+            question_what="the product of 4 and 5",
+            goal_text="multiply 4 by 5",
+            scenario=(
+                "Shelly the tortoise had arranged her acorn-gathering "
+                "in 4 equal rows of 5 acorns each along the meadow's "
+                "edge, each row the same size."
+            ),
+            need=(
+                "She needed the full count of acorns without adding "
+                "row by row — the repeated-addition shortcut was the "
+                "quickest path."
+            ),
+            mapping=(
+                "`*` computes the repeated sum: 4 rows of 5 is the "
+                "same as adding 5 four times. The runtime returns "
+                "that total directly."
+            ),
+            resolution=(
+                "the runtime returned the total count across all "
+                "rows — the full morning's harvest in one number."
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form="(/ 10 2)",
+            expected=5,
+            concept_phrase="the division",
+            question_what="the quotient of 10 and 2",
+            goal_text="divide 10 by 2",
+            scenario=(
+                "Mossback and Pip had gathered a shared heap of 10 "
+                "acorns. They agreed to split the heap into 2 equal "
+                "shares, one for each of them."
+            ),
+            need=(
+                "Mossback needed to know exactly how many acorns each "
+                "share would hold so the split was fair."
+            ),
+            mapping=(
+                "`/` divides the heap into equal portions: the "
+                "dividend is the total heap, the divisor is the number "
+                "of shares, and the runtime returns each share's size."
+            ),
+            resolution=(
+                "the runtime returned each share's count — the heap "
+                "divided cleanly between the two."
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form="(+ 7 8)",
+            expected=15,
+            concept_phrase="the addition",
+            question_what="the sum of 7 and 8",
+            goal_text="add 7 and 8",
+            scenario=(
+                "Bramble the hare had counted 7 acorns beneath the "
+                "oak and 8 more under the elm. Both heaps sat in "
+                "separate leaf-cups at the edge of the path."
+            ),
+            need=(
+                "Bramble needed the combined count to report back to "
+                "Shelly, who was tallying the morning's whole haul."
+            ),
+            mapping=(
+                "`+` combines the two heap sizes into a single total; "
+                "each argument is one leaf-cup's count, and the "
+                "runtime adds them."
+            ),
+            resolution=(
+                "the runtime returned the combined tally — both "
+                "leaf-cups counted together."
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form="(- 20 7)",
+            expected=13,
+            concept_phrase="the subtraction",
+            question_what="the difference of 20 and 7",
+            goal_text="subtract 7 from 20",
+            scenario=(
+                "Slowpoke the tortoise had stockpiled 20 acorns near "
+                "the hollow log. During the night, squirrels had "
+                "carried off 7 of them."
+            ),
+            need=(
+                "Slowpoke needed the remaining count before deciding "
+                "whether the stockpile was still enough for the week."
+            ),
+            mapping=(
+                "`-` removes the taken amount from the starting "
+                "stockpile; the first argument is what was there, the "
+                "second is what was lost."
+            ),
+            resolution=(
+                "the runtime returned the remainder — what the "
+                "stockpile held after the squirrels' visit."
+            ),
+            tags=("story",),
+        ),
     ],
     subplots=_ACORN_SUBPLOTS,
     plan_pool=_PLAN_POOL,
@@ -671,22 +1012,117 @@ G1_14 = SubjectCurriculum(
     subject_title="Nested call evaluation",
     fable="tortoise-hare",
     examples=[
-        _ex("(+ 1 (* 2 3))", 7,
-            "the nested computation",
-            "the sum of 1 with the product of 2 and 3",
-            goal="add 1 to the product of 2 and 3"),
-        _ex("(* (+ 1 2) (+ 3 4))", 21,
-            "the nested product of sums",
-            "the product of two nested sums",
-            goal="multiply the sum of 1 and 2 by the sum of 3 and 4"),
-        _ex("(- 100 (* 5 5))", 75,
-            "the nested subtraction",
-            "100 minus a nested product",
-            goal="subtract the product of 5 and 5 from 100"),
-        _ex("(+ (* 2 3) (* 4 5))", 26,
-            "the sum of two products",
-            "the sum of two nested products",
-            goal="add the product of 2 and 3 to the product of 4 and 5"),
+        SubjectExample(
+            form="(+ 1 (* 2 3))",
+            expected=7,
+            concept_phrase="the nested computation",
+            question_what="the sum of 1 with the product of 2 and 3",
+            goal_text="add 1 to the product of 2 and 3",
+            scenario=(
+                "Mossback had set out 1 lone acorn from yesterday "
+                "and 2 rows of 3 freshly gathered acorns beside it. "
+                "She needed to count everything together."
+            ),
+            need=(
+                "The rows had to be counted as a group first — their "
+                "combined total then joined with the single acorn."
+            ),
+            mapping=(
+                "The inner `(* 2 3)` computes the rows' total first; "
+                "that result becomes the second argument to the outer "
+                "`+`. Inner heaps resolve before the outer addition "
+                "runs."
+            ),
+            resolution=(
+                "the runtime resolved the inner product first, then "
+                "added the lone acorn, returning the grand total."
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form="(* (+ 1 2) (+ 3 4))",
+            expected=21,
+            concept_phrase="the nested product of sums",
+            question_what="the product of two nested sums",
+            goal_text="multiply the sum of 1 and 2 by the sum of 3 and 4",
+            scenario=(
+                "Pip the hare described two separate acorn-gathering "
+                "rounds: the morning round collected 1 and 2 acorns, "
+                "the afternoon round collected 3 and 4. He wanted to "
+                "arrange both round-totals in equal-sized rows."
+            ),
+            need=(
+                "Each round's total had to be known before the row "
+                "arrangement could be computed — the two sums were "
+                "the row-lengths."
+            ),
+            mapping=(
+                "Each `(+...)` resolves its own round's total first. "
+                "The outer `*` then uses those two totals as its "
+                "arguments, computing the arranged count."
+            ),
+            resolution=(
+                "the runtime resolved both inner sums first, then "
+                "multiplied them, returning the arranged total."
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form="(- 100 (* 5 5))",
+            expected=75,
+            concept_phrase="the nested subtraction",
+            question_what="100 minus a nested product",
+            goal_text="subtract the product of 5 and 5 from 100",
+            scenario=(
+                "Shelly the tortoise had a stockpile of 100 acorns. "
+                "Hopper had agreed to take 5 rows of 5 away for the "
+                "winter cache — a square portion of the pile."
+            ),
+            need=(
+                "Shelly needed to know what would remain after Hopper "
+                "took his square portion, so she could plan the week's "
+                "meals."
+            ),
+            mapping=(
+                "The inner `(* 5 5)` computes how many acorns Hopper "
+                "takes; the outer `-` removes that amount from the "
+                "full stockpile. Inner product resolves before the "
+                "subtraction runs."
+            ),
+            resolution=(
+                "the runtime computed Hopper's portion first, then "
+                "removed it from the stockpile, returning what remained."
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form="(+ (* 2 3) (* 4 5))",
+            expected=26,
+            concept_phrase="the sum of two products",
+            question_what="the sum of two nested products",
+            goal_text="add the product of 2 and 3 to the product of 4 and 5",
+            scenario=(
+                "Mossback gathered from two oak groves: the near "
+                "grove yielded 2 rows of 3 acorns, the far grove "
+                "yielded 4 rows of 5. She needed both grove-totals "
+                "combined."
+            ),
+            need=(
+                "Each grove's count had to be computed as a product "
+                "before the two groves could be summed — combining "
+                "them row-by-row would take all day."
+            ),
+            mapping=(
+                "Each `(* ...)` computes one grove's total "
+                "independently. The outer `+` then combines the two "
+                "grove-totals. Both inner products resolve first."
+            ),
+            resolution=(
+                "the runtime computed both grove totals first, then "
+                "added them, returning the combined morning harvest."
+            ),
+            tags=("story",),
+        ),
     ],
     subplots=_ACORN_SUBPLOTS,
     plan_pool=_PLAN_POOL,
@@ -699,24 +1135,172 @@ G1_15 = SubjectCurriculum(
     subject_title="Equality",
     fable="tortoise-hare",
     examples=[
-        _ex("(= 1 1)", True,
-            "the equality check", "whether 1 equals 1",
-            goal="test whether 1 equals 1 with ="),
-        _ex("(= 1 2)", False,
-            "the equality check", "whether 1 equals 2",
-            goal="test whether 1 equals 2 with ="),
-        _ex("(= \"a\" \"a\")", True,
-            "the string equality", "whether two equal strings are equal",
-            goal="test whether the string \"a\" equals itself with ="),
-        _ex("(= :hare :hare)", True,
-            "the keyword equality", "whether two equal keywords are equal",
-            goal="test whether the keyword :hare equals itself with ="),
-        _ex("(= :hare :tortoise)", False,
-            "the keyword equality", "whether two different keywords are equal",
-            goal="test whether :hare equals :tortoise with ="),
-        _ex("(= 1 1 1 1)", True,
-            "the multi-arg equality", "whether four 1s are all equal",
-            goal="test with = whether four 1s are all equal"),
+        SubjectExample(
+            form="(= 1 1)",
+            expected=True,
+            concept_phrase="the equality check",
+            question_what="whether 1 equals 1",
+            goal_text="test whether 1 equals 1 with =",
+            scenario=(
+                "At the wooden gate blocking the trail, Mossback "
+                "painted a tally of 1 on each gatepost. Pip demanded "
+                "to know whether the two tallies were the same before "
+                "the gate would swing open."
+            ),
+            need=(
+                "The gate only opened when both sides matched — "
+                "without asking the runtime, neither Pip nor Mossback "
+                "could be certain the marks were equal."
+            ),
+            mapping=(
+                "`=` checks each gatepost in turn: if the values on "
+                "both sides are the same, the gate passes the truthy "
+                "verdict; if any differ, it stops."
+            ),
+            resolution=(
+                "the runtime let the gate swing: both sides matched, "
+                "so the truthy verdict came back."
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form="(= 1 2)",
+            expected=False,
+            concept_phrase="the equality check",
+            question_what="whether 1 equals 2",
+            goal_text="test whether 1 equals 2 with =",
+            scenario=(
+                "The same wooden gate stood on the trail, but now the "
+                "two gateposts bore different tallies — 1 on the left, "
+                "2 on the right. Hopper the hare insisted they were "
+                "close enough."
+            ),
+            need=(
+                "Mossback needed the runtime's ruling on whether "
+                "close was the same as equal — the gate would only "
+                "pass on an exact match."
+            ),
+            mapping=(
+                "`=` is strict: different values on the gateposts "
+                "stop the gate. 1 and 2 are distinct, so the gate "
+                "returns the falsey verdict and stays closed."
+            ),
+            resolution=(
+                "the runtime closed the gate: the two values were "
+                "not equal, so the falsey verdict came back."
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form='(= "a" "a")',
+            expected=True,
+            concept_phrase="the string equality",
+            question_what="whether two equal strings are equal",
+            goal_text='test whether the string "a" equals itself with =',
+            scenario=(
+                "Two bark-strips each bore the single letter \"a\" "
+                "pressed in ink, one on each gatepost of the trail "
+                "gate. Bramble the hare said one might be a different "
+                "shade of ink."
+            ),
+            need=(
+                "Shelly needed to know whether the runtime considered "
+                "the two strings the same — shade of ink was not what "
+                "the gate checked."
+            ),
+            mapping=(
+                "`=` compares strings by their characters, not by "
+                "which bark-strip they're on. Identical contents mean "
+                "the gate passes the truthy verdict."
+            ),
+            resolution=(
+                "the runtime found both strings identical and let the "
+                "gate swing, returning the truthy verdict."
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form="(= :hare :hare)",
+            expected=True,
+            concept_phrase="the keyword equality",
+            question_what="whether two equal keywords are equal",
+            goal_text="test whether the keyword :hare equals itself with =",
+            scenario=(
+                "Two trail-markers each bore the label :hare — the "
+                "keyword that every gate on this stretch checked "
+                "before letting a runner through. Pip had carved both."
+            ),
+            need=(
+                "The gate keeper needed the runtime's word that both "
+                "markers bore the same keyword before raising the bar."
+            ),
+            mapping=(
+                "Keywords are their own identity: two `:hare` markers "
+                "are always the same keyword. `=` checks identity "
+                "and the gate passes the truthy verdict."
+            ),
+            resolution=(
+                "the runtime confirmed both markers matched, the gate "
+                "opened, and the truthy verdict came back."
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form="(= :hare :tortoise)",
+            expected=False,
+            concept_phrase="the keyword equality",
+            question_what="whether two different keywords are equal",
+            goal_text="test whether :hare equals :tortoise with =",
+            scenario=(
+                "The left gatepost of the trail gate was marked "
+                ":hare and the right one was marked :tortoise. "
+                "Hopper felt the labels were similar enough and "
+                "tried to push through."
+            ),
+            need=(
+                "Mossback needed the runtime's ruling: were the two "
+                "different labels still considered equal by the gate's "
+                "check?"
+            ),
+            mapping=(
+                "Keywords with different names are never equal — "
+                "`:hare` and `:tortoise` name different things. The "
+                "gate's `=` check stops and returns the falsey verdict."
+            ),
+            resolution=(
+                "the runtime stopped the gate: the two keywords were "
+                "distinct, so the falsey verdict came back."
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form="(= 1 1 1 1)",
+            expected=True,
+            concept_phrase="the multi-arg equality",
+            question_what="whether four 1s are all equal",
+            goal_text="test with = whether four 1s are all equal",
+            scenario=(
+                "The long stretch of trail had four gateposts in a "
+                "row, each bearing a tally of 1 scratched by Mossback "
+                "to mark the equal-length stages. Every post had to "
+                "match for the path to be declared uniform."
+            ),
+            need=(
+                "Pip needed the runtime's ruling across all four posts "
+                "at once — checking them one by one would take as long "
+                "as running the race."
+            ),
+            mapping=(
+                "`=` accepts any number of arguments and checks them "
+                "all: if every gatepost bears the same value, the "
+                "gate passes the truthy verdict."
+            ),
+            resolution=(
+                "the runtime checked all four tallies and found them "
+                "uniform, returning the truthy verdict."
+            ),
+            tags=("story",),
+        ),
     ],
     subplots=_GATE_SUBPLOTS,
     plan_pool=_PLAN_POOL,
@@ -729,24 +1313,171 @@ G1_16 = SubjectCurriculum(
     subject_title="Numeric predicates",
     fable="tortoise-hare",
     examples=[
-        _ex("(zero? 0)", True,
-            "the zero check", "whether 0 is zero",
-            goal="check whether 0 is zero using zero?"),
-        _ex("(zero? 5)", False,
-            "the zero check", "whether 5 is zero",
-            goal="check whether 5 is zero using zero?"),
-        _ex("(pos? 7)", True,
-            "the positive check", "whether 7 is positive",
-            goal="check whether 7 is positive using pos?"),
-        _ex("(pos? -2)", False,
-            "the positive check", "whether -2 is positive",
-            goal="check whether -2 is positive using pos?"),
-        _ex("(neg? -3)", True,
-            "the negative check", "whether -3 is negative",
-            goal="check whether -3 is negative using neg?"),
-        _ex("(neg? 4)", False,
-            "the negative check", "whether 4 is negative",
-            goal="check whether 4 is negative using neg?"),
+        SubjectExample(
+            form="(zero? 0)",
+            expected=True,
+            concept_phrase="the zero check",
+            question_what="whether 0 is zero",
+            goal_text="check whether 0 is zero using zero?",
+            scenario=(
+                "Mossback counted the acorns remaining in her morning "
+                "heap and found none — the heap had been emptied. She "
+                "needed to confirm the count was truly nothing."
+            ),
+            need=(
+                "Before announcing the heap was gone, she needed the "
+                "runtime's verdict that the count was exactly zero, "
+                "not merely small."
+            ),
+            mapping=(
+                "`zero?` asks the runtime whether the count is "
+                "precisely zero acorns — an empty heap, nothing in "
+                "the pile. A count of zero returns the truthy verdict."
+            ),
+            resolution=(
+                "the runtime confirmed the count was zero — the heap "
+                "was gone — and returned the truthy verdict."
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form="(zero? 5)",
+            expected=False,
+            concept_phrase="the zero check",
+            question_what="whether 5 is zero",
+            goal_text="check whether 5 is zero using zero?",
+            scenario=(
+                "Pip the hare counted 5 acorns left in his heap after "
+                "the morning's sharing. He thought the heap might be "
+                "empty and wanted a quick check."
+            ),
+            need=(
+                "Without asking the runtime, Pip might mistakenly "
+                "declare the heap empty and walk off, leaving 5 "
+                "acorns behind."
+            ),
+            mapping=(
+                "`zero?` checks for an exactly empty pile. A count of "
+                "5 is not zero — the heap is not empty — so the "
+                "predicate returns the falsey verdict."
+            ),
+            resolution=(
+                "the runtime replied that the count was not zero: the "
+                "heap still held acorns, and the falsey verdict came "
+                "back."
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form="(pos? 7)",
+            expected=True,
+            concept_phrase="the positive check",
+            question_what="whether 7 is positive",
+            goal_text="check whether 7 is positive using pos?",
+            scenario=(
+                "Shelly the tortoise counted 7 acorns gathered from "
+                "beneath the elm. Before adding them to the shared "
+                "heap, she wanted to confirm the count was a genuine "
+                "gain."
+            ),
+            need=(
+                "Only a positive count warranted adding to the heap; "
+                "the runtime had to confirm the tally was above zero."
+            ),
+            mapping=(
+                "`pos?` asks whether the count is greater than zero — "
+                "a real addition to the pile. A count of 7 is above "
+                "zero, so the truthy verdict comes back."
+            ),
+            resolution=(
+                "the runtime confirmed the count was above zero, "
+                "clearing the way to add the acorns to the shared heap."
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form="(pos? -2)",
+            expected=False,
+            concept_phrase="the positive check",
+            question_what="whether -2 is positive",
+            goal_text="check whether -2 is positive using pos?",
+            scenario=(
+                "Hopper the hare reported a shortfall: the heap count "
+                "had gone negative — 2 acorns owed rather than "
+                "owned. Mossback needed to know whether the tally "
+                "still counted as a gain."
+            ),
+            need=(
+                "If the tally was not positive, the heap entry should "
+                "not be added — the runtime had to confirm the sign "
+                "before Mossback committed the count."
+            ),
+            mapping=(
+                "`pos?` checks whether the count is above zero. A "
+                "negative count means a debt, not a gain — so the "
+                "predicate returns the falsey verdict."
+            ),
+            resolution=(
+                "the runtime returned the falsey verdict: the count "
+                "was below zero, not a positive gain."
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form="(neg? -3)",
+            expected=True,
+            concept_phrase="the negative check",
+            question_what="whether -3 is negative",
+            goal_text="check whether -3 is negative using neg?",
+            scenario=(
+                "Bramble the hare had borrowed 3 acorns last season "
+                "and the debt appeared as a negative count in Mossback's "
+                "tally. Mossback needed to flag it as a true shortfall."
+            ),
+            need=(
+                "Before marking the tally as a debt, she needed "
+                "the runtime to confirm the count was genuinely "
+                "below zero."
+            ),
+            mapping=(
+                "`neg?` checks whether the count is less than zero — "
+                "a deficit in the pile. A count below zero returns "
+                "the truthy verdict."
+            ),
+            resolution=(
+                "the runtime confirmed the count was below zero: the "
+                "debt was genuine, and the truthy verdict came back."
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form="(neg? 4)",
+            expected=False,
+            concept_phrase="the negative check",
+            question_what="whether 4 is negative",
+            goal_text="check whether 4 is negative using neg?",
+            scenario=(
+                "Slowpoke the tortoise tallied 4 acorns added to the "
+                "shared heap. Pip claimed the tally must be negative "
+                "because of yesterday's borrowing — Slowpoke was not "
+                "sure."
+            ),
+            need=(
+                "Slowpoke needed the runtime to rule on the sign: a "
+                "count of 4 either was or was not a deficit, and only "
+                "the predicate could say."
+            ),
+            mapping=(
+                "`neg?` checks whether the count is below zero. A "
+                "count of 4 is above zero — a surplus, not a deficit "
+                "— so the predicate returns the falsey verdict."
+            ),
+            resolution=(
+                "the runtime returned the falsey verdict: the count "
+                "was positive, not a shortfall."
+            ),
+            tags=("story",),
+        ),
     ],
     subplots=_ACORN_SUBPLOTS,
     plan_pool=_PLAN_POOL,
@@ -759,12 +1490,64 @@ G1_17 = SubjectCurriculum(
     subject_title="Printing vs returning",
     fable="tortoise-hare",
     examples=[
-        _ex("42", 42,
-            "the literal 42", "the value 42 returned by the REPL",
-            goal="submit the integer 42 so the REPL returns it"),
-        _ex("(+ 1 2)", 3,
-            "the addition", "the value returned by adding 1 and 2",
-            goal="add 1 and 2 so the REPL returns the result"),
+        SubjectExample(
+            form="42",
+            expected=42,
+            concept_phrase="the literal 42",
+            question_what="the value 42 returned by the REPL",
+            goal_text="submit the integer 42 so the REPL returns it",
+            scenario=(
+                "Mossback the tortoise had handed the scribe a "
+                "stone with the number 42 carved on it. The scribe "
+                "read it, then placed the stone's value back on the "
+                "table — not announcing it aloud, but setting it "
+                "where it could be read."
+            ),
+            need=(
+                "Pip the hare needed to know whether the scribe "
+                "printed the value or returned it — only a returned "
+                "value could be used by the next form."
+            ),
+            mapping=(
+                "The REPL returns the value of the last form "
+                "evaluated; it does not print a side-effect message. "
+                "Submitting a literal returns that literal directly."
+            ),
+            resolution=(
+                "the runtime returned the integer — the value appeared "
+                "as the REPL's result, ready for the next step."
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form="(+ 1 2)",
+            expected=3,
+            concept_phrase="the addition",
+            question_what="the value returned by adding 1 and 2",
+            goal_text="add 1 and 2 so the REPL returns the result",
+            scenario=(
+                "Shelly the tortoise submitted an addition to the "
+                "scribe. The scribe computed the sum, then set the "
+                "result-stone where it could be read — no announcement, "
+                "just the value placed quietly on the table."
+            ),
+            need=(
+                "Hopper the hare needed the sum available for the "
+                "next form, not just displayed on a banner — the "
+                "distinction between printing and returning mattered."
+            ),
+            mapping=(
+                "The REPL's return value is the usable result: the "
+                "sum is handed back to the caller, not merely "
+                "announced. Printing is a side effect; returning is "
+                "the primary channel."
+            ),
+            resolution=(
+                "the runtime handed back the sum as the return value "
+                "— available to whatever came next, not just shown."
+            ),
+            tags=("story",),
+        ),
     ],
     subplots=_SCRIBE_SUBPLOTS,
     plan_pool=_PLAN_POOL,
@@ -777,12 +1560,65 @@ G1_18 = SubjectCurriculum(
     subject_title="Errors are safe in the REPL",
     fable="tortoise-hare",
     examples=[
-        _ex("(+ 1 2)", 3,
-            "the addition", "the result of adding 1 and 2",
-            goal="add 1 and 2"),
-        _ex("(* 7 6)", 42,
-            "the multiplication", "the product of 7 and 6",
-            goal="multiply 7 by 6"),
+        SubjectExample(
+            form="(+ 1 2)",
+            expected=3,
+            concept_phrase="the addition",
+            question_what="the result of adding 1 and 2",
+            goal_text="add 1 and 2",
+            scenario=(
+                "Pip the hare had been afraid to try anything in "
+                "the REPL since the last time a mistyped form threw "
+                "an error. Mossback had strung a safety net beneath "
+                "the practice-meadow — a stumble there cost nothing."
+            ),
+            need=(
+                "Pip needed to submit a first form to feel how the "
+                "net worked: a mistake would bounce back as an error "
+                "message, never as permanent harm."
+            ),
+            mapping=(
+                "The REPL's net catches errors and returns an error "
+                "message instead of crashing; a correct form simply "
+                "returns its value. The meadow itself is never "
+                "damaged by a wrong step."
+            ),
+            resolution=(
+                "the runtime caught the form cleanly — no stumble — "
+                "and returned the sum, showing the net was there but "
+                "not needed."
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form="(* 7 6)",
+            expected=42,
+            concept_phrase="the multiplication",
+            question_what="the product of 7 and 6",
+            goal_text="multiply 7 by 6",
+            scenario=(
+                "Hopper the hare tried a second form in the "
+                "practice-meadow, still wary after a previous mis-step "
+                "had bounced off the net. Shelly stood nearby, net "
+                "confirmed in place."
+            ),
+            need=(
+                "Hopper needed to build confidence that the net "
+                "made exploration safe — submitting a second correct "
+                "form would confirm no permanent risk."
+            ),
+            mapping=(
+                "In the practice-meadow any form can be tried freely: "
+                "correct forms return their value, wrong ones return "
+                "an error and nothing more. The net is the REPL's "
+                "isolation from the rest of the world."
+            ),
+            resolution=(
+                "the runtime returned the product without incident — "
+                "no net needed, but Hopper now knew it was there."
+            ),
+            tags=("story",),
+        ),
     ],
     subplots=_SAFETYNET_SUBPLOTS,
     plan_pool=_PLAN_POOL,
