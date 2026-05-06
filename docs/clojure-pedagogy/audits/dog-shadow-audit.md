@@ -6,13 +6,6 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 ## Grade 1
 
-### G1-17: Printing vs returning
-
-- examples: 2
-- variety @ n=50: 1.00
-- issues: {'FORM_LEAK': 1}
-    - [FORM_LEAK] form=`(+ 1 2)` — form '(+ 1 2)' appears in user_msg of a goal-style subject
-
 ## Grade 2
 
 ### G2-01: Multi-arg arithmetic
@@ -205,6 +198,20 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 - variety @ n=50: 0.96
 - issues: {'HIGH_LENGTH': 1}
     - [HIGH_LENGTH] form=`((juxt inc dec) 5)` — user_msg 212 words
+
+### G5-19: every?
+
+- examples: 2
+- variety @ n=50: 0.97
+- issues: {'UNFILLED_PLACEHOLDER': 1}
+    - [UNFILLED_PLACEHOLDER] form=`(every? even? [1 2 3])` — user_msg has un-substituted placeholder
+
+### G5-21: distinct and sort
+
+- examples: 2
+- variety @ n=50: 0.96
+- issues: {'UNFILLED_PLACEHOLDER': 1}
+    - [UNFILLED_PLACEHOLDER] form=`(sort [3 1 2])` — user_msg has un-substituted placeholder
 
 ## Grade 6
 
@@ -402,27 +409,11 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 ## Grade 10
 
-### G10-01: quote, unquote, unquote-splice
-
-- examples: 3
-- variety @ n=50: 0.99
-- issues: {'HIGH_LENGTH': 1}
-    - [HIGH_LENGTH] form=`(let [x 5] `(a ~x b))` — user_msg 223 words
-
-### G10-04: Macro expansion rule
-
-- examples: 2
-- variety @ n=50: 0.98
-- issues: {'HIGH_LENGTH': 2}
-    - [HIGH_LENGTH] form=`(macroexpand-1 '(when true 1))` — user_msg 212 words
-    - [HIGH_LENGTH] form=`(macroexpand-1 '(or a b))` — user_msg 219 words
-
 ### G10-05: macroexpand
 
 - examples: 2
 - variety @ n=50: 0.99
-- issues: {'HIGH_LENGTH': 2}
-    - [HIGH_LENGTH] form=`(macroexpand '(when true 1))` — user_msg 205 words
+- issues: {'HIGH_LENGTH': 1}
     - [HIGH_LENGTH] form=`(macroexpand '(-> 1 inc inc))` — user_msg 217 words
 
 ### G10-07: Threading macros revisited
@@ -513,39 +504,29 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 ### Issue counts (across all examples × 3 records)
 
-- **HIGH_LENGTH**: 60
-- **UNFILLED_PLACEHOLDER**: 24
+- **HIGH_LENGTH**: 56
+- **UNFILLED_PLACEHOLDER**: 26
 - **ANSWER_LEAK_STRING**: 14
 - **ANSWER_LEAK**: 9
-- **FORM_LEAK**: 1
 
 ### Per-grade summary
 
 | Grade | Subjects | Examples | Issues | Low-variety |
 |---|---|---|---|---|
-| 1 | 18 | 76 | 1 | — |
+| 1 | 18 | 76 | 0 | — |
 | 2 | 22 | 88 | 3 | G2-20(0.95) |
 | 3 | 18 | 31 | 18 | — |
 | 4 | 20 | 39 | 0 | — |
-| 5 | 22 | 39 | 27 | — |
+| 5 | 22 | 39 | 29 | — |
 | 6 | 16 | 33 | 3 | — |
 | 7 | 18 | 36 | 12 | — |
 | 8 | 16 | 31 | 9 | — |
 | 9 | 18 | 34 | 12 | G9-05(0.94) |
-| 10 | 16 | 36 | 19 | — |
+| 10 | 16 | 36 | 15 | — |
 | 11 | 14 | 29 | 4 | — |
 | 12 | 18 | 37 | 0 | — |
 
 ### Sample issues by severity
-
-#### FORM_LEAK
-
-- `G1-17` (form `(+ 1 2)`): form '(+ 1 2)' appears in user_msg of a goal-style subject
-    ```
-    What the Dog thought he saw beneath the water turned out to be his own reflection. This was along the river bank.
-
-Patch the hound marked a form on bark near the meadow: (+ 1 2). "When the REPL reads this," Patch said, "it will evaluate the form and return the result — not the form itself, but what ...
-    ```
 
 #### ANSWER_LEAK
 

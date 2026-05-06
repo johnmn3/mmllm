@@ -1088,6 +1088,27 @@ G5_19 = SubjectCurriculum(grade=5, subject_id="G5-19",
             concept_phrase="checking if all elements satisfy a predicate",
             question_what="whether every pebble in 1, 2, 3 passes the pos? sieve",
             goal_text="check if all elements in the vector containing 1, 2, and 3 are positive",
+            scenario=(
+                'Patch the hound held a pile of bones marked 1, 2, 3 at the stream '
+                'near the forest. A gap-sieve had a rule: only positive-marked bones '
+                'can pass. She wanted to know: will every bone in this pile fit '
+                'through?'
+            ),
+            need=(
+                'She needed to check whether all bones would pass the pos? sieve. '
+                'Every? is the strict test: it stops as soon as one fails, or returns '
+                'yes if all pass.'
+            ),
+            mapping=(
+                'The every?-form checks the pile. The bones are 1, 2, 3. The gap-rule '
+                'is pos?. Every? pours each bone through and stops if one fails, or '
+                'confirms yes if all pass.'
+            ),
+            resolution=(
+                'The REPL poured bone 1 (passed), poured 2 (passed), poured 3 (passed). '
+                'Every bone made it through. Every? returned true — all bones fit.'
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(every? even? [1 2 3])",
@@ -1095,6 +1116,27 @@ G5_19 = SubjectCurriculum(grade=5, subject_id="G5-19",
             concept_phrase="checking if all elements satisfy a predicate",
             question_what="whether every pebble in 1, 2, 3 passes the even? sieve",
             goal_text="check if all elements in the vector containing 1, 2, and 3 are even",
+            scenario=(
+                'Bell the hound held a pile of bones marked 1, 2, 3 {place}. A '
+                'gap-sieve had a rule: only even-marked bones can pass. She wanted to '
+                'know: will every bone fit through?'
+            ),
+            need=(
+                'She needed to check whether all bones would pass the even? sieve. '
+                'Every? returns yes only if every bone passes, and returns no as soon '
+                'as one fails.'
+            ),
+            mapping=(
+                'The every?-form checks the pile. The bones are 1, 2, 3. The gap-rule '
+                'is even?. Every? pours each through and returns no if any fails, or '
+                'yes if all pass.'
+            ),
+            resolution=(
+                'The REPL poured bone 1 (held back — odd, not even). Every? found a '
+                'failure immediately and returned false without checking the rest. Not '
+                'every bone fit.'
+            ),
+            tags=("story",),
         ),
     ], subplots=_SIEVE_SUBPLOTS, plan_pool=_PLAN_G5)
 
@@ -1108,6 +1150,26 @@ G5_20 = SubjectCurriculum(grade=5, subject_id="G5-20",
             concept_phrase="taking elements from a sequence",
             question_what="the sequence produced by taking 3 elements from the row of 10, 20, 30, 40, 50",
             goal_text="take the first 3 elements from the vector containing 10, 20, 30, 40, and 50",
+            scenario=(
+                'Rex the hound faced a long row of bones: 10, 20, 30, 40, 50. A gap-sieve '
+                'would count out just the first three and pass them through. The rest would '
+                'stay behind on the near bank.'
+            ),
+            need=(
+                'He wanted just the first three bones from the row. Take counts off the '
+                'first n bones and passes only those through the sieve.'
+            ),
+            mapping=(
+                'The take-form is the sieve-gap. The input row is 10, 20, 30, 40, 50. '
+                'The count is 3. Take lets the first three bones through and holds the '
+                'rest back.'
+            ),
+            resolution=(
+                'The REPL poured bones 10, 20, 30 through the gap and let the rest fall '
+                'back. The far bank caught the first three bones. The sieve-pour was '
+                'complete.'
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(drop 2 [10 20 30 40 50])",
@@ -1115,6 +1177,25 @@ G5_20 = SubjectCurriculum(grade=5, subject_id="G5-20",
             concept_phrase="dropping elements from a sequence",
             question_what="the sequence produced by dropping 2 elements from the row of 10, 20, 30, 40, 50",
             goal_text="drop the first 2 elements from the vector containing 10, 20, 30, 40, and 50",
+            scenario=(
+                'Bell the hound faced the same long row by the river bank: 10, 20, 30, '
+                '40, 50. A different gap-sieve would skip the first two and pass the '
+                'rest through. The first two would be held back on the near bank.'
+            ),
+            need=(
+                'She wanted everything except the first two bones. Drop skips the first n '
+                'bones and passes the rest through the sieve.'
+            ),
+            mapping=(
+                'The drop-form is the sieve-gap. The input row is 10, 20, 30, 40, 50. '
+                'The count is 2. Drop holds the first two back and lets the rest through.'
+            ),
+            resolution=(
+                'The REPL skipped bones 10 and 20, then poured bones 30, 40, 50 through '
+                'the gap. The far bank caught the remaining three bones. The sieve-pour '
+                'was complete.'
+            ),
+            tags=("story",),
         ),
     ], subplots=_SIEVE_SUBPLOTS, plan_pool=_PLAN_G5)
 
@@ -1128,6 +1209,28 @@ G5_21 = SubjectCurriculum(grade=5, subject_id="G5-21",
             concept_phrase="removing duplicates from a sequence",
             question_what="the sequence produced by passing 1, 1, 2, 3, 3, 4 through the dedup-sieve",
             goal_text="remove duplicate elements from the vector containing 1, 1, 2, 3, 3, and 4",
+            scenario=(
+                'Patch the hound gathered a pile of bones marked 1, 1, 2, 3, 3, 4 at '
+                'the stream near the meadow. Some bones had the same mark — duplicates. '
+                'A special gap-sieve would pass each bone through once and catch it, '
+                'holding back any bones already seen.'
+            ),
+            need=(
+                'She wanted to keep only the first copy of each unique mark. Distinct is '
+                'the dedup-sieve: it passes each unique bone through and holds back '
+                'repeats.'
+            ),
+            mapping=(
+                'The distinct-form is the sieve-gap. The input bones are 1, 1, 2, 3, 3, '
+                '4. The gap-rule is uniqueness: pass the first copy, hold back any repeat '
+                'marks.'
+            ),
+            resolution=(
+                'The REPL poured bone 1 (passed), poured 1 again (held back as duplicate), '
+                'poured 2 (passed), poured 3 (passed), poured 3 (held back), poured 4 '
+                '(passed). The far bank caught 1, 2, 3, 4. No duplicates remained.'
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(sort [3 1 2])",
@@ -1135,6 +1238,25 @@ G5_21 = SubjectCurriculum(grade=5, subject_id="G5-21",
             concept_phrase="sorting a sequence",
             question_what="the sequence produced by sorting the row of 3, 1, 2 into ascending order",
             goal_text="sort the vector containing 3, 1, and 2 in ascending order",
+            scenario=(
+                'Bell the hound held a pile of bones marked 3, 1, 2 {place}. The bones '
+                'were out of order. A gap-sieve with a sorting rule would rearrange them '
+                'in ascending order as they passed through.'
+            ),
+            need=(
+                'She wanted the bones in ascending order. Sort is the arranging-sieve: it '
+                'takes the bones and passes them through in a rearranged sequence.'
+            ),
+            mapping=(
+                'The sort-form is the sieve-gap. The input bones are 3, 1, 2. The '
+                'gap-rule is ascending order. Sort rearranges the bones from smallest to '
+                'largest.'
+            ),
+            resolution=(
+                'The REPL took the bones 3, 1, 2 and rearranged them in ascending order. '
+                'The far bank caught 1, 2, 3. The sorting-sieve was complete.'
+            ),
+            tags=("story",),
         ),
     ], subplots=_SIEVE_SUBPLOTS, plan_pool=_PLAN_G5)
 

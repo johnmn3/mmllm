@@ -159,26 +159,24 @@ G10_01 = SubjectCurriculum(
             question_what="what you get when unquoting x inside a syntax-quoted form",
             goal_text="create a form that when x is 5 produces a list containing the value of x",
             scenario=(
-                'Patch the hound held the bone gripped at 5 and wanted to build '
-                'a marked form that would name the bone in the middle — the '
-                'symbol a before it, the symbol b after. Inside the syntax-quote, '
-                'the tilde would tell the runtime: uncover the value here.'
+                'Patch the hound held the bone and wanted to build a marked form. '
+                'Inside the syntax-quote, the tilde would tell the runtime: unquote '
+                'this spot, substitute the bone\'s value here.'
             ),
             need=(
-                'When the binding held x at 5, unquoting inside the form should '
-                'splice in the value 5 itself. The result should be a list where '
-                '5 appears in the middle — not x, but 5.'
+                'When the binding held the bone, unquoting inside the form should '
+                'splice the value into the middle. The result should be a list '
+                'with the value between two symbols.'
             ),
             mapping=(
-                'The let-jaws grip x at 5. The backtick is the syntax-quote: '
-                '"build this form by rule." The tilde says "unquote this one '
-                'spot" — substitute the value here, not the symbol.'
+                'The let-jaws grip the bone. The backtick is the syntax-quote. '
+                'The tilde says "unquote this spot" — substitute the value here, '
+                'not the symbol.'
             ),
             resolution=(
-                'The REPL built the form according to the tilde: the value 5 '
-                'replaced x in the output. The list came back with the bone '
-                '(5) nested between the two symbol-marks, exactly as the scratch '
-                'had intended.'
+                'The REPL built the form: the tilde unquoted the value and '
+                'inserted it into the output. The list came back with the value '
+                'nested between the two symbol-marks, exactly as scratched.'
             ),
             tags=("story",),
         ),
@@ -348,26 +346,22 @@ G10_04 = SubjectCurriculum(
             goal_text="expand a when-macro call one step to see what code it produces",
             scenario=(
                 'Bell the hound found an old scratch-mark on bark: when. She '
-                'wanted to see what scratch-mark it would be rewritten into — '
-                'not to run the form yet, but to watch the rewrite happen once.'
+                'wanted to see what scratch-mark it would be rewritten into.'
             ),
             need=(
-                'Macroexpand-1 would take the scratch-mark as written and show '
-                'what it became after one pass of the rewriter. The form '
-                '"(when true 1)" would be rewritten into the if-form it '
-                'abbreviates, but no further.'
+                'Macroexpand-1 would take the form and show what it became after '
+                'one pass of the rewriter. The when-form would become an if-form '
+                'it abbreviates, but no further.'
             ),
             mapping=(
-                'Macroexpand-1 is the magnifying glass. The scratch-mark is '
-                'the original form, and the rewritten form is what the magnifier '
-                'shows after one layer of rewriting. No evaluation yet — just '
-                'the rewrite revealed.'
+                'Macroexpand-1 is the magnifying glass. The original form is the '
+                'scratch-mark, and the rewritten form is what the magnifier shows '
+                'after one layer of rewriting. No evaluation yet.'
             ),
             resolution=(
                 'The REPL looked through the magnifier and saw the when scratch '
-                'become an if-form with a do-block. The intermediate form was '
-                'shown — one step of rewriting, nothing computed, nothing '
-                'evaluated. The scratch-mark itself had been read out.'
+                'become an if-form with a do-block. The intermediate rewrite was '
+                'shown — one step, nothing computed, nothing evaluated.'
             ),
             tags=("story",),
         ),
@@ -380,26 +374,25 @@ G10_04 = SubjectCurriculum(
             goal_text="expand an or-macro call one step to reveal its internal structure",
             scenario=(
                 'Rex the hound studied a complex scratch-mark at the stream: or. '
-                'He did not want to know what it evaluated to — he wanted to see '
-                'the intermediate form it would be rewritten into, the one step '
-                'that would happen before evaluation.'
+                'He wanted to see the intermediate form it would become, the step '
+                'before evaluation.'
             ),
             need=(
-                'Macroexpand-1 with the or-form would reveal the inner rewrite: '
-                'the let*-binding and the if-form it produced. One pass only — '
-                'the form was not to be evaluated, just rewritten and revealed.'
+                'Macroexpand-1 would reveal the inner rewrite: a let*-binding and '
+                'an if-form created to handle the logic. One pass only — the form '
+                'not evaluated, just rewritten and revealed.'
             ),
             mapping=(
-                'The or scratch-mark is the macro call. Macroexpand-1 is the '
-                'device that shows what one rewrite produces. The complex form '
-                'with let* and if is the intermediate step — the form that '
-                'exists after the macro rewrites but before evaluation.'
+                'The or-mark is the macro call. Macroexpand-1 shows what one '
+                'rewrite produces. The resulting form with let* and if is the '
+                'intermediate step — after the macro rewrites but before '
+                'evaluation.'
             ),
             resolution=(
                 'The REPL expanded once and showed the form beneath the scratch: '
-                'a let*-binding with a safe copy of the argument, then an if that '
-                'checked the value. The rewrite was bare — not evaluated, just '
-                'shown. Rex could read the intermediate structure clearly.'
+                'a let*-binding with a safe copy, then an if. The rewrite was '
+                'bare — not evaluated, just shown. The intermediate structure was '
+                'clear.'
             ),
             tags=("story",),
         ),
@@ -422,25 +415,22 @@ G10_05 = SubjectCurriculum(
             goal_text="fully expand a when-macro call to reveal the if-form it becomes",
             scenario=(
                 'Patch the hound came to the bank with a scratched form: when. '
-                'This time, the hound wanted to see the final form — not one '
-                'rewrite step, but all the way through. How many layers of '
-                'rewriting would it take?'
+                'This time, the hound wanted to see the final form — not one step, '
+                'but all the way through.'
             ),
             need=(
                 'Macroexpand — with no limit — would keep rewriting until no '
-                'more macros remained. The when-form would be fully unwound into '
-                'the innermost form that no macro could touch.'
+                'more macros remained. The when-form would be fully unwound.'
             ),
             mapping=(
                 'Macroexpand is the full-passage view. The when-mark is the '
                 'original scratch, and the final if-form is what it becomes when '
-                'all rewrites are done. Every layer of nesting is unwound.'
+                'all rewrites are done.'
             ),
             resolution=(
-                'The REPL expanded fully and showed the complete form: the '
-                'when had become an if with a do-block inside. No more macros '
-                'remained to rewrite. The final form was bare — evaluation-ready, '
-                'though not yet evaluated.'
+                'The REPL expanded fully and showed the complete form: the when '
+                'had become an if with a do-block inside. No more macros remained. '
+                'The final form was bare and evaluation-ready.'
             ),
             tags=("story",),
         ),
@@ -451,26 +441,24 @@ G10_05 = SubjectCurriculum(
             question_what="the final form after threading the value through all steps",
             goal_text="fully expand a thread-first macro call to see how the value threads through",
             scenario=(
-                'Bell the hound picked up the bone marked 1 and studied the '
-                'threading scratch-mark at the bank: arrow-right inc inc. She '
-                'wanted to see the full path the bone would take through each '
-                'step — how the form would be rewritten from start to finish.'
+                'Bell the hound picked up a bone and studied the threading mark '
+                'at the bank: arrow inc inc. She wanted to see the full path the '
+                'bone would take through each step.'
             ),
             need=(
-                'The thread-first macro would rewrite the arrow-form to show '
-                'how the value threads through each function. The final expanded '
-                'form would show the nested function calls in their true order.'
+                'The thread-first macro would rewrite the arrow-form to show how '
+                'the value threads through each function. The expanded form would '
+                'show nested function calls.'
             ),
             mapping=(
-                'The thread-first scratch-mark is the shorthand. Macroexpand '
-                'reveals the full path by unfolding how each function nests '
-                'around the value. The threading is made visible as nested calls.'
+                'The arrow-mark is the shorthand. Macroexpand reveals the full '
+                'path by unfolding how each function nests around the value. '
+                'Threading is visible as nested calls.'
             ),
             resolution=(
-                'The REPL expanded the arrow-form fully. The value 1 was shown '
-                'threaded first through inc, then the result through inc again. '
-                'The final nested form made the path clear: inc(inc(1)). The '
-                'shorthand had expanded to show the full journey.'
+                'The REPL expanded the arrow-form fully. The value was threaded '
+                'through inc, then through inc again. The final nested form showed '
+                'the path. The shorthand had expanded to show the full journey.'
             ),
             tags=("story",),
         ),

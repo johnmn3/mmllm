@@ -277,25 +277,21 @@ G8_04 = SubjectCurriculum(
             question_what="whether the Runners' guild named Pace is real after the founding",
             goal_text="found a Runners' guild named Pace whose only requirement is a method speed taking the runner as its single argument; then check whether the guild's name is now a real thing in the runtime",
             scenario=(
-                'Bell the hound stood at the bank near the pond and began to '
-                'carve a new pack agreement on a flat stone. All members of '
-                'the Pace guild would honor a single call — speed — and each '
-                'would answer in its own way.'
+                'Bell the hound carved a pack agreement on a flat stone at the '
+                'bank. All members would honor a single call — speed — each '
+                'answering in its own way.'
             ),
             need=(
-                'The pack needed proof that the guild agreement had been set '
-                'into the runtime as a binding. The guild itself, as a real '
-                'thing, had to exist.'
+                'The pack needed proof that the guild agreement was real in '
+                'the runtime.'
             ),
             mapping=(
-                'The flat stone is the defprotocol, the guild name is Pace, '
-                'the speed method is the pack\'s requirement, and the guild\'s '
-                'existence is the protocol var itself.'
+                'The flat stone is the defprotocol, Pace is the guild name, '
+                'and the protocol var is the guild\'s realness.'
             ),
             resolution=(
-                'The REPL carved the agreement on the bank and handed back '
-                'the guild as proof. The pack agreement was now real and '
-                'ready for members to join.'
+                'The REPL set the agreement and handed back the guild as '
+                'proof. The agreement was real and ready.'
             ),
             tags=("story",),
         ),
@@ -912,24 +908,22 @@ G8_13 = SubjectCurriculum(
             goal_text="define a protocol Named with method name-of, define a record that uses this to access a field, then call the method",
             scenario=(
                 'Rex the hound carved a guild called Named with a name-of '
-                'requirement. He built a record case for swift runners with '
-                'one field, n, holding the runner\'s name. Inside the guild '
-                'method, the this-word would point to the whole case.'
+                'requirement. He built a record case for runners with one '
+                'field, n, and sealed it with the guild mark.'
             ),
             need=(
                 'When a runner arrived at name-of, the guild would route to '
-                'the record\'s body, where this referred to the runner itself. '
-                'By reading the n field from this, the name would come out.'
+                'the record\'s body, where this would refer to the runner itself.'
             ),
             mapping=(
-                'The guild is the defprotocol, the runner pouch is the '
-                'defrecord, the this-word is a reference to the current '
-                'record, and the field value is what the implementation returns.'
+                'The guild is the defprotocol, the record is the defrecord, '
+                'the this-word points to the current record, and the field '
+                'value is what returns.'
             ),
             resolution=(
-                'The REPL built a Hare with "Zephyr" in the n field, then '
-                'called name-of. The guild routed to the Hare\'s body, where '
-                'this let the method read the n field, and the name came back.'
+                'The REPL built a Hare with "Zephyr" in the n field, called '
+                'name-of, and the this-bound method read the field from the '
+                'record. The name came back.'
             ),
             tags=("story",),
         ),
@@ -1132,24 +1126,22 @@ G8_16 = SubjectCurriculum(
             goal_text="define a protocol Move with method step, define two record types Hare and Tortoise that each implement it, then call the method on both instances",
             scenario=(
                 'Patch the hound carved a guild called Move with a step '
-                'requirement at the bank. He built two record cases — one for '
-                'swift runners, one for steady runners — each marking the same '
-                'guild but answering in its own movement.'
+                'requirement. He built two record cases — one for swift '
+                'runners, one for steady — each marking the guild.'
             ),
             need=(
-                'When both runners passed through the step call, each would '
-                'answer according to its nature. A vector of their answers '
-                'would come back.'
+                'When both runners passed the step call, each would answer '
+                'by its own movement. A vector of their answers would come back.'
             ),
             mapping=(
-                'The guild is the defprotocol, the two record cases are the '
-                'defrecords, the guild marks are the implementations, and each '
-                'breed\'s movement is what the step returns.'
+                'The guild is the defprotocol, the record cases are the '
+                'defrecords, the marks are the implementations, and each '
+                'breed\'s movement is what step returns.'
             ),
             resolution=(
-                'The REPL set the guild and both record cases, then called '
-                'step on both via mapv. The guild routed each to its own '
-                'case\'s implementation, and the vector of movements came back.'
+                'The REPL set the guild and both records, called step on both '
+                'via mapv. The guild routed each to its implementation, and '
+                'the vector of movements came back.'
             ),
             tags=("story",),
         ),

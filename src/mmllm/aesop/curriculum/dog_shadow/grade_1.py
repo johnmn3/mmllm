@@ -1513,13 +1513,14 @@ G1_17 = SubjectCurriculum(
             question_what="the value returned by adding 1 and 2",
             goal_text="add 1 and 2 so the REPL returns the result",
             scenario=(
-                'Patch the hound marked a form on bark near the meadow: (+ 1 2). '
+                'Patch the hound marked an arithmetic form on bark near the meadow. '
                 '"When the REPL reads this," Patch said, "it will evaluate the form '
                 'and return the result — not the form itself, but what it computes to."'
             ),
             need=(
-                'He wanted the runtime to evaluate the form and hand back the running '
-                'total. The operation mattered — the form would compute to something.'
+                'He wanted the runtime to evaluate the operation and hand back the '
+                'running total. The computation mattered — the form would compute to '
+                'a value.'
             ),
             mapping=(
                 'The marks on bark are the form. The REPL sees the operator and '

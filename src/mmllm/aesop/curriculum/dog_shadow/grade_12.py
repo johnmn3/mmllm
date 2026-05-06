@@ -195,28 +195,22 @@ G12_02 = SubjectCurriculum(
             question_what="the sum accumulated via transduce using the composed transducer of map-inc then filter-even, starting from 0, applied to the vector containing 1, 2, 3, 4, 5",
             goal_text="compose map-inc and filter-even, then use transduce to sum the kept elements from the vector containing 1, 2, 3, 4, 5, starting from 0",
             scenario=(
-                'Bell the hound found two stacked logs at the stream, the first '
-                'gap shaped to add weight, the second to filter by evenness. But '
-                'this time her receiver was not an empty row — it was a counting-'
-                'stick at her paws. Bones 1 through 5 waited to pass through.'
+                'Bell the hound found two stacked logs — the first adding weight, '
+                'the second filtering. Her receiver was a counting-stick. Bones 1 '
+                'through 5 waited to pass.'
             ),
             need=(
-                'She wanted each bone to pass through both gaps, and instead of '
-                'collecting them as a row, she wanted their total weight summed '
-                'together, starting from zero, using the transducer to do all the '
-                'work.'
+                'She wanted each bone through both gaps, summed into a total, '
+                'starting from zero, using the transducer to do the work.'
             ),
             mapping=(
-                'The stacked gaps are the composed transducer, the reduction '
-                "function is the addition that adds each kept bone\'s weight, the "
-                'running total is the accumulation, and transduce connects the '
-                'pipeline to the sum.'
+                'The stacked gaps are the composed transducer, transduce is the '
+                'reduction operator, and the counting-stick is where the tally '
+                'accumulates.'
             ),
             resolution=(
-                'The REPL applied the composed pipeline to each bone and summed '
-                'the survivors: 1 became 2 (kept), 2 became 3 (kept), 3 became 4 '
-                '(kept), 4 became 5 (rejected), 5 became 6 (rejected). The kept '
-                'bones summed to the running total: 2 + 4 + 6 = 12.'
+                'The REPL applied the pipeline: each bone incremented, then '
+                'filtered. The kept ones were summed into the final tally.'
             ),
             tags=("story",),
         ),
@@ -267,25 +261,24 @@ G12_03 = SubjectCurriculum(
             question_what="the vector produced by reifying the take-3 transducer into an empty vector via into, applied to the range of 100 numbers",
             goal_text="use the take-3 transducer with into to collect the first three elements from a range of 100 numbers",
             scenario=(
-                'Patch the hound arrived at a vast stream with an endless flood of '
-                'bones flowing past — a range of one hundred from beginning to end. '
-                'A small gap stood at the bank, sized to stop after only three had '
-                'passed.'
+                'Patch the hound arrived at a vast stream with an endless flood — '
+                'a range of one hundred bones. A gap at the bank was sized to stop '
+                'after only three had passed.'
             ),
             need=(
-                'The hound wanted to catch what the gap let through — just the '
-                'first three bones from the endless stream — and place them into an '
-                'empty row. The form would take what it needed and stop.'
+                'The hound wanted the gap to let through just the first three bones '
+                'and place them into an empty row. The form would take what it '
+                'needed and stop.'
             ),
             mapping=(
-                'The gap that stops after three is the take-3 rule, the stream of '
-                'one hundred bones is the range, each bone passing the threshold is '
-                'an element, and the empty row is the collecting vessel.'
+                'The gap is the take-3 rule, the endless stream is the range, '
+                'each bone is an element, and the empty row is the collecting '
+                'vessel.'
             ),
             resolution=(
-                'The REPL sent the bones through the gap: 0 passed, 1 passed, 2 '
+                'The REPL sent bones through the gap: 0 passed, 1 passed, 2 '
                 'passed — and the gap closed. The row caught the first three from '
-                'the endless stream, bringing the long race to a halt.'
+                'the endless stream.'
             ),
             tags=("story",),
         ),

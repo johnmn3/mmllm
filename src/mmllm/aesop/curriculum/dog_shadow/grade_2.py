@@ -1227,12 +1227,79 @@ G2_10 = SubjectCurriculum(
             ),
             tags=("story",),
         ),
-        _ex("(* 5 5)",   25,       "repeated multiplication", "5 to the second power",
-            goal="multiply 5 by itself"),
-        _ex("(* 3 3 3 3)", 81,     "repeated multiplication", "3 to the fourth power",
-            goal="multiply 3 by itself four times"),
-        _ex("(* 10 10)", 100,      "repeated multiplication", "10 to the second power",
-            goal="multiply 10 by itself"),
+        SubjectExample(
+            form="(* 5 5)", expected=25,
+            concept_phrase="repeated multiplication",
+            question_what="5 to the second power",
+            goal_text="multiply 5 by itself",
+            scenario=(
+                'Patch the hound laid two marked stones near the pond, each carved '
+                'with the number 5. They wanted to multiply them together to see '
+                'the power.'
+            ),
+            need=(
+                'They needed the result of five multiplied by itself once — five '
+                'squared. The running product would hold the power.'
+            ),
+            mapping=(
+                'Each stone marked 5 is one factor, repeating it twice makes the '
+                'square, and the running product is the answer.'
+            ),
+            resolution=(
+                'The REPL multiplied five by five to get twenty-five. The square was '
+                'exact, and the answer was handed back at once.'
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form="(* 3 3 3 3)", expected=81,
+            concept_phrase="repeated multiplication",
+            question_what="3 to the fourth power",
+            goal_text="multiply 3 by itself four times",
+            scenario=(
+                'Bell the hound gathered four pebbles at the stream\'s edge, each '
+                'marked with 3. She wanted to multiply them all together to find the '
+                'fourth power.'
+            ),
+            need=(
+                'She needed the result of three multiplied four times by itself — '
+                'three to the fourth. The compounding would show the final answer.'
+            ),
+            mapping=(
+                'Each pebble marked 3 is one factor in the multiplication, repeating '
+                'four times makes the fourth power, and the running product grows '
+                'until it settles.'
+            ),
+            resolution=(
+                'The REPL multiplied 3 by 3 to get 9, then by 3 again to get 27, '
+                'then by 3 once more to get 81. The fourth power was exact.'
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form="(* 10 10)", expected=100,
+            concept_phrase="repeated multiplication",
+            question_what="10 to the second power",
+            goal_text="multiply 10 by itself",
+            scenario=(
+                'Rex the hound stood by the beach and placed two marked pebbles, each '
+                'carved with 10. He wanted to multiply them together to find the '
+                'square.'
+            ),
+            need=(
+                'He needed ten multiplied by itself — ten squared. The power would '
+                'reach one hundred.'
+            ),
+            mapping=(
+                'Each pebble marked 10 is one factor, repeating twice makes the '
+                'square, and the running product is the answer.'
+            ),
+            resolution=(
+                'The REPL multiplied ten by ten to get one hundred. The square was '
+                'exact, and the verdict came back clear.'
+            ),
+            tags=("story",),
+        ),
     ],
     subplots=_ACORN_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
@@ -1318,10 +1385,30 @@ G2_12 = SubjectCurriculum(
             ),
             tags=("story",),
         ),
-        _ex('(print "x")', None,
-            'the print call',
-            'the return value of using print on the string "x"',
-            goal='print the string "x" without a newline'),
+        SubjectExample(
+            form='(print "x")', expected=None,
+            concept_phrase='the print call',
+            question_what='the return value of using print on the string "x"',
+            goal_text='print the string "x" without a newline',
+            scenario=(
+                'Patch the hound picked up a piece of bark near the meadow and scratched '
+                'a single mark x into its surface. They wanted the mark to appear but no '
+                'line-break after it.'
+            ),
+            need=(
+                'They needed the side effect — the mark left on the bark. The return value '
+                'was less important than the scratch itself.'
+            ),
+            mapping=(
+                'The string "x" is the message, print is the paw-stroke that writes without '
+                'a line-break, and the return is nil — void when the marking is done.'
+            ),
+            resolution=(
+                'The REPL scratched x onto the bark without a newline and handed back nil. '
+                'The message was written, and nothing more was needed.'
+            ),
+            tags=("story",),
+        ),
     ],
     subplots=_SCRIBE_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
@@ -1360,21 +1447,125 @@ G2_13 = SubjectCurriculum(
             ),
             tags=("story",),
         ),
-        _ex("(and true false)",  False,  "the logical and",
-            "the result of using and on true and false",
-            goal="test true and false with the and operator"),
-        _ex("(or false true)",   True,   "the logical or",
-            "the result of using or on false and true",
-            goal="test false or true with the or operator"),
-        _ex("(or false false)",  False,  "the logical or",
-            "the result of using or on false and false",
-            goal="test false or false with the or operator"),
-        _ex("(and 1 2 3)",       3,      "the logical and",
-            "the result of using and on 1, 2, and 3",
-            goal="apply and to 1, 2, and 3"),
-        _ex("(or nil false 5)",  5,      "the logical or",
-            "the result of using or on nil, false, and 5",
-            goal="apply or to nil, false, and 5"),
+        SubjectExample(
+            form="(and true false)", expected=False,
+            concept_phrase="the logical and",
+            question_what="the result of using and on true and false",
+            goal_text="test true and false with the and operator",
+            scenario=(
+                'Rex the hound stood at the stream bank facing two test gates placed '
+                'one after the other. The first bore the mark true, the second false.'
+            ),
+            need=(
+                'He wanted to cross if both gates would let him pass. The and would test '
+                'each in turn — if either blocked, the chain would fail and he could not '
+                'cross.'
+            ),
+            mapping=(
+                'Each gate is one condition, the and chains them, and the verdict is true '
+                'only if all pass him through.'
+            ),
+            resolution=(
+                'The REPL tested true at the first gate — it opened. False at the second '
+                'gate — it barred the way. One condition failed, and the verdict came back '
+                'false. He could not cross.'
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form="(or false true)", expected=True,
+            concept_phrase="the logical or",
+            question_what="the result of using or on false and true",
+            goal_text="test false or true with the or operator",
+            scenario=(
+                'Patch the hound approached a fork near the meadow. The first path bore the '
+                'mark false, the second true. They wanted to find any path that was open.'
+            ),
+            need=(
+                'They needed to know if at least one path would lead forward. The or would '
+                'test each — if any opened, the journey could continue.'
+            ),
+            mapping=(
+                'Each path is one condition, the or tests them seeking an opening, and true '
+                'returns if any path is available.'
+            ),
+            resolution=(
+                'The REPL tested false at the first path — closed. True at the second — '
+                'open. At least one way forward existed, and the verdict came back true.'
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form="(or false false)", expected=False,
+            concept_phrase="the logical or",
+            question_what="the result of using or on false and false",
+            goal_text="test false or false with the or operator",
+            scenario=(
+                'Bell the hound arrived at a fork by the pond. Both paths bore the mark '
+                'false. She wanted to know if any path was open.'
+            ),
+            need=(
+                'She needed at least one path to lead forward. The or would test both — if '
+                'all were closed, the journey could not continue.'
+            ),
+            mapping=(
+                'Each path is one condition, the or tests them seeking an opening, and '
+                'false returns only when no path is available.'
+            ),
+            resolution=(
+                'The REPL tested false at the first path — closed. False at the second — '
+                'also closed. No way forward existed, and false was handed back.'
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form="(and 1 2 3)", expected=3,
+            concept_phrase="the logical and",
+            question_what="the result of using and on 1, 2, and 3",
+            goal_text="apply and to 1, 2, and 3",
+            scenario=(
+                'Rex the hound held three marked stones at the forest — 1, 2, and 3. He '
+                'wanted to apply the and operator to see what would pass through the chain '
+                'of tests.'
+            ),
+            need=(
+                'He needed to know what the and-chain would return when applied to three '
+                'truthy values. The result would show what the chain carried forward.'
+            ),
+            mapping=(
+                'Each stone is one value tested by and, all are truthy, and the chain '
+                'returns the last value that passed through.'
+            ),
+            resolution=(
+                'The REPL tested 1 with and — truthy, passed. Then 2 — truthy, passed. '
+                'Then 3 — truthy, passed. The last value, 3, was returned.'
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form="(or nil false 5)", expected=5,
+            concept_phrase="the logical or",
+            question_what="the result of using or on nil, false, and 5",
+            goal_text="apply or to nil, false, and 5",
+            scenario=(
+                'Patch the hound approached three paths near the meadow — one marked nil, '
+                'one marked false, and one marked 5. They wanted to find which could carry '
+                'them forward.'
+            ),
+            need=(
+                'They needed the first truthy value in the chain — the path that would lead '
+                'forward. The or-chain would find it.'
+            ),
+            mapping=(
+                'Each path is one value tested by or, the first truthy value is the answer, '
+                'and false or nil values are skipped until a true one is found.'
+            ),
+            resolution=(
+                'The REPL tested nil — falsey, skipped. Then false — falsey, skipped. Then '
+                '5 — truthy, returned. The first open path was 5.'
+            ),
+            tags=("story",),
+        ),
     ],
     subplots=_GATE_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
@@ -1410,14 +1601,99 @@ G2_14 = SubjectCurriculum(
             ),
             tags=("story",),
         ),
-        _ex("(not false)", True,  "the logical not", "the result of using not on false",
-            goal="negate the value false"),
-        _ex("(not nil)",   True,  "the logical not",   "the result of using not on nil",
-            goal="negate the value nil"),
-        _ex("(not 0)",     False, "the logical not",     "the result of using not on 0",
-            goal="negate the value 0"),
-        _ex("(not \"\")",  False, "the logical not",  "the result of using not on the empty string",
-            goal="negate the empty string"),
+        SubjectExample(
+            form="(not false)", expected=True,
+            concept_phrase="the logical not",
+            question_what="the result of using not on false",
+            goal_text="negate the value false",
+            scenario=(
+                'Bell the hound held a stone marked false near the pond. She wanted to flip '
+                'its meaning — to ask what the opposite would be if taken from the other '
+                'side.'
+            ),
+            need=(
+                'She needed the negation of false — the inverse verdict that would tell her '
+                'the opposite state. The not operation would turn it around.'
+            ),
+            mapping=(
+                'The false value is the input, the not operator is the flip, and the result '
+                'is the negated verdict.'
+            ),
+            resolution=(
+                'The REPL negated false and handed back true. The opposite was clear, and '
+                'the verdict was reversed. Falsehood became truth.'
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form="(not nil)", expected=True,
+            concept_phrase="the logical not",
+            question_what="the result of using not on nil",
+            goal_text="negate the value nil",
+            scenario=(
+                'Patch the hound held a stone marked nil at the meadow. They wanted to flip '
+                'its meaning — to know what the opposite of nothing would be.'
+            ),
+            need=(
+                'They needed the negation of nil — the truth value that would oppose it. '
+                'The not would settle what nothing became when negated.'
+            ),
+            mapping=(
+                'Nil is the input, the not operator flips it, and the result is the negated '
+                'verdict.'
+            ),
+            resolution=(
+                'The REPL negated nil and handed back true. Nothing became truth when '
+                'negated, and the answer was clear.'
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form="(not 0)", expected=False,
+            concept_phrase="the logical not",
+            question_what="the result of using not on 0",
+            goal_text="negate the value 0",
+            scenario=(
+                'Rex the hound held a stone marked 0 near the forest. He wanted to flip its '
+                'truthiness — to know if zero negated would become false.'
+            ),
+            need=(
+                'He needed the negation of zero. Since zero is truthy, the negation would '
+                'return false.'
+            ),
+            mapping=(
+                'Zero is the input, the not operator flips its truthiness, and the result '
+                'is false.'
+            ),
+            resolution=(
+                'The REPL negated zero — which is truthy — and returned false. The truth '
+                'was flipped, and the answer came back clear.'
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form='(not "")', expected=False,
+            concept_phrase="the logical not",
+            question_what="the result of using not on the empty string",
+            goal_text="negate the empty string",
+            scenario=(
+                'Patch the hound held a blank bark-strip at the stream\'s edge — empty, '
+                'with no marks. They wanted to know what the empty string negated would be.'
+            ),
+            need=(
+                'They needed the negation of the empty string. Since empty is truthy, the '
+                'negation would return false.'
+            ),
+            mapping=(
+                'The empty string is the input, the not operator flips its truthiness, and '
+                'the result is false.'
+            ),
+            resolution=(
+                'The REPL negated the empty string — which is truthy — and returned false. '
+                'The truth was inverted, and the answer was settled.'
+            ),
+            tags=("story",),
+        ),
     ],
     subplots=_GATE_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
@@ -1455,15 +1731,78 @@ G2_15 = SubjectCurriculum(
             ),
             tags=("story",),
         ),
-        _ex("(if \"\" 1 0)", 1, "the if conditional with empty string as condition",
-            "the result of if with condition the empty string, then-branch 1, else-branch 0",
-            goal="use if to return 1 when the condition is the empty string (then-branch) and 0 otherwise (else-branch)"),
-        _ex("(if nil 1 0)", 0, "the if conditional with nil as condition",
-            "the result of if with condition nil, then-branch 1, else-branch 0",
-            goal="use if to return 1 when the condition is nil (then-branch) and 0 otherwise (else-branch)"),
-        _ex("(if false 1 0)", 0, "the if conditional with false as condition",
-            "the result of if with condition false, then-branch 1, else-branch 0",
-            goal="use if to return 1 when the condition is false (then-branch) and 0 otherwise (else-branch)"),
+        SubjectExample(
+            form='(if "" 1 0)', expected=1,
+            concept_phrase="the if conditional with empty string as condition",
+            question_what="the result of if with condition the empty string, then-branch 1, else-branch 0",
+            goal_text="use if to return 1 when the condition is the empty string (then-branch) and 0 otherwise (else-branch)",
+            scenario=(
+                'Bell the hound stood at a fork in the path near the pond. A blank '
+                'bark-strip — empty, with no marks — sat at the junction. If the '
+                'condition checked empty as truthy, one path opened.'
+            ),
+            need=(
+                'She needed to know which path to take when the test condition was an '
+                'empty string. The if would read the value and branch to one of two '
+                'destinations.'
+            ),
+            mapping=(
+                'The empty string is the test condition, the then-branch returns 1, the '
+                'else-branch returns 0, and the if decides which fork to follow.'
+            ),
+            resolution=(
+                'The REPL tested the empty string — which is truthy, not false and not nil. '
+                'The then-branch opened, and 1 was returned. The right path was taken.'
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form="(if nil 1 0)", expected=0,
+            concept_phrase="the if conditional with nil as condition",
+            question_what="the result of if with condition nil, then-branch 1, else-branch 0",
+            goal_text="use if to return 1 when the condition is nil (then-branch) and 0 otherwise (else-branch)",
+            scenario=(
+                'Patch the hound stood at a fork near the meadow. A stone marked nil sat '
+                'at the junction. If nil checked falsey, the else path would open.'
+            ),
+            need=(
+                'They needed to know which branch would follow when the condition was nil. '
+                'The if would test and route to the right destination.'
+            ),
+            mapping=(
+                'Nil is the test condition, the then-branch returns 1, the else-branch '
+                'returns 0, and the if decides the fork.'
+            ),
+            resolution=(
+                'The REPL tested nil — which is falsey. The else-branch opened, and 0 was '
+                'returned. The left path was taken.'
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form="(if false 1 0)", expected=0,
+            concept_phrase="the if conditional with false as condition",
+            question_what="the result of if with condition false, then-branch 1, else-branch 0",
+            goal_text="use if to return 1 when the condition is false (then-branch) and 0 otherwise (else-branch)",
+            scenario=(
+                'Rex the hound stood at a fork in the path at the stream\'s edge. A stone '
+                'marked false sat at the junction. If false checked falsey, the else path '
+                'would open.'
+            ),
+            need=(
+                'He needed to know which path to follow when the test condition was false. '
+                'The if would test and branch to one of two destinations.'
+            ),
+            mapping=(
+                'False is the test condition, the then-branch returns 1, the else-branch '
+                'returns 0, and the if decides which fork leads home.'
+            ),
+            resolution=(
+                'The REPL tested false — which is falsey. The else-branch opened, and 0 was '
+                'handed back. The left path was taken.'
+            ),
+            tags=("story",),
+        ),
     ],
     subplots=_GATE_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
