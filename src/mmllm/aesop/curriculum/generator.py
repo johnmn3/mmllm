@@ -274,6 +274,124 @@ def _pick_ge_location(scene: Scene) -> ont.Location:
     return scene.rng.choice(cands)
 
 
+# Crow-pitcher: the thirsty crow drops smooth stones into the pitcher
+# one by one until the water rises to where the beak can reach.
+# `{clever}` = patient stone-dropper (tortoise-analog).
+# `{hasty}` = impatient guesser who wants the answer without submitting
+# (hare-analog). Both roles can be played by any of the three crows.
+# Excludes pond/river locations — proximity to open water defuses the
+# fable's core tension (the crow would simply drink from the river).
+CROW_PITCHER_LOCATIONS = ("garden", "orchard", "farm", "market",
+                           "village", "meadow", "road", "hilltop")
+
+# Pronoun-neutral emotion pools for crow-pitcher.
+CP_EMO_THIRSTY = (
+    "beak parched from the long search",
+    "throat dry with the afternoon's search",
+    "wings heavy from circling without finding water",
+    "eyes darting for any glint of water",
+    "tired and parched from the long afternoon",
+    "growing more desperate with each empty perch",
+)
+CP_EMO_PATIENT = (
+    "calm and methodical",
+    "dropping each stone with careful attention",
+    "steady in the stone-by-stone approach",
+    "unbothered by the slow progress",
+    "trusting the process, stone after stone",
+    "unhurried, form after form",
+)
+CP_EMO_PROUD = (
+    "with a triumphant rattle of feathers",
+    "head tilted confidently to one side",
+    "ruffling up with certainty",
+    "clicking the beak in self-satisfaction",
+    "preening at the thought of knowing",
+    "cocking the head with certainty",
+)
+
+
+def _crows() -> tuple[ont.Character, ...]:
+    return tuple(c for c in ont.CHARACTERS if c.species == "crow")
+
+
+def _pick_cp_chars(scene: Scene) -> tuple[ont.Character, ont.Character]:
+    """Pick a fresh (clever, hasty) crow pair for a crow-pitcher record.
+
+    `clever` is the patient evaluator (tortoise-analog): drops stones
+    carefully, lets the REPL decide.
+    `hasty` is the impatient guesser (hare-analog): wants the answer
+    without submitting the form.
+    """
+    pool = _crows()
+    clever = scene.rng.choice(pool)
+    hasty_pool = [c for c in pool if c.name != clever.name]
+    hasty = scene.rng.choice(hasty_pool)
+    return clever, hasty
+
+
+def _pick_cp_location(scene: Scene) -> ont.Location:
+    """Pick from outdoor locations natural for crow-pitcher."""
+    cands = [l for l in ont.LOCATIONS if l.name in CROW_PITCHER_LOCATIONS]
+    return scene.rng.choice(cands)
+
+
+def _build_cp_placeholders(scene: Scene,
+                           clever: ont.Character,
+                           hasty: ont.Character,
+                           location: ont.Location,
+                           example: SubjectExample) -> dict:
+    """Crow-pitcher placeholder dict.
+
+    Exposes `{clever}` / `{hasty}` (and their suffix families) for
+    crow-specific metaphor-pool templates, PLUS `{hare}` / `{tortoise}`
+    aliases so the inherited `_GOAL_SUBPLOTS` and other shared templates
+    from tortoise-hare render naturally. The mapping is:
+      hasty  → hare-analog   (impatient guesser)
+      clever → tortoise-analog (patient evaluator)
+    """
+    base = {
+        "place":          place_phrase(scene, location),
+        "location":       location.name,
+        "form_display":   _format_form_display(example.form),
+        "concept_phrase": example.concept_phrase,
+        "what":           example.question_what,
+        "goal_text":      example.goal_text,
+        "scenario":       example.scenario,
+        "need":           example.need,
+        "mapping":        example.mapping,
+        "resolution":     example.resolution,
+        "emo_proud":      scene.rng.choice(CP_EMO_PROUD),
+        "emo_patient":    scene.rng.choice(CP_EMO_PATIENT),
+        "emo_tired":      scene.rng.choice(CP_EMO_THIRSTY),
+        "emo_thirsty":    scene.rng.choice(CP_EMO_THIRSTY),
+        "emo_content":    scene.rng.choice(CP_EMO_PATIENT),
+        "emo_regretful":  scene.rng.choice(CP_EMO_THIRSTY),
+        "emo_hungry":     scene.rng.choice(CP_EMO_THIRSTY),
+    }
+    for role, char in (("clever", clever), ("hasty", hasty)):
+        base[role]                  = char.name
+        base[f"{role}_phrase"]      = species_phrase(char)
+        base[f"{role}_he_she"]      = char.he_she
+        base[f"{role}_he_she_cap"]  = cap(char.he_she)
+        base[f"{role}_his_her"]     = char.his_her
+        base[f"{role}_him_her"]     = char.him_her
+    # hare/tortoise aliases for compatibility with shared subplot templates
+    base["hare"]                = hasty.name
+    base["hare_phrase"]         = species_phrase(hasty)
+    base["hare_he_she"]         = hasty.he_she
+    base["hare_he_she_cap"]     = cap(hasty.he_she)
+    base["hare_his_her"]        = hasty.his_her
+    base["hare_him_her"]        = hasty.him_her
+    base["tortoise"]            = clever.name
+    base["tortoise_phrase"]     = species_phrase(clever)
+    base["tortoise_he_she"]     = clever.he_she
+    base["tortoise_he_she_cap"] = cap(clever.he_she)
+    base["tortoise_his_her"]    = clever.his_her
+    base["tortoise_him_her"]    = clever.him_her
+    return base
+
+
 # Pronoun-neutral emotion pools. The fables.py EMO_GREEDY/EMO_CONTENT/
 # EMO_REGRETFUL pools hard-code "his/her", which produces ungrammatical
 # text when the assigned character has a different gender. These pools
@@ -500,6 +618,11 @@ def generate_one_record(scene: Scene,
         location = _pick_ag_location(scene)
         placeholders_fn = lambda ex: _build_placeholders(
             scene, primary, secondary, location, ex, sub.fable)
+    elif sub.fable == "crow-pitcher":
+        clever, hasty = _pick_cp_chars(scene)
+        location = _pick_cp_location(scene)
+        placeholders_fn = lambda ex: _build_cp_placeholders(
+            scene, clever, hasty, location, ex)
     else:
         # tortoise-hare default
         hare, tortoise = _pick_th_chars(scene)
