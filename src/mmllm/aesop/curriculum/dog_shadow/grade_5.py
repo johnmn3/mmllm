@@ -938,18 +938,17 @@ G5_16 = SubjectCurriculum(grade=5, subject_id="G5-16",
             question_what="the sequence produced by mapping the half-loaded * card pre-filled with 3 over the vector containing 1, 2, and 3",
             goal_text="apply a partially applied multiplication to each element of the vector containing 1, 2, and 3",
             scenario=(
-                'Bell the hound wanted to multiply a pile of bones by 3. She would use '
-                'partial to pre-load the * recipe, creating a new trail that waited for '
-                'each bone. Then map would pour the pile through that trail.'
+                'Bell wanted to multiply bones by 3. She would use partial to pre-load '
+                'the * recipe, creating a new trail for each bone. Then map would pour '
+                'the pile through that trail.'
             ),
             need=(
-                'She wanted to multiply each bone by 3. Partial freezes 3 into the * '
-                'recipe, and map feeds each bone through that trail.'
+                'She wanted each bone multiplied by 3. Partial freezes 3 into *, and '
+                'map feeds each bone through.'
             ),
             mapping=(
-                'The map-form is the sieve, and partial is the gap-rule. Partial '
-                'pre-loads * with 3. Map pours bones 1, 2, 3 through the pre-loaded '
-                'trail one at a time.'
+                'The map-form is the sieve, partial is the gap-rule. Partial pre-loads '
+                '* with 3. Map pours bones 1, 2, 3 through the trail one at a time.'
             ),
             resolution=(
                 'The REPL created the partial trail, then map poured bone 1 (got 3), '
