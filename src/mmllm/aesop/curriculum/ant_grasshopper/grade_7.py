@@ -187,7 +187,7 @@ G7_09 = SubjectCurriculum(grade=7, subject_id="G7-09",
             "the boolean true returned by tap>"),
         _ex("(tap> 42)", True,
             "tapping the number 42 into the tap pool",
-            "the boolean true (tap> always returns true on send)"),
+            "the boolean true"),
     ], subplots=_ERR_SUBPLOTS, plan_pool=_PLAN_G7)
 
 
@@ -226,7 +226,7 @@ G7_12 = SubjectCurriculum(grade=7, subject_id="G7-12",
         # An in-memory analogue: build a string, then read it back via
         # split / count, the way slurp-then-process works in practice.
         _ex("(count \"grasshopper\\nant\\n\")", 16,
-            "the length of a multi-line string (as if read by slurp)",
+            "the length of a multi-line string",
             "the count of characters in \"grasshopper\\nant\\n\""),
         _ex("(clojure.string/split \"a\\nb\\nc\" #\"\\n\")", ["a", "b", "c"],
             "splitting a slurped-style string on newlines",
@@ -319,7 +319,7 @@ G7_18 = SubjectCurriculum(grade=7, subject_id="G7-18",
         _ex("(count (:args {:cmd \"echo\" :args [\"hello\" \"world\"]}))",
             2,
             "the number of args in a shell-call descriptor",
-            "the count of args, which is 2"),
+            "the count of args"),
     ], subplots=_ERR_SUBPLOTS, plan_pool=_PLAN_G7)
 
 

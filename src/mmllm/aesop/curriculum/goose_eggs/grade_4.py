@@ -34,7 +34,7 @@ morning's count by laying one more egg."""),
 of eggs, a stack of coins, nothing worth a second look. {owner_phrase}
 wrote {form_display} on a slate {place}, calmly. "It's not about
 plain or fancy," {owner_he_she} said, {emo_patient}. "It's about
-whether the runtime agrees with what we think we're describing."""),
+whether the runtime agrees with what we think we're describing.\""""),
 
     # Tallies in the barn — counting alongside the goose's cadence.
     SubplotTemplate("""\
