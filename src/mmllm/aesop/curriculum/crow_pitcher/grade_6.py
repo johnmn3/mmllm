@@ -399,23 +399,23 @@ G6_05 = SubjectCurriculum(grade=6, subject_id="G6-05",
             scenario=(
                 "Sable found a qualified keyword stone at the market: "
                 "two parts separated by a slash, the left part naming "
-                "whose shelf it came from, the right part its local name. "
+                "which shelf it came from, the right part its local name. "
                 "They needed only the left part."
             ),
             need=(
                 "They needed to know which namespace the keyword belonged "
-                "to — the shelf-owner's name carved before the slash, "
+                "to — the shelf's name carved before the slash, "
                 "not the local name that followed."
             ),
             mapping=(
                 "`namespace` reads a qualified keyword and returns only "
-                "the portion before the slash — the shelf-owner's name. "
+                "the portion before the slash — the shelf's name. "
                 "The local name after the slash is left behind; only the "
                 "namespace portion is returned."
             ),
             resolution=(
-                "The pitcher returned the namespace portion — the "
-                "shelf-owner's name that had been carved before the slash."
+                "The pitcher returned the namespace portion — "
+                "the shelf's name carved before the slash."
             ),
             tags=("story",),
         ),
@@ -428,13 +428,13 @@ G6_05 = SubjectCurriculum(grade=6, subject_id="G6-05",
 
             scenario=(
                 "Korvus inspected the same two-part keyword stone at the "
-                "market: shelf-owner before the slash, local name after. "
+                "market: shelf's name before the slash, local name after. "
                 "This time he needed the local name — what the thing "
                 "was called inside the shelf."
             ),
             need=(
                 "He needed the local name scratched after the slash, "
-                "not the shelf-owner's prefix. The registered name alone "
+                "not the shelf's prefix. The registered name alone "
                 "would tell him what value to retrieve."
             ),
             mapping=(
@@ -922,8 +922,7 @@ G6_12 = SubjectCurriculum(grade=6, subject_id="G6-12",
             ),
             resolution=(
                 "The pitcher returned both dotted paths as strings — "
-                "the symbol wrappers shed, the strings ready for the "
-                "copybook index."
+                "wrappers shed, the strings ready for the index."
             ),
             tags=("story",),
         ),
@@ -944,26 +943,23 @@ G6_13 = SubjectCurriculum(grade=6, subject_id="G6-13",
 
             scenario=(
                 "Sable perched at the pitcher in the village and tucked "
-                "the long qualified shelf-and-groove name under one "
-                "wing, labeling the tucked value s. They then called "
-                "through the short alias to avoid repeating the full path."
+                "the long qualified shelf-and-groove name under one wing, "
+                "labeling it s. They called through the alias to avoid "
+                "repeating the full path."
             ),
             need=(
-                "They needed the four-letter word capitalized, but "
-                "writing the full qualified path every time was "
-                "unwieldy — a local alias tucked under a wing "
+                "They needed the four-letter word capitalized, but the "
+                "full qualified path was unwieldy — a wing-tucked alias "
                 "would let them call with a single letter."
             ),
             mapping=(
-                "`let` tucks the function value — not the name, the "
-                "function itself — under the alias s. Calling `(s ...)` "
-                "reaches under the wing and invokes the same groove as "
-                "the full qualified path would."
+                "`let` tucks the function itself — not its name — under "
+                "the alias s. Calling `(s ...)` invokes the same groove "
+                "as the full qualified path."
             ),
             resolution=(
                 "The pitcher returned the four letters capitalized — "
-                "the alias reached the same groove as the full path, "
-                "the shorthand validated."
+                "the alias and full path reached the same groove."
             ),
             tags=("story",),
         ),
@@ -1138,9 +1134,8 @@ G6_16 = SubjectCurriculum(grade=6, subject_id="G6-16",
                 "otherwise."
             ),
             resolution=(
-                "The pitcher confirmed the string shelf's stone was "
-                "present — the require was still in use, the stone "
-                "found in the set."
+                "The pitcher confirmed the stone was present — "
+                "the require still in use, the shelf still needed."
             ),
             tags=("story",),
         ),

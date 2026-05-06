@@ -1342,18 +1342,81 @@ G2_11 = SubjectCurriculum(
             ),
             tags=("story",),
         ),
-        _ex('(str 42)', "42",
-            'the string coercion of an integer',
-            'the result of using str on the integer 42',
-            goal='use str to coerce the integer 42 to its string representation'),
-        _ex('(str "p" "q" "r")', "pqr",
-            'the three-arg string concatenation',
-            'the result of using str to join "p", "q", and "r"',
-            goal='use str to join the three single-character strings "p", "q", and "r"'),
-        _ex('(str 1 "+" 2 "=" 3)', "1+2=3",
-            'the mixed string concatenation',
-            'the result of using str to join 1, "+", 2, "=", and 3',
-            goal='use str to join the integer 1, the plus sign, the integer 2, the equals sign, and the integer 3'),
+        SubjectExample(
+            form='(str 42)', expected="42",
+            concept_phrase='the string coercion of an integer',
+            question_what='the result of using str on the integer 42',
+            goal_text='use str to coerce the integer 42 to its string representation',
+
+            scenario=(
+                "Sable held a stone-count of forty-two at the market pitcher "
+                "but needed to thread it onto a vine as individual bead-characters, "
+                "not carry it as a raw number."
+            ),
+            need=(
+                "She needed the integer converted to a pebble-string form "
+                "so it could be joined onto other vines."
+            ),
+            mapping=(
+                "`str` on any non-string value converts it to its printed "
+                "representation. The integer forty-two becomes the two-bead "
+                "vine \"42\", ready to be strung with other pebbles."
+            ),
+            resolution=(
+                "The integer became a two-bead vine and the expected string returned."
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form='(str "p" "q" "r")', expected="pqr",
+            concept_phrase='the three-arg string concatenation',
+            question_what='the result of using str to join "p", "q", and "r"',
+            goal_text='use str to join the three single-character strings "p", "q", and "r"',
+
+            scenario=(
+                "Caw had three single-bead vines in the garden: one strung "
+                "with p, one with q, one with r. She wanted all three threaded "
+                "onto a single continuous vine in order."
+            ),
+            need=(
+                "She needed the three single-bead vines joined end-to-end "
+                "without gaps or separators."
+            ),
+            mapping=(
+                "`str` with three arguments appends each vine to the previous "
+                "left to right. P is followed by q, which is followed by r; "
+                "the result is one unbroken pebble-string."
+            ),
+            resolution=(
+                "The three vines joined seamlessly and the expected pebble-string arrived."
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form='(str 1 "+" 2 "=" 3)', expected="1+2=3",
+            concept_phrase='the mixed string concatenation',
+            question_what='the result of using str to join 1, "+", 2, "=", and 3',
+            goal_text='use str to join the integer 1, the plus sign, the integer 2, the equals sign, and the integer 3',
+
+            scenario=(
+                "Korvus wanted to label the rim of the road pitcher with "
+                "an equation. He had two integers and two symbol-beads as "
+                "separators, all needing to form one vine."
+            ),
+            need=(
+                "He needed integers and symbol-bead strings joined into one "
+                "vine without losing any part of the equation shape."
+            ),
+            mapping=(
+                "`str` converts each argument to its string form and appends "
+                "them in order. Integers become digit-beads; string arguments "
+                "are threaded as-is; all join into one pebble-string vine."
+            ),
+            resolution=(
+                "All five pieces joined into one vine and the expected equation-string returned."
+            ),
+            tags=("story",),
+        ),
     ],
     subplots=_BEADSTRING_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
@@ -1389,10 +1452,31 @@ G2_12 = SubjectCurriculum(
             ),
             tags=("story",),
         ),
-        _ex('(print "x")', None,
-            'the print call',
-            'the return value of using print on the string "x"',
-            goal='print the string "x" without a newline'),
+        SubjectExample(
+            form='(print "x")', expected=None,
+            concept_phrase='the print call',
+            question_what='the return value of using print on the string "x"',
+            goal_text='print the string "x" without a newline',
+
+            scenario=(
+                "Sable pressed a single character \"x\" into the pitcher's clay "
+                "at the village, with no line-break notch at the end. She "
+                "asked what value the pitcher handed back after writing."
+            ),
+            need=(
+                "She needed to know what `print` returned as a value, "
+                "separate from what it wrote to the output."
+            ),
+            mapping=(
+                "`print` writes its argument without a trailing newline and "
+                "returns nil. The clay is marked, but the wing-cache is empty — "
+                "output and return value are entirely separate things."
+            ),
+            resolution=(
+                "The mark was pressed and nil returned, exactly as expected."
+            ),
+            tags=("story",),
+        ),
     ],
     subplots=_SCRIBE_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
@@ -1429,21 +1513,131 @@ G2_13 = SubjectCurriculum(
             ),
             tags=("story",),
         ),
-        _ex("(and true false)",  False,  "the logical and",
-            "the result of using and on true and false",
-            goal="test true and false with the and operator"),
-        _ex("(or false true)",   True,   "the logical or",
-            "the result of using or on false and true",
-            goal="test false or true with the or operator"),
-        _ex("(or false false)",  False,  "the logical or",
-            "the result of using or on false and false",
-            goal="test false or false with the or operator"),
-        _ex("(and 1 2 3)",       3,      "the logical and",
-            "the result of using and on 1, 2, and 3",
-            goal="apply and to 1, 2, and 3"),
-        _ex("(or nil false 5)",  5,      "the logical or",
-            "the result of using or on nil, false, and 5",
-            goal="apply or to nil, false, and 5"),
+        SubjectExample(
+            form="(and true false)", expected=False,
+            concept_phrase="the logical and",
+            question_what="the result of using and on true and false",
+            goal_text="test true and false with the and operator",
+
+            scenario=(
+                "Caw approached the road pitcher with two gate-arms across the "
+                "mouth: the first raised open, the second lowered shut. "
+                "She wanted to know if passage through both was possible."
+            ),
+            need=(
+                "She needed a verdict on the whole chain — open only if every "
+                "gate was open, closed the moment any gate was shut."
+            ),
+            mapping=(
+                "`and` checks gates left to right and short-circuits on the "
+                "first falsey value. The second gate is closed; `and` returns "
+                "that falsey value without checking any further."
+            ),
+            resolution=(
+                "The second gate closed the chain and the expected false value returned."
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form="(or false true)", expected=True,
+            concept_phrase="the logical or",
+            question_what="the result of using or on false and true",
+            goal_text="test false or true with the or operator",
+
+            scenario=(
+                "Sable reached a fork at the orchard pitcher: the left gate-arm "
+                "was shut, the right one open. She needed to know if at least "
+                "one arm offered passage."
+            ),
+            need=(
+                "She needed a single verdict — open if any one gate was open, "
+                "closed only if every gate was shut."
+            ),
+            mapping=(
+                "`or` checks gates left to right and short-circuits on the first "
+                "truthy value. The left arm is false; `or` moves to the right "
+                "arm, finds it open, and returns that truthy value."
+            ),
+            resolution=(
+                "The right arm opened and the expected truthy value returned."
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form="(or false false)", expected=False,
+            concept_phrase="the logical or",
+            question_what="the result of using or on false and false",
+            goal_text="test false or false with the or operator",
+
+            scenario=(
+                "Korvus found both gate-arms at the meadow pitcher shut. "
+                "He asked whether any arm offered passage — but neither "
+                "arm was open to let him through."
+            ),
+            need=(
+                "He needed to know if even one gate was open, willing to "
+                "accept any truthy arm as enough."
+            ),
+            mapping=(
+                "`or` exhausts all gates before giving up. Both are false; "
+                "no truthy value is ever found, so `or` returns the last "
+                "value it checked — still false."
+            ),
+            resolution=(
+                "Both gates were shut and the expected false value returned."
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form="(and 1 2 3)", expected=3,
+            concept_phrase="the logical and",
+            question_what="the result of using and on 1, 2, and 3",
+            goal_text="apply and to 1, 2, and 3",
+
+            scenario=(
+                "Caw set three stones marked 1, 2, and 3 as gate tokens at "
+                "the village pitcher. All three were truthy. She wanted "
+                "to know what `and` would return at the end."
+            ),
+            need=(
+                "She needed to know what value `and` handed back when every "
+                "gate token was truthy all the way through."
+            ),
+            mapping=(
+                "`and` returns the last value it checked when no falsey value "
+                "is found. All three tokens are truthy; `and` advances "
+                "to the end and returns the final stone's value."
+            ),
+            resolution=(
+                "All three gates passed and the last value returned as expected."
+            ),
+            tags=("story",),
+        ),
+        SubjectExample(
+            form="(or nil false 5)", expected=5,
+            concept_phrase="the logical or",
+            question_what="the result of using or on nil, false, and 5",
+            goal_text="apply or to nil, false, and 5",
+
+            scenario=(
+                "Sable checked three gate tokens at the farm pitcher in order: "
+                "nil, then false, then a stone marked 5. She wanted the first "
+                "truthy token the chain would accept."
+            ),
+            need=(
+                "She needed `or` to skip past falsey tokens and return "
+                "the first truthy one it encountered."
+            ),
+            mapping=(
+                "`or` skips nil and false because both are falsey. When it "
+                "reaches 5, a non-nil non-false value, it short-circuits "
+                "immediately and returns that stone."
+            ),
+            resolution=(
+                "The first truthy token was found and the expected value returned."
+            ),
+            tags=("story",),
+        ),
     ],
     subplots=_GATE_SUBPLOTS, plan_pool=_PLAN_POOL,
 )

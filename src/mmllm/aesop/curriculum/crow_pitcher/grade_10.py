@@ -1098,20 +1098,18 @@ G10_14 = SubjectCurriculum(
             question_what="the result of evaluating the quoted addition",
             goal_text="evaluate a quoted addition form at runtime",
             scenario=(
-                "Caw had a chalk-marked addition form — a list of symbols and "
-                "numbers held as data on the meadow pitcher's rim. She used "
-                "`eval` to hand the chalk mark back to the REPL as if it were "
-                "freshly dropped, not just a stored shape."
+                "Caw held a chalk-marked addition form as data on the meadow "
+                "pitcher's rim — a quoted list, not yet run. She used `eval` "
+                "to hand the chalk mark back to the REPL to run as code."
             ),
             need=(
-                "She needed to run the chalk-marked form as code at runtime, "
-                "raising the water level as if the addition had been written "
-                "directly — `eval` would bridge the gap between data and code."
+                "She needed the chalk-marked form treated as code at runtime, "
+                "not as stored data. `eval` would bridge the gap."
             ),
             mapping=(
-                "`eval` takes a data form — the chalk mark — and submits it "
-                "to the REPL as code. The quoted addition, held as data, is "
-                "evaluated as if freshly scratched on the rim."
+                "`eval` takes a data form and submits it to the REPL as code. "
+                "The quoted addition, held as a chalk mark, is evaluated as "
+                "if freshly scratched on the rim."
             ),
             resolution=(
                 "The chalk mark evaluated as code; the addition ran and the "
