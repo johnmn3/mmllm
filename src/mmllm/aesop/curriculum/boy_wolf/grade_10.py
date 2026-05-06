@@ -16,6 +16,10 @@ from mmllm.aesop.curriculum.generator import (
 from mmllm.aesop.curriculum.boy_wolf.grade_1 import (
     _SHARED_SUBPLOTS as _G1_SUBPLOTS, _PLAN_POOL,
 )
+from mmllm.aesop.curriculum.boy_wolf._metaphor_pools import (
+    _CHALKMARK_SUBPLOTS, _RECIPE_SUBPLOTS, _REWRITERULE_SUBPLOTS, _SCRIBE_SUBPLOTS,
+)
+from mmllm.aesop.curriculum.boy_wolf._goals import GOALS
 
 
 # ─────────────────────── grade-10 subplot extensions ───────────────────────
@@ -71,9 +75,15 @@ macroexpander. The day's example was {concept_phrase}. The form
 ]
 
 
-def _ex(form, expected, concept, what):
-    return SubjectExample(form=form, expected=expected,
-                          concept_phrase=concept, question_what=what)
+def _ex(form, expected, concept, what, goal=None, tags=()):
+    canon = GOALS.get(form, {})
+    return SubjectExample(
+        form=form, expected=expected,
+        concept_phrase=canon.get("concept", concept),
+        question_what=canon.get("what", what),
+        goal_text=goal if goal is not None else canon.get("goal", ""),
+        tags=tags,
+    )
 
 
 _PLAN_G10 = _PLAN_POOL + (
@@ -103,7 +113,7 @@ G10_01 = SubjectCurriculum(
             "a syntax-quoted list with one unquote",
             "the result of `(a ~x b) when x is 5"),
     ],
-    subplots=_MACRO_SUBPLOTS, plan_pool=_PLAN_G10,
+    subplots=_CHALKMARK_SUBPLOTS, plan_pool=_PLAN_G10,
 )
 
 
@@ -120,7 +130,7 @@ G10_02 = SubjectCurriculum(
             "a syntax-quoted list with unquote-splice",
             "the form produced by `(list ~@xs) when xs is [1 2 3]"),
     ],
-    subplots=_MACRO_SUBPLOTS, plan_pool=_PLAN_G10,
+    subplots=_CHALKMARK_SUBPLOTS, plan_pool=_PLAN_G10,
 )
 
 
@@ -138,7 +148,7 @@ G10_03 = SubjectCurriculum(
             "a macro that emits its argument twice in a do",
             "what (twice 7) returns"),
     ],
-    subplots=_MACRO_SUBPLOTS, plan_pool=_PLAN_G10,
+    subplots=_REWRITERULE_SUBPLOTS, plan_pool=_PLAN_G10,
 )
 
 
@@ -157,7 +167,7 @@ G10_04 = SubjectCurriculum(
             "the one-step expansion of (or a b)",
             "what macroexpand-1 returns for (or a b)"),
     ],
-    subplots=_MACRO_SUBPLOTS, plan_pool=_PLAN_G10,
+    subplots=_REWRITERULE_SUBPLOTS, plan_pool=_PLAN_G10,
 )
 
 
@@ -174,7 +184,7 @@ G10_05 = SubjectCurriculum(
             "the full expansion of (-> 1 inc inc)",
             "what macroexpand returns for the threading form"),
     ],
-    subplots=_MACRO_SUBPLOTS, plan_pool=_PLAN_G10,
+    subplots=_REWRITERULE_SUBPLOTS, plan_pool=_PLAN_G10,
 )
 
 
@@ -194,7 +204,7 @@ G10_06 = SubjectCurriculum(
             "the form (when-not false :ok)",
             "what (when-not false :ok) returns"),
     ],
-    subplots=_MACRO_SUBPLOTS, plan_pool=_PLAN_G10,
+    subplots=_REWRITERULE_SUBPLOTS, plan_pool=_PLAN_G10,
 )
 
 
@@ -214,7 +224,7 @@ G10_07 = SubjectCurriculum(
             "the expansion of (-> x f g)",
             "what macroexpand produces for the threading form"),
     ],
-    subplots=_MACRO_SUBPLOTS, plan_pool=_PLAN_G10,
+    subplots=_RECIPE_SUBPLOTS, plan_pool=_PLAN_G10,
 )
 
 
@@ -232,7 +242,7 @@ G10_08 = SubjectCurriculum(
             "a macro that emits the same addition form",
             "the result the macro yields after expansion + eval"),
     ],
-    subplots=_MACRO_SUBPLOTS, plan_pool=_PLAN_G10,
+    subplots=_REWRITERULE_SUBPLOTS, plan_pool=_PLAN_G10,
 )
 
 
@@ -250,7 +260,7 @@ G10_09 = SubjectCurriculum(
             "two distinct gensyms with the same prefix",
             "whether two fresh gensyms are equal"),
     ],
-    subplots=_MACRO_SUBPLOTS, plan_pool=_PLAN_G10,
+    subplots=_REWRITERULE_SUBPLOTS, plan_pool=_PLAN_G10,
 )
 
 
@@ -271,7 +281,7 @@ G10_10 = SubjectCurriculum(
             "the built-in if-let, which binds explicitly",
             "what (if-let [x 7] (* x x) 0) returns"),
     ],
-    subplots=_MACRO_SUBPLOTS, plan_pool=_PLAN_G10,
+    subplots=_REWRITERULE_SUBPLOTS, plan_pool=_PLAN_G10,
 )
 
 
@@ -292,7 +302,7 @@ G10_11 = SubjectCurriculum(
             "the #_ form-skip reader macro",
             "what [1 #_ 2 3] reads as"),
     ],
-    subplots=_MACRO_SUBPLOTS, plan_pool=_PLAN_G10,
+    subplots=_SCRIBE_SUBPLOTS, plan_pool=_PLAN_G10,
 )
 
 
@@ -310,7 +320,7 @@ G10_12 = SubjectCurriculum(
             "the predicate on a #uuid tagged literal",
             "whether the #uuid tagged literal reads to a uuid"),
     ],
-    subplots=_MACRO_SUBPLOTS, plan_pool=_PLAN_G10,
+    subplots=_SCRIBE_SUBPLOTS, plan_pool=_PLAN_G10,
 )
 
 
@@ -328,7 +338,7 @@ G10_13 = SubjectCurriculum(
             "edn read-string of a vector source",
             "what edn/read-string returns for \"[:a :b :c]\""),
     ],
-    subplots=_MACRO_SUBPLOTS, plan_pool=_PLAN_G10,
+    subplots=_SCRIBE_SUBPLOTS, plan_pool=_PLAN_G10,
 )
 
 
@@ -345,7 +355,7 @@ G10_14 = SubjectCurriculum(
             "eval applied to a constructed list",
             "what eval returns when handed (list '+ 4 5)"),
     ],
-    subplots=_MACRO_SUBPLOTS, plan_pool=_PLAN_G10,
+    subplots=_REWRITERULE_SUBPLOTS, plan_pool=_PLAN_G10,
 )
 
 
@@ -366,7 +376,7 @@ G10_15 = SubjectCurriculum(
             "map applied to inc — no macro needed",
             "the result of mapping inc"),
     ],
-    subplots=_MACRO_SUBPLOTS, plan_pool=_PLAN_G10,
+    subplots=_REWRITERULE_SUBPLOTS, plan_pool=_PLAN_G10,
 )
 
 
@@ -388,7 +398,7 @@ G10_16 = SubjectCurriculum(
             "a def-X-thing macro that introduces a named binding",
             "the value of the symbol the macro defined"),
     ],
-    subplots=_MACRO_SUBPLOTS, plan_pool=_PLAN_G10,
+    subplots=_REWRITERULE_SUBPLOTS, plan_pool=_PLAN_G10,
 )
 
 

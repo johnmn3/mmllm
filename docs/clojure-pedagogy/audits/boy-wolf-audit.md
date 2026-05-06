@@ -12,6 +12,11 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 ## Grade 4
 
+### G4-10: keys and vals
+
+- examples: 1
+- variety @ n=50: 0.94
+
 ## Grade 5
 
 ## Grade 6
@@ -42,7 +47,7 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 | 1 | 18 | 80 | 0 | — |
 | 2 | 22 | 88 | 0 | — |
 | 3 | 18 | 31 | 0 | — |
-| 4 | 20 | 39 | 0 | — |
+| 4 | 20 | 39 | 0 | G4-10(0.94) |
 | 5 | 22 | 39 | 0 | — |
 | 6 | 16 | 33 | 0 | — |
 | 7 | 18 | 36 | 0 | — |

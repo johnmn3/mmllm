@@ -948,7 +948,7 @@ returned the value the rewritten form had produced."""),
 
     # 2. The rule-shapes-the-form template — generic; emphasizes
     #    that macros operate on forms, not values.
-    SubplotTemplate("""Here's the difference between a routine and a rule,"
+    SubplotTemplate("""\"Here's the difference between a routine and a rule,"
 {elder_phrase} said. "A routine takes ingredients and makes a dish.
 A rule takes a *form* and makes a different *form* — only then does
 the runtime get to evaluate it." To {goal_text},
@@ -957,7 +957,7 @@ and the REPL — applying the rule to the form first, then evaluating —
 handed back the value the rewritten form had produced."""),
 
     # 3. The runtime-applies-the-rule template — generic.
-    SubplotTemplate("""The order matters," {elder_phrase} said. "When a rule is involved,
+    SubplotTemplate("""\"The order matters," {elder_phrase} said. "When a rule is involved,
 the runtime first reads through the form and applies the rule wherever
 it sees one — and only then does it evaluate the result." To
 {goal_text}, {elder_he_she_cap} composed {concept_phrase}, submitted
@@ -1002,7 +1002,7 @@ _SCRIBE_SUBPLOTS: list[SubplotTemplate] = [
 
     # 1. The reading-conventions-of-the-form template — generic;
     #    works for comments, whitespace, parens, do, reader macros.
-    SubplotTemplate("""There are conventions for how the runtime *reads* a form,"
+    SubplotTemplate("""\"There are conventions for how the runtime *reads* a form,"
 {elder_phrase} said: "what counts as one token, what's just
 spacing, what gets ignored, what gets grouped together. The
 scribe and the reader both follow the same conventions." To
@@ -1011,7 +1011,7 @@ submitted the form, and the REPL — reading exactly by the
 conventions — returned the value the form had specified."""),
 
     # 2. The form-is-what-the-reader-sees template — generic.
-    SubplotTemplate("""A form is what the reader sees," {elder_phrase} said,
+    SubplotTemplate("""\"A form is what the reader sees," {elder_phrase} said,
 "after the conventions have been applied. Some marks count, some
 don't; some shapes are expanded before the runtime even gets a
 look. The form you write and the form the runtime evaluates
@@ -1040,7 +1040,7 @@ literally — returned the right value, while {shepherd}'s guess fell
 short."""),
 
     # 5. The form-as-it-is template — generic.
-    SubplotTemplate("""A form is what's actually there on the page," {elder_phrase}
+    SubplotTemplate("""\"A form is what's actually there on the page," {elder_phrase}
 said, "after the conventions of writing and reading have done
 their work. The runtime sees the cleaned-up form, evaluates it,
 and gives back what it computes." To {goal_text},
@@ -1075,7 +1075,7 @@ submitted the form, and the REPL — keeping the name and the
 value distinct — returned the right answer."""),
 
     # 2. The label-the-form template — `quote` / `'`.
-    SubplotTemplate("""To talk about the form itself rather than evaluating it,"
+    SubplotTemplate("""\"To talk about the form itself rather than evaluating it,"
 {elder_phrase} said, "you label the form with a chalk mark
 in front. Quoting tells the runtime: don't evaluate this, just hand
 it back as the shape it is." To {goal_text}, {elder_he_she_cap}
@@ -1085,7 +1085,7 @@ respecting the chalk mark — returned the form unevaluated."""),
     # 3. The labeling-form-vs-evaluating-it template — generic
     #    emphasis on the distinction without claiming a specific
     #    quote/unquote arrangement.
-    SubplotTemplate("""There's a difference between *labeling* the form and
+    SubplotTemplate("""\"There's a difference between *labeling* the form and
 *evaluating* it," {elder_phrase} said. "Quote in any of its
 shapes is the labeling — the runtime hands you back the form,
 not its value, unless you say otherwise." To {goal_text},
@@ -1114,7 +1114,7 @@ answer that would do: the form-as-data, marked and unevaluated."""),
 
     # 6. The name and value are kept always distinct; symbols let you
     #    choose which one to work with. Generic emphasis without fable.
-    SubplotTemplate("""The chalk mark and the sheep are tools in a shepherd's hand,"
+    SubplotTemplate("""\"The chalk mark and the sheep are tools in a shepherd's hand,"
 {elder_phrase} said, drawing both on the slate. "Sometimes you want
 the mark — the symbol itself — and sometimes the value it points to.
 Clojure has both, and the runtime knows the difference." To
@@ -1139,7 +1139,7 @@ form, and the REPL — reading the sheep's brand, picking the
 gate — returned the value the right pen had produced."""),
 
     # 2. The brand-handling template — `defmethod`.
-    SubplotTemplate("""To add a pen to the sorting-gate," {elder_phrase} said,
+    SubplotTemplate("""\"To add a pen to the sorting-gate," {elder_phrase} said,
 "you say what brand the pen handles and what the shepherds do
 when a sheep with that brand arrives." To {goal_text},
 {elder_he_she_cap} composed {concept_phrase} for the right
@@ -1149,7 +1149,7 @@ dispatching the sheep — returned the pen-specific value."""),
     # 3. The runtime-reads-the-brand template — generic; the
     #    sorting-gate reads whatever the dispatch function returns
     #    and routes accordingly.
-    SubplotTemplate("""What the gate sorts by is up to you," {elder_phrase} said.
+    SubplotTemplate("""\"What the gate sorts by is up to you," {elder_phrase} said.
 "You decide what to look at on each sheep — a brand, a fleece color, a
 mark, anything. The runtime reads it, finds the matching pen,
 and routes that one." To {goal_text}, {elder_he_she_cap}
@@ -1159,7 +1159,7 @@ value the right pen had given."""),
 
     # 4. The flexible-routing template — generic emphasis on
     #    the open-dispatch nature.
-    SubplotTemplate("""The good thing about a sorting-gate," {elder_phrase} said,
+    SubplotTemplate("""\"The good thing about a sorting-gate," {elder_phrase} said,
 "is that you can keep adding new pens whenever a new brand of
 sheep shows up. The original gate doesn't change; the runtime
 just learns one more route." To {goal_text},
@@ -1369,7 +1369,7 @@ and the REPL — looping without growing the call-stack — returned
 the final value."""),
 
     # 2. The base-case template — termination.
-    SubplotTemplate("""Every circuit has a stopping condition," {elder_phrase} said.
+    SubplotTemplate("""\"Every circuit has a stopping condition," {elder_phrase} said.
 "Without one, the walker goes round and round forever. With one, the
 walker knows when the circuit is done and the answer is the final
 tally." To {goal_text}, {elder_he_she_cap} composed {concept_phrase},
@@ -1385,7 +1385,7 @@ and the REPL — looping the right number of times, then stopping —
 returned the value cleanly."""),
 
     # 4. The circuit-as-state-machine template.
-    SubplotTemplate("""Watch the fence-walk," {elder_phrase} said {place}. "Each lap
+    SubplotTemplate("""\"Watch the fence-walk," {elder_phrase} said {place}. "Each lap
 brings new bindings — the tally changes, the path count changes, the
 walk moves forward by the logic we've composed." To {goal_text},
 {elder_he_she_cap} composed {concept_phrase}, submitted the form,

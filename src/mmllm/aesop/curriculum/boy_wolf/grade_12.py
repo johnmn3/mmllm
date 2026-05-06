@@ -15,6 +15,10 @@ from mmllm.aesop.curriculum.generator import (
 from mmllm.aesop.curriculum.boy_wolf.grade_1 import (
     _SHARED_SUBPLOTS as _G1_SUBPLOTS, _PLAN_POOL,
 )
+from mmllm.aesop.curriculum.boy_wolf._metaphor_pools import (
+    _GOAL_SUBPLOTS, _SIEVE_SUBPLOTS,
+)
+from mmllm.aesop.curriculum.boy_wolf._goals import GOALS
 
 
 # ─────────────────────── grade-12 subplot extensions ───────────────────────
@@ -73,9 +77,15 @@ again, agreed to read it into the REPL."""),
 ]
 
 
-def _ex(form, expected, concept, what):
-    return SubjectExample(form=form, expected=expected,
-                          concept_phrase=concept, question_what=what)
+def _ex(form, expected, concept, what, goal=None, tags=()):
+    canon = GOALS.get(form, {})
+    return SubjectExample(
+        form=form, expected=expected,
+        concept_phrase=canon.get("concept", concept),
+        question_what=canon.get("what", what),
+        goal_text=goal if goal is not None else canon.get("goal", ""),
+        tags=tags,
+    )
 
 
 _PLAN_G12 = _PLAN_POOL + (
@@ -102,7 +112,7 @@ G12_01 = SubjectCurriculum(
             "the transducer (filter even?) used via into",
             "the even elements via a filter transducer"),
     ],
-    subplots=_REAL_SUBPLOTS, plan_pool=_PLAN_G12,
+    subplots=_SIEVE_SUBPLOTS, plan_pool=_PLAN_G12,
 )
 
 
@@ -120,7 +130,7 @@ G12_02 = SubjectCurriculum(
             "transduce with a composed transducer summing the kept items",
             "the sum after inc-then-keep-evens via transduce"),
     ],
-    subplots=_REAL_SUBPLOTS, plan_pool=_PLAN_G12,
+    subplots=_SIEVE_SUBPLOTS, plan_pool=_PLAN_G12,
 )
 
 
@@ -137,7 +147,7 @@ G12_03 = SubjectCurriculum(
             "into [] with the (take 3) transducer over (range 100)",
             "the first three items collected through a transducer"),
     ],
-    subplots=_REAL_SUBPLOTS, plan_pool=_PLAN_G12,
+    subplots=_SIEVE_SUBPLOTS, plan_pool=_PLAN_G12,
 )
 
 
@@ -157,7 +167,7 @@ G12_04 = SubjectCurriculum(
             "what go blocks give you",
             "the marker keyword for go-blocks"),
     ],
-    subplots=_REAL_SUBPLOTS, plan_pool=_PLAN_G12,
+    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G12,
 )
 
 
@@ -176,7 +186,7 @@ G12_05 = SubjectCurriculum(
             "the role of pipelines in async code",
             "the marker keyword for pipelines"),
     ],
-    subplots=_REAL_SUBPLOTS, plan_pool=_PLAN_G12,
+    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G12,
 )
 
 
@@ -196,7 +206,7 @@ G12_06 = SubjectCurriculum(
             "(s/valid? string? 42)",
             "whether 42 conforms to the string? spec"),
     ],
-    subplots=_REAL_SUBPLOTS, plan_pool=_PLAN_G12,
+    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G12,
 )
 
 
@@ -215,7 +225,7 @@ G12_07 = SubjectCurriculum(
             "the role of spec generators",
             "the marker keyword for spec generators"),
     ],
-    subplots=_REAL_SUBPLOTS, plan_pool=_PLAN_G12,
+    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G12,
 )
 
 
@@ -234,7 +244,7 @@ G12_08 = SubjectCurriculum(
             "the clojure.test core forms",
             "the marker for the clojure.test lesson"),
     ],
-    subplots=_REAL_SUBPLOTS, plan_pool=_PLAN_G12,
+    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G12,
 )
 
 
@@ -253,7 +263,7 @@ G12_09 = SubjectCurriculum(
             "the purpose of fixtures",
             "the marker keyword for the fixture lesson"),
     ],
-    subplots=_REAL_SUBPLOTS, plan_pool=_PLAN_G12,
+    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G12,
 )
 
 
@@ -273,7 +283,7 @@ G12_10 = SubjectCurriculum(
             "what test.check does",
             "the marker for property-based testing"),
     ],
-    subplots=_REAL_SUBPLOTS, plan_pool=_PLAN_G12,
+    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G12,
 )
 
 
@@ -292,7 +302,7 @@ G12_11 = SubjectCurriculum(
             "where Leiningen finds project.clj",
             "the marker keyword for the Leiningen lesson"),
     ],
-    subplots=_REAL_SUBPLOTS, plan_pool=_PLAN_G12,
+    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G12,
 )
 
 
@@ -311,7 +321,7 @@ G12_12 = SubjectCurriculum(
             "who reads deps.edn",
             "the marker keyword for the deps.edn lesson"),
     ],
-    subplots=_REAL_SUBPLOTS, plan_pool=_PLAN_G12,
+    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G12,
 )
 
 
@@ -330,7 +340,7 @@ G12_13 = SubjectCurriculum(
             "what aliases let you compose",
             "the marker keyword for the aliases lesson"),
     ],
-    subplots=_REAL_SUBPLOTS, plan_pool=_PLAN_G12,
+    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G12,
 )
 
 
@@ -349,7 +359,7 @@ G12_14 = SubjectCurriculum(
             "the Pedestal interceptor model",
             "the marker keyword for the Pedestal lesson"),
     ],
-    subplots=_REAL_SUBPLOTS, plan_pool=_PLAN_G12,
+    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G12,
 )
 
 
@@ -368,7 +378,7 @@ G12_15 = SubjectCurriculum(
             "how queries look in these databases",
             "the marker keyword for datalog queries"),
     ],
-    subplots=_REAL_SUBPLOTS, plan_pool=_PLAN_G12,
+    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G12,
 )
 
 
@@ -387,7 +397,7 @@ G12_16 = SubjectCurriculum(
             "how Reagent components are written",
             "the marker keyword for Reagent components"),
     ],
-    subplots=_REAL_SUBPLOTS, plan_pool=_PLAN_G12,
+    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G12,
 )
 
 
@@ -409,7 +419,7 @@ G12_17 = SubjectCurriculum(
             "a tiny example of a data-first conversion at the API edge",
             "whether the vector and the converted seq are equal"),
     ],
-    subplots=_REAL_SUBPLOTS, plan_pool=_PLAN_G12,
+    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G12,
 )
 
 
@@ -428,7 +438,7 @@ G12_18 = SubjectCurriculum(
             "two naming conventions from the style guide",
             "the marker keyword for the naming-conventions lesson"),
     ],
-    subplots=_REAL_SUBPLOTS, plan_pool=_PLAN_G12,
+    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G12,
 )
 
 

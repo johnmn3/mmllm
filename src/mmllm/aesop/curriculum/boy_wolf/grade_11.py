@@ -19,6 +19,10 @@ from mmllm.aesop.curriculum.generator import (
 from mmllm.aesop.curriculum.boy_wolf.grade_1 import (
     _SHARED_SUBPLOTS as _G1_SUBPLOTS, _PLAN_POOL,
 )
+from mmllm.aesop.curriculum.boy_wolf._metaphor_pools import (
+    _ACORN_SUBPLOTS, _GOAL_SUBPLOTS, _TOOLSHED_SUBPLOTS,
+)
+from mmllm.aesop.curriculum.boy_wolf._goals import GOALS
 
 
 # ─────────────────────── grade-11 subplot extensions ───────────────────────
@@ -71,9 +75,15 @@ before trusting a translation."""),
 ]
 
 
-def _ex(form, expected, concept, what):
-    return SubjectExample(form=form, expected=expected,
-                          concept_phrase=concept, question_what=what)
+def _ex(form, expected, concept, what, goal=None, tags=()):
+    canon = GOALS.get(form, {})
+    return SubjectExample(
+        form=form, expected=expected,
+        concept_phrase=canon.get("concept", concept),
+        question_what=canon.get("what", what),
+        goal_text=goal if goal is not None else canon.get("goal", ""),
+        tags=tags,
+    )
 
 
 _PLAN_G11 = _PLAN_POOL + (
@@ -102,7 +112,7 @@ G11_01 = SubjectCurriculum(
             "the family of Clojure host runtimes",
             "the marker keyword for the host family"),
     ],
-    subplots=_INTEROP_SUBPLOTS, plan_pool=_PLAN_G11,
+    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G11,
 )
 
 
@@ -122,7 +132,7 @@ G11_02 = SubjectCurriculum(
             'the alternate dot form (. obj method)',
             "the uppercased result via the longer dot syntax"),
     ],
-    subplots=_INTEROP_SUBPLOTS, plan_pool=_PLAN_G11,
+    subplots=_TOOLSHED_SUBPLOTS, plan_pool=_PLAN_G11,
 )
 
 
@@ -140,7 +150,7 @@ G11_03 = SubjectCurriculum(
             "the static call (Math/max 3 9)",
             "the larger of 3 and 9 via the static method"),
     ],
-    subplots=_INTEROP_SUBPLOTS, plan_pool=_PLAN_G11,
+    subplots=_TOOLSHED_SUBPLOTS, plan_pool=_PLAN_G11,
 )
 
 
@@ -160,7 +170,7 @@ G11_04 = SubjectCurriculum(
             'the count of "flock"',
             'the length of "flock"'),
     ],
-    subplots=_INTEROP_SUBPLOTS, plan_pool=_PLAN_G11,
+    subplots=_TOOLSHED_SUBPLOTS, plan_pool=_PLAN_G11,
 )
 
 
@@ -180,7 +190,7 @@ G11_05 = SubjectCurriculum(
             "the role of import in a Clojure file",
             "the marker for studying import"),
     ],
-    subplots=_INTEROP_SUBPLOTS, plan_pool=_PLAN_G11,
+    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G11,
 )
 
 
@@ -199,7 +209,7 @@ G11_06 = SubjectCurriculum(
             'the (new String "world") form',
             'the string built by (new ...)'),
     ],
-    subplots=_INTEROP_SUBPLOTS, plan_pool=_PLAN_G11,
+    subplots=_TOOLSHED_SUBPLOTS, plan_pool=_PLAN_G11,
 )
 
 
@@ -217,7 +227,7 @@ G11_07 = SubjectCurriculum(
             "the length of an int-array via alength",
             "the length of the array"),
     ],
-    subplots=_INTEROP_SUBPLOTS, plan_pool=_PLAN_G11,
+    subplots=_TOOLSHED_SUBPLOTS, plan_pool=_PLAN_G11,
 )
 
 
@@ -236,7 +246,7 @@ G11_08 = SubjectCurriculum(
             "the role of ^Type metadata as a hint",
             "the marker keyword for the type-hint lesson"),
     ],
-    subplots=_INTEROP_SUBPLOTS, plan_pool=_PLAN_G11,
+    subplots=_TOOLSHED_SUBPLOTS, plan_pool=_PLAN_G11,
 )
 
 
@@ -258,7 +268,7 @@ G11_09 = SubjectCurriculum(
             "the *unchecked-math* dynamic var",
             "the marker for the checked/unchecked lesson"),
     ],
-    subplots=_INTEROP_SUBPLOTS, plan_pool=_PLAN_G11,
+    subplots=_ACORN_SUBPLOTS, plan_pool=_PLAN_G11,
 )
 
 
@@ -277,7 +287,7 @@ G11_10 = SubjectCurriculum(
             "where ClojureScript runs and how interop looks",
             "the marker for the cljs-runtime lesson"),
     ],
-    subplots=_INTEROP_SUBPLOTS, plan_pool=_PLAN_G11,
+    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G11,
 )
 
 
@@ -296,7 +306,7 @@ G11_11 = SubjectCurriculum(
             "two key cljs-js interop conventions",
             "the marker keyword for the conventions"),
     ],
-    subplots=_INTEROP_SUBPLOTS, plan_pool=_PLAN_G11,
+    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G11,
 )
 
 
@@ -315,7 +325,7 @@ G11_12 = SubjectCurriculum(
             "how basilisp does Python interop",
             "the marker keyword for basilisp interop"),
     ],
-    subplots=_INTEROP_SUBPLOTS, plan_pool=_PLAN_G11,
+    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G11,
 )
 
 
@@ -334,7 +344,7 @@ G11_13 = SubjectCurriculum(
             "the role of .cljc files",
             "the marker keyword for the .cljc lesson"),
     ],
-    subplots=_INTEROP_SUBPLOTS, plan_pool=_PLAN_G11,
+    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G11,
 )
 
 
@@ -352,7 +362,7 @@ G11_14 = SubjectCurriculum(
             "wrapping a host call in try/catch in case it leaks",
             "the result when the host call succeeds"),
     ],
-    subplots=_INTEROP_SUBPLOTS, plan_pool=_PLAN_G11,
+    subplots=_TOOLSHED_SUBPLOTS, plan_pool=_PLAN_G11,
 )
 
 

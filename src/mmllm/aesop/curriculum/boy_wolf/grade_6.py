@@ -15,6 +15,10 @@ from mmllm.aesop.curriculum.generator import (
 from mmllm.aesop.curriculum.boy_wolf.grade_1 import (
     _SHARED_SUBPLOTS as _G1_SUBPLOTS, _PLAN_POOL,
 )
+from mmllm.aesop.curriculum.boy_wolf._metaphor_pools import (
+    _GOAL_SUBPLOTS, _ROADSIGN_SUBPLOTS, _SCROLL_SUBPLOTS, _TOOLSHED_SUBPLOTS,
+)
+from mmllm.aesop.curriculum.boy_wolf._goals import GOALS
 
 
 # ─────────────────────── grade-6 subplot extensions ───────────────────────
@@ -64,9 +68,15 @@ agreed; the question on that line came down to {concept_phrase}."""),
 ]
 
 
-def _ex(form, expected, concept, what):
-    return SubjectExample(form=form, expected=expected,
-                          concept_phrase=concept, question_what=what)
+def _ex(form, expected, concept, what, goal=None, tags=()):
+    canon = GOALS.get(form, {})
+    return SubjectExample(
+        form=form, expected=expected,
+        concept_phrase=canon.get("concept", concept),
+        question_what=canon.get("what", what),
+        goal_text=goal if goal is not None else canon.get("goal", ""),
+        tags=tags,
+    )
 
 
 _PLAN_G6 = _PLAN_POOL + (
@@ -94,7 +104,7 @@ G6_01 = SubjectCurriculum(grade=6, subject_id="G6-01",
         _ex("(symbol? 'village.flock)", True,
             "whether village.flock is a symbol",
             "the value of (symbol? 'village.flock)"),
-    ], subplots=_NS_SUBPLOTS, plan_pool=_PLAN_G6)
+    ], subplots=_ROADSIGN_SUBPLOTS, plan_pool=_PLAN_G6)
 
 
 # G6-02 — ns form (we exercise via `name` style introspection)
@@ -107,7 +117,7 @@ G6_02 = SubjectCurriculum(grade=6, subject_id="G6-02",
         _ex("(= 'village.shepherd 'village.shepherd)", True,
             "two identical namespace symbols",
             "whether the two namespace symbols are equal"),
-    ], subplots=_NS_SUBPLOTS, plan_pool=_PLAN_G6)
+    ], subplots=_ROADSIGN_SUBPLOTS, plan_pool=_PLAN_G6)
 
 
 # G6-03 — require — fully qualified usage (require already loaded
@@ -122,7 +132,7 @@ G6_03 = SubjectCurriculum(grade=6, subject_id="G6-03",
         _ex("(clojure.string/lower-case \"WOLF\")", "wolf",
             "the form using clojure.string/lower-case",
             "the lower-cased string \"wolf\""),
-    ], subplots=_NS_SUBPLOTS, plan_pool=_PLAN_G6)
+    ], subplots=_ROADSIGN_SUBPLOTS, plan_pool=_PLAN_G6)
 
 
 # G6-04 — refer-and-use (we exercise the effect: a referred name
@@ -135,7 +145,7 @@ G6_04 = SubjectCurriculum(grade=6, subject_id="G6-04",
             True,
             "whether two calls to the same fully-qualified function agree",
             "the value of (= (clojure.string/upper-case \"x\") (clojure.string/upper-case \"x\"))"),
-    ], subplots=_NS_SUBPLOTS, plan_pool=_PLAN_G6)
+    ], subplots=_ROADSIGN_SUBPLOTS, plan_pool=_PLAN_G6)
 
 
 # G6-05 — Fully qualified names
@@ -154,7 +164,7 @@ G6_05 = SubjectCurriculum(grade=6, subject_id="G6-05",
         _ex("(name :village/shepherd)", "shepherd",
             "the name portion of the keyword :village/shepherd",
             "the string \"shepherd\""),
-    ], subplots=_NS_SUBPLOTS, plan_pool=_PLAN_G6)
+    ], subplots=_ROADSIGN_SUBPLOTS, plan_pool=_PLAN_G6)
 
 
 # G6-06 — Private defs (we can't test ^:private effect with eval, but
@@ -169,7 +179,7 @@ G6_06 = SubjectCurriculum(grade=6, subject_id="G6-06",
         _ex("(:private (meta 'x))", None,
             "the :private flag on plain metadata of 'x",
             "the value of (:private (meta 'x))"),
-    ], subplots=_NS_SUBPLOTS, plan_pool=_PLAN_G6)
+    ], subplots=_ROADSIGN_SUBPLOTS, plan_pool=_PLAN_G6)
 
 
 # G6-07 — Public vs private API (design decision; we exercise via
@@ -183,7 +193,7 @@ G6_07 = SubjectCurriculum(grade=6, subject_id="G6-07",
         _ex("(boolean (:private (meta 'public)))", False,
             "whether 'public carries the :private flag",
             "the boolean of (:private (meta 'public))"),
-    ], subplots=_NS_SUBPLOTS, plan_pool=_PLAN_G6)
+    ], subplots=_ROADSIGN_SUBPLOTS, plan_pool=_PLAN_G6)
 
 
 # G6-08 — Circular dependencies (we exercise via a plain form that
@@ -198,7 +208,7 @@ G6_08 = SubjectCurriculum(grade=6, subject_id="G6-08",
         _ex("(= 'a.b 'a.b)", True,
             "whether two references to the same namespace symbol agree",
             "the value of (= 'a.b 'a.b)"),
-    ], subplots=_NS_SUBPLOTS, plan_pool=_PLAN_G6)
+    ], subplots=_ROADSIGN_SUBPLOTS, plan_pool=_PLAN_G6)
 
 
 # G6-09 — Loading order (we exercise via straightforward sequence of
@@ -212,7 +222,7 @@ G6_09 = SubjectCurriculum(grade=6, subject_id="G6-09",
         _ex("(let [a 1 b (+ a 1)] (+ a b))", 3,
             "an in-expression analogue of file-loading order via let",
             "the value of (+ a b) given a=1 b=(+ a 1)"),
-    ], subplots=_NS_SUBPLOTS, plan_pool=_PLAN_G6)
+    ], subplots=_ROADSIGN_SUBPLOTS, plan_pool=_PLAN_G6)
 
 
 # G6-10 — leiningen / deps.edn (project setup; we exercise via reading
@@ -226,7 +236,7 @@ G6_10 = SubjectCurriculum(grade=6, subject_id="G6-10",
         _ex("(get-in {:paths [\"src\"]} [:paths 0])", "src",
             "the first :paths entry from a tiny deps-style map",
             "the string \"src\" at [:paths 0]"),
-    ], subplots=_NS_SUBPLOTS, plan_pool=_PLAN_G6)
+    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G6)
 
 
 # G6-11 — Classpath (we use a tiny path-string operation as the
@@ -240,7 +250,7 @@ G6_11 = SubjectCurriculum(grade=6, subject_id="G6-11",
         _ex("(count [\"src\" \"test\" \"resources\"])", 3,
             "the number of entries in a classpath-like vector",
             "the count of three classpath entries"),
-    ], subplots=_NS_SUBPLOTS, plan_pool=_PLAN_G6)
+    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G6)
 
 
 # G6-12 — Multiple files, one project (we exercise via a vector
@@ -255,7 +265,7 @@ G6_12 = SubjectCurriculum(grade=6, subject_id="G6-12",
             ["village.shepherd", "village.elder"],
             "the names of two namespaces as strings",
             "the vector of namespace name strings"),
-    ], subplots=_NS_SUBPLOTS, plan_pool=_PLAN_G6)
+    ], subplots=_ROADSIGN_SUBPLOTS, plan_pool=_PLAN_G6)
 
 
 # G6-13 — Aliasing conventions (we exercise via a tiny alias-style
@@ -266,7 +276,7 @@ G6_13 = SubjectCurriculum(grade=6, subject_id="G6-13",
         _ex("(let [s clojure.string/upper-case] (s \"wolf\"))", "WOLF",
             "binding the function clojure.string/upper-case to a local s",
             "the value (s \"wolf\") where s is upper-case"),
-    ], subplots=_NS_SUBPLOTS, plan_pool=_PLAN_G6)
+    ], subplots=_ROADSIGN_SUBPLOTS, plan_pool=_PLAN_G6)
 
 
 # G6-14 — Import for Java classes (basilisp targets Python; we use a
@@ -280,7 +290,7 @@ G6_14 = SubjectCurriculum(grade=6, subject_id="G6-14",
         _ex("(name 'java.util.Date)", "java.util.Date",
             "the dotted-class symbol's name",
             "the string \"java.util.Date\""),
-    ], subplots=_NS_SUBPLOTS, plan_pool=_PLAN_G6)
+    ], subplots=_TOOLSHED_SUBPLOTS, plan_pool=_PLAN_G6)
 
 
 # G6-15 — Namespace meta (we exercise the metadata mechanism on a
@@ -295,7 +305,7 @@ G6_15 = SubjectCurriculum(grade=6, subject_id="G6-15",
         _ex("(:author (meta '^{:author \"Aesop\"} village))", "Aesop",
             "the :author metadata on 'village",
             "the string \"Aesop\""),
-    ], subplots=_NS_SUBPLOTS, plan_pool=_PLAN_G6)
+    ], subplots=_SCROLL_SUBPLOTS, plan_pool=_PLAN_G6)
 
 
 # G6-16 — Cleaning up requires (we exercise via a simple "is this name
@@ -309,7 +319,7 @@ G6_16 = SubjectCurriculum(grade=6, subject_id="G6-16",
         _ex("(contains? #{'clojure.string} 'clojure.set)", False,
             "whether the require list contains an unused 'clojure.set",
             "the value of (contains? #{'clojure.string} 'clojure.set)"),
-    ], subplots=_NS_SUBPLOTS, plan_pool=_PLAN_G6)
+    ], subplots=_ROADSIGN_SUBPLOTS, plan_pool=_PLAN_G6)
 
 
 # ─────────────────────── registry ───────────────────────

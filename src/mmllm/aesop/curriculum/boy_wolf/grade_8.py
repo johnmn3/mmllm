@@ -16,6 +16,10 @@ from mmllm.aesop.curriculum.generator import (
 from mmllm.aesop.curriculum.boy_wolf.grade_1 import (
     _SHARED_SUBPLOTS as _G1_SUBPLOTS, _PLAN_POOL,
 )
+from mmllm.aesop.curriculum.boy_wolf._metaphor_pools import (
+    _CARRYINGCASE_SUBPLOTS, _GUILD_SUBPLOTS, _SORTINGTABLE_SUBPLOTS,
+)
+from mmllm.aesop.curriculum.boy_wolf._goals import GOALS
 
 
 # ─────────────────────── grade-8 subplot extensions ───────────────────────
@@ -49,9 +53,15 @@ decided."""),
 ]
 
 
-def _ex(form, expected, concept, what):
-    return SubjectExample(form=form, expected=expected,
-                          concept_phrase=concept, question_what=what)
+def _ex(form, expected, concept, what, goal=None, tags=()):
+    canon = GOALS.get(form, {})
+    return SubjectExample(
+        form=form, expected=expected,
+        concept_phrase=canon.get("concept", concept),
+        question_what=canon.get("what", what),
+        goal_text=goal if goal is not None else canon.get("goal", ""),
+        tags=tags,
+    )
 
 
 _PLAN_POOL_G8: tuple[str, ...] = _PLAN_POOL + (
@@ -81,7 +91,7 @@ G8_01 = SubjectCurriculum(
             "speak applied to :flock via cond-dispatch",
             "what speak returns for :flock"),
     ],
-    subplots=_SUBPLOTS,
+    subplots=_GUILD_SUBPLOTS,
     plan_pool=_PLAN_POOL_G8,
 )
 
@@ -101,7 +111,7 @@ G8_02 = SubjectCurriculum(
             "a deftype Crook with a length field, then read its length",
             "the length of a Crook constructed with 7"),
     ],
-    subplots=_SUBPLOTS,
+    subplots=_CARRYINGCASE_SUBPLOTS,
     plan_pool=_PLAN_POOL_G8,
 )
 
@@ -121,7 +131,7 @@ G8_03 = SubjectCurriculum(
             "the :name field of a Watcher record",
             "the :name value of the Watcher constructed with \"elder\""),
     ],
-    subplots=_SUBPLOTS,
+    subplots=_CARRYINGCASE_SUBPLOTS,
     plan_pool=_PLAN_POOL_G8,
 )
 
@@ -143,7 +153,7 @@ G8_04 = SubjectCurriculum(
             "a defprotocol Greet with one method hail",
             "whether Greet has been established"),
     ],
-    subplots=_SUBPLOTS,
+    subplots=_GUILD_SUBPLOTS,
     plan_pool=_PLAN_POOL_G8,
 )
 
@@ -167,7 +177,7 @@ G8_05 = SubjectCurriculum(
             "a Greet protocol extended to Long, then call hail on 7",
             "the keyword hail returns for the number 7"),
     ],
-    subplots=_SUBPLOTS,
+    subplots=_GUILD_SUBPLOTS,
     plan_pool=_PLAN_POOL_G8,
 )
 
@@ -195,7 +205,7 @@ G8_06 = SubjectCurriculum(
             "Alarm dispatched on a string argument",
             "the keyword sound returns for the string \"x\""),
     ],
-    subplots=_SUBPLOTS,
+    subplots=_GUILD_SUBPLOTS,
     plan_pool=_PLAN_POOL_G8,
 )
 
@@ -219,7 +229,7 @@ G8_07 = SubjectCurriculum(
             "an Elder record implementing Alarm with sound -> :measured",
             "the keyword sound returns for an Elder record"),
     ],
-    subplots=_SUBPLOTS,
+    subplots=_GUILD_SUBPLOTS,
     plan_pool=_PLAN_POOL_G8,
 )
 
@@ -243,7 +253,7 @@ G8_08 = SubjectCurriculum(
             "a defmulti tag dispatching on :kind",
             "what tag returns for {:kind :lantern}"),
     ],
-    subplots=_SUBPLOTS,
+    subplots=_SORTINGTABLE_SUBPLOTS,
     plan_pool=_PLAN_POOL_G8,
 )
 
@@ -270,7 +280,7 @@ G8_09 = SubjectCurriculum(
             "a :default fallback method on reply, called with an unknown role",
             "what reply returns for {:role :stranger} when :default falls through"),
     ],
-    subplots=_SUBPLOTS,
+    subplots=_SORTINGTABLE_SUBPLOTS,
     plan_pool=_PLAN_POOL_G8,
 )
 
@@ -295,7 +305,7 @@ G8_10 = SubjectCurriculum(
             "a Show protocol extended to String, called with \"wolf\"",
             "the string show returns for \"wolf\" via protocol"),
     ],
-    subplots=_SUBPLOTS,
+    subplots=_SORTINGTABLE_SUBPLOTS,
     plan_pool=_PLAN_POOL_G8,
 )
 
@@ -316,7 +326,7 @@ G8_11 = SubjectCurriculum(
             "an IAlarm protocol (Clojure analogue of a Java interface) extended to String",
             "the keyword raise returns for \"wolf\" via the protocol"),
     ],
-    subplots=_SUBPLOTS,
+    subplots=_GUILD_SUBPLOTS,
     plan_pool=_PLAN_POOL_G8,
 )
 
@@ -340,7 +350,7 @@ G8_12 = SubjectCurriculum(
             "extend-type attaching Alarm to String",
             "the keyword sound returns for \"wolf\" via extend-type"),
     ],
-    subplots=_SUBPLOTS,
+    subplots=_SORTINGTABLE_SUBPLOTS,
     plan_pool=_PLAN_POOL_G8,
 )
 
@@ -366,7 +376,7 @@ G8_13 = SubjectCurriculum(
             "a Tagged protocol method that pulls :t off this",
             "the :t value via tag-of for a Lantern"),
     ],
-    subplots=_SUBPLOTS,
+    subplots=_GUILD_SUBPLOTS,
     plan_pool=_PLAN_POOL_G8,
 )
 
@@ -388,7 +398,7 @@ G8_14 = SubjectCurriculum(
             "two independent protocols A and B both extended to String",
             "the pair [a-op b-op] when each protocol is used independently"),
     ],
-    subplots=_SUBPLOTS,
+    subplots=_GUILD_SUBPLOTS,
     plan_pool=_PLAN_POOL_G8,
 )
 
@@ -412,7 +422,7 @@ G8_15 = SubjectCurriculum(
             "the predicate (isa? String Number)",
             "whether String isa? Number"),
     ],
-    subplots=_SUBPLOTS,
+    subplots=_SORTINGTABLE_SUBPLOTS,
     plan_pool=_PLAN_POOL_G8,
 )
 
@@ -439,7 +449,7 @@ G8_16 = SubjectCurriculum(
             "a Sound protocol with two implementations, called on an Elder",
             "the keyword cry returns for an Elder"),
     ],
-    subplots=_SUBPLOTS,
+    subplots=_GUILD_SUBPLOTS,
     plan_pool=_PLAN_POOL_G8,
 )
 
