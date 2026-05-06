@@ -80,6 +80,26 @@ G7_01 = SubjectCurriculum(grade=7, subject_id="G7-01",
             concept_phrase="the exception handler returning a value after catching",
             question_what="what the catch clause returns after catching the Exception",
             goal_text="throw an Exception and catch it, returning a numeric code",
+            scenario=(
+                "Sable perched at the garden pitcher and lobbed a stone labeled "
+                "\"bad\" hard into the water. Korvus had laid the soft moss pad "
+                "beneath so any thrown stone would be caught before it struck "
+                "the ground."
+            ),
+            need=(
+                "Sable needed the thrown form intercepted and a safe fallback "
+                "value returned rather than a crash left unresolved."
+            ),
+            mapping=(
+                "`throw` hurls the Exception into the air. The wrapping `catch` "
+                "— the moss pad — intercepts it and returns the handler's value. "
+                "The dangerous stone lands softly; the fallback rises in its place."
+            ),
+            resolution=(
+                "The moss caught the hurled stone and the handler's fallback "
+                "value surfaced to beak-reach."
+            ),
+            tags=("story",),
         ),
     ], subplots=_SAFETYNET_SUBPLOTS, plan_pool=_PLAN_G7)
 
@@ -137,6 +157,25 @@ G7_03 = SubjectCurriculum(grade=7, subject_id="G7-03",
             concept_phrase="a try block with a finally clause that performs cleanup",
             question_what="what the try block returns when finally runs",
             goal_text="evaluate a number in a try block, then run a finally clause for cleanup",
+            scenario=(
+                "Caw dropped a numbered stone into the orchard pitcher. Korvus "
+                "insisted on a cleanup sweep of the moss pad after every drop, "
+                "whether or not anything went wrong with the stone."
+            ),
+            need=(
+                "Caw needed to know the stone's value while Korvus ran the "
+                "cleanup sweep regardless of outcome."
+            ),
+            mapping=(
+                "`finally` runs after the `try` body no matter what — the "
+                "cleanup sweep happens whether the stone lands cleanly or not. "
+                "The try body's value is still what surfaces to the beak."
+            ),
+            resolution=(
+                "The cleanup swept the moss pad and the try body's stone value "
+                "rose to the rim."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(try (try (/ 1 0) (finally (prn :ran))) (catch Exception e -1))",
@@ -144,6 +183,25 @@ G7_03 = SubjectCurriculum(grade=7, subject_id="G7-03",
             concept_phrase="a finally clause running before an outer catch handler",
             question_what="what the outer catch handler returns after the inner finally runs",
             goal_text="evaluate a division by zero with an inner finally clause, caught by an outer handler",
+            scenario=(
+                "Sable nested two moss pads at the hilltop pitcher: an inner "
+                "pad with a cleanup flag, and an outer pad ready to intercept "
+                "any stone that slipped through after a bad division."
+            ),
+            need=(
+                "Sable needed the inner cleanup to run first, then the outer "
+                "pad to catch the failing stone and return a safe value."
+            ),
+            mapping=(
+                "The inner `finally` sweeps before the exception escapes. The "
+                "outer `catch` intercepts it and returns the handler's fallback. "
+                "Both pads activate in order; the outer value is what surfaces."
+            ),
+            resolution=(
+                "The inner cleanup ran, the outer moss caught the bad stone, "
+                "and the fallback value rose to beak-reach."
+            ),
+            tags=("story",),
         ),
     ], subplots=_SAFETYNET_SUBPLOTS, plan_pool=_PLAN_G7)
 
@@ -158,6 +216,25 @@ G7_04 = SubjectCurriculum(grade=7, subject_id="G7-04",
             concept_phrase="the data map from a caught ex-info",
             question_what="what data map is attached to the ex-info",
             goal_text="throw an ex-info with attached data and extract the data map from the caught exception",
+            scenario=(
+                "Korvus hurled a specially carved stone into the meadow pitcher "
+                "— not just labeled \"bad\" but also carrying a small engraved "
+                "data pouch on its side. The moss pad caught it cleanly."
+            ),
+            need=(
+                "He needed the moss to hand back not just a fallback value but "
+                "the data pouch fastened to the caught stone."
+            ),
+            mapping=(
+                "`ex-info` attaches a map to the exception stone. After `catch` "
+                "intercepts it, `ex-data` lifts off the engraved pouch. The map "
+                "inside is what the handler returns."
+            ),
+            resolution=(
+                "The moss delivered the caught stone's engraved data pouch "
+                "to Korvus's waiting talon."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(try (throw (ex-info \"x\" {:k :v})) (catch Exception e (:k (ex-data e))))",
@@ -165,6 +242,25 @@ G7_04 = SubjectCurriculum(grade=7, subject_id="G7-04",
             concept_phrase="a single value extracted from the caught ex-info's data",
             question_what="what value is at a specific key in the ex-info's data",
             goal_text="throw an ex-info with data, catch it, and extract the value at key :k",
+            scenario=(
+                "Caw flung a labeled stone with a small pouch of notations into "
+                "the village pitcher. The moss caught it; she then pried open "
+                "the pouch and looked for the mark under a specific key."
+            ),
+            need=(
+                "Caw needed to reach into the caught stone's pouch and pull out "
+                "only the value stored at the key she cared about."
+            ),
+            mapping=(
+                "`ex-data` lifts the entire pouch off the caught exception. "
+                "Applying the key to that map — `(:k ...)` — extracts the single "
+                "engraved value at that slot."
+            ),
+            resolution=(
+                "The pouch opened and the value at the chosen key rose "
+                "to beak-reach."
+            ),
+            tags=("story",),
         ),
     ], subplots=_SAFETYNET_SUBPLOTS, plan_pool=_PLAN_G7)
 
@@ -179,6 +275,25 @@ G7_05 = SubjectCurriculum(grade=7, subject_id="G7-05",
             concept_phrase="whether nil is considered some",
             question_what="the result of testing if nil is some",
             goal_text="test whether nil is considered some",
+            scenario=(
+                "Sable peered into the garden pitcher and found nothing — no "
+                "stone, no pebble, just empty water. A small moss-pad gate "
+                "stood ready to check whether anything real was present."
+            ),
+            need=(
+                "Sable needed the gate to decide whether the empty pitcher "
+                "counted as some-thing or no-thing."
+            ),
+            mapping=(
+                "`some?` checks for the presence of a real value. Nil — the "
+                "empty pitcher — holds nothing, so the gate closes: the answer "
+                "is false. Absence is not some."
+            ),
+            resolution=(
+                "The moss-pad gate closed on the empty pitcher and false "
+                "rose to the rim."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(some? 0)",
@@ -186,6 +301,25 @@ G7_05 = SubjectCurriculum(grade=7, subject_id="G7-05",
             concept_phrase="whether 0 is considered some",
             question_what="the result of testing if 0 is some",
             goal_text="test whether the number 0 is considered some",
+            scenario=(
+                "Korvus dropped a flat zero-marked stone into the orchard "
+                "pitcher. The moss-pad gate waited to see whether a zero stone "
+                "counted as something real present at the pitcher."
+            ),
+            need=(
+                "He needed to know whether a zero-marked stone — not an "
+                "empty slot — would pass the some-thing test."
+            ),
+            mapping=(
+                "`some?` returns true for any non-nil value. A zero stone is "
+                "still a stone — it occupies the pitcher — so the gate opens: "
+                "zero is some."
+            ),
+            resolution=(
+                "The gate swung open on the zero stone and true rose "
+                "to the rim."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(first nil)",
@@ -193,6 +327,25 @@ G7_05 = SubjectCurriculum(grade=7, subject_id="G7-05",
             concept_phrase="the first element of nil",
             question_what="what the first element of nil is",
             goal_text="get the first element of nil",
+            scenario=(
+                "Caw reached into the hilltop pitcher to pull the first pebble "
+                "from an empty collection. She found no pebbles, no water — "
+                "only nil waited at the bottom."
+            ),
+            need=(
+                "She needed to know what first returns when the collection "
+                "itself is nil, not just empty."
+            ),
+            mapping=(
+                "`first` on nil punts gracefully: nil is treated as an empty "
+                "sequence, so the first element is nothing — nil itself floats "
+                "back up undisturbed."
+            ),
+            resolution=(
+                "Caw's talon found nothing and nil drifted back up "
+                "to the rim."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(count nil)",
@@ -200,6 +353,25 @@ G7_05 = SubjectCurriculum(grade=7, subject_id="G7-05",
             concept_phrase="the number of elements in nil",
             question_what="how many elements nil contains",
             goal_text="count the number of elements in nil",
+            scenario=(
+                "Sable stood at the farm pitcher counting pebbles in a nil "
+                "collection. No pebbles sat inside — the pitcher held only "
+                "the empty nil, yet the count had to be settled."
+            ),
+            need=(
+                "Sable needed a definite tally from the nil collection, not "
+                "an error or a crash."
+            ),
+            mapping=(
+                "`count` on nil is nil punning in action: nil is treated as "
+                "an empty sequence. The tally returns cleanly with no crash; "
+                "zero marks appear on the pitcher face."
+            ),
+            resolution=(
+                "The tally scratched zero marks on the pitcher face and "
+                "the count rose safely to the rim."
+            ),
+            tags=("story",),
         ),
     ], subplots=_SAFETYNET_SUBPLOTS, plan_pool=_PLAN_G7)
 
@@ -215,6 +387,25 @@ G7_06 = SubjectCurriculum(grade=7, subject_id="G7-06",
             concept_phrase="the result of a function call that satisfies its precondition",
             question_what="what the function returns when the precondition holds",
             goal_text="call a function with a positive precondition on a positive number, doubling it",
+            scenario=(
+                "Korvus set a gate stone at the village pitcher: only positive "
+                "pebbles may enter and be doubled. He dropped a clearly "
+                "positive pebble in and watched the gate swing open."
+            ),
+            need=(
+                "He needed to confirm the gate passed the good pebble and "
+                "returned the doubled result without triggering the guard."
+            ),
+            mapping=(
+                "`{:pre [(pos? x)]}` is the gate stone. A positive input "
+                "passes the check; the body runs and returns the doubled "
+                "value. No guard fires; the result surfaces cleanly."
+            ),
+            resolution=(
+                "The gate opened, the body ran, and the doubled result "
+                "rose to the rim."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(try ((fn [x] {:pre [(pos? x)]} x) -1) (catch Exception e 0))",
@@ -222,6 +413,25 @@ G7_06 = SubjectCurriculum(grade=7, subject_id="G7-06",
             concept_phrase="the result when a precondition is violated and caught",
             question_what="what the catch handler returns when the precondition fails",
             goal_text="call a function with a positive precondition on a negative number, catching the failure",
+            scenario=(
+                "Caw shoved a negative pebble toward the same gate at the "
+                "village pitcher. The gate stone blocked it at once; the moss "
+                "pad beneath caught the resulting crash."
+            ),
+            need=(
+                "She needed to know what the outer moss pad returned when "
+                "the gate rejected her pebble and threw an error."
+            ),
+            mapping=(
+                "The precondition gate fires and throws. The outer `catch` "
+                "— the moss pad — intercepts the error and returns the "
+                "handler's safe fallback value."
+            ),
+            resolution=(
+                "The gate slammed, the moss caught the crash, and the "
+                "handler's fallback rose to the rim."
+            ),
+            tags=("story",),
         ),
     ], subplots=_SAFETYNET_SUBPLOTS, plan_pool=_PLAN_G7)
 
@@ -236,6 +446,25 @@ G7_07 = SubjectCurriculum(grade=7, subject_id="G7-07",
             concept_phrase="the result when an assertion passes",
             question_what="what is returned after the assertion succeeds",
             goal_text="assert that 1 equals 1, then return a numeric code",
+            scenario=(
+                "Sable pressed a verify-stone against the meadow pitcher to "
+                "confirm two identical pebbles matched. The stone glowed "
+                "green — they matched — and Sable moved on to the next form."
+            ),
+            need=(
+                "Sable needed the assertion to pass silently so the subsequent "
+                "numeric stone could surface as the result."
+            ),
+            mapping=(
+                "`assert` checks the condition — the verify-stone press. When "
+                "the condition holds, it returns nil silently and the `do` "
+                "block's final form is what surfaces."
+            ),
+            resolution=(
+                "The verify-stone passed without complaint and the final "
+                "numeric stone rose to the rim."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(try (assert (= 1 2)) (catch Throwable e 0))",
@@ -243,6 +472,25 @@ G7_07 = SubjectCurriculum(grade=7, subject_id="G7-07",
             concept_phrase="the result when an assertion fails and is caught",
             question_what="what the catch handler returns when the assertion fails",
             goal_text="assert that 1 equals 2, catch the failure, and return a numeric code",
+            scenario=(
+                "Korvus pressed a verify-stone against the road pitcher "
+                "comparing two pebbles that did not match. The stone cracked; "
+                "the moss pad beneath caught the falling shards."
+            ),
+            need=(
+                "He needed the moss to intercept the assertion failure and "
+                "return a numeric fallback instead of crashing."
+            ),
+            mapping=(
+                "`assert` throws when the condition is false — the verify-stone "
+                "cracks. The `catch Throwable` moss catches the shards and "
+                "returns the handler's numeric fallback."
+            ),
+            resolution=(
+                "The verify-stone cracked, the moss caught it, and the "
+                "fallback number rose to the rim."
+            ),
+            tags=("story",),
         ),
     ], subplots=_SAFETYNET_SUBPLOTS, plan_pool=_PLAN_G7)
 
@@ -258,6 +506,25 @@ G7_08 = SubjectCurriculum(grade=7, subject_id="G7-08",
             concept_phrase="the output captured from printing a number",
             question_what="what string is produced when printing the number 42",
             goal_text="print the number 42 and capture the output string",
+            scenario=(
+                "Caw scratched a number onto a flat stone at the garden "
+                "pitcher, then held the stone up to inspect the inscribed "
+                "mark and newline groove left by the talon."
+            ),
+            need=(
+                "She needed to capture the entire inscription — numeral and "
+                "trailing groove — as a readable string from the stone's face."
+            ),
+            mapping=(
+                "`prn` inscribes the value onto the output stream like a talon "
+                "scratching a flat stone. `with-out-str` gathers the scratches "
+                "into a string, newline groove included."
+            ),
+            resolution=(
+                "The number and its trailing groove were gathered into a "
+                "string and returned to the rim."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(with-out-str (prn :hare))",
@@ -265,6 +532,25 @@ G7_08 = SubjectCurriculum(grade=7, subject_id="G7-08",
             concept_phrase="the output captured from printing a keyword",
             question_what="what string is produced when printing a keyword",
             goal_text="print the keyword :hare and capture the output string",
+            scenario=(
+                "Sable scratched a keyword label onto a flat stone at the "
+                "orchard pitcher, then wrapped the output to read back the "
+                "inscribed label exactly as the talon had left it."
+            ),
+            need=(
+                "Sable needed the keyword inscription plus its trailing "
+                "groove captured as a single string from the stone."
+            ),
+            mapping=(
+                "`prn` writes the keyword to the stream, talon-mark and "
+                "trailing newline groove alike. `with-out-str` collects "
+                "every mark into the returned string."
+            ),
+            resolution=(
+                "The keyword label and its groove were gathered into a "
+                "string at the rim."
+            ),
+            tags=("story",),
         ),
     ], subplots=_SCROLL_SUBPLOTS, plan_pool=_PLAN_G7)
 
@@ -279,6 +565,25 @@ G7_09 = SubjectCurriculum(grade=7, subject_id="G7-09",
             concept_phrase="the result of tapping a keyword into the tap pool",
             question_what="what tap> returns when sending a value",
             goal_text="send a keyword into the tap pool",
+            scenario=(
+                "Korvus tapped a keyword pebble into the inspection basin "
+                "at the village pitcher, sending it along to any waiting "
+                "observers without stopping the main flow."
+            ),
+            need=(
+                "He needed to confirm the tap delivery succeeded while the "
+                "main form continued without interruption."
+            ),
+            mapping=(
+                "`tap>` sends the value to registered tap listeners — a pebble "
+                "diverted to an observer basin. It always returns true to signal "
+                "the delivery was attempted, leaving the stream undisturbed."
+            ),
+            resolution=(
+                "The pebble reached the observer basin and true rose "
+                "to the rim."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(tap> 42)",
@@ -286,6 +591,25 @@ G7_09 = SubjectCurriculum(grade=7, subject_id="G7-09",
             concept_phrase="the result of tapping a number into the tap pool",
             question_what="what tap> returns when sending a number",
             goal_text="send a number into the tap pool",
+            scenario=(
+                "Caw diverted a numbered stone into the inspection basin "
+                "at the hilltop pitcher. The basin accepted the stone; "
+                "the pitcher's main water level was unaffected."
+            ),
+            need=(
+                "She needed the tap to confirm successful delivery so she "
+                "could trust the basin had received the stone."
+            ),
+            mapping=(
+                "`tap>` routes the value aside for inspection without altering "
+                "the main flow. The always-true return is the delivery receipt "
+                "stamped on the stone's side."
+            ),
+            resolution=(
+                "The numbered stone reached the basin and the delivery "
+                "receipt — true — rose to the rim."
+            ),
+            tags=("story",),
         ),
     ], subplots=_SCROLL_SUBPLOTS, plan_pool=_PLAN_G7)
 
@@ -301,6 +625,25 @@ G7_10 = SubjectCurriculum(grade=7, subject_id="G7-10",
             concept_phrase="the documentation string from a symbol's metadata",
             question_what="what documentation string is attached to a symbol",
             goal_text="extract the :doc metadata value from a symbol",
+            scenario=(
+                "Sable found a carved stone at the meadow pitcher with a small "
+                "side-note engraved beneath the name mark — a doc notation "
+                "scratched in by whoever first inscribed the symbol."
+            ),
+            need=(
+                "Sable needed to lift only the doc side-note off the stone's "
+                "metadata face, ignoring all other engraved marks."
+            ),
+            mapping=(
+                "`meta` reads the side-notations carved on the symbol stone. "
+                "The `:doc` key extracts just the documentation groove — the "
+                "brief inscription explaining the symbol's purpose."
+            ),
+            resolution=(
+                "The doc notation lifted cleanly off the stone's face "
+                "and rose to the rim."
+            ),
+            tags=("story",),
         ),
     ], subplots=_SCROLL_SUBPLOTS, plan_pool=_PLAN_G7)
 
@@ -316,6 +659,25 @@ G7_11 = SubjectCurriculum(grade=7, subject_id="G7-11",
             concept_phrase="the message extracted from a caught Exception",
             question_what="what message is inside the caught Exception",
             goal_text="throw an Exception with a message and extract the message from the caught exception",
+            scenario=(
+                "Korvus hurled a labeled stone into the farm pitcher. The moss "
+                "caught it; Korvus then read the label scratched on the stone's "
+                "surface to understand what went wrong."
+            ),
+            need=(
+                "He needed to read the message label carved onto the caught "
+                "exception stone rather than just discard it."
+            ),
+            mapping=(
+                "The `catch` block intercepts the thrown stone. `.getMessage` "
+                "reads the label engraved on its surface — the stack-trace's "
+                "top line, the short message of the exception."
+            ),
+            resolution=(
+                "The label inscribed on the caught stone rose to Korvus's "
+                "beak as the returned message."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(try (throw (ex-info \"trouble\" {})) (catch Exception e (.getMessage e)))",
@@ -323,6 +685,25 @@ G7_11 = SubjectCurriculum(grade=7, subject_id="G7-11",
             concept_phrase="the message extracted from a caught ex-info",
             question_what="what message is inside the caught ex-info",
             goal_text="throw an ex-info with a message and extract the message from the caught exception",
+            scenario=(
+                "Caw flung an ex-info stone bearing an engraved message label "
+                "into the road pitcher. The moss caught it; she bent to read "
+                "the label scratched across its top."
+            ),
+            need=(
+                "Caw needed to lift the message label off the ex-info stone "
+                "so she could report back what the stone said happened."
+            ),
+            mapping=(
+                "`ex-info` carves a message onto the thrown stone alongside "
+                "its data pouch. `.getMessage` reads only the surface label — "
+                "the same top line a stack trace would show first."
+            ),
+            resolution=(
+                "The surface label of the caught ex-info stone rose "
+                "to Caw's beak as the message."
+            ),
+            tags=("story",),
         ),
     ], subplots=_SAFETYNET_SUBPLOTS, plan_pool=_PLAN_G7)
 
@@ -340,6 +721,25 @@ G7_12 = SubjectCurriculum(grade=7, subject_id="G7-12",
             concept_phrase="the character count of a multi-line string",
             question_what="the total characters in a two-line string with newline-marks at each line's end",
             goal_text="count every character in a two-line string ending each line with a newline-mark, including the marks",
+            scenario=(
+                "Sable unrolled a flat scroll at the orchard pitcher showing "
+                "two rows of talon-marks: one short word and one longer word, "
+                "each ending with a newline groove scratched across the stone."
+            ),
+            need=(
+                "Sable needed the total count of every mark on the scroll, "
+                "including the newline grooves at each row's end."
+            ),
+            mapping=(
+                "`count` on a string tallies every character — talon-marks "
+                "and grooves alike. Each letter is one mark; each newline "
+                "groove is one more mark in the tally."
+            ),
+            resolution=(
+                "Every mark and groove on the scroll was tallied and the "
+                "count rose to the rim."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(clojure.string/split \"a\\nb\\nc\" #\"\\n\")",
@@ -384,6 +784,25 @@ G7_13 = SubjectCurriculum(grade=7, subject_id="G7-13",
             concept_phrase="the number of lines in a multi-line string",
             question_what="how many lines are in the text",
             goal_text="count the lines in a multi-line string",
+            scenario=(
+                "Korvus unrolled a scroll at the hilltop pitcher showing rows "
+                "of talon-marks divided by newline grooves. He needed to count "
+                "how many distinct rows the scroll contained."
+            ),
+            need=(
+                "He needed the row tally after splitting the scroll at each "
+                "newline groove, not a character count."
+            ),
+            mapping=(
+                "`split-lines` separates the scroll at every newline groove, "
+                "lifting each row as a pebble. `count` then tallies the "
+                "resulting pebbles to give the row count."
+            ),
+            resolution=(
+                "The rows were split and tallied; the row count rose "
+                "to the rim."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(first (clojure.string/split-lines \"first\\nsecond\"))",
@@ -391,6 +810,25 @@ G7_13 = SubjectCurriculum(grade=7, subject_id="G7-13",
             concept_phrase="the initial line from splitting a multi-line string",
             question_what="what the initial line is",
             goal_text="get the initial line from splitting a multi-line string",
+            scenario=(
+                "Caw unrolled a two-row scroll at the meadow pitcher. She "
+                "split it at the newline groove and reached for only the "
+                "topmost row-pebble, ignoring the rest."
+            ),
+            need=(
+                "She needed only the first row lifted from the scroll, "
+                "exactly as the talon had inscribed it."
+            ),
+            mapping=(
+                "`split-lines` splits the scroll into row-pebbles; `first` "
+                "picks up only the topmost one. The initial row surfaces "
+                "as-is, inscription preserved."
+            ),
+            resolution=(
+                "The topmost row-pebble lifted from the split scroll "
+                "rose to Caw's beak."
+            ),
+            tags=("story",),
         ),
     ], subplots=_SCROLL_SUBPLOTS, plan_pool=_PLAN_G7)
 
@@ -406,6 +844,25 @@ G7_14 = SubjectCurriculum(grade=7, subject_id="G7-14",
             concept_phrase="the output captured from a resource-scoped block",
             question_what="what output is captured within the scope",
             goal_text="capture the output of printing within a resource-scoped block",
+            scenario=(
+                "Sable opened a scoped flat stone at the village pitcher, "
+                "scratched a label onto it, then sealed the scope. Whatever "
+                "the talon wrote inside would be captured and returned."
+            ),
+            need=(
+                "Sable needed the inscription made inside the scope gathered "
+                "into a string — label and trailing groove both included."
+            ),
+            mapping=(
+                "`with-out-str` opens a scoped capture, like sealing a flat "
+                "stone's surface. `println` scratches inside the scope; when "
+                "the scope closes, every mark is returned as a string."
+            ),
+            resolution=(
+                "The scope closed, gathering the label and groove into "
+                "a string at the rim."
+            ),
+            tags=("story",),
         ),
     ], subplots=_SCROLL_SUBPLOTS, plan_pool=_PLAN_G7)
 
@@ -421,6 +878,25 @@ G7_15 = SubjectCurriculum(grade=7, subject_id="G7-15",
             concept_phrase="the output captured by redirecting the output stream",
             question_what="what is captured when output is redirected",
             goal_text="redirect the output stream and capture what is printed",
+            scenario=(
+                "Korvus redirected the pitcher's output spout into a small "
+                "collecting basin at the farm, then scratched a single mark "
+                "through the spout to see what the basin caught."
+            ),
+            need=(
+                "He needed to confirm exactly what character landed in the "
+                "basin when the spout was redirected — no trailing groove."
+            ),
+            mapping=(
+                "`*out*` is the pitcher's output spout; `with-out-str` "
+                "redirects it into a capture basin. `print` scratches the "
+                "mark without a trailing groove; the basin returns it bare."
+            ),
+            resolution=(
+                "The basin caught the single mark and returned it "
+                "to the rim without a trailing groove."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(with-out-str (println))",
@@ -428,6 +904,25 @@ G7_15 = SubjectCurriculum(grade=7, subject_id="G7-15",
             concept_phrase="the output captured from a bare print-line call",
             question_what="what is captured when a bare println is redirected",
             goal_text="redirect the output stream and capture what a bare println produces",
+            scenario=(
+                "Caw redirected the orchard pitcher's spout and called a bare "
+                "print-line through it — no label, just the action. The "
+                "collecting basin waited to see what arrived."
+            ),
+            need=(
+                "She needed to know what a bare print-line deposits in the "
+                "basin when there is nothing to inscribe but the groove itself."
+            ),
+            mapping=(
+                "A bare `println` with no arguments writes only the newline "
+                "groove to the stream. The `with-out-str` basin catches that "
+                "single groove and returns it as the captured string."
+            ),
+            resolution=(
+                "The basin caught only the newline groove and returned "
+                "it to the rim."
+            ),
+            tags=("story",),
         ),
     ], subplots=_SCROLL_SUBPLOTS, plan_pool=_PLAN_G7)
 
@@ -442,6 +937,25 @@ G7_16 = SubjectCurriculum(grade=7, subject_id="G7-16",
             concept_phrase="the integer parsed from an edn string",
             question_what="what integer is read from the string",
             goal_text="parse an edn integer from a string",
+            scenario=(
+                "Sable found a flat scroll at the hilltop pitcher bearing a "
+                "numeral mark scratched in edn notation. The scroll's text "
+                "held the number as a string of talon-marks."
+            ),
+            need=(
+                "Sable needed to read the scroll's talon-marks as a real "
+                "integer value, not as a string of characters."
+            ),
+            mapping=(
+                "`clojure.edn/read-string` reads the talon-marks on the scroll "
+                "and converts them to their data value. A numeral string "
+                "becomes the integer it inscribes."
+            ),
+            resolution=(
+                "The numeral marks on the scroll were read as an integer "
+                "and rose to the rim."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(clojure.edn/read-string \"{:a 1}\")",
@@ -449,6 +963,25 @@ G7_16 = SubjectCurriculum(grade=7, subject_id="G7-16",
             concept_phrase="the map parsed from an edn string",
             question_what="what map is read from the string",
             goal_text="parse an edn map from a string",
+            scenario=(
+                "Korvus unrolled a scroll at the garden pitcher inscribed with "
+                "a map notation — a curly-braced set of key-value marks "
+                "scratched in edn. He needed the live map, not the text."
+            ),
+            need=(
+                "He needed to parse the scroll's inscription back into a real "
+                "map structure usable inside the REPL."
+            ),
+            mapping=(
+                "`clojure.edn/read-string` reads the inscription and "
+                "reconstitutes the map it describes. The curly marks become "
+                "a real key-value structure at the pitcher."
+            ),
+            resolution=(
+                "The map inscription was read back into a live map "
+                "and rose to Korvus's beak."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(clojure.edn/read-string \"[:hare :tortoise]\")",
@@ -456,6 +989,25 @@ G7_16 = SubjectCurriculum(grade=7, subject_id="G7-16",
             concept_phrase="the vector parsed from an edn string",
             question_what="what vector is read from the string",
             goal_text="parse an edn vector of keywords from a string",
+            scenario=(
+                "Caw unrolled a scroll at the road pitcher marked with a "
+                "bracket-wrapped list of keyword labels scratched in edn. She "
+                "needed the live vector, not the raw inscription."
+            ),
+            need=(
+                "She needed to parse the keyword list on the scroll back into "
+                "a real vector structure ready for use."
+            ),
+            mapping=(
+                "`clojure.edn/read-string` reads the bracket marks and keyword "
+                "labels, reconstituting them as a live vector. The inscription "
+                "becomes data the REPL can traverse."
+            ),
+            resolution=(
+                "The bracket inscription was parsed into a live vector "
+                "and rose to Caw's beak."
+            ),
+            tags=("story",),
         ),
     ], subplots=_SCROLL_SUBPLOTS, plan_pool=_PLAN_G7)
 
@@ -472,6 +1024,25 @@ G7_17 = SubjectCurriculum(grade=7, subject_id="G7-17",
             concept_phrase="the map after writing and reading back via edn",
             question_what="what map is recovered from the roundtrip",
             goal_text="serialize a map to a string with pr-str and read it back into data with clojure.edn/read-string",
+            scenario=(
+                "Sable scratched a map onto a flat scroll at the village "
+                "pitcher using pr-str, rolled it up, then unrolled and read "
+                "it back with the edn reader to recover the live data."
+            ),
+            need=(
+                "Sable needed to confirm the map survived the roundtrip — "
+                "inscribed to scroll and read back as identical live data."
+            ),
+            mapping=(
+                "`pr-str` inscribes the map as a text scroll; "
+                "`clojure.edn/read-string` reads the scroll back into live "
+                "data. The roundtrip preserves every key-value pair."
+            ),
+            resolution=(
+                "The scroll was read back and the recovered map rose "
+                "to the rim intact."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(clojure.edn/read-string (pr-str [1 2 3]))",
@@ -479,6 +1050,25 @@ G7_17 = SubjectCurriculum(grade=7, subject_id="G7-17",
             concept_phrase="the vector after writing and reading back via edn",
             question_what="what vector is recovered from the roundtrip",
             goal_text="serialize a vector to a string with pr-str and read it back into data with clojure.edn/read-string",
+            scenario=(
+                "Korvus inscribed a sequence of numbered stones onto a flat "
+                "scroll at the orchard pitcher with pr-str, then unrolled it "
+                "and read it back with the edn reader."
+            ),
+            need=(
+                "He needed to confirm the vector of numbers survived the "
+                "scroll-and-read roundtrip as identical live data."
+            ),
+            mapping=(
+                "`pr-str` serializes the vector to a scroll; "
+                "`clojure.edn/read-string` reads the scroll back to live data. "
+                "Each numbered stone is recovered in its original order."
+            ),
+            resolution=(
+                "The scroll was read back and the vector of numbered "
+                "stones rose to Korvus's beak intact."
+            ),
+            tags=("story",),
         ),
     ], subplots=_SCROLL_SUBPLOTS, plan_pool=_PLAN_G7)
 

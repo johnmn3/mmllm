@@ -98,6 +98,27 @@ G12_01 = SubjectCurriculum(
             concept_phrase="the map-inc transducer applied via into",
             question_what="the vector produced by reifying the map-inc transducer into an empty vector via into, applied to the vector containing 1, 2, 3",
             goal_text="use the map-inc transducer with into to increment the vector containing 1, 2, 3",
+            scenario=(
+                "Korvus stood at the sorting-perch in the garden, one groove "
+                "carved into its surface: every stone that passed through was "
+                "nudged one notch larger before dropping into the empty "
+                "pitcher-vector below."
+            ),
+            need=(
+                "He needed to pass three stones — one, two, three — through "
+                "the increment groove and collect what landed."
+            ),
+            mapping=(
+                "The sorting-perch is the transducer; its single groove is "
+                "map-inc. The empty pitcher-vector is the destination given "
+                "to into. Each stone falls through once, nudged, then lands. "
+                "No intermediate collection is built."
+            ),
+            resolution=(
+                "The pitcher held the three nudged stones — the map-inc "
+                "transducer's work confirmed in one pass."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(into [] (filter even?) [1 2 3 4 5])",
@@ -105,6 +126,26 @@ G12_01 = SubjectCurriculum(
             concept_phrase="the filter-even transducer applied via into",
             question_what="the vector of even elements reified via into with the filter-even transducer applied to the vector containing 1, 2, 3, 4, 5",
             goal_text="use the filter-even transducer with into to keep only the even numbers from the vector containing 1, 2, 3, 4, 5",
+            scenario=(
+                "Caw set up the sorting-perch at the hilltop with a single "
+                "selection groove: only even-numbered stones could pass. "
+                "Five stones — one through five — waited in a row beside her."
+            ),
+            need=(
+                "She needed to know which stones from the five would clear "
+                "the even-groove and land in the collection below."
+            ),
+            mapping=(
+                "The sorting-perch is the transducer; the even-groove is "
+                "filter-even. Odd stones are turned aside; even ones drop "
+                "through into the empty pitcher-vector. into drives each "
+                "stone through in a single traversal."
+            ),
+            resolution=(
+                "Only the even stones settled into the pitcher — the "
+                "filter-even transducer's answer arrived in one pass."
+            ),
+            tags=("story",),
         ),
     ],
     subplots=_SIEVE_SUBPLOTS, plan_pool=_PLAN_G12,
@@ -123,6 +164,27 @@ G12_02 = SubjectCurriculum(
             concept_phrase="the composed transducer pipeline of map-inc then filter-even",
             question_what="the vector result of reifying the composed transducer via into, applying map-inc then filter-even to the vector containing 1, 2, 3, 4",
             goal_text="compose map-inc and filter-even into a transducer pipeline, then apply it with into to the vector containing 1, 2, 3, 4",
+            scenario=(
+                "Sable arranged the sorting-perch at the orchard with two "
+                "grooves in sequence: the first nudges every stone one notch "
+                "larger; the second keeps only the even-sized ones. Four "
+                "stones waited to pass through."
+            ),
+            need=(
+                "They needed to know which stones would survive both grooves "
+                "and land in the empty pitcher-vector on the other side."
+            ),
+            mapping=(
+                "comp links two transducers into one pipeline decoupled from "
+                "any context. Each stone passes through map-inc first, then "
+                "filter-even — in a single traversal. into supplies the "
+                "empty-vector destination and drives the stones through."
+            ),
+            resolution=(
+                "The pipeline's result settled into the pitcher — both grooves "
+                "applied in one pass, without a middle collection."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(transduce (comp (map inc) (filter even?)) + 0 [1 2 3 4 5])",
@@ -130,6 +192,26 @@ G12_02 = SubjectCurriculum(
             concept_phrase="the composed transducer summing the incremented-then-filtered elements",
             question_what="the sum accumulated via transduce using the composed transducer of map-inc then filter-even, starting from 0, applied to the vector containing 1, 2, 3, 4, 5",
             goal_text="compose map-inc and filter-even, then use transduce to sum the kept elements from the vector containing 1, 2, 3, 4, 5, starting from 0",
+            scenario=(
+                "Korvus stood at the meadow sorting-perch with the two-groove "
+                "pipeline — increment then even-filter — and a running-tally "
+                "starting at zero. Five stones waited in a row."
+            ),
+            need=(
+                "He needed the total weight of all stones that cleared both "
+                "grooves, accumulated into a single running sum."
+            ),
+            mapping=(
+                "transduce drives each stone through the composed pipeline, "
+                "then hands survivors to the + reducer, accumulating from the "
+                "seed of zero. The two grooves and the fold happen in a single "
+                "traversal with no intermediate collection."
+            ),
+            resolution=(
+                "The running tally came to rest — the pipeline's final count "
+                "confirmed at the pitcher's beak-reach."
+            ),
+            tags=("story",),
         ),
     ],
     subplots=_SIEVE_SUBPLOTS, plan_pool=_PLAN_G12,
@@ -148,6 +230,27 @@ G12_03 = SubjectCurriculum(
             concept_phrase="the transducer-powered construction of a set from incremented elements",
             question_what="the set produced by reifying the map-inc transducer into an empty set via into, applied to the vector containing 1, 2, 3",
             goal_text="use the map-inc transducer with into to create a set from the incremented elements of the vector containing 1, 2, 3",
+            scenario=(
+                "Caw stood at the village sorting-perch with the increment "
+                "groove, but this time the receiving pile below was a set — "
+                "a heap that keeps only unique stones. Three stones waited "
+                "in line to pass through."
+            ),
+            need=(
+                "She needed each stone nudged one notch larger and then "
+                "dropped into the set, which would discard any duplicates."
+            ),
+            mapping=(
+                "The transducer is decoupled from its destination: into "
+                "accepts an empty set just as readily as a vector. map-inc "
+                "transforms each stone; the set collects survivors without "
+                "repetition. The groove itself does not change."
+            ),
+            resolution=(
+                "Three distinct nudged stones filled the set — the "
+                "transducer's result confirmed, destination chosen freely."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(into [] (take 3) (range 100))",
@@ -155,6 +258,27 @@ G12_03 = SubjectCurriculum(
             concept_phrase="the transducer-powered collection of the first few elements",
             question_what="the vector produced by reifying the take-3 transducer into an empty vector via into, applied to the range of 100 numbers",
             goal_text="use the take-3 transducer with into to collect the first three elements from a range of 100 numbers",
+            scenario=(
+                "Sable perched at the road's edge over a long row of a hundred "
+                "stones. The sorting-perch had one rule: stop after three "
+                "stones have passed through. An empty pitcher-vector waited "
+                "below to receive them."
+            ),
+            need=(
+                "They needed only the first three stones from the long row, "
+                "without walking the full hundred before collecting."
+            ),
+            mapping=(
+                "take as a transducer carries an early-exit signal: once "
+                "three stones have passed, it halts traversal. into drives "
+                "the source through the groove and stops the moment the "
+                "transducer signals done — the rest of the row is never touched."
+            ),
+            resolution=(
+                "The first three stones settled into the pitcher — the "
+                "early-halt confirmed, the long row untouched beyond them."
+            ),
+            tags=("story",),
         ),
     ],
     subplots=_SIEVE_SUBPLOTS, plan_pool=_PLAN_G12,

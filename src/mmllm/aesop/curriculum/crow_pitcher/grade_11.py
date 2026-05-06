@@ -154,6 +154,25 @@ G11_02 = SubjectCurriculum(
             concept_phrase="the host method startsWith checking a string prefix",
             question_what="whether the string hare-tortoise starts with the prefix hare via the host method startsWith",
             goal_text="call the host method startsWith on a string to check for a prefix",
+
+            scenario=(
+                "Caw found a Java vessel at the market with a method scratched "
+                "on its rim: startsWith. She fed it the stone 'hare-tortoise' "
+                "and a small prefix-stone 'hare', then held it over the pitcher."
+            ),
+            need=(
+                "She needed to know whether the vessel's method would confirm "
+                "the longer stone began with the prefix-stone."
+            ),
+            mapping=(
+                "The dot-call borrows the Java vessel's startsWith method. "
+                "The object receives the call; the prefix stone is the argument. "
+                "The runtime bridges into the Java side and returns the verdict."
+            ),
+            resolution=(
+                "The borrowed vessel's method settled at beak-reach with its verdict."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form='(. "abc" toUpperCase)',
@@ -161,6 +180,26 @@ G11_02 = SubjectCurriculum(
             concept_phrase='the alternate dot form for a host method',
             question_what="the uppercase form of the string abc produced by the host method toUpperCase via the alternate dot syntax",
             goal_text="call the host method toUpperCase using the alternate dot form",
+
+            scenario=(
+                "Sable paused at the orchard's edge with the same Java vessel "
+                "Korvus had used before, but wanted to try the alternate "
+                "inscription: dot first, then the vessel, then the method name."
+            ),
+            need=(
+                "Sable needed to confirm the alternate dot notation reached "
+                "the same method inside the same borrowed earthenware vessel."
+            ),
+            mapping=(
+                "The `(. obj method)` form is the alternate dot syntax for "
+                "host method calls. Object and method swap positions but the "
+                "runtime still bridges into the Java vessel the same way."
+            ),
+            resolution=(
+                "The alternate-dot inscription returned the borrowed vessel's "
+                "method result at beak-reach."
+            ),
+            tags=("story",),
         ),
     ],
     subplots=_TOOLSHED_SUBPLOTS, plan_pool=_PLAN_G11,
@@ -180,6 +219,27 @@ G11_03 = SubjectCurriculum(
             concept_phrase="the static host method Math/abs",
             question_what="the absolute value of the integer -7 produced by calling the static host method Math/abs via slash notation",
             goal_text="call the static host method Math/abs with the argument -7",
+
+            scenario=(
+                "Korvus found a standard-issue vessel at the hilltop — the "
+                "human potter's Math class, etched with absolute-value marks. "
+                "He dropped the stone -7 into the slash-named method's slot."
+            ),
+            need=(
+                "He needed the vessel to strip the negative sign and return "
+                "the plain distance from zero for the stone he had dropped."
+            ),
+            mapping=(
+                "The slash notation calls a static method on the Java class "
+                "directly — no object instance needed. Math/abs reaches into "
+                "the human potter's standard library and applies the rule to "
+                "the stone's value."
+            ),
+            resolution=(
+                "The standard-issue vessel's absolute-value method returned "
+                "its result at beak-reach."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(Math/max 3 9)",
@@ -187,6 +247,26 @@ G11_03 = SubjectCurriculum(
             concept_phrase="the static host method Math/max",
             question_what="the maximum value of the integers 3 and 9 produced by calling the static host method Math/max via slash notation",
             goal_text="call the static host method Math/max to find the larger of two numbers",
+
+            scenario=(
+                "Caw laid two stones at the farm — one marked 3, one marked 9. "
+                "She reached for the human potter's Math vessel and used the "
+                "slash-form to call its maximum-finding method on both stones."
+            ),
+            need=(
+                "She needed to know which of the two stones the human potter's "
+                "method would declare the larger."
+            ),
+            mapping=(
+                "Math/max uses slash notation to invoke a static class method "
+                "with two stone-arguments. The runtime crosses into the Java "
+                "vessel and lets the human potter's rule decide the winner."
+            ),
+            resolution=(
+                "The borrowed vessel's maximum-finding method settled with "
+                "its choice at beak-reach."
+            ),
+            tags=("story",),
         ),
     ],
     subplots=_TOOLSHED_SUBPLOTS, plan_pool=_PLAN_G11,
@@ -208,6 +288,25 @@ G11_04 = SubjectCurriculum(
             concept_phrase='the count of a sequence',
             question_what='the number of characters in the string tortoise via the count function',
             goal_text="count the characters in a string",
+
+            scenario=(
+                "Sable stood at the garden with a stone inscribed 'tortoise' "
+                "and wanted to know how many notches the human potter's vessel "
+                "would count along its surface."
+            ),
+            need=(
+                "Sable needed the count of characters etched into the stone "
+                "to confirm the vessel measured them correctly."
+            ),
+            mapping=(
+                "`count` reaches into the host vessel's length property and "
+                "returns the tally. The Clojure function bridges to the host "
+                "sequence measure without exposing the raw field access."
+            ),
+            resolution=(
+                "The pitcher returned the tally of notches counted along the stone."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form='(count "hare")',
@@ -215,6 +314,25 @@ G11_04 = SubjectCurriculum(
             concept_phrase='the count of a sequence',
             question_what='the number of characters in the string hare via the count function',
             goal_text="count the characters in another string",
+
+            scenario=(
+                "Korvus held a shorter stone — one inscribed 'hare' — at the "
+                "orchard and placed it near the pitcher to see how many "
+                "notches the vessel would register."
+            ),
+            need=(
+                "He needed the count of the shorter stone's characters to "
+                "compare it against a longer one."
+            ),
+            mapping=(
+                "`count` again bridges to the host vessel's length measure. "
+                "Fewer characters means fewer notches — the host and Clojure "
+                "side agree on the tally."
+            ),
+            resolution=(
+                "The pitcher returned the notch-count for the shorter stone."
+            ),
+            tags=("story",),
         ),
     ],
     subplots=_TOOLSHED_SUBPLOTS, plan_pool=_PLAN_G11,
@@ -257,6 +375,26 @@ G11_06 = SubjectCurriculum(
             concept_phrase='constructing a String via the dot-construct form',
             question_what='the newly constructed String object created from a text argument via the dot-construct syntax',
             goal_text="construct a host String object with the dot-construct syntax",
+
+            scenario=(
+                "Caw found the human potter's unfired clay at the village "
+                "and shaped a new String vessel herself — pressing the word "
+                "'go' into the wet clay using the dot-construct inscription."
+            ),
+            need=(
+                "She needed to confirm that the dot-construct form fired a "
+                "fresh earthenware vessel holding the text she had pressed in."
+            ),
+            mapping=(
+                "The `ClassName.` trailing-dot form calls the Java constructor "
+                "directly. It fires a new host object from the potter's mold, "
+                "returning the freshly-constructed vessel to the Clojure side."
+            ),
+            resolution=(
+                "The pitcher returned the freshly-fired vessel with its "
+                "pressed-in text at beak-reach."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form='(new String "jump")',
@@ -264,6 +402,26 @@ G11_06 = SubjectCurriculum(
             concept_phrase='constructing a String via the new form',
             question_what='the newly constructed String object created from a text argument via the new keyword',
             goal_text="construct a host String object using the new keyword",
+
+            scenario=(
+                "Korvus tried the same potter's mold at the meadow but wrote "
+                "the inscription differently — using the `new` keyword before "
+                "the class name, pressing 'jump' into the wet clay."
+            ),
+            need=(
+                "He wanted to confirm `new` was an equivalent way to fire "
+                "the same kind of Java vessel from the human potter's mold."
+            ),
+            mapping=(
+                "The `(new ClassName ...)` form is the alternate constructor "
+                "syntax. Both forms fire the same Java constructor; only the "
+                "inscription on the rim differs — the vessel is identical."
+            ),
+            resolution=(
+                "The pitcher returned the newly-fired vessel, its pressed-in "
+                "text settling at beak-reach."
+            ),
+            tags=("story",),
         ),
     ],
     subplots=_TOOLSHED_SUBPLOTS, plan_pool=_PLAN_G11,
@@ -283,6 +441,26 @@ G11_07 = SubjectCurriculum(
             concept_phrase="indexing into a host array",
             question_what="the element at index 1 of the int-array [10 20 30] via the aget function",
             goal_text="access an element in a host array by index",
+
+            scenario=(
+                "Sable laid three numbered stones in a row at the road's edge "
+                "inside a Java tray — 10, 20, 30 — and then reached with a "
+                "talon for the stone at position one."
+            ),
+            need=(
+                "Sable needed the exact stone at index one of the tray, not "
+                "the first or the last, to continue the work at hand."
+            ),
+            mapping=(
+                "`int-array` fires a host-side tray for whole-number stones. "
+                "`aget` reaches into the tray by index position and lifts the "
+                "stone out — the Java side handles the raw slot access."
+            ),
+            resolution=(
+                "The pitcher returned the stone lifted from position one of "
+                "the Java tray."
+            ),
+            tags=("story",),
         ),
         SubjectExample(
             form="(let [a (int-array [1 2 3])] (alength a))",
@@ -290,6 +468,26 @@ G11_07 = SubjectCurriculum(
             concept_phrase="getting the length of a host array",
             question_what="the length of the int-array [1 2 3] via the alength function",
             goal_text="get the length of a host array",
+
+            scenario=(
+                "Korvus filled a Java tray at the garden with three small "
+                "stones and wanted to ask the human potter's vessel how many "
+                "slots it had been fired with."
+            ),
+            need=(
+                "He needed the tray's own slot-count so he would know "
+                "its limits before reaching inside for elements."
+            ),
+            mapping=(
+                "`alength` asks the host array how many slots it holds — "
+                "a direct question to the Java vessel's own length field. "
+                "The Clojure side receives the tally without counting manually."
+            ),
+            resolution=(
+                "The pitcher returned the tray's slot-count reported by "
+                "the Java vessel itself."
+            ),
+            tags=("story",),
         ),
     ],
     subplots=_TOOLSHED_SUBPLOTS, plan_pool=_PLAN_G11,
@@ -309,6 +507,26 @@ G11_08 = SubjectCurriculum(
             concept_phrase="using a type hint in a binding",
             question_what="the uppercase form of the type-hinted string abc produced by calling the host method toUpperCase on the binding",
             goal_text="add a type hint to a binding and call a method on the typed value",
+
+            scenario=(
+                "Caw scratched a marginal note on the pitcher's rim at the "
+                "village — `^String` — before binding the letter-stone 'abc'. "
+                "The rim-note told the runtime which potter had fired the clay."
+            ),
+            need=(
+                "She needed the runtime to skip its guesswork about which "
+                "potter's vessel to call, reading the rim-note instead."
+            ),
+            mapping=(
+                "The `^String` annotation is a type hint scratched on the "
+                "binding's rim. The compiler reads it to avoid reflection, "
+                "then the dot-call reaches into the Java vessel directly."
+            ),
+            resolution=(
+                "The borrowed vessel's method returned its result, guided by "
+                "the rim-note, at beak-reach."
+            ),
+            tags=("story",),
         ),
         _ex('(do "type hints are metadata that guide compilation" :studied)',
             ":studied",
@@ -336,6 +554,25 @@ G11_09 = SubjectCurriculum(
             concept_phrase="basic addition under the default checked math regime",
             question_what="the sum of two numbers",
             goal_text="add two numbers with the default math behavior",
+
+            scenario=(
+                "Korvus stood at the farm with two ordinary stones — one "
+                "notched once, one notched twice — and dropped them both "
+                "into the pitcher under the default arithmetic rules."
+            ),
+            need=(
+                "He needed the pitcher to add the two stones together safely, "
+                "with the default overflow-checking guard active."
+            ),
+            mapping=(
+                "Clojure's `+` uses checked arithmetic by default — if the "
+                "host primitive overflows, an error surfaces. For small stones "
+                "like these, the result arrives without incident."
+            ),
+            resolution=(
+                "The pitcher returned the combined count of the two stones."
+            ),
+            tags=("story",),
         ),
         _ex('(do "*unchecked-math* turns off overflow checking on prims" :studied)',
             ":studied",
@@ -448,6 +685,26 @@ G11_14 = SubjectCurriculum(
             concept_phrase="catching exceptions from a host method call",
             question_what="the square root of 4 produced by the static host method Math/sqrt via slash notation when the call succeeds",
             goal_text="wrap a static host method call in error handling",
+
+            scenario=(
+                "Sable wrapped the human potter's Math vessel in a soft-moss "
+                "safety net at the hilltop before calling Math/sqrt on the "
+                "stone marked 4 — in case the host vessel leaked an error."
+            ),
+            need=(
+                "Sable needed the host method's answer if it arrived cleanly, "
+                "or a safe fallback keyword if the Java side threw an exception."
+            ),
+            mapping=(
+                "`try`/`catch Exception` is the soft-moss net spread under "
+                "the borrowed Java vessel. If the host leaks a stack trace, "
+                "the net catches it; otherwise the clean result passes through."
+            ),
+            resolution=(
+                "The call succeeded and the pitcher returned the method's "
+                "result without triggering the safety net."
+            ),
+            tags=("story",),
         ),
     ],
     subplots=_TOOLSHED_SUBPLOTS, plan_pool=_PLAN_G11,
