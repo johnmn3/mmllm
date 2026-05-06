@@ -36,9 +36,15 @@ with what we think we're describing.\""""),
 ]
 
 
-def _ex(form, expected, concept, what):
+def _ex(form, expected, concept, what,
+        goal="", scenario="", need="", mapping="", resolution="",
+        tags=()):
     return SubjectExample(form=form, expected=expected,
-                          concept_phrase=concept, question_what=what)
+                          concept_phrase=concept, question_what=what,
+                          goal_text=goal,
+                          scenario=scenario, need=need,
+                          mapping=mapping, resolution=resolution,
+                          tags=tags)
 
 
 _PLAN_G4 = _PLAN_POOL + (
@@ -177,8 +183,16 @@ G4_15 = SubjectCurriculum(grade=4, subject_id="G4-15",
 G4_16 = SubjectCurriculum(grade=4, subject_id="G4-16",
     subject_title="into and conj on collections", fable="fox-grapes",
     examples=[
-        _ex("(into [] '(1 2 3))", [1,2,3],
-            "the form (into [] '(1 2 3))", "the vector built from a list"),
+        _ex("(into [] '(1 2 3))",
+            [1,2,3],
+            'the pour of a list into an empty vector',
+            'the new-shape collection holding the same row of values',
+            goal='pour a list into an empty vector, ending up with the same items in vector form',
+            scenario='Sly the fox set an empty stave-bucket below the trellis and held a sieve above it. The sieve already held three graded clusters in a row, ready to be poured through into a fresh container of a different shape.',
+            need="Sly wanted the contents transferred into the new bucket without losing the row's order — every cluster from the sieve, in the same sequence, settled into the empty bucket.",
+            mapping="The into form pours one collection through into another, item by item, preserving order. The list pours through the sieve and into the empty vector — the container's shape changes; the row of values does not.",
+            resolution='the bucket now held the same row Sly had started with, in the new vector shape — every cluster transferred, the order intact.',
+            tags=("story",)),
         _ex("(into #{} [1 2 2 3])", [1,2,3],
             "the form (into #{} [1 2 2 3])", "the set built from a vector (dups removed)"),
     ], subplots=_SIEVE_SUBPLOTS, plan_pool=_PLAN_G4)

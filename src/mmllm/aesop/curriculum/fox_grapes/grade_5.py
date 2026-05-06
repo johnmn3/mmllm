@@ -37,9 +37,15 @@ insisted, again, that the REPL was the only honest judge."""),
 ]
 
 
-def _ex(form, expected, concept, what):
+def _ex(form, expected, concept, what,
+        goal="", scenario="", need="", mapping="", resolution="",
+        tags=()):
     return SubjectExample(form=form, expected=expected,
-                          concept_phrase=concept, question_what=what)
+                          concept_phrase=concept, question_what=what,
+                          goal_text=goal,
+                          scenario=scenario, need=need,
+                          mapping=mapping, resolution=resolution,
+                          tags=tags)
 
 
 _PLAN_G5 = _PLAN_POOL + (
@@ -51,7 +57,16 @@ _PLAN_G5 = _PLAN_POOL + (
 G5_01 = SubjectCurriculum(grade=5, subject_id="G5-01",
     subject_title="if", fable="fox-grapes",
     examples=[
-        _ex("(if true :a :b)",  ":a", "the form (if true :a :b)",  "which of :a or :b is returned"),
+        _ex("(if true :a :b)",
+            ":a",
+            'the if-fork with a true test',
+            "the keyword on the prong the fork's true test selects",
+            goal='choose :a when the test is true, otherwise :b',
+            scenario='Renard the fox came to a fork in the orchard path. A small wooden sign at the fork carried a test; the left prong led to one keyword, the right prong to another.',
+            need="Renard had to take exactly one prong, and the choice depended on whether the test held. The other prong would stay untravelled; only one branch's value would be returned.",
+            mapping="`if` is the fork: the test decides which prong runs, the other is skipped entirely. When the test holds, the left prong's value is returned; when it does not, the right prong's is. One branch evaluates; the other is not even visited.",
+            resolution='the test held, the left prong was taken, and the form returned the value at that branch — exactly the destination the fork had pointed Renard toward.',
+            tags=("story",)),
         _ex("(if false :a :b)", ":b", "the form (if false :a :b)", "which of :a or :b is returned"),
         _ex("(if (> 5 3) :a :b)", ":a", "the form (if (> 5 3) :a :b)", "the if's branch"),
     ], subplots=_FORK_SUBPLOTS, plan_pool=_PLAN_G5)
@@ -242,9 +257,16 @@ G5_21 = SubjectCurriculum(grade=5, subject_id="G5-21",
 G5_22 = SubjectCurriculum(grade=5, subject_id="G5-22",
     subject_title="recur — first taste", fable="fox-grapes",
     examples=[
-        _ex("(loop [n 5 acc 1] (if (zero? n) acc (recur (dec n) (* acc n))))", 120,
-            "a loop computing factorial of 5 via recur",
-            "5! computed via loop/recur"),
+        _ex("(loop [n 5 acc 1] (if (zero? n) acc (recur (dec n) (* acc n))))",
+            120,
+            'the loop-recur factorial of five',
+            'the row-end product after walking the five-vine row',
+            goal='compute the factorial of 5 by looping a counter down to 0 with a running product',
+            scenario="Sly the fox stood at the head of a five-vine row, slate in paw. On each lap he would multiply the running tally by the current vine's number, then walk back to the head of the row with the new tally and the next vine to count.",
+            need='Sly wanted the running product of all five vine-numbers — five times four times three and so on down — landing as the row-end tally on the slate.',
+            mapping="`loop` sets the head of the row with starting bindings; `recur` is walking back to that head with new values, not stacking new walks on the old. The base case `zero?` is the row's end — no more vines to multiply, return the tally.",
+            resolution="after the fifth lap the row's end was reached, and the slate held the running product of every vine — exactly the factorial Sly had set out to count.",
+            tags=("story",)),
     ], subplots=_CIRCUIT_SUBPLOTS, plan_pool=_PLAN_G5)
 
 

@@ -74,9 +74,15 @@ form {form_display} had to be submitted; nothing else would do."""),
 ]
 
 
-def _ex(form, expected, concept, what):
+def _ex(form, expected, concept, what,
+        goal="", scenario="", need="", mapping="", resolution="",
+        tags=()):
     return SubjectExample(form=form, expected=expected,
-                          concept_phrase=concept, question_what=what)
+                          concept_phrase=concept, question_what=what,
+                          goal_text=goal,
+                          scenario=scenario, need=need,
+                          mapping=mapping, resolution=resolution,
+                          tags=tags)
 
 
 _PLAN_G10 = _PLAN_POOL + (
@@ -134,9 +140,16 @@ G10_03 = SubjectCurriculum(
     fable="fox-grapes",
     examples=[
         _ex("(do (defmacro my-when [t & body] `(if ~t (do ~@body))) "
-            "(my-when true 1 2 3))", 3,
-            "a tiny when-style macro and a call to it",
-            "what (my-when true 1 2 3) returns"),
+            "(my-when true 1 2 3))",
+            3,
+            'the value the rewritten guarded-block returns from its last step',
+            "the value of the last step in the macro's expanded guarded block",
+            goal='define a macro that wraps body in a guarded do-block, and call it with three steps',
+            scenario="Vix the fox kept a rewriting-quill at the orchard's posting wall. Whenever a shorthand tasting-card came in, she rewrote it into a longer card before any fox followed it — the new card had explicit checks and an in-order block the runtime would actually run.",
+            need='She wanted the shorthand card to expand into a guarded block: the test up front, then all the body steps in order. Once expanded, the rewritten card would behave as if she had written the long form by hand.',
+            mapping="A macro is a quill that rewrites the card before reading. `defmacro` registers the rewriting rule; the syntax-quote and unquote-splice splice the body into the new card's block. The expansion happens before runtime; only the rewritten form runs.",
+            resolution="the rewritten card ran in order; the body's last step's value was what came back, just as if she had written the long form herself.",
+            tags=("story",)),
         _ex("(do (defmacro twice [x] `(do ~x ~x)) (twice 7))", 7,
             "a macro that emits its argument twice in a do",
             "what (twice 7) returns"),

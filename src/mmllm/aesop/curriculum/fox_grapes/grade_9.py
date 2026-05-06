@@ -48,9 +48,15 @@ runtime to manage change. They agreed to submit it to the REPL."""),
 ]
 
 
-def _ex(form, expected, concept, what):
+def _ex(form, expected, concept, what,
+        goal="", scenario="", need="", mapping="", resolution="",
+        tags=()):
     return SubjectExample(form=form, expected=expected,
-                          concept_phrase=concept, question_what=what)
+                          concept_phrase=concept, question_what=what,
+                          goal_text=goal,
+                          scenario=scenario, need=need,
+                          mapping=mapping, resolution=resolution,
+                          tags=tags)
 
 
 _PLAN_POOL_G9: tuple[str, ...] = _PLAN_POOL + (
@@ -93,8 +99,14 @@ G9_02 = SubjectCurriculum(
         # The minimal "place that needs identity over time" example.
         _ex("(do (def counter (atom 0)) (swap! counter inc) @counter)",
             1,
-            "an atom counter, incremented once, then read",
-            "the value of counter after one swap! inc"),
+            "the atom's value after one atomic increment stroke",
+            "the ledger page's tally after the atomic increment stroke",
+            goal='create an atom holding 0, increment it, then read its value',
+            scenario='Vix the fox kept a leather ledger on the orchard wall. One page tracked a running tally that any fox could update, but only by crossing out the old number and writing the new one in a single, careful stroke.',
+            need='She wanted the tally moved one step forward — the old value replaced by old-plus-one — then she would read off whatever number now stood on the page.',
+            mapping="An atom is the ledger's mutable page; the swap form is the atomic stroke — applying the increment to the old value and writing the new one in one indivisible move. The deref form peeks at the current page without changing it.",
+            resolution="the page now read the post-stroke tally — the old number advanced by one, the ledger's record honest and current.",
+            tags=("story",)),
         _ex("(do (def progress (atom :idle)) (reset! progress :running) @progress)",
             ":running",
             "a progress atom reset to :running",
@@ -266,8 +278,14 @@ G9_10 = SubjectCurriculum(
         # send is async — we await before reading.
         _ex("(do (def ag (agent 0)) (send ag inc) (await ag) @ag)",
             1,
-            "an agent sent inc and awaited",
-            "the value of the agent after send inc and await"),
+            "the agent's value after a send-and-await increment",
+            "the slate's tally after the runner has returned with the new value",
+            goal='create an agent at 0, send an increment, wait for completion, read the value',
+            scenario="Vix the fox sent a swift runner ahead to the market with a small slate. The runner would advance the slate's tally by one and return.",
+            need="She needed the slate updated by the runner's pace, with a guarantee that by the time she read it, the runner had finished.",
+            mapping="An agent is the slate the runner carries; the send form dispatches the work; the await form waits for return; the deref reads the slate's value.",
+            resolution='by the time Vix arrived, the runner had returned, and the slate showed one more than it had started with.',
+            tags=("story",)),
         _ex("(do (def ag (agent 5)) (send ag + 10) (await ag) @ag)",
             15,
             "an agent sent (+ 10) and awaited",

@@ -48,9 +48,15 @@ said only the REPL could confirm what {form_display} actually decided."""),
 ]
 
 
-def _ex(form, expected, concept, what):
+def _ex(form, expected, concept, what,
+        goal="", scenario="", need="", mapping="", resolution="",
+        tags=()):
     return SubjectExample(form=form, expected=expected,
-                          concept_phrase=concept, question_what=what)
+                          concept_phrase=concept, question_what=what,
+                          goal_text=goal,
+                          scenario=scenario, need=need,
+                          mapping=mapping, resolution=resolution,
+                          tags=tags)
 
 
 _PLAN_POOL_G8: tuple[str, ...] = _PLAN_POOL + (
@@ -73,8 +79,14 @@ G8_01 = SubjectCurriculum(
         # rough equivalent. We illustrate "many shapes, one operation."
         _ex("(defn speak [k] (cond (= k :hare) \"swift\" (= k :tortoise) \"steady\" :else \"silent\"))",
             None,
-            "a function speak that returns different strings for :hare vs :tortoise",
-            "the form that defines speak via cond"),
+            'the defn that returns a habit-word per species tag',
+            'the habit-word the procedure returns for a registered species tag',
+            goal='define a procedure that returns a habit-word for each species tag, with a default for unrecognised tags',
+            scenario="Renard the fox kept the orchard-keeper guild's roster. Each creature on the roster — sparrow, hedgehog, badger — had signed up for the same contract: when called by tag, respond with the species's own habit-word.",
+            need="He needed a single procedure that took a creature's tag and read back the right habit-word — one phrase per registered tag, a default phrase otherwise.",
+            mapping="A guild here is a shared interface — one entry-point name, many species-specific answers. `cond` walks the roster: the first matching tag's answer is what comes back. The guild's contract is the procedure; the species's habit-word is the answer.",
+            resolution="the procedure stood ready on the guild's roster, dispatching each tag to its own habit-word, and to the default when no tag matched.",
+            tags=("story",)),
         _ex("(let [speak (fn [k] (cond (= k :hare) \"swift\" (= k :tortoise) \"steady\"))] (speak :tortoise))",
             "steady",
             "speak applied to :tortoise via cond-dispatch",
@@ -93,8 +105,14 @@ G8_02 = SubjectCurriculum(
     examples=[
         _ex("(do (deftype Pebble [color]) (.-color (Pebble. \"grey\")))",
             "grey",
-            "a deftype Pebble with a color field, then read color of an instance",
-            "the color field of a Pebble instance"),
+            'the field-access on a deftype-instance',
+            'the value at the named compartment of the labeled crate',
+            goal='define a Pebble type with a color field, build one, and read its color',
+            scenario='Renard the fox had built a labeled fruit-crate at the press with one named compartment. Each crate of his own type carried just that single field, fixed at the time of construction.',
+            need='He had just packed a fresh crate, marking its slot, and now wanted to read back what was written on its label without unpacking the rest of the crate.',
+            mapping="`deftype` declares a crate's shape — its named compartments. Constructing the type fills those slots; the field-access form reads the value at the named compartment directly. The shape is fixed; the slot's value is stamped at build time.",
+            resolution="the label slot read back the value Renard had stamped at the press — the crate's own field, fetched in one step.",
+            tags=("story",)),
         _ex("(do (deftype Stone [weight]) (.-weight (Stone. 7)))",
             7,
             "a deftype Stone with a weight field, then read its weight",
@@ -233,8 +251,14 @@ G8_08 = SubjectCurriculum(
             " (defmethod pace :hare [_] :swift)"
             " (pace {:species :hare}))",
             ":swift",
-            "a defmulti pace that dispatches on :species, called with :hare",
-            "what pace returns for {:species :hare}"),
+            'the multimethod call routed through a registered species channel',
+            "the channel's habit-word for a basket bearing a registered species tag",
+            goal='define a multimethod that dispatches on a :species tag, register a method for one species, then call it',
+            scenario='Renard the fox set up a sorting-tray at the market. The tray dispatched each basket by the :species tag stamped on it — one channel per species, more added by anyone.',
+            need='He needed to register a handler for one species, then drop a basket bearing that tag onto the tray.',
+            mapping='A defmulti posts the tray and the dispatch rule. A defmethod registers a channel for one tag. Calling the multimethod reads the tag and routes through the matching channel.',
+            resolution="the basket's tag routed it through the registered channel, and the tray returned that channel's habit-word.",
+            tags=("story",)),
         _ex("(do (defmulti tag :kind)"
             " (defmethod tag :stone [_] :hard)"
             " (tag {:kind :stone}))",

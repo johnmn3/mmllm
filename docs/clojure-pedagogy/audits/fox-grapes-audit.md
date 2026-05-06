@@ -10,12 +10,12 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 ## Grade 3
 
-### G3-13: fn body returns last form
-
-- examples: 1
-- variety @ n=50: 0.94
-
 ## Grade 4
+
+### G4-04: List literal
+
+- examples: 2
+- variety @ n=50: 0.94
 
 ## Grade 5
 
@@ -26,21 +26,26 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 ## Grade 6
 
+### G6-04: refer and use
+
+- examples: 1
+- variety @ n=50: 0.90
+
 ## Grade 7
 
 ## Grade 8
 
-### G8-05: Protocol extension
+### G8-04: Protocol definition
 
 - examples: 2
 - variety @ n=50: 0.93
 
 ## Grade 9
 
-### G9-05: Watch on atom
+### G9-04: Atom CAS semantics
 
-- examples: 1
-- variety @ n=50: 0.94
+- examples: 2
+- variety @ n=50: 0.93
 
 ## Grade 10
 
@@ -49,7 +54,7 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 ### G11-04: Field access
 
 - examples: 2
-- variety @ n=50: 0.92
+- variety @ n=50: 0.94
 
 ## Grade 12
 
@@ -66,15 +71,15 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 |---|---|---|---|---|
 | 1 | 18 | 80 | 0 | — |
 | 2 | 22 | 88 | 0 | — |
-| 3 | 18 | 31 | 0 | G3-13(0.94) |
-| 4 | 20 | 39 | 0 | — |
+| 3 | 18 | 31 | 0 | — |
+| 4 | 20 | 39 | 0 | G4-04(0.94) |
 | 5 | 22 | 39 | 0 | G5-04(0.92) |
-| 6 | 16 | 33 | 0 | — |
+| 6 | 16 | 33 | 0 | G6-04(0.90) |
 | 7 | 18 | 36 | 0 | — |
-| 8 | 16 | 31 | 0 | G8-05(0.93) |
-| 9 | 18 | 34 | 0 | G9-05(0.94) |
+| 8 | 16 | 31 | 0 | G8-04(0.93) |
+| 9 | 18 | 34 | 0 | G9-04(0.93) |
 | 10 | 16 | 36 | 0 | — |
-| 11 | 14 | 29 | 0 | G11-04(0.92) |
+| 11 | 14 | 29 | 0 | G11-04(0.94) |
 | 12 | 18 | 37 | 0 | — |
 
 ### Sample issues by severity

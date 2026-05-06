@@ -34,9 +34,14 @@ for {hasty_fox_phrase}: the form {form_display} captured
 ]
 
 
-def _ex(form, expected, concept, what, tags=()):
+def _ex(form, expected, concept, what,
+        goal="", scenario="", need="", mapping="", resolution="",
+        tags=()):
     return SubjectExample(form=form, expected=expected,
                           concept_phrase=concept, question_what=what,
+                          goal_text=goal,
+                          scenario=scenario, need=need,
+                          mapping=mapping, resolution=resolution,
                           tags=tags)
 
 
@@ -50,8 +55,16 @@ _PLAN_POOL_G3 = _PLAN_POOL + (
 G3_01 = SubjectCurriculum(grade=3, subject_id="G3-01",
     subject_title="def — top-level binding", fable="fox-grapes",
     examples=[
-        _ex("(do (def x 42) x)", 42, "the binding (def x 42) followed by x",
-            "the value bound to x after (def x 42)"),
+        _ex("(do (def x 42) x)",
+            42,
+            'a top-level def followed by a read of the bound symbol',
+            "the value the post's nameplate yields when read",
+            goal='declare a top-level binding x to a value, then read x',
+            scenario='Renard the fox chalked a fresh nameplate onto a vine-post at the head of the row. The post now read x, and behind the post sat the value the post named — a single tally Renard had counted out for the day.',
+            need="He wanted to look up the post's name later in the row and read off whatever value the post stood for, without re-counting the tally itself.",
+            mapping='A `def` form posts a nameplate — a top-level binding from a symbol to a value, persistent across the orchard. After the binding is posted, the symbol means the value anywhere in the namespace. Reading the symbol later just looks at the post.',
+            resolution="the post's nameplate yielded back the value Renard had chalked there — the same tally any fox in the orchard could read off.",
+            tags=("story",)),
         _ex("(do (def y 7) y)",  7,  "the binding (def y 7)",
             "the value bound to y"),
     ], subplots=_ROADSIGN_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
@@ -68,8 +81,16 @@ G3_02 = SubjectCurriculum(grade=3, subject_id="G3-02",
 G3_03 = SubjectCurriculum(grade=3, subject_id="G3-03",
     subject_title="let — local binding", fable="fox-grapes",
     examples=[
-        _ex("(let [x 3] (+ x 1))", 4, "the form (let [x 3] (+ x 1))",
-            "the result of (let [x 3] (+ x 1))"),
+        _ex("(let [x 3] (+ x 1))",
+            4,
+            'the let-bound increment by one',
+            "the running total after the pouch's value is incremented by one",
+            goal='bind a value of 3 to a local name x, then return that value plus 1',
+            scenario="Renard the fox tucked three grapes into the small berry-pouch tied at his belt and gave the pouch's contents the local name x. The pouch sat between trellis and basket — in his belt only for one short stretch of orchard path.",
+            need='Just before he reached the basket, Renard wanted the running total — what x plus one more grape would come to. Once he tipped the pouch into the basket, x would empty again.',
+            mapping="`let` ties a value into a pouch named locally for the stretch of one form. Inside the form, the local name stands for the pouch's value; outside the form, the pouch is empty and the name is unknown again. The binding is in force only for the form's stretch.",
+            resolution='the pouch yielded its three grapes, the increment added one more, and the total stood at one beyond what the pouch had held — exactly the haul the basket would receive.',
+            tags=("story",)),
         _ex("(let [n 10] (* n n))", 100, "the form (let [n 10] (* n n))",
             "the square of n where n is bound to 10"),
         _ex("(let [a 5] a)", 5, "the form (let [a 5] a)",
@@ -119,9 +140,16 @@ G3_06 = SubjectCurriculum(grade=3, subject_id="G3-06",
 G3_07 = SubjectCurriculum(grade=3, subject_id="G3-07",
     subject_title="fn — anonymous function", fable="fox-grapes",
     examples=[
-        _ex("((fn [x] (+ x 1)) 4)", 5,
-            "an anonymous function applied to 4",
-            "the result of applying (fn [x] (+ x 1)) to 4"),
+        _ex("((fn [x] (+ x 1)) 4)",
+            5,
+            'an anonymous tasting-card applied to four',
+            'the value the increment-by-one card serves on input four',
+            goal='apply an anonymous tasting-card that adds 1 to its argument, with input 4',
+            scenario='Sly the fox had pinned a fresh tasting-card to the orchard post: take one cluster, add one. The card had no name of its own — it was meant to be used once, right where it hung.',
+            need="Sly fed the card a cluster of four to taste. The card's single step would run on that input and serve back a value — what the routine produced for that one cluster.",
+            mapping='An anonymous function is a tasting-card with no posted name. The card lists its parameters, then its steps; calling the card hands an ingredient through the steps and serves the value of the last one. The card is the routine; the call is its execution.',
+            resolution="the card's last step served back four-plus-one — the only value the routine had been written to produce for that input.",
+            tags=("story",)),
         _ex("((fn [a b] (* a b)) 3 4)", 12,
             "a two-arg anonymous function",
             "the result of applying (fn [a b] (* a b)) to 3 and 4"),

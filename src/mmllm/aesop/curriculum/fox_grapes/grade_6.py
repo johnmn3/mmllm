@@ -39,9 +39,15 @@ REPL reached across the shared path."""),
 ]
 
 
-def _ex(form, expected, concept, what):
+def _ex(form, expected, concept, what,
+        goal="", scenario="", need="", mapping="", resolution="",
+        tags=()):
     return SubjectExample(form=form, expected=expected,
-                          concept_phrase=concept, question_what=what)
+                          concept_phrase=concept, question_what=what,
+                          goal_text=goal,
+                          scenario=scenario, need=need,
+                          mapping=mapping, resolution=resolution,
+                          tags=tags)
 
 
 _PLAN_G6 = _PLAN_POOL + (
@@ -248,9 +254,16 @@ G6_13 = SubjectCurriculum(grade=6, subject_id="G6-13",
 G6_14 = SubjectCurriculum(grade=6, subject_id="G6-14",
     subject_title="Import for host classes", fable="fox-grapes",
     examples=[
-        _ex("(symbol? 'java.util.Date)", True,
-            "whether 'java.util.Date is a symbol",
-            "the value of (symbol? 'java.util.Date)"),
+        _ex("(symbol? 'java.util.Date)",
+            True,
+            'the predicate that asks if a foreign dotted name is a symbol',
+            'whether a host-side dotted name is still a symbol locally',
+            goal="ask whether a dotted name from the host's catalogue is a symbol",
+            scenario="Renard the fox stood at the stone tool-shed at the orchard's edge. The tools carried foreign dotted names — borrowed tokens that the orchard still recognised as names.",
+            need='Renard wanted to know whether the foreign-looking tool label was, in his own world, still a symbol — a name-token the runtime understood.',
+            mapping="Foreign dotted names from the host's catalogue are still symbols in Clojure's reader. The symbol? predicate confirms the local kind: a name-token, regardless of where it points.",
+            resolution='the predicate confirmed it — the dotted token was a symbol, even pointing across the boundary.',
+            tags=("story",)),
         _ex("(name 'java.util.Date)", "java.util.Date",
             "the dotted-class symbol's name",
             "the string \"java.util.Date\""),
@@ -262,9 +275,16 @@ G6_14 = SubjectCurriculum(grade=6, subject_id="G6-14",
 G6_15 = SubjectCurriculum(grade=6, subject_id="G6-15",
     subject_title="Namespace meta", fable="fox-grapes",
     examples=[
-        _ex("(:doc (meta '^{:doc \"sour or sweet\"} orchard))", "sour or sweet",
-            "the :doc metadata attached to the symbol 'orchard",
-            "the docstring \"sour or sweet\" from the metadata"),
+        _ex("(:doc (meta '^{:doc \"sour or sweet\"} orchard))",
+            "sour or sweet",
+            'the :doc slot of a metadata-tagged symbol',
+            'the small lesson tied to the symbol via its :doc parchment',
+            goal='read the :doc metadata attached to a symbol, where the docstring carries a small lesson',
+            scenario="Vix the fox had pinned a parchment to the orchard fence with a docstring tied to a symbol. The parchment's :doc note carried a small lesson the symbol kept with it wherever it was filed.",
+            need="She wanted to read off just the :doc note from the parchment's metadata — the symbol's posted lesson, not the symbol itself.",
+            mapping='Metadata travels with a symbol like a parchment tied to the value. The meta form unpins the parchment; the :doc keyword reads the note labeled :doc. The symbol is the value; the parchment is the metadata; the keyword pulls the right field.',
+            resolution="the parchment yielded its small lesson — the docstring Vix had tied to the symbol, read off cleanly without disturbing the symbol's own value.",
+            tags=("story",)),
         _ex("(:author (meta '^{:author \"Aesop\"} orchard))", "Aesop",
             "the :author metadata on 'orchard",
             "the string \"Aesop\""),
