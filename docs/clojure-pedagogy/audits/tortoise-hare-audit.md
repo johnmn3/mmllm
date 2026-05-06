@@ -10,6 +10,11 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 ## Grade 3
 
+### G3-13: fn body returns last form
+
+- examples: 1
+- variety @ n=50: 0.94
+
 ## Grade 4
 
 ## Grade 5
@@ -41,7 +46,7 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 |---|---|---|---|---|
 | 1 | 18 | 76 | 0 | — |
 | 2 | 22 | 88 | 0 | — |
-| 3 | 18 | 31 | 0 | — |
+| 3 | 18 | 31 | 0 | G3-13(0.94) |
 | 4 | 20 | 39 | 0 | — |
 | 5 | 22 | 39 | 0 | — |
 | 6 | 16 | 33 | 0 | — |

@@ -9,6 +9,9 @@ from mmllm.aesop.curriculum.tortoise_hare.grade_1 import (
     _GOAL_SUBPLOTS,
     _PLAN_POOL,
 )
+from mmllm.aesop.curriculum.tortoise_hare._metaphor_pools import (
+    _RECIPE_SUBPLOTS, _SIEVE_SUBPLOTS,
+)
 
 
 
@@ -110,7 +113,7 @@ G5_09 = SubjectCurriculum(grade=5, subject_id="G5-09",
         _ex("((fn [f x] (f (f x))) inc 5)", 7,
             "applying a function twice", "the result of inc applied twice",
             goal="apply the inc function twice to 5"),
-    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G5)
+    ], subplots=_RECIPE_SUBPLOTS, plan_pool=_PLAN_G5)
 
 
 G5_10 = SubjectCurriculum(grade=5, subject_id="G5-10",
@@ -122,7 +125,7 @@ G5_10 = SubjectCurriculum(grade=5, subject_id="G5-10",
         _ex("(map #(* % %) [1 2 3 4])", [1,4,9,16],
             "mapping a squaring operation over a vector", "the sequence produced by mapping a lambda that squares its argument over the vector containing 1, 2, 3, and 4",
             goal="apply a squaring operation to each element of the vector containing 1, 2, 3, and 4, returning a sequence"),
-    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G5)
+    ], subplots=_SIEVE_SUBPLOTS, plan_pool=_PLAN_G5)
 
 
 G5_11 = SubjectCurriculum(grade=5, subject_id="G5-11",
@@ -134,7 +137,7 @@ G5_11 = SubjectCurriculum(grade=5, subject_id="G5-11",
         _ex("(filter pos? [-2 -1 0 1 2])", [1,2],
             "filtering positive elements from a vector", "the sequence produced by filtering pos? over the vector containing -2, -1, 0, 1, and 2",
             goal="keep the positive elements from the vector containing -2, -1, 0, 1, and 2"),
-    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G5)
+    ], subplots=_SIEVE_SUBPLOTS, plan_pool=_PLAN_G5)
 
 
 G5_12 = SubjectCurriculum(grade=5, subject_id="G5-12",
@@ -171,7 +174,7 @@ G5_14 = SubjectCurriculum(grade=5, subject_id="G5-14",
         _ex("(apply max [3 1 4 1 5])", 5,
             "applying max to vector elements", "the result of applying max to the elements of the vector containing 3, 1, 4, 1, and 5",
             goal="apply max to the elements of the vector containing 3, 1, 4, 1, and 5"),
-    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G5)
+    ], subplots=_RECIPE_SUBPLOTS, plan_pool=_PLAN_G5)
 
 
 G5_15 = SubjectCurriculum(grade=5, subject_id="G5-15",
@@ -183,7 +186,7 @@ G5_15 = SubjectCurriculum(grade=5, subject_id="G5-15",
         _ex("((comp str inc) 9)", "10",
             "composing str and inc", "the result of applying the composition of str and inc to 9",
             goal="compose str and inc functions and apply them to 9"),
-    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G5)
+    ], subplots=_RECIPE_SUBPLOTS, plan_pool=_PLAN_G5)
 
 
 G5_16 = SubjectCurriculum(grade=5, subject_id="G5-16",
@@ -195,7 +198,7 @@ G5_16 = SubjectCurriculum(grade=5, subject_id="G5-16",
         _ex("(map (partial * 3) [1 2 3])", [3,6,9],
             "mapping partial multiplication over a vector", "the sequence produced by mapping a partially applied multiplication function with first argument 3 over the vector containing 1, 2, and 3",
             goal="apply a partially applied multiplication to each element of the vector containing 1, 2, and 3"),
-    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G5)
+    ], subplots=_RECIPE_SUBPLOTS, plan_pool=_PLAN_G5)
 
 
 G5_17 = SubjectCurriculum(grade=5, subject_id="G5-17",
@@ -204,7 +207,7 @@ G5_17 = SubjectCurriculum(grade=5, subject_id="G5-17",
         _ex("((juxt inc dec) 5)", [6,4],
             "juxtaposing inc and dec", "the vector produced by applying juxt to inc and dec with argument 5",
             goal="apply both inc and dec functions to 5 and return both results as a vector"),
-    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G5)
+    ], subplots=_RECIPE_SUBPLOTS, plan_pool=_PLAN_G5)
 
 
 G5_18 = SubjectCurriculum(grade=5, subject_id="G5-18",
@@ -216,7 +219,7 @@ G5_18 = SubjectCurriculum(grade=5, subject_id="G5-18",
         _ex("(some neg? [1 2 3])", None,
             "checking if any element satisfies a predicate", "the result of applying some with neg? to the vector containing 1, 2, and 3",
             goal="check if any element in the vector containing 1, 2, and 3 is negative"),
-    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G5)
+    ], subplots=_SIEVE_SUBPLOTS, plan_pool=_PLAN_G5)
 
 
 G5_19 = SubjectCurriculum(grade=5, subject_id="G5-19",
@@ -226,7 +229,7 @@ G5_19 = SubjectCurriculum(grade=5, subject_id="G5-19",
             goal="check if all elements in the vector containing 1, 2, and 3 are positive"),
         _ex("(every? even? [1 2 3])", False, "checking if all elements satisfy a predicate", "the result of applying every? with even? to the vector containing 1, 2, and 3",
             goal="check if all elements in the vector containing 1, 2, and 3 are even"),
-    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G5)
+    ], subplots=_SIEVE_SUBPLOTS, plan_pool=_PLAN_G5)
 
 
 G5_20 = SubjectCurriculum(grade=5, subject_id="G5-20",
@@ -238,7 +241,7 @@ G5_20 = SubjectCurriculum(grade=5, subject_id="G5-20",
         _ex("(drop 2 [10 20 30 40 50])", [30,40,50],
             "dropping elements from a sequence", "the sequence produced by dropping 2 elements from the vector containing 10, 20, 30, 40, and 50",
             goal="drop the first 2 elements from the vector containing 10, 20, 30, 40, and 50"),
-    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G5)
+    ], subplots=_SIEVE_SUBPLOTS, plan_pool=_PLAN_G5)
 
 
 G5_21 = SubjectCurriculum(grade=5, subject_id="G5-21",
@@ -250,7 +253,7 @@ G5_21 = SubjectCurriculum(grade=5, subject_id="G5-21",
         _ex("(sort [3 1 2])", [1,2,3],
             "sorting a sequence", "the sequence produced by applying sort to the vector containing 3, 1, and 2",
             goal="sort the vector containing 3, 1, and 2 in ascending order"),
-    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G5)
+    ], subplots=_SIEVE_SUBPLOTS, plan_pool=_PLAN_G5)
 
 
 G5_22 = SubjectCurriculum(grade=5, subject_id="G5-22",

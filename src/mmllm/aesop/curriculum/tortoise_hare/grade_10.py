@@ -13,6 +13,9 @@ from mmllm.aesop.curriculum.generator import (
 from mmllm.aesop.curriculum.tortoise_hare.grade_1 import (
     _SHARED_SUBPLOTS as _G1_SUBPLOTS, _GOAL_SUBPLOTS, _PLAN_POOL,
 )
+from mmllm.aesop.curriculum.tortoise_hare._metaphor_pools import (
+    _RECIPE_SUBPLOTS,
+)
 
 
 # ─────────────────────── grade-10 subplot extensions ───────────────────────
@@ -229,7 +232,7 @@ G10_07 = SubjectCurriculum(
             "the nested function calls after expansion",
             goal="expand a thread-first macro to see how functions compose"),
     ],
-    subplots=_MACRO_SUBPLOTS, plan_pool=_PLAN_G10,
+    subplots=_RECIPE_SUBPLOTS, plan_pool=_PLAN_G10,
 )
 
 

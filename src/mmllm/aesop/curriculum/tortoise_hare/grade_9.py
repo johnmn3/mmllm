@@ -13,6 +13,9 @@ from mmllm.aesop.curriculum.generator import (
 from mmllm.aesop.curriculum.tortoise_hare.grade_1 import (
     _SHARED_SUBPLOTS as _G1_SUBPLOTS, _GOAL_SUBPLOTS, _PLAN_POOL,
 )
+from mmllm.aesop.curriculum.tortoise_hare._metaphor_pools import (
+    _BASKET_SUBPLOTS, _NOTEBOOK_SUBPLOTS,
+)
 
 
 # ─────────────────────── grade-9 subplot pool ───────────────────────
@@ -58,7 +61,7 @@ G9_01 = SubjectCurriculum(
             "the original vector after conj returns a new vector",
             goal="bind a vector v, call conj to add 4 to a new vector, then return the unchanged v"),
     ],
-    subplots=_SUBPLOTS,
+    subplots=_BASKET_SUBPLOTS,
     plan_pool=_PLAN_POOL_G9,
 )
 
@@ -81,7 +84,7 @@ G9_02 = SubjectCurriculum(
             "the value after atomically resetting progress and dereferencing",
             goal="construct an atom holding an idle value as progress, atomically reset it to running, and dereference the result"),
     ],
-    subplots=_SUBPLOTS,
+    subplots=_NOTEBOOK_SUBPLOTS,
     plan_pool=_PLAN_POOL_G9,
 )
 
@@ -108,7 +111,7 @@ G9_03 = SubjectCurriculum(
             "the value returned by dereferencing a after defining a as an atom holding a start keyword and resetting it to done",
             goal="construct an atom holding a start keyword, atomically reset it to a done keyword, and dereference the result"),
     ],
-    subplots=_SUBPLOTS,
+    subplots=_NOTEBOOK_SUBPLOTS,
     plan_pool=_PLAN_POOL_G9,
 )
 
@@ -131,7 +134,7 @@ G9_04 = SubjectCurriculum(
             "the value returned by dereferencing a after defining a as an atom holding 5 and attempting a compare-and-set that fails",
             goal="construct an atom holding 5, perform a compare-and-set checking for 0 and setting to 99, and dereference"),
     ],
-    subplots=_SUBPLOTS,
+    subplots=_NOTEBOOK_SUBPLOTS,
     plan_pool=_PLAN_POOL_G9,
 )
 
@@ -154,7 +157,7 @@ G9_05 = SubjectCurriculum(
             "the log vector after defining an atom a, defining a log atom, adding a watch that records each new value, swapping a, and dereferencing the log",
             goal="construct an atom a, construct a log atom, add a watch to a that conjoins new values to the log, swap a, and dereference the log"),
     ],
-    subplots=_SUBPLOTS,
+    subplots=_NOTEBOOK_SUBPLOTS,
     plan_pool=_PLAN_POOL_G9,
 )
 
@@ -175,7 +178,7 @@ G9_06 = SubjectCurriculum(
             "the value returned by dereferencing a after defining an atom, setting a number? validator, swapping by applying inc, and dereferencing",
             goal="construct an atom holding 0, set a number? validator on it, atomically swap by applying inc, and dereference"),
     ],
-    subplots=_SUBPLOTS,
+    subplots=_NOTEBOOK_SUBPLOTS,
     plan_pool=_PLAN_POOL_G9,
 )
 
@@ -198,7 +201,7 @@ G9_07 = SubjectCurriculum(
             "the value returned by dereferencing r after defining a ref holding 100, setting it to 7 inside dosync, and dereferencing",
             goal="construct a ref holding 100, perform a transactional ref-set to 7 inside dosync, and dereference"),
     ],
-    subplots=_SUBPLOTS,
+    subplots=_NOTEBOOK_SUBPLOTS,
     plan_pool=_PLAN_POOL_G9,
 )
 
@@ -223,7 +226,7 @@ G9_08 = SubjectCurriculum(
             "the value returned by dereferencing r after defining a ref holding 10, performing a transactional alter via + 5, and dereferencing",
             goal="construct a ref holding 10, perform a transactional alter by applying + with 5 inside dosync, and dereference"),
     ],
-    subplots=_SUBPLOTS,
+    subplots=_NOTEBOOK_SUBPLOTS,
     plan_pool=_PLAN_POOL_G9,
 )
 
@@ -246,7 +249,7 @@ G9_09 = SubjectCurriculum(
             "the value returned by dereferencing r after defining a ref holding 0, altering it via inc inside dosync, and dereferencing",
             goal="construct a ref holding 0, perform a transactional alter by applying inc inside dosync, and dereference"),
     ],
-    subplots=_SUBPLOTS,
+    subplots=_NOTEBOOK_SUBPLOTS,
     plan_pool=_PLAN_POOL_G9,
 )
 
@@ -352,7 +355,7 @@ G9_14 = SubjectCurriculum(
             "the value extracted from an atom using the deref function",
             goal="construct an atom holding 7 and dereference it using the deref function"),
     ],
-    subplots=_SUBPLOTS,
+    subplots=_NOTEBOOK_SUBPLOTS,
     plan_pool=_PLAN_POOL_G9,
 )
 
@@ -396,7 +399,7 @@ G9_16 = SubjectCurriculum(
             "the value returned by dereferencing v after defining a volatile holding 5, performing a non-transactional reset to 99, and dereferencing",
             goal="construct a volatile holding 5, perform a non-transactional reset to 99, and dereference"),
     ],
-    subplots=_SUBPLOTS,
+    subplots=_NOTEBOOK_SUBPLOTS,
     plan_pool=_PLAN_POOL_G9,
 )
 
@@ -418,7 +421,7 @@ G9_17 = SubjectCurriculum(
             "the value of the dynamic var when read after the binding form unwounds",
             goal="define a dynamic var *p* as 1, use binding to rebind it to 99 inside, and read its value after binding exits"),
     ],
-    subplots=_SUBPLOTS,
+    subplots=_NOTEBOOK_SUBPLOTS,
     plan_pool=_PLAN_POOL_G9,
 )
 
@@ -441,7 +444,7 @@ G9_18 = SubjectCurriculum(
             "the literal value returned by evaluating it inside a locked critical section after creating a monitor and acquiring the lock",
             goal="create an object to use as a monitor, acquire the lock, and evaluate a literal inside"),
     ],
-    subplots=_SUBPLOTS,
+    subplots=_NOTEBOOK_SUBPLOTS,
     plan_pool=_PLAN_POOL_G9,
 )
 

@@ -12,6 +12,9 @@ from mmllm.aesop.curriculum.generator import (
 from mmllm.aesop.curriculum.tortoise_hare.grade_1 import (
     _GOAL_SUBPLOTS, _PLAN_POOL,
 )
+from mmllm.aesop.curriculum.tortoise_hare._metaphor_pools import (
+    _POUCH_SUBPLOTS, _RECIPE_SUBPLOTS,
+)
 
 # Add naming-themed subplots: a character names a value, then references it.
 # Based on _GOAL_SUBPLOTS to ensure goal-driven design.
@@ -76,7 +79,7 @@ G3_03 = SubjectCurriculum(grade=3, subject_id="G3-03",
         _ex("(let [a 5] a)", 5, "the local binding and lookup",
             "the value of a after binding it locally to 5 via let",
             goal="bind a to 5 and return it"),
-    ], subplots=_NAMING_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
+    ], subplots=_POUCH_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
 
 
 G3_04 = SubjectCurriculum(grade=3, subject_id="G3-04",
@@ -94,7 +97,7 @@ G3_04 = SubjectCurriculum(grade=3, subject_id="G3-04",
             "the three-binding sum",
             "adding a, b, and c after binding via let to 2, 3, and 4",
             goal="bind a to 2, b to 3, c to 4, and add them"),
-    ], subplots=_NAMING_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
+    ], subplots=_POUCH_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
 
 
 G3_05 = SubjectCurriculum(grade=3, subject_id="G3-05",
@@ -108,7 +111,7 @@ G3_05 = SubjectCurriculum(grade=3, subject_id="G3-05",
             "the outer binding after the let scope",
             "the value of x in the outer scope after the let scope ends",
             goal="define x, shadow it in a let, then look up x again in the outer scope"),
-    ], subplots=_NAMING_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
+    ], subplots=_POUCH_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
 
 
 G3_06 = SubjectCurriculum(grade=3, subject_id="G3-06",
@@ -122,7 +125,7 @@ G3_06 = SubjectCurriculum(grade=3, subject_id="G3-06",
             "the chained bindings with sequential references",
             "the value of c, bound via let to twice b, after a is 3 and b is a+1",
             goal="bind a to 3, b to a+1, c to 2*b, and return c"),
-    ], subplots=_NAMING_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
+    ], subplots=_POUCH_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
 
 
 G3_07 = SubjectCurriculum(grade=3, subject_id="G3-07",
@@ -136,7 +139,7 @@ G3_07 = SubjectCurriculum(grade=3, subject_id="G3-07",
             "the two-argument anonymous function call",
             "the result of applying an anonymous fn with two parameters that multiplies them to 3 and 4",
             goal="create an anonymous function that multiplies its two arguments and apply it to 3 and 4"),
-    ], subplots=_NAMING_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
+    ], subplots=_RECIPE_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
 
 
 G3_08 = SubjectCurriculum(grade=3, subject_id="G3-08",
@@ -146,7 +149,7 @@ G3_08 = SubjectCurriculum(grade=3, subject_id="G3-08",
             "the three-argument anonymous function call",
             "the result of applying an anonymous fn with three parameters that adds them to 1, 2, and 3",
             goal="create an anonymous function with three parameters that adds them and apply it to 1, 2, and 3"),
-    ], subplots=_NAMING_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
+    ], subplots=_RECIPE_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
 
 
 G3_09 = SubjectCurriculum(grade=3, subject_id="G3-09",
@@ -160,7 +163,7 @@ G3_09 = SubjectCurriculum(grade=3, subject_id="G3-09",
             "the multi-argument function definition and call",
             "the result of calling the function add3, defined via defn to add three arguments, with 1, 2, and 3",
             goal="define a function add3 that adds three arguments, then call it with 1, 2, and 3"),
-    ], subplots=_NAMING_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
+    ], subplots=_RECIPE_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
 
 
 G3_10 = SubjectCurriculum(grade=3, subject_id="G3-10",
@@ -174,7 +177,7 @@ G3_10 = SubjectCurriculum(grade=3, subject_id="G3-10",
             "the multi-argument shorthand syntax",
             "the result of using the #() shorthand to create a function that multiplies two arguments and applying it to 3 and 4",
             goal="use the shorthand syntax to create a function that multiplies two arguments and apply it to 3 and 4"),
-    ], subplots=_NAMING_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
+    ], subplots=_RECIPE_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
 
 
 G3_11 = SubjectCurriculum(grade=3, subject_id="G3-11",
@@ -188,7 +191,7 @@ G3_11 = SubjectCurriculum(grade=3, subject_id="G3-11",
             "the function call with self-multiplication",
             "the result of applying an anonymous fn that multiplies its argument by itself to 6",
             goal="apply a function that squares its argument to 6"),
-    ], subplots=_NAMING_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
+    ], subplots=_POUCH_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
 
 
 G3_12 = SubjectCurriculum(grade=3, subject_id="G3-12",
@@ -208,7 +211,7 @@ G3_13 = SubjectCurriculum(grade=3, subject_id="G3-13",
             "the function body with multiple expressions",
             "the result of applying an anonymous fn where the body contains multiple expressions but only the last one is returned, applied to 1",
             goal="create an anonymous function with multiple forms in its body but return only the last one"),
-    ], subplots=_NAMING_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
+    ], subplots=_RECIPE_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
 
 
 G3_14 = SubjectCurriculum(grade=3, subject_id="G3-14",
@@ -232,7 +235,7 @@ G3_15 = SubjectCurriculum(grade=3, subject_id="G3-15",
             "the do form with side-effects and final return",
             "the final value evaluated by do, ignoring the intermediate println side-effect",
             goal="execute a print statement for side-effects, then return a different value"),
-    ], subplots=_NAMING_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
+    ], subplots=_RECIPE_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
 
 
 G3_16 = SubjectCurriculum(grade=3, subject_id="G3-16",
@@ -242,7 +245,7 @@ G3_16 = SubjectCurriculum(grade=3, subject_id="G3-16",
             "the shadowed operator binding",
             "the value locally bound to the + operator via let",
             goal="shadow the plus operator with a local binding and return the bound value"),
-    ], subplots=_NAMING_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
+    ], subplots=_POUCH_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
 
 
 G3_17 = SubjectCurriculum(grade=3, subject_id="G3-17",
@@ -266,7 +269,7 @@ G3_18 = SubjectCurriculum(grade=3, subject_id="G3-18",
             "the inline multiplication without binding",
             "the result of multiplying 5 by itself three times without any binding",
             goal="compute 5 cubed using direct values"),
-    ], subplots=_NAMING_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
+    ], subplots=_POUCH_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
 
 
 SUBJECTS: dict[str, SubjectCurriculum] = {

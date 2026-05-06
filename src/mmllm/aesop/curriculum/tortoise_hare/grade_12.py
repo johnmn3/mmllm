@@ -14,6 +14,9 @@ from mmllm.aesop.curriculum.generator import (
 from mmllm.aesop.curriculum.tortoise_hare.grade_1 import (
     _SHARED_SUBPLOTS as _G1_SUBPLOTS, _GOAL_SUBPLOTS, _PLAN_POOL,
 )
+from mmllm.aesop.curriculum.tortoise_hare._metaphor_pools import (
+    _SIEVE_SUBPLOTS,
+)
 
 
 # ─────────────────────── grade-12 subplot extensions ───────────────────────
@@ -98,7 +101,7 @@ G12_01 = SubjectCurriculum(
             "the vector of even elements reified via into with the filter-even transducer applied to the vector containing 1, 2, 3, 4, 5",
             goal="use the filter-even transducer with into to keep only the even numbers from the vector containing 1, 2, 3, 4, 5"),
     ],
-    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G12,
+    subplots=_SIEVE_SUBPLOTS, plan_pool=_PLAN_G12,
 )
 
 
@@ -118,7 +121,7 @@ G12_02 = SubjectCurriculum(
             "the sum accumulated via transduce using the composed transducer of map-inc then filter-even, starting from 0, applied to the vector containing 1, 2, 3, 4, 5",
             goal="compose map-inc and filter-even, then use transduce to sum the kept elements from the vector containing 1, 2, 3, 4, 5, starting from 0"),
     ],
-    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G12,
+    subplots=_SIEVE_SUBPLOTS, plan_pool=_PLAN_G12,
 )
 
 
@@ -137,7 +140,7 @@ G12_03 = SubjectCurriculum(
             "the vector produced by reifying the take-3 transducer into an empty vector via into, applied to the range of 100 numbers",
             goal="use the take-3 transducer with into to collect the first three elements from a range of 100 numbers"),
     ],
-    subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G12,
+    subplots=_SIEVE_SUBPLOTS, plan_pool=_PLAN_G12,
 )
 
 

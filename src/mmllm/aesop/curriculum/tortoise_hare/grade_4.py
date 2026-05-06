@@ -11,6 +11,9 @@ from mmllm.aesop.curriculum.generator import (
 from mmllm.aesop.curriculum.tortoise_hare.grade_1 import (
     _SHARED_SUBPLOTS as _G1_SUBPLOTS, _GOAL_SUBPLOTS, _PLAN_POOL
 )
+from mmllm.aesop.curriculum.tortoise_hare._metaphor_pools import (
+    _BASKET_SUBPLOTS, _SIEVE_SUBPLOTS,
+)
 
 
 _COLL_SUBPLOTS: list[SubplotTemplate] = list(_G1_SUBPLOTS) + [
@@ -53,7 +56,7 @@ G4_01 = SubjectCurriculum(grade=4, subject_id="G4-01",
             goal="create an empty vector"),
         _ex("[\"a\" \"b\"]", ["a","b"], "a vector of strings", "the vector of strings",
             goal="create a vector containing the strings a and b"),
-    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G4)
+    ], subplots=_BASKET_SUBPLOTS, plan_pool=_PLAN_G4)
 
 
 G4_02 = SubjectCurriculum(grade=4, subject_id="G4-02",
@@ -63,7 +66,7 @@ G4_02 = SubjectCurriculum(grade=4, subject_id="G4-02",
             goal="get the element at index 0 of a vector containing 10, 20, and 30"),
         _ex("(nth [10 20 30] 2)", 30, "accessing by index", "the value at index 2",
             goal="get the element at index 2 of a vector containing 10, 20, and 30"),
-    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G4)
+    ], subplots=_BASKET_SUBPLOTS, plan_pool=_PLAN_G4)
 
 
 G4_03 = SubjectCurriculum(grade=4, subject_id="G4-03",
@@ -73,7 +76,7 @@ G4_03 = SubjectCurriculum(grade=4, subject_id="G4-03",
             goal="append 3 to the end of a vector containing 1 and 2"),
         _ex("(conj [] :hare)",      [":hare"], "the conj operation",     "the vector after conjing",
             goal="append the keyword :hare to an empty vector"),
-    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G4)
+    ], subplots=_BASKET_SUBPLOTS, plan_pool=_PLAN_G4)
 
 
 G4_04 = SubjectCurriculum(grade=4, subject_id="G4-04",
@@ -83,7 +86,7 @@ G4_04 = SubjectCurriculum(grade=4, subject_id="G4-04",
             goal="create a list containing 1, 2, and 3"),
         _ex("'()",      [],       "an empty list",     "the empty list",
             goal="create an empty list"),
-    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G4)
+    ], subplots=_BASKET_SUBPLOTS, plan_pool=_PLAN_G4)
 
 
 G4_05 = SubjectCurriculum(grade=4, subject_id="G4-05",
@@ -91,7 +94,7 @@ G4_05 = SubjectCurriculum(grade=4, subject_id="G4-05",
     examples=[
         _ex("(cons 0 '(1 2 3))", [0,1,2,3], "the cons operation", "the seq after cons'ing",
             goal="prepend 0 to the front of a list containing 1, 2, and 3"),
-    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G4)
+    ], subplots=_BASKET_SUBPLOTS, plan_pool=_PLAN_G4)
 
 
 G4_06 = SubjectCurriculum(grade=4, subject_id="G4-06",
@@ -100,7 +103,7 @@ G4_06 = SubjectCurriculum(grade=4, subject_id="G4-06",
         _ex("{:hare 1 :tortoise 2}", {":hare": 1, ":tortoise": 2},
             "a map literal", "the map with two entries",
             goal="create a map binding the keyword :hare to 1 and :tortoise to 2"),
-    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G4)
+    ], subplots=_BASKET_SUBPLOTS, plan_pool=_PLAN_G4)
 
 
 G4_07 = SubjectCurriculum(grade=4, subject_id="G4-07",
@@ -111,7 +114,7 @@ G4_07 = SubjectCurriculum(grade=4, subject_id="G4-07",
         _ex("(get {:a 1} :missing :default)", ":default",
             "map lookup with default", "the default value when key missing",
             goal="look up a missing key in a map, returning a default value"),
-    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G4)
+    ], subplots=_BASKET_SUBPLOTS, plan_pool=_PLAN_G4)
 
 
 G4_08 = SubjectCurriculum(grade=4, subject_id="G4-08",
@@ -123,7 +126,7 @@ G4_08 = SubjectCurriculum(grade=4, subject_id="G4-08",
         _ex("(assoc {:a 1} :a 99)", {":a": 99},
             "the assoc operation", "the map after using assoc to change the key :a to value 99",
             goal="update the key :a to value 99 in a map that binds :a to 1"),
-    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G4)
+    ], subplots=_BASKET_SUBPLOTS, plan_pool=_PLAN_G4)
 
 
 G4_09 = SubjectCurriculum(grade=4, subject_id="G4-09",
@@ -132,7 +135,7 @@ G4_09 = SubjectCurriculum(grade=4, subject_id="G4-09",
         _ex("(dissoc {:a 1 :b 2} :a)", {":b": 2},
             "the dissoc operation", "the map after using dissoc to remove a key",
             goal="remove the key :a from a map binding :a to 1 and :b to 2"),
-    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G4)
+    ], subplots=_BASKET_SUBPLOTS, plan_pool=_PLAN_G4)
 
 
 G4_10 = SubjectCurriculum(grade=4, subject_id="G4-10",
@@ -141,7 +144,7 @@ G4_10 = SubjectCurriculum(grade=4, subject_id="G4-10",
         _ex("(count (keys {:a 1 :b 2 :c 3}))", 3,
             "counting keys in a map", "the number of keys in the map",
             goal="count how many keys are in a map binding :a, :b, and :c"),
-    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G4)
+    ], subplots=_BASKET_SUBPLOTS, plan_pool=_PLAN_G4)
 
 
 G4_11 = SubjectCurriculum(grade=4, subject_id="G4-11",
@@ -151,7 +154,7 @@ G4_11 = SubjectCurriculum(grade=4, subject_id="G4-11",
             goal="count the elements in a set containing 1, 2, and 3"),
         _ex("(count #{1 1 1})", 1, "the size of a set", "the size of the set",
             goal="count the unique elements in a set literal with duplicate 1s"),
-    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G4)
+    ], subplots=_BASKET_SUBPLOTS, plan_pool=_PLAN_G4)
 
 
 G4_12 = SubjectCurriculum(grade=4, subject_id="G4-12",
@@ -161,7 +164,7 @@ G4_12 = SubjectCurriculum(grade=4, subject_id="G4-12",
             goal="check whether 2 is a member of a set containing 1, 2, and 3"),
         _ex("(contains? #{1 2 3} 4)", False, "testing set membership", "whether an element is in the set using contains?",
             goal="check whether 4 is a member of a set containing 1, 2, and 3"),
-    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G4)
+    ], subplots=_BASKET_SUBPLOTS, plan_pool=_PLAN_G4)
 
 
 G4_13 = SubjectCurriculum(grade=4, subject_id="G4-13",
@@ -175,7 +178,7 @@ G4_13 = SubjectCurriculum(grade=4, subject_id="G4-13",
             goal="count the elements in a set containing the keywords :a, :b, and :c"),
         _ex("(count \"tortoise\")", 8, "the length of a string", "the number of characters in the string",
             goal="count the characters in the string tortoise"),
-    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G4)
+    ], subplots=_BASKET_SUBPLOTS, plan_pool=_PLAN_G4)
 
 
 G4_14 = SubjectCurriculum(grade=4, subject_id="G4-14",
@@ -187,7 +190,7 @@ G4_14 = SubjectCurriculum(grade=4, subject_id="G4-14",
             goal="test whether a vector containing 1 is empty"),
         _ex("(empty? \"\")", True,  "checking if a string is empty", "whether the string is empty using empty?",
             goal="test whether an empty string is empty"),
-    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G4)
+    ], subplots=_BASKET_SUBPLOTS, plan_pool=_PLAN_G4)
 
 
 G4_15 = SubjectCurriculum(grade=4, subject_id="G4-15",
@@ -199,7 +202,7 @@ G4_15 = SubjectCurriculum(grade=4, subject_id="G4-15",
             goal="get the last element of a vector containing 10, 20, and 30"),
         _ex("(count (rest [10 20 30]))", 2, "removing the first element and counting", "the count after removing first",
             goal="count the elements remaining after removing the first element from a vector with 10, 20, and 30"),
-    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G4)
+    ], subplots=_BASKET_SUBPLOTS, plan_pool=_PLAN_G4)
 
 
 G4_16 = SubjectCurriculum(grade=4, subject_id="G4-16",
@@ -211,7 +214,7 @@ G4_16 = SubjectCurriculum(grade=4, subject_id="G4-16",
         _ex("(into #{} [1 2 2 3])", [1,2,3],
             "building a set from a vector", "the set built from a vector",
             goal="convert a vector containing duplicates into a set, keeping unique elements"),
-    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G4)
+    ], subplots=_SIEVE_SUBPLOTS, plan_pool=_PLAN_G4)
 
 
 G4_17 = SubjectCurriculum(grade=4, subject_id="G4-17",
@@ -220,7 +223,7 @@ G4_17 = SubjectCurriculum(grade=4, subject_id="G4-17",
         _ex("(let [m {:a 1}] (assoc m :a 99) m)", {":a": 1},
             "immutability of maps", "the original map after assoc",
             goal="demonstrate that assoc returns a new map without modifying the original"),
-    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G4)
+    ], subplots=_BASKET_SUBPLOTS, plan_pool=_PLAN_G4)
 
 
 G4_18 = SubjectCurriculum(grade=4, subject_id="G4-18",
@@ -229,7 +232,7 @@ G4_18 = SubjectCurriculum(grade=4, subject_id="G4-18",
         _ex("(= [1 2 3] '(1 2 3))", True,
             "testing equality of different collection types", "whether vector and list are equal",
             goal="test whether a vector with elements 1, 2, 3 equals a list with the same elements"),
-    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G4)
+    ], subplots=_BASKET_SUBPLOTS, plan_pool=_PLAN_G4)
 
 
 G4_19 = SubjectCurriculum(grade=4, subject_id="G4-19",
@@ -239,7 +242,7 @@ G4_19 = SubjectCurriculum(grade=4, subject_id="G4-19",
             goal="count how many numbers are generated by a range from 0 to 4"),
         _ex("(first (range 1 100))", 1, "getting the first element of a range", "the first of range 1..99",
             goal="get the first element of a range starting at 1 and ending before 100"),
-    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G4)
+    ], subplots=_BASKET_SUBPLOTS, plan_pool=_PLAN_G4)
 
 
 G4_20 = SubjectCurriculum(grade=4, subject_id="G4-20",
@@ -251,7 +254,7 @@ G4_20 = SubjectCurriculum(grade=4, subject_id="G4-20",
         _ex("(seq [])", None,
             "creating a sequence from an empty vector", "the result of seq on an empty vector",
             goal="convert an empty vector to a sequence"),
-    ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G4)
+    ], subplots=_BASKET_SUBPLOTS, plan_pool=_PLAN_G4)
 
 
 SUBJECTS = {s.subject_id: s for s in (
