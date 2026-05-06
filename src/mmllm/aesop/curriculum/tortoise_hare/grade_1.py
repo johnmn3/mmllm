@@ -502,10 +502,36 @@ G1_09 = SubjectCurriculum(
     subject_title="Symbols vs values",
     fable="tortoise-hare",
     examples=[
-        _ex("(symbol? 'hare)", True,
-            "the symbol-predicate on a quoted name",
-            "whether a quoted name is a symbol",
-            goal="ask whether a quoted name is a symbol, using the symbol? predicate"),
+        SubjectExample(
+            form="(symbol? 'hare)",
+            expected=True,
+            concept_phrase="the symbol-predicate on a quoted name",
+            question_what="whether a quoted name is a symbol",
+            goal_text="ask whether a quoted name is a symbol, using the symbol? predicate",
+            scenario=(
+                "Mossback the tortoise scratched a chalk mark across a "
+                "piece of bark — the name 'hare — and pointed first at "
+                "the chalk mark, then at the actual bounding hare "
+                "itself."
+            ),
+            need=(
+                "She wanted to show that the chalk mark and the bounding "
+                "hare are different kinds of thing — and to ask the "
+                "runtime which kind the chalk mark itself was."
+            ),
+            mapping=(
+                "Quoting (with the leading apostrophe) labels a name as "
+                "a name — a symbol — rather than evaluating it. "
+                "`symbol?` then asks the runtime: is this thing a "
+                "chalk-mark-of-a-name?"
+            ),
+            resolution=(
+                "the runtime confirmed: 'hare is indeed a symbol, a "
+                "name and not the bounding thing the name might refer "
+                "to. true came back."
+            ),
+            tags=("story",),
+        ),
         _ex("(symbol? 42)", False,
             "the symbol-predicate on an integer",
             "whether an integer is a symbol",
@@ -570,9 +596,35 @@ G1_12 = SubjectCurriculum(
     subject_title="Parens group; they don't multiply",
     fable="tortoise-hare",
     examples=[
-        _ex("(+ 2 3)", 5,
-            "the simple addition", "the result of adding 2 and 3",
-            goal="add 2 and 3"),
+        SubjectExample(
+            form="(+ 2 3)",
+            expected=5,
+            concept_phrase="the simple addition",
+            question_what="the result of adding 2 and 3",
+            goal_text="add 2 and 3",
+            scenario=(
+                "Mossback the tortoise chalked a small expression on the "
+                "path: the plus-mark, then 2, then 3, all wrapped in a "
+                "single set of parens. Pip the hare paused — was the "
+                "answer 6 (parens means multiply, surely?), or maybe 23?"
+            ),
+            need=(
+                "Mossback wanted to show that the parens are fence-posts, "
+                "not multiplication: they mark which tokens belong "
+                "together as one form, nothing more."
+            ),
+            mapping=(
+                "Parens in Clojure group: the first token inside is the "
+                "operator (`+`), the rest are arguments (2, 3). The "
+                "runtime applies + to 2 and 3 — the parens themselves "
+                "do no math."
+            ),
+            resolution=(
+                "the runtime applied + to 2 and 3 and returned 5 — not "
+                "6, not 23, just the sum the form had asked for."
+            ),
+            tags=("story",),
+        ),
         _ex("(* (+ 1 2) 3)", 9,
             "the nested multiplication",
             "the result of multiplying a nested sum by 3",

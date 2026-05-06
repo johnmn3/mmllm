@@ -95,11 +95,36 @@ G9_03 = SubjectCurriculum(
     subject_title="Atom introduction",
     fable="tortoise-hare",
     examples=[
-        _ex("(do (def a (atom 0)) (swap! a inc) @a)",
-            1,
-            "atom, swap, and deref",
-            "the value returned by dereferencing a after defining a as an atom holding 0 and swapping it via inc",
-            goal="construct an atom holding 0, atomically swap it by applying inc, and dereference the result"),
+        SubjectExample(
+            form="(do (def a (atom 0)) (swap! a inc) @a)",
+            expected=1,
+            concept_phrase="atom, swap, and deref",
+            question_what="the running tally on the page after one foraging contribution",
+            goal_text="set up a shared notebook starting at 0, atomically add one to its page, then read the page",
+            scenario=(
+                "The forest's berry-tally lived on a notebook open on "
+                "the tree stump in the middle of the meadow. Anyone "
+                "returning from foraging walked up, read the running "
+                "total, and added their own count."
+            ),
+            need=(
+                "Today's tally page started at 0 — no one had foraged "
+                "yet. Mossback the tortoise's first handful was a "
+                "single berry, and she wanted the page to reflect it."
+            ),
+            mapping=(
+                "An `atom` is the notebook on the stump, named here "
+                "`a`. `swap!` reads the current page, applies a "
+                "function (here `inc`, adding one), and writes the new "
+                "page back — all atomically. `@a` dereferences to read "
+                "the page."
+            ),
+            resolution=(
+                "Mossback dereferenced the page and read the new "
+                "tally — one berry, exactly her contribution."
+            ),
+            tags=("story",),
+        ),
         _ex("(do (def a (atom 10)) (swap! a + 5) @a)",
             15,
             "atom, swap, deref",
@@ -322,11 +347,35 @@ G9_13 = SubjectCurriculum(
     subject_title="future introduction",
     fable="tortoise-hare",
     examples=[
-        _ex("@(future (+ 1 2))",
-            3,
-            "future, add, deref",
-            "the value returned by dereferencing a future that adds 1 and 2",
-            goal="construct a future that adds 1 and 2, and dereference it"),
+        SubjectExample(
+            form="@(future (+ 1 2))",
+            expected=3,
+            concept_phrase="future, add, deref",
+            question_what="the value the messenger returns from adding 1 and 2",
+            goal_text="dispatch a runner to compute the sum of 1 and 2; later, ask the runner for the answer",
+            scenario=(
+                "Mossback the tortoise dispatched a young messenger "
+                "down the road to compute the sum of 1 and 2 while she "
+                "carried on with her own work."
+            ),
+            need=(
+                "When she eventually wanted the messenger's answer, "
+                "she'd need a way to ask for it — and to wait if the "
+                "messenger hadn't quite returned yet."
+            ),
+            mapping=(
+                "`future` sends the work down the road as a "
+                "runner-sent-ahead. `@` (deref) asks for the runner's "
+                "answer when needed; if the runner is still running, "
+                "the runtime waits until they return."
+            ),
+            resolution=(
+                "the messenger had finished by the time Mossback "
+                "dereferenced — the answer came back cleanly, exactly "
+                "the sum the runner had computed."
+            ),
+            tags=("story",),
+        ),
         _ex("@(future (* 6 7))",
             42,
             "future, multiply, deref",

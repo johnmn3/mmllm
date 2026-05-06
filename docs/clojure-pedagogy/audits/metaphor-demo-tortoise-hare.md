@@ -1,15 +1,26 @@
 # Metaphor demo — tortoise-hare curriculum
 
-One canonical subject per metaphor family, rendered **twice**
-with different seeds so two templates from each family pool
-are visible. Each entry includes a short annotation explaining
-what the metaphor is mirroring in Clojure.
+One canonical subject per metaphor family. For each, two
+renders are shown:
+
+- **Story-scaffold render** — the example's authored
+  `scenario` / `need` / `mapping` / `resolution` slots
+  composed into a 5-act grounded story by the
+  `_story()` template (Phase C framework). The metaphor
+  *drives* the action — concrete situation, specific need,
+  explicit mapping, resolution that closes the loop.
+- **Family-template render** — one of the family pool's
+  generic templates, for contrast. Same example, no story
+  slots used.
 
 Coverage: 22 metaphor families + atoms + the goal-fallback
 for abstract subjects. Across 216 subjects the split is:
 
 - 8 atoms (form-display IS the lesson)
-- 172 metaphor-rich (22 families)
+- 172 metaphor-rich (22 families) — 22 of these have
+  story-scaffold slots authored (Phase C demo); the rest
+  render with the family-template only until their
+  scenario/need/mapping/resolution are authored
 - 36 abstract-by-nature (kept generic honestly)
 
 ---
@@ -20,45 +31,22 @@ _pool_: `_SHARED_SUBPLOTS`
 
 **The metaphor:** For atoms (literals), the form IS the answer. The user_msg deliberately shows the form (`{form_display}`); copy-from-prompt is the lesson — submit the literal as-is.
 
-### Record A _(seed 18292201)_
+### Atom render
 
 **form**: `42`  •  **expected**: `42`
 
 ````text
-There was once a Hare whose pride was as quick as her feet, and a Tortoise who said nothing about either.
+The Hare and the Tortoise had argued for as long as anyone could remember about who was truly the swifter. It happened along the road.
 
-Hopper the hare chalked a wager on a flat stone in the forest: whoever
-predicted the result of `42` would set the next race's
-distance. Slowpoke the tortoise, without complaint, said it would be simpler
-to type the form into the REPL than to bicker about the value 42.
-
-What Clojure form computes the value of 42? Submit it via `eval`.
-
----
-
-I let the runtime decide what the form evaluates to.
-
-{"tool_calls":[{"name":"eval","args":{"form":"42"}}]}
-````
-
-### Record B _(seed 90036841)_
-
-**form**: `42`  •  **expected**: `42`
-
-````text
-In that part of the forest, no one ever expected the Tortoise to outrun the Hare — yet today the question would be settled.
-
-Mossback the tortoise had been trying to teach Bramble the hare how the REPL
-works. "Look here," he said, pointing to
-the value 42. "You hand the form `42` to the runtime, and
-the runtime hands you back what it evaluates to." Bramble, with legs heavy from sprinting,
-agreed to try.
+A small audience of forest creatures had gathered along the road to watch
+Whisker the hare attempt to outwit Slowpoke the tortoise at reading the REPL.
+Slowpoke pointed to the value 42 and read out the form aloud:
+`42`. The crowd waited to see who would correctly write
+the form to submit.
 
 Write a Clojure expression that computes the value of 42.
 
 ---
-
-Let me compute that.
 
 {"tool_calls":[{"name":"eval","args":{"form":"42"}}]}
 ````
@@ -71,51 +59,50 @@ _pool_: `_POUCH_SUBPLOTS`
 
 **The metaphor:** A small leather pouch tied at the Tortoise's hip. Whatever is tucked inside is held just for one stretch of road; by the next milestone the pouch is empty again. Mirrors `let`-binding scope: the binding lives only inside the form.
 
-### Record A _(seed 888635)_
+### Story-scaffold render
 
 **form**: `(let [x 3] (+ x 1))`  •  **expected**: `4`
 
 ````text
-There was once a Hare whose pride was as quick as her feet, and a Tortoise who said nothing about either. It happened atop the hilltop.
+There was once a Hare whose pride was as quick as her feet, and a Tortoise who said nothing about either. This was near the road.
 
-"Watch the pouch carefully," Shelly the tortoise said near the hilltop.
-"While the form's stretch of road runs, the pouch is full and
-the binding is yours." To bind x to 3 and add 1 to it, She
-composed the local binding and addition with the binding tucked safely inside,
-then submitted the form. The REPL returned the value, and the
-pouch — its work done — was empty again. Pip the hare, with legs heavy from sprinting,
-finally admitted that the patient pouch-walk had carried the
-day.
+Mossback the tortoise had been counting along a stretch of road. She set a single pebble — worth 3 acorns — into the small leather pouch tied at her hip and gave the pouch's contents the local name x.
 
-Write a form whose evaluation gives adding 1 to x after binding x locally to 3 via let.
+Just past the next milestone she'd want the running total — what x plus one more acorn would come to. After the milestone, the pouch would empty and x would mean nothing again.
+
+`let` binds a value into a pouch named locally for the stretch of one form. Inside `(+ x 1)`, x means 3; outside the form, x is empty and unknown again. The binding is in force only for the form's stretch.
+
+To bind a value of 3 to a local name x for one stretch, then return that value plus one, He composed the local binding and addition with the binding tucked safely into the pouch and submitted the form. The REPL pulled from the pouch as the form directed:
+
+the pouch yielded 3, the +1 added a fourth acorn, and the running total stood at 4 — exactly what the next milestone needed.
+
+Question: write a Clojure expression for the running total after binding x to 3 and adding 1.
 
 ---
 
 {"tool_calls":[{"name":"eval","args":{"form":"(let [x 3] (+ x 1))"}}]}
 ````
 
-### Record B _(seed 65169382)_
+### Family-template render _(seed 96386568)_
 
 **form**: `(let [x 3] (+ x 1))`  •  **expected**: `4`
 
 ````text
-The Hare and the Tortoise had argued for as long as anyone could remember about who was truly the swifter.
+It was well known among the animals that the Hare boasted of his speed at every chance.
 
-Slowpoke the tortoise reached for the small leather pouch tied at
-his hip. "When I want to bind x to 3 and add 1 to it," he
-said, "I tuck the value into the pouch and carry it just for the
-stretch of road where I need it. By the next milestone the pouch
-is empty again." He composed the local binding and addition,
-the binding tucked away inside, and submitted the form to the
-REPL. Hopper the hare, as if the race were already won, had already forgotten what was
-in the pouch — but the form, which still carried it, came back
-with the answer.
+Mossback the tortoise had been counting along a stretch of road. She set a single pebble — worth 3 acorns — into the small leather pouch tied at her hip and gave the pouch's contents the local name x.
 
-What Clojure form computes adding 1 to x after binding x locally to 3 via let? Submit it via `eval`.
+Just past the next milestone she'd want the running total — what x plus one more acorn would come to. After the milestone, the pouch would empty and x would mean nothing again.
+
+`let` binds a value into a pouch named locally for the stretch of one form. Inside `(+ x 1)`, x means 3; outside the form, x is empty and unknown again. The binding is in force only for the form's stretch.
+
+To bind a value of 3 to a local name x for one stretch, then return that value plus one, She composed the local binding and addition with the binding tucked safely into the pouch and submitted the form. The REPL pulled from the pouch as the form directed:
+
+the pouch yielded 3, the +1 added a fourth acorn, and the running total stood at 4 — exactly what the next milestone needed.
+
+Write a form whose evaluation gives the running total after binding x to 3 and adding 1.
 
 ---
-
-I express the form as Clojure source.
 
 {"tool_calls":[{"name":"eval","args":{"form":"(let [x 3] (+ x 1))"}}]}
 ````
@@ -128,48 +115,48 @@ _pool_: `_RECIPE_SUBPLOTS`
 
 **The metaphor:** A recipe-card posted on the road, naming a paw-step routine that any animal can follow. Mirrors `defn`: a named, reusable procedure with parameters — the next runner along the road picks up the card and follows it.
 
-### Record A _(seed 33179888)_
+### Story-scaffold render
 
 **form**: `(do (defn dbl [x] (* x 2)) (dbl 5))`  •  **expected**: `10`
 
 ````text
-The Hare loved nothing better than the sound of his own boasts; the Tortoise, nothing better than a long quiet walk.
+There was once a Hare whose pride was as quick as her feet, and a Tortoise who said nothing about either. This was near the road.
 
-Pip the hare, as if the race were already won, insisted they could just
-shout the answer rather than bother writing a recipe.
-Slowpoke the tortoise only smiled and reached for a fresh card. To
-define a function dbl that doubles its argument, then call it with 5, he composed the function definition and call,
-submitted the form, and the REPL — running the recipe paw-step
-by paw-step — handed back the value Pip had been guessing
-at.
+Twice as many animals had arrived for dinner as Mossback the tortoise had planned for, and every recipe now needed twice its salt.
 
-Write a Clojure expression that computes the result of calling the function dbl, defined via defn to multiply its argument by 2, with 5.
+Mossback wanted a doubling routine written once and posted under a name any cook could shout — tonight's first reach being 5 pinches of salt.
+
+`defn` writes the routine on a recipe-card and posts the card under a name. The name (here `dbl`) is what the kitchen shouts to invoke the doubling; the parameter `x` is the quantity the cook brings.
+
+To define a recipe named dbl that takes a quantity and serves twice that, then call dbl on 5 pinches, He wrote out the named recipe-card and its first call on a card and submitted the form. The REPL ran the recipe end to end:
+
+the named recipe ran on 5 and handed back twice that — exactly what the doubled crowd would need.
+
+Question: write a Clojure expression for the doubled count after defining a recipe named dbl and calling it on 5.
 
 ---
 
 {"tool_calls":[{"name":"eval","args":{"form":"(do (defn dbl [x] (* x 2)) (dbl 5))"}}]}
 ````
 
-### Record B _(seed 9994032)_
+### Family-template render _(seed 3890326)_
 
 **form**: `(do (defn dbl [x] (* x 2)) (dbl 5))`  •  **expected**: `10`
 
 ````text
-The Hare loved nothing better than the sound of his own boasts; the Tortoise, nothing better than a long quiet walk.
+There was once a Hare whose pride was as quick as her feet, and a Tortoise who said nothing about either.
 
-Mossback the tortoise kept a small stack of recipe-cards by the road,
-each one a paw-step routine. "Recipes in Clojure are like these
-cards," he said: "the ingredients go at the head,
-the steps in order, and the last step is what gets served." To
-define a function dbl that doubles its argument, then call it with 5, He wrote out the function definition and call on
-a fresh card, submitted the form, and the REPL followed the
-recipe and handed back the value the last step had produced.
+"Recipes can feed into one another," Mossback the tortoise said,
+spreading several cards on the path. "What one recipe serves, the
+next can take as its ingredient — together they make a longer
+routine." To define a recipe named dbl that takes a quantity and serves twice that, then call dbl on 5 pinches, He composed
+the named recipe-card and its first call, submitted the form, and the REPL — walking
+through the recipe in order — handed back the value at the
+end.
 
-What Clojure form computes the result of calling the function dbl, defined via defn to multiply its argument by 2, with 5? Submit it via `eval`.
+What Clojure form computes the doubled count after defining a recipe named dbl and calling it on 5? Submit it via `eval`.
 
 ---
-
-I write the form and let the REPL evaluate it.
 
 {"tool_calls":[{"name":"eval","args":{"form":"(do (defn dbl [x] (* x 2)) (dbl 5))"}}]}
 ````
@@ -182,47 +169,50 @@ _pool_: `_BASKET_SUBPLOTS`
 
 **The metaphor:** A basket on the path: original sits untouched, you get a fresh one back. Mirrors immutable updates on collections — `assoc` doesn't mutate the original map; it returns a new one with the additional tag pinned on.
 
-### Record A _(seed 52897455)_
+### Story-scaffold render
 
 **form**: `(assoc {:a 1} :b 2)`  •  **expected**: `{':a': 1, ':b': 2}`
 
 ````text
-The Hare and the Tortoise had argued for as long as anyone could remember about who was truly the swifter.
+There was once a Hare whose pride was as quick as her feet, and a Tortoise who said nothing about either. This was near the road.
 
-Shelly the tortoise pointed to a small basket on the path atop the hilltop.
-"Whatever I want to do with what's inside," she
-said, "I read from the basket, work the change, and the basket
-itself stays as it was — what I get back is a fresh arrangement."
-To associate the key :b with value 2 onto a map binding :a to 1, She composed the assoc operation,
-submitted the form, and let the REPL handle the basket exactly
-as the operation prescribed.
+Mossback the tortoise's foraging-basket had compartments stitched into its sides — an open area at the top, plus named pouches :a and :b. Pouch :a already held 1 acorn from the morning's gathering.
 
-Question: write a Clojure expression for the map after using assoc to add the key :b with value 2.
+Pip the hare arrived from the orchard with 2 more acorns. Mossback decided they belonged in pouch :b — and pouch :a's acorn should stay exactly where it was.
+
+`assoc` associates a value with a named compartment of the basket. The basket's shape stays the same — :a still holds its 1, and :b now holds the new 2 — exactly as the foraging called for.
+
+To associate value 2 with the :b compartment of a basket already binding :a to 1, He composed the assoc operation for the basket and submitted the form. The REPL handed back the arrangement:
+
+the basket carried both — 1 in :a, 2 in :b — ready for the rest of the day's gathering.
+
+Question: write a Clojure expression for the basket after associating value 2 with the :b compartment.
 
 ---
 
 {"tool_calls":[{"name":"eval","args":{"form":"(assoc {:a 1} :b 2)"}}]}
 ````
 
-### Record B _(seed 13755973)_
+### Family-template render _(seed 8407194)_
 
 **form**: `(assoc {:a 1} :b 2)`  •  **expected**: `{':a': 1, ':b': 2}`
 
 ````text
-It was well known among the animals that the Hare boasted of his speed at every chance.
+In that part of the forest, no one ever expected the Tortoise to outrun the Hare — yet today the question would be settled. This was near the garden.
 
-A line of animals had formed near the road, each one taking the next
-animal's tail in its paw — head at the front, the rest trailing
-behind. "Many of our baskets are like this procession,"
-Mossback the tortoise said. "You can grab the head, you can ask for
-the tail, you can put a new animal at the front of the line."
-To associate the key :b with value 2 onto a map binding :a to 1, he composed the assoc operation,
-submitted the form, and the REPL marched the procession exactly
-as the form described.
+Shelly the tortoise pointed to a small basket on the path in the garden.
+"Whatever I want to do with what's inside," she
+said, "I read from the basket, work the change, and the basket
+itself stays as it was — what I get back is a fresh arrangement."
+To associate value 2 with the :b compartment of a basket already binding :a to 1, She composed the assoc operation,
+submitted the form, and let the REPL handle the basket exactly
+as the operation prescribed.
 
-Question: write a Clojure expression for the map after using assoc to add the key :b with value 2.
+Write a form whose evaluation gives the basket after associating value 2 with the :b compartment.
 
 ---
+
+I write the collection literal and let the REPL evaluate.
 
 {"tool_calls":[{"name":"eval","args":{"form":"(assoc {:a 1} :b 2)"}}]}
 ````
@@ -235,51 +225,50 @@ _pool_: `_SIEVE_SUBPLOTS`
 
 **The metaphor:** A sieve over an empty basket; the rule attached at its mouth decides what each pebble becomes. Mirrors `map`/`filter`/transducers — pour the basket through the sieve, and what lands below is the result.
 
-### Record A _(seed 86726173)_
+### Story-scaffold render
 
 **form**: `(map inc [1 2 3])`  •  **expected**: `[2, 3, 4]`
 
 ````text
-The Hare and the Tortoise had argued for as long as anyone could remember about who was truly the swifter. All this took place by the woods.
+There was once a Hare whose pride was as quick as her feet, and a Tortoise who said nothing about either. This was near the road.
 
-Mossback the tortoise stacked two sieves one above the other, the
-output of the first feeding into the second. "What lands at the
-bottom," he said, "has been through both rules in
-order — applied as a single combined sieve." To apply inc to each element of the vector containing 1, 2, and 3, returning a sequence,
-He composed mapping increment over a vector as a stack of
-sieves, poured the input through, submitted the form, and the
-REPL caught what the stack let through.
+A row of three small acorns lay on a flat stone — the morning's first gathering, with counts of 1, 2, and 3.
 
-Write a form whose evaluation gives the sequence produced by mapping inc over the vector containing 1, 2, and 3.
+Each acorn was missing a single bud at the cap. Mossback the tortoise wanted to add one bud to every acorn before sending the row to market — without pulling the row apart.
+
+`map` is a sieve with a rule attached at its mouth. Pour the row through, and each acorn passes the rule — here, `inc`, adding one bud — coming out the other side budded by one. The shape stays a row; only the counts step up.
+
+To pour the vector containing 1, 2, 3 through a sieve whose rule is inc, collecting each transformed element, He composed mapping increment over a vector as the sieve's rule, poured the input through, and submitted the form. The REPL caught what landed below:
+
+what landed below the sieve was the same three acorns, each budded one more — counts of 2, 3, and 4.
+
+Question: write a Clojure expression for the sequence produced by passing the vector containing 1, 2, and 3 through the inc-sieve.
 
 ---
-
-Let me compute that.
 
 {"tool_calls":[{"name":"eval","args":{"form":"(map inc [1 2 3])"}}]}
 ````
 
-### Record B _(seed 46202357)_
+### Family-template render _(seed 20992547)_
 
 **form**: `(map inc [1 2 3])`  •  **expected**: `[2, 3, 4]`
 
 ````text
 It was well known among the animals that the Hare boasted of his speed at every chance.
 
-Whisker the hare eyed the basket, puffed up with pride, and called out a
-guess about what would come out the other side of the sieve
-without bothering to actually pour. Mossback the tortoise shook
-his head and went on with the work: to
-apply inc to each element of the vector containing 1, 2, and 3, returning a sequence, he composed mapping increment over a vector as
-the sieve's rule, poured the input through carefully,
-submitted the form, and the REPL returned the only answer
-that would do — the one the sieve had actually produced.
+Mossback the tortoise balanced a sieve over an empty basket. "The
+pebbles go in at the top," he said, "and the
+sieve does its work — applying the rule, choosing or changing —
+and what lands in the basket below is the result." To
+pour the vector containing 1, 2, 3 through a sieve whose rule is inc, collecting each transformed element, He composed mapping increment over a vector,
+poured the input through, submitted the form, and the REPL
+collected what fell into the receiving basket.
 
-Write a Clojure expression that computes the sequence produced by mapping inc over the vector containing 1, 2, and 3.
+Write a Clojure expression that computes the sequence produced by passing the vector containing 1, 2, and 3 through the inc-sieve.
 
 ---
 
-I let the REPL do the evaluation.
+Time to write the form.
 
 {"tool_calls":[{"name":"eval","args":{"form":"(map inc [1 2 3])"}}]}
 ````
@@ -292,44 +281,46 @@ _pool_: `_NOTEBOOK_SUBPLOTS`
 
 **The metaphor:** A notebook open on a tree stump. Any animal can read; updates happen atomically; the bell on the corner rings on each change. Mirrors `atom`/`ref`/`swap!` — shared state with safe concurrent updates.
 
-### Record A _(seed 13295164)_
+### Story-scaffold render
 
 **form**: `(do (def a (atom 0)) (swap! a inc) @a)`  •  **expected**: `1`
 
 ````text
-The Hare loved nothing better than the sound of his own boasts; the Tortoise, nothing better than a long quiet walk.
+There was once a Hare whose pride was as quick as her feet, and a Tortoise who said nothing about either. This was near the road.
 
-A notebook lay open on a tree stump in the middle of the meadow.
-Any animal could walk up, read the page, or — carefully — update
-it. "Atoms are like this notebook," Slowpoke the tortoise said. "You
-can deref to read; you can swap! to write atomically, no matter
-who else is watching." To construct an atom holding 0, atomically swap it by applying inc, and dereference the result, he composed
-atom, swap, and deref, submitted the form, and let the REPL work the
-notebook exactly as the form prescribed.
+The forest's berry-tally lived on a notebook open on the tree stump in the middle of the meadow. Anyone returning from foraging walked up, read the running total, and added their own count.
 
-Write a Clojure expression that computes the value returned by dereferencing a after defining a as an atom holding 0 and swapping it via inc.
+Today's tally page started at 0 — no one had foraged yet. Mossback the tortoise's first handful was a single berry, and she wanted the page to reflect it.
+
+An `atom` is the notebook on the stump, named here `a`. `swap!` reads the current page, applies a function (here `inc`, adding one), and writes the new page back — all atomically. `@a` dereferences to read the page.
+
+To set up a shared notebook starting at 0, atomically add one to its page, then read the page, He composed atom, swap, and deref for the notebook and submitted the form. The REPL applied the update on the stump:
+
+Mossback dereferenced the page and read the new tally — one berry, exactly her contribution.
+
+Question: write a Clojure expression for the running tally on the page after one foraging contribution.
 
 ---
 
 {"tool_calls":[{"name":"eval","args":{"form":"(do (def a (atom 0)) (swap! a inc) @a)"}}]}
 ````
 
-### Record B _(seed 41319561)_
+### Family-template render _(seed 92978719)_
 
 **form**: `(do (def a (atom 0)) (swap! a inc) @a)`  •  **expected**: `1`
 
 ````text
-There was once a Hare whose pride was as quick as her feet, and a Tortoise who said nothing about either. All this took place in the orchard.
+There was once a Hare whose pride was as quick as her feet, and a Tortoise who said nothing about either.
 
-"The notebook stays put on the stump," Mossback the tortoise said,
-"so any animal who comes by can read what's on the page right
-now. The page changes only when someone writes — and only as the
-runtime allows." To construct an atom holding 0, atomically swap it by applying inc, and dereference the result, He composed
-atom, swap, and deref, submitted the form, and the REPL — reading
-or writing the notebook as the form prescribed — handed back the
-value the page had carried.
+"When I want to update the notebook," Slowpoke the tortoise said,
+"I don't pick it up and walk away — I read the page, apply the
+change, and write it back, all in a single motion. If two
+animals arrive at once, the runtime makes sure only one of us
+goes through at a time." To set up a shared notebook starting at 0, atomically add one to its page, then read the page, He
+composed atom, swap, and deref for the notebook, submitted the form,
+and the REPL applied the update atomically.
 
-What Clojure form computes the value returned by dereferencing a after defining a as an atom holding 0 and swapping it via inc? Submit it via `eval`.
+Write a form whose evaluation gives the running tally on the page after one foraging contribution.
 
 ---
 
@@ -344,45 +335,45 @@ _pool_: `_ACORN_SUBPLOTS`
 
 **The metaphor:** Acorns sorted into heaps, counted, divided, combined. The number is just the count of acorns; the operation is what the Tortoise does with the heap. Mirrors arithmetic, comparisons, multi-arg operators.
 
-### Record A _(seed 92632328)_
+### Story-scaffold render
 
 **form**: `(min 1 2 3)`  •  **expected**: `1`
 
 ````text
-The Hare loved nothing better than the sound of his own boasts; the Tortoise, nothing better than a long quiet walk.
+There was once a Hare whose pride was as quick as her feet, and a Tortoise who said nothing about either. This was near the road.
 
-Mossback the tortoise laid acorns out on a flat stone at the edge of the orchard, sorting
-them into small heaps. "Numbers in Clojure are just like acorns in
-heaps," he said: "you can count them, you can add
-two heaps together, you can divide one heap among several." To
-find the minimum of 1, 2, and 3, He composed the minimum of three numbers,
-submitted the form, and let the REPL hand back the count of
-whatever the operation had produced.
+Mossback the tortoise laid out three small acorn-counts on a flat stone — 1 from a dawn trip, 2 from a midday trip, 3 from an afternoon trip.
 
-What Clojure form computes the smallest of 1, 2, and 3? Submit it via `eval`.
+She wanted to know which trip had been the lightest, to plan tomorrow's routing.
+
+`min` walks the heaps and returns the smallest count. The acorns themselves stay where they are; only the runtime's verdict — the smallest number — comes back.
+
+To find the minimum of 1, 2, and 3, He composed the minimum of three numbers and submitted the form. The REPL counted out the answer:
+
+the runtime named the lightest trip's count: 1, the dawn trip the smallest of the three.
+
+Question: write a Clojure expression for the smallest of 1, 2, and 3.
 
 ---
 
 {"tool_calls":[{"name":"eval","args":{"form":"(min 1 2 3)"}}]}
 ````
 
-### Record B _(seed 49927199)_
+### Family-template render _(seed 51556413)_
 
 **form**: `(min 1 2 3)`  •  **expected**: `1`
 
 ````text
 The Hare and the Tortoise had argued for as long as anyone could remember about who was truly the swifter.
 
-Shelly the tortoise arranged a small heap of acorns by the woods,
-careful with the count. "Numbers in Clojure don't fudge,"
-she said. "Whatever you do — adding, subtracting,
-dividing into heaps with leftovers, comparing two piles — the
-runtime gets it exactly right, every time." To find the minimum of 1, 2, and 3,
-She composed the minimum of three numbers, submitted the
-form, and the REPL handed back the precise number the operation
-called for.
+"Whatever the heap looks like after the operation,"
+Slowpoke the tortoise said, "the runtime gives the exact count —
+small or large, fraction or whole, the answer is precise." To
+find the minimum of 1, 2, and 3, He composed the minimum of three numbers,
+submitted the form, and the REPL handed back the value, exactly
+as the operation had produced it.
 
-What Clojure form computes the smallest of 1, 2, and 3? Submit it via `eval`.
+Write a Clojure expression that computes the smallest of 1, 2, and 3.
 
 ---
 
@@ -397,46 +388,51 @@ _pool_: `_GATE_SUBPLOTS`
 
 **The metaphor:** Gates on the trail that pass or stop the value. The first closed gate stops the chain; the value at that gate is what comes back. Mirrors short-circuit boolean logic — `and` / `or` / `not` / falsey rules.
 
-### Record A _(seed 90155415)_
+### Story-scaffold render
 
 **form**: `(and true true)`  •  **expected**: `True`
 
 ````text
-In that part of the forest, no one ever expected the Tortoise to outrun the Hare — yet today the question would be settled.
+There was once a Hare whose pride was as quick as her feet, and a Tortoise who said nothing about either. This was near the road.
 
-"Only two things in Clojure close the gate," Mossback the tortoise
-said: "nil and false. Everything else — zero, the empty string,
-an empty list — opens it. The gate's verdict follows that rule
-exactly." To test true and true with the and operator, He composed
-the logical and, submitted the form, and the REPL returned the
-value the gate had passed, true or false.
+Two small wooden gates stood at the start of the meadow trail. Each gate's verdict-stone was carved with the value the runner would carry to it — and today's two stones both read true.
 
-Write a form whose evaluation gives the result of using and on true and true.
+Mossback the tortoise wanted to know whether both gates would let the runner through together, or whether the first one would close and stop the chain.
+
+`and` walks the gates left to right: the first false closes the chain and that value comes back; otherwise the value at the last gate is what comes back. With both stones reading true, the chain holds and the last gate's true is the verdict.
+
+To test whether two trues both pass through an and-chain of gates, He composed the logical and and submitted the form. The REPL let the gates decide:
+
+both gates stood open, and the value at the last gate — true — passed back as the chain's verdict.
+
+Question: write a Clojure expression for the result of passing true and true through the and-chain of gates.
 
 ---
-
-I write the form and let the REPL evaluate it.
 
 {"tool_calls":[{"name":"eval","args":{"form":"(and true true)"}}]}
 ````
 
-### Record B _(seed 96739842)_
+### Family-template render _(seed 33296541)_
 
 **form**: `(and true true)`  •  **expected**: `True`
 
 ````text
-There was once a Hare whose pride was as quick as her feet, and a Tortoise who said nothing about either.
+It was well known among the animals that the Hare boasted of his speed at every chance. All this took place by the orchard.
 
-"You can't tell which way the gate will swing by guessing,"
-Slowpoke the tortoise said. "You bring the value to the gate, the
-runtime checks it, and the gate gives the only answer that
-matters." To test true and true with the and operator, He composed
-the logical and, submitted the form, and the REPL settled the
-matter — the gate had swung exactly as the rule said.
+Bramble the hare sprinted toward the gate near the orchard, swaggering through the underbrush,
+certain it would swing open for her. Mossback the tortoise
+slowed and watched: the only way to know which way the gate
+would swing was to actually carry the value to it. To
+test whether two trues both pass through an and-chain of gates, he composed the logical and,
+submitted the form, and the REPL settled the matter — the gate
+had swung exactly as the rules said, regardless of Bramble the hare's
+guess.
 
-What Clojure form computes the result of using and on true and true? Submit it via `eval`.
+Write a Clojure expression that computes the result of passing true and true through the and-chain of gates.
 
 ---
+
+I read the form and submit it directly.
 
 {"tool_calls":[{"name":"eval","args":{"form":"(and true true)"}}]}
 ````
@@ -449,45 +445,51 @@ _pool_: `_FORK_SUBPLOTS`
 
 **The metaphor:** A fork at a crossroads. Each arm is marked by a condition-stone; the runner walks past each and takes the first arm whose stone says true. Mirrors `if`/`cond`/`case`/`when`.
 
-### Record A _(seed 79194221)_
+### Story-scaffold render
 
 **form**: `(cond (= 1 2) :a (= 1 1) :b :else :c)`  •  **expected**: `':b'`
 
 ````text
-In that part of the forest, no one ever expected the Tortoise to outrun the Hare — yet today the question would be settled.
+There was once a Hare whose pride was as quick as her feet, and a Tortoise who said nothing about either. This was near the road.
 
-"What's important about a fork," Shelly the tortoise said, "is
-that the arm not taken doesn't run at all. The runtime checks
-the condition, walks the right arm, and the unrun arm is just
-left behind." To evaluate multiple conditions in sequence and return the value from the first true clause, She composed
-the multi-clause conditional, submitted the form, and the REPL — running
-only what was needed — handed back the value of the chosen
-arm.
+The trail forked into three arms, each marked by a small condition-stone — the first carved `(= 1 2)`, the second `(= 1 1)`, the third `:else`.
 
-Question: write a Clojure expression for which clause of the cond fires.
+Mossback the tortoise wanted the runtime to walk the stones in order and take the first arm whose stone read true.
+
+`cond` walks each (condition, value) pair in order. The first stone is false (skip), the second is true (take that arm; return its value); the third is never reached.
+
+To walk three condition-stones in order, taking the arm whose stone first reads true, He composed the multi-clause conditional and submitted the form. The REPL took the right arm:
+
+the runtime took the second arm and returned :b, the value that arm carried.
+
+Question: write a Clojure expression for the value of the first arm whose stone reads true.
 
 ---
 
 {"tool_calls":[{"name":"eval","args":{"form":"(cond (= 1 2) :a (= 1 1) :b :else :c)"}}]}
 ````
 
-### Record B _(seed 57466888)_
+### Family-template render _(seed 37603403)_
 
 **form**: `(cond (= 1 2) :a (= 1 1) :b :else :c)`  •  **expected**: `':b'`
 
 ````text
-It was well known among the animals that the Hare boasted of his speed at every chance.
+It was well known among the animals that the Hare boasted of his speed at every chance. It happened by the meadow.
 
-"It isn't the runner who picks the arm," Slowpoke the tortoise said,
-"it's the condition. Whatever the condition evaluates to, that
-decides." To evaluate multiple conditions in sequence and return the value from the first true clause, He composed
-the multi-clause conditional, submitted the form, and the REPL — letting the
-condition decide — handed back the value of the arm the
-condition had pointed at.
+The trail in the meadow opened into a crossroads, each arm marked by a
+small condition-stone. "Branching forms work like this,"
+Mossback the tortoise said: "the runner walks past the stones in
+order, takes the first arm whose stone says true, and the value
+of that arm is what comes back." To walk three condition-stones in order, taking the arm whose stone first reads true,
+He composed the multi-clause conditional, submitted the
+form, and the REPL took the right arm and returned its
+value.
 
-What Clojure form computes which clause of the cond fires? Submit it via `eval`.
+What Clojure form computes the value of the first arm whose stone reads true? Submit it via `eval`.
 
 ---
+
+I write the literal value as Clojure source.
 
 {"tool_calls":[{"name":"eval","args":{"form":"(cond (= 1 2) :a (= 1 1) :b :else :c)"}}]}
 ````
@@ -500,47 +502,46 @@ _pool_: `_ROADSIGN_SUBPLOTS`
 
 **The metaphor:** Posted signs on the road; library of scrolls. A `def` is a sign by the road; a namespace is a scroll; `require` borrows the scroll, fully-qualified names point library-section-title.
 
-### Record A _(seed 12367368)_
+### Story-scaffold render
 
 **form**: `(clojure.string/upper-case "hare")`  •  **expected**: `'HARE'`
 
 ````text
-It was well known among the animals that the Hare boasted of his speed at every chance. It happened in the meadow.
+There was once a Hare whose pride was as quick as her feet, and a Tortoise who said nothing about either. This was near the road.
 
-A small wooden library stood at the edge of the meadow, its shelves stocked with
-scrolls — each scroll holding the signs for one stretch of road.
-"Names live on scrolls," Slowpoke the tortoise said: "to use a sign
-from a scroll, you make sure the scroll is on the shelf where the
-runtime can find it." To call the uppercasing function from clojure.string on a test string, He
-composed calling a fully-qualified string function, submitted the form, and the REPL —
-finding the right sign on the right scroll — returned the value
-the form had asked for.
+The library by the road kept a scroll on its shelves called `clojure.string`. Among its signs was a routine named `upper-case` — a routine that took a string and returned the same letters, capitalized.
 
-Question: write a Clojure expression for the uppercase form of the string hare produced by clojure.string/upper-case.
+Mossback the tortoise wanted the capitalized form of the four-letter word `hare`, for a road-sign she was painting.
+
+When a routine lives on a scroll, you call it by both names together: scroll-name slash routine-name — `clojure.string/upper-case`. The runtime fetches the scroll and invokes the routine on the argument.
+
+To call the upper-case routine on the clojure.string scroll, applied to the four-letter string hare, He composed calling a fully-qualified string function and submitted the form. The REPL read the signs and replied:
+
+the routine returned the four letters in capitals, ready for the road-sign Mossback was painting.
+
+Question: write a Clojure expression for the capitalized form returned by the upper-case routine on the scroll.
 
 ---
-
-I require the namespace and call the function.
 
 {"tool_calls":[{"name":"eval","args":{"form":"(clojure.string/upper-case \"hare\")"}}]}
 ````
 
-### Record B _(seed 32838944)_
+### Family-template render _(seed 53205677)_
 
 **form**: `(clojure.string/upper-case "hare")`  •  **expected**: `'HARE'`
 
 ````text
-The Hare loved nothing better than the sound of his own boasts; the Tortoise, nothing better than a long quiet walk. All this took place at the edge of the meadow.
+The Hare and the Tortoise had argued for as long as anyone could remember about who was truly the swifter.
 
-Hopper the hare, with great whoops of laughter, glanced at the sign by the meadow and
-called out what he thought it said without slowing.
-Mossback the tortoise stopped and read carefully. To call the uppercasing function from clojure.string on a test string, the
-sign had to be read exactly: he composed
-calling a fully-qualified string function, submitted the form, and the REPL — reading
-literally — returned the right value, while Hopper's guess fell
-short.
+Mossback the tortoise drove a small wooden post near the road and nailed a
+fresh sign to it. "A def is a sign by the road," he
+said. "Anyone passing reads the name, learns the value, and can
+refer to it later by name alone." To call the upper-case routine on the clojure.string scroll, applied to the four-letter string hare,
+He composed calling a fully-qualified string function, submitted the
+form, and the REPL planted the sign — the name now bound to its
+value for any later runner along the road.
 
-Write a form whose evaluation gives the uppercase form of the string hare produced by clojure.string/upper-case.
+Question: write a Clojure expression for the capitalized form returned by the upper-case routine on the scroll.
 
 ---
 
@@ -555,50 +556,50 @@ _pool_: `_SAFETYNET_SUBPLOTS`
 
 **The metaphor:** A net stretched beneath a high jump. The runner can fall — the net catches them; the run continues, only the path bends. Mirrors error handling: `try`/`catch`, the practice-meadow REPL where stumbles cost nothing.
 
-### Record A _(seed 18435215)_
+### Story-scaffold render
 
 **form**: `(try (/ 1 0) (catch Exception e -1))`  •  **expected**: `-1`
 
 ````text
-There was once a Hare whose pride was as quick as her feet, and a Tortoise who said nothing about either. All this took place by the garden.
+There was once a Hare whose pride was as quick as her feet, and a Tortoise who said nothing about either. This was near the road.
 
-Shelly the tortoise stretched a small net beneath a high jump
-by the garden. "If the runner falls, the net catches them; the run
-doesn't end, only the path bends." To divide 1 by 0, catch the resulting ArithmeticException, return a numeric code,
-She composed the handler for a division-by-zero error, submitted the
-form, and the REPL — net in place — caught the trouble and
-returned the value the catch-arm had specified, the run continuing
-the patient way.
+Mossback the tortoise was about to ask the runtime for the result of dividing 1 acorn into 0 piles — a division she knew would throw, because dividing by zero isn't a thing the runtime can do.
 
-Write a form whose evaluation gives what the catch clause returns when ArithmeticException is caught.
+She didn't want the throw to end the run. She wanted the form to come back with -1 as a placeholder so the rest of the work could continue.
+
+`try`/`catch` is a net beneath the leap. The throw still happens, but the catch-arm catches the Exception cleanly. Whatever the catch-arm returns is what the form yields — here, the placeholder -1.
+
+To attempt to divide 1 by 0; when the runtime throws, catch the Exception and return -1 from the catch arm, He composed the handler for a division-by-zero error and submitted the form. The REPL — net in place — handed back the value:
+
+the throw happened, the catch caught it, and the form yielded -1 — the placeholder Mossback had specified.
+
+Question: write a Clojure expression for the value the catch arm returns when the divide-by-zero throw is caught.
 
 ---
-
-I let the runtime decide what the form evaluates to.
 
 {"tool_calls":[{"name":"eval","args":{"form":"(try (/ 1 0) (catch Exception e -1))"}}]}
 ````
 
-### Record B _(seed 78087795)_
+### Family-template render _(seed 33133535)_
 
 **form**: `(try (/ 1 0) (catch Exception e -1))`  •  **expected**: `-1`
 
 ````text
-It was well known among the animals that the Hare boasted of his speed at every chance.
+There was once a Hare whose pride was as quick as her feet, and a Tortoise who said nothing about either. This was in the woods.
 
-Mossback the tortoise stretched a small net beneath a high jump
-near the orchard. "If the runner falls, the net catches them; the run
-doesn't end, only the path bends." To divide 1 by 0, catch the resulting ArithmeticException, return a numeric code,
-He composed the handler for a division-by-zero error, submitted the
-form, and the REPL — net in place — caught the trouble and
-returned the value the catch-arm had specified, the run continuing
-the patient way.
+"There's a discipline to running safely," Mossback the tortoise said,
+"and it starts with checking — making sure the form does what it
+claims, catching what could go wrong before it does." To
+attempt to divide 1 by 0; when the runtime throws, catch the Exception and return -1 from the catch arm, He composed the handler for a division-by-zero error,
+submitted the form, and the REPL — applying whatever check or
+catch the form had asked for — returned the value the discipline
+had earned.
 
-Question: write a Clojure expression for what the catch clause returns when ArithmeticException is caught.
+Question: write a Clojure expression for the value the catch arm returns when the divide-by-zero throw is caught.
 
 ---
 
-Here's the calculation.
+I read the form and submit it directly.
 
 {"tool_calls":[{"name":"eval","args":{"form":"(try (/ 1 0) (catch Exception e -1))"}}]}
 ````
@@ -611,50 +612,56 @@ _pool_: `_SCROLL_SUBPLOTS`
 
 **The metaphor:** Scrolls written and read. Marginalia (metadata) along the side. Drinking from / writing onto a scroll — `slurp`/`spit`. Reading line by line — `line-seq`. Open and roll up — `with-open`.
 
-### Record A _(seed 92757339)_
+### Story-scaffold render
 
-**form**: `(count "hare\ntortoise\n")`  •  **expected**: `14`
+**form**: `(count "hare
+tortoise
+")`  •  **expected**: `14`
 
 ````text
-It was well known among the animals that the Hare boasted of his speed at every chance. All this took place near the hilltop.
+There was once a Hare whose pride was as quick as her feet, and a Tortoise who said nothing about either. This was near the road.
 
-Whisker the hare, with a smug grin, claimed the scroll said exactly what
-he expected and didn't bother to actually read.
-Mossback the tortoise unrolled it carefully. To count the characters in a multi-line string required
-the scroll's actual contents — he composed
-the character count of a multi-line string, submitted the form, and the REPL — reading the
-scroll faithfully — returned the value the parchment had
-held.
+Mossback the tortoise had a small two-line message on a scroll — the word `hare` on one line, `tortoise` on the next, each line ending with a newline-mark.
 
-Write a form whose evaluation gives how many characters are in the multi-line string.
+She wanted to know whether the message would fit in her message-pouch — and to know that, she needed the total character count, including the newline-marks.
+
+`count` on a string walks each character — visible letters and the invisible newline-marks alike — returning the total. The scroll itself is unchanged.
+
+To count every character in a two-line string ending each line with a newline-mark, including the marks, He composed the character count of a multi-line string and submitted the form. The REPL — quill in hand — completed the scroll-work:
+
+the runtime tallied 14 characters: the four of `hare`, a newline, the eight of `tortoise`, and a final newline — the fit she had hoped for.
+
+Question: write a Clojure expression for the total characters in a two-line string with newline-marks at each line's end.
 
 ---
 
-I submit the form to the REPL via the eval tool.
-
-{"tool_calls":[{"name":"eval","args":{"form":"(count \"hare\\ntortoise\\n\")"}}]}
+{"tool_calls":[{"name":"eval","args":{"form":"(count \"hare\ntortoise\n\")"}}]}
 ````
 
-### Record B _(seed 21075757)_
+### Family-template render _(seed 17018218)_
 
-**form**: `(count "hare\ntortoise\n")`  •  **expected**: `14`
+**form**: `(count "hare
+tortoise
+")`  •  **expected**: `14`
 
 ````text
-There was once a Hare whose pride was as quick as her feet, and a Tortoise who said nothing about either.
+The Hare and the Tortoise had argued for as long as anyone could remember about who was truly the swifter.
 
-"Reading and writing scrolls is just like reading and writing
-forms," Slowpoke the tortoise said. "You ask the runtime for what's
-on the parchment, you write what you want recorded, and the work
-goes both ways through one quill." To count the characters in a multi-line string,
+"There's the world inside the REPL," Mossback the tortoise said,
+"and the world outside it. Scrolls are how the two meet — a value
+crosses out and becomes letters on parchment, or letters on
+parchment cross in and become a value again." To count every character in a two-line string ending each line with a newline-mark, including the marks,
 He composed the character count of a multi-line string, submitted the
-form, and the REPL handed back what the scroll had said — or
-what the writing had committed.
+form, and the REPL — bridging the two worlds — handed back the
+value the work had carried.
 
-Question: write a Clojure expression for how many characters are in the multi-line string.
+Write a Clojure expression that computes the total characters in a two-line string with newline-marks at each line's end.
 
 ---
 
-{"tool_calls":[{"name":"eval","args":{"form":"(count \"hare\\ntortoise\\n\")"}}]}
+I express the form as Clojure source.
+
+{"tool_calls":[{"name":"eval","args":{"form":"(count \"hare\ntortoise\n\")"}}]}
 ````
 
 ---
@@ -665,46 +672,46 @@ _pool_: `_GUILD_SUBPLOTS`
 
 **The metaphor:** A guild any species can join. The guild lists what its members must be able to do — the methods. Any animal that signs the ledger may claim membership. Mirrors `defprotocol` / `extend-protocol`.
 
-### Record A _(seed 63577878)_
+### Story-scaffold render
 
 **form**: `(do (defprotocol Pace (speed [this])) (some? Pace))`  •  **expected**: `True`
 
 ````text
-In that part of the forest, no one ever expected the Tortoise to outrun the Hare — yet today the question would be settled.
+There was once a Hare whose pride was as quick as her feet, and a Tortoise who said nothing about either. This was near the road.
 
-Slowpoke the tortoise carved a small wooden sign near the meadow: "Runners'
-Guild — any species may join." "A protocol is a guild,"
-he said. "It lists what every member must be able
-to do — the methods. Any animal that can sign the book may claim
-membership." To define a protocol named Pace with one method speed that takes a single argument this, He composed
-a protocol definition, submitted the form, and the REPL — guild
-founded — handed back the guild's record.
+Mossback wanted to found a Runners' guild named `Pace`. Members would have to perform `speed`, taking the runner as its argument.
 
-Write a Clojure expression that computes whether the protocol var Pace is truthy after defining a protocol named Pace with one method speed taking a single argument this.
+Before any species could sign, the guild had to be founded — and Mossback wanted to confirm the name was now real to the runtime.
+
+`defprotocol Pace (speed [this])` founds the guild. `(some? Pace)` then asks whether the name is non-nil.
+
+To found a Runners' guild named Pace whose only requirement is a method speed taking the runner as its single argument; then check whether the guild's name is now a real thing in the runtime, He composed a protocol definition and submitted the form. The REPL — checking the guild book — dispatched cleanly:
+
+the runtime confirmed the guild was real — `some?` returned true.
+
+Question: write a Clojure expression for whether the Runners' guild named Pace is real after the founding.
 
 ---
-
-I let the runtime decide what the form evaluates to.
 
 {"tool_calls":[{"name":"eval","args":{"form":"(do (defprotocol Pace (speed [this])) (some? Pace))"}}]}
 ````
 
-### Record B _(seed 34109032)_
+### Family-template render _(seed 35529658)_
 
 **form**: `(do (defprotocol Pace (speed [this])) (some? Pace))`  •  **expected**: `True`
 
 ````text
-The Hare loved nothing better than the sound of his own boasts; the Tortoise, nothing better than a long quiet walk. All this took place near the woods.
+In that part of the forest, no one ever expected the Tortoise to outrun the Hare — yet today the question would be settled. All this took place near the woods.
 
-Hopper the hare, with great whoops of laughter, declared that he could of
-course do whatever the guild's call demanded — even though the
-species had never signed the book. Mossback the tortoise only smiled
-and asked for the actual implementation. To define a protocol named Pace with one method speed that takes a single argument this,
-he composed a protocol definition, submitted the form,
-and the REPL — checking the book first — returned the right answer
-based on who had actually signed.
+"What makes a guild useful," Slowpoke the tortoise said, "is that
+the call is the same for every member, but each species answers
+in its own way. The runtime looks up which species the runner
+is, then runs that species' answer." To found a Runners' guild named Pace whose only requirement is a method speed taking the runner as its single argument; then check whether the guild's name is now a real thing in the runtime,
+He composed a protocol definition, submitted the
+form, and the REPL — dispatching to the right species — returned
+the species-specific value.
 
-Write a Clojure expression that computes whether the protocol var Pace is truthy after defining a protocol named Pace with one method speed taking a single argument this.
+Write a form whose evaluation gives whether the Runners' guild named Pace is real after the founding.
 
 ---
 
@@ -719,45 +726,46 @@ _pool_: `_SORTINGTABLE_SUBPLOTS`
 
 **The metaphor:** A sorting-table with arms branching off the sides. Runners walk up; the table reads what's stamped on each runner; the matching arm runs. Mirrors `defmulti`/`defmethod` — open-dispatch by any criterion.
 
-### Record A _(seed 17895662)_
+### Story-scaffold render
 
 **form**: `(do (defmulti pace :species) (defmethod pace :hare [_] :swift) (pace {:species :hare}))`  •  **expected**: `':swift'`
 
 ````text
-The Hare loved nothing better than the sound of his own boasts; the Tortoise, nothing better than a long quiet walk. This was at the edge of the meadow.
+There was once a Hare whose pride was as quick as her feet, and a Tortoise who said nothing about either. This was near the road.
 
-"What the table sorts by is up to you," Shelly the tortoise said.
-"You decide what to look at on each runner — a tag, a kind, a
-field, anything. The runtime reads it, finds the matching arm,
-and runs that one." To define a multimethod pace that dispatches on the :species key, add a method for :hare, then call pace with a map, She
-composed calling a multimethod with a specific dispatch value, submitted the form, and the REPL —
-reading the stamp the dispatch function produced — returned the
-value the right arm had given.
+Mossback the tortoise set up a sorting-table at the edge of the meadow. Runners would walk up; the table would read each runner's :species stamp and route them to the matching arm.
 
-Question: write a Clojure expression for the value returned after defining multimethod pace that dispatches on :species, adding a method for :hare, then calling pace with a map.
+Today's first arm she added was for hares: any runner stamped :hare should be routed to an arm that returns the swift-pace keyword. Today's first runner arrived stamped :hare.
+
+`defmulti` declares the table and what it sorts by (`:species`). `defmethod` adds an arm for a specific stamp (`:hare`). Calling `pace` on a runner reads the stamp and routes to the matching arm.
+
+To declare a sorting-table named pace that reads each runner's :species stamp; add an arm for the :hare stamp returning the swift-pace keyword; then route a runner stamped :hare through the table, He composed the multimethod and its first arm and submitted the form. The REPL routed through the table:
+
+the table read the :hare stamp, took the matching arm, and returned the swift-pace keyword — exactly the right pace for the species.
+
+Question: write a Clojure expression for the pace returned for a runner stamped :hare after the table routes to its arm.
 
 ---
-
-Let me work that out.
 
 {"tool_calls":[{"name":"eval","args":{"form":"(do (defmulti pace :species) (defmethod pace :hare [_] :swift) (pace {:species :hare}))"}}]}
 ````
 
-### Record B _(seed 87266701)_
+### Family-template render _(seed 52002123)_
 
 **form**: `(do (defmulti pace :species) (defmethod pace :hare [_] :swift) (pace {:species :hare}))`  •  **expected**: `':swift'`
 
 ````text
-In that part of the forest, no one ever expected the Tortoise to outrun the Hare — yet today the question would be settled. All this took place on the hilltop.
+The Hare and the Tortoise had argued for as long as anyone could remember about who was truly the swifter. It happened at the edge of the meadow.
 
-"To add a branch to the sorting-table," Mossback the tortoise said,
-"you say what stamp the branch handles and what behavior runs
-when a runner with that stamp arrives." To define a multimethod pace that dispatches on the :species key, add a method for :hare, then call pace with a map,
-He composed calling a multimethod with a specific dispatch value for the right
-branch, submitted the form, and the REPL — adding the branch,
-dispatching the runner — returned the branch-specific value.
+Whisker the hare, with a smug grin, leaped onto the sorting-table without
+showing his stamp. Mossback the tortoise pointed at the
+edge of the table: every runner must show the stamp the table
+sorts by. To declare a sorting-table named pace that reads each runner's :species stamp; add an arm for the :hare stamp returning the swift-pace keyword; then route a runner stamped :hare through the table, he composed
+the multimethod and its first arm, submitted the form, and the REPL — reading the
+stamp first, dispatching second — returned the value from the
+correct branch.
 
-Write a form whose evaluation gives the value returned after defining multimethod pace that dispatches on :species, adding a method for :hare, then calling pace with a map.
+Question: write a Clojure expression for the pace returned for a runner stamped :hare after the table routes to its arm.
 
 ---
 
@@ -772,44 +780,47 @@ _pool_: `_CARRYINGCASE_SUBPLOTS`
 
 **The metaphor:** A small wooden case with named compartments. The stamp on the outside says what kind of case; the labels on the inside say what each compartment holds. Mirrors `deftype` / `defrecord`.
 
-### Record A _(seed 69794072)_
+### Story-scaffold render
 
 **form**: `(do (defrecord Runner [name pace]) (:pace (->Runner "Alice" :slow)))`  •  **expected**: `':slow'`
 
 ````text
-It was well known among the animals that the Hare boasted of his speed at every chance.
+There was once a Hare whose pride was as quick as her feet, and a Tortoise who said nothing about either. This was near the road.
 
-Mossback the tortoise held up a small wooden case at the edge of the forest, its inside
-divided into labeled compartments. "Defrecord makes a case like
-this," he said: "named compartments holding
-specific things; a stamp on the outside saying what kind of case
-it is." To define a record type named Runner with two fields, then retrieve one field from an instance, He composed
-reading the pace field from a Runner record, submitted the form, and the REPL — constructing
-the case, filling its compartments — returned the value the case
-held or carried.
+Mossback the tortoise was outfitting the meadow's runners with carrying-cases — small wooden cases with two named compartments inside, one labeled `name` and one labeled `pace`. The case-stamp on the outside would read `Runner`.
 
-What Clojure form computes the pace field value after defining a record Runner with two fields name and pace, then creating an instance and reading the pace field? Submit it via `eval`.
+She wanted to define the Runner case-shape, then build one such case for a tortoise named Alice carrying a deliberate-pace keyword, and finally read what was in the pace compartment.
+
+`defrecord` declares the case-shape: stamp `Runner`, compartments [name pace]. `(->Runner "Alice" :slow)` constructs a case filling the compartments in order. `(:pace …)` reads the named compartment by its keyword.
+
+To define a Runner case with two named compartments, name and pace; build a Runner case for Alice with a deliberate-pace keyword; then read the pace compartment, He composed reading the pace compartment of a Runner case and submitted the form. The REPL constructed the case:
+
+the case held the runner's name and the pace keyword in their compartments; reading the pace compartment returned exactly what the case had been built with.
+
+Question: write a Clojure expression for the value in the pace compartment of a freshly-built Runner case for Alice.
 
 ---
 
 {"tool_calls":[{"name":"eval","args":{"form":"(do (defrecord Runner [name pace]) (:pace (->Runner \"Alice\" :slow)))"}}]}
 ````
 
-### Record B _(seed 34110903)_
+### Family-template render _(seed 58982356)_
 
 **form**: `(do (defrecord Runner [name pace]) (:pace (->Runner "Alice" :slow)))`  •  **expected**: `':slow'`
 
 ````text
-The Hare loved nothing better than the sound of his own boasts; the Tortoise, nothing better than a long quiet walk. It happened in the meadow.
+The Hare and the Tortoise had argued for as long as anyone could remember about who was truly the swifter.
 
-"To reach into a labeled compartment," Mossback the tortoise said,
-"you ask for it by name. The case knows where each compartment
-is; the runtime fetches it cleanly." To define a record type named Runner with two fields, then retrieve one field from an instance,
-He composed reading the pace field from a Runner record, submitted the
-form, and the REPL — opening the right compartment — returned
-exactly what was inside.
+Shelly the tortoise held up a small wooden case near the garden, its inside
+divided into labeled compartments. "Defrecord makes a case like
+this," she said: "named compartments holding
+specific things; a stamp on the outside saying what kind of case
+it is." To define a Runner case with two named compartments, name and pace; build a Runner case for Alice with a deliberate-pace keyword; then read the pace compartment, She composed
+reading the pace compartment of a Runner case, submitted the form, and the REPL — constructing
+the case, filling its compartments — returned the value the case
+held or carried.
 
-Question: write a Clojure expression for the pace field value after defining a record Runner with two fields name and pace, then creating an instance and reading the pace field.
+What Clojure form computes the value in the pace compartment of a freshly-built Runner case for Alice? Submit it via `eval`.
 
 ---
 
@@ -824,45 +835,50 @@ _pool_: `_TOOLSHED_SUBPLOTS`
 
 **The metaphor:** A different toolshed of foreign tools, none carved by the Tortoise. Each tool has a label; calling it uses dot-prefix for instance, slash for static. Mirrors host interop — `.method`, `Class/static`, `(new …)`, type hints.
 
-### Record A _(seed 92276244)_
+### Story-scaffold render
 
 **form**: `(.toUpperCase "abc")`  •  **expected**: `'ABC'`
 
 ````text
-There was once a Hare whose pride was as quick as her feet, and a Tortoise who said nothing about either. All this took place on the road.
+There was once a Hare whose pride was as quick as her feet, and a Tortoise who said nothing about either. This was near the road.
 
-"There's the meadow's own toolshed," Shelly the tortoise said,
-"and there's the foreign one. The runtime moves a value across
-the boundary, calls the foreign tool, and brings the result back
-into the meadow." To call the host method toUpperCase on the string abc, She composed
-the host method toUpperCase, submitted the form, and the REPL — bridging
-the two toolsheds — returned the value cleanly.
+Mossback the tortoise was using a small string of three letters from the foreign toolshed — `abc` — and she wanted the host's own routine for capitalizing strings, kept under the name `toUpperCase`.
 
-Question: write a Clojure expression for the uppercase form of the string abc produced by the host method toUpperCase via dot-prefix syntax.
+She didn't want to write a Clojure routine for capitalization; she wanted to call the host's own routine directly.
+
+Host instance methods are called with dot-prefix on the instance: `(.toUpperCase "abc")` invokes the host's routine on the string. The runtime crosses the boundary to the host, calls the method, and brings the result back.
+
+To call the host's toUpperCase routine on the three-letter string abc using the dot-prefix calling convention, He composed the host method toUpperCase and submitted the form. The REPL — calling into the foreign toolshed — returned:
+
+the host returned the three letters in capitals, and the runtime brought the value back as a Clojure string.
+
+Question: write a Clojure expression for the capitalized result the host's toUpperCase returns on the three-letter string abc.
 
 ---
 
 {"tool_calls":[{"name":"eval","args":{"form":"(.toUpperCase \"abc\")"}}]}
 ````
 
-### Record B _(seed 12457461)_
+### Family-template render _(seed 74392710)_
 
 **form**: `(.toUpperCase "abc")`  •  **expected**: `'ABC'`
 
 ````text
-In that part of the forest, no one ever expected the Tortoise to outrun the Hare — yet today the question would be settled.
+There was once a Hare whose pride was as quick as her feet, and a Tortoise who said nothing about either.
 
-"Foreign tools work, but they need careful handling,"
-Slowpoke the tortoise said. "Their labels are different, their
-calling conventions are different, and the runtime has to bridge
-between Clojure and the host every time." To call the host method toUpperCase on the string abc,
+Bramble the hare, boasting at every turn, grabbed at the foreign toolshed
+without checking which tool was which. The wrong tool, of course,
+made an awful sound. Slowpoke the tortoise sighed and walked over: to
+call the host's toUpperCase routine on the three-letter string abc using the dot-prefix calling convention required reading the toolshed's labels carefully.
 He composed the host method toUpperCase, submitted the
-form, and the REPL — making the bridge cleanly — handed back the
-value the foreign tool had produced.
+form, and the REPL — calling the right host method by name —
+returned the value cleanly while Bramble watched, chastened.
 
-What Clojure form computes the uppercase form of the string abc produced by the host method toUpperCase via dot-prefix syntax? Submit it via `eval`.
+Question: write a Clojure expression for the capitalized result the host's toUpperCase returns on the three-letter string abc.
 
 ---
+
+Let me work that out.
 
 {"tool_calls":[{"name":"eval","args":{"form":"(.toUpperCase \"abc\")"}}]}
 ````
@@ -875,49 +891,50 @@ _pool_: `_RUNNERAHEAD_SUBPLOTS`
 
 **The metaphor:** A messenger sent down the road while the Tortoise carries on. Later, the Tortoise asks the runner to hand back the result. Mirrors `future` / `agent` / `promise` / `await`.
 
-### Record A _(seed 38920704)_
+### Story-scaffold render
 
 **form**: `@(future (+ 1 2))`  •  **expected**: `3`
 
 ````text
-In that part of the forest, no one ever expected the Tortoise to outrun the Hare — yet today the question would be settled. This was in the garden.
+The Hare loved nothing better than the sound of his own boasts; the Tortoise, nothing better than a long quiet walk. It happened by the woods.
 
-"The hard part isn't sending the runner," Slowpoke the tortoise said.
-"The hard part is being patient enough to wait for the answer
-when it comes — not snatching too early, not giving up too soon.
-The runtime makes that easier than it sounds." To construct a future that adds 1 and 2, and dereference it,
-He composed future, add, deref, submitted the
-form, and the REPL — coordinating the wait properly — returned
-the runner's answer when the runner had it ready.
+Mossback the tortoise dispatched a young messenger down the long road
+by the woods, work in paw. "The runner goes ahead while we keep on
+with our own business," he said, "and when we
+need the result we ask the runner to hand it back." To
+dispatch a runner to compute the sum of 1 and 2; later, ask the runner for the answer, He composed future, add, deref,
+submitted the form, and the REPL — sending the runner, fetching
+the result later — returned the value when it was ready.
 
-What Clojure form computes the value returned by dereferencing a future that adds 1 and 2? Submit it via `eval`.
-
----
-
-{"tool_calls":[{"name":"eval","args":{"form":"@(future (+ 1 2))"}}]}
-````
-
-### Record B _(seed 74060815)_
-
-**form**: `@(future (+ 1 2))`  •  **expected**: `3`
-
-````text
-The Hare loved nothing better than the sound of his own boasts; the Tortoise, nothing better than a long quiet walk.
-
-Mossback the tortoise arranged a small relay near the road, runners and
-messengers each in their place. "The runtime keeps track of who
-sent what and when each one finishes," he said,
-"so the values come back in the right order, no matter how long
-each runner takes." To construct a future that adds 1 and 2, and dereference it, He
-composed future, add, deref, submitted the form, and the REPL —
-coordinating the relay — returned the right value at the right
-time.
-
-Question: write a Clojure expression for the value returned by dereferencing a future that adds 1 and 2.
+Write a form whose evaluation gives the value the messenger returns from adding 1 and 2.
 
 ---
 
 Let me compute that.
+
+{"tool_calls":[{"name":"eval","args":{"form":"@(future (+ 1 2))"}}]}
+````
+
+### Family-template render _(seed 88118324)_
+
+**form**: `@(future (+ 1 2))`  •  **expected**: `3`
+
+````text
+The Hare and the Tortoise had argued for as long as anyone could remember about who was truly the swifter.
+
+"The hard part isn't sending the runner," Shelly the tortoise said.
+"The hard part is being patient enough to wait for the answer
+when it comes — not snatching too early, not giving up too soon.
+The runtime makes that easier than it sounds." To dispatch a runner to compute the sum of 1 and 2; later, ask the runner for the answer,
+She composed future, add, deref, submitted the
+form, and the REPL — coordinating the wait properly — returned
+the runner's answer when the runner had it ready.
+
+Write a form whose evaluation gives the value the messenger returns from adding 1 and 2.
+
+---
+
+Here's the calculation.
 
 {"tool_calls":[{"name":"eval","args":{"form":"@(future (+ 1 2))"}}]}
 ````
@@ -930,7 +947,31 @@ _pool_: `_REWRITERULE_SUBPLOTS`
 
 **The metaphor:** A scribe with the power to rewrite the recipe before the runtime ever cooks it. The rule pays off when many recipes need the same rewriting. Mirrors `defmacro` / `macroexpand` / `eval`.
 
-### Record A _(seed 44775824)_
+### Story-scaffold render
+
+**form**: `` (do (defmacro my-when [t & body] `(if ~t (do ~@body))) (my-when true 1 2 3)) ``  •  **expected**: `3`
+
+````text
+There was once a Hare whose pride was as quick as her feet, and a Tortoise who said nothing about either. This was near the road.
+
+Mossback the tortoise was tired of writing `if`/`do` by hand for every form where she wanted several steps to run only if a condition held.
+
+She wanted a rule called `my-when` that rewrote the shorter form `(my-when t body...)` into the longer `(if t (do body...))` — once written, applicable to any test and body.
+
+`defmacro` defines a rewrite-rule. The rule's body uses syntax-quote and unquote-splicing to build the rewritten form. The runtime applies the rule first, then evaluates the rewritten form normally.
+
+To define a rule named my-when that rewrites (my-when t body...) into (if t (do body...)); then invoke it with the test true and a three-expression body, He composed defining a conditional macro and invoking it and submitted the form. The REPL — applying the rewrite, then evaluating the rewritten form — returned:
+
+the rewritten form ran the body, kept only the last-step value, and returned it — the rule had saved Mossback the longer writing.
+
+Question: write a Clojure expression for the value the rewritten if-do form returns when the test is true and the body has three expressions.
+
+---
+
+{"tool_calls":[{"name":"eval","args":{"form":"(do (defmacro my-when [t & body] `(if ~t (do ~@body))) (my-when true 1 2 3))"}}]}
+````
+
+### Family-template render _(seed 43771232)_
 
 **form**: `` (do (defmacro my-when [t & body] `(if ~t (do ~@body))) (my-when true 1 2 3)) ``  •  **expected**: `3`
 
@@ -940,36 +981,13 @@ In that part of the forest, no one ever expected the Tortoise to outrun the Hare
 "Here's the difference between a rule and a recipe,"
 Mossback the tortoise said. "A recipe takes ingredients and makes a
 dish. A rule takes a *form* and makes a different *form* — only
-then does the runtime get to evaluate it." To define a macro named my-when that takes a test and body expressions, then invoke it,
+then does the runtime get to evaluate it." To define a rule named my-when that rewrites (my-when t body...) into (if t (do body...)); then invoke it with the test true and a three-expression body,
 He composed defining a conditional macro and invoking it, submitted the
 form, and the REPL — applying the rule to the form first, then
 evaluating — handed back the value the rewritten form had
 produced.
 
-Write a Clojure expression that computes the value returned when my-when expands to an if-do block that runs the body with test true.
-
----
-
-{"tool_calls":[{"name":"eval","args":{"form":"(do (defmacro my-when [t & body] `(if ~t (do ~@body))) (my-when true 1 2 3))"}}]}
-````
-
-### Record B _(seed 60533359)_
-
-**form**: `` (do (defmacro my-when [t & body] `(if ~t (do ~@body))) (my-when true 1 2 3)) ``  •  **expected**: `3`
-
-````text
-There was once a Hare whose pride was as quick as her feet, and a Tortoise who said nothing about either. It happened at the edge of the orchard.
-
-Bramble the hare, with great whoops of laughter, insisted that the rule was unnecessary
-— she could write the rewritten recipe directly.
-Slowpoke the tortoise only smiled: a hand-rewritten recipe is fine
-once, but the rule pays off when many recipes need rewriting the
-same way. To define a macro named my-when that takes a test and body expressions, then invoke it, he composed
-defining a conditional macro and invoking it, submitted the form, and the REPL — running the
-rule the rule's way — returned the value the rewritten recipe
-yielded.
-
-Question: write a Clojure expression for the value returned when my-when expands to an if-do block that runs the body with test true.
+Write a Clojure expression that computes the value the rewritten if-do form returns when the test is true and the body has three expressions.
 
 ---
 
@@ -984,49 +1002,49 @@ _pool_: `_SCRIBE_SUBPLOTS`
 
 **The metaphor:** The scribe's reading conventions. Comments are marginalia skipped by the eye. Whitespace is the breath between words. Parens are fence-posts marking which things go together. `do` is a sequence in one breath. Reader macros are shorthand.
 
-### Record A _(seed 94701405)_
+### Story-scaffold render
 
 **form**: `(+ 2 3)`  •  **expected**: `5`
 
 ````text
-The Hare and the Tortoise had argued for as long as anyone could remember about who was truly the swifter.
+There was once a Hare whose pride was as quick as her feet, and a Tortoise who said nothing about either. This was near the road.
 
-Bramble the hare, boasting at every turn, glanced at the form and called out
-what she thought it would do without paying attention to
-the conventions of how it was written. Mossback the tortoise only
-shook his head — the runtime reads the form
-exactly. To add 2 and 3, he composed
-the simple addition, submitted the form, and the REPL — reading
-literally — returned the right value, while Bramble's guess fell
-short.
+Mossback the tortoise chalked a small expression on the path: the plus-mark, then 2, then 3, all wrapped in a single set of parens. Pip the hare paused — was the answer 6 (parens means multiply, surely?), or maybe 23?
 
-Write a Clojure expression that computes the result of adding 2 and 3.
+Mossback wanted to show that the parens are fence-posts, not multiplication: they mark which tokens belong together as one form, nothing more.
+
+Parens in Clojure group: the first token inside is the operator (`+`), the rest are arguments (2, 3). The runtime applies + to 2 and 3 — the parens themselves do no math.
+
+To add 2 and 3, He composed the simple addition and submitted the form. The REPL read by the conventions and returned:
+
+the runtime applied + to 2 and 3 and returned 5 — not 6, not 23, just the sum the form had asked for.
+
+Question: write a Clojure expression for the result of adding 2 and 3.
 
 ---
 
 {"tool_calls":[{"name":"eval","args":{"form":"(+ 2 3)"}}]}
 ````
 
-### Record B _(seed 70839667)_
+### Family-template render _(seed 7082350)_
 
 **form**: `(+ 2 3)`  •  **expected**: `5`
 
 ````text
-In that part of the forest, no one ever expected the Tortoise to outrun the Hare — yet today the question would be settled. It happened in the forest.
+In that part of the forest, no one ever expected the Tortoise to outrun the Hare — yet today the question would be settled. This was along the road.
 
-"A form is what's actually there on the page," Mossback the tortoise
-said, "after the conventions of writing and reading have done
-their work. The runtime sees the cleaned-up form, evaluates it,
-and gives back what it computes." To add 2 and 3,
-He composed the simple addition, submitted the
-form, and the REPL — taking the form exactly as it was — handed
-back the value.
+"A form is what the reader sees," Slowpoke the tortoise said,
+"after the conventions have been applied. Some marks count, some
+don't; some shapes are expanded before the runtime even gets a
+look. The form you write and the form the runtime evaluates
+aren't always character-for-character the same." To
+add 2 and 3, He composed the simple addition,
+submitted the form, and the REPL — reading carefully — returned
+the value of what the conventions had produced.
 
-Write a form whose evaluation gives the result of adding 2 and 3.
+What Clojure form computes the result of adding 2 and 3? Submit it via `eval`.
 
 ---
-
-I'll express the answer as a Clojure form.
 
 {"tool_calls":[{"name":"eval","args":{"form":"(+ 2 3)"}}]}
 ````
@@ -1039,43 +1057,48 @@ _pool_: `_CHALKMARK_SUBPLOTS`
 
 **The metaphor:** The chalk mark scratched onto the bark vs the actual acorn it names. The mark is the *name*; the acorn is the *value*. `quote` labels a form so the runtime hands it back as-is instead of cooking it. Mirrors `'` / syntax-quote.
 
-### Record A _(seed 95498852)_
+### Story-scaffold render
 
 **form**: `(symbol? 'hare)`  •  **expected**: `True`
 
 ````text
-The Hare and the Tortoise had argued for as long as anyone could remember about who was truly the swifter.
+There was once a Hare whose pride was as quick as her feet, and a Tortoise who said nothing about either. This was near the road.
 
-Whisker the hare, boasting at every turn, mistook the name on the bark for the
-acorn it pointed to. "It says hare, so the value must be the
-hare!" Shelly the tortoise only shook her head: the
-mark and the acorn are never the same thing. To ask whether a quoted name is a symbol, using the symbol? predicate,
-she composed the symbol-predicate on a quoted name, submitted the form,
-and the REPL — keeping mark and acorn distinct — returned the
-right answer for the goal.
+Mossback the tortoise scratched a chalk mark across a piece of bark — the name 'hare — and pointed first at the chalk mark, then at the actual bounding hare itself.
 
-Write a form whose evaluation gives whether a quoted name is a symbol.
+She wanted to show that the chalk mark and the bounding hare are different kinds of thing — and to ask the runtime which kind the chalk mark itself was.
+
+Quoting (with the leading apostrophe) labels a name as a name — a symbol — rather than evaluating it. `symbol?` then asks the runtime: is this thing a chalk-mark-of-a-name?
+
+To ask whether a quoted name is a symbol, using the symbol? predicate, He composed the symbol-predicate on a quoted name and submitted the form. The REPL — distinguishing label from value — returned:
+
+the runtime confirmed: 'hare is indeed a symbol, a name and not the bounding thing the name might refer to. true came back.
+
+Question: write a Clojure expression for whether a quoted name is a symbol.
 
 ---
 
 {"tool_calls":[{"name":"eval","args":{"form":"(symbol? 'hare)"}}]}
 ````
 
-### Record B _(seed 25591429)_
+### Family-template render _(seed 56262718)_
 
 **form**: `(symbol? 'hare)`  •  **expected**: `True`
 
 ````text
-In that part of the forest, no one ever expected the Tortoise to outrun the Hare — yet today the question would be settled.
+In that part of the forest, no one ever expected the Tortoise to outrun the Hare — yet today the question would be settled. All this took place near the hilltop.
 
-"To talk about the form itself rather than evaluating it,"
-Shelly the tortoise said, "you label the form with a chalk mark
-in front. Quoting tells the runtime: don't cook this, just hand
-it back as the shape it is." To ask whether a quoted name is a symbol, using the symbol? predicate, She
-composed the symbol-predicate on a quoted name, submitted the form, and the REPL —
-respecting the chalk mark — returned the form unevaluated.
+Mossback the tortoise scratched a chalk mark across a piece of bark — the name 'hare — and pointed first at the chalk mark, then at the actual bounding hare itself.
 
-Write a Clojure expression that computes whether a quoted name is a symbol.
+She wanted to show that the chalk mark and the bounding hare are different kinds of thing — and to ask the runtime which kind the chalk mark itself was.
+
+Quoting (with the leading apostrophe) labels a name as a name — a symbol — rather than evaluating it. `symbol?` then asks the runtime: is this thing a chalk-mark-of-a-name?
+
+To ask whether a quoted name is a symbol, using the symbol? predicate, She composed the symbol-predicate on a quoted name and submitted the form. The REPL — distinguishing label from value — returned:
+
+the runtime confirmed: 'hare is indeed a symbol, a name and not the bounding thing the name might refer to. true came back.
+
+Write a form whose evaluation gives whether a quoted name is a symbol.
 
 ---
 
@@ -1090,50 +1113,52 @@ _pool_: `_TALLYWALK_SUBPLOTS`
 
 **The metaphor:** Walking the row of pebbles one paw at a time, a slate in hand for the running tally. At each pebble, combine it into the tally; at the end, the tally is the answer. Mirrors `reduce` / `count` / fold.
 
-### Record A _(seed 84939804)_
+### Story-scaffold render
 
 **form**: `(reduce + [1 2 3 4])`  •  **expected**: `10`
 
 ````text
-The Hare and the Tortoise had argued for as long as anyone could remember about who was truly the swifter.
+There was once a Hare whose pride was as quick as her feet, and a Tortoise who said nothing about either. This was near the road.
 
-"The simplest tally-walk is just counting,"
-Shelly the tortoise said: "step along the row, add one at every
-pebble, no other operation. The runtime does this for any
-collection — vector, list, map, string." To fold + over the vector containing 1, 2, 3, and 4, summing them,
-She composed the fold operation, submitted the
-form, and the REPL — walking the row, counting the steps —
-returned the count.
+A row of four small pebbles lay along the path — counts of 1, 2, 3, and 4 from four foraging trips.
 
-Write a Clojure expression that computes the sum produced by reducing + over the vector containing 1, 2, 3, and 4.
+Mossback the tortoise wanted the grand total of the four trips. Walking the row and carrying a running tally was the patient way.
+
+`reduce` walks the collection from left to right carrying a tally. At each pebble, the combine function (here `+`) is applied to (tally, pebble), producing the new tally. The final tally is what comes back.
+
+To walk the row of pebbles 1, 2, 3, 4 carrying a tally that combines each with + into the running total, He composed the fold operation and submitted the form. The REPL walked the row carrying the tally:
+
+the walk produced a tally that grew across the four pebbles, ending at the grand total of all four trips.
+
+Question: write a Clojure expression for the running tally after walking 1, 2, 3, 4 with + as the combine step.
 
 ---
-
-I write the higher-order form so the REPL can compute.
 
 {"tool_calls":[{"name":"eval","args":{"form":"(reduce + [1 2 3 4])"}}]}
 ````
 
-### Record B _(seed 95841351)_
+### Family-template render _(seed 28017048)_
 
 **form**: `(reduce + [1 2 3 4])`  •  **expected**: `10`
 
 ````text
-It was well known among the animals that the Hare boasted of his speed at every chance. All this took place near the forest.
+There was once a Hare whose pride was as quick as her feet, and a Tortoise who said nothing about either.
 
-Shelly the tortoise walked the row of pebbles at the edge of the forest, one paw at a
-time, a small slate in hand for the running tally. "Reduce is
-this walk," she said: "at each pebble, you combine
-it into the tally; at the end, the tally is your answer." To
-fold + over the vector containing 1, 2, 3, and 4, summing them, She composed the fold operation,
-submitted the form, and the REPL — walking the row, carrying the
-tally — returned the final number.
+A row of four small pebbles lay along the path — counts of 1, 2, 3, and 4 from four foraging trips.
 
-What Clojure form computes the sum produced by reducing + over the vector containing 1, 2, 3, and 4? Submit it via `eval`.
+Mossback the tortoise wanted the grand total of the four trips. Walking the row and carrying a running tally was the patient way.
+
+`reduce` walks the collection from left to right carrying a tally. At each pebble, the combine function (here `+`) is applied to (tally, pebble), producing the new tally. The final tally is what comes back.
+
+To walk the row of pebbles 1, 2, 3, 4 carrying a tally that combines each with + into the running total, He composed the fold operation and submitted the form. The REPL walked the row carrying the tally:
+
+the walk produced a tally that grew across the four pebbles, ending at the grand total of all four trips.
+
+Write a Clojure expression that computes the running tally after walking 1, 2, 3, 4 with + as the combine step.
 
 ---
 
-Let me compute that.
+Let me work that out.
 
 {"tool_calls":[{"name":"eval","args":{"form":"(reduce + [1 2 3 4])"}}]}
 ````
@@ -1146,47 +1171,49 @@ _pool_: `_BEADSTRING_SUBPLOTS`
 
 **The metaphor:** Strings as strings of beads, threaded in order. Concatenating splices threads together; substring cuts a counted run; counting beads gives the length. Mirrors `str` / `subs` / string operations.
 
-### Record A _(seed 54587182)_
+### Story-scaffold render
 
 **form**: `(str "ab" "cd")`  •  **expected**: `'abcd'`
 
 ````text
-The Hare and the Tortoise had argued for as long as anyone could remember about who was truly the swifter. This was in the garden.
+There was once a Hare whose pride was as quick as her feet, and a Tortoise who said nothing about either. This was near the road.
 
-Shelly the tortoise held up a string of small wooden beads near the garden.
-"Strings in Clojure are like this," she said: "a
-threaded line of characters, in order. Concat strings together,
-and the threads are spliced; cut a substring out, and you get a
-shorter thread." To use str to join the two-letter strings "ab" and "cd", She composed
-the string concatenation, submitted the form, and the REPL — splicing or
-cutting as the form said — returned the new bead-string.
+Mossback the tortoise held two short threads of beads — one with the two letters "ab" wound on, the other with the two letters "cd". Two threads, four beads in all.
 
-Write a Clojure expression that computes the result of using str to join "ab" and "cd".
+She wanted them spliced end to end into one longer thread, so the four-bead string could carry as a single name in her foraging-ledger.
+
+`str` splices its arguments into one bead-string: each argument's beads thread one after another. With two short threads "ab" and "cd", the splice yields a single four-bead thread.
+
+To use str to splice the two-letter strings "ab" and "cd" into a single thread, He composed the string concatenation and submitted the form. The REPL spliced or counted as the form said:
+
+the spliced thread came back as a single four-letter string in order — ready to wear in the ledger.
+
+Question: write a Clojure expression for the result of using str to splice "ab" and "cd".
 
 ---
 
 {"tool_calls":[{"name":"eval","args":{"form":"(str \"ab\" \"cd\")"}}]}
 ````
 
-### Record B _(seed 58176305)_
+### Family-template render _(seed 15807505)_
 
 **form**: `(str "ab" "cd")`  •  **expected**: `'abcd'`
 
 ````text
-The Hare loved nothing better than the sound of his own boasts; the Tortoise, nothing better than a long quiet walk.
+There was once a Hare whose pride was as quick as her feet, and a Tortoise who said nothing about either.
 
-Hopper the hare, boasting at every turn, yanked at the bead-thread near the garden
-without bothering to count. Shelly the tortoise stopped him:
+Bramble the hare, with a smug grin, yanked at the bead-thread on the road
+without bothering to count. Shelly the tortoise stopped her:
 strings are precise — every bead in its place, every position
-counted. To use str to join the two-letter strings "ab" and "cd", she composed
+counted. To use str to splice the two-letter strings "ab" and "cd" into a single thread, she composed
 the string concatenation, submitted the form, and the REPL — handling the
 thread carefully — returned the right answer.
 
-Write a Clojure expression that computes the result of using str to join "ab" and "cd".
+What Clojure form computes the result of using str to splice "ab" and "cd"? Submit it via `eval`.
 
 ---
 
-Let me work that out.
+I let the runtime decide what the form evaluates to.
 
 {"tool_calls":[{"name":"eval","args":{"form":"(str \"ab\" \"cd\")"}}]}
 ````
@@ -1199,50 +1226,48 @@ _pool_: `_CIRCUIT_SUBPLOTS`
 
 **The metaphor:** Walking a circle around the meadow: each lap returns to the same starting point with a slightly different tally. No extra trail laid behind. Mirrors `recur` / `loop` — tail-call iteration.
 
-### Record A _(seed 49643070)_
+### Story-scaffold render
 
 **form**: `(loop [n 5 acc 1] (if (zero? n) acc (recur (dec n) (* acc n))))`  •  **expected**: `120`
 
 ````text
-There was once a Hare whose pride was as quick as her feet, and a Tortoise who said nothing about either. It happened at the edge of the orchard.
+There was once a Hare whose pride was as quick as her feet, and a Tortoise who said nothing about either. This was near the road.
 
-Shelly the tortoise walked a small circle around the meadow near the orchard,
-each lap returning to the same starting point with a slightly
-different tally in hand. "Recur is this circuit," she
-said: "back to the top with new bindings, no extra trail laid
-down behind us." To compute the factorial of 5 using a loop and tail recursion, She composed
-a factorial computation via loop and recur, submitted the form, and the REPL — looping
-without growing the call-stack — returned the final value.
+Mossback the tortoise wanted to compute 5! — the product 5 × 4 × 3 × 2 × 1 — without writing five separate multiplications.
 
-What Clojure form computes 5! computed via loop/recur? Submit it via `eval`.
+She'd walk a small circuit around a stone, each lap multiplying her tally by the current step, until the step counter reached zero — then return the tally.
+
+`loop`/`recur` is the circuit. `loop [n 5 acc 1]` starts the bindings; `recur` jumps back to the top with new bindings — `(dec n)` and `(* acc n)` — without growing the call-stack. The base case `(zero? n)` returns `acc`.
+
+To walk a small circuit five times, multiplying a running tally by the current step each lap, until the step counter reaches zero, He composed a factorial computation via loop and recur and submitted the form. The REPL looped without growing the trail:
+
+five laps later the step counter reached zero and the tally — 5! — came back.
+
+Question: write a Clojure expression for the factorial of 5 computed by walking a circuit.
 
 ---
-
-I express the form as Clojure source.
 
 {"tool_calls":[{"name":"eval","args":{"form":"(loop [n 5 acc 1] (if (zero? n) acc (recur (dec n) (* acc n))))"}}]}
 ````
 
-### Record B _(seed 95484508)_
+### Family-template render _(seed 30121832)_
 
 **form**: `(loop [n 5 acc 1] (if (zero? n) acc (recur (dec n) (* acc n))))`  •  **expected**: `120`
 
 ````text
 There was once a Hare whose pride was as quick as her feet, and a Tortoise who said nothing about either.
 
-"Every circuit has a stopping condition," Shelly the tortoise
-said. "Without one, the runner walks forever. With one, the
-runner knows when the laps are done and the tally is the
-answer." To compute the factorial of 5 using a loop and tail recursion, She composed
+Shelly the tortoise walked a small circle around the meadow in the forest,
+each lap returning to the same starting point with a slightly
+different tally in hand. "Recur is this circuit," she
+said: "back to the top with new bindings, no extra trail laid
+down behind us." To walk a small circuit five times, multiplying a running tally by the current step each lap, until the step counter reaches zero, She composed
 a factorial computation via loop and recur, submitted the form, and the REPL — looping
-until the base case — returned the value the final lap
-produced.
+without growing the call-stack — returned the final value.
 
-Question: write a Clojure expression for 5! computed via loop/recur.
+Write a Clojure expression that computes the factorial of 5 computed by walking a circuit.
 
 ---
-
-I'll express the answer as a Clojure form.
 
 {"tool_calls":[{"name":"eval","args":{"form":"(loop [n 5 acc 1] (if (zero? n) acc (recur (dec n) (* acc n))))"}}]}
 ````
@@ -1255,45 +1280,25 @@ _pool_: `_GOAL_SUBPLOTS`
 
 **The metaphor:** Tooling subjects (host platforms, build tools, library overviews, test framework, style guide) keep generic Hare/Tortoise narrative. Forcing a forest metaphor on `clojure.test` would be cargo-cult — the topic is *about* the ecosystem rather than a Clojure idiom.
 
-### Record A _(seed 51897388)_
+### Generic render
 
 **form**: `(= (+ 1 2) 3)`  •  **expected**: `True`
 
 ````text
-The Hare loved nothing better than the sound of his own boasts; the Tortoise, nothing better than a long quiet walk.
+It was well known among the animals that the Hare boasted of his speed at every chance. This was near the road.
 
-A wooden sign nailed to a tree at the edge of the orchard carried a small puzzle. The
-challenge was simple: test whether the sum of 1 and 2 equals 3 using equality. Hopper laughed, swaggering through the underbrush, and
-declared it too easy. Slowpoke said patiently that the only way
-to be sure of the equality assertion at the heart of test checking was to write the form and put it
-in the REPL — not to guess at the value from the goal alone.
+Bramble the hare and Shelly the tortoise stopped along the road to settle a small
+puzzle. Bramble wanted to test whether the sum of 1 and 2 equals 3 using equality. Bramble, as if the race were already won, declared
+that she could write the form for it without thinking.
+Shelly, untroubled by what others thought, suggested she actually write
+the equality assertion at the heart of test checking carefully — and then let the REPL confirm what
+the value really was.
 
-What Clojure form computes the truth value showing the assertion passes? Submit it via `eval`.
+Write a form whose evaluation gives the truth value showing the assertion passes.
 
 ---
 
 I'll express the answer as a Clojure form.
-
-{"tool_calls":[{"name":"eval","args":{"form":"(= (+ 1 2) 3)"}}]}
-````
-
-### Record B _(seed 49666726)_
-
-**form**: `(= (+ 1 2) 3)`  •  **expected**: `True`
-
-````text
-There was once a Hare whose pride was as quick as her feet, and a Tortoise who said nothing about either. It happened in the forest.
-
-Whisker the hare and Shelly the tortoise stopped by the forest to settle a small
-puzzle. Whisker wanted to test whether the sum of 1 and 2 equals 3 using equality. Whisker, boasting at every turn, declared
-that he could write the form for it without thinking.
-Shelly, saying very little, suggested he actually write
-the equality assertion at the heart of test checking carefully — and then let the REPL confirm what
-the value really was.
-
-What Clojure form computes the truth value showing the assertion passes? Submit it via `eval`.
-
----
 
 {"tool_calls":[{"name":"eval","args":{"form":"(= (+ 1 2) 3)"}}]}
 ````

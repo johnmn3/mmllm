@@ -99,10 +99,35 @@ G6_02 = SubjectCurriculum(grade=6, subject_id="G6-02",
 G6_03 = SubjectCurriculum(grade=6, subject_id="G6-03",
     subject_title="require", fable="tortoise-hare",
     examples=[
-        _ex("(clojure.string/upper-case \"hare\")", "HARE",
-            "calling a fully-qualified string function",
-            "the uppercase form of the string hare produced by clojure.string/upper-case",
-            goal="call the uppercasing function from clojure.string on a test string"),
+        SubjectExample(
+            form='(clojure.string/upper-case "hare")',
+            expected="HARE",
+            concept_phrase="calling a fully-qualified string function",
+            question_what="the capitalized form returned by the upper-case routine on the scroll",
+            goal_text="call the upper-case routine on the clojure.string scroll, applied to the four-letter string hare",
+            scenario=(
+                "The library by the road kept a scroll on its shelves "
+                "called `clojure.string`. Among its signs was a routine "
+                "named `upper-case` — a routine that took a string and "
+                "returned the same letters, capitalized."
+            ),
+            need=(
+                "Mossback the tortoise wanted the capitalized form of "
+                "the four-letter word `hare`, for a road-sign she was "
+                "painting."
+            ),
+            mapping=(
+                "When a routine lives on a scroll, you call it by both "
+                "names together: scroll-name slash routine-name — "
+                "`clojure.string/upper-case`. The runtime fetches the "
+                "scroll and invokes the routine on the argument."
+            ),
+            resolution=(
+                "the routine returned the four letters in capitals, "
+                "ready for the road-sign Mossback was painting."
+            ),
+            tags=("story",),
+        ),
         _ex("(clojure.string/lower-case \"ZEBRA\")", "zebra",
             "calling a fully-qualified string function",
             "the lowercase form of the string ZEBRA produced by clojure.string/lower-case",

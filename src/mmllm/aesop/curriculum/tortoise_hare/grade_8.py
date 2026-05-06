@@ -96,11 +96,38 @@ G8_03 = SubjectCurriculum(
     subject_title="defrecord introduction",
     fable="tortoise-hare",
     examples=[
-        _ex("(do (defrecord Runner [name pace]) (:pace (->Runner \"Alice\" :slow)))",
-            ":slow",
-            "reading the pace field from a Runner record",
-            "the pace field value after defining a record Runner with two fields name and pace, then creating an instance and reading the pace field",
-            goal="define a record type named Runner with two fields, then retrieve one field from an instance"),
+        SubjectExample(
+            form='(do (defrecord Runner [name pace]) (:pace (->Runner "Alice" :slow)))',
+            expected=":slow",
+            concept_phrase="reading the pace compartment of a Runner case",
+            question_what="the value in the pace compartment of a freshly-built Runner case for Alice",
+            goal_text="define a Runner case with two named compartments, name and pace; build a Runner case for Alice with a deliberate-pace keyword; then read the pace compartment",
+            scenario=(
+                "Mossback the tortoise was outfitting the meadow's "
+                "runners with carrying-cases — small wooden cases with "
+                "two named compartments inside, one labeled `name` and "
+                "one labeled `pace`. The case-stamp on the outside "
+                "would read `Runner`."
+            ),
+            need=(
+                "She wanted to define the Runner case-shape, then "
+                "build one such case for a tortoise named Alice "
+                "carrying a deliberate-pace keyword, and finally read "
+                "what was in the pace compartment."
+            ),
+            mapping=(
+                "`defrecord` declares the case-shape: stamp `Runner`, "
+                "compartments [name pace]. `(->Runner \"Alice\" :slow)` "
+                "constructs a case filling the compartments in order. "
+                "`(:pace …)` reads the named compartment by its keyword."
+            ),
+            resolution=(
+                "the case held the runner's name and the pace keyword "
+                "in their compartments; reading the pace compartment "
+                "returned exactly what the case had been built with."
+            ),
+            tags=("story",),
+        ),
         _ex("(do (defrecord Runner [name pace]) (:name (->Runner \"Bob\" :moderate)))",
             "Bob",
             "reading the name field from a Runner record",
@@ -120,11 +147,32 @@ G8_04 = SubjectCurriculum(
     examples=[
         # Defining a protocol returns the protocol var; we use an
         # ancillary call that demonstrates it was defined.
-        _ex("(do (defprotocol Pace (speed [this])) (some? Pace))",
-            True,
-            "a protocol definition",
-            "whether the protocol var Pace is truthy after defining a protocol named Pace with one method speed taking a single argument this",
-            goal="define a protocol named Pace with one method speed that takes a single argument this"),
+        SubjectExample(
+            form="(do (defprotocol Pace (speed [this])) (some? Pace))",
+            expected=True,
+            concept_phrase="a protocol definition",
+            question_what="whether the Runners' guild named Pace is real after the founding",
+            goal_text="found a Runners' guild named Pace whose only requirement is a method speed taking the runner as its single argument; then check whether the guild's name is now a real thing in the runtime",
+            scenario=(
+                "Mossback wanted to found a Runners' guild named "
+                "`Pace`. Members would have to perform `speed`, taking "
+                "the runner as its argument."
+            ),
+            need=(
+                "Before any species could sign, the guild had to be "
+                "founded — and Mossback wanted to confirm the name was "
+                "now real to the runtime."
+            ),
+            mapping=(
+                "`defprotocol Pace (speed [this])` founds the guild. "
+                "`(some? Pace)` then asks whether the name is non-nil."
+            ),
+            resolution=(
+                "the runtime confirmed the guild was real — `some?` "
+                "returned true."
+            ),
+            tags=("story",),
+        ),
         _ex("(do (defprotocol Greet (hail [this])) (some? Greet))",
             True,
             "a protocol definition",
@@ -224,13 +272,37 @@ G8_08 = SubjectCurriculum(
     subject_title="Multimethod defmulti",
     fable="tortoise-hare",
     examples=[
-        _ex("(do (defmulti pace :species)"
-            " (defmethod pace :hare [_] :swift)"
-            " (pace {:species :hare}))",
-            ":swift",
-            "calling a multimethod with a specific dispatch value",
-            "the value returned after defining multimethod pace that dispatches on :species, adding a method for :hare, then calling pace with a map",
-            goal="define a multimethod pace that dispatches on the :species key, add a method for :hare, then call pace with a map"),
+        SubjectExample(
+            form='(do (defmulti pace :species) (defmethod pace :hare [_] :swift) (pace {:species :hare}))',
+            expected=":swift",
+            concept_phrase="the multimethod and its first arm",
+            question_what="the pace returned for a runner stamped :hare after the table routes to its arm",
+            goal_text="declare a sorting-table named pace that reads each runner's :species stamp; add an arm for the :hare stamp returning the swift-pace keyword; then route a runner stamped :hare through the table",
+            scenario=(
+                "Mossback the tortoise set up a sorting-table at the "
+                "edge of the meadow. Runners would walk up; the table "
+                "would read each runner's :species stamp and route them "
+                "to the matching arm."
+            ),
+            need=(
+                "Today's first arm she added was for hares: any runner "
+                "stamped :hare should be routed to an arm that returns "
+                "the swift-pace keyword. Today's first runner arrived "
+                "stamped :hare."
+            ),
+            mapping=(
+                "`defmulti` declares the table and what it sorts by "
+                "(`:species`). `defmethod` adds an arm for a specific "
+                "stamp (`:hare`). Calling `pace` on a runner reads the "
+                "stamp and routes to the matching arm."
+            ),
+            resolution=(
+                "the table read the :hare stamp, took the matching arm, "
+                "and returned the swift-pace keyword — exactly the "
+                "right pace for the species."
+            ),
+            tags=("story",),
+        ),
         _ex("(do (defmulti tag :kind)"
             " (defmethod tag :stone [_] :hard)"
             " (tag {:kind :stone}))",

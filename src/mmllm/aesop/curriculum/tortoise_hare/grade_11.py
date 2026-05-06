@@ -118,10 +118,37 @@ G11_02 = SubjectCurriculum(
     subject_title="Method call syntax",
     fable="tortoise-hare",
     examples=[
-        _ex('(.toUpperCase "abc")', "ABC",
-            'the host method toUpperCase',
-            "the uppercase form of the string abc produced by the host method toUpperCase via dot-prefix syntax",
-            goal="call the host method toUpperCase on the string abc"),
+        SubjectExample(
+            form='(.toUpperCase "abc")',
+            expected="ABC",
+            concept_phrase='the host method toUpperCase',
+            question_what="the capitalized result the host's toUpperCase returns on the three-letter string abc",
+            goal_text="call the host's toUpperCase routine on the three-letter string abc using the dot-prefix calling convention",
+            scenario=(
+                "Mossback the tortoise was using a small string of "
+                "three letters from the foreign toolshed — `abc` — and "
+                "she wanted the host's own routine for capitalizing "
+                "strings, kept under the name `toUpperCase`."
+            ),
+            need=(
+                "She didn't want to write a Clojure routine for "
+                "capitalization; she wanted to call the host's own "
+                "routine directly."
+            ),
+            mapping=(
+                "Host instance methods are called with dot-prefix on "
+                "the instance: `(.toUpperCase \"abc\")` invokes the "
+                "host's routine on the string. The runtime crosses the "
+                "boundary to the host, calls the method, and brings "
+                "the result back."
+            ),
+            resolution=(
+                "the host returned the three letters in capitals, and "
+                "the runtime brought the value back as a Clojure "
+                "string."
+            ),
+            tags=("story",),
+        ),
         _ex('(.startsWith "hare-tortoise" "hare")', True,
             "the host method startsWith checking a string prefix",
             "whether the string hare-tortoise starts with the prefix hare via the host method startsWith",

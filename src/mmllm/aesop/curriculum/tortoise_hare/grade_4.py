@@ -120,9 +120,35 @@ G4_07 = SubjectCurriculum(grade=4, subject_id="G4-07",
 G4_08 = SubjectCurriculum(grade=4, subject_id="G4-08",
     subject_title="assoc — map update", fable="tortoise-hare",
     examples=[
-        _ex("(assoc {:a 1} :b 2)", {":a": 1, ":b": 2},
-            "the assoc operation", "the map after using assoc to add the key :b with value 2",
-            goal="associate the key :b with value 2 onto a map binding :a to 1"),
+        SubjectExample(
+            form="(assoc {:a 1} :b 2)",
+            expected={":a": 1, ":b": 2},
+            concept_phrase="the assoc operation",
+            question_what="the basket after associating value 2 with the :b compartment",
+            goal_text="associate value 2 with the :b compartment of a basket already binding :a to 1",
+            scenario=(
+                "Mossback the tortoise's foraging-basket had compartments "
+                "stitched into its sides — an open area at the top, plus "
+                "named pouches :a and :b. Pouch :a already held 1 acorn "
+                "from the morning's gathering."
+            ),
+            need=(
+                "Pip the hare arrived from the orchard with 2 more "
+                "acorns. Mossback decided they belonged in pouch :b — "
+                "and pouch :a's acorn should stay exactly where it was."
+            ),
+            mapping=(
+                "`assoc` associates a value with a named compartment of "
+                "the basket. The basket's shape stays the same — :a "
+                "still holds its 1, and :b now holds the new 2 — exactly "
+                "as the foraging called for."
+            ),
+            resolution=(
+                "the basket carried both — 1 in :a, 2 in :b — ready for "
+                "the rest of the day's gathering."
+            ),
+            tags=("story",),
+        ),
         _ex("(assoc {:a 1} :a 99)", {":a": 99},
             "the assoc operation", "the map after using assoc to change the key :a to value 99",
             goal="update the key :a to value 99 in a map that binds :a to 1"),

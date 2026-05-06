@@ -70,9 +70,37 @@ G3_02 = SubjectCurriculum(grade=3, subject_id="G3-02",
 G3_03 = SubjectCurriculum(grade=3, subject_id="G3-03",
     subject_title="let — local binding", fable="tortoise-hare",
     examples=[
-        _ex("(let [x 3] (+ x 1))", 4, "the local binding and addition",
-            "adding 1 to x after binding x locally to 3 via let",
-            goal="bind x to 3 and add 1 to it"),
+        SubjectExample(
+            form="(let [x 3] (+ x 1))",
+            expected=4,
+            concept_phrase="the local binding and addition",
+            question_what="the running total after binding x to 3 and adding 1",
+            goal_text="bind a value of 3 to a local name x for one stretch, then return that value plus one",
+            scenario=(
+                "Mossback the tortoise had been counting along a stretch "
+                "of road. She set a single pebble — worth 3 acorns — into "
+                "the small leather pouch tied at her hip and gave the "
+                "pouch's contents the local name x."
+            ),
+            need=(
+                "Just past the next milestone she'd want the running "
+                "total — what x plus one more acorn would come to. After "
+                "the milestone, the pouch would empty and x would mean "
+                "nothing again."
+            ),
+            mapping=(
+                "`let` binds a value into a pouch named locally for the "
+                "stretch of one form. Inside `(+ x 1)`, x means 3; "
+                "outside the form, x is empty and unknown again. The "
+                "binding is in force only for the form's stretch."
+            ),
+            resolution=(
+                "the pouch yielded 3, the +1 added a fourth acorn, and "
+                "the running total stood at 4 — exactly what the next "
+                "milestone needed."
+            ),
+            tags=("story",),
+        ),
         _ex("(let [n 10] (* n n))", 100, "the local binding and multiplication",
             "multiplying n by itself after binding n locally to 10 via let",
             goal="bind n to 10 and compute n squared"),
@@ -155,10 +183,34 @@ G3_08 = SubjectCurriculum(grade=3, subject_id="G3-08",
 G3_09 = SubjectCurriculum(grade=3, subject_id="G3-09",
     subject_title="defn — shorthand", fable="tortoise-hare",
     examples=[
-        _ex("(do (defn dbl [x] (* x 2)) (dbl 5))", 10,
-            "the function definition and call",
-            "the result of calling the function dbl, defined via defn to multiply its argument by 2, with 5",
-            goal="define a function dbl that doubles its argument, then call it with 5"),
+        SubjectExample(
+            form="(do (defn dbl [x] (* x 2)) (dbl 5))",
+            expected=10,
+            concept_phrase="the named recipe-card and its first call",
+            question_what="the doubled count after defining a recipe named dbl and calling it on 5",
+            goal_text="define a recipe named dbl that takes a quantity and serves twice that, then call dbl on 5 pinches",
+            scenario=(
+                "Twice as many animals had arrived for dinner as "
+                "Mossback the tortoise had planned for, and every "
+                "recipe now needed twice its salt."
+            ),
+            need=(
+                "Mossback wanted a doubling routine written once and "
+                "posted under a name any cook could shout — tonight's "
+                "first reach being 5 pinches of salt."
+            ),
+            mapping=(
+                "`defn` writes the routine on a recipe-card and posts "
+                "the card under a name. The name (here `dbl`) is what "
+                "the kitchen shouts to invoke the doubling; the "
+                "parameter `x` is the quantity the cook brings."
+            ),
+            resolution=(
+                "the named recipe ran on 5 and handed back twice "
+                "that — exactly what the doubled crowd would need."
+            ),
+            tags=("story",),
+        ),
         _ex("(do (defn add3 [a b c] (+ a b c)) (add3 1 2 3))", 6,
             "the multi-argument function definition and call",
             "the result of calling the function add3, defined via defn to add three arguments, with 1, 2, and 3",

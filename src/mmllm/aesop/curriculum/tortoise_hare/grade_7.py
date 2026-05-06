@@ -86,10 +86,35 @@ G7_01 = SubjectCurriculum(grade=7, subject_id="G7-01",
 G7_02 = SubjectCurriculum(grade=7, subject_id="G7-02",
     subject_title="try / catch", fable="tortoise-hare",
     examples=[
-        _ex("(try (/ 1 0) (catch Exception e -1))", -1,
-            "the handler for a division-by-zero error",
-            "what the catch clause returns when ArithmeticException is caught",
-            goal="divide 1 by 0, catch the resulting ArithmeticException, return a numeric code"),
+        SubjectExample(
+            form="(try (/ 1 0) (catch Exception e -1))",
+            expected=-1,
+            concept_phrase="the handler for a division-by-zero error",
+            question_what="the value the catch arm returns when the divide-by-zero throw is caught",
+            goal_text="attempt to divide 1 by 0; when the runtime throws, catch the Exception and return -1 from the catch arm",
+            scenario=(
+                "Mossback the tortoise was about to ask the runtime "
+                "for the result of dividing 1 acorn into 0 piles — a "
+                "division she knew would throw, because dividing by "
+                "zero isn't a thing the runtime can do."
+            ),
+            need=(
+                "She didn't want the throw to end the run. She wanted "
+                "the form to come back with -1 as a placeholder so the "
+                "rest of the work could continue."
+            ),
+            mapping=(
+                "`try`/`catch` is a net beneath the leap. The throw "
+                "still happens, but the catch-arm catches the "
+                "Exception cleanly. Whatever the catch-arm returns is "
+                "what the form yields — here, the placeholder -1."
+            ),
+            resolution=(
+                "the throw happened, the catch caught it, and the form "
+                "yielded -1 — the placeholder Mossback had specified."
+            ),
+            tags=("story",),
+        ),
         _ex("(try 42 (catch Exception e :caught))", 42,
             "a try block with no error",
             "what the try block returns when no error occurs",
@@ -254,10 +279,34 @@ G7_12 = SubjectCurriculum(grade=7, subject_id="G7-12",
     examples=[
         # An in-memory analogue: build a string, then read it back via
         # split / count, the way slurp-then-process works in practice.
-        _ex("(count \"hare\\ntortoise\\n\")", 14,
-            "the character count of a multi-line string",
-            "how many characters are in the multi-line string",
-            goal="count the characters in a multi-line string"),
+        SubjectExample(
+            form='(count "hare\ntortoise\n")',
+            expected=14,
+            concept_phrase="the character count of a multi-line string",
+            question_what="the total characters in a two-line string with newline-marks at each line's end",
+            goal_text="count every character in a two-line string ending each line with a newline-mark, including the marks",
+            scenario=(
+                "Mossback the tortoise had a small two-line message on "
+                "a scroll — the word `hare` on one line, `tortoise` on "
+                "the next, each line ending with a newline-mark."
+            ),
+            need=(
+                "She wanted to know whether the message would fit in "
+                "her message-pouch — and to know that, she needed the "
+                "total character count, including the newline-marks."
+            ),
+            mapping=(
+                "`count` on a string walks each character — visible "
+                "letters and the invisible newline-marks alike — "
+                "returning the total. The scroll itself is unchanged."
+            ),
+            resolution=(
+                "the runtime tallied 14 characters: the four of `hare`, "
+                "a newline, the eight of `tortoise`, and a final "
+                "newline — the fit she had hoped for."
+            ),
+            tags=("story",),
+        ),
         _ex("(clojure.string/split \"a\\nb\\nc\" #\"\\n\")", ["a", "b", "c"],
             "the vector of lines from splitting a string",
             "what lines result from splitting a string on newlines",

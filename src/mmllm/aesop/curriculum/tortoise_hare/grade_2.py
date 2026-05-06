@@ -130,8 +130,32 @@ G2_04 = SubjectCurriculum(
     subject_title="min and max",
     fable="tortoise-hare",
     examples=[
-        _ex("(min 1 2 3)",  1, "the minimum of three numbers",  "the smallest of 1, 2, and 3",
-            goal="find the minimum of 1, 2, and 3"),
+        SubjectExample(
+            form="(min 1 2 3)",
+            expected=1,
+            concept_phrase="the minimum of three numbers",
+            question_what="the smallest of 1, 2, and 3",
+            goal_text="find the minimum of 1, 2, and 3",
+            scenario=(
+                "Mossback the tortoise laid out three small acorn-counts "
+                "on a flat stone — 1 from a dawn trip, 2 from a midday "
+                "trip, 3 from an afternoon trip."
+            ),
+            need=(
+                "She wanted to know which trip had been the lightest, to "
+                "plan tomorrow's routing."
+            ),
+            mapping=(
+                "`min` walks the heaps and returns the smallest count. "
+                "The acorns themselves stay where they are; only the "
+                "runtime's verdict — the smallest number — comes back."
+            ),
+            resolution=(
+                "the runtime named the lightest trip's count: 1, the "
+                "dawn trip the smallest of the three."
+            ),
+            tags=("story",),
+        ),
         _ex("(max 1 2 3)",  3, "the maximum of three numbers",  "the largest of 1, 2, and 3",
             goal="find the maximum of 1, 2, and 3"),
         _ex("(min 7 3 9 1 5)", 1, "the minimum of five numbers", "the smallest of 7, 3, 9, 1, and 5",
@@ -268,10 +292,34 @@ G2_11 = SubjectCurriculum(
     subject_title="String concatenation with str",
     fable="tortoise-hare",
     examples=[
-        _ex('(str "ab" "cd")', "abcd",
-            'the string concatenation',
-            'the result of using str to join "ab" and "cd"',
-            goal='use str to join the two-letter strings "ab" and "cd"'),
+        SubjectExample(
+            form='(str "ab" "cd")',
+            expected="abcd",
+            concept_phrase='the string concatenation',
+            question_what='the result of using str to splice "ab" and "cd"',
+            goal_text='use str to splice the two-letter strings "ab" and "cd" into a single thread',
+            scenario=(
+                "Mossback the tortoise held two short threads of beads — "
+                'one with the two letters "ab" wound on, the other with '
+                'the two letters "cd". Two threads, four beads in all.'
+            ),
+            need=(
+                "She wanted them spliced end to end into one longer "
+                "thread, so the four-bead string could carry as a single "
+                "name in her foraging-ledger."
+            ),
+            mapping=(
+                "`str` splices its arguments into one bead-string: each "
+                "argument's beads thread one after another. With two "
+                'short threads "ab" and "cd", the splice yields a single '
+                "four-bead thread."
+            ),
+            resolution=(
+                "the spliced thread came back as a single four-letter "
+                "string in order — ready to wear in the ledger."
+            ),
+            tags=("story",),
+        ),
         _ex('(str 42)', "42",
             'the string coercion of an integer',
             'the result of using str on the integer 42',
@@ -315,9 +363,36 @@ G2_13 = SubjectCurriculum(
     subject_title="and / or — short circuit, return values",
     fable="tortoise-hare",
     examples=[
-        _ex("(and true true)",   True,   "the logical and",
-            "the result of using and on true and true",
-            goal="test true and true with the and operator"),
+        SubjectExample(
+            form="(and true true)",
+            expected=True,
+            concept_phrase="the logical and",
+            question_what="the result of passing true and true through the and-chain of gates",
+            goal_text="test whether two trues both pass through an and-chain of gates",
+            scenario=(
+                "Two small wooden gates stood at the start of the meadow "
+                "trail. Each gate's verdict-stone was carved with the "
+                "value the runner would carry to it — and today's two "
+                "stones both read true."
+            ),
+            need=(
+                "Mossback the tortoise wanted to know whether both gates "
+                "would let the runner through together, or whether the "
+                "first one would close and stop the chain."
+            ),
+            mapping=(
+                "`and` walks the gates left to right: the first false "
+                "closes the chain and that value comes back; otherwise "
+                "the value at the last gate is what comes back. With "
+                "both stones reading true, the chain holds and the last "
+                "gate's true is the verdict."
+            ),
+            resolution=(
+                "both gates stood open, and the value at the last "
+                "gate — true — passed back as the chain's verdict."
+            ),
+            tags=("story",),
+        ),
         _ex("(and true false)",  False,  "the logical and",
             "the result of using and on true and false",
             goal="test true and false with the and operator"),

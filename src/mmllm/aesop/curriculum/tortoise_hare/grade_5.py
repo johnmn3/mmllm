@@ -62,9 +62,34 @@ G5_03 = SubjectCurriculum(grade=5, subject_id="G5-03",
 G5_04 = SubjectCurriculum(grade=5, subject_id="G5-04",
     subject_title="cond", fable="tortoise-hare",
     examples=[
-        _ex("(cond (= 1 2) :a (= 1 1) :b :else :c)", ":b",
-            "the multi-clause conditional", "which clause of the cond fires",
-            goal="evaluate multiple conditions in sequence and return the value from the first true clause"),
+        SubjectExample(
+            form="(cond (= 1 2) :a (= 1 1) :b :else :c)",
+            expected=":b",
+            concept_phrase="the multi-clause conditional",
+            question_what="the value of the first arm whose stone reads true",
+            goal_text="walk three condition-stones in order, taking the arm whose stone first reads true",
+            scenario=(
+                "The trail forked into three arms, each marked by a "
+                "small condition-stone — the first carved `(= 1 2)`, "
+                "the second `(= 1 1)`, the third `:else`."
+            ),
+            need=(
+                "Mossback the tortoise wanted the runtime to walk the "
+                "stones in order and take the first arm whose stone "
+                "read true."
+            ),
+            mapping=(
+                "`cond` walks each (condition, value) pair in order. "
+                "The first stone is false (skip), the second is true "
+                "(take that arm; return its value); the third is never "
+                "reached."
+            ),
+            resolution=(
+                "the runtime took the second arm and returned :b, the "
+                "value that arm carried."
+            ),
+            tags=("story",),
+        ),
     ], subplots=_FORK_SUBPLOTS, plan_pool=_PLAN_G5)
 
 
@@ -119,9 +144,36 @@ G5_09 = SubjectCurriculum(grade=5, subject_id="G5-09",
 G5_10 = SubjectCurriculum(grade=5, subject_id="G5-10",
     subject_title="map", fable="tortoise-hare",
     examples=[
-        _ex("(map inc [1 2 3])", [2,3,4],
-            "mapping increment over a vector", "the sequence produced by mapping inc over the vector containing 1, 2, and 3",
-            goal="apply inc to each element of the vector containing 1, 2, and 3, returning a sequence"),
+        SubjectExample(
+            form="(map inc [1 2 3])",
+            expected=[2,3,4],
+            concept_phrase="mapping increment over a vector",
+            question_what="the sequence produced by passing the vector containing 1, 2, and 3 through the inc-sieve",
+            goal_text="pour the vector containing 1, 2, 3 through a sieve whose rule is inc, collecting each transformed element",
+            scenario=(
+                "A row of three small acorns lay on a flat stone — "
+                "the morning's first gathering, with counts of 1, 2, "
+                "and 3."
+            ),
+            need=(
+                "Each acorn was missing a single bud at the cap. "
+                "Mossback the tortoise wanted to add one bud to every "
+                "acorn before sending the row to market — without "
+                "pulling the row apart."
+            ),
+                mapping=(
+                "`map` is a sieve with a rule attached at its mouth. "
+                "Pour the row through, and each acorn passes the rule — "
+                "here, `inc`, adding one bud — coming out the other "
+                "side budded by one. The shape stays a row; only the "
+                "counts step up."
+            ),
+            resolution=(
+                "what landed below the sieve was the same three acorns, "
+                "each budded one more — counts of 2, 3, and 4."
+            ),
+            tags=("story",),
+        ),
         _ex("(map #(* % %) [1 2 3 4])", [1,4,9,16],
             "mapping a squaring operation over a vector", "the sequence produced by mapping a lambda that squares its argument over the vector containing 1, 2, 3, and 4",
             goal="apply a squaring operation to each element of the vector containing 1, 2, 3, and 4, returning a sequence"),
@@ -143,8 +195,35 @@ G5_11 = SubjectCurriculum(grade=5, subject_id="G5-11",
 G5_12 = SubjectCurriculum(grade=5, subject_id="G5-12",
     subject_title="reduce", fable="tortoise-hare",
     examples=[
-        _ex("(reduce + [1 2 3 4])",   10, "the fold operation", "the sum produced by reducing + over the vector containing 1, 2, 3, and 4",
-            goal="fold + over the vector containing 1, 2, 3, and 4, summing them"),
+        SubjectExample(
+            form="(reduce + [1 2 3 4])",
+            expected=10,
+            concept_phrase="the fold operation",
+            question_what="the running tally after walking 1, 2, 3, 4 with + as the combine step",
+            goal_text="walk the row of pebbles 1, 2, 3, 4 carrying a tally that combines each with + into the running total",
+            scenario=(
+                "A row of four small pebbles lay along the path — "
+                "counts of 1, 2, 3, and 4 from four foraging trips."
+            ),
+            need=(
+                "Mossback the tortoise wanted the grand total of the "
+                "four trips. Walking the row and carrying a running "
+                "tally was the patient way."
+            ),
+            mapping=(
+                "`reduce` walks the collection from left to right "
+                "carrying a tally. At each pebble, the combine "
+                "function (here `+`) is applied to (tally, pebble), "
+                "producing the new tally. The final tally is what "
+                "comes back."
+            ),
+            resolution=(
+                "the walk produced a tally that grew across the four "
+                "pebbles, ending at the grand total of all four "
+                "trips."
+            ),
+            tags=("story",),
+        ),
         _ex("(reduce * [1 2 3 4 5])", 120,"the fold operation", "the product produced by reducing * over the vector containing 1, 2, 3, 4, and 5",
             goal="fold * over the vector containing 1, 2, 3, 4, and 5, computing their product"),
         _ex("(reduce max [3 1 4 1 5 9 2 6])", 9,
@@ -259,10 +338,35 @@ G5_21 = SubjectCurriculum(grade=5, subject_id="G5-21",
 G5_22 = SubjectCurriculum(grade=5, subject_id="G5-22",
     subject_title="recur — first taste", fable="tortoise-hare",
     examples=[
-        _ex("(loop [n 5 acc 1] (if (zero? n) acc (recur (dec n) (* acc n))))", 120,
-            "a factorial computation via loop and recur",
-            "5! computed via loop/recur",
-            goal="compute the factorial of 5 using a loop and tail recursion"),
+        SubjectExample(
+            form="(loop [n 5 acc 1] (if (zero? n) acc (recur (dec n) (* acc n))))",
+            expected=120,
+            concept_phrase="a factorial computation via loop and recur",
+            question_what="the factorial of 5 computed by walking a circuit",
+            goal_text="walk a small circuit five times, multiplying a running tally by the current step each lap, until the step counter reaches zero",
+            scenario=(
+                "Mossback the tortoise wanted to compute 5! — the "
+                "product 5 × 4 × 3 × 2 × 1 — without writing five "
+                "separate multiplications."
+            ),
+            need=(
+                "She'd walk a small circuit around a stone, each lap "
+                "multiplying her tally by the current step, until the "
+                "step counter reached zero — then return the tally."
+            ),
+            mapping=(
+                "`loop`/`recur` is the circuit. `loop [n 5 acc 1]` "
+                "starts the bindings; `recur` jumps back to the top "
+                "with new bindings — `(dec n)` and `(* acc n)` — "
+                "without growing the call-stack. The base case "
+                "`(zero? n)` returns `acc`."
+            ),
+            resolution=(
+                "five laps later the step counter reached zero and the "
+                "tally — 5! — came back."
+            ),
+            tags=("story",),
+        ),
     ], subplots=_CIRCUIT_SUBPLOTS, plan_pool=_PLAN_G5)
 
 

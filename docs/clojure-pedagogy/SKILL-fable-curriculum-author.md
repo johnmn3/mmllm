@@ -364,6 +364,182 @@ Therefore, when you implement a grade file:
 - If you find an idiom without a family: design one and add it.
   Don't fall back. **The metaphor is the lesson.**
 
+## Story-scaffold framework — the metaphor must DRIVE the action
+
+Even with metaphor pools wired in, an early review found a subtle but
+deep failure mode: templates *named* the metaphor (pouch, basket,
+recipe…) but didn't *drive* the action with it. Every record had the
+same shape — generic opener, Tortoise philosophically introduces the
+metaphor, composes the form, REPL returns. There was no concrete
+need, no narrative tension, no mapping from fable elements to
+operation parts. The Tortoise became a nature documentary narrator
+giving definitions.
+
+A grounded story has 5 acts:
+
+1. **SETUP**     — a concrete situation in the meadow that *exists*.
+2. **NEED**      — something specific the operation answers.
+3. **MAPPING**   — how the metaphor's elements map 1:1 to the
+                   operation's parts.
+4. **ACTION**    — the character composes and submits the form.
+5. **RESOLUTION**— what the REPL's value means in the story; closes
+                   the loop with the need.
+
+### The four story slots
+
+`SubjectExample` has four optional slots that compose with the
+existing `goal_text`/`concept_phrase` fields:
+
+```python
+SubjectExample(
+    form="(assoc {:a 1} :b 2)",
+    expected={":a": 1, ":b": 2},
+    concept_phrase="the assoc operation",
+    question_what="the basket after associating value 2 with the :b compartment",
+    goal_text="associate value 2 with the :b compartment of a basket already binding :a to 1",
+
+    # Story scaffold — Phase C:
+    scenario=(
+        "Mossback the tortoise's foraging-basket had compartments "
+        "stitched into its sides — an open area at the top, plus "
+        "named pouches :a and :b. Pouch :a already held 1 acorn "
+        "from the morning's gathering."
+    ),
+    need=(
+        "Pip the hare arrived from the orchard with 2 more acorns. "
+        "Mossback decided they belonged in pouch :b — and pouch :a's "
+        "acorn should stay exactly where it was."
+    ),
+    mapping=(
+        "`assoc` associates a value with a named compartment of the "
+        "basket. The basket's shape stays the same — :a still holds "
+        "its 1, and :b now holds the new 2 — exactly as the foraging "
+        "called for."
+    ),
+    resolution=(
+        "the basket carried both — 1 in :a, 2 in :b — ready for the "
+        "rest of the day's gathering."
+    ),
+    tags=("story",),
+)
+```
+
+The `"story"` tag is essential. Story-scaffold templates carry
+`fits_tags=("story",)`, so they only fire for examples with all four
+slots filled. Examples without story slots continue to render with
+the existing family templates as before.
+
+### Authoring rules for story slots
+
+Follow these religiously. They're the difference between a story
+that lands and one that constructs scenes the form contradicts.
+
+1. **The scenario must *exist*, not be hypothetical.** "There was a
+   basket on the path" is good; "Whatever I want to do with what's
+   inside" is decoration, not a story. Set up the meadow concretely:
+   what's there, what state it's in, who's around.
+
+2. **The need must be specific.** Without the operation, *something
+   fails* — dinner doesn't get its salt, the pear has no pouch, the
+   tally doesn't update. Generic "Mossback wanted to know X" doesn't
+   work; the need has to drive the operation.
+
+3. **The mapping is the pedagogical core.** Spell out how the
+   metaphor's elements correspond to the operation's parts.
+   `assoc → associate-with-named-compartment`, `defn → recipe-card-
+   with-name`, `swap! → atomic-read-modify-write-on-stump-notebook`.
+   The model trains on this mapping; don't hand-wave it.
+
+4. **The resolution closes the loop with the need.** If the need was
+   "tally up to 1 berry," the resolution is "the page now reads 1." If
+   the need was "the pear belongs in pouch :b," the resolution is
+   "the basket carried both, 1 in :a and 2 in :b." Don't end on
+   "the REPL returned the value" generically.
+
+5. **No answer leaks.** The same audit checks apply: don't put the
+   literal expected value as a string in `scenario` / `need` /
+   `mapping` / `resolution`. Describe values as "doubled," "the new
+   tally," "the running sum" — not "10" / "1" / "abcd" / ":caught".
+
+6. **Length budget: roughly 100-150 words across all four slots.**
+   The audit's `HIGH_LENGTH` check fires above ~200 words of
+   `user_msg`, which includes the opener + template prose + slots.
+   Trim ruthlessly.
+
+### Story-scaffold templates
+
+Each metaphor family has one extra template (in
+`tortoise_hare/_metaphor_pools.py`) that composes the four slots into
+the 5-act shape. The template provides Act 4 (the character composes
++ submits) using the family's verb (compose / pour / swap / tuck /
+etc.). The slots provide Acts 1, 2, 3, 5. The templates are tagged
+`fits_tags=("story",)` so they only fire for tagged examples.
+
+A new family pool **must** include a story-scaffold template. The
+`_story()` helper in `_metaphor_pools.py` builds one from a single
+piece of family-specific connective prose:
+
+```python
+_FAMILY_SUBPLOTS = _FAMILY_SUBPLOTS + [
+    _story(
+        "To {goal_text}, {tortoise_he_she_cap} composed {concept_phrase} "
+        "[family-specific verb], submitted the form, and the REPL "
+        "[family-specific REPL action]:"
+    ),
+]
+```
+
+### Worked story examples
+
+The reference implementation has 22 worked examples — one per
+metaphor family — in the curriculum files. To find them, grep for
+`tags=("story",)`:
+
+```bash
+grep -rln 'tags=("story",)' src/mmllm/aesop/curriculum/tortoise_hare/
+```
+
+Recommended reading: G3-03 (let → pouch), G3-09 (defn → recipe),
+G4-08 (assoc → basket-with-compartments), G5-10 (map → sieve),
+G9-03 (atom → notebook-on-stump). Each demonstrates the mapping from
+the operation's structure to the fable's imagery.
+
+### Cross-fable parity
+
+Story slots are fable-specific (each fable's scenarios use that
+fable's characters and props), but the **operation's structure is the
+same**, so the mapping translates. For tortoise-hare's G4-08 assoc,
+the scenario uses "foraging-basket with compartments :a and :b"; for
+goose-eggs the equivalent might be "egg-basket with pouches for white
+eggs and brown eggs"; for ant-grasshopper, "grain-stockpile with
+named bins." The operation (`assoc`) is the same; only the props
+differ.
+
+When you implement a new fable:
+1. Author parallel family pools in that fable's `_metaphor_pools.py`
+   with the same family names (`_POUCH_SUBPLOTS`, `_BASKET_SUBPLOTS`,
+   etc.).
+2. Author parallel `_story()` templates in each pool.
+3. Author parallel story slots for the same canonical examples,
+   translated into that fable's imagery.
+4. The `fits_tags=("story",)` mechanism works the same way — examples
+   with all four slots filled and `tags=("story",)` get the
+   story-scaffold template.
+
+### Don't drop the story
+
+The most common failure mode for fable-curriculum agents is to author
+`scenario` / `need` / `mapping` / `resolution` slots that *describe*
+the metaphor instead of *staging* it. "The basket has compartments"
+is a description; "Mossback's foraging-basket had compartments
+stitched into its sides — pouch :a held 1 acorn from this morning"
+is a stage.
+
+When in doubt, ask: *"What's happening in the meadow right now?"* If
+the answer is "Mossback is philosophically introducing a metaphor,"
+rewrite. If the answer is "Pip just arrived with 2 acorns from the
+orchard and Mossback has to decide where they go," keep going.
+
 ## Plan pool
 
 A short list of plan-only prefaces — single sentences describing

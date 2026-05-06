@@ -209,6 +209,33 @@ def check_record(rec, sub, example):
                 issues.append(("ANSWER_LEAK_STRING",
                     f"answer string {ans!r} appears in user_msg"))
 
+    # STORY_TAG_MISMATCH — examples with the "story" tag should have
+    # all four story slots filled (scenario / need / mapping /
+    # resolution). Conversely, examples with all four slots filled
+    # should declare tags=("story",) so story-scaffold templates fire.
+    has_story_tag = "story" in getattr(example, "tags", ())
+    has_all_slots = all(
+        getattr(example, slot, "")
+        for slot in ("scenario", "need", "mapping", "resolution")
+    )
+    has_any_slot = any(
+        getattr(example, slot, "")
+        for slot in ("scenario", "need", "mapping", "resolution")
+    )
+    if has_story_tag and not has_all_slots:
+        issues.append(("STORY_TAG_MISMATCH",
+                       'example tagged "story" but is missing one or '
+                       'more of scenario/need/mapping/resolution slots'))
+    elif has_any_slot and not has_all_slots:
+        issues.append(("STORY_TAG_MISMATCH",
+                       "example has some story slots filled but not "
+                       "all four; either fill all four or remove all"))
+    elif has_all_slots and not has_story_tag:
+        issues.append(("STORY_TAG_MISMATCH",
+                       "example has all four story slots filled but "
+                       'is not tagged "story"; story-scaffold '
+                       "template will not fire"))
+
     # ─────────────────────── deep-audit additions ───────────────────────
     # Checks added after the goose-eggs and ant-grasshopper hand-audits
     # surfaced patterns the original structural rules missed. Each was

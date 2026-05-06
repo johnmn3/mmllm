@@ -136,11 +136,37 @@ G10_03 = SubjectCurriculum(
     subject_title="defmacro introduction",
     fable="tortoise-hare",
     examples=[
-        _ex("(do (defmacro my-when [t & body] `(if ~t (do ~@body))) "
-            "(my-when true 1 2 3))", 3,
-            "defining a conditional macro and invoking it",
-            "the value returned when my-when expands to an if-do block that runs the body with test true",
-            goal="define a macro named my-when that takes a test and body expressions, then invoke it"),
+        SubjectExample(
+            form="(do (defmacro my-when [t & body] `(if ~t (do ~@body))) "
+                 "(my-when true 1 2 3))",
+            expected=3,
+            concept_phrase="defining a conditional macro and invoking it",
+            question_what="the value the rewritten if-do form returns when the test is true and the body has three expressions",
+            goal_text="define a rule named my-when that rewrites (my-when t body...) into (if t (do body...)); then invoke it with the test true and a three-expression body",
+            scenario=(
+                "Mossback the tortoise was tired of writing `if`/`do` "
+                "by hand for every form where she wanted several steps "
+                "to run only if a condition held."
+            ),
+            need=(
+                "She wanted a rule called `my-when` that rewrote the "
+                "shorter form `(my-when t body...)` into the longer "
+                "`(if t (do body...))` — once written, applicable to "
+                "any test and body."
+            ),
+            mapping=(
+                "`defmacro` defines a rewrite-rule. The rule's body "
+                "uses syntax-quote and unquote-splicing to build the "
+                "rewritten form. The runtime applies the rule first, "
+                "then evaluates the rewritten form normally."
+            ),
+            resolution=(
+                "the rewritten form ran the body, kept only the "
+                "last-step value, and returned it — the rule had "
+                "saved Mossback the longer writing."
+            ),
+            tags=("story",),
+        ),
         _ex("(do (defmacro twice [x] `(do ~x ~x)) (twice 7))", 7,
             "defining a macro that repeats its argument",
             "the value returned by twice expanding to a do-block with the unquoted argument repeated",

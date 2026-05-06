@@ -1332,3 +1332,223 @@ patiently — the base case is the runner's compass. To
 submitted the form, and the REPL — looping the right number of
 times, then stopping — returned the value cleanly."""),
 ]
+
+
+# ════════════════════════════════════════════════════════════════════
+# STORY TEMPLATES (Phase C — story-scaffold framework)
+# ════════════════════════════════════════════════════════════════════
+#
+# Each family gets ONE additional template that composes the example's
+# `scenario` / `need` / `mapping` / `resolution` slots into a 5-act
+# grounded story:
+#
+#   Act 1 (SETUP):       {scenario}
+#   Act 2 (NEED):        {need}
+#   Act 3 (MAPPING):     {mapping}
+#   Act 4 (ACTION):      character composes form; supplied by template
+#   Act 5 (RESOLUTION):  {resolution}
+#
+# These templates carry `fits_tags=("story",)` so they only fire for
+# examples whose tags include "story" (i.e., examples that have all
+# four story slots authored). Examples without story slots continue
+# to render with the existing family templates as before.
+#
+# Each family's story template differs only in the metaphor-vocabulary
+# of its connective prose around the {concept_phrase} action — pouch
+# is "tucked into the pouch", basket is "for the basket", sieve is
+# "as the sieve's rule", etc. The slots provide the specifics.
+
+
+def _story(connective_prose: str) -> SubplotTemplate:
+    """Build a story-scaffold template for a family.
+
+    The template is the canonical 5-act story shape; the family
+    differentiates itself only by the {connective_prose} around the
+    composed/submitted action — using the family's verb (compose /
+    pour / swap / tuck / etc.) and its imagery vocabulary.
+    """
+    return SubplotTemplate(f"""\
+{{scenario}}
+
+{{need}}
+
+{{mapping}}
+
+{connective_prose}
+
+{{resolution}}""", fits_tags=("story",))
+
+
+# Family-specific story templates. The connective prose for each
+# uses the family's verb + imagery, so the metaphor's vocabulary
+# stays consistent through the action act.
+
+_POUCH_SUBPLOTS = _POUCH_SUBPLOTS + [
+    _story(
+        "To {goal_text}, {tortoise_he_she_cap} composed {concept_phrase} "
+        "with the binding tucked safely into the pouch and submitted the "
+        "form. The REPL pulled from the pouch as the form directed:"
+    ),
+]
+
+_RECIPE_SUBPLOTS = _RECIPE_SUBPLOTS + [
+    _story(
+        "To {goal_text}, {tortoise_he_she_cap} wrote out {concept_phrase} "
+        "on a card and submitted the form. The REPL ran the recipe end "
+        "to end:"
+    ),
+]
+
+_BASKET_SUBPLOTS = _BASKET_SUBPLOTS + [
+    _story(
+        "To {goal_text}, {tortoise_he_she_cap} composed {concept_phrase} "
+        "for the basket and submitted the form. The REPL handed back the "
+        "arrangement:"
+    ),
+]
+
+_SIEVE_SUBPLOTS = _SIEVE_SUBPLOTS + [
+    _story(
+        "To {goal_text}, {tortoise_he_she_cap} composed {concept_phrase} "
+        "as the sieve's rule, poured the input through, and submitted "
+        "the form. The REPL caught what landed below:"
+    ),
+]
+
+_NOTEBOOK_SUBPLOTS = _NOTEBOOK_SUBPLOTS + [
+    _story(
+        "To {goal_text}, {tortoise_he_she_cap} composed {concept_phrase} "
+        "for the notebook and submitted the form. The REPL applied the "
+        "update on the stump:"
+    ),
+]
+
+_ACORN_SUBPLOTS = _ACORN_SUBPLOTS + [
+    _story(
+        "To {goal_text}, {tortoise_he_she_cap} composed {concept_phrase} "
+        "and submitted the form. The REPL counted out the answer:"
+    ),
+]
+
+_GATE_SUBPLOTS = _GATE_SUBPLOTS + [
+    _story(
+        "To {goal_text}, {tortoise_he_she_cap} composed {concept_phrase} "
+        "and submitted the form. The REPL let the gates decide:"
+    ),
+]
+
+_FORK_SUBPLOTS = _FORK_SUBPLOTS + [
+    _story(
+        "To {goal_text}, {tortoise_he_she_cap} composed {concept_phrase} "
+        "and submitted the form. The REPL took the right arm:"
+    ),
+]
+
+_ROADSIGN_SUBPLOTS = _ROADSIGN_SUBPLOTS + [
+    _story(
+        "To {goal_text}, {tortoise_he_she_cap} composed {concept_phrase} "
+        "and submitted the form. The REPL read the signs and replied:"
+    ),
+]
+
+_SAFETYNET_SUBPLOTS = _SAFETYNET_SUBPLOTS + [
+    _story(
+        "To {goal_text}, {tortoise_he_she_cap} composed {concept_phrase} "
+        "and submitted the form. The REPL — net in place — handed back "
+        "the value:"
+    ),
+]
+
+_SCROLL_SUBPLOTS = _SCROLL_SUBPLOTS + [
+    _story(
+        "To {goal_text}, {tortoise_he_she_cap} composed {concept_phrase} "
+        "and submitted the form. The REPL — quill in hand — completed "
+        "the scroll-work:"
+    ),
+]
+
+_GUILD_SUBPLOTS = _GUILD_SUBPLOTS + [
+    _story(
+        "To {goal_text}, {tortoise_he_she_cap} composed {concept_phrase} "
+        "and submitted the form. The REPL — checking the guild book — "
+        "dispatched cleanly:"
+    ),
+]
+
+_SORTINGTABLE_SUBPLOTS = _SORTINGTABLE_SUBPLOTS + [
+    _story(
+        "To {goal_text}, {tortoise_he_she_cap} composed {concept_phrase} "
+        "and submitted the form. The REPL routed through the table:"
+    ),
+]
+
+_CARRYINGCASE_SUBPLOTS = _CARRYINGCASE_SUBPLOTS + [
+    _story(
+        "To {goal_text}, {tortoise_he_she_cap} composed {concept_phrase} "
+        "and submitted the form. The REPL constructed the case:"
+    ),
+]
+
+_TOOLSHED_SUBPLOTS = _TOOLSHED_SUBPLOTS + [
+    _story(
+        "To {goal_text}, {tortoise_he_she_cap} composed {concept_phrase} "
+        "and submitted the form. The REPL — calling into the foreign "
+        "toolshed — returned:"
+    ),
+]
+
+_RUNNERAHEAD_SUBPLOTS = _RUNNERAHEAD_SUBPLOTS + [
+    _story(
+        "To {goal_text}, {tortoise_he_she_cap} composed {concept_phrase} "
+        "and submitted the form. The REPL coordinated the runner's "
+        "return:"
+    ),
+]
+
+_REWRITERULE_SUBPLOTS = _REWRITERULE_SUBPLOTS + [
+    _story(
+        "To {goal_text}, {tortoise_he_she_cap} composed {concept_phrase} "
+        "and submitted the form. The REPL — applying the rewrite, then "
+        "evaluating the rewritten form — returned:"
+    ),
+]
+
+_SCRIBE_SUBPLOTS = _SCRIBE_SUBPLOTS + [
+    _story(
+        "To {goal_text}, {tortoise_he_she_cap} composed {concept_phrase} "
+        "and submitted the form. The REPL read by the conventions and "
+        "returned:"
+    ),
+]
+
+_CHALKMARK_SUBPLOTS = _CHALKMARK_SUBPLOTS + [
+    _story(
+        "To {goal_text}, {tortoise_he_she_cap} composed {concept_phrase} "
+        "and submitted the form. The REPL — distinguishing label from "
+        "value — returned:"
+    ),
+]
+
+_TALLYWALK_SUBPLOTS = _TALLYWALK_SUBPLOTS + [
+    _story(
+        "To {goal_text}, {tortoise_he_she_cap} composed {concept_phrase} "
+        "and submitted the form. The REPL walked the row carrying the "
+        "tally:"
+    ),
+]
+
+_BEADSTRING_SUBPLOTS = _BEADSTRING_SUBPLOTS + [
+    _story(
+        "To {goal_text}, {tortoise_he_she_cap} composed {concept_phrase} "
+        "and submitted the form. The REPL spliced or counted as the "
+        "form said:"
+    ),
+]
+
+_CIRCUIT_SUBPLOTS = _CIRCUIT_SUBPLOTS + [
+    _story(
+        "To {goal_text}, {tortoise_he_she_cap} composed {concept_phrase} "
+        "and submitted the form. The REPL looped without growing the "
+        "trail:"
+    ),
+]

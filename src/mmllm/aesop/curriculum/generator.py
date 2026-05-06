@@ -80,13 +80,51 @@ class SubjectExample:
     `"add 1 and 2"`. When empty, subjects use atom-style subplots
     that show the form (legitimate for L1 atom subjects where the form
     IS the answer; copy-from-prompt is the lesson).
+
+    Story-scaffold slots (optional, all four together) — when an
+    example is authored with a grounded fable story, these four
+    slots compose a 5-act narrative that templates can render
+    directly. Templates that reference these placeholders should be
+    tagged with `fits_tags=("story",)` so they only fire for
+    examples that include "story" in their tags.
+
+      `scenario`   (act 1 — SETUP)     — a concrete situation in the
+                                         meadow that *exists*. Names
+                                         characters, place, and the
+                                         current state of the world.
+                                         1-3 sentences.
+      `need`       (act 2 — NEED)      — what's needed; the question
+                                         the operation answers.
+                                         Without the operation,
+                                         something fails. 1-2
+                                         sentences.
+      `mapping`    (act 3 — MAPPING)   — how the metaphor's elements
+                                         map 1:1 to the operation's
+                                         parts. The pedagogical core.
+                                         1-2 sentences.
+      `resolution` (act 5 — RESOLUTION)— what the REPL's value means
+                                         in the story; closes the
+                                         loop with the need. 1
+                                         sentence.
+
+    Act 4 (ACTION) is supplied by the template — the character
+    composes `{concept_phrase}` and submits.
     """
     form:           str
     expected:       object
     concept_phrase: str
     question_what:  str
     goal_text:      str = ""
-    # tags used for filtering / weighting (optional)
+    # Story-scaffold slots (Phase C). All four authored together,
+    # with the example's tags including "story" so story-aware
+    # subplot templates can match via fits_tags.
+    scenario:       str = ""
+    need:           str = ""
+    mapping:        str = ""
+    resolution:     str = ""
+    # tags used for filtering / weighting (optional). Examples with
+    # all four story slots filled should also include "story" in
+    # their tags so story-templates fire.
     tags:           tuple[str, ...] = ()
 
 
@@ -309,6 +347,13 @@ def _build_placeholders(scene: Scene,
         "concept_phrase":  example.concept_phrase,
         "what":            example.question_what,
         "goal_text":       example.goal_text,
+        # story-scaffold slots (Phase C). Empty when the example
+        # has no story authored; templates that use them should
+        # be tagged fits_tags=("story",).
+        "scenario":        example.scenario,
+        "need":            example.need,
+        "mapping":         example.mapping,
+        "resolution":      example.resolution,
 
         # emotions — single picks. The pool covers ant-grasshopper's
         # natural emotional palette (content/proud/regretful/tired/hungry)
@@ -403,6 +448,12 @@ def _build_ge_placeholders(scene: Scene,
         "concept_phrase":  example.concept_phrase,
         "what":            example.question_what,
         "goal_text":       example.goal_text,
+        # story-scaffold slots (Phase C); see the same block in
+        # the tortoise-hare branch above.
+        "scenario":        example.scenario,
+        "need":            example.need,
+        "mapping":         example.mapping,
+        "resolution":      example.resolution,
 
         # emotions (pronoun-neutral pools so any character gender works)
         "emo_proud":       scene.rng.choice(EMO_PROUD),
