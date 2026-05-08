@@ -17,6 +17,50 @@ from pathlib import Path
 sys.path.insert(0, "/home/user/mmllm/src")
 
 from mmllm.aesop.curriculum.generator import generate_subject
+from mmllm.aesop.curriculum.emotion_pools import (
+    EMO_PROUD as EP_PROUD, EMO_PATIENT as EP_PATIENT,
+    EMO_TIRED as EP_TIRED, EMO_THIRSTY as EP_THIRSTY,
+    EMO_HUNGRY as EP_HUNGRY, EMO_GREEDY as EP_GREEDY,
+    EMO_CONTENT as EP_CONTENT, EMO_REGRETFUL as EP_REGRETFUL,
+    EMO_DESPERATE as EP_DESPERATE,
+    EMO_SUSPICIOUS as EP_SUSPICIOUS,
+    EMO_BOASTFUL as EP_BOASTFUL, EMO_CAUTIOUS as EP_CAUTIOUS,
+)
+# Also union the renderer-side pools (mmllm.aesop.fables) so the
+# detector matches phrases the generator actually emits — the two sets
+# overlap heavily but a handful of short phrases (e.g. "without
+# complaint") live only in fables and would otherwise be undetected.
+from mmllm.aesop.fables import (
+    EMO_PROUD as F_PROUD, EMO_PATIENT as F_PATIENT,
+    EMO_TIRED as F_TIRED, EMO_HUNGRY as F_HUNGRY,
+    EMO_GREEDY as F_GREEDY, EMO_CONTENT as F_CONTENT,
+    EMO_REGRETFUL as F_REGRETFUL, EMO_DESPERATE as F_DESPERATE,
+)
+
+# Cached set of all archetype-pool phrases for LOW_GROUNDING detector.
+_ALL_EMO_PHRASES: tuple[str, ...] = tuple(set(
+    EP_PROUD + EP_PATIENT + EP_TIRED + EP_THIRSTY + EP_HUNGRY +
+    EP_GREEDY + EP_CONTENT + EP_REGRETFUL + EP_DESPERATE +
+    EP_SUSPICIOUS + EP_BOASTFUL + EP_CAUTIOUS +
+    F_PROUD + F_PATIENT + F_TIRED + F_HUNGRY + F_GREEDY +
+    F_CONTENT + F_REGRETFUL + F_DESPERATE
+))
+
+# Regex to pull int/keyword/string/quoted-symbol literals from rec.code_str.
+_LITERAL_RES = (
+    re.compile(r'(?<![\w-])(-?\d+(?:/\d+)?)(?![\w-])'),  # ints, ratios
+    re.compile(r':([a-zA-Z][\w.-]*)'),                   # keywords (no leading :)
+    re.compile(r'"([^"\\]*(?:\\.[^"\\]*)*)"'),           # strings
+    re.compile(r"'([a-zA-Z][\w.-]*)"),                   # quoted symbols
+)
+
+
+def _drawn_literals(form: str) -> list[str]:
+    """Return all int/keyword/string/quoted-symbol literals in `form`."""
+    out = []
+    for r in _LITERAL_RES:
+        out.extend(r.findall(form))
+    return out
 
 
 CURRICULUM_ROOT = Path("/home/user/mmllm/src/mmllm/aesop/curriculum")
@@ -602,6 +646,24 @@ def check_record(rec, sub, example):
                            f"{word!r} via 'returned {word}' / "
                            f"'gave {word}' / etc. — describe the "
                            f"verdict abstractly instead"))
+
+    # LOW_GROUNDING — affirmative Cat-J check. Records that lack BOTH
+    # (i) a drawn-value reference (any literal from rec.code_str
+    #     appears in user_msg), AND
+    # (ii) any phrase from one of the EMO archetype pools
+    # are flagged. The two conditions form an OR — a record that has
+    # at least one of them is grounded enough; only those satisfying
+    # NEITHER fail. This catches the rendering style where the prose
+    # names the operation but does not feel it.
+    drawn = _drawn_literals(rec.code_str)
+    has_drawn = any(d and d in user for d in drawn)
+    has_emo = any(p in user for p in _ALL_EMO_PHRASES)
+    if not has_drawn and not has_emo:
+        issues.append(("LOW_GROUNDING",
+                       "user_msg lacks both a drawn-value reference "
+                       "(any literal from the form) and any "
+                       "archetype-EMO phrase — emotional/concrete "
+                       "grounding is insufficient (Cat-J)"))
 
     return issues
 

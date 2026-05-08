@@ -52,8 +52,10 @@ G5_01 = SubjectCurriculum(grade=5, subject_id="G5-01",
                 "Here the stone reads `true`, so the first arm is taken."
             ),
             resolution=(
-                "the runtime took the first arm and returned the value "
-                "that arm carried."
+                "the trail forked cold and clear; the truthy stone sent "
+                "the runner down the first arm, and the runtime — letting "
+                "one step settle before the next — handed back the value "
+                "that arm carried, the other lane left walked-past."
             ),
             tags=("story",),
         ),
@@ -200,8 +202,10 @@ G5_03 = SubjectCurriculum(grade=5, subject_id="G5-03",
                 "the Clojure nil, the empty-handed result."
             ),
             resolution=(
-                "the arm was closed; the runtime turned back empty-handed "
-                "and returned nothing."
+                "the trail's gate stood closed at the test; the body-arm "
+                "was never walked, and the runtime — minding the order "
+                "without skipping — turned back empty-handed, the "
+                "closed-gate verdict spoken by silence."
             ),
             tags=("story",),
         ),
@@ -234,8 +238,10 @@ G5_04 = SubjectCurriculum(grade=5, subject_id="G5-04",
                 "reached."
             ),
             resolution=(
-                "the runtime took the second arm and returned :b, the "
-                "value that arm carried."
+                "the runtime walked past the failed first stone, found "
+                "the second stone's test true, and — minding each part "
+                "in its turn — handed back the value of the second arm, "
+                "no further arms consulted."
             ),
             tags=("story",),
         ),
@@ -1274,8 +1280,8 @@ G5_22 = SubjectCurriculum(grade=5, subject_id="G5-22",
                 "`(zero? n)` returns `acc`."
             ),
             resolution=(
-                "five laps later the step counter reached zero and the "
-                "tally — 5! — came back."
+                "lap after lap on the compact circuit, the counter fell "
+                "while the tally grew; the accumulated product came back."
             ),
             tags=("story",),
         ),

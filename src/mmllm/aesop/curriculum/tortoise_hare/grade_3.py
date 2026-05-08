@@ -73,8 +73,9 @@ G3_01 = SubjectCurriculum(grade=3, subject_id="G3-01",
                 "posted — here, 42."
             ),
             resolution=(
-                "the sign returned exactly the count carved into "
-                "it, confirming the posting took hold."
+                "the sign held its name on the long road; the runtime, "
+                "minding each step, returned exactly what the chisel had "
+                "carved beneath the name."
             ),
             tags=("story",),
         ),

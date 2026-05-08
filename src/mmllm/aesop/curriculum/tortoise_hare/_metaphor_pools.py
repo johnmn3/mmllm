@@ -1385,7 +1385,7 @@ def _story(connective_prose: str) -> SubplotTemplate:
 
 _POUCH_SUBPLOTS = _POUCH_SUBPLOTS + [
     _story(
-        "To {goal_text}, {tortoise_he_she} composed {concept_phrase} "
+        "To {goal_text}, {tortoise_he_she}, {emo_patient}, composed {concept_phrase} "
         "with the binding tucked safely into the pouch and submitted the "
         "form. The REPL pulled from the pouch as the form directed:"
     ),
@@ -1393,7 +1393,7 @@ _POUCH_SUBPLOTS = _POUCH_SUBPLOTS + [
 
 _RECIPE_SUBPLOTS = _RECIPE_SUBPLOTS + [
     _story(
-        "To {goal_text}, {tortoise_he_she} wrote out {concept_phrase} "
+        "To {goal_text}, {tortoise_he_she}, {emo_patient}, wrote out {concept_phrase} "
         "on a card and submitted the form. The REPL ran the recipe end "
         "to end:"
     ),
@@ -1401,7 +1401,7 @@ _RECIPE_SUBPLOTS = _RECIPE_SUBPLOTS + [
 
 _BASKET_SUBPLOTS = _BASKET_SUBPLOTS + [
     _story(
-        "To {goal_text}, {tortoise_he_she} composed {concept_phrase} "
+        "To {goal_text}, {tortoise_he_she}, {emo_patient}, composed {concept_phrase} "
         "for the basket and submitted the form. The REPL handed back the "
         "arrangement:"
     ),
@@ -1409,7 +1409,7 @@ _BASKET_SUBPLOTS = _BASKET_SUBPLOTS + [
 
 _SIEVE_SUBPLOTS = _SIEVE_SUBPLOTS + [
     _story(
-        "To {goal_text}, {tortoise_he_she} composed {concept_phrase} "
+        "To {goal_text}, {tortoise_he_she}, {emo_patient}, composed {concept_phrase} "
         "as the sieve's rule, poured the input through, and submitted "
         "the form. The REPL caught what landed below:"
     ),
@@ -1417,7 +1417,7 @@ _SIEVE_SUBPLOTS = _SIEVE_SUBPLOTS + [
 
 _NOTEBOOK_SUBPLOTS = _NOTEBOOK_SUBPLOTS + [
     _story(
-        "To {goal_text}, {tortoise_he_she} composed {concept_phrase} "
+        "To {goal_text}, {tortoise_he_she}, {emo_patient}, composed {concept_phrase} "
         "for the notebook and submitted the form. The REPL applied the "
         "update on the stump:"
     ),
@@ -1425,35 +1425,35 @@ _NOTEBOOK_SUBPLOTS = _NOTEBOOK_SUBPLOTS + [
 
 _ACORN_SUBPLOTS = _ACORN_SUBPLOTS + [
     _story(
-        "To {goal_text}, {tortoise_he_she} composed {concept_phrase} "
+        "To {goal_text}, {tortoise_he_she}, {emo_patient}, composed {concept_phrase} "
         "and submitted the form. The REPL counted out the answer:"
     ),
 ]
 
 _GATE_SUBPLOTS = _GATE_SUBPLOTS + [
     _story(
-        "To {goal_text}, {tortoise_he_she} composed {concept_phrase} "
+        "To {goal_text}, {tortoise_he_she}, {emo_patient}, composed {concept_phrase} "
         "and submitted the form. The REPL let the gates decide:"
     ),
 ]
 
 _FORK_SUBPLOTS = _FORK_SUBPLOTS + [
     _story(
-        "To {goal_text}, {tortoise_he_she} composed {concept_phrase} "
+        "To {goal_text}, {tortoise_he_she}, {emo_patient}, composed {concept_phrase} "
         "and submitted the form. The REPL took the right arm:"
     ),
 ]
 
 _ROADSIGN_SUBPLOTS = _ROADSIGN_SUBPLOTS + [
     _story(
-        "To {goal_text}, {tortoise_he_she} composed {concept_phrase} "
+        "To {goal_text}, {tortoise_he_she}, {emo_patient}, composed {concept_phrase} "
         "and submitted the form. The REPL read the signs and replied:"
     ),
 ]
 
 _SAFETYNET_SUBPLOTS = _SAFETYNET_SUBPLOTS + [
     _story(
-        "To {goal_text}, {tortoise_he_she} composed {concept_phrase} "
+        "To {goal_text}, {tortoise_he_she}, {emo_patient}, composed {concept_phrase} "
         "and submitted the form. The REPL — net in place — handed back "
         "the value:"
     ),
@@ -1461,7 +1461,7 @@ _SAFETYNET_SUBPLOTS = _SAFETYNET_SUBPLOTS + [
 
 _SCROLL_SUBPLOTS = _SCROLL_SUBPLOTS + [
     _story(
-        "To {goal_text}, {tortoise_he_she} composed {concept_phrase} "
+        "To {goal_text}, {tortoise_he_she}, {emo_patient}, composed {concept_phrase} "
         "and submitted the form. The REPL — quill in hand — completed "
         "the scroll-work:"
     ),
@@ -1469,7 +1469,7 @@ _SCROLL_SUBPLOTS = _SCROLL_SUBPLOTS + [
 
 _GUILD_SUBPLOTS = _GUILD_SUBPLOTS + [
     _story(
-        "To {goal_text}, {tortoise_he_she} composed {concept_phrase} "
+        "To {goal_text}, {tortoise_he_she}, {emo_patient}, composed {concept_phrase} "
         "and submitted the form. The REPL — checking the guild book — "
         "dispatched cleanly:"
     ),
@@ -1477,21 +1477,21 @@ _GUILD_SUBPLOTS = _GUILD_SUBPLOTS + [
 
 _SORTINGTABLE_SUBPLOTS = _SORTINGTABLE_SUBPLOTS + [
     _story(
-        "To {goal_text}, {tortoise_he_she} composed {concept_phrase} "
+        "To {goal_text}, {tortoise_he_she}, {emo_patient}, composed {concept_phrase} "
         "and submitted the form. The REPL routed through the table:"
     ),
 ]
 
 _CARRYINGCASE_SUBPLOTS = _CARRYINGCASE_SUBPLOTS + [
     _story(
-        "To {goal_text}, {tortoise_he_she} composed {concept_phrase} "
+        "To {goal_text}, {tortoise_he_she}, {emo_patient}, composed {concept_phrase} "
         "and submitted the form. The REPL constructed the case:"
     ),
 ]
 
 _TOOLSHED_SUBPLOTS = _TOOLSHED_SUBPLOTS + [
     _story(
-        "To {goal_text}, {tortoise_he_she} composed {concept_phrase} "
+        "To {goal_text}, {tortoise_he_she}, {emo_patient}, composed {concept_phrase} "
         "and submitted the form. The REPL — calling into the foreign "
         "toolshed — returned:"
     ),
@@ -1499,7 +1499,7 @@ _TOOLSHED_SUBPLOTS = _TOOLSHED_SUBPLOTS + [
 
 _RUNNERAHEAD_SUBPLOTS = _RUNNERAHEAD_SUBPLOTS + [
     _story(
-        "To {goal_text}, {tortoise_he_she} composed {concept_phrase} "
+        "To {goal_text}, {tortoise_he_she}, {emo_patient}, composed {concept_phrase} "
         "and submitted the form. The REPL coordinated the runner's "
         "return:"
     ),
@@ -1507,7 +1507,7 @@ _RUNNERAHEAD_SUBPLOTS = _RUNNERAHEAD_SUBPLOTS + [
 
 _REWRITERULE_SUBPLOTS = _REWRITERULE_SUBPLOTS + [
     _story(
-        "To {goal_text}, {tortoise_he_she} composed {concept_phrase} "
+        "To {goal_text}, {tortoise_he_she}, {emo_patient}, composed {concept_phrase} "
         "and submitted the form. The REPL — applying the rewrite, then "
         "evaluating the rewritten form — returned:"
     ),
@@ -1515,7 +1515,7 @@ _REWRITERULE_SUBPLOTS = _REWRITERULE_SUBPLOTS + [
 
 _SCRIBE_SUBPLOTS = _SCRIBE_SUBPLOTS + [
     _story(
-        "To {goal_text}, {tortoise_he_she} composed {concept_phrase} "
+        "To {goal_text}, {tortoise_he_she}, {emo_patient}, composed {concept_phrase} "
         "and submitted the form. The REPL read by the conventions and "
         "returned:"
     ),
@@ -1523,7 +1523,7 @@ _SCRIBE_SUBPLOTS = _SCRIBE_SUBPLOTS + [
 
 _CHALKMARK_SUBPLOTS = _CHALKMARK_SUBPLOTS + [
     _story(
-        "To {goal_text}, {tortoise_he_she} composed {concept_phrase} "
+        "To {goal_text}, {tortoise_he_she}, {emo_patient}, composed {concept_phrase} "
         "and submitted the form. The REPL — distinguishing label from "
         "value — returned:"
     ),
@@ -1531,7 +1531,7 @@ _CHALKMARK_SUBPLOTS = _CHALKMARK_SUBPLOTS + [
 
 _TALLYWALK_SUBPLOTS = _TALLYWALK_SUBPLOTS + [
     _story(
-        "To {goal_text}, {tortoise_he_she} composed {concept_phrase} "
+        "To {goal_text}, {tortoise_he_she}, {emo_patient}, composed {concept_phrase} "
         "and submitted the form. The REPL walked the row carrying the "
         "tally:"
     ),
@@ -1539,7 +1539,7 @@ _TALLYWALK_SUBPLOTS = _TALLYWALK_SUBPLOTS + [
 
 _BEADSTRING_SUBPLOTS = _BEADSTRING_SUBPLOTS + [
     _story(
-        "To {goal_text}, {tortoise_he_she} composed {concept_phrase} "
+        "To {goal_text}, {tortoise_he_she}, {emo_patient}, composed {concept_phrase} "
         "and submitted the form. The REPL spliced or counted as the "
         "form said:"
     ),
@@ -1547,7 +1547,7 @@ _BEADSTRING_SUBPLOTS = _BEADSTRING_SUBPLOTS + [
 
 _CIRCUIT_SUBPLOTS = _CIRCUIT_SUBPLOTS + [
     _story(
-        "To {goal_text}, {tortoise_he_she} composed {concept_phrase} "
+        "To {goal_text}, {tortoise_he_she}, {emo_patient}, composed {concept_phrase} "
         "and submitted the form. The REPL looped without growing the "
         "trail:"
     ),

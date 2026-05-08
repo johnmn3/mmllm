@@ -606,8 +606,9 @@ G2_13 = SubjectCurriculum(
                 "gate's true is the verdict."
             ),
             resolution=(
-                "both gates stood open, and the value at the last "
-                "gate — true — passed back as the chain's verdict."
+                "both gates along the chain swung open easily; the "
+                "chain's last gate handed back its own value as the "
+                "verdict — the path-to-end clear, uninterrupted."
             ),
             tags=("story",),
         ),
