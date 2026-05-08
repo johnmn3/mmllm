@@ -484,7 +484,7 @@ G5_10 = SubjectCurriculum(grade=5, subject_id="G5-10",
             expected=[1,4,9,16],
             concept_phrase="mapping a squaring operation over a vector",
             question_what="the sequence produced by mapping a squaring rule over the vector containing 1, 2, 3, and 4",
-            goal_text="apply a squaring operation to each element of the vector containing 1, 2, 3, and 4, returning a sequence",
+            goal_text="apply a squaring operation to each element of the vector [1 2 3 4] returning a sequence",
             scenario=(
                 "A row of four acorn-caps lay on the flat stone — "
                 "counts of 1, 2, 3, and 4. A second sieve waited, "
@@ -520,7 +520,7 @@ G5_11 = SubjectCurriculum(grade=5, subject_id="G5-11",
             expected=[2,4],
             concept_phrase="filtering even elements from a vector",
             question_what="the sequence produced by filtering even? over the vector containing 1, 2, 3, and 4",
-            goal_text="keep the even elements from the vector containing 1, 2, 3, and 4",
+            goal_text="keep the even elements from the vector [1 2 3 4]",
             scenario=(
                 "A row of four pebbles — counts 1, 2, 3, and 4 — "
                 "approached a sieve whose mesh let through only even "
@@ -548,7 +548,7 @@ G5_11 = SubjectCurriculum(grade=5, subject_id="G5-11",
             expected=[1,2],
             concept_phrase="filtering positive elements from a vector",
             question_what="the sequence produced by filtering pos? over the vector containing -2, -1, 0, 1, and 2",
-            goal_text="keep the positive elements from the vector containing -2, -1, 0, 1, and 2",
+            goal_text="keep the positive elements from the vector [-2 -1 0 1 2]",
             scenario=(
                 "Five pebbles lay in a row — counts -2, -1, 0, 1, "
                 "and 2. A sieve with the `pos?` rule waited: only "
@@ -583,7 +583,7 @@ G5_12 = SubjectCurriculum(grade=5, subject_id="G5-12",
             expected=10,
             concept_phrase="the fold operation",
             question_what="the running tally after walking 1, 2, 3, 4 with + as the combine step",
-            goal_text="walk the row of pebbles 1, 2, 3, 4 carrying a tally that combines each with + into the running total",
+            goal_text="walk the row of pebbles [1 2 3 4] carrying a tally that combines each with + into the running total",
             scenario=(
                 "A row of four small pebbles lay along the path — "
                 "counts of 1, 2, 3, and 4 from four foraging trips. The value drawn fresh was {drawn.a}."
@@ -612,7 +612,7 @@ G5_12 = SubjectCurriculum(grade=5, subject_id="G5-12",
             expected=120,
             concept_phrase="the fold operation",
             question_what="the product produced by walking 1, 2, 3, 4, 5 with * as the combine step",
-            goal_text="fold * over the vector containing 1, 2, 3, 4, and 5, computing their product",
+            goal_text="fold * over the vector [1 2 3 4 5] computing their product",
             scenario=(
                 "A row of five pebbles lay along the path — counts "
                 "1, 2, 3, 4, and 5 from five foraging trips. Mossback "
@@ -639,8 +639,8 @@ G5_12 = SubjectCurriculum(grade=5, subject_id="G5-12",
             form="(reduce max [3 1 4 1 5 9 2 6])",
             expected=9,
             concept_phrase="the fold operation",
-            question_what="the largest pebble found by walking 3, 1, 4, 1, 5, 9, 2, 6 with max as the combine step",
-            goal_text="fold max over the vector containing 3, 1, 4, 1, 5, 9, 2, and 6, finding the maximum",
+            question_what="the largest pebble found by walking [3 1 4 1 5 9 2 6] with max as the combine step",
+            goal_text="fold max over the vector [3 1 4 1 5 9 2 6] finding the maximum",
             scenario=(
                 "Eight pebbles of varying size lay along the trail. "
                 "Mossback wanted the largest without lifting all eight "
@@ -734,7 +734,7 @@ G5_14 = SubjectCurriculum(grade=5, subject_id="G5-14",
             expected=10,
             concept_phrase="applying + to vector elements",
             question_what="the result of spreading the basket of 1, 2, 3, 4 as ingredients into +",
-            goal_text="apply + to the elements of the vector containing 1, 2, 3, and 4",
+            goal_text="apply + to the elements of the vector [1 2 3 4]",
             scenario=(
                 "A recipe-card for `+` was pinned at the post. "
                 "Beside it sat a basket holding four acorns — counts "
@@ -763,7 +763,7 @@ G5_14 = SubjectCurriculum(grade=5, subject_id="G5-14",
             expected=5,
             concept_phrase="applying max to vector elements",
             question_what="the largest count found after spreading the basket of 3, 1, 4, 1, 5 into max",
-            goal_text="apply max to the elements of the vector containing 3, 1, 4, 1, and 5",
+            goal_text="apply max to the elements of the vector [3 1 4 1 5]",
             scenario=(
                 "Five pebbles sat in a basket — counts 3, 1, 4, 1, "
                 "and 5. A `max` recipe-card waited at the post, "
@@ -955,7 +955,7 @@ G5_18 = SubjectCurriculum(grade=5, subject_id="G5-18",
             expected=True,
             concept_phrase="checking if any element satisfies a predicate",
             question_what="whether any pebble in 1, 3, 5, 8, 7 passes the even? sieve",
-            goal_text="check if any element in the vector containing 1, 3, 5, 8, and 7 is even",
+            goal_text="check if any element in the vector [1 3 5 8 7] is even",
             scenario=(
                 "Five pebbles lay in a row — counts 1, 3, 5, 8, and "
                 "7. A checking-sieve with the `even?` rule stood at "
@@ -1086,7 +1086,7 @@ G5_20 = SubjectCurriculum(grade=5, subject_id="G5-20",
             expected=[10,20,30],
             concept_phrase="taking elements from a sequence",
             question_what="the sequence produced by taking 3 elements from the row of 10, 20, 30, 40, 50",
-            goal_text="take the first 3 elements from the vector containing 10, 20, 30, 40, and 50",
+            goal_text="take the first 3 elements from the vector [10 20 30 40 50]",
             scenario=(
                 'Five pebbles lay in a row — counts 10, 20, 30, 40, and 50. A counting-sieve stood at the front with a gauge set to {drawn.a}: it would let the first three pebbles through and hold the rest back.'
             ),
@@ -1113,7 +1113,7 @@ G5_20 = SubjectCurriculum(grade=5, subject_id="G5-20",
             expected=[30,40,50],
             concept_phrase="dropping elements from a sequence",
             question_what="the sequence produced by dropping 2 elements from the row of 10, 20, 30, 40, 50",
-            goal_text="drop the first 2 elements from the vector containing 10, 20, 30, 40, and 50",
+            goal_text="drop the first 2 elements from the vector [10 20 30 40 50]",
             scenario=(
                 'The same five pebbles — counts 10, 20, 30, 40, and 50. A skip-sieve stood at the front with its counter set to {drawn.a}: it would skip the first two pebbles and let the rest through.'
             ),
@@ -1143,8 +1143,8 @@ G5_21 = SubjectCurriculum(grade=5, subject_id="G5-21",
             form="(distinct [1 1 2 3 3 4])",
             expected=[1,2,3,4],
             concept_phrase="removing duplicates from a sequence",
-            question_what="the sequence produced by passing 1, 1, 2, 3, 3, 4 through the dedup-sieve",
-            goal_text="remove duplicate elements from the vector containing 1, 1, 2, 3, 3, and 4",
+            question_what="the sequence produced by passing [1 1 2 3 3 4] through the dedup-sieve",
+            goal_text="remove duplicate elements from the vector [1 1 2 3 3 4]",
             scenario=(
                 "Six pebbles lay in a row — counts 1, 1, 2, 3, 3, "
                 "and 4 — with two duplicate pairs. A dedup-sieve "

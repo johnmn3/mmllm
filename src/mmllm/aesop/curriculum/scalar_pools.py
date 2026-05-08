@@ -249,11 +249,34 @@ BOOL = ScalarPool("BOOL", values=(True, False))
 # ─────────────────────── character / string pools ───────────────────────
 
 
-CHAR_LOWER = ScalarPool(
+@dataclass(frozen=True)
+class _CharPool(ScalarPool):
+    """ScalarPool that renders single-char values as Clojure char
+    literals (`\\h`, `\\space`) instead of strings (`"h"`). Used by
+    G1-08 character subjects so the form_template `{a}` renders as
+    `\\h` not `"h"` — preventing the STRING_AS_CHAR_MISCLAIM papercut
+    where the prose's 'the character \\X' idiom contradicts the form's
+    rendered string."""
+    def clojure_lit(self, value: Any) -> str:
+        if value == " ":   return "\\space"
+        if value == "\n":  return "\\newline"
+        if value == "\t":  return "\\tab"
+        if value == "\r":  return "\\return"
+        return "\\" + value
+
+    def prose(self, value: Any) -> str:
+        if value == " ":   return "\\space"
+        if value == "\n":  return "\\newline"
+        if value == "\t":  return "\\tab"
+        if value == "\r":  return "\\return"
+        return "\\" + value
+
+
+CHAR_LOWER = _CharPool(
     "CHAR_LOWER",
     values=tuple(chr(c) for c in range(ord('a'), ord('z') + 1)))
 
-CHAR_UPPER = ScalarPool(
+CHAR_UPPER = _CharPool(
     "CHAR_UPPER",
     values=tuple(chr(c) for c in range(ord('A'), ord('Z') + 1)))
 

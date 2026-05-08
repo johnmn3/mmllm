@@ -501,7 +501,7 @@ G5_10 = SubjectCurriculum(grade=5, subject_id="G5-10",
             expected=[1,4,9,16],
             concept_phrase="mapping a squaring operation over a vector",
             question_what="the sequence produced by mapping a squaring rule over the vector containing 1, 2, 3, and 4",
-            goal_text="apply a squaring operation to each element of the vector containing 1, 2, 3, and 4, returning a sequence",
+            goal_text="apply a squaring operation to each element of the vector [1 2 3 4] returning a sequence",
             scenario=(
                 "The milkmaid fitted a squaring rule to her milk-strainer and poured "
                 "several counts through it: one, two, three, four. Each piece would come "
@@ -534,7 +534,7 @@ G5_11 = SubjectCurriculum(grade=5, subject_id="G5-11",
             expected=[2,4],
             concept_phrase="filtering even elements from a vector",
             question_what="the sequence produced by filtering even? over the vector containing 1, 2, 3, and 4",
-            goal_text="keep the even elements from the vector containing 1, 2, 3, and 4",
+            goal_text="keep the even elements from the vector [1 2 3 4]",
             scenario=(
                 "The milkmaid set her milk-strainer over the pail and poured four "
                 "counts through: one, two, three, four. The strainer's mesh was set "
@@ -646,7 +646,7 @@ G5_12 = SubjectCurriculum(grade=5, subject_id="G5-12",
             form="(reduce max [3 1 4 1 5 9 2 6])",
             expected=9,
             concept_phrase="the fold operation",
-            question_what="the largest pebble found by walking 3, 1, 4, 1, 5, 9, 2, 6 with max as the combine step",
+            question_what="the largest pebble found by walking [3 1 4 1 5 9 2 6] with max as the combine step",
             goal_text="fold max over the vector containing these numbers, finding the maximum",
             scenario=(
                 "The milkmaid walked eight market stalls, tally-slate in hand, keeping "
@@ -741,7 +741,7 @@ G5_14 = SubjectCurriculum(grade=5, subject_id="G5-14",
             expected=10,
             concept_phrase="applying + to vector elements",
             question_what="the result of spreading the basket of 1, 2, 3, 4 as ingredients into +",
-            goal_text="apply + to the elements of the vector containing 1, 2, 3, and 4",
+            goal_text="apply + to the elements of the vector [1 2 3 4]",
             scenario=(
                 "The milkmaid arrived at market with a market-basket holding four "
                 "counts: one coin, two, three, four. She needed to pass all of them "
@@ -1129,7 +1129,7 @@ G5_21 = SubjectCurriculum(grade=5, subject_id="G5-21",
             form="(distinct [1 1 2 3 3 4])",
             expected=[1,2,3,4],
             concept_phrase="removing duplicates from a sequence",
-            question_what="the sequence produced by passing 1, 1, 2, 3, 3, 4 through the dedup-sieve",
+            question_what="the sequence produced by passing [1 1 2 3 3 4] through the dedup-sieve",
             goal_text="remove duplicate elements from the vector containing these numbers",
             scenario=(
                 "The milkmaid's pail held six coin counts with repeats: one, one, two, "

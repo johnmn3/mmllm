@@ -41,9 +41,15 @@ from mmllm.aesop.expr import (
 # ─────────────────────── pool inference ───────────────────────
 
 
-def _infer_pool(value: Any) -> str:
+def _infer_pool(value: Any, *, is_char: bool = False) -> str:
     """Map a raw literal value to a typed pool name. Conservative
-    defaults keep the value space tight for grade-appropriate ranges."""
+    defaults keep the value space tight for grade-appropriate ranges.
+
+    `is_char=True` signals the literal came from a `\\X` Clojure char
+    syntax (not `"X"` string), so it routes to a CHAR_* pool instead
+    of STR_SHORT — preventing the STRING_AS_CHAR_MISCLAIM papercut
+    where a single-char form_template draws a multi-character string
+    while the prose still calls it 'the character \\X'."""
     if isinstance(value, bool):
         return "BOOL"
     if isinstance(value, int):
@@ -55,6 +61,10 @@ def _infer_pool(value: Any) -> str:
         if 100 <= value <= 999:                  return "INT_LARGE"
         return "INT_BIGINT"
     if isinstance(value, str):
+        if is_char:
+            if len(value) == 1 and value.isalpha() and value.isupper():
+                return "CHAR_UPPER"
+            return "CHAR_LOWER"
         return "STR_SHORT"
     if isinstance(value, tuple) and len(value) == 2 and value[0] == "__kw__":
         # Disambiguate keyword theme by membership in known pools
@@ -120,7 +130,7 @@ def _collect_literals(ast: Expr,
             if pool:
                 out.append((ast, tagged, pool))
         else:
-            pool = _infer_pool(v)
+            pool = _infer_pool(v, is_char=getattr(ast, "is_char", False))
             if pool:
                 out.append((ast, v, pool))
         return

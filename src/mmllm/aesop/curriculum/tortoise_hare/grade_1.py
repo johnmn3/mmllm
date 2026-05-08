@@ -259,12 +259,12 @@ between the two slates: only {tortoise_his_her} had run."""),
     SubplotTemplate("""\
 The wager was set {place}: produce the value before the breeze had
 turned the next leaf. {hare_phrase}, {emo_proud}, bolted into a flurry
-of guesses, calling out numbers and second-guessing {hare_him_her}self
-about whether the goal was to {goal_text} or something close to it.
-{tortoise_phrase}, {emo_patient}, simply walked to the slate, wrote
-{concept_phrase}, finished the form, submitted it, and read the value
-off the REPL while {hare} was still arguing with the breeze. The race,
-like every other, went to the steady hand."""),
+of guesses. {hare_he_she_cap} called out numbers and second-guessed
+{hare_him_her}self about whether the goal was to {goal_text}.
+{tortoise_phrase}, {emo_patient}, simply walked to the slate.
+{tortoise_he_she_cap} wrote {concept_phrase} and finished the form.
+The REPL handed back the value while {hare} was still arguing with
+the breeze. The race went to the steady hand."""),
 
     # 11. The wrong-guess-then-form template — Hare blurts a guess at
     #     the answer (deliberately abstract — no actual value leaks),

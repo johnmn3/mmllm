@@ -803,15 +803,36 @@ def check_record(rec, sub, example):
     # appears in a non-tortoise-hare record's user_msg. Either as a
     # defrecord field-name string or in narrative prose. Cat-E
     # (semantic — wrong-fable imagery leakage).
+    #
+    # Two ghost classes:
+    #   • UNIQUE — names not used in any other character pool, so any
+    #     occurrence in a non-TH fable is a leak.
+    #   • AMBIGUOUS — names that ALSO appear in dog/hare/etc. pools
+    #     (e.g. "Pip" is a dog name AND a hare name). A bare match
+    #     would false-positive when the OTHER fable's pool legitimately
+    #     drew the name. Only flag if accompanied by a tortoise-hare-
+    #     specific species annotation.
     if sub.fable != "tortoise-hare":
-        for ghost in ("Mossback", "Shelly", "Slowpoke", "Pip",
-                      "Bramble", "Hopper", "Whisker", "Speedwick",
-                      "Speedy"):
+        UNIQUE_GHOSTS = ("Mossback", "Shelly", "Slowpoke",
+                         "Hopper", "Speedwick")
+        AMBIGUOUS_GHOSTS = ("Pip", "Bramble", "Whisker", "Speedy")
+        flagged = None
+        for ghost in UNIQUE_GHOSTS:
             if re.search(r"\b" + ghost + r"\b", user):
-                issues.append(("WRONG_FABLE_LITERAL",
-                               f"tortoise-hare ghost name '{ghost}' "
-                               f"appears in {sub.fable} user_msg"))
+                flagged = ghost
                 break
+        if not flagged:
+            for ghost in AMBIGUOUS_GHOSTS:
+                if re.search(
+                    r"\b" + ghost + r"\s+the\s+(?:hare|tortoise)\b",
+                    user, re.IGNORECASE
+                ):
+                    flagged = ghost
+                    break
+        if flagged:
+            issues.append(("WRONG_FABLE_LITERAL",
+                           f"tortoise-hare ghost name '{flagged}' "
+                           f"appears in {sub.fable} user_msg"))
 
     # FOREIGN_FABLE_IMAGERY — wrong-fable props in narrative prose.
     # Cat-H (plot coherence).
@@ -1645,10 +1666,22 @@ def check_record(rec, sub, example):
     # one who W, and the result of A, was B" template-output cadence.
     # 5+ commas inside a single sentence is almost always a sign of
     # template-output rhythm rather than fable prose.
-    for sentence in re.split(r"[.!?]\s+", user):
-        # Skip dialogue-quoted sentences (lots of internal commas
-        # legitimately) and Clojure form snippets.
+    #
+    # Dialogue-aware: track quote state across the user_msg so a
+    # period inside quoted dialogue ("press it." in mid-speech) doesn't
+    # split a sentence-fragment that the detector then mis-flags.
+    # Sentences whose split landed inside an open dialogue (odd number
+    # of quote chars seen so far) are skipped — the comma-stacking
+    # there is a moralist enumeration, not narrative AI cadence.
+    cursor = 0
+    for m in re.finditer(r"[.!?]\s+", user):
+        sentence = user[cursor:m.start()]
+        prefix_quotes = user[:cursor].count('"')
+        sentence_in_dialogue = (prefix_quotes % 2 == 1)
+        cursor = m.end()
         if "`" in sentence or sentence.count('"') >= 2:
+            continue
+        if sentence_in_dialogue:
             continue
         n_commas = sentence.count(",")
         if n_commas >= 5 and len(sentence) > 60:
@@ -1995,6 +2028,72 @@ def check_record(rec, sub, example):
                                 f"the noun 'the {noun}' appears in all 4 "
                                 "story slots (scenario/need/mapping/"
                                 "resolution) — vary the imagery between beats"))
+
+    # ─────────── slice wvNE (fixset-gamma) — 3 NEW Cat-K detectors ─────────
+
+    # TRAILING_PARTICIPLE_CLOSER (K-3 cadence) — a sentence that closes
+    # with the LLM-signature pattern `, <verb>ing the <noun>\.` reads
+    # as a participial coda — naming a secondary, decorative event
+    # after the main clause has finished. ("returned the value, settling
+    # the matter cleanly.", "waited at the perch, watching the breeze
+    # turn.")  The native fable register closes on the verb itself.
+    # The detector REQUIRES "the X" / "her X" / "his X" / "its X" /
+    # "their X" after the participle so a bare ", waiting." or ",
+    # boasting at every turn." is fine; the LLM-tic is specifically
+    # the ", verbing the [definite-noun]" closing arc. Excludes common
+    # Clojure-idiomatic verbs whose participial form is the natural
+    # idiom (binding, evaluating, applying, passing, calling, using).
+    trailing_participle_re = re.compile(
+        r",\s+(?!binding|evaluating|applying|passing|calling|using)"
+        r"([a-z]+ing)\s+(?:the|her|his|its|their)\s+\w+[^.!?\"`,]{0,40}\.",
+    )
+    if len(user) > 200:
+        m = trailing_participle_re.search(user)
+        if m:
+            issues.append(("TRAILING_PARTICIPLE_CLOSER",
+                            f"sentence closes with a participial coda "
+                            f"({m.group(0).strip()[:60]!r}) — LLM-cadence; "
+                            f"close on the verb instead"))
+
+    # ABSTRACT_RESULT_NARRATION (K-2 storytelling) — meta-narrative
+    # phrasings like "the result of the operation", "the outcome of
+    # the form", "the value that the form produced", or "the return
+    # of the expression" describe what the runtime does in abstract
+    # layered-noun terms. The fable register names the concrete thing
+    # — "the count", "the answer", "the new pile". These layered
+    # abstractions are an AI tic where the model hedges by stacking
+    # nominalizations.
+    abstract_result_re = re.compile(
+        r"\bthe (?:result|outcome|return|value) of (?:the |a |an )?"
+        r"(?:operation|form|expression|evaluation|computation|"
+        r"procedure|function call|application)\b",
+        re.IGNORECASE,
+    )
+    m = abstract_result_re.search(user)
+    if m:
+        issues.append(("ABSTRACT_RESULT_NARRATION",
+                        f"meta-narrative '{m.group(0).strip()}' uses "
+                        f"layered abstract nouns instead of naming "
+                        f"the concrete thing the form returns"))
+
+    # REDUNDANT_VALUE_TAUTOLOGY (K-3 / Cat-K-1) — circular phrasings
+    # like "returned the value the form returned", "gave back the
+    # answer the REPL gave back", "produced the result the runtime
+    # produced". These collapse into pure tautology — the prose says
+    # nothing once the predicate-and-object are matched. Caught by
+    # looking for repeated verb stems on either side of "the X
+    # (that|which|the)".
+    tautology_re = re.compile(
+        r"\b(returned|gave back|produced|handed back|yielded)\b"
+        r"\s+(?:the\s+)?(\w+)\s+(?:that|which|the)\s+"
+        r"(?:the\s+\w+\s+)?\1\b",
+        re.IGNORECASE,
+    )
+    m = tautology_re.search(user)
+    if m:
+        issues.append(("REDUNDANT_VALUE_TAUTOLOGY",
+                        f"tautological phrasing {m.group(0)!r} — the verb "
+                        f"repeats with no new information"))
 
     return issues
 
