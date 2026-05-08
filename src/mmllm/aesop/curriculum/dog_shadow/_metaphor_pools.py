@@ -87,7 +87,7 @@ back with the answer."""),
 "Whatever I hold here is in force only while my jaws stay
 closed," {hound_he_she} said carefully, "and only for the form
 that names the binding. Step past the form's edge and the mouth
-is empty again." To {goal_text}, {hound_he_she_cap} composed
+is empty again." To {goal_text}, {hound_he_she} composed
 {concept_phrase} with the binding gripped through that stretch,
 submitted it, and let the REPL read out the value the mouth had
 held."""),
@@ -121,7 +121,7 @@ into every place the binding had been named."""),
     SubplotTemplate("""\
 "Watch the mouth carefully," {hound_phrase} said {place}.
 "While the form's stretch runs, the bone is held and the binding
-is yours." To {goal_text}, {hound_he_she_cap} composed
+is yours." To {goal_text}, {hound_he_she} composed
 {concept_phrase} with the binding gripped safely between the
 teeth, then submitted the form. The REPL returned the value, and
 the mouth — its work done — was empty again. {dog_phrase},
@@ -142,7 +142,7 @@ _RECIPE_SUBPLOTS: list[SubplotTemplate] = [
 worked out a careful sniffing-trail toward the buried bone.
 "Recipes in Clojure are like a nose-trail," {hound_he_she} said:
 "each sniff is a step, the steps come in order, and the last
-sniff is what you serve." To {goal_text}, {hound_he_she_cap}
+sniff is what you serve." To {goal_text}, {hound_he_she}
 laid out {concept_phrase} along the trail, submitted the form,
 and the REPL followed the sniffs and handed back the value the
 last step had produced."""),
@@ -171,7 +171,7 @@ the value of the last."""),
 "Trails can feed into one another," {hound_phrase} said,
 sketching two paw-paths in the dirt. "What one trail turns up,
 the next can take as its scent — together they make a longer
-sniffing-route." To {goal_text}, {hound_he_she_cap} composed
+sniffing-route." To {goal_text}, {hound_he_she} composed
 {concept_phrase}, submitted the form, and the REPL — walking the
 trail in order — handed back the value at the end."""),
 
@@ -199,7 +199,7 @@ _BASKET_SUBPLOTS: list[SubplotTemplate] = [
 with bones tucked into named slots. "Whatever I want to do with
 what's cached," {hound_he_she} said, "I read from the log, work
 the change, and the cache itself stays as it was — what I get
-back is a fresh arrangement." To {goal_text}, {hound_he_she_cap}
+back is a fresh arrangement." To {goal_text}, {hound_he_she}
 composed {concept_phrase}, submitted the form, and let the REPL
 handle the cache exactly as the operation prescribed."""),
 
@@ -209,7 +209,7 @@ handle the cache exactly as the operation prescribed."""),
 "You can find what you want in a bone-cache several ways,"
 {hound_phrase} said, gesturing at the hollow log: "by the scratch
 above the slot, by its place in line, or by simply asking whether
-it's there at all." To {goal_text}, {hound_he_she_cap} wrote
+it's there at all." To {goal_text}, {hound_he_she} wrote
 {concept_phrase} for the cache, submitted the form, and the REPL
 applied the lookup or update exactly as the form directed."""),
 
@@ -271,7 +271,7 @@ what the gap had let pass."""),
 bones come in at one end of the gap," {hound_he_she} said, "the
 gap does its work — applying the rule, choosing or changing —
 and what falls into the receiving log is the result." To
-{goal_text}, {hound_he_she_cap} composed {concept_phrase}, ran
+{goal_text}, {hound_he_she} composed {concept_phrase}, ran
 the input through, submitted the form, and the REPL collected
 what fell into the receiving log."""),
 
@@ -290,7 +290,7 @@ what the stack had let through."""),
 "You can collect the result into any kind of cache you like,"
 {hound_phrase} said. "A row of bones, a unique-only pile, a sack
 of any shape — the gap doesn't care; the receiver does." To
-{goal_text}, {hound_he_she_cap} composed {concept_phrase}, chose
+{goal_text}, {hound_he_she} composed {concept_phrase}, chose
 the right empty receiver, ran the bones through the gap,
 submitted the form, and the REPL packed the result into the
 cache of {hound_his_her} choosing."""),
@@ -331,7 +331,7 @@ prescribed."""),
 pick the stone up and walk away — I read the scratch, apply the
 change, and scratch the new count back, all in a single motion.
 If two dogs arrive at once, the runtime makes sure only one of us
-goes through at a time." To {goal_text}, {hound_he_she_cap}
+goes through at a time." To {goal_text}, {hound_he_she}
 composed {concept_phrase} for the tally, submitted the form, and
 the REPL applied the update atomically."""),
 
@@ -340,7 +340,7 @@ the REPL applied the update atomically."""),
 "The tally stays scratched into the stone," {hound_phrase} said,
 "so any dog who comes by can read what's there right now. The
 count changes only when one of us scratches a new one — and only
-as the runtime allows." To {goal_text}, {hound_he_she_cap}
+as the runtime allows." To {goal_text}, {hound_he_she}
 composed {concept_phrase}, submitted the form, and the REPL —
 reading or scratching the tally as the form prescribed — handed
 back the value the stone had carried."""),
@@ -350,7 +350,7 @@ back the value the stone had carried."""),
 "Many dogs can come and go past the stone," {hound_phrase} said,
 "and each one's read or scratch must agree with the others. The
 runtime sees to that — no two writers stomp on each other's
-work." To {goal_text}, {hound_he_she_cap} composed
+work." To {goal_text}, {hound_he_she} composed
 {concept_phrase}, submitted the form, and the REPL — coordinating
 each access cleanly — handed back what the tally now said."""),
 
@@ -377,7 +377,7 @@ _ACORN_SUBPLOTS: list[SubplotTemplate] = [
 them into small piles. "Numbers in Clojure are just like bones
 in piles," {hound_he_she} said: "you can count them, you can
 add two piles together, you can divide one pile among several."
-To {goal_text}, {hound_he_she_cap} composed {concept_phrase},
+To {goal_text}, {hound_he_she} composed {concept_phrase},
 submitted the form, and let the REPL hand back the count of
 whatever the operation had produced."""),
 
@@ -386,7 +386,7 @@ whatever the operation had produced."""),
 "Watch the pile," {hound_phrase} said, gesturing at a small heap
 of bones. "Every operation either adds, takes away, or combines
 what's already there — the pile grows or shrinks by exactly what
-you say." To {goal_text}, {hound_he_she_cap} composed
+you say." To {goal_text}, {hound_he_she} composed
 {concept_phrase}, submitted the form, and the REPL returned the
 new count, the pile settled into its new arrangement."""),
 
@@ -416,7 +416,7 @@ matter the patient way."""),
 "Whatever the pile looks like after the operation,"
 {hound_phrase} said, "the runtime gives the exact count — small
 or large, fraction or whole, the answer is precise." To
-{goal_text}, {hound_he_she_cap} composed {concept_phrase},
+{goal_text}, {hound_he_she} composed {concept_phrase},
 submitted the form, and the REPL handed back the value, exactly
 as the operation had produced it."""),
 ]
@@ -433,7 +433,7 @@ _GATE_SUBPLOTS: list[SubplotTemplate] = [
 crossing. "Boolean forms in Clojure are like the conditions for a
 crossing," {hound_phrase} said: "the runtime checks the value,
 opens or closes the way, and what comes back is the verdict." To
-{goal_text}, {hound_he_she_cap} composed {concept_phrase},
+{goal_text}, {hound_he_she} composed {concept_phrase},
 submitted the form, and the REPL returned whatever the conditions
 had decided."""),
 
@@ -442,7 +442,7 @@ had decided."""),
 "Only two things in Clojure close the crossing," {hound_phrase}
 said: "nil and false. Everything else — zero, the empty string,
 an empty list — opens it. The verdict follows that rule
-exactly." To {goal_text}, {hound_he_she_cap} composed
+exactly." To {goal_text}, {hound_he_she} composed
 {concept_phrase}, submitted the form, and the REPL returned the
 value the crossing had passed, true or false."""),
 
@@ -451,7 +451,7 @@ value the crossing had passed, true or false."""),
 "You can't tell whether the crossing will be open by guessing,"
 {hound_phrase} said. "You bring the value to the bank, the
 runtime checks it, and the conditions give the only answer that
-matters." To {goal_text}, {hound_he_she_cap} composed
+matters." To {goal_text}, {hound_he_she} composed
 {concept_phrase}, submitted the form, and the REPL settled the
 matter — the conditions had spoken exactly as the rule said."""),
 
@@ -490,7 +490,7 @@ branching off — upstream, downstream, or back into the trees —
 each arm marked with a condition. "Branching forms in Clojure
 are forks like this," {hound_phrase} said. "The runtime checks
 the condition, takes the matching arm, and only that arm's value
-comes back." To {goal_text}, {hound_he_she_cap} composed
+comes back." To {goal_text}, {hound_he_she} composed
 {concept_phrase}, submitted the form, and the REPL — having
 taken the right arm — handed back its value."""),
 
@@ -509,7 +509,7 @@ and the REPL took the right arm and returned its value."""),
 "What's important about a fork," {hound_phrase} said, "is that
 the arm not taken doesn't run at all. The runtime checks the
 condition, walks the right arm, and the unrun arm is just left
-behind." To {goal_text}, {hound_he_she_cap} composed
+behind." To {goal_text}, {hound_he_she} composed
 {concept_phrase}, submitted the form, and the REPL — running
 only what was needed — handed back the value of the chosen
 arm."""),
@@ -528,7 +528,7 @@ value of the arm the form actually ran."""),
     SubplotTemplate("""\
 "It isn't the dog who picks the arm," {hound_phrase} said, "it's
 the condition. Whatever the condition evaluates to, that
-decides." To {goal_text}, {hound_he_she_cap} composed
+decides." To {goal_text}, {hound_he_she} composed
 {concept_phrase}, submitted the form, and the REPL — letting the
 condition decide — handed back the value of the arm the
 condition had pointed at."""),
@@ -546,7 +546,7 @@ _ROADSIGN_SUBPLOTS: list[SubplotTemplate] = [
 name into its surface. "A def is a marker stone by the stream,"
 {hound_he_she} said. "Any dog passing reads the scratch, learns
 where the bone is buried, and can find it later by the name
-alone." To {goal_text}, {hound_he_she_cap} composed
+alone." To {goal_text}, {hound_he_she} composed
 {concept_phrase}, submitted the form, and the REPL set the
 stone — the name now bound to its value for any later dog along
 the bank."""),
@@ -556,7 +556,7 @@ the bank."""),
 "The good thing about a marker stone," {hound_phrase} said, "is
 that it stays where you set it. The next dog along the bank
 reads the freshest scratch — whatever the latest mark says." To
-{goal_text}, {hound_he_she_cap} composed {concept_phrase},
+{goal_text}, {hound_he_she} composed {concept_phrase},
 submitted the form, and the REPL — reading the markers as the
 form directed — returned the value the bank had recorded."""),
 
@@ -576,7 +576,7 @@ returned the value the form had asked for."""),
 "Naming is half the art," {hound_phrase} said, scratching a
 careful sign into a fresh stone. "A clear name on the bank tells
 every later dog what to expect; a careless one leads them to
-the wrong bone." To {goal_text}, {hound_he_she_cap} composed
+the wrong bone." To {goal_text}, {hound_he_she} composed
 {concept_phrase} with the right name in mind, submitted the form,
 and the REPL — reading the name exactly — returned the value the
 stone had promised."""),
@@ -603,7 +603,7 @@ _SAFETYNET_SUBPLOTS: list[SubplotTemplate] = [
 {hound_phrase} stepped onto a fallen log spanning the stream
 {place}, testing its hold paw by paw before trusting full weight.
 "If the log gives, I retreat to the bank; the run doesn't end,
-only the path bends." To {goal_text}, {hound_he_she_cap}
+only the path bends." To {goal_text}, {hound_he_she}
 composed {concept_phrase}, submitted the form, and the REPL —
 log tested in advance — caught any trouble and returned the
 value the catch-arm had specified, the run continuing the patient
@@ -634,7 +634,7 @@ value the recovery path had produced."""),
 "There's a discipline to crossing safely," {hound_phrase} said,
 "and it starts with checking — making sure the form does what it
 claims, catching what could go wrong before it does." To
-{goal_text}, {hound_he_she_cap} composed {concept_phrase},
+{goal_text}, {hound_he_she} composed {concept_phrase},
 submitted the form, and the REPL — applying whatever check or
 catch the form had asked for — returned the value the discipline
 had earned."""),
@@ -662,7 +662,7 @@ _SCROLL_SUBPLOTS: list[SubplotTemplate] = [
 along its length with a sharp claw. "The world outside the REPL
 is message-bones," {hound_he_she} said: "you read what they
 say, you scratch what you want to keep, and the runtime carries
-the marks back and forth." To {goal_text}, {hound_he_she_cap}
+the marks back and forth." To {goal_text}, {hound_he_she}
 composed {concept_phrase}, submitted the form, and the REPL
 handed back what the bone had said, or what the writing had
 committed."""),
@@ -682,7 +682,7 @@ the writing had committed."""),
 "The world outside the REPL is bigger than the REPL,"
 {hound_phrase} said, "and a message-bone out there has its own
 discipline — pick it up carefully, handle it with care, set it
-back when you're done." To {goal_text}, {hound_he_she_cap}
+back when you're done." To {goal_text}, {hound_he_she}
 composed {concept_phrase}, submitted the form, and the REPL —
 handling the bone the runtime's careful way — returned the value
 the work had produced."""),
@@ -741,7 +741,7 @@ scratched with breed-by-breed entries. "Membership is in this
 record," {hound_he_she} said: "the breed, the signals they
 honor, and the actual answers each breed gives. The runtime
 reads from the ledger whenever the call goes out." To
-{goal_text}, {hound_he_she_cap} composed {concept_phrase},
+{goal_text}, {hound_he_she} composed {concept_phrase},
 submitted the form, and the REPL — checking the ledger as it
 ran — returned the right answer."""),
 
@@ -809,7 +809,7 @@ the foreign tool had produced."""),
 "There's the pack's own kit," {hound_phrase} said, "and there's
 the kennel-master's. The runtime moves a value across the
 boundary, calls the human-side tool, and brings the result back
-into the pack." To {goal_text}, {hound_he_she_cap} composed
+into the pack." To {goal_text}, {hound_he_she} composed
 {concept_phrase}, submitted the form, and the REPL — bridging
 the two sheds — returned the value cleanly."""),
 
@@ -837,7 +837,7 @@ _REWRITERULE_SUBPLOTS: list[SubplotTemplate] = [
 poised. "A macro," {hound_he_she} said, "is a rule that rewrites
 a scent-mark before the pack ever follows it. You set the rule
 once, and any mark that uses it gets rewritten on the way to the
-trail." To {goal_text}, {hound_he_she_cap} composed
+trail." To {goal_text}, {hound_he_she} composed
 {concept_phrase}, submitted the form, and the REPL — first
 rewriting, then evaluating — returned the value the rewritten
 mark yielded."""),
@@ -858,7 +858,7 @@ produced."""),
 "The order matters," {hound_phrase} said. "When a rule is
 involved, the runtime first walks through the form and applies
 the rule wherever it sees one — and only then does it evaluate
-the result." To {goal_text}, {hound_he_she_cap} composed
+the result." To {goal_text}, {hound_he_she} composed
 {concept_phrase}, submitted the form, and the REPL — rewriting
 first, evaluating second — returned the final value."""),
 
@@ -908,7 +908,7 @@ the conventions have been applied. Some marks count, some
 don't; some shapes are expanded before the runtime even gets a
 look. The form you scratch and the form the runtime evaluates
 aren't always paw-print-for-paw-print the same." To
-{goal_text}, {hound_he_she_cap} composed {concept_phrase},
+{goal_text}, {hound_he_she} composed {concept_phrase},
 submitted the form, and the REPL — reading carefully — returned
 the value of what the conventions had produced."""),
 
@@ -967,7 +967,7 @@ returned the right answer."""),
 "To talk about the form itself rather than evaluating it,"
 {hound_phrase} said, "you mark the form with a quote-scratch in
 front. Quoting tells the runtime: don't run this, just hand it
-back as the shape it is." To {goal_text}, {hound_he_she_cap}
+back as the shape it is." To {goal_text}, {hound_he_she}
 composed {concept_phrase}, submitted the form, and the REPL —
 respecting the scratch — returned the form unevaluated."""),
 
@@ -1015,7 +1015,7 @@ later — returned the value when it was ready."""),
 keep on with your own work. The result will be there when you
 ask for it — sometimes you have to wait for the scout to be
 finished, sometimes you can keep arranging things until you
-need it." To {goal_text}, {hound_he_she_cap} composed
+need it." To {goal_text}, {hound_he_she} composed
 {concept_phrase}, submitted the form, and the REPL —
 coordinating the scout the way the form prescribed — returned
 the value when it was ready."""),
@@ -1065,7 +1065,7 @@ forming around it — fish, bird, deer, each in its own pile.
 "Defmulti is a sorting-stone," {hound_phrase} said. "You decide
 what about each bone to look at — its shape, its smell — and
 the stone routes each bone to the matching pile." To
-{goal_text}, {hound_he_she_cap} composed {concept_phrase},
+{goal_text}, {hound_he_she} composed {concept_phrase},
 submitted the form, and the REPL — reading the bone, picking the
 pile — returned the value the right pile had produced."""),
 
@@ -1083,7 +1083,7 @@ the bone — returned the pile-specific value."""),
 "What the stone sorts by is up to you," {hound_phrase} said.
 "You decide what to look at on each bone — a kind, a smell, a
 size, anything. The runtime reads it, finds the matching pile,
-and runs that one." To {goal_text}, {hound_he_she_cap} composed
+and runs that one." To {goal_text}, {hound_he_she} composed
 {concept_phrase}, submitted the form, and the REPL — reading
 what the dispatch function produced — returned the value the
 right pile had given."""),
@@ -1122,7 +1122,7 @@ divided into labeled compartments — one for the bone's date,
 one for its size, one for its source. "Defrecord makes a bag
 like this," {hound_he_she} said: "named compartments holding
 specific things; a stamp on the outside saying what kind of
-bag it is." To {goal_text}, {hound_he_she_cap} composed
+bag it is." To {goal_text}, {hound_he_she} composed
 {concept_phrase}, submitted the form, and the REPL —
 constructing the bag, filling its compartments — returned the
 value the bag held or carried."""),
@@ -1158,7 +1158,7 @@ _TALLYWALK_SUBPLOTS: list[SubplotTemplate] = [
 a time, a flat stone in {hound_his_her} jaws for the running
 tally. "Reduce is this walk," {hound_he_she} said: "at each
 bone, you fold its count into the tally; at the end, the tally
-is your answer." To {goal_text}, {hound_he_she_cap} composed
+is your answer." To {goal_text}, {hound_he_she} composed
 {concept_phrase}, submitted the form, and the REPL — walking
 the row, carrying the tally — returned the final number."""),
 
@@ -1168,7 +1168,7 @@ the row, carrying the tally — returned the final number."""),
 said, holding up a stone already scratched with a number. "If
 you start with a different value, the walk begins from there —
 the combine-step folds each bone in from that starting point."
-To {goal_text}, {hound_he_she_cap} composed {concept_phrase},
+To {goal_text}, {hound_he_she} composed {concept_phrase},
 submitted the form, and the REPL — starting from the given
 tally, walking the row — returned the final value."""),
 
@@ -1177,7 +1177,7 @@ tally, walking the row — returned the final value."""),
 "The simplest tally-walk is just counting," {hound_phrase} said:
 "step along the row, add one at every bone, no other operation.
 The runtime does this for any collection — vector, list, map,
-string." To {goal_text}, {hound_he_she_cap} composed
+string." To {goal_text}, {hound_he_she} composed
 {concept_phrase}, submitted the form, and the REPL — walking the
 row, counting the steps — returned the count."""),
 ]
@@ -1194,7 +1194,7 @@ _BEADSTRING_SUBPLOTS: list[SubplotTemplate] = [
 {place}. "Strings in Clojure are like this," {hound_he_she}
 said: "a row of scratched marks, in order. Concat two strips
 together, and the marks are spliced; cut a substring out, and
-you get a shorter strip." To {goal_text}, {hound_he_she_cap}
+you get a shorter strip." To {goal_text}, {hound_he_she}
 composed {concept_phrase}, submitted the form, and the REPL —
 splicing or cutting as the form said — returned the new
 strip."""),
@@ -1204,7 +1204,7 @@ strip."""),
 "To count the marks, walk the strip," {hound_phrase} said.
 "Want a section of marks? Cut from one position to another and
 you get a smaller strip, the original untouched." To
-{goal_text}, {hound_he_she_cap} composed {concept_phrase},
+{goal_text}, {hound_he_she} composed {concept_phrase},
 submitted the form, and the REPL — counting or cutting —
 returned the answer the strip had given up."""),
 
@@ -1240,7 +1240,7 @@ returned the final value."""),
 "Every pacing has a stopping condition," {hound_phrase} said.
 "Without one, the dog walks forever. With one, the dog knows
 when the passes are done and the tally is the answer." To
-{goal_text}, {hound_he_she_cap} composed {concept_phrase},
+{goal_text}, {hound_he_she} composed {concept_phrase},
 submitted the form, and the REPL — looping until the base case —
 returned the value the final pass produced."""),
 
@@ -1306,76 +1306,86 @@ def _story(connective_prose: str) -> SubplotTemplate:
 
 _POUCH_SUBPLOTS = _POUCH_SUBPLOTS + [
     _story(
-        "To {goal_text}, {hound_he_she_cap} composed {concept_phrase} "
-        "with the binding gripped safely between the teeth and submitted "
-        "the form. The REPL pulled from the mouth as the form directed:"
+        "To {goal_text}, {hound_he_she}, {emo_patient}, composed {concept_phrase} "
+        "with the binding gripped safely between {hound_his_her} teeth — the grip "
+        "firm only for the stretch the form needed — and submitted the form. "
+        "The REPL pulled from the mouth as the form directed:"
     ),
 ]
 
 _RECIPE_SUBPLOTS = _RECIPE_SUBPLOTS + [
     _story(
-        "To {goal_text}, {hound_he_she_cap} laid out {concept_phrase} "
-        "along the nose-trail and submitted the form. The REPL walked "
-        "the trail end to end:"
+        "To {goal_text}, {hound_he_she}, {emo_patient}, laid out {concept_phrase} "
+        "along the nose-trail — long enough to hold every step the routine "
+        "would take in turn — and submitted the form. The REPL walked the "
+        "trail end to end:"
     ),
 ]
 
 _BASKET_SUBPLOTS = _BASKET_SUBPLOTS + [
     _story(
-        "To {goal_text}, {hound_he_she_cap} composed {concept_phrase} "
-        "for the bone-cache and submitted the form. The REPL handed "
-        "back the arrangement:"
+        "To {goal_text}, {hound_he_she}, {emo_patient}, composed {concept_phrase} "
+        "for the bone-cache — the cache's weight unchanged by the new "
+        "arrangement — and submitted the form. The REPL handed back the "
+        "arrangement:"
     ),
 ]
 
 _SIEVE_SUBPLOTS = _SIEVE_SUBPLOTS + [
     _story(
-        "To {goal_text}, {hound_he_she_cap} composed {concept_phrase} "
-        "as the gap's rule, ran the input through, and submitted the "
-        "form. The REPL caught what landed below:"
+        "To {goal_text}, {hound_he_she}, {emo_patient}, composed {concept_phrase} "
+        "as the gap's rule — the gap narrow, the rule deciding which items "
+        "passed through — ran the input through, and submitted the form. "
+        "The REPL caught what landed below:"
     ),
 ]
 
 _NOTEBOOK_SUBPLOTS = _NOTEBOOK_SUBPLOTS + [
     _story(
-        "To {goal_text}, {hound_he_she_cap} composed {concept_phrase} "
-        "for the tally-stone and submitted the form. The REPL applied "
-        "the update at the stream's edge:"
+        "To {goal_text}, {hound_he_she}, {emo_patient}, composed {concept_phrase} "
+        "for the tally-stone — the stone heavy enough to hold a single "
+        "honest count without sliding — and submitted the form. The REPL "
+        "applied the update at the stream's edge:"
     ),
 ]
 
 _ACORN_SUBPLOTS = _ACORN_SUBPLOTS + [
     _story(
-        "To {goal_text}, {hound_he_she_cap} composed {concept_phrase} "
-        "and submitted the form. The REPL counted out the answer:"
+        "To {goal_text}, {hound_he_she}, {emo_patient}, composed {concept_phrase} "
+        "with the running tally heavy in the count — each value added in turn "
+        "— and submitted the form. The REPL counted out the answer:"
     ),
 ]
 
 _GATE_SUBPLOTS = _GATE_SUBPLOTS + [
     _story(
-        "To {goal_text}, {hound_he_she_cap} composed {concept_phrase} "
-        "and submitted the form. The REPL let the crossing-conditions "
-        "decide:"
+        "To {goal_text}, {hound_he_she}, {emo_patient}, composed {concept_phrase} "
+        "with the crossing-conditions arrayed in order — the first to fail "
+        "would close the chain — and submitted the form. The REPL let the "
+        "crossing-conditions decide:"
     ),
 ]
 
 _FORK_SUBPLOTS = _FORK_SUBPLOTS + [
     _story(
-        "To {goal_text}, {hound_he_she_cap} composed {concept_phrase} "
-        "and submitted the form. The REPL took the right arm:"
+        "To {goal_text}, {hound_he_she}, {emo_patient}, composed {concept_phrase} "
+        "with the path forking ahead — only one arm walked, the other left "
+        "untrodden — and submitted the form. The REPL took the right arm:"
     ),
 ]
 
 _ROADSIGN_SUBPLOTS = _ROADSIGN_SUBPLOTS + [
     _story(
-        "To {goal_text}, {hound_he_she_cap} composed {concept_phrase} "
-        "and submitted the form. The REPL read the markers and replied:"
+        "To {goal_text}, {hound_he_she}, {emo_patient}, composed {concept_phrase} "
+        "with the marker's name posted firm beside the path — readable by "
+        "any traveller — and submitted the form. The REPL read the markers "
+        "and replied:"
     ),
 ]
 
 _SAFETYNET_SUBPLOTS = _SAFETYNET_SUBPLOTS + [
     _story(
-        "To {goal_text}, {hound_he_she_cap} composed {concept_phrase} "
+        "To {goal_text}, {hound_he_she} composed {concept_phrase} "
         "and submitted the form. The REPL — log tested in advance — "
         "handed back the value:"
     ),
@@ -1383,7 +1393,7 @@ _SAFETYNET_SUBPLOTS = _SAFETYNET_SUBPLOTS + [
 
 _SCROLL_SUBPLOTS = _SCROLL_SUBPLOTS + [
     _story(
-        "To {goal_text}, {hound_he_she_cap} composed {concept_phrase} "
+        "To {goal_text}, {hound_he_she} composed {concept_phrase} "
         "and submitted the form. The REPL — claw to bark — completed "
         "the message-bone work:"
     ),
@@ -1391,7 +1401,7 @@ _SCROLL_SUBPLOTS = _SCROLL_SUBPLOTS + [
 
 _GUILD_SUBPLOTS = _GUILD_SUBPLOTS + [
     _story(
-        "To {goal_text}, {hound_he_she_cap} composed {concept_phrase} "
+        "To {goal_text}, {hound_he_she} composed {concept_phrase} "
         "and submitted the form. The REPL — checking the pack ledger — "
         "dispatched cleanly:"
     ),
@@ -1399,21 +1409,21 @@ _GUILD_SUBPLOTS = _GUILD_SUBPLOTS + [
 
 _SORTINGTABLE_SUBPLOTS = _SORTINGTABLE_SUBPLOTS + [
     _story(
-        "To {goal_text}, {hound_he_she_cap} composed {concept_phrase} "
+        "To {goal_text}, {hound_he_she} composed {concept_phrase} "
         "and submitted the form. The REPL routed through the piles:"
     ),
 ]
 
 _CARRYINGCASE_SUBPLOTS = _CARRYINGCASE_SUBPLOTS + [
     _story(
-        "To {goal_text}, {hound_he_she_cap} composed {concept_phrase} "
+        "To {goal_text}, {hound_he_she} composed {concept_phrase} "
         "and submitted the form. The REPL constructed the kennel-bag:"
     ),
 ]
 
 _TOOLSHED_SUBPLOTS = _TOOLSHED_SUBPLOTS + [
     _story(
-        "To {goal_text}, {hound_he_she_cap} composed {concept_phrase} "
+        "To {goal_text}, {hound_he_she} composed {concept_phrase} "
         "and submitted the form. The REPL — calling into the "
         "kennel-master's shed — returned:"
     ),
@@ -1421,7 +1431,7 @@ _TOOLSHED_SUBPLOTS = _TOOLSHED_SUBPLOTS + [
 
 _RUNNERAHEAD_SUBPLOTS = _RUNNERAHEAD_SUBPLOTS + [
     _story(
-        "To {goal_text}, {hound_he_she_cap} composed {concept_phrase} "
+        "To {goal_text}, {hound_he_she} composed {concept_phrase} "
         "and submitted the form. The REPL coordinated the scout's "
         "return:"
     ),
@@ -1429,7 +1439,7 @@ _RUNNERAHEAD_SUBPLOTS = _RUNNERAHEAD_SUBPLOTS + [
 
 _REWRITERULE_SUBPLOTS = _REWRITERULE_SUBPLOTS + [
     _story(
-        "To {goal_text}, {hound_he_she_cap} composed {concept_phrase} "
+        "To {goal_text}, {hound_he_she} composed {concept_phrase} "
         "and submitted the form. The REPL — applying the rewrite, then "
         "evaluating the rewritten form — returned:"
     ),
@@ -1437,7 +1447,7 @@ _REWRITERULE_SUBPLOTS = _REWRITERULE_SUBPLOTS + [
 
 _SCRIBE_SUBPLOTS = _SCRIBE_SUBPLOTS + [
     _story(
-        "To {goal_text}, {hound_he_she_cap} composed {concept_phrase} "
+        "To {goal_text}, {hound_he_she} composed {concept_phrase} "
         "and submitted the form. The REPL read by the conventions and "
         "returned:"
     ),
@@ -1445,7 +1455,7 @@ _SCRIBE_SUBPLOTS = _SCRIBE_SUBPLOTS + [
 
 _CHALKMARK_SUBPLOTS = _CHALKMARK_SUBPLOTS + [
     _story(
-        "To {goal_text}, {hound_he_she_cap} composed {concept_phrase} "
+        "To {goal_text}, {hound_he_she} composed {concept_phrase} "
         "and submitted the form. The REPL — distinguishing scratch from "
         "bone — returned:"
     ),
@@ -1453,7 +1463,7 @@ _CHALKMARK_SUBPLOTS = _CHALKMARK_SUBPLOTS + [
 
 _TALLYWALK_SUBPLOTS = _TALLYWALK_SUBPLOTS + [
     _story(
-        "To {goal_text}, {hound_he_she_cap} composed {concept_phrase} "
+        "To {goal_text}, {hound_he_she} composed {concept_phrase} "
         "and submitted the form. The REPL walked the bone-row carrying "
         "the tally:"
     ),
@@ -1461,7 +1471,7 @@ _TALLYWALK_SUBPLOTS = _TALLYWALK_SUBPLOTS + [
 
 _BEADSTRING_SUBPLOTS = _BEADSTRING_SUBPLOTS + [
     _story(
-        "To {goal_text}, {hound_he_she_cap} composed {concept_phrase} "
+        "To {goal_text}, {hound_he_she} composed {concept_phrase} "
         "and submitted the form. The REPL spliced or counted as the "
         "form said:"
     ),
@@ -1469,7 +1479,7 @@ _BEADSTRING_SUBPLOTS = _BEADSTRING_SUBPLOTS + [
 
 _CIRCUIT_SUBPLOTS = _CIRCUIT_SUBPLOTS + [
     _story(
-        "To {goal_text}, {hound_he_she_cap} composed {concept_phrase} "
+        "To {goal_text}, {hound_he_she} composed {concept_phrase} "
         "and submitted the form. The REPL paced without growing the "
         "trail:"
     ),
