@@ -415,9 +415,10 @@ G3_06 = SubjectCurriculum(grade=3, subject_id="G3-06",
                 'verdict the form returns.'
             ),
             resolution=(
-                'The REPL read the first grip, used it to compute the second, '
-                'and held both in the let\'s span. The mouth released both as '
-                'the form ended, returning b\'s value.'
+                "The REPL read 5 from the first grip, doubled it for the "
+                "second grip's value, and held both inside the let's span. "
+                "When the form ended, the mouth opened — but b's count "
+                "had already come back."
             ),
             tags=("story",),
         ),

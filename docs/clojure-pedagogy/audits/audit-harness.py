@@ -142,6 +142,31 @@ def _build_emo_markers():
             markers.extend(pool)
     except ImportError:
         pass
+    # Integration emotion_pools rich archetype set (>=30 entries per
+    # pool) — dog_shadow and other fables draw from these rather than
+    # the legacy 6-entry fables pools. Fables.py entries are a strict
+    # subset so coverage widens without losing anything. Added by the
+    # audit-dog-shadow-xe8M slice when LOW_GROUNDING over-flagged
+    # dog_shadow records carrying rich emotion_pools phrases.
+    try:
+        from mmllm.aesop.curriculum.emotion_pools import (
+            EMO_PROUD as EP_PROUD2, EMO_PATIENT as EP_PATIENT2,
+            EMO_TIRED as EP_TIRED2, EMO_HUNGRY as EP_HUNGRY2,
+            EMO_THIRSTY as EP_THIRSTY2,
+            EMO_GREEDY as EP_GREEDY2, EMO_CONTENT as EP_CONTENT2,
+            EMO_REGRETFUL as EP_REGRETFUL2,
+            EMO_DESPERATE as EP_DESPERATE2,
+            EMO_BOASTFUL as EP_BOASTFUL2,
+            EMO_CAUTIOUS as EP_CAUTIOUS2,
+            EMO_SUSPICIOUS as EP_SUSPICIOUS2,
+        )
+        for pool in (EP_PROUD2, EP_PATIENT2, EP_TIRED2, EP_HUNGRY2,
+                      EP_THIRSTY2, EP_GREEDY2, EP_CONTENT2,
+                      EP_REGRETFUL2, EP_DESPERATE2, EP_BOASTFUL2,
+                      EP_CAUTIOUS2, EP_SUSPICIOUS2):
+            markers.extend(pool)
+    except ImportError:
+        pass
     # De-dupe and sort longest-first so longer markers match before
     # their substrings.
     return tuple(sorted(set(markers), key=len, reverse=True))
@@ -981,6 +1006,86 @@ def check_record(rec, sub, example):
                        "implies the answer pre-existed evaluation — "
                        "describe the form's evaluation, not a "
                        "pre-existing 'right' answer"))
+
+    # ─────────── slice xe8M (dog-shadow) detector additions ───────────
+    #
+    # Three new detectors authored during the dog-shadow hand audit
+    # (slice xe8M, branch claude/audit-dog-shadow-xe8M). Each surfaces
+    # a Cat-K storytelling-coherence pattern that detectors did not
+    # previously catch.
+
+    # NARRATIVE_NUMERAL_HARDCODE — when example.form_template is set
+    # (form is parametric and operands are drawn at render time), the
+    # scenario / need / mapping / resolution slots SHOULDN'T hard-code
+    # English-numeral count phrases like "five bones", "ten stones",
+    # "three bundles" since those drift from the actual draws.
+    # Distinct from PARAMETRIC_LITERAL_NUMERALS (which only catches
+    # enumerations like "one, two, three, four, five"). This catches
+    # the singleton-numeral-quantifier pattern.
+    if getattr(example, "form_template", None):
+        slot_text = " ".join(
+            getattr(example, slot, "") or ""
+            for slot in ("scenario", "need", "mapping", "resolution")
+        )
+        # Only flag if a slot quantifies a count using a fixed English
+        # numeral immediately followed by a content noun. Restricted
+        # to count-words 3-10 to avoid catching grammatical "one bone"
+        # / "a single line".
+        m = re.search(
+            r"\b(three|four|five|six|seven|eight|nine|ten)\s+"
+            r"(bones?|stones?|bundles?|piles?|heaps?|values?|"
+            r"numbers?|counts?|integers?|elements?|items?)\b",
+            slot_text, re.IGNORECASE,
+        )
+        if m:
+            issues.append(("NARRATIVE_NUMERAL_HARDCODE",
+                           f"parametric example has hard-coded English "
+                           f"numeral '{m.group(0)}' in a story slot — "
+                           f"the actual draws may differ from this fixed "
+                           f"count"))
+
+    # META_FILLER_RESOLUTION — generic resolution phrases that don't
+    # close the loop on what the form computed. "Returned exactly",
+    # "settled with certainty", "handed back with certainty",
+    # "the answer was exact" — these are template-output filler that
+    # tells the reader the runtime gave a value (which is trivially
+    # true) without saying what the value WAS or what made it land.
+    # Cat-K K-3 (AI-output cadence) / K-4 (missing causality).
+    META_FILLER_RES_RE = re.compile(
+        r"\b(?:settled with certainty|handed back with certainty|"
+        r"the (?:answer|result|product|sum|tally) was exact|"
+        r"returned with certainty|with certainty\.|returned exactly\.|"
+        r"returned exact\.)",
+    )
+    if META_FILLER_RES_RE.search(user):
+        issues.append(("META_FILLER_RESOLUTION",
+                       "user_msg uses generic 'returned exactly' / "
+                       "'settled with certainty' filler — describe what "
+                       "actually came back, not just that something did"))
+
+    # FORM_DISPLAY_AND_FORM_NOUN — when {form_display} (the rendered
+    # backticked form) appears in close proximity with "the form" used
+    # as a noun phrase (template tic). Distinct from THE_FORM_OVERUSE
+    # which counts global "the form" occurrences; this targets the
+    # specific co-location pattern: backticked form + "the form ..."
+    # within ~120 chars. Cat-I distraction (over-explained transitions).
+    backtick_form_re = re.compile(r"`[^`]*`")
+    backticks = list(backtick_form_re.finditer(user))
+    flagged_form_collision = False
+    for m in backticks:
+        # Skip very short backticked tokens (e.g. `let`, `if`).
+        if m.end() - m.start() < 5:
+            continue
+        nearby = user[m.end():m.end() + 120]
+        if re.search(r"\bthe form\b", nearby, re.IGNORECASE):
+            flagged_form_collision = True
+            break
+    if flagged_form_collision:
+        issues.append(("FORM_DISPLAY_AND_FORM_NOUN",
+                       "user_msg places `<form>` adjacent to a 'the "
+                       "form ...' noun-phrase reference within 120 "
+                       "chars — template tic that doubles the form "
+                       "reference (vary the second mention)"))
 
     # Both modes are LOW_GROUNDING.
     _check_grounding(user, rec, issues)

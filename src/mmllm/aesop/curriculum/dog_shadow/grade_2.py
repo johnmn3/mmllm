@@ -66,113 +66,119 @@ G2_01 = SubjectCurriculum(
         SubjectExample(
             form="(+ 1 2 3 4)", expected=10,
             concept_phrase="the multi-arg sum",
-            question_what="the sum of 1, 2, 3, and 4",
-            goal_text="add 1, 2, 3, and 4",
+            question_what="the sum of four drawn counts",
+            goal_text="add four drawn counts together",
             scenario=(
-                'Rex the hound stood at the stream\'s edge, arranging four '
-                'small bones in a row on a flat stone. The bones were marked '
-                '1, 2, 3, and 4.'
+                "Rex the hound stood at the stream's edge, arranging four "
+                "small bones in a row on a flat stone. The bones were marked "
+                "{drawn.a}, {drawn.b}, {drawn.c}, and {drawn.d}."
             ),
             need=(
-                'He needed the running total — what all four bones counted '
-                'to when stacked together. The REPL would tally them for him '
-                'in one breath.'
+                "He needed the running total — what all four bones counted "
+                "to when stacked together. The REPL would tally them for him "
+                "in one breath."
             ),
             mapping=(
-                'Each bone is one operand, their sum is the result, and the '
-                'plus operator is the paw-stroke that gathers them all into '
-                'one count.'
+                "Each bone is one operand, their sum is the result, and `+` "
+                "is the paw-stroke that gathers them all into one count."
             ),
             resolution=(
-                'The REPL brought the four bones into a single pile and '
-                'handed back the total. The answer settled the wager at once.'
+                "The REPL added {drawn.a} and {drawn.b}, then {drawn.c}, "
+                "then {drawn.d}. The total came back, the wager settled at "
+                "once."
             ),
             tags=("story",),
         ),
         SubjectExample(
             form="(* 2 3 4)", expected=24,
             concept_phrase="the multi-arg product",
-            question_what="the product of 2, 3, and 4",
-            goal_text="multiply 2, 3, and 4",
+            question_what="the product of three drawn counts",
+            goal_text="multiply three drawn counts",
             scenario=(
-                'Patch the hound gathered three separate piles of bones near the '
-                'meadow — each pile marked with a number. Two bones in the first, '
-                'three in the second, four in the third.'
+                "Patch the hound gathered three piles of bones near the "
+                "meadow, each pile marked with a count: {drawn.a}, "
+                "{drawn.b}, and {drawn.c}."
             ),
             need=(
-                'They wanted the total if each pile was multiplied together — what '
-                'two times three times four would come to in one compounded count.'
+                "They wanted the total if each pile was multiplied together — "
+                "what {drawn.a} times {drawn.b} times {drawn.c} would come to "
+                "in one compounded count."
             ),
             mapping=(
-                'Each pile is one factor, the multiplication chains them, and the '
-                'running product grows at each step until the final answer holds all.'
+                "Each pile is one factor, `*` chains them, and the running "
+                "product grows at each step until the final answer holds them "
+                "all."
             ),
             resolution=(
-                'The REPL multiplied two by three to get six, then six by four to '
-                'get twenty-four. The compounded total was exact, handed back with '
-                'certainty.'
+                "The REPL multiplied {drawn.a} by {drawn.b}, then by "
+                "{drawn.c}. The compounded total came back exactly."
             ),
             tags=("story",),
         ),
         SubjectExample(
             form="(- 100 1 2 3)", expected=94,
             concept_phrase="the multi-arg subtraction",
-            question_what="100 minus 1, 2, and 3",
-            goal_text="subtract 1, 2, and 3 from 100",
+            question_what="a starting count minus three drawn losses",
+            goal_text="subtract three drawn losses from a starting count",
             scenario=(
-                'Bell the hound held a great pile of one hundred bones by the river '
-                'bank. Then came three separate losses — one bone, then two more, '
-                'then three more taken away in turn.'
+                "Bell the hound held a great pile of {drawn.a} bones by the "
+                "river bank. Then came three separate losses — first "
+                "{drawn.b}, then {drawn.c}, then {drawn.d} bones taken away "
+                "in turn."
             ),
             need=(
-                'She wanted to know how many remained after each subtraction. The '
-                'chain of losses would leave a final count that told the story.'
+                "She wanted to know how many remained after each subtraction. "
+                "The chain of losses would leave a final count that told the "
+                "story."
             ),
             mapping=(
-                'One hundred is the starting pile, each subtraction removes a '
-                'portion, and the running remainder shrinks with each step until '
-                'the answer settles.'
+                "{drawn.a} is the starting pile, each subtraction removes a "
+                "portion, and the running remainder shrinks with each step "
+                "until the answer settles."
             ),
             resolution=(
-                'The REPL subtracted one from one hundred to get ninety-nine, '
-                'then two more to get ninety-seven, then three to get ninety-four. '
-                'The final tally was returned.'
+                "The REPL subtracted {drawn.b} from {drawn.a}, then "
+                "{drawn.c} more, then {drawn.d} more. The final tally was "
+                "returned exactly."
             ),
             tags=("story",),
         ),
         SubjectExample(
             form="(+ 1 2 3 4 5 6 7 8 9 10)", expected=55,
-            concept_phrase="the sum of ten numbers",
-            question_what="the sum of integers 1 through 10",
-            goal_text="add the integers 1 through 10",
+            concept_phrase="the sum of ten counts",
+            question_what="the sum of ten counts gathered along the stream",
+            goal_text="add ten counts together",
             scenario=(
-                'Rex the hound arranged ten marked stones in a line at the stream\'s '
-                'edge, each one numbered from 1 to 10. He wanted the grand tally of '
-                'all of them stacked together.'
+                "Rex the hound laid ten marked stones in a line at the stream's "
+                "edge: {drawn.a}, {drawn.b}, {drawn.c}, {drawn.d}, {drawn.e}, "
+                "{drawn.f}, {drawn.g}, {drawn.h}, {drawn.i}, and {drawn.j}. "
+                "He wanted one tally for all of them."
             ),
             need=(
-                'He needed the running total when all ten were gathered — the sum '
-                'that would tell him the exact count of the entire sequence.'
+                "He needed the running total when each stone's count was folded "
+                "into the next — the sum that would settle the whole row."
             ),
             mapping=(
-                'Each stone is one number in the sequence, the addition combines '
-                'them all, and the final sum holds the answer for the whole row.'
+                "Each stone is one operand, `+` folds them in left to right, and "
+                "the final sum holds the answer the row had been waiting for."
             ),
             resolution=(
-                'The REPL added all ten in sequence — one plus two plus three all the '
-                'way through ten — and handed back the running total. The sum was exact.'
+                "The REPL added the ten in order — folding {drawn.a} and "
+                "{drawn.b} and on through {drawn.j} — and handed back the "
+                "running total exactly."
             ),
             tags=("story",),
         ),
         SubjectExample(
             form="(* 1 2 3 4 5)", expected=120,
             concept_phrase="the multi-arg product",
-            question_what="the product of 1 through 5",
-            goal_text="multiply the integers 1 through 5",
+            question_what="the product of five drawn counts",
+            goal_text="multiply five counts together",
             scenario=(
-                'Patch the hound laid five bones in a row near the forest, each one '
-                'carved with the numbers 1, 2, 3, 4, and 5. They wanted to multiply '
-                'them all together to see what the chain would yield.'
+                "Patch the hound laid five bones in a row near the forest, each "
+                "one carved with a count: {drawn.a}, {drawn.b}, {drawn.c}, "
+                "{drawn.d}, and {drawn.e}. They wanted the chain multiplied "
+                "to a single product."
             ),
             need=(
                 'They needed the product when all five were multiplied in sequence. '
@@ -184,33 +190,34 @@ G2_01 = SubjectCurriculum(
                 'together, and the final product grows until it settles on the answer.'
             ),
             resolution=(
-                'The REPL multiplied one by two to get two, then by three to get six, '
-                'then by four to get twenty-four, then by five to get the final '
-                'factorial-like product. The result was exact.'
+                "The REPL chained the multiplication: {drawn.a} times "
+                "{drawn.b}, then by {drawn.c}, then by {drawn.d}, then by "
+                "{drawn.e}. The compounded product came back exactly."
             ),
             tags=("story",),
         ),
         SubjectExample(
             form="(+ 10 20 30)", expected=60,
-            concept_phrase="the sum of three numbers",
-            question_what="the sum of 10, 20, and 30",
-            goal_text="add 10, 20, and 30",
+            concept_phrase="the sum of three counts",
+            question_what="the sum of three drawn counts",
+            goal_text="add three drawn counts",
             scenario=(
-                'Bell the hound carried three bundles of bones to the pond — one '
-                'held ten, the second twenty, the third thirty. She wanted to stack '
-                'them all into one count.'
+                "Bell the hound carried three bundles of bones to the pond: "
+                "the first held {drawn.a}, the second {drawn.b}, the third "
+                "{drawn.c}. She wanted them stacked into one count."
             ),
             need=(
-                'She needed the total when all three bundles were joined. The '
-                'running sum would tell her the grand tally without confusion.'
+                "She needed the total when the three bundles joined — the "
+                "running sum that would settle the grand tally without "
+                "confusion."
             ),
             mapping=(
-                'Each bundle is one addend, the addition combines them, and the '
-                'final sum holds the answer for all three together.'
+                "Each bundle is one addend, `+` folds them in turn, and the "
+                "final sum holds the answer for all three together."
             ),
             resolution=(
-                'The REPL added ten and twenty to get thirty, then thirty to get '
-                'sixty. The total was returned with certainty.'
+                "The REPL added {drawn.a} and {drawn.b}, then folded in "
+                "{drawn.c}. The total came back exact."
             ),
             tags=("story",),
         ),
