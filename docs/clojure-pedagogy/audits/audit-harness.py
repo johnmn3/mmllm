@@ -612,6 +612,97 @@ def check_record(rec, sub, example):
                         "as subject) — produced when subplot template ends a "
                         "sentence with a period before {concept_phrase}"))
 
+    # ─────────── LOW_GROUNDING (Cat-J) ──────────────────────────────
+    # Affirmative-push detector. A record is "grounded" when its prose
+    # carries BOTH:
+    #   (i)  a drawn-value reference — at least one int / keyword /
+    #        string literal from the form appears in the user_msg.
+    #        This anchors the prose to the actual instance the model
+    #        is computing, not just the operation name.
+    #   (ii) an environment-anchored emotion phrase — at least one
+    #        phrase from a milkmaid-aligned EMO pool (EMO_PATIENT,
+    #        EMO_REGRETFUL, EMO_CONTENT, EMO_BOASTFUL, EMO_CAUTIOUS,
+    #        plus universal EMO_PROUD, EMO_DESPERATE, EMO_HUNGRY).
+    #        The phrase ties the character's inner state to the
+    #        environment / situation in a way that maps onto the
+    #        algorithmic action.
+    #
+    # Records lacking BOTH ingredients are LOW_GROUNDING.
+    #
+    # Additionally, records that have a generic emotion-adverb
+    # ("softly" / "quietly" / "gently" / "calmly" — when paired with
+    # a generic dialogue tag like "she said softly, 'the X
+    # operation...'") but no environment-anchored phrase are also
+    # LOW_GROUNDING — the adverb names a tone but doesn't ground it.
+    #
+    # The detector is structural: it doesn't try to grade prose
+    # quality, only confirm the two ingredients are present.
+    try:
+        from mmllm.aesop.curriculum import emotion_pools as _eps
+        _EMO_GROUNDING_PHRASES = (
+            _eps.EMO_PATIENT + _eps.EMO_REGRETFUL + _eps.EMO_CONTENT
+            + _eps.EMO_BOASTFUL + _eps.EMO_CAUTIOUS
+            + _eps.EMO_PROUD + _eps.EMO_DESPERATE + _eps.EMO_HUNGRY
+        )
+    except (ImportError, AttributeError):
+        _EMO_GROUNDING_PHRASES = ()
+
+    if _EMO_GROUNDING_PHRASES:
+        # (i) drawn-value reference: pull literal ints / keywords /
+        # strings from the form and check user.
+        form = rec.code_str or ""
+        drawn_values: list[str] = []
+        # ints (≥2 chars, to skip noisy single-digits like 0/1)
+        for m in re.finditer(r"\b\d{2,}\b", form):
+            drawn_values.append(m.group(0))
+        # multi-digit ints already caught; also catch single-digit
+        # ints when they appear inside multi-arg ops
+        for m in re.finditer(r"(?<![0-9-])([2-9])(?![0-9])", form):
+            drawn_values.append(m.group(0))
+        # keywords (with the colon)
+        for m in re.finditer(r":[a-zA-Z][a-zA-Z0-9-]*", form):
+            drawn_values.append(m.group(0))
+        # quoted strings
+        for m in re.finditer(r'"([^"\\]{2,}|\\.)+"', form):
+            drawn_values.append(m.group(0))
+        # symbols (variable names of length ≥3)
+        for m in re.finditer(r"\b[a-z][a-z0-9_-]{2,}\b", form):
+            tok = m.group(0)
+            if tok not in {"def", "let", "fn", "do", "if", "or",
+                            "and", "not", "the", "for", "into",
+                            "true", "false", "nil", "map", "str"}:
+                drawn_values.append(tok)
+        has_drawn_ref = any(v and v in user for v in drawn_values)
+
+        # (ii) any grounding-pool phrase appears in user
+        user_lower = user.lower()
+        has_emo_phrase = any(p.lower() in user_lower
+                              for p in _EMO_GROUNDING_PHRASES)
+
+        # Generic-adverb-only check: a bare "softly/quietly/gently/
+        # calmly" tag without an environment-anchored emotion is
+        # LOW_GROUNDING even if a literal appears.
+        generic_adverb_re = re.compile(
+            r"\b(?:said|asked|replied|explained|added|continued|"
+            r"murmured|whispered|laughed)\s+"
+            r"(?:softly|quietly|gently|calmly|simply|easily|"
+            r"matter-of-factly)\b"
+        )
+        has_generic_adverb_tag = bool(generic_adverb_re.search(user))
+
+        if not has_emo_phrase and not has_drawn_ref:
+            issues.append(("LOW_GROUNDING",
+                            "user_msg lacks both a drawn-value reference "
+                            "(literal from form) AND any environment-"
+                            "anchored EMO phrase — no grounding for the "
+                            "operation"))
+        elif has_generic_adverb_tag and not has_emo_phrase:
+            issues.append(("LOW_GROUNDING",
+                            "user_msg has a generic emotion-adverb "
+                            "dialogue tag (softly/quietly/gently/calmly) "
+                            "but no environment-anchored EMO phrase — "
+                            "tone named but not grounded"))
+
     return issues
 
 

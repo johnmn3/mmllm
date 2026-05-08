@@ -126,11 +126,12 @@ forward. This is how we build great recipes from small ones."
 """),
 
     SubplotTemplate("""\
-{milkmaid} claimed, "I know how to {goal_text}, and I'll tell you the answer without writing
-any form!" {farmer_he_she_cap} asked calmly, "Then produce the form whose execution would {goal_text}.
-Write the steps on the pail-steps card, in order, and submit it." {milkmaid} tried, stumbled,
-and finally understood: a form is not a guess. It is a card with steps written, each one clear,
-each one leading to the last — {concept_phrase}.
+{milkmaid} claimed, {emo_boastful}, "I know how to {goal_text}, and I'll tell you the answer
+without writing any form!" {farmer_he_she_cap} answered, {emo_cautious}, "Then produce the
+form whose execution would {goal_text}. Write the steps on the pail-steps card, in order,
+and submit it — the road is long, the pail is full, and a guess will not carry it." {milkmaid}
+tried, stumbled, and finally understood: a form is not a guess. It is a card with steps
+written, each one clear, each one leading to the last — {concept_phrase}.
 """),
 
     SubplotTemplate("""\
@@ -157,11 +158,12 @@ the first one exactly as it was."
 """),
 
     SubplotTemplate("""\
-{milkmaid} claimed, "I shall {goal_text} by changing the basket as I carry it." {farmer_he_she_cap}
-smiled and said, "No. To {goal_text}, produce a form that builds a new basket — a fresh one, with
-compartments for cream, skim, and curds arranged according to {concept_phrase}. The old basket never
-changes. The milkmaid's daydream is to imagine the basket transforms; the farmer's method is to
-build a new one."
+{milkmaid} claimed, {emo_boastful}, "I shall {goal_text} by changing the basket as I carry it."
+{farmer_he_she_cap} smiled, {emo_patient}, the basket steady on the counting-table between them.
+"No. To {goal_text}, produce a form that builds a new basket — a fresh one, with compartments
+for cream, skim, and curds arranged according to {concept_phrase}. The old basket never changes;
+its weight is fixed. The milkmaid's daydream is to imagine the basket transforms; the farmer's
+method is to build a new one."
 """),
 
     SubplotTemplate("""\
@@ -229,12 +231,13 @@ wrote the form and submitted it. The strainer's rule flowed through, and the fre
 """),
 
     SubplotTemplate("""\
-One morning, {milkmaid_he_she_cap} poured milk through a strainer with no rule written. The strainer did
-nothing — every drop fell away, and the fresh pail was empty. "The strainer is broken!" {milkmaid_he_she_cap}
-cried. {farmer_he_she_cap} smiled and said, "No. The strainer requires a rule — a form that
-{concept_phrase}. Without the rule, the strainer cannot decide. Write the form that says 'pass this,
-reject that,' and the fresh pail will fill. But {milkmaid_he_she} must write it — the farmer's form, not
-the milkmaid's guess."
+One morning, {milkmaid_he_she_cap} poured milk through a strainer with no rule written. The strainer
+did nothing — every drop fell away, the fresh pail empty and the linen-strainer slack on its frame.
+"The strainer is broken!" {milkmaid_he_she_cap} cried, {emo_desperate}. {farmer_he_she_cap} smiled,
+{emo_cautious}. "No. The strainer requires a rule — a form that {concept_phrase}. Without the rule,
+the strainer cannot decide which drops belong below and which return up the pail. Write the form
+that says 'pass this, reject that,' and the fresh pail will fill. But {milkmaid_he_she} must write
+it — the farmer's form, not the milkmaid's guess."
 """),
 ]
 
@@ -261,11 +264,13 @@ unbreakable motion.' If two farmers arrive together, the form ensures only one u
 """),
 
     SubplotTemplate("""\
-{farmer_he_she_cap} approached the tally-slate and muttered a form: "The old count is 47. Add 3. The new
-count is 50. Write it." In one motion, {farmer_he_she} read, computed, and wrote. {milkmaid_he_she_cap}
-watched and asked, "How did you keep it so neat?" {farmer_he_she_cap} replied, "The form for {concept_phrase}
-is atomic — it promises that no other farmer can sneak in mid-update. The slate shows 50, and every farmer
-knows it is the result of one unbroken form, not a daydream or a half-written guess."
+{farmer_he_she_cap} approached the tally-slate, {emo_cautious}, and muttered a form: "The old count
+is 47. Add 3. The new count is 50. Write it." In one motion — the chalk steady, the slate firm under
+the heel of {farmer_his_her} hand — {farmer_he_she} read, computed, and wrote. {milkmaid_he_she_cap}
+watched and asked, "How did you keep it so neat?" {farmer_he_she_cap} replied, {emo_patient}, "The
+form for {concept_phrase} is atomic — it promises that no other farmer can sneak in mid-update.
+The slate shows 50, and every farmer knows it is the result of one unbroken form, not a daydream
+or a half-written guess."
 """),
 
     SubplotTemplate("""\
@@ -293,32 +298,37 @@ _ACORN_SUBPLOTS: list[SubplotTemplate] = [
 {milkmaid_he_she_cap} arrived at the market with a handful of copper coins, jingling in
 {milkmaid_his_her} pocket. "I know how much I have without counting," {milkmaid_he_she_cap} boasted.
 But {farmer_he_she} took the coins and began stacking them in neat rows, one by one: one coin,
-two coins, three coins. "To {goal_text}," {farmer_he_she_cap} said calmly, "{concept_phrase} means
-we count, we stack, we tally. The coins do not lie. Submit the form and read the REPL's count."
+two coins, three coins. "To {goal_text}," {farmer_he_she_cap} said, {emo_patient}, "{concept_phrase}
+means we count, we stack, we tally. The pail is heavy because every coin is in it. The coins
+do not lie. Submit the form and read the REPL's count."
 """),
 
     SubplotTemplate("""\
-Every morning, {milkmaid} carried a pail of milk to the dairy, imagining what the coins would
-total. {farmer_he_she_cap} only smiled and said, "Come. Let us count the coins from yesterday's
-sales." Together they counted: one coin, then another, then another, stacking them into piles.
-"This is {concept_phrase}," {farmer_he_she_cap} said. "To {goal_text}, we do not guess. We count
-each coin and see what the stack becomes. Write the form and let the REPL count for you."
+Every morning, {milkmaid} carried a pail of milk to the dairy, the pail full and balanced on her
+head, imagining what the coins would total. {farmer_he_she_cap} answered her, {emo_patient}, "Come.
+Let us count the coins from yesterday's sales." Together they counted: one coin, then another,
+then another, stacking them into piles, the table heavy with the slow weight of true count.
+"This is {concept_phrase}," {farmer_he_she} said. "To {goal_text}, we do not guess. We count each
+coin and see what the stack becomes. Write the form and let the REPL count for you."
 """),
 
     SubplotTemplate("""\
 {milkmaid_he_she_cap} watched {farmer} sort coins at the dairy table: copper in one pile, silver
-in another, gold in a third. "{farmer}, how do you know the total without guessing?" {milkmaid_he_she_cap}
-asked. {farmer_he_she_cap} replied, "The coins speak for themselves. To {goal_text}, {concept_phrase}
-means we examine each coin — its weight, its value — and we combine them. The form's logic stacks
-them just as {farmer_his_her} hands do. Submit it, and the REPL tallies the truth."
+in another, gold in a third, the table heavy with the orderly weight of three settled stacks.
+"{farmer}, how do you know the total without guessing?" {milkmaid_he_she_cap} asked.
+{farmer_he_she_cap} replied, {emo_patient}, "The coins speak for themselves. To {goal_text},
+{concept_phrase} means we examine each coin — its weight, its value — and we combine them.
+The form's logic stacks them just as {farmer_his_her} hands do, slow and sure. Submit it, and
+the REPL tallies the truth."
 """),
 
     SubplotTemplate("""\
-At the market square, {milkmaid} declared to all the traders, "I will {goal_text}, and I need no
-help!" But when she tried to tally the coins in her head, she stumbled. {farmer_he_she_cap} arrived
-and set out the coins in order. "Counting is not a dream," {farmer_he_she_cap} said gently. "It is a
-step-by-step walk through the coins — {concept_phrase} does this step by step, stacking one coin
-upon the next. Submit the form and watch the stack grow."
+At the market square, {milkmaid} declared, {emo_boastful}, to all the traders, "I will {goal_text},
+and I need no help!" But when she tried to tally the coins in her head, the pail grew heavy on
+her arm and she stumbled. {farmer_he_she_cap} arrived and set out the coins in order, {emo_patient}.
+"Counting is not a dream," {farmer_he_she} said. "It is a step-by-step walk through the coins —
+the road is long enough to hold every coin in turn. {concept_phrase} does this step by step,
+stacking one coin upon the next. Submit the form and watch the stack grow."
 """),
 
     SubplotTemplate("""\
@@ -542,11 +552,12 @@ every mark helps us understand what the buyer truly needs."
 """),
 
     SubplotTemplate("""\
-One morning, {milkmaid} brought two slips — one the buyer wrote, one {milkmaid_he_she} had copied.
-{farmer_he_she_cap} compared them. "Yours is an echo," {farmer_he_she_cap} said gently. "The true slip
-is the buyer's scroll. To {goal_text} correctly, we must apply {concept_phrase} — read the original slip
-that came from the buyer's hand. We can trust what is written there. Copy errors creep in when we
-try to remember instead of reading."
+One morning, {milkmaid} brought two slips — one the buyer wrote, one {milkmaid_he_she} had copied,
+the ink on her copy faint and uneven. {farmer_he_she_cap} compared them, {emo_cautious}.
+"Yours is an echo," {farmer_he_she} said. "The true slip is the buyer's scroll, written firm
+and dark by the hand that paid. To {goal_text} correctly, we must apply {concept_phrase} — read
+the original slip that came from the buyer's hand. We can trust what is written there. Copy
+errors creep in when we try to remember instead of reading."
 """),
 
     SubplotTemplate("""\
@@ -821,11 +832,12 @@ at that address."
 """),
 
     SubplotTemplate("""\
-{milkmaid_he_she_cap} claimed, "I can {goal_text} without opening the pail — I'll just read the label!"
-{farmer} smiled and said, "Then {concept_phrase} is your answer. The form reads the chalk mark, not the
-milk inside. But if you want to use the milk — to churn it, to drink it — you must open the pail. The chalk
-mark is useful for knowing what is inside — {concept_phrase} makes that knowledge clear: you have the name,
-not the value; the label, not the contents."
+{milkmaid_he_she_cap} claimed, {emo_boastful}, "I can {goal_text} without opening the pail — I'll
+just read the label!" {farmer} answered, {emo_cautious}, the chalk-marked pail sitting unopened
+on the bench between them. "Then {concept_phrase} is your answer. The form reads the chalk mark,
+not the milk inside. But if you want to use the milk — to churn it, to drink it — you must open
+the pail. The chalk mark is useful for knowing what is inside — {concept_phrase} makes that
+knowledge clear: you have the name, not the value; the label, not the contents."
 """),
 
     SubplotTemplate("""\
@@ -870,11 +882,13 @@ as the dairy grows."
 """),
 
     SubplotTemplate("""\
-{milkmaid} claimed, "I can guess where each batch should go without looking at its stamp!" {farmer_he_she_cap}
-asked calmly, "Then show me the sorting table you have built. Where is the code that reads the stamp and routes
-the milk?" {milkmaid_he_she_cap} had no answer. {farmer_he_she_cap} continued, "{concept_phrase} is the table's
-logic — the rules written in form. Each rule says: 'If you see this stamp, do this.' The table is not a guess.
-It is a form with routes written out, one for each kind of milk."
+{milkmaid} claimed, {emo_boastful}, "I can guess where each batch should go without looking
+at its stamp!" {farmer_he_she_cap} answered, {emo_cautious}, "Then show me the sorting table
+you have built. Where is the code that reads the stamp and routes the milk?" {milkmaid_he_she_cap}
+had no answer; the table stood empty, the pails still queued at the door. {farmer_he_she_cap}
+continued, "{concept_phrase} is the table's logic — the rules written in form. Each rule says:
+'If you see this stamp, do this.' The table is not a guess. It is a form with routes written
+out, one for each kind of milk."
 """),
 
     SubplotTemplate("""\
