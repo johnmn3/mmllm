@@ -679,9 +679,11 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 3
 - variety @ n=50: 1.00
-- issues: {'CLAUSE_STACK_OVERFLOW': 3, 'DOUBLE_NAME_INTRO': 1}
+- issues: {'CLAUSE_STACK_OVERFLOW': 3, 'UNFILLED_DRAWN_PLACEHOLDER': 2, 'DRAWN_PLACEHOLDER_LEAK': 2, 'DOUBLE_NAME_INTRO': 1}
     - [CLAUSE_STACK_OVERFLOW] form=`(if true :a :b)` — sentence with 5 commas reads as AI-output cadence: 'The\ntrail is long and effort is precious — the runtime checks the\ncondition, wal'
     - [CLAUSE_STACK_OVERFLOW] form=`(if false :a :b)` — sentence with 5 commas reads as AI-output cadence: 'The\ntrail is long and effort is precious — the runtime checks the\ncondition, wal'
+    - [UNFILLED_DRAWN_PLACEHOLDER] form=`(if (> 5 3) :a :b)` — user_msg has un-substituted `{drawn.y}` placeholder — slot mismatch or render-time gap
+    - [DRAWN_PLACEHOLDER_LEAK] form=`(if (> 5 3) :a :b)` — user_msg contains an un-substituted {drawn.<slot>} placeholder — interpolation pipeline missed it
     - [DOUBLE_NAME_INTRO] form=`(if (> 5 3) :a :b)` — character 'Spread the tortoise' introduced twice within 200 chars — drop the second 'the tortoise'
     - [CLAUSE_STACK_OVERFLOW] form=`(if (> 5 3) :a :b)` — sentence with 5 commas reads as AI-output cadence: 'The\ntrail is long and effort is precious — the runtime checks the\ncondition, wal'
 
@@ -912,13 +914,13 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'STORY_RESOLUTION_NO_DRAWN': 6}
+- issues: {'STORY_RESOLUTION_NO_DRAWN': 6, 'GENERIC_RESOLUTION_TAIL': 3}
     - [STORY_RESOLUTION_NO_DRAWN] form=`(boolean (:private (meta '^:private hidden)))` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':private', ':private'), resolution doesn't close the loop)
     - [STORY_RESOLUTION_NO_DRAWN] form=`(boolean (:private (meta '^:private hidden)))` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':private', ':private'), resolution doesn't close the loop)
     - [STORY_RESOLUTION_NO_DRAWN] form=`(boolean (:private (meta '^:private hidden)))` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':private', ':private'), resolution doesn't close the loop)
+    - [GENERIC_RESOLUTION_TAIL] form=`(boolean (:private (meta 'public)))` — resolution ends with generic 'the answer was returned' / 'returned cleanly' / 'settled the matter' — name the operand or close the metaphor's loop
     - [STORY_RESOLUTION_NO_DRAWN] form=`(boolean (:private (meta 'public)))` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':private',), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(boolean (:private (meta 'public)))` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':private',), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(boolean (:private (meta 'public)))` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':private',), resolution doesn't close the loop)
+    - [GENERIC_RESOLUTION_TAIL] form=`(boolean (:private (meta 'public)))` — resolution ends with generic 'the answer was returned' / 'returned cleanly' / 'settled the matter' — name the operand or close the metaphor's loop
 
 ### G6-08: Circular dependencies
 
@@ -1544,7 +1546,7 @@ tortoise
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'CONCEPT_PHRASE_COMMA_LIST': 6, 'CLAUSE_STACK_OVERFLOW': 6, 'FORM_DISPLAY_AND_FORM_NOUN': 2, 'STORY_RESOLUTION_NO_DRAWN': 3, 'HIGH_LENGTH': 2}
+- issues: {'CONCEPT_PHRASE_COMMA_LIST': 6, 'CLAUSE_STACK_OVERFLOW': 6, 'FORM_DISPLAY_AND_FORM_NOUN': 2, 'GENERIC_RESOLUTION_TAIL': 3, 'STORY_RESOLUTION_NO_DRAWN': 3, 'HIGH_LENGTH': 2}
     - [CONCEPT_PHRASE_COMMA_LIST] form=`(do (def lock (Object.)) (locking lock (+ 1 2)))` — concept_phrase 'lock, locking, arithmetic' is a comma-list of bare tokens — rewrite as a noun phrase that flows into subplot prose
     - [CLAUSE_STACK_OVERFLOW] form=`(do (def lock (Object.)) (locking lock (+ 1 2)))` — sentence with 7 commas reads as AI-output cadence: 'The page changes only when someone writes — and only as the\nruntime allows." To '
     - [FORM_DISPLAY_AND_FORM_NOUN] form=`(do (def lock (Object.)) (locking lock (+ 1 2)))` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
@@ -2018,11 +2020,14 @@ tortoise
 - **HEDGING_NEAR_FORM**: 12
 - **PARAGRAPH_FRAGMENTATION**: 9
 - **STRING_AS_CHAR_MISCLAIM**: 6
+- **GENERIC_RESOLUTION_TAIL**: 6
 - **THE_FORM_OVERUSE**: 6
 - **ANSWER_LEAK_STRING**: 4
 - **ANSWER_LEAK**: 3
 - **REPEATED_OPENER_FRAGMENT**: 3
 - **ONLY_SHOOK_HEAD_TIC**: 2
+- **UNFILLED_DRAWN_PLACEHOLDER**: 2
+- **DRAWN_PLACEHOLDER_LEAK**: 2
 - **SMALL_INT_LEAK**: 1
 - **COLLECTION_LEAK**: 1
 
@@ -2034,11 +2039,11 @@ tortoise
 | 2 | 22 | 88 | 100 | — |
 | 3 | 18 | 31 | 49 | — |
 | 4 | 20 | 39 | 54 | — |
-| 5 | 22 | 39 | 96 | — |
-| 6 | 16 | 33 | 29 | — |
+| 5 | 22 | 39 | 100 | — |
+| 6 | 16 | 33 | 32 | — |
 | 7 | 18 | 36 | 88 | — |
 | 8 | 16 | 31 | 138 | — |
-| 9 | 18 | 34 | 234 | — |
+| 9 | 18 | 34 | 237 | — |
 | 10 | 16 | 36 | 129 | — |
 | 11 | 14 | 29 | 44 | — |
 | 12 | 18 | 37 | 59 | — |
@@ -2622,6 +2627,44 @@ at the edge of the woods. "If the runner falls, the net catches them; the run
 doesn't end, only th...
     ```
 
+#### UNFILLED_DRAWN_PLACEHOLDER
+
+- `G5-01` (form `(if (> 5 3) :a :b)`): user_msg has un-substituted `{drawn.y}` placeholder — slot mismatch or render-time gap
+    ```
+    When Skitter the hare declared the race already won, no one yet knew how long the afternoon would be.
+
+The trail forked near a mossy boulder. The condition-stone at the split was carved `(> 2 1)` — a comparison between two pebble-counts left there by a previous traveller.
+
+Before taking a step, Moss...
+    ```
+- `G5-01` (form `(if (> 5 3) :a :b)`): user_msg has un-substituted `{drawn.soft}` placeholder — slot mismatch or render-time gap
+    ```
+    A path ran from the old oak to the river stone, and on it many a boast had been measured against many a steady step.
+
+The trail forked near a mossy boulder. The condition-stone at the split was carved `(> 9 0)` — a comparison between two pebble-counts left there by a previous traveller.
+
+Before taki...
+    ```
+
+#### DRAWN_PLACEHOLDER_LEAK
+
+- `G5-01` (form `(if (> 5 3) :a :b)`): user_msg contains an un-substituted {drawn.<slot>} placeholder — interpolation pipeline missed it
+    ```
+    When Skitter the hare declared the race already won, no one yet knew how long the afternoon would be.
+
+The trail forked near a mossy boulder. The condition-stone at the split was carved `(> 2 1)` — a comparison between two pebble-counts left there by a previous traveller.
+
+Before taking a step, Moss...
+    ```
+- `G5-01` (form `(if (> 5 3) :a :b)`): user_msg contains an un-substituted {drawn.<slot>} placeholder — interpolation pipeline missed it
+    ```
+    A path ran from the old oak to the river stone, and on it many a boast had been measured against many a steady step.
+
+The trail forked near a mossy boulder. The condition-stone at the split was carved `(> 9 0)` — a comparison between two pebble-counts left there by a previous traveller.
+
+Before taki...
+    ```
+
 #### COLLECTION_LEAK
 
 - `G5-10` (form `(map inc [1 2 3])`): elements of expected [2, 3, 4] appear comma-separated in user_msg (collection answer leak)
@@ -2631,6 +2674,46 @@ doesn't end, only th...
 A row of three small acorns lay on a flat stone — the morning's first gathering, with counts of 1, 2, and 3.
 
 Each acorn was missing a single bud at the cap. Mossback the tortoise wanted to a...
+    ```
+
+#### GENERIC_RESOLUTION_TAIL
+
+- `G6-07` (form `(boolean (:private (meta 'public)))`): resolution ends with generic 'the answer was returned' / 'returned cleanly' / 'settled the matter' — name the operand or close the metaphor's loop
+    ```
+    The judge was a fox of solemn ear, and the prize was nothing more than the quiet certainty of being right.
+
+"The good thing about a sign," Burl the tortoise said, untroubled by what others thought,
+"is that it stays where you posted it. The road is long but the
+sign holds; the next runner reads what...
+    ```
+- `G6-07` (form `(boolean (:private (meta 'public)))`): resolution ends with generic 'the answer was returned' / 'returned cleanly' / 'settled the matter' — name the operand or close the metaphor's loop
+    ```
+    Among the small kingdoms of the meadow, swiftness was a kind of currency, and one creature spent it loudly.
+
+Now she did the same with a plain symbol 'public — no markers, no ropes. She wanted to test it the same way: extract the :private flag and convert to a boolean.
+
+Would the plain symbol's answ...
+    ```
+- `G6-07` (form `(boolean (:private (meta 'public)))`): resolution ends with generic 'the answer was returned' / 'returned cleanly' / 'settled the matter' — name the operand or close the metaphor's loop
+    ```
+    It happened in a year when the wheat came in early and the children had time to lean against fences and watch.
+
+Dart the hare, as if the race were already won, glanced at the sign near the meadow and
+called out what he thought it said without slowing.
+Stonefoot the tortoise stopped and read carefull...
+    ```
+- `G9-18` (form `(do (def lock (Object.)) (locking lock 42))`): resolution ends with generic 'the answer was returned' / 'returned cleanly' / 'settled the matter' — name the operand or close the metaphor's loop
+    ```
+    It happened in a year when the wheat came in early and the children had time to lean against fences and watch.
+
+"Many animals can come and go past the stump," Bog the tortoise, without complaint, said, "and each one's read or write must agree with the others.
+The runtime sees to that — no two writer...
+    ```
+- `G9-18` (form `(do (def lock (Object.)) (locking lock 42))`): resolution ends with generic 'the answer was returned' / 'returned cleanly' / 'settled the matter' — name the operand or close the metaphor's loop
+    ```
+    near the hilltop, a Hare and a Tortoise once made a wager that the meadow still talks about.
+
+Pip the hare wanted to understand the locking fence by using the simplest possible body — a bare value that needed no computation. She grabbed the fence-key and stepped inside just long enough to read the v...
     ```
 
 #### HEDGING_NEAR_FORM

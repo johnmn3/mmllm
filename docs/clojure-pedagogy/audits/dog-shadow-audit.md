@@ -10,7 +10,8 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 4
 - variety @ n=50: 1.00
-- issues: {'AS_ONE_WHO_CADENCE': 2, 'FORM_DISPLAY_AND_FORM_NOUN': 1, 'LOW_GROUNDING': 2}
+- issues: {'DOUBLE_EMO_INJECTION': 1, 'AS_ONE_WHO_CADENCE': 2, 'FORM_DISPLAY_AND_FORM_NOUN': 1, 'LOW_GROUNDING': 2}
+    - [DOUBLE_EMO_INJECTION] form=`42` — sentence has 2+ distinct EMO-pool phrases ('stepping deliberately, one foo' + 'stepping deliberately') — the character can't earn two emotional registers in the same beat
     - [AS_ONE_WHO_CADENCE] form=`42` — user_msg contains 'as one who…' / 'with the X of one who Y' template-output cadence
     - [AS_ONE_WHO_CADENCE] form=`"hello"` — user_msg contains 'as one who…' / 'with the X of one who Y' template-output cadence
     - [FORM_DISPLAY_AND_FORM_NOUN] form=`nil` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
@@ -21,19 +22,19 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 6
 - variety @ n=50: 1.00
-- issues: {'LOW_GROUNDING': 1, 'FORM_DISPLAY_AND_FORM_NOUN': 5, 'DOUBLE_NAME_INTRO': 1}
+- issues: {'LOW_GROUNDING': 1, 'DOUBLE_EMO_INJECTION': 1, 'FORM_DISPLAY_AND_FORM_NOUN': 5, 'DOUBLE_NAME_INTRO': 1}
     - [LOW_GROUNDING] form=`7` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+    - [DOUBLE_EMO_INJECTION] form=`-3` — sentence has 2+ distinct EMO-pool phrases ('without complaint or hurry' + 'without complaint') — the character can't earn two emotional registers in the same beat
     - [FORM_DISPLAY_AND_FORM_NOUN] form=`-25` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
     - [DOUBLE_NAME_INTRO] form=`-25` — character 'Sniff the dog' introduced twice within 200 chars — drop the second 'the dog'
     - [FORM_DISPLAY_AND_FORM_NOUN] form=`-25` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
-    - [FORM_DISPLAY_AND_FORM_NOUN] form=`12345` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
     - [FORM_DISPLAY_AND_FORM_NOUN] form=`12345` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
 
 ### G1-03: Ratios
 
 - examples: 5
 - variety @ n=50: 1.00
-- issues: {'AS_ONE_WHO_CADENCE': 1, 'LOW_GROUNDING': 1, 'FORM_DISPLAY_AND_FORM_NOUN': 5, 'DOUBLE_NAME_INTRO': 3}
+- issues: {'AS_ONE_WHO_CADENCE': 1, 'LOW_GROUNDING': 1, 'FORM_DISPLAY_AND_FORM_NOUN': 5, 'DOUBLE_NAME_INTRO': 3, 'DOUBLE_EMO_INJECTION': 2}
     - [AS_ONE_WHO_CADENCE] form=`1/2` — user_msg contains 'as one who…' / 'with the X of one who Y' template-output cadence
     - [LOW_GROUNDING] form=`1/2` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [FORM_DISPLAY_AND_FORM_NOUN] form=`1/2` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
@@ -45,13 +46,13 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 5
 - variety @ n=50: 1.00
-- issues: {'FORM_DISPLAY_AND_FORM_NOUN': 4, 'DOUBLE_NAME_INTRO': 2, 'AS_ONE_WHO_CADENCE': 1}
+- issues: {'DOUBLE_EMO_INJECTION': 1, 'FORM_DISPLAY_AND_FORM_NOUN': 4, 'DOUBLE_NAME_INTRO': 2, 'AS_ONE_WHO_CADENCE': 1}
+    - [DOUBLE_EMO_INJECTION] form=`"hello"` — sentence has 2+ distinct EMO-pool phrases ('stepping deliberately, one foo' + 'stepping deliberately') — the character can't earn two emotional registers in the same beat
     - [FORM_DISPLAY_AND_FORM_NOUN] form=`"race"` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
     - [DOUBLE_NAME_INTRO] form=`"race"` — character 'Gizmo the dog' introduced twice within 200 chars — drop the second 'the dog'
     - [AS_ONE_WHO_CADENCE] form=`"slow and steady"` — user_msg contains 'as one who…' / 'with the X of one who Y' template-output cadence
     - [FORM_DISPLAY_AND_FORM_NOUN] form=`"slow and steady"` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
     - [DOUBLE_NAME_INTRO] form=`"slow and steady"` — character 'Watcher the dog' introduced twice within 200 chars — drop the second 'the dog'
-    - [FORM_DISPLAY_AND_FORM_NOUN] form=`""` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
 
 ### G1-05: Booleans
 
@@ -69,12 +70,12 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 5
 - variety @ n=50: 1.00
-- issues: {'LOW_GROUNDING': 3, 'AS_ONE_WHO_CADENCE': 1, 'FORM_DISPLAY_AND_FORM_NOUN': 2, 'DOUBLE_NAME_INTRO': 1}
+- issues: {'LOW_GROUNDING': 3, 'DOUBLE_EMO_INJECTION': 2, 'AS_ONE_WHO_CADENCE': 1, 'FORM_DISPLAY_AND_FORM_NOUN': 2, 'DOUBLE_NAME_INTRO': 1}
     - [LOW_GROUNDING] form=`nil` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+    - [DOUBLE_EMO_INJECTION] form=`nil` — sentence has 2+ distinct EMO-pool phrases ('without complaint or hurry' + 'without complaint') — the character can't earn two emotional registers in the same beat
+    - [DOUBLE_EMO_INJECTION] form=`(nil? nil)` — sentence has 2+ distinct EMO-pool phrases ('stepping deliberately, one foo' + 'stepping deliberately') — the character can't earn two emotional registers in the same beat
     - [AS_ONE_WHO_CADENCE] form=`(nil? nil)` — user_msg contains 'as one who…' / 'with the X of one who Y' template-output cadence
     - [FORM_DISPLAY_AND_FORM_NOUN] form=`(nil? 0)` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
-    - [LOW_GROUNDING] form=`(nil? false)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-    - [FORM_DISPLAY_AND_FORM_NOUN] form=`(nil? false)` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
     - [LOW_GROUNDING] form=`(nil? false)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
 
 ### G1-07: Keywords
@@ -162,7 +163,7 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 4
 - variety @ n=50: 1.00
-- issues: {'HIGH_LENGTH': 2, 'ANSWER_LEAK': 1, 'DOUBLE_NAME_INTRO': 2, 'RESOLUTION_GENERIC': 3, 'PARALLEL_POSSESSIVE_TIC': 1, 'REPL_AS_TIME_TRAVELLER': 2, 'AS_ONE_WHO_CADENCE': 1, 'CLAUSE_STACK_OVERFLOW': 1}
+- issues: {'HIGH_LENGTH': 2, 'ANSWER_LEAK': 1, 'DOUBLE_NAME_INTRO': 2, 'RESOLUTION_GENERIC': 3, 'PARALLEL_POSSESSIVE_TIC': 1, 'REPL_AS_TIME_TRAVELLER': 2, 'DOUBLE_EMO_INJECTION': 1, 'AS_ONE_WHO_CADENCE': 1, 'CLAUSE_STACK_OVERFLOW': 1}
     - [HIGH_LENGTH] form=`(+ 1 (* 2 3))` — user_msg 223 words
     - [ANSWER_LEAK] form=`(+ 1 (* 2 3))` — answer 7 in narrative
     - [HIGH_LENGTH] form=`(* (+ 1 2) (+ 3 4))` — user_msg 215 words
@@ -186,13 +187,13 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 6
 - variety @ n=50: 1.00
-- issues: {'DOUBLE_NAME_INTRO': 4, 'REPL_AS_TIME_TRAVELLER': 2, 'NARRATIVE_NUMERAL_HARDCODE': 3, 'CLAUSE_STACK_OVERFLOW': 2, 'RESOLUTION_GENERIC': 3, 'BOOL_LEAK_RESOLUTION': 2}
+- issues: {'DOUBLE_NAME_INTRO': 4, 'REPL_AS_TIME_TRAVELLER': 2, 'NARRATIVE_NUMERAL_HARDCODE': 3, 'CLAUSE_STACK_OVERFLOW': 2, 'DOUBLE_EMO_INJECTION': 2, 'RESOLUTION_GENERIC': 3, 'BOOL_LEAK_RESOLUTION': 2}
     - [DOUBLE_NAME_INTRO] form=`(zero? 0)` — character 'Pumpkin the dog' introduced twice within 200 chars — drop the second 'the dog'
     - [REPL_AS_TIME_TRAVELLER] form=`(zero? 0)` — user_msg uses meta-narrator language that implies the answer pre-existed evaluation — describe the form's evaluation, not a pre-existing 'right' answer
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(zero? 5)` — parametric example has hard-coded English numeral 'five bones' in a story slot — the actual draws may differ from this fixed count
     - [CLAUSE_STACK_OVERFLOW] form=`(zero? 5)` — sentence with 5 commas reads as AI-output cadence: 'Gizmo the dog, stepping deliberately, one foot before the next, arranged a small'
+    - [DOUBLE_EMO_INJECTION] form=`(zero? 5)` — sentence has 2+ distinct EMO-pool phrases ('stepping deliberately, one foo' + 'stepping deliberately') — the character can't earn two emotional registers in the same beat
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(zero? 5)` — parametric example has hard-coded English numeral 'five bones' in a story slot — the actual draws may differ from this fixed count
-    - [RESOLUTION_GENERIC] form=`(zero? 5)` — user_msg has canned 'the X the operation produced' resolution boilerplate — tie it to the fable's metaphor / drawn values
 
 ### G1-17: Printing vs returning
 
@@ -230,7 +231,7 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 5
 - variety @ n=50: 1.00
-- issues: {'RESOLUTION_GENERIC': 3, 'HIGH_LENGTH': 4, 'BOOL_LEAK_RESOLUTION': 1, 'REPL_AS_TIME_TRAVELLER': 1, 'AS_ONE_WHO_CADENCE': 1, 'NARRATIVE_NUMERAL_HARDCODE': 3, 'CLAUSE_STACK_OVERFLOW': 3, 'PARALLEL_POSSESSIVE_TIC': 1, 'LOW_GROUNDING': 1}
+- issues: {'RESOLUTION_GENERIC': 3, 'HIGH_LENGTH': 4, 'BOOL_LEAK_RESOLUTION': 1, 'REPL_AS_TIME_TRAVELLER': 1, 'AS_ONE_WHO_CADENCE': 1, 'NARRATIVE_NUMERAL_HARDCODE': 3, 'CLAUSE_STACK_OVERFLOW': 3, 'PARALLEL_POSSESSIVE_TIC': 1, 'LOW_GROUNDING': 1, 'GENERIC_RESOLUTION_TAIL': 3}
     - [RESOLUTION_GENERIC] form=`(< 1 2 3)` — user_msg has canned 'the X the operation produced' resolution boilerplate — tie it to the fable's metaphor / drawn values
     - [HIGH_LENGTH] form=`(< 1 2 3)` — user_msg 203 words
     - [BOOL_LEAK_RESOLUTION] form=`(< 1 2 3)` — resolution leaks boolean answer 'true' — describe the verdict abstractly instead
@@ -278,13 +279,13 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 5
 - variety @ n=50: 1.00
-- issues: {'LOW_GROUNDING': 2, 'RESOLUTION_GENERIC': 4, 'DOUBLE_NAME_INTRO': 5, 'PARALLEL_POSSESSIVE_TIC': 1, 'CLAUSE_STACK_OVERFLOW': 1, 'REPL_AS_TIME_TRAVELLER': 2}
+- issues: {'LOW_GROUNDING': 2, 'RESOLUTION_GENERIC': 4, 'DOUBLE_NAME_INTRO': 5, 'DOUBLE_EMO_INJECTION': 2, 'PARALLEL_POSSESSIVE_TIC': 1, 'CLAUSE_STACK_OVERFLOW': 1, 'REPL_AS_TIME_TRAVELLER': 2}
     - [LOW_GROUNDING] form=`(inc 5)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [RESOLUTION_GENERIC] form=`(dec 5)` — user_msg has canned 'the X the operation produced' resolution boilerplate — tie it to the fable's metaphor / drawn values
     - [DOUBLE_NAME_INTRO] form=`(dec 5)` — character 'Acorn the dog' introduced twice within 200 chars — drop the second 'the dog'
+    - [DOUBLE_EMO_INJECTION] form=`(dec 5)` — sentence has 2+ distinct EMO-pool phrases ('stepping deliberately, one foo' + 'stepping deliberately') — the character can't earn two emotional registers in the same beat
     - [DOUBLE_NAME_INTRO] form=`(dec 5)` — character 'Buster the dog' introduced twice within 200 chars — drop the second 'the dog'
     - [RESOLUTION_GENERIC] form=`(inc 0)` — user_msg has canned 'the X the operation produced' resolution boilerplate — tie it to the fable's metaphor / drawn values
-    - [RESOLUTION_GENERIC] form=`(dec 0)` — user_msg has canned 'the X the operation produced' resolution boilerplate — tie it to the fable's metaphor / drawn values
 
 ### G2-07: Absolute value
 
@@ -326,7 +327,7 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 4
 - variety @ n=50: 1.00
-- issues: {'CLAUSE_STACK_OVERFLOW': 2, 'DOUBLE_NAME_INTRO': 3, 'LOW_GROUNDING': 1, 'AS_ONE_WHO_CADENCE': 1, 'RESOLUTION_GENERIC': 2}
+- issues: {'CLAUSE_STACK_OVERFLOW': 2, 'DOUBLE_NAME_INTRO': 3, 'LOW_GROUNDING': 1, 'AS_ONE_WHO_CADENCE': 1, 'RESOLUTION_GENERIC': 2, 'DOUBLE_EMO_INJECTION': 1}
     - [CLAUSE_STACK_OVERFLOW] form=`(* 2 2 2)` — sentence with 5 commas reads as AI-output cadence: 'To multiply 2 by itself three times, she, her breath even, her step even, her th'
     - [DOUBLE_NAME_INTRO] form=`(* 2 2 2)` — character 'Louie the dog' introduced twice within 200 chars — drop the second 'the dog'
     - [LOW_GROUNDING] form=`(* 3 3 3 3)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
@@ -360,13 +361,13 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 6
 - variety @ n=50: 1.00
-- issues: {'BOOL_LEAK_RESOLUTION': 3, 'DOUBLE_NAME_INTRO': 5, 'LOW_GROUNDING': 4, 'CLAUSE_STACK_OVERFLOW': 4, 'AS_ONE_WHO_CADENCE': 1}
+- issues: {'BOOL_LEAK_RESOLUTION': 3, 'DOUBLE_NAME_INTRO': 5, 'LOW_GROUNDING': 4, 'DOUBLE_EMO_INJECTION': 2, 'CLAUSE_STACK_OVERFLOW': 4, 'AS_ONE_WHO_CADENCE': 1}
     - [BOOL_LEAK_RESOLUTION] form=`(and true true)` — resolution leaks boolean answer 'true' — describe the verdict abstractly instead
     - [DOUBLE_NAME_INTRO] form=`(and true true)` — character 'Sooty the dog' introduced twice within 200 chars — drop the second 'the dog'
     - [LOW_GROUNDING] form=`(and true false)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [BOOL_LEAK_RESOLUTION] form=`(and true false)` — resolution leaks boolean answer 'false' — describe the verdict abstractly instead
+    - [DOUBLE_EMO_INJECTION] form=`(and true false)` — sentence has 2+ distinct EMO-pool phrases ('without complaint or hurry' + 'without complaint') — the character can't earn two emotional registers in the same beat
     - [CLAUSE_STACK_OVERFLOW] form=`(and true false)` — sentence with 6 commas reads as AI-output cadence: 'The verdict follows that\nrule exactly, the way a steady current keeps its line."'
-    - [BOOL_LEAK_RESOLUTION] form=`(or false true)` — resolution leaks boolean answer 'true' — describe the verdict abstractly instead
 
 ### G2-14: not — turning truthy to false
 
@@ -464,7 +465,7 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 3
 - variety @ n=50: 1.00
-- issues: {'NARRATIVE_NUMERAL_HARDCODE': 3, 'DOUBLE_NAME_INTRO': 1, 'HIGH_LENGTH': 2, 'ANSWER_LEAK': 2, 'REPL_AS_TIME_TRAVELLER': 2}
+- issues: {'NARRATIVE_NUMERAL_HARDCODE': 3, 'DOUBLE_NAME_INTRO': 1, 'HIGH_LENGTH': 2, 'ANSWER_LEAK': 2, 'DOUBLE_EMO_INJECTION': 1, 'REPL_AS_TIME_TRAVELLER': 2}
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(- (* 5 4) 7)` — parametric example has hard-coded English numeral 'four piles' in a story slot — the actual draws may differ from this fixed count
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(- (* 5 4) 7)` — parametric example has hard-coded English numeral 'four piles' in a story slot — the actual draws may differ from this fixed count
     - [DOUBLE_NAME_INTRO] form=`(- (* 5 4) 7)` — character 'Nosey the dog' introduced twice within 200 chars — drop the second 'the dog'
@@ -658,7 +659,7 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 3
 - variety @ n=50: 1.00
-- issues: {'PARAMETRIC_LITERAL_NUMERALS': 3, 'NARRATIVE_NUMERAL_HARDCODE': 3}
+- issues: {'PARAMETRIC_LITERAL_NUMERALS': 3, 'NARRATIVE_NUMERAL_HARDCODE': 3, 'DOUBLE_EMO_INJECTION': 1}
     - [PARAMETRIC_LITERAL_NUMERALS] form=`[1 2 3]` — parametric example has enumerated English numerals (one, two, three, …) hard-coded in a story slot — won't track the actual draws that {form_template} produces
     - [NARRATIVE_NUMERAL_HARDCODE] form=`[1 2 3]` — parametric example has hard-coded English numeral 'three bones' in a story slot — the actual draws may differ from this fixed count
     - [PARAMETRIC_LITERAL_NUMERALS] form=`[1 2 3]` — parametric example has enumerated English numerals (one, two, three, …) hard-coded in a story slot — won't track the actual draws that {form_template} produces
@@ -706,13 +707,13 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 1
 - variety @ n=50: 1.00
-- issues: {'PARAMETRIC_LITERAL_NUMERALS': 3, 'NARRATIVE_NUMERAL_HARDCODE': 3}
+- issues: {'PARAMETRIC_LITERAL_NUMERALS': 3, 'NARRATIVE_NUMERAL_HARDCODE': 3, 'DOUBLE_EMO_INJECTION': 2}
+    - [PARAMETRIC_LITERAL_NUMERALS] form=`(cons 0 '(1 2 3))` — parametric example has enumerated English numerals (one, two, three, …) hard-coded in a story slot — won't track the actual draws that {form_template} produces
+    - [NARRATIVE_NUMERAL_HARDCODE] form=`(cons 0 '(1 2 3))` — parametric example has hard-coded English numeral 'three bones' in a story slot — the actual draws may differ from this fixed count
+    - [DOUBLE_EMO_INJECTION] form=`(cons 0 '(1 2 3))` — sentence has 2+ distinct EMO-pool phrases ('without complaint or hurry' + 'without complaint') — the character can't earn two emotional registers in the same beat
     - [PARAMETRIC_LITERAL_NUMERALS] form=`(cons 0 '(1 2 3))` — parametric example has enumerated English numerals (one, two, three, …) hard-coded in a story slot — won't track the actual draws that {form_template} produces
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(cons 0 '(1 2 3))` — parametric example has hard-coded English numeral 'three bones' in a story slot — the actual draws may differ from this fixed count
     - [PARAMETRIC_LITERAL_NUMERALS] form=`(cons 0 '(1 2 3))` — parametric example has enumerated English numerals (one, two, three, …) hard-coded in a story slot — won't track the actual draws that {form_template} produces
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`(cons 0 '(1 2 3))` — parametric example has hard-coded English numeral 'three bones' in a story slot — the actual draws may differ from this fixed count
-    - [PARAMETRIC_LITERAL_NUMERALS] form=`(cons 0 '(1 2 3))` — parametric example has enumerated English numerals (one, two, three, …) hard-coded in a story slot — won't track the actual draws that {form_template} produces
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`(cons 0 '(1 2 3))` — parametric example has hard-coded English numeral 'three bones' in a story slot — the actual draws may differ from this fixed count
 
 ### G4-06: Map literal
 
@@ -728,6 +729,13 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 - issues: {'DOUBLE_NAME_INTRO': 2}
     - [DOUBLE_NAME_INTRO] form=`(get {:a 1 :b 2} :a)` — character 'Tucker the dog' introduced twice within 200 chars — drop the second 'the dog'
     - [DOUBLE_NAME_INTRO] form=`(get {:a 1} :missing :default)` — character 'Buster the dog' introduced twice within 200 chars — drop the second 'the dog'
+
+### G4-08: assoc — map update
+
+- examples: 2
+- variety @ n=50: 1.00
+- issues: {'DOUBLE_EMO_INJECTION': 1}
+    - [DOUBLE_EMO_INJECTION] form=`(assoc {:a 1} :b 2)` — sentence has 2+ distinct EMO-pool phrases ('without complaint or hurry' + 'without complaint') — the character can't earn two emotional registers in the same beat
 
 ### G4-09: dissoc — map remove key
 
@@ -749,8 +757,9 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'CLAUSE_STACK_OVERFLOW': 1, 'AS_ONE_WHO_CADENCE': 1}
+- issues: {'CLAUSE_STACK_OVERFLOW': 1, 'DOUBLE_EMO_INJECTION': 1, 'AS_ONE_WHO_CADENCE': 1}
     - [CLAUSE_STACK_OVERFLOW] form=`(count #{1 2 3})` — sentence with 5 commas reads as AI-output cadence: 'Alabaster the dog, as a millwheel turns, slow and sure, pointed to a hollow log '
+    - [DOUBLE_EMO_INJECTION] form=`(count #{1 1 1})` — sentence has 2+ distinct EMO-pool phrases ('without complaint or hurry' + 'without complaint') — the character can't earn two emotional registers in the same beat
     - [AS_ONE_WHO_CADENCE] form=`(count #{1 1 1})` — user_msg contains 'as one who…' / 'with the X of one who Y' template-output cadence
 
 ### G4-12: Set membership
@@ -958,7 +967,7 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 3
 - variety @ n=50: 1.00
-- issues: {'HIGH_LENGTH': 6, 'ANSWER_LEAK': 2, 'CLAUSE_STACK_OVERFLOW': 9, 'LOW_GROUNDING': 1, 'AS_ONE_WHO_CADENCE': 1}
+- issues: {'HIGH_LENGTH': 6, 'ANSWER_LEAK': 2, 'CLAUSE_STACK_OVERFLOW': 9, 'LOW_GROUNDING': 1, 'DOUBLE_EMO_INJECTION': 1, 'AS_ONE_WHO_CADENCE': 1}
     - [HIGH_LENGTH] form=`(reduce + [1 2 3 4])` — user_msg 265 words
     - [ANSWER_LEAK] form=`(reduce + [1 2 3 4])` — answer 10 in narrative
     - [CLAUSE_STACK_OVERFLOW] form=`(reduce + [1 2 3 4])` — sentence with 6 commas reads as AI-output cadence: 'To walk the row of pebbles 1, 2, 3, 4 carrying a tally that combines each with +'
@@ -1034,13 +1043,13 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'HIGH_LENGTH': 1, 'PREDICATE_QUESTION_COLLISION': 1, 'BOOL_LEAK_RESOLUTION': 1, 'CLAUSE_STACK_OVERFLOW': 1, 'DOUBLE_NAME_INTRO': 1, 'PARALLEL_POSSESSIVE_TIC': 1, 'LOW_GROUNDING': 1}
+- issues: {'HIGH_LENGTH': 1, 'PREDICATE_QUESTION_COLLISION': 1, 'BOOL_LEAK_RESOLUTION': 1, 'CLAUSE_STACK_OVERFLOW': 1, 'DOUBLE_EMO_INJECTION': 1, 'DOUBLE_NAME_INTRO': 1, 'PARALLEL_POSSESSIVE_TIC': 1, 'LOW_GROUNDING': 1}
     - [HIGH_LENGTH] form=`(every? pos? [1 2 3])` — user_msg 232 words
     - [PREDICATE_QUESTION_COLLISION] form=`(every? pos? [1 2 3])` — predicate-suffix ``?`` collides with the question framing's trailing ``?`` or ``.``
     - [BOOL_LEAK_RESOLUTION] form=`(every? pos? [1 2 3])` — resolution leaks boolean answer 'true' — describe the verdict abstractly instead
     - [CLAUSE_STACK_OVERFLOW] form=`(every? pos? [1 2 3])` — sentence with 7 commas reads as AI-output cadence: 'To check if all elements in the vector containing 1, 2, and 3 are positive, she,'
+    - [DOUBLE_EMO_INJECTION] form=`(every? pos? [1 2 3])` — sentence has 2+ distinct EMO-pool phrases ('without complaint or hurry' + 'without complaint') — the character can't earn two emotional registers in the same beat
     - [DOUBLE_NAME_INTRO] form=`(every? pos? [1 2 3])` — character 'Tracksman the dog' introduced twice within 200 chars — drop the second 'the dog'
-    - [PARALLEL_POSSESSIVE_TIC] form=`(every? pos? [1 2 3])` — user_msg uses 'her X Y, her X Yer still' parallel possessive construction — AI tic
 
 ### G5-20: take and drop
 
@@ -1382,7 +1391,7 @@ tortoise
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'STORY_RESOLUTION_NO_DRAWN': 6, 'LOW_GROUNDING': 4, 'DOUBLE_NAME_INTRO': 1}
+- issues: {'STORY_RESOLUTION_NO_DRAWN': 6, 'LOW_GROUNDING': 4, 'DOUBLE_NAME_INTRO': 1, 'DOUBLE_EMO_INJECTION': 1}
     - [STORY_RESOLUTION_NO_DRAWN] form=`(count (clojure.string/split-lines "a\nb\nc"))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('a\\nb\\nc',), resolution doesn't close the loop)
     - [LOW_GROUNDING] form=`(count (clojure.string/split-lines "a\nb\nc"))` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [STORY_RESOLUTION_NO_DRAWN] form=`(count (clojure.string/split-lines "a\nb\nc"))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('a\\nb\\nc',), resolution doesn't close the loop)
@@ -1596,7 +1605,7 @@ tortoise
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'HIGH_LENGTH': 2, 'STORY_RESOLUTION_NO_DRAWN': 6, 'PARAGRAPH_FRAGMENTATION': 1, 'CLAUSE_STACK_OVERFLOW': 6, 'LOW_GROUNDING': 4, 'DOUBLE_NAME_INTRO': 1}
+- issues: {'HIGH_LENGTH': 2, 'STORY_RESOLUTION_NO_DRAWN': 6, 'PARAGRAPH_FRAGMENTATION': 1, 'CLAUSE_STACK_OVERFLOW': 6, 'LOW_GROUNDING': 4, 'DOUBLE_NAME_INTRO': 1, 'DOUBLE_EMO_INJECTION': 1}
     - [HIGH_LENGTH] form=`(do (defprotocol Named (name-of [this])) (defrecor` — user_msg 216 words
     - [STORY_RESOLUTION_NO_DRAWN] form=`(do (defprotocol Named (name-of [this])) (defrecor` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':n', 'Zephyr'), resolution doesn't close the loop)
     - [PARAGRAPH_FRAGMENTATION] form=`(do (defprotocol Named (name-of [this])) (defrecor` — user_msg has 4 short (≤25-word) paragraphs in body — reads as a bullet list, not a story
@@ -1787,7 +1796,7 @@ tortoise
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'HIGH_LENGTH': 1, 'CONCEPT_PHRASE_COMMA_LIST': 6, 'CLAUSE_STACK_OVERFLOW': 4, 'LOW_GROUNDING': 2, 'DOUBLE_NAME_INTRO': 1, 'STORY_RESOLUTION_NO_DRAWN': 3, 'PARAGRAPH_FRAGMENTATION': 1}
+- issues: {'HIGH_LENGTH': 1, 'CONCEPT_PHRASE_COMMA_LIST': 6, 'CLAUSE_STACK_OVERFLOW': 4, 'LOW_GROUNDING': 2, 'DOUBLE_NAME_INTRO': 1, 'STORY_RESOLUTION_NO_DRAWN': 3, 'PARAGRAPH_FRAGMENTATION': 1, 'DOUBLE_EMO_INJECTION': 1}
     - [HIGH_LENGTH] form=`@(future (+ 1 2))` — user_msg 238 words
     - [CONCEPT_PHRASE_COMMA_LIST] form=`@(future (+ 1 2))` — concept_phrase 'future, add, deref' is a comma-list of bare tokens — rewrite as a noun phrase that flows into subplot prose
     - [CLAUSE_STACK_OVERFLOW] form=`@(future (+ 1 2))` — sentence with 6 commas reads as AI-output cadence: 'To dispatch a runner to compute the sum of 1 and 2; later, ask the runner for th'
@@ -2050,13 +2059,13 @@ tortoise
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'LOW_GROUNDING': 3, 'AS_ONE_WHO_CADENCE': 1, 'DOUBLE_NAME_INTRO': 2}
+- issues: {'LOW_GROUNDING': 3, 'AS_ONE_WHO_CADENCE': 1, 'DOUBLE_NAME_INTRO': 2, 'DOUBLE_EMO_INJECTION': 1}
     - [LOW_GROUNDING] form=`(do "Clojure runs on multiple hosts: JVM, CLR, JS,` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [AS_ONE_WHO_CADENCE] form=`(do "Clojure runs on multiple hosts: JVM, CLR, JS,` — user_msg contains 'as one who…' / 'with the X of one who Y' template-output cadence
     - [DOUBLE_NAME_INTRO] form=`(do "Clojure runs on multiple hosts: JVM, CLR, JS,` — character 'Runner the dog' introduced twice within 200 chars — drop the second 'the dog'
+    - [DOUBLE_EMO_INJECTION] form=`(do "JVM: Clojure; CLR: ClojureCLR; JS: ClojureScr` — sentence has 2+ distinct EMO-pool phrases ('stepping deliberately, one foo' + 'stepping deliberately') — the character can't earn two emotional registers in the same beat
     - [LOW_GROUNDING] form=`(do "JVM: Clojure; CLR: ClojureCLR; JS: ClojureScr` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [LOW_GROUNDING] form=`(do "JVM: Clojure; CLR: ClojureCLR; JS: ClojureScr` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-    - [DOUBLE_NAME_INTRO] form=`(do "JVM: Clojure; CLR: ClojureCLR; JS: ClojureScr` — character 'Pippin the dog' introduced twice within 200 chars — drop the second 'the dog'
 
 ### G11-02: Method call syntax
 
@@ -2164,10 +2173,11 @@ tortoise
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'LOW_GROUNDING': 2, 'AS_ONE_WHO_CADENCE': 1}
+- issues: {'LOW_GROUNDING': 2, 'AS_ONE_WHO_CADENCE': 1, 'DOUBLE_EMO_INJECTION': 1}
     - [LOW_GROUNDING] form=`(do "(js/console.log x) calls a JS global; (.-foo ` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [AS_ONE_WHO_CADENCE] form=`(do "(js/console.log x) calls a JS global; (.-foo ` — user_msg contains 'as one who…' / 'with the X of one who Y' template-output cadence
     - [LOW_GROUNDING] form=`(do "(js/console.log x) calls a JS global; (.-foo ` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+    - [DOUBLE_EMO_INJECTION] form=`(do "js/<name> namespaces JS globals; .- prefix ma` — sentence has 2+ distinct EMO-pool phrases ('without complaint or hurry' + 'without complaint') — the character can't earn two emotional registers in the same beat
 
 ### G11-12: Basilisp overview (Python host)
 
@@ -2262,8 +2272,9 @@ tortoise
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'HEDGING_NEAR_FORM': 1}
+- issues: {'HEDGING_NEAR_FORM': 1, 'DOUBLE_EMO_INJECTION': 1}
     - [HEDGING_NEAR_FORM] form=`(do (require '[clojure.spec.alpha :as s]) (s/valid` — hedge 'or something close to it' in user_msg — eval-deterministic narratives shouldn't hedge about the form's value
+    - [DOUBLE_EMO_INJECTION] form=`(do (require '[clojure.spec.alpha :as s]) (s/valid` — sentence has 2+ distinct EMO-pool phrases ('stepping deliberately, one foo' + 'stepping deliberately') — the character can't earn two emotional registers in the same beat
 
 ### G12-07: Spec generators
 
@@ -2276,8 +2287,9 @@ tortoise
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'HEDGING_NEAR_FORM': 1, 'DOUBLE_NAME_INTRO': 1, 'CLAUSE_STACK_OVERFLOW': 1}
+- issues: {'HEDGING_NEAR_FORM': 1, 'DOUBLE_EMO_INJECTION': 1, 'DOUBLE_NAME_INTRO': 1, 'CLAUSE_STACK_OVERFLOW': 1}
     - [HEDGING_NEAR_FORM] form=`(= (+ 1 2) 3)` — hedge 'or something close to it' in user_msg — eval-deterministic narratives shouldn't hedge about the form's value
+    - [DOUBLE_EMO_INJECTION] form=`(= (+ 1 2) 3)` — sentence has 2+ distinct EMO-pool phrases ('without complaint or hurry' + 'without complaint') — the character can't earn two emotional registers in the same beat
     - [DOUBLE_NAME_INTRO] form=`(do "(deftest …), (is …), (testing …) are the core` — character 'Zippy the dog' introduced twice within 200 chars — drop the second 'the dog'
     - [CLAUSE_STACK_OVERFLOW] form=`(do "(deftest …), (is …), (testing …) are the core` — sentence with 6 commas reads as AI-output cadence: 'Marble the dog, her breath even, her step even, her thought even, had already wr'
 
@@ -2308,10 +2320,11 @@ tortoise
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'LOW_GROUNDING': 2, 'AS_ONE_WHO_CADENCE': 1}
+- issues: {'LOW_GROUNDING': 2, 'AS_ONE_WHO_CADENCE': 1, 'DOUBLE_EMO_INJECTION': 1}
     - [LOW_GROUNDING] form=`(do "project.clj declares :dependencies, :main, :p` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [AS_ONE_WHO_CADENCE] form=`(do "project.clj declares :dependencies, :main, :p` — user_msg contains 'as one who…' / 'with the X of one who Y' template-output cadence
     - [LOW_GROUNDING] form=`(do "project.clj declares :dependencies, :main, :p` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+    - [DOUBLE_EMO_INJECTION] form=`(do "Leiningen reads project.clj at the project ro` — sentence has 2+ distinct EMO-pool phrases ('without complaint or hurry' + 'without complaint') — the character can't earn two emotional registers in the same beat
 
 ### G12-12: deps.edn projects
 
@@ -2400,6 +2413,7 @@ tortoise
 - **HIGH_LENGTH**: 127
 - **AS_ONE_WHO_CADENCE**: 99
 - **CONCEPT_PHRASE_COMMA_LIST**: 75
+- **DOUBLE_EMO_INJECTION**: 31
 - **REPL_AS_TIME_TRAVELLER**: 31
 - **RESOLUTION_GENERIC**: 31
 - **FORM_DISPLAY_AND_FORM_NOUN**: 26
@@ -2415,6 +2429,7 @@ tortoise
 - **ANSWER_LEAK_STRING**: 6
 - **ONLY_SHOOK_HEAD_TIC**: 4
 - **META_FILLER_RESOLUTION**: 3
+- **GENERIC_RESOLUTION_TAIL**: 3
 - **COLLECTION_LEAK**: 3
 - **PREDICATE_QUESTION_COLLISION**: 3
 - **SENTENCE_START_LOWER_PRONOUN**: 2
@@ -2425,20 +2440,64 @@ tortoise
 
 | Grade | Subjects | Examples | Issues | Low-variety |
 |---|---|---|---|---|
-| 1 | 18 | 76 | 168 | — |
-| 2 | 22 | 88 | 283 | — |
+| 1 | 18 | 76 | 178 | — |
+| 2 | 22 | 88 | 292 | — |
 | 3 | 18 | 31 | 109 | — |
-| 4 | 20 | 39 | 113 | — |
-| 5 | 22 | 39 | 147 | — |
+| 4 | 20 | 39 | 118 | — |
+| 5 | 22 | 39 | 149 | — |
 | 6 | 16 | 33 | 94 | — |
-| 7 | 18 | 36 | 128 | — |
-| 8 | 16 | 31 | 189 | — |
-| 9 | 18 | 34 | 275 | — |
+| 7 | 18 | 36 | 129 | — |
+| 8 | 16 | 31 | 190 | — |
+| 9 | 18 | 34 | 276 | — |
 | 10 | 16 | 36 | 168 | — |
-| 11 | 14 | 29 | 86 | — |
-| 12 | 18 | 37 | 79 | — |
+| 11 | 14 | 29 | 88 | — |
+| 12 | 18 | 37 | 82 | — |
 
 ### Sample issues by severity
+
+#### DOUBLE_EMO_INJECTION
+
+- `G1-01` (form `42`): sentence has 2+ distinct EMO-pool phrases ('stepping deliberately, one foo' + 'stepping deliberately') — the character can't earn two emotional registers in the same beat
+    ```
+    Bayer had crossed this bridge a hundred times in the meadow, but never with so fine a bone clamped in his jaws.
+
+With a twig, Bingo the dog marked a wager into the wet sand near the meadow:
+whoever guessed the result of `28` first would choose
+which bone to carry. Bayer the dog, stepping deliberatel...
+    ```
+- `G1-02` (form `-3`): sentence has 2+ distinct EMO-pool phrases ('without complaint or hurry' + 'without complaint') — the character can't earn two emotional registers in the same beat
+    ```
+    Down by the stream where the bank dipped low, the world above was answered politely by the world below.
+
+Toby the dog and Marley the dog paused on the river bank where
+someone had scratched the integer -75 into the wet sand. The water
+ran clear and the bridge cast a long, trembling shadow.
+Toby, puf...
+    ```
+- `G1-03` (form `(* 2 1/2)`): sentence has 2+ distinct EMO-pool phrases ('stepping deliberately, one foo' + 'stepping deliberately') — the character can't earn two emotional registers in the same beat
+    ```
+    on the beach, on a still afternoon by the brook, Collie learned what a reflection costs the careless.
+
+With a twig, Houndsman the dog marked a wager into the wet sand near the beach:
+whoever guessed the result of `(* 5 1/2)` first would choose
+which bone to carry. Collie the dog, stepping deliberate...
+    ```
+- `G1-03` (form `(- 1 1/3)`): sentence has 2+ distinct EMO-pool phrases ('without complaint or hurry' + 'without complaint') — the character can't earn two emotional registers in the same beat
+    ```
+    It was on the river bank, on the wooden bridge above the slow brook, that Whatsit the dog looked down at the water.
+
+With a twig, Bounder the dog marked a wager into the wet sand along the river bank:
+whoever guessed the result of `(- 7 1/3)` first would choose
+which bone to carry. Whatsit the dog, ...
+    ```
+- `G1-04` (form `"hello"`): sentence has 2+ distinct EMO-pool phrases ('stepping deliberately, one foo' + 'stepping deliberately') — the character can't earn two emotional registers in the same beat
+    ```
+    It happened on a day so ordinary that it seemed impossible anything could have been lost.
+
+By a flat stone at the stream's edge at the edge of the pond, Buttermilk the dog scratched
+a small wager: whoever guessed the result of `"apple"` first
+would carry the bone home. The water ran past, indifferen...
+    ```
 
 #### AS_ONE_WHO_CADENCE
 
@@ -3150,6 +3209,34 @@ She wanted to know how many remained after eac...
 Rex the hound held an enormous pile of 99 billion, 999 million bones at the river bank. A single extra bone sat beside the pile. He wanted to know the total.
 
 He needed the exact sum when one bo...
+    ```
+
+#### GENERIC_RESOLUTION_TAIL
+
+- `G2-02` (form `(> 5 4 3 2 1)`): resolution ends with generic 'the answer was returned' / 'returned cleanly' / 'settled the matter' — name the operand or close the metaphor's loop
+    ```
+    in the forest, on a still afternoon by the brook, Ziggy learned what a reflection costs the careless.
+
+Ziggy the dog, with the steady breathing of a long walker, arranged a small heap of bones
+near the forest, careful with the count — the bridge's shadow long across
+the water, every bone weighing wh...
+    ```
+- `G2-02` (form `(> 5 4 3 2 1)`): resolution ends with generic 'the answer was returned' / 'returned cleanly' / 'settled the matter' — name the operand or close the metaphor's loop
+    ```
+    on the beach, the stream ran clear enough to mirror anything that passed above it, and Whatsit passed above it.
+
+Whatsit the dog, as the sun moves across the sky, slow and certain, arranged a small heap of bones
+near the beach, careful with the count — the bridge's shadow long across
+the water, ever...
+    ```
+- `G2-02` (form `(> 5 4 3 2 1)`): resolution ends with generic 'the answer was returned' / 'returned cleanly' / 'settled the matter' — name the operand or close the metaphor's loop
+    ```
+    When Galloper reached the bridge near the pond, she paused to admire the bone he had been so lucky to find.
+
+Galloper the dog laid bones out on a flat stone near the pond, sorting
+them into small piles. "Numbers in Clojure are just like bones
+in piles," she said: "you can count them, you can
+add two...
     ```
 
 #### SMALL_INT_LEAK
