@@ -309,8 +309,7 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'ANSWER_LEAK': 1, 'TRAILING_PARTICIPLE_CLOSER': 1}
-    - [ANSWER_LEAK] form=`(+ 99999999999 1)` — answer 100000000000 in narrative
+- issues: {'TRAILING_PARTICIPLE_CLOSER': 1}
     - [TRAILING_PARTICIPLE_CLOSER] form=`(+ 99999999999 1)` — sentence closes with a participial coda (', settling the matter the patient way.') — LLM-cadence; close on the verb instead
 
 ### G2-20: Counting
@@ -348,11 +347,9 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 3
 - variety @ n=50: 1.00
-- issues: {'FORM_DISPLAY_AND_FORM_NOUN': 2, 'ANSWER_LEAK': 2, 'THE_FORM_OVERUSE': 1}
+- issues: {'FORM_DISPLAY_AND_FORM_NOUN': 2, 'THE_FORM_OVERUSE': 1}
     - [FORM_DISPLAY_AND_FORM_NOUN] form=`(let [a 1 b 2] (+ a b))` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
     - [FORM_DISPLAY_AND_FORM_NOUN] form=`(let [x 5 y 3] (- x y))` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
-    - [ANSWER_LEAK] form=`(let [a 2 b 3 c 4] (+ a b c))` — answer 9 in narrative
-    - [ANSWER_LEAK] form=`(let [a 2 b 3 c 4] (+ a b c))` — answer 9 in narrative
     - [THE_FORM_OVERUSE] form=`(let [a 2 b 3 c 4] (+ a b c))` — `the form` appears 5 times in user_msg (template tic — vary references)
 
 ### G3-06: let — binding can reference prior
@@ -373,8 +370,7 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'ANSWER_LEAK': 1, 'CONCEPT_AS_VERB': 1, 'EXPECTED_META_PHRASE': 1, 'PARAGRAPH_FRAGMENTATION': 1}
-    - [ANSWER_LEAK] form=`(do (defn add3 [a b c] (+ a b c)) (add3 1 2 3))` — answer 6 in narrative
+- issues: {'CONCEPT_AS_VERB': 1, 'EXPECTED_META_PHRASE': 1, 'PARAGRAPH_FRAGMENTATION': 1}
     - [CONCEPT_AS_VERB] form=`(do (defn add3 [a b c] (+ a b c)) (add3 1 2 3))` — concept_phrase substituted into a finite-verb slot (e.g. 'must calling X', 'I applying Y')
     - [EXPECTED_META_PHRASE] form=`(do (defn add3 [a b c] (+ a b c)) (add3 1 2 3))` — user_msg uses 'the expected X' meta-language — describes the answer in graders'-vocabulary instead of letting the runtime's return speak for itself
     - [PARAGRAPH_FRAGMENTATION] form=`(do (defn add3 [a b c] (+ a b c)) (add3 1 2 3))` — user_msg has 4 short (≤25-word) paragraphs in body — reads as a bullet list, not a story
@@ -570,18 +566,15 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'ANSWER_LEAK_STRING': 2, 'LOW_GROUNDING': 2}
-    - [ANSWER_LEAK_STRING] form=`(when true :yes)` — answer string ':yes' appears in user_msg
+- issues: {'LOW_GROUNDING': 2}
     - [LOW_GROUNDING] form=`(when true :yes)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-    - [ANSWER_LEAK_STRING] form=`(when true :yes)` — answer string ':yes' appears in user_msg
     - [LOW_GROUNDING] form=`(when true :yes)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
 
 ### G5-07: and / or as control flow
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'ANSWER_LEAK_STRING': 1, 'LOW_GROUNDING': 1, 'TRAILING_PARTICIPLE_CLOSER': 1}
-    - [ANSWER_LEAK_STRING] form=`(or nil false :found)` — answer string ':found' appears in user_msg
+- issues: {'LOW_GROUNDING': 1, 'TRAILING_PARTICIPLE_CLOSER': 1}
     - [LOW_GROUNDING] form=`(or nil false :found)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [TRAILING_PARTICIPLE_CLOSER] form=`(or nil false :found)` — sentence closes with a participial coda (', returning the first truthy value it finds.') — LLM-cadence; close on the verb instead
 
@@ -681,8 +674,7 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 3
 - variety @ n=50: 1.00
-- issues: {'ANSWER_LEAK_STRING': 1, 'LOW_GROUNDING': 1}
-    - [ANSWER_LEAK_STRING] form=`(name 'foo.bar)` — answer string 'foo.bar' appears in user_msg
+- issues: {'LOW_GROUNDING': 1}
     - [LOW_GROUNDING] form=`(name 'foo.bar)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
 
 ### G6-05: Fully qualified names
@@ -774,12 +766,12 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'STORY_RESOLUTION_NO_DRAWN': 6, 'ANSWER_LEAK_STRING': 1}
+- issues: {'STORY_RESOLUTION_NO_DRAWN': 6}
     - [STORY_RESOLUTION_NO_DRAWN] form=`(try (throw (Exception. "oops")) (catch Exception ` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('oops',), resolution doesn't close the loop)
     - [STORY_RESOLUTION_NO_DRAWN] form=`(try (throw (Exception. "oops")) (catch Exception ` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('oops',), resolution doesn't close the loop)
     - [STORY_RESOLUTION_NO_DRAWN] form=`(try (throw (Exception. "oops")) (catch Exception ` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('oops',), resolution doesn't close the loop)
     - [STORY_RESOLUTION_NO_DRAWN] form=`(try (throw (ex-info "trouble" {})) (catch Excepti` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('trouble',), resolution doesn't close the loop)
-    - [ANSWER_LEAK_STRING] form=`(try (throw (ex-info "trouble" {})) (catch Excepti` — answer string 'trouble' appears in user_msg
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(try (throw (ex-info "trouble" {})) (catch Excepti` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('trouble',), resolution doesn't close the loop)
     - [STORY_RESOLUTION_NO_DRAWN] form=`(try (throw (ex-info "trouble" {})) (catch Excepti` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('trouble',), resolution doesn't close the loop)
 
 ### G7-13: line-seq
@@ -859,8 +851,7 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'ANSWER_LEAK_STRING': 1, 'TRAILING_PARTICIPLE_CLOSER': 2}
-    - [ANSWER_LEAK_STRING] form=`(do (defrecord Runner [name pace]) (:pace (->Runne` — answer string ':slow' appears in user_msg
+- issues: {'TRAILING_PARTICIPLE_CLOSER': 2}
     - [TRAILING_PARTICIPLE_CLOSER] form=`(do (defrecord Runner [name pace]) (:name (->Runne` — sentence closes with a participial coda (', filling its slots — returned the value\nthe pouch held.') — LLM-cadence; close on the verb instead
     - [TRAILING_PARTICIPLE_CLOSER] form=`(do (defrecord Runner [name pace]) (:name (->Runne` — sentence closes with a participial coda (', leaving the pace slot untouched.') — LLM-cadence; close on the verb instead
 
@@ -884,20 +875,18 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'CLAUSE_STACK_OVERFLOW': 2, 'ANSWER_LEAK_STRING': 1, 'TRAILING_PARTICIPLE_CLOSER': 1}
+- issues: {'CLAUSE_STACK_OVERFLOW': 2, 'TRAILING_PARTICIPLE_CLOSER': 1}
     - [CLAUSE_STACK_OVERFLOW] form=`(do (defprotocol Pace (speed [this])) (extend-prot` — sentence with 5 commas reads as AI-output cadence: 'To define a protocol Pace with method speed, extend it to both String and Long t'
     - [CLAUSE_STACK_OVERFLOW] form=`(do (defprotocol Pace (speed [this])) (extend-prot` — sentence with 5 commas reads as AI-output cadence: 'To define a protocol Pace with method speed, extend it to both String and Long t'
-    - [ANSWER_LEAK_STRING] form=`(do (defprotocol Pace (speed [this])) (extend-prot` — answer string ':string-pace' appears in user_msg
     - [TRAILING_PARTICIPLE_CLOSER] form=`(do (defprotocol Pace (speed [this])) (extend-prot` — sentence closes with a participial coda (', proving the guild dispatched correctly.') — LLM-cadence; close on the verb instead
 
 ### G8-07: Record implementing protocol
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'CLAUSE_STACK_OVERFLOW': 3, 'HIGH_LENGTH': 1, 'ANSWER_LEAK_STRING': 1, 'TRAILING_PARTICIPLE_CLOSER': 1}
+- issues: {'CLAUSE_STACK_OVERFLOW': 3, 'HIGH_LENGTH': 1, 'TRAILING_PARTICIPLE_CLOSER': 1}
     - [CLAUSE_STACK_OVERFLOW] form=`(do (defprotocol Pace (speed [this])) (defrecord F` — sentence with 5 commas reads as AI-output cadence: 'To define a protocol Pace with method speed, define a record Falcon that impleme'
     - [HIGH_LENGTH] form=`(do (defprotocol Pace (speed [this])) (defrecord F` — user_msg 201 words
-    - [ANSWER_LEAK_STRING] form=`(do (defprotocol Pace (speed [this])) (defrecord F` — answer string ':swift' appears in user_msg
     - [TRAILING_PARTICIPLE_CLOSER] form=`(do (defprotocol Pace (speed [this])) (defrecord F` — sentence closes with a participial coda (', pledging its own pace response.') — LLM-cadence; close on the verb instead
     - [CLAUSE_STACK_OVERFLOW] form=`(do (defprotocol Pace (speed [this])) (defrecord H` — sentence with 5 commas reads as AI-output cadence: 'To define a protocol Pace with method speed, define a record Heron that implemen'
     - [CLAUSE_STACK_OVERFLOW] form=`(do (defprotocol Pace (speed [this])) (defrecord H` — sentence with 5 commas reads as AI-output cadence: 'To define a protocol Pace with method speed, define a record Heron that implemen'
@@ -1135,13 +1124,13 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 3
 - variety @ n=50: 1.00
-- issues: {'CONCEPT_AS_VERB': 2, 'CLAUSE_STACK_OVERFLOW': 3, 'ANSWER_LEAK': 1, 'LOW_GROUNDING': 1}
+- issues: {'CONCEPT_AS_VERB': 2, 'CLAUSE_STACK_OVERFLOW': 3, 'LOW_GROUNDING': 1}
     - [CONCEPT_AS_VERB] form=`(-> 5 inc inc inc)` — concept_phrase substituted into a finite-verb slot (e.g. 'must calling X', 'I applying Y')
     - [CLAUSE_STACK_OVERFLOW] form=`(->> [1 2 3 4] (filter even?) (map inc) (reduce +)` — sentence with 7 commas reads as AI-output cadence: 'To thread a vector through filter, map, and reduce using thread-last, he compose'
-    - [ANSWER_LEAK] form=`(->> [1 2 3 4] (filter even?) (map inc) (reduce +)` — answer 8 in narrative
     - [CLAUSE_STACK_OVERFLOW] form=`(->> [1 2 3 4] (filter even?) (map inc) (reduce +)` — sentence with 5 commas reads as AI-output cadence: 'To thread a vector through filter, map, and reduce using thread-last, she scratc'
     - [CLAUSE_STACK_OVERFLOW] form=`(->> [1 2 3 4] (filter even?) (map inc) (reduce +)` — sentence with 5 commas reads as AI-output cadence: 'To thread a vector through filter, map, and reduce using thread-last, she scratc'
     - [CONCEPT_AS_VERB] form=`(macroexpand '(-> x f g))` — concept_phrase substituted into a finite-verb slot (e.g. 'must calling X', 'I applying Y')
+    - [LOW_GROUNDING] form=`(macroexpand '(-> x f g))` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
 
 ### G10-09: Hygiene and gensym
 
@@ -1217,11 +1206,10 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'STORY_RESOLUTION_NO_DRAWN': 3, 'ANSWER_LEAK_STRING': 1, 'PARAGRAPH_FRAGMENTATION': 1}
+- issues: {'STORY_RESOLUTION_NO_DRAWN': 3, 'PARAGRAPH_FRAGMENTATION': 1}
     - [STORY_RESOLUTION_NO_DRAWN] form=`(do (defmacro with-tortoise-pace [& body] `(let [p` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('42', ':slow-and-steady'), resolution doesn't close the loop)
     - [STORY_RESOLUTION_NO_DRAWN] form=`(do (defmacro with-tortoise-pace [& body] `(let [p` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('42', ':slow-and-steady'), resolution doesn't close the loop)
     - [STORY_RESOLUTION_NO_DRAWN] form=`(do (defmacro with-tortoise-pace [& body] `(let [p` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('42', ':slow-and-steady'), resolution doesn't close the loop)
-    - [ANSWER_LEAK_STRING] form=`(do (defmacro def-pace [name v] `(def ~name ~v)) (` — answer string ':slow' appears in user_msg
     - [PARAGRAPH_FRAGMENTATION] form=`(do (defmacro def-pace [name v] `(def ~name ~v)) (` — user_msg has 4 short (≤25-word) paragraphs in body — reads as a bullet list, not a story
 
 ## Grade 11
@@ -1242,13 +1230,6 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
     - [STORY_RESOLUTION_NO_DRAWN] form=`(. "abc" toUpperCase)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('abc',), resolution doesn't close the loop)
     - [STORY_RESOLUTION_NO_DRAWN] form=`(. "abc" toUpperCase)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('abc',), resolution doesn't close the loop)
     - [STORY_RESOLUTION_NO_DRAWN] form=`(. "abc" toUpperCase)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('abc',), resolution doesn't close the loop)
-
-### G11-06: new and dot-construct
-
-- examples: 2
-- variety @ n=50: 1.00
-- issues: {'ANSWER_LEAK_STRING': 1}
-    - [ANSWER_LEAK_STRING] form=`(new String "jump")` — answer string 'jump' appears in user_msg
 
 ### G11-08: Type hints
 
@@ -1411,9 +1392,7 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 - **NARRATIVE_NUMERAL_HARDCODE**: 15
 - **ONLY_SHOOK_HEAD_TIC**: 14
 - **HEDGING_NEAR_FORM**: 11
-- **ANSWER_LEAK_STRING**: 10
 - **THE_FORM_OVERUSE**: 8
-- **ANSWER_LEAK**: 7
 - **HIGH_LENGTH**: 6
 - **REPEATED_OPENER_FRAGMENT**: 4
 - **EXPECTED_META_PHRASE**: 3
@@ -1422,6 +1401,7 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 - **PROCEDURAL_OPENER**: 3
 - **METAPHOR_DISAPPEARS**: 3
 - **META_FILLER_RESOLUTION**: 3
+- **ANSWER_LEAK**: 2
 - **BAD_PLACE_PREP**: 2
 - **FORM_LEAK**: 1
 
@@ -1430,16 +1410,16 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 | Grade | Subjects | Examples | Issues | Low-variety |
 |---|---|---|---|---|
 | 1 | 18 | 76 | 36 | — |
-| 2 | 22 | 88 | 91 | — |
-| 3 | 18 | 31 | 32 | — |
+| 2 | 22 | 88 | 90 | — |
+| 3 | 18 | 31 | 29 | — |
 | 4 | 20 | 39 | 49 | — |
-| 5 | 22 | 39 | 37 | — |
-| 6 | 16 | 33 | 17 | — |
-| 7 | 18 | 36 | 39 | — |
-| 8 | 16 | 31 | 39 | — |
+| 5 | 22 | 39 | 34 | — |
+| 6 | 16 | 33 | 16 | — |
+| 7 | 18 | 36 | 38 | — |
+| 8 | 16 | 31 | 36 | — |
 | 9 | 18 | 34 | 52 | — |
-| 10 | 16 | 36 | 59 | — |
-| 11 | 14 | 29 | 20 | — |
+| 10 | 16 | 36 | 57 | — |
+| 11 | 14 | 29 | 19 | — |
 | 12 | 18 | 37 | 25 | — |
 
 ### Sample issues by severity
@@ -1894,49 +1874,6 @@ the gate would swing open. Shout the crow watched: the only way to know
 which way the gate swings is to b...
     ```
 
-#### ANSWER_LEAK
-
-- `G2-19` (form `(+ 99999999999 1)`): answer 100000000000 in narrative
-    ```
-    The orchard at the farm had grown quiet in the heat, and Cipher was the only sound at midday.
-
-Gale the crow eyed the heap, with a self-satisfied beak-click, and called out a guess
-about how many stones could be dropped before the water rose high
-enough, without bothering to count. Cipher the crow s...
-    ```
-- `G3-04` (form `(let [a 2 b 3 c 4] (+ a b c))`): answer 9 in narrative
-    ```
-    On a long afternoon when even the bees had grown slow, a thirsty bird settled on the rim of a clay vessel.
-
-"Watch the wing carefully," Drift the crow said near the market.
-"While the form's stretch runs, the wing is closed and
-the binding is safe." To bind a to 5, b to 9, c to 9, and add them, she
-...
-    ```
-- `G3-04` (form `(let [a 2 b 3 c 4] (+ a b c))`): answer 9 in narrative
-    ```
-    A row of pebbles lay at the foot of the wall, sun-warmed, unremarkable, and just heavy enough.
-
-Sage the crow, unhurried with form after form, patted the feathers of one wing.
-"Whatever I tuck under a wing is in force only while the form runs,"
-she said, "and only for the form that names the binding...
-    ```
-- `G3-09` (form `(do (defn add3 [a b c] (+ a b c)) (add3 1 2 3))`): answer 6 in narrative
-    ```
-    It was the kind of summer that turned every shaded stone into a small kindness.
-
-Cunning the crow, trusting the stone-by-stone process, held up a smooth stone and scratched
-a step-by-step sequence into the pitcher's clay rim. "Drop-orders in
-Clojure are like this," she said: "the smooth stones go
-at...
-    ```
-- `G5-22` (form `(loop [n 5 acc 1] (if (zero? n) acc (recur (dec n) (* acc n)`): answer 120 in narrative
-    ```
-    near the village, where the heat shimmered above the stones, Buffet began the slow business of solving thirst.
-
-Caw stood at the pitcher's rim in the hilltop field, a circuit chalked beneath her feet: start with n=5 and accumulator=1. Each lap, multiply the accumulator by n, step n down by one — loo...
-    ```
-
 #### HIGH_LENGTH
 
 - `G3-03` (form `(let [x 3] (+ x 1))`): user_msg 210 words
@@ -2022,47 +1959,19 @@ she said, "and only for the form that names...
 Korvus dropped three literal stone-counts of five into the garden pitcher all at once — no wing tucked, no name carved — just three fives fed directly to the multiplication as plain inline valu...
     ```
 
-#### ANSWER_LEAK_STRING
+#### ANSWER_LEAK
 
-- `G5-03` (form `(when true :yes)`): answer string ':yes' appears in user_msg
+- `G5-22` (form `(loop [n 5 acc 1] (if (zero? n) acc (recur (dec n) (* acc n)`): answer 120 in narrative
     ```
-    Vane circled twice at the farm before settling on the rim of the old clay jar, eyes on the water below.
+    near the village, where the heat shimmered above the stones, Buffet began the slow business of solving thirst.
 
-Korvus examined the meadow pitcher's single-branch fork: one stone marked :yes sat poised above the opening. No second branch existed — only the one guarded by `when`.
-
-He needed to know whether ...
+Caw stood at the pitcher's rim in the hilltop field, a circuit chalked beneath her feet: start with n=5 and accumulator=1. Each lap, multiply the accumulator by n, step n down by one — loo...
     ```
-- `G5-03` (form `(when true :yes)`): answer string ':yes' appears in user_msg
+- `G5-22` (form `(loop [n 5 acc 1] (if (zero? n) acc (recur (dec n) (* acc n)`): answer 120 in narrative
     ```
-    The orchard had not seen a real rain in weeks, and even the lavender stood with its head bowed.
+    On a long afternoon when even the bees had grown slow, a thirsty bird settled on the rim of a clay vessel.
 
-Korvus examined the meadow pitcher's single-branch fork: one stone marked :yes sat poised above the opening. No second branch existed — only the one guarded by `when`.
-
-He needed to know whether the lone...
-    ```
-- `G5-07` (form `(or nil false :found)`): answer string ':found' appears in user_msg
-    ```
-    A row of pebbles lay at the foot of the wall, sun-warmed, unremarkable, and just heavy enough.
-
-Caw examined the village pitcher's open-gate rail, the stones lined up: nil, false, then :found. The gate would release the first stone that proved truthy.
-
-She needed to know which stone would be the fir...
-    ```
-- `G6-01` (form `(name 'foo.bar)`): answer string 'foo.bar' appears in user_msg
-    ```
-    In a year when the wells ran low, a single jar of water was a small kingdom unto itself.
-
-Korvus perched at the pitcher's clay rim in the garden and studied the name carved into the side: a dotted path, two segments pressed into the clay. He wanted to read it as a plain string, not a symbol.
-
-He nee...
-    ```
-- `G7-11` (form `(try (throw (ex-info "trouble" {})) (catch Exception e (.get`): answer string 'trouble' appears in user_msg
-    ```
-    A row of pebbles lay at the foot of the wall, sun-warmed, unremarkable, and just heavy enough.
-
-Onyxwing the crow, steady in the stone-by-stone approach, spread a patch of soft moss
-beneath the pitcher at the market — the day was hot, the throat was narrow, and any
-pebble flung wrong without a cushi...
+Caw stood at the pitcher's rim in the hilltop field, a circuit chalked beneath her feet: start with n=5 and accumulator=1. Each lap, multiply the accumulator by n, step n down by one — loop wi...
     ```
 
 #### BAD_PLACE_PREP

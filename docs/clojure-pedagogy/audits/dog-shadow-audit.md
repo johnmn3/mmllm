@@ -28,23 +28,20 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 5
 - variety @ n=50: 1.00
-- issues: {'FORM_DISPLAY_AND_FORM_NOUN': 5, 'DOUBLE_NAME_INTRO': 2}
+- issues: {'FORM_DISPLAY_AND_FORM_NOUN': 5}
     - [FORM_DISPLAY_AND_FORM_NOUN] form=`1/2` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
     - [FORM_DISPLAY_AND_FORM_NOUN] form=`3/4` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
     - [FORM_DISPLAY_AND_FORM_NOUN] form=`(+ 1/2 1/4)` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
-    - [DOUBLE_NAME_INTRO] form=`(+ 1/2 1/4)` — character 'Pumpernickel the dog' introduced twice within 200 chars — drop the second 'the dog'
     - [FORM_DISPLAY_AND_FORM_NOUN] form=`(+ 1/2 1/4)` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
-    - [DOUBLE_NAME_INTRO] form=`(- 1 1/3)` — character 'Whatsit the dog' introduced twice within 200 chars — drop the second 'the dog'
+    - [FORM_DISPLAY_AND_FORM_NOUN] form=`(- 1 1/3)` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
 
 ### G1-04: Strings
 
 - examples: 5
 - variety @ n=50: 1.00
-- issues: {'FORM_DISPLAY_AND_FORM_NOUN': 4, 'DOUBLE_NAME_INTRO': 2}
+- issues: {'FORM_DISPLAY_AND_FORM_NOUN': 4}
     - [FORM_DISPLAY_AND_FORM_NOUN] form=`"race"` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
-    - [DOUBLE_NAME_INTRO] form=`"race"` — character 'Gizmo the dog' introduced twice within 200 chars — drop the second 'the dog'
     - [FORM_DISPLAY_AND_FORM_NOUN] form=`"slow and steady"` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
-    - [DOUBLE_NAME_INTRO] form=`"slow and steady"` — character 'Watcher the dog' introduced twice within 200 chars — drop the second 'the dog'
     - [FORM_DISPLAY_AND_FORM_NOUN] form=`""` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
     - [FORM_DISPLAY_AND_FORM_NOUN] form=`"42"` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
 
@@ -52,11 +49,10 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 6
 - variety @ n=50: 1.00
-- issues: {'FORM_DISPLAY_AND_FORM_NOUN': 5, 'DOUBLE_NAME_INTRO': 1}
+- issues: {'FORM_DISPLAY_AND_FORM_NOUN': 5}
     - [FORM_DISPLAY_AND_FORM_NOUN] form=`true` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
     - [FORM_DISPLAY_AND_FORM_NOUN] form=`true` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
     - [FORM_DISPLAY_AND_FORM_NOUN] form=`(= 1 1)` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
-    - [DOUBLE_NAME_INTRO] form=`(= 1 2)` — character 'Leo the dog' introduced twice within 200 chars — drop the second 'the dog'
     - [FORM_DISPLAY_AND_FORM_NOUN] form=`(< 3 5)` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
     - [FORM_DISPLAY_AND_FORM_NOUN] form=`(> 3 5)` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
 
@@ -64,26 +60,22 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 5
 - variety @ n=50: 1.00
-- issues: {'FORM_DISPLAY_AND_FORM_NOUN': 2, 'DOUBLE_NAME_INTRO': 2}
+- issues: {'FORM_DISPLAY_AND_FORM_NOUN': 2}
     - [FORM_DISPLAY_AND_FORM_NOUN] form=`(nil? 0)` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
-    - [DOUBLE_NAME_INTRO] form=`(nil? 0)` — character 'Buttermilk the dog' introduced twice within 200 chars — drop the second 'the dog'
     - [FORM_DISPLAY_AND_FORM_NOUN] form=`(nil? false)` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
-    - [DOUBLE_NAME_INTRO] form=`(= nil nil)` — character 'Doodle the dog' introduced twice within 200 chars — drop the second 'the dog'
 
 ### G1-07: Keywords
 
 - examples: 5
 - variety @ n=50: 1.00
-- issues: {'FORM_DISPLAY_AND_FORM_NOUN': 1, 'DOUBLE_NAME_INTRO': 1}
+- issues: {'FORM_DISPLAY_AND_FORM_NOUN': 1}
     - [FORM_DISPLAY_AND_FORM_NOUN] form=`:hare` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
-    - [DOUBLE_NAME_INTRO] form=`:hare` — character 'Tucker the dog' introduced twice within 200 chars — drop the second 'the dog'
 
 ### G1-08: Characters
 
 - examples: 4
 - variety @ n=50: 1.00
-- issues: {'DOUBLE_NAME_INTRO': 1, 'FORM_DISPLAY_AND_FORM_NOUN': 2}
-    - [DOUBLE_NAME_INTRO] form=`\T` — character 'Winston the dog' introduced twice within 200 chars — drop the second 'the dog'
+- issues: {'FORM_DISPLAY_AND_FORM_NOUN': 2}
     - [FORM_DISPLAY_AND_FORM_NOUN] form=`(char? \h)` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
     - [FORM_DISPLAY_AND_FORM_NOUN] form=`(char? \h)` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
 
@@ -91,70 +83,33 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 4
 - variety @ n=50: 1.00
-- issues: {'ONLY_SHOOK_HEAD_TIC': 1, 'HIGH_LENGTH': 2, 'TRAILING_PARTICIPLE_CLOSER': 1, 'BOOL_LEAK_RESOLUTION': 2, 'REPL_TRIPLE_VOICE': 2}
+- issues: {'ONLY_SHOOK_HEAD_TIC': 1, 'TRAILING_PARTICIPLE_CLOSER': 1}
     - [ONLY_SHOOK_HEAD_TIC] form=`(symbol? 'hare)` — user_msg uses 'only shook his/her head' — recurring AI-fable filler cadence
-    - [HIGH_LENGTH] form=`(symbol? 42)` — user_msg 209 words
     - [TRAILING_PARTICIPLE_CLOSER] form=`(symbol? 42)` — sentence closes with a participial coda (', tapping the bark.') — LLM-cadence; close on the verb instead
-    - [BOOL_LEAK_RESOLUTION] form=`(symbol? "tortoise")` — resolution leaks boolean answer 'false' — describe the verdict abstractly instead
-    - [REPL_TRIPLE_VOICE] form=`(symbol? "tortoise")` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
-    - [HIGH_LENGTH] form=`(= 'hare 'hare)` — user_msg 208 words
 
 ### G1-10: Comments
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'HIGH_LENGTH': 1, 'REPL_TRIPLE_VOICE': 1, 'TRAILING_PARTICIPLE_CLOSER': 6}
-    - [HIGH_LENGTH] form=`(+ 1 2) ;; sum of one and two` — user_msg 205 words
-    - [REPL_TRIPLE_VOICE] form=`(+ 1 2) ;; sum of one and two` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
+- issues: {'TRAILING_PARTICIPLE_CLOSER': 6}
     - [TRAILING_PARTICIPLE_CLOSER] form=`(+ 1 2) ;; sum of one and two` — sentence closes with a participial coda (', ignoring the comment.') — LLM-cadence; close on the verb instead
     - [TRAILING_PARTICIPLE_CLOSER] form=`(+ 1 2) ;; sum of one and two` — sentence closes with a participial coda (', ignoring the comment.') — LLM-cadence; close on the verb instead
     - [TRAILING_PARTICIPLE_CLOSER] form=`(+ 1 2) ;; sum of one and two` — sentence closes with a participial coda (', ignoring the comment.') — LLM-cadence; close on the verb instead
     - [TRAILING_PARTICIPLE_CLOSER] form=`42 ;; the answer` — sentence closes with a participial coda (', ignoring the comment.') — LLM-cadence; close on the verb instead
-
-### G1-11: Whitespace doesn't matter
-
-- examples: 2
-- variety @ n=50: 1.00
-- issues: {'HIGH_LENGTH': 1, 'THE_FORM_OVERUSE': 1}
-    - [HIGH_LENGTH] form=`(+
-  1
-  2)` — user_msg 211 words
-    - [THE_FORM_OVERUSE] form=`(+
-  1
-  2)` — `the form` appears 5 times in user_msg (template tic — vary references)
-
-### G1-12: Parens group; they don't multiply
-
-- examples: 2
-- variety @ n=50: 1.00
-- issues: {'HIGH_LENGTH': 1, 'ANSWER_LEAK': 2}
-    - [HIGH_LENGTH] form=`(* (+ 1 2) 3)` — user_msg 206 words
-    - [ANSWER_LEAK] form=`(* (+ 1 2) 3)` — answer 9 in narrative
-    - [ANSWER_LEAK] form=`(* (+ 1 2) 3)` — answer 9 in narrative
+    - [TRAILING_PARTICIPLE_CLOSER] form=`42 ;; the answer` — sentence closes with a participial coda (', ignoring the comment.') — LLM-cadence; close on the verb instead
+    - [TRAILING_PARTICIPLE_CLOSER] form=`42 ;; the answer` — sentence closes with a participial coda (', ignoring the comment.') — LLM-cadence; close on the verb instead
 
 ### G1-13: First arithmetic call
 
 - examples: 6
 - variety @ n=50: 1.00
-- issues: {'REPL_TRIPLE_VOICE': 3, 'REPL_AS_TIME_TRAVELLER': 3, 'TRAILING_PARTICIPLE_CLOSER': 3, 'NARRATIVE_NUMERAL_HARDCODE': 15, 'RESOLUTION_GENERIC': 2, 'SENTENCE_START_LOWER_PRONOUN': 1}
-    - [REPL_TRIPLE_VOICE] form=`(+ 1 2)` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
-    - [REPL_AS_TIME_TRAVELLER] form=`(+ 1 2)` — user_msg uses meta-narrator language that implies the answer pre-existed evaluation — describe the form's evaluation, not a pre-existing 'right' answer
-    - [TRAILING_PARTICIPLE_CLOSER] form=`(+ 1 2)` — sentence closes with a participial coda (', settling the\nmatter the patient way.') — LLM-cadence; close on the verb instead
+- issues: {'NARRATIVE_NUMERAL_HARDCODE': 15, 'REPL_TRIPLE_VOICE': 2, 'SENTENCE_START_LOWER_PRONOUN': 1}
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(- 5 3)` — parametric example has hard-coded English numeral 'five bones' in a story slot — the actual draws may differ from this fixed count
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(- 5 3)` — parametric example has hard-coded English numeral 'five bones' in a story slot — the actual draws may differ from this fixed count
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(- 5 3)` — parametric example has hard-coded English numeral 'five bones' in a story slot — the actual draws may differ from this fixed count
-
-### G1-14: Nested call evaluation
-
-- examples: 4
-- variety @ n=50: 1.00
-- issues: {'REPL_TRIPLE_VOICE': 2, 'ANSWER_LEAK': 1, 'RESOLUTION_GENERIC': 3, 'REPL_AS_TIME_TRAVELLER': 2, 'TRAILING_PARTICIPLE_CLOSER': 2, 'DOUBLE_NAME_INTRO': 1}
-    - [REPL_TRIPLE_VOICE] form=`(+ 1 (* 2 3))` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
-    - [ANSWER_LEAK] form=`(+ 1 (* 2 3))` — answer 7 in narrative
-    - [REPL_TRIPLE_VOICE] form=`(* (+ 1 2) (+ 3 4))` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
-    - [RESOLUTION_GENERIC] form=`(* (+ 1 2) (+ 3 4))` — user_msg has canned 'the X the operation produced' resolution boilerplate — tie it to the fable's metaphor / drawn values
-    - [REPL_AS_TIME_TRAVELLER] form=`(- 100 (* 5 5))` — user_msg uses meta-narrator language that implies the answer pre-existed evaluation — describe the form's evaluation, not a pre-existing 'right' answer
-    - [TRAILING_PARTICIPLE_CLOSER] form=`(- 100 (* 5 5))` — sentence closes with a participial coda (', settling the\nmatter the patient way.') — LLM-cadence; close on the verb instead
+    - [NARRATIVE_NUMERAL_HARDCODE] form=`(* 4 5)` — parametric example has hard-coded English numeral 'four piles' in a story slot — the actual draws may differ from this fixed count
+    - [NARRATIVE_NUMERAL_HARDCODE] form=`(* 4 5)` — parametric example has hard-coded English numeral 'four piles' in a story slot — the actual draws may differ from this fixed count
+    - [NARRATIVE_NUMERAL_HARDCODE] form=`(* 4 5)` — parametric example has hard-coded English numeral 'four piles' in a story slot — the actual draws may differ from this fixed count
 
 ### G1-15: Equality
 
@@ -172,13 +127,11 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 6
 - variety @ n=50: 1.00
-- issues: {'REPL_AS_TIME_TRAVELLER': 2, 'TRAILING_PARTICIPLE_CLOSER': 2, 'NARRATIVE_NUMERAL_HARDCODE': 3, 'RESOLUTION_GENERIC': 3, 'REPL_TRIPLE_VOICE': 2}
-    - [REPL_AS_TIME_TRAVELLER] form=`(zero? 0)` — user_msg uses meta-narrator language that implies the answer pre-existed evaluation — describe the form's evaluation, not a pre-existing 'right' answer
-    - [TRAILING_PARTICIPLE_CLOSER] form=`(zero? 0)` — sentence closes with a participial coda (', settling the\nmatter the patient way.') — LLM-cadence; close on the verb instead
+- issues: {'NARRATIVE_NUMERAL_HARDCODE': 3, 'REPL_TRIPLE_VOICE': 1}
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(zero? 5)` — parametric example has hard-coded English numeral 'five bones' in a story slot — the actual draws may differ from this fixed count
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(zero? 5)` — parametric example has hard-coded English numeral 'five bones' in a story slot — the actual draws may differ from this fixed count
-    - [RESOLUTION_GENERIC] form=`(zero? 5)` — user_msg has canned 'the X the operation produced' resolution boilerplate — tie it to the fable's metaphor / drawn values
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(zero? 5)` — parametric example has hard-coded English numeral 'five bones' in a story slot — the actual draws may differ from this fixed count
+    - [REPL_TRIPLE_VOICE] form=`(neg? -3)` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
 
 ### G1-17: Printing vs returning
 
@@ -194,7 +147,7 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 - examples: 2
 - variety @ n=50: 1.00
 - issues: {'REPL_TRIPLE_VOICE': 1}
-    - [REPL_TRIPLE_VOICE] form=`(* 7 6)` — user_msg mentions 'REPL' 4 times — the REPL personification should appear at most twice per record (submit + return)
+    - [REPL_TRIPLE_VOICE] form=`(* 7 6)` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
 
 ## Grade 2
 
@@ -202,141 +155,52 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 6
 - variety @ n=50: 1.00
-- issues: {'NARRATIVE_NUMERAL_HARDCODE': 12, 'PARAGRAPH_FRAGMENTATION': 1, 'META_FILLER_RESOLUTION': 2, 'REPL_AS_TIME_TRAVELLER': 1, 'TRAILING_PARTICIPLE_CLOSER': 1, 'RESOLUTION_GENERIC': 1}
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`(+ 1 2 3 4)` — parametric example has hard-coded English numeral 'four bones' in a story slot — the actual draws may differ from this fixed count
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`(+ 1 2 3 4)` — parametric example has hard-coded English numeral 'four bones' in a story slot — the actual draws may differ from this fixed count
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`(+ 1 2 3 4)` — parametric example has hard-coded English numeral 'four bones' in a story slot — the actual draws may differ from this fixed count
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`(* 2 3 4)` — parametric example has hard-coded English numeral 'three piles' in a story slot — the actual draws may differ from this fixed count
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`(* 2 3 4)` — parametric example has hard-coded English numeral 'three piles' in a story slot — the actual draws may differ from this fixed count
-    - [PARAGRAPH_FRAGMENTATION] form=`(* 2 3 4)` — user_msg has 5 short (≤25-word) paragraphs in body — reads as a bullet list, not a story
+- issues: {'META_FILLER_RESOLUTION': 2}
+    - [META_FILLER_RESOLUTION] form=`(- 100 1 2 3)` — user_msg uses generic 'returned exactly' / 'settled with certainty' filler — describe what actually came back, not just that something did
+    - [META_FILLER_RESOLUTION] form=`(- 100 1 2 3)` — user_msg uses generic 'returned exactly' / 'settled with certainty' filler — describe what actually came back, not just that something did
 
 ### G2-02: Comparison chains
 
 - examples: 5
 - variety @ n=50: 1.00
-- issues: {'RESOLUTION_GENERIC': 3, 'BOOL_LEAK_RESOLUTION': 1, 'REPL_AS_TIME_TRAVELLER': 1, 'TRAILING_PARTICIPLE_CLOSER': 1, 'NARRATIVE_NUMERAL_HARDCODE': 3, 'GENERIC_RESOLUTION_TAIL': 3}
-    - [RESOLUTION_GENERIC] form=`(< 1 2 3)` — user_msg has canned 'the X the operation produced' resolution boilerplate — tie it to the fable's metaphor / drawn values
-    - [BOOL_LEAK_RESOLUTION] form=`(< 1 2 3)` — resolution leaks boolean answer 'true' — describe the verdict abstractly instead
-    - [REPL_AS_TIME_TRAVELLER] form=`(< 3 2 1)` — user_msg uses meta-narrator language that implies the answer pre-existed evaluation — describe the form's evaluation, not a pre-existing 'right' answer
-    - [TRAILING_PARTICIPLE_CLOSER] form=`(< 3 2 1)` — sentence closes with a participial coda (', settling the\nmatter the patient way.') — LLM-cadence; close on the verb instead
-    - [RESOLUTION_GENERIC] form=`(< 3 2 1)` — user_msg has canned 'the X the operation produced' resolution boilerplate — tie it to the fable's metaphor / drawn values
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`(<= 1 1 2)` — parametric example has hard-coded English numeral 'three stones' in a story slot — the actual draws may differ from this fixed count
+- issues: {'GENERIC_RESOLUTION_TAIL': 3}
+    - [GENERIC_RESOLUTION_TAIL] form=`(> 5 4 3 2 1)` — resolution ends with generic 'the answer was returned' / 'returned cleanly' / 'settled the matter' — name the operand or close the metaphor's loop
+    - [GENERIC_RESOLUTION_TAIL] form=`(> 5 4 3 2 1)` — resolution ends with generic 'the answer was returned' / 'returned cleanly' / 'settled the matter' — name the operand or close the metaphor's loop
+    - [GENERIC_RESOLUTION_TAIL] form=`(> 5 4 3 2 1)` — resolution ends with generic 'the answer was returned' / 'returned cleanly' / 'settled the matter' — name the operand or close the metaphor's loop
 
 ### G2-03: not= and = with multiple args
 
 - examples: 5
 - variety @ n=50: 1.00
-- issues: {'REPL_AS_TIME_TRAVELLER': 4, 'TRAILING_PARTICIPLE_CLOSER': 4, 'BOOL_LEAK_RESOLUTION': 2, 'NARRATIVE_NUMERAL_HARDCODE': 9}
-    - [REPL_AS_TIME_TRAVELLER] form=`(not= 1 2)` — user_msg uses meta-narrator language that implies the answer pre-existed evaluation — describe the form's evaluation, not a pre-existing 'right' answer
-    - [TRAILING_PARTICIPLE_CLOSER] form=`(not= 1 2)` — sentence closes with a participial coda (', settling the\nmatter the patient way.') — LLM-cadence; close on the verb instead
-    - [REPL_AS_TIME_TRAVELLER] form=`(not= 1 1)` — user_msg uses meta-narrator language that implies the answer pre-existed evaluation — describe the form's evaluation, not a pre-existing 'right' answer
-    - [TRAILING_PARTICIPLE_CLOSER] form=`(not= 1 1)` — sentence closes with a participial coda (', settling the\nmatter the patient way.') — LLM-cadence; close on the verb instead
-    - [BOOL_LEAK_RESOLUTION] form=`(not= 1 1)` — resolution leaks boolean answer 'false' — describe the verdict abstractly instead
+- issues: {'BOOL_LEAK_RESOLUTION': 1}
     - [BOOL_LEAK_RESOLUTION] form=`(= 1 1 1)` — resolution leaks boolean answer 'true' — describe the verdict abstractly instead
-
-### G2-04: min and max
-
-- examples: 5
-- variety @ n=50: 1.00
-- issues: {'REPL_AS_TIME_TRAVELLER': 1, 'TRAILING_PARTICIPLE_CLOSER': 1, 'RESOLUTION_GENERIC': 3, 'NARRATIVE_NUMERAL_HARDCODE': 3}
-    - [REPL_AS_TIME_TRAVELLER] form=`(min 1 2 3)` — user_msg uses meta-narrator language that implies the answer pre-existed evaluation — describe the form's evaluation, not a pre-existing 'right' answer
-    - [TRAILING_PARTICIPLE_CLOSER] form=`(min 1 2 3)` — sentence closes with a participial coda (', settling the\nmatter the patient way.') — LLM-cadence; close on the verb instead
-    - [RESOLUTION_GENERIC] form=`(max 1 2 3)` — user_msg has canned 'the X the operation produced' resolution boilerplate — tie it to the fable's metaphor / drawn values
-    - [RESOLUTION_GENERIC] form=`(min 7 3 9 1 5)` — user_msg has canned 'the X the operation produced' resolution boilerplate — tie it to the fable's metaphor / drawn values
-    - [RESOLUTION_GENERIC] form=`(max 7 3 9 1 5)` — user_msg has canned 'the X the operation produced' resolution boilerplate — tie it to the fable's metaphor / drawn values
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`(min -3 -1 -5)` — parametric example has hard-coded English numeral 'three stones' in a story slot — the actual draws may differ from this fixed count
-
-### G2-05: quot, rem, mod
-
-- examples: 6
-- variety @ n=50: 1.00
-- issues: {'RESOLUTION_GENERIC': 5, 'REPL_AS_TIME_TRAVELLER': 3, 'TRAILING_PARTICIPLE_CLOSER': 3, 'SMALL_INT_LEAK': 1}
-    - [RESOLUTION_GENERIC] form=`(quot 17 5)` — user_msg has canned 'the X the operation produced' resolution boilerplate — tie it to the fable's metaphor / drawn values
-    - [REPL_AS_TIME_TRAVELLER] form=`(rem 17 5)` — user_msg uses meta-narrator language that implies the answer pre-existed evaluation — describe the form's evaluation, not a pre-existing 'right' answer
-    - [TRAILING_PARTICIPLE_CLOSER] form=`(rem 17 5)` — sentence closes with a participial coda (', settling the\nmatter the patient way.') — LLM-cadence; close on the verb instead
-    - [RESOLUTION_GENERIC] form=`(rem 17 5)` — user_msg has canned 'the X the operation produced' resolution boilerplate — tie it to the fable's metaphor / drawn values
-    - [RESOLUTION_GENERIC] form=`(rem 17 5)` — user_msg has canned 'the X the operation produced' resolution boilerplate — tie it to the fable's metaphor / drawn values
-    - [REPL_AS_TIME_TRAVELLER] form=`(mod 17 5)` — user_msg uses meta-narrator language that implies the answer pre-existed evaluation — describe the form's evaluation, not a pre-existing 'right' answer
-
-### G2-06: inc and dec
-
-- examples: 5
-- variety @ n=50: 1.00
-- issues: {'RESOLUTION_GENERIC': 4, 'REPL_AS_TIME_TRAVELLER': 2, 'TRAILING_PARTICIPLE_CLOSER': 2}
-    - [RESOLUTION_GENERIC] form=`(dec 5)` — user_msg has canned 'the X the operation produced' resolution boilerplate — tie it to the fable's metaphor / drawn values
-    - [RESOLUTION_GENERIC] form=`(inc 0)` — user_msg has canned 'the X the operation produced' resolution boilerplate — tie it to the fable's metaphor / drawn values
-    - [RESOLUTION_GENERIC] form=`(dec 0)` — user_msg has canned 'the X the operation produced' resolution boilerplate — tie it to the fable's metaphor / drawn values
-    - [RESOLUTION_GENERIC] form=`(dec 0)` — user_msg has canned 'the X the operation produced' resolution boilerplate — tie it to the fable's metaphor / drawn values
-    - [REPL_AS_TIME_TRAVELLER] form=`(inc -1)` — user_msg uses meta-narrator language that implies the answer pre-existed evaluation — describe the form's evaluation, not a pre-existing 'right' answer
-    - [TRAILING_PARTICIPLE_CLOSER] form=`(inc -1)` — sentence closes with a participial coda (', settling the\nmatter the patient way.') — LLM-cadence; close on the verb instead
 
 ### G2-07: Absolute value
 
 - examples: 4
 - variety @ n=50: 1.00
-- issues: {'REPL_AS_TIME_TRAVELLER': 3, 'TRAILING_PARTICIPLE_CLOSER': 4, 'PARAGRAPH_FRAGMENTATION': 2, 'RESOLUTION_GENERIC': 1}
-    - [REPL_AS_TIME_TRAVELLER] form=`(abs 5)` — user_msg uses meta-narrator language that implies the answer pre-existed evaluation — describe the form's evaluation, not a pre-existing 'right' answer
-    - [TRAILING_PARTICIPLE_CLOSER] form=`(abs 5)` — sentence closes with a participial coda (', settling the\nmatter the patient way.') — LLM-cadence; close on the verb instead
-    - [REPL_AS_TIME_TRAVELLER] form=`(abs 5)` — user_msg uses meta-narrator language that implies the answer pre-existed evaluation — describe the form's evaluation, not a pre-existing 'right' answer
-    - [TRAILING_PARTICIPLE_CLOSER] form=`(abs 5)` — sentence closes with a participial coda (', settling the\nmatter the patient way.') — LLM-cadence; close on the verb instead
-    - [PARAGRAPH_FRAGMENTATION] form=`(abs -5)` — user_msg has 4 short (≤25-word) paragraphs in body — reads as a bullet list, not a story
+- issues: {'TRAILING_PARTICIPLE_CLOSER': 1}
     - [TRAILING_PARTICIPLE_CLOSER] form=`(abs -5)` — sentence closes with a participial coda (', ignoring the negative sign entirely.') — LLM-cadence; close on the verb instead
-
-### G2-08: Arithmetic on ratios
-
-- examples: 3
-- variety @ n=50: 1.00
-- issues: {'PARAGRAPH_FRAGMENTATION': 3, 'REPL_AS_TIME_TRAVELLER': 1, 'DOUBLE_NAME_INTRO': 1, 'TRAILING_PARTICIPLE_CLOSER': 1, 'RESOLUTION_GENERIC': 1}
-    - [PARAGRAPH_FRAGMENTATION] form=`(+ 1/2 1/4)` — user_msg has 4 short (≤25-word) paragraphs in body — reads as a bullet list, not a story
-    - [REPL_AS_TIME_TRAVELLER] form=`(* 2/3 3/4)` — user_msg uses meta-narrator language that implies the answer pre-existed evaluation — describe the form's evaluation, not a pre-existing 'right' answer
-    - [DOUBLE_NAME_INTRO] form=`(* 2/3 3/4)` — character 'Ebony the dog' introduced twice within 200 chars — drop the second 'the dog'
-    - [TRAILING_PARTICIPLE_CLOSER] form=`(* 2/3 3/4)` — sentence closes with a participial coda (', settling the\nmatter the patient way.') — LLM-cadence; close on the verb instead
-    - [RESOLUTION_GENERIC] form=`(* 2/3 3/4)` — user_msg has canned 'the X the operation produced' resolution boilerplate — tie it to the fable's metaphor / drawn values
-    - [PARAGRAPH_FRAGMENTATION] form=`(- 1 1/3)` — user_msg has 4 short (≤25-word) paragraphs in body — reads as a bullet list, not a story
-
-### G2-09: Floats vs ints (the / operator)
-
-- examples: 3
-- variety @ n=50: 1.00
-- issues: {'NARRATIVE_NUMERAL_HARDCODE': 6, 'REPL_AS_TIME_TRAVELLER': 2, 'TRAILING_PARTICIPLE_CLOSER': 2, 'RESOLUTION_GENERIC': 1}
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`(/ 10 2)` — parametric example has hard-coded English numeral 'Ten bones' in a story slot — the actual draws may differ from this fixed count
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`(/ 10 2)` — parametric example has hard-coded English numeral 'Ten bones' in a story slot — the actual draws may differ from this fixed count
-    - [REPL_AS_TIME_TRAVELLER] form=`(/ 10 2)` — user_msg uses meta-narrator language that implies the answer pre-existed evaluation — describe the form's evaluation, not a pre-existing 'right' answer
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`(/ 10 2)` — parametric example has hard-coded English numeral 'Ten bones' in a story slot — the actual draws may differ from this fixed count
-    - [TRAILING_PARTICIPLE_CLOSER] form=`(/ 10 2)` — sentence closes with a participial coda (', settling the\nmatter the patient way.') — LLM-cadence; close on the verb instead
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`(/ 10 3)` — parametric example has hard-coded English numeral 'three piles' in a story slot — the actual draws may differ from this fixed count
-
-### G2-10: Powers via repeated multiplication
-
-- examples: 4
-- variety @ n=50: 1.00
-- issues: {'RESOLUTION_GENERIC': 2, 'PARAGRAPH_FRAGMENTATION': 1}
-    - [RESOLUTION_GENERIC] form=`(* 3 3 3 3)` — user_msg has canned 'the X the operation produced' resolution boilerplate — tie it to the fable's metaphor / drawn values
-    - [PARAGRAPH_FRAGMENTATION] form=`(* 10 10)` — user_msg has 4 short (≤25-word) paragraphs in body — reads as a bullet list, not a story
-    - [RESOLUTION_GENERIC] form=`(* 10 10)` — user_msg has canned 'the X the operation produced' resolution boilerplate — tie it to the fable's metaphor / drawn values
 
 ### G2-13: and / or — short circuit, return values
 
 - examples: 6
 - variety @ n=50: 1.00
-- issues: {'BOOL_LEAK_RESOLUTION': 3, 'TRAILING_PARTICIPLE_CLOSER': 4, 'DOUBLE_NAME_INTRO': 1, 'CLAUSE_STACK_OVERFLOW': 2}
-    - [BOOL_LEAK_RESOLUTION] form=`(and true true)` — resolution leaks boolean answer 'true' — describe the verdict abstractly instead
+- issues: {'TRAILING_PARTICIPLE_CLOSER': 4, 'BOOL_LEAK_RESOLUTION': 1, 'CLAUSE_STACK_OVERFLOW': 2}
     - [TRAILING_PARTICIPLE_CLOSER] form=`(and true true)` — sentence closes with a participial coda (', weighing the crossing.') — LLM-cadence; close on the verb instead
     - [TRAILING_PARTICIPLE_CLOSER] form=`(and true true)` — sentence closes with a participial coda (', weighing the crossing.') — LLM-cadence; close on the verb instead
     - [BOOL_LEAK_RESOLUTION] form=`(and true false)` — resolution leaks boolean answer 'false' — describe the verdict abstractly instead
-    - [BOOL_LEAK_RESOLUTION] form=`(or false true)` — resolution leaks boolean answer 'true' — describe the verdict abstractly instead
     - [TRAILING_PARTICIPLE_CLOSER] form=`(or false false)` — sentence closes with a participial coda (', weighing the crossing.') — LLM-cadence; close on the verb instead
+    - [CLAUSE_STACK_OVERFLOW] form=`(and 1 2 3)` — sentence with 6 commas reads as AI-output cadence: 'To apply and to 6, 9, and 2,\nshe composed the logical and, submitted the form,\na'
+    - [TRAILING_PARTICIPLE_CLOSER] form=`(and 1 2 3)` — sentence closes with a participial coda (', weighing the crossing.') — LLM-cadence; close on the verb instead
 
 ### G2-14: not — turning truthy to false
 
 - examples: 5
 - variety @ n=50: 1.00
-- issues: {'PARAGRAPH_FRAGMENTATION': 3, 'TRAILING_PARTICIPLE_CLOSER': 3, 'DOUBLE_NAME_INTRO': 1}
-    - [PARAGRAPH_FRAGMENTATION] form=`(not true)` — user_msg has 4 short (≤25-word) paragraphs in body — reads as a bullet list, not a story
+- issues: {'TRAILING_PARTICIPLE_CLOSER': 3}
     - [TRAILING_PARTICIPLE_CLOSER] form=`(not true)` — sentence closes with a participial coda (', weighing the crossing.') — LLM-cadence; close on the verb instead
     - [TRAILING_PARTICIPLE_CLOSER] form=`(not false)` — sentence closes with a participial coda (', weighing the crossing.') — LLM-cadence; close on the verb instead
-    - [PARAGRAPH_FRAGMENTATION] form=`(not false)` — user_msg has 4 short (≤25-word) paragraphs in body — reads as a bullet list, not a story
-    - [PARAGRAPH_FRAGMENTATION] form=`(not nil)` — user_msg has 4 short (≤25-word) paragraphs in body — reads as a bullet list, not a story
     - [TRAILING_PARTICIPLE_CLOSER] form=`(not nil)` — sentence closes with a participial coda (', weighing the crossing.') — LLM-cadence; close on the verb instead
 
 ### G2-15: Falsey values: only false and nil
@@ -364,23 +228,9 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 3
 - variety @ n=50: 1.00
-- issues: {'BOOL_LEAK_RESOLUTION': 2, 'CLAUSE_STACK_OVERFLOW': 1, 'ONLY_SHOOK_HEAD_TIC': 1}
-    - [BOOL_LEAK_RESOLUTION] form=`(symbol? (quote hare))` — resolution leaks boolean answer 'true' — describe the verdict abstractly instead
-    - [BOOL_LEAK_RESOLUTION] form=`(symbol? (quote hare))` — resolution leaks boolean answer 'true' — describe the verdict abstractly instead
+- issues: {'CLAUSE_STACK_OVERFLOW': 1, 'ONLY_SHOOK_HEAD_TIC': 1}
     - [CLAUSE_STACK_OVERFLOW] form=`(count '(1 2 3))` — sentence with 5 commas reads as AI-output cadence: 'To\ncount the elements in a quoted list of the integers 1, 2, and 3, he composed '
     - [ONLY_SHOOK_HEAD_TIC] form=`(count '(1 2 3))` — user_msg uses 'only shook his/her head' — recurring AI-fable filler cadence
-
-### G2-19: Auto-promotion to bigint
-
-- examples: 2
-- variety @ n=50: 1.00
-- issues: {'REPL_TRIPLE_VOICE': 2, 'RESOLUTION_REPL_DOUBLED': 3, 'REPL_AS_TIME_TRAVELLER': 2, 'DOUBLE_NAME_INTRO': 1, 'TRAILING_PARTICIPLE_CLOSER': 2, 'RESOLUTION_GENERIC': 2}
-    - [REPL_TRIPLE_VOICE] form=`(* 1000000 1000000)` — user_msg mentions 'REPL' 4 times — the REPL personification should appear at most twice per record (submit + return)
-    - [RESOLUTION_REPL_DOUBLED] form=`(* 1000000 1000000)` — story-tagged resolution mentions 'REPL' 2 times — name the mechanic once, use pronoun/it/runtime/it for the second beat
-    - [REPL_AS_TIME_TRAVELLER] form=`(* 1000000 1000000)` — user_msg uses meta-narrator language that implies the answer pre-existed evaluation — describe the form's evaluation, not a pre-existing 'right' answer
-    - [DOUBLE_NAME_INTRO] form=`(* 1000000 1000000)` — character 'Inky the dog' introduced twice within 200 chars — drop the second 'the dog'
-    - [RESOLUTION_REPL_DOUBLED] form=`(* 1000000 1000000)` — story-tagged resolution mentions 'REPL' 2 times — name the mechanic once, use pronoun/it/runtime/it for the second beat
-    - [TRAILING_PARTICIPLE_CLOSER] form=`(* 1000000 1000000)` — sentence closes with a participial coda (', settling the\nmatter the patient way.') — LLM-cadence; close on the verb instead
 
 ### G2-20: Counting
 
@@ -389,22 +239,10 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 - issues: {'TRAILING_PARTICIPLE_CLOSER': 6, 'HIGH_LENGTH': 1}
     - [TRAILING_PARTICIPLE_CLOSER] form=`(count [1 2 3])` — sentence closes with a participial coda (', counting the steps — returned the count.') — LLM-cadence; close on the verb instead
     - [TRAILING_PARTICIPLE_CLOSER] form=`(count [1 2 3])` — sentence closes with a participial coda (', counting the steps — returned the count.') — LLM-cadence; close on the verb instead
-    - [HIGH_LENGTH] form=`(count [1 2 3])` — user_msg 210 words
+    - [HIGH_LENGTH] form=`(count [1 2 3])` — user_msg 201 words
     - [TRAILING_PARTICIPLE_CLOSER] form=`(count "hello")` — sentence closes with a participial coda (', counting the steps — returned the count.') — LLM-cadence; close on the verb instead
     - [TRAILING_PARTICIPLE_CLOSER] form=`(count "hello")` — sentence closes with a participial coda (', carrying the tally — returned the final number.') — LLM-cadence; close on the verb instead
     - [TRAILING_PARTICIPLE_CLOSER] form=`(count [])` — sentence closes with a participial coda (', counting the steps — returned the count.') — LLM-cadence; close on the verb instead
-
-### G2-22: Compose pure arithmetic (multi-step calculation)
-
-- examples: 3
-- variety @ n=50: 1.00
-- issues: {'NARRATIVE_NUMERAL_HARDCODE': 3, 'ANSWER_LEAK': 2, 'REPL_AS_TIME_TRAVELLER': 2, 'TRAILING_PARTICIPLE_CLOSER': 2}
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`(- (* 5 4) 7)` — parametric example has hard-coded English numeral 'four piles' in a story slot — the actual draws may differ from this fixed count
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`(- (* 5 4) 7)` — parametric example has hard-coded English numeral 'four piles' in a story slot — the actual draws may differ from this fixed count
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`(- (* 5 4) 7)` — parametric example has hard-coded English numeral 'four piles' in a story slot — the actual draws may differ from this fixed count
-    - [ANSWER_LEAK] form=`(+ (* 3 8) (* 2 4))` — answer 32 in narrative
-    - [ANSWER_LEAK] form=`(+ (* 3 8) (* 2 4))` — answer 32 in narrative
-    - [REPL_AS_TIME_TRAVELLER] form=`(quot (+ 100 50) 5)` — user_msg uses meta-narrator language that implies the answer pre-existed evaluation — describe the form's evaluation, not a pre-existing 'right' answer
 
 ## Grade 3
 
@@ -413,21 +251,16 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 - examples: 3
 - variety @ n=50: 1.00
 - issues: {'HIGH_LENGTH': 3}
-    - [HIGH_LENGTH] form=`(let [x 3] (+ x 1))` — user_msg 225 words
-    - [HIGH_LENGTH] form=`(let [n 10] (* n n))` — user_msg 223 words
-    - [HIGH_LENGTH] form=`(let [a 5] a)` — user_msg 220 words
+    - [HIGH_LENGTH] form=`(let [x 3] (+ x 1))` — user_msg 217 words
+    - [HIGH_LENGTH] form=`(let [n 10] (* n n))` — user_msg 215 words
+    - [HIGH_LENGTH] form=`(let [a 5] a)` — user_msg 219 words
 
 ### G3-04: let — multi-binding
 
 - examples: 3
 - variety @ n=50: 1.00
-- issues: {'HIGH_LENGTH': 2, 'NARRATIVE_NUMERAL_HARDCODE': 3, 'CLAUSE_STACK_OVERFLOW': 1, 'ANSWER_LEAK': 1}
-    - [HIGH_LENGTH] form=`(let [x 5 y 3] (- x y))` — user_msg 202 words
-    - [HIGH_LENGTH] form=`(let [x 5 y 3] (- x y))` — user_msg 201 words
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`(let [a 2 b 3 c 4] (+ a b c))` — parametric example has hard-coded English numeral 'three bones' in a story slot — the actual draws may differ from this fixed count
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`(let [a 2 b 3 c 4] (+ a b c))` — parametric example has hard-coded English numeral 'three bones' in a story slot — the actual draws may differ from this fixed count
+- issues: {'CLAUSE_STACK_OVERFLOW': 1}
     - [CLAUSE_STACK_OVERFLOW] form=`(let [a 2 b 3 c 4] (+ a b c))` — sentence with 7 commas reads as AI-output cadence: 'Tracker the dog, with even breath and steady step,\nheld his grip steady and did '
-    - [ANSWER_LEAK] form=`(let [a 2 b 3 c 4] (+ a b c))` — answer 9 in narrative
 
 ### G3-05: let — shadowing outer def
 
@@ -440,13 +273,11 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'NARRATIVE_NUMERAL_HARDCODE': 6, 'HIGH_LENGTH': 4, 'ANSWER_LEAK': 1}
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`(let [a 5 b (* a 2)] b)` — parametric example has hard-coded English numeral 'five bones' in a story slot — the actual draws may differ from this fixed count
-    - [HIGH_LENGTH] form=`(let [a 5 b (* a 2)] b)` — user_msg 240 words
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`(let [a 5 b (* a 2)] b)` — parametric example has hard-coded English numeral 'five bones' in a story slot — the actual draws may differ from this fixed count
-    - [HIGH_LENGTH] form=`(let [a 5 b (* a 2)] b)` — user_msg 242 words
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`(let [a 5 b (* a 2)] b)` — parametric example has hard-coded English numeral 'five bones' in a story slot — the actual draws may differ from this fixed count
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`(let [a 3 b (+ a 1) c (* b 2)] c)` — parametric example has hard-coded English numeral 'three bones' in a story slot — the actual draws may differ from this fixed count
+- issues: {'HIGH_LENGTH': 4}
+    - [HIGH_LENGTH] form=`(let [a 5 b (* a 2)] b)` — user_msg 234 words
+    - [HIGH_LENGTH] form=`(let [a 5 b (* a 2)] b)` — user_msg 236 words
+    - [HIGH_LENGTH] form=`(let [a 3 b (+ a 1) c (* b 2)] c)` — user_msg 238 words
+    - [HIGH_LENGTH] form=`(let [a 3 b (+ a 1) c (* b 2)] c)` — user_msg 242 words
 
 ### G3-07: fn — anonymous function
 
@@ -466,30 +297,21 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'NARRATIVE_NUMERAL_HARDCODE': 3, 'RESOLUTION_REPL_DOUBLED': 3, 'HIGH_LENGTH': 1, 'REPL_TRIPLE_VOICE': 1, 'CLAUSE_STACK_OVERFLOW': 1}
+- issues: {'NARRATIVE_NUMERAL_HARDCODE': 3, 'HIGH_LENGTH': 1, 'CLAUSE_STACK_OVERFLOW': 1}
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(do (defn add3 [a b c] (+ a b c)) (add3 1 2 3))` — parametric example has hard-coded English numeral 'three counts' in a story slot — the actual draws may differ from this fixed count
-    - [RESOLUTION_REPL_DOUBLED] form=`(do (defn add3 [a b c] (+ a b c)) (add3 1 2 3))` — story-tagged resolution mentions 'REPL' 2 times — name the mechanic once, use pronoun/it/runtime/it for the second beat
     - [HIGH_LENGTH] form=`(do (defn add3 [a b c] (+ a b c)) (add3 1 2 3))` — user_msg 241 words
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(do (defn add3 [a b c] (+ a b c)) (add3 1 2 3))` — parametric example has hard-coded English numeral 'three counts' in a story slot — the actual draws may differ from this fixed count
-    - [REPL_TRIPLE_VOICE] form=`(do (defn add3 [a b c] (+ a b c)) (add3 1 2 3))` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
     - [CLAUSE_STACK_OVERFLOW] form=`(do (defn add3 [a b c] (+ a b c)) (add3 1 2 3))` — sentence with 6 commas reads as AI-output cadence: 'To define a function add3 that adds three arguments, then call it with 9, 8, and'
+    - [NARRATIVE_NUMERAL_HARDCODE] form=`(do (defn add3 [a b c] (+ a b c)) (add3 1 2 3))` — parametric example has hard-coded English numeral 'three counts' in a story slot — the actual draws may differ from this fixed count
 
 ### G3-10: anonymous shorthand #()
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'PARAGRAPH_FRAGMENTATION': 1, 'CONCEPT_AS_VERB': 3}
-    - [PARAGRAPH_FRAGMENTATION] form=`(#(+ % 1) 5)` — user_msg has 4 short (≤25-word) paragraphs in body — reads as a bullet list, not a story
+- issues: {'CONCEPT_AS_VERB': 3}
     - [CONCEPT_AS_VERB] form=`(#(+ % 1) 5)` — concept_phrase substituted into a finite-verb slot (e.g. 'must calling X', 'I applying Y')
     - [CONCEPT_AS_VERB] form=`(#(+ % 1) 5)` — concept_phrase substituted into a finite-verb slot (e.g. 'must calling X', 'I applying Y')
     - [CONCEPT_AS_VERB] form=`(#(* %1 %2) 3 4)` — concept_phrase substituted into a finite-verb slot (e.g. 'must calling X', 'I applying Y')
-
-### G3-11: Substitution rule
-
-- examples: 2
-- variety @ n=50: 1.00
-- issues: {'HIGH_LENGTH': 1}
-    - [HIGH_LENGTH] form=`((fn [x] (* x x)) 6)` — user_msg 203 words
 
 ### G3-12: Scope vs namespace
 
@@ -505,25 +327,17 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 - examples: 1
 - variety @ n=50: 1.00
 - issues: {'HIGH_LENGTH': 1, 'STORY_RESOLUTION_NO_DRAWN': 3}
-    - [HIGH_LENGTH] form=`((fn [x] x x x 99) 1)` — user_msg 240 words
+    - [HIGH_LENGTH] form=`((fn [x] x x x 99) 1)` — user_msg 241 words
     - [STORY_RESOLUTION_NO_DRAWN] form=`((fn [x] x x x 99) 1)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('99',), resolution doesn't close the loop)
     - [STORY_RESOLUTION_NO_DRAWN] form=`((fn [x] x x x 99) 1)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('99',), resolution doesn't close the loop)
     - [STORY_RESOLUTION_NO_DRAWN] form=`((fn [x] x x x 99) 1)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('99',), resolution doesn't close the loop)
-
-### G3-14: do form
-
-- examples: 2
-- variety @ n=50: 1.00
-- issues: {'HIGH_LENGTH': 1, 'ANSWER_LEAK': 1}
-    - [HIGH_LENGTH] form=`(do 1 2 3)` — user_msg 213 words
-    - [ANSWER_LEAK] form=`(do (+ 1 1) (+ 2 2) (+ 3 3))` — answer 6 in narrative
 
 ### G3-15: Side-effects in body
 
 - examples: 1
 - variety @ n=50: 1.00
 - issues: {'HIGH_LENGTH': 1, 'SENTENCE_START_LOWER_PRONOUN': 1, 'TRAILING_PARTICIPLE_CLOSER': 2}
-    - [HIGH_LENGTH] form=`(do (println "hi") 42)` — user_msg 215 words
+    - [HIGH_LENGTH] form=`(do (println "hi") 42)` — user_msg 216 words
     - [SENTENCE_START_LOWER_PRONOUN] form=`(do (println "hi") 42)` — pronoun starts a sentence in lowercase — template should use the _cap variant after a sentence-ending punctuation
     - [TRAILING_PARTICIPLE_CLOSER] form=`(do (println "hi") 42)` — sentence closes with a participial coda (', ignoring the intermediate println side-effect.') — LLM-cadence; close on the verb instead
     - [TRAILING_PARTICIPLE_CLOSER] form=`(do (println "hi") 42)` — sentence closes with a participial coda (', ignoring the intermediate println side-effect.') — LLM-cadence; close on the verb instead
@@ -532,13 +346,10 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'HIGH_LENGTH': 1, 'TRAILING_PARTICIPLE_CLOSER': 1, 'NARRATIVE_NUMERAL_HARDCODE': 3, 'THE_FORM_OVERUSE': 1}
-    - [HIGH_LENGTH] form=`(let [n 5] (* n n n))` — user_msg 220 words
+- issues: {'HIGH_LENGTH': 1, 'TRAILING_PARTICIPLE_CLOSER': 1, 'THE_FORM_OVERUSE': 1}
+    - [HIGH_LENGTH] form=`(let [n 5] (* n n n))` — user_msg 210 words
     - [TRAILING_PARTICIPLE_CLOSER] form=`(let [n 5] (* n n n))` — sentence closes with a participial coda (', holding the grip tight.') — LLM-cadence; close on the verb instead
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`(* 5 5 5)` — parametric example has hard-coded English numeral 'three stones' in a story slot — the actual draws may differ from this fixed count
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`(* 5 5 5)` — parametric example has hard-coded English numeral 'three stones' in a story slot — the actual draws may differ from this fixed count
     - [THE_FORM_OVERUSE] form=`(* 5 5 5)` — `the form` appears 5 times in user_msg (template tic — vary references)
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`(* 5 5 5)` — parametric example has hard-coded English numeral 'three stones' in a story slot — the actual draws may differ from this fixed count
 
 ## Grade 4
 
@@ -546,25 +357,23 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 3
 - variety @ n=50: 1.00
-- issues: {'PARAMETRIC_LITERAL_NUMERALS': 3, 'NARRATIVE_NUMERAL_HARDCODE': 3, 'REPL_TRIPLE_VOICE': 2, 'TRAILING_PARTICIPLE_CLOSER': 1}
+- issues: {'PARAMETRIC_LITERAL_NUMERALS': 3, 'TRAILING_PARTICIPLE_CLOSER': 1}
     - [PARAMETRIC_LITERAL_NUMERALS] form=`[1 2 3]` — parametric example has enumerated English numerals (one, two, three, …) hard-coded in a story slot — won't track the actual draws that {form_template} produces
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`[1 2 3]` — parametric example has hard-coded English numeral 'three bones' in a story slot — the actual draws may differ from this fixed count
     - [PARAMETRIC_LITERAL_NUMERALS] form=`[1 2 3]` — parametric example has enumerated English numerals (one, two, three, …) hard-coded in a story slot — won't track the actual draws that {form_template} produces
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`[1 2 3]` — parametric example has hard-coded English numeral 'three bones' in a story slot — the actual draws may differ from this fixed count
     - [PARAMETRIC_LITERAL_NUMERALS] form=`[1 2 3]` — parametric example has enumerated English numerals (one, two, three, …) hard-coded in a story slot — won't track the actual draws that {form_template} produces
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`[1 2 3]` — parametric example has hard-coded English numeral 'three bones' in a story slot — the actual draws may differ from this fixed count
+    - [TRAILING_PARTICIPLE_CLOSER] form=`["a" "b"]` — sentence closes with a participial coda (',\nleaving the first one untouched.') — LLM-cadence; close on the verb instead
 
 ### G4-02: nth — vector access
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'NARRATIVE_NUMERAL_HARDCODE': 6, 'REPL_TRIPLE_VOICE': 2, 'TRAILING_PARTICIPLE_CLOSER': 1}
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`(nth [10 20 30] 0)` — parametric example has hard-coded English numeral 'three bone' in a story slot — the actual draws may differ from this fixed count
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`(nth [10 20 30] 0)` — parametric example has hard-coded English numeral 'three bone' in a story slot — the actual draws may differ from this fixed count
-    - [REPL_TRIPLE_VOICE] form=`(nth [10 20 30] 0)` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`(nth [10 20 30] 0)` — parametric example has hard-coded English numeral 'three bone' in a story slot — the actual draws may differ from this fixed count
-    - [REPL_TRIPLE_VOICE] form=`(nth [10 20 30] 0)` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
+- issues: {'FABLE_FOREIGN_NUMERAL_QUANTIFIER': 2, 'NARRATIVE_NUMERAL_HARDCODE': 3, 'TRAILING_PARTICIPLE_CLOSER': 1}
+    - [FABLE_FOREIGN_NUMERAL_QUANTIFIER] form=`(nth [10 20 30] 0)` — parametric example has hardcoded digit quantifier 'a pile of 10 bones' in narrative — the form is parametric so the actual count drifts from the prose
+    - [FABLE_FOREIGN_NUMERAL_QUANTIFIER] form=`(nth [10 20 30] 0)` — parametric example has hardcoded digit quantifier 'a pile of 10 bones' in narrative — the form is parametric so the actual count drifts from the prose
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(nth [10 20 30] 2)` — parametric example has hard-coded English numeral 'three piles' in a story slot — the actual draws may differ from this fixed count
+    - [NARRATIVE_NUMERAL_HARDCODE] form=`(nth [10 20 30] 2)` — parametric example has hard-coded English numeral 'three piles' in a story slot — the actual draws may differ from this fixed count
+    - [NARRATIVE_NUMERAL_HARDCODE] form=`(nth [10 20 30] 2)` — parametric example has hard-coded English numeral 'three piles' in a story slot — the actual draws may differ from this fixed count
+    - [TRAILING_PARTICIPLE_CLOSER] form=`(nth [10 20 30] 2)` — sentence closes with a participial coda (',\nleaving the first one untouched.') — LLM-cadence; close on the verb instead
 
 ### G4-03: conj — append to vector
 
@@ -579,25 +388,18 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'NARRATIVE_NUMERAL_HARDCODE': 3, 'TRAILING_PARTICIPLE_CLOSER': 1, 'HANGING_FORM_THAT': 1, 'PARAGRAPH_FRAGMENTATION': 1, 'REPL_TRIPLE_VOICE': 1}
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`'(1 2 3)` — parametric example has hard-coded English numeral 'three bones' in a story slot — the actual draws may differ from this fixed count
+- issues: {'TRAILING_PARTICIPLE_CLOSER': 1, 'HANGING_FORM_THAT': 1}
     - [TRAILING_PARTICIPLE_CLOSER] form=`'(1 2 3)` — sentence closes with a participial coda (',\nleaving the first one untouched.') — LLM-cadence; close on the verb instead
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`'(1 2 3)` — parametric example has hard-coded English numeral 'three bones' in a story slot — the actual draws may differ from this fixed count
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`'(1 2 3)` — parametric example has hard-coded English numeral 'three bones' in a story slot — the actual draws may differ from this fixed count
     - [HANGING_FORM_THAT] form=`'()` — 'form that <noun>' rendered without a verb — template should be 'form for {concept_phrase}'
-    - [PARAGRAPH_FRAGMENTATION] form=`'()` — user_msg has 4 short (≤25-word) paragraphs in body — reads as a bullet list, not a story
 
 ### G4-05: cons — prepend to seq
 
 - examples: 1
 - variety @ n=50: 1.00
-- issues: {'PARAMETRIC_LITERAL_NUMERALS': 3, 'NARRATIVE_NUMERAL_HARDCODE': 3}
+- issues: {'PARAMETRIC_LITERAL_NUMERALS': 3}
     - [PARAMETRIC_LITERAL_NUMERALS] form=`(cons 0 '(1 2 3))` — parametric example has enumerated English numerals (one, two, three, …) hard-coded in a story slot — won't track the actual draws that {form_template} produces
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`(cons 0 '(1 2 3))` — parametric example has hard-coded English numeral 'three bones' in a story slot — the actual draws may differ from this fixed count
     - [PARAMETRIC_LITERAL_NUMERALS] form=`(cons 0 '(1 2 3))` — parametric example has enumerated English numerals (one, two, three, …) hard-coded in a story slot — won't track the actual draws that {form_template} produces
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`(cons 0 '(1 2 3))` — parametric example has hard-coded English numeral 'three bones' in a story slot — the actual draws may differ from this fixed count
     - [PARAMETRIC_LITERAL_NUMERALS] form=`(cons 0 '(1 2 3))` — parametric example has enumerated English numerals (one, two, three, …) hard-coded in a story slot — won't track the actual draws that {form_template} produces
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`(cons 0 '(1 2 3))` — parametric example has hard-coded English numeral 'three bones' in a story slot — the actual draws may differ from this fixed count
 
 ### G4-07: get — map lookup
 
@@ -611,73 +413,48 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'TRAILING_PARTICIPLE_CLOSER': 2, 'REPL_TRIPLE_VOICE': 1}
+- issues: {'TRAILING_PARTICIPLE_CLOSER': 2}
     - [TRAILING_PARTICIPLE_CLOSER] form=`(assoc {:a 1} :a 99)` — sentence closes with a participial coda (',\nleaving the first one untouched.') — LLM-cadence; close on the verb instead
-    - [REPL_TRIPLE_VOICE] form=`(assoc {:a 1} :a 99)` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
     - [TRAILING_PARTICIPLE_CLOSER] form=`(assoc {:a 1} :a 99)` — sentence closes with a participial coda (',\nleaving the first one untouched.') — LLM-cadence; close on the verb instead
-
-### G4-10: keys and vals
-
-- examples: 1
-- variety @ n=50: 1.00
-- issues: {'REPL_TRIPLE_VOICE': 1}
-    - [REPL_TRIPLE_VOICE] form=`(count (keys {:a 1 :b 2 :c 3}))` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
-
-### G4-11: Set literal
-
-- examples: 2
-- variety @ n=50: 1.00
-- issues: {'PARAGRAPH_FRAGMENTATION': 1, 'REPL_TRIPLE_VOICE': 1}
-    - [PARAGRAPH_FRAGMENTATION] form=`(count #{1 1 1})` — user_msg has 4 short (≤25-word) paragraphs in body — reads as a bullet list, not a story
-    - [REPL_TRIPLE_VOICE] form=`(count #{1 1 1})` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
 
 ### G4-12: Set membership
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'NARRATIVE_NUMERAL_HARDCODE': 6, 'TRAILING_PARTICIPLE_CLOSER': 3}
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`(contains? #{1 2 3} 2)` — parametric example has hard-coded English numeral 'three bones' in a story slot — the actual draws may differ from this fixed count
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`(contains? #{1 2 3} 2)` — parametric example has hard-coded English numeral 'three bones' in a story slot — the actual draws may differ from this fixed count
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`(contains? #{1 2 3} 2)` — parametric example has hard-coded English numeral 'three bones' in a story slot — the actual draws may differ from this fixed count
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`(contains? #{1 2 3} 4)` — parametric example has hard-coded English numeral 'three bones' in a story slot — the actual draws may differ from this fixed count
+- issues: {'TRAILING_PARTICIPLE_CLOSER': 3}
     - [TRAILING_PARTICIPLE_CLOSER] form=`(contains? #{1 2 3} 4)` — sentence closes with a participial coda (',\nleaving the first one untouched.') — LLM-cadence; close on the verb instead
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`(contains? #{1 2 3} 4)` — parametric example has hard-coded English numeral 'three bones' in a story slot — the actual draws may differ from this fixed count
+    - [TRAILING_PARTICIPLE_CLOSER] form=`(contains? #{1 2 3} 4)` — sentence closes with a participial coda (',\nleaving the first one untouched.') — LLM-cadence; close on the verb instead
+    - [TRAILING_PARTICIPLE_CLOSER] form=`(contains? #{1 2 3} 4)` — sentence closes with a participial coda (',\nleaving the first one untouched.') — LLM-cadence; close on the verb instead
 
 ### G4-13: count — universal
 
 - examples: 4
 - variety @ n=50: 1.00
-- issues: {'NARRATIVE_NUMERAL_HARDCODE': 3, 'REPL_TRIPLE_VOICE': 2, 'TRAILING_PARTICIPLE_CLOSER': 2}
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`(count [1 2 3 4 5])` — parametric example has hard-coded English numeral 'five bones' in a story slot — the actual draws may differ from this fixed count
-    - [REPL_TRIPLE_VOICE] form=`(count [1 2 3 4 5])` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`(count [1 2 3 4 5])` — parametric example has hard-coded English numeral 'five bones' in a story slot — the actual draws may differ from this fixed count
+- issues: {'TRAILING_PARTICIPLE_CLOSER': 2}
     - [TRAILING_PARTICIPLE_CLOSER] form=`(count [1 2 3 4 5])` — sentence closes with a participial coda (',\nleaving the first one untouched.') — LLM-cadence; close on the verb instead
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`(count [1 2 3 4 5])` — parametric example has hard-coded English numeral 'five bones' in a story slot — the actual draws may differ from this fixed count
     - [TRAILING_PARTICIPLE_CLOSER] form=`(count {:a 1 :b 2})` — sentence closes with a participial coda (',\nleaving the first one untouched.') — LLM-cadence; close on the verb instead
 
 ### G4-14: empty?
 
 - examples: 3
 - variety @ n=50: 1.00
-- issues: {'BOOL_LEAK_RESOLUTION': 3, 'REPL_TRIPLE_VOICE': 3, 'TRAILING_PARTICIPLE_CLOSER': 3, 'PARAGRAPH_FRAGMENTATION': 2}
-    - [BOOL_LEAK_RESOLUTION] form=`(empty? [])` — resolution leaks boolean answer 'true' — describe the verdict abstractly instead
-    - [REPL_TRIPLE_VOICE] form=`(empty? [])` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
+- issues: {'TRAILING_PARTICIPLE_CLOSER': 3, 'REPL_TRIPLE_VOICE': 2}
     - [TRAILING_PARTICIPLE_CLOSER] form=`(empty? [])` — sentence closes with a participial coda (',\nleaving the first one untouched.') — LLM-cadence; close on the verb instead
-    - [BOOL_LEAK_RESOLUTION] form=`(empty? [1])` — resolution leaks boolean answer 'false' — describe the verdict abstractly instead
-    - [PARAGRAPH_FRAGMENTATION] form=`(empty? [1])` — user_msg has 4 short (≤25-word) paragraphs in body — reads as a bullet list, not a story
-    - [REPL_TRIPLE_VOICE] form=`(empty? [1])` — user_msg mentions 'REPL' 4 times — the REPL personification should appear at most twice per record (submit + return)
+    - [REPL_TRIPLE_VOICE] form=`(empty? [1])` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
+    - [REPL_TRIPLE_VOICE] form=`(empty? [1])` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
+    - [TRAILING_PARTICIPLE_CLOSER] form=`(empty? "")` — sentence closes with a participial coda (',\nleaving the first one untouched.') — LLM-cadence; close on the verb instead
+    - [TRAILING_PARTICIPLE_CLOSER] form=`(empty? "")` — sentence closes with a participial coda (',\nleaving the first one untouched.') — LLM-cadence; close on the verb instead
 
 ### G4-15: first, rest, last
 
 - examples: 3
 - variety @ n=50: 1.00
-- issues: {'NARRATIVE_NUMERAL_HARDCODE': 9, 'REPL_TRIPLE_VOICE': 2, 'TRAILING_PARTICIPLE_CLOSER': 2}
+- issues: {'NARRATIVE_NUMERAL_HARDCODE': 3, 'TRAILING_PARTICIPLE_CLOSER': 2}
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(first [10 20 30])` — parametric example has hard-coded English numeral 'three bone' in a story slot — the actual draws may differ from this fixed count
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(first [10 20 30])` — parametric example has hard-coded English numeral 'three bone' in a story slot — the actual draws may differ from this fixed count
-    - [REPL_TRIPLE_VOICE] form=`(first [10 20 30])` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(first [10 20 30])` — parametric example has hard-coded English numeral 'three bone' in a story slot — the actual draws may differ from this fixed count
     - [TRAILING_PARTICIPLE_CLOSER] form=`(first [10 20 30])` — sentence closes with a participial coda (',\nleaving the first one untouched.') — LLM-cadence; close on the verb instead
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`(last [10 20 30])` — parametric example has hard-coded English numeral 'three heaps' in a story slot — the actual draws may differ from this fixed count
+    - [TRAILING_PARTICIPLE_CLOSER] form=`(count (rest [10 20 30]))` — sentence closes with a participial coda (',\nleaving the first one untouched.') — LLM-cadence; close on the verb instead
 
 ### G4-16: into and conj on collections
 
@@ -699,13 +476,13 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'NARRATIVE_NUMERAL_HARDCODE': 3, 'REPL_TRIPLE_VOICE': 3, 'CLAUSE_STACK_OVERFLOW': 2, 'TRAILING_PARTICIPLE_CLOSER': 3}
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`(count (range 5))` — parametric example has hard-coded English numeral 'five bones' in a story slot — the actual draws may differ from this fixed count
-    - [REPL_TRIPLE_VOICE] form=`(count (range 5))` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
-    - [CLAUSE_STACK_OVERFLOW] form=`(count (range 5))` — sentence with 6 commas reads as AI-output cadence: 'The range is a promise of five bones (0, 1, 2, 3, 4), and count consumes that pr'
+- issues: {'CLAUSE_STACK_OVERFLOW': 2, 'TRAILING_PARTICIPLE_CLOSER': 3, 'REPL_TRIPLE_VOICE': 1}
+    - [CLAUSE_STACK_OVERFLOW] form=`(count (range 5))` — sentence with 6 commas reads as AI-output cadence: 'The range is a promise of a row of bones (0, 1, 2, 3, 4), and count consumes tha'
     - [TRAILING_PARTICIPLE_CLOSER] form=`(count (range 5))` — sentence closes with a participial coda (', tallying the whole.') — LLM-cadence; close on the verb instead
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`(count (range 5))` — parametric example has hard-coded English numeral 'five bones' in a story slot — the actual draws may differ from this fixed count
     - [TRAILING_PARTICIPLE_CLOSER] form=`(count (range 5))` — sentence closes with a participial coda (',\nleaving the first one untouched.') — LLM-cadence; close on the verb instead
+    - [CLAUSE_STACK_OVERFLOW] form=`(count (range 5))` — sentence with 6 commas reads as AI-output cadence: 'The range is a promise of a row of bones (0, 1, 2, 3, 4), and count consumes tha'
+    - [TRAILING_PARTICIPLE_CLOSER] form=`(count (range 5))` — sentence closes with a participial coda (', tallying the whole.') — LLM-cadence; close on the verb instead
+    - [REPL_TRIPLE_VOICE] form=`(first (range 1 100))` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
 
 ### G4-20: Collection vs sequence
 
@@ -730,20 +507,15 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 1
 - variety @ n=50: 1.00
-- issues: {'RESOLUTION_REPL_DOUBLED': 3, 'HIGH_LENGTH': 1, 'REPL_TRIPLE_VOICE': 1}
-    - [RESOLUTION_REPL_DOUBLED] form=`(+ 1 (if true 10 20))` — story-tagged resolution mentions 'REPL' 2 times — name the mechanic once, use pronoun/it/runtime/it for the second beat
-    - [HIGH_LENGTH] form=`(+ 1 (if true 10 20))` — user_msg 222 words
-    - [REPL_TRIPLE_VOICE] form=`(+ 1 (if true 10 20))` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
-    - [RESOLUTION_REPL_DOUBLED] form=`(+ 1 (if true 10 20))` — story-tagged resolution mentions 'REPL' 2 times — name the mechanic once, use pronoun/it/runtime/it for the second beat
-    - [RESOLUTION_REPL_DOUBLED] form=`(+ 1 (if true 10 20))` — story-tagged resolution mentions 'REPL' 2 times — name the mechanic once, use pronoun/it/runtime/it for the second beat
+- issues: {'HIGH_LENGTH': 1}
+    - [HIGH_LENGTH] form=`(+ 1 (if true 10 20))` — user_msg 219 words
 
 ### G5-07: and / or as control flow
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'HIGH_LENGTH': 1, 'CLAUSE_STACK_OVERFLOW': 1}
-    - [HIGH_LENGTH] form=`(or nil false :found)` — user_msg 204 words
-    - [CLAUSE_STACK_OVERFLOW] form=`(or nil false :found)` — sentence with 6 commas reads as AI-output cadence: 'The REPL let the crossing-conditions decide:\n\nThe REPL walked the first gate, fo'
+- issues: {'CLAUSE_STACK_OVERFLOW': 1}
+    - [CLAUSE_STACK_OVERFLOW] form=`(or nil false :found)` — sentence with 6 commas reads as AI-output cadence: 'The runtime let the crossing-conditions decide: The REPL walked the first gate, '
 
 ### G5-10: map
 
@@ -753,57 +525,44 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
     - [COLLECTION_LEAK] form=`(map inc [1 2 3])` — elements of expected [2, 3, 4] appear comma-separated in user_msg (collection answer leak)
     - [CLAUSE_STACK_OVERFLOW] form=`(map inc [1 2 3])` — sentence with 5 commas reads as AI-output cadence: 'Zoomer the dog shook\nhis head and went on with the work: to pour the vector cont'
 
-### G5-11: filter
-
-- examples: 2
-- variety @ n=50: 1.00
-- issues: {'NARRATIVE_NUMERAL_HARDCODE': 3}
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`(filter pos? [-2 -1 0 1 2])` — parametric example has hard-coded English numeral 'five bones' in a story slot — the actual draws may differ from this fixed count
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`(filter pos? [-2 -1 0 1 2])` — parametric example has hard-coded English numeral 'five bones' in a story slot — the actual draws may differ from this fixed count
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`(filter pos? [-2 -1 0 1 2])` — parametric example has hard-coded English numeral 'five bones' in a story slot — the actual draws may differ from this fixed count
-
 ### G5-12: reduce
 
 - examples: 3
 - variety @ n=50: 1.00
-- issues: {'HIGH_LENGTH': 2, 'ANSWER_LEAK': 2, 'TRAILING_PARTICIPLE_CLOSER': 5, 'CLAUSE_STACK_OVERFLOW': 2}
-    - [HIGH_LENGTH] form=`(reduce + [1 2 3 4])` — user_msg 226 words
-    - [ANSWER_LEAK] form=`(reduce + [1 2 3 4])` — answer 10 in narrative
-    - [HIGH_LENGTH] form=`(reduce + [1 2 3 4])` — user_msg 218 words
-    - [ANSWER_LEAK] form=`(reduce + [1 2 3 4])` — answer 10 in narrative
+- issues: {'HIGH_LENGTH': 2, 'TRAILING_PARTICIPLE_CLOSER': 5, 'CLAUSE_STACK_OVERFLOW': 2}
+    - [HIGH_LENGTH] form=`(reduce + [1 2 3 4])` — user_msg 215 words
+    - [HIGH_LENGTH] form=`(reduce + [1 2 3 4])` — user_msg 209 words
     - [TRAILING_PARTICIPLE_CLOSER] form=`(reduce + [1 2 3 4])` — sentence closes with a participial coda (', counting the steps — returned the count.') — LLM-cadence; close on the verb instead
     - [TRAILING_PARTICIPLE_CLOSER] form=`(reduce * [1 2 3 4 5])` — sentence closes with a participial coda (', counting the steps — returned the count.') — LLM-cadence; close on the verb instead
+    - [CLAUSE_STACK_OVERFLOW] form=`(reduce max [3 1 4 1 5 9 2 6])` — sentence with 7 commas reads as AI-output cadence: 'It walked the bone-row carrying the tally: The REPL walked the row: 3 (tally=3),'
+    - [TRAILING_PARTICIPLE_CLOSER] form=`(reduce max [3 1 4 1 5 9 2 6])` — sentence closes with a participial coda (', keeping the largest seen.') — LLM-cadence; close on the verb instead
 
 ### G5-13: reduce with init
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'ANSWER_LEAK': 1, 'TRAILING_PARTICIPLE_CLOSER': 4, 'HIGH_LENGTH': 1}
-    - [ANSWER_LEAK] form=`(reduce + 100 [1 2 3])` — answer 106 in narrative
+- issues: {'TRAILING_PARTICIPLE_CLOSER': 4, 'HIGH_LENGTH': 1}
     - [TRAILING_PARTICIPLE_CLOSER] form=`(reduce + 100 [1 2 3])` — sentence closes with a participial coda (', counting the steps — returned the count.') — LLM-cadence; close on the verb instead
     - [TRAILING_PARTICIPLE_CLOSER] form=`(reduce + 100 [1 2 3])` — sentence closes with a participial coda (', counting the steps — returned the count.') — LLM-cadence; close on the verb instead
     - [TRAILING_PARTICIPLE_CLOSER] form=`(reduce + 0 [])` — sentence closes with a participial coda (', walking the row — returned the final value.') — LLM-cadence; close on the verb instead
-    - [HIGH_LENGTH] form=`(reduce + 0 [])` — user_msg 212 words
+    - [HIGH_LENGTH] form=`(reduce + 0 [])` — user_msg 203 words
     - [TRAILING_PARTICIPLE_CLOSER] form=`(reduce + 0 [])` — sentence closes with a participial coda (', carrying the tally — returned the final number.') — LLM-cadence; close on the verb instead
 
 ### G5-14: apply
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'HIGH_LENGTH': 3, 'NARRATIVE_NUMERAL_HARDCODE': 6}
-    - [HIGH_LENGTH] form=`(apply + [1 2 3 4])` — user_msg 228 words
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`(apply + [1 2 3 4])` — parametric example has hard-coded English numeral 'four bones' in a story slot — the actual draws may differ from this fixed count
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`(apply + [1 2 3 4])` — parametric example has hard-coded English numeral 'four bones' in a story slot — the actual draws may differ from this fixed count
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`(apply + [1 2 3 4])` — parametric example has hard-coded English numeral 'four bones' in a story slot — the actual draws may differ from this fixed count
+- issues: {'HIGH_LENGTH': 3}
+    - [HIGH_LENGTH] form=`(apply + [1 2 3 4])` — user_msg 231 words
+    - [HIGH_LENGTH] form=`(apply max [3 1 4 1 5])` — user_msg 220 words
     - [HIGH_LENGTH] form=`(apply max [3 1 4 1 5])` — user_msg 217 words
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`(apply max [3 1 4 1 5])` — parametric example has hard-coded English numeral 'five bones' in a story slot — the actual draws may differ from this fixed count
 
 ### G5-15: comp
 
 - examples: 2
 - variety @ n=50: 1.00
 - issues: {'HIGH_LENGTH': 1, 'ANSWER_LEAK': 1, 'CONCEPT_AS_VERB': 1}
-    - [HIGH_LENGTH] form=`((comp inc inc) 5)` — user_msg 211 words
+    - [HIGH_LENGTH] form=`((comp inc inc) 5)` — user_msg 212 words
     - [ANSWER_LEAK] form=`((comp inc inc) 5)` — answer 7 in narrative
     - [CONCEPT_AS_VERB] form=`((comp str inc) 9)` — concept_phrase substituted into a finite-verb slot (e.g. 'must calling X', 'I applying Y')
 
@@ -821,66 +580,29 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 - issues: {'HIGH_LENGTH': 2, 'PREDICATE_QUESTION_COLLISION': 2}
     - [HIGH_LENGTH] form=`(some neg? [1 2 3])` — user_msg 205 words
     - [PREDICATE_QUESTION_COLLISION] form=`(some neg? [1 2 3])` — predicate-suffix ``?`` collides with the question framing's trailing ``?`` or ``.``
-    - [HIGH_LENGTH] form=`(some neg? [1 2 3])` — user_msg 206 words
+    - [HIGH_LENGTH] form=`(some neg? [1 2 3])` — user_msg 204 words
     - [PREDICATE_QUESTION_COLLISION] form=`(some neg? [1 2 3])` — predicate-suffix ``?`` collides with the question framing's trailing ``?`` or ``.``
 
 ### G5-19: every?
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'HIGH_LENGTH': 1, 'PREDICATE_QUESTION_COLLISION': 1, 'BOOL_LEAK_RESOLUTION': 1}
-    - [HIGH_LENGTH] form=`(every? pos? [1 2 3])` — user_msg 201 words
+- issues: {'PREDICATE_QUESTION_COLLISION': 1}
     - [PREDICATE_QUESTION_COLLISION] form=`(every? pos? [1 2 3])` — predicate-suffix ``?`` collides with the question framing's trailing ``?`` or ``.``
-    - [BOOL_LEAK_RESOLUTION] form=`(every? pos? [1 2 3])` — resolution leaks boolean answer 'true' — describe the verdict abstractly instead
-
-### G5-20: take and drop
-
-- examples: 2
-- variety @ n=50: 1.00
-- issues: {'NARRATIVE_NUMERAL_HARDCODE': 6, 'STORY_SLOT_NOUN_REPEAT': 3}
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`(take 3 [10 20 30 40 50])` — parametric example has hard-coded English numeral 'three bones' in a story slot — the actual draws may differ from this fixed count
-    - [STORY_SLOT_NOUN_REPEAT] form=`(take 3 [10 20 30 40 50])` — the noun 'the first three' appears in all 4 story slots (scenario/need/mapping/resolution) — vary the imagery between beats
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`(take 3 [10 20 30 40 50])` — parametric example has hard-coded English numeral 'three bones' in a story slot — the actual draws may differ from this fixed count
-    - [STORY_SLOT_NOUN_REPEAT] form=`(take 3 [10 20 30 40 50])` — the noun 'the first three' appears in all 4 story slots (scenario/need/mapping/resolution) — vary the imagery between beats
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`(take 3 [10 20 30 40 50])` — parametric example has hard-coded English numeral 'three bones' in a story slot — the actual draws may differ from this fixed count
-    - [STORY_SLOT_NOUN_REPEAT] form=`(take 3 [10 20 30 40 50])` — the noun 'the first three' appears in all 4 story slots (scenario/need/mapping/resolution) — vary the imagery between beats
 
 ### G5-22: recur — first taste
 
 - examples: 1
 - variety @ n=50: 1.00
 - issues: {'HIGH_LENGTH': 3, 'STORY_RESOLUTION_NO_DRAWN': 3}
-    - [HIGH_LENGTH] form=`(loop [n 5 acc 1] (if (zero? n) acc (recur (dec n)` — user_msg 220 words
+    - [HIGH_LENGTH] form=`(loop [n 5 acc 1] (if (zero? n) acc (recur (dec n)` — user_msg 209 words
     - [STORY_RESOLUTION_NO_DRAWN] form=`(loop [n 5 acc 1] (if (zero? n) acc (recur (dec n)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('5',), resolution doesn't close the loop)
-    - [HIGH_LENGTH] form=`(loop [n 5 acc 1] (if (zero? n) acc (recur (dec n)` — user_msg 217 words
+    - [HIGH_LENGTH] form=`(loop [n 5 acc 1] (if (zero? n) acc (recur (dec n)` — user_msg 208 words
     - [STORY_RESOLUTION_NO_DRAWN] form=`(loop [n 5 acc 1] (if (zero? n) acc (recur (dec n)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('5',), resolution doesn't close the loop)
-    - [HIGH_LENGTH] form=`(loop [n 5 acc 1] (if (zero? n) acc (recur (dec n)` — user_msg 215 words
+    - [HIGH_LENGTH] form=`(loop [n 5 acc 1] (if (zero? n) acc (recur (dec n)` — user_msg 206 words
     - [STORY_RESOLUTION_NO_DRAWN] form=`(loop [n 5 acc 1] (if (zero? n) acc (recur (dec n)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('5',), resolution doesn't close the loop)
 
 ## Grade 6
-
-### G6-01: Namespace as file
-
-- examples: 3
-- variety @ n=50: 1.00
-- issues: {'ANSWER_LEAK_STRING': 1, 'DOUBLE_NAME_INTRO': 1}
-    - [ANSWER_LEAK_STRING] form=`(name 'foo.bar)` — answer string 'foo.bar' appears in user_msg
-    - [DOUBLE_NAME_INTRO] form=`(symbol? 'tortoise.race)` — character 'Apricot the dog' introduced twice within 200 chars — drop the second 'the dog'
-
-### G6-05: Fully qualified names
-
-- examples: 4
-- variety @ n=50: 1.00
-- issues: {'ANSWER_LEAK_STRING': 2}
-    - [ANSWER_LEAK_STRING] form=`(namespace :owner/item)` — answer string 'owner' appears in user_msg
-    - [ANSWER_LEAK_STRING] form=`(name :owner/item)` — answer string 'item' appears in user_msg
-
-### G6-09: Loading order
-
-- examples: 2
-- variety @ n=50: 1.00
-- issues: {'DOUBLE_NAME_INTRO': 1}
-    - [DOUBLE_NAME_INTRO] form=`(let [a 1 b (+ a 1)] (+ a b))` — character 'Peach the dog' introduced twice within 200 chars — drop the second 'the dog'
 
 ### G6-10: Leiningen and deps.edn
 
@@ -889,13 +611,6 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 - issues: {'HEDGING_NEAR_FORM': 1, 'CLAUSE_STACK_OVERFLOW': 1}
     - [HEDGING_NEAR_FORM] form=`(:deps {:deps {:a 1 :b 2}})` — hedge 'or something close to it' in user_msg — eval-deterministic narratives shouldn't hedge about the form's value
     - [CLAUSE_STACK_OVERFLOW] form=`(:deps {:deps {:a 1 :b 2}})` — sentence with 5 commas reads as AI-output cadence: 'Pewter the dog, with eyes always on the path, who had simply walked to a flat st'
-
-### G6-12: Multiple files in one project
-
-- examples: 2
-- variety @ n=50: 1.00
-- issues: {'DOUBLE_NAME_INTRO': 1}
-    - [DOUBLE_NAME_INTRO] form=`(count ['race.tortoise 'race.hare 'race.shared])` — character 'Topsy the dog' introduced twice within 200 chars — drop the second 'the dog'
 
 ### G6-13: Aliasing conventions
 
@@ -909,10 +624,9 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'STORY_SLOT_NOUN_REPEAT': 3, 'ANSWER_LEAK_STRING': 1}
+- issues: {'STORY_SLOT_NOUN_REPEAT': 3}
     - [STORY_SLOT_NOUN_REPEAT] form=`(name 'java.util.Map)` — the noun 'the kennel-master' appears in all 4 story slots (scenario/need/mapping/resolution) — vary the imagery between beats
     - [STORY_SLOT_NOUN_REPEAT] form=`(name 'java.util.Map)` — the noun 'the kennel-master' appears in all 4 story slots (scenario/need/mapping/resolution) — vary the imagery between beats
-    - [ANSWER_LEAK_STRING] form=`(name 'java.util.Map)` — answer string 'java.util.Map' appears in user_msg
     - [STORY_SLOT_NOUN_REPEAT] form=`(name 'java.util.Map)` — the noun 'the kennel-master' appears in all 4 story slots (scenario/need/mapping/resolution) — vary the imagery between beats
 
 ### G6-15: Namespace meta
@@ -924,37 +638,27 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
     - [HIGH_LENGTH] form=`(:doc (meta '\{:doc "steady wins"\} race))` — user_msg 220 words
     - [REPL_TRIPLE_VOICE] form=`(:author (meta '\{:author "Aesop"\} race))` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
 
-### G6-16: Cleaning up requires
-
-- examples: 2
-- variety @ n=50: 1.00
-- issues: {'BOOL_LEAK_RESOLUTION': 1}
-    - [BOOL_LEAK_RESOLUTION] form=`(contains? #{'clojure.string} 'clojure.set)` — resolution leaks boolean answer 'false' — describe the verdict abstractly instead
-
 ## Grade 7
 
 ### G7-01: throw
 
 - examples: 1
 - variety @ n=50: 1.00
-- issues: {'TRAILING_PARTICIPLE_CLOSER': 1, 'REPL_TRIPLE_VOICE': 1}
+- issues: {'TRAILING_PARTICIPLE_CLOSER': 1}
     - [TRAILING_PARTICIPLE_CLOSER] form=`(try (throw (Exception. "bad")) (catch Exception e` — sentence closes with a participial coda (', testing its hold paw by paw before trusting full weight.') — LLM-cadence; close on the verb instead
-    - [REPL_TRIPLE_VOICE] form=`(try (throw (Exception. "bad")) (catch Exception e` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
 
 ### G7-02: try / catch
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'REPL_TRIPLE_VOICE': 1, 'TRAILING_PARTICIPLE_CLOSER': 1}
-    - [REPL_TRIPLE_VOICE] form=`(try (/ 1 0) (catch Exception e -1))` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
+- issues: {'TRAILING_PARTICIPLE_CLOSER': 1}
     - [TRAILING_PARTICIPLE_CLOSER] form=`(try (/ 1 0) (catch Exception e -1))` — sentence closes with a participial coda (', testing its hold paw by paw before trusting full weight.') — LLM-cadence; close on the verb instead
 
 ### G7-03: try / finally
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'REPL_TRIPLE_VOICE': 1, 'TRAILING_PARTICIPLE_CLOSER': 1}
-    - [REPL_TRIPLE_VOICE] form=`(try 7 (finally (prn :cleanup)))` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
+- issues: {'TRAILING_PARTICIPLE_CLOSER': 1}
     - [TRAILING_PARTICIPLE_CLOSER] form=`(try 7 (finally (prn :cleanup)))` — sentence closes with a participial coda (', crossing the shallow ford.') — LLM-cadence; close on the verb instead
 
 ### G7-04: ex-info
@@ -971,7 +675,7 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 - issues: {'TRAILING_PARTICIPLE_CLOSER': 3, 'REPL_TRIPLE_VOICE': 1}
     - [TRAILING_PARTICIPLE_CLOSER] form=`(some? 0)` — sentence closes with a participial coda (', testing its hold paw by paw before trusting full weight.') — LLM-cadence; close on the verb instead
     - [TRAILING_PARTICIPLE_CLOSER] form=`(some? 0)` — sentence closes with a participial coda (', testing its hold paw by paw before trusting full weight.') — LLM-cadence; close on the verb instead
-    - [REPL_TRIPLE_VOICE] form=`(first nil)` — user_msg mentions 'REPL' 4 times — the REPL personification should appear at most twice per record (submit + return)
+    - [REPL_TRIPLE_VOICE] form=`(first nil)` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
     - [TRAILING_PARTICIPLE_CLOSER] form=`(first nil)` — sentence closes with a participial coda (', testing its hold paw by paw before trusting full weight.') — LLM-cadence; close on the verb instead
 
 ### G7-06: pre and post conditions
@@ -997,9 +701,8 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'REPL_TRIPLE_VOICE': 1, 'DOUBLE_NAME_INTRO': 1}
+- issues: {'REPL_TRIPLE_VOICE': 1}
     - [REPL_TRIPLE_VOICE] form=`(with-out-str (prn 42))` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
-    - [DOUBLE_NAME_INTRO] form=`(with-out-str (prn :hare))` — character 'Ebony the dog' introduced twice within 200 chars — drop the second 'the dog'
 
 ### G7-09: tap>
 
@@ -1022,21 +725,17 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'STORY_RESOLUTION_NO_DRAWN': 3, 'ANSWER_LEAK_STRING': 1, 'TRAILING_PARTICIPLE_CLOSER': 1}
+- issues: {'STORY_RESOLUTION_NO_DRAWN': 3, 'TRAILING_PARTICIPLE_CLOSER': 1}
     - [STORY_RESOLUTION_NO_DRAWN] form=`(try (throw (Exception. "oops")) (catch Exception ` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('oops',), resolution doesn't close the loop)
     - [STORY_RESOLUTION_NO_DRAWN] form=`(try (throw (Exception. "oops")) (catch Exception ` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('oops',), resolution doesn't close the loop)
     - [STORY_RESOLUTION_NO_DRAWN] form=`(try (throw (Exception. "oops")) (catch Exception ` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('oops',), resolution doesn't close the loop)
-    - [ANSWER_LEAK_STRING] form=`(try (throw (ex-info "trouble" {})) (catch Excepti` — answer string 'trouble' appears in user_msg
     - [TRAILING_PARTICIPLE_CLOSER] form=`(try (throw (ex-info "trouble" {})) (catch Excepti` — sentence closes with a participial coda (', testing its hold paw by paw before trusting full weight.') — LLM-cadence; close on the verb instead
 
 ### G7-12: slurp and spit
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'ANSWER_LEAK': 1, 'CLAUSE_STACK_OVERFLOW': 1, 'TRAILING_PARTICIPLE_CLOSER': 1, 'REPL_TRIPLE_VOICE': 2}
-    - [ANSWER_LEAK] form=`(count "hare
-tortoise
-")` — answer 14 in narrative
+- issues: {'CLAUSE_STACK_OVERFLOW': 1, 'TRAILING_PARTICIPLE_CLOSER': 1, 'REPL_TRIPLE_VOICE': 2}
     - [CLAUSE_STACK_OVERFLOW] form=`(count "hare
 tortoise
 ")` — sentence with 5 commas reads as AI-output cadence: 'To count every character in a two-line string ending each line with a newline-ma'
@@ -1096,29 +795,14 @@ tortoise
 
 ## Grade 8
 
-### G8-01: Why polymorphism
-
-- examples: 2
-- variety @ n=50: 1.00
-- issues: {'ANSWER_LEAK_STRING': 1}
-    - [ANSWER_LEAK_STRING] form=`(let [speak (fn [k] (cond (= k :hare) "swift" (= k` — answer string 'steady' appears in user_msg
-
 ### G8-02: deftype introduction
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'STORY_RESOLUTION_NO_DRAWN': 3, 'HIGH_LENGTH': 1}
+- issues: {'STORY_RESOLUTION_NO_DRAWN': 3}
     - [STORY_RESOLUTION_NO_DRAWN] form=`(do (deftype Pebble [color]) (.-color (Pebble. "gr` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('grey',), resolution doesn't close the loop)
     - [STORY_RESOLUTION_NO_DRAWN] form=`(do (deftype Pebble [color]) (.-color (Pebble. "gr` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('grey',), resolution doesn't close the loop)
     - [STORY_RESOLUTION_NO_DRAWN] form=`(do (deftype Pebble [color]) (.-color (Pebble. "gr` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('grey',), resolution doesn't close the loop)
-    - [HIGH_LENGTH] form=`(do (deftype Stone [weight]) (.-weight (Stone. 7))` — user_msg 203 words
-
-### G8-03: defrecord introduction
-
-- examples: 2
-- variety @ n=50: 1.00
-- issues: {'ANSWER_LEAK_STRING': 1}
-    - [ANSWER_LEAK_STRING] form=`(do (defrecord Runner [name pace]) (:pace (->Runne` — answer string ':slow' appears in user_msg
 
 ### G8-05: Protocol extension
 
@@ -1194,8 +878,7 @@ tortoise
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'DOUBLE_NAME_INTRO': 1, 'CLAUSE_STACK_OVERFLOW': 2}
-    - [DOUBLE_NAME_INTRO] form=`(do (defprotocol Pace (speed [this])) (extend-type` — character 'Topsy the dog' introduced twice within 200 chars — drop the second 'the dog'
+- issues: {'CLAUSE_STACK_OVERFLOW': 2}
     - [CLAUSE_STACK_OVERFLOW] form=`(do (defprotocol Pace (speed [this])) (extend-type` — sentence with 6 commas reads as AI-output cadence: 'To define a protocol Pace with method speed, use extend-type to attach it to Lon'
     - [CLAUSE_STACK_OVERFLOW] form=`(do (defprotocol Pace (speed [this])) (extend-type` — sentence with 6 commas reads as AI-output cadence: 'To define a protocol Pace with method speed, use extend-type to attach it to Lon'
 
@@ -1203,11 +886,11 @@ tortoise
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'STORY_RESOLUTION_NO_DRAWN': 6, 'PARAGRAPH_FRAGMENTATION': 1}
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(do (defprotocol Named (name-of [this])) (defrecor` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':n', 'Zephyr'), resolution doesn't close the loop)
-    - [PARAGRAPH_FRAGMENTATION] form=`(do (defprotocol Named (name-of [this])) (defrecor` — user_msg has 4 short (≤25-word) paragraphs in body — reads as a bullet list, not a story
+- issues: {'STORY_RESOLUTION_NO_DRAWN': 6}
     - [STORY_RESOLUTION_NO_DRAWN] form=`(do (defprotocol Named (name-of [this])) (defrecor` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':n', 'Zephyr'), resolution doesn't close the loop)
     - [STORY_RESOLUTION_NO_DRAWN] form=`(do (defprotocol Named (name-of [this])) (defrecor` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':n', 'Zephyr'), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(do (defprotocol Named (name-of [this])) (defrecor` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':n', 'Zephyr'), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(do (defprotocol Tagged (tag-of [this])) (defrecor` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':t', ':grey'), resolution doesn't close the loop)
     - [STORY_RESOLUTION_NO_DRAWN] form=`(do (defprotocol Tagged (tag-of [this])) (defrecor` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':t', ':grey'), resolution doesn't close the loop)
     - [STORY_RESOLUTION_NO_DRAWN] form=`(do (defprotocol Tagged (tag-of [this])) (defrecor` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':t', ':grey'), resolution doesn't close the loop)
 
@@ -1225,19 +908,17 @@ tortoise
 
 - examples: 3
 - variety @ n=50: 1.00
-- issues: {'CLAUSE_STACK_OVERFLOW': 1, 'BOOL_LEAK_RESOLUTION': 2, 'TRAILING_PARTICIPLE_CLOSER': 2, 'PARAGRAPH_FRAGMENTATION': 1, 'DOUBLE_NAME_INTRO': 1}
+- issues: {'CLAUSE_STACK_OVERFLOW': 1, 'TRAILING_PARTICIPLE_CLOSER': 2, 'BOOL_LEAK_RESOLUTION': 1}
     - [CLAUSE_STACK_OVERFLOW] form=`(do (derive ::hare ::runner) (isa? ::hare ::runner` — sentence with 5 commas reads as AI-output cadence: 'To establish a type relationship where ::hare is a type of ::runner, then check '
-    - [BOOL_LEAK_RESOLUTION] form=`(do (derive ::hare ::runner) (isa? ::hare ::runner` — resolution leaks boolean answer 'true' — describe the verdict abstractly instead
     - [TRAILING_PARTICIPLE_CLOSER] form=`(isa? java.lang.Long java.lang.Number)` — sentence closes with a participial coda (', dispatching\nthe bone — returned the pile-specific value.') — LLM-cadence; close on the verb instead
     - [TRAILING_PARTICIPLE_CLOSER] form=`(isa? java.lang.String java.lang.Number)` — sentence closes with a participial coda (', dispatching\nthe bone — returned the pile-specific value.') — LLM-cadence; close on the verb instead
     - [BOOL_LEAK_RESOLUTION] form=`(isa? java.lang.String java.lang.Number)` — resolution leaks boolean answer 'false' — describe the verdict abstractly instead
-    - [PARAGRAPH_FRAGMENTATION] form=`(isa? java.lang.String java.lang.Number)` — user_msg has 4 short (≤25-word) paragraphs in body — reads as a bullet list, not a story
 
 ### G8-16: Abstract design with protocols
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'STORY_RESOLUTION_NO_DRAWN': 6, 'PARAGRAPH_FRAGMENTATION': 1}
+- issues: {'STORY_RESOLUTION_NO_DRAWN': 6}
     - [STORY_RESOLUTION_NO_DRAWN] form=`(do (defprotocol Move (step [this])) (defrecord Ha` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':leap', ':plod'), resolution doesn't close the loop)
     - [STORY_RESOLUTION_NO_DRAWN] form=`(do (defprotocol Move (step [this])) (defrecord Ha` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':leap', ':plod'), resolution doesn't close the loop)
     - [STORY_RESOLUTION_NO_DRAWN] form=`(do (defprotocol Move (step [this])) (defrecord Ha` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':leap', ':plod'), resolution doesn't close the loop)
@@ -1294,60 +975,15 @@ tortoise
     - [CLAUSE_STACK_OVERFLOW] form=`(do (def a (atom 0)) (set-validator! a number?) (s` — sentence with 5 commas reads as AI-output cadence: 'validator on it, atomically swap by applying inc, and dereference, he composed a'
     - [CLAUSE_STACK_OVERFLOW] form=`(do (def a (atom 0)) (set-validator! a number?) (s` — sentence with 5 commas reads as AI-output cadence: 'validator on it, atomically swap by applying inc, and dereference, he\ncomposed a'
 
-### G9-08: dosync and alter
-
-- examples: 2
-- variety @ n=50: 1.00
-- issues: {'PARAGRAPH_FRAGMENTATION': 1}
-    - [PARAGRAPH_FRAGMENTATION] form=`(do (def a (ref 1)) (def b (ref 2)) (dosync (alter` — user_msg has 5 short (≤25-word) paragraphs in body — reads as a bullet list, not a story
-
-### G9-12: await — synchronizing on agents
-
-- examples: 1
-- variety @ n=50: 1.00
-- issues: {'DOUBLE_NAME_INTRO': 1}
-    - [DOUBLE_NAME_INTRO] form=`(do (def ag (agent 0)) (send ag inc) (send ag inc)` — character 'Topsy the dog' introduced twice within 200 chars — drop the second 'the dog'
-
-### G9-13: future introduction
-
-- examples: 2
-- variety @ n=50: 1.00
-- issues: {'HIGH_LENGTH': 1, 'PARAGRAPH_FRAGMENTATION': 1}
-    - [HIGH_LENGTH] form=`@(future (+ 1 2))` — user_msg 208 words
-    - [PARAGRAPH_FRAGMENTATION] form=`@(future (* 6 7))` — user_msg has 4 short (≤25-word) paragraphs in body — reads as a bullet list, not a story
-
-### G9-14: deref @ shorthand
-
-- examples: 2
-- variety @ n=50: 1.00
-- issues: {'PARAGRAPH_FRAGMENTATION': 2}
-    - [PARAGRAPH_FRAGMENTATION] form=`(do (def a (atom 7)) @a)` — user_msg has 4 short (≤25-word) paragraphs in body — reads as a bullet list, not a story
-    - [PARAGRAPH_FRAGMENTATION] form=`(do (def a (atom 7)) (deref a))` — user_msg has 4 short (≤25-word) paragraphs in body — reads as a bullet list, not a story
-
-### G9-15: promise — deliver and deref
-
-- examples: 2
-- variety @ n=50: 1.00
-- issues: {'ANSWER_LEAK_STRING': 1, 'PARAGRAPH_FRAGMENTATION': 1}
-    - [ANSWER_LEAK_STRING] form=`(do (def p (promise)) (deliver p :done) @p)` — answer string ':done' appears in user_msg
-    - [PARAGRAPH_FRAGMENTATION] form=`(do (def p (promise)) (deliver p :done) @p)` — user_msg has 4 short (≤25-word) paragraphs in body — reads as a bullet list, not a story
-
-### G9-16: volatile — when STM is too heavy
-
-- examples: 2
-- variety @ n=50: 1.00
-- issues: {'PARAGRAPH_FRAGMENTATION': 1}
-    - [PARAGRAPH_FRAGMENTATION] form=`(do (def v (volatile! 5)) (vreset! v 99) @v)` — user_msg has 4 short (≤25-word) paragraphs in body — reads as a bullet list, not a story
-
 ### G9-17: binding — thread-local
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'STORY_RESOLUTION_NO_DRAWN': 6, 'PARAGRAPH_FRAGMENTATION': 1}
+- issues: {'STORY_RESOLUTION_NO_DRAWN': 6}
     - [STORY_RESOLUTION_NO_DRAWN] form=`(do (def ^:dynamic *p* 1) (binding [*p* 99] *p*))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('99', ':dynamic'), resolution doesn't close the loop)
     - [STORY_RESOLUTION_NO_DRAWN] form=`(do (def ^:dynamic *p* 1) (binding [*p* 99] *p*))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('99', ':dynamic'), resolution doesn't close the loop)
     - [STORY_RESOLUTION_NO_DRAWN] form=`(do (def ^:dynamic *p* 1) (binding [*p* 99] *p*))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('99', ':dynamic'), resolution doesn't close the loop)
-    - [PARAGRAPH_FRAGMENTATION] form=`(do (def ^:dynamic *p* 1) (binding [*p* 99] *p*))` — user_msg has 4 short (≤25-word) paragraphs in body — reads as a bullet list, not a story
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(do (def ^:dynamic *p* 1) (binding [*p* 99] *p*) *` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('99', ':dynamic'), resolution doesn't close the loop)
     - [STORY_RESOLUTION_NO_DRAWN] form=`(do (def ^:dynamic *p* 1) (binding [*p* 99] *p*) *` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('99', ':dynamic'), resolution doesn't close the loop)
     - [STORY_RESOLUTION_NO_DRAWN] form=`(do (def ^:dynamic *p* 1) (binding [*p* 99] *p*) *` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('99', ':dynamic'), resolution doesn't close the loop)
 
@@ -1366,10 +1002,10 @@ tortoise
 - examples: 3
 - variety @ n=50: 1.00
 - issues: {'NARRATIVE_NUMERAL_HARDCODE': 3, 'THE_FORM_OVERUSE': 2, 'ONLY_SHOOK_HEAD_TIC': 1}
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`'(1 2 3)` — parametric example has hard-coded English numeral 'three stones' in a story slot — the actual draws may differ from this fixed count
+    - [NARRATIVE_NUMERAL_HARDCODE] form=`'(1 2 3)` — parametric example has hard-coded English numeral 'three numbers' in a story slot — the actual draws may differ from this fixed count
     - [THE_FORM_OVERUSE] form=`'(1 2 3)` — `the form` appears 5 times in user_msg (template tic — vary references)
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`'(1 2 3)` — parametric example has hard-coded English numeral 'three stones' in a story slot — the actual draws may differ from this fixed count
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`'(1 2 3)` — parametric example has hard-coded English numeral 'three stones' in a story slot — the actual draws may differ from this fixed count
+    - [NARRATIVE_NUMERAL_HARDCODE] form=`'(1 2 3)` — parametric example has hard-coded English numeral 'three numbers' in a story slot — the actual draws may differ from this fixed count
+    - [NARRATIVE_NUMERAL_HARDCODE] form=`'(1 2 3)` — parametric example has hard-coded English numeral 'three numbers' in a story slot — the actual draws may differ from this fixed count
     - [THE_FORM_OVERUSE] form=`'(1 2 3)` — `the form` appears 5 times in user_msg (template tic — vary references)
     - [ONLY_SHOOK_HEAD_TIC] form=`(let [x 5] `(a ~x b))` — user_msg uses 'only shook his/her head' — recurring AI-fable filler cadence
 
@@ -1377,9 +1013,8 @@ tortoise
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'THE_FORM_OVERUSE': 2, 'HIGH_LENGTH': 1, 'ONLY_SHOOK_HEAD_TIC': 1}
+- issues: {'THE_FORM_OVERUSE': 2, 'ONLY_SHOOK_HEAD_TIC': 1}
     - [THE_FORM_OVERUSE] form=`(let [x 10] `(+ ~x ~x))` — `the form` appears 5 times in user_msg (template tic — vary references)
-    - [HIGH_LENGTH] form=`(let [xs [1 2 3]] `(list ~@xs))` — user_msg 211 words
     - [THE_FORM_OVERUSE] form=`(let [xs [1 2 3]] `(list ~@xs))` — `the form` appears 5 times in user_msg (template tic — vary references)
     - [ONLY_SHOOK_HEAD_TIC] form=`(let [xs [1 2 3]] `(list ~@xs))` — user_msg uses 'only shook his/her head' — recurring AI-fable filler cadence
 
@@ -1387,8 +1022,7 @@ tortoise
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'HIGH_LENGTH': 1, 'STORY_RESOLUTION_NO_DRAWN': 3}
-    - [HIGH_LENGTH] form=`(do (defmacro my-when [t & body] `(if ~t (do ~@bod` — user_msg 213 words
+- issues: {'STORY_RESOLUTION_NO_DRAWN': 3}
     - [STORY_RESOLUTION_NO_DRAWN] form=`(do (defmacro my-when [t & body] `(if ~t (do ~@bod` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('3',), resolution doesn't close the loop)
     - [STORY_RESOLUTION_NO_DRAWN] form=`(do (defmacro my-when [t & body] `(if ~t (do ~@bod` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('3',), resolution doesn't close the loop)
     - [STORY_RESOLUTION_NO_DRAWN] form=`(do (defmacro my-when [t & body] `(if ~t (do ~@bod` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('3',), resolution doesn't close the loop)
@@ -1397,21 +1031,13 @@ tortoise
 
 - examples: 3
 - variety @ n=50: 1.00
-- issues: {'ANSWER_LEAK': 3, 'HIGH_LENGTH': 3, 'NARRATIVE_NUMERAL_HARDCODE': 3, 'CLAUSE_STACK_OVERFLOW': 1, 'CONCEPT_AS_VERB': 1}
-    - [ANSWER_LEAK] form=`(-> 5 inc inc inc)` — answer 8 in narrative
-    - [HIGH_LENGTH] form=`(-> 5 inc inc inc)` — user_msg 226 words
-    - [ANSWER_LEAK] form=`(-> 5 inc inc inc)` — answer 8 in narrative
-    - [HIGH_LENGTH] form=`(->> [1 2 3 4] (filter even?) (map inc) (reduce +)` — user_msg 216 words
-    - [ANSWER_LEAK] form=`(->> [1 2 3 4] (filter even?) (map inc) (reduce +)` — answer 8 in narrative
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`(->> [1 2 3 4] (filter even?) (map inc) (reduce +)` — parametric example has hard-coded English numeral 'four bones' in a story slot — the actual draws may differ from this fixed count
-
-### G10-08: Macro vs fn
-
-- examples: 2
-- variety @ n=50: 1.00
-- issues: {'ANSWER_LEAK': 1, 'DOUBLE_NAME_INTRO': 1}
-    - [ANSWER_LEAK] form=`(do (defn add-fn [a b] (+ a b)) (add-fn 3 4))` — answer 7 in narrative
-    - [DOUBLE_NAME_INTRO] form=`(do (defmacro add-mac [a b] `(+ ~a ~b)) (add-mac 3` — character 'Chestnut the dog' introduced twice within 200 chars — drop the second 'the dog'
+- issues: {'HIGH_LENGTH': 3, 'ANSWER_LEAK': 1, 'CLAUSE_STACK_OVERFLOW': 1, 'CONCEPT_AS_VERB': 1}
+    - [HIGH_LENGTH] form=`(-> 5 inc inc inc)` — user_msg 227 words
+    - [ANSWER_LEAK] form=`(-> 5 inc inc inc)` — answer 7 in narrative
+    - [HIGH_LENGTH] form=`(->> [1 2 3 4] (filter even?) (map inc) (reduce +)` — user_msg 219 words
+    - [CLAUSE_STACK_OVERFLOW] form=`(->> [1 2 3 4] (filter even?) (map inc) (reduce +)` — sentence with 7 commas reads as AI-output cadence: 'To thread a vector through filter, map, and reduce using thread-last, she, with '
+    - [CONCEPT_AS_VERB] form=`(->> [1 2 3 4] (filter even?) (map inc) (reduce +)` — concept_phrase substituted into a finite-verb slot (e.g. 'must calling X', 'I applying Y')
+    - [HIGH_LENGTH] form=`(macroexpand '(-> x f g))` — user_msg 202 words
 
 ### G10-10: Anaphoric macros are confusing
 
@@ -1426,30 +1052,19 @@ tortoise
 
 - examples: 3
 - variety @ n=50: 1.00
-- issues: {'HIGH_LENGTH': 2, 'ANSWER_LEAK': 1, 'TRAILING_PARTICIPLE_CLOSER': 2}
-    - [HIGH_LENGTH] form=`(#(* % %) 6)` — user_msg 221 words
+- issues: {'ANSWER_LEAK': 1, 'TRAILING_PARTICIPLE_CLOSER': 2}
     - [ANSWER_LEAK] form=`(#(* % %) 6)` — answer 36 in narrative
     - [TRAILING_PARTICIPLE_CLOSER] form=`(#(* % %) 6)` — sentence closes with a participial coda (', yielding the product.') — LLM-cadence; close on the verb instead
-    - [HIGH_LENGTH] form=`[1 #_ 2 3]` — user_msg 201 words
     - [TRAILING_PARTICIPLE_CLOSER] form=`[1 #_ 2 3]` — sentence closes with a participial coda (', leaving the others in the vector.') — LLM-cadence; close on the verb instead
 
 ### G10-12: Tagged literals
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'HIGH_LENGTH': 1, 'BOOL_LEAK_RESOLUTION': 1, 'STORY_RESOLUTION_NO_DRAWN': 3}
-    - [HIGH_LENGTH] form=`(uuid? #uuid "00000000-0000-0000-0000-000000000000` — user_msg 206 words
-    - [BOOL_LEAK_RESOLUTION] form=`(uuid? #uuid "00000000-0000-0000-0000-000000000000` — resolution leaks boolean answer 'true' — describe the verdict abstractly instead
+- issues: {'STORY_RESOLUTION_NO_DRAWN': 3}
     - [STORY_RESOLUTION_NO_DRAWN] form=`(uuid? #uuid "00000000-0000-0000-0000-000000000000` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('00000000', '-0000', '-0000'), resolution doesn't close the loop)
     - [STORY_RESOLUTION_NO_DRAWN] form=`(uuid? #uuid "00000000-0000-0000-0000-000000000000` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('00000000', '-0000', '-0000'), resolution doesn't close the loop)
     - [STORY_RESOLUTION_NO_DRAWN] form=`(uuid? #uuid "00000000-0000-0000-0000-000000000000` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('00000000', '-0000', '-0000'), resolution doesn't close the loop)
-
-### G10-13: Data readers and EDN extension
-
-- examples: 2
-- variety @ n=50: 1.00
-- issues: {'HIGH_LENGTH': 1}
-    - [HIGH_LENGTH] form=`(clojure.edn/read-string "[:a :b :c]")` — user_msg 209 words
 
 ### G10-14: eval (the function)
 
@@ -1462,7 +1077,7 @@ tortoise
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'STORY_RESOLUTION_NO_DRAWN': 6, 'PARAGRAPH_FRAGMENTATION': 1}
+- issues: {'STORY_RESOLUTION_NO_DRAWN': 6}
     - [STORY_RESOLUTION_NO_DRAWN] form=`(do (defmacro with-steady-pace [& body] `(let [pac` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('42', ':slow-and-steady'), resolution doesn't close the loop)
     - [STORY_RESOLUTION_NO_DRAWN] form=`(do (defmacro with-steady-pace [& body] `(let [pac` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('42', ':slow-and-steady'), resolution doesn't close the loop)
     - [STORY_RESOLUTION_NO_DRAWN] form=`(do (defmacro with-steady-pace [& body] `(let [pac` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('42', ':slow-and-steady'), resolution doesn't close the loop)
@@ -1472,47 +1087,13 @@ tortoise
 
 ## Grade 11
 
-### G11-01: JVM vs CLR vs JS vs Python (host overview)
-
-- examples: 2
-- variety @ n=50: 1.00
-- issues: {'DOUBLE_NAME_INTRO': 2}
-    - [DOUBLE_NAME_INTRO] form=`(do "Clojure runs on multiple hosts: JVM, CLR, JS,` — character 'Runner the dog' introduced twice within 200 chars — drop the second 'the dog'
-    - [DOUBLE_NAME_INTRO] form=`(do "JVM: Clojure; CLR: ClojureCLR; JS: ClojureScr` — character 'Pippin the dog' introduced twice within 200 chars — drop the second 'the dog'
-
-### G11-02: Method call syntax
-
-- examples: 3
-- variety @ n=50: 1.00
-- issues: {'HIGH_LENGTH': 1, 'BOOL_LEAK_RESOLUTION': 1, 'PARAGRAPH_FRAGMENTATION': 1}
-    - [HIGH_LENGTH] form=`(.startsWith "hare-tortoise" "hare")` — user_msg 202 words
-    - [BOOL_LEAK_RESOLUTION] form=`(.startsWith "hare-tortoise" "hare")` — resolution leaks boolean answer 'true' — describe the verdict abstractly instead
-    - [PARAGRAPH_FRAGMENTATION] form=`(. "abc" toUpperCase)` — user_msg has 4 short (≤25-word) paragraphs in body — reads as a bullet list, not a story
-
 ### G11-03: Static method call
 
 - examples: 2
 - variety @ n=50: 1.00
 - issues: {'HIGH_LENGTH': 1, 'TRAILING_PARTICIPLE_CLOSER': 1}
-    - [HIGH_LENGTH] form=`(Math/abs -7)` — user_msg 224 words
+    - [HIGH_LENGTH] form=`(Math/abs -7)` — user_msg 212 words
     - [TRAILING_PARTICIPLE_CLOSER] form=`(Math/abs -7)` — sentence closes with a participial coda (', removing the sign and leaving only the magnitude.') — LLM-cadence; close on the verb instead
-
-### G11-08: Type hints
-
-- examples: 2
-- variety @ n=50: 1.00
-- issues: {'PARAGRAPH_FRAGMENTATION': 1}
-    - [PARAGRAPH_FRAGMENTATION] form=`(let [^String s "abc"] (.toUpperCase s))` — user_msg has 4 short (≤25-word) paragraphs in body — reads as a bullet list, not a story
-
-### G11-09: Checked vs unchecked math
-
-- examples: 2
-- variety @ n=50: 1.00
-- issues: {'REPL_AS_TIME_TRAVELLER': 2, 'TRAILING_PARTICIPLE_CLOSER': 2}
-    - [REPL_AS_TIME_TRAVELLER] form=`(+ 1 2)` — user_msg uses meta-narrator language that implies the answer pre-existed evaluation — describe the form's evaluation, not a pre-existing 'right' answer
-    - [TRAILING_PARTICIPLE_CLOSER] form=`(+ 1 2)` — sentence closes with a participial coda (', settling the\nmatter the patient way.') — LLM-cadence; close on the verb instead
-    - [REPL_AS_TIME_TRAVELLER] form=`(do "*unchecked-math* turns off overflow checking ` — user_msg uses meta-narrator language that implies the answer pre-existed evaluation — describe the form's evaluation, not a pre-existing 'right' answer
-    - [TRAILING_PARTICIPLE_CLOSER] form=`(do "*unchecked-math* turns off overflow checking ` — sentence closes with a participial coda (', settling the\nmatter the patient way.') — LLM-cadence; close on the verb instead
 
 ### G11-10: ClojureScript overview
 
@@ -1625,51 +1206,46 @@ tortoise
 
 ### Issue counts (across all examples × 3 records)
 
-- **NARRATIVE_NUMERAL_HARDCODE**: 138
-- **TRAILING_PARTICIPLE_CLOSER**: 124
+- **TRAILING_PARTICIPLE_CLOSER**: 93
 - **STORY_RESOLUTION_NO_DRAWN**: 84
-- **HIGH_LENGTH**: 58
-- **REPL_TRIPLE_VOICE**: 54
 - **CLAUSE_STACK_OVERFLOW**: 45
-- **REPL_AS_TIME_TRAVELLER**: 31
-- **RESOLUTION_GENERIC**: 31
-- **PARAGRAPH_FRAGMENTATION**: 28
+- **NARRATIVE_NUMERAL_HARDCODE**: 42
+- **HIGH_LENGTH**: 38
 - **FORM_DISPLAY_AND_FORM_NOUN**: 25
-- **DOUBLE_NAME_INTRO**: 24
-- **BOOL_LEAK_RESOLUTION**: 19
-- **ANSWER_LEAK**: 19
-- **RESOLUTION_REPL_DOUBLED**: 12
+- **REPL_TRIPLE_VOICE**: 25
 - **HEDGING_NEAR_FORM**: 11
 - **PARAMETRIC_LITERAL_NUMERALS**: 9
-- **ANSWER_LEAK_STRING**: 8
 - **CONCEPT_AS_VERB**: 7
-- **THE_FORM_OVERUSE**: 6
-- **STORY_SLOT_NOUN_REPEAT**: 6
+- **THE_FORM_OVERUSE**: 5
 - **ONLY_SHOOK_HEAD_TIC**: 4
+- **ANSWER_LEAK**: 4
 - **GENERIC_RESOLUTION_TAIL**: 3
+- **BOOL_LEAK_RESOLUTION**: 3
 - **COLLECTION_LEAK**: 3
 - **PREDICATE_QUESTION_COLLISION**: 3
+- **STORY_SLOT_NOUN_REPEAT**: 3
 - **ABSTRACT_RESULT_NARRATION**: 3
+- **RESOLUTION_REPL_DOUBLED**: 3
 - **SENTENCE_START_LOWER_PRONOUN**: 2
 - **META_FILLER_RESOLUTION**: 2
-- **SMALL_INT_LEAK**: 1
+- **FABLE_FOREIGN_NUMERAL_QUANTIFIER**: 2
 - **HANGING_FORM_THAT**: 1
 
 ### Per-grade summary
 
 | Grade | Subjects | Examples | Issues | Low-variety |
 |---|---|---|---|---|
-| 1 | 18 | 76 | 117 | — |
-| 2 | 22 | 88 | 160 | — |
-| 3 | 18 | 31 | 57 | — |
-| 4 | 20 | 39 | 99 | — |
-| 5 | 22 | 39 | 67 | — |
-| 6 | 16 | 33 | 18 | — |
-| 7 | 18 | 36 | 52 | — |
-| 8 | 16 | 31 | 67 | — |
-| 9 | 18 | 34 | 38 | — |
-| 10 | 16 | 36 | 49 | — |
-| 11 | 14 | 29 | 16 | — |
+| 1 | 18 | 76 | 67 | — |
+| 2 | 22 | 88 | 29 | — |
+| 3 | 18 | 31 | 33 | — |
+| 4 | 20 | 39 | 49 | — |
+| 5 | 22 | 39 | 39 | — |
+| 6 | 16 | 33 | 10 | — |
+| 7 | 18 | 36 | 46 | — |
+| 8 | 16 | 31 | 58 | — |
+| 9 | 18 | 34 | 28 | — |
+| 10 | 16 | 36 | 34 | — |
+| 11 | 14 | 29 | 6 | — |
 | 12 | 18 | 37 | 21 | — |
 
 ### Sample issues by severity
@@ -1687,12 +1263,12 @@ Yappy, stepping d...
     ```
 - `G1-02` (form `-25`): user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
     ```
-    Sniff the dog was halfway home at the edge of the forest when the water played its old trick on a young dog.
+    Sniff was halfway home at the edge of the forest when the water played its old trick on a young dog.
 
 Sniff had been showing Bailey the dog how the REPL works,
 the stream cool against their paws and the bridge's shadow long.
 "Look here," he said, pointing to the integer -60.
-"You hand the fo...
+"You hand the form `-60`...
     ```
 - `G1-02` (form `-25`): user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
     ```
@@ -1719,49 +1295,6 @@ A few stream-side creatures had gathered on the bank near the forest to
 watch Scout attempt to outwit Snuffler the dog at reading
 the REPL. The water moved on, the bridge held its shadow, and
 ...
-    ```
-
-#### DOUBLE_NAME_INTRO
-
-- `G1-03` (form `(+ 1/2 1/4)`): character 'Pumpernickel the dog' introduced twice within 200 chars — drop the second 'the dog'
-    ```
-    It was on the beach, on the wooden bridge above the slow brook, that Pumpernickel the dog looked down at the water.
-
-Loki chalked a wager on a flat stone by the beach: whoever
-predicted the result of `(+ 1/2 1/4)` would set who crossed the
-bridge first. Pumpernickel the dog, with the slow grace of a...
-    ```
-- `G1-03` (form `(- 1 1/3)`): character 'Whatsit the dog' introduced twice within 200 chars — drop the second 'the dog'
-    ```
-    It was on the river bank, on the wooden bridge above the slow brook, that Whatsit the dog looked down at the water.
-
-With a twig, Bounder marked a wager into the wet sand along the river bank:
-whoever guessed the result of `(- 7 1/3)` first would choose
-which bone to carry. Whatsit the dog, without ...
-    ```
-- `G1-04` (form `"race"`): character 'Gizmo the dog' introduced twice within 200 chars — drop the second 'the dog'
-    ```
-    near the village, where the path crosses the stream, Gizmo the dog trotted home with a fine bone in his teeth.
-
-A few stream-side creatures had gathered on the bank near the village to
-watch Tucker attempt to outwit Gizmo the dog at reading
-the REPL. The water moved on, the bridge held its shadow, a...
-    ```
-- `G1-04` (form `"slow and steady"`): character 'Watcher the dog' introduced twice within 200 chars — drop the second 'the dog'
-    ```
-    It was along the road, on the wooden bridge above the slow brook, that Watcher the dog looked down at the water.
-
-A few stream-side creatures had gathered on the bank along the road to
-watch Leaper attempt to outwit Watcher the dog at reading
-the REPL. The water moved on, the bridge held its shadow,...
-    ```
-- `G1-05` (form `(= 1 2)`): character 'Leo the dog' introduced twice within 200 chars — drop the second 'the dog'
-    ```
-    It happened on the river bank, on the very bridge Leo the dog crossed every day, that he stopped longer than he should have.
-
-Stalker and Leo the dog paused on the river bank where
-someone had scratched the equality (= 3 2) into the wet sand. The water
-ran clear and the bridge cast a long, trembling...
     ```
 
 #### ONLY_SHOOK_HEAD_TIC
@@ -1793,47 +1326,12 @@ bone!" Mocha the dog only shoo...
     ```
 - `G10-02` (form `(let [xs [1 2 3]] `(list ~@xs))`): user_msg uses 'only shook his/her head' — recurring AI-fable filler cadence
     ```
-    Pebble the dog was crossing the stream by the beach when he caught a glimpse of his own reflection.
+    Pebble was crossing the stream by the beach when he caught a glimpse of his own reflection.
 
 Pickles, as a crow turns a coin against the sun, mistook the name on the bark for the
 bone it pointed to. "It says bone, so the value must be the
 bone!" Pebble the dog only shook his head: the mark
-a...
-    ```
-
-#### HIGH_LENGTH
-
-- `G1-09` (form `(symbol? 42)`): user_msg 209 words
-    ```
-    Silver had crossed this bridge a hundred times by the village, but never with so fine a bone clamped in his jaws.
-
-Patch the hound stood at the stream's edge, holding two objects side by side: a scratch-mark on bark and a smooth stone bearing the number 68. "This one is the symbol," Patch said, tapp...
-    ```
-- `G1-09` (form `(= 'hare 'hare)`): user_msg 208 words
-    ```
-    in the meadow, where the boards of the bridge meet the stones of the path, Jack the dog caught sight of himself in the stream.
-
-Rex the hound laid two scratch-marks side by side on bark near the forest. Both marks said the same thing: hare, hare. "Are these two scratches the same name?" Rex asked. "...
-    ```
-- `G1-10` (form `(+ 1 2) ;; sum of one and two`): user_msg 205 words
-    ```
-    The bone was good, the day was warm, and the path was clear, and yet the trouble was already shaped in the water.
-
-Bell the hound wrote a form on a clean strip of bark near the pond, then added a double-semicolon mark followed by a note in plain words. "The note is only for other dogs to read," she ...
-    ```
-- `G1-11` (form `(+
-  1
-  2)`): user_msg 211 words
-    ```
-    A dog with a bone in his jaws is a happy creature; a dog who looks too hard at the water may not be.
-
-Patch the hound marked a form on a long bark-strip at the stream's edge but spread the tokens across many lines, each indented neatly. "Does the layout change what the form says?" his packmate asked...
-    ```
-- `G1-12` (form `(* (+ 1 2) 3)`): user_msg 206 words
-    ```
-    On a path that ran beside the stream, a dog was carrying his supper home and looking pleased with himself.
-
-Patch the hound marked a nested form on a flat stone near the bank, with one grouped form tucked inside another. "The inner group runs first," Patch said. "Its value becomes the input to the o...
+and the b...
     ```
 
 #### TRAILING_PARTICIPLE_CLOSER
@@ -1852,11 +1350,11 @@ Bell the hound wrote a form on a clean strip of bark near the pond, then added a
     ```
 - `G1-10` (form `(+ 1 2) ;; sum of one and two`): sentence closes with a participial coda (', ignoring the comment.') — LLM-cadence; close on the verb instead
     ```
-    Louie the dog was nearly home at the village when the water below showed him a second bone that did not exist.
+    Louie was nearly home at the village when the water below showed him a second bone that did not exist.
 
 Louie, stepping deliberately one foot before the next smoothed a fresh strip of bark near the village and
 scratched slowly, paying attention to every mark. "The form has
-to be written so t...
+to be written so the reade...
     ```
 - `G1-10` (form `(+ 1 2) ;; sum of one and two`): sentence closes with a participial coda (', ignoring the comment.') — LLM-cadence; close on the verb instead
     ```
@@ -1873,206 +1371,6 @@ their work. The runtime sees the cl...
 Pathfinder, with only one measure: more, glanced at the form and called out
 what he thought it would do without paying attention
 to the conventions of how it was scratched. Ginger the d...
-    ```
-
-#### BOOL_LEAK_RESOLUTION
-
-- `G1-09` (form `(symbol? "tortoise")`): resolution leaks boolean answer 'false' — describe the verdict abstractly instead
-    ```
-    The bone was good, the day was warm, and the path was clear, and yet the trouble was already shaped in the water.
-
-Patch the hound held a message scratched on bark — not a name to pass around, but a strand of letters. "The reader will treat this as text, not as a symbol the dogs can quote," Patch sa...
-    ```
-- `G1-09` (form `(= 'hare 'hare)`): resolution leaks boolean answer 'true' — describe the verdict abstractly instead
-    ```
-    in the meadow, where the boards of the bridge meet the stones of the path, Jack the dog caught sight of himself in the stream.
-
-Rex the hound laid two scratch-marks side by side on bark near the forest. Both marks said the same thing: hare, hare. "Are these two scratches the same name?" Rex asked. "...
-    ```
-- `G2-02` (form `(< 1 2 3)`): resolution leaks boolean answer 'true' — describe the verdict abstractly instead
-    ```
-    Some lessons are taught by mirrors, and some are taught by rivers; this one was taught by both at once.
-
-Bell the hound laid three smooth pebbles near the pond, each one marked with a number: 6, then 6, then 9. The sizes of the pebbles did not matter — only their marks.
-
-She needed to know if the ma...
-    ```
-- `G2-03` (form `(not= 1 1)`): resolution leaks boolean answer 'false' — describe the verdict abstractly instead
-    ```
-    When Cloud reached the bridge in the forest, he paused to admire the bone he had been so lucky to find.
-
-Patch the hound held two bones carved with the same mark — 1 and 1. They wanted to test if the marks were different from each other.
-
-They needed to know if the two marks were distinct. The inequ...
-    ```
-- `G2-03` (form `(= 1 1 1)`): resolution leaks boolean answer 'true' — describe the verdict abstractly instead
-    ```
-    On a path that ran beside the stream, a dog was carrying his supper home and looking pleased with himself.
-
-Bell the hound gathered three bones near the pond, each carved with the same mark: 9. She wanted to test if all three matched each other.
-
-She needed to know if all three marks were identical....
-    ```
-
-#### REPL_TRIPLE_VOICE
-
-- `G1-09` (form `(symbol? "tortoise")`): user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
-    ```
-    The bone was good, the day was warm, and the path was clear, and yet the trouble was already shaped in the water.
-
-Patch the hound held a message scratched on bark — not a name to pass around, but a strand of letters. "The reader will treat this as text, not as a symbol the dogs can quote," Patch sa...
-    ```
-- `G1-09` (form `(= 'hare 'hare)`): user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
-    ```
-    in the meadow, where the boards of the bridge meet the stones of the path, Jack the dog caught sight of himself in the stream.
-
-Rex the hound laid two scratch-marks side by side on bark near the forest. Both marks said the same thing: hare, hare. "Are these two scratches the same name?" Rex asked. "...
-    ```
-- `G1-10` (form `(+ 1 2) ;; sum of one and two`): user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
-    ```
-    The bone was good, the day was warm, and the path was clear, and yet the trouble was already shaped in the water.
-
-Bell the hound wrote a form on a clean strip of bark near the pond, then added a double-semicolon mark followed by a note in plain words. "The note is only for other dogs to read," she ...
-    ```
-- `G1-13` (form `(+ 1 2)`): user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
-    ```
-    It happened on a day so ordinary that it seemed impossible anything could have been lost.
-
-Bell the hound sat by a flat stone near the pond and laid out two small piles of bones — one of one bone, one of two — careful with the count.
-
-She wanted the precise size of the heap if both piles were nudged...
-    ```
-- `G1-13` (form `(/ 10 2)`): user_msg mentions 'REPL' 4 times — the REPL personification should appear at most twice per record (submit + return)
-    ```
-    The path home wound past a slow brook, and on bright days the brook was full of borrowed shapes.
-
-Patch the hound looked at a heap of ten bones and measured them into two equal piles. "How many bones in each pile?" asked a younger dog. "The runtime can tell us exactly by dividing."
-
-Patch wanted the...
-    ```
-
-#### THE_FORM_OVERUSE
-
-- `G1-11` (form `(+
-  1
-  2)`): `the form` appears 5 times in user_msg (template tic — vary references)
-    ```
-    A dog with a bone in his jaws is a happy creature; a dog who looks too hard at the water may not be.
-
-Patch the hound marked a form on a long bark-strip at the stream's edge but spread the tokens across many lines, each indented neatly. "Does the layout change what the form says?" his packmate asked...
-    ```
-- `G3-18` (form `(* 5 5 5)`): `the form` appears 5 times in user_msg (template tic — vary references)
-    ```
-    It was at the village, on the wooden bridge above the slow brook, that Muffin the dog looked down at the water.
-
-Patch the hound arrived at the crossing and saw three stones arranged in a pile. "I don't need to name these," he said, "because I will use them just once and the form is so short that th...
-    ```
-- `G10-01` (form `'(1 2 3)`): `the form` appears 5 times in user_msg (template tic — vary references)
-    ```
-    along the road, the stream ran clear enough to mirror anything that passed above it, and Toby passed above it.
-
-"There's a difference between *labeling* the form and
-*evaluating* it," Toby, with eyes always on the path said. "Quote in any of its
-shapes is the labeling — the runtime hands you back th...
-    ```
-- `G10-01` (form `'(1 2 3)`): `the form` appears 5 times in user_msg (template tic — vary references)
-    ```
-    Some greedy creatures lose what they have to a thief; others lose it to themselves, by way of a careless glance.
-
-"There's a difference between *labeling* the form and
-*evaluating* it," Kobe, with the still patience of a fisher said. "Quote in any of its
-shapes is the labeling — the runtime hands yo...
-    ```
-- `G10-02` (form `(let [x 10] `(+ ~x ~x))`): `the form` appears 5 times in user_msg (template tic — vary references)
-    ```
-    On a path that ran beside the stream, a dog was carrying his supper home and looking pleased with himself.
-
-"There's a difference between *labeling* the form and
-*evaluating* it," Runner, with the soft patience of running water said. "Quote in any of its
-shapes is the labeling — the runtime hands yo...
-    ```
-
-#### ANSWER_LEAK
-
-- `G1-12` (form `(* (+ 1 2) 3)`): answer 9 in narrative
-    ```
-    On a path that ran beside the stream, a dog was carrying his supper home and looking pleased with himself.
-
-Patch the hound marked a nested form on a flat stone near the bank, with one grouped form tucked inside another. "The inner group runs first," Patch said. "Its value becomes the input to the o...
-    ```
-- `G1-12` (form `(* (+ 1 2) 3)`): answer 9 in narrative
-    ```
-    Cinnamon the dog was halfway home in the pond when the water played its old trick on a young dog.
-
-Cinnamon, saying very little smoothed a fresh strip of bark at the edge of the pond and
-scratched slowly, paying attention to every mark. "The form has
-to be written so the reader can read it cleanly,"...
-    ```
-- `G1-14` (form `(+ 1 (* 2 3))`): answer 7 in narrative
-    ```
-    at the edge of the forest, the stream ran clear enough to mirror anything that passed above it, and Alabaster passed above it.
-
-Alabaster, with the calm of long custom laid bones out on a flat stone by the forest, sorting
-them into small piles. "Numbers in Clojure are just like bones
-in piles," she ...
-    ```
-- `G2-22` (form `(+ (* 3 8) (* 2 4))`): answer 32 in narrative
-    ```
-    There was once a dog who carried a fine bone home along a path that crossed a stream by an old wooden bridge.
-
-Bell the hound had two tasks near the pond. First, she needed to multiply 4 and 5 to get one pile. Then, she would multiply 8 and 6 to get another pile. Finally, she would add them together...
-    ```
-- `G2-22` (form `(+ (* 3 8) (* 2 4))`): answer 32 in narrative
-    ```
-    by the beach, on a still afternoon by the brook, Scoutmaster learned what a reflection costs the careless.
-
-Bell the hound had two tasks near the pond. First, she needed to multiply 9 and 4 to get one pile. Then, she would multiply 1 and 1 to get another pile. Finally, she would add them together.
-
-...
-    ```
-
-#### REPL_AS_TIME_TRAVELLER
-
-- `G1-13` (form `(+ 1 2)`): user_msg uses meta-narrator language that implies the answer pre-existed evaluation — describe the form's evaluation, not a pre-existing 'right' answer
-    ```
-    Charcoal had crossed this bridge a hundred times near the river bank, but never with so fine a bone clamped in his jaws.
-
-Fudge eyed the pile, with the cold appetite of unceasing want, and called out a guess
-about how many bones were there without bothering to count.
-Charcoal the dog simply began co...
-    ```
-- `G1-13` (form `(/ 10 2)`): user_msg uses meta-narrator language that implies the answer pre-existed evaluation — describe the form's evaluation, not a pre-existing 'right' answer
-    ```
-    Auburn had found the bone near the river bank and was carrying it home with no small amount of pride.
-
-Tucker eyed the pile, with hard hungry eyes, and called out a guess
-about how many bones were there without bothering to count.
-Auburn the dog simply began counting — to divide 14 by 14 required no...
-    ```
-- `G1-13` (form `(- 20 7)`): user_msg uses meta-narrator language that implies the answer pre-existed evaluation — describe the form's evaluation, not a pre-existing 'right' answer
-    ```
-    Tawny the dog was halfway home by the pond when the water played its old trick on a young dog.
-
-Polly eyed the pile, with hard hungry eyes, and called out a guess
-about how many bones were there without bothering to count.
-Tawny the dog simply began counting — to subtract 6 from 11 required no
-eyeba...
-    ```
-- `G1-14` (form `(- 100 (* 5 5))`): user_msg uses meta-narrator language that implies the answer pre-existed evaluation — describe the form's evaluation, not a pre-existing 'right' answer
-    ```
-    Some greedy creatures lose what they have to a thief; others lose it to themselves, by way of a careless glance.
-
-Henry eyed the pile, his thoughts already on more, and called out a guess
-about how many bones were there without bothering to count.
-Wallace the dog simply began counting — to subtract ...
-    ```
-- `G1-14` (form `(+ (* 2 3) (* 4 5))`): user_msg uses meta-narrator language that implies the answer pre-existed evaluation — describe the form's evaluation, not a pre-existing 'right' answer
-    ```
-    It happened along the road, on the very bridge Inky the dog crossed every day, that he stopped longer than he should have.
-
-Charcoal eyed the pile, with hard hungry eyes, and called out a guess
-about how many bones were there without bothering to count.
-Inky the dog simply began counting — to add th...
     ```
 
 #### NARRATIVE_NUMERAL_HARDCODE
@@ -2095,11 +1393,11 @@ the water, every bone weighing what it weighed....
     ```
 - `G1-13` (form `(- 5 3)`): parametric example has hard-coded English numeral 'five bones' in a story slot — the actual draws may differ from this fixed count
     ```
-    Retriever the dog was halfway home in the forest when the water played its old trick on a young dog.
+    Retriever was halfway home in the forest when the water played its old trick on a young dog.
 
 Retriever, without complaint or hurry laid bones out on a flat stone near the forest, sorting
 them into small piles. "Numbers in Clojure are just like bones
-in piles," she said: "you can count them,...
+in piles," she said: "you can count them, you can...
     ```
 - `G1-13` (form `(* 4 5)`): parametric example has hard-coded English numeral 'four piles' in a story slot — the actual draws may differ from this fixed count
     ```
@@ -2119,48 +1417,42 @@ at a small heap of bones beside the river. "Every operation
 either adds, takes away, or combines what's already there ...
     ```
 
-#### RESOLUTION_GENERIC
+#### REPL_TRIPLE_VOICE
 
-- `G1-13` (form `(* 4 5)`): user_msg has canned 'the X the operation produced' resolution boilerplate — tie it to the fable's metaphor / drawn values
-    ```
-    The stream ran clear that afternoon, and the bridge cast a long trembling shadow across the water.
-
-"Watch the pile," Ginger said, with steady road-tested feet, gesturing
-at a small heap of bones beside the river. "Every operation
-either adds, takes away, or combines what's already there — the
-pile ...
-    ```
-- `G1-13` (form `(* 4 5)`): user_msg has canned 'the X the operation produced' resolution boilerplate — tie it to the fable's metaphor / drawn values
+- `G1-13` (form `(/ 10 2)`): user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
     ```
     The path home wound past a slow brook, and on bright days the brook was full of borrowed shapes.
 
-"Watch the pile," Yipper said, with a calm that nothing seemed to ruffle, gesturing
-at a small heap of bones beside the river. "Every operation
-either adds, takes away, or combines what's already there ...
+Patch the hound looked at a heap of ten bones and measured them into two equal piles. "How many bones in each pile?" asked a younger dog. "The runtime can tell us exactly by dividing." Patch wanted the ...
     ```
-- `G1-14` (form `(* (+ 1 2) (+ 3 4))`): user_msg has canned 'the X the operation produced' resolution boilerplate — tie it to the fable's metaphor / drawn values
+- `G1-13` (form `(+ 7 8)`): user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
     ```
-    Doodle the dog was crossing the stream near the meadow when she caught a glimpse of his own reflection.
+    Honey had crossed this bridge a hundred times along the river bank, but never with so fine a bone clamped in his jaws.
 
-"Watch the pile," Doodle said, with face quiet and hands quieter still, gesturing
-at a small heap of bones beside the river. "Every operation
-either adds, takes away, or combines what's already t...
+Rex the hound gathered seven bones from one bank and eight from another. "Should I count them all?" he asked. "Let the runtime add them together. It will give the exact total." He ...
     ```
-- `G1-14` (form `(- 100 (* 5 5))`): user_msg has canned 'the X the operation produced' resolution boilerplate — tie it to the fable's metaphor / drawn values
+- `G1-16` (form `(neg? -3)`): user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
     ```
-    Down by the stream where the bank dipped low, the world above was answered politely by the world below.
+    On a path that ran beside the stream, a dog was carrying his supper home and looking pleased with himself.
 
-"Watch the pile," Sniff said, stepping deliberately one foot before the next, gesturing
-at a small heap of bones beside the river. "Every operation
-either adds, takes away, or combines what's alr...
+Bell the hound marked a negative number on flat bark at the pond and asked: "Is this count moving backward from the starting point?" "The runtime can check," her packmate said. She wanted the ...
     ```
-- `G1-14` (form `(- 100 (* 5 5))`): user_msg has canned 'the X the operation produced' resolution boilerplate — tie it to the fable's metaphor / drawn values
+- `G1-17` (form `42`): user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
     ```
-    Lunger had crossed this bridge a hundred times along the river bank, but never with so fine a bone clamped in his jaws.
+    Pathfinder was halfway home by the meadow when the water played its old trick on a young dog.
 
-"Watch the pile," Lunger said, neither hastening nor hanging back, gesturing
-at a small heap of bones beside the river. "Every operation
-either adds, takes away, or combines what'...
+Kobe, with greed like a small worm at the heart, glanced at the form and called out
+what he thought it would do without paying attention
+to the conventions of how it was scratched. Pathfinder the dog only
+...
+    ```
+- `G1-17` (form `42`): user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
+    ```
+    On a path that ran beside the stream, a dog was carrying his supper home and looking pleased with himself.
+
+"A form is what the reader sees," Skippy, with no need to hurry the work said, "after
+the conventions have been applied. Some marks count, some
+don't; some shapes are expanded before the runti...
     ```
 
 #### SENTENCE_START_LOWER_PRONOUN
@@ -2169,9 +1461,7 @@ either adds, takes away, or combines what'...
     ```
     Honey had crossed this bridge a hundred times along the river bank, but never with so fine a bone clamped in his jaws.
 
-Rex the hound gathered seven bones from one bank and eight from another. "Should I count them all?" he asked. "Let the runtime add them together. It will give the exact total."
-
-He...
+Rex the hound gathered seven bones from one bank and eight from another. "Should I count them all?" he asked. "Let the runtime add them together. It will give the exact total." He ...
     ```
 - `G3-15` (form `(do (println "hi") 42)`): pronoun starts a sentence in lowercase — template should use the _cap variant after a sentence-ending punctuation
     ```
@@ -2180,66 +1470,19 @@ He...
 Bell the hound barked a signal across the bank near the forest — "Hi!" she called out, watching it echo into the canyon. "That bark had its moment," she said. "But what I carry back is not the s...
     ```
 
-#### PARAGRAPH_FRAGMENTATION
-
-- `G2-01` (form `(* 2 3 4)`): user_msg has 5 short (≤25-word) paragraphs in body — reads as a bullet list, not a story
-    ```
-    Leo had carried his prize all the way from the village, and along the road the bridge offered him an unwelcome second look.
-
-Patch the hound gathered three piles of bones near the meadow, each pile marked with a count: 2, 1, and 2.
-
-They wanted the total if each pile was multiplied together — what 2...
-    ```
-- `G2-07` (form `(abs -5)`): user_msg has 4 short (≤25-word) paragraphs in body — reads as a bullet list, not a story
-    ```
-    It is one of the oldest tricks of light to make one bone seem like two and to make a fool of the unwary.
-
-Patch the hound held a marked stone carved with negative 5. They wanted to know the distance from zero, ignoring the negative sign entirely.
-
-They needed the magnitude — the pure measure of how ...
-    ```
-- `G2-07` (form `(abs 0)`): user_msg has 4 short (≤25-word) paragraphs in body — reads as a bullet list, not a story
-    ```
-    by the river bank, the stream ran clear enough to mirror anything that passed above it, and Otis passed above it.
-
-Bell the hound held a stone marked with zero near the pond. She wanted the absolute value — the distance from zero itself.
-
-She needed to know the magnitude of zero. The absolute value ...
-    ```
-- `G2-08` (form `(+ 1/2 1/4)`): user_msg has 4 short (≤25-word) paragraphs in body — reads as a bullet list, not a story
-    ```
-    The bone was good, the day was warm, and the path was clear, and yet the trouble was already shaped in the water.
-
-Rex the hound broke two bones into pieces near the meadow. One bone yielded one-half, the other one-quarter. He wanted to know the combined measure.
-
-He needed the total when the two fr...
-    ```
-- `G2-08` (form `(- 1 1/3)`): user_msg has 4 short (≤25-word) paragraphs in body — reads as a bullet list, not a story
-    ```
-    Jack the dog was halfway home near the beach when the water played its old trick on a young dog.
-
-Bell the hound held one whole bone at the stream's edge and removed one-third of it. She wanted to know what fraction remained.
-
-She needed the remainder when one-third was taken from one whole. The sub...
-    ```
-
 #### META_FILLER_RESOLUTION
 
 - `G2-01` (form `(- 100 1 2 3)`): user_msg uses generic 'returned exactly' / 'settled with certainty' filler — describe what actually came back, not just that something did
     ```
-    at the edge of the forest, the path bends down to meet the water, and Buddy the dog stopped at exactly the wrong moment.
+    at the edge of the forest, the path bends down to meet the water, and Buddy stopped at exactly the wrong moment.
 
-Bell the hound held a great pile of 639 bones by the river bank. Then came three separate losses — first 5, then 7, then 1 bones taken away in turn.
-
-She wanted to know how many ...
+Bell the hound held a great pile of 639 bones by the river bank. Then came three separate losses — first 5, then 7, then 1 bones taken away in turn. She wanted to know how many remained ...
     ```
 - `G2-01` (form `(- 100 1 2 3)`): user_msg uses generic 'returned exactly' / 'settled with certainty' filler — describe what actually came back, not just that something did
     ```
     by the beach, on a still afternoon by the brook, Saffron learned what a reflection costs the careless.
 
-Bell the hound held a great pile of 422 bones by the river bank. Then came three separate losses — first 1, then 3, then 1 bones taken away in turn.
-
-She wanted to know how many remained after eac...
+Bell the hound held a great pile of 422 bones by the river bank. Then came three separate losses — first 1, then 3, then 1 bones taken away in turn. She wanted to know how many remained after each...
     ```
 
 #### GENERIC_RESOLUTION_TAIL
@@ -2269,26 +1512,36 @@ them into small piles. "Numbers in Clojure are just like bones
 in piles," she said: "you ca...
     ```
 
-#### SMALL_INT_LEAK
+#### BOOL_LEAK_RESOLUTION
 
-- `G2-05` (form `(mod -7 3)`): small-int answer 2 leaks via resolution-slot phrasing
+- `G2-03` (form `(= 1 1 1)`): resolution leaks boolean answer 'true' — describe the verdict abstractly instead
     ```
-    It is one of the oldest tricks of light to make one bone seem like two and to make a fool of the unwary.
+    On a path that ran beside the stream, a dog was carrying his supper home and looking pleased with himself.
 
-Bell the hound stood by the river bank holding a negative value — negative seven — and wanted to find its modulo against three. Negative numbers in modulo work in their own way.
+Bell the hound gathered a row of bones near the pond, each carved with the same mark: 9. She wanted to test if all three matched each other. She needed to know if all three marks were identica...
+    ```
+- `G2-13` (form `(and true false)`): resolution leaks boolean answer 'false' — describe the verdict abstractly instead
+    ```
+    Cooper was crossing the stream near the forest when he caught a glimpse of his own reflection.
 
-She needed to k...
+Rex the hound stood at the stream bank facing two test gates placed one after the other. The first bore the mark true, the second false. He wanted to cross if both gates would let him pass. The and would ...
+    ```
+- `G8-15` (form `(isa? java.lang.String java.lang.Number)`): resolution leaks boolean answer 'false' — describe the verdict abstractly instead
+    ```
+    The water beneath the bridge was unhurried that day, and any creature looking down would see a perfect copy of itself.
+
+Patch the hound asked a second isa? question at the bank: is the String-pack a kind of Number? The Java records would show if there was any family connection. To know whether Strin...
     ```
 
 #### CLAUSE_STACK_OVERFLOW
 
 - `G2-13` (form `(and 1 2 3)`): sentence with 6 commas reads as AI-output cadence: 'To apply and to 6, 9, and 2,\nshe composed the logical and, submitted the form,\na'
     ```
-    It was near the road, on the wooden bridge above the slow brook, that Pearl the dog looked down at the water.
+    It was near the road, on the wooden bridge above the slow brook, that Pearl looked down at the water.
 
 Stalker sprinted toward the stream near the road, with the sharp hunger that no meal mends,
 certain the way would be open for him. Pearl the dog
-slowed and watched: the only way to know whe...
+slowed and watched: the only way to know whether the...
     ```
 - `G2-13` (form `(or nil false 5)`): sentence with 6 commas reads as AI-output cadence: 'To apply or to nil, false, and 1,\nshe composed the logical or, submitted the for'
     ```
@@ -2318,54 +1571,45 @@ the real bone fe...
     ```
 - `G3-05` (form `(do (def x 10) (let [x 99] x))`): sentence with 5 commas reads as AI-output cadence: 'Howler the dog, untroubled by what others thought,\nheld his grip steady and did '
     ```
-    It was in the forest, on the wooden bridge above the slow brook, that Howler the dog looked down at the water.
+    It was in the forest, on the wooden bridge above the slow brook, that Howler looked down at the water.
 
 Gus, his mind already on the larger share, eyed the bone in her jaws
 and the brighter one shimmering on the water below — sure the
 shadow was the better catch. She snapped at it, and
-the r...
+the real bone...
     ```
 
-#### RESOLUTION_REPL_DOUBLED
+#### HIGH_LENGTH
 
-- `G2-19` (form `(* 1000000 1000000)`): story-tagged resolution mentions 'REPL' 2 times — name the mechanic once, use pronoun/it/runtime/it for the second beat
-    ```
-    Peach the dog was crossing the stream near the village when she caught a glimpse of his own reflection.
-
-Rex the hound stood by the river bank with two enormous piles of bones. Each pile held one million bones. He wanted to know the result if he multiplied them together.
-
-He needed the exact product...
-    ```
-- `G2-19` (form `(* 1000000 1000000)`): story-tagged resolution mentions 'REPL' 2 times — name the mechanic once, use pronoun/it/runtime/it for the second beat
-    ```
-    It was near the meadow, on the wooden bridge above the slow brook, that Inky the dog looked down at the water.
-
-Bayer eyed the pile, his mouth watering at the thought of more, and called out a guess
-about how many bones were there without bothering to count.
-Inky the dog simply began counting — to m...
-    ```
-- `G2-19` (form `(* 1000000 1000000)`): story-tagged resolution mentions 'REPL' 2 times — name the mechanic once, use pronoun/it/runtime/it for the second beat
-    ```
-    Down by the stream where the bank dipped low, the world above was answered politely by the world below.
-
-Granite eyed the pile, with the sharp hunger that no meal mends, and called out a guess
-about how many bones were there without bothering to count.
-Biscuit the dog simply began counting — to mult...
-    ```
-- `G3-09` (form `(do (defn add3 [a b c] (+ a b c)) (add3 1 2 3))`): story-tagged resolution mentions 'REPL' 2 times — name the mechanic once, use pronoun/it/runtime/it for the second beat
-    ```
-    There is a kind of greed that does not see what it already has, and another kind that mistakes a reflection for a meal.
-
-Cooper, as a miser tallies in his sleep, insisted she could just
-bound straight to the bone without bothering to follow the
-sniff-trail. Drover the dog only smiled and lowered
-his...
-    ```
-- `G3-09` (form `(do (defn add3 [a b c] (+ a b c)) (add3 1 2 3))`): story-tagged resolution mentions 'REPL' 2 times — name the mechanic once, use pronoun/it/runtime/it for the second beat
+- `G2-20` (form `(count [1 2 3])`): user_msg 201 words
     ```
     A reflection is a strange kind of promise: present and unreachable, and very hard to argue with.
 
-Patch the hound laid out a three-step sniffing-trail at the stream's edge and scratched its name — add3 — into a marker stone beside the path. "This trail takes three counts and gives back their sum," P...
+Bell the hound paced down a small row of cached bones near the pond — three of them lying end to end on a flat stone — adding one to her running tally at each bone, no other operation needed. She wanted...
+    ```
+- `G3-03` (form `(let [x 3] (+ x 1))`): user_msg 217 words
+    ```
+    Diesel had crossed this bridge a hundred times on the beach, but never with so fine a bone clamped in his jaws.
+
+Bell the hound had picked up a small bone near the pond and held it firmly between her jaws. Just for the next stretch of crossing she would need to know the bone's tally — 7 — by a short...
+    ```
+- `G3-03` (form `(let [n 10] (* n n))`): user_msg 215 words
+    ```
+    When Cloud reached the bridge in the forest, he paused to admire the bone he had been so lucky to find.
+
+Rex the hound found ten smooth stones near the forest and gathered them into a tight mouthful. "I hold this count only for one stretch — while I carry these stones from bank to bank," he said, hi...
+    ```
+- `G3-03` (form `(let [a 5] a)`): user_msg 219 words
+    ```
+    On a path that ran beside the stream, a dog was carrying his supper home and looking pleased with himself.
+
+Bell the hound found a bone near the meadow, five joints long, and cradled it between her teeth. "For this one stretch of the path, I will know this bone by the name a," she said through the g...
+    ```
+- `G3-06` (form `(let [a 5 b (* a 2)] b)`): user_msg 234 words
+    ```
+    Some lessons are taught by mirrors, and some are taught by rivers; this one was taught by both at once.
+
+Rex the hound gathered a row of bones and clamped them in his jaws as the name a. Before stepping forward, he computed in his mind what twice that grip would weigh — and held both the first grip ...
     ```
 
 #### CONCEPT_AS_VERB
@@ -2396,11 +1640,11 @@ ingredients, the runtime does the rest." To use ...
     ```
 - `G3-10` (form `(#(* %1 %2) 3 4)`): concept_phrase substituted into a finite-verb slot (e.g. 'must calling X', 'I applying Y')
     ```
-    in the meadow, where the boards of the bridge meet the stones of the path, Bingo the dog caught sight of himself in the stream.
+    in the meadow, where the boards of the bridge meet the stones of the path, Bingo caught sight of himself in the stream.
 
 "A nose-trail is only useful when it gets walked," Bingo, with the soft patience of running water
 said, head low. "You set out the sniffs, you bring the
-ingredients, the r...
+ingredients, the runtime d...
     ```
 - `G5-15` (form `((comp str inc) 9)`): concept_phrase substituted into a finite-verb slot (e.g. 'must calling X', 'I applying Y')
     ```
@@ -2421,11 +1665,11 @@ Bell the hound laid out a sniffing-trail at the stream's edge with many scent-ma
     ```
 - `G3-13` (form `((fn [x] x x x 99) 1)`): story-tagged example's resolution slot has no drawn-value reference (form has literals ('99',), resolution doesn't close the loop)
     ```
-    along the river bank, where the path crosses the stream, Sooty the dog trotted home with a fine bone in his teeth.
+    along the river bank, where the path crosses the stream, Sooty trotted home with a fine bone in his teeth.
 
 Sooty, with eyes always on the path put her nose to the ground on the river bank and
 worked out a careful sniffing-trail toward the buried bone.
-"Recipes in Clojure are like a nose-tra...
+"Recipes in Clojure are like a nose-trail," she...
     ```
 - `G3-13` (form `((fn [x] x x x 99) 1)`): story-tagged example's resolution slot has no drawn-value reference (form has literals ('99',), resolution doesn't close the loop)
     ```
@@ -2437,15 +1681,54 @@ worked out a careful sniffing-trail toward the buried bone.
     ```
 - `G5-22` (form `(loop [n 5 acc 1] (if (zero? n) acc (recur (dec n) (* acc n)`): story-tagged example's resolution slot has no drawn-value reference (form has literals ('5',), resolution doesn't close the loop)
     ```
-    on the beach, where the path crosses the stream, Hunter the dog trotted home with a fine bone in his teeth.
+    on the beach, where the path crosses the stream, Hunter trotted home with a fine bone in his teeth.
 
-Bell the hound paced back and forth along a stretch of stream bank near the pond, carrying a small running tally in her jaws. Each pass returned to the same starting point, with the tally a l...
+Bell the hound paced back and forth along a stretch of stream bank near the pond, carrying a small running tally in her jaws. Each pass returned to the same starting point, with the tally a little di...
     ```
 - `G5-22` (form `(loop [n 5 acc 1] (if (zero? n) acc (recur (dec n) (* acc n)`): story-tagged example's resolution slot has no drawn-value reference (form has literals ('5',), resolution doesn't close the loop)
     ```
     Russet had found the bone along the river bank and was carrying it home with no small amount of pride.
 
 Bell the hound paced back and forth along a stretch of stream bank near the pond, carrying a small running tally in her jaws. Each pass returned to the same starting point, with the tally a little...
+    ```
+
+#### THE_FORM_OVERUSE
+
+- `G3-18` (form `(* 5 5 5)`): `the form` appears 5 times in user_msg (template tic — vary references)
+    ```
+    It was at the village, on the wooden bridge above the slow brook, that Muffin looked down at the water.
+
+Patch the hound arrived at the crossing and saw a row of stones arranged in a pile. "I don't need to name these," he said, "because I will use them just once and the form is so short that the val...
+    ```
+- `G10-01` (form `'(1 2 3)`): `the form` appears 5 times in user_msg (template tic — vary references)
+    ```
+    along the road, the stream ran clear enough to mirror anything that passed above it, and Toby passed above it.
+
+"There's a difference between *labeling* the form and
+*evaluating* it," Toby, with eyes always on the path said. "Quote in any of its
+shapes is the labeling — the runtime hands you back th...
+    ```
+- `G10-01` (form `'(1 2 3)`): `the form` appears 5 times in user_msg (template tic — vary references)
+    ```
+    Some greedy creatures lose what they have to a thief; others lose it to themselves, by way of a careless glance.
+
+"There's a difference between *labeling* the form and
+*evaluating* it," Kobe, with the still patience of a fisher said. "Quote in any of its
+shapes is the labeling — the runtime hands yo...
+    ```
+- `G10-02` (form `(let [x 10] `(+ ~x ~x))`): `the form` appears 5 times in user_msg (template tic — vary references)
+    ```
+    On a path that ran beside the stream, a dog was carrying his supper home and looking pleased with himself.
+
+"There's a difference between *labeling* the form and
+*evaluating* it," Runner, with the soft patience of running water said. "Quote in any of its
+shapes is the labeling — the runtime hands yo...
+    ```
+- `G10-02` (form `(let [xs [1 2 3]] `(list ~@xs))`): `the form` appears 5 times in user_msg (template tic — vary references)
+    ```
+    It happened on a day so ordinary that it seemed impossible anything could have been lost.
+
+Rex the hound had cached three bones — marked 1, 2, 3 — in a vector. He scratched a new form with the word "list" and then a tilde-at sign — meaning: unwrap the vector and splice all the bones into this spot. ...
     ```
 
 #### PARAMETRIC_LITERAL_NUMERALS
@@ -2478,9 +1761,7 @@ cool, the slots solid. "Whatever I want to...
     ```
     Diesel had crossed this bridge a hundred times on the beach, but never with so fine a bone clamped in his jaws.
 
-Patch the hound tended a hollow log cache holding two bones already: one and two. A third bone lay nearby, ready to be added to the end of the row.
-
-Patch wanted the third bone packed int...
+Patch the hound tended a hollow log cache holding two bones already: one and two. A third bone lay nearby, ready to be added to the end of the row. Patch wanted the third bone packed into...
     ```
 - `G4-03` (form `(conj [1 2] 3)`): parametric example has enumerated English numerals (one, two, three, …) hard-coded in a story slot — won't track the actual draws that {form_template} produces
     ```
@@ -2491,15 +1772,28 @@ its inside lined with bones tucked into named slots — the wood
 cool, the slots solid. "Whatever I wan...
     ```
 
+#### FABLE_FOREIGN_NUMERAL_QUANTIFIER
+
+- `G4-02` (form `(nth [10 20 30] 0)`): parametric example has hardcoded digit quantifier 'a pile of 10 bones' in narrative — the form is parametric so the actual count drifts from the prose
+    ```
+    A dog with a bone in his jaws is a happy creature; a dog who looks too hard at the water may not be.
+
+Bell the hound counted a row of bones-heaps in the hollow log cache: a pile of 10 bones first, then 20, then 30. She wanted the very first heap to be pulled out and held up. She asked the REPL for t...
+    ```
+- `G4-02` (form `(nth [10 20 30] 0)`): parametric example has hardcoded digit quantifier 'a pile of 10 bones' in narrative — the form is parametric so the actual count drifts from the prose
+    ```
+    The bridge had stood there as long as anyone remembered, and so had the temptation it offered to anyone crossing with full jaws.
+
+Bell the hound counted a row of bones-heaps in the hollow log cache: a pile of 10 bones first, then 20, then 30. She wanted the very first heap to be pulled out and held ...
+    ```
+
 #### HANGING_FORM_THAT
 
 - `G4-04` (form `'()`): 'form that <noun>' rendered without a verb — template should be 'form for {concept_phrase}'
     ```
     On a path that ran beside the stream, a dog was carrying his supper home and looking pleased with himself.
 
-Patch the hound picked up an empty chain by the bank, a mere collar with no bones attached, and held it up.
-
-Patch wanted the empty chain itself to be a recognizable form that the REPL would h...
+Patch the hound picked up an empty chain by the bank, a mere collar with no bones attached, and held it up. Patch wanted the empty chain itself to be a recognizable form that the REPL would ho...
     ```
 
 #### COLLECTION_LEAK
@@ -2523,6 +1817,33 @@ Bell the hound found a log with a gap at the stream's edge, the opening shaped t
 Rex the hound stood at the stream's edge with two kinds of receivers: an empty row and an empty pile. He had a gap that added weight, and bones 1, 2, 3 lay ready. "The gap is the same rul...
     ```
 
+#### ANSWER_LEAK
+
+- `G5-15` (form `((comp inc inc) 5)`): answer 7 in narrative
+    ```
+    It was an afternoon of quiet sky and steady current, and the world below the surface seemed almost solid.
+
+Patch the hound laid down two nose-trails end to end by the river bank. The first trail was inc, the second trail was inc again. She would chain them together, so what the first trail turned up...
+    ```
+- `G10-07` (form `(-> 5 inc inc inc)`): answer 7 in narrative
+    ```
+    Some lessons are taught by mirrors, and some are taught by rivers; this one was taught by both at once.
+
+Bell the hound held the bone marked 4 and laid out a sniffing trail with three increments in order. "Watch the bone pass from sniff to sniff," she said. "Each step takes the previous result as th...
+    ```
+- `G10-11` (form `(#(* % %) 6)`): answer 36 in narrative
+    ```
+    by the pond, where the path crosses the stream, Ace trotted home with a fine bone in his teeth.
+
+Bell the hound found a shorthand reading-mark on bark: #(* % %). This was the scribe's way of saying "make a quick function where %  is the argument." The function would take 6 and square it. No need for...
+    ```
+- `G10-14` (form `(eval '(+ 1 2 3))`): answer 6 in narrative
+    ```
+    The stream ran clear that afternoon, and the bridge cast a long trembling shadow across the water.
+
+Bell the hound had a quoted form scratched on bark: (+ 1 2 3). The quote kept it as a form, not evaluated. But she wanted to ask the runtime to evaluate it later — not at read-time, but when she calle...
+    ```
+
 #### PREDICATE_QUESTION_COLLISION
 
 - `G5-18` (form `(some neg? [1 2 3])`): predicate-suffix ``?`` collides with the question framing's trailing ``?`` or ``.``
@@ -2533,96 +1854,15 @@ Bell the hound held a pile of bones marked 1, 2, 3 by the river bank. A gap-siev
     ```
 - `G5-18` (form `(some neg? [1 2 3])`): predicate-suffix ``?`` collides with the question framing's trailing ``?`` or ``.``
     ```
-    It was on the river bank, on the wooden bridge above the slow brook, that Gizmo the dog looked down at the water.
+    It was on the river bank, on the wooden bridge above the slow brook, that Gizmo looked down at the water.
 
-Bell the hound held a pile of bones marked 1, 2, 3 by the river bank. A gap-sieve before her had a different rule: only negative-marked bones can pass. She wanted to know: does any bone...
+Bell the hound held a pile of bones marked 1, 2, 3 by the river bank. A gap-sieve before her had a different rule: only negative-marked bones can pass. She wanted to know: does any bone fit thr...
     ```
 - `G5-19` (form `(every? pos? [1 2 3])`): predicate-suffix ``?`` collides with the question framing's trailing ``?`` or ``.``
     ```
-    Peach the dog was crossing the stream near the village when she caught a glimpse of his own reflection.
+    Peach was crossing the stream near the village when she caught a glimpse of his own reflection.
 
-Patch the hound held a pile of bones marked 1, 2, 3 at the stream near the forest. A gap-sieve had a rule: only positive-marked bones can pass. She wanted to know: will every bone in this pile fi...
-    ```
-
-#### STORY_SLOT_NOUN_REPEAT
-
-- `G5-20` (form `(take 3 [10 20 30 40 50])`): the noun 'the first three' appears in all 4 story slots (scenario/need/mapping/resolution) — vary the imagery between beats
-    ```
-    Zoomer had found the bone in the meadow and was carrying it home with no small amount of pride.
-
-Rocco eyed the bones, as a miser tallies in his sleep, and called out a guess
-about what would come out the far side of the gap without
-bothering to actually run any through. Zoomer the dog shook
-his hea...
-    ```
-- `G5-20` (form `(take 3 [10 20 30 40 50])`): the noun 'the first three' appears in all 4 story slots (scenario/need/mapping/resolution) — vary the imagery between beats
-    ```
-    Down by the stream where the bank dipped low, the world above was answered politely by the world below.
-
-Ace eyed the bones, with the slow secret smile of the covetous, and called out a guess
-about what would come out the far side of the gap without
-bothering to actually run any through. Slate the d...
-    ```
-- `G5-20` (form `(take 3 [10 20 30 40 50])`): the noun 'the first three' appears in all 4 story slots (scenario/need/mapping/resolution) — vary the imagery between beats
-    ```
-    Down by the stream where the bank dipped low, the world above was answered politely by the world below.
-
-"You can collect the result into any kind of cache you like,"
-Marigold, keeping a steady pace through the work said. "A row of bones, a unique-only pile, a sack
-of any shape — the gap doesn't car...
-    ```
-- `G6-14` (form `(name 'java.util.Map)`): the noun 'the kennel-master' appears in all 4 story slots (scenario/need/mapping/resolution) — vary the imagery between beats
-    ```
-    near the river bank, where the path crosses the stream, Shadow the dog trotted home with a fine bone in his teeth.
-
-"Each tool in the kennel-master's shed has its own label,"
-Shadow, with steady road-tested feet said, "and the right way to call it depends on
-which kind of tool it is — some held by a...
-    ```
-- `G6-14` (form `(name 'java.util.Map)`): the noun 'the kennel-master' appears in all 4 story slots (scenario/need/mapping/resolution) — vary the imagery between beats
-    ```
-    Down by the stream where the bank dipped low, the world above was answered politely by the world below.
-
-Barker, with the slow grace of a creature unhurried padded over to the kennel-master's shed near the road
-and pulled down a tool the dogs hadn't carved themselves — a
-leash, a bowl, a collar. "Th...
-    ```
-
-#### ANSWER_LEAK_STRING
-
-- `G6-01` (form `(name 'foo.bar)`): answer string 'foo.bar' appears in user_msg
-    ```
-    There is a kind of greed that does not see what it already has, and another kind that mistakes a reflection for a meal.
-
-Patch the hound examined a marker stone at the stream's edge with a strange dotted path scratched into it — foo.bar. {hound_he_she} wanted to read what the scratch said without us...
-    ```
-- `G6-05` (form `(namespace :owner/item)`): answer string 'owner' appears in user_msg
-    ```
-    It happened at the edge of the forest, on the very bridge Bingo the dog crossed every day, that he stopped longer than he should have.
-
-At the forest edge, Bell found a marker with a qualified keyword written there — low. The mark had two parts separated by a slash, and she wondered what lay before ...
-    ```
-- `G6-05` (form `(name :owner/item)`): answer string 'item' appears in user_msg
-    ```
-    The path home wound past a slow brook, and on bright days the brook was full of borrowed shapes.
-
-Looking at the same marker :owner/item, Bell now wanted the other half — the local name after the slash, to see what kind of thing the owner had stored.
-
-She wanted to pull the name portion from the qua...
-    ```
-- `G6-14` (form `(name 'java.util.Map)`): answer string 'java.util.Map' appears in user_msg
-    ```
-    Cashew had found the bone near the beach and was carrying it home with no small amount of pride.
-
-Patch returned to the kennel-master's shed where another tool hung on a peg — this one labeled with a long, dotted Java class name. She wanted to extract the plain text of that host-side label and read ...
-    ```
-- `G7-11` (form `(try (throw (ex-info "trouble" {})) (catch Exception e (.get`): answer string 'trouble' appears in user_msg
-    ```
-    It is one of the oldest tricks of light to make one bone seem like two and to make a fool of the unwary.
-
-Alabaster, untroubled by what others thought stepped onto a fallen log spanning the stream
-near the forest, testing its hold paw by paw before trusting full weight.
-"If the log gives, I retreat ...
+Patch the hound held a pile of bones marked 1, 2, 3 at the stream near the forest. A gap-sieve had a rule: only positive-marked bones can pass. She wanted to know: will every bone in this pile fit throug...
     ```
 
 #### HEDGING_NEAR_FORM
@@ -2646,11 +1886,11 @@ whether t...
     ```
 - `G11-12` (form `(do "basilisp is a Clojure-like Lisp implemented on Python" `): hedge 'or something close to it' in user_msg — eval-deterministic narratives shouldn't hedge about the form's value
     ```
-    at the edge of the meadow, where the path crosses the stream, Topsy the dog trotted home with a fine bone in his teeth.
+    at the edge of the meadow, where the path crosses the stream, Topsy trotted home with a fine bone in his teeth.
 
 A wager was set at the edge of the meadow: produce the value before the next ripple
 crossed the pond. Trailblazer bolted into a flurry of guesses,
-calling out numbers and second-g...
+calling out numbers and second-guessing ...
     ```
 - `G12-06` (form `(do (require '[clojure.spec.alpha :as s]) (s/valid? int? 42)`): hedge 'or something close to it' in user_msg — eval-deterministic narratives shouldn't hedge about the form's value
     ```
@@ -2667,6 +1907,31 @@ calling out numbers and second-guessin...
 A wager was set by the beach: produce the value before the next ripple
 crossed the pond. Pointer bolted into a flurry of guesses,
 calling out numbers and second-guessing himself...
+    ```
+
+#### STORY_SLOT_NOUN_REPEAT
+
+- `G6-14` (form `(name 'java.util.Map)`): the noun 'the kennel-master' appears in all 4 story slots (scenario/need/mapping/resolution) — vary the imagery between beats
+    ```
+    near the river bank, where the path crosses the stream, Shadow trotted home with a fine bone in his teeth.
+
+"Each tool in the kennel-master's shed has its own label,"
+Shadow, with steady road-tested feet said, "and the right way to call it depends on
+which kind of tool it is — some held by a single ...
+    ```
+- `G6-14` (form `(name 'java.util.Map)`): the noun 'the kennel-master' appears in all 4 story slots (scenario/need/mapping/resolution) — vary the imagery between beats
+    ```
+    Down by the stream where the bank dipped low, the world above was answered politely by the world below.
+
+Barker, with the slow grace of a creature unhurried padded over to the kennel-master's shed near the road
+and pulled down a tool the dogs hadn't carved themselves — a
+leash, a bowl, a collar. "Th...
+    ```
+- `G6-14` (form `(name 'java.util.Map)`): the noun 'the kennel-master' appears in all 4 story slots (scenario/need/mapping/resolution) — vary the imagery between beats
+    ```
+    Cashew had found the bone near the beach and was carrying it home with no small amount of pride.
+
+Patch returned to the kennel-master's shed where another tool hung on a peg — this one labeled with a long, dotted Java class name. She wanted to extract the plain text of that host-side label and read ...
     ```
 
 #### ABSTRACT_RESULT_NARRATION
@@ -2694,5 +1959,33 @@ shook his head a...
 "This is the practice bank," Inky, without complaint or hurry said on the beach,
 gesturing wide. "A stumble here costs nothing. Try a form, see
 what comes back, fix it, try again. The REPL is ...
+    ```
+
+#### RESOLUTION_REPL_DOUBLED
+
+- `G9-01` (form `(let [m {:a 1}] (assoc m :b 2) m)`): story-tagged resolution mentions 'REPL' 2 times — name the mechanic once, use pronoun/it/runtime/it for the second beat
+    ```
+    Bayer had crossed this bridge a hundred times in the meadow, but never with so fine a bone clamped in his jaws.
+
+A row of bones lay tucked end-to-end inside the log by the meadow, head
+at the front, the rest trailing behind. The river ran past, and
+the bones stayed in their order, each one waiting t...
+    ```
+- `G9-01` (form `(let [m {:a 1}] (assoc m :b 2) m)`): story-tagged resolution mentions 'REPL' 2 times — name the mechanic once, use pronoun/it/runtime/it for the second beat
+    ```
+    It was an afternoon of quiet sky and steady current, and the world below the surface seemed almost solid.
+
+"Watch carefully," Scoutmaster said, holding open the hollow
+log. "Whatever I do to the cache, this one stays exactly as it
+was — what I get back is a fresh cache with the change made,
+leaving ...
+    ```
+- `G9-01` (form `(let [m {:a 1}] (assoc m :b 2) m)`): story-tagged resolution mentions 'REPL' 2 times — name the mechanic once, use pronoun/it/runtime/it for the second beat
+    ```
+    It is one of the oldest tricks of light to make one bone seem like two and to make a fool of the unwary.
+
+Woofer, with the calm of long custom, pointed to a hollow log by the river bank,
+its inside lined with bones tucked into named slots — the wood
+cool, the slots solid. "Whatever I want to do with...
     ```
 
