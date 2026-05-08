@@ -799,6 +799,101 @@ def _op_remove(args, _):
     return [x for x in coll if not f([x])]
 
 
+def _op_some(args, _):
+    """`(some pred coll)` — returns the first truthy `pred(x)` value
+    for x in coll, else nil. Common in Clojure for "any matches."""
+    f, coll = args
+    for x in coll:
+        v = f([x])
+        if _truthy(v):
+            return v
+    return None
+
+
+def _op_every(args, _):
+    f, coll = args
+    return all(_truthy(f([x])) for x in coll)
+
+
+def _op_not_any(args, _):
+    f, coll = args
+    return not any(_truthy(f([x])) for x in coll)
+
+
+def _op_cons(args, _):
+    x, coll = args
+    if coll is None:
+        return [x]
+    return [x] + list(coll)
+
+
+def _op_keep(args, _):
+    f, coll = args
+    out = []
+    for x in coll:
+        v = f([x])
+        if v is not None:
+            out.append(v)
+    return out
+
+
+def _op_juxt(args, _):
+    funcs = args
+    def _juxt_fn(in_args):
+        return [f(list(in_args)) for f in funcs]
+    return _juxt_fn
+
+
+def _op_complement(args, _):
+    f = args[0]
+    return lambda in_args: not _truthy(f(list(in_args)))
+
+
+def _op_constantly(args, _):
+    val = args[0]
+    return lambda in_args: val
+
+
+def _op_identity(args, _):
+    return args[0]
+
+
+def _op_max_key(args, _):
+    f, *coll = args
+    if len(coll) == 1:
+        coll = coll[0]
+    return max(coll, key=lambda x: f([x]))
+
+
+def _op_min_key(args, _):
+    f, *coll = args
+    if len(coll) == 1:
+        coll = coll[0]
+    return min(coll, key=lambda x: f([x]))
+
+
+def _op_partition_by(args, _):
+    f, coll = args
+    out = []
+    cur = []
+    last_key = object()  # sentinel
+    for x in coll:
+        k = f([x])
+        if k != last_key and cur:
+            out.append(cur)
+            cur = []
+        cur.append(x)
+        last_key = k
+    if cur:
+        out.append(cur)
+    return out
+
+
+def _op_sort_by(args, _):
+    f, coll = args
+    return sorted(coll, key=lambda x: f([x]))
+
+
 def _op_iterate(args, _):
     # (iterate f x) → infinite seq; we cap at 100 for safety
     f, x = args
@@ -1024,6 +1119,12 @@ OPS: dict[str, Callable[[list[Any], dict], Any]] = {
     "remove": _op_remove, "iterate": _op_iterate,
     "repeatedly": _op_repeatedly, "zipmap": _op_zipmap,
     "select-keys": _op_select_keys, "update": _op_update,
+    "some": _op_some, "every?": _op_every, "not-any?": _op_not_any,
+    "cons": _op_cons, "keep": _op_keep, "juxt": _op_juxt,
+    "complement": _op_complement, "constantly": _op_constantly,
+    "identity": _op_identity,
+    "max-key": _op_max_key, "min-key": _op_min_key,
+    "partition-by": _op_partition_by, "sort-by": _op_sort_by,
 
     "println": _op_println, "print": _op_print,
     "pr": _op_pr, "prn": _op_prn, "newline": _op_newline,

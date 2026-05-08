@@ -148,6 +148,40 @@ class SubjectExample:
     # with bb's evaluation.
     bb_verify:      bool = False
 
+    def __post_init__(self):
+        """If this is a legacy example (no form_template) and the form
+        contains literals we can identify, auto-migrate to parametric.
+        Prose fields with literal occurrences also get
+        `{drawn.<slot>}` interpolation injected automatically."""
+        if self.form_template:
+            return  # already parametric
+        if not self.form:
+            return  # nothing to convert
+        # Skip the conversion for forms where the legacy path is the
+        # only sensible interpretation (e.g. macros, host interop).
+        if self.bb_verify:
+            return
+        from mmllm.aesop.curriculum.auto_parametric import (
+            auto_parametric_from_form, replace_literals_in_prose,
+        )
+        result = auto_parametric_from_form(self.form, expected=self.expected)
+        if result is None:
+            return  # cannot auto-convert; remain legacy
+        template, slots, expected_fn, value_to_slot = result
+        # Mutate via object.__setattr__ since this is a frozen-style
+        # post-init (dataclass field assignment).
+        object.__setattr__(self, "form_template", template)
+        object.__setattr__(self, "slots",         slots)
+        object.__setattr__(self, "expected_fn",   expected_fn)
+        # Prose: scan each prose field and replace literal occurrences
+        # with {drawn.<slot>} placeholders.
+        for fld in ("concept_phrase", "question_what", "goal_text",
+                    "scenario", "need", "mapping", "resolution"):
+            old = getattr(self, fld)
+            new = replace_literals_in_prose(old, value_to_slot)
+            if new != old:
+                object.__setattr__(self, fld, new)
+
 
 @dataclass
 class SubplotTemplate:
