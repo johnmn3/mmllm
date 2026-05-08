@@ -603,7 +603,7 @@ G7_17 = SubjectCurriculum(grade=7, subject_id="G7-17",
             scenario="Lila recorded three orders on a slip: [1 2 3]—three pails to deliver, in vector notation.",
             need="She mailed the slip to the market. When it arrived and was read back into data, what vector would it be?",
             mapping="Writing and reading a vector is sending a message that preserves its order and count perfectly. What leaves as a vector returns as a vector, the same sequence intact.",
-            resolution="The form serialized the vector to text and read it back, recovering [1 2 3]—the three items in their original order, unchanged.",
+            resolution="The form serialized the vector to text and read it back, recovering [1 2 3]—the several items in their original order, unchanged.",
             tags=("story",),
         ),
     ], subplots=_SCROLL_SUBPLOTS, plan_pool=_PLAN_G7)

@@ -51,7 +51,7 @@ reflective than usual, agreed to write the form into the REPL."""),
 At the finish line {place}, a row of small monuments commemorated
 the libraries the racers had learned along the way. The newest one
 honoured {concept_phrase}. {farmer_phrase} touched it with a paw
-and said the form to remember was {form_display}; {milkmaid_phrase}
+and said the form to remember was {form_display}; {milkmaid_phrase}, {emo_boastful}
 agreed to submit it."""),
 
     SubplotTemplate("""\
@@ -109,7 +109,7 @@ G12_01 = SubjectCurriculum(
             expected=[2, 4],
             concept_phrase="the filter-even transducer applied via into",
             question_what="the vector of even elements reified via into with the filter-even transducer applied to the vector containing 1, 2, 3, 4, 5",
-            goal_text="use the filter-even transducer with into to keep only the even numbers from the vector containing 1, 2, 3, 4, 5",
+            goal_text="use the filter-even transducer with into to keep only the even numbers from the vector containing these numbers",
             scenario="Lila gripped the milk-strainer, her rule carved into the mesh: 'Let only the even-yielding drops pass.' She steadied a pail beneath and poured the raw milk through. Some drops fell away to the dairy floor; others dripped clean and even into the fresh pail.",
             need="Could Lila trust the mesh to choose correctly, or would she need to guess which drops belonged in the fresh pail?",
             mapping="The mesh reads drops one by one like the filter reads numbers; the rule 'keep even' is filter-even; the fresh pail holds only what the mesh permits.",
@@ -132,7 +132,7 @@ G12_02 = SubjectCurriculum(
             expected=[2, 4],
             concept_phrase="the composed transducer pipeline of map-inc then filter-even",
             question_what="the vector result of reifying the composed transducer via into, applying map-inc then filter-even to the vector containing 1, 2, 3, 4",
-            goal_text="compose map-inc and filter-even into a transducer pipeline, then apply it with into to the vector containing 1, 2, 3, 4",
+            goal_text="compose map-inc and filter-even into a transducer pipeline, then apply it with into to the vector containing these numbers",
             scenario="Clara stood at the dairy with two strainers nested one behind the other. The first strainer whispered 'thicken'; the second whispered 'keep only the even-thickness drops.' She held both over the fresh pail and began to pour the raw milk through the first mesh, then the second.",
             need="Would milk flow correctly through both meshes in order, or would Clara have to guess which drops would survive both rules?",
             mapping="The first strainer is map-inc; the second is filter-even; they are composed together; the fresh pail collects the survivors.",
@@ -144,7 +144,7 @@ G12_02 = SubjectCurriculum(
             expected=12,
             concept_phrase="the composed transducer summing the incremented-then-filtered elements",
             question_what="the sum accumulated via transduce using the composed transducer of map-inc then filter-even, starting from 0, applied to the vector containing 1, 2, 3, 4, 5",
-            goal_text="compose map-inc and filter-even, then use transduce to sum the kept elements from the vector containing 1, 2, 3, 4, 5, starting from 0",
+            goal_text="compose map-inc and filter-even, then use transduce to sum the kept elements from the vector containing these numbersstarting from 0",
             scenario="Nan poured milk through her double-strainer while holding a coin-purse over a second pail. For each drop that survived both meshes, she added one coin to the purse. The strainers decided which drops passed; the purse tallied their worth as they fell.",
             need="Could the coin tally accumulate correctly while the mesh was still deciding which drops belonged?",
             mapping="The composed transducer is the pipeline of two strainers; the accumulation function is the coin-counting; the fresh pail holds the tally.",
@@ -179,7 +179,7 @@ G12_03 = SubjectCurriculum(
             expected=[0, 1, 2],
             concept_phrase="the transducer-powered collection of the first few elements",
             question_what="the vector produced by reifying the take-3 transducer into an empty vector via into, applied to the range of 100 numbers",
-            goal_text="use the take-3 transducer with into to collect the first three elements from a range of 100 numbers",
+            goal_text="use the take-3 transducer with into to collect the first several elements from a range of 100 numbers",
             scenario="Margery watched a great stream of milk flowing from the dairy toward the market. The stream seemed endless—100 pails worth. But her basket could hold only three. She held a strainer over the basket with a rule carved into the mesh: 'Stop after three drops pass.' She positioned it at the stream's head.",
             need="Would the mesh know when to close and stop the flow, or would milk keep pouring until the basket overflowed?",
             mapping="The stream is the range; the rule 'take three' is the transducer; the basket collects only what the mesh permits through.",

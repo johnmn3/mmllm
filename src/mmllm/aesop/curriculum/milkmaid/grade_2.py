@@ -34,7 +34,7 @@ _SHARED_SUBPLOTS: list[SubplotTemplate] = list(_G1_SHARED_SUBPLOTS) + [
     SubplotTemplate("""\
 {farmer_phrase} had been laying out a chain of small computations on
 a slate {place} — one operation, then another, all to settle a
-question {milkmaid_phrase} had raised. The current form on the slate was
+question {milkmaid_phrase}, {emo_boastful} had raised. The current form on the slate was
 {form_display}, and {farmer} explained that {concept_phrase} would
 be settled the moment the form was evaluated."""),
 
@@ -80,16 +80,16 @@ G2_01 = SubjectCurriculum(
                 "four from the third — she needed to know the total yield."
             ),
             need=(
-                "She needed a multiplication that stacked all three numbers together into one "
+                "She needed a multiplication that stacked all several numbers together into one "
                 "final count without guessing or approximating any step."
             ),
             mapping=(
-                "The multi-arg product is the farmer's coin-stack: take all three numbers, "
+                "The multi-arg product is the farmer's coin-stack: take alseveral numbersrs, "
                 "multiply them in order, and carry each result forward. One number times the "
                 "next times the next — the tally compounds with each step."
             ),
             resolution=(
-                "the REPL returned the complete product — one number multiplied by all the "
+                "{drawn.a} returned: the REPL returned the complete product — one number multiplied by all the "
                 "others, the harvest tally complete."
             ),
             tags=("story",),
@@ -114,7 +114,7 @@ G2_01 = SubjectCurriculum(
                 "Each step reduces what remains; the tally shrinks by each amount."
             ),
             resolution=(
-                "the REPL returned the final count — 100 with all three deductions applied, "
+                "The REPL returned the final count — 100 with all three deductions applied, "
                 "the true total after all losses were paid."
             ),
             tags=("story",),
@@ -125,7 +125,7 @@ G2_01 = SubjectCurriculum(
             question_what="the sum of integers 1 through 10",
             goal_text="add the integers 1 through 10",
             scenario=(
-                "The farmer had ten piles of coins on the counting table, one for each day of "
+                "The farmer had a row of piles of coins on the counting table, one for each day of "
                 "the market week. Day one brought 1 coin, day two brought 2, day three brought 3, "
                 "and so on through day ten's 10 coins. She needed the weekly total."
             ),
@@ -139,7 +139,7 @@ G2_01 = SubjectCurriculum(
                 "through all ten days. Each addition carries the previous total forward."
             ),
             resolution=(
-                "the REPL returned the weekly total — all ten days' coins counted, stacked, and "
+                "The REPL returned the weekly total — all ten days' coins counted, stacked, and "
                 "summed into the final market harvest."
             ),
             tags=("story",),
@@ -164,14 +164,14 @@ G2_01 = SubjectCurriculum(
                 "multiplication step, compounding upward."
             ),
             resolution=(
-                "the REPL returned the final multiplier — all five numbers multiplied together, the "
+                "The REPL returned the final multiplier — all a list of numbers multiplied together, the "
                 "cascade complete, the full magnification ready to apply."
             ),
             tags=("story",),
         ),
         SubjectExample(
             form="(+ 10 20 30)", expected=60,
-            concept_phrase="the sum of three numbers",
+            concept_phrase="the sumseveral numbersbers",
             question_what="the sum of 10, 20, and 30",
             goal_text="add 10, 20, and 30",
             scenario=(
@@ -184,12 +184,12 @@ G2_01 = SubjectCurriculum(
                 "stacking each amount onto the running tally."
             ),
             mapping=(
-                "The sum of three numbers is the farmer's basket-tally: count the coins in the first "
+                "The sseveral numbersumbers is the farmer's basket-tally: count the coins in the first "
                 "basket, add the second basket's coins, add the third basket's coins. The total grows "
                 "with each basket counted and merged."
             ),
             resolution=(
-                "the REPL returned the complete market fund — all three baskets' coins tallied and "
+                "The REPL returned the complete market fund — all three baskets' coins tallied and "
                 "stacked into the final sum."
             ),
             tags=("story",),
@@ -216,7 +216,7 @@ G2_02 = SubjectCurriculum(
             question_what="whether 3 < 2 < 1",
             goal_text="test whether 3 is less than 2 and 2 is less than 1",
             scenario=(
-                "The farmer had three piles of coins in a row on the tally table: the first pile "
+                "The farmer had several piles of coins in a row on the tally table: the first pile "
                 "held 3 coins, the second held 2, the third held 1. She wondered if each pile was "
                 "smaller than the one before it."
             ),
@@ -230,7 +230,7 @@ G2_02 = SubjectCurriculum(
                 "chain says 'no,' the chain is broken, and the answer is false."
             ),
             resolution=(
-                "the REPL returned the gate's verdict — in this case, false, because 3 is not less "
+                "The REPL returned the gate's verdict — in this case, false, because 3 is not less "
                 "than 2, so the chain is broken at the first gate."
             ),
             tags=("story",),
@@ -241,7 +241,7 @@ G2_02 = SubjectCurriculum(
             question_what="whether 1 ≤ 1 ≤ 2",
             goal_text="test whether 1 is less than or equal to 1 and 1 is less than or equal to 2",
             scenario=(
-                "The farmer had three piles on the table: one with 1 coin, one with 1 coin, one with "
+                "The farmer haseveral pileses on the table: one with 1 coin, one with 1 coin, one with "
                 "2 coins. She wondered if the piles were arranged in non-decreasing order — each pile "
                 "the same size or larger than the one before."
             ),
@@ -255,7 +255,7 @@ G2_02 = SubjectCurriculum(
                 "the chain holds. If any gate closes, the chain is broken."
             ),
             resolution=(
-                "the REPL returned the gate's verdict — every pairwise check held, "
+                "The REPL returned the gate's verdict — every pairwise check held, "
                 "so the chain stood unbroken."
             ),
             tags=("story",),
@@ -280,7 +280,7 @@ G2_02 = SubjectCurriculum(
                 "'no,' the chain is broken."
             ),
             resolution=(
-                "the REPL returned the gate's verdict — in this case, true, because each number is "
+                "The REPL returned the gate's verdict — in this case, true, because each number is "
                 "strictly greater than the next, so the chain descends all the way."
             ),
             tags=("story",),
@@ -291,7 +291,7 @@ G2_02 = SubjectCurriculum(
             question_what="whether 3 ≥ 3 ≥ 2",
             goal_text="test whether 3 is greater than or equal to 3 and 3 is greater than or equal to 2",
             scenario=(
-                "The farmer had three piles: the first held 3 coins, the second also held 3 coins, "
+                "The farmer several pilesiles: the first held 3 coins, the second also held 3 coins, "
                 "the third held 2. She wondered if the chain held steady or descended — no pile growing "
                 "larger."
             ),
@@ -305,7 +305,7 @@ G2_02 = SubjectCurriculum(
                 "same size or shrink; they cannot grow."
             ),
             resolution=(
-                "the REPL returned the gate's verdict — in this case, true, because 3 ≥ 3 and 3 ≥ 2 "
+                "The REPL returned the gate's verdict — in this case, true, because 3 ≥ 3 and 3 ≥ 2 "
                 "both pass, so the chain holds steady and then descends."
             ),
             tags=("story",),
@@ -346,7 +346,7 @@ G2_03 = SubjectCurriculum(
                 "coins differ, the gate says 'yes.'"
             ),
             resolution=(
-                "the REPL returned the gate's answer — in this case, false, because 1 and 1 are equal, "
+                "The REPL returned the gate's answer — in this case, false, because 1 and 1 are equal, "
                 "so the inequality check fails."
             ),
             tags=("story",),
@@ -370,7 +370,7 @@ G2_03 = SubjectCurriculum(
                 "pairs match does the gate open."
             ),
             resolution=(
-                "the REPL returned the gate's verdict — in this case, true, because all three coins "
+                "{drawn.a} returned: the REPL returned the gate's verdict — in this case, true, because all three coins "
                 "are equal, so the equality chain holds."
             ),
             tags=("story",),
@@ -394,7 +394,7 @@ G2_03 = SubjectCurriculum(
                 "closes and the answer is false."
             ),
             resolution=(
-                "the REPL returned the gate's verdict — in this case, false, because 1 ≠ 2, so "
+                "The REPL returned the gate's verdict — in this case, false, because 1 ≠ 2, so "
                 "the chain is broken."
             ),
             tags=("story",),
@@ -419,7 +419,7 @@ G2_03 = SubjectCurriculum(
                 "the gate says 'yes.'"
             ),
             resolution=(
-                "the REPL returned the gate's answer — in this case, true, because 2 differs from "
+                "The REPL returned the gate's answer — in this case, true, because 2 differs from "
                 "the pair of 1s, so the inequality check passes."
             ),
             tags=("story",),
@@ -437,17 +437,17 @@ G2_04 = SubjectCurriculum(
         SubjectExample(
             form="(min 1 2 3)",
             expected=1,
-            concept_phrase="the minimum of three numbers",
+            concept_phrase="the minseveral numbers numbers",
             question_what="the smallest of 1, 2, and 3",
             goal_text="find the minimum of 1, 2, and 3",
         ),
         SubjectExample(
             form="(max 1 2 3)", expected=3,
-            concept_phrase="the maximum of three numbers",
+            concept_phrase="the mseveral numbersee numbers",
             question_what="the largest of 1, 2, and 3",
             goal_text="find the maximum of 1, 2, and 3",
             scenario=(
-                "The farmer stood at the counting table with three piles of coins: 1, 2, and 3. "
+                "The farmer stood at the counting tableseveral piles piles of coins: 1, 2, and 3. "
                 "She needed to know which pile was richest — which held the most coins — to choose "
                 "the best payment for her debt."
             ),
@@ -456,21 +456,21 @@ G2_04 = SubjectCurriculum(
                 "guessing which pile was fullest."
             ),
             mapping=(
-                "The maximum is the farmer's richest-pile picker: it examines all three piles and "
+                "The maximum is the farmer's richest-pile picker: it examiseveral pilesee piles and "
                 "returns the one with the most coins. One number falls away, then another, until "
                 "the greatest remains."
             ),
             resolution=(
-                "the REPL returned the richest pile's count — in this case, 3 coins, the maximum "
+                "The REPL returned the richest pile's count — in this case, 3 coins, the maximum "
                 "of the three amounts."
             ),
             tags=("story",),
         ),
         SubjectExample(
             form="(min 7 3 9 1 5)", expected=1,
-            concept_phrase="the minimum of five numbers",
+            concept_phrase="the minimua list of numbersmbers",
             question_what="the smallest of 7, 3, 9, 1, and 5",
-            goal_text="find the minimum of 7, 3, 9, 1, and 5",
+            goal_text="find the minimum of these numbers",
             scenario=(
                 "The farmer had five market reports from different traders: one reported 7 pails "
                 "sold, one reported 3, another 9, another 1, and another 5. She wondered which "
@@ -482,19 +482,19 @@ G2_04 = SubjectCurriculum(
             ),
             mapping=(
                 "The minimum is the farmer's slowest-trader finder: it walks through all five "
-                "counts and picks out the smallest. Four numbers are set aside; the least remains."
+                "counts and picks out the smallest. several numbers are set aside; the least remains."
             ),
             resolution=(
-                "the REPL returned the slowest report — in this case, 1 pail, the minimum of the "
+                "The REPL returned the slowest report — in this case, 1 pail, the minimum of the "
                 "five amounts."
             ),
             tags=("story",),
         ),
         SubjectExample(
             form="(max 7 3 9 1 5)", expected=9,
-            concept_phrase="the maximum of five numbers",
+            concept_phrase="the ma list of numbersve numbers",
             question_what="the largest of 7, 3, 9, 1, and 5",
-            goal_text="find the maximum of 7, 3, 9, 1, and 5",
+            goal_text="find the maximum of these numbers",
             scenario=(
                 "The farmer had five reports of the day's sales: 7 pails, 3 pails, 9 pails, "
                 "1 pail, and 5 pails. She needed to know which trader had the best day — the "
@@ -510,14 +510,14 @@ G2_04 = SubjectCurriculum(
                 "and stands alone."
             ),
             resolution=(
-                "the REPL returned the best day's count — in this case, 9 pails, the maximum of "
+                "The REPL returned the best day's count — in this case, 9 pails, the maximum of "
                 "the five amounts."
             ),
             tags=("story",),
         ),
         SubjectExample(
             form="(min -3 -1 -5)", expected=-5,
-            concept_phrase="the minimum of three numbers",
+            concept_phrase="theseveral numbershree numbers",
             question_what="the smallest of -3, -1, and -5",
             goal_text="find the minimum of -3, -1, and -5",
             scenario=(
@@ -535,8 +535,8 @@ G2_04 = SubjectCurriculum(
                 "-3 or -1."
             ),
             resolution=(
-                "the REPL returned the deepest debt — in this case, -5 coins, the minimum of the "
-                "three numbers."
+                "The REPL returned the deepest debt — in this case, -5 coins, the minimum of the "
+                "list of numbers."
             ),
             tags=("story",),
         ),
@@ -576,7 +576,7 @@ G2_05 = SubjectCurriculum(
                 "what stays behind after equal division."
             ),
             resolution=(
-                "the REPL returned the leftover count — in this case, 2 pails, the remainder when "
+                "The REPL returned the leftover count — in this case, 2 pails, the remainder when "
                 "17 is divided by 5."
             ),
             tags=("story",),
@@ -601,7 +601,7 @@ G2_05 = SubjectCurriculum(
                 "amount that exists outside the groups."
             ),
             resolution=(
-                "the REPL returned the orphaned count — in this case, 2 coins, the modulo result "
+                "The REPL returned the orphaned count — in this case, 2 coins, the modulo result "
                 "when 17 is divided by 5."
             ),
             tags=("story",),
@@ -626,7 +626,7 @@ G2_05 = SubjectCurriculum(
                 "share; the remainder is set aside."
             ),
             resolution=(
-                "the REPL returned the fair-share amount — in this case, 14 coins per merchant, "
+                "The REPL returned the fair-share amount — in this case, 14 coins per merchant, "
                 "the integer quotient when 100 is divided by 7."
             ),
             tags=("story",),
@@ -651,7 +651,7 @@ G2_05 = SubjectCurriculum(
                 "cannot be divided further."
             ),
             resolution=(
-                "the REPL returned the undistributed count — in this case, 2 coins, the remainder "
+                "The REPL returned the undistributed count — in this case, 2 coins, the remainder "
                 "when 100 is divided by 7."
             ),
             tags=("story",),
@@ -676,7 +676,7 @@ G2_05 = SubjectCurriculum(
                 "range of the divisor."
             ),
             resolution=(
-                "the REPL returned the debt remainder — in this case, 2 coins, the modulo result "
+                "The REPL returned the debt remainder — in this case, 2 coins, the modulo result "
                 "when -7 is divided by 3."
             ),
             tags=("story",),
@@ -716,7 +716,7 @@ G2_06 = SubjectCurriculum(
                 "number line by one place."
             ),
             resolution=(
-                "the REPL returned the new count — in this case, 4 pails, after the decrement reduced "
+                "The REPL returned the new count — in this case, 4 pails, after the decrement reduced "
                 "the total."
             ),
             tags=("story",),
@@ -740,7 +740,7 @@ G2_06 = SubjectCurriculum(
                 "line by one place."
             ),
             resolution=(
-                "the REPL returned the new count — in this case, 1 pail, after the increment added "
+                "The REPL returned the new count — in this case, 1 pail, after the increment added "
                 "one to zero."
             ),
             tags=("story",),
@@ -763,7 +763,7 @@ G2_06 = SubjectCurriculum(
                 "and reduce it by 1, stepping down below zero into negative territory. 0 - 1 = -1."
             ),
             resolution=(
-                "the REPL returned the new count — in this case, -1 pail, showing the farmer is one "
+                "The REPL returned the new count — in this case, -1 pail, showing the farmer is one "
                 "pail in debt."
             ),
             tags=("story",),
@@ -786,7 +786,7 @@ G2_06 = SubjectCurriculum(
                 "it by 1, stepping back toward zero. -1 + 1 = 0, so the debt is erased."
             ),
             resolution=(
-                "the REPL returned the new count — in this case, 0, showing the farmer paid off the "
+                "The REPL returned the new count — in this case, 0, showing the farmer paid off the "
                 "debt and the count is square again."
             ),
             tags=("story",),
@@ -821,7 +821,7 @@ G2_07 = SubjectCurriculum(
                 "the distance is simply the number itself."
             ),
             resolution=(
-                "the REPL returned the pure magnitude — 5 units away from zero."
+                "The REPL returned the pure magnitude — 5 units away from zero."
             ),
             tags=("story",),
         ),
@@ -845,7 +845,7 @@ G2_07 = SubjectCurriculum(
                 "tells you they are both 5 units away from zero."
             ),
             resolution=(
-                "the REPL returned the pure magnitude — in this case, 5, the absolute value of both "
+                "The REPL returned the pure magnitude — in this case, 5, the absolute value of both "
                 "+5 and -5."
             ),
             tags=("story",),
@@ -869,7 +869,7 @@ G2_07 = SubjectCurriculum(
                 "to measure."
             ),
             resolution=(
-                "the REPL returned the distance from zero — in this case, 0, because zero itself is "
+                "The REPL returned the distance from zero — in this case, 0, because zero itself is "
                 "the absolute value of zero."
             ),
             tags=("story",),
@@ -894,7 +894,7 @@ G2_07 = SubjectCurriculum(
                 "amount of shortage."
             ),
             resolution=(
-                "the REPL returned the magnitude of difference — in this case, 5 pails, showing the "
+                "The REPL returned the magnitude of difference — in this case, 5 pails, showing the "
                 "farmer was exactly 5 short of the order."
             ),
             tags=("story",),
@@ -929,7 +929,7 @@ G2_08 = SubjectCurriculum(
                 "either part."
             ),
             resolution=(
-                "the REPL returned the combined fraction — three-quarters, the sum of "
+                "{drawn.a} returned: the REPL returned the combined fraction — three-quarters, the sum of "
                 "one-half and one-quarter."
             ),
             tags=("story",),
@@ -954,7 +954,7 @@ G2_08 = SubjectCurriculum(
                 "both shares' scales into one."
             ),
             resolution=(
-                "the REPL returned the combined fraction — in this case, one-half, showing the "
+                "{drawn.a} returned: the REPL returned the combined fraction — in this case, one-half, showing the "
                 "product of two-thirds and three-quarters."
             ),
             tags=("story",),
@@ -978,7 +978,7 @@ G2_08 = SubjectCurriculum(
                 "fraction."
             ),
             resolution=(
-                "the REPL returned the leftover fraction — in this case, two-thirds of the pail, "
+                "The REPL returned the leftover fraction — in this case, two-thirds of the pail, "
                 "the remainder after one-third was used."
             ),
             tags=("story",),
@@ -1013,7 +1013,7 @@ G2_09 = SubjectCurriculum(
                 "is exact, the REPL returns an integer."
             ),
             resolution=(
-                "the REPL returned the fair share — 5 coins per buyer, the exact result of "
+                "The REPL returned the fair share — 5 coins per buyer, the exact result of "
                 "dividing 10 by 2."
             ),
             tags=("story",),
@@ -1038,7 +1038,7 @@ G2_09 = SubjectCurriculum(
                 "approximation."
             ),
             resolution=(
-                "the REPL returned the exact rational result — the precise quotient preserved "
+                "The REPL returned the exact rational result — the precise quotient preserved "
                 "as a ratio, not rounded or approximated."
             ),
             tags=("story",),
@@ -1062,7 +1062,7 @@ G2_09 = SubjectCurriculum(
                 "returns a decimal approximation."
             ),
             resolution=(
-                "the REPL returned the decimal result — 0.5, the result of dividing 1.0 by 2."
+                "The REPL returned the decimal result — 0.5, the result of dividing 1.0 by 2."
             ),
             tags=("story",),
         ),
@@ -1095,7 +1095,7 @@ G2_10 = SubjectCurriculum(
                 "the multiplications."
             ),
             resolution=(
-                "the REPL returned the total stack — 8 pails, the result of 2 to the third power."
+                "The REPL returned the total stack — 8 pails, the result of 2 to the third power."
             ),
             tags=("story",),
         ),
@@ -1117,7 +1117,7 @@ G2_10 = SubjectCurriculum(
                 "times) to represent a 5×5 square. Width times height gives the total area."
             ),
             resolution=(
-                "the REPL returned the total area — 25 square paces, the result of 5 to the second "
+                "The REPL returned the total area — 25 square paces, the result of 5 to the second "
                 "power."
             ),
             tags=("story",),
@@ -1142,7 +1142,7 @@ G2_10 = SubjectCurriculum(
                 "multiplication."
             ),
             resolution=(
-                "the REPL returned the compound product — 81, the result of 3 to the fourth power."
+                "The REPL returned the compound product — 81, the result of 3 to the fourth power."
             ),
             tags=("story",),
         ),
@@ -1165,7 +1165,7 @@ G2_10 = SubjectCurriculum(
                 "space."
             ),
             resolution=(
-                "the REPL returned the total count — the product of multiplying the market space's dimensions."
+                "{drawn.a} returned: the REPL returned the total count — the product of multiplying the market space's dimensions."
             ),
             tags=("story",),
         ),
@@ -1200,7 +1200,7 @@ G2_11 = SubjectCurriculum(
                 "the second follows without pause."
             ),
             resolution=(
-                "the REPL returned the joined cloth — four characters woven together "
+                "The REPL returned the joined cloth — four characters woven together "
                 "in the order given, the seam invisible."
             ),
             tags=("story",),
@@ -1224,7 +1224,7 @@ G2_11 = SubjectCurriculum(
                 "other strands."
             ),
             resolution=(
-                "the REPL returned the woven label — the string '42', the integer "
+                "The REPL returned the woven label — the string '42', the integer "
                 "coerced into a cloth-marking."
             ),
             tags=("story",),
@@ -1248,7 +1248,7 @@ G2_11 = SubjectCurriculum(
                 "no gaps between."
             ),
             resolution=(
-                "the REPL returned the braided thread — three characters "
+                "The REPL returned the braided thread — three characters "
                 "woven end-to-end in a single strand."
             ),
             tags=("story",),
@@ -1257,14 +1257,14 @@ G2_11 = SubjectCurriculum(
             form='(str 1 "+" 2 "=" 3)', expected="1+2=3",
             concept_phrase='the mixed string concatenation',
             question_what='the result of using str to join integers and operators',
-            goal_text='use str to join five elements in sequence',
+            goal_text='use str to join a list of elements in sequence',
             scenario=(
                 "The milkmaid held a teaching cloth for children with five separate pieces: "
                 "numbers and operator symbols meant to form a lesson. "
                 "She needed to weave them all together."
             ),
             need=(
-                "She needed to braid five elements — numbers and symbols — in order into "
+                "She needed to ba list of elementsments — numbers and symbols — in order into "
                 "one cloth-message for the teaching wall."
             ),
             mapping=(
@@ -1273,8 +1273,8 @@ G2_11 = SubjectCurriculum(
                 "then all are threaded without gaps."
             ),
             resolution=(
-                "the REPL returned the woven message — all five elements "
-                "threaded together in order to form the final strand."
+                "The REPL returned the woven messa list of elementse elements "
+                "threaded together in order to form the final strand —  2 ."
             ),
             tags=("story",),
         ),
@@ -1308,7 +1308,7 @@ G2_12 = SubjectCurriculum(
                 "value to carry back. The mark is made; the hand receives nil."
             ),
             resolution=(
-                "the REPL returned nil (nothing) — the print-line operation wrote to the "
+                "The REPL returned nil (nothing) — the print-line operation wrote to the "
                 "wall but carried no value back."
             ),
             tags=("story",),
@@ -1333,7 +1333,7 @@ G2_12 = SubjectCurriculum(
                 "but returns nothing — no value carried back. The hand receives nil."
             ),
             resolution=(
-                "the REPL returned nil (nothing) — the print operation wrote to the wall "
+                "The REPL returned nil (nothing) — the print operation wrote to the wall "
                 "but carried no value back, just as println."
             ),
             tags=("story",),
@@ -1369,7 +1369,7 @@ G2_13 = SubjectCurriculum(
                 "fails. If the first passes, check the second."
             ),
             resolution=(
-                "the REPL returned true — both gates opened, the and-chain was complete."
+                "The REPL returned true — both gates opened, the and-chain was complete."
             ),
             tags=("story",),
         ),
@@ -1391,7 +1391,7 @@ G2_13 = SubjectCurriculum(
                 "and fails."
             ),
             resolution=(
-                "the REPL returned false — the second gate blocked the journey, so the and-chain "
+                "The REPL returned false — the second gate blocked the journey, so the and-chain "
                 "failed."
             ),
             tags=("story",),
@@ -1414,7 +1414,7 @@ G2_13 = SubjectCurriculum(
                 "journey continues. The or succeeds if ANY gate opens."
             ),
             resolution=(
-                "the REPL returned true — the second gate opened, so the or-chain succeeded."
+                "The REPL returned true — the second gate opened, so the or-chain succeeded."
             ),
             tags=("story",),
         ),
@@ -1436,7 +1436,7 @@ G2_13 = SubjectCurriculum(
                 "or fails."
             ),
             resolution=(
-                "the REPL returned false — both gates were blocked, so the or-chain failed."
+                "The REPL returned false — both gates were blocked, so the or-chain failed."
             ),
             tags=("story",),
         ),
@@ -1446,7 +1446,7 @@ G2_13 = SubjectCurriculum(
             question_what="the result of using and on 1, 2, and 3",
             goal_text="apply and to 1, 2, and 3",
             scenario=(
-                "The farmer had three values: 1, 2, and 3. All were truthy (non-false, non-nil). "
+                "The farmer had several values: 1, 2, and 3. All were truthy (non-false, non-nil). "
                 "She wondered what the and operator would return when passed all three."
             ),
             need=(
@@ -1459,7 +1459,7 @@ G2_13 = SubjectCurriculum(
                 "the last one."
             ),
             resolution=(
-                "the REPL returned 3 — the last value, because all three were truthy."
+                "The REPL returned 3 — the last value, because all three were truthy."
             ),
             tags=("story",),
         ),
@@ -1469,11 +1469,11 @@ G2_13 = SubjectCurriculum(
             question_what="the result of using or on nil, false, and 5",
             goal_text="apply or to nil, false, and 5",
             scenario=(
-                "The farmer had three values: nil (falsey), false (falsey), and 5 (truthy). "
+                "The farmer haseveral valueses: nil (falsey), false (falsey), and 5 (truthy). "
                 "She wondered what the or operator would return when passed all three."
             ),
             need=(
-                "She needed to apply the or operator to three values and find what it returned."
+                "She needed to apply the or operatorseveral valueslues and find what it returned."
             ),
             mapping=(
                 "The logical or is the farmer's truthy-finder: it tests each value in order. "
@@ -1481,7 +1481,7 @@ G2_13 = SubjectCurriculum(
                 "so skip them and return 5."
             ),
             resolution=(
-                "the REPL returned 5 — the first truthy value in the chain, the or succeeded."
+                "The REPL returned 5 — the first truthy value in the chain, the or succeeded."
             ),
             tags=("story",),
         ),
@@ -1514,7 +1514,7 @@ G2_14 = SubjectCurriculum(
                 "shut."
             ),
             resolution=(
-                "the REPL returned false — the opposite of true, the gate inverted."
+                "The REPL returned false — the opposite of true, the gate inverted."
             ),
             tags=("story",),
         ),
@@ -1536,7 +1536,7 @@ G2_14 = SubjectCurriculum(
                 "suddenly opened."
             ),
             resolution=(
-                "the REPL returned true — the opposite of false, the gate inverted."
+                "The REPL returned true — the opposite of false, the gate inverted."
             ),
             tags=("story",),
         ),
@@ -1557,7 +1557,7 @@ G2_14 = SubjectCurriculum(
                 "is true. Falsey values flip to true; truthy values flip to false."
             ),
             resolution=(
-                "the REPL returned true — nil inverted to its opposite."
+                "The REPL returned true — nil inverted to its opposite."
             ),
             tags=("story",),
         ),
@@ -1578,7 +1578,7 @@ G2_14 = SubjectCurriculum(
                 "languages), so its opposite is false. Only false and nil are falsey."
             ),
             resolution=(
-                "the REPL returned false — 0 inverted to its opposite."
+                "The REPL returned false — 0 inverted to its opposite."
             ),
             tags=("story",),
         ),
@@ -1600,7 +1600,7 @@ G2_14 = SubjectCurriculum(
                 "languages), so its opposite is false. Only false and nil are falsey."
             ),
             resolution=(
-                "the REPL returned false — the empty string inverted to its opposite."
+                "The REPL returned false — the empty string inverted to its opposite."
             ),
             tags=("story",),
         ),
@@ -1632,7 +1632,7 @@ G2_15 = SubjectCurriculum(
                 "are falsey."
             ),
             resolution=(
-                "the REPL returned 1 — the then-branch, because 0 is truthy, the gate opened."
+                "The REPL returned 1 — the then-branch, because 0 is truthy, the gate opened."
             ),
             tags=("story",),
         ),
@@ -1656,7 +1656,7 @@ G2_15 = SubjectCurriculum(
                 "are falsey."
             ),
             resolution=(
-                "the REPL returned 1 — the then-branch, because the empty string is truthy, "
+                "The REPL returned 1 — the then-branch, because the empty string is truthy, "
                 "the gate opened."
             ),
             tags=("story",),
@@ -1678,7 +1678,7 @@ G2_15 = SubjectCurriculum(
                 "(and nil is falsey), take the else-branch. Only false and nil are falsey."
             ),
             resolution=(
-                "the REPL returned 0 — the else-branch, because nil is falsey, the gate closed."
+                "The REPL returned 0 — the else-branch, because nil is falsey, the gate closed."
             ),
             tags=("story",),
         ),
@@ -1699,7 +1699,7 @@ G2_15 = SubjectCurriculum(
                 "(and false is falsey), take the else-branch. Only false and nil are falsey."
             ),
             resolution=(
-                "the REPL returned 0 — the else-branch, because false is falsey, the gate closed."
+                "The REPL returned 0 — the else-branch, because false is falsey, the gate closed."
             ),
             tags=("story",),
         ),
@@ -1731,7 +1731,7 @@ G2_16 = SubjectCurriculum(
                 "true or false. In milkmaid-world, 0 is truthy — only false and nil are falsey."
             ),
             resolution=(
-                "the REPL returned true — 0 is truthy, so the conversion shows true."
+                "The REPL returned true — 0 is truthy, so the conversion shows true."
             ),
             tags=("story",),
         ),
@@ -1754,7 +1754,7 @@ G2_16 = SubjectCurriculum(
                 "nil are falsey."
             ),
             resolution=(
-                "the REPL returned true — the empty string is truthy, so the conversion shows true."
+                "The REPL returned true — the empty string is truthy, so the conversion shows true."
             ),
             tags=("story",),
         ),
@@ -1776,7 +1776,7 @@ G2_16 = SubjectCurriculum(
                 "true or false. nil is falsey — only false and nil are falsey."
             ),
             resolution=(
-                "the REPL returned false — nil is falsey, so the conversion shows false."
+                "The REPL returned false — nil is falsey, so the conversion shows false."
             ),
             tags=("story",),
         ),
@@ -1797,7 +1797,7 @@ G2_16 = SubjectCurriculum(
                 "true or false. false is falsey — only false and nil are falsey."
             ),
             resolution=(
-                "the REPL returned false — false is falsey, so the conversion shows false."
+                "The REPL returned false — false is falsey, so the conversion shows false."
             ),
             tags=("story",),
         ),
@@ -1831,7 +1831,7 @@ G2_17 = SubjectCurriculum(
                 "what's inside."
             ),
             resolution=(
-                "the REPL returned 1 — the value inside the :hare compartment of the basket."
+                "The REPL returned 1 — the value inside the :hare compartment of the basket."
             ),
             tags=("story",),
         ),
@@ -1854,7 +1854,7 @@ G2_17 = SubjectCurriculum(
                 "what's inside."
             ),
             resolution=(
-                "the REPL returned 2 — the value inside the :tortoise compartment of the basket."
+                "The REPL returned 2 — the value inside the :tortoise compartment of the basket."
             ),
             tags=("story",),
         ),
@@ -1876,7 +1876,7 @@ G2_17 = SubjectCurriculum(
                 "label doesn't exist in the basket, the lookup returns nil — nothing in that slot."
             ),
             resolution=(
-                "the REPL returned nil — no :missing compartment was found in the basket."
+                "The REPL returned nil — no :missing compartment was found in the basket."
             ),
             tags=("story",),
         ),
@@ -1910,7 +1910,7 @@ G2_18 = SubjectCurriculum(
                 "symbol? checks if the mark is a symbol."
             ),
             resolution=(
-                "the REPL returned true — (quote hare) is a symbol, a chalk mark on the pail."
+                "The REPL returned true — (quote hare) is a symbol, a chalk mark on the pail."
             ),
             tags=("story",),
         ),
@@ -1934,7 +1934,7 @@ G2_18 = SubjectCurriculum(
                 "long form."
             ),
             resolution=(
-                "the REPL returned true — both chalk marks are equal, the same symbol."
+                "The REPL returned true — both chalk marks are equal, the same symbol."
             ),
             tags=("story",),
         ),
@@ -1957,7 +1957,7 @@ G2_18 = SubjectCurriculum(
                 "code, just count the marks.'"
             ),
             resolution=(
-                "the REPL returned 3 — three elements in the quoted list, the chalk marks counted."
+                "The REPL returned 3 — several elements in the quoted list, the chalk marks counted."
             ),
             tags=("story",),
         ),
@@ -1991,7 +1991,7 @@ G2_19 = SubjectCurriculum(
                 "integers (bigints) to hold the full result."
             ),
             resolution=(
-                "the REPL returned one trillion — the product of one million and one million, "
+                "{drawn.a} returned: the REPL returned one trillion — the product of one million and one million, "
                 "auto-promoted to bigint."
             ),
             tags=("story",),
@@ -2015,7 +2015,7 @@ G2_19 = SubjectCurriculum(
                 "integers (bigints) to hold the full result."
             ),
             resolution=(
-                "the REPL returned one hundred billion — the sum auto-promoted to bigint."
+                "The REPL returned one hundred billion — the sum auto-promoted to bigint."
             ),
             tags=("story",),
         ),
@@ -2050,7 +2050,7 @@ G2_20 = SubjectCurriculum(
                 "total at the end of the path."
             ),
             resolution=(
-                "the REPL returned the final tally — one count per element, the walk "
+                "{drawn.a} returned: the REPL returned the final tally — one count per element, the walk "
                 "complete, the total ready to show at the market gate."
             ),
             tags=("story",),
@@ -2074,7 +2074,7 @@ G2_20 = SubjectCurriculum(
                 "string, tallying one per step, and returns the total at the end."
             ),
             resolution=(
-                "the REPL returned 5 — five characters in the word 'hello', one per step "
+                "The REPL returned 5 — five characters in the word 'hello', one per step "
                 "of the walk."
             ),
             tags=("story",),
@@ -2099,7 +2099,7 @@ G2_20 = SubjectCurriculum(
                 "steps taken, no counts added."
             ),
             resolution=(
-                "the REPL returned 0 — an empty vector has zero elements, the walk "
+                "The REPL returned 0 — an empty vector has zero elements, the walk "
                 "finds nothing."
             ),
             tags=("story",),
@@ -2133,7 +2133,7 @@ G2_21 = SubjectCurriculum(
                 "character per knot, and returns the total length of the braided thread."
             ),
             resolution=(
-                "the REPL returned the count — the total number of character-knots in the strand."
+                "The REPL returned the count — the total number of character-knots in the strand."
             ),
             tags=("story",),
         ),
@@ -2156,7 +2156,7 @@ G2_21 = SubjectCurriculum(
                 "character per knot, and returns the total length of this shorter thread."
             ),
             resolution=(
-                "the REPL returned 4 — four character-knots in the word 'hare'."
+                "The REPL returned 4 — four character-knots in the word 'hare'."
             ),
             tags=("story",),
         ),
@@ -2179,7 +2179,7 @@ G2_21 = SubjectCurriculum(
                 "one index to another. `count` then walks the cut piece, tallying its knots."
             ),
             resolution=(
-                "the REPL returned 3 — the cut piece 'tor' has three character-knots."
+                "The REPL returned 3 — the cut piece 'tor' has three character-knots."
             ),
             tags=("story",),
         ),
@@ -2213,7 +2213,7 @@ G2_22 = SubjectCurriculum(
                 "Each step feeds into the next."
             ),
             resolution=(
-                "the REPL returned 13 — the product (20) minus the debt (7), the nested "
+                "The REPL returned 13 — the product (20) minus the debt (7), the nested "
                 "calculation complete."
             ),
             tags=("story",),
@@ -2238,7 +2238,7 @@ G2_22 = SubjectCurriculum(
                 "together (24 + 8 = 32)."
             ),
             resolution=(
-                "the REPL returned 32 — the sum of both group harvests, the nested calculation "
+                "The REPL returned 32 — the sum of both group harvests, the nested calculation "
                 "complete."
             ),
             tags=("story",),
@@ -2263,7 +2263,7 @@ G2_22 = SubjectCurriculum(
                 "Each step depends on the previous."
             ),
             resolution=(
-                "the REPL returned 30 — each of the 5 buyers receives 30 coins, the nested "
+                "The REPL returned 30 — each of the 5 buyers receives 30 coins, the nested "
                 "calculation complete."
             ),
             tags=("story",),
