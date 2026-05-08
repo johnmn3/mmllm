@@ -618,7 +618,7 @@ G7_09 = SubjectCurriculum(grade=7, subject_id="G7-09",
                 'the pool is the inspection-stream, and true confirms success.'
             ),
             resolution=(
-                'The REPL tapped the number 42 into the pool and returned true. '
+                'The REPL tapped the number 42 into the pool and returned the verdict. '
                 'The message was received — 42.'
             ),
             tags=("story",),

@@ -140,7 +140,7 @@ G9_02 = SubjectCurriculum(
                 "slate says now."
             ),
             resolution=(
-                "The REPL read the slate and returned 1 — one delivery tallied, the "
+                "The REPL read the slate and returned the result — one delivery tallied, the "
                 "slate faithfully updated after the first pail left the door."
             ),
             tags=("story",),

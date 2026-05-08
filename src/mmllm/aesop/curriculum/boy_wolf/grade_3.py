@@ -165,7 +165,7 @@ G3_03 = SubjectCurriculum(grade=3, subject_id="G3-03",
                 "binding is in force only for the form's stretch."
             ),
             resolution=(
-                'the pouch yielded 3, the +1 added a fourth lamb, and the running total stood at 4 — exactly what the next fence-post called for. Tom chalked {drawn.a} on the village notice, and the morning record stood for the next shepherd to read.'           )),
+                'the pouch yielded the result, the +1 added a fourth lamb, and the running total stood at the result — exactly what the next fence-post called for. Tom chalked {drawn.a} on the village notice, and the morning record stood for the next shepherd to read.'           )),
         _ex("(let [n 10] (* n n))", 100, "the form (let [n 10] (* n n))",
             "the square of n where n is bound to 10",
             scenario=(
@@ -206,7 +206,7 @@ G3_03 = SubjectCurriculum(grade=3, subject_id="G3-03",
                 "5, and that is what the whole form returns."
             ),
             resolution=(
-                "the pouch yielded 5, the count matched Carol's tally, and the fence-post record stood correct. The watchhouse warmed as the elder set {drawn.a} into the day record, the fold quiet by then."
+                "the pouch yielded the result, the count matched Carol's tally, and the fence-post record stood correct. The watchhouse warmed as the elder set {drawn.a} into the day record, the fold quiet by then."
             )),
     ], subplots=_POUCH_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
 
@@ -400,7 +400,7 @@ G3_07 = SubjectCurriculum(grade=3, subject_id="G3-07",
                 "the count adjustment."
             ),
             resolution=(
-                'the card ran end-to-end and returned 5 — the adjusted count Carol would carry to the slate, no naming needed.'
+                'the card ran end-to-end and returned the result — the adjusted count Carol would carry to the slate, no naming needed.'
             )),
         _ex("((fn [a b] (* a b)) 3 4)", 12,
             "a two-arg anonymous function",
@@ -655,7 +655,7 @@ G3_14 = SubjectCurriculum(grade=3, subject_id="G3-14",
                 "value: 3."
             ),
             resolution=(
-                "the do form ran all three, returned 3, and Tom learned the REPL's rule for sequences. Carol marked {drawn.a} on the watchhouse beam, the lookout high above the valley quiet at last."
+                "the do form ran all three, returned the result, and Tom learned the REPL's rule for sequences. Carol marked {drawn.a} on the watchhouse beam, the lookout high above the valley quiet at last."
             )),
         _ex("(do (+ 1 1) (+ 2 2) (+ 3 3))", 6,
             "a do with three forms",

@@ -1473,7 +1473,7 @@ G1_18 = SubjectCurriculum(
                 "may tip, but the milkmaid picks it up and walks on."
             ),
             resolution=(
-                "The REPL returned 2 — the step landed correctly, the pail "
+                "The REPL returned the result — the step landed correctly, the pail "
                 "stayed balanced, and the walk continued to market without crisis."
             ),
             tags=("story",),

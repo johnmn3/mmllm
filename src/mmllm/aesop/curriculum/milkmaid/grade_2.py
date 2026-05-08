@@ -662,9 +662,9 @@ G2_05 = SubjectCurriculum(
             question_what="negative seven mod 3",
             goal_text="find negative 7 modulo 3",
             scenario=(
-                "The farmer had a debt of 7 coins to pay back in groups of 3. She could arrange "
-                "paying back 2 complete groups (6 coins), but 1 coin of debt remained. The modulo "
-                "told her what was left over — how much debt remained after grouping repayments."
+                "The farmer had a debt of coins to pay back in groups. She could arrange "
+                "complete groups, but some coins of debt remained. The modulo told her what "
+                "was left over — how much debt remained after grouping repayments."
             ),
             need=(
                 "She needed to find the leftover debt — the modulo of a negative amount — to know "
@@ -1369,7 +1369,7 @@ G2_13 = SubjectCurriculum(
                 "fails. If the first passes, check the second."
             ),
             resolution=(
-                "The REPL returned true — both gates opened, the and-chain was complete."
+                "The REPL returned the verdict — both gates opened, the and-chain was complete."
             ),
             tags=("story",),
         ),
@@ -1391,7 +1391,7 @@ G2_13 = SubjectCurriculum(
                 "and fails."
             ),
             resolution=(
-                "The REPL returned false — the second gate blocked the journey, so the and-chain "
+                "The REPL returned the verdict — the second gate blocked the journey, so the and-chain "
                 "failed."
             ),
             tags=("story",),
@@ -1414,7 +1414,7 @@ G2_13 = SubjectCurriculum(
                 "journey continues. The or succeeds if ANY gate opens."
             ),
             resolution=(
-                "The REPL returned true — the second gate opened, so the or-chain succeeded."
+                "The REPL returned the verdict — the second gate opened, so the or-chain succeeded."
             ),
             tags=("story",),
         ),
@@ -1436,7 +1436,7 @@ G2_13 = SubjectCurriculum(
                 "or fails."
             ),
             resolution=(
-                "The REPL returned false — both gates were blocked, so the or-chain failed."
+                "The REPL returned the verdict — both gates were blocked, so the or-chain failed."
             ),
             tags=("story",),
         ),
@@ -1459,7 +1459,7 @@ G2_13 = SubjectCurriculum(
                 "the last one."
             ),
             resolution=(
-                "The REPL returned 3 — the last value, because all three were truthy."
+                "The REPL returned the result — the last value, because all three were truthy."
             ),
             tags=("story",),
         ),
@@ -1481,7 +1481,7 @@ G2_13 = SubjectCurriculum(
                 "so skip them and return 5."
             ),
             resolution=(
-                "The REPL returned 5 — the first truthy value in the chain, the or succeeded."
+                "The REPL returned the result — the first truthy value in the chain, the or succeeded."
             ),
             tags=("story",),
         ),
@@ -1514,7 +1514,7 @@ G2_14 = SubjectCurriculum(
                 "shut."
             ),
             resolution=(
-                "The REPL returned false — the opposite of true, the gate inverted."
+                "The REPL returned the verdict — the opposite of true, the gate inverted."
             ),
             tags=("story",),
         ),
@@ -1536,7 +1536,7 @@ G2_14 = SubjectCurriculum(
                 "suddenly opened."
             ),
             resolution=(
-                "The REPL returned true — the opposite of false, the gate inverted."
+                "The REPL returned the verdict — the opposite of false, the gate inverted."
             ),
             tags=("story",),
         ),
@@ -1557,7 +1557,7 @@ G2_14 = SubjectCurriculum(
                 "is true. Falsey values flip to true; truthy values flip to false."
             ),
             resolution=(
-                "The REPL returned true — nil inverted to its opposite."
+                "The REPL returned the verdict — nil inverted to its opposite."
             ),
             tags=("story",),
         ),
@@ -1578,7 +1578,7 @@ G2_14 = SubjectCurriculum(
                 "languages), so its opposite is false. Only false and nil are falsey."
             ),
             resolution=(
-                "The REPL returned false — 0 inverted to its opposite."
+                "The REPL returned the verdict — 0 inverted to its opposite."
             ),
             tags=("story",),
         ),
@@ -1600,7 +1600,7 @@ G2_14 = SubjectCurriculum(
                 "languages), so its opposite is false. Only false and nil are falsey."
             ),
             resolution=(
-                "The REPL returned false — the empty string inverted to its opposite."
+                "The REPL returned the verdict — the empty string inverted to its opposite."
             ),
             tags=("story",),
         ),
@@ -1632,7 +1632,7 @@ G2_15 = SubjectCurriculum(
                 "are falsey."
             ),
             resolution=(
-                "The REPL returned 1 — the then-branch, because 0 is truthy, the gate opened."
+                "The REPL returned the result — the then-branch, because 0 is truthy, the gate opened."
             ),
             tags=("story",),
         ),
@@ -1656,7 +1656,7 @@ G2_15 = SubjectCurriculum(
                 "are falsey."
             ),
             resolution=(
-                "The REPL returned 1 — the then-branch, because the empty string is truthy, "
+                "The REPL returned the result — the then-branch, because the empty string is truthy, "
                 "the gate opened."
             ),
             tags=("story",),
@@ -1731,7 +1731,7 @@ G2_16 = SubjectCurriculum(
                 "true or false. In milkmaid-world, 0 is truthy — only false and nil are falsey."
             ),
             resolution=(
-                "The REPL returned true — 0 is truthy, so the conversion shows true."
+                "The REPL returned the verdict — 0 is truthy, so the conversion shows true."
             ),
             tags=("story",),
         ),
@@ -1754,7 +1754,7 @@ G2_16 = SubjectCurriculum(
                 "nil are falsey."
             ),
             resolution=(
-                "The REPL returned true — the empty string is truthy, so the conversion shows true."
+                "The REPL returned the verdict — the empty string is truthy, so the conversion shows true."
             ),
             tags=("story",),
         ),
@@ -1776,7 +1776,7 @@ G2_16 = SubjectCurriculum(
                 "true or false. nil is falsey — only false and nil are falsey."
             ),
             resolution=(
-                "The REPL returned false — nil is falsey, so the conversion shows false."
+                "The REPL returned the verdict — nil is falsey, so the conversion shows false."
             ),
             tags=("story",),
         ),
@@ -1797,7 +1797,7 @@ G2_16 = SubjectCurriculum(
                 "true or false. false is falsey — only false and nil are falsey."
             ),
             resolution=(
-                "The REPL returned false — false is falsey, so the conversion shows false."
+                "The REPL returned the verdict — false is falsey, so the conversion shows false."
             ),
             tags=("story",),
         ),
@@ -1831,7 +1831,7 @@ G2_17 = SubjectCurriculum(
                 "what's inside."
             ),
             resolution=(
-                "The REPL returned 1 — the value inside the :hare compartment of the basket."
+                "The REPL returned the result — the value inside the :hare compartment of the basket."
             ),
             tags=("story",),
         ),
@@ -1854,7 +1854,7 @@ G2_17 = SubjectCurriculum(
                 "what's inside."
             ),
             resolution=(
-                "The REPL returned 2 — the value inside the :tortoise compartment of the basket."
+                "The REPL returned the result — the value inside the :tortoise compartment of the basket."
             ),
             tags=("story",),
         ),
@@ -1910,7 +1910,7 @@ G2_18 = SubjectCurriculum(
                 "symbol? checks if the mark is a symbol."
             ),
             resolution=(
-                "The REPL returned true — (quote hare) is a symbol, a chalk mark on the pail."
+                "The REPL returned the verdict — (quote hare) is a symbol, a chalk mark on the pail."
             ),
             tags=("story",),
         ),
@@ -1934,7 +1934,7 @@ G2_18 = SubjectCurriculum(
                 "long form."
             ),
             resolution=(
-                "The REPL returned true — both chalk marks are equal, the same symbol."
+                "The REPL returned the verdict — both chalk marks are equal, the same symbol."
             ),
             tags=("story",),
         ),
@@ -1957,7 +1957,7 @@ G2_18 = SubjectCurriculum(
                 "code, just count the marks.'"
             ),
             resolution=(
-                "The REPL returned 3 — several elements in the quoted list, the chalk marks counted."
+                "The REPL returned the result — several elements in the quoted list, the chalk marks counted."
             ),
             tags=("story",),
         ),
@@ -2074,7 +2074,7 @@ G2_20 = SubjectCurriculum(
                 "string, tallying one per step, and returns the total at the end."
             ),
             resolution=(
-                "The REPL returned 5 — five characters in the word 'hello', one per step "
+                "The REPL returned the result — five characters in the word 'hello', one per step "
                 "of the walk."
             ),
             tags=("story",),
@@ -2156,7 +2156,7 @@ G2_21 = SubjectCurriculum(
                 "character per knot, and returns the total length of this shorter thread."
             ),
             resolution=(
-                "The REPL returned 4 — four character-knots in the word 'hare'."
+                "The REPL returned the result — four character-knots in the word 'hare'."
             ),
             tags=("story",),
         ),
@@ -2179,7 +2179,7 @@ G2_21 = SubjectCurriculum(
                 "one index to another. `count` then walks the cut piece, tallying its knots."
             ),
             resolution=(
-                "The REPL returned 3 — the cut piece 'tor' has three character-knots."
+                "The REPL returned the result — the cut piece 'tor' has three character-knots."
             ),
             tags=("story",),
         ),

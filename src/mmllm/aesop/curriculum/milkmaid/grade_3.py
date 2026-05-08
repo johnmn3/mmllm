@@ -162,7 +162,7 @@ G3_03 = SubjectCurriculum(grade=3, subject_id="G3-03",
                 "When the body ends, the pocket is put away and `x` ceases to exist."
             ),
             resolution=(
-                "The REPL returned 4 — the count from the pocket incremented by one, "
+                "The REPL returned the result — the count from the pocket incremented by one, "
                 "the pocket now set aside at the road's end."
             ),
             tags=("story",),

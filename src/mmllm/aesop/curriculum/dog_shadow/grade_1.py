@@ -576,7 +576,7 @@ G1_09 = SubjectCurriculum(
                 'the difference between mark and message.'
             ),
             resolution=(
-                'The REPL tested the string and returned false. It was not a '
+                'The REPL tested the string and returned the verdict. It was not a '
                 'symbol, only text. Patch nodded — the tortoise had settled the kind.'
             ),
             tags=("story",),
@@ -604,7 +604,7 @@ G1_09 = SubjectCurriculum(
                 'is true if the names match, false if they differ.'
             ),
             resolution=(
-                'The REPL compared the two symbols and returned true. Both marks '
+                'The REPL compared the two symbols and returned the verdict. Both marks '
                 'were the same name. The runtime had settled it perfectly — two '
                 'equal scratches, and the hare to prove it.'
             ),
@@ -1288,7 +1288,7 @@ G1_15 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL checked all four numbers, saw they were all identical, and '
-                'returned 1. The verdict was clear — all four pebbles bore the same '
+                'returned the result. The verdict was clear — all four pebbles bore the same '
                 'mark.'
             ),
             tags=("story",),
@@ -1351,7 +1351,7 @@ G1_16 = SubjectCurriculum(
                 'verdict — true if zero, false if not — is what the REPL hands back.'
             ),
             resolution=(
-                'The REPL tested the count, saw it was not zero, and returned 5. '
+                'The REPL tested the count, saw it was not zero, and returned the result. '
                 'The verdict was clear — the bones had weight, not emptiness.'
             ),
             tags=("story",),
@@ -1455,7 +1455,7 @@ G1_16 = SubjectCurriculum(
                 'what the runtime returns.'
             ),
             resolution=(
-                'The REPL tested the number, saw it moved forward, and returned 4. '
+                'The REPL tested the number, saw it moved forward, and returned the result. '
                 'The verdict was clear — the count was positive.'
             ),
             tags=("story",),

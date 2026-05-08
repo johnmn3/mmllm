@@ -299,7 +299,7 @@ G7_05 = SubjectCurriculum(grade=7, subject_id="G7-05",
                 "returns false for nil because nil is not *some*."
             ),
             resolution=(
-                'the predicate returned false — nil confirmed as absence, not as something the accountant could count.'
+                'the predicate returned the verdict — nil confirmed as absence, not as something the accountant could count.'
             )),
         _ex("(some? 0)", True,
             "the predicate (some? 0)",
@@ -319,7 +319,7 @@ G7_05 = SubjectCurriculum(grade=7, subject_id="G7-05",
                 "pen."
             ),
             resolution=(
-                'the predicate returned true — zero was something countable, even if the count was empty. The fold gate held tight against the count of {drawn.a}, slate cool under the elder hand.'           )),
+                'the predicate returned the verdict — zero was something countable, even if the count was empty. The fold gate held tight against the count of {drawn.a}, slate cool under the elder hand.'           )),
         _ex("(first nil)", None,
             "calling first on nil",
             "the value of (first nil)",
@@ -525,7 +525,7 @@ G7_09 = SubjectCurriculum(grade=7, subject_id="G7-09",
                 "the toss worked by returning true."
             ),
             resolution=(
-                'the form returned true — the keyword had been tapped into the pool and Carol could fish it out later for inspection.'
+                'the form returned the verdict — the keyword had been tapped into the pool and Carol could fish it out later for inspection.'
             )),
         _ex("(tap> 42)", True,
             "tapping the number 42 into the tap pool",
@@ -546,7 +546,7 @@ G7_09 = SubjectCurriculum(grade=7, subject_id="G7-09",
                 "Numbers and keywords both tap the same way."
             ),
             resolution=(
-                'the form returned true — the number had been tapped into the pool, ready for later inspection.'
+                'the form returned the verdict — the number had been tapped into the pool, ready for later inspection.'
             )),
     ], subplots=_SCROLL_SUBPLOTS, plan_pool=_PLAN_G7)
 
@@ -688,7 +688,7 @@ G7_13 = SubjectCurriculum(grade=7, subject_id="G7-13",
                 "entry."
             ),
             resolution=(
-                "the form returned 3 — the log held exactly three lines, ready for the morning's processing."
+                "the form returned the result — the log held exactly three lines, ready for the morning's processing."
             )),
         _ex("(first (clojure.string/split-lines \"alpha\\nbeta\"))",
             "alpha",
@@ -941,7 +941,7 @@ G7_18 = SubjectCurriculum(grade=7, subject_id="G7-18",
                 "`count` on that vector gives 2. The tool has two arguments."
             ),
             resolution=(
-                "the form returned 2 — Tom had extracted the argument count from the foreign tool's descriptor. {drawn.a} stood as the answer the fold required, slate, chalk, and a steady eye all in agreement."           )),
+                "the form returned the result — Tom had extracted the argument count from the foreign tool's descriptor. {drawn.a} stood as the answer the fold required, slate, chalk, and a steady eye all in agreement."           )),
     ], subplots=_TOOLSHED_SUBPLOTS, plan_pool=_PLAN_G7)
 
 

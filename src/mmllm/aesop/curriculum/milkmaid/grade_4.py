@@ -117,7 +117,7 @@ G4_01 = SubjectCurriculum(grade=4, subject_id="G4-01",
                 "their own compartments of the same basket."
             ),
             mapping=(
-                "A vector of strings is the basket holding string values: `[\"a\" \"b\"]` is two compartments, "
+                "A vector of strings is the basket holding string values: two compartments, "
                 "each holding exactly one string, in the order they were placed."
             ),
             resolution=(
@@ -202,7 +202,7 @@ G4_03 = SubjectCurriculum(grade=4, subject_id="G4-03",
             ),
             mapping=(
                 "The `conj` operation is reaching into the basket and adding a new compartment: "
-                "`(conj [1 2] 3)` creates a new basket with all several items, the 3 now at the end."
+                "the form creates a new basket with all several items, the 3 now at the end."
             ),
             resolution=(
                 "The REPL handed back a new basket with three compartments: 1, 2, and 3 — the original "
@@ -447,7 +447,7 @@ G4_08 = SubjectCurriculum(grade=4, subject_id="G4-08",
                 "the same label :a but a different value inside — 99 where 1 had been."
             ),
             mapping=(
-                "`assoc` can change a binding too: `(assoc {:a 1} :a 99)` takes the original basket and creates a fresh "
+                "`assoc` can change a binding too: the form takes the original basket and creates a fresh "
                 "one where :a now points to 99. The label stays; the value changes. The old basket remains, untouched."
             ),
             resolution=(
@@ -477,7 +477,7 @@ G4_09 = SubjectCurriculum(grade=4, subject_id="G4-09",
                 "intact. The new basket would have only one label, only one binding."
             ),
             mapping=(
-                "The `dissoc` operation removes a compartment: `(dissoc {:a 1 :b 2} :a)` creates a new basket with :a's "
+                "The `dissoc` operation removes a compartment: the form creates a new basket with :a's "
                 "label and binding stripped away. The :b binding stays. The old basket remains, still holding both labels."
             ),
             resolution=(
@@ -614,7 +614,7 @@ G4_12 = SubjectCurriculum(grade=4, subject_id="G4-12",
                 "no-or-false answer was the honest reply."
             ),
             mapping=(
-                "`contains?` searches the set: `(contains? #{1 2 3} 4)` asks if 4 belongs to the set of 1, 2, and 3. The set "
+                "`contains?` searches the set: the form asks if 4 belongs to the set of 1, 2, and 3. The set "
                 "answers false — 4 is not among the known prices."
             ),
             resolution=(
@@ -741,7 +741,7 @@ G4_14 = SubjectCurriculum(grade=4, subject_id="G4-14",
                 "She needed a yes-or-no answer: does the basket hold nothing? Is it truly bare?"
             ),
             mapping=(
-                "The `empty?` function checks if a collection has no items: `(empty? [])` asks whether "
+                "The `empty?` function checks if a collection has no items: the form asks whether "
                 "the basket is void, and the answer is true."
             ),
             resolution=(
@@ -763,7 +763,7 @@ G4_14 = SubjectCurriculum(grade=4, subject_id="G4-14",
                 "She needed to verify: does the basket hold anything? Is there at least one item inside?"
             ),
             mapping=(
-                "The `empty?` function checks if a collection has items: `(empty? [1])` asks whether "
+                "The `empty?` function checks if a collection has items: the form asks whether "
                 "the basket is void — but it holds 1, so the answer is false."
             ),
             resolution=(
@@ -919,7 +919,7 @@ G4_16 = SubjectCurriculum(grade=4, subject_id="G4-16",
                 "allow only unique prices through to the fresh pail."
             ),
             mapping=(
-                "The `into` function with a set as target pours through a uniqueness-strainer: `(into #{} [1 2 2 3])` "
+                "The `into` function with a set as target pours through a uniqueness-strainer: the form "
                 "pours each element into the set, which rejects duplicates."
             ),
             resolution=(
