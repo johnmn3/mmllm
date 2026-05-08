@@ -44,7 +44,7 @@ be settled the moment the form was evaluated."""),
 "Whatever {form_display} comes to," {milkmaid_phrase} declared, {emo_proud},
 {place}, "I'll wager I know it without typing it." {farmer_phrase},
 {emo_patient}, picked up a stick and drew {concept_phrase} in the
-dust. "Then write the form," {farmer_he_she} said. "The REPL will
+dust. "Then write the form," {farmer_he_she_cap} said. "The REPL will
 have the last word.\""""),
 ]
 
@@ -255,8 +255,8 @@ G2_02 = SubjectCurriculum(
                 "the chain holds. If any gate closes, the chain is broken."
             ),
             resolution=(
-                "the REPL returned the gate's verdict — in this case, true, because 1 ≤ 1 and 1 ≤ 2 "
-                "both pass, so the chain is complete."
+                "the REPL returned the gate's verdict — every pairwise check held, "
+                "so the chain stood unbroken."
             ),
             tags=("story",),
         ),

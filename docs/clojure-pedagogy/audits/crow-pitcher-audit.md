@@ -6,102 +6,129 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 ## Grade 1
 
+### G1-15: Equality
+
+- examples: 6
+- variety @ n=50: 0.98
+- issues: {'CONCEPT_AS_VERB': 5}
+    - [CONCEPT_AS_VERB] form=`(= 1 1)` — concept_phrase substituted into a slot that needs a finite verb (e.g., 'must calling X', 'I applying Y')
+    - [CONCEPT_AS_VERB] form=`(= 1 1)` — concept_phrase substituted into a slot that needs a finite verb (e.g., 'must calling X', 'I applying Y')
+    - [CONCEPT_AS_VERB] form=`(= 1 2)` — concept_phrase substituted into a slot that needs a finite verb (e.g., 'must calling X', 'I applying Y')
+    - [CONCEPT_AS_VERB] form=`(= "a" "a")` — concept_phrase substituted into a slot that needs a finite verb (e.g., 'must calling X', 'I applying Y')
+    - [CONCEPT_AS_VERB] form=`(= :hare :tortoise)` — concept_phrase substituted into a slot that needs a finite verb (e.g., 'must calling X', 'I applying Y')
+
 ## Grade 2
+
+### G2-13: and / or — short circuit, return values
+
+- examples: 6
+- variety @ n=50: 0.99
+- issues: {'CONCEPT_AS_VERB': 2}
+    - [CONCEPT_AS_VERB] form=`(or false false)` — concept_phrase substituted into a slot that needs a finite verb (e.g., 'must calling X', 'I applying Y')
+    - [CONCEPT_AS_VERB] form=`(and 1 2 3)` — concept_phrase substituted into a slot that needs a finite verb (e.g., 'must calling X', 'I applying Y')
+
+### G2-14: not — turning truthy to false
+
+- examples: 5
+- variety @ n=50: 0.99
+- issues: {'CONCEPT_AS_VERB': 4}
+    - [CONCEPT_AS_VERB] form=`(not true)` — concept_phrase substituted into a slot that needs a finite verb (e.g., 'must calling X', 'I applying Y')
+    - [CONCEPT_AS_VERB] form=`(not 0)` — concept_phrase substituted into a slot that needs a finite verb (e.g., 'must calling X', 'I applying Y')
+    - [CONCEPT_AS_VERB] form=`(not 0)` — concept_phrase substituted into a slot that needs a finite verb (e.g., 'must calling X', 'I applying Y')
+    - [CONCEPT_AS_VERB] form=`(not "")` — concept_phrase substituted into a slot that needs a finite verb (e.g., 'must calling X', 'I applying Y')
+
+### G2-15: Falsey values: only false and nil
+
+- examples: 4
+- variety @ n=50: 0.98
+- issues: {'CONCEPT_AS_VERB': 4}
+    - [CONCEPT_AS_VERB] form=`(if 0 1 0)` — concept_phrase substituted into a slot that needs a finite verb (e.g., 'must calling X', 'I applying Y')
+    - [CONCEPT_AS_VERB] form=`(if 0 1 0)` — concept_phrase substituted into a slot that needs a finite verb (e.g., 'must calling X', 'I applying Y')
+    - [CONCEPT_AS_VERB] form=`(if "" 1 0)` — concept_phrase substituted into a slot that needs a finite verb (e.g., 'must calling X', 'I applying Y')
+    - [CONCEPT_AS_VERB] form=`(if nil 1 0)` — concept_phrase substituted into a slot that needs a finite verb (e.g., 'must calling X', 'I applying Y')
+
+### G2-16: Truthy 0 and empty string
+
+- examples: 4
+- variety @ n=50: 0.94
+- issues: {'CONCEPT_AS_VERB': 3}
+    - [CONCEPT_AS_VERB] form=`(boolean "")` — concept_phrase substituted into a slot that needs a finite verb (e.g., 'must calling X', 'I applying Y')
+    - [CONCEPT_AS_VERB] form=`(boolean "")` — concept_phrase substituted into a slot that needs a finite verb (e.g., 'must calling X', 'I applying Y')
+    - [CONCEPT_AS_VERB] form=`(boolean nil)` — concept_phrase substituted into a slot that needs a finite verb (e.g., 'must calling X', 'I applying Y')
 
 ## Grade 3
 
-### G3-18: When to name vs inline
+### G3-07: fn — anonymous function
 
 - examples: 2
-- variety @ n=50: 1.00
-- issues: {'HIGH_LENGTH': 1, 'FORM_LEAK': 1}
-    - [HIGH_LENGTH] form=`(let [n 5] (* n n n))` — user_msg 203 words
-    - [FORM_LEAK] form=`(* 5 5 5)` — form '(* 5 5 5)' appears in user_msg of a goal-style subject
+- variety @ n=50: 0.96
+- issues: {'CONCEPT_AS_VERB': 1}
+    - [CONCEPT_AS_VERB] form=`((fn [x] (+ x 1)) 4)` — concept_phrase substituted into a slot that needs a finite verb (e.g., 'must calling X', 'I applying Y')
+
+### G3-09: defn — shorthand
+
+- examples: 2
+- variety @ n=50: 0.97
+- issues: {'CONCEPT_AS_VERB': 1}
+    - [CONCEPT_AS_VERB] form=`(do (defn add3 [a b c] (+ a b c)) (add3 1 2 3))` — concept_phrase substituted into a slot that needs a finite verb (e.g., 'must calling X', 'I applying Y')
 
 ## Grade 4
 
+### G4-16: into and conj on collections
+
+- examples: 2
+- variety @ n=50: 0.94
+
 ## Grade 5
 
-### G5-22: recur — first taste
+### G5-07: and / or as control flow
+
+- examples: 2
+- variety @ n=50: 0.97
+- issues: {'CONCEPT_AS_VERB': 1}
+    - [CONCEPT_AS_VERB] form=`(and 1 2 3)` — concept_phrase substituted into a slot that needs a finite verb (e.g., 'must calling X', 'I applying Y')
+
+### G5-08: not
 
 - examples: 1
-- variety @ n=50: 0.98
-- issues: {'ANSWER_LEAK': 2, 'BAD_PLACE_PREP': 2}
-    - [ANSWER_LEAK] form=`(loop [n 5 acc 1] (if (zero? n) acc (recur (dec n)` — answer 120 in narrative
-    - [BAD_PLACE_PREP] form=`(loop [n 5 acc 1] (if (zero? n) acc (recur (dec n)` — 'in the hilltop' (wrong preposition)
-    - [ANSWER_LEAK] form=`(loop [n 5 acc 1] (if (zero? n) acc (recur (dec n)` — answer 120 in narrative
-    - [BAD_PLACE_PREP] form=`(loop [n 5 acc 1] (if (zero? n) acc (recur (dec n)` — 'in the hilltop' (wrong preposition)
+- variety @ n=50: 0.94
+
+### G5-16: partial
+
+- examples: 2
+- variety @ n=50: 0.93
+- issues: {'CONCEPT_AS_VERB': 1}
+    - [CONCEPT_AS_VERB] form=`((partial + 10) 5)` — concept_phrase substituted into a slot that needs a finite verb (e.g., 'must calling X', 'I applying Y')
+
+### G5-17: juxt
+
+- examples: 1
+- variety @ n=50: 0.96
+- issues: {'CONCEPT_AS_VERB': 1}
+    - [CONCEPT_AS_VERB] form=`((juxt inc dec) 5)` — concept_phrase substituted into a slot that needs a finite verb (e.g., 'must calling X', 'I applying Y')
 
 ## Grade 6
 
-### G6-01: Namespace as file
-
-- examples: 3
-- variety @ n=50: 1.00
-- issues: {'ANSWER_LEAK_STRING': 1}
-    - [ANSWER_LEAK_STRING] form=`(name 'foo.bar)` — answer string 'foo.bar' appears in user_msg
-
 ## Grade 7
-
-### G7-11: Reading stack traces
-
-- examples: 2
-- variety @ n=50: 1.00
-- issues: {'ANSWER_LEAK_STRING': 1}
-    - [ANSWER_LEAK_STRING] form=`(try (throw (ex-info "trouble" {})) (catch Excepti` — answer string 'trouble' appears in user_msg
 
 ## Grade 8
 
-### G8-03: defrecord introduction
-
-- examples: 2
-- variety @ n=50: 0.99
-- issues: {'ANSWER_LEAK_STRING': 1}
-    - [ANSWER_LEAK_STRING] form=`(do (defrecord Runner [name pace]) (:pace (->Runne` — answer string ':slow' appears in user_msg
-
 ## Grade 9
-
-### G9-07: Ref introduction
-
-- examples: 2
-- variety @ n=50: 1.00
-- issues: {'DOUBLE_PREP': 1}
-    - [DOUBLE_PREP] form=`(do (def r (ref 0)) (dosync (alter r inc)) @r)` — verb+preposition followed by {place} which already carries its own preposition
-
-### G9-18: locking — last resort
-
-- examples: 2
-- variety @ n=50: 1.00
-- issues: {'DOUBLE_PREP': 2}
-    - [DOUBLE_PREP] form=`(do (def lock (Object.)) (locking lock 42))` — verb+preposition followed by {place} which already carries its own preposition
-    - [DOUBLE_PREP] form=`(do (def lock (Object.)) (locking lock 42))` — verb+preposition followed by {place} which already carries its own preposition
 
 ## Grade 10
 
-### G10-03: defmacro introduction
+### G10-07: Threading macros revisited
 
-- examples: 2
-- variety @ n=50: 0.99
-- issues: {'HIGH_LENGTH': 1}
-    - [HIGH_LENGTH] form=`(do (defmacro my-when [t & body] `(if ~t (do ~@bod` — user_msg 221 words
+- examples: 3
+- variety @ n=50: 0.96
+- issues: {'CONCEPT_AS_VERB': 3}
+    - [CONCEPT_AS_VERB] form=`(-> 5 inc inc inc)` — concept_phrase substituted into a slot that needs a finite verb (e.g., 'must calling X', 'I applying Y')
+    - [CONCEPT_AS_VERB] form=`(macroexpand '(-> x f g))` — concept_phrase substituted into a slot that needs a finite verb (e.g., 'must calling X', 'I applying Y')
+    - [CONCEPT_AS_VERB] form=`(macroexpand '(-> x f g))` — concept_phrase substituted into a slot that needs a finite verb (e.g., 'must calling X', 'I applying Y')
 
 ## Grade 11
 
-### G11-06: new and dot-construct
-
-- examples: 2
-- variety @ n=50: 1.00
-- issues: {'ANSWER_LEAK_STRING': 1}
-    - [ANSWER_LEAK_STRING] form=`(new String "jump")` — answer string 'jump' appears in user_msg
-
 ## Grade 12
-
-### G12-03: into with a transducer (xform)
-
-- examples: 2
-- variety @ n=50: 0.99
-- issues: {'HIGH_LENGTH': 1}
-    - [HIGH_LENGTH] form=`(into #{} (map inc) [1 2 3])` — user_msg 206 words
 
 ---
 
@@ -109,143 +136,71 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 ### Issue counts (across all examples × 3 records)
 
-- **ANSWER_LEAK_STRING**: 4
-- **HIGH_LENGTH**: 3
-- **DOUBLE_PREP**: 3
-- **ANSWER_LEAK**: 2
-- **BAD_PLACE_PREP**: 2
-- **FORM_LEAK**: 1
+- **CONCEPT_AS_VERB**: 26
 
 ### Per-grade summary
 
 | Grade | Subjects | Examples | Issues | Low-variety |
 |---|---|---|---|---|
-| 1 | 18 | 76 | 0 | — |
-| 2 | 22 | 88 | 0 | — |
+| 1 | 18 | 76 | 5 | — |
+| 2 | 22 | 88 | 13 | G2-16(0.94) |
 | 3 | 18 | 31 | 2 | — |
-| 4 | 20 | 39 | 0 | — |
-| 5 | 22 | 39 | 4 | — |
-| 6 | 16 | 33 | 1 | — |
-| 7 | 18 | 36 | 1 | — |
-| 8 | 16 | 31 | 1 | — |
-| 9 | 18 | 34 | 3 | — |
-| 10 | 16 | 36 | 1 | — |
-| 11 | 14 | 29 | 1 | — |
-| 12 | 18 | 37 | 1 | — |
+| 4 | 20 | 39 | 0 | G4-16(0.94) |
+| 5 | 22 | 39 | 3 | G5-08(0.94); G5-16(0.93) |
+| 6 | 16 | 33 | 0 | — |
+| 7 | 18 | 36 | 0 | — |
+| 8 | 16 | 31 | 0 | — |
+| 9 | 18 | 34 | 0 | — |
+| 10 | 16 | 36 | 3 | — |
+| 11 | 14 | 29 | 0 | — |
+| 12 | 18 | 37 | 0 | — |
 
 ### Sample issues by severity
 
-#### HIGH_LENGTH
+#### CONCEPT_AS_VERB
 
-- `G3-18` (form `(let [n 5] (* n n n))`): user_msg 203 words
+- `G1-15` (form `(= 1 1)`): concept_phrase substituted into a slot that needs a finite verb (e.g., 'must calling X', 'I applying Y')
     ```
-    Mantle the crow alighted on the rim of a jar at the edge of the orchard and peered down at the small dark gleam below.
+    It is said that wit, more than strength, is the friend of the thirsty Crow. This was in the meadow.
 
-Sable tucked five stones under one wing at the village pitcher, naming the count n, then used that one tucked count three times in the body — multiplying n by itself twice over wit...
+"You can't tell which way the gate will swing by guessing,"
+Sable the crow said. "You bring the form to the gate, the runtime
+checks it, and the gate gives the only answer that matters." To
+test whet...
     ```
-- `G10-03` (form `(do (defmacro my-when [t & body] `(if ~t (do ~@body))) (my-w`): user_msg 221 words
+- `G1-15` (form `(= 1 1)`): concept_phrase substituted into a slot that needs a finite verb (e.g., 'must calling X', 'I applying Y')
     ```
-    Vane circled twice at the farm before settling on the rim of the old clay jar, eyes on the water below.
+    The Crow knew that water in the world is sometimes hidden where only the patient can reach it.
 
-Caw scratched a master revision rule on the pitcher's rim at the village: `my-when` — whenever this pattern appeared in a form, the talon would rewrite it before the REPL ever saw the body. The r...
+"You can't tell which way the gate will swing by guessing,"
+Korvus the crow said. "You bring the form to the gate, the runtime
+checks it, and the gate gives the only answer that matters." To
+test whether ...
     ```
-- `G12-03` (form `(into #{} (map inc) [1 2 3])`): user_msg 206 words
+- `G1-15` (form `(= 1 2)`): concept_phrase substituted into a slot that needs a finite verb (e.g., 'must calling X', 'I applying Y')
     ```
-    Vane circled twice at the farm before settling on the rim of the old clay jar, eyes on the water below.
+    The Crow knew that water in the world is sometimes hidden where only the patient can reach it. It happened near the farm.
 
-Caw stood at the village sorting-perch with the increment groove, but this time the receiving pile below was a set — a heap that keeps only unique stones. Three stones waited in line to pass thro...
+"You can't tell which way the gate will swing by guessing,"
+Caw the crow said. "You bring the form to the gate, the runtime
+checks it, and the gate gives the only answer that ma...
     ```
-
-#### FORM_LEAK
-
-- `G3-18` (form `(* 5 5 5)`): form '(* 5 5 5)' appears in user_msg of a goal-style subject
+- `G1-15` (form `(= "a" "a")`): concept_phrase substituted into a slot that needs a finite verb (e.g., 'must calling X', 'I applying Y')
     ```
-    near the village, where the orchard meets the well, an old clay pitcher had stood for as long as anyone could remember.
+    It is said that wit, more than strength, is the friend of the thirsty Crow. All this took place in the garden.
 
-Korvus dropped three literal stone-counts of five into the garden pitcher all at once — no wing tucked, no name carved — just three fives fed directly to the multiplication as pla...
+"You can't tell which way the gate will swing by guessing,"
+Caw the crow said. "You bring the form to the gate, the runtime
+checks it, and the gate gives the only answer that matters." To
+...
     ```
+- `G1-15` (form `(= :hare :tortoise)`): concept_phrase substituted into a slot that needs a finite verb (e.g., 'must calling X', 'I applying Y')
+    ```
+    It is said that wit, more than strength, is the friend of the thirsty Crow.
 
-#### ANSWER_LEAK
-
-- `G5-22` (form `(loop [n 5 acc 1] (if (zero? n) acc (recur (dec n) (* acc n)`): answer 120 in narrative
-    ```
-    near the village, where the heat shimmered above the stones, Buffet the crow began the slow business of solving thirst.
-
-Caw stood at the pitcher's rim in the hilltop field, a circuit chalked beneath her feet: start with n=5 and accumulator=1. Each lap, multiply the accumulator by n, step n down by ...
-    ```
-- `G5-22` (form `(loop [n 5 acc 1] (if (zero? n) acc (recur (dec n) (* acc n)`): answer 120 in narrative
-    ```
-    On a long afternoon when even the bees had grown slow, a thirsty bird settled on the rim of a clay vessel.
-
-Caw stood at the pitcher's rim in the hilltop field, a circuit chalked beneath her feet: start with n=5 and accumulator=1. Each lap, multiply the accumulator by n, step n down by one — loop wi...
-    ```
-
-#### BAD_PLACE_PREP
-
-- `G5-22` (form `(loop [n 5 acc 1] (if (zero? n) acc (recur (dec n) (* acc n)`): 'in the hilltop' (wrong preposition)
-    ```
-    near the village, where the heat shimmered above the stones, Buffet the crow began the slow business of solving thirst.
-
-Caw stood at the pitcher's rim in the hilltop field, a circuit chalked beneath her feet: start with n=5 and accumulator=1. Each lap, multiply the accumulator by n, step n down by ...
-    ```
-- `G5-22` (form `(loop [n 5 acc 1] (if (zero? n) acc (recur (dec n) (* acc n)`): 'in the hilltop' (wrong preposition)
-    ```
-    On a long afternoon when even the bees had grown slow, a thirsty bird settled on the rim of a clay vessel.
-
-Caw stood at the pitcher's rim in the hilltop field, a circuit chalked beneath her feet: start with n=5 and accumulator=1. Each lap, multiply the accumulator by n, step n down by one — loop wi...
-    ```
-
-#### ANSWER_LEAK_STRING
-
-- `G6-01` (form `(name 'foo.bar)`): answer string 'foo.bar' appears in user_msg
-    ```
-    In a year when the wells ran low, a single jar of water was a small kingdom unto itself.
-
-Korvus perched at the pitcher's clay rim in the garden and studied the name carved into the side: a dotted path, two segments pressed into the clay. He wanted to read it as a plain string, not a symbol.
-
-He nee...
-    ```
-- `G7-11` (form `(try (throw (ex-info "trouble" {})) (catch Exception e (.get`): answer string 'trouble' appears in user_msg
-    ```
-    A row of pebbles lay at the foot of the wall, sun-warmed, unremarkable, and just heavy enough.
-
-Onyxwing the crow spread a patch of soft moss beneath the pitcher on the market.
-"If a stone goes wrong — if the form fails — the moss catches it safely,"
-he said. "The pitcher's water level doesn't drop;...
-    ```
-- `G8-03` (form `(do (defrecord Runner [name pace]) (:pace (->Runner "Alice" `): answer string ':slow' appears in user_msg
-    ```
-    Vane circled twice at the farm before settling on the rim of the old clay jar, eyes on the water below.
-
-Caw wove a bark-and-vine carrying-pouch with two named slots: one for a name-stone, one for a pace-stone. She stitched the shape onto the rim once, then packed an instance: name='Alice', pace=:sl...
-    ```
-- `G11-06` (form `(new String "jump")`): answer string 'jump' appears in user_msg
-    ```
-    The kitchen garden had been lovingly kept, but the sun that year had been merciless and constant.
-
-Korvus tried the same potter's mold at the meadow but wrote the inscription differently — using the `new` keyword before the class name, pressing 'jump' into the wet clay.
-
-He wanted to confirm `new` w...
-    ```
-
-#### DOUBLE_PREP
-
-- `G9-07` (form `(do (def r (ref 0)) (dosync (alter r inc)) @r)`): verb+preposition followed by {place} which already carries its own preposition
-    ```
-    Witty circled twice near the hilltop before settling on the rim of the old clay jar, eyes on the water below.
-
-Caw placed a zero-mark in a sealed safe-box beside the pitcher at the garden. To change the mark she had to open the safe-box in one atomic transaction, nudge the tally up by one, and seal ...
-    ```
-- `G9-18` (form `(do (def lock (Object.)) (locking lock 42))`): verb+preposition followed by {place} which already carries its own preposition
-    ```
-    Cluck the crow was no fool, and at the edge of the garden the day demanded thinking rather than complaining.
-
-Korvus planted a gate-stone at the pitcher's mouth on the road. He rolled it aside, placed a single stone tally inside the sealed section, then rolled the gate back — the tally was the body'...
-    ```
-- `G9-18` (form `(do (def lock (Object.)) (locking lock 42))`): verb+preposition followed by {place} which already carries its own preposition
-    ```
-    Coal the crow arrived at the farm with no plan but a sharp eye and a willingness to take small steps.
-
-Korvus planted a gate-stone at the pitcher's mouth on the road. He rolled it aside, placed a single stone tally inside the sealed section, then rolled the gate back — the tally was the body's only ...
+"You can't tell which way the gate will swing by guessing,"
+Sable the crow said. "You bring the form to the gate, the runtime
+checks it, and the gate gives the only answer that matters." To
+test whether :hare equals :tortoi...
     ```
 

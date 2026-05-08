@@ -504,6 +504,114 @@ def check_record(rec, sub, example):
                         "boast subplot 'X insisted they already knew' reads as "
                         "plural after singular-named subject (pitfall #19)"))
 
+    # ─────────── milkmaid hand-audit additions (claude/audit-milkmaid-k7Pq) ───────────
+
+    # CONCEPT_AS_VERB — milkmaid grade-8/10 templates substitute
+    # {concept_phrase} (often a gerund noun phrase like "calling a
+    # protocol method on a string", "applying a function to each
+    # element of a collection") into slots that grammatically require
+    # a finite verb. Renders as broken text:
+    #   - "you must calling a protocol method on a string"
+    #   - "I applying a function to each element of a collection — I
+    #      turned..."
+    #   - "any farmer who joins must calling..."
+    #   - "her own calling a protocol method on a string"
+    #   - "the form that calling a protocol method on a string for ..."
+    # The fix is template-level: rewrap concept_phrase as a noun
+    # ("must perform {concept_phrase}", "I followed {concept_phrase}")
+    # rather than as a verb.
+    # Two-arm pattern:
+    #   (a) modal/quasi-modal + gerund + obj-prep — always wrong, no
+    #       auxiliary can rescue it (must/should/can/will/may/own/...).
+    #   (b) bare-subject ("I"/"you"/"we"/"that") + gerund + obj-prep,
+    #       skipped when preceded by a be/keep/while-style word that
+    #       legitimately licenses the gerund (progressive aspect).
+    #
+    # Python re's lookbehinds must be fixed-width; instead of a
+    # variable-width lookbehind we capture the preceding word and
+    # filter in the loop.
+    concept_as_verb_modal_re = re.compile(
+        r"\b(?:must|should|can|will|may|own way of doing)"
+        r"\s+(?:[a-z]+ing)\s+(?:a|the|an|to|by|via|on|in|at|of|for|with)\b"
+    )
+    concept_as_verb_subj_re = re.compile(
+        r"(?:^|(?<=\W))(\w+\s)?\b(I|you|we)"
+        r"\s+(?:[a-z]+ing)\s+(?:a|the|an|to|by|via|on|in|at|of|for|with)\b"
+    )
+    licensors = {
+        "am", "is", "are", "was", "were", "been", "being", "keep", "kept",
+        "keeps", "started", "continued", "finished", "stopped", "while",
+        "after", "before", "by", "from", "since", "without", "for", "of",
+        "to", "and", "or", "but", "than"
+    }
+    has_concept_as_verb = bool(concept_as_verb_modal_re.search(user))
+    if not has_concept_as_verb:
+        for m in concept_as_verb_subj_re.finditer(user):
+            prev_word = (m.group(1) or "").strip().lower()
+            if prev_word in licensors:
+                continue
+            has_concept_as_verb = True
+            break
+    if has_concept_as_verb:
+        issues.append(("CONCEPT_AS_VERB",
+                        "concept_phrase substituted into a slot that needs a "
+                        "finite verb (e.g., 'must calling X', 'I applying Y')"))
+
+    # LOWERCASE_PRONOUN_AFTER_PERIOD — sentence-initial pronoun fails
+    # to capitalize when the prior subplot template ends with a period
+    # and the next clause starts with `{tortoise_he_she}` or a bare
+    # pronoun. Renders as:
+    #   - "she cried. she only shook her head"
+    #   - "he asked. he replied"
+    #   - "she said. they nodded"
+    # Distinct from LOWERCASE_AFTER_PERIOD (which only catches lower-
+    # case `{place}` phrases like "in the meadow").
+    if re.search(
+        r"\.\s+(?:she|he|they)\s+(?:[a-z]+ed|only|asked|replied|nodded|"
+        r"smiled|laughed|continued|explained|added|cried|shook|pointed|"
+        r"declared|insisted|said|wondered|listened)\b",
+        user,
+    ):
+        issues.append(("LOWERCASE_PRONOUN_AFTER_PERIOD",
+                        "sentence-initial pronoun (she/he/they) appears "
+                        "lowercase after a period (pronoun-substitution did "
+                        "not capitalize at sentence start)"))
+
+    # VOCATIVE_PRONOUN — a pronoun used as a vocative ("stops you, she.")
+    # is unidiomatic English. Pattern surfaced in milkmaid GATE
+    # templates: ", she." / ", he." / ", they." used as direct address.
+    # The template should call the character by name (or drop the
+    # vocative), not by pronoun.
+    if re.search(r",\s+(?:she|he|they)\.", user):
+        issues.append(("VOCATIVE_PRONOUN",
+                        "pronoun used as vocative form of address (',she.' / "
+                        "',he.') — should use the character's name"))
+
+    # LOWERCASE_CONCEPT_AFTER_PERIOD — sentence ends with a period and
+    # the next sentence opens with the lowercase concept_phrase
+    # ("the multi-arg sum", "the inequality check", etc.) acting as
+    # subject. The template author meant for the concept_phrase to
+    # be a sentence-internal noun-phrase but the period-then-concept
+    # pattern produces a lowercase sentence-start. The fix is to
+    # split the sentence with a comma, dash, or to capitalize the
+    # concept_phrase's first word.
+    #
+    # Examples surfaced in milkmaid G2/G6:
+    #   - "It is a step-by-step walk through the coins. the multi-arg
+    #      sum does this step by step..."
+    #   - "...the path the pail takes. the case statement with default
+    #      examines the choice..."
+    if re.search(
+        r"\.\s+the\s+(?:[a-z]+\s+){1,4}"
+        r"(?:does|is|means|chooses|examines|reads|"
+        r"writes|examines|walks|stacks|fires|takes)\b",
+        user,
+    ):
+        issues.append(("LOWERCASE_CONCEPT_AFTER_PERIOD",
+                        "sentence-initial 'the X verb' (lowercase concept_phrase "
+                        "as subject) — produced when subplot template ends a "
+                        "sentence with a period before {concept_phrase}"))
+
     return issues
 
 

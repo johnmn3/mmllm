@@ -6,132 +6,174 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 ## Grade 1
 
+### G1-15: Equality
+
+- examples: 6
+- variety @ n=50: 0.98
+- issues: {'CONCEPT_AS_VERB': 1}
+    - [CONCEPT_AS_VERB] form=`(= 1 2)` — concept_phrase substituted into a slot that needs a finite verb (e.g., 'must calling X', 'I applying Y')
+
 ## Grade 2
 
+### G2-13: and / or — short circuit, return values
+
+- examples: 6
+- variety @ n=50: 0.98
+- issues: {'CONCEPT_AS_VERB': 1}
+    - [CONCEPT_AS_VERB] form=`(and true true)` — concept_phrase substituted into a slot that needs a finite verb (e.g., 'must calling X', 'I applying Y')
+
+### G2-14: not — turning truthy to false
+
+- examples: 5
+- variety @ n=50: 0.98
+- issues: {'CONCEPT_AS_VERB': 2}
+    - [CONCEPT_AS_VERB] form=`(not false)` — concept_phrase substituted into a slot that needs a finite verb (e.g., 'must calling X', 'I applying Y')
+    - [CONCEPT_AS_VERB] form=`(not 0)` — concept_phrase substituted into a slot that needs a finite verb (e.g., 'must calling X', 'I applying Y')
+
+### G2-15: Falsey values: only false and nil
+
+- examples: 4
+- variety @ n=50: 0.98
+- issues: {'CONCEPT_AS_VERB': 1}
+    - [CONCEPT_AS_VERB] form=`(if "" 1 0)` — concept_phrase substituted into a slot that needs a finite verb (e.g., 'must calling X', 'I applying Y')
+
+### G2-16: Truthy 0 and empty string
+
+- examples: 4
+- variety @ n=50: 0.97
+- issues: {'CONCEPT_AS_VERB': 1}
+    - [CONCEPT_AS_VERB] form=`(boolean "")` — concept_phrase substituted into a slot that needs a finite verb (e.g., 'must calling X', 'I applying Y')
+
+### G2-18: Quoting symbols
+
+- examples: 3
+- variety @ n=50: 0.95
+
 ## Grade 3
+
+### G3-07: fn — anonymous function
+
+- examples: 2
+- variety @ n=50: 0.96
+- issues: {'CONCEPT_AS_VERB': 3}
+    - [CONCEPT_AS_VERB] form=`((fn [a b] (* a b)) 3 4)` — concept_phrase substituted into a slot that needs a finite verb (e.g., 'must calling X', 'I applying Y')
+    - [CONCEPT_AS_VERB] form=`((fn [a b] (* a b)) 3 4)` — concept_phrase substituted into a slot that needs a finite verb (e.g., 'must calling X', 'I applying Y')
+    - [CONCEPT_AS_VERB] form=`((fn [a b] (* a b)) 3 4)` — concept_phrase substituted into a slot that needs a finite verb (e.g., 'must calling X', 'I applying Y')
+
+### G3-09: defn — shorthand
+
+- examples: 2
+- variety @ n=50: 0.96
+- issues: {'CONCEPT_AS_VERB': 1}
+    - [CONCEPT_AS_VERB] form=`(do (defn add3 [a b c] (+ a b c)) (add3 1 2 3))` — concept_phrase substituted into a slot that needs a finite verb (e.g., 'must calling X', 'I applying Y')
 
 ### G3-10: anonymous shorthand #()
 
 - examples: 2
+- variety @ n=50: 0.98
+- issues: {'CONCEPT_AS_VERB': 2}
+    - [CONCEPT_AS_VERB] form=`(#(+ % 1) 5)` — concept_phrase substituted into a slot that needs a finite verb (e.g., 'must calling X', 'I applying Y')
+    - [CONCEPT_AS_VERB] form=`(#(+ % 1) 5)` — concept_phrase substituted into a slot that needs a finite verb (e.g., 'must calling X', 'I applying Y')
+
+### G3-13: fn body returns last form
+
+- examples: 1
+- variety @ n=50: 0.94
+
+### G3-15: Side-effects in body
+
+- examples: 1
 - variety @ n=50: 1.00
-- issues: {'HIGH_LENGTH': 1}
-    - [HIGH_LENGTH] form=`(#(+ % 1) 5)` — user_msg 203 words
+- issues: {'CONCEPT_AS_VERB': 2}
+    - [CONCEPT_AS_VERB] form=`(do (println "hi") 42)` — concept_phrase substituted into a slot that needs a finite verb (e.g., 'must calling X', 'I applying Y')
+    - [CONCEPT_AS_VERB] form=`(do (println "hi") 42)` — concept_phrase substituted into a slot that needs a finite verb (e.g., 'must calling X', 'I applying Y')
 
 ## Grade 4
 
 ## Grade 5
 
-## Grade 6
-
-### G6-01: Namespace as file
-
-- examples: 3
-- variety @ n=50: 1.00
-- issues: {'ANSWER_LEAK_STRING': 1}
-    - [ANSWER_LEAK_STRING] form=`(name 'foo.bar)` — answer string 'foo.bar' appears in user_msg
-
-### G6-15: Namespace meta
+### G5-07: and / or as control flow
 
 - examples: 2
-- variety @ n=50: 1.00
-- issues: {'ANSWER_LEAK_STRING': 1}
-    - [ANSWER_LEAK_STRING] form=`(:doc (meta '\{:doc "steady wins"\} race))` — answer string 'steady wins' appears in user_msg
+- variety @ n=50: 0.98
+- issues: {'CONCEPT_AS_VERB': 1}
+    - [CONCEPT_AS_VERB] form=`(and 1 2 3)` — concept_phrase substituted into a slot that needs a finite verb (e.g., 'must calling X', 'I applying Y')
 
-## Grade 7
+### G5-09: fn as value
 
-### G7-11: Reading stack traces
+- examples: 1
+- variety @ n=50: 0.94
+
+### G5-15: comp
+
+- examples: 2
+- variety @ n=50: 0.98
+- issues: {'CONCEPT_AS_VERB': 3}
+    - [CONCEPT_AS_VERB] form=`((comp inc inc) 5)` — concept_phrase substituted into a slot that needs a finite verb (e.g., 'must calling X', 'I applying Y')
+    - [CONCEPT_AS_VERB] form=`((comp inc inc) 5)` — concept_phrase substituted into a slot that needs a finite verb (e.g., 'must calling X', 'I applying Y')
+    - [CONCEPT_AS_VERB] form=`((comp str inc) 9)` — concept_phrase substituted into a slot that needs a finite verb (e.g., 'must calling X', 'I applying Y')
+
+### G5-16: partial
 
 - examples: 2
 - variety @ n=50: 0.99
-- issues: {'ANSWER_LEAK_STRING': 1}
-    - [ANSWER_LEAK_STRING] form=`(try (throw (ex-info "trouble" {})) (catch Excepti` — answer string 'trouble' appears in user_msg
+- issues: {'CONCEPT_AS_VERB': 4}
+    - [CONCEPT_AS_VERB] form=`((partial + 10) 5)` — concept_phrase substituted into a slot that needs a finite verb (e.g., 'must calling X', 'I applying Y')
+    - [CONCEPT_AS_VERB] form=`((partial + 10) 5)` — concept_phrase substituted into a slot that needs a finite verb (e.g., 'must calling X', 'I applying Y')
+    - [CONCEPT_AS_VERB] form=`(map (partial * 3) [1 2 3])` — concept_phrase substituted into a slot that needs a finite verb (e.g., 'must calling X', 'I applying Y')
+    - [CONCEPT_AS_VERB] form=`(map (partial * 3) [1 2 3])` — concept_phrase substituted into a slot that needs a finite verb (e.g., 'must calling X', 'I applying Y')
+
+### G5-17: juxt
+
+- examples: 1
+- variety @ n=50: 1.00
+- issues: {'CONCEPT_AS_VERB': 1}
+    - [CONCEPT_AS_VERB] form=`((juxt inc dec) 5)` — concept_phrase substituted into a slot that needs a finite verb (e.g., 'must calling X', 'I applying Y')
+
+## Grade 6
+
+### G6-13: Aliasing conventions
+
+- examples: 1
+- variety @ n=50: 0.94
+
+## Grade 7
 
 ## Grade 8
 
-### G8-03: defrecord introduction
+### G8-02: deftype introduction
 
 - examples: 2
-- variety @ n=50: 1.00
-- issues: {'HIGH_LENGTH': 1}
-    - [HIGH_LENGTH] form=`(do (defrecord Runner [name pace]) (:pace (->Runne` — user_msg 204 words
+- variety @ n=50: 0.92
 
-### G8-08: Multimethod defmulti
+### G8-13: this-style vs fn-style
 
 - examples: 2
-- variety @ n=50: 1.00
-- issues: {'HIGH_LENGTH': 1}
-    - [HIGH_LENGTH] form=`(do (defmulti pace :species) (defmethod pace :hare` — user_msg 207 words
+- variety @ n=50: 0.94
 
 ### G8-14: Protocols don't inherit
 
 - examples: 1
-- variety @ n=50: 0.98
-- issues: {'HIGH_LENGTH': 1}
-    - [HIGH_LENGTH] form=`(do (defprotocol A (a-op [this])) (defprotocol B (` — user_msg 218 words
+- variety @ n=50: 0.92
 
 ## Grade 9
 
-### G9-02: Why state at all
-
-- examples: 2
-- variety @ n=50: 1.00
-- issues: {'HIGH_LENGTH': 1}
-    - [HIGH_LENGTH] form=`(do (def progress (atom :idle)) (reset! progress :` — user_msg 201 words
-
-### G9-08: dosync and alter
-
-- examples: 2
-- variety @ n=50: 1.00
-- issues: {'HIGH_LENGTH': 1}
-    - [HIGH_LENGTH] form=`(do (def a (ref 1)) (def b (ref 2)) (dosync (alter` — user_msg 207 words
-
-### G9-17: binding — thread-local
-
-- examples: 2
-- variety @ n=50: 1.00
-- issues: {'HIGH_LENGTH': 1}
-    - [HIGH_LENGTH] form=`(do (def ^:dynamic *p* 1) (binding [*p* 99] *p*))` — user_msg 206 words
-
-### G9-18: locking — last resort
-
-- examples: 2
-- variety @ n=50: 1.00
-- issues: {'HIGH_LENGTH': 1}
-    - [HIGH_LENGTH] form=`(do (def lock (Object.)) (locking lock 42))` — user_msg 204 words
-
 ## Grade 10
 
-### G10-03: defmacro introduction
+### G10-07: Threading macros revisited
 
-- examples: 2
-- variety @ n=50: 1.00
-- issues: {'HIGH_LENGTH': 1}
-    - [HIGH_LENGTH] form=`(do (defmacro my-when [t & body] `(if ~t (do ~@bod` — user_msg 204 words
-
-### G10-16: Macro pattern library
-
-- examples: 2
-- variety @ n=50: 1.00
-- issues: {'HIGH_LENGTH': 1}
-    - [HIGH_LENGTH] form=`(do (defmacro def-pace [name v] `(def ~name ~v)) (` — user_msg 204 words
+- examples: 3
+- variety @ n=50: 0.97
+- issues: {'CONCEPT_AS_VERB': 5}
+    - [CONCEPT_AS_VERB] form=`(->> [1 2 3 4] (filter even?) (map inc) (reduce +)` — concept_phrase substituted into a slot that needs a finite verb (e.g., 'must calling X', 'I applying Y')
+    - [CONCEPT_AS_VERB] form=`(->> [1 2 3 4] (filter even?) (map inc) (reduce +)` — concept_phrase substituted into a slot that needs a finite verb (e.g., 'must calling X', 'I applying Y')
+    - [CONCEPT_AS_VERB] form=`(->> [1 2 3 4] (filter even?) (map inc) (reduce +)` — concept_phrase substituted into a slot that needs a finite verb (e.g., 'must calling X', 'I applying Y')
+    - [CONCEPT_AS_VERB] form=`(macroexpand '(-> x f g))` — concept_phrase substituted into a slot that needs a finite verb (e.g., 'must calling X', 'I applying Y')
+    - [CONCEPT_AS_VERB] form=`(macroexpand '(-> x f g))` — concept_phrase substituted into a slot that needs a finite verb (e.g., 'must calling X', 'I applying Y')
 
 ## Grade 11
 
-### G11-08: Type hints
-
-- examples: 2
-- variety @ n=50: 1.00
-- issues: {'HIGH_LENGTH': 1}
-    - [HIGH_LENGTH] form=`(let [^String s "abc"] (.toUpperCase s))` — user_msg 203 words
-
 ## Grade 12
-
-### G12-02: Transducer composition
-
-- examples: 2
-- variety @ n=50: 1.00
-- issues: {'HIGH_LENGTH': 1}
-    - [HIGH_LENGTH] form=`(transduce (comp (map inc) (filter even?)) + 0 [1 ` — user_msg 210 words
 
 ---
 
@@ -139,89 +181,70 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 ### Issue counts (across all examples × 3 records)
 
-- **HIGH_LENGTH**: 12
-- **ANSWER_LEAK_STRING**: 3
+- **CONCEPT_AS_VERB**: 28
 
 ### Per-grade summary
 
 | Grade | Subjects | Examples | Issues | Low-variety |
 |---|---|---|---|---|
-| 1 | 18 | 76 | 0 | — |
-| 2 | 22 | 88 | 0 | — |
-| 3 | 18 | 31 | 1 | — |
+| 1 | 18 | 76 | 1 | — |
+| 2 | 22 | 88 | 5 | G2-18(0.95) |
+| 3 | 18 | 31 | 8 | G3-13(0.94) |
 | 4 | 20 | 39 | 0 | — |
-| 5 | 22 | 39 | 0 | — |
-| 6 | 16 | 33 | 2 | — |
-| 7 | 18 | 36 | 1 | — |
-| 8 | 16 | 31 | 3 | — |
-| 9 | 18 | 34 | 4 | — |
-| 10 | 16 | 36 | 2 | — |
-| 11 | 14 | 29 | 1 | — |
-| 12 | 18 | 37 | 1 | — |
+| 5 | 22 | 39 | 9 | G5-09(0.94) |
+| 6 | 16 | 33 | 0 | G6-13(0.94) |
+| 7 | 18 | 36 | 0 | — |
+| 8 | 16 | 31 | 0 | G8-02(0.92); G8-13(0.94); G8-14(0.92) |
+| 9 | 18 | 34 | 0 | — |
+| 10 | 16 | 36 | 5 | — |
+| 11 | 14 | 29 | 0 | — |
+| 12 | 18 | 37 | 0 | — |
 
 ### Sample issues by severity
 
-#### HIGH_LENGTH
+#### CONCEPT_AS_VERB
 
-- `G3-10` (form `(#(+ % 1) 5)`): user_msg 203 words
+- `G1-15` (form `(= 1 2)`): concept_phrase substituted into a slot that needs a finite verb (e.g., 'must calling X', 'I applying Y')
     ```
-    Among the small kingdoms of the meadow, swiftness was a kind of currency, and one creature spent it loudly.
+    The Hare and the Tortoise had argued for as long as anyone could remember about who was truly the faster. This was at the edge of the forest.
 
-Mossback was in a hurry at the roadside and had no time to write a full recipe card. She scratched a quick shorthand mark — `#(+ % 1)` — on a stone and put 5 acorns in front of it immediately...
+"You can't tell which way the gate will swing by guessing,"
+Mossback the tortoise said. "You bring the value to the gate, the
+runtime checks it, and the gate...
     ```
-- `G8-03` (form `(do (defrecord Runner [name pace]) (:pace (->Runner "Alice" `): user_msg 204 words
+- `G2-13` (form `(and true true)`): concept_phrase substituted into a slot that needs a finite verb (e.g., 'must calling X', 'I applying Y')
     ```
-    Galop announced the race in a voice loud enough to wake the owls, and Fen accepted with a nod.
+    The Hare and the Tortoise had argued for as long as anyone could remember about who was truly the faster.
 
-Mossback the tortoise was outfitting the meadow's runners with carrying-cases — small wooden cases with two named compartments inside, one labeled `name` and one labeled `pace`. The case-stamp on the outs...
+"You can't tell which way the gate will swing by guessing,"
+Mossback the tortoise said. "You bring the value to the gate, the
+runtime checks it, and the gate gives the only answer that
+matters....
     ```
-- `G8-08` (form `(do (defmulti pace :species) (defmethod pace :hare [_] :swif`): user_msg 207 words
+- `G2-14` (form `(not false)`): concept_phrase substituted into a slot that needs a finite verb (e.g., 'must calling X', 'I applying Y')
     ```
-    Among the small kingdoms of the meadow, swiftness was a kind of currency, and one creature spent it loudly.
+    The Hare and the Tortoise had argued for as long as anyone could remember about who was truly the faster.
 
-Mossback the tortoise set up a sorting-table at the edge of the meadow. Runners would walk up; the table would read each runner's :species stamp and route them to the matching arm.
-
-Today's f...
+"You can't tell which way the gate will swing by guessing,"
+Slowpoke the tortoise said. "You bring the value to the gate, the
+runtime checks it, and the gate gives the only answer that
+matters....
     ```
-- `G8-14` (form `(do (defprotocol A (a-op [this])) (defprotocol B (b-op [this`): user_msg 218 words
+- `G2-14` (form `(not 0)`): concept_phrase substituted into a slot that needs a finite verb (e.g., 'must calling X', 'I applying Y')
     ```
-    In that part of the woods, no one ever expected the slow to outpace the swift, yet the question was always quietly asked.
+    There was once a Hare whose pride matched her feet in speed, and a Tortoise who said nothing about either.
 
-Mossback the tortoise founded two separate guilds — A and B — each with its own routine. She signed the String type into both guilds independently, giving each its own implement...
+"You can't tell which way the gate will swing by guessing,"
+Mossback the tortoise said. "You bring the value to the gate, the
+runtime checks it, and the gate gives the only answer that
+matters...
     ```
-- `G9-02` (form `(do (def progress (atom :idle)) (reset! progress :running) @`): user_msg 201 words
+- `G2-15` (form `(if "" 1 0)`): concept_phrase substituted into a slot that needs a finite verb (e.g., 'must calling X', 'I applying Y')
     ```
-    It is one thing to have fast legs and another to know how to use them, as the meadow folk would soon be reminded.
+    The Hare and the Tortoise had argued for as long as anyone could remember about who was truly the faster. This was at the edge of the forest.
 
-Mossback kept a small notebook on the stump to track the race's status. Before the starting horn, the page read the idle word. The horn sounded and the race began.
-
-The status needed to...
-    ```
-
-#### ANSWER_LEAK_STRING
-
-- `G6-01` (form `(name 'foo.bar)`): answer string 'foo.bar' appears in user_msg
-    ```
-    Some say it began with a yawn and a laugh; others say it began with a quiet refusal to be laughed at.
-
-On the long road, there lay a library shelf holding scrolls. Each scroll had a name — foo.bar, tortoise.race — inscribed on its spine in the style of the land.
-
-Mossback the tortoise needed to know...
-    ```
-- `G6-15` (form `(:doc (meta '\{:doc "steady wins"\} race))`): answer string 'steady wins' appears in user_msg
-    ```
-    Two creatures of very different gait once agreed that the ground between two stones would settle a long argument.
-
-On a scroll lay a symbol race, marked with marginalia in the margin: ^{:doc "steady wins"}. The margin held a note — a docstring — explaining what the symbol was about.
-
-Mossback wanted...
-    ```
-- `G7-11` (form `(try (throw (ex-info "trouble" {})) (catch Exception e (.get`): answer string 'trouble' appears in user_msg
-    ```
-    Among the small kingdoms of the meadow, swiftness was a kind of currency, and one creature spent it loudly.
-
-Lichen the tortoise stretched a small net beneath a high jump
-at the edge of the woods. "If the runner falls, the net catches them; the run
-doesn't end, only the path bends." To throw an ex-i...
+"You can't tell which way the gate will swing by guessing,"
+Mossback the tortoise said. "You bring the value to the gate, the
+runtime checks it, and the gate...
     ```
 

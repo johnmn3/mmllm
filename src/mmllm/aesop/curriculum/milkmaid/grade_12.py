@@ -30,7 +30,7 @@ _REAL_SUBPLOTS: list[SubplotTemplate] = list(_G1_SUBPLOTS) + [
     SubplotTemplate("""\
 The race had ended {place} and the two were sitting beneath an old
 tree, comparing notes. {farmer_phrase} drew {concept_phrase} into
-the dust. "We've come a long way," {farmer_he_she} said. "The form
+the dust. "We've come a long way," {farmer_he_she_cap} said. "The form
 {form_display} is the kind of thing we'd reach for now." {milkmaid}
 nodded — for once {emo_tired} enough to listen."""),
 

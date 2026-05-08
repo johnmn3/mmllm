@@ -6,22 +6,41 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 ## Grade 1
 
-### G1-13: First arithmetic call
-
-- examples: 6
-- variety @ n=50: 1.00
-- issues: {'FORM_LEAK': 1}
-    - [FORM_LEAK] form=`(+ 7 8)` — form '(+ 7 8)' appears in user_msg of a goal-style subject
-
 ## Grade 2
 
-### G2-10: Powers via repeated multiplication
+### G2-13: and / or — short circuit, return values
+
+- examples: 6
+- variety @ n=50: 0.98
+- issues: {'CONCEPT_AS_VERB': 4}
+    - [CONCEPT_AS_VERB] form=`(and true true)` — concept_phrase substituted into a slot that needs a finite verb (e.g., 'must calling X', 'I applying Y')
+    - [CONCEPT_AS_VERB] form=`(and true true)` — concept_phrase substituted into a slot that needs a finite verb (e.g., 'must calling X', 'I applying Y')
+    - [CONCEPT_AS_VERB] form=`(or false false)` — concept_phrase substituted into a slot that needs a finite verb (e.g., 'must calling X', 'I applying Y')
+    - [CONCEPT_AS_VERB] form=`(or nil false 5)` — concept_phrase substituted into a slot that needs a finite verb (e.g., 'must calling X', 'I applying Y')
+
+### G2-14: not — turning truthy to false
+
+- examples: 5
+- variety @ n=50: 1.00
+- issues: {'CONCEPT_AS_VERB': 3}
+    - [CONCEPT_AS_VERB] form=`(not true)` — concept_phrase substituted into a slot that needs a finite verb (e.g., 'must calling X', 'I applying Y')
+    - [CONCEPT_AS_VERB] form=`(not 0)` — concept_phrase substituted into a slot that needs a finite verb (e.g., 'must calling X', 'I applying Y')
+    - [CONCEPT_AS_VERB] form=`(not "")` — concept_phrase substituted into a slot that needs a finite verb (e.g., 'must calling X', 'I applying Y')
+
+### G2-16: Truthy 0 and empty string
 
 - examples: 4
+- variety @ n=50: 0.99
+- issues: {'CONCEPT_AS_VERB': 2}
+    - [CONCEPT_AS_VERB] form=`(boolean 0)` — concept_phrase substituted into a slot that needs a finite verb (e.g., 'must calling X', 'I applying Y')
+    - [CONCEPT_AS_VERB] form=`(boolean false)` — concept_phrase substituted into a slot that needs a finite verb (e.g., 'must calling X', 'I applying Y')
+
+### G2-20: Counting
+
+- examples: 3
 - variety @ n=50: 1.00
-- issues: {'ANSWER_LEAK': 2}
-    - [ANSWER_LEAK] form=`(* 2 2 2)` — answer 8 in narrative
-    - [ANSWER_LEAK] form=`(* 2 2 2)` — answer 8 in narrative
+- issues: {'LOWERCASE_PRONOUN_AFTER_PERIOD': 1}
+    - [LOWERCASE_PRONOUN_AFTER_PERIOD] form=`(count "hello")` — sentence-initial pronoun (she/he/they) appears lowercase after a period (pronoun-substitution did not capitalize at sentence start)
 
 ## Grade 3
 
@@ -29,130 +48,186 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 3
 - variety @ n=50: 1.00
-- issues: {'HIGH_LENGTH': 1, 'ANSWER_LEAK': 2}
-    - [HIGH_LENGTH] form=`(let [x 3] (+ x 1))` — user_msg 229 words
-    - [ANSWER_LEAK] form=`(let [n 10] (* n n))` — answer 100 in narrative
-    - [ANSWER_LEAK] form=`(let [n 10] (* n n))` — answer 100 in narrative
+- issues: {'LOWERCASE_PRONOUN_AFTER_PERIOD': 1}
+    - [LOWERCASE_PRONOUN_AFTER_PERIOD] form=`(let [n 10] (* n n))` — sentence-initial pronoun (she/he/they) appears lowercase after a period (pronoun-substitution did not capitalize at sentence start)
 
-### G3-06: let — binding can reference prior
+### G3-04: let — multi-binding
+
+- examples: 3
+- variety @ n=50: 0.99
+- issues: {'LOWERCASE_PRONOUN_AFTER_PERIOD': 1}
+    - [LOWERCASE_PRONOUN_AFTER_PERIOD] form=`(let [x 5 y 3] (- x y))` — sentence-initial pronoun (she/he/they) appears lowercase after a period (pronoun-substitution did not capitalize at sentence start)
+
+### G3-05: let — shadowing outer def
 
 - examples: 2
-- variety @ n=50: 1.00
-- issues: {'ANSWER_LEAK': 1}
-    - [ANSWER_LEAK] form=`(let [a 5 b (* a 2)] b)` — answer 10 in narrative
+- variety @ n=50: 0.98
+- issues: {'LOWERCASE_PRONOUN_AFTER_PERIOD': 1}
+    - [LOWERCASE_PRONOUN_AFTER_PERIOD] form=`(do (def x 10) (let [x 99] x))` — sentence-initial pronoun (she/he/they) appears lowercase after a period (pronoun-substitution did not capitalize at sentence start)
 
 ### G3-07: fn — anonymous function
 
 - examples: 2
-- variety @ n=50: 1.00
-- issues: {'HIGH_LENGTH': 1}
-    - [HIGH_LENGTH] form=`((fn [x] (+ x 1)) 4)` — user_msg 223 words
+- variety @ n=50: 0.99
+- issues: {'CONCEPT_AS_VERB': 1}
+    - [CONCEPT_AS_VERB] form=`((fn [x] (+ x 1)) 4)` — concept_phrase substituted into a slot that needs a finite verb (e.g., 'must calling X', 'I applying Y')
 
-### G3-10: anonymous shorthand #()
+### G3-09: defn — shorthand
 
 - examples: 2
-- variety @ n=50: 1.00
-- issues: {'ANSWER_LEAK': 1}
-    - [ANSWER_LEAK] form=`(#(+ % 1) 5)` — answer 6 in narrative
+- variety @ n=50: 0.98
+- issues: {'CONCEPT_AS_VERB': 1}
+    - [CONCEPT_AS_VERB] form=`(do (defn add3 [a b c] (+ a b c)) (add3 1 2 3))` — concept_phrase substituted into a slot that needs a finite verb (e.g., 'must calling X', 'I applying Y')
 
-### G3-13: fn body returns last form
+### G3-15: Side-effects in body
 
 - examples: 1
-- variety @ n=50: 0.98
-- issues: {'HIGH_LENGTH': 1}
-    - [HIGH_LENGTH] form=`((fn [x] x x x 99) 1)` — user_msg 201 words
+- variety @ n=50: 1.00
+- issues: {'CONCEPT_AS_VERB': 1}
+    - [CONCEPT_AS_VERB] form=`(do (println "hi") 42)` — concept_phrase substituted into a slot that needs a finite verb (e.g., 'must calling X', 'I applying Y')
+
+### G3-16: Name collision: namespace vs let
+
+- examples: 1
+- variety @ n=50: 1.00
+- issues: {'LOWERCASE_PRONOUN_AFTER_PERIOD': 1}
+    - [LOWERCASE_PRONOUN_AFTER_PERIOD] form=`(let [+ 99] +)` — sentence-initial pronoun (she/he/they) appears lowercase after a period (pronoun-substitution did not capitalize at sentence start)
+
+### G3-18: When to name vs inline
+
+- examples: 2
+- variety @ n=50: 0.99
+- issues: {'LOWERCASE_PRONOUN_AFTER_PERIOD': 1}
+    - [LOWERCASE_PRONOUN_AFTER_PERIOD] form=`(let [n 5] (* n n n))` — sentence-initial pronoun (she/he/they) appears lowercase after a period (pronoun-substitution did not capitalize at sentence start)
 
 ## Grade 4
 
+### G4-10: keys and vals
+
+- examples: 1
+- variety @ n=50: 0.94
+
 ## Grade 5
 
-## Grade 6
+### G5-07: and / or as control flow
 
-### G6-01: Namespace as file
+- examples: 2
+- variety @ n=50: 1.00
+- issues: {'CONCEPT_AS_VERB': 1}
+    - [CONCEPT_AS_VERB] form=`(and 1 2 3)` — concept_phrase substituted into a slot that needs a finite verb (e.g., 'must calling X', 'I applying Y')
+
+### G5-12: reduce
 
 - examples: 3
 - variety @ n=50: 0.99
-- issues: {'ANSWER_LEAK_STRING': 1}
-    - [ANSWER_LEAK_STRING] form=`(name 'foo.bar)` — answer string 'foo.bar' appears in user_msg
+- issues: {'LOWERCASE_PRONOUN_AFTER_PERIOD': 2}
+    - [LOWERCASE_PRONOUN_AFTER_PERIOD] form=`(reduce + [1 2 3 4])` — sentence-initial pronoun (she/he/they) appears lowercase after a period (pronoun-substitution did not capitalize at sentence start)
+    - [LOWERCASE_PRONOUN_AFTER_PERIOD] form=`(reduce max [3 1 4 1 5 9 2 6])` — sentence-initial pronoun (she/he/they) appears lowercase after a period (pronoun-substitution did not capitalize at sentence start)
 
-## Grade 7
+### G5-13: reduce with init
 
-### G7-10: doc and source
+- examples: 2
+- variety @ n=50: 0.98
+- issues: {'LOWERCASE_PRONOUN_AFTER_PERIOD': 1}
+    - [LOWERCASE_PRONOUN_AFTER_PERIOD] form=`(reduce + 100 [1 2 3])` — sentence-initial pronoun (she/he/they) appears lowercase after a period (pronoun-substitution did not capitalize at sentence start)
+
+### G5-15: comp
+
+- examples: 2
+- variety @ n=50: 0.98
+- issues: {'CONCEPT_AS_VERB': 3}
+    - [CONCEPT_AS_VERB] form=`((comp inc inc) 5)` — concept_phrase substituted into a slot that needs a finite verb (e.g., 'must calling X', 'I applying Y')
+    - [CONCEPT_AS_VERB] form=`((comp str inc) 9)` — concept_phrase substituted into a slot that needs a finite verb (e.g., 'must calling X', 'I applying Y')
+    - [CONCEPT_AS_VERB] form=`((comp str inc) 9)` — concept_phrase substituted into a slot that needs a finite verb (e.g., 'must calling X', 'I applying Y')
+
+### G5-16: partial
+
+- examples: 2
+- variety @ n=50: 1.00
+- issues: {'CONCEPT_AS_VERB': 3}
+    - [CONCEPT_AS_VERB] form=`((partial + 10) 5)` — concept_phrase substituted into a slot that needs a finite verb (e.g., 'must calling X', 'I applying Y')
+    - [CONCEPT_AS_VERB] form=`(map (partial * 3) [1 2 3])` — concept_phrase substituted into a slot that needs a finite verb (e.g., 'must calling X', 'I applying Y')
+    - [CONCEPT_AS_VERB] form=`(map (partial * 3) [1 2 3])` — concept_phrase substituted into a slot that needs a finite verb (e.g., 'must calling X', 'I applying Y')
+
+### G5-17: juxt
 
 - examples: 1
 - variety @ n=50: 1.00
-- issues: {'ANSWER_LEAK_STRING': 1}
-    - [ANSWER_LEAK_STRING] form=`(:doc (meta '^{:doc "adds two"} plus))` — answer string 'adds two' appears in user_msg
+- issues: {'CONCEPT_AS_VERB': 1}
+    - [CONCEPT_AS_VERB] form=`((juxt inc dec) 5)` — concept_phrase substituted into a slot that needs a finite verb (e.g., 'must calling X', 'I applying Y')
+
+## Grade 6
+
+## Grade 7
 
 ## Grade 8
 
-### G8-01: Why polymorphism
-
-- examples: 2
-- variety @ n=50: 0.99
-- issues: {'HIGH_LENGTH': 1}
-    - [HIGH_LENGTH] form=`(defn speak [k] (cond (= k :wolf) "howl" (= k :flo` — user_msg 208 words
-
-### G8-05: Protocol extension
+### G8-03: defrecord introduction
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'ANSWER_LEAK_STRING': 1}
-    - [ANSWER_LEAK_STRING] form=`(do (defprotocol Greet (hail [this])) (extend-prot` — answer string ':number' appears in user_msg
+- issues: {'LOWERCASE_PRONOUN_AFTER_PERIOD': 1}
+    - [LOWERCASE_PRONOUN_AFTER_PERIOD] form=`(do (defrecord Watcher [name post]) (:name (->Watc` — sentence-initial pronoun (she/he/they) appears lowercase after a period (pronoun-substitution did not capitalize at sentence start)
 
 ## Grade 9
 
-### G9-07: Ref introduction
-
-- examples: 2
-- variety @ n=50: 1.00
-- issues: {'HIGH_LENGTH': 1}
-    - [HIGH_LENGTH] form=`(do (def r (ref 0)) (dosync (alter r inc)) @r)` — user_msg 218 words
-
-### G9-10: Agent introduction
-
-- examples: 2
-- variety @ n=50: 1.00
-- issues: {'HIGH_LENGTH': 1}
-    - [HIGH_LENGTH] form=`(do (def ag (agent 0)) (send ag inc) (await ag) @a` — user_msg 212 words
-
 ## Grade 10
+
+### G10-05: macroexpand
+
+- examples: 2
+- variety @ n=50: 0.99
+- issues: {'LOWERCASE_PRONOUN_AFTER_PERIOD': 1}
+    - [LOWERCASE_PRONOUN_AFTER_PERIOD] form=`(macroexpand '(when true 1))` — sentence-initial pronoun (she/he/they) appears lowercase after a period (pronoun-substitution did not capitalize at sentence start)
+
+### G10-06: when and when-not as macros
+
+- examples: 3
+- variety @ n=50: 1.00
+- issues: {'LOWERCASE_PRONOUN_AFTER_PERIOD': 1}
+    - [LOWERCASE_PRONOUN_AFTER_PERIOD] form=`(when false 1 2 3)` — sentence-initial pronoun (she/he/they) appears lowercase after a period (pronoun-substitution did not capitalize at sentence start)
+
+### G10-07: Threading macros revisited
+
+- examples: 3
+- variety @ n=50: 0.98
+- issues: {'CONCEPT_AS_VERB': 1}
+    - [CONCEPT_AS_VERB] form=`(-> 5 inc inc inc)` — concept_phrase substituted into a slot that needs a finite verb (e.g., 'must calling X', 'I applying Y')
+
+### G10-08: Macro vs fn
+
+- examples: 2
+- variety @ n=50: 1.00
+- issues: {'LOWERCASE_PRONOUN_AFTER_PERIOD': 1}
+    - [LOWERCASE_PRONOUN_AFTER_PERIOD] form=`(do (defn add-fn [a b] (+ a b)) (add-fn 3 4))` — sentence-initial pronoun (she/he/they) appears lowercase after a period (pronoun-substitution did not capitalize at sentence start)
 
 ### G10-10: Anaphoric macros are confusing
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'HIGH_LENGTH': 1, 'ANSWER_LEAK': 1}
-    - [HIGH_LENGTH] form=`(do (defmacro safe-if-let [bind then else] `(if-le` — user_msg 206 words
-    - [ANSWER_LEAK] form=`(do (defmacro safe-if-let [bind then else] `(if-le` — answer 10 in narrative
+- issues: {'LOWERCASE_PRONOUN_AFTER_PERIOD': 3}
+    - [LOWERCASE_PRONOUN_AFTER_PERIOD] form=`(do (defmacro safe-if-let [bind then else] `(if-le` — sentence-initial pronoun (she/he/they) appears lowercase after a period (pronoun-substitution did not capitalize at sentence start)
+    - [LOWERCASE_PRONOUN_AFTER_PERIOD] form=`(if-let [x 7] (* x x) 0)` — sentence-initial pronoun (she/he/they) appears lowercase after a period (pronoun-substitution did not capitalize at sentence start)
+    - [LOWERCASE_PRONOUN_AFTER_PERIOD] form=`(if-let [x 7] (* x x) 0)` — sentence-initial pronoun (she/he/they) appears lowercase after a period (pronoun-substitution did not capitalize at sentence start)
+
+### G10-14: eval (the function)
+
+- examples: 2
+- variety @ n=50: 1.00
+- issues: {'LOWERCASE_PRONOUN_AFTER_PERIOD': 1}
+    - [LOWERCASE_PRONOUN_AFTER_PERIOD] form=`(eval '(+ 1 2 3))` — sentence-initial pronoun (she/he/they) appears lowercase after a period (pronoun-substitution did not capitalize at sentence start)
+
+### G10-16: Macro pattern library
+
+- examples: 2
+- variety @ n=50: 1.00
+- issues: {'LOWERCASE_PRONOUN_AFTER_PERIOD': 2}
+    - [LOWERCASE_PRONOUN_AFTER_PERIOD] form=`(do (defmacro with-careful-watch [& body] `(let [p` — sentence-initial pronoun (she/he/they) appears lowercase after a period (pronoun-substitution did not capitalize at sentence start)
+    - [LOWERCASE_PRONOUN_AFTER_PERIOD] form=`(do (defmacro def-watch [name v] `(def ~name ~v)) ` — sentence-initial pronoun (she/he/they) appears lowercase after a period (pronoun-substitution did not capitalize at sentence start)
 
 ## Grade 11
 
-### G11-02: Method call syntax
-
-- examples: 8
-- variety @ n=50: 1.00
-- issues: {'HIGH_LENGTH': 2, 'ANSWER_LEAK_STRING': 2}
-    - [HIGH_LENGTH] form=`(. "abc" toUpperCase)` — user_msg 201 words
-    - [ANSWER_LEAK_STRING] form=`(. "abc" toUpperCase)` — answer string 'ABC' appears in user_msg
-    - [HIGH_LENGTH] form=`(. "abc" toUpperCase)` — user_msg 201 words
-    - [ANSWER_LEAK_STRING] form=`(. "abc" toUpperCase)` — answer string 'ABC' appears in user_msg
-
 ## Grade 12
-
-### G12-01: Transducers introduction
-
-- examples: 2
-- variety @ n=50: 0.99
-- issues: {'HIGH_LENGTH': 1}
-    - [HIGH_LENGTH] form=`(into [] (map inc) [1 2 3])` — user_msg 218 words
-
-### G12-03: into with a transducer (xform)
-
-- examples: 2
-- variety @ n=50: 1.00
-- issues: {'HIGH_LENGTH': 1}
-    - [HIGH_LENGTH] form=`(into #{} (map inc) [1 2 3])` — user_msg 213 words
 
 ---
 
@@ -160,159 +235,113 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 ### Issue counts (across all examples × 3 records)
 
-- **HIGH_LENGTH**: 11
-- **ANSWER_LEAK**: 7
-- **ANSWER_LEAK_STRING**: 5
-- **FORM_LEAK**: 1
+- **CONCEPT_AS_VERB**: 21
+- **LOWERCASE_PRONOUN_AFTER_PERIOD**: 19
 
 ### Per-grade summary
 
 | Grade | Subjects | Examples | Issues | Low-variety |
 |---|---|---|---|---|
-| 1 | 18 | 80 | 1 | — |
-| 2 | 22 | 88 | 2 | — |
-| 3 | 18 | 31 | 7 | — |
-| 4 | 20 | 39 | 0 | — |
-| 5 | 22 | 39 | 0 | — |
-| 6 | 16 | 33 | 1 | — |
-| 7 | 18 | 36 | 1 | — |
-| 8 | 16 | 31 | 2 | — |
-| 9 | 18 | 34 | 2 | — |
-| 10 | 16 | 36 | 2 | — |
-| 11 | 14 | 58 | 4 | — |
-| 12 | 18 | 37 | 2 | — |
+| 1 | 18 | 80 | 0 | — |
+| 2 | 22 | 88 | 10 | — |
+| 3 | 18 | 31 | 8 | — |
+| 4 | 20 | 39 | 0 | G4-10(0.94) |
+| 5 | 22 | 39 | 11 | — |
+| 6 | 16 | 33 | 0 | — |
+| 7 | 18 | 36 | 0 | — |
+| 8 | 16 | 31 | 1 | — |
+| 9 | 18 | 34 | 0 | — |
+| 10 | 16 | 36 | 10 | — |
+| 11 | 14 | 58 | 0 | — |
+| 12 | 18 | 37 | 0 | — |
 
 ### Sample issues by severity
 
-#### FORM_LEAK
+#### CONCEPT_AS_VERB
 
-- `G1-13` (form `(+ 7 8)`): form '(+ 7 8)' appears in user_msg of a goal-style subject
+- `G2-13` (form `(and true true)`): concept_phrase substituted into a slot that needs a finite verb (e.g., 'must calling X', 'I applying Y')
     ```
-    Paola had been told the rules plainly: cry only when the wolf is real, and never when she is bored.
+    A young shepherd had been left alone with the flock far too often, and boredom had taken root.
 
-At dawn, Tom had brought lambs back from the south pasture and Carol had brought lambs from the north. They stood at the fold counting together, the village's morning record waiting on them.
-
-The com...
+"You can't tell which way the fold-gates will swing by guessing," Robin
+said. "You bring the value to the first gate, the runtime checks it, and if
+that gate closes, the chain stops — the rest of the gate...
     ```
-
-#### ANSWER_LEAK
-
-- `G2-10` (form `(* 2 2 2)`): answer 8 in narrative
+- `G2-13` (form `(and true true)`): concept_phrase substituted into a slot that needs a finite verb (e.g., 'must calling X', 'I applying Y')
     ```
-    The hilltop offered a fine view of both the flock and the road below, where help would have to come from.
+    Every shepherd in the valley knew the danger of crying wolf for sport.
 
-Carol stacked boxes in a cube pattern: 2 boxes deep, 2 boxes wide, 2 boxes tall. She wanted to know the total volume.
-
-The cube volume required multiplying 2 three times. Tom estimated; Carol d...
+"You can't tell which way the fold-gates will swing by guessing," Sam
+said. "You bring the value to the first gate, the runtime checks it, and if
+that gate closes, the chain stops — the rest of the gates never even see the
+value...
     ```
-- `G2-10` (form `(* 2 2 2)`): answer 8 in narrative
+- `G2-13` (form `(or false false)`): concept_phrase substituted into a slot that needs a finite verb (e.g., 'must calling X', 'I applying Y')
     ```
-    Maarten had been told the rules plainly: cry only when the wolf is real, and never when he is bored.
+    A young shepherd had been left alone with the flock far too often, and boredom had taken root.
 
-Carol stacked boxes in a cube pattern: 2 boxes deep, 2 boxes wide, 2 boxes tall. She wanted to know the total volume.
-
-The cube volume required multiplying 2 three times. Tom estimated; Carol drew t...
+"You can't tell which way the fold-gates will swing by guessing," Alice
+said. "You bring the value to the first gate, the runtime checks it, and if
+that gate closes, the chain stops — the rest of the gate...
     ```
-- `G3-03` (form `(let [n 10] (* n n))`): answer 100 in narrative
+- `G2-13` (form `(or nil false 5)`): concept_phrase substituted into a slot that needs a finite verb (e.g., 'must calling X', 'I applying Y')
     ```
-    Grainne was a clever boy, and by the meadow cleverness had begun to look very much like trouble.
+    It is hard to be believed twice when you have lied even once — a lesson every shepherd must one day learn. It happened at the farm.
 
-Tom had just counted 10 stones for a marker wall, and he wanted to know how many stones would fill a perfect square patch. He reached for a tally-token and turned to Carol.
-
-The square count was needed ...
+"You can't tell which way the fold-gates will swing by guessing," Alex
+said. "You bring the value to the first gate, the runtime checks it, and if
+that gate closes, th...
     ```
-- `G3-03` (form `(let [n 10] (* n n))`): answer 100 in narrative
+- `G2-14` (form `(not true)`): concept_phrase substituted into a slot that needs a finite verb (e.g., 'must calling X', 'I applying Y')
     ```
-    On those slopes, trust was a thing the village extended freely, and a thing it could not afford to lose.
+    A young shepherd had been left alone with the flock far too often, and boredom had taken root. All this took place at the edge of the orchard.
 
-Tom had just counted 10 stones for a marker wall, and he wanted to know how many stones would fill a perfect square patch. He reached for a tally-token and turned to Carol.
-
-The square count was...
-    ```
-- `G3-06` (form `(let [a 5 b (* a 2)] b)`): answer 10 in narrative
-    ```
-    An empty hour can sometimes be filled with mischief, and mischief once started has a way of escalating.
-
-Carol had counted 5 morning lambs in the upper pasture. Tom asked: what if we double that count for the afternoon fold calculations?
-
-Tom needed the doubled count for one specific task, but that ...
+"You can't tell which way the fold-gates will swing by guessing," Grace
+said. "You bring the value to the first gate, the runtime checks it, and if
+that gat...
     ```
 
-#### HIGH_LENGTH
+#### LOWERCASE_PRONOUN_AFTER_PERIOD
 
-- `G3-03` (form `(let [x 3] (+ x 1))`): user_msg 229 words
+- `G2-20` (form `(count "hello")`): sentence-initial pronoun (she/he/they) appears lowercase after a period (pronoun-substitution did not capitalize at sentence start)
     ```
-    The hilltop offered a fine view of both the flock and the road below, where help would have to come from.
+    The boy on the hill thought the trick clever the first time he played it. It happened in the forest.
 
-Carol the elder had been counting along a stretch of fence-line at dawn. She slipped a tally-token worth 3 lambs into the small leather belt-pouch at her hip and gave the pouch's contents the l...
+Jess, in a panic, was beginning to understand: the
+tally-stick walk was not magic, only patient. Morgan took the
+goal — to count the characters in the string hello — and composed the count operation...
     ```
-- `G3-07` (form `((fn [x] (+ x 1)) 4)`): user_msg 223 words
+- `G3-03` (form `(let [n 10] (* n n))`): sentence-initial pronoun (she/he/they) appears lowercase after a period (pronoun-substitution did not capitalize at sentence start)
     ```
-    It happened at the edge of the orchard, on a hill where shouting carries far and trust carries further, until it doesn't.
+    The boy on the hill thought the trick clever the first time he played it.
 
-On the watchhouse wall, Carol the elder had pinned a small drill-card with no name at the top — just the steps for what to do once an unnamed quantity arrived. Tom waited beside...
+Lou, wide-eyed with fear, was beginning to understand:
+the belt-pouch was not magic, only careful. Alex took the
+goal — to bind n to 10 and compute n squared — and composed the local binding and multiplication, the value
+tuck...
     ```
-- `G3-13` (form `((fn [x] x x x 99) 1)`): user_msg 201 words
+- `G3-04` (form `(let [x 5 y 3] (- x y))`): sentence-initial pronoun (she/he/they) appears lowercase after a period (pronoun-substitution did not capitalize at sentence start)
     ```
-    On those slopes, trust was a thing the village extended freely, and a thing it could not afford to lose.
+    A young shepherd had been left alone with the flock far too often, and boredom had taken root.
 
-Carol had written a drill-card with three steps: read x, read x again, read x a third time. But then she realized the final step should return 99 instead.
-
-Tom asked: if the drill-card lists man...
+Tom, calling out without confidence anyone would come, was beginning to understand:
+the belt-pouch was not magic, only careful. Grace took the
+goal — to bind x to 5 and y to 3, then subtract y from x — an...
     ```
-- `G8-01` (form `(defn speak [k] (cond (= k :wolf) "howl" (= k :flock) "bleat`): user_msg 208 words
+- `G3-05` (form `(do (def x 10) (let [x 99] x))`): sentence-initial pronoun (she/he/they) appears lowercase after a period (pronoun-substitution did not capitalize at sentence start)
     ```
-    On a hill above the village, a boy watched sheep, and the sheep watched the grass, and the day moved slowly.
+    The boy on the hill thought the trick clever the first time he played it.
 
-Carol had called a meeting of the shepherds' fellowship on the village green — sheep-shepherd, goat-shepherd, geese-keeper, all gathered. Each kind of keeper had their own way of raising an ...
+Lou, calling out without confidence anyone would come, was beginning to understand:
+the belt-pouch was not magic, only careful. Frank took the
+goal — to define x at the top level, then shadow it locally and return the inner v...
     ```
-- `G9-07` (form `(do (def r (ref 0)) (dosync (alter r inc)) @r)`): user_msg 218 words
+- `G3-16` (form `(let [+ 99] +)`): sentence-initial pronoun (she/he/they) appears lowercase after a period (pronoun-substitution did not capitalize at sentence start)
     ```
-    It happened at the edge of the orchard, on a hill where shouting carries far and trust carries further, until it doesn't.
+    It is hard to be believed twice when you have lied even once — a lesson every shepherd must one day learn.
 
-Carol led Tom into the watchhouse vault, where the ledger lay under lock. 'This record is precious,' she said. 'You cannot touch it alone. We enter together, I read the page, yo...
-    ```
-
-#### ANSWER_LEAK_STRING
-
-- `G6-01` (form `(name 'foo.bar)`): answer string 'foo.bar' appears in user_msg
-    ```
-    On a hill above the village, a boy watched sheep, and the sheep watched the grass, and the day moved slowly.
-
-Tom stood at the village notice-post, where scrolls hung labeled with dotted names. Carol showed him the scroll marked `foo.bar`—a namespace written as a symbol.
-
-Tom wanted to know what the...
-    ```
-- `G7-10` (form `(:doc (meta '^{:doc "adds two"} plus))`): answer string 'adds two' appears in user_msg
-    ```
-    The hilltop offered a fine view of both the flock and the road below, where help would have to come from.
-
-Carol carved a drill-card on the watchhouse wall. Above the recipe's steps, she chalked a small note: "adds two". Tom asked what the note was for. Carol opened the metadata.
-
-Every drill-card n...
-    ```
-- `G8-05` (form `(do (defprotocol Greet (hail [this])) (extend-protocol Greet`): answer string ':number' appears in user_msg
-    ```
-    The wolves of those hills were rare but not absent, and the shepherds knew it was safer to be vigilant than clever.
-
-Carol had posted a Greet protocol at the fold-gate. A number-keeper — a tender of the tally-sticks — offered their pledge: any number greeting would return the keyword `:number`.
-
-The...
-    ```
-- `G11-02` (form `(. "abc" toUpperCase)`): answer string 'ABC' appears in user_msg
-    ```
-    The pasture lay below a rocky lookout, and the sheep were easier to count than the hours.
-
-Tom noticed a second way to write the same kind of tool-call, using the same dot but with the syntax stretched out: `(. object method)`. Carol explained this was the more explicit form.
-
-Tom wanted to understa...
-    ```
-- `G11-02` (form `(. "abc" toUpperCase)`): answer string 'ABC' appears in user_msg
-    ```
-    The pasture lay below a rocky lookout, and the sheep were easier to count than the hours.
-
-Tom noticed a second way to write the same kind of tool-call, using the same dot but with the syntax stretched out: `(. object method)`. Carol explained this was the more explicit form.
-
-Tom wanted to understa...
+Jess, in a panic, was beginning to understand:
+the belt-pouch was not magic, only careful. Morgan took the
+goal — to shadow the plus operator with a local binding and return the bound value — ...
     ```
 
