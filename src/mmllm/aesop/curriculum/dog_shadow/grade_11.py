@@ -68,7 +68,7 @@ to submit it to the runtime."""),
     SubplotTemplate("""\
 A merchant's stall {place} sold translated phrasebooks for the host
 language; today's lesson was {concept_phrase}. {tortoise}, {emo_patient}
-copied the form {form_display} from the page, and {hare_phrase}
+copied {form_display} from the page, and {hare_phrase}
 agreed (for once) that one should always check the REPL before
 trusting a translation."""),
 ]

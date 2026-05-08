@@ -57,7 +57,7 @@ G4_01 = SubjectCurriculum(grade=4, subject_id="G4-01",
             question_what="the vector",
             goal_text="create a vector containing 1, 2, and 3",
             scenario=(
-                "Rex the hound arrived at the hollow log cache at the stream's edge and laid out three bones in a neat row — one, then two, then three. The log could hold them arranged this way."
+                "Rex the hound arrived at the hollow log cache at the stream's edge and laid out a row of bones in a neat row — one, then two, then three. The log could hold them arranged this way."
             ),
             need=(
                 'He wanted the row fixed in the hollow log so any dog could '
@@ -65,7 +65,7 @@ G4_01 = SubjectCurriculum(grade=4, subject_id="G4-01",
                 'The vector was the shape the cache would take.'
             ),
             mapping=(
-                'The hollow log is the vector, the three bones are the '
+                'The hollow log is the vector, the a row of bones are the '
                 'elements 1, 2, 3, and the arrangement is what the form '
                 'describes when written as [1 2 3].'
             ),
@@ -142,7 +142,7 @@ G4_02 = SubjectCurriculum(grade=4, subject_id="G4-02",
             question_what="the value at index 0",
             goal_text="get the element at index 0 of a vector containing 10, 20, and 30",
             scenario=(
-                'Bell the hound counted three bone-heaps in the hollow log '
+                'Bell the hound counted a row of bones-heaps in the hollow log '
                 'cache: a pile of 10 bones first, then 20, then 30. She '
                 'wanted the very first heap to be pulled out and held up.'
             ),
@@ -261,7 +261,7 @@ G4_04 = SubjectCurriculum(grade=4, subject_id="G4-04",
             question_what="the list of three numbers",
             goal_text="create a list containing 1, 2, and 3",
             scenario=(
-                'Rex the hound chained three bones together in sequence — one '
+                'Rex the hound chained a row of bones together in sequence — one '
                 'at the front, then two, then three — so that any dog could '
                 'pick up the first and the rest would follow as a linked row.'
             ),
@@ -318,7 +318,7 @@ G4_05 = SubjectCurriculum(grade=4, subject_id="G4-05",
             question_what="the seq after cons'ing",
             goal_text="prepend 0 to the front of a list containing 1, 2, and 3",
             scenario=(
-                'Bell the hound held a chain of three bones — one, two, three '
+                'Bell the hound held a chain of a row of bones — one, two, three '
                 '— linked in sequence. A fourth bone, numbered 0, lay at her '
                 'feet, ready to be spliced to the front of the chain.'
             ),
@@ -596,7 +596,7 @@ G4_11 = SubjectCurriculum(grade=4, subject_id="G4-11",
             question_what="the size of the set",
             goal_text="count the unique elements in a set literal with duplicate 1s",
             scenario=(
-                'Rex the hound picked up three bones that all looked alike — '
+                'Rex the hound picked up a row of bones that all looked alike — '
                 'three copies of the same bone, really. He placed them in a set '
                 'and wanted to know how many truly distinct bones were there.'
             ),
@@ -609,7 +609,7 @@ G4_11 = SubjectCurriculum(grade=4, subject_id="G4-11",
                 'single unique element. The count function returns 1.'
             ),
             resolution=(
-                'The REPL examined the set, saw that all three bones were '
+                'The REPL examined the set, saw that all a row of bones were '
                 'identical, and counted only 1 unique member. The running '
                 'tally was 1 — 1.'
             ),
@@ -628,7 +628,7 @@ G4_12 = SubjectCurriculum(grade=4, subject_id="G4-12",
             question_what="whether an element is in the set using contains?",
             goal_text="check whether 2 is a member of a set containing 1, 2, and 3",
             scenario=(
-                'Bell the hound held a set of three bones in a hollow log: 1, 2, '
+                'Bell the hound held a set of a row of bones in a hollow log: 1, 2, '
                 'and 3. She wanted to test if the bone numbered 2 was among them.'
             ),
             need=(
@@ -652,7 +652,7 @@ G4_12 = SubjectCurriculum(grade=4, subject_id="G4-12",
             question_what="whether an element is in the set using contains?",
             goal_text="check whether 4 is a member of a set containing 1, 2, and 3",
             scenario=(
-                'Patch the hound held a set of three bones numbered 1, 2, and 3 '
+                'Patch the hound held a set of a row of boness numbered 1, 2, and 3 '
                 'in a hollow log. A bone numbered 4 lay outside, and Patch asked '
                 'the REPL if bone 4 belonged to the set.'
             ),
@@ -662,7 +662,7 @@ G4_12 = SubjectCurriculum(grade=4, subject_id="G4-12",
                 'been placed inside.'
             ),
             mapping=(
-                'The set #{1 2 3} holds three bones, the bone 4 is outside the '
+                'The set #{1 2 3} holds a row of bones, the bone 4 is outside the '
                 'set, and contains? verifies that bone 4 is not a member.'
             ),
             resolution=(
@@ -684,7 +684,7 @@ G4_13 = SubjectCurriculum(grade=4, subject_id="G4-13",
             question_what="the number of elements in the collection",
             goal_text="count the elements in the vector [1 2 3 4 5]",
             scenario=(
-                'Rex the hound laid out five bones in a hollow log arranged in '
+                'Rex the hound laid out a row of bones in a hollow log arranged in '
                 'a neat row: 1, 2, 3, 4, 5. He wanted the precise count of all '
                 'bones in the cache.'
             ),
@@ -697,7 +697,7 @@ G4_13 = SubjectCurriculum(grade=4, subject_id="G4-13",
                 'the result is the bone-count: 5.'
             ),
             resolution=(
-                'The REPL counted the five bones in the cache and handed back the '
+                'The REPL counted the a row of bones in the cache and handed back the '
                 'tally: 5. The verdict was the size of the vector — 5.'
             ),
             tags=("story",),
@@ -889,7 +889,7 @@ G4_15 = SubjectCurriculum(grade=4, subject_id="G4-15",
             question_what="the last element",
             goal_text="get the last element of a vector containing 10, 20, and 30",
             scenario=(
-                'Rex the hound inspected a hollow log with three heaps: 10 in the '
+                'Rex the hound inspected a hollow log with a row of heaps: 10 in the '
                 'first slot, 20 in the middle, 30 at the very end. He wanted the '
                 'last heap.'
             ),
@@ -913,7 +913,7 @@ G4_15 = SubjectCurriculum(grade=4, subject_id="G4-15",
             question_what="the count after removing first",
             goal_text="count the elements remaining after removing the first element from a vector with 10, 20, and 30",
             scenario=(
-                'Patch the hound held a hollow log with three heaps: 10, 20, 30. '
+                'Patch the hound held a hollow log with a row of heaps: 10, 20, 30. '
                 'He wanted to drop the first heap and count how many remained.'
             ),
             need=(
@@ -950,13 +950,13 @@ G4_16 = SubjectCurriculum(grade=4, subject_id="G4-16",
                 'near end, ready to pour through.'
             ),
             need=(
-                'She wanted the same three bones to land in the empty '
+                'She wanted the same a row of bones to land in the empty '
                 'receiver, in their original order, but as a row that could '
                 'be read from either end rather than only from the front.'
             ),
             mapping=(
                 'The gap is the transducer (here, identity since `into` '
-                'carries no xform), the source is the chain of three bones, '
+                'carries no xform), the source is the chain of a row of bones, '
                 'the empty receiver below the gap is the vector, and what '
                 'lands in it is the result.'
             ),
@@ -1083,7 +1083,7 @@ G4_19 = SubjectCurriculum(grade=4, subject_id="G4-19",
                 'counted them all?'
             ),
             mapping=(
-                'The range is a promise of five bones (0, 1, 2, 3, 4), and count '
+                'The range is a promise of a row of bones (0, 1, 2, 3, 4), and count '
                 'consumes that promise one bone at a time, tallying the whole.'
             ),
             resolution=(

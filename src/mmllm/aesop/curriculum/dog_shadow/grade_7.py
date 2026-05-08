@@ -36,7 +36,7 @@ to catch whatever the REPL might throw back. {hare_phrase},
 
     # Hare ignores the warning; Tortoise reads the stack trace.
     SubplotTemplate("""\
-A small slip of paper {place} carried the form {form_display}. {hare}
+A small slip of paper {place} carried {form_display}. {hare}
 glanced at it and dashed on, certain there was no trouble.
 {tortoise} sat down, {emo_patient}, and worked through
 {concept_phrase} step by step — ready, if anything went wrong, to read
@@ -47,7 +47,7 @@ the stack trace from top to bottom and try again."""),
 Beyond the REPL the world had files, streams, and surprises.
 {tortoise} opened a small notebook {place}, copying down
 {concept_phrase}. {hare}, {emo_tired}, watched as {tortoise_he_she}
-wrote the form {form_display} so the runtime could carry the work the
+wrote {form_display} so the runtime could carry the work the
 rest of the way."""),
 ]
 

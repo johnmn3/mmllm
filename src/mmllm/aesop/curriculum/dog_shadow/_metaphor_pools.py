@@ -397,8 +397,9 @@ at a small heap of bones beside the river. "Every operation
 either adds, takes away, or combines what's already there — the
 pile grows or shrinks by exactly what you say, and the river
 neither rushes nor stops the count." To {goal_text},
-{hound_he_she} composed {concept_phrase}, submitted the form,
-and the REPL returned the value the operation had produced."""),
+{hound_he_she} composed {concept_phrase} and submitted it. The
+runtime handed back the count, the river running steady beside
+the heap."""),
 
     # 3. The careful-arrangement template.
     SubplotTemplate("""\
@@ -409,9 +410,9 @@ Clojure don't fudge," {hound_he_she} said. "Whatever you do —
 adding, subtracting, dividing into piles with leftovers,
 comparing two heaps — the runtime gets it exactly right, every
 time. A reflection lies; a tally does not." To {goal_text},
-{hound_he_she} composed {concept_phrase}, submitted the form,
-and the REPL handed back the precise number the operation
-called for."""),
+{hound_he_she} composed {concept_phrase} and submitted it. The
+runtime handed back the count, the bridge-shadow steady on the
+water beside the bones."""),
 
     # 4. The Dog-eyeballs-the-pile template.
     SubplotTemplate("""\
@@ -419,9 +420,8 @@ called for."""),
 about how many bones were there without bothering to count.
 {hound_phrase} simply began counting — to {goal_text} required no
 eyeballing, only the form. {hound_he_she_cap} composed
-{concept_phrase}, submitted it to the REPL, and the runtime
-returned the number that had been there all along, settling the
-matter the patient way."""),
+{concept_phrase} and submitted it. The runtime returned the
+count the patient way, the bridge-shadow long across the water."""),
 
     # 5. The exact-count template.
     SubplotTemplate("""\
@@ -1302,15 +1302,9 @@ def _story(connective_prose: str) -> SubplotTemplate:
     pour / swap / grip / etc.) and its imagery vocabulary.
     """
     return SubplotTemplate(f"""\
-{{scenario}}
+{{scenario}} {{need}} {{mapping}}
 
-{{need}}
-
-{{mapping}}
-
-{connective_prose}
-
-{{resolution}}""", fits_tags=("story",))
+{connective_prose} {{resolution}}""", fits_tags=("story",))
 
 
 # Family-specific story templates. The connective prose for each
@@ -1319,61 +1313,61 @@ def _story(connective_prose: str) -> SubplotTemplate:
 
 _POUCH_SUBPLOTS = _POUCH_SUBPLOTS + [
     _story(
-        "{hound_he_she_cap}, {emo_patient}, composed {concept_phrase} with the binding gripped safely between {hound_his_her} teeth. The REPL pulled from the mouth as the form directed:"
+        "{hound_he_she_cap}, {emo_patient}, composed {concept_phrase}. The runtime pulled from the mouth as the form directed:"
     ),
 ]
 
 _RECIPE_SUBPLOTS = _RECIPE_SUBPLOTS + [
     _story(
-        "To {goal_text}, {hound_he_she}, {emo_patient}, laid out {concept_phrase} along the nose-trail and submitted the form. The REPL walked the trail end to end:"
+        "To {goal_text}, {hound_he_she}, {emo_patient}, laid out {concept_phrase} along the nose-trail and submitted the form. It walked the trail end to end and returned:"
     ),
 ]
 
 _BASKET_SUBPLOTS = _BASKET_SUBPLOTS + [
     _story(
-        "{hound_he_she_cap}, {emo_patient}, composed {concept_phrase} for the bone-cache. The REPL handed back the arrangement:"
+        "{hound_he_she_cap}, {emo_patient}, composed {concept_phrase} for the bone-cache. The runtime handed back the arrangement:"
     ),
 ]
 
 _SIEVE_SUBPLOTS = _SIEVE_SUBPLOTS + [
     _story(
-        "{hound_he_she_cap}, {emo_patient}, composed {concept_phrase} as the gap's rule ran the input through,. The REPL caught what landed below:"
+        "{hound_he_she_cap}, {emo_patient}, composed {concept_phrase} as the gap's rule ran the input through,. The runtime caught what landed below:"
     ),
 ]
 
 _NOTEBOOK_SUBPLOTS = _NOTEBOOK_SUBPLOTS + [
     _story(
-        "{hound_he_she_cap}, {emo_patient}, composed {concept_phrase} for the tally-stone. The REPL applied the update at the stream's edge:"
+        "{hound_he_she_cap}, {emo_patient}, composed {concept_phrase} for the tally-stone. The runtime applied the update at the stream's edge:"
     ),
 ]
 
 _ACORN_SUBPLOTS = _ACORN_SUBPLOTS + [
     _story(
-        "{hound_he_she_cap}, {emo_patient}, composed {concept_phrase} with the running tally heavy in the count. The REPL counted out the answer:"
+        "{hound_he_she_cap}, {emo_patient}, composed {concept_phrase} with the running tally heavy in the count. The runtime counted out the answer:"
     ),
 ]
 
 _GATE_SUBPLOTS = _GATE_SUBPLOTS + [
     _story(
-        "{hound_he_she_cap}, {emo_patient}, composed {concept_phrase} with the crossing-conditions arrayed in order. The REPL let the crossing-conditions decide:"
+        "{hound_he_she_cap}, {emo_patient}, composed {concept_phrase}. The runtime let the crossing-conditions decide:"
     ),
 ]
 
 _FORK_SUBPLOTS = _FORK_SUBPLOTS + [
     _story(
-        "{hound_he_she_cap}, {emo_patient}, composed {concept_phrase} with the path forking ahead. The REPL took the right arm:"
+        "{hound_he_she_cap}, {emo_patient}, composed {concept_phrase}. The runtime took the right arm of the path:"
     ),
 ]
 
 _ROADSIGN_SUBPLOTS = _ROADSIGN_SUBPLOTS + [
     _story(
-        "{hound_he_she_cap}, {emo_patient}, composed {concept_phrase} with the marker's name posted firm beside the path. The REPL read the markers and replied:"
+        "{hound_he_she_cap}, {emo_patient}, composed {concept_phrase}. The runtime read the markers and replied:"
     ),
 ]
 
 _SAFETYNET_SUBPLOTS = _SAFETYNET_SUBPLOTS + [
     _story(
-        "{hound_he_she_cap}, {emo_cautious}, composed {concept_phrase} with the practice-log laid out before the leap. The REPL handed back the value:"
+        "{hound_he_she_cap}, {emo_cautious}, composed {concept_phrase}. It handed back the value:"
     ),
 ]
 
@@ -1385,66 +1379,66 @@ _SCROLL_SUBPLOTS = _SCROLL_SUBPLOTS + [
 
 _GUILD_SUBPLOTS = _GUILD_SUBPLOTS + [
     _story(
-        "{hound_he_she_cap}, {emo_patient}, composed {concept_phrase} with the pack ledger laid open. The REPL dispatched cleanly:"
+        "{hound_he_she_cap}, {emo_patient}, composed {concept_phrase}. It dispatched cleanly:"
     ),
 ]
 
 _SORTINGTABLE_SUBPLOTS = _SORTINGTABLE_SUBPLOTS + [
     _story(
-        "{hound_he_she_cap}, {emo_patient}, composed {concept_phrase} with the piles arranged by mark. The REPL routed through the piles:"
+        "{hound_he_she_cap}, {emo_patient}, composed {concept_phrase}. The runtime routed through the piles:"
     ),
 ]
 
 _CARRYINGCASE_SUBPLOTS = _CARRYINGCASE_SUBPLOTS + [
     _story(
-        "{hound_he_she_cap}, {emo_patient}, composed {concept_phrase} with the kennel-bag shaped to hold each piece in its own named pocket —. The REPL constructed the kennel-bag:"
+        "{hound_he_she_cap}, {emo_patient}, composed {concept_phrase}. It constructed the kennel-bag:"
     ),
 ]
 
 _TOOLSHED_SUBPLOTS = _TOOLSHED_SUBPLOTS + [
     _story(
-        "{hound_he_she_cap}, {emo_cautious}, composed {concept_phrase} with the borrowed tool held the way the kennel-master had shown. The REPL returned:"
+        "{hound_he_she_cap}, {emo_cautious}, composed {concept_phrase}. It returned:"
     ),
 ]
 
 _RUNNERAHEAD_SUBPLOTS = _RUNNERAHEAD_SUBPLOTS + [
     _story(
-        "{hound_he_she_cap}, {emo_patient}, composed {concept_phrase} with the scout already away down the long path. The REPL coordinated the scout's return:"
+        "{hound_he_she_cap}, {emo_patient}, composed {concept_phrase}. The runtime coordinated the scout's return:"
     ),
 ]
 
 _REWRITERULE_SUBPLOTS = _REWRITERULE_SUBPLOTS + [
     _story(
-        "{hound_he_she_cap}, {emo_patient}, composed {concept_phrase} with the rule rewriting the shorthand into its full shape before the run. The REPL returned:"
+        "{hound_he_she_cap}, {emo_patient}, composed {concept_phrase}. It returned:"
     ),
 ]
 
 _SCRIBE_SUBPLOTS = _SCRIBE_SUBPLOTS + [
     _story(
-        "{hound_he_she_cap}, {emo_cautious}, composed {concept_phrase} with the bark cleared of stray scratches and only the form left for the runtime to read —. The REPL read by the conventions and returned:"
+        "{hound_he_she_cap}, {emo_cautious}, composed {concept_phrase}. It read by the conventions and returned:"
     ),
 ]
 
 _CHALKMARK_SUBPLOTS = _CHALKMARK_SUBPLOTS + [
     _story(
-        "{hound_he_she_cap}, {emo_patient}, composed {concept_phrase} with the scratch on the bark held distinct from the bone it named. The REPL returned:"
+        "{hound_he_she_cap}, {emo_patient}, composed {concept_phrase}. It returned:"
     ),
 ]
 
 _TALLYWALK_SUBPLOTS = _TALLYWALK_SUBPLOTS + [
     _story(
-        "{hound_he_she_cap}, {emo_patient}, composed {concept_phrase} with the running tally heavy in the carrying. The REPL walked the bone-row carrying the tally:"
+        "{hound_he_she_cap}, {emo_patient}, composed {concept_phrase}. It walked the bone-row carrying the tally:"
     ),
 ]
 
 _BEADSTRING_SUBPLOTS = _BEADSTRING_SUBPLOTS + [
     _story(
-        "{hound_he_she_cap}, {emo_patient}, composed {concept_phrase} with the bead-cord laid straight. The REPL spliced or counted as the form said:"
+        "{hound_he_she_cap}, {emo_patient}, composed {concept_phrase}. It spliced or counted as the form said:"
     ),
 ]
 
 _CIRCUIT_SUBPLOTS = _CIRCUIT_SUBPLOTS + [
     _story(
-        "{hound_he_she_cap}, {emo_patient}, composed {concept_phrase} with the same path walked again and again. The REPL paced without growing the trail:"
+        "{hound_he_she_cap}, {emo_patient}, composed {concept_phrase}. It paced without growing the trail:"
     ),
 ]

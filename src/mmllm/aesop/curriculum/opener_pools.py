@@ -318,34 +318,34 @@ OPENERS_DOG_SHADOW: tuple[str, ...] = (
     "had the temptation it offered to anyone crossing with full jaws.",
 
     # — placeholder-bearing —
-    "{place}, where the path crosses the stream, {primary_phrase} "
+    "{place}, where the path crosses the stream, {primary} "
     "trotted home with a fine bone in his teeth.",
     "{primary} had found the bone {place} and was carrying it home "
     "with no small amount of pride.",
     "It was {place}, on the wooden bridge above the slow brook, that "
-    "{primary_phrase} looked down at the water.",
-    "{primary_phrase} was crossing the stream {place} when "
+    "{primary} looked down at the water.",
+    "{primary} was crossing the stream {place} when "
     "{primary_he_she} caught a glimpse of his own reflection.",
     "{place}, the path bends down to meet the water, and "
-    "{primary_phrase} stopped at exactly the wrong moment.",
+    "{primary} stopped at exactly the wrong moment.",
     "{primary} had carried his prize all the way from the village, "
     "and {place} the bridge offered him an unwelcome second look.",
     "{place}, the stream ran clear enough to mirror anything that "
     "passed above it, and {primary} passed above it.",
     "When {primary} reached the bridge {place}, {primary_he_she} "
     "paused to admire the bone he had been so lucky to find.",
-    "{primary_phrase} was nearly home {place} when the water below "
+    "{primary} was nearly home {place} when the water below "
     "showed him a second bone that did not exist.",
     "{place}, on a still afternoon by the brook, {primary} learned "
     "what a reflection costs the careless.",
     "{primary} had crossed this bridge a hundred times {place}, but "
     "never with so fine a bone clamped in his jaws.",
-    "It happened {place}, on the very bridge {primary_phrase} crossed "
+    "It happened {place}, on the very bridge {primary} crossed "
     "every day, that he stopped longer than he should have.",
-    "{primary_phrase} was halfway home {place} when the water played "
+    "{primary} was halfway home {place} when the water played "
     "its old trick on a young dog.",
     "{place}, where the boards of the bridge meet the stones of the "
-    "path, {primary_phrase} caught sight of himself in the stream.",
+    "path, {primary} caught sight of himself in the stream.",
 )
 
 
