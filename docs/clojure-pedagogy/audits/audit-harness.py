@@ -1214,6 +1214,75 @@ def check_record(rec, sub, example):
                        f"{user.lower().count('the village')} times "
                        "(noun-saturation tic — vary or drop)"))
 
+    # ─────────── slice GrkS (dog-shadow) detector additions ────────────
+    #
+    # Three new detectors targeting Cat-K storytelling failures the
+    # existing 60+ detectors don't catch.
+
+    # OUT_OF_REGISTER_CONNECTIVE — Cat-K-5: vocabulary register doesn't
+    # fit a children's storybook. Words like "thereby", "consequently",
+    # "thus", "henceforth", "moreover", "furthermore" mark formal
+    # academic prose, not a fable about a dog and a reflection.
+    # Children's storybook reading-level prose uses "and so", "then",
+    # "because" instead.
+    if re.search(
+        r"\b(thereby|consequently|henceforth|moreover|furthermore|"
+        r"insofar|inasmuch|notwithstanding|whereupon|whereunto)\b",
+        user, re.IGNORECASE
+    ):
+        m = re.search(
+            r"\b(thereby|consequently|henceforth|moreover|furthermore|"
+            r"insofar|inasmuch|notwithstanding|whereupon|whereunto)\b",
+            user, re.IGNORECASE
+        )
+        issues.append(("OUT_OF_REGISTER_CONNECTIVE",
+                        f"formal-academic connective {m.group(0)!r} in user_msg "
+                        "— storybook register should be 5th-grade reading level"))
+
+    # DOUBLE_NAME_INTRO — Cat-K-1 / Cat-H: same character introduced
+    # twice as "<Name> the <species>" within ~120 chars. Pacing
+    # failure: a name introduction is a one-time-per-record beat, and
+    # repeating it within a few sentences reads as a template-stitch
+    # error rather than story prose.
+    name_intro_re = re.compile(
+        r"\b([A-Z][a-z]+) the (hound|dog|crow|tortoise|hare|farmer|"
+        r"milkmaid|elder|shepherd|villager|fox)\b"
+    )
+    intros = list(name_intro_re.finditer(user))
+    seen_intros = {}
+    for m in intros:
+        key = (m.group(1), m.group(2))
+        if key in seen_intros:
+            prev_end = seen_intros[key]
+            if m.start() - prev_end <= 200:
+                issues.append(("DOUBLE_NAME_INTRO",
+                                f"character {m.group(0)!r} introduced twice "
+                                f"within 200 chars — drop the second 'the {m.group(2)}'"))
+                break
+        seen_intros[key] = m.end()
+
+    # HEDGING_NEAR_FORM — Cat-K-3 / Cat-A-adjacent: prose hedges about
+    # what the form does ("or something close to it", "more or less",
+    # "approximately what it returns", "roughly the value", "kind of
+    # like X"). The eval-deterministic curriculum's narrative voice
+    # should be confident — the form returns exactly what it returns.
+    # Hedging signals an AI cadence that's covering its uncertainty.
+    if re.search(
+        r"\b(or something close to it|more or less|"
+        r"approximately what|roughly the value|kind of like|"
+        r"sort of like|in a sense it|as it were)\b",
+        user, re.IGNORECASE
+    ):
+        m = re.search(
+            r"\b(or something close to it|more or less|"
+            r"approximately what|roughly the value|kind of like|"
+            r"sort of like|in a sense it|as it were)\b",
+            user, re.IGNORECASE
+        )
+        issues.append(("HEDGING_NEAR_FORM",
+                        f"hedge {m.group(0)!r} in user_msg — eval-deterministic "
+                        "narratives shouldn't hedge about the form's value"))
+
     return issues
 
 

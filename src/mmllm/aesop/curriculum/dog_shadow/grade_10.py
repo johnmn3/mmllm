@@ -1206,25 +1206,25 @@ G10_15 = SubjectCurriculum(
             question_what="the sum of 3 and 4",
             goal_text="use an anonymous function to add two numbers",
             scenario=(
-                'Patch the hound defined a quick function right there on the trail: '
-                '(fn [x y] (+ x y)). No macro tricks, no rewriting — just a nose-trail '
-                'that takes two arguments and returns their sum. The function was '
-                'unnamed but ready to use.'
+                'Patch the hound laid a quick nose-trail at the river bank: a small '
+                'unnamed routine that takes two values and adds them. No macro '
+                'rewriting, no scratch-mark setup — a plain function, ready to use '
+                'where it was made.'
             ),
             need=(
-                'When called immediately with 3 and 4, the function would receive '
-                'the computed values, add them, and return the running total. No '
-                'syntax shaping was needed — a plain function would do the work.'
+                'Called right there with 3 and 4, the routine would add the two '
+                'and hand the sum back. The trail was meant to be walked once, '
+                'where it lay; a fancier macro would only get in the way.'
             ),
             mapping=(
-                'The anonymous function is the nose-trail. The parameters x and y '
-                'are the bones passed in. The addition is the computation. The '
-                'function is called directly with the values.'
+                'An anonymous function is a nose-trail laid down and walked '
+                'immediately. The parameters are the bones it accepts; the body '
+                'is the trail it walks; the call hands those bones in and reads '
+                'off what the body produced.'
             ),
             resolution=(
-                'The REPL created the function, called it with 3 and 4, and the '
-                'function returned their sum: 7. No macros, no rewriting — just a '
-                'straightforward function call. Simple sufficed.'
+                'the routine added the two and gave back the sum — no rewrite, '
+                'no scratch-mark, just the trail walked the once.'
             ),
             tags=("story",),
         ),
@@ -1269,35 +1269,36 @@ G10_16 = SubjectCurriculum(
     examples=[
         # A `with-` style macro that binds and ensures cleanup conceptually.
         SubjectExample(
-            form="(do (defmacro with-tortoise-pace [& body] "
+            form="(do (defmacro with-steady-pace [& body] "
                  "`(let [pace# :slow-and-steady] ~@body)) "
-                 "(with-tortoise-pace 42))",
+                 "(with-steady-pace 42))",
             expected=42,
             concept_phrase="defining and using a with-X macro pattern",
-            question_what="the value returned when with-tortoise-pace expands to a let-block and runs the body",
-            goal_text="define a with-tortoise-pace macro and call it to execute a body",
+            question_what="the value returned when the with-steady-pace macro expands to a let-block and runs the body",
+            goal_text="define a with-steady-pace macro and call it to execute a body",
             scenario=(
-                'Rex the hound carved a macro-pattern on bark called with-tortoise-pace. '
-                'The pattern would capture the dog\'s steady, deliberate approach. When '
-                'the macro was called, it would bind a pace variable and run the body '
-                'within that context.'
+                'Rex the hound scratched a macro-pattern into the bark, named for '
+                'the steady pace the pack always favoured at the river crossing. '
+                'The pattern would set up a fresh pace-binding around any body it '
+                'was handed, like clearing a calm patch of water before letting '
+                'a bone drop.'
             ),
             need=(
-                'When with-tortoise-pace was called with the body form 42, the macro '
-                'would expand to a let-block that bound pace to :slow-and-steady, then '
-                'spliced in and executed the body. The body would run within that '
-                'binding.'
+                'Called with a single body, the macro would rewrite that body '
+                'inside a let-block — the pace named locally, the body running '
+                'inside the binding. The runtime would never see the shorthand; '
+                'only the rewritten, expanded form.'
             ),
             mapping=(
-                'The defmacro sets the pattern on bark. The & body captures all the '
-                'arguments. The backtick builds the let-form. The gensym pace# ensures '
-                'a fresh variable. The ~@body splices the body into the let.'
+                'A macro is the rewriter that runs before the runtime: the bark '
+                'scratch holds the pattern, the call hands in the body, the '
+                'pattern wraps the body in a fresh-pace let and submits the '
+                'rewritten form for evaluation.'
             ),
             resolution=(
-                'The REPL set the macro-pattern, then called with-tortoise-pace with 42. '
-                'The macro expanded to (let [pace# :slow-and-steady] 42). The let ran, '
-                'binding pace, then the body executed and returned 42. The pattern had '
-                'worked.'
+                'the macro rewrote the call into a pace-bound let, the body '
+                'ran inside it, and the value the body produced came back as '
+                'the call\'s answer.'
             ),
             tags=("story",),
         ),
