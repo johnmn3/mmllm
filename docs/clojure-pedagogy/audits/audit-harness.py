@@ -904,6 +904,72 @@ def check_record(rec, sub, example):
     # Both modes are LOW_GROUNDING.
     _check_grounding(user, rec, issues)
 
+    # ─────────── slice QVez (dog-shadow) detector additions ────────────
+
+    # GOAL_TEXT_REPETITION — `{goal_text}` rendered three or more times
+    # in the same user_msg. Catches templates that drop the goal_text in
+    # multiple beats (intro + question + connective) without restating
+    # the action; the resulting prose feels like an over-explained
+    # tutorial instead of a scenario.
+    if example.goal_text and len(example.goal_text) >= 12:
+        gt = example.goal_text.strip(".? ")
+        # Count case-insensitive overlapping-free occurrences.
+        if gt and user.lower().count(gt.lower()) >= 3:
+            issues.append(("GOAL_TEXT_REPETITION",
+                            f"goal_text {gt[:40]!r} repeated {user.lower().count(gt.lower())}× in user_msg"))
+
+    # PATIENT_ROLE_BOASTFUL — for fables whose patient/evaluator
+    # character is named (tortoise / farmer / hound / elder), flag any
+    # record that places a clearly-boastful EMO phrase in the same
+    # sentence as that character's name. This is a polarity-flip
+    # signal: the patient role should never be the one boasting.
+    boastful_markers = (
+        "with a smug grin", "puffed up with pride", "boasting at every",
+        "loudly claiming the credit", "with the broad voice of a bragging",
+        "with great whoops of laughter", "with the swagger of an unrepentant",
+    )
+    patient_names = {
+        "tortoise": ("Mossback", "Slowpoke", "Shelly"),
+        "milkmaid": ("the farmer", "Farmer"),
+        "boy_wolf": ("the elder", "the villager", "Carol"),
+        "dog_shadow": ("the hound", "Hound"),
+        "crow_pitcher": ("the crow", "Crow"),
+    }
+    fable_id = sub.fable.replace("-", "_") if hasattr(sub, "fable") else ""
+    if fable_id in patient_names:
+        for name in patient_names[fable_id]:
+            for sentence in re.split(r"[.!?]\s+", user):
+                if name in sentence:
+                    for bm in boastful_markers:
+                        if bm in sentence:
+                            issues.append(("PATIENT_ROLE_BOASTFUL",
+                                            f"patient role {name!r} co-occurs with "
+                                            f"boastful EMO phrase {bm[:30]!r}"))
+                            break
+                    else:
+                        continue
+                    break
+
+    # STORY_RESOLUTION_NO_DRAWN — for story-tagged examples, the
+    # `resolution` slot should reference at least one drawn-from-form
+    # literal so the resolution closes the algorithmic loop, not just a
+    # generic "the REPL returned the value." Skips examples that don't
+    # have story tags and skips when the form has no extractable
+    # literals to begin with.
+    if "story" in getattr(example, "tags", ()) and example.resolution:
+        form = rec.code_str or ""
+        lits = _drawn_literals(form)
+        if lits:
+            res_text = example.resolution
+            has_lit = any(
+                (lit and lit in res_text) for lit in lits
+            )
+            if not has_lit:
+                issues.append(("STORY_RESOLUTION_NO_DRAWN",
+                                f"story-tagged example's resolution slot has no "
+                                f"drawn-value reference (form has literals "
+                                f"{lits[:3]!r}, resolution doesn't close the loop)"))
+
     return issues
 
 
@@ -928,10 +994,26 @@ def _emo_fragments():
         return _EMO_FRAGMENTS
     pools = (EMO_PROUD, EMO_PATIENT, EMO_REGRETFUL, EMO_CONTENT,
              EMO_DESPERATE, EMO_HUNGRY)
-    # Optional milkmaid-aligned EMO_BOASTFUL.
+    # ALSO include the integration branch's full archetype pools so
+    # records that draw from the larger 33+ entry pools register as
+    # grounded. The legacy fables.py pools are short (≤8 entries); the
+    # emotion_pools versions overlap heavily but include extra
+    # environment-anchored variants the detector should recognize.
     try:
-        from mmllm.aesop.curriculum.emotion_pools import EMO_BOASTFUL
-        pools = pools + (EMO_BOASTFUL,)
+        from mmllm.aesop.curriculum.emotion_pools import (
+            EMO_PROUD as EP_PROUD2, EMO_PATIENT as EP_PATIENT2,
+            EMO_REGRETFUL as EP_REGRETFUL2, EMO_CONTENT as EP_CONTENT2,
+            EMO_DESPERATE as EP_DESPERATE2, EMO_HUNGRY as EP_HUNGRY2,
+            EMO_TIRED as EP_TIRED2, EMO_THIRSTY as EP_THIRSTY2,
+            EMO_GREEDY as EP_GREEDY2, EMO_SUSPICIOUS as EP_SUSPICIOUS2,
+            EMO_BOASTFUL, EMO_CAUTIOUS,
+        )
+        pools = pools + (
+            EP_PROUD2, EP_PATIENT2, EP_REGRETFUL2, EP_CONTENT2,
+            EP_DESPERATE2, EP_HUNGRY2, EP_TIRED2, EP_THIRSTY2,
+            EP_GREEDY2, EP_SUSPICIOUS2,
+            EMO_BOASTFUL, EMO_CAUTIOUS,
+        )
     except ImportError:
         pass
     out = set()

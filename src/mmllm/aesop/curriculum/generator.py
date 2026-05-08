@@ -757,13 +757,25 @@ def _build_ds_placeholders(scene: Scene,
         "mapping":           example.mapping,
         "resolution":        example.resolution,
 
-        # emotions — pronoun-neutral pools
-        "emo_proud":         scene.rng.choice(EMO_PROUD),
-        "emo_patient":       scene.rng.choice(EMO_PATIENT),
-        "emo_tired":         scene.rng.choice(EMO_TIRED),
-        "emo_greedy":        scene.rng.choice(GE_EMO_GREEDY),
-        "emo_content":       scene.rng.choice(GE_EMO_CONTENT),
-        "emo_regretful":     scene.rng.choice(GE_EMO_REGRETFUL),
+        # Emotions — dog-shadow Cat-J lift (slice QVez) draws from the
+        # integration branch's emotion_pools (≥30 entries each,
+        # environment-anchored) rather than the 6-entry legacy
+        # fables pools. This widens LOW_GROUNDING coverage across
+        # all dog-shadow records and adds the polarity-aligned
+        # placeholders the templates need: hound (patient evaluator)
+        # → emo_patient/emo_cautious/emo_content; dog (greedy/hasty)
+        # → emo_greedy/emo_boastful/emo_desperate.
+        "emo_proud":         scene.rng.choice(emo_pools.EMO_PROUD),
+        "emo_patient":       scene.rng.choice(emo_pools.EMO_PATIENT),
+        "emo_tired":         scene.rng.choice(emo_pools.EMO_TIRED),
+        "emo_greedy":        scene.rng.choice(emo_pools.EMO_GREEDY),
+        "emo_content":       scene.rng.choice(emo_pools.EMO_CONTENT),
+        "emo_regretful":     scene.rng.choice(emo_pools.EMO_REGRETFUL),
+        "emo_boastful":      scene.rng.choice(emo_pools.EMO_BOASTFUL),
+        "emo_cautious":      scene.rng.choice(emo_pools.EMO_CAUTIOUS),
+        "emo_desperate":     scene.rng.choice(emo_pools.EMO_DESPERATE),
+        "emo_hungry":        scene.rng.choice(emo_pools.EMO_HUNGRY),
+        "emo_suspicious":    scene.rng.choice(emo_pools.EMO_SUSPICIOUS),
     }
 
 
