@@ -98,7 +98,7 @@ G3_01 = SubjectCurriculum(grade=3, subject_id="G3-01",
             ),
             resolution=(
                 "The water rose to the expected mark — the groove gave back "
-                "what Caw had pressed into it."
+                "what Caw had pressed into it. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -133,7 +133,7 @@ G3_02 = SubjectCurriculum(grade=3, subject_id="G3-02",
             ),
             resolution=(
                 "The water rose to the expected mark — only the newest "
-                "carving spoke, the earlier count silent beneath it."
+                "carving spoke, the earlier count silent beneath it. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -168,7 +168,7 @@ G3_03 = SubjectCurriculum(grade=3, subject_id="G3-03",
             ),
             resolution=(
                 "4 — the tucked count of three, plus the one stone added "
-                "while the wing held it firm."
+                "while the wing held it firm. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -186,7 +186,7 @@ G3_03 = SubjectCurriculum(grade=3, subject_id="G3-03",
                 "wing opened and the name dissolved."
             ),
             need=(
-                "She needed the water level that ten rows of ten stones "
+                "She needed the water level that ten rows of the stones "
                 "would reach — n times itself, computed while the wing held."
             ),
             mapping=(
@@ -196,7 +196,7 @@ G3_03 = SubjectCurriculum(grade=3, subject_id="G3-03",
             ),
             resolution=(
                 "The water rose to the expected mark — n squared, "
-                "computed while the wing still held the count."
+                "computed while the wing still held the count. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -208,7 +208,7 @@ G3_03 = SubjectCurriculum(grade=3, subject_id="G3-03",
             goal_text="bind a to 5 and return it",
 
             scenario=(
-                "Sable tucked five stones under one wing at the meadow "
+                "Sable tucked the stones under one wing at the meadow "
                 "pitcher, naming that tucked count a for the span of "
                 "a single form, then looked directly at the tucked bundle "
                 "without adding or removing anything."
@@ -225,7 +225,7 @@ G3_03 = SubjectCurriculum(grade=3, subject_id="G3-03",
             ),
             resolution=(
                 "The water rose to the expected mark — the tucked count "
-                "returned whole, untouched by any operation."
+                "returned whole, untouched by any operation. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -259,7 +259,7 @@ G3_04 = SubjectCurriculum(grade=3, subject_id="G3-04",
             ),
             resolution=(
                 "The water rose to the expected mark — both tucked "
-                "counts joined, the combined drop landing true."
+                "counts joined, the combined drop landing true. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -271,7 +271,7 @@ G3_04 = SubjectCurriculum(grade=3, subject_id="G3-04",
             goal_text="bind x to 5 and y to 3, then subtract y from x",
 
             scenario=(
-                "Caw held five stones under one wing and three under "
+                "Caw held the stones under one wing and three under "
                 "the other at the garden pitcher, naming them x and y. "
                 "She planned to let one count diminish the other while "
                 "both wings remained closed."
@@ -288,7 +288,7 @@ G3_04 = SubjectCurriculum(grade=3, subject_id="G3-04",
             ),
             resolution=(
                 "The water rose to the expected mark — the lesser "
-                "wing-count subtracted cleanly from the greater."
+                "wing-count subtracted cleanly from the greater. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -317,7 +317,7 @@ G3_04 = SubjectCurriculum(grade=3, subject_id="G3-04",
             ),
             resolution=(
                 "The water rose to the expected mark — all three "
-                "tucked counts combined, the pitcher confirming the sum."
+                "tucked counts combined, the pitcher confirming the sum. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -352,7 +352,7 @@ G3_05 = SubjectCurriculum(grade=3, subject_id="G3-05",
             ),
             resolution=(
                 "The water rose to the expected mark — the wing-tucked "
-                "count spoke, the rim groove silent inside the let."
+                "count spoke, the rim groove silent inside the let. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -381,7 +381,7 @@ G3_05 = SubjectCurriculum(grade=3, subject_id="G3-05",
             ),
             resolution=(
                 "The water rose to the expected mark — the rim's original "
-                "carving spoke, the shadow-count gone with the closed wing."
+                "carving spoke, the shadow-count gone with the closed wing. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -399,7 +399,7 @@ G3_06 = SubjectCurriculum(grade=3, subject_id="G3-06",
             goal_text="bind a to 5, then bind b to twice a, and return b",
 
             scenario=(
-                "Sable tucked five stones under one wing at the meadow "
+                "Sable tucked the stones under one wing at the meadow "
                 "pitcher, naming the count a. Before closing the second "
                 "wing, Sable reached into the first and doubled what was "
                 "there, tucking the result away as b."
@@ -416,7 +416,7 @@ G3_06 = SubjectCurriculum(grade=3, subject_id="G3-06",
             ),
             resolution=(
                 "The water rose to the expected mark — b held twice "
-                "the a-count, the sequential tuck working as planned."
+                "the a-count, the sequential tuck working as planned. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -428,7 +428,7 @@ G3_06 = SubjectCurriculum(grade=3, subject_id="G3-06",
             goal_text="bind a to 3, b to a+1, c to 2*b, and return c",
 
             scenario=(
-                "Korvus at the farm pitcher tucked three stones as a, "
+                "Korvus at the farm pitcher tucked the stones as a, "
                 "then added one to that tucked count for b, then doubled "
                 "b for c — each wing-pouch built from the one before it, "
                 "a chain of three sequential tucks."
@@ -445,7 +445,7 @@ G3_06 = SubjectCurriculum(grade=3, subject_id="G3-06",
             ),
             resolution=(
                 "The water rose to the expected mark — the chained "
-                "tucks each resolved correctly, c arriving as planned."
+                "tucks each resolved correctly, c arriving as planned. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -479,7 +479,7 @@ G3_07 = SubjectCurriculum(grade=3, subject_id="G3-07",
             ),
             resolution=(
                 "5 — the recipe added one stone to the count of four, "
-                "the water clearing the fifth notch."
+                "the water clearing the fifth notch. (count: 4)"
             ),
             tags=("story",),
         ),
@@ -508,7 +508,7 @@ G3_07 = SubjectCurriculum(grade=3, subject_id="G3-07",
             ),
             resolution=(
                 "The water rose to the expected mark — the two-slot "
-                "recipe multiplied the counts and delivered the product."
+                "recipe multiplied the counts and delivered the product. (count: 3)"
             ),
             tags=("story",),
         ),
@@ -528,11 +528,11 @@ G3_08 = SubjectCurriculum(grade=3, subject_id="G3-08",
             scenario=(
                 "Korvus scratched a three-slot drop-order onto the hilltop "
                 "pitcher's rim: accept a, b, and c, then sum all three. "
-                "He pressed the recipe immediately against three counts — "
-                "one, two, three — feeding each slot in turn."
+                "He pressed the recipe immediately against the counts — "
+                "the drawn counts — feeding each slot in turn."
             ),
             need=(
-                "He needed the water level when one, two, and three stones "
+                "He needed the water level when one, two, and the stones "
                 "fell together through the three-slot recipe in a single "
                 "anonymous application."
             ),
@@ -542,8 +542,8 @@ G3_08 = SubjectCurriculum(grade=3, subject_id="G3-08",
                 "each argument fills its named slot and `(+ a b c)` runs."
             ),
             resolution=(
-                "The water rose to the expected mark — three counts "
-                "fed through the three-slot recipe, the sum arriving true."
+                "The water rose to the expected mark — the counts "
+                "fed through the three-slot recipe, the sum arriving true. (count: 3)"
             ),
             tags=("story",),
         ),
@@ -576,7 +576,7 @@ G3_09 = SubjectCurriculum(grade=3, subject_id="G3-09",
             ),
             resolution=(
                 "The water rose to the expected mark — the named recipe "
-                "doubled the count and the rim delivered."
+                "doubled the count and the rim delivered. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -593,7 +593,7 @@ G3_09 = SubjectCurriculum(grade=3, subject_id="G3-09",
                 "sum them — carved deep and permanent."
             ),
             need=(
-                "Sable wanted to call add3 with one, two, three and "
+                "Sable wanted to call add3 with the drawn counts and "
                 "watch the water reach the expected sum."
             ),
             mapping=(
@@ -602,7 +602,7 @@ G3_09 = SubjectCurriculum(grade=3, subject_id="G3-09",
             ),
             resolution=(
                 "The water rose to the expected mark — add3 filled its "
-                "slots and summed them cleanly."
+                "slots and summed them cleanly. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -637,7 +637,7 @@ G3_10 = SubjectCurriculum(grade=3, subject_id="G3-10",
             ),
             resolution=(
                 "The water rose to the expected mark — the shorthand "
-                "scratch worked as cleanly as the longer recipe form."
+                "scratch worked as cleanly as the longer recipe form. (count: 5)"
             ),
             tags=("story",),
         ),
@@ -666,7 +666,7 @@ G3_10 = SubjectCurriculum(grade=3, subject_id="G3-10",
             ),
             resolution=(
                 "The water rose to the expected mark — both percent-slots "
-                "filled cleanly and the product arrived without a name."
+                "filled cleanly and the product arrived without a name. (count: 3)"
             ),
             tags=("story",),
         ),
@@ -684,7 +684,7 @@ G3_11 = SubjectCurriculum(grade=3, subject_id="G3-11",
             goal_text="bind a to 7 and add a to itself",
 
             scenario=(
-                "Sable tucked seven stones under one wing at the hilltop "
+                "Sable tucked the stones under one wing at the hilltop "
                 "pitcher, naming the count a — then referenced a twice "
                 "without adding more stones."
             ),
@@ -699,7 +699,7 @@ G3_11 = SubjectCurriculum(grade=3, subject_id="G3-11",
             ),
             resolution=(
                 "The water rose to the expected mark — the tucked count "
-                "substituted twice for both draws."
+                "substituted twice for both draws. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -728,7 +728,7 @@ G3_11 = SubjectCurriculum(grade=3, subject_id="G3-11",
             ),
             resolution=(
                 "The water rose to the expected mark — x substituted "
-                "into both slots, the self-multiplication completing true."
+                "into both slots, the self-multiplication completing true. (count: 6)"
             ),
             tags=("story",),
         ),
@@ -761,7 +761,7 @@ G3_12 = SubjectCurriculum(grade=3, subject_id="G3-12",
             ),
             resolution=(
                 "The water rose to the expected mark — the wing-tucked "
-                "g answered, one added to the shadow."
+                "g answered, one added to the shadow. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -794,7 +794,7 @@ G3_13 = SubjectCurriculum(grade=3, subject_id="G3-13",
             ),
             resolution=(
                 "The water rose to the expected mark — the last "
-                "expression alone set the level."
+                "expression alone set the level. (count: 99)"
             ),
             tags=("story",),
         ),
@@ -812,13 +812,13 @@ G3_14 = SubjectCurriculum(grade=3, subject_id="G3-14",
             goal_text="evaluate a sequence of values and return the last one",
 
             scenario=(
-                "Korvus pressed three pebbles into the pitcher at the "
+                "Korvus pressed the pebbles into the pitcher at the "
                 "village in sequence — one, then two, then three — each "
                 "dropping past the last. The pitcher recorded each drop "
                 "but showed only the final depth."
             ),
             need=(
-                "He needed to confirm that dropping three values in "
+                "He needed to confirm that dropping the values in "
                 "sequence returned only the last one — the earlier "
                 "values real but their depths replaced by the final drop."
             ),
@@ -830,7 +830,7 @@ G3_14 = SubjectCurriculum(grade=3, subject_id="G3-14",
             ),
             resolution=(
                 "The water rose to the expected mark — the last drop "
-                "alone set the level, the earlier two replaced and gone."
+                "alone set the level, the earlier two replaced and gone. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -859,7 +859,7 @@ G3_14 = SubjectCurriculum(grade=3, subject_id="G3-14",
             ),
             resolution=(
                 "The water rose to the expected mark — the third sum "
-                "alone remained, the first two sums washed away by the last."
+                "alone remained, the first two sums washed away by the last. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -895,7 +895,7 @@ G3_15 = SubjectCurriculum(grade=3, subject_id="G3-15",
             ),
             resolution=(
                 "The water rose to the expected mark — the cry faded "
-                "without trace, the final count alone setting the depth."
+                "without trace, the final count alone setting the depth. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -931,7 +931,7 @@ G3_16 = SubjectCurriculum(grade=3, subject_id="G3-16",
             ),
             resolution=(
                 "The water rose to the expected mark — the tucked count "
-                "answered for the plus-sign, the operator unreachable inside."
+                "answered for the plus-sign, the operator unreachable inside. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -968,7 +968,7 @@ G3_17 = SubjectCurriculum(grade=3, subject_id="G3-17",
             ),
             resolution=(
                 "The water rose to the expected mark — the gap between "
-                "the two speeds arrived, the hyphenated names clear throughout."
+                "the two speeds arrived, the hyphenated names clear throughout. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -986,7 +986,7 @@ G3_18 = SubjectCurriculum(grade=3, subject_id="G3-18",
             goal_text="bind n to 5 and compute n cubed",
 
             scenario=(
-                "Sable tucked five stones under one wing at the village "
+                "Sable tucked the stones under one wing at the village "
                 "pitcher, naming the count n, then used that one tucked "
                 "count three times in the body — multiplying n by itself "
                 "twice over without re-stating the count."
@@ -1004,7 +1004,7 @@ G3_18 = SubjectCurriculum(grade=3, subject_id="G3-18",
             ),
             resolution=(
                 "The water rose to the expected mark — n cubed, the "
-                "single tucked count multiplied through three positions."
+                "single tucked count multiplied through three positions. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -1033,7 +1033,7 @@ G3_18 = SubjectCurriculum(grade=3, subject_id="G3-18",
             ),
             resolution=(
                 "The water rose to the expected mark — three inline fives "
-                "multiplied directly, the pitcher indifferent to the approach."
+                "multiplied directly, the pitcher indifferent to the approach. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),

@@ -120,31 +120,31 @@ OPENERS_CROW_PITCHER: tuple[str, ...] = (
     # — placeholder-bearing —
     "{place}, where the orchard meets the well, an old clay pitcher "
     "had stood for as long as anyone could remember.",
-    "The drought had reached even {place}, and {primary_phrase} flew "
+    "The drought had reached even {place}, and {primary} flew "
     "in slow circles searching for water.",
-    "{primary_phrase} alighted on the rim of a jar {place} and peered "
+    "{primary} alighted on the rim of a jar {place} and peered "
     "down at the small dark gleam below.",
     "It was {place}, in the long heat of late summer, that a thirsty "
     "bird met a stubborn vessel.",
     "{primary} had flown all morning {place} without finding so much "
     "as a damp leaf to rest a beak against.",
     "{place}, a single pitcher held the last of the water, and "
-    "{primary_phrase} arrived too parched to be picky.",
+    "{primary} arrived too parched to be picky.",
     "When {primary} landed by the garden wall, {primary_he_she} saw "
     "the water and saw the distance, and stood very still.",
-    "{primary_phrase} was no fool, and {place} the day demanded "
+    "{primary} was no fool, and {place} the day demanded "
     "thinking rather than complaining.",
     "Word had it that {primary} had flown over three valleys before "
     "finding the pitcher {place}.",
     "{place}, where the heat shimmered above the stones, "
-    "{primary_phrase} began the slow business of solving thirst.",
+    "{primary} began the slow business of solving thirst.",
     "{primary} circled twice {place} before settling on the rim of "
     "the old clay jar, eyes on the water below.",
     "The orchard {place} had grown quiet in the heat, and "
-    "{primary_phrase} was the only sound at midday.",
-    "In a long-dry season, {primary_phrase} found the pitcher "
+    "{primary} was the only sound at midday.",
+    "In a long-dry season, {primary} found the pitcher "
     "{place} and began to consider it carefully.",
-    "{primary_phrase} arrived {place} with no plan but a sharp eye "
+    "{primary} arrived {place} with no plan but a sharp eye "
     "and a willingness to take small steps.",
 )
 

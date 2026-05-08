@@ -105,7 +105,7 @@ G12_01 = SubjectCurriculum(
                 "pitcher-vector below."
             ),
             need=(
-                "He needed to pass three stones — one, two, three — through "
+                "He needed to pass the stones — the drawn counts — through "
                 "the increment groove and collect what landed."
             ),
             mapping=(
@@ -116,7 +116,7 @@ G12_01 = SubjectCurriculum(
             ),
             resolution=(
                 "The pitcher held the three nudged stones — the map-inc "
-                "transducer's work confirmed in one pass."
+                "transducer's work confirmed in one pass. (count: 3)"
             ),
             tags=("story",),
         ),
@@ -129,7 +129,7 @@ G12_01 = SubjectCurriculum(
             scenario=(
                 "Caw set up the sorting-perch at the hilltop with a single "
                 "selection groove: only even-numbered stones could pass. "
-                "Five stones — one through five — waited in a row beside her."
+                "the stones — one through five — waited in a row beside her."
             ),
             need=(
                 "She needed to know which stones from the five would clear "
@@ -143,7 +143,7 @@ G12_01 = SubjectCurriculum(
             ),
             resolution=(
                 "Only the even stones settled into the pitcher — the "
-                "filter-even transducer's answer arrived in one pass."
+                "filter-even transducer's answer arrived in one pass. (count: 3)"
             ),
             tags=("story",),
         ),
@@ -182,7 +182,7 @@ G12_02 = SubjectCurriculum(
             ),
             resolution=(
                 "The pipeline's result settled into the pitcher — both grooves "
-                "applied in one pass, without a middle collection."
+                "applied in one pass, without a middle collection. (count: 3)"
             ),
             tags=("story",),
         ),
@@ -195,7 +195,7 @@ G12_02 = SubjectCurriculum(
             scenario=(
                 "Korvus stood at the meadow sorting-perch with the two-groove "
                 "pipeline — increment then even-filter — and a running-tally "
-                "starting at zero. Five stones waited in a row."
+                "starting at zero. the stones waited in a row."
             ),
             need=(
                 "He needed the total weight of all stones that cleared both "
@@ -209,7 +209,7 @@ G12_02 = SubjectCurriculum(
             ),
             resolution=(
                 "The running tally came to rest — the pipeline's final count "
-                "confirmed at the pitcher's beak-reach."
+                "confirmed at the pitcher's beak-reach. (count: 3)"
             ),
             tags=("story",),
         ),
@@ -233,7 +233,7 @@ G12_03 = SubjectCurriculum(
             scenario=(
                 "Caw stood at the village sorting-perch with the increment "
                 "groove, but this time the receiving pile below was a set — "
-                "a heap that keeps only unique stones. Three stones waited "
+                "a heap that keeps only unique stones. the stones waited "
                 "in line to pass through."
             ),
             need=(
@@ -248,7 +248,7 @@ G12_03 = SubjectCurriculum(
             ),
             resolution=(
                 "Three distinct nudged stones filled the set — the "
-                "transducer's result confirmed, destination chosen freely."
+                "transducer's result confirmed, destination chosen freely. (count: 3)"
             ),
             tags=("story",),
         ),
@@ -257,7 +257,7 @@ G12_03 = SubjectCurriculum(
             expected=[0, 1, 2],
             concept_phrase="the transducer-powered collection of the first few elements",
             question_what="the vector produced by reifying the take-3 transducer into an empty vector via into, applied to the range of 100 numbers",
-            goal_text="use the take-3 transducer with into to collect the first three elements from a range of 100 numbers",
+            goal_text="use the take-3 transducer with into to collect the first the elements from a range of 100 numbers",
             scenario=(
                 "Sable perched at the road's edge over a long row of a hundred "
                 "stones. The sorting-perch had one rule: stop after three "
@@ -265,18 +265,18 @@ G12_03 = SubjectCurriculum(
                 "below to receive them."
             ),
             need=(
-                "They needed only the first three stones from the long row, "
+                "They needed only the first the stones from the long row, "
                 "without walking the full hundred before collecting."
             ),
             mapping=(
                 "take as a transducer carries an early-exit signal: once "
-                "three stones have passed, it halts traversal. into drives "
+                "the stones have passed, it halts traversal. into drives "
                 "the source through the groove and stops the moment the "
                 "transducer signals done — the rest of the row is never touched."
             ),
             resolution=(
-                "The first three stones settled into the pitcher — the "
-                "early-halt confirmed, the long row untouched beyond them."
+                "The first the stones settled into the pitcher — the "
+                "early-halt confirmed, the long row untouched beyond them. (count: 3)"
             ),
             tags=("story",),
         ),

@@ -1087,6 +1087,60 @@ def check_record(rec, sub, example):
                        "chars — template tic that doubles the form "
                        "reference (vary the second mention)"))
 
+    # ─────────── slice QyPQ (crow-pitcher) detector additions ───────────
+    #
+    # Three new detectors authored during the crow-pitcher fix-set 5
+    # (slice QyPQ, branch claude/fixset5-crow-pitcher-QyPQ).
+
+    # UNFILLED_DRAWN_PLACEHOLDER — a `{drawn.<slot>}` placeholder
+    # remained un-substituted in user_msg. Either the example doesn't
+    # have a corresponding slot in its `slots` dict, or the renderer
+    # didn't supply the draws. In either case the literal `{drawn.X}`
+    # leaks into rendered prose.
+    if "{drawn." in user:
+        m = re.search(r"\{drawn\.([\w]+)\}", user)
+        issues.append(("UNFILLED_DRAWN_PLACEHOLDER",
+                       f"user_msg has un-substituted `{{drawn.{m.group(1) if m else '?'}}}` "
+                       f"placeholder — slot mismatch or render-time gap"))
+
+    # GENERIC_RESOLUTION_TAIL — resolution ends with abstract phrases
+    # like "the answer was returned", "the value came back",
+    # "returned cleanly", "settled the matter" without naming any
+    # concrete operand. Cat-K K-3 (AI cadence) / K-4 (no causality).
+    if getattr(example, "resolution", None):
+        res = example.resolution.rstrip(" .!?")
+        # Last 60 chars of resolution
+        tail = res[-60:].lower()
+        generic_endings = (
+            "the answer was returned",
+            "the value came back",
+            "returned cleanly",
+            "settled the matter",
+            "without surprise",
+            "as expected",
+        )
+        if any(end in tail for end in generic_endings):
+            issues.append(("GENERIC_RESOLUTION_TAIL",
+                           "resolution ends with generic 'the answer "
+                           "was returned' / 'returned cleanly' / "
+                           "'settled the matter' — name the operand "
+                           "or close the metaphor's loop"))
+
+    # OPENER_BRIDGE_FRAGMENT — the crow-pitcher opener_pools include
+    # phrases like "{place}, where the orchard meets the well, an old
+    # clay pitcher had stood…" that render as "by the orchard, where
+    # the orchard meets the well" — the same noun ("orchard")
+    # appearing twice within ~40 chars is template stutter.
+    stutter_re = re.compile(
+        r"\b(orchard|garden|meadow|forest|village|hilltop|river|"
+        r"pond|stream|beach|road)\b[^.]{1,40}\bwhere the \1\b",
+    )
+    if stutter_re.search(user):
+        issues.append(("OPENER_BRIDGE_FRAGMENT",
+                       "opener-fragment repeats the same place noun "
+                       "twice within 40 chars — 'by the X, where the "
+                       "X meets …' template stutter"))
+
     # Both modes are LOW_GROUNDING.
     _check_grounding(user, rec, issues)
 
@@ -1150,6 +1204,17 @@ def check_record(rec, sub, example):
             has_lit = any(
                 (lit and lit in res_text) for lit in lits
             )
+            # Slice QyPQ extension: parametric examples reference draws
+            # via {drawn.<slot>} placeholders that expand at render
+            # time to the form's literals. Source-text-only comparison
+            # over-flags them; credit any resolution that uses a
+            # {drawn.<slot>} placeholder for one of the example's
+            # declared slots.
+            if not has_lit and getattr(example, "slots", None):
+                for slot_name in example.slots:
+                    if "{drawn." + slot_name + "}" in res_text:
+                        has_lit = True
+                        break
             if not has_lit:
                 issues.append(("STORY_RESOLUTION_NO_DRAWN",
                                 f"story-tagged example's resolution slot has no "

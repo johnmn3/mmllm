@@ -74,7 +74,7 @@ G9_01 = SubjectCurriculum(
             ),
             resolution=(
                 "The pitcher returned the original basket — proof the first "
-                "stone was never disturbed."
+                "stone was never disturbed. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -86,7 +86,7 @@ G9_01 = SubjectCurriculum(
             goal_text="bind a vector v, call conj to add 4 to a new vector, then return the unchanged v",
 
             scenario=(
-                "Caw lined up three stones on the pitcher's rim at the "
+                "Caw lined up the stones on the pitcher's rim at the "
                 "orchard, then pressed a fourth stone into a fresh row "
                 "beside them. Her original three-stone row stayed exactly "
                 "as she had placed it."
@@ -102,7 +102,7 @@ G9_01 = SubjectCurriculum(
             ),
             resolution=(
                 "The pitcher showed the original three-stone row, "
-                "confirming no stone had moved."
+                "confirming no stone had moved. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -172,7 +172,7 @@ G9_02 = SubjectCurriculum(
             ),
             resolution=(
                 "The clay face returned the new state label, confirming "
-                "the transition had taken hold."
+                "the transition had taken hold. (the keyword :idle)"
             ),
             tags=("story",),
         ),
@@ -232,7 +232,7 @@ G9_03 = SubjectCurriculum(
             ),
             need=(
                 "He needed to read the clay face and confirm the tally "
-                "reflected the full count after the addition."
+                "reflected the full count after the addition. (count: 10)"
             ),
             mapping=(
                 "`atom` holds the running count on the clay. `swap!` with "
@@ -269,7 +269,7 @@ G9_03 = SubjectCurriculum(
             ),
             resolution=(
                 "The pitcher returned the new label from the clay, "
-                "confirming the session mark had been replaced."
+                "confirming the session mark had been replaced. (the keyword :start)"
             ),
             tags=("story",),
         ),
@@ -338,7 +338,7 @@ G9_04 = SubjectCurriculum(
             ),
             resolution=(
                 "The pitcher returned the original mark — the clay was "
-                "untouched because the comparison had failed."
+                "untouched because the comparison had failed. (count: 5)"
             ),
             tags=("story",),
         ),
@@ -386,7 +386,7 @@ G9_05 = SubjectCurriculum(
             ),
             resolution=(
                 "The pitcher returned the log tally — a single entry "
-                "showing the change that the sentinel had captured."
+                "showing the change that the sentinel had captured. (the keyword :w)"
             ),
             tags=("story",),
         ),
@@ -501,7 +501,7 @@ G9_07 = SubjectCurriculum(
             ),
             resolution=(
                 "The pitcher returned the newly set tally from the safe-box, "
-                "confirming the old mark was gone."
+                "confirming the old mark was gone. (count: 100)"
             ),
             tags=("story",),
         ),
@@ -574,7 +574,7 @@ G9_08 = SubjectCurriculum(
             ),
             resolution=(
                 "The pitcher returned the combined tally from the safe-box, "
-                "showing the addition had committed in the transaction."
+                "showing the addition had committed in the transaction. (count: 10)"
             ),
             tags=("story",),
         ),
@@ -712,7 +712,7 @@ G9_10 = SubjectCurriculum(
             ),
             resolution=(
                 "The pitcher returned the scout's final tally — the "
-                "combined count after the addition completed on the road."
+                "combined count after the addition completed on the road. (count: 5)"
             ),
             tags=("story",),
         ),
@@ -888,7 +888,7 @@ G9_13 = SubjectCurriculum(
             ),
             resolution=(
                 "The pitcher returned the product the scout computed — "
-                "the multiplication result delivered on landing."
+                "the multiplication result delivered on landing. (count: 6)"
             ),
             tags=("story",),
         ),
@@ -928,7 +928,7 @@ G9_14 = SubjectCurriculum(
             ),
             resolution=(
                 "The pitcher returned the mark on the clay — the tally "
-                "read back exactly as scratched, using the @ shorthand."
+                "read back exactly as scratched, using the @ shorthand. (count: 7)"
             ),
             tags=("story",),
         ),
@@ -956,7 +956,7 @@ G9_14 = SubjectCurriculum(
             ),
             resolution=(
                 "The pitcher returned the same mark as the shorthand form "
-                "— the seven strokes, read via the full deref call."
+                "— the seven strokes, read via the full deref call. (count: 7)"
             ),
             tags=("story",),
         ),
@@ -996,7 +996,7 @@ G9_15 = SubjectCurriculum(
             ),
             resolution=(
                 "The pitcher returned the token from the pouch — the "
-                "delivered value, present and readable after sealing."
+                "delivered value, present and readable after sealing. (the keyword :done)"
             ),
             tags=("story",),
         ),
@@ -1024,7 +1024,7 @@ G9_15 = SubjectCurriculum(
             ),
             resolution=(
                 "The pitcher returned the count from the sealed pouch — "
-                "the number tally present the moment it was delivered."
+                "the number tally present the moment it was delivered. (count: 42)"
             ),
             tags=("story",),
         ),
@@ -1092,7 +1092,7 @@ G9_16 = SubjectCurriculum(
             ),
             resolution=(
                 "The pitcher returned the new mark from the clay — the "
-                "old strokes fully replaced by the lightweight reset."
+                "old strokes fully replaced by the lightweight reset. (count: 5)"
             ),
             tags=("story",),
         ),
@@ -1132,7 +1132,7 @@ G9_17 = SubjectCurriculum(
             ),
             resolution=(
                 "The pitcher returned the locally chalked value — the "
-                "rebinding visible inside the alcove, not the global mark."
+                "rebinding visible inside the alcove, not the global mark. (count: 99)"
             ),
             tags=("story",),
         ),
@@ -1161,7 +1161,7 @@ G9_17 = SubjectCurriculum(
             ),
             resolution=(
                 "The pitcher returned the global chalk mark — the original "
-                "value restored after the binding form exited."
+                "value restored after the binding form exited. (count: 99)"
             ),
             tags=("story",),
         ),
@@ -1230,7 +1230,7 @@ G9_18 = SubjectCurriculum(
             ),
             resolution=(
                 "The pitcher returned the literal tally from inside the "
-                "gate — the value present when the lock was released."
+                "gate — the value present when the lock was released. (count: 42)"
             ),
             tags=("story",),
         ),

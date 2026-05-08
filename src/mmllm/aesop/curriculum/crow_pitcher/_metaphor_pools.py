@@ -456,9 +456,9 @@ heat would let the crow count it."""),
 about how many stones could be dropped before the water rose high
 enough, without bothering to count. {clever_phrase} simply began
 counting carefully — to {goal_text} required no eyeballing, only
-the form. {clever_he_she} composed {concept_phrase}, submitted
-it to the REPL, and the runtime returned the number that had been
-there all along, settling the matter the patient way."""),
+the form. {clever_he_she_cap} composed {concept_phrase}, submitted
+it to the REPL, and the runtime read off the exact tally the form
+computed, settling the matter the patient way."""),
 
     # 5. The exact-count template — generic; emphasizes that the
     #    REPL gives the exact number, no matter the operation.

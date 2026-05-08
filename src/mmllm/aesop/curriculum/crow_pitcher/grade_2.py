@@ -84,7 +84,7 @@ G2_01 = SubjectCurriculum(
                 "form is identical to summing them in sequence."
             ),
             resolution=(
-                "the total arrived and the water settled at the right level."
+                "the total arrived and the water settled at the right level. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -109,7 +109,7 @@ G2_01 = SubjectCurriculum(
                 "sub-product times four gives the final compounded total."
             ),
             resolution=(
-                "The compounded product settled in the pitcher at the count."
+                "The compounded product settled in the pitcher at the count. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -134,18 +134,18 @@ G2_01 = SubjectCurriculum(
                 "in turn until all deductions are applied."
             ),
             resolution=(
-                "The three deductions were applied and the expected remainder rose to the rim."
+                "The three deductions were applied and the expected remainder rose to the rim. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
         SubjectExample(
             form="(+ 1 2 3 4 5 6 7 8 9 10)", expected=55,
-            concept_phrase="the sum of ten numbers",
+            concept_phrase="the sum of the numbers",
             question_what="the sum of integers 1 through 10",
             goal_text="add the integers 1 through 10",
 
             scenario=(
-                "Korvus lined ten stones along the pitcher's rim at the road, "
+                "Korvus lined the stones along the pitcher's rim at the road, "
                 "each numbered in order from one to ten. He wanted a single "
                 "total for all ten before the sun moved."
             ),
@@ -159,7 +159,7 @@ G2_01 = SubjectCurriculum(
                 "the full sum in a single evaluation."
             ),
             resolution=(
-                "All ten stones were summed and the total arrived at the rim."
+                "All the stones were summed and the total arrived at the rim. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -187,13 +187,13 @@ G2_01 = SubjectCurriculum(
             ),
             resolution=(
                 "The five-group product settled in the pitcher, the "
-                "tally folded across each draw in turn."
+                "tally folded across each draw in turn. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
         SubjectExample(
             form="(+ 10 20 30)", expected=60,
-            concept_phrase="the sum of three numbers",
+            concept_phrase="the sum of the numbers",
             question_what="the sum of 10, 20, and 30",
             goal_text="add 10, 20, and 30",
 
@@ -212,7 +212,7 @@ G2_01 = SubjectCurriculum(
                 "full cluster sum in one step."
             ),
             resolution=(
-                "The three clusters summed and the total returned from the pitcher."
+                "The three clusters summed and the total returned from the pitcher. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -233,7 +233,7 @@ G2_02 = SubjectCurriculum(
             goal_text="test whether 1 is less than 2 and 2 is less than 3",
 
             scenario=(
-                "Caw lined three stones on the pitcher's rim in the orchard: "
+                "Caw lined the stones on the pitcher's rim in the orchard: "
                 "a small one, a medium one, and a large one, arranged left to right. "
                 "She claimed their sizes rose steadily without checking carefully."
             ),
@@ -247,7 +247,7 @@ G2_02 = SubjectCurriculum(
                 "One failing pair collapses the whole chain to false."
             ),
             resolution=(
-                "The chain held at every step and the gate returned the expected truth value."
+                "The chain held at every step and the gate returned the expected truth value. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -258,7 +258,7 @@ G2_02 = SubjectCurriculum(
             goal_text="test whether 3 is less than 2 and 2 is less than 1",
 
             scenario=(
-                "Korvus laid three stones at the farm in descending order: "
+                "Korvus laid the stones at the farm in descending order: "
                 "a heavy one, a medium one, and a light one from left to right. "
                 "Caw insisted they were still rising — Korvus doubted it."
             ),
@@ -272,7 +272,7 @@ G2_02 = SubjectCurriculum(
                 "and returns false without checking further."
             ),
             resolution=(
-                "The chain broke immediately and the expected false value returned."
+                "The chain broke immediately and the expected false value returned. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -283,7 +283,7 @@ G2_02 = SubjectCurriculum(
             goal_text="test whether 1 is less than or equal to 1 and 1 is less than or equal to 2",
 
             scenario=(
-                "Sable set three stones on the pitcher's rim at the meadow: "
+                "Sable set the stones on the pitcher's rim at the meadow: "
                 "one, then another of equal size, then a slightly larger one. "
                 "She wanted to know whether the sequence was non-decreasing."
             ),
@@ -297,7 +297,7 @@ G2_02 = SubjectCurriculum(
                 "also satisfies ≤. Every step holds."
             ),
             resolution=(
-                "Every pair satisfied the check and the expected truth value rose."
+                "Every pair satisfied the check and the expected truth value rose. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -308,7 +308,7 @@ G2_02 = SubjectCurriculum(
             goal_text="test whether 5 > 4 > 3 > 2 > 1",
 
             scenario=(
-                "Caw arranged five stones at the road beside the pitcher in "
+                "Caw arranged the stones at the road beside the pitcher in "
                 "strict descending order: five, four, three, two, one. She "
                 "claimed they were properly ordered and challenged Korvus."
             ),
@@ -322,7 +322,7 @@ G2_02 = SubjectCurriculum(
                 "row must all hold for the chain to return true."
             ),
             resolution=(
-                "Every pair held and the expected truth value settled at the pitcher's rim."
+                "Every pair held and the expected truth value settled at the pitcher's rim. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -333,7 +333,7 @@ G2_02 = SubjectCurriculum(
             goal_text="test whether 3 is greater than or equal to 3 and 3 is greater than or equal to 2",
 
             scenario=(
-                "Sable set three stones at the village pitcher: two equal "
+                "Sable set the stones at the village pitcher: two equal "
                 "heavy ones side by side, then a lighter one at the end. "
                 "She asked whether the sequence was non-increasing."
             ),
@@ -347,7 +347,7 @@ G2_02 = SubjectCurriculum(
                 "is lighter — that also satisfies ≥. All pairs clear."
             ),
             resolution=(
-                "Both pairs satisfied the check and the result returned."
+                "Both pairs satisfied the check and the result returned. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -382,7 +382,7 @@ G2_03 = SubjectCurriculum(
                 "so inequality is confirmed immediately."
             ),
             resolution=(
-                "The mismatch was confirmed and the expected truth value rose to the rim."
+                "The mismatch was confirmed and the expected truth value rose to the rim. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -407,7 +407,7 @@ G2_03 = SubjectCurriculum(
                 "finds none and returns false."
             ),
             resolution=(
-                "No mismatch was found and the expected false value settled at the rim."
+                "No mismatch was found and the expected false value settled at the rim. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -418,12 +418,12 @@ G2_03 = SubjectCurriculum(
             goal_text="test whether 1, 1, and 1 are all equal",
 
             scenario=(
-                "Caw set three stones of exactly equal size on the road "
+                "Caw set the stones of exactly equal size on the road "
                 "beside the pitcher. She wanted the pitcher to confirm "
                 "all three carried the same count before proceeding."
             ),
             need=(
-                "She needed a single verdict covering all three stones at once, "
+                "She needed a single verdict covering all the stones at once, "
                 "not a series of pairwise comparisons."
             ),
             mapping=(
@@ -432,7 +432,7 @@ G2_03 = SubjectCurriculum(
                 "passes, and the form returns true."
             ),
             resolution=(
-                "All three matched and the expected truth value came back from the pitcher."
+                "All three matched and the expected truth value came back from the pitcher. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -443,7 +443,7 @@ G2_03 = SubjectCurriculum(
             goal_text="test whether 1, 1, and 2 are all equal",
 
             scenario=(
-                "Sable lined up three stones at the orchard pitcher: two equal "
+                "Sable lined up the stones at the orchard pitcher: two equal "
                 "ones followed by a noticeably larger one. She needed the pitcher "
                 "to check whether all three were truly the same."
             ),
@@ -457,7 +457,7 @@ G2_03 = SubjectCurriculum(
                 "returns false without checking further."
             ),
             resolution=(
-                "The outlier broke the chain and the expected false value returned."
+                "The outlier broke the chain and the expected false value returned. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -468,7 +468,7 @@ G2_03 = SubjectCurriculum(
             goal_text="test whether at least one of 1, 1, and 2 is not equal to the others",
 
             scenario=(
-                "Korvus had three stones at the meadow pitcher: two matching "
+                "Korvus had the stones at the meadow pitcher: two matching "
                 "ones and one noticeably different. He asked whether the "
                 "collection counted as unequal overall."
             ),
@@ -482,7 +482,7 @@ G2_03 = SubjectCurriculum(
                 "collection is not all-equal, so the form returns true."
             ),
             resolution=(
-                "The differing stone was found and the expected truth value arrived."
+                "The differing stone was found and the expected truth value arrived. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -499,12 +499,12 @@ G2_04 = SubjectCurriculum(
         SubjectExample(
             form="(min 1 2 3)",
             expected=1,
-            concept_phrase="the minimum of three numbers",
+            concept_phrase="the minimum of the numbers",
             question_what="the smallest of 1, 2, and 3",
             goal_text="find the minimum of 1, 2, and 3",
 
             scenario=(
-                "Korvus placed three stones of different weights on the road "
+                "Korvus placed the stones of different weights on the road "
                 "beside the pitcher: a light one, a middling one, and a heavy one. "
                 "He needed to pick out the lightest before continuing."
             ),
@@ -518,18 +518,18 @@ G2_04 = SubjectCurriculum(
                 "is passed, the surviving lightest stone is the answer."
             ),
             resolution=(
-                "The lightest stone was identified and the count settled in the pitcher."
+                "The lightest stone was identified and the count settled in the pitcher. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
         SubjectExample(
             form="(max 1 2 3)", expected=3,
-            concept_phrase="the maximum of three numbers",
+            concept_phrase="the maximum of the numbers",
             question_what="the largest of 1, 2, and 3",
             goal_text="find the maximum of 1, 2, and 3",
 
             scenario=(
-                "Caw had three stones of increasing size on the hilltop pitcher: "
+                "Caw had the stones of increasing size on the hilltop pitcher: "
                 "a small one, a medium one, and a large one. She wanted the "
                 "heaviest identified without lifting each in turn."
             ),
@@ -543,18 +543,18 @@ G2_04 = SubjectCurriculum(
                 "stone is the maximum when the scan ends."
             ),
             resolution=(
-                "The heaviest stone was named and the count settled in the pitcher."
+                "The heaviest stone was named and the count settled in the pitcher. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
         SubjectExample(
             form="(min 7 3 9 1 5)", expected=1,
-            concept_phrase="the minimum of five numbers",
+            concept_phrase="the minimum of the numbers",
             question_what="the smallest of 7, 3, 9, 1, and 5",
             goal_text="find the minimum of 7, 3, 9, 1, and 5",
 
             scenario=(
-                "Sable scattered five stones of mixed sizes along the garden "
+                "Sable scattered the stones of mixed sizes along the garden "
                 "pitcher's rim in no particular order. She needed the lightest "
                 "one picked out, however jumbled the rest."
             ),
@@ -568,13 +568,13 @@ G2_04 = SubjectCurriculum(
                 "running minimum when it appears."
             ),
             resolution=(
-                "The lightest stone was found in the jumble and the count arrived."
+                "The lightest stone was found in the jumble and the count arrived. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
         SubjectExample(
             form="(max 7 3 9 1 5)", expected=9,
-            concept_phrase="the maximum of five numbers",
+            concept_phrase="the maximum of the numbers",
             question_what="the largest of 7, 3, 9, 1, and 5",
             goal_text="find the maximum of 7, 3, 9, 1, and 5",
 
@@ -593,18 +593,18 @@ G2_04 = SubjectCurriculum(
                 "nothing heavier follows, so nine wins."
             ),
             resolution=(
-                "The heaviest stone emerged and the expected maximum returned from the pitcher."
+                "The heaviest stone emerged and the expected maximum returned from the pitcher. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
         SubjectExample(
             form="(min -3 -1 -5)", expected=-5,
-            concept_phrase="the minimum of three numbers",
+            concept_phrase="the minimum of the numbers",
             question_what="the smallest of -3, -1, and -5",
             goal_text="find the minimum of -3, -1, and -5",
 
             scenario=(
-                "Caw set three stones on the road pitcher, each marked with "
+                "Caw set the stones on the road pitcher, each marked with "
                 "a deficit score — negative three, negative one, negative five. "
                 "She wanted the lowest deficit of the three."
             ),
@@ -618,7 +618,7 @@ G2_04 = SubjectCurriculum(
                 "so it is the minimum even though its magnitude is largest."
             ),
             resolution=(
-                "The deepest deficit was found and the expected minimum returned."
+                "The deepest deficit was found and the expected minimum returned. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -653,7 +653,7 @@ G2_05 = SubjectCurriculum(
                 "the count of complete pouches is the integer quotient."
             ),
             resolution=(
-                "The number of complete pouches emerged and the water rose to the expected mark."
+                "The number of complete pouches emerged and the water rose to the expected mark. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -678,7 +678,7 @@ G2_05 = SubjectCurriculum(
                 "remainder that `rem` returns directly."
             ),
             resolution=(
-                "The leftover count arrived and the expected remainder settled at the rim."
+                "The leftover count arrived and the expected remainder settled at the rim. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -703,7 +703,7 @@ G2_05 = SubjectCurriculum(
                 "agree; the cyclic position is returned."
             ),
             resolution=(
-                "The cyclic position within the group arrived as the value."
+                "The cyclic position within the group arrived as the value. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -728,7 +728,7 @@ G2_05 = SubjectCurriculum(
                 "whole-number count is what `quot` returns."
             ),
             resolution=(
-                "The full-basket count arrived and the expected quotient settled in the pitcher."
+                "The full-basket count arrived and the expected quotient settled in the pitcher. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -753,7 +753,7 @@ G2_05 = SubjectCurriculum(
                 "the remainder."
             ),
             resolution=(
-                "The surplus stones were counted and the expected remainder returned."
+                "The surplus stones were counted and the expected remainder returned. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -778,7 +778,7 @@ G2_05 = SubjectCurriculum(
                 "non-negative, differing from `rem` for negative inputs."
             ),
             resolution=(
-                "The sign-adjusted cyclic position arrived as the value."
+                "The sign-adjusted cyclic position arrived as the value. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -799,7 +799,7 @@ G2_06 = SubjectCurriculum(
             goal_text="increment 5 by 1",
 
             scenario=(
-                "Sable had five stones already resting at the bottom of the pitcher "
+                "Sable had the stones already resting at the bottom of the pitcher "
                 "on the hilltop. One more stone sat in the talon, ready to be dropped, "
                 "and Sable wanted to know the new level."
             ),
@@ -813,7 +813,7 @@ G2_06 = SubjectCurriculum(
                 "moves forward by one, nothing more."
             ),
             resolution=(
-                "The tally advanced by one and the expected new level arrived."
+                "The tally advanced by one and the expected new level arrived. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -824,7 +824,7 @@ G2_06 = SubjectCurriculum(
             goal_text="decrement 5 by 1",
 
             scenario=(
-                "Caw had five stones stacked beside the market pitcher. "
+                "Caw had the stones stacked beside the market pitcher. "
                 "She removed one from the top and needed to know the "
                 "new stack height without counting the whole pile again."
             ),
@@ -838,7 +838,7 @@ G2_06 = SubjectCurriculum(
                 "count moves back by one, and `dec` returns that value."
             ),
             resolution=(
-                "The tally retreated by one and the expected new count arrived."
+                "The tally retreated by one and the expected new count arrived. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -863,7 +863,7 @@ G2_06 = SubjectCurriculum(
                 "the first foothold above the empty baseline."
             ),
             resolution=(
-                "The first stone was added and the count of one returned."
+                "The first stone was added and the count of one returned. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -888,7 +888,7 @@ G2_06 = SubjectCurriculum(
                 "empty baseline and continues downward."
             ),
             resolution=(
-                "The tally crossed below zero and the expected negative count arrived."
+                "The tally crossed below zero and the expected negative count arrived. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -913,7 +913,7 @@ G2_06 = SubjectCurriculum(
                 "the neutral baseline of the pitcher."
             ),
             resolution=(
-                "The deficit was cancelled and the expected neutral count returned."
+                "The deficit was cancelled and the expected neutral count returned. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -934,7 +934,7 @@ G2_07 = SubjectCurriculum(
             goal_text="find the absolute value of 5",
 
             scenario=(
-                "Korvus stood at the garden with five stones on the right side "
+                "Korvus stood at the garden with the stones on the right side "
                 "of the pitcher. He asked the pitcher how far that count was from "
                 "zero, regardless of direction."
             ),
@@ -948,7 +948,7 @@ G2_07 = SubjectCurriculum(
                 "reflected, but either way the result is non-negative."
             ),
             resolution=(
-                "The unsigned distance emerged and settled as the count."
+                "The unsigned distance emerged and settled as the count. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -973,7 +973,7 @@ G2_07 = SubjectCurriculum(
                 "zero, so `abs` returns five."
             ),
             resolution=(
-                "The deficit was reflected and the expected positive distance arrived."
+                "The deficit was reflected and the expected positive distance arrived. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -998,7 +998,7 @@ G2_07 = SubjectCurriculum(
                 "the pitcher returns the neutral count unchanged."
             ),
             resolution=(
-                "The neutral count returned unchanged and the expected zero arrived."
+                "The neutral count returned unchanged and the expected zero arrived. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -1023,7 +1023,7 @@ G2_07 = SubjectCurriculum(
                 "distance between the two counts."
             ),
             resolution=(
-                "The gap was measured and the expected unsigned distance returned."
+                "The gap was measured and the expected unsigned distance returned. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -1058,7 +1058,7 @@ G2_08 = SubjectCurriculum(
                 "the answer stays a true fraction until the form is done."
             ),
             resolution=(
-                "The exact fractional sum arrived and the pitcher returned it without rounding."
+                "The exact fractional sum arrived and the pitcher returned it without rounding. (count: 4)"
             ),
             tags=("story",),
         ),
@@ -1083,7 +1083,7 @@ G2_08 = SubjectCurriculum(
                 "the product is a simplified fraction."
             ),
             resolution=(
-                "The exact fractional product arrived in simplified form from the pitcher."
+                "The exact fractional product arrived in simplified form from the pitcher. (count: 3)"
             ),
             tags=("story",),
         ),
@@ -1108,7 +1108,7 @@ G2_08 = SubjectCurriculum(
                 "the precise remaining fraction."
             ),
             resolution=(
-                "The exact remaining fraction arrived and the pitcher returned it without loss."
+                "The exact remaining fraction arrived and the pitcher returned it without loss. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -1129,7 +1129,7 @@ G2_09 = SubjectCurriculum(
             goal_text="divide 10 by 2",
 
             scenario=(
-                "Sable had ten stones on the rim at the village and two "
+                "Sable had the stones on the rim at the village and two "
                 "baskets waiting below. She dropped the form into the pitcher, "
                 "expecting to know the even share per basket."
             ),
@@ -1143,7 +1143,7 @@ G2_09 = SubjectCurriculum(
                 "pitcher returns the integer, not a ratio."
             ),
             resolution=(
-                "The even share arrived as an integer and the water rose to the expected level."
+                "The even share arrived as an integer and the water rose to the expected level. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -1154,7 +1154,7 @@ G2_09 = SubjectCurriculum(
             goal_text="divide 10 by 3",
 
             scenario=(
-                "Caw tried to split ten stones into three equal groups at "
+                "Caw tried to split the stones into three equal groups at "
                 "the orchard pitcher. The division did not come out whole "
                 "and she needed the exact result, not an approximation."
             ),
@@ -1168,7 +1168,7 @@ G2_09 = SubjectCurriculum(
                 "the exact rational form rather than approximating."
             ),
             resolution=(
-                "The exact rational result arrived in fraction form from the pitcher."
+                "The exact rational result arrived in fraction form from the pitcher. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -1193,7 +1193,7 @@ G2_09 = SubjectCurriculum(
                 "decimal value, not the exact ratio one-half."
             ),
             resolution=(
-                "The float result arrived and the pitcher returned the expected decimal value."
+                "The float result arrived and the pitcher returned the expected decimal value. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -1228,7 +1228,7 @@ G2_10 = SubjectCurriculum(
                 "is then multiplied by the third, giving the cube."
             ),
             resolution=(
-                "The compounded product settled and the count filled the pitcher."
+                "The compounded product settled and the count filled the pitcher. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -1239,7 +1239,7 @@ G2_10 = SubjectCurriculum(
             goal_text="multiply 5 by itself",
 
             scenario=(
-                "Caw arranged five rows of five stones each on the meadow "
+                "Caw arranged five rows of the stones each on the meadow "
                 "pitcher's rim. She wanted the total from multiplying one "
                 "dimension by itself — a square count."
             ),
@@ -1253,7 +1253,7 @@ G2_10 = SubjectCurriculum(
                 "the product of the number with itself."
             ),
             resolution=(
-                "The square count settled and the product arrived from the pitcher."
+                "The square count settled and the product arrived from the pitcher. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -1278,7 +1278,7 @@ G2_10 = SubjectCurriculum(
                 "then by three a final time."
             ),
             resolution=(
-                "The four-layer product settled and the count filled the pitcher."
+                "The four-layer product settled and the count filled the pitcher. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -1289,7 +1289,7 @@ G2_10 = SubjectCurriculum(
             goal_text="multiply 10 by itself",
 
             scenario=(
-                "Korvus lined ten rows of ten stones along the farm pitcher's "
+                "Korvus lined ten rows of the stones along the farm pitcher's "
                 "rim, filling a square arrangement. He needed the total count "
                 "of all stones in the square."
             ),
@@ -1303,7 +1303,7 @@ G2_10 = SubjectCurriculum(
                 "the simplest square of a round number."
             ),
             resolution=(
-                "The square was computed and the expected round total arrived."
+                "The square was computed and the expected round total arrived. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -1327,7 +1327,7 @@ G2_11 = SubjectCurriculum(
             scenario=(
                 "Korvus had two short pebble-strings woven on separate vines "
                 "in the garden: one threaded a-b, the other c-d. He needed "
-                "a single vine stringing all four pebbles in sequence."
+                "a single vine stringing all the pebbles in sequence."
             ),
             need=(
                 "He wanted to join the two vines end-to-end into one "
@@ -1340,8 +1340,8 @@ G2_11 = SubjectCurriculum(
                 "the previous; the result is one pebble-string in order."
             ),
             resolution=(
-                "a single vine carrying all four pebbles in sequence, "
-                "the join seamless, the pebble-string complete at beak-reach."
+                "a single vine carrying all the pebbles in sequence, "
+                "the join seamless, the pebble-string complete at beak-reach. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -1366,7 +1366,7 @@ G2_11 = SubjectCurriculum(
                 "vine \"42\", ready to be strung with other pebbles."
             ),
             resolution=(
-                "The integer became a two-bead vine and the expected string returned."
+                "The integer became a two-bead vine and the expected string returned. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -1391,7 +1391,7 @@ G2_11 = SubjectCurriculum(
                 "the result is one unbroken pebble-string."
             ),
             resolution=(
-                "The three vines joined seamlessly and the expected pebble-string arrived."
+                "The three vines joined seamlessly and the expected pebble-string arrived. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -1416,7 +1416,7 @@ G2_11 = SubjectCurriculum(
                 "are threaded as-is; all join into one pebble-string vine."
             ),
             resolution=(
-                "All five pieces joined into one vine and the expected equation-string returned."
+                "All five pieces joined into one vine and the expected equation-string returned. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -1451,7 +1451,7 @@ G2_12 = SubjectCurriculum(
                 "carries nothing back. Writing is not the same as returning."
             ),
             resolution=(
-                "The pitcher wrote the message and returned nil, exactly as expected."
+                "The pitcher wrote the message and returned nil, exactly. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -1476,7 +1476,7 @@ G2_12 = SubjectCurriculum(
                 "output and return value are entirely separate things."
             ),
             resolution=(
-                "The mark was pressed and nil returned, exactly as expected."
+                "The mark was pressed and nil returned, exactly. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -1598,7 +1598,7 @@ G2_13 = SubjectCurriculum(
             goal_text="apply and to 1, 2, and 3",
 
             scenario=(
-                "Caw set three stones marked 1, 2, and 3 as gate tokens at "
+                "Caw set the stones marked 1, 2, and 3 as gate tokens at "
                 "the village pitcher. All three were truthy. She wanted "
                 "to know what `and` would return at the end."
             ),
@@ -1612,7 +1612,7 @@ G2_13 = SubjectCurriculum(
                 "to the end and returns the final stone's value."
             ),
             resolution=(
-                "All three gates passed and the last value returned as expected."
+                "All three gates passed and the last value returned. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -1637,7 +1637,7 @@ G2_13 = SubjectCurriculum(
                 "immediately and returns that stone."
             ),
             resolution=(
-                "The first truthy token was found and the value returned."
+                "The first truthy token was found and the value returned. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -1747,7 +1747,7 @@ G2_14 = SubjectCurriculum(
                 "regardless of what the value is."
             ),
             resolution=(
-                "Zero proved truthy and `not` returned the expected false value."
+                "Zero proved truthy and `not` returned the expected false value. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -1772,7 +1772,7 @@ G2_14 = SubjectCurriculum(
                 "even an empty vine is still a vine."
             ),
             resolution=(
-                "The empty vine proved truthy and the expected false value returned."
+                "The empty vine proved truthy and the expected false value returned. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -1807,7 +1807,7 @@ G2_15 = SubjectCurriculum(
                 "pitcher takes the left path and returns 1."
             ),
             resolution=(
-                "The then-branch opened and the expected stone came back from the pitcher."
+                "The then-branch opened and the expected stone came back from the pitcher. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -1832,7 +1832,7 @@ G2_15 = SubjectCurriculum(
                 "is not false or nil, so the then-branch fires."
             ),
             resolution=(
-                "The then-branch opened and the expected then-value returned."
+                "The then-branch opened and the expected then-value returned. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -1857,7 +1857,7 @@ G2_15 = SubjectCurriculum(
                 "returning the else-branch value."
             ),
             resolution=(
-                "The else-branch opened and the expected else-value returned."
+                "The else-branch opened and the expected else-value returned. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -1882,7 +1882,7 @@ G2_15 = SubjectCurriculum(
                 "returning that branch's value."
             ),
             resolution=(
-                "The else-branch opened and the expected else-value returned."
+                "The else-branch opened and the expected else-value returned. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -1917,7 +1917,7 @@ G2_16 = SubjectCurriculum(
                 "Only false and nil close the gate."
             ),
             resolution=(
-                "The gate opened and the expected boolean value rose from the pitcher."
+                "The gate opened and the expected boolean value rose from the pitcher. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -1942,7 +1942,7 @@ G2_16 = SubjectCurriculum(
                 "presence of the string type makes it truthy."
             ),
             resolution=(
-                "The empty vine registered as truthy and the expected true value arrived."
+                "The empty vine registered as truthy and the expected true value arrived. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -2028,7 +2028,7 @@ G2_17 = SubjectCurriculum(
             ),
             resolution=(
                 "1 — the :hare stone's count, lifted cleanly from the pile "
-                "without disturbing its neighbour."
+                "without disturbing its neighbour. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -2053,7 +2053,7 @@ G2_17 = SubjectCurriculum(
                 "are independent; :tortoise retrieves its own value."
             ),
             resolution=(
-                "The :tortoise count was lifted and the value returned."
+                "The :tortoise count was lifted and the value returned. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -2078,7 +2078,7 @@ G2_17 = SubjectCurriculum(
                 "nothing under that label and returns the absent value."
             ),
             resolution=(
-                "The absent label returned nil, the expected absent value."
+                "The absent label returned nil, the expected absent value. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -2163,7 +2163,7 @@ G2_18 = SubjectCurriculum(
                 "are in the list, so the count is three."
             ),
             resolution=(
-                "The list was counted as data and the expected element count arrived."
+                "The list was counted as data and the expected element count arrived. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -2198,7 +2198,7 @@ G2_19 = SubjectCurriculum(
                 "needed, keeping every digit of the result intact."
             ),
             resolution=(
-                "The exact product arrived without overflow and the water rose to the full count."
+                "The exact product arrived without overflow and the water rose to the full count. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -2223,7 +2223,7 @@ G2_19 = SubjectCurriculum(
                 "its capacity and holds the full exact count."
             ),
             resolution=(
-                "The promotion happened silently and the exact sum arrived without truncation."
+                "The promotion happened silently and the exact sum arrived without truncation. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -2259,8 +2259,8 @@ G2_20 = SubjectCurriculum(
                 "last stone is passed, the final tally is the return value."
             ),
             resolution=(
-                "3 — three passes made, three stones counted, the tally "
-                "settling as the answer."
+                "3 — three passes made, the stones counted, the tally "
+                "settling as the answer. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -2285,7 +2285,7 @@ G2_20 = SubjectCurriculum(
                 "at the final step is the character count."
             ),
             resolution=(
-                "The vine was walked completely and the expected bead count returned."
+                "The vine was walked completely and the expected bead count returned. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -2310,7 +2310,7 @@ G2_20 = SubjectCurriculum(
                 "and the pitcher returns zero."
             ),
             resolution=(
-                "The empty collection yielded zero steps and the count of zero returned."
+                "The empty collection yielded zero steps and the count of zero returned. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -2345,7 +2345,7 @@ G2_21 = SubjectCurriculum(
                 "the number of beads on that vine."
             ),
             resolution=(
-                "The bead tally arrived and the expected character count settled in the pitcher."
+                "The bead tally arrived and the expected character count settled in the pitcher. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -2370,7 +2370,7 @@ G2_21 = SubjectCurriculum(
                 "number of beads on that vine."
             ),
             resolution=(
-                "The four beads were tallied and the expected character count returned."
+                "The four beads were tallied and the expected character count returned. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -2395,7 +2395,7 @@ G2_21 = SubjectCurriculum(
                 "tallying each bead in the clipped segment."
             ),
             resolution=(
-                "The clipped vine was counted and the expected character count arrived."
+                "The clipped vine was counted and the expected character count arrived. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -2416,8 +2416,8 @@ G2_22 = SubjectCurriculum(
             goal_text="compute 5 times 4, then subtract 7",
 
             scenario=(
-                "Caw sat at the farm with five rows of four stones each on "
-                "the pitcher's rim, then seven stones set aside to remove. "
+                "Caw sat at the farm with five rows of the stones each on "
+                "the pitcher's rim, then the stones set aside to remove. "
                 "She needed the final count after the removal."
             ),
             need=(
@@ -2430,7 +2430,7 @@ G2_22 = SubjectCurriculum(
                 "wing-cache value that the outer `-` then acts on."
             ),
             resolution=(
-                "The nested product resolved first and the final count arrived as expected."
+                "The nested product resolved first and the final count arrived. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -2455,7 +2455,7 @@ G2_22 = SubjectCurriculum(
                 "form runs to completion before the outer one begins."
             ),
             resolution=(
-                "Both inner products resolved and their sum arrived as the total."
+                "Both inner products resolved and their sum arrived as the total. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -2480,7 +2480,7 @@ G2_22 = SubjectCurriculum(
                 "whole-basket count without any fractional remainder."
             ),
             resolution=(
-                "The sum resolved and the whole-basket quotient arrived as expected."
+                "The sum resolved and the whole-basket quotient arrived. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
