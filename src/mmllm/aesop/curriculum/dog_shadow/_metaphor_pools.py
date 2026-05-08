@@ -83,7 +83,9 @@ back with the answer."""),
     # 2. Closed-jaws-as-binding: whatever's gripped is in force only while the
     #    jaws are closed. Type-neutral framing.
     SubplotTemplate("""\
-{hound_phrase} tightened {hound_his_her} grip on the bone.
+{hound_phrase}, {emo_patient}, tightened {hound_his_her} grip on
+the bone. The crossing was short and the grip held only for that
+span — the binding sealed inside the form's reach.
 "Whatever I hold here is in force only while my jaws stay
 closed," {hound_he_she} said carefully, "and only for the form
 that names the binding. Step past the form's edge and the mouth
@@ -138,8 +140,10 @@ _RECIPE_SUBPLOTS: list[SubplotTemplate] = [
     # 1. Following a nose-trail: paw-step sniffing path; the runtime
     #    walks each sniff in order. Type-neutral.
     SubplotTemplate("""\
-{hound_phrase} put {hound_his_her} nose to the ground {place} and
-worked out a careful sniffing-trail toward the buried bone.
+{hound_phrase}, {emo_patient}, put {hound_his_her} nose to the
+ground {place} and worked out a careful sniffing-trail toward the
+buried bone. The trail was long and the steps fell in order, each
+sniff teeing up the next.
 "Recipes in Clojure are like a nose-trail," {hound_he_she} said:
 "each sniff is a step, the steps come in order, and the last
 sniff is what you serve." To {goal_text}, {hound_he_she}
@@ -152,7 +156,7 @@ last step had produced."""),
 "A nose-trail is only useful when it gets walked," {hound_phrase}
 said, head low. "You set out the sniffs, you bring the
 ingredients, the runtime does the rest." To {goal_text},
-{hound_he_she_cap} composed {concept_phrase}, submitted the form,
+{hound_he_she} composed {concept_phrase}, submitted the form,
 and the REPL — taking the trail and its inputs — handed back what
 the steps had produced."""),
 
@@ -229,7 +233,7 @@ described."""),
 log. "Whatever I do to the cache, this one stays exactly as it
 was — what I get back is a fresh cache with the change made,
 leaving the first one untouched." To {goal_text},
-{hound_he_she_cap} composed {concept_phrase}, submitted the form,
+{hound_he_she} composed {concept_phrase}, submitted the form,
 and the REPL returned a new arrangement while the original
 waited, untouched. {dog_phrase}, {emo_tired}, was beginning to
 see why nothing could be lost by trying."""),
@@ -261,7 +265,7 @@ _SIEVE_SUBPLOTS: list[SubplotTemplate] = [
 choose for the gap," {hound_he_she} said, "the bones from the
 near bank pass through one at a time: some are changed, some
 kept, some held back, depending on the gap." To {goal_text},
-{hound_he_she_cap} composed {concept_phrase} as the gap's rule,
+{hound_he_she} composed {concept_phrase} as the gap's rule,
 ran the bones through, submitted the form, and the REPL returned
 what the gap had let pass."""),
 
@@ -281,7 +285,7 @@ what fell into the receiving log."""),
 that passed the first gap arriving at the second. "What lands at
 the bottom," {hound_he_she} said, "has been through both rules in
 order — applied as a single combined gap." To {goal_text},
-{hound_he_she_cap} composed {concept_phrase} as a stack of gaps,
+{hound_he_she} composed {concept_phrase} as a stack of gaps,
 ran the input through, submitted the form, and the REPL caught
 what the stack had let through."""),
 
@@ -373,9 +377,10 @@ _ACORN_SUBPLOTS: list[SubplotTemplate] = [
 
     # 1. The counting-bones template — generic arithmetic frame.
     SubplotTemplate("""\
-{hound_phrase} laid bones out on a flat stone {place}, sorting
-them into small piles. "Numbers in Clojure are just like bones
-in piles," {hound_he_she} said: "you can count them, you can
+{hound_phrase}, {emo_patient}, laid bones out on a flat stone
+{place}, sorting them into small piles — each pile a steady
+count, no bone borrowed across. "Numbers in Clojure are just like
+bones in piles," {hound_he_she} said: "you can count them, you can
 add two piles together, you can divide one pile among several."
 To {goal_text}, {hound_he_she} composed {concept_phrase},
 submitted the form, and let the REPL hand back the count of
@@ -397,7 +402,7 @@ with the count. "Numbers in Clojure don't fudge,"
 {hound_he_she} said. "Whatever you do — adding, subtracting,
 dividing into piles with leftovers, comparing two heaps — the
 runtime gets it exactly right, every time." To {goal_text},
-{hound_he_she_cap} composed {concept_phrase}, submitted the
+{hound_he_she} composed {concept_phrase}, submitted the
 form, and the REPL handed back the precise number the operation
 called for."""),
 
@@ -408,7 +413,7 @@ about how many bones were there without bothering to count.
 {hound_phrase} simply began counting — to {goal_text} required no
 eyeballing, only the form. {hound_he_she_cap} composed
 {concept_phrase}, submitted it to the REPL, and the runtime
-returned the number that had been there all along, settling the
+read off the exact tally the form computed, settling the
 matter the patient way."""),
 
     # 5. The exact-count template.
@@ -429,10 +434,11 @@ _GATE_SUBPLOTS: list[SubplotTemplate] = [
 
     # 1. The crossing-conditions template — generic for any boolean.
     SubplotTemplate("""\
-{hound_phrase} paused at the stream's edge {place}, weighing the
-crossing. "Boolean forms in Clojure are like the conditions for a
-crossing," {hound_phrase} said: "the runtime checks the value,
-opens or closes the way, and what comes back is the verdict." To
+{hound_phrase}, {emo_cautious}, paused at the stream's edge
+{place}, weighing the crossing. The chain of crossing-tests was
+short and cool — the first false stone halted the chain. "Boolean
+forms in Clojure are like the conditions for a crossing,"
+{hound_he_she} said: "the runtime checks the value, opensor closes the way, and what comes back is the verdict." To
 {goal_text}, {hound_he_she} composed {concept_phrase},
 submitted the form, and the REPL returned whatever the conditions
 had decided."""),
@@ -487,7 +493,9 @@ _FORK_SUBPLOTS: list[SubplotTemplate] = [
     SubplotTemplate("""\
 The path forked at the bank {place}, with one or more arms
 branching off — upstream, downstream, or back into the trees —
-each arm marked with a condition. "Branching forms in Clojure
+each arm marked with a condition. {hound_phrase}, {emo_patient},
+read the markers cool and clear: only one arm would be taken,
+the others left walked-past. "Branching forms in Clojure
 are forks like this," {hound_phrase} said. "The runtime checks
 the condition, takes the matching arm, and only that arm's value
 comes back." To {goal_text}, {hound_he_she} composed
@@ -501,7 +509,7 @@ marked by a small condition-stone. "Branching forms work like
 this," {hound_phrase} said: "the dog walks past the stones in
 order, takes the first arm whose stone says true, and the value
 of that arm is what comes back." To {goal_text},
-{hound_he_she_cap} composed {concept_phrase}, submitted the form,
+{hound_he_she} composed {concept_phrase}, submitted the form,
 and the REPL took the right arm and returned its value."""),
 
     # 3. The unrun-arm template — branches not taken don't run.
@@ -542,8 +550,10 @@ _ROADSIGN_SUBPLOTS: list[SubplotTemplate] = [
 
     # 1. The marker-stone-by-the-stream template — `def`.
     SubplotTemplate("""\
-{hound_phrase} chose a flat stone {place} and scratched a fresh
-name into its surface. "A def is a marker stone by the stream,"
+{hound_phrase}, {emo_patient}, chose a flat stone {place} and
+scratched a fresh name into its surface. The stone sat plain on
+the long path: any later dog could read the scratch, no
+bookkeeping required. "A def is a marker stone by the stream,"
 {hound_he_she} said. "Any dog passing reads the scratch, learns
 where the bone is buried, and can find it later by the name
 alone." To {goal_text}, {hound_he_she} composed
@@ -567,7 +577,7 @@ stone carrying the names for one stretch of riverbank. "Names
 live in groups," {hound_phrase} said: "to use a name from a
 stretch you didn't dig, you make sure that stretch's stones are
 where the runtime can find them." To {goal_text},
-{hound_he_she_cap} composed {concept_phrase}, submitted the form,
+{hound_he_she} composed {concept_phrase}, submitted the form,
 and the REPL — finding the right name on the right stone —
 returned the value the form had asked for."""),
 
@@ -600,8 +610,10 @@ _SAFETYNET_SUBPLOTS: list[SubplotTemplate] = [
 
     # 1. The log-bridge test before crossing — `try`/`catch`.
     SubplotTemplate("""\
-{hound_phrase} stepped onto a fallen log spanning the stream
-{place}, testing its hold paw by paw before trusting full weight.
+{hound_phrase}, {emo_cautious}, stepped onto a fallen log spanning
+the stream {place}, testing its hold paw by paw before trusting
+full weight. The log was the safety-net: a slip on the form just
+returned the dog to the bank, no harm done.
 "If the log gives, I retreat to the bank; the run doesn't end,
 only the path bends." To {goal_text}, {hound_he_she}
 composed {concept_phrase}, submitted the form, and the REPL —
@@ -615,7 +627,7 @@ way."""),
 gesturing wide. "A stumble here costs nothing. Try a form, see
 what comes back, fix it, try again. The REPL is forgiving in a
 way that a real crossing is not." To {goal_text},
-{hound_he_she_cap} composed {concept_phrase}, submitted the form,
+{hound_he_she} composed {concept_phrase}, submitted the form,
 and the REPL returned the value — even if the form had been
 close to a mis-step."""),
 
@@ -625,7 +637,7 @@ close to a mis-step."""),
 "is that the run can continue — the runtime catches the slip,
 takes the recovery path, and the answer comes back even when
 something inside the form went off the bank." To {goal_text},
-{hound_he_she_cap} composed {concept_phrase}, submitted the
+{hound_he_she} composed {concept_phrase}, submitted the
 form, and the REPL — handling the slip cleanly — returned the
 value the recovery path had produced."""),
 
@@ -673,7 +685,7 @@ committed."""),
 writing forms," {hound_phrase} said. "You ask the runtime for
 what's on the bone, you scratch what you want recorded, and the
 work goes both ways through one claw." To {goal_text},
-{hound_he_she_cap} composed {concept_phrase}, submitted the
+{hound_he_she} composed {concept_phrase}, submitted the
 form, and the REPL handed back what the bone had said — or what
 the writing had committed."""),
 
@@ -703,7 +715,7 @@ held."""),
 the bank outside it. Message-bones are how the two meet — a
 value crosses out and becomes scratches on a bone, or scratches
 on a bone cross in and become a value again." To {goal_text},
-{hound_he_she_cap} composed {concept_phrase}, submitted the form,
+{hound_he_she} composed {concept_phrase}, submitted the form,
 and the REPL — bridging the two banks — handed back the value
 the work had carried."""),
 ]
@@ -721,7 +733,7 @@ _GUILD_SUBPLOTS: list[SubplotTemplate] = [
 "A protocol is a pack agreement," {hound_he_she} said. "It lists
 what every member must be able to signal — the methods. Any dog
 that learns the signals may join the pack." To {goal_text},
-{hound_he_she_cap} composed {concept_phrase}, submitted the form,
+{hound_he_she} composed {concept_phrase}, submitted the form,
 and the REPL — agreement set — handed back the pack's record."""),
 
     # 2. The same-call-many-breeds template.
@@ -730,7 +742,7 @@ and the REPL — agreement set — handed back the pack's record."""),
 that the call is the same for every member, but each breed
 answers in its own way. The runtime looks up which breed the
 dog is, then runs that breed's answer." To {goal_text},
-{hound_he_she_cap} composed {concept_phrase}, submitted the form,
+{hound_he_she} composed {concept_phrase}, submitted the form,
 and the REPL — dispatching to the right breed — returned the
 breed-specific value."""),
 
@@ -751,7 +763,7 @@ ran — returned the right answer."""),
 "Belonging to the Bone-Sniffers' pack doesn't mean belonging to
 the River-Crossers' pack — the runtime checks each separately,
 and only the right pack's answer comes back." To {goal_text},
-{hound_he_she_cap} composed {concept_phrase}, submitted the form,
+{hound_he_she} composed {concept_phrase}, submitted the form,
 and the REPL — respecting which pack was being called — returned
 the right value."""),
 
@@ -774,12 +786,14 @@ _TOOLSHED_SUBPLOTS: list[SubplotTemplate] = [
 
     # 1. The borrowed-tool template — `.method` syntax.
     SubplotTemplate("""\
-{hound_phrase} padded over to the kennel-master's shed {place}
-and pulled down a tool the dogs hadn't carved themselves — a
-leash, a bowl, a collar. "These aren't ours," {hound_he_she}
+{hound_phrase}, {emo_patient}, padded over to the kennel-master's
+shed {place} and pulled down a tool the dogs hadn't carved
+themselves — a leash, a bowl, a collar. The shed was a foreign
+yard with its own conventions; the borrowed tool answered only
+when called by its true name. "These aren't ours," {hound_he_she}
 said, "but we can call their methods directly: dot-prefix on the
 tool, or slash for standard-issue." To {goal_text},
-{hound_he_she_cap} composed {concept_phrase}, submitted the form,
+{hound_he_she} composed {concept_phrase}, submitted the form,
 and the REPL — calling into the kennel-master's tool — handed
 back what its method had returned."""),
 
@@ -789,7 +803,7 @@ back what its method had returned."""),
 {hound_phrase} said, "and the right way to call it depends on
 which kind of tool it is — some held by a single dog, some
 standard-issue called by the shed's name." To {goal_text},
-{hound_he_she_cap} composed {concept_phrase} using the right
+{hound_he_she} composed {concept_phrase} using the right
 calling convention, submitted the form, and the REPL — invoking
 the host tool by its label — returned the value the host had
 computed."""),
@@ -800,7 +814,7 @@ computed."""),
 {hound_phrase} said. "Their labels are different, their calling
 conventions are different, and the runtime has to bridge between
 the dogs' world and the human's every time." To {goal_text},
-{hound_he_she_cap} composed {concept_phrase}, submitted the form,
+{hound_he_she} composed {concept_phrase}, submitted the form,
 and the REPL — making the bridge cleanly — handed back the value
 the foreign tool had produced."""),
 
@@ -833,10 +847,12 @@ _REWRITERULE_SUBPLOTS: list[SubplotTemplate] = [
 
     # 1. The rewriting-scent-mark template — `defmacro` introduction.
     SubplotTemplate("""\
-{hound_phrase} crouched at a scratch in the bark {place}, paw
-poised. "A macro," {hound_he_she} said, "is a rule that rewrites
-a scent-mark before the pack ever follows it. You set the rule
-once, and any mark that uses it gets rewritten on the way to the
+{hound_phrase}, {emo_patient}, crouched at a scratch in the bark
+{place}, paw poised. The rewrite ran first, the pack-follow ran
+second — search for the right scratch alternating with the
+verification step the runtime took. "A macro," {hound_he_she}
+said, "is a rule that rewrites a scent-mark before the pack ever
+follows it. You set the rule once, andany mark that uses it gets rewritten on the way to the
 trail." To {goal_text}, {hound_he_she} composed
 {concept_phrase}, submitted the form, and the REPL — first
 rewriting, then evaluating — returned the value the rewritten
@@ -848,7 +864,7 @@ mark yielded."""),
 {hound_phrase} said. "A trail takes ingredients and finds a
 bone. A rule takes a *form* and makes a different *form* — only
 then does the runtime get to evaluate it." To {goal_text},
-{hound_he_she_cap} composed {concept_phrase}, submitted the
+{hound_he_she} composed {concept_phrase}, submitted the
 form, and the REPL — applying the rule to the form first, then
 evaluating — handed back the value the rewritten form had
 produced."""),
@@ -893,11 +909,11 @@ _SCRIBE_SUBPLOTS: list[SubplotTemplate] = [
     # 1. The reading-conventions-of-the-form template.
     SubplotTemplate("""\
 "There are conventions for how the runtime *reads* a form,"
-{hound_phrase} said: "what counts as one mark, what's just blank
-bark between marks, what gets ignored, what gets grouped
-together. The dog who scratches and the runtime who reads both
+{hound_phrase}, {emo_patient}, said: "what counts as one mark,
+what's just blank bark between marks, what gets ignored, what
+gets grouped together. The dogwho scratches and the runtime who reads both
 follow the same conventions." To {goal_text},
-{hound_he_she_cap} composed {concept_phrase}, submitted the form,
+{hound_he_she} composed {concept_phrase}, submitted the form,
 and the REPL — reading exactly by the conventions — returned
 the value the form had specified."""),
 
@@ -919,7 +935,7 @@ scratched slowly, paying attention to every mark. "The form has
 to be written so the reader can read it cleanly,"
 {hound_he_she} said. "If the marks are right, the runtime gets
 the right form; if not, not." To {goal_text},
-{hound_he_she_cap} composed {concept_phrase}, submitted the
+{hound_he_she} composed {concept_phrase}, submitted the
 form, and the REPL — reading exactly as scratched — returned
 the value cleanly."""),
 
@@ -939,7 +955,7 @@ the right value, while {dog}'s guess fell short."""),
 said, "after the conventions of writing and reading have done
 their work. The runtime sees the cleaned-up form, evaluates it,
 and gives back what it computes." To {goal_text},
-{hound_he_she_cap} composed {concept_phrase}, submitted the
+{hound_he_she} composed {concept_phrase}, submitted the
 form, and the REPL — taking the form exactly as it was — handed
 back the value."""),
 ]
@@ -952,13 +968,14 @@ _CHALKMARK_SUBPLOTS: list[SubplotTemplate] = [
 
     # 1. The mark-on-the-bark template — symbols vs values.
     SubplotTemplate("""\
-{hound_phrase} pointed at a name scratched into the bark {place},
-then at an actual bone lying on the path. "The mark on the bark
-is the *name*; the bone is the *value*. They are not the same
-thing — and Clojure lets you talk about either one. The
+{hound_phrase}, {emo_patient}, pointed at a name scratched into
+the bark {place}, then at an actual bone lying on the path. The
+mark and the bone stayed plainly distinct: the label was not the
+thing it pointed at. "The mark on the bark is the *name*; the
+bone is the *value*. They are not the same thing —and Clojure lets you talk about either one. The
 reflection in the stream looks like a bone, but the scratch that
 says 'bone' isn't the bone either." To {goal_text},
-{hound_he_she_cap} composed {concept_phrase}, submitted the form,
+{hound_he_she} composed {concept_phrase}, submitted the form,
 and the REPL — keeping the name and the value distinct —
 returned the right answer."""),
 
@@ -977,7 +994,7 @@ respecting the scratch — returned the form unevaluated."""),
 *evaluating* it," {hound_phrase} said. "Quote in any of its
 shapes is the labeling — the runtime hands you back the form,
 not its value, unless you say otherwise." To {goal_text},
-{hound_he_she_cap} composed {concept_phrase}, submitted the
+{hound_he_she} composed {concept_phrase}, submitted the
 form, and the REPL — labeling exactly what the form asked for —
 returned the form-as-data, exactly as the marks had directed."""),
 
@@ -1005,7 +1022,7 @@ _RUNNERAHEAD_SUBPLOTS: list[SubplotTemplate] = [
 {place}, work in jaws. "The scout goes ahead while we keep on
 with our own business," {hound_he_she} said, "and when we need
 the result we ask the scout to bring it back." To {goal_text},
-{hound_he_she_cap} composed {concept_phrase}, submitted the
+{hound_he_she} composed {concept_phrase}, submitted the
 form, and the REPL — sending the scout, fetching the result
 later — returned the value when it was ready."""),
 
@@ -1026,7 +1043,7 @@ the value when it was ready."""),
 "The hard part is being patient enough to wait for the answer
 when it comes — not snatching too early, not giving up too soon.
 The runtime makes that easier than it sounds." To {goal_text},
-{hound_he_she_cap} composed {concept_phrase}, submitted the
+{hound_he_she} composed {concept_phrase}, submitted the
 form, and the REPL — coordinating the wait properly — returned
 the scout's answer when the scout had it ready."""),
 
@@ -1037,7 +1054,7 @@ messengers each in their place along the banks. "The runtime
 keeps track of who set out when, and when each one finishes,"
 {hound_he_she} said, "so the values come back in the right
 order, no matter how long each scout takes." To {goal_text},
-{hound_he_she_cap} composed {concept_phrase}, submitted the
+{hound_he_she} composed {concept_phrase}, submitted the
 form, and the REPL — coordinating the relay — returned the right
 value at the right time."""),
 
@@ -1074,7 +1091,7 @@ pile — returned the value the right pile had produced."""),
 "To add a pile to the sorting-stone," {hound_phrase} said, "you
 say what kind of bone the pile handles and what behavior runs
 when a bone of that kind arrives." To {goal_text},
-{hound_he_she_cap} composed {concept_phrase} for the right pile,
+{hound_he_she} composed {concept_phrase} for the right pile,
 submitted the form, and the REPL — adding the pile, dispatching
 the bone — returned the pile-specific value."""),
 
@@ -1094,7 +1111,7 @@ right pile had given."""),
 "is that you can keep adding new piles whenever a new kind of
 bone shows up. The original stone doesn't change; the runtime
 just learns one more route." To {goal_text},
-{hound_he_she_cap} composed {concept_phrase}, submitted the
+{hound_he_she} composed {concept_phrase}, submitted the
 form, and the REPL — routing through the piles cleanly —
 returned the right value."""),
 
@@ -1132,7 +1149,7 @@ value the bag held or carried."""),
 "A deftype is a barer bag," {hound_phrase} said. "Compartments,
 a stamp — no map-like behavior unless you ask for it. Faster,
 more focused, less convenient." To {goal_text},
-{hound_he_she_cap} composed {concept_phrase}, submitted the
+{hound_he_she} composed {concept_phrase}, submitted the
 form, and the REPL — constructing the bare bag as specified —
 returned the value inside."""),
 
@@ -1141,7 +1158,7 @@ returned the value inside."""),
 "To reach into a labeled compartment," {hound_phrase} said,
 "you ask for it by name. The bag knows where each compartment
 is; the runtime fetches it cleanly." To {goal_text},
-{hound_he_she_cap} composed {concept_phrase}, submitted the
+{hound_he_she} composed {concept_phrase}, submitted the
 form, and the REPL — opening the right compartment — returned
 exactly what was inside."""),
 ]
@@ -1231,7 +1248,7 @@ _CIRCUIT_SUBPLOTS: list[SubplotTemplate] = [
 slightly different tally in jaws. "Recur is this pacing,"
 {hound_he_she} said: "back to the top with new bindings, no
 extra trail laid down behind us." To {goal_text},
-{hound_he_she_cap} composed {concept_phrase}, submitted the
+{hound_he_she} composed {concept_phrase}, submitted the
 form, and the REPL — looping without growing the call-stack —
 returned the final value."""),
 

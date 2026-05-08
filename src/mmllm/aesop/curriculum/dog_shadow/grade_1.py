@@ -50,7 +50,7 @@ in the REPL and read off whatever it returned."""),
     #    so the same wager-template doesn't always read as "drew a wager
     #    in the dust" verbatim (cosmetic variety).
     SubplotTemplate("""\
-At a moss-covered milestone {place}, {hare_phrase} sketched a small
+At a weathered bridge-stone {place}, {hare_phrase} sketched a small
 wager into the path: whoever guessed the result of {form_display}
 first would win the right to set the next race. {tortoise_phrase},
 {emo_patient}, said it was simpler to type the form into the REPL
@@ -87,7 +87,7 @@ agreed to try."""),
     #    equality (= 1 1)" / "the predicate (zero? 0)" don't fit
     #    "read aloud" semantically (you read FORMS aloud, not types).
     SubplotTemplate("""\
-A small audience of forest creatures had gathered {place} to watch
+A small pack of meadow-dogs had gathered {place} to watch
 {hare_phrase} attempt to outwit {tortoise_phrase} at reading the REPL.
 {tortoise} pointed to {concept_phrase} and read out the form aloud:
 {form_display}. The crowd waited to see who would correctly write
@@ -108,7 +108,7 @@ evaluated to. {hare} called it impossible.
 
     # 6. The notebook template — the tortoise keeps a careful ledger.
     SubplotTemplate("""\
-{tortoise_phrase} had been keeping a small leather notebook of every
+{tortoise_phrase} had been keeping a scratched bone-tally of every
 form {tortoise_he_she} had successfully evaluated. {place_idx}, the
 next entry was {concept_phrase}. {hare_phrase} peered over
 {tortoise_his_her} shoulder at the form {form_display} and asked what
@@ -129,7 +129,7 @@ sure."""),
 
     # 8. The puzzle-on-the-path template — they find a riddle on a sign.
     SubplotTemplate("""\
-A wooden sign nailed to a tree {place} carried a puzzle. The riddle
+A scratched marker-stone by the bridge {place} carried a puzzle. The riddle
 was simple: it asked the reader to evaluate {form_display}. {hare}
 laughed, {emo_proud}, and declared it too easy. {tortoise} said
 patiently that the only way to be sure of {concept_phrase} was to put
@@ -178,7 +178,7 @@ the value really was."""),
     #    Fix: drop "write a form to" verb-on-verb collision; use
     #    "produce a form whose evaluation would" (noun-clause framing).
     SubplotTemplate("""\
-At a moss-covered milestone {place}, {hare_phrase} sketched a small
+At a weathered bridge-stone {place}, {hare_phrase} sketched a small
 wager into the path: whoever could produce a form whose evaluation
 would {goal_text} ahead of the other would win the right to set
 the next race. {tortoise_phrase}, {emo_patient}, said it was
@@ -196,7 +196,7 @@ writing it."""),
 
     # 4. The audience template — onlookers wait to see the form written.
     SubplotTemplate("""\
-A small audience of forest creatures had gathered {place} to watch
+A small pack of meadow-dogs had gathered {place} to watch
 {hare_phrase} attempt to outwit {tortoise_phrase} at writing the
 right form. The challenge: {goal_text}. {tortoise} reminded the
 crowd that what mattered was writing {concept_phrase} carefully,
@@ -215,7 +215,7 @@ submit it. Whatever comes back is the answer.\""""),
 
     # 6. The notebook template — Tortoise records goal/form pairs.
     SubplotTemplate("""\
-{tortoise_phrase} kept a small leather notebook of every goal
+{tortoise_phrase} kept a scratched bone-tally of every goal
 {tortoise_he_she} had translated into a Clojure form. Today {place},
 the next entry was a goal: {goal_text}. {tortoise} sat with pen in
 hand, ready to compose {concept_phrase}, then let the REPL
@@ -234,7 +234,7 @@ just to be sure."""),
 
     # 8. The puzzle-on-the-path template — a sign poses the goal.
     SubplotTemplate("""\
-A wooden sign nailed to a tree {place} carried a small puzzle. The
+A scratched marker-stone by the bridge {place} carried a small puzzle. The
 challenge was simple: {goal_text}. {hare} laughed, {emo_proud}, and
 declared it too easy. {tortoise} said patiently that the only way
 to be sure of {concept_phrase} was to write the form and put it
@@ -274,10 +274,10 @@ breeze. The race, like every other, went to the steady hand."""),
 {hare_phrase} squinted at the goal — to {goal_text} — and blurted
 out a confident guess, {emo_proud}, as though loudness were the
 same as correctness. {tortoise_phrase} did not argue.
-{tortoise_he_she_cap} simply wrote {concept_phrase} on the path,
-submitted it to the REPL, and held up the value the runtime
-returned. The crowd compared the two, and the hare's guess was
-found wanting against the form that had actually run."""),
+{tortoise_he_she_cap} simply scratched {concept_phrase} into the
+dust, submitted it to the REPL, and held up the value the runtime
+returned. The dogs at the bridge compared the two, and the
+greedy guess fell short of the form that had actually run."""),
 
     # 12. The patient-explanation template — Tortoise teaches, Hare
     #     resists, the lesson takes hold by the end. Slower beat,
@@ -381,17 +381,17 @@ G1_04 = SubjectCurriculum(
     subject_title="Strings",
     fable="dog-shadow",
     examples=[
-        _ex('"hello"',    "hello",    'the string "hello"',
-            'the value of "hello"'),
-        _ex('"race"',     "race",     'the string "race"',
-            'the value of "race"'),
+        _ex('"hello"',    "hello",    'the literal string',
+            'the value of the literal string'),
+        _ex('"race"',     "race",     'the literal string',
+            'the value of the literal string'),
         _ex('"slow and steady"', "slow and steady",
-            'the string "slow and steady"',
-            'the value of "slow and steady"'),
-        _ex('""',         "",         'the empty string',
-            'the value of the empty string'),
-        _ex('"42"',       "42",       'the string "42"',
-            'the value of the string "42"'),
+            'the literal string',
+            'the value of the literal string'),
+        _ex('""',         "",         'the literal string',
+            'the value of the literal string'),
+        _ex('"42"',       "42",       'the literal string',
+            'the value of the literal string'),
     ],
     subplots=_SHARED_SUBPLOTS,
     plan_pool=_PLAN_POOL,
@@ -480,15 +480,15 @@ G1_08 = SubjectCurriculum(
     subject_title="Characters",
     fable="dog-shadow",
     examples=[
-        _ex("\\h",      "h",     "the character \\h",
-            "the value of \\h"),
-        _ex("\\space",  " ",     "the character \\space",
-            "the value of \\space"),
-        _ex("\\T",      "T",     "the character \\T",
-            "the value of \\T"),
+        _ex("\\h",      "h",     "the character literal",
+            "the value of the character literal"),
+        _ex("\\space",  " ",     "the character literal",
+            "the value of the character literal"),
+        _ex("\\T",      "T",     "the character literal",
+            "the value of the character literal"),
         _ex("(char? \\h)", True,
-            "the predicate (char? \\h)",
-            "whether \\h is a character"),
+            "the char-predicate on a character literal",
+            "whether the character literal is a character"),
     ],
     subplots=_SHARED_SUBPLOTS,
     plan_pool=_PLAN_POOL,
