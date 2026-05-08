@@ -349,7 +349,7 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
     - [DOUBLE_EMO_INJECTION] form=`(not true)` — sentence has 2+ distinct EMO-pool phrases ('her breath even, her step even' + 'with the loud bark of a sure w') — the character can't earn two emotional registers in the same beat
     - [LOW_GROUNDING] form=`(not true)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [DOUBLE_EMO_IN_SENTENCE] form=`(not false)` — sentence contains 2 disjoint EMO-pool phrases — two emotional anchors stacked in one sentence read as over-described
-    - [DOUBLE_EMO_INJECTION] form=`(not false)` — sentence has 2+ distinct EMO-pool phrases ('her quiet hands at her quiet s' + 'his voice loud over the quiet ') — the character can't earn two emotional registers in the same beat
+    - [DOUBLE_EMO_INJECTION] form=`(not false)` — sentence has 2+ distinct EMO-pool phrases ('his voice loud over the quiet ' + 'her quiet hands at her quiet s') — the character can't earn two emotional registers in the same beat
     - [BOOL_LEAK_RESOLUTION] form=`(not false)` — resolution leaks boolean answer 'true' — describe the verdict abstractly instead
 
 ### G2-15: Falsey values: only false and nil
