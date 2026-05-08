@@ -10,9 +10,8 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 8
 - variety @ n=50: 1.00
-- issues: {'LOW_GROUNDING': 4}
+- issues: {'LOW_GROUNDING': 3}
     - [LOW_GROUNDING] form=`0` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-    - [LOW_GROUNDING] form=`(+ 1 2)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [LOW_GROUNDING] form=`nil` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [LOW_GROUNDING] form=`nil` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
 
@@ -29,37 +28,37 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 5
 - variety @ n=50: 1.00
-- issues: {'LOW_GROUNDING': 5, 'FOREIGN_FABLE_IMAGERY': 1, 'HONEST_JUDGE_REPEAT': 1}
-    - [LOW_GROUNDING] form=`1/2` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+- issues: {'LOW_GROUNDING': 4, 'FOREIGN_FABLE_IMAGERY': 1, 'HONEST_JUDGE_REPEAT': 1}
     - [LOW_GROUNDING] form=`1/2` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [FOREIGN_FABLE_IMAGERY] form=`1/2` — tortoise-hare-specific imagery 'leather notebook' leaks into boy-wolf prose
     - [LOW_GROUNDING] form=`1/2` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [LOW_GROUNDING] form=`(* 2 1/2)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [LOW_GROUNDING] form=`(* 2 1/2)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+    - [HONEST_JUDGE_REPEAT] form=`(- 1 1/3)` — two or more 'honest' uses in one boy-wolf user_msg (judge-bombast tic — drop one)
 
 ### G1-05: Booleans
 
 - examples: 6
 - variety @ n=50: 1.00
-- issues: {'LOW_GROUNDING': 11, 'HONEST_JUDGE_REPEAT': 1}
-    - [LOW_GROUNDING] form=`true` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+- issues: {'LOW_GROUNDING': 8, 'HONEST_JUDGE_REPEAT': 1}
     - [LOW_GROUNDING] form=`true` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [LOW_GROUNDING] form=`true` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [LOW_GROUNDING] form=`false` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [LOW_GROUNDING] form=`false` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+    - [LOW_GROUNDING] form=`(= 1 1)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [LOW_GROUNDING] form=`(= 1 1)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
 
 ### G1-06: nil
 
 - examples: 5
 - variety @ n=50: 1.00
-- issues: {'LOW_GROUNDING': 14, 'FOREIGN_FABLE_IMAGERY': 4, 'HONEST_JUDGE_REPEAT': 2}
-    - [LOW_GROUNDING] form=`nil` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-    - [LOW_GROUNDING] form=`nil` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+- issues: {'LOW_GROUNDING': 12, 'FOREIGN_FABLE_IMAGERY': 4, 'HONEST_JUDGE_REPEAT': 2}
     - [LOW_GROUNDING] form=`nil` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [LOW_GROUNDING] form=`(nil? nil)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [FOREIGN_FABLE_IMAGERY] form=`(nil? nil)` — tortoise-hare-specific imagery 'leather notebook' leaks into boy-wolf prose
     - [LOW_GROUNDING] form=`(nil? nil)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+    - [LOW_GROUNDING] form=`(nil? nil)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+    - [FOREIGN_FABLE_IMAGERY] form=`(nil? 0)` — tortoise-hare-specific imagery 'leather notebook' leaks into boy-wolf prose
 
 ### G1-07: Keywords
 
@@ -72,44 +71,65 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 4
 - variety @ n=50: 0.99
-- issues: {'BOOL_LEAK_RESOLUTION': 1, 'LOW_GROUNDING': 7}
+- issues: {'BOOL_LEAK_RESOLUTION': 1, 'LOW_GROUNDING': 7, 'STORY_RESOLUTION_NO_DRAWN': 3}
     - [BOOL_LEAK_RESOLUTION] form=`(symbol? 'wolf)` — resolution leaks boolean answer 'true' — describe the verdict abstractly instead
     - [LOW_GROUNDING] form=`(symbol? 'wolf)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(symbol? 42)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('42',), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(symbol? 42)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('42',), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(symbol? 42)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('42',), resolution doesn't close the loop)
     - [LOW_GROUNDING] form=`'wolf` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-    - [LOW_GROUNDING] form=`'wolf` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-    - [LOW_GROUNDING] form=`'wolf` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-    - [LOW_GROUNDING] form=`(= 'wolf 'wolf)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+
+### G1-12: Parens group; they don't multiply
+
+- examples: 2
+- variety @ n=50: 1.00
+- issues: {'STORY_RESOLUTION_NO_DRAWN': 1}
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(+ 2 3)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('3',), resolution doesn't close the loop)
 
 ### G1-13: First arithmetic call
 
 - examples: 6
 - variety @ n=50: 1.00
-- issues: {'FORM_LEAK': 1}
+- issues: {'STORY_RESOLUTION_NO_DRAWN': 5, 'FORM_LEAK': 1}
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(- 5 3)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('5', '3'), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(* 4 5)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('4', '5'), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(* 4 5)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('4', '5'), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(* 4 5)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('4', '5'), resolution doesn't close the loop)
     - [FORM_LEAK] form=`(+ 7 8)` — form '(+ 7 8)' appears in user_msg of a goal-style subject
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(+ 7 8)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('7', '8'), resolution doesn't close the loop)
 
 ### G1-15: Equality
 
 - examples: 6
 - variety @ n=50: 1.00
-- issues: {'CONCEPT_AS_VERB': 2, 'LOW_GROUNDING': 6}
+- issues: {'CONCEPT_AS_VERB': 2, 'LOW_GROUNDING': 6, 'STORY_RESOLUTION_NO_DRAWN': 2}
     - [CONCEPT_AS_VERB] form=`(= 1 1)` — concept_phrase substituted into a finite-verb slot (e.g. 'must calling X', 'I applying Y')
     - [LOW_GROUNDING] form=`(= 1 1)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [LOW_GROUNDING] form=`(= 1 1)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [LOW_GROUNDING] form=`(= 1 2)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-    - [CONCEPT_AS_VERB] form=`(= 1 1 1 1)` — concept_phrase substituted into a finite-verb slot (e.g. 'must calling X', 'I applying Y')
-    - [LOW_GROUNDING] form=`(= 1 1 1 1)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(= :wolf :wolf)` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':wolf', ':wolf'), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(= :wolf :wolf)` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':wolf', ':wolf'), resolution doesn't close the loop)
 
 ### G1-16: Numeric predicates
 
 - examples: 6
 - variety @ n=50: 1.00
-- issues: {'LOW_GROUNDING': 3, 'BOOL_LEAK_RESOLUTION': 5}
+- issues: {'LOW_GROUNDING': 3, 'BOOL_LEAK_RESOLUTION': 5, 'STORY_RESOLUTION_NO_DRAWN': 15}
     - [LOW_GROUNDING] form=`(zero? 0)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [LOW_GROUNDING] form=`(zero? 0)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [LOW_GROUNDING] form=`(zero? 0)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [BOOL_LEAK_RESOLUTION] form=`(zero? 5)` — resolution leaks boolean answer 'false' — describe the verdict abstractly instead
-    - [BOOL_LEAK_RESOLUTION] form=`(pos? 7)` — resolution leaks boolean answer 'true' — describe the verdict abstractly instead
-    - [BOOL_LEAK_RESOLUTION] form=`(pos? -2)` — resolution leaks boolean answer 'false' — describe the verdict abstractly instead
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(zero? 5)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('5',), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(zero? 5)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('5',), resolution doesn't close the loop)
+
+### G1-17: Printing vs returning
+
+- examples: 2
+- variety @ n=50: 1.00
+- issues: {'STORY_RESOLUTION_NO_DRAWN': 3}
+    - [STORY_RESOLUTION_NO_DRAWN] form=`42` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('42',), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`42` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('42',), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`42` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('42',), resolution doesn't close the loop)
 
 ### G1-18: Errors are safe in the REPL
 
@@ -124,8 +144,11 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 5
 - variety @ n=50: 1.00
-- issues: {'LOW_GROUNDING': 1}
+- issues: {'STORY_RESOLUTION_NO_DRAWN': 3, 'LOW_GROUNDING': 1}
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(< 3 2 1)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('3',), resolution doesn't close the loop)
     - [LOW_GROUNDING] form=`(<= 1 1 2)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(>= 3 3 2)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('3', '3'), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(>= 3 3 2)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('3', '3'), resolution doesn't close the loop)
 
 ### G2-03: not= and = with multiple args
 
@@ -143,38 +166,43 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 5
 - variety @ n=50: 1.00
-- issues: {'LOW_GROUNDING': 6}
-    - [LOW_GROUNDING] form=`(inc 0)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-    - [LOW_GROUNDING] form=`(inc 0)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-    - [LOW_GROUNDING] form=`(inc 0)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-    - [LOW_GROUNDING] form=`(dec 0)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-    - [LOW_GROUNDING] form=`(dec 0)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-    - [LOW_GROUNDING] form=`(inc -1)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+- issues: {'STORY_RESOLUTION_NO_DRAWN': 7, 'LOW_GROUNDING': 6}
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(inc 5)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('5',), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(inc 5)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('5',), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(inc 5)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('5',), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(dec 5)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('5',), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(dec 5)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('5',), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(dec 5)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('5',), resolution doesn't close the loop)
 
 ### G2-07: Absolute value
 
 - examples: 4
 - variety @ n=50: 1.00
-- issues: {'LOW_GROUNDING': 5}
+- issues: {'STORY_RESOLUTION_NO_DRAWN': 8, 'LOW_GROUNDING': 5}
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(abs 5)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('5',), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(abs 5)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('5',), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(abs 5)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('5',), resolution doesn't close the loop)
     - [LOW_GROUNDING] form=`(abs -5)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(abs -5)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('-5',), resolution doesn't close the loop)
     - [LOW_GROUNDING] form=`(abs -5)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-    - [LOW_GROUNDING] form=`(abs 0)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-    - [LOW_GROUNDING] form=`(abs 0)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-    - [LOW_GROUNDING] form=`(abs 0)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
 
 ### G2-08: Arithmetic on ratios
 
 - examples: 3
 - variety @ n=50: 0.99
-- issues: {'LOW_GROUNDING': 2}
+- issues: {'LOW_GROUNDING': 2, 'STORY_RESOLUTION_NO_DRAWN': 3}
     - [LOW_GROUNDING] form=`(* 2/3 3/4)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(* 2/3 3/4)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('3', '3', '4'), resolution doesn't close the loop)
     - [LOW_GROUNDING] form=`(* 2/3 3/4)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(* 2/3 3/4)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('3', '3', '4'), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(* 2/3 3/4)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('3', '3', '4'), resolution doesn't close the loop)
 
 ### G2-09: Floats vs ints (the / operator)
 
 - examples: 3
 - variety @ n=50: 1.00
-- issues: {'LOW_GROUNDING': 2}
+- issues: {'STORY_RESOLUTION_NO_DRAWN': 1, 'LOW_GROUNDING': 2}
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(/ 10 2)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('10',), resolution doesn't close the loop)
     - [LOW_GROUNDING] form=`(/ 1.0 2)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [LOW_GROUNDING] form=`(/ 1.0 2)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
 
@@ -182,18 +210,19 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 4
 - variety @ n=50: 1.00
-- issues: {'ANSWER_LEAK': 2, 'LOW_GROUNDING': 3}
+- issues: {'ANSWER_LEAK': 2, 'LOW_GROUNDING': 3, 'STORY_RESOLUTION_NO_DRAWN': 9}
     - [ANSWER_LEAK] form=`(* 2 2 2)` — answer 8 in narrative
     - [LOW_GROUNDING] form=`(* 2 2 2)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [ANSWER_LEAK] form=`(* 2 2 2)` — answer 8 in narrative
     - [LOW_GROUNDING] form=`(* 2 2 2)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [LOW_GROUNDING] form=`(* 2 2 2)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(* 5 5)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('5', '5'), resolution doesn't close the loop)
 
 ### G2-13: and / or — short circuit, return values
 
 - examples: 6
 - variety @ n=50: 0.99
-- issues: {'BOOL_LEAK_RESOLUTION': 2, 'LOW_GROUNDING': 8, 'CONCEPT_AS_VERB': 2}
+- issues: {'BOOL_LEAK_RESOLUTION': 2, 'LOW_GROUNDING': 8, 'CONCEPT_AS_VERB': 2, 'STORY_RESOLUTION_NO_DRAWN': 3}
     - [BOOL_LEAK_RESOLUTION] form=`(and true true)` — resolution leaks boolean answer 'true' — describe the verdict abstractly instead
     - [LOW_GROUNDING] form=`(and true true)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [CONCEPT_AS_VERB] form=`(and true true)` — concept_phrase substituted into a finite-verb slot (e.g. 'must calling X', 'I applying Y')
@@ -240,20 +269,35 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'LOW_GROUNDING': 3}
+- issues: {'LOW_GROUNDING': 3, 'STORY_RESOLUTION_NO_DRAWN': 3}
     - [LOW_GROUNDING] form=`(* 1000000 1000000)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(* 1000000 1000000)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('1000000', '1000000'), resolution doesn't close the loop)
     - [LOW_GROUNDING] form=`(* 1000000 1000000)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(* 1000000 1000000)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('1000000', '1000000'), resolution doesn't close the loop)
     - [LOW_GROUNDING] form=`(* 1000000 1000000)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(* 1000000 1000000)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('1000000', '1000000'), resolution doesn't close the loop)
 
 ## Grade 3
+
+### G3-01: def — top-level binding
+
+- examples: 2
+- variety @ n=50: 1.00
+- issues: {'STORY_RESOLUTION_NO_DRAWN': 4}
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(do (def x 42) x)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('42',), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(do (def y 7) y)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('7',), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(do (def y 7) y)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('7',), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(do (def y 7) y)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('7',), resolution doesn't close the loop)
 
 ### G3-03: let — local binding
 
 - examples: 3
 - variety @ n=50: 1.00
-- issues: {'HIGH_LENGTH': 1, 'SMALL_INT_LEAK': 1, 'ANSWER_LEAK': 2}
+- issues: {'STORY_RESOLUTION_NO_DRAWN': 5, 'HIGH_LENGTH': 1, 'SMALL_INT_LEAK': 1, 'ANSWER_LEAK': 2}
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(let [x 3] (+ x 1))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('3',), resolution doesn't close the loop)
     - [HIGH_LENGTH] form=`(let [x 3] (+ x 1))` — user_msg 229 words
     - [SMALL_INT_LEAK] form=`(let [x 3] (+ x 1))` — small-int answer 4 leaks via resolution-slot phrasing
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(let [x 3] (+ x 1))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('3',), resolution doesn't close the loop)
     - [ANSWER_LEAK] form=`(let [n 10] (* n n))` — answer 100 in narrative
     - [ANSWER_LEAK] form=`(let [n 10] (* n n))` — answer 100 in narrative
 
@@ -261,47 +305,72 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 3
 - variety @ n=50: 1.00
-- issues: {'SENTENCE_START_LOWER_PRONOUN': 1}
+- issues: {'SENTENCE_START_LOWER_PRONOUN': 1, 'STORY_RESOLUTION_NO_DRAWN': 1}
     - [SENTENCE_START_LOWER_PRONOUN] form=`(let [x 5 y 3] (- x y))` — pronoun starts a sentence in lowercase — template should use the _cap variant after a sentence-ending punctuation
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(let [x 5 y 3] (- x y))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('5', '3'), resolution doesn't close the loop)
+
+### G3-05: let — shadowing outer def
+
+- examples: 2
+- variety @ n=50: 1.00
+- issues: {'STORY_RESOLUTION_NO_DRAWN': 1}
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(do (def x 10) (let [x 99] x))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('10', '99'), resolution doesn't close the loop)
 
 ### G3-06: let — binding can reference prior
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'ANSWER_LEAK': 1}
+- issues: {'ANSWER_LEAK': 1, 'STORY_RESOLUTION_NO_DRAWN': 3}
     - [ANSWER_LEAK] form=`(let [a 5 b (* a 2)] b)` — answer 10 in narrative
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(let [a 5 b (* a 2)] b)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('5',), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(let [a 5 b (* a 2)] b)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('5',), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(let [a 5 b (* a 2)] b)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('5',), resolution doesn't close the loop)
 
 ### G3-07: fn — anonymous function
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'HIGH_LENGTH': 1, 'SMALL_INT_LEAK': 1}
+- issues: {'STORY_RESOLUTION_NO_DRAWN': 6, 'HIGH_LENGTH': 1, 'SMALL_INT_LEAK': 1}
+    - [STORY_RESOLUTION_NO_DRAWN] form=`((fn [x] (+ x 1)) 4)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('4',), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`((fn [x] (+ x 1)) 4)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('4',), resolution doesn't close the loop)
     - [HIGH_LENGTH] form=`((fn [x] (+ x 1)) 4)` — user_msg 223 words
     - [SMALL_INT_LEAK] form=`((fn [x] (+ x 1)) 4)` — small-int answer 5 leaks via resolution-slot phrasing
+    - [STORY_RESOLUTION_NO_DRAWN] form=`((fn [x] (+ x 1)) 4)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('4',), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`((fn [a b] (* a b)) 3 4)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('3', '4'), resolution doesn't close the loop)
 
 ### G3-08: fn — multi-arg
 
 - examples: 1
 - variety @ n=50: 1.00
-- issues: {'CONCEPT_AS_VERB': 1}
+- issues: {'STORY_RESOLUTION_NO_DRAWN': 3, 'CONCEPT_AS_VERB': 1}
+    - [STORY_RESOLUTION_NO_DRAWN] form=`((fn [a b c] (+ a b c)) 1 2 3)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('3',), resolution doesn't close the loop)
     - [CONCEPT_AS_VERB] form=`((fn [a b c] (+ a b c)) 1 2 3)` — concept_phrase substituted into a finite-verb slot (e.g. 'must calling X', 'I applying Y')
+    - [STORY_RESOLUTION_NO_DRAWN] form=`((fn [a b c] (+ a b c)) 1 2 3)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('3',), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`((fn [a b c] (+ a b c)) 1 2 3)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('3',), resolution doesn't close the loop)
 
 ### G3-10: anonymous shorthand #()
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'ANSWER_LEAK': 1, 'CONCEPT_AS_VERB': 2}
+- issues: {'ANSWER_LEAK': 1, 'CONCEPT_AS_VERB': 2, 'STORY_RESOLUTION_NO_DRAWN': 3}
     - [ANSWER_LEAK] form=`(#(+ % 1) 5)` — answer 6 in narrative
     - [CONCEPT_AS_VERB] form=`(#(+ % 1) 5)` — concept_phrase substituted into a finite-verb slot (e.g. 'must calling X', 'I applying Y')
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(#(* %1 %2) 3 4)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('3', '4'), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(#(* %1 %2) 3 4)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('3', '4'), resolution doesn't close the loop)
     - [CONCEPT_AS_VERB] form=`(#(* %1 %2) 3 4)` — concept_phrase substituted into a finite-verb slot (e.g. 'must calling X', 'I applying Y')
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(#(* %1 %2) 3 4)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('3', '4'), resolution doesn't close the loop)
 
 ### G3-11: Substitution rule
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'SENTENCE_START_LOWER_PRONOUN': 2}
+- issues: {'STORY_RESOLUTION_NO_DRAWN': 6, 'SENTENCE_START_LOWER_PRONOUN': 2}
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(let [a 7] (+ a a))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('7',), resolution doesn't close the loop)
     - [SENTENCE_START_LOWER_PRONOUN] form=`(let [a 7] (+ a a))` — pronoun starts a sentence in lowercase — template should use the _cap variant after a sentence-ending punctuation
-    - [SENTENCE_START_LOWER_PRONOUN] form=`((fn [x] (* x x)) 6)` — pronoun starts a sentence in lowercase — template should use the _cap variant after a sentence-ending punctuation
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(let [a 7] (+ a a))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('7',), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(let [a 7] (+ a a))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('7',), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`((fn [x] (* x x)) 6)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('6',), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`((fn [x] (* x x)) 6)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('6',), resolution doesn't close the loop)
 
 ### G3-13: fn body returns last form
 
@@ -311,19 +380,30 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
     - [HIGH_LENGTH] form=`((fn [x] x x x 99) 1)` — user_msg 201 words
     - [LOW_GROUNDING] form=`((fn [x] x x x 99) 1)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
 
+### G3-16: Name collision: namespace vs let
+
+- examples: 1
+- variety @ n=50: 1.00
+- issues: {'STORY_RESOLUTION_NO_DRAWN': 1}
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(let [+ 99] +)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('99',), resolution doesn't close the loop)
+
 ### G3-17: Naming conventions (kebab-case)
 
 - examples: 1
 - variety @ n=50: 1.00
-- issues: {'LOW_GROUNDING': 1}
+- issues: {'LOW_GROUNDING': 1, 'STORY_RESOLUTION_NO_DRAWN': 1}
     - [LOW_GROUNDING] form=`(let [flock-size 8 stray-count 2] (- flock-size st` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(let [flock-size 8 stray-count 2] (- flock-size st` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('8',), resolution doesn't close the loop)
 
 ### G3-18: When to name vs inline
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'SENTENCE_START_LOWER_PRONOUN': 1}
+- issues: {'STORY_RESOLUTION_NO_DRAWN': 3, 'SENTENCE_START_LOWER_PRONOUN': 1}
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(let [n 5] (* n n n))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('5',), resolution doesn't close the loop)
     - [SENTENCE_START_LOWER_PRONOUN] form=`(let [n 5] (* n n n))` — pronoun starts a sentence in lowercase — template should use the _cap variant after a sentence-ending punctuation
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(let [n 5] (* n n n))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('5',), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(let [n 5] (* n n n))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('5',), resolution doesn't close the loop)
 
 ## Grade 4
 
@@ -354,20 +434,44 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'LOW_GROUNDING': 3}
+- issues: {'LOW_GROUNDING': 3, 'STORY_RESOLUTION_NO_DRAWN': 3}
     - [LOW_GROUNDING] form=`(count (range 5))` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(count (range 5))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('5',), resolution doesn't close the loop)
     - [LOW_GROUNDING] form=`(count (range 5))` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(count (range 5))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('5',), resolution doesn't close the loop)
     - [LOW_GROUNDING] form=`(count (range 5))` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(count (range 5))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('5',), resolution doesn't close the loop)
 
 ## Grade 5
+
+### G5-09: fn as value
+
+- examples: 1
+- variety @ n=50: 1.00
+- issues: {'STORY_RESOLUTION_NO_DRAWN': 3}
+    - [STORY_RESOLUTION_NO_DRAWN] form=`((fn [f x] (f (f x))) inc 5)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('5',), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`((fn [f x] (f (f x))) inc 5)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('5',), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`((fn [f x] (f (f x))) inc 5)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('5',), resolution doesn't close the loop)
+
+### G5-10: map
+
+- examples: 2
+- variety @ n=50: 1.00
+- issues: {'STORY_RESOLUTION_NO_DRAWN': 3}
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(map #(* % %) [1 2 3 4])` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('3', '4'), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(map #(* % %) [1 2 3 4])` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('3', '4'), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(map #(* % %) [1 2 3 4])` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('3', '4'), resolution doesn't close the loop)
 
 ### G5-15: comp
 
 - examples: 2
 - variety @ n=50: 0.99
-- issues: {'CONCEPT_AS_VERB': 3}
+- issues: {'CONCEPT_AS_VERB': 3, 'STORY_RESOLUTION_NO_DRAWN': 3}
     - [CONCEPT_AS_VERB] form=`((comp inc inc) 5)` — concept_phrase substituted into a finite-verb slot (e.g. 'must calling X', 'I applying Y')
+    - [STORY_RESOLUTION_NO_DRAWN] form=`((comp inc inc) 5)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('5',), resolution doesn't close the loop)
     - [CONCEPT_AS_VERB] form=`((comp inc inc) 5)` — concept_phrase substituted into a finite-verb slot (e.g. 'must calling X', 'I applying Y')
+    - [STORY_RESOLUTION_NO_DRAWN] form=`((comp inc inc) 5)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('5',), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`((comp inc inc) 5)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('5',), resolution doesn't close the loop)
     - [CONCEPT_AS_VERB] form=`((comp str inc) 9)` — concept_phrase substituted into a finite-verb slot (e.g. 'must calling X', 'I applying Y')
 
 ### G5-16: partial
@@ -381,8 +485,20 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 1
 - variety @ n=50: 1.00
-- issues: {'CONCEPT_AS_VERB': 1}
+- issues: {'STORY_RESOLUTION_NO_DRAWN': 3, 'CONCEPT_AS_VERB': 1}
+    - [STORY_RESOLUTION_NO_DRAWN] form=`((juxt inc dec) 5)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('5',), resolution doesn't close the loop)
     - [CONCEPT_AS_VERB] form=`((juxt inc dec) 5)` — concept_phrase substituted into a finite-verb slot (e.g. 'must calling X', 'I applying Y')
+    - [STORY_RESOLUTION_NO_DRAWN] form=`((juxt inc dec) 5)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('5',), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`((juxt inc dec) 5)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('5',), resolution doesn't close the loop)
+
+### G5-22: recur — first taste
+
+- examples: 1
+- variety @ n=50: 1.00
+- issues: {'STORY_RESOLUTION_NO_DRAWN': 3}
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(loop [n 5 acc 1] (if (zero? n) acc (recur (dec n)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('5',), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(loop [n 5 acc 1] (if (zero? n) acc (recur (dec n)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('5',), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(loop [n 5 acc 1] (if (zero? n) acc (recur (dec n)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('5',), resolution doesn't close the loop)
 
 ## Grade 6
 
@@ -409,13 +525,41 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
     - [LOW_GROUNDING] form=`(= 'village.shepherd 'village.shepherd)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [LOW_GROUNDING] form=`(= 'village.shepherd 'village.shepherd)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
 
+### G6-05: Fully qualified names
+
+- examples: 4
+- variety @ n=50: 1.00
+- issues: {'STORY_RESOLUTION_NO_DRAWN': 6}
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(clojure.string/reverse "flock")` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('flock',), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(clojure.string/reverse "flock")` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('flock',), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(clojure.string/reverse "flock")` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('flock',), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(name :village/shepherd)` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':village',), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(name :village/shepherd)` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':village',), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(name :village/shepherd)` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':village',), resolution doesn't close the loop)
+
+### G6-06: Private defs
+
+- examples: 2
+- variety @ n=50: 1.00
+- issues: {'STORY_RESOLUTION_NO_DRAWN': 6}
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(:private (meta '^:private x))` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':private', ':private'), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(:private (meta '^:private x))` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':private', ':private'), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(:private (meta '^:private x))` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':private', ':private'), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(:private (meta 'x))` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':private',), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(:private (meta 'x))` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':private',), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(:private (meta 'x))` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':private',), resolution doesn't close the loop)
+
 ### G6-07: Public vs private API
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'BOOL_LEAK_RESOLUTION': 1, 'VILLAGE_NOUN_OVERUSE': 1}
+- issues: {'STORY_RESOLUTION_NO_DRAWN': 6, 'BOOL_LEAK_RESOLUTION': 1, 'VILLAGE_NOUN_OVERUSE': 1}
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(boolean (:private (meta '^:private hidden)))` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':private', ':private'), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(boolean (:private (meta '^:private hidden)))` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':private', ':private'), resolution doesn't close the loop)
     - [BOOL_LEAK_RESOLUTION] form=`(boolean (:private (meta '^:private hidden)))` — resolution leaks boolean answer 'true' — describe the verdict abstractly instead
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(boolean (:private (meta '^:private hidden)))` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':private', ':private'), resolution doesn't close the loop)
     - [VILLAGE_NOUN_OVERUSE] form=`(boolean (:private (meta '^:private hidden)))` — `the village` appears 4 times (noun-saturation tic — vary or drop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(boolean (:private (meta 'public)))` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':private',), resolution doesn't close the loop)
 
 ### G6-08: Circular dependencies
 
@@ -442,16 +586,25 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'VILLAGE_NOUN_OVERUSE': 1}
+- issues: {'PATIENT_ROLE_BOASTFUL': 2, 'STORY_RESOLUTION_NO_DRAWN': 3, 'VILLAGE_NOUN_OVERUSE': 1}
+    - [PATIENT_ROLE_BOASTFUL] form=`(get-in {:paths ["src"]} [:paths 0])` — patient role 'the elder' co-occurs with boastful EMO phrase 'with the swagger of an unrepen'
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(get-in {:paths ["src"]} [:paths 0])` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':paths', ':paths', 'src'), resolution doesn't close the loop)
     - [VILLAGE_NOUN_OVERUSE] form=`(get-in {:paths ["src"]} [:paths 0])` — `the village` appears 4 times (noun-saturation tic — vary or drop)
+    - [PATIENT_ROLE_BOASTFUL] form=`(get-in {:paths ["src"]} [:paths 0])` — patient role 'the elder' co-occurs with boastful EMO phrase 'puffed up with pride'
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(get-in {:paths ["src"]} [:paths 0])` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':paths', ':paths', 'src'), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(get-in {:paths ["src"]} [:paths 0])` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':paths', ':paths', 'src'), resolution doesn't close the loop)
 
 ### G6-11: Classpath
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'LOW_GROUNDING': 2}
+- issues: {'LOW_GROUNDING': 2, 'STORY_RESOLUTION_NO_DRAWN': 6}
     - [LOW_GROUNDING] form=`(clojure.string/split "src:test" #":")` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(clojure.string/split "src:test" #":")` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':test', 'src:test'), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(clojure.string/split "src:test" #":")` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':test', 'src:test'), resolution doesn't close the loop)
     - [LOW_GROUNDING] form=`(clojure.string/split "src:test" #":")` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(clojure.string/split "src:test" #":")` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':test', 'src:test'), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(count ["src" "test" "resources"])` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('src', 'test', 'resources'), resolution doesn't close the loop)
 
 ### G6-12: Multiple files in one project
 
@@ -472,6 +625,15 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
     - [LOW_GROUNDING] form=`(name 'java.util.Date)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [LOW_GROUNDING] form=`(name 'java.util.Date)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
 
+### G6-15: Namespace meta
+
+- examples: 2
+- variety @ n=50: 0.99
+- issues: {'STORY_RESOLUTION_NO_DRAWN': 3}
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(:doc (meta '^{:doc "trust the runtime"} village))` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':doc', ':doc', 'trust the runtime'), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(:doc (meta '^{:doc "trust the runtime"} village))` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':doc', ':doc', 'trust the runtime'), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(:doc (meta '^{:doc "trust the runtime"} village))` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':doc', ':doc', 'trust the runtime'), resolution doesn't close the loop)
+
 ### G6-16: Cleaning up requires
 
 - examples: 2
@@ -485,13 +647,25 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 ## Grade 7
 
+### G7-01: throw
+
+- examples: 1
+- variety @ n=50: 0.98
+- issues: {'STORY_RESOLUTION_NO_DRAWN': 3}
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(try (throw (Exception. "bad")) (catch Exception e` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':thrown', 'bad'), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(try (throw (Exception. "bad")) (catch Exception e` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':thrown', 'bad'), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(try (throw (Exception. "bad")) (catch Exception e` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':thrown', 'bad'), resolution doesn't close the loop)
+
 ### G7-04: ex-info
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'LOW_GROUNDING': 2}
+- issues: {'LOW_GROUNDING': 2, 'STORY_RESOLUTION_NO_DRAWN': 3}
     - [LOW_GROUNDING] form=`(try (throw (ex-info "bad" {:a 1})) (catch Excepti` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(try (throw (ex-info "bad" {:a 1})) (catch Excepti` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':a', 'bad'), resolution doesn't close the loop)
     - [LOW_GROUNDING] form=`(try (throw (ex-info "bad" {:a 1})) (catch Excepti` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(try (throw (ex-info "bad" {:a 1})) (catch Excepti` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':a', 'bad'), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(try (throw (ex-info "bad" {:a 1})) (catch Excepti` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':a', 'bad'), resolution doesn't close the loop)
 
 ### G7-05: nil punning
 
@@ -518,10 +692,12 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'BOOL_LEAK_RESOLUTION': 1, 'LOW_GROUNDING': 3}
+- issues: {'STORY_RESOLUTION_NO_DRAWN': 6, 'BOOL_LEAK_RESOLUTION': 1, 'LOW_GROUNDING': 3}
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(tap> :hello)` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':hello',), resolution doesn't close the loop)
     - [BOOL_LEAK_RESOLUTION] form=`(tap> :hello)` — resolution leaks boolean answer 'true' — describe the verdict abstractly instead
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(tap> :hello)` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':hello',), resolution doesn't close the loop)
     - [LOW_GROUNDING] form=`(tap> :hello)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-    - [LOW_GROUNDING] form=`(tap> 42)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(tap> :hello)` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':hello',), resolution doesn't close the loop)
     - [LOW_GROUNDING] form=`(tap> 42)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
 
 ### G7-10: doc and source
@@ -535,31 +711,35 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'LOW_GROUNDING': 5}
+- issues: {'LOW_GROUNDING': 5, 'STORY_RESOLUTION_NO_DRAWN': 6}
     - [LOW_GROUNDING] form=`(try (throw (Exception. "oops")) (catch Exception ` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(try (throw (Exception. "oops")) (catch Exception ` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('oops',), resolution doesn't close the loop)
     - [LOW_GROUNDING] form=`(try (throw (Exception. "oops")) (catch Exception ` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(try (throw (Exception. "oops")) (catch Exception ` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('oops',), resolution doesn't close the loop)
     - [LOW_GROUNDING] form=`(try (throw (Exception. "oops")) (catch Exception ` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-    - [LOW_GROUNDING] form=`(try (throw (ex-info "trouble" {})) (catch Excepti` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-    - [LOW_GROUNDING] form=`(try (throw (ex-info "trouble" {})) (catch Excepti` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(try (throw (Exception. "oops")) (catch Exception ` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('oops',), resolution doesn't close the loop)
 
 ### G7-12: slurp and spit
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'LOW_GROUNDING': 1}
+- issues: {'STORY_RESOLUTION_NO_DRAWN': 3, 'LOW_GROUNDING': 1}
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(clojure.string/split "a\nb\nc" #"\n")` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('a\\nb\\nc', '\\n'), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(clojure.string/split "a\nb\nc" #"\n")` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('a\\nb\\nc', '\\n'), resolution doesn't close the loop)
     - [LOW_GROUNDING] form=`(clojure.string/split "a\nb\nc" #"\n")` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(clojure.string/split "a\nb\nc" #"\n")` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('a\\nb\\nc', '\\n'), resolution doesn't close the loop)
 
 ### G7-13: line-seq
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'SMALL_INT_LEAK': 1, 'LOW_GROUNDING': 5}
+- issues: {'SMALL_INT_LEAK': 1, 'STORY_RESOLUTION_NO_DRAWN': 6, 'LOW_GROUNDING': 5}
     - [SMALL_INT_LEAK] form=`(count (clojure.string/split-lines "a\nb\nc"))` — small-int answer 3 leaks via resolution-slot phrasing
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(count (clojure.string/split-lines "a\nb\nc"))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('a\\nb\\nc',), resolution doesn't close the loop)
     - [LOW_GROUNDING] form=`(count (clojure.string/split-lines "a\nb\nc"))` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(count (clojure.string/split-lines "a\nb\nc"))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('a\\nb\\nc',), resolution doesn't close the loop)
     - [LOW_GROUNDING] form=`(count (clojure.string/split-lines "a\nb\nc"))` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-    - [LOW_GROUNDING] form=`(first (clojure.string/split-lines "alpha\nbeta"))` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-    - [LOW_GROUNDING] form=`(first (clojure.string/split-lines "alpha\nbeta"))` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-    - [LOW_GROUNDING] form=`(first (clojure.string/split-lines "alpha\nbeta"))` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(count (clojure.string/split-lines "a\nb\nc"))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('a\\nb\\nc',), resolution doesn't close the loop)
 
 ### G7-15: *in* and *out*
 
@@ -595,24 +775,33 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 0.99
-- issues: {'HIGH_LENGTH': 1}
+- issues: {'STORY_RESOLUTION_NO_DRAWN': 3, 'HIGH_LENGTH': 1}
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(defn speak [k] (cond (= k :wolf) "howl" (= k :flo` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':wolf', ':flock', ':else'), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(defn speak [k] (cond (= k :wolf) "howl" (= k :flo` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':wolf', ':flock', ':else'), resolution doesn't close the loop)
     - [HIGH_LENGTH] form=`(defn speak [k] (cond (= k :wolf) "howl" (= k :flo` — user_msg 208 words
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(defn speak [k] (cond (= k :wolf) "howl" (= k :flo` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':wolf', ':flock', ':else'), resolution doesn't close the loop)
 
 ### G8-02: deftype introduction
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'SENTENCE_START_LOWER_PRONOUN': 1, 'LOW_GROUNDING': 2}
+- issues: {'SENTENCE_START_LOWER_PRONOUN': 1, 'STORY_RESOLUTION_NO_DRAWN': 3, 'LOW_GROUNDING': 2}
     - [SENTENCE_START_LOWER_PRONOUN] form=`(do (deftype Lantern [color]) (.-color (Lantern. "` — pronoun starts a sentence in lowercase — template should use the _cap variant after a sentence-ending punctuation
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(do (deftype Lantern [color]) (.-color (Lantern. "` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('amber',), resolution doesn't close the loop)
     - [LOW_GROUNDING] form=`(do (deftype Lantern [color]) (.-color (Lantern. "` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(do (deftype Lantern [color]) (.-color (Lantern. "` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('amber',), resolution doesn't close the loop)
     - [LOW_GROUNDING] form=`(do (deftype Lantern [color]) (.-color (Lantern. "` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(do (deftype Lantern [color]) (.-color (Lantern. "` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('amber',), resolution doesn't close the loop)
 
 ### G8-03: defrecord introduction
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'SENTENCE_START_LOWER_PRONOUN': 1}
+- issues: {'STORY_RESOLUTION_NO_DRAWN': 3, 'SENTENCE_START_LOWER_PRONOUN': 1}
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(do (defrecord Watcher [name post]) (:post (->Watc` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':post', ':hilltop', 'shepherd'), resolution doesn't close the loop)
     - [SENTENCE_START_LOWER_PRONOUN] form=`(do (defrecord Watcher [name post]) (:post (->Watc` — pronoun starts a sentence in lowercase — template should use the _cap variant after a sentence-ending punctuation
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(do (defrecord Watcher [name post]) (:post (->Watc` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':post', ':hilltop', 'shepherd'), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(do (defrecord Watcher [name post]) (:post (->Watc` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':post', ':hilltop', 'shepherd'), resolution doesn't close the loop)
 
 ### G8-04: Protocol definition
 
@@ -639,17 +828,25 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'LOW_GROUNDING': 3}
+- issues: {'STORY_RESOLUTION_NO_DRAWN': 6, 'LOW_GROUNDING': 3}
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(do (defprotocol Alarm (sound [this])) (extend-pro` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('42', ':string-alarm', ':long-alarm'), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(do (defprotocol Alarm (sound [this])) (extend-pro` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('42', ':string-alarm', ':long-alarm'), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(do (defprotocol Alarm (sound [this])) (extend-pro` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('42', ':string-alarm', ':long-alarm'), resolution doesn't close the loop)
     - [LOW_GROUNDING] form=`(do (defprotocol Alarm (sound [this])) (extend-pro` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-    - [LOW_GROUNDING] form=`(do (defprotocol Alarm (sound [this])) (extend-pro` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(do (defprotocol Alarm (sound [this])) (extend-pro` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':string-alarm', ':long-alarm'), resolution doesn't close the loop)
     - [LOW_GROUNDING] form=`(do (defprotocol Alarm (sound [this])) (extend-pro` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
 
 ### G8-07: Record implementing protocol
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'HONEST_JUDGE_REPEAT': 1}
+- issues: {'STORY_RESOLUTION_NO_DRAWN': 6, 'HONEST_JUDGE_REPEAT': 1}
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(do (defprotocol Alarm (sound [this])) (defrecord ` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':cry', 'Pip'), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(do (defprotocol Alarm (sound [this])) (defrecord ` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':cry', 'Pip'), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(do (defprotocol Alarm (sound [this])) (defrecord ` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':cry', 'Pip'), resolution doesn't close the loop)
     - [HONEST_JUDGE_REPEAT] form=`(do (defprotocol Alarm (sound [this])) (defrecord ` — two or more 'honest' uses in one boy-wolf user_msg (judge-bombast tic — drop one)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(do (defprotocol Alarm (sound [this])) (defrecord ` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':measured', 'Mira'), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(do (defprotocol Alarm (sound [this])) (defrecord ` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':measured', 'Mira'), resolution doesn't close the loop)
 
 ### G8-13: this-style vs fn-style
 
@@ -664,21 +861,24 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 1
 - variety @ n=50: 1.00
-- issues: {'LOW_GROUNDING': 2}
+- issues: {'LOW_GROUNDING': 2, 'STORY_RESOLUTION_NO_DRAWN': 3}
     - [LOW_GROUNDING] form=`(do (defprotocol A (a-op [this])) (defprotocol B (` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(do (defprotocol A (a-op [this])) (defprotocol B (` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':a-impl', ':b-impl', ') (b-op '), resolution doesn't close the loop)
     - [LOW_GROUNDING] form=`(do (defprotocol A (a-op [this])) (defprotocol B (` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(do (defprotocol A (a-op [this])) (defprotocol B (` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':a-impl', ':b-impl', ') (b-op '), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(do (defprotocol A (a-op [this])) (defprotocol B (` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':a-impl', ':b-impl', ') (b-op '), resolution doesn't close the loop)
 
 ### G8-15: derive and isa? — multimethod hierarchy
 
 - examples: 3
 - variety @ n=50: 0.99
-- issues: {'LOW_GROUNDING': 6, 'BOOL_LEAK_RESOLUTION': 1}
+- issues: {'STORY_RESOLUTION_NO_DRAWN': 3, 'LOW_GROUNDING': 6, 'BOOL_LEAK_RESOLUTION': 1}
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(do (derive ::shepherd ::villager) (isa? ::shepher` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':shepherd', ':villager', ':shepherd'), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(do (derive ::shepherd ::villager) (isa? ::shepher` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':shepherd', ':villager', ':shepherd'), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(do (derive ::shepherd ::villager) (isa? ::shepher` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':shepherd', ':villager', ':shepherd'), resolution doesn't close the loop)
     - [LOW_GROUNDING] form=`(isa? java.lang.Long java.lang.Number)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [LOW_GROUNDING] form=`(isa? java.lang.Long java.lang.Number)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [LOW_GROUNDING] form=`(isa? java.lang.Long java.lang.Number)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-    - [LOW_GROUNDING] form=`(isa? java.lang.String java.lang.Number)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-    - [BOOL_LEAK_RESOLUTION] form=`(isa? java.lang.String java.lang.Number)` — resolution leaks boolean answer 'false' — describe the verdict abstractly instead
-    - [LOW_GROUNDING] form=`(isa? java.lang.String java.lang.Number)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
 
 ### G8-16: Abstract design with protocols
 
@@ -724,10 +924,12 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 1
 - variety @ n=50: 1.00
-- issues: {'LOW_GROUNDING': 3}
+- issues: {'LOW_GROUNDING': 2, 'STORY_RESOLUTION_NO_DRAWN': 3}
     - [LOW_GROUNDING] form=`(do (def a (atom 0)) (def log (atom [])) (add-watc` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(do (def a (atom 0)) (def log (atom [])) (add-watc` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':w',), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(do (def a (atom 0)) (def log (atom [])) (add-watc` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':w',), resolution doesn't close the loop)
     - [LOW_GROUNDING] form=`(do (def a (atom 0)) (def log (atom [])) (add-watc` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-    - [LOW_GROUNDING] form=`(do (def a (atom 0)) (def log (atom [])) (add-watc` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(do (def a (atom 0)) (def log (atom [])) (add-watc` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':w',), resolution doesn't close the loop)
 
 ### G9-06: Validator on atom
 
@@ -741,10 +943,13 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'LOW_GROUNDING': 2, 'HIGH_LENGTH': 1}
+- issues: {'LOW_GROUNDING': 2, 'HIGH_LENGTH': 1, 'STORY_RESOLUTION_NO_DRAWN': 3}
     - [LOW_GROUNDING] form=`(do (def r (ref 0)) (dosync (alter r inc)) @r)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [HIGH_LENGTH] form=`(do (def r (ref 0)) (dosync (alter r inc)) @r)` — user_msg 218 words
     - [LOW_GROUNDING] form=`(do (def r (ref 0)) (dosync (alter r inc)) @r)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(do (def r (ref 100)) (dosync (ref-set r 7)) @r)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('100', '7'), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(do (def r (ref 100)) (dosync (ref-set r 7)) @r)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('100', '7'), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(do (def r (ref 100)) (dosync (ref-set r 7)) @r)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('100', '7'), resolution doesn't close the loop)
 
 ### G9-08: dosync and alter
 
@@ -770,10 +975,13 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'HIGH_LENGTH': 1, 'LOW_GROUNDING': 2}
+- issues: {'HIGH_LENGTH': 1, 'LOW_GROUNDING': 2, 'STORY_RESOLUTION_NO_DRAWN': 3}
     - [HIGH_LENGTH] form=`(do (def ag (agent 0)) (send ag inc) (await ag) @a` — user_msg 212 words
     - [LOW_GROUNDING] form=`(do (def ag (agent 0)) (send ag inc) (await ag) @a` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [LOW_GROUNDING] form=`(do (def ag (agent 0)) (send ag inc) (await ag) @a` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(do (def ag (agent 5)) (send ag + 10) (await ag) @` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('5', '10'), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(do (def ag (agent 5)) (send ag + 10) (await ag) @` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('5', '10'), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(do (def ag (agent 5)) (send ag + 10) (await ag) @` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('5', '10'), resolution doesn't close the loop)
 
 ### G9-11: send and send-off
 
@@ -798,26 +1006,41 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 0.99
-- issues: {'LOW_GROUNDING': 3}
+- issues: {'LOW_GROUNDING': 3, 'STORY_RESOLUTION_NO_DRAWN': 3}
     - [LOW_GROUNDING] form=`@(future (+ 1 2))` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [LOW_GROUNDING] form=`@(future (+ 1 2))` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [LOW_GROUNDING] form=`@(future (+ 1 2))` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+    - [STORY_RESOLUTION_NO_DRAWN] form=`@(future (* 6 7))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('6', '7'), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`@(future (* 6 7))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('6', '7'), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`@(future (* 6 7))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('6', '7'), resolution doesn't close the loop)
 
 ### G9-15: promise — deliver and deref
 
 - examples: 2
 - variety @ n=50: 0.99
-- issues: {'LOW_GROUNDING': 2}
+- issues: {'LOW_GROUNDING': 2, 'STORY_RESOLUTION_NO_DRAWN': 6}
     - [LOW_GROUNDING] form=`(do (def p (promise)) (deliver p :done) @p)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(do (def p (promise)) (deliver p :done) @p)` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':done',), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(do (def p (promise)) (deliver p :done) @p)` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':done',), resolution doesn't close the loop)
     - [LOW_GROUNDING] form=`(do (def p (promise)) (deliver p :done) @p)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(do (def p (promise)) (deliver p :done) @p)` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':done',), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(do (def p (promise)) (deliver p 42) @p)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('42',), resolution doesn't close the loop)
 
 ### G9-16: volatile — when STM is too heavy
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'LOW_GROUNDING': 2}
+- issues: {'LOW_GROUNDING': 1}
     - [LOW_GROUNDING] form=`(do (def v (volatile! 0)) (vswap! v inc) @v)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-    - [LOW_GROUNDING] form=`(do (def v (volatile! 0)) (vswap! v inc) @v)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+
+### G9-17: binding — thread-local
+
+- examples: 2
+- variety @ n=50: 1.00
+- issues: {'STORY_RESOLUTION_NO_DRAWN': 3}
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(do (def ^:dynamic *p* 1) (binding [*p* 99] *p*) *` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('99', ':dynamic'), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(do (def ^:dynamic *p* 1) (binding [*p* 99] *p*) *` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('99', ':dynamic'), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(do (def ^:dynamic *p* 1) (binding [*p* 99] *p*) *` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('99', ':dynamic'), resolution doesn't close the loop)
 
 ### G9-18: locking — last resort
 
@@ -845,31 +1068,36 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'LOW_GROUNDING': 2}
+- issues: {'STORY_RESOLUTION_NO_DRAWN': 3, 'LOW_GROUNDING': 2}
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(let [xs [1 2 3]] `(list ~@xs))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('3',), resolution doesn't close the loop)
     - [LOW_GROUNDING] form=`(let [xs [1 2 3]] `(list ~@xs))` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(let [xs [1 2 3]] `(list ~@xs))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('3',), resolution doesn't close the loop)
     - [LOW_GROUNDING] form=`(let [xs [1 2 3]] `(list ~@xs))` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(let [xs [1 2 3]] `(list ~@xs))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('3',), resolution doesn't close the loop)
 
 ### G10-03: defmacro introduction
 
 - examples: 2
 - variety @ n=50: 0.99
-- issues: {'SENTENCE_START_LOWER_PRONOUN': 1, 'LOW_GROUNDING': 4}
+- issues: {'SENTENCE_START_LOWER_PRONOUN': 1, 'STORY_RESOLUTION_NO_DRAWN': 3, 'LOW_GROUNDING': 4}
     - [SENTENCE_START_LOWER_PRONOUN] form=`(do (defmacro my-when [t & body] `(if ~t (do ~@bod` — pronoun starts a sentence in lowercase — template should use the _cap variant after a sentence-ending punctuation
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(do (defmacro my-when [t & body] `(if ~t (do ~@bod` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('3',), resolution doesn't close the loop)
     - [LOW_GROUNDING] form=`(do (defmacro my-when [t & body] `(if ~t (do ~@bod` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(do (defmacro my-when [t & body] `(if ~t (do ~@bod` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('3',), resolution doesn't close the loop)
     - [LOW_GROUNDING] form=`(do (defmacro my-when [t & body] `(if ~t (do ~@bod` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-    - [LOW_GROUNDING] form=`(do (defmacro twice [x] `(do ~x ~x)) (twice 7))` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-    - [LOW_GROUNDING] form=`(do (defmacro twice [x] `(do ~x ~x)) (twice 7))` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(do (defmacro my-when [t & body] `(if ~t (do ~@bod` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('3',), resolution doesn't close the loop)
 
 ### G10-04: Macro expansion rule
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'LOW_GROUNDING': 4, 'SENTENCE_START_LOWER_PRONOUN': 1}
+- issues: {'LOW_GROUNDING': 4, 'STORY_RESOLUTION_NO_DRAWN': 6, 'SENTENCE_START_LOWER_PRONOUN': 1}
     - [LOW_GROUNDING] form=`(macroexpand-1 '(when true 1))` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(macroexpand-1 '(when true 1))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('-1',), resolution doesn't close the loop)
     - [LOW_GROUNDING] form=`(macroexpand-1 '(when true 1))` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(macroexpand-1 '(when true 1))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('-1',), resolution doesn't close the loop)
     - [LOW_GROUNDING] form=`(macroexpand-1 '(when true 1))` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-    - [LOW_GROUNDING] form=`(macroexpand-1 '(or a b))` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-    - [SENTENCE_START_LOWER_PRONOUN] form=`(macroexpand-1 '(or a b))` — pronoun starts a sentence in lowercase — template should use the _cap variant after a sentence-ending punctuation
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(macroexpand-1 '(when true 1))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('-1',), resolution doesn't close the loop)
 
 ### G10-05: macroexpand
 
@@ -886,10 +1114,13 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 3
 - variety @ n=50: 1.00
-- issues: {'LOW_GROUNDING': 3}
+- issues: {'LOW_GROUNDING': 3, 'STORY_RESOLUTION_NO_DRAWN': 3}
     - [LOW_GROUNDING] form=`(when-not false :ok)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(when-not false :ok)` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':ok',), resolution doesn't close the loop)
     - [LOW_GROUNDING] form=`(when-not false :ok)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(when-not false :ok)` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':ok',), resolution doesn't close the loop)
     - [LOW_GROUNDING] form=`(when-not false :ok)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(when-not false :ok)` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':ok',), resolution doesn't close the loop)
 
 ### G10-07: Threading macros revisited
 
@@ -901,14 +1132,26 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
     - [LOW_GROUNDING] form=`(macroexpand '(-> x f g))` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [LOW_GROUNDING] form=`(macroexpand '(-> x f g))` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
 
+### G10-08: Macro vs fn
+
+- examples: 2
+- variety @ n=50: 1.00
+- issues: {'STORY_RESOLUTION_NO_DRAWN': 3}
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(do (defmacro add-mac [a b] `(+ ~a ~b)) (add-mac 3` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('3', '4'), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(do (defmacro add-mac [a b] `(+ ~a ~b)) (add-mac 3` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('3', '4'), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(do (defmacro add-mac [a b] `(+ ~a ~b)) (add-mac 3` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('3', '4'), resolution doesn't close the loop)
+
 ### G10-09: Hygiene and gensym
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'LOW_GROUNDING': 3}
+- issues: {'LOW_GROUNDING': 3, 'STORY_RESOLUTION_NO_DRAWN': 3}
     - [LOW_GROUNDING] form=`(symbol? (gensym))` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [LOW_GROUNDING] form=`(let [a (gensym "x_") b (gensym "x_")] (= a b))` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(let [a (gensym "x_") b (gensym "x_")] (= a b))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('x_', 'x_'), resolution doesn't close the loop)
     - [LOW_GROUNDING] form=`(let [a (gensym "x_") b (gensym "x_")] (= a b))` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(let [a (gensym "x_") b (gensym "x_")] (= a b))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('x_', 'x_'), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(let [a (gensym "x_") b (gensym "x_")] (= a b))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('x_', 'x_'), resolution doesn't close the loop)
 
 ### G10-10: Anaphoric macros are confusing
 
@@ -923,46 +1166,49 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 3
 - variety @ n=50: 1.00
-- issues: {'LOW_GROUNDING': 6}
+- issues: {'LOW_GROUNDING': 6, 'STORY_RESOLUTION_NO_DRAWN': 3}
     - [LOW_GROUNDING] form=`(#(* % %) 6)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(#(* % %) 6)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('6',), resolution doesn't close the loop)
     - [LOW_GROUNDING] form=`(#(* % %) 6)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(#(* % %) 6)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('6',), resolution doesn't close the loop)
     - [LOW_GROUNDING] form=`(#(* % %) 6)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-    - [LOW_GROUNDING] form=`[1 #_ 2 3]` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-    - [LOW_GROUNDING] form=`[1 #_ 2 3]` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-    - [LOW_GROUNDING] form=`[1 #_ 2 3]` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(#(* % %) 6)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('6',), resolution doesn't close the loop)
 
 ### G10-12: Tagged literals
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'LOW_GROUNDING': 5}
+- issues: {'LOW_GROUNDING': 5, 'STORY_RESOLUTION_NO_DRAWN': 6}
     - [LOW_GROUNDING] form=`(inst? #inst "2024-01-01")` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(inst? #inst "2024-01-01")` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('2024', '-01', '-01'), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(inst? #inst "2024-01-01")` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('2024', '-01', '-01'), resolution doesn't close the loop)
     - [LOW_GROUNDING] form=`(inst? #inst "2024-01-01")` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-    - [LOW_GROUNDING] form=`(uuid? #uuid "00000000-0000-0000-0000-000000000000` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-    - [LOW_GROUNDING] form=`(uuid? #uuid "00000000-0000-0000-0000-000000000000` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(inst? #inst "2024-01-01")` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('2024', '-01', '-01'), resolution doesn't close the loop)
     - [LOW_GROUNDING] form=`(uuid? #uuid "00000000-0000-0000-0000-000000000000` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
 
 ### G10-13: Data readers and EDN extension
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'LOW_GROUNDING': 5}
+- issues: {'LOW_GROUNDING': 5, 'STORY_RESOLUTION_NO_DRAWN': 3}
     - [LOW_GROUNDING] form=`(clojure.edn/read-string "42")` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [LOW_GROUNDING] form=`(clojure.edn/read-string "42")` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [LOW_GROUNDING] form=`(clojure.edn/read-string "[:a :b :c]")` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(clojure.edn/read-string "[:a :b :c]")` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':a', ':b', ':c'), resolution doesn't close the loop)
     - [LOW_GROUNDING] form=`(clojure.edn/read-string "[:a :b :c]")` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-    - [LOW_GROUNDING] form=`(clojure.edn/read-string "[:a :b :c]")` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(clojure.edn/read-string "[:a :b :c]")` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':a', ':b', ':c'), resolution doesn't close the loop)
 
 ### G10-14: eval (the function)
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'LOW_GROUNDING': 3, 'SENTENCE_START_LOWER_PRONOUN': 2}
+- issues: {'STORY_RESOLUTION_NO_DRAWN': 3, 'LOW_GROUNDING': 3, 'SENTENCE_START_LOWER_PRONOUN': 2}
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(eval '(+ 1 2 3))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('3',), resolution doesn't close the loop)
     - [LOW_GROUNDING] form=`(eval '(+ 1 2 3))` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(eval '(+ 1 2 3))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('3',), resolution doesn't close the loop)
     - [SENTENCE_START_LOWER_PRONOUN] form=`(eval '(+ 1 2 3))` — pronoun starts a sentence in lowercase — template should use the _cap variant after a sentence-ending punctuation
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(eval '(+ 1 2 3))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('3',), resolution doesn't close the loop)
     - [SENTENCE_START_LOWER_PRONOUN] form=`(eval (list '+ 4 5))` — pronoun starts a sentence in lowercase — template should use the _cap variant after a sentence-ending punctuation
-    - [LOW_GROUNDING] form=`(eval (list '+ 4 5))` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-    - [LOW_GROUNDING] form=`(eval (list '+ 4 5))` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
 
 ### G10-16: Macro pattern library
 
@@ -979,48 +1225,61 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 8
 - variety @ n=50: 1.00
-- issues: {'LOW_GROUNDING': 8, 'HIGH_LENGTH': 2, 'ANSWER_LEAK_STRING': 2}
+- issues: {'LOW_GROUNDING': 8, 'HIGH_LENGTH': 2, 'ANSWER_LEAK_STRING': 2, 'STORY_RESOLUTION_NO_DRAWN': 12}
     - [LOW_GROUNDING] form=`(.startsWith "shepherd-elder" "shepherd")` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [LOW_GROUNDING] form=`(.startsWith "shepherd-elder" "shepherd")` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [HIGH_LENGTH] form=`(. "abc" toUpperCase)` — user_msg 201 words
     - [ANSWER_LEAK_STRING] form=`(. "abc" toUpperCase)` — answer string 'ABC' appears in user_msg
-    - [LOW_GROUNDING] form=`(.startsWith "shepherd-elder" "shepherd")` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-    - [LOW_GROUNDING] form=`(.startsWith "shepherd-elder" "shepherd")` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(.toUpperCase "abc")` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('abc',), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(.toUpperCase "abc")` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('abc',), resolution doesn't close the loop)
+
+### G11-03: Static method call
+
+- examples: 6
+- variety @ n=50: 1.00
+- issues: {'STORY_RESOLUTION_NO_DRAWN': 9}
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(Math/abs -7)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('-7',), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(Math/abs -7)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('-7',), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(Math/abs -7)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('-7',), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(Math/min 5 2)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('5',), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(Math/min 5 2)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('5',), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(Math/min 5 2)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('5',), resolution doesn't close the loop)
 
 ### G11-07: Arrays
 
 - examples: 6
 - variety @ n=50: 1.00
-- issues: {'LOW_GROUNDING': 5}
+- issues: {'LOW_GROUNDING': 5, 'STORY_RESOLUTION_NO_DRAWN': 3}
     - [LOW_GROUNDING] form=`(let [a (int-array [5 10 15])] (aget a 0))` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [LOW_GROUNDING] form=`(let [a (int-array [5 10 15])] (aget a 0))` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [LOW_GROUNDING] form=`(let [a (int-array [5 10 15])] (aget a 0))` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(let [a (int-array [7 8 9])] (alength a))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('7', '8', '9'), resolution doesn't close the loop)
     - [LOW_GROUNDING] form=`(let [a (int-array [7 8 9])] (alength a))` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-    - [LOW_GROUNDING] form=`(let [a (int-array [7 8 9])] (alength a))` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(let [a (int-array [7 8 9])] (alength a))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('7', '8', '9'), resolution doesn't close the loop)
 
 ### G11-08: Type hints
 
 - examples: 6
 - variety @ n=50: 1.00
-- issues: {'LOW_GROUNDING': 6, 'VILLAGE_NOUN_OVERUSE': 1}
+- issues: {'STORY_RESOLUTION_NO_DRAWN': 12, 'LOW_GROUNDING': 6, 'VILLAGE_NOUN_OVERUSE': 1}
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(let [^String s "abc"] (.toUpperCase s))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('abc',), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(let [^String s "abc"] (.toUpperCase s))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('abc',), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(let [^String s "abc"] (.toUpperCase s))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('abc',), resolution doesn't close the loop)
     - [LOW_GROUNDING] form=`(let [^String s "def"] (.length s))` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(let [^String s "def"] (.length s))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('def',), resolution doesn't close the loop)
     - [LOW_GROUNDING] form=`(let [^String s "def"] (.length s))` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-    - [LOW_GROUNDING] form=`(let [^long n 42] (+ n 8))` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-    - [LOW_GROUNDING] form=`(let [^long n 42] (+ n 8))` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-    - [VILLAGE_NOUN_OVERUSE] form=`(let [^long n 42] (+ n 8))` — `the village` appears 4 times (noun-saturation tic — vary or drop)
-    - [LOW_GROUNDING] form=`(let [^long n 42] (+ n 8))` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
 
 ### G11-14: Debugging host leaks
 
 - examples: 6
 - variety @ n=50: 1.00
-- issues: {'LOW_GROUNDING': 6}
+- issues: {'STORY_RESOLUTION_NO_DRAWN': 9, 'LOW_GROUNDING': 6}
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(try (Math/sqrt 4) (catch Exception _ :err))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('4', ':err'), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(try (Math/sqrt 4) (catch Exception _ :err))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('4', ':err'), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(try (Math/sqrt 4) (catch Exception _ :err))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('4', ':err'), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(try (Math/abs -42) (catch Exception _ :err))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('-42', ':err'), resolution doesn't close the loop)
     - [LOW_GROUNDING] form=`(try (Math/abs -42) (catch Exception _ :err))` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-    - [LOW_GROUNDING] form=`(try (Math/abs -42) (catch Exception _ :err))` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-    - [LOW_GROUNDING] form=`(try (.length "test") (catch Exception _ :err))` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-    - [LOW_GROUNDING] form=`(try (.length "test") (catch Exception _ :err))` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-    - [LOW_GROUNDING] form=`(try (do (Math/sqrt 4) :success) (catch Exception ` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-    - [LOW_GROUNDING] form=`(try (do (Math/sqrt 4) :success) (catch Exception ` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(try (Math/abs -42) (catch Exception _ :err))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('-42', ':err'), resolution doesn't close the loop)
 
 ## Grade 12
 
@@ -1028,8 +1287,11 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 0.99
-- issues: {'HIGH_LENGTH': 1}
+- issues: {'HIGH_LENGTH': 1, 'STORY_RESOLUTION_NO_DRAWN': 3}
     - [HIGH_LENGTH] form=`(into [] (map inc) [1 2 3])` — user_msg 218 words
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(into [] (filter even?) [1 2 3 4 5])` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('3', '4', '5'), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(into [] (filter even?) [1 2 3 4 5])` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('3', '4', '5'), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(into [] (filter even?) [1 2 3 4 5])` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('3', '4', '5'), resolution doesn't close the loop)
 
 ### G12-03: into with a transducer (xform)
 
@@ -1043,17 +1305,24 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'VILLAGE_NOUN_OVERUSE': 2}
+- issues: {'STORY_RESOLUTION_NO_DRAWN': 6, 'VILLAGE_NOUN_OVERUSE': 2, 'PATIENT_ROLE_BOASTFUL': 1}
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(do (require '[clojure.spec.alpha :as s]) (s/valid` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('42', ':as'), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(do (require '[clojure.spec.alpha :as s]) (s/valid` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('42', ':as'), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(do (require '[clojure.spec.alpha :as s]) (s/valid` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('42', ':as'), resolution doesn't close the loop)
     - [VILLAGE_NOUN_OVERUSE] form=`(do (require '[clojure.spec.alpha :as s]) (s/valid` — `the village` appears 4 times (noun-saturation tic — vary or drop)
-    - [VILLAGE_NOUN_OVERUSE] form=`(do (require '[clojure.spec.alpha :as s]) (s/valid` — `the village` appears 4 times (noun-saturation tic — vary or drop)
+    - [PATIENT_ROLE_BOASTFUL] form=`(do (require '[clojure.spec.alpha :as s]) (s/valid` — patient role 'the elder' co-occurs with boastful EMO phrase 'with the swagger of an unrepen'
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(do (require '[clojure.spec.alpha :as s]) (s/valid` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('42', ':as'), resolution doesn't close the loop)
 
 ### G12-17: Library design patterns
 
 - examples: 3
 - variety @ n=50: 1.00
-- issues: {'VILLAGE_NOUN_OVERUSE': 3}
+- issues: {'PATIENT_ROLE_BOASTFUL': 3, 'STORY_RESOLUTION_NO_DRAWN': 3, 'VILLAGE_NOUN_OVERUSE': 3}
+    - [PATIENT_ROLE_BOASTFUL] form=`(= [1 2 3] (vec '(1 2 3)))` — patient role 'the elder' co-occurs with boastful EMO phrase 'puffed up with pride'
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(= [1 2 3] (vec '(1 2 3)))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('3', '3'), resolution doesn't close the loop)
     - [VILLAGE_NOUN_OVERUSE] form=`(= [1 2 3] (vec '(1 2 3)))` — `the village` appears 4 times (noun-saturation tic — vary or drop)
-    - [VILLAGE_NOUN_OVERUSE] form=`(= [1 2 3] (vec '(1 2 3)))` — `the village` appears 4 times (noun-saturation tic — vary or drop)
+    - [PATIENT_ROLE_BOASTFUL] form=`(= [1 2 3] (vec '(1 2 3)))` — patient role 'the elder' co-occurs with boastful EMO phrase 'with great whoops of laughter'
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(= [1 2 3] (vec '(1 2 3)))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('3', '3'), resolution doesn't close the loop)
     - [VILLAGE_NOUN_OVERUSE] form=`(= [1 2 3] (vec '(1 2 3)))` — `the village` appears 4 times (noun-saturation tic — vary or drop)
 
 ---
@@ -1062,7 +1331,8 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 ### Issue counts (across all examples × 3 records)
 
-- **LOW_GROUNDING**: 336
+- **LOW_GROUNDING**: 327
+- **STORY_RESOLUTION_NO_DRAWN**: 319
 - **BOOL_LEAK_RESOLUTION**: 17
 - **CONCEPT_AS_VERB**: 14
 - **SENTENCE_START_LOWER_PRONOUN**: 12
@@ -1071,6 +1341,7 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 - **VILLAGE_NOUN_OVERUSE**: 8
 - **ANSWER_LEAK**: 7
 - **FOREIGN_FABLE_IMAGERY**: 6
+- **PATIENT_ROLE_BOASTFUL**: 6
 - **ANSWER_LEAK_STRING**: 5
 - **SMALL_INT_LEAK**: 3
 - **FORM_LEAK**: 1
@@ -1081,18 +1352,18 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 | Grade | Subjects | Examples | Issues | Low-variety |
 |---|---|---|---|---|
-| 1 | 18 | 80 | 73 | — |
-| 2 | 22 | 88 | 67 | — |
-| 3 | 18 | 31 | 18 | — |
-| 4 | 20 | 39 | 8 | — |
-| 5 | 22 | 39 | 5 | — |
-| 6 | 16 | 33 | 42 | — |
-| 7 | 18 | 36 | 41 | — |
-| 8 | 16 | 31 | 34 | — |
-| 9 | 18 | 34 | 48 | — |
-| 10 | 16 | 36 | 57 | — |
-| 11 | 14 | 58 | 30 | — |
-| 12 | 18 | 37 | 8 | — |
+| 1 | 18 | 80 | 95 | — |
+| 2 | 22 | 88 | 104 | — |
+| 3 | 18 | 31 | 55 | — |
+| 4 | 20 | 39 | 11 | — |
+| 5 | 22 | 39 | 20 | — |
+| 6 | 16 | 33 | 74 | — |
+| 7 | 18 | 36 | 68 | — |
+| 8 | 16 | 31 | 61 | — |
+| 9 | 18 | 34 | 67 | — |
+| 10 | 16 | 36 | 93 | — |
+| 11 | 14 | 58 | 75 | — |
+| 12 | 18 | 37 | 24 | — |
 
 ### Sample issues by severity
 
@@ -1106,14 +1377,6 @@ A small crowd of villagers had gathered in the forest to watch
 Giulia attempt to predict, off the cuff, what the REPL would
 return. Konstantin pointed to the value 0 and read out the
 form aloud: `...
-    ```
-- `G1-01` (form `(+ 1 2)`): user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-    ```
-    When Solveig climbed up to the lookout that morning, she did not yet know that the day would teach a lasting lesson.
-
-Each Saturday, the reeve walked up to the meadow and reviewed which
-forms the shepherds had actually submitted to the REPL during the week.
-This week, the next form on the page was `...
     ```
 - `G1-01` (form `nil`): user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     ```
@@ -1139,6 +1402,14 @@ Ingrid had been trying to teach Damien how the REPL
 works. "Look here," she said, pointing to the integer 0.
 "You hand the form `0` to the runtime, and the runtime hands
 you back what it evaluat...
+    ```
+- `G1-03` (form `1/2`): user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+    ```
+    The lambs were milling in the lower meadow when the boy first thought of the joke he should not have made.
+
+"There is no need to evaluate that," Ivan said, with the swagger of an unrepentant fibber.
+"Anyone can see what the ratio 1/2 comes to." Isidora, who
+at the edge of the hilltop had heard such ...
     ```
 
 #### FOREIGN_FABLE_IMAGERY
@@ -1270,6 +1541,52 @@ The village had to track losses as loss...
 Carol had a record: -3 fleeces sold this week (a shortage). Tom wondered if `neg?` would confirm the negative change.
 
 The wool-ledger had to mark shortages clearly. `neg?` had to confirm that...
+    ```
+
+#### STORY_RESOLUTION_NO_DRAWN
+
+- `G1-09` (form `(symbol? 42)`): story-tagged example's resolution slot has no drawn-value reference (form has literals ('42',), resolution doesn't close the loop)
+    ```
+    near the road, on a slope above the village, Eloise watched his flock and his shadow grow longer.
+
+"There's a difference between *labeling* the form and
+*evaluating* it," Nikodemus said. "Quote in any of its
+shapes is the labeling — the runtime hands you back the form,
+not its value, unless you say ...
+    ```
+- `G1-09` (form `(symbol? 42)`): story-tagged example's resolution slot has no drawn-value reference (form has literals ('42',), resolution doesn't close the loop)
+    ```
+    Sebastien had been minding the sheep along the road since the first light, and the day was wearing thin.
+
+"The chalk mark and the sheep are tools in a shepherd's hand,"
+Theophilus said, drawing both on the slate. "Sometimes you want
+the mark — the symbol itself — and sometimes the value it points to...
+    ```
+- `G1-09` (form `(symbol? 42)`): story-tagged example's resolution slot has no drawn-value reference (form has literals ('42',), resolution doesn't close the loop)
+    ```
+    The villagers lived just down the slope from where Erazm stood watch, and they trusted his voice.
+
+Obadiah pointed at a name chalked onto the slate by the farm,
+then at an actual sheep standing in the fold. "The mark on the
+slate is the *name*; the sheep is the *value*. They are not
+the same thing —...
+    ```
+- `G1-12` (form `(+ 2 3)`): story-tagged example's resolution slot has no drawn-value reference (form has literals ('3',), resolution doesn't close the loop)
+    ```
+    The sheep had grazed peacefully all morning, and there was nothing at all the matter, which was exactly the problem.
+
+"A form is what's actually there on the page," Gertrude
+said, "after the conventions of writing and reading have done
+their work. The runtime sees the cleaned-up form, evaluates it,
+...
+    ```
+- `G1-13` (form `(- 5 3)`): story-tagged example's resolution slot has no drawn-value reference (form has literals ('5', '3'), resolution doesn't close the loop)
+    ```
+    Llew had a fine view near the orchard, but a finer talent for stretching a quiet hour into a noisy one.
+
+"Watch the flock," Kasimir said, gesturing at the grazing sheep. "Every
+operation either adds a lamb, removes one, or combines what's already there —
+the flock grows or shrinks by exactly what yo...
     ```
 
 #### FORM_LEAK
@@ -1549,6 +1866,44 @@ posted: how to use spec to validate that 42 conforms to the int? predicate. Vero
 
 At the village notice-stone in the village, the question of the day was
 posted: how to use spec to validate that 42 conforms to the string? predicate. Stavros, with the swagger of an unrepentan...
+    ```
+
+#### PATIENT_ROLE_BOASTFUL
+
+- `G6-10` (form `(get-in {:paths ["src"]} [:paths 0])`): patient role 'the elder' co-occurs with boastful EMO phrase 'with the swagger of an unrepen'
+    ```
+    Melina had cried wolf once already, near the road, and the villagers had laughed but not entirely.
+
+At the village notice-stone on the road, the question of the day was
+posted: how to extract the first entry from the :paths vector in a deps-style map. Melina, with the swagger of an unrepentant fibbe...
+    ```
+- `G6-10` (form `(get-in {:paths ["src"]} [:paths 0])`): patient role 'the elder' co-occurs with boastful EMO phrase 'puffed up with pride'
+    ```
+    Renzo had a fine view at the edge of the orchard, but a finer talent for stretching a quiet hour into a noisy one.
+
+At the village notice-stone in the orchard, the question of the day was
+posted: how to extract the first entry from the :paths vector in a deps-style map. Renzo, puffed up with pride, ...
+    ```
+- `G12-06` (form `(do (require '[clojure.spec.alpha :as s]) (s/valid? string? `): patient role 'the elder' co-occurs with boastful EMO phrase 'with the swagger of an unrepen'
+    ```
+    The hilltop offered a fine view of both the flock and the road below, where help would have to come from.
+
+At the village notice-stone in the village, the question of the day was
+posted: how to use spec to validate that 42 conforms to the string? predicate. Stavros, with the swagger of an unrepentan...
+    ```
+- `G12-17` (form `(= [1 2 3] (vec '(1 2 3)))`): patient role 'the elder' co-occurs with boastful EMO phrase 'puffed up with pride'
+    ```
+    On those slopes, trust was a thing the village extended freely, and a thing it could not afford to lose.
+
+At the village notice-stone in the woods, the question of the day was
+posted: how to verify that converting a seq to a vector produces the same data structure. Kostis, puffed up with pride, star...
+    ```
+- `G12-17` (form `(= [1 2 3] (vec '(1 2 3)))`): patient role 'the elder' co-occurs with boastful EMO phrase 'with great whoops of laughter'
+    ```
+    It happened in a quiet season, when the lambs were strong and the days were long enough to grow tired of.
+
+At the village notice-stone by the village, the question of the day was
+posted: how to verify that converting a seq to a vector produces the same data structure. Ivana, with great whoops of lau...
     ```
 
 #### WRONG_FABLE_LITERAL
