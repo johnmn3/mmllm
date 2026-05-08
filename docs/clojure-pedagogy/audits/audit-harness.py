@@ -504,6 +504,61 @@ def check_record(rec, sub, example):
                         "boast subplot 'X insisted they already knew' reads as "
                         "plural after singular-named subject (pitfall #19)"))
 
+    # Milkmaid hand-audit (claude/audit-milkmaid-Wvxw):
+    #
+    # SENTENCE_START_LOWER_PRONOUN — a pronoun starts a sentence in
+    # lowercase. Source pattern: a template uses {X_he_she} (lowercase
+    # pronoun) right after a sentence-ending period, when it should
+    # have been {X_he_she_cap}. Example rendered: 'asked. she replied'.
+    if re.search(r"[.!?]\"?\s+(he|she|they)\b", user):
+        issues.append(("SENTENCE_START_LOWER_PRONOUN",
+                        "pronoun starts a sentence in lowercase — template "
+                        "should use the _cap variant after a sentence-ending "
+                        "punctuation"))
+
+    # PRONOUN_AS_VOCATIVE — a bare pronoun used as a vocative inside
+    # dialogue, e.g. '"They, what did you do?"' or '"He, where did you
+    # go?"'. Source pattern: {X_he_she_cap} placed at the start of a
+    # quoted address; should be the character's NAME, not the pronoun.
+    if re.search(r'"(He|She|They), ', user):
+        issues.append(("PRONOUN_AS_VOCATIVE",
+                        "pronoun used as vocative inside dialogue — template "
+                        "should use the character's name, not the pronoun"))
+
+    # FOR_GOAL_TEXT_VERB_INCONGRUITY — 'For [imperative verb]' is
+    # ungrammatical when goal_text starts with an infinitive verb.
+    # Pattern: 'For create a vector', 'For find the minimum',
+    # 'For test whether'. Source: a template that wrote 'For {goal_text}'
+    # where goal_text begins with an imperative verb; should be
+    # 'To {goal_text}'.
+    if re.search(
+        r"\bFor (create|find|test|add|subtract|multiply|divide|compute|"
+        r"apply|append|extract|get|return|count|build|name|read|write|"
+        r"submit|evaluate|call|check|use|swap|deref|throw|catch|throw|"
+        r"sort|filter|map|reduce|increment|decrement) ",
+        user
+    ):
+        issues.append(("FOR_GOAL_TEXT_VERB_INCONGRUITY",
+                        "'For [imperative-verb]' rendered in user_msg — "
+                        "template should use 'To {goal_text}', not "
+                        "'For {goal_text}'"))
+
+    # HANGING_FORM_THAT — 'the form that the [noun phrase]' with no
+    # verb between 'that' and 'the X'. Source: a template wrote
+    # 'the form that {concept_phrase}' where concept_phrase is itself a
+    # noun phrase. Should be 'the form for {concept_phrase}' or
+    # 'the form that does {concept_phrase}'.
+    if re.search(
+        r"\bform that\s+(the |an |a |this )"
+        r"(?!says|reads|computes|prints|returns|writes|posts|opens|"
+        r"reaches|calls|catches|throws|sets|gets|builds|filters|maps|"
+        r"reduces|sorts|appends|removes|knows)",
+        user
+    ):
+        issues.append(("HANGING_FORM_THAT",
+                        "'form that <noun>' rendered without a verb — "
+                        "template should be 'form for {concept_phrase}'"))
+
     return issues
 
 
