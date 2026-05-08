@@ -300,10 +300,7 @@ G3_04 = SubjectCurriculum(grade=3, subject_id="G3-04",
             goal_text="bind a to 2, b to 3, c to 4, and add them",
 
             scenario=(
-                "Sable spread three wing-pouches at the village pitcher "
-                "and tucked a different count into each — two, three, "
-                "and four — naming them a, b, and c, all held for "
-                "one combined form."
+                'Sable spread three wing-pouches at the village pitcher and tucked a different count into each — the counts — naming them a, b, and c, all held for one combined form.'
             ),
             need=(
                 "Sable needed the water level when all three tucked "

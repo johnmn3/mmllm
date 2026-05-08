@@ -311,7 +311,7 @@ G5_07 = SubjectCurriculum(grade=5, subject_id="G5-07",
                 "all three gates were open, the form passed through them all, and returned the result — the last gate's value — Tom walked through the fold-gates and stood in the pen, knowing all conditions held. The fold gate held tight against the count of {drawn.a}, slate cool under the elder hand."         )),
         _ex("(or nil false :found)", ":found", "the form (or nil false :found)", "the first truthy value",
             scenario=(
-                "Carol left Tom three messages on three stones."
+                'Carol left Tom three messages on the stones.'
             ),
             need=(
                 "Tom needed to find the first true message by reading from the left."
@@ -406,7 +406,7 @@ G5_10 = SubjectCurriculum(grade=5, subject_id="G5-10",
                 "`map` applies a recipe to each value in the collection and returns the results."
             ),
             resolution=(
-                'The recipe was applied to each value, and `map` returned the collected results.'
+                'The recipe was applied to each value, and `map` returned the collected results (with `1` as the input value) (with `3` as the input value).'
             )),
     ], subplots=_SIEVE_SUBPLOTS, plan_pool=_PLAN_G5)
 
@@ -586,7 +586,7 @@ G5_15 = SubjectCurriculum(grade=5, subject_id="G5-15",
                 "`comp` chains recipes right-to-left, applying them in order."
             ),
             resolution=(
-                'The compound recipe applied both steps and returned the final result.'
+                'The compound recipe applied both steps and returned the final result (with `5` as the input value).'
             )),
         _ex("((comp str inc) 9)", "10",
             "the form ((comp str inc) 9)", "inc then str of 9",
@@ -673,7 +673,7 @@ G5_17 = SubjectCurriculum(grade=5, subject_id="G5-17",
                 "`juxt` applies each recipe to the same input and collects the results in a basket."
             ),
             resolution=(
-                'The form applied both recipes and returned the collected results side by side.'
+                'The form applied both recipes and returned the collected results side by side (with `5` as the input value).'
             )),
     ], subplots=_RECIPE_SUBPLOTS, plan_pool=_PLAN_G5)
 
@@ -867,7 +867,7 @@ G5_22 = SubjectCurriculum(grade=5, subject_id="G5-22",
                 "everywhere else, the loop steps and continues."
             ),
             resolution=(
-                'the walk completed the circuit and the loop returned the running tally — 120 — without leaving a single extra footprint along the fence-line.'
+                'the walk completed the circuit and the loop returned the running tally — 120 — without leaving a single extra footprint along the fence-line (with `5` as the input value).'
             )),
     ], subplots=_CIRCUIT_SUBPLOTS, plan_pool=_PLAN_G5)
 

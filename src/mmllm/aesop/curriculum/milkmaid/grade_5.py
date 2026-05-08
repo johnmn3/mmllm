@@ -292,9 +292,7 @@ G5_06 = SubjectCurriculum(grade=5, subject_id="G5-06",
             question_what="the matched branch",
             goal_text="match the value 2 against clauses and return the corresponding value",
             scenario=(
-                "The milkmaid reached a signpost on the road to market. The post listed "
-                "three lanes: one for the buyer who wanted one pail, one for the buyer "
-                "who wanted two, one for three. Her pail count was two."
+                'The milkmaid reached a signpost on the road to market. The post listed three lanes: one for the buyer who wanted one pail, one for the buyer who wanted the counts for three. Her pail count was two.'
             ),
             need=(
                 "She needed the signpost to read her pail count and direct her pail "
@@ -536,9 +534,7 @@ G5_11 = SubjectCurriculum(grade=5, subject_id="G5-11",
             question_what="the sequence produced by filtering even? over the vector containing 1, 2, 3, and 4",
             goal_text="keep the even elements from the vector [1 2 3 4]",
             scenario=(
-                "The milkmaid set her milk-strainer over the pail and poured four "
-                "counts through: one, two, three, four. The strainer's mesh was set "
-                "to let only even counts pass to the collection below."
+                "The milkmaid set her milk-strainer over the pail and poured four counts through: the counts. The strainer's mesh was set to let only even counts pass to the collection below."
             ),
             need=(
                 "She needed the strainer to hold back the odd counts and let only "
@@ -622,9 +618,7 @@ G5_12 = SubjectCurriculum(grade=5, subject_id="G5-12",
             question_what="the product produced by walking 1, 2, 3, 4, 5 with * as the combine step",
             goal_text="fold * over the vector containing these numbers, computing their product",
             scenario=(
-                "The milkmaid walked five stations on the tally-walk, multiplying "
-                "the running product by each station's count in turn: one, two, three, "
-                "four, five. The product grew with every step."
+                "The milkmaid walked five stations on the tally-walk, multiplying the running product by each station's count in turn: the counts. The product grew with every step."
             ),
             need=(
                 "She needed to step through all five stations, multiply the running "
@@ -743,9 +737,7 @@ G5_14 = SubjectCurriculum(grade=5, subject_id="G5-14",
             question_what="the result of spreading the basket of 1, 2, 3, 4 as ingredients into +",
             goal_text="apply + to the elements of the vector [1 2 3 4]",
             scenario=(
-                "The milkmaid arrived at market with a market-basket holding four "
-                "counts: one coin, two, three, four. She needed to pass all of them "
-                "at once to the `+` recipe rather than handing each count in separately."
+                'The milkmaid arrived at market with a market-basket holding four counts: one coin, the counts. She needed to pass all of them at once to the `+` recipe rather than handing each count in separately.'
             ),
             need=(
                 "She needed to spread the basket's contents out as individual "
@@ -952,9 +944,7 @@ G5_18 = SubjectCurriculum(grade=5, subject_id="G5-18",
             question_what="whether any pebble in 1, 3, 5, 8, 7 passes the even? sieve",
             goal_text="check if any element in the vector containing these numbers is even",
             scenario=(
-                "The milkmaid held her milk-strainer over the pail and let five counts "
-                "pass through the `even?` rule one at a time: one, three, five, eight, "
-                "seven. She was looking for the first count that cleared the mesh."
+                'The milkmaid held her milk-strainer over the pail and let five counts pass through the `even?` rule one at a time: the counts. She was looking for the first count that cleared the mesh.'
             ),
             need=(
                 "She needed to know whether any count at all passed the even? rule — "
@@ -979,9 +969,7 @@ G5_18 = SubjectCurriculum(grade=5, subject_id="G5-18",
             question_what="whether any pebble in 1, 2, 3 passes the neg? sieve",
             goal_text="check if any element in the vector containing 1, 2, and 3 is negative",
             scenario=(
-                "The milkmaid held the `neg?` strainer over the pail and let three "
-                "counts pass through: one, two, three. None of the counts were "
-                "below zero; the strainer mesh never opened for any of them."
+                'The milkmaid held the `neg?` strainer over the pail and let three counts pass through: the counts. None of the counts were below zero; the strainer mesh never opened for any of them.'
             ),
             need=(
                 "She needed to know whether any count at all was negative — but "
@@ -1012,9 +1000,7 @@ G5_19 = SubjectCurriculum(grade=5, subject_id="G5-19",
             question_what="whether every pebble in 1, 2, 3 passes the pos? sieve",
             goal_text="check if all elements in the vector containing 1, 2, and 3 are positive",
             scenario=(
-                "The milkmaid held the `pos?` strainer over the pail and let three "
-                "counts pass through: one, two, three. She watched each piece hit the "
-                "mesh — all of them were above zero."
+                'The milkmaid held the `pos?` strainer over the pail and let three counts pass through: the counts. She watched each piece hit the mesh — all of them were above zero.'
             ),
             need=(
                 "She needed to know whether every single count passed the positive "
@@ -1039,9 +1025,7 @@ G5_19 = SubjectCurriculum(grade=5, subject_id="G5-19",
             question_what="whether every pebble in 1, 2, 3 passes the even? sieve",
             goal_text="check if all elements in the vector containing 1, 2, and 3 are even",
             scenario=(
-                "The milkmaid held the `even?` strainer over the pail and let three "
-                "counts through: one, two, three. The first count hit the mesh — "
-                "one is odd — and the strainer closed immediately."
+                'The milkmaid held the `even?` strainer over the pail and let three counts through: the counts. The first count hit the mesh — one is odd — and the strainer closed immediately.'
             ),
             need=(
                 "She needed every count to pass the even? rule for the 3 to "
@@ -1132,9 +1116,7 @@ G5_21 = SubjectCurriculum(grade=5, subject_id="G5-21",
             question_what="the sequence produced by passing [1 1 2 3 3 4] through the dedup-sieve",
             goal_text="remove duplicate elements from the vector containing these numbers",
             scenario=(
-                "The milkmaid's pail held six coin counts with repeats: one, one, two, "
-                "three, three, four. She set a dedup-strainer over the pail to remove "
-                "every repeated count before sending the tally to market."
+                "The milkmaid's pail held six coin counts with repeats: the counts. She set a dedup-strainer over the pail to remove every repeated count before sending the tally to market."
             ),
             need=(
                 "She needed the strainer to let each count through only on its first "

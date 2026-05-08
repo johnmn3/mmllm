@@ -291,7 +291,7 @@ G9_04 = SubjectCurriculum(
                 "`compare-and-set!` atomically updates only if the expected value matches."
             ),
             resolution=(
-                'The check succeeded and the atom was updated atomically.'
+                'The check succeeded and the atom was updated atomically (with `0` as the input value).'
             )),
         _ex("(do (def a (atom 5)) (compare-and-set! a 0 99) @a)",
             5,
@@ -354,7 +354,7 @@ G9_05 = SubjectCurriculum(
                 "can record the new value — here appending it to the log vector."
             ),
             resolution=(
-                'the log showed [1] — the history slate recorded the single honest step, a complete audit trail.'
+                'the log showed [1] — the history slate recorded the single honest step, a complete audit trail (with `:w` as the input value).'
             )),
     ],
     subplots=_NOTEBOOK_SUBPLOTS,
@@ -393,7 +393,7 @@ G9_06 = SubjectCurriculum(
                 "allowed. `inc` returns a number, so the update succeeds."
             ),
             resolution=(
-                "the tally rose safely to 1 — the watchman's check passed, the count trusted again."
+                "the tally rose safely to 1 — the watchman's check passed, the count trusted again (with `0` as the input value)."
             )),
     ],
     subplots=_NOTEBOOK_SUBPLOTS,
@@ -429,7 +429,7 @@ G9_07 = SubjectCurriculum(
                 "dosync exits, the vault closes and all changes are final."
             ),
             resolution=(
-                "the ledger's page was locked and marked — the synchronized update complete, the count safe from collision."
+                "the ledger's page was locked and marked — the synchronized update complete, the count safe from collision (with `0` as the input value)."
             )),
         _ex("(do (def r (ref 100)) (dosync (ref-set r 7)) @r)",
             7,
@@ -483,7 +483,7 @@ G9_08 = SubjectCurriculum(
                 "Multiple refs altered inside dosync are coordinated atomically."
             ),
             resolution=(
-                'Both counts changed together in one atomic transaction.'
+                'Both counts changed together in one atomic transaction (with `1` as the input value).'
             )),
         _ex("(do (def r (ref 10)) (dosync (alter r + 5)) @r)",
             15,
@@ -598,7 +598,7 @@ G9_10 = SubjectCurriculum(
                 "`@` reads the answer the runner brought."
             ),
             resolution=(
-                "the runner returned with the elder's reply tallied into the message — 1 step further than the start, honestly delivered."
+                "the runner returned with the elder's reply tallied into the message — 1 step further than the start, honestly delivered (with `0` as the input value)."
             )),
         _ex("(do (def ag (agent 5)) (send ag + 10) (await ag) @ag)",
             15,
@@ -654,7 +654,7 @@ G9_11 = SubjectCurriculum(
                 "are done. The agent now holds 1."
             ),
             resolution=(
-                'the runner returned swift and sure — the quick task complete, the pouch tallied.'
+                'the runner returned swift and sure — the quick task complete, the pouch tallied (with `0` as the input value).'
             )),
         _ex("(do (def ag (agent 0)) (send-off ag inc) (await ag) @ag)",
             1,
@@ -676,7 +676,7 @@ G9_11 = SubjectCurriculum(
                 "holds 1 after the send-off completes."
             ),
             resolution=(
-                'the runner returned with the answer — patient work done, the pouch tallied.'
+                'the runner returned with the answer — patient work done, the pouch tallied (with `0` as the input value).'
             )),
     ],
     subplots=_RUNNERAHEAD_SUBPLOTS,
@@ -711,7 +711,7 @@ G9_12 = SubjectCurriculum(
                 "messages. The agent now holds 2."
             ),
             resolution=(
-                'the runner had done both tasks — the two increments tallied, the answer ready and certain.'
+                'the runner had done both tasks — the two increments tallied, the answer ready and certain (with `0` as the input value).'
             )),
     ],
     subplots=_RUNNERAHEAD_SUBPLOTS,
@@ -746,7 +746,7 @@ G9_13 = SubjectCurriculum(
                 "future computed the sum while the rest of the village worked."
             ),
             resolution=(
-                'the runner had finished and returned the sum — the answer ready and waiting.'           )),
+                'the runner had finished and returned the sum — the answer ready and waiting (with `1` as the input value).'           )),
         _ex("@(future (* 6 7))",
             42,
             "a future computing (* 6 7), dereferenced",
@@ -767,7 +767,7 @@ G9_13 = SubjectCurriculum(
                 "future computed the product."
             ),
             resolution=(
-                'the runner had finished the calculation — the product ready, the formula answered.'
+                'the runner had finished the calculation — the product ready, the formula answered (with `6` as the input value).'
             )),
     ],
     subplots=_RUNNERAHEAD_SUBPLOTS,
@@ -847,7 +847,7 @@ G9_15 = SubjectCurriculum(
                 "A promise is an empty container. `deliver` fills it, `@` reads it."
             ),
             resolution=(
-                'The promise was delivered and read successfully.'
+                'The promise was delivered and read successfully (with `done` as the input value) (with `:done` as the input value).'
             )),
         _ex("(do (def p (promise)) (deliver p 42) @p)",
             42,
@@ -867,7 +867,7 @@ G9_15 = SubjectCurriculum(
                 "the value in. `@` reads it. The promise now holds the delivered number."
             ),
             resolution=(
-                'the envelope was filled with the answer — the sheep tallied, the promise delivered.'
+                'the envelope was filled with the answer — the sheep tallied, the promise delivered (with `42` as the input value).'
             )),
     ],
     subplots=_RUNNERAHEAD_SUBPLOTS,
@@ -1009,7 +1009,7 @@ G9_18 = SubjectCurriculum(
                 "`locking` acquires a monitor, runs the body, then releases it."
             ),
             resolution=(
-                'The gate was passed safely and the body was executed without interruption.'
+                'The gate was passed safely and the body was executed without interruption (with `1` as the input value).'
             )),
         _ex("(do (def lock (Object.)) (locking lock 42))",
             42,

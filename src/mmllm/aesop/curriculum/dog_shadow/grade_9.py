@@ -87,9 +87,7 @@ G9_01 = SubjectCurriculum(
             question_what="the original vector after conj returns a new vector",
             goal_text="bind a vector v, call conj to add 4 to a new vector, then return the unchanged v",
             scenario=(
-                'Rex the hound lined up three bones by the stream bank. He '
-                'considered adding a fourth, but wondered if the original '
-                'would hold steady.'
+                'Rex the hound lined up the bones by the stream bank. He considered adding a fourth, but wondered if the original would hold steady.'
             ),
             need=(
                 'He wanted conj to leave his bones untouched while building a '
@@ -100,8 +98,7 @@ G9_01 = SubjectCurriculum(
                 'and asking for v shows the original stayed put.'
             ),
             resolution=(
-                'The REPL returned the original row of three bones. The fourth '
-                'had been conjoined to a copy, not to the row Rex held — 4.'
+                'The REPL returned the original row of the bones. The fourth had been conjoined to a copy, not to the row Rex held — 4.'
             ),
             tags=("story",),
         ),
@@ -174,9 +171,7 @@ G9_02 = SubjectCurriculum(
                 'dereferencing asks the stone for what it now says.'
             ),
             resolution=(
-                'The REPL reset the stone from idle to running and handed '
-                'back the new keyword. The running status was now clear to '
-                'any pack member who read the bank — running.'
+                'The REPL reset the stone from idle to running and handed back the new keyword. The running status was now clear to any pack member who read the bank — running (with `:idle` as the input value).'
             ),
             tags=("story",),
         ),
@@ -384,8 +379,7 @@ G9_05 = SubjectCurriculum(
                 'holding a vector, add-watch sets a function that fires on change.'
             ),
             resolution=(
-                'The REPL attached the watch, then swapped the tally. The watch '
-                'fired and appended the new value. The log showed the record.'
+                'The REPL attached the watch, then swapped the tally. The watch fired and appended the new value. The log showed the record (with `:w` as the input value).'
             ),
             tags=("story",),
         ),
@@ -432,10 +426,7 @@ G9_06 = SubjectCurriculum(
                 'the validator before committing the new value.'
             ),
             resolution=(
-                'The REPL set the validator, then swapped the stone by '
-                'applying inc. The guard checked the result — one is a number '
-                '— and the swap succeeded. The dereference showed the stone '
-                'held the count, protected by the rule.'
+                'The REPL set the validator, then swapped the stone by applying inc. The guard checked the result — one is a number — and the swap succeeded. The dereference showed the stone held the count, protected by the rule (with `0` as the input value).'
             ),
             tags=("story",),
         ),
@@ -552,8 +543,7 @@ G9_08 = SubjectCurriculum(
                 'coordinates both changes, alter applies inc to each page.'
             ),
             resolution=(
-                'The REPL opened the dosync, altered both pages, and committed '
-                'together. Both values advanced safely inside the transaction.'
+                'The REPL opened the dosync, altered both pages, and committed together. Both values advanced safely inside the transaction (with `1` as the input value).'
             ),
             tags=("story",),
         ),
@@ -1123,8 +1113,7 @@ G9_17 = SubjectCurriculum(
                 'rebind, reading shows the bound value.'
             ),
             resolution=(
-                'Inside binding, *p* was ninety-nine. When the form ended, the '
-                'original scent returned — dynamic.'
+                'Inside binding, *p* was ninety-nine. When the form ended, the original scent returned — dynamic (with `99` as the input value).'
             ),
             tags=("story",),
         ),
@@ -1148,8 +1137,7 @@ G9_17 = SubjectCurriculum(
                 'resets it to ninety-nine, the second read shows original returned.'
             ),
             resolution=(
-                'The REPL set permanent scent to one. Inside binding, *p* was '
-                'ninety-nine. When unwound, the second read caught the original — dynamic.'
+                'The REPL set permanent scent to one. Inside binding, *p* was ninety-nine. When unwound, the second read caught the original — dynamic (with `99` as the input value).'
             ),
             tags=("story",),
         ),

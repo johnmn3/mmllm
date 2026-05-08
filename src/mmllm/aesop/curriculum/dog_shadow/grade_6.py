@@ -36,7 +36,7 @@ The two of them lived in cottages on opposite sides {place} —
 {tortoise} on one side, {hare_phrase} on the other. Each kept
 their own copybook of forms. When the time came to compare notes,
 {tortoise} read aloud {concept_phrase} and asked, {emo_patient}, what
-{form_display} would return when the REPL reached across the
+the form {form_display} would return when the REPL reached across the
 shared path."""),
 ]
 
@@ -291,8 +291,7 @@ G6_04 = SubjectCurriculum(grade=6, subject_id="G6-04",
                 'and the equality test compares what both applications returned.'
             ),
             resolution=(
-                'The REPL executed both calls, received the same result from each, and '
-                'returned the verdict — proving the routine was consistent and reliable.'
+                'The REPL executed both calls, received the same result from each, and returned true — proving the routine was consistent and reliable (with `) (clojure.string/upper-case ` as the input value).'
             ),
             tags=("story",),
         ),
@@ -431,7 +430,7 @@ G6_06 = SubjectCurriculum(grade=6, subject_id="G6-06",
                 'restricted.'
             ),
             resolution=(
-                'The REPL checked the metadata and returned the verdict — the :private flag was '
+                'The REPL checked the metadata and returned true — the :private flag was '
                 'indeed attached, marking this symbol as private.'
             ),
             tags=("story",),
@@ -489,7 +488,7 @@ G6_07 = SubjectCurriculum(grade=6, subject_id="G6-07",
                 'the flag, and the boolean conversion gives a clear true-or-false answer.'
             ),
             resolution=(
-                'The REPL extracted the flag, converted it to a boolean, and returned the verdict — '
+                'The REPL extracted the flag, converted it to a boolean, and returned true — '
                 'confirming the symbol was indeed marked as private.'
             ),
             tags=("story",),
@@ -991,7 +990,7 @@ G6_16 = SubjectCurriculum(grade=6, subject_id="G6-16",
                 'this name in the collection?'
             ),
             resolution=(
-                'The REPL checked the set and returned the verdict — clojure.string was indeed there, '
+                'The REPL checked the set and returned true — clojure.string was indeed there, '
                 'among the scrolls she had required.'
             ),
             tags=("story",),
@@ -1016,7 +1015,7 @@ G6_16 = SubjectCurriculum(grade=6, subject_id="G6-16",
                 'membership, and if a name is not there, the answer is false.'
             ),
             resolution=(
-                'The REPL checked the set and returned the verdict — clojure.set was not among the '
+                'The REPL checked the set and returned false — clojure.set was not among the '
                 'scrolls she had borrowed.'
             ),
             tags=("story",),

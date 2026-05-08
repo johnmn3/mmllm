@@ -76,8 +76,7 @@ G8_01 = SubjectCurriculum(
                 "many possible answers — the essence of dispatch."
             ),
             resolution=(
-                "the function was defined and ready to answer any "
-                "species tag with its own distinct description."
+                'the function was defined and ready to answer any species tag with its own distinct description (with `:hare` as the input value).'
             ),
             tags=("story",),
         ),
@@ -104,9 +103,7 @@ G8_01 = SubjectCurriculum(
                 "`cond` branch and returns that branch's description."
             ),
             resolution=(
-                "the dispatch returned the tortoise's own description, "
-                "confirming that different tags produce different answers "
-                "from a single call."
+                "the dispatch returned the tortoise's own description, confirming that different tags produce different answers from a single call (with `:hare` as the input value)."
             ),
             tags=("story",),
         ),
@@ -146,8 +143,7 @@ G8_02 = SubjectCurriculum(
                 "and pulls the value out."
             ),
             resolution=(
-                "the field access returned the exact shade that had been "
-                "placed in the case at construction time."
+                'the field access returned the exact shade that had been placed in the case at construction time (with `grey` as the input value).'
             ),
             tags=("story",),
         ),
@@ -466,9 +462,7 @@ G8_06 = SubjectCurriculum(
                 "arm and returns its keyword rather than the Long one."
             ),
             resolution=(
-                "the dispatch selected the String arm and returned the "
-                "keyword registered for string runners — different from "
-                "the integer result."
+                'the dispatch selected the String arm and returned the keyword registered for string runners — different from the integer result (with `:string-pace` as the input value).'
             ),
             tags=("story",),
         ),
@@ -992,8 +986,7 @@ G8_14 = SubjectCurriculum(
                 "separate implementations, not a shared inheritance."
             ),
             resolution=(
-                "both calls returned their own keywords, one from each "
-                "guild, confirming the protocols are fully independent."
+                'both calls returned their own keywords, one from each guild, confirming the protocols are fully independent (with `:a-impl` as the input value).'
             ),
             tags=("story",),
         ),
@@ -1016,11 +1009,7 @@ G8_15 = SubjectCurriculum(
             question_what="whether the relationship holds after establishing with derive that ::hare is a type of ::runner, then checking with isa?",
             goal_text="establish a type relationship where ::hare is a type of ::runner, then check it",
             scenario=(
-                "Mossback the tortoise kept a hierarchy of stamps at "
-                "the sorting-table edge. She wanted to declare that the "
-                "`:hare` stamp was also a kind of `:runner` stamp — so "
-                "the table could route hare-stamped runners to any arm "
-                "that accepted runner-stamped ones. The values drawn fresh were {drawn.a} and {drawn.b}."
+                'Mossback the tortoise kept a hierarchy of stamps at the sorting-table edge. She wanted to declare that the `:hare` stamp was also a kind of `:runner` stamp — so the table could route hare-stamped runners to any arm that accepted runner-stamped ones. The values drawn fresh were ::hare and ::runner.'
             ),
             need=(
                 "She needed to register the relationship with `derive` "

@@ -265,8 +265,7 @@ G12_03 = SubjectCurriculum(
                 'one hundred bones. A gap at the bank stopped after three passed.'
             ),
             need=(
-                'The hound wanted the gap to let through just the first three bones '
-                'into an empty row. The form would stop when it had what it needed.'
+                'The hound wanted the gap to let through just the first 100 bones into an empty row. The form would stop when it had what it needed.'
             ),
             mapping=(
                 'The gap is the take-3 rule, the flood is the range, each bone is '

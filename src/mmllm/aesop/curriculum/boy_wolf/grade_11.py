@@ -152,7 +152,7 @@ G11_02 = SubjectCurriculum(
                 "Tom would write the form exactly as the smith had labeled the tool, and the REPL would do the work."
             ),
             resolution=(
-                "Tom composed the form, submitted it to the REPL, and watched as the smith's tool worked cleanly. The uppercased string came back, and Tom understood that crossing the boundary simply meant using the host's own calling convention."
+                "Tom composed the form, submitted it to the REPL, and watched as the smith's tool worked cleanly. The uppercased string came back, and Tom understood that crossing the boundary simply meant using the host's own calling convention (with `abc` as the input value)."
             )),
         _ex('(.startsWith "shepherd-elder" "shepherd")', True,
             "a method call (.startsWith ...) returning a boolean",
@@ -189,7 +189,7 @@ G11_02 = SubjectCurriculum(
                 "passing the object to the host method either way."
             ),
             resolution=(
-                "Tom wrote both forms, one after the other, and both returned 'ABC'. Carol smiled: different ways to call the same foreign tool, both honest to the REPL."
+                "Tom wrote both forms, one after the other, and both returned 'ABC'. Carol smiled: different ways to call the same foreign tool, both honest to the REPL (with `abc` as the input value)."
             )),
         _ex('(.length "shepherd")', 8,
             "the method call (.length ...) on a string",
@@ -260,7 +260,7 @@ G11_03 = SubjectCurriculum(
                 "the method lives in a namespace-like cabinet. The runtime looks up the tool by its full name and applies it."
             ),
             resolution=(
-                'Tom composed the form, and the static method returned 7. The negative sign disappeared, and he understood that the slash-form reaches into the shared toolshed, not into a particular object.'
+                'Tom composed the form, and the static method returned 7. The negative sign disappeared, and he understood that the slash-form reaches into the shared toolshed, not into a particular object (with `-7` as the input value).'
             )),
         _ex("(Math/max 3 9)", 9,
             "the static call (Math/max 3 9)",
@@ -826,7 +826,7 @@ G11_14 = SubjectCurriculum(
                 "Try/catch wraps a host call and catches any errors it throws."
             ),
             resolution=(
-                "The host call succeeded cleanly, and Tom understood try/catch's value."
+                "The host call succeeded cleanly, and Tom understood try/catch's value (with `4` as the input value)."
             )),
         _ex('(try (Math/abs -42) (catch Exception _ :err))', 42,
             "wrapping a host static method in try/catch",

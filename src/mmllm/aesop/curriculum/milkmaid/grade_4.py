@@ -301,20 +301,17 @@ G4_05 = SubjectCurriculum(grade=4, subject_id="G4-05",
             question_what="the seq after cons'ing",
             goal_text="prepend 0 to the front of a list containing 1, 2, and 3",
             scenario=(
-                "The milkmaid had spoken a list aloud: one, two, three. But then she realized she had forgotten the "
-                "starting point — the zero from which the count should begin. She needed to add it to the front."
+                'The milkmaid had spoken a list aloud: the counts. But then she realized she had forgotten the starting point — the zero from which the count should begin. She needed to add it to the front.'
             ),
             need=(
-                "She needed to place the 0 at the very beginning of the list, so the sequence would read: zero, one, "
-                "two, three — as if she had spoken them in the correct order from the start."
+                'She needed to place the 0 at the very beginning of the list, so the sequence would read: zero, the counts — as if she had spoken them in the correct order from the start.'
             ),
             mapping=(
                 "The `cons` operation is reaching to the front of the list and adding an item there: "
                 "the cons form creates a new list with 0 at the head and the rest following in order."
             ),
             resolution=(
-                "The REPL handed back a list of several items in order — zero at the front, then one, two, and three "
-                "flowing behind it, exactly as she had meant to speak them — 3."
+                'The REPL handed back a list of several items in order — zero at the front, then the counts flowing behind it, exactly as she had meant to speak them — 3.'
             ),
             tags=("story",),
         ),
@@ -790,7 +787,7 @@ G4_14 = SubjectCurriculum(grade=4, subject_id="G4-14",
                 "asks whether that string is void, and the answer is true."
             ),
             resolution=(
-                "The REPL handed back true — the empty string was indeed empty, confirmed."
+                'The REPL handed back true — the empty string was indeed empty, confirmed (with `` as the input value) (with `` as the input value).'
             ),
             tags=("story",),
         ),

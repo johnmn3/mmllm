@@ -121,7 +121,7 @@ G7_01 = SubjectCurriculum(grade=7, subject_id="G7-01",
                 "practice-pen catches what was thrown."
             ),
             resolution=(
-                'the form caught the error and returned the keyword, keeping the work inside the pen where mistakes stay lessons, not disasters.'
+                'the form caught the error and returned the keyword, keeping the work inside the pen where mistakes stay lessons, not disasters (with `:thrown` as the input value).'
             )),
     ], subplots=_SAFETYNET_SUBPLOTS, plan_pool=_PLAN_G7)
 
@@ -598,7 +598,7 @@ G7_11 = SubjectCurriculum(grade=7, subject_id="G7-11",
                 "`throw` sends an exception with a message. `catch` receives it. `.getMessage` reads the tag."
             ),
             resolution=(
-                "The form returned the error's message and Carol understood the mistake."
+                "The form returned the error's message and Carol understood the mistake (with `oops` as the input value)."
             )),
         _ex("(try (throw (ex-info \"trouble\" {})) (catch Exception e (.getMessage e)))",
             "trouble",
@@ -614,7 +614,7 @@ G7_11 = SubjectCurriculum(grade=7, subject_id="G7-11",
                 "`ex-info` is a fancier error that carries data and a message. `.getMessage` reads it the same way."
             ),
             resolution=(
-                "The form returned the ex-info's message and Tom understood the error."
+                "The form returned the ex-info's message and Tom understood the error (with `trouble` as the input value)."
             )),
     ], subplots=_SAFETYNET_SUBPLOTS, plan_pool=_PLAN_G7)
 
@@ -707,7 +707,7 @@ G7_13 = SubjectCurriculum(grade=7, subject_id="G7-13",
                 "`split-lines` breaks the string into lines. `first` picks the head of the sequence."
             ),
             resolution=(
-                'The form returned the first line of the scroll.'
+                'The form returned the first line of the scroll (with `alpha\\nbeta` as the input value).'
             )),
     ], subplots=_SCROLL_SUBPLOTS, plan_pool=_PLAN_G7)
 

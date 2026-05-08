@@ -142,8 +142,7 @@ G9_02 = SubjectCurriculum(
                 "new mark. `@counter` reads the mark back from the clay."
             ),
             resolution=(
-                "The clay face showed the updated tally — one visit "
-                "recorded, the counter holding its new mark."
+                'The clay face showed the updated tally — one visit recorded, the counter holding its new mark (with `0` as the input value).'
             ),
             tags=("story",),
         ),
@@ -212,8 +211,7 @@ G9_03 = SubjectCurriculum(
                 "the current tally from the clay."
             ),
             resolution=(
-                "1 — the tally, incremented once by the swap, read back "
-                "from the clay face."
+                '1 — the tally, incremented once by the swap, read back from the clay face (with `0` as the input value).'
             ),
             tags=("story",),
         ),
@@ -309,8 +307,7 @@ G9_04 = SubjectCurriculum(
                 "if they match. `@a` then reads the result from the clay."
             ),
             resolution=(
-                "The pitcher returned the new mark from the clay face, "
-                "confirming the conditional swap had succeeded."
+                'The pitcher returned the new mark from the clay face, confirming the conditional swap had succeeded (with `0` as the input value).'
             ),
             tags=("story",),
         ),
@@ -431,8 +428,7 @@ G9_06 = SubjectCurriculum(
                 "`swap!` with `inc` passes, and `@a` reads the result."
             ),
             resolution=(
-                "The pitcher returned the updated tally — the rule was "
-                "satisfied and the new mark settled into the clay."
+                'The pitcher returned the updated tally — the rule was satisfied and the new mark settled into the clay (with `0` as the input value).'
             ),
             tags=("story",),
         ),
@@ -472,8 +468,7 @@ G9_07 = SubjectCurriculum(
                 "and seals the change. `@r` reads the committed tally."
             ),
             resolution=(
-                "The pitcher returned the tally from inside the safe-box, "
-                "showing the transaction had committed cleanly."
+                'The pitcher returned the tally from inside the safe-box, showing the transaction had committed cleanly (with `0` as the input value).'
             ),
             tags=("story",),
         ),
@@ -545,8 +540,7 @@ G9_08 = SubjectCurriculum(
                 "`[@a @b]` reads the pair of updated marks."
             ),
             resolution=(
-                "The pitcher returned both tallies side by side, each "
-                "advanced by one in the same sealed transaction."
+                'The pitcher returned both tallies side by side, each advanced by one in the same sealed transaction (with `1` as the input value).'
             ),
             tags=("story",),
         ),
@@ -614,8 +608,7 @@ G9_09 = SubjectCurriculum(
                 "atomically. `@a` reads the mark back from the face."
             ),
             resolution=(
-                "The pitcher returned the mark from the clay, updated by "
-                "the direct swap without any enclosing transaction."
+                'The pitcher returned the mark from the clay, updated by the direct swap without any enclosing transaction (with `0` as the input value).'
             ),
             tags=("story",),
         ),
@@ -642,8 +635,7 @@ G9_09 = SubjectCurriculum(
                 "coordinated. `@r` reads the committed mark."
             ),
             resolution=(
-                "The pitcher returned the same updated mark as the atom "
-                "path — identical result, different mechanism."
+                'The pitcher returned the same updated mark as the atom path — identical result, different mechanism (with `0` as the input value).'
             ),
             tags=("story",),
         ),
@@ -683,8 +675,7 @@ G9_10 = SubjectCurriculum(
                 "returns. `@` dereferences the final tally from the agent."
             ),
             resolution=(
-                "1 — the scout returned with the incremented count, the "
-                "tally settling into the pitcher's depth."
+                "1 — the scout returned with the incremented count, the tally settling into the pitcher's depth (with `0` as the input value)."
             ),
             tags=("story",),
         ),
@@ -751,8 +742,7 @@ G9_11 = SubjectCurriculum(
                 "the scout lands. `@ag` reads the tally it carried back."
             ),
             resolution=(
-                "The pitcher returned the scout's tally, confirming the "
-                "short-task send had completed and the count was updated."
+                "The pitcher returned the scout's tally, confirming the short-task send had completed and the count was updated (with `0` as the input value)."
             ),
             tags=("story",),
         ),
@@ -779,8 +769,7 @@ G9_11 = SubjectCurriculum(
                 "return. `@ag` reads the tally the scout carried back."
             ),
             resolution=(
-                "The pitcher returned the scout's tally — the long-task "
-                "route and the short-task route yielded the same result."
+                "The pitcher returned the scout's tally — the long-task route and the short-task route yielded the same result (with `0` as the input value)."
             ),
             tags=("story",),
         ),
@@ -819,8 +808,7 @@ G9_12 = SubjectCurriculum(
                 "completely. `@ag` then reads the fully updated tally."
             ),
             resolution=(
-                "The pitcher returned the scout's tally after both "
-                "missions completed — both increments accounted for."
+                "The pitcher returned the scout's tally after both missions completed — both increments accounted for (with `0` as the input value)."
             ),
             tags=("story",),
         ),
@@ -859,8 +847,7 @@ G9_13 = SubjectCurriculum(
                 "lands and then reads the value it carries back."
             ),
             resolution=(
-                "The pitcher returned the scout's computed answer — the "
-                "sum delivered the moment the scout touched down."
+                "The pitcher returned the scout's computed answer — the sum delivered the moment the scout touched down (with `1` as the input value)."
             ),
             tags=("story",),
         ),
@@ -1063,8 +1050,7 @@ G9_16 = SubjectCurriculum(
                 "it directly. `@v` reads the mark back from the clay."
             ),
             resolution=(
-                "The pitcher returned the updated mark from the clay — "
-                "the lightweight swap had written it without any transaction."
+                'The pitcher returned the updated mark from the clay — the lightweight swap had written it without any transaction (with `0` as the input value).'
             ),
             tags=("story",),
         ),
@@ -1201,8 +1187,7 @@ G9_18 = SubjectCurriculum(
                 "the body. The result of the body is returned on release."
             ),
             resolution=(
-                "The pitcher returned the sum produced within the gate — "
-                "the addition completed safely behind the locked section."
+                'The pitcher returned the sum produced within the gate — the addition completed safely behind the locked section (with `1` as the input value).'
             ),
             tags=("story",),
         ),

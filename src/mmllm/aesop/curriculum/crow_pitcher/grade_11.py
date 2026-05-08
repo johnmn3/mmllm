@@ -196,8 +196,7 @@ G11_02 = SubjectCurriculum(
                 "runtime still bridges into the Java vessel the same way."
             ),
             resolution=(
-                "The alternate-dot inscription returned the borrowed vessel's "
-                "method result at beak-reach. (count: -7)"
+                "The alternate-dot inscription returned the borrowed vessel's method result at beak-reach. (count: -7) (with `abc` as the input value)"
             ),
             tags=("story",),
         ),

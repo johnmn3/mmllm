@@ -684,8 +684,7 @@ G7_11 = SubjectCurriculum(grade=7, subject_id="G7-11",
                 'is the sniff that reads the mark.'
             ),
             resolution=(
-                'The REPL threw the bone, Rex caught it, and his sniff extracted '
-                'the message the bone had carried.'
+                'The REPL threw the bone, Rex caught it, and his sniff extracted the message the bone had carried (with `oops` as the input value).'
             ),
             tags=("story",),
         ),
@@ -805,8 +804,7 @@ G7_13 = SubjectCurriculum(grade=7, subject_id="G7-13",
                 'running total of line-bones in the vector.'
             ),
             resolution=(
-                'The REPL split the message into lines and counted them: 3 lines '
-                'in all. Bell held the precise tally.'
+                'The REPL split the message into lines and counted them: 3 lines in all. Bell held the precise tally (with `a\\nb\\nc` as the input value).'
             ),
             tags=("story",),
         ),
@@ -831,8 +829,7 @@ G7_13 = SubjectCurriculum(grade=7, subject_id="G7-13",
                 'result is the mark on that opening piece.'
             ),
             resolution=(
-                'The REPL split the message into lines and handed Patch the '
-                'opening line. She could now read it.'
+                'The REPL split the message into lines and handed Patch the opening line. She could now read it (with `first\\nsecond` as the input value).'
             ),
             tags=("story",),
         ),
@@ -1049,8 +1046,7 @@ G7_17 = SubjectCurriculum(grade=7, subject_id="G7-17",
                 'sniff that brings it back to life.'
             ),
             resolution=(
-                'The REPL scratched the map as a string, then sniffed the marks '
-                'and handed Rex the parsed map. The roundtrip was complete — b.'
+                'The REPL scratched the map as a string, then sniffed the marks and handed Rex the parsed map. The roundtrip was complete — b (with `:a` as the input value).'
             ),
             tags=("story",),
         ),

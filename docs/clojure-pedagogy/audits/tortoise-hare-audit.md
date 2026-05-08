@@ -89,7 +89,8 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'CLAUSE_STACK_OVERFLOW': 2}
+- issues: {'AND_HANDED_BACK_CADENCE': 1, 'CLAUSE_STACK_OVERFLOW': 2}
+    - [AND_HANDED_BACK_CADENCE] form=`(+ 2 3)` — user_msg tail has 3 performed/handed-back/returned verbs — AI-output verb-and-verb cadence
     - [CLAUSE_STACK_OVERFLOW] form=`(* (+ 1 2) 3)` — sentence with 5 commas reads as AI-output cadence: 'Mossback chalked two nested fences on the path: an inner fence holding the plus-'
     - [CLAUSE_STACK_OVERFLOW] form=`(* (+ 1 2) 3)` — sentence with 5 commas reads as AI-output cadence: 'Mossback chalked two nested fences on the path: an inner fence holding the plus-'
 
@@ -122,35 +123,22 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 ## Grade 2
 
-### G2-02: Comparison chains
-
-- examples: 5
-- variety @ n=50: 1.00
-- issues: {'NARRATIVE_NUMERAL_HARDCODE': 3}
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`(< 1 2 3)` — parametric example has hard-coded English numeral 'three counts' in a story slot — the actual draws may differ from this fixed count
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`(< 1 2 3)` — parametric example has hard-coded English numeral 'three counts' in a story slot — the actual draws may differ from this fixed count
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`(< 1 2 3)` — parametric example has hard-coded English numeral 'three counts' in a story slot — the actual draws may differ from this fixed count
-
 ### G2-04: min and max
 
 - examples: 5
 - variety @ n=50: 1.00
-- issues: {'NARRATIVE_NUMERAL_HARDCODE': 3, 'CLAUSE_STACK_OVERFLOW': 4}
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`(min 1 2 3)` — parametric example has hard-coded English numeral 'three heaps' in a story slot — the actual draws may differ from this fixed count
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`(min 1 2 3)` — parametric example has hard-coded English numeral 'three heaps' in a story slot — the actual draws may differ from this fixed count
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`(min 1 2 3)` — parametric example has hard-coded English numeral 'three heaps' in a story slot — the actual draws may differ from this fixed count
+- issues: {'CLAUSE_STACK_OVERFLOW': 4}
     - [CLAUSE_STACK_OVERFLOW] form=`(min 7 3 9 1 5)` — sentence with 5 commas reads as AI-output cadence: 'To find the minimum of 2, 1, 6, 3, and 0, she with eyes always on the path compo'
     - [CLAUSE_STACK_OVERFLOW] form=`(min 7 3 9 1 5)` — sentence with 5 commas reads as AI-output cadence: 'To find the minimum of 8, 2, 3, 5, and 6, she with eyes always on the path compo'
     - [CLAUSE_STACK_OVERFLOW] form=`(max 7 3 9 1 5)` — sentence with 5 commas reads as AI-output cadence: 'To find the maximum of 4, 6, 4, 1, and 6, she saying very little composed the ma'
+    - [CLAUSE_STACK_OVERFLOW] form=`(max 7 3 9 1 5)` — sentence with 5 commas reads as AI-output cadence: 'To find the maximum of 6, 8, 9, 4, and 3, she with eyes always on the path compo'
 
 ### G2-08: Arithmetic on ratios
 
 - examples: 3
 - variety @ n=50: 1.00
-- issues: {'STORY_RESOLUTION_NO_DRAWN': 3}
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(+ 1/2 1/4)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('4',), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(+ 1/2 1/4)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('4',), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(+ 1/2 1/4)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('4',), resolution doesn't close the loop)
+- issues: {'DOUBLED_INPUT_VALUE_PARENS': 1}
+    - [DOUBLED_INPUT_VALUE_PARENS] form=`(+ 1/2 1/4)` — user_msg contains two or more 'as the input value' parentheticals — auto-closer fired twice or authored prose duplicated it
 
 ### G2-11: String concatenation with str
 
@@ -228,8 +216,9 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 1
 - variety @ n=50: 1.00
-- issues: {'HIGH_LENGTH': 1}
+- issues: {'HIGH_LENGTH': 1, 'AND_HANDED_BACK_CADENCE': 1}
     - [HIGH_LENGTH] form=`((fn [x] x x x 99) 1)` — user_msg 201 words
+    - [AND_HANDED_BACK_CADENCE] form=`((fn [x] x x x 99) 1)` — user_msg tail has 3 performed/handed-back/returned verbs — AI-output verb-and-verb cadence
 
 ### G3-15: Side-effects in body
 
@@ -491,11 +480,8 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'NARRATIVE_NUMERAL_HARDCODE': 6, 'HIGH_LENGTH': 1}
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`(take 3 [10 20 30 40 50])` — parametric example has hard-coded English numeral 'three counts' in a story slot — the actual draws may differ from this fixed count
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`(take 3 [10 20 30 40 50])` — parametric example has hard-coded English numeral 'three counts' in a story slot — the actual draws may differ from this fixed count
-    - [HIGH_LENGTH] form=`(take 3 [10 20 30 40 50])` — user_msg 202 words
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`(take 3 [10 20 30 40 50])` — parametric example has hard-coded English numeral 'three counts' in a story slot — the actual draws may differ from this fixed count
+- issues: {'NARRATIVE_NUMERAL_HARDCODE': 3}
+    - [NARRATIVE_NUMERAL_HARDCODE] form=`(drop 2 [10 20 30 40 50])` — parametric example has hard-coded English numeral 'three counts' in a story slot — the actual draws may differ from this fixed count
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(drop 2 [10 20 30 40 50])` — parametric example has hard-coded English numeral 'three counts' in a story slot — the actual draws may differ from this fixed count
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(drop 2 [10 20 30 40 50])` — parametric example has hard-coded English numeral 'three counts' in a story slot — the actual draws may differ from this fixed count
 
@@ -514,14 +500,6 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 - variety @ n=50: 1.00
 - issues: {'REPL_TRIPLE_VOICE': 1}
     - [REPL_TRIPLE_VOICE] form=`(= 'race.tortoise 'race.tortoise)` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
-
-### G6-05: Fully qualified names
-
-- examples: 4
-- variety @ n=50: 1.00
-- issues: {'UNFILLED_DRAWN_PLACEHOLDER': 1, 'DRAWN_PLACEHOLDER_LEAK': 1}
-    - [UNFILLED_DRAWN_PLACEHOLDER] form=`(clojure.string/reverse "abc")` — user_msg has un-substituted `{drawn.a}` placeholder — slot mismatch or render-time gap
-    - [DRAWN_PLACEHOLDER_LEAK] form=`(clojure.string/reverse "abc")` — user_msg contains an un-substituted {drawn.<slot>} placeholder — interpolation pipeline missed it
 
 ### G6-07: Public vs private API
 
@@ -552,10 +530,8 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'FORM_DISPLAY_AND_FORM_NOUN': 1, 'UNFILLED_DRAWN_PLACEHOLDER': 1, 'DRAWN_PLACEHOLDER_LEAK': 1}
+- issues: {'FORM_DISPLAY_AND_FORM_NOUN': 1}
     - [FORM_DISPLAY_AND_FORM_NOUN] form=`(try 7 (finally (prn :cleanup)))` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
-    - [UNFILLED_DRAWN_PLACEHOLDER] form=`(try 7 (finally (prn :cleanup)))` — user_msg has un-substituted `{drawn.a}` placeholder — slot mismatch or render-time gap
-    - [DRAWN_PLACEHOLDER_LEAK] form=`(try 7 (finally (prn :cleanup)))` — user_msg contains an un-substituted {drawn.<slot>} placeholder — interpolation pipeline missed it
 
 ### G7-06: pre and post conditions
 
@@ -570,62 +546,28 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'UNFILLED_DRAWN_PLACEHOLDER': 1, 'DRAWN_PLACEHOLDER_LEAK': 1, 'REPL_TRIPLE_VOICE': 1}
-    - [UNFILLED_DRAWN_PLACEHOLDER] form=`(with-out-str (prn 42))` — user_msg has un-substituted `{drawn.a}` placeholder — slot mismatch or render-time gap
-    - [DRAWN_PLACEHOLDER_LEAK] form=`(with-out-str (prn 42))` — user_msg contains an un-substituted {drawn.<slot>} placeholder — interpolation pipeline missed it
+- issues: {'REPL_TRIPLE_VOICE': 1}
     - [REPL_TRIPLE_VOICE] form=`(with-out-str (prn 42))` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
 
 ### G7-09: tap>
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'REPL_TRIPLE_VOICE': 1, 'UNFILLED_DRAWN_PLACEHOLDER': 1, 'DRAWN_PLACEHOLDER_LEAK': 1}
+- issues: {'REPL_TRIPLE_VOICE': 1}
     - [REPL_TRIPLE_VOICE] form=`(tap> :hello)` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
-    - [UNFILLED_DRAWN_PLACEHOLDER] form=`(tap> 42)` — user_msg has un-substituted `{drawn.a}` placeholder — slot mismatch or render-time gap
-    - [DRAWN_PLACEHOLDER_LEAK] form=`(tap> 42)` — user_msg contains an un-substituted {drawn.<slot>} placeholder — interpolation pipeline missed it
-
-### G7-11: Reading stack traces
-
-- examples: 2
-- variety @ n=50: 1.00
-- issues: {'STORY_RESOLUTION_NO_DRAWN': 3}
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(try (throw (Exception. "oops")) (catch Exception ` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('oops',), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(try (throw (Exception. "oops")) (catch Exception ` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('oops',), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(try (throw (Exception. "oops")) (catch Exception ` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('oops',), resolution doesn't close the loop)
 
 ### G7-12: slurp and spit
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'STORY_RESOLUTION_NO_DRAWN': 3, 'REPL_TRIPLE_VOICE': 1}
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(clojure.string/split "a\nb\nc" #"\n")` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('a\\nb\\nc', '\\n'), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(clojure.string/split "a\nb\nc" #"\n")` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('a\\nb\\nc', '\\n'), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(clojure.string/split "a\nb\nc" #"\n")` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('a\\nb\\nc', '\\n'), resolution doesn't close the loop)
+- issues: {'REPL_TRIPLE_VOICE': 1}
     - [REPL_TRIPLE_VOICE] form=`(clojure.string/split "a\nb\nc" #"\n")` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
-
-### G7-13: line-seq
-
-- examples: 2
-- variety @ n=50: 1.00
-- issues: {'UNFILLED_DRAWN_PLACEHOLDER': 1, 'DRAWN_PLACEHOLDER_LEAK': 1}
-    - [UNFILLED_DRAWN_PLACEHOLDER] form=`(count (clojure.string/split-lines "a\nb\nc"))` — user_msg has un-substituted `{drawn.a}` placeholder — slot mismatch or render-time gap
-    - [DRAWN_PLACEHOLDER_LEAK] form=`(count (clojure.string/split-lines "a\nb\nc"))` — user_msg contains an un-substituted {drawn.<slot>} placeholder — interpolation pipeline missed it
-
-### G7-14: with-open
-
-- examples: 1
-- variety @ n=50: 0.98
-- issues: {'UNFILLED_DRAWN_PLACEHOLDER': 1, 'DRAWN_PLACEHOLDER_LEAK': 1}
-    - [UNFILLED_DRAWN_PLACEHOLDER] form=`(with-out-str (println "hare"))` — user_msg has un-substituted `{drawn.a}` placeholder — slot mismatch or render-time gap
-    - [DRAWN_PLACEHOLDER_LEAK] form=`(with-out-str (println "hare"))` — user_msg contains an un-substituted {drawn.<slot>} placeholder — interpolation pipeline missed it
 
 ### G7-15: *in* and *out*
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'UNFILLED_DRAWN_PLACEHOLDER': 1, 'DRAWN_PLACEHOLDER_LEAK': 1, 'REPL_TRIPLE_VOICE': 1}
-    - [UNFILLED_DRAWN_PLACEHOLDER] form=`(with-out-str (print "x"))` — user_msg has un-substituted `{drawn.a}` placeholder — slot mismatch or render-time gap
-    - [DRAWN_PLACEHOLDER_LEAK] form=`(with-out-str (print "x"))` — user_msg contains an un-substituted {drawn.<slot>} placeholder — interpolation pipeline missed it
+- issues: {'REPL_TRIPLE_VOICE': 1}
     - [REPL_TRIPLE_VOICE] form=`(with-out-str (println))` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
 
 ### G7-16: edn read
@@ -640,12 +582,9 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'FORM_DISPLAY_AND_FORM_NOUN': 1, 'STORY_RESOLUTION_NO_DRAWN': 3, 'REPL_TRIPLE_VOICE': 2}
+- issues: {'FORM_DISPLAY_AND_FORM_NOUN': 1, 'REPL_TRIPLE_VOICE': 2}
     - [FORM_DISPLAY_AND_FORM_NOUN] form=`(clojure.edn/read-string (pr-str {:a 1 :b 2}))` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(clojure.edn/read-string (pr-str [1 2 3]))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('3',), resolution doesn't close the loop)
     - [REPL_TRIPLE_VOICE] form=`(clojure.edn/read-string (pr-str [1 2 3]))` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(clojure.edn/read-string (pr-str [1 2 3]))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('3',), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(clojure.edn/read-string (pr-str [1 2 3]))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('3',), resolution doesn't close the loop)
     - [REPL_TRIPLE_VOICE] form=`(clojure.edn/read-string (pr-str [1 2 3]))` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
 
 ### G7-18: Shell command
@@ -658,23 +597,11 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 ## Grade 8
 
-### G8-01: Why polymorphism
-
-- examples: 2
-- variety @ n=50: 1.00
-- issues: {'STORY_RESOLUTION_NO_DRAWN': 3}
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(defn speak [k] (cond (= k :hare) "swift" (= k :to` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':hare', ':tortoise', ':else'), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(defn speak [k] (cond (= k :hare) "swift" (= k :to` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':hare', ':tortoise', ':else'), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(defn speak [k] (cond (= k :hare) "swift" (= k :to` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':hare', ':tortoise', ':else'), resolution doesn't close the loop)
-
 ### G8-02: deftype introduction
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'STORY_RESOLUTION_NO_DRAWN': 3, 'HIGH_LENGTH': 1, 'FORM_DISPLAY_AND_FORM_NOUN': 1, 'TRAILING_PARTICIPLE_CLOSER': 1}
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(do (deftype Pebble [color]) (.-color (Pebble. "gr` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('grey',), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(do (deftype Pebble [color]) (.-color (Pebble. "gr` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('grey',), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(do (deftype Pebble [color]) (.-color (Pebble. "gr` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('grey',), resolution doesn't close the loop)
+- issues: {'HIGH_LENGTH': 1, 'FORM_DISPLAY_AND_FORM_NOUN': 1, 'TRAILING_PARTICIPLE_CLOSER': 1}
     - [HIGH_LENGTH] form=`(do (deftype Stone [weight]) (.-weight (Stone. 7))` — user_msg 212 words
     - [FORM_DISPLAY_AND_FORM_NOUN] form=`(do (deftype Stone [weight]) (.-weight (Stone. 7))` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
     - [TRAILING_PARTICIPLE_CLOSER] form=`(do (deftype Stone [weight]) (.-weight (Stone. 7))` — sentence closes with a participial coda (', confirming the bare case held it faithfully.') — LLM-cadence; close on the verb instead
@@ -694,15 +621,6 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
     - [HIGH_LENGTH] form=`(do (defprotocol Greet (hail [this])) (extend-prot` — user_msg 203 words
     - [FORM_DISPLAY_AND_FORM_NOUN] form=`(do (defprotocol Greet (hail [this])) (extend-prot` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
     - [TRAILING_PARTICIPLE_CLOSER] form=`(do (defprotocol Greet (hail [this])) (extend-prot` — sentence closes with a participial coda (', confirming the dispatch worked.') — LLM-cadence; close on the verb instead
-
-### G8-06: Protocol method dispatch
-
-- examples: 2
-- variety @ n=50: 1.00
-- issues: {'STORY_RESOLUTION_NO_DRAWN': 3}
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(do (defprotocol Pace (speed [this])) (extend-prot` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':string-pace', ':long-pace'), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(do (defprotocol Pace (speed [this])) (extend-prot` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':string-pace', ':long-pace'), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(do (defprotocol Pace (speed [this])) (extend-prot` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':string-pace', ':long-pace'), resolution doesn't close the loop)
 
 ### G8-07: Record implementing protocol
 
@@ -764,22 +682,16 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 1
 - variety @ n=50: 0.98
-- issues: {'HIGH_LENGTH': 1, 'STORY_RESOLUTION_NO_DRAWN': 3, 'TRAILING_PARTICIPLE_CLOSER': 1, 'CLAUSE_STACK_OVERFLOW': 1}
-    - [HIGH_LENGTH] form=`(do (defprotocol A (a-op [this])) (defprotocol B (` — user_msg 227 words
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(do (defprotocol A (a-op [this])) (defprotocol B (` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':a-impl', ':b-impl', ') (b-op '), resolution doesn't close the loop)
-    - [TRAILING_PARTICIPLE_CLOSER] form=`(do (defprotocol A (a-op [this])) (defprotocol B (` — sentence closes with a participial coda (', confirming the protocols are fully independent.') — LLM-cadence; close on the verb instead
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(do (defprotocol A (a-op [this])) (defprotocol B (` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':a-impl', ':b-impl', ') (b-op '), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(do (defprotocol A (a-op [this])) (defprotocol B (` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':a-impl', ':b-impl', ') (b-op '), resolution doesn't close the loop)
+- issues: {'HIGH_LENGTH': 1, 'CLAUSE_STACK_OVERFLOW': 1}
+    - [HIGH_LENGTH] form=`(do (defprotocol A (a-op [this])) (defprotocol B (` — user_msg 233 words
     - [CLAUSE_STACK_OVERFLOW] form=`(do (defprotocol A (a-op [this])) (defprotocol B (` — sentence with 6 commas reads as AI-output cadence: 'To define two protocols A and B, each with a method, extend both to String type '
 
 ### G8-15: derive and isa? — multimethod hierarchy
 
 - examples: 3
 - variety @ n=50: 1.00
-- issues: {'TRAILING_PARTICIPLE_CLOSER': 1, 'UNFILLED_DRAWN_PLACEHOLDER': 1, 'DRAWN_PLACEHOLDER_LEAK': 1}
+- issues: {'TRAILING_PARTICIPLE_CLOSER': 1}
     - [TRAILING_PARTICIPLE_CLOSER] form=`(do (derive ::hare ::runner) (isa? ::hare ::runner` — sentence closes with a participial coda (',\ndispatching the runner — returned the branch-specific valu') — LLM-cadence; close on the verb instead
-    - [UNFILLED_DRAWN_PLACEHOLDER] form=`(do (derive ::hare ::runner) (isa? ::hare ::runner` — user_msg has un-substituted `{drawn.a}` placeholder — slot mismatch or render-time gap
-    - [DRAWN_PLACEHOLDER_LEAK] form=`(do (derive ::hare ::runner) (isa? ::hare ::runner` — user_msg contains an un-substituted {drawn.<slot>} placeholder — interpolation pipeline missed it
 
 ### G8-16: Abstract design with protocols
 
@@ -796,12 +708,13 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'TRAILING_PARTICIPLE_CLOSER': 1, 'CLAUSE_STACK_OVERFLOW': 3, 'HIGH_LENGTH': 1}
+- issues: {'TRAILING_PARTICIPLE_CLOSER': 1, 'CLAUSE_STACK_OVERFLOW': 3, 'HIGH_LENGTH': 2, 'DOUBLED_INPUT_VALUE_PARENS': 2}
     - [TRAILING_PARTICIPLE_CLOSER] form=`(let [m {:a 1}] (assoc m :b 2) m)` — sentence closes with a participial coda (', leaving the first one exactly where it was.') — LLM-cadence; close on the verb instead
     - [CLAUSE_STACK_OVERFLOW] form=`(let [m {:a 1}] (assoc m :b 2) m)` — sentence with 6 commas reads as AI-output cadence: 'To bind a map m, call assoc to add :b 2 to a new map, then return the unchanged '
+    - [HIGH_LENGTH] form=`(let [v [1 2 3]] (conj v 4) v)` — user_msg 207 words
     - [CLAUSE_STACK_OVERFLOW] form=`(let [v [1 2 3]] (conj v 4) v)` — sentence with 5 commas reads as AI-output cadence: 'To bind a vector v, call conj to add 9 to a new vector, then return the unchange'
-    - [HIGH_LENGTH] form=`(let [v [1 2 3]] (conj v 4) v)` — user_msg 204 words
-    - [CLAUSE_STACK_OVERFLOW] form=`(let [v [1 2 3]] (conj v 4) v)` — sentence with 5 commas reads as AI-output cadence: 'To bind a vector v, call conj to add 6 to a new vector, then return the unchange'
+    - [DOUBLED_INPUT_VALUE_PARENS] form=`(let [v [1 2 3]] (conj v 4) v)` — user_msg contains two or more 'as the input value' parentheticals — auto-closer fired twice or authored prose duplicated it
+    - [HIGH_LENGTH] form=`(let [v [1 2 3]] (conj v 4) v)` — user_msg 216 words
 
 ### G9-02: Why state at all
 
@@ -815,22 +728,11 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 3
 - variety @ n=50: 1.00
-- issues: {'HIGH_LENGTH': 1, 'CLAUSE_STACK_OVERFLOW': 3, 'STORY_RESOLUTION_NO_DRAWN': 3}
+- issues: {'HIGH_LENGTH': 1, 'CLAUSE_STACK_OVERFLOW': 3}
     - [HIGH_LENGTH] form=`(do (def a (atom 0)) (swap! a inc) @a)` — user_msg 201 words
     - [CLAUSE_STACK_OVERFLOW] form=`(do (def a (atom 0)) (swap! a inc) @a)` — sentence with 5 commas reads as AI-output cadence: 'To set up a shared notebook starting at 0, atomically add one to its page, then '
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(do (def a (atom :start)) (reset! a :done) @a)` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':start', ':done'), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(do (def a (atom :start)) (reset! a :done) @a)` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':start', ':done'), resolution doesn't close the loop)
     - [CLAUSE_STACK_OVERFLOW] form=`(do (def a (atom :start)) (reset! a :done) @a)` — sentence with 5 commas reads as AI-output cadence: 'To construct an atom holding a start keyword, atomically reset it to a done keyw'
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(do (def a (atom :start)) (reset! a :done) @a)` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':start', ':done'), resolution doesn't close the loop)
-
-### G9-04: Atom CAS semantics
-
-- examples: 2
-- variety @ n=50: 1.00
-- issues: {'STORY_RESOLUTION_NO_DRAWN': 3}
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(do (def a (atom 5)) (compare-and-set! a 0 99) @a)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('5', '99'), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(do (def a (atom 5)) (compare-and-set! a 0 99) @a)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('5', '99'), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(do (def a (atom 5)) (compare-and-set! a 0 99) @a)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('5', '99'), resolution doesn't close the loop)
+    - [CLAUSE_STACK_OVERFLOW] form=`(do (def a (atom :start)) (reset! a :done) @a)` — sentence with 5 commas reads as AI-output cadence: 'To construct an atom holding a start keyword, atomically reset it to a done keyw'
 
 ### G9-06: Validator on atom
 
@@ -897,14 +799,13 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
     - [CLAUSE_STACK_OVERFLOW] form=`(do (def ag (agent 0)) (send ag inc) (send ag inc)` — sentence with 7 commas reads as AI-output cadence: 'To\nconstruct an agent holding 0, asynchronously send inc twice, synchronize with'
     - [CLAUSE_STACK_OVERFLOW] form=`(do (def ag (agent 0)) (send ag inc) (send ag inc)` — sentence with 7 commas reads as AI-output cadence: 'To\nconstruct an agent holding 0, asynchronously send inc twice, synchronize with'
 
-### G9-14: deref @ shorthand
+### G9-13: future introduction
 
 - examples: 2
-- variety @ n=50: 0.99
-- issues: {'STORY_RESOLUTION_NO_DRAWN': 3}
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(do (def a (atom 7)) (deref a))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('7',), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(do (def a (atom 7)) (deref a))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('7',), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(do (def a (atom 7)) (deref a))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('7',), resolution doesn't close the loop)
+- variety @ n=50: 1.00
+- issues: {'AND_HANDED_BACK_CADENCE': 2}
+    - [AND_HANDED_BACK_CADENCE] form=`@(future (* 6 7))` — user_msg tail has 3 performed/handed-back/returned verbs — AI-output verb-and-verb cadence
+    - [AND_HANDED_BACK_CADENCE] form=`@(future (* 6 7))` — user_msg tail has 3 performed/handed-back/returned verbs — AI-output verb-and-verb cadence
 
 ### G9-16: volatile — when STM is too heavy
 
@@ -918,12 +819,10 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'CLAUSE_STACK_OVERFLOW': 2, 'HIGH_LENGTH': 1, 'TRAILING_PARTICIPLE_CLOSER': 1, 'STORY_RESOLUTION_NO_DRAWN': 3}
+- issues: {'CLAUSE_STACK_OVERFLOW': 2, 'HIGH_LENGTH': 1, 'TRAILING_PARTICIPLE_CLOSER': 1}
     - [CLAUSE_STACK_OVERFLOW] form=`(do (def ^:dynamic *p* 1) (binding [*p* 99] *p*))` — sentence with 5 commas reads as AI-output cadence: 'To define a dynamic var *p* as 1, use binding to rebind it to 99, and read its v'
     - [HIGH_LENGTH] form=`(do (def ^:dynamic *p* 1) (binding [*p* 99] *p*))` — user_msg 215 words
     - [TRAILING_PARTICIPLE_CLOSER] form=`(do (def ^:dynamic *p* 1) (binding [*p* 99] *p*))` — sentence closes with a participial coda (', overriding the default for the duration of her stretch.') — LLM-cadence; close on the verb instead
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(do (def ^:dynamic *p* 1) (binding [*p* 99] *p*) *` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('99', ':dynamic'), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(do (def ^:dynamic *p* 1) (binding [*p* 99] *p*) *` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('99', ':dynamic'), resolution doesn't close the loop)
     - [CLAUSE_STACK_OVERFLOW] form=`(do (def ^:dynamic *p* 1) (binding [*p* 99] *p*) *` — sentence with 6 commas reads as AI-output cadence: 'To define a dynamic var *p* as 1, use binding to rebind it to 99 inside, and rea'
 
 ### G9-18: locking — last resort
@@ -944,7 +843,7 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 3
 - variety @ n=50: 1.00
-- issues: {'FORM_DISPLAY_AND_FORM_NOUN': 2, 'THE_FORM_OVERUSE': 3, 'NARRATIVE_NUMERAL_HARDCODE': 3, 'STORY_RESOLUTION_NO_DRAWN': 3, 'ONLY_SHOOK_HEAD_TIC': 1}
+- issues: {'FORM_DISPLAY_AND_FORM_NOUN': 2, 'THE_FORM_OVERUSE': 3, 'NARRATIVE_NUMERAL_HARDCODE': 3, 'ONLY_SHOOK_HEAD_TIC': 1}
     - [FORM_DISPLAY_AND_FORM_NOUN] form=`(quote (+ 1 2))` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
     - [THE_FORM_OVERUSE] form=`(quote (+ 1 2))` — `the form` appears 6 times in user_msg (template tic — vary references)
     - [NARRATIVE_NUMERAL_HARDCODE] form=`'(1 2 3)` — parametric example has hard-coded English numeral 'three numbers' in a story slot — the actual draws may differ from this fixed count
@@ -956,23 +855,20 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'THE_FORM_OVERUSE': 3, 'STORY_RESOLUTION_NO_DRAWN': 3, 'HIGH_LENGTH': 1, 'FORM_DISPLAY_AND_FORM_NOUN': 1}
+- issues: {'THE_FORM_OVERUSE': 3, 'HIGH_LENGTH': 1, 'FORM_DISPLAY_AND_FORM_NOUN': 1}
     - [THE_FORM_OVERUSE] form=`(let [x 10] `(+ ~x ~x))` — `the form` appears 5 times in user_msg (template tic — vary references)
     - [THE_FORM_OVERUSE] form=`(let [x 10] `(+ ~x ~x))` — `the form` appears 5 times in user_msg (template tic — vary references)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(let [xs [1 2 3]] `(list ~@xs))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('3',), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(let [xs [1 2 3]] `(list ~@xs))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('3',), resolution doesn't close the loop)
     - [THE_FORM_OVERUSE] form=`(let [xs [1 2 3]] `(list ~@xs))` — `the form` appears 5 times in user_msg (template tic — vary references)
-    - [HIGH_LENGTH] form=`(let [xs [1 2 3]] `(list ~@xs))` — user_msg 205 words
+    - [HIGH_LENGTH] form=`(let [xs [1 2 3]] `(list ~@xs))` — user_msg 211 words
+    - [FORM_DISPLAY_AND_FORM_NOUN] form=`(let [xs [1 2 3]] `(list ~@xs))` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
 
 ### G10-03: defmacro introduction
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'HIGH_LENGTH': 1, 'STORY_RESOLUTION_NO_DRAWN': 3}
-    - [HIGH_LENGTH] form=`(do (defmacro my-when [t & body] `(if ~t (do ~@bod` — user_msg 207 words
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(do (defmacro my-when [t & body] `(if ~t (do ~@bod` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('3',), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(do (defmacro my-when [t & body] `(if ~t (do ~@bod` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('3',), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(do (defmacro my-when [t & body] `(if ~t (do ~@bod` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('3',), resolution doesn't close the loop)
+- issues: {'HIGH_LENGTH': 1, 'DOUBLED_INPUT_VALUE_PARENS': 1}
+    - [HIGH_LENGTH] form=`(do (defmacro my-when [t & body] `(if ~t (do ~@bod` — user_msg 219 words
+    - [DOUBLED_INPUT_VALUE_PARENS] form=`(do (defmacro my-when [t & body] `(if ~t (do ~@bod` — user_msg contains two or more 'as the input value' parentheticals — auto-closer fired twice or authored prose duplicated it
 
 ### G10-07: Threading macros revisited
 
@@ -985,14 +881,6 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
     - [PARAGRAPH_FRAGMENTATION] form=`(macroexpand '(-> x f g))` — user_msg has 4 short (≤25-word) paragraphs in body — reads as a bullet list, not a story
     - [PARAGRAPH_FRAGMENTATION] form=`(macroexpand '(-> x f g))` — user_msg has 4 short (≤25-word) paragraphs in body — reads as a bullet list, not a story
 
-### G10-09: Hygiene and gensym
-
-- examples: 2
-- variety @ n=50: 1.00
-- issues: {'UNFILLED_DRAWN_PLACEHOLDER': 1, 'DRAWN_PLACEHOLDER_LEAK': 1}
-    - [UNFILLED_DRAWN_PLACEHOLDER] form=`(let [a (gensym "x_") b (gensym "x_")] (= a b))` — user_msg has un-substituted `{drawn.a}` placeholder — slot mismatch or render-time gap
-    - [DRAWN_PLACEHOLDER_LEAK] form=`(let [a (gensym "x_") b (gensym "x_")] (= a b))` — user_msg contains an un-substituted {drawn.<slot>} placeholder — interpolation pipeline missed it
-
 ### G10-10: Anaphoric macros are confusing
 
 - examples: 2
@@ -1002,26 +890,14 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
     - [TRAILING_PARTICIPLE_CLOSER] form=`(if-let [x 7] (* x x) 0)` — sentence closes with a participial coda (', making the expansion readable and collision-free.') — LLM-cadence; close on the verb instead
     - [TRAILING_PARTICIPLE_CLOSER] form=`(if-let [x 7] (* x x) 0)` — sentence closes with a participial coda (', making the expansion readable and collision-free.') — LLM-cadence; close on the verb instead
 
-### G10-11: Reader macros overview
-
-- examples: 3
-- variety @ n=50: 1.00
-- issues: {'STORY_RESOLUTION_NO_DRAWN': 3}
-    - [STORY_RESOLUTION_NO_DRAWN] form=`[1 #_ 2 3]` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('3',), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`[1 #_ 2 3]` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('3',), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`[1 #_ 2 3]` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('3',), resolution doesn't close the loop)
-
 ### G10-14: eval (the function)
 
 - examples: 2
 - variety @ n=50: 0.99
-- issues: {'STORY_RESOLUTION_NO_DRAWN': 3, 'TRAILING_PARTICIPLE_CLOSER': 1, 'FORM_DISPLAY_AND_FORM_NOUN': 2, 'UNFILLED_DRAWN_PLACEHOLDER': 2, 'DRAWN_PLACEHOLDER_LEAK': 2}
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(eval '(+ 1 2 3))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('3',), resolution doesn't close the loop)
-    - [TRAILING_PARTICIPLE_CLOSER] form=`(eval '(+ 1 2 3))` — sentence closes with a participial coda (', turning the quoted list into a computed value.') — LLM-cadence; close on the verb instead
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(eval '(+ 1 2 3))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('3',), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(eval '(+ 1 2 3))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('3',), resolution doesn't close the loop)
+- issues: {'HIGH_LENGTH': 1, 'FORM_DISPLAY_AND_FORM_NOUN': 2}
+    - [HIGH_LENGTH] form=`(eval '(+ 1 2 3))` — user_msg 206 words
     - [FORM_DISPLAY_AND_FORM_NOUN] form=`(eval (list '+ 4 5))` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
-    - [UNFILLED_DRAWN_PLACEHOLDER] form=`(eval (list '+ 4 5))` — user_msg has un-substituted `{drawn.a}` placeholder — slot mismatch or render-time gap
+    - [FORM_DISPLAY_AND_FORM_NOUN] form=`(eval (list '+ 4 5))` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
 
 ### G10-16: Macro pattern library
 
@@ -1033,28 +909,12 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 ## Grade 11
 
-### G11-03: Static method call
-
-- examples: 2
-- variety @ n=50: 1.00
-- issues: {'UNFILLED_DRAWN_PLACEHOLDER': 1, 'DRAWN_PLACEHOLDER_LEAK': 1}
-    - [UNFILLED_DRAWN_PLACEHOLDER] form=`(Math/abs -7)` — user_msg has un-substituted `{drawn.a}` placeholder — slot mismatch or render-time gap
-    - [DRAWN_PLACEHOLDER_LEAK] form=`(Math/abs -7)` — user_msg contains an un-substituted {drawn.<slot>} placeholder — interpolation pipeline missed it
-
 ### G11-04: Field access
 
 - examples: 2
 - variety @ n=50: 1.00
 - issues: {'TRAILING_PARTICIPLE_CLOSER': 1}
     - [TRAILING_PARTICIPLE_CLOSER] form=`(count "hare")` — sentence closes with a participial coda (', returning the length regardless of the input.') — LLM-cadence; close on the verb instead
-
-### G11-07: Arrays
-
-- examples: 2
-- variety @ n=50: 1.00
-- issues: {'UNFILLED_DRAWN_PLACEHOLDER': 1, 'DRAWN_PLACEHOLDER_LEAK': 1}
-    - [UNFILLED_DRAWN_PLACEHOLDER] form=`(let [a (int-array [1 2 3])] (alength a))` — user_msg has un-substituted `{drawn.a}` placeholder — slot mismatch or render-time gap
-    - [DRAWN_PLACEHOLDER_LEAK] form=`(let [a (int-array [1 2 3])] (alength a))` — user_msg contains an un-substituted {drawn.<slot>} placeholder — interpolation pipeline missed it
 
 ### G11-08: Type hints
 
@@ -1068,12 +928,8 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'UNFILLED_DRAWN_PLACEHOLDER': 2, 'DRAWN_PLACEHOLDER_LEAK': 2, 'TRAILING_PARTICIPLE_CLOSER': 2}
-    - [UNFILLED_DRAWN_PLACEHOLDER] form=`(try (Math/sqrt 4) (catch Exception _ :err))` — user_msg has un-substituted `{drawn.a}` placeholder — slot mismatch or render-time gap
-    - [DRAWN_PLACEHOLDER_LEAK] form=`(try (Math/sqrt 4) (catch Exception _ :err))` — user_msg contains an un-substituted {drawn.<slot>} placeholder — interpolation pipeline missed it
+- issues: {'TRAILING_PARTICIPLE_CLOSER': 2}
     - [TRAILING_PARTICIPLE_CLOSER] form=`(try (Math/sqrt 4) (catch Exception _ :err))` — sentence closes with a participial coda (', letting the form continue if things go wrong.') — LLM-cadence; close on the verb instead
-    - [UNFILLED_DRAWN_PLACEHOLDER] form=`(try (Math/sqrt 4) (catch Exception _ :err))` — user_msg has un-substituted `{drawn.a}` placeholder — slot mismatch or render-time gap
-    - [DRAWN_PLACEHOLDER_LEAK] form=`(try (Math/sqrt 4) (catch Exception _ :err))` — user_msg contains an un-substituted {drawn.<slot>} placeholder — interpolation pipeline missed it
     - [TRAILING_PARTICIPLE_CLOSER] form=`(try (Math/sqrt 4) (catch Exception _ :err))` — sentence closes with a participial coda (', letting the form continue if things go wrong.') — LLM-cadence; close on the verb instead
 
 ## Grade 12
@@ -1082,32 +938,26 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'HIGH_LENGTH': 1, 'UNFILLED_DRAWN_PLACEHOLDER': 1, 'CLAUSE_STACK_OVERFLOW': 1, 'DRAWN_PLACEHOLDER_LEAK': 1}
+- issues: {'HIGH_LENGTH': 1, 'CLAUSE_STACK_OVERFLOW': 1}
     - [HIGH_LENGTH] form=`(into [] (map inc) [1 2 3])` — user_msg 211 words
-    - [UNFILLED_DRAWN_PLACEHOLDER] form=`(into [] (map inc) [1 2 3])` — user_msg has un-substituted `{drawn.a}` placeholder — slot mismatch or render-time gap
     - [CLAUSE_STACK_OVERFLOW] form=`(into [] (map inc) [1 2 3])` — sentence with 5 commas reads as AI-output cadence: 'To use the map-inc transducer with into to increment the vector containing 1, 2,'
-    - [DRAWN_PLACEHOLDER_LEAK] form=`(into [] (map inc) [1 2 3])` — user_msg contains an un-substituted {drawn.<slot>} placeholder — interpolation pipeline missed it
 
 ### G12-02: Transducer composition
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'CLAUSE_STACK_OVERFLOW': 2, 'HIGH_LENGTH': 1, 'UNFILLED_DRAWN_PLACEHOLDER': 1, 'DRAWN_PLACEHOLDER_LEAK': 1}
+- issues: {'CLAUSE_STACK_OVERFLOW': 2, 'HIGH_LENGTH': 1}
     - [CLAUSE_STACK_OVERFLOW] form=`(transduce (comp (map inc) (filter even?)) + 0 [1 ` — sentence with 6 commas reads as AI-output cadence: 'What Clojure form computes the sum accumulated via transduce using the composed '
-    - [HIGH_LENGTH] form=`(transduce (comp (map inc) (filter even?)) + 0 [1 ` — user_msg 219 words
-    - [UNFILLED_DRAWN_PLACEHOLDER] form=`(transduce (comp (map inc) (filter even?)) + 0 [1 ` — user_msg has un-substituted `{drawn.a}` placeholder — slot mismatch or render-time gap
+    - [HIGH_LENGTH] form=`(transduce (comp (map inc) (filter even?)) + 0 [1 ` — user_msg 225 words
     - [CLAUSE_STACK_OVERFLOW] form=`(transduce (comp (map inc) (filter even?)) + 0 [1 ` — sentence with 6 commas reads as AI-output cadence: 'What Clojure form computes the sum accumulated via transduce using the composed '
-    - [DRAWN_PLACEHOLDER_LEAK] form=`(transduce (comp (map inc) (filter even?)) + 0 [1 ` — user_msg contains an un-substituted {drawn.<slot>} placeholder — interpolation pipeline missed it
 
 ### G12-03: into with a transducer (xform)
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'HIGH_LENGTH': 1, 'UNFILLED_DRAWN_PLACEHOLDER': 1, 'CLAUSE_STACK_OVERFLOW': 2, 'DRAWN_PLACEHOLDER_LEAK': 1}
+- issues: {'HIGH_LENGTH': 1, 'CLAUSE_STACK_OVERFLOW': 2}
     - [HIGH_LENGTH] form=`(into #{} (map inc) [1 2 3])` — user_msg 211 words
-    - [UNFILLED_DRAWN_PLACEHOLDER] form=`(into #{} (map inc) [1 2 3])` — user_msg has un-substituted `{drawn.a}` placeholder — slot mismatch or render-time gap
     - [CLAUSE_STACK_OVERFLOW] form=`(into #{} (map inc) [1 2 3])` — sentence with 5 commas reads as AI-output cadence: 'To use the map-inc transducer with into to create a set from the incremented ele'
-    - [DRAWN_PLACEHOLDER_LEAK] form=`(into #{} (map inc) [1 2 3])` — user_msg contains an un-substituted {drawn.<slot>} placeholder — interpolation pipeline missed it
     - [CLAUSE_STACK_OVERFLOW] form=`(into #{} (map inc) [1 2 3])` — sentence with 5 commas reads as AI-output cadence: 'Deepen the tortoise shook\nher head and went on with the work: to\nuse the map-inc'
 
 ### G12-15: Datomic / XTDB (datalog db brief)
@@ -1137,19 +987,20 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 ### Issue counts (across all examples × 3 records)
 
-- **TRAILING_PARTICIPLE_CLOSER**: 74
+- **TRAILING_PARTICIPLE_CLOSER**: 72
 - **CLAUSE_STACK_OVERFLOW**: 60
-- **HIGH_LENGTH**: 54
-- **STORY_RESOLUTION_NO_DRAWN**: 51
-- **NARRATIVE_NUMERAL_HARDCODE**: 42
+- **HIGH_LENGTH**: 55
+- **NARRATIVE_NUMERAL_HARDCODE**: 33
 - **FORM_DISPLAY_AND_FORM_NOUN**: 28
 - **REPL_TRIPLE_VOICE**: 25
-- **UNFILLED_DRAWN_PLACEHOLDER**: 21
-- **DRAWN_PLACEHOLDER_LEAK**: 21
 - **PARAGRAPH_FRAGMENTATION**: 8
 - **GENERIC_RESOLUTION_TAIL**: 6
 - **THE_FORM_OVERUSE**: 6
+- **AND_HANDED_BACK_CADENCE**: 4
+- **DOUBLED_INPUT_VALUE_PARENS**: 4
 - **REPEATED_OPENER_FRAGMENT**: 3
+- **UNFILLED_DRAWN_PLACEHOLDER**: 3
+- **DRAWN_PLACEHOLDER_LEAK**: 3
 - **ABSTRACT_RESULT_NARRATION**: 3
 - **ONLY_SHOOK_HEAD_TIC**: 2
 - **DOUBLE_NAME_INTRO**: 2
@@ -1159,18 +1010,18 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 | Grade | Subjects | Examples | Issues | Low-variety |
 |---|---|---|---|---|
-| 1 | 18 | 76 | 28 | — |
-| 2 | 22 | 88 | 25 | — |
-| 3 | 18 | 31 | 11 | — |
+| 1 | 18 | 76 | 29 | — |
+| 2 | 22 | 88 | 17 | — |
+| 3 | 18 | 31 | 12 | — |
 | 4 | 20 | 39 | 57 | — |
-| 5 | 22 | 39 | 51 | — |
-| 6 | 16 | 33 | 9 | — |
-| 7 | 18 | 36 | 36 | — |
-| 8 | 16 | 31 | 48 | — |
-| 9 | 18 | 34 | 63 | — |
-| 10 | 16 | 36 | 49 | — |
-| 11 | 14 | 29 | 13 | — |
-| 12 | 18 | 37 | 17 | — |
+| 5 | 22 | 39 | 47 | — |
+| 6 | 16 | 33 | 7 | — |
+| 7 | 18 | 36 | 15 | — |
+| 8 | 16 | 31 | 33 | — |
+| 9 | 18 | 34 | 56 | — |
+| 10 | 16 | 36 | 29 | — |
+| 11 | 14 | 29 | 5 | — |
+| 12 | 18 | 37 | 11 | — |
 
 ### Sample issues by severity
 
@@ -1316,6 +1167,41 @@ Back ...
 Mossback prepared three pouches in order: a held 2 acorns, then b was filled with one more than a, and finally c was loaded with twice whatever b held. Each pouch drew from the ...
     ```
 
+#### AND_HANDED_BACK_CADENCE
+
+- `G1-12` (form `(+ 2 3)`): user_msg tail has 3 performed/handed-back/returned verbs — AI-output verb-and-verb cadence
+    ```
+    It happened atop the hilltop, on a morning when the air was kind to swift feet and steady ones alike.
+
+Mossback the tortoise chalked a small expression on the path: the plus-mark, then 9, then 9, all wrapped in a single set of parens. Pip the hare paused — was the answer 6 (parens means multiply, su...
+    ```
+- `G3-13` (form `((fn [x] x x x 99) 1)`): user_msg tail has 3 performed/handed-back/returned verbs — AI-output verb-and-verb cadence
+    ```
+    By the time the dew had lifted, the meadow had gathered to watch the strangest race anyone could remember.
+
+Mossback's recipe card for this stretch listed several intermediate steps, but the cook only served the final dish — everything before it was preparation, not what got plated.
+
+The kitchen nee...
+    ```
+- `G9-13` (form `@(future (* 6 7))`): user_msg tail has 3 performed/handed-back/returned verbs — AI-output verb-and-verb cadence
+    ```
+    When Fern declared the race already won, no one yet knew how long the afternoon would be.
+
+Fern the hare as if the race were already won reached for the runner's pouch before
+the runner had even returned. Hushwise the tortoise held him
+back: a runner sent ahead must be allowed to finish. To
+construc...
+    ```
+- `G9-13` (form `@(future (* 6 7))`): user_msg tail has 3 performed/handed-back/returned verbs — AI-output verb-and-verb cadence
+    ```
+    atop the hilltop, where the path bends past the elm, Hedgepig taunted Whorl one too many times.
+
+Hedgepig the hare with great whoops of laughter reached for the runner's pouch before
+the runner had even returned. Whorl the tortoise held him
+back: a runner sent ahead must be allowed to finish. To
+con...
+    ```
+
 #### CLAUSE_STACK_OVERFLOW
 
 - `G1-12` (form `(* (+ 1 2) 3)`): sentence with 5 commas reads as AI-output cadence: 'Mossback chalked two nested fences on the path: an inner fence holding the plus-'
@@ -1450,18 +1336,6 @@ The trail forked near a mossy boulder. The condition-stone at the split was carv
 
 Before taki...
     ```
-- `G6-05` (form `(clojure.string/reverse "abc")`): user_msg has un-substituted `{drawn.a}` placeholder — slot mismatch or render-time gap
-    ```
-    Two creatures of very different gait once agreed that the ground between two stones would settle a long argument.
-
-The same scroll held another routine: reverse. It took the letters in a string and handed them back in the opposite order. Mossback had a string {drawn.a} and wanted to see what the rev...
-    ```
-- `G7-03` (form `(try 7 (finally (prn :cleanup)))`): user_msg has un-substituted `{drawn.a}` placeholder — slot mismatch or render-time gap
-    ```
-    Galop announced the race in a voice loud enough to wake the owls, and Fen accepted with a nod.
-
-Mossback the tortoise always folded her safety net after each practice jump, no matter how the leap went. She asked the runtime to do the same: carry out the cleanup step after the form, regardless of out...
-    ```
 
 #### DRAWN_PLACEHOLDER_LEAK
 
@@ -1488,18 +1362,6 @@ Before taking a step, Mossback need...
 The trail forked near a mossy boulder. The condition-stone at the split was carved `(> 9 0)` — a comparison between two pebble-counts left there by a previous traveller.
 
 Before taki...
-    ```
-- `G6-05` (form `(clojure.string/reverse "abc")`): user_msg contains an un-substituted {drawn.<slot>} placeholder — interpolation pipeline missed it
-    ```
-    Two creatures of very different gait once agreed that the ground between two stones would settle a long argument.
-
-The same scroll held another routine: reverse. It took the letters in a string and handed them back in the opposite order. Mossback had a string {drawn.a} and wanted to see what the rev...
-    ```
-- `G7-03` (form `(try 7 (finally (prn :cleanup)))`): user_msg contains an un-substituted {drawn.<slot>} placeholder — interpolation pipeline missed it
-    ```
-    Galop announced the race in a voice loud enough to wake the owls, and Fen accepted with a nod.
-
-Mossback the tortoise always folded her safety net after each practice jump, no matter how the leap went. She asked the runtime to do the same: carry out the cleanup step after the form, regardless of out...
     ```
 
 #### REPL_TRIPLE_VOICE
@@ -1542,87 +1404,75 @@ For a one-time ...
 Before the morning's foraging began, Mossback the tortoise set her basket on the path with its pebble row still empty — no pebbles, no contents, ready for whatever the meadow would yield. The value drawn fresh was 1, 15, ...
     ```
 
-#### NARRATIVE_NUMERAL_HARDCODE
+#### DOUBLED_INPUT_VALUE_PARENS
 
-- `G2-02` (form `(< 1 2 3)`): parametric example has hard-coded English numeral 'three counts' in a story slot — the actual draws may differ from this fixed count
-    ```
-    Spring had loosened the soil and the grasses had grown tall enough to brush a passing flank.
-
-"Watch the basket," Sepia the tortoise said, gesturing with eyes always on the path
-at a small heap of acorns. "Every operation adds, takes away, or
-combines — the heap grows or shrinks by exactly what you ...
-    ```
-- `G2-02` (form `(< 1 2 3)`): parametric example has hard-coded English numeral 'three counts' in a story slot — the actual draws may differ from this fixed count
-    ```
-    When Heath declared the race already won, no one yet knew how long the afternoon would be.
-
-Hazel the tortoise laid acorns out on a flat stone at the edge of the orchard, sorting
-them without complaint. "Numbers in Clojure are like acorns in heaps,"
-he said. "You can count them. You can add heaps
-to...
-    ```
-- `G2-02` (form `(< 1 2 3)`): parametric example has hard-coded English numeral 'three counts' in a story slot — the actual draws may differ from this fixed count
-    ```
-    A path ran from the old oak to the river stone, and on it many a boast had been measured against many a steady step.
-
-"The runtime gives the exact count," Boulderkin the tortoise said,
-untroubled by what others thought. "Small or large. Fraction or whole. The answer is
-precise." To test whether 7 is...
-    ```
-- `G2-04` (form `(min 1 2 3)`): parametric example has hard-coded English numeral 'three heaps' in a story slot — the actual draws may differ from this fixed count
-    ```
-    Long ago, when wagers were still settled by running rather than talking, two unlikely rivals agreed to a race.
-
-Jolt the hare eyed the heap with great whoops of laughter and called out a guess
-without bothering to count. Whorl the tortoise simply began counting,
-saying very little. To find the minim...
-    ```
-- `G2-04` (form `(min 1 2 3)`): parametric example has hard-coded English numeral 'three heaps' in a story slot — the actual draws may differ from this fixed count
-    ```
-    All this took place at the edge of the orchard, where the dust still keeps the shape of the runners' feet.
-
-Lavender the hare eyed the heap as if the race were already won and called out a guess
-without bothering to count. Pine the tortoise simply began counting,
-stepping deliberately. To find the m...
-    ```
-
-#### STORY_RESOLUTION_NO_DRAWN
-
-- `G2-08` (form `(+ 1/2 1/4)`): story-tagged example's resolution slot has no drawn-value reference (form has literals ('4',), resolution doesn't close the loop)
-    ```
-    Whiskling liked to talk; Stoneheart liked to listen, and the rivalry between them had grown into a small legend along the road.
-
-"The runtime gives the exact count," Stoneheart the tortoise said,
-untroubled by what others thought. "Small or large. Fraction or whole. The answer is
-precise." To add on...
-    ```
-- `G2-08` (form `(+ 1/2 1/4)`): story-tagged example's resolution slot has no drawn-value reference (form has literals ('4',), resolution doesn't close the loop)
+- `G2-08` (form `(+ 1/2 1/4)`): user_msg contains two or more 'as the input value' parentheticals — auto-closer fired twice or authored prose duplicated it
     ```
     Among the small kingdoms of the meadow, swiftness was a kind of currency, and one creature spent it loudly.
 
 Mossback the tortoise divided a berry into halves and quarters. She held one half in her paw and one quarter in a small leaf. Both pieces were parts of the same whole fruit. The value at the ...
     ```
-- `G2-08` (form `(+ 1/2 1/4)`): story-tagged example's resolution slot has no drawn-value reference (form has literals ('4',), resolution doesn't close the loop)
+- `G9-01` (form `(let [v [1 2 3]] (conj v 4) v)`): user_msg contains two or more 'as the input value' parentheticals — auto-closer fired twice or authored prose duplicated it
     ```
-    The morning was bright and the dust on the road was dry, the sort of weather that invites a contest.
+    The sun rose by the woods, and with it the question of who could outrun whom.
 
-Stoneback the tortoise arranged a small heap of acorns at the edge of the meadow with steady, careful steps.
-"Numbers in Clojure don't fudge," he said.
-"Whatever you do, the runtime gets it right." ...
+Three smooth stones sat in a row on the meadow path — Mossback's tally-stones for the morning's laps. Pip suggested adding a fourth stone to mark an extra stretch, but Mossback wanted her original row kept exactly as it s...
     ```
-- `G7-11` (form `(try (throw (Exception. "oops")) (catch Exception e (.getMes`): story-tagged example's resolution slot has no drawn-value reference (form has literals ('oops',), resolution doesn't close the loop)
+- `G9-01` (form `(let [v [1 2 3]] (conj v 4) v)`): user_msg contains two or more 'as the input value' parentheticals — auto-closer fired twice or authored prose duplicated it
     ```
-    Hawthorn announced the race in a voice loud enough to wake the owls, and Inch accepted with a nod.
+    Bunny liked to talk; Cobblestone liked to listen, and the rivalry between them had grown into a small legend at the edge of the garden.
 
-"This is the practice meadow," Inch the tortoise untroubled by what others thought said near the forest,
-gesturing wide. "A stumble here costs nothing. Type a form, see
-what comes back, fix it, try ag...
+Three smooth stones sat in a row on the meadow path — Mossback's tally-stones for the morning's laps. Pip suggested adding a fourth stone to mark an extra stretch,...
     ```
-- `G7-11` (form `(try (throw (Exception. "oops")) (catch Exception e (.getMes`): story-tagged example's resolution slot has no drawn-value reference (form has literals ('oops',), resolution doesn't close the loop)
+- `G10-03` (form `(do (defmacro my-when [t & body] `(if ~t (do ~@body))) (my-w`): user_msg contains two or more 'as the input value' parentheticals — auto-closer fired twice or authored prose duplicated it
     ```
-    There is a kind of pride that runs ahead of itself, and a kind of patience that arrives at its own pace.
+    Galop announced the race in a voice loud enough to wake the owls, and Fen accepted with a nod.
 
-Mossback's alarm horn had sounded during a run. Rather than ignoring the alarm and dashing on like Hare, she stopped to read the message written on the horn's label — the first line of the stack...
+Mossback the tortoise was tired of writing `if`/`do` by hand for every form where she wanted several steps to run only if a condition held.
+
+She wanted a rule called `my-when` that rewrote the shorter for...
+    ```
+
+#### NARRATIVE_NUMERAL_HARDCODE
+
+- `G4-02` (form `(nth [10 20 30] 0)`): parametric example has hard-coded English numeral 'three stones' in a story slot — the actual draws may differ from this fixed count
+    ```
+    Spring had loosened the soil and the grasses had grown tall enough to brush a passing flank.
+
+"You can find what you want in a basket several ways,"
+Sepia the tortoise with steady, careful steps said, gesturing at the woven shape:
+"by the tag pinned to it, by its place in line, or by simply
+asking w...
+    ```
+- `G4-02` (form `(nth [10 20 30] 0)`): parametric example has hard-coded English numeral 'three stones' in a story slot — the actual draws may differ from this fixed count
+    ```
+    It happened at the edge of the meadow, on a morning when the air was kind to swift feet and steady ones alike.
+
+Sturdy the tortoise untroubled by what others thought pointed to a small basket on the path in the meadow.
+"Whatever I want to do with what's inside," he
+said pleased with her small fortun...
+    ```
+- `G4-02` (form `(nth [10 20 30] 0)`): parametric example has hard-coded English numeral 'three stones' in a story slot — the actual draws may differ from this fixed count
+    ```
+    Yarrow announced the race in a voice loud enough to wake the owls, and Mossfoot accepted with a nod.
+
+"You can find what you want in a basket several ways,"
+Mossfoot the tortoise with eyes always on the path said, gesturing at the woven shape:
+"by the tag pinned to it, by its place in line, or by si...
+    ```
+- `G4-13` (form `(count [1 2 3 4 5])`): parametric example has hard-coded English numeral 'five stones' in a story slot — the actual draws may differ from this fixed count
+    ```
+    By the time the dew had lifted, the meadow had gathered to watch the strangest race anyone could remember.
+
+Mossback the tortoise's pebble row held five stones laid out in order. She had lost track of the total and needed the REPL to confirm the count without her counting by hand. The value drawn fr...
+    ```
+- `G4-13` (form `(count [1 2 3 4 5])`): parametric example has hard-coded English numeral 'five stones' in a story slot — the actual draws may differ from this fixed count
+    ```
+    Word went around at the edge of the orchard that two creatures had agreed to settle an old question with their feet.
+
+A line of animals had formed by the orchard, each one taking the next
+animal's tail in its paw — head at the front, the rest trailing
+behind. "Many of our baskets are like this proce...
     ```
 
 #### DOUBLE_NAME_INTRO

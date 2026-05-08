@@ -110,7 +110,7 @@ G8_01 = SubjectCurriculum(
                 "have to know which keeper showed up."
             ),
             resolution=(
-                'the function was posted to the fellowship roll — a single name the village could call, with each kind of keeper answering in their own honest voice.'
+                'the function was posted to the fellowship roll — a single name the village could call, with each kind of keeper answering in their own honest voice (with `wolf` as the input value) (with `:wolf` as the input value).'
             )),
         _ex("(let [speak (fn [k] (cond (= k :wolf) \"howl\" (= k :flock) \"bleat\"))] (speak :flock))",
             "bleat",
@@ -152,7 +152,7 @@ G8_02 = SubjectCurriculum(
                 "into the slot named `color` and reads it back."
             ),
             resolution=(
-                "the tally-box yielded the lantern's color cleanly — the cooper's plan and the village's uniform readout, exactly as designed."
+                "the tally-box yielded the lantern's color cleanly — the cooper's plan and the village's uniform readout, exactly as designed (with `amber` as the input value)."
             )),
         _ex("(do (deftype Crook [length]) (.-length (Crook. 7)))",
             7,
@@ -405,7 +405,7 @@ G8_06 = SubjectCurriculum(
                 "implementation."
             ),
             resolution=(
-                'the fellowship routed to the word-keeper, and their honest alarm came back — the string-alarm verdict.'           )),
+                'the fellowship routed to the word-keeper, and their honest alarm came back — the string-alarm verdict (with `:string-alarm` as the input value).'           )),
     ],
     subplots=_GUILD_SUBPLOTS,
     plan_pool=_PLAN_POOL_G8,
@@ -835,7 +835,7 @@ G8_14 = SubjectCurriculum(
                 "`extend-protocol` adds pledges independently to a type."
             ),
             resolution=(
-                'Each protocol routed to its own method independently.'
+                'Each protocol routed to its own method independently (with `:a-impl` as the input value).'
             )),
     ],
     subplots=_GUILD_SUBPLOTS,

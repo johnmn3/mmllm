@@ -291,9 +291,7 @@ G3_04 = SubjectCurriculum(grade=3, subject_id="G3-04",
                 "start with its own count for the day."
             ),
             need=(
-                "She needed to reach into all three pouches and sum the three "
-                "counts inside the body, then let every pouch go empty when "
-                "the form closed."
+                'She needed to reach into all three pouches and sum the {drawn.b} counts inside the body, then let every pouch go empty when the form closed.'
             ),
             mapping=(
                 "`let` opens three apron-pockets: a, b, and c each hold one "

@@ -144,7 +144,7 @@ G12_01 = SubjectCurriculum(
                 "`into` feeds items through the transducer into a receiver vector."
             ),
             resolution=(
-                'The transducer filtered the items and returned the qualifying results.'
+                'The transducer filtered the items and returned the qualifying results (with `1` as the input value) (with `3` as the input value).'
             )),
     ],
     subplots=_SIEVE_SUBPLOTS, plan_pool=_PLAN_G12,
@@ -213,9 +213,7 @@ G12_03 = SubjectCurriculum(
             "into a set with the (map inc) transducer",
             "the set produced by mapping inc into an empty set",
             scenario=(
-                "Carol had an empty unique-only basket — one that would not hold "
-                "duplicates. The fleece-comb with its increment rule waited. Three "
-                "numbers sat ready to be poured through."
+                'Carol had an empty unique-only basket — one that would not hold duplicates. The fleece-comb with its increment rule waited. the numbers sat ready to be poured through.'
             ),
             need=(
                 "The numbers needed to be incremented and collected into a set "
@@ -234,19 +232,13 @@ G12_03 = SubjectCurriculum(
             "into [] with the (take 3) transducer over (range 100)",
             "the first three items collected through a transducer",
             scenario=(
-                "A fleece-comb with a new rule: take only the first three items, "
-                "drop the rest. An infinite cord of numbers waited — 0, 1, 2, ... "
-                "up to 99. An empty wool-basket sat ready."
+                'A fleece-comb with a new rule: take only the first 100 items, drop the rest. An infinite cord of numbers waited — 0, 1, 2, ... up to 99. An empty wool-basket sat ready.'
             ),
             need=(
-                "The village needed only the first three numbers from the long "
-                "sequence, collected into a vector. The transducer would stop "
-                "after three, so the REPL never had to process the rest."
+                'The village needed only the first 100 numbers from the long sequence, collected into a vector. The transducer would stop after three, so the REPL never had to process the rest.'
             ),
             mapping=(
-                "`(take 3)` is the comb's rule: stop after three items pass "
-                "through. `(range 100)` feeds the numbers. `into` pours them "
-                "through and collects into the vector basket."
+                "`(take 3)` is the comb's rule: stop after 100 items pass through. `(range 100)` feeds the numbers. `into` pours them through and collects into the vector basket."
             ),
             resolution=(
                 'Numbers 0, 1, 2 passed through and landed in the basket. The transducer stopped; no processing of 3–99 happened. The form returned [0 1 2], and the shepherd saw efficiency.'
@@ -973,7 +965,7 @@ G12_17 = SubjectCurriculum(
                 "what they get."
             ),
             resolution=(
-                'Tom saw the power: libraries that work with plain data are easier to use, test, and compose with other code.'
+                'Tom saw the power: libraries that work with plain data are easier to use, test, and compose with other code (with `1` as the input value) (with `3` as the input value).'
             )),
     ],
     subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G12,

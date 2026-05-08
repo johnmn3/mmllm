@@ -576,7 +576,7 @@ G1_09 = SubjectCurriculum(
                 'the difference between mark and message.'
             ),
             resolution=(
-                'The REPL tested the string and returned the verdict. It was not a '
+                'The REPL tested the string and returned false. It was not a '
                 'symbol, only text. Patch nodded — the tortoise had settled the kind.'
             ),
             tags=("story",),
@@ -604,7 +604,7 @@ G1_09 = SubjectCurriculum(
                 'is true if the names match, false if they differ.'
             ),
             resolution=(
-                'The REPL compared the two symbols and returned the verdict. Both marks '
+                'The REPL compared the two symbols and returned true. Both marks '
                 'were the same name. The runtime had settled it perfectly — two '
                 'equal scratches, and the hare to prove it.'
             ),
@@ -867,9 +867,7 @@ G1_13 = SubjectCurriculum(
             question_what="the difference of 5 and 3",
             goal_text="subtract 3 from 5",
             scenario=(
-                'Rex the hound laid out five bones on a flat stone, then moved three '
-                'to another pile. "How many are left?" he asked his packmate. "I could '
-                'count the remainder, or I could let the runtime do it exactly."'
+                'Rex the hound laid out {drawn.a} bones on a flat stone, then moved three to another pile. "How many are left?" he asked his packmate. "I could count the remainder, or I could let the runtime do it exactly."'
             ),
             need=(
                 'He wanted the REPL to take the first heap, remove the second, and '
@@ -895,25 +893,16 @@ G1_13 = SubjectCurriculum(
             question_what="the product of 4 and 5",
             goal_text="multiply 4 by 5",
             scenario=(
-                'Bell the hound arranged four piles of bones, each pile holding five '
-                'bones. "How many bones altogether?" she asked. "I could count every '
-                'one, or I could let the runtime multiply them for me — one operation, '
-                'exact answer."'
+                'Bell the hound arranged {drawn.a} piles of bones, each pile holding {drawn.b} bones. "How many bones altogether?" she asked. "I could count every one, or I could let the runtime multiply them for me — one operation, exact answer."'
             ),
             need=(
-                'She wanted the REPL to take the four piles of five and return the '
-                'total count. The multiplication had to be exact, with no room for '
-                'mis-counting.'
+                'She wanted the REPL to take the {drawn.a} piles of five and return the total count. The multiplication had to be exact, with no room for mis-counting.'
             ),
             mapping=(
-                'The four piles are the multiplicand. The five bones per pile are the '
-                'multiplier. The multiplication is the combining of equal groups. The '
-                'REPL gives the precise heap-size that results.'
+                'The {drawn.a} piles are the multiplicand. The {drawn.b} bones per pile are the multiplier. The multiplication is the combining of equal groups. The REPL gives the precise heap-size that results.'
             ),
             resolution=(
-                'The REPL performed the multiplication and handed back the precise count. '
-                'The four piles had been combined exactly right — the runtime had not '
-                'fumbled the counting — 5.'
+                'The REPL performed the multiplication and handed back the precise count. The {drawn.a} piles had been combined exactly right — the runtime had not fumbled the counting — 5.'
             ),
             tags=("story",),
         ),
@@ -924,9 +913,7 @@ G1_13 = SubjectCurriculum(
             question_what="the quotient of 10 and 2",
             goal_text="divide 10 by 2",
             scenario=(
-                'Patch the hound looked at a heap of ten bones and measured them into '
-                'two equal piles. "How many bones in each pile?" asked a younger dog. '
-                '"The runtime can tell us exactly by dividing."'
+                'Patch the hound looked at a heap of {drawn.a} bones and measured them into two equal piles. "How many bones in each pile?" asked a younger dog. "The runtime can tell us exactly by dividing."'
             ),
             need=(
                 'Patch wanted the REPL to split the heap fairly and hand back the count '
@@ -934,13 +921,10 @@ G1_13 = SubjectCurriculum(
                 'case.'
             ),
             mapping=(
-                'The ten bones are the dividend. The two piles are the divisor. The '
-                'division is the fair splitting. The REPL gives the count per pile — the '
-                'quotient.'
+                'The {drawn.a} bones are the dividend. The two piles are the divisor. The division is the fair splitting. The REPL gives the count per pile — the quotient.'
             ),
             resolution=(
-                'The REPL performed the division and handed back the precise count. Each '
-                'pile had been measured exactly right — the runtime had split fairly — 2.'
+                'The REPL performed the division and handed back the precise count. Each pile had been measured exactly right — the runtime had split fairly — 2 (with `10` as the input value).'
             ),
             tags=("story",),
         ),
@@ -951,9 +935,7 @@ G1_13 = SubjectCurriculum(
             question_what="the sum of 7 and 8",
             goal_text="add 7 and 8",
             scenario=(
-                'Rex the hound gathered seven bones from one bank and eight from '
-                'another. "Should I count them all?" he asked. "Let the runtime add '
-                'them together. It will give the exact total."'
+                'Rex the hound gathered {drawn.a} bones from one bank and eight from another. "Should I count them all?" he asked. "Let the runtime add them together. It will give the exact total."'
             ),
             need=(
                 'He wanted the REPL to combine the two heaps and hand back the precise '
@@ -988,9 +970,7 @@ G1_13 = SubjectCurriculum(
                 'mis-count.'
             ),
             mapping=(
-                'The twenty bones are the minuend. The seven bones moved away are the '
-                'subtrahend. The subtraction is the taking-away. The REPL gives the '
-                'exact count remaining.'
+                'The twenty bones are the minuend. The {drawn.b} bones moved away are the subtrahend. The subtraction is the taking-away. The REPL gives the exact count remaining.'
             ),
             resolution=(
                 'The REPL performed the subtraction and handed back the precise count. '
@@ -1278,18 +1258,13 @@ G1_15 = SubjectCurriculum(
                 'she asked. "The runtime can check them all at once."'
             ),
             need=(
-                'She wanted the REPL to compare all four numbers and return the verdict '
-                'on whether they were all equal. The comparison had to be exact.'
+                'She wanted the REPL to compare all the numbers and return the verdict on whether they were all equal. The comparison had to be exact.'
             ),
             mapping=(
-                'The crossing-condition is =. The four numbers are the operands. The '
-                'verdict — true if all match, false if any differs — is what the '
-                'conditions return.'
+                'The crossing-condition is =. The the numbers are the operands. The verdict — true if all match, false if any differs — is what the conditions return.'
             ),
             resolution=(
-                'The REPL checked all four numbers, saw they were all identical, and '
-                'returned the result. The verdict was clear — all four pebbles bore the same '
-                'mark.'
+                'The REPL checked all the numbers, saw they were all identical, and returned 1. The verdict was clear — all four pebbles bore the same mark.'
             ),
             tags=("story",),
         ),
@@ -1338,9 +1313,7 @@ G1_16 = SubjectCurriculum(
             question_what="whether 5 is zero",
             goal_text="check whether 5 is zero using zero?",
             scenario=(
-                'Bell the hound held five bones at the stream\'s edge and laid them '
-                'on a flat stone. "Is this count zero?" she asked. "The runtime can '
-                'tell me for certain."'
+                'Bell the hound held {drawn.a} bones at the stream\'s edge and laid them on a flat stone. "Is this count zero?" she asked. "The runtime can tell me for certain."'
             ),
             need=(
                 'She wanted the REPL to test the number and return the verdict: was it '
@@ -1351,7 +1324,7 @@ G1_16 = SubjectCurriculum(
                 'verdict — true if zero, false if not — is what the REPL hands back.'
             ),
             resolution=(
-                'The REPL tested the count, saw it was not zero, and returned the result. '
+                'The REPL tested the count, saw it was not zero, and returned 5. '
                 'The verdict was clear — the bones had weight, not emptiness.'
             ),
             tags=("story",),
@@ -1455,7 +1428,7 @@ G1_16 = SubjectCurriculum(
                 'what the runtime returns.'
             ),
             resolution=(
-                'The REPL tested the number, saw it moved forward, and returned the result. '
+                'The REPL tested the number, saw it moved forward, and returned 4. '
                 'The verdict was clear — the count was positive.'
             ),
             tags=("story",),

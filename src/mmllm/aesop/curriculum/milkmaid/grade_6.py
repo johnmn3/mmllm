@@ -85,8 +85,7 @@ G6_01 = SubjectCurriculum(grade=6, subject_id="G6-01",
                 "market address, not the runtime name-object."
             ),
             resolution=(
-                "The REPL returned the string the market-board carried — the dotted "
-                "vendor address, readable and ready to hand to a buyer."
+                'The REPL returned the string the market-board carried — the dotted vendor address, readable and ready to hand to a buyer (with `foo.bar` as the input value).'
             ),
             tags=("story",),
         ),
@@ -133,8 +132,7 @@ G6_02 = SubjectCurriculum(grade=6, subject_id="G6-02",
                 "address rather than the symbol itself."
             ),
             resolution=(
-                "The REPL returned the dotted string the board carried — the "
-                "namespace address she could write down and hand to the next vendor."
+                'The REPL returned the dotted string the board carried — the namespace address she could write down and hand to the next vendor (with `race.tortoise` as the input value).'
             ),
             tags=("story",),
         ),
@@ -161,8 +159,7 @@ G6_02 = SubjectCurriculum(grade=6, subject_id="G6-02",
                 "so equality holds."
             ),
             resolution=(
-                "The REPL confirmed the two board entries matched — the same namespace "
-                "was indeed posted on both sides of the panel."
+                'The REPL confirmed the two board entries matched — the same namespace was indeed posted on both sides of the panel (with `race.tortoise` as the input value).'
             ),
             tags=("story",),
         ),
@@ -198,8 +195,7 @@ G6_03 = SubjectCurriculum(grade=6, subject_id="G6-03",
                 "it produces the transformed output."
             ),
             resolution=(
-                "The REPL returned the all-capitals version of the word, confirming "
-                "the board-listed routine had been reached and applied correctly."
+                'The REPL returned the all-capitals version of the word, confirming the board-listed routine had been reached and applied correctly (with `hare` as the input value).'
             ),
             tags=("story",),
         ),
@@ -226,8 +222,7 @@ G6_03 = SubjectCurriculum(grade=6, subject_id="G6-03",
                 "fully-qualified name on the board delivers the lowercased result."
             ),
             resolution=(
-                "The REPL returned the all-lowercase version of the word, proving "
-                "the board-listed lowercasing service had been found and applied."
+                'The REPL returned the all-lowercase version of the word, proving the board-listed lowercasing service had been found and applied (with `ZEBRA` as the input value).'
             ),
             tags=("story",),
         ),
@@ -262,8 +257,7 @@ G6_04 = SubjectCurriculum(grade=6, subject_id="G6-04",
                 "when the routine is pure."
             ),
             resolution=(
-                "The REPL returned that both calls produced the same result, "
-                "confirming the board-listed function behaves consistently."
+                'The REPL returned that both calls produced the same result, confirming the board-listed function behaves consistently (with `x` as the input value) (with `) (clojure.string/upper-case ` as the input value).'
             ),
             tags=("story",),
         ),
@@ -297,8 +291,7 @@ G6_05 = SubjectCurriculum(grade=6, subject_id="G6-05",
                 "board entry and invokes the posted service."
             ),
             resolution=(
-                "The REPL returned the all-capitals greeting, confirming the board "
-                "entry had been found and the uppercasing service applied."
+                'The REPL returned the all-capitals greeting, confirming the board entry had been found and the uppercasing service applied (with `hello` as the input value).'
             ),
             tags=("story",),
         ),
@@ -324,8 +317,7 @@ G6_05 = SubjectCurriculum(grade=6, subject_id="G6-05",
                 "reverses the characters in the string."
             ),
             resolution=(
-                "The REPL returned the reversed string, confirming the board's "
-                "reversing service had been located and applied correctly."
+                "The REPL returned the reversed string, confirming the board's reversing service had been located and applied correctly (with `abc` as the input value)."
             ),
             tags=("story",),
         ),
@@ -574,8 +566,7 @@ G6_08 = SubjectCurriculum(grade=6, subject_id="G6-08",
                 "so the equality check returns a clear result."
             ),
             resolution=(
-                "The REPL confirmed the two board entries matched, proving the "
-                "namespace symbols were identical and the dependency graph was clean."
+                'The REPL confirmed the two board entries matched, proving the namespace symbols were identical and the dependency graph was clean (with `a.b` as the input value).'
             ),
             tags=("story",),
         ),
@@ -638,8 +629,7 @@ G6_09 = SubjectCurriculum(grade=6, subject_id="G6-09",
                 "sums both entries to produce the total."
             ),
             resolution=(
-                "The REPL returned the sum of the two local board entries, "
-                "confirming the dependent binding order was respected."
+                'The REPL returned the sum of the two local board entries, confirming the dependent binding order was respected (with `1` as the input value).'
             ),
             tags=("story",),
         ),
@@ -706,8 +696,7 @@ G6_12 = SubjectCurriculum(grade=6, subject_id="G6-12",
                 "many vendor sections the project board carries."
             ),
             resolution=(
-                "The REPL returned the number of namespace entries on the board, "
-                "confirming all the project's files were represented."
+                "The REPL returned the number of namespace entries on the board, confirming all the project's files were represented (with `race.tortoise` as the input value)."
             ),
             tags=("story",),
         ),
@@ -733,8 +722,7 @@ G6_12 = SubjectCurriculum(grade=6, subject_id="G6-12",
                 "entry in turn and collecting the results."
             ),
             resolution=(
-                "The REPL returned the sequence of string names, one per board "
-                "entry, ready to be written onto the delivery slip."
+                'The REPL returned the sequence of string names, one per board entry, ready to be written onto the delivery slip (with `race.tortoise` as the input value).'
             ),
             tags=("story",),
         ),
@@ -769,8 +757,7 @@ G6_13 = SubjectCurriculum(grade=6, subject_id="G6-13",
                 "posted routine as the full namespace path would."
             ),
             resolution=(
-                "The REPL returned the uppercased word, confirming the alias "
-                "reached the board-listed routine just as the full name would."
+                'The REPL returned the uppercased word, confirming the alias reached the board-listed routine just as the full name would (with `hare` as the input value).'
             ),
             tags=("story",),
         ),
@@ -805,8 +792,7 @@ G6_14 = SubjectCurriculum(grade=6, subject_id="G6-14",
                 "for any other qualified name on the neighbor's rack."
             ),
             resolution=(
-                "The REPL confirmed the dotted class name was indeed a symbol, "
-                "clearing the borrowed tool for use at the dairy."
+                'The REPL confirmed the dotted class name was indeed a symbol, clearing the borrowed tool for use at the dairy (with `java.util.List` as the input value).'
             ),
             tags=("story",),
         ),
@@ -833,8 +819,7 @@ G6_14 = SubjectCurriculum(grade=6, subject_id="G6-14",
                 "technique used for any namespace symbol on the market-board."
             ),
             resolution=(
-                "The REPL returned the dotted string name from the class symbol, "
-                "ready to be written into the dairy ledger."
+                'The REPL returned the dotted string name from the class symbol, ready to be written into the dairy ledger (with `java.util.Map` as the input value).'
             ),
             tags=("story",),
         ),

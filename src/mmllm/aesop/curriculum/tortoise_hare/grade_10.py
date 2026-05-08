@@ -169,9 +169,7 @@ G10_01 = SubjectCurriculum(
                 "runtime sees the resulting list."
             ),
             resolution=(
-                "the REPL returned a list with the symbol `a`, the number "
-                "from the pouch, and the symbol `b` — the template filled "
-                "exactly as Mossback intended."
+                'the REPL returned a list with the symbol `a`, the number from the pouch, and the symbol `b` — the template filled exactly as Mossback intended (with `5` as the input value).'
             ),
             tags=("story",),
         ),
@@ -237,9 +235,7 @@ G10_02 = SubjectCurriculum(
                 "producing a flat list the runtime can read directly."
             ),
             resolution=(
-                "the REPL returned a list with `list` followed by each "
-                "number spread out — the bag had been emptied into the "
-                "template exactly as Bramble needed."
+                'the REPL returned a list with `list` followed by each number spread out — the bag had been emptied into the template exactly as Bramble needed (with `3` as the input value).'
             ),
             tags=("story",),
         ),
@@ -279,9 +275,7 @@ G10_03 = SubjectCurriculum(
                 "then evaluates the rewritten form normally."
             ),
             resolution=(
-                "the rewritten form ran the body, kept only the "
-                "last-step value, and returned it — the rule had "
-                "saved Mossback the longer writing."
+                'the rewritten form ran the body, kept only the last-step value, and returned it — the rule had saved Mossback the longer writing (with `1` as the input value) (with `3` as the input value).'
             ),
             tags=("story",),
         ),
@@ -529,9 +523,7 @@ G10_06 = SubjectCurriculum(
             question_what="the result when using when-not with a false condition",
             goal_text="use when-not to execute an expression when the condition is false",
             scenario=(
-                "Mossback had a second trail-mark, `when-not`, for the "
-                "opposite case: run the body only when the condition did "
-                "not hold. The value drawn fresh was {drawn.a}."
+                'Mossback had a second trail-mark, `when-not`, for the opposite case: run the body only when the condition did not hold. The value drawn fresh was :ok.'
             ),
             need=(
                 "She needed `when-not` to rewrite its call so that a false "
@@ -765,7 +757,7 @@ G10_09 = SubjectCurriculum(
             question_what="whether two fresh gensyms are identical",
             goal_text="generate two gensyms with the same prefix and check if they are equal",
             scenario=(
-                'Bramble noticed that two macro expansions both needed a scratch-name starting with `{drawn.a}` and wondered if `gensym` would hand out the same name twice, causing a collision.'
+                'Bramble noticed that two macro expansions both needed a scratch-name starting with `x_` and wondered if `gensym` would hand out the same name twice, causing a collision.'
             ),
             need=(
                 "She needed to call `gensym` twice with the same prefix "
@@ -954,9 +946,7 @@ G10_11 = SubjectCurriculum(
                 "sees only the remaining elements."
             ),
             resolution=(
-                "the REPL returned a two-element vector — the middle "
-                "element had been discarded by the scribe at read time, "
-                "leaving no trace for the runtime."
+                'the REPL returned a two-element vector — the middle element had been discarded by the scribe at read time, leaving no trace for the runtime (with `1` as the input value) (with `3` as the input value).'
             ),
             tags=("story",),
         ),
@@ -1133,9 +1123,7 @@ G10_14 = SubjectCurriculum(
                 "and returns whatever value the evaluator computes from it."
             ),
             resolution=(
-                "the REPL returned the sum — the runtime had received "
-                "the form from `eval` and evaluated it immediately, "
-                "turning the quoted list into a computed value."
+                'the REPL returned the sum — the runtime had received the form from `eval` and evaluated it immediately, turning the quoted list into a computed value (with `3` as the input value).'
             ),
             tags=("story",),
         ),
@@ -1146,9 +1134,7 @@ G10_14 = SubjectCurriculum(
             question_what="the result of evaluating the constructed list",
             goal_text="construct a list that represents addition and evaluate it",
             scenario=(
-                "Bramble wanted to build a form at runtime from separate "
-                "pieces — a symbol and two numbers — and then ask the "
-                "runtime to evaluate the assembled result. The values drawn fresh were {drawn.a} and {drawn.b}."
+                'Bramble wanted to build a form at runtime from separate pieces — a symbol and two numbers — and then ask the runtime to evaluate the assembled result. The values drawn fresh were 4 and 5.'
             ),
             need=(
                 "She needed `list` to assemble the form as data, then "

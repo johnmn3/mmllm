@@ -236,7 +236,7 @@ G3_03 = SubjectCurriculum(grade=3, subject_id="G3-03",
                 'calling a is what happens when the form looks up the grip.'
             ),
             resolution=(
-                'The REPL read the bite and returned the result the mouth had '
+                'The REPL read the bite and returned 5 the mouth had '
                 'held. Bell stepped past the form\'s edge and released the '
                 'binding. The name a was gone.'
             ),
@@ -297,7 +297,7 @@ G3_04 = SubjectCurriculum(grade=3, subject_id="G3-04",
                 'the bound values, and the verdict is the difference.'
             ),
             resolution=(
-                'The REPL subtracted y from x and returned the result. Bell '
+                'The REPL subtracted y from x and returned 3. Bell '
                 'released both bones as she crossed.'
             ),
             tags=("story",),
@@ -309,17 +309,14 @@ G3_04 = SubjectCurriculum(grade=3, subject_id="G3-04",
             question_what="adding a, b, and c after binding via let to 2, 3, and 4",
             goal_text="bind a to 2, b to 3, c to 4, and add them",
             scenario=(
-                'Rex the hound gathered a row of bones at the stream\'s edge and '
-                'clenched them between his jaws — light, medium, heavy. "I hold '
-                'these as a, b, and c."'
+                'Rex the hound gathered {drawn.b} bones at the stream\'s edge and clenched them between his jaws — light, medium, heavy. "I hold these as a, b, and c."'
             ),
             need=(
                 'The form needed all three known by names so the mouth could add '
                 'them.'
             ),
             mapping=(
-                'The a row of bones are the three-binding; the names a, b, and c are '
-                'the throat\'s hold; the sum is what comes back.'
+                "The {drawn.b} bones are the three-binding; the names a, b, and c are the throat's hold; the sum is what comes back."
             ),
             resolution=(
                 'The REPL added the bound values and returned the total. Rex '
@@ -396,12 +393,7 @@ G3_06 = SubjectCurriculum(grade=3, subject_id="G3-06",
             question_what="the value of b, bound to twice a via let, after a is bound to 5",
             goal_text="bind a to 5, then bind b to twice a, and return b",
             scenario=(
-                'Rex the hound gathered a row of bones and clamped them in his '
-                'jaws as the name a. Before stepping forward, he computed in '
-                'his mind what twice that grip would weigh — and held both the '
-                'first grip and the second answer as b. "Each binding speaks '
-                'to the next," he said through the dual grip. "The second form '
-                'sees the first."'
+                'Rex the hound gathered {drawn.a} bones and clamped them in his jaws as the name a. Before stepping forward, he computed in his mind what twice that grip would weigh — and held both the first grip and the second answer as b. "Each binding speaks to the next," he said through the dual grip. "The second form sees the first."'
             ),
             need=(
                 'He needed the second binding to refer to the first — to '
@@ -429,13 +421,7 @@ G3_06 = SubjectCurriculum(grade=3, subject_id="G3-06",
             question_what="the value of c, bound via let to twice b, after a is 3 and b is a+1",
             goal_text="bind a to 3, b to a+1, c to 2*b, and return c",
             scenario=(
-                'Bell the hound picked up a row of bones and gripped them in '
-                'careful sequence within the mouth. First, she called the '
-                'smallest a. Then she thought of adding one more — and held '
-                'that grip as b. Then she doubled b in her mind and held the '
-                'final answer as c. "Each binding speaks to the ones before," '
-                'she said through the triple grip. "One after another, until '
-                'the form speaks the last."'
+                'Bell the hound picked up {drawn.a} bones and gripped them in careful sequence within the mouth. First, she called the smallest a. Then she thought of adding one more — and held that grip as b. Then she doubled b in her mind and held the final answer as c. "Each binding speaks to the ones before," she said through the triple grip. "One after another, until the form speaks the last."'
             ),
             need=(
                 'She needed the chain — a into b, b into c — all held in the '
@@ -528,7 +514,7 @@ G3_08 = SubjectCurriculum(grade=3, subject_id="G3-08",
             question_what="the result of applying an anonymous fn with three parameters that adds them to 1, 2, and 3",
             goal_text="create an anonymous function with three parameters that adds them and apply it to 1, 2, and 3",
             scenario=(
-                'Rex the hound drew three sniffing-steps: take a row of counts and carry back their sum. '
+                'Rex the hound drew three sniffing-steps: take three counts and carry back their sum. '
                 '"This trail has no name — I design it for this walk."'
             ),
             need=(
@@ -586,7 +572,7 @@ G3_09 = SubjectCurriculum(grade=3, subject_id="G3-09",
             question_what="the result of calling the function add3, defined via defn to add three arguments, with 1, 2, and 3",
             goal_text="define a function add3 that adds three arguments, then call it with 1, 2, and 3",
             scenario=(
-                'Patch the hound laid out a three-step sniffing-trail at the stream\'s edge and scratched its name — add3 — into a marker stone beside the path. "This trail takes three counts and gives back their sum," Patch said. "I name it so I can call it whenever I need to add three together."'
+                'Patch the hound laid out a three-step sniffing-trail at the stream\'s edge and scratched its name — add3 — into a marker stone beside the path. "This trail takes {drawn.c} counts and gives back their sum," Patch said. "I name it so I can call it whenever I need to add three together."'
             ),
             need=(
                 'The form defined the named trail once, then proved it worked '
@@ -599,9 +585,9 @@ G3_09 = SubjectCurriculum(grade=3, subject_id="G3-09",
                 'and walking the trail it marks.'
             ),
             resolution=(
-                'The runtime marked the stone with the name add3 and remembered '
-                'the trail. When the form called add3 with 1, 2, and 3, it '
-                'walked the trail, added the counts as the sniffs showed, '
+                'The REPL marked the stone with the name add3 and remembered '
+                'the trail. When the form called add3 with 1, 2, and 3, the '
+                'REPL walked the trail, added the counts as the sniffs showed, '
                 'and returned the total.'
             ),
             tags=("story",),
@@ -755,7 +741,7 @@ G3_12 = SubjectCurriculum(grade=3, subject_id="G3-12",
             ),
             resolution=(
                 'The REPL read the jaws first when it saw g inside the let, '
-                'added one, and returned the result. The shadow faded when the '
+                'added one, and returned 1. The shadow faded when the '
                 'form ended. The stone stood untouched — its mark would be read '
                 'again outside the let.'
             ),
@@ -790,9 +776,7 @@ G3_13 = SubjectCurriculum(grade=3, subject_id="G3-13",
                 'step, and the last sniff is the only value that comes back.'
             ),
             resolution=(
-                'The REPL walked the trail, followed each mark in order, but '
-                'returned only what the final sniff had revealed — the running '
-                'total that mattered was always what lay at the trail\'s end — 1.'
+                "The REPL walked the trail, followed each mark in order, but returned only what the final sniff had revealed — the running total that mattered was always what lay at the trail's end — 1 (with `99` as the input value)."
             ),
             tags=("story",),
         ),
@@ -952,7 +936,7 @@ G3_17 = SubjectCurriculum(grade=3, subject_id="G3-17",
                 'calls them, and the difference comes back.'
             ),
             resolution=(
-                'The REPL read the dashed names and computed the difference — 1.'
+                'The REPL read the dashed names and computed the difference — 1 (with `4` as the input value).'
             ),
             tags=("story",),
         ),
@@ -998,10 +982,7 @@ G3_18 = SubjectCurriculum(grade=3, subject_id="G3-18",
             question_what="the result of multiplying 5 by itself three times without any binding",
             goal_text="compute 5 cubed using direct values",
             scenario=(
-                'Patch the hound arrived at the crossing and saw a row of stones '
-                'arranged in a pile. "I don\'t need to name these," he said, "because '
-                'I will use them just once and the form is so short that the values '
-                'are clear enough."'
+                'Patch the hound arrived at the crossing and saw the stones arranged in a pile. "I don\'t need to name these," he said, "because I will use them just once and the form is so short that the values are clear enough."'
             ),
             need=(
                 'When the form was brief and the value appeared only once or the '
@@ -1009,9 +990,7 @@ G3_18 = SubjectCurriculum(grade=3, subject_id="G3-18",
                 'clarity.'
             ),
             mapping=(
-                'The a row of stones laid out are the literal values in the form, the '
-                'pile itself is the operation, and the product is what comes back '
-                'without any naming layer.'
+                'The the stones laid out are the literal values in the form, the pile itself is the operation, and the product is what comes back without any naming layer.'
             ),
             resolution=(
                 'The REPL saw the literal values and multiplied them directly, '

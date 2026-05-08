@@ -341,7 +341,7 @@ G6_05 = SubjectCurriculum(grade=6, subject_id="G6-05",
             question_what="the reversed form of the string abc produced by clojure.string/reverse",
             goal_text="call the reversing function from clojure.string on a test string",
             scenario=(
-                'The same scroll held another routine: reverse. It took the letters in a string and handed them back in the opposite order. Mossback had a string {drawn.a} and wanted to see what the reversed order would look like.'
+                'The same scroll held another routine: reverse. It took the letters in a string and handed them back in the opposite order. Mossback had a string abc and wanted to see what the reversed order would look like.'
             ),
             need=(
                 "She needed the scroll's reverse routine to rearrange the letters "
@@ -391,8 +391,7 @@ G6_05 = SubjectCurriculum(grade=6, subject_id="G6-05",
             question_what="the name part of a qualified keyword",
             goal_text="extract the name local portion of a qualified keyword",
             scenario=(
-                "From the same qualified label :owner/item, Mossback now wanted "
-                "the second part — the local name that lived *within* the namespace. The value drawn fresh was {drawn.a}."
+                'From the same qualified label :owner/item, Mossback now wanted the second part — the local name that lived *within* the namespace. The value drawn fresh was :owner/item.'
             ),
             need=(
                 "She needed to know what the routine was called — the part after "
@@ -806,7 +805,7 @@ G6_14 = SubjectCurriculum(grade=6, subject_id="G6-14",
                 "to its string form. `(name ...)` extracts that string."
             ),
             resolution=(
-                "the runtime returned the string spelling out the foreign tool's full name."
+                "the runtime returned the string spelling out the foreign tool's full name (with `java.util.Map` as the input value)."
             ),
             tags=("story",),
         ),

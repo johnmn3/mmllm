@@ -259,10 +259,7 @@ G12_03 = SubjectCurriculum(
             question_what="the vector produced by reifying the take-3 transducer into an empty vector via into, applied to the range of 100 numbers",
             goal_text="use the take-3 transducer with into to collect the first the elements from a range of 100 numbers",
             scenario=(
-                "Sable perched at the road's edge over a long row of a hundred "
-                "stones. The sorting-perch had one rule: stop after three "
-                "stones have passed through. An empty pitcher-vector waited "
-                "below to receive them."
+                "Sable perched at the road's edge over a long row of a hundred stones. The sorting-perch had one rule: stop after 100 stones have passed through. An empty pitcher-vector waited below to receive them."
             ),
             need=(
                 "They needed only the first the stones from the long row, "
