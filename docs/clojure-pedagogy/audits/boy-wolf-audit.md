@@ -1627,11 +1627,13 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 6
 - variety @ n=50: 1.00
-- issues: {'CLAUSE_STACK_OVERFLOW': 3, 'GOAL_FALLBACK_GENERIC': 1}
+- issues: {'CLAUSE_STACK_OVERFLOW': 3, 'STORY_SLOT_NOUN_REPEAT': 3, 'GOAL_FALLBACK_GENERIC': 1}
     - [CLAUSE_STACK_OVERFLOW] form=`(let [a (int-array [1 2 3])] (alength a))` — sentence with 6 commas reads as AI-output cadence: "When we need a smith's tool, the runtime\ncarries the value over the wall, asks t"
+    - [STORY_SLOT_NOUN_REPEAT] form=`(let [a (int-array [10 20 30])] (aget a 1))` — the noun 'the host's' appears in all 4 story slots (scenario/need/mapping/resolution) — vary the imagery between beats
+    - [STORY_SLOT_NOUN_REPEAT] form=`(let [a (int-array [10 20 30])] (aget a 1))` — the noun 'the host's' appears in all 4 story slots (scenario/need/mapping/resolution) — vary the imagery between beats
+    - [STORY_SLOT_NOUN_REPEAT] form=`(let [a (int-array [10 20 30])] (aget a 1))` — the noun 'the host's' appears in all 4 story slots (scenario/need/mapping/resolution) — vary the imagery between beats
     - [CLAUSE_STACK_OVERFLOW] form=`(let [a (int-array [1 2 3])] (alength a))` — sentence with 6 commas reads as AI-output cadence: "When we need a smith's tool, the runtime\ncarries the value over the wall, asks t"
     - [CLAUSE_STACK_OVERFLOW] form=`(let [a (int-array [5 10 15])] (aget a 0))` — sentence with 6 commas reads as AI-output cadence: "When we need a smith's tool, the runtime\ncarries the value over the wall, asks t"
-    - [GOAL_FALLBACK_GENERIC] form=`(let [a (int-array [7 8 9])] (alength a))` — user_msg uses generic 'To evaluate the X, ...' fallback AND no drawn-literal anchor — add a canonical GOALS entry for richer prose
 
 ### G11-08: Type hints
 
@@ -1912,6 +1914,7 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 - **AI_OUTPUT_CADENCE**: 6
 - **REPEATED_OPENER_FRAGMENT**: 4
 - **RESOLUTION_REPL_DOUBLED**: 3
+- **STORY_SLOT_NOUN_REPEAT**: 3
 - **UNFILLED_DRAWN_PLACEHOLDER**: 1
 - **DRAWN_PLACEHOLDER_LEAK**: 1
 - **WRONG_FABLE_LITERAL**: 1
@@ -1933,7 +1936,7 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 | 8 | 16 | 31 | 64 | — |
 | 9 | 18 | 34 | 87 | — |
 | 10 | 16 | 36 | 63 | — |
-| 11 | 14 | 58 | 77 | — |
+| 11 | 14 | 58 | 80 | — |
 | 12 | 18 | 37 | 82 | — |
 
 ### Sample issues by severity
@@ -2994,6 +2997,34 @@ Carol had a Shepherd tally-box with a name slot. When she asked the box to tell 
     The hilltop offered a fine view of both the flock and the road below, where help would have to come from.
 
 Carol warned Tom about a tempting but dangerous macro style: anaphoric macros that secretly inject a name into the user's code. She showed him a safe alternative: `safe-if-let`, which bound the...
+    ```
+
+#### STORY_SLOT_NOUN_REPEAT
+
+- `G11-07` (form `(let [a (int-array [10 20 30])] (aget a 1))`): the noun 'the host's' appears in all 4 story slots (scenario/need/mapping/resolution) — vary the imagery between beats
+    ```
+    The hilltop offered a fine view of both the flock and the road below, where help would have to come from.
+
+Damien, with great whoops of laughter, grabbed at the foreign toolshed
+without checking which tool was which. The wrong tool, of course,
+made an awful sound. Drusilla sighed and walked over: to...
+    ```
+- `G11-07` (form `(let [a (int-array [10 20 30])] (aget a 1))`): the noun 'the host's' appears in all 4 story slots (scenario/need/mapping/resolution) — vary the imagery between beats
+    ```
+    There was once a shepherd boy whose afternoons were long and whose imagination was longer.
+
+Philippa, with the swagger of an unrepentant fibber, reached for a foreign tool from the
+toolshed and tried to call it his own way, without checking the label.
+Diogenes caught her. "Each tool in the foreign
+t...
+    ```
+- `G11-07` (form `(let [a (int-array [10 20 30])] (aget a 1))`): the noun 'the host's' appears in all 4 story slots (scenario/need/mapping/resolution) — vary the imagery between beats
+    ```
+    When Philippa called out by the orchard the first time, the village came running, and the sheep stayed exactly as they were.
+
+Philippa, with the swagger of an unrepentant fibber, grabbed at the foreign toolshed
+without checking which tool was which. The wrong tool, of course,
+made an awful sound. Is...
     ```
 
 #### AI_OUTPUT_CADENCE

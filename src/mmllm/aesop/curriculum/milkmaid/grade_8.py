@@ -76,7 +76,7 @@ G8_01 = SubjectCurriculum(
                 "card not listed."
             ),
             resolution=(
-                "the REPL registered the function without complaint — the dispatch "
+                "The REPL registered the function without complaint — the dispatch "
                 "window was installed and ready to route any caller who arrived "
                 "with a guild-card."
             ),
@@ -105,7 +105,7 @@ G8_01 = SubjectCurriculum(
                 "the stamp matches. No caller walks through the wrong door."
             ),
             resolution=(
-                "the REPL returned the answer belonging to the tortoise's guild-card "
+                "The REPL returned the answer belonging to the tortoise's guild-card "
                 "— the dispatch had routed correctly to the right paired keyword."
             ),
             tags=("story",),
@@ -144,7 +144,7 @@ G8_02 = SubjectCurriculum(
                 "slot-reader that reaches in and retrieves the value."
             ),
             resolution=(
-                "the REPL handed back the contents of the color slot — exactly what "
+                "The REPL handed back the contents of the color slot — exactly what "
                 "the farmer had placed there when she hammered the pail."
             ),
             tags=("story",),
@@ -172,8 +172,8 @@ G8_02 = SubjectCurriculum(
                 "is the slot-reader that reaches in and retrieves the stored value."
             ),
             resolution=(
-                "the REPL handed back the contents of the weight slot — the number "
-                "the farmer had pressed into the mold when she stamped the pail."
+                "The REPL handed back the contents of the weight slot — the number "
+                "the farmer had pressed into the mold when she stamped the pail — 7."
             ),
             tags=("story",),
         ),
@@ -212,7 +212,7 @@ G8_03 = SubjectCurriculum(
                 "into the pail and retrieving whatever sits in that compartment."
             ),
             resolution=(
-                "the REPL returned the keyword sitting in the pace slot — the stamp "
+                "The REPL returned the keyword sitting in the pace slot — the stamp "
                 "the farmer had pressed into that compartment when she built the pail."
             ),
             tags=("story",),
@@ -239,7 +239,7 @@ G8_03 = SubjectCurriculum(
                 "reaches into the name compartment and retrieves the stored value."
             ),
             resolution=(
-                "the REPL returned the string sitting in the name slot — whatever "
+                "The REPL returned the string sitting in the name slot — whatever "
                 "the farmer had placed there when she hammered the pail into shape."
             ),
             tags=("story",),
@@ -281,7 +281,7 @@ G8_04 = SubjectCurriculum(
                 "the charter's name is a real, non-nil value."
             ),
             resolution=(
-                "the REPL confirmed the charter was real — the guild name existed "
+                "The REPL confirmed the charter was real — the guild name existed "
                 "as a recognized value and the inspector returned an affirmative "
                 "answer."
             ),
@@ -309,7 +309,7 @@ G8_04 = SubjectCurriculum(
                 "is present, falsy if the name resolves to nothing."
             ),
             resolution=(
-                "the REPL returned a truthy answer — the Greet charter had been "
+                "The REPL returned a truthy answer — the Greet charter had been "
                 "properly registered and the inspector confirmed its presence."
             ),
             tags=("story",),
@@ -350,7 +350,7 @@ G8_05 = SubjectCurriculum(
                 "a string pail routes the call to her registered method."
             ),
             resolution=(
-                "the REPL returned the answer the string farmer had registered — "
+                "The REPL returned the answer the string farmer had registered — "
                 "her method had answered the guild call, not any other member's."
             ),
             tags=("story",),
@@ -380,7 +380,7 @@ G8_05 = SubjectCurriculum(
                 "registered method — each guild member produces her own variety."
             ),
             resolution=(
-                "the REPL returned the keyword the number farmer had registered — "
+                "The REPL returned the keyword the number farmer had registered — "
                 "her method had answered the guild call correctly."
             ),
             tags=("story",),
@@ -423,7 +423,7 @@ G8_06 = SubjectCurriculum(
                 "the string arm is never consulted."
             ),
             resolution=(
-                "the REPL returned the keyword the number farmer had registered "
+                "The REPL returned the keyword the number farmer had registered "
                 "— dispatch had routed past the string arm to the correct "
                 "guild member."
             ),
@@ -455,7 +455,7 @@ G8_06 = SubjectCurriculum(
                 "Each member's reply belongs only to her own variety."
             ),
             resolution=(
-                "the REPL returned the keyword the string farmer had placed on "
+                "The REPL returned the keyword the string farmer had placed on "
                 "her charter arm — dispatch had routed to the right member "
                 "and no other."
             ),
@@ -497,7 +497,7 @@ G8_07 = SubjectCurriculum(
                 "`speed` dispatches to the mold's own method body."
             ),
             resolution=(
-                "the REPL returned the keyword the Milkmaid mold's body declared "
+                "The REPL returned the keyword the Milkmaid mold's body declared "
                 "— dispatch had routed correctly to the record's own "
                 "implementation."
             ),
@@ -527,7 +527,7 @@ G8_07 = SubjectCurriculum(
                 "routes to the Farmer body — a separate slot from the Milkmaid's."
             ),
             resolution=(
-                "the REPL returned the keyword the Farmer mold's body declared "
+                "The REPL returned the keyword the Farmer mold's body declared "
                 "— each mold's implementation answered its own charter slot "
                 "with no overlap."
             ),
@@ -567,7 +567,7 @@ G8_08 = SubjectCurriculum(
                 "`pace` with a stamped map routes the pail to the matching arm."
             ),
             resolution=(
-                "the REPL returned the value the `:hare` arm had posted — the sort "
+                "The REPL returned the value the `:hare` arm had posted — the sort "
                 "had routed correctly and the pail landed exactly where the placard "
                 "said."
             ),
@@ -599,7 +599,7 @@ G8_08 = SubjectCurriculum(
                 "pail to the matching arm."
             ),
             resolution=(
-                "the REPL returned the keyword posted on the `:stone` shelf — "
+                "The REPL returned the keyword posted on the `:stone` shelf — "
                 "the pail had been sorted correctly and the shelf's placard "
                 "declared the result."
             ),
@@ -644,7 +644,7 @@ G8_09 = SubjectCurriculum(
                 "is what the table returns."
             ),
             resolution=(
-                "the REPL returned the keyword posted on the `:tortoise` shelf "
+                "The REPL returned the keyword posted on the `:tortoise` shelf "
                 "— the sort had ignored the `:hare` arm and routed the pail "
                 "precisely to the matching placard."
             ),
@@ -678,7 +678,7 @@ G8_09 = SubjectCurriculum(
                 "returns for any unrecognised variety."
             ),
             resolution=(
-                "the REPL returned the keyword posted on the `:default` shelf "
+                "The REPL returned the keyword posted on the `:default` shelf "
                 "— the owl pail had been safely caught by the fallback arm, "
                 "with no arm error raised."
             ),
@@ -723,7 +723,7 @@ G8_10 = SubjectCurriculum(
                 "and returns the arm's declared value."
             ),
             resolution=(
-                "the REPL returned the string posted on the `:rabbit` shelf "
+                "The REPL returned the string posted on the `:rabbit` shelf "
                 "— `identity` dispatch had routed the pail precisely to the "
                 "matching arm."
             ),
@@ -755,7 +755,7 @@ G8_10 = SubjectCurriculum(
                 "to the registered string implementation."
             ),
             resolution=(
-                "the REPL returned the string the farmer's method had assembled "
+                "The REPL returned the string the farmer's method had assembled "
                 "— the prefix fused with the pail's own contents, confirming "
                 "that protocol dispatch had reached the right guild member."
             ),
@@ -801,7 +801,7 @@ G8_11 = SubjectCurriculum(
                 "for the guild."
             ),
             resolution=(
-                "the REPL returned the keyword the string farmer's body declared "
+                "The REPL returned the keyword the string farmer's body declared "
                 "— the charter was honored and dispatch routed to the registered "
                 "member."
             ),
@@ -847,7 +847,7 @@ G8_12 = SubjectCurriculum(
                 "method and returns its posted value."
             ),
             resolution=(
-                "the REPL returned the keyword the number-type arm had declared "
+                "The REPL returned the keyword the number-type arm had declared "
                 "— the sorting-table dispatch had routed correctly to the "
                 "`extend-type` implementation."
             ),
@@ -879,7 +879,7 @@ G8_12 = SubjectCurriculum(
                 "keyword — the sorting-table's string shelf."
             ),
             resolution=(
-                "the REPL returned the keyword the string-type arm had declared "
+                "The REPL returned the keyword the string-type arm had declared "
                 "— dispatch had routed to the `extend-type` implementation for "
                 "the string variety, not to any other shelf."
             ),
@@ -923,7 +923,7 @@ G8_13 = SubjectCurriculum(
                 "to the arriving pail and runs the body against it."
             ),
             resolution=(
-                "the REPL returned the string from the `n` slot — `this` had "
+                "The REPL returned the string from the `n` slot — `this` had "
                 "retrieved what the caller placed there when stamping the pail."
             ),
             tags=("story",),
@@ -952,7 +952,7 @@ G8_13 = SubjectCurriculum(
                 "to the pail and runs the body against it."
             ),
             resolution=(
-                "the REPL returned the keyword from the `t` slot — `this` had "
+                "The REPL returned the keyword from the `t` slot — `this` had "
                 "retrieved the pail's own variety-stamp as pressed at construction."
             ),
             tags=("story",),
@@ -997,7 +997,7 @@ G8_14 = SubjectCurriculum(
                 "both replies — one per charter — side by side."
             ),
             resolution=(
-                "the REPL returned a two-element vector, one slot per charter's "
+                "The REPL returned a two-element vector, one slot per charter's "
                 "dispatch — the two guild memberships had answered independently "
                 "with no inheritance between them."
             ),
@@ -1039,7 +1039,7 @@ G8_15 = SubjectCurriculum(
                 "one if it does not."
             ),
             resolution=(
-                "the REPL confirmed the relationship — `isa?` returned an affirmative "
+                "The REPL confirmed the relationship — `isa?` returned an affirmative "
                 "answer, showing the derived lineage had been recorded in the "
                 "hierarchy ledger."
             ),
@@ -1069,7 +1069,7 @@ G8_15 = SubjectCurriculum(
                 "the parent–child relationship is pre-recorded."
             ),
             resolution=(
-                "the REPL confirmed the Java lineage — `isa?` returned an "
+                "The REPL confirmed the Java lineage — `isa?` returned an "
                 "affirmative answer, showing Long was recorded as a sub-variety "
                 "of Number in Java's own breed-book."
             ),
@@ -1100,7 +1100,7 @@ G8_15 = SubjectCurriculum(
                 "the relation, `isa?` returns a falsy result."
             ),
             resolution=(
-                "the REPL returned a negative answer — `isa?` found no lineage "
+                "The REPL returned a negative answer — `isa?` found no lineage "
                 "connecting String to Number in Java's breed-book, confirming "
                 "the two varieties were unrelated at the sorting table."
             ),
@@ -1144,7 +1144,7 @@ G8_16 = SubjectCurriculum(
                 "per guild member, in order."
             ),
             resolution=(
-                "the REPL returned a two-element vector — one keyword per mold, "
+                "The REPL returned a two-element vector — one keyword per mold, "
                 "each guild member's implementation having answered its own "
                 "charter slot in sequence."
             ),
@@ -1175,7 +1175,7 @@ G8_16 = SubjectCurriculum(
                 "Milkmaid's slot sits separately and is never consulted."
             ),
             resolution=(
-                "the REPL returned the keyword the Farmer mold's `cry` body "
+                "The REPL returned the keyword the Farmer mold's `cry` body "
                 "declared — dispatch had routed precisely to the Farmer's "
                 "charter entry, not to the Milkmaid's."
             ),

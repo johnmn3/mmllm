@@ -1768,19 +1768,36 @@ def check_record(rec, sub, example):
     # {emo_patient} adjacent to a hand-authored EMO clause).
     # Heuristic: count distinct EMO-marker hits inside one sentence
     # (split on `.`/`?`/`!`); flag when >=2 distinct markers fire.
+    # Position-deduped: two markers whose match positions overlap
+    # are the same phrase (one is a substring of another) and count
+    # as ONE hit.
     for sent in re.split(r"[.!?]\s+", user):
         if len(sent) < 60:
             continue
-        hits = []
+        # Collect (start, end, marker) for each marker that appears.
+        spans = []
         for m in _EMO_MARKERS:
-            if m and len(m) >= 8 and m in sent:
-                hits.append(m)
-                if len(hits) >= 2:
+            if not m or len(m) < 8:
+                continue
+            i = sent.find(m)
+            if i >= 0:
+                spans.append((i, i + len(m), m))
+        # Sort by start, then by length descending so longer phrases
+        # at the same start win.
+        spans.sort(key=lambda t: (t[0], -(t[1] - t[0])))
+        # Greedy non-overlap pick.
+        picked = []
+        last_end = -1
+        for s, e, m in spans:
+            if s >= last_end:
+                picked.append(m)
+                last_end = e
+                if len(picked) >= 2:
                     break
-        if len(hits) >= 2:
+        if len(picked) >= 2:
             issues.append(("DOUBLE_EMO_INJECTION",
                             f"sentence has 2+ distinct EMO-pool phrases "
-                            f"({hits[0][:30]!r} + {hits[1][:30]!r}) — the "
+                            f"({picked[0][:30]!r} + {picked[1][:30]!r}) — the "
                             "character can't earn two emotional registers "
                             "in the same beat"))
             break
@@ -1908,6 +1925,76 @@ def check_record(rec, sub, example):
                             "user_msg starts a sentence with 'This form' / "
                             "'That form' — replace with concrete reference "
                             "or pronoun ('it')"))
+    # ───── slice D580 (milkmaid fixset-beta) detector additions ─────
+
+    # COMMA_EMO_AT_SENTENCE_START — a stray ", {emo_X}," construction at
+    # sentence start. After bulk-emo-injection the body sometimes carries
+    # a leading-comma emo clause whose subject got removed (e.g. ", with
+    # measured careful attention, looked at the pail"). Reads as
+    # template-shrapnel rather than fable prose.
+    if re.search(r"(?:^|\.\s+|\n)\s*,\s*[a-z]", user):
+        issues.append(("COMMA_EMO_AT_SENTENCE_START",
+                        "user_msg has a sentence beginning with a stray "
+                        "comma + lowercase clause — emo injection lost "
+                        "its subject; rewrite the connective"))
+
+    # PROFIT_LIST_TIC — the milkmaid daydream literally lists 4+ profit
+    # items in a comma sequence ('eggs, chicks, ribbons, a dress, a
+    # husband'). The fable trope IS the daydream, but stacking 4+ items
+    # in one sentence reads as scaffolding rather than a daydreamer's
+    # lazy progression. Two or three is the storyteller's natural beat;
+    # four is template output.
+    profit_words = (
+        r"(?:eggs?|chicks?|chickens?|ribbons?|dresses?|husbands?|"
+        r"cheeses?|butters?|coins?|pennies|fortunes?|hens?|cows?|"
+        r"calves?|piglets?|sheep|wool|geese|goose|silks?|jewels?)"
+    )
+    profit_run = re.search(
+        rf"\b{profit_words}(?:,\s*(?:a |an |the |some )?{profit_words}\b){{3,}}",
+        user, re.IGNORECASE,
+    )
+    if profit_run:
+        issues.append(("PROFIT_LIST_TIC",
+                        f"milkmaid daydream lists 4+ profit items in a "
+                        f"single comma sequence ('{profit_run.group(0)[:60]}...') "
+                        f"— two or three items is the natural beat"))
+
+    # STORY_SLOT_NOUN_REPEAT — story-tagged examples whose scenario,
+    # need, mapping, and resolution all repeat the same key noun
+    # without variation (e.g. "the pail" appears in all four). Reads
+    # as the same beat retold four times instead of a 5-act arc.
+    if "story" in getattr(example, "tags", ()):
+        slots = (
+            getattr(example, "scenario", "") or "",
+            getattr(example, "need",     "") or "",
+            getattr(example, "mapping",  "") or "",
+            getattr(example, "resolution", "") or "",
+        )
+        # Pull capitalized + lowercase noun candidates of length >= 4
+        # that appear in EVERY slot.
+        if all(len(s) > 20 for s in slots):
+            common = None
+            for slot in slots:
+                # extract content nouns — words after "the"
+                nouns = set(
+                    m.group(1).lower()
+                    for m in re.finditer(r"\bthe ([a-z]{4,}(?:[-' ][a-z]+)?)\b", slot)
+                )
+                if common is None:
+                    common = nouns
+                else:
+                    common &= nouns
+            # Filter out common-prose words that legitimately recur
+            common -= {"form", "value", "result", "answer", "verdict",
+                       "runtime", "repl", "list", "rule", "name",
+                       "concept", "story", "buffer", "way", "first",
+                       "field", "table", "stable"}
+            if common and len(common) >= 1:
+                noun = next(iter(common))
+                issues.append(("STORY_SLOT_NOUN_REPEAT",
+                                f"the noun 'the {noun}' appears in all 4 "
+                                "story slots (scenario/need/mapping/"
+                                "resolution) — vary the imagery between beats"))
 
     return issues
 

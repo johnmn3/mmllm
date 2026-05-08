@@ -717,11 +717,13 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 4
 - variety @ n=50: 1.00
-- issues: {'STORY_RESOLUTION_NO_DRAWN': 3, 'LOW_GROUNDING': 1}
+- issues: {'STORY_RESOLUTION_NO_DRAWN': 3, 'LOW_GROUNDING': 1, 'STORY_SLOT_NOUN_REPEAT': 3}
     - [STORY_RESOLUTION_NO_DRAWN] form=`(clojure.string/reverse "abc")` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('abc',), resolution doesn't close the loop)
     - [STORY_RESOLUTION_NO_DRAWN] form=`(clojure.string/reverse "abc")` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('abc',), resolution doesn't close the loop)
     - [STORY_RESOLUTION_NO_DRAWN] form=`(clojure.string/reverse "abc")` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('abc',), resolution doesn't close the loop)
     - [LOW_GROUNDING] form=`(namespace :owner/item)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+    - [STORY_SLOT_NOUN_REPEAT] form=`(name :owner/item)` — the noun 'the local name' appears in all 4 story slots (scenario/need/mapping/resolution) — vary the imagery between beats
+    - [STORY_SLOT_NOUN_REPEAT] form=`(name :owner/item)` — the noun 'the local name' appears in all 4 story slots (scenario/need/mapping/resolution) — vary the imagery between beats
 
 ### G6-09: Loading order
 
@@ -912,6 +914,15 @@ tortoise
     - [ANSWER_LEAK_STRING] form=`(do (defrecord Runner [name pace]) (:pace (->Runne` — answer string ':slow' appears in user_msg
     - [CLAUSE_STACK_OVERFLOW] form=`(do (defrecord Runner [name pace]) (:pace (->Runne` — sentence with 5 commas reads as AI-output cadence: 'Lighter, more focused." To\ndefine a Runner case with two named compartments, nam'
 
+### G8-04: Protocol definition
+
+- examples: 2
+- variety @ n=50: 1.00
+- issues: {'STORY_SLOT_NOUN_REPEAT': 3}
+    - [STORY_SLOT_NOUN_REPEAT] form=`(do (defprotocol Pace (speed [this])) (some? Pace)` — the noun 'the guild's' appears in all 4 story slots (scenario/need/mapping/resolution) — vary the imagery between beats
+    - [STORY_SLOT_NOUN_REPEAT] form=`(do (defprotocol Pace (speed [this])) (some? Pace)` — the noun 'the guild's' appears in all 4 story slots (scenario/need/mapping/resolution) — vary the imagery between beats
+    - [STORY_SLOT_NOUN_REPEAT] form=`(do (defprotocol Pace (speed [this])) (some? Pace)` — the noun 'the guild's' appears in all 4 story slots (scenario/need/mapping/resolution) — vary the imagery between beats
+
 ### G8-05: Protocol extension
 
 - examples: 2
@@ -1093,22 +1104,24 @@ tortoise
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'CLAUSE_STACK_OVERFLOW': 4, 'DOUBLE_PREP': 1, 'LOW_GROUNDING': 1}
+- issues: {'CLAUSE_STACK_OVERFLOW': 4, 'STORY_SLOT_NOUN_REPEAT': 6, 'DOUBLE_PREP': 1, 'LOW_GROUNDING': 1}
     - [CLAUSE_STACK_OVERFLOW] form=`(do (def r (ref 0)) (dosync (alter r inc)) @r)` — sentence with 5 commas reads as AI-output cadence: 'To construct a ref holding 0, perform a transactional alter by applying inc insi'
+    - [STORY_SLOT_NOUN_REPEAT] form=`(do (def r (ref 0)) (dosync (alter r inc)) @r)` — the noun 'the safe-box' appears in all 4 story slots (scenario/need/mapping/resolution) — vary the imagery between beats
+    - [STORY_SLOT_NOUN_REPEAT] form=`(do (def r (ref 0)) (dosync (alter r inc)) @r)` — the noun 'the safe-box' appears in all 4 story slots (scenario/need/mapping/resolution) — vary the imagery between beats
     - [DOUBLE_PREP] form=`(do (def r (ref 0)) (dosync (alter r inc)) @r)` — verb+preposition followed by {place} which already carries its own preposition
     - [LOW_GROUNDING] form=`(do (def r (ref 0)) (dosync (alter r inc)) @r)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-    - [CLAUSE_STACK_OVERFLOW] form=`(do (def r (ref 100)) (dosync (ref-set r 7)) @r)` — sentence with 5 commas reads as AI-output cadence: 'To construct a ref holding 100, perform a transactional ref-set to 7 inside dosy'
-    - [CLAUSE_STACK_OVERFLOW] form=`(do (def r (ref 100)) (dosync (ref-set r 7)) @r)` — sentence with 5 commas reads as AI-output cadence: 'To construct a ref holding 100, perform a transactional ref-set to 7 inside dosy'
-    - [CLAUSE_STACK_OVERFLOW] form=`(do (def r (ref 100)) (dosync (ref-set r 7)) @r)` — sentence with 5 commas reads as AI-output cadence: 'The runtime sees to that — no two crows scratch over each other\'s\nmarks." To con'
+    - [STORY_SLOT_NOUN_REPEAT] form=`(do (def r (ref 0)) (dosync (alter r inc)) @r)` — the noun 'the safe-box' appears in all 4 story slots (scenario/need/mapping/resolution) — vary the imagery between beats
 
 ### G9-08: dosync and alter
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'CLAUSE_STACK_OVERFLOW': 4}
+- issues: {'CLAUSE_STACK_OVERFLOW': 4, 'STORY_SLOT_NOUN_REPEAT': 3}
     - [CLAUSE_STACK_OVERFLOW] form=`(do (def a (ref 1)) (def b (ref 2)) (dosync (alter` — sentence with 7 commas reads as AI-output cadence: 'If two crows arrive at once, the runtime makes sure only one\nof us completes the'
     - [CLAUSE_STACK_OVERFLOW] form=`(do (def a (ref 1)) (def b (ref 2)) (dosync (alter` — sentence with 6 commas reads as AI-output cadence: 'The marks change only when someone scratches — and only as the\nruntime allows." '
     - [CLAUSE_STACK_OVERFLOW] form=`(do (def r (ref 10)) (dosync (alter r + 5)) @r)` — sentence with 6 commas reads as AI-output cadence: 'If two crows arrive at once, the runtime makes sure only one\nof us completes the'
+    - [STORY_SLOT_NOUN_REPEAT] form=`(do (def r (ref 10)) (dosync (alter r + 5)) @r)` — the noun 'the safe-box' appears in all 4 story slots (scenario/need/mapping/resolution) — vary the imagery between beats
+    - [STORY_SLOT_NOUN_REPEAT] form=`(do (def r (ref 10)) (dosync (alter r + 5)) @r)` — the noun 'the safe-box' appears in all 4 story slots (scenario/need/mapping/resolution) — vary the imagery between beats
     - [CLAUSE_STACK_OVERFLOW] form=`(do (def r (ref 10)) (dosync (alter r + 5)) @r)` — sentence with 5 commas reads as AI-output cadence: 'To construct a ref holding 10, perform a transactional alter by applying + with '
 
 ### G9-09: Ref vs atom
@@ -1265,18 +1278,23 @@ tortoise
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'CLAUSE_STACK_OVERFLOW': 2}
+- issues: {'STORY_SLOT_NOUN_REPEAT': 3, 'CLAUSE_STACK_OVERFLOW': 2}
+    - [STORY_SLOT_NOUN_REPEAT] form=`(let [a (gensym "x_") b (gensym "x_")] (= a b))` — the noun 'the same prefix' appears in all 4 story slots (scenario/need/mapping/resolution) — vary the imagery between beats
     - [CLAUSE_STACK_OVERFLOW] form=`(let [a (gensym "x_") b (gensym "x_")] (= a b))` — sentence with 5 commas reads as AI-output cadence: 'You\nwrite the rule once, and any drop-order that calls it gets rewritten\non the '
+    - [STORY_SLOT_NOUN_REPEAT] form=`(let [a (gensym "x_") b (gensym "x_")] (= a b))` — the noun 'the same prefix' appears in all 4 story slots (scenario/need/mapping/resolution) — vary the imagery between beats
     - [CLAUSE_STACK_OVERFLOW] form=`(let [a (gensym "x_") b (gensym "x_")] (= a b))` — sentence with 5 commas reads as AI-output cadence: 'You\nwrite the rule once, and any drop-order that calls it gets rewritten\non the '
+    - [STORY_SLOT_NOUN_REPEAT] form=`(let [a (gensym "x_") b (gensym "x_")] (= a b))` — the noun 'the same prefix' appears in all 4 story slots (scenario/need/mapping/resolution) — vary the imagery between beats
 
 ### G10-10: Anaphoric macros are confusing
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'STORY_RESOLUTION_NO_DRAWN': 3, 'CLAUSE_STACK_OVERFLOW': 1}
+- issues: {'STORY_RESOLUTION_NO_DRAWN': 3, 'CLAUSE_STACK_OVERFLOW': 1, 'STORY_SLOT_NOUN_REPEAT': 3}
     - [STORY_RESOLUTION_NO_DRAWN] form=`(if-let [x 7] (* x x) 0)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('7',), resolution doesn't close the loop)
     - [CLAUSE_STACK_OVERFLOW] form=`(if-let [x 7] (* x x) 0)` — sentence with 5 commas reads as AI-output cadence: 'You\nwrite the rule once, and any drop-order that calls it gets rewritten\non the '
+    - [STORY_SLOT_NOUN_REPEAT] form=`(if-let [x 7] (* x x) 0)` — the noun 'the then-branch' appears in all 4 story slots (scenario/need/mapping/resolution) — vary the imagery between beats
     - [STORY_RESOLUTION_NO_DRAWN] form=`(if-let [x 7] (* x x) 0)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('7',), resolution doesn't close the loop)
+    - [STORY_SLOT_NOUN_REPEAT] form=`(if-let [x 7] (* x x) 0)` — the noun 'the then-branch' appears in all 4 story slots (scenario/need/mapping/resolution) — vary the imagery between beats
     - [STORY_RESOLUTION_NO_DRAWN] form=`(if-let [x 7] (* x x) 0)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('7',), resolution doesn't close the loop)
 
 ### G10-11: Reader macros overview
@@ -1556,6 +1574,7 @@ tortoise
 - **LOW_GROUNDING**: 52
 - **NUMERAL_LIST_IN_GOAL**: 48
 - **CONCEPT_AS_VERB**: 29
+- **STORY_SLOT_NOUN_REPEAT**: 21
 - **FORM_DISPLAY_AND_FORM_NOUN**: 18
 - **REPL_TRIPLE_VOICE**: 18
 - **PARAGRAPH_FRAGMENTATION**: 15
@@ -1585,11 +1604,11 @@ tortoise
 | 3 | 18 | 31 | 33 | — |
 | 4 | 20 | 39 | 46 | — |
 | 5 | 22 | 39 | 87 | — |
-| 6 | 16 | 33 | 17 | — |
+| 6 | 16 | 33 | 20 | — |
 | 7 | 18 | 36 | 41 | — |
-| 8 | 16 | 31 | 49 | — |
-| 9 | 18 | 34 | 72 | — |
-| 10 | 16 | 36 | 65 | — |
+| 8 | 16 | 31 | 52 | — |
+| 9 | 18 | 34 | 81 | — |
+| 10 | 16 | 36 | 71 | — |
 | 11 | 14 | 29 | 30 | — |
 | 12 | 18 | 37 | 38 | — |
 
@@ -2322,6 +2341,49 @@ Keen the crow at writing the right form. The challenge:
 A clay tag tied around the tall pitcher's neck by the village carried a
 small puzzle. The challenge was simple: split a colon-separated classpath-like string into its individual entries. The day was
 h...
+    ```
+
+#### STORY_SLOT_NOUN_REPEAT
+
+- `G6-05` (form `(name :owner/item)`): the noun 'the local name' appears in all 4 story slots (scenario/need/mapping/resolution) — vary the imagery between beats
+    ```
+    The water sat at the bottom of the jar, deep enough to glimpse and far enough to tantalize.
+
+Korvus inspected the same two-part keyword stone at the market: shelf's name before the slash, local name after. This time he needed the local name — what the thing was called inside the shelf.
+
+He needed th...
+    ```
+- `G6-05` (form `(name :owner/item)`): the noun 'the local name' appears in all 4 story slots (scenario/need/mapping/resolution) — vary the imagery between beats
+    ```
+    In a year when the wells ran low, a single jar of water was a small kingdom unto itself.
+
+Murk the crow, patient as the water rose, pressed a talon-tip into the
+pitcher's clay rim near the orchard, carving a name with care. The clay was
+soft only briefly; once dry, the carving would last for every l...
+    ```
+- `G6-05` (form `(name :owner/item)`): the noun 'the local name' appears in all 4 story slots (scenario/need/mapping/resolution) — vary the imagery between beats
+    ```
+    Some problems cannot be hurried; they only respond to the slow addition of small things.
+
+"Naming is half the art," Tarwing the crow, steady in the stone-by-stone approach, said, scoring a careful mark
+into the pitcher's clay. "A clear carving tells every later crow what to
+expect; a careless one tr...
+    ```
+- `G8-04` (form `(do (defprotocol Pace (speed [this])) (some? Pace))`): the noun 'the guild's' appears in all 4 story slots (scenario/need/mapping/resolution) — vary the imagery between beats
+    ```
+    An old pitcher of glazed clay sat by the garden wall, half-empty and entirely useless to anyone too proud to think.
+
+"Each guild has its own boundaries," Soothe the crow, unbothered by the slow progress, said. "Belonging to
+the stone-drop guild doesn't mean belonging to the inscription guild —
+the r...
+    ```
+- `G8-04` (form `(do (defprotocol Pace (speed [this])) (some? Pace))`): the noun 'the guild's' appears in all 4 story slots (scenario/need/mapping/resolution) — vary the imagery between beats
+    ```
+    at the edge of the garden, where the orchard meets the well, an old clay pitcher had stood for as long as anyone could remember.
+
+Tailwind the crow, dropping each stone with careful attention, held up the guild ledger in the garden.
+The day's pitcher was narrow and the drop-orders many; the ledger
+w...
     ```
 
 #### HEDGING_NEAR_FORM

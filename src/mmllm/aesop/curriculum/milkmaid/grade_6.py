@@ -24,7 +24,7 @@ _NS_SUBPLOTS: list[SubplotTemplate] = list(_G1_SUBPLOTS) + [
     # Two characters at separate workbenches, exchanging a labeled form.
     SubplotTemplate("""\
 {farmer_phrase} kept a small workbench {place}, where every form had
-its own labeled drawer. {milkmaid_phrase} preferred to scribble each
+its own labeled drawer. {milkmaid_phrase}, {emo_boastful} preferred to scribble each
 expression in a single notebook. To settle a question that morning,
 {farmer} pointed to {concept_phrase} and asked {milkmaid} to evaluate the
 form {form_display} so they could see what name belonged with what
@@ -85,7 +85,7 @@ G6_01 = SubjectCurriculum(grade=6, subject_id="G6-01",
                 "market address, not the runtime name-object."
             ),
             resolution=(
-                "the REPL returned the string the market-board carried — the dotted "
+                "The REPL returned the string the market-board carried — the dotted "
                 "vendor address, readable and ready to hand to a buyer."
             ),
             tags=("story",),
@@ -133,7 +133,7 @@ G6_02 = SubjectCurriculum(grade=6, subject_id="G6-02",
                 "address rather than the symbol itself."
             ),
             resolution=(
-                "the REPL returned the dotted string the board carried — the "
+                "The REPL returned the dotted string the board carried — the "
                 "namespace address she could write down and hand to the next vendor."
             ),
             tags=("story",),
@@ -161,7 +161,7 @@ G6_02 = SubjectCurriculum(grade=6, subject_id="G6-02",
                 "so equality holds."
             ),
             resolution=(
-                "the REPL confirmed the two board entries matched — the same namespace "
+                "The REPL confirmed the two board entries matched — the same namespace "
                 "was indeed posted on both sides of the panel."
             ),
             tags=("story",),
@@ -198,7 +198,7 @@ G6_03 = SubjectCurriculum(grade=6, subject_id="G6-03",
                 "it produces the transformed output."
             ),
             resolution=(
-                "the REPL returned the all-capitals version of the word, confirming "
+                "The REPL returned the all-capitals version of the word, confirming "
                 "the board-listed routine had been reached and applied correctly."
             ),
             tags=("story",),
@@ -226,7 +226,7 @@ G6_03 = SubjectCurriculum(grade=6, subject_id="G6-03",
                 "fully-qualified name on the board delivers the lowercased result."
             ),
             resolution=(
-                "the REPL returned the all-lowercase version of the word, proving "
+                "The REPL returned the all-lowercase version of the word, proving "
                 "the board-listed lowercasing service had been found and applied."
             ),
             tags=("story",),
@@ -262,7 +262,7 @@ G6_04 = SubjectCurriculum(grade=6, subject_id="G6-04",
                 "when the routine is pure."
             ),
             resolution=(
-                "the REPL returned that both calls produced the same result, "
+                "The REPL returned that both calls produced the same result, "
                 "confirming the board-listed function behaves consistently."
             ),
             tags=("story",),
@@ -297,7 +297,7 @@ G6_05 = SubjectCurriculum(grade=6, subject_id="G6-05",
                 "board entry and invokes the posted service."
             ),
             resolution=(
-                "the REPL returned the all-capitals greeting, confirming the board "
+                "The REPL returned the all-capitals greeting, confirming the board "
                 "entry had been found and the uppercasing service applied."
             ),
             tags=("story",),
@@ -324,7 +324,7 @@ G6_05 = SubjectCurriculum(grade=6, subject_id="G6-05",
                 "reverses the characters in the string."
             ),
             resolution=(
-                "the REPL returned the reversed string, confirming the board's "
+                "The REPL returned the reversed string, confirming the board's "
                 "reversing service had been located and applied correctly."
             ),
             tags=("story",),
@@ -352,7 +352,7 @@ G6_05 = SubjectCurriculum(grade=6, subject_id="G6-05",
                 "after the slash."
             ),
             resolution=(
-                "the REPL returned the section string — the left-hand portion of the "
+                "The REPL returned the section string — the left-hand portion of the — :owner. "
                 "compound keyword, identifying which vendor's board the entry belonged to."
             ),
             tags=("story",),
@@ -380,7 +380,7 @@ G6_05 = SubjectCurriculum(grade=6, subject_id="G6-05",
                 "board section."
             ),
             resolution=(
-                "the REPL returned the local name string — just the right-hand "
+                "The REPL returned the local name string — just the right-hand — :owner. "
                 "portion of the keyword, ready to write on the pail's label."
             ),
             tags=("story",),
@@ -416,7 +416,7 @@ G6_06 = SubjectCurriculum(grade=6, subject_id="G6-06",
                 "A symbol annotated with `^:private` carries the flag set to true."
             ),
             resolution=(
-                "the REPL returned the value the slip carried for the restriction "
+                "The REPL returned the value the slip carried for the restriction "
                 "field, confirming the board entry was marked as private."
             ),
             tags=("story",),
@@ -444,7 +444,7 @@ G6_06 = SubjectCurriculum(grade=6, subject_id="G6-06",
                 "no restriction field."
             ),
             resolution=(
-                "the REPL returned nothing for the restriction field, confirming "
+                "The REPL returned nothing for the restriction field, confirming "
                 "the plain board entry had no private marker attached."
             ),
             tags=("story",),
@@ -480,7 +480,7 @@ G6_07 = SubjectCurriculum(grade=6, subject_id="G6-07",
                 "boolean — truthy flag becomes true, absent value becomes false."
             ),
             resolution=(
-                "the REPL returned the boolean equivalent of the restriction flag, "
+                "The REPL returned the boolean equivalent of the restriction flag, "
                 "giving the gatekeeper a clear access decision for the hidden stall."
             ),
             tags=("story",),
@@ -508,7 +508,7 @@ G6_07 = SubjectCurriculum(grade=6, subject_id="G6-07",
                 "is treated as openly accessible."
             ),
             resolution=(
-                "the REPL returned the boolean for an absent restriction flag, "
+                "The REPL returned the boolean for an absent restriction flag, "
                 "confirming the unmarked stall was openly accessible."
             ),
             tags=("story",),
@@ -546,7 +546,7 @@ G6_08 = SubjectCurriculum(grade=6, subject_id="G6-08",
                 "no circular reference intervenes when the dependency is resolved."
             ),
             resolution=(
-                "the REPL returned the uppercased character, confirming the "
+                "The REPL returned the uppercased character, confirming the "
                 "board-listed namespace was reachable and the circular tangle cleared."
             ),
             tags=("story",),
@@ -574,7 +574,7 @@ G6_08 = SubjectCurriculum(grade=6, subject_id="G6-08",
                 "so the equality check returns a clear result."
             ),
             resolution=(
-                "the REPL confirmed the two board entries matched, proving the "
+                "The REPL confirmed the two board entries matched, proving the "
                 "namespace symbols were identical and the dependency graph was clean."
             ),
             tags=("story",),
@@ -610,7 +610,7 @@ G6_09 = SubjectCurriculum(grade=6, subject_id="G6-09",
                 "own value. The final expression returns the last entry's value."
             ),
             resolution=(
-                "the REPL returned the value of the last board entry after both "
+                "The REPL returned the value of the last board entry after both "
                 "definitions were posted in order, confirming the sequence was sound."
             ),
             tags=("story",),
@@ -638,7 +638,7 @@ G6_09 = SubjectCurriculum(grade=6, subject_id="G6-09",
                 "sums both entries to produce the total."
             ),
             resolution=(
-                "the REPL returned the sum of the two local board entries, "
+                "The REPL returned the sum of the two local board entries, "
                 "confirming the dependent binding order was respected."
             ),
             tags=("story",),
@@ -706,7 +706,7 @@ G6_12 = SubjectCurriculum(grade=6, subject_id="G6-12",
                 "many vendor sections the project board carries."
             ),
             resolution=(
-                "the REPL returned the number of namespace entries on the board, "
+                "The REPL returned the number of namespace entries on the board, "
                 "confirming all the project's files were represented."
             ),
             tags=("story",),
@@ -733,7 +733,7 @@ G6_12 = SubjectCurriculum(grade=6, subject_id="G6-12",
                 "entry in turn and collecting the results."
             ),
             resolution=(
-                "the REPL returned the sequence of string names, one per board "
+                "The REPL returned the sequence of string names, one per board "
                 "entry, ready to be written onto the delivery slip."
             ),
             tags=("story",),
@@ -769,7 +769,7 @@ G6_13 = SubjectCurriculum(grade=6, subject_id="G6-13",
                 "posted routine as the full namespace path would."
             ),
             resolution=(
-                "the REPL returned the uppercased word, confirming the alias "
+                "The REPL returned the uppercased word, confirming the alias "
                 "reached the board-listed routine just as the full name would."
             ),
             tags=("story",),
@@ -805,7 +805,7 @@ G6_14 = SubjectCurriculum(grade=6, subject_id="G6-14",
                 "for any other qualified name on the neighbor's rack."
             ),
             resolution=(
-                "the REPL confirmed the dotted class name was indeed a symbol, "
+                "The REPL confirmed the dotted class name was indeed a symbol, "
                 "clearing the borrowed tool for use at the dairy."
             ),
             tags=("story",),
@@ -833,7 +833,7 @@ G6_14 = SubjectCurriculum(grade=6, subject_id="G6-14",
                 "technique used for any namespace symbol on the market-board."
             ),
             resolution=(
-                "the REPL returned the dotted string name from the class symbol, "
+                "The REPL returned the dotted string name from the class symbol, "
                 "ready to be written into the dairy ledger."
             ),
             tags=("story",),
@@ -868,7 +868,7 @@ G6_15 = SubjectCurriculum(grade=6, subject_id="G6-15",
                 "the annotation, not the symbol itself."
             ),
             resolution=(
-                "the REPL returned the docstring the farmer had tucked into the slip "
+                "The REPL returned the docstring the farmer had tucked into the slip "
                 "— the principle she had recorded for the day's dairy run."
             ),
             tags=("story",),
@@ -896,7 +896,7 @@ G6_15 = SubjectCurriculum(grade=6, subject_id="G6-15",
                 "name written there, not the symbol itself."
             ),
             resolution=(
-                "the REPL returned the author name the farmer had tucked into "
+                "The REPL returned the author name the farmer had tucked into "
                 "the slip, completing the ledger entry for the commissioned order."
             ),
             tags=("story",),
@@ -932,7 +932,7 @@ G6_16 = SubjectCurriculum(grade=6, subject_id="G6-16",
                 "listing is still active and should not be removed."
             ),
             resolution=(
-                "the REPL confirmed the namespace was in the required set, "
+                "The REPL confirmed the namespace was in the required set, "
                 "telling the milkmaid to leave that board entry in place."
             ),
             tags=("story",),
@@ -960,7 +960,7 @@ G6_16 = SubjectCurriculum(grade=6, subject_id="G6-16",
                 "required it and the board entry is a stale listing."
             ),
             resolution=(
-                "the REPL returned a negative result, confirming the namespace "
+                "The REPL returned a negative result, confirming the namespace "
                 "was not in the required set and could be removed from the board."
             ),
             tags=("story",),
