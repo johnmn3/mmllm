@@ -52,6 +52,88 @@ else:
 GRADE_MODULES = _load_grade_modules(FABLES_TO_AUDIT[0])
 
 
+# ─────────────────── Cat-J grounding helpers ──────────────────────
+#
+# A record is "grounded" when its prose references either a value
+# drawn from the actual code (so the narrative isn't drifting from
+# the form) OR carries an emotion-pool phrase (so the character has
+# a stance and the prose doesn't read like dry exposition).
+#
+# Records that lack BOTH are flagged LOW_GROUNDING.
+
+# Cache the EMO pool markers; computed once at module import.
+def _build_emo_markers():
+    """Pull short discriminating substrings from the EMO pools."""
+    markers: list[str] = []
+    try:
+        from mmllm.aesop.fables import (
+            EMO_PROUD, EMO_PATIENT, EMO_TIRED, EMO_HUNGRY,
+            EMO_GREEDY, EMO_CONTENT, EMO_REGRETFUL,
+            EMO_DESPERATE, EMO_THIRSTY,
+        )
+        for pool in (EMO_PROUD, EMO_PATIENT, EMO_TIRED, EMO_HUNGRY,
+                      EMO_GREEDY, EMO_CONTENT, EMO_REGRETFUL,
+                      EMO_DESPERATE, EMO_THIRSTY):
+            markers.extend(pool)
+    except ImportError:
+        pass
+    try:
+        from mmllm.aesop.curriculum.generator import (
+            CP_EMO_PATIENT, CP_EMO_PROUD, CP_EMO_THIRSTY,
+        )
+        for pool in (CP_EMO_PATIENT, CP_EMO_PROUD, CP_EMO_THIRSTY):
+            markers.extend(pool)
+    except ImportError:
+        pass
+    # De-dupe and sort longest-first so longer markers match before
+    # their substrings.
+    return tuple(sorted(set(markers), key=len, reverse=True))
+
+
+_EMO_MARKERS = _build_emo_markers()
+
+
+def _has_emo_phrase(user: str) -> bool:
+    """True if user_msg contains any literal phrase from an EMO pool.
+
+    EMO pools are intentionally short, distinctive phrases (e.g.,
+    "calm and methodical", "with a smug grin"); a substring match
+    is precise enough.
+    """
+    return any(m and m in user for m in _EMO_MARKERS)
+
+
+_INT_RE     = re.compile(r"(?<![\w.:-])(-?\d+)(?![\w.])")
+_KW_RE      = re.compile(r":([\w][\w-]*)")
+_STR_RE     = re.compile(r'"([^"\\]*(?:\\.[^"\\]*)*)"')
+
+
+def _has_drawn_value(user: str, code_str: str) -> bool:
+    """True if user_msg references any int/keyword/string literal
+    drawn from code_str.
+
+    The grounding signal we want: when the rendered prose names the
+    operands ("the value 7", "the :hare slot", '"hello" string')
+    rather than only operating on placeholders. We exclude tiny
+    integers (|n| <= 1) because those occur incidentally in prose.
+    """
+    # Integer literals from code_str.
+    for n in _INT_RE.findall(code_str):
+        if abs(int(n)) <= 1:
+            continue
+        if re.search(rf"(?<![\d-]){re.escape(n)}(?!\d)", user):
+            return True
+    # Keyword literals (':foo', ':hare').
+    for kw in _KW_RE.findall(code_str):
+        if len(kw) >= 2 and (f":{kw}" in user or f" {kw} " in user):
+            return True
+    # String literals (must be at least 3 chars to avoid trivial hits).
+    for s in _STR_RE.findall(code_str):
+        if s and len(s) >= 3 and s in user:
+            return True
+    return False
+
+
 def check_record(rec, sub, example):
     issues = []
     user = rec.user_msg
@@ -555,6 +637,16 @@ def check_record(rec, sub, example):
         issues.append(("DEFINITE_BODY_PART",
                        f"'{m.group(0)}' (definite-article body-part "
                        "in participle; use possessive-free phrasing)"))
+
+    # LOW_GROUNDING — Cat-J detector. A record is grounded when it
+    # references either (i) a drawn value from rec.code_str's literal
+    # slots OR (ii) an EMO-pool phrase. Records satisfying NEITHER
+    # are flagged as flat / under-grounded.
+    if not _has_drawn_value(user, rec.code_str) \
+            and not _has_emo_phrase(user):
+        issues.append(("LOW_GROUNDING",
+                       "user_msg lacks both drawn-value reference and "
+                       "EMO-pool phrasing — flat narrative grounding"))
 
     return issues
 

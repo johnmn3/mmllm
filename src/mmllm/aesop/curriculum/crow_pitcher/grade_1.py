@@ -89,9 +89,10 @@ agreed to try."""),
     SubplotTemplate("""\
 A small audience of forest creatures had gathered {place} to watch
 {hare_phrase} attempt to outwit {tortoise_phrase} at reading the REPL.
-{tortoise} pointed to {concept_phrase} and read out the form aloud:
-{form_display}. The crowd waited to see who would correctly write
-the form to submit."""),
+The day was hot and the answer plain — every onlooker craned a head
+to see. {tortoise}, {emo_patient}, pointed to {concept_phrase} and
+read out the form aloud: {form_display}. The crowd waited to see who
+would correctly write the form to submit."""),
 
     # 5. The race-pause template — hare pauses mid-race, tortoise catches up
     #    via careful evaluation.
@@ -100,19 +101,22 @@ the form to submit."""),
     #    "They called it impossible." reads as plural-subject right after
     #    a singular "Pip the hare stopped" introduction.
     SubplotTemplate("""\
-Halfway through the race, {hare_phrase} stopped {place} and refused to
-continue until someone could prove what the form {form_display}
-evaluated to. {hare} called it impossible.
-{tortoise_phrase}, walking up at her usual pace, simply said: "Submit
-{concept_phrase} to the REPL. Whatever comes back is the answer.\""""),
+Halfway through the race, {hare_phrase}, {emo_proud}, stopped {place}
+and refused to continue until someone could prove what the form
+{form_display} evaluated to. {hare} called it impossible.
+{tortoise_phrase}, {emo_patient}, walking up at her usual pace,
+simply said: "Submit {concept_phrase} to the REPL. Whatever comes
+back is the answer.\""""),
 
     # 6. The notebook template — the tortoise keeps a careful ledger.
     SubplotTemplate("""\
-{tortoise_phrase} had been keeping a small leather notebook of every
-form {tortoise_he_she} had successfully evaluated. {place_idx}, the
-next entry was {concept_phrase}. {hare_phrase} peered over
-{tortoise_his_her} shoulder at the form {form_display} and asked what
-it would come out to.""".replace("{place_idx}", "Today {place}")),
+{tortoise_phrase}, {emo_patient}, had been keeping a small leather
+notebook of every form {tortoise_he_she} had successfully evaluated.
+The notebook was nearly full — every page another careful entry,
+the answer plain on each one. {place_idx}, the next entry was
+{concept_phrase}. {hare_phrase}, {emo_proud}, peered over
+{tortoise_his_her} shoulder at the form {form_display} and asked
+what it would come out to.""".replace("{place_idx}", "Today {place}")),
 
     # 7. The boast-and-rebuke template — Hare claims to know without checking.
     #    NOTE: uses {hare_him_her} (object case) for "asked X to ..."; uses
