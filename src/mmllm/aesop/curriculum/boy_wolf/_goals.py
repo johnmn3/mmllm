@@ -1924,6 +1924,32 @@ GOALS: dict[str, dict[str, str]] = {
         "what":    'whether the two qualified symbols are equal',
         "goal":    'test whether the two qualified shepherd symbols are equal',
     },
+    # ─────── round3 group4 (V7dL): per-form GOALS for atom subjects
+    # that previously fell back to "evaluate the literal/predicate/..."
+    # Skipped: forms whose answer-string IS a literal substring of the
+    # form (FORM_LEAK / ANSWER_LEAK_STRING risk), e.g. (= :wolf :wolf)
+    # answers ":wolf" which is in the form. Those keep the placeholder
+    # fallback path with empty goal_text.
+    "(:missing {:wolf 1})": {
+        "concept": 'looking up an absent key in a small map',
+        "what":    'what comes back when a key is not in the map',
+        "goal":    'look up an absent key in a one-entry map and observe the runtime result',
+    },
+    "(count ['village.shepherd 'village.elder 'village.flock])": {
+        "concept": 'counting the elements of a quoted-symbol vector',
+        "what":    'how many elements the vector holds',
+        "goal":    'count the elements in a vector of qualified shepherd symbols',
+    },
+    "(last  [10 20 30])": {
+        "concept": 'the last element of a vector',
+        "what":    'what last returns from a small vector',
+        "goal":    'fetch the last element of a small vector via last',
+    },
+    "(symbol? 'village.flock)": {
+        "concept": 'the symbol-predicate on a qualified name',
+        "what":    'whether a qualified quoted name is a symbol',
+        "goal":    'test whether a qualified quoted name is a symbol',
+    },
 }
 
 

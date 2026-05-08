@@ -2037,6 +2037,7 @@ def check_record(rec, sub, example):
                                 "story slots (scenario/need/mapping/"
                                 "resolution) — vary the imagery between beats"))
 
+<<<<<<< HEAD
     # ─────────── slice wvNE (fixset-gamma) — 3 NEW Cat-K detectors ─────────
 
     # TRAILING_PARTICIPLE_CLOSER (K-3 cadence) — a sentence that closes
@@ -2270,6 +2271,58 @@ def check_record(rec, sub, example):
                         "user_msg has 3+ chained English numerals "
                         "in sequence — fixed enumeration that won't "
                         "track form_template draws"))
+=======
+    # ─────────── slice V7dL (boy-wolf round3-group4) detector additions ─
+
+    # 1. CONCEPT_PHRASE_FORM_PREFIX — a concept_phrase rendered in the
+    #    user_msg starts with the literal phrase "the form X" where X is
+    #    the rendered form (or near-form). This is a Cat-I template tic
+    #    that doubles a backticked form_display with a "the form ..."
+    #    nominal in the same paragraph. Distinct from
+    #    FORM_DISPLAY_AND_FORM_NOUN (which catches a 120-char window
+    #    around backticked code): this catches the source pattern of a
+    #    concept_phrase argument that begins "the form (".
+    if getattr(example, "concept_phrase", "").lower().startswith("the form ("):
+        issues.append(("CONCEPT_PHRASE_FORM_PREFIX",
+                        "example.concept_phrase begins with 'the form ('"
+                        " — vary the noun phrase (use 'the expression', "
+                        "'the call', or drop the prefix entirely)"))
+
+    # 2. SUBMITTED_THE_FORM_DOUBLED — connective_prose-style "submitted
+    #    the form" appears 2+ times in one user_msg. The template draws
+    #    a story-scaffold connective_prose ("To X, she composed Y and
+    #    submitted the form") AND a subplot template ALSO contains
+    #    "submitted the form", producing a doubled tic that reads as
+    #    AI-cadence boilerplate.
+    if user.lower().count("submitted the form") >= 2:
+        issues.append(("SUBMITTED_THE_FORM_DOUBLED",
+                        f"'submitted the form' appears "
+                        f"{user.lower().count('submitted the form')}× "
+                        "in user_msg — connective_prose + subplot "
+                        "double the same beat"))
+
+    # 3. BOY_WOLF_NOUN_SATURATION — boy-wolf-specific metaphor-noun
+    #    saturation (akin to VILLAGE_NOUN_OVERUSE but for the wider set
+    #    of fable nouns). When a single noun like 'watchhouse' or
+    #    'fold-gate' or 'tally-stick' appears 4+ times in one record,
+    #    the prose reads as a single tic rather than varied imagery.
+    #    Distinct from VILLAGE_NOUN_OVERUSE (which targets only
+    #    'the village'); this catches the broader noun overuse pattern
+    #    across boy-wolf's metaphor pool.
+    if hasattr(sub, "fable") and sub.fable == "boy-wolf":
+        bw_nouns = (
+            "watchhouse", "fold-gate", "tally-stick", "belt-pouch",
+            "drill-card", "wool-basket", "fleece-comb", "log-book",
+        )
+        ul = user.lower()
+        for noun in bw_nouns:
+            if ul.count(noun) >= 4:
+                issues.append(("BOY_WOLF_NOUN_SATURATION",
+                                f"boy-wolf metaphor noun {noun!r} "
+                                f"appears {ul.count(noun)}× in user_msg "
+                                "— vary the imagery"))
+                break
+>>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
 
     return issues
 

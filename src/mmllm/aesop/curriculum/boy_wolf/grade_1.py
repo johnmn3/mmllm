@@ -48,14 +48,14 @@ from mmllm.aesop.curriculum.boy_wolf._goals import GOALS, get_goal
 # ─────────────────────── boy-wolf-specific EMO pools ───────────────────────
 #
 # Gender-neutral (no possessive "her"/"his"/"their" baked in). Imagery
-# fits the boy-wolf valley setting (shouting from the hill, the village
+# fits the boy-wolf valley setting (shouting from the hill, the watchhouse
 # slate, false alarms, the elder's patience) — no race / sprint /
 # underbrush leakage from tortoise-hare.
 
 BW_EMO_PROUD: tuple[str, ...] = (
     "with a smug grin",
     "puffed up with pride",
-    "as if the village would always believe",
+    "as if the watchhouse would always believe",
     "with great whoops of laughter",
     "boasting at every turn",
     "with the swagger of an unrepentant fibber",
@@ -130,7 +130,7 @@ _SHARED_SUBPLOTS: list[SubplotTemplate] = [
 chalked {concept_phrase} on a flat board. {shepherd}, {emo_proud},
 declared {shepherd_he_she} already knew what would come back. {elder},
 {emo_patient}, asked {shepherd_him_her} to actually submit
-{form_display} to the REPL — the village had stopped trusting answers
+{form_display} to the REPL — the townsfolk had stopped trusting answers
 that weren't checked."""),
 
     # 2. The trust-ledger template — the village elder keeps a written
@@ -138,16 +138,16 @@ that weren't checked."""),
     #    entry is the form. (Boy-wolf-flavored ledger beat — analogous
     #    to tortoise-hare's "wager" without the wager's gambling tone.)
     SubplotTemplate("""\
-The elder of the village kept a small slate {place}, {emo_patient},
-with a tally of expressions the shepherds had honestly submitted versus
+The elder of the meadow folk kept a small slate {place}, {emo_patient},
+with a tally of expressions the shepherds had directly submitted versus
 ones they had only guessed at. The valley was long and the
-shepherds many; an honest tally was the only way the village kept
-track of who could be trusted. The next line was {concept_phrase}.
+shepherds many; the slate kept what speech could not. The next
+line was {concept_phrase}.
 {elder_phrase} read aloud {form_display} so {shepherd_phrase}
-could write it properly into the REPL and earn an honest mark on
+could write it properly into the REPL and earn a clean mark on
 the slate."""),
 
-    # 2b. Trust-ledger variant — slate kept on a stone at the village edge.
+    # 2b. Trust-ledger variant — slate kept on a stone at the townsfolk edge.
     SubplotTemplate("""\
 A small slate sat on a flat stone {place}; the day was long and the
 slate filled slowly, mark by mark. On it the reeve recorded each
@@ -155,11 +155,11 @@ expression a shepherd had submitted to the REPL alongside each claim
 made without checking. Today's entry was {form_display}, and the page
 heading read {concept_phrase}. {elder}, {emo_patient}, nodded at
 {shepherd_phrase} to write it properly so the slate would
-carry an honest entry."""),
+carry a verified entry."""),
 
     # 2c. Trust-ledger variant — the elder's pocket notebook.
     SubplotTemplate("""\
-{elder_phrase}, {emo_patient}, kept a small leather notebook of
+{elder_phrase}, {emo_patient}, kept a small slate-pocket of
 every expression the shepherds of the valley had actually evaluated —
 each entry slow as the rising sun, the page-count climbing only
 when the REPL had spoken. Today {place} the next entry was
@@ -248,7 +248,7 @@ actually write {form_display} and submit it to the REPL —
 just to be sure."""),
 
     # 8. The puzzle-on-the-village-board template — a sign / scrap of
-    #    parchment in the village square poses the form as a riddle.
+    #    parchment in the valley square poses the form as a riddle.
     SubplotTemplate("""\
 A wooden notice nailed to a post {place} carried a small puzzle. The
 riddle simply asked the reader to evaluate {form_display}. {shepherd}
@@ -303,13 +303,13 @@ G1_01 = SubjectCurriculum(
             "the value of 42"),
         _ex("0",                   0,     "the value 0",
             "the value of 0"),
-        _ex("(+ 1 2)",             3,     "the form (+ 1 2)",
+        _ex("(+ 1 2)",             3,     "the expression (+ 1 2)",
             "the result of (+ 1 2)"),
-        _ex("(* 4 5)",             20,    "the form (* 4 5)",
+        _ex("(* 4 5)",             20,    "the expression (* 4 5)",
             "the result of (* 4 5)"),
-        _ex("(- 10 (+ 2 3))",      5,     "the nested form (- 10 (+ 2 3))",
+        _ex("(- 10 (+ 2 3))",      5,     "the nested expression (- 10 (+ 2 3))",
             "the result of (- 10 (+ 2 3))"),
-        _ex("(+ 1 (* 2 3))",       7,     "the form (+ 1 (* 2 3))",
+        _ex("(+ 1 (* 2 3))",       7,     "the expression (+ 1 (* 2 3))",
             "the result of (+ 1 (* 2 3))"),
         _ex("\"hello\"",          "hello","the string \"hello\"",
             "the value of \"hello\""),
@@ -350,13 +350,13 @@ G1_03 = SubjectCurriculum(
         _ex("1/2",   "1/2", "the ratio 1/2",   "the value of the ratio 1/2"),
         _ex("3/4",   "3/4", "the ratio 3/4",   "the value of three-quarters"),
         _ex("(+ 1/2 1/4)", "3/4",
-            "the form (+ 1/2 1/4)",
+            "the expression (+ 1/2 1/4)",
             "the value of (+ 1/2 1/4)"),
         _ex("(* 2 1/2)", 1,
-            "the form (* 2 1/2)",
+            "the expression (* 2 1/2)",
             "the value of (* 2 1/2)"),
         _ex("(- 1 1/3)", "2/3",
-            "the form (- 1 1/3)",
+            "the expression (- 1 1/3)",
             "the value of (- 1 1/3)"),
     ],
     subplots=_SHARED_SUBPLOTS,
@@ -586,7 +586,7 @@ G1_10 = SubjectCurriculum(
     examples=[
         # Comments are stripped by the reader; what remains evaluates.
         _ex("(+ 1 2) ; sum of one and two", 3,
-            "the form (+ 1 2) followed by a comment",
+            "the expression (+ 1 2) followed by a comment",
             "the result of (+ 1 2) ignoring the comment",
             scenario=(
                 "Carol had chalked an addition on the slate with a dashed "
@@ -638,7 +638,7 @@ G1_11 = SubjectCurriculum(
     fable="boy-wolf",
     examples=[
         _ex("(+    1    2)", 3,
-            "the form (+ 1 2) with extra spaces",
+            "the expression (+ 1 2) with extra spaces",
             "the result of the form",
             scenario=(
                 "Carol had written the form on the slate with extra space "
@@ -656,9 +656,9 @@ G1_11 = SubjectCurriculum(
                 "structure, not the formatting."
             ),
             resolution=(
-                'the form evaluated to the sum, indifferent to the spacing — the runtime had seen only the operator and operands, nothing more. Tom chalked {drawn.a} on the village notice, and the morning record stood for the next shepherd to read.'           )),
+                'the form evaluated to the sum, indifferent to the spacing — the runtime had seen only the operator and operands, nothing more. Tom chalked {drawn.a} on the watchhouse notice, and the morning record stood for the next shepherd to read.'           )),
         _ex("(+\n  1\n  2)", 3,
-            "the form (+ 1 2) split across lines",
+            "the expression (+ 1 2) split across lines",
             "the result of the form",
             scenario=(
                 "Carol had chalk-written an addition in a tall column on the "
@@ -678,7 +678,7 @@ G1_11 = SubjectCurriculum(
                 "is what counts, not the layout."
             ),
             resolution=(
-                "the form returned its sum, exact as if written in a single line — the slate's vertical layout had been invisible to the runtime. The lookout returned with {drawn.a} on his slate, the valley long behind him and the count plain."           )),
+                "the call returned its sum, exact as if written in a single line — the slate's vertical layout had been invisible to the runtime. The lookout returned with {drawn.a} on his slate, the valley long behind him and the count plain."           )),
     ],
     subplots=_SCRIBE_SUBPLOTS,
     plan_pool=_PLAN_POOL,
@@ -692,7 +692,7 @@ G1_12 = SubjectCurriculum(
     fable="boy-wolf",
     examples=[
         _ex("(+ 2 3)", 5,
-            "the form (+ 2 3)",
+            "the expression (+ 2 3)",
             "the result of (+ 2 3)",
             scenario=(
                 "Carol had written parentheses on the watchhouse slate — "
@@ -710,9 +710,9 @@ G1_12 = SubjectCurriculum(
                 "the rest become arguments. No implicit multiplication."
             ),
             resolution=(
-                'the form returned the sum — the runtime had grouped the symbols correctly without treating the parens as an operation themselves. The watchhouse warmed as the elder set {drawn.a} into the day record, the fold quiet by then.'           )),
+                'the call returned the sum — the runtime had grouped the symbols correctly without treating the parens as an operation themselves. The watchhouse warmed as the elder set {drawn.a} into the day record, the fold quiet by then.'           )),
         _ex("(* (+ 1 2) 3)", 9,
-            "the form (* (+ 1 2) 3)",
+            "the expression (* (+ 1 2) 3)",
             "the result of (* (+ 1 2) 3)",
             scenario=(
                 "Carol had nested parentheses on the slate — one pair of "
@@ -745,16 +745,16 @@ G1_13 = SubjectCurriculum(
     subject_title="First arithmetic call",
     fable="boy-wolf",
     examples=[
-        _ex("(+ 1 2)",  3,    "the form (+ 1 2)",    "the result of (+ 1 2)",
+        _ex("(+ 1 2)",  3,    "the expression (+ 1 2)",    "the result of (+ 1 2)",
             scenario=(
                 "At dawn, Tom had brought lambs back from the south "
                 "pasture and Carol had brought lambs from the north. They "
-                "stood at the fold counting together, the village's "
+                "stood at the fold counting together, the meadow folk's "
                 "morning record waiting on them."
             ),
             need=(
                 "The combined morning tally needed to settle correctly "
-                "before the day's work could begin — the village's "
+                "before the day's work could begin — the townsfolk's "
                 "records depended on exact arithmetic, no boasting and "
                 "no fudging."
             ),
@@ -765,7 +765,7 @@ G1_13 = SubjectCurriculum(
             ),
             resolution=(
                 "the count came back — the morning's flock confirmed by the runtime, not by Tom's memory. The pasture tally settled at {drawn.a}, and Carol closed the day slate with that one number written clear."           )),
-        _ex("(- 5 3)",  2,    "the form (- 5 3)",    "the result of (- 5 3)",
+        _ex("(- 5 3)",  2,    "the expression (- 5 3)",    "the result of (- 5 3)",
             scenario=(
                 "Tom had watched some sheep leave the fold that morning and "
                 "some return by noon. Carol chalked the question on the "
@@ -782,7 +782,7 @@ G1_13 = SubjectCurriculum(
             ),
             resolution=(
                 "the result came back — the exact number of sheep still grazing, confirmed by arithmetic not by Tom's memory. The slate showed {drawn.a} in clear chalk, and the fold tally stood as the day record."           )),
-        _ex("(* 4 5)",  20,   "the form (* 4 5)",    "the result of (* 4 5)",
+        _ex("(* 4 5)",  20,   "the expression (* 4 5)",    "the result of (* 4 5)",
             scenario=(
                 "Carol had several small baskets of wool, each holding the "
                 "same count of fleeces. Tom tried to count them all at once "
@@ -798,7 +798,7 @@ G1_13 = SubjectCurriculum(
             ),
             resolution=(
                 'the result came back — the total fleeces, exact as any careful basket count would yield. Carol marked {drawn.a} on the watchhouse beam, the lookout high above the valley quiet at last.'           )),
-        _ex("(/ 10 2)", 5,    "the form (/ 10 2)",   "the result of (/ 10 2)",
+        _ex("(/ 10 2)", 5,    "the expression (/ 10 2)",   "the result of (/ 10 2)",
             scenario=(
                 "Carol had coins paid for wool. She and Tom had agreed to "
                 "split them evenly. Carol wrote the division on the slate."
@@ -813,7 +813,7 @@ G1_13 = SubjectCurriculum(
             ),
             resolution=(
                 "the result came back — each shepherd's coins, arithmetic settling what trust could not. The fold gate held tight against the count of {drawn.a}, slate cool under the elder hand."           )),
-        _ex("(+ 7 8)",  15,   "the form (+ 7 8)",    "the result of (+ 7 8)",
+        _ex("(+ 7 8)",  15,   "the expression (+ 7 8)",    "the result of (+ 7 8)",
             scenario=(
                 "Tom brought lambs from the north pen, Carol brought lambs "
                 "from the south. Together they needed the total for the "
@@ -830,7 +830,7 @@ G1_13 = SubjectCurriculum(
             ),
             resolution=(
                 "the count came back — the morning's full flock, confirmed by the runtime and entered in the ledger. Tom chalked {drawn.a} on the village notice, and the morning record stood for the next shepherd to read."           )),
-        _ex("(- 20 7)", 13,   "the form (- 20 7)",   "the result of (- 20 7)",
+        _ex("(- 20 7)", 13,   "the expression (- 20 7)",   "the result of (- 20 7)",
             scenario=(
                 "Carol had many fleeces sorted for the week's market. By "
                 "noon some had been claimed by shepherds. She wrote the "
@@ -860,7 +860,7 @@ G1_14 = SubjectCurriculum(
     fable="boy-wolf",
     examples=[
         _ex("(+ 1 (* 2 3))",       7,
-            "the nested form (+ 1 (* 2 3))",
+            "the nested expression (+ 1 (* 2 3))",
             "the result of (+ 1 (* 2 3))",
             scenario=(
                 "Carol had written a nested form on the slate showing the "
@@ -880,7 +880,7 @@ G1_14 = SubjectCurriculum(
             resolution=(
                 'the result came back — the runtime had nested the arithmetic perfectly, giving the total flock for the ledger. The watchhouse warmed as the elder set {drawn.a} into the day record, the fold quiet by then.'           )),
         _ex("(* (+ 1 2) (+ 3 4))", 21,
-            "the nested form (* (+ 1 2) (+ 3 4))",
+            "the nested expression (* (+ 1 2) (+ 3 4))",
             "the result of (* (+ 1 2) (+ 3 4))",
             scenario=(
                 "Carol had chalked two addition problems side by side, then "
@@ -896,9 +896,9 @@ G1_14 = SubjectCurriculum(
                 "Inside resolves before outside."
             ),
             resolution=(
-                'the form returned the product — the runtime had nested the order perfectly, each sum resolved before the multiplication. {drawn.a} stood as the answer the fold required, slate, chalk, and a steady eye all in agreement.'           )),
+                'the call returned the product — the runtime had nested the order perfectly, each sum resolved before the multiplication. {drawn.a} stood as the answer the fold required, slate, chalk, and a steady eye all in agreement.'           )),
         _ex("(- 100 (* 5 5))",     75,
-            "the nested form (- 100 (* 5 5))",
+            "the nested expression (- 100 (* 5 5))",
             "the result of (- 100 (* 5 5))",
             scenario=(
                 "Carol had a tally of coins. Tom wondered how many "
@@ -972,7 +972,7 @@ G1_15 = SubjectCurriculum(
                 "verdict — no opinion required."
             ),
             resolution=(
-                "the gate opened — `=` returned true — and the village's count for the morning held without dispute. Carol marked {drawn.a} on the watchhouse beam, the lookout high above the valley quiet at last."         )),
+                "the gate opened — `=` returned true — and the meadow folk's count for the morning held without dispute. Carol marked {drawn.a} on the watchhouse beam, the lookout high above the valley quiet at last."         )),
         _ex("(= 1 2)",          False, "the equality (= 1 2)",
             "the value of (= 1 2)",
             scenario=(
@@ -991,7 +991,7 @@ G1_15 = SubjectCurriculum(
                 "runtime's verdict is false — they are not the same."
             ),
             resolution=(
-                'the gate returned false — the counts differed, and the village would note which pen had gained or lost sheep. The fold gate held tight against the count of {drawn.a}, slate cool under the elder hand.'           )),
+                'the gate returned false — the counts differed, and the valley would note which pen had gained or lost sheep. The fold gate held tight against the count of {drawn.a}, slate cool under the elder hand.'           )),
         _ex("(= \"a\" \"a\")",  True,  "the equality (= \"a\" \"a\")",
             "the value of (= \"a\" \"a\")",
             scenario=(
@@ -1009,7 +1009,7 @@ G1_15 = SubjectCurriculum(
                 "runtime returns true — both are the same string."
             ),
             resolution=(
-                "the predicate returned true — the chalk marks matched letter for letter, confirming Carol's careful writing. Tom chalked {drawn.a} on the village notice, and the morning record stood for the next shepherd to read."           )),
+                "the predicate returned true — the chalk marks matched letter for letter, confirming Carol's careful writing. Tom chalked {drawn.a} on the valley notice, and the morning record stood for the next shepherd to read."           )),
         _ex("(= :wolf :wolf)",  True,  "the equality (= :wolf :wolf)",
             "the value of (= :wolf :wolf)",
             scenario=(
@@ -1063,7 +1063,7 @@ G1_15 = SubjectCurriculum(
                 "on? Yes to all. The runtime returns true."
             ),
             resolution=(
-                "the predicate returned true — all four counts agreed, and the morning's record locked in with the village ledger. {drawn.a} stood as the answer the fold required, slate, chalk, and a steady eye all in agreement."           )),
+                "the predicate returned true — all four counts agreed, and the morning's record locked in with the watchhouse ledger. {drawn.a} stood as the answer the fold required, slate, chalk, and a steady eye all in agreement."           )),
     ],
     subplots=_GATE_SUBPLOTS,
     plan_pool=_PLAN_POOL,
@@ -1161,7 +1161,7 @@ G1_16 = SubjectCurriculum(
                 "the predicate returns true — the shortage is negative."
             ),
             resolution=(
-                'the predicate returned true — the shortage was confirmed as negative, and the village would plan accordingly. Tom chalked {drawn.a} on the village notice, and the morning record stood for the next shepherd to read.'           )),
+                'the predicate returned true — the shortage was confirmed as negative, and the watchhouse would plan accordingly. Tom chalked {drawn.a} on the townsfolk notice, and the morning record stood for the next shepherd to read.'           )),
         _ex("(neg? 4)",   False, "the predicate (neg? 4)",
             "whether 4 is negative",
             scenario=(
@@ -1211,7 +1211,7 @@ G1_17 = SubjectCurriculum(
             resolution=(
                 'the REPL returned the value — not a mark, but the answer. Tom could carry that forward; the slate was just a record. The watchhouse warmed as the elder set {drawn.a} into the day record, the fold quiet by then.'           )),
         _ex("(+ 1 2)", 3,
-            "the form (+ 1 2)",
+            "the expression (+ 1 2)",
             "the result of (+ 1 2)",
             scenario=(
                 "Carol had chalked an addition on the slate and asked Tom "
@@ -1243,7 +1243,7 @@ G1_18 = SubjectCurriculum(
     fable="boy-wolf",
     examples=[
         _ex("(+ 1 2)", 3,
-            "the form (+ 1 2)",
+            "the expression (+ 1 2)",
             "the result of (+ 1 2)",
             scenario=(
                 "Tom hesitated at the practice-pen behind the watchhouse. "
@@ -1258,14 +1258,14 @@ G1_18 = SubjectCurriculum(
                 "a typo, anything tried inside is safely walked back."
             ),
             resolution=(
-                'Tom wrote the form, the runtime returned its value cleanly, and the pen had served its purpose. The pasture tally settled at {drawn.a}, and Carol closed the day slate with that one number written clear.'
+                'Tom wrote it, the runtime returned its value cleanly, and the pen had served its purpose. The pasture tally settled at {drawn.a}, and Carol closed the day slate with that one number written clear.'
             )),
         _ex("(* 7 6)", 42,
-            "the form (* 7 6)",
+            "the expression (* 7 6)",
             "the result of (* 7 6)",
             scenario=(
                 "Tom was trying again inside the practice-pen — a "
-                "multiplication this time. Carol watched as Tom wrote the form."
+                "multiplication this time. Carol watched as Tom wrote it."
             ),
             need=(
                 "The pen's purpose was to let Tom experiment without fear. "
@@ -1276,7 +1276,7 @@ G1_18 = SubjectCurriculum(
                 "The runtime returns the answer or an error that teaches."
             ),
             resolution=(
-                'the form returned the product — the pen had served its purpose as a safe place to try and learn. The slate showed {drawn.a} in clear chalk, and the fold tally stood as the day record.'           )),
+                'the call returned the product — the pen had served its purpose as a safe place to try and learn. The slate showed {drawn.a} in clear chalk, and the fold tally stood as the day record.'           )),
     ],
     subplots=_SAFETYNET_SUBPLOTS,
     plan_pool=_PLAN_POOL,

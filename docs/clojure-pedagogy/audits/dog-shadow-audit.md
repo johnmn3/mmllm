@@ -28,12 +28,22 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 5
 - variety @ n=50: 1.00
+<<<<<<< HEAD
 - issues: {'FORM_DISPLAY_AND_FORM_NOUN': 5}
     - [FORM_DISPLAY_AND_FORM_NOUN] form=`1/2` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
     - [FORM_DISPLAY_AND_FORM_NOUN] form=`3/4` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
     - [FORM_DISPLAY_AND_FORM_NOUN] form=`(+ 1/2 1/4)` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
     - [FORM_DISPLAY_AND_FORM_NOUN] form=`(+ 1/2 1/4)` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
     - [FORM_DISPLAY_AND_FORM_NOUN] form=`(- 1 1/3)` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
+=======
+- issues: {'FORM_DISPLAY_AND_FORM_NOUN': 5, 'CONCEPT_PHRASE_FORM_PREFIX': 9, 'DOUBLE_NAME_INTRO': 2}
+    - [FORM_DISPLAY_AND_FORM_NOUN] form=`1/2` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
+    - [FORM_DISPLAY_AND_FORM_NOUN] form=`3/4` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
+    - [FORM_DISPLAY_AND_FORM_NOUN] form=`(+ 1/2 1/4)` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
+    - [CONCEPT_PHRASE_FORM_PREFIX] form=`(+ 1/2 1/4)` — example.concept_phrase begins with 'the form (' — vary the noun phrase (use 'the expression', 'the call', or drop the prefix entirely)
+    - [DOUBLE_NAME_INTRO] form=`(+ 1/2 1/4)` — character 'Pumpernickel the dog' introduced twice within 200 chars — drop the second 'the dog'
+    - [CONCEPT_PHRASE_FORM_PREFIX] form=`(+ 1/2 1/4)` — example.concept_phrase begins with 'the form (' — vary the noun phrase (use 'the expression', 'the call', or drop the prefix entirely)
+>>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
 
 ### G1-04: Strings
 
@@ -344,7 +354,20 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 - examples: 1
 - variety @ n=50: 1.00
 - issues: {'HIGH_LENGTH': 1}
+<<<<<<< HEAD
     - [HIGH_LENGTH] form=`((fn [x] x x x 99) 1)` — user_msg 247 words
+=======
+    - [HIGH_LENGTH] form=`((fn [x] x x x 99) 1)` — user_msg 246 words
+
+### G3-14: do form
+
+- examples: 2
+- variety @ n=50: 1.00
+- issues: {'HIGH_LENGTH': 1, 'CLAUSE_STACK_OVERFLOW': 1, 'ANSWER_LEAK': 1}
+    - [HIGH_LENGTH] form=`(do 1 2 3)` — user_msg 213 words
+    - [CLAUSE_STACK_OVERFLOW] form=`(do 1 2 3)` — sentence with 5 commas reads as AI-output cadence: 'The runtime sees the cleaned-up form, evaluates it,\nand gives back what it compu'
+    - [ANSWER_LEAK] form=`(do (+ 1 1) (+ 2 2) (+ 3 3))` — answer 6 in narrative
+>>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
 
 ### G3-15: Side-effects in body
 
@@ -669,9 +692,15 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 - examples: 1
 - variety @ n=50: 1.00
 - issues: {'HIGH_LENGTH': 3}
+<<<<<<< HEAD
     - [HIGH_LENGTH] form=`(loop [n 5 acc 1] (if (zero? n) acc (recur (dec n)` — user_msg 215 words
     - [HIGH_LENGTH] form=`(loop [n 5 acc 1] (if (zero? n) acc (recur (dec n)` — user_msg 214 words
     - [HIGH_LENGTH] form=`(loop [n 5 acc 1] (if (zero? n) acc (recur (dec n)` — user_msg 212 words
+=======
+    - [HIGH_LENGTH] form=`(loop [n 5 acc 1] (if (zero? n) acc (recur (dec n)` — user_msg 226 words
+    - [HIGH_LENGTH] form=`(loop [n 5 acc 1] (if (zero? n) acc (recur (dec n)` — user_msg 223 words
+    - [HIGH_LENGTH] form=`(loop [n 5 acc 1] (if (zero? n) acc (recur (dec n)` — user_msg 221 words
+>>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
 
 ## Grade 6
 
@@ -803,8 +832,14 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
+<<<<<<< HEAD
 - issues: {'TRAILING_PARTICIPLE_CLOSER': 1}
     - [TRAILING_PARTICIPLE_CLOSER] form=`(try (throw (ex-info "trouble" {})) (catch Excepti` — sentence closes with a participial coda (', testing its hold paw by paw before trusting full weight.') — LLM-cadence; close on the verb instead
+=======
+- issues: {'ANSWER_LEAK_STRING': 2}
+    - [ANSWER_LEAK_STRING] form=`(try (throw (Exception. "oops")) (catch Exception ` — answer string 'oops' appears in user_msg
+    - [ANSWER_LEAK_STRING] form=`(try (throw (ex-info "trouble" {})) (catch Excepti` — answer string 'trouble' appears in user_msg
+>>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
 
 ### G7-12: slurp and spit
 
@@ -826,8 +861,14 @@ tortoise
 
 - examples: 2
 - variety @ n=50: 1.00
+<<<<<<< HEAD
 - issues: {'REPL_TRIPLE_VOICE': 1}
     - [REPL_TRIPLE_VOICE] form=`(first (clojure.string/split-lines "first\nsecond"` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
+=======
+- issues: {'REPL_TRIPLE_VOICE': 1, 'ANSWER_LEAK_STRING': 1}
+    - [REPL_TRIPLE_VOICE] form=`(first (clojure.string/split-lines "first\nsecond"` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
+    - [ANSWER_LEAK_STRING] form=`(first (clojure.string/split-lines "first\nsecond"` — answer string 'first' appears in user_msg
+>>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
 
 ### G7-14: with-open
 
@@ -862,34 +903,94 @@ tortoise
 
 ## Grade 8
 
+<<<<<<< HEAD
+=======
+### G8-01: Why polymorphism
+
+- examples: 2
+- variety @ n=50: 1.00
+- issues: {'ANSWER_LEAK_STRING': 1}
+    - [ANSWER_LEAK_STRING] form=`(let [speak (fn [k] (cond (= k :hare) "swift" (= k` — answer string 'steady' appears in user_msg
+
+### G8-02: deftype introduction
+
+- examples: 2
+- variety @ n=50: 1.00
+- issues: {'CLAUSE_STACK_OVERFLOW': 2, 'HIGH_LENGTH': 1}
+    - [CLAUSE_STACK_OVERFLOW] form=`(do (deftype Pebble [color]) (.-color (Pebble. "gr` — sentence with 5 commas reads as AI-output cadence: 'Faster,\nmore focused, less convenient." To define a type Pebble with a color fie'
+    - [CLAUSE_STACK_OVERFLOW] form=`(do (deftype Pebble [color]) (.-color (Pebble. "gr` — sentence with 5 commas reads as AI-output cadence: 'Faster,\nmore focused, less convenient." To define a type Pebble with a color fie'
+    - [HIGH_LENGTH] form=`(do (deftype Stone [weight]) (.-weight (Stone. 7))` — user_msg 203 words
+
+### G8-03: defrecord introduction
+
+- examples: 2
+- variety @ n=50: 1.00
+- issues: {'ANSWER_LEAK_STRING': 1, 'CLAUSE_STACK_OVERFLOW': 2}
+    - [ANSWER_LEAK_STRING] form=`(do (defrecord Runner [name pace]) (:pace (->Runne` — answer string ':slow' appears in user_msg
+    - [CLAUSE_STACK_OVERFLOW] form=`(do (defrecord Runner [name pace]) (:pace (->Runne` — sentence with 6 commas reads as AI-output cadence: 'Faster,\nmore focused, less convenient." To define a Runner case with two named c'
+    - [CLAUSE_STACK_OVERFLOW] form=`(do (defrecord Runner [name pace]) (:name (->Runne` — sentence with 6 commas reads as AI-output cadence: 'Faster,\nmore focused, less convenient." To define a record type named Runner wit'
+
+>>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
 ### G8-05: Protocol extension
 
 - examples: 2
 - variety @ n=50: 1.00
+<<<<<<< HEAD
 - issues: {'CLAUSE_STACK_OVERFLOW': 1}
     - [CLAUSE_STACK_OVERFLOW] form=`(do (defprotocol Greet (hail [this])) (extend-prot` — sentence with 5 commas reads as AI-output cadence: 'To define a protocol named Greet with one method hail, extend it to Long type wi'
+=======
+- issues: {'CLAUSE_STACK_OVERFLOW': 5}
+    - [CLAUSE_STACK_OVERFLOW] form=`(do (defprotocol Pace (speed [this])) (extend-prot` — sentence with 6 commas reads as AI-output cadence: 'The runtime looks up which breed the\ndog is, then runs that breed\'s answer." To '
+    - [CLAUSE_STACK_OVERFLOW] form=`(do (defprotocol Pace (speed [this])) (extend-prot` — sentence with 5 commas reads as AI-output cadence: 'The runtime\nreads from the ledger whenever the call goes out." To\ndefine a proto'
+    - [CLAUSE_STACK_OVERFLOW] form=`(do (defprotocol Greet (hail [this])) (extend-prot` — sentence with 5 commas reads as AI-output cadence: 'The runtime\nreads from the ledger whenever the call goes out." To\ndefine a proto'
+    - [CLAUSE_STACK_OVERFLOW] form=`(do (defprotocol Greet (hail [this])) (extend-prot` — sentence with 5 commas reads as AI-output cadence: 'To define a protocol named Greet with one method hail, extend it to Long type wi'
+    - [CLAUSE_STACK_OVERFLOW] form=`(do (defprotocol Greet (hail [this])) (extend-prot` — sentence with 5 commas reads as AI-output cadence: 'Any dog\nthat learns the signals may join the pack." To define a protocol named G'
+>>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
 
 ### G8-06: Protocol method dispatch
 
 - examples: 2
 - variety @ n=50: 1.00
+<<<<<<< HEAD
 - issues: {'CLAUSE_STACK_OVERFLOW': 1}
     - [CLAUSE_STACK_OVERFLOW] form=`(do (defprotocol Pace (speed [this])) (extend-prot` — sentence with 5 commas reads as AI-output cadence: 'To define a protocol Pace with method speed, extend it to both String and Long t'
+=======
+- issues: {'CLAUSE_STACK_OVERFLOW': 6}
+    - [CLAUSE_STACK_OVERFLOW] form=`(do (defprotocol Pace (speed [this])) (extend-prot` — sentence with 5 commas reads as AI-output cadence: 'Any dog\nthat learns the signals may join the pack." To define a protocol Pace wi'
+    - [CLAUSE_STACK_OVERFLOW] form=`(do (defprotocol Pace (speed [this])) (extend-prot` — sentence with 5 commas reads as AI-output cadence: 'To define a protocol Pace with method speed, extend it to both String and Long t'
+    - [CLAUSE_STACK_OVERFLOW] form=`(do (defprotocol Pace (speed [this])) (extend-prot` — sentence with 6 commas reads as AI-output cadence: 'The runtime looks up which breed the\ndog is, then runs that breed\'s answer." To '
+    - [CLAUSE_STACK_OVERFLOW] form=`(do (defprotocol Pace (speed [this])) (extend-prot` — sentence with 5 commas reads as AI-output cadence: 'Any dog\nthat learns the signals may join the pack." To define a protocol Pace wi'
+    - [CLAUSE_STACK_OVERFLOW] form=`(do (defprotocol Pace (speed [this])) (extend-prot` — sentence with 5 commas reads as AI-output cadence: 'The runtime\nreads from the ledger whenever the call goes out." To\ndefine a proto'
+    - [CLAUSE_STACK_OVERFLOW] form=`(do (defprotocol Pace (speed [this])) (extend-prot` — sentence with 5 commas reads as AI-output cadence: 'Any dog\nthat learns the signals may join the pack." To define a protocol Pace wi'
+>>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
 
 ### G8-07: Record implementing protocol
 
 - examples: 2
 - variety @ n=50: 1.00
+<<<<<<< HEAD
 - issues: {'CLAUSE_STACK_OVERFLOW': 3}
     - [CLAUSE_STACK_OVERFLOW] form=`(do (defprotocol Pace (speed [this])) (defrecord H` — sentence with 5 commas reads as AI-output cadence: 'To define a protocol Pace with method speed, define a record Hare that implement'
     - [CLAUSE_STACK_OVERFLOW] form=`(do (defprotocol Pace (speed [this])) (defrecord H` — sentence with 5 commas reads as AI-output cadence: 'To define a protocol Pace with method speed, define a record Hare that implement'
     - [CLAUSE_STACK_OVERFLOW] form=`(do (defprotocol Pace (speed [this])) (defrecord T` — sentence with 5 commas reads as AI-output cadence: 'To define a protocol Pace with method speed, define a record Tortoise that imple'
+=======
+- issues: {'CLAUSE_STACK_OVERFLOW': 4}
+    - [CLAUSE_STACK_OVERFLOW] form=`(do (defprotocol Pace (speed [this])) (defrecord H` — sentence with 5 commas reads as AI-output cadence: 'To define a protocol Pace with method speed, define a record Hare that implement'
+    - [CLAUSE_STACK_OVERFLOW] form=`(do (defprotocol Pace (speed [this])) (defrecord H` — sentence with 5 commas reads as AI-output cadence: 'To define a protocol Pace with method speed, define a record Hare that implement'
+    - [CLAUSE_STACK_OVERFLOW] form=`(do (defprotocol Pace (speed [this])) (defrecord T` — sentence with 5 commas reads as AI-output cadence: 'To define a protocol Pace with method speed, define a record Tortoise that imple'
+    - [CLAUSE_STACK_OVERFLOW] form=`(do (defprotocol Pace (speed [this])) (defrecord T` — sentence with 6 commas reads as AI-output cadence: 'The runtime looks up which breed the\ndog is, then runs that breed\'s answer." To '
+>>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
 
 ### G8-08: Multimethod defmulti
 
 - examples: 2
 - variety @ n=50: 1.00
+<<<<<<< HEAD
 - issues: {'CLAUSE_STACK_OVERFLOW': 1, 'TRAILING_PARTICIPLE_CLOSER': 1}
+=======
+- issues: {'CLAUSE_STACK_OVERFLOW': 3}
+    - [CLAUSE_STACK_OVERFLOW] form=`(do (defmulti pace :species) (defmethod pace :hare` — sentence with 5 commas reads as AI-output cadence: 'The runtime reads it, finds the matching pile,\nand runs that one." To declare a '
+>>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
     - [CLAUSE_STACK_OVERFLOW] form=`(do (defmulti tag :kind) (defmethod tag :stone [_]` — sentence with 6 commas reads as AI-output cadence: 'To define a multimethod tag that dispatches on the :kind key, add a method for :'
     - [TRAILING_PARTICIPLE_CLOSER] form=`(do (defmulti tag :kind) (defmethod tag :stone [_]` — sentence closes with a participial coda (', dispatching\nthe bone — returned the pile-specific value.') — LLM-cadence; close on the verb instead
 
@@ -923,12 +1024,32 @@ tortoise
 - issues: {'CLAUSE_STACK_OVERFLOW': 2}
     - [CLAUSE_STACK_OVERFLOW] form=`(do (defprotocol Pace (speed [this])) (extend-type` — sentence with 6 commas reads as AI-output cadence: 'To define a protocol Pace with method speed, use extend-type to attach it to Lon'
     - [CLAUSE_STACK_OVERFLOW] form=`(do (defprotocol Pace (speed [this])) (extend-type` — sentence with 6 commas reads as AI-output cadence: 'To define a protocol Pace with method speed, use extend-type to attach it to Lon'
+<<<<<<< HEAD
+=======
+    - [CLAUSE_STACK_OVERFLOW] form=`(do (defprotocol Pace (speed [this])) (extend-type` — sentence with 7 commas reads as AI-output cadence: 'The runtime reads it, finds the matching pile,\nand runs that one." To define a p'
+
+### G8-13: this-style vs fn-style
+
+- examples: 2
+- variety @ n=50: 1.00
+- issues: {'CLAUSE_STACK_OVERFLOW': 4}
+    - [CLAUSE_STACK_OVERFLOW] form=`(do (defprotocol Named (name-of [this])) (defrecor` — sentence with 5 commas reads as AI-output cadence: 'Any dog\nthat learns the signals may join the pack." To define a protocol Named w'
+    - [CLAUSE_STACK_OVERFLOW] form=`(do (defprotocol Named (name-of [this])) (defrecor` — sentence with 5 commas reads as AI-output cadence: 'Any dog\nthat learns the signals may join the pack." To define a protocol Named w'
+    - [CLAUSE_STACK_OVERFLOW] form=`(do (defprotocol Tagged (tag-of [this])) (defrecor` — sentence with 5 commas reads as AI-output cadence: 'The runtime\nreads from the ledger whenever the call goes out." To\ndefine a proto'
+    - [CLAUSE_STACK_OVERFLOW] form=`(do (defprotocol Tagged (tag-of [this])) (defrecor` — sentence with 6 commas reads as AI-output cadence: 'The runtime looks up which breed the\ndog is, then runs that breed\'s answer." To '
+>>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
 
 ### G8-14: Protocols don't inherit
 
 - examples: 1
 - variety @ n=50: 1.00
+<<<<<<< HEAD
 - issues: {'CLAUSE_STACK_OVERFLOW': 1}
+=======
+- issues: {'HIGH_LENGTH': 1, 'CLAUSE_STACK_OVERFLOW': 2}
+    - [HIGH_LENGTH] form=`(do (defprotocol A (a-op [this])) (defprotocol B (` — user_msg 205 words
+    - [CLAUSE_STACK_OVERFLOW] form=`(do (defprotocol A (a-op [this])) (defprotocol B (` — sentence with 6 commas reads as AI-output cadence: 'Any dog\nthat learns the signals may join the pack." To define two protocols A an'
+>>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
     - [CLAUSE_STACK_OVERFLOW] form=`(do (defprotocol A (a-op [this])) (defprotocol B (` — sentence with 6 commas reads as AI-output cadence: 'To define two protocols A and B, each with a method, extend both to String type '
 
 ### G8-15: derive and isa? — multimethod hierarchy
@@ -941,6 +1062,18 @@ tortoise
     - [TRAILING_PARTICIPLE_CLOSER] form=`(isa? java.lang.String java.lang.Number)` — sentence closes with a participial coda (', dispatching\nthe bone — returned the pile-specific value.') — LLM-cadence; close on the verb instead
     - [BOOL_LEAK_RESOLUTION] form=`(isa? java.lang.String java.lang.Number)` — resolution leaks boolean answer 'false' — describe the verdict abstractly instead
 
+<<<<<<< HEAD
+=======
+### G8-16: Abstract design with protocols
+
+- examples: 2
+- variety @ n=50: 1.00
+- issues: {'CLAUSE_STACK_OVERFLOW': 2, 'PARAGRAPH_FRAGMENTATION': 1}
+    - [CLAUSE_STACK_OVERFLOW] form=`(do (defprotocol Move (step [this])) (defrecord Ha` — sentence with 5 commas reads as AI-output cadence: 'Any dog\nthat learns the signals may join the pack." To define a protocol Move wi'
+    - [CLAUSE_STACK_OVERFLOW] form=`(do (defprotocol Move (step [this])) (defrecord Ha` — sentence with 6 commas reads as AI-output cadence: 'The runtime looks up which breed the\ndog is, then runs that breed\'s answer." To '
+    - [PARAGRAPH_FRAGMENTATION] form=`(do (defprotocol Sound (cry [this])) (defrecord Ha` — user_msg has 4 short (≤25-word) paragraphs in body — reads as a bullet list, not a story
+
+>>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
 ## Grade 9
 
 ### G9-01: Immutability as default — review
@@ -959,16 +1092,57 @@ tortoise
 
 - examples: 2
 - variety @ n=50: 1.00
+<<<<<<< HEAD
 - issues: {'HIGH_LENGTH': 1, 'CLAUSE_STACK_OVERFLOW': 1}
     - [HIGH_LENGTH] form=`(do (def progress (atom :idle)) (reset! progress :` — user_msg 214 words
     - [CLAUSE_STACK_OVERFLOW] form=`(do (def progress (atom :idle)) (reset! progress :` — sentence with 5 commas reads as AI-output cadence: 'To construct an atom holding an idle value as progress, atomically reset it to r'
+=======
+- issues: {'CLAUSE_STACK_OVERFLOW': 5, 'HIGH_LENGTH': 1}
+    - [CLAUSE_STACK_OVERFLOW] form=`(do (def counter (atom 0)) (swap! counter inc) @co` — sentence with 8 commas reads as AI-output cadence: 'If two dogs arrive at once, the runtime makes sure only one of us\ngoes through a'
+    - [CLAUSE_STACK_OVERFLOW] form=`(do (def counter (atom 0)) (swap! counter inc) @co` — sentence with 8 commas reads as AI-output cadence: 'to\nwrite atomically, no matter who else is sniffing." To\nconstruct an atom holdi'
+    - [CLAUSE_STACK_OVERFLOW] form=`(do (def counter (atom 0)) (swap! counter inc) @co` — sentence with 7 commas reads as AI-output cadence: 'The\ncount changes only when one of us scratches a new one — and only\nas the runt'
+    - [CLAUSE_STACK_OVERFLOW] form=`(do (def progress (atom :idle)) (reset! progress :` — sentence with 8 commas reads as AI-output cadence: 'to\nwrite atomically, no matter who else is sniffing." To\nconstruct an atom holdi'
+    - [HIGH_LENGTH] form=`(do (def progress (atom :idle)) (reset! progress :` — user_msg 214 words
+    - [CLAUSE_STACK_OVERFLOW] form=`(do (def progress (atom :idle)) (reset! progress :` — sentence with 7 commas reads as AI-output cadence: 'To construct an atom holding an idle value as progress, atomically reset it to r'
+>>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
 
 ### G9-03: Atom introduction
 
 - examples: 3
 - variety @ n=50: 1.00
+<<<<<<< HEAD
 - issues: {'HIGH_LENGTH': 1}
     - [HIGH_LENGTH] form=`(do (def a (atom 0)) (swap! a inc) @a)` — user_msg 205 words
+=======
+- issues: {'HIGH_LENGTH': 1, 'CONCEPT_PHRASE_COMMA_LIST': 9, 'CLAUSE_STACK_OVERFLOW': 8}
+    - [HIGH_LENGTH] form=`(do (def a (atom 0)) (swap! a inc) @a)` — user_msg 203 words
+    - [CONCEPT_PHRASE_COMMA_LIST] form=`(do (def a (atom 0)) (swap! a inc) @a)` — concept_phrase 'atom, swap, and deref' is a comma-list of bare tokens — rewrite as a noun phrase that flows into subplot prose
+    - [CONCEPT_PHRASE_COMMA_LIST] form=`(do (def a (atom 0)) (swap! a inc) @a)` — concept_phrase 'atom, swap, and deref' is a comma-list of bare tokens — rewrite as a noun phrase that flows into subplot prose
+    - [CLAUSE_STACK_OVERFLOW] form=`(do (def a (atom 0)) (swap! a inc) @a)` — sentence with 7 commas reads as AI-output cadence: 'To set up a shared notebook starting at 0, atomically add one to its page, then '
+    - [CONCEPT_PHRASE_COMMA_LIST] form=`(do (def a (atom 0)) (swap! a inc) @a)` — concept_phrase 'atom, swap, and deref' is a comma-list of bare tokens — rewrite as a noun phrase that flows into subplot prose
+    - [CLAUSE_STACK_OVERFLOW] form=`(do (def a (atom 0)) (swap! a inc) @a)` — sentence with 7 commas reads as AI-output cadence: 'The\ncount changes only when one of us scratches a new one — and only\nas the runt'
+
+### G9-04: Atom CAS semantics
+
+- examples: 2
+- variety @ n=50: 1.00
+- issues: {'CONCEPT_PHRASE_COMMA_LIST': 6, 'CLAUSE_STACK_OVERFLOW': 6}
+    - [CONCEPT_PHRASE_COMMA_LIST] form=`(do (def a (atom 0)) (compare-and-set! a 0 1) @a)` — concept_phrase 'atom, CAS, deref' is a comma-list of bare tokens — rewrite as a noun phrase that flows into subplot prose
+    - [CLAUSE_STACK_OVERFLOW] form=`(do (def a (atom 0)) (compare-and-set! a 0 1) @a)` — sentence with 7 commas reads as AI-output cadence: 'The\nruntime sees to that — no two writers stomp on each other\'s\nwork." To constr'
+    - [CONCEPT_PHRASE_COMMA_LIST] form=`(do (def a (atom 0)) (compare-and-set! a 0 1) @a)` — concept_phrase 'atom, CAS, deref' is a comma-list of bare tokens — rewrite as a noun phrase that flows into subplot prose
+    - [CLAUSE_STACK_OVERFLOW] form=`(do (def a (atom 0)) (compare-and-set! a 0 1) @a)` — sentence with 7 commas reads as AI-output cadence: 'The\ncount changes only when one of us scratches a new one — and only\nas the runt'
+    - [CONCEPT_PHRASE_COMMA_LIST] form=`(do (def a (atom 0)) (compare-and-set! a 0 1) @a)` — concept_phrase 'atom, CAS, deref' is a comma-list of bare tokens — rewrite as a noun phrase that flows into subplot prose
+    - [CLAUSE_STACK_OVERFLOW] form=`(do (def a (atom 0)) (compare-and-set! a 0 1) @a)` — sentence with 7 commas reads as AI-output cadence: 'The\ncount changes only when one of us scratches a new one — and only\nas the runt'
+
+### G9-05: Watch on atom
+
+- examples: 1
+- variety @ n=50: 1.00
+- issues: {'CLAUSE_STACK_OVERFLOW': 3}
+    - [CLAUSE_STACK_OVERFLOW] form=`(do (def a (atom 0)) (def log (atom [])) (add-watc` — sentence with 8 commas reads as AI-output cadence: 'If two dogs arrive at once, the runtime makes sure only one of us\ngoes through a'
+    - [CLAUSE_STACK_OVERFLOW] form=`(do (def a (atom 0)) (def log (atom [])) (add-watc` — sentence with 7 commas reads as AI-output cadence: 'The\nruntime sees to that — no two writers stomp on each other\'s\nwork." To constr'
+    - [CLAUSE_STACK_OVERFLOW] form=`(do (def a (atom 0)) (def log (atom [])) (add-watc` — sentence with 7 commas reads as AI-output cadence: 'The\ncount changes only when one of us scratches a new one — and only\nas the runt'
+>>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
 
 ### G9-06: Validator on atom
 
@@ -978,6 +1152,137 @@ tortoise
     - [CLAUSE_STACK_OVERFLOW] form=`(do (def a (atom 0)) (set-validator! a number?) (s` — sentence with 5 commas reads as AI-output cadence: 'validator on it, atomically swap by applying inc, and dereference, he composed a'
     - [CLAUSE_STACK_OVERFLOW] form=`(do (def a (atom 0)) (set-validator! a number?) (s` — sentence with 5 commas reads as AI-output cadence: 'validator on it, atomically swap by applying inc, and dereference, he\ncomposed a'
 
+<<<<<<< HEAD
+=======
+### G9-07: Ref introduction
+
+- examples: 2
+- variety @ n=50: 1.00
+- issues: {'CONCEPT_PHRASE_COMMA_LIST': 6, 'CLAUSE_STACK_OVERFLOW': 6}
+    - [CONCEPT_PHRASE_COMMA_LIST] form=`(do (def r (ref 0)) (dosync (alter r inc)) @r)` — concept_phrase 'ref, dosync, alter, deref' is a comma-list of bare tokens — rewrite as a noun phrase that flows into subplot prose
+    - [CLAUSE_STACK_OVERFLOW] form=`(do (def r (ref 0)) (dosync (alter r inc)) @r)` — sentence with 8 commas reads as AI-output cadence: 'The\nruntime sees to that — no two writers stomp on each other\'s\nwork." To constr'
+    - [CONCEPT_PHRASE_COMMA_LIST] form=`(do (def r (ref 0)) (dosync (alter r inc)) @r)` — concept_phrase 'ref, dosync, alter, deref' is a comma-list of bare tokens — rewrite as a noun phrase that flows into subplot prose
+    - [CLAUSE_STACK_OVERFLOW] form=`(do (def r (ref 0)) (dosync (alter r inc)) @r)` — sentence with 8 commas reads as AI-output cadence: 'To construct a ref holding 0, perform a transactional alter by applying inc insi'
+    - [CONCEPT_PHRASE_COMMA_LIST] form=`(do (def r (ref 0)) (dosync (alter r inc)) @r)` — concept_phrase 'ref, dosync, alter, deref' is a comma-list of bare tokens — rewrite as a noun phrase that flows into subplot prose
+    - [CLAUSE_STACK_OVERFLOW] form=`(do (def r (ref 0)) (dosync (alter r inc)) @r)` — sentence with 8 commas reads as AI-output cadence: 'To construct a ref holding 0, perform a transactional alter by applying inc insi'
+
+### G9-08: dosync and alter
+
+- examples: 2
+- variety @ n=50: 1.00
+- issues: {'CLAUSE_STACK_OVERFLOW': 5, 'PARAGRAPH_FRAGMENTATION': 1, 'CONCEPT_PHRASE_COMMA_LIST': 3}
+    - [CLAUSE_STACK_OVERFLOW] form=`(do (def a (ref 1)) (def b (ref 2)) (dosync (alter` — sentence with 6 commas reads as AI-output cadence: 'To construct refs a and b, perform a coordinated transaction that alters both by'
+    - [PARAGRAPH_FRAGMENTATION] form=`(do (def a (ref 1)) (def b (ref 2)) (dosync (alter` — user_msg has 5 short (≤25-word) paragraphs in body — reads as a bullet list, not a story
+    - [CLAUSE_STACK_OVERFLOW] form=`(do (def a (ref 1)) (def b (ref 2)) (dosync (alter` — sentence with 6 commas reads as AI-output cadence: 'The\ncount changes only when one of us scratches a new one — and only\nas the runt'
+    - [CONCEPT_PHRASE_COMMA_LIST] form=`(do (def r (ref 10)) (dosync (alter r + 5)) @r)` — concept_phrase 'ref, dosync, alter, deref' is a comma-list of bare tokens — rewrite as a noun phrase that flows into subplot prose
+    - [CLAUSE_STACK_OVERFLOW] form=`(do (def r (ref 10)) (dosync (alter r + 5)) @r)` — sentence with 8 commas reads as AI-output cadence: 'To construct a ref holding 10, perform a transactional alter by applying + with '
+    - [CONCEPT_PHRASE_COMMA_LIST] form=`(do (def r (ref 10)) (dosync (alter r + 5)) @r)` — concept_phrase 'ref, dosync, alter, deref' is a comma-list of bare tokens — rewrite as a noun phrase that flows into subplot prose
+
+### G9-09: Ref vs atom
+
+- examples: 2
+- variety @ n=50: 1.00
+- issues: {'CONCEPT_PHRASE_COMMA_LIST': 6, 'CLAUSE_STACK_OVERFLOW': 6}
+    - [CONCEPT_PHRASE_COMMA_LIST] form=`(do (def a (atom 0)) (swap! a inc) @a)` — concept_phrase 'atom, swap, deref' is a comma-list of bare tokens — rewrite as a noun phrase that flows into subplot prose
+    - [CLAUSE_STACK_OVERFLOW] form=`(do (def a (atom 0)) (swap! a inc) @a)` — sentence with 7 commas reads as AI-output cadence: 'The\ncount changes only when one of us scratches a new one — and only\nas the runt'
+    - [CONCEPT_PHRASE_COMMA_LIST] form=`(do (def a (atom 0)) (swap! a inc) @a)` — concept_phrase 'atom, swap, deref' is a comma-list of bare tokens — rewrite as a noun phrase that flows into subplot prose
+    - [CLAUSE_STACK_OVERFLOW] form=`(do (def a (atom 0)) (swap! a inc) @a)` — sentence with 7 commas reads as AI-output cadence: 'To construct an atom holding 0, atomically swap it by applying inc, and derefere'
+    - [CONCEPT_PHRASE_COMMA_LIST] form=`(do (def a (atom 0)) (swap! a inc) @a)` — concept_phrase 'atom, swap, deref' is a comma-list of bare tokens — rewrite as a noun phrase that flows into subplot prose
+    - [CLAUSE_STACK_OVERFLOW] form=`(do (def a (atom 0)) (swap! a inc) @a)` — sentence with 7 commas reads as AI-output cadence: 'The\nruntime sees to that — no two writers stomp on each other\'s\nwork." To constr'
+
+### G9-10: Agent introduction
+
+- examples: 2
+- variety @ n=50: 1.00
+- issues: {'CONCEPT_PHRASE_COMMA_LIST': 6, 'CLAUSE_STACK_OVERFLOW': 6}
+    - [CONCEPT_PHRASE_COMMA_LIST] form=`(do (def ag (agent 0)) (send ag inc) (await ag) @a` — concept_phrase 'agent, send, await, deref' is a comma-list of bare tokens — rewrite as a noun phrase that flows into subplot prose
+    - [CLAUSE_STACK_OVERFLOW] form=`(do (def ag (agent 0)) (send ag inc) (await ag) @a` — sentence with 5 commas reads as AI-output cadence: 'She, neither restless nor weary but steady, composed agent, send, await, deref w'
+    - [CONCEPT_PHRASE_COMMA_LIST] form=`(do (def ag (agent 0)) (send ag inc) (await ag) @a` — concept_phrase 'agent, send, await, deref' is a comma-list of bare tokens — rewrite as a noun phrase that flows into subplot prose
+    - [CLAUSE_STACK_OVERFLOW] form=`(do (def ag (agent 0)) (send ag inc) (await ag) @a` — sentence with 10 commas reads as AI-output cadence: 'The result will be there when you\nask for it — sometimes you have to wait for th'
+    - [CONCEPT_PHRASE_COMMA_LIST] form=`(do (def ag (agent 0)) (send ag inc) (await ag) @a` — concept_phrase 'agent, send, await, deref' is a comma-list of bare tokens — rewrite as a noun phrase that flows into subplot prose
+    - [CLAUSE_STACK_OVERFLOW] form=`(do (def ag (agent 0)) (send ag inc) (await ag) @a` — sentence with 10 commas reads as AI-output cadence: 'The result will be there when you\nask for it — sometimes you have to wait for th'
+
+### G9-11: send and send-off
+
+- examples: 2
+- variety @ n=50: 1.00
+- issues: {'CONCEPT_PHRASE_COMMA_LIST': 6, 'CLAUSE_STACK_OVERFLOW': 5}
+    - [CONCEPT_PHRASE_COMMA_LIST] form=`(do (def ag (agent 0)) (send ag inc) (await ag) @a` — concept_phrase 'agent, send, await, deref' is a comma-list of bare tokens — rewrite as a noun phrase that flows into subplot prose
+    - [CLAUSE_STACK_OVERFLOW] form=`(do (def ag (agent 0)) (send ag inc) (await ag) @a` — sentence with 10 commas reads as AI-output cadence: 'The result will be there when you\nask for it — sometimes you have to wait for th'
+    - [CONCEPT_PHRASE_COMMA_LIST] form=`(do (def ag (agent 0)) (send ag inc) (await ag) @a` — concept_phrase 'agent, send, await, deref' is a comma-list of bare tokens — rewrite as a noun phrase that flows into subplot prose
+    - [CLAUSE_STACK_OVERFLOW] form=`(do (def ag (agent 0)) (send ag inc) (await ag) @a` — sentence with 5 commas reads as AI-output cadence: 'She, with the steady breathing of a long walker, composed agent, send, await, de'
+    - [CONCEPT_PHRASE_COMMA_LIST] form=`(do (def ag (agent 0)) (send ag inc) (await ag) @a` — concept_phrase 'agent, send, await, deref' is a comma-list of bare tokens — rewrite as a noun phrase that flows into subplot prose
+    - [CLAUSE_STACK_OVERFLOW] form=`(do (def ag (agent 0)) (send ag inc) (await ag) @a` — sentence with 9 commas reads as AI-output cadence: 'To construct an agent holding 0, use send to asynchronously apply inc, await its'
+
+### G9-12: await — synchronizing on agents
+
+- examples: 1
+- variety @ n=50: 1.00
+- issues: {'CONCEPT_PHRASE_COMMA_LIST': 3, 'DOUBLE_NAME_INTRO': 1, 'CLAUSE_STACK_OVERFLOW': 3}
+    - [CONCEPT_PHRASE_COMMA_LIST] form=`(do (def ag (agent 0)) (send ag inc) (send ag inc)` — concept_phrase 'agent, double send, await, deref' is a comma-list of bare tokens — rewrite as a noun phrase that flows into subplot prose
+    - [DOUBLE_NAME_INTRO] form=`(do (def ag (agent 0)) (send ag inc) (send ag inc)` — character 'Topsy the dog' introduced twice within 200 chars — drop the second 'the dog'
+    - [CLAUSE_STACK_OVERFLOW] form=`(do (def ag (agent 0)) (send ag inc) (send ag inc)` — sentence with 9 commas reads as AI-output cadence: 'To construct an agent holding 0, asynchronously send inc twice, synchronize with'
+    - [CONCEPT_PHRASE_COMMA_LIST] form=`(do (def ag (agent 0)) (send ag inc) (send ag inc)` — concept_phrase 'agent, double send, await, deref' is a comma-list of bare tokens — rewrite as a noun phrase that flows into subplot prose
+    - [CLAUSE_STACK_OVERFLOW] form=`(do (def ag (agent 0)) (send ag inc) (send ag inc)` — sentence with 9 commas reads as AI-output cadence: 'The runtime makes that easier than it sounds." To construct an agent holding 0, '
+    - [CONCEPT_PHRASE_COMMA_LIST] form=`(do (def ag (agent 0)) (send ag inc) (send ag inc)` — concept_phrase 'agent, double send, await, deref' is a comma-list of bare tokens — rewrite as a noun phrase that flows into subplot prose
+
+### G9-13: future introduction
+
+- examples: 2
+- variety @ n=50: 1.00
+- issues: {'HIGH_LENGTH': 1, 'CONCEPT_PHRASE_COMMA_LIST': 6, 'CLAUSE_STACK_OVERFLOW': 2, 'PARAGRAPH_FRAGMENTATION': 1}
+    - [HIGH_LENGTH] form=`@(future (+ 1 2))` — user_msg 204 words
+    - [CONCEPT_PHRASE_COMMA_LIST] form=`@(future (+ 1 2))` — concept_phrase 'future, add, deref' is a comma-list of bare tokens — rewrite as a noun phrase that flows into subplot prose
+    - [CONCEPT_PHRASE_COMMA_LIST] form=`@(future (+ 1 2))` — concept_phrase 'future, add, deref' is a comma-list of bare tokens — rewrite as a noun phrase that flows into subplot prose
+    - [CONCEPT_PHRASE_COMMA_LIST] form=`@(future (+ 1 2))` — concept_phrase 'future, add, deref' is a comma-list of bare tokens — rewrite as a noun phrase that flows into subplot prose
+    - [CONCEPT_PHRASE_COMMA_LIST] form=`@(future (* 6 7))` — concept_phrase 'future, multiply, deref' is a comma-list of bare tokens — rewrite as a noun phrase that flows into subplot prose
+    - [CLAUSE_STACK_OVERFLOW] form=`@(future (* 6 7))` — sentence with 6 commas reads as AI-output cadence: 'The runtime makes that easier than it sounds." To construct a future that multip'
+
+### G9-14: deref @ shorthand
+
+- examples: 2
+- variety @ n=50: 1.00
+- issues: {'PARAGRAPH_FRAGMENTATION': 2}
+    - [PARAGRAPH_FRAGMENTATION] form=`(do (def a (atom 7)) @a)` — user_msg has 4 short (≤25-word) paragraphs in body — reads as a bullet list, not a story
+    - [PARAGRAPH_FRAGMENTATION] form=`(do (def a (atom 7)) (deref a))` — user_msg has 4 short (≤25-word) paragraphs in body — reads as a bullet list, not a story
+
+### G9-15: promise — deliver and deref
+
+- examples: 2
+- variety @ n=50: 1.00
+- issues: {'WRONG_FABLE_LITERAL': 1, 'CONCEPT_PHRASE_COMMA_LIST': 6, 'CLAUSE_STACK_OVERFLOW': 4, 'ANSWER_LEAK_STRING': 1, 'PARAGRAPH_FRAGMENTATION': 1}
+    - [WRONG_FABLE_LITERAL] form=`(do (def p (promise)) (deliver p :done) @p)` — tortoise-hare ghost name 'Pip' appears in dog-shadow user_msg
+    - [CONCEPT_PHRASE_COMMA_LIST] form=`(do (def p (promise)) (deliver p :done) @p)` — concept_phrase 'promise, deliver, deref' is a comma-list of bare tokens — rewrite as a noun phrase that flows into subplot prose
+    - [CLAUSE_STACK_OVERFLOW] form=`(do (def p (promise)) (deliver p :done) @p)` — sentence with 7 commas reads as AI-output cadence: 'The runtime makes that easier than it sounds." To construct a promise, deliver a'
+    - [CONCEPT_PHRASE_COMMA_LIST] form=`(do (def p (promise)) (deliver p :done) @p)` — concept_phrase 'promise, deliver, deref' is a comma-list of bare tokens — rewrite as a noun phrase that flows into subplot prose
+    - [CLAUSE_STACK_OVERFLOW] form=`(do (def p (promise)) (deliver p :done) @p)` — sentence with 7 commas reads as AI-output cadence: 'To construct a promise, deliver a completion keyword to it, and dereference to g'
+    - [ANSWER_LEAK_STRING] form=`(do (def p (promise)) (deliver p :done) @p)` — answer string ':done' appears in user_msg
+
+### G9-16: volatile — when STM is too heavy
+
+- examples: 2
+- variety @ n=50: 1.00
+- issues: {'CONCEPT_PHRASE_COMMA_LIST': 6, 'CLAUSE_STACK_OVERFLOW': 5, 'PARAGRAPH_FRAGMENTATION': 1}
+    - [CONCEPT_PHRASE_COMMA_LIST] form=`(do (def v (volatile! 0)) (vswap! v inc) @v)` — concept_phrase 'volatile, vswap, deref' is a comma-list of bare tokens — rewrite as a noun phrase that flows into subplot prose
+    - [CLAUSE_STACK_OVERFLOW] form=`(do (def v (volatile! 0)) (vswap! v inc) @v)` — sentence with 8 commas reads as AI-output cadence: 'to\nwrite atomically, no matter who else is sniffing." To\nconstruct a volatile ho'
+    - [CONCEPT_PHRASE_COMMA_LIST] form=`(do (def v (volatile! 0)) (vswap! v inc) @v)` — concept_phrase 'volatile, vswap, deref' is a comma-list of bare tokens — rewrite as a noun phrase that flows into subplot prose
+    - [CLAUSE_STACK_OVERFLOW] form=`(do (def v (volatile! 0)) (vswap! v inc) @v)` — sentence with 8 commas reads as AI-output cadence: 'If two dogs arrive at once, the runtime makes sure only one of us\ngoes through a'
+    - [CONCEPT_PHRASE_COMMA_LIST] form=`(do (def v (volatile! 0)) (vswap! v inc) @v)` — concept_phrase 'volatile, vswap, deref' is a comma-list of bare tokens — rewrite as a noun phrase that flows into subplot prose
+    - [CLAUSE_STACK_OVERFLOW] form=`(do (def v (volatile! 0)) (vswap! v inc) @v)` — sentence with 7 commas reads as AI-output cadence: 'The\nruntime sees to that — no two writers stomp on each other\'s\nwork." To constr'
+
+### G9-17: binding — thread-local
+
+- examples: 2
+- variety @ n=50: 1.00
+- issues: {'CONCEPT_PHRASE_COMMA_LIST': 6, 'CLAUSE_STACK_OVERFLOW': 5, 'PARAGRAPH_FRAGMENTATION': 1}
+    - [CONCEPT_PHRASE_COMMA_LIST] form=`(do (def ^:dynamic *p* 1) (binding [*p* 99] *p*))` — concept_phrase 'dynamic var, binding, read' is a comma-list of bare tokens — rewrite as a noun phrase that flows into subplot prose
+    - [CLAUSE_STACK_OVERFLOW] form=`(do (def ^:dynamic *p* 1) (binding [*p* 99] *p*))` — sentence with 7 commas reads as AI-output cadence: 'The\nruntime sees to that — no two writers stomp on each other\'s\nwork." To define'
+    - [CONCEPT_PHRASE_COMMA_LIST] form=`(do (def ^:dynamic *p* 1) (binding [*p* 99] *p*))` — concept_phrase 'dynamic var, binding, read' is a comma-list of bare tokens — rewrite as a noun phrase that flows into subplot prose
+    - [CLAUSE_STACK_OVERFLOW] form=`(do (def ^:dynamic *p* 1) (binding [*p* 99] *p*))` — sentence with 7 commas reads as AI-output cadence: 'To define a dynamic var *p* as 1, use binding to rebind it to 99, and read its v'
+    - [CONCEPT_PHRASE_COMMA_LIST] form=`(do (def ^:dynamic *p* 1) (binding [*p* 99] *p*))` — concept_phrase 'dynamic var, binding, read' is a comma-list of bare tokens — rewrite as a noun phrase that flows into subplot prose
+    - [PARAGRAPH_FRAGMENTATION] form=`(do (def ^:dynamic *p* 1) (binding [*p* 99] *p*))` — user_msg has 4 short (≤25-word) paragraphs in body — reads as a bullet list, not a story
+
+>>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
 ### G9-18: locking — last resort
 
 - examples: 2
@@ -1013,14 +1318,43 @@ tortoise
 
 - examples: 2
 - variety @ n=50: 1.00
+<<<<<<< HEAD
 - issues: {'HIGH_LENGTH': 1, 'DOUBLED_INPUT_VALUE_PARENS': 1}
     - [HIGH_LENGTH] form=`(do (defmacro my-when [t & body] `(if ~t (do ~@bod` — user_msg 211 words
     - [DOUBLED_INPUT_VALUE_PARENS] form=`(do (defmacro my-when [t & body] `(if ~t (do ~@bod` — user_msg contains two or more 'as the input value' parentheticals — auto-closer fired twice or authored prose duplicated it
+=======
+- issues: {'HIGH_LENGTH': 1, 'CLAUSE_STACK_OVERFLOW': 1}
+    - [HIGH_LENGTH] form=`(do (defmacro my-when [t & body] `(if ~t (do ~@bod` — user_msg 219 words
+    - [CLAUSE_STACK_OVERFLOW] form=`(do (defmacro twice [x] `(do ~x ~x)) (twice 7))` — sentence with 5 commas reads as AI-output cadence: 'A rule takes a *form* and makes a different *form* — only\nthen does the runtime '
+
+### G10-04: Macro expansion rule
+
+- examples: 2
+- variety @ n=50: 1.00
+- issues: {'CLAUSE_STACK_OVERFLOW': 1}
+    - [CLAUSE_STACK_OVERFLOW] form=`(macroexpand-1 '(or a b))` — sentence with 5 commas reads as AI-output cadence: 'You set the rule\nonce, and any mark that uses it gets rewritten on the way to th'
+
+### G10-05: macroexpand
+
+- examples: 2
+- variety @ n=50: 1.00
+- issues: {'CLAUSE_STACK_OVERFLOW': 1}
+    - [CLAUSE_STACK_OVERFLOW] form=`(macroexpand '(-> 1 inc inc))` — sentence with 5 commas reads as AI-output cadence: 'You set the rule\nonce, and any mark that uses it gets rewritten on the way to th'
+
+### G10-06: when and when-not as macros
+
+- examples: 3
+- variety @ n=50: 1.00
+- issues: {'CLAUSE_STACK_OVERFLOW': 1, 'WRONG_FABLE_LITERAL': 1}
+    - [CLAUSE_STACK_OVERFLOW] form=`(when true 1 2 3)` — sentence with 5 commas reads as AI-output cadence: 'You set the rule\nonce, and any mark that uses it gets rewritten on the way to th'
+    - [WRONG_FABLE_LITERAL] form=`(when-not false :ok)` — tortoise-hare ghost name 'Pip' appears in dog-shadow user_msg
+>>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
 
 ### G10-07: Threading macros revisited
 
 - examples: 3
 - variety @ n=50: 1.00
+<<<<<<< HEAD
 - issues: {'HIGH_LENGTH': 3, 'ANSWER_LEAK': 1, 'CLAUSE_STACK_OVERFLOW': 1, 'CONCEPT_AS_VERB': 1}
     - [HIGH_LENGTH] form=`(-> 5 inc inc inc)` — user_msg 227 words
     - [ANSWER_LEAK] form=`(-> 5 inc inc inc)` — answer 7 in narrative
@@ -1028,6 +1362,30 @@ tortoise
     - [CLAUSE_STACK_OVERFLOW] form=`(->> [1 2 3 4] (filter even?) (map inc) (reduce +)` — sentence with 7 commas reads as AI-output cadence: 'To thread a vector through filter, map, and reduce using thread-last, she, with '
     - [CONCEPT_AS_VERB] form=`(->> [1 2 3 4] (filter even?) (map inc) (reduce +)` — concept_phrase substituted into a finite-verb slot (e.g. 'must calling X', 'I applying Y')
     - [HIGH_LENGTH] form=`(macroexpand '(-> x f g))` — user_msg 202 words
+=======
+- issues: {'ANSWER_LEAK': 3, 'HIGH_LENGTH': 3, 'NARRATIVE_NUMERAL_HARDCODE': 3, 'CLAUSE_STACK_OVERFLOW': 1, 'CONCEPT_AS_VERB': 1}
+    - [ANSWER_LEAK] form=`(-> 5 inc inc inc)` — answer 8 in narrative
+    - [HIGH_LENGTH] form=`(-> 5 inc inc inc)` — user_msg 226 words
+    - [ANSWER_LEAK] form=`(-> 5 inc inc inc)` — answer 8 in narrative
+    - [HIGH_LENGTH] form=`(->> [1 2 3 4] (filter even?) (map inc) (reduce +)` — user_msg 216 words
+    - [ANSWER_LEAK] form=`(->> [1 2 3 4] (filter even?) (map inc) (reduce +)` — answer 8 in narrative
+    - [NARRATIVE_NUMERAL_HARDCODE] form=`(->> [1 2 3 4] (filter even?) (map inc) (reduce +)` — parametric example has hard-coded English numeral 'four bones' in a story slot — the actual draws may differ from this fixed count
+
+### G10-08: Macro vs fn
+
+- examples: 2
+- variety @ n=50: 1.00
+- issues: {'ANSWER_LEAK': 1, 'DOUBLE_NAME_INTRO': 1}
+    - [ANSWER_LEAK] form=`(do (defn add-fn [a b] (+ a b)) (add-fn 3 4))` — answer 7 in narrative
+    - [DOUBLE_NAME_INTRO] form=`(do (defmacro add-mac [a b] `(+ ~a ~b)) (add-mac 3` — character 'Chestnut the dog' introduced twice within 200 chars — drop the second 'the dog'
+
+### G10-10: Anaphoric macros are confusing
+
+- examples: 2
+- variety @ n=50: 1.00
+- issues: {'HIGH_LENGTH': 1}
+    - [HIGH_LENGTH] form=`(do (defmacro safe-if-let [bind then else] `(if-le` — user_msg 204 words
+>>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
 
 ### G10-11: Reader macros overview
 
@@ -1042,8 +1400,23 @@ tortoise
 
 - examples: 2
 - variety @ n=50: 1.00
+<<<<<<< HEAD
 - issues: {'BOOL_LEAK_RESOLUTION': 1}
     - [BOOL_LEAK_RESOLUTION] form=`(uuid? #uuid "00000000-0000-0000-0000-000000000000` — resolution leaks boolean answer 'true' — describe the verdict abstractly instead
+=======
+- issues: {'CLAUSE_STACK_OVERFLOW': 2, 'HIGH_LENGTH': 1, 'BOOL_LEAK_RESOLUTION': 1}
+    - [CLAUSE_STACK_OVERFLOW] form=`(inst? #inst "2024-01-01")` — sentence with 5 commas reads as AI-output cadence: 'The runtime sees the cleaned-up form, evaluates it,\nand gives back what it compu'
+    - [CLAUSE_STACK_OVERFLOW] form=`(inst? #inst "2024-01-01")` — sentence with 5 commas reads as AI-output cadence: 'The runtime sees the cleaned-up form, evaluates it,\nand gives back what it compu'
+    - [HIGH_LENGTH] form=`(uuid? #uuid "00000000-0000-0000-0000-000000000000` — user_msg 212 words
+    - [BOOL_LEAK_RESOLUTION] form=`(uuid? #uuid "00000000-0000-0000-0000-000000000000` — resolution leaks boolean answer 'true' — describe the verdict abstractly instead
+
+### G10-13: Data readers and EDN extension
+
+- examples: 2
+- variety @ n=50: 1.00
+- issues: {'HIGH_LENGTH': 1}
+    - [HIGH_LENGTH] form=`(clojure.edn/read-string "[:a :b :c]")` — user_msg 209 words
+>>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
 
 ### G10-14: eval (the function)
 
@@ -1056,8 +1429,14 @@ tortoise
 
 - examples: 2
 - variety @ n=50: 1.00
+<<<<<<< HEAD
 - issues: {'DOUBLED_INPUT_VALUE_PARENS': 1}
     - [DOUBLED_INPUT_VALUE_PARENS] form=`(do (defmacro def-pace [name v] `(def ~name ~v)) (` — user_msg contains two or more 'as the input value' parentheticals — auto-closer fired twice or authored prose duplicated it
+=======
+- issues: {'CLAUSE_STACK_OVERFLOW': 1, 'ANSWER_LEAK_STRING': 1}
+    - [CLAUSE_STACK_OVERFLOW] form=`(do (defmacro with-steady-pace [& body] `(let [pac` — sentence with 5 commas reads as AI-output cadence: 'You set the rule\nonce, and any mark that uses it gets rewritten on the way to th'
+    - [ANSWER_LEAK_STRING] form=`(do (defmacro def-pace [name v] `(def ~name ~v)) (` — answer string ':slow' appears in user_msg
+>>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
 
 ## Grade 11
 
@@ -1180,6 +1559,7 @@ tortoise
 
 ### Issue counts (across all examples × 3 records)
 
+<<<<<<< HEAD
 - **TRAILING_PARTICIPLE_CLOSER**: 95
 - **CLAUSE_STACK_OVERFLOW**: 55
 - **NARRATIVE_NUMERAL_HARDCODE**: 51
@@ -1188,8 +1568,31 @@ tortoise
 - **REPL_TRIPLE_VOICE**: 26
 - **FORM_DISPLAY_AND_FORM_NOUN**: 25
 - **BOOL_LEAK_RESOLUTION**: 17
+=======
+- **CLAUSE_STACK_OVERFLOW**: 253
+- **NARRATIVE_NUMERAL_HARDCODE**: 138
+- **CONCEPT_PHRASE_COMMA_LIST**: 75
+- **HIGH_LENGTH**: 60
+- **REPL_TRIPLE_VOICE**: 54
+- **NUMERAL_LIST_IN_GOAL**: 48
+- **REPL_AS_TIME_TRAVELLER**: 31
+- **RESOLUTION_GENERIC**: 31
+- **FORM_DISPLAY_AND_FORM_NOUN**: 26
+- **PARAGRAPH_FRAGMENTATION**: 26
+- **DOUBLE_NAME_INTRO**: 24
+- **BOOL_LEAK_RESOLUTION**: 19
+- **ANSWER_LEAK**: 19
+- **WRONG_FABLE_LITERAL**: 16
+>>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
 - **RESOLUTION_REPL_DOUBLED**: 12
+- **ANSWER_LEAK_STRING**: 11
 - **HEDGING_NEAR_FORM**: 11
+<<<<<<< HEAD
+=======
+- **CONCEPT_PHRASE_FORM_PREFIX**: 9
+- **PARAMETRIC_LITERAL_NUMERALS**: 9
+- **THE_FORM_OVERUSE**: 7
+>>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
 - **CONCEPT_AS_VERB**: 7
 - **THE_FORM_OVERUSE**: 5
 - **ONLY_SHOOK_HEAD_TIC**: 4
@@ -1210,6 +1613,7 @@ tortoise
 
 | Grade | Subjects | Examples | Issues | Low-variety |
 |---|---|---|---|---|
+<<<<<<< HEAD
 | 1 | 18 | 76 | 49 | — |
 | 2 | 22 | 88 | 40 | — |
 | 3 | 18 | 31 | 30 | — |
@@ -1222,6 +1626,20 @@ tortoise
 | 10 | 16 | 36 | 23 | — |
 | 11 | 14 | 29 | 6 | — |
 | 12 | 18 | 37 | 21 | — |
+=======
+| 1 | 18 | 76 | 114 | — |
+| 2 | 22 | 88 | 146 | — |
+| 3 | 18 | 31 | 58 | — |
+| 4 | 20 | 39 | 89 | — |
+| 5 | 22 | 39 | 120 | — |
+| 6 | 16 | 33 | 20 | — |
+| 7 | 18 | 36 | 30 | — |
+| 8 | 16 | 31 | 57 | — |
+| 9 | 18 | 34 | 172 | — |
+| 10 | 16 | 36 | 46 | — |
+| 11 | 14 | 29 | 21 | — |
+| 12 | 18 | 37 | 38 | — |
+>>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
 
 ### Sample issues by severity
 
@@ -1272,6 +1690,97 @@ the REPL. The water moved on, the bridge held its shadow, and
 ...
     ```
 
+<<<<<<< HEAD
+=======
+#### CONCEPT_PHRASE_FORM_PREFIX
+
+- `G1-03` (form `(+ 1/2 1/4)`): example.concept_phrase begins with 'the form (' — vary the noun phrase (use 'the expression', 'the call', or drop the prefix entirely)
+    ```
+    Tippet had found the bone by the meadow and was carrying it home with no small amount of pride.
+
+A few stream-side creatures had gathered on the bank by the meadow to
+watch Rover attempt to outwit Tippet the dog at reading
+the REPL. The water moved on, the bridge held its shadow, and
+Tippet, with th...
+    ```
+- `G1-03` (form `(+ 1/2 1/4)`): example.concept_phrase begins with 'the form (' — vary the noun phrase (use 'the expression', 'the call', or drop the prefix entirely)
+    ```
+    It was on the beach, on the wooden bridge above the slow brook, that Pumpernickel the dog looked down at the water.
+
+Loki chalked a wager on a flat stone by the beach: whoever
+predicted the result of `(+ 1/2 1/4)` would set who crossed the
+bridge first. Pumpernickel the dog, with the slow grace of a...
+    ```
+- `G1-03` (form `(+ 1/2 1/4)`): example.concept_phrase begins with 'the form (' — vary the noun phrase (use 'the expression', 'the call', or drop the prefix entirely)
+    ```
+    A dog with a bone in his jaws is a happy creature; a dog who looks too hard at the water may not be.
+
+Bagel had been showing Cloud the dog how the REPL works,
+the stream cool against their paws and the bridge's shadow long.
+"Look here," he said, pointing to the form (+ 1/2 1/4).
+"You hand the form `...
+    ```
+- `G1-03` (form `(* 2 1/2)`): example.concept_phrase begins with 'the form (' — vary the noun phrase (use 'the expression', 'the call', or drop the prefix entirely)
+    ```
+    It is one of the oldest tricks of light to make one bone seem like two and to make a fool of the unwary.
+
+With a twig, Bear marked a wager into the wet sand on the road:
+whoever guessed the result of `(* 6 1/2)` first would choose
+which bone to carry. Marley the dog, untroubled by what others though...
+    ```
+- `G1-03` (form `(* 2 1/2)`): example.concept_phrase begins with 'the form (' — vary the noun phrase (use 'the expression', 'the call', or drop the prefix entirely)
+    ```
+    on the beach, on a still afternoon by the brook, Collie learned what a reflection costs the careless.
+
+With a twig, Houndsman marked a wager into the wet sand near the beach:
+whoever guessed the result of `(* 5 1/2)` first would choose
+which bone to carry. Collie the dog, stepping deliberately one f...
+    ```
+
+#### DOUBLE_NAME_INTRO
+
+- `G1-03` (form `(+ 1/2 1/4)`): character 'Pumpernickel the dog' introduced twice within 200 chars — drop the second 'the dog'
+    ```
+    It was on the beach, on the wooden bridge above the slow brook, that Pumpernickel the dog looked down at the water.
+
+Loki chalked a wager on a flat stone by the beach: whoever
+predicted the result of `(+ 1/2 1/4)` would set who crossed the
+bridge first. Pumpernickel the dog, with the slow grace of a...
+    ```
+- `G1-03` (form `(- 1 1/3)`): character 'Whatsit the dog' introduced twice within 200 chars — drop the second 'the dog'
+    ```
+    It was on the river bank, on the wooden bridge above the slow brook, that Whatsit the dog looked down at the water.
+
+With a twig, Bounder marked a wager into the wet sand along the river bank:
+whoever guessed the result of `(- 7 1/3)` first would choose
+which bone to carry. Whatsit the dog, without ...
+    ```
+- `G1-04` (form `"race"`): character 'Gizmo the dog' introduced twice within 200 chars — drop the second 'the dog'
+    ```
+    near the village, where the path crosses the stream, Gizmo the dog trotted home with a fine bone in his teeth.
+
+A few stream-side creatures had gathered on the bank near the village to
+watch Tucker attempt to outwit Gizmo the dog at reading
+the REPL. The water moved on, the bridge held its shadow, a...
+    ```
+- `G1-04` (form `"slow and steady"`): character 'Watcher the dog' introduced twice within 200 chars — drop the second 'the dog'
+    ```
+    It was along the road, on the wooden bridge above the slow brook, that Watcher the dog looked down at the water.
+
+A few stream-side creatures had gathered on the bank along the road to
+watch Leaper attempt to outwit Watcher the dog at reading
+the REPL. The water moved on, the bridge held its shadow,...
+    ```
+- `G1-05` (form `(= 1 2)`): character 'Leo the dog' introduced twice within 200 chars — drop the second 'the dog'
+    ```
+    It happened on the river bank, on the very bridge Leo the dog crossed every day, that he stopped longer than he should have.
+
+Stalker and Leo the dog paused on the river bank where
+someone had scratched the equality (= 3 2) into the wet sand. The water
+ran clear and the bridge cast a long, trembling...
+    ```
+
+>>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
 #### ONLY_SHOOK_HEAD_TIC
 
 - `G1-09` (form `(symbol? 'hare)`): user_msg uses 'only shook his/her head' — recurring AI-fable filler cadence
@@ -1668,6 +2177,7 @@ said, head low. "You set out the sniffs, you bring the
 ingredients, the runtime does the rest." ...
     ```
 
+<<<<<<< HEAD
 #### THE_FORM_OVERUSE
 
 - `G3-18` (form `(* 5 5 5)`): `the form` appears 5 times in user_msg (template tic — vary references)
@@ -1708,6 +2218,9 @@ Rex the hound had cached three bones — marked 1, 2, 3 — in a vector. He scra
     ```
 
 #### NARRATIVE_NUMERAL_HARDCODE
+=======
+#### PARAMETRIC_LITERAL_NUMERALS
+>>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
 
 - `G4-01` (form `[1 2 3]`): parametric example has hard-coded English numeral 'three bones' in a story slot — the actual draws may differ from this fixed count
     ```
@@ -1893,7 +2406,92 @@ Bell the hound held a pile of bones marked 1, 2, 3 by the river bank. A gap-siev
     ```
     Peach was crossing the stream near the village when she caught a glimpse of his own reflection.
 
+<<<<<<< HEAD
 Patch the hound held a pile of bones marked 1, 2, 3 at the stream near the forest. A gap-sieve had a rule: only positive-marked bones can pass. She wanted to know: will every bone in this pile fit throug...
+=======
+Patch the hound held a pile of bones marked 1, 2, 3 at the stream near the forest. A gap-sieve had a rule: only positive-marked bones can pass. She wanted to know: will every bone in this pile fi...
+    ```
+
+#### STORY_SLOT_NOUN_REPEAT
+
+- `G5-20` (form `(take 3 [10 20 30 40 50])`): the noun 'the first three' appears in all 4 story slots (scenario/need/mapping/resolution) — vary the imagery between beats
+    ```
+    Zoomer had found the bone in the meadow and was carrying it home with no small amount of pride.
+
+Rocco eyed the bones, as a miser tallies in his sleep, and called out a guess
+about what would come out the far side of the gap without
+bothering to actually run any through. Zoomer the dog shook
+his hea...
+    ```
+- `G5-20` (form `(take 3 [10 20 30 40 50])`): the noun 'the first three' appears in all 4 story slots (scenario/need/mapping/resolution) — vary the imagery between beats
+    ```
+    Down by the stream where the bank dipped low, the world above was answered politely by the world below.
+
+Ace eyed the bones, with the slow secret smile of the covetous, and called out a guess
+about what would come out the far side of the gap without
+bothering to actually run any through. Slate the d...
+    ```
+- `G5-20` (form `(take 3 [10 20 30 40 50])`): the noun 'the first three' appears in all 4 story slots (scenario/need/mapping/resolution) — vary the imagery between beats
+    ```
+    Down by the stream where the bank dipped low, the world above was answered politely by the world below.
+
+"You can collect the result into any kind of cache you like,"
+Marigold, keeping a steady pace through the work said. "A row of bones, a unique-only pile, a sack
+of any shape — the gap doesn't car...
+    ```
+- `G6-14` (form `(name 'java.util.Map)`): the noun 'the kennel-master' appears in all 4 story slots (scenario/need/mapping/resolution) — vary the imagery between beats
+    ```
+    near the river bank, where the path crosses the stream, Shadow the dog trotted home with a fine bone in his teeth.
+
+"Each tool in the kennel-master's shed has its own label,"
+Shadow, with steady road-tested feet said, "and the right way to call it depends on
+which kind of tool it is — some held by a...
+    ```
+- `G6-14` (form `(name 'java.util.Map)`): the noun 'the kennel-master' appears in all 4 story slots (scenario/need/mapping/resolution) — vary the imagery between beats
+    ```
+    Down by the stream where the bank dipped low, the world above was answered politely by the world below.
+
+Barker, with the slow grace of a creature unhurried padded over to the kennel-master's shed near the road
+and pulled down a tool the dogs hadn't carved themselves — a
+leash, a bowl, a collar. "Th...
+    ```
+
+#### ANSWER_LEAK_STRING
+
+- `G6-01` (form `(name 'foo.bar)`): answer string 'foo.bar' appears in user_msg
+    ```
+    There is a kind of greed that does not see what it already has, and another kind that mistakes a reflection for a meal.
+
+Patch the hound examined a marker stone at the stream's edge with a strange dotted path scratched into it — foo.bar. {hound_he_she} wanted to read what the scratch said without us...
+    ```
+- `G6-05` (form `(namespace :owner/item)`): answer string 'owner' appears in user_msg
+    ```
+    It happened at the edge of the forest, on the very bridge Bingo the dog crossed every day, that he stopped longer than he should have.
+
+At the forest edge, Bell found a marker with a qualified keyword written there — low. The mark had two parts separated by a slash, and she wondered what lay before ...
+    ```
+- `G6-05` (form `(name :owner/item)`): answer string 'item' appears in user_msg
+    ```
+    The path home wound past a slow brook, and on bright days the brook was full of borrowed shapes.
+
+Looking at the same marker :owner/item, Bell now wanted the other half — the local name after the slash, to see what kind of thing the owner had stored.
+
+She wanted to pull the name portion from the qua...
+    ```
+- `G6-14` (form `(name 'java.util.Map)`): answer string 'java.util.Map' appears in user_msg
+    ```
+    Cashew had found the bone near the beach and was carrying it home with no small amount of pride.
+
+Patch returned to the kennel-master's shed where another tool hung on a peg — this one labeled with a long, dotted Java class name. She wanted to extract the plain text of that host-side label and read ...
+    ```
+- `G7-11` (form `(try (throw (Exception. "oops")) (catch Exception e (.getMes`): answer string 'oops' appears in user_msg
+    ```
+    Some greedy creatures lose what they have to a thief; others lose it to themselves, by way of a careless glance.
+
+Rex found a broken log-bridge with a message bone attached at the stream. He prepared to catch it and sniff the message.
+
+He wanted to throw the bone and catch it, then read the message ...
+>>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
     ```
 
 #### HEDGING_NEAR_FORM

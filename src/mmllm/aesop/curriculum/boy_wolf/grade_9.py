@@ -31,7 +31,7 @@ from mmllm.aesop.curriculum.boy_wolf._goals import GOALS, get_goal
 
 _SUBPLOTS: list[SubplotTemplate] = list(_G1_SUBPLOTS) + [
 
-    # 9. The careful-ledger template — elder updates the village trust
+    # 9. The careful-ledger template — elder updates the watchhouse trust
     #    counter the right way; shepherd watches impatiently.
     SubplotTemplate("""\
 {elder_phrase} kept a small ledger of state {place} — a value that
@@ -149,7 +149,7 @@ G9_02 = SubjectCurriculum(
             need=(
                 "Each time a form was honestly evaluated, the slate's "
                 "tally needed to step up by one — and only one shepherd "
-                "could be writing at a time, so the village's running "
+                "could be writing at a time, so the watchhouse's running "
                 "count would never be lost or doubled."
             ),
                 mapping=(
@@ -384,7 +384,7 @@ G9_06 = SubjectCurriculum(
             ),
             need=(
                 "The slate needed a guardian to prevent accidents — if Tom ever "
-                "scribbled a word or symbol instead of a numeral, the village's count "
+                "scribbled a word or symbol instead of a numeral, the townsfolk's count "
                 "would corrupt. The validator caught and rejected bad writes."
             ),
             mapping=(
@@ -668,7 +668,7 @@ G9_11 = SubjectCurriculum(
             need=(
                 "The runner might need to wait for a slow operation — I/O, network, "
                 "the elder's reply. `send-off` was the dispatch for long-running tasks "
-                "without blocking the village."
+                "without blocking the meadow folk."
             ),
             mapping=(
                 "`send-off` dispatches to a thread that can block — for slow operations "
@@ -702,7 +702,7 @@ G9_12 = SubjectCurriculum(
             ),
             need=(
                 "Multiple sends could queue up in the agent's mailbox. `await` ensured "
-                "all pending tasks had finished before the village tried to read the "
+                "all pending tasks had finished before the townsfolk tried to read the "
                 "result — no race with the runner."
             ),
             mapping=(
@@ -743,7 +743,7 @@ G9_13 = SubjectCurriculum(
             mapping=(
                 "`future` sends a computation to another thread and returns immediately. "
                 "`@` blocks until the computation completes and returns the result. The "
-                "future computed the sum while the rest of the village worked."
+                "future computed the sum while the rest of the valley worked."
             ),
             resolution=(
                 'the runner had finished and returned the sum — the answer ready and waiting (with `1` as the input value).'           )),
@@ -888,7 +888,7 @@ G9_16 = SubjectCurriculum(
             scenario=(
                 "Tom held a small temporary tally-stick in his palm — 0 notches. As "
                 "he sorted sheep through the gate, he marked one notch. The stick was "
-                "just for his pocket during this task, not a record the village would "
+                "just for his pocket during this task, not a record the watchhouse would "
                 "ever see."
             ),
             need=(
@@ -942,7 +942,7 @@ G9_17 = SubjectCurriculum(
             "a dynamic var *p* rebound to 99 inside binding",
             "the value of *p* inside the binding form",
             scenario=(
-                "Carol posted a notice on the village board: 'Today, all messages "
+                "Carol posted a notice on the meadow folk board: 'Today, all messages "
                 "carry a priority level of 1.' Tom was about to send an urgent "
                 "message, so he entered the urgent zone (binding) and the priority "
                 "became 99. While inside the zone, he sent his message with the "
@@ -967,7 +967,7 @@ G9_17 = SubjectCurriculum(
             "the original value of *p* once binding has unwound",
             scenario=(
                 "The urgent message was sent with priority 99. Tom exited the urgent "
-                "zone (binding unwound). He checked the village notice again and saw "
+                "zone (binding unwound). He checked the townsfolk notice again and saw "
                 "the original priority: 1. The temporary rebinding was gone."
             ),
             need=(

@@ -22,14 +22,14 @@ from mmllm.aesop.curriculum.boy_wolf._metaphor_pools import (
 from mmllm.aesop.curriculum.boy_wolf._goals import GOALS, get_goal
 
 
-# Add naming-themed subplots: the elder maintains the village ledger of
+# Add naming-themed subplots: the elder maintains the watchhouse ledger of
 # named values, where every meaningful quantity gets its own labeled
 # mark on the slate. Polarity preserved: ELDER labels and binds;
 # SHEPHERD agrees to look at the binding rather than guess.
 _NAMING_SUBPLOTS: list[SubplotTemplate] = list(_G1_SUBPLOTS) + [
     SubplotTemplate("""\
 {elder_phrase} kept a small ledger {place} where every meaningful
-quantity in the village got its own labeled mark on the slate.
+quantity in the watchhouse got its own labeled mark on the slate.
 {elder_he_she_cap} pointed to today's entry: {concept_phrase}. The form
 {form_display} would settle it once {shepherd_phrase} agreed to look at
 the binding rather than guess."""),
@@ -70,7 +70,7 @@ G3_01 = SubjectCurriculum(grade=3, subject_id="G3-01",
         _ex("(do (def x 42) x)", 42, "the binding (def x 42) followed by x",
             "the value bound to x after (def x 42)",
             scenario=(
-                "Carol the elder stood at the village notice-post at the "
+                "Carol the elder stood at the townsfolk notice-post at the "
                 "crossroads. She took her chalk and wrote the name x on the "
                 "post, posting 42 sheep's worth of head-count beneath it for "
                 "anyone walking past to see."
@@ -144,7 +144,7 @@ G3_02 = SubjectCurriculum(grade=3, subject_id="G3-02",
 G3_03 = SubjectCurriculum(grade=3, subject_id="G3-03",
     subject_title="let — local binding", fable="boy-wolf",
     examples=[
-        _ex("(let [x 3] (+ x 1))", 4, "the form (let [x 3] (+ x 1))",
+        _ex("(let [x 3] (+ x 1))", 4, "the expression (let [x 3] (+ x 1))",
             "the result of (let [x 3] (+ x 1))",
             scenario=(
                 "Carol the elder had been counting along a stretch of "
@@ -165,8 +165,13 @@ G3_03 = SubjectCurriculum(grade=3, subject_id="G3-03",
                 "binding is in force only for the form's stretch."
             ),
             resolution=(
+<<<<<<< HEAD
                 'the pouch yielded the result, the +1 added a fourth lamb, and the running total stood at the result — exactly what the next fence-post called for. Tom chalked {drawn.a} on the village notice, and the morning record stood for the next shepherd to read.'           )),
         _ex("(let [n 10] (* n n))", 100, "the form (let [n 10] (* n n))",
+=======
+                'the pouch yielded 3, the +1 added a fourth lamb, and the running total stood at 4 — exactly what the next fence-post called for. Tom chalked {drawn.a} on the meadow folk notice, and the morning record stood for the next shepherd to read.'           )),
+        _ex("(let [n 10] (* n n))", 100, "the expression (let [n 10] (* n n))",
+>>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
             "the square of n where n is bound to 10",
             scenario=(
                 "Tom had just counted 10 stones for a marker wall, and he "
@@ -187,7 +192,7 @@ G3_03 = SubjectCurriculum(grade=3, subject_id="G3-03",
             resolution=(
                 'the pouch held 10, the multiplication yielded 100, and Tom knew exactly how many stones to gather for his perfect square. The lookout returned with {drawn.a} on his slate, the valley long behind him and the count plain.'
             )),
-        _ex("(let [a 5] a)", 5, "the form (let [a 5] a)",
+        _ex("(let [a 5] a)", 5, "the expression (let [a 5] a)",
             "the value of (let [a 5] a)",
             scenario=(
                 "Carol had slipped a tally-token worth 5 lambs into the "
@@ -236,7 +241,7 @@ G3_04 = SubjectCurriculum(grade=3, subject_id="G3-04",
                 "the pouch held both counts, the add combined them, and Carol had the day's total ready for the notice-post. {drawn.a} stood as the answer the fold required, slate, chalk, and a steady eye all in agreement."
             )),
         _ex("(let [x 5 y 3] (- x y))", 2,
-            "the form (let [x 5 y 3] (- x y))",
+            "the expression (let [x 5 y 3] (- x y))",
             "the result of (- x y) when x=5, y=3",
             scenario=(
                 "Tom had marked 5 wool-bundles for the market in the fold "
@@ -262,7 +267,7 @@ G3_04 = SubjectCurriculum(grade=3, subject_id="G3-04",
             scenario=(
                 "Carol had counted wool from three different shearing "
                 "stations: 2 fleeces from the north pasture, 3 from the "
-                "east fold, 4 from the village pens."
+                "east fold, 4 from the townsfolk pens."
             ),
             need=(
                 "The morning's inventory required all {drawn.b} counts summed for the leather-bound log, but only for the day's entry — no standing rule."
@@ -285,7 +290,7 @@ G3_05 = SubjectCurriculum(grade=3, subject_id="G3-05",
             "an inner let shadowing the outer def",
             "the inner-let value of x",
             scenario=(
-                "Carol had posted x on the village notice-post at 10 sheep "
+                "Carol had posted x on the valley notice-post at 10 sheep "
                 "for the week's standing count. But Tom came running that "
                 "afternoon with a second flock of 99 strays at the fold, "
                 "only for today."
@@ -386,7 +391,7 @@ G3_07 = SubjectCurriculum(grade=3, subject_id="G3-07",
             ),
             need=(
                 "The strays needed to be added to the running tally, "
-                "but the village wanted a one-shot routine for it — no "
+                "but the watchhouse wanted a one-shot routine for it — no "
                 "name to remember, no card to file, just the steps run "
                 "this once."
             ),
@@ -616,7 +621,7 @@ G3_13 = SubjectCurriculum(grade=3, subject_id="G3-13",
             ),
             need=(
                 "Tom asked: if the drill-card lists many steps, which one does "
-                "the village get? Only the last step's answer matters to the "
+                "the meadow folk get? Only the last step's answer matters to the "
                 "caller."
             ),
             mapping=(
@@ -625,7 +630,7 @@ G3_13 = SubjectCurriculum(grade=3, subject_id="G3-13",
                 "Here, the last form is 99, so 99 is what the caller gets."
             ),
             resolution=(
-                'the drill-card ran all its steps, but returned only the last one — 99 — and that was the answer Carol posted for the village.'
+                'the drill-card ran all its steps, but returned only the last one — 99 — and that was the answer Carol posted for the townsfolk.'
             )),
     ], subplots=_RECIPE_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
 
@@ -637,19 +642,28 @@ G3_14 = SubjectCurriculum(grade=3, subject_id="G3-14",
             "the do form (do 1 2 3)",
             "the value of (do 1 2 3)",
             scenario=(
+<<<<<<< HEAD
                 'Carol had written {drawn.c} numbers on her slate in a column: 1, then 2, then 3. She asked Tom: if I ask the REPL to read this whole sequence, what comes back?'
+=======
+                "Carol had written three numbers on her slate in a column: 1, "
+                "then 2, then 3. She asked Tom: if I read this whole sequence, "
+                "what comes back?"
+>>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
             ),
             need=(
                 "Tom needed to learn that `do` groups forms together, but only "
                 "the last one's answer is what the village hears."
             ),
             mapping=(
-                "The `do` form groups multiple forms. The REPL reads 1, then "
-                "2, then 3 in sequence. But it only returns the final "
-                "value: 3."
+                "The `do` form groups multiple forms. The runtime reads 1, then "
+                "2, then 3 in sequence. But only the final value comes back: 3."
             ),
             resolution=(
+<<<<<<< HEAD
                 "the do form ran all three, returned the result, and Tom learned the REPL's rule for sequences. Carol marked {drawn.a} on the watchhouse beam, the lookout high above the valley quiet at last."
+=======
+                "the do form ran all three, returned 3, and Tom learned the rule for sequences. Carol marked {drawn.a} on the watchhouse beam, the lookout high above the valley quiet at last."
+>>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
             )),
         _ex("(do (+ 1 1) (+ 2 2) (+ 3 3))", 6,
             "a do with three forms",
@@ -678,7 +692,7 @@ G3_15 = SubjectCurriculum(grade=3, subject_id="G3-15",
     subject_title="Side-effects in body", fable="boy-wolf",
     examples=[
         _ex("(do (println \"hi\") 42)", 42,
-            "the form (do (println \"hi\") 42)",
+            "the expression (do (println \"hi\") 42)",
             "the return value of the do",
             scenario=(
                 "Carol stood at the watchhouse and Tom came running. Carol "
@@ -696,7 +710,7 @@ G3_15 = SubjectCurriculum(grade=3, subject_id="G3-15",
                 "but only the last form's value is returned."
             ),
             resolution=(
-                "the do printed the greeting, then returned 42, and Tom knew the REPL's rule: side-effects do their work, but the final value is the return. Tom chalked {drawn.a} on the village notice, and the morning record stood for the next shepherd to read."
+                "the do printed the greeting, then returned 42, and Tom knew the rule: side-effects do their work, but the final value is the return. Tom chalked {drawn.a} on the meadow folk notice, and the morning record stood for the next shepherd to read."
             )),
     ], subplots=_RECIPE_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
 
@@ -746,7 +760,7 @@ G3_17 = SubjectCurriculum(grade=3, subject_id="G3-17",
                 "abbreviations."
             ),
             mapping=(
-                "Kebab-case names with dashes are the village standard. The "
+                "Kebab-case names with dashes are the valley standard. The "
                 "`let` binds `flock-size` to 8 and `stray-count` to 2. The "
                 "subtraction finds the difference between them."
             ),

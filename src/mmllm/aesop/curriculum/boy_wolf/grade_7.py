@@ -44,9 +44,9 @@ _ERR_SUBPLOTS: list[SubplotTemplate] = list(_G1_SUBPLOTS) + [
 {shepherd_phrase} had cried alarm so often that the runtime now took
 every careless throw at its word, and {place}, {elder_phrase} typed
 {form_display} carefully, ready to catch whatever the REPL might raise.
-{shepherd}, {emo_proud}, said no error would ever come — but {elder}
-insisted on letting the runtime decide, then reading {concept_phrase}
-from whatever it returned."""),
+{shepherd}, {emo_proud}, said no error would ever come. The elder
+let the runtime decide, then read {concept_phrase} from whatever it
+returned."""),
 
     # The elder reads the stack trace; the shepherd shrugs the warning
     # off. Mirrors the fable's "boy ignores the villagers' worry" beat.
@@ -63,7 +63,7 @@ to read the stack trace from top to bottom and try the form again."""),
 Beyond the REPL the world had files, streams, and surprises.
 {elder_phrase} opened a small notebook {place}, copying down
 {concept_phrase}. {shepherd}, {emo_tired}, watched as {elder_he_she}
-wrote the form {form_display} so the runtime could carry the work the
+wrote it {form_display} so the runtime could carry the work the
 rest of the way."""),
 ]
 
@@ -121,7 +121,7 @@ G7_01 = SubjectCurriculum(grade=7, subject_id="G7-01",
                 "practice-pen catches what was thrown."
             ),
             resolution=(
-                'the form caught the error and returned the keyword, keeping the work inside the pen where mistakes stay lessons, not disasters (with `:thrown` as the input value).'
+                'the form caught the error and returned the keyword, keeping the work inside the pen where mistakes stay lessons, not disasters.'
             )),
     ], subplots=_SAFETYNET_SUBPLOTS, plan_pool=_PLAN_G7)
 
@@ -171,7 +171,7 @@ G7_02 = SubjectCurriculum(grade=7, subject_id="G7-02",
                 "the pen's safety."
             ),
             resolution=(
-                'the form returned 42 exactly, the catch unused because the arithmetic had posed no trouble — proving the pen only catches when needed. Carol marked {drawn.a} on the watchhouse beam, the lookout high above the valley quiet at last.'           )),
+                'the call returned 42 exactly, the catch unused because the arithmetic had posed no trouble — proving the pen only catches when needed. Carol marked {drawn.a} on the watchhouse beam, the lookout high above the valley quiet at last.'           )),
     ], subplots=_SAFETYNET_SUBPLOTS, plan_pool=_PLAN_G7)
 
 
@@ -199,7 +199,7 @@ G7_03 = SubjectCurriculum(grade=7, subject_id="G7-03",
                 "outside the value's path."
             ),
             resolution=(
-                "the form returned 7, and the finally clause ran after — the cleanup kept the pen prepared for the next morning's watch."
+                "the call returned 7, and the finally clause ran after — the cleanup kept the pen prepared for the next morning's watch."
             )),
         _ex("(try (try (/ 1 0) (finally :ran)) (catch Exception e :caught))",
             ":caught",
@@ -222,7 +222,7 @@ G7_03 = SubjectCurriculum(grade=7, subject_id="G7-03",
                 "runs first, cleanup before the catch answer."
             ),
             resolution=(
-                "the form returned :caught, but the inner finally had already run, proving the pen's nested layers work as designed — cleanup first, then the outer catch."
+                "the call returned :caught, but the inner finally had already run, proving the pen's nested layers work as designed — cleanup first, then the outer catch."
             )),
     ], subplots=_SAFETYNET_SUBPLOTS, plan_pool=_PLAN_G7)
 
@@ -273,7 +273,7 @@ G7_04 = SubjectCurriculum(grade=7, subject_id="G7-04",
                 ":v. Each layer peels back one piece."
             ),
             resolution=(
-                "the form returned :v exactly — Carol had navigated the error's data layers and found the piece she needed."
+                "the call returned :v exactly — Carol had navigated the error's data layers and found the piece she needed."
             )),
     ], subplots=_SAFETYNET_SUBPLOTS, plan_pool=_PLAN_G7)
 
@@ -299,7 +299,7 @@ G7_05 = SubjectCurriculum(grade=7, subject_id="G7-05",
                 "returns false for nil because nil is not *some*."
             ),
             resolution=(
-                'the predicate returned the verdict — nil confirmed as absence, not as something the accountant could count.'
+                'the predicate returned false — nil confirmed as absence, not as something the accountant could count.'
             )),
         _ex("(some? 0)", True,
             "the predicate (some? 0)",
@@ -319,7 +319,7 @@ G7_05 = SubjectCurriculum(grade=7, subject_id="G7-05",
                 "pen."
             ),
             resolution=(
-                'the predicate returned the verdict — zero was something countable, even if the count was empty. The fold gate held tight against the count of {drawn.a}, slate cool under the elder hand.'           )),
+                'the predicate returned true — zero was something countable, even if the count was empty. The fold gate held tight against the count of {drawn.a}, slate cool under the elder hand.'           )),
         _ex("(first nil)", None,
             "calling first on nil",
             "the value of (first nil)",
@@ -336,14 +336,14 @@ G7_05 = SubjectCurriculum(grade=7, subject_id="G7-05",
                 "is no first element of nothing, so the runtime returns nothing."
             ),
             resolution=(
-                'the form returned nil — the first element of an empty pen was absence itself.'
+                'the call returned nil — the first element of an empty pen was absence itself.'
             )),
         _ex("(count nil)", 0,
             "counting a nil collection",
             "the count of nil",
             scenario=(
                 "Carol asked Tom to count the sheep in an empty pen. Tom was "
-                "confused — how could you count nothing? Carol wrote the form."
+                "confused — how could you count nothing? Carol wrote it."
             ),
             need=(
                 "Counting must always work, even when there's nothing to count. "
@@ -354,7 +354,7 @@ G7_05 = SubjectCurriculum(grade=7, subject_id="G7-05",
                 "treats it as an empty collection with a count of zero."
             ),
             resolution=(
-                "the form returned 0 — counting nothing gave zero, a real value the village's ledger could record."
+                "the call returned 0 — counting nothing gave zero, a real value the village's ledger could record."
             )),
     ], subplots=_SAFETYNET_SUBPLOTS, plan_pool=_PLAN_G7)
 
@@ -382,7 +382,7 @@ G7_06 = SubjectCurriculum(grade=7, subject_id="G7-06",
                 "5 to 10). If it fails, the pen catches the guard's rejection."
             ),
             resolution=(
-                'the form returned 10 — the guard had approved 5 as positive, and the drill ran its full course.'
+                'the call returned 10 — the guard had approved 5 as positive, and the drill ran its full course.'
             )),
         _ex("(try ((fn [x] {:pre [(pos? x)]} x) -1) (catch Exception e :pre-failed))",
             ":pre-failed",
@@ -430,7 +430,7 @@ G7_07 = SubjectCurriculum(grade=7, subject_id="G7-07",
                 "let the value through cleanly when the check held."
             ),
             resolution=(
-                'the form returned :ok — the assertion had passed and the next form had run without interruption.'
+                'the call returned :ok — the assertion had passed and the next form had run without interruption.'
             )),
         _ex("(try (assert (= 1 2)) (catch Throwable e :asserted))",
             ":asserted",
@@ -450,7 +450,7 @@ G7_07 = SubjectCurriculum(grade=7, subject_id="G7-07",
                 "a gate that rejected the bad path and fed an error to safety."
             ),
             resolution=(
-                "the form caught the assertion's failure and returned :asserted — the practice-pen had held the broken claim without spilling. Tom chalked {drawn.a} on the village notice, and the morning record stood for the next shepherd to read."           )),
+                "the form caught the assertion's failure and returned :asserted — the practice-pen had held the broken claim without spilling. Tom chalked {drawn.a} on the watchhouse notice, and the morning record stood for the next shepherd to read."           )),
     ], subplots=_SAFETYNET_SUBPLOTS, plan_pool=_PLAN_G7)
 
 
@@ -463,7 +463,7 @@ G7_08 = SubjectCurriculum(grade=7, subject_id="G7-08",
             "capturing the output of (prn 42)",
             "the string \"42\\n\" produced by prn",
             scenario=(
-                "Carol opened the village log-book and dipped her quill in ink. "
+                "Carol opened the watchhouse log-book and dipped her quill in ink. "
                 "She chalked the form to capture what `prn` would write. Tom "
                 "watched as she opened a scroll and caught the words."
             ),
@@ -477,7 +477,7 @@ G7_08 = SubjectCurriculum(grade=7, subject_id="G7-08",
                 "the capture catches it in the log-book as text."
             ),
             resolution=(
-                'the form returned the string "42\\n" — the log-book had recorded what `prn` would have printed to the village square.'
+                'the call returned the string "42\\n" — the log-book had recorded what `prn` would have printed to the townsfolk square.'
             )),
         _ex("(with-out-str (prn :wolf))", ":wolf\n",
             "capturing prn applied to the keyword :wolf",
@@ -497,7 +497,7 @@ G7_08 = SubjectCurriculum(grade=7, subject_id="G7-08",
                 "with the colon and a newline."
             ),
             resolution=(
-                'the form returned ":wolf\\n" — the log-book held the keyword as `prn` would have printed it, ready to send downhill.'
+                'the call returned ":wolf\\n" — the log-book held the keyword as `prn` would have printed it, ready to send downhill.'
             )),
     ], subplots=_SCROLL_SUBPLOTS, plan_pool=_PLAN_G7)
 
@@ -525,7 +525,7 @@ G7_09 = SubjectCurriculum(grade=7, subject_id="G7-09",
                 "the toss worked by returning true."
             ),
             resolution=(
-                'the form returned the verdict — the keyword had been tapped into the pool and Carol could fish it out later for inspection.'
+                'the call returned true — the keyword had been tapped into the pool and Carol could fish it out later for inspection.'
             )),
         _ex("(tap> 42)", True,
             "tapping the number 42 into the tap pool",
@@ -542,11 +542,11 @@ G7_09 = SubjectCurriculum(grade=7, subject_id="G7-09",
             ),
             mapping=(
                 "Whether the value is a keyword or a number, `tap>` always "
-                "returns true. The value lands in the pool, the form confirms. "
+                "returns true. The value lands in the pool, it confirms. "
                 "Numbers and keywords both tap the same way."
             ),
             resolution=(
-                'the form returned the verdict — the number had been tapped into the pool, ready for later inspection.'
+                'the call returned true — the number had been tapped into the pool, ready for later inspection.'
             )),
     ], subplots=_SCROLL_SUBPLOTS, plan_pool=_PLAN_G7)
 
@@ -574,7 +574,7 @@ G7_10 = SubjectCurriculum(grade=7, subject_id="G7-10",
                 "string from the card's metadata."
             ),
             resolution=(
-                'the form returned "adds two" — the note Carol had chalked was now written in the log-book for all shepherds to read.'
+                'the call returned "adds two" — the note Carol had chalked was now written in the log-book for all shepherds to read.'
             )),
     ], subplots=_SCROLL_SUBPLOTS, plan_pool=_PLAN_G7)
 
@@ -598,7 +598,7 @@ G7_11 = SubjectCurriculum(grade=7, subject_id="G7-11",
                 "`throw` sends an exception with a message. `catch` receives it. `.getMessage` reads the tag."
             ),
             resolution=(
-                "The form returned the error's message and Carol understood the mistake (with `oops` as the input value)."
+                "The form returned the error's message and Carol understood the mistake."
             )),
         _ex("(try (throw (ex-info \"trouble\" {})) (catch Exception e (.getMessage e)))",
             "trouble",
@@ -614,7 +614,7 @@ G7_11 = SubjectCurriculum(grade=7, subject_id="G7-11",
                 "`ex-info` is a fancier error that carries data and a message. `.getMessage` reads it the same way."
             ),
             resolution=(
-                "The form returned the ex-info's message and Tom understood the error (with `trouble` as the input value)."
+                "The form returned the ex-info's message and Tom understood the error."
             )),
     ], subplots=_SAFETYNET_SUBPLOTS, plan_pool=_PLAN_G7)
 
@@ -630,7 +630,7 @@ G7_12 = SubjectCurriculum(grade=7, subject_id="G7-12",
             "the length of a multi-line string",
             "the count of characters in \"wolf\\nshepherd\\n\"",
             scenario=(
-                "Carol kept the village log-book. She'd read the scroll aloud: "
+                "Carol kept the meadow folk log-book. She'd read the scroll aloud: "
                 "\"wolf, newline, shepherd, newline.\" Tom counted the marks "
                 "and got 14."
             ),
@@ -643,7 +643,7 @@ G7_12 = SubjectCurriculum(grade=7, subject_id="G7-12",
                 "newline is 1, \"shepherd\" is 8, newline is 1. Together: 4+1+8+1=14."
             ),
             resolution=(
-                'the form returned 14 — the log-book was exactly that long, counted from scroll to scroll. The lookout returned with {drawn.a} on his slate, the valley long behind him and the count plain.'           )),
+                'the call returned 14 — the log-book was exactly that long, counted from scroll to scroll. The lookout returned with {drawn.a} on his slate, the valley long behind him and the count plain.'           )),
         _ex("(clojure.string/split \"a\\nb\\nc\" #\"\\n\")", ["a", "b", "c"],
             "splitting a slurped-style string on newlines",
             "the vector [\"a\" \"b\" \"c\"] of three lines",
@@ -661,7 +661,7 @@ G7_12 = SubjectCurriculum(grade=7, subject_id="G7-12",
                 "becomes [\"a\", \"b\", \"c\"] — three separate lines in a vector."
             ),
             resolution=(
-                'the form returned ["a", "b", "c"] — the scroll had been split into its three lines, ready for the village\'s processing.'
+                'the call returned ["a", "b", "c"] — the scroll had been split into its three lines, ready for the townsfolk\'s processing.'
             )),
     ], subplots=_SCROLL_SUBPLOTS, plan_pool=_PLAN_G7)
 
@@ -679,7 +679,7 @@ G7_13 = SubjectCurriculum(grade=7, subject_id="G7-13",
                 "to count how many lines the scroll held."
             ),
             need=(
-                "Before processing the log, the village needs to know its size. "
+                "Before processing the log, the valley needs to know its size. "
                 "Tom had to count the lines."
             ),
             mapping=(
@@ -688,7 +688,7 @@ G7_13 = SubjectCurriculum(grade=7, subject_id="G7-13",
                 "entry."
             ),
             resolution=(
-                "the form returned the result — the log held exactly three lines, ready for the morning's processing."
+                "the call returned 3 — the log held exactly three lines, ready for the morning's processing."
             )),
         _ex("(first (clojure.string/split-lines \"alpha\\nbeta\"))",
             "alpha",
@@ -707,7 +707,7 @@ G7_13 = SubjectCurriculum(grade=7, subject_id="G7-13",
                 "`split-lines` breaks the string into lines. `first` picks the head of the sequence."
             ),
             resolution=(
-                'The form returned the first line of the scroll (with `alpha\\nbeta` as the input value).'
+                'The form returned the first line of the scroll.'
             )),
     ], subplots=_SCROLL_SUBPLOTS, plan_pool=_PLAN_G7)
 
@@ -735,7 +735,7 @@ G7_14 = SubjectCurriculum(grade=7, subject_id="G7-14",
                 "The string \"wolf\\n\" is the captured text."
             ),
             resolution=(
-                'the form returned "wolf\\n" — the scope had held the print, captured it, and closed cleanly without spill.'
+                'the call returned "wolf\\n" — the scope had held the print, captured it, and closed cleanly without spill.'
             )),
     ], subplots=_SCROLL_SUBPLOTS, plan_pool=_PLAN_G7)
 
@@ -762,7 +762,7 @@ G7_15 = SubjectCurriculum(grade=7, subject_id="G7-15",
                 "captured by the scope."
             ),
             resolution=(
-                'the form returned "x" — the print had gone to the scroll, and the scroll had been captured perfectly.'
+                'the call returned "x" — the print had gone to the scroll, and the scroll had been captured perfectly.'
             )),
         _ex("(with-out-str (println))", "\n",
             "a bare println redirected through *out*",
@@ -781,7 +781,7 @@ G7_15 = SubjectCurriculum(grade=7, subject_id="G7-15",
                 "a single newline, nothing more."
             ),
             resolution=(
-                'the form returned "\\n" — the blank line had been printed and captured, proving the scroll holds what\'s not written too.'
+                'the call returned "\\n" — the blank line had been printed and captured, proving the scroll holds what\'s not written too.'
             )),
     ], subplots=_SCROLL_SUBPLOTS, plan_pool=_PLAN_G7)
 
@@ -807,7 +807,7 @@ G7_16 = SubjectCurriculum(grade=7, subject_id="G7-16",
                 "becomes 42 as a number — a real value again, ready to calculate."
             ),
             resolution=(
-                "the form returned 42 — the log-book's mark had been translated back into a live number."
+                "the call returned 42 — the log-book's mark had been translated back into a live number."
             )),
         _ex("(clojure.edn/read-string \"{:a 1}\")", {":a": 1},
             "reading an edn map from a string",
@@ -825,7 +825,7 @@ G7_16 = SubjectCurriculum(grade=7, subject_id="G7-16",
                 "{:a 1}. The characters become a data structure again."
             ),
             resolution=(
-                "the form returned {:a 1} — the scroll's notation had been decoded into a live map the village could use."
+                "the call returned {:a 1} — the scroll's notation had been decoded into a live map the watchhouse could use."
             )),
         _ex("(clojure.edn/read-string \"[:wolf :flock]\")",
             [":wolf", ":flock"],
@@ -844,7 +844,7 @@ G7_16 = SubjectCurriculum(grade=7, subject_id="G7-16",
                 "[:wolf :flock]. Keywords come back as real keywords."
             ),
             resolution=(
-                "the form returned [:wolf :flock] — the scroll's roster had been decoded into live keywords."
+                "the call returned [:wolf :flock] — the scroll's roster had been decoded into live keywords."
             )),
     ], subplots=_SCROLL_SUBPLOTS, plan_pool=_PLAN_G7)
 
@@ -874,7 +874,7 @@ G7_17 = SubjectCurriculum(grade=7, subject_id="G7-17",
                 "comes back as a live map."
             ),
             resolution=(
-                'the form returned {:a 1 :b 2} — the map had survived the journey to the scroll and back, unchanged.'
+                'the call returned {:a 1 :b 2} — the map had survived the journey to the scroll and back, unchanged.'
             )),
         _ex("(clojure.edn/read-string (pr-str [1 2 3]))", [1, 2, 3],
             "round-tripping a vector through pr-str then edn/read-string",
@@ -892,7 +892,7 @@ G7_17 = SubjectCurriculum(grade=7, subject_id="G7-17",
                 "The three numbers return as a vector, unchanged."
             ),
             resolution=(
-                'the form returned [1 2 3] — the vector had made the roundtrip cleanly, proving all data can survive the scroll.'
+                'the call returned [1 2 3] — the vector had made the roundtrip cleanly, proving all data can survive the scroll.'
             )),
     ], subplots=_SCROLL_SUBPLOTS, plan_pool=_PLAN_G7)
 
@@ -907,7 +907,7 @@ G7_18 = SubjectCurriculum(grade=7, subject_id="G7-18",
             "the :cmd portion of a shell-call descriptor map",
             "the string \"ls\"",
             scenario=(
-                "Tom visited the foreign toolshed at the village smithy. He picked "
+                "Tom visited the foreign toolshed at the meadow folk smithy. He picked "
                 "up a tool labeled with a command name. Carol showed him how to "
                 "read the tool's label."
             ),
@@ -922,7 +922,7 @@ G7_18 = SubjectCurriculum(grade=7, subject_id="G7-18",
                 "to read that label first."
             ),
             resolution=(
-                'the form returned "ls" — Tom had read the toolshed\'s label and found the command he needed to call. The watchhouse warmed as the elder set {drawn.a} into the day record, the fold quiet by then.'           )),
+                'the call returned "ls" — Tom had read the toolshed\'s label and found the command he needed to call. The watchhouse warmed as the elder set {drawn.a} into the day record, the fold quiet by then.'           )),
         _ex("(count (:args {:cmd \"echo\" :args [\"hello\" \"world\"]}))",
             2,
             "the number of args in a shell-call descriptor",
@@ -941,7 +941,7 @@ G7_18 = SubjectCurriculum(grade=7, subject_id="G7-18",
                 "`count` on that vector gives 2. The tool has two arguments."
             ),
             resolution=(
-                "the form returned the result — Tom had extracted the argument count from the foreign tool's descriptor. {drawn.a} stood as the answer the fold required, slate, chalk, and a steady eye all in agreement."           )),
+                "the call returned 2 — Tom had extracted the argument count from the foreign tool's descriptor. {drawn.a} stood as the answer the fold required, slate, chalk, and a steady eye all in agreement."           )),
     ], subplots=_TOOLSHED_SUBPLOTS, plan_pool=_PLAN_G7)
 
 

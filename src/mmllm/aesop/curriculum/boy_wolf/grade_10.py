@@ -164,7 +164,7 @@ G10_01 = SubjectCurriculum(
                 "but the `x` thaws and becomes 5."
             ),
             resolution=(
-                'the form returned the list with the template shape held intact but the unquoted position filled with 5 — exactly the drill-card pattern.'           )),
+                'the call returned the list with the template shape held intact but the unquoted position filled with 5 — exactly the drill-card pattern.'           )),
     ],
     subplots=_CHALKMARK_SUBPLOTS, plan_pool=_PLAN_G10,
 )
@@ -216,7 +216,7 @@ G10_02 = SubjectCurriculum(
                 "`(list 1 2 3)` — the contents spread out, not a nested list."
             ),
             resolution=(
-                'the form returned the spliced result: the list symbol with each item from the basket spread out as separate arguments.'
+                'the call returned the spliced result: the list symbol with each item from the basket spread out as separate arguments.'
             )),
     ],
     subplots=_CHALKMARK_SUBPLOTS, plan_pool=_PLAN_G10,
@@ -240,7 +240,7 @@ G10_03 = SubjectCurriculum(
                 "fresh card and a stick of chalk."
             ),
             need=(
-                "The shorthand was easy to write but the village's "
+                "The shorthand was easy to write but the watchhouse's "
                 "runner needed the full sequence. Carol's job was to "
                 "rewrite each shorthand card into the spelled-out drill "
                 "before runtime — the runner only ever saw the full "
@@ -276,7 +276,7 @@ G10_03 = SubjectCurriculum(
                 "so both could execute."
             ),
             resolution=(
-                "the form returned 7 — the last value in the `do` sequence, since `do` returns only its final expression. The macro's expansion had worked correctly."
+                "the call returned 7 — the last value in the `do` sequence, since `do` returns only its final expression. The macro's expansion had worked correctly."
             )),
     ],
     subplots=_REWRITERULE_SUBPLOTS, plan_pool=_PLAN_G10,
@@ -353,7 +353,7 @@ G10_05 = SubjectCurriculum(
                 "'until no more rules apply.'"
             ),
             need=(
-                "To debug a macro chain, the village's shepherds needed to see the "
+                "To debug a macro chain, the watchhouse's shepherds needed to see the "
                 "form after every rewrite rule had been applied, all the way through "
                 "until the rules stopped firing."
             ),
@@ -399,7 +399,7 @@ G10_06 = SubjectCurriculum(
     fable="boy-wolf",
     examples=[
         _ex("(when true 1 2 3)", 3,
-            "the form (when true 1 2 3)",
+            "the expression (when true 1 2 3)",
             "what (when true 1 2 3) returns",
             scenario=(
                 "Carol had a drill-card shorthand `when` for conditional watches. Tom used it "
@@ -417,7 +417,7 @@ G10_06 = SubjectCurriculum(
             resolution=(
                 'since the condition was true, the form ran the body and returned the result — the last value in the sequence. Carol marked {drawn.a} on the watchhouse beam, the lookout high above the valley quiet at last.'           )),
         _ex("(when false 1 2 3)", None,
-            "the form (when false 1 2 3)",
+            "the expression (when false 1 2 3)",
             "what (when false 1 2 3) returns",
             scenario=(
                 "Tom tried the same `when` macro with a false condition this time: "
@@ -435,7 +435,7 @@ G10_06 = SubjectCurriculum(
             resolution=(
                 'since the condition was false, the form skipped the body entirely and returned nil — no values in the sequence were computed. The fold gate held tight against the count of {drawn.a}, slate cool under the elder hand.'         )),
         _ex("(when-not false :ok)", ":ok",
-            "the form (when-not false :ok)",
+            "the expression (when-not false :ok)",
             "what (when-not false :ok) returns",
             scenario=(
                 "Carol had another shorthand that inverted the test."
@@ -479,7 +479,7 @@ G10_07 = SubjectCurriculum(
                 "through three `inc` calls, each receiving it as the first argument."
             ),
             resolution=(
-                'starting with 5, each `inc` added 1, so the result was 8 — the value had threaded correctly through all three functions. Tom chalked {drawn.a} on the village notice, and the morning record stood for the next shepherd to read.'           )),
+                'starting with 5, each `inc` added 1, so the result was 8 — the value had threaded correctly through all three functions. Tom chalked {drawn.a} on the townsfolk notice, and the morning record stood for the next shepherd to read.'           )),
         _ex("(->> [1 2 3 4] (filter even?) (map inc) (reduce +))", 8,
             "a thread-last pipeline over [1 2 3 4]",
             "what the ->> pipeline returns",
@@ -805,7 +805,7 @@ G10_13 = SubjectCurriculum(
             "edn read-string of \"42\"",
             "what edn/read-string returns for the source \"42\"",
             scenario=(
-                "Carol explained that sometimes the village needed to read data from a scroll "
+                "Carol explained that sometimes the meadow folk needed to read data from a scroll "
                 "or message — text that arrived as a string. The EDN reader could parse it."
             ),
             need=(
@@ -853,10 +853,10 @@ G10_14 = SubjectCurriculum(
     fable="boy-wolf",
     examples=[
         _ex("(eval '(+ 1 2 3))", 6,
-            "the form (eval '(+ 1 2 3))",
+            "the expression (eval '(+ 1 2 3))",
             "what eval returns for the quoted (+ 1 2 3)",
             scenario=(
-                "Carol explained that sometimes the village needed to take a form that had "
+                "Carol explained that sometimes the townsfolk needed to take a form that had "
                 "been held as data — quoted, frozen — and ask the runtime to evaluate it. "
                 "`eval` did exactly that."
             ),
@@ -876,7 +876,7 @@ G10_14 = SubjectCurriculum(
             "eval applied to a constructed list",
             "what eval returns when handed (list '+ 4 5)",
             scenario=(
-                "Tom asked what would happen if the village constructed a form dynamically. "
+                "Tom asked what would happen if the valley constructed a form dynamically. "
                 "Carol showed him a form built with `list`: `(list '+ 4 5)`. 'Can `eval` "
                 "handle hand-built forms?' he asked."
             ),
