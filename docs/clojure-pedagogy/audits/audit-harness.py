@@ -970,7 +970,79 @@ def check_record(rec, sub, example):
                                 f"drawn-value reference (form has literals "
                                 f"{lits[:3]!r}, resolution doesn't close the loop)"))
 
+    # ─────────── crow-pitcher audit slice (claude/audit-crow-pitcher-kaLA) ──
+    #
+    # Three new detectors added by this slice. None duplicates an
+    # existing one (verified by greping `issues.append` for the codes
+    # before authoring).
+
+    # MULTIPLE_SAID_TAGS — three or more "said" dialogue tags in one
+    # user_msg. Records with that many attribution tags read like
+    # over-announced theatre rather than a flowing narrative; the model
+    # learns the dialogue structure better when characters' speech is
+    # tagged sparingly. Threshold 3 catches the worst offenders without
+    # flagging legitimate two-character exchanges.
+    n_said_tags = len(re.findall(r"\b(said|replied|answered|asked|cried|"
+                                   r"declared|exclaimed|whispered)\b,?\s+\"",
+                                   user))
+    if n_said_tags >= 3:
+        issues.append(("MULTIPLE_SAID_TAGS",
+                        f"user_msg has {n_said_tags} dialogue-attribution "
+                        "tags — over-announcing the speakers"))
+
+    # REPEATED_OPENER_FRAGMENT — a clause-length fragment from the
+    # user_msg's first sentence appears verbatim later in the same
+    # user_msg. Catches templates whose subplot body re-uses an
+    # aesopian-opener clause word-for-word (e.g., "At the foot of a
+    # tall pitcher" appearing twice). Walks every 4-7-word ngram of
+    # the first sentence; if any one of those phrase-grams reappears
+    # in the rest of the user_msg, flag.
+    first_sent_end = re.search(r"[.!?](?:\s|$)", user)
+    if first_sent_end:
+        first_sent = user[:first_sent_end.start()]
+        rest = user[first_sent_end.end():]
+        words = first_sent.split()
+        for n in (7, 6, 5):
+            if len(words) < n:
+                continue
+            for i in range(len(words) - n + 1):
+                gram = " ".join(words[i:i + n])
+                if len(gram) >= 25 and gram in rest:
+                    issues.append(("REPEATED_OPENER_FRAGMENT",
+                                    f"opener fragment {gram!r} also appears "
+                                    "later in user_msg"))
+                    break
+            else:
+                continue
+            break
+
+    # METAPHOR_DISAPPEARS — fable-keyed check: the rendered prose
+    # mentions none of the fable's primary metaphor nouns. Crow-pitcher
+    # records that don't reference pitcher / water / pebble / stone /
+    # throat / rim — the central imagery — have lost the metaphor
+    # entirely (a Cat-F polarity-adjacent failure mode). Same shape
+    # extends to other fables; see _METAPHOR_NOUNS table.
+    fable_name = getattr(sub, "fable", "") or ""
+    metaphor_nouns = _METAPHOR_NOUNS.get(fable_name, ())
+    if metaphor_nouns:
+        ul = user.lower()
+        if not any(n in ul for n in metaphor_nouns):
+            issues.append(("METAPHOR_DISAPPEARS",
+                            f"user_msg has none of the fable's primary "
+                            f"metaphor nouns ({', '.join(metaphor_nouns[:4])}...)"))
+
     return issues
+
+
+# Per-fable primary metaphor nouns. A record that mentions none of these
+# has lost the metaphor — a sign that the template fired without
+# fable-specific imagery (often a tortoise-hare-shaped template carried
+# across without lifting). Conservative: only the fables I've audited
+# get listed; absent fables don't trigger this check.
+_METAPHOR_NOUNS = {
+    "crow-pitcher":  ("pitcher", "water", "pebble", "stone", "throat",
+                      "rim", "crow"),
+}
 
 
 # Cached EMO-pool fragments for fast LOW_GROUNDING detection.
@@ -1014,6 +1086,20 @@ def _emo_fragments():
             EP_GREEDY2, EP_SUSPICIOUS2,
             EMO_BOASTFUL, EMO_CAUTIOUS,
         )
+    except ImportError:
+        pass
+    # Crow-pitcher-specific EMO pools (CP_EMO_*) live in generator.py
+    # and are what the crow-pitcher renderer actually draws from. Without
+    # them in the marker set, every crow-pitcher record would fail the
+    # EMO half of LOW_GROUNDING even when the renderer emits a rich
+    # EMO phrase. (Same goes for any other fable's bespoke pools.)
+    try:
+        from mmllm.aesop.curriculum.generator import (
+            CP_EMO_PATIENT, CP_EMO_PROUD, CP_EMO_THIRSTY,
+            GE_EMO_GREEDY, GE_EMO_CONTENT, GE_EMO_REGRETFUL,
+        )
+        pools = pools + (CP_EMO_PATIENT, CP_EMO_PROUD, CP_EMO_THIRSTY,
+                          GE_EMO_GREEDY, GE_EMO_CONTENT, GE_EMO_REGRETFUL)
     except ImportError:
         pass
     out = set()

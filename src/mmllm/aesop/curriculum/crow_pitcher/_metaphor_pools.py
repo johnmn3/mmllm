@@ -575,10 +575,13 @@ _ACORN_SUBPLOTS = _ACORN_SUBPLOTS + [
 _GATE_SUBPLOTS: list[SubplotTemplate] = [
 
     SubplotTemplate("""\
-{clever_phrase} paused at the pitcher's rim {place}, talon raised.
+{clever_phrase}, {emo_patient}, paused at the pitcher's rim {place},
+talon raised — the throat was narrow, the day was hot, and the dual
+latch above the water glinted in the sun.
 "Boolean forms in Clojure are like a dual-gate check at the pitcher's
 mouth," {clever_he_she} said. "The runtime checks the value and the
-gate swings open or closed — what comes back is the gate's verdict." To
+gate swings open or closed — what comes back is the gate's verdict;
+a narrow throat punishes any latch that lifts on a wrong guess." To
 {goal_text}, {clever_he_she} composed {concept_phrase}, submitted
 the form, and the REPL returned whatever the gate had decided."""),
 
@@ -721,10 +724,12 @@ mind, submitted the form, and the REPL — reading the name exactly —
 returned the value the carving had promised."""),
 
     SubplotTemplate("""\
-{hasty_phrase} glanced at the rim-carving {place} and called out what
-{hasty_he_she} thought it said without stopping to read carefully.
-{clever_phrase} stopped and read each scratch precisely. To {goal_text},
-the carving had to be read exactly: {clever_he_she} composed
+{hasty_phrase}, {emo_proud}, glanced at the rim-carving {place} and
+called out what {hasty_he_she} thought it said without stopping to
+read carefully. The day was hot and the throat was narrow — a
+mis-read symbol cost a wasted pebble. {clever_phrase}, {emo_patient},
+stopped and read each scratch precisely. To {goal_text}, the carving
+had to be read exactly: {clever_he_she} composed
 {concept_phrase}, submitted the form, and the REPL — reading literally —
 returned the right value."""),
 ]
@@ -742,13 +747,15 @@ _ROADSIGN_SUBPLOTS = _ROADSIGN_SUBPLOTS + [
 _SAFETYNET_SUBPLOTS: list[SubplotTemplate] = [
 
     SubplotTemplate("""\
-{clever_phrase} spread a patch of soft moss beneath the pitcher {place}.
-"If a stone goes wrong — if the form fails — the moss catches it safely,"
-{clever_he_she} said. "The pitcher's water level doesn't drop; you try a
-different stone." To {goal_text}, {clever_he_she} composed
-{concept_phrase}, submitted the form, and the REPL — moss in place —
-caught any trouble and returned the value the recovery path had
-specified."""),
+{clever_phrase}, {emo_patient}, spread a patch of soft moss beneath
+the pitcher {place} — the day was hot, the throat was narrow, and any
+pebble flung wrong without a cushion would chip the rim and waste the
+work. "If a stone goes wrong — if the form fails — the moss catches
+it safely," {clever_he_she} said. "The pitcher's water level doesn't
+drop; you try a different stone." To {goal_text}, {clever_he_she}
+composed {concept_phrase}, submitted the form, and the REPL — moss
+in place — caught any trouble and returned the value the recovery
+path had specified."""),
 
     SubplotTemplate("""\
 "This patch of moss is the practice area," {clever_phrase}, {emo_patient}, said {place}.
@@ -1006,13 +1013,15 @@ _CARRYINGCASE_SUBPLOTS = _CARRYINGCASE_SUBPLOTS + [
 _TOOLSHED_SUBPLOTS: list[SubplotTemplate] = [
 
     SubplotTemplate("""\
-{clever_phrase} found a different pitcher {place} — one made by a human
-potter, not fired by any crow. "This isn't our clay," {clever_he_she}
+{clever_phrase}, {emo_patient}, found a different pitcher {place} — one
+made by a human potter, not fired by any crow, its throat narrow and
+its rim cool to the touch. "This isn't our clay," {clever_he_she}
 said, "but we can call its methods directly: dot-prefix on the vessel,
-or slash for what the potter made standard-issue." To {goal_text},
-{clever_he_she} composed {concept_phrase}, submitted the form, and
-the REPL — calling into the foreign vessel — handed back what its method
-had returned."""),
+or slash for what the potter made standard-issue. A foreign vessel is
+a host bridge — pebbles drop the same way, but the rim is unfamiliar."
+To {goal_text}, {clever_he_she} composed {concept_phrase}, submitted
+the form, and the REPL — calling into the foreign vessel — handed back
+what its method had returned."""),
 
     SubplotTemplate("""\
 "Each vessel from the human potters has its own label," {clever_phrase}, {emo_patient}, said, "and the right way to call it depends on which kind of vessel it is
@@ -1041,7 +1050,7 @@ cleanly."""),
 {hasty_phrase}, {emo_proud}, grabbed at the human's vessel without
 checking which method was which. The wrong method rattled back an error.
 {clever_phrase} shook {clever_his_her} head: to {goal_text} required
-reading the vessel's labels carefully. {clever_he_she} composed
+reading the vessel's labels carefully. {clever_he_she_cap} composed
 {concept_phrase}, submitted the form, and the REPL — calling the right
 host method by name — returned the value cleanly."""),
 ]
@@ -1116,14 +1125,17 @@ _RUNNERAHEAD_SUBPLOTS = _RUNNERAHEAD_SUBPLOTS + [
 _REWRITERULE_SUBPLOTS: list[SubplotTemplate] = [
 
     SubplotTemplate("""\
-{clever_phrase} pressed a talon-tip to the pitcher's rim {place} and
-traced the drop-order carefully. "A macro," {clever_he_she} said, "is a
-rule that rewrites the drop-order scratched on the rim before a single
-stone falls. You write the rule once, and any drop-order that calls it
-gets rewritten on the way to the pitcher." To {goal_text},
-{clever_he_she} composed {concept_phrase}, submitted the form, and
-the REPL — first rewriting, then evaluating — returned the value the
-rewritten drop-order yielded."""),
+{clever_phrase}, {emo_patient}, pressed a talon-tip to the pitcher's
+rim {place} and traced the drop-order carefully. The day was hot, the
+throat was narrow, and a hasty rewrite would lose pebbles into a wrong
+sequence. "A macro," {clever_he_she} said, "is a rule that rewrites
+the drop-order scratched on the rim before a single stone falls. You
+write the rule once, and any drop-order that calls it gets rewritten
+on the way to the pitcher; the rewrite happens cool and stable before
+the runtime ever sees the form." To {goal_text}, {clever_he_she}
+composed {concept_phrase}, submitted the form, and the REPL — first
+rewriting, then evaluating — returned the value the rewritten
+drop-order yielded."""),
 
     SubplotTemplate("""\
 "Here's the difference between a rule and a drop-order," {clever_phrase}, {emo_patient}, said. "A drop-order takes stones and raises the water. A rule takes a

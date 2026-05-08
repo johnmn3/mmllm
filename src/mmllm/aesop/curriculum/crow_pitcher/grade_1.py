@@ -40,35 +40,44 @@ _SHARED_SUBPLOTS: list[SubplotTemplate] = [
     #    they evaluate it carefully. The student writes the form.
     SubplotTemplate("""\
 {hare_phrase} and {tortoise_phrase} stopped {place} where someone had
-written {concept_phrase} on a flat stone. {hare}, {emo_proud}, declared
-that {hare_he_she} could see the answer at a glance. {tortoise},
-{emo_patient}, suggested they actually evaluate the form {form_display}
-in the REPL and read off whatever it returned."""),
+scratched {concept_phrase} into the dust beside a tall pitcher. The day
+was hot, the throat of the pitcher was narrow, and the water inside lay
+low. {hare}, {emo_proud}, declared {hare_he_she} could see the answer
+at a glance. {tortoise}, {emo_patient}, said the narrow throat was a
+bottleneck — only the form, dropped in patiently like a pebble, would
+raise the water — and suggested they actually evaluate the form
+{form_display} in the REPL and read off whatever it returned."""),
 
     # 2. The wager template — bets on what the form returns.
     #    Three near-equivalent variants of the wager-setup line, picked
     #    so the same wager-template doesn't always read as "drew a wager
     #    in the dust" verbatim (cosmetic variety).
     SubplotTemplate("""\
-At a moss-covered milestone {place}, {hare_phrase} sketched a small
-wager into the path: whoever guessed the result of {form_display}
-first would win the right to set the next race. {tortoise_phrase},
-{emo_patient}, said it was simpler to type the form into the REPL
-than to argue about {concept_phrase}."""),
+At the foot of a tall pitcher {place}, {hare_phrase} sketched a small
+wager into the dry dust: whoever guessed the result of {form_display}
+first would claim the cool water lying low at the bottom. The throat
+was narrow — a bottleneck for any answer that came in too fast.
+{tortoise_phrase}, {emo_patient}, said it was simpler to drop the form
+into the REPL like a careful pebble than to argue about
+{concept_phrase} on a hot day."""),
 
-    # 2b. wager variant — chalk on stone
+    # 2b. wager variant — chalk on a smooth pebble
     SubplotTemplate("""\
-{hare_phrase} chalked a wager on a flat stone {place}: whoever
-predicted the result of {form_display} would set the next race's
-distance. {tortoise_phrase}, {emo_patient}, said it would be simpler
-to type the form into the REPL than to bicker about {concept_phrase}."""),
+{hare_phrase} chalked a wager on a smooth round pebble {place}: whoever
+predicted the result of {form_display} would drop {hare_his_her} pebble
+in the pitcher first. The water at the bottom was cool but very low,
+and a wrong guess sent a pebble in for nothing. {tortoise_phrase},
+{emo_patient}, said it would be simpler to drop the form into the REPL
+than to bicker about {concept_phrase} while the day grew hotter."""),
 
-    # 2c. wager variant — twig in the path
+    # 2c. wager variant — twig in the dust beside the pitcher
     SubplotTemplate("""\
-With a twig, {hare_phrase} marked out a wager {place}: whoever
-guessed the result of {form_display} first would win the right to
-choose the next contest. {tortoise_phrase}, {emo_patient}, said it
-was easier to ask the REPL about {concept_phrase} than to argue."""),
+With a twig, {hare_phrase} marked out a wager in the dust beside the
+pitcher {place}: whoever guessed the result of {form_display} first
+would win the right to choose the next pebble to drop. The pitcher's
+rim was high, the water far below, and every wasted guess made the
+shadows feel longer. {tortoise_phrase}, {emo_patient}, said it was
+easier to ask the REPL about {concept_phrase} than to argue."""),
 
     # 3. The teacher template — Tortoise is gently correcting Hare.
     #    NOTE: drops the "from a recent sprint" tail because EMO_TIRED
@@ -76,9 +85,12 @@ was easier to ask the REPL about {concept_phrase} than to argue."""),
     #    produced "from sprinting from a recent sprint" awkwardness.
     SubplotTemplate("""\
 {tortoise_phrase} had been trying to teach {hare_phrase} how the REPL
-works. "Look here," {tortoise_he_she} said, pointing to
-{concept_phrase}. "You hand the form {form_display} to the runtime, and
-the runtime hands you back what it evaluates to." {hare}, {emo_tired},
+works. The day was hot and the water in the nearby pitcher far below
+the narrow rim — a fitting backdrop for a lesson about patience.
+"Look here," {tortoise_he_she} said, {emo_patient}, pointing to
+{concept_phrase}. "You hand the form {form_display} to the runtime,
+the runtime evaluates step by step like pebbles dropping past the
+narrow throat, and you read off what it returns." {hare}, {emo_tired},
 agreed to try."""),
 
     # 4. The audience template — small forest creatures watch and learn.
@@ -87,12 +99,14 @@ agreed to try."""),
     #    equality (= 1 1)" / "the predicate (zero? 0)" don't fit
     #    "read aloud" semantically (you read FORMS aloud, not types).
     SubplotTemplate("""\
-A small audience of forest creatures had gathered {place} to watch
-{hare_phrase} attempt to outwit {tortoise_phrase} at reading the REPL.
-The day was hot and the answer plain — every onlooker craned a head
-to see. {tortoise}, {emo_patient}, pointed to {concept_phrase} and
-read out the form aloud: {form_display}. The crowd waited to see who
-would correctly write the form to submit."""),
+A small audience of meadow birds had perched on the rim of a tall
+pitcher {place} to watch {hare_phrase} attempt to outwit
+{tortoise_phrase} at reading the REPL. The day was hot, the water
+inside lay cool but unreachable, and the answer was plain — every
+onlooker craned a head down the narrow throat to see. {tortoise},
+{emo_patient}, pointed to {concept_phrase} and read out the form
+aloud: {form_display}. The crowd waited to see who would correctly
+write the form to submit."""),
 
     # 5. The race-pause template — hare pauses mid-race, tortoise catches up
     #    via careful evaluation.
@@ -101,19 +115,24 @@ would correctly write the form to submit."""),
     #    "They called it impossible." reads as plural-subject right after
     #    a singular "Pip the hare stopped" introduction.
     SubplotTemplate("""\
-Halfway through the race, {hare_phrase}, {emo_proud}, stopped {place}
-and refused to continue until someone could prove what the form
-{form_display} evaluated to. {hare} called it impossible.
-{tortoise_phrase}, {emo_patient}, walking up at her usual pace,
-simply said: "Submit {concept_phrase} to the REPL. Whatever comes
-back is the answer.\""""),
+Halfway to the pitcher, {hare_phrase}, {emo_proud}, stopped {place}
+and refused to take another step until someone could prove what the
+form {form_display} evaluated to. The day was hot, {hare_his_her}
+throat dry, and the water in the pitcher's narrow throat still far
+below the rim. {hare} called the answer impossible to know.
+{tortoise_phrase}, {emo_patient}, walking up at {tortoise_his_her}
+usual pace, simply said: "Submit {concept_phrase} to the REPL.
+Whatever comes back is the answer — the water will rise pebble by
+pebble.\""""),
 
     # 6. The notebook template — the tortoise keeps a careful ledger.
     SubplotTemplate("""\
 {tortoise_phrase}, {emo_patient}, had been keeping a small leather
-notebook of every form {tortoise_he_she} had successfully evaluated.
-The notebook was nearly full — every page another careful entry,
-the answer plain on each one. {place_idx}, the next entry was
+notebook of every form {tortoise_he_she} had successfully evaluated —
+each page like a pebble in the pitcher's growing pile, raising the
+ledger's water-level of known answers a little further each time.
+The notebook was nearly full, the day was hot, and the answer plain
+on each careful entry. {place_idx}, the next entry was
 {concept_phrase}. {hare_phrase}, {emo_proud}, peered over
 {tortoise_his_her} shoulder at the form {form_display} and asked
 what it would come out to.""".replace("{place_idx}", "Today {place}")),
@@ -125,19 +144,24 @@ what it would come out to.""".replace("{place_idx}", "Today {place}")),
     #    parse as adverbial — without the comma, "said boasting" reads
     #    as agrammatical.
     SubplotTemplate("""\
-"There is no need to evaluate that," {hare_phrase} said, {emo_proud}.
-"Anyone can see what {concept_phrase} comes to." {tortoise_phrase}, who
-{place} had grown used to such claims, asked {hare_him_her} to actually
-write the form {form_display} and submit it to the REPL — just to be
-sure."""),
+"There is no need to evaluate that," {hare_phrase} said, {emo_proud},
+the throat dry and the water at the pitcher's bottom still out of
+reach. "Anyone can see what {concept_phrase} comes to." {tortoise_phrase},
+who {place} had grown used to such claims, said {emo_patient} that the
+narrow throat punished hasty answers, and asked {hare_him_her} to
+actually write the form {form_display} and submit it to the REPL —
+just to be sure."""),
 
     # 8. The puzzle-on-the-path template — they find a riddle on a sign.
     SubplotTemplate("""\
-A wooden sign nailed to a tree {place} carried a puzzle. The riddle
-was simple: it asked the reader to evaluate {form_display}. {hare}
-laughed, {emo_proud}, and declared it too easy. {tortoise} said
-patiently that the only way to be sure of {concept_phrase} was to put
-it in the REPL."""),
+A clay tag tied around the tall pitcher's neck {place} carried a
+puzzle. The riddle was simple: it asked the reader to evaluate
+{form_display}. The day was hot, the water at the bottom cool but
+narrow-throated, and a wrong guess sent a useless pebble in.
+{hare} laughed, {emo_proud}, and declared it too easy. {tortoise}
+said, {emo_patient}, that the only honest way to be sure of
+{concept_phrase} — and to keep the rising pile of pebbles
+purposeful — was to put it in the REPL."""),
 ]
 
 
@@ -182,12 +206,13 @@ the value really was."""),
     #    Fix: drop "write a form to" verb-on-verb collision; use
     #    "produce a form whose evaluation would" (noun-clause framing).
     SubplotTemplate("""\
-At a moss-covered milestone {place}, {hare_phrase} sketched a small
-wager into the path: whoever could produce a form whose evaluation
-would {goal_text} ahead of the other would win the right to set
-the next race. {tortoise_phrase}, {emo_patient}, said it was
-simpler to write {concept_phrase} carefully than to guess at the
-answer."""),
+At the foot of the tall pitcher {place}, {hare_phrase} sketched a
+small wager into the dust: whoever could produce a form whose
+evaluation would {goal_text} ahead of the other would win the cool
+water lying low at the bottom. The throat was narrow — a hard
+bottleneck for any rushed answer. {tortoise_phrase}, {emo_patient},
+said it was simpler to write {concept_phrase} carefully than to
+guess at the answer while the day grew hotter."""),
 
     # 3. The teacher template — Tortoise teaches goal → form.
     #    Fix: "; submit that to the REPL" instead of "and submit it".
@@ -200,12 +225,14 @@ writing it."""),
 
     # 4. The audience template — onlookers wait to see the form written.
     SubplotTemplate("""\
-A small audience of forest creatures had gathered {place} to watch
-{hare_phrase} attempt to outwit {tortoise_phrase} at writing the
-right form. The challenge: {goal_text}. {tortoise} reminded the
-crowd that what mattered was writing {concept_phrase} carefully,
-then submitting it to the REPL — not guessing aloud at the
-answer."""),
+A small audience of meadow birds had perched on the rim of the tall
+pitcher {place} to watch {hare_phrase} attempt to outwit
+{tortoise_phrase} at writing the right form. The challenge:
+{goal_text}. The day was hot, the water below the rim cool but
+unreachable, and the throat was narrow. {tortoise}, {emo_patient},
+reminded the crowd that what mattered was writing {concept_phrase}
+carefully, then submitting it to the REPL — not guessing aloud at
+the answer while pebbles waited at hand."""),
 
     # 5. The race-pause template — pause mid-race for a goal-write.
     #    Fix: drop "write a form to {goal_text}"; reframe as
@@ -238,25 +265,30 @@ just to be sure."""),
 
     # 8. The puzzle-on-the-path template — a sign poses the goal.
     SubplotTemplate("""\
-A wooden sign nailed to a tree {place} carried a small puzzle. The
-challenge was simple: {goal_text}. {hare} laughed, {emo_proud}, and
-declared it too easy. {tortoise} said patiently that the only way
-to be sure of {concept_phrase} was to write the form and put it
-in the REPL — not to guess at the value from the goal alone."""),
+A clay tag tied around the tall pitcher's neck {place} carried a
+small puzzle. The challenge was simple: {goal_text}. The day was
+hot, the water at the pitcher's bottom cool but narrow-throated.
+{hare} laughed, {emo_proud}, and declared it too easy. {tortoise}
+said, {emo_patient}, that the only way to be sure of
+{concept_phrase} was to write the form and put it in the REPL —
+not to guess at the value from the goal alone, like a pebble flung
+without aim."""),
 
     # 9. The Hare-stumbles template — Hare's hurry betrays him; the
     #    Tortoise's careful form returns the value first. Delivers
     #    the fable's moral (vanity vs. steadiness) directly.
     SubplotTemplate("""\
-"This is nothing," {hare_phrase} scoffed, {emo_proud}. "I can
-{goal_text} in my sleep." {hare} grabbed a stick and dashed off a
-few characters in the dust — but a paren went missing, an operand
-fell out of place, and the form did not even read as Clojure.
+"This is nothing," {hare_phrase} scoffed, {emo_proud}, the day hot
+and the throat dry. "I can {goal_text} in my sleep." {hare} grabbed
+a stick and dashed off a few characters in the dust — but a paren
+went missing, an operand fell out of place, and the form did not
+even read as Clojure. The pitcher stood narrow and tall, the water
+inside still as far below as a bad guess could leave it.
 {tortoise_phrase}, {emo_patient}, had already written
-{concept_phrase} on a flat stone, neat and unhurried, and
+{concept_phrase} on a smooth pebble, neat and unhurried, and
 submitted it to the REPL. The value came back as quietly as
-{tortoise_he_she} had written. The hares of the meadow looked
-between the two slates: only {tortoise_his_her} had run."""),
+{tortoise_he_she} had written, and the water in the pitcher seemed
+to rise a finger's width."""),
 
     # 10. The race-against-the-REPL template — wager on speed-of-
     #     answering, Tortoise's careful path wins. Moral lands.
