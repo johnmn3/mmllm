@@ -1468,6 +1468,72 @@ def check_record(rec, sub, example):
                         f"formal-academic connective {m.group(0)!r} in user_msg "
                         "— storybook register should be 5th-grade reading level"))
 
+    # ─────────── slice Dg6q (tortoise_hare fixset 4) detector additions ─────
+    #
+    # Three new detectors covering papercut classes the existing 75
+    # detectors don't yet catch.
+
+    # DOUBLE_EMO_IN_SENTENCE — two or more DISJOINT EMO-pool phrase
+    # matches in the same sentence. Cat-J lifts add a second EMO for
+    # richer grounding, but stacking two within one sentence reads as
+    # over-described instead of grounded. Detection: find EMO-pool
+    # fragment matches whose start positions are at least one EMO-length
+    # apart, so two fragments matching the SAME phrase don't double-count.
+    emo_frags = _emo_fragments()
+    sentences_de = re.split(r"(?<=[.!?])\s+", user)
+    for sent in sentences_de:
+        s_low = sent.lower()
+        spans = []
+        for f in emo_frags:
+            i = s_low.find(f)
+            if i >= 0:
+                spans.append((i, i + len(f)))
+        spans.sort()
+        # Greedy: keep first; require the next start to be > prev end
+        # (i.e. no positional overlap).
+        picked = 0
+        last_end = -1
+        for s, e in spans:
+            if s >= last_end:
+                picked += 1
+                last_end = e
+        if picked >= 2:
+            issues.append(("DOUBLE_EMO_IN_SENTENCE",
+                            f"sentence contains {picked} disjoint EMO-pool "
+                            f"phrases — two emotional anchors stacked in "
+                            "one sentence read as over-described"))
+            break
+
+    # NUMERAL_LIST_IN_GOAL — goal_text rendered with 4+ comma-separated
+    # numerals (e.g. 'add 2, 4, 6, 8, and 10'). The dense numeric
+    # enumeration spends 4-5 commas inside the goal_text alone, so any
+    # surrounding template comma pushes the sentence over the 5-comma
+    # CLAUSE_STACK threshold. Authors should use ranges or "all of these
+    # numbers" framing for high-arity examples.
+    if getattr(example, "goal_text", ""):
+        gt = example.goal_text
+        # Count comma-separated numerals (incl negatives, ratios)
+        nums = re.findall(r"\b-?\d+(?:/\d+)?\b", gt)
+        commas_in_gt = gt.count(",")
+        if len(nums) >= 4 and commas_in_gt >= 3:
+            issues.append(("NUMERAL_LIST_IN_GOAL",
+                            f"goal_text contains {len(nums)} numerals across "
+                            f"{commas_in_gt} commas — comma-list of numerals "
+                            "blows the sentence's clause budget; use a range "
+                            "or 'these numbers' framing"))
+
+    # REPL_TRIPLE_VOICE — the word 'REPL' appears 3+ times in user_msg.
+    # Repeating the REPL personification beat across multiple sentences
+    # reads as scaffolding noise, not story. Each record should mention
+    # the REPL at most twice (once when the form is submitted, once
+    # when the value is returned).
+    repl_hits = len(re.findall(r"\bREPL\b", user))
+    if repl_hits >= 3:
+        issues.append(("REPL_TRIPLE_VOICE",
+                        f"user_msg mentions 'REPL' {repl_hits} times — "
+                        "the REPL personification should appear at most "
+                        "twice per record (submit + return)"))
+
     # DOUBLE_NAME_INTRO — Cat-K-1 / Cat-H: same character introduced
     # twice as "<Name> the <species>" within ~120 chars. Pacing
     # failure: a name introduction is a one-time-per-record beat, and

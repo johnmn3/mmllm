@@ -94,7 +94,7 @@ with the answer."""),
     #    plain-let subjects too and asserted a road-sign that wasn't
     #    in the form).
     SubplotTemplate("""\
-{tortoise_phrase} patted the pouch at {tortoise_his_her} hip.
+{tortoise_phrase} patted the pouch at {tortoise_his_her} hip {emo_patient}.
 "Whatever I tuck in here is in force only while the pouch is
 worn," {tortoise_he_she} said, "and only for the form that names
 the binding. Step past the form's edge and the pouch is empty
@@ -151,7 +151,7 @@ _RECIPE_SUBPLOTS: list[SubplotTemplate] = [
     SubplotTemplate("""\
 {tortoise_phrase} {emo_patient} kept a small stack of recipe-cards by the road,
 each one a paw-step routine. "Recipes in Clojure are like these
-cards," {tortoise_he_she} said: "the ingredients go at the head,
+cards," {tortoise_he_she} said {emo_content}: "the ingredients go at the head,
 the steps in order, and the last step is what gets served." To
 {goal_text}, {tortoise_he_she} wrote out {concept_phrase} on
 a fresh card, submitted the form. The REPL followed the
@@ -214,7 +214,7 @@ _BASKET_SUBPLOTS: list[SubplotTemplate] = [
     SubplotTemplate("""\
 {tortoise_phrase} {emo_patient} pointed to a small basket on the path {place}.
 "Whatever I want to do with what's inside," {tortoise_he_she}
-said, "I read from the basket, work the change, and the basket
+said {emo_content}, "I read from the basket, work the change, and the basket
 itself stays as it was — what I get back is a fresh arrangement."
 To {goal_text}, {tortoise_he_she} composed {concept_phrase},
 submitted the form, and let the REPL handle the basket exactly
@@ -241,7 +241,7 @@ animal's tail in its paw — head at the front, the rest trailing
 behind. "Many of our baskets are like this procession,"
 {tortoise_phrase} {emo_patient} said. "You can grab the head, you can ask for
 the tail, you can put a new animal at the front of the line."
-To {goal_text}, {tortoise_he_she} composed {concept_phrase},
+To {goal_text}, {tortoise_he_she} composed {concept_phrase} {emo_content},
 submitted the form. The REPL marched the procession exactly
 as the form described."""),
 
@@ -344,7 +344,7 @@ _SIEVE_SUBPLOTS: list[SubplotTemplate] = [
     SubplotTemplate("""\
 {tortoise_phrase} {emo_patient} held up a sieve {place} — a paw-step rule
 attached at its mouth. "Whatever rule we hang on the sieve,"
-{tortoise_he_she} said, "the basket's pebbles pass through one
+{tortoise_he_she} said {emo_content}, "the basket's pebbles pass through one
 at a time: some are changed, some kept, some dropped, depending
 on the rule." To {goal_text}, {tortoise_he_she} composed
 {concept_phrase} as the sieve's rule, poured the basket through,
@@ -355,7 +355,7 @@ let through."""),
     #    on the new-basket-out-the-other-side metaphor.
     SubplotTemplate("""\
 {tortoise_phrase} {emo_patient} balanced a sieve over an empty basket. "The
-pebbles go in at the top," {tortoise_he_she} said, "and the
+pebbles go in at the top," {tortoise_he_she} said {emo_content}, "and the
 sieve does its work — applying the rule, choosing or changing —
 and what lands in the basket below is the result." To
 {goal_text}, {tortoise_he_she} composed {concept_phrase},
@@ -590,7 +590,7 @@ _ROADSIGN_SUBPLOTS: list[SubplotTemplate] = [
 {tortoise_phrase} {emo_patient} drove a small wooden post {place}
 and nailed a fresh sign to it. The post was set deep — once the
 sign was up it would last for every later runner. "A def is a sign
-by the road," {tortoise_he_she} said. "Anyone passing reads the
+by the road," {tortoise_he_she} said {emo_content}. "Anyone passing reads the
 name, learns the value, and can refer to it later by name alone."
 To {goal_text}, {tortoise_he_she} composed {concept_phrase},
 submitted the form. The REPL planted the sign — the name now
@@ -835,7 +835,7 @@ _TOOLSHED_SUBPLOTS: list[SubplotTemplate] = [
 
     # 1. The borrowed-tool template — `.method` syntax.
     SubplotTemplate("""\
-{tortoise_phrase} reached into a different toolshed {place} and
+{tortoise_phrase} reached into a different toolshed {place} {emo_patient} and
 pulled out a tool {tortoise_he_she} hadn't carved {tortoise_him_her}self
 — a tool from the host platform. "This isn't ours," {tortoise_he_she}
 said, "but we can call its methods directly: dot-prefix on the
@@ -899,9 +899,9 @@ _REWRITERULE_SUBPLOTS: list[SubplotTemplate] = [
 
     # 1. The rewriting-scribe template — `defmacro` introduction.
     SubplotTemplate("""\
-{tortoise_phrase} sat at a small writing desk {place}, quill in
+{tortoise_phrase} sat at a small writing desk {place} {emo_patient}, quill in
 paw. "A macro," {tortoise_he_she} said, "is a rule that rewrites
-the recipe before the runtime ever cooks it. You write the rule
+the recipe before the runtime ever cooks it. Write the rule
 once, and any recipe that uses it gets rewritten on the way to
 the kitchen." To {goal_text}, {tortoise_he_she} composed
 {concept_phrase}, submitted the form. The REPL — first
@@ -1225,9 +1225,9 @@ _TALLYWALK_SUBPLOTS: list[SubplotTemplate] = [
 
     # 1. The walking-the-row template — reduce.
     SubplotTemplate("""\
-{tortoise_phrase} walked the row of pebbles {place}, one paw at a
+{tortoise_phrase} walked the row of pebbles {place} {emo_patient}, one paw at a
 time, a small slate in hand for the running tally. "Reduce is
-this walk," {tortoise_he_she} said: "at each pebble, you combine
+this walk," {tortoise_he_she} said: "at each pebble, combine
 it into the tally; at the end, the tally is your answer." To
 {goal_text}, {tortoise_he_she} composed {concept_phrase},
 submitted the form. The REPL — walking the row, carrying the
@@ -1296,7 +1296,7 @@ _CIRCUIT_SUBPLOTS: list[SubplotTemplate] = [
 
     # 1. The circuit-without-growing-the-trail template — recur.
     SubplotTemplate("""\
-{tortoise_phrase} walked a small circle around the meadow {place},
+{tortoise_phrase} walked a small circle around the meadow {place} {emo_patient},
 each lap returning to the same starting point with a slightly
 different tally in hand. "Recur is this circuit," {tortoise_he_she}
 said: "back to the top with new bindings, no extra trail laid

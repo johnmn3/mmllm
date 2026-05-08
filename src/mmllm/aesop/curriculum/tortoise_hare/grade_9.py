@@ -196,7 +196,7 @@ G9_03 = SubjectCurriculum(
         SubjectExample(
             form="(do (def a (atom 0)) (swap! a inc) @a)",
             expected=1,
-            concept_phrase="atom, swap, and deref",
+            concept_phrase="the atom updated through a swap and read by deref",
             question_what="the running tally on the page after one foraging contribution",
             goal_text="set up a shared notebook starting at 0, atomically add one to its page, then read the page",
             scenario=(
@@ -226,7 +226,7 @@ G9_03 = SubjectCurriculum(
         SubjectExample(
             form="(do (def a (atom 10)) (swap! a + 5) @a)",
             expected=15,
-            concept_phrase="atom, swap, deref",
+            concept_phrase="the atom whose value swap updates and deref reads",
             question_what="the value returned by dereferencing a after defining a as an atom holding 10 and swapping it via + 5",
             goal_text="construct an atom holding 10, atomically swap it by applying + to 5, and dereference the result",
             scenario=(
@@ -256,7 +256,7 @@ G9_03 = SubjectCurriculum(
         SubjectExample(
             form="(do (def a (atom :start)) (reset! a :done) @a)",
             expected=":done",
-            concept_phrase="atom, reset, deref",
+            concept_phrase="the atom whose value reset replaces and deref reads",
             question_what="the value returned by dereferencing a after defining a as an atom holding a start keyword and resetting it to done",
             goal_text="construct an atom holding a start keyword, atomically reset it to a done keyword, and dereference the result",
             scenario=(
@@ -298,7 +298,7 @@ G9_04 = SubjectCurriculum(
         SubjectExample(
             form="(do (def a (atom 0)) (compare-and-set! a 0 1) @a)",
             expected=1,
-            concept_phrase="atom, CAS, deref",
+            concept_phrase="the atom whose value compare-and-set updates and deref reads",
             question_what="the value returned by dereferencing a after defining a as an atom holding 0 and performing a successful compare-and-set to 1",
             goal_text="construct an atom holding 0, perform a compare-and-set checking for 0 and setting to 1, and dereference",
             scenario=(
@@ -325,7 +325,7 @@ G9_04 = SubjectCurriculum(
         SubjectExample(
             form="(do (def a (atom 5)) (compare-and-set! a 0 99) @a)",
             expected=5,
-            concept_phrase="atom, failed CAS, deref",
+            concept_phrase="the atom whose compare-and-set leaves the value untouched and deref reads",
             question_what="the value returned by dereferencing a after defining a as an atom holding 5 and attempting a compare-and-set that fails",
             goal_text="construct an atom holding 5, perform a compare-and-set checking for 0 and setting to 99, and dereference",
             scenario=(
@@ -467,7 +467,7 @@ G9_07 = SubjectCurriculum(
         SubjectExample(
             form="(do (def r (ref 0)) (dosync (alter r inc)) @r)",
             expected=1,
-            concept_phrase="ref, dosync, alter, deref",
+            concept_phrase="the ref altered inside a transaction and read by deref",
             question_what="the value returned by dereferencing r after defining a ref holding 0, performing a transactional alter via inc, and dereferencing",
             goal_text="construct a ref holding 0, perform a transactional alter by applying inc inside dosync, and dereference",
             scenario=(
@@ -498,7 +498,7 @@ G9_07 = SubjectCurriculum(
         SubjectExample(
             form="(do (def r (ref 100)) (dosync (ref-set r 7)) @r)",
             expected=7,
-            concept_phrase="ref, dosync, ref-set, deref",
+            concept_phrase="the ref whose value ref-set replaces inside a transaction and deref reads",
             question_what="the value returned by dereferencing r after defining a ref holding 100, setting it to 7 inside dosync, and dereferencing",
             goal_text="construct a ref holding 100, perform a transactional ref-set to 7 inside dosync, and dereference",
             scenario=(
@@ -579,7 +579,7 @@ G9_08 = SubjectCurriculum(
         SubjectExample(
             form="(do (def r (ref 10)) (dosync (alter r + 5)) @r)",
             expected=15,
-            concept_phrase="ref, dosync, alter, deref",
+            concept_phrase="the ref altered inside a transaction and read by deref",
             question_what="the value returned by dereferencing r after defining a ref holding 10, performing a transactional alter via + 5, and dereferencing",
             goal_text="construct a ref holding 10, perform a transactional alter by applying + with 5 inside dosync, and dereference",
             scenario=(
@@ -621,7 +621,7 @@ G9_09 = SubjectCurriculum(
         SubjectExample(
             form="(do (def a (atom 0)) (swap! a inc) @a)",
             expected=1,
-            concept_phrase="atom, swap, deref",
+            concept_phrase="the atom whose value swap updates and deref reads",
             question_what="the value returned by dereferencing a after defining an atom holding 0, swapping it via inc, and dereferencing",
             goal_text="construct an atom holding 0, atomically swap it by applying inc, and dereference",
             scenario=(
@@ -649,7 +649,7 @@ G9_09 = SubjectCurriculum(
         SubjectExample(
             form="(do (def r (ref 0)) (dosync (alter r inc)) @r)",
             expected=1,
-            concept_phrase="ref, dosync, alter, deref",
+            concept_phrase="the ref altered inside a transaction and read by deref",
             question_what="the value returned by dereferencing r after defining a ref holding 0, altering it via inc inside dosync, and dereferencing",
             goal_text="construct a ref holding 0, perform a transactional alter by applying inc inside dosync, and dereference",
             scenario=(
@@ -694,7 +694,7 @@ G9_10 = SubjectCurriculum(
         SubjectExample(
             form="(do (def ag (agent 0)) (send ag inc) (await ag) @ag)",
             expected=1,
-            concept_phrase="agent, send, await, deref",
+            concept_phrase="the agent updated by send, awaited, and read by deref",
             question_what="the value returned by dereferencing ag after defining an agent holding 0, sending inc asynchronously, awaiting, and dereferencing",
             goal_text="construct an agent holding 0, asynchronously send inc to it, await its completion, and dereference",
             scenario=(
@@ -725,7 +725,7 @@ G9_10 = SubjectCurriculum(
         SubjectExample(
             form="(do (def ag (agent 5)) (send ag + 10) (await ag) @ag)",
             expected=15,
-            concept_phrase="agent, send, await, deref",
+            concept_phrase="the agent updated by send, awaited, and read by deref",
             question_what="the value returned by dereferencing ag after defining an agent holding 5, sending + 10 asynchronously, awaiting, and dereferencing",
             goal_text="construct an agent holding 5, asynchronously send + with 10 to it, await its completion, and dereference",
             scenario=(
@@ -767,7 +767,7 @@ G9_11 = SubjectCurriculum(
         SubjectExample(
             form="(do (def ag (agent 0)) (send ag inc) (await ag) @ag)",
             expected=1,
-            concept_phrase="agent, send, await, deref",
+            concept_phrase="the agent updated by send, awaited, and read by deref",
             question_what="the value returned by dereferencing ag after defining an agent holding 0, using send to dispatch inc, awaiting, and dereferencing",
             goal_text="construct an agent holding 0, use send to asynchronously apply inc, await its completion, and dereference",
             scenario=(
@@ -795,7 +795,7 @@ G9_11 = SubjectCurriculum(
         SubjectExample(
             form="(do (def ag (agent 0)) (send-off ag inc) (await ag) @ag)",
             expected=1,
-            concept_phrase="agent, send-off, await, deref",
+            concept_phrase="the agent updated by send-off on a blocking thread, awaited, and read by deref",
             question_what="the value returned by dereferencing ag after defining an agent holding 0, using send-off to dispatch inc, awaiting, and dereferencing",
             goal_text="construct an agent holding 0, use send-off to asynchronously apply inc, await its completion, and dereference",
             scenario=(
@@ -838,7 +838,7 @@ G9_12 = SubjectCurriculum(
         SubjectExample(
             form="(do (def ag (agent 0)) (send ag inc) (send ag inc) (await ag) @ag)",
             expected=2,
-            concept_phrase="agent, double send, await, deref",
+            concept_phrase="the agent updated twice by send, awaited, and read by deref",
             question_what="the value returned by dereferencing ag after defining an agent holding 0, sending inc twice asynchronously, awaiting, and dereferencing",
             goal_text="construct an agent holding 0, asynchronously send inc twice, synchronize with await, and dereference",
             scenario=(
@@ -882,7 +882,7 @@ G9_13 = SubjectCurriculum(
         SubjectExample(
             form="@(future (+ 1 2))",
             expected=3,
-            concept_phrase="future, add, deref",
+            concept_phrase="the future computing the sum and read by deref",
             question_what="the value the messenger returns from adding 1 and 2",
             goal_text="dispatch a runner to compute the sum of 1 and 2; later, ask the runner for the answer",
             scenario=(
@@ -911,7 +911,7 @@ G9_13 = SubjectCurriculum(
         SubjectExample(
             form="@(future (* 6 7))",
             expected=42,
-            concept_phrase="future, multiply, deref",
+            concept_phrase="the future computing the product and read by deref",
             question_what="the value returned by dereferencing a future that multiplies 6 and 7",
             goal_text="construct a future that multiplies 6 and 7, and dereference it",
             scenario=(
@@ -1024,7 +1024,7 @@ G9_15 = SubjectCurriculum(
         SubjectExample(
             form="(do (def p (promise)) (deliver p :done) @p)",
             expected=":done",
-            concept_phrase="promise, deliver, deref",
+            concept_phrase="the promise fulfilled by deliver and read by deref",
             question_what="the value returned by dereferencing a promise after defining it, delivering a keyword to it, and dereferencing",
             goal_text="construct a promise, deliver a completion keyword to it, and dereference to get the delivered value",
             scenario=(
@@ -1054,7 +1054,7 @@ G9_15 = SubjectCurriculum(
         SubjectExample(
             form="(do (def p (promise)) (deliver p 42) @p)",
             expected=42,
-            concept_phrase="promise, deliver, deref",
+            concept_phrase="the promise fulfilled by deliver and read by deref",
             question_what="the value returned by dereferencing a promise after defining it, delivering a number to it, and dereferencing",
             goal_text="construct a promise, deliver 42 to it, and dereference to get the delivered value",
             scenario=(
@@ -1097,7 +1097,7 @@ G9_16 = SubjectCurriculum(
         SubjectExample(
             form="(do (def v (volatile! 0)) (vswap! v inc) @v)",
             expected=1,
-            concept_phrase="volatile, vswap, deref",
+            concept_phrase="the volatile updated through vswap and read by deref",
             question_what="the value returned by dereferencing v after defining a volatile holding 0, performing a non-transactional swap via inc, and dereferencing",
             goal_text="construct a volatile holding 0, perform a non-transactional swap by applying inc, and dereference",
             scenario=(
@@ -1129,7 +1129,7 @@ G9_16 = SubjectCurriculum(
         SubjectExample(
             form="(do (def v (volatile! 5)) (vreset! v 99) @v)",
             expected=99,
-            concept_phrase="volatile, vreset, deref",
+            concept_phrase="the volatile whose value vreset replaces and deref reads",
             question_what="the value returned by dereferencing v after defining a volatile holding 5, performing a non-transactional reset to 99, and dereferencing",
             goal_text="construct a volatile holding 5, perform a non-transactional reset to 99, and dereference",
             scenario=(
@@ -1172,7 +1172,7 @@ G9_17 = SubjectCurriculum(
         SubjectExample(
             form="(do (def ^:dynamic *p* 1) (binding [*p* 99] *p*))",
             expected=99,
-            concept_phrase="dynamic var, binding, read",
+            concept_phrase="the dynamic var whose value binding rebinds and the body reads",
             question_what="the value of the dynamic var when read inside the binding form after defining it and rebinding",
             goal_text="define a dynamic var *p* as 1, use binding to rebind it to 99, and read its value inside",
             scenario=(
@@ -1205,7 +1205,7 @@ G9_17 = SubjectCurriculum(
         SubjectExample(
             form="(do (def ^:dynamic *p* 1) (binding [*p* 99] *p*) *p*)",
             expected=1,
-            concept_phrase="dynamic var, binding, read after",
+            concept_phrase="the dynamic var whose binding rebind ends with the body, leaving the original visible afterward",
             question_what="the value of the dynamic var when read after the binding form unwound",
             goal_text="define a dynamic var *p* as 1, use binding to rebind it to 99 inside, and read its value after binding exits",
             scenario=(
@@ -1249,7 +1249,7 @@ G9_18 = SubjectCurriculum(
         SubjectExample(
             form="(do (def lock (Object.)) (locking lock (+ 1 2)))",
             expected=3,
-            concept_phrase="lock, locking, arithmetic",
+            concept_phrase="the arithmetic guarded by a locking block on a lock object",
             question_what="the value returned by evaluating an addition inside a locked critical section after creating a monitor and acquiring the lock",
             goal_text="create an object to use as a monitor, acquire the lock, and evaluate an addition inside",
             scenario=(
@@ -1280,7 +1280,7 @@ G9_18 = SubjectCurriculum(
         SubjectExample(
             form="(do (def lock (Object.)) (locking lock 42))",
             expected=42,
-            concept_phrase="lock, locking, literal",
+            concept_phrase="the literal returned from a locking block on a lock object",
             question_what="the literal value returned by evaluating it inside a locked critical section after creating a monitor and acquiring the lock",
             goal_text="create an object to use as a monitor, acquire the lock, and evaluate a literal inside",
             scenario=(
