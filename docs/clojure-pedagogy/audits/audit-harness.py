@@ -52,6 +52,88 @@ else:
 GRADE_MODULES = _load_grade_modules(FABLES_TO_AUDIT[0])
 
 
+# ─────────────────── Cat-J grounding helpers ──────────────────────
+#
+# A record is "grounded" when its prose references either a value
+# drawn from the actual code (so the narrative isn't drifting from
+# the form) OR carries an emotion-pool phrase (so the character has
+# a stance and the prose doesn't read like dry exposition).
+#
+# Records that lack BOTH are flagged LOW_GROUNDING.
+
+# Cache the EMO pool markers; computed once at module import.
+def _build_emo_markers():
+    """Pull short discriminating substrings from the EMO pools."""
+    markers: list[str] = []
+    try:
+        from mmllm.aesop.fables import (
+            EMO_PROUD, EMO_PATIENT, EMO_TIRED, EMO_HUNGRY,
+            EMO_GREEDY, EMO_CONTENT, EMO_REGRETFUL,
+            EMO_DESPERATE, EMO_THIRSTY,
+        )
+        for pool in (EMO_PROUD, EMO_PATIENT, EMO_TIRED, EMO_HUNGRY,
+                      EMO_GREEDY, EMO_CONTENT, EMO_REGRETFUL,
+                      EMO_DESPERATE, EMO_THIRSTY):
+            markers.extend(pool)
+    except ImportError:
+        pass
+    try:
+        from mmllm.aesop.curriculum.generator import (
+            CP_EMO_PATIENT, CP_EMO_PROUD, CP_EMO_THIRSTY,
+        )
+        for pool in (CP_EMO_PATIENT, CP_EMO_PROUD, CP_EMO_THIRSTY):
+            markers.extend(pool)
+    except ImportError:
+        pass
+    # De-dupe and sort longest-first so longer markers match before
+    # their substrings.
+    return tuple(sorted(set(markers), key=len, reverse=True))
+
+
+_EMO_MARKERS = _build_emo_markers()
+
+
+def _has_emo_phrase(user: str) -> bool:
+    """True if user_msg contains any literal phrase from an EMO pool.
+
+    EMO pools are intentionally short, distinctive phrases (e.g.,
+    "calm and methodical", "with a smug grin"); a substring match
+    is precise enough.
+    """
+    return any(m and m in user for m in _EMO_MARKERS)
+
+
+_INT_RE     = re.compile(r"(?<![\w.:-])(-?\d+)(?![\w.])")
+_KW_RE      = re.compile(r":([\w][\w-]*)")
+_STR_RE     = re.compile(r'"([^"\\]*(?:\\.[^"\\]*)*)"')
+
+
+def _has_drawn_value(user: str, code_str: str) -> bool:
+    """True if user_msg references any int/keyword/string literal
+    drawn from code_str.
+
+    The grounding signal we want: when the rendered prose names the
+    operands ("the value 7", "the :hare slot", '"hello" string')
+    rather than only operating on placeholders. We exclude tiny
+    integers (|n| <= 1) because those occur incidentally in prose.
+    """
+    # Integer literals from code_str.
+    for n in _INT_RE.findall(code_str):
+        if abs(int(n)) <= 1:
+            continue
+        if re.search(rf"(?<![\d-]){re.escape(n)}(?!\d)", user):
+            return True
+    # Keyword literals (':foo', ':hare').
+    for kw in _KW_RE.findall(code_str):
+        if len(kw) >= 2 and (f":{kw}" in user or f" {kw} " in user):
+            return True
+    # String literals (must be at least 3 chars to avoid trivial hits).
+    for s in _STR_RE.findall(code_str):
+        if s and len(s) >= 3 and s in user:
+            return True
+    return False
+
+
 def check_record(rec, sub, example):
     issues = []
     user = rec.user_msg
@@ -185,12 +267,27 @@ def check_record(rec, sub, example):
 
     # Bad place-preposition combos: "in the hilltop" (should be "on/atop"),
     # "in the road" (should be "on the road"), "in the farm" (should
-    # be "on/at the farm"), etc. Pitfall #22 family.
+    # be "on/at the farm"), "on the village/market" (should be at/in/near).
+    # Pitfall #22 family.
+    #
+    # The "in the X" cases use `(?!\w)` — they catch any "in the hilltop…"
+    # regardless of what follows (a hilltop never takes "in").
+    # The "on the {village|market}" cases must NOT match compound nouns
+    # like "on the market pitcher's clay" (idiomatic), so we require
+    # a phrase-terminator after the location (punctuation or end-of-line),
+    # which is what `place_phrase` produces.
     for bad in ("in the hilltop", "in the road", "in the beach",
                  "in the farm"):
         # Use word-boundary check so "in the farmyard" doesn't false-positive
         # on the "in the farm" pattern.
         if re.search(re.escape(bad) + r"(?!\w)", user):
+            issues.append(("BAD_PLACE_PREP", f"'{bad}' (wrong preposition)"))
+            break
+    for bad in ("on the village", "on the market"):
+        # Only flag when the phrase ends here (punctuation / end-of-line);
+        # don't fire on compound nouns ("on the market pitcher's").
+        if re.search(re.escape(bad) + r"\b(?=[\s]*(?:[.,;:!?]|$))",
+                     user, re.MULTILINE):
             issues.append(("BAD_PLACE_PREP", f"'{bad}' (wrong preposition)"))
             break
 
@@ -558,6 +655,43 @@ def check_record(rec, sub, example):
         issues.append(("HANGING_FORM_THAT",
                         "'form that <noun>' rendered without a verb — "
                         "template should be 'form for {concept_phrase}'"))
+
+    # Crow-pitcher hand-audit (claude/audit-crow-pitcher-R81D):
+    #
+    # CAP_PRONOUN_MID_SENTENCE — capitalized pronoun (She/He/They)
+    # mid-sentence after a comma, typically from a `_he_she_cap`
+    # placeholder placed after a comma in a story-template.
+    # E.g., "To bind X, She composed..." should be "...she composed..."
+    # since the comma is mid-sentence, not a sentence boundary.
+    cap_mid_re = re.compile(
+        r",\s+(She|He|They)\s+"
+        r"(?:composed|wrote|submitted|chose|set|tested|checked|added|"
+        r"swapped|paused|brought|read|laid|scratched|extracted|built|"
+        r"intended|coordinated|reached|ran|dispatched|started|prepared)"
+        r"\b"
+    )
+    m = cap_mid_re.search(user)
+    if m:
+        issues.append(("CAP_PRONOUN_MID_SENTENCE",
+                       f"'{m.group(0)[:40]}…' (capitalized pronoun "
+                       "mid-sentence after comma — should be lowercase)"))
+
+    # DEFINITE_BODY_PART — bird-body participle phrases that prefix
+    # the body part with a definite article ("clicking the beak",
+    # "cocking the head"). The CP_EMO_PROUD pool used to ship these
+    # entries; the audit catches any future regression in the pool
+    # OR any new fable that copies the pattern.
+    body_part_re = re.compile(
+        r"\b(?:clicking|cocking|tilting|preening|fluffing|ruffling|"
+        r"tucking|spreading|opening|flicking|stretching|smoothing)"
+        r"\s+the\s+"
+        r"(?:beak|head|wings?|feathers?|tail|throat|crest)\b"
+    )
+    m = body_part_re.search(user)
+    if m:
+        issues.append(("DEFINITE_BODY_PART",
+                       f"'{m.group(0)}' (definite-article body-part "
+                       "in participle; use possessive-free phrasing)"))
 
     # Cat-J — insufficient emotion-and-adjective grounding. The user's
     # affirmative directive: prose should NAME the character's emotion
