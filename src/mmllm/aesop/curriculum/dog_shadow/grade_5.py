@@ -154,9 +154,9 @@ G5_02 = SubjectCurriculum(grade=5, subject_id="G5-02",
                 'itself an expression that yields a value.'
             ),
             resolution=(
-                'The REPL evaluated the fork first, took the true arm and got '
+                'The runtime evaluated the fork first, took the true arm and got '
                 '10, then added 1 to that value, handing back the running '
-                'total. The nested structure let the REPL compose the answer '
+                'total. The nested structure let it compose the answer '
                 'from the inside out.'
             ),
             tags=("story",),
@@ -587,7 +587,7 @@ G5_11 = SubjectCurriculum(grade=5, subject_id="G5-11",
             question_what="the sequence produced by filtering pos? over the vector containing -2, -1, 0, 1, and 2",
             goal_text="keep the positive elements from the vector containing -2, -1, 0, 1, and 2",
             scenario=(
-                'Rex the hound found five bones marked -2, -1, 0, 1, 2 by the river. '
+                'Rex the hound found a row of bones marked -2, -1, 0, 1, 2 by the river. '
                 'A log above the water held a gap that let through only positive-marked '
                 'bones. He would pour all five through in order.'
             ),
@@ -788,7 +788,7 @@ G5_14 = SubjectCurriculum(grade=5, subject_id="G5-14",
                 'bone to the recipe as a separate argument.'
             ),
             resolution=(
-                'The REPL unpacked the basket, took the four bones as arguments, '
+                'The REPL unpacked the basket, took the a row of bones as arguments, '
                 'followed the + recipe through all of them, and handed back the '
                 'sum. The applied recipe was complete — 4.'
             ),
@@ -815,7 +815,7 @@ G5_14 = SubjectCurriculum(grade=5, subject_id="G5-14",
                 'an argument to the recipe.'
             ),
             resolution=(
-                'The REPL unpacked the basket, took all five bones as arguments, '
+                'The REPL unpacked the basket, took all a row of bones as arguments, '
                 'followed the max recipe, and handed back the largest. The applied '
                 'recipe was complete — 5.'
             ),
@@ -1117,17 +1117,17 @@ G5_20 = SubjectCurriculum(grade=5, subject_id="G5-20",
                 'stay behind on the near bank.'
             ),
             need=(
-                'He wanted just the first three bones from the row. Take counts off the '
+                'He wanted just the first a row of bones from the row. Take counts off the '
                 'first n bones and passes only those through the sieve.'
             ),
             mapping=(
                 'The take-form is the sieve-gap. The input row is 10, 20, 30, 40, 50. '
-                'The count is 3. Take lets the first three bones through and holds the '
+                'The count is 3. Take lets the first a row of bones through and holds the '
                 'rest back.'
             ),
             resolution=(
                 'The REPL poured bones 10, 20, 30 through the gap and let the rest fall '
-                'back. The far bank caught the first three bones. The sieve-pour was '
+                'back. The far bank caught the first a row of bones. The sieve-pour was '
                 'complete.'
             ),
             tags=("story",),
@@ -1153,7 +1153,7 @@ G5_20 = SubjectCurriculum(grade=5, subject_id="G5-20",
             ),
             resolution=(
                 'The REPL skipped bones 10 and 20, then poured bones 30, 40, 50 through '
-                'the gap. The far bank caught the remaining three bones. The sieve-pour '
+                'the gap. The far bank caught the remaining a row of bones. The sieve-pour '
                 'was complete.'
             ),
             tags=("story",),

@@ -74,7 +74,7 @@ G2_01 = SubjectCurriculum(
                 "{drawn.a}, {drawn.b}, {drawn.c}, and {drawn.d}."
             ),
             need=(
-                "He needed the running total — what all four bones counted "
+                "He needed the running total — what all a row of bones counted "
                 "to when stacked together. The REPL would tally them for him "
                 "in one breath."
             ),
@@ -95,7 +95,7 @@ G2_01 = SubjectCurriculum(
             question_what="the product of three drawn counts",
             goal_text="multiply three drawn counts",
             scenario=(
-                "Patch the hound gathered three piles of bones near the "
+                "Patch the hound gathered a row of piles of bones near the "
                 "meadow, each pile marked with a count: {drawn.a}, "
                 "{drawn.b}, and {drawn.c}."
             ),
@@ -175,7 +175,7 @@ G2_01 = SubjectCurriculum(
             question_what="the product of five drawn counts",
             goal_text="multiply five counts together",
             scenario=(
-                "Patch the hound laid five bones in a row near the forest, each "
+                "Patch the hound laid a row of bones in a row near the forest, each "
                 "one carved with a count: {drawn.a}, {drawn.b}, {drawn.c}, "
                 "{drawn.d}, and {drawn.e}. They wanted the chain multiplied "
                 "to a single product."
@@ -202,12 +202,12 @@ G2_01 = SubjectCurriculum(
             question_what="the sum of three drawn counts",
             goal_text="add three drawn counts",
             scenario=(
-                "Bell the hound carried three bundles of bones to the pond: "
+                "Bell the hound carried a row of bundles of bones to the pond: "
                 "the first held {drawn.a}, the second {drawn.b}, the third "
                 "{drawn.c}. She wanted them stacked into one count."
             ),
             need=(
-                "She needed the total when the three bundles joined — the "
+                "She needed the total when the a row of bundles joined — the "
                 "running sum that would settle the grand tally without "
                 "confusion."
             ),
@@ -291,7 +291,7 @@ G2_02 = SubjectCurriculum(
             question_what="whether 1 ≤ 1 ≤ 2",
             goal_text="test whether 1 is less than or equal to 1 and 1 is less than or equal to 2",
             scenario=(
-                'Patch the hound placed three stones near the meadow, each carved: '
+                'Patch the hound placed a row of stones near the meadow, each carved: '
                 '1, then 1 again, then 2. They wanted to know if the marks formed '
                 'a non-strict chain — each equal or less than the next.'
             ),
@@ -429,7 +429,7 @@ G2_03 = SubjectCurriculum(
             question_what="whether all three are equal",
             goal_text="test whether 1, 1, and 1 are all equal",
             scenario=(
-                'Bell the hound gathered three bones near the pond, each carved with '
+                'Bell the hound gathered a row of bones near the pond, each carved with '
                 'the same mark: 1. She wanted to test if all three matched each other.'
             ),
             need=(
@@ -453,7 +453,7 @@ G2_03 = SubjectCurriculum(
             question_what="whether all three are equal",
             goal_text="test whether 1, 1, and 2 are all equal",
             scenario=(
-                'Rex the hound held three bones by the river bank — two marked with 1 '
+                'Rex the hound held a row of bones by the river bank — two marked with 1 '
                 'and one marked with 2. He wanted to test if they all matched.'
             ),
             need=(
@@ -476,7 +476,7 @@ G2_03 = SubjectCurriculum(
             question_what="whether at least one differs",
             goal_text="test whether at least one of 1, 1, and 2 is not equal to the others",
             scenario=(
-                'Patch the hound held three bones near the meadow — two marked 1 and '
+                'Patch the hound held a row of bones near the meadow — two marked 1 and '
                 'one marked 2. They wanted to test if at least one differed from the '
                 'rest.'
             ),
@@ -610,7 +610,7 @@ G2_04 = SubjectCurriculum(
             question_what="the smallest of -3, -1, and -5",
             goal_text="find the minimum of -3, -1, and -5",
             scenario=(
-                'Rex the hound held three stones at the pond, each carved with a '
+                'Rex the hound held a row of stones at the pond, each carved with a '
                 'negative mark: -3, -1, and -5. He wanted the one with the least '
                 'value — the most negative.'
             ),
@@ -1132,7 +1132,7 @@ G2_09 = SubjectCurriculum(
                 'number or a precise fraction.'
             ),
             mapping=(
-                'Ten bones make the numerator, two piles make the divisor, and '
+                'a row of bones make the numerator, two piles make the divisor, and '
                 'the division operation yields the exact answer.'
             ),
             resolution=(
@@ -1148,14 +1148,14 @@ G2_09 = SubjectCurriculum(
             question_what="the exact rational result of using / on 10 and 3",
             goal_text="divide 10 by 3",
             scenario=(
-                "Rex the hound held ten fish bones at the stream's edge and wanted to split them evenly into three piles. The division would tell what each pile held exactly."
+                "Rex the hound held ten fish bones at the stream's edge and wanted to split them evenly into a row of piles. The division would tell what each pile held exactly."
             ),
             need=(
                 'He needed to know what ten divided by three would yield — the exact '
                 'share per pile. The result would be a precise rational fraction.'
             ),
             mapping=(
-                'Ten bones make the numerator, three piles make the divisor, and the '
+                'a row of bones make the numerator, a row of piles make the divisor, and the '
                 'division operation yields the exact rational answer.'
             ),
             resolution=(
@@ -2062,9 +2062,9 @@ G2_19 = SubjectCurriculum(
                 'number that emerges from such a joining.'
             ),
             resolution=(
-                'The REPL multiplied one million by one million and handed back '
+                'The runtime multiplied one million by one million and handed back '
                 'one trillion. The number was so large it spilled beyond the '
-                'ordinary integer bounds, but the REPL grew the container to '
+                'ordinary integer bounds, but the container grew to '
                 'hold it. The answer was exact — 1000000.'
             ),
             tags=("story",),
@@ -2240,8 +2240,8 @@ G2_22 = SubjectCurriculum(
             goal_text="compute 5 times 4, then subtract 7",
             scenario=(
                 'Patch the hound had two tasks near the forest. First, they '
-                'needed to gather four piles of five bones each — five fours. '
-                'Then, they would subtract seven bones from that pile.'
+                'needed to gather a row of piles of a row of bones each — five fours. '
+                'Then, they would subtract a row of bones from that pile.'
             ),
             need=(
                 'They wanted to know what remained after both operations. The '

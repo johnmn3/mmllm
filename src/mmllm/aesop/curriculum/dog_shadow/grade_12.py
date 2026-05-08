@@ -63,7 +63,7 @@ the REPL would confirm what it produced."""),
     SubplotTemplate("""\
 A banquet at the end of the road {place} brought together every
 animal who'd ever raced. The day's discussion was {concept_phrase}.
-{tortoise} wrote the form {form_display} on a square of parchment
+{tortoise} wrote {form_display} on a square of parchment
 and passed it across the table; {hare}, {emo_tired} but pleased,
 agreed to read it into the REPL."""),
 ]

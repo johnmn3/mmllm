@@ -36,7 +36,7 @@ The two of them lived in cottages on opposite sides {place} —
 {tortoise} on one side, {hare_phrase} on the other. Each kept
 their own copybook of forms. When the time came to compare notes,
 {tortoise} read aloud {concept_phrase} and asked, {emo_patient}, what
-the form {form_display} would return when the REPL reached across the
+{form_display} would return when the REPL reached across the
 shared path."""),
 ]
 

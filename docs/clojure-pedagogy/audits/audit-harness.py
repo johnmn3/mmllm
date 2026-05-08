@@ -1996,6 +1996,67 @@ def check_record(rec, sub, example):
                                 "story slots (scenario/need/mapping/"
                                 "resolution) — vary the imagery between beats"))
 
+    # ─────────── slice 7MIx (dog-shadow round-3 group-3) detector additions ─
+    #
+    # Three new detectors covering papercut classes the existing 97
+    # detectors don't catch.
+
+    # PRONOUN_AT_SENTENCE_START_AFTER_QUOTE — sentence opens with a
+    # bare subject pronoun ("He, ...", "She, ...", "They, ...")
+    # immediately following a closing quote AND followed by an EMO
+    # participial AND followed by "composed" (the dog-shadow story-
+    # scaffold connector tic where the slot text was folded into one
+    # paragraph and a bare pronoun introduces the action). Cat-K
+    # storytelling tic: connector reads as a stage direction.
+    # Scoped tightly to the dog-shadow scaffold pattern so the milkmaid
+    # / boy-wolf "He said." / "She, with concern, nodded." cadences
+    # don't false-positive.
+    if re.search(
+        r'\."\s+(?:He|She|They),\s+[a-z][a-z ,]+(?:ing|ly|ate|ent|able|ed)'
+        r'(?:\s+[a-z]+){0,3}\s+composed\b',
+        user,
+    ):
+        issues.append(("PRONOUN_AT_SENTENCE_START_AFTER_QUOTE",
+                        "sentence opens with bare subject pronoun "
+                        "after a close-quote followed by EMO "
+                        "participial + 'composed' — dog-shadow "
+                        "scaffold seam (drop the pronoun)"))
+
+    # CONNECTOR_IT_RETURNED_LITERAL — the connector beat "It returned:"
+    # / "The runtime returned:" appears immediately followed by another
+    # paragraph beginning with "The runtime" or "The REPL". Two named
+    # mentions of the runtime separated only by a colon-paragraph break
+    # is a stitched scaffold seam, not narrative.
+    if re.search(
+        r"(?:It|The runtime|The REPL) returned:\s*\n+\s*"
+        r"(?:The runtime|The REPL)\b",
+        user,
+    ):
+        issues.append(("CONNECTOR_RUNTIME_DOUBLED",
+                        "connector 'It/The runtime returned:' immediately "
+                        "followed by paragraph that re-names the runtime "
+                        "— scaffold seam (drop one mention)"))
+
+    # FABLE_FOREIGN_NUMERAL_QUANTIFIER — generic Cat-K-2 numerical
+    # quantifier patterns common across fables: 'a row of NN', 'a heap
+    # of NN', 'a stack of NN' followed by a number-word in figures
+    # (digits) where the number is a small constant 3-30 hardcoded
+    # by the author. Distinct from NARRATIVE_NUMERAL_HARDCODE (which
+    # catches English-numeral form) — this catches the digit form
+    # that escaped the previous detector.
+    quant_re = re.compile(
+        r"\b(?:a row of|a heap of|a stack of|a pile of|a cache of)"
+        r"\s+(\d{1,2})\s+(?:bones?|stones?|piles?|values?|elements?|items?|numbers?)\b",
+        re.IGNORECASE,
+    )
+    qm = quant_re.search(user)
+    if qm and getattr(example, "form_template", None):
+        issues.append(("FABLE_FOREIGN_NUMERAL_QUANTIFIER",
+                        f"parametric example has hardcoded digit "
+                        f"quantifier {qm.group(0)!r} in narrative — "
+                        "the form is parametric so the actual count "
+                        "drifts from the prose"))
+
     return issues
 
 

@@ -309,7 +309,7 @@ G3_04 = SubjectCurriculum(grade=3, subject_id="G3-04",
             question_what="adding a, b, and c after binding via let to 2, 3, and 4",
             goal_text="bind a to 2, b to 3, c to 4, and add them",
             scenario=(
-                'Rex the hound gathered three bones at the stream\'s edge and '
+                'Rex the hound gathered a row of bones at the stream\'s edge and '
                 'clenched them between his jaws — light, medium, heavy. "I hold '
                 'these as a, b, and c."'
             ),
@@ -318,7 +318,7 @@ G3_04 = SubjectCurriculum(grade=3, subject_id="G3-04",
                 'them.'
             ),
             mapping=(
-                'The three bones are the three-binding; the names a, b, and c are '
+                'The a row of bones are the three-binding; the names a, b, and c are '
                 'the throat\'s hold; the sum is what comes back.'
             ),
             resolution=(
@@ -396,7 +396,7 @@ G3_06 = SubjectCurriculum(grade=3, subject_id="G3-06",
             question_what="the value of b, bound to twice a via let, after a is bound to 5",
             goal_text="bind a to 5, then bind b to twice a, and return b",
             scenario=(
-                'Rex the hound gathered five bones and clamped them in his '
+                'Rex the hound gathered a row of bones and clamped them in his '
                 'jaws as the name a. Before stepping forward, he computed in '
                 'his mind what twice that grip would weigh — and held both the '
                 'first grip and the second answer as b. "Each binding speaks '
@@ -429,7 +429,7 @@ G3_06 = SubjectCurriculum(grade=3, subject_id="G3-06",
             question_what="the value of c, bound via let to twice b, after a is 3 and b is a+1",
             goal_text="bind a to 3, b to a+1, c to 2*b, and return c",
             scenario=(
-                'Bell the hound picked up three bones and gripped them in '
+                'Bell the hound picked up a row of bones and gripped them in '
                 'careful sequence within the mouth. First, she called the '
                 'smallest a. Then she thought of adding one more — and held '
                 'that grip as b. Then she doubled b in her mind and held the '
@@ -528,7 +528,7 @@ G3_08 = SubjectCurriculum(grade=3, subject_id="G3-08",
             question_what="the result of applying an anonymous fn with three parameters that adds them to 1, 2, and 3",
             goal_text="create an anonymous function with three parameters that adds them and apply it to 1, 2, and 3",
             scenario=(
-                'Rex the hound drew three sniffing-steps: take three counts and carry back their sum. '
+                'Rex the hound drew three sniffing-steps: take a row of counts and carry back their sum. '
                 '"This trail has no name — I design it for this walk."'
             ),
             need=(
@@ -599,9 +599,9 @@ G3_09 = SubjectCurriculum(grade=3, subject_id="G3-09",
                 'and walking the trail it marks.'
             ),
             resolution=(
-                'The REPL marked the stone with the name add3 and remembered '
-                'the trail. When the form called add3 with 1, 2, and 3, the '
-                'REPL walked the trail, added the counts as the sniffs showed, '
+                'The runtime marked the stone with the name add3 and remembered '
+                'the trail. When the form called add3 with 1, 2, and 3, it '
+                'walked the trail, added the counts as the sniffs showed, '
                 'and returned the total.'
             ),
             tags=("story",),
@@ -998,7 +998,7 @@ G3_18 = SubjectCurriculum(grade=3, subject_id="G3-18",
             question_what="the result of multiplying 5 by itself three times without any binding",
             goal_text="compute 5 cubed using direct values",
             scenario=(
-                'Patch the hound arrived at the crossing and saw three stones '
+                'Patch the hound arrived at the crossing and saw a row of stones '
                 'arranged in a pile. "I don\'t need to name these," he said, "because '
                 'I will use them just once and the form is so short that the values '
                 'are clear enough."'
@@ -1009,7 +1009,7 @@ G3_18 = SubjectCurriculum(grade=3, subject_id="G3-18",
                 'clarity.'
             ),
             mapping=(
-                'The three stones laid out are the literal values in the form, the '
+                'The a row of stones laid out are the literal values in the form, the '
                 'pile itself is the operation, and the product is what comes back '
                 'without any naming layer.'
             ),

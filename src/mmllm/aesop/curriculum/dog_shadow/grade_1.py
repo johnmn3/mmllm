@@ -44,7 +44,7 @@ someone had scratched {concept_phrase} into the wet sand. The water
 ran clear and the bridge cast a long, trembling shadow.
 {hare}, {emo_proud}, said the answer was plain — anyone could see
 it on the surface. {tortoise}, {emo_patient}, said the surface only
-shows what the surface shows: the form {form_display}, dropped into
+shows what the surface shows: {form_display}, dropped into
 the REPL, would tell what the value really was."""),
 
     # 2. The wager template — bets on what the form returns.
@@ -77,18 +77,18 @@ a reflection that gave nothing back."""),
 {tortoise} had been showing {hare_phrase} how the REPL works,
 the stream cool against their paws and the bridge's shadow long.
 "Look here," {tortoise_he_she} said, pointing to {concept_phrase}.
-"You hand the form {form_display} to the runtime — the runtime is
-the stream's honest reading, not the surface guess — and it gives
-back what the form really is." {hare}, {emo_tired}, agreed to try."""),
+"You hand {form_display} to the runtime — the stream's honest
+reading, not the surface guess — and it gives back the value
+exactly." {hare}, {emo_tired}, agreed to try."""),
 
     # 4. The audience template — small stream-side creatures watch.
     SubplotTemplate("""\
 A few stream-side creatures had gathered on the bank {place} to
 watch {hare} attempt to outwit {tortoise_phrase} at reading
 the REPL. The water moved on, the bridge held its shadow, and
-{tortoise}, {emo_patient}, pointed to {concept_phrase} and read the
-form aloud: {form_display}. The crowd waited to see who would
-correctly write the form to submit."""),
+{tortoise}, {emo_patient}, pointed to {concept_phrase} and read it
+aloud: {form_display}. The crowd waited to see who would
+correctly write the expression to submit."""),
 
     # 5. The race-pause / bone-pause template — hare pauses; tortoise
     #    catches up by careful reading.
@@ -108,7 +108,7 @@ bark-scratch tally of every form {tortoise_he_she} had successfully
 evaluated — each new mark deepening the line and crowding out the
 day's wishful guesses. {place_idx}, the next entry was
 {concept_phrase}. {hare_phrase} peered over {tortoise_his_her}
-shoulder at the form {form_display} and asked what it would come
+shoulder at {form_display} and asked what it would come
 out to.""".replace("{place_idx}", "Today {place}")),
 
     # 7. The boast-and-rebuke template — the greedy dog claims to know;
@@ -867,7 +867,7 @@ G1_13 = SubjectCurriculum(
             question_what="the difference of 5 and 3",
             goal_text="subtract 3 from 5",
             scenario=(
-                'Rex the hound laid out five bones on a flat stone, then moved three '
+                'Rex the hound laid out a row of bones on a flat stone, then moved three '
                 'to another pile. "How many are left?" he asked his packmate. "I could '
                 'count the remainder, or I could let the runtime do it exactly."'
             ),
@@ -895,24 +895,24 @@ G1_13 = SubjectCurriculum(
             question_what="the product of 4 and 5",
             goal_text="multiply 4 by 5",
             scenario=(
-                'Bell the hound arranged four piles of bones, each pile holding five '
+                'Bell the hound arranged a row of piles of bones, each pile holding five '
                 'bones. "How many bones altogether?" she asked. "I could count every '
                 'one, or I could let the runtime multiply them for me — one operation, '
                 'exact answer."'
             ),
             need=(
-                'She wanted the REPL to take the four piles of five and return the '
+                'She wanted the REPL to take the a row of piles of five and return the '
                 'total count. The multiplication had to be exact, with no room for '
                 'mis-counting.'
             ),
             mapping=(
-                'The four piles are the multiplicand. The five bones per pile are the '
+                'The a row of piles are the multiplicand. The a row of bones per pile are the '
                 'multiplier. The multiplication is the combining of equal groups. The '
                 'REPL gives the precise heap-size that results.'
             ),
             resolution=(
                 'The REPL performed the multiplication and handed back the precise count. '
-                'The four piles had been combined exactly right — the runtime had not '
+                'The a row of piles had been combined exactly right — the runtime had not '
                 'fumbled the counting — 5.'
             ),
             tags=("story",),
@@ -924,7 +924,7 @@ G1_13 = SubjectCurriculum(
             question_what="the quotient of 10 and 2",
             goal_text="divide 10 by 2",
             scenario=(
-                'Patch the hound looked at a heap of ten bones and measured them into '
+                'Patch the hound looked at a heap of a row of bones and measured them into '
                 'two equal piles. "How many bones in each pile?" asked a younger dog. '
                 '"The runtime can tell us exactly by dividing."'
             ),
@@ -934,7 +934,7 @@ G1_13 = SubjectCurriculum(
                 'case.'
             ),
             mapping=(
-                'The ten bones are the dividend. The two piles are the divisor. The '
+                'The a row of bones are the dividend. The two piles are the divisor. The '
                 'division is the fair splitting. The REPL gives the count per pile — the '
                 'quotient.'
             ),
@@ -951,7 +951,7 @@ G1_13 = SubjectCurriculum(
             question_what="the sum of 7 and 8",
             goal_text="add 7 and 8",
             scenario=(
-                'Rex the hound gathered seven bones from one bank and eight from '
+                'Rex the hound gathered a row of bones from one bank and eight from '
                 'another. "Should I count them all?" he asked. "Let the runtime add '
                 'them together. It will give the exact total."'
             ),
@@ -988,7 +988,7 @@ G1_13 = SubjectCurriculum(
                 'mis-count.'
             ),
             mapping=(
-                'The twenty bones are the minuend. The seven bones moved away are the '
+                'The twenty bones are the minuend. The a row of bones moved away are the '
                 'subtrahend. The subtraction is the taking-away. The REPL gives the '
                 'exact count remaining.'
             ),
@@ -1278,16 +1278,16 @@ G1_15 = SubjectCurriculum(
                 'she asked. "The runtime can check them all at once."'
             ),
             need=(
-                'She wanted the REPL to compare all four numbers and return the verdict '
+                'She wanted the REPL to compare all a row of numbers and return the verdict '
                 'on whether they were all equal. The comparison had to be exact.'
             ),
             mapping=(
-                'The crossing-condition is =. The four numbers are the operands. The '
+                'The crossing-condition is =. The a row of numbers are the operands. The '
                 'verdict — true if all match, false if any differs — is what the '
                 'conditions return.'
             ),
             resolution=(
-                'The REPL checked all four numbers, saw they were all identical, and '
+                'The REPL checked all a row of numbers, saw they were all identical, and '
                 'returned 1. The verdict was clear — all four pebbles bore the same '
                 'mark.'
             ),
@@ -1338,7 +1338,7 @@ G1_16 = SubjectCurriculum(
             question_what="whether 5 is zero",
             goal_text="check whether 5 is zero using zero?",
             scenario=(
-                'Bell the hound held five bones at the stream\'s edge and laid them '
+                'Bell the hound held a row of bones at the stream\'s edge and laid them '
                 'on a flat stone. "Is this count zero?" she asked. "The runtime can '
                 'tell me for certain."'
             ),

@@ -126,11 +126,11 @@ G10_01 = SubjectCurriculum(
         SubjectExample(
             form="'(1 2 3)",
             expected=[1, 2, 3],
-            concept_phrase="the quoted list with three numbers",
+            concept_phrase="the quoted list with a row of numbers",
             question_what="the result of quoting a three-element list",
-            goal_text="quote a list of three numbers so it returns the form itself",
+            goal_text="quote a list of a row of numbers so it returns the form itself",
             scenario=(
-                'Rex the hound wanted to mark three stones by the pond — '
+                'Rex the hound wanted to mark a row of stones by the pond — '
                 'one marked 1, one marked 2, one marked 3. Instead of counting '
                 'them, he made a single scratch-mark that spelled the list '
                 'shape itself.'
@@ -612,7 +612,7 @@ G10_07 = SubjectCurriculum(
             question_what="the sum of mapped values after filtering even numbers",
             goal_text="thread a vector through filter, map, and reduce using thread-last",
             scenario=(
-                'Rex the hound had a vector of four bones and a multi-step '
+                'Rex the hound had a vector of a row of bones and a multi-step '
                 'sniffing-trail. Thread-last would pass the bones as the final '
                 'argument to each step.'
             ),
