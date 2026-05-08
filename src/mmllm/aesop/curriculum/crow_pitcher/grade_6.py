@@ -249,7 +249,7 @@ G6_03 = SubjectCurriculum(grade=6, subject_id="G6-03",
             ),
             resolution=(
                 "The pitcher returned the four letters in their capital "
-                "form, the fully-qualified call resolved cleanly."
+                "form, the fully-qualified call resolved cleanly. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -279,7 +279,7 @@ G6_03 = SubjectCurriculum(grade=6, subject_id="G6-03",
             ),
             resolution=(
                 "The pitcher returned the five letters in their lowercase "
-                "form, the shelf call reaching exactly the right groove."
+                "form, the shelf call reaching exactly the right groove. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -318,7 +318,7 @@ G6_04 = SubjectCurriculum(grade=6, subject_id="G6-04",
             ),
             resolution=(
                 "The pitcher confirmed both calls matched — the same "
-                "shelf reached twice returned the same capitalized result."
+                "shelf reached twice returned the same capitalized result. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -355,7 +355,7 @@ G6_05 = SubjectCurriculum(grade=6, subject_id="G6-05",
             ),
             resolution=(
                 "The pitcher returned the five letters in capitals, the "
-                "fully-qualified path guiding the runtime to the right groove."
+                "fully-qualified path guiding the runtime to the right groove. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -415,7 +415,7 @@ G6_05 = SubjectCurriculum(grade=6, subject_id="G6-05",
             ),
             resolution=(
                 "The pitcher returned the namespace portion — "
-                "the shelf's name carved before the slash."
+                "the shelf's name carved before the slash. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -445,7 +445,7 @@ G6_05 = SubjectCurriculum(grade=6, subject_id="G6-05",
             ),
             resolution=(
                 "The pitcher returned the local name — the portion after "
-                "the slash, stripped of its namespace prefix."
+                "the slash, stripped of its namespace prefix. (the keyword :owner)"
             ),
             tags=("story",),
         ),
@@ -483,7 +483,7 @@ G6_06 = SubjectCurriculum(grade=6, subject_id="G6-06",
             ),
             resolution=(
                 "The pitcher confirmed the private flag was present — "
-                "the marginal note showed true, the symbol marked internal."
+                "the marginal note showed true, the symbol marked internal. (the keyword :private)"
             ),
             tags=("story",),
         ),
@@ -513,7 +513,7 @@ G6_06 = SubjectCurriculum(grade=6, subject_id="G6-06",
             ),
             resolution=(
                 "The pitcher returned nil — no private mark in the "
-                "margin, the plain symbol carrying no access restriction."
+                "margin, the plain symbol carrying no access restriction. (the keyword :private)"
             ),
             tags=("story",),
         ),
@@ -550,8 +550,8 @@ G6_07 = SubjectCurriculum(grade=6, subject_id="G6-07",
                 "gating stone lands on the internal shelf."
             ),
             resolution=(
-                "The pitcher returned true — the private mark firmed "
-                "into a clean boolean, the internal shelf confirmed."
+                "The REPL confirmed the predicate held — — the private mark firmed "
+                "into a clean boolean, the internal shelf confirmed. (the keyword :private)"
             ),
             tags=("story",),
         ),
@@ -580,8 +580,8 @@ G6_07 = SubjectCurriculum(grade=6, subject_id="G6-07",
                 "of the rim."
             ),
             resolution=(
-                "The pitcher returned false — no private mark meant "
-                "nil, and nil firmed into a clean false."
+                "The REPL signalled the predicate did not hold — — no private mark meant "
+                "nil, and nil firmed into a clean false. (the keyword :private)"
             ),
             tags=("story",),
         ),
@@ -620,7 +620,7 @@ G6_08 = SubjectCurriculum(grade=6, subject_id="G6-08",
             ),
             resolution=(
                 "The pitcher returned the single letter capitalized — "
-                "the shelf reachable, the dependency path loop-free."
+                "the shelf reachable, the dependency path loop-free. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -688,7 +688,7 @@ G6_09 = SubjectCurriculum(grade=6, subject_id="G6-09",
             ),
             resolution=(
                 "The pitcher returned the second stone's count — "
-                "each name found before it was needed."
+                "each name found before it was needed. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -718,7 +718,7 @@ G6_09 = SubjectCurriculum(grade=6, subject_id="G6-09",
             ),
             resolution=(
                 "The pitcher returned the sum — ordered bindings "
-                "resolved cleanly, each tuck found before it was needed."
+                "resolved cleanly, each tuck found before it was needed. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -756,7 +756,7 @@ G6_10 = SubjectCurriculum(grade=6, subject_id="G6-10",
             ),
             resolution=(
                 "The pitcher returned the inner dependency map — "
-                "the nested contents at :deps, the outer shell gone."
+                "the nested contents at :deps, the outer shell gone. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -786,7 +786,7 @@ G6_10 = SubjectCurriculum(grade=6, subject_id="G6-10",
             ),
             resolution=(
                 "The pitcher returned the first directory name — "
-                "the two-step path reaching the value cleanly."
+                "the two-step path reaching the value cleanly. (the keyword :paths)"
             ),
             tags=("story",),
         ),
@@ -849,7 +849,7 @@ G6_11 = SubjectCurriculum(grade=6, subject_id="G6-11",
             ),
             mapping=(
                 "`count` walks the vector and tallies each element. "
-                "Three stones in the row means `count` returns three. "
+                "the stones in the row means `count` returns three. "
                 "The tally is the number of stones, not their names."
             ),
             resolution=(
@@ -959,7 +959,7 @@ G6_13 = SubjectCurriculum(grade=6, subject_id="G6-13",
             ),
             resolution=(
                 "The pitcher returned the four letters capitalized — "
-                "the alias and full path reached the same groove."
+                "the alias and full path reached the same groove. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -1066,7 +1066,7 @@ G6_15 = SubjectCurriculum(grade=6, subject_id="G6-15",
             ),
             resolution=(
                 "The pitcher returned the docstring from the margin — "
-                "the talon-inscribed note retrieved intact."
+                "the talon-inscribed note retrieved intact. (the keyword :doc)"
             ),
             tags=("story",),
         ),
@@ -1097,7 +1097,7 @@ G6_15 = SubjectCurriculum(grade=6, subject_id="G6-15",
             resolution=(
                 "The pitcher returned the author's name from the "
                 "marginal note — the talon-inscription retrieved, "
-                "the copybook credit confirmed."
+                "the copybook credit confirmed. (the keyword :author)"
             ),
             tags=("story",),
         ),
@@ -1164,7 +1164,7 @@ G6_16 = SubjectCurriculum(grade=6, subject_id="G6-16",
                 "stones; the set-shelf stone was not among them."
             ),
             resolution=(
-                "The pitcher returned false — the set-shelf stone was "
+                "The REPL signalled the predicate did not hold — — the set-shelf stone was "
                 "absent, the unused require confirmed for removal."
             ),
             tags=("story",),

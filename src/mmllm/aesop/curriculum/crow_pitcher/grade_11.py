@@ -197,7 +197,7 @@ G11_02 = SubjectCurriculum(
             ),
             resolution=(
                 "The alternate-dot inscription returned the borrowed vessel's "
-                "method result at beak-reach."
+                "method result at beak-reach. (count: -7)"
             ),
             tags=("story",),
         ),
@@ -264,7 +264,7 @@ G11_03 = SubjectCurriculum(
             ),
             resolution=(
                 "The borrowed vessel's maximum-finding method settled with "
-                "its choice at beak-reach."
+                "its choice at beak-reach. (count: 3)"
             ),
             tags=("story",),
         ),
@@ -304,7 +304,7 @@ G11_04 = SubjectCurriculum(
                 "sequence measure without exposing the raw field access."
             ),
             resolution=(
-                "The pitcher returned the tally of notches counted along the stone."
+                "The pitcher returned the tally of notches counted along the stone. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -330,7 +330,7 @@ G11_04 = SubjectCurriculum(
                 "side agree on the tally."
             ),
             resolution=(
-                "The pitcher returned the notch-count for the shorter stone."
+                "The pitcher returned the notch-count for the shorter stone. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -485,7 +485,7 @@ G11_07 = SubjectCurriculum(
             ),
             resolution=(
                 "The pitcher returned the tray's slot-count reported by "
-                "the Java vessel itself."
+                "the Java vessel itself. (count: 3)"
             ),
             tags=("story",),
         ),
@@ -570,7 +570,7 @@ G11_09 = SubjectCurriculum(
                 "like these, the result arrives without incident."
             ),
             resolution=(
-                "The pitcher returned the combined count of the two stones."
+                "The pitcher returned the combined count of the two stones. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -702,7 +702,7 @@ G11_14 = SubjectCurriculum(
             ),
             resolution=(
                 "The call succeeded and the pitcher returned the method's "
-                "result without triggering the safety net."
+                "result without triggering the safety net. (count: 4)"
             ),
             tags=("story",),
         ),

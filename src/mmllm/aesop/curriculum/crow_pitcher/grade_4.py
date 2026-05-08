@@ -53,7 +53,7 @@ G4_01 = SubjectCurriculum(grade=4, subject_id="G4-01",
         SubjectExample(
             form="[1 2 3]",
             expected=[1,2,3],
-            concept_phrase="a vector of three numbers",
+            concept_phrase="a vector of the numbers",
             question_what="the vector",
             goal_text="create a vector containing 1, 2, and 3",
 
@@ -64,7 +64,7 @@ G4_01 = SubjectCurriculum(grade=4, subject_id="G4-01",
             ),
             need=(
                 "He needed the REPL to confirm that the ordered stone-pile "
-                "held exactly those three stones in that order."
+                "held exactly those the stones in that order."
             ),
             mapping=(
                 "A vector is an ordered stone-pile: square brackets open and "
@@ -100,7 +100,7 @@ G4_01 = SubjectCurriculum(grade=4, subject_id="G4-01",
             ),
             resolution=(
                 "The REPL returned an empty pile, confirming the reserved "
-                "space held nothing at all."
+                "space held nothing at all. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -160,7 +160,7 @@ G4_02 = SubjectCurriculum(grade=4, subject_id="G4-02",
             ),
             resolution=(
                 "The REPL lifted the leftmost stone from the pile and "
-                "returned its count."
+                "returned its count. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -207,7 +207,7 @@ G4_03 = SubjectCurriculum(grade=4, subject_id="G4-03",
             scenario=(
                 "Sable had a two-stone pile on the pitcher's rim in the "
                 "village — one and two, side by side. A third stone sat "
-                "ready on the ground; the pile needed it at the right end."
+                "ready on the ground; the pile needed it at the right end. (with {drawn.a} folded in)"
             ),
             need=(
                 "The original pile had to remain untouched; a new extended "
@@ -220,7 +220,7 @@ G4_03 = SubjectCurriculum(grade=4, subject_id="G4-03",
             ),
             resolution=(
                 "The REPL returned a fresh three-stone pile, original pile "
-                "undisturbed beside it."
+                "undisturbed beside it. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -247,7 +247,7 @@ G4_03 = SubjectCurriculum(grade=4, subject_id="G4-03",
             ),
             resolution=(
                 "The REPL returned a one-label pile, the keyword stone "
-                "seated at the right end."
+                "seated at the right end. (the keyword :hare)"
             ),
             tags=("story",),
         ),
@@ -261,11 +261,11 @@ G4_04 = SubjectCurriculum(grade=4, subject_id="G4-04",
             form="'(1 2 3)",
             expected=[1,2,3],
             concept_phrase="a list literal",
-            question_what="the list of three numbers",
+            question_what="the list of the numbers",
             goal_text="create a list containing 1, 2, and 3",
 
             scenario=(
-                "Caw arranged three stones in a front-to-back queue on the "
+                "Caw arranged the stones in a front-to-back queue on the "
                 "pitcher's edge in the market — one stone leading, then two, "
                 "then three, each touching the next in a chain."
             ),
@@ -307,7 +307,7 @@ G4_04 = SubjectCurriculum(grade=4, subject_id="G4-04",
             ),
             resolution=(
                 "The REPL confirmed an empty list, the chain structure intact "
-                "with nothing inside."
+                "with nothing inside. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -326,7 +326,7 @@ G4_05 = SubjectCurriculum(grade=4, subject_id="G4-05",
 
             scenario=(
                 "Korvus found a stone-chain of three at the pitcher in the "
-                "orchard — one, two, three queued up. He had a zero-stone "
+                "orchard — the drawn counts queued up. He had a zero-stone "
                 "in his talon that needed to lead the chain."
             ),
             need=(
@@ -340,7 +340,7 @@ G4_05 = SubjectCurriculum(grade=4, subject_id="G4-05",
             ),
             resolution=(
                 "The REPL returned a new sequence with the zero-stone at the "
-                "front, original chain following."
+                "front, original chain following. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -373,7 +373,7 @@ G4_06 = SubjectCurriculum(grade=4, subject_id="G4-06",
             ),
             resolution=(
                 "The REPL returned the map with both compartments named and "
-                "filled as scratched."
+                "filled as scratched. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -406,7 +406,7 @@ G4_07 = SubjectCurriculum(grade=4, subject_id="G4-07",
             ),
             resolution=(
                 "The REPL returned the count from the :a compartment, "
-                "the pile intact."
+                "the pile intact. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -466,7 +466,7 @@ G4_08 = SubjectCurriculum(grade=4, subject_id="G4-08",
             ),
             resolution=(
                 "The REPL returned the extended pile with both compartments "
-                "present, the original unchanged."
+                "present, the original unchanged. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -493,7 +493,7 @@ G4_08 = SubjectCurriculum(grade=4, subject_id="G4-08",
             ),
             resolution=(
                 "The REPL returned a new pile with :a holding the updated "
-                "count, original pile untouched."
+                "count, original pile untouched. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -526,7 +526,7 @@ G4_09 = SubjectCurriculum(grade=4, subject_id="G4-09",
             ),
             resolution=(
                 "The REPL returned the reduced pile with only the :b "
-                "compartment remaining."
+                "compartment remaining. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -559,7 +559,7 @@ G4_10 = SubjectCurriculum(grade=4, subject_id="G4-10",
             ),
             resolution=(
                 "The REPL returned the tally of labels, confirming how many "
-                "compartments were scratched in."
+                "compartments were scratched in. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -578,7 +578,7 @@ G4_11 = SubjectCurriculum(grade=4, subject_id="G4-11",
 
             scenario=(
                 "Sable dropped three distinct stones into a sorting-pile at "
-                "the meadow pitcher — one, two, three, no duplicates allowed. "
+                "the meadow pitcher — the drawn counts, no duplicates allowed. "
                 "She needed to know how many unique stones the pile held."
             ),
             need=(
@@ -592,7 +592,7 @@ G4_11 = SubjectCurriculum(grade=4, subject_id="G4-11",
             ),
             resolution=(
                 "The REPL returned the count of unique stones settled "
-                "in the sorting-pile."
+                "in the sorting-pile. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -638,7 +638,7 @@ G4_12 = SubjectCurriculum(grade=4, subject_id="G4-12",
 
             scenario=(
                 "Caw had a three-stone sorting-pile at the farm pitcher — "
-                "one, two, three settled in their grooves. She held a stone "
+                "the drawn counts settled in their grooves. She held a stone "
                 "marked two and needed to know if it already occupied a slot."
             ),
             need=(
@@ -651,8 +651,8 @@ G4_12 = SubjectCurriculum(grade=4, subject_id="G4-12",
                 "the REPL returns true; otherwise false."
             ),
             resolution=(
-                "The REPL returned true, confirming the two-stone was already "
-                "seated in the pile."
+                "The REPL confirmed the predicate held — confirming the two-stone was already "
+                "seated in the pile. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -678,7 +678,7 @@ G4_12 = SubjectCurriculum(grade=4, subject_id="G4-12",
                 "the crow the stone has no slot."
             ),
             resolution=(
-                "The REPL returned false, confirming the four-stone had no "
+                "The REPL signalled the predicate did not hold — confirming the four-stone had no "
                 "slot in the sorting-pile."
             ),
             tags=("story",),
@@ -707,12 +707,12 @@ G4_13 = SubjectCurriculum(grade=4, subject_id="G4-13",
             ),
             mapping=(
                 "`count` tallies every element in a collection without "
-                "inspecting their values. For a vector-pile of five stones, "
+                "inspecting their values. For a vector-pile of the stones, "
                 "it returns five — one per stone in the row."
             ),
             resolution=(
                 "The REPL returned the stone-count of the ordered pile "
-                "without lifting a single stone."
+                "without lifting a single stone. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -739,7 +739,7 @@ G4_13 = SubjectCurriculum(grade=4, subject_id="G4-13",
             ),
             resolution=(
                 "The REPL returned the number of compartment entries present "
-                "in the map-pile."
+                "in the map-pile. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -793,7 +793,7 @@ G4_13 = SubjectCurriculum(grade=4, subject_id="G4-13",
             ),
             resolution=(
                 "The REPL returned the bead-count of the full word, every "
-                "letter tallied."
+                "letter tallied. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -826,7 +826,7 @@ G4_14 = SubjectCurriculum(grade=4, subject_id="G4-14",
             ),
             resolution=(
                 "The REPL confirmed the pile was empty, returning true "
-                "for the bare vector."
+                "for the bare vector. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -852,8 +852,8 @@ G4_14 = SubjectCurriculum(grade=4, subject_id="G4-14",
                 "the pile is not empty."
             ),
             resolution=(
-                "The REPL returned false, the single stone sufficient to "
-                "show the pile was occupied."
+                "The REPL signalled the predicate did not hold — the single stone sufficient to "
+                "show the pile was occupied. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -879,7 +879,7 @@ G4_14 = SubjectCurriculum(grade=4, subject_id="G4-14",
                 "beads; the REPL returns true."
             ),
             resolution=(
-                "The REPL returned true, confirming the vine carried no "
+                "The REPL confirmed the predicate held — confirming the vine carried no "
                 "beads at all."
             ),
             tags=("story",),
@@ -913,7 +913,7 @@ G4_15 = SubjectCurriculum(grade=4, subject_id="G4-15",
             ),
             resolution=(
                 "The REPL returned the leading stone's count, the row "
-                "still in place."
+                "still in place. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -940,7 +940,7 @@ G4_15 = SubjectCurriculum(grade=4, subject_id="G4-15",
             ),
             resolution=(
                 "The REPL returned the trailing stone's count, confirming "
-                "the rightmost position."
+                "the rightmost position. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -967,7 +967,7 @@ G4_15 = SubjectCurriculum(grade=4, subject_id="G4-15",
             ),
             resolution=(
                 "The REPL returned the count of the tail after the leading "
-                "stone was removed."
+                "stone was removed. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -1000,7 +1000,7 @@ G4_16 = SubjectCurriculum(grade=4, subject_id="G4-16",
             ),
             resolution=(
                 "The REPL returned the filled vector-pile with all stones from "
-                "the chain transferred in order."
+                "the chain transferred in order. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -1027,7 +1027,7 @@ G4_16 = SubjectCurriculum(grade=4, subject_id="G4-16",
             ),
             resolution=(
                 "The REPL returned the sorting-pile with duplicates collapsed "
-                "to unique stones only."
+                "to unique stones only. (count: 3)"
             ),
             tags=("story",),
         ),
@@ -1060,7 +1060,7 @@ G4_17 = SubjectCurriculum(grade=4, subject_id="G4-17",
             ),
             resolution=(
                 "The REPL returned the original pile from under the wing, "
-                "unchanged by the assoc call."
+                "unchanged by the assoc call. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -1092,8 +1092,8 @@ G4_18 = SubjectCurriculum(grade=4, subject_id="G4-18",
                 "ordered stones are considered equal in Clojure."
             ),
             resolution=(
-                "The REPL returned true, confirming same stones same order "
-                "means equality regardless of container."
+                "The REPL confirmed the predicate held — confirming same stones same order "
+                "means equality regardless of container. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -1126,7 +1126,7 @@ G4_19 = SubjectCurriculum(grade=4, subject_id="G4-19",
             ),
             resolution=(
                 "The REPL returned the count of stones the range produced, "
-                "one per integer generated."
+                "one per integer generated. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -1153,7 +1153,7 @@ G4_19 = SubjectCurriculum(grade=4, subject_id="G4-19",
             ),
             resolution=(
                 "The REPL returned the first stone of the range without "
-                "generating the rest."
+                "generating the rest. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -1182,11 +1182,11 @@ G4_20 = SubjectCurriculum(grade=4, subject_id="G4-20",
             mapping=(
                 "`seq` turns any collection into a sequential chain view. "
                 "`count` then tallies the chain. The vector's stones are "
-                "unchanged; the chain holds the same three elements."
+                "unchanged; the chain holds the same the elements."
             ),
             resolution=(
                 "The REPL returned the count of the chain view, same as "
-                "the original pile's stone total."
+                "the original pile's stone total. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),

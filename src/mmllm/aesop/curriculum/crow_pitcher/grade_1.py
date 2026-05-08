@@ -248,9 +248,9 @@ submit it. Whatever comes back is the answer.\""""),
 
     # 6. The notebook template — Tortoise records goal/form pairs.
     SubplotTemplate("""\
-{tortoise_phrase}, {emo_patient}, kept a small leather notebook of
+{tortoise_phrase}, {emo_patient}, kept a small bark-strip ledger of
 every goal {tortoise_he_she} had translated into a Clojure form —
-each entry a pebble's worth of progress, the ledger's page-count
+each entry a pebble's worth of progress, the ledger's mark-count
 rising slowly the way the pitcher's water rose with patient drops.
 Today {place}, the next entry was a goal: {goal_text}. {tortoise}
 sat with pen in hand, ready to compose {concept_phrase}, then let
@@ -595,7 +595,7 @@ G1_09 = SubjectCurriculum(
             ),
             resolution=(
                 "The gate returned the negative verdict: a bare stone-count "
-                "is no chalk mark."
+                "is no chalk mark. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -689,7 +689,7 @@ G1_10 = SubjectCurriculum(
             ),
             resolution=(
                 "The sum arrived unchanged, the marginal note never "
-                "entering the water, exactly as the scribe intended."
+                "entering the water, exactly as the scribe intended. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -716,7 +716,7 @@ G1_10 = SubjectCurriculum(
             ),
             resolution=(
                 "The count returned unchanged, the note never entering the water, "
-                "just as the double mark promised."
+                "just as the double mark promised. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -755,7 +755,7 @@ G1_11 = SubjectCurriculum(
             ),
             resolution=(
                 "The expected sum returned, the extra spacing having vanished "
-                "before the form ever reached the pitcher."
+                "before the form ever reached the pitcher. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -782,7 +782,7 @@ G1_11 = SubjectCurriculum(
             ),
             resolution=(
                 "The correct sum returned, the line breaks invisible to the "
-                "runtime just as any other spacing would be."
+                "runtime just as any other spacing would be. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -821,7 +821,7 @@ G1_12 = SubjectCurriculum(
             ),
             resolution=(
                 "The sum returned, the parens having grouped the form cleanly "
-                "without adding any multiplication."
+                "without adding any multiplication. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -848,7 +848,7 @@ G1_12 = SubjectCurriculum(
             ),
             resolution=(
                 "The nested product returned, the inner sum resolved before "
-                "the outer multiplication ever ran."
+                "the outer multiplication ever ran. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -887,7 +887,7 @@ G1_13 = SubjectCurriculum(
             ),
             resolution=(
                 "The two handfuls combined, the water rising to the "
-                "expected notch at beak-reach."
+                "expected notch at beak-reach. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -905,16 +905,16 @@ G1_13 = SubjectCurriculum(
             ),
             need=(
                 "She needed the runtime to return the count of what remained "
-                "after the three stones were lifted away."
+                "after the the stones were lifted away."
             ),
             mapping=(
-                "`-` removes the second stone-count from the first. Five stones "
+                "`-` removes the second stone-count from the first. the stones "
                 "less three gives the smaller heap; the runtime counts what's left "
                 "and returns it as the water-level."
             ),
             resolution=(
                 "The remaining count returned, the heap diminished by exactly "
-                "the stones lifted away."
+                "the stones lifted away. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -927,7 +927,7 @@ G1_13 = SubjectCurriculum(
 
             scenario=(
                 "Korvus arranged four rows of stones on the hilltop pitcher's "
-                "rim, five stones in each row, tallying how many stones he would "
+                "rim, the stones in each row, tallying how many stones he would "
                 "need in total before dropping them all at once."
             ),
             need=(
@@ -936,12 +936,12 @@ G1_13 = SubjectCurriculum(
             ),
             mapping=(
                 "`*` repeats the addition of the first count as many times as "
-                "the second count says. Four rows of five stones gives the full "
+                "the second count says. Four rows of the stones gives the full "
                 "heap; the runtime returns the exact product."
             ),
             resolution=(
                 "The total stone-count returned, the full heap tallied without "
-                "a single stone miscounted."
+                "a single stone miscounted. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -953,7 +953,7 @@ G1_13 = SubjectCurriculum(
             goal_text="divide 10 by 2",
 
             scenario=(
-                "Sable stood at the garden pitcher's rim with ten stones and "
+                "Sable stood at the garden pitcher's rim with the stones and "
                 "two waiting spots on the clay, sorting the pile evenly into "
                 "both spots before counting what each portion held."
             ),
@@ -963,12 +963,12 @@ G1_13 = SubjectCurriculum(
             ),
             mapping=(
                 "`/` divides the first stone-count into as many equal parts as "
-                "the second count says. Ten stones split evenly into two portions "
+                "the second count says. the stones split evenly into two portions "
                 "gives the per-portion count the runtime returns."
             ),
             resolution=(
                 "The even-split count returned, each portion holding the same "
-                "number of stones."
+                "number of stones. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -980,7 +980,7 @@ G1_13 = SubjectCurriculum(
             goal_text="add 7 and 8",
 
             scenario=(
-                "Caw crouched at the orchard pitcher's rim, seven stones in "
+                "Caw crouched at the orchard pitcher's rim, the stones in "
                 "her left talon and eight in her right, both handfuls poised "
                 "above the water."
             ),
@@ -995,7 +995,7 @@ G1_13 = SubjectCurriculum(
             ),
             resolution=(
                 "The combined count returned, both handfuls measured together "
-                "in a single stone-count call."
+                "in a single stone-count call. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -1047,7 +1047,7 @@ G1_14 = SubjectCurriculum(
 
             scenario=(
                 "Sable stood at the meadow pitcher's rim with one loose stone "
-                "and two small groups of three stones each, the grouped stones "
+                "and two small groups of the stones each, the grouped stones "
                 "nested inside the outer count like a bag within a bag."
             ),
             need=(
@@ -1061,7 +1061,7 @@ G1_14 = SubjectCurriculum(
             ),
             resolution=(
                 "The outer sum returned, the inner product having resolved "
-                "before the addition ever ran."
+                "before the addition ever ran. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -1074,7 +1074,7 @@ G1_14 = SubjectCurriculum(
 
             scenario=(
                 "Korvus arranged two small heaps on the farm pitcher's rim — "
-                "one of three stones summed from two groups, another of seven "
+                "one of the stones summed from two groups, another of seven "
                 "summed from two groups — before multiplying the resolved heaps together."
             ),
             need=(
@@ -1088,7 +1088,7 @@ G1_14 = SubjectCurriculum(
             ),
             resolution=(
                 "The product returned, both nested sums resolved and then "
-                "multiplied by the outer call."
+                "multiplied by the outer call. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -1115,7 +1115,7 @@ G1_14 = SubjectCurriculum(
             ),
             resolution=(
                 "The diminished count returned, the inner product resolved "
-                "and removed from the outer pile."
+                "and removed from the outer pile. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -1142,7 +1142,7 @@ G1_14 = SubjectCurriculum(
             ),
             resolution=(
                 "The combined total returned, both inner products resolved and "
-                "then added together by the outer call."
+                "then added together by the outer call. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -1181,7 +1181,7 @@ G1_15 = SubjectCurriculum(
             ),
             resolution=(
                 "true — both gates closed in agreement, the counts identical, "
-                "the confirmation dropping into the pitcher."
+                "the confirmation dropping into the pitcher. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -1208,7 +1208,7 @@ G1_15 = SubjectCurriculum(
             ),
             resolution=(
                 "The gate returned the negative verdict: the counts differed, "
-                "the arms refusing to close together."
+                "the arms refusing to close together. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -1235,7 +1235,7 @@ G1_15 = SubjectCurriculum(
             ),
             resolution=(
                 "The gate confirmed agreement: the two letter-marks matched "
-                "and the arms closed together."
+                "and the arms closed together. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -1262,7 +1262,7 @@ G1_15 = SubjectCurriculum(
             ),
             resolution=(
                 "The gate confirmed the match: both colon-prefixed name-stones "
-                "were identical, the arms closing in agreement."
+                "were identical, the arms closing in agreement. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -1289,7 +1289,7 @@ G1_15 = SubjectCurriculum(
             ),
             resolution=(
                 "The gate returned the rejection: the two name-stones were "
-                "distinct, the arms unable to close together."
+                "distinct, the arms unable to close together. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -1306,17 +1306,17 @@ G1_15 = SubjectCurriculum(
                 "all four to the gate at the same time."
             ),
             need=(
-                "Sable needed the gate to confirm all four stones carried "
+                "Sable needed the gate to confirm all the stones carried "
                 "identical counts — a multi-stone check, not just a pair."
             ),
             mapping=(
                 "`=` accepts any number of arguments and confirms all equal. "
-                "Four stones each carrying the count one pass the gate-arms "
+                "the stones each carrying the count one pass the gate-arms "
                 "in sequence; every comparison matches."
             ),
             resolution=(
-                "The gate confirmed unanimous agreement: all four stone-counts "
-                "matched, the arms closing with each comparison."
+                "The gate confirmed unanimous agreement: all the stone-counts "
+                "matched, the arms closing with each comparison. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -1355,7 +1355,7 @@ G1_16 = SubjectCurriculum(
             ),
             resolution=(
                 "The positive verdict returned: the empty talon held the zero "
-                "count, confirmed by the predicate."
+                "count, confirmed by the predicate. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -1372,17 +1372,17 @@ G1_16 = SubjectCurriculum(
                 "despite the obvious weight in her grip."
             ),
             need=(
-                "She needed the runtime to report whether five stones in "
+                "She needed the runtime to report whether the stones in "
                 "the talon could ever pass the empty-talon test."
             ),
             mapping=(
-                "`zero?` checks for the empty notch only. Five stones is a "
+                "`zero?` checks for the empty notch only. the stones is a "
                 "non-empty count; the predicate finds the talon occupied and "
                 "returns the negative verdict without hesitation."
             ),
             resolution=(
-                "The negative verdict returned: five stones is not zero, "
-                "the talon far from empty."
+                "The negative verdict returned: the stones is not zero, "
+                "the talon far from empty. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -1394,21 +1394,21 @@ G1_16 = SubjectCurriculum(
             goal_text="check whether 7 is positive using pos?",
 
             scenario=(
-                "Sable placed seven stones above the zero-notch scratch on the "
+                "Sable placed the stones above the zero-notch scratch on the "
                 "meadow pitcher's rim — clearly on the positive side of the "
                 "mark — and submitted the positive-check to the runtime."
             ),
             need=(
-                "Sable needed the runtime to confirm whether seven stones "
-                "above the zero-notch satisfied the positive-side test."
+                "Sable needed the runtime to confirm whether the stones "
+                "above the zero-notch satisfied the positive-side test. (with {drawn.a} folded in)"
             ),
             mapping=(
                 "`pos?` checks whether the stone-count sits above the zero-notch. "
-                "Seven stones land squarely on the positive side; "
+                "the stones land squarely on the positive side; "
                 "the predicate confirms the verdict."
             ),
             resolution=(
-                "The positive verdict returned: seven stones above the notch "
+                "The positive verdict returned: the stones above the notch "
                 "satisfied the positive-side test."
             ),
             tags=("story",),
@@ -1463,7 +1463,7 @@ G1_16 = SubjectCurriculum(
             ),
             resolution=(
                 "The positive verdict returned: a below-zero count satisfies "
-                "the negative-side test as expected."
+                "the negative-side test. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -1475,21 +1475,21 @@ G1_16 = SubjectCurriculum(
             goal_text="check whether 4 is negative using neg?",
 
             scenario=(
-                "Korvus held four stones clearly above the zero-notch at the "
+                "Korvus held the stones clearly above the zero-notch at the "
                 "market pitcher's rim and put the negative-side test to the "
                 "runtime despite the count sitting in positive territory."
             ),
             need=(
-                "He needed the runtime to confirm whether four stones above "
-                "zero could pass the below-zero test."
+                "He needed the runtime to confirm whether the stones above "
+                "zero could pass the below-zero test. (with {drawn.a} folded in)"
             ),
             mapping=(
                 "`neg?` only passes counts that sit below the zero-notch. "
-                "Four stones above the mark are on the positive side; "
+                "the stones above the mark are on the positive side; "
                 "the predicate finds the count above the line and rejects it."
             ),
             resolution=(
-                "The negative verdict returned: four stones above zero do not "
+                "The negative verdict returned: the stones above zero do not "
                 "satisfy the below-zero test."
             ),
             tags=("story",),
@@ -1530,7 +1530,7 @@ G1_17 = SubjectCurriculum(
             ),
             resolution=(
                 "The literal value rose in the water, returned by the REPL "
-                "as the form's own value."
+                "as the form's own value. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -1557,7 +1557,7 @@ G1_17 = SubjectCurriculum(
             ),
             resolution=(
                 "The sum rose in the water, returned directly by the REPL "
-                "as the form's evaluated value."
+                "as the form's evaluated value. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -1595,8 +1595,8 @@ G1_18 = SubjectCurriculum(
                 "value as usual, the moss untouched and the pitcher undisturbed."
             ),
             resolution=(
-                "The expected sum returned cleanly, the moss never needed, "
-                "the REPL untroubled by the safety pad beneath."
+                "The expected sum came back, the moss never needed, "
+                "the REPL untroubled by the safety pad beneath. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -1609,7 +1609,7 @@ G1_18 = SubjectCurriculum(
 
             scenario=(
                 "Korvus laid a wide moss pad beneath the hilltop pitcher, "
-                "then arranged seven rows of six stones on the rim, ready to "
+                "then arranged seven rows of the stones on the rim, ready to "
                 "drop the product-form with the safety net in place."
             ),
             need=(
@@ -1623,7 +1623,7 @@ G1_18 = SubjectCurriculum(
             ),
             resolution=(
                 "The full product returned, the moss untouched, the pitcher's "
-                "water rising to the correct level."
+                "water rising to the correct level. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
