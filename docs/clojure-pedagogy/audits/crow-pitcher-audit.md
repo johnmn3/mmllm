@@ -19,10 +19,8 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 6
 - variety @ n=50: 1.00
-- issues: {'LOW_GROUNDING': 5}
+- issues: {'LOW_GROUNDING': 3}
     - [LOW_GROUNDING] form=`(+ 1 2)` — user_msg lacks both a drawn-value reference and any emotion-pool phrase (Cat-J: prose names the operation but doesn't feel it)
-    - [LOW_GROUNDING] form=`(* 4 5)` — user_msg lacks both a drawn-value reference and any emotion-pool phrase (Cat-J: prose names the operation but doesn't feel it)
-    - [LOW_GROUNDING] form=`(* 4 5)` — user_msg lacks both a drawn-value reference and any emotion-pool phrase (Cat-J: prose names the operation but doesn't feel it)
     - [LOW_GROUNDING] form=`(* 4 5)` — user_msg lacks both a drawn-value reference and any emotion-pool phrase (Cat-J: prose names the operation but doesn't feel it)
     - [LOW_GROUNDING] form=`(+ 7 8)` — user_msg lacks both a drawn-value reference and any emotion-pool phrase (Cat-J: prose names the operation but doesn't feel it)
 
@@ -48,54 +46,50 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 5
 - variety @ n=50: 1.00
-- issues: {'LOW_GROUNDING': 2}
-    - [LOW_GROUNDING] form=`(< 3 2 1)` — user_msg lacks both a drawn-value reference and any emotion-pool phrase (Cat-J: prose names the operation but doesn't feel it)
+- issues: {'LOW_GROUNDING': 1}
     - [LOW_GROUNDING] form=`(<= 1 1 2)` — user_msg lacks both a drawn-value reference and any emotion-pool phrase (Cat-J: prose names the operation but doesn't feel it)
 
 ### G2-03: not= and = with multiple args
 
 - examples: 5
 - variety @ n=50: 1.00
-- issues: {'LOW_GROUNDING': 11}
-    - [LOW_GROUNDING] form=`(not= 1 2)` — user_msg lacks both a drawn-value reference and any emotion-pool phrase (Cat-J: prose names the operation but doesn't feel it)
+- issues: {'LOW_GROUNDING': 6}
     - [LOW_GROUNDING] form=`(not= 1 1)` — user_msg lacks both a drawn-value reference and any emotion-pool phrase (Cat-J: prose names the operation but doesn't feel it)
-    - [LOW_GROUNDING] form=`(not= 1 1)` — user_msg lacks both a drawn-value reference and any emotion-pool phrase (Cat-J: prose names the operation but doesn't feel it)
-    - [LOW_GROUNDING] form=`(= 1 1 1)` — user_msg lacks both a drawn-value reference and any emotion-pool phrase (Cat-J: prose names the operation but doesn't feel it)
-    - [LOW_GROUNDING] form=`(= 1 1 1)` — user_msg lacks both a drawn-value reference and any emotion-pool phrase (Cat-J: prose names the operation but doesn't feel it)
-    - [LOW_GROUNDING] form=`(= 1 1 1)` — user_msg lacks both a drawn-value reference and any emotion-pool phrase (Cat-J: prose names the operation but doesn't feel it)
+    - [LOW_GROUNDING] form=`(= 1 1 2)` — user_msg lacks both a drawn-value reference and any emotion-pool phrase (Cat-J: prose names the operation but doesn't feel it)
+    - [LOW_GROUNDING] form=`(= 1 1 2)` — user_msg lacks both a drawn-value reference and any emotion-pool phrase (Cat-J: prose names the operation but doesn't feel it)
+    - [LOW_GROUNDING] form=`(= 1 1 2)` — user_msg lacks both a drawn-value reference and any emotion-pool phrase (Cat-J: prose names the operation but doesn't feel it)
+    - [LOW_GROUNDING] form=`(not= 1 1 2)` — user_msg lacks both a drawn-value reference and any emotion-pool phrase (Cat-J: prose names the operation but doesn't feel it)
+    - [LOW_GROUNDING] form=`(not= 1 1 2)` — user_msg lacks both a drawn-value reference and any emotion-pool phrase (Cat-J: prose names the operation but doesn't feel it)
 
 ### G2-08: Arithmetic on ratios
 
 - examples: 3
 - variety @ n=50: 0.99
-- issues: {'LOW_GROUNDING': 8}
-    - [LOW_GROUNDING] form=`(+ 1/2 1/4)` — user_msg lacks both a drawn-value reference and any emotion-pool phrase (Cat-J: prose names the operation but doesn't feel it)
+- issues: {'LOW_GROUNDING': 5}
     - [LOW_GROUNDING] form=`(+ 1/2 1/4)` — user_msg lacks both a drawn-value reference and any emotion-pool phrase (Cat-J: prose names the operation but doesn't feel it)
     - [LOW_GROUNDING] form=`(+ 1/2 1/4)` — user_msg lacks both a drawn-value reference and any emotion-pool phrase (Cat-J: prose names the operation but doesn't feel it)
     - [LOW_GROUNDING] form=`(* 2/3 3/4)` — user_msg lacks both a drawn-value reference and any emotion-pool phrase (Cat-J: prose names the operation but doesn't feel it)
     - [LOW_GROUNDING] form=`(* 2/3 3/4)` — user_msg lacks both a drawn-value reference and any emotion-pool phrase (Cat-J: prose names the operation but doesn't feel it)
-    - [LOW_GROUNDING] form=`(* 2/3 3/4)` — user_msg lacks both a drawn-value reference and any emotion-pool phrase (Cat-J: prose names the operation but doesn't feel it)
+    - [LOW_GROUNDING] form=`(- 1 1/3)` — user_msg lacks both a drawn-value reference and any emotion-pool phrase (Cat-J: prose names the operation but doesn't feel it)
 
 ### G2-09: Floats vs ints (the / operator)
 
 - examples: 3
 - variety @ n=50: 1.00
-- issues: {'LOW_GROUNDING': 3}
-    - [LOW_GROUNDING] form=`(/ 1.0 2)` — user_msg lacks both a drawn-value reference and any emotion-pool phrase (Cat-J: prose names the operation but doesn't feel it)
-    - [LOW_GROUNDING] form=`(/ 1.0 2)` — user_msg lacks both a drawn-value reference and any emotion-pool phrase (Cat-J: prose names the operation but doesn't feel it)
+- issues: {'LOW_GROUNDING': 1}
     - [LOW_GROUNDING] form=`(/ 1.0 2)` — user_msg lacks both a drawn-value reference and any emotion-pool phrase (Cat-J: prose names the operation but doesn't feel it)
 
 ### G2-10: Powers via repeated multiplication
 
 - examples: 4
 - variety @ n=50: 1.00
-- issues: {'LOW_GROUNDING': 9}
-    - [LOW_GROUNDING] form=`(* 2 2 2)` — user_msg lacks both a drawn-value reference and any emotion-pool phrase (Cat-J: prose names the operation but doesn't feel it)
+- issues: {'LOW_GROUNDING': 7}
     - [LOW_GROUNDING] form=`(* 2 2 2)` — user_msg lacks both a drawn-value reference and any emotion-pool phrase (Cat-J: prose names the operation but doesn't feel it)
     - [LOW_GROUNDING] form=`(* 2 2 2)` — user_msg lacks both a drawn-value reference and any emotion-pool phrase (Cat-J: prose names the operation but doesn't feel it)
     - [LOW_GROUNDING] form=`(* 5 5)` — user_msg lacks both a drawn-value reference and any emotion-pool phrase (Cat-J: prose names the operation but doesn't feel it)
     - [LOW_GROUNDING] form=`(* 5 5)` — user_msg lacks both a drawn-value reference and any emotion-pool phrase (Cat-J: prose names the operation but doesn't feel it)
     - [LOW_GROUNDING] form=`(* 5 5)` — user_msg lacks both a drawn-value reference and any emotion-pool phrase (Cat-J: prose names the operation but doesn't feel it)
+    - [LOW_GROUNDING] form=`(* 3 3 3 3)` — user_msg lacks both a drawn-value reference and any emotion-pool phrase (Cat-J: prose names the operation but doesn't feel it)
 
 ### G2-13: and / or — short circuit, return values
 
@@ -134,8 +128,7 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'LOW_GROUNDING': 3}
-    - [LOW_GROUNDING] form=`(* 1000000 1000000)` — user_msg lacks both a drawn-value reference and any emotion-pool phrase (Cat-J: prose names the operation but doesn't feel it)
+- issues: {'LOW_GROUNDING': 2}
     - [LOW_GROUNDING] form=`(* 1000000 1000000)` — user_msg lacks both a drawn-value reference and any emotion-pool phrase (Cat-J: prose names the operation but doesn't feel it)
     - [LOW_GROUNDING] form=`(* 1000000 1000000)` — user_msg lacks both a drawn-value reference and any emotion-pool phrase (Cat-J: prose names the operation but doesn't feel it)
 
@@ -237,9 +230,7 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 3
 - variety @ n=50: 1.00
-- issues: {'LOW_GROUNDING': 3}
-    - [LOW_GROUNDING] form=`["a" "b"]` — user_msg lacks both a drawn-value reference and any emotion-pool phrase (Cat-J: prose names the operation but doesn't feel it)
-    - [LOW_GROUNDING] form=`["a" "b"]` — user_msg lacks both a drawn-value reference and any emotion-pool phrase (Cat-J: prose names the operation but doesn't feel it)
+- issues: {'LOW_GROUNDING': 1}
     - [LOW_GROUNDING] form=`["a" "b"]` — user_msg lacks both a drawn-value reference and any emotion-pool phrase (Cat-J: prose names the operation but doesn't feel it)
 
 ## Grade 5
@@ -401,11 +392,8 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 3
 - variety @ n=50: 1.00
-- issues: {'LOW_GROUNDING': 6}
+- issues: {'LOW_GROUNDING': 3}
     - [LOW_GROUNDING] form=`(#(* % %) 6)` — user_msg lacks both a drawn-value reference and any emotion-pool phrase (Cat-J: prose names the operation but doesn't feel it)
-    - [LOW_GROUNDING] form=`(#(* % %) 6)` — user_msg lacks both a drawn-value reference and any emotion-pool phrase (Cat-J: prose names the operation but doesn't feel it)
-    - [LOW_GROUNDING] form=`(#(* % %) 6)` — user_msg lacks both a drawn-value reference and any emotion-pool phrase (Cat-J: prose names the operation but doesn't feel it)
-    - [LOW_GROUNDING] form=`[1 #_ 2 3]` — user_msg lacks both a drawn-value reference and any emotion-pool phrase (Cat-J: prose names the operation but doesn't feel it)
     - [LOW_GROUNDING] form=`[1 #_ 2 3]` — user_msg lacks both a drawn-value reference and any emotion-pool phrase (Cat-J: prose names the operation but doesn't feel it)
     - [LOW_GROUNDING] form=`[1 #_ 2 3]` — user_msg lacks both a drawn-value reference and any emotion-pool phrase (Cat-J: prose names the operation but doesn't feel it)
 
@@ -440,7 +428,7 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 ### Issue counts (across all examples × 3 records)
 
-- **LOW_GROUNDING**: 137
+- **LOW_GROUNDING**: 116
 - **ANSWER_LEAK_STRING**: 4
 - **HIGH_LENGTH**: 3
 - **DOUBLE_PREP**: 3
@@ -452,16 +440,16 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 | Grade | Subjects | Examples | Issues | Low-variety |
 |---|---|---|---|---|
-| 1 | 18 | 76 | 12 | — |
-| 2 | 22 | 88 | 62 | — |
+| 1 | 18 | 76 | 10 | — |
+| 2 | 22 | 88 | 48 | — |
 | 3 | 18 | 31 | 31 | — |
-| 4 | 20 | 39 | 3 | — |
+| 4 | 20 | 39 | 1 | — |
 | 5 | 22 | 39 | 6 | — |
 | 6 | 16 | 33 | 12 | — |
 | 7 | 18 | 36 | 3 | — |
 | 8 | 16 | 31 | 1 | — |
 | 9 | 18 | 34 | 3 | — |
-| 10 | 16 | 36 | 16 | — |
+| 10 | 16 | 36 | 13 | — |
 | 11 | 14 | 29 | 2 | — |
 | 12 | 18 | 37 | 1 | — |
 
@@ -506,11 +494,11 @@ dividing stone...
     ```
 - `G1-13` (form `(* 4 5)`): user_msg lacks both a drawn-value reference and any emotion-pool phrase (Cat-J: prose names the operation but doesn't feel it)
     ```
-    In a long-dry season, Cowl the crow found the pitcher at the edge of the garden and began to consider it carefully.
+    A row of pebbles lay at the foot of the wall, sun-warmed, unremarkable, and just heavy enough.
 
-"Watch the heap," Cowl the crow said, gesturing at a small
-mound of smooth stones. "Every operation either adds more stones,
-takes some away, or combines what's already there — the he...
+Korvus arranged four rows of stones on the hilltop pitcher's rim, five stones in each row, tallying how many stones he would need in total before dropping them all at once.
+
+He needed the runtime to count...
     ```
 
 #### HIGH_LENGTH

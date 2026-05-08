@@ -210,38 +210,50 @@ _BASKET_SUBPLOTS: list[SubplotTemplate] = [
     # 1. The stone-pile-on-the-rim template — generic; whatever the
     #    operation, the pile stays as it was, the form returns
     #    the new arrangement.
+    #    Cat-J grounding: the stone-pile is heavy on the high rim
+    #    (heavy ↔ accumulator value, high ↔ loop bound); the
+    #    {clever_phrase}'s steady focus carries that weight.
     SubplotTemplate("""\
-{clever_phrase} pointed to a pile of smooth stones gathered on the
-pitcher's rim {place}. "Whatever I want to do with the stones," {clever_he_she}
-said, "I read from the pile, work the change, and the pile
-itself stays as it was — what I get back is a fresh arrangement."
-To {goal_text}, {clever_he_she_cap} composed {concept_phrase},
-submitted the form, and let the REPL handle the stone-pile exactly
-as the operation prescribed."""),
+{clever_phrase}, {emo_patient}, pointed to a heavy pile of smooth
+stones gathered on the pitcher's high rim {place}. "Whatever I
+want to do with the stones," {clever_he_she} said, "I read from
+the pile, work the change, and the pile itself stays as it was —
+what I get back is a fresh arrangement, the original weight
+undisturbed." To {goal_text}, {clever_he_she_cap} composed
+{concept_phrase}, submitted the form, and let the REPL handle the
+stone-pile exactly as the operation prescribed."""),
 
     # 2. The sorted-and-tagged-stones template — works for tagged
     #    collections (maps), positional rows (vectors), or kind-only
     #    piles (sets). The narrative is generic; goal_text says which.
+    #    Cat-J grounding: the warm rim presses for an answer (heat ↔
+    #    pressure to terminate), the {clever_phrase}'s patience
+    #    carries the careful lookup.
     SubplotTemplate("""\
 "You can find what you want in a stone-pile several ways,"
-{clever_phrase} said, gesturing at the gathered stones:
-"by the mark scratched on it, by its place in line, or by simply
-asking whether it's there at all." To {goal_text},
-{clever_he_she_cap} wrote {concept_phrase} for the stone-pile,
-submitted the form, and the REPL applied the lookup or update
-exactly as the form directed."""),
+{clever_phrase} said, {emo_patient}, gesturing at the gathered
+stones along the warm clay rim: "by the mark scratched on it,
+by its place in line, or by simply asking whether it's there at
+all." To {goal_text}, {clever_he_she_cap} wrote {concept_phrase}
+for the stone-pile, submitted the form, and the REPL applied the
+lookup or update exactly as the form directed — the answer
+surfacing as cleanly as a stone lifted from a still pile."""),
 
     # 3. The procession-of-stones template — for ordered collections
     #    (vectors, lists, seqs). Sub-template is more
     #    vector-leaning but doesn't claim a specific type.
+    #    Cat-J grounding: the line of stones is heavy in order
+    #    (heavy ↔ accumulator), the calm flock waits (calm ↔ stable
+    #    intermediate state) while the {clever_phrase} composes.
     SubplotTemplate("""\
-A line of smooth stones had been arranged {place}, each one resting
-against the next — first at the front, the rest in order behind.
-"Many of our stone-piles are like this procession,"
-{clever_phrase} said. "You can grab the first, you can ask for
-the rest, you can put a new stone at the front of the line."
-To {goal_text}, {clever_he_she} composed {concept_phrase},
-submitted the form, and the REPL marched the procession exactly
+A line of heavy stones had been arranged {place}, each one resting
+against the next — first at the front, the rest in order behind,
+their cool clay weight steady on the ground. "Many of our
+stone-piles are like this procession," {clever_phrase} said,
+{emo_patient}. "You can grab the first, you can ask for the rest,
+you can put a new stone at the front of the line." To {goal_text},
+{clever_he_she} composed {concept_phrase}, submitted the form,
+and the REPL marched the procession exactly
 as the form described."""),
 
     # 4. The new-pile-from-old template — immutability emphasis;
@@ -415,14 +427,20 @@ submitted the form, and let the REPL hand back the count of
 whatever the operation had produced."""),
 
     # 2. The heap-grows-or-shrinks template — for inc/dec, +/-.
+    #    Cat-J grounding: the heap is heavy on the cool clay
+    #    (heavy ↔ accumulator value, cool ↔ stable intermediate
+    #    state); the {clever_phrase}'s focus rides the heap as it
+    #    settles. Pressure of the warm day urges the answer to
+    #    surface.
     SubplotTemplate("""\
-"Watch the heap," {clever_phrase} said, gesturing at a small
-mound of smooth stones. "Every operation either adds more stones,
-takes some away, or combines what's already there — the heap grows or shrinks by
+"Watch the heap," {clever_phrase} said, {emo_patient}, gesturing
+at a small mound of heavy smooth stones cool on the clay rim.
+"Every operation either adds more stones, takes some away, or
+combines what's already there — the heap grows or shrinks by
 exactly what you say." To {goal_text}, {clever_he_she_cap}
 composed {concept_phrase}, submitted the form, and the REPL
 returned the new count, the heap settled into its new
-arrangement."""),
+arrangement, every stone accounted for."""),
 
     # 3. The careful-arrangement template — generic; the operation
     #    is whatever the form says, but the Clever crow's care with the
@@ -450,13 +468,18 @@ there all along, settling the matter the patient way."""),
 
     # 5. The exact-count template — generic; emphasizes that the
     #    REPL gives the exact number, no matter the operation.
+    #    Cat-J grounding: the rim is high (high ↔ loop bound),
+    #    the water is rising (rising ↔ progress toward fixpoint);
+    #    the {clever_phrase}'s patience makes the count exact.
     SubplotTemplate("""\
 "Whatever the heap looks like after the operation,"
-{clever_phrase} said, "the runtime gives the exact count —
-small or large, fraction or whole, the answer is precise." To
-{goal_text}, {clever_he_she_cap} composed {concept_phrase},
-submitted the form, and the REPL handed back the value, exactly
-as the operation had produced it."""),
+{clever_phrase} said, {emo_patient}, "the runtime gives the exact
+count — small or large, fraction or whole, the answer is precise."
+On the high rim above the rising water-line, {clever_he_she} added,
+"counting stones is the only honest way." To {goal_text},
+{clever_he_she_cap} composed {concept_phrase}, submitted the form,
+and the REPL handed back the value, exactly as the operation had
+produced it."""),
 ]
 
 
@@ -1157,25 +1180,37 @@ _SCRIBE_SUBPLOTS: list[SubplotTemplate] = [
 
     # 1. The reading-conventions-of-the-form template — generic;
     #    works for comments, whitespace, parens, do, reader macros.
+    #    Cat-J grounding: the {clever_phrase}'s steady focus
+    #    (patient ↔ careful evaluation), the cool clay rim where
+    #    the conventions are scratched (cool ↔ stable read state),
+    #    the narrow throat the form passes through (narrow ↔ the
+    #    bottleneck of the reader's strict grammar).
     SubplotTemplate("""\
 "There are conventions for how the runtime *reads* a form,"
-{clever_phrase} said: "what counts as one token, what's just
-spacing, what gets ignored, what gets grouped together. The
-scribe and the reader both follow the same conventions." To
-{goal_text}, {clever_he_she_cap} composed {concept_phrase},
-submitted the form, and the REPL — reading exactly by the
-conventions — returned the value the form had specified."""),
+{clever_phrase} said, {emo_patient}, "what counts as one token,
+what's just spacing, what gets ignored, what gets grouped
+together. The scribe and the reader both follow the same
+conventions, and the form passes through the runtime's narrow
+reading-throat exactly once." To {goal_text}, {clever_he_she_cap}
+composed {concept_phrase} on the cool clay rim, submitted the
+form, and the REPL — reading exactly by the conventions —
+returned the value the form had specified."""),
 
     # 2. The form-is-what-the-reader-sees template — generic.
+    #    Cat-J grounding: the {clever_phrase}'s patience steadies
+    #    the reading-pass; the warm rim presses for an answer
+    #    (warm ↔ pressure to terminate the read), the talon-marks
+    #    weigh exactly (heavy ↔ what the runtime actually sees).
     SubplotTemplate("""\
 "A form is what the reader sees," {clever_phrase} said,
-"after the conventions have been applied. Some marks count, some
-don't; some shapes are expanded before the runtime even gets a
-look. The form you write and the form the runtime evaluates
-aren't always character-for-character the same." To
-{goal_text}, {clever_he_she_cap} composed {concept_phrase},
-submitted the form, and the REPL — reading carefully — returned
-the value of what the conventions had produced."""),
+{emo_patient}, on the warm clay rim. "After the conventions have
+been applied — some marks count, some don't; some shapes are
+expanded before the runtime even gets a look — the form you
+write and the form the runtime evaluates aren't always
+character-for-character the same." To {goal_text},
+{clever_he_she_cap} composed {concept_phrase}, submitted the
+form, and the REPL — reading carefully — returned the value of
+what the conventions had produced."""),
 
     # 3. The careful-writing-careful-reading template — generic.
     SubplotTemplate("""\
@@ -1199,14 +1234,19 @@ literally — returned the right value, while {hasty}'s guess fell
 short."""),
 
     # 5. The form-as-it-is template — generic.
+    #    Cat-J grounding: cool clay (cool ↔ stable intermediate
+    #    state where the form sits between writer and reader);
+    #    the {clever_phrase}'s patience holds the form steady on
+    #    the rim while the runtime reads. The high rim is the
+    #    boundary — once the form crosses it, the value comes back.
     SubplotTemplate("""\
-"A form is what's actually there on the pitcher's clay,"
-{clever_phrase} said, "after the conventions of writing and
-reading have done their work. The runtime sees the cleaned-up form,
-evaluates it, and gives back what it computes." To {goal_text},
-{clever_he_she_cap} composed {concept_phrase}, submitted the
-form, and the REPL — taking the form exactly as it was — handed
-back the value."""),
+"A form is what's actually there on the pitcher's cool clay,"
+{clever_phrase} said, {emo_patient}, "after the conventions of
+writing and reading have done their work. The runtime sees the
+cleaned-up form on the high rim, evaluates it, and gives back
+what it computes." To {goal_text}, {clever_he_she_cap} composed
+{concept_phrase}, submitted the form, and the REPL — taking the
+form exactly as it was — handed back the value."""),
 ]
 
 _SCRIBE_SUBPLOTS = _SCRIBE_SUBPLOTS + [

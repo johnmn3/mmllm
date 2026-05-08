@@ -56,8 +56,10 @@ Cat-J = "insufficient emotion-and-adjective grounding mapped to
 the algorithmic situation." The original audit identified Cat-J as
 an out-of-scope follow-on; this remediation closes that gap.
 
-**Five source-level template lifts in
-`src/mmllm/aesop/curriculum/crow_pitcher/grade_1.py`:**
+**Total: 13 source-level template lifts (5 in the first
+remediation pass, 8 in the completion pass).**
+
+### First-pass lifts (5) — `crow_pitcher/grade_1.py`
 
 1. **`_SHARED_SUBPLOTS` template 4 (audience)** — added
    "narrow-throated pitcher" (narrow ↔ bottleneck the form passes
@@ -81,6 +83,53 @@ an out-of-scope follow-on; this remediation closes that gap.
    stone-drop"; added `{emo_thirsty}` and `{emo_patient}` to
    ground the patience-vs-haste polarity.
 
+### Completion-pass lifts (8) — `crow_pitcher/_metaphor_pools.py`
+
+These hit the metaphor-pool families that drive grades 4 / 6 / 7 /
+8 / 9 records (where grades 1 was already lifted in the first
+pass). Each names a {emo_*} for the clever-crow role AND ties an
+environmental adjective on the pitcher to a specific algorithmic
+mapping.
+
+6. **`_BASKET_SUBPLOTS` template 1 (stone-pile-on-the-rim)** —
+   added `{emo_patient}` plus "heavy pile of smooth stones" on
+   the "high rim" (heavy ↔ accumulator value, high ↔ loop
+   bound), and "the original weight undisturbed" closing image
+   (immutability of persistent collections).
+7. **`_BASKET_SUBPLOTS` template 2 (sorted-and-tagged-stones)**
+   — added `{emo_patient}`, "warm clay rim" (heat ↔ pressure to
+   terminate the lookup), and "the answer surfacing as cleanly
+   as a stone lifted from a still pile" (still pile ↔ stable
+   intermediate state).
+8. **`_BASKET_SUBPLOTS` template 3 (procession-of-stones)** —
+   added `{emo_patient}`, "heavy stones" with "cool clay weight
+   steady on the ground" (heavy ↔ accumulator, cool ↔ stable
+   intermediate state).
+9. **`_ACORN_SUBPLOTS` template 2 (heap-grows-or-shrinks)** —
+   added `{emo_patient}`, "heavy smooth stones cool on the clay
+   rim" (cool ↔ stable intermediate, heavy ↔ accumulator), and
+   "every stone accounted for" closing image.
+10. **`_ACORN_SUBPLOTS` template 5 (exact-count)** — added
+    `{emo_patient}`, "the high rim above the rising water-line"
+    (high ↔ loop bound, rising ↔ progress toward fixpoint).
+11. **`_SCRIBE_SUBPLOTS` template 1 (reading-conventions)** —
+    added `{emo_patient}`, "narrow reading-throat" (narrow ↔
+    bottleneck of the strict grammar), and the form scratched
+    "on the cool clay rim" (cool ↔ stable read state).
+12. **`_SCRIBE_SUBPLOTS` template 2 (form-is-what-the-reader-sees)**
+    — added `{emo_patient}` plus the "warm clay rim" (warm ↔
+    pressure to terminate the read).
+13. **`_SCRIBE_SUBPLOTS` template 5 (form-as-it-is)** — added
+    `{emo_patient}`, "cool clay" (cool ↔ stable intermediate
+    state between writer and reader), and "the high rim" boundary
+    (high ↔ loop bound — once the form crosses, the value comes
+    back).
+
+Each lift is one source change that elevates 5–30 records that
+draw the template, per the playbook's "tweak the template, not
+the record" principle. The first 5 lifts are NOT modified or
+reverted; the 8 new lifts are additive.
+
 Each lift is one source change that elevates 5–30 records that
 draw the template, per the playbook's "tweak the template, not
 the record" principle.
@@ -92,7 +141,9 @@ the record" principle.
 | Audit | Baseline (integration HEAD) | After cherry-pick + Cat-J lift |
 | --- | ---: | ---: |
 | crow-pitcher (existing detectors) | 15 issues | **15 issues** (no regression) |
-| crow-pitcher LOW_GROUNDING (new Cat-J detector) | 159 hits | **137 hits** (delta −22, ~14% lift) |
+| crow-pitcher LOW_GROUNDING (new Cat-J detector), first pass | 159 hits | 137 hits (delta −22, ~14%) |
+| crow-pitcher LOW_GROUNDING after completion (8 more lifts) | 137 hits | **116 hits** (delta −21, additional ~15%) |
+| crow-pitcher LOW_GROUNDING net (159 → 116) | — | **−43 records, ~27% reduction** |
 | Smoke tests (7 integration + 1 e2e) | 8/8 | 8/8 |
 | Crow-pitcher grade smoke (12 grades) | 12/12 | 12/12 |
 
