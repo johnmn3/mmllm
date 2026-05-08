@@ -52,7 +52,7 @@ macroexpander."""),
     SubplotTemplate("""\
 {milkmaid_phrase} insisted {place} that macros were the same as functions.
 {farmer_phrase}, {emo_patient}, sketched {concept_phrase} on a
-strip of bark. "The difference," {farmer_he_she} said, "is in what
+strip of bark. "The difference," {farmer_he_she_cap} said, "is in what
 we're trying to accomplish: {goal_text}. Write the form and let the
 runtime tell us exactly what it does.\""""),
 

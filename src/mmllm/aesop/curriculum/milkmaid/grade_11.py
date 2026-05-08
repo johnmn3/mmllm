@@ -190,7 +190,7 @@ G11_02 = SubjectCurriculum(
                 "with the string object positioned differently in the form."
             ),
             mapping=(
-                "The alternate dot form `(. \"abc\" toUpperCase)` still borrows the neighbor's "
+                "The alternate dot form still borrows the neighbor's "
                 "tool; only the order changes. The string comes first, then the method name; "
                 "both conventions work — the neighbor's well-made stool delivers the same result."
             ),

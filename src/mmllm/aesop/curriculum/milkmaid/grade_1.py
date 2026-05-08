@@ -76,7 +76,7 @@ was easier to ask the REPL about {concept_phrase} than to argue."""),
     #    produced "from sprinting from a recent sprint" awkwardness.
     SubplotTemplate("""\
 {farmer_phrase} had been trying to teach {milkmaid_phrase} how the REPL
-works. "Look here," {farmer_he_she} said, pointing to
+works. "Look here," {farmer_he_she_cap} said, pointing to
 {concept_phrase}. "You hand the form {form_display} to the runtime, and
 the runtime hands you back what it evaluates to." {milkmaid}, {emo_tired},
 agreed to try."""),
@@ -189,7 +189,7 @@ answer."""),
     #    Fix: "; submit that to the REPL" instead of "and submit it".
     SubplotTemplate("""\
 {farmer_phrase} had been teaching {milkmaid_phrase} how to translate a
-goal into a Clojure form. "If you want to {goal_text}," {farmer_he_she}
+goal into a Clojure form. "If you want to {goal_text}," {farmer_he_she_cap}
 said, "you write {concept_phrase}; submit that to the REPL, and it
 hands you back the value." {milkmaid}, {emo_tired}, agreed to try
 writing it."""),
@@ -251,7 +251,7 @@ fell out of place, and the form did not even read as Clojure.
 {farmer_phrase}, {emo_patient}, had already written
 {concept_phrase} on a flat stone, neat and unhurried, and
 submitted it to the REPL. The value came back as quietly as
-{farmer_he_she} had written. The hares of the meadow looked
+{farmer_he_she_cap} had written. The hares of the meadow looked
 between the two slates: only {farmer_his_her} had run."""),
 
     # 10. The race-against-the-REPL template — wager on speed-of-

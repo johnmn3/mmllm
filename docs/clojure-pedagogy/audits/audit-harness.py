@@ -854,6 +854,53 @@ def check_record(rec, sub, example):
                            f"resolution leaks boolean answer {word!r} — "
                            "describe the verdict abstractly instead"))
 
+    # Milkmaid k7Pq-remediated additions:
+    #
+    # CONCEPT_AS_VERB — concept_phrase substituted into a slot that
+    # requires a finite verb. Renders as "must calling X", "I applying Y".
+    # Distinct from FOR_GOAL_TEXT_VERB_INCONGRUITY (which is goal_text
+    # after "For"); CONCEPT_AS_VERB is the gerund-after-modal /
+    # bare-subject pattern with object-prep tail.
+    concept_as_verb_modal_re = re.compile(
+        r"\b(?:must|should|can|will|may|own way of doing)"
+        r"\s+(?:[a-z]+ing)\s+(?:a|the|an|to|by|via|on|in|at|of|for|with)\b"
+    )
+    concept_as_verb_subj_re = re.compile(
+        r"(?:^|(?<=\W))(\w+\s)?\b(I|you|we)"
+        r"\s+(?:[a-z]+ing)\s+(?:a|the|an|to|by|via|on|in|at|of|for|with)\b"
+    )
+    licensors = {
+        "am", "is", "are", "was", "were", "been", "being", "keep", "kept",
+        "keeps", "started", "continued", "finished", "stopped", "while",
+        "after", "before", "by", "from", "since", "without", "for", "of",
+        "to", "and", "or", "but", "than"
+    }
+    has_concept_as_verb = bool(concept_as_verb_modal_re.search(user))
+    if not has_concept_as_verb:
+        for m in concept_as_verb_subj_re.finditer(user):
+            prev_word = (m.group(1) or "").strip().lower()
+            if prev_word in licensors:
+                continue
+            has_concept_as_verb = True
+            break
+    if has_concept_as_verb:
+        issues.append(("CONCEPT_AS_VERB",
+                        "concept_phrase substituted into a finite-verb slot "
+                        "(e.g. 'must calling X', 'I applying Y')"))
+
+    # LOWERCASE_CONCEPT_AFTER_PERIOD — sentence ends, next opens with
+    # lowercase "the X verb" pattern (concept_phrase as subject after
+    # period). Caught by the milkmaid k7Pq deep audit.
+    if re.search(
+        r"\.\s+the\s+(?:[a-z]+\s+){1,4}"
+        r"(?:does|is|means|chooses|examines|reads|"
+        r"writes|walks|stacks|fires|takes)\b",
+        user,
+    ):
+        issues.append(("LOWERCASE_CONCEPT_AFTER_PERIOD",
+                        "sentence-initial 'the X verb' (lowercase "
+                        "concept_phrase as subject after a period)"))
+
     # Both modes are LOW_GROUNDING.
     _check_grounding(user, rec, issues)
 

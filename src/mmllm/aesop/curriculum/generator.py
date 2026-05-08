@@ -644,14 +644,25 @@ def _build_mm_placeholders(scene: Scene,
         "mapping":              example.mapping,
         "resolution":           example.resolution,
 
-        # emotions (use existing gender-neutral pools where available)
-        "emo_proud":            scene.rng.choice(EMO_PROUD),
-        "emo_patient":          scene.rng.choice(EMO_PATIENT),
-        "emo_tired":            scene.rng.choice(EMO_TIRED),
-        "emo_content":          scene.rng.choice(EMO_CONTENT),
-        "emo_regretful":        scene.rng.choice(EMO_REGRETFUL),
-        "emo_hungry":           scene.rng.choice(EMO_HUNGRY),
+        # Emotions — milkmaid Cat-J lift draws from the integration
+        # branch's emotion_pools (≥30 entries each, environment-anchored)
+        # rather than the legacy 6-entry fables pools. This gives the
+        # subplot prose access to phrases like "with eyes always on the
+        # path" / "checking the path before setting her foot" that map
+        # the milkmaid's emotional state to the algorithmic situation.
+        # Polarity-aware: milkmaid is the daydreamer/guesser (boastful
+        # / regretful when the pail tips); farmer is the patient
+        # evaluator (patient / cautious).
+        "emo_proud":            scene.rng.choice(emo_pools.EMO_PROUD),
+        "emo_patient":          scene.rng.choice(emo_pools.EMO_PATIENT),
+        "emo_tired":            scene.rng.choice(emo_pools.EMO_TIRED),
+        "emo_content":          scene.rng.choice(emo_pools.EMO_CONTENT),
+        "emo_regretful":        scene.rng.choice(emo_pools.EMO_REGRETFUL),
+        "emo_hungry":           scene.rng.choice(emo_pools.EMO_HUNGRY),
         "emo_greedy":           scene.rng.choice(GE_EMO_GREEDY),
+        "emo_boastful":         scene.rng.choice(emo_pools.EMO_BOASTFUL),
+        "emo_cautious":         scene.rng.choice(emo_pools.EMO_CAUTIOUS),
+        "emo_desperate":        scene.rng.choice(emo_pools.EMO_DESPERATE),
     }
 
 

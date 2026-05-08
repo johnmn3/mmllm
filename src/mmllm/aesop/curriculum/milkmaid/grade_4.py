@@ -30,7 +30,7 @@ form into the REPL so they could confirm it together."""),
     SubplotTemplate("""\
 {milkmaid_phrase}, {emo_proud}, declared the collection plain. {farmer_phrase}
 wrote {form_display} on a slate {place}, calmly. "It's not about plain
-or fancy," {farmer_he_she} said. "It's about whether the runtime
+or fancy," {farmer_he_she_cap} said. "It's about whether the runtime
 agrees with what we think we're describing.\""""),
 ]
 
