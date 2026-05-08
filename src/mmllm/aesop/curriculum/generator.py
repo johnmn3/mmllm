@@ -37,6 +37,9 @@ from dataclasses import dataclass, field
 from typing import Callable, Iterable
 
 from mmllm.aesop import ontology as ont
+from mmllm.aesop.curriculum import character_pools as char_pools
+from mmllm.aesop.curriculum import opener_pools as opener_pools_mod
+from mmllm.aesop.curriculum import emotion_pools as emo_pools
 from mmllm.aesop.fables import (
     FABLE_OPENERS, _aesopian_intro, EMO_PROUD, EMO_PATIENT, EMO_TIRED,
     EMO_HUNGRY, EMO_GREEDY, EMO_CONTENT, EMO_REGRETFUL, EMO_DESPERATE,
@@ -213,11 +216,99 @@ ANT_GRASSHOPPER_LOCATIONS = ("meadow", "forest", "woods", "garden",
                               "orchard", "hilltop", "farm")
 
 
+def _make_char(name: str, species: str, gender: str = "n",
+               role_classes: tuple = (), archetypes: tuple = ()) -> ont.Character:
+    """Build a Character from a name-pool draw. Used by per-fable
+    pickers when drawing from the expanded ~200-name pools rather
+    than the legacy 2-4-name ontology."""
+    return ont.Character(
+        name=name, species=species, gender=gender,
+        role_classes=role_classes, archetypes=archetypes,
+    )
+
+
+_FABLE_OPENER_POOL = {
+    "tortoise-hare": opener_pools_mod.OPENERS_TORTOISE_HARE,
+    "crow-pitcher":  opener_pools_mod.OPENERS_CROW_PITCHER,
+    "milkmaid":      opener_pools_mod.OPENERS_MILKMAID,
+    "boy-wolf":      opener_pools_mod.OPENERS_BOY_WOLF,
+    "dog-shadow":    opener_pools_mod.OPENERS_DOG_SHADOW,
+}
+
+_FABLE_PLAN_POOL = {
+    "tortoise-hare": opener_pools_mod.PLANS_TORTOISE_HARE,
+    "crow-pitcher":  opener_pools_mod.PLANS_CROW_PITCHER,
+    "milkmaid":      opener_pools_mod.PLANS_MILKMAID,
+    "boy-wolf":      opener_pools_mod.PLANS_BOY_WOLF,
+    "dog-shadow":    opener_pools_mod.PLANS_DOG_SHADOW,
+}
+
+
+_FABLE_SPECIES_PHRASE = {
+    "tortoise-hare": {"hare": "the hare", "tortoise": "the tortoise"},
+    "crow-pitcher":  {"crow": "the crow"},
+    "milkmaid":      {"human": ""},
+    "boy-wolf":      {"human": ""},
+    "dog-shadow":    {"dog": "the dog"},
+}
+
+
+def _phrase_for(ch: ont.Character, fable: str) -> str:
+    """`Whisker the hare` style. For human roles, just the name."""
+    species_phrases = _FABLE_SPECIES_PHRASE.get(fable, {})
+    suffix = species_phrases.get(ch.species, "")
+    return f"{ch.name} {suffix}".strip()
+
+
+def _curriculum_intro(scene: Scene, fable: str, location,
+                      primary: ont.Character | None,
+                      secondary: ont.Character | None) -> str:
+    """Pick an opener from the 30-entry expanded opener pool for the
+    given fable, substitute placeholders ({place}, {primary},
+    {secondary}, {primary_phrase}, {secondary_phrase},
+    {primary_he_she}, {secondary_he_she}), and return with the
+    "\\n\\n" suffix the caller expects.
+    """
+    pool = _FABLE_OPENER_POOL.get(fable)
+    if not pool:
+        # Fallback: legacy path for unknown fables.
+        from mmllm.aesop.fables import _aesopian_intro
+        return _aesopian_intro(scene, fable, location)
+    template = scene.rng.choice(pool)
+    if "{" in template and "}" in template:
+        place_phrase_str = (place_phrase(scene, location)
+                            if location is not None else "in the meadow")
+        sub = {
+            "place":             place_phrase_str,
+            "primary":           primary.name if primary else "",
+            "secondary":         secondary.name if secondary else "",
+            "primary_phrase":    _phrase_for(primary, fable) if primary else "",
+            "secondary_phrase":  _phrase_for(secondary, fable) if secondary else "",
+            "primary_he_she":    primary.he_she if primary else "they",
+            "secondary_he_she":  secondary.he_she if secondary else "they",
+        }
+        try:
+            opener = template.format(**sub)
+        except KeyError:
+            # If a template references a placeholder we don't supply,
+            # fall back to the unformatted template — better than
+            # crashing the whole pipeline.
+            opener = template
+    else:
+        opener = template
+    return f"{opener}\n\n"
+
+
 def _pick_th_chars(scene: Scene) -> tuple[ont.Character, ont.Character]:
-    """Pick a fresh (hare, tortoise) pair for a record."""
-    hare = scene.rng.choice(_hares())
-    # ensure tortoise is different name (always is — different species — but defensively)
-    tortoise = scene.rng.choice(_tortoises())
+    """Pick a fresh (hare, tortoise) pair from the 200+ expanded
+    name pools. Gender alternates so prose pronouns vary."""
+    hare_name = scene.rng.choice(char_pools.HARE_NAMES)
+    tort_name = scene.rng.choice(char_pools.TORTOISE_NAMES)
+    hare_gender = scene.rng.choice(("m", "f"))
+    tort_gender = scene.rng.choice(("m", "f"))
+    hare = _make_char(hare_name, "hare", hare_gender, ("racer", "fast"))
+    tortoise = _make_char(tort_name, "tortoise", tort_gender,
+                          ("plodder", "slow"))
     return hare, tortoise
 
 
@@ -335,17 +426,21 @@ def _crows() -> tuple[ont.Character, ...]:
 
 
 def _pick_cp_chars(scene: Scene) -> tuple[ont.Character, ont.Character]:
-    """Pick a fresh (clever, hasty) crow pair for a crow-pitcher record.
+    """Pick a fresh (clever, hasty) crow pair from the 200+ expanded
+    crow name pool.
 
     `clever` is the patient evaluator (tortoise-analog): drops stones
     carefully, lets the REPL decide.
     `hasty` is the impatient guesser (hare-analog): wants the answer
     without submitting the form.
     """
-    pool = _crows()
-    clever = scene.rng.choice(pool)
-    hasty_pool = [c for c in pool if c.name != clever.name]
-    hasty = scene.rng.choice(hasty_pool)
+    names = scene.rng.sample(char_pools.CROW_NAMES, 2)
+    clever_gender = scene.rng.choice(("m", "f"))
+    hasty_gender  = scene.rng.choice(("m", "f"))
+    clever = _make_char(names[0], "crow", clever_gender,
+                        ("evaluator", "patient"))
+    hasty  = _make_char(names[1], "crow", hasty_gender,
+                        ("guesser", "impatient"))
     return clever, hasty
 
 
@@ -431,13 +526,22 @@ def _mm_farmers() -> tuple[ont.Character, ...]:
 
 
 def _pick_mm_chars(scene: Scene) -> tuple[ont.Character, ont.Character]:
-    """Pick a fresh (milkmaid, farmer) pair for a milkmaid record.
+    """Pick a fresh (milkmaid, farmer) pair from the 200+ expanded
+    human pools.
 
-    `milkmaid` is the dreamer/guesser (hare-analog).
-    `farmer` is the patient evaluator (tortoise-analog).
+    `milkmaid` is the dreamer/guesser (hare-analog) — young woman.
+    `farmer`   is the patient evaluator (tortoise-analog) — older,
+               m or f.
     """
-    milkmaid = scene.rng.choice(_mm_milkmaids())
-    farmer   = scene.rng.choice(_mm_farmers())
+    milkmaid_name = scene.rng.choice(char_pools.HUMAN_F)
+    farmer_pool = (char_pools.HUMAN_ELDER_M if scene.rng.random() < 0.6
+                   else char_pools.HUMAN_ELDER_F)
+    farmer_gender = "m" if farmer_pool is char_pools.HUMAN_ELDER_M else "f"
+    farmer_name = scene.rng.choice(farmer_pool)
+    milkmaid = _make_char(milkmaid_name, "human", "f",
+                          ("milkmaid", "dreamer"))
+    farmer   = _make_char(farmer_name, "human", farmer_gender,
+                          ("farmer", "evaluator"))
     return milkmaid, farmer
 
 
@@ -532,10 +636,13 @@ def _pick_ds_chars(scene: Scene) -> tuple[ont.Character, ont.Character]:
     hasty, greedy one who drops the real bone chasing a reflection
     (hare-analog).
     """
-    pool = _dogs()
-    hound = scene.rng.choice(pool)
-    dog_pool = [c for c in pool if c.name != hound.name]
-    dog = scene.rng.choice(dog_pool)
+    names = scene.rng.sample(char_pools.DOG_NAMES, 2)
+    hound_gender = scene.rng.choice(("m", "f"))
+    dog_gender   = scene.rng.choice(("m", "f"))
+    hound = _make_char(names[0], "dog", hound_gender,
+                       ("evaluator", "patient"))
+    dog   = _make_char(names[1], "dog", dog_gender,
+                       ("greedy", "hasty"))
     return hound, dog
 
 
@@ -678,12 +785,26 @@ BOY_WOLF_LOCATIONS = ("meadow", "forest", "hilltop", "village", "farm",
 
 
 def _pick_bw_chars(scene: Scene) -> tuple[ont.Character, ont.Character]:
-    """Pick a fresh (shepherd, elder) pair for a boy-wolf record."""
-    shepherd = scene.rng.choice(_shepherds())
-    # Avoid name collision (different name pools, but defensive guard
-    # in case the ontology grows).
-    cands = [c for c in _bw_villagers() if c.name != shepherd.name]
-    elder = scene.rng.choice(cands)
+    """Pick a fresh (shepherd, elder) pair from the 200+ expanded
+    human pools.
+
+    `shepherd` is the boy/young-shepherd (hare-analog dreamer).
+    `elder`    is the village elder (tortoise-analog evaluator).
+    """
+    shepherd_gender = scene.rng.choice(("m", "f"))
+    shepherd_pool = (char_pools.HUMAN_M if shepherd_gender == "m"
+                     else char_pools.HUMAN_F)
+    shepherd_name = scene.rng.choice(shepherd_pool)
+    elder_gender = scene.rng.choice(("m", "f"))
+    elder_pool = (char_pools.HUMAN_ELDER_M if elder_gender == "m"
+                  else char_pools.HUMAN_ELDER_F)
+    elder_name = scene.rng.choice(elder_pool)
+    while elder_name == shepherd_name:
+        elder_name = scene.rng.choice(elder_pool)
+    shepherd = _make_char(shepherd_name, "human", shepherd_gender,
+                          ("shepherd", "dreamer"))
+    elder    = _make_char(elder_name, "human", elder_gender,
+                          ("elder", "evaluator"))
     return shepherd, elder
 
 
@@ -1045,9 +1166,11 @@ def generate_one_record(scene: Scene,
     # dict for its templates. The default branch (tortoise-hare and any
     # fable that maps cleanly onto a two-character cast) uses the
     # standard `_build_placeholders` with a `fable=` parameter.
+    primary = secondary = None
     if sub.fable == "goose-eggs":
         owner, visitor, goose = _pick_ge_chars(scene)
         location = _pick_ge_location(scene)
+        primary, secondary = owner, visitor
         placeholders_fn = lambda ex: _build_ge_placeholders(
             scene, owner, visitor, goose, location, ex)
     elif sub.fable == "ant-grasshopper":
@@ -1058,11 +1181,13 @@ def generate_one_record(scene: Scene,
     elif sub.fable == "crow-pitcher":
         clever, hasty = _pick_cp_chars(scene)
         location = _pick_cp_location(scene)
+        primary, secondary = clever, hasty
         placeholders_fn = lambda ex: _build_cp_placeholders(
             scene, clever, hasty, location, ex)
     elif sub.fable == "milkmaid":
         milkmaid, farmer = _pick_mm_chars(scene)
         location = _pick_mm_location(scene)
+        primary, secondary = milkmaid, farmer
         placeholders_fn = lambda ex: _build_mm_placeholders(
             scene, milkmaid, farmer, location, ex)
     elif sub.fable == "boy-wolf":
@@ -1073,16 +1198,18 @@ def generate_one_record(scene: Scene,
     elif sub.fable == "dog-shadow":
         hound, dog = _pick_ds_chars(scene)
         location = _pick_ds_location(scene)
+        primary, secondary = hound, dog
         placeholders_fn = lambda ex: _build_ds_placeholders(
             scene, hound, dog, location, ex)
     else:
         # tortoise-hare default
         hare, tortoise = _pick_th_chars(scene)
         location = _pick_th_location(scene)
+        primary, secondary = hare, tortoise
         placeholders_fn = lambda ex: _build_placeholders(
             scene, hare, tortoise, location, ex)
 
-    intro = _aesopian_intro(scene, sub.fable, location)
+    intro = _curriculum_intro(scene, sub.fable, location, primary, secondary)
 
     # Filter subplots by tags if example has tags
     candidate_subplots = sub.subplots
@@ -1128,8 +1255,20 @@ def generate_one_record(scene: Scene,
                                 form_str=rendered_form,
                                 prefer_eval=True)
     sys_msg  = system_prompt(use_eval=True)
-    plan     = scene.rng.choice(sub.plan_pool) if sub.plan_pool else ""
-    plan     = _interpolate_drawn(plan, draws) if draws else plan
+    # Plan pool: prefer the expanded 30-entry per-fable pool over the
+    # subject's own plan_pool (which is 4-6 entries). The subject's
+    # plan_pool, if set, gets folded in as additional candidates.
+    expanded_plans = _FABLE_PLAN_POOL.get(sub.fable, ())
+    plan_candidates = list(expanded_plans) + list(sub.plan_pool or ())
+    plan = scene.rng.choice(plan_candidates) if plan_candidates else ""
+    if "{primary}" in plan or "{secondary}" in plan:
+        try:
+            plan = plan.format(
+                primary=primary.name if primary else "",
+                secondary=secondary.name if secondary else "")
+        except (KeyError, AttributeError):
+            pass
+    plan = _interpolate_drawn(plan, draws) if draws else plan
     preface  = resolve_preface(scene, plan)
     asst     = assemble_assistant_msg(
         preface=preface,
