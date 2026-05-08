@@ -33,13 +33,13 @@ from mmllm.aesop.curriculum.dog_shadow._metaphor_pools import (
 _INTEROP_SUBPLOTS: list[SubplotTemplate] = list(_GOAL_SUBPLOTS) + [
 
     SubplotTemplate("""\
-{tortoise_phrase} and {hare_phrase} had wandered {place} into territory
+{tortoise}, {emo_patient} and {hare_phrase} had wandered {place} into territory
 where the REPL spoke to another runtime entirely. {tortoise} read the
 sign and pointed at {concept_phrase}; the form to submit, written in
 the foreign convention, was {form_display}."""),
 
     SubplotTemplate("""\
-"This is not your meadow," {tortoise_phrase} said {place}, {emo_patient}.
+"This is not your meadow," {tortoise} said {place}, {emo_patient}.
 "Here, the methods belong to objects, and the dot has a particular
 meaning." {hare_phrase}, {emo_proud}, said {hare_he_she} could read
 the foreign form anyway. {tortoise} sketched {form_display} on the
@@ -54,20 +54,20 @@ that crossing into foreign syntax called for actual evaluation, not
 guessing."""),
 
     SubplotTemplate("""\
-{hare_phrase} insisted the foreign-runtime forms were "just like home."
-{tortoise_phrase} tapped a stone {place} where someone had inscribed
+{hare} insisted the foreign-runtime forms were "just like home."
+{tortoise_phrase}, {emo_patient} tapped a stone {place} where someone had inscribed
 {concept_phrase}. "Then write {form_display} into the REPL," {tortoise}
 said, "and we'll see if your familiarity holds.\""""),
 
     SubplotTemplate("""\
 At a wayside shrine {place} dedicated to interop, the day's offering
-was {concept_phrase}. {tortoise_phrase} knelt and placed the form
+was {concept_phrase}. {tortoise}, {emo_patient} knelt and placed the form
 {form_display} on the stone. {hare}, watching, agreed to be the one
 to submit it to the runtime."""),
 
     SubplotTemplate("""\
 A merchant's stall {place} sold translated phrasebooks for the host
-language; today's lesson was {concept_phrase}. {tortoise_phrase}
+language; today's lesson was {concept_phrase}. {tortoise}, {emo_patient}
 copied the form {form_display} from the page, and {hare_phrase}
 agreed (for once) that one should always check the REPL before
 trusting a translation."""),
@@ -177,7 +177,7 @@ G11_02 = SubjectCurriculum(
                 'The REPL invoked the host\'s startsWith, passing both the text '
                 'and the prefix. The method returned true, confirming that the '
                 'scroll\'s beginning matched what Bell sought. The crossing into '
-                'the host\'s territory had yielded the verdict.'
+                'the host\'s territory had yielded the hare.'
             ),
             tags=("story",),
         ),
@@ -201,7 +201,7 @@ G11_02 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL understood the alternate syntax. Both forms were '
-                'faithful paths.'
+                'faithful paths — abc.'
             ),
             tags=("story",),
         ),
@@ -244,7 +244,7 @@ G11_03 = SubjectCurriculum(
                 'The REPL called Math/abs with the negative number. The static '
                 'method computed and returned the absolute value as the true '
                 'measure. Rex learned that slash-notation opened the standard '
-                'tools when the dot would not fit.'
+                'tools when the dot would not fit — -7.'
             ),
             tags=("story",),
         ),
@@ -273,7 +273,7 @@ G11_03 = SubjectCurriculum(
             resolution=(
                 'The REPL called the static method Math/max, passing both '
                 'numbers. The method evaluated and returned 9 — the true maximum. '
-                'Bell had learned another path through the kennel-master\'s shed.'
+                'Bell had learned another path through the kennel-master\'s shed — 9.'
             ),
             tags=("story",),
         ),
@@ -315,7 +315,7 @@ G11_04 = SubjectCurriculum(
             resolution=(
                 'The REPL applied count to the string and returned the exact '
                 'number of marks. Patch now knew the measure and could cross, '
-                'confident in the reckoning.'
+                'confident in the reckoning — tortoise.'
             ),
             tags=("story",),
         ),
@@ -343,7 +343,7 @@ G11_04 = SubjectCurriculum(
             resolution=(
                 'The REPL applied count and returned the number. Bell confirmed '
                 'that the shorter message held four marks, and the count '
-                'function proved itself consistent across both texts.'
+                'function proved itself consistent across both texts — hare.'
             ),
             tags=("story",),
         ),
@@ -408,7 +408,7 @@ G11_06 = SubjectCurriculum(
                 'The REPL invoked the String constructor via dot-construct. It '
                 'built a new String object holding the text and returned it. Rex '
                 'learned that constructors could be called this way in the '
-                'foreign land.'
+                'foreign land — go.'
             ),
             tags=("story",),
         ),
@@ -437,7 +437,7 @@ G11_06 = SubjectCurriculum(
                 'The REPL understood the new keyword form just as readily. It '
                 'created a String object and returned it. Bell saw that both '
                 'the dot-construct and the new keyword were paths to the same '
-                'outcome.'
+                'outcome — jump.'
             ),
             tags=("story",),
         ),
@@ -477,7 +477,7 @@ G11_07 = SubjectCurriculum(
             resolution=(
                 'The REPL applied aget to the array, asking for the element at '
                 'position 1. It returned the second bone\'s weight: 20. Patch '
-                'learned how to reach into host arrays by their numbered positions.'
+                'learned how to reach into host arrays by their numbered positions — 1.'
             ),
             tags=("story",),
         ),
@@ -505,7 +505,7 @@ G11_07 = SubjectCurriculum(
             resolution=(
                 'The REPL called alength and returned the exact count: 3. Rex '
                 'confirmed that the array held three positions, and alength proved '
-                'itself a trustworthy path into host array properties.'
+                'itself a trustworthy path into host array properties — 3.'
             ),
             tags=("story",),
         ),
@@ -541,7 +541,7 @@ G11_08 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL read the hint. When it called .toUpperCase, it took the '
-                'direct path. The method returned the capitalized text.'
+                'direct path. The method returned the capitalized text — abc.'
             ),
             tags=("story",),
         ),
@@ -589,7 +589,7 @@ G11_09 = SubjectCurriculum(
             resolution=(
                 'The REPL applied the addition with its watchful gaze. It returned '
                 'the sum: 3 bones. Patch learned that ordinary arithmetic in Clojure '
-                'runs in checked mode by default, guarding against silent overflow.'
+                'runs in checked mode by default, guarding against silent overflow — 2.'
             ),
             tags=("story",),
         ),
@@ -718,7 +718,7 @@ G11_14 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL tested the boundary and called Math/sqrt safely. It '
-                'returned 2.0. The try form caught nothing because nothing went wrong.'
+                'returned 2.0. The try form caught nothing because nothing went wrong — err.'
             ),
             tags=("story",),
         ),

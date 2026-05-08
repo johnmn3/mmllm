@@ -28,7 +28,7 @@ from mmllm.aesop.curriculum.dog_shadow._metaphor_pools import (
 _MACRO_SUBPLOTS: list[SubplotTemplate] = list(_GOAL_SUBPLOTS) + [
 
     SubplotTemplate("""\
-{tortoise_phrase} had spent the morning {place} sketching a tiny
+{tortoise}, {emo_patient} had spent the morning {place} sketching a tiny
 language of {tortoise_his_her} own — a notebook of macros that wrote
 other forms. The next entry was {concept_phrase}. {hare_phrase} wanted to
 {goal_text}. {tortoise} asked {hare_him_her} to write the form carefully
@@ -38,19 +38,19 @@ and submit it so the REPL could show what code it produced or what value it retu
 "A macro is just a function that runs at compile time," {tortoise}
 explained {place}, {emo_patient}. {hare}, {emo_proud}, said
 {hare_he_she} could already understand what {concept_phrase} meant.
-{tortoise_phrase} insisted they actually write a form to {goal_text}
+{tortoise} insisted they actually write a form to {goal_text}
 and read what the runtime reported, expansion or value."""),
 
     SubplotTemplate("""\
 The path {place} was littered with old macro definitions someone had
-carved into bark. {hare_phrase} found one shaped like
-{concept_phrase} and dared {tortoise_phrase} to write the form that could {goal_text}.
+carved into bark. {hare} found one shaped like
+{concept_phrase} and dared {tortoise_phrase}, {emo_patient} to write the form that could {goal_text}.
 {tortoise} only smiled and asked {hare_him_her} to submit it carefully
 into the REPL — that, after all, was the whole point of having a
 macroexpander."""),
 
     SubplotTemplate("""\
-{hare_phrase} insisted {place} that macros were the same as functions.
+{hare} insisted {place} that macros were the same as functions.
 {tortoise_phrase}, {emo_patient}, sketched {concept_phrase} on a
 strip of bark. "The difference," {tortoise_he_she} said, "is in what
 we're trying to accomplish: {goal_text}. Write the form and let the
@@ -59,11 +59,11 @@ runtime tell us exactly what it does.\""""),
     SubplotTemplate("""\
 A small notebook lay open {place} where the Tortoise had been studying
 syntax-quote. The page showed {concept_phrase}, and a goal written in
-pencil: {goal_text}. {hare_phrase}, {emo_tired}, reluctantly
+pencil: {goal_text}. {hare}, {emo_tired}, reluctantly
 agreed to write the form to settle once and for all what it produced."""),
 
     SubplotTemplate("""\
-At a stone tablet {place}, {tortoise_phrase} was teaching
+At a stone tablet {place}, {tortoise}, {emo_patient} was teaching
 {hare_phrase} the discipline of expansion: never trust your eyes, only
 the macroexpander. The day's challenge was simple: {goal_text}. The
 form that accomplishes {concept_phrase} had to be submitted; nothing
@@ -119,7 +119,7 @@ G10_01 = SubjectCurriculum(
             resolution=(
                 'The REPL read the quote and returned the form untouched: the '
                 'three symbols in order, the computation never invoked. The '
-                'scratch had stayed a scratch.'
+                'scratch had stayed a scratch — 2.'
             ),
             tags=("story",),
         ),
@@ -148,7 +148,7 @@ G10_01 = SubjectCurriculum(
             resolution=(
                 'The REPL read the quote and returned the three numbers in the '
                 'order the scratch had marked. The form came back intact — three '
-                'elements, untouched by evaluation.'
+                'elements, untouched by evaluation — 3.'
             ),
             tags=("story",),
         ),
@@ -174,7 +174,7 @@ G10_01 = SubjectCurriculum(
                 'not the symbol.'
             ),
             resolution=(
-                'The REPL built the form: the tilde unquoted the value and '
+                'The REPL built the form: the tilde unquoted the 5 and '
                 'inserted it into the output. The list came back with the value '
                 'nested between the two symbol-marks, exactly as scratched.'
             ),
@@ -248,7 +248,7 @@ G10_02 = SubjectCurriculum(
                 'The REPL built the form, saw the tilde-at, and spliced the '
                 'three bones into the spot. The finished form had the list '
                 'operator with all three values as arguments, no nesting — '
-                'exactly the shape the splice had spelled.'
+                'exactly the shape the splice had spelled — 3.'
             ),
             tags=("story",),
         ),
@@ -361,7 +361,7 @@ G10_04 = SubjectCurriculum(
             resolution=(
                 'The REPL looked through the magnifier and saw the when scratch '
                 'become an if-form with a do-block. The intermediate rewrite was '
-                'shown — one step, nothing computed, nothing evaluated.'
+                'shown — one step, nothing computed, nothing evaluated — 1.'
             ),
             tags=("story",),
         ),
@@ -430,7 +430,7 @@ G10_05 = SubjectCurriculum(
             resolution=(
                 'The REPL expanded fully and showed the complete form: the when '
                 'had become an if with a do-block inside. No more macros remained. '
-                'The final form was bare and evaluation-ready.'
+                'The final form was bare and evaluation-ready — 1.'
             ),
             tags=("story",),
         ),
@@ -458,7 +458,7 @@ G10_05 = SubjectCurriculum(
             resolution=(
                 'The REPL expanded the arrow-form fully. The value was threaded '
                 'through inc, then through inc again. The final nested form showed '
-                'the path. The shorthand had expanded to show the full journey.'
+                'the path. The shorthand had expanded to show the full journey — 1.'
             ),
             tags=("story",),
         ),
@@ -531,7 +531,7 @@ G10_06 = SubjectCurriculum(
                 'The REPL checked the condition (false), found the path blocked, '
                 'and skipped all three tasks entirely. No expressions ran. The '
                 'form returned nil — the hound waited at the blocked fork, '
-                'unable to proceed.'
+                'unable to proceed — 3.'
             ),
             tags=("story",),
         ),
@@ -601,7 +601,7 @@ G10_07 = SubjectCurriculum(
                 'The REPL followed the sniffing-trail, passing the bone through '
                 'each step. At the end, the bone had become 8 — three increments '
                 'complete. The trail had threaded it perfectly to the final '
-                'result.'
+                'result — 5.'
             ),
             tags=("story",),
         ),
@@ -630,7 +630,7 @@ G10_07 = SubjectCurriculum(
                 'The REPL followed the thread-last trail through each step. The '
                 'filtering removed odd bones. The mapping incremented the rest. The '
                 'reduce accumulated them. The threading had transformed the bones '
-                'step by step.'
+                'step by step — 4.'
             ),
             tags=("story",),
         ),
@@ -699,7 +699,7 @@ G10_08 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL called add-fn, evaluated the arguments, then walked the '
-                'trail. The trail took the values and produced the result. A plain '
+                'trail. The trail took the values and produced the 4. A plain '
                 'function had done the work straightforwardly.'
             ),
             tags=("story",),
@@ -915,7 +915,7 @@ G10_11 = SubjectCurriculum(
             resolution=(
                 'The REPL read the quote-mark and returned the list untouched. '
                 'The numbers came back in sequence, exactly as scratched. The '
-                'quote had told the reader to preserve the form.'
+                'quote had told the reader to preserve the form — 3.'
             ),
             tags=("story",),
         ),
@@ -972,7 +972,7 @@ G10_11 = SubjectCurriculum(
             resolution=(
                 'The REPL read the vector and saw the discard-mark. It consumed the '
                 'marked element and removed it. The final vector came back with the '
-                'unwanted element skipped.'
+                'unwanted element skipped — 3.'
             ),
             tags=("story",),
         ),
@@ -1181,7 +1181,7 @@ G10_14 = SubjectCurriculum(
             resolution=(
                 'The REPL constructed the list dynamically, then passed it to eval. '
                 'The eval function asked the runtime to compute the operation. The '
-                'dynamic form had been evaluated on demand.'
+                'dynamic form had been evaluated on demand — 5.'
             ),
             tags=("story",),
         ),

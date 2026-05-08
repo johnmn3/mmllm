@@ -78,7 +78,7 @@ G8_01 = SubjectCurriculum(
                 'The REPL set the agreement on the bank and the function '
                 'value came back. Any later call to speak with a known '
                 "breed would now produce that breed's characteristic "
-                'phrase.'
+                'phrase — hare — hare.'
             ),
             tags=("story",),
         ),
@@ -109,7 +109,7 @@ G8_01 = SubjectCurriculum(
                 'The REPL held the signals in force, routed by the key, '
                 'and handed back the characteristic answer. Past the call, '
                 'Bell\'s mind was empty — the local binding had served its '
-                'stretch and was gone.'
+                'stretch and was gone — hare.'
             ),
             tags=("story",),
         ),
@@ -181,7 +181,7 @@ G8_02 = SubjectCurriculum(
             resolution=(
                 'The REPL constructed the bag, read the named compartment, '
                 'and handed back the precise weight the stone had borne. '
-                'The bag itself kept its kind-stamp for any later read.'
+                'The bag itself kept its kind-stamp for any later read — 7.'
             ),
             tags=("story",),
         ),
@@ -223,7 +223,7 @@ G8_03 = SubjectCurriculum(
             resolution=(
                 'The REPL built the bag, read the named compartment, and '
                 'handed back the pace-style. The bag kept both slots '
-                'intact — pulling one didn\'t disturb the other.'
+                'intact — pulling one didn\'t disturb the other — pace.'
             ),
             tags=("story",),
         ),
@@ -252,7 +252,7 @@ G8_03 = SubjectCurriculum(
             resolution=(
                 'The REPL built the bag, read the name-slot by its label, '
                 'and handed back the name. The second slot stood ready for '
-                'later reads.'
+                'later reads — name.'
             ),
             tags=("story",),
         ),
@@ -571,7 +571,7 @@ G8_08 = SubjectCurriculum(
             resolution=(
                 'The REPL read the species, picked the matching pile, and '
                 'handed back its pace-word. The stone stood ready for any '
-                'later breed.'
+                'later breed — hare.'
             ),
             tags=("story",),
         ),
@@ -1022,7 +1022,7 @@ G8_15 = SubjectCurriculum(
             resolution=(
                 'The REPL carved the hierarchy link and answered the isa? '
                 'question. The verdict came back true — ::hare was confirmed '
-                'as a type of ::runner.'
+                'as a type of ::runner — runner.'
             ),
             tags=("story",),
         ),

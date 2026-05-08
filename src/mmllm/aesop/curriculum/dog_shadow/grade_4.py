@@ -22,13 +22,13 @@ _COLL_SUBPLOTS: list[SubplotTemplate] = list(_G1_SUBPLOTS) + [
     # produces ungrammatical "the form X described the form X" prose
     # when concept_phrase is "the form X" verbatim — see SKILL doc #11).
     SubplotTemplate("""\
-{tortoise_phrase} had been laying out a small collection {place} —
+{tortoise}, {emo_patient} had been laying out a small collection {place} —
 pebbles, milestones, paw-prints, whatever the day produced. {tortoise}
 wrote {form_display} on a slate and asked {hare_phrase} to write the
 form into the REPL so they could confirm it together."""),
 
     SubplotTemplate("""\
-{hare_phrase}, {emo_proud}, declared the collection plain. {tortoise_phrase}
+{hare}, {emo_proud}, declared the collection plain. {tortoise_phrase}
 wrote {form_display} on a slate {place}, calmly. "It's not about plain
 or fancy," {tortoise_he_she} said. "It's about whether the runtime
 agrees with what we think we're describing.\""""),
@@ -72,7 +72,7 @@ G4_01 = SubjectCurriculum(grade=4, subject_id="G4-01",
             resolution=(
                 'The REPL set the bones in the log exactly as Rex directed, '
                 'in their order, and handed back the complete row. The cache '
-                'now held what the form promised.'
+                'now held what the form promised — 3.'
             ),
             tags=("story",),
         ),
@@ -158,7 +158,7 @@ G4_02 = SubjectCurriculum(grade=4, subject_id="G4-02",
             resolution=(
                 'The REPL stepped into the cache, found the first slot, and '
                 'handed back the heap that rested there: 10 bones. The '
-                'position had led true.'
+                'position had led true — 0.'
             ),
             tags=("story",),
         ),
@@ -184,7 +184,7 @@ G4_02 = SubjectCurriculum(grade=4, subject_id="G4-02",
             resolution=(
                 'The REPL counted to the third slot in the cache and handed '
                 'back the pile of 30 bones. The heap at position 2 was now '
-                'in Rex\'s grasp.'
+                'in Rex\'s grasp — 2.'
             ),
             tags=("story",),
         ),
@@ -218,7 +218,7 @@ G4_03 = SubjectCurriculum(grade=4, subject_id="G4-03",
                 'The REPL took the new bone and slid it into the end of the '
                 'log, sealing the cache so it now held one, two, three in '
                 'order. The original cache stayed untouched; the new one was '
-                'what came back.'
+                'what came back — 3.'
             ),
             tags=("story",),
         ),
@@ -244,7 +244,7 @@ G4_03 = SubjectCurriculum(grade=4, subject_id="G4-03",
             resolution=(
                 'The REPL received the marked stone and placed it in the empty '
                 'log. The cache now held the keyword :hare and handed back the '
-                'new row.'
+                'new row — hare.'
             ),
             tags=("story",),
         ),
@@ -277,7 +277,7 @@ G4_04 = SubjectCurriculum(grade=4, subject_id="G4-04",
             resolution=(
                 'The REPL recognized the chained form and handed back the '
                 'sequence as Rex had described it: one, then two, then three, '
-                'linked together.'
+                'linked together — 3.'
             ),
             tags=("story",),
         ),
@@ -335,7 +335,7 @@ G4_05 = SubjectCurriculum(grade=4, subject_id="G4-05",
             resolution=(
                 'The REPL stitched the 0 bone to the front of the chain, '
                 'creating a new linked sequence. The chain now ran from 0 at '
-                'the head through 1, 2, 3 in order.'
+                'the head through 1, 2, 3 in order — 0.'
             ),
             tags=("story",),
         ),
@@ -369,7 +369,7 @@ G4_06 = SubjectCurriculum(grade=4, subject_id="G4-06",
             resolution=(
                 'The REPL sealed the named compartments exactly as Patch '
                 'described, binding each name to its count. The map came back '
-                'with both slots in place.'
+                'with both slots in place — tortoise.'
             ),
             tags=("story",),
         ),
@@ -400,7 +400,7 @@ G4_07 = SubjectCurriculum(grade=4, subject_id="G4-07",
             ),
             resolution=(
                 'The REPL read the name :a, found the correct compartment, and '
-                'handed back the bone-count it held: 1.'
+                'handed back the bone-count it held: 1 — a.'
             ),
             tags=("story",),
         ),
@@ -427,7 +427,7 @@ G4_07 = SubjectCurriculum(grade=4, subject_id="G4-07",
             ),
             resolution=(
                 'The REPL looked for :missing in the cache, found nothing, and '
-                'returned the default marker instead. The fallback held true.'
+                'returned the default marker instead. The fallback held true — default.'
             ),
             tags=("story",),
         ),
@@ -462,7 +462,7 @@ G4_08 = SubjectCurriculum(grade=4, subject_id="G4-08",
             resolution=(
                 'The REPL extended the cache by one compartment, placing 2 '
                 'bones in the :b slot while :a kept its 1 bone. The expanded '
-                'cache came back intact.'
+                'cache came back intact — b.'
             ),
             tags=("story",),
         ),
@@ -488,7 +488,7 @@ G4_08 = SubjectCurriculum(grade=4, subject_id="G4-08",
             resolution=(
                 'The REPL updated the cache so the :a compartment now held 99 '
                 'bones. A new cache with the revised count came back, the old '
-                'one left behind.'
+                'one left behind — a.'
             ),
             tags=("story",),
         ),
@@ -521,7 +521,7 @@ G4_09 = SubjectCurriculum(grade=4, subject_id="G4-09",
             resolution=(
                 'The REPL closed the :a compartment and sealed it from the '
                 'cache, leaving only :b standing. The new cache held 2 bones '
-                'in a single compartment now.'
+                'in a single compartment now — a.'
             ),
             tags=("story",),
         ),
@@ -554,7 +554,7 @@ G4_10 = SubjectCurriculum(grade=4, subject_id="G4-10",
             resolution=(
                 'The REPL read off the three compartment names and counted '
                 'them: 3 compartments total. The verdict came back as the '
-                'running tally.'
+                'running tally — c.'
             ),
             tags=("story",),
         ),
@@ -585,7 +585,7 @@ G4_11 = SubjectCurriculum(grade=4, subject_id="G4-11",
             ),
             resolution=(
                 'The REPL recognized the three unique bones and counted them: '
-                '3. The tally of the set came back as the answer.'
+                '3. The tally of the set came back as the 3.'
             ),
             tags=("story",),
         ),
@@ -611,7 +611,7 @@ G4_11 = SubjectCurriculum(grade=4, subject_id="G4-11",
             resolution=(
                 'The REPL examined the set, saw that all three bones were '
                 'identical, and counted only 1 unique member. The running '
-                'tally was 1.'
+                'tally was 1 — 1.'
             ),
             tags=("story",),
         ),
@@ -641,7 +641,7 @@ G4_12 = SubjectCurriculum(grade=4, subject_id="G4-12",
             ),
             resolution=(
                 'The REPL searched the set for the bone numbered 2, found it, '
-                'and returned true. The verdict was certain.'
+                'and returned true. The verdict was certain — 2.'
             ),
             tags=("story",),
         ),
@@ -667,7 +667,7 @@ G4_12 = SubjectCurriculum(grade=4, subject_id="G4-12",
             ),
             resolution=(
                 'The REPL searched the set and found no bone numbered 4 among '
-                'them. It returned false. The bone lay beyond the cache.'
+                'them. It returned false. The bone lay beyond the cache — 4.'
             ),
             tags=("story",),
         ),
@@ -698,7 +698,7 @@ G4_13 = SubjectCurriculum(grade=4, subject_id="G4-13",
             ),
             resolution=(
                 'The REPL counted the five bones in the cache and handed back the '
-                'tally: 5. The verdict was the size of the vector.'
+                'tally: 5. The verdict was the size of the vector — 5.'
             ),
             tags=("story",),
         ),
@@ -722,7 +722,7 @@ G4_13 = SubjectCurriculum(grade=4, subject_id="G4-13",
             ),
             resolution=(
                 'The REPL tallied the compartments in the cache: 2 named slots '
-                'total. The count came back as 2.'
+                'total. The count came back as 2 — b.'
             ),
             tags=("story",),
         ),
@@ -747,7 +747,7 @@ G4_13 = SubjectCurriculum(grade=4, subject_id="G4-13",
             ),
             resolution=(
                 'The REPL counted the three unique signal stones and handed back '
-                'the tally: 3. Each marker was distinct and counted once.'
+                'the tally: 3. Each marker was distinct and counted once — c.'
             ),
             tags=("story",),
         ),
@@ -771,7 +771,7 @@ G4_13 = SubjectCurriculum(grade=4, subject_id="G4-13",
             ),
             resolution=(
                 'The REPL counted all eight scratch-marks on the bark and handed '
-                'back the tally: 8. Each mark was counted in order.'
+                'back the tally: 8. Each mark was counted in order — tortoise.'
             ),
             tags=("story",),
         ),
@@ -824,7 +824,7 @@ G4_14 = SubjectCurriculum(grade=4, subject_id="G4-14",
             ),
             resolution=(
                 'The REPL looked inside and found 1 bone, so it returned false. '
-                'The cache was not empty; it held bone-cargo.'
+                'The cache was not empty; it held bone-cargo — 1.'
             ),
             tags=("story",),
         ),
@@ -878,7 +878,7 @@ G4_15 = SubjectCurriculum(grade=4, subject_id="G4-15",
             ),
             resolution=(
                 'The REPL reached to the front of the cache and pulled out the '
-                'first heap: 10 bones. The verdict was the first element.'
+                'first heap: 10 bones. The verdict was the first element — 30.'
             ),
             tags=("story",),
         ),
@@ -902,7 +902,7 @@ G4_15 = SubjectCurriculum(grade=4, subject_id="G4-15",
             ),
             resolution=(
                 'The REPL reached to the back of the cache and pulled out the '
-                'last heap: 30 bones. The tail held the verdict.'
+                'last heap: 30 bones. The tail held the 30.'
             ),
             tags=("story",),
         ),
@@ -927,7 +927,7 @@ G4_15 = SubjectCurriculum(grade=4, subject_id="G4-15",
             resolution=(
                 'The REPL dropped the first heap from the cache and counted the '
                 'two heaps that remained: 2. The running tally of the rest was '
-                'the verdict.'
+                'the 30.'
             ),
             tags=("story",),
         ),
@@ -964,7 +964,7 @@ G4_16 = SubjectCurriculum(grade=4, subject_id="G4-16",
                 'The REPL ran each bone through the gap and packed it into '
                 'the receiving log. The chain above stayed as it had been; '
                 'the row below now held the three bones in their original '
-                'order.'
+                'order — 3.'
             ),
             tags=("story",),
         ),
@@ -992,7 +992,7 @@ G4_16 = SubjectCurriculum(grade=4, subject_id="G4-16",
             resolution=(
                 'The REPL fed each bone through the gap. When the second two tried '
                 'to pass, the set turned it away as a duplicate. The cache filled '
-                'with three unique bones: one, two, three.'
+                'with three unique bones: one, two, three — 3.'
             ),
             tags=("story",),
         ),
@@ -1026,7 +1026,7 @@ G4_17 = SubjectCurriculum(grade=4, subject_id="G4-17",
             resolution=(
                 'The REPL created a new cache with 99 bones in the :a slot, but '
                 'when Bell consulted m at the end of the stretch, it still held '
-                '1 bone. The immutable cache had never been altered.'
+                '1 bone. The immutable cache had never been altered — a.'
             ),
             tags=("story",),
         ),
@@ -1057,7 +1057,7 @@ G4_18 = SubjectCurriculum(grade=4, subject_id="G4-18",
             resolution=(
                 'The REPL examined both shapes, found the same bones in the same '
                 'order, and returned true. Both containers held the same cargo, '
-                'and the verdict was equality.'
+                'and the 3 was equality.'
             ),
             tags=("story",),
         ),
@@ -1088,7 +1088,7 @@ G4_19 = SubjectCurriculum(grade=4, subject_id="G4-19",
             ),
             resolution=(
                 'The REPL worked through the range, counting each bone as it was '
-                'produced: 5 total. The verdict was the sum of the sequence.'
+                'produced: 5 total. The verdict was the sum of the sequence — 5.'
             ),
             tags=("story",),
         ),
@@ -1114,7 +1114,7 @@ G4_19 = SubjectCurriculum(grade=4, subject_id="G4-19",
             resolution=(
                 'The REPL looked at the start of the range and handed back 1. No '
                 'need to unfold the whole sequence — the first bone came straight '
-                'away.'
+                'away — 100.'
             ),
             tags=("story",),
         ),
@@ -1146,7 +1146,7 @@ G4_20 = SubjectCurriculum(grade=4, subject_id="G4-20",
             resolution=(
                 'The REPL converted the vector into a sequence and walked it from '
                 'head to tail, counting each bone: 3 total. The verdict was the '
-                'size of the sequence.'
+                'size of the sequence — 3.'
             ),
             tags=("story",),
         ),

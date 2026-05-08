@@ -29,13 +29,13 @@ _REAL_SUBPLOTS: list[SubplotTemplate] = list(_G1_SUBPLOTS) + [
 
     SubplotTemplate("""\
 The race had ended {place} and the two were sitting beneath an old
-tree, comparing notes. {tortoise_phrase} drew {concept_phrase} into
+tree, comparing notes. {tortoise} drew {concept_phrase} into
 the dust. "We've come a long way," {tortoise_he_she} said. "The form
 {form_display} is the kind of thing we'd reach for now." {hare}
 nodded — for once {emo_tired} enough to listen."""),
 
     SubplotTemplate("""\
-{tortoise_phrase} had filled an entire notebook over the long race
+{tortoise} had filled an entire notebook over the long race
 with tools and patterns — transducers, channels, specs, tests —
 and {place} the next entry was {concept_phrase}, with the form
 written as {form_display}. {hare_phrase}, {emo_proud} but more
@@ -43,19 +43,19 @@ reflective than usual, agreed to write the form into the REPL."""),
 
     SubplotTemplate("""\
 "This isn't a sprint trick," {tortoise} said {place}, {emo_patient}.
-"It's a tool." {hare_phrase} looked at {concept_phrase} and admitted
+"It's a tool." {hare} looked at {concept_phrase} and admitted
 {hare_he_she} would not have known what to write. {tortoise} sketched
 {form_display} on a slate so the runtime could speak for itself."""),
 
     SubplotTemplate("""\
 At the finish line {place}, a row of small monuments commemorated
 the libraries the racers had learned along the way. The newest one
-honoured {concept_phrase}. {tortoise_phrase} touched it with a paw
+honoured {concept_phrase}. {tortoise}, {emo_patient} touched it with a paw
 and said the form to remember was {form_display}; {hare_phrase}
 agreed to submit it."""),
 
     SubplotTemplate("""\
-{hare_phrase}, {emo_tired}, was finally willing
+{hare}, {emo_tired}, was finally willing
 to study patterns. {tortoise_phrase} pointed {place} at
 {concept_phrase}. The form {form_display} was the canonical example;
 the REPL would confirm what it produced."""),
@@ -117,7 +117,7 @@ G12_01 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL threaded each bone through the gap, applied the '
-                'increment, and collected the result into the empty vector. What '
+                'increment, and collected the 3 into the empty vector. What '
                 'fell through was the vector of incremented bones: 2, 3, 4.'
             ),
             tags=("story",),
@@ -142,7 +142,7 @@ G12_01 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL tested each: 1 stuck, 2 passed, 3 stuck, 4 passed, 5 '
-                'stuck. The vessel held the ones that fit: 2 and 4.'
+                'stuck. The vessel held the ones that fit: 2 and 4 — 5.'
             ),
             tags=("story",),
         ),
@@ -184,7 +184,7 @@ G12_02 = SubjectCurriculum(
                 'The REPL threaded 1, 2, 3, 4 through the composed pipeline: '
                 'first they gained weight (to 2, 3, 4, 5), then the filter kept '
                 'only the even ones. What landed in the final vessel was the '
-                'precise count: 2 and 4.'
+                'precise count: 2 and 4 — 4.'
             ),
             tags=("story",),
         ),
@@ -210,7 +210,7 @@ G12_02 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL applied the pipeline: each bone incremented, then '
-                'filtered. The kept ones were summed into the final tally.'
+                'filtered. The kept ones were summed into the final tally — 5.'
             ),
             tags=("story",),
         ),
@@ -250,7 +250,7 @@ G12_03 = SubjectCurriculum(
             resolution=(
                 'The REPL threaded each bone through the gap and poured the '
                 'incremented weights into the pile instead of the row. The unique '
-                'pile held 2, 3, and 4 — one of each.'
+                'pile held 2, 3, and 4 — one of each — 3.'
             ),
             tags=("story",),
         ),
@@ -274,7 +274,7 @@ G12_03 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL sent bones through the gap: 0, 1, 2 passed — and the gap '
-                'closed. The row caught the first three from the endless stream.'
+                'closed. The row caught the first three from the endless stream — 100.'
             ),
             tags=("story",),
         ),

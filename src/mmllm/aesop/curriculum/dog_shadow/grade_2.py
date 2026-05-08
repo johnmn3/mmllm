@@ -32,7 +32,7 @@ _SHARED_SUBPLOTS: list[SubplotTemplate] = list(_G1_SHARED_SUBPLOTS) + [
     # 9. The chain-of-operations template — useful for multi-arg
     #    arithmetic and comparison-chain subjects.
     SubplotTemplate("""\
-{tortoise_phrase} had been laying out a chain of small computations on
+{tortoise}, {emo_patient} had been laying out a chain of small computations on
 a slate {place} — one operation, then another, all to settle a
 question {hare_phrase} had raised. The current form on the slate was
 {form_display}, and {tortoise} explained that {concept_phrase} would
@@ -41,7 +41,7 @@ be settled the moment the form was evaluated."""),
     # 10. The wager-with-stakes template — increases the dramatic stakes
     #     when the form is more interesting (e.g., min/max, mod).
     SubplotTemplate("""\
-"Whatever {form_display} comes to," {hare_phrase} declared, {emo_proud},
+"Whatever {form_display} comes to," {hare} declared, {emo_proud},
 {place}, "I'll wager I know it without typing it." {tortoise_phrase},
 {emo_patient}, picked up a stick and drew {concept_phrase} in the
 dust. "Then write the form," {tortoise_he_she} said. "The REPL will
@@ -253,7 +253,7 @@ G2_02 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL tested each pair in turn — was 1 less than 2? Yes. '
-                'Was 2 less than 3? Yes. The chain held fast, and the answer '
+                'Was 2 less than 3? Yes. The chain held fast, and the 3 '
                 'came back true.'
             ),
             tags=("story",),
@@ -281,7 +281,7 @@ G2_02 = SubjectCurriculum(
             resolution=(
                 'The REPL tested if 3 is less than 2 — it is not. The chain broke '
                 'at the first link, and false was handed back. The marks did not '
-                'decrease.'
+                'decrease — 1.'
             ),
             tags=("story",),
         ),
@@ -308,7 +308,7 @@ G2_02 = SubjectCurriculum(
             resolution=(
                 'The REPL tested 1 ≤ 1, which is true, then 1 ≤ 2, which is also '
                 'true. The chain held with the gentle slope, and true was returned. '
-                'The pattern was settled.'
+                'The pattern was settled — 2.'
             ),
             tags=("story",),
         ),
@@ -335,7 +335,7 @@ G2_02 = SubjectCurriculum(
             resolution=(
                 'The REPL tested 5 > 4, 4 > 3, 3 > 2, and 2 > 1 — all passed. The '
                 'perfect descent held, and true was returned. Every step went down as '
-                'expected.'
+                'expected — 1.'
             ),
             tags=("story",),
         ),
@@ -361,7 +361,7 @@ G2_02 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL tested 3 ≥ 3, which held, then 3 ≥ 2, which also held. '
-                'The gentle chain remained true throughout, and the verdict was '
+                'The gentle chain remained true throughout, and the 2 was '
                 'returned.'
             ),
             tags=("story",),
@@ -396,7 +396,7 @@ G2_03 = SubjectCurriculum(
             resolution=(
                 'The REPL compared the marks — 1 is not equal to 2 — and '
                 'handed back true. The bones were indeed different, and the '
-                'question was answered.'
+                'question was answered — 2.'
             ),
             tags=("story",),
         ),
@@ -419,7 +419,7 @@ G2_03 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL compared the marks — 1 is equal to 1 — and returned false. '
-                'The bones bore identical marks, so they were not different.'
+                'The bones bore identical marks, so they were not different — 1.'
             ),
             tags=("story",),
         ),
@@ -443,7 +443,7 @@ G2_03 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL compared all three — 1 equals 1 equals 1 — and returned '
-                'true. All three marks were identical, and the verdict was certain.'
+                'true. All three marks were identical, and the 1 was certain.'
             ),
             tags=("story",),
         ),
@@ -466,7 +466,7 @@ G2_03 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL compared the marks — 1 equals 1, but 1 does not equal 2. '
-                'The chain broke, and false was returned. Not all were the same.'
+                'The chain broke, and false was returned. Not all were the same — 2.'
             ),
             tags=("story",),
         ),
@@ -490,7 +490,7 @@ G2_03 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL compared the marks — two are 1, but one is 2. The '
-                'difference was found, and true was returned. The mismatch was clear.'
+                'difference was found, and true was returned. The mismatch was clear — 2.'
             ),
             tags=("story",),
         ),
@@ -527,7 +527,7 @@ G2_04 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL scanned all three — 1, 2, 3 — and returned 1. The '
-                'smallest had been found, and the verdict rested in Bell\'s paw.'
+                'smallest had been found, and the 3 rested in Bell\'s paw.'
             ),
             tags=("story",),
         ),
@@ -551,7 +551,7 @@ G2_04 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL scanned all three — 1, 2, 3 — and returned 3. The largest '
-                'had been found, and the verdict rested clear.'
+                'had been found, and the 3 rested clear.'
             ),
             tags=("story",),
         ),
@@ -575,7 +575,7 @@ G2_04 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL scanned all five and found that 1 was the least. The '
-                'smallest had been identified, and the verdict was handed back with '
+                'smallest had been identified, and the 5 was handed back with '
                 'certainty.'
             ),
             tags=("story",),
@@ -600,7 +600,7 @@ G2_04 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL scanned all five and found 9 was the greatest. The maximum '
-                'had been located, and the verdict came back clear and certain.'
+                'had been located, and the 5 came back clear and certain.'
             ),
             tags=("story",),
         ),
@@ -624,7 +624,7 @@ G2_04 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL scanned the three negatives — -3, -1, -5 — and returned -5. '
-                'It was the smallest, and the verdict was clear.'
+                'It was the smallest, and the -5 was clear.'
             ),
             tags=("story",),
         ),
@@ -661,7 +661,7 @@ G2_05 = SubjectCurriculum(
             resolution=(
                 'The REPL divided seventeen by five and handed back 3 — three '
                 'whole groups, with two bones left over that didn\'t matter '
-                'for the quotient.'
+                'for the quotient — 5.'
             ),
             tags=("story",),
         ),
@@ -686,7 +686,7 @@ G2_05 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL divided and found three complete groups with two bones left '
-                'over. The remainder of 2 was handed back and held the answer.'
+                'over. The remainder of 2 was handed back and held the 5.'
             ),
             tags=("story",),
         ),
@@ -711,7 +711,7 @@ G2_05 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL applied modulo to seventeen and five, and returned 2. The '
-                'remainder was exact, and the answer held what did not fit.'
+                'remainder was exact, and the 5 held what did not fit.'
             ),
             tags=("story",),
         ),
@@ -736,7 +736,7 @@ G2_05 = SubjectCurriculum(
             resolution=(
                 'The REPL divided one hundred by seven and returned 14 — fourteen '
                 'complete groups. The quotient was exact, and the remainder did not '
-                'matter.'
+                'matter — 7.'
             ),
             tags=("story",),
         ),
@@ -760,7 +760,7 @@ G2_05 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL divided and found that 100 divided by 7 left a remainder of '
-                '2. The leftover count was returned and held the final answer.'
+                '2. The leftover count was returned and held the final answer — 7.'
             ),
             tags=("story",),
         ),
@@ -786,7 +786,7 @@ G2_05 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL applied modulo to negative 7 and 3, and returned 2. The '
-                'result followed modular arithmetic rules, and the answer was certain.'
+                'result followed modular arithmetic rules, and the 3 was certain.'
             ),
             tags=("story",),
         ),
@@ -819,7 +819,7 @@ G2_06 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL added one to five and handed back six. The path '
-                'forward was clear — one more bone, one more mark in the tally.'
+                'forward was clear — one more bone, one more mark in the tally — 5.'
             ),
             tags=("story",),
         ),
@@ -843,7 +843,7 @@ G2_06 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL subtracted one from five and handed back four. The path '
-                'backward was clear — one fewer mark, one less in the tally.'
+                'backward was clear — one fewer mark, one less in the tally — 5.'
             ),
             tags=("story",),
         ),
@@ -865,7 +865,7 @@ G2_06 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL added one to zero and handed back one. From nothing came '
-                'the first count, and the answer was certain.'
+                'the first count, and the 0 was certain.'
             ),
             tags=("story",),
         ),
@@ -888,7 +888,7 @@ G2_06 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL subtracted one from zero and handed back negative one. The '
-                'path into negative numbers was opened, and the answer was clear.'
+                'path into negative numbers was opened, and the 0 was clear.'
             ),
             tags=("story",),
         ),
@@ -911,7 +911,7 @@ G2_06 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL added one to negative one and handed back zero. The path '
-                'forward had reached the neutral point, the answer exact.'
+                'forward had reached the neutral point, the -1 exact.'
             ),
             tags=("story",),
         ),
@@ -946,7 +946,7 @@ G2_07 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL stripped away the sign and measured the distance — '
-                '5 had no negative sign, so the answer was 5. The magnitude '
+                '5 had no negative sign, so the 5 was 5. The magnitude '
                 'was returned unchanged.'
             ),
             tags=("story",),
@@ -972,7 +972,7 @@ G2_07 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL stripped away the negative sign and measured the distance — '
-                'negative 5 became 5. The magnitude was returned unchanged.'
+                'negative 5 became 5. The magnitude was returned unchanged — -5.'
             ),
             tags=("story",),
         ),
@@ -995,7 +995,7 @@ G2_07 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL applied absolute value to zero and returned zero. The '
-                'distance at the center was itself, and the answer was clear.'
+                'distance at the center was itself, and the 0 was clear.'
             ),
             tags=("story",),
         ),
@@ -1020,7 +1020,7 @@ G2_07 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL subtracted three from eight to get five, then applied '
-                'absolute value. The distance was five, exact and unsigned.'
+                'absolute value. The distance was five, exact and unsigned — 8.'
             ),
             tags=("story",),
         ),
@@ -1057,7 +1057,7 @@ G2_08 = SubjectCurriculum(
             resolution=(
                 'The REPL added one-half and one-quarter with precision and '
                 'handed back three-quarters. The combined measure was exact, '
-                'a true rational sum.'
+                'a true rational sum — 1/4.'
             ),
             tags=("story",),
         ),
@@ -1081,7 +1081,7 @@ G2_08 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL multiplied two-thirds by three-quarters with precision and '
-                'returned one-half. The product was exact, a true rational result.'
+                'returned one-half. The product was exact, a true rational result — 3/4.'
             ),
             tags=("story",),
         ),
@@ -1104,7 +1104,7 @@ G2_08 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL subtracted one-third from one whole and returned two-thirds. '
-                'The remainder was exact, a true rational difference.'
+                'The remainder was exact, a true rational difference — 1/3.'
             ),
             tags=("story",),
         ),
@@ -1138,7 +1138,7 @@ G2_09 = SubjectCurriculum(
             resolution=(
                 'The REPL divided ten by two and handed back five. Since the '
                 'division was clean, five whole bones went to each pile, and '
-                'no remainder lingered.'
+                'no remainder lingered — 2.'
             ),
             tags=("story",),
         ),
@@ -1160,7 +1160,7 @@ G2_09 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL divided ten by three and handed back the exact ratio '
-                'ten-thirds. The answer was rational and precise, not a flat number.'
+                'ten-thirds. The answer was rational and precise, not a flat number — 3.'
             ),
             tags=("story",),
         ),
@@ -1184,7 +1184,7 @@ G2_09 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL divided one-point-zero by 2 and returned zero-point-five. '
-                'The floating-point answer was exact.'
+                'The floating-point answer was exact — 2.'
             ),
             tags=("story",),
         ),
@@ -1221,7 +1221,7 @@ G2_10 = SubjectCurriculum(
             resolution=(
                 'The REPL multiplied two by two, got four, then multiplied '
                 'that by two again to get eight. The power was exact, and the '
-                'answer was handed back at once.'
+                'answer was handed back at once — 2.'
             ),
             tags=("story",),
         ),
@@ -1245,7 +1245,7 @@ G2_10 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL multiplied five by five to get twenty-five. The square was '
-                'exact, and the answer was handed back at once.'
+                'exact, and the 5 was handed back at once.'
             ),
             tags=("story",),
         ),
@@ -1270,7 +1270,7 @@ G2_10 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL multiplied 3 by 3 to get 9, then by 3 again to get 27, '
-                'then by 3 once more to get 81. The fourth power was exact.'
+                'then by 3 once more to get 81. The fourth power was exact — 3.'
             ),
             tags=("story",),
         ),
@@ -1294,7 +1294,7 @@ G2_10 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL multiplied ten by ten to get one hundred. The square was '
-                'exact, and the verdict came back clear.'
+                'exact, and the 10 came back clear.'
             ),
             tags=("story",),
         ),
@@ -1330,7 +1330,7 @@ G2_11 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL spliced the strips and handed back the longer '
-                'one. The two originals stayed as they had been.'
+                'one. The two originals stayed as they had been — cd.'
             ),
             tags=("story",),
         ),
@@ -1534,7 +1534,7 @@ G2_13 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL tested 1 with and — truthy, passed. Then 2 — truthy, passed. '
-                'Then 3 — truthy, passed. The last value, 3, was returned.'
+                'Then 3 — truthy, passed. The last value, 3, was returned — 3.'
             ),
             tags=("story",),
         ),
@@ -1558,7 +1558,7 @@ G2_13 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL tested nil — falsey, skipped. Then false — falsey, skipped. Then '
-                '5 — truthy, returned. The first open path was 5.'
+                '5 — truthy, returned. The first open path was 5 — 5.'
             ),
             tags=("story",),
         ),
@@ -1663,7 +1663,7 @@ G2_14 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL negated zero — which is truthy — and returned false. The truth '
-                'was flipped, and the answer came back clear.'
+                'was flipped, and the 0 came back clear.'
             ),
             tags=("story",),
         ),
@@ -1721,7 +1721,7 @@ G2_15 = SubjectCurriculum(
             resolution=(
                 'The REPL tested zero — which is not false and not nil, so it '
                 'counts as truthy. The then-branch opened, and 1 was handed back. '
-                'The right path was taken.'
+                'The right path was taken — 0.'
             ),
             tags=("story",),
         ),
@@ -1769,7 +1769,7 @@ G2_15 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL tested nil — which is falsey. The else-branch opened, and 0 was '
-                'returned. The left path was taken.'
+                'returned. The left path was taken — 0.'
             ),
             tags=("story",),
         ),
@@ -1793,7 +1793,7 @@ G2_15 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL tested false — which is falsey. The else-branch opened, and 0 was '
-                'handed back. The left path was taken.'
+                'handed back. The left path was taken — 0.'
             ),
             tags=("story",),
         ),
@@ -1830,7 +1830,7 @@ G2_16 = SubjectCurriculum(
             resolution=(
                 'The REPL converted zero to a boolean. Since zero is not false '
                 'and not nil, it counts as truthy. The answer came back true — '
-                'the zero was a true value in boolean terms.'
+                'the zero was a true value in boolean terms — 0.'
             ),
             tags=("story",),
         ),
@@ -1938,7 +1938,7 @@ G2_17 = SubjectCurriculum(
             resolution=(
                 'The REPL reached into the named slot and handed back its '
                 'bone. The cache stayed exactly as it was, the other slot '
-                'undisturbed.'
+                'undisturbed — tortoise.'
             ),
             tags=("story",),
         ),
@@ -2065,7 +2065,7 @@ G2_19 = SubjectCurriculum(
                 'The REPL multiplied one million by one million and handed back '
                 'one trillion. The number was so large it spilled beyond the '
                 'ordinary integer bounds, but the REPL grew the container to '
-                'hold it. The answer was exact.'
+                'hold it. The answer was exact — 1000000.'
             ),
             tags=("story",),
         ),
@@ -2089,7 +2089,7 @@ G2_19 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL added one to the vast number and handed back one hundred billion. '
-                'The sum was so large the integer container grew, but the answer was exact.'
+                'The sum was so large the integer container grew, but the 1 was exact.'
             ),
             tags=("story",),
         ),
@@ -2128,7 +2128,7 @@ G2_20 = SubjectCurriculum(
             resolution=(
                 'The REPL walked the row, adding one at each bone, and '
                 'handed back the size. The bones themselves stayed where '
-                'they had been — the answer was the count, not the '
+                'they had been — the 3 was the count, not the '
                 'contents.'
             ),
             tags=("story",),
@@ -2256,7 +2256,7 @@ G2_22 = SubjectCurriculum(
             resolution=(
                 'The REPL first multiplied five and four to get twenty. Then it '
                 'subtracted seven, leaving thirteen. The nested arithmetic was '
-                'exact, the final count handed back without doubt.'
+                'exact, the final count handed back without doubt — 7.'
             ),
             tags=("story",),
         ),
@@ -2280,7 +2280,7 @@ G2_22 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL multiplied 3 by 8 to get 24, then 2 by 4 to get 8. Then it added '
-                'them to get 32. The sum of products was exact.'
+                'them to get 32. The sum of products was exact — 4.'
             ),
             tags=("story",),
         ),
@@ -2304,7 +2304,7 @@ G2_22 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL added 100 and 50 to get 150. Then it divided 150 by 5 to get 30. '
-                'The integer quotient was exact, no remainder.'
+                'The integer quotient was exact, no remainder — 5.'
             ),
             tags=("story",),
         ),

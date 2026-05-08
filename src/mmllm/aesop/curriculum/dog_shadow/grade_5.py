@@ -191,7 +191,7 @@ G5_03 = SubjectCurriculum(grade=5, subject_id="G5-03",
                 'is returned — not a default branch, but an empty mouth.'
             ),
             resolution=(
-                'The REPL read the true stone and handed back the value. The '
+                'The REPL read the true stone and handed back yes. The '
                 'silence-on-false rule is why when has only one arm: you get '
                 'the answer or you get nothing.'
             ),
@@ -223,7 +223,7 @@ G5_03 = SubjectCurriculum(grade=5, subject_id="G5-03",
             resolution=(
                 'The REPL read the false stone, found no arm to take, and handed '
                 "back nothing. The when-form's contract is simple: true gives the "
-                'value, false gives silence.'
+                'value, false gives silence — yes.'
             ),
             tags=("story",),
         ),
@@ -383,7 +383,7 @@ G5_07 = SubjectCurriculum(grade=5, subject_id="G5-07",
                 'The REPL walked the first gate, found it truthy, walked the second, '
                 'found it truthy, walked the third, found it truthy, and handed back '
                 "the last gate's value. All gates had opened. The final value was the "
-                'answer.'
+                'answer — 3.'
             ),
             tags=("story",),
         ),
@@ -448,7 +448,7 @@ G5_08 = SubjectCurriculum(grade=5, subject_id="G5-08",
             resolution=(
                 'The REPL evaluated the comparison and found it false. The not-form '
                 'flipped that false to true and handed back the inverted verdict. The '
-                'negation was complete.'
+                'negation was complete — 2.'
             ),
             tags=("story",),
         ),
@@ -790,7 +790,7 @@ G5_14 = SubjectCurriculum(grade=5, subject_id="G5-14",
             resolution=(
                 'The REPL unpacked the basket, took the four bones as arguments, '
                 'followed the + recipe through all of them, and handed back the '
-                'sum. The applied recipe was complete.'
+                'sum. The applied recipe was complete — 4.'
             ),
             tags=("story",),
         ),
@@ -817,7 +817,7 @@ G5_14 = SubjectCurriculum(grade=5, subject_id="G5-14",
             resolution=(
                 'The REPL unpacked the basket, took all five bones as arguments, '
                 'followed the max recipe, and handed back the largest. The applied '
-                'recipe was complete.'
+                'recipe was complete — 5.'
             ),
             tags=("story",),
         ),
@@ -1254,7 +1254,7 @@ G5_22 = SubjectCurriculum(grade=5, subject_id="G5-22",
                 'The REPL paced the bank the right number of times, then '
                 'stopped at the base case, and handed back the final tally. '
                 'The trail beneath the pacing had not grown — the '
-                'call-stack was exactly as it began.'
+                'call-stack was exactly as it began — 1.'
             ),
             tags=("story",),
         ),

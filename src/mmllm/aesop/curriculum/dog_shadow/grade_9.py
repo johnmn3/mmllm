@@ -76,7 +76,7 @@ G9_01 = SubjectCurriculum(
             resolution=(
                 'The REPL showed the original cache unchanged — still just '
                 'the :a slot with one bone. The new slot :b had been added '
-                'to a copy in the REPL\'s paw, not to the cache Bell held.'
+                'to a copy in the REPL\'s paw, not to the cache Bell held — b.'
             ),
             tags=("story",),
         ),
@@ -101,7 +101,7 @@ G9_01 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL returned the original row of three bones. The fourth '
-                'had been conjoined to a copy, not to the row Rex held.'
+                'had been conjoined to a copy, not to the row Rex held — 4.'
             ),
             tags=("story",),
         ),
@@ -146,7 +146,7 @@ G9_02 = SubjectCurriculum(
                 'The REPL applied the update atomically, scratched the new '
                 'tally into the stone, and handed back what the stone now '
                 'read. Any later dog at the bank would see the same updated '
-                'count.'
+                'count — 0.'
             ),
             tags=("story",),
         ),
@@ -176,7 +176,7 @@ G9_02 = SubjectCurriculum(
             resolution=(
                 'The REPL reset the stone from idle to running and handed '
                 'back the new keyword. The running status was now clear to '
-                'any pack member who read the bank.'
+                'any pack member who read the bank — running.'
             ),
             tags=("story",),
         ),
@@ -219,7 +219,7 @@ G9_03 = SubjectCurriculum(
             resolution=(
                 'The REPL swapped the zero to one in a single stroke, and '
                 'the page showed the new tally. Each bone added would '
-                'increment the count further, safely, one at a time.'
+                'increment the count further, safely, one at a time — 0.'
             ),
             tags=("story",),
         ),
@@ -249,7 +249,7 @@ G9_03 = SubjectCurriculum(
             resolution=(
                 'The REPL swapped the 10 to 15 by applying plus-five, and '
                 'the stone showed the new running total. The count was now '
-                'accurate and safe from any race.'
+                'accurate and safe from any race — 5.'
             ),
             tags=("story",),
         ),
@@ -279,7 +279,7 @@ G9_03 = SubjectCurriculum(
             resolution=(
                 'The REPL reset the stone to :done in one atomic pulse, and '
                 'the page showed the new status. The pack could read the '
-                'change clearly and move to their rest.'
+                'change clearly and move to their rest — done.'
             ),
             tags=("story",),
         ),
@@ -316,7 +316,7 @@ G9_04 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL checked the stone, found zero, and swapped it to one '
-                'atomically. The dereference showed the new count.'
+                'atomically. The dereference showed the new count — 1.'
             ),
             tags=("story",),
         ),
@@ -341,7 +341,7 @@ G9_04 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL checked the stone, found 5 not zero, and refused the '
-                'swap. The stone remained unchanged.'
+                'swap. The stone remained unchanged — 99.'
             ),
             tags=("story",),
         ),
@@ -481,7 +481,7 @@ G9_07 = SubjectCurriculum(
                 'The REPL opened the dosync fence, altered the page from '
                 'zero to one inside the transaction, committed the change, '
                 'and handed back what the page now held. The zero became one '
-                'safely within the fence.'
+                'safely within the fence — 0.'
             ),
             tags=("story",),
         ),
@@ -512,7 +512,7 @@ G9_07 = SubjectCurriculum(
             resolution=(
                 "The page showed the fresh small tally — the old "
                 "season's count was gone, replaced cleanly within "
-                "the transaction."
+                "the transaction — 7."
             ),
             tags=("story",),
         ),
@@ -583,7 +583,7 @@ G9_08 = SubjectCurriculum(
             resolution=(
                 'The REPL opened the dosync, altered the page from ten to '
                 'fifteen by adding five, committed the change, and handed '
-                'back the new count. The transaction was complete and safe.'
+                'back the new count. The transaction was complete and safe — 5.'
             ),
             tags=("story",),
         ),
@@ -625,7 +625,7 @@ G9_09 = SubjectCurriculum(
             resolution=(
                 'The REPL swapped the stone from zero to one atomically, and '
                 'the dereference showed the new count. The atom was simple, '
-                'fast, and safe for a standalone tally.'
+                'fast, and safe for a standalone tally — 0.'
             ),
             tags=("story",),
         ),
@@ -654,7 +654,7 @@ G9_09 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL opened the dosync, altered the page from zero to '
-                'one inside the fence, and handed back the result. The ref '
+                'one inside the fence, and handed back 0. The ref '
                 'was ready for coordinated transactions anytime.'
             ),
             tags=("story",),
@@ -696,7 +696,7 @@ G9_10 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL coordinated the scout, awaited its completion, '
-                'and handed back the value the scout had delivered. Bell '
+                'and handed back 0 the scout had delivered. Bell '
                 'read it without snatching too early.'
             ),
             tags=("story",),
@@ -728,7 +728,7 @@ G9_10 = SubjectCurriculum(
             resolution=(
                 'The REPL sent the instruction, the scout worked asynchronously '
                 'adding 10 to 5, await brought Patch back into sync with the '
-                'result, and the dereference showed the final tally of fifteen.'
+                'result, and the dereference showed the final tally of fifteen — 10.'
             ),
             tags=("story",),
         ),
@@ -769,7 +769,7 @@ G9_11 = SubjectCurriculum(
             resolution=(
                 'The REPL sent the instruction on a quick thread, the scout '
                 'applied inc to zero, await brought synchronization, and the '
-                'dereference returned one.'
+                'dereference returned one — 0.'
             ),
             tags=("story",),
         ),
@@ -798,7 +798,7 @@ G9_11 = SubjectCurriculum(
             resolution=(
                 'The REPL sent the instruction on a blocking thread, the '
                 'scout applied inc to zero, await brought synchronization, '
-                'and the dereference returned one.'
+                'and the dereference returned one — 0.'
             ),
             tags=("story",),
         ),
@@ -842,7 +842,7 @@ G9_12 = SubjectCurriculum(
                 'The REPL queued both inc instructions on the agent, the '
                 'scout ran through both steps asynchronously, await brought '
                 'synchronization when both finished, and the dereference '
-                'showed two.'
+                'showed two — 0.'
             ),
             tags=("story",),
         ),
@@ -884,7 +884,7 @@ G9_13 = SubjectCurriculum(
             resolution=(
                 'The REPL sent the runner with the addition task. The scout '
                 'computed one plus two as it raced forward. When Bell '
-                'dereferenced the future, she received the result the scout had '
+                'dereferenced the future, she received the 2 the scout had '
                 'gathered: the running total of three.'
             ),
             tags=("story",),
@@ -909,7 +909,7 @@ G9_13 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL sent the scout to compute six times seven. When Rex '
-                'dereferenced the future, the scout delivered forty-two.'
+                'dereferenced the future, the scout delivered forty-two — 7.'
             ),
             tags=("story",),
         ),
@@ -944,7 +944,7 @@ G9_14 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL created the atom. When Bell used @, it handed back the '
-                'value the stone carried.'
+                'value the stone carried — 7.'
             ),
             tags=("story",),
         ),
@@ -968,7 +968,7 @@ G9_14 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL created the atom. When Patch called deref, it returned '
-                'the value the stone carried.'
+                'the 7 the stone carried.'
             ),
             tags=("story",),
         ),
@@ -1004,7 +1004,7 @@ G9_15 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL created the promise. The scout finished and delivered '
-                ':done. When Bell dereferenced, she got the answer.'
+                ':done. When Bell dereferenced, she got the done.'
             ),
             tags=("story",),
         ),
@@ -1028,7 +1028,7 @@ G9_15 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL created the promise. The scout ran, counted, and '
-                'delivered the number. When Rex dereferenced, he got the count.'
+                'delivered the number. When Rex dereferenced, he got the count — 42.'
             ),
             tags=("story",),
         ),
@@ -1064,7 +1064,7 @@ G9_16 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL vswapped zero to one. The volatile was the lightest '
-                'way to hold a mutable value.'
+                'way to hold a mutable value — 0.'
             ),
             tags=("story",),
         ),
@@ -1088,7 +1088,7 @@ G9_16 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL vreset five to ninety-nine in one stroke. The volatile '
-                'was the fastest way.'
+                'was the fastest way — 99.'
             ),
             tags=("story",),
         ),
@@ -1124,7 +1124,7 @@ G9_17 = SubjectCurriculum(
             ),
             resolution=(
                 'Inside binding, *p* was ninety-nine. When the form ended, the '
-                'original scent returned.'
+                'original scent returned — dynamic.'
             ),
             tags=("story",),
         ),
@@ -1149,7 +1149,7 @@ G9_17 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL set permanent scent to one. Inside binding, *p* was '
-                'ninety-nine. When unwound, the second read caught the original.'
+                'ninety-nine. When unwound, the second read caught the original — dynamic.'
             ),
             tags=("story",),
         ),
@@ -1192,7 +1192,7 @@ G9_18 = SubjectCurriculum(
             resolution=(
                 'The REPL acquired the monitor stone, held it while adding one '
                 'and two together, and released it when the work was done. The '
-                'arithmetic was safe from any concurrent access.'
+                'arithmetic was safe from any concurrent access — 2.'
             ),
             tags=("story",),
         ),
@@ -1223,7 +1223,7 @@ G9_18 = SubjectCurriculum(
                 'The REPL created the monitor and acquired the lock. Inside the '
                 'locked form, the literal forty-two was evaluated safely. When '
                 'the locking completed, the monitor was released and other dogs '
-                'could proceed.'
+                'could proceed — 42.'
             ),
             tags=("story",),
         ),

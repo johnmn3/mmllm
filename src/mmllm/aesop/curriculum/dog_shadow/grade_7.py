@@ -27,7 +27,7 @@ _ERR_SUBPLOTS: list[SubplotTemplate] = list(_G1_SUBPLOTS) + [
     # "...first reading. near the meadow,..." with sentence breaking
     # mid-prep).
     SubplotTemplate("""\
-{tortoise_phrase} had learned not to trust a form on first reading,
+{tortoise} had learned not to trust a form on first reading,
 and {place} {tortoise_he_she} typed {form_display} carefully, ready
 to catch whatever the REPL might throw back. {hare_phrase},
 {emo_proud}, laughed and said no error would ever come — but
@@ -38,14 +38,14 @@ to catch whatever the REPL might throw back. {hare_phrase},
     SubplotTemplate("""\
 A small slip of paper {place} carried the form {form_display}. {hare}
 glanced at it and dashed on, certain there was no trouble.
-{tortoise_phrase} sat down, {emo_patient}, and worked through
+{tortoise} sat down, {emo_patient}, and worked through
 {concept_phrase} step by step — ready, if anything went wrong, to read
 the stack trace from top to bottom and try again."""),
 
     # The "world outside the REPL" beat — files, streams, printing.
     SubplotTemplate("""\
 Beyond the REPL the world had files, streams, and surprises.
-{tortoise_phrase} opened a small notebook {place}, copying down
+{tortoise} opened a small notebook {place}, copying down
 {concept_phrase}. {hare}, {emo_tired}, watched as {tortoise_he_she}
 wrote the form {form_display} so the runtime could carry the work the
 rest of the way."""),
@@ -128,7 +128,7 @@ G7_02 = SubjectCurriculum(grade=7, subject_id="G7-02",
             ),
             resolution=(
                 'The REPL caught the division-by-zero, her paw intercepted it, '
-                'and she received the verdict without crashing.'
+                'and she received the -1 without crashing.'
             ),
             tags=("story",),
         ),
@@ -155,7 +155,7 @@ G7_02 = SubjectCurriculum(grade=7, subject_id="G7-02",
             ),
             resolution=(
                 'The REPL evaluated the form, no error arose, and the catch '
-                'was not needed. The count came back whole.'
+                'was not needed. The count came back whole — caught.'
             ),
             tags=("story",),
         ),
@@ -187,7 +187,7 @@ G7_03 = SubjectCurriculum(grade=7, subject_id="G7-03",
             ),
             resolution=(
                 'The REPL gave back the 7, then ran the cleanup mark, then '
-                'returned the value. The crossing was complete and tidy.'
+                'returned cleanup. The crossing was complete and tidy.'
             ),
             tags=("story",),
         ),
@@ -214,7 +214,7 @@ G7_03 = SubjectCurriculum(grade=7, subject_id="G7-03",
             ),
             resolution=(
                 'The REPL hit the division-by-zero, fired the inner finally, '
-                'then the outer catch took the error, handing back -1 to Patch.'
+                'then the outer catch took the error, handing back -1 to Patch — ran.'
             ),
             tags=("story",),
         ),
@@ -333,7 +333,7 @@ G7_05 = SubjectCurriculum(grade=7, subject_id="G7-05",
             ),
             resolution=(
                 'The REPL checked and found zero is indeed some—a real number '
-                'on the stone.'
+                'on the stone — 0.'
             ),
             tags=("story",),
         ),
@@ -416,7 +416,7 @@ G7_06 = SubjectCurriculum(grade=7, subject_id="G7-06",
             ),
             resolution=(
                 'The REPL checked the precondition—5 is positive—so the recipe '
-                'ran, doubling to 10. The hound had the answer.'
+                'ran, doubling to 10. The hound had the pre.'
             ),
             tags=("story",),
         ),
@@ -443,7 +443,7 @@ G7_06 = SubjectCurriculum(grade=7, subject_id="G7-06",
             ),
             resolution=(
                 'The REPL checked the precondition, found -1 was not positive, '
-                'threw the error, and Bell caught it, receiving 0.'
+                'threw the error, and Bell caught it, receiving 0 — pre.'
             ),
             tags=("story",),
         ),
@@ -476,7 +476,7 @@ G7_07 = SubjectCurriculum(grade=7, subject_id="G7-07",
             ),
             resolution=(
                 'The REPL checked: 1 equals 1? Yes. The assert passed, and '
-                'Patch received the code 1.'
+                'Patch received the code 1 — 1.'
             ),
             tags=("story",),
         ),
@@ -503,7 +503,7 @@ G7_07 = SubjectCurriculum(grade=7, subject_id="G7-07",
             ),
             resolution=(
                 'The REPL checked: 1 equals 2? No. The assert threw, the catch '
-                'received it, and Rex got the code 0.'
+                'received it, and Rex got the code 0 — 0.'
             ),
             tags=("story",),
         ),
@@ -539,7 +539,7 @@ G7_08 = SubjectCurriculum(grade=7, subject_id="G7-08",
             ),
             resolution=(
                 'The REPL scratched 42 and the newline onto the message-bone, '
-                'then Bell captured the scratch-marks as a string to carry.'
+                'then Bell captured the scratch-marks as a string to carry — 42.'
             ),
             tags=("story",),
         ),
@@ -564,7 +564,7 @@ G7_08 = SubjectCurriculum(grade=7, subject_id="G7-08",
             ),
             resolution=(
                 'The REPL scratched :hare and the newline, Patch captured the '
-                'marks as a message-string, ready to carry it onward.'
+                'marks as a message-string, ready to carry it onward — hare.'
             ),
             tags=("story",),
         ),
@@ -594,7 +594,7 @@ G7_09 = SubjectCurriculum(grade=7, subject_id="G7-09",
             ),
             resolution=(
                 'The REPL tapped the message :hello into the pool and confirmed '
-                'true. Rex had sent the signal.'
+                'true. Rex had sent the signal — hello.'
             ),
             tags=("story",),
         ),
@@ -619,7 +619,7 @@ G7_09 = SubjectCurriculum(grade=7, subject_id="G7-09",
             ),
             resolution=(
                 'The REPL tapped the number 42 into the pool and returned true. '
-                'The message was received.'
+                'The message was received — 42.'
             ),
             tags=("story",),
         ),
@@ -652,7 +652,7 @@ G7_10 = SubjectCurriculum(grade=7, subject_id="G7-10",
             ),
             resolution=(
                 'The REPL read the metadata, found the :doc mark, and returned '
-                'the documentation string. Patch understood what the symbol did.'
+                'the documentation string. Patch understood what the symbol did — doc.'
             ),
             tags=("story",),
         ),
@@ -747,7 +747,7 @@ G7_12 = SubjectCurriculum(grade=7, subject_id="G7-12",
             ),
             resolution=(
                 'The REPL counted every scratch on the bone: 14 marks in all, '
-                'including the newlines. The message was fully measured.'
+                'including the newlines. The message was fully measured — hare\ntortoise\n.'
             ),
             tags=("story",),
         ),
@@ -1050,7 +1050,7 @@ G7_17 = SubjectCurriculum(grade=7, subject_id="G7-17",
             ),
             resolution=(
                 'The REPL scratched the map as a string, then sniffed the marks '
-                'and handed Rex the parsed map. The roundtrip was complete.'
+                'and handed Rex the parsed map. The roundtrip was complete — b.'
             ),
             tags=("story",),
         ),
@@ -1076,7 +1076,7 @@ G7_17 = SubjectCurriculum(grade=7, subject_id="G7-17",
             resolution=(
                 'The REPL scratched the vector as marks on the message-bone, '
                 'then sniffed the scratches and handed Bell the vector back. '
-                'The roundtrip carried it across whole.'
+                'The roundtrip carried it across whole — 3.'
             ),
             tags=("story",),
         ),
@@ -1140,7 +1140,7 @@ G7_18 = SubjectCurriculum(grade=7, subject_id="G7-18",
             ),
             resolution=(
                 'The REPL opened the tool-bag, pulled the vector from :args, '
-                'and counted two arguments. Rex had the running total he needed.'
+                'and counted two arguments. Rex had the cmd he needed.'
             ),
             tags=("story",),
         ),

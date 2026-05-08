@@ -1355,11 +1355,13 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 0.99
-- issues: {'STORY_RESOLUTION_NO_DRAWN': 3, 'ONLY_SHOOK_HEAD_TIC': 1}
+- issues: {'STORY_RESOLUTION_NO_DRAWN': 3, 'RESOLUTION_REPL_DOUBLED': 3, 'ONLY_SHOOK_HEAD_TIC': 1}
     - [STORY_RESOLUTION_NO_DRAWN] form=`(:doc (meta '^{:doc "trust the runtime"} village))` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':doc', ':doc', 'trust the runtime'), resolution doesn't close the loop)
     - [STORY_RESOLUTION_NO_DRAWN] form=`(:doc (meta '^{:doc "trust the runtime"} village))` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':doc', ':doc', 'trust the runtime'), resolution doesn't close the loop)
     - [STORY_RESOLUTION_NO_DRAWN] form=`(:doc (meta '^{:doc "trust the runtime"} village))` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':doc', ':doc', 'trust the runtime'), resolution doesn't close the loop)
+    - [RESOLUTION_REPL_DOUBLED] form=`(:author (meta '^{:author "Aesop"} village))` — story-tagged resolution mentions 'REPL' 2 times — name the mechanic once, use pronoun/it/runtime/it for the second beat
     - [ONLY_SHOOK_HEAD_TIC] form=`(:author (meta '^{:author "Aesop"} village))` — user_msg uses 'only shook his/her head' — recurring AI-fable filler cadence
+    - [RESOLUTION_REPL_DOUBLED] form=`(:author (meta '^{:author "Aesop"} village))` — story-tagged resolution mentions 'REPL' 2 times — name the mechanic once, use pronoun/it/runtime/it for the second beat
 
 ### G6-16: Cleaning up requires
 
@@ -2484,6 +2486,7 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 - **PROCEDURAL_OPENER**: 7
 - **AI_OUTPUT_CADENCE**: 6
 - **REPEATED_OPENER_FRAGMENT**: 4
+- **RESOLUTION_REPL_DOUBLED**: 3
 - **UNFILLED_DRAWN_PLACEHOLDER**: 1
 - **DRAWN_PLACEHOLDER_LEAK**: 1
 - **WRONG_FABLE_LITERAL**: 1
@@ -2500,7 +2503,7 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 | 3 | 18 | 31 | 141 | — |
 | 4 | 20 | 39 | 193 | — |
 | 5 | 22 | 39 | 186 | — |
-| 6 | 16 | 33 | 138 | — |
+| 6 | 16 | 33 | 141 | — |
 | 7 | 18 | 36 | 103 | — |
 | 8 | 16 | 31 | 93 | — |
 | 9 | 18 | 34 | 119 | — |
@@ -3548,6 +3551,34 @@ to shout an ans...
 At the village notice-stone on the road, the question of the day was
 posted: how to understand how to import a host class into a namespace. Floarea, with a smug grin, started
 to shou...
+    ```
+
+#### RESOLUTION_REPL_DOUBLED
+
+- `G6-15` (form `(:author (meta '^{:author "Aesop"} village))`): story-tagged resolution mentions 'REPL' 2 times — name the mechanic once, use pronoun/it/runtime/it for the second beat
+    ```
+    A boy with too little to do and too loud a voice is a small danger to himself and a larger one to his village.
+
+"There's the world inside the REPL," Vespasia, letting the runtime have the last word, said, "and the
+world outside it. Watch-roll scrolls are how the two meet — a value
+crosses out and be...
+    ```
+- `G6-15` (form `(:author (meta '^{:author "Aesop"} village))`): story-tagged resolution mentions 'REPL' 2 times — name the mechanic once, use pronoun/it/runtime/it for the second beat
+    ```
+    Long days alone with a flock can teach patience, or they can teach mischief, depending on the boy.
+
+Helene, boasting at every turn, claimed she could guess
+what the leather-bound village log-book would say without bothering
+to open it. Cornelius only shook his head and opened
+the book near the villa...
+    ```
+- `G6-15` (form `(:author (meta '^{:author "Aesop"} village))`): story-tagged resolution mentions 'REPL' 2 times — name the mechanic once, use pronoun/it/runtime/it for the second beat
+    ```
+    Some games seem harmless until the moment they are needed in earnest, and then they cost everything.
+
+"Reading and writing watch-roll scrolls is just like reading and
+writing forms," Gertrude, untroubled by what others thought, said. "You ask the runtime for what's
+on the parchment, you write what y...
     ```
 
 #### PROCEDURAL_OPENER
