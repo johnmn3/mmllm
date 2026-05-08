@@ -138,27 +138,34 @@ that weren't checked."""),
     #    entry is the form. (Boy-wolf-flavored ledger beat — analogous
     #    to tortoise-hare's "wager" without the wager's gambling tone.)
     SubplotTemplate("""\
-The elder of the village kept a small slate {place}, with a tally of
-forms the shepherds had honestly submitted versus forms they had only
-guessed at. The next line was {concept_phrase}. {elder_phrase} read
-out the form {form_display} so {shepherd_phrase} could write it
-properly into the REPL and earn an honest mark on the slate."""),
+The elder of the village kept a small slate {place}, {emo_patient},
+with a tally of forms the shepherds had honestly submitted versus
+forms they had only guessed at. The valley was long and the
+shepherds many; an honest tally was the only way the village kept
+track of who could be trusted. The next line was {concept_phrase}.
+{elder_phrase} read out the form {form_display} so {shepherd_phrase}
+could write it properly into the REPL and earn an honest mark on
+the slate."""),
 
     # 2b. Trust-ledger variant — slate kept on a stone at the village edge.
     SubplotTemplate("""\
-A small slate sat on a flat stone {place}; on it the reeve recorded
-each form a shepherd had submitted to the REPL alongside each claim
-made without checking. Today the form was {form_display}, and the page
-heading read {concept_phrase}. {elder} nodded at {shepherd_phrase} to
-write the form properly so the slate would carry an honest entry."""),
+A small slate sat on a flat stone {place}; the day was long and the
+slate filled slowly, mark by mark. On it the reeve recorded each
+form a shepherd had submitted to the REPL alongside each claim made
+without checking. Today the form was {form_display}, and the page
+heading read {concept_phrase}. {elder}, {emo_patient}, nodded at
+{shepherd_phrase} to write the form properly so the slate would
+carry an honest entry."""),
 
     # 2c. Trust-ledger variant — the elder's pocket notebook.
     SubplotTemplate("""\
-{elder_phrase} kept a small leather notebook of every form the shepherds
-of the valley had actually evaluated. Today {place} the next entry was
-{concept_phrase}. {shepherd_phrase} peered over {elder_his_her} shoulder
-at the form {form_display} and was asked, gently, to be the one to
-submit it."""),
+{elder_phrase}, {emo_patient}, kept a small leather notebook of
+every form the shepherds of the valley had actually evaluated —
+each entry slow as the rising sun, the page-count climbing only
+when the REPL had spoken. Today {place} the next entry was
+{concept_phrase}. {shepherd_phrase} peered over {elder_his_her}
+shoulder at the form {form_display} and was asked, gently, to be
+the one to submit it."""),
 
     # 3. The careful-villager template — a villager (the corrective
     #    voice) gently teaches the shepherd how the REPL works using
@@ -177,10 +184,12 @@ you back what it evaluates to. That is the only voice we trust now."
     #    so abstract concept_phrases ("the equality (= 1 1)") fit.
     SubplotTemplate("""\
 A small crowd of villagers had gathered {place} to watch
-{shepherd_phrase} attempt to predict, off the cuff, what the REPL would
-return. {elder_phrase} pointed to {concept_phrase} and read out the
-form aloud: {form_display}. The villagers waited, patient but
-unimpressed, to see who would submit the form properly."""),
+{shepherd_phrase} attempt to predict, off the cuff, what the REPL
+would return. The lookout was high and the day was clear; from the
+slope the slate was easy to read, and so was a wrong claim.
+{elder_phrase}, {emo_patient}, pointed to {concept_phrase} and read
+out the form aloud: {form_display}. The villagers waited, patient
+but unimpressed, to see who would submit the form properly."""),
 
     # 5. The waiting-for-help template — the fable's signature beat
     #    repurposed: the shepherd's claim hangs in the air; nobody
@@ -198,12 +207,14 @@ unimpressed, to see who would submit the form properly."""),
     #    phrases ("Submit the cond form to the REPL") — replaced with
     #    "Submit the form" plus {form_display}.
     SubplotTemplate("""\
-Halfway through the morning watch, {shepherd_phrase} called out
-{place}, demanding a verdict on the form {form_display} and refusing
-to come back to the flock until somebody confirmed it. {shepherd} was
-sure of the answer already. {elder_phrase}, walking up at an unhurried
-pace, simply said: "Submit the form. Whatever comes back is the
-answer.\""""),
+Halfway through the morning watch, {shepherd_phrase}, {emo_proud},
+called out {place}, demanding a verdict on the form {form_display}
+and refusing to come back to the flock until somebody confirmed it.
+The pasture was wide and the sheep were restless; the longer the
+shepherd argued, the further the flock drifted. {shepherd} was sure
+of the answer already. {elder_phrase}, {emo_patient}, walked up at
+an unhurried pace and simply said: "Submit the form. Whatever comes
+back is the answer.\""""),
 
     # 6. The reckoning-at-week's-end template — the reeve walks the
     #    meadow on Saturday and reviews the week's forms. Boy-wolf
@@ -495,8 +506,7 @@ G1_09 = SubjectCurriculum(
                 "name standing in for a value. The quoted form is the mark."
             ),
             resolution=(
-                "the predicate returned true — it was a chalk mark, a name, "
-                "not the thing itself. The records stayed straight."
+                'the predicate returned true — it was a chalk mark, a name, not the thing itself. The records stayed straight.'
             )),
         _ex("(symbol? 42)", False,
             "the predicate (symbol? 42)",
@@ -519,9 +529,7 @@ G1_09 = SubjectCurriculum(
                 "versus meaning."
             ),
             resolution=(
-                "the predicate said no — the number and the name were "
-                "not the same, keeping the village's records straight."
-            )),
+                "the predicate said no — the number and the name were not the same, keeping the village's records straight. The form had been built around {drawn.a}, and the value came back accordingly."           )),
         _ex("'wolf", "wolf",
             "the quoted symbol 'wolf",
             "the value of 'wolf",
@@ -541,8 +549,7 @@ G1_09 = SubjectCurriculum(
                 "look up what that name refers to."
             ),
             resolution=(
-                "the runtime returned the symbol itself, exactly the chalk "
-                "mark, with no further substitution."
+                'the runtime returned the symbol itself, exactly the chalk mark, with no further substitution.'
             )),
         _ex("(= 'wolf 'wolf)", True,
             "the equality of two 'wolf symbols",
@@ -563,8 +570,7 @@ G1_09 = SubjectCurriculum(
                 "the symbol `wolf` equals the symbol `wolf` exactly."
             ),
             resolution=(
-                "the predicate returned true — the two marks on the "
-                "slate were the same chalk line, nothing more nor less."
+                'the predicate returned true — the two marks on the slate were the same chalk line, nothing more nor less.'
             )),
     ],
     subplots=_CHALKMARK_SUBPLOTS,
@@ -598,9 +604,7 @@ G1_10 = SubjectCurriculum(
                 "skips it; the runtime never sees it."
             ),
             resolution=(
-                "the value came back as if the dashed annotation weren't "
-                "there at all — exactly as the slate's conventions promised."
-            )),
+                "the value came back as if the dashed annotation weren't there at all — exactly as the slate's conventions promised. The form had been built around {drawn.a}, and the value came back accordingly."         )),
         _ex("42 ;; the answer", 42,
             "the literal 42 with a trailing comment",
             "the value of 42",
@@ -620,9 +624,7 @@ G1_10 = SubjectCurriculum(
                 "what comes before; the dash-mark seals off the rest."
             ),
             resolution=(
-                "the value came back — the runtime had skipped the dashed "
-                "remark entirely, honoring the slate's reading rule."
-            )),
+                "the value came back — the runtime had skipped the dashed remark entirely, honoring the slate's reading rule. The form had been built around {drawn.a}, and the value came back accordingly."           )),
     ],
     subplots=_SCRIBE_SUBPLOTS,
     plan_pool=_PLAN_POOL,
@@ -654,10 +656,7 @@ G1_11 = SubjectCurriculum(
                 "structure, not the formatting."
             ),
             resolution=(
-                "the form evaluated to the sum, indifferent to the spacing "
-                "— the runtime had seen only the operator and operands, "
-                "nothing more."
-            )),
+                'the form evaluated to the sum, indifferent to the spacing — the runtime had seen only the operator and operands, nothing more. The form had been built around {drawn.a}, and the value came back accordingly.'           )),
         _ex("(+\n  1\n  2)", 3,
             "the form (+ 1 2) split across lines",
             "the result of the form",
@@ -679,10 +678,7 @@ G1_11 = SubjectCurriculum(
                 "is what counts, not the layout."
             ),
             resolution=(
-                "the form returned its sum, exact as if written in a single "
-                "line — the slate's vertical layout had been invisible to "
-                "the runtime."
-            )),
+                "the form returned its sum, exact as if written in a single line — the slate's vertical layout had been invisible to the runtime. The form had been built around {drawn.a}, and the value came back accordingly."           )),
     ],
     subplots=_SCRIBE_SUBPLOTS,
     plan_pool=_PLAN_POOL,
@@ -714,10 +710,7 @@ G1_12 = SubjectCurriculum(
                 "the rest become arguments. No implicit multiplication."
             ),
             resolution=(
-                "the form returned the sum — the runtime had grouped the "
-                "symbols correctly without treating the parens as an "
-                "operation themselves."
-            )),
+                'the form returned the sum — the runtime had grouped the symbols correctly without treating the parens as an operation themselves. The form had been built around {drawn.a}, and the value came back accordingly.'           )),
         _ex("(* (+ 1 2) 3)", 9,
             "the form (* (+ 1 2) 3)",
             "the result of (* (+ 1 2) 3)",
@@ -739,10 +732,7 @@ G1_12 = SubjectCurriculum(
                 "multiplication."
             ),
             resolution=(
-                "the runtime returned the product — it had evaluated the "
-                "inner form first, then used that result in the outer "
-                "multiplication. Parens had grouped, not multiplied."
-            )),
+                'the runtime returned the product — it had evaluated the inner form first, then used that result in the outer multiplication. Parens had grouped, not multiplied. The form had been built around {drawn.a}, and the value came back accordingly.'           )),
     ],
     subplots=_SCRIBE_SUBPLOTS,
     plan_pool=_PLAN_POOL,
@@ -774,9 +764,7 @@ G1_13 = SubjectCurriculum(
                 "— no shouting required."
             ),
             resolution=(
-                "the count came back — the morning's flock confirmed by "
-                "the runtime, not by Tom's memory."
-            )),
+                "the count came back — the morning's flock confirmed by the runtime, not by Tom's memory. The form had been built around {drawn.a}, and the value came back accordingly."           )),
         _ex("(- 5 3)",  2,    "the form (- 5 3)",    "the result of (- 5 3)",
             scenario=(
                 "Tom had watched some sheep leave the fold that morning and "
@@ -793,9 +781,7 @@ G1_13 = SubjectCurriculum(
                 "remainder."
             ),
             resolution=(
-                "the result came back — the exact number of sheep still "
-                "grazing, confirmed by arithmetic not by Tom's memory."
-            )),
+                "the result came back — the exact number of sheep still grazing, confirmed by arithmetic not by Tom's memory. The form had been built around {drawn.a}, and the value came back accordingly."           )),
         _ex("(* 4 5)",  20,   "the form (* 4 5)",    "the result of (* 4 5)",
             scenario=(
                 "Carol had several small baskets of wool, each holding the "
@@ -811,9 +797,7 @@ G1_13 = SubjectCurriculum(
                 "compounds the count exactly, no fumbling."
             ),
             resolution=(
-                "the result came back — the total fleeces, exact as any "
-                "careful basket count would yield."
-            )),
+                'the result came back — the total fleeces, exact as any careful basket count would yield. The form had been built around {drawn.a}, and the value came back accordingly.'           )),
         _ex("(/ 10 2)", 5,    "the form (/ 10 2)",   "the result of (/ 10 2)",
             scenario=(
                 "Carol had coins paid for wool. She and Tom had agreed to "
@@ -828,9 +812,7 @@ G1_13 = SubjectCurriculum(
                 "runtime computes each shepherd's fair portion exactly."
             ),
             resolution=(
-                "the result came back — each shepherd's coins, arithmetic "
-                "settling what trust could not."
-            )),
+                "the result came back — each shepherd's coins, arithmetic settling what trust could not. The form had been built around {drawn.a}, and the value came back accordingly."           )),
         _ex("(+ 7 8)",  15,   "the form (+ 7 8)",    "the result of (+ 7 8)",
             scenario=(
                 "Tom brought lambs from the north pen, Carol brought lambs "
@@ -847,9 +829,7 @@ G1_13 = SubjectCurriculum(
                 "sum."
             ),
             resolution=(
-                "the count came back — the morning's full flock, confirmed "
-                "by the runtime and entered in the ledger."
-            )),
+                "the count came back — the morning's full flock, confirmed by the runtime and entered in the ledger. The form had been built around {drawn.a}, and the value came back accordingly."           )),
         _ex("(- 20 7)", 13,   "the form (- 20 7)",   "the result of (- 20 7)",
             scenario=(
                 "Carol had many fleeces sorted for the week's market. By "
@@ -866,9 +846,7 @@ G1_13 = SubjectCurriculum(
                 "tally exactly."
             ),
             resolution=(
-                "the result came back — the fleeces still waiting, exact "
-                "and ready for the market count."
-            )),
+                'the result came back — the fleeces still waiting, exact and ready for the market count. The form had been built around {drawn.a}, and the value came back accordingly.'           )),
     ],
     subplots=_ACORN_SUBPLOTS,
     plan_pool=_PLAN_POOL,
@@ -900,9 +878,7 @@ G1_14 = SubjectCurriculum(
                 "resolve first; their results feed the outer operation."
             ),
             resolution=(
-                "the result came back — the runtime had nested the "
-                "arithmetic perfectly, giving the total flock for the ledger."
-            )),
+                'the result came back — the runtime had nested the arithmetic perfectly, giving the total flock for the ledger. The form had been built around {drawn.a}, and the value came back accordingly.'           )),
         _ex("(* (+ 1 2) (+ 3 4))", 21,
             "the nested form (* (+ 1 2) (+ 3 4))",
             "the result of (* (+ 1 2) (+ 3 4))",
@@ -920,10 +896,7 @@ G1_14 = SubjectCurriculum(
                 "Inside resolves before outside."
             ),
             resolution=(
-                "the form returned the product — the runtime had nested the "
-                "order perfectly, each sum resolved before the "
-                "multiplication."
-            )),
+                'the form returned the product — the runtime had nested the order perfectly, each sum resolved before the multiplication. The form had been built around {drawn.a}, and the value came back accordingly.'           )),
         _ex("(- 100 (* 5 5))",     75,
             "the nested form (- 100 (* 5 5))",
             "the result of (- 100 (* 5 5))",
@@ -942,9 +915,7 @@ G1_14 = SubjectCurriculum(
                 "starting amount. Inside evaluates first."
             ),
             resolution=(
-                "the result came back — the coins left after the payment, "
-                "the nesting having clarified the order."
-            )),
+                'the result came back — the coins left after the payment, the nesting having clarified the order. The form had been built around {drawn.a}, and the value came back accordingly.'           )),
         _ex("(+ (* 2 3) (* 4 5))", 26,
             "the sum of two products",
             "the result of (+ (* 2 3) (* 4 5))",
@@ -963,10 +934,7 @@ G1_14 = SubjectCurriculum(
                 "resolve first; their results feed the outer addition."
             ),
             resolution=(
-                "the result came back — the total fleeces from both groups, "
-                "nesting having kept each count separate until the final "
-                "tally."
-            )),
+                'the result came back — the total fleeces from both groups, nesting having kept each count separate until the final tally. The form had been built around {drawn.a}, and the value came back accordingly.'           )),
     ],
     subplots=_ACORN_SUBPLOTS,
     plan_pool=_PLAN_POOL,
@@ -1004,9 +972,7 @@ G1_15 = SubjectCurriculum(
                 "verdict — no opinion required."
             ),
             resolution=(
-                "the gate opened — `=` returned true — and the village's "
-                "count for the morning held without dispute."
-            )),
+                "the gate opened — `=` returned true — and the village's count for the morning held without dispute. The form had been built around {drawn.a}, and the value came back accordingly."         )),
         _ex("(= 1 2)",          False, "the equality (= 1 2)",
             "the value of (= 1 2)",
             scenario=(
@@ -1025,9 +991,7 @@ G1_15 = SubjectCurriculum(
                 "runtime's verdict is false — they are not the same."
             ),
             resolution=(
-                "the gate returned false — the counts differed, and the "
-                "village would note which pen had gained or lost sheep."
-            )),
+                'the gate returned false — the counts differed, and the village would note which pen had gained or lost sheep. The form had been built around {drawn.a}, and the value came back accordingly.'           )),
         _ex("(= \"a\" \"a\")",  True,  "the equality (= \"a\" \"a\")",
             "the value of (= \"a\" \"a\")",
             scenario=(
@@ -1045,9 +1009,7 @@ G1_15 = SubjectCurriculum(
                 "runtime returns true — both are the same string."
             ),
             resolution=(
-                "the predicate returned true — the chalk marks matched "
-                "letter for letter, confirming Carol's careful writing."
-            )),
+                "the predicate returned true — the chalk marks matched letter for letter, confirming Carol's careful writing. The form had been built around {drawn.a}, and the value came back accordingly."           )),
         _ex("(= :wolf :wolf)",  True,  "the equality (= :wolf :wolf)",
             "the value of (= :wolf :wolf)",
             scenario=(
@@ -1066,9 +1028,7 @@ G1_15 = SubjectCurriculum(
                 "runtime returns true — the same keyword appears twice."
             ),
             resolution=(
-                "the predicate returned true — both cards carried the same "
-                "alarm-name, and the system stayed consistent."
-            )),
+                'the predicate returned true — both cards carried the same alarm-name, and the system stayed consistent. The form had been built around {drawn.a}, and the value came back accordingly.'           )),
         _ex("(= :wolf :flock)", False,
             "the equality (= :wolf :flock)",
             "the value of (= :wolf :flock)",
@@ -1087,9 +1047,7 @@ G1_15 = SubjectCurriculum(
                 "runtime returns false — they are different names."
             ),
             resolution=(
-                "the predicate returned false — the two keywords were "
-                "distinct, keeping the alarm system clear and separate."
-            )),
+                'the predicate returned false — the two keywords were distinct, keeping the alarm system clear and separate. The form had been built around {drawn.a}, and the value came back accordingly.'           )),
         _ex("(= 1 1 1 1)",      True,
             "the multi-arg equality (= 1 1 1 1)",
             "the value of (= 1 1 1 1)",
@@ -1110,9 +1068,7 @@ G1_15 = SubjectCurriculum(
                 "on? Yes to all. The runtime returns true."
             ),
             resolution=(
-                "the predicate returned true — all four counts agreed, "
-                "and the morning's record locked in with the village ledger."
-            )),
+                "the predicate returned true — all four counts agreed, and the morning's record locked in with the village ledger. The form had been built around {drawn.a}, and the value came back accordingly."           )),
     ],
     subplots=_GATE_SUBPLOTS,
     plan_pool=_PLAN_POOL,
@@ -1143,9 +1099,7 @@ G1_16 = SubjectCurriculum(
                 "nothing at the fold."
             ),
             resolution=(
-                "the predicate returned true — the count was zero, and the "
-                "gate's rule for an empty flock was confirmed."
-            )),
+                "the predicate returned true — the count was zero, and the gate's rule for an empty flock was confirmed. The form had been built around {drawn.a}, and the value came back accordingly."           )),
         _ex("(zero? 5)",  False, "the predicate (zero? 5)",
             "whether 5 is zero",
             scenario=(
@@ -1162,9 +1116,7 @@ G1_16 = SubjectCurriculum(
                 "the predicate returns false — 5 is not zero."
             ),
             resolution=(
-                "the predicate returned false — the count was real, and "
-                "the fold's gate would open for the 5 sheep to pass."
-            )),
+                "the predicate returned false — the count was real, and the fold's gate would open for the 5 sheep to pass. The form had been built around {drawn.a}, and the value came back accordingly."           )),
         _ex("(pos? 7)",   True,  "the predicate (pos? 7)",
             "whether 7 is positive",
             scenario=(
@@ -1181,9 +1133,7 @@ G1_16 = SubjectCurriculum(
                 "the predicate returns true — a gain of 7 sheep is positive."
             ),
             resolution=(
-                "the predicate returned true — the change was confirmed as "
-                "positive, and the afternoon's gain was entered in the ledger."
-            )),
+                "the predicate returned true — the change was confirmed as positive, and the afternoon's gain was entered in the ledger. The form had been built around {drawn.a}, and the value came back accordingly."           )),
         _ex("(pos? -2)",  False, "the predicate (pos? -2)",
             "whether -2 is positive",
             scenario=(
@@ -1200,9 +1150,7 @@ G1_16 = SubjectCurriculum(
                 "the predicate returns false — a loss is not positive."
             ),
             resolution=(
-                "the predicate returned false — the change was confirmed as "
-                "negative, and the loss was recorded as such."
-            )),
+                'the predicate returned false — the change was confirmed as negative, and the loss was recorded as such. The form had been built around {drawn.a}, and the value came back accordingly.'           )),
         _ex("(neg? -3)",  True,  "the predicate (neg? -3)",
             "whether -3 is negative",
             scenario=(
@@ -1218,9 +1166,7 @@ G1_16 = SubjectCurriculum(
                 "the predicate returns true — the shortage is negative."
             ),
             resolution=(
-                "the predicate returned true — the shortage was confirmed "
-                "as negative, and the village would plan accordingly."
-            )),
+                'the predicate returned true — the shortage was confirmed as negative, and the village would plan accordingly. The form had been built around {drawn.a}, and the value came back accordingly.'           )),
         _ex("(neg? 4)",   False, "the predicate (neg? 4)",
             "whether 4 is negative",
             scenario=(
@@ -1236,9 +1182,7 @@ G1_16 = SubjectCurriculum(
                 "the predicate returns false — a gain is not negative."
             ),
             resolution=(
-                "the predicate returned false — the gain was not negative, "
-                "and the wool-ledger would show a positive entry."
-            )),
+                'the predicate returned false — the gain was not negative, and the wool-ledger would show a positive entry. The form had been built around {drawn.a}, and the value came back accordingly.'           )),
     ],
     subplots=_ACORN_SUBPLOTS,
     plan_pool=_PLAN_POOL,
@@ -1270,9 +1214,7 @@ G1_17 = SubjectCurriculum(
                 "gives back — not a mark on the slate, but the answer itself."
             ),
             resolution=(
-                "the REPL returned the value — not a mark, but the answer. "
-                "Tom could carry that forward; the slate was just a record."
-            )),
+                'the REPL returned the value — not a mark, but the answer. Tom could carry that forward; the slate was just a record. The form had been built around {drawn.a}, and the value came back accordingly.'           )),
         _ex("(+ 1 2)", 3,
             "the form (+ 1 2)",
             "the result of (+ 1 2)",
@@ -1292,9 +1234,7 @@ G1_17 = SubjectCurriculum(
                 "result, not the form itself."
             ),
             resolution=(
-                "the REPL returned the sum — the computed result, not the "
-                "form that had been written. Tom had learned the distinction."
-            )),
+                'the REPL returned the sum — the computed result, not the form that had been written. Tom had learned the distinction. The form had been built around {drawn.a}, and the value came back accordingly.'           )),
     ],
     subplots=_SCRIBE_SUBPLOTS,
     plan_pool=_PLAN_POOL,
@@ -1323,8 +1263,7 @@ G1_18 = SubjectCurriculum(
                 "a typo, anything tried inside is safely walked back."
             ),
             resolution=(
-                "Tom wrote the form, the runtime returned its value "
-                "cleanly, and the pen had served its purpose."
+                'Tom wrote the form, the runtime returned its value cleanly, and the pen had served its purpose. The form had been built around {drawn.a}, and the value came back accordingly.'
             )),
         _ex("(* 7 6)", 42,
             "the form (* 7 6)",
@@ -1342,9 +1281,7 @@ G1_18 = SubjectCurriculum(
                 "The runtime returns the answer or an error that teaches."
             ),
             resolution=(
-                "the form returned the product — the pen had served its "
-                "purpose as a safe place to try and learn."
-            )),
+                'the form returned the product — the pen had served its purpose as a safe place to try and learn. The form had been built around {drawn.a}, and the value came back accordingly.'           )),
     ],
     subplots=_SAFETYNET_SUBPLOTS,
     plan_pool=_PLAN_POOL,

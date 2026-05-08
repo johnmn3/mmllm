@@ -152,9 +152,7 @@ G11_02 = SubjectCurriculum(
                 "Tom would write the form exactly as the smith had labeled the tool, and the REPL would do the work."
             ),
             resolution=(
-                "Tom composed the form, submitted it to the REPL, and watched as the smith's tool "
-                "worked cleanly. The uppercased string came back, and Tom understood that crossing "
-                "the boundary simply meant using the host's own calling convention."
+                "Tom composed the form, submitted it to the REPL, and watched as the smith's tool worked cleanly. The uppercased string came back, and Tom understood that crossing the boundary simply meant using the host's own calling convention."
             )),
         _ex('(.startsWith "shepherd-elder" "shepherd")', True,
             "a method call (.startsWith ...) returning a boolean",
@@ -172,9 +170,7 @@ G11_02 = SubjectCurriculum(
                 "a boolean result. The runtime bridges the value across, and the host method answers truthfully."
             ),
             resolution=(
-                "Carol composed the form with both arguments in place, submitted it, and the REPL returned true—"
-                "the word indeed started with the prefix. Tom saw that host methods could answer yes-or-no questions "
-                "just as reliably as any village computation."
+                'Carol composed the form with both arguments in place, submitted it, and the REPL returned true—the word indeed started with the prefix. Tom saw that host methods could answer yes-or-no questions just as reliably as any village computation.'
             )),
         _ex('(. "abc" toUpperCase)', "ABC",
             'the alternate dot form (. obj method)',
@@ -193,8 +189,7 @@ G11_02 = SubjectCurriculum(
                 "passing the object to the host method either way."
             ),
             resolution=(
-                "Tom wrote both forms, one after the other, and both returned 'ABC'. "
-                "Carol smiled: different ways to call the same foreign tool, both honest to the REPL."
+                "Tom wrote both forms, one after the other, and both returned 'ABC'. Carol smiled: different ways to call the same foreign tool, both honest to the REPL."
             )),
         _ex('(.length "shepherd")', 8,
             "the method call (.length ...) on a string",
@@ -212,8 +207,7 @@ G11_02 = SubjectCurriculum(
                 "the count of characters. The host counts from the inside; the REPL trusts what it returns."
             ),
             resolution=(
-                "Tom composed the form, the REPL called the foreign method, and the answer came back: 8. "
-                "'Shepherd' has 8 letters. The host counted faithfully, just as the village would have."
+                "Tom composed the form, the REPL called the foreign method, and the answer came back: 8. 'Shepherd' has 8 letters. The host counted faithfully, just as the village would have."
             )),
         _ex('(.isEmpty "test")', False,
             "the method call (.isEmpty ...) checking if a string is empty",
@@ -230,9 +224,7 @@ G11_02 = SubjectCurriculum(
                 "The host checks if the string has zero length and returns true or false."
             ),
             resolution=(
-                "Tom composed the form on the word 'test', and the host returned false. The string was not empty. "
-                "Tom had now crossed the boundary with dot-prefix syntax, instance methods, method chaining, and boolean returns. "
-                "The smithy's tools were his to use."
+                "Tom composed the form on the word 'test', and the host returned false. The string was not empty. Tom had now crossed the boundary with dot-prefix syntax, instance methods, method chaining, and boolean returns. The smithy's tools were his to use."
             )),
     ],
     subplots=_TOOLSHED_SUBPLOTS, plan_pool=_PLAN_G11,
@@ -268,8 +260,7 @@ G11_03 = SubjectCurriculum(
                 "the method lives in a namespace-like cabinet. The runtime looks up the tool by its full name and applies it."
             ),
             resolution=(
-                "Tom composed the form, and the static method returned 7. The negative sign disappeared, "
-                "and he understood that the slash-form reaches into the shared toolshed, not into a particular object."
+                'Tom composed the form, and the static method returned 7. The negative sign disappeared, and he understood that the slash-form reaches into the shared toolshed, not into a particular object.'
             )),
         _ex("(Math/max 3 9)", 9,
             "the static call (Math/max 3 9)",
@@ -287,8 +278,7 @@ G11_03 = SubjectCurriculum(
                 "The runtime passes both values to the host method, which compares them and returns the maximum."
             ),
             resolution=(
-                "The form returned 9. Tom realized that static methods worked just like instance methods, except "
-                "the first 'object' was replaced by the namespace-like cabinet name."
+                "The form returned 9. Tom realized that static methods worked just like instance methods, except the first 'object' was replaced by the namespace-like cabinet name."
             )),
         _ex("(Math/min 5 2)", 2,
             "the static call (Math/min 5 2)",
@@ -306,8 +296,7 @@ G11_03 = SubjectCurriculum(
                 "in the Math namespace and applies it to both arguments."
             ),
             resolution=(
-                "The REPL returned 2. Tom submitted another form, and the host answered cleanly. "
-                "The pattern held: static methods, called by namespace name, worked as well as any other tool."
+                'The REPL returned 2. Tom submitted another form, and the host answered cleanly. The pattern held: static methods, called by namespace name, worked as well as any other tool.'
             )),
         _ex("(Math/sqrt 16)", 4.0,
             "the static call (Math/sqrt 16)",
@@ -325,8 +314,7 @@ G11_03 = SubjectCurriculum(
                 "The host computes the square root and returns the floating-point result."
             ),
             resolution=(
-                "The REPL returned 4.0. Tom saw that even complex operations could be borrowed from the host, "
-                "as long as he used the right slash-form to reach the static method inside its cabinet."
+                'The REPL returned 4.0. Tom saw that even complex operations could be borrowed from the host, as long as he used the right slash-form to reach the static method inside its cabinet.'
             )),
     ],
     subplots=_TOOLSHED_SUBPLOTS, plan_pool=_PLAN_G11,
@@ -361,7 +349,7 @@ G11_04 = SubjectCurriculum(
                 "The village's count function reaches into host data and counts the elements."
             ),
             resolution=(
-                "The form returned the character count and Tom understood the boundary was permeable."
+                'The form returned the character count and Tom understood the boundary was permeable. The form had been built around {drawn.a}, and the value came back accordingly.'
             )),
         _ex('(count "flock")', 5,
             'the count of "flock"',
@@ -379,8 +367,7 @@ G11_04 = SubjectCurriculum(
                 "The village function is polymorphic; it knows how to count across the host boundary."
             ),
             resolution=(
-                "The answer came back: 5. Tom submitted the form and got the right answer. "
-                "He saw that the village's tools could reach into the host's world cleanly, without special syntax."
+                "The answer came back: 5. Tom submitted the form and got the right answer. He saw that the village's tools could reach into the host's world cleanly, without special syntax. The form had been built around {drawn.a}, and the value came back accordingly."
             )),
         _ex('(count "wolf")', 4,
             'the count of "wolf"',
@@ -398,8 +385,7 @@ G11_04 = SubjectCurriculum(
                 "The REPL bridges the boundary transparently."
             ),
             resolution=(
-                "The REPL returned 4. Tom had now called count on three different strings and gotten three correct answers. "
-                "He understood that the village's tools had been designed to work across the host boundary all along."
+                "The REPL returned 4. Tom had now called count on three different strings and gotten three correct answers. He understood that the village's tools had been designed to work across the host boundary all along. The form had been built around {drawn.a}, and the value came back accordingly."
             )),
         _ex('(count "elder")', 5,
             'the count of "elder"',
@@ -417,8 +403,7 @@ G11_04 = SubjectCurriculum(
                 "The function is general enough to handle any sequence the host provides."
             ),
             resolution=(
-                "The answer was 5. Tom had now moved past the fear of the boundary. The village's tools and the host's data "
-                "spoke to each other smoothly, and the REPL made the translation happen without fuss."
+                "The answer was 5. Tom had now moved past the fear of the boundary. The village's tools and the host's data spoke to each other smoothly, and the REPL made the translation happen without fuss. The form had been built around {drawn.a}, and the value came back accordingly."
             )),
     ],
     subplots=_TOOLSHED_SUBPLOTS, plan_pool=_PLAN_G11,
@@ -476,8 +461,7 @@ G11_06 = SubjectCurriculum(
                 "to the host, which builds and returns the new String object."
             ),
             resolution=(
-                "The form built 'hello' and handed it back. Tom saw that constructors, too, could be borrowed "
-                "from the host using the dot-construct notation."
+                "The form built 'hello' and handed it back. Tom saw that constructors, too, could be borrowed from the host using the dot-construct notation."
             )),
         _ex('(new String "world")', "world",
             'the (new String "world") form',
@@ -496,8 +480,7 @@ G11_06 = SubjectCurriculum(
                 "passing the value to the host constructor either way."
             ),
             resolution=(
-                "Both forms built 'world' cleanly. Tom understood that the dot-construct and the 'new' form were two ways "
-                "to cross the same boundary into the host's constructor."
+                "Both forms built 'world' cleanly. Tom understood that the dot-construct and the 'new' form were two ways to cross the same boundary into the host's constructor."
             )),
         _ex('(String. "village")', "village",
             'the constructor call (String. "village")',
@@ -515,8 +498,7 @@ G11_06 = SubjectCurriculum(
                 "The constructor is polymorphic and works with any input the REPL provides."
             ),
             resolution=(
-                "The constructor returned 'village'. Tom had now called it three times on three different inputs, "
-                "and each time it had built a String correctly."
+                "The constructor returned 'village'. Tom had now called it three times on three different inputs, and each time it had built a String correctly."
             )),
         _ex('(new String "shepherd")', "shepherd",
             'the (new String "shepherd") form',
@@ -534,8 +516,7 @@ G11_06 = SubjectCurriculum(
                 "The 'new' form works the same way as the dot-construct; the REPL translates it and passes the value to the host."
             ),
             resolution=(
-                "The constructor built 'shepherd' cleanly. Tom had now used both forms—dot-construct and 'new'—and seen them work. "
-                "The boundary was no longer a mystery; the host's constructors spoke the village's language."
+                "The constructor built 'shepherd' cleanly. Tom had now used both forms—dot-construct and 'new'—and seen them work. The boundary was no longer a mystery; the host's constructors spoke the village's language."
             )),
     ],
     subplots=_TOOLSHED_SUBPLOTS, plan_pool=_PLAN_G11,
@@ -572,9 +553,7 @@ G11_07 = SubjectCurriculum(
                 "and returns the integer inside."
             ),
             resolution=(
-                "The form fetched 20 from index 1. Tom understood: the host's arrays were strange, but the village had "
-                "a bridge—the aget function—that could reach inside them."
-            )),
+                "The form fetched 20 from index 1. Tom understood: the host's arrays were strange, but the village had a bridge—the aget function—that could reach inside them."         )),
         _ex("(let [a (int-array [1 2 3])] (alength a))", 3,
             "the length of an int-array via alength",
             "the length of the array",
@@ -591,9 +570,7 @@ G11_07 = SubjectCurriculum(
                 "then uses alength to fetch its length. The REPL returns the integer count of elements."
             ),
             resolution=(
-                "The form returned 3. Tom realized that arrays, like strings, had a length that could be queried. "
-                "The village had bridges—aget and alength—for crossing into the host's array machinery."
-            )),
+                "The form returned 3. Tom realized that arrays, like strings, had a length that could be queried. The village had bridges—aget and alength—for crossing into the host's array machinery."         )),
         _ex("(let [a (int-array [5 10 15])] (aget a 0))", 5,
             "indexing into an int-array via aget at index 0",
             "the value at index 0 of the array",
@@ -610,9 +587,7 @@ G11_07 = SubjectCurriculum(
                 "Indexing starts at 0, just as it does in the village. The REPL returns the value inside."
             ),
             resolution=(
-                "The form returned 5, the first integer in the array. Tom saw that the host's indexing convention "
-                "matched the village's—a good sign that crossing the boundary would feel natural."
-            )),
+                "The form returned 5, the first integer in the array. Tom saw that the host's indexing convention matched the village's—a good sign that crossing the boundary would feel natural."           )),
         _ex("(let [a (int-array [7 8 9])] (alength a))", 3,
             "the length of an int-array via alength",
             "the length of the array",
@@ -629,8 +604,7 @@ G11_07 = SubjectCurriculum(
                 "The village tool alength knows how to query the host's array structure."
             ),
             resolution=(
-                "The form returned 3. Tom had now used both aget and alength several times. "
-                "The host's array machinery was no longer foreign; it was just another tool the village could reach."
+                "The form returned 3. Tom had now used both aget and alength several times. The host's array machinery was no longer foreign; it was just another tool the village could reach."
             )),
     ],
     subplots=_TOOLSHED_SUBPLOTS, plan_pool=_PLAN_G11,
@@ -668,9 +642,7 @@ G11_08 = SubjectCurriculum(
                 "The value itself doesn't change; the hint just guides the compiler's work."
             ),
             resolution=(
-                "The form called toUpperCase and returned 'ABC'. Tom realized the type hint didn't change "
-                "the computation, only helped the compiler optimize it. The REPL worked the same way whether "
-                "the hint was there or not."
+                "The form called toUpperCase and returned 'ABC'. Tom realized the type hint didn't change the computation, only helped the compiler optimize it. The REPL worked the same way whether the hint was there or not."
             )),
         _ex('(let [^String s "def"] (.length s))', 3,
             "a let-binding with a ^String type hint and method call",
@@ -687,9 +659,7 @@ G11_08 = SubjectCurriculum(
                 "The type hint helps the compiler generate fast code for the method call."
             ),
             resolution=(
-                "The form returned 3, and the method call worked smoothly. Tom understood that type hints were "
-                "optional metadata—useful for performance, but not necessary for correctness."
-            )),
+                'The form returned 3, and the method call worked smoothly. Tom understood that type hints were optional metadata—useful for performance, but not necessary for correctness.'           )),
         _ex('(let [^long n 42] (+ n 8))', 50,
             "a let-binding with a ^long type hint for arithmetic",
             "the sum after arithmetic on a type-hinted value",
@@ -707,7 +677,7 @@ G11_08 = SubjectCurriculum(
                 "The computation itself is the same, but the hint optimizes how it runs."
             ),
             resolution=(
-                "The form computed the sum correctly. Tom understood that type hints optimize without changing the result."
+                'The form computed the sum correctly. Tom understood that type hints optimize without changing the result.'
             )),
         _ex('(let [^double d 3.14] (* d 2))', 6.28,
             "a let-binding with a ^double type hint for floating-point arithmetic",
@@ -725,8 +695,7 @@ G11_08 = SubjectCurriculum(
                 "The hint lets the compiler use fast floating-point multiplication without boxing overhead."
             ),
             resolution=(
-                "The form returned 6.28, the correct product. Tom had now used type hints on integers, strings, and floats. "
-                "The pattern was clear: hints were metadata for the compiler, not instructions to change the computation."
+                'The form returned 6.28, the correct product. Tom had now used type hints on integers, strings, and floats. The pattern was clear: hints were metadata for the compiler, not instructions to change the computation.'
             )),
     ],
     subplots=_TOOLSHED_SUBPLOTS, plan_pool=_PLAN_G11,
@@ -875,9 +844,7 @@ G11_14 = SubjectCurriculum(
                 "The catch clause is a blanket: any exception from the host lands in :err, not the REPL."
             ),
             resolution=(
-                "The form succeeded and returned 42. Tom had now wrapped two host calls, and both worked smoothly. "
-                "He understood that try/catch was the village's way of saying to the host: 'Work, but if you fail, "
-                "fail quietly. Let the village handle the error.'"
+                "The form succeeded and returned 42. Tom had now wrapped two host calls, and both worked smoothly. He understood that try/catch was the village's way of saying to the host: 'Work, but if you fail, fail quietly. Let the village handle the error.'"
             )),
         _ex('(try (.length "test") (catch Exception _ :err))', 4,
             "wrapping a host method call in try/catch to guard against errors",
@@ -895,8 +862,7 @@ G11_14 = SubjectCurriculum(
                 "The pattern is the same whether the call is static or instance-based."
             ),
             resolution=(
-                "The form succeeded and returned 4. Tom realized that try/catch was the universal defense: "
-                "it worked for any kind of host call, catching any error that leaked and turning it into a safe value."
+                'The form succeeded and returned 4. Tom realized that try/catch was the universal defense: it worked for any kind of host call, catching any error that leaked and turning it into a safe value.'
             )),
         _ex('(try (do (Math/sqrt 4) :success) (catch Exception _ :err))', ":success",
             "a try/catch that wraps multiple host operations and returns a marker on success",
@@ -914,8 +880,7 @@ G11_14 = SubjectCurriculum(
                 "If all succeed, :success is returned. If any throws, the catch clause returns :err."
             ),
             resolution=(
-                "The form returned :success. Tom had now mastered the try/catch pattern across many scenarios. "
-                "He understood that the village's error handling could protect against the chaos of the host boundary."
+                "The form returned :success. Tom had now mastered the try/catch pattern across many scenarios. He understood that the village's error handling could protect against the chaos of the host boundary."
             )),
     ],
     subplots=_TOOLSHED_SUBPLOTS, plan_pool=_PLAN_G11,

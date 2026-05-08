@@ -82,10 +82,7 @@ G5_01 = SubjectCurriculum(grade=5, subject_id="G5-01",
                 "The runtime walks one path; the other simply isn't."
             ),
             resolution=(
-                "the runner went left — `:a` was the value the fork "
-                "carried back — and the morning's question settled "
-                "without the second arm ever being walked."
-            )),
+                "the runner went left — `:a` was the value the fork carried back — and the morning's question settled without the second arm ever being walked. The form had been built around {drawn.a}, and the value came back accordingly."         )),
         _ex("(if false :a :b)", ":b", "the form (if false :a :b)", "which of :a or :b is returned",
             scenario=(
                 "Carol asked Tom to bring either fleece or grain from the "
@@ -104,10 +101,7 @@ G5_01 = SubjectCurriculum(grade=5, subject_id="G5-01",
                 "its value isn't computed, just passed by."
             ),
             resolution=(
-                "the wind still howled, the condition was false, and Tom "
-                "stayed put — the right arm's `:b` was what the fork produced "
-                "— and Carol nodded, satisfied the form had made the careful choice."
-            )),
+                "the wind still howled, the condition was false, and Tom stayed put — the right arm's `:b` was what the fork produced — and Carol nodded, satisfied the form had made the careful choice. The form had been built around {drawn.a}, and the value came back accordingly."       )),
         _ex("(if (> 5 3) :a :b)", ":a", "the form (if (> 5 3) :a :b)", "the if's branch",
             scenario=(
                 "Tom stood sorting wool by weight at the watchhouse. Carol "
@@ -126,10 +120,7 @@ G5_01 = SubjectCurriculum(grade=5, subject_id="G5-01",
                 "the first arm is taken. `:a` is the result."
             ),
             resolution=(
-                "the form returned `:a`, and Tom dropped the fleece into the "
-                "dyer's basket — the comparison had done its work, and the "
-                "form had steered him to the right choice without guessing."
-            )),
+                "the form returned `:a`, and Tom dropped the fleece into the dyer's basket — the comparison had done its work, and the form had steered him to the right choice without guessing. The form had been built around {drawn.a}, and the value came back accordingly."           )),
     ], subplots=_FORK_SUBPLOTS, plan_pool=_PLAN_G5)
 
 
@@ -158,10 +149,7 @@ G5_02 = SubjectCurriculum(grade=5, subject_id="G5-02",
                 "then adds 1 to whatever the fork produced."
             ),
             resolution=(
-                "the condition was true, the fork returned 10, then `+` added "
-                "1 to it, and the final value was 11 — the fork wasn't just an "
-                "answer; it was a building block in a larger calculation."
-            )),
+                "the condition was true, the fork returned 10, then `+` added 1 to it, and the final value was 11 — the fork wasn't just an answer; it was a building block in a larger calculation. The form had been built around {drawn.a}, and the value came back accordingly."           )),
     ], subplots=_FORK_SUBPLOTS, plan_pool=_PLAN_G5)
 
 
@@ -187,10 +175,7 @@ G5_03 = SubjectCurriculum(grade=5, subject_id="G5-03",
                 "value is returned. `:yes` is the body; it evaluates to itself."
             ),
             resolution=(
-                "the condition was true, the form evaluated the body, and "
-                "`:yes` came back — Tom rang the bell, knowing the form had "
-                "settled the matter and given back the promised value."
-            )),
+                'the condition was true, the form evaluated the body, and `:yes` came back — Tom rang the bell, knowing the form had settled the matter and given back the promised value. The form had been built around {drawn.a}, and the value came back accordingly.'           )),
         _ex("(when false :yes)", None, "the form (when false :yes)", "the value of (when false :yes)",
             scenario=(
                 "The next morning, Carol asked Tom to check the lambs again. "
@@ -209,10 +194,7 @@ G5_03 = SubjectCurriculum(grade=5, subject_id="G5-03",
                 "it's just left behind, untouched."
             ),
             resolution=(
-                "the lambs were still, the condition was false, the form "
-                "returned `nil` — no bell rang, no value came back, and Tom "
-                "understood: `when` only acts when the condition says yes."
-            )),
+                'the lambs were still, the condition was false, the form returned `nil` — no bell rang, no value came back, and Tom understood: `when` only acts when the condition says yes. The form had been built around {drawn.a}, and the value came back accordingly.'           )),
     ], subplots=_FORK_SUBPLOTS, plan_pool=_PLAN_G5)
 
 
@@ -231,7 +213,7 @@ G5_04 = SubjectCurriculum(grade=5, subject_id="G5-04",
                 "`cond` walks through condition pairs in order and returns the value of the first true arm."
             ),
             resolution=(
-                "The first condition was false, the second was true, so the form returned that arm's value."
+                "The first condition was false, the second was true, so the form returned that arm's value. The form had been built around {drawn.a}, and the value came back accordingly."
             )),
     ], subplots=_FORK_SUBPLOTS, plan_pool=_PLAN_G5)
 
@@ -261,11 +243,7 @@ G5_05 = SubjectCurriculum(grade=5, subject_id="G5-05",
                 "returning its value."
             ),
             resolution=(
-                "both conditions were false, the form stepped past them both "
-                "and took the `:else` arm — `:c` was the value returned — and "
-                "Tom dropped the fleece into the catch-all basket, knowing "
-                "every piece had a home."
-            )),
+                'both conditions were false, the form stepped past them both and took the `:else` arm — `:c` was the value returned — and Tom dropped the fleece into the catch-all basket, knowing every piece had a home. The form had been built around {drawn.a}, and the value came back accordingly.'         )),
     ], subplots=_FORK_SUBPLOTS, plan_pool=_PLAN_G5)
 
 
@@ -291,10 +269,7 @@ G5_06 = SubjectCurriculum(grade=5, subject_id="G5-06",
                 "returns its value. The default catches any mismatches."
             ),
             resolution=(
-                "the token read 2, the form found the matching pen marked 2, "
-                "and returned `:two` — the pen door opened, and Tom led the "
-                "lamb to the right place without guessing."
-            )),
+                'the token read 2, the form found the matching pen marked 2, and returned `:two` — the pen door opened, and Tom led the lamb to the right place without guessing. The form had been built around {drawn.a}, and the value came back accordingly.'           )),
         _ex("(case 99 1 :one 2 :two :default)", ":default",
             "case falling through to default", "the default branch",
             scenario=(
@@ -307,7 +282,7 @@ G5_06 = SubjectCurriculum(grade=5, subject_id="G5-06",
                 "`case` checks the value against each key. When no key matches, it returns the fallback arm."
             ),
             resolution=(
-                "The token matched no pen, so the form took the fallback arm and returned the default value."
+                'The token matched no pen, so the form took the fallback arm and returned the default value. The form had been built around {drawn.a}, and the value came back accordingly.'
             )),
     ], subplots=_FORK_SUBPLOTS, plan_pool=_PLAN_G5)
 
@@ -333,10 +308,7 @@ G5_07 = SubjectCurriculum(grade=5, subject_id="G5-07",
                 "value. If all gates are truthy (open), it returns the last one."
             ),
             resolution=(
-                "all three gates were open, the form passed through them all, "
-                "and returned 3 — the last gate's value — Tom walked through the "
-                "fold-gates and stood in the pen, knowing all conditions held."
-            )),
+                "all three gates were open, the form passed through them all, and returned 3 — the last gate's value — Tom walked through the fold-gates and stood in the pen, knowing all conditions held. The form had been built around {drawn.a}, and the value came back accordingly."         )),
         _ex("(or nil false :found)", ":found", "the form (or nil false :found)", "the first truthy value",
             scenario=(
                 "Carol left Tom three messages on three stones."
@@ -348,7 +320,7 @@ G5_07 = SubjectCurriculum(grade=5, subject_id="G5-07",
                 "`or` walks through values left to right and stops at the first truthy one, returning it."
             ),
             resolution=(
-                "The first two stones held nothing, but the third held a real message, so the form returned it."
+                'The first two stones held nothing, but the third held a real message, so the form returned it. The form had been built around {drawn.a}, and the value came back accordingly.'
             )),
     ], subplots=_GATE_SUBPLOTS, plan_pool=_PLAN_G5)
 
@@ -367,7 +339,7 @@ G5_08 = SubjectCurriculum(grade=5, subject_id="G5-08",
                 "`not` takes a value and returns the opposite: falsey becomes true, truthy becomes false."
             ),
             resolution=(
-                "The comparison produced false, `not` flipped it to true, and the form was done."
+                'The comparison produced false, `not` flipped it to true, and the form was done. The form had been built around {drawn.a}, and the value came back accordingly.'
             )),
     ], subplots=_GATE_SUBPLOTS, plan_pool=_PLAN_G5)
 
@@ -393,7 +365,7 @@ G5_09 = SubjectCurriculum(grade=5, subject_id="G5-09",
                 "It applies the recipe twice."
             ),
             resolution=(
-                "The drill-card applied the recipe twice and returned the final result."
+                'The drill-card applied the recipe twice and returned the final result.'
             )),
     ], subplots=_RECIPE_SUBPLOTS, plan_pool=_PLAN_G5)
 
@@ -421,11 +393,7 @@ G5_10 = SubjectCurriculum(grade=5, subject_id="G5-10",
                 "none are skipped."
             ),
             resolution=(
-                "the comb passed each value through: 1+1=2, 2+1=3, 3+1=4, "
-                "and `map` returned [2 3 4] — a new basket with each fleece "
-                "carded — Tom saw the pattern and understood `map` was how to "
-                "do the same thing many times at once."
-            )),
+                'the comb passed each value through: 1+1=2, 2+1=3, 3+1=4, and `map` returned [2 3 4] — a new basket with each fleece carded — Tom saw the pattern and understood `map` was how to do the same thing many times at once. The form had been built around {drawn.a}, and the value came back accordingly.'         )),
         _ex("(map #(* % %) [1 2 3 4])", [1,4,9,16],
             "the form (map #(* % %) [1 2 3 4])", "[1 2 3 4] each squared",
             scenario=(
@@ -438,7 +406,7 @@ G5_10 = SubjectCurriculum(grade=5, subject_id="G5-10",
                 "`map` applies a recipe to each value in the collection and returns the results."
             ),
             resolution=(
-                "The recipe was applied to each value, and `map` returned the collected results."
+                'The recipe was applied to each value, and `map` returned the collected results.'
             )),
     ], subplots=_SIEVE_SUBPLOTS, plan_pool=_PLAN_G5)
 
@@ -458,7 +426,7 @@ G5_11 = SubjectCurriculum(grade=5, subject_id="G5-11",
                 "`filter` takes a test-rule and keeps only values where the rule is true."
             ),
             resolution=(
-                "The form returned only the values that passed the test."
+                'The form returned only the values that passed the test. The form had been built around {drawn.a}, and the value came back accordingly.'
             )),
         _ex("(filter pos? [-2 -1 0 1 2])", [1,2],
             "the form (filter pos? ...)", "the positive numbers",
@@ -472,7 +440,7 @@ G5_11 = SubjectCurriculum(grade=5, subject_id="G5-11",
                 "`filter` works the same way with any test-rule."
             ),
             resolution=(
-                "The form returned only the values that passed the new test."
+                'The form returned only the values that passed the new test. The form had been built around {drawn.a}, and the value came back accordingly.'
             )),
     ], subplots=_SIEVE_SUBPLOTS, plan_pool=_PLAN_G5)
 
@@ -491,7 +459,7 @@ G5_12 = SubjectCurriculum(grade=5, subject_id="G5-12",
                 "`reduce` takes a combination-rule and applies it across the list."
             ),
             resolution=(
-                "The form combined all values into a single result."
+                'The form combined all values into a single result. The form had been built around {drawn.a}, and the value came back accordingly.'
             )),
         _ex("(reduce * [1 2 3 4 5])", 120,"the form (reduce * [1 2 3 4 5])", "5!",
             scenario=(
@@ -504,7 +472,7 @@ G5_12 = SubjectCurriculum(grade=5, subject_id="G5-12",
                 "`reduce` works with any combination-rule, whether addition or multiplication."
             ),
             resolution=(
-                "The form collapsed the numbers into their product."
+                'The form collapsed the numbers into their product. The form had been built around {drawn.a}, and the value came back accordingly.'
             )),
         _ex("(reduce max [3 1 4 1 5 9 2 6])", 9,
             "the form (reduce max [...])", "the maximum",
@@ -518,7 +486,7 @@ G5_12 = SubjectCurriculum(grade=5, subject_id="G5-12",
                 "`reduce` works with any comparison-rule to find extreme values."
             ),
             resolution=(
-                "The form walked through the list keeping track of the largest and returned it."
+                'The form walked through the list keeping track of the largest and returned it. The form had been built around {drawn.a}, and the value came back accordingly.'
             )),
     ], subplots=_TALLYWALK_SUBPLOTS, plan_pool=_PLAN_G5)
 
@@ -545,11 +513,7 @@ G5_13 = SubjectCurriculum(grade=5, subject_id="G5-13",
                 "first item in the list, then continues as normal."
             ),
             resolution=(
-                "the tally began at 100, then 100+1=101, then 101+2=103, then "
-                "103+3=106. The final result was 106 — Tom saw that the initial "
-                "value got factored into the sum from the start, carrying the "
-                "old count forward."
-            )),
+                'the tally began at 100, then 100+1=101, then 101+2=103, then 103+3=106. The final result was 106 — Tom saw that the initial value got factored into the sum from the start, carrying the old count forward. The form had been built around {drawn.a}, and the value came back accordingly.'           )),
         _ex("(reduce + 0 [])", 0,
             "the form (reduce + 0 [])",
             "the value when reducing over empty seq with init 0",
@@ -563,7 +527,7 @@ G5_13 = SubjectCurriculum(grade=5, subject_id="G5-13",
                 "`reduce` with an initial value returns it unchanged when the list is empty."
             ),
             resolution=(
-                "The list was empty, so the form returned the initial value safely."
+                'The list was empty, so the form returned the initial value safely. The form had been built around {drawn.a}, and the value came back accordingly.'
             )),
     ], subplots=_TALLYWALK_SUBPLOTS, plan_pool=_PLAN_G5)
 
@@ -583,7 +547,7 @@ G5_14 = SubjectCurriculum(grade=5, subject_id="G5-14",
                 "`apply` unpacks the basket and passes each item as a separate argument to the recipe."
             ),
             resolution=(
-                "The basket opened and the recipe processed all the arguments, returning the result."
+                'The basket opened and the recipe processed all the arguments, returning the result. The form had been built around {drawn.a}, and the value came back accordingly.'
             )),
         _ex("(apply max [3 1 4 1 5])", 5,
             "the form (apply max ...)", "max of the vector via apply",
@@ -603,10 +567,7 @@ G5_14 = SubjectCurriculum(grade=5, subject_id="G5-14",
                 "by one."
             ),
             resolution=(
-                "the basket opened: 3, 1, 4, 1, 5, the `max` recipe compared "
-                "them all, and the form returned 5 — the largest — Tom saw that "
-                "`apply` turned a basket into separate arguments for any recipe."
-            )),
+                'the basket opened: 3, 1, 4, 1, 5, the `max` recipe compared them all, and the form returned 5 — the largest — Tom saw that `apply` turned a basket into separate arguments for any recipe. The form had been built around {drawn.a}, and the value came back accordingly.'         )),
     ], subplots=_RECIPE_SUBPLOTS, plan_pool=_PLAN_G5)
 
 
@@ -625,7 +586,7 @@ G5_15 = SubjectCurriculum(grade=5, subject_id="G5-15",
                 "`comp` chains recipes right-to-left, applying them in order."
             ),
             resolution=(
-                "The compound recipe applied both steps and returned the final result."
+                'The compound recipe applied both steps and returned the final result.'
             )),
         _ex("((comp str inc) 9)", "10",
             "the form ((comp str inc) 9)", "inc then str of 9",
@@ -646,10 +607,7 @@ G5_15 = SubjectCurriculum(grade=5, subject_id="G5-15",
                 "`str` to the result (10 becomes \"10\")."
             ),
             resolution=(
-                "the compound recipe took 9, applied `inc` (got 10), then "
-                "applied `str` (got \"10\"), and returned the text — Tom saw "
-                "that `comp` could transform not just the number but also the "
-                "type, by chaining recipes in order."
+                'the compound recipe took 9, applied `inc` (got 10), then applied `str` (got "10"), and returned the text — Tom saw that `comp` could transform not just the number but also the type, by chaining recipes in order.'
             )),
     ], subplots=_RECIPE_SUBPLOTS, plan_pool=_PLAN_G5)
 
@@ -676,9 +634,7 @@ G5_16 = SubjectCurriculum(grade=5, subject_id="G5-16",
                 "new recipe that adds 10. When called with 5, it computes 10+5."
             ),
             resolution=(
-                "the partial recipe took 5, added it to the pre-filled 10, and "
-                "returned 15 — Tom saw that `partial` let him customize a recipe "
-                "without changing the original."
+                'the partial recipe took 5, added it to the pre-filled 10, and returned 15 — Tom saw that `partial` let him customize a recipe without changing the original.'
             )),
         _ex("(map (partial * 3) [1 2 3])", [3,6,9],
             "(partial * 3) mapped over [1 2 3]", "each element times 3",
@@ -698,10 +654,7 @@ G5_16 = SubjectCurriculum(grade=5, subject_id="G5-16",
                 "3. `map` applies it to each item in the list."
             ),
             resolution=(
-                "`map` took the partial recipe and applied it three times: "
-                "3*1=3, 3*2=6, 3*3=9, returning [3 6 9] — Tom saw that `partial` "
-                "let him specialize a recipe so `map` could use it elegantly."
-            )),
+                '`map` took the partial recipe and applied it three times: 3*1=3, 3*2=6, 3*3=9, returning [3 6 9] — Tom saw that `partial` let him specialize a recipe so `map` could use it elegantly. The form had been built around {drawn.a}, and the value came back accordingly.'           )),
     ], subplots=_RECIPE_SUBPLOTS, plan_pool=_PLAN_G5)
 
 
@@ -720,7 +673,7 @@ G5_17 = SubjectCurriculum(grade=5, subject_id="G5-17",
                 "`juxt` applies each recipe to the same input and collects the results in a basket."
             ),
             resolution=(
-                "The form applied both recipes and returned the collected results side by side."
+                'The form applied both recipes and returned the collected results side by side.'
             )),
     ], subplots=_RECIPE_SUBPLOTS, plan_pool=_PLAN_G5)
 
@@ -740,7 +693,7 @@ G5_18 = SubjectCurriculum(grade=5, subject_id="G5-18",
                 "`some` tests values until one passes the rule and stops immediately."
             ),
             resolution=(
-                "The form found a match and returned true without checking all values."
+                'The form found a match and returned true without checking all values. The form had been built around {drawn.a}, and the value came back accordingly.'
             )),
         _ex("(some neg? [1 2 3])", None,
             "the form (some neg? [1 2 3])", "the value when no element is negative",
@@ -760,10 +713,7 @@ G5_18 = SubjectCurriculum(grade=5, subject_id="G5-18",
                 "returns nil — nothing matched."
             ),
             resolution=(
-                "the screen caught nothing (all three were positive), and `some` "
-                "returned nil — Tom knew that no negative number existed in the "
-                "list."
-            )),
+                'the screen caught nothing (all three were positive), and `some` returned nil — Tom knew that no negative number existed in the list. The form had been built around {drawn.a}, and the value came back accordingly.'           )),
     ], subplots=_SIEVE_SUBPLOTS, plan_pool=_PLAN_G5)
 
 
@@ -787,10 +737,7 @@ G5_19 = SubjectCurriculum(grade=5, subject_id="G5-19",
                 "an all-or-nothing check."
             ),
             resolution=(
-                "the screen passed all three: 1 is positive, 2 is positive, 3 "
-                "is positive — `every?` returned true — Tom knew that every "
-                "bundle was above zero."
-            )),
+                'the screen passed all three: 1 is positive, 2 is positive, 3 is positive — `every?` returned true — Tom knew that every bundle was above zero. The form had been built around {drawn.a}, and the value came back accordingly.'         )),
         _ex("(every? even? [1 2 3])", False, "the form (every? even? [1 2 3])", "whether all are even",
             scenario=(
                 "Carol asked: are all these numbers even? Tom looked: 1 (odd), 2 "
@@ -808,10 +755,7 @@ G5_19 = SubjectCurriculum(grade=5, subject_id="G5-19",
                 "once one fails."
             ),
             resolution=(
-                "the screen rejected 1 (odd), and `every?` stopped and returned "
-                "false — Tom knew immediately that not every number was even "
-                "without checking all three."
-            )),
+                'the screen rejected 1 (odd), and `every?` stopped and returned false — Tom knew immediately that not every number was even without checking all three. The form had been built around {drawn.a}, and the value came back accordingly.'           )),
     ], subplots=_SIEVE_SUBPLOTS, plan_pool=_PLAN_G5)
 
 
@@ -836,10 +780,7 @@ G5_20 = SubjectCurriculum(grade=5, subject_id="G5-20",
                 "second basket is created."
             ),
             resolution=(
-                "the comb kept [10 20 30] and dropped 40 and 50 — Tom held a "
-                "shorter comb with exactly three knots — `take` had trimmed the "
-                "list to the size he needed."
-            )),
+                'the comb kept [10 20 30] and dropped 40 and 50 — Tom held a shorter comb with exactly three knots — `take` had trimmed the list to the size he needed. The form had been built around {drawn.a}, and the value came back accordingly.'         )),
         _ex("(drop 2 [10 20 30 40 50])", [30,40,50],
             "the form (drop 2 ...)", "all but the first two",
             scenario=(
@@ -852,7 +793,7 @@ G5_20 = SubjectCurriculum(grade=5, subject_id="G5-20",
                 "`drop` skips the first n items and returns all the rest."
             ),
             resolution=(
-                "The form skipped the first items and returned the tail of the sequence."
+                'The form skipped the first items and returned the tail of the sequence. The form had been built around {drawn.a}, and the value came back accordingly.'
             )),
     ], subplots=_SIEVE_SUBPLOTS, plan_pool=_PLAN_G5)
 
@@ -878,10 +819,7 @@ G5_21 = SubjectCurriculum(grade=5, subject_id="G5-21",
                 "with no repeats."
             ),
             resolution=(
-                "the list lost the duplicate 1 and the duplicate 3, leaving [1 2 "
-                "3 4] — Tom saw four distinct brands and understood how many "
-                "different groups existed."
-            )),
+                'the list lost the duplicate 1 and the duplicate 3, leaving [1 2 3 4] — Tom saw four distinct brands and understood how many different groups existed. The form had been built around {drawn.a}, and the value came back accordingly.'           )),
         _ex("(sort [3 1 2])", [1,2,3],
             "the form (sort [3 1 2])", "the sorted seq",
             scenario=(
@@ -900,10 +838,7 @@ G5_21 = SubjectCurriculum(grade=5, subject_id="G5-21",
                 "items rearranged."
             ),
             resolution=(
-                "the list rearranged from [3 1 2] to [1 2 3] — Tom held the "
-                "sorted counts and could see the pattern: the smallest, then the "
-                "medium, then the largest."
-            )),
+                'the list rearranged from [3 1 2] to [1 2 3] — Tom held the sorted counts and could see the pattern: the smallest, then the medium, then the largest. The form had been built around {drawn.a}, and the value came back accordingly.'           )),
     ], subplots=_SIEVE_SUBPLOTS, plan_pool=_PLAN_G5)
 
 
@@ -932,9 +867,7 @@ G5_22 = SubjectCurriculum(grade=5, subject_id="G5-22",
                 "everywhere else, the loop steps and continues."
             ),
             resolution=(
-                "the walk completed the circuit and the loop returned "
-                "the running tally — 120 — without leaving a single "
-                "extra footprint along the fence-line."
+                'the walk completed the circuit and the loop returned the running tally — 120 — without leaving a single extra footprint along the fence-line.'
             )),
     ], subplots=_CIRCUIT_SUBPLOTS, plan_pool=_PLAN_G5)
 

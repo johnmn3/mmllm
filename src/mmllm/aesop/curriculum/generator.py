@@ -1018,6 +1018,31 @@ def _build_placeholders(scene: Scene,
             "emo_regretful":   scene.rng.choice(BW_EMO_REGRETFUL),
             "emo_desperate":   scene.rng.choice(BW_EMO_DESPERATE),
         })
+        # Fix-set 2 (ju2R): when goal_text is empty (atom subjects),
+        # avoid the EMPTY_GOAL_RENDERED bug where templates like
+        # "To {goal_text}, X composed Y" render as "To , X composed Y".
+        # Substitute a type-generic fallback that keeps the prefix
+        # well-formed without leaking the form's literals (FORM_LEAK).
+        if not (example.goal_text or "").strip():
+            f = (example.form or "").strip()
+            if not f.startswith("("):
+                base["goal_text"] = "evaluate the literal"
+            else:
+                head = f[1:].split(None, 1)[0] if len(f) > 1 else ""
+                if head in {"=", "not=", "<", ">", "<=", ">=",
+                             "zero?", "pos?", "neg?", "nil?", "true?",
+                             "false?", "symbol?", "keyword?", "string?",
+                             "number?", "boolean?", "vector?", "list?",
+                             "map?", "set?", "seq?", "coll?",
+                             "even?", "odd?", "empty?", "some?", "any?",
+                             "every?", "contains?", "instance?"}:
+                    base["goal_text"] = "evaluate the predicate"
+                elif head in {"and", "or", "not"}:
+                    base["goal_text"] = "evaluate the boolean form"
+                elif head in {"if", "when", "cond", "case"}:
+                    base["goal_text"] = "evaluate the conditional form"
+                else:
+                    base["goal_text"] = "evaluate the form"
 
     return base
 

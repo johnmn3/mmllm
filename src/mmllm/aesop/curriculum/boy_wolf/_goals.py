@@ -186,7 +186,7 @@ GOALS: dict[str, dict[str, str]] = {
     '(+ 1 2) ; sum of one and two': {
         "concept": 'the addition with a trailing comment',
         "what":    'the result, ignoring the comment',
-        "goal":    'add 1 and 2, with a single-semicolon trailing comment',
+        "goal":    'add 1 and 2 with a trailing comment',
     },
     '(+ 10 20 30)': {
         "concept": 'the sum of three numbers',
@@ -874,17 +874,17 @@ GOALS: dict[str, dict[str, str]] = {
         "goal":    'evaluate three arithmetic expressions in sequence and return the result of the last one',
     },
     '(do (def ^:dynamic *p* 1) (binding [*p* 99] *p*) *p*)': {
-        "concept": 'dynamic var, binding, read after',
+        "concept": 'the dynamic var rebound inside a binding form, read inside, then read again outside',
         "what":    'the value of the dynamic var when read after the binding form unwound',
         "goal":    'define a dynamic var *p* as 1, use binding to rebind it to 99 inside, and read its value after binding exits',
     },
     '(do (def ^:dynamic *p* 1) (binding [*p* 99] *p*))': {
-        "concept": 'dynamic var, binding, read',
+        "concept": 'the dynamic var rebound inside a binding form and read',
         "what":    'the value of the dynamic var when read inside the binding form after defining it and rebinding',
         "goal":    'define a dynamic var *p* as 1, use binding to rebind it to 99, and read its value inside',
     },
     '(do (def a (atom 0)) (compare-and-set! a 0 1) @a)': {
-        "concept": 'atom, CAS, deref',
+        "concept": 'the atom updated via compare-and-set and read',
         "what":    'the value returned by dereferencing a after defining a as an atom holding 0 and performing a successful compare-and-set to 1',
         "goal":    'construct an atom holding 0, perform a compare-and-set checking for 0 and setting to 1, and dereference',
     },
@@ -899,17 +899,17 @@ GOALS: dict[str, dict[str, str]] = {
         "goal":    'construct an atom holding 0, set a number? validator on it, atomically swap by applying inc, and dereference',
     },
     '(do (def a (atom 0)) (swap! a inc) @a)': {
-        "concept": 'atom, swap, deref',
+        "concept": 'the atom updated atomically and then read',
         "what":    'the value returned by dereferencing a after defining an atom holding 0, swapping it via inc, and dereferencing',
         "goal":    'construct an atom holding 0, atomically swap it by applying inc, and dereference',
     },
     '(do (def a (atom 10)) (swap! a + 5) @a)': {
-        "concept": 'atom, swap, deref',
+        "concept": 'the atom updated atomically and then read',
         "what":    'the value returned by dereferencing a after defining a as an atom holding 10 and swapping it via + 5',
         "goal":    'construct an atom holding 10, atomically swap it by applying + to 5, and dereference the result',
     },
     '(do (def a (atom 5)) (compare-and-set! a 0 99) @a)': {
-        "concept": 'atom, failed CAS, deref',
+        "concept": 'the atom guarded by a compare-and-set whose expected value did not match',
         "what":    'the value returned by dereferencing a after defining a as an atom holding 5 and attempting a compare-and-set that fails',
         "goal":    'construct an atom holding 5, perform a compare-and-set checking for 0 and setting to 99, and dereference',
     },
@@ -924,7 +924,7 @@ GOALS: dict[str, dict[str, str]] = {
         "goal":    'construct an atom holding 7 and dereference it using @',
     },
     '(do (def a (atom :start)) (reset! a :done) @a)': {
-        "concept": 'atom, reset, deref',
+        "concept": 'the atom reset to a new value and then read',
         "what":    'the value returned by dereferencing a after defining a as an atom holding a start keyword and resetting it to done',
         "goal":    'construct an atom holding a start keyword, atomically reset it to a done keyword, and dereference the result',
     },
@@ -934,22 +934,22 @@ GOALS: dict[str, dict[str, str]] = {
         "goal":    'construct refs a and b, perform a coordinated transaction that alters both by applying inc, and dereference both',
     },
     '(do (def ag (agent 0)) (send ag inc) (await ag) @ag)': {
-        "concept": 'agent, send, await, deref',
+        "concept": 'the agent sent a function asynchronously, awaited, and read',
         "what":    'the value returned by dereferencing ag after defining an agent holding 0, using send to dispatch inc, awaiting, and dereferencing',
         "goal":    'construct an agent holding 0, use send to asynchronously apply inc, await its completion, and dereference',
     },
     '(do (def ag (agent 0)) (send ag inc) (send ag inc) (await ag) @ag)': {
-        "concept": 'agent, double send, await, deref',
+        "concept": 'the agent sent two updates in succession, awaited, and read',
         "what":    'the value returned by dereferencing ag after defining an agent holding 0, sending inc twice asynchronously, awaiting, and dereferencing',
         "goal":    'construct an agent holding 0, asynchronously send inc twice, synchronize with await, and dereference',
     },
     '(do (def ag (agent 0)) (send-off ag inc) (await ag) @ag)': {
-        "concept": 'agent, send-off, await, deref',
+        "concept": 'the agent dispatched via send-off, awaited, and read',
         "what":    'the value returned by dereferencing ag after defining an agent holding 0, using send-off to dispatch inc, awaiting, and dereferencing',
         "goal":    'construct an agent holding 0, use send-off to asynchronously apply inc, await its completion, and dereference',
     },
     '(do (def ag (agent 5)) (send ag + 10) (await ag) @ag)': {
-        "concept": 'agent, send, await, deref',
+        "concept": 'the agent sent a function asynchronously, awaited, and read',
         "what":    'the value returned by dereferencing ag after defining an agent holding 5, sending + 10 asynchronously, awaiting, and dereferencing',
         "goal":    'construct an agent holding 5, asynchronously send + with 10 to it, await its completion, and dereference',
     },
@@ -964,22 +964,22 @@ GOALS: dict[str, dict[str, str]] = {
         "goal":    'define g at the top level, shadow it in a let with a different value, and compute g+1 inside the let',
     },
     '(do (def lock (Object.)) (locking lock (+ 1 2)))': {
-        "concept": 'lock, locking, arithmetic',
+        "concept": 'the arithmetic evaluated inside a critical section guarded by locking',
         "what":    'the value returned by evaluating an addition inside a locked critical section after creating a monitor and acquiring the lock',
         "goal":    'create an object to use as a monitor, acquire the lock, and evaluate an addition inside',
     },
     '(do (def lock (Object.)) (locking lock 42))': {
-        "concept": 'lock, locking, literal',
+        "concept": 'the literal value evaluated inside a critical section guarded by locking',
         "what":    'the literal value returned by evaluating it inside a locked critical section after creating a monitor and acquiring the lock',
         "goal":    'create an object to use as a monitor, acquire the lock, and evaluate a literal inside',
     },
     '(do (def p (promise)) (deliver p 42) @p)': {
-        "concept": 'promise, deliver, deref',
+        "concept": 'the promise delivered a value and then dereferenced',
         "what":    'the value returned by dereferencing a promise after defining it, delivering a number to it, and dereferencing',
         "goal":    'construct a promise, deliver 42 to it, and dereference to get the delivered value',
     },
     '(do (def p (promise)) (deliver p :done) @p)': {
-        "concept": 'promise, deliver, deref',
+        "concept": 'the promise delivered a value and then dereferenced',
         "what":    'the value returned by dereferencing a promise after defining it, delivering a keyword to it, and dereferencing',
         "goal":    'construct a promise, deliver a completion keyword to it, and dereference to get the delivered value',
     },
@@ -989,17 +989,17 @@ GOALS: dict[str, dict[str, str]] = {
         "goal":    'construct an atom holding an idle value as progress, atomically reset it to running, and dereference the result',
     },
     '(do (def r (ref 0)) (dosync (alter r inc)) @r)': {
-        "concept": 'ref, dosync, alter, deref',
+        "concept": 'the ref altered inside a transaction and read',
         "what":    'the value returned by dereferencing r after defining a ref holding 0, altering it via inc inside dosync, and dereferencing',
         "goal":    'construct a ref holding 0, perform a transactional alter by applying inc inside dosync, and dereference',
     },
     '(do (def r (ref 10)) (dosync (alter r + 5)) @r)': {
-        "concept": 'ref, dosync, alter, deref',
+        "concept": 'the ref altered inside a transaction and read',
         "what":    'the value returned by dereferencing r after defining a ref holding 10, performing a transactional alter via + 5, and dereferencing',
         "goal":    'construct a ref holding 10, perform a transactional alter by applying + with 5 inside dosync, and dereference',
     },
     '(do (def r (ref 100)) (dosync (ref-set r 7)) @r)': {
-        "concept": 'ref, dosync, ref-set, deref',
+        "concept": 'the ref reset inside a transaction and read',
         "what":    'the value returned by dereferencing r after defining a ref holding 100, setting it to 7 inside dosync, and dereferencing',
         "goal":    'construct a ref holding 100, perform a transactional ref-set to 7 inside dosync, and dereference',
     },
@@ -1009,12 +1009,12 @@ GOALS: dict[str, dict[str, str]] = {
         "goal":    'define step1 as 1, then define step2 as step1 plus 1, then return step2',
     },
     '(do (def v (volatile! 0)) (vswap! v inc) @v)': {
-        "concept": 'volatile, vswap, deref',
+        "concept": 'the volatile updated by vswap! and read',
         "what":    'the value returned by dereferencing v after defining a volatile holding 0, performing a non-transactional swap via inc, and dereferencing',
         "goal":    'construct a volatile holding 0, perform a non-transactional swap by applying inc, and dereference',
     },
     '(do (def v (volatile! 5)) (vreset! v 99) @v)': {
-        "concept": 'volatile, vreset, deref',
+        "concept": 'the volatile reset by vreset! and read',
         "what":    'the value returned by dereferencing v after defining a volatile holding 5, performing a non-transactional reset to 99, and dereferencing',
         "goal":    'construct a volatile holding 5, perform a non-transactional reset to 99, and dereference',
     },
@@ -1794,12 +1794,12 @@ GOALS: dict[str, dict[str, str]] = {
         "goal":    'submit the integer 42 with a double-semicolon trailing comment',
     },
     '@(future (* 6 7))': {
-        "concept": 'future, multiply, deref',
+        "concept": 'the multiplication wrapped in a future and dereferenced',
         "what":    'the value returned by dereferencing a future that multiplies 6 and 7',
         "goal":    'construct a future that multiplies 6 and 7, and dereference it',
     },
     '@(future (+ 1 2))': {
-        "concept": 'future, add, deref',
+        "concept": 'the addition wrapped in a future and dereferenced',
         "what":    'the value the messenger returns from adding 1 and 2',
         "goal":    'dispatch a runner to compute the sum of 1 and 2; later, ask the runner for the answer',
     },
@@ -1846,11 +1846,6 @@ def get_goal(form: str, concept: str, what: str) -> str:
     if not what or not form:
         return ""
     f = form.strip()
-    # Narrow allow-list: only synthesize for forms that are clearly
-    # metaphor-rich constructs (Clojure top-level definers + type-hint
-    # bindings). Atom-style forms (literal numbers, strings, simple
-    # arithmetic) stay on the {form_display} path. The check below
-    # tip-toes around FORM_LEAK / ANSWER_LEAK_STRING.
     needs_synthesis = (
         "defprotocol" in f
         or "defmacro" in f
