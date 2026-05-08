@@ -72,9 +72,25 @@ def _infer_pool(value: Any) -> str:
                 return name
         return "KW_GENERIC"  # fallback
     if isinstance(value, list):
-        if all(isinstance(x, int) for x in value):
+        if all(isinstance(x, int) and not isinstance(x, bool) for x in value):
             return "COLL_INT_SHORT"
-        return "COLL_INT_SHORT"  # fallback for mixed-type lists
+        # Keyword/string/sym lists — keep them homogeneous typed
+        if all(isinstance(x, tuple) and len(x) == 2 and x[0] == "__kw__"
+               for x in value):
+            # Try to detect theme based on first element membership
+            from mmllm.aesop.curriculum.scalar_pools import (
+                KW_FRUIT, KW_ANIMAL, KW_COLOR, KW_TOOL,
+            )
+            for pool, coll_pool in (
+                (KW_FRUIT,  "COLL_KW_FRUIT_SHORT"),
+                (KW_ANIMAL, "COLL_KW_ANIMAL_SHORT"),
+                (KW_COLOR,  "COLL_KW_COLOR_SHORT"),
+            ):
+                if value and value[0] in pool.values:
+                    return coll_pool
+            return "COLL_KW_FRUIT_SHORT"  # fallback theme
+        # Mixed-type collection — too risky to parametrize; signal skip
+        return ""
     if isinstance(value, dict):
         return "MAP_FRUIT_INT"  # rough fallback; rewriting common case
     return ""  # unrecognized — caller should fall back to legacy
