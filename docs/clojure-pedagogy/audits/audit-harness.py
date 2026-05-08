@@ -559,7 +559,111 @@ def check_record(rec, sub, example):
                         "'form that <noun>' rendered without a verb — "
                         "template should be 'form for {concept_phrase}'"))
 
+    # Cat-J — insufficient emotion-and-adjective grounding. The user's
+    # affirmative directive: prose should NAME the character's emotion
+    # at appropriate intensity AND name an environmental adjective that
+    # maps to the algorithmic situation. Two failure modes:
+    #
+    #   (1) total grounding deficit: user_msg lacks BOTH any drawn-value
+    #       reference (literals from rec.code_str's ints/keywords/strings)
+    #       AND any phrase from the rich EMO pools (EMO_PATIENT,
+    #       EMO_REGRETFUL, EMO_CONTENT, EMO_BOASTFUL, EMO_PROUD,
+    #       EMO_DESPERATE, EMO_HUNGRY).
+    #   (2) generic-adverb shortcut: user_msg has an emotion phrase BUT
+    #       it's "softly" / "quietly" / "gently" / "calmly" — bare adverb
+    #       rather than an environment-anchored EMO phrase.
+    #
+    # Both modes are LOW_GROUNDING.
+    _check_grounding(user, rec, issues)
+
     return issues
+
+
+# Cached EMO-pool fragments for fast LOW_GROUNDING detection.
+_EMO_FRAGMENTS = None
+
+
+def _emo_fragments():
+    """Distinctive opening fragments from the rich EMO pools so we can
+    detect whether the user_msg carries an environment-anchored emotion
+    phrase (as opposed to a bare adverb)."""
+    global _EMO_FRAGMENTS
+    if _EMO_FRAGMENTS is not None:
+        return _EMO_FRAGMENTS
+    try:
+        from mmllm.aesop.fables import (
+            EMO_PROUD, EMO_PATIENT, EMO_REGRETFUL, EMO_CONTENT,
+            EMO_DESPERATE, EMO_HUNGRY,
+        )
+    except ImportError:
+        _EMO_FRAGMENTS = ()
+        return _EMO_FRAGMENTS
+    pools = (EMO_PROUD, EMO_PATIENT, EMO_REGRETFUL, EMO_CONTENT,
+             EMO_DESPERATE, EMO_HUNGRY)
+    # Optional milkmaid-aligned EMO_BOASTFUL.
+    try:
+        from mmllm.aesop.curriculum.emotion_pools import EMO_BOASTFUL
+        pools = pools + (EMO_BOASTFUL,)
+    except ImportError:
+        pass
+    out = set()
+    for pool in pools:
+        for phrase in pool:
+            # Use the first 12-20 characters as the distinctive fragment.
+            frag = phrase[:18].lower().rstrip(",.!?;:")
+            if len(frag) >= 8:
+                out.add(frag)
+    _EMO_FRAGMENTS = tuple(out)
+    return _EMO_FRAGMENTS
+
+
+def _drawn_literals(form: str):
+    """Extract distinctive scalar literals from a form for grounding
+    detection: numbers, keywords, and string contents (>=2 chars)."""
+    if not form:
+        return ()
+    literals = []
+    # ints (positive + negative)
+    for m in re.finditer(r"-?\d+", form):
+        v = m.group(0)
+        # Skip very common numbers that appear ambient in prose.
+        if v not in ("0", "1", "2"):
+            literals.append(v)
+    # keywords (:foo)
+    for m in re.finditer(r":[a-zA-Z][a-zA-Z0-9-]*", form):
+        literals.append(m.group(0))
+    # double-quoted strings
+    for m in re.finditer(r'"([^"]{2,})"', form):
+        literals.append(m.group(1))
+    return tuple(literals)
+
+
+def _check_grounding(user, rec, issues):
+    """LOW_GROUNDING — affirmative Cat-J check."""
+    user_lower = user.lower()
+    # generic-adverb shortcut: presence of bare adverbs without an
+    # accompanying rich EMO fragment.
+    has_generic_adverb = bool(re.search(
+        r"\bsaid (softly|quietly|gently|calmly)\b", user_lower
+    ))
+    has_emo_fragment = any(frag in user_lower for frag in _emo_fragments())
+    if has_generic_adverb and not has_emo_fragment:
+        issues.append(("LOW_GROUNDING",
+                        "user_msg uses a bare 'said softly/quietly/"
+                        "gently/calmly' adverb without a rich EMO phrase"))
+        return
+    # total grounding deficit: no drawn-literal reference AND no EMO
+    # fragment.
+    literals = _drawn_literals(rec.code_str)
+    has_literal_in_user = False
+    for lit in literals:
+        if lit and lit in user:
+            has_literal_in_user = True
+            break
+    if not has_literal_in_user and not has_emo_fragment:
+        issues.append(("LOW_GROUNDING",
+                        "user_msg lacks both a form-literal anchor and "
+                        "an EMO-pool phrase — no environmental grounding"))
 
 
 def per_example_records(sub, example, n: int, seed: int):

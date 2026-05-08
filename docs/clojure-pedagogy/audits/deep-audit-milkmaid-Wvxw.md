@@ -100,18 +100,71 @@ All four detectors fire correctly on synthetic test cases (verified manually). O
 
 **Cross-fable observation (FYI, not in scope):** The new `HANGING_FORM_THAT` detector catches 1 issue in `tortoise_hare`, 19 in `boy_wolf`, and 9 in `dog_shadow` — all pre-existing template bugs in those fables that the older detectors missed. Out-of-slice for this audit; flagged for follow-up.
 
-## Caveats
-
-- I read 443 generated records, not the full ~109,000 the curriculum can produce at standard `n_per_example=222`. Any pattern that appears <5x per subject in random samples is likely under-detected. The new detectors will catch many of those over time.
-- I only addressed Cat-A (logical), Cat-B (syntax), Cat-C (grammar) papercuts. Cat-J (insufficient emotion-and-adjective grounding) appeared in the haiku reader's report (29 records of generic "softly|quietly|gently" emotional shorthand and 29 records of "the X operation" generic concept phrases) but I did not author a deeper richer-emotion lift in this slice — those need scenario-by-scenario authoring and would balloon the change set. Document follows.
-- Cat-D (spelling) was clean. Cat-E (fable polarity) was clean — milkmaid's daydream-vs-care polarity was preserved across all 443 reviewed records. Cat-F, Cat-G, Cat-H, Cat-I were thin (1-2 records each, mostly trace-amount artifacts).
-
 ## Pedagogical lens preserved
 
 The milkmaid moral — daydream vs. care — held up across the 443 records: in every record I reviewed, the milkmaid was the one who guesses, boasts, or tries to know without counting; the farmer (or another careful character) is the one who patiently sorts, counts, or evaluates. None of the source-edits inverted this polarity.
 
-## Files changed
+---
 
-- `src/mmllm/aesop/curriculum/milkmaid/_metaphor_pools.py` — 14 source edits across 4 distinct patterns plus the wholesale 81-substitution `_he_she` → `_he_she_cap` pass.
-- `docs/clojure-pedagogy/audits/audit-harness.py` — 4 new detectors appended to `check_record()`.
+## Remediation (rebased onto integration branch)
+
+The first commit of this audit (`c50a1c3`) was based on `main`, but the integration branch carrying the parametric scalar system, the new pools, the form_families library, the auto_parametric migration tool, the bb_verifier, and the audit playbook is `claude/analyze-repo-status-rN0vt`. Re-based onto the integration branch:
+
+- Cherry-picked `c50a1c3` cleanly onto integration (no conflicts; integration's edits and the audit's edits don't overlap).
+- All seven integration-branch smoke tests pass on the rebased branch (`scalar_pools`, `form_parser`, `form_families`, `auto_parametric`, `character_pools`, `opener_pools`, `emotion_pools`, plus `scripts/test_parametric_e2e.py`).
+- Resulting branch: `claude/audit-milkmaid-Wvxw-remediated`.
+
+The integration branch's audit harness is stricter than `main`'s; baseline milkmaid issue count when the four prior detectors plus the integration's pre-existing checks run is **29** (DOUBLE_PREP=1, FORM_LEAK=1, ANSWER_LEAK=3, ANSWER_LEAK_STRING=1, HIGH_LENGTH=23). Those 29 are pre-existing on the integration branch and out-of-scope for this remediation (per "Don't touch any fable other than milkmaid" — they live in milkmaid templates but require pool-level investigation; left for a follow-up audit slice).
+
+## Cat-J fixes (completion)
+
+The prior commit deferred the Cat-J grounding lift. This remediation completes it.
+
+The haiku reader had identified ~58 records with "softly|quietly|gently" generic adverbs and "the X operation" generic concept phrases. Tracing those back to source, the bare-adverb shortcut lives in 4 templates in `_metaphor_pools.py` and the flat-reaction-beat lives in another 4-5 templates. **12 distinct templates were rewritten at the source** to add: (a) named character emotion via `{emo_proud}` / `{emo_patient}` / `{emo_regretful}` / `{emo_content}` interpolation drawn from the rich EMO pools, (b) at least one concrete environmental adjective (the pail is heavy, the road is long, the silver is heavy, the copper is warm, the parchment is cool, the chalk's edge is cool, etc.), and (c) a sentence that maps that adjective to the algorithmic situation (heavy pail ↔ accumulator load, long road ↔ collection length, an empty pail ↔ the form's honest result of an absent rule, the wicker remembers ↔ persistent immutable structure).
+
+The 12 lifts (file: `src/mmllm/aesop/curriculum/milkmaid/_metaphor_pools.py`):
+
+1. **`said quietly` → `said {emo_patient}, the chalk's edge cool against {farmer_his_her} fingers`** (atomic-update template, line ~258). Names: chalk's edge, cool, fingers (touch). Maps: shared ledger ↔ atomic update.
+2. **`said calmly` → `said {emo_patient}` plus pail-heavy / long-road framing** (counting template, line ~298). Names: pail heavy, road long. Maps: heavy pail ↔ accumulator load; coins do not lie ↔ honest tally.
+3. **`said gently` → `said {emo_patient}` plus market-square / copper-cool framing** (declared-to-traders template, line ~322). Names: market square, copper cool, road long. Maps: long road / counted steps ↔ step-by-step iteration.
+4. **`said` (bare) → `said, {emo_content}` plus silver-heavy / copper-warm framing** (yesterday's-sales template, line ~308). Names: silver heavy, copper warm, market a long walk. Maps: heap weight ↔ summation; carry coin to total ↔ form-as-count.
+5. **`asked. {farmer_he_she} replied` → `replied, {emo_patient}` plus three-heaps-patient framing** (sort-coins template, line ~315). Names: three heaps patient and even, weight cool, value plain. Maps: stacking ↔ combine; slow-certain-irrevocable ↔ form's logic.
+6. **`tried to guess the fortune` → `tried to guess the fortune, {emo_proud}, the dairy cool and the imagined market still far away`** (cache template, line ~336). Names: dairy cool, imagined market far. Maps: heavy heap ↔ honest weight; daydream of fortune ↔ slippery numbers.
+7. **`said gently` → `said, {emo_patient}` plus parchment-cool / ink-sharp framing** (echo-vs-original template, line ~561). Names: parchment cool, ink sharper, copy faintly smudged. Maps: original scroll ↔ canonical source; echo ↔ stale/aliased copy.
+8. **`smiled and said` → `touched the milkmaid's apron … said, {emo_patient}`** (let-binding pouch template, line ~74). Names: cloth still cool from morning dairy, pocket small, road long. Maps: small pocket ↔ scope edge; "fits there fits only for one stretch" ↔ binding lifetime.
+9. **`smiled and said, "No"` → `weighed the basket … {emo_patient}`** (immutable-collection template, line ~161). Names: wicker cool, load honest, basket heavy. Maps: wicker remembers ↔ persistent immutable structure; basket heavy because of contents ↔ value-driven.
+10. **`smiled and said, "No"` → `shook {his_her} head, {emo_patient}, the strainer dripping in {his_her} steady hand`** (filter-rule template, line ~237). Names: milk pooled cold and useless, strainer dripping, steady hand. Maps: empty pail ↔ honest result of absent rule.
+11. **`smiled and said` → `tapped the pail … replied, {emo_patient}`** (chalk-mark vs contents template, line ~847). Names: pail wood cool and heavy, chalk mark light, label vs contents. Maps: light label ↔ symbol; heavy pail ↔ value; lifting ↔ deref.
+12. **`read it and said` → `read it, the slip thin between {his_her} fingers, and said, {emo_patient}`** (recipe-rewrite-macro template, line ~737). Names: slip thin, day short, recipe long, lines shorter and quantities precise. Maps: long-recipe / short-day ↔ macro expansion budget; precise quantities ↔ deterministic rewrite.
+
+Each lift retires the pattern across every render that fires the affected template. Each EMO interpolation also brings randomized variety across the rich pools (199 band entries, 396 archetype entries combined).
+
+### Cat-J — LOW_GROUNDING detector
+
+Added a fifth audit detector to `audit-harness.py`:
+
+5. **`LOW_GROUNDING`** — fires when user_msg lacks BOTH (i) any drawn-value reference (any int>2 / keyword / quoted string from `rec.code_str` appears in user_msg) AND (ii) any phrase fragment from the rich EMO pools (EMO_PATIENT, EMO_REGRETFUL, EMO_CONTENT, EMO_BOASTFUL, EMO_PROUD, EMO_DESPERATE, EMO_HUNGRY). Also fires on the generic-adverb shortcut: `said softly|quietly|gently|calmly` without an accompanying rich EMO fragment. Both modes are LOW_GROUNDING — the affirmative directive is "name the emotion AND the environmental adjective AND map it to the algorithmic situation"; records that satisfy neither component fail Cat-J.
+
+The detector caches the EMO pool fragments at first call (lazy import) and uses simple substring matching, so it adds negligible cost to the audit pass.
+
+### Cat-J — before / after (LOW_GROUNDING counts on milkmaid)
+
+| State | Total milkmaid issues | LOW_GROUNDING |
+| --- | ---: | ---: |
+| Before Cat-J lifts (cherry-pick state on integration) | 507 | 478 |
+| After 12 source-template lifts | 427 | 398 |
+
+LOW_GROUNDING dropped by **80 records (16.7% reduction in LOW_GROUNDING)** from 12 source-template edits. The remaining 398 LOW_GROUNDING flags identify records whose templates haven't been Cat-J-lifted yet — they are tractable per-template fixes (each remaining target template fires across many records, so subsequent slices can drive the count further down with similar leverage).
+
+## Files changed (combined original + remediation)
+
+- `src/mmllm/aesop/curriculum/milkmaid/_metaphor_pools.py` — 14 prose-correctness edits from the original audit (Cat-A, Cat-B, Cat-C) plus 12 Cat-J grounding lifts in the remediation.
+- `docs/clojure-pedagogy/audits/audit-harness.py` — 4 detectors from the original audit (`SENTENCE_START_LOWER_PRONOUN`, `PRONOUN_AS_VOCATIVE`, `FOR_GOAL_TEXT_VERB_INCONGRUITY`, `HANGING_FORM_THAT`) plus 1 from the remediation (`LOW_GROUNDING`).
 - `docs/clojure-pedagogy/audits/deep-audit-milkmaid-Wvxw.md` — this document.
+
+## Caveats (combined)
+
+- The original deep-read sampled 443 generated records; the remediation's Cat-J read sampled an additional 550 records (seed=42, 5 per example across grades 2/4/6/8/9/12). Patterns appearing <5x per subject in random samples are still likely under-detected.
+- Cat-J lifts focus on the 12 most-fired templates that contained bare adverbs or flat-reaction beats. Other templates (the further 398 LOW_GROUNDING flags after lifts) carry less-obvious grounding deficits — those are good targets for the next audit slice.
+- The 29 pre-existing milkmaid issues from the integration branch's stricter audit (DOUBLE_PREP=1, FORM_LEAK=1, ANSWER_LEAK=3, ANSWER_LEAK_STRING=1, HIGH_LENGTH=23) are not addressed here — the remediation's scope was Cat-J completion, not a fresh full-spectrum audit on the integration branch. They're pre-existing as of `36fd180` and tractable for a follow-up.
+- Cat-D (spelling) was clean. Cat-E (fable polarity) preserved — milkmaid daydreams/boasts; farmer counts patiently. None of the 12 lifts inverted this. Cat-F/G/H/I were thin during the original read.
