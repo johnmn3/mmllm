@@ -655,11 +655,18 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 - issues: {'LOW_GROUNDING': 1}
     - [LOW_GROUNDING] form=`(or nil false :found)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
 
+### G5-09: fn as value
+
+- examples: 1
+- variety @ n=50: 1.00
+- issues: {'AND_HANDED_BACK_CADENCE': 1}
+    - [AND_HANDED_BACK_CADENCE] form=`((fn [f x] (f (f x))) inc 5)` — user_msg tail has 3 performed/handed-back/returned verbs — AI-output verb-and-verb cadence
+
 ### G5-10: map
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'HIGH_LENGTH': 1, 'CLAUSE_STACK_OVERFLOW': 3, 'NUMERAL_LIST_IN_GOAL': 3}
+- issues: {'HIGH_LENGTH': 1, 'CLAUSE_STACK_OVERFLOW': 3, 'NUMERAL_LIST_IN_GOAL': 3, 'DOUBLED_INPUT_VALUE_PARENS': 1}
     - [HIGH_LENGTH] form=`(map inc [1 2 3])` — user_msg 264 words
     - [CLAUSE_STACK_OVERFLOW] form=`(map inc [1 2 3])` — sentence with 6 commas reads as AI-output cadence: 'To pour the vector containing 1, 2, 3 through a sieve whose rule is inc, collect'
     - [NUMERAL_LIST_IN_GOAL] form=`(map #(* % %) [1 2 3 4])` — goal_text contains 4 numerals across 4 commas — comma-list of numerals blows the sentence's clause budget; use a range or 'these numbers' framing
@@ -848,8 +855,9 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'REPL_TRIPLE_VOICE': 1, 'CLAUSE_STACK_OVERFLOW': 1}
+- issues: {'REPL_TRIPLE_VOICE': 1, 'DOUBLED_INPUT_VALUE_PARENS': 1, 'CLAUSE_STACK_OVERFLOW': 1}
     - [REPL_TRIPLE_VOICE] form=`(clojure.string/split "src:test" #":")` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
+    - [DOUBLED_INPUT_VALUE_PARENS] form=`(clojure.string/split "src:test" #":")` — user_msg contains two or more 'as the input value' parentheticals — auto-closer fired twice or authored prose duplicated it
     - [CLAUSE_STACK_OVERFLOW] form=`(count ["src" "test" "resources"])` — sentence with 6 commas reads as AI-output cadence: 'To count the number of entries in a vector of classpath directories,\nthe elder, '
 
 ### G6-12: Multiple files in one project
@@ -1037,13 +1045,13 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 0.99
-- issues: {'HIGH_LENGTH': 1, 'FORM_DISPLAY_AND_FORM_NOUN': 1, 'LOW_GROUNDING': 3, 'PROCEDURAL_OPENER': 2, 'GOAL_FALLBACK_GENERIC': 3}
+- issues: {'HIGH_LENGTH': 1, 'FORM_DISPLAY_AND_FORM_NOUN': 1, 'DOUBLED_INPUT_VALUE_PARENS': 1, 'LOW_GROUNDING': 3, 'PROCEDURAL_OPENER': 2, 'GOAL_FALLBACK_GENERIC': 3}
     - [HIGH_LENGTH] form=`(defn speak [k] (cond (= k :wolf) "howl" (= k :flo` — user_msg 222 words
     - [FORM_DISPLAY_AND_FORM_NOUN] form=`(defn speak [k] (cond (= k :wolf) "howl" (= k :flo` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
+    - [DOUBLED_INPUT_VALUE_PARENS] form=`(defn speak [k] (cond (= k :wolf) "howl" (= k :flo` — user_msg contains two or more 'as the input value' parentheticals — auto-closer fired twice or authored prose duplicated it
     - [LOW_GROUNDING] form=`(let [speak (fn [k] (cond (= k :wolf) "howl" (= k ` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [PROCEDURAL_OPENER] form=`(let [speak (fn [k] (cond (= k :wolf) "howl" (= k ` — user_msg jumps from fable-opener directly to 'To {goal}, [pronoun] composed ...' without a scene-setting sentence
     - [GOAL_FALLBACK_GENERIC] form=`(let [speak (fn [k] (cond (= k :wolf) "howl" (= k ` — user_msg uses generic 'To evaluate the X, ...' fallback AND no drawn-literal anchor — add a canonical GOALS entry for richer prose
-    - [LOW_GROUNDING] form=`(let [speak (fn [k] (cond (= k :wolf) "howl" (= k ` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
 
 ### G8-02: deftype introduction
 
@@ -1300,9 +1308,10 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 0.99
-- issues: {'LOW_GROUNDING': 2, 'CLAUSE_STACK_OVERFLOW': 1}
+- issues: {'LOW_GROUNDING': 2, 'AND_HANDED_BACK_CADENCE': 1, 'CLAUSE_STACK_OVERFLOW': 1}
     - [LOW_GROUNDING] form=`@(future (+ 1 2))` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [LOW_GROUNDING] form=`@(future (+ 1 2))` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+    - [AND_HANDED_BACK_CADENCE] form=`@(future (* 6 7))` — user_msg tail has 3 performed/handed-back/returned verbs — AI-output verb-and-verb cadence
     - [CLAUSE_STACK_OVERFLOW] form=`@(future (* 6 7))` — sentence with 5 commas reads as AI-output cadence: 'The result will\nbe there when you ask for it — sometimes you have to wait for th'
 
 ### G9-15: promise — deliver and deref
@@ -1391,12 +1400,13 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 3
 - variety @ n=50: 1.00
-- issues: {'SENTENCE_START_LOWER_PRONOUN': 2, 'REPEATED_OPENER_FRAGMENT': 1, 'CLAUSE_STACK_OVERFLOW': 1, 'ANSWER_LEAK_STRING': 1}
+- issues: {'SENTENCE_START_LOWER_PRONOUN': 2, 'REPEATED_OPENER_FRAGMENT': 1, 'CLAUSE_STACK_OVERFLOW': 1, 'ANSWER_LEAK_STRING': 1, 'DOUBLED_INPUT_VALUE_PARENS': 1}
     - [SENTENCE_START_LOWER_PRONOUN] form=`(when true 1 2 3)` — pronoun starts a sentence in lowercase — template should use the _cap variant after a sentence-ending punctuation
     - [SENTENCE_START_LOWER_PRONOUN] form=`(when false 1 2 3)` — pronoun starts a sentence in lowercase — template should use the _cap variant after a sentence-ending punctuation
     - [REPEATED_OPENER_FRAGMENT] form=`(when-not false :ok)` — opener fragment 'at the edge of the forest,' also appears later in user_msg
     - [CLAUSE_STACK_OVERFLOW] form=`(when-not false :ok)` — sentence with 5 commas reads as AI-output cadence: 'You write the rule\nonce, and any form that names it gets rewritten on the way in'
     - [ANSWER_LEAK_STRING] form=`(when-not false :ok)` — answer string ':ok' appears in user_msg
+    - [DOUBLED_INPUT_VALUE_PARENS] form=`(when-not false :ok)` — user_msg contains two or more 'as the input value' parentheticals — auto-closer fired twice or authored prose duplicated it
 
 ### G10-07: Threading macros revisited
 
@@ -1626,12 +1636,12 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 0.99
-- issues: {'HIGH_LENGTH': 1, 'CLAUSE_STACK_OVERFLOW': 3, 'NUMERAL_LIST_IN_GOAL': 3}
+- issues: {'HIGH_LENGTH': 1, 'CLAUSE_STACK_OVERFLOW': 3, 'NUMERAL_LIST_IN_GOAL': 3, 'DOUBLED_INPUT_VALUE_PARENS': 2}
     - [HIGH_LENGTH] form=`(into [] (map inc) [1 2 3])` — user_msg 218 words
     - [CLAUSE_STACK_OVERFLOW] form=`(into [] (map inc) [1 2 3])` — sentence with 5 commas reads as AI-output cadence: 'To use the map-inc transducer with into to increment the vector containing 1, 2,'
     - [NUMERAL_LIST_IN_GOAL] form=`(into [] (filter even?) [1 2 3 4 5])` — goal_text contains 5 numerals across 4 commas — comma-list of numerals blows the sentence's clause budget; use a range or 'these numbers' framing
     - [CLAUSE_STACK_OVERFLOW] form=`(into [] (filter even?) [1 2 3 4 5])` — sentence with 7 commas reads as AI-output cadence: 'To use the filter-even transducer with into to keep only the even numbers from t'
-    - [NUMERAL_LIST_IN_GOAL] form=`(into [] (filter even?) [1 2 3 4 5])` — goal_text contains 5 numerals across 4 commas — comma-list of numerals blows the sentence's clause budget; use a range or 'these numbers' framing
+    - [DOUBLED_INPUT_VALUE_PARENS] form=`(into [] (filter even?) [1 2 3 4 5])` — user_msg contains two or more 'as the input value' parentheticals — auto-closer fired twice or authored prose duplicated it
     - [NUMERAL_LIST_IN_GOAL] form=`(into [] (filter even?) [1 2 3 4 5])` — goal_text contains 5 numerals across 4 commas — comma-list of numerals blows the sentence's clause budget; use a range or 'these numbers' framing
 
 ### G12-02: Transducer composition
@@ -1825,10 +1835,12 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 - **SMALL_INT_LEAK**: 8
 - **STRING_AS_CHAR_MISCLAIM**: 7
 - **PROCEDURAL_OPENER**: 7
+- **DOUBLED_INPUT_VALUE_PARENS**: 6
 - **AI_OUTPUT_CADENCE**: 6
 - **REPEATED_OPENER_FRAGMENT**: 4
 - **RESOLUTION_REPL_DOUBLED**: 3
 - **STORY_SLOT_NOUN_REPEAT**: 3
+- **AND_HANDED_BACK_CADENCE**: 2
 - **UNFILLED_DRAWN_PLACEHOLDER**: 1
 - **DRAWN_PLACEHOLDER_LEAK**: 1
 - **WRONG_FABLE_LITERAL**: 1
@@ -1844,14 +1856,14 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 | 2 | 22 | 88 | 88 | — |
 | 3 | 18 | 31 | 33 | — |
 | 4 | 20 | 39 | 59 | — |
-| 5 | 22 | 39 | 92 | — |
-| 6 | 16 | 33 | 49 | — |
+| 5 | 22 | 39 | 94 | — |
+| 6 | 16 | 33 | 50 | — |
 | 7 | 18 | 36 | 34 | — |
-| 8 | 16 | 31 | 52 | — |
-| 9 | 18 | 34 | 75 | — |
-| 10 | 16 | 36 | 53 | — |
+| 8 | 16 | 31 | 53 | — |
+| 9 | 18 | 34 | 76 | — |
+| 10 | 16 | 36 | 54 | — |
 | 11 | 14 | 58 | 68 | — |
-| 12 | 18 | 37 | 76 | — |
+| 12 | 18 | 37 | 78 | — |
 
 ### Sample issues by severity
 
@@ -2740,6 +2752,61 @@ Tom stood sorting wool by weight at the watchhouse. Carol had given him a simple
     near the hilltop, on a slope above the village, Tove watched his flock and his shadow grow longer.
 
 Tom stood sorting wool by weight at the watchhouse. Carol had given him a simple rule: if a fleece weighed more than three coins' worth, send it to the dyer; if not, keep it for the lambing-pen. A fle...
+    ```
+
+#### AND_HANDED_BACK_CADENCE
+
+- `G5-09` (form `((fn [f x] (f (f x))) inc 5)`): user_msg tail has 3 performed/handed-back/returned verbs — AI-output verb-and-verb cadence
+    ```
+    There is a difference between a real alarm and a bored one, and the village knew the difference well.
+
+Carol drew a drill-card on the watchhouse wall with a blank slot for a recipe and a blank slot for a starting number. Tom came with the recipe `inc` (add one) and the number 5. Carol said the card ...
+    ```
+- `G9-13` (form `@(future (* 6 7))`): user_msg tail has 3 performed/handed-back/returned verbs — AI-output verb-and-verb cadence
+    ```
+    On those slopes, trust was a thing the village extended freely, and a thing it could not afford to lose.
+
+Krystyna, sounding sure of every word, reached for the runner's pouch
+before the runner had even returned. Severina held
+her back: a runner sent ahead must be allowed to
+finish. To construct a f...
+    ```
+
+#### DOUBLED_INPUT_VALUE_PARENS
+
+- `G5-10` (form `(map #(* % %) [1 2 3 4])`): user_msg contains two or more 'as the input value' parentheticals — auto-closer fired twice or authored prose duplicated it
+    ```
+    Some games seem harmless until the moment they are needed in earnest, and then they cost everything.
+
+Carol gave Tom a comb with four knots and asked him to square each one. Tom needed to apply a complex recipe to each value in the basket. `map` applies a recipe to each value in the collection and r...
+    ```
+- `G6-11` (form `(clojure.string/split "src:test" #":")`): user_msg contains two or more 'as the input value' parentheticals — auto-closer fired twice or authored prose duplicated it
+    ```
+    Maarten had been told the rules plainly: cry only when the wolf is real, and never when he is bored.
+
+The reeve had written a list of directories on a single scroll line, separated by colons—the classpath, a road map of where the REPL would search for files. Tom wanted to turn the colon-separated st...
+    ```
+- `G8-01` (form `(defn speak [k] (cond (= k :wolf) "howl" (= k :flock) "bleat`): user_msg contains two or more 'as the input value' parentheticals — auto-closer fired twice or authored prose duplicated it
+    ```
+    On a hill above the village, a boy watched sheep, and the sheep watched the grass, and the day moved slowly.
+
+Carol had called a meeting of the shepherds' fellowship on the village green — sheep-shepherd, goat-shepherd, geese-keeper, all gathered. Each kind of keeper had their own way of raising an ...
+    ```
+- `G10-06` (form `(when-not false :ok)`): user_msg contains two or more 'as the input value' parentheticals — auto-closer fired twice or authored prose duplicated it
+    ```
+    Some games seem harmless until the moment they are needed in earnest, and then they cost everything.
+
+Carol had another shorthand that inverted the test. Some watches ran only when a condition was false. `when-not` is a macro that inverts the condition and expands to a negated-test form.
+
+To use whe...
+    ```
+- `G12-01` (form `(into [] (filter even?) [1 2 3 4 5])`): user_msg contains two or more 'as the input value' parentheticals — auto-closer fired twice or authored prose duplicated it
+    ```
+    The pasture lay below a rocky lookout, and the sheep were easier to count than the hours.
+
+Carol attached a filtering rule to the fleece-comb. The village wanted only the even-numbered items collected together. `into` feeds items through the transducer into a receiver vector.
+
+To use the filter-even...
     ```
 
 #### PATIENT_ROLE_BOASTFUL

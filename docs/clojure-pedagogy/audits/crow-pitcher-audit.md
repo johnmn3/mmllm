@@ -447,11 +447,12 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'CLAUSE_STACK_OVERFLOW': 3, 'REPL_TRIPLE_VOICE': 1}
+- issues: {'CLAUSE_STACK_OVERFLOW': 3, 'REPL_TRIPLE_VOICE': 1, 'DOUBLED_INPUT_VALUE_PARENS': 1}
     - [CLAUSE_STACK_OVERFLOW] form=`(contains? #{1 2 3} 2)` — sentence with 5 commas reads as AI-output cadence: 'To check whether 2 is a member of a set containing 1, 2, and 3 properly,\nhe comp'
     - [CLAUSE_STACK_OVERFLOW] form=`(contains? #{1 2 3} 2)` — sentence with 5 commas reads as AI-output cadence: 'The pile is heavy; one\nright reach saves a dozen wrong ones." To check whether 2'
     - [CLAUSE_STACK_OVERFLOW] form=`(contains? #{1 2 3} 2)` — sentence with 5 commas reads as AI-output cadence: 'The pile is heavy; one\nright reach saves a dozen wrong ones." To check whether 2'
     - [REPL_TRIPLE_VOICE] form=`(contains? #{1 2 3} 4)` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
+    - [DOUBLED_INPUT_VALUE_PARENS] form=`(contains? #{1 2 3} 4)` — user_msg contains two or more 'as the input value' parentheticals — auto-closer fired twice or authored prose duplicated it
 
 ### G4-13: count — universal
 
@@ -701,9 +702,9 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 - variety @ n=50: 1.00
 - issues: {'LOW_GROUNDING': 1, 'STORY_SLOT_NOUN_REPEAT': 3}
     - [LOW_GROUNDING] form=`(namespace :owner/item)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-    - [STORY_SLOT_NOUN_REPEAT] form=`(name :owner/item)` — the noun 'the local name' appears in all 4 story slots (scenario/need/mapping/resolution) — vary the imagery between beats
-    - [STORY_SLOT_NOUN_REPEAT] form=`(name :owner/item)` — the noun 'the local name' appears in all 4 story slots (scenario/need/mapping/resolution) — vary the imagery between beats
-    - [STORY_SLOT_NOUN_REPEAT] form=`(name :owner/item)` — the noun 'the local name' appears in all 4 story slots (scenario/need/mapping/resolution) — vary the imagery between beats
+    - [STORY_SLOT_NOUN_REPEAT] form=`(name :owner/item)` — the noun 'the slash' appears in all 4 story slots (scenario/need/mapping/resolution) — vary the imagery between beats
+    - [STORY_SLOT_NOUN_REPEAT] form=`(name :owner/item)` — the noun 'the slash' appears in all 4 story slots (scenario/need/mapping/resolution) — vary the imagery between beats
+    - [STORY_SLOT_NOUN_REPEAT] form=`(name :owner/item)` — the noun 'the slash' appears in all 4 story slots (scenario/need/mapping/resolution) — vary the imagery between beats
 
 ### G6-09: Loading order
 
@@ -1179,13 +1180,13 @@ tortoise
 
 - examples: 3
 - variety @ n=50: 1.00
-- issues: {'CONCEPT_AS_VERB': 2, 'CLAUSE_STACK_OVERFLOW': 3, 'HIGH_LENGTH': 2, 'ANSWER_LEAK': 1, 'LOW_GROUNDING': 1}
+- issues: {'CONCEPT_AS_VERB': 2, 'CLAUSE_STACK_OVERFLOW': 3, 'HIGH_LENGTH': 2, 'ANSWER_LEAK': 1, 'DOUBLED_INPUT_VALUE_PARENS': 2, 'LOW_GROUNDING': 1}
     - [CONCEPT_AS_VERB] form=`(-> 5 inc inc inc)` — concept_phrase substituted into a finite-verb slot (e.g. 'must calling X', 'I applying Y')
     - [CLAUSE_STACK_OVERFLOW] form=`(->> [1 2 3 4] (filter even?) (map inc) (reduce +)` — sentence with 7 commas reads as AI-output cadence: 'To thread a vector through filter, map, and reduce using thread-last, he compose'
     - [HIGH_LENGTH] form=`(->> [1 2 3 4] (filter even?) (map inc) (reduce +)` — user_msg 208 words
     - [ANSWER_LEAK] form=`(->> [1 2 3 4] (filter even?) (map inc) (reduce +)` — answer 8 in narrative
     - [CLAUSE_STACK_OVERFLOW] form=`(->> [1 2 3 4] (filter even?) (map inc) (reduce +)` — sentence with 5 commas reads as AI-output cadence: 'To thread a vector through filter, map, and reduce using thread-last, she scratc'
-    - [HIGH_LENGTH] form=`(->> [1 2 3 4] (filter even?) (map inc) (reduce +)` — user_msg 206 words
+    - [DOUBLED_INPUT_VALUE_PARENS] form=`(->> [1 2 3 4] (filter even?) (map inc) (reduce +)` — user_msg contains two or more 'as the input value' parentheticals — auto-closer fired twice or authored prose duplicated it
 
 ### G10-08: Macro vs fn
 
@@ -1242,15 +1243,17 @@ tortoise
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'REPL_TRIPLE_VOICE': 1, 'CLAUSE_STACK_OVERFLOW': 1}
+- issues: {'REPL_TRIPLE_VOICE': 1, 'DOUBLED_INPUT_VALUE_PARENS': 1, 'CLAUSE_STACK_OVERFLOW': 1}
     - [REPL_TRIPLE_VOICE] form=`(eval '(+ 1 2 3))` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
+    - [DOUBLED_INPUT_VALUE_PARENS] form=`(eval '(+ 1 2 3))` — user_msg contains two or more 'as the input value' parentheticals — auto-closer fired twice or authored prose duplicated it
     - [CLAUSE_STACK_OVERFLOW] form=`(eval '(+ 1 2 3))` — sentence with 5 commas reads as AI-output cadence: 'You\nwrite the rule once, and any drop-order that calls it gets rewritten\non the '
 
 ### G10-15: When not to write a macro
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'CLAUSE_STACK_OVERFLOW': 1}
+- issues: {'DOUBLED_INPUT_VALUE_PARENS': 1, 'CLAUSE_STACK_OVERFLOW': 1}
+    - [DOUBLED_INPUT_VALUE_PARENS] form=`(do "a function suffices when no syntax shaping is` — user_msg contains two or more 'as the input value' parentheticals — auto-closer fired twice or authored prose duplicated it
     - [CLAUSE_STACK_OVERFLOW] form=`(do "prefer fn unless you must shape syntax" (map ` — sentence with 5 commas reads as AI-output cadence: 'You\nwrite the rule once, and any drop-order that calls it gets rewritten\non the '
 
 ### G10-16: Macro pattern library
@@ -1486,6 +1489,7 @@ tortoise
 - **THE_FORM_OVERUSE**: 8
 - **ANSWER_LEAK**: 7
 - **STRING_AS_CHAR_MISCLAIM**: 6
+- **DOUBLED_INPUT_VALUE_PARENS**: 5
 - **REPEATED_OPENER_FRAGMENT**: 4
 - **EXPECTED_META_PHRASE**: 3
 - **DOUBLE_PREP**: 3
@@ -1502,13 +1506,13 @@ tortoise
 | 1 | 18 | 76 | 45 | — |
 | 2 | 22 | 88 | 75 | — |
 | 3 | 18 | 31 | 33 | — |
-| 4 | 20 | 39 | 43 | — |
+| 4 | 20 | 39 | 44 | — |
 | 5 | 22 | 39 | 87 | — |
 | 6 | 16 | 33 | 15 | — |
 | 7 | 18 | 36 | 18 | — |
 | 8 | 16 | 31 | 49 | — |
 | 9 | 18 | 34 | 82 | — |
-| 10 | 16 | 36 | 47 | — |
+| 10 | 16 | 36 | 51 | — |
 | 11 | 14 | 29 | 27 | — |
 | 12 | 18 | 37 | 38 | — |
 
@@ -2097,6 +2101,45 @@ she said, "and only for the form that names...
 Korvus dropped three literal stone-counts of five into the garden pitcher all at once — no wing tucked, no name carved — just three fives fed directly to the multiplication as plain inline valu...
     ```
 
+#### DOUBLED_INPUT_VALUE_PARENS
+
+- `G4-12` (form `(contains? #{1 2 3} 4)`): user_msg contains two or more 'as the input value' parentheticals — auto-closer fired twice or authored prose duplicated it
+    ```
+    A row of pebbles lay at the foot of the wall, sun-warmed, unremarkable, and just heavy enough.
+
+Sable held a stone marked four near the same three-stone sorting-pile at the farm pitcher. No groove was carved for four; she asked whether it belonged.
+
+She needed a definitive answer before adding the s...
+    ```
+- `G10-07` (form `(->> [1 2 3 4] (filter even?) (map inc) (reduce +))`): user_msg contains two or more 'as the input value' parentheticals — auto-closer fired twice or authored prose duplicated it
+    ```
+    Smoke had flown all morning on the farm without finding so much as a damp leaf to rest a beak against.
+
+Caw lined up the stones at the farm pitcher and scratched a last-argument drop-order: sieve the evens, raise each by one, then tally the results. The `->>` rewrite-rule would compose the whole pip...
+    ```
+- `G10-07` (form `(->> [1 2 3 4] (filter even?) (map inc) (reduce +))`): user_msg contains two or more 'as the input value' parentheticals — auto-closer fired twice or authored prose duplicated it
+    ```
+    Word had it that Drone had flown over three valleys before finding the pitcher along the road.
+
+Caw lined up the stones at the farm pitcher and scratched a last-argument drop-order: sieve the evens, raise each by one, then tally the results. The `->>` rewrite-rule would compose the whole pipeline.
+
+...
+    ```
+- `G10-14` (form `(eval '(+ 1 2 3))`): user_msg contains two or more 'as the input value' parentheticals — auto-closer fired twice or authored prose duplicated it
+    ```
+    The orchard had not seen a real rain in weeks, and even the lavender stood with its head bowed.
+
+Caw held a chalk-marked addition form as data on the meadow pitcher's rim — a quoted list, not yet run. She used `eval` to hand the chalk mark back to the REPL to run as code.
+
+She needed the chalk-marke...
+    ```
+- `G10-15` (form `(do "a function suffices when no syntax shaping is needed" (`): user_msg contains two or more 'as the input value' parentheticals — auto-closer fired twice or authored prose duplicated it
+    ```
+    The orchard had not seen a real rain in weeks, and even the lavender stood with its head bowed.
+
+Korvus held a rewrite-rule stone in one talon and a plain drop-order stone in the other at the orchard pitcher. The task was simple addition — no syntax shaping needed. He set the rewrite-rule stone down...
+    ```
+
 #### NUMERAL_LIST_IN_GOAL
 
 - `G4-13` (form `(count [1 2 3 4 5])`): goal_text contains 5 numerals across 4 commas — comma-list of numerals blows the sentence's clause budget; use a range or 'these numbers' framing
@@ -2199,7 +2242,7 @@ Caw stood at the pitcher's rim in the hilltop field, a circuit chalked beneath h
 
 #### STORY_SLOT_NOUN_REPEAT
 
-- `G6-05` (form `(name :owner/item)`): the noun 'the local name' appears in all 4 story slots (scenario/need/mapping/resolution) — vary the imagery between beats
+- `G6-05` (form `(name :owner/item)`): the noun 'the slash' appears in all 4 story slots (scenario/need/mapping/resolution) — vary the imagery between beats
     ```
     The water sat at the bottom of the jar, deep enough to glimpse and far enough to tantalize.
 
@@ -2207,7 +2250,7 @@ Korvus inspected the same two-part keyword stone at the market: shelf's name bef
 
 He needed th...
     ```
-- `G6-05` (form `(name :owner/item)`): the noun 'the local name' appears in all 4 story slots (scenario/need/mapping/resolution) — vary the imagery between beats
+- `G6-05` (form `(name :owner/item)`): the noun 'the slash' appears in all 4 story slots (scenario/need/mapping/resolution) — vary the imagery between beats
     ```
     In a year when the wells ran low, a single jar of water was a small kingdom unto itself.
 
@@ -2215,7 +2258,7 @@ Murk the crow, patient as the water rose, pressed a talon-tip into the
 pitcher's clay rim near the orchard, carving a name with care. The clay was
 soft only briefly; once dry, the carving would last for every l...
     ```
-- `G6-05` (form `(name :owner/item)`): the noun 'the local name' appears in all 4 story slots (scenario/need/mapping/resolution) — vary the imagery between beats
+- `G6-05` (form `(name :owner/item)`): the noun 'the slash' appears in all 4 story slots (scenario/need/mapping/resolution) — vary the imagery between beats
     ```
     Some problems cannot be hurried; they only respond to the slow addition of small things.
 

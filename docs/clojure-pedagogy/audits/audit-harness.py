@@ -2221,6 +2221,56 @@ def check_record(rec, sub, example):
                         "the form is parametric so the actual count "
                         "drifts from the prose"))
 
+    # ─────── slice uUMr (round3-group1-parametric) detectors ───────
+
+    # DOUBLED_INPUT_VALUE_PARENS — the resolution-closer parenthetical
+    # `(with `X` as the input value)` is appended once per record by
+    # the post-init auto-closer. If user_msg contains two or more
+    # occurrences, an authored example explicitly repeated the
+    # parenthetical or an upstream fix-set ran twice. Flag as a tic.
+    if user.count("as the input value") >= 2:
+        issues.append(("DOUBLED_INPUT_VALUE_PARENS",
+                        "user_msg contains two or more 'as the input "
+                        "value' parentheticals — auto-closer fired "
+                        "twice or authored prose duplicated it"))
+
+    # AND_HANDED_BACK_CADENCE — three or more verb-and-verb past-tense
+    # conjunctions in close proximity, like "the REPL performed the
+    # subtraction and handed back the difference and returned it".
+    # This is a recurring AI-output cadence that drains voice.
+    AND_VERB_RE = re.compile(
+        r"\b(?:returned|handed back|gave back|performed|computed|"
+        r"applied|combined|received|delivered|provided)\b"
+    )
+    matches = AND_VERB_RE.findall(user)
+    # Look only at the resolution-anchored portion (last 200 chars
+    # of user_msg) to avoid false positives in earlier story prose.
+    tail = user[-200:] if len(user) > 200 else user
+    tail_matches = AND_VERB_RE.findall(tail)
+    if len(tail_matches) >= 3:
+        issues.append(("AND_HANDED_BACK_CADENCE",
+                        f"user_msg tail has {len(tail_matches)} "
+                        "performed/handed-back/returned verbs — "
+                        "AI-output verb-and-verb cadence"))
+
+    # NUMERAL_LITERAL_ENUM — extends PARAMETRIC_LITERAL_NUMERALS to
+    # arbitrary 3+ length runs of consecutive count words. Catches
+    # patterns like 'one, two, three, four' OR 'five, six, seven'
+    # OR runs joined by 'and' like 'two, three, and four' that
+    # the original regex missed.
+    NUM_ENUM_RE = re.compile(
+        r"\b(?:one|two|three|four|five|six|seven|eight|nine|ten)"
+        r"(?:,\s*(?:one|two|three|four|five|six|seven|eight|nine|ten)){2,}"
+        r"(?:,?\s*(?:and\s+)?(?:one|two|three|four|five|six|seven|eight|nine|ten))?\b",
+        re.IGNORECASE,
+    )
+    if (getattr(example, "form_template", None)
+            and NUM_ENUM_RE.search(user or "")):
+        issues.append(("NUMERAL_LITERAL_ENUM",
+                        "user_msg has 3+ chained English numerals "
+                        "in sequence — fixed enumeration that won't "
+                        "track form_template draws"))
+
     return issues
 
 

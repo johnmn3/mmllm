@@ -83,8 +83,9 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'SMALL_INT_LEAK': 1, 'CLAUSE_STACK_OVERFLOW': 2, 'ANSWER_LEAK': 1}
+- issues: {'SMALL_INT_LEAK': 1, 'AND_HANDED_BACK_CADENCE': 1, 'CLAUSE_STACK_OVERFLOW': 2, 'ANSWER_LEAK': 1}
     - [SMALL_INT_LEAK] form=`(+ 2 3)` — small-int answer 5 leaks via resolution-slot phrasing
+    - [AND_HANDED_BACK_CADENCE] form=`(+ 2 3)` — user_msg tail has 3 performed/handed-back/returned verbs — AI-output verb-and-verb cadence
     - [CLAUSE_STACK_OVERFLOW] form=`(* (+ 1 2) 3)` — sentence with 5 commas reads as AI-output cadence: 'Mossback chalked two nested fences on the path: an inner fence holding the plus-'
     - [ANSWER_LEAK] form=`(* (+ 1 2) 3)` — answer 9 in narrative
     - [CLAUSE_STACK_OVERFLOW] form=`(* (+ 1 2) 3)` — sentence with 5 commas reads as AI-output cadence: 'Mossback chalked two nested fences on the path: an inner fence holding the plus-'
@@ -146,6 +147,13 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 - variety @ n=50: 1.00
 - issues: {'ANSWER_LEAK': 1}
     - [ANSWER_LEAK] form=`(inc 5)` — answer 6 in narrative
+
+### G2-08: Arithmetic on ratios
+
+- examples: 3
+- variety @ n=50: 1.00
+- issues: {'DOUBLED_INPUT_VALUE_PARENS': 1}
+    - [DOUBLED_INPUT_VALUE_PARENS] form=`(+ 1/2 1/4)` — user_msg contains two or more 'as the input value' parentheticals — auto-closer fired twice or authored prose duplicated it
 
 ### G2-11: String concatenation with str
 
@@ -215,8 +223,9 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 1
 - variety @ n=50: 1.00
-- issues: {'HIGH_LENGTH': 1}
+- issues: {'HIGH_LENGTH': 1, 'AND_HANDED_BACK_CADENCE': 1}
     - [HIGH_LENGTH] form=`((fn [x] x x x 99) 1)` — user_msg 201 words
+    - [AND_HANDED_BACK_CADENCE] form=`((fn [x] x x x 99) 1)` — user_msg tail has 3 performed/handed-back/returned verbs — AI-output verb-and-verb cadence
 
 ### G3-15: Side-effects in body
 
@@ -746,10 +755,11 @@ tortoise
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'CLAUSE_STACK_OVERFLOW': 3, 'HIGH_LENGTH': 2}
+- issues: {'CLAUSE_STACK_OVERFLOW': 3, 'HIGH_LENGTH': 2, 'DOUBLED_INPUT_VALUE_PARENS': 2}
     - [CLAUSE_STACK_OVERFLOW] form=`(let [m {:a 1}] (assoc m :b 2) m)` — sentence with 6 commas reads as AI-output cadence: 'To bind a map m, call assoc to add :b 2 to a new map, then return the unchanged '
     - [HIGH_LENGTH] form=`(let [v [1 2 3]] (conj v 4) v)` — user_msg 207 words
     - [CLAUSE_STACK_OVERFLOW] form=`(let [v [1 2 3]] (conj v 4) v)` — sentence with 5 commas reads as AI-output cadence: 'To bind a vector v, call conj to add 9 to a new vector, then return the unchange'
+    - [DOUBLED_INPUT_VALUE_PARENS] form=`(let [v [1 2 3]] (conj v 4) v)` — user_msg contains two or more 'as the input value' parentheticals — auto-closer fired twice or authored prose duplicated it
     - [HIGH_LENGTH] form=`(let [v [1 2 3]] (conj v 4) v)` — user_msg 216 words
     - [CLAUSE_STACK_OVERFLOW] form=`(let [v [1 2 3]] (conj v 4) v)` — sentence with 5 commas reads as AI-output cadence: 'To bind a vector v, call conj to add 6 to a new vector, then return the unchange'
 
@@ -868,6 +878,14 @@ tortoise
     - [CLAUSE_STACK_OVERFLOW] form=`(do (def ag (agent 0)) (send ag inc) (send ag inc)` — sentence with 8 commas reads as AI-output cadence: 'The runtime makes that easier than it sounds." To construct an agent holding 0, '
     - [CLAUSE_STACK_OVERFLOW] form=`(do (def ag (agent 0)) (send ag inc) (send ag inc)` — sentence with 7 commas reads as AI-output cadence: 'To\nconstruct an agent holding 0, asynchronously send inc twice, synchronize with'
 
+### G9-13: future introduction
+
+- examples: 2
+- variety @ n=50: 1.00
+- issues: {'AND_HANDED_BACK_CADENCE': 2}
+    - [AND_HANDED_BACK_CADENCE] form=`@(future (* 6 7))` — user_msg tail has 3 performed/handed-back/returned verbs — AI-output verb-and-verb cadence
+    - [AND_HANDED_BACK_CADENCE] form=`@(future (* 6 7))` — user_msg tail has 3 performed/handed-back/returned verbs — AI-output verb-and-verb cadence
+
 ### G9-15: promise — deliver and deref
 
 - examples: 2
@@ -938,8 +956,9 @@ tortoise
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'HIGH_LENGTH': 1, 'CLAUSE_STACK_OVERFLOW': 1}
+- issues: {'HIGH_LENGTH': 1, 'DOUBLED_INPUT_VALUE_PARENS': 1, 'CLAUSE_STACK_OVERFLOW': 1}
     - [HIGH_LENGTH] form=`(do (defmacro my-when [t & body] `(if ~t (do ~@bod` — user_msg 219 words
+    - [DOUBLED_INPUT_VALUE_PARENS] form=`(do (defmacro my-when [t & body] `(if ~t (do ~@bod` — user_msg contains two or more 'as the input value' parentheticals — auto-closer fired twice or authored prose duplicated it
     - [CLAUSE_STACK_OVERFLOW] form=`(do (defmacro twice [x] `(do ~x ~x)) (twice 7))` — sentence with 5 commas reads as AI-output cadence: 'A rule takes a *form* and makes a different *form* — only\nthen does the runtime '
 
 ### G10-07: Threading macros revisited
@@ -1131,6 +1150,8 @@ tortoise
 - **STRING_AS_CHAR_MISCLAIM**: 6
 - **GENERIC_RESOLUTION_TAIL**: 6
 - **THE_FORM_OVERUSE**: 6
+- **AND_HANDED_BACK_CADENCE**: 4
+- **DOUBLED_INPUT_VALUE_PARENS**: 4
 - **ANSWER_LEAK**: 3
 - **REPEATED_OPENER_FRAGMENT**: 3
 - **UNFILLED_DRAWN_PLACEHOLDER**: 3
@@ -1144,16 +1165,16 @@ tortoise
 
 | Grade | Subjects | Examples | Issues | Low-variety |
 |---|---|---|---|---|
-| 1 | 18 | 76 | 32 | — |
-| 2 | 22 | 88 | 17 | — |
-| 3 | 18 | 31 | 11 | — |
+| 1 | 18 | 76 | 33 | — |
+| 2 | 22 | 88 | 18 | — |
+| 3 | 18 | 31 | 12 | — |
 | 4 | 20 | 39 | 43 | — |
 | 5 | 22 | 39 | 85 | — |
 | 6 | 16 | 33 | 12 | — |
 | 7 | 18 | 36 | 17 | — |
 | 8 | 16 | 31 | 38 | — |
-| 9 | 18 | 34 | 76 | — |
-| 10 | 16 | 36 | 28 | — |
+| 9 | 18 | 34 | 80 | — |
+| 10 | 16 | 36 | 29 | — |
 | 11 | 14 | 29 | 9 | — |
 | 12 | 18 | 37 | 36 | — |
 
@@ -1311,6 +1332,41 @@ Mossback prepared three pouches in order: a held 2 acorns, then b was filled wit
     It happened atop the hilltop, on a morning when the air was kind to swift feet and steady ones alike.
 
 Mossback the tortoise chalked a small expression on the path: the plus-mark, then 9, then 9, all wrapped in a single set of parens. Pip the hare paused — was the answer 6 (parens means multiply, su...
+    ```
+
+#### AND_HANDED_BACK_CADENCE
+
+- `G1-12` (form `(+ 2 3)`): user_msg tail has 3 performed/handed-back/returned verbs — AI-output verb-and-verb cadence
+    ```
+    It happened atop the hilltop, on a morning when the air was kind to swift feet and steady ones alike.
+
+Mossback the tortoise chalked a small expression on the path: the plus-mark, then 9, then 9, all wrapped in a single set of parens. Pip the hare paused — was the answer 6 (parens means multiply, su...
+    ```
+- `G3-13` (form `((fn [x] x x x 99) 1)`): user_msg tail has 3 performed/handed-back/returned verbs — AI-output verb-and-verb cadence
+    ```
+    By the time the dew had lifted, the meadow had gathered to watch the strangest race anyone could remember.
+
+Mossback's recipe card for this stretch listed several intermediate steps, but the cook only served the final dish — everything before it was preparation, not what got plated.
+
+The kitchen nee...
+    ```
+- `G9-13` (form `@(future (* 6 7))`): user_msg tail has 3 performed/handed-back/returned verbs — AI-output verb-and-verb cadence
+    ```
+    When Fern declared the race already won, no one yet knew how long the afternoon would be.
+
+Fern the hare as if the race were already won reached for the runner's pouch before
+the runner had even returned. Hushwise the tortoise held him
+back: a runner sent ahead must be allowed to finish. To
+construc...
+    ```
+- `G9-13` (form `@(future (* 6 7))`): user_msg tail has 3 performed/handed-back/returned verbs — AI-output verb-and-verb cadence
+    ```
+    atop the hilltop, where the path bends past the elm, Hedgepig taunted Whorl one too many times.
+
+Hedgepig the hare with great whoops of laughter reached for the runner's pouch before
+the runner had even returned. Whorl the tortoise held him
+back: a runner sent ahead must be allowed to finish. To
+con...
     ```
 
 #### CLAUSE_STACK_OVERFLOW
@@ -1539,6 +1595,35 @@ For a one-time ...
     The sun rose by the woods, and with it the question of who could outrun whom.
 
 Before the morning's foraging began, Mossback the tortoise set her basket on the path with its pebble row still empty — no pebbles, no contents, ready for whatever the meadow would yield. The value drawn fresh was 1, 15, ...
+    ```
+
+#### DOUBLED_INPUT_VALUE_PARENS
+
+- `G2-08` (form `(+ 1/2 1/4)`): user_msg contains two or more 'as the input value' parentheticals — auto-closer fired twice or authored prose duplicated it
+    ```
+    Among the small kingdoms of the meadow, swiftness was a kind of currency, and one creature spent it loudly.
+
+Mossback the tortoise divided a berry into halves and quarters. She held one half in her paw and one quarter in a small leaf. Both pieces were parts of the same whole fruit. The value at the ...
+    ```
+- `G9-01` (form `(let [v [1 2 3]] (conj v 4) v)`): user_msg contains two or more 'as the input value' parentheticals — auto-closer fired twice or authored prose duplicated it
+    ```
+    The sun rose by the woods, and with it the question of who could outrun whom.
+
+Three smooth stones sat in a row on the meadow path — Mossback's tally-stones for the morning's laps. Pip suggested adding a fourth stone to mark an extra stretch, but Mossback wanted her original row kept exactly as it s...
+    ```
+- `G9-01` (form `(let [v [1 2 3]] (conj v 4) v)`): user_msg contains two or more 'as the input value' parentheticals — auto-closer fired twice or authored prose duplicated it
+    ```
+    Bunny liked to talk; Cobblestone liked to listen, and the rivalry between them had grown into a small legend at the edge of the garden.
+
+Three smooth stones sat in a row on the meadow path — Mossback's tally-stones for the morning's laps. Pip suggested adding a fourth stone to mark an extra stretch,...
+    ```
+- `G10-03` (form `(do (defmacro my-when [t & body] `(if ~t (do ~@body))) (my-w`): user_msg contains two or more 'as the input value' parentheticals — auto-closer fired twice or authored prose duplicated it
+    ```
+    Galop announced the race in a voice loud enough to wake the owls, and Fen accepted with a nod.
+
+Mossback the tortoise was tired of writing `if`/`do` by hand for every form where she wanted several steps to run only if a condition held.
+
+She wanted a rule called `my-when` that rewrote the shorter for...
     ```
 
 #### NARRATIVE_NUMERAL_HARDCODE

@@ -714,9 +714,10 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'HIGH_LENGTH': 1, 'ANSWER_LEAK_STRING': 1}
+- issues: {'HIGH_LENGTH': 1, 'ANSWER_LEAK_STRING': 1, 'DOUBLED_INPUT_VALUE_PARENS': 1}
     - [HIGH_LENGTH] form=`(when true :yes)` — user_msg 206 words
     - [ANSWER_LEAK_STRING] form=`(when true :yes)` — answer string ':yes' appears in user_msg
+    - [DOUBLED_INPUT_VALUE_PARENS] form=`(when true :yes)` — user_msg contains two or more 'as the input value' parentheticals — auto-closer fired twice or authored prose duplicated it
 
 ### G5-04: cond
 
@@ -745,10 +746,11 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'HIGH_LENGTH': 1, 'ANSWER_LEAK_STRING': 1, 'CLAUSE_STACK_OVERFLOW': 1}
+- issues: {'HIGH_LENGTH': 1, 'ANSWER_LEAK_STRING': 1, 'CLAUSE_STACK_OVERFLOW': 1, 'DOUBLED_INPUT_VALUE_PARENS': 1}
     - [HIGH_LENGTH] form=`(or nil false :found)` — user_msg 210 words
     - [ANSWER_LEAK_STRING] form=`(or nil false :found)` — answer string ':found' appears in user_msg
     - [CLAUSE_STACK_OVERFLOW] form=`(or nil false :found)` — sentence with 6 commas reads as AI-output cadence: 'The REPL let the crossing-conditions decide:\n\nThe REPL walked the first gate, fo'
+    - [DOUBLED_INPUT_VALUE_PARENS] form=`(or nil false :found)` — user_msg contains two or more 'as the input value' parentheticals — auto-closer fired twice or authored prose duplicated it
 
 ### G5-08: not
 
@@ -1466,8 +1468,9 @@ tortoise
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'HIGH_LENGTH': 1, 'CLAUSE_STACK_OVERFLOW': 1}
+- issues: {'HIGH_LENGTH': 1, 'DOUBLED_INPUT_VALUE_PARENS': 1, 'CLAUSE_STACK_OVERFLOW': 1}
     - [HIGH_LENGTH] form=`(do (defmacro my-when [t & body] `(if ~t (do ~@bod` — user_msg 225 words
+    - [DOUBLED_INPUT_VALUE_PARENS] form=`(do (defmacro my-when [t & body] `(if ~t (do ~@bod` — user_msg contains two or more 'as the input value' parentheticals — auto-closer fired twice or authored prose duplicated it
     - [CLAUSE_STACK_OVERFLOW] form=`(do (defmacro twice [x] `(do ~x ~x)) (twice 7))` — sentence with 5 commas reads as AI-output cadence: 'A rule takes a *form* and makes a different *form* — only\nthen does the runtime '
 
 ### G10-04: Macro expansion rule
@@ -1568,9 +1571,10 @@ tortoise
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'CLAUSE_STACK_OVERFLOW': 1, 'ANSWER_LEAK_STRING': 1}
+- issues: {'CLAUSE_STACK_OVERFLOW': 1, 'ANSWER_LEAK_STRING': 1, 'DOUBLED_INPUT_VALUE_PARENS': 1}
     - [CLAUSE_STACK_OVERFLOW] form=`(do (defmacro with-steady-pace [& body] `(let [pac` — sentence with 5 commas reads as AI-output cadence: 'You set the rule\nonce, and any mark that uses it gets rewritten on the way to th'
     - [ANSWER_LEAK_STRING] form=`(do (defmacro def-pace [name v] `(def ~name ~v)) (` — answer string ':slow' appears in user_msg
+    - [DOUBLED_INPUT_VALUE_PARENS] form=`(do (defmacro def-pace [name v] `(def ~name ~v)) (` — user_msg contains two or more 'as the input value' parentheticals — auto-closer fired twice or authored prose duplicated it
 
 ## Grade 11
 
@@ -1795,6 +1799,7 @@ tortoise
 - **THE_FORM_OVERUSE**: 7
 - **CONCEPT_AS_VERB**: 7
 - **ONLY_SHOOK_HEAD_TIC**: 4
+- **DOUBLED_INPUT_VALUE_PARENS**: 4
 - **META_FILLER_RESOLUTION**: 3
 - **GENERIC_RESOLUTION_TAIL**: 3
 - **COLLECTION_LEAK**: 3
@@ -1812,12 +1817,12 @@ tortoise
 | 2 | 22 | 88 | 124 | — |
 | 3 | 18 | 31 | 44 | — |
 | 4 | 20 | 39 | 76 | — |
-| 5 | 22 | 39 | 114 | — |
+| 5 | 22 | 39 | 116 | — |
 | 6 | 16 | 33 | 19 | — |
 | 7 | 18 | 36 | 30 | — |
 | 8 | 16 | 31 | 57 | — |
 | 9 | 18 | 34 | 170 | — |
-| 10 | 16 | 36 | 45 | — |
+| 10 | 16 | 36 | 47 | — |
 | 11 | 14 | 29 | 22 | — |
 | 12 | 18 | 37 | 38 | — |
 
@@ -2645,6 +2650,35 @@ At the forest edge, Bell found a marker with a qualified keyword written there �
 Looking at the same marker :owner/item, Bell now wanted the other half — the local name after the slash, to see what kind of thing the owner had stored.
 
 She wanted to pull the name portion from the qua...
+    ```
+
+#### DOUBLED_INPUT_VALUE_PARENS
+
+- `G5-03` (form `(when true :yes)`): user_msg contains two or more 'as the input value' parentheticals — auto-closer fired twice or authored prose duplicated it
+    ```
+    Diesel had crossed this bridge a hundred times on the beach, but never with so fine a bone clamped in his jaws.
+
+Bell stood at the stream crossing near the pond. A single marker-stone bore a clear verdict: true. The form when was different from if — it had no else arm. If the stone read true, she wo...
+    ```
+- `G5-07` (form `(or nil false :found)`): user_msg contains two or more 'as the input value' parentheticals — auto-closer fired twice or authored prose duplicated it
+    ```
+    On a path that ran beside the stream, a dog was carrying his supper home and looking pleased with himself.
+
+Rex stood at a fork by the stream facing gates. Three gates in sequence: the first held nil (closed), the second held false (closed), the third held a keyword (open). The or-form would test ea...
+    ```
+- `G10-03` (form `(do (defmacro my-when [t & body] `(if ~t (do ~@body))) (my-w`): user_msg contains two or more 'as the input value' parentheticals — auto-closer fired twice or authored prose duplicated it
+    ```
+    Diesel had crossed this bridge a hundred times on the beach, but never with so fine a bone clamped in his jaws.
+
+Bell the hound crouched at a fresh patch of bark near the pond, paw poised. She would set a rule that any later mark of a certain shape would be rewritten — before the runtime ever follow...
+    ```
+- `G10-16` (form `(do (defmacro def-pace [name v] `(def ~name ~v)) (def-pace r`): user_msg contains two or more 'as the input value' parentheticals — auto-closer fired twice or authored prose duplicated it
+    ```
+    The bridge had stood there as long as anyone remembered, and so had the temptation it offered to anyone crossing with full jaws.
+
+Patch the hound carved another macro-pattern that would define named values. The macro would rewrite calls into def-forms.
+
+When called with a name and value, the macro w...
     ```
 
 #### COLLECTION_LEAK

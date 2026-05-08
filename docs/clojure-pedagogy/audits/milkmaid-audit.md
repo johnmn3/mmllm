@@ -744,6 +744,13 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
     - [ANSWER_LEAK_STRING] form=`(name 'race.tortoise)` — answer string 'race.tortoise' appears in user_msg
     - [LOW_GROUNDING] form=`(name 'race.tortoise)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
 
+### G6-04: refer and use
+
+- examples: 1
+- variety @ n=50: 1.00
+- issues: {'DOUBLED_INPUT_VALUE_PARENS': 1}
+    - [DOUBLED_INPUT_VALUE_PARENS] form=`(= (clojure.string/upper-case "x") (clojure.string` — user_msg contains two or more 'as the input value' parentheticals — auto-closer fired twice or authored prose duplicated it
+
 ### G6-05: Fully qualified names
 
 - examples: 4
@@ -1341,13 +1348,13 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'CONCEPT_AS_VERB': 3, 'MULTIPLE_SAID_TAGS': 3, 'HIGH_LENGTH': 1}
+- issues: {'CONCEPT_AS_VERB': 3, 'MULTIPLE_SAID_TAGS': 3, 'HIGH_LENGTH': 1, 'DOUBLED_INPUT_VALUE_PARENS': 1}
     - [CONCEPT_AS_VERB] form=`(do "a function suffices when no syntax shaping is` — concept_phrase substituted into a finite-verb slot (e.g. 'must calling X', 'I applying Y')
     - [MULTIPLE_SAID_TAGS] form=`(do "a function suffices when no syntax shaping is` — user_msg has 3 dialogue-attribution tags — over-announcing the speakers
     - [HIGH_LENGTH] form=`(do "a function suffices when no syntax shaping is` — user_msg 207 words
+    - [DOUBLED_INPUT_VALUE_PARENS] form=`(do "a function suffices when no syntax shaping is` — user_msg contains two or more 'as the input value' parentheticals — auto-closer fired twice or authored prose duplicated it
     - [CONCEPT_AS_VERB] form=`(do "prefer fn unless you must shape syntax" (map ` — concept_phrase substituted into a finite-verb slot (e.g. 'must calling X', 'I applying Y')
     - [MULTIPLE_SAID_TAGS] form=`(do "prefer fn unless you must shape syntax" (map ` — user_msg has 3 dialogue-attribution tags — over-announcing the speakers
-    - [CONCEPT_AS_VERB] form=`(do "prefer fn unless you must shape syntax" (map ` — concept_phrase substituted into a finite-verb slot (e.g. 'must calling X', 'I applying Y')
 
 ### G10-16: Macro pattern library
 
@@ -1445,17 +1452,19 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'HIGH_LENGTH': 1, 'CLAUSE_STACK_OVERFLOW': 2}
+- issues: {'HIGH_LENGTH': 1, 'CLAUSE_STACK_OVERFLOW': 2, 'DOUBLED_INPUT_VALUE_PARENS': 1}
     - [HIGH_LENGTH] form=`(into [] (map inc) [1 2 3])` — user_msg 206 words
     - [CLAUSE_STACK_OVERFLOW] form=`(into [] (map inc) [1 2 3])` — sentence with 5 commas reads as AI-output cadence: 'To use the map-inc transducer with into to increment the vector containing 1, 2,'
+    - [DOUBLED_INPUT_VALUE_PARENS] form=`(into [] (map inc) [1 2 3])` — user_msg contains two or more 'as the input value' parentheticals — auto-closer fired twice or authored prose duplicated it
     - [CLAUSE_STACK_OVERFLOW] form=`(into [] (filter even?) [1 2 3 4 5])` — sentence with 5 commas reads as AI-output cadence: 'But she must write it —\nthe farmer\'s form, not the milkmaid\'s guess."\n\nWrite a C'
 
 ### G12-02: Transducer composition
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'HIGH_LENGTH': 1, 'CLAUSE_STACK_OVERFLOW': 4}
+- issues: {'HIGH_LENGTH': 1, 'DOUBLED_INPUT_VALUE_PARENS': 1, 'CLAUSE_STACK_OVERFLOW': 4}
     - [HIGH_LENGTH] form=`(into [] (comp (map inc) (filter even?)) [1 2 3 4]` — user_msg 217 words
+    - [DOUBLED_INPUT_VALUE_PARENS] form=`(into [] (comp (map inc) (filter even?)) [1 2 3 4]` — user_msg contains two or more 'as the input value' parentheticals — auto-closer fired twice or authored prose duplicated it
     - [CLAUSE_STACK_OVERFLOW] form=`(into [] (comp (map inc) (filter even?)) [1 2 3 4]` — sentence with 5 commas reads as AI-output cadence: 'The fresh pail holds not just filtered\ndrops, but changed ones."\n\nWrite a form w'
     - [CLAUSE_STACK_OVERFLOW] form=`(transduce (comp (map inc) (filter even?)) + 0 [1 ` — sentence with 6 commas reads as AI-output cadence: 'The original stream\nis untouched — the fresh pail catches only what the rule all'
     - [CLAUSE_STACK_OVERFLOW] form=`(transduce (comp (map inc) (filter even?)) + 0 [1 ` — sentence with 6 commas reads as AI-output cadence: 'That is the composed transducer summing the incremented-then-filtered elements —'
@@ -1537,6 +1546,7 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 - **STRING_AS_CHAR_MISCLAIM**: 6
 - **GENERIC_RESOLUTION_TAIL**: 6
 - **DOUBLED_PLACE**: 4
+- **DOUBLED_INPUT_VALUE_PARENS**: 4
 - **PROCEDURAL_OPENER**: 3
 - **SMALL_INT_LEAK**: 2
 - **REPEATED_OPENER_FRAGMENT**: 1
@@ -1551,13 +1561,13 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 | 3 | 18 | 31 | 33 | — |
 | 4 | 20 | 39 | 37 | — |
 | 5 | 22 | 39 | 90 | — |
-| 6 | 16 | 33 | 43 | — |
+| 6 | 16 | 33 | 44 | — |
 | 7 | 18 | 36 | 31 | — |
 | 8 | 16 | 31 | 66 | — |
 | 9 | 18 | 34 | 53 | — |
-| 10 | 16 | 36 | 65 | — |
+| 10 | 16 | 36 | 66 | — |
 | 11 | 14 | 29 | 22 | — |
-| 12 | 18 | 37 | 20 | — |
+| 12 | 18 | 37 | 22 | — |
 
 ### Sample issues by severity
 
@@ -2372,6 +2382,33 @@ But she only shook her head. "No, Slavena. To check whether th...
 
 Ursula, wearing his pride like a bright cloak, declared, "I will invent new names for the prices each time I visit the market!"
 But she only shook her head. "No, Ursula. To check whether...
+    ```
+
+#### DOUBLED_INPUT_VALUE_PARENS
+
+- `G6-04` (form `(= (clojure.string/upper-case "x") (clojure.string/upper-cas`): user_msg contains two or more 'as the input value' parentheticals — auto-closer fired twice or authored prose duplicated it
+    ```
+    Long before the market opened its stalls, a young woman had already spent her milk three times in her head.
+
+The farmer had posted the clojure.string section on the market-board and the milkmaid called the same board-listed routine twice in a row on the same letter, once from each side of the stall....
+    ```
+- `G10-15` (form `(do "a function suffices when no syntax shaping is needed" (`): user_msg contains two or more 'as the input value' parentheticals — auto-closer fired twice or authored prose duplicated it
+    ```
+    A walk to market, with a full pail and a full head, is one of the oldest tests of attention there is.
+
+The farmer looked at the milkmaid's plan and said there was no need for a rewrite rule here — a plain nameless pail-steps card would do. No syntax needed shaping; the arguments were already evaluat...
+    ```
+- `G12-01` (form `(into [] (map inc) [1 2 3])`): user_msg contains two or more 'as the input value' parentheticals — auto-closer fired twice or authored prose duplicated it
+    ```
+    Long before the market opened its stalls, a young woman had already spent her milk three times in her head.
+
+Margery held a milk-strainer over the fresh pail. The rule inside the mesh whispered: 'Each drop shall thicken by one.' She poured the stream of raw milk through. One by one, the drops passed...
+    ```
+- `G12-02` (form `(into [] (comp (map inc) (filter even?)) [1 2 3 4])`): user_msg contains two or more 'as the input value' parentheticals — auto-closer fired twice or authored prose duplicated it
+    ```
+    Long before the market opened its stalls, a young woman had already spent her milk three times in her head.
+
+Clara stood at the dairy with two strainers nested one behind the other. The first strainer whispered 'thicken'; the second whispered 'keep only the even-thickness drops.' She held both over ...
     ```
 
 #### HEDGING_NEAR_FORM
