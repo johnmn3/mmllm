@@ -1150,7 +1150,13 @@ def check_record(rec, sub, example):
             has_lit = any(
                 (lit and lit in res_text) for lit in lits
             )
-            if not has_lit:
+            # A `{drawn.<slot>}` placeholder in the source resolution
+            # counts as a drawn-value reference — the placeholder
+            # interpolates to the actual drawn literal at render time.
+            has_drawn_placeholder = bool(
+                re.search(r"\{drawn\.\w+\}", res_text)
+            )
+            if not has_lit and not has_drawn_placeholder:
                 issues.append(("STORY_RESOLUTION_NO_DRAWN",
                                 f"story-tagged example's resolution slot has no "
                                 f"drawn-value reference (form has literals "
@@ -1541,6 +1547,54 @@ def check_record(rec, sub, example):
         issues.append(("OUT_OF_REGISTER_VOCAB",
                         "user_msg uses an out-of-register word that "
                         "doesn't fit a children's-fable register"))
+
+    # ─────── slice wggf (fixset1-milkmaid) detectors ───────
+
+    # POINTED_AND_SAID_TIC — the cadence "X, ..., pointed and said:"
+    # is a recurring AI-generated dialogue construction that drains
+    # voice. A single occurrence is acceptable; two or more in the
+    # same user_msg signals a template tic.
+    if len(re.findall(r"\bpointed and said\b", user, re.IGNORECASE)) >= 1:
+        # Only flag when paired with a clause-break before it (the
+        # appositive-then-action shape). A bare "she pointed and said"
+        # without a leading clause is usually a normal sentence.
+        if re.search(
+            r"[,—]\s*[a-z][^.!?]{0,80}\bpointed and said\b",
+            user,
+            re.IGNORECASE,
+        ):
+            issues.append(("POINTED_AND_SAID_TIC",
+                            "user_msg uses 'X, [appositive], pointed "
+                            "and said:' — overused AI dialogue cadence"))
+
+    # ONLY_SHOOK_HEAD_TIC — "only shook his/her head" is a hallmark
+    # AI-fable cadence that recurs across templates. The "only" +
+    # head-shake construction is template-output filler and should
+    # be replaced with a concrete reaction.
+    if re.search(
+        r"\bonly shook (?:his|her|their) head\b",
+        user,
+        re.IGNORECASE,
+    ):
+        issues.append(("ONLY_SHOOK_HEAD_TIC",
+                        "user_msg uses 'only shook his/her head' — "
+                        "recurring AI-fable filler cadence"))
+
+    # PARALLEL_POSSESSIVE_TIC — "X her face quiet, her hands quieter
+    # still" / "his eyes calm, his voice calmer still" — the parallel
+    # comparative-possessive construction is a signature AI-output
+    # tic. Flag when two `her/his Y <adj>er still` occur together
+    # OR when an adjective is intensified to its comparative on the
+    # second clause of a parallel pair.
+    if re.search(
+        r"\b(?:her|his|their) [a-z]+ [a-z]+,\s*(?:her|his|their) "
+        r"[a-z]+ [a-z]+er still\b",
+        user,
+        re.IGNORECASE,
+    ):
+        issues.append(("PARALLEL_POSSESSIVE_TIC",
+                        "user_msg uses 'her X Y, her X Yer still' "
+                        "parallel possessive construction — AI tic"))
 
     return issues
 

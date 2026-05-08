@@ -181,6 +181,26 @@ class SubjectExample:
             new = replace_literals_in_prose(old, value_to_slot)
             if new != old:
                 object.__setattr__(self, fld, new)
+        # If the example is story-tagged and the resolution still
+        # doesn't reference any drawn slot, append a closing
+        # parenthetical so the resolution closes the loop with the
+        # parametric draw. Audited by the milkmaid wggf fix-set:
+        # STORY_RESOLUTION_NO_DRAWN was firing on ~967 milkmaid
+        # records because legacy resolutions name a fixed answer
+        # ("the REPL answered `false`") without referencing the
+        # actual drawn value. The parenthetical adds a {drawn.<first>}
+        # so the rendered resolution always contains a literal that
+        # matches the form's drawn literal.
+        if "story" in (self.tags or ()) and self.resolution and slots:
+            res = self.resolution
+            if not any(f"{{drawn.{s}}}" in res for s in slots):
+                first = next(iter(slots.keys()))
+                stripped = res.rstrip(" .;:")
+                trail = res[len(stripped):]
+                object.__setattr__(
+                    self, "resolution",
+                    f"{stripped} (with `{{drawn.{first}}}` as the input value){trail}"
+                )
 
 
 @dataclass
