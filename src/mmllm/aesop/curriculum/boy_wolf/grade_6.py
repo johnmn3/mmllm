@@ -226,7 +226,7 @@ G6_03 = SubjectCurriculum(grade=6, subject_id="G6-03",
                 "it with \"wolf\" borrows the smith's transformation."
             ),
             resolution=(
-                'Carol wrote the form into the REPL, crossed into the smithy by name, and the smith\'s tool returned "WOLF". Tom learned: the namespace slash is the boundary you must cross by name. The form had been built around {drawn.a}, and the value came back accordingly.'
+                'Carol wrote the form into the REPL, crossed into the smithy by name, and the smith\'s tool returned "WOLF". Tom learned: the namespace slash is the boundary you must cross by name. The slate showed {drawn.a} in clear chalk, and the fold tally stood as the day record.'
             )),
         _ex("(clojure.string/lower-case \"WOLF\")", "wolf",
             "the form using clojure.string/lower-case",
@@ -247,7 +247,7 @@ G6_03 = SubjectCurriculum(grade=6, subject_id="G6-03",
                 "you call it by its full name from the smithy."
             ),
             resolution=(
-                'The form returned "wolf" to the ledger, and Tom saw the pattern: a fully-qualified name unlocks the foreign tool; the REPL does the honest work. The form had been built around {drawn.a}, and the value came back accordingly.'
+                'The form returned "wolf" to the ledger, and Tom saw the pattern: a fully-qualified name unlocks the foreign tool; the REPL does the honest work. Carol marked {drawn.a} on the watchhouse beam, the lookout high above the valley quiet at last.'
             )),
     ], subplots=_ROADSIGN_SUBPLOTS, plan_pool=_PLAN_G6)
 
@@ -279,7 +279,7 @@ G6_04 = SubjectCurriculum(grade=6, subject_id="G6-04",
                 "same input should always yield the same output."
             ),
             resolution=(
-                "Carol wrote the form, calling the smith's tool twice with the same letter. The REPL returned true—the smith's work was consistent. Tom trusted the boundary now. The form had been built around {drawn.a}, and the value came back accordingly."           )),
+                "Carol wrote the form, calling the smith's tool twice with the same letter. The REPL returned true—the smith's work was consistent. Tom trusted the boundary now. The fold gate held tight against the count of {drawn.a}, slate cool under the elder hand."           )),
     ], subplots=_ROADSIGN_SUBPLOTS, plan_pool=_PLAN_G6)
 
 
@@ -307,7 +307,7 @@ G6_05 = SubjectCurriculum(grade=6, subject_id="G6-05",
                 "names the smithy, the right side names the particular tool."
             ),
             resolution=(
-                'Carol wrote the full name, and the smithy returned "SHEPHERD" in uppercase. Tom saw: the slash was not decoration—it was the key to crossing safely. The form had been built around {drawn.a}, and the value came back accordingly.'         )),
+                'Carol wrote the full name, and the smithy returned "SHEPHERD" in uppercase. Tom saw: the slash was not decoration—it was the key to crossing safely. Tom chalked {drawn.a} on the village notice, and the morning record stood for the next shepherd to read.'         )),
         _ex("(clojure.string/reverse \"flock\")", "kcolf",
             "clojure.string/reverse applied to \"flock\"",
             "the reversed string \"kcolf\"",
@@ -346,7 +346,7 @@ G6_05 = SubjectCurriculum(grade=6, subject_id="G6-05",
                 "postal code that qualifies the name."
             ),
             resolution=(
-                'Carol wrote the form, and the REPL handed back "village". Tom saw: every qualified name has two parts—the namespace that qualifies and the name that is qualified. The form had been built around {drawn.a}, and the value came back accordingly.'           )),
+                'Carol wrote the form, and the REPL handed back "village". Tom saw: every qualified name has two parts—the namespace that qualifies and the name that is qualified. The lookout returned with {drawn.a} on his slate, the valley long behind him and the count plain.'           )),
         _ex("(name :village/shepherd)", "shepherd",
             "the name portion of the keyword :village/shepherd",
             "the string \"shepherd\"",
@@ -497,7 +497,7 @@ G6_08 = SubjectCurriculum(grade=6, subject_id="G6-08",
                 "rule allows this form."
             ),
             resolution=(
-                'Carol wrote the form, crossed the bridge, and the smithy returned "A". Tom learned: circular dependencies are the danger; one-way calls are safe. The form had been built around {drawn.a}, and the value came back accordingly.'
+                'Carol wrote the form, crossed the bridge, and the smithy returned "A". Tom learned: circular dependencies are the danger; one-way calls are safe. The watchhouse warmed as the elder set {drawn.a} into the day record, the fold quiet by then.'
             )),
         _ex("(= 'a.b 'a.b)", True,
             "whether two references to the same namespace symbol agree",
@@ -546,7 +546,7 @@ G6_09 = SubjectCurriculum(grade=6, subject_id="G6-09",
                 "`step1` already posted."
             ),
             resolution=(
-                'Carol wrote the `do` form, and the REPL posted each definition in order. At the end, `step2` held 2. Tom saw: loading order matters. The form had been built around {drawn.a}, and the value came back accordingly.'
+                'Carol wrote the `do` form, and the REPL posted each definition in order. At the end, `step2` held 2. Tom saw: loading order matters. {drawn.a} stood as the answer the fold required, slate, chalk, and a steady eye all in agreement.'
             )),
         _ex("(let [a 1 b (+ a 1)] (+ a b))", 3,
             "an in-expression analogue of file-loading order via let",
@@ -567,7 +567,7 @@ G6_09 = SubjectCurriculum(grade=6, subject_id="G6-09",
                 "Then the whole form computes with both bindings alive."
             ),
             resolution=(
-                'Carol wrote the `let` form, and the REPL returned 3—the sum of `a` (1) and `b` (2). Tom understood: whether you post or bind, the order is always first-to-last. The form had been built around {drawn.a}, and the value came back accordingly.'           )),
+                'Carol wrote the `let` form, and the REPL returned 3—the sum of `a` (1) and `b` (2). Tom understood: whether you post or bind, the order is always first-to-last. The pasture tally settled at {drawn.a}, and Carol closed the day slate with that one number written clear.'           )),
     ], subplots=_ROADSIGN_SUBPLOTS, plan_pool=_PLAN_G6)
 
 
@@ -596,7 +596,7 @@ G6_10 = SubjectCurriculum(grade=6, subject_id="G6-10",
                 "the dependencies the project declared it would need."
             ),
             resolution=(
-                'Carol wrote the form, and the REPL returned the dependencies map. Tom had read the ledger correctly; the village approved the project setup. The form had been built around {drawn.a}, and the value came back accordingly.'
+                'Carol wrote the form, and the REPL returned the dependencies map. Tom had read the ledger correctly; the village approved the project setup. The slate showed {drawn.a} in clear chalk, and the fold tally stood as the day record.'
             )),
         _ex("(get-in {:paths [\"src\"]} [:paths 0])", "src",
             "the first :paths entry from a tiny deps-style map",
@@ -743,7 +743,7 @@ G6_13 = SubjectCurriculum(grade=6, subject_id="G6-13",
                 "temporary."
             ),
             resolution=(
-                'Carol wrote the form with the alias, and the REPL called the smithy\'s tool as if fully named. The result was "WOLF". Aliases shorten the form without changing the work. The form had been built around {drawn.a}, and the value came back accordingly.'
+                'Carol wrote the form with the alias, and the REPL called the smithy\'s tool as if fully named. The result was "WOLF". Aliases shorten the form without changing the work. Carol marked {drawn.a} on the watchhouse beam, the lookout high above the valley quiet at last.'
             )),
     ], subplots=_ROADSIGN_SUBPLOTS, plan_pool=_PLAN_G6)
 

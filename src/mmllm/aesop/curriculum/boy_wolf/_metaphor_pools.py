@@ -116,17 +116,11 @@ _GOAL_SUBPLOTS = _GOAL_SUBPLOTS + [
     # alone in the action line and threads the patience as a manner
     # adverb rather than a stitched-in phrase.
     SubplotTemplate(f"""\
-{{scenario}}
-
-{{need}}
-
-{{mapping}}
+{{scenario}} {{need}} {{mapping}}
 
 {{elder_phrase}}, {{emo_patient}}, composed {{concept_phrase}} \
-and submitted the form. The REPL — the only judge that doesn't \
-talk back — returned:
-
-{{resolution}}""", fits_tags=("story",)),
+and submitted it. The REPL — the only judge that does not \
+talk back — returned: {{resolution}}""", fits_tags=("story",)),
 ]
 
 
@@ -499,8 +493,8 @@ _ACORN_SUBPLOTS: list[SubplotTemplate] = [
     SubplotTemplate("""{shepherd_phrase} eyed the grazing flock {place}, {emo_proud}, and called out a
 guess about how many sheep were there without bothering to count. {elder_phrase}
 simply began counting — to {goal_text} required no eyeballing, only the form.
-{elder_he_she_cap} composed {concept_phrase}, submitted it to the REPL, and the
-runtime returned the number that had been there all along, settling the matter
+{elder_he_she_cap} composed {concept_phrase}, submitted it to the REPL. The
+runtime returned the count the form computed, and the slate showed the answer
 the patient way."""),
 
     # 2. The flock-grows-or-shrinks template — for inc/dec, +/-.
@@ -517,8 +511,8 @@ returned the new count, the flock settled into its new arrangement."""),
 adding sheep to the count, subtracting, dividing wool-weight into shares with
 leftovers, comparing two flocks — the runtime gets it exactly right, every
 time." To {goal_text}, {elder_he_she} composed {concept_phrase}, submitted
-the form, and the REPL handed back the precise number the operation called
-for."""),
+the form. The REPL handed back the count, slate cool against the elder's
+quiet hand."""),
 
     # 4. The shepherd-boasts-wrong template — shepherd claims answer by sight;
     #    elder counts and REPL proves shepherd wrong.
@@ -526,7 +520,7 @@ for."""),
 what {shepherd_he_she} claimed the count would be, without bothering to tally.
 "I know numbers," {shepherd_he_she} insisted. {elder_phrase} simply reached for
 the tally-stick and began marking carefully. To {goal_text}, {elder_he_she}
-composed {concept_phrase}, submitted it to the REPL, and the runtime returned
+composed {concept_phrase} and submitted it. The REPL returned
 the true count — which was not what {shepherd_phrase} had claimed."""),
 
     # 5. The exact-number template — generic; emphasizes that the REPL gives
@@ -553,7 +547,7 @@ _GATE_SUBPLOTS: list[SubplotTemplate] = [
 they would open for {shepherd_him_her}. {elder_phrase}, {emo_patient}, slowed
 and watched the latched timber: the only way to know which way the gates would
 swing was to actually bring the value to them. To {goal_text}, {elder_he_she}
-composed {concept_phrase}, submitted the form, and the REPL — testing the gates
+composed {concept_phrase} and submitted it. The REPL — testing the gates
 properly — settled the matter, the heavy gates swinging exactly as the rule
 said, regardless of {shepherd_phrase}'s guess."""),
 
@@ -578,7 +572,7 @@ gate had carried."""),
 {emo_patient}, leaning on the heavy timber of the first fold-gate. "Bring
 the value to the first gate. If it shuts, the chain stops there — the gates
 behind it never see the value at all." To {goal_text}, {elder_he_she}
-composed {concept_phrase}, submitted the form, and the REPL — checking
+composed {concept_phrase} and submitted it. The REPL — checking
 each gate in order, stopping at the first that closed — settled the matter
 exactly as the rule said."""),
 
@@ -621,7 +615,7 @@ _FORK_SUBPLOTS: list[SubplotTemplate] = [
 {shepherd_he_she} was sure the runtime would take, without bothering to check
 the condition. {elder_phrase}, {emo_patient}, only smiled in the long afternoon:
 the only way to know is to evaluate the condition. To {goal_text}, {elder_he_she}
-composed {concept_phrase}, submitted the form, and the REPL — checking the
+composed {concept_phrase} and submitted it. The REPL — checking the
 condition properly — returned the value of the arm the form actually took."""),
 
     # 2. The crossroads-with-many-stones template — applies to `cond` / `case` /
@@ -639,7 +633,7 @@ returned its value."""),
     SubplotTemplate(""""What's important about a path-fork," {elder_phrase}, {emo_patient}, said, "is that the arm not
 taken doesn't run at all. The runtime checks the condition, walks the right arm,
 and the unwalked arm is just left behind." To {goal_text}, {elder_he_she}
-composed {concept_phrase}, submitted the form, and the REPL — running only what
+composed {concept_phrase} and submitted it. The REPL — running only what
 was needed — handed back the value of the chosen arm."""),
 
     # 4. The path-fork-boast template — shepherd boasts he can pick the arm
@@ -671,7 +665,7 @@ _ROADSIGN_SUBPLOTS: list[SubplotTemplate] = [
     SubplotTemplate("""{shepherd_phrase}, {emo_proud}, glanced at the notice {place} and called out
 what {shepherd_he_she} thought it said without slowing. {elder_phrase} stopped
 and read carefully. To {goal_text}, the notice had to be read exactly:
-{elder_he_she} composed {concept_phrase}, submitted the form, and the REPL —
+{elder_he_she} composed {concept_phrase} and submitted it. The REPL —
 reading literally — returned the right value, while {shepherd_phrase}'s guess
 fell short."""),
 
@@ -777,7 +771,7 @@ the book {place}, dipping a quill into ink at the edge. "The world
 outside the REPL is scrolls," {elder_he_she} said: "you read what
 they say, you write what you want to keep, and the runtime carries
 the words back and forth." To {goal_text}, {elder_he_she}
-composed {concept_phrase}, submitted the form, and the REPL handed
+composed {concept_phrase} and submitted it. The REPL handed
 back what the log-book actually held."""),
 
     # 2. The reading-and-writing template — generic; works for
@@ -1183,7 +1177,7 @@ value distinct — returned the right answer."""),
 {elder_phrase}, {emo_patient}, said, "you label the form with a chalk mark
 in front. Quoting tells the runtime: don't evaluate this, just hand
 it back as the shape it is." To {goal_text}, {elder_he_she}
-composed {concept_phrase}, submitted the form, and the REPL —
+composed {concept_phrase} and submitted it. The REPL —
 respecting the chalk mark — returned the form unevaluated."""),
 
     # 3. The labeling-form-vs-evaluating-it template — generic
@@ -1261,7 +1255,7 @@ dispatching the sheep — returned the pen-specific value."""),
 "You decide what to look at on each sheep — a brand, a fleece color, a
 mark, anything. The runtime reads it, finds the matching pen,
 and routes that one." To {goal_text}, {elder_he_she}
-composed {concept_phrase}, submitted the form, and the REPL —
+composed {concept_phrase} and submitted it. The REPL —
 reading the brand the dispatch function produced — returned the
 value the right pen had given."""),
 
@@ -1308,7 +1302,7 @@ divided into labeled pigeon-holes — one for count, one for weight,
 one for breed. "A defrecord is like this box," {elder_he_she} said:
 "named compartments holding specific things; a mark on the outside
 saying what kind of record it is." To {goal_text}, {elder_he_she}
-composed {concept_phrase}, submitted the form, and the REPL —
+composed {concept_phrase} and submitted it. The REPL —
 constructing the box, filling its compartments — returned the value
 the tally-box held."""),
 
@@ -1317,7 +1311,7 @@ the tally-box held."""),
 "A deftype is a barer tally-box," {elder_phrase}, {emo_patient}, said. "Compartments,
 a mark — no map-like behavior unless you ask for it. Faster, more
 focused, lighter in hand." To {goal_text}, {elder_he_she}
-composed {concept_phrase}, submitted the form, and the REPL —
+composed {concept_phrase} and submitted it. The REPL —
 constructing the bare box as specified — returned the value
 inside."""),
 
@@ -1555,15 +1549,9 @@ def _story(connective_prose: str) -> SubplotTemplate:
     pour / chalk / tuck / etc.) and its imagery vocabulary.
     """
     return SubplotTemplate(f"""\
-{{scenario}}
+{{scenario}} {{need}} {{mapping}}
 
-{{need}}
-
-{{mapping}}
-
-{connective_prose}
-
-{{resolution}}""", fits_tags=("story",))
+{connective_prose} {{resolution}}""", fits_tags=("story",))
 
 
 # Family-specific story templates. The connective prose for each uses

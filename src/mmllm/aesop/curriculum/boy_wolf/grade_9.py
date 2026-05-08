@@ -105,7 +105,7 @@ G9_01 = SubjectCurriculum(
                 "runs."
             ),
             resolution=(
-                "the original basket still held only its three pouches — the map m unchanged, ready for the next shepherd's count. The form had been built around {drawn.a}, and the value came back accordingly."           )),
+                "the original basket still held only its three pouches — the map m unchanged, ready for the next shepherd's count. The slate showed {drawn.a} in clear chalk, and the fold tally stood as the day record."           )),
         _ex("(let [v [1 2 3]] (conj v 4) v)",
             [1, 2, 3],
             "binding v, calling (conj v 4), then returning v unchanged",
@@ -120,7 +120,7 @@ G9_01 = SubjectCurriculum(
                 "`conj` builds a new vector but doesn't rewrite the original."
             ),
             resolution=(
-                'The original vector stood unchanged as the immutable record. The form had been built around {drawn.a}, and the value came back accordingly.'
+                'The original vector stood unchanged as the immutable record. Carol marked {drawn.a} on the watchhouse beam, the lookout high above the valley quiet at last.'
             )),
     ],
     subplots=_BASKET_SUBPLOTS,

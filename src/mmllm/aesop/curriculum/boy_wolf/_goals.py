@@ -1823,6 +1823,107 @@ GOALS: dict[str, dict[str, str]] = {
         "what":    'the empty vector',
         "goal":    'create an empty vector',
     },
+
+    # ── slice yTpz: per-form GOALS for the most common atom-form
+    #    GOAL_FALLBACK_GENERIC offenders (G1-01..G1-09 and beyond).
+    #    Each entry replaces the generic "evaluate the literal /
+    #    predicate / form" fallback with a concrete verb-phrase that
+    #    flows naturally into "To {goal_text}, X composed Y" templates.
+    "(quote wolf)": {
+        "concept": 'the quote special form on the symbol wolf',
+        "what":    'the quoted symbol wolf',
+        "goal":    'use quote to obtain the symbol wolf without evaluating it',
+    },
+    "(symbol? 'wolf)": {
+        "concept": 'the symbol predicate on a quoted name',
+        "what":    'whether the quoted form is a symbol',
+        "goal":    'test whether the quoted form is a symbol',
+    },
+    "(symbol? 'java.util.Date)": {
+        "concept": 'the symbol predicate on a quoted host name',
+        "what":    'whether the host class name is a symbol',
+        "goal":    'test whether the quoted host class name is a symbol',
+    },
+    "(name 'village.shepherd)": {
+        "concept": 'the name lookup on a quoted symbol',
+        "what":    'the unqualified portion of the symbol',
+        "goal":    'extract the unqualified name from the quoted symbol',
+    },
+    "(name 'java.util.Date)": {
+        "concept": 'the name lookup on a host class symbol',
+        "what":    'the unqualified portion of the host class name',
+        "goal":    'extract the unqualified name from the host class symbol',
+    },
+    "(namespace :village/shepherd)": {
+        "concept": 'the namespace lookup on a qualified keyword',
+        "what":    'the namespace portion of the qualified keyword',
+        "goal":    'extract the namespace from the qualified keyword',
+    },
+    "(map name ['village.shepherd 'village.elder])": {
+        "concept": 'mapping name across a list of symbols',
+        "what":    'the list of unqualified names',
+        "goal":    'apply name across the two qualified symbols and collect the results',
+    },
+    "(count ['village.shepherd 'village.elder 'village.wolf])": {
+        "concept": 'counting a vector of qualified symbols',
+        "what":    'the number of items in the vector',
+        "goal":    'count the number of qualified symbols in the vector',
+    },
+    "(:wolf {:wolf 1 :flock 2})": {
+        "concept": 'keyword lookup on a map',
+        "what":    'the value associated with the wolf key',
+        "goal":    'look up the wolf key in the map by invoking the keyword',
+    },
+    "(clojure.string/lower-case \"WOLF\")": {
+        "concept": 'lowercasing a string with clojure.string/lower-case',
+        "what":    'the lower-cased form of the input string',
+        "goal":    'lowercase the alarm string with clojure.string/lower-case',
+    },
+    "(clojure.string/reverse \"flock\")": {
+        "concept": 'reversing a string with clojure.string/reverse',
+        "what":    'the reversed form of the input string',
+        "goal":    'reverse the flock string with clojure.string/reverse',
+    },
+    "(count \"wolf\\nshepherd\\n\")": {
+        "concept": 'counting characters in a multi-line string',
+        "what":    'the total character count including newlines',
+        "goal":    'count every character in the multi-line alarm string',
+    },
+    "(.startsWith \"shepherd-elder\" \"shepherd\")": {
+        "concept": 'host-method check for a string prefix',
+        "what":    'whether the compound name begins with shepherd',
+        "goal":    'test whether the compound name begins with the shepherd prefix',
+    },
+    "(try (/ 1 0) (catch Exception e :caught))": {
+        "concept": 'a try form with a catch returning a sentinel keyword',
+        "what":    'the value the catch branch returns',
+        "goal":    'catch the divide-by-zero error and return the caught keyword',
+    },
+    "(let [flock-size 8 stray-count 2] (- flock-size stray-count))": {
+        "concept": 'a let-bound subtraction of flock and stray counts',
+        "what":    'the remaining flock after subtracting strays',
+        "goal":    'bind flock-size and stray-count, then subtract strays from the flock',
+    },
+    "(let [a (int-array [5 10 15])] (aget a 0))": {
+        "concept": 'binding a host int-array and reading the first slot',
+        "what":    'the value at the first array index',
+        "goal":    'bind a host int-array and read its first slot with aget',
+    },
+    "(= 1 1)": {
+        "concept": 'the equality check on two equal integers',
+        "what":    'whether 1 equals 1',
+        "goal":    'test whether 1 equals 1 with =',
+    },
+    "(= 1 2)": {
+        "concept": 'the equality check on two distinct integers',
+        "what":    'whether 1 equals 2',
+        "goal":    'test whether 1 equals 2 with =',
+    },
+    "(= 'village.shepherd 'village.shepherd)": {
+        "concept": 'the equality check on two identical qualified symbols',
+        "what":    'whether the two qualified symbols are equal',
+        "goal":    'test whether the two qualified shepherd symbols are equal',
+    },
 }
 
 

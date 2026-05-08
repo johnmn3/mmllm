@@ -1849,6 +1849,66 @@ def check_record(rec, sub, example):
                             f"{repl_count} times — name the mechanic once, "
                             f"use pronoun/it/runtime/it for the second beat"))
 
+    # ─────────── slice yTpz (boy-wolf alpha-fixset) detector additions ────
+    #
+    # Three new detectors covering papercut classes the existing 91
+    # detectors don't catch.
+
+    # SUBMIT_THE_FORM_REPEAT — boy-wolf templates often instruct the
+    # shepherd to "submit the form" twice in the same record (once at
+    # template setup, once at the resolution beat). Repeating the
+    # imperative reads as scaffolding noise rather than a single
+    # pedagogical beat.
+    submit_form_hits = len(re.findall(
+        r"\bsubmit (?:the form|it)\b", user, re.IGNORECASE
+    ))
+    if submit_form_hits >= 3:
+        issues.append(("SUBMIT_THE_FORM_REPEAT",
+                        f"user_msg uses 'submit the form/it' {submit_form_hits} "
+                        "times — name the action once per beat (the imperative "
+                        "+ the resolution narrative is enough)"))
+
+    # TRUST_RHETORIC_FILLER — phrases like "the only voice we trust",
+    # "the village had stopped trusting answers that weren't checked",
+    # "an honest tally is the only way", "the only judge that doesn't
+    # talk back" — generic trust-rhetoric filler that replaces concrete
+    # algorithmic detail. Two or more such phrases in one record signal
+    # a Cat-K under-earned-metaphor stack.
+    trust_filler_re = re.compile(
+        r"\b(?:the only voice (?:we|the village) trust|"
+        r"the only judge that (?:doesn't|does not) talk back|"
+        r"stopped trusting answers|"
+        r"an honest tally|"
+        r"the only way the village kept track|"
+        r"who could be trusted)\b",
+        re.IGNORECASE,
+    )
+    trust_hits = len(trust_filler_re.findall(user))
+    if trust_hits >= 2:
+        issues.append(("TRUST_RHETORIC_FILLER",
+                        f"user_msg has {trust_hits} stacked 'only voice/judge "
+                        "we trust / honest tally' filler phrases — replace "
+                        "with concrete algorithm narration"))
+
+    # FORM_DEMONSTRATIVE_THIS — sentence opens with "This form" or
+    # "That form" used as a noun-phrase referent — usually a stitched
+    # transition that doesn't cohere with the prior sentence. Cat-K-3
+    # AI cadence: storybook prose names the thing concretely or uses
+    # `it`, not "this form". Skips dialogue-internal occurrences (the
+    # milkmaid pool legitimately uses "This form reads the slate" as
+    # quoted speech).
+    fdt_re = re.compile(r"(?:^|\.\s+|\n)(?:This|That) form\b")
+    fdt_m = fdt_re.search(user)
+    if fdt_m:
+        # Walk the preceding text and count unescaped quotes; if odd,
+        # we're inside a quoted dialogue and skip.
+        before = user[:fdt_m.start()]
+        if before.count('"') % 2 == 0:
+            issues.append(("FORM_DEMONSTRATIVE_THIS",
+                            "user_msg starts a sentence with 'This form' / "
+                            "'That form' — replace with concrete reference "
+                            "or pronoun ('it')"))
+
     return issues
 
 
@@ -1918,6 +1978,21 @@ def _emo_fragments():
         )
         pools = pools + (CP_EMO_PATIENT, CP_EMO_PROUD, CP_EMO_THIRSTY,
                           GE_EMO_GREEDY, GE_EMO_CONTENT, GE_EMO_REGRETFUL)
+    except ImportError:
+        pass
+    # Boy-wolf-specific EMO pools (BW_EMO_*) live in boy_wolf/grade_1.py
+    # and are what the boy-wolf renderer actually draws from. Without
+    # them in the marker set, every boy-wolf record would fail the EMO
+    # half of LOW_GROUNDING even when the renderer emits a rich EMO
+    # phrase like "with great whoops of laughter" or "letting the
+    # runtime have the last word".
+    try:
+        from mmllm.aesop.curriculum.boy_wolf.grade_1 import (
+            BW_EMO_PROUD, BW_EMO_PATIENT, BW_EMO_TIRED,
+            BW_EMO_REGRETFUL, BW_EMO_DESPERATE,
+        )
+        pools = pools + (BW_EMO_PROUD, BW_EMO_PATIENT, BW_EMO_TIRED,
+                          BW_EMO_REGRETFUL, BW_EMO_DESPERATE)
     except ImportError:
         pass
     out = set()

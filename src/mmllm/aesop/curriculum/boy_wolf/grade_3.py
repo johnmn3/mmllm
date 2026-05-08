@@ -87,7 +87,7 @@ G3_01 = SubjectCurriculum(grade=3, subject_id="G3-01",
                 "reads back whatever was posted under that name — here, 42."
             ),
             resolution=(
-                "the post returned exactly the count Carol had chalked, and the morning's record stood on village authority. The form had been built around {drawn.a}, and the value came back accordingly."
+                "the post returned exactly the count Carol had chalked, and the morning's record stood on village authority. The slate showed {drawn.a} in clear chalk, and the fold tally stood as the day record."
             )),
         _ex("(do (def y 7) y)",  7,  "the binding (def y 7)",
             "the value bound to y",
@@ -107,7 +107,7 @@ G3_01 = SubjectCurriculum(grade=3, subject_id="G3-01",
                 "holds under that name — here, 7."
             ),
             resolution=(
-                "the post returned 7 for y, the afternoon's count stood posted, and both x and y had their own places on the village notice. The form had been built around {drawn.a}, and the value came back accordingly."
+                "the post returned 7 for y, the afternoon's count stood posted, and both x and y had their own places on the village notice. Carol marked {drawn.a} on the watchhouse beam, the lookout high above the valley quiet at last."
             )),
     ], subplots=_ROADSIGN_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
 
@@ -136,7 +136,7 @@ G3_02 = SubjectCurriculum(grade=3, subject_id="G3-02",
                 "returns."
             ),
             resolution=(
-                "the notice-post returned 99, the revision Carol had chalked, and the day's tally stood corrected. The form had been built around {drawn.a}, and the value came back accordingly."
+                "the notice-post returned 99, the revision Carol had chalked, and the day's tally stood corrected. The fold gate held tight against the count of {drawn.a}, slate cool under the elder hand."
             )),
     ], subplots=_ROADSIGN_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
 
@@ -165,7 +165,7 @@ G3_03 = SubjectCurriculum(grade=3, subject_id="G3-03",
                 "binding is in force only for the form's stretch."
             ),
             resolution=(
-                'the pouch yielded 3, the +1 added a fourth lamb, and the running total stood at 4 — exactly what the next fence-post called for. The form had been built around {drawn.a}, and the value came back accordingly.'           )),
+                'the pouch yielded 3, the +1 added a fourth lamb, and the running total stood at 4 — exactly what the next fence-post called for. Tom chalked {drawn.a} on the village notice, and the morning record stood for the next shepherd to read.'           )),
         _ex("(let [n 10] (* n n))", 100, "the form (let [n 10] (* n n))",
             "the square of n where n is bound to 10",
             scenario=(
@@ -185,7 +185,7 @@ G3_03 = SubjectCurriculum(grade=3, subject_id="G3-03",
                 "forgotten."
             ),
             resolution=(
-                'the pouch held 10, the multiplication yielded 100, and Tom knew exactly how many stones to gather for his perfect square. The form had been built around {drawn.a}, and the value came back accordingly.'
+                'the pouch held 10, the multiplication yielded 100, and Tom knew exactly how many stones to gather for his perfect square. The lookout returned with {drawn.a} on his slate, the valley long behind him and the count plain.'
             )),
         _ex("(let [a 5] a)", 5, "the form (let [a 5] a)",
             "the value of (let [a 5] a)",
@@ -206,7 +206,7 @@ G3_03 = SubjectCurriculum(grade=3, subject_id="G3-03",
                 "5, and that is what the whole form returns."
             ),
             resolution=(
-                "the pouch yielded 5, the count matched Carol's tally, and the fence-post record stood correct. The form had been built around {drawn.a}, and the value came back accordingly."
+                "the pouch yielded 5, the count matched Carol's tally, and the fence-post record stood correct. The watchhouse warmed as the elder set {drawn.a} into the day record, the fold quiet by then."
             )),
     ], subplots=_POUCH_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
 
@@ -233,7 +233,7 @@ G3_04 = SubjectCurriculum(grade=3, subject_id="G3-04",
                 "the addition. The sum of both pouch-contents is 3."
             ),
             resolution=(
-                "the pouch held both counts, the add combined them, and Carol had the day's total ready for the notice-post. The form had been built around {drawn.a}, and the value came back accordingly."
+                "the pouch held both counts, the add combined them, and Carol had the day's total ready for the notice-post. {drawn.a} stood as the answer the fold required, slate, chalk, and a steady eye all in agreement."
             )),
         _ex("(let [x 5 y 3] (- x y))", 2,
             "the form (let [x 5 y 3] (- x y))",
@@ -254,7 +254,7 @@ G3_04 = SubjectCurriculum(grade=3, subject_id="G3-04",
                 "pouch-values: 5 minus 3 leaves 2."
             ),
             resolution=(
-                "the pouch held both, the math found the remainder, and Tom wrote the unsold count on the day's tally. The form had been built around {drawn.a}, and the value came back accordingly."
+                "the pouch held both, the math found the remainder, and Tom wrote the unsold count on the day's tally. The pasture tally settled at {drawn.a}, and Carol closed the day slate with that one number written clear."
             )),
         _ex("(let [a 2 b 3 c 4] (+ a b c))", 9,
             "a let with three bindings",
@@ -275,7 +275,7 @@ G3_04 = SubjectCurriculum(grade=3, subject_id="G3-04",
                 "inside the form, returning their total."
             ),
             resolution=(
-                "the pouch held all three counts, the addition combined them all, and the morning's fleece-tally was recorded in the elder's hand. The form had been built around {drawn.a}, and the value came back accordingly."
+                "the pouch held all three counts, the addition combined them all, and the morning's fleece-tally was recorded in the elder's hand. The slate showed {drawn.a} in clear chalk, and the fold tally stood as the day record."
             )),
     ], subplots=_POUCH_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
 
@@ -304,7 +304,7 @@ G3_05 = SubjectCurriculum(grade=3, subject_id="G3-05",
                 "body reads 99."
             ),
             resolution=(
-                'the pouch held 99, the local x returned that value, and the temporary count was settled without touching the posted notice. The form had been built around {drawn.a}, and the value came back accordingly.'
+                'the pouch held 99, the local x returned that value, and the temporary count was settled without touching the posted notice. Carol marked {drawn.a} on the watchhouse beam, the lookout high above the valley quiet at last.'
             )),
         _ex("(do (def x 10) (let [x 99] x) x)", 10,
             "the outer x after the inner let returns",
@@ -327,7 +327,7 @@ G3_05 = SubjectCurriculum(grade=3, subject_id="G3-05",
                 "original 10."
             ),
             resolution=(
-                "the let's pouch had released its contents, the posted notice returned 10, and the week's count stood as it was posted. The form had been built around {drawn.a}, and the value came back accordingly."
+                "the let's pouch had released its contents, the posted notice returned 10, and the week's count stood as it was posted. The fold gate held tight against the count of {drawn.a}, slate cool under the elder hand."
             )),
     ], subplots=_POUCH_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
 
@@ -353,7 +353,7 @@ G3_06 = SubjectCurriculum(grade=3, subject_id="G3-06",
                 "and doubles it. So b becomes 10 inside the pouch."
             ),
             resolution=(
-                'the pouch let a settle to 5, then used a to compute b as 10, and the doubled count was ready for the afternoon ledger. The form had been built around {drawn.a}, and the value came back accordingly.'
+                'the pouch let a settle to 5, then used a to compute b as 10, and the doubled count was ready for the afternoon ledger. Tom chalked {drawn.a} on the village notice, and the morning record stood for the next shepherd to read.'
             )),
         _ex("(let [a 3 b (+ a 1) c (* b 2)] c)", 8,
             "a let with sequential bindings",
@@ -368,7 +368,7 @@ G3_06 = SubjectCurriculum(grade=3, subject_id="G3-06",
                 "The `let` binds a to 3, then b to `(+ a 1)`, then c to `(* b 2)`. Each reads what came before."
             ),
             resolution=(
-                'All bindings settled, and the final tally was ready. The form had been built around {drawn.a}, and the value came back accordingly.'
+                'All bindings settled, and the final tally was ready. The lookout returned with {drawn.a} on his slate, the valley long behind him and the count plain.'
             )),
     ], subplots=_POUCH_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
 
@@ -463,7 +463,7 @@ G3_09 = SubjectCurriculum(grade=3, subject_id="G3-09",
                 "The name is `dbl`, and it doubles its argument."
             ),
             resolution=(
-                'The posted drill-card `dbl` was ready. When 5 arrived, Carol ran it and got the doubled count. The form had been built around {drawn.a}, and the value came back accordingly.'
+                'The posted drill-card `dbl` was ready. When 5 arrived, Carol ran it and got the doubled count. The watchhouse warmed as the elder set {drawn.a} into the day record, the fold quiet by then.'
             )),
         _ex("(do (defn add3 [a b c] (+ a b c)) (add3 1 2 3))", 6,
             "a defn with three args",
@@ -484,7 +484,7 @@ G3_09 = SubjectCurriculum(grade=3, subject_id="G3-09",
                 "1 plus 2 plus 3."
             ),
             resolution=(
-                "the posted drill-card `add3` served the three counts, returned 6, and the morning's three-gate total was recorded efficiently. The form had been built around {drawn.a}, and the value came back accordingly."
+                "the posted drill-card `add3` served the three counts, returned 6, and the morning's three-gate total was recorded efficiently. {drawn.a} stood as the answer the fold required, slate, chalk, and a steady eye all in agreement."
             )),
     ], subplots=_RECIPE_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
 
@@ -555,7 +555,7 @@ G3_11 = SubjectCurriculum(grade=3, subject_id="G3-11",
                 "every `a` substitutes to 7, and both get added together."
             ),
             resolution=(
-                'The pouch held the value, it was substituted in both slots, and the addition yielded the doubled count. The form had been built around {drawn.a}, and the value came back accordingly.'
+                'The pouch held the value, it was substituted in both slots, and the addition yielded the doubled count. The pasture tally settled at {drawn.a}, and Carol closed the day slate with that one number written clear.'
             )),
         _ex("((fn [x] (* x x)) 6)", 36,
             "applying square to 6",
@@ -602,7 +602,7 @@ G3_12 = SubjectCurriculum(grade=3, subject_id="G3-12",
                 "99, giving 100."
             ),
             resolution=(
-                "the pouch shadowed the posted name, the local g plus one gave 100, and the afternoon's calculation was complete without changing the posted notice. The form had been built around {drawn.a}, and the value came back accordingly."
+                "the pouch shadowed the posted name, the local g plus one gave 100, and the afternoon's calculation was complete without changing the posted notice. The slate showed {drawn.a} in clear chalk, and the fold tally stood as the day record."
             )),
     ], subplots=_ROADSIGN_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
 
@@ -655,7 +655,7 @@ G3_14 = SubjectCurriculum(grade=3, subject_id="G3-14",
                 "value: 3."
             ),
             resolution=(
-                "the do form ran all three, returned 3, and Tom learned the REPL's rule for sequences. The form had been built around {drawn.a}, and the value came back accordingly."
+                "the do form ran all three, returned 3, and Tom learned the REPL's rule for sequences. Carol marked {drawn.a} on the watchhouse beam, the lookout high above the valley quiet at last."
             )),
         _ex("(do (+ 1 1) (+ 2 2) (+ 3 3))", 6,
             "a do with three forms",
@@ -675,7 +675,7 @@ G3_14 = SubjectCurriculum(grade=3, subject_id="G3-14",
                 "value, 6, is returned."
             ),
             resolution=(
-                'the do form ran all three additions, returned 6 from the final one, and Carol had the complete sequence recorded with the answer ready. The form had been built around {drawn.a}, and the value came back accordingly.'
+                'the do form ran all three additions, returned 6 from the final one, and Carol had the complete sequence recorded with the answer ready. The fold gate held tight against the count of {drawn.a}, slate cool under the elder hand.'
             )),
     ], subplots=_SCRIBE_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
 
@@ -702,7 +702,7 @@ G3_15 = SubjectCurriculum(grade=3, subject_id="G3-15",
                 "but only the last form's value is returned."
             ),
             resolution=(
-                "the do printed the greeting, then returned 42, and Tom knew the REPL's rule: side-effects do their work, but the final value is the return. The form had been built around {drawn.a}, and the value came back accordingly."
+                "the do printed the greeting, then returned 42, and Tom knew the REPL's rule: side-effects do their work, but the final value is the return. Tom chalked {drawn.a} on the village notice, and the morning record stood for the next shepherd to read."
             )),
     ], subplots=_RECIPE_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
 
@@ -730,7 +730,7 @@ G3_16 = SubjectCurriculum(grade=3, subject_id="G3-16",
                 "reads `+`, it finds the pouch-value first."
             ),
             resolution=(
-                "the pouch's `+` shadowed the posted function, returning 99, and Tom learned that local names hide posted ones. The form had been built around {drawn.a}, and the value came back accordingly."
+                "the pouch's `+` shadowed the posted function, returning 99, and Tom learned that local names hide posted ones. The lookout returned with {drawn.a} on his slate, the valley long behind him and the count plain."
             )),
     ], subplots=_POUCH_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
 
@@ -757,7 +757,7 @@ G3_17 = SubjectCurriculum(grade=3, subject_id="G3-17",
                 "subtraction finds the difference between them."
             ),
             resolution=(
-                'the pouch held both clearly named counts, the math found the difference, and the naming convention kept the ledger readable. The form had been built around {drawn.a}, and the value came back accordingly.'
+                'the pouch held both clearly named counts, the math found the difference, and the naming convention kept the ledger readable. The watchhouse warmed as the elder set {drawn.a} into the day record, the fold quiet by then.'
             )),
     ], subplots=_ROADSIGN_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
 
@@ -782,7 +782,7 @@ G3_18 = SubjectCurriculum(grade=3, subject_id="G3-18",
                 "three times, and the REPL substitutes the value each time."
             ),
             resolution=(
-                'The pouch held the value, the name was used three times, and the multiplication gave the cubic result. The form had been built around {drawn.a}, and the value came back accordingly.'
+                'The pouch held the value, the name was used three times, and the multiplication gave the cubic result. {drawn.a} stood as the answer the fold required, slate, chalk, and a steady eye all in agreement.'
             )),
         _ex("(* 5 5 5)", 125,
             "the inline form (* 5 5 5)",
@@ -802,7 +802,7 @@ G3_18 = SubjectCurriculum(grade=3, subject_id="G3-18",
                 "numbers in place."
             ),
             resolution=(
-                'the inline multiplication gave 125 — same answer as the named version, but faster for this quick calculation. The form had been built around {drawn.a}, and the value came back accordingly.'           )),
+                'the inline multiplication gave 125 — same answer as the named version, but faster for this quick calculation. The pasture tally settled at {drawn.a}, and Carol closed the day slate with that one number written clear.'           )),
     ], subplots=_POUCH_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
 
 

@@ -149,7 +149,7 @@ G7_02 = SubjectCurriculum(grade=7, subject_id="G7-02",
                 "clause returns :caught instead of crashing. The pen holds it."
             ),
             resolution=(
-                "the form caught the error and returned :caught, keeping the counting safe without stopping the day's watch. The form had been built around {drawn.a}, and the value came back accordingly."
+                "the form caught the error and returned :caught, keeping the counting safe without stopping the day's watch. The slate showed {drawn.a} in clear chalk, and the fold tally stood as the day record."
             )),
         _ex("(try 42 (catch Exception e :caught))", 42,
             "a try with no error — the body's value is returned",
@@ -171,7 +171,7 @@ G7_02 = SubjectCurriculum(grade=7, subject_id="G7-02",
                 "the pen's safety."
             ),
             resolution=(
-                'the form returned 42 exactly, the catch unused because the arithmetic had posed no trouble — proving the pen only catches when needed. The form had been built around {drawn.a}, and the value came back accordingly.'           )),
+                'the form returned 42 exactly, the catch unused because the arithmetic had posed no trouble — proving the pen only catches when needed. Carol marked {drawn.a} on the watchhouse beam, the lookout high above the valley quiet at last.'           )),
     ], subplots=_SAFETYNET_SUBPLOTS, plan_pool=_PLAN_G7)
 
 
@@ -319,7 +319,7 @@ G7_05 = SubjectCurriculum(grade=7, subject_id="G7-05",
                 "pen."
             ),
             resolution=(
-                'the predicate returned true — zero was something countable, even if the count was empty. The form had been built around {drawn.a}, and the value came back accordingly.'           )),
+                'the predicate returned true — zero was something countable, even if the count was empty. The fold gate held tight against the count of {drawn.a}, slate cool under the elder hand.'           )),
         _ex("(first nil)", None,
             "calling first on nil",
             "the value of (first nil)",
@@ -450,7 +450,7 @@ G7_07 = SubjectCurriculum(grade=7, subject_id="G7-07",
                 "a gate that rejected the bad path and fed an error to safety."
             ),
             resolution=(
-                "the form caught the assertion's failure and returned :asserted — the practice-pen had held the broken claim without spilling. The form had been built around {drawn.a}, and the value came back accordingly."           )),
+                "the form caught the assertion's failure and returned :asserted — the practice-pen had held the broken claim without spilling. Tom chalked {drawn.a} on the village notice, and the morning record stood for the next shepherd to read."           )),
     ], subplots=_SAFETYNET_SUBPLOTS, plan_pool=_PLAN_G7)
 
 
@@ -643,7 +643,7 @@ G7_12 = SubjectCurriculum(grade=7, subject_id="G7-12",
                 "newline is 1, \"shepherd\" is 8, newline is 1. Together: 4+1+8+1=14."
             ),
             resolution=(
-                'the form returned 14 — the log-book was exactly that long, counted from scroll to scroll. The form had been built around {drawn.a}, and the value came back accordingly.'           )),
+                'the form returned 14 — the log-book was exactly that long, counted from scroll to scroll. The lookout returned with {drawn.a} on his slate, the valley long behind him and the count plain.'           )),
         _ex("(clojure.string/split \"a\\nb\\nc\" #\"\\n\")", ["a", "b", "c"],
             "splitting a slurped-style string on newlines",
             "the vector [\"a\" \"b\" \"c\"] of three lines",
@@ -922,7 +922,7 @@ G7_18 = SubjectCurriculum(grade=7, subject_id="G7-18",
                 "to read that label first."
             ),
             resolution=(
-                'the form returned "ls" — Tom had read the toolshed\'s label and found the command he needed to call. The form had been built around {drawn.a}, and the value came back accordingly.'           )),
+                'the form returned "ls" — Tom had read the toolshed\'s label and found the command he needed to call. The watchhouse warmed as the elder set {drawn.a} into the day record, the fold quiet by then.'           )),
         _ex("(count (:args {:cmd \"echo\" :args [\"hello\" \"world\"]}))",
             2,
             "the number of args in a shell-call descriptor",
@@ -941,7 +941,7 @@ G7_18 = SubjectCurriculum(grade=7, subject_id="G7-18",
                 "`count` on that vector gives 2. The tool has two arguments."
             ),
             resolution=(
-                "the form returned 2 — Tom had extracted the argument count from the foreign tool's descriptor. The form had been built around {drawn.a}, and the value came back accordingly."           )),
+                "the form returned 2 — Tom had extracted the argument count from the foreign tool's descriptor. {drawn.a} stood as the answer the fold required, slate, chalk, and a steady eye all in agreement."           )),
     ], subplots=_TOOLSHED_SUBPLOTS, plan_pool=_PLAN_G7)
 
 
