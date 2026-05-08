@@ -126,6 +126,24 @@ class SubjectExample:
     # all four story slots filled should also include "story" in
     # their tags so story-templates fire.
     tags:           tuple[str, ...] = ()
+    # Parametric scalar slots (Phase D — zero-hardcoded-scalars).
+    # When `form_template` is set, `slots` defines the typed pools
+    # to draw from at render time, and `expected_fn(draws) -> value`
+    # computes the ground-truth answer from the draws. The verifier
+    # parses the rendered form via form_parser.parse, evaluates via
+    # expr.evaluate, and confirms the answer matches expected_fn(draws).
+    # Story slots and concept_phrase / question_what / goal_text may
+    # reference `{drawn.<slot>}` placeholders to interpolate drawn
+    # values into the prose.
+    form_template:  str = ""
+    slots:          dict = field(default_factory=dict)
+    expected_fn:    object = None  # Callable[[dict], Any]
+    # Macro / host-interop subjects: `bb_verify=True` routes the form
+    # to a Babashka subprocess at curriculum-build time instead of
+    # the in-process expr.py evaluator. Requires the form to be valid
+    # Clojure source; expected_fn (or hardcoded `expected`) must agree
+    # with bb's evaluation.
+    bb_verify:      bool = False
 
 
 @dataclass
@@ -880,16 +898,132 @@ def _build_ge_placeholders(scene: Scene,
     }
 
 
-def _render_question(scene: Scene, example: SubjectExample) -> str:
+def _render_question(scene: Scene, example: SubjectExample,
+                     question_what: str | None = None) -> str:
     """The closing line of the user_msg. Always asks the student to
     write a Clojure expression that produces the answer."""
+    what = question_what if question_what is not None else example.question_what
     framings = (
-        f"Write a Clojure expression that computes {example.question_what}.",
-        f"Write a form whose evaluation gives {example.question_what}.",
-        f"What Clojure form computes {example.question_what}? Submit it via `eval`.",
-        f"Question: write a Clojure expression for {example.question_what}.",
+        f"Write a Clojure expression that computes {what}.",
+        f"Write a form whose evaluation gives {what}.",
+        f"What Clojure form computes {what}? Submit it via `eval`.",
+        f"Question: write a Clojure expression for {what}.",
     )
     return scene.rng.choice(framings)
+
+
+# ─────────────────────── parametric draw + verify ───────────────────────
+
+
+class VerifierMismatch(Exception):
+    """Raised when a parametric draw's evaluator answer doesn't match
+    the schema's expected_fn(draws). Indicates either a buggy
+    expected_fn or a form_template / pool combination that the
+    evaluator can't handle."""
+
+
+def _draw_and_verify(example: SubjectExample,
+                     scene: Scene,
+                     max_rerolls: int = 8) -> tuple[str, object, dict]:
+    """Render the parametric form, evaluate it, and confirm the answer
+    matches expected_fn(draws). Returns (form_str, expected, draws).
+
+    Re-rolls up to `max_rerolls` times on transient ConstraintFailure
+    (predicate couldn't fire); raises VerifierMismatch on a true
+    answer mismatch.
+    """
+    from mmllm.aesop.curriculum.scalar_pools import (
+        render_form, ConstraintFailure,
+    )
+    from mmllm.aesop.curriculum.form_parser import parse
+    from mmllm.aesop.expr import evaluate
+
+    last_err = None
+    for attempt in range(max_rerolls):
+        try:
+            form_str, draws = render_form(
+                example.form_template, example.slots, scene.rng)
+        except ConstraintFailure as e:
+            last_err = e
+            continue
+        try:
+            ast = parse(form_str)
+            got = evaluate(ast)
+        except Exception as e:
+            raise VerifierMismatch(
+                f"parse/eval failure on {form_str!r}: {e}") from e
+        want = example.expected_fn(draws)
+        if got != want:
+            # Try a tolerant compare for keyword/list normalization.
+            from mmllm.aesop.expr import _eval_v  # noqa: F401
+            if _values_equal(got, want):
+                return form_str, want, draws
+            raise VerifierMismatch(
+                f"answer mismatch on {form_str!r}: "
+                f"got {got!r}, want {want!r} (draws={draws!r})")
+        return form_str, want, draws
+    raise VerifierMismatch(
+        f"could not satisfy slot constraints in {max_rerolls} re-rolls: "
+        f"last_err={last_err!r}")
+
+
+def _values_equal(a, b) -> bool:
+    """Tolerant equality for evaluator outputs vs author intent.
+    Normalizes keyword sentinels and dict key types."""
+    if isinstance(a, str) and a.startswith(":"):
+        a = ("__kw__", a[1:])
+    if isinstance(b, str) and b.startswith(":"):
+        b = ("__kw__", b[1:])
+    if isinstance(a, list) and isinstance(b, list):
+        return (len(a) == len(b)
+                and all(_values_equal(x, y) for x, y in zip(a, b)))
+    if isinstance(a, dict) and isinstance(b, dict):
+        if set(_norm_key(k) for k in a) != set(_norm_key(k) for k in b):
+            return False
+        an = {_norm_key(k): v for k, v in a.items()}
+        bn = {_norm_key(k): v for k, v in b.items()}
+        return all(_values_equal(an[k], bn[k]) for k in an)
+    return a == b
+
+
+def _norm_key(k):
+    if isinstance(k, str) and k.startswith(":"):
+        return ("__kw__", k[1:])
+    return k
+
+
+def _interpolate_drawn(text: str, draws: dict) -> str:
+    """Substitute `{drawn.<slot>}` tokens in narrative text with prose
+    renderings of drawn values. Other `{...}` placeholders are left
+    intact for the subplot template's own format pass."""
+    if not text or "{drawn." not in text:
+        return text
+    from mmllm.aesop.curriculum.scalar_pools import POOLS, Slot
+    out = text
+    for sname, value in draws.items():
+        token = "{drawn." + sname + "}"
+        if token not in out:
+            continue
+        # Use prose rendering. Pool name resolution: we don't have the
+        # slot here directly, so fall back to str() if value is a
+        # primitive. For collections, render English.
+        if isinstance(value, list):
+            if len(value) == 0:    s = "an empty list"
+            elif len(value) == 1:  s = str(value[0])
+            elif len(value) == 2:  s = f"{value[0]} and {value[1]}"
+            else:
+                s = ", ".join(str(v) for v in value[:-1]) + f", and {value[-1]}"
+        elif isinstance(value, str) and value.startswith(":"):
+            s = value[1:]
+        elif isinstance(value, tuple) and len(value) == 2 and value[0] == "__kw__":
+            s = value[1]
+        elif isinstance(value, tuple) and len(value) == 2 and value[1] != 0:
+            # Ratio
+            s = f"{value[0]}/{value[1]}"
+        else:
+            s = str(value)
+        out = out.replace(token, s)
+    return out
 
 
 # ─────────────────────── generator ───────────────────────
@@ -961,18 +1095,41 @@ def generate_one_record(scene: Scene,
     weights = [s.weight for s in candidate_subplots]
     subplot = scene.rng.choices(candidate_subplots, weights=weights)[0]
 
-    placeholders = placeholders_fn(example)
+    # Parametric draw + verify (when example has form_template).
+    # This produces a fresh (form, expected, draws) triple per record;
+    # legacy examples without a template fall through to static
+    # form/expected from authoring time.
+    if example.form_template:
+        rendered_form, rendered_expected, draws = _draw_and_verify(
+            example, scene)
+    else:
+        rendered_form     = example.form
+        rendered_expected = example.expected
+        draws             = {}
+
+    # Build placeholders. We pass a "slot-aware" example so subplot
+    # templates that reference {form_display}, {concept_phrase},
+    # {goal_text}, scenario/need/mapping/resolution see the
+    # drawn-value-interpolated versions.
+    if draws:
+        slot_example = _example_with_draws(example, rendered_form,
+                                           rendered_expected, draws)
+    else:
+        slot_example = example
+    placeholders = placeholders_fn(slot_example)
     body = subplot.template.format(**placeholders).strip()
-    question = _render_question(scene, example)
+    question_what = _interpolate_drawn(slot_example.question_what, draws)
+    question = _render_question(scene, slot_example, question_what)
 
     user_msg = f"{intro}{body}\n\n{question}"
 
     # Eval-first tool call: form is the Clojure source the model produces.
-    calls    = build_tool_calls(value=example.expected,
-                                form_str=example.form,
+    calls    = build_tool_calls(value=rendered_expected,
+                                form_str=rendered_form,
                                 prefer_eval=True)
     sys_msg  = system_prompt(use_eval=True)
     plan     = scene.rng.choice(sub.plan_pool) if sub.plan_pool else ""
+    plan     = _interpolate_drawn(plan, draws) if draws else plan
     preface  = resolve_preface(scene, plan)
     asst     = assemble_assistant_msg(
         preface=preface,
@@ -983,11 +1140,39 @@ def generate_one_record(scene: Scene,
         user_msg=user_msg,
         assistant_msg=asst,
         tool_calls=calls,
-        expected=example.expected,
-        code_str=example.form,
+        expected=rendered_expected,
+        code_str=rendered_form,
         fable=sub.fable,
         chapter=sub.subject_id,
         catalog=ANSWER_AND_EVAL,
+    )
+
+
+def _example_with_draws(ex: SubjectExample,
+                        form_str: str,
+                        expected: object,
+                        draws: dict) -> SubjectExample:
+    """Return a shallow copy of `ex` with form/expected replaced by
+    the rendered values, and concept_phrase / question_what /
+    goal_text / scenario / need / mapping / resolution all
+    drawn-value-interpolated."""
+    return SubjectExample(
+        form           = form_str,
+        expected       = expected,
+        concept_phrase = _interpolate_drawn(ex.concept_phrase, draws),
+        question_what  = _interpolate_drawn(ex.question_what,  draws),
+        goal_text      = _interpolate_drawn(ex.goal_text,      draws),
+        scenario       = _interpolate_drawn(ex.scenario,       draws),
+        need           = _interpolate_drawn(ex.need,           draws),
+        mapping        = _interpolate_drawn(ex.mapping,        draws),
+        resolution     = _interpolate_drawn(ex.resolution,     draws),
+        tags           = ex.tags,
+        # Keep template fields in case the rest of the pipeline
+        # introspects them, but they're not used post-draw.
+        form_template  = ex.form_template,
+        slots          = ex.slots,
+        expected_fn    = ex.expected_fn,
+        bb_verify      = ex.bb_verify,
     )
 
 
