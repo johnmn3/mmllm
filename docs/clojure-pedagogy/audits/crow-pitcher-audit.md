@@ -17,7 +17,8 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 6
 - variety @ n=50: 1.00
-- issues: {'LOW_GROUNDING': 1, 'STORY_RESOLUTION_NO_DRAWN': 3}
+- issues: {'REPL_AS_TIME_TRAVELLER': 1, 'LOW_GROUNDING': 1, 'STORY_RESOLUTION_NO_DRAWN': 3}
+    - [REPL_AS_TIME_TRAVELLER] form=`(+ 1 2)` — user_msg uses meta-narrator language that implies the answer pre-existed evaluation — describe the form's evaluation, not a pre-existing 'right' answer
     - [LOW_GROUNDING] form=`(+ 1 2)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [STORY_RESOLUTION_NO_DRAWN] form=`(* 4 5)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('4', '5'), resolution doesn't close the loop)
     - [STORY_RESOLUTION_NO_DRAWN] form=`(* 4 5)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('4', '5'), resolution doesn't close the loop)
@@ -60,8 +61,9 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 5
 - variety @ n=50: 1.00
-- issues: {'STORY_RESOLUTION_NO_DRAWN': 1}
+- issues: {'STORY_RESOLUTION_NO_DRAWN': 1, 'REPL_AS_TIME_TRAVELLER': 1}
     - [STORY_RESOLUTION_NO_DRAWN] form=`(< 3 2 1)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('3',), resolution doesn't close the loop)
+    - [REPL_AS_TIME_TRAVELLER] form=`(<= 1 1 2)` — user_msg uses meta-narrator language that implies the answer pre-existed evaluation — describe the form's evaluation, not a pre-existing 'right' answer
 
 ### G2-03: not= and = with multiple args
 
@@ -76,11 +78,11 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 5
 - variety @ n=50: 1.00
-- issues: {'STORY_RESOLUTION_NO_DRAWN': 8, 'SENTENCE_START_LOWER_PRONOUN': 1}
+- issues: {'STORY_RESOLUTION_NO_DRAWN': 8, 'REPL_AS_TIME_TRAVELLER': 2, 'SENTENCE_START_LOWER_PRONOUN': 1}
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(inc 5)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('5',), resolution doesn't close the loop)
+    - [REPL_AS_TIME_TRAVELLER] form=`(inc 5)` — user_msg uses meta-narrator language that implies the answer pre-existed evaluation — describe the form's evaluation, not a pre-existing 'right' answer
     - [STORY_RESOLUTION_NO_DRAWN] form=`(inc 5)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('5',), resolution doesn't close the loop)
     - [STORY_RESOLUTION_NO_DRAWN] form=`(inc 5)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('5',), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(inc 5)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('5',), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(dec 5)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('5',), resolution doesn't close the loop)
     - [STORY_RESOLUTION_NO_DRAWN] form=`(dec 5)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('5',), resolution doesn't close the loop)
     - [STORY_RESOLUTION_NO_DRAWN] form=`(dec 5)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('5',), resolution doesn't close the loop)
 
@@ -99,21 +101,22 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 3
 - variety @ n=50: 1.00
-- issues: {'STORY_RESOLUTION_NO_DRAWN': 9, 'SENTENCE_START_LOWER_PRONOUN': 2}
+- issues: {'STORY_RESOLUTION_NO_DRAWN': 9, 'REPL_AS_TIME_TRAVELLER': 2, 'SENTENCE_START_LOWER_PRONOUN': 2}
     - [STORY_RESOLUTION_NO_DRAWN] form=`(+ 1/2 1/4)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('4',), resolution doesn't close the loop)
     - [STORY_RESOLUTION_NO_DRAWN] form=`(+ 1/2 1/4)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('4',), resolution doesn't close the loop)
+    - [REPL_AS_TIME_TRAVELLER] form=`(+ 1/2 1/4)` — user_msg uses meta-narrator language that implies the answer pre-existed evaluation — describe the form's evaluation, not a pre-existing 'right' answer
     - [STORY_RESOLUTION_NO_DRAWN] form=`(+ 1/2 1/4)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('4',), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(* 2/3 3/4)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('3', '3', '4'), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(* 2/3 3/4)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('3', '3', '4'), resolution doesn't close the loop)
+    - [REPL_AS_TIME_TRAVELLER] form=`(* 2/3 3/4)` — user_msg uses meta-narrator language that implies the answer pre-existed evaluation — describe the form's evaluation, not a pre-existing 'right' answer
     - [STORY_RESOLUTION_NO_DRAWN] form=`(* 2/3 3/4)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('3', '3', '4'), resolution doesn't close the loop)
 
 ### G2-09: Floats vs ints (the / operator)
 
 - examples: 3
 - variety @ n=50: 1.00
-- issues: {'STORY_RESOLUTION_NO_DRAWN': 3, 'SENTENCE_START_LOWER_PRONOUN': 1}
+- issues: {'STORY_RESOLUTION_NO_DRAWN': 3, 'REPL_AS_TIME_TRAVELLER': 1, 'SENTENCE_START_LOWER_PRONOUN': 1}
     - [STORY_RESOLUTION_NO_DRAWN] form=`(/ 10 2)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('10',), resolution doesn't close the loop)
     - [STORY_RESOLUTION_NO_DRAWN] form=`(/ 10 2)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('10',), resolution doesn't close the loop)
+    - [REPL_AS_TIME_TRAVELLER] form=`(/ 10 3)` — user_msg uses meta-narrator language that implies the answer pre-existed evaluation — describe the form's evaluation, not a pre-existing 'right' answer
     - [STORY_RESOLUTION_NO_DRAWN] form=`(/ 10 3)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('10', '3'), resolution doesn't close the loop)
     - [SENTENCE_START_LOWER_PRONOUN] form=`(/ 1.0 2)` — pronoun starts a sentence in lowercase — template should use the _cap variant after a sentence-ending punctuation
 
@@ -121,13 +124,13 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 4
 - variety @ n=50: 1.00
-- issues: {'LOW_GROUNDING': 1, 'STORY_RESOLUTION_NO_DRAWN': 9, 'SENTENCE_START_LOWER_PRONOUN': 1}
+- issues: {'LOW_GROUNDING': 1, 'REPL_AS_TIME_TRAVELLER': 1, 'STORY_RESOLUTION_NO_DRAWN': 9, 'SENTENCE_START_LOWER_PRONOUN': 1}
     - [LOW_GROUNDING] form=`(* 2 2 2)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+    - [REPL_AS_TIME_TRAVELLER] form=`(* 2 2 2)` — user_msg uses meta-narrator language that implies the answer pre-existed evaluation — describe the form's evaluation, not a pre-existing 'right' answer
     - [STORY_RESOLUTION_NO_DRAWN] form=`(* 5 5)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('5', '5'), resolution doesn't close the loop)
     - [SENTENCE_START_LOWER_PRONOUN] form=`(* 5 5)` — pronoun starts a sentence in lowercase — template should use the _cap variant after a sentence-ending punctuation
     - [STORY_RESOLUTION_NO_DRAWN] form=`(* 5 5)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('5', '5'), resolution doesn't close the loop)
     - [STORY_RESOLUTION_NO_DRAWN] form=`(* 5 5)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('5', '5'), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(* 3 3 3 3)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('3', '3', '3'), resolution doesn't close the loop)
 
 ### G2-13: and / or — short circuit, return values
 
@@ -177,9 +180,11 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 0.99
-- issues: {'STORY_RESOLUTION_NO_DRAWN': 3}
+- issues: {'REPL_AS_TIME_TRAVELLER': 2, 'STORY_RESOLUTION_NO_DRAWN': 3}
+    - [REPL_AS_TIME_TRAVELLER] form=`(* 1000000 1000000)` — user_msg uses meta-narrator language that implies the answer pre-existed evaluation — describe the form's evaluation, not a pre-existing 'right' answer
     - [STORY_RESOLUTION_NO_DRAWN] form=`(* 1000000 1000000)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('1000000', '1000000'), resolution doesn't close the loop)
     - [STORY_RESOLUTION_NO_DRAWN] form=`(* 1000000 1000000)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('1000000', '1000000'), resolution doesn't close the loop)
+    - [REPL_AS_TIME_TRAVELLER] form=`(* 1000000 1000000)` — user_msg uses meta-narrator language that implies the answer pre-existed evaluation — describe the form's evaluation, not a pre-existing 'right' answer
     - [STORY_RESOLUTION_NO_DRAWN] form=`(* 1000000 1000000)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('1000000', '1000000'), resolution doesn't close the loop)
 
 ## Grade 3
@@ -1175,6 +1180,13 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
     - [STORY_RESOLUTION_NO_DRAWN] form=`(let [^String s "abc"] (.toUpperCase s))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('abc',), resolution doesn't close the loop)
     - [STORY_RESOLUTION_NO_DRAWN] form=`(let [^String s "abc"] (.toUpperCase s))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('abc',), resolution doesn't close the loop)
 
+### G11-09: Checked vs unchecked math
+
+- examples: 2
+- variety @ n=50: 0.99
+- issues: {'REPL_AS_TIME_TRAVELLER': 1}
+    - [REPL_AS_TIME_TRAVELLER] form=`(+ 1 2)` — user_msg uses meta-narrator language that implies the answer pre-existed evaluation — describe the form's evaluation, not a pre-existing 'right' answer
+
 ### G11-14: Debugging host leaks
 
 - examples: 2
@@ -1238,6 +1250,7 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 - **STORY_RESOLUTION_NO_DRAWN**: 457
 - **LOW_GROUNDING**: 78
 - **CONCEPT_AS_VERB**: 15
+- **REPL_AS_TIME_TRAVELLER**: 11
 - **SENTENCE_START_LOWER_PRONOUN**: 11
 - **ANSWER_LEAK_STRING**: 4
 - **HIGH_LENGTH**: 3
@@ -1253,8 +1266,8 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 | Grade | Subjects | Examples | Issues | Low-variety |
 |---|---|---|---|---|
-| 1 | 18 | 76 | 29 | — |
-| 2 | 22 | 88 | 71 | — |
+| 1 | 18 | 76 | 30 | — |
+| 2 | 22 | 88 | 80 | — |
 | 3 | 18 | 31 | 53 | — |
 | 4 | 20 | 39 | 10 | — |
 | 5 | 22 | 39 | 22 | — |
@@ -1263,7 +1276,7 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 | 8 | 16 | 31 | 67 | — |
 | 9 | 18 | 34 | 67 | — |
 | 10 | 16 | 36 | 74 | — |
-| 11 | 14 | 29 | 34 | — |
+| 11 | 14 | 29 | 35 | — |
 | 12 | 18 | 37 | 20 | — |
 
 ### Sample issues by severity
@@ -1310,6 +1323,49 @@ Penumbra the crow, watching the level lift, drop by drop, paused at the pitcher'
 talon raised — the throat was narrow, the day was hot, and the dual
 latch above the water glinted in the sun.
 "Boole...
+    ```
+
+#### REPL_AS_TIME_TRAVELLER
+
+- `G1-13` (form `(+ 1 2)`): user_msg uses meta-narrator language that implies the answer pre-existed evaluation — describe the form's evaluation, not a pre-existing 'right' answer
+    ```
+    On a long afternoon when even the bees had grown slow, a thirsty bird settled on the rim of a clay vessel.
+
+Umbra the crow, watching the level lift, drop by drop, arranged a small heap of smooth
+stones on the hilltop, careful with the count. The day was hot and the
+water was low; the heap had to ris...
+    ```
+- `G2-02` (form `(<= 1 1 2)`): user_msg uses meta-narrator language that implies the answer pre-existed evaluation — describe the form's evaluation, not a pre-existing 'right' answer
+    ```
+    It was the kind of summer that turned every shaded stone into a small kindness.
+
+Skreigh the crow, deliberate, unhurried by the rising sun, arranged a small heap of smooth
+stones atop the hilltop, careful with the count. The day was hot and the
+water was low; the heap had to rise enough to drink, no...
+    ```
+- `G2-06` (form `(inc 5)`): user_msg uses meta-narrator language that implies the answer pre-existed evaluation — describe the form's evaluation, not a pre-existing 'right' answer
+    ```
+    In a year when the wells ran low, a single jar of water was a small kingdom unto itself.
+
+Eclipse the crow, deliberate, unhurried by the rising sun, arranged a small heap of smooth
+stones in the village, careful with the count. The day was hot and the
+water was low; the heap had to rise enough to dr...
+    ```
+- `G2-06` (form `(dec 0)`): user_msg uses meta-narrator language that implies the answer pre-existed evaluation — describe the form's evaluation, not a pre-existing 'right' answer
+    ```
+    Word had it that Featherdark had flown over three valleys before finding the pitcher by the farm.
+
+Featherdark the crow, deliberate, unhurried by the rising sun, arranged a small heap of smooth
+stones by the farm, careful with the count. The day was hot and the
+water was low; the heap had to rise en...
+    ```
+- `G2-08` (form `(+ 1/2 1/4)`): user_msg uses meta-narrator language that implies the answer pre-existed evaluation — describe the form's evaluation, not a pre-existing 'right' answer
+    ```
+    The farmstead had stored what it could, but the heat was honest and the water was patient with no one.
+
+Buffet the crow, trusting the process, stone after stone, arranged a small heap of smooth
+stones at the edge of the meadow, careful with the count. The day was hot and the
+water was low; the heap ...
     ```
 
 #### LOW_GROUNDING

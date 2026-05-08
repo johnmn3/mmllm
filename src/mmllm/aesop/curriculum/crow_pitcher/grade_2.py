@@ -84,7 +84,7 @@ G2_01 = SubjectCurriculum(
                 "form is identical to summing them in sequence."
             ),
             resolution=(
-                "The expected total arrived and the water settled at the right level."
+                "the total arrived and the water settled at the right level."
             ),
             tags=("story",),
         ),
@@ -109,7 +109,7 @@ G2_01 = SubjectCurriculum(
                 "sub-product times four gives the final compounded total."
             ),
             resolution=(
-                "The compounded product settled in the pitcher at the expected count."
+                "The compounded product settled in the pitcher at the count."
             ),
             tags=("story",),
         ),
@@ -159,7 +159,7 @@ G2_01 = SubjectCurriculum(
                 "the full sum in a single evaluation."
             ),
             resolution=(
-                "All ten stones were summed and the expected total arrived at the rim."
+                "All ten stones were summed and the total arrived at the rim."
             ),
             tags=("story",),
         ),
@@ -170,21 +170,24 @@ G2_01 = SubjectCurriculum(
             goal_text="multiply the integers 1 through 5",
 
             scenario=(
-                "Caw set five groups along the hilltop pitcher: one, two, "
-                "three, four, and five stones in each. She wanted the full "
-                "compounded product from multiplying all five together."
+                "Caw set five groups of stones along the hilltop pitcher's "
+                "rim, drawn from {drawn.a}, {drawn.b}, {drawn.c}, {drawn.d}, "
+                "and {drawn.e} per group. She wanted the full compounded "
+                "product across all five."
             ),
             need=(
                 "She needed every group multiplied together in one form, "
-                "the product compounding across all five."
+                "the product compounding across all five draws."
             ),
             mapping=(
-                "`*` composes multiplication across all its arguments. Starting "
-                "from one the product doubles, triples, and grows; the final "
-                "result is the product of the entire sequence."
+                "`*` composes multiplication across all its arguments. "
+                "Starting from one the product folds in each operand in "
+                "turn; the final result is the product of the entire "
+                "drawn sequence."
             ),
             resolution=(
-                "The five-group product settled in the pitcher at the expected count."
+                "The five-group product settled in the pitcher, the "
+                "tally folded across each draw in turn."
             ),
             tags=("story",),
         ),
@@ -209,7 +212,7 @@ G2_01 = SubjectCurriculum(
                 "full cluster sum in one step."
             ),
             resolution=(
-                "The three clusters summed and the expected total returned from the pitcher."
+                "The three clusters summed and the total returned from the pitcher."
             ),
             tags=("story",),
         ),
@@ -344,7 +347,7 @@ G2_02 = SubjectCurriculum(
                 "is lighter — that also satisfies ≥. All pairs clear."
             ),
             resolution=(
-                "Both pairs satisfied the check and the expected result returned."
+                "Both pairs satisfied the check and the result returned."
             ),
             tags=("story",),
         ),
@@ -515,7 +518,7 @@ G2_04 = SubjectCurriculum(
                 "is passed, the surviving lightest stone is the answer."
             ),
             resolution=(
-                "The lightest stone was identified and the expected count settled in the pitcher."
+                "The lightest stone was identified and the count settled in the pitcher."
             ),
             tags=("story",),
         ),
@@ -540,7 +543,7 @@ G2_04 = SubjectCurriculum(
                 "stone is the maximum when the scan ends."
             ),
             resolution=(
-                "The heaviest stone was named and the expected count settled in the pitcher."
+                "The heaviest stone was named and the count settled in the pitcher."
             ),
             tags=("story",),
         ),
@@ -565,7 +568,7 @@ G2_04 = SubjectCurriculum(
                 "running minimum when it appears."
             ),
             resolution=(
-                "The lightest stone was found in the jumble and the expected count arrived."
+                "The lightest stone was found in the jumble and the count arrived."
             ),
             tags=("story",),
         ),
@@ -700,7 +703,7 @@ G2_05 = SubjectCurriculum(
                 "agree; the cyclic position is returned."
             ),
             resolution=(
-                "The cyclic position within the group arrived as the expected value."
+                "The cyclic position within the group arrived as the value."
             ),
             tags=("story",),
         ),
@@ -775,7 +778,7 @@ G2_05 = SubjectCurriculum(
                 "non-negative, differing from `rem` for negative inputs."
             ),
             resolution=(
-                "The sign-adjusted cyclic position arrived as the expected value."
+                "The sign-adjusted cyclic position arrived as the value."
             ),
             tags=("story",),
         ),
@@ -860,7 +863,7 @@ G2_06 = SubjectCurriculum(
                 "the first foothold above the empty baseline."
             ),
             resolution=(
-                "The first stone was added and the expected count of one returned."
+                "The first stone was added and the count of one returned."
             ),
             tags=("story",),
         ),
@@ -945,7 +948,7 @@ G2_07 = SubjectCurriculum(
                 "reflected, but either way the result is non-negative."
             ),
             resolution=(
-                "The unsigned distance emerged and settled as the expected count."
+                "The unsigned distance emerged and settled as the count."
             ),
             tags=("story",),
         ),
@@ -1225,7 +1228,7 @@ G2_10 = SubjectCurriculum(
                 "is then multiplied by the third, giving the cube."
             ),
             resolution=(
-                "The compounded product settled and the expected count filled the pitcher."
+                "The compounded product settled and the count filled the pitcher."
             ),
             tags=("story",),
         ),
@@ -1250,7 +1253,7 @@ G2_10 = SubjectCurriculum(
                 "the product of the number with itself."
             ),
             resolution=(
-                "The square count settled and the expected product arrived from the pitcher."
+                "The square count settled and the product arrived from the pitcher."
             ),
             tags=("story",),
         ),
@@ -1275,7 +1278,7 @@ G2_10 = SubjectCurriculum(
                 "then by three a final time."
             ),
             resolution=(
-                "The four-layer product settled and the expected count filled the pitcher."
+                "The four-layer product settled and the count filled the pitcher."
             ),
             tags=("story",),
         ),
@@ -1509,7 +1512,7 @@ G2_13 = SubjectCurriculum(
                 "returns the last value it checked."
             ),
             resolution=(
-                "Both gates passed and the expected value arrived at the rim."
+                "Both gates passed and the value arrived at the rim."
             ),
             tags=("story",),
         ),
@@ -1634,7 +1637,7 @@ G2_13 = SubjectCurriculum(
                 "immediately and returns that stone."
             ),
             resolution=(
-                "The first truthy token was found and the expected value returned."
+                "The first truthy token was found and the value returned."
             ),
             tags=("story",),
         ),
@@ -2050,7 +2053,7 @@ G2_17 = SubjectCurriculum(
                 "are independent; :tortoise retrieves its own value."
             ),
             resolution=(
-                "The :tortoise count was lifted and the expected value returned."
+                "The :tortoise count was lifted and the value returned."
             ),
             tags=("story",),
         ),
@@ -2110,7 +2113,7 @@ G2_18 = SubjectCurriculum(
                 "whether the shape qualifies as a Clojure symbol."
             ),
             resolution=(
-                "The chalk-mark was confirmed as a symbol and the expected answer arrived."
+                "The chalk-mark was confirmed as a symbol and the answer arrived."
             ),
             tags=("story",),
         ),
@@ -2307,7 +2310,7 @@ G2_20 = SubjectCurriculum(
                 "and the pitcher returns zero."
             ),
             resolution=(
-                "The empty collection yielded zero steps and the expected count of zero returned."
+                "The empty collection yielded zero steps and the count of zero returned."
             ),
             tags=("story",),
         ),
@@ -2452,7 +2455,7 @@ G2_22 = SubjectCurriculum(
                 "form runs to completion before the outer one begins."
             ),
             resolution=(
-                "Both inner products resolved and their sum arrived as the expected total."
+                "Both inner products resolved and their sum arrived as the total."
             ),
             tags=("story",),
         ),
