@@ -446,7 +446,7 @@ allowed. "Numbers in Clojure don't fudge," {clever_he_she} said.
 heaps with leftovers, comparing two piles — the runtime gets it
 exactly right, every time." To {goal_text}, {clever_he_she}
 composed {concept_phrase}, submitted the form, and the REPL handed
-back the precise number the operation called for."""),
+back the exact value the operation produced."""),
 
     # 4. The Hasty-counts-aloud template — Hasty crow guesses by sight,
     #    Clever crow counts.
@@ -455,7 +455,7 @@ back the precise number the operation called for."""),
 about how many stones could be dropped before the water rose high
 enough, without bothering to count. {clever_phrase} simply began
 counting carefully — to {goal_text} required no eyeballing, only
-the form. {clever_he_she} composed {concept_phrase}, submitted
+the form. {clever_he_she_cap} composed {concept_phrase}, submitted
 it to the REPL, and the runtime returned the number that had been
 there all along, settling the matter the patient way."""),
 
@@ -575,12 +575,15 @@ _ACORN_SUBPLOTS = _ACORN_SUBPLOTS + [
 _GATE_SUBPLOTS: list[SubplotTemplate] = [
 
     SubplotTemplate("""\
-{clever_phrase} paused at the pitcher's rim {place}, talon raised.
-"Boolean forms in Clojure are like a dual-gate check at the pitcher's
-mouth," {clever_he_she} said. "The runtime checks the value and the
-gate swings open or closed — what comes back is the gate's verdict." To
-{goal_text}, {clever_he_she} composed {concept_phrase}, submitted
-the form, and the REPL returned whatever the gate had decided."""),
+{clever_phrase}, {emo_patient}, paused at the pitcher's rim {place},
+talon raised. The chain of gates was short and cool: each gate's
+verdict cascaded to the next, the chain stopping at the first closed
+one. "Boolean forms in Clojure are like a dual-gate check at the
+pitcher's mouth," {clever_he_she} said. "The runtime checks the value
+and the gate swings open or closed — what comes back is the gate's
+verdict." To {goal_text}, {clever_he_she} composed {concept_phrase},
+submitted the form, and the REPL returned whatever the gate had
+decided."""),
 
     SubplotTemplate("""\
 "Only two things close the gate," {clever_phrase}, {emo_patient}, said, perched on
@@ -590,7 +593,7 @@ string or a zero, opens it. The gate's rule is that simple." To
 the form, and the REPL returned the value the gate had passed."""),
 
     SubplotTemplate("""\
-"You can't tell which way the gate will swing by guessing,"
+"There is no guessing the gate's verdict,"
 {clever_phrase}, {emo_patient}, said. "You bring the form to the gate, the runtime
 checks it, and the gate gives the only answer that matters." To
 {goal_text}, {clever_he_she} composed {concept_phrase}, submitted
@@ -645,13 +648,15 @@ the form, and the REPL — running only what was needed — handed back
 the value of the chosen path."""),
 
     SubplotTemplate("""\
-{clever_phrase} spread {clever_his_her} wings {place}, one side for
-yes, one side for no. "At each branching point," {clever_he_she}
-said, "the condition is what decides — not the crow's preference.
-Whatever the condition evaluates to, that decides the wing to take."
-To {goal_text}, {clever_he_she} composed {concept_phrase}, submitted
-the form, and the REPL — letting the condition decide — handed back
-the value of the branch it had taken."""),
+{clever_phrase}, {emo_patient}, spread {clever_his_her} wings {place},
+one side for yes, one side for no. The fork-air was cool and the
+unflown wing stayed folded — only one branch ever took weight. "At
+each branching point," {clever_he_she} said, "the condition is what
+decides — not the crow's preference. Whatever the condition evaluates
+to, that decides the wing to take." To {goal_text}, {clever_he_she}
+composed {concept_phrase}, submitted the form, and the REPL — letting
+the condition decide — handed back the value of the branch it had
+taken."""),
 
     SubplotTemplate("""\
 {hasty_phrase}, {emo_proud}, called out which path {hasty_he_she} was
@@ -721,12 +726,13 @@ mind, submitted the form, and the REPL — reading the name exactly —
 returned the value the carving had promised."""),
 
     SubplotTemplate("""\
-{hasty_phrase} glanced at the rim-carving {place} and called out what
-{hasty_he_she} thought it said without stopping to read carefully.
-{clever_phrase} stopped and read each scratch precisely. To {goal_text},
-the carving had to be read exactly: {clever_he_she} composed
-{concept_phrase}, submitted the form, and the REPL — reading literally —
-returned the right value."""),
+{hasty_phrase}, {emo_proud}, glanced at the rim-carving {place} and
+called out what {hasty_he_she} thought it said without stopping to
+read. The rim-line was long and any miss-read scratched the wrong
+name. {clever_phrase}, {emo_patient}, stopped and read each scratch
+precisely. To {goal_text}, the carving had to be read exactly:
+{clever_he_she} composed {concept_phrase}, submitted the form, and
+the REPL — reading literally — returned the right value."""),
 ]
 
 _ROADSIGN_SUBPLOTS = _ROADSIGN_SUBPLOTS + [
@@ -742,13 +748,15 @@ _ROADSIGN_SUBPLOTS = _ROADSIGN_SUBPLOTS + [
 _SAFETYNET_SUBPLOTS: list[SubplotTemplate] = [
 
     SubplotTemplate("""\
-{clever_phrase} spread a patch of soft moss beneath the pitcher {place}.
-"If a stone goes wrong — if the form fails — the moss catches it safely,"
-{clever_he_she} said. "The pitcher's water level doesn't drop; you try a
-different stone." To {goal_text}, {clever_he_she} composed
-{concept_phrase}, submitted the form, and the REPL — moss in place —
-caught any trouble and returned the value the recovery path had
-specified."""),
+{clever_phrase}, {emo_patient}, spread a patch of soft moss beneath
+the pitcher {place}. The moss was cool and quiet — the safety-path
+stable, not loose, so a single bad drop would not slosh the water
+out of the pitcher. "If a stone goes wrong — if the form fails — the
+moss catches it safely," {clever_he_she} said. "The pitcher's water
+level doesn't drop; you try a different stone." To {goal_text},
+{clever_he_she} composed {concept_phrase}, submitted the form, and
+the REPL — moss in place — caught any trouble and returned the value
+the recovery path had specified."""),
 
     SubplotTemplate("""\
 "This patch of moss is the practice area," {clever_phrase}, {emo_patient}, said {place}.
@@ -797,10 +805,13 @@ _SAFETYNET_SUBPLOTS = _SAFETYNET_SUBPLOTS + [
 _SCROLL_SUBPLOTS: list[SubplotTemplate] = [
 
     SubplotTemplate("""\
-{clever_phrase} picked up a smooth flat stone {place} and pressed the
-talon-tip in. "The flat stone is how the pitcher's world and the outside
-world meet," {clever_he_she} said: "you scratch what you want to keep,
-any crow who alights later reads what's there." To {goal_text},
+{clever_phrase}, {emo_patient}, picked up a smooth flat stone {place}
+and pressed the talon-tip in. The stone's surface was cool and
+narrow — only what the talon scratched survived, the side-channel a
+deliberate bottleneck between the inner pitcher and the outer world.
+"The flat stone is how the pitcher's world and the outside world
+meet," {clever_he_she} said: "you scratch what you want to keep, any
+crow who alights later reads what's there." To {goal_text},
 {clever_he_she} composed {concept_phrase}, submitted the form, and
 the REPL handed back what the stone had said, or committed what the
 scratching had written."""),
@@ -1006,13 +1017,15 @@ _CARRYINGCASE_SUBPLOTS = _CARRYINGCASE_SUBPLOTS + [
 _TOOLSHED_SUBPLOTS: list[SubplotTemplate] = [
 
     SubplotTemplate("""\
-{clever_phrase} found a different pitcher {place} — one made by a human
-potter, not fired by any crow. "This isn't our clay," {clever_he_she}
-said, "but we can call its methods directly: dot-prefix on the vessel,
-or slash for what the potter made standard-issue." To {goal_text},
-{clever_he_she} composed {concept_phrase}, submitted the form, and
-the REPL — calling into the foreign vessel — handed back what its method
-had returned."""),
+{clever_phrase}, {emo_patient}, found a different pitcher {place} —
+one made by a human potter, not fired by any crow. The vessel's
+clay was unfamiliar and its throat narrow — the borrowed-tool
+bottleneck demanded the host's calling-convention exactly. "This
+isn't our clay," {clever_he_she} said, "but we can call its methods
+directly: dot-prefix on the vessel, or slash for what the potter made
+standard-issue." To {goal_text}, {clever_he_she} composed
+{concept_phrase}, submitted the form, and the REPL — calling into
+the foreign vessel — handed back what its method had returned."""),
 
     SubplotTemplate("""\
 "Each vessel from the human potters has its own label," {clever_phrase}, {emo_patient}, said, "and the right way to call it depends on which kind of vessel it is
@@ -1041,7 +1054,7 @@ cleanly."""),
 {hasty_phrase}, {emo_proud}, grabbed at the human's vessel without
 checking which method was which. The wrong method rattled back an error.
 {clever_phrase} shook {clever_his_her} head: to {goal_text} required
-reading the vessel's labels carefully. {clever_he_she} composed
+reading the vessel's labels carefully. {clever_he_she_cap} composed
 {concept_phrase}, submitted the form, and the REPL — calling the right
 host method by name — returned the value cleanly."""),
 ]
@@ -1060,12 +1073,16 @@ _TOOLSHED_SUBPLOTS = _TOOLSHED_SUBPLOTS + [
 _RUNNERAHEAD_SUBPLOTS: list[SubplotTemplate] = [
 
     SubplotTemplate("""\
-{clever_phrase} dispatched a scout-crow down the far end of the meadow
-{place}, task in beak. "The scout goes ahead while we keep dropping here,"
-{clever_he_she} said, "and when we need the count we signal the scout to
-fly back with the tally." To {goal_text}, {clever_he_she} composed
-{concept_phrase}, submitted the form, and the REPL — sending the scout,
-fetching the count later — returned the value when the scout was ready."""),
+{clever_phrase}, {emo_patient}, dispatched a scout-crow down the far
+end of the meadow {place}, task in beak. The far end was long and
+the home pitcher kept dropping — the asynchronous run kept moving
+while the synchronous wait stayed cool, the two clocks
+independent. "The scout goes ahead while we keep dropping here,"
+{clever_he_she} said, "and when we need the count we signal the
+scout to fly back with the tally." To {goal_text}, {clever_he_she}
+composed {concept_phrase}, submitted the form, and the REPL —
+sending the scout, fetching the count later — returned the value
+when the scout was ready."""),
 
     SubplotTemplate("""\
 "Once you've sent the scout ahead," {clever_phrase}, {emo_patient}, said, "you keep on
@@ -1116,10 +1133,13 @@ _RUNNERAHEAD_SUBPLOTS = _RUNNERAHEAD_SUBPLOTS + [
 _REWRITERULE_SUBPLOTS: list[SubplotTemplate] = [
 
     SubplotTemplate("""\
-{clever_phrase} pressed a talon-tip to the pitcher's rim {place} and
-traced the drop-order carefully. "A macro," {clever_he_she} said, "is a
-rule that rewrites the drop-order scratched on the rim before a single
-stone falls. You write the rule once, and any drop-order that calls it
+{clever_phrase}, {emo_patient}, pressed a talon-tip to the pitcher's
+rim {place} and traced the drop-order carefully. The rim's surface
+was cool and the rewrite ran in alternation with the read — the
+search for the right drop-shape weighed against the verification
+step that followed. "A macro," {clever_he_she} said, "is a rule that
+rewrites the drop-order scratched on the rim before a single stone
+falls. You write the rule once, and any drop-order that calls it
 gets rewritten on the way to the pitcher." To {goal_text},
 {clever_he_she} composed {concept_phrase}, submitted the form, and
 the REPL — first rewriting, then evaluating — returned the value the
@@ -1304,11 +1324,13 @@ _TALLYWALK_SUBPLOTS: list[SubplotTemplate] = [
 
     # 1. The walking-the-rim-with-tally template — reduce.
     SubplotTemplate("""\
-{clever_phrase} walked the rim of the pitcher {place}, one claw at a
-time, a small smooth stone held in the other talon for the running tally.
+{clever_phrase}, {emo_patient}, walked the rim of the pitcher {place},
+one claw at a time, a small smooth stone held in the other talon for
+the running tally. The rim was long and the tally grew heavier with
+each step — the accumulator's weight rising in step with the walk.
 "Reduce is this walk," {clever_he_she} said: "at each drop-point, you
-combine the stone into the tally; at the end, the tally is your answer."
-To {goal_text}, {clever_he_she} composed {concept_phrase},
+combine the stone into the tally; at the end, the tally is your
+answer." To {goal_text}, {clever_he_she} composed {concept_phrase},
 submitted the form, and the REPL — walking the rim, carrying the
 tally — returned the final number."""),
 
@@ -1386,12 +1408,14 @@ cutting — returned the answer the pebble-vine had given up."""),
 
     # 3. The reassembling-the-string template — generic string building.
     SubplotTemplate("""\
-{clever_phrase} took two vines with pebbles threaded on them
-{place}. "Join two vines together and you have one longer vine,"
-{clever_he_she} said, "or take a piece from one and attach it
-elsewhere." To {goal_text}, {clever_he_she} composed
-{concept_phrase}, submitted the form, and the REPL — manipulating
-the pebble-strings exactly — returned the new vine."""),
+{clever_phrase}, {emo_patient}, took two vines with pebbles threaded
+on them {place}. The vines were long and the join sat plain — pebble
+order preserved through the splice, no bead lost. "Join two vines
+together and you have one longer vine," {clever_he_she} said, "or
+take a piece from one and attach it elsewhere." To {goal_text},
+{clever_he_she} composed {concept_phrase}, submitted the form, and
+the REPL — manipulating the pebble-strings exactly — returned the
+new vine."""),
 
     # 4. The Hasty-yanks-at-the-vine template — fable beat.
     SubplotTemplate("""\
@@ -1427,13 +1451,15 @@ _CIRCUIT_SUBPLOTS: list[SubplotTemplate] = [
 
     # 1. The circuit-without-growth template — recur.
     SubplotTemplate("""\
-{clever_phrase} walked a small circle around the pitcher {place},
-each lap returning to the same starting point with a slightly
-different tally in talon. "Recur is this circuit," {clever_he_she}
-said: "back to the top with new bindings, no extra trail laid
-down behind us." To {goal_text}, {clever_he_she} composed
-{concept_phrase}, submitted the form, and the REPL — looping
-without growing the call-stack — returned the final value."""),
+{clever_phrase}, {emo_patient}, walked a small circle around the
+pitcher {place}, each lap returning to the same starting point with
+a slightly different tally in talon. The trail was cool and flat —
+no extra path laid behind, the loop boundary holding the recur tight
+against the call-stack so nothing climbed taller. "Recur is this
+circuit," {clever_he_she} said: "back to the top with new bindings,
+no extra trail laid down behind us." To {goal_text}, {clever_he_she}
+composed {concept_phrase}, submitted the form, and the REPL —
+looping without growing the call-stack — returned the final value."""),
 
     # 2. The base-case template — termination.
     SubplotTemplate("""\

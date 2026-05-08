@@ -50,9 +50,9 @@ in the REPL and read off whatever it returned."""),
     #    so the same wager-template doesn't always read as "drew a wager
     #    in the dust" verbatim (cosmetic variety).
     SubplotTemplate("""\
-At a moss-covered milestone {place}, {hare_phrase} sketched a small
+At a weathered stone cairn {place}, {hare_phrase} sketched a small
 wager into the path: whoever guessed the result of {form_display}
-first would win the right to set the next race. {tortoise_phrase},
+first would set the next contest. {tortoise_phrase},
 {emo_patient}, said it was simpler to type the form into the REPL
 than to argue about {concept_phrase}."""),
 
@@ -87,7 +87,7 @@ agreed to try."""),
     #    equality (= 1 1)" / "the predicate (zero? 0)" don't fit
     #    "read aloud" semantically (you read FORMS aloud, not types).
     SubplotTemplate("""\
-A small audience of forest creatures had gathered {place} to watch
+A small gathering of meadow folk had assembled {place} to watch
 {hare_phrase} attempt to outwit {tortoise_phrase} at reading the REPL.
 The day was hot and the answer plain — every onlooker craned a head
 to see. {tortoise}, {emo_patient}, pointed to {concept_phrase} and
@@ -110,9 +110,9 @@ back is the answer.\""""),
 
     # 6. The notebook template — the tortoise keeps a careful ledger.
     SubplotTemplate("""\
-{tortoise_phrase}, {emo_patient}, had been keeping a small leather
-notebook of every form {tortoise_he_she} had successfully evaluated.
-The notebook was nearly full — every page another careful entry,
+{tortoise_phrase}, {emo_patient}, had been keeping a small bark-strip
+ledger of every form {tortoise_he_she} had successfully evaluated.
+The ledger was nearly full — every strip another careful entry,
 the answer plain on each one. {place_idx}, the next entry was
 {concept_phrase}. {hare_phrase}, {emo_proud}, peered over
 {tortoise_his_her} shoulder at the form {form_display} and asked
@@ -133,11 +133,11 @@ sure."""),
 
     # 8. The puzzle-on-the-path template — they find a riddle on a sign.
     SubplotTemplate("""\
-A wooden sign nailed to a tree {place} carried a puzzle. The riddle
-was simple: it asked the reader to evaluate {form_display}. {hare}
-laughed, {emo_proud}, and declared it too easy. {tortoise} said
-patiently that the only way to be sure of {concept_phrase} was to put
-it in the REPL."""),
+A wax tablet propped on a low branch {place} carried a puzzle. The
+riddle was simple: it asked the reader to evaluate {form_display}.
+{hare} laughed, {emo_proud}, and declared it too easy. {tortoise}
+said patiently that the only way to be sure of {concept_phrase} was
+to put it in the REPL."""),
 ]
 
 
@@ -182,12 +182,11 @@ the value really was."""),
     #    Fix: drop "write a form to" verb-on-verb collision; use
     #    "produce a form whose evaluation would" (noun-clause framing).
     SubplotTemplate("""\
-At a moss-covered milestone {place}, {hare_phrase} sketched a small
+At a weathered stone cairn {place}, {hare_phrase} sketched a small
 wager into the path: whoever could produce a form whose evaluation
-would {goal_text} ahead of the other would win the right to set
-the next race. {tortoise_phrase}, {emo_patient}, said it was
-simpler to write {concept_phrase} carefully than to guess at the
-answer."""),
+would {goal_text} ahead of the other would set the next contest.
+{tortoise_phrase}, {emo_patient}, said it was simpler to write
+{concept_phrase} carefully than to guess at the answer."""),
 
     # 3. The teacher template — Tortoise teaches goal → form.
     #    Fix: "; submit that to the REPL" instead of "and submit it".
@@ -200,12 +199,12 @@ writing it."""),
 
     # 4. The audience template — onlookers wait to see the form written.
     SubplotTemplate("""\
-A small audience of forest creatures had gathered {place} to watch
+A small gathering of meadow folk had assembled {place} to watch
 {hare_phrase} attempt to outwit {tortoise_phrase} at writing the
-right form. The challenge: {goal_text}. {tortoise} reminded the
-crowd that what mattered was writing {concept_phrase} carefully,
-then submitting it to the REPL — not guessing aloud at the
-answer."""),
+right form. The challenge: {goal_text}. {tortoise}, {emo_patient},
+reminded the crowd that what mattered was writing {concept_phrase}
+carefully, then submitting it to the REPL — not guessing aloud at
+the answer."""),
 
     # 5. The race-pause template — pause mid-race for a goal-write.
     #    Fix: drop "write a form to {goal_text}"; reframe as
@@ -219,11 +218,11 @@ submit it. Whatever comes back is the answer.\""""),
 
     # 6. The notebook template — Tortoise records goal/form pairs.
     SubplotTemplate("""\
-{tortoise_phrase} kept a small leather notebook of every goal
-{tortoise_he_she} had translated into a Clojure form. Today {place},
-the next entry was a goal: {goal_text}. {tortoise} sat with pen in
-hand, ready to compose {concept_phrase}, then let the REPL
-confirm the value."""),
+{tortoise_phrase}, {emo_patient}, kept a small bark-strip ledger of
+every goal {tortoise_he_she} had translated into a Clojure form.
+Today {place}, the next entry was a goal: {goal_text}. {tortoise}
+sat with quill in claw, ready to compose {concept_phrase}, then
+let the REPL confirm the value."""),
 
     # 7. The boast-and-rebuke template — Hare boasts; Tortoise asks
     #    for the actual form. Fix: "To X is something anyone could
@@ -238,11 +237,12 @@ just to be sure."""),
 
     # 8. The puzzle-on-the-path template — a sign poses the goal.
     SubplotTemplate("""\
-A wooden sign nailed to a tree {place} carried a small puzzle. The
-challenge was simple: {goal_text}. {hare} laughed, {emo_proud}, and
-declared it too easy. {tortoise} said patiently that the only way
-to be sure of {concept_phrase} was to write the form and put it
-in the REPL — not to guess at the value from the goal alone."""),
+A wax tablet propped on a low branch {place} carried a small
+puzzle. The challenge was simple: {goal_text}. {hare} laughed,
+{emo_proud}, and declared it too easy. {tortoise} said patiently
+that the only way to be sure of {concept_phrase} was to write the
+form and put it in the REPL — not to guess at the value from the
+goal alone."""),
 
     # 9. The Hare-stumbles template — Hare's hurry betrays him; the
     #    Tortoise's careful form returns the value first. Delivers

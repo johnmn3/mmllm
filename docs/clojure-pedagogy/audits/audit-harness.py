@@ -901,6 +901,74 @@ def check_record(rec, sub, example):
                         "sentence-initial 'the X verb' (lowercase "
                         "concept_phrase as subject after a period)"))
 
+    # ─────────────────── crow-pitcher slice 4YJl additions ──────────────
+    #
+    # Three new detectors authored during the crow-pitcher hand audit
+    # (slice 4YJl, branch claude/audit-crow-pitcher-4YJl). Each surfaces
+    # a papercut pattern not caught by any of the ~46 existing detectors.
+
+    # EXPECTED_META_PHRASE — meta-language that talks about "the
+    # expected" answer instead of describing what the runtime returned.
+    # E.g., "the expected total arrived at the rim", "settled at the
+    # expected count". Breaks immersion (the *expected* value is the
+    # graded answer; the prose should describe what *did* return, not
+    # talk about what was "expected"). Cat-E (semantic) / Cat-I.
+    if re.search(
+        r"\bthe expected (?:total|count|value|result|number|product|"
+        r"sum|tally|answer)\b",
+        user, re.IGNORECASE,
+    ):
+        issues.append(("EXPECTED_META_PHRASE",
+                       "user_msg uses 'the expected X' meta-language — "
+                       "describes the answer in graders'-vocabulary "
+                       "instead of letting the runtime's return speak "
+                       "for itself"))
+
+    # PARAMETRIC_LITERAL_NUMERALS — when the example is parametric (its
+    # form_template is set, so the actual operands are drawn at render
+    # time), scenario/need/mapping/resolution slots should reference
+    # the draws via {drawn.X}, not via fixed English numerals
+    # ("one, two, three, four, five"). The latter drifts off the
+    # actual draws and produces Cat-A logical mismatches such as
+    # form (* 5 8 2 2 1) with prose "five groups: one, two, three,
+    # four, five stones in each".
+    if getattr(example, "form_template", None):
+        slot_text = " ".join(
+            getattr(example, slot, "") or ""
+            for slot in ("scenario", "need", "mapping", "resolution")
+        )
+        # Only flag enumerated numeral runs of length >=2 (a single
+        # "one" is licit; a sequence of 3+ is the parametric-drift
+        # signature).
+        if re.search(
+            r"\b(?:one,\s*two,\s*three|two,\s*three,\s*four|"
+            r"three,\s*four,\s*five|four,\s*five,\s*six|"
+            r"five,\s*six,\s*seven|six,\s*seven,\s*eight)\b",
+            slot_text, re.IGNORECASE,
+        ):
+            issues.append(("PARAMETRIC_LITERAL_NUMERALS",
+                           "parametric example has enumerated English "
+                           "numerals (one, two, three, …) hard-coded in "
+                           "a story slot — won't track the actual draws "
+                           "that {form_template} produces"))
+
+    # REPL_AS_TIME_TRAVELLER — meta-narrator phrases implying the
+    # answer pre-existed evaluation. "had been there all along",
+    # "the value the operation called for", "the precise number the
+    # operation called for". These foreground the concept of an
+    # external graded answer rather than the form's evaluated value.
+    if re.search(
+        r"\b(?:had been there all along|the value the operation "
+        r"called for|the (?:precise|exact) number the operation "
+        r"called for|the answer that had been waiting)\b",
+        user,
+    ):
+        issues.append(("REPL_AS_TIME_TRAVELLER",
+                       "user_msg uses meta-narrator language that "
+                       "implies the answer pre-existed evaluation — "
+                       "describe the form's evaluation, not a "
+                       "pre-existing 'right' answer"))
+
     # Both modes are LOW_GROUNDING.
     _check_grounding(user, rec, issues)
 
@@ -1014,6 +1082,18 @@ def _emo_fragments():
             EP_GREEDY2, EP_SUSPICIOUS2,
             EMO_BOASTFUL, EMO_CAUTIOUS,
         )
+    except ImportError:
+        pass
+    # Crow-pitcher specific pools live in the generator module
+    # (CP_EMO_PATIENT, CP_EMO_PROUD, CP_EMO_THIRSTY). Include them
+    # so the detector matches the phrases the crow-pitcher renderer
+    # actually emits — otherwise crow-pitcher records are
+    # over-flagged for "no EMO phrase" even though they carry one.
+    try:
+        from mmllm.aesop.curriculum.generator import (
+            CP_EMO_PATIENT, CP_EMO_PROUD, CP_EMO_THIRSTY,
+        )
+        pools = pools + (CP_EMO_PATIENT, CP_EMO_PROUD, CP_EMO_THIRSTY)
     except ImportError:
         pass
     out = set()
