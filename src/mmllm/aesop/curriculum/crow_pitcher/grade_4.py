@@ -72,8 +72,7 @@ G4_01 = SubjectCurriculum(grade=4, subject_id="G4-01",
                 "The REPL returns the pile as it was arranged."
             ),
             resolution=(
-                "The REPL returned the ordered pile, every stone confirmed "
-                "in sequence."
+                'The REPL returned the ordered pile, every stone confirmed in sequence (with `1` as the input value) (with `3` as the input value).'
             ),
             tags=("story",),
         ),
@@ -186,8 +185,7 @@ G4_02 = SubjectCurriculum(grade=4, subject_id="G4-02",
                 "the pile stays arranged as before."
             ),
             resolution=(
-                "The REPL reached to position two and returned the rightmost "
-                "stone's count."
+                "The REPL reached to position two and returned the rightmost stone's count (with `10` as the input value)."
             ),
             tags=("story",),
         ),
@@ -279,8 +277,7 @@ G4_04 = SubjectCurriculum(grade=4, subject_id="G4-04",
                 "the REPL returns the chain in order."
             ),
             resolution=(
-                "The REPL returned the three-stone chain, front to back, "
-                "as a list."
+                'The REPL returned the three-stone chain, front to back, as a list (with `1` as the input value) (with `3` as the input value).'
             ),
             tags=("story",),
         ),
@@ -618,8 +615,7 @@ G4_11 = SubjectCurriculum(grade=4, subject_id="G4-11",
                 "unique stones actually occupy the pile."
             ),
             resolution=(
-                "The REPL returned a count of one, confirming all three "
-                "duplicates had collapsed to a single stone."
+                'The REPL returned a count of one, confirming all three duplicates had collapsed to a single stone (with `1` as the input value).'
             ),
             tags=("story",),
         ),
@@ -678,8 +674,7 @@ G4_12 = SubjectCurriculum(grade=4, subject_id="G4-12",
                 "the crow the stone has no slot."
             ),
             resolution=(
-                "The REPL signalled the predicate did not hold — confirming the four-stone had no "
-                "slot in the sorting-pile."
+                'The REPL signalled the predicate did not hold — confirming the four-stone had no slot in the sorting-pile (with `1` as the input value) (with `3` as the input value).'
             ),
             tags=("story",),
         ),
@@ -879,8 +874,7 @@ G4_14 = SubjectCurriculum(grade=4, subject_id="G4-14",
                 "beads; the REPL returns true."
             ),
             resolution=(
-                "The REPL confirmed the predicate held — confirming the vine carried no "
-                "beads at all."
+                'The REPL confirmed the predicate held — confirming the vine carried no beads at all (with `` as the input value) (with `` as the input value).'
             ),
             tags=("story",),
         ),
@@ -1012,9 +1006,7 @@ G4_16 = SubjectCurriculum(grade=4, subject_id="G4-16",
             goal_text="convert a vector containing duplicates into a set, keeping unique elements",
 
             scenario=(
-                "Sable had a four-stone vector-pile at the orchard pitcher — "
-                "one, two, two, three — with a duplicate two. She poured "
-                "the stones toward an empty sorting-pile."
+                'Sable had a four-stone vector-pile at the orchard pitcher — the counts — with a duplicate two. She poured the stones toward an empty sorting-pile.'
             ),
             need=(
                 "The sorting-pile would reject any duplicate, so only unique "
@@ -1120,9 +1112,7 @@ G4_19 = SubjectCurriculum(grade=4, subject_id="G4-19",
                 "before she started placing them."
             ),
             mapping=(
-                "`range` produces a lazy sequence of integers from zero; "
-                "`count` walks it and tallies. Five integers from zero through "
-                "four yield a count of five."
+                '`range` produces a lazy sequence of integers from zero; `count` walks it and tallies. {drawn.a} integers from zero through four yield a count of five.'
             ),
             resolution=(
                 "The REPL returned the count of stones the range produced, "

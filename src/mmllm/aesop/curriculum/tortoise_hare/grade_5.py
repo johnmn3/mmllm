@@ -1102,9 +1102,7 @@ G5_20 = SubjectCurriculum(grade=5, subject_id="G5-20",
                 "containing only those first elements."
             ),
             resolution=(
-                "the gauge stopped the sieve after three pebbles; "
-                "the first three counts came through as the "
-                "new row."
+                'the gauge stopped the sieve after three pebbles; the first {drawn.a} counts came through as the new row.'
             ),
             tags=("story",),
         ),

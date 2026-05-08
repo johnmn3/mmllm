@@ -130,7 +130,7 @@ G6_01 = SubjectCurriculum(grade=6, subject_id="G6-01",
                 "`name` converts a symbol to a string representation."
             ),
             resolution=(
-                'The form returned the symbol as a string for the registry.'
+                'The form returned the symbol as a string for the registry (with `clojure.string` as the input value).'
             )),
         _ex("(symbol? 'village.flock)", True,
             "whether village.flock is a symbol",
@@ -149,7 +149,7 @@ G6_01 = SubjectCurriculum(grade=6, subject_id="G6-01",
                 "posted mark is a proper symbol—a borrowable, nameable thing."
             ),
             resolution=(
-                'The predicate returned the verdict, and the reeve approved the namespace label for posting at the crossroads.'
+                'The predicate returned true, and the reeve approved the namespace label for posting at the crossroads.'
             )),
     ], subplots=_ROADSIGN_SUBPLOTS, plan_pool=_PLAN_G6)
 
@@ -195,7 +195,7 @@ G6_02 = SubjectCurriculum(grade=6, subject_id="G6-02",
                 "and form are equal—the same covenant posted in two places."
             ),
             resolution=(
-                'The comparison returned the verdict, and Tom understood: the namespace posted at both corners was one village covenant, honored everywhere.'
+                'The comparison returned true, and Tom understood: the namespace posted at both corners was one village covenant, honored everywhere.'
             )),
     ], subplots=_ROADSIGN_SUBPLOTS, plan_pool=_PLAN_G6)
 
@@ -279,7 +279,7 @@ G6_04 = SubjectCurriculum(grade=6, subject_id="G6-04",
                 "same input should always yield the same output."
             ),
             resolution=(
-                "Carol wrote the form, calling the smith's tool twice with the same letter. The REPL returned the verdict—the smith's work was consistent. Tom trusted the boundary now. The fold gate held tight against the count of {drawn.a}, slate cool under the elder hand."           )),
+                "Carol wrote the form, calling the smith's tool twice with the same letter. The REPL returned true—the smith's work was consistent. Tom trusted the boundary now. The fold gate held tight against the count of {drawn.a}, slate cool under the elder hand."           )),
     ], subplots=_ROADSIGN_SUBPLOTS, plan_pool=_PLAN_G6)
 
 
@@ -395,7 +395,7 @@ G6_06 = SubjectCurriculum(grade=6, subject_id="G6-06",
                 "fingers follow a written line."
             ),
             resolution=(
-                'Carol wrote the form, and the REPL returned the verdict. The private flag was there in the margin, exactly as Tom had seen it.'
+                'Carol wrote the form, and the REPL returned true. The private flag was there in the margin, exactly as Tom had seen it.'
             )),
         _ex("(:private (meta 'x))", None,
             "the :private flag on plain metadata of 'x",
@@ -416,7 +416,7 @@ G6_06 = SubjectCurriculum(grade=6, subject_id="G6-06",
                 "the absence that means \"not marked.\" "
             ),
             resolution=(
-                'Carol wrote the form, and the REPL returned nil. The plain symbol carried no private marker. Tom understood: metadata marks are optional; absence means publicly shared.'
+                'Carol wrote the form, and the REPL returned nil. The plain symbol carried no private marker. Tom understood: metadata marks are optional; absence means publicly shared (with `:private` as the input value).'
             )),
     ], subplots=_ROADSIGN_SUBPLOTS, plan_pool=_PLAN_G6)
 
@@ -446,7 +446,7 @@ G6_07 = SubjectCurriculum(grade=6, subject_id="G6-07",
                 "becomes false. The village's gate is open or shut."
             ),
             resolution=(
-                "Carol wrote the form, and the REPL returned the verdict. The village's gate remained closed to the `hidden` symbol—it stayed private, as the margin declared."
+                "Carol wrote the form, and the REPL returned true. The village's gate remained closed to the `hidden` symbol—it stayed private, as the margin declared (with `:private` as the input value)."
             )),
         _ex("(boolean (:private (meta 'public)))", False,
             "whether 'public carries the :private flag",
@@ -467,7 +467,7 @@ G6_07 = SubjectCurriculum(grade=6, subject_id="G6-07",
                 "the namespace boundary and be used elsewhere."
             ),
             resolution=(
-                "Carol wrote the form, and the REPL returned the verdict. The village's gate opened for the `public` symbol—it could be shared across cottage boundaries."
+                "Carol wrote the form, and the REPL returned false. The village's gate opened for the `public` symbol—it could be shared across cottage boundaries (with `:private` as the input value)."
             )),
     ], subplots=_ROADSIGN_SUBPLOTS, plan_pool=_PLAN_G6)
 
@@ -518,7 +518,7 @@ G6_08 = SubjectCurriculum(grade=6, subject_id="G6-08",
                 "of dependency."
             ),
             resolution=(
-                "Carol wrote the form, and the REPL returned the verdict. Tom's namespace was consistent. A one-way dependency, posted clearly, was a solid design."
+                "Carol wrote the form, and the REPL returned true. Tom's namespace was consistent. A one-way dependency, posted clearly, was a solid design."
             )),
     ], subplots=_ROADSIGN_SUBPLOTS, plan_pool=_PLAN_G6)
 
@@ -567,7 +567,7 @@ G6_09 = SubjectCurriculum(grade=6, subject_id="G6-09",
                 "Then the whole form computes with both bindings alive."
             ),
             resolution=(
-                'Carol wrote the `let` form, and the REPL returned the result—the sum of `a` (1) and `b` (2). Tom understood: whether you post or bind, the order is always first-to-last. The pasture tally settled at {drawn.a}, and Carol closed the day slate with that one number written clear.'           )),
+                'Carol wrote the `let` form, and the REPL returned 3—the sum of `a` (1) and `b` (2). Tom understood: whether you post or bind, the order is always first-to-last. The pasture tally settled at {drawn.a}, and Carol closed the day slate with that one number written clear.'           )),
     ], subplots=_ROADSIGN_SUBPLOTS, plan_pool=_PLAN_G6)
 
 
@@ -645,7 +645,7 @@ G6_11 = SubjectCurriculum(grade=6, subject_id="G6-11",
                 "a vector of the pieces between the cuts."
             ),
             resolution=(
-                "Carol called the smithy's split tool with the colon pattern. The REPL cut the string and returned the vector of directory paths. Tom could now see each path clearly."
+                "Carol called the smithy's split tool with the colon pattern. The REPL cut the string and returned the vector of directory paths. Tom could now see each path clearly (with `test` as the input value) (with `:test` as the input value)."
             )),
         _ex("(count [\"src\" \"test\" \"resources\"])", 3,
             "the number of entries in a classpath-like vector",
@@ -665,7 +665,7 @@ G6_11 = SubjectCurriculum(grade=6, subject_id="G6-11",
                 "directory is one step the REPL will check."
             ),
             resolution=(
-                'Carol wrote the form, and the REPL returned the result. The classpath held three directories. Tom understood: count lets you measure any collection to know its size.'
+                'Carol wrote the form, and the REPL returned 3. The classpath held three directories. Tom understood: count lets you measure any collection to know its size (with `src` as the input value).'
             )),
     ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G6)
 
@@ -693,7 +693,7 @@ G6_12 = SubjectCurriculum(grade=6, subject_id="G6-12",
                 "of files."
             ),
             resolution=(
-                "Carol wrote the form, and the REPL returned the result. The project held three files. Tom could now plan the work knowing the project's true size."
+                "Carol wrote the form, and the REPL returned 3. The project held three files. Tom could now plan the work knowing the project's true size."
             )),
         _ex("(map name ['village.shepherd 'village.elder])",
             ["village.shepherd", "village.elder"],
@@ -872,7 +872,7 @@ G6_16 = SubjectCurriculum(grade=6, subject_id="G6-16",
                 "whether a given library still has a home on the require list."
             ),
             resolution=(
-                'Carol wrote the form, and the REPL returned the verdict. The library was still needed. Tom marked it safe to keep; no cleanup required.'
+                'Carol wrote the form, and the REPL returned true. The library was still needed. Tom marked it safe to keep; no cleanup required.'
             )),
         _ex("(contains? #{'clojure.string} 'clojure.set)", False,
             "whether the require list contains an unused 'clojure.set",
@@ -892,7 +892,7 @@ G6_16 = SubjectCurriculum(grade=6, subject_id="G6-16",
                 "the require list—no form in the project needs it anymore."
             ),
             resolution=(
-                'Carol wrote the form, and the REPL returned the verdict. The set library was not on the kept list. Tom approved the cleanup: `clojure.set` could be struck from the requires.'
+                'Carol wrote the form, and the REPL returned false. The set library was not on the kept list. Tom approved the cleanup: `clojure.set` could be struck from the requires.'
             )),
     ], subplots=_ROADSIGN_SUBPLOTS, plan_pool=_PLAN_G6)
 

@@ -796,8 +796,7 @@ G4_19 = SubjectCurriculum(grade=4, subject_id="G4-19",
                 "to generate the sequence 0, 1, 2, 3, 4."
             ),
             need=(
-                "The form had to create a range of five numbers starting from zero "
-                "and count them without typing each one."
+                'The form had to create a range of {drawn.a} numbers starting from zero and count them without typing each one.'
             ),
             mapping=(
                 "`range 5` generates the sequence 0, 1, 2, 3, 4 — a lazy span. "

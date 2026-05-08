@@ -134,9 +134,7 @@ G2_01 = SubjectCurriculum(
                 "each day's coins without losing any along the way."
             ),
             mapping=(
-                "The sum of ten numbers is the farmer's daily tally-walk: start at zero, add day one's "
-                "coin, add day two's coins to that, add day three's to the running sum, and so forward "
-                "through all ten days. Each addition carries the previous total forward."
+                "The sum of {drawn.j} numbers is the farmer's daily tally-walk: start at zero, add day one's coin, add day two's coins to that, add day three's to the running sum, and so forward through all ten days. Each addition carries the previous total forward."
             ),
             resolution=(
                 "The REPL returned the weekly total — all ten days' coins counted, stacked, and "
@@ -481,8 +479,7 @@ G2_04 = SubjectCurriculum(
                 "by hand."
             ),
             mapping=(
-                "The minimum is the farmer's slowest-trader finder: it walks through all five "
-                "counts and picks out the smallest. several numbers are set aside; the least remains."
+                "The minimum is the farmer's slowest-trader finder: it walks through all {drawn.e} counts and picks out the smallest. several numbers are set aside; the least remains."
             ),
             resolution=(
                 "The REPL returned the slowest report — in this case, 1 pail, the minimum of the "
@@ -505,9 +502,7 @@ G2_04 = SubjectCurriculum(
                 "by hand."
             ),
             mapping=(
-                "The maximum is the farmer's best-day finder: it examines all five counts and "
-                "returns the one with the most pails sold. One report rises above the others "
-                "and stands alone."
+                "The maximum is the farmer's best-day finder: it examines all {drawn.e} counts and returns the one with the most pails sold. One report rises above the others and stands alone."
             ),
             resolution=(
                 "The REPL returned the best day's count — in this case, 9 pails, the maximum of "
@@ -929,8 +924,7 @@ G2_08 = SubjectCurriculum(
                 "either part."
             ),
             resolution=(
-                "{drawn.a} returned: the REPL returned the combined fraction — three-quarters, the sum of "
-                "one-half and one-quarter."
+                '1/2 returned: the REPL returned the combined fraction — three-quarters, the sum of one-half and one-quarter (with `4` as the input value).'
             ),
             tags=("story",),
         ),
@@ -954,8 +948,7 @@ G2_08 = SubjectCurriculum(
                 "both shares' scales into one."
             ),
             resolution=(
-                "{drawn.a} returned: the REPL returned the combined fraction — in this case, one-half, showing the "
-                "product of two-thirds and three-quarters."
+                '2/3 returned: the REPL returned the combined fraction — in this case, one-half, showing the product of two-thirds and three-quarters.'
             ),
             tags=("story",),
         ),

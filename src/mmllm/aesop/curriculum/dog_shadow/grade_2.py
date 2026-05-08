@@ -74,9 +74,7 @@ G2_01 = SubjectCurriculum(
                 "{drawn.a}, {drawn.b}, {drawn.c}, and {drawn.d}."
             ),
             need=(
-                "He needed the running total — what all a row of bones counted "
-                "to when stacked together. The REPL would tally them for him "
-                "in one breath."
+                'He needed the running total — what all {drawn.d} bones counted to when stacked together. The REPL would tally them for him in one breath.'
             ),
             mapping=(
                 "Each bone is one operand, their sum is the result, and `+` "
@@ -95,9 +93,7 @@ G2_01 = SubjectCurriculum(
             question_what="the product of three drawn counts",
             goal_text="multiply three drawn counts",
             scenario=(
-                "Patch the hound gathered a row of piles of bones near the "
-                "meadow, each pile marked with a count: {drawn.a}, "
-                "{drawn.b}, and {drawn.c}."
+                'Patch the hound gathered {drawn.b} piles of bones near the meadow, each pile marked with a count: {drawn.a}, {drawn.b}, and {drawn.c}.'
             ),
             need=(
                 "They wanted the total if each pile was multiplied together — "
@@ -175,10 +171,7 @@ G2_01 = SubjectCurriculum(
             question_what="the product of five drawn counts",
             goal_text="multiply five counts together",
             scenario=(
-                "Patch the hound laid a row of bones in a row near the forest, each "
-                "one carved with a count: {drawn.a}, {drawn.b}, {drawn.c}, "
-                "{drawn.d}, and {drawn.e}. They wanted the chain multiplied "
-                "to a single product."
+                'Patch the hound laid {drawn.e} bones in a row near the forest, each one carved with a count: {drawn.a}, {drawn.b}, {drawn.c}, {drawn.d}, and {drawn.e}. They wanted the chain multiplied to a single product.'
             ),
             need=(
                 'They needed the product when all five were multiplied in sequence. '
@@ -202,14 +195,10 @@ G2_01 = SubjectCurriculum(
             question_what="the sum of three drawn counts",
             goal_text="add three drawn counts",
             scenario=(
-                "Bell the hound carried a row of bundles of bones to the pond: "
-                "the first held {drawn.a}, the second {drawn.b}, the third "
-                "{drawn.c}. She wanted them stacked into one count."
+                'Bell the hound carried the bundles of bones to the pond: the first held {drawn.a}, the second {drawn.b}, the third {drawn.c}. She wanted them stacked into one count.'
             ),
             need=(
-                "She needed the total when the a row of bundles joined — the "
-                "running sum that would settle the grand tally without "
-                "confusion."
+                'She needed the total when the the bundles joined — the running sum that would settle the grand tally without confusion.'
             ),
             mapping=(
                 "Each bundle is one addend, `+` folds them in turn, and the "
@@ -254,7 +243,7 @@ G2_02 = SubjectCurriculum(
             resolution=(
                 'The REPL tested each pair in turn — was 1 less than 2? Yes. '
                 'Was 2 less than 3? Yes. The chain held fast, and the 3 '
-                'came back with the verdict.'
+                'came back true.'
             ),
             tags=("story",),
         ),
@@ -291,9 +280,7 @@ G2_02 = SubjectCurriculum(
             question_what="whether 1 ≤ 1 ≤ 2",
             goal_text="test whether 1 is less than or equal to 1 and 1 is less than or equal to 2",
             scenario=(
-                'Patch the hound placed a row of stones near the meadow, each carved: '
-                '1, then 1 again, then 2. They wanted to know if the marks formed '
-                'a non-strict chain — each equal or less than the next.'
+                'Patch the hound placed the stones near the meadow, each carved: 1, then 1 again, then 2. They wanted to know if the marks formed a non-strict chain — each equal or less than the next.'
             ),
             need=(
                 'They needed to test whether each stone\'s mark was less than or '
@@ -418,7 +405,7 @@ G2_03 = SubjectCurriculum(
                 'and the verdict is false when the marks are the same.'
             ),
             resolution=(
-                'The REPL compared the marks — 1 is equal to 1 — and returned the verdict. '
+                'The REPL compared the marks — 1 is equal to 1 — and returned false. '
                 'The bones bore identical marks, so they were not different — 1.'
             ),
             tags=("story",),
@@ -429,8 +416,7 @@ G2_03 = SubjectCurriculum(
             question_what="whether all three are equal",
             goal_text="test whether 1, 1, and 1 are all equal",
             scenario=(
-                'Bell the hound gathered a row of bones near the pond, each carved with '
-                'the same mark: 1. She wanted to test if all three matched each other.'
+                'Bell the hound gathered the bones near the pond, each carved with the same mark: 1. She wanted to test if all three matched each other.'
             ),
             need=(
                 'She needed to know if all three marks were identical. The equality '
@@ -453,8 +439,7 @@ G2_03 = SubjectCurriculum(
             question_what="whether all three are equal",
             goal_text="test whether 1, 1, and 2 are all equal",
             scenario=(
-                'Rex the hound held a row of bones by the river bank — two marked with 1 '
-                'and one marked with 2. He wanted to test if they all matched.'
+                'Rex the hound held the bones by the river bank — two marked with 1 and one marked with 2. He wanted to test if they all matched.'
             ),
             need=(
                 'He needed to know if all three matched or if one broke the pattern. '
@@ -476,9 +461,7 @@ G2_03 = SubjectCurriculum(
             question_what="whether at least one differs",
             goal_text="test whether at least one of 1, 1, and 2 is not equal to the others",
             scenario=(
-                'Patch the hound held a row of bones near the meadow — two marked 1 and '
-                'one marked 2. They wanted to test if at least one differed from the '
-                'rest.'
+                'Patch the hound held the bones near the meadow — two marked 1 and one marked 2. They wanted to test if at least one differed from the rest.'
             ),
             need=(
                 'They needed to know if any mark stood apart from the others. The '
@@ -526,7 +509,7 @@ G2_04 = SubjectCurriculum(
                 'the answer is the winning mark.'
             ),
             resolution=(
-                'The REPL scanned all three — 1, 2, 3 — and returned the result. The '
+                'The REPL scanned all three — 1, 2, 3 — and returned 1. The '
                 'smallest had been found, and the 3 rested in Bell\'s paw.'
             ),
             tags=("story",),
@@ -550,7 +533,7 @@ G2_04 = SubjectCurriculum(
                 'for the greatest, and the answer is the winning mark.'
             ),
             resolution=(
-                'The REPL scanned all three — 1, 2, 3 — and returned the result. The largest '
+                'The REPL scanned all three — 1, 2, 3 — and returned 3. The largest '
                 'had been found, and the 3 rested clear.'
             ),
             tags=("story",),
@@ -610,9 +593,7 @@ G2_04 = SubjectCurriculum(
             question_what="the smallest of -3, -1, and -5",
             goal_text="find the minimum of -3, -1, and -5",
             scenario=(
-                'Rex the hound held a row of stones at the pond, each carved with a '
-                'negative mark: -3, -1, and -5. He wanted the one with the least '
-                'value — the most negative.'
+                'Rex the hound held the stones at the pond, each carved with a negative mark: -3, -1, and -5. He wanted the one with the least value — the most negative.'
             ),
             need=(
                 'He needed to know which held the smallest value — the most deeply '
@@ -710,7 +691,7 @@ G2_05 = SubjectCurriculum(
                 'returns only the remainder, and the answer is what\'s left over.'
             ),
             resolution=(
-                'The REPL applied modulo to seventeen and five, and returned the result. The '
+                'The REPL applied modulo to seventeen and five, and returned 2. The '
                 'remainder was exact, and the 5 held what did not fit.'
             ),
             tags=("story",),
@@ -785,7 +766,7 @@ G2_05 = SubjectCurriculum(
                 'the rules of modular arithmetic.'
             ),
             resolution=(
-                'The REPL applied modulo to negative 7 and 3, and returned the result. The '
+                'The REPL applied modulo to negative 7 and 3, and returned 2. The '
                 'result followed modular arithmetic rules, and the 3 was certain.'
             ),
             tags=("story",),
@@ -1132,13 +1113,10 @@ G2_09 = SubjectCurriculum(
                 'number or a precise fraction.'
             ),
             mapping=(
-                'a row of bones make the numerator, two piles make the divisor, and '
-                'the division operation yields the exact answer.'
+                '{drawn.a} bones make the numerator, two piles make the divisor, and the division operation yields the exact answer.'
             ),
             resolution=(
-                'The REPL divided ten by two and handed back five. Since the '
-                'division was clean, five whole bones went to each pile, and '
-                'no remainder lingered — 2.'
+                'The REPL divided ten by two and handed back five. Since the division was clean, five whole bones went to each pile, and no remainder lingered — 2 (with `10` as the input value).'
             ),
             tags=("story",),
         ),
@@ -1148,15 +1126,14 @@ G2_09 = SubjectCurriculum(
             question_what="the exact rational result of using / on 10 and 3",
             goal_text="divide 10 by 3",
             scenario=(
-                "Rex the hound held ten fish bones at the stream's edge and wanted to split them evenly into a row of piles. The division would tell what each pile held exactly."
+                "Rex the hound held ten fish bones at the stream's edge and wanted to split them evenly into {drawn.b} piles. The division would tell what each pile held exactly."
             ),
             need=(
                 'He needed to know what ten divided by three would yield — the exact '
                 'share per pile. The result would be a precise rational fraction.'
             ),
             mapping=(
-                'a row of bones make the numerator, a row of piles make the divisor, and the '
-                'division operation yields the exact rational answer.'
+                '{drawn.a} bones make the numerator, {drawn.b} piles make the divisor, and the division operation yields the exact rational answer.'
             ),
             resolution=(
                 'The REPL divided ten by three and handed back the exact ratio '
@@ -1439,7 +1416,7 @@ G2_13 = SubjectCurriculum(
             resolution=(
                 'The REPL tested true at the first gate — it opened. True at '
                 'the second gate — it opened too. Both conditions held, and the '
-                'verdict came back with the verdict. She could cross.'
+                'verdict came back true. She could cross.'
             ),
             tags=("story",),
         ),
@@ -1487,7 +1464,7 @@ G2_13 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL tested false at the first path — closed. True at the second — '
-                'open. At least one way forward existed, and the verdict came back with the verdict.'
+                'open. At least one way forward existed, and the verdict came back true.'
             ),
             tags=("story",),
         ),
@@ -1662,7 +1639,7 @@ G2_14 = SubjectCurriculum(
                 'is false.'
             ),
             resolution=(
-                'The REPL negated zero — which is truthy — and returned the verdict. The truth '
+                'The REPL negated zero — which is truthy — and returned false. The truth '
                 'was flipped, and the 0 came back clear.'
             ),
             tags=("story",),
@@ -1685,8 +1662,7 @@ G2_14 = SubjectCurriculum(
                 'the result is false.'
             ),
             resolution=(
-                'The REPL negated the empty string — which is truthy — and returned the verdict. '
-                'The truth was inverted, and the answer was settled.'
+                'The REPL negated the empty string — which is truthy — and returned false. The truth was inverted, and the answer was settled (with `` as the input value) (with `` as the input value).'
             ),
             tags=("story",),
         ),
@@ -1829,7 +1805,7 @@ G2_16 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL converted zero to a boolean. Since zero is not false '
-                'and not nil, it counts as truthy. The answer came back with the verdict — '
+                'and not nil, it counts as truthy. The answer came back true — '
                 'the zero was a true value in boolean terms — 0.'
             ),
             tags=("story",),
@@ -1854,8 +1830,7 @@ G2_16 = SubjectCurriculum(
                 'truthiness, and the result is the pure true-or-false state.'
             ),
             resolution=(
-                'The REPL converted the empty string to a boolean. Since empty is not false '
-                'and not nil, it counts as truthy. True was returned.'
+                'The REPL converted the empty string to a boolean. Since empty is not false and not nil, it counts as truthy. True was returned (with `` as the input value) (with `` as the input value).'
             ),
             tags=("story",),
         ),
@@ -1981,7 +1956,7 @@ G2_18 = SubjectCurriculum(
             resolution=(
                 'The REPL quoted the name hare and then tested whether it was a '
                 'symbol. Yes — a quoted name is a symbol, not the animal. The '
-                'answer came back with the verdict. The mark was what it appeared to be.'
+                'answer came back true. The mark was what it appeared to be.'
             ),
             tags=("story",),
         ),
@@ -2062,9 +2037,9 @@ G2_19 = SubjectCurriculum(
                 'number that emerges from such a joining.'
             ),
             resolution=(
-                'The runtime multiplied one million by one million and handed back '
+                'The REPL multiplied one million by one million and handed back '
                 'one trillion. The number was so large it spilled beyond the '
-                'ordinary integer bounds, but the container grew to '
+                'ordinary integer bounds, but the REPL grew the container to '
                 'hold it. The answer was exact — 1000000.'
             ),
             tags=("story",),
@@ -2239,9 +2214,7 @@ G2_22 = SubjectCurriculum(
             question_what="the result of multiplying 5 and 4, then subtracting 7",
             goal_text="compute 5 times 4, then subtract 7",
             scenario=(
-                'Patch the hound had two tasks near the forest. First, they '
-                'needed to gather a row of piles of a row of bones each — five fours. '
-                'Then, they would subtract a row of bones from that pile.'
+                'Patch the hound had two tasks near the forest. First, they needed to gather {drawn.b} piles of {drawn.a} bones each — five fours. Then, they would subtract {drawn.c} bones from that pile.'
             ),
             need=(
                 'They wanted to know what remained after both operations. The '

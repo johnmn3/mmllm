@@ -116,8 +116,7 @@ G10_01 = SubjectCurriculum(
                 "the value. The mark and the milk are never the same thing."
             ),
             resolution=(
-                "The REPL handed back the chalk mark itself — a list of the symbol "
-                "and its two arguments, with no arithmetic performed."
+                'The REPL handed back the chalk mark itself — a list of the symbol and its two arguments, with no arithmetic performed (with `1` as the input value).'
             ),
             tags=("story",),
         ),
@@ -420,9 +419,7 @@ G10_05 = SubjectCurriculum(
                 "is blank of shorthands by the time the runtime arrives."
             ),
             resolution=(
-                "The REPL returned the fully expanded form — the `if` "
-                "with its `do` body, with no macro shorthand remaining "
-                "for the runtime to intercept."
+                'The REPL returned the fully expanded form — the `if` with its `do` body, with no macro shorthand remaining for the runtime to intercept (with `1` as the input value).'
             ),
             tags=("story",),
         ),
@@ -803,9 +800,7 @@ G10_09 = SubjectCurriculum(
                 "the full marks and finds them unequal."
             ),
             resolution=(
-                "The REPL returned the inequality verdict — the two "
-                "fresh marks were not identical, confirming that each "
-                "stamp press produced a genuinely distinct label."
+                'The REPL returned the inequality verdict — the two fresh marks were not identical, confirming that each stamp press produced a genuinely distinct label (with `x_` as the input value).'
             ),
             tags=("story",),
         ),
@@ -849,9 +844,7 @@ G10_10 = SubjectCurriculum(
                 "and safe. No surprise label appears in the rewrite."
             ),
             resolution=(
-                "The REPL evaluated the expanded `if-let` form and "
-                "returned the value from the then-branch — the hygienic "
-                "rewrite had passed the binding through cleanly."
+                'The REPL evaluated the expanded `if-let` form and returned the value from the then-branch — the hygienic rewrite had passed the binding through cleanly (with `5` as the input value).'
             ),
             tags=("story",),
         ),
@@ -1025,9 +1018,7 @@ G10_12 = SubjectCurriculum(
                 "label tells the reader how to transform the raw string."
             ),
             resolution=(
-                "The REPL confirmed the predicate's verdict — the reader "
-                "had produced a genuine instant from the tagged string, "
-                "and the type check returned the affirmative."
+                "The REPL confirmed the predicate's verdict — the reader had produced a genuine instant from the tagged string, and the type check returned the affirmative (with `2024-01-01` as the input value)."
             ),
             tags=("story",),
         ),
@@ -1056,9 +1047,7 @@ G10_12 = SubjectCurriculum(
                 "determines how the raw text is transformed."
             ),
             resolution=(
-                "The REPL confirmed the predicate's verdict — the reader "
-                "had built a proper uuid from the tagged string, and "
-                "the type check returned the affirmative."
+                "The REPL confirmed the predicate's verdict — the reader had built a proper uuid from the tagged string, and the type check returned the affirmative (with `00000000-0000-0000-0000-000000000000` as the input value)."
             ),
             tags=("story",),
         ),
@@ -1099,9 +1088,7 @@ G10_13 = SubjectCurriculum(
                 "runtime, turning the written mark into live data."
             ),
             resolution=(
-                "The REPL returned the parsed number — the scribe's "
-                "reader had converted the textual tally mark into a "
-                "typed integer the runtime could use directly."
+                "The REPL returned the parsed number — the scribe's reader had converted the textual tally mark into a typed integer the runtime could use directly (with `42` as the input value)."
             ),
             tags=("story",),
         ),
@@ -1130,9 +1117,7 @@ G10_13 = SubjectCurriculum(
                 "the written marks into live typed data."
             ),
             resolution=(
-                "The REPL returned the parsed vector of keywords — the "
-                "scribe's reader had converted the textual bracket marks "
-                "into structured data the runtime could work with."
+                "The REPL returned the parsed vector of keywords — the scribe's reader had converted the textual bracket marks into structured data the runtime could work with (with `:a` as the input value)."
             ),
             tags=("story",),
         ),
@@ -1248,9 +1233,7 @@ G10_15 = SubjectCurriculum(
                 "farmer's rewrite rule would be overkill."
             ),
             resolution=(
-                "The REPL evaluated the anonymous function call and "
-                "returned the sum — the plain recipe card had done "
-                "the job without any macro rewriting at all."
+                'The REPL evaluated the anonymous function call and returned the sum — the plain recipe card had done the job without any macro rewriting at all (with `3` as the input value).'
             ),
             tags=("story",),
         ),
@@ -1280,9 +1263,7 @@ G10_15 = SubjectCurriculum(
                 "the form shape needs no transformation."
             ),
             resolution=(
-                "The REPL returned the collection of incremented values "
-                "— the plain function had walked each element without "
-                "any macro expansion being needed."
+                'The REPL returned the collection of incremented values — the plain function had walked each element without any macro expansion being needed (with `1` as the input value) (with `3` as the input value).'
             ),
             tags=("story",),
         ),
@@ -1325,9 +1306,7 @@ G10_16 = SubjectCurriculum(
                 "and the body runs as if inside a prepared pail."
             ),
             resolution=(
-                "The REPL evaluated the expanded `let` block and "
-                "returned the body's final value — the context rewrite "
-                "had prepared the pail and the body ran cleanly inside."
+                "The REPL evaluated the expanded `let` block and returned the body's final value — the context rewrite had prepared the pail and the body ran cleanly inside (with `42` as the input value)."
             ),
             tags=("story",),
         ),
@@ -1358,9 +1337,7 @@ G10_16 = SubjectCurriculum(
                 "the binding on the market-board before evaluation."
             ),
             resolution=(
-                "The REPL evaluated the expanded `def` and then looked "
-                "up the posted name, returning the keyword value — the "
-                "market-board had been chalked by the rewrite rule."
+                'The REPL evaluated the expanded `def` and then looked up the posted name, returning the keyword value — the market-board had been chalked by the rewrite rule (with `slow` as the input value) (with `:slow` as the input value).'
             ),
             tags=("story",),
         ),

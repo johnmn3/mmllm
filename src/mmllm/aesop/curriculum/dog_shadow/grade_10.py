@@ -126,11 +126,11 @@ G10_01 = SubjectCurriculum(
         SubjectExample(
             form="'(1 2 3)",
             expected=[1, 2, 3],
-            concept_phrase="the quoted list with a row of numbers",
+            concept_phrase="the quoted list with three numbers",
             question_what="the result of quoting a three-element list",
-            goal_text="quote a list of a row of numbers so it returns the form itself",
+            goal_text="quote a list of three numbers so it returns the form itself",
             scenario=(
-                'Rex the hound wanted to mark a row of stones by the pond — '
+                'Rex the hound wanted to mark three stones by the pond — '
                 'one marked 1, one marked 2, one marked 3. Instead of counting '
                 'them, he made a single scratch-mark that spelled the list '
                 'shape itself.'
@@ -289,9 +289,7 @@ G10_03 = SubjectCurriculum(
                 'the runtime applies the rewrite before evaluation begins.'
             ),
             resolution=(
-                'The REPL set the rule on the bark, walked through the use, '
-                'rewriting first and evaluating second. The rewritten form '
-                'yielded the value the original had asked for.'
+                'The REPL set the rule on the bark, walked through the use, rewriting first and evaluating second. The rewritten form yielded the value the original had asked for (with `1` as the input value) (with `3` as the input value).'
             ),
             tags=("story",),
         ),
@@ -612,9 +610,7 @@ G10_07 = SubjectCurriculum(
             question_what="the sum of mapped values after filtering even numbers",
             goal_text="thread a vector through filter, map, and reduce using thread-last",
             scenario=(
-                'Rex the hound had a vector of a row of bones and a multi-step '
-                'sniffing-trail. Thread-last would pass the bones as the final '
-                'argument to each step.'
+                'Rex the hound had a vector of the bones and a multi-step sniffing-trail. Thread-last would pass the bones as the final argument to each step.'
             ),
             need=(
                 'The vector enters the filter for even counts. The filtered bones '
@@ -799,7 +795,7 @@ G10_09 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL generated two fresh marks with the same prefix but '
-                'different serial numbers. The equality test returned the verdict — '
+                'different serial numbers. The equality test returned false — '
                 'they were not equal. Fresh marks, even with the same label, '
                 'remain distinct.'
             ),
@@ -843,10 +839,7 @@ G10_10 = SubjectCurriculum(
                 'into the if-let form. The macro rewrites hygienically.'
             ),
             resolution=(
-                'The REPL set the macro-rule, then called it with the binding. '
-                'The rule expanded to if-let. The then-branch '
-                'ran and produced a result. The explicit binding prevented '
-                'any confusion.'
+                'The REPL set the macro-rule, then called it with the binding. The rule expanded to if-let. The then-branch ran and produced a result. The explicit binding prevented any confusion (with `5` as the input value).'
             ),
             tags=("story",),
         ),
@@ -1012,7 +1005,7 @@ G10_12 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL read the tagged literal and converted "2024-01-01" into '
-                'an instant. The inst? predicate returned the verdict — the value was '
+                'an instant. The inst? predicate returned true — the value was '
                 'indeed an instant. The tag had told the reader how to interpret '
                 'the string.'
             ),
@@ -1040,9 +1033,7 @@ G10_12 = SubjectCurriculum(
                 'UUID object. The uuid? test verifies the type.'
             ),
             resolution=(
-                'The REPL read the tagged literal and converted the string into a '
-                'UUID. The uuid? predicate returned the verdict — the value was a proper '
-                'UUID. The tag had guided the reader to parse correctly.'
+                'The REPL read the tagged literal and converted the string into a UUID. The uuid? predicate returned true — the value was a proper UUID. The tag had guided the reader to parse correctly (with `00000000-0000-0000-0000-000000000000` as the input value).'
             ),
             tags=("story",),
         ),
@@ -1250,9 +1241,7 @@ G10_15 = SubjectCurriculum(
                 'sequence with the trail applied to each.'
             ),
             resolution=(
-                'The REPL applied map with inc to the vector. Each bone was passed '
-                'through the inc trail in order. The result came back with each '
-                'element incremented. No macros needed — a function sufficed.'
+                'The REPL applied map with inc to the vector. Each bone was passed through the inc trail in order. The result came back with each element incremented. No macros needed — a function sufficed (with `1` as the input value) (with `3` as the input value).'
             ),
             tags=("story",),
         ),
@@ -1296,9 +1285,7 @@ G10_16 = SubjectCurriculum(
                 'rewritten form for evaluation.'
             ),
             resolution=(
-                'the macro rewrote the call into a pace-bound let, the body '
-                'ran inside it, and the value the body produced came back as '
-                'the call\'s answer.'
+                "the macro rewrote the call into a pace-bound let, the body ran inside it, and the value the body produced came back as the call's answer (with `42` as the input value)."
             ),
             tags=("story",),
         ),
@@ -1323,9 +1310,7 @@ G10_16 = SubjectCurriculum(
                 'The v is the value. The backtick builds the def-form.'
             ),
             resolution=(
-                'The REPL set the macro, then called it. The macro expanded to def '
-                'and set the binding. A lookup returned the value. The pattern '
-                'worked.'
+                'The REPL set the macro, then called it. The macro expanded to def and set the binding. A lookup returned the value. The pattern worked (with `slow` as the input value) (with `:slow` as the input value).'
             ),
             tags=("story",),
         ),

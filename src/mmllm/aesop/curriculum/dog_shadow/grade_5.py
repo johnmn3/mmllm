@@ -57,9 +57,7 @@ G5_01 = SubjectCurriculum(grade=5, subject_id="G5-01",
                 'the REPL hands back.'
             ),
             resolution=(
-                'The REPL read the condition, took the matching arm, and '
-                'handed back its value. The other arm remained unrun, the '
-                'path beneath it untouched.'
+                'The REPL read the condition, took the matching arm, and handed back its value. The other arm remained unrun, the path beneath it untouched (with `:a` as the input value).'
             ),
             tags=("story",),
         ),
@@ -87,9 +85,7 @@ G5_01 = SubjectCurriculum(grade=5, subject_id="G5-01",
                 'takes only the chosen arm.'
             ),
             resolution=(
-                'The REPL read the false stone, took the downstream arm, '
-                'and handed back its value. The upstream arm had never been '
-                'sniffed. The decision was final.'
+                'The REPL read the false stone, took the downstream arm, and handed back its value. The upstream arm had never been sniffed. The decision was final (with `:a` as the input value).'
             ),
             tags=("story",),
         ),
@@ -100,10 +96,7 @@ G5_01 = SubjectCurriculum(grade=5, subject_id="G5-01",
             question_what="the if's branch",
             goal_text="choose between :a and :b based on whether 5 is greater than 3",
             scenario=(
-                'The path forked again, this time by the river bank. A new '
-                'stone at the fork held a test: is 5 bigger than 3? Bell '
-                'the hound checked the marks. The test read true — five '
-                'bones stacked higher than three.'
+                'The path forked again, this time by the river bank. A new stone at the fork held a test: is 5 bigger than 3? Bell the hound checked the marks. The test read true — {drawn.a} bones stacked higher than three.'
             ),
             need=(
                 'She wanted to take the right arm without guessing. The test '
@@ -154,9 +147,9 @@ G5_02 = SubjectCurriculum(grade=5, subject_id="G5-02",
                 'itself an expression that yields a value.'
             ),
             resolution=(
-                'The runtime evaluated the fork first, took the true arm and got '
+                'The REPL evaluated the fork first, took the true arm and got '
                 '10, then added 1 to that value, handing back the running '
-                'total. The nested structure let it compose the answer '
+                'total. The nested structure let the REPL compose the answer '
                 'from the inside out.'
             ),
             tags=("story",),
@@ -191,9 +184,7 @@ G5_03 = SubjectCurriculum(grade=5, subject_id="G5-03",
                 'is returned — not a default branch, but an empty mouth.'
             ),
             resolution=(
-                'The REPL read the true stone and handed back yes. The '
-                'silence-on-false rule is why when has only one arm: you get '
-                'the answer or you get nothing.'
+                'The REPL read the true stone and handed back yes. The silence-on-false rule is why when has only one arm: you get the answer or you get nothing (with `:yes` as the input value).'
             ),
             tags=("story",),
         ),
@@ -410,10 +401,7 @@ G5_07 = SubjectCurriculum(grade=5, subject_id="G5-07",
                 'value.'
             ),
             resolution=(
-                'The REPL walked the first gate, found it falsey, walked the second, '
-                'found it falsey, walked the third, found it truthy, and handed back '
-                'that value immediately. The walk had stopped at the first open gate. '
-                'The answer was certain.'
+                'The REPL walked the first gate, found it falsey, walked the second, found it falsey, walked the third, found it truthy, and handed back that value immediately. The walk had stopped at the first open gate. The answer was certain (with `:found` as the input value).'
             ),
             tags=("story",),
         ),
@@ -526,7 +514,7 @@ G5_10 = SubjectCurriculum(grade=5, subject_id="G5-10",
             expected=[1,4,9,16],
             concept_phrase="mapping a squaring operation over a vector",
             question_what="the sequence produced by mapping a squaring rule over the vector containing 1, 2, 3, and 4",
-            goal_text="apply a squaring operation to each element of the vector [1 2 3 4] returning a sequence",
+            goal_text="apply a squaring operation to each element of the vector containing 1, 2, 3, and 4, returning a sequence",
             scenario=(
                 'Patch had bones marked 1, 2, 3, 4 by the river. A sieve lay above, '
                 'shaped like squaring: take a bone, multiply by itself, drop the '
@@ -558,7 +546,7 @@ G5_11 = SubjectCurriculum(grade=5, subject_id="G5-11",
             expected=[2,4],
             concept_phrase="filtering even elements from a vector",
             question_what="the sequence produced by filtering even? over the vector containing 1, 2, 3, and 4",
-            goal_text="keep the even elements from the vector [1 2 3 4]",
+            goal_text="keep the even elements from the vector containing 1, 2, 3, and 4",
             scenario=(
                 'Bell gathered bones marked 1, 2, 3, 4 at the stream. A log above '
                 'held a gap that let through only even bones. She would pour all four '
@@ -585,9 +573,9 @@ G5_11 = SubjectCurriculum(grade=5, subject_id="G5-11",
             expected=[1,2],
             concept_phrase="filtering positive elements from a vector",
             question_what="the sequence produced by filtering pos? over the vector containing -2, -1, 0, 1, and 2",
-            goal_text="keep the positive elements from the vector [-2 -1 0 1 2]",
+            goal_text="keep the positive elements from the vector containing -2, -1, 0, 1, and 2",
             scenario=(
-                'Rex the hound found a row of bones marked -2, -1, 0, 1, 2 by the river. '
+                'Rex the hound found five bones marked -2, -1, 0, 1, 2 by the river. '
                 'A log above the water held a gap that let through only positive-marked '
                 'bones. He would pour all five through in order.'
             ),
@@ -618,7 +606,7 @@ G5_12 = SubjectCurriculum(grade=5, subject_id="G5-12",
             expected=10,
             concept_phrase="the fold operation",
             question_what="the running tally after walking 1, 2, 3, 4 with + as the combine step",
-            goal_text="walk the row of pebbles [1 2 3 4] carrying a tally that combines each with + into the running total",
+            goal_text="walk the row of pebbles 1, 2, 3, 4 carrying a tally that combines each with + into the running total",
             scenario=(
                 'Patch the hound stood at the stream near the forest, facing a '
                 'row of pebbles marked 1, 2, 3, 4 laid end to end. She would '
@@ -648,7 +636,7 @@ G5_12 = SubjectCurriculum(grade=5, subject_id="G5-12",
             expected=120,
             concept_phrase="the fold operation",
             question_what="the product produced by walking 1, 2, 3, 4, 5 with * as the combine step",
-            goal_text="fold * over the vector [1 2 3 4 5] computing their product",
+            goal_text="fold * over the vector containing 1, 2, 3, 4, and 5, computing their product",
             scenario=(
                 'Bell the hound faced a row of pebbles marked 1, 2, 3, 4, 5 at '
                 'the stream. She would walk the row, carrying a product-tally, '
@@ -674,8 +662,8 @@ G5_12 = SubjectCurriculum(grade=5, subject_id="G5-12",
             form="(reduce max [3 1 4 1 5 9 2 6])",
             expected=9,
             concept_phrase="the fold operation",
-            question_what="the largest pebble found by walking [3 1 4 1 5 9 2 6] with max as the combine step",
-            goal_text="fold max over the vector [3 1 4 1 5 9 2 6] finding the maximum",
+            question_what="the largest pebble found by walking 3, 1, 4, 1, 5, 9, 2, 6 with max as the combine step",
+            goal_text="fold max over the vector containing 3, 1, 4, 1, 5, 9, 2, and 6, finding the maximum",
             scenario=(
                 'Rex faced a long row: 3, 1, 4, 1, 5, 9, 2, 6. He would walk it, '
                 'carrying the largest seen so far, updating whenever he found a bigger.'
@@ -770,7 +758,7 @@ G5_14 = SubjectCurriculum(grade=5, subject_id="G5-14",
             expected=10,
             concept_phrase="applying + to vector elements",
             question_what="the result of spreading the basket of 1, 2, 3, 4 as ingredients into +",
-            goal_text="apply + to the elements of the vector [1 2 3 4]",
+            goal_text="apply + to the elements of the vector containing 1, 2, 3, and 4",
             scenario=(
                 'Rex the hound held a basket of bones marked 1, 2, 3, 4 at the '
                 'stream. A nose-trail lay before him — the + recipe. The apply-form '
@@ -788,7 +776,7 @@ G5_14 = SubjectCurriculum(grade=5, subject_id="G5-14",
                 'bone to the recipe as a separate argument.'
             ),
             resolution=(
-                'The REPL unpacked the basket, took the a row of bones as arguments, '
+                'The REPL unpacked the basket, took the four bones as arguments, '
                 'followed the + recipe through all of them, and handed back the '
                 'sum. The applied recipe was complete — 4.'
             ),
@@ -799,7 +787,7 @@ G5_14 = SubjectCurriculum(grade=5, subject_id="G5-14",
             expected=5,
             concept_phrase="applying max to vector elements",
             question_what="the largest count found after spreading the basket of 3, 1, 4, 1, 5 into max",
-            goal_text="apply max to the elements of the vector [3 1 4 1 5]",
+            goal_text="apply max to the elements of the vector containing 3, 1, 4, 1, and 5",
             scenario=(
                 'Bell carried a basket of bones marked 3, 1, 4, 1, 5 at the stream. A '
                 'nose-trail lay ahead — the max recipe. Apply would unpack the basket '
@@ -815,7 +803,7 @@ G5_14 = SubjectCurriculum(grade=5, subject_id="G5-14",
                 'an argument to the recipe.'
             ),
             resolution=(
-                'The REPL unpacked the basket, took all a row of bones as arguments, '
+                'The REPL unpacked the basket, took all five bones as arguments, '
                 'followed the max recipe, and handed back the largest. The applied '
                 'recipe was complete — 5.'
             ),
@@ -988,7 +976,7 @@ G5_18 = SubjectCurriculum(grade=5, subject_id="G5-18",
             expected=True,
             concept_phrase="checking if any element satisfies a predicate",
             question_what="whether any pebble in 1, 3, 5, 8, 7 passes the even? sieve",
-            goal_text="check if any element in the vector [1 3 5 8 7] is even",
+            goal_text="check if any element in the vector containing 1, 3, 5, 8, and 7 is even",
             scenario=(
                 "Rex the hound held a pile of bones marked 1, 3, 5, 8, 7 at the stream at the stream's edge. A gap-sieve before him had a rule: only even-marked bones can pass through. He wanted to know: does any bone in this pile fit through?"
             ),
@@ -1004,7 +992,7 @@ G5_18 = SubjectCurriculum(grade=5, subject_id="G5-18",
             ),
             resolution=(
                 'The REPL poured bone 1 (held back), poured 3 (held back), poured 5 '
-                '(held back), poured 8 (passed). Some found a match and returned the verdict '
+                '(held back), poured 8 (passed). Some found a match and returned true '
                 'without checking the rest.'
             ),
             tags=("story",),
@@ -1067,7 +1055,7 @@ G5_19 = SubjectCurriculum(grade=5, subject_id="G5-19",
             ),
             resolution=(
                 'The REPL poured bone 1 (passed), poured 2 (passed), poured 3 (passed). '
-                'Every bone made it through. Every? returned the verdict — all bones fit.'
+                'Every bone made it through. Every? returned true — all bones fit.'
             ),
             tags=("story",),
         ),
@@ -1094,7 +1082,7 @@ G5_19 = SubjectCurriculum(grade=5, subject_id="G5-19",
             ),
             resolution=(
                 'The REPL poured bone 1 (held back — odd, not even). Every? found a '
-                'failure immediately and returned the verdict without checking the rest. Not '
+                'failure immediately and returned false without checking the rest. Not '
                 'every bone fit.'
             ),
             tags=("story",),
@@ -1110,25 +1098,20 @@ G5_20 = SubjectCurriculum(grade=5, subject_id="G5-20",
             expected=[10,20,30],
             concept_phrase="taking elements from a sequence",
             question_what="the sequence produced by taking 3 elements from the row of 10, 20, 30, 40, 50",
-            goal_text="take the first 3 elements from the vector [10 20 30 40 50]",
+            goal_text="take the first 3 elements from the vector containing 10, 20, 30, 40, and 50",
             scenario=(
                 'Rex the hound faced a long row of bones: 10, 20, 30, 40, 50. A gap-sieve '
                 'would count out just the first three and pass them through. The rest would '
                 'stay behind on the near bank.'
             ),
             need=(
-                'He wanted just the first a row of bones from the row. Take counts off the '
-                'first n bones and passes only those through the sieve.'
+                'He wanted just the first {drawn.a} bones from the row. Take counts off the first n bones and passes only those through the sieve.'
             ),
             mapping=(
-                'The take-form is the sieve-gap. The input row is 10, 20, 30, 40, 50. '
-                'The count is 3. Take lets the first a row of bones through and holds the '
-                'rest back.'
+                'The take-form is the sieve-gap. The input row is 10, 20, 30, 40, 50. The count is 3. Take lets the first {drawn.a} bones through and holds the rest back.'
             ),
             resolution=(
-                'The REPL poured bones 10, 20, 30 through the gap and let the rest fall '
-                'back. The far bank caught the first a row of bones. The sieve-pour was '
-                'complete.'
+                'The REPL poured bones 10, 20, 30 through the gap and let the rest fall back. The far bank caught the first {drawn.a} bones. The sieve-pour was complete.'
             ),
             tags=("story",),
         ),
@@ -1137,7 +1120,7 @@ G5_20 = SubjectCurriculum(grade=5, subject_id="G5-20",
             expected=[30,40,50],
             concept_phrase="dropping elements from a sequence",
             question_what="the sequence produced by dropping 2 elements from the row of 10, 20, 30, 40, 50",
-            goal_text="drop the first 2 elements from the vector [10 20 30 40 50]",
+            goal_text="drop the first 2 elements from the vector containing 10, 20, 30, 40, and 50",
             scenario=(
                 'Bell the hound faced the same long row by the river bank: 10, 20, 30, '
                 '40, 50. A different gap-sieve would skip the first two and pass the '
@@ -1153,7 +1136,7 @@ G5_20 = SubjectCurriculum(grade=5, subject_id="G5-20",
             ),
             resolution=(
                 'The REPL skipped bones 10 and 20, then poured bones 30, 40, 50 through '
-                'the gap. The far bank caught the remaining a row of bones. The sieve-pour '
+                'the gap. The far bank caught the remaining three bones. The sieve-pour '
                 'was complete.'
             ),
             tags=("story",),
@@ -1168,8 +1151,8 @@ G5_21 = SubjectCurriculum(grade=5, subject_id="G5-21",
             form="(distinct [1 1 2 3 3 4])",
             expected=[1,2,3,4],
             concept_phrase="removing duplicates from a sequence",
-            question_what="the sequence produced by passing [1 1 2 3 3 4] through the dedup-sieve",
-            goal_text="remove duplicate elements from the vector [1 1 2 3 3 4]",
+            question_what="the sequence produced by passing 1, 1, 2, 3, 3, 4 through the dedup-sieve",
+            goal_text="remove duplicate elements from the vector containing 1, 1, 2, 3, 3, and 4",
             scenario=(
                 'Patch the hound gathered a pile of bones marked 1, 1, 2, 3, 3, 4 at '
                 'the stream near the meadow. Some bones had the same mark — duplicates. '
@@ -1251,10 +1234,7 @@ G5_22 = SubjectCurriculum(grade=5, subject_id="G5-22",
                 'supplies.'
             ),
             resolution=(
-                'The REPL paced the bank the right number of times, then '
-                'stopped at the base case, and handed back the final tally. '
-                'The trail beneath the pacing had not grown — the '
-                'call-stack was exactly as it began — 1.'
+                'The REPL paced the bank the right number of times, then stopped at the base case, and handed back the final tally. The trail beneath the pacing had not grown — the call-stack was exactly as it began — 1 (with `5` as the input value).'
             ),
             tags=("story",),
         ),

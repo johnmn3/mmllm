@@ -265,9 +265,7 @@ G3_04 = SubjectCurriculum(grade=3, subject_id="G3-04",
                 "east fold, 4 from the village pens."
             ),
             need=(
-                "The morning's inventory required all three counts summed "
-                "for the leather-bound log, but only for the day's entry — "
-                "no standing rule."
+                "The morning's inventory required all {drawn.b} counts summed for the leather-bound log, but only for the day's entry — no standing rule."
             ),
             mapping=(
                 "The `let` places a, b, and c into the pouch together: 2, "
@@ -275,7 +273,7 @@ G3_04 = SubjectCurriculum(grade=3, subject_id="G3-04",
                 "inside the form, returning their total."
             ),
             resolution=(
-                "the pouch held all three counts, the addition combined them all, and the morning's fleece-tally was recorded in the elder's hand. The slate showed {drawn.a} in clear chalk, and the fold tally stood as the day record."
+                "the pouch held all {drawn.b} counts, the addition combined them all, and the morning's fleece-tally was recorded in the elder's hand. The slate showed {drawn.a} in clear chalk, and the fold tally stood as the day record."
             )),
     ], subplots=_POUCH_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
 
@@ -436,7 +434,7 @@ G3_08 = SubjectCurriculum(grade=3, subject_id="G3-08",
                 "An anonymous `fn` can take three parameters and add them together."
             ),
             resolution=(
-                'The unnamed drill-card summed all counts and returned the total.'
+                'The unnamed drill-card summed all counts and returned the total (with `1` as the input value) (with `3` as the input value).'
             )),
     ], subplots=_RECIPE_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
 
@@ -474,9 +472,7 @@ G3_09 = SubjectCurriculum(grade=3, subject_id="G3-09",
                 "decided to post a standing drill-card."
             ),
             need=(
-                "A named routine would save time. The village could call "
-                "`add3` whenever three counts needed summing, without Carol "
-                "doing the addition by hand each time."
+                'A named routine would save time. The village could call `add3` whenever {drawn.c} counts needed summing, without Carol doing the addition by hand each time.'
             ),
             mapping=(
                 "`defn add3` posts a named drill-card for adding three "
@@ -484,7 +480,7 @@ G3_09 = SubjectCurriculum(grade=3, subject_id="G3-09",
                 "1 plus 2 plus 3."
             ),
             resolution=(
-                "the posted drill-card `add3` served the three counts, returned 6, and the morning's three-gate total was recorded efficiently. {drawn.a} stood as the answer the fold required, slate, chalk, and a steady eye all in agreement."
+                "the posted drill-card `add3` served the {drawn.c} counts, returned 6, and the morning's three-gate total was recorded efficiently. {drawn.a} stood as the answer the fold required, slate, chalk, and a steady eye all in agreement."
             )),
     ], subplots=_RECIPE_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
 
@@ -641,9 +637,7 @@ G3_14 = SubjectCurriculum(grade=3, subject_id="G3-14",
             "the do form (do 1 2 3)",
             "the value of (do 1 2 3)",
             scenario=(
-                "Carol had written three numbers on her slate in a column: 1, "
-                "then 2, then 3. She asked Tom: if I ask the REPL to read "
-                "this whole sequence, what comes back?"
+                'Carol had written {drawn.c} numbers on her slate in a column: 1, then 2, then 3. She asked Tom: if I ask the REPL to read this whole sequence, what comes back?'
             ),
             need=(
                 "Tom needed to learn that `do` groups forms together, but only "

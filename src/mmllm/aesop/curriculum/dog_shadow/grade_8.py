@@ -149,10 +149,7 @@ G8_02 = SubjectCurriculum(
                 'is asking the bag for the slot by name.'
             ),
             resolution=(
-                'The REPL constructed the bag, fetched the named '
-                'compartment, and handed back the shade the stone had '
-                'borne. The bag itself kept its kind-stamp on the outside '
-                'for any later read.'
+                'The REPL constructed the bag, fetched the named compartment, and handed back the shade the stone had borne. The bag itself kept its kind-stamp on the outside for any later read (with `grey` as the input value).'
             ),
             tags=("story",),
         ),
@@ -358,8 +355,7 @@ G8_05 = SubjectCurriculum(
                 'type, and the method is what answers the call.'
             ),
             resolution=(
-                'The REPL marked the text-pack and called speed on text. The '
-                'text answered, proving the extension was live.'
+                'The REPL marked the text-pack and called speed on text. The text answered, proving the extension was live (with `swift` as the input value).'
             ),
             tags=("story",),
         ),
@@ -384,8 +380,7 @@ G8_05 = SubjectCurriculum(
                 'is the extend-protocol, and the number-voice is the method.'
             ),
             resolution=(
-                'The REPL stamped the mark on the number-type, then dispatched a '
-                'number to hail. The number answered in its own voice.'
+                'The REPL stamped the mark on the number-type, then dispatched a number to hail. The number answered in its own voice (with `7` as the input value).'
             ),
             tags=("story",),
         ),
@@ -428,9 +423,7 @@ G8_06 = SubjectCurriculum(
                 'and each breed\'s answer is its speed implementation.'
             ),
             resolution=(
-                'The REPL set the guild and both marks, then dispatched a '
-                'number. The Long-breed\'s speed-answer came back, proving '
-                'the protocol routed correctly.'
+                "The REPL set the guild and both marks, then dispatched a number. The Long-breed's speed-answer came back, proving the protocol routed correctly (with `42` as the input value)."
             ),
             tags=("story",),
         ),
@@ -460,9 +453,7 @@ G8_06 = SubjectCurriculum(
                 'String-answer is what the String-breed returns.'
             ),
             resolution=(
-                'The REPL dispatched a text-pack to the speed call. The '
-                'String-breed\'s implementation fired, and the text-answer '
-                'came back.'
+                "The REPL dispatched a text-pack to the speed call. The String-breed's implementation fired, and the text-answer came back (with `:string-pace` as the input value)."
             ),
             tags=("story",),
         ),
@@ -503,9 +494,7 @@ G8_07 = SubjectCurriculum(
                 'and the speed-word is what the record returns.'
             ),
             resolution=(
-                'The REPL built the record case with the guild mark, then '
-                'called speed on a Hare. The guild routed to the Hare\'s '
-                'implementation, and the breed\'s word came back.'
+                "The REPL built the record case with the guild mark, then called speed on a Hare. The guild routed to the Hare's implementation, and the breed's word came back (with `swift` as the input value) (with `:swift` as the input value)."
             ),
             tags=("story",),
         ),
@@ -530,8 +519,7 @@ G8_07 = SubjectCurriculum(
                 'the mark is the protocol implementation.'
             ),
             resolution=(
-                'The REPL built the Tortoise case with the mark, then called speed. '
-                'The steady-answer came back.'
+                'The REPL built the Tortoise case with the mark, then called speed. The steady-answer came back (with `:steady` as the input value).'
             ),
             tags=("story",),
         ),
@@ -569,9 +557,7 @@ G8_08 = SubjectCurriculum(
                 'the pace-word is what the runtime returns.'
             ),
             resolution=(
-                'The REPL read the species, picked the matching pile, and '
-                'handed back its pace-word. The stone stood ready for any '
-                'later breed — hare.'
+                'The REPL read the species, picked the matching pile, and handed back its pace-word. The stone stood ready for any later breed — hare (with `:species` as the input value).'
             ),
             tags=("story",),
         ),
@@ -906,8 +892,7 @@ G8_13 = SubjectCurriculum(
                 'returns.'
             ),
             resolution=(
-                'The REPL built the Hare, called name-of, and this let the '
-                'method read the n field from the record. The name came back.'
+                'The REPL built the Hare, called name-of, and this let the method read the n field from the record. The name came back (with `:n` as the input value).'
             ),
             tags=("story",),
         ),
@@ -932,8 +917,7 @@ G8_13 = SubjectCurriculum(
                 'this is a reference to the current record instance.'
             ),
             resolution=(
-                'The REPL built a Stone with a tag in the t field, then called '
-                'tag-of. The guild routed to the body and returned the stored tag.'
+                'The REPL built a Stone with a tag in the t field, then called tag-of. The guild routed to the body and returned the stored tag (with `:t` as the input value).'
             ),
             tags=("story",),
         ),
@@ -978,10 +962,7 @@ G8_14 = SubjectCurriculum(
                 'independent, and each returns its own implementation.'
             ),
             resolution=(
-                'The REPL set both guilds and marked the String-pack twice, '
-                'then called both methods on "x". The String answered to both '
-                'guilds independently, and the vector came back with both '
-                'answers.'
+                'The REPL set both guilds and marked the String-pack twice, then called both methods on "x". The String answered to both guilds independently, and the vector came back with both answers (with `:a-impl` as the input value).'
             ),
             tags=("story",),
         ),
@@ -1116,8 +1097,7 @@ G8_16 = SubjectCurriculum(
                 'what step returns.'
             ),
             resolution=(
-                'The REPL set the guild and both records, called step on both '
-                'via mapv. The guild routed each to its implementation.'
+                'The REPL set the guild and both records, called step on both via mapv. The guild routed each to its implementation (with `leap` as the input value) (with `:leap` as the input value).'
             ),
             tags=("story",),
         ),
@@ -1143,8 +1123,7 @@ G8_16 = SubjectCurriculum(
                 'and each breed\'s sound is what returns.'
             ),
             resolution=(
-                'The REPL set the guild and both cases, then called cry on '
-                'Tortoise. The hiss-sound came back.'
+                'The REPL set the guild and both cases, then called cry on Tortoise. The hiss-sound came back (with `:thump` as the input value).'
             ),
             tags=("story",),
         ),

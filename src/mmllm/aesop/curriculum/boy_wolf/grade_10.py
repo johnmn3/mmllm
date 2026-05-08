@@ -254,7 +254,7 @@ G10_03 = SubjectCurriculum(
                 "runtime then evaluates the rewritten form."
             ),
             resolution=(
-                'the rewrite landed correctly: the shorthand expanded to its full drill, and the runtime returned the value the spelled-out form produced.'
+                'the rewrite landed correctly: the shorthand expanded to its full drill, and the runtime returned the value the spelled-out form produced (with `1` as the input value) (with `3` as the input value).'
             )),
         _ex("(do (defmacro twice [x] `(do ~x ~x)) (twice 7))", 7,
             "a macro that emits its argument twice in a do",
@@ -447,7 +447,7 @@ G10_06 = SubjectCurriculum(
                 "`when-not` is a macro that inverts the condition and expands to a negated-test form."
             ),
             resolution=(
-                'The condition was false, so `when-not` inverted it to true and the body executed.'
+                'The condition was false, so `when-not` inverted it to true and the body executed (with `ok` as the input value) (with `:ok` as the input value).'
             )),
     ],
     subplots=_REWRITERULE_SUBPLOTS, plan_pool=_PLAN_G10,
@@ -719,7 +719,7 @@ G10_11 = SubjectCurriculum(
                 "and multiplies it by itself."
             ),
             resolution=(
-                'The reader macro produced an anonymous function, which computed the square of the argument.'
+                'The reader macro produced an anonymous function, which computed the square of the argument (with `6` as the input value).'
             )),
         _ex("[1 #_ 2 3]", [1, 3],
             "the #_ form-skip reader macro",

@@ -506,7 +506,7 @@ G1_09 = SubjectCurriculum(
                 "name standing in for a value. The quoted form is the mark."
             ),
             resolution=(
-                'the predicate returned the verdict — it was a chalk mark, a name, not the thing itself. The records stayed straight.'
+                'the predicate returned true — it was a chalk mark, a name, not the thing itself. The records stayed straight (with `wolf` as the input value).'
             )),
         _ex("(symbol? 42)", False,
             "the predicate (symbol? 42)",
@@ -549,7 +549,7 @@ G1_09 = SubjectCurriculum(
                 "look up what that name refers to."
             ),
             resolution=(
-                'the runtime returned the symbol itself, exactly the chalk mark, with no further substitution.'
+                'the runtime returned the symbol itself, exactly the chalk mark, with no further substitution (with `wolf` as the input value).'
             )),
         _ex("(= 'wolf 'wolf)", True,
             "the equality of two 'wolf symbols",
@@ -570,7 +570,7 @@ G1_09 = SubjectCurriculum(
                 "the symbol `wolf` equals the symbol `wolf` exactly."
             ),
             resolution=(
-                'the predicate returned the verdict — the two marks on the slate were the same chalk line, nothing more nor less.'
+                'the predicate returned true — the two marks on the slate were the same chalk line, nothing more nor less.'
             )),
     ],
     subplots=_CHALKMARK_SUBPLOTS,
@@ -972,7 +972,7 @@ G1_15 = SubjectCurriculum(
                 "verdict — no opinion required."
             ),
             resolution=(
-                "the gate opened — `=` returned the verdict — and the village's count for the morning held without dispute. Carol marked {drawn.a} on the watchhouse beam, the lookout high above the valley quiet at last."         )),
+                "the gate opened — `=` returned true — and the village's count for the morning held without dispute. Carol marked {drawn.a} on the watchhouse beam, the lookout high above the valley quiet at last."         )),
         _ex("(= 1 2)",          False, "the equality (= 1 2)",
             "the value of (= 1 2)",
             scenario=(
@@ -991,7 +991,7 @@ G1_15 = SubjectCurriculum(
                 "runtime's verdict is false — they are not the same."
             ),
             resolution=(
-                'the gate returned the verdict — the counts differed, and the village would note which pen had gained or lost sheep. The fold gate held tight against the count of {drawn.a}, slate cool under the elder hand.'           )),
+                'the gate returned false — the counts differed, and the village would note which pen had gained or lost sheep. The fold gate held tight against the count of {drawn.a}, slate cool under the elder hand.'           )),
         _ex("(= \"a\" \"a\")",  True,  "the equality (= \"a\" \"a\")",
             "the value of (= \"a\" \"a\")",
             scenario=(
@@ -1009,7 +1009,7 @@ G1_15 = SubjectCurriculum(
                 "runtime returns true — both are the same string."
             ),
             resolution=(
-                "the predicate returned the verdict — the chalk marks matched letter for letter, confirming Carol's careful writing. Tom chalked {drawn.a} on the village notice, and the morning record stood for the next shepherd to read."           )),
+                "the predicate returned true — the chalk marks matched letter for letter, confirming Carol's careful writing. Tom chalked {drawn.a} on the village notice, and the morning record stood for the next shepherd to read."           )),
         _ex("(= :wolf :wolf)",  True,  "the equality (= :wolf :wolf)",
             "the value of (= :wolf :wolf)",
             scenario=(
@@ -1028,7 +1028,7 @@ G1_15 = SubjectCurriculum(
                 "runtime returns true — the same keyword appears twice."
             ),
             resolution=(
-                'the predicate returned the verdict — both cards carried the same alarm-name, and the system stayed consistent. The lookout returned with {drawn.a} on his slate, the valley long behind him and the count plain.'           )),
+                'the predicate returned true — both cards carried the same alarm-name, and the system stayed consistent. The lookout returned with {drawn.a} on his slate, the valley long behind him and the count plain.'           )),
         _ex("(= :wolf :flock)", False,
             "the equality (= :wolf :flock)",
             "the value of (= :wolf :flock)",
@@ -1047,20 +1047,15 @@ G1_15 = SubjectCurriculum(
                 "runtime returns false — they are different names."
             ),
             resolution=(
-                'the predicate returned the verdict — the two keywords were distinct, keeping the alarm system clear and separate. The watchhouse warmed as the elder set {drawn.a} into the day record, the fold quiet by then.'           )),
+                'the predicate returned false — the two keywords were distinct, keeping the alarm system clear and separate. The watchhouse warmed as the elder set {drawn.a} into the day record, the fold quiet by then.'           )),
         _ex("(= 1 1 1 1)",      True,
             "the multi-arg equality (= 1 1 1 1)",
             "the value of (= 1 1 1 1)",
             scenario=(
-                "Carol had four stones at the fold, each notched once — "
-                "the morning count from four separate shepherds. They all "
-                "agreed on the same tally. Carol wrote the multi-arg "
-                "equality test."
+                'Carol had the stones at the fold, each notched once — the morning count from four separate shepherds. They all agreed on the same tally. Carol wrote the multi-arg equality test.'
             ),
             need=(
-                "Before the day's work began, all four counts had to agree. "
-                "If they matched, the flock was accounted for and the "
-                "village could proceed."
+                "Before the day's work began, all the counts had to agree. If they matched, the flock was accounted for and the village could proceed."
             ),
             mapping=(
                 "`=` with multiple arguments checks if all are the same. "
@@ -1068,7 +1063,7 @@ G1_15 = SubjectCurriculum(
                 "on? Yes to all. The runtime returns true."
             ),
             resolution=(
-                "the predicate returned the verdict — all four counts agreed, and the morning's record locked in with the village ledger. {drawn.a} stood as the answer the fold required, slate, chalk, and a steady eye all in agreement."           )),
+                "the predicate returned true — all four counts agreed, and the morning's record locked in with the village ledger. {drawn.a} stood as the answer the fold required, slate, chalk, and a steady eye all in agreement."           )),
     ],
     subplots=_GATE_SUBPLOTS,
     plan_pool=_PLAN_POOL,
@@ -1099,7 +1094,7 @@ G1_16 = SubjectCurriculum(
                 "nothing at the fold."
             ),
             resolution=(
-                "the predicate returned the verdict — the count was zero, and the gate's rule for an empty flock was confirmed. The pasture tally settled at {drawn.a}, and Carol closed the day slate with that one number written clear."           )),
+                "the predicate returned true — the count was zero, and the gate's rule for an empty flock was confirmed. The pasture tally settled at {drawn.a}, and Carol closed the day slate with that one number written clear."           )),
         _ex("(zero? 5)",  False, "the predicate (zero? 5)",
             "whether 5 is zero",
             scenario=(
@@ -1116,7 +1111,7 @@ G1_16 = SubjectCurriculum(
                 "the predicate returns false — 5 is not zero."
             ),
             resolution=(
-                "the predicate returned the verdict — the count was real, and the fold's gate would open for the 5 sheep to pass. The slate showed {drawn.a} in clear chalk, and the fold tally stood as the day record."           )),
+                "the predicate returned false — the count was real, and the fold's gate would open for the 5 sheep to pass. The slate showed {drawn.a} in clear chalk, and the fold tally stood as the day record."           )),
         _ex("(pos? 7)",   True,  "the predicate (pos? 7)",
             "whether 7 is positive",
             scenario=(
@@ -1133,7 +1128,7 @@ G1_16 = SubjectCurriculum(
                 "the predicate returns true — a gain of 7 sheep is positive."
             ),
             resolution=(
-                "the predicate returned the verdict — the change was confirmed as positive, and the afternoon's gain was entered in the ledger. Carol marked {drawn.a} on the watchhouse beam, the lookout high above the valley quiet at last."           )),
+                "the predicate returned true — the change was confirmed as positive, and the afternoon's gain was entered in the ledger. Carol marked {drawn.a} on the watchhouse beam, the lookout high above the valley quiet at last."           )),
         _ex("(pos? -2)",  False, "the predicate (pos? -2)",
             "whether -2 is positive",
             scenario=(
@@ -1150,7 +1145,7 @@ G1_16 = SubjectCurriculum(
                 "the predicate returns false — a loss is not positive."
             ),
             resolution=(
-                'the predicate returned the verdict — the change was confirmed as negative, and the loss was recorded as such. The fold gate held tight against the count of {drawn.a}, slate cool under the elder hand.'           )),
+                'the predicate returned false — the change was confirmed as negative, and the loss was recorded as such. The fold gate held tight against the count of {drawn.a}, slate cool under the elder hand.'           )),
         _ex("(neg? -3)",  True,  "the predicate (neg? -3)",
             "whether -3 is negative",
             scenario=(
@@ -1166,7 +1161,7 @@ G1_16 = SubjectCurriculum(
                 "the predicate returns true — the shortage is negative."
             ),
             resolution=(
-                'the predicate returned the verdict — the shortage was confirmed as negative, and the village would plan accordingly. Tom chalked {drawn.a} on the village notice, and the morning record stood for the next shepherd to read.'           )),
+                'the predicate returned true — the shortage was confirmed as negative, and the village would plan accordingly. Tom chalked {drawn.a} on the village notice, and the morning record stood for the next shepherd to read.'           )),
         _ex("(neg? 4)",   False, "the predicate (neg? 4)",
             "whether 4 is negative",
             scenario=(
@@ -1182,7 +1177,7 @@ G1_16 = SubjectCurriculum(
                 "the predicate returns false — a gain is not negative."
             ),
             resolution=(
-                'the predicate returned the verdict — the gain was not negative, and the wool-ledger would show a positive entry. The lookout returned with {drawn.a} on his slate, the valley long behind him and the count plain.'           )),
+                'the predicate returned false — the gain was not negative, and the wool-ledger would show a positive entry. The lookout returned with {drawn.a} on his slate, the valley long behind him and the count plain.'           )),
     ],
     subplots=_ACORN_SUBPLOTS,
     plan_pool=_PLAN_POOL,

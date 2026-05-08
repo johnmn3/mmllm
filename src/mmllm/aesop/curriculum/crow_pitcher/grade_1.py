@@ -648,8 +648,7 @@ G1_09 = SubjectCurriculum(
                 "together and confirms the match."
             ),
             resolution=(
-                "The gate closed in agreement: two identical chalk marks are "
-                "equal, the confirmation returned."
+                'The gate closed in agreement: two identical chalk marks are equal, the confirmation returned (with `hare` as the input value).'
             ),
             tags=("story",),
         ),
@@ -1021,8 +1020,7 @@ G1_13 = SubjectCurriculum(
                 "and returns as the water-level."
             ),
             resolution=(
-                "The remainder returned, the heap diminished and the count "
-                "precise."
+                'The remainder returned, the heap diminished and the count precise (with `20` as the input value).'
             ),
             tags=("story",),
         ),
@@ -1435,8 +1433,7 @@ G1_16 = SubjectCurriculum(
                 "and returns the negative verdict."
             ),
             resolution=(
-                "The negative verdict returned: a below-zero count does not "
-                "pass the positive-side test."
+                'The negative verdict returned: a below-zero count does not pass the positive-side test (with `-2` as the input value).'
             ),
             tags=("story",),
         ),

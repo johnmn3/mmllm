@@ -605,10 +605,7 @@ G4_11 = SubjectCurriculum(grade=4, subject_id="G4-11",
             question_what="the size of the set",
             goal_text="count the unique elements in a set literal with duplicate 1s",
             scenario=(
-                "Mossback the tortoise wrote a set with the same kind "
-                "listed three times over. The unique-kinds basket, by "
-                "its rule, would keep only one of any kind no matter "
-                "how many were offered. The value drawn fresh was {drawn.a}."
+                'Mossback the tortoise wrote a set with the same kind listed three times over. The unique-kinds basket, by its rule, would keep only one of any kind no matter how many were offered. The value drawn fresh was 1.'
             ),
             need=(
                 "Pip the hare expected the basket to stay true to its "
@@ -735,8 +732,7 @@ G4_13 = SubjectCurriculum(grade=4, subject_id="G4-13",
                 "entry."
             ),
             resolution=(
-                "the REPL returned the pair count — confirming how many "
-                "distinct label-and-contents pairs the basket held."
+                'the REPL returned the pair count — confirming how many distinct label-and-contents pairs the basket held (with `:a` as the input value).'
             ),
             tags=("story",),
         ),
@@ -998,10 +994,7 @@ G4_16 = SubjectCurriculum(grade=4, subject_id="G4-16",
             question_what="the set built from a vector",
             goal_text="convert a vector containing duplicates into a set, keeping unique elements",
             scenario=(
-                "Mossback the tortoise's pebble row had four stones, but "
-                "one kind appeared twice. She held an empty unique-kinds "
-                "basket below the sieve, ready to catch only what was "
-                "genuinely new. The values drawn fresh were {drawn.a} and {drawn.b}."
+                "Mossback the tortoise's pebble row had four stones, but one kind appeared twice. She held an empty unique-kinds basket below the sieve, ready to catch only what was genuinely new. The values drawn fresh were 1 and 2."
             ),
             need=(
                 "Pip the hare wanted the unique kinds only — no repeats. "
@@ -1014,8 +1007,7 @@ G4_16 = SubjectCurriculum(grade=4, subject_id="G4-16",
                 "through; duplicates are absorbed, unique kinds land."
             ),
             resolution=(
-                "the REPL returned the unique-kinds basket — only the "
-                "distinct members inside, duplicates sieved away."
+                'the REPL returned the unique-kinds basket — only the distinct members inside, duplicates sieved away (with `3` as the input value).'
             ),
             tags=("story",),
         ),

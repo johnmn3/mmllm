@@ -104,8 +104,7 @@ G9_01 = SubjectCurriculum(
                 "after `conj` confirms the original row is unchanged."
             ),
             resolution=(
-                "The original three-stone row came back untouched — "
-                "exactly as Mossback had placed it at the start."
+                'The original three-stone row came back untouched — exactly as Mossback had placed it at the start (with `1` as the input value) (with `3` as the input value).'
             ),
             tags=("story",),
         ),
@@ -277,8 +276,7 @@ G9_03 = SubjectCurriculum(
                 "`@a` confirms the page now carries the done status."
             ),
             resolution=(
-                "The page read the done marking — the morning task was "
-                "officially closed on the shared notebook."
+                'The page read the done marking — the morning task was officially closed on the shared notebook (with `:start` as the input value).'
             ),
             tags=("story",),
         ),
@@ -346,9 +344,7 @@ G9_04 = SubjectCurriculum(
                 "original tally is still there."
             ),
             resolution=(
-                "The page stayed at the original tally — the stale "
-                "check protected the notebook from Pip's outdated "
-                "write."
+                "The page stayed at the original tally — the stale check protected the notebook from Pip's outdated write (with `5` as the input value)."
             ),
             tags=("story",),
         ),
@@ -1003,9 +999,7 @@ G9_14 = SubjectCurriculum(
                 "explicit in the code."
             ),
             resolution=(
-                "The page value came back unchanged — `deref` and "
-                "`@` are two spellings of the same peek at the "
-                "notebook."
+                'The page value came back unchanged — `deref` and `@` are two spellings of the same peek at the notebook (with `7` as the input value).'
             ),
             tags=("story",),
         ),
@@ -1227,9 +1221,7 @@ G9_17 = SubjectCurriculum(
                 "`*p*` outside the form returns the shared default."
             ),
             resolution=(
-                "The road-sign showed the original default — the "
-                "binding's scope ended cleanly, leaving the shared "
-                "value untouched."
+                "The road-sign showed the original default — the binding's scope ended cleanly, leaving the shared value untouched (with `99` as the input value)."
             ),
             tags=("story",),
         ),

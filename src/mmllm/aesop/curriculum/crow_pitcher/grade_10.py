@@ -116,8 +116,7 @@ G10_01 = SubjectCurriculum(
                 "and numbers — rather than collapsing into a computed value."
             ),
             resolution=(
-                "The chalk-marked form settled into the pitcher unevaluated, "
-                "returned as a list of its parts."
+                'The chalk-marked form settled into the pitcher unevaluated, returned as a list of its parts (with `1` as the input value).'
             ),
             tags=("story",),
         ),
@@ -538,8 +537,7 @@ G10_06 = SubjectCurriculum(
                 "The keyword stone drops as the result."
             ),
             resolution=(
-                "The negation gate opened, the body ran, and the keyword "
-                "value settled into the pitcher."
+                'The negation gate opened, the body ran, and the keyword value settled into the pitcher (with `ok` as the input value) (with `:ok` as the input value).'
             ),
             tags=("story",),
         ),
@@ -605,8 +603,7 @@ G10_07 = SubjectCurriculum(
                 "reduce tallies them all. Only the expanded nesting runs."
             ),
             resolution=(
-                "The pipeline ran through all three steps and the final tally "
-                "settled into the pitcher."
+                'The pipeline ran through all three steps and the final tally settled into the pitcher (with `1` as the input value) (with `3` as the input value).'
             ),
             tags=("story",),
         ),
@@ -700,8 +697,7 @@ G10_08 = SubjectCurriculum(
                 "rewrites first, then evaluates the produced addition."
             ),
             resolution=(
-                "The rewrite produced an addition form; the expanded form "
-                "evaluated and the sum settled into the pitcher. (with {drawn.a} folded in)"
+                'The rewrite produced an addition form; the expanded form evaluated and the sum settled into the pitcher. (with 3 folded in)'
             ),
             tags=("story",),
         ),
@@ -840,8 +836,7 @@ G10_10 = SubjectCurriculum(
                 "The multiplication runs with the wing-cached value."
             ),
             resolution=(
-                "The binding succeeded, the then-branch evaluated, and the "
-                "squared value settled into the pitcher."
+                'The binding succeeded, the then-branch evaluated, and the squared value settled into the pitcher (with `7` as the input value).'
             ),
             tags=("story",),
         ),
@@ -909,8 +904,7 @@ G10_11 = SubjectCurriculum(
                 "becomes a callable drop-order. `%` receives the argument stone."
             ),
             resolution=(
-                "The reader expanded the notation, the drop-order ran with "
-                "the argument, and the squared value settled into the pitcher."
+                'The reader expanded the notation, the drop-order ran with the argument, and the squared value settled into the pitcher (with `6` as the input value).'
             ),
             tags=("story",),
         ),
@@ -937,8 +931,7 @@ G10_11 = SubjectCurriculum(
                 "the REPL. The REPL never sees the discarded stone."
             ),
             resolution=(
-                "The reader removed the middle stone; the two-element vector "
-                "settled into the pitcher."
+                'The reader removed the middle stone; the two-element vector settled into the pitcher (with `1` as the input value) (with `3` as the input value).'
             ),
             tags=("story",),
         ),
@@ -978,8 +971,7 @@ G10_12 = SubjectCurriculum(
                 "sees the already-converted value."
             ),
             resolution=(
-                "The predicate confirmed the tagged literal read as an instant; "
-                "truth settled into the pitcher. (count: 2024)"
+                'The predicate confirmed the tagged literal read as an instant; truth settled into the pitcher. (count: 2024) (with `2024-01-01` as the input value)'
             ),
             tags=("story",),
         ),
@@ -1006,8 +998,7 @@ G10_12 = SubjectCurriculum(
                 "produced — the REPL receives the converted value, not the string."
             ),
             resolution=(
-                "The predicate confirmed the tagged literal read as a uuid; "
-                "truth settled into the pitcher."
+                'The predicate confirmed the tagged literal read as a uuid; truth settled into the pitcher (with `00000000-0000-0000-0000-000000000000` as the input value).'
             ),
             tags=("story",),
         ),
@@ -1112,8 +1103,7 @@ G10_14 = SubjectCurriculum(
                 "if freshly scratched on the rim."
             ),
             resolution=(
-                "The chalk mark evaluated as code; the addition ran and the "
-                "sum settled into the pitcher."
+                'The chalk mark evaluated as code; the addition ran and the sum settled into the pitcher (with `1` as the input value) (with `3` as the input value).'
             ),
             tags=("story",),
         ),
@@ -1140,8 +1130,7 @@ G10_14 = SubjectCurriculum(
                 "form evaluates just as if it had been written directly."
             ),
             resolution=(
-                "The assembled form evaluated as code; the sum settled into "
-                "the pitcher."
+                'The assembled form evaluated as code; the sum settled into the pitcher (with `4` as the input value).'
             ),
             tags=("story",),
         ),
@@ -1183,8 +1172,7 @@ G10_15 = SubjectCurriculum(
                 "before evaluation."
             ),
             resolution=(
-                "The plain drop-order evaluated both arguments and the sum "
-                "settled into the pitcher."
+                'The plain drop-order evaluated both arguments and the sum settled into the pitcher (with `3` as the input value).'
             ),
             tags=("story",),
         ),
@@ -1255,8 +1243,7 @@ G10_16 = SubjectCurriculum(
                 "evaluates only the expansion."
             ),
             resolution=(
-                "The with-pattern expansion ran, the let-block wrapped the "
-                "body, and the body's value settled into the pitcher."
+                "The with-pattern expansion ran, the let-block wrapped the body, and the body's value settled into the pitcher (with `42` as the input value)."
             ),
             tags=("story",),
         ),

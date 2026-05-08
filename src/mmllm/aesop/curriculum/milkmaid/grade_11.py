@@ -449,7 +449,7 @@ G11_07 = SubjectCurriculum(
                 "the borrowing convention for accessing a host array's contents."
             ),
             resolution=(
-                "The REPL returned the element at index 1, exactly as the host's tool was built to deliver."
+                "The REPL returned the element at index 1, exactly as the host's tool was built to deliver (with `10` as the input value)."
             ),
             tags=("story",),
         ),

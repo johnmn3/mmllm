@@ -335,8 +335,7 @@ G7_05 = SubjectCurriculum(grade=7, subject_id="G7-05",
                 "zero is some."
             ),
             resolution=(
-                "The gate swung open on the zero stone and true rose "
-                "to the rim."
+                'The gate swung open on the zero stone and true rose to the rim (with `0` as the input value).'
             ),
             tags=("story",),
         ),
@@ -480,8 +479,7 @@ G7_07 = SubjectCurriculum(grade=7, subject_id="G7-07",
                 "block's final form is what surfaces."
             ),
             resolution=(
-                "The verify-stone passed without complaint and the final "
-                "numeric stone rose to the rim."
+                'The verify-stone passed without complaint and the final numeric stone rose to the rim (with `1` as the input value).'
             ),
             tags=("story",),
         ),
@@ -566,8 +564,7 @@ G7_08 = SubjectCurriculum(grade=7, subject_id="G7-08",
                 "every mark into the returned string."
             ),
             resolution=(
-                "The keyword label and its groove were gathered into a "
-                "string at the rim."
+                'The keyword label and its groove were gathered into a string at the rim (with `hare` as the input value) (with `:hare` as the input value).'
             ),
             tags=("story",),
         ),
@@ -599,8 +596,7 @@ G7_09 = SubjectCurriculum(grade=7, subject_id="G7-09",
                 "the delivery was attempted, leaving the stream undisturbed."
             ),
             resolution=(
-                "The pebble reached the observer basin and true rose "
-                "to the rim."
+                'The pebble reached the observer basin and true rose to the rim (with `hello` as the input value) (with `:hello` as the input value).'
             ),
             tags=("story",),
         ),
@@ -693,8 +689,7 @@ G7_11 = SubjectCurriculum(grade=7, subject_id="G7-11",
                 "top line, the short message of the exception."
             ),
             resolution=(
-                "The label inscribed on the caught stone rose to Korvus's "
-                "beak as the returned message."
+                "The label inscribed on the caught stone rose to Korvus's beak as the returned message (with `oops` as the input value)."
             ),
             tags=("story",),
         ),
@@ -719,8 +714,7 @@ G7_11 = SubjectCurriculum(grade=7, subject_id="G7-11",
                 "the same top line a stack trace would show first."
             ),
             resolution=(
-                "The surface label of the caught ex-info stone rose "
-                "to Caw's beak as the message."
+                "The surface label of the caught ex-info stone rose to Caw's beak as the message (with `trouble` as the input value)."
             ),
             tags=("story",),
         ),
@@ -755,8 +749,7 @@ G7_12 = SubjectCurriculum(grade=7, subject_id="G7-12",
                 "groove is one more mark in the tally."
             ),
             resolution=(
-                "Every mark and groove on the scroll was tallied and the "
-                "count rose to the rim. (a\nb\nc)"
+                'Every mark and groove on the scroll was tallied and the count rose to the rim. (a\nb\nc) (with `hare\ntortoise\n` as the input value)'
             ),
             tags=("story",),
         ),
@@ -818,8 +811,7 @@ G7_13 = SubjectCurriculum(grade=7, subject_id="G7-13",
                 "resulting pebbles to give the row count."
             ),
             resolution=(
-                "The rows were split and tallied; the row count rose "
-                "to the rim."
+                'The rows were split and tallied; the row count rose to the rim (with `a\\nb\\nc` as the input value).'
             ),
             tags=("story",),
         ),
@@ -844,8 +836,7 @@ G7_13 = SubjectCurriculum(grade=7, subject_id="G7-13",
                 "as-is, inscription preserved."
             ),
             resolution=(
-                "The topmost row-pebble lifted from the split scroll "
-                "rose to Caw's beak. (with {drawn.a} folded in)"
+                "The topmost row-pebble lifted from the split scroll rose to Caw's beak. (with alpha\\nbeta folded in)"
             ),
             tags=("story",),
         ),
@@ -971,8 +962,7 @@ G7_16 = SubjectCurriculum(grade=7, subject_id="G7-16",
                 "becomes the integer it inscribes."
             ),
             resolution=(
-                "The numeral marks on the scroll were read as an integer "
-                "and rose to the rim."
+                'The numeral marks on the scroll were read as an integer and rose to the rim (with `42` as the input value).'
             ),
             tags=("story",),
         ),
@@ -1058,8 +1048,7 @@ G7_17 = SubjectCurriculum(grade=7, subject_id="G7-17",
                 "data. The roundtrip preserves every key-value pair."
             ),
             resolution=(
-                "The scroll was read back and the recovered map rose "
-                "to the rim intact."
+                'The scroll was read back and the recovered map rose to the rim intact (with `:a` as the input value).'
             ),
             tags=("story",),
         ),

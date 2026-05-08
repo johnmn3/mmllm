@@ -154,9 +154,7 @@ G2_01 = SubjectCurriculum(
                 "not ten separate additions piled one atop the next."
             ),
             mapping=(
-                "`+` is variadic — it accepts any number of arguments. Ten "
-                "stones enter at once; the tally grows with each, producing "
-                "the full sum in a single evaluation."
+                '`+` is variadic — it accepts any number of arguments. {drawn.j} stones enter at once; the tally grows with each, producing the full sum in a single evaluation.'
             ),
             resolution=(
                 "All the stones were summed and the total arrived at the rim. (with {drawn.a} folded in)"
@@ -308,9 +306,7 @@ G2_02 = SubjectCurriculum(
             goal_text="test whether 5 > 4 > 3 > 2 > 1",
 
             scenario=(
-                "Caw arranged the stones at the road beside the pitcher in "
-                "strict descending order: five, four, three, two, one. She "
-                "claimed they were properly ordered and challenged Korvus."
+                'Caw arranged the stones at the road beside the pitcher in strict descending order: the counts. She claimed they were properly ordered and challenged Korvus.'
             ),
             need=(
                 "Korvus needed the pitcher to verify every adjacent pair was "
@@ -579,9 +575,7 @@ G2_04 = SubjectCurriculum(
             goal_text="find the maximum of 7, 3, 9, 1, and 5",
 
             scenario=(
-                "Korvus laid five unsorted stones beside the market pitcher: "
-                "seven, three, nine, one, and five. He wanted the heaviest "
-                "stone identified from the pile."
+                'Korvus laid five unsorted stones beside the market pitcher: the counts. He wanted the heaviest stone identified from the pile.'
             ),
             need=(
                 "He needed the single heaviest stone named without sorting "
@@ -1058,7 +1052,7 @@ G2_08 = SubjectCurriculum(
                 "the answer stays a true fraction until the form is done."
             ),
             resolution=(
-                "The exact fractional sum arrived and the pitcher returned it without rounding. (count: 4)"
+                'The exact fractional sum arrived and the pitcher returned it without rounding. (count: 4) (with `1/2` as the input value)'
             ),
             tags=("story",),
         ),
@@ -1083,7 +1077,7 @@ G2_08 = SubjectCurriculum(
                 "the product is a simplified fraction."
             ),
             resolution=(
-                "The exact fractional product arrived in simplified form from the pitcher. (count: 3)"
+                'The exact fractional product arrived in simplified form from the pitcher. (count: 3) (with `2/3` as the input value)'
             ),
             tags=("story",),
         ),

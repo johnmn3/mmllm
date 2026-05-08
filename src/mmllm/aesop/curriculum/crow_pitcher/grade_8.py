@@ -138,7 +138,7 @@ G8_02 = SubjectCurriculum(
                 "The `.-color` accessor reaches directly into the slot and lifts the value."
             ),
             resolution=(
-                "The color slot answered with the value packed inside."
+                'The color slot answered with the value packed inside (with `grey` as the input value).'
             ),
             tags=("story",),
         ),

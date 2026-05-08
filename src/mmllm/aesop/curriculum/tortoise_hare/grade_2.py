@@ -118,9 +118,7 @@ G2_02 = SubjectCurriculum(
                 "so the heap-sizes showed proper growth from dawn to dusk."
             ),
             mapping=(
-                "`<` checks whether all three counts climb: first smaller than second, second "
-                "smaller than third. If all links in the chain hold, the verdict comes back true; "
-                "if any link breaks, the verdict is false."
+                '`<` checks whether all {drawn.c} counts climb: first smaller than second, second smaller than third. If all links in the chain hold, the verdict comes back true; if any link breaks, the verdict is false.'
             ),
             resolution=(
                 "the runtime confirmed the chain held — each acorn-count was strictly larger than "
@@ -210,8 +208,7 @@ G2_04 = SubjectCurriculum(
                 "runtime's verdict — the lightest heap's number — comes back."
             ),
             resolution=(
-                "the runtime named the lightest trip's count, showing "
-                "the smallest of all three heaps."
+                "the runtime named the lightest trip's count, showing the smallest of all {drawn.c} heaps."
             ),
             tags=("story",),
         ),
@@ -381,8 +378,7 @@ G2_08 = SubjectCurriculum(
                 "tells what part of the whole remains."
             ),
             resolution=(
-                "the runtime returned the combined portion: three-quarters of the berry held "
-                "in Mossback's grasp."
+                "the runtime returned the combined portion: three-quarters of the berry held in Mossback's grasp (with `1/2` as the input value) (with `4` as the input value)."
             ),
             tags=("story",),
         ),

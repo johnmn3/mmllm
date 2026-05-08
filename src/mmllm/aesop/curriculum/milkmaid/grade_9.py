@@ -207,8 +207,7 @@ G9_03 = SubjectCurriculum(
                 "next number. `@` reads what the slate says now."
             ),
             resolution=(
-                "The REPL read the slate and returned the updated count — one "
-                "pail tallied, the chalk mark correct after the first delivery."
+                'The REPL read the slate and returned the updated count — one pail tallied, the chalk mark correct after the first delivery (with `0` as the input value).'
             ),
             tags=("story",),
         ),
@@ -301,8 +300,7 @@ G9_04 = SubjectCurriculum(
                 "writes only when they match. `@` reads the slate after the attempt."
             ),
             resolution=(
-                "The REPL read the slate and returned the updated count — the marks "
-                "matched and the chalk-update succeeded."
+                'The REPL read the slate and returned the updated count — the marks matched and the chalk-update succeeded (with `0` as the input value).'
             ),
             tags=("story",),
         ),
@@ -372,8 +370,7 @@ G9_05 = SubjectCurriculum(
                 "it onto the log-slate. `@log` reads what the log-slate collected."
             ),
             resolution=(
-                "The REPL read the log-slate and returned its collected entries — "
-                "every update had been captured by the watcher."
+                'The REPL read the log-slate and returned its collected entries — every update had been captured by the watcher (with `:w` as the input value).'
             ),
             tags=("story",),
         ),
@@ -417,8 +414,7 @@ G9_06 = SubjectCurriculum(
                 "`@` reads what the slate holds after the validated chalk-update."
             ),
             resolution=(
-                "The REPL read the slate and returned the updated count — the "
-                "chalk-update passed the door-rule, and the tally advanced safely."
+                'The REPL read the slate and returned the updated count — the chalk-update passed the door-rule, and the tally advanced safely (with `0` as the input value).'
             ),
             tags=("story",),
         ),
@@ -455,8 +451,7 @@ G9_07 = SubjectCurriculum(
                 "applies `inc` inside it. `@` reads the slate after the window closes."
             ),
             resolution=(
-                "The REPL read the slate and returned the updated count — the "
-                "transactional chalk-update completed safely."
+                'The REPL read the slate and returned the updated count — the transactional chalk-update completed safely (with `0` as the input value).'
             ),
             tags=("story",),
         ),
@@ -525,8 +520,7 @@ G9_08 = SubjectCurriculum(
                 "Both slates are updated atomically — either both advance, or neither does."
             ),
             resolution=(
-                "The REPL read both slates and returned the updated pair — each "
-                "tally had advanced by one inside the single coordinated transaction."
+                'The REPL read both slates and returned the updated pair — each tally had advanced by one inside the single coordinated transaction (with `1` as the input value).'
             ),
             tags=("story",),
         ),
@@ -592,8 +586,7 @@ G9_09 = SubjectCurriculum(
                 "internal coordination. `@` reads the slate afterward."
             ),
             resolution=(
-                "The REPL read the atom slate and returned the incremented count — "
-                "the solo chalk-update succeeded with no transaction required."
+                'The REPL read the atom slate and returned the incremented count — the solo chalk-update succeeded with no transaction required (with `0` as the input value).'
             ),
             tags=("story",),
         ),
@@ -619,8 +612,7 @@ G9_09 = SubjectCurriculum(
                 "the slate after the window closes."
             ),
             resolution=(
-                "The REPL read the ref slate and returned the same incremented count "
-                "as the atom — same result, different coordination mechanism."
+                'The REPL read the ref slate and returned the same incremented count as the atom — same result, different coordination mechanism (with `0` as the input value).'
             ),
             tags=("story",),
         ),
@@ -660,9 +652,7 @@ G9_10 = SubjectCurriculum(
                 "reads the answer the runner brought back."
             ),
             resolution=(
-                "The REPL read the agent's final tally — the runner had arrived, "
-                "applied `inc`, and the count was waiting when the milkmaid came "
-                "to collect it."
+                "The REPL read the agent's final tally — the runner had arrived, applied `inc`, and the count was waiting when the milkmaid came to collect it (with `0` as the input value)."
             ),
             tags=("story",),
         ),
@@ -725,8 +715,7 @@ G9_11 = SubjectCurriculum(
                 "quick tasks; `await` waits at the gate; `@` reads the result."
             ),
             resolution=(
-                "The REPL read the agent's count — the runner completed the task "
-                "and reported back the updated tally."
+                "The REPL read the agent's count — the runner completed the task and reported back the updated tally (with `0` as the input value)."
             ),
             tags=("story",),
         ),
@@ -751,8 +740,7 @@ G9_11 = SubjectCurriculum(
                 "the result."
             ),
             resolution=(
-                "The REPL read the agent's count — the runner finished along its "
-                "own road and reported back the same incremented tally."
+                "The REPL read the agent's count — the runner finished along its own road and reported back the same incremented tally (with `0` as the input value)."
             ),
             tags=("story",),
         ),
@@ -791,8 +779,7 @@ G9_12 = SubjectCurriculum(
                 "until both deliveries are done. `@` reads the final tally."
             ),
             resolution=(
-                "The REPL read the agent's tally — both increments had been "
-                "applied in sequence, and the count reflected both deliveries."
+                "The REPL read the agent's tally — both increments had been applied in sequence, and the count reflected both deliveries (with `0` as the input value)."
             ),
             tags=("story",),
         ),
@@ -830,8 +817,7 @@ G9_13 = SubjectCurriculum(
                 "for the runner to return and reads the answer brought back."
             ),
             resolution=(
-                "The REPL read the future and returned the sum — the runner had "
-                "completed the addition along the market road and reported back."
+                'The REPL read the future and returned the sum — the runner had completed the addition along the market road and reported back (with `1` as the input value).'
             ),
             tags=("story",),
         ),
@@ -1028,8 +1014,7 @@ G9_16 = SubjectCurriculum(
                 "what the slate holds after the fast update."
             ),
             resolution=(
-                "The REPL read the volatile slate and returned the updated count — "
-                "the fast chalk-update completed without heavier coordination."
+                'The REPL read the volatile slate and returned the updated count — the fast chalk-update completed without heavier coordination (with `0` as the input value).'
             ),
             tags=("story",),
         ),
@@ -1160,8 +1145,7 @@ G9_18 = SubjectCurriculum(
                 "thread can enter while the padlock is held."
             ),
             resolution=(
-                "The REPL returned the result of the addition — the critical section "
-                "ran safely under the padlock, and the lock was released afterward."
+                'The REPL returned the result of the addition — the critical section ran safely under the padlock, and the lock was released afterward (with `1` as the input value).'
             ),
             tags=("story",),
         ),
