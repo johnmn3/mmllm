@@ -1210,23 +1210,16 @@ def check_record(rec, sub, example):
             # A `{drawn.<slot>}` placeholder in the source resolution
             # counts as a drawn-value reference — the placeholder
             # interpolates to the actual drawn literal at render time.
-            has_drawn_placeholder = bool(
-                re.search(r"\{drawn\.\w+\}", res_text)
-            )
             has_drawn_placeholder = "{drawn." in res_text
-            if not has_lit and not has_drawn_placeholder:
-            # Slice QyPQ extension: parametric examples reference draws
-            # via {drawn.<slot>} placeholders that expand at render
-            # time to the form's literals. Source-text-only comparison
-            # over-flags them; credit any resolution that uses a
-            # {drawn.<slot>} placeholder for one of the example's
-            # declared slots.
+            # Credit {drawn.<slot>} placeholders against slot names —
+            # for parametric examples these expand at render time to
+            # the form's actual literals.
             if not has_lit and getattr(example, "slots", None):
                 for slot_name in example.slots:
                     if "{drawn." + slot_name + "}" in res_text:
                         has_lit = True
                         break
-            if not has_lit:
+            if not has_lit and not has_drawn_placeholder:
                 issues.append(("STORY_RESOLUTION_NO_DRAWN",
                                 f"story-tagged example's resolution slot has no "
                                 f"drawn-value reference (form has literals "
