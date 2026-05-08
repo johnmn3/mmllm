@@ -1,10 +1,9 @@
 # Deep-audit playbook — K-12 Clojure curriculum × 5 fables
 
 Scope: each Phase-C-complete fable (`tortoise_hare`, `crow_pitcher`,
-`milkmaid`, `boy_wolf`, `dog_shadow`) gets a deep-read pass, one agent
-per `(fable, grade-band)` slice. Bands are `G1-G3`, `G4-G6`, `G7-G9`,
-`G10-G12` — 4 bands × 5 fables = **20 agents** for full coverage, but
-any subset (e.g. one band per fable) is a useful first pass.
+`milkmaid`, `boy_wolf`, `dog_shadow`) gets one or more independent
+deep-read passes. Each agent picks ONE fable and a random 6 of the
+12 grades — that's the working slice.
 
 The agent's job is to **read records, find papercuts the existing
 audit harness can't catch, extend the harness with new detectors, and
@@ -17,15 +16,20 @@ end-to-end before starting; you can knock out the slice solo.
 
 ## 0. Setup (one-time per agent)
 
-Designate a working branch:
+Pick your slice:
+
+  1. Choose ONE fable (tortoise_hare, crow_pitcher, milkmaid,
+     boy_wolf, or dog_shadow).
+  2. Pick a random 6 of the 12 grades.
+  3. Designate a working branch:
 
 ```
-claude/audit-<fable>-<grade-band>     # e.g. claude/audit-tortoise-hare-g4-g6
+claude/audit-<fable-dash>-<short-tag>     # e.g. claude/audit-milkmaid-rN0v
 ```
 
 ```bash
 git fetch origin main
-git checkout -b claude/audit-<fable>-<grade-band> origin/main
+git checkout -b claude/audit-<fable-dash>-<short-tag> origin/main
 ```
 
 If the branch already exists, rebase onto current `main`:
@@ -45,27 +49,28 @@ python -m mmllm.aesop.curriculum.character_pools        # 1,824 names ok
 python -m mmllm.aesop.curriculum.opener_pools           # 150 openers / 150 plans ok
 python -m mmllm.aesop.curriculum.emotion_pools          # 199 band / 396 archetype ok
 python scripts/test_parametric_e2e.py                   # 50/50 verified
-FABLE=<fable> python docs/clojure-pedagogy/audits/audit-harness.py
+FABLE=<your-fable> python docs/clojure-pedagogy/audits/audit-harness.py
 ```
 
-If any smoke test or audit fails on `main`, DO NOT proceed. Pull down
-the latest, retry, and report the breakage in your final summary.
+If any smoke test or audit fails on `main`, DO NOT proceed. Pull
+down the latest, retry, and report the breakage in your final
+summary.
 
 ---
 
 ## 1. Generate a deep-read sample (Step 1 of the workflow)
 
-For your `(fable, grade-band)` slice, generate **5 records per
-example** for every subject in every grade in the band. Code:
+For each of your 6 sampled grades, generate **5 records per
+example** for every subject. Code:
 
 ```python
-# scripts/deep_read_<fable>_<band>.py
+# scripts/deep_read_<fable>_<short-tag>.py
 import sys; sys.path.insert(0, "/home/user/mmllm/src")
 import importlib
 from mmllm.aesop.curriculum.generator import generate_subject
 
-FABLE = "<fable>"             # e.g. "tortoise_hare"
-GRADES = [<grade-band>]       # e.g. [4, 5, 6]
+FABLE  = "<your-fable>"          # e.g. "milkmaid"
+GRADES = [<your six grades>]     # e.g. [1, 3, 5, 7, 10, 12]
 N = 5
 out = []
 for g in GRADES:
@@ -77,7 +82,7 @@ for g in GRADES:
         for r in recs:
             out.append((sid, r))
 
-with open(f"/tmp/deep_read_{FABLE}_{GRADES[0]}_{GRADES[-1]}.txt", "w") as f:
+with open(f"/tmp/deep_read_{FABLE}.txt", "w") as f:
     for sid, r in out:
         f.write(f"--- {sid} | form={r.code_str} | expected={r.expected!r}\n")
         f.write(r.user_msg.rstrip() + "\n\n")
@@ -85,11 +90,10 @@ with open(f"/tmp/deep_read_{FABLE}_{GRADES[0]}_{GRADES[-1]}.txt", "w") as f:
 print(f"wrote {len(out)} records")
 ```
 
-Run it. The output is your read-corpus: ~80-110 records per band.
+Run it. Output: ~500-700 records across your 6 grades.
 
 **Read every record.** Don't skim. Every prose line is potentially a
-papercut. Take notes as you go in a fresh `/tmp/papercuts_<fable>_<band>.md`
-file.
+papercut. Take notes as you go in `/tmp/papercuts.md`.
 
 ---
 
@@ -410,15 +414,15 @@ Do NOT force-push.
 Write a single markdown file at:
 
 ```
-docs/clojure-pedagogy/audits/deep-audit-<fable>-<grade-band>.md
+docs/clojure-pedagogy/audits/deep-audit-<fable-dash>-<short-tag>.md
 ```
 
 with this structure:
 
 ```
-# Deep audit — <fable> <grade-band>
+# Deep audit — <fable> (grades: <list>)
 
-Read <N> records (<N>/example × <S> subjects × <G> grades). Total
+Read <N> records (~5/example × <S> subjects × 6 grades). Total
 papercuts: <T>, of which <T_fixed> fixed in this branch.
 
 ## Papercuts found (raw, before fixes)
@@ -443,7 +447,7 @@ papercuts: <T>, of which <T_fixed> fixed in this branch.
 
 ## Branch
 
-claude/audit-<fable>-<grade-band> at <commit-sha>
+claude/audit-<fable-dash>-<short-tag> at <commit-sha>
 
 ## Caveats / open work
 
@@ -476,27 +480,24 @@ src/mmllm/aesop/curriculum/form_families.py                      parametric form
 docs/clojure-pedagogy/audits/audit-harness.py                    detectors live here
 ```
 
-## Reference: dispatch matrix
+## Reference: dispatch model
 
-| fable          | bands | branches |
-|----------------|-------|----------|
-| tortoise_hare  | G1-G3, G4-G6, G7-G9, G10-G12 | claude/audit-tortoise-hare-{g1-g3,g4-g6,g7-g9,g10-g12} |
-| crow_pitcher   | G1-G3, G4-G6, G7-G9, G10-G12 | claude/audit-crow-pitcher-... |
-| milkmaid       | G1-G3, G4-G6, G7-G9, G10-G12 | claude/audit-milkmaid-... |
-| boy_wolf       | G1-G3, G4-G6, G7-G9, G10-G12 | claude/audit-boy-wolf-... |
-| dog_shadow     | G1-G3, G4-G6, G7-G9, G10-G12 | claude/audit-dog-shadow-... |
+Each agent picks ONE fable and a random 6 of the 12 grades. Each
+agent's branch is independent and starts from current `main`.
+Multiple agents can audit the same fable on different random
+samples — overlapping papercut findings are expected and useful
+(the user dedups when collating).
 
-20 slices total. Run them in parallel where the underlying code
-edits don't conflict (each agent's branch starts from `main`; final
-merges happen via the user picking branches into `main` once the
-PRs are reviewed).
+Branch naming: `claude/audit-<fable-dash>-<short-tag>` where
+`<short-tag>` is a 4-character random suffix to keep multiple
+runs on the same fable from colliding.
 
 ## Reference: detector coverage targets
 
-After the 20-agent sweep, the audit harness should have ~50-80
-detectors (currently ~25). Each fable's audit issue count should be
-≤10 across all categories combined (currently 15-53 per fable). The
-prose-grounding detector (Cat-J) should report ≥85% coverage —
-i.e., ≥85% of records have at least one drawn-value mention AND at
-least one EMO-band phrase AND at least one environmental adjective
-mapped to the algorithmic situation.
+After several waves of agents, the audit harness should grow from
+the current ~25 detectors to ≥50. Each fable's audit issue count
+should drop from 15-53 to ≤10. The prose-grounding detector
+(Cat-J) should report ≥85% coverage — i.e., ≥85% of records have
+at least one drawn-value mention AND at least one EMO-band phrase
+AND at least one environmental adjective mapped to the algorithmic
+situation.
