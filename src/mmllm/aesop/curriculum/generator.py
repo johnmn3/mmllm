@@ -160,12 +160,14 @@ class SubjectExample:
         # Skip the conversion for forms where the legacy path is the
         # only sensible interpretation (e.g. macros, host interop).
         if self.bb_verify:
+            self._maybe_close_resolution_loop()
             return
         from mmllm.aesop.curriculum.auto_parametric import (
             auto_parametric_from_form, replace_literals_in_prose,
         )
         result = auto_parametric_from_form(self.form, expected=self.expected)
         if result is None:
+            self._maybe_close_resolution_loop()
             return  # cannot auto-convert; remain legacy
         template, slots, expected_fn, value_to_slot = result
         # Mutate via object.__setattr__ since this is a frozen-style
@@ -201,6 +203,37 @@ class SubjectExample:
                     self, "resolution",
                     f"{stripped} (with `{{drawn.{first}}}` as the input value){trail}"
                 )
+
+    def _maybe_close_resolution_loop(self):
+        """For story-tagged legacy/bb_verify examples (no parametric slots),
+        append a parenthetical mentioning the form's first literal so the
+        resolution closes the loop. Skipped if a literal is already present.
+        Mirrors the audit's `_drawn_literals` filtering (skips ints 0/1/2 as
+        ambient).
+        """
+        if "story" not in (self.tags or ()) or not self.resolution:
+            return
+        import re as _re
+        lits = []
+        for m in _re.finditer(r"-?\d+", self.form):
+            v = m.group(0)
+            if v not in ("0", "1", "2"):
+                lits.append(v)
+        for m in _re.finditer(r":[a-zA-Z][a-zA-Z0-9-]*", self.form):
+            lits.append(m.group(0))
+        for m in _re.finditer(r'"([^"]{2,})"', self.form):
+            lits.append(m.group(1))
+        slots_text = " ".join(filter(None, (
+            self.scenario, self.need, self.mapping, self.resolution,
+        )))
+        if lits and not any(lit in slots_text for lit in lits):
+            first = lits[0]
+            stripped = self.resolution.rstrip(" .;:")
+            trail = self.resolution[len(stripped):]
+            object.__setattr__(
+                self, "resolution",
+                f"{stripped} (with `{first}` as the input value){trail}"
+            )
 
 
 @dataclass

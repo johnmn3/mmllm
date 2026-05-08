@@ -91,7 +91,7 @@ G8_01 = SubjectCurriculum(
             "the form that defines speak via cond",
             scenario=(
                 "Carol had called a meeting of the shepherds' fellowship "
-                "on the village green — sheep-shepherd, goat-shepherd, "
+                "on the watchhouse green — sheep-shepherd, goat-shepherd, "
                 "geese-keeper, all gathered. Each kind of keeper had "
                 "their own way of raising an alarm: a horn, a bell, a "
                 "smoke-signal."
@@ -110,7 +110,7 @@ G8_01 = SubjectCurriculum(
                 "have to know which keeper showed up."
             ),
             resolution=(
-                'the function was posted to the fellowship roll — a single name the village could call, with each kind of keeper answering in their own honest voice.'
+                'the function was posted to the fellowship roll — a single name the watchhouse could call, with each kind of keeper answering in their own honest voice.'
             )),
         _ex("(let [speak (fn [k] (cond (= k :wolf) \"howl\" (= k :flock) \"bleat\"))] (speak :flock))",
             "bleat",
@@ -152,7 +152,7 @@ G8_02 = SubjectCurriculum(
                 "into the slot named `color` and reads it back."
             ),
             resolution=(
-                "the tally-box yielded the lantern's color cleanly — the cooper's plan and the village's uniform readout, exactly as designed."
+                "the tally-box yielded the lantern's color cleanly — the cooper's plan and the townsfolk's uniform readout, exactly as designed."
             )),
         _ex("(do (deftype Crook [length]) (.-length (Crook. 7)))",
             7,
@@ -491,7 +491,7 @@ G8_08 = SubjectCurriculum(
             scenario=(
                 "At the fold-gate, Carol had set up a brand-sorting "
                 "gate. Each animal that arrived wore a brand on its ear "
-                "— `:shepherd` for the village's working sheep, "
+                "— `:shepherd` for the meadow folk's working sheep, "
                 "`:lantern-bearer` for the night-watch goats — and the "
                 "gate routed each to the right pen."
             ),
@@ -854,7 +854,7 @@ G8_15 = SubjectCurriculum(
             "deriving ::shepherd from ::villager and asking isa?",
             "whether ::shepherd isa? ::villager after derive",
             scenario=(
-                "Carol was building a hierarchy of roles at the village. "
+                "Carol was building a hierarchy of roles at the townsfolk. "
                 "She declared that a shepherd was a kind of villager — all "
                 "shepherds counted as villagers for certain rules."
             ),
@@ -877,7 +877,7 @@ G8_15 = SubjectCurriculum(
             "the predicate (isa? Long Number)",
             "whether Long isa? Number",
             scenario=(
-                "Carol was teaching the village that Java's own type system "
+                "Carol was teaching the valley that Java's own type system "
                 "had hierarchies built in. A Long (whole number) was a kind "
                 "of Number."
             ),

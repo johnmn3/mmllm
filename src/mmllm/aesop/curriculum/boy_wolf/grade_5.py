@@ -32,9 +32,8 @@ answer."""),
     SubplotTemplate("""\
 "Same trick, repeated cleverly," {elder} said {place}, sketching the
 form {form_display} into the dust. {shepherd}, {emo_proud}, claimed to
-know exactly what {concept_phrase} would produce — but {elder}
-insisted, again, that the REPL was the only honest judge in the
-village now."""),
+know exactly what {concept_phrase} would produce. The runtime, again,
+was the only honest judge in the village now."""),
 ]
 
 
@@ -61,10 +60,10 @@ _PLAN_G5 = _PLAN_POOL + (
 G5_01 = SubjectCurriculum(grade=5, subject_id="G5-01",
     subject_title="if", fable="boy-wolf",
     examples=[
-        _ex("(if true :a :b)",  ":a", "the form (if true :a :b)",  "which of :a or :b is returned",
+        _ex("(if true :a :b)",  ":a", "the expression (if true :a :b)",  "which of :a or :b is returned",
             scenario=(
                 "Tom stood at the path-fork on the lookout — three paths "
-                "fanning out below, one to the village, one to the fold, "
+                "fanning out below, one to the watchhouse, one to the fold, "
                 "one back to the pasture. Carol had set a small "
                 "condition-stone at the fork: the day's question for the "
                 "morning's runner."
@@ -83,7 +82,7 @@ G5_01 = SubjectCurriculum(grade=5, subject_id="G5-01",
             ),
             resolution=(
                 "the runner went left — `:a` was the value the fork carried back — and the morning's question settled without the second arm ever being walked. The slate showed {drawn.a} in clear chalk, and the fold tally stood as the day record."         )),
-        _ex("(if false :a :b)", ":b", "the form (if false :a :b)", "which of :a or :b is returned",
+        _ex("(if false :a :b)", ":b", "the expression (if false :a :b)", "which of :a or :b is returned",
             scenario=(
                 "Carol asked Tom to bring either fleece or grain from the "
                 "fold — but the weather had turned cold, and the path to "
@@ -102,7 +101,7 @@ G5_01 = SubjectCurriculum(grade=5, subject_id="G5-01",
             ),
             resolution=(
                 "the wind still howled, the condition was false, and Tom stayed put — the right arm's `:b` was what the fork produced — and Carol nodded, satisfied the form had made the careful choice. Carol marked {drawn.a} on the watchhouse beam, the lookout high above the valley quiet at last."       )),
-        _ex("(if (> 5 3) :a :b)", ":a", "the form (if (> 5 3) :a :b)", "the if's branch",
+        _ex("(if (> 5 3) :a :b)", ":a", "the expression (if (> 5 3) :a :b)", "the if's branch",
             scenario=(
                 "Tom stood sorting wool by weight at the watchhouse. Carol "
                 "had given him a simple rule: if a fleece weighed more than "
@@ -112,7 +111,7 @@ G5_01 = SubjectCurriculum(grade=5, subject_id="G5-01",
             need=(
                 "Tom needed to decide which basket to drop it into, based on "
                 "the weight. The condition `(> 5 3)` — is five greater than "
-                "three? — would settle which path the form took."
+                "three? — would settle which path it took."
             ),
             mapping=(
                 "`if` evaluates the comparison `(> 5 3)` first. Since five "
@@ -120,7 +119,7 @@ G5_01 = SubjectCurriculum(grade=5, subject_id="G5-01",
                 "the first arm is taken. `:a` is the result."
             ),
             resolution=(
-                "the form returned `:a`, and Tom dropped the fleece into the dyer's basket — the comparison had done its work, and the form had steered him to the right choice without guessing. The fold gate held tight against the count of {drawn.a}, slate cool under the elder hand."           )),
+                "the call returned `:a`, and Tom dropped the fleece into the dyer's basket — the comparison had done its work, and the form had steered him to the right choice without guessing. The fold gate held tight against the count of {drawn.a}, slate cool under the elder hand."           )),
     ], subplots=_FORK_SUBPLOTS, plan_pool=_PLAN_G5)
 
 
@@ -128,7 +127,7 @@ G5_02 = SubjectCurriculum(grade=5, subject_id="G5-02",
     subject_title="if as expression", fable="boy-wolf",
     examples=[
         _ex("(+ 1 (if true 10 20))", 11,
-            "the form (+ 1 (if true 10 20))", "the result of adding 1 to the if expression",
+            "the expression (+ 1 (if true 10 20))", "the result of adding 1 to the if expression",
             scenario=(
                 "Carol asked Tom to add one measure of powder to whichever "
                 "pigment the elder had chosen from the shelf. The fork's "
@@ -145,22 +144,22 @@ G5_02 = SubjectCurriculum(grade=5, subject_id="G5-02",
             mapping=(
                 "`if` returns a value (10 or 20), but that value then becomes "
                 "part of the larger form `(+ 1 ...)`. The `if` expression sits "
-                "inside the `+` operation, so the form evaluates the fork first, "
+                "inside the `+` operation, so it evaluates the fork first, "
                 "then adds 1 to whatever the fork produced."
             ),
             resolution=(
-                "the condition was true, the fork returned 10, then `+` added 1 to it, and the final value was 11 — the fork wasn't just an answer; it was a building block in a larger calculation. Tom chalked {drawn.a} on the village notice, and the morning record stood for the next shepherd to read."           )),
+                "the condition was true, the fork returned 10, then `+` added 1 to it, and the final value was 11 — the fork wasn't just an answer; it was a building block in a larger calculation. Tom chalked {drawn.a} on the watchhouse notice, and the morning record stood for the next shepherd to read."           )),
     ], subplots=_FORK_SUBPLOTS, plan_pool=_PLAN_G5)
 
 
 G5_03 = SubjectCurriculum(grade=5, subject_id="G5-03",
     subject_title="when", fable="boy-wolf",
     examples=[
-        _ex("(when true :yes)", ":yes", "the form (when true :yes)", "the value of (when true :yes)",
+        _ex("(when true :yes)", ":yes", "the expression (when true :yes)", "the value of (when true :yes)",
             scenario=(
                 "Carol posted a watch-order at the fold: if the lambs were "
                 "restless today, Tom was to ring the bell and post a notice "
-                "at the village stone. Tom checked the pen, and yes — the lambs "
+                "at the townsfolk stone. Tom checked the pen, and yes — the lambs "
                 "were pacing. The condition was met."
             ),
             need=(
@@ -175,8 +174,8 @@ G5_03 = SubjectCurriculum(grade=5, subject_id="G5-03",
                 "value is returned. `:yes` is the body; it evaluates to itself."
             ),
             resolution=(
-                'the condition was true, the form evaluated the body, and `:yes` came back — Tom rang the bell, knowing the form had settled the matter and given back the promised value. The lookout returned with {drawn.a} on his slate, the valley long behind him and the count plain.'           )),
-        _ex("(when false :yes)", None, "the form (when false :yes)", "the value of (when false :yes)",
+                'the condition was true, it evaluated the body, and `:yes` came back — Tom rang the bell, knowing it had settled the matter and given back the promised value. The lookout returned with {drawn.a} on his slate, the valley long behind him and the count plain.'           )),
+        _ex("(when false :yes)", None, "the expression (when false :yes)", "the value of (when false :yes)",
             scenario=(
                 "The next morning, Carol asked Tom to check the lambs again. "
                 "The same watch-order stood: `when` the lambs are restless, "
@@ -194,7 +193,7 @@ G5_03 = SubjectCurriculum(grade=5, subject_id="G5-03",
                 "it's just left behind, untouched."
             ),
             resolution=(
-                'the lambs were still, the condition was false, the form returned `nil` — no bell rang, no value came back, and Tom understood: `when` only acts when the condition says yes. The watchhouse warmed as the elder set {drawn.a} into the day record, the fold quiet by then.'           )),
+                'the lambs were still, the condition was false, it returned `nil` — no bell rang, no value came back, and Tom understood: `when` only acts when the condition says yes. The watchhouse warmed as the elder set {drawn.a} into the day record, the fold quiet by then.'           )),
     ], subplots=_FORK_SUBPLOTS, plan_pool=_PLAN_G5)
 
 
@@ -213,7 +212,7 @@ G5_04 = SubjectCurriculum(grade=5, subject_id="G5-04",
                 "`cond` walks through condition pairs in order and returns the value of the first true arm."
             ),
             resolution=(
-                "The first condition was false, the second was true, so the form returned that arm's value. {drawn.a} stood as the answer the fold required, slate, chalk, and a steady eye all in agreement."
+                "The first condition was false, the second was true, so it returned that arm's value. {drawn.a} stood as the answer the fold required, slate, chalk, and a steady eye all in agreement."
             )),
     ], subplots=_FORK_SUBPLOTS, plan_pool=_PLAN_G5)
 
@@ -265,11 +264,11 @@ G5_06 = SubjectCurriculum(grade=5, subject_id="G5-06",
             ),
             mapping=(
                 "`case` matches the first value (2) against each key in order "
-                "(1, 2, 3). When a key matches, the form takes that arm and "
+                "(1, 2, 3). When a key matches, it takes that arm and "
                 "returns its value. The default catches any mismatches."
             ),
             resolution=(
-                'the token read 2, the form found the matching pen marked 2, and returned `:two` — the pen door opened, and Tom led the lamb to the right place without guessing. The slate showed {drawn.a} in clear chalk, and the fold tally stood as the day record.'           )),
+                'the token read 2, it found the matching pen marked 2, and returned `:two` — the pen door opened, and Tom led the lamb to the right place without guessing. The slate showed {drawn.a} in clear chalk, and the fold tally stood as the day record.'           )),
         _ex("(case 99 1 :one 2 :two :default)", ":default",
             "case falling through to default", "the default branch",
             scenario=(
@@ -309,7 +308,7 @@ G5_07 = SubjectCurriculum(grade=5, subject_id="G5-07",
             ),
             resolution=(
                 "all three gates were open, the form passed through them all, and returned 3 — the last gate's value — Tom walked through the fold-gates and stood in the pen, knowing all conditions held. The fold gate held tight against the count of {drawn.a}, slate cool under the elder hand."         )),
-        _ex("(or nil false :found)", ":found", "the form (or nil false :found)", "the first truthy value",
+        _ex("(or nil false :found)", ":found", "the expression (or nil false :found)", "the first truthy value",
             scenario=(
                 "Carol left Tom three messages on three stones."
             ),
@@ -320,7 +319,7 @@ G5_07 = SubjectCurriculum(grade=5, subject_id="G5-07",
                 "`or` walks through values left to right and stops at the first truthy one, returning it."
             ),
             resolution=(
-                'The first two stones held nothing, but the third held a real message, so the form returned it. Tom chalked {drawn.a} on the village notice, and the morning record stood for the next shepherd to read.'
+                'The first two stones held nothing, but the third held a real message, so it returned it. Tom chalked {drawn.a} on the village notice, and the morning record stood for the next shepherd to read.'
             )),
     ], subplots=_GATE_SUBPLOTS, plan_pool=_PLAN_G5)
 
@@ -328,7 +327,7 @@ G5_07 = SubjectCurriculum(grade=5, subject_id="G5-07",
 G5_08 = SubjectCurriculum(grade=5, subject_id="G5-08",
     subject_title="not", fable="boy-wolf",
     examples=[
-        _ex("(not (> 1 2))", True, "the form (not (> 1 2))", "the negated comparison",
+        _ex("(not (> 1 2))", True, "the expression (not (> 1 2))", "the negated comparison",
             scenario=(
                 "Carol asked Tom to flip the answer to a comparison."
             ),
@@ -374,7 +373,7 @@ G5_10 = SubjectCurriculum(grade=5, subject_id="G5-10",
     subject_title="map", fable="boy-wolf",
     examples=[
         _ex("(map inc [1 2 3])", [2,3,4],
-            "the form (map inc [1 2 3])", "[1 2 3] each incremented",
+            "the expression (map inc [1 2 3])", "[1 2 3] each incremented",
             scenario=(
                 "Carol gave Tom a fleece-comb with three knots in it (standing "
                 "for 1, 2, 3) and asked him to add one knot to each. Tom took "
@@ -395,7 +394,7 @@ G5_10 = SubjectCurriculum(grade=5, subject_id="G5-10",
             resolution=(
                 'the comb passed each value through: 1+1=2, 2+1=3, 3+1=4, and `map` returned [2 3 4] — a new basket with each fleece carded — Tom saw the pattern and understood `map` was how to do the same thing many times at once. The watchhouse warmed as the elder set {drawn.a} into the day record, the fold quiet by then.'         )),
         _ex("(map #(* % %) [1 2 3 4])", [1,4,9,16],
-            "the form (map #(* % %) [1 2 3 4])", "[1 2 3 4] each squared",
+            "the expression (map #(* % %) [1 2 3 4])", "[1 2 3 4] each squared",
             scenario=(
                 "Carol gave Tom a comb with four knots and asked him to square each one."
             ),
@@ -415,7 +414,7 @@ G5_11 = SubjectCurriculum(grade=5, subject_id="G5-11",
     subject_title="filter", fable="boy-wolf",
     examples=[
         _ex("(filter even? [1 2 3 4])", [2,4],
-            "the form (filter even? [1 2 3 4])", "the even numbers from [1 2 3 4]",
+            "the expression (filter even? [1 2 3 4])", "the even numbers from [1 2 3 4]",
             scenario=(
                 "Carol brought a screen to filter fleeces through."
             ),
@@ -429,7 +428,7 @@ G5_11 = SubjectCurriculum(grade=5, subject_id="G5-11",
                 'The form returned only the values that passed the test. {drawn.a} stood as the answer the fold required, slate, chalk, and a steady eye all in agreement.'
             )),
         _ex("(filter pos? [-2 -1 0 1 2])", [1,2],
-            "the form (filter pos? ...)", "the positive numbers",
+            "the expression (filter pos? ...)", "the positive numbers",
             scenario=(
                 "Carol brought another screen for positive numbers."
             ),
@@ -448,7 +447,7 @@ G5_11 = SubjectCurriculum(grade=5, subject_id="G5-11",
 G5_12 = SubjectCurriculum(grade=5, subject_id="G5-12",
     subject_title="reduce", fable="boy-wolf",
     examples=[
-        _ex("(reduce + [1 2 3 4])",   10, "the form (reduce + [1 2 3 4])", "the sum",
+        _ex("(reduce + [1 2 3 4])",   10, "the expression (reduce + [1 2 3 4])", "the sum",
             scenario=(
                 "Tom walked the tally-stick down a line of sheep."
             ),
@@ -461,7 +460,7 @@ G5_12 = SubjectCurriculum(grade=5, subject_id="G5-12",
             resolution=(
                 'The form combined all values into a single result. The slate showed {drawn.a} in clear chalk, and the fold tally stood as the day record.'
             )),
-        _ex("(reduce * [1 2 3 4 5])", 120,"the form (reduce * [1 2 3 4 5])", "5!",
+        _ex("(reduce * [1 2 3 4 5])", 120,"the expression (reduce * [1 2 3 4 5])", "5!",
             scenario=(
                 "Carol asked Tom to apply a different rule: multiply instead of add."
             ),
@@ -475,7 +474,7 @@ G5_12 = SubjectCurriculum(grade=5, subject_id="G5-12",
                 'The form collapsed the numbers into their product. Carol marked {drawn.a} on the watchhouse beam, the lookout high above the valley quiet at last.'
             )),
         _ex("(reduce max [3 1 4 1 5 9 2 6])", 9,
-            "the form (reduce max [...])", "the maximum",
+            "the expression (reduce max [...])", "the maximum",
             scenario=(
                 "Carol asked Tom to find the largest sheep-count among eight pens."
             ),
@@ -495,7 +494,7 @@ G5_13 = SubjectCurriculum(grade=5, subject_id="G5-13",
     subject_title="reduce with init", fable="boy-wolf",
     examples=[
         _ex("(reduce + 100 [1 2 3])", 106,
-            "the form (reduce + 100 [1 2 3])", "100 + sum of [1 2 3]",
+            "the expression (reduce + 100 [1 2 3])", "100 + sum of [1 2 3]",
             scenario=(
                 "Tom arrived at the fold with a tally-stick already marked with "
                 "100 knots (from yesterday's flock). Today he found three new "
@@ -513,9 +512,9 @@ G5_13 = SubjectCurriculum(grade=5, subject_id="G5-13",
                 "first item in the list, then continues as normal."
             ),
             resolution=(
-                'the tally began at 100, then 100+1=101, then 101+2=103, then 103+3=106. The final result was 106 — Tom saw that the initial value got factored into the sum from the start, carrying the old count forward. Tom chalked {drawn.a} on the village notice, and the morning record stood for the next shepherd to read.'           )),
+                'the tally began at 100, then 100+1=101, then 101+2=103, then 103+3=106. The final result was 106 — Tom saw that the initial value got factored into the sum from the start, carrying the old count forward. Tom chalked {drawn.a} on the meadow folk notice, and the morning record stood for the next shepherd to read.'           )),
         _ex("(reduce + 0 [])", 0,
-            "the form (reduce + 0 [])",
+            "the expression (reduce + 0 [])",
             "the value when reducing over empty seq with init 0",
             scenario=(
                 "Tom arrived at an empty pen with no counts to tally."
@@ -527,7 +526,7 @@ G5_13 = SubjectCurriculum(grade=5, subject_id="G5-13",
                 "`reduce` with an initial value returns it unchanged when the list is empty."
             ),
             resolution=(
-                'The list was empty, so the form returned the initial value safely. The lookout returned with {drawn.a} on his slate, the valley long behind him and the count plain.'
+                'The list was empty, so it returned the initial value safely. The lookout returned with {drawn.a} on his slate, the valley long behind him and the count plain.'
             )),
     ], subplots=_TALLYWALK_SUBPLOTS, plan_pool=_PLAN_G5)
 
@@ -536,7 +535,7 @@ G5_14 = SubjectCurriculum(grade=5, subject_id="G5-14",
     subject_title="apply", fable="boy-wolf",
     examples=[
         _ex("(apply + [1 2 3 4])", 10,
-            "the form (apply + [1 2 3 4])", "+ applied to the elements of the vector",
+            "the expression (apply + [1 2 3 4])", "+ applied to the elements of the vector",
             scenario=(
                 "Tom held a basket of numbers and a recipe to apply to them all."
             ),
@@ -550,7 +549,7 @@ G5_14 = SubjectCurriculum(grade=5, subject_id="G5-14",
                 'The basket opened and the recipe processed all the arguments, returning the result. The watchhouse warmed as the elder set {drawn.a} into the day record, the fold quiet by then.'
             )),
         _ex("(apply max [3 1 4 1 5])", 5,
-            "the form (apply max ...)", "max of the vector via apply",
+            "the expression (apply max ...)", "max of the vector via apply",
             scenario=(
                 "Another day, Tom held a basket of sheep-counts [3 1 4 1 5] and "
                 "a drill-card with the `max` recipe. Carol asked him to find the "
@@ -567,7 +566,7 @@ G5_14 = SubjectCurriculum(grade=5, subject_id="G5-14",
                 "by one."
             ),
             resolution=(
-                'the basket opened: 3, 1, 4, 1, 5, the `max` recipe compared them all, and the form returned 5 — the largest — Tom saw that `apply` turned a basket into separate arguments for any recipe. {drawn.a} stood as the answer the fold required, slate, chalk, and a steady eye all in agreement.'         )),
+                'the basket opened: 3, 1, 4, 1, 5, the `max` recipe compared them all, and the call returned 5 — the largest — Tom saw that `apply` turned a basket into separate arguments for any recipe. {drawn.a} stood as the answer the fold required, slate, chalk, and a steady eye all in agreement.'         )),
     ], subplots=_RECIPE_SUBPLOTS, plan_pool=_PLAN_G5)
 
 
@@ -575,7 +574,7 @@ G5_15 = SubjectCurriculum(grade=5, subject_id="G5-15",
     subject_title="comp", fable="boy-wolf",
     examples=[
         _ex("((comp inc inc) 5)", 7,
-            "the form ((comp inc inc) 5)", "inc twice applied to 5",
+            "the expression ((comp inc inc) 5)", "inc twice applied to 5",
             scenario=(
                 "Carol asked Tom to combine two recipes into one."
             ),
@@ -589,7 +588,7 @@ G5_15 = SubjectCurriculum(grade=5, subject_id="G5-15",
                 'The compound recipe applied both steps and returned the final result.'
             )),
         _ex("((comp str inc) 9)", "10",
-            "the form ((comp str inc) 9)", "inc then str of 9",
+            "the expression ((comp str inc) 9)", "inc then str of 9",
             scenario=(
                 "Carol drew two more drill-cards: `inc` (add one) and `str` "
                 "(turn into text). Tom asked: can I combine these so the result "
@@ -616,7 +615,7 @@ G5_16 = SubjectCurriculum(grade=5, subject_id="G5-16",
     subject_title="partial", fable="boy-wolf",
     examples=[
         _ex("((partial + 10) 5)", 15,
-            "the form ((partial + 10) 5)", "10 + 5",
+            "the expression ((partial + 10) 5)", "10 + 5",
             scenario=(
                 "Carol handed Tom the `+` recipe but asked him to fill in one "
                 "ingredient now and leave a blank for later. Tom wrote 10 in the "
@@ -662,7 +661,7 @@ G5_17 = SubjectCurriculum(grade=5, subject_id="G5-17",
     subject_title="juxt", fable="boy-wolf",
     examples=[
         _ex("((juxt inc dec) 5)", [6,4],
-            "the form ((juxt inc dec) 5)", "inc and dec of 5 in parallel",
+            "the expression ((juxt inc dec) 5)", "inc and dec of 5 in parallel",
             scenario=(
                 "Carol drew two recipes side by side and asked Tom to apply both."
             ),
@@ -682,7 +681,7 @@ G5_18 = SubjectCurriculum(grade=5, subject_id="G5-18",
     subject_title="some", fable="boy-wolf",
     examples=[
         _ex("(some even? [1 3 5 8 7])", True,
-            "the form (some even? [...])", "whether any element is even",
+            "the expression (some even? [...])", "whether any element is even",
             scenario=(
                 "Tom asked Carol if any count in the basket was even."
             ),
@@ -696,7 +695,7 @@ G5_18 = SubjectCurriculum(grade=5, subject_id="G5-18",
                 'The form found a match and returned true without checking all values. The slate showed {drawn.a} in clear chalk, and the fold tally stood as the day record.'
             )),
         _ex("(some neg? [1 2 3])", None,
-            "the form (some neg? [1 2 3])", "the value when no element is negative",
+            "the expression (some neg? [1 2 3])", "the value when no element is negative",
             scenario=(
                 "Another day, Tom asked: is there a negative count in [1 2 3]? "
                 "The screen for `neg?` (negative numbers) wouldn't catch any of "
@@ -720,7 +719,7 @@ G5_18 = SubjectCurriculum(grade=5, subject_id="G5-18",
 G5_19 = SubjectCurriculum(grade=5, subject_id="G5-19",
     subject_title="every?", fable="boy-wolf",
     examples=[
-        _ex("(every? pos? [1 2 3])", True, "the form (every? pos? [1 2 3])", "whether all are positive",
+        _ex("(every? pos? [1 2 3])", True, "the expression (every? pos? [1 2 3])", "whether all are positive",
             scenario=(
                 "Carol brought three fleece-bundles with weights [1 2 3] and "
                 "asked Tom: are all of them positive numbers? `every?` would pour "
@@ -738,7 +737,7 @@ G5_19 = SubjectCurriculum(grade=5, subject_id="G5-19",
             ),
             resolution=(
                 'the screen passed all three: 1 is positive, 2 is positive, 3 is positive — `every?` returned true — Tom knew that every bundle was above zero. The fold gate held tight against the count of {drawn.a}, slate cool under the elder hand.'         )),
-        _ex("(every? even? [1 2 3])", False, "the form (every? even? [1 2 3])", "whether all are even",
+        _ex("(every? even? [1 2 3])", False, "the expression (every? even? [1 2 3])", "whether all are even",
             scenario=(
                 "Carol asked: are all these numbers even? Tom looked: 1 (odd), 2 "
                 "(even), 3 (odd). The screen for `even?` would catch 2 but not "
@@ -755,7 +754,7 @@ G5_19 = SubjectCurriculum(grade=5, subject_id="G5-19",
                 "once one fails."
             ),
             resolution=(
-                'the screen rejected 1 (odd), and `every?` stopped and returned false — Tom knew immediately that not every number was even without checking all three. Tom chalked {drawn.a} on the village notice, and the morning record stood for the next shepherd to read.'           )),
+                'the screen rejected 1 (odd), and `every?` stopped and returned false — Tom knew immediately that not every number was even without checking all three. Tom chalked {drawn.a} on the townsfolk notice, and the morning record stood for the next shepherd to read.'           )),
     ], subplots=_SIEVE_SUBPLOTS, plan_pool=_PLAN_G5)
 
 
@@ -763,7 +762,7 @@ G5_20 = SubjectCurriculum(grade=5, subject_id="G5-20",
     subject_title="take and drop", fable="boy-wolf",
     examples=[
         _ex("(take 3 [10 20 30 40 50])", [10,20,30],
-            "the form (take 3 ...)", "the first three elements",
+            "the expression (take 3 ...)", "the first three elements",
             scenario=(
                 "Tom held a long comb with five knots [10 20 30 40 50] and Carol "
                 "asked: keep only the first three knots and drop the rest. `take` "
@@ -782,7 +781,7 @@ G5_20 = SubjectCurriculum(grade=5, subject_id="G5-20",
             resolution=(
                 'the comb kept [10 20 30] and dropped 40 and 50 — Tom held a shorter comb with exactly three knots — `take` had trimmed the list to the size he needed. The lookout returned with {drawn.a} on his slate, the valley long behind him and the count plain.'         )),
         _ex("(drop 2 [10 20 30 40 50])", [30,40,50],
-            "the form (drop 2 ...)", "all but the first two",
+            "the expression (drop 2 ...)", "all but the first two",
             scenario=(
                 "Carol asked Tom to skip the first two counts and keep the rest."
             ),
@@ -802,7 +801,7 @@ G5_21 = SubjectCurriculum(grade=5, subject_id="G5-21",
     subject_title="distinct and sort", fable="boy-wolf",
     examples=[
         _ex("(distinct [1 1 2 3 3 4])", [1,2,3,4],
-            "the form (distinct [1 1 2 3 3 4])", "the deduplicated seq",
+            "the expression (distinct [1 1 2 3 3 4])", "the deduplicated seq",
             scenario=(
                 "Tom counted sheep by brand and found duplicates: [1 1 2 3 3 4]. "
                 "Carol asked: how many different brands were there? `distinct` "
@@ -821,7 +820,7 @@ G5_21 = SubjectCurriculum(grade=5, subject_id="G5-21",
             resolution=(
                 'the list lost the duplicate 1 and the duplicate 3, leaving [1 2 3 4] — Tom saw four distinct brands and understood how many different groups existed. {drawn.a} stood as the answer the fold required, slate, chalk, and a steady eye all in agreement.'           )),
         _ex("(sort [3 1 2])", [1,2,3],
-            "the form (sort [3 1 2])", "the sorted seq",
+            "the expression (sort [3 1 2])", "the sorted seq",
             scenario=(
                 "Tom brought three fleece-counts [3 1 2] in jumbled order and "
                 "Carol asked: arrange them from smallest to largest. `sort` would "

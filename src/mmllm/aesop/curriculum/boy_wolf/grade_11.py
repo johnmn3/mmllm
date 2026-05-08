@@ -138,7 +138,7 @@ G11_02 = SubjectCurriculum(
             'the method call (.toUpperCase "abc")',
             "the uppercased string returned by the method",
             scenario=(
-                "Tom stood at the boundary between the village and the foreign smithy, "
+                "Tom stood at the boundary between the watchhouse and the foreign smithy, "
                 "studying the tools on the wall. Each tool had a name written in the smith's own language. "
                 "On one shelf sat a method labeled 'toUpperCase,' attached to an object of type String."
             ),
@@ -207,7 +207,7 @@ G11_02 = SubjectCurriculum(
                 "the count of characters. The host counts from the inside; the REPL trusts what it returns."
             ),
             resolution=(
-                "Tom composed the form, the REPL called the foreign method, and the answer came back: 8. 'Shepherd' has 8 letters. The host counted faithfully, just as the village would have."
+                "Tom composed the form, the REPL called the foreign method, and the answer came back: 8. 'Shepherd' has 8 letters. The host counted faithfully, just as the watchhouse would have."
             )),
         _ex('(.isEmpty "test")', False,
             "the method call (.isEmpty ...) checking if a string is empty",
@@ -340,7 +340,7 @@ G11_04 = SubjectCurriculum(
             'the count of "shepherd"',
             'the length of "shepherd"',
             scenario=(
-                "Tom found that the village's count function worked on host strings."
+                "Tom found that the townsfolk's count function worked on host strings."
             ),
             need=(
                 "He wanted to count letters using the village tool rather than a host method."
@@ -359,7 +359,7 @@ G11_04 = SubjectCurriculum(
                 "The function was general—it didn't care where the string came from."
             ),
             need=(
-                "Tom wanted to count 'flock' using the village's count function, just to be sure the pattern held. "
+                "Tom wanted to count 'flock' using the meadow folk's count function, just to be sure the pattern held. "
                 "Did it work the same way?"
             ),
             mapping=(
@@ -367,13 +367,13 @@ G11_04 = SubjectCurriculum(
                 "The village function is polymorphic; it knows how to count across the host boundary."
             ),
             resolution=(
-                "The answer came back: 5. Tom submitted the form and got the right answer. He saw that the village's tools could reach into the host's world cleanly, without special syntax. Carol marked {drawn.a} on the watchhouse beam, the lookout high above the valley quiet at last."
+                "The answer came back: 5. Tom submitted it and got the right answer. He saw that the townsfolk's tools could reach into the host's world cleanly, without special syntax. Carol marked {drawn.a} on the watchhouse beam, the lookout high above the valley quiet at last."
             )),
         _ex('(count "wolf")', 4,
             'the count of "wolf"',
             'the length of "wolf"',
             scenario=(
-                "Tom played with more examples, counting different strings. Each time, the village's count function "
+                "Tom played with more examples, counting different strings. Each time, the valley's count function "
                 "reached into the host representation and returned the right answer."
             ),
             need=(
@@ -381,29 +381,29 @@ G11_04 = SubjectCurriculum(
                 "He needed to see the pattern hold one more time."
             ),
             mapping=(
-                "The form `(count \"wolf\")` applies the village's count function to the host string. "
+                "The form `(count \"wolf\")` applies the watchhouse's count function to the host string. "
                 "The REPL bridges the boundary transparently."
             ),
             resolution=(
-                "The REPL returned 4. Tom had now called count on three different strings and gotten three correct answers. He understood that the village's tools had been designed to work across the host boundary all along. The fold gate held tight against the count of {drawn.a}, slate cool under the elder hand."
+                "The REPL returned 4. Tom had now called count on three different strings and gotten three correct answers. He understood that the meadow folk's tools had been designed to work across the host boundary all along. The fold gate held tight against the count of {drawn.a}, slate cool under the elder hand."
             )),
         _ex('(count "elder")', 5,
             'the count of "elder"',
             'the length of "elder"',
             scenario=(
                 "Carol and Tom sat by the watchhouse, counting strings together. Tom was getting comfortable "
-                "with the idea that the village's tools just worked with host data."
+                "with the idea that the townsfolk's tools just worked with host data."
             ),
             need=(
                 "Tom wanted to count 'elder'—the wise one from the fable. "
                 "One more time, he'd use the village's count function, and one more time it would answer true."
             ),
             mapping=(
-                "The form `(count \"elder\")` sends the string to the village's count function. "
+                "The form `(count \"elder\")` sends the string to the meadow folk's count function. "
                 "The function is general enough to handle any sequence the host provides."
             ),
             resolution=(
-                "The answer was 5. Tom had now moved past the fear of the boundary. The village's tools and the host's data spoke to each other smoothly, and the REPL made the translation happen without fuss. Tom chalked {drawn.a} on the village notice, and the morning record stood for the next shepherd to read."
+                "The answer was 5. Tom had now moved past the fear of the boundary. The village's tools and the host's data spoke to each other smoothly, and the REPL made the translation happen without fuss. Tom chalked {drawn.a} on the valley notice, and the morning record stood for the next shepherd to read."
             )),
     ],
     subplots=_TOOLSHED_SUBPLOTS, plan_pool=_PLAN_G11,
@@ -453,7 +453,7 @@ G11_06 = SubjectCurriculum(
             ),
             need=(
                 "Tom wanted to build a new String from the word 'hello'. The host had a constructor for this work, "
-                "and Tom wanted to call it using the village's notation."
+                "and Tom wanted to call it using the valley's notation."
             ),
             mapping=(
                 "The dot-construct `(String. value)` calls the host's String constructor. "
@@ -548,12 +548,12 @@ G11_07 = SubjectCurriculum(
                 "The village didn't have arrays; the host did. Tom needed to use the host's tools."
             ),
             mapping=(
-                "The form `(aget array index)` is the village's way of calling the host's array-get operation. "
+                "The form `(aget array index)` is the watchhouse's way of calling the host's array-get operation. "
                 "Tom binds the array in a let, then uses aget to fetch the value at the given index. The REPL fetches "
                 "and returns the integer inside."
             ),
             resolution=(
-                "The form fetched 20 from index 1. Tom understood: the host's arrays were strange, but the village had a bridge—the aget function—that could reach inside them."         )),
+                "The form fetched 20 from index 1. Tom understood: the host's arrays were strange, but the watchhouse had a bridge—the aget function—that could reach inside them."         )),
         _ex("(let [a (int-array [1 2 3])] (alength a))", 3,
             "the length of an int-array via alength",
             "the length of the array",
@@ -580,14 +580,14 @@ G11_07 = SubjectCurriculum(
             ),
             need=(
                 "Tom wanted to fetch the first element, at index 0, to see whether the indexing pattern was what he expected. "
-                "Did the host count from 0, like the village?"
+                "Did the host count from 0, like the townsfolk?"
             ),
             mapping=(
                 "The form `(aget array 0)` fetches the element at the beginning of the array. "
                 "Indexing starts at 0, just as it does in the village. The REPL returns the value inside."
             ),
             resolution=(
-                "The form returned 5, the first integer in the array. Tom saw that the host's indexing convention matched the village's—a good sign that crossing the boundary would feel natural."           )),
+                "The form returned 5, the first integer in the array. Tom saw that the host's indexing convention matched the meadow folk's—a good sign that crossing the boundary would feel natural."           )),
         _ex("(let [a (int-array [7 8 9])] (alength a))", 3,
             "the length of an int-array via alength",
             "the length of the array",
@@ -604,7 +604,7 @@ G11_07 = SubjectCurriculum(
                 "The village tool alength knows how to query the host's array structure."
             ),
             resolution=(
-                "The form returned 3. Tom had now used both aget and alength several times. The host's array machinery was no longer foreign; it was just another tool the village could reach."
+                "The form returned 3. Tom had now used both aget and alength several times. The host's array machinery was no longer foreign; it was just another tool the townsfolk could reach."
             )),
     ],
     subplots=_TOOLSHED_SUBPLOTS, plan_pool=_PLAN_G11,
@@ -844,7 +844,7 @@ G11_14 = SubjectCurriculum(
                 "The catch clause is a blanket: any exception from the host lands in :err, not the REPL."
             ),
             resolution=(
-                "The form succeeded and returned 42. Tom had now wrapped two host calls, and both worked smoothly. He understood that try/catch was the village's way of saying to the host: 'Work, but if you fail, fail quietly. Let the village handle the error.'"
+                "The form succeeded and returned 42. Tom had now wrapped two host calls, and both worked smoothly. He understood that try/catch was the valley's way of saying to the host: 'Work, but if you fail, fail quietly. Let the village handle the error.'"
             )),
         _ex('(try (.length "test") (catch Exception _ :err))', 4,
             "wrapping a host method call in try/catch to guard against errors",
@@ -880,7 +880,7 @@ G11_14 = SubjectCurriculum(
                 "If all succeed, :success is returned. If any throws, the catch clause returns :err."
             ),
             resolution=(
-                "The form returned :success. Tom had now mastered the try/catch pattern across many scenarios. He understood that the village's error handling could protect against the chaos of the host boundary."
+                "The form returned :success. Tom had now mastered the try/catch pattern across many scenarios. He understood that the watchhouse's error handling could protect against the chaos of the host boundary."
             )),
     ],
     subplots=_TOOLSHED_SUBPLOTS, plan_pool=_PLAN_G11,

@@ -3,7 +3,7 @@
 Subplot lens: the long season has ended and the village reflects on
 the tools the careful shepherds have collected — transducers, channels,
 specs, tests. Each is a tool against the kind of careless guessing
-that used to cost the village so dearly. The shepherd, finally tired
+that used to cost the watchhouse so dearly. The shepherd, finally tired
 and reflective, agrees that careful tools beat clever guesses, but
 the corrective discipline still belongs to the elder and the villagers.
 """
@@ -23,7 +23,7 @@ from mmllm.aesop.curriculum.boy_wolf._goals import GOALS, get_goal
 
 # ─────────────────────── grade-12 subplot extensions ───────────────────────
 #
-# The long season has ended and the village reflects on the tools the
+# The long season has ended and the watchhouse reflects on the tools the
 # careful shepherds have collected. Each subplot frames the subject as
 # a tool re-examined at season's end. The shepherd is mature enough
 # to listen now, but the corrective voice is still the elder's.
@@ -56,7 +56,7 @@ admitted {shepherd_he_she} would not have known what to write.
 for itself."""),
 
     SubplotTemplate("""\
-At the village square {place}, a row of small markers commemorated
+At the townsfolk square {place}, a row of small markers commemorated
 the libraries the careful shepherds had learned over the season. The
 newest one honoured {concept_phrase}. {elder_phrase} touched it and
 said the form to remember was {form_display}; {shepherd_phrase}
@@ -71,7 +71,7 @@ it produced."""),
     SubplotTemplate("""\
 A harvest gathering at the end of the season {place} brought together
 every villager. The day's discussion was {concept_phrase}. {elder}
-wrote the form {form_display} on a square of parchment and passed it
+wrote it {form_display} on a square of parchment and passed it
 across the table; {shepherd}, {emo_tired} but pleased to be trusted
 again, agreed to read it into the REPL."""),
 ]
@@ -129,7 +129,7 @@ G12_01 = SubjectCurriculum(
                 "the transducer rule, and the source feed together."
             ),
             resolution=(
-                'Each number passed through, incremented by the rule, landing in the basket as it emerged — the form returned [2 3 4], and the shepherd finally saw: transducers separate the rule from the receiver.'
+                'Each number passed through, incremented by the rule, landing in the basket as it emerged — it returned [2 3 4], and the shepherd finally saw: transducers separate the rule from the receiver.'
             )),
         _ex("(into [] (filter even?) [1 2 3 4 5])", [2, 4],
             "the transducer (filter even?) used via into",
@@ -352,7 +352,7 @@ G12_05 = SubjectCurriculum(
                 "function, and writes to another. Stages compose into flows."
             ),
             resolution=(
-                'The form showed pipelines working. Tom understood: async code was often best described as streams transforming through stages. Tom chalked {drawn.a} on the village notice, and the morning record stood for the next shepherd to read.'
+                'The form showed pipelines working. Tom understood: async code was often best described as streams transforming through stages. Tom chalked {drawn.a} on the meadow folk notice, and the morning record stood for the next shepherd to read.'
             )),
     ],
     subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G12,
@@ -401,7 +401,7 @@ G12_06 = SubjectCurriculum(
                 "false, because 42 is a number, not a string."
             ),
             resolution=(
-                "The form showed the REPL rejecting the bad value. Tom understood: specs were the village's way of writing rules the runtime enforced."
+                "The form showed the REPL rejecting the bad value. Tom understood: specs were the townsfolk's way of writing rules the runtime enforced."
             )),
     ],
     subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G12,
@@ -486,7 +486,7 @@ G12_08 = SubjectCurriculum(
             "the clojure.test core forms",
             "the marker for the clojure.test lesson",
             scenario=(
-                "Carol showed Tom the three main forms the village used for tests: "
+                "Carol showed Tom the three main forms the valley used for tests: "
                 "deftest, is, and testing."
             ),
             need=(
@@ -541,7 +541,7 @@ G12_09 = SubjectCurriculum(
             ),
             need=(
                 "Carol explained that this pattern — setup, test, teardown — was so "
-                "common that the village had made it a named tool."
+                "common that the watchhouse had made it a named tool."
             ),
             mapping=(
                 "A fixture is a routine that runs before a test (setup) and after "
@@ -598,7 +598,7 @@ G12_10 = SubjectCurriculum(
                 "property against each, and reports which inputs failed."
             ),
             resolution=(
-                'Tom saw properties tested against hundreds of inputs. Test.check found edge cases he had never thought to check by hand. Tom chalked {drawn.a} on the village notice, and the morning record stood for the next shepherd to read.'
+                'Tom saw properties tested against hundreds of inputs. Test.check found edge cases he had never thought to check by hand. Tom chalked {drawn.a} on the meadow folk notice, and the morning record stood for the next shepherd to read.'
             )),
     ],
     subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G12,
@@ -637,7 +637,7 @@ G12_11 = SubjectCurriculum(
             "the marker keyword for the Leiningen lesson",
             scenario=(
                 "By season's end, Tom had created many projects with Leiningen. "
-                "He always put project.clj at the root, as the village required."
+                "He always put project.clj at the root, as the townsfolk required."
             ),
             need=(
                 "Carol explained that Leiningen always looked for project.clj at "
@@ -941,7 +941,7 @@ G12_17 = SubjectCurriculum(
             "the conventional Clojure API shape",
             "the marker keyword for the API-shape lesson",
             scenario=(
-                "Carol showed Tom the libraries the village used most. Every one "
+                "Carol showed Tom the libraries the meadow folk used most. Every one "
                 "had a small, focused API."
             ),
             need=(
@@ -964,7 +964,7 @@ G12_17 = SubjectCurriculum(
                 "to a vector. Plain data in, plain data out."
             ),
             need=(
-                "This is the API shape the village trusted: no wrappers, no objects, "
+                "This is the API shape the valley trusted: no wrappers, no objects, "
                 "just the data transformation."
             ),
             mapping=(
@@ -992,7 +992,7 @@ G12_18 = SubjectCurriculum(
             "the marker for the style-guide lesson",
             scenario=(
                 "The season had nearly ended. Carol and Tom reviewed the code Tom "
-                "had written. They checked it against the village's style guide."
+                "had written. They checked it against the valley's style guide."
             ),
             need=(
                 "Tom had written names in camelCase, indented with four spaces. "
@@ -1001,7 +1001,7 @@ G12_18 = SubjectCurriculum(
             mapping=(
                 "Clojure style: kebab-case names (like my-function), two-space "
                 "indent, and threading operators (-> and ->>) for deep nesting. "
-                "These make code readable to every shepherd in the village."
+                "These make code readable to every shepherd in the watchhouse."
             ),
             resolution=(
                 "Tom reformatted his code to match the guide. It looked cleaner. By season's end, he wrote in style without thinking. The fold gate held tight against the count of {drawn.a}, slate cool under the elder hand."
@@ -1024,7 +1024,7 @@ G12_18 = SubjectCurriculum(
                 "warns readers: be careful, this one changes something."
             ),
             resolution=(
-                'Tom renamed his functions. Now a reader could glance at the name and know: this one just reads data, this one might change it. The naming was its own documentation. Tom chalked {drawn.a} on the village notice, and the morning record stood for the next shepherd to read.'
+                'Tom renamed his functions. Now a reader could glance at the name and know: this one just reads data, this one might change it. The naming was its own documentation. Tom chalked {drawn.a} on the watchhouse notice, and the morning record stood for the next shepherd to read.'
             )),
     ],
     subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G12,

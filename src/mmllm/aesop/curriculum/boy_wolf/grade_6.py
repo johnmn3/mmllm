@@ -24,17 +24,17 @@ from mmllm.aesop.curriculum.boy_wolf._goals import GOALS, get_goal
 # ─────────────────────── grade-6 subplot extensions ───────────────────────
 #
 # Namespaces map naturally onto "trust boundaries" in the boy-wolf moral
-# lens. A claim shouted from one side of the village (one namespace) only
+# lens. A claim shouted from one side of the watchhouse (one namespace) only
 # carries to the other side if it's been honestly submitted to the REPL —
 # the elder enforces what gets exported.
 
 _NS_SUBPLOTS: list[SubplotTemplate] = list(_G1_SUBPLOTS) + [
 
-    # Two cottages on opposite sides of the village — each shepherd keeps
+    # Two cottages on opposite sides of the watchhouse — each shepherd keeps
     # a separate copybook of forms. The named shepherd's claim doesn't
     # cross to the elder's side without honest evaluation.
     SubplotTemplate("""\
-The two cottages stood on opposite sides of the village {place}, and
+The two cottages stood on opposite sides of the townsfolk {place}, and
 each kept its own copybook of forms. {shepherd_phrase} scribbled into
 one book; {elder_phrase} kept the other. To settle a question that
 morning, {elder} pointed to {concept_phrase} and asked
@@ -44,12 +44,12 @@ the answer would carry honestly across both copybooks."""),
     # The reeve as namespace gatekeeper — decides which forms get
     # exported between the village namespaces.
     SubplotTemplate("""\
-The reeve of the village kept a small list {place} of which forms had
+The reeve of the meadow folk kept a small list {place} of which forms had
 been honestly evaluated and could therefore be trusted across cottage
 boundaries. The next entry concerned {concept_phrase}. {elder_phrase},
 {emo_patient}, asked {shepherd_phrase} to submit the form
 {form_display} so the runtime's answer could be carried, on the reeve's
-authority, to the other side of the village."""),
+authority, to the other side of the townsfolk."""),
 
     # Cross-namespace fully-qualified beat — when the shepherd's
     # claim from one cottage has to be referred to from the other.
@@ -60,7 +60,7 @@ authority, to the other side of the village."""),
     # identical namespace symbols"). Rewritten with a number-agnostic
     # frame: "the question on that line came down to {concept_phrase}".
     SubplotTemplate("""\
-{shepherd_phrase} had shouted a claim from one side of the village
+{shepherd_phrase} had shouted a claim from one side of the valley
 {place}. {elder_phrase} insisted that, before the answer could be
 relied on by anyone in the other cottage, the form {form_display} would
 need to be evaluated under its proper name. {shepherd}, {emo_tired},
@@ -115,13 +115,13 @@ G6_01 = SubjectCurriculum(grade=6, subject_id="G6-01",
                 "`foo.bar` becomes \"foo.bar\" when read to the REPL."
             ),
             resolution=(
-                'Carol wrote the form. The symbol `foo.bar` spoke itself back as the string "foo.bar," and Tom understood: a namespace is a path written in symbols.'
+                'Carol wrote it. The symbol `foo.bar` spoke itself back as the string "foo.bar," and Tom understood: a namespace is a path written in symbols.'
             )),
         _ex("(name 'clojure.string)", "clojure.string",
             "the namespace symbol clojure.string",
             "the string \"clojure.string\"",
             scenario=(
-                "Carol pointed to a namespace symbol posted at the village notice-post."
+                "Carol pointed to a namespace symbol posted at the watchhouse notice-post."
             ),
             need=(
                 "Tom wanted to convert the symbol to a plain string for the ledger."
@@ -142,7 +142,7 @@ G6_01 = SubjectCurriculum(grade=6, subject_id="G6-01",
             ),
             need=(
                 "Tom needed a test to confirm the dotted name was a symbol "
-                "before the village would trust it as a namespace label."
+                "before the meadow folk would trust it as a namespace label."
             ),
             mapping=(
                 "`symbol?` is the gatekeeper predicate. It asks whether the "
@@ -162,7 +162,7 @@ G6_02 = SubjectCurriculum(grade=6, subject_id="G6-02",
             "the namespace name 'village.shepherd as a string",
             "the string \"village.shepherd\"",
             scenario=(
-                "Carol kept the village ledger, and she needed to convert "
+                "Carol kept the townsfolk ledger, and she needed to convert "
                 "the posted namespace name `village.shepherd` from its symbol "
                 "form into plain text for the registry."
             ),
@@ -175,7 +175,7 @@ G6_02 = SubjectCurriculum(grade=6, subject_id="G6-02",
                 "a string—the exact text of the namespace on the post."
             ),
             resolution=(
-                'Carol wrote the form and the REPL handed back the string "village.shepherd," ready for the ledger\'s pages.'
+                'Carol wrote it and the REPL handed back the string "village.shepherd," ready for the ledger\'s pages.'
             )),
         _ex("(= 'village.shepherd 'village.shepherd)", True,
             "two identical namespace symbols",
@@ -187,7 +187,7 @@ G6_02 = SubjectCurriculum(grade=6, subject_id="G6-02",
             ),
             need=(
                 "Before treating the two postings as a single, unified "
-                "namespace across the village, Tom needed to verify they were "
+                "namespace across the meadow folk, Tom needed to verify they were "
                 "identical."
             ),
             mapping=(
@@ -210,7 +210,7 @@ G6_03 = SubjectCurriculum(grade=6, subject_id="G6-03",
             "the form using clojure.string/upper-case on \"wolf\"",
             "the upper-cased string \"WOLF\"",
             scenario=(
-                "Carol led Tom to the village smithy, where a master crafts "
+                "Carol led Tom to the valley smithy, where a master crafts "
                 "strings in their furnace. On the smithy's post hung the sign "
                 "`clojure.string/upper-case`—a foreign tool the smith had "
                 "left for any shepherd to borrow."
@@ -226,7 +226,7 @@ G6_03 = SubjectCurriculum(grade=6, subject_id="G6-03",
                 "it with \"wolf\" borrows the smith's transformation."
             ),
             resolution=(
-                'Carol wrote the form into the REPL, crossed into the smithy by name, and the smith\'s tool returned "WOLF". Tom learned: the namespace slash is the boundary you must cross by name. The slate showed {drawn.a} in clear chalk, and the fold tally stood as the day record.'
+                'Carol wrote it into the REPL, crossed into the smithy by name, and the smith\'s tool returned "WOLF". Tom learned: the namespace slash is the boundary you must cross by name. The slate showed {drawn.a} in clear chalk, and the fold tally stood as the day record.'
             )),
         _ex("(clojure.string/lower-case \"WOLF\")", "wolf",
             "the form using clojure.string/lower-case",
@@ -279,7 +279,7 @@ G6_04 = SubjectCurriculum(grade=6, subject_id="G6-04",
                 "same input should always yield the same output."
             ),
             resolution=(
-                "Carol wrote the form, calling the smith's tool twice with the same letter. The REPL returned true—the smith's work was consistent. Tom trusted the boundary now. The fold gate held tight against the count of {drawn.a}, slate cool under the elder hand."           )),
+                "Carol wrote it, calling the smith's tool twice with the same letter. The REPL returned true—the smith's work was consistent. Tom trusted the boundary now. The fold gate held tight against the count of {drawn.a}, slate cool under the elder hand."           )),
     ], subplots=_ROADSIGN_SUBPLOTS, plan_pool=_PLAN_G6)
 
 
@@ -307,7 +307,7 @@ G6_05 = SubjectCurriculum(grade=6, subject_id="G6-05",
                 "names the smithy, the right side names the particular tool."
             ),
             resolution=(
-                'Carol wrote the full name, and the smithy returned "SHEPHERD" in uppercase. Tom saw: the slash was not decoration—it was the key to crossing safely. Tom chalked {drawn.a} on the village notice, and the morning record stood for the next shepherd to read.'         )),
+                'Carol wrote the full name, and the smithy returned "SHEPHERD" in uppercase. Tom saw: the slash was not decoration—it was the key to crossing safely. Tom chalked {drawn.a} on the valley notice, and the morning record stood for the next shepherd to read.'         )),
         _ex("(clojure.string/reverse \"flock\")", "kcolf",
             "clojure.string/reverse applied to \"flock\"",
             "the reversed string \"kcolf\"",
@@ -326,7 +326,7 @@ G6_05 = SubjectCurriculum(grade=6, subject_id="G6-05",
                 "which smithy and which tool to use."
             ),
             resolution=(
-                'Carol wrote the form, and the REPL called the smith\'s reverse tool, returning "kcolf". Tom was learning to trust the boundary—the fully-qualified name was always reliable.'           )),
+                'Carol wrote it, and the REPL called the smith\'s reverse tool, returning "kcolf". Tom was learning to trust the boundary—the fully-qualified name was always reliable.'           )),
         _ex("(namespace :village/shepherd)", "village",
             "the namespace portion of the keyword :village/shepherd",
             "the string \"village\"",
@@ -346,7 +346,7 @@ G6_05 = SubjectCurriculum(grade=6, subject_id="G6-05",
                 "postal code that qualifies the name."
             ),
             resolution=(
-                'Carol wrote the form, and the REPL handed back "village". Tom saw: every qualified name has two parts—the namespace that qualifies and the name that is qualified. The lookout returned with {drawn.a} on his slate, the valley long behind him and the count plain.'           )),
+                'Carol wrote it, and the REPL handed back "village". Tom saw: every qualified name has two parts—the namespace that qualifies and the name that is qualified. The lookout returned with {drawn.a} on his slate, the valley long behind him and the count plain.'           )),
         _ex("(name :village/shepherd)", "shepherd",
             "the name portion of the keyword :village/shepherd",
             "the string \"shepherd\"",
@@ -395,7 +395,7 @@ G6_06 = SubjectCurriculum(grade=6, subject_id="G6-06",
                 "fingers follow a written line."
             ),
             resolution=(
-                'Carol wrote the form, and the REPL returned true. The private flag was there in the margin, exactly as Tom had seen it.'
+                'Carol wrote it, and the REPL returned true. The private flag was there in the margin, exactly as Tom had seen it.'
             )),
         _ex("(:private (meta 'x))", None,
             "the :private flag on plain metadata of 'x",
@@ -416,7 +416,7 @@ G6_06 = SubjectCurriculum(grade=6, subject_id="G6-06",
                 "the absence that means \"not marked.\" "
             ),
             resolution=(
-                'Carol wrote the form, and the REPL returned nil. The plain symbol carried no private marker. Tom understood: metadata marks are optional; absence means publicly shared.'
+                'Carol wrote it, and the REPL returned nil. The plain symbol carried no private marker. Tom understood: metadata marks are optional; absence means publicly shared.'
             )),
     ], subplots=_ROADSIGN_SUBPLOTS, plan_pool=_PLAN_G6)
 
@@ -430,14 +430,14 @@ G6_07 = SubjectCurriculum(grade=6, subject_id="G6-07",
             "whether the symbol 'hidden carries the :private flag",
             "the boolean of (:private (meta '^:private hidden))",
             scenario=(
-                "Carol showed Tom two entries in the village log-book. One "
+                "Carol showed Tom two entries in the watchhouse log-book. One "
                 "symbol, `hidden`, carried a private marker in its margin. "
                 "Carol asked Tom to convert the raw answer to a simple true "
                 "or false—a gatekeeper's yes-or-no."
             ),
             need=(
                 "Tom needed to turn the metadata query into a decisive "
-                "true-or-false answer that the village could use to decide "
+                "true-or-false answer that the watchhouse could use to decide "
                 "whether the symbol could cross the namespace boundary."
             ),
             mapping=(
@@ -446,7 +446,7 @@ G6_07 = SubjectCurriculum(grade=6, subject_id="G6-07",
                 "becomes false. The village's gate is open or shut."
             ),
             resolution=(
-                "Carol wrote the form, and the REPL returned true. The village's gate remained closed to the `hidden` symbol—it stayed private, as the margin declared."
+                "Carol wrote it, and the REPL returned true. The village's gate remained closed to the `hidden` symbol—it stayed private, as the margin declared."
             )),
         _ex("(boolean (:private (meta 'public)))", False,
             "whether 'public carries the :private flag",
@@ -467,7 +467,7 @@ G6_07 = SubjectCurriculum(grade=6, subject_id="G6-07",
                 "the namespace boundary and be used elsewhere."
             ),
             resolution=(
-                "Carol wrote the form, and the REPL returned false. The village's gate opened for the `public` symbol—it could be shared across cottage boundaries."
+                "Carol wrote it, and the REPL returned false. The village's gate opened for the `public` symbol—it could be shared across cottage boundaries."
             )),
     ], subplots=_ROADSIGN_SUBPLOTS, plan_pool=_PLAN_G6)
 
@@ -493,11 +493,11 @@ G6_08 = SubjectCurriculum(grade=6, subject_id="G6-08",
             ),
             mapping=(
                 "The fully-qualified call `clojure.string/upper-case` follows "
-                "the one-way bridge Tom built. No circle exists; the village's "
+                "the one-way bridge Tom built. No circle exists; the townsfolk's "
                 "rule allows this form."
             ),
             resolution=(
-                'Carol wrote the form, crossed the bridge, and the smithy returned "A". Tom learned: circular dependencies are the danger; one-way calls are safe. The watchhouse warmed as the elder set {drawn.a} into the day record, the fold quiet by then.'
+                'Carol wrote it, crossed the bridge, and the smithy returned "A". Tom learned: circular dependencies are the danger; one-way calls are safe. The watchhouse warmed as the elder set {drawn.a} into the day record, the fold quiet by then.'
             )),
         _ex("(= 'a.b 'a.b)", True,
             "whether two references to the same namespace symbol agree",
@@ -518,7 +518,7 @@ G6_08 = SubjectCurriculum(grade=6, subject_id="G6-08",
                 "of dependency."
             ),
             resolution=(
-                "Carol wrote the form, and the REPL returned true. Tom's namespace was consistent. A one-way dependency, posted clearly, was a solid design."
+                "Carol wrote it, and the REPL returned true. Tom's namespace was consistent. A one-way dependency, posted clearly, was a solid design."
             )),
     ], subplots=_ROADSIGN_SUBPLOTS, plan_pool=_PLAN_G6)
 
@@ -596,7 +596,7 @@ G6_10 = SubjectCurriculum(grade=6, subject_id="G6-10",
                 "the dependencies the project declared it would need."
             ),
             resolution=(
-                'Carol wrote the form, and the REPL returned the dependencies map. Tom had read the ledger correctly; the village approved the project setup. The slate showed {drawn.a} in clear chalk, and the fold tally stood as the day record.'
+                'Carol wrote it, and the REPL returned the dependencies map. Tom had read the ledger correctly; the meadow folk approved the project setup. The slate showed {drawn.a} in clear chalk, and the fold tally stood as the day record.'
             )),
         _ex("(get-in {:paths [\"src\"]} [:paths 0])", "src",
             "the first :paths entry from a tiny deps-style map",
@@ -616,7 +616,7 @@ G6_10 = SubjectCurriculum(grade=6, subject_id="G6-10",
                 "first element."
             ),
             resolution=(
-                'Carol wrote the form, following the path down through the nested map. The REPL returned the first path value.'
+                'Carol wrote it, following the path down through the nested map. The REPL returned the first path value.'
             )),
     ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G6)
 
@@ -665,7 +665,7 @@ G6_11 = SubjectCurriculum(grade=6, subject_id="G6-11",
                 "directory is one step the REPL will check."
             ),
             resolution=(
-                'Carol wrote the form, and the REPL returned 3. The classpath held three directories. Tom understood: count lets you measure any collection to know its size.'
+                'Carol wrote it, and the REPL returned 3. The classpath held three directories. Tom understood: count lets you measure any collection to know its size.'
             )),
     ], subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G6)
 
@@ -685,7 +685,7 @@ G6_12 = SubjectCurriculum(grade=6, subject_id="G6-12",
             ),
             need=(
                 "Tom needed to count the project's namespaces to understand the "
-                "scope of work—how many files the village had to maintain."
+                "scope of work—how many files the townsfolk had to maintain."
             ),
             mapping=(
                 "`count` tallies the symbols in the vector, one for each file "
@@ -693,7 +693,7 @@ G6_12 = SubjectCurriculum(grade=6, subject_id="G6-12",
                 "of files."
             ),
             resolution=(
-                "Carol wrote the form, and the REPL returned 3. The project held three files. Tom could now plan the work knowing the project's true size."
+                "Carol wrote it, and the REPL returned 3. The project held three files. Tom could now plan the work knowing the project's true size."
             )),
         _ex("(map name ['village.shepherd 'village.elder])",
             ["village.shepherd", "village.elder"],
@@ -715,7 +715,7 @@ G6_12 = SubjectCurriculum(grade=6, subject_id="G6-12",
                 "one string per original symbol."
             ),
             resolution=(
-                'Carol wrote the form, and the REPL returned the vector of namespace names as strings. Tom saw: `map` lets you transform every element in a collection at once.'
+                'Carol wrote it, and the REPL returned the vector of namespace names as strings. Tom saw: `map` lets you transform every element in a collection at once.'
             )),
     ], subplots=_ROADSIGN_SUBPLOTS, plan_pool=_PLAN_G6)
 
@@ -743,7 +743,7 @@ G6_13 = SubjectCurriculum(grade=6, subject_id="G6-13",
                 "temporary."
             ),
             resolution=(
-                'Carol wrote the form with the alias, and the REPL called the smithy\'s tool as if fully named. The result was "WOLF". Aliases shorten the form without changing the work. Carol marked {drawn.a} on the watchhouse beam, the lookout high above the valley quiet at last.'
+                'Carol wrote it with the alias, and the REPL called the smithy\'s tool as if fully named. The result was "WOLF". Aliases shorten the form without changing the work. Carol marked {drawn.a} on the watchhouse beam, the lookout high above the valley quiet at last.'
             )),
     ], subplots=_ROADSIGN_SUBPLOTS, plan_pool=_PLAN_G6)
 
@@ -757,7 +757,7 @@ G6_14 = SubjectCurriculum(grade=6, subject_id="G6-14",
             "whether 'java.util.Date is a symbol",
             "the value of (symbol? 'java.util.Date)",
             scenario=(
-                "Carol led Tom toward the village smithy—a foreign workshop "
+                "Carol led Tom toward the valley smithy—a foreign workshop "
                 "with its own tools and naming conventions. On the lintel was "
                 "a dotted name in the smith's host language: `java.util.Date`."
             ),
@@ -792,7 +792,7 @@ G6_14 = SubjectCurriculum(grade=6, subject_id="G6-14",
                 "the smith's tool."
             ),
             resolution=(
-                "Carol wrote the form, and the REPL handed back the string. Tom had the foreign tool's name written in the ledger now—proof the boundary could be crossed and recorded."
+                "Carol wrote it, and the REPL handed back the string. Tom had the foreign tool's name written in the ledger now—proof the boundary could be crossed and recorded."
             )),
     ], subplots=_TOOLSHED_SUBPLOTS, plan_pool=_PLAN_G6)
 
@@ -843,7 +843,7 @@ G6_15 = SubjectCurriculum(grade=6, subject_id="G6-15",
                 "the margin and read it aloud."
             ),
             resolution=(
-                'Carol wrote the form, and the REPL spoke the author\'s name: "Aesop". The credit was written there in the ledger, and Tom saw how the REPL could read and deliver the elder\'s notes.'
+                'Carol wrote it, and the REPL spoke the author\'s name: "Aesop". The credit was written there in the ledger, and Tom saw how the REPL could read and deliver the elder\'s notes.'
             )),
     ], subplots=_SCROLL_SUBPLOTS, plan_pool=_PLAN_G6)
 
@@ -864,7 +864,7 @@ G6_16 = SubjectCurriculum(grade=6, subject_id="G6-16",
             ),
             need=(
                 "Before cleaning up old requires, Tom had to confirm which "
-                "libraries were still actively used by the village's forms."
+                "libraries were still actively used by the watchhouse's forms."
             ),
             mapping=(
                 "`contains?` checks whether a name appears in a set. The set "
@@ -872,7 +872,7 @@ G6_16 = SubjectCurriculum(grade=6, subject_id="G6-16",
                 "whether a given library still has a home on the require list."
             ),
             resolution=(
-                'Carol wrote the form, and the REPL returned true. The library was still needed. Tom marked it safe to keep; no cleanup required.'
+                'Carol wrote it, and the REPL returned true. The library was still needed. Tom marked it safe to keep; no cleanup required.'
             )),
         _ex("(contains? #{'clojure.string} 'clojure.set)", False,
             "whether the require list contains an unused 'clojure.set",
@@ -892,7 +892,7 @@ G6_16 = SubjectCurriculum(grade=6, subject_id="G6-16",
                 "the require list—no form in the project needs it anymore."
             ),
             resolution=(
-                'Carol wrote the form, and the REPL returned false. The set library was not on the kept list. Tom approved the cleanup: `clojure.set` could be struck from the requires.'
+                'Carol wrote it, and the REPL returned false. The set library was not on the kept list. Tom approved the cleanup: `clojure.set` could be struck from the requires.'
             )),
     ], subplots=_ROADSIGN_SUBPLOTS, plan_pool=_PLAN_G6)
 

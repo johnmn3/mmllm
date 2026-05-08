@@ -9,13 +9,13 @@ cannot be recovered when it matters — is mapped onto REPL discipline:
     trusted by the village (and by the shepherd's own self).
   - The ELDER / VILLAGER plays the corrective voice: "Submit the form.
     The runtime is the only voice we trust now." The corrective
-    discipline lives in the surrounding villagers, the village elder,
+    discipline lives in the surrounding villagers, the watchhouse elder,
     and the careful neighbouring shepherds, NOT in the boy himself.
 
 This is the principled difference from tortoise-hare's mapping: there,
 both characters are alive in the story and the corrective voice is
 itself a model character. Here, the named protagonist is the negative
-example, and the corrective voice is the village around him.
+example, and the corrective voice is the watchhouse around him.
 
 Tonal note: the boy-wolf chapters in `mmllm.aesop.fables` use measured
 language about wolf encounters — "the wolf scattered the flock", "sheep

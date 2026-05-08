@@ -31,7 +31,7 @@ _COLL_SUBPLOTS: list[SubplotTemplate] = list(_G1_SUBPLOTS) + [
 {elder_phrase} had been laying out a small collection {place} —
 pebbles, sheep counted at sundown, marks on the slate, whatever the
 day produced. {elder} wrote {form_display} on a flat board and asked
-{shepherd_phrase} to write the form into the REPL so the village could
+{shepherd_phrase} to write the form into the REPL so the watchhouse could
 confirm it together."""),
 
     # NOTE (boy-wolf polish, hand-audit pass): the second quoted
@@ -84,7 +84,7 @@ G4_01 = SubjectCurriculum(grade=4, subject_id="G4-01",
                 "with nothing inside it — the basket exists, but holds no fleeces."
             ),
             resolution=(
-                "the form returned the empty vector, capturing the basket's state before the day's shearing began. The slate showed {drawn.a} in clear chalk, and the fold tally stood as the day record."
+                "the call returned the empty vector, capturing the basket's state before the day's shearing began. The slate showed {drawn.a} in clear chalk, and the fold tally stood as the day record."
             )),
         _ex("[\"a\" \"b\"]", ["a","b"], "the vector of strings", "the vector [\"a\" \"b\"]",
             scenario=(
@@ -102,7 +102,7 @@ G4_01 = SubjectCurriculum(grade=4, subject_id="G4-01",
                 "grouped collection the `count` form or `nth` form can address."
             ),
             resolution=(
-                "the form returned the pair of strings, and the dyers read off 'a' then 'b' from the basket as the REPL had settled it."
+                "the call returned the pair of strings, and the dyers read off 'a' then 'b' from the basket as the REPL had settled it."
             )),
     ], subplots=_BASKET_SUBPLOTS, plan_pool=_PLAN_G4)
 
@@ -110,7 +110,7 @@ G4_01 = SubjectCurriculum(grade=4, subject_id="G4-01",
 G4_02 = SubjectCurriculum(grade=4, subject_id="G4-02",
     subject_title="nth — vector access", fable="boy-wolf",
     examples=[
-        _ex("(nth [10 20 30] 0)", 10, "the form (nth [10 20 30] 0)", "the value at index 0",
+        _ex("(nth [10 20 30] 0)", 10, "the expression (nth [10 20 30] 0)", "the value at index 0",
             scenario=(
                 "Carol lined up three bundles of fleece in the basket, "
                 "marking them by weight: 10 at the left, 20 in the middle, 30 at "
@@ -126,9 +126,9 @@ G4_02 = SubjectCurriculum(grade=4, subject_id="G4-02",
                 "spot without changing the basket."
             ),
             resolution=(
-                'the form returned 10, the weight Carol had marked on the leftmost bundle. Carol marked {drawn.a} on the watchhouse beam, the lookout high above the valley quiet at last.'
+                'the call returned 10, the weight Carol had marked on the leftmost bundle. Carol marked {drawn.a} on the watchhouse beam, the lookout high above the valley quiet at last.'
             )),
-        _ex("(nth [10 20 30] 2)", 30, "the form (nth [10 20 30] 2)", "the value at index 2",
+        _ex("(nth [10 20 30] 2)", 30, "the expression (nth [10 20 30] 2)", "the value at index 2",
             scenario=(
                 "Carol's three bundles still lay in the basket: 10, 20, 30 from "
                 "left to right. Tom now wanted the rightmost bundle's weight, "
@@ -144,7 +144,7 @@ G4_02 = SubjectCurriculum(grade=4, subject_id="G4-02",
                 "form walks there and returns the item."
             ),
             resolution=(
-                'the form returned 30, the weight at the rightmost position in the basket. The fold gate held tight against the count of {drawn.a}, slate cool under the elder hand.'
+                'the call returned 30, the weight at the rightmost position in the basket. The fold gate held tight against the count of {drawn.a}, slate cool under the elder hand.'
             )),
     ], subplots=_BASKET_SUBPLOTS, plan_pool=_PLAN_G4)
 
@@ -152,7 +152,7 @@ G4_02 = SubjectCurriculum(grade=4, subject_id="G4-02",
 G4_03 = SubjectCurriculum(grade=4, subject_id="G4-03",
     subject_title="conj — append to vector", fable="boy-wolf",
     examples=[
-        _ex("(conj [1 2] 3)",       [1,2,3],   "the form (conj [1 2] 3)",      "[1 2] with 3 conjed",
+        _ex("(conj [1 2] 3)",       [1,2,3],   "the expression (conj [1 2] 3)",      "[1 2] with 3 conjed",
             scenario=(
                 "Carol held a wool-basket with two fleeces already sorted: "
                 "weight 1 and weight 2 tucked inside. A third fleece, weight 3, "
@@ -169,9 +169,9 @@ G4_03 = SubjectCurriculum(grade=4, subject_id="G4-03",
                 "fresh item appended, the old basket untouched."
             ),
             resolution=(
-                "the form returned the new basket with three fleeces in the new arrangement, while Carol's original remained unchanged. Tom chalked {drawn.a} on the village notice, and the morning record stood for the next shepherd to read."
+                "the call returned the new basket with three fleeces in the new arrangement, while Carol's original remained unchanged. Tom chalked {drawn.a} on the watchhouse notice, and the morning record stood for the next shepherd to read."
             )),
-        _ex("(conj [] :wolf)",      [":wolf"], "the form (conj [] :wolf)",     "the empty vector with :wolf conjed",
+        _ex("(conj [] :wolf)",      [":wolf"], "the expression (conj [] :wolf)",     "the empty vector with :wolf conjed",
             scenario=(
                 "Carol brought an empty wool-basket to the fold. Tom wanted "
                 "to add a single marker, the keyword `:wolf`, to track which "
@@ -187,7 +187,7 @@ G4_03 = SubjectCurriculum(grade=4, subject_id="G4-03",
                 "empty form into a one-element vector."
             ),
             resolution=(
-                'the form returned a basket with one item, the marker `:wolf` nested inside, ready for the flock count. The lookout returned with {drawn.a} on his slate, the valley long behind him and the count plain.'
+                'the call returned a basket with one item, the marker `:wolf` nested inside, ready for the flock count. The lookout returned with {drawn.a} on his slate, the valley long behind him and the count plain.'
             )),
     ], subplots=_BASKET_SUBPLOTS, plan_pool=_PLAN_G4)
 
@@ -211,7 +211,7 @@ G4_04 = SubjectCurriculum(grade=4, subject_id="G4-04",
                 "as a list shape instead of trying to call the first as a function."
             ),
             resolution=(
-                'the form returned the list with three items in sequence, ready to be counted or passed through another form. The watchhouse warmed as the elder set {drawn.a} into the day record, the fold quiet by then.'
+                'the call returned the list with three items in sequence, ready to be counted or passed through another form. The watchhouse warmed as the elder set {drawn.a} into the day record, the fold quiet by then.'
             )),
         _ex("'()",      [],       "the empty list",     "the empty list",
             scenario=(
@@ -221,14 +221,14 @@ G4_04 = SubjectCurriculum(grade=4, subject_id="G4-04",
             ),
             need=(
                 "The form had to express the cord itself without any items on it, "
-                "so the village could understand the shape of an empty list."
+                "so the townsfolk could understand the shape of an empty list."
             ),
             mapping=(
                 "The quoted empty list `'()` describes a rope-like sequence with "
                 "no items, parentheses wrapped in the quote to hold its shape."
             ),
             resolution=(
-                'the form returned the empty list, and the REPL showed the cord with no markers strung. {drawn.a} stood as the answer the fold required, slate, chalk, and a steady eye all in agreement.'
+                'the call returned the empty list, and the REPL showed the cord with no markers strung. {drawn.a} stood as the answer the fold required, slate, chalk, and a steady eye all in agreement.'
             )),
     ], subplots=_BASKET_SUBPLOTS, plan_pool=_PLAN_G4)
 
@@ -236,7 +236,7 @@ G4_04 = SubjectCurriculum(grade=4, subject_id="G4-04",
 G4_05 = SubjectCurriculum(grade=4, subject_id="G4-05",
     subject_title="cons — prepend to seq", fable="boy-wolf",
     examples=[
-        _ex("(cons 0 '(1 2 3))", [0,1,2,3], "the form (cons 0 '(1 2 3))", "the seq with 0 cons'd at the front",
+        _ex("(cons 0 '(1 2 3))", [0,1,2,3], "the expression (cons 0 '(1 2 3))", "the seq with 0 cons'd at the front",
             scenario=(
                 "Carol held a cord with three markers: 1, 2, 3 in sequence. A new "
                 "marker, 0, arrived that needed to go at the very front, before all "
@@ -253,7 +253,7 @@ G4_05 = SubjectCurriculum(grade=4, subject_id="G4-05",
                 "rest of the rope intact behind it."
             ),
             resolution=(
-                'the form returned a new sequence with 0 at the front and 1, 2, 3 following — the original cord preserved, the new pattern complete. The pasture tally settled at {drawn.a}, and Carol closed the day slate with that one number written clear.'         )),
+                'the call returned a new sequence with 0 at the front and 1, 2, 3 following — the original cord preserved, the new pattern complete. The pasture tally settled at {drawn.a}, and Carol closed the day slate with that one number written clear.'         )),
     ], subplots=_BASKET_SUBPLOTS, plan_pool=_PLAN_G4)
 
 
@@ -277,7 +277,7 @@ G4_06 = SubjectCurriculum(grade=4, subject_id="G4-06",
                 "the basket's labeled arrangement in a form."
             ),
             resolution=(
-                'the form returned the map showing both pouches and their counts, ready for the `get` form to pull from a single named pouch. The slate showed {drawn.a} in clear chalk, and the fold tally stood as the day record.'
+                'the call returned the map showing both pouches and their counts, ready for the `get` form to pull from a single named pouch. The slate showed {drawn.a} in clear chalk, and the fold tally stood as the day record.'
             )),
     ], subplots=_BASKET_SUBPLOTS, plan_pool=_PLAN_G4)
 
@@ -285,7 +285,7 @@ G4_06 = SubjectCurriculum(grade=4, subject_id="G4-06",
 G4_07 = SubjectCurriculum(grade=4, subject_id="G4-07",
     subject_title="get — map lookup", fable="boy-wolf",
     examples=[
-        _ex("(get {:a 1 :b 2} :a)", 1, "the form (get {:a 1 :b 2} :a)", "the value at :a",
+        _ex("(get {:a 1 :b 2} :a)", 1, "the expression (get {:a 1 :b 2} :a)", "the value at :a",
             scenario=(
                 "Carol's wool-basket held two labeled pouches: `:a` with 1 fleece "
                 "and `:b` with 2. Tom wanted the count from the `:a` pouch alone."
@@ -302,7 +302,7 @@ G4_07 = SubjectCurriculum(grade=4, subject_id="G4-07",
             resolution=(
                 'the lookup returned 1 — the count from the `:a` pouch — and the rest of the basket stayed settled. Carol marked {drawn.a} on the watchhouse beam, the lookout high above the valley quiet at last.'         )),
         _ex("(get {:a 1} :missing :default)", ":default",
-            "the form (get {:a 1} :missing :default)", "the default value when key missing",
+            "the expression (get {:a 1} :missing :default)", "the default value when key missing",
             scenario=(
                 "Carol's basket held one pouch labeled `:a` with 1 fleece. Tom "
                 "asked for a pouch that didn't exist in the basket."
@@ -314,7 +314,7 @@ G4_07 = SubjectCurriculum(grade=4, subject_id="G4-07",
             mapping=(
                 "`get` with three arguments takes the map, the key to look for, "
                 "and a fallback value. When the key isn't found in the basket, "
-                "the form returns the fallback instead of nil."
+                "it returns the fallback instead of nil."
             ),
             resolution=(
                 "the lookup returned the fallback value, signaling that the missing pouch didn't exist. The fold gate held tight against the count of {drawn.a}, slate cool under the elder hand."
@@ -326,7 +326,7 @@ G4_08 = SubjectCurriculum(grade=4, subject_id="G4-08",
     subject_title="assoc — map update", fable="boy-wolf",
     examples=[
         _ex("(assoc {:a 1} :b 2)", {":a": 1, ":b": 2},
-            "the form (assoc {:a 1} :b 2)", "the map after assoc'ing :b 2",
+            "the expression (assoc {:a 1} :b 2)", "the map after assoc'ing :b 2",
             scenario=(
                 "Carol held a wool-basket with one pouch labeled `:a` holding 1 "
                 "fleece. A fresh delivery brought new fleeces that needed a second "
@@ -342,10 +342,10 @@ G4_08 = SubjectCurriculum(grade=4, subject_id="G4-08",
                 "basket that holds both the original `:a` and the new `:b`."
             ),
             resolution=(
-                'the form returned a new basket showing both `:a` 1 and `:b` 2, while the original single-pouch basket stood untouched. Tom chalked {drawn.a} on the village notice, and the morning record stood for the next shepherd to read.'
+                'the call returned a new basket showing both `:a` 1 and `:b` 2, while the original single-pouch basket stood untouched. Tom chalked {drawn.a} on the village notice, and the morning record stood for the next shepherd to read.'
             )),
         _ex("(assoc {:a 1} :a 99)", {":a": 99},
-            "the form (assoc {:a 1} :a 99)", "the map after updating :a to 99",
+            "the expression (assoc {:a 1} :a 99)", "the map after updating :a to 99",
             scenario=(
                 "Carol's basket held one pouch labeled `:a` with 1 fleece. Later "
                 "that day, a full recount showed 99 fleeces actually in the `:a` pouch."
@@ -360,7 +360,7 @@ G4_08 = SubjectCurriculum(grade=4, subject_id="G4-08",
                 "and returning a new basket with the corrected count."
             ),
             resolution=(
-                "the form returned a new basket with `:a` now paired with 99, and Carol's original basket with `:a` 1 remained as it was before. The lookout returned with {drawn.a} on his slate, the valley long behind him and the count plain."
+                "the call returned a new basket with `:a` now paired with 99, and Carol's original basket with `:a` 1 remained as it was before. The lookout returned with {drawn.a} on his slate, the valley long behind him and the count plain."
             )),
     ], subplots=_BASKET_SUBPLOTS, plan_pool=_PLAN_G4)
 
@@ -369,7 +369,7 @@ G4_09 = SubjectCurriculum(grade=4, subject_id="G4-09",
     subject_title="dissoc — map remove key", fable="boy-wolf",
     examples=[
         _ex("(dissoc {:a 1 :b 2} :a)", {":b": 2},
-            "the form (dissoc {:a 1 :b 2} :a)", "the map without :a",
+            "the expression (dissoc {:a 1 :b 2} :a)", "the map without :a",
             scenario=(
                 "Carol's wool-basket held two pouches: `:a` with 1 fleece and "
                 "`:b` with 2. A recount showed the `:a` pouch had been miscounted "
@@ -385,7 +385,7 @@ G4_09 = SubjectCurriculum(grade=4, subject_id="G4-09",
                 "pouch gone and only `:b` remaining."
             ),
             resolution=(
-                "the form returned a new basket showing only `:b` 2, and Carol's original two-pouch basket sat unchanged. The watchhouse warmed as the elder set {drawn.a} into the day record, the fold quiet by then."
+                "the call returned a new basket showing only `:b` 2, and Carol's original two-pouch basket sat unchanged. The watchhouse warmed as the elder set {drawn.a} into the day record, the fold quiet by then."
             )),
     ], subplots=_BASKET_SUBPLOTS, plan_pool=_PLAN_G4)
 
@@ -394,7 +394,7 @@ G4_10 = SubjectCurriculum(grade=4, subject_id="G4-10",
     subject_title="keys and vals", fable="boy-wolf",
     examples=[
         _ex("(count (keys {:a 1 :b 2 :c 3}))", 3,
-            "the form (count (keys ...))", "the number of keys in the map",
+            "the expression (count (keys ...))", "the number of keys in the map",
             scenario=(
                 "Carol's wool-basket held three labeled pouches: `:a`, `:b`, and "
                 "`:c`, each with different fleece counts. Tom wanted to know how "
@@ -410,7 +410,7 @@ G4_10 = SubjectCurriculum(grade=4, subject_id="G4-10",
                 "once for each key, yielding the total number of pouches."
             ),
             resolution=(
-                'the form returned 3, one notch for each pouch label `:a`, `:b`, and `:c` that the basket carried. {drawn.a} stood as the answer the fold required, slate, chalk, and a steady eye all in agreement.'
+                'the call returned 3, one notch for each pouch label `:a`, `:b`, and `:c` that the basket carried. {drawn.a} stood as the answer the fold required, slate, chalk, and a steady eye all in agreement.'
             )),
     ], subplots=_BASKET_SUBPLOTS, plan_pool=_PLAN_G4)
 
@@ -433,7 +433,7 @@ G4_11 = SubjectCurriculum(grade=4, subject_id="G4-11",
                 "count of distinct items in the set."
             ),
             resolution=(
-                'the form returned 3, one notch for each distinct fleece weight the fold had received. The pasture tally settled at {drawn.a}, and Carol closed the day slate with that one number written clear.'
+                'the call returned 3, one notch for each distinct fleece weight the fold had received. The pasture tally settled at {drawn.a}, and Carol closed the day slate with that one number written clear.'
             )),
         _ex("(count #{1 1 1})", 1, "the count of #{1 1 1}", "the size of the set",
             scenario=(
@@ -451,7 +451,7 @@ G4_11 = SubjectCurriculum(grade=4, subject_id="G4-11",
                 "once — the runtime's rule for sets is that duplicates vanish."
             ),
             resolution=(
-                'the form returned 1, because a set holds only unique items, and all three sacks carried the same weight mark.'
+                'the call returned 1, because a set holds only unique items, and all three sacks carried the same weight mark.'
             )),
     ], subplots=_BASKET_SUBPLOTS, plan_pool=_PLAN_G4)
 
@@ -459,7 +459,7 @@ G4_11 = SubjectCurriculum(grade=4, subject_id="G4-11",
 G4_12 = SubjectCurriculum(grade=4, subject_id="G4-12",
     subject_title="Set membership", fable="boy-wolf",
     examples=[
-        _ex("(contains? #{1 2 3} 2)", True, "the form (contains? #{1 2 3} 2)", "whether 2 is in the set",
+        _ex("(contains? #{1 2 3} 2)", True, "the expression (contains? #{1 2 3} 2)", "whether 2 is in the set",
             scenario=(
                 "Carol's sorting pen held three distinct fleece weights: 1, 2, and "
                 "3. Tom asked if weight 2 had arrived in that morning's shearing."
@@ -471,12 +471,12 @@ G4_12 = SubjectCurriculum(grade=4, subject_id="G4-12",
             mapping=(
                 "`contains?` tests membership. It takes the set and the item 2, "
                 "checking if 2 sits among the unique weights. Since 2 is there, "
-                "the form returns true."
+                "it returns true."
             ),
             resolution=(
-                "the form returned true, confirming that weight 2 had indeed arrived in the morning's fleeces. The slate showed {drawn.a} in clear chalk, and the fold tally stood as the day record."
+                "the call returned true, confirming that weight 2 had indeed arrived in the morning's fleeces. The slate showed {drawn.a} in clear chalk, and the fold tally stood as the day record."
             )),
-        _ex("(contains? #{1 2 3} 4)", False, "the form (contains? #{1 2 3} 4)", "whether 4 is in the set",
+        _ex("(contains? #{1 2 3} 4)", False, "the expression (contains? #{1 2 3} 4)", "whether 4 is in the set",
             scenario=(
                 "Carol's set held fleeces of weight 1, 2, and 3. Tom wondered if "
                 "any weight-4 fleeces had slipped into the pen unnoticed."
@@ -487,11 +487,11 @@ G4_12 = SubjectCurriculum(grade=4, subject_id="G4-12",
             ),
             mapping=(
                 "`contains?` checks the set for the item 4. Since 4 is not among "
-                "the weights, the form returns false — no weight-4 fleeces have "
+                "the weights, it returns false — no weight-4 fleeces have "
                 "arrived."
             ),
             resolution=(
-                'the form returned false, confirming that the pen held no weight-4 fleeces and the count was exact. Carol marked {drawn.a} on the watchhouse beam, the lookout high above the valley quiet at last.'
+                'the call returned false, confirming that the pen held no weight-4 fleeces and the count was exact. Carol marked {drawn.a} on the watchhouse beam, the lookout high above the valley quiet at last.'
             )),
     ], subplots=_BASKET_SUBPLOTS, plan_pool=_PLAN_G4)
 
@@ -515,7 +515,7 @@ G4_13 = SubjectCurriculum(grade=4, subject_id="G4-13",
                 "have been tallied."
             ),
             resolution=(
-                'the form returned 5, the exact number of fleeces Carol had placed in the basket. The fold gate held tight against the count of {drawn.a}, slate cool under the elder hand.'
+                'the call returned 5, the exact number of fleeces Carol had placed in the basket. The fold gate held tight against the count of {drawn.a}, slate cool under the elder hand.'
             )),
         _ex("(count {:a 1 :b 2})", 2, "the count of a 2-key map", "the count",
             scenario=(
@@ -533,7 +533,7 @@ G4_13 = SubjectCurriculum(grade=4, subject_id="G4-13",
                 "giving the basket's total structure size."
             ),
             resolution=(
-                'the form returned 2, one notch for each pouch `:a` and `:b` that the basket carried. Tom chalked {drawn.a} on the village notice, and the morning record stood for the next shepherd to read.'
+                'the call returned 2, one notch for each pouch `:a` and `:b` that the basket carried. Tom chalked {drawn.a} on the meadow folk notice, and the morning record stood for the next shepherd to read.'
             )),
         _ex("(count #{:a :b :c})", 3, "the count of a 3-element set", "the count",
             scenario=(
@@ -550,7 +550,7 @@ G4_13 = SubjectCurriculum(grade=4, subject_id="G4-13",
                 "the count matches the brands present."
             ),
             resolution=(
-                'the form returned 3, confirming three distinct fleece brands in the pen. The lookout returned with {drawn.a} on his slate, the valley long behind him and the count plain.'
+                'the call returned 3, confirming three distinct fleece brands in the pen. The lookout returned with {drawn.a} on his slate, the valley long behind him and the count plain.'
             )),
         _ex("(count \"shepherd\")", 8, "the count of \"shepherd\"", "the string length",
             scenario=(
@@ -567,7 +567,7 @@ G4_13 = SubjectCurriculum(grade=4, subject_id="G4-13",
                 "per mark, building the total."
             ),
             resolution=(
-                'the form returned 8, one notch for each letter: s, h, e, p, h, e, r, d. The watchhouse warmed as the elder set {drawn.a} into the day record, the fold quiet by then.'
+                'the call returned 8, one notch for each letter: s, h, e, p, h, e, r, d. The watchhouse warmed as the elder set {drawn.a} into the day record, the fold quiet by then.'
             )),
     ], subplots=_BASKET_SUBPLOTS, plan_pool=_PLAN_G4)
 
@@ -575,7 +575,7 @@ G4_13 = SubjectCurriculum(grade=4, subject_id="G4-13",
 G4_14 = SubjectCurriculum(grade=4, subject_id="G4-14",
     subject_title="empty?", fable="boy-wolf",
     examples=[
-        _ex("(empty? [])",   True,  "the form (empty? [])",   "whether [] is empty",
+        _ex("(empty? [])",   True,  "the expression (empty? [])",   "whether [] is empty",
             scenario=(
                 "Carol held an empty wool-basket at the watchhouse, fresh from "
                 "cleaning. Tom asked if the basket held any fleeces at all."
@@ -586,12 +586,12 @@ G4_14 = SubjectCurriculum(grade=4, subject_id="G4-14",
             ),
             mapping=(
                 "`empty?` tests whether the collection has no items. For an empty "
-                "vector `[]`, the form returns true — the basket holds nothing."
+                "vector `[]`, it returns true — the basket holds nothing."
             ),
             resolution=(
-                "the form returned true, confirming the basket was completely empty and ready for the day's shearing. {drawn.a} stood as the answer the fold required, slate, chalk, and a steady eye all in agreement."
+                "the call returned true, confirming the basket was completely empty and ready for the day's shearing. {drawn.a} stood as the answer the fold required, slate, chalk, and a steady eye all in agreement."
             )),
-        _ex("(empty? [1])",  False, "the form (empty? [1])",  "whether [1] is empty",
+        _ex("(empty? [1])",  False, "the expression (empty? [1])",  "whether [1] is empty",
             scenario=(
                 "Carol held the same basket, now with one fleece inside marked "
                 "with weight 1. Tom asked again if the basket was empty."
@@ -602,10 +602,10 @@ G4_14 = SubjectCurriculum(grade=4, subject_id="G4-14",
             ),
             mapping=(
                 "`empty?` checks for the absence of items. For `[1]`, which holds "
-                "one fleece, the form returns false — the basket is not empty."
+                "one fleece, it returns false — the basket is not empty."
             ),
             resolution=(
-                'the form returned false, showing the basket had changed from empty to occupied. The pasture tally settled at {drawn.a}, and Carol closed the day slate with that one number written clear.'
+                'the call returned false, showing the basket had changed from empty to occupied. The pasture tally settled at {drawn.a}, and Carol closed the day slate with that one number written clear.'
             )),
         _ex("(empty? \"\")", True,  "the form (empty? \"\")", "whether the empty string is empty",
             scenario=(
@@ -618,11 +618,11 @@ G4_14 = SubjectCurriculum(grade=4, subject_id="G4-14",
             ),
             mapping=(
                 "`empty?` works on strings too. An empty string `\"\"` is the "
-                "blank slate, and the form returns true because no chalk marks "
+                "blank slate, and it returns true because no chalk marks "
                 "remain."
             ),
             resolution=(
-                "the form returned true, confirming the slate was completely blank and ready for the day's tallies. The slate showed {drawn.a} in clear chalk, and the fold tally stood as the day record."
+                "the call returned true, confirming the slate was completely blank and ready for the day's tallies. The slate showed {drawn.a} in clear chalk, and the fold tally stood as the day record."
             )),
     ], subplots=_BASKET_SUBPLOTS, plan_pool=_PLAN_G4)
 
@@ -645,7 +645,7 @@ G4_15 = SubjectCurriculum(grade=4, subject_id="G4-15",
                 "first item. For `[10 20 30]`, it yields the leftmost item, 10."
             ),
             resolution=(
-                'the form returned 10, the weight of the leftmost bundle. Carol marked {drawn.a} on the watchhouse beam, the lookout high above the valley quiet at last.'
+                'the call returned 10, the weight of the leftmost bundle. Carol marked {drawn.a} on the watchhouse beam, the lookout high above the valley quiet at last.'
             )),
         _ex("(last  [10 20 30])", 30, "the last of the vector",  "the last element",
             scenario=(
@@ -661,7 +661,7 @@ G4_15 = SubjectCurriculum(grade=4, subject_id="G4-15",
                 "final item. For `[10 20 30]`, it yields 30."
             ),
             resolution=(
-                'the form returned 30, the weight of the rightmost bundle. The fold gate held tight against the count of {drawn.a}, slate cool under the elder hand.'
+                'the call returned 30, the weight of the rightmost bundle. The fold gate held tight against the count of {drawn.a}, slate cool under the elder hand.'
             )),
         _ex("(count (rest [10 20 30]))", 2, "the count of (rest [10 20 30])", "the count after removing first",
             scenario=(
@@ -678,7 +678,7 @@ G4_15 = SubjectCurriculum(grade=4, subject_id="G4-15",
                 "and notching the count once per item, yielding 2."
             ),
             resolution=(
-                'the form returned 2, confirming that after removing the first bundle, two remained in the basket. Tom chalked {drawn.a} on the village notice, and the morning record stood for the next shepherd to read.'
+                'the call returned 2, confirming that after removing the first bundle, two remained in the basket. Tom chalked {drawn.a} on the townsfolk notice, and the morning record stood for the next shepherd to read.'
             )),
     ], subplots=_BASKET_SUBPLOTS, plan_pool=_PLAN_G4)
 
@@ -687,7 +687,7 @@ G4_16 = SubjectCurriculum(grade=4, subject_id="G4-16",
     subject_title="into and conj on collections", fable="boy-wolf",
     examples=[
         _ex("(into [] '(1 2 3))", [1,2,3],
-            "the form (into [] '(1 2 3))", "the vector built from a list",
+            "the expression (into [] '(1 2 3))", "the vector built from a list",
             scenario=(
                 "Carol set up the fleece-comb at the watchhouse, an empty "
                 "wool-basket beneath it. Three fleeces arrived from the "
@@ -708,7 +708,7 @@ G4_16 = SubjectCurriculum(grade=4, subject_id="G4-16",
             resolution=(
                 "the basket caught all three fleeces in the same order they had arrived — the morning's shearing settled into the day's container. The lookout returned with {drawn.a} on his slate, the valley long behind him and the count plain."           )),
         _ex("(into #{} [1 2 2 3])", [1,2,3],
-            "the form (into #{} [1 2 2 3])", "the set built from a vector (dups removed)",
+            "the expression (into #{} [1 2 2 3])", "the set built from a vector (dups removed)",
             scenario=(
                 "Carol held a wool-basket with four weight-tags: 1, 2, 2, 3. "
                 "The second tag was a duplicate — two fleeces bore weight 2. "
@@ -726,7 +726,7 @@ G4_16 = SubjectCurriculum(grade=4, subject_id="G4-16",
                 "the second 2 collapses into the first."
             ),
             resolution=(
-                "the form returned the set with three unique weights: 1, 2, 3, the duplicate resolved by the set's rule."
+                "the call returned the set with three unique weights: 1, 2, 3, the duplicate resolved by the set's rule."
             )),
     ], subplots=_SIEVE_SUBPLOTS, plan_pool=_PLAN_G4)
 
@@ -753,7 +753,7 @@ G4_17 = SubjectCurriculum(grade=4, subject_id="G4-17",
                 "original, confirming it still holds `:a` 1."
             ),
             resolution=(
-                "the form returned 1, the original count, proving Carol's basket had not been changed by the `assoc` operation. The watchhouse warmed as the elder set {drawn.a} into the day record, the fold quiet by then."
+                "the call returned 1, the original count, proving Carol's basket had not been changed by the `assoc` operation. The watchhouse warmed as the elder set {drawn.a} into the day record, the fold quiet by then."
             )),
     ], subplots=_BASKET_SUBPLOTS, plan_pool=_PLAN_G4)
 
@@ -762,7 +762,7 @@ G4_18 = SubjectCurriculum(grade=4, subject_id="G4-18",
     subject_title="Equality of vectors and lists", fable="boy-wolf",
     examples=[
         _ex("(= [1 2 3] '(1 2 3))", True,
-            "the form (= [1 2 3] '(1 2 3))", "whether vector and list with same elements are equal",
+            "the expression (= [1 2 3] '(1 2 3))", "whether vector and list with same elements are equal",
             scenario=(
                 "Carol held two containers of fleeces: one a wool-basket `[1 2 3]` "
                 "and another a cord `'(1 2 3)` with three markers strung on it. "
@@ -777,11 +777,11 @@ G4_18 = SubjectCurriculum(grade=4, subject_id="G4-18",
             mapping=(
                 "`=` compares for value equality, not container shape. The vector "
                 "`[1 2 3]` and the list `'(1 2 3)` both hold the same three items "
-                "in the same order, so the form returns true even though one is a "
+                "in the same order, so it returns true even though one is a "
                 "basket and one is a cord."
             ),
             resolution=(
-                'the form returned true, confirming that despite their different containers, the basket and the cord held the same cargo. {drawn.a} stood as the answer the fold required, slate, chalk, and a steady eye all in agreement.'
+                'the call returned true, confirming that despite their different containers, the basket and the cord held the same cargo. {drawn.a} stood as the answer the fold required, slate, chalk, and a steady eye all in agreement.'
             )),
     ], subplots=_BASKET_SUBPLOTS, plan_pool=_PLAN_G4)
 
@@ -805,7 +805,7 @@ G4_19 = SubjectCurriculum(grade=4, subject_id="G4-19",
                 "per item, yielding 5."
             ),
             resolution=(
-                "the form returned 5, confirming that the range held five days' worth of counts. The pasture tally settled at {drawn.a}, and Carol closed the day slate with that one number written clear."
+                "the call returned 5, confirming that the range held five days' worth of counts. The pasture tally settled at {drawn.a}, and Carol closed the day slate with that one number written clear."
             )),
         _ex("(first (range 1 100))", 1, "the first of (range 1 100)", "the first of range 1..99",
             scenario=(
@@ -823,7 +823,7 @@ G4_19 = SubjectCurriculum(grade=4, subject_id="G4-19",
                 "leftmost item from that range, which is 1."
             ),
             resolution=(
-                'the form returned 1, the first day in the 99-day range Carol had requested. The slate showed {drawn.a} in clear chalk, and the fold tally stood as the day record.'
+                'the call returned 1, the first day in the 99-day range Carol had requested. The slate showed {drawn.a} in clear chalk, and the fold tally stood as the day record.'
             )),
     ], subplots=_BASKET_SUBPLOTS, plan_pool=_PLAN_G4)
 
@@ -832,7 +832,7 @@ G4_20 = SubjectCurriculum(grade=4, subject_id="G4-20",
     subject_title="Collection vs sequence", fable="boy-wolf",
     examples=[
         _ex("(count (seq [1 2 3]))", 3,
-            "the form (count (seq [1 2 3]))", "the count of seq over a vector",
+            "the expression (count (seq [1 2 3]))", "the count of seq over a vector",
             scenario=(
                 "Carol held a wool-basket with three fleeces: 1, 2, 3. She passed "
                 "the basket through a filter-funnel that would return it as a "
@@ -848,10 +848,10 @@ G4_20 = SubjectCurriculum(grade=4, subject_id="G4-20",
                 "per item — the three fleeces counted one by one."
             ),
             resolution=(
-                'the form returned 3, confirming that the sequence held all three items from the original basket. Carol marked {drawn.a} on the watchhouse beam, the lookout high above the valley quiet at last.'
+                'the call returned 3, confirming that the sequence held all three items from the original basket. Carol marked {drawn.a} on the watchhouse beam, the lookout high above the valley quiet at last.'
             )),
         _ex("(seq [])", None,
-            "the form (seq [])", "what (seq []) returns",
+            "the expression (seq [])", "what (seq []) returns",
             scenario=(
                 "Carol held an empty wool-basket at the watchhouse. She wanted to "
                 "know what happened if she passed the empty basket through the "
@@ -867,7 +867,7 @@ G4_20 = SubjectCurriculum(grade=4, subject_id="G4-20",
                 "absence of a value."
             ),
             resolution=(
-                'the form returned nil, showing that an empty basket produces no sequence at all. The fold gate held tight against the count of {drawn.a}, slate cool under the elder hand.'
+                'the call returned nil, showing that an empty basket produces no sequence at all. The fold gate held tight against the count of {drawn.a}, slate cool under the elder hand.'
             )),
     ], subplots=_BASKET_SUBPLOTS, plan_pool=_PLAN_G4)
 
