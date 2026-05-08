@@ -1231,11 +1231,7 @@ G2_13 = SubjectCurriculum(
                 "All pass, so it returns the last value — 3."
             ),
             resolution=(
-<<<<<<< HEAD
-                'the form returned 3, confirming all {drawn.c} counts were valid, and the tally stood complete. The fold gate held tight against the count of {drawn.a}, slate cool under the elder hand.'
-=======
                 'the call returned 3, confirming all three counts were valid, and the tally stood complete. The fold gate held tight against the count of {drawn.a}, slate cool under the elder hand.'
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
             )),
         _ex("(or nil false 5)",  5,      "the expression (or nil false 5)",
             "the value of (or nil false 5)",

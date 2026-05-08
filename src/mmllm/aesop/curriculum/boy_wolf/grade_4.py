@@ -410,11 +410,7 @@ G4_10 = SubjectCurriculum(grade=4, subject_id="G4-10",
                 "once for each key, yielding the total number of pouches."
             ),
             resolution=(
-<<<<<<< HEAD
-                'the form returned the result, one notch for each pouch label `:a`, `:b`, and `:c` that the basket carried. {drawn.a} stood as the answer the fold required, slate, chalk, and a steady eye all in agreement.'
-=======
                 'the call returned 3, one notch for each pouch label `:a`, `:b`, and `:c` that the basket carried. {drawn.a} stood as the answer the fold required, slate, chalk, and a steady eye all in agreement.'
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
             )),
     ], subplots=_BASKET_SUBPLOTS, plan_pool=_PLAN_G4)
 
@@ -437,11 +433,7 @@ G4_11 = SubjectCurriculum(grade=4, subject_id="G4-11",
                 "count of distinct items in the set."
             ),
             resolution=(
-<<<<<<< HEAD
-                'the form returned the result, one notch for each distinct fleece weight the fold had received. The pasture tally settled at {drawn.a}, and Carol closed the day slate with that one number written clear.'
-=======
                 'the call returned 3, one notch for each distinct fleece weight the fold had received. The pasture tally settled at {drawn.a}, and Carol closed the day slate with that one number written clear.'
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
             )),
         _ex("(count #{1 1 1})", 1, "the count of #{1 1 1}", "the size of the set",
             scenario=(
@@ -459,11 +451,7 @@ G4_11 = SubjectCurriculum(grade=4, subject_id="G4-11",
                 "once — the runtime's rule for sets is that duplicates vanish."
             ),
             resolution=(
-<<<<<<< HEAD
-                'the form returned the result, because a set holds only unique items, and all three sacks carried the same weight mark.'
-=======
                 'the call returned 1, because a set holds only unique items, and all three sacks carried the same weight mark.'
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
             )),
     ], subplots=_BASKET_SUBPLOTS, plan_pool=_PLAN_G4)
 
@@ -486,11 +474,7 @@ G4_12 = SubjectCurriculum(grade=4, subject_id="G4-12",
                 "it returns true."
             ),
             resolution=(
-<<<<<<< HEAD
-                "the form returned the verdict, confirming that weight 2 had indeed arrived in the morning's fleeces. The slate showed {drawn.a} in clear chalk, and the fold tally stood as the day record."
-=======
                 "the call returned true, confirming that weight 2 had indeed arrived in the morning's fleeces. The slate showed {drawn.a} in clear chalk, and the fold tally stood as the day record."
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
             )),
         _ex("(contains? #{1 2 3} 4)", False, "the expression (contains? #{1 2 3} 4)", "whether 4 is in the set",
             scenario=(
@@ -507,11 +491,7 @@ G4_12 = SubjectCurriculum(grade=4, subject_id="G4-12",
                 "arrived."
             ),
             resolution=(
-<<<<<<< HEAD
-                'the form returned the verdict, confirming that the pen held no weight-4 fleeces and the count was exact. Carol marked {drawn.a} on the watchhouse beam, the lookout high above the valley quiet at last.'
-=======
                 'the call returned false, confirming that the pen held no weight-4 fleeces and the count was exact. Carol marked {drawn.a} on the watchhouse beam, the lookout high above the valley quiet at last.'
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
             )),
     ], subplots=_BASKET_SUBPLOTS, plan_pool=_PLAN_G4)
 
@@ -535,11 +515,7 @@ G4_13 = SubjectCurriculum(grade=4, subject_id="G4-13",
                 "have been tallied."
             ),
             resolution=(
-<<<<<<< HEAD
-                'the form returned the result, the exact number of fleeces Carol had placed in the basket. The fold gate held tight against the count of {drawn.a}, slate cool under the elder hand.'
-=======
                 'the call returned 5, the exact number of fleeces Carol had placed in the basket. The fold gate held tight against the count of {drawn.a}, slate cool under the elder hand.'
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
             )),
         _ex("(count {:a 1 :b 2})", 2, "the count of a 2-key map", "the count",
             scenario=(
@@ -557,11 +533,7 @@ G4_13 = SubjectCurriculum(grade=4, subject_id="G4-13",
                 "giving the basket's total structure size."
             ),
             resolution=(
-<<<<<<< HEAD
-                'the form returned the result, one notch for each pouch `:a` and `:b` that the basket carried. Tom chalked {drawn.a} on the village notice, and the morning record stood for the next shepherd to read.'
-=======
                 'the call returned 2, one notch for each pouch `:a` and `:b` that the basket carried. Tom chalked {drawn.a} on the meadow folk notice, and the morning record stood for the next shepherd to read.'
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
             )),
         _ex("(count #{:a :b :c})", 3, "the count of a 3-element set", "the count",
             scenario=(
@@ -578,11 +550,7 @@ G4_13 = SubjectCurriculum(grade=4, subject_id="G4-13",
                 "the count matches the brands present."
             ),
             resolution=(
-<<<<<<< HEAD
-                'the form returned the result, confirming three distinct fleece brands in the pen. The lookout returned with {drawn.a} on his slate, the valley long behind him and the count plain.'
-=======
                 'the call returned 3, confirming three distinct fleece brands in the pen. The lookout returned with {drawn.a} on his slate, the valley long behind him and the count plain.'
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
             )),
         _ex("(count \"shepherd\")", 8, "the count of \"shepherd\"", "the string length",
             scenario=(
@@ -621,11 +589,7 @@ G4_14 = SubjectCurriculum(grade=4, subject_id="G4-14",
                 "vector `[]`, it returns true — the basket holds nothing."
             ),
             resolution=(
-<<<<<<< HEAD
-                "the form returned the verdict, confirming the basket was completely empty and ready for the day's shearing. {drawn.a} stood as the answer the fold required, slate, chalk, and a steady eye all in agreement."
-=======
                 "the call returned true, confirming the basket was completely empty and ready for the day's shearing. {drawn.a} stood as the answer the fold required, slate, chalk, and a steady eye all in agreement."
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
             )),
         _ex("(empty? [1])",  False, "the expression (empty? [1])",  "whether [1] is empty",
             scenario=(
@@ -641,11 +605,7 @@ G4_14 = SubjectCurriculum(grade=4, subject_id="G4-14",
                 "one fleece, it returns false — the basket is not empty."
             ),
             resolution=(
-<<<<<<< HEAD
-                'the form returned the verdict, showing the basket had changed from empty to occupied. The pasture tally settled at {drawn.a}, and Carol closed the day slate with that one number written clear.'
-=======
                 'the call returned false, showing the basket had changed from empty to occupied. The pasture tally settled at {drawn.a}, and Carol closed the day slate with that one number written clear.'
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
             )),
         _ex("(empty? \"\")", True,  "the expression (empty? \"\")", "whether the empty string is empty",
             scenario=(
@@ -662,11 +622,7 @@ G4_14 = SubjectCurriculum(grade=4, subject_id="G4-14",
                 "remain."
             ),
             resolution=(
-<<<<<<< HEAD
-                "the form returned the verdict, confirming the slate was completely blank and ready for the day's tallies. The slate showed {drawn.a} in clear chalk, and the fold tally stood as the day record."
-=======
                 "the call returned true, confirming the slate was completely blank and ready for the day's tallies. The slate showed {drawn.a} in clear chalk, and the fold tally stood as the day record."
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
             )),
     ], subplots=_BASKET_SUBPLOTS, plan_pool=_PLAN_G4)
 
@@ -722,11 +678,7 @@ G4_15 = SubjectCurriculum(grade=4, subject_id="G4-15",
                 "and notching the count once per item, yielding 2."
             ),
             resolution=(
-<<<<<<< HEAD
-                'the form returned the result, confirming that after removing the first bundle, two remained in the basket. Tom chalked {drawn.a} on the village notice, and the morning record stood for the next shepherd to read.'
-=======
                 'the call returned 2, confirming that after removing the first bundle, two remained in the basket. Tom chalked {drawn.a} on the townsfolk notice, and the morning record stood for the next shepherd to read.'
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
             )),
     ], subplots=_BASKET_SUBPLOTS, plan_pool=_PLAN_G4)
 
@@ -801,11 +753,7 @@ G4_17 = SubjectCurriculum(grade=4, subject_id="G4-17",
                 "original, confirming it still holds `:a` 1."
             ),
             resolution=(
-<<<<<<< HEAD
-                "the form returned the result, the original count, proving Carol's basket had not been changed by the `assoc` operation. The watchhouse warmed as the elder set {drawn.a} into the day record, the fold quiet by then."
-=======
                 "the call returned 1, the original count, proving Carol's basket had not been changed by the `assoc` operation. The watchhouse warmed as the elder set {drawn.a} into the day record, the fold quiet by then."
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
             )),
     ], subplots=_BASKET_SUBPLOTS, plan_pool=_PLAN_G4)
 
@@ -833,11 +781,7 @@ G4_18 = SubjectCurriculum(grade=4, subject_id="G4-18",
                 "basket and one is a cord."
             ),
             resolution=(
-<<<<<<< HEAD
-                'the form returned the verdict, confirming that despite their different containers, the basket and the cord held the same cargo. {drawn.a} stood as the answer the fold required, slate, chalk, and a steady eye all in agreement.'
-=======
                 'the call returned true, confirming that despite their different containers, the basket and the cord held the same cargo. {drawn.a} stood as the answer the fold required, slate, chalk, and a steady eye all in agreement.'
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
             )),
     ], subplots=_BASKET_SUBPLOTS, plan_pool=_PLAN_G4)
 
@@ -860,11 +804,7 @@ G4_19 = SubjectCurriculum(grade=4, subject_id="G4-19",
                 "per item, yielding 5."
             ),
             resolution=(
-<<<<<<< HEAD
-                "the form returned the result, confirming that the range held five days' worth of counts. The pasture tally settled at {drawn.a}, and Carol closed the day slate with that one number written clear."
-=======
                 "the call returned 5, confirming that the range held five days' worth of counts. The pasture tally settled at {drawn.a}, and Carol closed the day slate with that one number written clear."
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
             )),
         _ex("(first (range 1 100))", 1, "the first of (range 1 100)", "the first of range 1..99",
             scenario=(
@@ -882,11 +822,7 @@ G4_19 = SubjectCurriculum(grade=4, subject_id="G4-19",
                 "leftmost item from that range, which is 1."
             ),
             resolution=(
-<<<<<<< HEAD
-                'the form returned the result, the first day in the 99-day range Carol had requested. The slate showed {drawn.a} in clear chalk, and the fold tally stood as the day record.'
-=======
                 'the call returned 1, the first day in the 99-day range Carol had requested. The slate showed {drawn.a} in clear chalk, and the fold tally stood as the day record.'
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
             )),
     ], subplots=_BASKET_SUBPLOTS, plan_pool=_PLAN_G4)
 
@@ -911,11 +847,7 @@ G4_20 = SubjectCurriculum(grade=4, subject_id="G4-20",
                 "per item — the three fleeces counted one by one."
             ),
             resolution=(
-<<<<<<< HEAD
-                'the form returned the result, confirming that the sequence held all three items from the original basket. Carol marked {drawn.a} on the watchhouse beam, the lookout high above the valley quiet at last.'
-=======
                 'the call returned 3, confirming that the sequence held all three items from the original basket. Carol marked {drawn.a} on the watchhouse beam, the lookout high above the valley quiet at last.'
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
             )),
         _ex("(seq [])", None,
             "the expression (seq [])", "what (seq []) returns",

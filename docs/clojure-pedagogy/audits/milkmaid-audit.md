@@ -662,15 +662,6 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(apply max [3 1 4 1 5])` — parametric example has hard-coded English numeral 'five counts' in a story slot — the actual draws may differ from this fixed count
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(apply max [3 1 4 1 5])` — parametric example has hard-coded English numeral 'five counts' in a story slot — the actual draws may differ from this fixed count
 
-### G5-15: comp
-
-- examples: 2
-- variety @ n=50: 1.00
-- issues: {'STORY_RESOLUTION_NO_DRAWN': 3}
-    - [STORY_RESOLUTION_NO_DRAWN] form=`((comp inc inc) 5)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('5',), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`((comp inc inc) 5)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('5',), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`((comp inc inc) 5)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('5',), resolution doesn't close the loop)
-
 ### G5-16: partial
 
 - examples: 2
@@ -759,7 +750,6 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 4
 - variety @ n=50: 0.99
-<<<<<<< HEAD
 - issues: {'CONCEPT_AS_VERB': 2, 'ONLY_SHOOK_HEAD_TIC': 2, 'LOW_GROUNDING': 2, 'TRAILING_PARTICIPLE_CLOSER': 2}
     - [CONCEPT_AS_VERB] form=`(clojure.string/reverse "abc")` — concept_phrase substituted into a finite-verb slot (e.g. 'must calling X', 'I applying Y')
     - [ONLY_SHOOK_HEAD_TIC] form=`(clojure.string/reverse "abc")` — user_msg uses 'only shook his/her head' — recurring AI-fable filler cadence
@@ -767,15 +757,6 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
     - [TRAILING_PARTICIPLE_CLOSER] form=`(namespace :owner/item)` — sentence closes with a participial coda (', ignoring the entry name after the slash.') — LLM-cadence; close on the verb instead
     - [LOW_GROUNDING] form=`(namespace :owner/item)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [TRAILING_PARTICIPLE_CLOSER] form=`(namespace :owner/item)` — sentence closes with a participial coda (', ignoring the entry name after the slash.') — LLM-cadence; close on the verb instead
-=======
-- issues: {'CONCEPT_AS_VERB': 2, 'ONLY_SHOOK_HEAD_TIC': 2, 'ANSWER_LEAK_STRING': 2, 'LOW_GROUNDING': 2}
-    - [CONCEPT_AS_VERB] form=`(clojure.string/reverse "abc")` — concept_phrase substituted into a finite-verb slot (e.g. 'must calling X', 'I applying Y')
-    - [ONLY_SHOOK_HEAD_TIC] form=`(clojure.string/reverse "abc")` — user_msg uses 'only shook his/her head' — recurring AI-fable filler cadence
-    - [ANSWER_LEAK_STRING] form=`(namespace :owner/item)` — answer string 'owner' appears in user_msg
-    - [LOW_GROUNDING] form=`(namespace :owner/item)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-    - [ANSWER_LEAK_STRING] form=`(namespace :owner/item)` — answer string 'owner' appears in user_msg
-    - [LOW_GROUNDING] form=`(namespace :owner/item)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
 
 ### G6-06: Private defs
 
@@ -912,19 +893,12 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-<<<<<<< HEAD
 - issues: {'LOW_GROUNDING': 2, 'ABSTRACT_RESULT_NARRATION': 3, 'LOWERCASE_CONCEPT_AFTER_PERIOD': 2}
     - [LOW_GROUNDING] form=`((fn [x] {:pre [(pos? x)]} (* x 2)) 5)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [ABSTRACT_RESULT_NARRATION] form=`((fn [x] {:pre [(pos? x)]} (* x 2)) 5)` — meta-narrative 'the result of a function call' uses layered abstract nouns instead of naming the concrete thing the form returns
     - [ABSTRACT_RESULT_NARRATION] form=`((fn [x] {:pre [(pos? x)]} (* x 2)) 5)` — meta-narrative 'the result of a function call' uses layered abstract nouns instead of naming the concrete thing the form returns
     - [LOW_GROUNDING] form=`((fn [x] {:pre [(pos? x)]} (* x 2)) 5)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [ABSTRACT_RESULT_NARRATION] form=`((fn [x] {:pre [(pos? x)]} (* x 2)) 5)` — meta-narrative 'the result of a function call' uses layered abstract nouns instead of naming the concrete thing the form returns
-=======
-- issues: {'LOW_GROUNDING': 2, 'LOWERCASE_CONCEPT_AFTER_PERIOD': 2}
-    - [LOW_GROUNDING] form=`((fn [x] {:pre [(pos? x)]} (* x 2)) 5)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-    - [LOW_GROUNDING] form=`((fn [x] {:pre [(pos? x)]} (* x 2)) 5)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-    - [LOWERCASE_CONCEPT_AFTER_PERIOD] form=`(try ((fn [x] {:pre [(pos? x)]} x) -1) (catch Exce` — sentence-initial 'the X verb' (lowercase concept_phrase as subject after a period)
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
     - [LOWERCASE_CONCEPT_AFTER_PERIOD] form=`(try ((fn [x] {:pre [(pos? x)]} x) -1) (catch Exce` — sentence-initial 'the X verb' (lowercase concept_phrase as subject after a period)
 
 ### G7-07: assert
@@ -975,15 +949,8 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-<<<<<<< HEAD
 - issues: {'HIGH_LENGTH': 1}
     - [HIGH_LENGTH] form=`(do (deftype Pebble [color]) (.-color (Pebble. "gr` — user_msg 210 words
-=======
-- issues: {'HIGH_LENGTH': 1, 'ANSWER_LEAK_STRING': 1, 'CLAUSE_STACK_OVERFLOW': 1}
-    - [HIGH_LENGTH] form=`(do (deftype Pebble [color]) (.-color (Pebble. "gr` — user_msg 210 words
-    - [ANSWER_LEAK_STRING] form=`(do (deftype Pebble [color]) (.-color (Pebble. "gr` — answer string 'grey' appears in user_msg
-    - [CLAUSE_STACK_OVERFLOW] form=`(do (deftype Stone [weight]) (.-weight (Stone. 7))` — sentence with 5 commas reads as AI-output cadence: "reading the weight field of a Stone instance is the form that says: 'A pail of t"
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
 
 ### G8-03: defrecord introduction
 
@@ -1007,7 +974,6 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 0.99
-<<<<<<< HEAD
 - issues: {'HIGH_LENGTH': 2, 'CONCEPT_AS_VERB': 3, 'CLAUSE_STACK_OVERFLOW': 1}
     - [HIGH_LENGTH] form=`(do (defprotocol Pace (speed [this])) (extend-prot` — user_msg 202 words
     - [HIGH_LENGTH] form=`(do (defprotocol Pace (speed [this])) (extend-prot` — user_msg 201 words
@@ -1015,57 +981,25 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
     - [CLAUSE_STACK_OVERFLOW] form=`(do (defprotocol Greet (hail [this])) (extend-prot` — sentence with 5 commas reads as AI-output cadence: 'Cassius, untroubled by what others thought,\nexplained to Czeslawa: "To define a '
     - [CONCEPT_AS_VERB] form=`(do (defprotocol Greet (hail [this])) (extend-prot` — concept_phrase substituted into a finite-verb slot (e.g. 'must calling X', 'I applying Y')
     - [CONCEPT_AS_VERB] form=`(do (defprotocol Greet (hail [this])) (extend-prot` — concept_phrase substituted into a finite-verb slot (e.g. 'must calling X', 'I applying Y')
-=======
-- issues: {'HIGH_LENGTH': 2, 'ANSWER_LEAK_STRING': 2, 'CONCEPT_AS_VERB': 3, 'CLAUSE_STACK_OVERFLOW': 1}
-    - [HIGH_LENGTH] form=`(do (defprotocol Pace (speed [this])) (extend-prot` — user_msg 202 words
-    - [ANSWER_LEAK_STRING] form=`(do (defprotocol Pace (speed [this])) (extend-prot` — answer string 'swift' appears in user_msg
-    - [HIGH_LENGTH] form=`(do (defprotocol Pace (speed [this])) (extend-prot` — user_msg 201 words
-    - [ANSWER_LEAK_STRING] form=`(do (defprotocol Pace (speed [this])) (extend-prot` — answer string 'swift' appears in user_msg
-    - [CONCEPT_AS_VERB] form=`(do (defprotocol Pace (speed [this])) (extend-prot` — concept_phrase substituted into a finite-verb slot (e.g. 'must calling X', 'I applying Y')
-    - [CLAUSE_STACK_OVERFLOW] form=`(do (defprotocol Greet (hail [this])) (extend-prot` — sentence with 5 commas reads as AI-output cadence: 'Cassius, untroubled by what others thought,\nexplained to Czeslawa: "To define a '
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
 
 ### G8-06: Protocol method dispatch
 
 - examples: 2
 - variety @ n=50: 1.00
-<<<<<<< HEAD
 - issues: {'LOW_GROUNDING': 1}
-=======
-- issues: {'CLAUSE_STACK_OVERFLOW': 2, 'LOW_GROUNDING': 1}
-    - [CLAUSE_STACK_OVERFLOW] form=`(do (defprotocol Pace (speed [this])) (extend-prot` — sentence with 5 commas reads as AI-output cadence: 'To define a protocol Pace with method speed, extend it to both String and Long t'
-    - [CLAUSE_STACK_OVERFLOW] form=`(do (defprotocol Pace (speed [this])) (extend-prot` — sentence with 5 commas reads as AI-output cadence: 'To define a protocol Pace with method speed, extend it to both String and Long t'
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
     - [LOW_GROUNDING] form=`(do (defprotocol Pace (speed [this])) (extend-prot` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
 
 ### G8-07: Record implementing protocol
 
 - examples: 2
 - variety @ n=50: 1.00
-<<<<<<< HEAD
 - issues: {'LOW_GROUNDING': 4, 'CONCEPT_AS_VERB': 2}
-=======
-- issues: {'LOW_GROUNDING': 4, 'CONCEPT_AS_VERB': 2, 'CLAUSE_STACK_OVERFLOW': 1}
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
     - [LOW_GROUNDING] form=`(do (defprotocol Pace (speed [this])) (defrecord M` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [LOW_GROUNDING] form=`(do (defprotocol Pace (speed [this])) (defrecord M` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [LOW_GROUNDING] form=`(do (defprotocol Pace (speed [this])) (defrecord M` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [CONCEPT_AS_VERB] form=`(do (defprotocol Pace (speed [this])) (defrecord F` — concept_phrase substituted into a finite-verb slot (e.g. 'must calling X', 'I applying Y')
-<<<<<<< HEAD
     - [CONCEPT_AS_VERB] form=`(do (defprotocol Pace (speed [this])) (defrecord F` — concept_phrase substituted into a finite-verb slot (e.g. 'must calling X', 'I applying Y')
     - [LOW_GROUNDING] form=`(do (defprotocol Pace (speed [this])) (defrecord F` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-=======
-    - [CLAUSE_STACK_OVERFLOW] form=`(do (defprotocol Pace (speed [this])) (defrecord F` — sentence with 5 commas reads as AI-output cadence: 'To define a protocol Pace with method speed, define a record Farmer that impleme'
-    - [CONCEPT_AS_VERB] form=`(do (defprotocol Pace (speed [this])) (defrecord F` — concept_phrase substituted into a finite-verb slot (e.g. 'must calling X', 'I applying Y')
-
-### G8-08: Multimethod defmulti
-
-- examples: 2
-- variety @ n=50: 1.00
-- issues: {'CLAUSE_STACK_OVERFLOW': 2}
-    - [CLAUSE_STACK_OVERFLOW] form=`(do (defmulti pace :species) (defmethod pace :hare` — sentence with 5 commas reads as AI-output cadence: 'To build a sorting-table named pace that reads the :species stamp, add a :hare a'
-    - [CLAUSE_STACK_OVERFLOW] form=`(do (defmulti tag :kind) (defmethod tag :stone [_]` — sentence with 5 commas reads as AI-output cadence: 'To define multimethod tag dispatching on :kind, add a :stone arm, then call tag '
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
 
 ### G8-09: Multimethod defmethod
 
@@ -1078,7 +1012,6 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-<<<<<<< HEAD
 - issues: {'HIGH_LENGTH': 3, 'STORY_SLOT_NOUN_REPEAT': 3}
     - [HIGH_LENGTH] form=`(do (defmulti show identity) (defmethod show :rabb` — user_msg 216 words
     - [HIGH_LENGTH] form=`(do (defprotocol Show (show [this])) (extend-proto` — user_msg 204 words
@@ -1086,32 +1019,15 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
     - [STORY_SLOT_NOUN_REPEAT] form=`(do (defprotocol Show (show [this])) (extend-proto` — the noun 'the pail's' appears in all 4 story slots (scenario/need/mapping/resolution) — vary the imagery between beats
     - [HIGH_LENGTH] form=`(do (defprotocol Show (show [this])) (extend-proto` — user_msg 229 words
     - [STORY_SLOT_NOUN_REPEAT] form=`(do (defprotocol Show (show [this])) (extend-proto` — the noun 'the pail's' appears in all 4 story slots (scenario/need/mapping/resolution) — vary the imagery between beats
-=======
-- issues: {'HIGH_LENGTH': 3, 'CLAUSE_STACK_OVERFLOW': 1, 'STORY_SLOT_NOUN_REPEAT': 3}
-    - [HIGH_LENGTH] form=`(do (defmulti show identity) (defmethod show :rabb` — user_msg 216 words
-    - [HIGH_LENGTH] form=`(do (defprotocol Show (show [this])) (extend-proto` — user_msg 204 words
-    - [CLAUSE_STACK_OVERFLOW] form=`(do (defprotocol Show (show [this])) (extend-proto` — sentence with 5 commas reads as AI-output cadence: 'To define a protocol Show with method show, extend it to String type, then call '
-    - [STORY_SLOT_NOUN_REPEAT] form=`(do (defprotocol Show (show [this])) (extend-proto` — the noun 'the pail's' appears in all 4 story slots (scenario/need/mapping/resolution) — vary the imagery between beats
-    - [STORY_SLOT_NOUN_REPEAT] form=`(do (defprotocol Show (show [this])) (extend-proto` — the noun 'the pail's' appears in all 4 story slots (scenario/need/mapping/resolution) — vary the imagery between beats
-    - [HIGH_LENGTH] form=`(do (defprotocol Show (show [this])) (extend-proto` — user_msg 229 words
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
 
 ### G8-11: Protocol vs Java interface
 
 - examples: 1
 - variety @ n=50: 1.00
-<<<<<<< HEAD
 - issues: {'LOW_GROUNDING': 2, 'CONCEPT_AS_VERB': 1}
     - [LOW_GROUNDING] form=`(do (defprotocol IPace (run [this])) (extend-proto` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [LOW_GROUNDING] form=`(do (defprotocol IPace (run [this])) (extend-proto` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [CONCEPT_AS_VERB] form=`(do (defprotocol IPace (run [this])) (extend-proto` — concept_phrase substituted into a finite-verb slot (e.g. 'must calling X', 'I applying Y')
-=======
-- issues: {'LOW_GROUNDING': 2, 'CONCEPT_AS_VERB': 1, 'CLAUSE_STACK_OVERFLOW': 1}
-    - [LOW_GROUNDING] form=`(do (defprotocol IPace (run [this])) (extend-proto` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-    - [LOW_GROUNDING] form=`(do (defprotocol IPace (run [this])) (extend-proto` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-    - [CONCEPT_AS_VERB] form=`(do (defprotocol IPace (run [this])) (extend-proto` — concept_phrase substituted into a finite-verb slot (e.g. 'must calling X', 'I applying Y')
-    - [CLAUSE_STACK_OVERFLOW] form=`(do (defprotocol IPace (run [this])) (extend-proto` — sentence with 5 commas reads as AI-output cadence: 'To define a protocol IPace with method run, extend it to String type, then call '
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
 
 ### G8-12: extend-type on built-in types
 
@@ -1138,14 +1054,8 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 1
 - variety @ n=50: 1.00
-<<<<<<< HEAD
 - issues: {'CLAUSE_STACK_OVERFLOW': 1, 'LOW_GROUNDING': 1}
     - [CLAUSE_STACK_OVERFLOW] form=`(do (defprotocol A (a-op [this])) (defprotocol B (` — sentence with 6 commas reads as AI-output cadence: 'Theodoric, untroubled by what others thought,\nexplained to Pernille: "To define '
-=======
-- issues: {'CLAUSE_STACK_OVERFLOW': 2, 'LOW_GROUNDING': 1}
-    - [CLAUSE_STACK_OVERFLOW] form=`(do (defprotocol A (a-op [this])) (defprotocol B (` — sentence with 6 commas reads as AI-output cadence: 'Theodoric, untroubled by what others thought,\nexplained to Pernille: "To define '
-    - [CLAUSE_STACK_OVERFLOW] form=`(do (defprotocol A (a-op [this])) (defprotocol B (` — sentence with 6 commas reads as AI-output cadence: 'To define two protocols A and B, each with a method, extend both to String type '
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
     - [LOW_GROUNDING] form=`(do (defprotocol A (a-op [this])) (defprotocol B (` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
 
 ### G8-15: derive and isa? — multimethod hierarchy
@@ -1160,20 +1070,12 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-<<<<<<< HEAD
 - issues: {'LOW_GROUNDING': 1, 'CLAUSE_STACK_OVERFLOW': 1, 'CONCEPT_AS_VERB': 4}
-=======
-- issues: {'LOW_GROUNDING': 1, 'CLAUSE_STACK_OVERFLOW': 4, 'CONCEPT_AS_VERB': 4}
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
     - [LOW_GROUNDING] form=`(do (defprotocol Move (step [this])) (defrecord Mi` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [CLAUSE_STACK_OVERFLOW] form=`(do (defprotocol Move (step [this])) (defrecord Mi` — sentence with 5 commas reads as AI-output cadence: 'Ulvilda, with the slow grace of a creature unhurried,\nexplained to Genevieve: "T'
     - [CONCEPT_AS_VERB] form=`(do (defprotocol Move (step [this])) (defrecord Mi` — concept_phrase substituted into a finite-verb slot (e.g. 'must calling X', 'I applying Y')
     - [CONCEPT_AS_VERB] form=`(do (defprotocol Sound (cry [this])) (defrecord Mi` — concept_phrase substituted into a finite-verb slot (e.g. 'must calling X', 'I applying Y')
-<<<<<<< HEAD
     - [CONCEPT_AS_VERB] form=`(do (defprotocol Sound (cry [this])) (defrecord Mi` — concept_phrase substituted into a finite-verb slot (e.g. 'must calling X', 'I applying Y')
-=======
-    - [CLAUSE_STACK_OVERFLOW] form=`(do (defprotocol Sound (cry [this])) (defrecord Mi` — sentence with 5 commas reads as AI-output cadence: 'To define a protocol Sound with method cry, define two record types that impleme'
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
     - [CONCEPT_AS_VERB] form=`(do (defprotocol Sound (cry [this])) (defrecord Mi` — concept_phrase substituted into a finite-verb slot (e.g. 'must calling X', 'I applying Y')
 
 ## Grade 9
@@ -1209,14 +1111,9 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 1
 - variety @ n=50: 1.00
-<<<<<<< HEAD
 - issues: {'CLAUSE_STACK_OVERFLOW': 2}
-=======
-- issues: {'CLAUSE_STACK_OVERFLOW': 3}
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
     - [CLAUSE_STACK_OVERFLOW] form=`(do (def a (atom 0)) (def log (atom [])) (add-watc` — sentence with 5 commas reads as AI-output cadence: 'To construct an atom a, construct a log atom, add a watch to a that conjoins new'
     - [CLAUSE_STACK_OVERFLOW] form=`(do (def a (atom 0)) (def log (atom [])) (add-watc` — sentence with 5 commas reads as AI-output cadence: 'To construct an atom a, construct a log atom, add a watch to a that conjoins new'
-    - [CLAUSE_STACK_OVERFLOW] form=`(do (def a (atom 0)) (def log (atom [])) (add-watc` — sentence with 9 commas reads as AI-output cadence: 'The count will construct an atom a, construct a log atom, add a watch to a that '
 
 ### G9-07: Ref introduction
 
@@ -1339,11 +1236,7 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 3
 - variety @ n=50: 1.00
-<<<<<<< HEAD
-- issues: {'MULTIPLE_SAID_TAGS': 1, 'HIGH_LENGTH': 2, 'LOW_GROUNDING': 2, 'REPL_TRIPLE_VOICE': 1, 'FORM_DISPLAY_AND_FORM_NOUN': 1}
-=======
-- issues: {'MULTIPLE_SAID_TAGS': 1, 'HIGH_LENGTH': 2, 'LOW_GROUNDING': 2, 'REPL_TRIPLE_VOICE': 1, 'SUBMITTED_THE_FORM_DOUBLED': 1, 'ANSWER_LEAK_STRING': 1, 'FORM_DISPLAY_AND_FORM_NOUN': 1}
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
+- issues: {'MULTIPLE_SAID_TAGS': 1, 'HIGH_LENGTH': 2, 'LOW_GROUNDING': 2, 'REPL_TRIPLE_VOICE': 1, 'SUBMITTED_THE_FORM_DOUBLED': 1, 'FORM_DISPLAY_AND_FORM_NOUN': 1}
     - [MULTIPLE_SAID_TAGS] form=`(when true 1 2 3)` — user_msg has 3 dialogue-attribution tags — over-announcing the speakers
     - [HIGH_LENGTH] form=`(when true 1 2 3)` — user_msg 211 words
     - [LOW_GROUNDING] form=`(when true 1 2 3)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
@@ -1387,16 +1280,10 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-<<<<<<< HEAD
 - issues: {'MULTIPLE_SAID_TAGS': 1, 'HIGH_LENGTH': 1, 'TRAILING_PARTICIPLE_CLOSER': 1, 'STORY_SLOT_NOUN_REPEAT': 3}
     - [MULTIPLE_SAID_TAGS] form=`(do (defmacro safe-if-let [bind then else] `(if-le` — user_msg has 3 dialogue-attribution tags — over-announcing the speakers
     - [HIGH_LENGTH] form=`(do (defmacro safe-if-let [bind then else] `(if-le` — user_msg 215 words
     - [TRAILING_PARTICIPLE_CLOSER] form=`(do (defmacro safe-if-let [bind then else] `(if-le` — sentence closes with a participial coda (', keeping the name visible and safe.') — LLM-cadence; close on the verb instead
-=======
-- issues: {'MULTIPLE_SAID_TAGS': 1, 'HIGH_LENGTH': 1, 'STORY_SLOT_NOUN_REPEAT': 3}
-    - [MULTIPLE_SAID_TAGS] form=`(do (defmacro safe-if-let [bind then else] `(if-le` — user_msg has 3 dialogue-attribution tags — over-announcing the speakers
-    - [HIGH_LENGTH] form=`(do (defmacro safe-if-let [bind then else] `(if-le` — user_msg 215 words
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
     - [STORY_SLOT_NOUN_REPEAT] form=`(if-let [x 7] (* x x) 0)` — the noun 'the then-branch' appears in all 4 story slots (scenario/need/mapping/resolution) — vary the imagery between beats
     - [STORY_SLOT_NOUN_REPEAT] form=`(if-let [x 7] (* x x) 0)` — the noun 'the then-branch' appears in all 4 story slots (scenario/need/mapping/resolution) — vary the imagery between beats
     - [STORY_SLOT_NOUN_REPEAT] form=`(if-let [x 7] (* x x) 0)` — the noun 'the then-branch' appears in all 4 story slots (scenario/need/mapping/resolution) — vary the imagery between beats
@@ -1536,22 +1423,15 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-<<<<<<< HEAD
 - issues: {'HIGH_LENGTH': 1, 'CLAUSE_STACK_OVERFLOW': 1, 'DOUBLED_INPUT_VALUE_PARENS': 1}
     - [HIGH_LENGTH] form=`(into [] (map inc) [1 2 3])` — user_msg 206 words
     - [CLAUSE_STACK_OVERFLOW] form=`(into [] (map inc) [1 2 3])` — sentence with 5 commas reads as AI-output cadence: 'To use the map-inc transducer with into to increment the vector containing 1, 2,'
     - [DOUBLED_INPUT_VALUE_PARENS] form=`(into [] (map inc) [1 2 3])` — user_msg contains two or more 'as the input value' parentheticals — auto-closer fired twice or authored prose duplicated it
-=======
-- issues: {'CLAUSE_STACK_OVERFLOW': 2}
-    - [CLAUSE_STACK_OVERFLOW] form=`(into [] (map inc) [1 2 3])` — sentence with 5 commas reads as AI-output cadence: 'To use the map-inc transducer with into to increment the vector containing 1, 2,'
-    - [CLAUSE_STACK_OVERFLOW] form=`(into [] (filter even?) [1 2 3 4 5])` — sentence with 5 commas reads as AI-output cadence: 'But she must write it —\nthe farmer\'s form, not the milkmaid\'s guess."\n\nWrite a C'
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
 
 ### G12-02: Transducer composition
 
 - examples: 2
 - variety @ n=50: 1.00
-<<<<<<< HEAD
 - issues: {'HIGH_LENGTH': 1, 'DOUBLED_INPUT_VALUE_PARENS': 1}
     - [HIGH_LENGTH] form=`(into [] (comp (map inc) (filter even?)) [1 2 3 4]` — user_msg 217 words
     - [DOUBLED_INPUT_VALUE_PARENS] form=`(into [] (comp (map inc) (filter even?)) [1 2 3 4]` — user_msg contains two or more 'as the input value' parentheticals — auto-closer fired twice or authored prose duplicated it
@@ -1562,14 +1442,6 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 - variety @ n=50: 1.00
 - issues: {'TRAILING_PARTICIPLE_CLOSER': 1}
     - [TRAILING_PARTICIPLE_CLOSER] form=`(into [] (take 3) (range 100))` — sentence closes with a participial coda (', hearing her own name in an old kindness.') — LLM-cadence; close on the verb instead
-=======
-- issues: {'HIGH_LENGTH': 1, 'CLAUSE_STACK_OVERFLOW': 4}
-    - [HIGH_LENGTH] form=`(into [] (comp (map inc) (filter even?)) [1 2 3 4]` — user_msg 211 words
-    - [CLAUSE_STACK_OVERFLOW] form=`(into [] (comp (map inc) (filter even?)) [1 2 3 4]` — sentence with 5 commas reads as AI-output cadence: 'The fresh pail holds not just filtered\ndrops, but changed ones."\n\nWrite a form w'
-    - [CLAUSE_STACK_OVERFLOW] form=`(transduce (comp (map inc) (filter even?)) + 0 [1 ` — sentence with 6 commas reads as AI-output cadence: 'The original stream\nis untouched — the fresh pail catches only what the rule all'
-    - [CLAUSE_STACK_OVERFLOW] form=`(transduce (comp (map inc) (filter even?)) + 0 [1 ` — sentence with 6 commas reads as AI-output cadence: 'That is the composed transducer summing the incremented-then-filtered elements —'
-    - [CLAUSE_STACK_OVERFLOW] form=`(transduce (comp (map inc) (filter even?)) + 0 [1 ` — sentence with 7 commas reads as AI-output cadence: 'But she must write it —\nthe farmer\'s form, not the milkmaid\'s guess."\n\nWrite a C'
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
 
 ### G12-05: Channels and pipelines
 
@@ -1632,17 +1504,10 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 ### Issue counts (across all examples × 3 records)
 
-<<<<<<< HEAD
 - **LOW_GROUNDING**: 69
 - **TRAILING_PARTICIPLE_CLOSER**: 61
 - **HIGH_LENGTH**: 51
 - **CLAUSE_STACK_OVERFLOW**: 44
-=======
-- **CLAUSE_STACK_OVERFLOW**: 116
-- **LOW_GROUNDING**: 69
-- **HIGH_LENGTH**: 50
-- **NARRATIVE_NUMERAL_HARDCODE**: 42
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
 - **CONCEPT_AS_VERB**: 39
 - **STORY_SLOT_NOUN_REPEAT**: 33
 - **NARRATIVE_NUMERAL_HARDCODE**: 30
@@ -1654,20 +1519,11 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 - **MULTIPLE_SAID_TAGS**: 15
 - **PARAGRAPH_FRAGMENTATION**: 14
 - **THE_FORM_OVERUSE**: 11
-<<<<<<< HEAD
-=======
-- **FORM_LEAK**: 10
 - **CONCEPT_PHRASE_FORM_PREFIX**: 9
-- **BOOL_LEAK_RESOLUTION**: 9
-- **ANSWER_LEAK_STRING**: 9
-- **NUMERAL_LIST_IN_GOAL**: 9
-- **STRING_AS_CHAR_MISCLAIM**: 6
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
 - **GENERIC_RESOLUTION_TAIL**: 6
 - **DOUBLED_PLACE**: 4
 - **DOUBLED_INPUT_VALUE_PARENS**: 4
 - **PROCEDURAL_OPENER**: 3
-- **STORY_RESOLUTION_NO_DRAWN**: 3
 - **ABSTRACT_RESULT_NARRATION**: 3
 - **ANSWER_LEAK**: 2
 - **REPEATED_OPENER_FRAGMENT**: 1
@@ -1678,29 +1534,16 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 | Grade | Subjects | Examples | Issues | Low-variety |
 |---|---|---|---|---|
-<<<<<<< HEAD
-| 1 | 18 | 76 | 39 | — |
+| 1 | 18 | 76 | 48 | — |
 | 2 | 22 | 88 | 45 | — |
 | 3 | 18 | 31 | 36 | — |
 | 4 | 20 | 39 | 51 | — |
-| 5 | 22 | 39 | 63 | — |
+| 5 | 22 | 39 | 60 | — |
 | 6 | 16 | 33 | 41 | — |
 | 7 | 18 | 36 | 32 | — |
 | 8 | 16 | 31 | 51 | — |
 | 9 | 18 | 34 | 36 | — |
-| 10 | 16 | 36 | 63 | — |
-=======
-| 1 | 18 | 76 | 53 | — |
-| 2 | 22 | 88 | 59 | — |
-| 3 | 18 | 31 | 37 | — |
-| 4 | 20 | 39 | 40 | — |
-| 5 | 22 | 39 | 111 | — |
-| 6 | 16 | 33 | 42 | — |
-| 7 | 18 | 36 | 31 | — |
-| 8 | 16 | 31 | 66 | — |
-| 9 | 18 | 34 | 53 | — |
 | 10 | 16 | 36 | 64 | — |
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
 | 11 | 14 | 29 | 22 | — |
 | 12 | 18 | 37 | 19 | — |
 
@@ -1751,8 +1594,6 @@ Kasimir at reading the REPL. Kasimir pointed to
 the...
     ```
 
-<<<<<<< HEAD
-=======
 #### CONCEPT_PHRASE_FORM_PREFIX
 
 - `G1-03` (form `(+ 1/2 1/4)`): example.concept_phrase begins with 'the form (' — vary the noun phrase (use 'the expression', 'the call', or drop the prefix entirely)
@@ -1798,51 +1639,6 @@ guessed the result of `(* 5 1/2)` first would win the right to
 choose the next contest. Wenceslas, untroubled by what others th...
     ```
 
-#### STRING_AS_CHAR_MISCLAIM
-
-- `G1-08` (form `\space`): form is a multi-character string but the prose refers to it as a single character (`the character \X` idiom)
-    ```
-    A pail of milk is a small fortune to a careful walker and a lost fortune to a careless one.
-
-A handful of market-goers had gathered around the dairy cart
-on the hilltop to watch Evgenia, with the broad voice of a bragging man attempt to outwit
-Gerhardt at reading the REPL. Gerhardt pointed to
-the ch...
-    ```
-- `G1-08` (form `\space`): form is a multi-character string but the prose refers to it as a single character (`the character \X` idiom)
-    ```
-    The sun had only just cleared the hedgerows when the day's first tally of imagined coins began.
-
-Solveig and Nicoletta stopped by the market where someone had
-written the character \space on a flat stone. Solveig, tossing his head as a proud horse tosses its mane, declared
-that she could see the ans...
-    ```
-- `G1-08` (form `\space`): form is a multi-character string but the prose refers to it as a single character (`the character \X` idiom)
-    ```
-    at the market, the road from the farmstead curved gently downhill, and Tudora walked it with her head held high.
-
-A chalk-board nailed beside the market stall in the market carried a puzzle.
-The riddle was simple: it asked the reader to evaluate `"marble"`.
-Tudora laughed, as a victor walks before a...
-    ```
-- `G1-08` (form `\T`): form is a multi-character string but the prose refers to it as a single character (`the character \X` idiom)
-    ```
-    On market mornings, the dairy yard smelled of damp grass and warm tin, and the future seemed safely arrangeable.
-
-A chalk-board nailed beside the market stall at the village carried a puzzle.
-The riddle was simple: it asked the reader to evaluate `"harbor"`.
-Vivien laughed, as if the race were alrea...
-    ```
-- `G1-08` (form `\T`): form is a multi-character string but the prose refers to it as a single character (`the character \X` idiom)
-    ```
-    It is an old habit to count the worth of a thing before the thing has reached the buyer.
-
-A chalk-board nailed beside the market stall at the edge of the hilltop carried a puzzle.
-The riddle was simple: it asked the reader to evaluate `"feather"`.
-Ninon laughed, as a young rooster crows above the ya...
-    ```
-
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
 #### LOW_GROUNDING
 
 - `G1-09` (form `(= 'hare 'hare)`): user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
@@ -2365,31 +2161,6 @@ basket!" But he set a milk-strainer between them. "No guessing," he, neither has
 keep the p...
     ```
 
-#### STORY_RESOLUTION_NO_DRAWN
-
-- `G5-15` (form `((comp inc inc) 5)`): story-tagged example's resolution slot has no drawn-value reference (form has literals ('5',), resolution doesn't close the loop)
-    ```
-    There was once a milkmaid who walked to market with a pail of fresh milk balanced upon her head.
-
-Mair, as if the prize already sat in his paw, dreamed aloud: "I'll compose two inc functions and apply them to 5 as I like, in any order
-I choose." But Urbanus, only chuckled and pulled out a pail-steps...
-    ```
-- `G5-15` (form `((comp inc inc) 5)`): story-tagged example's resolution slot has no drawn-value reference (form has literals ('5',), resolution doesn't close the loop)
-    ```
-    Aniko set out from the farm by the meadow with the pail balanced carefully on her head.
-
-Every morning, Aniko carried the same pail-steps card, a recipe pinned inside her
-apron with a heavy pail balanced overhead. She, boasting at every turn, always followed the
-card in order, and the last step — th...
-    ```
-- `G5-15` (form `((comp inc inc) 5)`): story-tagged example's resolution slot has no drawn-value reference (form has literals ('5',), resolution doesn't close the loop)
-    ```
-    by the village, where the lane bends past the old hedge, Juliana began to add up coins she had not yet earned.
-
-Juliana found Salomea's pail-steps card and studied it, but then said, "This recipe calls
-another recipe! Is that allowed?" She, with the slow grace of a creature unhurried, nodded. "Yes —...
-    ```
-
 #### CONCEPT_AS_VERB
 
 - `G6-01` (form `(name 'clojure.string)`): concept_phrase substituted into a finite-verb slot (e.g. 'must calling X', 'I applying Y')
@@ -2428,7 +2199,6 @@ Slavena, stepping high as proud creatures step, declared, "I will invent new nam
 But she only shook her head. "No, Slavena. To check whether th...
     ```
 
-<<<<<<< HEAD
 #### DOUBLED_INPUT_VALUE_PARENS
 
 - `G6-04` (form `(= (clojure.string/upper-case "x") (clojure.string/upper-cas`): user_msg contains two or more 'as the input value' parentheticals — auto-closer fired twice or authored prose duplicated it
@@ -2456,8 +2226,6 @@ Margery held a milk-strainer over the fresh pail. The rule inside the mesh whisp
 Clara stood at the dairy with two strainers nested one behind the other. The first strainer whispered 'thicken'; the second whispered 'keep only the even-thickness drops.' She held both over ...
     ```
 
-=======
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
 #### HEDGING_NEAR_FORM
 
 - `G6-10` (form `(:deps {:deps {:a 1 :b 2}})`): hedge 'or something close to it' in user_msg — eval-deterministic narratives shouldn't hedge about the form's value

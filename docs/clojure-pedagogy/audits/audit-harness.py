@@ -2037,7 +2037,6 @@ def check_record(rec, sub, example):
                                 "story slots (scenario/need/mapping/"
                                 "resolution) — vary the imagery between beats"))
 
-<<<<<<< HEAD
     # ─────────── slice wvNE (fixset-gamma) — 3 NEW Cat-K detectors ─────────
 
     # TRAILING_PARTICIPLE_CLOSER (K-3 cadence) — a sentence that closes
@@ -2271,7 +2270,6 @@ def check_record(rec, sub, example):
                         "user_msg has 3+ chained English numerals "
                         "in sequence — fixed enumeration that won't "
                         "track form_template draws"))
-=======
     # ─────────── slice V7dL (boy-wolf round3-group4) detector additions ─
 
     # 1. CONCEPT_PHRASE_FORM_PREFIX — a concept_phrase rendered in the
@@ -2322,7 +2320,6 @@ def check_record(rec, sub, example):
                                 f"appears {ul.count(noun)}× in user_msg "
                                 "— vary the imagery"))
                 break
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
 
     return issues
 

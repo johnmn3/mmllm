@@ -385,11 +385,7 @@ G11_04 = SubjectCurriculum(
                 "The REPL bridges the boundary transparently."
             ),
             resolution=(
-<<<<<<< HEAD
-                "The REPL returned the result. Tom had now called count on three different strings and gotten three correct answers. He understood that the village's tools had been designed to work across the host boundary all along. The fold gate held tight against the count of {drawn.a}, slate cool under the elder hand."
-=======
                 "The REPL returned 4. Tom had now called count on three different strings and gotten three correct answers. He understood that the meadow folk's tools had been designed to work across the host boundary all along. The fold gate held tight against the count of {drawn.a}, slate cool under the elder hand."
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
             )),
         _ex('(count "elder")', 5,
             'the count of "elder"',
@@ -591,11 +587,7 @@ G11_07 = SubjectCurriculum(
                 "Indexing starts at 0, just as it does in the village. The REPL returns the value inside."
             ),
             resolution=(
-<<<<<<< HEAD
-                "The form returned the result, the first integer in the array. Tom saw that the host's indexing convention matched the village's—a good sign that crossing the boundary would feel natural."           )),
-=======
                 "The form returned 5, the first integer in the array. Tom saw that the host's indexing convention matched the meadow folk's—a good sign that crossing the boundary would feel natural."           )),
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
         _ex("(let [a (int-array [7 8 9])] (alength a))", 3,
             "the length of an int-array via alength",
             "the length of the array",
@@ -612,11 +604,7 @@ G11_07 = SubjectCurriculum(
                 "The village tool alength knows how to query the host's array structure."
             ),
             resolution=(
-<<<<<<< HEAD
-                "The form returned the result. Tom had now used both aget and alength several times. The host's array machinery was no longer foreign; it was just another tool the village could reach."
-=======
                 "The form returned 3. Tom had now used both aget and alength several times. The host's array machinery was no longer foreign; it was just another tool the townsfolk could reach."
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
             )),
     ],
     subplots=_TOOLSHED_SUBPLOTS, plan_pool=_PLAN_G11,

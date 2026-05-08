@@ -165,13 +165,8 @@ G3_03 = SubjectCurriculum(grade=3, subject_id="G3-03",
                 "binding is in force only for the form's stretch."
             ),
             resolution=(
-<<<<<<< HEAD
-                'the pouch yielded the result, the +1 added a fourth lamb, and the running total stood at the result — exactly what the next fence-post called for. Tom chalked {drawn.a} on the village notice, and the morning record stood for the next shepherd to read.'           )),
-        _ex("(let [n 10] (* n n))", 100, "the form (let [n 10] (* n n))",
-=======
                 'the pouch yielded 3, the +1 added a fourth lamb, and the running total stood at 4 — exactly what the next fence-post called for. Tom chalked {drawn.a} on the meadow folk notice, and the morning record stood for the next shepherd to read.'           )),
         _ex("(let [n 10] (* n n))", 100, "the expression (let [n 10] (* n n))",
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
             "the square of n where n is bound to 10",
             scenario=(
                 "Tom had just counted 10 stones for a marker wall, and he "
@@ -642,13 +637,9 @@ G3_14 = SubjectCurriculum(grade=3, subject_id="G3-14",
             "the do form (do 1 2 3)",
             "the value of (do 1 2 3)",
             scenario=(
-<<<<<<< HEAD
-                'Carol had written {drawn.c} numbers on her slate in a column: 1, then 2, then 3. She asked Tom: if I ask the REPL to read this whole sequence, what comes back?'
-=======
                 "Carol had written three numbers on her slate in a column: 1, "
                 "then 2, then 3. She asked Tom: if I read this whole sequence, "
                 "what comes back?"
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
             ),
             need=(
                 "Tom needed to learn that `do` groups forms together, but only "
@@ -659,11 +650,7 @@ G3_14 = SubjectCurriculum(grade=3, subject_id="G3-14",
                 "2, then 3 in sequence. But only the final value comes back: 3."
             ),
             resolution=(
-<<<<<<< HEAD
-                "the do form ran all three, returned the result, and Tom learned the REPL's rule for sequences. Carol marked {drawn.a} on the watchhouse beam, the lookout high above the valley quiet at last."
-=======
                 "the do form ran all three, returned 3, and Tom learned the rule for sequences. Carol marked {drawn.a} on the watchhouse beam, the lookout high above the valley quiet at last."
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
             )),
         _ex("(do (+ 1 1) (+ 2 2) (+ 3 3))", 6,
             "a do with three forms",

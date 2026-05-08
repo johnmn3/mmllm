@@ -6,28 +6,6 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 ## Grade 1
 
-### G1-08: Characters
-
-- examples: 4
-- variety @ n=50: 1.00
-<<<<<<< HEAD
-- issues: {'VILLAGE_NOUN_OVERUSE': 1, 'HONEST_JUDGE_REPEAT': 1, 'TRUST_RHETORIC_FILLER': 1, 'FOREIGN_FABLE_IMAGERY': 3}
-    - [VILLAGE_NOUN_OVERUSE] form=`\w` — `the village` appears 4 times (noun-saturation tic — vary or drop)
-    - [HONEST_JUDGE_REPEAT] form=`\w` — two or more 'honest' uses in one boy-wolf user_msg (judge-bombast tic — drop one)
-    - [TRUST_RHETORIC_FILLER] form=`\w` — user_msg has 2 stacked 'only voice/judge we trust / honest tally' filler phrases — replace with concrete algorithm narration
-    - [FOREIGN_FABLE_IMAGERY] form=`\w` — tortoise-hare-specific imagery 'leather notebook' leaks into boy-wolf prose
-    - [FOREIGN_FABLE_IMAGERY] form=`\T` — tortoise-hare-specific imagery 'leather notebook' leaks into boy-wolf prose
-    - [FOREIGN_FABLE_IMAGERY] form=`(char? \w)` — tortoise-hare-specific imagery 'leather notebook' leaks into boy-wolf prose
-=======
-- issues: {'STRING_AS_CHAR_MISCLAIM': 7}
-    - [STRING_AS_CHAR_MISCLAIM] form=`\w` — form is a multi-character string but the prose refers to it as a single character (`the character \X` idiom)
-    - [STRING_AS_CHAR_MISCLAIM] form=`\w` — form is a multi-character string but the prose refers to it as a single character (`the character \X` idiom)
-    - [STRING_AS_CHAR_MISCLAIM] form=`\w` — form is a multi-character string but the prose refers to it as a single character (`the character \X` idiom)
-    - [STRING_AS_CHAR_MISCLAIM] form=`\space` — form is a multi-character string but the prose refers to it as a single character (`the character \X` idiom)
-    - [STRING_AS_CHAR_MISCLAIM] form=`\space` — form is a multi-character string but the prose refers to it as a single character (`the character \X` idiom)
-    - [STRING_AS_CHAR_MISCLAIM] form=`\T` — form is a multi-character string but the prose refers to it as a single character (`the character \X` idiom)
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
-
 ### G1-09: Symbols vs values
 
 - examples: 4
@@ -121,21 +99,11 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 5
 - variety @ n=50: 1.00
-<<<<<<< HEAD
-- issues: {'BOOL_LEAK_RESOLUTION': 3, 'FORM_DISPLAY_AND_FORM_NOUN': 2, 'TRAILING_PARTICIPLE_CLOSER': 2}
+- issues: {'BOOL_LEAK_RESOLUTION': 3, 'TRAILING_PARTICIPLE_CLOSER': 2}
     - [BOOL_LEAK_RESOLUTION] form=`(not= 1 2)` — resolution leaks boolean answer 'true' — describe the verdict abstractly instead
-    - [FORM_DISPLAY_AND_FORM_NOUN] form=`(not= 1 2)` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
     - [TRAILING_PARTICIPLE_CLOSER] form=`(not= 1 2)` — sentence closes with a participial coda (', confirming the two lambs had separate weights.') — LLM-cadence; close on the verb instead
     - [BOOL_LEAK_RESOLUTION] form=`(= 1 1 1)` — resolution leaks boolean answer 'true' — describe the verdict abstractly instead
     - [TRAILING_PARTICIPLE_CLOSER] form=`(= 1 1 1)` — sentence closes with a participial coda (", confirming the lamb's steady count across the full day.") — LLM-cadence; close on the verb instead
-=======
-- issues: {'BOOL_LEAK_RESOLUTION': 3, 'NARRATIVE_NUMERAL_HARDCODE': 3}
-    - [BOOL_LEAK_RESOLUTION] form=`(not= 1 2)` — resolution leaks boolean answer 'true' — describe the verdict abstractly instead
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`(= 1 1 1)` — parametric example has hard-coded English numeral 'three counts' in a story slot — the actual draws may differ from this fixed count
-    - [BOOL_LEAK_RESOLUTION] form=`(= 1 1 1)` — resolution leaks boolean answer 'true' — describe the verdict abstractly instead
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`(= 1 1 1)` — parametric example has hard-coded English numeral 'three counts' in a story slot — the actual draws may differ from this fixed count
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`(= 1 1 1)` — parametric example has hard-coded English numeral 'three counts' in a story slot — the actual draws may differ from this fixed count
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
     - [BOOL_LEAK_RESOLUTION] form=`(not= 1 1 2)` — resolution leaks boolean answer 'true' — describe the verdict abstractly instead
 
 ### G2-04: min and max
@@ -152,28 +120,19 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 - issues: {'SMALL_INT_LEAK': 1}
     - [SMALL_INT_LEAK] form=`(mod 17 5)` — small-int answer 2 leaks via resolution-slot phrasing
 
-<<<<<<< HEAD
 ### G2-06: inc and dec
 
 - examples: 5
 - variety @ n=50: 1.00
-- issues: {'FORM_DISPLAY_AND_FORM_NOUN': 1, 'TRAILING_PARTICIPLE_CLOSER': 1}
-    - [FORM_DISPLAY_AND_FORM_NOUN] form=`(inc -1)` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
+- issues: {'TRAILING_PARTICIPLE_CLOSER': 1}
     - [TRAILING_PARTICIPLE_CLOSER] form=`(inc -1)` — sentence closes with a participial coda (', canceling the debt.') — LLM-cadence; close on the verb instead
 
-=======
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
 ### G2-07: Absolute value
 
 - examples: 4
 - variety @ n=50: 1.00
-<<<<<<< HEAD
-- issues: {'FORM_DISPLAY_AND_FORM_NOUN': 2, 'TRAILING_PARTICIPLE_CLOSER': 2}
-    - [FORM_DISPLAY_AND_FORM_NOUN] form=`(abs 5)` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
+- issues: {'TRAILING_PARTICIPLE_CLOSER': 2, 'FORM_DISPLAY_AND_FORM_NOUN': 1}
     - [TRAILING_PARTICIPLE_CLOSER] form=`(abs 5)` — sentence closes with a participial coda (', ignoring the sign.') — LLM-cadence; close on the verb instead
-=======
-- issues: {'FORM_DISPLAY_AND_FORM_NOUN': 1}
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
     - [FORM_DISPLAY_AND_FORM_NOUN] form=`(abs -5)` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
     - [TRAILING_PARTICIPLE_CLOSER] form=`(abs -5)` — sentence closes with a participial coda (', leaving the magnitude.') — LLM-cadence; close on the verb instead
 
@@ -209,31 +168,19 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 6
 - variety @ n=50: 0.99
-<<<<<<< HEAD
-- issues: {'BOOL_LEAK_RESOLUTION': 2, 'LOW_GROUNDING': 2, 'FORM_DISPLAY_AND_FORM_NOUN': 1}
-=======
 - issues: {'BOOL_LEAK_RESOLUTION': 2, 'LOW_GROUNDING': 2, 'NARRATIVE_NUMERAL_HARDCODE': 3, 'CLAUSE_STACK_OVERFLOW': 1}
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
     - [BOOL_LEAK_RESOLUTION] form=`(and true true)` — resolution leaks boolean answer 'true' — describe the verdict abstractly instead
     - [LOW_GROUNDING] form=`(and true true)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [BOOL_LEAK_RESOLUTION] form=`(or false true)` — resolution leaks boolean answer 'true' — describe the verdict abstractly instead
     - [LOW_GROUNDING] form=`(or false true)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-<<<<<<< HEAD
-    - [FORM_DISPLAY_AND_FORM_NOUN] form=`(and 1 2 3)` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
-=======
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(and 1 2 3)` — parametric example has hard-coded English numeral 'three counts' in a story slot — the actual draws may differ from this fixed count
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(and 1 2 3)` — parametric example has hard-coded English numeral 'three counts' in a story slot — the actual draws may differ from this fixed count
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
 
 ### G2-14: not — turning truthy to false
 
 - examples: 5
 - variety @ n=50: 1.00
-<<<<<<< HEAD
-- issues: {'BOOL_LEAK_RESOLUTION': 1, 'FORM_DISPLAY_AND_FORM_NOUN': 1, 'LOW_GROUNDING': 1, 'TRAILING_PARTICIPLE_CLOSER': 1}
-=======
-- issues: {'BOOL_LEAK_RESOLUTION': 1, 'LOW_GROUNDING': 1}
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
+- issues: {'BOOL_LEAK_RESOLUTION': 1, 'LOW_GROUNDING': 1, 'TRAILING_PARTICIPLE_CLOSER': 1}
     - [BOOL_LEAK_RESOLUTION] form=`(not true)` — resolution leaks boolean answer 'false' — describe the verdict abstractly instead
     - [LOW_GROUNDING] form=`(not true)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [TRAILING_PARTICIPLE_CLOSER] form=`(not true)` — sentence closes with a participial coda (", confirming the gate wasn't closed — it was open.") — LLM-cadence; close on the verb instead
@@ -253,164 +200,86 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 3
 - variety @ n=50: 1.00
-<<<<<<< HEAD
-- issues: {'TRAILING_PARTICIPLE_CLOSER': 2, 'FORM_DISPLAY_AND_FORM_NOUN': 2, 'LOW_GROUNDING': 2, 'GOAL_FALLBACK_GENERIC': 1, 'THE_FORM_OVERUSE': 1}
+- issues: {'TRAILING_PARTICIPLE_CLOSER': 2, 'FORM_DISPLAY_AND_FORM_NOUN': 1, 'LOW_GROUNDING': 2}
     - [TRAILING_PARTICIPLE_CLOSER] form=`(:wolf {:wolf 1 :flock 2})` — sentence closes with a participial coda (', leaving the first\none exactly where it was.') — LLM-cadence; close on the verb instead
     - [TRAILING_PARTICIPLE_CLOSER] form=`(:wolf {:wolf 1 :flock 2})` — sentence closes with a participial coda (', leaving the first\none exactly where it was.') — LLM-cadence; close on the verb instead
-    - [FORM_DISPLAY_AND_FORM_NOUN] form=`(:flock {:wolf 1 :flock 2})` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
-    - [LOW_GROUNDING] form=`(:flock {:wolf 1 :flock 2})` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-    - [GOAL_FALLBACK_GENERIC] form=`(:missing {:wolf 1})` — user_msg uses generic 'To evaluate the X, ...' fallback AND no drawn-literal anchor — add a canonical GOALS entry for richer prose
-    - [FORM_DISPLAY_AND_FORM_NOUN] form=`(:missing {:wolf 1})` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
-=======
-- issues: {'FORM_DISPLAY_AND_FORM_NOUN': 1, 'LOW_GROUNDING': 2}
     - [FORM_DISPLAY_AND_FORM_NOUN] form=`(:flock {:wolf 1 :flock 2})` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
     - [LOW_GROUNDING] form=`(:flock {:wolf 1 :flock 2})` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [LOW_GROUNDING] form=`(:missing {:wolf 1})` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
 
 ### G2-18: Quoting symbols
 
 - examples: 3
 - variety @ n=50: 0.99
-<<<<<<< HEAD
-- issues: {'LOW_GROUNDING': 4, 'FORM_DISPLAY_AND_FORM_NOUN': 1, 'GOAL_FALLBACK_GENERIC': 3, 'NARRATIVE_NUMERAL_HARDCODE': 3}
-=======
-- issues: {'ANSWER_LEAK_STRING': 3, 'LOW_GROUNDING': 4, 'GOAL_FALLBACK_GENERIC': 3, 'NARRATIVE_NUMERAL_HARDCODE': 3}
-    - [ANSWER_LEAK_STRING] form=`(quote wolf)` — answer string 'wolf' appears in user_msg
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
+- issues: {'LOW_GROUNDING': 4, 'GOAL_FALLBACK_GENERIC': 3, 'NARRATIVE_NUMERAL_HARDCODE': 3}
     - [LOW_GROUNDING] form=`(quote wolf)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [LOW_GROUNDING] form=`(quote wolf)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [LOW_GROUNDING] form=`(quote wolf)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-    - [FORM_DISPLAY_AND_FORM_NOUN] form=`'flock` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
     - [LOW_GROUNDING] form=`'flock` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+    - [GOAL_FALLBACK_GENERIC] form=`'flock` — user_msg uses generic 'To evaluate the X, ...' fallback AND no drawn-literal anchor — add a canonical GOALS entry for richer prose
     - [GOAL_FALLBACK_GENERIC] form=`'flock` — user_msg uses generic 'To evaluate the X, ...' fallback AND no drawn-literal anchor — add a canonical GOALS entry for richer prose
 
 ### G2-20: Counting
 
 - examples: 3
 - variety @ n=50: 1.00
-<<<<<<< HEAD
-- issues: {'TRAILING_PARTICIPLE_CLOSER': 3, 'ONLY_SHOOK_HEAD_TIC': 1, 'SMALL_INT_LEAK': 2, 'FORM_DISPLAY_AND_FORM_NOUN': 2, 'SENTENCE_START_LOWER_PRONOUN': 2}
+- issues: {'TRAILING_PARTICIPLE_CLOSER': 3, 'SMALL_INT_LEAK': 2}
     - [TRAILING_PARTICIPLE_CLOSER] form=`(count [1 2 3])` — sentence closes with a participial coda (', notching the\ntally-stick — returned the final number.') — LLM-cadence; close on the verb instead
-    - [ONLY_SHOOK_HEAD_TIC] form=`(count [1 2 3])` — user_msg uses 'only shook his/her head' — recurring AI-fable filler cadence
-=======
-- issues: {'CLAUSE_STACK_OVERFLOW': 1, 'SMALL_INT_LEAK': 2}
-    - [CLAUSE_STACK_OVERFLOW] form=`(count [1 2 3])` — sentence with 6 commas reads as AI-output cadence: 'The runtime does this the same way for any kind of collection."\nTo count the ele'
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
     - [SMALL_INT_LEAK] form=`(count "hello")` — small-int answer 5 leaks via resolution-slot phrasing
     - [SMALL_INT_LEAK] form=`(count "hello")` — small-int answer 5 leaks via resolution-slot phrasing
+    - [TRAILING_PARTICIPLE_CLOSER] form=`(count "hello")` — sentence closes with a participial coda (', walking\nthe flock — returned the final tally.') — LLM-cadence; close on the verb instead
+    - [TRAILING_PARTICIPLE_CLOSER] form=`(count [])` — sentence closes with a participial coda (', notching the\ntally-stick — returned the final number.') — LLM-cadence; close on the verb instead
 
 ### G2-21: String length and substring
 
 - examples: 3
 - variety @ n=50: 1.00
-<<<<<<< HEAD
-- issues: {'TRAILING_PARTICIPLE_CLOSER': 2, 'FORM_DISPLAY_AND_FORM_NOUN': 3, 'THE_FORM_OVERUSE': 3, 'SMALL_INT_LEAK': 1}
+- issues: {'TRAILING_PARTICIPLE_CLOSER': 2, 'FORM_DISPLAY_AND_FORM_NOUN': 3, 'SMALL_INT_LEAK': 1}
     - [TRAILING_PARTICIPLE_CLOSER] form=`(count "shepherd")` — sentence closes with a participial coda (', leaving the original\nuntouched.') — LLM-cadence; close on the verb instead
     - [FORM_DISPLAY_AND_FORM_NOUN] form=`(count "shepherd")` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
-    - [THE_FORM_OVERUSE] form=`(count "shepherd")` — `the form` appears 6 times in user_msg (template tic — vary references)
     - [TRAILING_PARTICIPLE_CLOSER] form=`(count "wolf")` — sentence closes with a participial coda (', leaving the original\nuntouched.') — LLM-cadence; close on the verb instead
-    - [SMALL_INT_LEAK] form=`(count "wolf")` — small-int answer 4 leaks via resolution-slot phrasing
-    - [FORM_DISPLAY_AND_FORM_NOUN] form=`(count "wolf")` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
-=======
-- issues: {'ANSWER_LEAK': 1, 'FORM_DISPLAY_AND_FORM_NOUN': 3, 'SMALL_INT_LEAK': 1}
-    - [ANSWER_LEAK] form=`(count "shepherd")` — answer 8 in narrative
-    - [FORM_DISPLAY_AND_FORM_NOUN] form=`(count "shepherd")` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
     - [SMALL_INT_LEAK] form=`(count "wolf")` — small-int answer 4 leaks via resolution-slot phrasing
     - [FORM_DISPLAY_AND_FORM_NOUN] form=`(count "wolf")` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
     - [FORM_DISPLAY_AND_FORM_NOUN] form=`(subs "shepherd" 0 3)` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
 
-### G2-22: Compose pure arithmetic (multi-step calculation)
-
-- examples: 3
-- variety @ n=50: 1.00
-- issues: {'ANSWER_LEAK': 2}
-    - [ANSWER_LEAK] form=`(quot (+ 100 50) 5)` — answer 30 in narrative
-    - [ANSWER_LEAK] form=`(quot (+ 100 50) 5)` — answer 30 in narrative
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
-
 ## Grade 3
+
+### G3-02: def — redefinition
+
+- examples: 1
+- variety @ n=50: 1.00
+- issues: {'CLAUSE_STACK_OVERFLOW': 1}
+    - [CLAUSE_STACK_OVERFLOW] form=`(do (def x 1) (def x 99) x)` — sentence with 5 commas reads as AI-output cadence: 'To bind x to 7, then redefine it as 59 and return it, he composed the redefined '
 
 ### G3-03: let — local binding
 
 - examples: 3
 - variety @ n=50: 1.00
-<<<<<<< HEAD
-- issues: {'HIGH_LENGTH': 1, 'FORM_DISPLAY_AND_FORM_NOUN': 1, 'SENTENCE_START_LOWER_PRONOUN': 1}
-    - [HIGH_LENGTH] form=`(let [x 3] (+ x 1))` — user_msg 247 words
-=======
 - issues: {'HIGH_LENGTH': 1, 'SMALL_INT_LEAK': 1, 'FORM_DISPLAY_AND_FORM_NOUN': 1}
     - [HIGH_LENGTH] form=`(let [x 3] (+ x 1))` — user_msg 246 words
     - [SMALL_INT_LEAK] form=`(let [x 3] (+ x 1))` — small-int answer 4 leaks via resolution-slot phrasing
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
     - [FORM_DISPLAY_AND_FORM_NOUN] form=`(let [x 3] (+ x 1))` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
 
 ### G3-04: let — multi-binding
 
 - examples: 3
 - variety @ n=50: 1.00
-<<<<<<< HEAD
-- issues: {'HIGH_LENGTH': 1, 'SENTENCE_START_LOWER_PRONOUN': 1}
+- issues: {'HIGH_LENGTH': 1}
     - [HIGH_LENGTH] form=`(let [a 1 b 2] (+ a b))` — user_msg 201 words
-    - [SENTENCE_START_LOWER_PRONOUN] form=`(let [x 5 y 3] (- x y))` — pronoun starts a sentence in lowercase — template should use the _cap variant after a sentence-ending punctuation
-=======
-- issues: {'HIGH_LENGTH': 1, 'NARRATIVE_NUMERAL_HARDCODE': 3}
-    - [HIGH_LENGTH] form=`(let [a 1 b 2] (+ a b))` — user_msg 201 words
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`(let [a 2 b 3 c 4] (+ a b c))` — parametric example has hard-coded English numeral 'three counts' in a story slot — the actual draws may differ from this fixed count
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`(let [a 2 b 3 c 4] (+ a b c))` — parametric example has hard-coded English numeral 'three counts' in a story slot — the actual draws may differ from this fixed count
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`(let [a 2 b 3 c 4] (+ a b c))` — parametric example has hard-coded English numeral 'three counts' in a story slot — the actual draws may differ from this fixed count
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
-
-### G3-06: let — binding can reference prior
-
-- examples: 2
-- variety @ n=50: 1.00
-<<<<<<< HEAD
-- issues: {'SENTENCE_START_LOWER_PRONOUN': 2}
-    - [SENTENCE_START_LOWER_PRONOUN] form=`(let [a 5 b (* a 2)] b)` — pronoun starts a sentence in lowercase — template should use the _cap variant after a sentence-ending punctuation
-    - [SENTENCE_START_LOWER_PRONOUN] form=`(let [a 3 b (+ a 1) c (* b 2)] c)` — pronoun starts a sentence in lowercase — template should use the _cap variant after a sentence-ending punctuation
-=======
-- issues: {'CLAUSE_STACK_OVERFLOW': 1, 'ANSWER_LEAK': 1}
-    - [CLAUSE_STACK_OVERFLOW] form=`(let [a 5 b (* a 2)] b)` — sentence with 5 commas reads as AI-output cadence: 'Step past the form\'s\nedge and the pouch is empty again." To bind a to 5, then bi'
-    - [ANSWER_LEAK] form=`(let [a 3 b (+ a 1) c (* b 2)] c)` — answer 8 in narrative
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
 
 ### G3-07: fn — anonymous function
 
 - examples: 2
 - variety @ n=50: 1.00
-<<<<<<< HEAD
 - issues: {'HIGH_LENGTH': 1}
-    - [HIGH_LENGTH] form=`((fn [x] (+ x 1)) 4)` — user_msg 224 words
-=======
-- issues: {'HIGH_LENGTH': 1, 'SMALL_INT_LEAK': 1}
-    - [HIGH_LENGTH] form=`((fn [x] (+ x 1)) 4)` — user_msg 222 words
-    - [SMALL_INT_LEAK] form=`((fn [x] (+ x 1)) 4)` — small-int answer 5 leaks via resolution-slot phrasing
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
-
-### G3-08: fn — multi-arg
-
-- examples: 1
-- variety @ n=50: 1.00
-<<<<<<< HEAD
-- issues: {'CONCEPT_AS_VERB': 1}
-    - [CONCEPT_AS_VERB] form=`((fn [a b c] (+ a b c)) 1 2 3)` — concept_phrase substituted into a finite-verb slot (e.g. 'must calling X', 'I applying Y')
-=======
-- issues: {'CLAUSE_STACK_OVERFLOW': 1}
-    - [CLAUSE_STACK_OVERFLOW] form=`((fn [a b c] (+ a b c)) 1 2 3)` — sentence with 5 commas reads as AI-output cadence: 'The earlier steps prepare the way; the last\nstep is the answer." To create an an'
+    - [HIGH_LENGTH] form=`((fn [x] (+ x 1)) 4)` — user_msg 223 words
 
 ### G3-09: defn — shorthand
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'ANSWER_LEAK': 2, 'NARRATIVE_NUMERAL_HARDCODE': 3, 'BOY_WOLF_NOUN_SATURATION': 1, 'CLAUSE_STACK_OVERFLOW': 1}
-    - [ANSWER_LEAK] form=`(do (defn add3 [a b c] (+ a b c)) (add3 1 2 3))` — answer 6 in narrative
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`(do (defn add3 [a b c] (+ a b c)) (add3 1 2 3))` — parametric example has hard-coded English numeral 'three counts' in a story slot — the actual draws may differ from this fixed count
+- issues: {'BOY_WOLF_NOUN_SATURATION': 1}
     - [BOY_WOLF_NOUN_SATURATION] form=`(do (defn add3 [a b c] (+ a b c)) (add3 1 2 3))` — boy-wolf metaphor noun 'drill-card' appears 4× in user_msg — vary the imagery
-    - [ANSWER_LEAK] form=`(do (defn add3 [a b c] (+ a b c)) (add3 1 2 3))` — answer 6 in narrative
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`(do (defn add3 [a b c] (+ a b c)) (add3 1 2 3))` — parametric example has hard-coded English numeral 'three counts' in a story slot — the actual draws may differ from this fixed count
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`(do (defn add3 [a b c] (+ a b c)) (add3 1 2 3))` — parametric example has hard-coded English numeral 'three counts' in a story slot — the actual draws may differ from this fixed count
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
 
 ### G3-10: anonymous shorthand #()
 
@@ -423,7 +292,8 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 1
 - variety @ n=50: 1.00
-- issues: {'TRAILING_PARTICIPLE_CLOSER': 3}
+- issues: {'CLAUSE_STACK_OVERFLOW': 1, 'TRAILING_PARTICIPLE_CLOSER': 3}
+    - [CLAUSE_STACK_OVERFLOW] form=`(do (def g 5) (let [g 99] (+ g 1)))` — sentence with 6 commas reads as AI-output cadence: 'To define g at the top level, shadow it in a let with a different value, and com'
     - [TRAILING_PARTICIPLE_CLOSER] form=`(do (def g 5) (let [g 99] (+ g 1)))` — sentence closes with a participial coda (', shadowing the top-level def.') — LLM-cadence; close on the verb instead
     - [TRAILING_PARTICIPLE_CLOSER] form=`(do (def g 5) (let [g 99] (+ g 1)))` — sentence closes with a participial coda (', shadowing the top-level def.') — LLM-cadence; close on the verb instead
     - [TRAILING_PARTICIPLE_CLOSER] form=`(do (def g 5) (let [g 99] (+ g 1)))` — sentence closes with a participial coda (', shadowing the top-level def.') — LLM-cadence; close on the verb instead
@@ -440,48 +310,19 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-<<<<<<< HEAD
-- issues: {'REPL_TRIPLE_VOICE': 1, 'LOW_GROUNDING': 1}
-    - [REPL_TRIPLE_VOICE] form=`(do 1 2 3)` — user_msg mentions 'REPL' 4 times — the REPL personification should appear at most twice per record (submit + return)
-    - [LOW_GROUNDING] form=`(do (+ 1 1) (+ 2 2) (+ 3 3))` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-
-### G3-15: Side-effects in body
-
-- examples: 1
-- variety @ n=50: 1.00
-- issues: {'CONCEPT_AS_VERB': 1, 'TRAILING_PARTICIPLE_CLOSER': 2}
-    - [CONCEPT_AS_VERB] form=`(do (println "hi") 42)` — concept_phrase substituted into a finite-verb slot (e.g. 'must calling X', 'I applying Y')
-    - [TRAILING_PARTICIPLE_CLOSER] form=`(do (println "hi") 42)` — sentence closes with a participial coda (', ignoring the intermediate println side-effect.') — LLM-cadence; close on the verb instead
-    - [TRAILING_PARTICIPLE_CLOSER] form=`(do (println "hi") 42)` — sentence closes with a participial coda (', ignoring the intermediate println side-effect.') — LLM-cadence; close on the verb instead
-
-### G3-16: Name collision: namespace vs let
-
-- examples: 1
-- variety @ n=50: 1.00
-- issues: {'SENTENCE_START_LOWER_PRONOUN': 1}
-    - [SENTENCE_START_LOWER_PRONOUN] form=`(let [+ 99] +)` — pronoun starts a sentence in lowercase — template should use the _cap variant after a sentence-ending punctuation
-
-### G3-18: When to name vs inline
-
-- examples: 2
-- variety @ n=50: 1.00
-- issues: {'SENTENCE_START_LOWER_PRONOUN': 2}
-    - [SENTENCE_START_LOWER_PRONOUN] form=`(* 5 5 5)` — pronoun starts a sentence in lowercase — template should use the _cap variant after a sentence-ending punctuation
-    - [SENTENCE_START_LOWER_PRONOUN] form=`(* 5 5 5)` — pronoun starts a sentence in lowercase — template should use the _cap variant after a sentence-ending punctuation
-=======
 - issues: {'NARRATIVE_NUMERAL_HARDCODE': 3, 'LOW_GROUNDING': 1}
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(do 1 2 3)` — parametric example has hard-coded English numeral 'three numbers' in a story slot — the actual draws may differ from this fixed count
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(do 1 2 3)` — parametric example has hard-coded English numeral 'three numbers' in a story slot — the actual draws may differ from this fixed count
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(do 1 2 3)` — parametric example has hard-coded English numeral 'three numbers' in a story slot — the actual draws may differ from this fixed count
     - [LOW_GROUNDING] form=`(do (+ 1 1) (+ 2 2) (+ 3 3))` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
 
-### G3-17: Naming conventions (kebab-case)
+### G3-15: Side-effects in body
 
 - examples: 1
 - variety @ n=50: 1.00
-- issues: {'ANSWER_LEAK': 1}
-    - [ANSWER_LEAK] form=`(let [flock-size 8 stray-count 2] (- flock-size st` — answer 6 in narrative
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
+- issues: {'TRAILING_PARTICIPLE_CLOSER': 2}
+    - [TRAILING_PARTICIPLE_CLOSER] form=`(do (println "hi") 42)` — sentence closes with a participial coda (', ignoring the intermediate println side-effect.') — LLM-cadence; close on the verb instead
+    - [TRAILING_PARTICIPLE_CLOSER] form=`(do (println "hi") 42)` — sentence closes with a participial coda (', ignoring the intermediate println side-effect.') — LLM-cadence; close on the verb instead
 
 ## Grade 4
 
@@ -489,7 +330,8 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 3
 - variety @ n=50: 1.00
-- issues: {'TRAILING_PARTICIPLE_CLOSER': 3}
+- issues: {'CLAUSE_STACK_OVERFLOW': 1, 'TRAILING_PARTICIPLE_CLOSER': 3}
+    - [CLAUSE_STACK_OVERFLOW] form=`[1 2 3]` — sentence with 5 commas reads as AI-output cadence: 'To create a vector containing 1, 2, and 3 properly, she wrote\na vector of three '
     - [TRAILING_PARTICIPLE_CLOSER] form=`[1 2 3]` — sentence closes with a participial coda (', leaving the first\none exactly where it was.') — LLM-cadence; close on the verb instead
     - [TRAILING_PARTICIPLE_CLOSER] form=`[]` — sentence closes with a participial coda (', leaving the first\none exactly where it was.') — LLM-cadence; close on the verb instead
     - [TRAILING_PARTICIPLE_CLOSER] form=`["a" "b"]` — sentence closes with a participial coda (', leaving the first\none exactly where it was.') — LLM-cadence; close on the verb instead
@@ -498,23 +340,19 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'NARRATIVE_NUMERAL_HARDCODE': 6, 'TRAILING_PARTICIPLE_CLOSER': 1}
+- issues: {'NARRATIVE_NUMERAL_HARDCODE': 6, 'CLAUSE_STACK_OVERFLOW': 3, 'TRAILING_PARTICIPLE_CLOSER': 1}
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(nth [10 20 30] 0)` — parametric example has hard-coded English numeral 'three bundles' in a story slot — the actual draws may differ from this fixed count
+    - [CLAUSE_STACK_OVERFLOW] form=`(nth [10 20 30] 0)` — sentence with 5 commas reads as AI-output cadence: 'To get the element at index 0 of a vector containing 10, 20, and 30 properly, he'
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(nth [10 20 30] 0)` — parametric example has hard-coded English numeral 'three bundles' in a story slot — the actual draws may differ from this fixed count
     - [TRAILING_PARTICIPLE_CLOSER] form=`(nth [10 20 30] 0)` — sentence closes with a participial coda (', leaving the first\none exactly where it was.') — LLM-cadence; close on the verb instead
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(nth [10 20 30] 0)` — parametric example has hard-coded English numeral 'three bundles' in a story slot — the actual draws may differ from this fixed count
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`(nth [10 20 30] 2)` — parametric example has hard-coded English numeral 'three bundles' in a story slot — the actual draws may differ from this fixed count
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`(nth [10 20 30] 2)` — parametric example has hard-coded English numeral 'three bundles' in a story slot — the actual draws may differ from this fixed count
+    - [CLAUSE_STACK_OVERFLOW] form=`(nth [10 20 30] 0)` — sentence with 5 commas reads as AI-output cadence: 'To get the element at index 0 of a vector containing 10, 20, and 30 properly, he'
 
 ### G4-03: conj — append to vector
 
 - examples: 2
 - variety @ n=50: 1.00
-<<<<<<< HEAD
-- issues: {'FORM_DISPLAY_AND_FORM_NOUN': 1, 'THE_FORM_OVERUSE': 1, 'CLAUSE_STACK_OVERFLOW': 1, 'TRAILING_PARTICIPLE_CLOSER': 1}
-=======
-- issues: {'FORM_DISPLAY_AND_FORM_NOUN': 1, 'CLAUSE_STACK_OVERFLOW': 1}
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
+- issues: {'FORM_DISPLAY_AND_FORM_NOUN': 1, 'CLAUSE_STACK_OVERFLOW': 1, 'TRAILING_PARTICIPLE_CLOSER': 1}
     - [FORM_DISPLAY_AND_FORM_NOUN] form=`(conj [] :wolf)` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
     - [CLAUSE_STACK_OVERFLOW] form=`(conj [] :wolf)` — sentence with 5 commas reads as AI-output cadence: 'The lookout returned with 14, 16, 19, 16, and 10 on his slate, the valley long b'
     - [TRAILING_PARTICIPLE_CLOSER] form=`(conj [] :wolf)` — sentence closes with a participial coda (', growing the empty form into a one-element vector.') — LLM-cadence; close on the verb instead
@@ -556,9 +394,10 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 1
 - variety @ n=50: 1.00
-- issues: {'CLAUSE_STACK_OVERFLOW': 1, 'TRAILING_PARTICIPLE_CLOSER': 1}
+- issues: {'CLAUSE_STACK_OVERFLOW': 2, 'TRAILING_PARTICIPLE_CLOSER': 1}
     - [CLAUSE_STACK_OVERFLOW] form=`(count (keys {:a 1 :b 2 :c 3}))` — sentence with 6 commas reads as AI-output cadence: "{('__kw__', 'tangerine'): 20, ('__kw__', 'raspberry'): 7} stood as the answer th"
     - [TRAILING_PARTICIPLE_CLOSER] form=`(count (keys {:a 1 :b 2 :c 3}))` — sentence closes with a participial coda (', yielding the total number of pouches.') — LLM-cadence; close on the verb instead
+    - [CLAUSE_STACK_OVERFLOW] form=`(count (keys {:a 1 :b 2 :c 3}))` — sentence with 5 commas reads as AI-output cadence: 'To count how many keys are in a map binding :a, :b, and :c properly, he wrote\nco'
 
 ### G4-11: Set literal
 
@@ -572,17 +411,11 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-<<<<<<< HEAD
-- issues: {'FORM_DISPLAY_AND_FORM_NOUN': 2, 'CLAUSE_STACK_OVERFLOW': 1}
-    - [FORM_DISPLAY_AND_FORM_NOUN] form=`(contains? #{1 2 3} 4)` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
-    - [FORM_DISPLAY_AND_FORM_NOUN] form=`(contains? #{1 2 3} 4)` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
-=======
 - issues: {'CLAUSE_STACK_OVERFLOW': 2, 'BOOL_LEAK_RESOLUTION': 3}
     - [CLAUSE_STACK_OVERFLOW] form=`(contains? #{1 2 3} 2)` — sentence with 5 commas reads as AI-output cadence: 'To check whether 2 is a member of a set containing 1, 2, and 3 properly, he wrot'
     - [BOOL_LEAK_RESOLUTION] form=`(contains? #{1 2 3} 2)` — resolution leaks boolean answer 'true' — describe the verdict abstractly instead
     - [BOOL_LEAK_RESOLUTION] form=`(contains? #{1 2 3} 4)` — resolution leaks boolean answer 'false' — describe the verdict abstractly instead
     - [BOOL_LEAK_RESOLUTION] form=`(contains? #{1 2 3} 4)` — resolution leaks boolean answer 'false' — describe the verdict abstractly instead
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
     - [CLAUSE_STACK_OVERFLOW] form=`(contains? #{1 2 3} 4)` — sentence with 5 commas reads as AI-output cadence: 'Carol marked 6, 5, 8, 11, and 14 on the watchhouse beam, the lookout high above '
 
 ### G4-13: count — universal
@@ -597,13 +430,8 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 3
 - variety @ n=50: 1.00
-<<<<<<< HEAD
-- issues: {'FORM_DISPLAY_AND_FORM_NOUN': 1, 'CLAUSE_STACK_OVERFLOW': 1, 'TRAILING_PARTICIPLE_CLOSER': 6}
-    - [FORM_DISPLAY_AND_FORM_NOUN] form=`(empty? [])` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
-=======
-- issues: {'BOOL_LEAK_RESOLUTION': 1, 'CLAUSE_STACK_OVERFLOW': 1}
+- issues: {'BOOL_LEAK_RESOLUTION': 1, 'CLAUSE_STACK_OVERFLOW': 1, 'TRAILING_PARTICIPLE_CLOSER': 6}
     - [BOOL_LEAK_RESOLUTION] form=`(empty? [])` — resolution leaks boolean answer 'true' — describe the verdict abstractly instead
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
     - [CLAUSE_STACK_OVERFLOW] form=`(empty? [])` — sentence with 6 commas reads as AI-output cadence: '18, 3, 16, and 7 stood as the answer the fold required, slate, chalk, and a stea'
     - [TRAILING_PARTICIPLE_CLOSER] form=`(empty? [])` — sentence closes with a participial coda (', leaving the first\none exactly where it was.') — LLM-cadence; close on the verb instead
     - [TRAILING_PARTICIPLE_CLOSER] form=`(empty? [])` — sentence closes with a participial coda (', leaving the first\none exactly where it was.') — LLM-cadence; close on the verb instead
@@ -614,35 +442,20 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 3
 - variety @ n=50: 1.00
-<<<<<<< HEAD
-- issues: {'NARRATIVE_NUMERAL_HARDCODE': 6, 'GOAL_FALLBACK_GENERIC': 1, 'TRAILING_PARTICIPLE_CLOSER': 1, 'FORM_DISPLAY_AND_FORM_NOUN': 1, 'CLAUSE_STACK_OVERFLOW': 1}
+- issues: {'CLAUSE_STACK_OVERFLOW': 3, 'NARRATIVE_NUMERAL_HARDCODE': 6, 'TRAILING_PARTICIPLE_CLOSER': 1}
+    - [CLAUSE_STACK_OVERFLOW] form=`(first [10 20 30])` — sentence with 5 commas reads as AI-output cadence: 'To get the first element of a vector containing 10, 20, and 30 properly, he wrot'
+    - [CLAUSE_STACK_OVERFLOW] form=`(first [10 20 30])` — sentence with 5 commas reads as AI-output cadence: 'To get the first element of a vector containing 10, 20, and 30 properly, he wrot'
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(last  [10 20 30])` — parametric example has hard-coded English numeral 'three bundles' in a story slot — the actual draws may differ from this fixed count
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(last  [10 20 30])` — parametric example has hard-coded English numeral 'three bundles' in a story slot — the actual draws may differ from this fixed count
-    - [GOAL_FALLBACK_GENERIC] form=`(last  [10 20 30])` — user_msg uses generic 'To evaluate the X, ...' fallback AND no drawn-literal anchor — add a canonical GOALS entry for richer prose
     - [TRAILING_PARTICIPLE_CLOSER] form=`(last  [10 20 30])` — sentence closes with a participial coda (', leaving the first\none exactly where it was.') — LLM-cadence; close on the verb instead
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(last  [10 20 30])` — parametric example has hard-coded English numeral 'three bundles' in a story slot — the actual draws may differ from this fixed count
-    - [FORM_DISPLAY_AND_FORM_NOUN] form=`(last  [10 20 30])` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
-=======
-- issues: {'CLAUSE_STACK_OVERFLOW': 3, 'NARRATIVE_NUMERAL_HARDCODE': 6}
-    - [CLAUSE_STACK_OVERFLOW] form=`(first [10 20 30])` — sentence with 5 commas reads as AI-output cadence: 'To get the first element of a vector containing 10, 20, and 30 properly, he wrot'
-    - [CLAUSE_STACK_OVERFLOW] form=`(first [10 20 30])` — sentence with 5 commas reads as AI-output cadence: 'To get the first element of a vector containing 10, 20, and 30 properly, he wrot'
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`(last  [10 20 30])` — parametric example has hard-coded English numeral 'three bundles' in a story slot — the actual draws may differ from this fixed count
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`(last  [10 20 30])` — parametric example has hard-coded English numeral 'three bundles' in a story slot — the actual draws may differ from this fixed count
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`(last  [10 20 30])` — parametric example has hard-coded English numeral 'three bundles' in a story slot — the actual draws may differ from this fixed count
-    - [CLAUSE_STACK_OVERFLOW] form=`(last  [10 20 30])` — sentence with 5 commas reads as AI-output cadence: 'The fold gate held tight against the count of 6, 6, 19, 8, and 3, slate cool und'
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
 
 ### G4-16: into and conj on collections
 
 - examples: 2
 - variety @ n=50: 1.00
-<<<<<<< HEAD
 - issues: {'HIGH_LENGTH': 1, 'CLAUSE_STACK_OVERFLOW': 1, 'TRAILING_PARTICIPLE_CLOSER': 2}
-    - [HIGH_LENGTH] form=`(into [] '(1 2 3))` — user_msg 208 words
-=======
-- issues: {'HIGH_LENGTH': 1, 'CLAUSE_STACK_OVERFLOW': 1}
     - [HIGH_LENGTH] form=`(into [] '(1 2 3))` — user_msg 207 words
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
     - [CLAUSE_STACK_OVERFLOW] form=`(into [] '(1 2 3))` — sentence with 5 commas reads as AI-output cadence: 'To convert a list containing 1, 2, and 3 into a vector, he composed building a v'
     - [TRAILING_PARTICIPLE_CLOSER] form=`(into [] '(1 2 3))` — sentence closes with a participial coda (', preserving the order.') — LLM-cadence; close on the verb instead
     - [TRAILING_PARTICIPLE_CLOSER] form=`(into #{} [1 2 2 3])` — sentence closes with a participial coda (', collapsing the duplicate weight 2 into a single entry.') — LLM-cadence; close on the verb instead
@@ -659,14 +472,9 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 1
 - variety @ n=50: 1.00
-<<<<<<< HEAD
-- issues: {'HIGH_LENGTH': 1, 'NARRATIVE_NUMERAL_HARDCODE': 3, 'FORM_DISPLAY_AND_FORM_NOUN': 1, 'CLAUSE_STACK_OVERFLOW': 1}
-    - [HIGH_LENGTH] form=`(= [1 2 3] '(1 2 3))` — user_msg 225 words
-=======
 - issues: {'HIGH_LENGTH': 1, 'BOOL_LEAK_RESOLUTION': 1, 'NARRATIVE_NUMERAL_HARDCODE': 3, 'CLAUSE_STACK_OVERFLOW': 1}
     - [HIGH_LENGTH] form=`(= [1 2 3] '(1 2 3))` — user_msg 222 words
     - [BOOL_LEAK_RESOLUTION] form=`(= [1 2 3] '(1 2 3))` — resolution leaks boolean answer 'true' — describe the verdict abstractly instead
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(= [1 2 3] '(1 2 3))` — parametric example has hard-coded English numeral 'three items' in a story slot — the actual draws may differ from this fixed count
     - [CLAUSE_STACK_OVERFLOW] form=`(= [1 2 3] '(1 2 3))` — sentence with 5 commas reads as AI-output cadence: '6, 5, and 16 stood as the answer the fold required, slate, chalk, and a steady e'
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(= [1 2 3] '(1 2 3))` — parametric example has hard-coded English numeral 'three items' in a story slot — the actual draws may differ from this fixed count
@@ -704,30 +512,16 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-<<<<<<< HEAD
-- issues: {'HIGH_LENGTH': 1, 'FORM_DISPLAY_AND_FORM_NOUN': 1, 'LOW_GROUNDING': 1}
-    - [HIGH_LENGTH] form=`(when true :yes)` — user_msg 223 words
-    - [FORM_DISPLAY_AND_FORM_NOUN] form=`(when true :yes)` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
-=======
-- issues: {'HIGH_LENGTH': 1, 'ANSWER_LEAK_STRING': 1, 'LOW_GROUNDING': 1}
+- issues: {'HIGH_LENGTH': 1, 'LOW_GROUNDING': 1}
     - [HIGH_LENGTH] form=`(when true :yes)` — user_msg 220 words
-    - [ANSWER_LEAK_STRING] form=`(when true :yes)` — answer string ':yes' appears in user_msg
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
     - [LOW_GROUNDING] form=`(when true :yes)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
 
 ### G5-06: case
 
 - examples: 2
 - variety @ n=50: 1.00
-<<<<<<< HEAD
-- issues: {'HIGH_LENGTH': 1, 'FORM_DISPLAY_AND_FORM_NOUN': 1}
-    - [HIGH_LENGTH] form=`(case 2 1 :one 2 :two 3 :three :default)` — user_msg 216 words
-    - [FORM_DISPLAY_AND_FORM_NOUN] form=`(case 2 1 :one 2 :two 3 :three :default)` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
-=======
-- issues: {'HIGH_LENGTH': 1, 'ANSWER_LEAK_STRING': 1}
+- issues: {'HIGH_LENGTH': 1}
     - [HIGH_LENGTH] form=`(case 2 1 :one 2 :two 3 :three :default)` — user_msg 213 words
-    - [ANSWER_LEAK_STRING] form=`(case 2 1 :one 2 :two 3 :three :default)` — answer string ':two' appears in user_msg
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
 
 ### G5-07: and / or as control flow
 
@@ -747,20 +541,10 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-<<<<<<< HEAD
 - issues: {'HIGH_LENGTH': 1, 'CLAUSE_STACK_OVERFLOW': 1, 'DOUBLED_INPUT_VALUE_PARENS': 1}
-    - [HIGH_LENGTH] form=`(map inc [1 2 3])` — user_msg 264 words
-    - [CLAUSE_STACK_OVERFLOW] form=`(map inc [1 2 3])` — sentence with 6 commas reads as AI-output cadence: 'To pour the vector containing 1, 2, 3 through a sieve whose rule is inc, collect'
-    - [DOUBLED_INPUT_VALUE_PARENS] form=`(map #(* % %) [1 2 3 4])` — user_msg contains two or more 'as the input value' parentheticals — auto-closer fired twice or authored prose duplicated it
-=======
-- issues: {'HIGH_LENGTH': 1, 'CLAUSE_STACK_OVERFLOW': 3, 'NUMERAL_LIST_IN_GOAL': 3}
     - [HIGH_LENGTH] form=`(map inc [1 2 3])` — user_msg 263 words
     - [CLAUSE_STACK_OVERFLOW] form=`(map inc [1 2 3])` — sentence with 6 commas reads as AI-output cadence: 'To pour the vector containing 1, 2, 3 through a sieve whose rule is inc, collect'
-    - [NUMERAL_LIST_IN_GOAL] form=`(map #(* % %) [1 2 3 4])` — goal_text contains 4 numerals across 4 commas — comma-list of numerals blows the sentence's clause budget; use a range or 'these numbers' framing
-    - [CLAUSE_STACK_OVERFLOW] form=`(map #(* % %) [1 2 3 4])` — sentence with 5 commas reads as AI-output cadence: 'To apply a squaring operation to each element of the vector containing 1, 2, 3, '
-    - [NUMERAL_LIST_IN_GOAL] form=`(map #(* % %) [1 2 3 4])` — goal_text contains 4 numerals across 4 commas — comma-list of numerals blows the sentence's clause budget; use a range or 'these numbers' framing
-    - [CLAUSE_STACK_OVERFLOW] form=`(map #(* % %) [1 2 3 4])` — sentence with 7 commas reads as AI-output cadence: 'To apply a squaring operation to each element of the vector containing 1, 2, 3, '
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
+    - [DOUBLED_INPUT_VALUE_PARENS] form=`(map #(* % %) [1 2 3 4])` — user_msg contains two or more 'as the input value' parentheticals — auto-closer fired twice or authored prose duplicated it
 
 ### G5-11: filter
 
@@ -773,40 +557,18 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 3
 - variety @ n=50: 1.00
-<<<<<<< HEAD
-- issues: {'SENTENCE_START_LOWER_PRONOUN': 1, 'ONLY_SHOOK_HEAD_TIC': 1, 'TRAILING_PARTICIPLE_CLOSER': 2}
-    - [SENTENCE_START_LOWER_PRONOUN] form=`(reduce + [1 2 3 4])` — pronoun starts a sentence in lowercase — template should use the _cap variant after a sentence-ending punctuation
-    - [ONLY_SHOOK_HEAD_TIC] form=`(reduce + [1 2 3 4])` — user_msg uses 'only shook his/her head' — recurring AI-fable filler cadence
+- issues: {'TRAILING_PARTICIPLE_CLOSER': 2}
     - [TRAILING_PARTICIPLE_CLOSER] form=`(reduce * [1 2 3 4 5])` — sentence closes with a participial coda (', notching the\ntally-stick — returned the final number.') — LLM-cadence; close on the verb instead
     - [TRAILING_PARTICIPLE_CLOSER] form=`(reduce max [3 1 4 1 5 9 2 6])` — sentence closes with a participial coda (', notching the\ntally-stick — returned the final number.') — LLM-cadence; close on the verb instead
-=======
-- issues: {'NUMERAL_LIST_IN_GOAL': 9, 'ANSWER_LEAK': 1, 'CLAUSE_STACK_OVERFLOW': 6}
-    - [NUMERAL_LIST_IN_GOAL] form=`(reduce + [1 2 3 4])` — goal_text contains 4 numerals across 3 commas — comma-list of numerals blows the sentence's clause budget; use a range or 'these numbers' framing
-    - [ANSWER_LEAK] form=`(reduce + [1 2 3 4])` — answer 10 in narrative
-    - [NUMERAL_LIST_IN_GOAL] form=`(reduce + [1 2 3 4])` — goal_text contains 4 numerals across 3 commas — comma-list of numerals blows the sentence's clause budget; use a range or 'these numbers' framing
-    - [NUMERAL_LIST_IN_GOAL] form=`(reduce + [1 2 3 4])` — goal_text contains 4 numerals across 3 commas — comma-list of numerals blows the sentence's clause budget; use a range or 'these numbers' framing
-    - [CLAUSE_STACK_OVERFLOW] form=`(reduce + [1 2 3 4])` — sentence with 5 commas reads as AI-output cadence: 'To walk the row of pebbles 1, 2, 3, 4 carrying a tally that combines each with +'
-    - [NUMERAL_LIST_IN_GOAL] form=`(reduce * [1 2 3 4 5])` — goal_text contains 5 numerals across 5 commas — comma-list of numerals blows the sentence's clause budget; use a range or 'these numbers' framing
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
 
 ### G5-13: reduce with init
 
 - examples: 2
 - variety @ n=50: 1.00
-<<<<<<< HEAD
-- issues: {'HIGH_LENGTH': 1, 'TRAILING_PARTICIPLE_CLOSER': 2, 'SENTENCE_START_LOWER_PRONOUN': 2, 'ONLY_SHOOK_HEAD_TIC': 1}
+- issues: {'HIGH_LENGTH': 1, 'TRAILING_PARTICIPLE_CLOSER': 2}
     - [HIGH_LENGTH] form=`(reduce + 100 [1 2 3])` — user_msg 241 words
     - [TRAILING_PARTICIPLE_CLOSER] form=`(reduce + 100 [1 2 3])` — sentence closes with a participial coda (', carrying the old count forward.') — LLM-cadence; close on the verb instead
-    - [SENTENCE_START_LOWER_PRONOUN] form=`(reduce + 100 [1 2 3])` — pronoun starts a sentence in lowercase — template should use the _cap variant after a sentence-ending punctuation
     - [TRAILING_PARTICIPLE_CLOSER] form=`(reduce + 0 [])` — sentence closes with a participial coda (', walking\nthe flock — returned the final tally.') — LLM-cadence; close on the verb instead
-    - [SENTENCE_START_LOWER_PRONOUN] form=`(reduce + 0 [])` — pronoun starts a sentence in lowercase — template should use the _cap variant after a sentence-ending punctuation
-    - [ONLY_SHOOK_HEAD_TIC] form=`(reduce + 0 [])` — user_msg uses 'only shook his/her head' — recurring AI-fable filler cadence
-=======
-- issues: {'HIGH_LENGTH': 1, 'ANSWER_LEAK': 1, 'CLAUSE_STACK_OVERFLOW': 1}
-    - [HIGH_LENGTH] form=`(reduce + 100 [1 2 3])` — user_msg 241 words
-    - [ANSWER_LEAK] form=`(reduce + 100 [1 2 3])` — answer 106 in narrative
-    - [CLAUSE_STACK_OVERFLOW] form=`(reduce + 100 [1 2 3])` — sentence with 6 commas reads as AI-output cadence: 'The runtime does this the same way for any kind of collection."\nTo fold + over t'
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
 
 ### G5-14: apply
 
@@ -818,95 +580,30 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(apply max [3 1 4 1 5])` — parametric example has hard-coded English numeral 'five numbers' in a story slot — the actual draws may differ from this fixed count
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(apply max [3 1 4 1 5])` — parametric example has hard-coded English numeral 'five numbers' in a story slot — the actual draws may differ from this fixed count
 
-<<<<<<< HEAD
-### G5-15: comp
-
-- examples: 2
-- variety @ n=50: 0.99
-- issues: {'CONCEPT_AS_VERB': 3}
-    - [CONCEPT_AS_VERB] form=`((comp inc inc) 5)` — concept_phrase substituted into a finite-verb slot (e.g. 'must calling X', 'I applying Y')
-    - [CONCEPT_AS_VERB] form=`((comp inc inc) 5)` — concept_phrase substituted into a finite-verb slot (e.g. 'must calling X', 'I applying Y')
-    - [CONCEPT_AS_VERB] form=`((comp str inc) 9)` — concept_phrase substituted into a finite-verb slot (e.g. 'must calling X', 'I applying Y')
-
-=======
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
 ### G5-16: partial
 
 - examples: 2
 - variety @ n=50: 1.00
-<<<<<<< HEAD
-- issues: {'CONCEPT_AS_VERB': 1, 'HIGH_LENGTH': 1}
-    - [CONCEPT_AS_VERB] form=`((partial + 10) 5)` — concept_phrase substituted into a finite-verb slot (e.g. 'must calling X', 'I applying Y')
-    - [HIGH_LENGTH] form=`(map (partial * 3) [1 2 3])` — user_msg 236 words
-
-### G5-17: juxt
-
-- examples: 1
-- variety @ n=50: 1.00
-- issues: {'CONCEPT_AS_VERB': 1}
-    - [CONCEPT_AS_VERB] form=`((juxt inc dec) 5)` — concept_phrase substituted into a finite-verb slot (e.g. 'must calling X', 'I applying Y')
-=======
-- issues: {'CLAUSE_STACK_OVERFLOW': 1, 'HIGH_LENGTH': 1}
-    - [CLAUSE_STACK_OVERFLOW] form=`(map (partial * 3) [1 2 3])` — sentence with 5 commas reads as AI-output cadence: 'The earlier steps prepare the way; the last\nstep is the answer." To apply a part'
+- issues: {'HIGH_LENGTH': 1}
     - [HIGH_LENGTH] form=`(map (partial * 3) [1 2 3])` — user_msg 235 words
-
-### G5-18: some
-
-- examples: 2
-- variety @ n=50: 1.00
-- issues: {'BOOL_LEAK_RESOLUTION': 1, 'NUMERAL_LIST_IN_GOAL': 3, 'CLAUSE_STACK_OVERFLOW': 1}
-    - [BOOL_LEAK_RESOLUTION] form=`(some even? [1 3 5 8 7])` — resolution leaks boolean answer 'true' — describe the verdict abstractly instead
-    - [NUMERAL_LIST_IN_GOAL] form=`(some even? [1 3 5 8 7])` — goal_text contains 5 numerals across 4 commas — comma-list of numerals blows the sentence's clause budget; use a range or 'these numbers' framing
-    - [CLAUSE_STACK_OVERFLOW] form=`(some even? [1 3 5 8 7])` — sentence with 7 commas reads as AI-output cadence: 'To check if any element in the vector containing 1, 3, 5, 8, and 7 is even, she '
-    - [NUMERAL_LIST_IN_GOAL] form=`(some even? [1 3 5 8 7])` — goal_text contains 5 numerals across 4 commas — comma-list of numerals blows the sentence's clause budget; use a range or 'these numbers' framing
-    - [NUMERAL_LIST_IN_GOAL] form=`(some even? [1 3 5 8 7])` — goal_text contains 5 numerals across 4 commas — comma-list of numerals blows the sentence's clause budget; use a range or 'these numbers' framing
-
-### G5-20: take and drop
-
-- examples: 2
-- variety @ n=50: 1.00
-- issues: {'NUMERAL_LIST_IN_GOAL': 6, 'CLAUSE_STACK_OVERFLOW': 2}
-    - [NUMERAL_LIST_IN_GOAL] form=`(take 3 [10 20 30 40 50])` — goal_text contains 6 numerals across 4 commas — comma-list of numerals blows the sentence's clause budget; use a range or 'these numbers' framing
-    - [NUMERAL_LIST_IN_GOAL] form=`(take 3 [10 20 30 40 50])` — goal_text contains 6 numerals across 4 commas — comma-list of numerals blows the sentence's clause budget; use a range or 'these numbers' framing
-    - [NUMERAL_LIST_IN_GOAL] form=`(take 3 [10 20 30 40 50])` — goal_text contains 6 numerals across 4 commas — comma-list of numerals blows the sentence's clause budget; use a range or 'these numbers' framing
-    - [NUMERAL_LIST_IN_GOAL] form=`(drop 2 [10 20 30 40 50])` — goal_text contains 6 numerals across 4 commas — comma-list of numerals blows the sentence's clause budget; use a range or 'these numbers' framing
-    - [CLAUSE_STACK_OVERFLOW] form=`(drop 2 [10 20 30 40 50])` — sentence with 5 commas reads as AI-output cadence: 'To drop the first 2 elements from the vector containing 10, 20, 30, 40, and 50, '
-    - [NUMERAL_LIST_IN_GOAL] form=`(drop 2 [10 20 30 40 50])` — goal_text contains 6 numerals across 4 commas — comma-list of numerals blows the sentence's clause budget; use a range or 'these numbers' framing
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
 
 ### G5-21: distinct and sort
 
 - examples: 2
 - variety @ n=50: 1.00
-<<<<<<< HEAD
 - issues: {'HIGH_LENGTH': 2, 'CLAUSE_STACK_OVERFLOW': 2, 'TRAILING_PARTICIPLE_CLOSER': 1}
-    - [HIGH_LENGTH] form=`(distinct [1 1 2 3 3 4])` — user_msg 205 words
+    - [HIGH_LENGTH] form=`(distinct [1 1 2 3 3 4])` — user_msg 204 words
     - [CLAUSE_STACK_OVERFLOW] form=`(distinct [1 1 2 3 3 4])` — sentence with 6 commas reads as AI-output cadence: '5, 18, 17, and 13 stood as the answer the fold required, slate, chalk, and a ste'
-    - [HIGH_LENGTH] form=`(sort [3 1 2])` — user_msg 204 words
+    - [HIGH_LENGTH] form=`(sort [3 1 2])` — user_msg 203 words
     - [CLAUSE_STACK_OVERFLOW] form=`(sort [3 1 2])` — sentence with 5 commas reads as AI-output cadence: 'To sort the vector containing 3, 1, and 2 in ascending order, she composed sorti'
     - [TRAILING_PARTICIPLE_CLOSER] form=`(sort [3 1 2])` — sentence closes with a participial coda (', making the pattern clear.') — LLM-cadence; close on the verb instead
-=======
-- issues: {'NUMERAL_LIST_IN_GOAL': 3, 'CLAUSE_STACK_OVERFLOW': 4, 'HIGH_LENGTH': 2}
-    - [NUMERAL_LIST_IN_GOAL] form=`(distinct [1 1 2 3 3 4])` — goal_text contains 6 numerals across 5 commas — comma-list of numerals blows the sentence's clause budget; use a range or 'these numbers' framing
-    - [CLAUSE_STACK_OVERFLOW] form=`(distinct [1 1 2 3 3 4])` — sentence with 5 commas reads as AI-output cadence: 'Write a form whose evaluation gives the sequence produced by passing 1, 1, 2, 3,'
-    - [NUMERAL_LIST_IN_GOAL] form=`(distinct [1 1 2 3 3 4])` — goal_text contains 6 numerals across 5 commas — comma-list of numerals blows the sentence's clause budget; use a range or 'these numbers' framing
-    - [CLAUSE_STACK_OVERFLOW] form=`(distinct [1 1 2 3 3 4])` — sentence with 5 commas reads as AI-output cadence: 'What Clojure form computes the sequence produced by passing 1, 1, 2, 3, 3, 4 thr'
-    - [HIGH_LENGTH] form=`(distinct [1 1 2 3 3 4])` — user_msg 206 words
-    - [NUMERAL_LIST_IN_GOAL] form=`(distinct [1 1 2 3 3 4])` — goal_text contains 6 numerals across 5 commas — comma-list of numerals blows the sentence's clause budget; use a range or 'these numbers' framing
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
 
 ### G5-22: recur — first taste
 
 - examples: 1
 - variety @ n=50: 1.00
-<<<<<<< HEAD
 - issues: {'CLAUSE_STACK_OVERFLOW': 1}
     - [CLAUSE_STACK_OVERFLOW] form=`(loop [n 5 acc 1] (if (zero? n) acc (recur (dec n)` — sentence with 5 commas reads as AI-output cadence: 'To walk a small circuit five times, multiplying a running tally by the current s'
-=======
-- issues: {'CLAUSE_STACK_OVERFLOW': 2}
-    - [CLAUSE_STACK_OVERFLOW] form=`(loop [n 5 acc 1] (if (zero? n) acc (recur (dec n)` — sentence with 5 commas reads as AI-output cadence: 'To walk a small circuit five times, multiplying a running tally by the current s'
-    - [CLAUSE_STACK_OVERFLOW] form=`(loop [n 5 acc 1] (if (zero? n) acc (recur (dec n)` — sentence with 6 commas reads as AI-output cadence: 'With one, the\nwalker knows when the circuit is done and the answer is the final\n'
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
 
 ## Grade 6
 
@@ -914,27 +611,13 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 3
 - variety @ n=50: 0.99
-<<<<<<< HEAD
-- issues: {'LOW_GROUNDING': 5, 'GOAL_FALLBACK_GENERIC': 3, 'BOOL_LEAK_RESOLUTION': 2}
-=======
-- issues: {'ANSWER_LEAK_STRING': 1, 'LOW_GROUNDING': 5, 'BOOL_LEAK_RESOLUTION': 2}
-    - [ANSWER_LEAK_STRING] form=`(name 'foo.bar)` — answer string 'foo.bar' appears in user_msg
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
+- issues: {'LOW_GROUNDING': 5, 'BOOL_LEAK_RESOLUTION': 2}
     - [LOW_GROUNDING] form=`(name 'foo.bar)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [LOW_GROUNDING] form=`(name 'clojure.string)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [LOW_GROUNDING] form=`(name 'clojure.string)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [BOOL_LEAK_RESOLUTION] form=`(symbol? 'village.flock)` — resolution leaks boolean answer 'true' — describe the verdict abstractly instead
     - [LOW_GROUNDING] form=`(symbol? 'village.flock)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-<<<<<<< HEAD
-=======
-
-### G6-03: require
-
-- examples: 2
-- variety @ n=50: 1.00
-- issues: {'ANSWER_LEAK_STRING': 1}
-    - [ANSWER_LEAK_STRING] form=`(clojure.string/lower-case "WOLF")` — answer string 'wolf' appears in user_msg
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
+    - [BOOL_LEAK_RESOLUTION] form=`(symbol? 'village.flock)` — resolution leaks boolean answer 'true' — describe the verdict abstractly instead
 
 ### G6-04: refer and use
 
@@ -948,56 +631,32 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 4
 - variety @ n=50: 1.00
-<<<<<<< HEAD
 - issues: {'ANSWER_LEAK_STRING': 1, 'REPL_TRIPLE_VOICE': 1, 'FORM_DISPLAY_AND_FORM_NOUN': 1}
     - [ANSWER_LEAK_STRING] form=`(clojure.string/reverse "flock")` — answer string 'kcolf' appears in user_msg
     - [REPL_TRIPLE_VOICE] form=`(clojure.string/reverse "flock")` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
-=======
-- issues: {'ANSWER_LEAK_STRING': 2, 'REPL_TRIPLE_VOICE': 1, 'FORM_DISPLAY_AND_FORM_NOUN': 1}
-    - [ANSWER_LEAK_STRING] form=`(clojure.string/reverse "flock")` — answer string 'kcolf' appears in user_msg
-    - [REPL_TRIPLE_VOICE] form=`(clojure.string/reverse "flock")` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
-    - [ANSWER_LEAK_STRING] form=`(namespace :village/shepherd)` — answer string 'village' appears in user_msg
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
     - [FORM_DISPLAY_AND_FORM_NOUN] form=`(name :village/shepherd)` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
 
 ### G6-07: Public vs private API
 
 - examples: 2
 - variety @ n=50: 1.00
-<<<<<<< HEAD
-- issues: {'BOOL_LEAK_RESOLUTION': 1, 'VILLAGE_NOUN_OVERUSE': 1}
-    - [BOOL_LEAK_RESOLUTION] form=`(boolean (:private (meta '^:private hidden)))` — resolution leaks boolean answer 'true' — describe the verdict abstractly instead
-    - [VILLAGE_NOUN_OVERUSE] form=`(boolean (:private (meta '^:private hidden)))` — `the village` appears 4 times (noun-saturation tic — vary or drop)
-=======
 - issues: {'BOOL_LEAK_RESOLUTION': 1}
     - [BOOL_LEAK_RESOLUTION] form=`(boolean (:private (meta '^:private hidden)))` — resolution leaks boolean answer 'true' — describe the verdict abstractly instead
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
 
 ### G6-10: Leiningen and deps.edn
 
 - examples: 2
 - variety @ n=50: 1.00
-<<<<<<< HEAD
-- issues: {'PATIENT_ROLE_BOASTFUL': 3, 'VILLAGE_NOUN_OVERUSE': 2, 'CLAUSE_STACK_OVERFLOW': 1, 'TRAILING_PARTICIPLE_CLOSER': 1}
-    - [PATIENT_ROLE_BOASTFUL] form=`(:deps {:deps {:a 1 :b 2}})` — patient role 'the elder' co-occurs with boastful EMO phrase 'with great whoops of laughter'
-    - [VILLAGE_NOUN_OVERUSE] form=`(:deps {:deps {:a 1 :b 2}})` — `the village` appears 4 times (noun-saturation tic — vary or drop)
-=======
-- issues: {'CLAUSE_STACK_OVERFLOW': 1}
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
+- issues: {'CLAUSE_STACK_OVERFLOW': 1, 'TRAILING_PARTICIPLE_CLOSER': 1}
     - [CLAUSE_STACK_OVERFLOW] form=`(:deps {:deps {:a 1 :b 2}})` — sentence with 6 commas reads as AI-output cadence: 'To extract the value at the :deps key from a nested map,\nthe elder, letting the '
+    - [TRAILING_PARTICIPLE_CLOSER] form=`(get-in {:paths ["src"]} [:paths 0])` — sentence closes with a participial coda (', following the path down through the nested map.') — LLM-cadence; close on the verb instead
 
 ### G6-11: Classpath
 
 - examples: 2
 - variety @ n=50: 1.00
-<<<<<<< HEAD
-- issues: {'REPL_TRIPLE_VOICE': 1, 'DOUBLED_INPUT_VALUE_PARENS': 1, 'CLAUSE_STACK_OVERFLOW': 1}
-    - [REPL_TRIPLE_VOICE] form=`(clojure.string/split "src:test" #":")` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
-    - [DOUBLED_INPUT_VALUE_PARENS] form=`(clojure.string/split "src:test" #":")` — user_msg contains two or more 'as the input value' parentheticals — auto-closer fired twice or authored prose duplicated it
-=======
 - issues: {'REPL_TRIPLE_VOICE': 1, 'CLAUSE_STACK_OVERFLOW': 1}
     - [REPL_TRIPLE_VOICE] form=`(clojure.string/split "src:test" #":")` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
     - [CLAUSE_STACK_OVERFLOW] form=`(count ["src" "test" "resources"])` — sentence with 6 commas reads as AI-output cadence: 'To count the number of entries in a vector of classpath directories,\nthe elder, '
 
 ### G6-12: Multiple files in one project
@@ -1070,7 +729,8 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 4
 - variety @ n=50: 1.00
-- issues: {'LOW_GROUNDING': 2}
+- issues: {'BOOL_LEAK_RESOLUTION': 1, 'LOW_GROUNDING': 2}
+    - [BOOL_LEAK_RESOLUTION] form=`(some? 0)` — resolution leaks boolean answer 'true' — describe the verdict abstractly instead
     - [LOW_GROUNDING] form=`(some? 0)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [LOW_GROUNDING] form=`(count nil)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
 
@@ -1103,7 +763,8 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'FORM_DISPLAY_AND_FORM_NOUN': 1, 'TRAILING_PARTICIPLE_CLOSER': 1, 'REPL_TRIPLE_VOICE': 2}
+- issues: {'BOOL_LEAK_RESOLUTION': 1, 'FORM_DISPLAY_AND_FORM_NOUN': 1, 'TRAILING_PARTICIPLE_CLOSER': 1, 'REPL_TRIPLE_VOICE': 2}
+    - [BOOL_LEAK_RESOLUTION] form=`(tap> :hello)` — resolution leaks boolean answer 'true' — describe the verdict abstractly instead
     - [FORM_DISPLAY_AND_FORM_NOUN] form=`(tap> :hello)` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
     - [TRAILING_PARTICIPLE_CLOSER] form=`(tap> :hello)` — sentence closes with a participial coda (', proving the value had been tapped.') — LLM-cadence; close on the verb instead
     - [REPL_TRIPLE_VOICE] form=`(tap> :hello)` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
@@ -1116,16 +777,6 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 - issues: {'FORM_DISPLAY_AND_FORM_NOUN': 1}
     - [FORM_DISPLAY_AND_FORM_NOUN] form=`(:doc (meta '^{:doc "adds two"} plus))` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
 
-<<<<<<< HEAD
-=======
-### G7-11: Reading stack traces
-
-- examples: 2
-- variety @ n=50: 1.00
-- issues: {'ANSWER_LEAK_STRING': 1}
-    - [ANSWER_LEAK_STRING] form=`(try (throw (Exception. "oops")) (catch Exception ` — answer string 'oops' appears in user_msg
-
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
 ### G7-12: slurp and spit
 
 - examples: 2
@@ -1137,16 +788,9 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-<<<<<<< HEAD
-- issues: {'ONLY_SHOOK_HEAD_TIC': 2, 'REPL_TRIPLE_VOICE': 1}
-    - [ONLY_SHOOK_HEAD_TIC] form=`(count (clojure.string/split-lines "a\nb\nc"))` — user_msg uses 'only shook his/her head' — recurring AI-fable filler cadence
-    - [REPL_TRIPLE_VOICE] form=`(count (clojure.string/split-lines "a\nb\nc"))` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
-    - [ONLY_SHOOK_HEAD_TIC] form=`(first (clojure.string/split-lines "alpha\nbeta"))` — user_msg uses 'only shook his/her head' — recurring AI-fable filler cadence
-=======
 - issues: {'SMALL_INT_LEAK': 1, 'REPL_TRIPLE_VOICE': 1}
     - [SMALL_INT_LEAK] form=`(count (clojure.string/split-lines "a\nb\nc"))` — small-int answer 3 leaks via resolution-slot phrasing
     - [REPL_TRIPLE_VOICE] form=`(count (clojure.string/split-lines "a\nb\nc"))` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
 
 ### G7-15: *in* and *out*
 
@@ -1169,15 +813,6 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 0.99
-<<<<<<< HEAD
-- issues: {'HIGH_LENGTH': 1, 'FORM_DISPLAY_AND_FORM_NOUN': 1, 'DOUBLED_INPUT_VALUE_PARENS': 1, 'LOW_GROUNDING': 3, 'PROCEDURAL_OPENER': 2, 'GOAL_FALLBACK_GENERIC': 3}
-    - [HIGH_LENGTH] form=`(defn speak [k] (cond (= k :wolf) "howl" (= k :flo` — user_msg 222 words
-    - [FORM_DISPLAY_AND_FORM_NOUN] form=`(defn speak [k] (cond (= k :wolf) "howl" (= k :flo` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
-    - [DOUBLED_INPUT_VALUE_PARENS] form=`(defn speak [k] (cond (= k :wolf) "howl" (= k :flo` — user_msg contains two or more 'as the input value' parentheticals — auto-closer fired twice or authored prose duplicated it
-    - [LOW_GROUNDING] form=`(let [speak (fn [k] (cond (= k :wolf) "howl" (= k ` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-    - [PROCEDURAL_OPENER] form=`(let [speak (fn [k] (cond (= k :wolf) "howl" (= k ` — user_msg jumps from fable-opener directly to 'To {goal}, [pronoun] composed ...' without a scene-setting sentence
-    - [GOAL_FALLBACK_GENERIC] form=`(let [speak (fn [k] (cond (= k :wolf) "howl" (= k ` — user_msg uses generic 'To evaluate the X, ...' fallback AND no drawn-literal anchor — add a canonical GOALS entry for richer prose
-=======
 - issues: {'HIGH_LENGTH': 1, 'FORM_DISPLAY_AND_FORM_NOUN': 1, 'LOW_GROUNDING': 3, 'PROCEDURAL_OPENER': 2, 'GOAL_FALLBACK_GENERIC': 3}
     - [HIGH_LENGTH] form=`(defn speak [k] (cond (= k :wolf) "howl" (= k :flo` — user_msg 215 words
     - [FORM_DISPLAY_AND_FORM_NOUN] form=`(defn speak [k] (cond (= k :wolf) "howl" (= k :flo` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
@@ -1185,35 +820,14 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
     - [PROCEDURAL_OPENER] form=`(let [speak (fn [k] (cond (= k :wolf) "howl" (= k ` — user_msg jumps from fable-opener directly to 'To {goal}, [pronoun] composed ...' without a scene-setting sentence
     - [GOAL_FALLBACK_GENERIC] form=`(let [speak (fn [k] (cond (= k :wolf) "howl" (= k ` — user_msg uses generic 'To evaluate the X, ...' fallback AND no drawn-literal anchor — add a canonical GOALS entry for richer prose
     - [LOW_GROUNDING] form=`(let [speak (fn [k] (cond (= k :wolf) "howl" (= k ` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
 
 ### G8-02: deftype introduction
 
 - examples: 2
 - variety @ n=50: 1.00
-<<<<<<< HEAD
-- issues: {'SENTENCE_START_LOWER_PRONOUN': 1, 'CLAUSE_STACK_OVERFLOW': 1, 'TRAILING_PARTICIPLE_CLOSER': 1}
-    - [SENTENCE_START_LOWER_PRONOUN] form=`(do (deftype Lantern [color]) (.-color (Lantern. "` — pronoun starts a sentence in lowercase — template should use the _cap variant after a sentence-ending punctuation
+- issues: {'CLAUSE_STACK_OVERFLOW': 1, 'TRAILING_PARTICIPLE_CLOSER': 1}
     - [CLAUSE_STACK_OVERFLOW] form=`(do (deftype Lantern [color]) (.-color (Lantern. "` — sentence with 5 commas reads as AI-output cadence: 'Edmund, untroubled by what others thought, held up a small wooden tally-box near'
     - [TRAILING_PARTICIPLE_CLOSER] form=`(do (deftype Lantern [color]) (.-color (Lantern. "` — sentence closes with a participial coda (', filling its compartments — returned the value\nthe tally-bo') — LLM-cadence; close on the verb instead
-=======
-- issues: {'CLAUSE_STACK_OVERFLOW': 1}
-    - [CLAUSE_STACK_OVERFLOW] form=`(do (deftype Lantern [color]) (.-color (Lantern. "` — sentence with 5 commas reads as AI-output cadence: 'Edmund, untroubled by what others thought, held up a small wooden tally-box near'
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
-
-### G8-03: defrecord introduction
-
-- examples: 2
-- variety @ n=50: 1.00
-<<<<<<< HEAD
-- issues: {'SENTENCE_START_LOWER_PRONOUN': 1}
-    - [SENTENCE_START_LOWER_PRONOUN] form=`(do (defrecord Watcher [name post]) (:post (->Watc` — pronoun starts a sentence in lowercase — template should use the _cap variant after a sentence-ending punctuation
-=======
-- issues: {'ANSWER_LEAK_STRING': 3}
-    - [ANSWER_LEAK_STRING] form=`(do (defrecord Watcher [name post]) (:name (->Watc` — answer string 'elder' appears in user_msg
-    - [ANSWER_LEAK_STRING] form=`(do (defrecord Watcher [name post]) (:name (->Watc` — answer string 'elder' appears in user_msg
-    - [ANSWER_LEAK_STRING] form=`(do (defrecord Watcher [name post]) (:name (->Watc` — answer string 'elder' appears in user_msg
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
 
 ### G8-04: Protocol definition
 
@@ -1236,14 +850,8 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-<<<<<<< HEAD
 - issues: {'TRAILING_PARTICIPLE_CLOSER': 1}
     - [TRAILING_PARTICIPLE_CLOSER] form=`(do (defprotocol Alarm (sound [this])) (extend-pro` — sentence closes with a participial coda (", running the word-keeper's implementation.") — LLM-cadence; close on the verb instead
-=======
-- issues: {'CLAUSE_STACK_OVERFLOW': 1, 'ANSWER_LEAK_STRING': 1}
-    - [CLAUSE_STACK_OVERFLOW] form=`(do (defprotocol Alarm (sound [this])) (extend-pro` — sentence with 5 commas reads as AI-output cadence: "The runtime looks up which species the shepherd is, then runs that\nspecies' answ"
-    - [ANSWER_LEAK_STRING] form=`(do (defprotocol Alarm (sound [this])) (extend-pro` — answer string ':string-alarm' appears in user_msg
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
 
 ### G8-07: Record implementing protocol
 
@@ -1259,6 +867,15 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 - issues: {'TRAILING_PARTICIPLE_CLOSER': 1}
     - [TRAILING_PARTICIPLE_CLOSER] form=`(do (defmulti tag :kind) (defmethod tag :lantern [` — sentence closes with a participial coda (',\ndispatching the sheep — returned the pen-specific value.') — LLM-cadence; close on the verb instead
 
+### G8-09: Multimethod defmethod
+
+- examples: 2
+- variety @ n=50: 1.00
+- issues: {'CLAUSE_STACK_OVERFLOW': 3}
+    - [CLAUSE_STACK_OVERFLOW] form=`(do (defmulti reply :role) (defmethod reply :sheph` — sentence with 5 commas reads as AI-output cadence: 'To find what reply returns for {:role :elder}, she composed\ntwo defmethod entrie'
+    - [CLAUSE_STACK_OVERFLOW] form=`(do (defmulti reply :role) (defmethod reply :sheph` — sentence with 5 commas reads as AI-output cadence: 'To find what reply returns for {:role :stranger} when :default falls through, sh'
+    - [CLAUSE_STACK_OVERFLOW] form=`(do (defmulti reply :role) (defmethod reply :sheph` — sentence with 5 commas reads as AI-output cadence: 'To find what reply returns for {:role :stranger} when :default falls through, he'
+
 ### G8-10: Multimethod vs protocol
 
 - examples: 2
@@ -1266,6 +883,13 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 - issues: {'TRAILING_PARTICIPLE_CLOSER': 2}
     - [TRAILING_PARTICIPLE_CLOSER] form=`(do (defmulti show identity) (defmethod show :wolf` — sentence closes with a participial coda (',\ndispatching the sheep — returned the pen-specific value.') — LLM-cadence; close on the verb instead
     - [TRAILING_PARTICIPLE_CLOSER] form=`(do (defprotocol Show (show [this])) (extend-proto` — sentence closes with a participial coda (',\ndispatching the sheep — returned the pen-specific value.') — LLM-cadence; close on the verb instead
+
+### G8-12: extend-type on built-in types
+
+- examples: 2
+- variety @ n=50: 1.00
+- issues: {'CLAUSE_STACK_OVERFLOW': 1}
+    - [CLAUSE_STACK_OVERFLOW] form=`(do (defprotocol Alarm (sound [this])) (extend-typ` — sentence with 5 commas reads as AI-output cadence: 'To compute the keyword sound returns for 5, she composed\nextend-type used to att'
 
 ### G8-13: this-style vs fn-style
 
@@ -1278,21 +902,17 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 1
 - variety @ n=50: 1.00
-<<<<<<< HEAD
 - issues: {'CLAUSE_STACK_OVERFLOW': 1}
-=======
-- issues: {'CLAUSE_STACK_OVERFLOW': 2}
-    - [CLAUSE_STACK_OVERFLOW] form=`(do (defprotocol A (a-op [this])) (defprotocol B (` — sentence with 8 commas reads as AI-output cadence: "The runtime looks up which species the shepherd is, then runs that\nspecies' answ"
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
     - [CLAUSE_STACK_OVERFLOW] form=`(do (defprotocol A (a-op [this])) (defprotocol B (` — sentence with 6 commas reads as AI-output cadence: 'To define two protocols A and B, each with a method, extend both to String type '
 
 ### G8-15: derive and isa? — multimethod hierarchy
 
 - examples: 3
 - variety @ n=50: 0.99
-- issues: {'TRAILING_PARTICIPLE_CLOSER': 2, 'LOW_GROUNDING': 1}
+- issues: {'TRAILING_PARTICIPLE_CLOSER': 2, 'BOOL_LEAK_RESOLUTION': 1, 'LOW_GROUNDING': 1}
     - [TRAILING_PARTICIPLE_CLOSER] form=`(do (derive ::shepherd ::villager) (isa? ::shepher` — sentence closes with a participial coda (',\ndispatching the sheep — returned the pen-specific value.') — LLM-cadence; close on the verb instead
     - [TRAILING_PARTICIPLE_CLOSER] form=`(isa? java.lang.Long java.lang.Number)` — sentence closes with a participial coda (',\ndispatching the sheep — returned the pen-specific value.') — LLM-cadence; close on the verb instead
+    - [BOOL_LEAK_RESOLUTION] form=`(isa? java.lang.String java.lang.Number)` — resolution leaks boolean answer 'false' — describe the verdict abstractly instead
     - [LOW_GROUNDING] form=`(isa? java.lang.String java.lang.Number)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
 
 ### G8-16: Abstract design with protocols
@@ -1310,88 +930,66 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 - examples: 2
 - variety @ n=50: 1.00
 - issues: {'CLAUSE_STACK_OVERFLOW': 2}
-    - [CLAUSE_STACK_OVERFLOW] form=`(let [m {:a 1}] (assoc m :b 2) m)` — sentence with 5 commas reads as AI-output cadence: 'To bind a map m, call assoc to add :b 0 to a new map, then return the unchanged '
-    - [CLAUSE_STACK_OVERFLOW] form=`(let [m {:a 1}] (assoc m :b 2) m)` — sentence with 5 commas reads as AI-output cadence: 'To bind a map m, call assoc to add :b 5 to a new map, then return the unchanged '
+    - [CLAUSE_STACK_OVERFLOW] form=`(let [m {:a 1}] (assoc m :b 2) m)` — sentence with 7 commas reads as AI-output cadence: 'To bind a map m, call assoc to add :b 0 to a new map, then return the unchanged '
+    - [CLAUSE_STACK_OVERFLOW] form=`(let [m {:a 1}] (assoc m :b 2) m)` — sentence with 7 commas reads as AI-output cadence: 'To bind a map m, call assoc to add :b 5 to a new map, then return the unchanged '
 
 ### G9-02: Why state at all
 
 - examples: 2
 - variety @ n=50: 1.00
 - issues: {'CLAUSE_STACK_OVERFLOW': 1}
-    - [CLAUSE_STACK_OVERFLOW] form=`(do (def counter (atom 0)) (swap! counter inc) @co` — sentence with 5 commas reads as AI-output cadence: 'To construct an atom holding 0 as counter, atomically swap it by applying inc, a'
+    - [CLAUSE_STACK_OVERFLOW] form=`(do (def counter (atom 0)) (swap! counter inc) @co` — sentence with 7 commas reads as AI-output cadence: 'To construct an atom holding 0 as counter, atomically swap it by applying inc, a'
 
 ### G9-03: Atom introduction
 
 - examples: 3
 - variety @ n=50: 1.00
-- issues: {'LOW_GROUNDING': 1}
+- issues: {'LOW_GROUNDING': 1, 'CLAUSE_STACK_OVERFLOW': 1}
     - [LOW_GROUNDING] form=`(do (def a (atom 0)) (swap! a inc) @a)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-<<<<<<< HEAD
-=======
     - [CLAUSE_STACK_OVERFLOW] form=`(do (def a (atom 0)) (swap! a inc) @a)` — sentence with 5 commas reads as AI-output cadence: 'To construct an atom holding 0, atomically swap it by applying inc, and derefere'
-    - [CLAUSE_STACK_OVERFLOW] form=`(do (def a (atom 0)) (swap! a inc) @a)` — sentence with 5 commas reads as AI-output cadence: 'The page\nchanges only when someone writes — and only as the REPL allows." To\ncon'
-    - [CLAUSE_STACK_OVERFLOW] form=`(do (def a (atom 10)) (swap! a + 5) @a)` — sentence with 5 commas reads as AI-output cadence: 'The REPL sees to that —\nno two writers stomp on each other\'s chalk." To construc'
-    - [CLAUSE_STACK_OVERFLOW] form=`(do (def a (atom 10)) (swap! a + 5) @a)` — sentence with 5 commas reads as AI-output cadence: 'The REPL holds any second\nwriter at the threshold so the slate is never half-wri'
-    - [CLAUSE_STACK_OVERFLOW] form=`(do (def a (atom 10)) (swap! a + 5) @a)` — sentence with 5 commas reads as AI-output cadence: 'The REPL sees to that —\nno two writers stomp on each other\'s chalk." To construc'
 
 ### G9-04: Atom CAS semantics
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'CLAUSE_STACK_OVERFLOW': 3}
-    - [CLAUSE_STACK_OVERFLOW] form=`(do (def a (atom 0)) (compare-and-set! a 0 1) @a)` — sentence with 5 commas reads as AI-output cadence: 'The page\nchanges only when someone writes — and only as the REPL allows." To\ncon'
+- issues: {'CLAUSE_STACK_OVERFLOW': 1}
     - [CLAUSE_STACK_OVERFLOW] form=`(do (def a (atom 5)) (compare-and-set! a 0 99) @a)` — sentence with 5 commas reads as AI-output cadence: 'To construct an atom holding 5, perform a compare-and-set checking for 0 and set'
-    - [CLAUSE_STACK_OVERFLOW] form=`(do (def a (atom 5)) (compare-and-set! a 0 99) @a)` — sentence with 5 commas reads as AI-output cadence: 'The REPL sees to that —\nno two writers stomp on each other\'s chalk." To construc'
-
-### G9-05: Watch on atom
-
-- examples: 1
-- variety @ n=50: 1.00
-- issues: {'CLAUSE_STACK_OVERFLOW': 2}
-    - [CLAUSE_STACK_OVERFLOW] form=`(do (def a (atom 0)) (def log (atom [])) (add-watc` — sentence with 7 commas reads as AI-output cadence: 'The REPL holds any second\nwriter at the threshold so the slate is never half-wri'
-    - [CLAUSE_STACK_OVERFLOW] form=`(do (def a (atom 0)) (def log (atom [])) (add-watc` — sentence with 7 commas reads as AI-output cadence: 'The REPL sees to that —\nno two writers stomp on each other\'s chalk." To construc'
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
 
 ### G9-06: Validator on atom
 
 - examples: 1
 - variety @ n=50: 1.00
-- issues: {'CLAUSE_STACK_OVERFLOW': 1}
+- issues: {'CLAUSE_STACK_OVERFLOW': 3}
+    - [CLAUSE_STACK_OVERFLOW] form=`(do (def a (atom 0)) (set-validator! a number?) (s` — sentence with 5 commas reads as AI-output cadence: 'validator on it, atomically swap by applying inc, and dereference, she composed\n'
+    - [CLAUSE_STACK_OVERFLOW] form=`(do (def a (atom 0)) (set-validator! a number?) (s` — sentence with 5 commas reads as AI-output cadence: 'validator on it, atomically swap by applying inc, and dereference, he composed\na'
     - [CLAUSE_STACK_OVERFLOW] form=`(do (def a (atom 0)) (set-validator! a number?) (s` — sentence with 5 commas reads as AI-output cadence: 'validator on it, atomically swap by applying inc, and dereference, he composed a'
 
 ### G9-07: Ref introduction
 
 - examples: 2
 - variety @ n=50: 1.00
-<<<<<<< HEAD
-- issues: {'HIGH_LENGTH': 1, 'LOW_GROUNDING': 1}
-    - [HIGH_LENGTH] form=`(do (def r (ref 0)) (dosync (alter r inc)) @r)` — user_msg 228 words
-=======
-- issues: {'CLAUSE_STACK_OVERFLOW': 5, 'HIGH_LENGTH': 1, 'LOW_GROUNDING': 1}
+- issues: {'CLAUSE_STACK_OVERFLOW': 4, 'HIGH_LENGTH': 1, 'LOW_GROUNDING': 1}
     - [CLAUSE_STACK_OVERFLOW] form=`(do (def r (ref 0)) (dosync (alter r inc)) @r)` — sentence with 5 commas reads as AI-output cadence: 'To construct a ref holding 0, perform a transactional alter by applying inc insi'
     - [CLAUSE_STACK_OVERFLOW] form=`(do (def r (ref 0)) (dosync (alter r inc)) @r)` — sentence with 5 commas reads as AI-output cadence: 'To construct a ref holding 0, perform a transactional alter by applying inc insi'
-    - [HIGH_LENGTH] form=`(do (def r (ref 0)) (dosync (alter r inc)) @r)` — user_msg 221 words
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
+    - [HIGH_LENGTH] form=`(do (def r (ref 0)) (dosync (alter r inc)) @r)` — user_msg 227 words
     - [LOW_GROUNDING] form=`(do (def r (ref 0)) (dosync (alter r inc)) @r)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+    - [CLAUSE_STACK_OVERFLOW] form=`(do (def r (ref 100)) (dosync (ref-set r 7)) @r)` — sentence with 5 commas reads as AI-output cadence: 'To construct a ref holding 100, perform a transactional ref-set to 7 inside dosy'
+    - [CLAUSE_STACK_OVERFLOW] form=`(do (def r (ref 100)) (dosync (ref-set r 7)) @r)` — sentence with 5 commas reads as AI-output cadence: 'To construct a ref holding 100, perform a transactional ref-set to 7 inside dosy'
 
 ### G9-09: Ref vs atom
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'LOW_GROUNDING': 1}
+- issues: {'LOW_GROUNDING': 1, 'CLAUSE_STACK_OVERFLOW': 1}
     - [LOW_GROUNDING] form=`(do (def a (atom 0)) (swap! a inc) @a)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+    - [CLAUSE_STACK_OVERFLOW] form=`(do (def r (ref 0)) (dosync (alter r inc)) @r)` — sentence with 5 commas reads as AI-output cadence: 'To construct a ref holding 0, perform a transactional alter by applying inc insi'
 
 ### G9-10: Agent introduction
 
 - examples: 2
 - variety @ n=50: 1.00
-<<<<<<< HEAD
 - issues: {'HIGH_LENGTH': 1, 'LOW_GROUNDING': 1, 'CLAUSE_STACK_OVERFLOW': 2}
-    - [HIGH_LENGTH] form=`(do (def ag (agent 0)) (send ag inc) (await ag) @a` — user_msg 223 words
-=======
-- issues: {'HIGH_LENGTH': 1, 'LOW_GROUNDING': 1, 'CLAUSE_STACK_OVERFLOW': 5}
-    - [HIGH_LENGTH] form=`(do (def ag (agent 0)) (send ag inc) (await ag) @a` — user_msg 216 words
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
+    - [HIGH_LENGTH] form=`(do (def ag (agent 0)) (send ag inc) (await ag) @a` — user_msg 222 words
     - [LOW_GROUNDING] form=`(do (def ag (agent 0)) (send ag inc) (await ag) @a` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [CLAUSE_STACK_OVERFLOW] form=`(do (def ag (agent 0)) (send ag inc) (await ag) @a` — sentence with 6 commas reads as AI-output cadence: 'To construct an agent holding 0, use send to asynchronously apply inc, await its'
     - [CLAUSE_STACK_OVERFLOW] form=`(do (def ag (agent 0)) (send ag inc) (await ag) @a` — sentence with 8 commas reads as AI-output cadence: 'To construct an agent holding 0, use send to asynchronously apply inc, await its'
@@ -1419,33 +1017,17 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 0.99
-<<<<<<< HEAD
 - issues: {'LOW_GROUNDING': 2, 'AND_HANDED_BACK_CADENCE': 1}
     - [LOW_GROUNDING] form=`@(future (+ 1 2))` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [LOW_GROUNDING] form=`@(future (+ 1 2))` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [AND_HANDED_BACK_CADENCE] form=`@(future (* 6 7))` — user_msg tail has 3 performed/handed-back/returned verbs — AI-output verb-and-verb cadence
-=======
-- issues: {'LOW_GROUNDING': 2, 'CLAUSE_STACK_OVERFLOW': 1}
-    - [LOW_GROUNDING] form=`@(future (+ 1 2))` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-    - [LOW_GROUNDING] form=`@(future (+ 1 2))` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-    - [CLAUSE_STACK_OVERFLOW] form=`@(future (* 6 7))` — sentence with 5 commas reads as AI-output cadence: 'The result will\nbe there when you ask for it — sometimes you have to wait for th'
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
 
 ### G9-15: promise — deliver and deref
 
 - examples: 2
 - variety @ n=50: 0.99
-<<<<<<< HEAD
 - issues: {'CLAUSE_STACK_OVERFLOW': 1}
     - [CLAUSE_STACK_OVERFLOW] form=`(do (def p (promise)) (deliver p 42) @p)` — sentence with 5 commas reads as AI-output cadence: 'To construct a promise, deliver 42 to it, and dereference to get the delivered v'
-=======
-- issues: {'CLAUSE_STACK_OVERFLOW': 5}
-    - [CLAUSE_STACK_OVERFLOW] form=`(do (def p (promise)) (deliver p :done) @p)` — sentence with 6 commas reads as AI-output cadence: 'The result will\nbe there when you ask for it — sometimes you have to wait for th'
-    - [CLAUSE_STACK_OVERFLOW] form=`(do (def p (promise)) (deliver p :done) @p)` — sentence with 6 commas reads as AI-output cadence: 'The result will\nbe there when you ask for it — sometimes you have to wait for th'
-    - [CLAUSE_STACK_OVERFLOW] form=`(do (def p (promise)) (deliver p :done) @p)` — sentence with 5 commas reads as AI-output cadence: 'The\nruntime makes that easier than it sounds." To construct a promise, deliver a'
-    - [CLAUSE_STACK_OVERFLOW] form=`(do (def p (promise)) (deliver p 42) @p)` — sentence with 5 commas reads as AI-output cadence: 'To construct a promise, deliver 42 to it, and dereference to get the delivered v'
-    - [CLAUSE_STACK_OVERFLOW] form=`(do (def p (promise)) (deliver p 42) @p)` — sentence with 6 commas reads as AI-output cadence: 'The result will\nbe there when you ask for it — sometimes you have to wait for th'
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
 
 ### G9-17: binding — thread-local
 
@@ -1477,32 +1059,6 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
     - [NARRATIVE_NUMERAL_HARDCODE] form=`'(1 2 3)` — parametric example has hard-coded English numeral 'three numbers' in a story slot — the actual draws may differ from this fixed count
     - [NARRATIVE_NUMERAL_HARDCODE] form=`'(1 2 3)` — parametric example has hard-coded English numeral 'three numbers' in a story slot — the actual draws may differ from this fixed count
 
-### G10-03: defmacro introduction
-
-- examples: 2
-- variety @ n=50: 0.99
-<<<<<<< HEAD
-- issues: {'SENTENCE_START_LOWER_PRONOUN': 1}
-    - [SENTENCE_START_LOWER_PRONOUN] form=`(do (defmacro my-when [t & body] `(if ~t (do ~@bod` — pronoun starts a sentence in lowercase — template should use the _cap variant after a sentence-ending punctuation
-=======
-- issues: {'CLAUSE_STACK_OVERFLOW': 1}
-    - [CLAUSE_STACK_OVERFLOW] form=`(do (defmacro twice [x] `(do ~x ~x)) (twice 7))` — sentence with 5 commas reads as AI-output cadence: 'A\nrewrite-rule takes one form and produces a different form — only after\nthat do'
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
-
-### G10-04: Macro expansion rule
-
-- examples: 2
-- variety @ n=50: 1.00
-<<<<<<< HEAD
-- issues: {'SENTENCE_START_LOWER_PRONOUN': 1}
-    - [SENTENCE_START_LOWER_PRONOUN] form=`(macroexpand-1 '(or a b))` — pronoun starts a sentence in lowercase — template should use the _cap variant after a sentence-ending punctuation
-=======
-- issues: {'CLAUSE_STACK_OVERFLOW': 3}
-    - [CLAUSE_STACK_OVERFLOW] form=`(macroexpand-1 '(when true 1))` — sentence with 5 commas reads as AI-output cadence: 'You write the rule\nonce, and any form that names it gets rewritten on the way in'
-    - [CLAUSE_STACK_OVERFLOW] form=`(macroexpand-1 '(when true 1))` — sentence with 5 commas reads as AI-output cadence: 'You write the rule\nonce, and any form that names it gets rewritten on the way in'
-    - [CLAUSE_STACK_OVERFLOW] form=`(macroexpand-1 '(or a b))` — sentence with 5 commas reads as AI-output cadence: 'You write the rule\nonce, and any form that names it gets rewritten on the way in'
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
-
 ### G10-05: macroexpand
 
 - examples: 2
@@ -1515,49 +1071,17 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 3
 - variety @ n=50: 1.00
-<<<<<<< HEAD
-- issues: {'SENTENCE_START_LOWER_PRONOUN': 2, 'REPEATED_OPENER_FRAGMENT': 1, 'DOUBLED_INPUT_VALUE_PARENS': 1}
-    - [SENTENCE_START_LOWER_PRONOUN] form=`(when true 1 2 3)` — pronoun starts a sentence in lowercase — template should use the _cap variant after a sentence-ending punctuation
-    - [SENTENCE_START_LOWER_PRONOUN] form=`(when false 1 2 3)` — pronoun starts a sentence in lowercase — template should use the _cap variant after a sentence-ending punctuation
+- issues: {'REPEATED_OPENER_FRAGMENT': 1, 'DOUBLED_INPUT_VALUE_PARENS': 1}
     - [REPEATED_OPENER_FRAGMENT] form=`(when-not false :ok)` — opener fragment 'at the edge of the forest,' also appears later in user_msg
     - [DOUBLED_INPUT_VALUE_PARENS] form=`(when-not false :ok)` — user_msg contains two or more 'as the input value' parentheticals — auto-closer fired twice or authored prose duplicated it
-=======
-- issues: {'REPEATED_OPENER_FRAGMENT': 1, 'CLAUSE_STACK_OVERFLOW': 1, 'ANSWER_LEAK_STRING': 1}
-    - [REPEATED_OPENER_FRAGMENT] form=`(when-not false :ok)` — opener fragment 'at the edge of the forest,' also appears later in user_msg
-    - [CLAUSE_STACK_OVERFLOW] form=`(when-not false :ok)` — sentence with 5 commas reads as AI-output cadence: 'You write the rule\nonce, and any form that names it gets rewritten on the way in'
-    - [ANSWER_LEAK_STRING] form=`(when-not false :ok)` — answer string ':ok' appears in user_msg
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
 
 ### G10-07: Threading macros revisited
 
 - examples: 3
 - variety @ n=50: 1.00
-<<<<<<< HEAD
-- issues: {'CONCEPT_AS_VERB': 3, 'CLAUSE_STACK_OVERFLOW': 2}
-    - [CONCEPT_AS_VERB] form=`(-> 5 inc inc inc)` — concept_phrase substituted into a finite-verb slot (e.g. 'must calling X', 'I applying Y')
+- issues: {'CLAUSE_STACK_OVERFLOW': 2}
     - [CLAUSE_STACK_OVERFLOW] form=`(->> [1 2 3 4] (filter even?) (map inc) (reduce +)` — sentence with 5 commas reads as AI-output cadence: 'To thread a vector through filter, map, and reduce using thread-last, she chalke'
     - [CLAUSE_STACK_OVERFLOW] form=`(->> [1 2 3 4] (filter even?) (map inc) (reduce +)` — sentence with 5 commas reads as AI-output cadence: 'To thread a vector through filter, map, and reduce using thread-last, he chalked'
-    - [CONCEPT_AS_VERB] form=`(->> [1 2 3 4] (filter even?) (map inc) (reduce +)` — concept_phrase substituted into a finite-verb slot (e.g. 'must calling X', 'I applying Y')
-    - [CONCEPT_AS_VERB] form=`(macroexpand '(-> x f g))` — concept_phrase substituted into a finite-verb slot (e.g. 'must calling X', 'I applying Y')
-=======
-- issues: {'ANSWER_LEAK': 2, 'CLAUSE_STACK_OVERFLOW': 2}
-    - [ANSWER_LEAK] form=`(-> 5 inc inc inc)` — answer 8 in narrative
-    - [ANSWER_LEAK] form=`(->> [1 2 3 4] (filter even?) (map inc) (reduce +)` — answer 8 in narrative
-    - [CLAUSE_STACK_OVERFLOW] form=`(->> [1 2 3 4] (filter even?) (map inc) (reduce +)` — sentence with 5 commas reads as AI-output cadence: 'To thread a vector through filter, map, and reduce using thread-last, she chalke'
-    - [CLAUSE_STACK_OVERFLOW] form=`(->> [1 2 3 4] (filter even?) (map inc) (reduce +)` — sentence with 5 commas reads as AI-output cadence: 'To thread a vector through filter, map, and reduce using thread-last, he chalked'
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
-
-### G10-08: Macro vs fn
-
-- examples: 2
-- variety @ n=50: 1.00
-<<<<<<< HEAD
-- issues: {'SENTENCE_START_LOWER_PRONOUN': 1}
-    - [SENTENCE_START_LOWER_PRONOUN] form=`(do (defn add-fn [a b] (+ a b)) (add-fn 3 4))` — pronoun starts a sentence in lowercase — template should use the _cap variant after a sentence-ending punctuation
-=======
-- issues: {'CLAUSE_STACK_OVERFLOW': 1}
-    - [CLAUSE_STACK_OVERFLOW] form=`(do (defn add-fn [a b] (+ a b)) (add-fn 3 4))` — sentence with 5 commas reads as AI-output cadence: 'You write the rule\nonce, and any form that names it gets rewritten on the way in'
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
 
 ### G10-09: Hygiene and gensym
 
@@ -1570,19 +1094,10 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-<<<<<<< HEAD
-- issues: {'HIGH_LENGTH': 1, 'ANSWER_LEAK': 1, 'EXPECTED_META_PHRASE': 1, 'SENTENCE_START_LOWER_PRONOUN': 1}
-    - [HIGH_LENGTH] form=`(do (defmacro safe-if-let [bind then else] `(if-le` — user_msg 206 words
-    - [ANSWER_LEAK] form=`(do (defmacro safe-if-let [bind then else] `(if-le` — answer 10 in narrative
-    - [EXPECTED_META_PHRASE] form=`(do (defmacro safe-if-let [bind then else] `(if-le` — user_msg uses 'the expected X' meta-language — describes the answer in graders'-vocabulary instead of letting the runtime's return speak for itself
-    - [SENTENCE_START_LOWER_PRONOUN] form=`(do (defmacro safe-if-let [bind then else] `(if-le` — pronoun starts a sentence in lowercase — template should use the _cap variant after a sentence-ending punctuation
-=======
-- issues: {'HIGH_LENGTH': 1, 'ANSWER_LEAK': 1, 'EXPECTED_META_PHRASE': 1, 'CLAUSE_STACK_OVERFLOW': 1}
+- issues: {'HIGH_LENGTH': 1, 'ANSWER_LEAK': 1, 'EXPECTED_META_PHRASE': 1}
     - [HIGH_LENGTH] form=`(do (defmacro safe-if-let [bind then else] `(if-le` — user_msg 205 words
     - [ANSWER_LEAK] form=`(do (defmacro safe-if-let [bind then else] `(if-le` — answer 10 in narrative
     - [EXPECTED_META_PHRASE] form=`(do (defmacro safe-if-let [bind then else] `(if-le` — user_msg uses 'the expected X' meta-language — describes the answer in graders'-vocabulary instead of letting the runtime's return speak for itself
-    - [CLAUSE_STACK_OVERFLOW] form=`(if-let [x 7] (* x x) 0)` — sentence with 5 commas reads as AI-output cadence: 'You write the rule\nonce, and any form that names it gets rewritten on the way in'
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
 
 ### G10-11: Reader macros overview
 
@@ -1610,31 +1125,6 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 - issues: {'LOW_GROUNDING': 1}
     - [LOW_GROUNDING] form=`(clojure.edn/read-string "42")` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
 
-### G10-14: eval (the function)
-
-- examples: 2
-- variety @ n=50: 1.00
-<<<<<<< HEAD
-- issues: {'SENTENCE_START_LOWER_PRONOUN': 2}
-    - [SENTENCE_START_LOWER_PRONOUN] form=`(eval '(+ 1 2 3))` — pronoun starts a sentence in lowercase — template should use the _cap variant after a sentence-ending punctuation
-    - [SENTENCE_START_LOWER_PRONOUN] form=`(eval (list '+ 4 5))` — pronoun starts a sentence in lowercase — template should use the _cap variant after a sentence-ending punctuation
-=======
-- issues: {'CLAUSE_STACK_OVERFLOW': 1}
-    - [CLAUSE_STACK_OVERFLOW] form=`(eval (list '+ 4 5))` — sentence with 5 commas reads as AI-output cadence: 'You write the rule\nonce, and any form that names it gets rewritten on the way in'
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
-
-### G10-16: Macro pattern library
-
-- examples: 2
-- variety @ n=50: 1.00
-<<<<<<< HEAD
-- issues: {'SENTENCE_START_LOWER_PRONOUN': 1}
-    - [SENTENCE_START_LOWER_PRONOUN] form=`(do (defmacro with-careful-watch [& body] `(let [p` — pronoun starts a sentence in lowercase — template should use the _cap variant after a sentence-ending punctuation
-=======
-- issues: {'ANSWER_LEAK_STRING': 1}
-    - [ANSWER_LEAK_STRING] form=`(do (defmacro def-watch [name v] `(def ~name ~v)) ` — answer string ':alert' appears in user_msg
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
-
 ## Grade 11
 
 ### G11-01: JVM vs CLR vs JS vs Python (host overview)
@@ -1649,41 +1139,21 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 8
 - variety @ n=50: 1.00
-<<<<<<< HEAD
 - issues: {'HIGH_LENGTH': 2, 'ANSWER_LEAK_STRING': 2, 'GOAL_FALLBACK_GENERIC': 3}
-    - [HIGH_LENGTH] form=`(. "abc" toUpperCase)` — user_msg 207 words
+    - [HIGH_LENGTH] form=`(. "abc" toUpperCase)` — user_msg 206 words
     - [ANSWER_LEAK_STRING] form=`(. "abc" toUpperCase)` — answer string 'ABC' appears in user_msg
-    - [HIGH_LENGTH] form=`(. "abc" toUpperCase)` — user_msg 207 words
+    - [HIGH_LENGTH] form=`(. "abc" toUpperCase)` — user_msg 206 words
     - [ANSWER_LEAK_STRING] form=`(. "abc" toUpperCase)` — answer string 'ABC' appears in user_msg
     - [GOAL_FALLBACK_GENERIC] form=`(.length "shepherd")` — user_msg uses generic 'To evaluate the X, ...' fallback AND no drawn-literal anchor — add a canonical GOALS entry for richer prose
     - [GOAL_FALLBACK_GENERIC] form=`(.isEmpty "test")` — user_msg uses generic 'To evaluate the X, ...' fallback AND no drawn-literal anchor — add a canonical GOALS entry for richer prose
-=======
-- issues: {'CLAUSE_STACK_OVERFLOW': 6, 'HIGH_LENGTH': 2, 'ANSWER_LEAK_STRING': 2, 'GOAL_FALLBACK_GENERIC': 3}
-    - [CLAUSE_STACK_OVERFLOW] form=`(.startsWith "shepherd-elder" "shepherd")` — sentence with 6 commas reads as AI-output cadence: "When we need a smith's tool, the runtime\ncarries the value over the wall, asks t"
-    - [CLAUSE_STACK_OVERFLOW] form=`(.startsWith "shepherd-elder" "shepherd")` — sentence with 6 commas reads as AI-output cadence: "When we need a smith's tool, the runtime\ncarries the value over the wall, asks t"
-    - [HIGH_LENGTH] form=`(. "abc" toUpperCase)` — user_msg 206 words
-    - [ANSWER_LEAK_STRING] form=`(. "abc" toUpperCase)` — answer string 'ABC' appears in user_msg
-    - [CLAUSE_STACK_OVERFLOW] form=`(.startsWith "shepherd-elder" "shepherd")` — sentence with 6 commas reads as AI-output cadence: "When we need a smith's tool, the runtime\ncarries the value over the wall, asks t"
-    - [CLAUSE_STACK_OVERFLOW] form=`(.startsWith "shepherd-elder" "shepherd")` — sentence with 6 commas reads as AI-output cadence: "When we need a smith's tool, the runtime\ncarries the value over the wall, asks t"
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
 
 ### G11-03: Static method call
 
 - examples: 6
 - variety @ n=50: 1.00
-<<<<<<< HEAD
 - issues: {'PROCEDURAL_OPENER': 2}
     - [PROCEDURAL_OPENER] form=`(Math/abs -7)` — user_msg jumps from fable-opener directly to 'To {goal}, [pronoun] composed ...' without a scene-setting sentence
     - [PROCEDURAL_OPENER] form=`(Math/abs -7)` — user_msg jumps from fable-opener directly to 'To {goal}, [pronoun] composed ...' without a scene-setting sentence
-=======
-- issues: {'PROCEDURAL_OPENER': 2, 'CLAUSE_STACK_OVERFLOW': 4}
-    - [PROCEDURAL_OPENER] form=`(Math/abs -7)` — user_msg jumps from fable-opener directly to 'To {goal}, [pronoun] composed ...' without a scene-setting sentence
-    - [CLAUSE_STACK_OVERFLOW] form=`(Math/max 3 9)` — sentence with 6 commas reads as AI-output cadence: "When we need a smith's tool, the runtime\ncarries the value over the wall, asks t"
-    - [CLAUSE_STACK_OVERFLOW] form=`(Math/max 3 9)` — sentence with 6 commas reads as AI-output cadence: "When we need a smith's tool, the runtime\ncarries the value over the wall, asks t"
-    - [PROCEDURAL_OPENER] form=`(Math/abs -7)` — user_msg jumps from fable-opener directly to 'To {goal}, [pronoun] composed ...' without a scene-setting sentence
-    - [CLAUSE_STACK_OVERFLOW] form=`(Math/max 3 9)` — sentence with 6 commas reads as AI-output cadence: "When we need a smith's tool, the runtime\ncarries the value over the wall, asks t"
-    - [CLAUSE_STACK_OVERFLOW] form=`(Math/max 3 9)` — sentence with 6 commas reads as AI-output cadence: "When we need a smith's tool, the runtime\ncarries the value over the wall, asks t"
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
 
 ### G11-04: Field access
 
@@ -1696,13 +1166,11 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 6
 - variety @ n=50: 1.00
-- issues: {'STORY_SLOT_NOUN_REPEAT': 3, 'STORY_RESOLUTION_NO_DRAWN': 6, 'GOAL_FALLBACK_GENERIC': 1}
+- issues: {'STORY_SLOT_NOUN_REPEAT': 3, 'GOAL_FALLBACK_GENERIC': 1}
     - [STORY_SLOT_NOUN_REPEAT] form=`(let [a (int-array [10 20 30])] (aget a 1))` — the noun 'the host's' appears in all 4 story slots (scenario/need/mapping/resolution) — vary the imagery between beats
     - [STORY_SLOT_NOUN_REPEAT] form=`(let [a (int-array [10 20 30])] (aget a 1))` — the noun 'the host's' appears in all 4 story slots (scenario/need/mapping/resolution) — vary the imagery between beats
     - [STORY_SLOT_NOUN_REPEAT] form=`(let [a (int-array [10 20 30])] (aget a 1))` — the noun 'the host's' appears in all 4 story slots (scenario/need/mapping/resolution) — vary the imagery between beats
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(let [a (int-array [1 2 3])] (alength a))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('3',), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(let [a (int-array [1 2 3])] (alength a))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('3',), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(let [a (int-array [1 2 3])] (alength a))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('3',), resolution doesn't close the loop)
+    - [GOAL_FALLBACK_GENERIC] form=`(let [a (int-array [7 8 9])] (alength a))` — user_msg uses generic 'To evaluate the X, ...' fallback AND no drawn-literal anchor — add a canonical GOALS entry for richer prose
 
 ### G11-08: Type hints
 
@@ -1759,11 +1227,7 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 6
 - variety @ n=50: 1.00
-<<<<<<< HEAD
 - issues: {'LOW_GROUNDING': 2, 'PROCEDURAL_OPENER': 1, 'GOAL_FALLBACK_GENERIC': 4}
-=======
-- issues: {'LOW_GROUNDING': 2, 'PROCEDURAL_OPENER': 1, 'CLAUSE_STACK_OVERFLOW': 7, 'GOAL_FALLBACK_GENERIC': 4}
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
     - [LOW_GROUNDING] form=`(do "host stack traces leak through interop; learn` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [PROCEDURAL_OPENER] form=`(do "host stack traces leak through interop; learn` — user_msg jumps from fable-opener directly to 'To {goal}, [pronoun] composed ...' without a scene-setting sentence
     - [LOW_GROUNDING] form=`(try (Math/abs -42) (catch Exception _ :err))` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
@@ -1777,21 +1241,11 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 0.99
-<<<<<<< HEAD
 - issues: {'HIGH_LENGTH': 1, 'CLAUSE_STACK_OVERFLOW': 1, 'DOUBLED_INPUT_VALUE_PARENS': 2}
-    - [HIGH_LENGTH] form=`(into [] (map inc) [1 2 3])` — user_msg 218 words
-    - [CLAUSE_STACK_OVERFLOW] form=`(into [] (map inc) [1 2 3])` — sentence with 5 commas reads as AI-output cadence: 'To use the map-inc transducer with into to increment the vector containing 1, 2,'
-    - [DOUBLED_INPUT_VALUE_PARENS] form=`(into [] (filter even?) [1 2 3 4 5])` — user_msg contains two or more 'as the input value' parentheticals — auto-closer fired twice or authored prose duplicated it
-    - [DOUBLED_INPUT_VALUE_PARENS] form=`(into [] (filter even?) [1 2 3 4 5])` — user_msg contains two or more 'as the input value' parentheticals — auto-closer fired twice or authored prose duplicated it
-=======
-- issues: {'HIGH_LENGTH': 1, 'CLAUSE_STACK_OVERFLOW': 3, 'NUMERAL_LIST_IN_GOAL': 3}
     - [HIGH_LENGTH] form=`(into [] (map inc) [1 2 3])` — user_msg 216 words
     - [CLAUSE_STACK_OVERFLOW] form=`(into [] (map inc) [1 2 3])` — sentence with 5 commas reads as AI-output cadence: 'To use the map-inc transducer with into to increment the vector containing 1, 2,'
-    - [NUMERAL_LIST_IN_GOAL] form=`(into [] (filter even?) [1 2 3 4 5])` — goal_text contains 5 numerals across 4 commas — comma-list of numerals blows the sentence's clause budget; use a range or 'these numbers' framing
-    - [CLAUSE_STACK_OVERFLOW] form=`(into [] (filter even?) [1 2 3 4 5])` — sentence with 7 commas reads as AI-output cadence: 'To use the filter-even transducer with into to keep only the even numbers from t'
-    - [NUMERAL_LIST_IN_GOAL] form=`(into [] (filter even?) [1 2 3 4 5])` — goal_text contains 5 numerals across 4 commas — comma-list of numerals blows the sentence's clause budget; use a range or 'these numbers' framing
-    - [NUMERAL_LIST_IN_GOAL] form=`(into [] (filter even?) [1 2 3 4 5])` — goal_text contains 5 numerals across 4 commas — comma-list of numerals blows the sentence's clause budget; use a range or 'these numbers' framing
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
+    - [DOUBLED_INPUT_VALUE_PARENS] form=`(into [] (filter even?) [1 2 3 4 5])` — user_msg contains two or more 'as the input value' parentheticals — auto-closer fired twice or authored prose duplicated it
+    - [DOUBLED_INPUT_VALUE_PARENS] form=`(into [] (filter even?) [1 2 3 4 5])` — user_msg contains two or more 'as the input value' parentheticals — auto-closer fired twice or authored prose duplicated it
 
 ### G12-02: Transducer composition
 
@@ -1813,11 +1267,7 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-<<<<<<< HEAD
-- issues: {'REPL_TRIPLE_VOICE': 1, 'VILLAGE_NOUN_OVERUSE': 1, 'CLAUSE_STACK_OVERFLOW': 1, 'TRAILING_PARTICIPLE_CLOSER': 1}
-=======
-- issues: {'REPL_TRIPLE_VOICE': 1, 'CLAUSE_STACK_OVERFLOW': 1}
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
+- issues: {'REPL_TRIPLE_VOICE': 1, 'CLAUSE_STACK_OVERFLOW': 1, 'TRAILING_PARTICIPLE_CLOSER': 1}
     - [REPL_TRIPLE_VOICE] form=`(do "(chan), (go ...), (<! ...), (>! ...) form the` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
     - [CLAUSE_STACK_OVERFLOW] form=`(do "go-blocks let you write async code as if it w` — sentence with 6 commas reads as AI-output cadence: 'To learn how go-blocks let you write asynchronous code in a synchronous style,\nt'
     - [TRAILING_PARTICIPLE_CLOSER] form=`(do "go-blocks let you write async code as if it w` — sentence closes with a participial coda (', making the form readable.') — LLM-cadence; close on the verb instead
@@ -1848,12 +1298,7 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-<<<<<<< HEAD
-- issues: {'REPL_TRIPLE_VOICE': 1, 'PATIENT_ROLE_BOASTFUL': 1, 'VILLAGE_NOUN_OVERUSE': 1}
-=======
-- issues: {'BOOL_LEAK_RESOLUTION': 1, 'REPL_TRIPLE_VOICE': 1}
-    - [BOOL_LEAK_RESOLUTION] form=`(= (+ 1 2) 3)` — resolution leaks boolean answer 'true' — describe the verdict abstractly instead
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
+- issues: {'REPL_TRIPLE_VOICE': 1}
     - [REPL_TRIPLE_VOICE] form=`(= (+ 1 2) 3)` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
 
 ### G12-09: Test fixtures
@@ -1867,11 +1312,7 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-<<<<<<< HEAD
-- issues: {'FORM_LEAK': 1, 'CLAUSE_STACK_OVERFLOW': 2, 'PATIENT_ROLE_BOASTFUL': 1, 'VILLAGE_NOUN_OVERUSE': 1}
-=======
-- issues: {'FORM_LEAK': 1, 'BOOL_LEAK_RESOLUTION': 1, 'CLAUSE_STACK_OVERFLOW': 2}
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
+- issues: {'FORM_LEAK': 1, 'CLAUSE_STACK_OVERFLOW': 2}
     - [FORM_LEAK] form=`(= (reverse (reverse [1 2 3])) [1 2 3])` — form '(= (reverse (reverse [1 2 3])) [1 2 3])' appears in user_msg of a goal-style subject
     - [CLAUSE_STACK_OVERFLOW] form=`(= (reverse (reverse [1 2 3])) [1 2 3])` — sentence with 6 commas reads as AI-output cadence: 'To verify the property that reversing a vector twice returns the original vector'
     - [CLAUSE_STACK_OVERFLOW] form=`(= (reverse (reverse [1 2 3])) [1 2 3])` — sentence with 6 commas reads as AI-output cadence: 'To verify the property that reversing a vector twice returns the original vector'
@@ -1922,13 +1363,7 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 3
 - variety @ n=50: 1.00
-<<<<<<< HEAD
-- issues: {'PATIENT_ROLE_BOASTFUL': 5, 'VILLAGE_NOUN_OVERUSE': 5, 'CLAUSE_STACK_OVERFLOW': 1}
-    - [PATIENT_ROLE_BOASTFUL] form=`(do "good libraries expose data, then functions, t` — patient role 'the elder' co-occurs with boastful EMO phrase 'boasting at every'
-    - [VILLAGE_NOUN_OVERUSE] form=`(do "good libraries expose data, then functions, t` — `the village` appears 4 times (noun-saturation tic — vary or drop)
-=======
 - issues: {'CLAUSE_STACK_OVERFLOW': 1}
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
     - [CLAUSE_STACK_OVERFLOW] form=`(do "small public API surface, plain data inputs, ` — sentence with 6 commas reads as AI-output cadence: 'To understand the Clojure convention of a small public API surface with plain da'
 
 ### G12-18: Clojure style guide
@@ -1946,58 +1381,28 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 ### Issue counts (across all examples × 3 records)
 
-<<<<<<< HEAD
+- **CLAUSE_STACK_OVERFLOW**: 92
 - **TRAILING_PARTICIPLE_CLOSER**: 70
 - **LOW_GROUNDING**: 68
-- **CLAUSE_STACK_OVERFLOW**: 68
-- **FORM_DISPLAY_AND_FORM_NOUN**: 54
-- **NARRATIVE_NUMERAL_HARDCODE**: 36
-- **GOAL_FALLBACK_GENERIC**: 35
-- **SENTENCE_START_LOWER_PRONOUN**: 27
-- **HIGH_LENGTH**: 24
-- **VILLAGE_NOUN_OVERUSE**: 23
-- **BOOL_LEAK_RESOLUTION**: 23
-- **ONLY_SHOOK_HEAD_TIC**: 20
-- **PATIENT_ROLE_BOASTFUL**: 20
-- **HONEST_JUDGE_REPEAT**: 18
-- **TRUST_RHETORIC_FILLER**: 15
-- **FOREIGN_FABLE_IMAGERY**: 14
-- **REPL_TRIPLE_VOICE**: 14
-- **THE_FORM_OVERUSE**: 13
-- **CONCEPT_AS_VERB**: 12
-=======
-- **CLAUSE_STACK_OVERFLOW**: 201
-- **LOW_GROUNDING**: 68
-- **NARRATIVE_NUMERAL_HARDCODE**: 60
-- **NUMERAL_LIST_IN_GOAL**: 48
-- **BOOL_LEAK_RESOLUTION**: 34
-- **ANSWER_LEAK_STRING**: 31
+- **NARRATIVE_NUMERAL_HARDCODE**: 42
+- **BOOL_LEAK_RESOLUTION**: 31
 - **GOAL_FALLBACK_GENERIC**: 30
 - **HIGH_LENGTH**: 24
 - **FORM_DISPLAY_AND_FORM_NOUN**: 22
-- **ANSWER_LEAK**: 15
 - **REPL_TRIPLE_VOICE**: 13
-- **SMALL_INT_LEAK**: 8
-- **STRING_AS_CHAR_MISCLAIM**: 7
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
+- **SMALL_INT_LEAK**: 7
 - **PROCEDURAL_OPENER**: 7
-- **DOUBLED_INPUT_VALUE_PARENS**: 6
-- **STORY_RESOLUTION_NO_DRAWN**: 6
 - **AI_OUTPUT_CADENCE**: 6
-- **SMALL_INT_LEAK**: 5
 - **REPEATED_OPENER_FRAGMENT**: 4
+- **DOUBLED_INPUT_VALUE_PARENS**: 4
 - **ANSWER_LEAK**: 3
 - **ANSWER_LEAK_STRING**: 3
 - **RESOLUTION_REPL_DOUBLED**: 3
-<<<<<<< HEAD
 - **ABSTRACT_RESULT_NARRATION**: 3
-- **STORY_SLOT_NOUN_REPEAT**: 3
-- **AND_HANDED_BACK_CADENCE**: 2
-=======
 - **HONEST_JUDGE_REPEAT**: 3
 - **STORY_SLOT_NOUN_REPEAT**: 3
 - **BOY_WOLF_NOUN_SATURATION**: 2
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
+- **AND_HANDED_BACK_CADENCE**: 2
 - **UNFILLED_DRAWN_PLACEHOLDER**: 1
 - **DRAWN_PLACEHOLDER_LEAK**: 1
 - **EXPECTED_META_PHRASE**: 1
@@ -2008,295 +1413,20 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 | Grade | Subjects | Examples | Issues | Low-variety |
 |---|---|---|---|---|
-<<<<<<< HEAD
-| 1 | 18 | 80 | 91 | — |
-| 2 | 22 | 88 | 95 | — |
-| 3 | 18 | 31 | 26 | — |
-| 4 | 20 | 39 | 67 | — |
-| 5 | 22 | 39 | 41 | — |
-| 6 | 16 | 33 | 43 | — |
-| 7 | 18 | 36 | 32 | — |
-| 8 | 16 | 31 | 32 | — |
-| 9 | 18 | 34 | 28 | — |
-| 10 | 16 | 36 | 41 | — |
-| 11 | 14 | 58 | 51 | — |
-| 12 | 18 | 37 | 63 | — |
-
-### Sample issues by severity
-
-#### HONEST_JUDGE_REPEAT
-
-- `G1-01` (form `0`): two or more 'honest' uses in one boy-wolf user_msg (judge-bombast tic — drop one)
-    ```
-    The wolves of those hills were rare but not absent, and the shepherds knew it was safer to be vigilant than clever.
-
-The elder of the village kept a small slate in the village, untroubled by what others thought,
-with a tally of expressions the shepherds had honestly submitted versus
-ones they had on...
-    ```
-- `G1-01` (form `(+ 1 2)`): two or more 'honest' uses in one boy-wolf user_msg (judge-bombast tic — drop one)
-    ```
-    On those slopes, trust was a thing the village extended freely, and a thing it could not afford to lose.
-
-The elder of the village kept a small slate in the village, saying very little,
-with a tally of expressions the shepherds had honestly submitted versus
-ones they had only guessed at. The valley ...
-    ```
-- `G1-02` (form `7`): two or more 'honest' uses in one boy-wolf user_msg (judge-bombast tic — drop one)
-    ```
-    near the hilltop, on a slope above the village, Zenta watched his flock and his shadow grow longer.
-
-The elder of the village kept a small slate near the hilltop, letting the runtime have the last word,
-with a tally of expressions the shepherds had honestly submitted versus
-ones they had only guesse...
-    ```
-- `G1-02` (form `0`): two or more 'honest' uses in one boy-wolf user_msg (judge-bombast tic — drop one)
-    ```
-    Long days alone with a flock can teach patience, or they can teach mischief, depending on the boy.
-
-The elder of the village kept a small slate near the orchard, untroubled by what others thought,
-with a tally of expressions the shepherds had honestly submitted versus
-ones they had only guessed at. ...
-    ```
-- `G1-02` (form `100`): two or more 'honest' uses in one boy-wolf user_msg (judge-bombast tic — drop one)
-    ```
-    There was once a shepherd boy whose afternoons were long and whose imagination was longer.
-
-The elder of the village kept a small slate at the edge of the meadow, with the calm of a long watch well kept,
-with a tally of expressions the shepherds had honestly submitted versus
-ones they had only guess...
-    ```
-
-#### TRUST_RHETORIC_FILLER
-
-- `G1-01` (form `0`): user_msg has 2 stacked 'only voice/judge we trust / honest tally' filler phrases — replace with concrete algorithm narration
-    ```
-    The wolves of those hills were rare but not absent, and the shepherds knew it was safer to be vigilant than clever.
-
-The elder of the village kept a small slate in the village, untroubled by what others thought,
-with a tally of expressions the shepherds had honestly submitted versus
-ones they had on...
-    ```
-- `G1-01` (form `(+ 1 2)`): user_msg has 2 stacked 'only voice/judge we trust / honest tally' filler phrases — replace with concrete algorithm narration
-    ```
-    On those slopes, trust was a thing the village extended freely, and a thing it could not afford to lose.
-
-The elder of the village kept a small slate in the village, saying very little,
-with a tally of expressions the shepherds had honestly submitted versus
-ones they had only guessed at. The valley ...
-    ```
-- `G1-02` (form `7`): user_msg has 2 stacked 'only voice/judge we trust / honest tally' filler phrases — replace with concrete algorithm narration
-    ```
-    near the hilltop, on a slope above the village, Zenta watched his flock and his shadow grow longer.
-
-The elder of the village kept a small slate near the hilltop, letting the runtime have the last word,
-with a tally of expressions the shepherds had honestly submitted versus
-ones they had only guesse...
-    ```
-- `G1-02` (form `0`): user_msg has 2 stacked 'only voice/judge we trust / honest tally' filler phrases — replace with concrete algorithm narration
-    ```
-    Long days alone with a flock can teach patience, or they can teach mischief, depending on the boy.
-
-The elder of the village kept a small slate near the orchard, untroubled by what others thought,
-with a tally of expressions the shepherds had honestly submitted versus
-ones they had only guessed at. ...
-    ```
-- `G1-02` (form `100`): user_msg has 2 stacked 'only voice/judge we trust / honest tally' filler phrases — replace with concrete algorithm narration
-    ```
-    There was once a shepherd boy whose afternoons were long and whose imagination was longer.
-
-The elder of the village kept a small slate at the edge of the meadow, with the calm of a long watch well kept,
-with a tally of expressions the shepherds had honestly submitted versus
-ones they had only guess...
-    ```
-
-#### VILLAGE_NOUN_OVERUSE
-
-- `G1-01` (form `(+ 1 2)`): `the village` appears 4 times (noun-saturation tic — vary or drop)
-    ```
-    On those slopes, trust was a thing the village extended freely, and a thing it could not afford to lose.
-
-The elder of the village kept a small slate in the village, saying very little,
-with a tally of expressions the shepherds had honestly submitted versus
-ones they had only guessed at. The valley ...
-    ```
-- `G1-01` (form `"hello"`): `the village` appears 4 times (noun-saturation tic — vary or drop)
-    ```
-    near the village, on a slope above the village, Kari watched his flock and his shadow grow longer.
-
-Halfway through the morning watch, Kari, as if the village would always believe,
-called out near the village, demanding a verdict on `"willow"`
-and refusing to come back to the flock until somebody co...
-    ```
-- `G1-08` (form `\w`): `the village` appears 4 times (noun-saturation tic — vary or drop)
-=======
 | 1 | 18 | 80 | 36 | — |
-| 2 | 22 | 88 | 65 | — |
-| 3 | 18 | 31 | 30 | — |
-| 4 | 20 | 39 | 55 | — |
-| 5 | 22 | 39 | 82 | — |
-| 6 | 16 | 33 | 33 | — |
-| 7 | 18 | 36 | 24 | — |
-| 8 | 16 | 31 | 50 | — |
-| 9 | 18 | 34 | 75 | — |
-| 10 | 16 | 36 | 35 | — |
-| 11 | 14 | 58 | 61 | — |
-| 12 | 18 | 37 | 49 | — |
+| 2 | 22 | 88 | 67 | — |
+| 3 | 18 | 31 | 20 | — |
+| 4 | 20 | 39 | 73 | — |
+| 5 | 22 | 39 | 28 | — |
+| 6 | 16 | 33 | 30 | — |
+| 7 | 18 | 36 | 25 | — |
+| 8 | 16 | 31 | 34 | — |
+| 9 | 18 | 34 | 37 | — |
+| 10 | 16 | 36 | 23 | — |
+| 11 | 14 | 58 | 38 | — |
+| 12 | 18 | 37 | 36 | — |
 
 ### Sample issues by severity
-
-#### STRING_AS_CHAR_MISCLAIM
-
-- `G1-08` (form `\w`): form is a multi-character string but the prose refers to it as a single character (`the character \X` idiom)
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
-    ```
-    When Andrej called out in the village the first time, the village came running, and the sheep stayed exactly as they were.
-
-Andrej called down from a stone at the village where someone had
-<<<<<<< HEAD
-chalked the character \t on a flat board. Andrej, with a smug grin,
-declared he already knew what would come ba...
-    ```
-- `G6-07` (form `(boolean (:private (meta '^:private hidden)))`): `the village` appears 4 times (noun-saturation tic — vary or drop)
-    ```
-    It happened at the edge of the orchard, on a hill where shouting carries far and trust carries further, until it doesn't.
-
-Carol showed Tom two entries in the village log-book. One symbol, `hidden`, carried a private marker in its margin. Carol asked Tom to convert the raw answer to a simple true or...
-    ```
-- `G6-10` (form `(:deps {:deps {:a 1 :b 2}})`): `the village` appears 4 times (noun-saturation tic — vary or drop)
-    ```
-    Melina had cried wolf once already, near the road, and the villagers had laughed but not entirely.
-
-At the village notice-stone on the road, the question of the day was
-posted: how to extract the value at the :deps key from a nested map. Melina, with great whoops of laughter, started
-to shout an ans...
-    ```
-
-#### FORM_DISPLAY_AND_FORM_NOUN
-
-- `G1-01` (form `(* 4 5)`): user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
-    ```
-    There was once a shepherd boy whose afternoons were long and whose imagination was longer.
-
-Each Saturday, the reeve walked up to the meadow and reviewed which
-forms the shepherds had actually submitted to the REPL during the week.
-This week, the next form on the page was `(* 7 4)`, and the line
-abo...
-    ```
-- `G1-01` (form `(+ 1 (* 2 3))`): user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
-    ```
-    Danuta had been minding the sheep by the woods since the first light, and the day was wearing thin.
-
-Each Saturday, the reeve walked up to the meadow and reviewed which
-forms the shepherds had actually submitted to the REPL during the week.
-This week, the next form on the page was `(+ 1 (* 4 0))`, a...
-    ```
-- `G1-03` (form `(+ 1/2 1/4)`): user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
-    ```
-    Cesare had been minding the sheep by the farm since the first light, and the day was wearing thin.
-
-A small slate sat on a flat stone at the farm; the day was long and the
-slate filled slowly, mark by mark. On it the reeve recorded each
-expression a shepherd had submitted to the REPL alongside each ...
-    ```
-- `G1-03` (form `(* 2 1/2)`): user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
-    ```
-    near the farm, in the long grass above the village road, Csilla settled in for another slow afternoon.
-
-A small slate sat on a flat stone by the farm; the day was long and the
-slate filled slowly, mark by mark. On it the reeve recorded each
-expression a shepherd had submitted to the REPL alongside e...
-    ```
-- `G1-03` (form `(- 1 1/3)`): user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
-    ```
-    When Adriana called out by the woods the first time, the village came running, and the sheep stayed exactly as they were.
-
-A small slate sat on a flat stone at the edge of the woods; the day was long and the
-slate filled slowly, mark by mark. On it the reeve recorded each
-expression a shepherd had s...
-    ```
-
-#### FOREIGN_FABLE_IMAGERY
-
-- `G1-02` (form `-3`): tortoise-hare-specific imagery 'leather notebook' leaks into boy-wolf prose
-    ```
-    The villagers had agreed that any cry of wolf would bring them running with their sticks and lanterns.
-
-Ulvilda, without complaint, kept a small leather notebook of
-=======
-chalked the character \indigo on a flat board. Andrej, with a smug grin,
-declared he already knew what would co...
-    ```
-- `G1-08` (form `\w`): form is a multi-character string but the prose refers to it as a single character (`the character \X` idiom)
-    ```
-    Some games seem harmless until the moment they are needed in earnest, and then they cost everything.
-
-The elder of the meadow folk kept a small slate near the orchard, with the calm of a long watch well kept,
-with a tally of expressions the shepherds had directly submitted versus
-ones they had only ...
-    ```
-- `G1-08` (form `\w`): form is a multi-character string but the prose refers to it as a single character (`the character \X` idiom)
-    ```
-    Iarlaith was a clever boy, and by the forest cleverness had begun to look very much like trouble.
-
-Crispin, with steady, careful steps, kept a small slate-pocket of
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
-every expression the shepherds of the valley had actually evaluated —
-each entry slow as the rising sun, the page-count climbing only
-w...
-    ```
-<<<<<<< HEAD
-- `G1-02` (form `-25`): tortoise-hare-specific imagery 'leather notebook' leaks into boy-wolf prose
-    ```
-    The villagers had agreed that any cry of wolf would bring them running with their sticks and lanterns.
-
-Gunhilda, with eyes always on the slate, kept a small leather notebook of
-every expression the shepherds of the valley had actually evaluated —
-each entry slow as the rising sun, the page-count cl...
-    ```
-- `G1-03` (form `1/2`): tortoise-hare-specific imagery 'leather notebook' leaks into boy-wolf prose
-    ```
-    The sheep had grazed peacefully all morning, and there was nothing at all the matter, which was exactly the problem.
-
-Gildas, with the calm of a long watch well kept, kept a small leather notebook of
-every expression the shepherds of the valley had actually evaluated —
-each entry slow as the rising ...
-    ```
-- `G1-04` (form `"flock"`): tortoise-hare-specific imagery 'leather notebook' leaks into boy-wolf prose
-    ```
-    Tunde was supposed to keep the sheep safe; instead, at the village, he kept inventing reasons for the village to run.
-
-Theodelinda, letting the runtime have the last word, kept a small leather notebook of
-every expression the shepherds of the valley had actually evaluated —
-each entry slow as the ri...
-    ```
-- `G1-04` (form `"watch the meadow"`): tortoise-hare-specific imagery 'leather notebook' leaks into boy-wolf prose
-    ```
-    at the farm, on a slope above the village, Yara watched his flock and his shadow grow longer.
-
-Walpurga, stepping deliberately, kept a small leather notebook of
-every expression the shepherds of the valley had actually evaluated —
-each entry slow as the rising sun, the page-count climbing only
-when ...
-=======
-- `G1-08` (form `\space`): form is a multi-character string but the prose refers to it as a single character (`the character \X` idiom)
-    ```
-    The pasture lay below a rocky lookout, and the sheep were easier to count than the hours.
-
-Manfred called down from a stone by the meadow where someone had
-chalked the character \space on a flat board. Manfred, as if the watchhouse would always believe,
-declared he already knew what would come back....
-    ```
-- `G1-08` (form `\space`): form is a multi-character string but the prose refers to it as a single character (`the character \X` idiom)
-    ```
-    Wojciech had cried wolf once already, near the forest, and the villagers had laughed but not entirely.
-
-Casimir had been trying to teach Wojciech how the REPL
-works. "Look here," he said, pointing to the character \space.
-"You hand `"marble"` to the runtime, and the runtime hands
-you back what it ev...
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
-    ```
 
 #### BOOL_LEAK_RESOLUTION
 
@@ -2447,10 +1577,10 @@ the cool slate. "What counts as one word, wh...
     ```
     in the village, where the path winds up toward the lookout, Ivan watched and waited and watched some more.
 
-Ivan, as if the village would always believe, glanced at the form and called out
+Ivan, as if the watchhouse would always believe, glanced at the form and called out
 what he thought it would do without paying attention to
 the conventions of how it was written. Oswald only
-shoo...
+s...
     ```
 
 #### REPEATED_OPENER_FRAGMENT
@@ -2510,22 +1640,19 @@ she insist...
 Valentina, with eyes always on the slate, shook her head and tapped the heavy
 timber. "Look closely. The gate carries the actual value...
     ```
-- `G2-18` (form `'(1 2 3)`): parametric example has hard-coded English numeral 'three numbers' in a story slot — the actual draws may differ from this fixed count
+- `G2-13` (form `(and 1 2 3)`): parametric example has hard-coded English numeral 'three counts' in a story slot — the actual draws may differ from this fixed count
     ```
-    On a hill above the village, a boy watched sheep, and the sheep watched the grass, and the day moved slowly.
+    On those slopes, trust was a thing the village extended freely, and a thing it could not afford to lose.
 
-Sabina, as if the village would always believe, tried to fetch the value that the
-chalk mark should carry, insisting it must be there waiting.
-Hilda picked up the slate and pointed: the mark...
+Three checks in sequence: a count of 6 sheep, then 5 more, then 3 more. Carol used `and` to verify all 3 counts were truthy (non-zero). All 3 counts had to be non-zero. Tom guessed they were; Ca...
     ```
-- `G2-18` (form `'(1 2 3)`): parametric example has hard-coded English numeral 'three numbers' in a story slot — the actual draws may differ from this fixed count
+- `G2-13` (form `(and 1 2 3)`): parametric example has hard-coded English numeral 'three counts' in a story slot — the actual draws may differ from this fixed count
     ```
-    There was once a shepherd boy whose afternoons were long and whose imagination was longer.
+    Galina was supposed to keep the sheep safe; instead, at the edge of the forest, he kept inventing reasons for the village to run.
 
-Anouk pointed at the chalk-mark `wolf` on the slate.
-"That's a wolf," she said. Bertilda, untroubled by what others thought,
-shook her head and pointed at the empty meadow beyond the
-pen: "That mark is the na...
+"You can't guess which way the gates will swing," Ferdinand said,
+saying very little, leaning on the heavy timber of the first fold-gate. "Bring
+the value to the first g...
     ```
 
 #### REPL_TRIPLE_VOICE
@@ -2536,15 +1663,6 @@ pen: "That mark is the na...
 
 Carol had chalked a number on the watchhouse slate. Tom peered at it and asked whether that mark on the stone was the value itself or just a record. Tom had to understand that the runtime's return ...
     ```
-<<<<<<< HEAD
-- `G3-14` (form `(do 1 2 3)`): user_msg mentions 'REPL' 4 times — the REPL personification should appear at most twice per record (submit + return)
-    ```
-    The pasture lay below a rocky lookout, and the sheep were easier to count than the hours.
-
-Carol had written 1 numbers on her slate in a column: 4, then 8, then 1. She asked Tom: if I ask the REPL to read this whole sequence, what comes back? Tom needed to learn that `do` groups forms together, but ...
-    ```
-=======
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
 - `G6-05` (form `(clojure.string/reverse "flock")`): user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
     ```
     The wolves of those hills were rare but not absent, and the shepherds knew it was safer to be vigilant than clever.
@@ -2636,42 +1754,21 @@ without bothering to count the knots. Dorotheus stopped
 her firmly: a cord's knots are precise — every one
 in i...
     ```
-<<<<<<< HEAD
-- `G4-03` (form `(conj [] :wolf)`): sentence with 5 commas reads as AI-output cadence: 'The lookout returned with 14, 16, 19, 16, and 10 on his slate, the valley long b'
-=======
 - `G2-13` (form `(or nil false 5)`): sentence with 5 commas reads as AI-output cadence: 'To apply or to nil, false, and 1, she composed\nthe logical or, submitted it, and'
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
     ```
-    Genevieve had a fine view on the road, but a finer talent for stretching a quiet hour into a noisy one.
+    Ula was supposed to keep the sheep safe; instead, on the hilltop, he kept inventing reasons for the village to run.
 
-Carol brought an empty wool-basket to the fold. Tom wanted to add a single marker, the keyword `:wolf`, to track which fleeces came from the wolf-shearing. The form had to write a basket with jus...
+Ula, with a smug grin, watched the fold-gates on the hilltop and claimed to
+know exactly what they would do without checking the condition. "I just know,"
+she insisted, calling out a ...
     ```
-- `G4-06` (form `{:wolf 1 :flock 2}`): sentence with 8 commas reads as AI-output cadence: "The slate showed {('__kw__', 'apricot'): 15, ('__kw__', 'pomegranate'): 18, ('__"
+- `G3-02` (form `(do (def x 1) (def x 99) x)`): sentence with 5 commas reads as AI-output cadence: 'To bind x to 7, then redefine it as 59 and return it, he composed the redefined '
     ```
-    A boy with too little to do and too loud a voice is a small danger to himself and a larger one to his village.
+    An empty hour can sometimes be filled with mischief, and mischief once started has a way of escalating.
 
-Carol stitched a wool-basket with two named pouches inside: one labeled `:wolf` holding 1 fleece from the south pasture, another `:flock` holding 2 from the north morning shearing. The for...
-    ```
-
-#### ANSWER_LEAK
-
-- `G2-10` (form `(* 2 2 2)`): answer 8 in narrative
-    ```
-    The hilltop offered a fine view of both the flock and the road below, where help would have to come from.
-
-Carol stacked boxes in a cube pattern: 2 boxes deep, 2 boxes wide, 2 boxes tall. She wanted to know the total volume. The cube volume required multiplying 2 three times. Tom estimated; Carol dr...
-    ```
-- `G3-10` (form `(#(+ % 1) 5)`): answer 6 in narrative
-    ```
-    The hilltop offered a fine view of both the flock and the road below, where help would have to come from.
-
-Tom handed Carol a count of 5 sheep, and Carol needed to add one more to it for the fold's requirement. She wanted a quick shorthand for the addition. The add-one operation was so brief, Carol ...
-    ```
-- `G10-10` (form `(do (defmacro safe-if-let [bind then else] `(if-let ~bind ~t`): answer 10 in narrative
-    ```
-    The hilltop offered a fine view of both the flock and the road below, where help would have to come from.
-
-Carol warned Tom about a tempting but dangerous macro style: anaphoric macros that secretly inject a name into the user's code. She showed him a safe alternative: `safe-if-let`, which bound the...
+Dylan, with the swagger of an unrepentant fibber, waved dismissively at the townsfolk notice-post.
+"Names are pointless," he claimed. "I can remember everything by
+sight." Leopold only sighed and...
     ```
 
 #### FORM_DISPLAY_AND_FORM_NOUN
@@ -2707,90 +1804,30 @@ Carol's wool-basket held the same two pouches: one for the wolf-fleeces, one for
 Carol wrote the word 'willow' on the slate as a long bead-string. She wanted to count every bead in the cord. The string length mattered for labeling in the ledger. Tom said roughly ...
     ```
 
-<<<<<<< HEAD
-#### SENTENCE_START_LOWER_PRONOUN
+#### ANSWER_LEAK
 
-- `G2-20` (form `(count [])`): pronoun starts a sentence in lowercase — template should use the _cap variant after a sentence-ending punctuation
+- `G2-10` (form `(* 2 2 2)`): answer 8 in narrative
     ```
-    The villagers lived just down the slope from where Kasper stood watch, and they trusted that voice.
+    The hilltop offered a fine view of both the flock and the road below, where help would have to come from.
 
-Kasper, in a panic, was beginning to understand: the
-tally-stick walk was not magic, only patient. Nikodemus took the
-goal — to count the elements in an empty vector — and composed the count operatio...
+Carol stacked boxes in a cube pattern: 2 boxes deep, 2 boxes wide, 2 boxes tall. She wanted to know the total volume. The cube volume required multiplying 2 three times. Tom estimated; Carol dr...
     ```
-- `G2-20` (form `(count [])`): pronoun starts a sentence in lowercase — template should use the _cap variant after a sentence-ending punctuation
+- `G3-10` (form `(#(+ % 1) 5)`): answer 6 in narrative
     ```
-    When Theobald called out by the meadow the first time, the village came running, and the sheep stayed exactly as they were.
+    The hilltop offered a fine view of both the flock and the road below, where help would have to come from.
 
-Theobald, calling out without confidence anyone would come, was beginning to understand: the
-tally-stick walk was not magic, only patient. Magnus took the
-goal — to count the ...
+Tom handed Carol a count of 5 sheep, and Carol needed to add one more to it for the fold's requirement. She wanted a quick shorthand for the addition. The add-one operation was so brief, Carol ...
     ```
-- `G3-03` (form `(let [x 3] (+ x 1))`): pronoun starts a sentence in lowercase — template should use the _cap variant after a sentence-ending punctuation
+- `G10-10` (form `(do (defmacro safe-if-let [bind then else] `(if-let ~bind ~t`): answer 10 in narrative
     ```
-    Gudrun had been minding the sheep along the road since the first light, and the day was wearing thin.
+    The hilltop offered a fine view of both the flock and the road below, where help would have to come from.
 
-Gudrun, wide-eyed with fear, was beginning to understand:
-the belt-pouch was not magic, only careful. Cordelia took the
-goal — to bind a value of 5 to a local name x for one stretch, then return th...
-    ```
-- `G3-04` (form `(let [x 5 y 3] (- x y))`): pronoun starts a sentence in lowercase — template should use the _cap variant after a sentence-ending punctuation
-    ```
-    On a hill above the village, a boy watched sheep, and the sheep watched the grass, and the day moved slowly.
-
-Brendan, with the fear of a watch that no one trusts, was beginning to understand:
-the belt-pouch was not magic, only careful. Engelberta took the
-goal — to bind x to 3 and y to 7, then subt...
-    ```
-- `G3-06` (form `(let [a 5 b (* a 2)] b)`): pronoun starts a sentence in lowercase — template should use the _cap variant after a sentence-ending punctuation
-    ```
-    It is a serious thing to call for help, and a more serious thing to call for it falsely.
-
-Soren, calling out without confidence anyone would come, was beginning to understand:
-the belt-pouch was not magic, only careful. Jacquelyn took the
-goal — to bind a to 8, then bind b to twice a, and return b —...
-=======
-#### ANSWER_LEAK_STRING
-
-- `G2-18` (form `(quote wolf)`): answer string 'wolf' appears in user_msg
-    ```
-    The lambs were milling in the lower meadow when the boy first thought of the joke he should not have made.
-
-Carol drew a chalk mark on the slate and labeled it `wolf`. She wanted the mark itself — the symbol — not what it named. The village needed the chalk mark as a name, not a direction to run. To...
-    ```
-- `G2-18` (form `(quote wolf)`): answer string 'wolf' appears in user_msg
-    ```
-    It happened in a quiet season, when the lambs were strong and the days were long enough to grow tired of.
-
-Carol drew a chalk mark on the slate and labeled it `wolf`. She wanted the mark itself — the symbol — not what it named. The village needed the chalk mark as a name, not a direction to run. Tom...
-    ```
-- `G2-18` (form `(quote wolf)`): answer string 'wolf' appears in user_msg
-    ```
-    There was once a shepherd boy whose afternoons were long and whose imagination was longer.
-
-Carol drew a chalk mark on the slate and labeled it `wolf`. She wanted the mark itself — the symbol — not what it named. The village needed the chalk mark as a name, not a direction to run. Tom said 'wolf' wa...
-    ```
-- `G5-03` (form `(when true :yes)`): answer string ':yes' appears in user_msg
-    ```
-    The lambs were milling in the lower meadow when the boy first thought of the joke he should not have made.
-
-Carol posted a watch-order at the fold: if the lambs were restless today, Tom was to ring the bell and post a notice at the townsfolk stone. Tom checked the pen, and warm — the lambs were paci...
-    ```
-- `G5-06` (form `(case 2 1 :one 2 :two 3 :three :default)`): answer string ':two' appears in user_msg
-    ```
-    A boy with too little to do and too loud a voice is a small danger to himself and a larger one to his village.
-
-Carol marked east lambing-pens with numbers: 4 for north-fold lambs, 2 for south-fold, 7 for those born late. Tom held a tally-token marked with the number 2. The form would read the token...
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
+Carol warned Tom about a tempting but dangerous macro style: anaphoric macros that secretly inject a name into the user's code. She showed him a safe alternative: `safe-if-let`, which bound the...
     ```
 
 #### HIGH_LENGTH
 
-<<<<<<< HEAD
-- `G3-03` (form `(let [x 3] (+ x 1))`): user_msg 247 words
-=======
 - `G3-03` (form `(let [x 3] (+ x 1))`): user_msg 246 words
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
     ```
     The lambs were milling in the lower meadow when the boy first thought of the joke he should not have made.
 
@@ -2802,11 +1839,7 @@ Carol the elder had been counting along a stretch of fence-line at dawn. She sli
 
 Carol the elder had watched two separate morning counts: 2 lamb at the upper pasture, 3 at the lower fold. She slipped both tally-tokens into her belt-pouch at once. The village...
     ```
-<<<<<<< HEAD
-- `G3-07` (form `((fn [x] (+ x 1)) 4)`): user_msg 224 words
-=======
-- `G3-07` (form `((fn [x] (+ x 1)) 4)`): user_msg 222 words
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
+- `G3-07` (form `((fn [x] (+ x 1)) 4)`): user_msg 223 words
     ```
     It happened at the edge of the orchard, on a hill where shouting carries far and trust carries further, until it doesn't.
 
@@ -2825,49 +1858,6 @@ Carol had written a drill-card with three steps: read x, read x again, read x a 
 Carol set up the fleece-comb at the watchhouse, an empty wool-basket beneath it. Three fleeces arrived from the morning shearing, threaded onto a rough cord ready to be fed through the comb. The villa...
     ```
 
-<<<<<<< HEAD
-#### CONCEPT_AS_VERB
-
-- `G3-08` (form `((fn [a b c] (+ a b c)) 1 2 3)`): concept_phrase substituted into a finite-verb slot (e.g. 'must calling X', 'I applying Y')
-    ```
-    The lambs were milling in the lower meadow when the boy first thought of the joke he should not have made.
-
-"A drill-card is only useful when it runs," Ignatius, saying very little, said,
-holding up a slate-card from the watchhouse wall. "You write the steps,
-you bring the shepherds, the runtime doe...
-    ```
-- `G3-10` (form `(#(+ % 1) 5)`): concept_phrase substituted into a finite-verb slot (e.g. 'must calling X', 'I applying Y')
-    ```
-    It happened near the woods, on a hill where shouting carries far and trust carries further, until it doesn't.
-
-"A drill-card is only useful when it runs," Kasimir, with steady, careful steps, said,
-holding up a slate-card from the watchhouse wall. "You write the steps,
-you bring the shepherds, the r...
-    ```
-- `G3-10` (form `(#(* %1 %2) 3 4)`): concept_phrase substituted into a finite-verb slot (e.g. 'must calling X', 'I applying Y')
-    ```
-    A boy with too little to do and too loud a voice is a small danger to himself and a larger one to his village.
-
-"A drill-card is only useful when it runs," Leonora, stepping deliberately, said,
-holding up a slate-card from the watchhouse wall. "You write the steps,
-you bring the shepherds, the runti...
-    ```
-- `G3-15` (form `(do (println "hi") 42)`): concept_phrase substituted into a finite-verb slot (e.g. 'must calling X', 'I applying Y')
-    ```
-    near the hilltop, on a slope above the village, Carys watched his flock and his shadow grow longer.
-
-"A drill-card is only useful when it runs," Bartholomew, with the calm of a long watch well kept, said,
-holding up a slate-card from the watchhouse wall. "You write the steps,
-you bring the shepherds...
-    ```
-- `G5-15` (form `((comp inc inc) 5)`): concept_phrase substituted into a finite-verb slot (e.g. 'must calling X', 'I applying Y')
-    ```
-    near the hilltop, on a slope above the village, Carys watched his flock and his shadow grow longer.
-
-"A drill-card is only useful when it runs," Bartholomew, letting the runtime have the last word, said,
-holding up a slate-card from the watchhouse wall. "You write the steps,
-you bring the shepherds,...
-=======
 #### BOY_WOLF_NOUN_SATURATION
 
 - `G3-09` (form `(do (defn add3 [a b c] (+ a b c)) (add3 1 2 3))`): boy-wolf metaphor noun 'drill-card' appears 4× in user_msg — vary the imagery
@@ -2881,7 +1871,6 @@ Carol noticed shepherds constantly asking her to sum three separate counts — n
     On those slopes, trust was a thing the village extended freely, and a thing it could not afford to lose.
 
 Carol had written a drill-card with three steps: read x, read x again, read x a third time. But then she realized the final step should return 99 instead. Tom asked: if the drill-card lists many...
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
     ```
 
 #### UNFILLED_DRAWN_PLACEHOLDER
@@ -2902,7 +1891,6 @@ Tom stood sorting wool by weight at the watchhouse. Carol had given him a simple
 Tom stood sorting wool by weight at the watchhouse. Carol had given him a simple rule: if a fleece weighed more than three coins' worth, send it to the dyer; if not, keep it for the lambing-pen. A fle...
     ```
 
-<<<<<<< HEAD
 #### AND_HANDED_BACK_CADENCE
 
 - `G5-09` (form `((fn [f x] (f (f x))) inc 5)`): user_msg tail has 3 performed/handed-back/returned verbs — AI-output verb-and-verb cadence
@@ -2929,18 +1917,6 @@ finish. To construct a f...
 
 Carol gave Tom a comb with four knots and asked him to square each one. Tom needed to apply a complex recipe to each value in the basket. `map` applies a recipe to each value in the collection and r...
     ```
-- `G6-11` (form `(clojure.string/split "src:test" #":")`): user_msg contains two or more 'as the input value' parentheticals — auto-closer fired twice or authored prose duplicated it
-    ```
-    Maarten had been told the rules plainly: cry only when the wolf is real, and never when he is bored.
-
-The reeve had written a list of directories on a single scroll line, separated by colons—the classpath, a road map of where the REPL would search for files. Tom wanted to turn the colon-separated st...
-    ```
-- `G8-01` (form `(defn speak [k] (cond (= k :wolf) "howl" (= k :flock) "bleat`): user_msg contains two or more 'as the input value' parentheticals — auto-closer fired twice or authored prose duplicated it
-    ```
-    On a hill above the village, a boy watched sheep, and the sheep watched the grass, and the day moved slowly.
-
-Carol had called a meeting of the shepherds' fellowship on the village green — sheep-shepherd, goat-shepherd, geese-keeper, all gathered. Each kind of keeper had their own way of raising an ...
-    ```
 - `G10-06` (form `(when-not false :ok)`): user_msg contains two or more 'as the input value' parentheticals — auto-closer fired twice or authored prose duplicated it
     ```
     Some games seem harmless until the moment they are needed in earnest, and then they cost everything.
@@ -2956,6 +1932,14 @@ To use whe...
 Carol attached a filtering rule to the fleece-comb. The village wanted only the even-numbered items collected together. `into` feeds items through the transducer into a receiver vector.
 
 To use the filter-even...
+    ```
+- `G12-01` (form `(into [] (filter even?) [1 2 3 4 5])`): user_msg contains two or more 'as the input value' parentheticals — auto-closer fired twice or authored prose duplicated it
+    ```
+    Konrad had a fine view at the village, but a finer talent for stretching a quiet hour into a noisy one.
+
+Carol attached a filtering rule to the fleece-comb. The village wanted only the even-numbered items collected together. `into` feeds items through the transducer into a receiver vector.
+
+To use t...
     ```
 
 #### ANSWER_LEAK_STRING
@@ -2979,49 +1963,6 @@ Tom noticed a second way to write the same kind of tool-call, using the same dot
 Tom noticed a second way to write the same kind of tool-call, using the same dot but with the syntax stretched out: `(. object method)`. Carol explained this was the more explicit form. Tom wanted to understan...
     ```
 
-#### PATIENT_ROLE_BOASTFUL
-
-- `G6-10` (form `(:deps {:deps {:a 1 :b 2}})`): patient role 'the elder' co-occurs with boastful EMO phrase 'with great whoops of laughter'
-    ```
-    Melina had cried wolf once already, near the road, and the villagers had laughed but not entirely.
-
-At the village notice-stone on the road, the question of the day was
-posted: how to extract the value at the :deps key from a nested map. Melina, with great whoops of laughter, started
-to shout an ans...
-    ```
-- `G6-10` (form `(get-in {:paths ["src"]} [:paths 0])`): patient role 'the elder' co-occurs with boastful EMO phrase 'with the swagger of an unrepen'
-    ```
-    Melina had cried wolf once already, near the road, and the villagers had laughed but not entirely.
-
-At the village notice-stone on the road, the question of the day was
-posted: how to extract the first entry from the :paths vector in a deps-style map. Melina, with the swagger of an unrepentant fibbe...
-    ```
-- `G6-10` (form `(get-in {:paths ["src"]} [:paths 0])`): patient role 'the elder' co-occurs with boastful EMO phrase 'puffed up with pride'
-    ```
-    Renzo had a fine view at the edge of the orchard, but a finer talent for stretching a quiet hour into a noisy one.
-
-At the village notice-stone in the orchard, the question of the day was
-posted: how to extract the first entry from the :paths vector in a deps-style map. Renzo, puffed up with pride, ...
-    ```
-- `G11-01` (form `(do "Clojure runs on multiple hosts: JVM, CLR, JS, Python" :`): patient role 'the elder' co-occurs with boastful EMO phrase 'boasting at every'
-    ```
-    A boy with too little to do and too loud a voice is a small danger to himself and a larger one to his village.
-
-At the village notice-stone at the farm, the question of the day was
-posted: how to understand that Clojure runs on multiple hosts. Calista, boasting at every turn, started
-to shout an ans...
-    ```
-- `G11-05` (form `(do "(:import (java.util Date)) imports a host class" :impor`): patient role 'the elder' co-occurs with boastful EMO phrase 'with a smug grin'
-    ```
-    Floarea was supposed to keep the sheep safe; instead, on the road, he kept inventing reasons for the village to run.
-
-At the village notice-stone on the road, the question of the day was
-posted: how to understand how to import a host class into a namespace. Floarea, with a smug grin, started
-to shou...
-    ```
-
-=======
->>>>>>> origin/claude/round3-group4-boy-wolf-V7dL
 #### RESOLUTION_REPL_DOUBLED
 
 - `G6-15` (form `(:author (meta '^{:author "Aesop"} village))`): story-tagged resolution mentions 'REPL' 2 times — name the mechanic once, use pronoun/it/runtime/it for the second beat
@@ -3175,48 +2116,6 @@ t...
 Philippa, with the swagger of an unrepentant fibber, grabbed at the foreign toolshed
 without checking which tool was which. The wrong tool, of course,
 made an awful sound. Is...
-    ```
-
-#### STORY_RESOLUTION_NO_DRAWN
-
-- `G11-07` (form `(let [a (int-array [1 2 3])] (alength a))`): story-tagged example's resolution slot has no drawn-value reference (form has literals ('3',), resolution doesn't close the loop)
-    ```
-    It happened in a quiet season, when the lambs were strong and the days were long enough to grow tired of.
-
-Octavia, with steady, careful steps, pointed past the cool stone wall behind
-the watchhouse to the smith's shed. "Our toolshed is on this side; the
-smith's is on that side. When we need a smith...
-    ```
-- `G11-07` (form `(let [a (int-array [1 2 3])] (alength a))`): story-tagged example's resolution slot has no drawn-value reference (form has literals ('3',), resolution doesn't close the loop)
-    ```
-    on the farm, in the long grass above the village road, Pieter settled in for another slow afternoon.
-
-Carol showed Tom another host tool: 'alength', which measured how many boxes an array held. The array was a fixed container; its length never changed once it was built. Tom wanted to know how many i...
-    ```
-- `G11-07` (form `(let [a (int-array [1 2 3])] (alength a))`): story-tagged example's resolution slot has no drawn-value reference (form has literals ('3',), resolution doesn't close the loop)
-    ```
-    Tegan had cried wolf once already, in the forest, and the villagers had laughed but not entirely.
-
-Tegan, boasting at every turn, grabbed at the foreign toolshed
-without checking which tool was which. The wrong tool, of course,
-made an awful sound. Isidora sighed and walked over: to
-get the length o...
-    ```
-- `G11-07` (form `(let [a (int-array [5 10 15])] (aget a 0))`): story-tagged example's resolution slot has no drawn-value reference (form has literals ('5', '10', '15'), resolution doesn't close the loop)
-    ```
-    When Jutta called out near the road the first time, the village came running, and the sheep stayed exactly as they were.
-
-Jutta, sounding sure of every word, grabbed at the foreign toolshed
-without checking which tool was which. The wrong tool, of course,
-made an awful sound. Salomea sighed and walk...
-    ```
-- `G11-07` (form `(let [a (int-array [5 10 15])] (aget a 0))`): story-tagged example's resolution slot has no drawn-value reference (form has literals ('5', '10', '15'), resolution doesn't close the loop)
-    ```
-    The villagers lived just down the slope from where Yannis stood watch, and they trusted that voice.
-
-Yannis, as if the village would always believe, reached for a foreign tool from the
-toolshed and tried to call it his own way, without checking the label.
-Septimus caught him. "Each tool in the forei...
     ```
 
 #### AI_OUTPUT_CADENCE
