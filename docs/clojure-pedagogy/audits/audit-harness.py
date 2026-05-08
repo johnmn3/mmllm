@@ -1199,31 +1199,35 @@ def check_record(rec, sub, example):
     # placeholder. The placeholder is what parametric authors write;
     # at render time it substitutes to the runtime literal. Both
     # close the loop semantically.
+    # literal so the resolution closes the algorithmic loop, not just a
+    # generic "the REPL returned the value." Skips examples that don't
+    # have story tags and skips when the form has no extractable
+    # literals to begin with.
+    #
+    # Parametric examples (form_template + slots) interpolate drawn
+    # values via `{drawn.<slot>}` placeholders. A resolution that
+    # contains `{drawn.X}` IS closing the loop — the renderer will
+    # substitute the actual drawn value at render time. Treat any
+    # `{drawn.<slot>}` placeholder in the resolution as a positive
+    # signal so this detector doesn't penalize parametric authoring.
     if "story" in getattr(example, "tags", ()) and example.resolution:
         form = rec.code_str or ""
         lits = _drawn_literals(form)
         if lits:
             res_text = example.resolution
-            # `{drawn.X}` placeholders are render-time substitutions that
-            # render the actual literal into the resolution prose, so they
-            # count as drawn-value grounding even though the literal is
-            # not a substring of the raw template text.
-            has_drawn_placeholder = "{drawn." in res_text
-            has_lit = has_drawn_placeholder or any(
-                (lit and lit in res_text) for lit in lits
+            # A drawn-value reference closes the loop if ANY of the four
+            # story slots (scenario / need / mapping / resolution) contains
+            # either a form-literal or a `{drawn.<slot>}` placeholder.
+            slots_text = " ".join(filter(None, (
+                getattr(example, "scenario", ""),
+                getattr(example, "need", ""),
+                getattr(example, "mapping", ""),
+                res_text,
+            )))
+            has_lit = any(
+                (lit and lit in slots_text) for lit in lits
             )
-            # A `{drawn.<slot>}` placeholder in the source resolution
-            # counts as a drawn-value reference — the placeholder
-            # interpolates to the actual drawn literal at render time.
-            has_drawn_placeholder = "{drawn." in res_text
-            # Credit {drawn.<slot>} placeholders against slot names —
-            # for parametric examples these expand at render time to
-            # the form's actual literals.
-            if not has_lit and getattr(example, "slots", None):
-                for slot_name in example.slots:
-                    if "{drawn." + slot_name + "}" in res_text:
-                        has_lit = True
-                        break
+            has_drawn_placeholder = "{drawn." in slots_text
             if not has_lit and not has_drawn_placeholder:
                 issues.append(("STORY_RESOLUTION_NO_DRAWN",
                                 f"story-tagged example's resolution slot has no "
@@ -1524,6 +1528,72 @@ def check_record(rec, sub, example):
         issues.append(("OUT_OF_REGISTER_CONNECTIVE",
                         f"formal-academic connective {m.group(0)!r} in user_msg "
                         "— storybook register should be 5th-grade reading level"))
+
+    # ─────────── slice Dg6q (tortoise_hare fixset 4) detector additions ─────
+    #
+    # Three new detectors covering papercut classes the existing 75
+    # detectors don't yet catch.
+
+    # DOUBLE_EMO_IN_SENTENCE — two or more DISJOINT EMO-pool phrase
+    # matches in the same sentence. Cat-J lifts add a second EMO for
+    # richer grounding, but stacking two within one sentence reads as
+    # over-described instead of grounded. Detection: find EMO-pool
+    # fragment matches whose start positions are at least one EMO-length
+    # apart, so two fragments matching the SAME phrase don't double-count.
+    emo_frags = _emo_fragments()
+    sentences_de = re.split(r"(?<=[.!?])\s+", user)
+    for sent in sentences_de:
+        s_low = sent.lower()
+        spans = []
+        for f in emo_frags:
+            i = s_low.find(f)
+            if i >= 0:
+                spans.append((i, i + len(f)))
+        spans.sort()
+        # Greedy: keep first; require the next start to be > prev end
+        # (i.e. no positional overlap).
+        picked = 0
+        last_end = -1
+        for s, e in spans:
+            if s >= last_end:
+                picked += 1
+                last_end = e
+        if picked >= 2:
+            issues.append(("DOUBLE_EMO_IN_SENTENCE",
+                            f"sentence contains {picked} disjoint EMO-pool "
+                            f"phrases — two emotional anchors stacked in "
+                            "one sentence read as over-described"))
+            break
+
+    # NUMERAL_LIST_IN_GOAL — goal_text rendered with 4+ comma-separated
+    # numerals (e.g. 'add 2, 4, 6, 8, and 10'). The dense numeric
+    # enumeration spends 4-5 commas inside the goal_text alone, so any
+    # surrounding template comma pushes the sentence over the 5-comma
+    # CLAUSE_STACK threshold. Authors should use ranges or "all of these
+    # numbers" framing for high-arity examples.
+    if getattr(example, "goal_text", ""):
+        gt = example.goal_text
+        # Count comma-separated numerals (incl negatives, ratios)
+        nums = re.findall(r"\b-?\d+(?:/\d+)?\b", gt)
+        commas_in_gt = gt.count(",")
+        if len(nums) >= 4 and commas_in_gt >= 3:
+            issues.append(("NUMERAL_LIST_IN_GOAL",
+                            f"goal_text contains {len(nums)} numerals across "
+                            f"{commas_in_gt} commas — comma-list of numerals "
+                            "blows the sentence's clause budget; use a range "
+                            "or 'these numbers' framing"))
+
+    # REPL_TRIPLE_VOICE — the word 'REPL' appears 3+ times in user_msg.
+    # Repeating the REPL personification beat across multiple sentences
+    # reads as scaffolding noise, not story. Each record should mention
+    # the REPL at most twice (once when the form is submitted, once
+    # when the value is returned).
+    repl_hits = len(re.findall(r"\bREPL\b", user))
+    if repl_hits >= 3:
+        issues.append(("REPL_TRIPLE_VOICE",
+                        f"user_msg mentions 'REPL' {repl_hits} times — "
+                        "the REPL personification should appear at most "
+                        "twice per record (submit + return)"))
 
     # DOUBLE_NAME_INTRO — Cat-K-1 / Cat-H: same character introduced
     # twice as "<Name> the <species>" within ~120 chars. Pacing

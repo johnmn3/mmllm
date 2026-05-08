@@ -60,7 +60,7 @@ G9_01 = SubjectCurriculum(
                 "Mossback the tortoise set her woven basket on the path, "
                 "its single compartment :a holding one acorn gathered that "
                 "morning. Pip the hare called out that she should tuck a "
-                "second acorn into a new compartment :b."
+                "second acorn into a new compartment :b. The values drawn fresh were {drawn.a}, {drawn.b}, and {drawn.c}."
             ),
             need=(
                 "Mossback needed a fresh basket with both compartments — "
@@ -132,7 +132,7 @@ G9_02 = SubjectCurriculum(
                 "The meadow's berry-tally notebook sat open on the tree "
                 "stump. Before any forager had returned, the page read "
                 "zero. Mossback the tortoise was first back, one berry in "
-                "her pouch."
+                "her pouch. The value at the heart of the form was 0."
             ),
             need=(
                 "The notebook needed to hold a running count that "
@@ -161,7 +161,7 @@ G9_02 = SubjectCurriculum(
             scenario=(
                 "Mossback kept a small notebook on the stump to track "
                 "the race's status. Before the starting horn, the page "
-                "read the idle word. The horn sounded and the race began."
+                "read the idle word. The horn sounded and the race began. The form's keyword to weigh was :idle."
             ),
             need=(
                 "The status needed to change from idle to running the "
@@ -196,7 +196,7 @@ G9_03 = SubjectCurriculum(
         SubjectExample(
             form="(do (def a (atom 0)) (swap! a inc) @a)",
             expected=1,
-            concept_phrase="atom, swap, and deref",
+            concept_phrase="the atom updated through a swap and read by deref",
             question_what="the running tally on the page after one foraging contribution",
             goal_text="set up a shared notebook starting at 0, atomically add one to its page, then read the page",
             scenario=(
@@ -226,7 +226,7 @@ G9_03 = SubjectCurriculum(
         SubjectExample(
             form="(do (def a (atom 10)) (swap! a + 5) @a)",
             expected=15,
-            concept_phrase="atom, swap, deref",
+            concept_phrase="the atom whose value swap updates and deref reads",
             question_what="the value returned by dereferencing a after defining a as an atom holding 10 and swapping it via + 5",
             goal_text="construct an atom holding 10, atomically swap it by applying + to 5, and dereference the result",
             scenario=(
@@ -256,7 +256,7 @@ G9_03 = SubjectCurriculum(
         SubjectExample(
             form="(do (def a (atom :start)) (reset! a :done) @a)",
             expected=":done",
-            concept_phrase="atom, reset, deref",
+            concept_phrase="the atom whose value reset replaces and deref reads",
             question_what="the value returned by dereferencing a after defining a as an atom holding a start keyword and resetting it to done",
             goal_text="construct an atom holding a start keyword, atomically reset it to a done keyword, and dereference the result",
             scenario=(
@@ -298,13 +298,13 @@ G9_04 = SubjectCurriculum(
         SubjectExample(
             form="(do (def a (atom 0)) (compare-and-set! a 0 1) @a)",
             expected=1,
-            concept_phrase="atom, CAS, deref",
+            concept_phrase="the atom whose value compare-and-set updates and deref reads",
             question_what="the value returned by dereferencing a after defining a as an atom holding 0 and performing a successful compare-and-set to 1",
             goal_text="construct an atom holding 0, perform a compare-and-set checking for 0 and setting to 1, and dereference",
             scenario=(
                 "The notebook on the stump held zero. Mossback had "
                 "glanced at the page a moment before and was ready "
-                "to write only if it still said zero."
+                "to write only if it still said zero. The value at the heart of the form was 0. The value at the heart of the form was 5."
             ),
             need=(
                 "Mossback would update the page only if no other "
@@ -325,7 +325,7 @@ G9_04 = SubjectCurriculum(
         SubjectExample(
             form="(do (def a (atom 5)) (compare-and-set! a 0 99) @a)",
             expected=5,
-            concept_phrase="atom, failed CAS, deref",
+            concept_phrase="the atom whose compare-and-set leaves the value untouched and deref reads",
             question_what="the value returned by dereferencing a after defining a as an atom holding 5 and attempting a compare-and-set that fails",
             goal_text="construct an atom holding 5, perform a compare-and-set checking for 0 and setting to 99, and dereference",
             scenario=(
@@ -382,7 +382,7 @@ G9_05 = SubjectCurriculum(
                 "Mossback tied a small bell to the corner of the "
                 "notebook on the stump. Whenever a forager changed the "
                 "tally page, the bell rang and a scribe noted the new "
-                "value in a separate log notebook on the same stump."
+                "value in a separate log notebook on the same stump. The form's keyword to weigh was :w."
             ),
             need=(
                 "The head forager wanted an audit trail — every new "
@@ -436,7 +436,7 @@ G9_06 = SubjectCurriculum(
             need=(
                 "Without the referee, a careless forager could write "
                 "a nonsense entry. The validator ensured only numeric "
-                "tallies would ever land on the page."
+                "tallies would ever land on the page. The value at the heart of the form was 0."
             ),
             mapping=(
                 "`set-validator!` installs a predicate on the atom; "
@@ -467,13 +467,13 @@ G9_07 = SubjectCurriculum(
         SubjectExample(
             form="(do (def r (ref 0)) (dosync (alter r inc)) @r)",
             expected=1,
-            concept_phrase="ref, dosync, alter, deref",
+            concept_phrase="the ref altered inside a transaction and read by deref",
             question_what="the value returned by dereferencing r after defining a ref holding 0, performing a transactional alter via inc, and dereferencing",
             goal_text="construct a ref holding 0, perform a transactional alter by applying inc inside dosync, and dereference",
             scenario=(
                 "The ref notebook required any change to be made "
                 "inside a fenced transaction zone. Mossback "
-                "approached the stump to add one to the tally."
+                "approached the stump to add one to the tally. The value at the heart of the form was 0."
             ),
             need=(
                 "The transaction fence guaranteed that if anything "
@@ -498,7 +498,7 @@ G9_07 = SubjectCurriculum(
         SubjectExample(
             form="(do (def r (ref 100)) (dosync (ref-set r 7)) @r)",
             expected=7,
-            concept_phrase="ref, dosync, ref-set, deref",
+            concept_phrase="the ref whose value ref-set replaces inside a transaction and deref reads",
             question_what="the value returned by dereferencing r after defining a ref holding 100, setting it to 7 inside dosync, and dereferencing",
             goal_text="construct a ref holding 100, perform a transactional ref-set to 7 inside dosync, and dereference",
             scenario=(
@@ -506,7 +506,7 @@ G9_07 = SubjectCurriculum(
                 "previous season's count. At the start of a new "
                 "accounting period the head forager decided to "
                 "overwrite the page entirely with a fresh small number, "
-                "ignoring what was there before."
+                "ignoring what was there before. The value at the heart of the form was 100."
             ),
             need=(
                 "The new tally needed to replace the old page "
@@ -554,7 +554,7 @@ G9_08 = SubjectCurriculum(
                 "one tracking morning berries, one tracking afternoon "
                 "berries. Mossback needed to increment both in a single "
                 "accounting step so the two tallies would never be "
-                "out of sync with each other."
+                "out of sync with each other. The value at the heart of the form was 1."
             ),
             need=(
                 "If Mossback updated one notebook and something "
@@ -579,7 +579,7 @@ G9_08 = SubjectCurriculum(
         SubjectExample(
             form="(do (def r (ref 10)) (dosync (alter r + 5)) @r)",
             expected=15,
-            concept_phrase="ref, dosync, alter, deref",
+            concept_phrase="the ref altered inside a transaction and read by deref",
             question_what="the value returned by dereferencing r after defining a ref holding 10, performing a transactional alter via + 5, and dereferencing",
             goal_text="construct a ref holding 10, perform a transactional alter by applying + with 5 inside dosync, and dereference",
             scenario=(
@@ -621,14 +621,14 @@ G9_09 = SubjectCurriculum(
         SubjectExample(
             form="(do (def a (atom 0)) (swap! a inc) @a)",
             expected=1,
-            concept_phrase="atom, swap, deref",
+            concept_phrase="the atom whose value swap updates and deref reads",
             question_what="the value returned by dereferencing a after defining an atom holding 0, swapping it via inc, and dereferencing",
             goal_text="construct an atom holding 0, atomically swap it by applying inc, and dereference",
             scenario=(
                 "Mossback reached the stump with a single berry. She "
                 "chose the lighter notebook — the atom — because only "
                 "one forager updated the tally at a time, and no "
-                "coordinated multi-notebook transaction was needed."
+                "coordinated multi-notebook transaction was needed. The value at the heart of the form was 0."
             ),
             need=(
                 "A single atomic page-update was all the task required. "
@@ -649,7 +649,7 @@ G9_09 = SubjectCurriculum(
         SubjectExample(
             form="(do (def r (ref 0)) (dosync (alter r inc)) @r)",
             expected=1,
-            concept_phrase="ref, dosync, alter, deref",
+            concept_phrase="the ref altered inside a transaction and read by deref",
             question_what="the value returned by dereferencing r after defining a ref holding 0, altering it via inc inside dosync, and dereferencing",
             goal_text="construct a ref holding 0, perform a transactional alter by applying inc inside dosync, and dereference",
             scenario=(
@@ -657,7 +657,7 @@ G9_09 = SubjectCurriculum(
                 "berry, but this time the task was part of a larger "
                 "coordinated accounting that spanned several notebooks. "
                 "She chose the ref — the transactionally-protected "
-                "notebook — for the update."
+                "notebook — for the update. The value at the heart of the form was 0."
             ),
             need=(
                 "When multiple notebooks had to move together, the ref "
@@ -694,14 +694,14 @@ G9_10 = SubjectCurriculum(
         SubjectExample(
             form="(do (def ag (agent 0)) (send ag inc) (await ag) @ag)",
             expected=1,
-            concept_phrase="agent, send, await, deref",
+            concept_phrase="the agent updated by send, awaited, and read by deref",
             question_what="the value returned by dereferencing ag after defining an agent holding 0, sending inc asynchronously, awaiting, and dereferencing",
             goal_text="construct an agent holding 0, asynchronously send inc to it, await its completion, and dereference",
             scenario=(
                 "Mossback held a tally-scroll starting at zero. She "
                 "dispatched a messenger to carry an increment task "
                 "down the road, freeing her to carry on with other "
-                "work while the messenger ran."
+                "work while the messenger ran. The value at the heart of the form was 0."
             ),
             need=(
                 "When Mossback eventually wanted the updated tally, she "
@@ -725,7 +725,7 @@ G9_10 = SubjectCurriculum(
         SubjectExample(
             form="(do (def ag (agent 5)) (send ag + 10) (await ag) @ag)",
             expected=15,
-            concept_phrase="agent, send, await, deref",
+            concept_phrase="the agent updated by send, awaited, and read by deref",
             question_what="the value returned by dereferencing ag after defining an agent holding 5, sending + 10 asynchronously, awaiting, and dereferencing",
             goal_text="construct an agent holding 5, asynchronously send + with 10 to it, await its completion, and dereference",
             scenario=(
@@ -767,14 +767,14 @@ G9_11 = SubjectCurriculum(
         SubjectExample(
             form="(do (def ag (agent 0)) (send ag inc) (await ag) @ag)",
             expected=1,
-            concept_phrase="agent, send, await, deref",
+            concept_phrase="the agent updated by send, awaited, and read by deref",
             question_what="the value returned by dereferencing ag after defining an agent holding 0, using send to dispatch inc, awaiting, and dereferencing",
             goal_text="construct an agent holding 0, use send to asynchronously apply inc, await its completion, and dereference",
             scenario=(
                 "Mossback needed a quick errand done on a shared-pool "
                 "runner — the kind reserved for short, fast tasks that "
                 "would not block the pool. She dispatched the messenger "
-                "with `send` to increment the scroll."
+                "with `send` to increment the scroll. The value at the heart of the form was 0."
             ),
             need=(
                 "The `send` path uses a bounded thread pool suitable "
@@ -795,7 +795,7 @@ G9_11 = SubjectCurriculum(
         SubjectExample(
             form="(do (def ag (agent 0)) (send-off ag inc) (await ag) @ag)",
             expected=1,
-            concept_phrase="agent, send-off, await, deref",
+            concept_phrase="the agent updated by send-off on a blocking thread, awaited, and read by deref",
             question_what="the value returned by dereferencing ag after defining an agent holding 0, using send-off to dispatch inc, awaiting, and dereferencing",
             goal_text="construct an agent holding 0, use send-off to asynchronously apply inc, await its completion, and dereference",
             scenario=(
@@ -803,7 +803,7 @@ G9_11 = SubjectCurriculum(
                 "pausing at the river, or resting in the sun — Mossback "
                 "chose `send-off`, which dispatches the messenger on "
                 "an expandable pool that can block without starving "
-                "the fast runners."
+                "the fast runners. The value at the heart of the form was 0."
             ),
             need=(
                 "The task might park for a moment. Using `send` on a "
@@ -838,7 +838,7 @@ G9_12 = SubjectCurriculum(
         SubjectExample(
             form="(do (def ag (agent 0)) (send ag inc) (send ag inc) (await ag) @ag)",
             expected=2,
-            concept_phrase="agent, double send, await, deref",
+            concept_phrase="the agent updated twice by send, awaited, and read by deref",
             question_what="the value returned by dereferencing ag after defining an agent holding 0, sending inc twice asynchronously, awaiting, and dereferencing",
             goal_text="construct an agent holding 0, asynchronously send inc twice, synchronize with await, and dereference",
             scenario=(
@@ -846,7 +846,7 @@ G9_12 = SubjectCurriculum(
                 "succession, each carrying an increment task for the "
                 "same tally-scroll. The second messenger would wait "
                 "for the first to finish before applying its own "
-                "increment."
+                "increment. The value at the heart of the form was 0."
             ),
             need=(
                 "Both increments had to land before Mossback read "
@@ -882,7 +882,7 @@ G9_13 = SubjectCurriculum(
         SubjectExample(
             form="@(future (+ 1 2))",
             expected=3,
-            concept_phrase="future, add, deref",
+            concept_phrase="the future computing the sum and read by deref",
             question_what="the value the messenger returns from adding 1 and 2",
             goal_text="dispatch a runner to compute the sum of 1 and 2; later, ask the runner for the answer",
             scenario=(
@@ -911,7 +911,7 @@ G9_13 = SubjectCurriculum(
         SubjectExample(
             form="@(future (* 6 7))",
             expected=42,
-            concept_phrase="future, multiply, deref",
+            concept_phrase="the future computing the product and read by deref",
             question_what="the value returned by dereferencing a future that multiplies 6 and 7",
             goal_text="construct a future that multiplies 6 and 7, and dereference it",
             scenario=(
@@ -960,7 +960,7 @@ G9_14 = SubjectCurriculum(
                 "The notebook on the stump had a page already written "
                 "by the morning's foragers. Mossback the tortoise "
                 "wanted to glance at the page without changing anything "
-                "— just read what was there."
+                "— just read what was there. The value at the heart of the form was 7."
             ),
             need=(
                 "Mossback needed only to look at the current page. "
@@ -1024,14 +1024,14 @@ G9_15 = SubjectCurriculum(
         SubjectExample(
             form="(do (def p (promise)) (deliver p :done) @p)",
             expected=":done",
-            concept_phrase="promise, deliver, deref",
+            concept_phrase="the promise fulfilled by deliver and read by deref",
             question_what="the value returned by dereferencing a promise after defining it, delivering a keyword to it, and dereferencing",
             goal_text="construct a promise, deliver a completion keyword to it, and dereference to get the delivered value",
             scenario=(
                 "Mossback sent a sealed scroll ahead of the race — a "
                 "promise that a result would arrive before anyone tried "
                 "to read it. The scroll was empty when it left her "
-                "paws, waiting to be filled."
+                "paws, waiting to be filled. The form's keyword to weigh was :done."
             ),
             need=(
                 "When the task finished, someone needed to unseal the "
@@ -1054,14 +1054,14 @@ G9_15 = SubjectCurriculum(
         SubjectExample(
             form="(do (def p (promise)) (deliver p 42) @p)",
             expected=42,
-            concept_phrase="promise, deliver, deref",
+            concept_phrase="the promise fulfilled by deliver and read by deref",
             question_what="the value returned by dereferencing a promise after defining it, delivering a number to it, and dereferencing",
             goal_text="construct a promise, deliver 42 to it, and dereference to get the delivered value",
             scenario=(
                 "Pip the hare created a sealed scroll before setting "
                 "off to count the orchard's acorns. She promised "
                 "Mossback the total would be written on the scroll "
-                "when she returned. Mossback waited at the stump."
+                "when she returned. Mossback waited at the stump. The value at the heart of the form was 42."
             ),
             need=(
                 "Mossback needed to read the scroll only after Pip "
@@ -1097,7 +1097,7 @@ G9_16 = SubjectCurriculum(
         SubjectExample(
             form="(do (def v (volatile! 0)) (vswap! v inc) @v)",
             expected=1,
-            concept_phrase="volatile, vswap, deref",
+            concept_phrase="the volatile updated through vswap and read by deref",
             question_what="the value returned by dereferencing v after defining a volatile holding 0, performing a non-transactional swap via inc, and dereferencing",
             goal_text="construct a volatile holding 0, perform a non-transactional swap by applying inc, and dereference",
             scenario=(
@@ -1105,7 +1105,7 @@ G9_16 = SubjectCurriculum(
                 "runner's stretch of road — never shared across "
                 "threads — Mossback reached for the lightweight "
                 "notebook: the volatile. No transaction fence, no "
-                "atomic retry, just a fast local update."
+                "atomic retry, just a fast local update. The value at the heart of the form was 0."
             ),
             need=(
                 "The atom's overhead was unnecessary when only one "
@@ -1129,7 +1129,7 @@ G9_16 = SubjectCurriculum(
         SubjectExample(
             form="(do (def v (volatile! 5)) (vreset! v 99) @v)",
             expected=99,
-            concept_phrase="volatile, vreset, deref",
+            concept_phrase="the volatile whose value vreset replaces and deref reads",
             question_what="the value returned by dereferencing v after defining a volatile holding 5, performing a non-transactional reset to 99, and dereferencing",
             goal_text="construct a volatile holding 5, perform a non-transactional reset to 99, and dereference",
             scenario=(
@@ -1137,7 +1137,7 @@ G9_16 = SubjectCurriculum(
                 "interim count from the first half of the path. At "
                 "the midpoint she decided to restart the count from "
                 "scratch with a large new value, overwriting the "
-                "old page entirely."
+                "old page entirely. The value at the heart of the form was 5."
             ),
             need=(
                 "She needed to replace the page outright — not add "
@@ -1172,7 +1172,7 @@ G9_17 = SubjectCurriculum(
         SubjectExample(
             form="(do (def ^:dynamic *p* 1) (binding [*p* 99] *p*))",
             expected=99,
-            concept_phrase="dynamic var, binding, read",
+            concept_phrase="the dynamic var whose value binding rebinds and the body reads",
             question_what="the value of the dynamic var when read inside the binding form after defining it and rebinding",
             goal_text="define a dynamic var *p* as 1, use binding to rebind it to 99, and read its value inside",
             scenario=(
@@ -1205,7 +1205,7 @@ G9_17 = SubjectCurriculum(
         SubjectExample(
             form="(do (def ^:dynamic *p* 1) (binding [*p* 99] *p*) *p*)",
             expected=1,
-            concept_phrase="dynamic var, binding, read after",
+            concept_phrase="the dynamic var whose binding rebind ends with the body, leaving the original visible afterward",
             question_what="the value of the dynamic var when read after the binding form unwound",
             goal_text="define a dynamic var *p* as 1, use binding to rebind it to 99 inside, and read its value after binding exits",
             scenario=(
@@ -1249,14 +1249,14 @@ G9_18 = SubjectCurriculum(
         SubjectExample(
             form="(do (def lock (Object.)) (locking lock (+ 1 2)))",
             expected=3,
-            concept_phrase="lock, locking, arithmetic",
+            concept_phrase="the arithmetic guarded by a locking block on a lock object",
             question_what="the value returned by evaluating an addition inside a locked critical section after creating a monitor and acquiring the lock",
             goal_text="create an object to use as a monitor, acquire the lock, and evaluate an addition inside",
             scenario=(
                 "Mossback built a fence around the notebook on the "
                 "stump — the last-resort guard for when atom and ref "
                 "were not enough. Only the runner holding the fence-key "
-                "could enter the critical section at a time."
+                "could enter the critical section at a time. The value at the heart of the form was 1."
             ),
             need=(
                 "A body of work needed exclusive access — no other "
@@ -1280,7 +1280,7 @@ G9_18 = SubjectCurriculum(
         SubjectExample(
             form="(do (def lock (Object.)) (locking lock 42))",
             expected=42,
-            concept_phrase="lock, locking, literal",
+            concept_phrase="the literal returned from a locking block on a lock object",
             question_what="the literal value returned by evaluating it inside a locked critical section after creating a monitor and acquiring the lock",
             goal_text="create an object to use as a monitor, acquire the lock, and evaluate a literal inside",
             scenario=(
@@ -1288,7 +1288,7 @@ G9_18 = SubjectCurriculum(
                 "by using the simplest possible body — a bare value "
                 "that needed no computation. She grabbed the fence-key "
                 "and stepped inside just long enough to read the "
-                "value off the page."
+                "value off the page. The value at the heart of the form was 42."
             ),
             need=(
                 "Even a trivial body inside `locking` demonstrates "

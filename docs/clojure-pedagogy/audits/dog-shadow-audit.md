@@ -101,20 +101,21 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 4
 - variety @ n=50: 1.00
-- issues: {'ONLY_SHOOK_HEAD_TIC': 1, 'HIGH_LENGTH': 2, 'BOOL_LEAK_RESOLUTION': 2, 'CLAUSE_STACK_OVERFLOW': 1}
+- issues: {'ONLY_SHOOK_HEAD_TIC': 1, 'HIGH_LENGTH': 2, 'BOOL_LEAK_RESOLUTION': 2, 'REPL_TRIPLE_VOICE': 2, 'CLAUSE_STACK_OVERFLOW': 1}
     - [ONLY_SHOOK_HEAD_TIC] form=`(symbol? 'hare)` — user_msg uses 'only shook his/her head' — recurring AI-fable filler cadence
     - [HIGH_LENGTH] form=`(symbol? 42)` — user_msg 209 words
     - [BOOL_LEAK_RESOLUTION] form=`(symbol? "tortoise")` — resolution leaks boolean answer 'false' — describe the verdict abstractly instead
+    - [REPL_TRIPLE_VOICE] form=`(symbol? "tortoise")` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
     - [CLAUSE_STACK_OVERFLOW] form=`(= 'hare 'hare)` — sentence with 5 commas reads as AI-output cadence: "The\nreflection in the stream looks like a bone, but the scratch that\nsays 'bone'"
     - [HIGH_LENGTH] form=`(= 'hare 'hare)` — user_msg 208 words
-    - [BOOL_LEAK_RESOLUTION] form=`(= 'hare 'hare)` — resolution leaks boolean answer 'true' — describe the verdict abstractly instead
 
 ### G1-10: Comments
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'HIGH_LENGTH': 1, 'DOUBLE_EMO_INJECTION': 2, 'CLAUSE_STACK_OVERFLOW': 1}
+- issues: {'HIGH_LENGTH': 1, 'REPL_TRIPLE_VOICE': 1, 'DOUBLE_EMO_INJECTION': 2, 'CLAUSE_STACK_OVERFLOW': 1}
     - [HIGH_LENGTH] form=`(+ 1 2) ;; sum of one and two` — user_msg 203 words
+    - [REPL_TRIPLE_VOICE] form=`(+ 1 2) ;; sum of one and two` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
     - [DOUBLE_EMO_INJECTION] form=`(+ 1 2) ;; sum of one and two` — sentence has 2+ distinct EMO-pool phrases ('stepping deliberately, one foo' + 'stepping deliberately') — the character can't earn two emotional registers in the same beat
     - [CLAUSE_STACK_OVERFLOW] form=`(+ 1 2) ;; sum of one and two` — sentence with 6 commas reads as AI-output cadence: 'The runtime sees the cleaned-up form, evaluates it,\nand gives back what it compu'
     - [DOUBLE_EMO_INJECTION] form=`(+ 1 2) ;; sum of one and two` — sentence has 2+ distinct EMO-pool phrases ('stepping deliberately, one foo' + 'stepping deliberately') — the character can't earn two emotional registers in the same beat
@@ -145,25 +146,25 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 6
 - variety @ n=50: 1.00
-- issues: {'CLAUSE_STACK_OVERFLOW': 1, 'REPL_AS_TIME_TRAVELLER': 3, 'NARRATIVE_NUMERAL_HARDCODE': 15, 'DOUBLE_EMO_INJECTION': 1, 'RESOLUTION_GENERIC': 2, 'SENTENCE_START_LOWER_PRONOUN': 1}
+- issues: {'REPL_TRIPLE_VOICE': 3, 'CLAUSE_STACK_OVERFLOW': 1, 'REPL_AS_TIME_TRAVELLER': 3, 'NARRATIVE_NUMERAL_HARDCODE': 15, 'DOUBLE_EMO_INJECTION': 1, 'RESOLUTION_GENERIC': 2, 'SENTENCE_START_LOWER_PRONOUN': 1}
+    - [REPL_TRIPLE_VOICE] form=`(+ 1 2)` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
     - [CLAUSE_STACK_OVERFLOW] form=`(+ 1 2)` — sentence with 5 commas reads as AI-output cadence: 'Snarler, with steady, careful steps, arranged a small heap of bones\non the road,'
     - [REPL_AS_TIME_TRAVELLER] form=`(+ 1 2)` — user_msg uses meta-narrator language that implies the answer pre-existed evaluation — describe the form's evaluation, not a pre-existing 'right' answer
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(- 5 3)` — parametric example has hard-coded English numeral 'five bones' in a story slot — the actual draws may differ from this fixed count
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(- 5 3)` — parametric example has hard-coded English numeral 'five bones' in a story slot — the actual draws may differ from this fixed count
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(- 5 3)` — parametric example has hard-coded English numeral 'five bones' in a story slot — the actual draws may differ from this fixed count
-    - [DOUBLE_EMO_INJECTION] form=`(- 5 3)` — sentence has 2+ distinct EMO-pool phrases ('without complaint or hurry' + 'without complaint') — the character can't earn two emotional registers in the same beat
 
 ### G1-14: Nested call evaluation
 
 - examples: 4
 - variety @ n=50: 1.00
-- issues: {'ANSWER_LEAK': 1, 'RESOLUTION_GENERIC': 3, 'PARALLEL_POSSESSIVE_TIC': 1, 'REPL_AS_TIME_TRAVELLER': 2, 'DOUBLE_EMO_INJECTION': 1, 'DOUBLE_NAME_INTRO': 1, 'CLAUSE_STACK_OVERFLOW': 1}
+- issues: {'REPL_TRIPLE_VOICE': 2, 'ANSWER_LEAK': 1, 'RESOLUTION_GENERIC': 3, 'PARALLEL_POSSESSIVE_TIC': 1, 'REPL_AS_TIME_TRAVELLER': 2, 'DOUBLE_EMO_INJECTION': 1, 'DOUBLE_NAME_INTRO': 1, 'CLAUSE_STACK_OVERFLOW': 1}
+    - [REPL_TRIPLE_VOICE] form=`(+ 1 (* 2 3))` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
     - [ANSWER_LEAK] form=`(+ 1 (* 2 3))` — answer 7 in narrative
+    - [REPL_TRIPLE_VOICE] form=`(* (+ 1 2) (+ 3 4))` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
     - [RESOLUTION_GENERIC] form=`(* (+ 1 2) (+ 3 4))` — user_msg has canned 'the X the operation produced' resolution boilerplate — tie it to the fable's metaphor / drawn values
     - [PARALLEL_POSSESSIVE_TIC] form=`(* (+ 1 2) (+ 3 4))` — user_msg uses 'her X Y, her X Yer still' parallel possessive construction — AI tic
     - [REPL_AS_TIME_TRAVELLER] form=`(- 100 (* 5 5))` — user_msg uses meta-narrator language that implies the answer pre-existed evaluation — describe the form's evaluation, not a pre-existing 'right' answer
-    - [RESOLUTION_GENERIC] form=`(- 100 (* 5 5))` — user_msg has canned 'the X the operation produced' resolution boilerplate — tie it to the fable's metaphor / drawn values
-    - [DOUBLE_EMO_INJECTION] form=`(- 100 (* 5 5))` — sentence has 2+ distinct EMO-pool phrases ('stepping deliberately, one foo' + 'stepping deliberately') — the character can't earn two emotional registers in the same beat
 
 ### G1-15: Equality
 
@@ -181,7 +182,7 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 6
 - variety @ n=50: 1.00
-- issues: {'REPL_AS_TIME_TRAVELLER': 2, 'NARRATIVE_NUMERAL_HARDCODE': 3, 'CLAUSE_STACK_OVERFLOW': 2, 'DOUBLE_EMO_INJECTION': 2, 'RESOLUTION_GENERIC': 3, 'PARALLEL_POSSESSIVE_TIC': 1}
+- issues: {'REPL_AS_TIME_TRAVELLER': 2, 'NARRATIVE_NUMERAL_HARDCODE': 3, 'CLAUSE_STACK_OVERFLOW': 2, 'DOUBLE_EMO_INJECTION': 2, 'RESOLUTION_GENERIC': 3, 'REPL_TRIPLE_VOICE': 2, 'PARALLEL_POSSESSIVE_TIC': 1}
     - [REPL_AS_TIME_TRAVELLER] form=`(zero? 0)` — user_msg uses meta-narrator language that implies the answer pre-existed evaluation — describe the form's evaluation, not a pre-existing 'right' answer
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(zero? 5)` — parametric example has hard-coded English numeral 'five bones' in a story slot — the actual draws may differ from this fixed count
     - [CLAUSE_STACK_OVERFLOW] form=`(zero? 5)` — sentence with 5 commas reads as AI-output cadence: 'Gizmo, stepping deliberately, one foot before the next, arranged a small heap of'
@@ -193,8 +194,18 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'CLAUSE_STACK_OVERFLOW': 1}
+- issues: {'REPL_TRIPLE_VOICE': 3, 'CLAUSE_STACK_OVERFLOW': 1}
+    - [REPL_TRIPLE_VOICE] form=`42` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
+    - [REPL_TRIPLE_VOICE] form=`42` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
+    - [REPL_TRIPLE_VOICE] form=`42` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
     - [CLAUSE_STACK_OVERFLOW] form=`(+ 1 2)` — sentence with 5 commas reads as AI-output cadence: 'The runtime sees the cleaned-up form, evaluates it,\nand gives back what it compu'
+
+### G1-18: Errors are safe in the REPL
+
+- examples: 2
+- variety @ n=50: 1.00
+- issues: {'REPL_TRIPLE_VOICE': 1}
+    - [REPL_TRIPLE_VOICE] form=`(* 7 6)` — user_msg mentions 'REPL' 4 times — the REPL personification should appear at most twice per record (submit + return)
 
 ## Grade 2
 
@@ -400,13 +411,13 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'RESOLUTION_REPL_DOUBLED': 3, 'REPL_AS_TIME_TRAVELLER': 2, 'DOUBLE_NAME_INTRO': 1, 'RESOLUTION_GENERIC': 2}
+- issues: {'REPL_TRIPLE_VOICE': 2, 'RESOLUTION_REPL_DOUBLED': 3, 'REPL_AS_TIME_TRAVELLER': 2, 'DOUBLE_NAME_INTRO': 1, 'RESOLUTION_GENERIC': 2}
+    - [REPL_TRIPLE_VOICE] form=`(* 1000000 1000000)` — user_msg mentions 'REPL' 4 times — the REPL personification should appear at most twice per record (submit + return)
     - [RESOLUTION_REPL_DOUBLED] form=`(* 1000000 1000000)` — story-tagged resolution mentions 'REPL' 2 times — name the mechanic once, use pronoun/it/runtime/it for the second beat
     - [REPL_AS_TIME_TRAVELLER] form=`(* 1000000 1000000)` — user_msg uses meta-narrator language that implies the answer pre-existed evaluation — describe the form's evaluation, not a pre-existing 'right' answer
     - [DOUBLE_NAME_INTRO] form=`(* 1000000 1000000)` — character 'Inky the dog' introduced twice within 200 chars — drop the second 'the dog'
     - [RESOLUTION_REPL_DOUBLED] form=`(* 1000000 1000000)` — story-tagged resolution mentions 'REPL' 2 times — name the mechanic once, use pronoun/it/runtime/it for the second beat
     - [REPL_AS_TIME_TRAVELLER] form=`(* 1000000 1000000)` — user_msg uses meta-narrator language that implies the answer pre-existed evaluation — describe the form's evaluation, not a pre-existing 'right' answer
-    - [RESOLUTION_REPL_DOUBLED] form=`(* 1000000 1000000)` — story-tagged resolution mentions 'REPL' 2 times — name the mechanic once, use pronoun/it/runtime/it for the second beat
 
 ### G2-20: Counting
 
@@ -511,13 +522,13 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'NARRATIVE_NUMERAL_HARDCODE': 3, 'CLAUSE_STACK_OVERFLOW': 2, 'RESOLUTION_REPL_DOUBLED': 3, 'HIGH_LENGTH': 1}
+- issues: {'NARRATIVE_NUMERAL_HARDCODE': 3, 'CLAUSE_STACK_OVERFLOW': 2, 'RESOLUTION_REPL_DOUBLED': 3, 'HIGH_LENGTH': 1, 'REPL_TRIPLE_VOICE': 1}
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(do (defn add3 [a b c] (+ a b c)) (add3 1 2 3))` — parametric example has hard-coded English numeral 'three counts' in a story slot — the actual draws may differ from this fixed count
     - [CLAUSE_STACK_OVERFLOW] form=`(do (defn add3 [a b c] (+ a b c)) (add3 1 2 3))` — sentence with 6 commas reads as AI-output cadence: 'To define a function add3 that adds three arguments, then call it with 4, 8, and'
     - [RESOLUTION_REPL_DOUBLED] form=`(do (defn add3 [a b c] (+ a b c)) (add3 1 2 3))` — story-tagged resolution mentions 'REPL' 2 times — name the mechanic once, use pronoun/it/runtime/it for the second beat
     - [HIGH_LENGTH] form=`(do (defn add3 [a b c] (+ a b c)) (add3 1 2 3))` — user_msg 241 words
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(do (defn add3 [a b c] (+ a b c)) (add3 1 2 3))` — parametric example has hard-coded English numeral 'three counts' in a story slot — the actual draws may differ from this fixed count
-    - [CLAUSE_STACK_OVERFLOW] form=`(do (defn add3 [a b c] (+ a b c)) (add3 1 2 3))` — sentence with 6 commas reads as AI-output cadence: 'To define a function add3 that adds three arguments, then call it with 9, 8, and'
+    - [REPL_TRIPLE_VOICE] form=`(do (defn add3 [a b c] (+ a b c)) (add3 1 2 3))` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
 
 ### G3-10: anonymous shorthand #()
 
@@ -591,7 +602,7 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 3
 - variety @ n=50: 1.00
-- issues: {'PARAMETRIC_LITERAL_NUMERALS': 3, 'NARRATIVE_NUMERAL_HARDCODE': 3, 'DOUBLE_EMO_INJECTION': 1}
+- issues: {'PARAMETRIC_LITERAL_NUMERALS': 3, 'NARRATIVE_NUMERAL_HARDCODE': 3, 'REPL_TRIPLE_VOICE': 2, 'DOUBLE_EMO_INJECTION': 1}
     - [PARAMETRIC_LITERAL_NUMERALS] form=`[1 2 3]` — parametric example has enumerated English numerals (one, two, three, …) hard-coded in a story slot — won't track the actual draws that {form_template} produces
     - [NARRATIVE_NUMERAL_HARDCODE] form=`[1 2 3]` — parametric example has hard-coded English numeral 'three bones' in a story slot — the actual draws may differ from this fixed count
     - [PARAMETRIC_LITERAL_NUMERALS] form=`[1 2 3]` — parametric example has enumerated English numerals (one, two, three, …) hard-coded in a story slot — won't track the actual draws that {form_template} produces
@@ -603,12 +614,12 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'NARRATIVE_NUMERAL_HARDCODE': 6}
+- issues: {'NARRATIVE_NUMERAL_HARDCODE': 6, 'REPL_TRIPLE_VOICE': 2}
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(nth [10 20 30] 0)` — parametric example has hard-coded English numeral 'three bone' in a story slot — the actual draws may differ from this fixed count
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(nth [10 20 30] 0)` — parametric example has hard-coded English numeral 'three bone' in a story slot — the actual draws may differ from this fixed count
+    - [REPL_TRIPLE_VOICE] form=`(nth [10 20 30] 0)` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(nth [10 20 30] 0)` — parametric example has hard-coded English numeral 'three bone' in a story slot — the actual draws may differ from this fixed count
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`(nth [10 20 30] 2)` — parametric example has hard-coded English numeral 'three piles' in a story slot — the actual draws may differ from this fixed count
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`(nth [10 20 30] 2)` — parametric example has hard-coded English numeral 'three piles' in a story slot — the actual draws may differ from this fixed count
+    - [REPL_TRIPLE_VOICE] form=`(nth [10 20 30] 0)` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(nth [10 20 30] 2)` — parametric example has hard-coded English numeral 'three piles' in a story slot — the actual draws may differ from this fixed count
 
 ### G4-03: conj — append to vector
@@ -626,7 +637,7 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'NARRATIVE_NUMERAL_HARDCODE': 3, 'CLAUSE_STACK_OVERFLOW': 2, 'HANGING_FORM_THAT': 1, 'PARAGRAPH_FRAGMENTATION': 1}
+- issues: {'NARRATIVE_NUMERAL_HARDCODE': 3, 'CLAUSE_STACK_OVERFLOW': 2, 'HANGING_FORM_THAT': 1, 'PARAGRAPH_FRAGMENTATION': 1, 'REPL_TRIPLE_VOICE': 1}
     - [NARRATIVE_NUMERAL_HARDCODE] form=`'(1 2 3)` — parametric example has hard-coded English numeral 'three bones' in a story slot — the actual draws may differ from this fixed count
     - [NARRATIVE_NUMERAL_HARDCODE] form=`'(1 2 3)` — parametric example has hard-coded English numeral 'three bones' in a story slot — the actual draws may differ from this fixed count
     - [CLAUSE_STACK_OVERFLOW] form=`'(1 2 3)` — sentence with 5 commas reads as AI-output cadence: 'Skippy, neither restless nor weary, only steady, pointed to a hollow log at the '
@@ -650,22 +661,25 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'DOUBLE_EMO_INJECTION': 1}
+- issues: {'DOUBLE_EMO_INJECTION': 1, 'REPL_TRIPLE_VOICE': 1}
     - [DOUBLE_EMO_INJECTION] form=`(assoc {:a 1} :b 2)` — sentence has 2+ distinct EMO-pool phrases ('without complaint or hurry' + 'without complaint') — the character can't earn two emotional registers in the same beat
+    - [REPL_TRIPLE_VOICE] form=`(assoc {:a 1} :a 99)` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
 
 ### G4-10: keys and vals
 
 - examples: 1
 - variety @ n=50: 1.00
-- issues: {'CLAUSE_STACK_OVERFLOW': 1}
+- issues: {'REPL_TRIPLE_VOICE': 1, 'CLAUSE_STACK_OVERFLOW': 1}
+    - [REPL_TRIPLE_VOICE] form=`(count (keys {:a 1 :b 2 :c 3}))` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
     - [CLAUSE_STACK_OVERFLOW] form=`(count (keys {:a 1 :b 2 :c 3}))` — sentence with 5 commas reads as AI-output cadence: 'To count how many keys are in a map binding :a, :b, and :c\nproperly, he wrote co'
 
 ### G4-11: Set literal
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'PARAGRAPH_FRAGMENTATION': 1, 'DOUBLE_EMO_INJECTION': 1}
+- issues: {'PARAGRAPH_FRAGMENTATION': 1, 'REPL_TRIPLE_VOICE': 1, 'DOUBLE_EMO_INJECTION': 1}
     - [PARAGRAPH_FRAGMENTATION] form=`(count #{1 1 1})` — user_msg has 4 short (≤25-word) paragraphs in body — reads as a bullet list, not a story
+    - [REPL_TRIPLE_VOICE] form=`(count #{1 1 1})` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
     - [DOUBLE_EMO_INJECTION] form=`(count #{1 1 1})` — sentence has 2+ distinct EMO-pool phrases ('without complaint or hurry' + 'without complaint') — the character can't earn two emotional registers in the same beat
 
 ### G4-12: Set membership
@@ -684,33 +698,36 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 4
 - variety @ n=50: 1.00
-- issues: {'NARRATIVE_NUMERAL_HARDCODE': 3, 'CLAUSE_STACK_OVERFLOW': 1}
+- issues: {'NARRATIVE_NUMERAL_HARDCODE': 3, 'NUMERAL_LIST_IN_GOAL': 3, 'REPL_TRIPLE_VOICE': 2, 'CLAUSE_STACK_OVERFLOW': 1}
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(count [1 2 3 4 5])` — parametric example has hard-coded English numeral 'five bones' in a story slot — the actual draws may differ from this fixed count
+    - [NUMERAL_LIST_IN_GOAL] form=`(count [1 2 3 4 5])` — goal_text contains 5 numerals across 4 commas — comma-list of numerals blows the sentence's clause budget; use a range or 'these numbers' framing
+    - [REPL_TRIPLE_VOICE] form=`(count [1 2 3 4 5])` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(count [1 2 3 4 5])` — parametric example has hard-coded English numeral 'five bones' in a story slot — the actual draws may differ from this fixed count
+    - [NUMERAL_LIST_IN_GOAL] form=`(count [1 2 3 4 5])` — goal_text contains 5 numerals across 4 commas — comma-list of numerals blows the sentence's clause budget; use a range or 'these numbers' framing
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(count [1 2 3 4 5])` — parametric example has hard-coded English numeral 'five bones' in a story slot — the actual draws may differ from this fixed count
-    - [CLAUSE_STACK_OVERFLOW] form=`(count #{:a :b :c})` — sentence with 5 commas reads as AI-output cadence: 'To count the elements in a set containing the keywords :a, :b, and :c\nproperly, '
 
 ### G4-14: empty?
 
 - examples: 3
 - variety @ n=50: 1.00
-- issues: {'BOOL_LEAK_RESOLUTION': 3, 'PARAGRAPH_FRAGMENTATION': 2}
+- issues: {'BOOL_LEAK_RESOLUTION': 3, 'REPL_TRIPLE_VOICE': 3, 'PARAGRAPH_FRAGMENTATION': 2}
     - [BOOL_LEAK_RESOLUTION] form=`(empty? [])` — resolution leaks boolean answer 'true' — describe the verdict abstractly instead
+    - [REPL_TRIPLE_VOICE] form=`(empty? [])` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
     - [BOOL_LEAK_RESOLUTION] form=`(empty? [1])` — resolution leaks boolean answer 'false' — describe the verdict abstractly instead
     - [PARAGRAPH_FRAGMENTATION] form=`(empty? [1])` — user_msg has 4 short (≤25-word) paragraphs in body — reads as a bullet list, not a story
+    - [REPL_TRIPLE_VOICE] form=`(empty? [1])` — user_msg mentions 'REPL' 4 times — the REPL personification should appear at most twice per record (submit + return)
     - [BOOL_LEAK_RESOLUTION] form=`(empty? [1])` — resolution leaks boolean answer 'false' — describe the verdict abstractly instead
-    - [PARAGRAPH_FRAGMENTATION] form=`(empty? [1])` — user_msg has 4 short (≤25-word) paragraphs in body — reads as a bullet list, not a story
 
 ### G4-15: first, rest, last
 
 - examples: 3
 - variety @ n=50: 1.00
-- issues: {'WRONG_FABLE_LITERAL': 1, 'NARRATIVE_NUMERAL_HARDCODE': 9, 'CLAUSE_STACK_OVERFLOW': 2}
+- issues: {'WRONG_FABLE_LITERAL': 1, 'NARRATIVE_NUMERAL_HARDCODE': 9, 'REPL_TRIPLE_VOICE': 2, 'CLAUSE_STACK_OVERFLOW': 2}
     - [WRONG_FABLE_LITERAL] form=`(first [10 20 30])` — tortoise-hare ghost name 'Pip' appears in dog-shadow user_msg
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(first [10 20 30])` — parametric example has hard-coded English numeral 'three bone' in a story slot — the actual draws may differ from this fixed count
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(first [10 20 30])` — parametric example has hard-coded English numeral 'three bone' in a story slot — the actual draws may differ from this fixed count
+    - [REPL_TRIPLE_VOICE] form=`(first [10 20 30])` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(first [10 20 30])` — parametric example has hard-coded English numeral 'three bone' in a story slot — the actual draws may differ from this fixed count
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`(last [10 20 30])` — parametric example has hard-coded English numeral 'three heaps' in a story slot — the actual draws may differ from this fixed count
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(last [10 20 30])` — parametric example has hard-coded English numeral 'three heaps' in a story slot — the actual draws may differ from this fixed count
 
 ### G4-16: into and conj on collections
@@ -734,12 +751,13 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'NARRATIVE_NUMERAL_HARDCODE': 3, 'CLAUSE_STACK_OVERFLOW': 2}
+- issues: {'NARRATIVE_NUMERAL_HARDCODE': 3, 'REPL_TRIPLE_VOICE': 3, 'CLAUSE_STACK_OVERFLOW': 2}
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(count (range 5))` — parametric example has hard-coded English numeral 'five bones' in a story slot — the actual draws may differ from this fixed count
+    - [REPL_TRIPLE_VOICE] form=`(count (range 5))` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
     - [CLAUSE_STACK_OVERFLOW] form=`(count (range 5))` — sentence with 6 commas reads as AI-output cadence: 'The range is a promise of five bones (0, 1, 2, 3, 4), and count consumes that pr'
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(count (range 5))` — parametric example has hard-coded English numeral 'five bones' in a story slot — the actual draws may differ from this fixed count
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(count (range 5))` — parametric example has hard-coded English numeral 'five bones' in a story slot — the actual draws may differ from this fixed count
-    - [CLAUSE_STACK_OVERFLOW] form=`(count (range 5))` — sentence with 6 commas reads as AI-output cadence: 'The range is a promise of five bones (0, 1, 2, 3, 4), and count consumes that pr'
+    - [REPL_TRIPLE_VOICE] form=`(count (range 5))` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
 
 ### G4-20: Collection vs sequence
 
@@ -767,9 +785,10 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 1
 - variety @ n=50: 1.00
-- issues: {'RESOLUTION_REPL_DOUBLED': 3, 'HIGH_LENGTH': 1}
+- issues: {'RESOLUTION_REPL_DOUBLED': 3, 'HIGH_LENGTH': 1, 'REPL_TRIPLE_VOICE': 1}
     - [RESOLUTION_REPL_DOUBLED] form=`(+ 1 (if true 10 20))` — story-tagged resolution mentions 'REPL' 2 times — name the mechanic once, use pronoun/it/runtime/it for the second beat
     - [HIGH_LENGTH] form=`(+ 1 (if true 10 20))` — user_msg 222 words
+    - [REPL_TRIPLE_VOICE] form=`(+ 1 (if true 10 20))` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
     - [RESOLUTION_REPL_DOUBLED] form=`(+ 1 (if true 10 20))` — story-tagged resolution mentions 'REPL' 2 times — name the mechanic once, use pronoun/it/runtime/it for the second beat
     - [RESOLUTION_REPL_DOUBLED] form=`(+ 1 (if true 10 20))` — story-tagged resolution mentions 'REPL' 2 times — name the mechanic once, use pronoun/it/runtime/it for the second beat
 
@@ -816,33 +835,37 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'COLLECTION_LEAK': 1, 'CLAUSE_STACK_OVERFLOW': 2}
+- issues: {'COLLECTION_LEAK': 1, 'CLAUSE_STACK_OVERFLOW': 2, 'NUMERAL_LIST_IN_GOAL': 3}
     - [COLLECTION_LEAK] form=`(map inc [1 2 3])` — elements of expected [2, 3, 4] appear comma-separated in user_msg (collection answer leak)
     - [CLAUSE_STACK_OVERFLOW] form=`(map inc [1 2 3])` — sentence with 7 commas reads as AI-output cadence: 'Zoomer the dog shook\nhis head and went on with the work: to pour the vector cont'
+    - [NUMERAL_LIST_IN_GOAL] form=`(map #(* % %) [1 2 3 4])` — goal_text contains 4 numerals across 4 commas — comma-list of numerals blows the sentence's clause budget; use a range or 'these numbers' framing
+    - [NUMERAL_LIST_IN_GOAL] form=`(map #(* % %) [1 2 3 4])` — goal_text contains 4 numerals across 4 commas — comma-list of numerals blows the sentence's clause budget; use a range or 'these numbers' framing
+    - [NUMERAL_LIST_IN_GOAL] form=`(map #(* % %) [1 2 3 4])` — goal_text contains 4 numerals across 4 commas — comma-list of numerals blows the sentence's clause budget; use a range or 'these numbers' framing
     - [CLAUSE_STACK_OVERFLOW] form=`(map #(* % %) [1 2 3 4])` — sentence with 8 commas reads as AI-output cadence: 'Leaper the dog shook\nhis head and went on with the work: to apply a squaring ope'
 
 ### G5-11: filter
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'CLAUSE_STACK_OVERFLOW': 2, 'NARRATIVE_NUMERAL_HARDCODE': 3}
+- issues: {'NUMERAL_LIST_IN_GOAL': 6, 'CLAUSE_STACK_OVERFLOW': 2, 'NARRATIVE_NUMERAL_HARDCODE': 3}
+    - [NUMERAL_LIST_IN_GOAL] form=`(filter even? [1 2 3 4])` — goal_text contains 4 numerals across 3 commas — comma-list of numerals blows the sentence's clause budget; use a range or 'these numbers' framing
     - [CLAUSE_STACK_OVERFLOW] form=`(filter even? [1 2 3 4])` — sentence with 7 commas reads as AI-output cadence: 'The receiver is patient; the gap is exact." To\nkeep the even elements from the v'
+    - [NUMERAL_LIST_IN_GOAL] form=`(filter even? [1 2 3 4])` — goal_text contains 4 numerals across 3 commas — comma-list of numerals blows the sentence's clause budget; use a range or 'these numbers' framing
+    - [NUMERAL_LIST_IN_GOAL] form=`(filter even? [1 2 3 4])` — goal_text contains 4 numerals across 3 commas — comma-list of numerals blows the sentence's clause budget; use a range or 'these numbers' framing
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(filter pos? [-2 -1 0 1 2])` — parametric example has hard-coded English numeral 'five bones' in a story slot — the actual draws may differ from this fixed count
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`(filter pos? [-2 -1 0 1 2])` — parametric example has hard-coded English numeral 'five bones' in a story slot — the actual draws may differ from this fixed count
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`(filter pos? [-2 -1 0 1 2])` — parametric example has hard-coded English numeral 'five bones' in a story slot — the actual draws may differ from this fixed count
-    - [CLAUSE_STACK_OVERFLOW] form=`(filter pos? [-2 -1 0 1 2])` — sentence with 8 commas reads as AI-output cadence: 'The receiver is patient; the gap is exact." To\nkeep the positive elements from t'
+    - [NUMERAL_LIST_IN_GOAL] form=`(filter pos? [-2 -1 0 1 2])` — goal_text contains 5 numerals across 4 commas — comma-list of numerals blows the sentence's clause budget; use a range or 'these numbers' framing
 
 ### G5-12: reduce
 
 - examples: 3
 - variety @ n=50: 1.00
-- issues: {'HIGH_LENGTH': 2, 'ANSWER_LEAK': 2, 'CLAUSE_STACK_OVERFLOW': 5, 'DOUBLE_EMO_INJECTION': 2}
+- issues: {'HIGH_LENGTH': 2, 'ANSWER_LEAK': 2, 'NUMERAL_LIST_IN_GOAL': 9, 'CLAUSE_STACK_OVERFLOW': 5, 'DOUBLE_EMO_INJECTION': 2}
     - [HIGH_LENGTH] form=`(reduce + [1 2 3 4])` — user_msg 226 words
     - [ANSWER_LEAK] form=`(reduce + [1 2 3 4])` — answer 10 in narrative
+    - [NUMERAL_LIST_IN_GOAL] form=`(reduce + [1 2 3 4])` — goal_text contains 4 numerals across 3 commas — comma-list of numerals blows the sentence's clause budget; use a range or 'these numbers' framing
     - [HIGH_LENGTH] form=`(reduce + [1 2 3 4])` — user_msg 218 words
     - [ANSWER_LEAK] form=`(reduce + [1 2 3 4])` — answer 10 in narrative
-    - [CLAUSE_STACK_OVERFLOW] form=`(reduce + [1 2 3 4])` — sentence with 10 commas reads as AI-output cadence: 'The runtime does this for any collection — vector, list, map,\nstring." To walk t'
-    - [DOUBLE_EMO_INJECTION] form=`(reduce + [1 2 3 4])` — sentence has 2+ distinct EMO-pool phrases ('stepping deliberately, one foo' + 'stepping deliberately') — the character can't earn two emotional registers in the same beat
+    - [NUMERAL_LIST_IN_GOAL] form=`(reduce + [1 2 3 4])` — goal_text contains 4 numerals across 3 commas — comma-list of numerals blows the sentence's clause budget; use a range or 'these numbers' framing
 
 ### G5-13: reduce with init
 
@@ -858,13 +881,13 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'HIGH_LENGTH': 3, 'NARRATIVE_NUMERAL_HARDCODE': 6, 'CLAUSE_STACK_OVERFLOW': 4}
+- issues: {'HIGH_LENGTH': 3, 'NARRATIVE_NUMERAL_HARDCODE': 6, 'NUMERAL_LIST_IN_GOAL': 6, 'CLAUSE_STACK_OVERFLOW': 4}
     - [HIGH_LENGTH] form=`(apply + [1 2 3 4])` — user_msg 230 words
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(apply + [1 2 3 4])` — parametric example has hard-coded English numeral 'four bones' in a story slot — the actual draws may differ from this fixed count
+    - [NUMERAL_LIST_IN_GOAL] form=`(apply + [1 2 3 4])` — goal_text contains 4 numerals across 3 commas — comma-list of numerals blows the sentence's clause budget; use a range or 'these numbers' framing
     - [CLAUSE_STACK_OVERFLOW] form=`(apply + [1 2 3 4])` — sentence with 6 commas reads as AI-output cadence: 'To apply + to the elements of the vector containing 1, 2, 3, and 4, he, with the'
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(apply + [1 2 3 4])` — parametric example has hard-coded English numeral 'four bones' in a story slot — the actual draws may differ from this fixed count
-    - [CLAUSE_STACK_OVERFLOW] form=`(apply + [1 2 3 4])` — sentence with 6 commas reads as AI-output cadence: 'To apply + to the elements of the vector containing 1, 2, 3, and 4, he composed\n'
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`(apply + [1 2 3 4])` — parametric example has hard-coded English numeral 'four bones' in a story slot — the actual draws may differ from this fixed count
+    - [NUMERAL_LIST_IN_GOAL] form=`(apply + [1 2 3 4])` — goal_text contains 4 numerals across 3 commas — comma-list of numerals blows the sentence's clause budget; use a range or 'these numbers' framing
 
 ### G5-15: comp
 
@@ -887,11 +910,12 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'PARALLEL_POSSESSIVE_TIC': 1, 'HIGH_LENGTH': 2, 'PREDICATE_QUESTION_COLLISION': 2}
+- issues: {'NUMERAL_LIST_IN_GOAL': 3, 'PARALLEL_POSSESSIVE_TIC': 1, 'HIGH_LENGTH': 2, 'PREDICATE_QUESTION_COLLISION': 2}
+    - [NUMERAL_LIST_IN_GOAL] form=`(some even? [1 3 5 8 7])` — goal_text contains 5 numerals across 4 commas — comma-list of numerals blows the sentence's clause budget; use a range or 'these numbers' framing
     - [PARALLEL_POSSESSIVE_TIC] form=`(some even? [1 3 5 8 7])` — user_msg uses 'her X Y, her X Yer still' parallel possessive construction — AI tic
+    - [NUMERAL_LIST_IN_GOAL] form=`(some even? [1 3 5 8 7])` — goal_text contains 5 numerals across 4 commas — comma-list of numerals blows the sentence's clause budget; use a range or 'these numbers' framing
+    - [NUMERAL_LIST_IN_GOAL] form=`(some even? [1 3 5 8 7])` — goal_text contains 5 numerals across 4 commas — comma-list of numerals blows the sentence's clause budget; use a range or 'these numbers' framing
     - [HIGH_LENGTH] form=`(some neg? [1 2 3])` — user_msg 205 words
-    - [PREDICATE_QUESTION_COLLISION] form=`(some neg? [1 2 3])` — predicate-suffix ``?`` collides with the question framing's trailing ``?`` or ``.``
-    - [HIGH_LENGTH] form=`(some neg? [1 2 3])` — user_msg 206 words
     - [PREDICATE_QUESTION_COLLISION] form=`(some neg? [1 2 3])` — predicate-suffix ``?`` collides with the question framing's trailing ``?`` or ``.``
 
 ### G5-19: every?
@@ -909,24 +933,25 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'NARRATIVE_NUMERAL_HARDCODE': 6, 'CLAUSE_STACK_OVERFLOW': 3}
+- issues: {'NARRATIVE_NUMERAL_HARDCODE': 6, 'NUMERAL_LIST_IN_GOAL': 6, 'CLAUSE_STACK_OVERFLOW': 3}
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(take 3 [10 20 30 40 50])` — parametric example has hard-coded English numeral 'three bones' in a story slot — the actual draws may differ from this fixed count
+    - [NUMERAL_LIST_IN_GOAL] form=`(take 3 [10 20 30 40 50])` — goal_text contains 6 numerals across 4 commas — comma-list of numerals blows the sentence's clause budget; use a range or 'these numbers' framing
     - [CLAUSE_STACK_OVERFLOW] form=`(take 3 [10 20 30 40 50])` — sentence with 8 commas reads as AI-output cadence: 'Zoomer the dog shook\nhis head and went on with the work: to take the first 3 ele'
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(take 3 [10 20 30 40 50])` — parametric example has hard-coded English numeral 'three bones' in a story slot — the actual draws may differ from this fixed count
+    - [NUMERAL_LIST_IN_GOAL] form=`(take 3 [10 20 30 40 50])` — goal_text contains 6 numerals across 4 commas — comma-list of numerals blows the sentence's clause budget; use a range or 'these numbers' framing
     - [CLAUSE_STACK_OVERFLOW] form=`(take 3 [10 20 30 40 50])` — sentence with 8 commas reads as AI-output cadence: 'Slate the dog shook\nhis head and went on with the work: to take the first 3 elem'
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`(take 3 [10 20 30 40 50])` — parametric example has hard-coded English numeral 'three bones' in a story slot — the actual draws may differ from this fixed count
-    - [NARRATIVE_NUMERAL_HARDCODE] form=`(drop 2 [10 20 30 40 50])` — parametric example has hard-coded English numeral 'three bones' in a story slot — the actual draws may differ from this fixed count
 
 ### G5-21: distinct and sort
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'CLAUSE_STACK_OVERFLOW': 5}
+- issues: {'NUMERAL_LIST_IN_GOAL': 3, 'CLAUSE_STACK_OVERFLOW': 5}
+    - [NUMERAL_LIST_IN_GOAL] form=`(distinct [1 1 2 3 3 4])` — goal_text contains 6 numerals across 5 commas — comma-list of numerals blows the sentence's clause budget; use a range or 'these numbers' framing
     - [CLAUSE_STACK_OVERFLOW] form=`(distinct [1 1 2 3 3 4])` — sentence with 9 commas reads as AI-output cadence: 'The receiver is patient; the gap is exact." To\nremove duplicate elements from th'
+    - [NUMERAL_LIST_IN_GOAL] form=`(distinct [1 1 2 3 3 4])` — goal_text contains 6 numerals across 5 commas — comma-list of numerals blows the sentence's clause budget; use a range or 'these numbers' framing
     - [CLAUSE_STACK_OVERFLOW] form=`(distinct [1 1 2 3 3 4])` — sentence with 9 commas reads as AI-output cadence: 'Marley the dog shook\nhis head and went on with the work: to remove duplicate ele'
+    - [NUMERAL_LIST_IN_GOAL] form=`(distinct [1 1 2 3 3 4])` — goal_text contains 6 numerals across 5 commas — comma-list of numerals blows the sentence's clause budget; use a range or 'these numbers' framing
     - [CLAUSE_STACK_OVERFLOW] form=`(distinct [1 1 2 3 3 4])` — sentence with 5 commas reads as AI-output cadence: 'What Clojure form computes the sequence produced by passing 1, 1, 2, 3, 3, 4 thr'
-    - [CLAUSE_STACK_OVERFLOW] form=`(sort [3 1 2])` — sentence with 6 commas reads as AI-output cadence: 'Almond the dog shook\nher head and went on with the work: to sort the vector cont'
-    - [CLAUSE_STACK_OVERFLOW] form=`(sort [3 1 2])` — sentence with 6 commas reads as AI-output cadence: 'The receiver is patient; the gap is exact." To\nsort the vector containing 3, 1, '
 
 ### G5-22: recur — first taste
 
@@ -963,13 +988,10 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 4
 - variety @ n=50: 1.00
-- issues: {'DOUBLE_EMO_INJECTION': 1, 'ANSWER_LEAK_STRING': 2, 'STORY_RESOLUTION_NO_DRAWN': 3}
+- issues: {'DOUBLE_EMO_INJECTION': 1, 'ANSWER_LEAK_STRING': 2}
     - [DOUBLE_EMO_INJECTION] form=`(clojure.string/reverse "abc")` — sentence has 2+ distinct EMO-pool phrases ('without complaint or hurry' + 'without complaint') — the character can't earn two emotional registers in the same beat
     - [ANSWER_LEAK_STRING] form=`(namespace :owner/item)` — answer string 'owner' appears in user_msg
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(name :owner/item)` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':owner',), resolution doesn't close the loop)
     - [ANSWER_LEAK_STRING] form=`(name :owner/item)` — answer string 'item' appears in user_msg
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(name :owner/item)` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':owner',), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(name :owner/item)` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':owner',), resolution doesn't close the loop)
 
 ### G6-06: Private defs
 
@@ -978,18 +1000,6 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 - issues: {'DOUBLE_EMO_INJECTION': 2}
     - [DOUBLE_EMO_INJECTION] form=`(:private (meta '^:private x))` — sentence has 2+ distinct EMO-pool phrases ('without complaint or hurry' + 'without complaint') — the character can't earn two emotional registers in the same beat
     - [DOUBLE_EMO_INJECTION] form=`(:private (meta 'x))` — sentence has 2+ distinct EMO-pool phrases ('stepping deliberately, one foo' + 'stepping deliberately') — the character can't earn two emotional registers in the same beat
-
-### G6-07: Public vs private API
-
-- examples: 2
-- variety @ n=50: 1.00
-- issues: {'STORY_RESOLUTION_NO_DRAWN': 6}
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(boolean (:private (meta '^:private hidden)))` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':private', ':private'), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(boolean (:private (meta '^:private hidden)))` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':private', ':private'), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(boolean (:private (meta '^:private hidden)))` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':private', ':private'), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(boolean (:private (meta 'public)))` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':private',), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(boolean (:private (meta 'public)))` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':private',), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(boolean (:private (meta 'public)))` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':private',), resolution doesn't close the loop)
 
 ### G6-09: Loading order
 
@@ -1007,15 +1017,6 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 - issues: {'HEDGING_NEAR_FORM': 1, 'CLAUSE_STACK_OVERFLOW': 1}
     - [HEDGING_NEAR_FORM] form=`(:deps {:deps {:a 1 :b 2}})` — hedge 'or something close to it' in user_msg — eval-deterministic narratives shouldn't hedge about the form's value
     - [CLAUSE_STACK_OVERFLOW] form=`(:deps {:deps {:a 1 :b 2}})` — sentence with 5 commas reads as AI-output cadence: 'Pewter the dog, with eyes always on the path, who had simply walked to a flat st'
-
-### G6-11: Classpath
-
-- examples: 2
-- variety @ n=50: 1.00
-- issues: {'STORY_RESOLUTION_NO_DRAWN': 3}
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(clojure.string/split "src:test" #":")` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':test', 'src:test'), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(clojure.string/split "src:test" #":")` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':test', 'src:test'), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(clojure.string/split "src:test" #":")` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':test', 'src:test'), resolution doesn't close the loop)
 
 ### G6-12: Multiple files in one project
 
@@ -1036,13 +1037,11 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'WRONG_FABLE_LITERAL': 1, 'STORY_RESOLUTION_NO_DRAWN': 6, 'HIGH_LENGTH': 1}
+- issues: {'WRONG_FABLE_LITERAL': 1, 'REPL_TRIPLE_VOICE': 2, 'HIGH_LENGTH': 1}
     - [WRONG_FABLE_LITERAL] form=`(:doc (meta '\{:doc "steady wins"\} race))` — tortoise-hare ghost name 'Pip' appears in dog-shadow user_msg
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(:doc (meta '\{:doc "steady wins"\} race))` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':doc', ':doc', 'steady wins'), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(:doc (meta '\{:doc "steady wins"\} race))` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':doc', ':doc', 'steady wins'), resolution doesn't close the loop)
+    - [REPL_TRIPLE_VOICE] form=`(:doc (meta '\{:doc "steady wins"\} race))` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
     - [HIGH_LENGTH] form=`(:doc (meta '\{:doc "steady wins"\} race))` — user_msg 220 words
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(:doc (meta '\{:doc "steady wins"\} race))` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':doc', ':doc', 'steady wins'), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(:author (meta '\{:author "Aesop"\} race))` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':author', ':author', 'Aesop'), resolution doesn't close the loop)
+    - [REPL_TRIPLE_VOICE] form=`(:author (meta '\{:author "Aesop"\} race))` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
 
 ### G6-16: Cleaning up requires
 
@@ -1057,33 +1056,37 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 1
 - variety @ n=50: 1.00
-- issues: {'STORY_RESOLUTION_NO_DRAWN': 3}
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(try (throw (Exception. "bad")) (catch Exception e` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('-1', 'bad'), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(try (throw (Exception. "bad")) (catch Exception e` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('-1', 'bad'), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(try (throw (Exception. "bad")) (catch Exception e` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('-1', 'bad'), resolution doesn't close the loop)
+- issues: {'REPL_TRIPLE_VOICE': 1}
+    - [REPL_TRIPLE_VOICE] form=`(try (throw (Exception. "bad")) (catch Exception e` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
 
 ### G7-02: try / catch
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'PARALLEL_POSSESSIVE_TIC': 1}
+- issues: {'REPL_TRIPLE_VOICE': 1, 'PARALLEL_POSSESSIVE_TIC': 1}
+    - [REPL_TRIPLE_VOICE] form=`(try (/ 1 0) (catch Exception e -1))` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
     - [PARALLEL_POSSESSIVE_TIC] form=`(try 42 (catch Exception e :caught))` — user_msg uses 'her X Y, her X Yer still' parallel possessive construction — AI tic
+
+### G7-03: try / finally
+
+- examples: 2
+- variety @ n=50: 1.00
+- issues: {'REPL_TRIPLE_VOICE': 1}
+    - [REPL_TRIPLE_VOICE] form=`(try 7 (finally (prn :cleanup)))` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
 
 ### G7-04: ex-info
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'STORY_RESOLUTION_NO_DRAWN': 3, 'DOUBLE_EMO_INJECTION': 1}
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(try (throw (ex-info "bad" {:a 1})) (catch Excepti` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':a', 'bad'), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(try (throw (ex-info "bad" {:a 1})) (catch Excepti` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':a', 'bad'), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(try (throw (ex-info "bad" {:a 1})) (catch Excepti` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':a', 'bad'), resolution doesn't close the loop)
+- issues: {'DOUBLE_EMO_INJECTION': 1}
     - [DOUBLE_EMO_INJECTION] form=`(try (throw (ex-info "bad" {:a 1})) (catch Excepti` — sentence has 2+ distinct EMO-pool phrases ('stepping deliberately, one foo' + 'stepping deliberately') — the character can't earn two emotional registers in the same beat
 
 ### G7-05: nil punning
 
 - examples: 4
 - variety @ n=50: 1.00
-- issues: {'DOUBLE_EMO_INJECTION': 1}
+- issues: {'REPL_TRIPLE_VOICE': 1, 'DOUBLE_EMO_INJECTION': 1}
+    - [REPL_TRIPLE_VOICE] form=`(first nil)` — user_msg mentions 'REPL' 4 times — the REPL personification should appear at most twice per record (submit + return)
     - [DOUBLE_EMO_INJECTION] form=`(first nil)` — sentence has 2+ distinct EMO-pool phrases ('without complaint or hurry' + 'without complaint') — the character can't earn two emotional registers in the same beat
 
 ### G7-06: pre and post conditions
@@ -1106,16 +1109,21 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'CLAUSE_STACK_OVERFLOW': 1, 'DOUBLE_NAME_INTRO': 1}
+- issues: {'CLAUSE_STACK_OVERFLOW': 1, 'REPL_TRIPLE_VOICE': 1, 'DOUBLE_NAME_INTRO': 1}
     - [CLAUSE_STACK_OVERFLOW] form=`(with-out-str (prn 42))` — sentence with 6 commas reads as AI-output cadence: 'To print the number 42 and capture the output string, he, her breath even, her s'
+    - [REPL_TRIPLE_VOICE] form=`(with-out-str (prn 42))` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
     - [DOUBLE_NAME_INTRO] form=`(with-out-str (prn :hare))` — character 'Ebony the dog' introduced twice within 200 chars — drop the second 'the dog'
 
 ### G7-09: tap>
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'DOUBLE_EMO_INJECTION': 1}
+- issues: {'REPL_TRIPLE_VOICE': 4, 'DOUBLE_EMO_INJECTION': 1}
+    - [REPL_TRIPLE_VOICE] form=`(tap> :hello)` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
     - [DOUBLE_EMO_INJECTION] form=`(tap> :hello)` — sentence has 2+ distinct EMO-pool phrases ('stepping deliberately, one foo' + 'stepping deliberately') — the character can't earn two emotional registers in the same beat
+    - [REPL_TRIPLE_VOICE] form=`(tap> 42)` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
+    - [REPL_TRIPLE_VOICE] form=`(tap> 42)` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
+    - [REPL_TRIPLE_VOICE] form=`(tap> 42)` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
 
 ### G7-10: doc and source
 
@@ -1139,7 +1147,7 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'CLAUSE_STACK_OVERFLOW': 2, 'PARALLEL_POSSESSIVE_TIC': 1, 'ANSWER_LEAK': 1, 'DOUBLE_EMO_INJECTION': 1, 'STORY_RESOLUTION_NO_DRAWN': 3}
+- issues: {'CLAUSE_STACK_OVERFLOW': 2, 'PARALLEL_POSSESSIVE_TIC': 1, 'ANSWER_LEAK': 1, 'REPL_TRIPLE_VOICE': 2, 'DOUBLE_EMO_INJECTION': 1}
     - [CLAUSE_STACK_OVERFLOW] form=`(count "hare
 tortoise
 ")` — sentence with 5 commas reads as AI-output cadence: 'Message-bones are how the two meet — a\nvalue crosses out and becomes scratches o'
@@ -1152,22 +1160,24 @@ tortoise
     - [CLAUSE_STACK_OVERFLOW] form=`(count "hare
 tortoise
 ")` — sentence with 6 commas reads as AI-output cadence: 'To count every character in a two-line string ending each line with a newline-ma'
+    - [REPL_TRIPLE_VOICE] form=`(count "hare
+tortoise
+")` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
     - [DOUBLE_EMO_INJECTION] form=`(count "hare
 tortoise
 ")` — sentence has 2+ distinct EMO-pool phrases ('without complaint or hurry' + 'without complaint') — the character can't earn two emotional registers in the same beat
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(clojure.string/split "a\nb\nc" #"\n")` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('a\\nb\\nc', '\\n'), resolution doesn't close the loop)
 
 ### G7-13: line-seq
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'STORY_RESOLUTION_NO_DRAWN': 6, 'DOUBLE_EMO_INJECTION': 2}
+- issues: {'STORY_RESOLUTION_NO_DRAWN': 6, 'REPL_TRIPLE_VOICE': 1, 'DOUBLE_EMO_INJECTION': 2}
     - [STORY_RESOLUTION_NO_DRAWN] form=`(count (clojure.string/split-lines "a\nb\nc"))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('a\\nb\\nc',), resolution doesn't close the loop)
     - [STORY_RESOLUTION_NO_DRAWN] form=`(count (clojure.string/split-lines "a\nb\nc"))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('a\\nb\\nc',), resolution doesn't close the loop)
     - [STORY_RESOLUTION_NO_DRAWN] form=`(count (clojure.string/split-lines "a\nb\nc"))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('a\\nb\\nc',), resolution doesn't close the loop)
     - [STORY_RESOLUTION_NO_DRAWN] form=`(first (clojure.string/split-lines "first\nsecond"` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('first\\nsecond',), resolution doesn't close the loop)
+    - [REPL_TRIPLE_VOICE] form=`(first (clojure.string/split-lines "first\nsecond"` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
     - [STORY_RESOLUTION_NO_DRAWN] form=`(first (clojure.string/split-lines "first\nsecond"` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('first\\nsecond',), resolution doesn't close the loop)
-    - [DOUBLE_EMO_INJECTION] form=`(first (clojure.string/split-lines "first\nsecond"` — sentence has 2+ distinct EMO-pool phrases ('without complaint or hurry' + 'without complaint') — the character can't earn two emotional registers in the same beat
 
 ### G7-14: with-open
 
@@ -1180,20 +1190,19 @@ tortoise
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'WRONG_FABLE_LITERAL': 1}
+- issues: {'WRONG_FABLE_LITERAL': 1, 'REPL_TRIPLE_VOICE': 2}
     - [WRONG_FABLE_LITERAL] form=`(with-out-str (print "x"))` — tortoise-hare ghost name 'Pip' appears in dog-shadow user_msg
+    - [REPL_TRIPLE_VOICE] form=`(with-out-str (print "x"))` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
+    - [REPL_TRIPLE_VOICE] form=`(with-out-str (println))` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
 
 ### G7-16: edn read
 
 - examples: 3
 - variety @ n=50: 1.00
-- issues: {'STORY_RESOLUTION_NO_DRAWN': 6, 'CLAUSE_STACK_OVERFLOW': 1}
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(clojure.edn/read-string "{:a 1}")` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':a', '{:a 1}'), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(clojure.edn/read-string "{:a 1}")` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':a', '{:a 1}'), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(clojure.edn/read-string "{:a 1}")` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':a', '{:a 1}'), resolution doesn't close the loop)
+- issues: {'CLAUSE_STACK_OVERFLOW': 1, 'REPL_TRIPLE_VOICE': 2}
     - [CLAUSE_STACK_OVERFLOW] form=`(clojure.edn/read-string "{:a 1}")` — sentence with 5 commas reads as AI-output cadence: 'To parse an edn map from a string, she, with the slow certainty of the sun, comp'
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(clojure.edn/read-string "[:hare :tortoise]")` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':hare', ':tortoise', '[:hare :tortoise]'), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(clojure.edn/read-string "[:hare :tortoise]")` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':hare', ':tortoise', '[:hare :tortoise]'), resolution doesn't close the loop)
+    - [REPL_TRIPLE_VOICE] form=`(clojure.edn/read-string "[:hare :tortoise]")` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
+    - [REPL_TRIPLE_VOICE] form=`(clojure.edn/read-string "[:hare :tortoise]")` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
 
 ### G7-17: JSON roundtrip
 
@@ -1219,10 +1228,7 @@ tortoise
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'STORY_RESOLUTION_NO_DRAWN': 3, 'ANSWER_LEAK_STRING': 1}
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(defn speak [k] (cond (= k :hare) "swift" (= k :to` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':hare', ':tortoise', ':else'), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(defn speak [k] (cond (= k :hare) "swift" (= k :to` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':hare', ':tortoise', ':else'), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(defn speak [k] (cond (= k :hare) "swift" (= k :to` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':hare', ':tortoise', ':else'), resolution doesn't close the loop)
+- issues: {'ANSWER_LEAK_STRING': 1}
     - [ANSWER_LEAK_STRING] form=`(let [speak (fn [k] (cond (= k :hare) "swift" (= k` — answer string 'steady' appears in user_msg
 
 ### G8-02: deftype introduction
@@ -1241,13 +1247,11 @@ tortoise
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'ANSWER_LEAK_STRING': 1, 'STORY_RESOLUTION_NO_DRAWN': 6, 'CLAUSE_STACK_OVERFLOW': 2, 'PARALLEL_POSSESSIVE_TIC': 1}
+- issues: {'ANSWER_LEAK_STRING': 1, 'CLAUSE_STACK_OVERFLOW': 2, 'PARALLEL_POSSESSIVE_TIC': 1}
     - [ANSWER_LEAK_STRING] form=`(do (defrecord Runner [name pace]) (:pace (->Runne` — answer string ':slow' appears in user_msg
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(do (defrecord Runner [name pace]) (:pace (->Runne` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':pace', ':slow', 'Alice'), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(do (defrecord Runner [name pace]) (:pace (->Runne` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':pace', ':slow', 'Alice'), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(do (defrecord Runner [name pace]) (:pace (->Runne` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':pace', ':slow', 'Alice'), resolution doesn't close the loop)
     - [CLAUSE_STACK_OVERFLOW] form=`(do (defrecord Runner [name pace]) (:pace (->Runne` — sentence with 6 commas reads as AI-output cadence: 'Faster,\nmore focused, less convenient." To define a Runner case with two named c'
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(do (defrecord Runner [name pace]) (:name (->Runne` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':name', ':moderate', 'Bob'), resolution doesn't close the loop)
+    - [PARALLEL_POSSESSIVE_TIC] form=`(do (defrecord Runner [name pace]) (:name (->Runne` — user_msg uses 'her X Y, her X Yer still' parallel possessive construction — AI tic
+    - [CLAUSE_STACK_OVERFLOW] form=`(do (defrecord Runner [name pace]) (:name (->Runne` — sentence with 6 commas reads as AI-output cadence: 'Faster,\nmore focused, less convenient." To define a record type named Runner wit'
 
 ### G8-04: Protocol definition
 
@@ -1642,12 +1646,8 @@ tortoise
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'STORY_RESOLUTION_NO_DRAWN': 6, 'DOUBLE_EMO_INJECTION': 1, 'CLAUSE_STACK_OVERFLOW': 1}
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(macroexpand-1 '(when true 1))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('-1',), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(macroexpand-1 '(when true 1))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('-1',), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(macroexpand-1 '(when true 1))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('-1',), resolution doesn't close the loop)
+- issues: {'DOUBLE_EMO_INJECTION': 1, 'CLAUSE_STACK_OVERFLOW': 1}
     - [DOUBLE_EMO_INJECTION] form=`(macroexpand-1 '(when true 1))` — sentence has 2+ distinct EMO-pool phrases ('stepping deliberately, one foo' + 'stepping deliberately') — the character can't earn two emotional registers in the same beat
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(macroexpand-1 '(or a b))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('-1',), resolution doesn't close the loop)
     - [CLAUSE_STACK_OVERFLOW] form=`(macroexpand-1 '(or a b))` — sentence with 5 commas reads as AI-output cadence: 'You set the rule\nonce, and any mark that uses it gets rewritten on the way to th'
 
 ### G10-05: macroexpand
@@ -1686,15 +1686,6 @@ tortoise
     - [ANSWER_LEAK] form=`(do (defn add-fn [a b] (+ a b)) (add-fn 3 4))` — answer 7 in narrative
     - [DOUBLE_NAME_INTRO] form=`(do (defmacro add-mac [a b] `(+ ~a ~b)) (add-mac 3` — character 'Chestnut the dog' introduced twice within 200 chars — drop the second 'the dog'
 
-### G10-09: Hygiene and gensym
-
-- examples: 2
-- variety @ n=50: 1.00
-- issues: {'STORY_RESOLUTION_NO_DRAWN': 3}
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(let [a (gensym "x_") b (gensym "x_")] (= a b))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('x_', 'x_'), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(let [a (gensym "x_") b (gensym "x_")] (= a b))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('x_', 'x_'), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(let [a (gensym "x_") b (gensym "x_")] (= a b))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('x_', 'x_'), resolution doesn't close the loop)
-
 ### G10-10: Anaphoric macros are confusing
 
 - examples: 2
@@ -1730,11 +1721,8 @@ tortoise
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'STORY_RESOLUTION_NO_DRAWN': 3, 'HIGH_LENGTH': 1, 'DOUBLE_EMO_INJECTION': 1}
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(clojure.edn/read-string "[:a :b :c]")` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':a', ':b', ':c'), resolution doesn't close the loop)
+- issues: {'HIGH_LENGTH': 1, 'DOUBLE_EMO_INJECTION': 1}
     - [HIGH_LENGTH] form=`(clojure.edn/read-string "[:a :b :c]")` — user_msg 209 words
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(clojure.edn/read-string "[:a :b :c]")` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':a', ':b', ':c'), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(clojure.edn/read-string "[:a :b :c]")` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':a', ':b', ':c'), resolution doesn't close the loop)
     - [DOUBLE_EMO_INJECTION] form=`(clojure.edn/read-string "[:a :b :c]")` — sentence has 2+ distinct EMO-pool phrases ('stepping deliberately, one foo' + 'stepping deliberately') — the character can't earn two emotional registers in the same beat
 
 ### G10-14: eval (the function)
@@ -1873,10 +1861,7 @@ tortoise
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'STORY_RESOLUTION_NO_DRAWN': 3, 'CLAUSE_STACK_OVERFLOW': 1}
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(try (Math/sqrt 4) (catch Exception _ :err))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('4', ':err'), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(try (Math/sqrt 4) (catch Exception _ :err))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('4', ':err'), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(try (Math/sqrt 4) (catch Exception _ :err))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('4', ':err'), resolution doesn't close the loop)
+- issues: {'CLAUSE_STACK_OVERFLOW': 1}
     - [CLAUSE_STACK_OVERFLOW] form=`(try (Math/sqrt 4) (catch Exception _ :err))` — sentence with 5 commas reads as AI-output cadence: 'The runtime moves a value across the\nboundary, calls the human-side tool, and br'
 
 ## Grade 12
@@ -1885,21 +1870,25 @@ tortoise
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'HIGH_LENGTH': 1, 'COLLECTION_LEAK': 1, 'WRONG_FABLE_LITERAL': 1, 'CLAUSE_STACK_OVERFLOW': 1}
+- issues: {'HIGH_LENGTH': 1, 'COLLECTION_LEAK': 1, 'NUMERAL_LIST_IN_GOAL': 3, 'WRONG_FABLE_LITERAL': 1, 'CLAUSE_STACK_OVERFLOW': 1}
     - [HIGH_LENGTH] form=`(into [] (map inc) [1 2 3])` — user_msg 226 words
     - [COLLECTION_LEAK] form=`(into [] (map inc) [1 2 3])` — elements of expected [2, 3, 4] appear comma-separated in user_msg (collection answer leak)
+    - [NUMERAL_LIST_IN_GOAL] form=`(into [] (filter even?) [1 2 3 4 5])` — goal_text contains 5 numerals across 4 commas — comma-list of numerals blows the sentence's clause budget; use a range or 'these numbers' framing
+    - [NUMERAL_LIST_IN_GOAL] form=`(into [] (filter even?) [1 2 3 4 5])` — goal_text contains 5 numerals across 4 commas — comma-list of numerals blows the sentence's clause budget; use a range or 'these numbers' framing
     - [WRONG_FABLE_LITERAL] form=`(into [] (filter even?) [1 2 3 4 5])` — tortoise-hare ghost name 'Pip' appears in dog-shadow user_msg
-    - [CLAUSE_STACK_OVERFLOW] form=`(into [] (filter even?) [1 2 3 4 5])` — sentence with 8 commas reads as AI-output cadence: 'Pip the dog shook\nher head and went on with the work: to use the filter-even tra'
+    - [NUMERAL_LIST_IN_GOAL] form=`(into [] (filter even?) [1 2 3 4 5])` — goal_text contains 5 numerals across 4 commas — comma-list of numerals blows the sentence's clause budget; use a range or 'these numbers' framing
 
 ### G12-02: Transducer composition
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'CLAUSE_STACK_OVERFLOW': 4}
+- issues: {'NUMERAL_LIST_IN_GOAL': 6, 'CLAUSE_STACK_OVERFLOW': 4}
+    - [NUMERAL_LIST_IN_GOAL] form=`(into [] (comp (map inc) (filter even?)) [1 2 3 4]` — goal_text contains 4 numerals across 4 commas — comma-list of numerals blows the sentence's clause budget; use a range or 'these numbers' framing
     - [CLAUSE_STACK_OVERFLOW] form=`(into [] (comp (map inc) (filter even?)) [1 2 3 4]` — sentence with 8 commas reads as AI-output cadence: 'The receiver is patient; the gap is exact." To\ncompose map-inc and filter-even i'
+    - [NUMERAL_LIST_IN_GOAL] form=`(into [] (comp (map inc) (filter even?)) [1 2 3 4]` — goal_text contains 4 numerals across 4 commas — comma-list of numerals blows the sentence's clause budget; use a range or 'these numbers' framing
+    - [NUMERAL_LIST_IN_GOAL] form=`(into [] (comp (map inc) (filter even?)) [1 2 3 4]` — goal_text contains 4 numerals across 4 commas — comma-list of numerals blows the sentence's clause budget; use a range or 'these numbers' framing
+    - [NUMERAL_LIST_IN_GOAL] form=`(transduce (comp (map inc) (filter even?)) + 0 [1 ` — goal_text contains 6 numerals across 6 commas — comma-list of numerals blows the sentence's clause budget; use a range or 'these numbers' framing
     - [CLAUSE_STACK_OVERFLOW] form=`(transduce (comp (map inc) (filter even?)) + 0 [1 ` — sentence with 5 commas reads as AI-output cadence: 'Diesel, her breath even, her step even, her thought even, stood beside a fallen '
-    - [CLAUSE_STACK_OVERFLOW] form=`(transduce (comp (map inc) (filter even?)) + 0 [1 ` — sentence with 6 commas reads as AI-output cadence: 'Write a form whose evaluation gives the sum accumulated via transduce using the '
-    - [CLAUSE_STACK_OVERFLOW] form=`(transduce (comp (map inc) (filter even?)) + 0 [1 ` — sentence with 10 commas reads as AI-output cadence: 'Pebble the dog shook\nhis head and went on with the work: to compose map-inc and '
 
 ### G12-03: into with a transducer (xform)
 
@@ -2033,11 +2022,13 @@ tortoise
 ### Issue counts (across all examples × 3 records)
 
 - **CLAUSE_STACK_OVERFLOW**: 281
-- **STORY_RESOLUTION_NO_DRAWN**: 141
 - **NARRATIVE_NUMERAL_HARDCODE**: 138
+- **STORY_RESOLUTION_NO_DRAWN**: 84
 - **DOUBLE_EMO_INJECTION**: 80
 - **CONCEPT_PHRASE_COMMA_LIST**: 75
 - **HIGH_LENGTH**: 58
+- **REPL_TRIPLE_VOICE**: 54
+- **NUMERAL_LIST_IN_GOAL**: 48
 - **PARALLEL_POSSESSIVE_TIC**: 32
 - **REPL_AS_TIME_TRAVELLER**: 31
 - **RESOLUTION_GENERIC**: 31
@@ -2066,18 +2057,18 @@ tortoise
 
 | Grade | Subjects | Examples | Issues | Low-variety |
 |---|---|---|---|---|
-| 1 | 18 | 76 | 119 | — |
-| 2 | 22 | 88 | 171 | — |
-| 3 | 18 | 31 | 64 | — |
-| 4 | 20 | 39 | 80 | — |
-| 5 | 22 | 39 | 90 | — |
-| 6 | 16 | 33 | 39 | — |
-| 7 | 18 | 36 | 53 | — |
-| 8 | 16 | 31 | 112 | — |
+| 1 | 18 | 76 | 133 | — |
+| 2 | 22 | 88 | 173 | — |
+| 3 | 18 | 31 | 65 | — |
+| 4 | 20 | 39 | 101 | — |
+| 5 | 22 | 39 | 127 | — |
+| 6 | 16 | 33 | 23 | — |
+| 7 | 18 | 36 | 54 | — |
+| 8 | 16 | 31 | 103 | — |
 | 9 | 18 | 34 | 190 | — |
-| 10 | 16 | 36 | 78 | — |
-| 11 | 14 | 29 | 33 | — |
-| 12 | 18 | 37 | 43 | — |
+| 10 | 16 | 36 | 66 | — |
+| 11 | 14 | 29 | 30 | — |
+| 12 | 18 | 37 | 52 | — |
 
 ### Sample issues by severity
 
@@ -2414,6 +2405,43 @@ They needed to know if the two marks were distinct. The inequ...
 Bell the hound gathered three bones near the pond, each carved with the same mark: 9. She wanted to test if all three matched each other.
 
 She needed to know if all three marks were identical....
+    ```
+
+#### REPL_TRIPLE_VOICE
+
+- `G1-09` (form `(symbol? "tortoise")`): user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
+    ```
+    The bone was good, the day was warm, and the path was clear, and yet the trouble was already shaped in the water.
+
+Patch the hound held a message scratched on bark — not a name to pass around, but a strand of letters. "The reader will treat this as text, not as a symbol the dogs can quote," Patch sa...
+    ```
+- `G1-09` (form `(= 'hare 'hare)`): user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
+    ```
+    in the meadow, where the boards of the bridge meet the stones of the path, Jack the dog caught sight of himself in the stream.
+
+Rex the hound laid two scratch-marks side by side on bark near the forest. Both marks said the same thing: hare, hare. "Are these two scratches the same name?" Rex asked. "...
+    ```
+- `G1-10` (form `(+ 1 2) ;; sum of one and two`): user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
+    ```
+    The bone was good, the day was warm, and the path was clear, and yet the trouble was already shaped in the water.
+
+Bell the hound wrote a form on a clean strip of bark near the pond, then added a double-semicolon mark followed by a note in plain words. "The note is only for other dogs to read," she ...
+    ```
+- `G1-13` (form `(+ 1 2)`): user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
+    ```
+    It happened on a day so ordinary that it seemed impossible anything could have been lost.
+
+Bell the hound sat by a flat stone near the pond and laid out two small piles of bones — one of one bone, one of two — careful with the count.
+
+She wanted the precise size of the heap if both piles were nudged...
+    ```
+- `G1-13` (form `(/ 10 2)`): user_msg mentions 'REPL' 4 times — the REPL personification should appear at most twice per record (submit + return)
+    ```
+    The path home wound past a slow brook, and on bright days the brook was full of borrowed shapes.
+
+Patch the hound looked at a heap of ten bones and measured them into two equal piles. "How many bones in each pile?" asked a younger dog. "The runtime can tell us exactly by dividing."
+
+Patch wanted the...
     ```
 
 #### THE_FORM_OVERUSE
@@ -2962,6 +2990,51 @@ cool, the slots solid. "Whatever I wan...
 Patch the hound picked up an empty chain by the bank, a mere collar with no bones attached, and held it up.
 
 Patch wanted the empty chain itself to be a recognizable form that the REPL would h...
+    ```
+
+#### NUMERAL_LIST_IN_GOAL
+
+- `G4-13` (form `(count [1 2 3 4 5])`): goal_text contains 5 numerals across 4 commas — comma-list of numerals blows the sentence's clause budget; use a range or 'these numbers' framing
+    ```
+    It happened on a day so ordinary that it seemed impossible anything could have been lost.
+
+Rex the hound laid out five bones in a hollow log arranged in a neat row: 1, 2, 3, 4, 5. He wanted the precise count of all bones in the cache.
+
+He asked the REPL to tally the bones in the vector and return th...
+    ```
+- `G4-13` (form `(count [1 2 3 4 5])`): goal_text contains 5 numerals across 4 commas — comma-list of numerals blows the sentence's clause budget; use a range or 'these numbers' framing
+    ```
+    on the road, on a still afternoon by the brook, Pouncer learned what a reflection costs the careless.
+
+"Watch carefully," Pouncer said, holding open the hollow
+log. "Whatever I do to the cache, this one stays exactly as it
+was — what I get back is a fresh cache with the change made,
+leaving the firs...
+    ```
+- `G4-13` (form `(count [1 2 3 4 5])`): goal_text contains 5 numerals across 4 commas — comma-list of numerals blows the sentence's clause budget; use a range or 'these numbers' framing
+    ```
+    When Bruno reached the bridge at the edge of the pond, she paused to admire the bone he had been so lucky to find.
+
+"You can find what you want in a bone-cache several ways,"
+Bruno said, without raising her voice at the troubles of the road, gesturing at the hollow log:
+"by the scratch above the slo...
+    ```
+- `G5-10` (form `(map #(* % %) [1 2 3 4])`): goal_text contains 4 numerals across 4 commas — comma-list of numerals blows the sentence's clause budget; use a range or 'these numbers' framing
+    ```
+    Spaniel had crossed this bridge a hundred times at the village, but never with so fine a bone clamped in his jaws.
+
+Spaniel, with eyes always on the path, stood beside a fallen log laid
+across the stream in the village — a gap chewed through its middle, the
+water cool and steady beneath. "Whatever r...
+    ```
+- `G5-10` (form `(map #(* % %) [1 2 3 4])`): goal_text contains 4 numerals across 4 commas — comma-list of numerals blows the sentence's clause budget; use a range or 'these numbers' framing
+    ```
+    The path home wound past a slow brook, and on bright days the brook was full of borrowed shapes.
+
+Rocco, saying very little, stood beside a fallen log laid
+across the stream by the river bank — a gap chewed through its middle, the
+water cool and steady beneath. "Whatever rule we choose for the
+gap,"...
     ```
 
 #### COLLECTION_LEAK

@@ -54,7 +54,7 @@ OPENERS_TORTOISE_HARE: tuple[str, ...] = (
     # — placeholder-bearing openers —
     "All this took place {place}, where the dust still keeps the shape "
     "of the runners' feet.",
-    "{primary_phrase} liked to talk; {secondary_phrase} liked to listen, "
+    "{primary} liked to talk; {secondary} liked to listen, "
     "and the rivalry between them had grown into a small legend {place}.",
     "{place}, a Hare and a Tortoise once made a wager that the meadow "
     "still talks about.",
@@ -62,21 +62,21 @@ OPENERS_TORTOISE_HARE: tuple[str, ...] = (
     "feet and steady ones alike.",
     "{primary} was the first to laugh and the first to boast, and "
     "{secondary} simply began to walk.",
-    "When {primary_phrase} declared the race already won, no one yet "
+    "When {primary} declared the race already won, no one yet "
     "knew how long the afternoon would be.",
     "The sun rose {place}, and with it the question of who could "
     "outrun whom.",
-    "{primary_phrase} was certain {primary_he_she} could not lose; "
-    "{secondary_phrase} was certain of nothing except the next step.",
+    "{primary} was certain {primary_he_she} could not lose; "
+    "{secondary} was certain of nothing except the next step.",
     "A quiet wager passed between {primary} and {secondary}, and "
     "{place} the meadow folk gathered to see it answered.",
     "Word went around {place} that two creatures had agreed to settle "
     "an old question with their feet.",
     "{primary} announced the race in a voice loud enough to wake the "
     "owls, and {secondary} accepted with a nod.",
-    "{place}, where the path bends past the elm, {primary_phrase} "
-    "taunted {secondary_phrase} one too many times.",
-    "{secondary_phrase} had nothing to prove, but {primary_phrase} "
+    "{place}, where the path bends past the elm, {primary} "
+    "taunted {secondary} one too many times.",
+    "{secondary} had nothing to prove, but {primary} "
     "had everything to lose, and the race was on.",
     "Anyone passing {place} that morning would have seen {primary} "
     "stretching for show while {secondary} simply began.",

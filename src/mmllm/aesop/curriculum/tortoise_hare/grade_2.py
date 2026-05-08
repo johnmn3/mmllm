@@ -69,18 +69,14 @@ G2_01 = SubjectCurriculum(
             question_what="the sum of 1, 2, 3, and 4",
             goal_text="add 1, 2, 3, and 4",
             scenario=(
-                "Mossback the tortoise laid out four small acorn-heaps on a flat stone — "
-                "the day's four foraging trips, one heap per trip, counted as 1, then 2, "
-                "then 3, then 4."
+                "Mossback the tortoise laid out four small acorn-heaps on a flat stone — the day's four foraging trips, one heap per trip, counted as {drawn.a}, then {drawn.b}, then {drawn.c}, then 4."
             ),
             need=(
                 "She wanted to know the total acorns gathered across all four trips, to "
                 "measure the day's success before the storage bins."
             ),
             mapping=(
-                "`+` combines multiple heaps by adding their counts together. Each heap's "
-                "count stays the same; only the running total — the sum of 1, 2, 3, and 4 — "
-                "comes back."
+                "`+` combines multiple heaps by adding their counts together. Each heap's count stays the same; only the running total — the sum of {drawn.a}, {drawn.b}, {drawn.c}, and {drawn.d} — comes back."
             ),
             resolution=(
                 "the runtime returned the total count of the day's four trips gathered into "
@@ -115,9 +111,7 @@ G2_02 = SubjectCurriculum(
             question_what="whether 1 < 2 < 3",
             goal_text="test whether 1 is less than 2 and 2 is less than 3",
             scenario=(
-                "Pip the hare had three acorn-counts laid out on a tally stone — 1, then 2, "
-                "then 3, the counts rising from left to right. Mossback the tortoise studied "
-                "the line."
+                'Pip the hare had three acorn-counts laid out on a tally stone — {drawn.a}, then {drawn.b}, then {drawn.c}, the counts rising from left to right. Mossback the tortoise studied the line.'
             ),
             need=(
                 "Pip wanted to know whether each count was strictly bigger than the one before, "
@@ -162,8 +156,7 @@ G2_03 = SubjectCurriculum(
             question_what="whether 1 differs from 2",
             goal_text="test whether 1 and 2 are not equal",
             scenario=(
-                "Mossback the tortoise compared two acorn-heaps placed side by side — one heap "
-                "held 1 acorn, the other held 2 acorns. The heaps looked obviously different."
+                'Mossback the tortoise compared two acorn-heaps placed side by side — one heap held {drawn.a} acorn, the other held {drawn.b} acorns. The heaps looked obviously different.'
             ),
             need=(
                 "She wanted to confirm that the two counts were not the same, so she could sort "
@@ -174,8 +167,7 @@ G2_03 = SubjectCurriculum(
                 "identical, it returns false; if any count stands apart, it returns true."
             ),
             resolution=(
-                "the runtime confirmed the two heaps were not equal — 1 differed from 2, so "
-                "they belonged in separate baskets."
+                'the runtime confirmed the two heaps were not equal — {drawn.a} differed from {drawn.b}, so they belonged in separate baskets.'
             ),
             tags=("story",),
         ),
@@ -206,7 +198,7 @@ G2_04 = SubjectCurriculum(
             scenario=(
                 "Mossback the tortoise laid out three small acorn-counts "
                 "on a flat stone — from a dawn trip, a midday trip, and an "
-                "afternoon trip, each heap growing larger."
+                "afternoon trip, each heap growing larger. The values drawn fresh were {drawn.a}, {drawn.b}, and {drawn.c}."
             ),
             need=(
                 "She wanted to know which trip had been the lightest, to "
@@ -249,7 +241,7 @@ G2_05 = SubjectCurriculum(
             scenario=(
                 "Mossback the tortoise had gathered acorns and wanted to divide them equally "
                 "among several cubs in her den. She laid out heaps, placing acorns round after "
-                "round, until she ran out of acorns to distribute evenly."
+                "round, until she ran out of acorns to distribute evenly. The values drawn fresh were {drawn.a} and {drawn.b}."
             ),
             need=(
                 "She needed to know how many complete rounds of distribution she had made — how "
@@ -292,8 +284,7 @@ G2_06 = SubjectCurriculum(
             question_what="5 plus 1",
             goal_text="increment 5 by 1",
             scenario=(
-                "Pip the hare had gathered 5 acorns and placed them in a heap on a tally-mark "
-                "stone. Mossback the tortoise arrived with one more acorn from the path."
+                'Pip the hare had gathered {drawn.a} acorns and placed them in a heap on a tally-mark stone. Mossback the tortoise arrived with one more acorn from the path.'
             ),
             need=(
                 "Mossback needed to record the new total — the count climbing from what it was "
@@ -335,7 +326,7 @@ G2_07 = SubjectCurriculum(
             scenario=(
                 "Mossback the tortoise stood at a mark on a numbered trail. A positive number "
                 "was carved on the stone. She wanted to know the distance from the starting point, "
-                "regardless of direction."
+                "regardless of direction. The value drawn fresh was {drawn.a}."
             ),
             need=(
                 "She needed the pure distance as a counting number — no negative marks, no "
@@ -378,7 +369,7 @@ G2_08 = SubjectCurriculum(
             scenario=(
                 "Mossback the tortoise divided a berry into halves and quarters. She held "
                 "one half in her paw and one quarter in a small leaf. Both pieces were parts "
-                "of the same whole fruit."
+                "of the same whole fruit. The value at the heart of the form was 1."
             ),
             need=(
                 "She wanted to know what fraction of the whole berry she held combined — the "
@@ -419,7 +410,7 @@ G2_09 = SubjectCurriculum(
             scenario=(
                 "Mossback the tortoise held acorns and wanted to split them evenly in half "
                 "between two cubs. She laid down equal heaps per cub and checked that the split "
-                "was fair."
+                "was fair. The values drawn fresh were {drawn.a} and {drawn.b}."
             ),
             need=(
                 "She needed to know the fair share per cub — the division — so each cub got "
@@ -459,7 +450,7 @@ G2_10 = SubjectCurriculum(
             goal_text="multiply 2 by itself three times",
             scenario=(
                 "Mossback the tortoise arranged acorns in a small shape on the stone — stacking "
-                "them with equal measurements in three dimensions. She was building a tiny cubic heap."
+                "them with equal measurements in three dimensions. She was building a tiny cubic heap. The value drawn fresh was {drawn.a}."
             ),
             need=(
                 "She wanted to know the total acorns filling that cubic shape — how many acorns "
@@ -499,9 +490,7 @@ G2_11 = SubjectCurriculum(
             question_what='the result of using str to splice "ab" and "cd"',
             goal_text='use str to splice the two-letter strings "ab" and "cd" into a single thread',
             scenario=(
-                "Mossback the tortoise held two short threads of beads — "
-                'one with the two letters "ab" wound on, the other with '
-                'the two letters "cd". Two threads, four beads in all.'
+                'Mossback the tortoise held two short threads of beads — one with the two letters "{drawn.a}" wound on, the other with the two letters "{drawn.b}". Two threads, four beads in all.'
             ),
             need=(
                 "She wanted them spliced end to end into one longer "
@@ -509,10 +498,7 @@ G2_11 = SubjectCurriculum(
                 "name in her foraging-ledger."
             ),
             mapping=(
-                "`str` splices its arguments into one bead-string: each "
-                "argument's beads thread one after another. With two "
-                'short threads "ab" and "cd", the splice yields a single '
-                "four-bead thread."
+                '`str` splices its arguments into one bead-string: each argument\'s beads thread one after another. With two short threads "{drawn.a}" and "{drawn.b}", the splice yields a single four-bead thread.'
             ),
             resolution=(
                 "the spliced thread came back as a single four-letter "
@@ -562,8 +548,7 @@ G2_12 = SubjectCurriculum(
                 "words already spoken."
             ),
             resolution=(
-                "the runtime spoke the message 'hello' with a line-break after, and returned nil — "
-                "the call had done its work: the message was heard."
+                "the runtime spoke the message '{drawn.a}' with a line-break after, and returned nil — the call had done its work: the message was heard."
             ),
             tags=("story",),
         ),
@@ -687,7 +672,7 @@ G2_15 = SubjectCurriculum(
             scenario=(
                 "A wooden gate at the trail's fork had a verdict-stone carved with the number zero. "
                 "Mossback the tortoise stood before it, confused — zero was nothing, yet the gate "
-                "stood, not absent."
+                "stood, not absent. The values drawn fresh were {drawn.a} and {drawn.b}."
             ),
             need=(
                 "She needed to know if zero would open the gate or close it — whether the number "
@@ -730,9 +715,7 @@ G2_16 = SubjectCurriculum(
             question_what="the result of using boolean on 0",
             goal_text="convert 0 to a boolean",
             scenario=(
-                "Mossback the tortoise held the number 0 in a small pouch and approached Pip the "
-                "hare, who tended the gate at the trail's fork. Pip's stone told verdicts — true "
-                "meant open, false meant closed."
+                "Mossback the tortoise held the number {drawn.a} in a small pouch and approached Pip the hare, who tended the gate at the trail's fork. Pip's stone told verdicts — true meant open, false meant closed."
             ),
             need=(
                 "She wanted to know the verdict for zero: if she painted zero on the gate's "
@@ -773,7 +756,7 @@ G2_17 = SubjectCurriculum(
             scenario=(
                 "Mossback the tortoise's foraging-basket had two named pouches stitched into its "
                 "sides — one labeled :hare, the other labeled :tortoise. Each pouch held acorns, "
-                "different counts in each."
+                "different counts in each. The values drawn fresh were {drawn.a} and {drawn.b}."
             ),
             need=(
                 "Pip the hare arrived and asked what lay in the :hare pouch. Mossback wanted to "
@@ -860,7 +843,7 @@ G2_19 = SubjectCurriculum(
             scenario=(
                 "Mossback the tortoise counted acorns from a season's full harvest — a million "
                 "acorns stacked in one great heap, and another million in a second heap. She "
-                "wanted to multiply these enormous quantities."
+                "wanted to multiply these enormous quantities. The value drawn fresh was {drawn.a}."
             ),
             need=(
                 "She needed to know the total if she combined the heaps by multiplying — how many "
@@ -903,7 +886,7 @@ G2_20 = SubjectCurriculum(
             ),
             need=(
                 "She wanted to know how many pebbles lay in the row — the full count from start "
-                "to end, one tally-mark for each pebble she passed."
+                "to end, one tally-mark for each pebble she passed. The value drawn fresh was {drawn.a}."
             ),
             mapping=(
                 "`count` walks through a sequence from beginning to end, tallying each element "
@@ -938,9 +921,7 @@ G2_21 = SubjectCurriculum(
             question_what="the result of using count on the string tortoise",
             goal_text="count the characters in the string tortoise",
             scenario=(
-                "Mossback the tortoise held a bead-thread with beads wound along it — "
-                "each bead a letter spelling out a name. The thread hung straight in her paw, "
-                "strung end to end."
+                'Mossback the {drawn.a} held a bead-thread with beads wound along it — each bead a letter spelling out a name. The thread hung straight in her paw, strung end to end.'
             ),
             need=(
                 "She wanted to know the length of the thread — how many beads, from the first "
@@ -979,9 +960,7 @@ G2_22 = SubjectCurriculum(
             question_what="the result of multiplying 5 and 4, then subtracting 7",
             goal_text="compute 5 times 4, then subtract 7",
             scenario=(
-                "Pip the hare claimed he could race at 5 acorn-lengths per hour and travel for "
-                "4 hours straight. Mossback the tortoise, however, had given Pip a head-start "
-                "of 7 acorn-lengths at the starting stone."
+                'Pip the hare claimed he could race at {drawn.a} acorn-lengths per hour and travel for {drawn.b} hours straight. Mossback the tortoise, however, had given Pip a head-start of {drawn.c} acorn-lengths at the starting stone.'
             ),
             need=(
                 "She wanted to know Pip's true lead-adjusted distance — how far ahead he really "
@@ -993,8 +972,7 @@ G2_22 = SubjectCurriculum(
                 "the next, building from inner forms to the final answer."
             ),
             resolution=(
-                "the runtime calculated Pip's actual progress: 5 times 4 acorn-lengths run, minus "
-                "the 7-length head-start already given, leaving a true lead of the running total."
+                "the runtime calculated Pip's actual progress: {drawn.a} times {drawn.b} acorn-lengths run, minus the {drawn.c}-length head-start already given, leaving a true lead of the running total."
             ),
             tags=("story",),
         ),
