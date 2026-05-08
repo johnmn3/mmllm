@@ -125,7 +125,7 @@ G12_01 = SubjectCurriculum(
             expected=[2, 4],
             concept_phrase="the filter-even transducer applied via into",
             question_what="the vector of even elements reified via into with the filter-even transducer applied to the vector containing 1, 2, 3, 4, 5",
-            goal_text="use the filter-even transducer with into to keep only the even numbers from the vector containing 1, 2, 3, 4, 5",
+            goal_text="use the filter-even transducer with into to keep only the even numbers from the vector [1 2 3 4 5]",
             scenario=(
                 "Another rule lay on the stones — 'keep only the even "
                 "counts; drop the odd ones.' This rule was separated from "
@@ -166,7 +166,7 @@ G12_02 = SubjectCurriculum(
             expected=[2, 4],
             concept_phrase="the composed transducer pipeline of map-inc then filter-even",
             question_what="the vector result of reifying the composed transducer via into, applying map-inc then filter-even to the vector containing 1, 2, 3, 4",
-            goal_text="compose map-inc and filter-even into a transducer pipeline, then apply it with into to the vector containing 1, 2, 3, 4",
+            goal_text="compose map-inc and filter-even into a transducer pipeline; apply it with into to the vector [1 2 3 4]",
             scenario=(
                 "Mossback had two separated sieve-rules from the path: "
                 "one incremented, another kept only even ones. At the "
@@ -195,7 +195,7 @@ G12_02 = SubjectCurriculum(
             expected=12,
             concept_phrase="the composed transducer summing the incremented-then-filtered elements",
             question_what="the sum accumulated via transduce using the composed transducer of map-inc then filter-even, starting from 0, applied to the vector containing 1, 2, 3, 4, 5",
-            goal_text="compose map-inc and filter-even, then use transduce to sum the kept elements from the vector containing 1, 2, 3, 4, 5, starting from 0",
+            goal_text="compose map-inc and filter-even; use transduce to sum the kept elements from the vector [1 2 3 4 5] starting from 0",
             scenario=(
                 "At day's end, the stacked-sieve rule was ready: increment "
                 "first, then keep even. But this time, she wanted to tally "

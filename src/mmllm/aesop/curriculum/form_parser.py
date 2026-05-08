@@ -133,11 +133,11 @@ def _atom(kind: str, text: str) -> Expr:
         return Lit(_unquote_string(text))
     if kind == "charlit":
         body = text[1:]
-        if body == "newline": return Lit("\n")
-        if body == "space":   return Lit(" ")
-        if body == "tab":     return Lit("\t")
-        if body == "return":  return Lit("\r")
-        return Lit(body)
+        if body == "newline": return Lit("\n", is_char=True)
+        if body == "space":   return Lit(" ", is_char=True)
+        if body == "tab":     return Lit("\t", is_char=True)
+        if body == "return":  return Lit("\r", is_char=True)
+        return Lit(body, is_char=True)
     if kind == "keyword":
         # :foo or ::foo — strip leading colon(s)
         return Lit(text.lstrip(":"), is_kw=True)

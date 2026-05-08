@@ -462,12 +462,12 @@ CP_EMO_PATIENT = (
     "dropping each stone with careful attention",
     "steady in the stone-by-stone approach",
     "unbothered by the slow progress",
-    "trusting the process, stone after stone",
-    "unhurried, form after form",
+    "trusting the stone-by-stone process",
+    "unhurried with form after form",
     "patient as the water rose",
     "letting the count rise on its own",
-    "watching the level lift, drop by drop",
-    "deliberate, unhurried by the rising sun",
+    "watching the level lift",
+    "deliberate and unhurried by the rising sun",
 )
 CP_EMO_PROUD = (
     "with a triumphant rattle of feathers",

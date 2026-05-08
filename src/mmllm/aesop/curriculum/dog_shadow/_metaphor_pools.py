@@ -90,7 +90,7 @@ is in force only while my jaws stay closed," {hound_he_she} said,
 "and only for the form that names the binding. Step past the
 form's edge and the mouth is empty again." To {goal_text},
 {hound_he_she} composed {concept_phrase} with the binding gripped
-through that stretch, submitted it, and let the REPL read out the
+through that stretch. The REPL read out the
 value the mouth had held."""),
 
     # 3. Dog drops the bone for the shadow; Hound's careful hold wins.
@@ -102,7 +102,7 @@ the real bone fell with a splash. {hound_phrase}, {emo_patient},
 held {hound_his_her} grip steady and did the careful work
 instead: to {goal_text}, the binding had to be gripped only for
 its own stretch, not chased after a reflection. {hound} composed
-{concept_phrase}, submitted the form, and the REPL handed back
+{concept_phrase}. The REPL handed back
 the value the held bone — not the lost one — had carried."""),
 
     # 4. Substitution rule — wherever the form names the binding,
@@ -173,7 +173,7 @@ the value of the last."""),
 sketching two paw-paths in the dirt. "What one trail turns up,
 the next can take as its scent — together they make a longer
 sniffing-route." To {goal_text}, {hound_he_she} composed
-{concept_phrase}, submitted the form, and the REPL — walking the
+{concept_phrase}. The REPL — walking the
 trail in order — handed back the value at the end."""),
 
     # 5. The Dog-skips-the-trail template.
@@ -182,7 +182,7 @@ trail in order — handed back the value at the end."""),
 bound straight to the bone without bothering to follow the
 sniff-trail. {hound_phrase} only smiled and lowered
 {hound_his_her} nose. To {goal_text}, {hound_he_she} composed
-{concept_phrase}, submitted the form, and the REPL — running the
+{concept_phrase}. The REPL — running the
 trail sniff by sniff — handed back the value {dog} had been
 guessing at."""),
 ]
@@ -248,7 +248,7 @@ calling out guesses about its contents without quite checking.
 "I know exactly what's in there," {dog_he_she} insisted.
 {hound_phrase} shook {hound_his_her} head. To {goal_text}
 properly, {hound_he_she} wrote {concept_phrase} carefully on a
-flat stone, submitted the form, and the REPL — looking into the
+flat stone. The REPL — looking into the
 log the way the form told it to — handed back the answer {dog}
 had been guessing at."""),
 ]
@@ -270,7 +270,7 @@ gap," {hound_he_she} said, "the bones from the near bank pass
 through one at a time: some are changed, some kept, some held
 back, depending on the gap." To {goal_text}, {hound_he_she}
 composed {concept_phrase} as the gap's rule, ran the bones
-through, submitted the form, and the REPL returned what the
+through. The REPL returned what the
 gap had let pass."""),
 
     # 2. The float-through-and-collect template — pour-through emphasis.
@@ -281,7 +281,7 @@ the gap. "The bones come in at one end of the gap,"
 choosing or changing — and what falls into the receiving log is
 the result. The receiver is patient; the gap is exact." To
 {goal_text}, {hound_he_she} composed {concept_phrase}, ran the
-input through, submitted the form, and the REPL collected what
+input through. The REPL collected what
 fell into the receiving log."""),
 
     # 3. Stacked gaps — output of one feeds the next. (comp xform.)
@@ -292,7 +292,7 @@ running calm beneath both. "What lands at the bottom,"
 {hound_he_she} said, {emo_patient}, "has been through both rules
 in order — applied as a single combined gap." To {goal_text},
 {hound_he_she} composed {concept_phrase} as a stack of gaps,
-ran the input through, submitted the form, and the REPL caught
+ran the input through. The REPL caught
 what the stack had let through."""),
 
     # 4. The receiver template — pour into any kind of cache.
@@ -312,8 +312,7 @@ about what would come out the far side of the gap without
 bothering to actually run any through. {hound_phrase} shook
 {hound_his_her} head and went on with the work: to {goal_text},
 {hound_he_she} composed {concept_phrase} as the gap's rule, ran
-the input through carefully, submitted the form, and the REPL
-returned the only answer that would do — the one the gap had
+the input through carefully. The REPL returned the only answer that would do — the one the gap had
 actually produced."""),
 ]
 
@@ -351,7 +350,7 @@ the REPL applied the update atomically."""),
 "so any dog who comes by can read what's there right now. The
 count changes only when one of us scratches a new one — and only
 as the runtime allows." To {goal_text}, {hound_he_she}
-composed {concept_phrase}, submitted the form, and the REPL —
+composed {concept_phrase}. The REPL —
 reading or scratching the tally as the form prescribed — handed
 back the value the stone had carried."""),
 
@@ -361,7 +360,7 @@ back the value the stone had carried."""),
 "and each one's read or scratch must agree with the others. The
 runtime sees to that — no two writers stomp on each other's
 work." To {goal_text}, {hound_he_she} composed
-{concept_phrase}, submitted the form, and the REPL — coordinating
+{concept_phrase}. The REPL — coordinating
 each access cleanly — handed back what the tally now said."""),
 
     # 5. The Dog-snatches-at-the-stone template.
@@ -370,7 +369,7 @@ each access cleanly — handed back what the tally now said."""),
 trying to scratch an answer over the count. {hound_phrase} caught
 {dog_him_her} firmly: tallies shared by all the pack need careful
 updates, not snatches. To {goal_text}, {hound_he_she} composed
-{concept_phrase}, submitted the form, and the REPL — applying the
+{concept_phrase}. The REPL — applying the
 update the runtime's careful way — handed back the value the
 stone now held."""),
 ]
@@ -458,7 +457,7 @@ said, {emo_patient}: "nil and false. Everything else — zero, the
 empty string, an empty list — opens it. The verdict follows that
 rule exactly, the way a steady current keeps its line." To
 {goal_text}, {hound_he_she} composed {concept_phrase},
-{concept_phrase}, submitted the form, and the REPL returned the
+{concept_phrase}. The REPL returned the
 value the crossing had passed, true or false."""),
 
     # 3. The boolean-verdict template.
@@ -467,7 +466,7 @@ value the crossing had passed, true or false."""),
 {hound}, {emo_patient} said. "You bring the value to the bank, the
 runtime checks it, and the conditions give the only answer that
 matters." To {goal_text}, {hound_he_she} composed
-{concept_phrase}, submitted the form, and the REPL settled the
+{concept_phrase}. The REPL settled the
 matter — the conditions had spoken exactly as the rule said."""),
 
     # 4. The Dog-leaps-without-checking template.
@@ -506,7 +505,7 @@ each arm marked with a condition. "Branching forms in Clojure
 are forks like this," {hound}, {emo_patient} said. "The runtime checks
 the condition, takes the matching arm, and only that arm's value
 comes back." To {goal_text}, {hound_he_she} composed
-{concept_phrase}, submitted the form, and the REPL — having
+{concept_phrase}. The REPL — having
 taken the right arm — handed back its value."""),
 
     # 2. The crossroads template — applies to cond / case.
@@ -525,7 +524,7 @@ and the REPL took the right arm and returned its value."""),
 the arm not taken doesn't run at all. The runtime checks the
 condition, walks the right arm, and the unrun arm is just left
 behind." To {goal_text}, {hound_he_she} composed
-{concept_phrase}, submitted the form, and the REPL — running
+{concept_phrase}. The REPL — running
 only what was needed — handed back the value of the chosen
 arm."""),
 
@@ -544,7 +543,7 @@ value of the arm the form actually ran."""),
 "It isn't the dog who picks the arm," {hound}, {emo_patient} said, "it's
 the condition. Whatever the condition evaluates to, that
 decides." To {goal_text}, {hound_he_she} composed
-{concept_phrase}, submitted the form, and the REPL — letting the
+{concept_phrase}. The REPL — letting the
 condition decide — handed back the value of the arm the
 condition had pointed at."""),
 ]
@@ -562,7 +561,7 @@ name into its surface. "A def is a marker stone by the stream,"
 {hound_he_she} said. "Any dog passing reads the scratch, learns
 where the bone is buried, and can find it later by the name
 alone." To {goal_text}, {hound_he_she} composed
-{concept_phrase}, submitted the form, and the REPL set the
+{concept_phrase}. The REPL set the
 stone — the name now bound to its value for any later dog along
 the bank."""),
 
@@ -602,7 +601,7 @@ stone had promised."""),
 and called out what {dog_he_she} thought it said without slowing.
 {hound_phrase} stopped and read carefully. To {goal_text}, the
 scratch had to be read exactly: {hound_he_she} composed
-{concept_phrase}, submitted the form, and the REPL — reading
+{concept_phrase}. The REPL — reading
 literally — returned the right value, while {dog}'s guess fell
 short."""),
 ]
@@ -619,7 +618,7 @@ _SAFETYNET_SUBPLOTS: list[SubplotTemplate] = [
 {place}, testing its hold paw by paw before trusting full weight.
 "If the log gives, I retreat to the bank; the run doesn't end,
 only the path bends." To {goal_text}, {hound_he_she}
-composed {concept_phrase}, submitted the form, and the REPL —
+composed {concept_phrase}. The REPL —
 log tested in advance — caught any trouble and returned the
 value the catch-arm had specified, the run continuing the patient
 way."""),
@@ -678,8 +677,7 @@ along its length with a sharp claw. "The world outside the REPL
 is message-bones," {hound_he_she} said: "you read what they
 say, you scratch what you want to keep, and the runtime carries
 the marks back and forth." To {goal_text}, {hound_he_she}
-composed {concept_phrase}, submitted the form, and the REPL
-handed back what the bone had said, or what the writing had
+composed {concept_phrase}. The REPL handed back what the bone had said, or what the writing had
 committed."""),
 
     # 2. The reading-and-writing template — slurp / spit.
@@ -698,7 +696,7 @@ the writing had committed."""),
 {hound}, {emo_patient} said, "and a message-bone out there has its own
 discipline — pick it up carefully, handle it with care, set it
 back when you're done." To {goal_text}, {hound_he_she}
-composed {concept_phrase}, submitted the form, and the REPL —
+composed {concept_phrase}. The REPL —
 handling the bone the runtime's careful way — returned the value
 the work had produced."""),
 
@@ -708,7 +706,7 @@ the work had produced."""),
 what {dog_he_she} expected and didn't bother to actually read.
 {hound_phrase} brought it close and read carefully. To
 {goal_text} required the bone's actual marks — {hound_he_she}
-composed {concept_phrase}, submitted the form, and the REPL —
+composed {concept_phrase}. The REPL —
 reading the bone faithfully — returned the value the marks had
 held."""),
 
@@ -805,7 +803,7 @@ back what its method had returned."""),
 which kind of tool it is — some held by a single dog, some
 standard-issue called by the shed's name." To {goal_text},
 {hound_he_she} composed {concept_phrase} using the right
-calling convention, submitted the form, and the REPL — invoking
+calling convention. The REPL — invoking
 the host tool by its label — returned the value the host had
 computed."""),
 
@@ -825,7 +823,7 @@ the foreign tool had produced."""),
 the kennel-master's. The runtime moves a value across the
 boundary, calls the human-side tool, and brings the result back
 into the pack." To {goal_text}, {hound_he_she} composed
-{concept_phrase}, submitted the form, and the REPL — bridging
+{concept_phrase}. The REPL — bridging
 the two sheds — returned the value cleanly."""),
 
     # 5. The Dog-grabs-the-wrong-tool template.
@@ -853,7 +851,7 @@ poised. "A macro," {hound_he_she} said, "is a rule that rewrites
 a scent-mark before the pack ever follows it. You set the rule
 once, and any mark that uses it gets rewritten on the way to the
 trail." To {goal_text}, {hound_he_she} composed
-{concept_phrase}, submitted the form, and the REPL — first
+{concept_phrase}. The REPL — first
 rewriting, then evaluating — returned the value the rewritten
 mark yielded."""),
 
@@ -874,7 +872,7 @@ produced."""),
 involved, the runtime first walks through the form and applies
 the rule wherever it sees one — and only then does it evaluate
 the result." To {goal_text}, {hound_he_she} composed
-{concept_phrase}, submitted the form, and the REPL — rewriting
+{concept_phrase}. The REPL — rewriting
 first, evaluating second — returned the final value."""),
 
     # 4. The Dog-claims-no-rule-needed template.
@@ -894,7 +892,7 @@ unnecessary — {dog_he_she} could scratch the rewritten mark
 directly. {hound_phrase} only smiled: a hand-rewritten mark is
 fine once, but the rule pays off when many marks need rewriting
 the same way. To {goal_text}, {hound_he_she} composed
-{concept_phrase}, submitted the form, and the REPL — running the
+{concept_phrase}. The REPL — running the
 rule the rule's way — returned the value the rewritten form
 yielded."""),
 ]
@@ -983,7 +981,7 @@ returned the right answer."""),
 {hound}, {emo_patient} said, "you mark the form with a quote-scratch in
 front. Quoting tells the runtime: don't run this, just hand it
 back as the shape it is." To {goal_text}, {hound_he_she}
-composed {concept_phrase}, submitted the form, and the REPL —
+composed {concept_phrase}. The REPL —
 respecting the scratch — returned the form unevaluated."""),
 
     # 3. The labeling-form-vs-evaluating-it template.
@@ -1031,7 +1029,7 @@ keep on with your own work. The result will be there when you
 ask for it — sometimes you have to wait for the scout to be
 finished, sometimes you can keep arranging things until you
 need it." To {goal_text}, {hound_he_she} composed
-{concept_phrase}, submitted the form, and the REPL —
+{concept_phrase}. The REPL —
 coordinating the scout the way the form prescribed — returned
 the value when it was ready."""),
 
@@ -1062,7 +1060,7 @@ value at the right time."""),
 the scout had even returned from the far bank. {hound_phrase}
 held {dog_him_her} back: a scout sent ahead must be allowed to
 finish. To {goal_text}, {hound_he_she} composed
-{concept_phrase}, submitted the form, and the REPL — waiting
+{concept_phrase}. The REPL — waiting
 for the scout the patient way — returned the value when the
 scout had actually delivered it."""),
 ]
@@ -1099,7 +1097,7 @@ the bone — returned the pile-specific value."""),
 "You decide what to look at on each bone — a kind, a smell, a
 size, anything. The runtime reads it, finds the matching pile,
 and runs that one." To {goal_text}, {hound_he_she} composed
-{concept_phrase}, submitted the form, and the REPL — reading
+{concept_phrase}. The REPL — reading
 what the dispatch function produced — returned the value the
 right pile had given."""),
 
@@ -1138,7 +1136,7 @@ one for its size, one for its source. "Defrecord makes a bag
 like this," {hound_he_she} said: "named compartments holding
 specific things; a stamp on the outside saying what kind of
 bag it is." To {goal_text}, {hound_he_she} composed
-{concept_phrase}, submitted the form, and the REPL —
+{concept_phrase}. The REPL —
 constructing the bag, filling its compartments — returned the
 value the bag held or carried."""),
 
@@ -1174,7 +1172,7 @@ a time, a flat stone in {hound_his_her} jaws for the running
 tally. "Reduce is this walk," {hound_he_she} said: "at each
 bone, you fold its count into the tally; at the end, the tally
 is your answer." To {goal_text}, {hound_he_she} composed
-{concept_phrase}, submitted the form, and the REPL — walking
+{concept_phrase}. The REPL — walking
 the row, carrying the tally — returned the final number."""),
 
     # 2. The starting-tally template — reduce with init.
@@ -1193,7 +1191,7 @@ tally, walking the row — returned the final value."""),
 "step along the row, add one at every bone, no other operation.
 The runtime does this for any collection — vector, list, map,
 string." To {goal_text}, {hound_he_she} composed
-{concept_phrase}, submitted the form, and the REPL — walking the
+{concept_phrase}. The REPL — walking the
 row, counting the steps — returned the count."""),
 ]
 
@@ -1210,7 +1208,7 @@ _BEADSTRING_SUBPLOTS: list[SubplotTemplate] = [
 said: "a row of scratched marks, in order. Concat two strips
 together, and the marks are spliced; cut a substring out, and
 you get a shorter strip." To {goal_text}, {hound_he_she}
-composed {concept_phrase}, submitted the form, and the REPL —
+composed {concept_phrase}. The REPL —
 splicing or cutting as the form said — returned the new
 strip."""),
 
@@ -1229,7 +1227,7 @@ returned the answer the strip had given up."""),
 without bothering to count. {hound_phrase} stopped {dog_him_her}:
 strings are precise — every mark in its place, every position
 counted. To {goal_text}, {hound_he_she} composed
-{concept_phrase}, submitted the form, and the REPL — handling
+{concept_phrase}. The REPL — handling
 the strip carefully — returned the right answer."""),
 ]
 

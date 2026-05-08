@@ -690,7 +690,7 @@ G4_13 = SubjectCurriculum(grade=4, subject_id="G4-13",
             expected=5,
             concept_phrase="the count of a collection",
             question_what="the number of elements in the collection",
-            goal_text="count the elements in a vector containing 1, 2, 3, 4, and 5",
+            goal_text="count the elements in the vector [1 2 3 4 5]",
             scenario=(
                 "Mossback the tortoise's pebble row held five stones "
                 "laid out in order. She had lost track of the total and "

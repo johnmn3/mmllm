@@ -416,12 +416,12 @@ GOALS: dict[str, dict[str, str]] = {
     '(apply + [1 2 3 4])': {
         "concept": 'applying + to vector elements',
         "what":    'the result of spreading the basket of 1, 2, 3, 4 as ingredients into +',
-        "goal":    'apply + to the elements of the vector containing 1, 2, 3, and 4',
+        "goal":    'apply + to the elements of the vector [1 2 3 4]',
     },
     '(apply max [3 1 4 1 5])': {
         "concept": 'applying max to vector elements',
         "what":    'the largest count found after spreading the basket of 3, 1, 4, 1, 5 into max',
-        "goal":    'apply max to the elements of the vector containing 3, 1, 4, 1, and 5',
+        "goal":    'apply max to the elements of the vector [3 1 4 1 5]',
     },
     '(assoc {:a 1} :a 99)': {
         "concept": 'the assoc operation',
@@ -611,7 +611,7 @@ GOALS: dict[str, dict[str, str]] = {
     '(count [1 2 3 4 5])': {
         "concept": 'the count of a collection',
         "what":    'the number of elements in the collection',
-        "goal":    'count the elements in a vector containing 1, 2, 3, 4, and 5',
+        "goal":    'count the elements in the vector [1 2 3 4 5]',
     },
     '(count [1 2 3])': {
         "concept": 'the count operation',
@@ -650,8 +650,8 @@ GOALS: dict[str, dict[str, str]] = {
     },
     '(distinct [1 1 2 3 3 4])': {
         "concept": 'removing duplicates from a sequence',
-        "what":    'the sequence produced by passing 1, 1, 2, 3, 3, 4 through the dedup-sieve',
-        "goal":    'remove duplicate elements from the vector containing 1, 1, 2, 3, 3, and 4',
+        "what":    'the sequence produced by passing [1 1 2 3 3 4] through the dedup-sieve',
+        "goal":    'remove duplicate elements from the vector [1 1 2 3 3 4]',
     },
     '(do "#?(:clj … :cljs …) selects a form per host at read time" :studied)': {
         "concept": 'selecting code by host at read time',
@@ -1116,7 +1116,7 @@ GOALS: dict[str, dict[str, str]] = {
     '(drop 2 [10 20 30 40 50])': {
         "concept": 'dropping elements from a sequence',
         "what":    'the sequence produced by dropping 2 elements from the row of 10, 20, 30, 40, 50',
-        "goal":    'drop the first 2 elements from the vector containing 10, 20, 30, 40, and 50',
+        "goal":    'drop the first 2 elements from the vector [10 20 30 40 50]',
     },
     '(empty? "")': {
         "concept": 'checking if a string is empty',
@@ -1156,12 +1156,12 @@ GOALS: dict[str, dict[str, str]] = {
     '(filter even? [1 2 3 4])': {
         "concept": 'filtering even elements from a vector',
         "what":    'the sequence produced by filtering even? over the vector containing 1, 2, 3, and 4',
-        "goal":    'keep the even elements from the vector containing 1, 2, 3, and 4',
+        "goal":    'keep the even elements from the vector [1 2 3 4]',
     },
     '(filter pos? [-2 -1 0 1 2])': {
         "concept": 'filtering positive elements from a vector',
         "what":    'the sequence produced by filtering pos? over the vector containing -2, -1, 0, 1, and 2',
-        "goal":    'keep the positive elements from the vector containing -2, -1, 0, 1, and 2',
+        "goal":    'keep the positive elements from the vector [-2 -1 0 1 2]',
     },
     '(first (range 1 100))': {
         "concept": 'getting the first element of a range',
@@ -1251,12 +1251,12 @@ GOALS: dict[str, dict[str, str]] = {
     '(into [] (comp (map inc) (filter even?)) [1 2 3 4])': {
         "concept": 'the composed transducer pipeline of map-inc then filter-even',
         "what":    'the vector result of reifying the composed transducer via into, applying map-inc then filter-even to the vector containing 1, 2, 3, 4',
-        "goal":    'compose map-inc and filter-even into a transducer pipeline, then apply it with into to the vector containing 1, 2, 3, 4',
+        "goal":    'compose map-inc and filter-even into a transducer pipeline; apply it with into to the vector [1 2 3 4]',
     },
     '(into [] (filter even?) [1 2 3 4 5])': {
         "concept": 'the filter-even transducer applied via into',
         "what":    'the vector of even elements reified via into with the filter-even transducer applied to the vector containing 1, 2, 3, 4, 5',
-        "goal":    'use the filter-even transducer with into to keep only the even numbers from the vector containing 1, 2, 3, 4, 5',
+        "goal":    'use the filter-even transducer with into to keep only the even numbers from the vector [1 2 3 4 5]',
     },
     '(into [] (map inc) [1 2 3])': {
         "concept": 'the map-inc transducer applied via into',
@@ -1421,7 +1421,7 @@ GOALS: dict[str, dict[str, str]] = {
     '(map #(* % %) [1 2 3 4])': {
         "concept": 'mapping a squaring operation over a vector',
         "what":    'the sequence produced by mapping a squaring rule over the vector containing 1, 2, 3, and 4',
-        "goal":    'apply a squaring operation to each element of the vector containing 1, 2, 3, and 4, returning a sequence',
+        "goal":    'apply a squaring operation to each element of the vector [1 2 3 4] returning a sequence',
     },
     '(map (partial * 3) [1 2 3])': {
         "concept": 'mapping partial multiplication over a vector',
@@ -1606,7 +1606,7 @@ GOALS: dict[str, dict[str, str]] = {
     '(reduce * [1 2 3 4 5])': {
         "concept": 'the fold operation',
         "what":    'the product produced by walking 1, 2, 3, 4, 5 with * as the combine step',
-        "goal":    'fold * over the vector containing 1, 2, 3, 4, and 5, computing their product',
+        "goal":    'fold * over the vector [1 2 3 4 5] computing their product',
     },
     '(reduce + 0 [])': {
         "concept": 'the fold with initial value over empty sequence',
@@ -1621,12 +1621,12 @@ GOALS: dict[str, dict[str, str]] = {
     '(reduce + [1 2 3 4])': {
         "concept": 'the fold operation',
         "what":    'the running tally after walking 1, 2, 3, 4 with + as the combine step',
-        "goal":    'walk the row of pebbles 1, 2, 3, 4 carrying a tally that combines each with + into the running total',
+        "goal":    'walk the row of pebbles [1 2 3 4] carrying a tally that combines each with + into the running total',
     },
     '(reduce max [3 1 4 1 5 9 2 6])': {
         "concept": 'the fold operation',
-        "what":    'the largest pebble found by walking 3, 1, 4, 1, 5, 9, 2, 6 with max as the combine step',
-        "goal":    'fold max over the vector containing 3, 1, 4, 1, 5, 9, 2, and 6, finding the maximum',
+        "what":    'the largest pebble found by walking [3 1 4 1 5 9 2 6] with max as the combine step',
+        "goal":    'fold max over the vector [3 1 4 1 5 9 2 6] finding the maximum',
     },
     '(rem 100 7)': {
         "concept": 'the remainder',
@@ -1646,7 +1646,7 @@ GOALS: dict[str, dict[str, str]] = {
     '(some even? [1 3 5 8 7])': {
         "concept": 'checking if any element satisfies a predicate',
         "what":    'whether any pebble in 1, 3, 5, 8, 7 passes the even? sieve',
-        "goal":    'check if any element in the vector containing 1, 3, 5, 8, and 7 is even',
+        "goal":    'check if any element in the vector [1 3 5 8 7] is even',
     },
     '(some neg? [1 2 3])': {
         "concept": 'checking if any element satisfies a predicate',
@@ -1686,7 +1686,7 @@ GOALS: dict[str, dict[str, str]] = {
     '(take 3 [10 20 30 40 50])': {
         "concept": 'taking elements from a sequence',
         "what":    'the sequence produced by taking 3 elements from the row of 10, 20, 30, 40, 50',
-        "goal":    'take the first 3 elements from the vector containing 10, 20, 30, 40, and 50',
+        "goal":    'take the first 3 elements from the vector [10 20 30 40 50]',
     },
     '(tap> 42)': {
         "concept": 'the result of tapping a number into the tap pool',
@@ -1701,7 +1701,7 @@ GOALS: dict[str, dict[str, str]] = {
     '(transduce (comp (map inc) (filter even?)) + 0 [1 2 3 4 5])': {
         "concept": 'the composed transducer summing the incremented-then-filtered elements',
         "what":    'the sum accumulated via transduce using the composed transducer of map-inc then filter-even, starting from 0, applied to the vector containing 1, 2, 3, 4, 5',
-        "goal":    'compose map-inc and filter-even, then use transduce to sum the kept elements from the vector containing 1, 2, 3, 4, 5, starting from 0',
+        "goal":    'compose map-inc and filter-even; use transduce to sum the kept elements from the vector [1 2 3 4 5] starting from 0',
     },
     '(try (Math/sqrt 4) (catch Exception _ :err))': {
         "concept": 'catching exceptions from a host method call',

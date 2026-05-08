@@ -258,7 +258,7 @@ only the result from the last."""),
 several slates on the watchhouse step. "What one card serves, the next
 can take as its ingredient — together they make a longer routine." To
 {goal_text}, {elder_he_she} composed {concept_phrase} as a chain of
-routines, submitted the form, and the REPL — walking through the recipe
+routines. The REPL — walking through the recipe
 in order — handed back the value at the end."""),
 
     # 5. The shepherd boasts that he can guess the answer; the elder
@@ -268,7 +268,7 @@ in order — handed back the value at the end."""),
 routine would produce, certain {shepherd_he_she} knew without writing a
 thing. {elder_phrase} simply kept chalking on the watchhouse wall. To
 {goal_text}, {elder_he_she} composed {concept_phrase} as a careful
-drill-card, submitted the form, and the REPL — running the recipe step
+drill-card. The REPL — running the recipe step
 by step — handed back the only answer that would do: the one the card
 had actually produced."""),
 ]
@@ -292,8 +292,7 @@ _BASKET_SUBPLOTS: list[SubplotTemplate] = [
 read from the loose-weave basket, work the change, and the basket
 itself stays as it was — what I get back is a fresh arrangement,
 the original weight undisturbed." To {goal_text}, {elder_he_she}
-composed {concept_phrase}, submitted the form, and let the REPL
-handle the basket exactly as the operation prescribed."""),
+composed {concept_phrase}. The REPL handle the basket exactly as the operation prescribed."""),
 
     # 2. The named pouches within the basket — works for tagged fleeces
     #    (maps), positional wool (vectors), or kind-only baskets (sets).
@@ -307,7 +306,7 @@ handle the basket exactly as the operation prescribed."""),
 woven pouches: "by the name chalked on the cool sturdy pouch, by
 its place in the row, or by simply asking whether it's there at
 all." To {goal_text}, {elder_he_she} wrote {concept_phrase} for
-the basket, submitted the form, and the REPL applied the lookup
+the basket. The REPL applied the lookup
 or update exactly as the form directed — the answer surfacing
 clean from the steady weave."""),
 
@@ -320,7 +319,7 @@ fleece in its mouth — head at the front, the rest trailing behind. "Many
 of our baskets are like this procession," {elder_phrase}, {emo_patient}, said. "You can
 grab the head, you can ask for the tail, you can put a new sheep at the
 front of the line." To {goal_text}, {elder_he_she} composed
-{concept_phrase}, submitted the form, and the REPL marched the procession
+{concept_phrase}. The REPL marched the procession
 exactly as the form described."""),
 
     # 4. The new-basket-from-old template — immutability emphasis;
@@ -330,7 +329,7 @@ exactly as the form described."""),
 wool-basket. "Whatever I do to it, this one sits unchanged in the fold —
 what I get back is a fresh basket with the change made, leaving the first
 one exactly where it was." To {goal_text}, {elder_he_she} composed
-{concept_phrase}, submitted the form, and the REPL returned a new
+{concept_phrase}. The REPL returned a new
 arrangement while the original waited, untouched. {shepherd_phrase},
 {emo_tired}, was beginning to see why nothing could be lost by
 trying."""),
@@ -342,7 +341,7 @@ trying."""),
 out guesses about its contents without quite checking. "I know exactly
 what's in there," {shepherd_he_she} insisted. {elder_phrase} shook
 {elder_his_her} head. To {goal_text} properly, {elder_he_she} wrote
-{concept_phrase} carefully on a slate, submitted the form, and the REPL —
+{concept_phrase} carefully on a slate. The REPL —
 looking into the basket the way the form told it to — handed back the
 answer {shepherd} had been guessing at."""),
 ]
@@ -478,7 +477,7 @@ said."""),
 trying to scribble an answer over the tally. {elder_phrase} caught
 {shepherd_him_her} firmly: slates shared by all the valley need careful
 updates, not snatches. To {goal_text}, {elder_he_she} composed
-{concept_phrase}, submitted the form, and the REPL — applying the update
+{concept_phrase}. The REPL — applying the update
 the runtime's careful way — handed back the value the slate now held."""),
 ]
 
@@ -501,8 +500,7 @@ the patient way."""),
     SubplotTemplate(""""Watch the flock," {elder_phrase}, {emo_patient}, said, gesturing at the grazing sheep. "Every
 operation either adds a lamb, removes one, or combines what's already there —
 the flock grows or shrinks by exactly what you say." To {goal_text},
-{elder_he_she} composed {concept_phrase}, submitted the form, and the REPL
-returned the new count, the flock settled into its new arrangement."""),
+{elder_he_she} composed {concept_phrase}. The REPL returned the new count, the flock settled into its new arrangement."""),
 
     # 3. The careful-count template — generic; the operation is whatever
     #    the form says, but the elder's care with numbers is the metaphor.
@@ -561,7 +559,7 @@ said, regardless of {shepherd_phrase}'s guess."""),
 {emo_patient}, leaned on the heavy timber. "Two things and only two things
 close these gates: nil and false. An empty bucket or a sleeping flock still
 swings the gate open." To {goal_text}, {elder_he_she} composed
-{concept_phrase}, submitted the form, and the REPL returned the verdict the
+{concept_phrase}. The REPL returned the verdict the
 gate had carried."""),
 
     # 3. The first-closed-gate template — emphasizes short-circuiting.
@@ -582,7 +580,7 @@ exactly as the rule said."""),
 know exactly what they would do without checking the condition. "I just know,"
 {shepherd_he_she} insisted, calling out a prediction. {elder_phrase} only smiled
 and reached for pen and slate. To {goal_text}, {elder_he_she} composed
-{concept_phrase}, submitted the form, and the REPL — checking the gates
+{concept_phrase}. The REPL — checking the gates
 properly — returned the verdict the gates actually gave."""),
 
     # 5. The gate-carries-the-value template — generic emphasis on the REPL
@@ -625,7 +623,7 @@ condition properly — returned the value of the arm the form actually took.""")
 "Branching forms work like this," {elder_phrase}, {emo_patient}, said: "the shepherd walks past
 the stones in order, takes the first arm whose stone says true, and the value of
 that arm is what comes back." To {goal_text}, {elder_he_she} composed
-{concept_phrase}, submitted the form, and the REPL took the right arm and
+{concept_phrase}. The REPL took the right arm and
 returned its value."""),
 
     # 3. The unwalked-arm template — generic emphasis that branches not taken
@@ -649,8 +647,7 @@ pointed to — returned the arm the fork had truly revealed."""),
     #    is what picks the arm, not the shepherd's hopes.
     SubplotTemplate(""""It isn't the shepherd who picks the arm," {elder_phrase}, {emo_patient}, said, "it's the
 condition. Whatever the condition evaluates to, that decides." To {goal_text},
-{elder_he_she} composed {concept_phrase}, submitted the form, and the REPL
-— letting the condition decide — handed back the value of the arm the condition
+{elder_he_she} composed {concept_phrase}. The REPL — letting the condition decide — handed back the value of the arm the condition
 had pointed at."""),
 ]
 
@@ -674,7 +671,7 @@ fell short."""),
     SubplotTemplate(""""The good thing about a notice," {elder_phrase}, {emo_patient}, said, "is that it stays where
 you posted it. The next shepherd along the path reads what's there now —
 whatever the latest chalk says." To {goal_text}, {elder_he_she} composed
-{concept_phrase}, submitted the form, and the REPL — reading the notices as the
+{concept_phrase}. The REPL — reading the notices as the
 form directed — returned the value the notice-post had recorded."""),
 
     # 3. The library-of-scrolls template — generic; the library of named scrolls
@@ -683,8 +680,7 @@ form directed — returned the value the notice-post had recorded."""),
 scroll holding the notices for one stretch of the village. "Names live on
 scrolls," {elder_phrase}, {emo_patient}, said: "to use a notice from a scroll, you make sure the
 scroll is on the shelf where the REPL can find it." To {goal_text},
-{elder_he_she} composed {concept_phrase}, submitted the form, and the REPL
-— finding the right notice on the right scroll — returned the value the form
+{elder_he_she} composed {concept_phrase}. The REPL — finding the right notice on the right scroll — returned the value the form
 had asked for."""),
 
     # 4. The careful-naming template — generic emphasis on names being chosen
@@ -702,7 +698,7 @@ promised."""),
 "Names are pointless," {shepherd_he_she} claimed. "I can remember everything by
 sight." {elder_phrase} only sighed and began chalking more notices on the post.
 To {goal_text}, {elder_he_she} composed {concept_phrase}, posted the named
-notice, submitted the form, and the REPL — following the careful names —
+notice. The REPL — following the careful names —
 returned the value only naming could have preserved."""),
 ]
 
@@ -744,7 +740,7 @@ had produced."""),
 watchhouse, insisting {shepherd_he_she} had no need for testing or safety checks.
 "My code is perfect," {shepherd_he_she} claimed. {elder_phrase} said nothing,
 only smiled. To {goal_text}, {elder_he_she} composed {concept_phrase}, placed
-the form in the practice-pen, submitted it, and the REPL — pen in place —
+the form in the practice-pen. The REPL — pen in place —
 caught the slip that {shepherd_phrase} had not foreseen."""),
 
     # 5. The discipline-of-checking template — generic; emphasizes care in
@@ -752,7 +748,7 @@ caught the slip that {shepherd_phrase} had not foreseen."""),
     SubplotTemplate(""""There's a discipline to running safely," {elder_phrase}, {emo_patient}, said, "and it starts
 with checking — making sure the form does what it claims, catching what could go
 wrong before it does." To {goal_text}, {elder_he_she} composed
-{concept_phrase}, submitted the form, and the REPL — applying whatever check or
+{concept_phrase}. The REPL — applying whatever check or
 catch the form had asked for — returned the value the discipline had earned."""),
 ]
 
@@ -792,7 +788,7 @@ writing had committed."""),
 {elder_phrase}, {emo_patient}, said, "and the log-book out there has its own
 discipline — open it carefully, handle it with care, close it when
 you're done." To {goal_text}, {elder_he_she} composed
-{concept_phrase}, submitted the form, and the REPL — handling the
+{concept_phrase}. The REPL — handling the
 scroll the runtime's careful way — returned the value the work had
 produced."""),
 
@@ -803,7 +799,7 @@ produced."""),
 what {shepherd_he_she} expected and didn't bother to actually read.
 {elder_phrase} unrolled it carefully. To {goal_text} required the
 log-book's actual contents — {elder_he_she_cap} composed
-{concept_phrase}, submitted the form, and the REPL — reading the
+{concept_phrase}. The REPL — reading the
 scroll faithfully — returned the value the parchment had held."""),
 
     # 5. The two-worlds template — generic; the inside-the-REPL
@@ -831,7 +827,7 @@ Fellowship — any species may join." "A protocol is a fellowship,"
 {elder_he_she} said. "It lists what every member must be able to
 do — the methods. Any animal that can sign the book may claim
 membership." To {goal_text}, {elder_he_she} composed
-{concept_phrase}, submitted the form, and the REPL — fellowship
+{concept_phrase}. The REPL — fellowship
 founded — handed back the fellowship's record."""),
 
     # 2. The shepherd-claims-all-species-call template — shepherd
@@ -845,7 +841,7 @@ makes a fellowship useful," {elder_he_she} said, "is that the call is
 the same for every member, but each species answers in its own way.
 The runtime looks up which species the shepherd is, then runs that
 species' answer." To {goal_text}, {elder_he_she} composed
-{concept_phrase}, submitted the form, and the REPL — checking the
+{concept_phrase}. The REPL — checking the
 ledger, then dispatching to the right species — returned the
 species-specific value."""),
 
@@ -896,7 +892,7 @@ out a tool {elder_he_she} hadn't carved {elder_him_her}self — a tool
 from the host platform. "This isn't ours," {elder_he_she} said, "but
 we can call its methods directly: dot-prefix on the instance, or
 slash for static." To {goal_text}, {elder_he_she} composed
-{concept_phrase}, submitted the form, and the REPL — calling into
+{concept_phrase}. The REPL — calling into
 the foreign tool — handed back what its method had returned."""),
 
     # 2. The shepherd-calls-the-tool-wrong template — shepherd guesses
@@ -910,7 +906,7 @@ toolshed has its own label," {elder_he_she} said, "and the right way
 to call it depends on which kind of tool it is — some held by a
 shepherd, some standard-issue called by the toolshed's name." To
 {goal_text}, {elder_he_she} composed {concept_phrase} using the
-right calling convention, submitted the form, and the REPL — invoking
+right calling convention. The REPL — invoking
 the host tool by its correct label — returned the value the host had
 computed."""),
 
@@ -936,7 +932,7 @@ the watchhouse to the smith's shed. "Our toolshed is on this side; the
 smith's is on that side. When we need a smith's tool, the runtime
 carries the value over the wall, asks the foreign tool to do its work,
 and carries the result back." To {goal_text}, {elder_he_she} composed
-{concept_phrase}, submitted the form, and the REPL — making the
+{concept_phrase}. The REPL — making the
 crossing cleanly — returned the value the foreign tool had produced."""),
 
     # 5. The shepherd-grabs-the-wrong-tool template — shepherd guesses,
@@ -978,7 +974,7 @@ held {shepherd_him_her} back. "Once you've sent the runner ahead,"
 be there when you ask for it — sometimes you have to wait for the
 runner to be finished, sometimes you can keep arranging things until
 you need it." To {goal_text}, {elder_he_she} composed
-{concept_phrase}, submitted the form, and the REPL — coordinating the
+{concept_phrase}. The REPL — coordinating the
 runner the patient way — returned the value when the runner had
 finished."""),
 
@@ -1001,7 +997,7 @@ messengers each in their place. "The runtime keeps track of who
 sent what and when each one finishes," {elder_he_she} said, "so
 the values come back in the right order, no matter how long each
 runner takes." To {goal_text}, {elder_he_she} composed
-{concept_phrase}, submitted the form, and the REPL — coordinating
+{concept_phrase}. The REPL — coordinating
 the relay — returned the right value at the right time."""),
 
     # 5. The shepherd-doesn't-wait template — shepherd reaches for
@@ -1056,7 +1052,7 @@ chalking on the cool watchhouse slate. "First the watchhouse rewrites
 every drill-card that names the rule. Only after that — every
 appearance of the rule expanded — does the morning watch follow what
 the rewritten cards say." To {goal_text}, {elder_he_she} composed
-{concept_phrase}, submitted the form, and the REPL — rewriting first,
+{concept_phrase}. The REPL — rewriting first,
 evaluating second — returned the final value."""),
 
     # 4. The Shepherd-claims-no-rule-needed template — generic fable
@@ -1125,7 +1121,7 @@ slowly, paying attention to every mark. "The form has to be
 written so the reader can read it cleanly," {elder_he_she}
 said. "If the marks are right, the runtime gets the right form;
 if not, not." To {goal_text}, {elder_he_she} composed
-{concept_phrase}, submitted the form, and the REPL — reading
+{concept_phrase}. The REPL — reading
 exactly as written — returned the value cleanly."""),
 
     # 4. The Shepherd-misreads-the-form template — generic fable beat.
@@ -1134,7 +1130,7 @@ what {shepherd_he_she} thought it would do without paying attention to
 the conventions of how it was written. {elder_phrase} only
 shook {elder_his_her} head — the runtime reads the form
 exactly. To {goal_text}, {elder_he_she} composed
-{concept_phrase}, submitted the form, and the REPL — reading
+{concept_phrase}. The REPL — reading
 literally — returned the right value, while {shepherd}'s guess fell
 short."""),
 
@@ -1152,7 +1148,7 @@ and handed back the value."""),
 and would never work, certain {shepherd_he_she} could see through it
 without so much as reading. {elder_phrase} simply opened the slate
 quietly. To {goal_text}, {elder_he_she} composed {concept_phrase}
-with the marks precisely placed, submitted the form, and the REPL —
+with the marks precisely placed. The REPL —
 reading exactly as written — handed back the only answer that would do:
 the one the careful marks had specified."""),
 ]
@@ -1245,7 +1241,7 @@ gate — returned the value the right pen had produced."""),
 "you say what brand the pen handles and what the shepherds do
 when a sheep with that brand arrives." To {goal_text},
 {elder_he_she} composed {concept_phrase} for the right
-pen, submitted the form, and the REPL — adding the pen,
+pen. The REPL — adding the pen,
 dispatching the sheep — returned the pen-specific value."""),
 
     # 3. The runtime-reads-the-brand template — generic; the
@@ -1274,7 +1270,7 @@ returned the right value."""),
 sorting-gate without bothering to check its brand. {elder_phrase}
 pointed at the gate: every sheep must show the brand the gate
 sorts by. To {goal_text}, {elder_he_she} composed
-{concept_phrase}, submitted the form, and the REPL — reading the
+{concept_phrase}. The REPL — reading the
 brand first, dispatching second — returned the value from the
 correct pen."""),
 
@@ -1420,7 +1416,7 @@ threaded with knots at intervals. "Strings in Clojure are like this,"
 {elder_he_she} said: "a cord of characters in order. Splice two cords
 together, and the threads join; cut a section out, and you get a
 shorter cord." To {goal_text}, {elder_he_she} composed
-{concept_phrase}, submitted the form, and the REPL — splicing or
+{concept_phrase}. The REPL — splicing or
 cutting as the form said — returned the new tally-cord."""),
 
     # 2. The counting-knots template — string length / substring.
@@ -1448,7 +1444,7 @@ returned the right answer."""),
 "When I work with it, this cord stays exactly as it was — what I get
 back is a fresh cord with the change made, leaving the original
 untouched." To {goal_text}, {elder_he_she} composed
-{concept_phrase}, submitted the form, and the REPL returned a new
+{concept_phrase}. The REPL returned a new
 arrangement while the original cord waited in {elder_his_her} hand,
 every knot still in its place."""),
 

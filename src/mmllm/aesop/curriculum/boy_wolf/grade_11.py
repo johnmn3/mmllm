@@ -170,7 +170,7 @@ G11_02 = SubjectCurriculum(
                 "a boolean result. The runtime bridges the value across, and the host method answers truthfully."
             ),
             resolution=(
-                'Carol composed the form with both arguments in place, submitted it, and the REPL returned true—the word indeed started with the prefix. Tom saw that host methods could answer yes-or-no questions just as reliably as any village computation.'
+                'Carol composed the form with both arguments in place. The REPL returned true—the word indeed started with the prefix. Tom saw that host methods could answer yes-or-no questions just as reliably as any village computation.'
             )),
         _ex('(. "abc" toUpperCase)', "ABC",
             'the alternate dot form (. obj method)',

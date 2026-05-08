@@ -110,7 +110,7 @@ calling out guesses without bothering to peek into
 {tortoise_phrase}'s pouch. But the pouch was where the answer
 lived: {tortoise_he_she_cap} intended to {goal_text}, and the
 value was tucked away for exactly that stretch. {tortoise} wrote
-out {concept_phrase}, submitted it, and the REPL — looking in
+out {concept_phrase}. The REPL — looking in
 the pouch as the form told it to — handed back the value
 {hare} had not even thought to check."""),
 
@@ -285,7 +285,7 @@ Any animal could walk up, read the page, or — carefully — update
 it. "Atoms are like this notebook," {tortoise_phrase} {emo_patient} said. "You
 can deref to read; you can swap! to write atomically, no matter
 who else is watching." To {goal_text}, {tortoise_he_she} composed
-{concept_phrase}, submitted the form, and let the REPL work the
+{concept_phrase}. The REPL work the
 notebook exactly as the form prescribed."""),
 
     # 2. Atomic swap — read, apply, write, all in one motion.
@@ -359,8 +359,7 @@ pebbles go in at the top," {tortoise_he_she} said {emo_content}, "and the
 sieve does its work — applying the rule, choosing or changing —
 and what lands in the basket below is the result." To
 {goal_text}, {tortoise_he_she} composed {concept_phrase},
-poured the input through, submitted the form, and the REPL
-collected what fell into the receiving basket."""),
+poured the input through. The REPL collected what fell into the receiving basket."""),
 
     # 3. Stacked sieves — output of one feeds the next.
     #    (comp xform.)
@@ -410,8 +409,7 @@ _ACORN_SUBPLOTS: list[SubplotTemplate] = [
 them {emo_patient}. "Numbers in Clojure are like acorns in heaps,"
 {tortoise_he_she} said. "You can count them. You can add heaps
 together. You can split a heap." To {goal_text}, {tortoise_he_she}
-composed {concept_phrase}, submitted the form, and let the REPL
-hand back the count."""),
+composed {concept_phrase}. The REPL hand back the count."""),
 
     # 2. The basket-grows-or-shrinks template — for inc/dec, +/-.
     SubplotTemplate("""\
@@ -667,8 +665,7 @@ the patient way."""),
 gesturing wide. "A stumble here costs nothing. Type a form, see
 what comes back, fix it, try again. The REPL is forgiving in a
 way that a real race is not." To {goal_text}, {tortoise_he_she}
-composed {concept_phrase}, submitted the form, and the REPL
-returned the value — even if the form had been close to a
+composed {concept_phrase}. The REPL returned the value — even if the form had been close to a
 mis-step."""),
 
     # 3. The slip-and-recovery template — generic emphasis on
@@ -1079,8 +1076,8 @@ the result later — returned the value when it was ready."""),
     SubplotTemplate("""\
 "Once you've sent the runner ahead," {tortoise_phrase} {emo_patient} said, "you
 keep on with your own work. The result will be there when you ask
-for it — sometimes you have to wait for the runner to be finished,
-sometimes you can keep arranging things until you need it." To
+for it — sometimes you wait for the runner to finish; other times you keep
+arranging things until you need it." To
 {goal_text}, {tortoise_he_she} composed {concept_phrase},
 submitted the form. The REPL — coordinating the runner the
 way the form prescribed — returned the value when it was

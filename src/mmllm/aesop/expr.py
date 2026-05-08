@@ -58,6 +58,7 @@ class Lit(Expr):
     value: Any
     is_kw: bool = False  # treat str as Clojure keyword (`:foo`)
     is_set: bool = False # treat list as Clojure set (`#{...}`)
+    is_char: bool = False # str came from `\X` Clojure char literal (vs `"X"`)
 
     def eval(self, env: dict) -> Any:
         if self.is_kw:

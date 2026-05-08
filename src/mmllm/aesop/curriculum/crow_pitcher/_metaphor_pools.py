@@ -98,7 +98,7 @@ The wing is narrow — it holds only what fits inside the form's
 stretch. Step past the form's edge and the wing opens; the value
 existed only inside the form's reach." To {goal_text},
 {clever_he_she} composed {concept_phrase} with the binding held under
-a wing for that stretch, submitted it, and let the REPL read out the
+a wing for that stretch. The REPL read out the
 value the wing had held."""),
 
     # 3. Hasty crow ignores the wing; Clever crow's form-work wins.
@@ -108,7 +108,7 @@ without bothering to tuck a value under a wing like
 {clever_phrase} did. But the wing-cache was where the answer
 lived: {clever_he_she_cap} intended to {goal_text}, and the
 value was tucked away under the wing for exactly that form's stretch.
-{clever} composed {concept_phrase}, submitted it, and the REPL —
+{clever} composed {concept_phrase}. The REPL —
 reaching under the wing as the form told it to — handed back the value
 {hasty} had not even thought to cache."""),
 
@@ -121,8 +121,7 @@ was tucked there." {clever_he_she_cap} demonstrated by intending
 to {goal_text}: each mention of the bound name, {clever} said, would
 be replaced by the value from under the wing the moment the form
 ran — the wing's hold steady through every reference. {clever_phrase}
-composed {concept_phrase}, submitted the form, and the REPL
-substituted as promised — the wing-cache's value threaded into every
+composed {concept_phrase}. The REPL substituted as promised — the wing-cache's value threaded into every
 place the binding had been named."""),
 
     # 5. End-of-drop — the wing opens when the form's stretch is over.
@@ -188,7 +187,7 @@ handed back only the rise from the last."""),
 scratching several sequences on the pitcher's sides. "What one drop-order
 raises, the next can take as its starting height — together they make a longer
 sequence." To {goal_text}, {clever_he_she} composed
-{concept_phrase}, submitted the form, and the REPL — walking
+{concept_phrase}. The REPL — walking
 through the drop-order in sequence — handed back the value at the
 end."""),
 
@@ -220,7 +219,7 @@ at a time was the only way. "Whatever I want to do with the stones,"
 {clever_he_she} said, "I read from the pile, work the change, and
 the pile itself stays as it was — what I get back is a fresh
 arrangement." To {goal_text}, {clever_he_she} composed
-{concept_phrase}, submitted the form, and let the REPL handle the
+{concept_phrase}. The REPL handle the
 stone-pile exactly as the operation prescribed."""),
 
     # 2. The sorted-and-tagged-stones template — works for tagged
@@ -291,7 +290,7 @@ carefully — scratch a new one. "Atoms are like this water-tally,"
 {clever_phrase} said, {emo_patient}: "you can read the marks to see
 the level; you can scratch a new mark atomically, no matter who else
 is watching." To {goal_text}, {clever_he_she} composed
-{concept_phrase}, submitted the form, and let the REPL work the
+{concept_phrase}. The REPL work the
 tally exactly as the form prescribed."""),
 
     # 2. Atomic scratch — read, apply, mark, all in one motion.
@@ -312,7 +311,7 @@ the form, and the REPL applied the update atomically."""),
 "so any crow who comes by can read what's marked right
 now. The marks change only when someone scratches — and only as the
 runtime allows." To {goal_text}, {clever_he_she} composed
-{concept_phrase}, submitted the form, and the REPL — reading
+{concept_phrase}. The REPL — reading
 or scratching the tally as the form prescribed — handed back the
 value the mark had carried."""),
 
@@ -322,7 +321,7 @@ value the mark had carried."""),
 "Many crows can come and go past the pitcher," {clever_phrase}, {emo_patient}, said, "and each one's read or scratch must agree with the others.
 The runtime sees to that — no two crows scratch over each other's
 marks." To {goal_text}, {clever_he_she} composed
-{concept_phrase}, submitted the form, and the REPL — coordinating
+{concept_phrase}. The REPL — coordinating
 each mark cleanly — handed back what the tally now said."""),
 
     # 5. The Hasty-scratches-wildly template — Hasty crow tries to
@@ -356,8 +355,7 @@ away before they could weigh the climb. "Whatever rule I hold here,"
 {clever_he_she} said, "each stone passes under my eye one at a time:
 some are changed, some kept, some set aside, depending on the rule."
 To {goal_text}, {clever_he_she} composed {concept_phrase} as the
-rule, sorted the pile through, submitted the form, and the REPL
-returned what the rule had let drop."""),
+rule, sorted the pile through. The REPL returned what the rule had let drop."""),
 
     # 2. The sort-and-drop template — generic emphasis
     #    on the new-pile-out-the-other-side metaphor.
@@ -367,8 +365,7 @@ stones go under my eye at the top," {clever_he_she} said, "and
 the sorting-perch does its work — applying the rule, choosing or changing —
 and what lands in the pitcher below is the result." To
 {goal_text}, {clever_he_she} composed {concept_phrase},
-sorted the input through, submitted the form, and the REPL
-collected what fell into the waiting pitcher."""),
+sorted the input through. The REPL collected what fell into the waiting pitcher."""),
 
     # 3. Stacked rules — output of one feeds the next.
     #    (comp xform.)
@@ -389,7 +386,7 @@ REPL caught what the stack let drop."""),
 a gathered heap of any shape — the sorting-perch doesn't care;
 the destination does." To {goal_text}, {clever_he_she} composed
 {concept_phrase}, chose the right empty destination, sorted
-through the rule, submitted the form, and the REPL packed the
+through the rule. The REPL packed the
 result into the pile of {clever_his_her} choosing."""),
 
     # 5. The Hasty-tries-to-shortcut-the-rule template — Hasty
@@ -430,8 +427,7 @@ exactly what the heap, dropped pebble by pebble, would have raised."""),
 mound of smooth stones. "Every operation either adds more stones,
 takes some away, or combines what's already there — the heap grows or shrinks by
 exactly what you say." To {goal_text}, {clever_he_she}
-composed {concept_phrase}, submitted the form, and the REPL
-returned the new count, the heap settled into its new
+composed {concept_phrase}. The REPL returned the new count, the heap settled into its new
 arrangement."""),
 
     # 3. The careful-arrangement template — generic; the operation
@@ -445,7 +441,7 @@ allowed. "Numbers in Clojure don't fudge," {clever_he_she} said.
 "Whatever you do — adding, subtracting, dividing stones into smaller
 heaps with leftovers, comparing two piles — the runtime gets it
 exactly right, every time." To {goal_text}, {clever_he_she}
-composed {concept_phrase}, submitted the form, and the REPL handed
+composed {concept_phrase}. The REPL handed
 back the precise count — the heap counted as carefully as the day's
 heat would let the crow count it."""),
 
@@ -576,9 +572,8 @@ _ACORN_SUBPLOTS = _ACORN_SUBPLOTS + [
 _GATE_SUBPLOTS: list[SubplotTemplate] = [
 
     SubplotTemplate("""\
-{clever_phrase}, {emo_patient}, paused at the pitcher's rim {place},
-talon raised — the throat was narrow, the day was hot, and the dual
-latch above the water glinted in the sun.
+{clever_phrase}, {emo_patient}, paused at the pitcher's rim {place}, talon raised. The throat was
+narrow; the day was hot.
 "Boolean forms in Clojure are like a dual-gate check at the pitcher's
 mouth," {clever_he_she} said. "The runtime checks the value and the
 gate swings open or closed — what comes back is the gate's verdict;
@@ -614,7 +609,7 @@ regardless of {hasty}'s guess."""),
 {clever_phrase}, {emo_patient}, said. "Whatever the gate's verdict, that's what the
 runtime hands back — sometimes a strict true or false, sometimes the
 very value that passed the test." To {goal_text}, {clever_he_she}
-composed {concept_phrase}, submitted the form, and the REPL returned
+composed {concept_phrase}. The REPL returned
 the value the gate had carried through."""),
 ]
 
@@ -671,7 +666,7 @@ returned the value of the path the form actually ran."""),
 "It isn't the crow who picks the path," {clever_phrase}, {emo_patient}, said,
 "it's the condition. Whatever the condition evaluates to, that
 decides." To {goal_text}, {clever_he_she} composed
-{concept_phrase}, submitted the form, and the REPL — letting the
+{concept_phrase}. The REPL — letting the
 condition decide — handed back the value of the path the condition
 had pointed at."""),
 ]
@@ -714,7 +709,7 @@ right stone first saved a dozen useless lifts. "Names live on these
 stones," {clever_phrase} said, {emo_patient}: "to use a name carved
 on another stone, you make sure that stone is placed where the
 runtime can find it." To {goal_text}, {clever_he_she} composed
-{concept_phrase}, submitted the form, and the REPL — finding the
+{concept_phrase}. The REPL — finding the
 right name on the right stone — returned the value the form had
 asked for."""),
 
@@ -723,7 +718,7 @@ asked for."""),
 into the pitcher's clay. "A clear carving tells every later crow what to
 expect; a careless one trips them up." To {goal_text},
 {clever_he_she} composed {concept_phrase} with the right name in
-mind, submitted the form, and the REPL — reading the name exactly —
+mind. The REPL — reading the name exactly —
 returned the value the carving had promised."""),
 
     SubplotTemplate("""\
@@ -733,7 +728,7 @@ read carefully. The day was hot and the throat was narrow — a
 mis-read symbol cost a wasted pebble. {clever_phrase}, {emo_patient},
 stopped and read each scratch precisely. To {goal_text}, the carving
 had to be read exactly: {clever_he_she} composed
-{concept_phrase}, submitted the form, and the REPL — reading literally —
+{concept_phrase}. The REPL — reading literally —
 returned the right value."""),
 ]
 
@@ -750,13 +745,13 @@ _ROADSIGN_SUBPLOTS = _ROADSIGN_SUBPLOTS + [
 _SAFETYNET_SUBPLOTS: list[SubplotTemplate] = [
 
     SubplotTemplate("""\
-{clever_phrase}, {emo_patient}, spread a patch of soft moss beneath
-the pitcher {place} — the day was hot, the throat was narrow, and any
+{clever_phrase}, {emo_patient}, spread a patch of soft moss
+beneath the pitcher {place} — the day was hot, the throat was narrow, and any
 pebble flung wrong without a cushion would chip the rim and waste the
 work. "If a stone goes wrong — if the form fails — the moss catches
 it safely," {clever_he_she} said. "The pitcher's water level doesn't
 drop; you try a different stone." To {goal_text}, {clever_he_she}
-composed {concept_phrase}, submitted the form, and the REPL — moss
+composed {concept_phrase}. The REPL — moss
 in place — caught any trouble and returned the value the recovery
 path had specified."""),
 
@@ -822,7 +817,7 @@ scratching had written."""),
 forms," {clever_phrase}, {emo_patient}, said. "You ask the runtime for what's on the stone,
 you scratch what you want recorded, and the work goes both ways through
 one talon-tip." To {goal_text}, {clever_he_she} composed
-{concept_phrase}, submitted the form, and the REPL handed back what the
+{concept_phrase}. The REPL handed back what the
 stone had held."""),
 
     SubplotTemplate("""\
@@ -830,7 +825,7 @@ stone had held."""),
 {clever_phrase}, {emo_patient}, said, "and a flat stone out there has its own
 discipline — scratch it carefully, handle it with care, close the
 inscription when you're done." To {goal_text}, {clever_he_she}
-composed {concept_phrase}, submitted the form, and the REPL —
+composed {concept_phrase}. The REPL —
 handling the stone with care — returned the value the work had
 produced."""),
 
@@ -847,7 +842,7 @@ inscription had held."""),
 world outside it. Flat stones are how the two meet — a value crosses out
 and becomes scratches on stone, or scratches on stone cross in and become
 a value again." To {goal_text}, {clever_he_she} composed
-{concept_phrase}, submitted the form, and the REPL — bridging the two
+{concept_phrase}. The REPL — bridging the two
 worlds — handed back the value the work had carried."""),
 ]
 
@@ -899,7 +894,7 @@ the right answer."""),
 the stone-drop guild doesn't mean belonging to the inscription guild —
 the runtime checks each separately, and only the right guild's answer
 comes back." To {goal_text}, {clever_he_she} composed
-{concept_phrase}, submitted the form, and the REPL — respecting which
+{concept_phrase}. The REPL — respecting which
 guild was being called — returned the right value."""),
 
     SubplotTemplate("""\
@@ -938,7 +933,7 @@ value the right chute had produced."""),
 "To add a chute to the shape-sorting rim," {clever_phrase}, {emo_patient}, said, "you
 say what mark the chute handles and what happens when a stone with that
 mark arrives." To {goal_text}, {clever_he_she} composed
-{concept_phrase} for the right chute, submitted the form, and the REPL —
+{concept_phrase} for the right chute. The REPL —
 adding the chute, routing the stone — returned the chute-specific
 value."""),
 
@@ -1032,7 +1027,7 @@ what its method had returned."""),
 "Each vessel from the human potters has its own label," {clever_phrase}, {emo_patient}, said, "and the right way to call it depends on which kind of vessel it is
 — some held by a crow, some standard-issue from the potter's hand." To
 {goal_text}, {clever_he_she} composed {concept_phrase} using the
-right calling convention, submitted the form, and the REPL — invoking
+right calling convention. The REPL — invoking
 the host vessel's method by its label — returned the value the human had
 crafted."""),
 
@@ -1056,7 +1051,7 @@ cleanly."""),
 checking which method was which. The wrong method rattled back an error.
 {clever_phrase} shook {clever_his_her} head: to {goal_text} required
 reading the vessel's labels carefully. {clever_he_she_cap} composed
-{concept_phrase}, submitted the form, and the REPL — calling the right
+{concept_phrase}. The REPL — calling the right
 host method by name — returned the value cleanly."""),
 ]
 
@@ -1087,8 +1082,8 @@ the form, and the REPL — sending the scout, fetching the count later
     SubplotTemplate("""\
 "Once you've sent the scout ahead," {clever_phrase}, {emo_patient}, said, "you keep on
 dropping here. The count will be there when you signal for it —
-sometimes you have to wait for the scout to finish, sometimes you can
-keep dropping until the scout returns." To {goal_text},
+sometimes you wait for the scout to finish; other times you keep
+dropping until the scout returns." To {goal_text},
 {clever_he_she} composed {concept_phrase}, submitted the form, and
 the REPL — coordinating the scout the way the form prescribed — returned
 the value when it was ready."""),
@@ -1098,7 +1093,7 @@ the value when it was ready."""),
 part is being patient enough to wait for the count when it comes — not
 reaching for it too early, not giving up too soon. The runtime makes that
 easier than it sounds." To {goal_text}, {clever_he_she} composed
-{concept_phrase}, submitted the form, and the REPL — coordinating the
+{concept_phrase}. The REPL — coordinating the
 wait — returned the scout's count when the scout had it ready."""),
 
     SubplotTemplate("""\
@@ -1141,7 +1136,7 @@ the drop-order scratched on the rim before a single stone falls. You
 write the rule once, and any drop-order that calls it gets rewritten
 on the way to the pitcher; the rewrite happens cool and stable before
 the runtime ever sees the form." To {goal_text}, {clever_he_she}
-composed {concept_phrase}, submitted the form, and the REPL — first
+composed {concept_phrase}. The REPL — first
 rewriting, then evaluating — returned the value the rewritten
 drop-order yielded."""),
 
@@ -1149,7 +1144,7 @@ drop-order yielded."""),
 "Here's the difference between a rule and a drop-order," {clever_phrase}, {emo_patient}, said. "A drop-order takes stones and raises the water. A rule takes a
 *form* and makes a different *form* — only then does the runtime get to
 evaluate it." To {goal_text}, {clever_he_she} composed
-{concept_phrase}, submitted the form, and the REPL — applying the rule to
+{concept_phrase}. The REPL — applying the rule to
 the form first, then evaluating — handed back the value the rewritten form
 had produced."""),
 
@@ -1223,7 +1218,7 @@ cling to the talon, so each scratch had to be clean the first time.
 "The form has to be written so the reader can read it cleanly,"
 {clever_he_she} said. "If the marks are right, the runtime gets the
 right form; if not, not." To {goal_text}, {clever_he_she}
-composed {concept_phrase}, submitted the form, and the REPL —
+composed {concept_phrase}. The REPL —
 reading exactly as written — returned the value cleanly."""),
 
     # 4. The Hasty-misreads-the-form template — generic fable beat.
@@ -1233,7 +1228,7 @@ called out what {hasty_he_she} thought they would do without paying
 attention to the conventions of how they were scratched.
 {clever_phrase} only shook {clever_his_her} head — the runtime reads
 the form exactly. To {goal_text}, {clever_he_she} composed
-{concept_phrase}, submitted the form, and the REPL — reading
+{concept_phrase}. The REPL — reading
 literally — returned the right value, while {hasty}'s guess fell
 short."""),
 
@@ -1277,7 +1272,7 @@ value distinct — returned the right answer."""),
 {clever_phrase}, {emo_patient}, said, "you mark the form with chalk in front.
 Quoting tells the runtime: don't evaluate this, just hand
 it back as the shape it is." To {goal_text}, {clever_he_she}
-composed {concept_phrase}, submitted the form, and the REPL —
+composed {concept_phrase}. The REPL —
 respecting the chalk mark — returned the form unevaluated."""),
 
     # 3. The marking-vs-evaluating template — generic
@@ -1405,7 +1400,7 @@ returned the new pebble-string."""),
 {clever_phrase}, {emo_patient}, said. "Want a section of pebbles? Cut from one
 position to another and you get a smaller vine, the original
 untouched." To {goal_text}, {clever_he_she} composed
-{concept_phrase}, submitted the form, and the REPL — counting or
+{concept_phrase}. The REPL — counting or
 cutting — returned the answer the pebble-vine had given up."""),
 
     # 3. The reassembling-the-string template — generic string building.
@@ -1460,7 +1455,7 @@ day was long; many laps would be wanted before the water rose, so
 each lap had to leave no extra footprint behind. "Recur is this
 circuit," {clever_he_she} said: "back to the top with new bindings,
 no extra trail laid down behind us." To {goal_text}, {clever_he_she}
-composed {concept_phrase}, submitted the form, and the REPL —
+composed {concept_phrase}. The REPL —
 looping without growing the call-stack — returned the final value."""),
 
     # 2. The base-case template — termination.
@@ -1468,7 +1463,7 @@ looping without growing the call-stack — returned the final value."""),
 "Every circuit has a stopping condition," {clever_phrase}, {emo_patient}, said. "Without one, the crow walks forever. With one, the
 crow knows when the laps are done and the tally is the
 answer." To {goal_text}, {clever_he_she} composed
-{concept_phrase}, submitted the form, and the REPL — looping
+{concept_phrase}. The REPL — looping
 until the base case — returned the value the final lap
 produced."""),
 
