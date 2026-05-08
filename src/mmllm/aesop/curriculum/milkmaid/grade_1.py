@@ -50,11 +50,12 @@ in the REPL and read off whatever it returned."""),
     #    so the same wager-template doesn't always read as "drew a wager
     #    in the dust" verbatim (cosmetic variety).
     SubplotTemplate("""\
-At a moss-covered milestone {place}, {milkmaid_phrase} sketched a small
-wager into the path: whoever guessed the result of {form_display}
-first would win the right to set the next race. {farmer_phrase},
-{emo_patient}, said it was simpler to type the form into the REPL
-than to argue about {concept_phrase}."""),
+At a wayside post on the road to market {place}, {milkmaid_phrase}
+sketched a small wager in the dust: whoever guessed the result of
+{form_display} first would carry the heavier pail to market.
+{farmer_phrase}, {emo_patient}, said it was simpler to type the
+form into the REPL than to argue about {concept_phrase} with a
+pail of warm milk balanced on her head."""),
 
     # 2b. wager variant — chalk on stone
     SubplotTemplate("""\
@@ -87,11 +88,12 @@ agreed to try."""),
     #    equality (= 1 1)" / "the predicate (zero? 0)" don't fit
     #    "read aloud" semantically (you read FORMS aloud, not types).
     SubplotTemplate("""\
-A small audience of forest creatures had gathered {place} to watch
-{milkmaid_phrase} attempt to outwit {farmer_phrase} at reading the REPL.
-{farmer} pointed to {concept_phrase} and read out the form aloud:
-{form_display}. The crowd waited to see who would correctly write
-the form to submit."""),
+A handful of market-goers had gathered around the dairy cart
+{place} to watch {milkmaid_phrase} attempt to outwit
+{farmer_phrase} at reading the REPL. {farmer} pointed to
+{concept_phrase} and read out the form aloud: {form_display}.
+The neighbors waited, pails on the cart still warm, to see who
+would correctly write the form to submit."""),
 
     # 5. The race-pause template — hare pauses mid-race, tortoise catches up
     #    via careful evaluation.
@@ -108,9 +110,10 @@ evaluated to. {milkmaid} called it impossible.
 
     # 6. The notebook template — the tortoise keeps a careful ledger.
     SubplotTemplate("""\
-{farmer_phrase} had been keeping a small leather notebook of every
-form {farmer_he_she} had successfully evaluated. {place_idx}, the
-next entry was {concept_phrase}. {milkmaid_phrase} peered over
+{farmer_phrase} had been keeping a careful chalk-tally on the dairy
+slate of every form {farmer_he_she} had successfully evaluated —
+each entry one more notch toward a steady reckoning. {place_idx},
+the next entry was {concept_phrase}. {milkmaid_phrase} peered over
 {farmer_his_her} shoulder at the form {form_display} and asked what
 it would come out to.""".replace("{place_idx}", "Today {place}")),
 
@@ -127,11 +130,11 @@ it would come out to.""".replace("{place_idx}", "Today {place}")),
 write the form {form_display} and submit it to the REPL — just to be
 sure."""),
 
-    # 8. The puzzle-on-the-path template — they find a riddle on a sign.
+    # 8. The market-board template — a price-board posts a riddle.
     SubplotTemplate("""\
-A wooden sign nailed to a tree {place} carried a puzzle. The riddle
-was simple: it asked the reader to evaluate {form_display}. {milkmaid}
-laughed, {emo_proud}, and declared it too easy. {farmer} said
+A chalk-board nailed beside the market stall {place} carried a puzzle.
+The riddle was simple: it asked the reader to evaluate {form_display}.
+{milkmaid} laughed, {emo_proud}, and declared it too easy. {farmer} said
 patiently that the only way to be sure of {concept_phrase} was to put
 it in the REPL."""),
 ]
@@ -178,12 +181,12 @@ the value really was."""),
     #    Fix: drop "write a form to" verb-on-verb collision; use
     #    "produce a form whose evaluation would" (noun-clause framing).
     SubplotTemplate("""\
-At a moss-covered milestone {place}, {milkmaid_phrase} sketched a small
-wager into the path: whoever could produce a form whose evaluation
-would {goal_text} ahead of the other would win the right to set
-the next race. {farmer_phrase}, {emo_patient}, said it was
+At the wayside post on the road to market {place}, {milkmaid_phrase}
+sketched a small wager in the dust: whoever could produce a form
+whose evaluation would {goal_text} ahead of the other would carry
+the heavier pail home. {farmer_phrase}, {emo_patient}, said it was
 simpler to write {concept_phrase} carefully than to guess at the
-answer."""),
+answer with a pail balanced precariously on the head."""),
 
     # 3. The teacher template — Farmer teaches goal → form.
     #    Fix: "; submit that to the REPL" instead of "and submit it".
@@ -194,14 +197,15 @@ said, "you write {concept_phrase}; submit that to the REPL, and it
 hands you back the value." {milkmaid}, {emo_tired}, agreed to try
 writing it."""),
 
-    # 4. The audience template — onlookers wait to see the form written.
+    # 4. The audience template — market-goers watch the form written.
     SubplotTemplate("""\
-A small audience of forest creatures had gathered {place} to watch
-{milkmaid_phrase} attempt to outwit {farmer_phrase} at writing the
-right form. The challenge: {goal_text}. {farmer} reminded the
-crowd that what mattered was writing {concept_phrase} carefully,
-then submitting it to the REPL — not guessing aloud at the
-answer."""),
+A handful of market-goers had gathered around the dairy cart
+{place} to watch {milkmaid_phrase} attempt to outwit
+{farmer_phrase} at writing the right form. The challenge:
+{goal_text}. {farmer} reminded the neighbors that what mattered
+was writing {concept_phrase} carefully, then submitting it to
+the REPL — not guessing aloud at the answer with the pails still
+warm in the cart."""),
 
     # 5. The race-pause template — pause mid-race for a goal-write.
     #    Fix: drop "write a form to {goal_text}"; reframe as
@@ -213,13 +217,13 @@ to continue until someone could {goal_text} with a Clojure form.
 {farmer_his_her} usual pace, simply said: "Compose {concept_phrase};
 submit it. Whatever comes back is the answer.\""""),
 
-    # 6. The notebook template — Farmer records goal/form pairs.
+    # 6. The dairy-slate template — Farmer records goal/form pairs.
     SubplotTemplate("""\
-{farmer_phrase} kept a small leather notebook of every goal
-{farmer_he_she} had translated into a Clojure form. Today {place},
-the next entry was a goal: {goal_text}. {farmer} sat with pen in
-hand, ready to compose {concept_phrase}, then let the REPL
-confirm the value."""),
+{farmer_phrase} kept a careful chalk-tally on the dairy slate of
+every goal {farmer_he_she} had translated into a Clojure form.
+Today {place}, the next entry was a goal: {goal_text}. {farmer}
+stood by the slate with chalk in hand, ready to compose
+{concept_phrase}, then let the REPL confirm the value."""),
 
     # 7. The boast-and-rebuke template — Milkmaid boasts; Farmer asks
     #    for the actual form. Fix: "To X is something anyone could
@@ -232,13 +236,15 @@ who {place} had grown used to such claims, asked {milkmaid_him_her} to
 actually write {concept_phrase}, then submit it to the REPL —
 just to be sure."""),
 
-    # 8. The puzzle-on-the-path template — a sign poses the goal.
+    # 8. The market-board-puzzle template — a price-board posts the goal.
     SubplotTemplate("""\
-A wooden sign nailed to a tree {place} carried a small puzzle. The
-challenge was simple: {goal_text}. {milkmaid} laughed, {emo_proud}, and
-declared it too easy. {farmer} said patiently that the only way
-to be sure of {concept_phrase} was to write the form and put it
-in the REPL — not to guess at the value from the goal alone."""),
+A chalk-board nailed beside the market stall {place} carried a small
+puzzle. The challenge was simple: {goal_text}. {milkmaid} laughed,
+{emo_proud}, and declared it too easy. {farmer} said patiently that
+the only way to be sure of {concept_phrase} was to write the form
+and put it in the REPL — not to guess at the value from the goal
+alone, the way a daydreamer guesses the value of a pail before
+reaching market."""),
 
     # 9. The Milkmaid-stumbles template — Milkmaid's hurry betrays him; the
     #    Farmer's careful form returns the value first. Delivers
