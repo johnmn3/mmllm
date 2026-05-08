@@ -129,6 +129,19 @@ def _build_emo_markers():
             markers.extend(pool)
     except ImportError:
         pass
+    # Boy-wolf-specific EMO pools (added by the audit-boy-wolf-eUtZ
+    # slice when LOW_GROUNDING was failing to credit the elder's
+    # BW_EMO_PATIENT phrasing for patient-evaluator records).
+    try:
+        from mmllm.aesop.curriculum.boy_wolf.grade_1 import (
+            BW_EMO_PROUD, BW_EMO_PATIENT, BW_EMO_TIRED,
+            BW_EMO_REGRETFUL, BW_EMO_DESPERATE,
+        )
+        for pool in (BW_EMO_PROUD, BW_EMO_PATIENT, BW_EMO_TIRED,
+                      BW_EMO_REGRETFUL, BW_EMO_DESPERATE):
+            markers.extend(pool)
+    except ImportError:
+        pass
     # De-dupe and sort longest-first so longer markers match before
     # their substrings.
     return tuple(sorted(set(markers), key=len, reverse=True))
@@ -969,6 +982,40 @@ def check_record(rec, sub, example):
                                 f"story-tagged example's resolution slot has no "
                                 f"drawn-value reference (form has literals "
                                 f"{lits[:3]!r}, resolution doesn't close the loop)"))
+
+    # ─────────── slice eUtZ (boy-wolf) detector additions ────────────
+
+    # THE_FORM_OVERUSE — boy-wolf 0HIm-style templates string together
+    # "the form" 5+ times in close succession ("the REPL ran the form
+    # against the form, then the form's scope handed back the form
+    # the form had requested"). Five+ occurrences in one rendered
+    # user_msg reads as a tic, not as natural English. Cat-I
+    # (distractions: over-announcing the operation).
+    if user.lower().count("the form") >= 5:
+        issues.append(("THE_FORM_OVERUSE",
+                       f"`the form` appears "
+                       f"{user.lower().count('the form')} times in "
+                       "user_msg (template tic — vary references)"))
+
+    # HONEST_JUDGE_REPEAT — boy-wolf-specific bombast: "honest as the
+    # watchhouse slate" plus "the only honest judge" plus "honestly
+    # answered" stack up across the goal-template + story-scaffold
+    # closing. Two "honest" hits in one record reads as moralizing.
+    # Cat-G (emotional / tone — pretentious closing).
+    if sub.fable == "boy-wolf" and len(re.findall(r"\bhonest", user.lower())) >= 2:
+        issues.append(("HONEST_JUDGE_REPEAT",
+                       "two or more 'honest' uses in one boy-wolf "
+                       "user_msg (judge-bombast tic — drop one)"))
+
+    # VILLAGE_NOUN_OVERUSE — boy-wolf template-tic: "the village" used
+    # 4+ times (one in opener, one in story-scaffold, one in
+    # resolution, plus extras from per-template). Drains the noun of
+    # specificity. Cat-I distraction.
+    if sub.fable == "boy-wolf" and user.lower().count("the village") >= 4:
+        issues.append(("VILLAGE_NOUN_OVERUSE",
+                       f"`the village` appears "
+                       f"{user.lower().count('the village')} times "
+                       "(noun-saturation tic — vary or drop)"))
 
     return issues
 
