@@ -1060,13 +1060,23 @@ def _build_ge_placeholders(scene: Scene,
 def _render_question(scene: Scene, example: SubjectExample,
                      question_what: str | None = None) -> str:
     """The closing line of the user_msg. Always asks the student to
-    write a Clojure expression that produces the answer."""
-    what = question_what if question_what is not None else example.question_what
+    write a Clojure expression that produces the answer.
+
+    If question_what already ends with ``?`` (often because the author
+    references a predicate by name — ``contains?`` / ``empty?`` /
+    ``zero?``), strip the trailing ``?`` before appending framing
+    punctuation. Otherwise the rendered text reads ``... using
+    contains?? Submit ...`` (PREDICATE_QUESTION_COLLISION).
+    """
+    qw = question_what if question_what is not None else example.question_what
+    # Strip trailing ``?`` so the framing's own ``?`` or ``.`` doesn't
+    # collide with the predicate-name suffix.
+    qw = qw.rstrip().rstrip('?').rstrip()
     framings = (
-        f"Write a Clojure expression that computes {what}.",
-        f"Write a form whose evaluation gives {what}.",
-        f"What Clojure form computes {what}? Submit it via `eval`.",
-        f"Question: write a Clojure expression for {what}.",
+        f"Write a Clojure expression that computes {qw}.",
+        f"Write a form whose evaluation gives {qw}.",
+        f"What Clojure form computes {qw}? Submit it via `eval`.",
+        f"Question: write a Clojure expression for {qw}.",
     )
     return scene.rng.choice(framings)
 

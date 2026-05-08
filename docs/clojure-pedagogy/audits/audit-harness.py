@@ -707,6 +707,46 @@ def check_record(rec, sub, example):
     #       it's "softly" / "quietly" / "gently" / "calmly" — bare adverb
     #       rather than an environment-anchored EMO phrase.
     #
+    # PREDICATE_QUESTION_COLLISION — a Clojure predicate ends in ``?``,
+    # and when the question framing appends its own ``?`` or ``.`` the
+    # rendered text reads ``contains??``, ``empty??``, ``zero??.``,
+    # ``contains?.`` etc. Surfaced as a Cat-C papercut by the
+    # crow-pitcher 0HIm deep audit.
+    if re.search(r"\b\w+\?[?]", user) or re.search(r"\b\w+\?\.(?!\.)", user):
+        issues.append(("PREDICATE_QUESTION_COLLISION",
+                       "predicate-suffix ``?`` collides with the question "
+                       "framing's trailing ``?`` or ``.``"))
+
+    # WRONG_FABLE_LITERAL — a tortoise-hare-specific named character
+    # appears in a non-tortoise-hare record's user_msg. Either as a
+    # defrecord field-name string or in narrative prose. Cat-E
+    # (semantic — wrong-fable imagery leakage).
+    if sub.fable != "tortoise-hare":
+        for ghost in ("Mossback", "Shelly", "Slowpoke", "Pip",
+                      "Bramble", "Hopper", "Whisker", "Speedwick",
+                      "Speedy"):
+            if re.search(r"\b" + ghost + r"\b", user):
+                issues.append(("WRONG_FABLE_LITERAL",
+                               f"tortoise-hare ghost name '{ghost}' "
+                               f"appears in {sub.fable} user_msg"))
+                break
+
+    # FOREIGN_FABLE_IMAGERY — wrong-fable props in narrative prose.
+    # Cat-H (plot coherence).
+    if sub.fable != "tortoise-hare":
+        TH_IMAGERY = (
+            "moss-covered milestone",
+            "leather notebook",
+            "wooden sign nailed to a tree",
+            "small audience of forest creatures",
+        )
+        for ph in TH_IMAGERY:
+            if ph in user:
+                issues.append(("FOREIGN_FABLE_IMAGERY",
+                               f"tortoise-hare-specific imagery "
+                               f"'{ph}' leaks into {sub.fable} prose"))
+                break
+
     # Both modes are LOW_GROUNDING.
     _check_grounding(user, rec, issues)
 
