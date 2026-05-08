@@ -115,8 +115,8 @@ G12_01 = SubjectCurriculum(
                 "falls into an empty vector."
             ),
             resolution=(
-                "each pebble emerged incremented by one, and the vector "
-                "caught the result: counts of 2, 3, and 4."
+                "rule and basket worked in alternation; the incremented "
+                "counts landed in the vector, source order preserved."
             ),
             tags=("story",),
         ),
@@ -142,8 +142,11 @@ G12_01 = SubjectCurriculum(
                 "empty vector and the input pebbles."
             ),
             resolution=(
-                "the rule kept the even counts — 2 and 4 — and dropped the "
-                "odd ones. The vector caught the filtered row."
+                "the rule weighed each count against the even-test in "
+                "alternation with the basket's collecting; what passed "
+                "the constraint landed in the vector, what failed was "
+                "let go, and the runtime returned the kept row in the "
+                "order the source had delivered it."
             ),
             tags=("story",),
         ),
@@ -247,8 +250,8 @@ G12_03 = SubjectCurriculum(
                 "specific receiver — here, an empty set."
             ),
             resolution=(
-                "the incremented counts fell into the set-basket, which "
-                "kept only unique values."
+                "rule and basket worked in alternation; only unique "
+                "incremented counts landed in the set."
             ),
             tags=("story",),
         ),

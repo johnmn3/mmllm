@@ -17,6 +17,50 @@ from pathlib import Path
 sys.path.insert(0, "/home/user/mmllm/src")
 
 from mmllm.aesop.curriculum.generator import generate_subject
+from mmllm.aesop.curriculum.emotion_pools import (
+    EMO_PROUD as EP_PROUD, EMO_PATIENT as EP_PATIENT,
+    EMO_TIRED as EP_TIRED, EMO_THIRSTY as EP_THIRSTY,
+    EMO_HUNGRY as EP_HUNGRY, EMO_GREEDY as EP_GREEDY,
+    EMO_CONTENT as EP_CONTENT, EMO_REGRETFUL as EP_REGRETFUL,
+    EMO_DESPERATE as EP_DESPERATE,
+    EMO_SUSPICIOUS as EP_SUSPICIOUS,
+    EMO_BOASTFUL as EP_BOASTFUL, EMO_CAUTIOUS as EP_CAUTIOUS,
+)
+# Also union the renderer-side pools (mmllm.aesop.fables) so the
+# detector matches phrases the generator actually emits — the two sets
+# overlap heavily but a handful of short phrases (e.g. "without
+# complaint") live only in fables and would otherwise be undetected.
+from mmllm.aesop.fables import (
+    EMO_PROUD as F_PROUD, EMO_PATIENT as F_PATIENT,
+    EMO_TIRED as F_TIRED, EMO_HUNGRY as F_HUNGRY,
+    EMO_GREEDY as F_GREEDY, EMO_CONTENT as F_CONTENT,
+    EMO_REGRETFUL as F_REGRETFUL, EMO_DESPERATE as F_DESPERATE,
+)
+
+# Cached set of all archetype-pool phrases for LOW_GROUNDING detector.
+_ALL_EMO_PHRASES: tuple[str, ...] = tuple(set(
+    EP_PROUD + EP_PATIENT + EP_TIRED + EP_THIRSTY + EP_HUNGRY +
+    EP_GREEDY + EP_CONTENT + EP_REGRETFUL + EP_DESPERATE +
+    EP_SUSPICIOUS + EP_BOASTFUL + EP_CAUTIOUS +
+    F_PROUD + F_PATIENT + F_TIRED + F_HUNGRY + F_GREEDY +
+    F_CONTENT + F_REGRETFUL + F_DESPERATE
+))
+
+# Regex to pull int/keyword/string/quoted-symbol literals from rec.code_str.
+_LITERAL_RES = (
+    re.compile(r'(?<![\w-])(-?\d+(?:/\d+)?)(?![\w-])'),  # ints, ratios
+    re.compile(r':([a-zA-Z][\w.-]*)'),                   # keywords (no leading :)
+    re.compile(r'"([^"\\]*(?:\\.[^"\\]*)*)"'),           # strings
+    re.compile(r"'([a-zA-Z][\w.-]*)"),                   # quoted symbols
+)
+
+
+def _drawn_literals(form: str) -> list[str]:
+    """Return all int/keyword/string/quoted-symbol literals in `form`."""
+    out = []
+    for r in _LITERAL_RES:
+        out.extend(r.findall(form))
+    return out
 
 
 CURRICULUM_ROOT = Path("/home/user/mmllm/src/mmllm/aesop/curriculum")
@@ -746,6 +790,69 @@ def check_record(rec, sub, example):
                                f"tortoise-hare-specific imagery "
                                f"'{ph}' leaks into {sub.fable} prose"))
                 break
+
+    # Tortoise-hare hand-audit (claude/audit-tortoise-hare-GCVH):
+    #
+    # POST_COMMA_CAPITAL_PRONOUN — capitalized pronoun (He/She/They)
+    # immediately after a comma in a continuation clause; should be
+    # lowercase. Symptom of {X_he_she_cap} placed mid-sentence.
+    if re.search(
+        r",\s+(?:He|She|They)\s+(?:composed|wrote|took|scratched|"
+        r"sketched|chalked|placed|sent|inspected|borrowed|pulled|"
+        r"drew|laid|stamped|threaded|walked|rolled|carved|spliced|"
+        r"hammered|reached|lined)\b",
+        user,
+    ):
+        issues.append(("POST_COMMA_CAPITAL_PRONOUN",
+                       "capitalized pronoun (He/She/They) immediately "
+                       "after a comma in a continuation clause — the "
+                       "story-scaffold template should use {X_he_she} "
+                       "(lowercase) here, not {X_he_she_cap}"))
+
+    # SMALL_INT_LEAK — extends ANSWER_LEAK (which only fires for
+    # `abs(expected) > 5`) to catch leaks of small ints 1-5 in
+    # resolution slots ("the running total stood at 4").
+    if isinstance(example.expected, int) and 1 <= example.expected <= 5:
+        ans_str = str(example.expected)
+        if ans_str not in example.form:
+            leak_re = re.compile(
+                rf"\b(?:stood at|came to|settled at|equaled|gave|"
+                rf"yielded|returned|resolved to|amounted to|"
+                rf"ended at|came out to)\s+{ans_str}\b"
+            )
+            if leak_re.search(user):
+                issues.append(("SMALL_INT_LEAK",
+                               f"small-int answer {ans_str} leaks via "
+                               "resolution-slot phrasing"))
+
+    # COLLECTION_LEAK — when expected is a collection, flag if its
+    # elements appear comma-separated in user_msg AND ≥1 element is
+    # absent from the form text (so the model would otherwise have
+    # to compute it).
+    if isinstance(example.expected, (list, tuple, set)) and \
+       2 <= len(example.expected) <= 10:
+        elems = [str(x) for x in example.expected
+                 if isinstance(x, int) and abs(x) > 1]
+        if len(elems) >= 2 and any(e not in example.form for e in elems):
+            joined_re = r",\s*(?:and\s+)?".join(re.escape(e) for e in elems)
+            if re.search(joined_re, user):
+                issues.append(("COLLECTION_LEAK",
+                               f"elements of expected {example.expected!r} "
+                               "appear comma-separated in user_msg "
+                               "(collection answer leak)"))
+
+    # BOOL_LEAK_RESOLUTION — bool answers leaked via "returned true"
+    # / "gave false" / etc. in the resolution slot.
+    if isinstance(example.expected, bool):
+        word = "true" if example.expected else "false"
+        leak_re = re.compile(
+            rf"\b(?:returned|gave|yielded|came back|answered|"
+            rf"replied with|came to)\s+{word}\b"
+        )
+        if leak_re.search(user):
+            issues.append(("BOOL_LEAK_RESOLUTION",
+                           f"resolution leaks boolean answer {word!r} — "
+                           "describe the verdict abstractly instead"))
 
     # Both modes are LOW_GROUNDING.
     _check_grounding(user, rec, issues)

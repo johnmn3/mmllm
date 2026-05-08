@@ -286,8 +286,10 @@ G8_04 = SubjectCurriculum(
                 "`(some? Pace)` then asks whether the name is non-nil."
             ),
             resolution=(
-                "the runtime confirmed the guild was real — `some?` "
-                "returned true."
+                "the council's roll, freshly inked, was looked up by "
+                "name; `some?` cast through the registry — feeling for "
+                "the var among many that might or might not be there — "
+                "and confirmed the guild now stood entered."
             ),
             tags=("story",),
         ),
@@ -505,7 +507,10 @@ G8_07 = SubjectCurriculum(
                 "Hare instance dispatches to that implementation."
             ),
             resolution=(
-                "the dispatch returned the hare's pace keyword."
+                "the search through the guild's roll narrowed to the "
+                "hare-arm waiting in the methods; the dispatcher — "
+                "leaving no candidate untried — handed back the keyword "
+                "that arm declared."
             ),
             tags=("story",),
         ),
@@ -607,8 +612,10 @@ G8_08 = SubjectCurriculum(
                 "`tag` on a map with `:kind :stone` routes to that arm."
             ),
             resolution=(
-                "the dispatch sent the map to the matching arm and returned "
-                "its keyword."
+                "the granary's sorting-table read the kernel's stamp and "
+                "routed the map to its right shelf; the dispatcher — "
+                "answering for every stamp the table had been taught — "
+                "handed back the keyword the matching arm declared."
             ),
             tags=("story",),
         ),
@@ -796,7 +803,10 @@ G8_11 = SubjectCurriculum(
                 "through the guild."
             ),
             resolution=(
-                "the guild dispatched to the String arm and returned the keyword."
+                "the guild's many-armed registry held arms for many "
+                "types; the runtime — moving through the candidates one "
+                "by one — found the String arm waiting and returned the "
+                "keyword that arm declared."
             ),
             tags=("story",),
         ),

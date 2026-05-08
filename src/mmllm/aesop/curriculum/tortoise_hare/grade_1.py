@@ -89,9 +89,9 @@ agreed to try."""),
     SubplotTemplate("""\
 A small audience of forest creatures had gathered {place} to watch
 {hare_phrase} attempt to outwit {tortoise_phrase} at reading the REPL.
-{tortoise} pointed to {concept_phrase} and read out the form aloud:
-{form_display}. The crowd waited to see who would correctly write
-the form to submit."""),
+{tortoise}, {emo_patient}, pointed to {concept_phrase} and read out the
+form aloud: {form_display}. The crowd waited to see who would correctly
+write the form to submit."""),
 
     # 5. The race-pause template — hare pauses mid-race, tortoise catches up
     #    via careful evaluation.
@@ -100,19 +100,19 @@ the form to submit."""),
     #    "They called it impossible." reads as plural-subject right after
     #    a singular "Pip the hare stopped" introduction.
     SubplotTemplate("""\
-Halfway through the race, {hare_phrase} stopped {place} and refused to
-continue until someone could prove what the form {form_display}
-evaluated to. {hare} called it impossible.
+Halfway through the race, {hare_phrase}, {emo_proud}, stopped {place}
+and refused to continue until someone could prove what the form
+{form_display} evaluated to. {hare} called it impossible.
 {tortoise_phrase}, walking up at her usual pace, simply said: "Submit
 {concept_phrase} to the REPL. Whatever comes back is the answer.\""""),
 
     # 6. The notebook template — the tortoise keeps a careful ledger.
     SubplotTemplate("""\
-{tortoise_phrase} had been keeping a small leather notebook of every
-form {tortoise_he_she} had successfully evaluated. {place_idx}, the
-next entry was {concept_phrase}. {hare_phrase} peered over
-{tortoise_his_her} shoulder at the form {form_display} and asked what
-it would come out to.""".replace("{place_idx}", "Today {place}")),
+{tortoise_phrase}, {emo_patient}, had been keeping a small leather
+notebook of every form {tortoise_he_she} had successfully evaluated.
+{place_idx}, the next entry was {concept_phrase}. {hare_phrase} peered
+over {tortoise_his_her} shoulder at the form {form_display} and asked
+what it would come out to.""".replace("{place_idx}", "Today {place}")),
 
     # 7. The boast-and-rebuke template — Hare claims to know without checking.
     #    NOTE: uses {hare_him_her} (object case) for "asked X to ..."; uses
@@ -198,28 +198,28 @@ writing it."""),
     SubplotTemplate("""\
 A small audience of forest creatures had gathered {place} to watch
 {hare_phrase} attempt to outwit {tortoise_phrase} at writing the
-right form. The challenge: {goal_text}. {tortoise} reminded the
-crowd that what mattered was writing {concept_phrase} carefully,
-then submitting it to the REPL — not guessing aloud at the
-answer."""),
+right form. The challenge: {goal_text}. {tortoise}, {emo_patient},
+reminded the crowd that what mattered was writing {concept_phrase}
+carefully, then submitting it to the REPL — not guessing aloud at
+the answer."""),
 
     # 5. The race-pause template — pause mid-race for a goal-write.
     #    Fix: drop "write a form to {goal_text}"; reframe as
     #    "until someone could {goal_text} with a Clojure form".
     SubplotTemplate("""\
-Halfway through the race, {hare_phrase} stopped {place} and refused
-to continue until someone could {goal_text} with a Clojure form.
-{hare} called the goal impossible. {tortoise_phrase}, walking up at
-{tortoise_his_her} usual pace, simply said: "Compose {concept_phrase};
-submit it. Whatever comes back is the answer.\""""),
+Halfway through the race, {hare_phrase}, {emo_proud}, stopped {place}
+and refused to continue until someone could {goal_text} with a Clojure
+form. {hare} called the goal impossible. {tortoise_phrase}, walking up
+at {tortoise_his_her} usual pace, simply said: "Compose
+{concept_phrase}; submit it. Whatever comes back is the answer.\""""),
 
     # 6. The notebook template — Tortoise records goal/form pairs.
     SubplotTemplate("""\
-{tortoise_phrase} kept a small leather notebook of every goal
-{tortoise_he_she} had translated into a Clojure form. Today {place},
-the next entry was a goal: {goal_text}. {tortoise} sat with pen in
-hand, ready to compose {concept_phrase}, then let the REPL
-confirm the value."""),
+{tortoise_phrase}, {emo_patient}, kept a small leather notebook of
+every goal {tortoise_he_she} had translated into a Clojure form.
+Today {place}, the next entry was a goal: {goal_text}. {tortoise} sat
+with pen in hand, ready to compose {concept_phrase}, then let the
+REPL confirm the value."""),
 
     # 7. The boast-and-rebuke template — Hare boasts; Tortoise asks
     #    for the actual form. Fix: "To X is something anyone could
@@ -258,13 +258,13 @@ between the two slates: only {tortoise_his_her} had run."""),
     #     answering, Tortoise's careful path wins. Moral lands.
     SubplotTemplate("""\
 The wager was set {place}: produce the value before the breeze had
-turned the next leaf. {hare_phrase} bolted into a flurry of
-guesses, calling out numbers and second-guessing {hare_him_her}self
+turned the next leaf. {hare_phrase}, {emo_proud}, bolted into a flurry
+of guesses, calling out numbers and second-guessing {hare_him_her}self
 about whether the goal was to {goal_text} or something close to it.
-{tortoise_phrase}, who had simply walked to the slate and begun to
-write {concept_phrase}, finished the form, submitted it, and read
-the value off the REPL while {hare} was still arguing with the
-breeze. The race, like every other, went to the steady hand."""),
+{tortoise_phrase}, {emo_patient}, simply walked to the slate, wrote
+{concept_phrase}, finished the form, submitted it, and read the value
+off the REPL while {hare} was still arguing with the breeze. The race,
+like every other, went to the steady hand."""),
 
     # 11. The wrong-guess-then-form template — Hare blurts a guess at
     #     the answer (deliberately abstract — no actual value leaks),
@@ -1158,8 +1158,9 @@ G1_15 = SubjectCurriculum(
                 "verdict; if any differ, it stops."
             ),
             resolution=(
-                "the runtime let the gate swing: both sides matched, "
-                "so the truthy verdict came back."
+                "both sides of the gate matched as plainly as the nose "
+                "on her face; the runtime — easily, the answer plain — "
+                "let the gate open and the truthy verdict came back."
             ),
             tags=("story",),
         ),

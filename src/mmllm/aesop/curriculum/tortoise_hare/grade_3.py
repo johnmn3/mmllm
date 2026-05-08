@@ -73,8 +73,9 @@ G3_01 = SubjectCurriculum(grade=3, subject_id="G3-01",
                 "posted — here, 42."
             ),
             resolution=(
-                "the sign returned exactly the count carved into "
-                "it, confirming the posting took hold."
+                "the sign held its name on the long road; the runtime, "
+                "minding each step, returned exactly what the chisel had "
+                "carved beneath the name."
             ),
             tags=("story",),
         ),
@@ -171,9 +172,9 @@ G3_03 = SubjectCurriculum(grade=3, subject_id="G3-03",
                 "binding is in force only for the form's stretch."
             ),
             resolution=(
-                "the pouch yielded 3, the +1 added a fourth acorn, and "
-                "the running total stood at 4 — exactly what the next "
-                "milestone needed."
+                "the pouch yielded its tucked count, the +1 added one "
+                "more acorn, and the running total — pouch already empty "
+                "again — was exactly what the next milestone needed."
             ),
             tags=("story",),
         ),
