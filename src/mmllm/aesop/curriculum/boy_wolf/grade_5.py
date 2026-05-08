@@ -308,7 +308,7 @@ G5_07 = SubjectCurriculum(grade=5, subject_id="G5-07",
                 "value. If all gates are truthy (open), it returns the last one."
             ),
             resolution=(
-                "all three gates were open, the form passed through them all, and returned 3 — the last gate's value — Tom walked through the fold-gates and stood in the pen, knowing all conditions held. The fold gate held tight against the count of {drawn.a}, slate cool under the elder hand."         )),
+                "all three gates were open, the form passed through them all, and returned the result — the last gate's value — Tom walked through the fold-gates and stood in the pen, knowing all conditions held. The fold gate held tight against the count of {drawn.a}, slate cool under the elder hand."         )),
         _ex("(or nil false :found)", ":found", "the form (or nil false :found)", "the first truthy value",
             scenario=(
                 "Carol left Tom three messages on three stones."
@@ -567,7 +567,7 @@ G5_14 = SubjectCurriculum(grade=5, subject_id="G5-14",
                 "by one."
             ),
             resolution=(
-                'the basket opened: 3, 1, 4, 1, 5, the `max` recipe compared them all, and the form returned 5 — the largest — Tom saw that `apply` turned a basket into separate arguments for any recipe. {drawn.a} stood as the answer the fold required, slate, chalk, and a steady eye all in agreement.'         )),
+                'the basket opened: 3, 1, 4, 1, 5, the `max` recipe compared them all, and the form returned the result — the largest — Tom saw that `apply` turned a basket into separate arguments for any recipe. {drawn.a} stood as the answer the fold required, slate, chalk, and a steady eye all in agreement.'         )),
     ], subplots=_RECIPE_SUBPLOTS, plan_pool=_PLAN_G5)
 
 
@@ -693,7 +693,7 @@ G5_18 = SubjectCurriculum(grade=5, subject_id="G5-18",
                 "`some` tests values until one passes the rule and stops immediately."
             ),
             resolution=(
-                'The form found a match and returned true without checking all values. The slate showed {drawn.a} in clear chalk, and the fold tally stood as the day record.'
+                'The form found a match and returned the verdict without checking all values. The slate showed {drawn.a} in clear chalk, and the fold tally stood as the day record.'
             )),
         _ex("(some neg? [1 2 3])", None,
             "the form (some neg? [1 2 3])", "the value when no element is negative",
@@ -737,7 +737,7 @@ G5_19 = SubjectCurriculum(grade=5, subject_id="G5-19",
                 "an all-or-nothing check."
             ),
             resolution=(
-                'the screen passed all three: 1 is positive, 2 is positive, 3 is positive — `every?` returned true — Tom knew that every bundle was above zero. The fold gate held tight against the count of {drawn.a}, slate cool under the elder hand.'         )),
+                'the screen passed all three: 1 is positive, 2 is positive, 3 is positive — `every?` returned the verdict — Tom knew that every bundle was above zero. The fold gate held tight against the count of {drawn.a}, slate cool under the elder hand.'         )),
         _ex("(every? even? [1 2 3])", False, "the form (every? even? [1 2 3])", "whether all are even",
             scenario=(
                 "Carol asked: are all these numbers even? Tom looked: 1 (odd), 2 "
@@ -755,7 +755,7 @@ G5_19 = SubjectCurriculum(grade=5, subject_id="G5-19",
                 "once one fails."
             ),
             resolution=(
-                'the screen rejected 1 (odd), and `every?` stopped and returned false — Tom knew immediately that not every number was even without checking all three. Tom chalked {drawn.a} on the village notice, and the morning record stood for the next shepherd to read.'           )),
+                'the screen rejected 1 (odd), and `every?` stopped and returned the verdict — Tom knew immediately that not every number was even without checking all three. Tom chalked {drawn.a} on the village notice, and the morning record stood for the next shepherd to read.'           )),
     ], subplots=_SIEVE_SUBPLOTS, plan_pool=_PLAN_G5)
 
 

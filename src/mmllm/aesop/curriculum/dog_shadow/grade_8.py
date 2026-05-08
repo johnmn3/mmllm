@@ -1021,7 +1021,7 @@ G8_15 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL carved the hierarchy link and answered the isa? '
-                'question. The verdict came back true — ::hare was confirmed '
+                'question. The verdict came back with the verdict — ::hare was confirmed '
                 'as a type of ::runner — runner.'
             ),
             tags=("story",),
@@ -1049,7 +1049,7 @@ G8_15 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL checked the breeding records and found that Long '
-                'did indeed trace back to Number. The verdict came back true.'
+                'did indeed trace back to Number. The verdict came back with the verdict.'
             ),
             tags=("story",),
         ),

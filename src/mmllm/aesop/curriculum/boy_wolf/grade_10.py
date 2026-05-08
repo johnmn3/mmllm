@@ -415,7 +415,7 @@ G10_06 = SubjectCurriculum(
                 "With false, the `when` returns nil."
             ),
             resolution=(
-                'since the condition was true, the form ran the body and returned 3 — the last value in the sequence. Carol marked {drawn.a} on the watchhouse beam, the lookout high above the valley quiet at last.'           )),
+                'since the condition was true, the form ran the body and returned the result — the last value in the sequence. Carol marked {drawn.a} on the watchhouse beam, the lookout high above the valley quiet at last.'           )),
         _ex("(when false 1 2 3)", None,
             "the form (when false 1 2 3)",
             "what (when false 1 2 3) returns",
@@ -613,7 +613,7 @@ G10_09 = SubjectCurriculum(
                 "suffix appended."
             ),
             resolution=(
-                'the equality test returned false — the two symbols were different, confirming that gensym had generated distinct names despite the shared prefix.'
+                'the equality test returned the verdict — the two symbols were different, confirming that gensym had generated distinct names despite the shared prefix.'
             )),
     ],
     subplots=_REWRITERULE_SUBPLOTS, plan_pool=_PLAN_G10,

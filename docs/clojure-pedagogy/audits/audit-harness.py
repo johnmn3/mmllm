@@ -236,20 +236,24 @@ def check_record(rec, sub, example):
     if "{form_display}" in user or "{concept_phrase}" in user or "{place}" in user:
         issues.append(("UNFILLED_PLACEHOLDER", "user_msg has un-substituted placeholder"))
 
-    # answer-leak detection: only if the answer is an int that's NOT a substring of the form
-    if isinstance(example.expected, int) and abs(example.expected) > 5:
-        ans_str = str(example.expected)
-        if ans_str not in example.form:
+    # answer-leak detection: only if the answer is an int that's NOT a substring of the form.
+    # Use rec.expected (runtime-computed value for parametric examples) when available,
+    # since example.expected is the static placeholder. For non-parametric examples
+    # rec.expected == example.expected.
+    runtime_expected = getattr(rec, "expected", example.expected)
+    if isinstance(runtime_expected, int) and abs(runtime_expected) > 5:
+        ans_str = str(runtime_expected)
+        if ans_str not in rec.code_str:
             # Strip every occurrence of the form, then look for the answer
-            user_clean = user.replace(example.form, "")
+            user_clean = user.replace(rec.code_str, "")
             ans_re = rf"(?<![0-9-]){re.escape(ans_str)}(?![0-9])"
             if re.search(ans_re, user_clean):
                 issues.append(("ANSWER_LEAK", f"answer {ans_str} in narrative"))
 
     # asst leak: strip the JSON form arg properly (handles escaped quotes)
-    if isinstance(example.expected, int) and abs(example.expected) > 5:
-        ans_str = str(example.expected)
-        if ans_str not in example.form:
+    if isinstance(runtime_expected, int) and abs(runtime_expected) > 5:
+        ans_str = str(runtime_expected)
+        if ans_str not in rec.code_str:
             # Strip everything between "form":" and the closing unescaped "
             asst_clean = re.sub(
                 r'"form":"(?:[^"\\]|\\.)*"', '', asst
@@ -399,12 +403,16 @@ def check_record(rec, sub, example):
     # Also catch string/keyword answer leaks in non-atom subjects:
     # if expected is a string or keyword, the literal value must NOT
     # appear in user_msg (e.g., "HARE" for upper-case form, ":caught"
-    # for catch branch).
-    if getattr(example, "goal_text", "") and isinstance(example.expected, str):
-        ans = example.expected
+    # for catch branch). Skip when the answer literal is already in the
+    # form text (it's an input/operand, not a leaked answer) — same
+    # exemption as the int ANSWER_LEAK detector.
+    runtime_expected_str = getattr(rec, "expected", example.expected)
+    if (getattr(example, "goal_text", "")
+            and isinstance(runtime_expected_str, str)):
+        ans = runtime_expected_str
         # Skip very short answers (<= 2 chars) and bool-ish strings
         if len(ans) >= 3 and ans not in ("yes", "no"):
-            if ans in user:
+            if ans in user and ans not in rec.code_str:
                 issues.append(("ANSWER_LEAK_STRING",
                     f"answer string {ans!r} appears in user_msg"))
 
@@ -1995,6 +2003,65 @@ def check_record(rec, sub, example):
                                 f"the noun 'the {noun}' appears in all 4 "
                                 "story slots (scenario/need/mapping/"
                                 "resolution) — vary the imagery between beats"))
+
+    # ───── slice C30F (round 3 group 2: leaks) detector additions ─────
+    #
+    # Three new leak-pattern detectors covering classes the existing
+    # ANSWER_LEAK/ANSWER_LEAK_STRING/BOOL_LEAK_RESOLUTION/SMALL_INT_LEAK
+    # /COLLECTION_LEAK/FORM_LEAK family doesn't catch.
+
+    # RATIO_LEAK — ratio answers (e.g. "3/4", "1/2") leaked in narrative
+    # with a leak-style verb. The other detectors don't catch ratios
+    # because they only look at int / string / bool answer types.
+    runtime_expected_ratio = getattr(rec, "expected", example.expected)
+    if (isinstance(runtime_expected_ratio, str)
+            and re.fullmatch(r"-?\d+/\d+", runtime_expected_ratio)):
+        ans = runtime_expected_ratio
+        if ans not in rec.code_str:
+            leak_re = re.compile(
+                rf"\b(?:returned|gave|yielded|came back|came to|"
+                rf"settled at|stood at|equaled|amounted to)\s+"
+                rf"{re.escape(ans)}\b"
+            )
+            if leak_re.search(user):
+                issues.append(("RATIO_LEAK",
+                                f"ratio answer {ans!r} leaked via "
+                                "resolution-slot phrasing — describe the "
+                                "fraction abstractly (e.g. 'the combined "
+                                "fraction')"))
+
+    # PLAN_LEAKS_VALUE — the plan content (the model's reasoning preamble)
+    # mentions the runtime answer literal. Plans are MEANT to be
+    # answer-free since they should not anchor the model to the value.
+    # We pull the assistant_msg's plan-prefix text and check for the
+    # answer literal.
+    if isinstance(runtime_expected, int) and abs(runtime_expected) > 2:
+        ans_str = str(runtime_expected)
+        if ans_str not in rec.code_str:
+            # Plan prefix is everything in asst before the JSON tool call
+            asst_prefix = re.split(r'\{"tool_calls"', asst, maxsplit=1)[0]
+            ans_re = rf"(?<![0-9-]){re.escape(ans_str)}(?![0-9])"
+            if re.search(ans_re, asst_prefix):
+                issues.append(("PLAN_LEAKS_VALUE",
+                                f"assistant plan-prefix leaks answer "
+                                f"{ans_str!r} — the plan should not "
+                                "anchor to the value"))
+
+    # QUESTION_WHAT_LEAKS_ANSWER — the example.question_what slot reveals
+    # the answer literal. question_what is rendered into the prompt as
+    # part of the question; if it names the answer, the model has the
+    # answer before evaluating.
+    if (isinstance(runtime_expected, int) and abs(runtime_expected) > 5
+            and getattr(example, "question_what", "")):
+        ans_str = str(runtime_expected)
+        qw = example.question_what
+        # Skip if the answer is in the form (it's an operand, not a leak)
+        if ans_str not in rec.code_str:
+            ans_re = rf"(?<![0-9-]){re.escape(ans_str)}(?![0-9])"
+            if re.search(ans_re, qw):
+                issues.append(("QUESTION_WHAT_LEAKS_ANSWER",
+                                f"question_what {qw[:40]!r}… "
+                                f"contains answer {ans_str!r}"))
 
     return issues
 

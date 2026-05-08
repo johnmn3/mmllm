@@ -236,7 +236,7 @@ G3_03 = SubjectCurriculum(grade=3, subject_id="G3-03",
                 'calling a is what happens when the form looks up the grip.'
             ),
             resolution=(
-                'The REPL read the bite and returned 5 the mouth had '
+                'The REPL read the bite and returned the result the mouth had '
                 'held. Bell stepped past the form\'s edge and released the '
                 'binding. The name a was gone.'
             ),
@@ -297,7 +297,7 @@ G3_04 = SubjectCurriculum(grade=3, subject_id="G3-04",
                 'the bound values, and the verdict is the difference.'
             ),
             resolution=(
-                'The REPL subtracted y from x and returned 3. Bell '
+                'The REPL subtracted y from x and returned the result. Bell '
                 'released both bones as she crossed.'
             ),
             tags=("story",),
@@ -755,7 +755,7 @@ G3_12 = SubjectCurriculum(grade=3, subject_id="G3-12",
             ),
             resolution=(
                 'The REPL read the jaws first when it saw g inside the let, '
-                'added one, and returned 1. The shadow faded when the '
+                'added one, and returned the result. The shadow faded when the '
                 'form ended. The stone stood untouched — its mark would be read '
                 'again outside the let.'
             ),

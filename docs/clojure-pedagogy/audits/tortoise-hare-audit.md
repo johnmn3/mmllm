@@ -83,10 +83,8 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'SMALL_INT_LEAK': 1, 'CLAUSE_STACK_OVERFLOW': 2, 'ANSWER_LEAK': 1}
-    - [SMALL_INT_LEAK] form=`(+ 2 3)` — small-int answer 5 leaks via resolution-slot phrasing
+- issues: {'CLAUSE_STACK_OVERFLOW': 2}
     - [CLAUSE_STACK_OVERFLOW] form=`(* (+ 1 2) 3)` — sentence with 5 commas reads as AI-output cadence: 'Mossback chalked two nested fences on the path: an inner fence holding the plus-'
-    - [ANSWER_LEAK] form=`(* (+ 1 2) 3)` — answer 9 in narrative
     - [CLAUSE_STACK_OVERFLOW] form=`(* (+ 1 2) 3)` — sentence with 5 commas reads as AI-output cadence: 'Mossback chalked two nested fences on the path: an inner fence holding the plus-'
 
 ### G1-13: First arithmetic call
@@ -149,13 +147,6 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
     - [CLAUSE_STACK_OVERFLOW] form=`(min 7 3 9 1 5)` — sentence with 5 commas reads as AI-output cadence: 'To find the minimum of 8, 2, 3, 5, and 6, she with eyes always on the path compo'
     - [CLAUSE_STACK_OVERFLOW] form=`(max 7 3 9 1 5)` — sentence with 7 commas reads as AI-output cadence: 'You can split a heap." To find the maximum of 5, 3, 5, 9, and 6, he\ncomposed the'
 
-### G2-06: inc and dec
-
-- examples: 5
-- variety @ n=50: 1.00
-- issues: {'ANSWER_LEAK': 1}
-    - [ANSWER_LEAK] form=`(inc 5)` — answer 6 in narrative
-
 ### G2-08: Arithmetic on ratios
 
 - examples: 3
@@ -180,13 +171,6 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 - variety @ n=50: 1.00
 - issues: {'HIGH_LENGTH': 1}
     - [HIGH_LENGTH] form=`(if 0 1 0)` — user_msg 219 words
-
-### G2-19: Auto-promotion to bigint
-
-- examples: 2
-- variety @ n=50: 1.00
-- issues: {'ANSWER_LEAK': 1}
-    - [ANSWER_LEAK] form=`(+ 99999999999 1)` — answer 100000000000 in narrative
 
 ### G2-20: Counting
 
@@ -289,10 +273,9 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'HIGH_LENGTH': 1, 'CLAUSE_STACK_OVERFLOW': 2, 'ANSWER_LEAK_STRING': 1}
+- issues: {'HIGH_LENGTH': 1, 'CLAUSE_STACK_OVERFLOW': 2}
     - [HIGH_LENGTH] form=`(get {:a 1 :b 2} :a)` — user_msg 204 words
     - [CLAUSE_STACK_OVERFLOW] form=`(get {:a 1 :b 2} :a)` — sentence with 7 commas reads as AI-output cadence: "The values drawn fresh were {('__kw__', 'currant'): 18, ('__kw__', 'pear'): 20, "
-    - [ANSWER_LEAK_STRING] form=`(get {:a 1} :missing :default)` — answer string ':default' appears in user_msg
     - [CLAUSE_STACK_OVERFLOW] form=`(get {:a 1} :missing :default)` — sentence with 5 commas reads as AI-output cadence: "The values drawn fresh were {('__kw__', 'blackberry'): 16, ('__kw__', 'mango'): "
 
 ### G4-08: assoc — map update
@@ -499,13 +482,6 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 ## Grade 6
 
-### G6-01: Namespace as file
-
-- examples: 3
-- variety @ n=50: 1.00
-- issues: {'ANSWER_LEAK_STRING': 1}
-    - [ANSWER_LEAK_STRING] form=`(name 'foo.bar)` — answer string 'foo.bar' appears in user_msg
-
 ### G6-02: ns form
 
 - examples: 2
@@ -549,8 +525,7 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'ANSWER_LEAK_STRING': 1, 'REPL_TRIPLE_VOICE': 1}
-    - [ANSWER_LEAK_STRING] form=`(:doc (meta '\{:doc "steady wins"\} race))` — answer string 'steady wins' appears in user_msg
+- issues: {'REPL_TRIPLE_VOICE': 1}
     - [REPL_TRIPLE_VOICE] form=`(:author (meta '\{:author "Aesop"\} race))` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
 
 ## Grade 7
@@ -600,11 +575,10 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'STORY_RESOLUTION_NO_DRAWN': 3, 'ANSWER_LEAK_STRING': 1}
+- issues: {'STORY_RESOLUTION_NO_DRAWN': 3}
     - [STORY_RESOLUTION_NO_DRAWN] form=`(try (throw (Exception. "oops")) (catch Exception ` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('oops',), resolution doesn't close the loop)
     - [STORY_RESOLUTION_NO_DRAWN] form=`(try (throw (Exception. "oops")) (catch Exception ` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('oops',), resolution doesn't close the loop)
     - [STORY_RESOLUTION_NO_DRAWN] form=`(try (throw (Exception. "oops")) (catch Exception ` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('oops',), resolution doesn't close the loop)
-    - [ANSWER_LEAK_STRING] form=`(try (throw (ex-info "trouble" {})) (catch Excepti` — answer string 'trouble' appears in user_msg
 
 ### G7-12: slurp and spit
 
@@ -707,10 +681,9 @@ tortoise
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'CLAUSE_STACK_OVERFLOW': 1, 'HIGH_LENGTH': 1, 'ANSWER_LEAK_STRING': 1, 'FORM_DISPLAY_AND_FORM_NOUN': 1}
+- issues: {'CLAUSE_STACK_OVERFLOW': 1, 'HIGH_LENGTH': 1, 'FORM_DISPLAY_AND_FORM_NOUN': 1}
     - [CLAUSE_STACK_OVERFLOW] form=`(do (defprotocol Pace (speed [this])) (extend-prot` — sentence with 6 commas reads as AI-output cadence: "The runtime looks up which species the runner\nis, then runs that species' answer"
     - [HIGH_LENGTH] form=`(do (defprotocol Greet (hail [this])) (extend-prot` — user_msg 203 words
-    - [ANSWER_LEAK_STRING] form=`(do (defprotocol Greet (hail [this])) (extend-prot` — answer string ':number' appears in user_msg
     - [FORM_DISPLAY_AND_FORM_NOUN] form=`(do (defprotocol Greet (hail [this])) (extend-prot` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
 
 ### G8-06: Protocol method dispatch
@@ -959,9 +932,8 @@ tortoise
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'CLAUSE_STACK_OVERFLOW': 2, 'ANSWER_LEAK_STRING': 1}
+- issues: {'CLAUSE_STACK_OVERFLOW': 2}
     - [CLAUSE_STACK_OVERFLOW] form=`(do (def p (promise)) (deliver p :done) @p)` — sentence with 5 commas reads as AI-output cadence: 'The result will be there when you ask\nfor it — sometimes you have to wait for th'
-    - [ANSWER_LEAK_STRING] form=`(do (def p (promise)) (deliver p :done) @p)` — answer string ':done' appears in user_msg
     - [CLAUSE_STACK_OVERFLOW] form=`(do (def p (promise)) (deliver p 42) @p)` — sentence with 5 commas reads as AI-output cadence: 'The runtime makes that easier than it sounds." To construct a promise, deliver 4'
 
 ### G9-16: volatile — when STM is too heavy
@@ -1085,9 +1057,8 @@ tortoise
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'HIGH_LENGTH': 1, 'ANSWER_LEAK_STRING': 1, 'FORM_DISPLAY_AND_FORM_NOUN': 1}
+- issues: {'HIGH_LENGTH': 1, 'FORM_DISPLAY_AND_FORM_NOUN': 1}
     - [HIGH_LENGTH] form=`(do (defmacro def-pace [name v] `(def ~name ~v)) (` — user_msg 217 words
-    - [ANSWER_LEAK_STRING] form=`(do (defmacro def-pace [name v] `(def ~name ~v)) (` — answer string ':slow' appears in user_msg
     - [FORM_DISPLAY_AND_FORM_NOUN] form=`(do (defmacro def-pace [name v] `(def ~name ~v)) (` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
 
 ## Grade 11
@@ -1270,31 +1241,28 @@ tortoise
 - **DRAWN_PLACEHOLDER_LEAK**: 21
 - **HEDGING_NEAR_FORM**: 12
 - **PARAGRAPH_FRAGMENTATION**: 8
-- **ANSWER_LEAK_STRING**: 7
 - **STRING_AS_CHAR_MISCLAIM**: 6
 - **GENERIC_RESOLUTION_TAIL**: 6
 - **THE_FORM_OVERUSE**: 6
-- **ANSWER_LEAK**: 3
 - **REPEATED_OPENER_FRAGMENT**: 3
 - **ONLY_SHOOK_HEAD_TIC**: 2
 - **DOUBLE_NAME_INTRO**: 2
-- **SMALL_INT_LEAK**: 1
 - **COLLECTION_LEAK**: 1
 
 ### Per-grade summary
 
 | Grade | Subjects | Examples | Issues | Low-variety |
 |---|---|---|---|---|
-| 1 | 18 | 76 | 32 | — |
-| 2 | 22 | 88 | 26 | — |
+| 1 | 18 | 76 | 30 | — |
+| 2 | 22 | 88 | 24 | — |
 | 3 | 18 | 31 | 11 | — |
-| 4 | 20 | 39 | 43 | — |
+| 4 | 20 | 39 | 42 | — |
 | 5 | 22 | 39 | 89 | — |
-| 6 | 16 | 33 | 12 | — |
-| 7 | 18 | 36 | 37 | — |
-| 8 | 16 | 31 | 52 | — |
-| 9 | 18 | 34 | 87 | — |
-| 10 | 16 | 36 | 48 | — |
+| 6 | 16 | 33 | 10 | — |
+| 7 | 18 | 36 | 36 | — |
+| 8 | 16 | 31 | 51 | — |
+| 9 | 18 | 34 | 86 | — |
+| 10 | 16 | 36 | 47 | — |
 | 11 | 14 | 29 | 17 | — |
 | 12 | 18 | 37 | 42 | — |
 
@@ -1445,15 +1413,6 @@ Back ...
 Mossback prepared three pouches in order: a held 2 acorns, then b was filled with one more than a, and finally c was loaded with twice whatever b held. Each pouch drew from the ...
     ```
 
-#### SMALL_INT_LEAK
-
-- `G1-12` (form `(+ 2 3)`): small-int answer 5 leaks via resolution-slot phrasing
-    ```
-    It happened atop the hilltop, on a morning when the air was kind to swift feet and steady ones alike.
-
-Mossback the tortoise chalked a small expression on the path: the plus-mark, then 9, then 9, all wrapped in a single set of parens. Pip the hare paused — was the answer 6 (parens means multiply, su...
-    ```
-
 #### CLAUSE_STACK_OVERFLOW
 
 - `G1-12` (form `(* (+ 1 2) 3)`): sentence with 5 commas reads as AI-output cadence: 'Mossback chalked two nested fences on the path: an inner fence holding the plus-'
@@ -1492,31 +1451,6 @@ submitted t...
 Hummock the tortoise laid acorns out on a flat stone at the edge of the woods, sorting
 them stepping deliberately. "Numbers in Clojure are like acorns in heaps,"
 she said. "You can count them....
-    ```
-
-#### ANSWER_LEAK
-
-- `G1-12` (form `(* (+ 1 2) 3)`): answer 9 in narrative
-    ```
-    It is one thing to have fast legs and another to know how to use them, as the meadow folk would soon be reminded.
-
-Mossback chalked two nested fences on the path: an inner fence holding the plus-mark, 6, and 9, and an outer fence holding the star-mark, the inner fence, and 9. Pip counted the parens ...
-    ```
-- `G2-06` (form `(inc 5)`): answer 6 in narrative
-    ```
-    By the time the dew had lifted, the meadow had gathered to watch the strangest race anyone could remember.
-
-Bramble the hare eyed the heap boasting at every turn and called out a guess
-without bothering to count. Sienna the tortoise simply began counting,
-with steady, careful steps. To increment 6 b...
-    ```
-- `G2-19` (form `(+ 99999999999 1)`): answer 100000000000 in narrative
-    ```
-    near the garden, where the path bends past the elm, Heather taunted Stoneback one too many times.
-
-Heather the hare eyed the heap with great whoops of laughter and called out a guess
-without bothering to count. Stoneback the tortoise simply began counting,
-stepping deliberately. To add 4 to 10000000...
     ```
 
 #### PARAGRAPH_FRAGMENTATION
@@ -1787,45 +1721,6 @@ what comes back, fix it, try ag...
     There is a kind of pride that runs ahead of itself, and a kind of patience that arrives at its own pace.
 
 Mossback's alarm horn had sounded during a run. Rather than ignoring the alarm and dashing on like Hare, she stopped to read the message written on the horn's label — the first line of the stack...
-    ```
-
-#### ANSWER_LEAK_STRING
-
-- `G4-07` (form `(get {:a 1} :missing :default)`): answer string ':default' appears in user_msg
-    ```
-    Among the small kingdoms of the meadow, swiftness was a kind of currency, and one creature spent it loudly.
-
-Mossback the tortoise's basket had one pouch — labeled :a. Pip the hare asked for the contents of a pouch labeled :missing, which had never been stitched into the basket at all. The values dr...
-    ```
-- `G6-01` (form `(name 'foo.bar)`): answer string 'foo.bar' appears in user_msg
-    ```
-    Some say it began with a yawn and a laugh; others say it began with a quiet refusal to be laughed at.
-
-On the long road, there lay a library shelf holding scrolls. Each scroll had a name — foo.bar, tortoise.race — inscribed on its spine in the style of the land.
-
-Mossback the tortoise needed to know...
-    ```
-- `G6-15` (form `(:doc (meta '\{:doc "steady wins"\} race))`): answer string 'steady wins' appears in user_msg
-    ```
-    Two creatures of very different gait once agreed that the ground between two stones would settle a long argument.
-
-On a scroll lay a symbol race, marked with marginalia in the margin: ^{:doc "steady wins"}. The margin held a note — a docstring — explaining what the symbol was about.
-
-Mossback wanted...
-    ```
-- `G7-11` (form `(try (throw (ex-info "trouble" {})) (catch Exception e (.get`): answer string 'trouble' appears in user_msg
-    ```
-    Among the small kingdoms of the meadow, swiftness was a kind of currency, and one creature spent it loudly.
-
-Lichen the tortoise with eyes always on the path stretched a small net beneath a high jump
-at the edge of the woods. "If the runner falls, the net catches them; the run
-doesn't end, only the ...
-    ```
-- `G8-05` (form `(do (defprotocol Greet (hail [this])) (extend-protocol Greet`): answer string ':number' appears in user_msg
-    ```
-    Two creatures of very different gait once agreed that the ground between two stones would settle a long argument.
-
-Pip the hare founded the Greet guild and then wondered: could a number ever sign the book? Mossback showed him that `extend-protocol` could enroll the Long type, giving it its own `hail...
     ```
 
 #### NUMERAL_LIST_IN_GOAL

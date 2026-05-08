@@ -99,12 +99,12 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 4
 - variety @ n=50: 0.99
-- issues: {'BOOL_LEAK_RESOLUTION': 1, 'LOW_GROUNDING': 1, 'ONLY_SHOOK_HEAD_TIC': 3, 'GOAL_FALLBACK_GENERIC': 6}
-    - [BOOL_LEAK_RESOLUTION] form=`(symbol? 'wolf)` — resolution leaks boolean answer 'true' — describe the verdict abstractly instead
+- issues: {'LOW_GROUNDING': 1, 'ONLY_SHOOK_HEAD_TIC': 3, 'GOAL_FALLBACK_GENERIC': 6}
     - [LOW_GROUNDING] form=`(symbol? 'wolf)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [ONLY_SHOOK_HEAD_TIC] form=`(symbol? 'wolf)` — user_msg uses 'only shook his/her head' — recurring AI-fable filler cadence
     - [ONLY_SHOOK_HEAD_TIC] form=`(symbol? 42)` — user_msg uses 'only shook his/her head' — recurring AI-fable filler cadence
     - [ONLY_SHOOK_HEAD_TIC] form=`'wolf` — user_msg uses 'only shook his/her head' — recurring AI-fable filler cadence
+    - [GOAL_FALLBACK_GENERIC] form=`'wolf` — user_msg uses generic 'To evaluate the X, ...' fallback AND no drawn-literal anchor — add a canonical GOALS entry for richer prose
     - [GOAL_FALLBACK_GENERIC] form=`'wolf` — user_msg uses generic 'To evaluate the X, ...' fallback AND no drawn-literal anchor — add a canonical GOALS entry for richer prose
 
 ### G1-13: First arithmetic call
@@ -119,25 +119,21 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 6
 - variety @ n=50: 1.00
-- issues: {'BOOL_LEAK_RESOLUTION': 4, 'GOAL_FALLBACK_GENERIC': 3, 'NARRATIVE_NUMERAL_HARDCODE': 3, 'LOW_GROUNDING': 1}
-    - [BOOL_LEAK_RESOLUTION] form=`(= 1 2)` — resolution leaks boolean answer 'false' — describe the verdict abstractly instead
-    - [BOOL_LEAK_RESOLUTION] form=`(= 1 2)` — resolution leaks boolean answer 'false' — describe the verdict abstractly instead
-    - [BOOL_LEAK_RESOLUTION] form=`(= "a" "a")` — resolution leaks boolean answer 'true' — describe the verdict abstractly instead
+- issues: {'GOAL_FALLBACK_GENERIC': 3, 'NARRATIVE_NUMERAL_HARDCODE': 3, 'LOW_GROUNDING': 1}
     - [GOAL_FALLBACK_GENERIC] form=`(= :wolf :wolf)` — user_msg uses generic 'To evaluate the X, ...' fallback AND no drawn-literal anchor — add a canonical GOALS entry for richer prose
     - [GOAL_FALLBACK_GENERIC] form=`(= :wolf :flock)` — user_msg uses generic 'To evaluate the X, ...' fallback AND no drawn-literal anchor — add a canonical GOALS entry for richer prose
     - [GOAL_FALLBACK_GENERIC] form=`(= :wolf :flock)` — user_msg uses generic 'To evaluate the X, ...' fallback AND no drawn-literal anchor — add a canonical GOALS entry for richer prose
+    - [NARRATIVE_NUMERAL_HARDCODE] form=`(= 1 1 1 1)` — parametric example has hard-coded English numeral 'four stones' in a story slot — the actual draws may differ from this fixed count
+    - [LOW_GROUNDING] form=`(= 1 1 1 1)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+    - [NARRATIVE_NUMERAL_HARDCODE] form=`(= 1 1 1 1)` — parametric example has hard-coded English numeral 'four stones' in a story slot — the actual draws may differ from this fixed count
 
 ### G1-16: Numeric predicates
 
 - examples: 6
 - variety @ n=50: 1.00
-- issues: {'BOOL_LEAK_RESOLUTION': 4, 'LOW_GROUNDING': 2}
-    - [BOOL_LEAK_RESOLUTION] form=`(zero? 5)` — resolution leaks boolean answer 'false' — describe the verdict abstractly instead
-    - [BOOL_LEAK_RESOLUTION] form=`(pos? 7)` — resolution leaks boolean answer 'true' — describe the verdict abstractly instead
+- issues: {'LOW_GROUNDING': 2}
     - [LOW_GROUNDING] form=`(pos? 7)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-    - [BOOL_LEAK_RESOLUTION] form=`(neg? 4)` — resolution leaks boolean answer 'false' — describe the verdict abstractly instead
     - [LOW_GROUNDING] form=`(neg? 4)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-    - [BOOL_LEAK_RESOLUTION] form=`(neg? 4)` — resolution leaks boolean answer 'false' — describe the verdict abstractly instead
 
 ### G1-17: Printing vs returning
 
@@ -155,36 +151,25 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 ## Grade 2
 
-### G2-01: Multi-arg arithmetic
-
-- examples: 6
-- variety @ n=50: 1.00
-- issues: {'ANSWER_LEAK': 1}
-    - [ANSWER_LEAK] form=`(+ 10 20 30)` — answer 60 in narrative
-
 ### G2-02: Comparison chains
 
 - examples: 5
 - variety @ n=50: 1.00
-- issues: {'BOOL_LEAK_RESOLUTION': 3, 'NARRATIVE_NUMERAL_HARDCODE': 3}
-    - [BOOL_LEAK_RESOLUTION] form=`(< 3 2 1)` — resolution leaks boolean answer 'false' — describe the verdict abstractly instead
+- issues: {'NARRATIVE_NUMERAL_HARDCODE': 3}
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(<= 1 1 2)` — parametric example has hard-coded English numeral 'three bundles' in a story slot — the actual draws may differ from this fixed count
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(<= 1 1 2)` — parametric example has hard-coded English numeral 'three bundles' in a story slot — the actual draws may differ from this fixed count
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(<= 1 1 2)` — parametric example has hard-coded English numeral 'three bundles' in a story slot — the actual draws may differ from this fixed count
-    - [BOOL_LEAK_RESOLUTION] form=`(> 5 4 3 2 1)` — resolution leaks boolean answer 'true' — describe the verdict abstractly instead
-    - [BOOL_LEAK_RESOLUTION] form=`(>= 3 3 2)` — resolution leaks boolean answer 'true' — describe the verdict abstractly instead
 
 ### G2-03: not= and = with multiple args
 
 - examples: 5
 - variety @ n=50: 1.00
-- issues: {'BOOL_LEAK_RESOLUTION': 3, 'FORM_DISPLAY_AND_FORM_NOUN': 2, 'NARRATIVE_NUMERAL_HARDCODE': 3}
-    - [BOOL_LEAK_RESOLUTION] form=`(not= 1 2)` — resolution leaks boolean answer 'true' — describe the verdict abstractly instead
+- issues: {'FORM_DISPLAY_AND_FORM_NOUN': 2, 'NARRATIVE_NUMERAL_HARDCODE': 3}
     - [FORM_DISPLAY_AND_FORM_NOUN] form=`(not= 1 2)` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(= 1 1 1)` — parametric example has hard-coded English numeral 'three counts' in a story slot — the actual draws may differ from this fixed count
-    - [BOOL_LEAK_RESOLUTION] form=`(= 1 1 1)` — resolution leaks boolean answer 'true' — describe the verdict abstractly instead
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(= 1 1 1)` — parametric example has hard-coded English numeral 'three counts' in a story slot — the actual draws may differ from this fixed count
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(= 1 1 1)` — parametric example has hard-coded English numeral 'three counts' in a story slot — the actual draws may differ from this fixed count
+    - [FORM_DISPLAY_AND_FORM_NOUN] form=`(not= 1 1 2)` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
 
 ### G2-04: min and max
 
@@ -195,13 +180,6 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
     - [FORM_DISPLAY_AND_FORM_NOUN] form=`(max 1 2 3)` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
     - [FORM_DISPLAY_AND_FORM_NOUN] form=`(max 1 2 3)` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
     - [CLAUSE_STACK_OVERFLOW] form=`(max 7 3 9 1 5)` — sentence with 5 commas reads as AI-output cadence: 'Wenceslas\nsimply began counting — to find the maximum of 2, 3, 5, 6, and 4 requi'
-
-### G2-05: quot, rem, mod
-
-- examples: 6
-- variety @ n=50: 1.00
-- issues: {'SMALL_INT_LEAK': 1}
-    - [SMALL_INT_LEAK] form=`(mod 17 5)` — small-int answer 2 leaks via resolution-slot phrasing
 
 ### G2-06: inc and dec
 
@@ -250,20 +228,19 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 6
 - variety @ n=50: 0.99
-- issues: {'BOOL_LEAK_RESOLUTION': 2, 'LOW_GROUNDING': 2, 'NARRATIVE_NUMERAL_HARDCODE': 3, 'FORM_DISPLAY_AND_FORM_NOUN': 1, 'CLAUSE_STACK_OVERFLOW': 1}
-    - [BOOL_LEAK_RESOLUTION] form=`(and true true)` — resolution leaks boolean answer 'true' — describe the verdict abstractly instead
+- issues: {'LOW_GROUNDING': 2, 'NARRATIVE_NUMERAL_HARDCODE': 3, 'FORM_DISPLAY_AND_FORM_NOUN': 1, 'CLAUSE_STACK_OVERFLOW': 1}
     - [LOW_GROUNDING] form=`(and true true)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-    - [BOOL_LEAK_RESOLUTION] form=`(or false true)` — resolution leaks boolean answer 'true' — describe the verdict abstractly instead
     - [LOW_GROUNDING] form=`(or false true)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(and 1 2 3)` — parametric example has hard-coded English numeral 'three counts' in a story slot — the actual draws may differ from this fixed count
     - [FORM_DISPLAY_AND_FORM_NOUN] form=`(and 1 2 3)` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
+    - [NARRATIVE_NUMERAL_HARDCODE] form=`(and 1 2 3)` — parametric example has hard-coded English numeral 'three counts' in a story slot — the actual draws may differ from this fixed count
+    - [NARRATIVE_NUMERAL_HARDCODE] form=`(and 1 2 3)` — parametric example has hard-coded English numeral 'three counts' in a story slot — the actual draws may differ from this fixed count
 
 ### G2-14: not — turning truthy to false
 
 - examples: 5
 - variety @ n=50: 1.00
-- issues: {'BOOL_LEAK_RESOLUTION': 1, 'FORM_DISPLAY_AND_FORM_NOUN': 1, 'LOW_GROUNDING': 1}
-    - [BOOL_LEAK_RESOLUTION] form=`(not true)` — resolution leaks boolean answer 'false' — describe the verdict abstractly instead
+- issues: {'FORM_DISPLAY_AND_FORM_NOUN': 1, 'LOW_GROUNDING': 1}
     - [FORM_DISPLAY_AND_FORM_NOUN] form=`(not true)` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
     - [LOW_GROUNDING] form=`(not true)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
 
@@ -302,45 +279,37 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 3
 - variety @ n=50: 0.99
-- issues: {'ANSWER_LEAK_STRING': 3, 'LOW_GROUNDING': 4, 'FORM_DISPLAY_AND_FORM_NOUN': 1, 'GOAL_FALLBACK_GENERIC': 3, 'NARRATIVE_NUMERAL_HARDCODE': 3}
-    - [ANSWER_LEAK_STRING] form=`(quote wolf)` — answer string 'wolf' appears in user_msg
+- issues: {'LOW_GROUNDING': 4, 'FORM_DISPLAY_AND_FORM_NOUN': 1, 'GOAL_FALLBACK_GENERIC': 3, 'NARRATIVE_NUMERAL_HARDCODE': 3}
     - [LOW_GROUNDING] form=`(quote wolf)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-    - [ANSWER_LEAK_STRING] form=`(quote wolf)` — answer string 'wolf' appears in user_msg
     - [LOW_GROUNDING] form=`(quote wolf)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-    - [ANSWER_LEAK_STRING] form=`(quote wolf)` — answer string 'wolf' appears in user_msg
     - [LOW_GROUNDING] form=`(quote wolf)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+    - [FORM_DISPLAY_AND_FORM_NOUN] form=`'flock` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
+    - [LOW_GROUNDING] form=`'flock` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+    - [GOAL_FALLBACK_GENERIC] form=`'flock` — user_msg uses generic 'To evaluate the X, ...' fallback AND no drawn-literal anchor — add a canonical GOALS entry for richer prose
 
 ### G2-20: Counting
 
 - examples: 3
 - variety @ n=50: 1.00
-- issues: {'ONLY_SHOOK_HEAD_TIC': 1, 'CLAUSE_STACK_OVERFLOW': 1, 'SMALL_INT_LEAK': 2, 'FORM_DISPLAY_AND_FORM_NOUN': 2, 'SENTENCE_START_LOWER_PRONOUN': 2}
+- issues: {'ONLY_SHOOK_HEAD_TIC': 1, 'CLAUSE_STACK_OVERFLOW': 1, 'FORM_DISPLAY_AND_FORM_NOUN': 2, 'SENTENCE_START_LOWER_PRONOUN': 2}
     - [ONLY_SHOOK_HEAD_TIC] form=`(count [1 2 3])` — user_msg uses 'only shook his/her head' — recurring AI-fable filler cadence
     - [CLAUSE_STACK_OVERFLOW] form=`(count [1 2 3])` — sentence with 6 commas reads as AI-output cadence: 'The runtime does this the same way for any kind of collection."\nTo count the ele'
-    - [SMALL_INT_LEAK] form=`(count "hello")` — small-int answer 5 leaks via resolution-slot phrasing
     - [FORM_DISPLAY_AND_FORM_NOUN] form=`(count "hello")` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
-    - [SMALL_INT_LEAK] form=`(count "hello")` — small-int answer 5 leaks via resolution-slot phrasing
     - [FORM_DISPLAY_AND_FORM_NOUN] form=`(count "hello")` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
+    - [SENTENCE_START_LOWER_PRONOUN] form=`(count [])` — pronoun starts a sentence in lowercase — template should use the _cap variant after a sentence-ending punctuation
+    - [SENTENCE_START_LOWER_PRONOUN] form=`(count [])` — pronoun starts a sentence in lowercase — template should use the _cap variant after a sentence-ending punctuation
 
 ### G2-21: String length and substring
 
 - examples: 3
 - variety @ n=50: 1.00
-- issues: {'ANSWER_LEAK': 1, 'FORM_DISPLAY_AND_FORM_NOUN': 3, 'THE_FORM_OVERUSE': 3, 'SMALL_INT_LEAK': 1}
-    - [ANSWER_LEAK] form=`(count "shepherd")` — answer 8 in narrative
+- issues: {'FORM_DISPLAY_AND_FORM_NOUN': 3, 'THE_FORM_OVERUSE': 3}
     - [FORM_DISPLAY_AND_FORM_NOUN] form=`(count "shepherd")` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
     - [THE_FORM_OVERUSE] form=`(count "shepherd")` — `the form` appears 6 times in user_msg (template tic — vary references)
-    - [SMALL_INT_LEAK] form=`(count "wolf")` — small-int answer 4 leaks via resolution-slot phrasing
     - [FORM_DISPLAY_AND_FORM_NOUN] form=`(count "wolf")` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
     - [THE_FORM_OVERUSE] form=`(count "wolf")` — `the form` appears 6 times in user_msg (template tic — vary references)
-
-### G2-22: Compose pure arithmetic (multi-step calculation)
-
-- examples: 3
-- variety @ n=50: 1.00
-- issues: {'ANSWER_LEAK': 2}
-    - [ANSWER_LEAK] form=`(quot (+ 100 50) 5)` — answer 30 in narrative
-    - [ANSWER_LEAK] form=`(quot (+ 100 50) 5)` — answer 30 in narrative
+    - [FORM_DISPLAY_AND_FORM_NOUN] form=`(subs "shepherd" 0 3)` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
+    - [THE_FORM_OVERUSE] form=`(subs "shepherd" 0 3)` — `the form` appears 7 times in user_msg (template tic — vary references)
 
 ## Grade 3
 
@@ -355,9 +324,8 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 3
 - variety @ n=50: 1.00
-- issues: {'HIGH_LENGTH': 1, 'SMALL_INT_LEAK': 1, 'FORM_DISPLAY_AND_FORM_NOUN': 1, 'SENTENCE_START_LOWER_PRONOUN': 1}
-    - [HIGH_LENGTH] form=`(let [x 3] (+ x 1))` — user_msg 245 words
-    - [SMALL_INT_LEAK] form=`(let [x 3] (+ x 1))` — small-int answer 4 leaks via resolution-slot phrasing
+- issues: {'HIGH_LENGTH': 1, 'FORM_DISPLAY_AND_FORM_NOUN': 1, 'SENTENCE_START_LOWER_PRONOUN': 1}
+    - [HIGH_LENGTH] form=`(let [x 3] (+ x 1))` — user_msg 247 words
     - [FORM_DISPLAY_AND_FORM_NOUN] form=`(let [x 3] (+ x 1))` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
     - [SENTENCE_START_LOWER_PRONOUN] form=`(let [x 3] (+ x 1))` — pronoun starts a sentence in lowercase — template should use the _cap variant after a sentence-ending punctuation
 
@@ -376,19 +344,17 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'SENTENCE_START_LOWER_PRONOUN': 2, 'CLAUSE_STACK_OVERFLOW': 1, 'ANSWER_LEAK': 1}
+- issues: {'SENTENCE_START_LOWER_PRONOUN': 2, 'CLAUSE_STACK_OVERFLOW': 1}
     - [SENTENCE_START_LOWER_PRONOUN] form=`(let [a 5 b (* a 2)] b)` — pronoun starts a sentence in lowercase — template should use the _cap variant after a sentence-ending punctuation
     - [CLAUSE_STACK_OVERFLOW] form=`(let [a 5 b (* a 2)] b)` — sentence with 5 commas reads as AI-output cadence: 'Step past the form\'s\nedge and the pouch is empty again." To bind a to 5, then bi'
     - [SENTENCE_START_LOWER_PRONOUN] form=`(let [a 3 b (+ a 1) c (* b 2)] c)` — pronoun starts a sentence in lowercase — template should use the _cap variant after a sentence-ending punctuation
-    - [ANSWER_LEAK] form=`(let [a 3 b (+ a 1) c (* b 2)] c)` — answer 8 in narrative
 
 ### G3-07: fn — anonymous function
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'HIGH_LENGTH': 1, 'SMALL_INT_LEAK': 1}
-    - [HIGH_LENGTH] form=`((fn [x] (+ x 1)) 4)` — user_msg 223 words
-    - [SMALL_INT_LEAK] form=`((fn [x] (+ x 1)) 4)` — small-int answer 5 leaks via resolution-slot phrasing
+- issues: {'HIGH_LENGTH': 1}
+    - [HIGH_LENGTH] form=`((fn [x] (+ x 1)) 4)` — user_msg 224 words
 
 ### G3-08: fn — multi-arg
 
@@ -405,10 +371,8 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'ANSWER_LEAK': 2, 'NARRATIVE_NUMERAL_HARDCODE': 3, 'CLAUSE_STACK_OVERFLOW': 1}
-    - [ANSWER_LEAK] form=`(do (defn add3 [a b c] (+ a b c)) (add3 1 2 3))` — answer 6 in narrative
+- issues: {'NARRATIVE_NUMERAL_HARDCODE': 3, 'CLAUSE_STACK_OVERFLOW': 1}
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(do (defn add3 [a b c] (+ a b c)) (add3 1 2 3))` — parametric example has hard-coded English numeral 'three counts' in a story slot — the actual draws may differ from this fixed count
-    - [ANSWER_LEAK] form=`(do (defn add3 [a b c] (+ a b c)) (add3 1 2 3))` — answer 6 in narrative
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(do (defn add3 [a b c] (+ a b c)) (add3 1 2 3))` — parametric example has hard-coded English numeral 'three counts' in a story slot — the actual draws may differ from this fixed count
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(do (defn add3 [a b c] (+ a b c)) (add3 1 2 3))` — parametric example has hard-coded English numeral 'three counts' in a story slot — the actual draws may differ from this fixed count
     - [CLAUSE_STACK_OVERFLOW] form=`(do (defn add3 [a b c] (+ a b c)) (add3 1 2 3))` — sentence with 6 commas reads as AI-output cadence: 'The earlier steps prepare the way; the last\nstep is the answer." To define a fun'
@@ -469,13 +433,6 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 - variety @ n=50: 1.00
 - issues: {'SENTENCE_START_LOWER_PRONOUN': 1}
     - [SENTENCE_START_LOWER_PRONOUN] form=`(let [+ 99] +)` — pronoun starts a sentence in lowercase — template should use the _cap variant after a sentence-ending punctuation
-
-### G3-17: Naming conventions (kebab-case)
-
-- examples: 1
-- variety @ n=50: 1.00
-- issues: {'ANSWER_LEAK': 1}
-    - [ANSWER_LEAK] form=`(let [flock-size 8 stray-count 2] (- flock-size st` — answer 6 in narrative
 
 ### G3-18: When to name vs inline
 
@@ -558,13 +515,11 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'CLAUSE_STACK_OVERFLOW': 2, 'BOOL_LEAK_RESOLUTION': 3, 'FORM_DISPLAY_AND_FORM_NOUN': 2}
+- issues: {'CLAUSE_STACK_OVERFLOW': 2, 'FORM_DISPLAY_AND_FORM_NOUN': 2}
     - [CLAUSE_STACK_OVERFLOW] form=`(contains? #{1 2 3} 2)` — sentence with 5 commas reads as AI-output cadence: 'To check whether 2 is a member of a set containing 1, 2, and 3 properly, he wrot'
-    - [BOOL_LEAK_RESOLUTION] form=`(contains? #{1 2 3} 2)` — resolution leaks boolean answer 'true' — describe the verdict abstractly instead
-    - [BOOL_LEAK_RESOLUTION] form=`(contains? #{1 2 3} 4)` — resolution leaks boolean answer 'false' — describe the verdict abstractly instead
     - [FORM_DISPLAY_AND_FORM_NOUN] form=`(contains? #{1 2 3} 4)` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
-    - [BOOL_LEAK_RESOLUTION] form=`(contains? #{1 2 3} 4)` — resolution leaks boolean answer 'false' — describe the verdict abstractly instead
     - [FORM_DISPLAY_AND_FORM_NOUN] form=`(contains? #{1 2 3} 4)` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
+    - [CLAUSE_STACK_OVERFLOW] form=`(contains? #{1 2 3} 4)` — sentence with 5 commas reads as AI-output cadence: 'Carol marked 6, 5, 8, 11, and 14 on the watchhouse beam, the lookout high above '
 
 ### G4-13: count — universal
 
@@ -580,8 +535,7 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 3
 - variety @ n=50: 1.00
-- issues: {'BOOL_LEAK_RESOLUTION': 1, 'FORM_DISPLAY_AND_FORM_NOUN': 1, 'CLAUSE_STACK_OVERFLOW': 1}
-    - [BOOL_LEAK_RESOLUTION] form=`(empty? [])` — resolution leaks boolean answer 'true' — describe the verdict abstractly instead
+- issues: {'FORM_DISPLAY_AND_FORM_NOUN': 1, 'CLAUSE_STACK_OVERFLOW': 1}
     - [FORM_DISPLAY_AND_FORM_NOUN] form=`(empty? [])` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
     - [CLAUSE_STACK_OVERFLOW] form=`(empty? [])` — sentence with 6 commas reads as AI-output cadence: '18, 3, 16, and 7 stood as the answer the fold required, slate, chalk, and a stea'
 
@@ -609,12 +563,12 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 1
 - variety @ n=50: 1.00
-- issues: {'HIGH_LENGTH': 1, 'BOOL_LEAK_RESOLUTION': 1, 'NARRATIVE_NUMERAL_HARDCODE': 3, 'FORM_DISPLAY_AND_FORM_NOUN': 1, 'CLAUSE_STACK_OVERFLOW': 1}
-    - [HIGH_LENGTH] form=`(= [1 2 3] '(1 2 3))` — user_msg 224 words
-    - [BOOL_LEAK_RESOLUTION] form=`(= [1 2 3] '(1 2 3))` — resolution leaks boolean answer 'true' — describe the verdict abstractly instead
+- issues: {'HIGH_LENGTH': 1, 'NARRATIVE_NUMERAL_HARDCODE': 3, 'FORM_DISPLAY_AND_FORM_NOUN': 1, 'CLAUSE_STACK_OVERFLOW': 1}
+    - [HIGH_LENGTH] form=`(= [1 2 3] '(1 2 3))` — user_msg 225 words
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(= [1 2 3] '(1 2 3))` — parametric example has hard-coded English numeral 'three items' in a story slot — the actual draws may differ from this fixed count
     - [FORM_DISPLAY_AND_FORM_NOUN] form=`(= [1 2 3] '(1 2 3))` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
     - [CLAUSE_STACK_OVERFLOW] form=`(= [1 2 3] '(1 2 3))` — sentence with 5 commas reads as AI-output cadence: '6, 5, and 16 stood as the answer the fold required, slate, chalk, and a steady e'
+    - [NARRATIVE_NUMERAL_HARDCODE] form=`(= [1 2 3] '(1 2 3))` — parametric example has hard-coded English numeral 'three items' in a story slot — the actual draws may differ from this fixed count
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(= [1 2 3] '(1 2 3))` — parametric example has hard-coded English numeral 'three items' in a story slot — the actual draws may differ from this fixed count
 
 ### G4-19: range and seq
@@ -651,9 +605,8 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'HIGH_LENGTH': 1, 'ANSWER_LEAK_STRING': 1, 'FORM_DISPLAY_AND_FORM_NOUN': 1, 'LOW_GROUNDING': 1}
+- issues: {'HIGH_LENGTH': 1, 'FORM_DISPLAY_AND_FORM_NOUN': 1, 'LOW_GROUNDING': 1}
     - [HIGH_LENGTH] form=`(when true :yes)` — user_msg 223 words
-    - [ANSWER_LEAK_STRING] form=`(when true :yes)` — answer string ':yes' appears in user_msg
     - [FORM_DISPLAY_AND_FORM_NOUN] form=`(when true :yes)` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
     - [LOW_GROUNDING] form=`(when true :yes)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
 
@@ -668,9 +621,8 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'HIGH_LENGTH': 1, 'ANSWER_LEAK_STRING': 1, 'FORM_DISPLAY_AND_FORM_NOUN': 1}
+- issues: {'HIGH_LENGTH': 1, 'FORM_DISPLAY_AND_FORM_NOUN': 1}
     - [HIGH_LENGTH] form=`(case 2 1 :one 2 :two 3 :three :default)` — user_msg 216 words
-    - [ANSWER_LEAK_STRING] form=`(case 2 1 :one 2 :two 3 :three :default)` — answer string ':two' appears in user_msg
     - [FORM_DISPLAY_AND_FORM_NOUN] form=`(case 2 1 :one 2 :two 3 :three :default)` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
 
 ### G5-07: and / or as control flow
@@ -711,21 +663,20 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 3
 - variety @ n=50: 1.00
-- issues: {'SENTENCE_START_LOWER_PRONOUN': 1, 'NUMERAL_LIST_IN_GOAL': 9, 'ANSWER_LEAK': 1, 'CLAUSE_STACK_OVERFLOW': 6, 'ONLY_SHOOK_HEAD_TIC': 1}
+- issues: {'SENTENCE_START_LOWER_PRONOUN': 1, 'NUMERAL_LIST_IN_GOAL': 9, 'CLAUSE_STACK_OVERFLOW': 6, 'ONLY_SHOOK_HEAD_TIC': 1}
     - [SENTENCE_START_LOWER_PRONOUN] form=`(reduce + [1 2 3 4])` — pronoun starts a sentence in lowercase — template should use the _cap variant after a sentence-ending punctuation
     - [NUMERAL_LIST_IN_GOAL] form=`(reduce + [1 2 3 4])` — goal_text contains 4 numerals across 3 commas — comma-list of numerals blows the sentence's clause budget; use a range or 'these numbers' framing
-    - [ANSWER_LEAK] form=`(reduce + [1 2 3 4])` — answer 10 in narrative
     - [NUMERAL_LIST_IN_GOAL] form=`(reduce + [1 2 3 4])` — goal_text contains 4 numerals across 3 commas — comma-list of numerals blows the sentence's clause budget; use a range or 'these numbers' framing
     - [NUMERAL_LIST_IN_GOAL] form=`(reduce + [1 2 3 4])` — goal_text contains 4 numerals across 3 commas — comma-list of numerals blows the sentence's clause budget; use a range or 'these numbers' framing
     - [CLAUSE_STACK_OVERFLOW] form=`(reduce + [1 2 3 4])` — sentence with 5 commas reads as AI-output cadence: 'To walk the row of pebbles 1, 2, 3, 4 carrying a tally that combines each with +'
+    - [ONLY_SHOOK_HEAD_TIC] form=`(reduce + [1 2 3 4])` — user_msg uses 'only shook his/her head' — recurring AI-fable filler cadence
 
 ### G5-13: reduce with init
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'HIGH_LENGTH': 1, 'ANSWER_LEAK': 1, 'SENTENCE_START_LOWER_PRONOUN': 2, 'CLAUSE_STACK_OVERFLOW': 1, 'ONLY_SHOOK_HEAD_TIC': 1}
+- issues: {'HIGH_LENGTH': 1, 'SENTENCE_START_LOWER_PRONOUN': 2, 'CLAUSE_STACK_OVERFLOW': 1, 'ONLY_SHOOK_HEAD_TIC': 1}
     - [HIGH_LENGTH] form=`(reduce + 100 [1 2 3])` — user_msg 241 words
-    - [ANSWER_LEAK] form=`(reduce + 100 [1 2 3])` — answer 106 in narrative
     - [SENTENCE_START_LOWER_PRONOUN] form=`(reduce + 100 [1 2 3])` — pronoun starts a sentence in lowercase — template should use the _cap variant after a sentence-ending punctuation
     - [CLAUSE_STACK_OVERFLOW] form=`(reduce + 100 [1 2 3])` — sentence with 6 commas reads as AI-output cadence: 'The runtime does this the same way for any kind of collection."\nTo fold + over t'
     - [SENTENCE_START_LOWER_PRONOUN] form=`(reduce + 0 [])` — pronoun starts a sentence in lowercase — template should use the _cap variant after a sentence-ending punctuation
@@ -778,8 +729,7 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'BOOL_LEAK_RESOLUTION': 1, 'NUMERAL_LIST_IN_GOAL': 3, 'CLAUSE_STACK_OVERFLOW': 1}
-    - [BOOL_LEAK_RESOLUTION] form=`(some even? [1 3 5 8 7])` — resolution leaks boolean answer 'true' — describe the verdict abstractly instead
+- issues: {'NUMERAL_LIST_IN_GOAL': 3, 'CLAUSE_STACK_OVERFLOW': 1}
     - [NUMERAL_LIST_IN_GOAL] form=`(some even? [1 3 5 8 7])` — goal_text contains 5 numerals across 4 commas — comma-list of numerals blows the sentence's clause budget; use a range or 'these numbers' framing
     - [CLAUSE_STACK_OVERFLOW] form=`(some even? [1 3 5 8 7])` — sentence with 7 commas reads as AI-output cadence: 'To check if any element in the vector containing 1, 3, 5, 8, and 7 is even, she '
     - [NUMERAL_LIST_IN_GOAL] form=`(some even? [1 3 5 8 7])` — goal_text contains 5 numerals across 4 commas — comma-list of numerals blows the sentence's clause budget; use a range or 'these numbers' framing
@@ -826,39 +776,28 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 3
 - variety @ n=50: 0.99
-- issues: {'ANSWER_LEAK_STRING': 1, 'LOW_GROUNDING': 5, 'GOAL_FALLBACK_GENERIC': 3, 'BOOL_LEAK_RESOLUTION': 2}
-    - [ANSWER_LEAK_STRING] form=`(name 'foo.bar)` — answer string 'foo.bar' appears in user_msg
+- issues: {'LOW_GROUNDING': 5, 'GOAL_FALLBACK_GENERIC': 3}
     - [LOW_GROUNDING] form=`(name 'foo.bar)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [LOW_GROUNDING] form=`(name 'clojure.string)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [LOW_GROUNDING] form=`(name 'clojure.string)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [GOAL_FALLBACK_GENERIC] form=`(symbol? 'village.flock)` — user_msg uses generic 'To evaluate the X, ...' fallback AND no drawn-literal anchor — add a canonical GOALS entry for richer prose
-    - [BOOL_LEAK_RESOLUTION] form=`(symbol? 'village.flock)` — resolution leaks boolean answer 'true' — describe the verdict abstractly instead
-
-### G6-03: require
-
-- examples: 2
-- variety @ n=50: 1.00
-- issues: {'ANSWER_LEAK_STRING': 1}
-    - [ANSWER_LEAK_STRING] form=`(clojure.string/lower-case "WOLF")` — answer string 'wolf' appears in user_msg
+    - [LOW_GROUNDING] form=`(symbol? 'village.flock)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+    - [GOAL_FALLBACK_GENERIC] form=`(symbol? 'village.flock)` — user_msg uses generic 'To evaluate the X, ...' fallback AND no drawn-literal anchor — add a canonical GOALS entry for richer prose
 
 ### G6-04: refer and use
 
 - examples: 1
 - variety @ n=50: 1.00
-- issues: {'HIGH_LENGTH': 1, 'BOOL_LEAK_RESOLUTION': 1}
-    - [HIGH_LENGTH] form=`(= (clojure.string/upper-case "x") (clojure.string` — user_msg 211 words
-    - [BOOL_LEAK_RESOLUTION] form=`(= (clojure.string/upper-case "x") (clojure.string` — resolution leaks boolean answer 'true' — describe the verdict abstractly instead
+- issues: {'HIGH_LENGTH': 1}
+    - [HIGH_LENGTH] form=`(= (clojure.string/upper-case "x") (clojure.string` — user_msg 212 words
 
 ### G6-05: Fully qualified names
 
 - examples: 4
 - variety @ n=50: 1.00
-- issues: {'ANSWER_LEAK_STRING': 4, 'REPL_TRIPLE_VOICE': 1, 'FORM_DISPLAY_AND_FORM_NOUN': 1}
+- issues: {'ANSWER_LEAK_STRING': 1, 'REPL_TRIPLE_VOICE': 1, 'FORM_DISPLAY_AND_FORM_NOUN': 1}
     - [ANSWER_LEAK_STRING] form=`(clojure.string/reverse "flock")` — answer string 'kcolf' appears in user_msg
     - [REPL_TRIPLE_VOICE] form=`(clojure.string/reverse "flock")` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
-    - [ANSWER_LEAK_STRING] form=`(namespace :village/shepherd)` — answer string 'village' appears in user_msg
-    - [ANSWER_LEAK_STRING] form=`(namespace :village/shepherd)` — answer string 'village' appears in user_msg
-    - [ANSWER_LEAK_STRING] form=`(namespace :village/shepherd)` — answer string 'village' appears in user_msg
     - [FORM_DISPLAY_AND_FORM_NOUN] form=`(name :village/shepherd)` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
 
 ### G6-06: Private defs
@@ -874,12 +813,12 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'STORY_RESOLUTION_NO_DRAWN': 6, 'BOOL_LEAK_RESOLUTION': 1, 'VILLAGE_NOUN_OVERUSE': 1}
+- issues: {'STORY_RESOLUTION_NO_DRAWN': 6, 'VILLAGE_NOUN_OVERUSE': 1}
     - [STORY_RESOLUTION_NO_DRAWN] form=`(boolean (:private (meta '^:private hidden)))` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':private', ':private'), resolution doesn't close the loop)
     - [STORY_RESOLUTION_NO_DRAWN] form=`(boolean (:private (meta '^:private hidden)))` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':private', ':private'), resolution doesn't close the loop)
-    - [BOOL_LEAK_RESOLUTION] form=`(boolean (:private (meta '^:private hidden)))` — resolution leaks boolean answer 'true' — describe the verdict abstractly instead
     - [STORY_RESOLUTION_NO_DRAWN] form=`(boolean (:private (meta '^:private hidden)))` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':private', ':private'), resolution doesn't close the loop)
     - [VILLAGE_NOUN_OVERUSE] form=`(boolean (:private (meta '^:private hidden)))` — `the village` appears 4 times (noun-saturation tic — vary or drop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(boolean (:private (meta 'public)))` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':private',), resolution doesn't close the loop)
     - [STORY_RESOLUTION_NO_DRAWN] form=`(boolean (:private (meta 'public)))` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':private',), resolution doesn't close the loop)
 
 ### G6-10: Leiningen and deps.edn
@@ -949,8 +888,7 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'BOOL_LEAK_RESOLUTION': 1, 'LOW_GROUNDING': 1}
-    - [BOOL_LEAK_RESOLUTION] form=`(contains? #{'clojure.string} 'clojure.set)` — resolution leaks boolean answer 'false' — describe the verdict abstractly instead
+- issues: {'LOW_GROUNDING': 1}
     - [LOW_GROUNDING] form=`(contains? #{'clojure.string} 'clojure.set)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
 
 ## Grade 7
@@ -984,8 +922,7 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 4
 - variety @ n=50: 1.00
-- issues: {'BOOL_LEAK_RESOLUTION': 1, 'LOW_GROUNDING': 2}
-    - [BOOL_LEAK_RESOLUTION] form=`(some? 0)` — resolution leaks boolean answer 'true' — describe the verdict abstractly instead
+- issues: {'LOW_GROUNDING': 2}
     - [LOW_GROUNDING] form=`(some? 0)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [LOW_GROUNDING] form=`(count nil)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
 
@@ -1017,8 +954,7 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'BOOL_LEAK_RESOLUTION': 1, 'FORM_DISPLAY_AND_FORM_NOUN': 1, 'REPL_TRIPLE_VOICE': 2}
-    - [BOOL_LEAK_RESOLUTION] form=`(tap> :hello)` — resolution leaks boolean answer 'true' — describe the verdict abstractly instead
+- issues: {'FORM_DISPLAY_AND_FORM_NOUN': 1, 'REPL_TRIPLE_VOICE': 2}
     - [FORM_DISPLAY_AND_FORM_NOUN] form=`(tap> :hello)` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
     - [REPL_TRIPLE_VOICE] form=`(tap> :hello)` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
     - [REPL_TRIPLE_VOICE] form=`(tap> 42)` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
@@ -1027,8 +963,7 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 1
 - variety @ n=50: 1.00
-- issues: {'ANSWER_LEAK_STRING': 1, 'FORM_DISPLAY_AND_FORM_NOUN': 1}
-    - [ANSWER_LEAK_STRING] form=`(:doc (meta '^{:doc "adds two"} plus))` — answer string 'adds two' appears in user_msg
+- issues: {'FORM_DISPLAY_AND_FORM_NOUN': 1}
     - [FORM_DISPLAY_AND_FORM_NOUN] form=`(:doc (meta '^{:doc "adds two"} plus))` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
 
 ### G7-11: Reading stack traces
@@ -1057,13 +992,13 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'SMALL_INT_LEAK': 1, 'ONLY_SHOOK_HEAD_TIC': 2, 'REPL_TRIPLE_VOICE': 1, 'STORY_RESOLUTION_NO_DRAWN': 3}
-    - [SMALL_INT_LEAK] form=`(count (clojure.string/split-lines "a\nb\nc"))` — small-int answer 3 leaks via resolution-slot phrasing
+- issues: {'ONLY_SHOOK_HEAD_TIC': 2, 'REPL_TRIPLE_VOICE': 1, 'STORY_RESOLUTION_NO_DRAWN': 3}
     - [ONLY_SHOOK_HEAD_TIC] form=`(count (clojure.string/split-lines "a\nb\nc"))` — user_msg uses 'only shook his/her head' — recurring AI-fable filler cadence
     - [REPL_TRIPLE_VOICE] form=`(count (clojure.string/split-lines "a\nb\nc"))` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
     - [STORY_RESOLUTION_NO_DRAWN] form=`(first (clojure.string/split-lines "alpha\nbeta"))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('alpha\\nbeta',), resolution doesn't close the loop)
     - [STORY_RESOLUTION_NO_DRAWN] form=`(first (clojure.string/split-lines "alpha\nbeta"))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('alpha\\nbeta',), resolution doesn't close the loop)
     - [ONLY_SHOOK_HEAD_TIC] form=`(first (clojure.string/split-lines "alpha\nbeta"))` — user_msg uses 'only shook his/her head' — recurring AI-fable filler cadence
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(first (clojure.string/split-lines "alpha\nbeta"))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('alpha\\nbeta',), resolution doesn't close the loop)
 
 ### G7-15: *in* and *out*
 
@@ -1124,11 +1059,8 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'SENTENCE_START_LOWER_PRONOUN': 1, 'ANSWER_LEAK_STRING': 3}
+- issues: {'SENTENCE_START_LOWER_PRONOUN': 1}
     - [SENTENCE_START_LOWER_PRONOUN] form=`(do (defrecord Watcher [name post]) (:post (->Watc` — pronoun starts a sentence in lowercase — template should use the _cap variant after a sentence-ending punctuation
-    - [ANSWER_LEAK_STRING] form=`(do (defrecord Watcher [name post]) (:name (->Watc` — answer string 'elder' appears in user_msg
-    - [ANSWER_LEAK_STRING] form=`(do (defrecord Watcher [name post]) (:name (->Watc` — answer string 'elder' appears in user_msg
-    - [ANSWER_LEAK_STRING] form=`(do (defrecord Watcher [name post]) (:name (->Watc` — answer string 'elder' appears in user_msg
 
 ### G8-04: Protocol definition
 
@@ -1143,8 +1075,7 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'ANSWER_LEAK_STRING': 1, 'HONEST_JUDGE_REPEAT': 1, 'CLAUSE_STACK_OVERFLOW': 1}
-    - [ANSWER_LEAK_STRING] form=`(do (defprotocol Greet (hail [this])) (extend-prot` — answer string ':number' appears in user_msg
+- issues: {'HONEST_JUDGE_REPEAT': 1, 'CLAUSE_STACK_OVERFLOW': 1}
     - [HONEST_JUDGE_REPEAT] form=`(do (defprotocol Greet (hail [this])) (extend-prot` — two or more 'honest' uses in one boy-wolf user_msg (judge-bombast tic — drop one)
     - [CLAUSE_STACK_OVERFLOW] form=`(do (defprotocol Greet (hail [this])) (extend-prot` — sentence with 5 commas reads as AI-output cadence: 'To define a protocol named Greet with one method hail, extend it to Long type wi'
 
@@ -1163,21 +1094,15 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'ANSWER_LEAK_STRING': 6, 'HONEST_JUDGE_REPEAT': 1}
-    - [ANSWER_LEAK_STRING] form=`(do (defprotocol Alarm (sound [this])) (defrecord ` — answer string ':cry' appears in user_msg
-    - [ANSWER_LEAK_STRING] form=`(do (defprotocol Alarm (sound [this])) (defrecord ` — answer string ':cry' appears in user_msg
-    - [ANSWER_LEAK_STRING] form=`(do (defprotocol Alarm (sound [this])) (defrecord ` — answer string ':cry' appears in user_msg
+- issues: {'HONEST_JUDGE_REPEAT': 1}
     - [HONEST_JUDGE_REPEAT] form=`(do (defprotocol Alarm (sound [this])) (defrecord ` — two or more 'honest' uses in one boy-wolf user_msg (judge-bombast tic — drop one)
-    - [ANSWER_LEAK_STRING] form=`(do (defprotocol Alarm (sound [this])) (defrecord ` — answer string ':measured' appears in user_msg
-    - [ANSWER_LEAK_STRING] form=`(do (defprotocol Alarm (sound [this])) (defrecord ` — answer string ':measured' appears in user_msg
 
 ### G8-09: Multimethod defmethod
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'CLAUSE_STACK_OVERFLOW': 3, 'ANSWER_LEAK_STRING': 1}
+- issues: {'CLAUSE_STACK_OVERFLOW': 3}
     - [CLAUSE_STACK_OVERFLOW] form=`(do (defmulti reply :role) (defmethod reply :sheph` — sentence with 5 commas reads as AI-output cadence: 'To find what reply returns for {:role :elder}, she composed\ntwo defmethod entrie'
-    - [ANSWER_LEAK_STRING] form=`(do (defmulti reply :role) (defmethod reply :sheph` — answer string ':measured' appears in user_msg
     - [CLAUSE_STACK_OVERFLOW] form=`(do (defmulti reply :role) (defmethod reply :sheph` — sentence with 5 commas reads as AI-output cadence: 'To find what reply returns for {:role :stranger} when :default falls through, sh'
     - [CLAUSE_STACK_OVERFLOW] form=`(do (defmulti reply :role) (defmethod reply :sheph` — sentence with 5 commas reads as AI-output cadence: 'To find what reply returns for {:role :stranger} when :default falls through, he'
 
@@ -1185,16 +1110,8 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'ANSWER_LEAK_STRING': 1, 'CLAUSE_STACK_OVERFLOW': 1}
-    - [ANSWER_LEAK_STRING] form=`(do (defmulti show identity) (defmethod show :wolf` — answer string 'howl' appears in user_msg
+- issues: {'CLAUSE_STACK_OVERFLOW': 1}
     - [CLAUSE_STACK_OVERFLOW] form=`(do (defmulti show identity) (defmethod show :wolf` — sentence with 5 commas reads as AI-output cadence: 'The dispatch\nfunction is the reader; the gate is the router." To compute the str'
-
-### G8-11: Protocol vs Java interface
-
-- examples: 1
-- variety @ n=50: 1.00
-- issues: {'ANSWER_LEAK_STRING': 1}
-    - [ANSWER_LEAK_STRING] form=`(do (defprotocol IAlarm (raise [this])) (extend-pr` — answer string ':raised' appears in user_msg
 
 ### G8-12: extend-type on built-in types
 
@@ -1208,8 +1125,7 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 0.99
-- issues: {'ANSWER_LEAK_STRING': 1, 'WRONG_FABLE_LITERAL': 1, 'LOW_GROUNDING': 1, 'CLAUSE_STACK_OVERFLOW': 1}
-    - [ANSWER_LEAK_STRING] form=`(do (defprotocol Named (name-of [this])) (defrecor` — answer string 'Pip' appears in user_msg
+- issues: {'WRONG_FABLE_LITERAL': 1, 'LOW_GROUNDING': 1, 'CLAUSE_STACK_OVERFLOW': 1}
     - [WRONG_FABLE_LITERAL] form=`(do (defprotocol Named (name-of [this])) (defrecor` — tortoise-hare ghost name 'Pip' appears in boy-wolf user_msg
     - [LOW_GROUNDING] form=`(do (defprotocol Named (name-of [this])) (defrecor` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [CLAUSE_STACK_OVERFLOW] form=`(do (defprotocol Tagged (tag-of [this])) (defrecor` — sentence with 5 commas reads as AI-output cadence: "The runtime looks up which species the shepherd is, then runs that\nspecies' answ"
@@ -1230,18 +1146,16 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 3
 - variety @ n=50: 0.99
-- issues: {'BOOL_LEAK_RESOLUTION': 1, 'LOW_GROUNDING': 1}
-    - [BOOL_LEAK_RESOLUTION] form=`(isa? java.lang.String java.lang.Number)` — resolution leaks boolean answer 'false' — describe the verdict abstractly instead
+- issues: {'LOW_GROUNDING': 1}
     - [LOW_GROUNDING] form=`(isa? java.lang.String java.lang.Number)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
 
 ### G8-16: Abstract design with protocols
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'CLAUSE_STACK_OVERFLOW': 1, 'LOW_GROUNDING': 1, 'ANSWER_LEAK_STRING': 1, 'HONEST_JUDGE_REPEAT': 1}
+- issues: {'CLAUSE_STACK_OVERFLOW': 1, 'LOW_GROUNDING': 1, 'HONEST_JUDGE_REPEAT': 1}
     - [CLAUSE_STACK_OVERFLOW] form=`(do (defprotocol Watch (look [this])) (defrecord S` — sentence with 6 commas reads as AI-output cadence: "The runtime looks up which species the shepherd is, then runs that\nspecies' answ"
     - [LOW_GROUNDING] form=`(do (defprotocol Watch (look [this])) (defrecord S` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-    - [ANSWER_LEAK_STRING] form=`(do (defprotocol Sound (cry [this])) (defrecord Sh` — answer string ':calm' appears in user_msg
     - [HONEST_JUDGE_REPEAT] form=`(do (defprotocol Sound (cry [this])) (defrecord Sh` — two or more 'honest' uses in one boy-wolf user_msg (judge-bombast tic — drop one)
 
 ## Grade 9
@@ -1487,13 +1401,12 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 3
 - variety @ n=50: 1.00
-- issues: {'ANSWER_LEAK': 2, 'CONCEPT_AS_VERB': 3, 'CLAUSE_STACK_OVERFLOW': 2}
-    - [ANSWER_LEAK] form=`(-> 5 inc inc inc)` — answer 8 in narrative
+- issues: {'CONCEPT_AS_VERB': 3, 'CLAUSE_STACK_OVERFLOW': 2}
     - [CONCEPT_AS_VERB] form=`(-> 5 inc inc inc)` — concept_phrase substituted into a finite-verb slot (e.g. 'must calling X', 'I applying Y')
-    - [ANSWER_LEAK] form=`(->> [1 2 3 4] (filter even?) (map inc) (reduce +)` — answer 8 in narrative
     - [CLAUSE_STACK_OVERFLOW] form=`(->> [1 2 3 4] (filter even?) (map inc) (reduce +)` — sentence with 5 commas reads as AI-output cadence: 'To thread a vector through filter, map, and reduce using thread-last, she chalke'
     - [CLAUSE_STACK_OVERFLOW] form=`(->> [1 2 3 4] (filter even?) (map inc) (reduce +)` — sentence with 5 commas reads as AI-output cadence: 'To thread a vector through filter, map, and reduce using thread-last, he chalked'
     - [CONCEPT_AS_VERB] form=`(->> [1 2 3 4] (filter even?) (map inc) (reduce +)` — concept_phrase substituted into a finite-verb slot (e.g. 'must calling X', 'I applying Y')
+    - [CONCEPT_AS_VERB] form=`(macroexpand '(-> x f g))` — concept_phrase substituted into a finite-verb slot (e.g. 'must calling X', 'I applying Y')
 
 ### G10-08: Macro vs fn
 
@@ -1569,9 +1482,8 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'SENTENCE_START_LOWER_PRONOUN': 1, 'ANSWER_LEAK_STRING': 1}
+- issues: {'SENTENCE_START_LOWER_PRONOUN': 1}
     - [SENTENCE_START_LOWER_PRONOUN] form=`(do (defmacro with-careful-watch [& body] `(let [p` — pronoun starts a sentence in lowercase — template should use the _cap variant after a sentence-ending punctuation
-    - [ANSWER_LEAK_STRING] form=`(do (defmacro def-watch [name v] `(def ~name ~v)) ` — answer string ':alert' appears in user_msg
 
 ## Grade 11
 
@@ -1627,13 +1539,13 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 6
 - variety @ n=50: 1.00
-- issues: {'CLAUSE_STACK_OVERFLOW': 3, 'STORY_SLOT_NOUN_REPEAT': 3, 'GOAL_FALLBACK_GENERIC': 1}
+- issues: {'CLAUSE_STACK_OVERFLOW': 3, 'STORY_SLOT_NOUN_REPEAT': 3, 'STORY_RESOLUTION_NO_DRAWN': 6, 'GOAL_FALLBACK_GENERIC': 1}
     - [CLAUSE_STACK_OVERFLOW] form=`(let [a (int-array [1 2 3])] (alength a))` — sentence with 6 commas reads as AI-output cadence: "When we need a smith's tool, the runtime\ncarries the value over the wall, asks t"
     - [STORY_SLOT_NOUN_REPEAT] form=`(let [a (int-array [10 20 30])] (aget a 1))` — the noun 'the host's' appears in all 4 story slots (scenario/need/mapping/resolution) — vary the imagery between beats
     - [STORY_SLOT_NOUN_REPEAT] form=`(let [a (int-array [10 20 30])] (aget a 1))` — the noun 'the host's' appears in all 4 story slots (scenario/need/mapping/resolution) — vary the imagery between beats
     - [STORY_SLOT_NOUN_REPEAT] form=`(let [a (int-array [10 20 30])] (aget a 1))` — the noun 'the host's' appears in all 4 story slots (scenario/need/mapping/resolution) — vary the imagery between beats
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(let [a (int-array [1 2 3])] (alength a))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('3',), resolution doesn't close the loop)
     - [CLAUSE_STACK_OVERFLOW] form=`(let [a (int-array [1 2 3])] (alength a))` — sentence with 6 commas reads as AI-output cadence: "When we need a smith's tool, the runtime\ncarries the value over the wall, asks t"
-    - [CLAUSE_STACK_OVERFLOW] form=`(let [a (int-array [5 10 15])] (aget a 0))` — sentence with 6 commas reads as AI-output cadence: "When we need a smith's tool, the runtime\ncarries the value over the wall, asks t"
 
 ### G11-08: Type hints
 
@@ -1781,8 +1693,7 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'BOOL_LEAK_RESOLUTION': 1, 'REPL_TRIPLE_VOICE': 1, 'PATIENT_ROLE_BOASTFUL': 1, 'VILLAGE_NOUN_OVERUSE': 1}
-    - [BOOL_LEAK_RESOLUTION] form=`(= (+ 1 2) 3)` — resolution leaks boolean answer 'true' — describe the verdict abstractly instead
+- issues: {'REPL_TRIPLE_VOICE': 1, 'PATIENT_ROLE_BOASTFUL': 1, 'VILLAGE_NOUN_OVERUSE': 1}
     - [REPL_TRIPLE_VOICE] form=`(= (+ 1 2) 3)` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
     - [PATIENT_ROLE_BOASTFUL] form=`(do "(deftest …), (is …), (testing …) are the core` — patient role 'the elder' co-occurs with boastful EMO phrase 'with great whoops of laughter'
     - [VILLAGE_NOUN_OVERUSE] form=`(do "(deftest …), (is …), (testing …) are the core` — `the village` appears 4 times (noun-saturation tic — vary or drop)
@@ -1798,9 +1709,8 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'FORM_LEAK': 1, 'BOOL_LEAK_RESOLUTION': 1, 'CLAUSE_STACK_OVERFLOW': 2, 'PATIENT_ROLE_BOASTFUL': 1, 'VILLAGE_NOUN_OVERUSE': 1}
+- issues: {'FORM_LEAK': 1, 'CLAUSE_STACK_OVERFLOW': 2, 'PATIENT_ROLE_BOASTFUL': 1, 'VILLAGE_NOUN_OVERUSE': 1}
     - [FORM_LEAK] form=`(= (reverse (reverse [1 2 3])) [1 2 3])` — form '(= (reverse (reverse [1 2 3])) [1 2 3])' appears in user_msg of a goal-style subject
-    - [BOOL_LEAK_RESOLUTION] form=`(= (reverse (reverse [1 2 3])) [1 2 3])` — resolution leaks boolean answer 'true' — describe the verdict abstractly instead
     - [CLAUSE_STACK_OVERFLOW] form=`(= (reverse (reverse [1 2 3])) [1 2 3])` — sentence with 6 commas reads as AI-output cadence: 'To verify the property that reversing a vector twice returns the original vector'
     - [CLAUSE_STACK_OVERFLOW] form=`(= (reverse (reverse [1 2 3])) [1 2 3])` — sentence with 6 commas reads as AI-output cadence: 'To verify the property that reversing a vector twice returns the original vector'
     - [PATIENT_ROLE_BOASTFUL] form=`(do "test.check generates inputs and checks proper` — patient role 'the elder' co-occurs with boastful EMO phrase 'with a smug grin'
@@ -1888,14 +1798,12 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 ### Issue counts (across all examples × 3 records)
 
 - **CLAUSE_STACK_OVERFLOW**: 201
-- **STORY_RESOLUTION_NO_DRAWN**: 93
+- **STORY_RESOLUTION_NO_DRAWN**: 99
 - **LOW_GROUNDING**: 73
 - **NARRATIVE_NUMERAL_HARDCODE**: 60
 - **FORM_DISPLAY_AND_FORM_NOUN**: 53
 - **NUMERAL_LIST_IN_GOAL**: 48
 - **GOAL_FALLBACK_GENERIC**: 35
-- **BOOL_LEAK_RESOLUTION**: 34
-- **ANSWER_LEAK_STRING**: 30
 - **SENTENCE_START_LOWER_PRONOUN**: 27
 - **HIGH_LENGTH**: 24
 - **VILLAGE_NOUN_OVERUSE**: 23
@@ -1903,18 +1811,19 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 - **PATIENT_ROLE_BOASTFUL**: 20
 - **HONEST_JUDGE_REPEAT**: 18
 - **TRUST_RHETORIC_FILLER**: 15
-- **ANSWER_LEAK**: 15
 - **FOREIGN_FABLE_IMAGERY**: 14
 - **REPL_TRIPLE_VOICE**: 14
 - **THE_FORM_OVERUSE**: 13
 - **CONCEPT_AS_VERB**: 12
-- **SMALL_INT_LEAK**: 8
 - **STRING_AS_CHAR_MISCLAIM**: 7
 - **PROCEDURAL_OPENER**: 7
 - **AI_OUTPUT_CADENCE**: 6
 - **REPEATED_OPENER_FRAGMENT**: 4
+- **ANSWER_LEAK**: 3
+- **ANSWER_LEAK_STRING**: 3
 - **RESOLUTION_REPL_DOUBLED**: 3
 - **STORY_SLOT_NOUN_REPEAT**: 3
+- **SMALL_INT_LEAK**: 1
 - **UNFILLED_DRAWN_PLACEHOLDER**: 1
 - **DRAWN_PLACEHOLDER_LEAK**: 1
 - **WRONG_FABLE_LITERAL**: 1
@@ -1926,18 +1835,18 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 | Grade | Subjects | Examples | Issues | Low-variety |
 |---|---|---|---|---|
-| 1 | 18 | 80 | 91 | — |
-| 2 | 22 | 88 | 97 | — |
-| 3 | 18 | 31 | 45 | — |
-| 4 | 20 | 39 | 62 | — |
-| 5 | 22 | 39 | 107 | — |
-| 6 | 16 | 33 | 62 | — |
-| 7 | 18 | 36 | 46 | — |
-| 8 | 16 | 31 | 64 | — |
+| 1 | 18 | 80 | 82 | — |
+| 2 | 22 | 88 | 77 | — |
+| 3 | 18 | 31 | 39 | — |
+| 4 | 20 | 39 | 57 | — |
+| 5 | 22 | 39 | 102 | — |
+| 6 | 16 | 33 | 52 | — |
+| 7 | 18 | 36 | 42 | — |
+| 8 | 16 | 31 | 48 | — |
 | 9 | 18 | 34 | 87 | — |
-| 10 | 16 | 36 | 63 | — |
-| 11 | 14 | 58 | 80 | — |
-| 12 | 18 | 37 | 82 | — |
+| 10 | 16 | 36 | 60 | — |
+| 11 | 14 | 58 | 86 | — |
+| 12 | 18 | 37 | 80 | — |
 
 ### Sample issues by severity
 
@@ -2201,39 +2110,6 @@ works. "Look here," he said, pointing to the character \space.
 you back what it ev...
     ```
 
-#### BOOL_LEAK_RESOLUTION
-
-- `G1-09` (form `(symbol? 'wolf)`): resolution leaks boolean answer 'true' — describe the verdict abstractly instead
-    ```
-    There is a difference between a real alarm and a bored one, and the village knew the difference well.
-
-Tom had chalked a label on the slate for a flock pen. Carol stood with a carved tag from the live sheep itself. The village's notes must not mix chalk marks with the things they name. Tom had to te...
-    ```
-- `G1-15` (form `(= 1 2)`): resolution leaks boolean answer 'false' — describe the verdict abstractly instead
-    ```
-    The lambs were milling in the lower meadow when the boy first thought of the joke he should not have made.
-
-Carol had two tally-marks on a stone by the fold: one from the morning count, one from midday. Tom claimed they must differ because sheep move. Carol wrote them side by side to test. Before th...
-    ```
-- `G1-15` (form `(= 1 2)`): resolution leaks boolean answer 'false' — describe the verdict abstractly instead
-    ```
-    It happened in a quiet season, when the lambs were strong and the days were long enough to grow tired of.
-
-Carol had two tally-marks on a stone by the fold: one from the morning count, one from midday. Tom claimed they must differ because sheep move. Carol wrote them side by side to test. Before the...
-    ```
-- `G1-15` (form `(= "a" "a")`): resolution leaks boolean answer 'true' — describe the verdict abstractly instead
-    ```
-    There is a difference between a real alarm and a bored one, and the village knew the difference well.
-
-Carol had written the letter `a` on the slate twice — once in the morning lesson, once in the afternoon. Tom wondered if the two marks were truly the same mark. The elder's teaching depended on sta...
-    ```
-- `G1-15` (form `(= 1 1 1 1)`): resolution leaks boolean answer 'true' — describe the verdict abstractly instead
-    ```
-    Ulrich was a clever boy, and near the village cleverness had begun to look very much like trouble.
-
-Carol had four stones at the fold, each notched once — the morning count from four separate shepherds. They all agreed on the same tally. Carol wrote the multi-arg equality test. Before the day's work...
-    ```
-
 #### LOW_GROUNDING
 
 - `G1-09` (form `(symbol? 'wolf)`): user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
@@ -2479,65 +2355,6 @@ you're...
 
 Tom hesitated at the practice-pen behind the watchhouse. Carol had set out a slate and chalk to demonstrate. Tom was anxious about errors. Carol explained the pen made careless tries cost noth...
     ```
-- `G2-05` (form `(mod 17 5)`): small-int answer 2 leaks via resolution-slot phrasing
-    ```
-    It was in the orchard, where the ridge looks down on the houses, that Nikolai first cried wolf.
-
-Carol worked with `mod` to sort lambs by a five-day cycle. On day 12 of the year, she wanted to know which position in the cycle it occupied. The position in the five-day cycle mattered for rotation. Tom...
-    ```
-- `G2-20` (form `(count "hello")`): small-int answer 5 leaks via resolution-slot phrasing
-    ```
-    Eamon had been told the rules plainly: cry only when the wolf is real, and never when he is bored.
-
-Carol wrote the word 'marble' on the slate and wanted to know how many characters it held. The character count mattered for the ledger. Tom said five; Carol insisted the form would walk the string and...
-    ```
-- `G2-20` (form `(count "hello")`): small-int answer 5 leaks via resolution-slot phrasing
-    ```
-    It was near the hilltop, where the ridge looks down on the houses, that Leonardo first cried wolf.
-
-Carol wrote the word 'myrtle' on the slate and wanted to know how many characters it held. The character count mattered for the ledger. Tom said five; Carol insisted the form would walk the string and...
-    ```
-- `G2-21` (form `(count "wolf")`): small-int answer 4 leaks via resolution-slot phrasing
-    ```
-    On those slopes, trust was a thing the village extended freely, and a thing it could not afford to lose.
-
-Carol wrote 'myrrh' on the slate and wanted to know its length. The name appeared shorter than 'shepherd'. The comparison mattered for the record. Tom said four; Carol insisted the form would se...
-    ```
-
-#### ANSWER_LEAK
-
-- `G2-01` (form `(+ 10 20 30)`): answer 60 in narrative
-    ```
-    It happened in a quiet season, when the lambs were strong and the days were long enough to grow tired of.
-
-Rafal eyed the grazing flock near the woods, with a smug grin, and called out a
-guess about how many sheep were there without bothering to count. Benedict
-simply began counting — to add 7, 10, ...
-    ```
-- `G2-10` (form `(* 2 2 2)`): answer 8 in narrative
-    ```
-    The hilltop offered a fine view of both the flock and the road below, where help would have to come from.
-
-Carol stacked boxes in a cube pattern: 2 boxes deep, 2 boxes wide, 2 boxes tall. She wanted to know the total volume. The cube volume required multiplying 2 three times. Tom estimated; Carol dr...
-    ```
-- `G2-21` (form `(count "shepherd")`): answer 8 in narrative
-    ```
-    The sheep had grazed peacefully all morning, and there was nothing at all the matter, which was exactly the problem.
-
-Carol wrote the word 'willow' on the slate as a long bead-string. She wanted to count every bead in the cord. The string length mattered for labeling in the ledger. Tom said roughly ...
-    ```
-- `G2-22` (form `(quot (+ 100 50) 5)`): answer 30 in narrative
-    ```
-    On those slopes, trust was a thing the village extended freely, and a thing it could not afford to lose.
-
-Carol had 590 fleeces in the west field and 73 in the east field. She wanted to divide the combined total equally by 6 buyers. The quotient after summing mattered for the fair price. Tom said th...
-    ```
-- `G2-22` (form `(quot (+ 100 50) 5)`): answer 30 in narrative
-    ```
-    A boy with too little to do and too loud a voice is a small danger to himself and a larger one to his village.
-
-Carol had 597 fleeces in the west field and 81 in the east field. She wanted to divide the combined total equally by 20 buyers. The quotient after summing mattered for the fair price. Tom ...
-    ```
 
 #### CLAUSE_STACK_OVERFLOW
 
@@ -2584,6 +2401,27 @@ know exactly what they would do without checking the condition. "I just know,"
 she insisted, calling out a ...
     ```
 
+#### ANSWER_LEAK
+
+- `G2-10` (form `(* 2 2 2)`): answer 8 in narrative
+    ```
+    The hilltop offered a fine view of both the flock and the road below, where help would have to come from.
+
+Carol stacked boxes in a cube pattern: 2 boxes deep, 2 boxes wide, 2 boxes tall. She wanted to know the total volume. The cube volume required multiplying 2 three times. Tom estimated; Carol dr...
+    ```
+- `G3-10` (form `(#(+ % 1) 5)`): answer 6 in narrative
+    ```
+    The hilltop offered a fine view of both the flock and the road below, where help would have to come from.
+
+Tom handed Carol a count of 5 sheep, and Carol needed to add one more to it for the fold's requirement. She wanted a quick shorthand for the addition. The add-one operation was so brief, Carol ...
+    ```
+- `G10-10` (form `(do (defmacro safe-if-let [bind then else] `(if-let ~bind ~t`): answer 10 in narrative
+    ```
+    The hilltop offered a fine view of both the flock and the road below, where help would have to come from.
+
+Carol warned Tom about a tempting but dangerous macro style: anaphoric macros that secretly inject a name into the user's code. She showed him a safe alternative: `safe-if-let`, which bound the...
+    ```
+
 #### THE_FORM_OVERUSE
 
 - `G2-12` (form `(print "x")`): `the form` appears 5 times in user_msg (template tic — vary references)
@@ -2615,39 +2453,6 @@ Carol wrote an empty string on the slate — zero characters, but a string nonet
     There is a difference between a real alarm and a bored one, and the village knew the difference well.
 
 Carol's search for an entry in the ledger came up empty — nil. The conditional needed to know which path a missing value took. The gate had to decide based on nil. Tom said nothing was nothing; Car...
-    ```
-
-#### ANSWER_LEAK_STRING
-
-- `G2-18` (form `(quote wolf)`): answer string 'wolf' appears in user_msg
-    ```
-    The lambs were milling in the lower meadow when the boy first thought of the joke he should not have made.
-
-Carol drew a chalk mark on the slate and labeled it `wolf`. She wanted the mark itself — the symbol — not what it named. The village needed the chalk mark as a name, not a direction to run. To...
-    ```
-- `G2-18` (form `(quote wolf)`): answer string 'wolf' appears in user_msg
-    ```
-    It happened in a quiet season, when the lambs were strong and the days were long enough to grow tired of.
-
-Carol drew a chalk mark on the slate and labeled it `wolf`. She wanted the mark itself — the symbol — not what it named. The village needed the chalk mark as a name, not a direction to run. Tom...
-    ```
-- `G2-18` (form `(quote wolf)`): answer string 'wolf' appears in user_msg
-    ```
-    There was once a shepherd boy whose afternoons were long and whose imagination was longer.
-
-Carol drew a chalk mark on the slate and labeled it `wolf`. She wanted the mark itself — the symbol — not what it named. The village needed the chalk mark as a name, not a direction to run. Tom said 'wolf' wa...
-    ```
-- `G5-03` (form `(when true :yes)`): answer string ':yes' appears in user_msg
-    ```
-    The lambs were milling in the lower meadow when the boy first thought of the joke he should not have made.
-
-Carol posted a watch-order at the fold: if the lambs were restless today, Tom was to ring the bell and post a notice at the village stone. Tom checked the pen, and warm — the lambs were pacing...
-    ```
-- `G5-06` (form `(case 2 1 :one 2 :two 3 :three :default)`): answer string ':two' appears in user_msg
-    ```
-    A boy with too little to do and too loud a voice is a small danger to himself and a larger one to his village.
-
-Carol marked east lambing-pens with numbers: 4 for north-fold lambs, 2 for south-fold, 7 for those born late. Tom held a tally-token marked with the number 2. The form would read the token...
     ```
 
 #### SENTENCE_START_LOWER_PRONOUN
@@ -2695,7 +2500,7 @@ goal — to bind a to 8, then bind b to twice a, and return b —...
 
 #### HIGH_LENGTH
 
-- `G3-03` (form `(let [x 3] (+ x 1))`): user_msg 245 words
+- `G3-03` (form `(let [x 3] (+ x 1))`): user_msg 247 words
     ```
     The lambs were milling in the lower meadow when the boy first thought of the joke he should not have made.
 
@@ -2707,7 +2512,7 @@ Carol the elder had been counting along a stretch of fence-line at dawn. She sli
 
 Carol the elder had watched two separate morning counts: 2 lamb at the upper pasture, 3 at the lower fold. She slipped both tally-tokens into her belt-pouch at once. The village...
     ```
-- `G3-07` (form `((fn [x] (+ x 1)) 4)`): user_msg 223 words
+- `G3-07` (form `((fn [x] (+ x 1)) 4)`): user_msg 224 words
     ```
     It happened at the edge of the orchard, on a hill where shouting carries far and trust carries further, until it doesn't.
 
@@ -2867,6 +2672,27 @@ Tom stood sorting wool by weight at the watchhouse. Carol had given him a simple
     near the hilltop, on a slope above the village, Tove watched his flock and his shadow grow longer.
 
 Tom stood sorting wool by weight at the watchhouse. Carol had given him a simple rule: if a fleece weighed more than three coins' worth, send it to the dyer; if not, keep it for the lambing-pen. A fle...
+    ```
+
+#### ANSWER_LEAK_STRING
+
+- `G6-05` (form `(clojure.string/reverse "flock")`): answer string 'kcolf' appears in user_msg
+    ```
+    The wolves of those hills were rare but not absent, and the shepherds knew it was safer to be vigilant than clever.
+
+At the smithy's next post, a different tool waited: `clojure.string/reverse`. Carol asked Tom to call it by its full name and see what it would do to the word "flock". Tom was beginni...
+    ```
+- `G11-02` (form `(. "abc" toUpperCase)`): answer string 'ABC' appears in user_msg
+    ```
+    The pasture lay below a rocky lookout, and the sheep were easier to count than the hours.
+
+Tom noticed a second way to write the same kind of tool-call, using the same dot but with the syntax stretched out: `(. object method)`. Carol explained this was the more explicit form. Tom wanted to understan...
+    ```
+- `G11-02` (form `(. "abc" toUpperCase)`): answer string 'ABC' appears in user_msg
+    ```
+    The pasture lay below a rocky lookout, and the sheep were easier to count than the hours.
+
+Tom noticed a second way to write the same kind of tool-call, using the same dot but with the syntax stretched out: `(. object method)`. Carol explained this was the more explicit form. Tom wanted to understan...
     ```
 
 #### PATIENT_ROLE_BOASTFUL

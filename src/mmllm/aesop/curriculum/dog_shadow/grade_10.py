@@ -799,7 +799,7 @@ G10_09 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL generated two fresh marks with the same prefix but '
-                'different serial numbers. The equality test returned false — '
+                'different serial numbers. The equality test returned the verdict — '
                 'they were not equal. Fresh marks, even with the same label, '
                 'remain distinct.'
             ),
@@ -1012,7 +1012,7 @@ G10_12 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL read the tagged literal and converted "2024-01-01" into '
-                'an instant. The inst? predicate returned true — the value was '
+                'an instant. The inst? predicate returned the verdict — the value was '
                 'indeed an instant. The tag had told the reader how to interpret '
                 'the string.'
             ),
@@ -1041,7 +1041,7 @@ G10_12 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL read the tagged literal and converted the string into a '
-                'UUID. The uuid? predicate returned true — the value was a proper '
+                'UUID. The uuid? predicate returned the verdict — the value was a proper '
                 'UUID. The tag had guided the reader to parse correctly.'
             ),
             tags=("story",),

@@ -781,7 +781,7 @@ G1_12 = SubjectCurriculum(
                 'Parens in Clojure group: the first token inside is the operator (`+`), the rest are arguments ({drawn.a}, {drawn.b}). The runtime applies + to {drawn.a} and {drawn.b} — the parens themselves do no math.'
             ),
             resolution=(
-                'the runtime applied + to {drawn.a} and {drawn.b} and returned 5 — not 6, not 23, just the sum the form had asked for.'
+                'the runtime applied + to {drawn.a} and {drawn.b} and returned the result — not 6, not 23, just the sum the form had asked for.'
             ),
             tags=("story",),
         ),

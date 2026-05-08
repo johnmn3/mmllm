@@ -107,16 +107,14 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 6
 - variety @ n=50: 1.00
-- issues: {'REPL_TRIPLE_VOICE': 1, 'ANSWER_LEAK': 1}
+- issues: {'REPL_TRIPLE_VOICE': 1}
     - [REPL_TRIPLE_VOICE] form=`(/ 10 2)` — user_msg mentions 'REPL' 5 times — the REPL personification should appear at most twice per record (submit + return)
-    - [ANSWER_LEAK] form=`(- 20 7)` — answer 13 in narrative
 
 ### G1-14: Nested call evaluation
 
 - examples: 4
 - variety @ n=50: 1.00
-- issues: {'ANSWER_LEAK': 1, 'REPL_TRIPLE_VOICE': 1}
-    - [ANSWER_LEAK] form=`(+ 1 (* 2 3))` — answer 7 in narrative
+- issues: {'REPL_TRIPLE_VOICE': 1}
     - [REPL_TRIPLE_VOICE] form=`(- 100 (* 5 5))` — user_msg mentions 'REPL' 4 times — the REPL personification should appear at most twice per record (submit + return)
 
 ### G1-15: Equality
@@ -196,7 +194,7 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 - variety @ n=50: 1.00
 - issues: {'PROCEDURAL_OPENER': 1, 'ANSWER_LEAK': 1}
     - [PROCEDURAL_OPENER] form=`(quot 17 5)` — user_msg jumps from fable-opener directly to 'To {goal}, [pronoun] composed ...' without a scene-setting sentence
-    - [ANSWER_LEAK] form=`(quot 100 7)` — answer 14 in narrative
+    - [ANSWER_LEAK] form=`(mod -7 3)` — answer 7 in narrative
 
 ### G2-06: inc and dec
 
@@ -209,10 +207,8 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 4
 - variety @ n=50: 1.00
-- issues: {'ANSWER_LEAK': 2, 'PARAGRAPH_FRAGMENTATION': 4}
-    - [ANSWER_LEAK] form=`(* 5 5)` — answer 25 in narrative
+- issues: {'PARAGRAPH_FRAGMENTATION': 4}
     - [PARAGRAPH_FRAGMENTATION] form=`(* 5 5)` — user_msg has 4 short (≤25-word) paragraphs in body — reads as a bullet list, not a story
-    - [ANSWER_LEAK] form=`(* 3 3 3 3)` — answer 81 in narrative
     - [PARAGRAPH_FRAGMENTATION] form=`(* 3 3 3 3)` — user_msg has 4 short (≤25-word) paragraphs in body — reads as a bullet list, not a story
     - [PARAGRAPH_FRAGMENTATION] form=`(* 10 10)` — user_msg has 4 short (≤25-word) paragraphs in body — reads as a bullet list, not a story
     - [PARAGRAPH_FRAGMENTATION] form=`(* 10 10)` — user_msg has 4 short (≤25-word) paragraphs in body — reads as a bullet list, not a story
@@ -229,9 +225,8 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 6
 - variety @ n=50: 1.00
-- issues: {'REPEATED_OPENER_FRAGMENT': 1, 'BOOL_LEAK_RESOLUTION': 1, 'LOW_GROUNDING': 1, 'PARAGRAPH_FRAGMENTATION': 2}
+- issues: {'REPEATED_OPENER_FRAGMENT': 1, 'LOW_GROUNDING': 1, 'PARAGRAPH_FRAGMENTATION': 2}
     - [REPEATED_OPENER_FRAGMENT] form=`(or false true)` — opener fragment 'pail balanced carefully on her head' also appears later in user_msg
-    - [BOOL_LEAK_RESOLUTION] form=`(or false false)` — resolution leaks boolean answer 'false' — describe the verdict abstractly instead
     - [LOW_GROUNDING] form=`(or false false)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [PARAGRAPH_FRAGMENTATION] form=`(or false false)` — user_msg has 4 short (≤25-word) paragraphs in body — reads as a bullet list, not a story
     - [PARAGRAPH_FRAGMENTATION] form=`(or nil false 5)` — user_msg has 4 short (≤25-word) paragraphs in body — reads as a bullet list, not a story
@@ -240,10 +235,8 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 5
 - variety @ n=50: 1.00
-- issues: {'BOOL_LEAK_RESOLUTION': 2, 'LOW_GROUNDING': 2, 'PARAGRAPH_FRAGMENTATION': 1}
-    - [BOOL_LEAK_RESOLUTION] form=`(not false)` — resolution leaks boolean answer 'true' — describe the verdict abstractly instead
+- issues: {'LOW_GROUNDING': 2, 'PARAGRAPH_FRAGMENTATION': 1}
     - [LOW_GROUNDING] form=`(not false)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-    - [BOOL_LEAK_RESOLUTION] form=`(not nil)` — resolution leaks boolean answer 'true' — describe the verdict abstractly instead
     - [LOW_GROUNDING] form=`(not nil)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [PARAGRAPH_FRAGMENTATION] form=`(not nil)` — user_msg has 5 short (≤25-word) paragraphs in body — reads as a bullet list, not a story
 
@@ -274,18 +267,16 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 3
 - variety @ n=50: 1.00
-- issues: {'BOOL_LEAK_RESOLUTION': 1, 'LOW_GROUNDING': 1}
-    - [BOOL_LEAK_RESOLUTION] form=`(= (quote tortoise) 'tortoise)` — resolution leaks boolean answer 'true' — describe the verdict abstractly instead
+- issues: {'LOW_GROUNDING': 1}
     - [LOW_GROUNDING] form=`(= (quote tortoise) 'tortoise)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
 
 ### G2-19: Auto-promotion to bigint
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'REPL_TRIPLE_VOICE': 2, 'ANSWER_LEAK': 1}
+- issues: {'REPL_TRIPLE_VOICE': 2}
     - [REPL_TRIPLE_VOICE] form=`(* 1000000 1000000)` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
     - [REPL_TRIPLE_VOICE] form=`(* 1000000 1000000)` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
-    - [ANSWER_LEAK] form=`(+ 99999999999 1)` — answer 100000000000 in narrative
 
 ### G2-20: Counting
 
@@ -303,18 +294,16 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 3
 - variety @ n=50: 1.00
-- issues: {'SMALL_INT_LEAK': 1, 'PARAGRAPH_FRAGMENTATION': 1}
-    - [SMALL_INT_LEAK] form=`(count "hare")` — small-int answer 4 leaks via resolution-slot phrasing
+- issues: {'ANSWER_LEAK': 1, 'PARAGRAPH_FRAGMENTATION': 1}
+    - [ANSWER_LEAK] form=`(count "tortoise")` — answer 6 in narrative
     - [PARAGRAPH_FRAGMENTATION] form=`(count "hare")` — user_msg has 4 short (≤25-word) paragraphs in body — reads as a bullet list, not a story
 
 ### G2-22: Compose pure arithmetic (multi-step calculation)
 
 - examples: 3
 - variety @ n=50: 1.00
-- issues: {'CLAUSE_STACK_OVERFLOW': 1, 'ANSWER_LEAK': 2}
+- issues: {'CLAUSE_STACK_OVERFLOW': 1}
     - [CLAUSE_STACK_OVERFLOW] form=`(- (* 5 4) 7)` — sentence with 5 commas reads as AI-output cadence: '"To compute 7 times 8, then subtract 0, we must count — truly count, and the nes'
-    - [ANSWER_LEAK] form=`(+ (* 3 8) (* 2 4))` — answer 32 in narrative
-    - [ANSWER_LEAK] form=`(+ (* 3 8) (* 2 4))` — answer 32 in narrative
 
 ## Grade 3
 
@@ -338,12 +327,10 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 3
 - variety @ n=50: 1.00
-- issues: {'ONLY_SHOOK_HEAD_TIC': 1, 'NARRATIVE_NUMERAL_HARDCODE': 3, 'ANSWER_LEAK': 2}
+- issues: {'ONLY_SHOOK_HEAD_TIC': 1, 'NARRATIVE_NUMERAL_HARDCODE': 3}
     - [ONLY_SHOOK_HEAD_TIC] form=`(let [a 1 b 2] (+ a b))` — user_msg uses 'only shook his/her head' — recurring AI-fable filler cadence
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(let [a 2 b 3 c 4] (+ a b c))` — parametric example has hard-coded English numeral 'three counts' in a story slot — the actual draws may differ from this fixed count
-    - [ANSWER_LEAK] form=`(let [a 2 b 3 c 4] (+ a b c))` — answer 9 in narrative
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(let [a 2 b 3 c 4] (+ a b c))` — parametric example has hard-coded English numeral 'three counts' in a story slot — the actual draws may differ from this fixed count
-    - [ANSWER_LEAK] form=`(let [a 2 b 3 c 4] (+ a b c))` — answer 9 in narrative
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(let [a 2 b 3 c 4] (+ a b c))` — parametric example has hard-coded English numeral 'three counts' in a story slot — the actual draws may differ from this fixed count
 
 ### G3-05: let — shadowing outer def
@@ -361,20 +348,17 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'ONLY_SHOOK_HEAD_TIC': 2, 'HIGH_LENGTH': 1, 'ANSWER_LEAK': 2, 'PARAGRAPH_FRAGMENTATION': 1}
+- issues: {'ONLY_SHOOK_HEAD_TIC': 2, 'HIGH_LENGTH': 1, 'PARAGRAPH_FRAGMENTATION': 1}
     - [ONLY_SHOOK_HEAD_TIC] form=`(let [a 5 b (* a 2)] b)` — user_msg uses 'only shook his/her head' — recurring AI-fable filler cadence
     - [HIGH_LENGTH] form=`(let [a 5 b (* a 2)] b)` — user_msg 215 words
-    - [ANSWER_LEAK] form=`(let [a 3 b (+ a 1) c (* b 2)] c)` — answer 8 in narrative
     - [ONLY_SHOOK_HEAD_TIC] form=`(let [a 3 b (+ a 1) c (* b 2)] c)` — user_msg uses 'only shook his/her head' — recurring AI-fable filler cadence
     - [PARAGRAPH_FRAGMENTATION] form=`(let [a 3 b (+ a 1) c (* b 2)] c)` — user_msg has 4 short (≤25-word) paragraphs in body — reads as a bullet list, not a story
-    - [ANSWER_LEAK] form=`(let [a 3 b (+ a 1) c (* b 2)] c)` — answer 8 in narrative
 
 ### G3-09: defn — shorthand
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'ANSWER_LEAK': 1, 'CLAUSE_STACK_OVERFLOW': 1, 'HIGH_LENGTH': 1}
-    - [ANSWER_LEAK] form=`(do (defn add3 [a b c] (+ a b c)) (add3 1 2 3))` — answer 6 in narrative
+- issues: {'CLAUSE_STACK_OVERFLOW': 1, 'HIGH_LENGTH': 1}
     - [CLAUSE_STACK_OVERFLOW] form=`(do (defn add3 [a b c] (+ a b c)) (add3 1 2 3))` — sentence with 5 commas reads as AI-output cadence: 'Skip a step, and you skip part of the multi-argument function definition and cal'
     - [HIGH_LENGTH] form=`(do (defn add3 [a b c] (+ a b c)) (add3 1 2 3))` — user_msg 223 words
 
@@ -433,11 +417,11 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 3
 - variety @ n=50: 1.00
-- issues: {'FORM_LEAK': 2, 'LOW_GROUNDING': 2}
-    - [FORM_LEAK] form=`["a" "b"]` — form '["a" "b"]' appears in user_msg of a goal-style subject
+- issues: {'LOW_GROUNDING': 2, 'PARAGRAPH_FRAGMENTATION': 2}
     - [LOW_GROUNDING] form=`["a" "b"]` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-    - [FORM_LEAK] form=`["a" "b"]` — form '["a" "b"]' appears in user_msg of a goal-style subject
+    - [PARAGRAPH_FRAGMENTATION] form=`["a" "b"]` — user_msg has 4 short (≤25-word) paragraphs in body — reads as a bullet list, not a story
     - [LOW_GROUNDING] form=`["a" "b"]` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+    - [PARAGRAPH_FRAGMENTATION] form=`["a" "b"]` — user_msg has 4 short (≤25-word) paragraphs in body — reads as a bullet list, not a story
 
 ### G4-02: nth — vector access
 
@@ -451,8 +435,8 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'FORM_LEAK': 1, 'STORY_SLOT_NOUN_REPEAT': 3}
-    - [FORM_LEAK] form=`(conj [1 2] 3)` — form '(conj [1 2] 3)' appears in user_msg of a goal-style subject
+- issues: {'FORM_DISPLAY_AND_FORM_NOUN': 1, 'STORY_SLOT_NOUN_REPEAT': 3}
+    - [FORM_DISPLAY_AND_FORM_NOUN] form=`(conj [1 2] 3)` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
     - [STORY_SLOT_NOUN_REPEAT] form=`(conj [] :hare)` — the noun 'the keyword' appears in all 4 story slots (scenario/need/mapping/resolution) — vary the imagery between beats
     - [STORY_SLOT_NOUN_REPEAT] form=`(conj [] :hare)` — the noun 'the keyword' appears in all 4 story slots (scenario/need/mapping/resolution) — vary the imagery between beats
     - [STORY_SLOT_NOUN_REPEAT] form=`(conj [] :hare)` — the noun 'the keyword' appears in all 4 story slots (scenario/need/mapping/resolution) — vary the imagery between beats
@@ -487,17 +471,17 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'HIGH_LENGTH': 1, 'FORM_LEAK': 1}
-    - [HIGH_LENGTH] form=`(assoc {:a 1} :a 99)` — user_msg 204 words
-    - [FORM_LEAK] form=`(assoc {:a 1} :a 99)` — form '(assoc {:a 1} :a 99)' appears in user_msg of a goal-style subject
+- issues: {'HIGH_LENGTH': 1, 'FORM_DISPLAY_AND_FORM_NOUN': 1}
+    - [HIGH_LENGTH] form=`(assoc {:a 1} :a 99)` — user_msg 201 words
+    - [FORM_DISPLAY_AND_FORM_NOUN] form=`(assoc {:a 1} :a 99)` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
 
 ### G4-09: dissoc — map remove key
 
 - examples: 1
 - variety @ n=50: 1.00
-- issues: {'HIGH_LENGTH': 1, 'FORM_LEAK': 1}
-    - [HIGH_LENGTH] form=`(dissoc {:a 1 :b 2} :a)` — user_msg 214 words
-    - [FORM_LEAK] form=`(dissoc {:a 1 :b 2} :a)` — form '(dissoc {:a 1 :b 2} :a)' appears in user_msg of a goal-style subject
+- issues: {'HIGH_LENGTH': 1, 'FORM_DISPLAY_AND_FORM_NOUN': 1}
+    - [HIGH_LENGTH] form=`(dissoc {:a 1 :b 2} :a)` — user_msg 210 words
+    - [FORM_DISPLAY_AND_FORM_NOUN] form=`(dissoc {:a 1 :b 2} :a)` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
 
 ### G4-10: keys and vals
 
@@ -520,11 +504,11 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'CLAUSE_STACK_OVERFLOW': 2, 'FORM_LEAK': 2}
+- issues: {'CLAUSE_STACK_OVERFLOW': 2, 'FORM_DISPLAY_AND_FORM_NOUN': 2}
     - [CLAUSE_STACK_OVERFLOW] form=`(contains? #{1 2 3} 2)` — sentence with 6 commas reads as AI-output cadence: 'To check whether 2 is a member of a set containing 1, 2, and 3, produce a form t'
     - [CLAUSE_STACK_OVERFLOW] form=`(contains? #{1 2 3} 2)` — sentence with 6 commas reads as AI-output cadence: 'To check whether 2 is a member of a set containing 1, 2, and 3, produce a form t'
-    - [FORM_LEAK] form=`(contains? #{1 2 3} 4)` — form '(contains? #{1 2 3} 4)' appears in user_msg of a goal-style subject
-    - [FORM_LEAK] form=`(contains? #{1 2 3} 4)` — form '(contains? #{1 2 3} 4)' appears in user_msg of a goal-style subject
+    - [FORM_DISPLAY_AND_FORM_NOUN] form=`(contains? #{1 2 3} 4)` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
+    - [FORM_DISPLAY_AND_FORM_NOUN] form=`(contains? #{1 2 3} 4)` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
 
 ### G4-13: count — universal
 
@@ -537,9 +521,9 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 3
 - variety @ n=50: 1.00
-- issues: {'FORM_LEAK': 2}
-    - [FORM_LEAK] form=`(empty? [])` — form '(empty? [])' appears in user_msg of a goal-style subject
-    - [FORM_LEAK] form=`(empty? [1])` — form '(empty? [1])' appears in user_msg of a goal-style subject
+- issues: {'FORM_DISPLAY_AND_FORM_NOUN': 2}
+    - [FORM_DISPLAY_AND_FORM_NOUN] form=`(empty? [])` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
+    - [FORM_DISPLAY_AND_FORM_NOUN] form=`(empty? [1])` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
 
 ### G4-15: first, rest, last
 
@@ -552,8 +536,8 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'FORM_LEAK': 1}
-    - [FORM_LEAK] form=`(into #{} [1 2 2 3])` — form '(into #{} [1 2 2 3])' appears in user_msg of a goal-style subject
+- issues: {'FORM_DISPLAY_AND_FORM_NOUN': 1}
+    - [FORM_DISPLAY_AND_FORM_NOUN] form=`(into #{} [1 2 2 3])` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
 
 ### G4-18: Equality of vectors and lists
 
@@ -612,11 +596,9 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'LOW_GROUNDING': 3, 'ANSWER_LEAK_STRING': 2, 'DOUBLED_PLACE': 1}
+- issues: {'LOW_GROUNDING': 3, 'DOUBLED_PLACE': 1}
     - [LOW_GROUNDING] form=`(and 1 2 3)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-    - [ANSWER_LEAK_STRING] form=`(or nil false :found)` — answer string ':found' appears in user_msg
     - [LOW_GROUNDING] form=`(or nil false :found)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-    - [ANSWER_LEAK_STRING] form=`(or nil false :found)` — answer string ':found' appears in user_msg
     - [DOUBLED_PLACE] form=`(or nil false :found)` — location stutter: 'farm on the farm...'
     - [LOW_GROUNDING] form=`(or nil false :found)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
 
@@ -647,13 +629,13 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 3
 - variety @ n=50: 1.00
-- issues: {'CLAUSE_STACK_OVERFLOW': 6, 'HIGH_LENGTH': 3, 'ANSWER_LEAK': 1, 'PARAMETRIC_LITERAL_NUMERALS': 3, 'LOWERCASE_CONCEPT_AFTER_PERIOD': 2}
+- issues: {'CLAUSE_STACK_OVERFLOW': 6, 'HIGH_LENGTH': 3, 'PARAMETRIC_LITERAL_NUMERALS': 3, 'LOWERCASE_CONCEPT_AFTER_PERIOD': 2}
     - [CLAUSE_STACK_OVERFLOW] form=`(reduce + [1 2 3 4])` — sentence with 5 commas reads as AI-output cadence: 'To walk the row of pebbles these numbers carrying a tally that combines each wit'
     - [HIGH_LENGTH] form=`(reduce + [1 2 3 4])` — user_msg 212 words
-    - [ANSWER_LEAK] form=`(reduce + [1 2 3 4])` — answer 10 in narrative
     - [CLAUSE_STACK_OVERFLOW] form=`(reduce + [1 2 3 4])` — sentence with 5 commas reads as AI-output cadence: 'To walk the row of pebbles these numbers carrying a tally that combines each wit'
     - [PARAMETRIC_LITERAL_NUMERALS] form=`(reduce * [1 2 3 4 5])` — parametric example has enumerated English numerals (one, two, three, …) hard-coded in a story slot — won't track the actual draws that {form_template} produces
     - [CLAUSE_STACK_OVERFLOW] form=`(reduce * [1 2 3 4 5])` — sentence with 7 commas reads as AI-output cadence: 'That is how to\nfold * over the vector containing these numbers, computing their '
+    - [LOWERCASE_CONCEPT_AFTER_PERIOD] form=`(reduce * [1 2 3 4 5])` — sentence-initial 'the X verb' (lowercase concept_phrase as subject after a period)
 
 ### G5-13: reduce with init
 
@@ -668,13 +650,22 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'PARAMETRIC_LITERAL_NUMERALS': 3, 'NARRATIVE_NUMERAL_HARDCODE': 6, 'NUMERAL_LIST_IN_GOAL': 3, 'HIGH_LENGTH': 1, 'ANSWER_LEAK': 1}
+- issues: {'PARAMETRIC_LITERAL_NUMERALS': 3, 'NARRATIVE_NUMERAL_HARDCODE': 6, 'NUMERAL_LIST_IN_GOAL': 3, 'HIGH_LENGTH': 1}
     - [PARAMETRIC_LITERAL_NUMERALS] form=`(apply + [1 2 3 4])` — parametric example has enumerated English numerals (one, two, three, …) hard-coded in a story slot — won't track the actual draws that {form_template} produces
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(apply + [1 2 3 4])` — parametric example has hard-coded English numeral 'four counts' in a story slot — the actual draws may differ from this fixed count
     - [NUMERAL_LIST_IN_GOAL] form=`(apply + [1 2 3 4])` — goal_text contains 4 numerals across 3 commas — comma-list of numerals blows the sentence's clause budget; use a range or 'these numbers' framing
     - [PARAMETRIC_LITERAL_NUMERALS] form=`(apply + [1 2 3 4])` — parametric example has enumerated English numerals (one, two, three, …) hard-coded in a story slot — won't track the actual draws that {form_template} produces
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(apply + [1 2 3 4])` — parametric example has hard-coded English numeral 'four counts' in a story slot — the actual draws may differ from this fixed count
     - [NUMERAL_LIST_IN_GOAL] form=`(apply + [1 2 3 4])` — goal_text contains 4 numerals across 3 commas — comma-list of numerals blows the sentence's clause budget; use a range or 'these numbers' framing
+
+### G5-15: comp
+
+- examples: 2
+- variety @ n=50: 1.00
+- issues: {'STORY_RESOLUTION_NO_DRAWN': 3}
+    - [STORY_RESOLUTION_NO_DRAWN] form=`((comp inc inc) 5)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('5',), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`((comp inc inc) 5)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('5',), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`((comp inc inc) 5)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('5',), resolution doesn't close the loop)
 
 ### G5-16: partial
 
@@ -699,13 +690,13 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'BOOL_LEAK_RESOLUTION': 2, 'PARAMETRIC_LITERAL_NUMERALS': 6, 'NARRATIVE_NUMERAL_HARDCODE': 6, 'CLAUSE_STACK_OVERFLOW': 2, 'HIGH_LENGTH': 1}
-    - [BOOL_LEAK_RESOLUTION] form=`(every? pos? [1 2 3])` — resolution leaks boolean answer 'true' — describe the verdict abstractly instead
+- issues: {'PARAMETRIC_LITERAL_NUMERALS': 6, 'NARRATIVE_NUMERAL_HARDCODE': 6, 'CLAUSE_STACK_OVERFLOW': 2, 'HIGH_LENGTH': 1}
     - [PARAMETRIC_LITERAL_NUMERALS] form=`(every? pos? [1 2 3])` — parametric example has enumerated English numerals (one, two, three, …) hard-coded in a story slot — won't track the actual draws that {form_template} produces
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(every? pos? [1 2 3])` — parametric example has hard-coded English numeral 'three counts' in a story slot — the actual draws may differ from this fixed count
     - [CLAUSE_STACK_OVERFLOW] form=`(every? pos? [1 2 3])` — sentence with 5 commas reads as AI-output cadence: 'To check if all elements in the vector containing 1, 2, and 3 are positive, he c'
     - [PARAMETRIC_LITERAL_NUMERALS] form=`(every? pos? [1 2 3])` — parametric example has enumerated English numerals (one, two, three, …) hard-coded in a story slot — won't track the actual draws that {form_template} produces
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(every? pos? [1 2 3])` — parametric example has hard-coded English numeral 'three counts' in a story slot — the actual draws may differ from this fixed count
+    - [PARAMETRIC_LITERAL_NUMERALS] form=`(every? pos? [1 2 3])` — parametric example has enumerated English numerals (one, two, three, …) hard-coded in a story slot — won't track the actual draws that {form_template} produces
 
 ### G5-20: take and drop
 
@@ -768,13 +759,13 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 4
 - variety @ n=50: 0.99
-- issues: {'STORY_RESOLUTION_NO_DRAWN': 3, 'CONCEPT_AS_VERB': 2, 'ONLY_SHOOK_HEAD_TIC': 2, 'ANSWER_LEAK_STRING': 2, 'LOW_GROUNDING': 2}
+- issues: {'STORY_RESOLUTION_NO_DRAWN': 3, 'CONCEPT_AS_VERB': 2, 'ONLY_SHOOK_HEAD_TIC': 2, 'LOW_GROUNDING': 2}
     - [STORY_RESOLUTION_NO_DRAWN] form=`(clojure.string/reverse "abc")` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('abc',), resolution doesn't close the loop)
     - [STORY_RESOLUTION_NO_DRAWN] form=`(clojure.string/reverse "abc")` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('abc',), resolution doesn't close the loop)
     - [CONCEPT_AS_VERB] form=`(clojure.string/reverse "abc")` — concept_phrase substituted into a finite-verb slot (e.g. 'must calling X', 'I applying Y')
     - [STORY_RESOLUTION_NO_DRAWN] form=`(clojure.string/reverse "abc")` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('abc',), resolution doesn't close the loop)
     - [ONLY_SHOOK_HEAD_TIC] form=`(clojure.string/reverse "abc")` — user_msg uses 'only shook his/her head' — recurring AI-fable filler cadence
-    - [ANSWER_LEAK_STRING] form=`(namespace :owner/item)` — answer string 'owner' appears in user_msg
+    - [LOW_GROUNDING] form=`(namespace :owner/item)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
 
 ### G6-06: Private defs
 
@@ -908,13 +899,13 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 4
 - variety @ n=50: 1.00
-- issues: {'BOOL_LEAK_RESOLUTION': 3, 'LOW_GROUNDING': 4, 'REPL_TRIPLE_VOICE': 2, 'LOWERCASE_CONCEPT_AFTER_PERIOD': 1}
-    - [BOOL_LEAK_RESOLUTION] form=`(some? nil)` — resolution leaks boolean answer 'false' — describe the verdict abstractly instead
+- issues: {'LOW_GROUNDING': 4, 'REPL_TRIPLE_VOICE': 2, 'LOWERCASE_CONCEPT_AFTER_PERIOD': 1}
     - [LOW_GROUNDING] form=`(some? nil)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-    - [BOOL_LEAK_RESOLUTION] form=`(some? nil)` — resolution leaks boolean answer 'false' — describe the verdict abstractly instead
     - [LOW_GROUNDING] form=`(some? nil)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-    - [BOOL_LEAK_RESOLUTION] form=`(some? 0)` — resolution leaks boolean answer 'true' — describe the verdict abstractly instead
     - [LOW_GROUNDING] form=`(some? 0)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+    - [REPL_TRIPLE_VOICE] form=`(some? 0)` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
+    - [LOWERCASE_CONCEPT_AFTER_PERIOD] form=`(first nil)` — sentence-initial 'the X verb' (lowercase concept_phrase as subject after a period)
+    - [LOW_GROUNDING] form=`(first nil)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
 
 ### G7-06: pre and post conditions
 
@@ -937,13 +928,6 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
     - [REPL_TRIPLE_VOICE] form=`(do (assert (= 1 1)) 1)` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
     - [REPL_TRIPLE_VOICE] form=`(do (assert (= 1 1)) 1)` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
     - [DOUBLED_PLACE] form=`(try (assert (= 1 2)) (catch Throwable e 0))` — location stutter: 'farm on the farm...'
-
-### G7-10: doc and source
-
-- examples: 1
-- variety @ n=50: 1.00
-- issues: {'ANSWER_LEAK_STRING': 1}
-    - [ANSWER_LEAK_STRING] form=`(:doc (meta '^{:doc "adds two"} plus))` — answer string 'adds two' appears in user_msg
 
 ### G7-11: Reading stack traces
 
@@ -1171,13 +1155,13 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'CLAUSE_STACK_OVERFLOW': 5, 'HIGH_LENGTH': 1, 'SMALL_INT_LEAK': 1, 'LOW_GROUNDING': 1}
+- issues: {'CLAUSE_STACK_OVERFLOW': 5, 'HIGH_LENGTH': 1, 'LOW_GROUNDING': 1}
     - [CLAUSE_STACK_OVERFLOW] form=`(do (def counter (atom 0)) (swap! counter inc) @co` — sentence with 6 commas reads as AI-output cadence: "She said untroubled by what others thought, the chalk's edge cool against her\nfi"
-    - [HIGH_LENGTH] form=`(do (def counter (atom 0)) (swap! counter inc) @co` — user_msg 206 words
-    - [SMALL_INT_LEAK] form=`(do (def counter (atom 0)) (swap! counter inc) @co` — small-int answer 1 leaks via resolution-slot phrasing
+    - [HIGH_LENGTH] form=`(do (def counter (atom 0)) (swap! counter inc) @co` — user_msg 207 words
     - [LOW_GROUNDING] form=`(do (def counter (atom 0)) (swap! counter inc) @co` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [CLAUSE_STACK_OVERFLOW] form=`(do (def counter (atom 0)) (swap! counter inc) @co` — sentence with 5 commas reads as AI-output cadence: 'To construct an atom holding 0 as counter, atomically swap it by applying inc, a'
     - [CLAUSE_STACK_OVERFLOW] form=`(do (def progress (atom :idle)) (reset! progress :` — sentence with 5 commas reads as AI-output cadence: 'But to change it, binding an atom to progress, atomically resetting it to a new '
+    - [CLAUSE_STACK_OVERFLOW] form=`(do (def progress (atom :idle)) (reset! progress :` — sentence with 6 commas reads as AI-output cadence: "She said with a hen's long stillness on the nest, the chalk's edge cool against "
 
 ### G9-04: Atom CAS semantics
 
@@ -1324,7 +1308,7 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 3
 - variety @ n=50: 1.00
-- issues: {'MULTIPLE_SAID_TAGS': 1, 'HIGH_LENGTH': 2, 'LOW_GROUNDING': 2, 'REPL_TRIPLE_VOICE': 1, 'ANSWER_LEAK_STRING': 1, 'FORM_DISPLAY_AND_FORM_NOUN': 1}
+- issues: {'MULTIPLE_SAID_TAGS': 1, 'HIGH_LENGTH': 2, 'LOW_GROUNDING': 2, 'REPL_TRIPLE_VOICE': 1, 'FORM_DISPLAY_AND_FORM_NOUN': 1}
     - [MULTIPLE_SAID_TAGS] form=`(when true 1 2 3)` — user_msg has 3 dialogue-attribution tags — over-announcing the speakers
     - [HIGH_LENGTH] form=`(when true 1 2 3)` — user_msg 211 words
     - [LOW_GROUNDING] form=`(when true 1 2 3)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
@@ -1336,10 +1320,8 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 3
 - variety @ n=50: 1.00
-- issues: {'ANSWER_LEAK': 2, 'HIGH_LENGTH': 1, 'DOUBLED_PLACE': 1, 'CLAUSE_STACK_OVERFLOW': 1, 'LOW_GROUNDING': 1}
-    - [ANSWER_LEAK] form=`(-> 5 inc inc inc)` — answer 8 in narrative
+- issues: {'HIGH_LENGTH': 1, 'DOUBLED_PLACE': 1, 'CLAUSE_STACK_OVERFLOW': 1, 'LOW_GROUNDING': 1}
     - [HIGH_LENGTH] form=`(->> [1 2 3 4] (filter even?) (map inc) (reduce +)` — user_msg 214 words
-    - [ANSWER_LEAK] form=`(->> [1 2 3 4] (filter even?) (map inc) (reduce +)` — answer 8 in narrative
     - [DOUBLED_PLACE] form=`(->> [1 2 3 4] (filter even?) (map inc) (reduce +)` — location stutter: 'farm on the farm...'
     - [CLAUSE_STACK_OVERFLOW] form=`(->> [1 2 3 4] (filter even?) (map inc) (reduce +)` — sentence with 5 commas reads as AI-output cadence: 'To thread a vector through filter, map, and reduce using thread-last, he wrote o'
     - [LOW_GROUNDING] form=`(macroexpand '(-> x f g))` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
@@ -1348,13 +1330,13 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'CONCEPT_AS_VERB': 3, 'MULTIPLE_SAID_TAGS': 3, 'ANSWER_LEAK': 1}
+- issues: {'CONCEPT_AS_VERB': 3, 'MULTIPLE_SAID_TAGS': 3}
     - [CONCEPT_AS_VERB] form=`(do (defn add-fn [a b] (+ a b)) (add-fn 3 4))` — concept_phrase substituted into a finite-verb slot (e.g. 'must calling X', 'I applying Y')
     - [MULTIPLE_SAID_TAGS] form=`(do (defn add-fn [a b] (+ a b)) (add-fn 3 4))` — user_msg has 3 dialogue-attribution tags — over-announcing the speakers
-    - [ANSWER_LEAK] form=`(do (defn add-fn [a b] (+ a b)) (add-fn 3 4))` — answer 7 in narrative
     - [CONCEPT_AS_VERB] form=`(do (defmacro add-mac [a b] `(+ ~a ~b)) (add-mac 3` — concept_phrase substituted into a finite-verb slot (e.g. 'must calling X', 'I applying Y')
     - [MULTIPLE_SAID_TAGS] form=`(do (defmacro add-mac [a b] `(+ ~a ~b)) (add-mac 3` — user_msg has 3 dialogue-attribution tags — over-announcing the speakers
     - [CONCEPT_AS_VERB] form=`(do (defmacro add-mac [a b] `(+ ~a ~b)) (add-mac 3` — concept_phrase substituted into a finite-verb slot (e.g. 'must calling X', 'I applying Y')
+    - [MULTIPLE_SAID_TAGS] form=`(do (defmacro add-mac [a b] `(+ ~a ~b)) (add-mac 3` — user_msg has 3 dialogue-attribution tags — over-announcing the speakers
 
 ### G10-09: Hygiene and gensym
 
@@ -1618,32 +1600,28 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 ### Issue counts (across all examples × 3 records)
 
-- **STORY_RESOLUTION_NO_DRAWN**: 117
+- **STORY_RESOLUTION_NO_DRAWN**: 120
 - **CLAUSE_STACK_OVERFLOW**: 116
 - **LOW_GROUNDING**: 79
 - **HIGH_LENGTH**: 47
 - **NARRATIVE_NUMERAL_HARDCODE**: 42
 - **CONCEPT_AS_VERB**: 39
 - **STORY_SLOT_NOUN_REPEAT**: 33
+- **FORM_DISPLAY_AND_FORM_NOUN**: 30
 - **PARAMETRIC_LITERAL_NUMERALS**: 24
-- **FORM_DISPLAY_AND_FORM_NOUN**: 22
 - **ONLY_SHOOK_HEAD_TIC**: 21
 - **REPL_TRIPLE_VOICE**: 20
 - **LOWERCASE_CONCEPT_AFTER_PERIOD**: 19
-- **ANSWER_LEAK**: 18
 - **HEDGING_NEAR_FORM**: 16
 - **MULTIPLE_SAID_TAGS**: 15
-- **PARAGRAPH_FRAGMENTATION**: 12
+- **PARAGRAPH_FRAGMENTATION**: 14
 - **THE_FORM_OVERUSE**: 11
-- **FORM_LEAK**: 10
-- **BOOL_LEAK_RESOLUTION**: 9
 - **NUMERAL_LIST_IN_GOAL**: 9
 - **STRING_AS_CHAR_MISCLAIM**: 6
-- **ANSWER_LEAK_STRING**: 6
 - **GENERIC_RESOLUTION_TAIL**: 6
 - **DOUBLED_PLACE**: 4
 - **PROCEDURAL_OPENER**: 3
-- **SMALL_INT_LEAK**: 2
+- **ANSWER_LEAK**: 2
 - **REPEATED_OPENER_FRAGMENT**: 1
 - **DOUBLE_PREP**: 1
 
@@ -1651,16 +1629,16 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 | Grade | Subjects | Examples | Issues | Low-variety |
 |---|---|---|---|---|
-| 1 | 18 | 76 | 44 | — |
-| 2 | 22 | 88 | 59 | — |
-| 3 | 18 | 31 | 37 | — |
+| 1 | 18 | 76 | 42 | — |
+| 2 | 22 | 88 | 50 | — |
+| 3 | 18 | 31 | 32 | — |
 | 4 | 20 | 39 | 40 | — |
-| 5 | 22 | 39 | 111 | — |
-| 6 | 16 | 33 | 45 | — |
-| 7 | 18 | 36 | 60 | — |
+| 5 | 22 | 39 | 108 | — |
+| 6 | 16 | 33 | 43 | — |
+| 7 | 18 | 36 | 56 | — |
 | 8 | 16 | 31 | 108 | — |
-| 9 | 18 | 34 | 58 | — |
-| 10 | 16 | 36 | 87 | — |
+| 9 | 18 | 34 | 57 | — |
+| 10 | 16 | 36 | 83 | — |
 | 11 | 14 | 29 | 25 | — |
 | 12 | 18 | 37 | 34 | — |
 
@@ -1873,47 +1851,6 @@ She wept. But he gathered the pieces of the...
 The farmer had a million coins stacked on one side of the counting table and a million coins stacked on the other side. She wondered what the total would be if she multiplied them together — a vast number...
     ```
 
-#### ANSWER_LEAK
-
-- `G1-13` (form `(- 20 7)`): answer 13 in narrative
-    ```
-    Seren was not a careless girl by nature, but in the orchard the morning was bright and the daydreams were brighter.
-
-Seren arrived at the market with a handful of copper coins, jingling in
-her pocket — the pail was heavy on her arm and the road had been
-long. "I know how much I have without counting...
-    ```
-- `G1-14` (form `(+ 1 (* 2 3))`): answer 7 in narrative
-    ```
-    It was the kind of morning that tempts a careful person into carelessness through the back door of a happy thought.
-
-Pernille arrived at the market with a handful of copper coins, jingling in
-her pocket — the pail was heavy on her arm and the road had been
-long. "I know how much I have without count...
-    ```
-- `G2-05` (form `(quot 100 7)`): answer 14 in narrative
-    ```
-    Between the dairy and the marketplace stretched a road, a hill, and an entire life imagined into being.
-
-The farmer had 163 coins to divide equally among 3 merchants at the market. She gave each merchant the same whole number of coins without any coins left over. She needed to know how many whole co...
-    ```
-- `G2-10` (form `(* 5 5)`): answer 25 in narrative
-    ```
-    The road from the farm to the town was long, and a daydream could fit comfortably along its length.
-
-The farmer had a square garden plot: 5 paces wide and 5 paces long. She needed the total area in square paces to know how much seed to sow.
-
-She needed to multiply 6 by itself to find the area of the...
-    ```
-- `G2-10` (form `(* 3 3 3 3)`): answer 81 in narrative
-    ```
-    A pail of milk is a small fortune to a careful walker and a lost fortune to a careless one.
-
-The farmer had a four-dimensional arrangement of coins (a thought experiment): 5 coins in each dimension. She wondered what the total count would be if she could stack all dimensions at once.
-
-She needed to ...
-    ```
-
 #### PROCEDURAL_OPENER
 
 - `G1-17` (form `(+ 1 2)`): user_msg jumps from fable-opener directly to 'To {goal}, [pronoun] composed ...' without a scene-setting sentence
@@ -2096,6 +2033,24 @@ The milkmaid needed a nameless pail-steps card in a hurry and scrawled it in sho
 The milkmaid had scrawled a two-slot nameless card in shorthand on a scrap of cheesecloth: first-count mark, second-count mark, and a step that multiplied them. She passed the scrap to the buyer at t...
     ```
 
+#### ANSWER_LEAK
+
+- `G2-05` (form `(mod -7 3)`): answer 7 in narrative
+    ```
+    A walk to market, with a full pail and a full head, is one of the oldest tests of attention there is.
+
+Slavena arrived at the market with a handful of copper coins, jingling in
+her pocket — the pail was heavy on her arm and the road had been
+long. "I know how much I have without counting," she boast...
+    ```
+- `G2-21` (form `(count "tortoise")`): answer 6 in narrative
+    ```
+    A pail of milk is a small fortune to a careful walker and a lost fortune to a careless one.
+
+Boglarka, his eyes bright with the joy of being first, asked, "Can I take a piece of the braided cloth?" He showed Boglarka the braid and
+said, "Yes. If the braid says 'morning-walk-to-dairy,' and you want o...
+    ```
+
 #### PARAGRAPH_FRAGMENTATION
 
 - `G2-10` (form `(* 5 5)`): user_msg has 4 short (≤25-word) paragraphs in body — reads as a bullet list, not a story
@@ -2148,50 +2103,6 @@ She needed to join three cloth-strands end-to-end ...
 Elsa, tossing back his ears as if to taunt the wind, hurried down the long farm path toward the village, the
 heavy pail balanced carefully on her head. But the path was blocked by a chain of gates — one
 after ...
-    ```
-
-#### BOOL_LEAK_RESOLUTION
-
-- `G2-13` (form `(or false false)`): resolution leaks boolean answer 'false' — describe the verdict abstractly instead
-    ```
-    by the meadow, the dairy stood between the lane and the meadow, and the day's milk waited to be carried to town.
-
-The farmer had two gates: both were blocked (both false). She wondered if the or-chain would have any way through.
-
-She needed to test if at least one gate opened using the or operator.
-...
-    ```
-- `G2-14` (form `(not false)`): resolution leaks boolean answer 'true' — describe the verdict abstractly instead
-    ```
-    The pail sat steady on Adela's head as she started down the lane at the edge of the hilltop.
-
-The farmer stood at the gate with the condition false (the gate was blocked). She wondered what would happen if she inverted the condition to the opposite.
-
-She needed to negate the value false, flipping it...
-    ```
-- `G2-14` (form `(not nil)`): resolution leaks boolean answer 'true' — describe the verdict abstractly instead
-    ```
-    Long before the market opened its stalls, a young woman had already spent her milk three times in her head.
-
-The farmer held nil (nothing, a falsey value) in her hand. She wondered what the not operator would return if she inverted it.
-
-She needed to negate nil, flipping the falsey value to its trut...
-    ```
-- `G2-18` (form `(= (quote tortoise) 'tortoise)`): resolution leaks boolean answer 'true' — describe the verdict abstractly instead
-    ```
-    A walk to market, with a full pail and a full head, is one of the oldest tests of attention there is.
-
-The scribe had two chalk marks: one was written as (quote tortoise), the other as 'tortoise (using the short-hand apostrophe). She wondered if the two chalk marks were equal.
-
-She needed to check i...
-    ```
-- `G5-19` (form `(every? pos? [1 2 3])`): resolution leaks boolean answer 'true' — describe the verdict abstractly instead
-    ```
-    Marina had walked this road near the farm a hundred times before, but never quite so dreamily.
-
-The milkmaid held the `pos?` strainer over the pail and let three counts pass through: one, two, three. She watched each piece hit the mesh — all of them were above zero.
-
-She needed to know whether every...
     ```
 
 #### STORY_SLOT_NOUN_REPEAT
@@ -2248,9 +2159,9 @@ She needed to count the elements in an empty collec...
     ```
     Zenta set out from the farm on the farm with the pail balanced carefully on her head.
 
-The milkmaid stood at a farmyard gate with three latch-checks in sequence. The first latch returned nothing; the second returned false. The third bore a keyword mark.
+The milkmaid stood at a farmyard gate with three latch-checks in sequence. The first latch returned nothing; the second returned the verdict. The third bore a keyword mark.
 
-She needed the gate to stop at the first latc...
+She needed the gate to stop at the firs...
     ```
 - `G7-07` (form `(try (assert (= 1 2)) (catch Throwable e 0))`): location stutter: 'farm on the farm...'
     ```
@@ -2265,23 +2176,6 @@ The assertion was false. Would the error be caught, or would the walk f...
     Zenta set out from the farm on the farm with the pail balanced carefully on her head.
 
 The farmer had written a longer pail-steps card: strain the pail through a sieve, ladle the results through a tally, and reduce the tallied pours to a single measure. The milkmaid threaded the vector through all t...
-    ```
-
-#### SMALL_INT_LEAK
-
-- `G2-21` (form `(count "hare")`): small-int answer 4 leaks via resolution-slot phrasing
-    ```
-    Runa balanced the pail with the ease of long practice, and at the edge of the hilltop the road stretched out invitingly.
-
-The milkmaid had woven another cloth-label with the name 'lichen' braided end-to-end. She walked this shorter strand from first character to last, counting each knot.
-
-She needed...
-    ```
-- `G9-02` (form `(do (def counter (atom 0)) (swap! counter inc) @counter)`): small-int answer 1 leaks via resolution-slot phrasing
-    ```
-    Long before the market opened its stalls, a young woman had already spent her milk three times in her head.
-
-The milkmaid hung a fresh tally-slate by the dairy door with the number 0 chalked at the top — the starting count for the day's deliveries. The first pail went out; the slate needed updating....
     ```
 
 #### ONLY_SHOOK_HEAD_TIC
@@ -2320,47 +2214,6 @@ She clutched her pail and p...
 
 On a bright morning, Niamh, his nose lifted toward the bright sky, announced, "I shall bind a to 1 and add a to itself while I walk to the mill!"
 She clutched her pail and pretended the answer was alread...
-    ```
-
-#### FORM_LEAK
-
-- `G4-01` (form `["a" "b"]`): form '["a" "b"]' appears in user_msg of a goal-style subject
-    ```
-    Ilona set out from the farm near the hilltop with the pail balanced carefully on her head.
-
-The milkmaid reached for the market-basket and placed two labeled jars inside: one compartment held a string marked 'a', another held a string marked 'b'.
-
-She needed a literal sequence of two strings — order...
-    ```
-- `G4-01` (form `["a" "b"]`): form '["a" "b"]' appears in user_msg of a goal-style subject
-    ```
-    Sigrid carried more than milk that morning near the meadow; she carried a whole imagined fortune.
-
-The milkmaid reached for the market-basket and placed two labeled jars inside: one compartment held a string marked 'a', another held a string marked 'b'.
-
-She needed a literal sequence of two strings ...
-    ```
-- `G4-03` (form `(conj [1 2] 3)`): form '(conj [1 2] 3)' appears in user_msg of a goal-style subject
-    ```
-    Roisin balanced the pail with the ease of long practice, and atop the hilltop the road stretched out invitingly.
-
-The milkmaid carried a market-basket holding two items: the number 1 in the first compartment, the number 2 in the second. She paused at the roadside, thinking to add one more item.
-
-She...
-    ```
-- `G4-08` (form `(assoc {:a 1} :a 99)`): form '(assoc {:a 1} :a 99)' appears in user_msg of a goal-style subject
-    ```
-    It was by the village, on a fair-weather morning, that Tegan began the long walk to market.
-
-The milkmaid's first basket had been marked :a and held the value 1. But after the day's business, she needed the :a compartment to hold a new value instead — 69, a much larger prize.
-
-She needed to change t...
-    ```
-- `G4-09` (form `(dissoc {:a 1 :b 2} :a)`): form '(dissoc {:a 1 :b 2} :a)' appears in user_msg of a goal-style subject
-    ```
-    The road from the farm to the town was long, and a daydream could fit comfortably along its length.
-
-The milkmaid's market-basket held two labeled compartments: one marked :a held 1, another marked :b held 2. But the buyer no longer needed the :a label — the milkmaid decided to leave that compartmen...
     ```
 
 #### PARAMETRIC_LITERAL_NUMERALS
@@ -2403,45 +2256,6 @@ basket!" But he set a milk-strainer between them. "No guessing," he, with the st
 keep the...
     ```
 
-#### ANSWER_LEAK_STRING
-
-- `G5-07` (form `(or nil false :found)`): answer string ':found' appears in user_msg
-    ```
-    The pail sat steady on Csilla's head as she started down the lane on the road.
-
-The milkmaid stood at a farmyard gate with three latch-checks in sequence. The first latch returned nothing; the second returned false. The third bore a keyword mark.
-
-She needed the gate to stop at the first latch that ...
-    ```
-- `G5-07` (form `(or nil false :found)`): answer string ':found' appears in user_msg
-    ```
-    Zenta set out from the farm on the farm with the pail balanced carefully on her head.
-
-The milkmaid stood at a farmyard gate with three latch-checks in sequence. The first latch returned nothing; the second returned false. The third bore a keyword mark.
-
-She needed the gate to stop at the first latc...
-    ```
-- `G6-05` (form `(namespace :owner/item)`): answer string 'owner' appears in user_msg
-    ```
-    Bianca had walked this road near the road a hundred times before, but never quite so dreamily.
-
-A qualified keyword appeared on the board — a compound entry of the form section/name. The farmer asked the milkmaid to read just the board section — the left-hand part that named which vendor's area the ...
-    ```
-- `G6-05` (form `(namespace :owner/item)`): answer string 'owner' appears in user_msg
-    ```
-    A walk to market, with a full pail and a full head, is one of the oldest tests of attention there is.
-
-A qualified keyword appeared on the board — a compound entry of the form section/name. The farmer asked the milkmaid to read just the board section — the left-hand part that named which vendor's ar...
-    ```
-- `G7-10` (form `(:doc (meta '^{:doc "adds two"} plus))`): answer string 'adds two' appears in user_msg
-    ```
-    It was the season of new chicks and first cheeses, and every small profit felt like the start of a larger one.
-
-Clara found an old scroll marking the symbol 'plus' with notes written in the margins: 'adds two'.
-
-She wanted to read the attached documentation note. What words were written in those mar...
-    ```
-
 #### NUMERAL_LIST_IN_GOAL
 
 - `G5-10` (form `(map #(* % %) [1 2 3 4])`): goal_text contains 4 numerals across 4 commas — comma-list of numerals blows the sentence's clause budget; use a range or 'these numbers' framing
@@ -2482,6 +2296,46 @@ basket!" But he set a milk-strainer between them. "No guessing," he, with the st
 keep the...
     ```
 
+#### STORY_RESOLUTION_NO_DRAWN
+
+- `G5-15` (form `((comp inc inc) 5)`): story-tagged example's resolution slot has no drawn-value reference (form has literals ('5',), resolution doesn't close the loop)
+    ```
+    There was once a milkmaid who walked to market with a pail of fresh milk balanced upon her head.
+
+Mair, as if the prize already sat in his paw, dreamed aloud: "I'll compose two inc functions and apply them to 5 as I like, in any order
+I choose." But Urbanus, only chuckled and pulled out a pail-steps...
+    ```
+- `G5-15` (form `((comp inc inc) 5)`): story-tagged example's resolution slot has no drawn-value reference (form has literals ('5',), resolution doesn't close the loop)
+    ```
+    Aniko set out from the farm by the meadow with the pail balanced carefully on her head.
+
+Every morning, Aniko carried the same pail-steps card, a recipe pinned inside her
+apron with a heavy pail balanced overhead. She, boasting at every turn, always followed the
+card in order, and the last step — th...
+    ```
+- `G5-15` (form `((comp inc inc) 5)`): story-tagged example's resolution slot has no drawn-value reference (form has literals ('5',), resolution doesn't close the loop)
+    ```
+    by the village, where the lane bends past the old hedge, Juliana began to add up coins she had not yet earned.
+
+Juliana found Salomea's pail-steps card and studied it, but then said, "This recipe calls
+another recipe! Is that allowed?" She, with the slow grace of a creature unhurried, nodded. "Yes —...
+    ```
+- `G6-05` (form `(clojure.string/reverse "abc")`): story-tagged example's resolution slot has no drawn-value reference (form has literals ('abc',), resolution doesn't close the loop)
+    ```
+    Milk does not forgive a tilted head, but a dreaming mind seldom remembers as much.
+
+The vendor's board section for clojure.string also listed a reversing service. The milkmaid had written a short label on her pail and needed to read it back in reverse order to satisfy a delivery note.
+
+She needed to...
+    ```
+- `G6-05` (form `(clojure.string/reverse "abc")`): story-tagged example's resolution slot has no drawn-value reference (form has literals ('abc',), resolution doesn't close the loop)
+    ```
+    Between the dairy and the marketplace stretched a road, a hill, and an entire life imagined into being.
+
+Natalya, sure of the win with head high, tried to make up a price for milk on the spot: "Let us call it 8 coins today!"
+But no buyer would listen. She led Natalya to the market-board at the villa...
+    ```
+
 #### CONCEPT_AS_VERB
 
 - `G6-01` (form `(name 'clojure.string)`): concept_phrase substituted into a finite-verb slot (e.g. 'must calling X', 'I applying Y')
@@ -2518,47 +2372,6 @@ But he only shook his head. "No, Mira. To extract...
 
 Slavena, stepping high as proud creatures step, declared, "I will invent new names for the prices each time I visit the market!"
 But she only shook her head. "No, Slavena. To check whether th...
-    ```
-
-#### STORY_RESOLUTION_NO_DRAWN
-
-- `G6-05` (form `(clojure.string/reverse "abc")`): story-tagged example's resolution slot has no drawn-value reference (form has literals ('abc',), resolution doesn't close the loop)
-    ```
-    Milk does not forgive a tilted head, but a dreaming mind seldom remembers as much.
-
-The vendor's board section for clojure.string also listed a reversing service. The milkmaid had written a short label on her pail and needed to read it back in reverse order to satisfy a delivery note.
-
-She needed to...
-    ```
-- `G6-05` (form `(clojure.string/reverse "abc")`): story-tagged example's resolution slot has no drawn-value reference (form has literals ('abc',), resolution doesn't close the loop)
-    ```
-    Between the dairy and the marketplace stretched a road, a hill, and an entire life imagined into being.
-
-Natalya, sure of the win with head high, tried to make up a price for milk on the spot: "Let us call it 8 coins today!"
-But no buyer would listen. She led Natalya to the market-board at the villa...
-    ```
-- `G6-05` (form `(clojure.string/reverse "abc")`): story-tagged example's resolution slot has no drawn-value reference (form has literals ('abc',), resolution doesn't close the loop)
-    ```
-    Every step of the road carried the soft sound of liquid against tin and the louder sound of a daydream gathering speed.
-
-Wanda, as a victor walks before a victory is named, declared, "I will invent new names for the prices each time I visit the market!"
-But he only shook his head. "No, Wanda. To cal...
-    ```
-- `G7-01` (form `(try (throw (Exception. "bad")) (catch Exception e -1))`): story-tagged example's resolution slot has no drawn-value reference (form has literals ('-1', 'bad'), resolution doesn't close the loop)
-    ```
-    The road from the farm to the town was long, and a daydream could fit comfortably along its length.
-
-Fleur, as a young rooster crows above the yard, carried the pail down the long farm road in a rush,
-hurrying toward the market. The fragile pail tipped, the milk spilled, and the cool grass
-took the ...
-    ```
-- `G7-01` (form `(try (throw (Exception. "bad")) (catch Exception e -1))`): story-tagged example's resolution slot has no drawn-value reference (form has literals ('-1', 'bad'), resolution doesn't close the loop)
-    ```
-    The sun had only just cleared the hedgerows when the day's first tally of imagined coins began.
-
-One afternoon, Emilia, his name first in every story he told hurried down the path and tripped. The pail crashed, and the milk was lost.
-She wept. But he gathered the pieces of the pail and showed her
-th...
     ```
 
 #### HEDGING_NEAR_FORM

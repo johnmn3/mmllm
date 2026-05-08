@@ -254,7 +254,7 @@ G2_02 = SubjectCurriculum(
             resolution=(
                 'The REPL tested each pair in turn — was 1 less than 2? Yes. '
                 'Was 2 less than 3? Yes. The chain held fast, and the 3 '
-                'came back true.'
+                'came back with the verdict.'
             ),
             tags=("story",),
         ),
@@ -418,7 +418,7 @@ G2_03 = SubjectCurriculum(
                 'and the verdict is false when the marks are the same.'
             ),
             resolution=(
-                'The REPL compared the marks — 1 is equal to 1 — and returned false. '
+                'The REPL compared the marks — 1 is equal to 1 — and returned the verdict. '
                 'The bones bore identical marks, so they were not different — 1.'
             ),
             tags=("story",),
@@ -526,7 +526,7 @@ G2_04 = SubjectCurriculum(
                 'the answer is the winning mark.'
             ),
             resolution=(
-                'The REPL scanned all three — 1, 2, 3 — and returned 1. The '
+                'The REPL scanned all three — 1, 2, 3 — and returned the result. The '
                 'smallest had been found, and the 3 rested in Bell\'s paw.'
             ),
             tags=("story",),
@@ -550,7 +550,7 @@ G2_04 = SubjectCurriculum(
                 'for the greatest, and the answer is the winning mark.'
             ),
             resolution=(
-                'The REPL scanned all three — 1, 2, 3 — and returned 3. The largest '
+                'The REPL scanned all three — 1, 2, 3 — and returned the result. The largest '
                 'had been found, and the 3 rested clear.'
             ),
             tags=("story",),
@@ -710,7 +710,7 @@ G2_05 = SubjectCurriculum(
                 'returns only the remainder, and the answer is what\'s left over.'
             ),
             resolution=(
-                'The REPL applied modulo to seventeen and five, and returned 2. The '
+                'The REPL applied modulo to seventeen and five, and returned the result. The '
                 'remainder was exact, and the 5 held what did not fit.'
             ),
             tags=("story",),
@@ -785,7 +785,7 @@ G2_05 = SubjectCurriculum(
                 'the rules of modular arithmetic.'
             ),
             resolution=(
-                'The REPL applied modulo to negative 7 and 3, and returned 2. The '
+                'The REPL applied modulo to negative 7 and 3, and returned the result. The '
                 'result followed modular arithmetic rules, and the 3 was certain.'
             ),
             tags=("story",),
@@ -1439,7 +1439,7 @@ G2_13 = SubjectCurriculum(
             resolution=(
                 'The REPL tested true at the first gate — it opened. True at '
                 'the second gate — it opened too. Both conditions held, and the '
-                'verdict came back true. She could cross.'
+                'verdict came back with the verdict. She could cross.'
             ),
             tags=("story",),
         ),
@@ -1487,7 +1487,7 @@ G2_13 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL tested false at the first path — closed. True at the second — '
-                'open. At least one way forward existed, and the verdict came back true.'
+                'open. At least one way forward existed, and the verdict came back with the verdict.'
             ),
             tags=("story",),
         ),
@@ -1662,7 +1662,7 @@ G2_14 = SubjectCurriculum(
                 'is false.'
             ),
             resolution=(
-                'The REPL negated zero — which is truthy — and returned false. The truth '
+                'The REPL negated zero — which is truthy — and returned the verdict. The truth '
                 'was flipped, and the 0 came back clear.'
             ),
             tags=("story",),
@@ -1685,7 +1685,7 @@ G2_14 = SubjectCurriculum(
                 'the result is false.'
             ),
             resolution=(
-                'The REPL negated the empty string — which is truthy — and returned false. '
+                'The REPL negated the empty string — which is truthy — and returned the verdict. '
                 'The truth was inverted, and the answer was settled.'
             ),
             tags=("story",),
@@ -1829,7 +1829,7 @@ G2_16 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL converted zero to a boolean. Since zero is not false '
-                'and not nil, it counts as truthy. The answer came back true — '
+                'and not nil, it counts as truthy. The answer came back with the verdict — '
                 'the zero was a true value in boolean terms — 0.'
             ),
             tags=("story",),
@@ -1981,7 +1981,7 @@ G2_18 = SubjectCurriculum(
             resolution=(
                 'The REPL quoted the name hare and then tested whether it was a '
                 'symbol. Yes — a quoted name is a symbol, not the animal. The '
-                'answer came back true. The mark was what it appeared to be.'
+                'answer came back with the verdict. The mark was what it appeared to be.'
             ),
             tags=("story",),
         ),

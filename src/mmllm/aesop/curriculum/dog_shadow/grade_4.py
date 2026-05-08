@@ -641,7 +641,7 @@ G4_12 = SubjectCurriculum(grade=4, subject_id="G4-12",
             ),
             resolution=(
                 'The REPL searched the set for the bone numbered 2, found it, '
-                'and returned true. The verdict was certain — 2.'
+                'and returned the verdict. The verdict was certain — 2.'
             ),
             tags=("story",),
         ),
@@ -667,7 +667,7 @@ G4_12 = SubjectCurriculum(grade=4, subject_id="G4-12",
             ),
             resolution=(
                 'The REPL searched the set and found no bone numbered 4 among '
-                'them. It returned false. The bone lay beyond the cache — 4.'
+                'them. It returned the verdict. The bone lay beyond the cache — 4.'
             ),
             tags=("story",),
         ),
@@ -799,7 +799,7 @@ G4_14 = SubjectCurriculum(grade=4, subject_id="G4-14",
                 'for the absence of bones.'
             ),
             resolution=(
-                'The REPL looked inside the empty cache and returned true. The '
+                'The REPL looked inside the empty cache and returned the verdict. The '
                 'verdict was certain: no bones lay within.'
             ),
             tags=("story",),
@@ -823,7 +823,7 @@ G4_14 = SubjectCurriculum(grade=4, subject_id="G4-14",
                 'test that checks whether the cache is void.'
             ),
             resolution=(
-                'The REPL looked inside and found 1 bone, so it returned false. '
+                'The REPL looked inside and found 1 bone, so it returned the verdict. '
                 'The cache was not empty; it held bone-cargo — 1.'
             ),
             tags=("story",),
@@ -847,7 +847,7 @@ G4_14 = SubjectCurriculum(grade=4, subject_id="G4-14",
             ),
             resolution=(
                 'The REPL examined the bark-strip and found no marks, so it '
-                'returned true. The string was completely empty.'
+                'returned the verdict. The string was completely empty.'
             ),
             tags=("story",),
         ),
@@ -1056,7 +1056,7 @@ G4_18 = SubjectCurriculum(grade=4, subject_id="G4-18",
             ),
             resolution=(
                 'The REPL examined both shapes, found the same bones in the same '
-                'order, and returned true. Both containers held the same cargo, '
+                'order, and returned the verdict. Both containers held the same cargo, '
                 'and the 3 was equality.'
             ),
             tags=("story",),

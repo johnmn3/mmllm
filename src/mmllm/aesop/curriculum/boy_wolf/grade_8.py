@@ -910,7 +910,7 @@ G8_15 = SubjectCurriculum(
                 "they're independent type families."
             ),
             resolution=(
-                'the verdict came back false: String and Number are not related in the hierarchy.'
+                'the verdict came back with the verdict: String and Number are not related in the hierarchy.'
             )),
     ],
     subplots=_SORTINGTABLE_SUBPLOTS,

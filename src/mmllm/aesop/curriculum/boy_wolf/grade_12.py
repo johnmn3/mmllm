@@ -479,7 +479,7 @@ G12_08 = SubjectCurriculum(
                 "An assertion is a form that evaluates to true or false, testing a claim about the code."
             ),
             resolution=(
-                'The form returned true. The REPL confirmed the math. Tom saw that tests were claims the runtime could verify. {drawn.a} stood as the answer the fold required, slate, chalk, and a steady eye all in agreement.'
+                'The form returned the verdict. The REPL confirmed the math. Tom saw that tests were claims the runtime could verify. {drawn.a} stood as the answer the fold required, slate, chalk, and a steady eye all in agreement.'
             )),
         _ex('(do "(deftest …), (is …), (testing …) are the core test forms" :studied)',
             ":studied",
@@ -580,7 +580,7 @@ G12_10 = SubjectCurriculum(
                 "of this property."
             ),
             resolution=(
-                'The form returned true. Tom saw that properties were stronger than individual tests — they expressed invariants. The fold gate held tight against the count of {drawn.a}, slate cool under the elder hand.'         )),
+                'The form returned the verdict. Tom saw that properties were stronger than individual tests — they expressed invariants. The fold gate held tight against the count of {drawn.a}, slate cool under the elder hand.'         )),
         _ex('(do "test.check generates inputs and checks properties hold" :studied)',
             ":studied",
             "what test.check does",

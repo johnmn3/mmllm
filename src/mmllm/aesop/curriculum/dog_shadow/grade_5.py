@@ -1004,7 +1004,7 @@ G5_18 = SubjectCurriculum(grade=5, subject_id="G5-18",
             ),
             resolution=(
                 'The REPL poured bone 1 (held back), poured 3 (held back), poured 5 '
-                '(held back), poured 8 (passed). Some found a match and returned true '
+                '(held back), poured 8 (passed). Some found a match and returned the verdict '
                 'without checking the rest.'
             ),
             tags=("story",),
@@ -1067,7 +1067,7 @@ G5_19 = SubjectCurriculum(grade=5, subject_id="G5-19",
             ),
             resolution=(
                 'The REPL poured bone 1 (passed), poured 2 (passed), poured 3 (passed). '
-                'Every bone made it through. Every? returned true — all bones fit.'
+                'Every bone made it through. Every? returned the verdict — all bones fit.'
             ),
             tags=("story",),
         ),
@@ -1094,7 +1094,7 @@ G5_19 = SubjectCurriculum(grade=5, subject_id="G5-19",
             ),
             resolution=(
                 'The REPL poured bone 1 (held back — odd, not even). Every? found a '
-                'failure immediately and returned false without checking the rest. Not '
+                'failure immediately and returned the verdict without checking the rest. Not '
                 'every bone fit.'
             ),
             tags=("story",),

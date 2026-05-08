@@ -175,7 +175,7 @@ G11_02 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL invoked the host\'s startsWith, passing both the text '
-                'and the prefix. The method returned true, confirming that the '
+                'and the prefix. The method returned the verdict, confirming that the '
                 'scroll\'s beginning matched what Bell sought. The crossing into '
                 'the host\'s territory had yielded the hare.'
             ),
@@ -718,7 +718,7 @@ G11_14 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL tested the boundary and called Math/sqrt safely. It '
-                'returned 2.0. The try form caught nothing because nothing went wrong — err.'
+                'returned the result.0. The try form caught nothing because nothing went wrong — err.'
             ),
             tags=("story",),
         ),

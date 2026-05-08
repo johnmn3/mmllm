@@ -300,7 +300,7 @@ G4_07 = SubjectCurriculum(grade=4, subject_id="G4-07",
                 "key, it finds the `:a` pouch and returns its contents."
             ),
             resolution=(
-                'the lookup returned 1 — the count from the `:a` pouch — and the rest of the basket stayed settled. Carol marked {drawn.a} on the watchhouse beam, the lookout high above the valley quiet at last.'         )),
+                'the lookup returned the result — the count from the `:a` pouch — and the rest of the basket stayed settled. Carol marked {drawn.a} on the watchhouse beam, the lookout high above the valley quiet at last.'         )),
         _ex("(get {:a 1} :missing :default)", ":default",
             "the form (get {:a 1} :missing :default)", "the default value when key missing",
             scenario=(
@@ -410,7 +410,7 @@ G4_10 = SubjectCurriculum(grade=4, subject_id="G4-10",
                 "once for each key, yielding the total number of pouches."
             ),
             resolution=(
-                'the form returned 3, one notch for each pouch label `:a`, `:b`, and `:c` that the basket carried. {drawn.a} stood as the answer the fold required, slate, chalk, and a steady eye all in agreement.'
+                'the form returned the result, one notch for each pouch label `:a`, `:b`, and `:c` that the basket carried. {drawn.a} stood as the answer the fold required, slate, chalk, and a steady eye all in agreement.'
             )),
     ], subplots=_BASKET_SUBPLOTS, plan_pool=_PLAN_G4)
 
@@ -433,7 +433,7 @@ G4_11 = SubjectCurriculum(grade=4, subject_id="G4-11",
                 "count of distinct items in the set."
             ),
             resolution=(
-                'the form returned 3, one notch for each distinct fleece weight the fold had received. The pasture tally settled at {drawn.a}, and Carol closed the day slate with that one number written clear.'
+                'the form returned the result, one notch for each distinct fleece weight the fold had received. The pasture tally settled at {drawn.a}, and Carol closed the day slate with that one number written clear.'
             )),
         _ex("(count #{1 1 1})", 1, "the count of #{1 1 1}", "the size of the set",
             scenario=(
@@ -451,7 +451,7 @@ G4_11 = SubjectCurriculum(grade=4, subject_id="G4-11",
                 "once — the runtime's rule for sets is that duplicates vanish."
             ),
             resolution=(
-                'the form returned 1, because a set holds only unique items, and all three sacks carried the same weight mark.'
+                'the form returned the result, because a set holds only unique items, and all three sacks carried the same weight mark.'
             )),
     ], subplots=_BASKET_SUBPLOTS, plan_pool=_PLAN_G4)
 
@@ -474,7 +474,7 @@ G4_12 = SubjectCurriculum(grade=4, subject_id="G4-12",
                 "the form returns true."
             ),
             resolution=(
-                "the form returned true, confirming that weight 2 had indeed arrived in the morning's fleeces. The slate showed {drawn.a} in clear chalk, and the fold tally stood as the day record."
+                "the form returned the verdict, confirming that weight 2 had indeed arrived in the morning's fleeces. The slate showed {drawn.a} in clear chalk, and the fold tally stood as the day record."
             )),
         _ex("(contains? #{1 2 3} 4)", False, "the form (contains? #{1 2 3} 4)", "whether 4 is in the set",
             scenario=(
@@ -491,7 +491,7 @@ G4_12 = SubjectCurriculum(grade=4, subject_id="G4-12",
                 "arrived."
             ),
             resolution=(
-                'the form returned false, confirming that the pen held no weight-4 fleeces and the count was exact. Carol marked {drawn.a} on the watchhouse beam, the lookout high above the valley quiet at last.'
+                'the form returned the verdict, confirming that the pen held no weight-4 fleeces and the count was exact. Carol marked {drawn.a} on the watchhouse beam, the lookout high above the valley quiet at last.'
             )),
     ], subplots=_BASKET_SUBPLOTS, plan_pool=_PLAN_G4)
 
@@ -515,7 +515,7 @@ G4_13 = SubjectCurriculum(grade=4, subject_id="G4-13",
                 "have been tallied."
             ),
             resolution=(
-                'the form returned 5, the exact number of fleeces Carol had placed in the basket. The fold gate held tight against the count of {drawn.a}, slate cool under the elder hand.'
+                'the form returned the result, the exact number of fleeces Carol had placed in the basket. The fold gate held tight against the count of {drawn.a}, slate cool under the elder hand.'
             )),
         _ex("(count {:a 1 :b 2})", 2, "the count of a 2-key map", "the count",
             scenario=(
@@ -533,7 +533,7 @@ G4_13 = SubjectCurriculum(grade=4, subject_id="G4-13",
                 "giving the basket's total structure size."
             ),
             resolution=(
-                'the form returned 2, one notch for each pouch `:a` and `:b` that the basket carried. Tom chalked {drawn.a} on the village notice, and the morning record stood for the next shepherd to read.'
+                'the form returned the result, one notch for each pouch `:a` and `:b` that the basket carried. Tom chalked {drawn.a} on the village notice, and the morning record stood for the next shepherd to read.'
             )),
         _ex("(count #{:a :b :c})", 3, "the count of a 3-element set", "the count",
             scenario=(
@@ -550,7 +550,7 @@ G4_13 = SubjectCurriculum(grade=4, subject_id="G4-13",
                 "the count matches the brands present."
             ),
             resolution=(
-                'the form returned 3, confirming three distinct fleece brands in the pen. The lookout returned with {drawn.a} on his slate, the valley long behind him and the count plain.'
+                'the form returned the result, confirming three distinct fleece brands in the pen. The lookout returned with {drawn.a} on his slate, the valley long behind him and the count plain.'
             )),
         _ex("(count \"shepherd\")", 8, "the count of \"shepherd\"", "the string length",
             scenario=(
@@ -589,7 +589,7 @@ G4_14 = SubjectCurriculum(grade=4, subject_id="G4-14",
                 "vector `[]`, the form returns true — the basket holds nothing."
             ),
             resolution=(
-                "the form returned true, confirming the basket was completely empty and ready for the day's shearing. {drawn.a} stood as the answer the fold required, slate, chalk, and a steady eye all in agreement."
+                "the form returned the verdict, confirming the basket was completely empty and ready for the day's shearing. {drawn.a} stood as the answer the fold required, slate, chalk, and a steady eye all in agreement."
             )),
         _ex("(empty? [1])",  False, "the form (empty? [1])",  "whether [1] is empty",
             scenario=(
@@ -605,7 +605,7 @@ G4_14 = SubjectCurriculum(grade=4, subject_id="G4-14",
                 "one fleece, the form returns false — the basket is not empty."
             ),
             resolution=(
-                'the form returned false, showing the basket had changed from empty to occupied. The pasture tally settled at {drawn.a}, and Carol closed the day slate with that one number written clear.'
+                'the form returned the verdict, showing the basket had changed from empty to occupied. The pasture tally settled at {drawn.a}, and Carol closed the day slate with that one number written clear.'
             )),
         _ex("(empty? \"\")", True,  "the form (empty? \"\")", "whether the empty string is empty",
             scenario=(
@@ -622,7 +622,7 @@ G4_14 = SubjectCurriculum(grade=4, subject_id="G4-14",
                 "remain."
             ),
             resolution=(
-                "the form returned true, confirming the slate was completely blank and ready for the day's tallies. The slate showed {drawn.a} in clear chalk, and the fold tally stood as the day record."
+                "the form returned the verdict, confirming the slate was completely blank and ready for the day's tallies. The slate showed {drawn.a} in clear chalk, and the fold tally stood as the day record."
             )),
     ], subplots=_BASKET_SUBPLOTS, plan_pool=_PLAN_G4)
 
@@ -678,7 +678,7 @@ G4_15 = SubjectCurriculum(grade=4, subject_id="G4-15",
                 "and notching the count once per item, yielding 2."
             ),
             resolution=(
-                'the form returned 2, confirming that after removing the first bundle, two remained in the basket. Tom chalked {drawn.a} on the village notice, and the morning record stood for the next shepherd to read.'
+                'the form returned the result, confirming that after removing the first bundle, two remained in the basket. Tom chalked {drawn.a} on the village notice, and the morning record stood for the next shepherd to read.'
             )),
     ], subplots=_BASKET_SUBPLOTS, plan_pool=_PLAN_G4)
 
@@ -753,7 +753,7 @@ G4_17 = SubjectCurriculum(grade=4, subject_id="G4-17",
                 "original, confirming it still holds `:a` 1."
             ),
             resolution=(
-                "the form returned 1, the original count, proving Carol's basket had not been changed by the `assoc` operation. The watchhouse warmed as the elder set {drawn.a} into the day record, the fold quiet by then."
+                "the form returned the result, the original count, proving Carol's basket had not been changed by the `assoc` operation. The watchhouse warmed as the elder set {drawn.a} into the day record, the fold quiet by then."
             )),
     ], subplots=_BASKET_SUBPLOTS, plan_pool=_PLAN_G4)
 
@@ -781,7 +781,7 @@ G4_18 = SubjectCurriculum(grade=4, subject_id="G4-18",
                 "basket and one is a cord."
             ),
             resolution=(
-                'the form returned true, confirming that despite their different containers, the basket and the cord held the same cargo. {drawn.a} stood as the answer the fold required, slate, chalk, and a steady eye all in agreement.'
+                'the form returned the verdict, confirming that despite their different containers, the basket and the cord held the same cargo. {drawn.a} stood as the answer the fold required, slate, chalk, and a steady eye all in agreement.'
             )),
     ], subplots=_BASKET_SUBPLOTS, plan_pool=_PLAN_G4)
 
@@ -805,7 +805,7 @@ G4_19 = SubjectCurriculum(grade=4, subject_id="G4-19",
                 "per item, yielding 5."
             ),
             resolution=(
-                "the form returned 5, confirming that the range held five days' worth of counts. The pasture tally settled at {drawn.a}, and Carol closed the day slate with that one number written clear."
+                "the form returned the result, confirming that the range held five days' worth of counts. The pasture tally settled at {drawn.a}, and Carol closed the day slate with that one number written clear."
             )),
         _ex("(first (range 1 100))", 1, "the first of (range 1 100)", "the first of range 1..99",
             scenario=(
@@ -823,7 +823,7 @@ G4_19 = SubjectCurriculum(grade=4, subject_id="G4-19",
                 "leftmost item from that range, which is 1."
             ),
             resolution=(
-                'the form returned 1, the first day in the 99-day range Carol had requested. The slate showed {drawn.a} in clear chalk, and the fold tally stood as the day record.'
+                'the form returned the result, the first day in the 99-day range Carol had requested. The slate showed {drawn.a} in clear chalk, and the fold tally stood as the day record.'
             )),
     ], subplots=_BASKET_SUBPLOTS, plan_pool=_PLAN_G4)
 
@@ -848,7 +848,7 @@ G4_20 = SubjectCurriculum(grade=4, subject_id="G4-20",
                 "per item — the three fleeces counted one by one."
             ),
             resolution=(
-                'the form returned 3, confirming that the sequence held all three items from the original basket. Carol marked {drawn.a} on the watchhouse beam, the lookout high above the valley quiet at last.'
+                'the form returned the result, confirming that the sequence held all three items from the original basket. Carol marked {drawn.a} on the watchhouse beam, the lookout high above the valley quiet at last.'
             )),
         _ex("(seq [])", None,
             "the form (seq [])", "what (seq []) returns",

@@ -103,7 +103,7 @@ G5_01 = SubjectCurriculum(grade=5, subject_id="G5-01",
             ),
             mapping=(
                 "`if` is the road fork: the comparison `(> 5 3)` is the "
-                "sign the fork reads. Because it came back true, the left "
+                "sign the fork reads. Because it came back with the verdict, the left "
                 "lane opened and the right was left untouched."
             ),
             resolution=(
@@ -231,7 +231,7 @@ G5_04 = SubjectCurriculum(grade=5, subject_id="G5-04",
             ),
             need=(
                 "She needed to read the stones in order and enter the first "
-                "lane whose stone came back true — skipping all earlier "
+                "lane whose stone came back with the verdict — skipping all earlier "
                 "closed forks, never doubling back."
             ),
             mapping=(
@@ -379,7 +379,7 @@ G5_07 = SubjectCurriculum(grade=5, subject_id="G5-07",
             goal_text="return the first truthy value from a sequence of values",
             scenario=(
                 "The milkmaid stood at a farmyard gate with three latch-checks in "
-                "sequence. The first latch returned nothing; the second returned false. "
+                "sequence. The first latch returned nothing; the second returned the verdict. "
                 "The third bore a keyword mark."
             ),
             need=(
@@ -412,7 +412,7 @@ G5_08 = SubjectCurriculum(grade=5, subject_id="G5-08",
             goal_text="negate the result of checking whether 1 is greater than 2",
             scenario=(
                 "At the farmyard gate, the milkmaid found a latch-check: was one pail "
-                "more than two? The inner check came back false — one was not greater "
+                "more than two? The inner check came back with the verdict — one was not greater "
                 "than two. A `not` sign hung on the gate's outer frame."
             ),
             need=(
@@ -818,7 +818,7 @@ G5_15 = SubjectCurriculum(grade=5, subject_id="G5-15",
                 "chained this way increment the input twice in one composed step."
             ),
             resolution=(
-                "The REPL returned 5 after two increments — the two `inc` "
+                "The REPL returned the result after two increments — the two `inc` "
                 "cards ran in sequence, each stepping the count once."
             ),
             tags=("story",),
@@ -1028,7 +1028,7 @@ G5_19 = SubjectCurriculum(grade=5, subject_id="G5-19",
             ),
             resolution=(
                 "The REPL confirmed that every element passed — several countsunts were "
-                "positive, and the all-or-nothing strainer returned true."
+                "positive, and the all-or-nothing strainer returned the verdict."
             ),
             tags=("story",),
         ),
@@ -1051,10 +1051,10 @@ G5_19 = SubjectCurriculum(grade=5, subject_id="G5-19",
             mapping=(
                 "`every?` stops as soon as one element fails the rule: the first "
                 "odd count hit the strainer mesh, closed it, and the strainer "
-                "returned false without testing the remaining elements."
+                "returned the verdict without testing the remaining elements."
             ),
             resolution=(
-                "The REPL returned false — not every count cleared the even? mesh, "
+                "The REPL returned the verdict — not every count cleared the even? mesh, "
                 "so the all-or-nothing strainer closed the moment the first one failed."
             ),
             tags=("story",),
