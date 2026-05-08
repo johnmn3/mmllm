@@ -69,7 +69,7 @@ _POUCH_SUBPLOTS: list[SubplotTemplate] = [
     # 1. Hound carries the bone in the mouth for one stretch of the
     #    crossing; the binding lives only as long as the form's stretch.
     SubplotTemplate("""\
-{hound_phrase} stooped to pick up a bone {place}, then held it
+{hound} stooped to pick up a bone {place}, then held it
 firmly between {hound_his_her} jaws. "When I want to {goal_text},"
 {hound_he_she} said around the bone, "I carry the value between
 my teeth just for the stretch of crossing where I need it. The
@@ -83,7 +83,7 @@ back with the answer."""),
     # 2. Closed-jaws-as-binding: whatever's gripped is in force only while the
     #    jaws are closed. Type-neutral framing.
     SubplotTemplate("""\
-{hound_phrase}, {emo_patient}, tightened {hound_his_her} grip on
+{hound}, {emo_patient}, tightened {hound_his_her} grip on
 the bone — the river was loud, the bridge unsteady, and a slack
 jaw at the wrong moment loses everything. "Whatever I hold here
 is in force only while my jaws stay closed," {hound_he_she} said,
@@ -95,7 +95,7 @@ value the mouth had held."""),
 
     # 3. Dog drops the bone for the shadow; Hound's careful hold wins.
     SubplotTemplate("""\
-{dog_phrase}, {emo_greedy}, eyed the bone in {dog_his_her} jaws
+{dog}, {emo_greedy}, eyed the bone in {dog_his_her} jaws
 and the brighter one shimmering on the water below — sure the
 shadow was the better catch. {dog_he_she_cap} snapped at it, and
 the real bone fell with a splash. {hound_phrase}, {emo_patient},
@@ -108,19 +108,19 @@ the value the held bone — not the lost one — had carried."""),
     # 4. Substitution rule — wherever the form names the binding,
     #    the runtime reaches into the mouth.
     SubplotTemplate("""\
-"Wherever the form names the binding," {hound_phrase} said,
+"Wherever the form names the binding," {hound}, {emo_patient} said,
 "the runtime reaches into the mouth and pulls out what was
 gripped there." {hound_he_she_cap} demonstrated by intending to
 {goal_text}: each mention of the bound name, {hound} said, would
 be replaced by the value from the jaws the moment the form ran.
-{hound_phrase} composed {concept_phrase}, submitted the form,
+{hound} composed {concept_phrase}, submitted the form,
 and the REPL substituted as promised — the gripped value threaded
 into every place the binding had been named."""),
 
     # 5. End-of-stretch — the mouth is empty when the form's stretch
     #    is over. (Scope ends.)
     SubplotTemplate("""\
-"Watch the mouth carefully," {hound_phrase} said {place}.
+"Watch the mouth carefully," {hound} said {place}.
 "While the form's stretch runs, the bone is held and the binding
 is yours." To {goal_text}, {hound_he_she} composed
 {concept_phrase} with the binding gripped safely between the
@@ -139,7 +139,7 @@ _RECIPE_SUBPLOTS: list[SubplotTemplate] = [
     # 1. Following a nose-trail: paw-step sniffing path; the runtime
     #    walks each sniff in order. Type-neutral.
     SubplotTemplate("""\
-{hound_phrase} put {hound_his_her} nose to the ground {place} and
+{hound}, {emo_patient} put {hound_his_her} nose to the ground {place} and
 worked out a careful sniffing-trail toward the buried bone.
 "Recipes in Clojure are like a nose-trail," {hound_he_she} said:
 "each sniff is a step, the steps come in order, and the last
@@ -150,7 +150,7 @@ last step had produced."""),
 
     # 2. The trail-as-runnable-routine — emphasizes the call site.
     SubplotTemplate("""\
-"A nose-trail is only useful when it gets walked," {hound_phrase}
+"A nose-trail is only useful when it gets walked," {hound}, {emo_patient}
 said, head low. "You set out the sniffs, you bring the
 ingredients, the runtime does the rest." To {goal_text},
 {hound_he_she} composed {concept_phrase}, submitted the form,
@@ -159,7 +159,7 @@ the steps had produced."""),
 
     # 3. Last sniff is what gets served. (Body returns last form.)
     SubplotTemplate("""\
-"On any nose-trail," {hound_phrase} explained, "the last sniff
+"On any nose-trail," {hound}, {emo_patient} explained, "the last sniff
 is what you carry home." {hound_he_she_cap} took the goal — to
 {goal_text} — and laid out the routine's paw-steps in order,
 knowing that whatever the final sniff turned up was what would
@@ -169,7 +169,7 @@ the value of the last."""),
 
     # 4. Trails feeding into trails — chained nose-trails.
     SubplotTemplate("""\
-"Trails can feed into one another," {hound_phrase} said,
+"Trails can feed into one another," {hound}, {emo_patient} said,
 sketching two paw-paths in the dirt. "What one trail turns up,
 the next can take as its scent — together they make a longer
 sniffing-route." To {goal_text}, {hound_he_she} composed
@@ -178,7 +178,7 @@ trail in order — handed back the value at the end."""),
 
     # 5. The Dog-skips-the-trail template.
     SubplotTemplate("""\
-{dog_phrase}, {emo_greedy}, insisted {dog_he_she} could just
+{dog}, {emo_greedy}, insisted {dog_he_she} could just
 bound straight to the bone without bothering to follow the
 sniff-trail. {hound_phrase} only smiled and lowered
 {hound_his_her} nose. To {goal_text}, {hound_he_she} composed
@@ -196,7 +196,7 @@ _BASKET_SUBPLOTS: list[SubplotTemplate] = [
     # 1. Bone-cache in a hollow log: pulling one bone out doesn't
     #    disturb the rest.
     SubplotTemplate("""\
-{hound_phrase}, {emo_patient}, pointed to a hollow log {place},
+{hound}, {emo_patient}, pointed to a hollow log {place},
 its inside lined with bones tucked into named slots — the wood
 cool, the slots solid. "Whatever I want to do with what's cached,"
 {hound_he_she} said, "I read from the log, work the change, and
@@ -210,7 +210,7 @@ prescribed."""),
     #    bone-rows (vectors), or kind-only piles (sets).
     SubplotTemplate("""\
 "You can find what you want in a bone-cache several ways,"
-{hound_phrase} said, {emo_patient}, gesturing at the hollow log:
+{hound} said, {emo_patient}, gesturing at the hollow log:
 "by the scratch above the slot, by its place in line, or by
 simply asking whether it's there at all — the cache is patient,
 but only one of those reaches lands the right bone." To
@@ -223,7 +223,7 @@ exactly as the form directed."""),
 A row of bones lay tucked end-to-end inside the log {place}, head
 at the front, the rest trailing behind. The river ran past, and
 the bones stayed in their order, each one waiting to be read.
-"Many of our caches are like this row," {hound_phrase} said,
+"Many of our caches are like this row," {hound} said,
 {emo_patient}. "You can grab the first bone, you can ask for the
 rest, you can lay a new bone at the front of the row." To
 {goal_text}, {hound_he_she} composed {concept_phrase}, submitted
@@ -232,7 +232,7 @@ described."""),
 
     # 4. New cache from old — immutability emphasis.
     SubplotTemplate("""\
-"Watch carefully," {hound_phrase} said, holding open the hollow
+"Watch carefully," {hound} said, holding open the hollow
 log. "Whatever I do to the cache, this one stays exactly as it
 was — what I get back is a fresh cache with the change made,
 leaving the first one untouched." To {goal_text},
@@ -243,7 +243,7 @@ see why nothing could be lost by trying."""),
 
     # 5. The Dog-rummages-loudly template.
     SubplotTemplate("""\
-{dog_phrase} began rummaging in the bone-cache, {emo_greedy},
+{dog} began rummaging in the bone-cache, {emo_greedy},
 calling out guesses about its contents without quite checking.
 "I know exactly what's in there," {dog_he_she} insisted.
 {hound_phrase} shook {hound_his_her} head. To {goal_text}
@@ -263,7 +263,7 @@ _SIEVE_SUBPLOTS: list[SubplotTemplate] = [
     #    select (filter), select-counted (take/drop), or dedupe
     #    (distinct). The rule is the gap.
     SubplotTemplate("""\
-{hound_phrase}, {emo_patient}, stood beside a fallen log laid
+{hound}, {emo_patient}, stood beside a fallen log laid
 across the stream {place} — a gap chewed through its middle, the
 water cool and steady beneath. "Whatever rule we choose for the
 gap," {hound_he_she} said, "the bones from the near bank pass
@@ -275,7 +275,7 @@ gap had let pass."""),
 
     # 2. The float-through-and-collect template — pour-through emphasis.
     SubplotTemplate("""\
-{hound_phrase}, {emo_cautious}, balanced an empty hollow log under
+{hound}, {emo_cautious}, balanced an empty hollow log under
 the gap. "The bones come in at one end of the gap,"
 {hound_he_she} said, "the gap does its work — applying the rule,
 choosing or changing — and what falls into the receiving log is
@@ -286,7 +286,7 @@ fell into the receiving log."""),
 
     # 3. Stacked gaps — output of one feeds the next. (comp xform.)
     SubplotTemplate("""\
-{hound_phrase} laid two gapped logs above one another, the bones
+{hound} laid two gapped logs above one another, the bones
 that passed the first gap arriving at the second — the river
 running calm beneath both. "What lands at the bottom,"
 {hound_he_she} said, {emo_patient}, "has been through both rules
@@ -298,7 +298,7 @@ what the stack had let through."""),
     # 4. The receiver template — pour into any kind of cache.
     SubplotTemplate("""\
 "You can collect the result into any kind of cache you like,"
-{hound_phrase} said. "A row of bones, a unique-only pile, a sack
+{hound}, {emo_patient} said. "A row of bones, a unique-only pile, a sack
 of any shape — the gap doesn't care; the receiver does." To
 {goal_text}, {hound_he_she} composed {concept_phrase}, chose
 the right empty receiver, ran the bones through the gap,
@@ -307,7 +307,7 @@ cache of {hound_his_her} choosing."""),
 
     # 5. The Dog-tries-to-shortcut-the-gap template.
     SubplotTemplate("""\
-{dog_phrase} eyed the bones, {emo_greedy}, and called out a guess
+{dog} eyed the bones, {emo_greedy}, and called out a guess
 about what would come out the far side of the gap without
 bothering to actually run any through. {hound_phrase} shook
 {hound_his_her} head and went on with the work: to {goal_text},
@@ -329,7 +329,7 @@ _NOTEBOOK_SUBPLOTS: list[SubplotTemplate] = [
 A flat stone sat at the stream's edge, its surface scratched with
 a running tally of cached bones. Any dog could trot up, read the
 count, or — carefully — update it. "Atoms are like this tally,"
-{hound_phrase} said. "You can deref to read; you can swap! to
+{hound}, {emo_patient} said. "You can deref to read; you can swap! to
 write atomically, no matter who else is sniffing." To
 {goal_text}, {hound_he_she} composed {concept_phrase}, submitted
 the form, and let the REPL work the tally exactly as the form
@@ -337,7 +337,7 @@ prescribed."""),
 
     # 2. Atomic swap — read, apply, write, all in one motion.
     SubplotTemplate("""\
-"When I want to update the tally," {hound_phrase} said, "I don't
+"When I want to update the tally," {hound}, {emo_patient} said, "I don't
 pick the stone up and walk away — I read the scratch, apply the
 change, and scratch the new count back, all in a single motion.
 If two dogs arrive at once, the runtime makes sure only one of us
@@ -347,7 +347,7 @@ the REPL applied the update atomically."""),
 
     # 3. The tally-stays-on-the-stone template.
     SubplotTemplate("""\
-"The tally stays scratched into the stone," {hound_phrase} said,
+"The tally stays scratched into the stone," {hound}, {emo_patient} said,
 "so any dog who comes by can read what's there right now. The
 count changes only when one of us scratches a new one — and only
 as the runtime allows." To {goal_text}, {hound_he_she}
@@ -357,7 +357,7 @@ back the value the stone had carried."""),
 
     # 4. The shared-state template — coordinated updates.
     SubplotTemplate("""\
-"Many dogs can come and go past the stone," {hound_phrase} said,
+"Many dogs can come and go past the stone," {hound}, {emo_patient} said,
 "and each one's read or scratch must agree with the others. The
 runtime sees to that — no two writers stomp on each other's
 work." To {goal_text}, {hound_he_she} composed
@@ -366,7 +366,7 @@ each access cleanly — handed back what the tally now said."""),
 
     # 5. The Dog-snatches-at-the-stone template.
     SubplotTemplate("""\
-{dog_phrase}, {emo_greedy}, swiped a paw across the tally-stone,
+{dog}, {emo_greedy}, swiped a paw across the tally-stone,
 trying to scratch an answer over the count. {hound_phrase} caught
 {dog_him_her} firmly: tallies shared by all the pack need careful
 updates, not snatches. To {goal_text}, {hound_he_she} composed
@@ -383,7 +383,7 @@ _ACORN_SUBPLOTS: list[SubplotTemplate] = [
 
     # 1. The counting-bones template — generic arithmetic frame.
     SubplotTemplate("""\
-{hound_phrase} laid bones out on a flat stone {place}, sorting
+{hound}, {emo_patient} laid bones out on a flat stone {place}, sorting
 them into small piles. "Numbers in Clojure are just like bones
 in piles," {hound_he_she} said: "you can count them, you can
 add two piles together, you can divide one pile among several."
@@ -393,7 +393,7 @@ whatever the operation had produced."""),
 
     # 2. The pile-grows-or-shrinks template — for inc/dec, +/-.
     SubplotTemplate("""\
-"Watch the pile," {hound_phrase} said, {emo_patient}, gesturing
+"Watch the pile," {hound} said, {emo_patient}, gesturing
 at a small heap of bones beside the river. "Every operation
 either adds, takes away, or combines what's already there — the
 pile grows or shrinks by exactly what you say, and the river
@@ -403,7 +403,7 @@ and the REPL returned the value the operation had produced."""),
 
     # 3. The careful-arrangement template.
     SubplotTemplate("""\
-{hound_phrase}, {emo_patient}, arranged a small heap of bones
+{hound}, {emo_patient}, arranged a small heap of bones
 {place}, careful with the count — the bridge's shadow long across
 the water, every bone weighing what it weighed. "Numbers in
 Clojure don't fudge," {hound_he_she} said. "Whatever you do —
@@ -416,7 +416,7 @@ called for."""),
 
     # 4. The Dog-eyeballs-the-pile template.
     SubplotTemplate("""\
-{dog_phrase} eyed the pile, {emo_greedy}, and called out a guess
+{dog} eyed the pile, {emo_greedy}, and called out a guess
 about how many bones were there without bothering to count.
 {hound_phrase} simply began counting — to {goal_text} required no
 eyeballing, only the form. {hound_he_she_cap} composed
@@ -427,7 +427,7 @@ matter the patient way."""),
     # 5. The exact-count template.
     SubplotTemplate("""\
 "Whatever the pile looks like after the operation,"
-{hound_phrase} said, "the runtime gives the exact count — small
+{hound}, {emo_patient} said, "the runtime gives the exact count — small
 or large, fraction or whole, the answer is precise." To
 {goal_text}, {hound_he_she} composed {concept_phrase},
 submitted the form, and the REPL handed back the value, exactly
@@ -442,7 +442,7 @@ _GATE_SUBPLOTS: list[SubplotTemplate] = [
 
     # 1. The crossing-conditions template — generic for any boolean.
     SubplotTemplate("""\
-{hound_phrase}, {emo_cautious}, paused at the stream's edge
+{hound}, {emo_cautious}, paused at the stream's edge
 {place}, weighing the crossing. The water was quick today, the
 ledge slick. "Boolean forms in Clojure are like the conditions
 for a crossing," {hound_he_she} said: "the runtime checks the
@@ -453,7 +453,7 @@ and the REPL returned whatever the conditions had decided."""),
 
     # 2. The truthy/falsey-rules template.
     SubplotTemplate("""\
-"Only two things in Clojure close the crossing," {hound_phrase}
+"Only two things in Clojure close the crossing," {hound}
 said, {emo_patient}: "nil and false. Everything else — zero, the
 empty string, an empty list — opens it. The verdict follows that
 rule exactly, the way a steady current keeps its line." To
@@ -464,7 +464,7 @@ value the crossing had passed, true or false."""),
     # 3. The boolean-verdict template.
     SubplotTemplate("""\
 "You can't tell whether the crossing will be open by guessing,"
-{hound_phrase} said. "You bring the value to the bank, the
+{hound}, {emo_patient} said. "You bring the value to the bank, the
 runtime checks it, and the conditions give the only answer that
 matters." To {goal_text}, {hound_he_she} composed
 {concept_phrase}, submitted the form, and the REPL settled the
@@ -472,21 +472,21 @@ matter — the conditions had spoken exactly as the rule said."""),
 
     # 4. The Dog-leaps-without-checking template.
     SubplotTemplate("""\
-{dog_phrase} sprinted toward the stream {place}, {emo_greedy},
+{dog} sprinted toward the stream {place}, {emo_greedy},
 certain the way would be open for {dog_him_her}. {hound_phrase}
 slowed and watched: the only way to know whether the crossing
 held was to actually carry the value to it. To {goal_text},
 {hound_he_she} composed {concept_phrase}, submitted the form,
 and the REPL settled the matter — the conditions had ruled
-exactly as the form said, regardless of {dog_phrase}'s guess."""),
+exactly as the form said, regardless of {dog}'s guess."""),
 
     # 5. The decisive-condition template — and/or carry the value.
     SubplotTemplate("""\
 "The condition carries the value through, not just a yes or a
-no," {hound_phrase} said. "Whatever the verdict, that's what the
+no," {hound}, {emo_patient} said. "Whatever the verdict, that's what the
 runtime hands back — sometimes a strict true or false, sometimes
 the very value that passed the test." To {goal_text},
-{hound_phrase} composed {concept_phrase}, submitted the form,
+{hound} composed {concept_phrase}, submitted the form,
 and the REPL returned the value the conditions had carried
 through."""),
 ]
@@ -503,7 +503,7 @@ _FORK_SUBPLOTS: list[SubplotTemplate] = [
 The path forked at the bank {place}, with one or more arms
 branching off — upstream, downstream, or back into the trees —
 each arm marked with a condition. "Branching forms in Clojure
-are forks like this," {hound_phrase} said. "The runtime checks
+are forks like this," {hound}, {emo_patient} said. "The runtime checks
 the condition, takes the matching arm, and only that arm's value
 comes back." To {goal_text}, {hound_he_she} composed
 {concept_phrase}, submitted the form, and the REPL — having
@@ -513,7 +513,7 @@ taken the right arm — handed back its value."""),
     SubplotTemplate("""\
 The path {place} opened into a fork of three or four arms, each
 marked by a small condition-stone. "Branching forms work like
-this," {hound_phrase} said: "the dog walks past the stones in
+this," {hound}, {emo_patient} said: "the dog walks past the stones in
 order, takes the first arm whose stone says true, and the value
 of that arm is what comes back." To {goal_text},
 {hound_he_she} composed {concept_phrase}, submitted the form,
@@ -521,7 +521,7 @@ and the REPL took the right arm and returned its value."""),
 
     # 3. The unrun-arm template — branches not taken don't run.
     SubplotTemplate("""\
-"What's important about a fork," {hound_phrase} said, "is that
+"What's important about a fork," {hound}, {emo_patient} said, "is that
 the arm not taken doesn't run at all. The runtime checks the
 condition, walks the right arm, and the unrun arm is just left
 behind." To {goal_text}, {hound_he_she} composed
@@ -531,7 +531,7 @@ arm."""),
 
     # 4. The Dog-tries-to-skip-the-condition template.
     SubplotTemplate("""\
-{dog_phrase}, {emo_greedy}, called out which arm of the fork
+{dog}, {emo_greedy}, called out which arm of the fork
 {dog_he_she} was sure the runtime would take, without bothering
 to check the condition. {hound_phrase} only smiled: the only
 way to know is to evaluate the condition. To {goal_text},
@@ -541,7 +541,7 @@ value of the arm the form actually ran."""),
 
     # 5. The one-form-decides template.
     SubplotTemplate("""\
-"It isn't the dog who picks the arm," {hound_phrase} said, "it's
+"It isn't the dog who picks the arm," {hound}, {emo_patient} said, "it's
 the condition. Whatever the condition evaluates to, that
 decides." To {goal_text}, {hound_he_she} composed
 {concept_phrase}, submitted the form, and the REPL — letting the
@@ -557,7 +557,7 @@ _ROADSIGN_SUBPLOTS: list[SubplotTemplate] = [
 
     # 1. The marker-stone-by-the-stream template — `def`.
     SubplotTemplate("""\
-{hound_phrase} chose a flat stone {place} and scratched a fresh
+{hound}, {emo_patient} chose a flat stone {place} and scratched a fresh
 name into its surface. "A def is a marker stone by the stream,"
 {hound_he_she} said. "Any dog passing reads the scratch, learns
 where the bone is buried, and can find it later by the name
@@ -568,7 +568,7 @@ the bank."""),
 
     # 2. The stones-stay-where-set template.
     SubplotTemplate("""\
-"The good thing about a marker stone," {hound_phrase} said, "is
+"The good thing about a marker stone," {hound}, {emo_patient} said, "is
 that it stays where you set it. The next dog along the bank
 reads the freshest scratch — whatever the latest mark says." To
 {goal_text}, {hound_he_she} composed {concept_phrase},
@@ -579,7 +579,7 @@ form directed — returned the value the bank had recorded."""),
     SubplotTemplate("""\
 A small set of marker stones stood in a half-circle {place}, each
 stone carrying the names for one stretch of riverbank. "Names
-live in groups," {hound_phrase} said: "to use a name from a
+live in groups," {hound}, {emo_patient} said: "to use a name from a
 stretch you didn't dig, you make sure that stretch's stones are
 where the runtime can find them." To {goal_text},
 {hound_he_she} composed {concept_phrase}, submitted the form,
@@ -588,7 +588,7 @@ returned the value the form had asked for."""),
 
     # 4. The careful-naming template.
     SubplotTemplate("""\
-"Naming is half the art," {hound_phrase} said, scratching a
+"Naming is half the art," {hound}, {emo_patient} said, scratching a
 careful sign into a fresh stone. "A clear name on the bank tells
 every later dog what to expect; a careless one leads them to
 the wrong bone." To {goal_text}, {hound_he_she} composed
@@ -598,7 +598,7 @@ stone had promised."""),
 
     # 5. The Dog-misreads-the-marker template.
     SubplotTemplate("""\
-{dog_phrase}, {emo_greedy}, glanced at the marker stone {place}
+{dog}, {emo_greedy}, glanced at the marker stone {place}
 and called out what {dog_he_she} thought it said without slowing.
 {hound_phrase} stopped and read carefully. To {goal_text}, the
 scratch had to be read exactly: {hound_he_she} composed
@@ -615,7 +615,7 @@ _SAFETYNET_SUBPLOTS: list[SubplotTemplate] = [
 
     # 1. The log-bridge test before crossing — `try`/`catch`.
     SubplotTemplate("""\
-{hound_phrase} stepped onto a fallen log spanning the stream
+{hound}, {emo_patient} stepped onto a fallen log spanning the stream
 {place}, testing its hold paw by paw before trusting full weight.
 "If the log gives, I retreat to the bank; the run doesn't end,
 only the path bends." To {goal_text}, {hound_he_she}
@@ -626,7 +626,7 @@ way."""),
 
     # 2. The practice-bank template — REPL safety; nil punning.
     SubplotTemplate("""\
-"This is the practice bank," {hound_phrase} said {place},
+"This is the practice bank," {hound}, {emo_patient} said {place},
 gesturing wide. "A stumble here costs nothing. Try a form, see
 what comes back, fix it, try again. The REPL is forgiving in a
 way that a real crossing is not." To {goal_text},
@@ -636,7 +636,7 @@ close to a mis-step."""),
 
     # 3. The slip-and-recovery template.
     SubplotTemplate("""\
-"What matters when something goes wrong," {hound_phrase} said,
+"What matters when something goes wrong," {hound}, {emo_patient} said,
 "is that the run can continue — the runtime catches the slip,
 takes the recovery path, and the answer comes back even when
 something inside the form went off the bank." To {goal_text},
@@ -646,7 +646,7 @@ value the recovery path had produced."""),
 
     # 4. The check-and-continue template.
     SubplotTemplate("""\
-"There's a discipline to crossing safely," {hound_phrase} said,
+"There's a discipline to crossing safely," {hound}, {emo_patient} said,
 "and it starts with checking — making sure the form does what it
 claims, catching what could go wrong before it does." To
 {goal_text}, {hound_he_she} composed {concept_phrase},
@@ -656,7 +656,7 @@ had earned."""),
 
     # 5. The Dog-tries-the-leap template.
     SubplotTemplate("""\
-{dog_phrase} eyed the log-bridge {place}, {emo_greedy}, certain
+{dog} eyed the log-bridge {place}, {emo_greedy}, certain
 {dog_he_she} could bound across without testing. {hound_phrase}
 shook {hound_his_her} head and tested the log carefully. To
 {goal_text} required no daring, only the test:
@@ -673,7 +673,7 @@ _SCROLL_SUBPLOTS: list[SubplotTemplate] = [
 
     # 1. The message-bone template — reading and writing.
     SubplotTemplate("""\
-{hound_phrase} unearthed a long bone {place}, scratching marks
+{hound}, {emo_patient} unearthed a long bone {place}, scratching marks
 along its length with a sharp claw. "The world outside the REPL
 is message-bones," {hound_he_she} said: "you read what they
 say, you scratch what you want to keep, and the runtime carries
@@ -685,7 +685,7 @@ committed."""),
     # 2. The reading-and-writing template — slurp / spit.
     SubplotTemplate("""\
 "Reading and scratching message-bones is just like reading and
-writing forms," {hound_phrase} said. "You ask the runtime for
+writing forms," {hound}, {emo_patient} said. "You ask the runtime for
 what's on the bone, you scratch what you want recorded, and the
 work goes both ways through one claw." To {goal_text},
 {hound_he_she} composed {concept_phrase}, submitted the
@@ -695,7 +695,7 @@ the writing had committed."""),
     # 3. The careful-handling template.
     SubplotTemplate("""\
 "The world outside the REPL is bigger than the REPL,"
-{hound_phrase} said, "and a message-bone out there has its own
+{hound}, {emo_patient} said, "and a message-bone out there has its own
 discipline — pick it up carefully, handle it with care, set it
 back when you're done." To {goal_text}, {hound_he_she}
 composed {concept_phrase}, submitted the form, and the REPL —
@@ -704,7 +704,7 @@ the work had produced."""),
 
     # 4. The Dog-tries-to-shortcut-the-bone template.
     SubplotTemplate("""\
-{dog_phrase}, {emo_greedy}, claimed the message-bone said exactly
+{dog}, {emo_greedy}, claimed the message-bone said exactly
 what {dog_he_she} expected and didn't bother to actually read.
 {hound_phrase} brought it close and read carefully. To
 {goal_text} required the bone's actual marks — {hound_he_she}
@@ -714,7 +714,7 @@ held."""),
 
     # 5. The two-banks template — inside-the-REPL and outside-the-REPL.
     SubplotTemplate("""\
-"There's the bank inside the REPL," {hound_phrase} said, "and
+"There's the bank inside the REPL," {hound}, {emo_patient} said, "and
 the bank outside it. Message-bones are how the two meet — a
 value crosses out and becomes scratches on a bone, or scratches
 on a bone cross in and become a value again." To {goal_text},
@@ -731,7 +731,7 @@ _GUILD_SUBPLOTS: list[SubplotTemplate] = [
 
     # 1. The founding-the-pack-agreement template — `defprotocol`.
     SubplotTemplate("""\
-{hound_phrase} scratched a small set of signs into a flat stone
+{hound}, {emo_patient} scratched a small set of signs into a flat stone
 {place}: signals that any dog of any breed could honor.
 "A protocol is a pack agreement," {hound_he_she} said. "It lists
 what every member must be able to signal — the methods. Any dog
@@ -741,7 +741,7 @@ and the REPL — agreement set — handed back the pack's record."""),
 
     # 2. The same-call-many-breeds template.
     SubplotTemplate("""\
-"What makes a pack agreement useful," {hound_phrase} said, "is
+"What makes a pack agreement useful," {hound}, {emo_patient} said, "is
 that the call is the same for every member, but each breed
 answers in its own way. The runtime looks up which breed the
 dog is, then runs that breed's answer." To {goal_text},
@@ -751,7 +751,7 @@ breed-specific value."""),
 
     # 3. The pack-ledger template.
     SubplotTemplate("""\
-{hound_phrase} held up the pack ledger — a slab of bark
+{hound}, {emo_patient} held up the pack ledger — a slab of bark
 scratched with breed-by-breed entries. "Membership is in this
 record," {hound_he_she} said: "the breed, the signals they
 honor, and the actual answers each breed gives. The runtime
@@ -762,7 +762,7 @@ ran — returned the right answer."""),
 
     # 4. The boundaries-of-the-pack template.
     SubplotTemplate("""\
-"Each pack has its own agreement," {hound_phrase} said.
+"Each pack has its own agreement," {hound}, {emo_patient} said.
 "Belonging to the Bone-Sniffers' pack doesn't mean belonging to
 the River-Crossers' pack — the runtime checks each separately,
 and only the right pack's answer comes back." To {goal_text},
@@ -772,7 +772,7 @@ the right value."""),
 
     # 5. The Dog-claims-membership template.
     SubplotTemplate("""\
-{dog_phrase}, {emo_greedy}, declared that {dog_he_she} could of
+{dog}, {emo_greedy}, declared that {dog_he_she} could of
 course honor whatever the pack's signal demanded — even though
 the breed had never learned the call. {hound_phrase} only smiled
 and asked for the actual response. To {goal_text},
@@ -789,7 +789,7 @@ _TOOLSHED_SUBPLOTS: list[SubplotTemplate] = [
 
     # 1. The borrowed-tool template — `.method` syntax.
     SubplotTemplate("""\
-{hound_phrase} padded over to the kennel-master's shed {place}
+{hound}, {emo_patient} padded over to the kennel-master's shed {place}
 and pulled down a tool the dogs hadn't carved themselves — a
 leash, a bowl, a collar. "These aren't ours," {hound_he_she}
 said, "but we can call their methods directly: dot-prefix on the
@@ -801,7 +801,7 @@ back what its method had returned."""),
     # 2. The labeled-toolshed template.
     SubplotTemplate("""\
 "Each tool in the kennel-master's shed has its own label,"
-{hound_phrase} said, "and the right way to call it depends on
+{hound}, {emo_patient} said, "and the right way to call it depends on
 which kind of tool it is — some held by a single dog, some
 standard-issue called by the shed's name." To {goal_text},
 {hound_he_she} composed {concept_phrase} using the right
@@ -812,7 +812,7 @@ computed."""),
     # 3. The careful-handling template.
     SubplotTemplate("""\
 "Kennel-master's tools work, but they need careful handling,"
-{hound_phrase} said. "Their labels are different, their calling
+{hound}, {emo_patient} said. "Their labels are different, their calling
 conventions are different, and the runtime has to bridge between
 the dogs' world and the human's every time." To {goal_text},
 {hound_he_she} composed {concept_phrase}, submitted the form,
@@ -821,7 +821,7 @@ the foreign tool had produced."""),
 
     # 4. The two-worlds template — dogs' world and humans' world.
     SubplotTemplate("""\
-"There's the pack's own kit," {hound_phrase} said, "and there's
+"There's the pack's own kit," {hound}, {emo_patient} said, "and there's
 the kennel-master's. The runtime moves a value across the
 boundary, calls the human-side tool, and brings the result back
 into the pack." To {goal_text}, {hound_he_she} composed
@@ -830,7 +830,7 @@ the two sheds — returned the value cleanly."""),
 
     # 5. The Dog-grabs-the-wrong-tool template.
     SubplotTemplate("""\
-{dog_phrase}, {emo_greedy}, snatched at the kennel-master's
+{dog}, {emo_greedy}, snatched at the kennel-master's
 shed without checking which tool was which. The wrong tool, of
 course, made an awful clatter. {hound_phrase} sighed and walked
 over: to {goal_text} required reading the shed's labels
@@ -848,7 +848,7 @@ _REWRITERULE_SUBPLOTS: list[SubplotTemplate] = [
 
     # 1. The rewriting-scent-mark template — `defmacro` introduction.
     SubplotTemplate("""\
-{hound_phrase} crouched at a scratch in the bark {place}, paw
+{hound}, {emo_patient} crouched at a scratch in the bark {place}, paw
 poised. "A macro," {hound_he_she} said, "is a rule that rewrites
 a scent-mark before the pack ever follows it. You set the rule
 once, and any mark that uses it gets rewritten on the way to the
@@ -860,7 +860,7 @@ mark yielded."""),
     # 2. The rule-shapes-the-form template.
     SubplotTemplate("""\
 "Here's the difference between a rule and a trail,"
-{hound_phrase} said. "A trail takes ingredients and finds a
+{hound}, {emo_patient} said. "A trail takes ingredients and finds a
 bone. A rule takes a *form* and makes a different *form* — only
 then does the runtime get to evaluate it." To {goal_text},
 {hound_he_she} composed {concept_phrase}, submitted the
@@ -870,7 +870,7 @@ produced."""),
 
     # 3. The runtime-applies-the-rule template.
     SubplotTemplate("""\
-"The order matters," {hound_phrase} said. "When a rule is
+"The order matters," {hound}, {emo_patient} said. "When a rule is
 involved, the runtime first walks through the form and applies
 the rule wherever it sees one — and only then does it evaluate
 the result." To {goal_text}, {hound_he_she} composed
@@ -879,7 +879,7 @@ first, evaluating second — returned the final value."""),
 
     # 4. The Dog-claims-no-rule-needed template.
     SubplotTemplate("""\
-{dog_phrase}, {emo_greedy}, insisted that no rule was needed —
+{dog}, {emo_greedy}, insisted that no rule was needed —
 {dog_he_she} could write the form directly. {hound_phrase}
 allowed that sometimes that's true, but the rule shines when
 many forms need the same rewriting. To {goal_text},
@@ -889,7 +889,7 @@ returned the value the form had produced."""),
 
     # 5. The Dog-tries-to-skip-the-rule template.
     SubplotTemplate("""\
-{dog_phrase}, {emo_greedy}, insisted that the rule was
+{dog}, {emo_greedy}, insisted that the rule was
 unnecessary — {dog_he_she} could scratch the rewritten mark
 directly. {hound_phrase} only smiled: a hand-rewritten mark is
 fine once, but the rule pays off when many marks need rewriting
@@ -908,7 +908,7 @@ _SCRIBE_SUBPLOTS: list[SubplotTemplate] = [
     # 1. The reading-conventions-of-the-form template.
     SubplotTemplate("""\
 "There are conventions for how the runtime *reads* a form,"
-{hound_phrase} said: "what counts as one mark, what's just blank
+{hound}, {emo_patient} said: "what counts as one mark, what's just blank
 bark between marks, what gets ignored, what gets grouped
 together. The dog who scratches and the runtime who reads both
 follow the same conventions." To {goal_text},
@@ -918,7 +918,7 @@ the value the form had specified."""),
 
     # 2. The form-is-what-the-reader-sees template.
     SubplotTemplate("""\
-"A form is what the reader sees," {hound_phrase} said, "after
+"A form is what the reader sees," {hound}, {emo_patient} said, "after
 the conventions have been applied. Some marks count, some
 don't; some shapes are expanded before the runtime even gets a
 look. The form you scratch and the form the runtime evaluates
@@ -929,7 +929,7 @@ the value of what the conventions had produced."""),
 
     # 3. The careful-writing-careful-reading template.
     SubplotTemplate("""\
-{hound_phrase} smoothed a fresh strip of bark {place} and
+{hound}, {emo_patient} smoothed a fresh strip of bark {place} and
 scratched slowly, paying attention to every mark. "The form has
 to be written so the reader can read it cleanly,"
 {hound_he_she} said. "If the marks are right, the runtime gets
@@ -940,7 +940,7 @@ the value cleanly."""),
 
     # 4. The Dog-misreads-the-form template.
     SubplotTemplate("""\
-{dog_phrase}, {emo_greedy}, glanced at the form and called out
+{dog}, {emo_greedy}, glanced at the form and called out
 what {dog_he_she} thought it would do without paying attention
 to the conventions of how it was scratched. {hound_phrase} only
 shook {hound_his_her} head — the runtime reads the form exactly.
@@ -950,7 +950,7 @@ the right value, while {dog}'s guess fell short."""),
 
     # 5. The form-as-it-is template.
     SubplotTemplate("""\
-"A form is what's actually there on the bark," {hound_phrase}
+"A form is what's actually there on the bark," {hound}, {emo_patient}
 said, "after the conventions of writing and reading have done
 their work. The runtime sees the cleaned-up form, evaluates it,
 and gives back what it computes." To {goal_text},
@@ -967,7 +967,7 @@ _CHALKMARK_SUBPLOTS: list[SubplotTemplate] = [
 
     # 1. The mark-on-the-bark template — symbols vs values.
     SubplotTemplate("""\
-{hound_phrase} pointed at a name scratched into the bark {place},
+{hound}, {emo_patient} pointed at a name scratched into the bark {place},
 then at an actual bone lying on the path. "The mark on the bark
 is the *name*; the bone is the *value*. They are not the same
 thing — and Clojure lets you talk about either one. The
@@ -980,7 +980,7 @@ returned the right answer."""),
     # 2. The label-the-list template — `quote` / `'`.
     SubplotTemplate("""\
 "To talk about the form itself rather than evaluating it,"
-{hound_phrase} said, "you mark the form with a quote-scratch in
+{hound}, {emo_patient} said, "you mark the form with a quote-scratch in
 front. Quoting tells the runtime: don't run this, just hand it
 back as the shape it is." To {goal_text}, {hound_he_she}
 composed {concept_phrase}, submitted the form, and the REPL —
@@ -989,7 +989,7 @@ respecting the scratch — returned the form unevaluated."""),
     # 3. The labeling-form-vs-evaluating-it template.
     SubplotTemplate("""\
 "There's a difference between *labeling* the form and
-*evaluating* it," {hound_phrase} said. "Quote in any of its
+*evaluating* it," {hound}, {emo_patient} said. "Quote in any of its
 shapes is the labeling — the runtime hands you back the form,
 not its value, unless you say otherwise." To {goal_text},
 {hound_he_she} composed {concept_phrase}, submitted the
@@ -998,7 +998,7 @@ returned the form-as-data, exactly as the marks had directed."""),
 
     # 4. The Dog-confuses-name-with-value template.
     SubplotTemplate("""\
-{dog_phrase}, {emo_greedy}, mistook the name on the bark for the
+{dog}, {emo_greedy}, mistook the name on the bark for the
 bone it pointed to. "It says bone, so the value must be the
 bone!" {hound_phrase} only shook {hound_his_her} head: the mark
 and the bone are never the same thing — no more than the
@@ -1016,7 +1016,7 @@ _RUNNERAHEAD_SUBPLOTS: list[SubplotTemplate] = [
 
     # 1. The scout-dog-sent-ahead template — future / agent.
     SubplotTemplate("""\
-{hound_phrase} dispatched a young scout-dog down the long bank
+{hound}, {emo_patient} dispatched a young scout-dog down the long bank
 {place}, work in jaws. "The scout goes ahead while we keep on
 with our own business," {hound_he_she} said, "and when we need
 the result we ask the scout to bring it back." To {goal_text},
@@ -1026,7 +1026,7 @@ later — returned the value when it was ready."""),
 
     # 2. The eventually-returns template.
     SubplotTemplate("""\
-"Once you've sent the scout ahead," {hound_phrase} said, "you
+"Once you've sent the scout ahead," {hound}, {emo_patient} said, "you
 keep on with your own work. The result will be there when you
 ask for it — sometimes you have to wait for the scout to be
 finished, sometimes you can keep arranging things until you
@@ -1037,7 +1037,7 @@ the value when it was ready."""),
 
     # 3. The patience-of-the-Hound template.
     SubplotTemplate("""\
-"The hard part isn't sending the scout," {hound_phrase} said.
+"The hard part isn't sending the scout," {hound}, {emo_patient} said.
 "The hard part is being patient enough to wait for the answer
 when it comes — not snatching too early, not giving up too soon.
 The runtime makes that easier than it sounds." To {goal_text},
@@ -1047,7 +1047,7 @@ the scout's answer when the scout had it ready."""),
 
     # 4. The Hound-coordinates template.
     SubplotTemplate("""\
-{hound_phrase} arranged a small relay {place}, scouts and
+{hound}, {emo_patient} arranged a small relay {place}, scouts and
 messengers each in their place along the banks. "The runtime
 keeps track of who set out when, and when each one finishes,"
 {hound_he_she} said, "so the values come back in the right
@@ -1058,7 +1058,7 @@ value at the right time."""),
 
     # 5. The Dog-doesn't-wait template — Dog grabs before scout returns.
     SubplotTemplate("""\
-{dog_phrase}, {emo_greedy}, lunged for the scout's satchel before
+{dog}, {emo_greedy}, lunged for the scout's satchel before
 the scout had even returned from the far bank. {hound_phrase}
 held {dog_him_her} back: a scout sent ahead must be allowed to
 finish. To {goal_text}, {hound_he_she} composed
@@ -1077,7 +1077,7 @@ _SORTINGTABLE_SUBPLOTS: list[SubplotTemplate] = [
     SubplotTemplate("""\
 A long flat stone sat {place}, with several piles of bones
 forming around it — fish, bird, deer, each in its own pile.
-"Defmulti is a sorting-stone," {hound_phrase} said. "You decide
+"Defmulti is a sorting-stone," {hound}, {emo_patient} said. "You decide
 what about each bone to look at — its shape, its smell — and
 the stone routes each bone to the matching pile." To
 {goal_text}, {hound_he_she} composed {concept_phrase},
@@ -1086,7 +1086,7 @@ pile — returned the value the right pile had produced."""),
 
     # 2. The branch-of-the-table template — `defmethod`.
     SubplotTemplate("""\
-"To add a pile to the sorting-stone," {hound_phrase} said, "you
+"To add a pile to the sorting-stone," {hound}, {emo_patient} said, "you
 say what kind of bone the pile handles and what behavior runs
 when a bone of that kind arrives." To {goal_text},
 {hound_he_she} composed {concept_phrase} for the right pile,
@@ -1095,7 +1095,7 @@ the bone — returned the pile-specific value."""),
 
     # 3. The runtime-reads-the-stamp template.
     SubplotTemplate("""\
-"What the stone sorts by is up to you," {hound_phrase} said.
+"What the stone sorts by is up to you," {hound}, {emo_patient} said.
 "You decide what to look at on each bone — a kind, a smell, a
 size, anything. The runtime reads it, finds the matching pile,
 and runs that one." To {goal_text}, {hound_he_she} composed
@@ -1105,7 +1105,7 @@ right pile had given."""),
 
     # 4. The flexible-routing template.
     SubplotTemplate("""\
-"The good thing about a sorting-stone," {hound_phrase} said,
+"The good thing about a sorting-stone," {hound}, {emo_patient} said,
 "is that you can keep adding new piles whenever a new kind of
 bone shows up. The original stone doesn't change; the runtime
 just learns one more route." To {goal_text},
@@ -1115,7 +1115,7 @@ returned the right value."""),
 
     # 5. The Dog-jumps-to-the-wrong-pile template.
     SubplotTemplate("""\
-{dog_phrase}, {emo_greedy}, leaped onto the sorting-stone
+{dog}, {emo_greedy}, leaped onto the sorting-stone
 without showing what kind of bone {dog_he_she} carried.
 {hound_phrase} pointed at the edge of the stone: every bone
 must show the kind the stone sorts by. To {goal_text},
@@ -1132,7 +1132,7 @@ _CARRYINGCASE_SUBPLOTS: list[SubplotTemplate] = [
 
     # 1. The labeled-compartments template — defrecord.
     SubplotTemplate("""\
-{hound_phrase} held up a small kennel-bag {place}, its inside
+{hound}, {emo_patient} held up a small kennel-bag {place}, its inside
 divided into labeled compartments — one for the bone's date,
 one for its size, one for its source. "Defrecord makes a bag
 like this," {hound_he_she} said: "named compartments holding
@@ -1144,7 +1144,7 @@ value the bag held or carried."""),
 
     # 2. The bare-bag template — deftype.
     SubplotTemplate("""\
-"A deftype is a barer bag," {hound_phrase} said. "Compartments,
+"A deftype is a barer bag," {hound}, {emo_patient} said. "Compartments,
 a stamp — no map-like behavior unless you ask for it. Faster,
 more focused, less convenient." To {goal_text},
 {hound_he_she} composed {concept_phrase}, submitted the
@@ -1153,7 +1153,7 @@ returned the value inside."""),
 
     # 3. The reaching-into-the-compartment template — field access.
     SubplotTemplate("""\
-"To reach into a labeled compartment," {hound_phrase} said,
+"To reach into a labeled compartment," {hound}, {emo_patient} said,
 "you ask for it by name. The bag knows where each compartment
 is; the runtime fetches it cleanly." To {goal_text},
 {hound_he_she} composed {concept_phrase}, submitted the
@@ -1169,7 +1169,7 @@ _TALLYWALK_SUBPLOTS: list[SubplotTemplate] = [
 
     # 1. The walking-the-bone-row template — reduce.
     SubplotTemplate("""\
-{hound_phrase} paced the row of cached bones {place}, one paw at
+{hound}, {emo_patient} paced the row of cached bones {place}, one paw at
 a time, a flat stone in {hound_his_her} jaws for the running
 tally. "Reduce is this walk," {hound_he_she} said: "at each
 bone, you fold its count into the tally; at the end, the tally
@@ -1179,7 +1179,7 @@ the row, carrying the tally — returned the final number."""),
 
     # 2. The starting-tally template — reduce with init.
     SubplotTemplate("""\
-"You don't have to start the tally at zero," {hound_phrase}
+"You don't have to start the tally at zero," {hound}, {emo_patient}
 said, holding up a stone already scratched with a number. "If
 you start with a different value, the walk begins from there —
 the combine-step folds each bone in from that starting point."
@@ -1189,7 +1189,7 @@ tally, walking the row — returned the final value."""),
 
     # 3. The simple-count template — `count`.
     SubplotTemplate("""\
-"The simplest tally-walk is just counting," {hound_phrase} said:
+"The simplest tally-walk is just counting," {hound}, {emo_patient} said:
 "step along the row, add one at every bone, no other operation.
 The runtime does this for any collection — vector, list, map,
 string." To {goal_text}, {hound_he_she} composed
@@ -1205,7 +1205,7 @@ _BEADSTRING_SUBPLOTS: list[SubplotTemplate] = [
 
     # 1. The threading-marks template — `str` concat.
     SubplotTemplate("""\
-{hound_phrase} held up a strip of bark covered in scratches
+{hound}, {emo_patient} held up a strip of bark covered in scratches
 {place}. "Strings in Clojure are like this," {hound_he_she}
 said: "a row of scratched marks, in order. Concat two strips
 together, and the marks are spliced; cut a substring out, and
@@ -1216,7 +1216,7 @@ strip."""),
 
     # 2. The counting-marks template — string length / substring.
     SubplotTemplate("""\
-"To count the marks, walk the strip," {hound_phrase} said.
+"To count the marks, walk the strip," {hound}, {emo_patient} said.
 "Want a section of marks? Cut from one position to another and
 you get a smaller strip, the original untouched." To
 {goal_text}, {hound_he_she} composed {concept_phrase},
@@ -1225,7 +1225,7 @@ returned the answer the strip had given up."""),
 
     # 3. The Dog-yanks-at-the-strip template.
     SubplotTemplate("""\
-{dog_phrase}, {emo_greedy}, yanked at the bark-strip {place}
+{dog}, {emo_greedy}, yanked at the bark-strip {place}
 without bothering to count. {hound_phrase} stopped {dog_him_her}:
 strings are precise — every mark in its place, every position
 counted. To {goal_text}, {hound_he_she} composed
@@ -1241,7 +1241,7 @@ _CIRCUIT_SUBPLOTS: list[SubplotTemplate] = [
 
     # 1. The pacing-without-growing-the-trail template — recur.
     SubplotTemplate("""\
-{hound_phrase} paced back and forth along the stream bank
+{hound}, {emo_patient} paced back and forth along the stream bank
 {place}, each pass returning to the same starting point with a
 slightly different tally in jaws. "Recur is this pacing,"
 {hound_he_she} said: "back to the top with new bindings, no
@@ -1252,7 +1252,7 @@ returned the final value."""),
 
     # 2. The base-case template — termination.
     SubplotTemplate("""\
-"Every pacing has a stopping condition," {hound_phrase} said.
+"Every pacing has a stopping condition," {hound}, {emo_patient} said.
 "Without one, the dog walks forever. With one, the dog knows
 when the passes are done and the tally is the answer." To
 {goal_text}, {hound_he_she} composed {concept_phrase},
@@ -1261,7 +1261,7 @@ returned the value the final pass produced."""),
 
     # 3. The Dog-doesn't-trust-the-pacing template.
     SubplotTemplate("""\
-{dog_phrase}, {emo_greedy}, distrusted the very idea of pacing:
+{dog}, {emo_greedy}, distrusted the very idea of pacing:
 surely you'd just walk forever? {hound_phrase} smiled patiently
 — the base case is the dog's compass. To {goal_text},
 {hound_he_she} composed {concept_phrase}, submitted the form,
@@ -1321,199 +1321,132 @@ def _story(connective_prose: str) -> SubplotTemplate:
 
 _POUCH_SUBPLOTS = _POUCH_SUBPLOTS + [
     _story(
-        "To {goal_text}, {hound_he_she}, {emo_patient}, composed {concept_phrase} "
-        "with the binding gripped safely between {hound_his_her} teeth — the grip "
-        "firm only for the stretch the form needed — and submitted the form. "
-        "The REPL pulled from the mouth as the form directed:"
+        "{hound_he_she_cap}, {emo_patient}, composed {concept_phrase} with the binding gripped safely between {hound_his_her} teeth. The REPL pulled from the mouth as the form directed:"
     ),
 ]
 
 _RECIPE_SUBPLOTS = _RECIPE_SUBPLOTS + [
     _story(
-        "To {goal_text}, {hound_he_she}, {emo_patient}, laid out {concept_phrase} "
-        "along the nose-trail — long enough to hold every step the routine "
-        "would take in turn — and submitted the form. The REPL walked the "
-        "trail end to end:"
+        "To {goal_text}, {hound_he_she}, {emo_patient}, laid out {concept_phrase} along the nose-trail and submitted the form. The REPL walked the trail end to end:"
     ),
 ]
 
 _BASKET_SUBPLOTS = _BASKET_SUBPLOTS + [
     _story(
-        "To {goal_text}, {hound_he_she}, {emo_patient}, composed {concept_phrase} "
-        "for the bone-cache — the cache's weight unchanged by the new "
-        "arrangement — and submitted the form. The REPL handed back the "
-        "arrangement:"
+        "{hound_he_she_cap}, {emo_patient}, composed {concept_phrase} for the bone-cache. The REPL handed back the arrangement:"
     ),
 ]
 
 _SIEVE_SUBPLOTS = _SIEVE_SUBPLOTS + [
     _story(
-        "To {goal_text}, {hound_he_she}, {emo_patient}, composed {concept_phrase} "
-        "as the gap's rule — the gap narrow, the rule deciding which items "
-        "passed through — ran the input through, and submitted the form. "
-        "The REPL caught what landed below:"
+        "{hound_he_she_cap}, {emo_patient}, composed {concept_phrase} as the gap's rule ran the input through,. The REPL caught what landed below:"
     ),
 ]
 
 _NOTEBOOK_SUBPLOTS = _NOTEBOOK_SUBPLOTS + [
     _story(
-        "To {goal_text}, {hound_he_she}, {emo_patient}, composed {concept_phrase} "
-        "for the tally-stone — the stone heavy enough to hold a single "
-        "honest count without sliding — and submitted the form. The REPL "
-        "applied the update at the stream's edge:"
+        "{hound_he_she_cap}, {emo_patient}, composed {concept_phrase} for the tally-stone. The REPL applied the update at the stream's edge:"
     ),
 ]
 
 _ACORN_SUBPLOTS = _ACORN_SUBPLOTS + [
     _story(
-        "To {goal_text}, {hound_he_she}, {emo_patient}, composed {concept_phrase} "
-        "with the running tally heavy in the count — each value added in turn "
-        "— and submitted the form. The REPL counted out the answer:"
+        "{hound_he_she_cap}, {emo_patient}, composed {concept_phrase} with the running tally heavy in the count. The REPL counted out the answer:"
     ),
 ]
 
 _GATE_SUBPLOTS = _GATE_SUBPLOTS + [
     _story(
-        "To {goal_text}, {hound_he_she}, {emo_patient}, composed {concept_phrase} "
-        "with the crossing-conditions arrayed in order — the first to fail "
-        "would close the chain — and submitted the form. The REPL let the "
-        "crossing-conditions decide:"
+        "{hound_he_she_cap}, {emo_patient}, composed {concept_phrase} with the crossing-conditions arrayed in order. The REPL let the crossing-conditions decide:"
     ),
 ]
 
 _FORK_SUBPLOTS = _FORK_SUBPLOTS + [
     _story(
-        "To {goal_text}, {hound_he_she}, {emo_patient}, composed {concept_phrase} "
-        "with the path forking ahead — only one arm walked, the other left "
-        "untrodden — and submitted the form. The REPL took the right arm:"
+        "{hound_he_she_cap}, {emo_patient}, composed {concept_phrase} with the path forking ahead. The REPL took the right arm:"
     ),
 ]
 
 _ROADSIGN_SUBPLOTS = _ROADSIGN_SUBPLOTS + [
     _story(
-        "To {goal_text}, {hound_he_she}, {emo_patient}, composed {concept_phrase} "
-        "with the marker's name posted firm beside the path — readable by "
-        "any traveller — and submitted the form. The REPL read the markers "
-        "and replied:"
+        "{hound_he_she_cap}, {emo_patient}, composed {concept_phrase} with the marker's name posted firm beside the path. The REPL read the markers and replied:"
     ),
 ]
 
 _SAFETYNET_SUBPLOTS = _SAFETYNET_SUBPLOTS + [
     _story(
-        "To {goal_text}, {hound_he_she}, {emo_cautious}, composed {concept_phrase} "
-        "with the practice-log laid out before the leap — every misstep "
-        "tested before the real crossing — and submitted the form. The "
-        "REPL handed back the value:"
+        "{hound_he_she_cap}, {emo_cautious}, composed {concept_phrase} with the practice-log laid out before the leap. The REPL handed back the value:"
     ),
 ]
 
 _SCROLL_SUBPLOTS = _SCROLL_SUBPLOTS + [
     _story(
-        "To {goal_text}, {hound_he_she}, {emo_patient}, composed {concept_phrase} "
-        "with the message-bone laid long enough to hold every word the "
-        "work would carry — and submitted the form. The REPL — claw to "
-        "bark — completed the message-bone work:"
+        "To {goal_text}, {hound_he_she}, {emo_patient}, composed {concept_phrase} with the message-bone laid long enough to hold every word the work would carry claw to bark — completed the message-bone work:"
     ),
 ]
 
 _GUILD_SUBPLOTS = _GUILD_SUBPLOTS + [
     _story(
-        "To {goal_text}, {hound_he_she}, {emo_patient}, composed {concept_phrase} "
-        "with the pack ledger laid open — each member ready to answer "
-        "the same call in their own way — and submitted the form. The "
-        "REPL — checking the pack ledger — dispatched cleanly:"
+        "{hound_he_she_cap}, {emo_patient}, composed {concept_phrase} with the pack ledger laid open. The REPL dispatched cleanly:"
     ),
 ]
 
 _SORTINGTABLE_SUBPLOTS = _SORTINGTABLE_SUBPLOTS + [
     _story(
-        "To {goal_text}, {hound_he_she}, {emo_patient}, composed {concept_phrase} "
-        "with the piles arranged by mark — each pile built for one kind "
-        "of bone — and submitted the form. The REPL routed through "
-        "the piles:"
+        "{hound_he_she_cap}, {emo_patient}, composed {concept_phrase} with the piles arranged by mark. The REPL routed through the piles:"
     ),
 ]
 
 _CARRYINGCASE_SUBPLOTS = _CARRYINGCASE_SUBPLOTS + [
     _story(
-        "To {goal_text}, {hound_he_she}, {emo_patient}, composed {concept_phrase} "
-        "with the kennel-bag shaped to hold each piece in its own named "
-        "pocket — and submitted the form. The REPL constructed the "
-        "kennel-bag:"
+        "{hound_he_she_cap}, {emo_patient}, composed {concept_phrase} with the kennel-bag shaped to hold each piece in its own named pocket —. The REPL constructed the kennel-bag:"
     ),
 ]
 
 _TOOLSHED_SUBPLOTS = _TOOLSHED_SUBPLOTS + [
     _story(
-        "To {goal_text}, {hound_he_she}, {emo_cautious}, composed {concept_phrase} "
-        "with the borrowed tool held the way the kennel-master had "
-        "shown — familiar shape, foreign mark — and submitted the "
-        "form. The REPL — calling into the kennel-master's shed — "
-        "returned:"
+        "{hound_he_she_cap}, {emo_cautious}, composed {concept_phrase} with the borrowed tool held the way the kennel-master had shown. The REPL returned:"
     ),
 ]
 
 _RUNNERAHEAD_SUBPLOTS = _RUNNERAHEAD_SUBPLOTS + [
     _story(
-        "To {goal_text}, {hound_he_she}, {emo_patient}, composed {concept_phrase} "
-        "with the scout already away down the long path — the answer "
-        "would catch up when it caught up — and submitted the form. "
-        "The REPL coordinated the scout's return:"
+        "{hound_he_she_cap}, {emo_patient}, composed {concept_phrase} with the scout already away down the long path. The REPL coordinated the scout's return:"
     ),
 ]
 
 _REWRITERULE_SUBPLOTS = _REWRITERULE_SUBPLOTS + [
     _story(
-        "To {goal_text}, {hound_he_she}, {emo_patient}, composed {concept_phrase} "
-        "with the rule rewriting the shorthand into its full shape before "
-        "the run — what the runtime saw was already full size — and "
-        "submitted the form. The REPL — applying the rewrite, then "
-        "evaluating the rewritten form — returned:"
+        "{hound_he_she_cap}, {emo_patient}, composed {concept_phrase} with the rule rewriting the shorthand into its full shape before the run. The REPL returned:"
     ),
 ]
 
 _SCRIBE_SUBPLOTS = _SCRIBE_SUBPLOTS + [
     _story(
-        "To {goal_text}, {hound_he_she}, {emo_cautious}, composed {concept_phrase} "
-        "with the bark cleared of stray scratches and only the form left "
-        "for the runtime to read — and submitted the form. The REPL "
-        "read by the conventions and returned:"
+        "{hound_he_she_cap}, {emo_cautious}, composed {concept_phrase} with the bark cleared of stray scratches and only the form left for the runtime to read —. The REPL read by the conventions and returned:"
     ),
 ]
 
 _CHALKMARK_SUBPLOTS = _CHALKMARK_SUBPLOTS + [
     _story(
-        "To {goal_text}, {hound_he_she}, {emo_patient}, composed {concept_phrase} "
-        "with the scratch on the bark held distinct from the bone it "
-        "named — name and thing kept apart — and submitted the form. "
-        "The REPL — distinguishing scratch from bone — returned:"
+        "{hound_he_she_cap}, {emo_patient}, composed {concept_phrase} with the scratch on the bark held distinct from the bone it named. The REPL returned:"
     ),
 ]
 
 _TALLYWALK_SUBPLOTS = _TALLYWALK_SUBPLOTS + [
     _story(
-        "To {goal_text}, {hound_he_she}, {emo_patient}, composed {concept_phrase} "
-        "with the running tally heavy in the carrying — each bone added "
-        "to the count without dropping what came before — and "
-        "submitted the form. The REPL walked the bone-row carrying the "
-        "tally:"
+        "{hound_he_she_cap}, {emo_patient}, composed {concept_phrase} with the running tally heavy in the carrying. The REPL walked the bone-row carrying the tally:"
     ),
 ]
 
 _BEADSTRING_SUBPLOTS = _BEADSTRING_SUBPLOTS + [
     _story(
-        "To {goal_text}, {hound_he_she}, {emo_patient}, composed {concept_phrase} "
-        "with the bead-cord laid straight — every knot in its proper "
-        "place along the length — and submitted the form. The REPL "
-        "spliced or counted as the form said:"
+        "{hound_he_she_cap}, {emo_patient}, composed {concept_phrase} with the bead-cord laid straight. The REPL spliced or counted as the form said:"
     ),
 ]
 
 _CIRCUIT_SUBPLOTS = _CIRCUIT_SUBPLOTS + [
     _story(
-        "To {goal_text}, {hound_he_she}, {emo_patient}, composed {concept_phrase} "
-        "with the same path walked again and again — no extra trail "
-        "laid down on each return — and submitted the form. The REPL "
-        "paced without growing the trail:"
+        "{hound_he_she_cap}, {emo_patient}, composed {concept_phrase} with the same path walked again and again. The REPL paced without growing the trail:"
     ),
 ]

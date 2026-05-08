@@ -39,7 +39,7 @@ _SHARED_SUBPLOTS: list[SubplotTemplate] = [
     # 1. The argument template — Hare boasts an answer, Tortoise insists
     #    they evaluate it carefully. The student writes the form.
     SubplotTemplate("""\
-{hare_phrase} and {tortoise_phrase} paused on the river bank where
+{hare} and {tortoise_phrase} paused on the river bank where
 someone had scratched {concept_phrase} into the wet sand. The water
 ran clear and the bridge cast a long, trembling shadow.
 {hare}, {emo_proud}, said the answer was plain — anyone could see
@@ -49,7 +49,7 @@ the REPL, would tell what the value really was."""),
 
     # 2. The wager template — bets on what the form returns.
     SubplotTemplate("""\
-By a flat stone at the stream's edge {place}, {hare_phrase} scratched
+By a flat stone at the stream's edge {place}, {hare} scratched
 a small wager: whoever guessed the result of {form_display} first
 would carry the bone home. The water ran past, indifferent.
 {tortoise_phrase}, {emo_patient}, said it was simpler to drop the
@@ -58,7 +58,7 @@ reflection costs more than reading the real bone."""),
 
     # 2b. wager variant — chalk on stone
     SubplotTemplate("""\
-{hare_phrase} chalked a wager on a flat stone {place}: whoever
+{hare} chalked a wager on a flat stone {place}: whoever
 predicted the result of {form_display} would set who crossed the
 bridge first. {tortoise_phrase}, {emo_patient}, said it would be
 simpler to type the form into the REPL than to bicker at the
@@ -66,7 +66,7 @@ water's edge over {concept_phrase}."""),
 
     # 2c. wager variant — twig in the path
     SubplotTemplate("""\
-With a twig, {hare_phrase} marked a wager into the wet sand {place}:
+With a twig, {hare} marked a wager into the wet sand {place}:
 whoever guessed the result of {form_display} first would choose
 which bone to carry. {tortoise_phrase}, {emo_patient}, said it was
 easier to ask the REPL about {concept_phrase} than to argue with
@@ -74,7 +74,7 @@ a reflection that gave nothing back."""),
 
     # 3. The teacher template — Hound is gently correcting the greedy dog.
     SubplotTemplate("""\
-{tortoise_phrase} had been showing {hare_phrase} how the REPL works,
+{tortoise} had been showing {hare_phrase} how the REPL works,
 the stream cool against their paws and the bridge's shadow long.
 "Look here," {tortoise_he_she} said, pointing to {concept_phrase}.
 "You hand the form {form_display} to the runtime — the runtime is
@@ -84,36 +84,37 @@ back what the form really is." {hare}, {emo_tired}, agreed to try."""),
     # 4. The audience template — small stream-side creatures watch.
     SubplotTemplate("""\
 A few stream-side creatures had gathered on the bank {place} to
-watch {hare_phrase} attempt to outwit {tortoise_phrase} at reading
+watch {hare} attempt to outwit {tortoise_phrase} at reading
 the REPL. The water moved on, the bridge held its shadow, and
-{tortoise} pointed to {concept_phrase} and read the form aloud:
-{form_display}. The crowd waited to see who would correctly write
-the form to submit."""),
+{tortoise}, {emo_patient}, pointed to {concept_phrase} and read the
+form aloud: {form_display}. The crowd waited to see who would
+correctly write the form to submit."""),
 
     # 5. The race-pause / bone-pause template — hare pauses; tortoise
     #    catches up by careful reading.
     SubplotTemplate("""\
-Halfway across the bridge, {hare_phrase} stopped {place} and refused
+Halfway across the bridge, {hare} stopped {place} and refused
 to take another step until someone could prove what the form
 {form_display} evaluated to. The reflection below glittered.
 {hare} called the answer impossible to know. {tortoise_phrase},
-walking up at {tortoise_his_her} usual pace, simply said: "Submit
-{concept_phrase} to the REPL. The water shows a shadow; the form
-shows the bone.\""""),
+{emo_patient}, walking up at {tortoise_his_her} usual pace, simply
+said: "Submit {concept_phrase} to the REPL. The water shows a
+shadow; the form shows the bone.\""""),
 
     # 6. The notebook template — the hound keeps a careful tally on bark.
     SubplotTemplate("""\
-{tortoise_phrase} had been keeping a small bark-scratch tally of
-every form {tortoise_he_she} had successfully evaluated — each new
-mark deepening the line and crowding out the day's wishful guesses.
-{place_idx}, the next entry was {concept_phrase}. {hare_phrase}
-peered over {tortoise_his_her} shoulder at the form {form_display}
-and asked what it would come out to.""".replace("{place_idx}", "Today {place}")),
+{tortoise}, {emo_patient}, had been keeping a small
+bark-scratch tally of every form {tortoise_he_she} had successfully
+evaluated — each new mark deepening the line and crowding out the
+day's wishful guesses. {place_idx}, the next entry was
+{concept_phrase}. {hare_phrase} peered over {tortoise_his_her}
+shoulder at the form {form_display} and asked what it would come
+out to.""".replace("{place_idx}", "Today {place}")),
 
     # 7. The boast-and-rebuke template — the greedy dog claims to know;
     #    the hound asks for the actual form.
     SubplotTemplate("""\
-"There is no need to evaluate that," {hare_phrase} said, {emo_proud},
+"There is no need to evaluate that," {hare} said, {emo_proud},
 the bone clamped tight in {hare_his_her} jaws. "Anyone can see what
 {concept_phrase} comes to." {tortoise_phrase}, who {place} had grown
 used to such claims, asked {hare_him_her} to actually write the
@@ -162,7 +163,7 @@ _GOAL_SUBPLOTS: list[SubplotTemplate] = [
     #    Fix: comma after concept_phrase to break "and" stutter when
     #    concept_phrase ends in "and"/"or"/"not".
     SubplotTemplate("""\
-{hare_phrase} and {tortoise_phrase} stopped {place} to settle a small
+{hare} and {tortoise_phrase} stopped {place} to settle a small
 puzzle. {hare} wanted to {goal_text}. {hare}, {emo_proud}, declared
 that {hare_he_she} could write the form for it without thinking.
 {tortoise}, {emo_patient}, suggested {hare_he_she} actually write
@@ -173,7 +174,7 @@ the value really was."""),
     #    Fix: drop "write a form to" verb-on-verb collision; use
     #    "produce a form whose evaluation would" (noun-clause framing).
     SubplotTemplate("""\
-By a flat stone at the stream's edge {place}, {hare_phrase} scratched
+By a flat stone at the stream's edge {place}, {hare} scratched
 a wager: whoever could produce a form whose evaluation would
 {goal_text} ahead of the other would carry the bone home.
 {tortoise_phrase}, {emo_patient}, said it was simpler to write
@@ -182,7 +183,7 @@ snapping at a reflection."""),
 
     # 3. The teacher template — Hound teaches the greedy dog goal → form.
     SubplotTemplate("""\
-{tortoise_phrase} had been showing {hare_phrase} how to translate a
+{tortoise} had been showing {hare_phrase} how to translate a
 goal into a Clojure form, the bridge's shadow long across the water.
 "If you want to {goal_text}," {tortoise_he_she} said, "you write
 {concept_phrase}; submit that to the REPL — the runtime is the
@@ -192,7 +193,7 @@ honest reading of the bone, not a guess at the reflection." {hare},
     # 4. The audience template — onlookers wait by the bank.
     SubplotTemplate("""\
 A few stream-side creatures had gathered on the bank {place} to
-watch {hare_phrase} attempt to outwit {tortoise_phrase} at writing
+watch {hare} attempt to outwit {tortoise_phrase}, {emo_patient} at writing
 the right form. The challenge: {goal_text}. {tortoise} reminded
 the bank that what mattered was writing {concept_phrase} carefully,
 then submitting it to the REPL — not snapping at a guess that
@@ -200,16 +201,16 @@ glittered on the water."""),
 
     # 5. The bridge-pause template — pause mid-bridge for a goal-write.
     SubplotTemplate("""\
-Halfway across the bridge, {hare_phrase} stopped {place} and refused
+Halfway across the bridge, {hare} stopped {place} and refused
 to take another step until someone could {goal_text} with a
 Clojure form. The reflection wavered below. {hare} called the goal
-impossible. {tortoise_phrase}, walking up at {tortoise_his_her}
+impossible. {tortoise_phrase}, {emo_patient}, walking up at {tortoise_his_her}
 usual pace, simply said: "Compose {concept_phrase}; submit it.
 Whatever comes back is the answer.\""""),
 
     # 6. The bark-tally template — Hound records goal/form pairs.
     SubplotTemplate("""\
-{tortoise_phrase} kept a small bark-scratch tally of every goal
+{tortoise}, {emo_patient} kept a small bark-scratch tally of every goal
 {tortoise_he_she} had translated into a Clojure form, the deepest
 marks scoring out the day's wishful guesses. Today {place}, the
 next entry was a goal: {goal_text}. {tortoise} stood ready to
@@ -217,7 +218,7 @@ compose {concept_phrase}, then let the REPL confirm the value."""),
 
     # 7. The boast-and-rebuke template.
     SubplotTemplate("""\
-"There is no challenge here," {hare_phrase} said, {emo_proud},
+"There is no challenge here," {hare} said, {emo_proud},
 the bone clamped tight in {hare_his_her} jaws. "Anyone could
 {goal_text} without thinking." {tortoise_phrase}, who {place} had
 grown used to such claims, asked {hare_him_her} to actually write
@@ -236,7 +237,7 @@ the surface back."""),
     # 9. The dog-stumbles template — dog's hurry betrays him; the
     #    hound's careful form returns the value first.
     SubplotTemplate("""\
-"This is nothing," {hare_phrase} scoffed, {emo_proud}, the bone
+"This is nothing," {hare} scoffed, {emo_proud}, the bone
 heavy in {hare_his_her} jaws. "I can {goal_text} in my sleep."
 {hare} dropped the bone reaching for the reflection — but a paren
 went missing in {hare_his_her} hurry, an operand fell out of
@@ -250,10 +251,10 @@ where the real bone had sunk."""),
     # 10. The race-against-the-REPL template.
     SubplotTemplate("""\
 A wager was set {place}: produce the value before the next ripple
-crossed the pond. {hare_phrase} bolted into a flurry of guesses,
+crossed the pond. {hare} bolted into a flurry of guesses,
 calling out numbers and second-guessing {hare_him_her}self about
 whether the goal was to {goal_text} or something close to it.
-{tortoise_phrase}, who had simply walked to a flat stone and
+{tortoise_phrase}, {emo_patient}, who had simply walked to a flat stone and
 begun to write {concept_phrase}, finished the form, submitted it,
 and read the value off the REPL while {hare} was still arguing
 with {hare_his_her} own reflection. The race, like every other,
@@ -261,7 +262,7 @@ went to the steady hand."""),
 
     # 11. The wrong-guess-then-form template.
     SubplotTemplate("""\
-{hare_phrase} squinted at the goal — to {goal_text} — and blurted
+{hare} squinted at the goal — to {goal_text} — and blurted
 out a confident guess, {emo_proud}, as though the loudness of a
 guess could make it true. {tortoise_phrase} did not argue.
 {tortoise_he_she_cap} simply wrote {concept_phrase} on a flat
@@ -272,7 +273,7 @@ firm."""),
 
     # 12. The patient-explanation template.
     SubplotTemplate("""\
-"You always insist on writing it out," {hare_phrase} complained,
+"You always insist on writing it out," {hare} complained,
 {emo_proud}. "I can see the answer from here." {tortoise_phrase}
 shook {tortoise_his_her} head slowly, the river running on past.
 "To {goal_text}, the eye is no help — only the form is. The
@@ -518,7 +519,7 @@ G1_09 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL read the form, distinguishing scratch from bone, '
-                'and handed back the verdict. The mark and the bone stayed '
+                'and handed back hare. The mark and the bone stayed '
                 'two distinct things, exactly as the scratch had said.'
             ),
             tags=("story",),
@@ -547,7 +548,7 @@ G1_09 = SubjectCurriculum(
                 'it might point to. The verdict settles the kind.'
             ),
             resolution=(
-                'The REPL examined the integer and returned false. It was not '
+                'The REPL examined the integer and returned 42. It was not '
                 'a symbol name, only a countable number. The distinction Patch '
                 'had drawn held exactly — scratch and stone stayed two kinds.'
             ),
@@ -576,7 +577,7 @@ G1_09 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL tested the string and returned false. It was not a '
-                'symbol, only text. Patch nodded — the verdict had settled the kind.'
+                'symbol, only text. Patch nodded — the tortoise had settled the kind.'
             ),
             tags=("story",),
         ),
@@ -605,7 +606,7 @@ G1_09 = SubjectCurriculum(
             resolution=(
                 'The REPL compared the two symbols and returned true. Both marks '
                 'were the same name. The runtime had settled it perfectly — two '
-                'equal scratches, and the verdict to prove it.'
+                'equal scratches, and the hare to prove it.'
             ),
             tags=("story",),
         ),
@@ -644,7 +645,7 @@ G1_10 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL read the marks up to the comment-sign, evaluated the form, and '
-                'handed back its value. The note stayed on the bark, untouched, waiting '
+                'handed back 2. The note stayed on the bark, untouched, waiting '
                 'for the pack.'
             ),
             tags=("story",),
@@ -673,7 +674,7 @@ G1_10 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL read the marks up to the comment-sign, evaluated the '
-                'number, and handed back its value. The note stayed on the bark, '
+                'number, and handed back 42. The note stayed on the bark, '
                 'untouched, waiting for the pack.'
             ),
             tags=("story",),
@@ -714,7 +715,7 @@ G1_11 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL read the form, ignored the extra whitespace, and handed '
-                'back the running total. The spacing had no effect — the form meant '
+                'back the 2. The spacing had no effect — the form meant '
                 'the same thing to the reader.'
             ),
             tags=("story",),
@@ -743,7 +744,7 @@ G1_11 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL traced the form across its lines, saw the addition, and '
-                'handed back the running total. The layout had changed nothing — the '
+                'handed back 2. The layout had changed nothing — the '
                 'form meant exactly the same.'
             ),
             tags=("story",),
@@ -784,7 +785,7 @@ G1_12 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL read the grouped form, applied the addition, and handed '
-                'back the running total. The parens had bundled the instruction '
+                'back the 3. The parens had bundled the instruction '
                 'exactly — nothing multiplied, only added.'
             ),
             tags=("story",),
@@ -814,7 +815,7 @@ G1_12 = SubjectCurriculum(
             resolution=(
                 'The REPL read the nested form, evaluated the inner addition, then '
                 'multiplied its result by three. The answer came back correctly — the '
-                'nesting had been honored exactly.'
+                'nesting had been honored exactly — 3.'
             ),
             tags=("story",),
         ),
@@ -855,7 +856,7 @@ G1_13 = SubjectCurriculum(
             resolution=(
                 'The REPL added the two piles and handed back the precise '
                 'count. Bell brushed the bones back into a single tidy heap '
-                '— the answer settled, no eyeballing needed.'
+                '— the 2 settled, no eyeballing needed.'
             ),
             tags=("story",),
         ),
@@ -883,7 +884,7 @@ G1_13 = SubjectCurriculum(
             resolution=(
                 'The REPL performed the subtraction and handed back the precise count. '
                 'No counting by paw was needed — the runtime had settled the difference '
-                'the patient way.'
+                'the patient way — 3.'
             ),
             tags=("story",),
         ),
@@ -912,7 +913,7 @@ G1_13 = SubjectCurriculum(
             resolution=(
                 'The REPL performed the multiplication and handed back the precise count. '
                 'The four piles had been combined exactly right — the runtime had not '
-                'fumbled the counting.'
+                'fumbled the counting — 5.'
             ),
             tags=("story",),
         ),
@@ -939,7 +940,7 @@ G1_13 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL performed the division and handed back the precise count. Each '
-                'pile had been measured exactly right — the runtime had split fairly.'
+                'pile had been measured exactly right — the runtime had split fairly — 2.'
             ),
             tags=("story",),
         ),
@@ -964,7 +965,7 @@ G1_13 = SubjectCurriculum(
                 'the precise count of the combined heap.'
             ),
             resolution=(
-                'The REPL added the two heaps and handed back the running total. The '
+                'The REPL added the two heaps and handed back 8. The '
                 'bones had been combined exactly right — the runtime\'s answer was the '
                 'one that mattered.'
             ),
@@ -993,7 +994,7 @@ G1_13 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL performed the subtraction and handed back the precise count. '
-                'The difference had been settled exactly — the runtime had not wavered.'
+                'The difference had been settled exactly — the runtime had not wavered — 7.'
             ),
             tags=("story",),
         ),
@@ -1033,7 +1034,7 @@ G1_14 = SubjectCurriculum(
             resolution=(
                 'The REPL read the nested form, multiplied two by three in the inner '
                 'form, then added one to that answer. The running total came back '
-                'exactly right — nesting honored, answer correct.'
+                'exactly right — nesting honored, answer correct — 3.'
             ),
             tags=("story",),
         ),
@@ -1063,7 +1064,7 @@ G1_14 = SubjectCurriculum(
             resolution=(
                 'The REPL read the nested form, evaluated both inner additions, then '
                 'multiplied their answers. The running total came back exactly right — '
-                'all nested forms honored, no steps skipped.'
+                'all nested forms honored, no steps skipped — 4.'
             ),
             tags=("story",),
         ),
@@ -1092,7 +1093,7 @@ G1_14 = SubjectCurriculum(
             resolution=(
                 'The REPL read the nested form, multiplied five by five in the inner '
                 'form, then subtracted that from the hundred. The precise count of '
-                'remaining bones came back exactly right — nesting honored.'
+                'remaining bones came back exactly right — nesting honored — 5.'
             ),
             tags=("story",),
         ),
@@ -1119,7 +1120,7 @@ G1_14 = SubjectCurriculum(
             resolution=(
                 'The REPL read the nested form, multiplied two by three and four by '
                 'five separately, then added their answers. The running total came back '
-                'exactly right — all nested forms honored, answer precise.'
+                'exactly right — all nested forms honored, answer precise — 5.'
             ),
             tags=("story",),
         ),
@@ -1159,7 +1160,7 @@ G1_15 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL checked the two values, the conditions ruled, and '
-                'the verdict came back. Bell trotted on, the matter settled '
+                'the 1 came back. Bell trotted on, the matter settled '
                 'by the runtime exactly as the rule said.'
             ),
             tags=("story",),
@@ -1186,7 +1187,7 @@ G1_15 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL checked the two values, saw they were not equal, and returned '
-                'false. The verdict was clear — the pebbles marked different numbers.'
+                'false. The verdict was clear — the pebbles marked different numbers — 2.'
             ),
             tags=("story",),
         ),
@@ -1236,7 +1237,7 @@ G1_15 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL checked the two keywords, saw they were identical, and returned '
-                'true. The verdict was clear — both scratches bore the same symbol.'
+                'true. The verdict was clear — both scratches bore the same symbol — hare.'
             ),
             tags=("story",),
         ),
@@ -1261,7 +1262,7 @@ G1_15 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL checked the two keywords, saw they were different, and returned '
-                'false. The verdict was clear — the two scratches named different symbols.'
+                'false. The verdict was clear — the two scratches named different symbols — tortoise.'
             ),
             tags=("story",),
         ),
@@ -1287,7 +1288,7 @@ G1_15 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL checked all four numbers, saw they were all identical, and '
-                'returned true. The verdict was clear — all four pebbles bore the same '
+                'returned 1. The verdict was clear — all four pebbles bore the same '
                 'mark.'
             ),
             tags=("story",),
@@ -1325,7 +1326,7 @@ G1_16 = SubjectCurriculum(
                 'REPL hands back.'
             ),
             resolution=(
-                'The REPL tested the number, saw it was zero, and returned true. The '
+                'The REPL tested the number, saw it was zero, and returned 0. The '
                 'verdict was clear — the count was settled exactly.'
             ),
             tags=("story",),
@@ -1350,7 +1351,7 @@ G1_16 = SubjectCurriculum(
                 'verdict — true if zero, false if not — is what the REPL hands back.'
             ),
             resolution=(
-                'The REPL tested the count, saw it was not zero, and returned false. '
+                'The REPL tested the count, saw it was not zero, and returned 5. '
                 'The verdict was clear — the bones had weight, not emptiness.'
             ),
             tags=("story",),
@@ -1376,7 +1377,7 @@ G1_16 = SubjectCurriculum(
                 'what the REPL returns.'
             ),
             resolution=(
-                'The REPL tested the number, saw it moved forward, and returned true. '
+                'The REPL tested the number, saw it moved forward, and returned 7. '
                 'The verdict was clear — the count was positive.'
             ),
             tags=("story",),
@@ -1403,7 +1404,7 @@ G1_16 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL tested the negative number, saw it moved backward, and '
-                'returned false. The verdict was clear — the count was negative.'
+                'returned -2. The verdict was clear — the count was negative.'
             ),
             tags=("story",),
         ),
@@ -1428,7 +1429,7 @@ G1_16 = SubjectCurriculum(
                 'what the REPL returns.'
             ),
             resolution=(
-                'The REPL tested the number, saw it moved backward, and returned true. '
+                'The REPL tested the number, saw it moved backward, and returned -3. '
                 'The verdict was clear — the count was negative.'
             ),
             tags=("story",),
@@ -1454,7 +1455,7 @@ G1_16 = SubjectCurriculum(
                 'what the runtime returns.'
             ),
             resolution=(
-                'The REPL tested the number, saw it moved forward, and returned false. '
+                'The REPL tested the number, saw it moved forward, and returned 4. '
                 'The verdict was clear — the count was positive.'
             ),
             tags=("story",),
@@ -1491,7 +1492,7 @@ G1_17 = SubjectCurriculum(
                 'The REPL returns exactly what the form says.'
             ),
             resolution=(
-                'The REPL read the literal and handed back the value. The number '
+                'The REPL read the literal and handed back 42. The number '
                 'had evaluated to itself — no guessing needed.'
             ),
             tags=("story",),
@@ -1518,7 +1519,7 @@ G1_17 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL read the form, performed the addition, and handed back the '
-                'running total. The computation had been settled by the runtime.'
+                'running total. The computation had been settled by the runtime — 2.'
             ),
             tags=("story",),
         ),
@@ -1560,7 +1561,7 @@ G1_18 = SubjectCurriculum(
             resolution=(
                 'The REPL — net in place — handed back the precise count. '
                 'Bell crossed safely, the arithmetic settled by the patient '
-                'method, with no daring needed.'
+                'method, with no daring needed — 2.'
             ),
             tags=("story",),
         ),
@@ -1588,7 +1589,7 @@ G1_18 = SubjectCurriculum(
             resolution=(
                 'The REPL — net in place — handed back the precise product. Rex '
                 'crossed safely, the arithmetic settled by the patient method, with '
-                'no daring needed.'
+                'no daring needed — 6.'
             ),
             tags=("story",),
         ),

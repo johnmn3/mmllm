@@ -23,7 +23,7 @@ _NS_SUBPLOTS: list[SubplotTemplate] = list(_G1_SUBPLOTS) + [
 
     # Two characters at separate workbenches, exchanging a labeled form.
     SubplotTemplate("""\
-{tortoise_phrase} kept a small workbench {place}, where every form had
+{tortoise}, {emo_patient} kept a small workbench {place}, where every form had
 its own labeled drawer. {hare_phrase} preferred to scribble each
 expression in a single notebook. To settle a question that morning,
 {tortoise} pointed to {concept_phrase} and asked {hare} to evaluate the
@@ -33,7 +33,7 @@ value."""),
     # The "two cottages" / cross-namespace beat.
     SubplotTemplate("""\
 The two of them lived in cottages on opposite sides {place} —
-{tortoise_phrase} on one side, {hare_phrase} on the other. Each kept
+{tortoise} on one side, {hare_phrase} on the other. Each kept
 their own copybook of forms. When the time came to compare notes,
 {tortoise} read aloud {concept_phrase} and asked, {emo_patient}, what
 the form {form_display} would return when the REPL reached across the
@@ -111,7 +111,7 @@ G6_01 = SubjectCurriculum(grade=6, subject_id="G6-01",
             ),
             resolution=(
                 'The REPL extracted the plain-text path from the symbol and handed '
-                'it back — a path any dog could follow upstream.'
+                'it back — a path any dog could follow upstream — clojure.string.'
             ),
             tags=("story",),
         ),
@@ -137,7 +137,7 @@ G6_01 = SubjectCurriculum(grade=6, subject_id="G6-01",
                 'proper name the pack could use.'
             ),
             resolution=(
-                'The REPL checked the mark and returned true — the stone\'s scratch '
+                'The REPL checked the mark and returned tortoise.race — the stone\'s scratch '
                 'was indeed a symbol, and the location it named was real.'
             ),
             tags=("story",),
@@ -197,7 +197,7 @@ G6_02 = SubjectCurriculum(grade=6, subject_id="G6-02",
                 'predicate asks: do these two scratches match perfectly?'
             ),
             resolution=(
-                'The REPL compared the marks and returned true — both stones carried '
+                'The REPL compared the marks and returned race.tortoise — both stones carried '
                 'the identical symbol, and the locations they named were the same.'
             ),
             tags=("story",),
@@ -233,7 +233,7 @@ G6_03 = SubjectCurriculum(grade=6, subject_id="G6-03",
             ),
             resolution=(
                 'The REPL reached into the scroll, found the routine, and applied it to the '
-                'text, handing back the result in capitalized form.'
+                'text, handing back hare in capitalized form.'
             ),
             tags=("story",),
         ),
@@ -258,7 +258,7 @@ G6_03 = SubjectCurriculum(grade=6, subject_id="G6-03",
             ),
             resolution=(
                 'The REPL applied the lowercasing function and returned the text in plain '
-                'lowercase form.'
+                'lowercase form — ZEBRA.'
             ),
             tags=("story",),
         ),
@@ -324,7 +324,7 @@ G6_05 = SubjectCurriculum(grade=6, subject_id="G6-05",
             ),
             resolution=(
                 'The REPL found the routine in the scroll and applied it, returning the '
-                'greeting in capitalized form.'
+                'greeting in capitalized form — hello.'
             ),
             tags=("story",),
         ),
@@ -349,7 +349,7 @@ G6_05 = SubjectCurriculum(grade=6, subject_id="G6-05",
             ),
             resolution=(
                 'The REPL executed the reverse function and returned the sequence in '
-                'opposite order.'
+                'opposite order — abc.'
             ),
             tags=("story",),
         ),
@@ -397,7 +397,7 @@ G6_05 = SubjectCurriculum(grade=6, subject_id="G6-05",
             ),
             resolution=(
                 'The REPL extracted the name portion and handed back item, the final part '
-                'of the qualified mark.'
+                'of the qualified mark — owner.'
             ),
             tags=("story",),
         ),
@@ -513,7 +513,7 @@ G6_07 = SubjectCurriculum(grade=6, subject_id="G6-07",
                 "the extraction returns nil. When nil is converted to a boolean, it becomes false."
             ),
             resolution=(
-                "the runtime returned false, because no flag was there at all."
+                "the runtime returned public, because no flag was there at all."
             ),
             tags=("story",),
         ),
@@ -572,7 +572,7 @@ G6_08 = SubjectCurriculum(grade=6, subject_id="G6-08",
                 'whether the scratches are the same.'
             ),
             resolution=(
-                'The REPL compared the symbols and returned true — both stones bore the exact '
+                'The REPL compared the symbols and returned a.b — both stones bore the exact '
                 'same mark, and the locations they named were truly identical.'
             ),
             tags=("story",),
@@ -606,7 +606,7 @@ G6_09 = SubjectCurriculum(grade=6, subject_id="G6-09",
             ),
             resolution=(
                 'The REPL marked the first stone, then marked the second using the first\'s '
-                'value, and returned the second marker\'s value — the running total.'
+                'value, and returned the second marker\'s value — the 1.'
             ),
             tags=("story",),
         ),
@@ -718,7 +718,7 @@ G6_11 = SubjectCurriculum(grade=6, subject_id="G6-11",
             ),
             resolution=(
                 'The REPL took the mark and cut it apart at the colon, handing back a vector of '
-                'two separate paths.'
+                'two separate paths — :.'
             ),
             tags=("story",),
         ),
@@ -743,7 +743,7 @@ G6_11 = SubjectCurriculum(grade=6, subject_id="G6-11",
             ),
             resolution=(
                 'The REPL counted the entries and returned the total — three directories on the '
-                'classpath.'
+                'classpath — resources.'
             ),
             tags=("story",),
         ),
@@ -776,7 +776,7 @@ G6_12 = SubjectCurriculum(grade=6, subject_id="G6-12",
             ),
             resolution=(
                 'The REPL counted the markers and returned the tally — three namespaces in '
-                'this small project.'
+                'this small project — race.shared.'
             ),
             tags=("story",),
         ),
@@ -801,7 +801,7 @@ G6_12 = SubjectCurriculum(grade=6, subject_id="G6-12",
             ),
             resolution=(
                 'The REPL mapped the name function over the symbols and returned a vector of '
-                'strings — the plain text paths of both namespaces.'
+                'strings — the plain text paths of both namespaces — race.hare.'
             ),
             tags=("story",),
         ),
@@ -872,7 +872,7 @@ G6_14 = SubjectCurriculum(grade=6, subject_id="G6-14",
             ),
             resolution=(
                 'The REPL read the mark, applied the predicate, and handed '
-                'back the verdict. The tool itself stayed on its peg — only '
+                'back the java.util.List. The tool itself stayed on its peg — only '
                 'its label had been examined.'
             ),
             tags=("story",),
@@ -898,7 +898,7 @@ G6_14 = SubjectCurriculum(grade=6, subject_id="G6-14",
             ),
             resolution=(
                 'The REPL traced the label and handed back the plain-text class path the '
-                'kennel-master had used.'
+                'kennel-master had used — java.util.Map.'
             ),
             tags=("story",),
         ),
@@ -936,7 +936,7 @@ G6_15 = SubjectCurriculum(grade=6, subject_id="G6-15",
             resolution=(
                 'The REPL read the marginal mark and handed back the phrase '
                 'the previous dog had set there. The bone itself stayed '
-                'untouched — the message-carrying scratch was simply read.'
+                'untouched — the message-carrying scratch was simply read — doc.'
             ),
             tags=("story",),
         ),

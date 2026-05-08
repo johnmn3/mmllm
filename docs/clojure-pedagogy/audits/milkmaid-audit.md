@@ -22,7 +22,7 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 6
 - variety @ n=50: 1.00
-- issues: {'FOREIGN_FABLE_IMAGERY': 9, 'FORM_DISPLAY_AND_FORM_NOUN': 3, 'LOW_GROUNDING': 1, 'AS_ONE_WHO_CADENCE': 1}
+- issues: {'FOREIGN_FABLE_IMAGERY': 9, 'FORM_DISPLAY_AND_FORM_NOUN': 3, 'LOW_GROUNDING': 1}
     - [FOREIGN_FABLE_IMAGERY] form=`7` — tortoise-hare-specific imagery 'moss-covered milestone' leaks into milkmaid prose
     - [FOREIGN_FABLE_IMAGERY] form=`-3` — tortoise-hare-specific imagery 'small audience of forest creatures' leaks into milkmaid prose
     - [FORM_DISPLAY_AND_FORM_NOUN] form=`-3` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
@@ -58,13 +58,13 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 6
 - variety @ n=50: 1.00
-- issues: {'LOW_GROUNDING': 4, 'AS_ONE_WHO_CADENCE': 2, 'FOREIGN_FABLE_IMAGERY': 8, 'FORM_DISPLAY_AND_FORM_NOUN': 3}
+- issues: {'LOW_GROUNDING': 4, 'FOREIGN_FABLE_IMAGERY': 8, 'FORM_DISPLAY_AND_FORM_NOUN': 4}
     - [LOW_GROUNDING] form=`true` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-    - [AS_ONE_WHO_CADENCE] form=`false` — user_msg contains 'as one who…' / 'with the X of one who Y' template-output cadence
     - [FOREIGN_FABLE_IMAGERY] form=`false` — tortoise-hare-specific imagery 'small audience of forest creatures' leaks into milkmaid prose
     - [FORM_DISPLAY_AND_FORM_NOUN] form=`false` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
     - [LOW_GROUNDING] form=`false` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [LOW_GROUNDING] form=`false` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+    - [FOREIGN_FABLE_IMAGERY] form=`(= 1 1)` — tortoise-hare-specific imagery 'leather notebook' leaks into milkmaid prose
 
 ### G1-06: nil
 
@@ -118,7 +118,7 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'LOW_GROUNDING': 3, 'THE_FORM_OVERUSE': 1, 'CAP_PRONOUN_MID_SENTENCE': 1, 'POST_COMMA_CAPITAL_PRONOUN': 1, 'STORY_RESOLUTION_NO_DRAWN': 4}
+- issues: {'LOW_GROUNDING': 3, 'THE_FORM_OVERUSE': 1, 'CAP_PRONOUN_MID_SENTENCE': 1, 'POST_COMMA_CAPITAL_PRONOUN': 1, 'STORY_RESOLUTION_NO_DRAWN': 1}
     - [LOW_GROUNDING] form=`(+ 1 2) ; sum of one and two` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [THE_FORM_OVERUSE] form=`(+ 1 2) ; sum of one and two` — `the form` appears 6 times in user_msg (template tic — vary references)
     - [LOW_GROUNDING] form=`(+ 1 2) ; sum of one and two` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
@@ -158,19 +158,19 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 6
 - variety @ n=50: 1.00
-- issues: {'STORY_RESOLUTION_NO_DRAWN': 18, 'AS_ONE_WHO_CADENCE': 2, 'NARRATIVE_NUMERAL_HARDCODE': 3, 'CAP_PRONOUN_MID_SENTENCE': 1, 'POST_COMMA_CAPITAL_PRONOUN': 1, 'ANSWER_LEAK': 1}
+- issues: {'STORY_RESOLUTION_NO_DRAWN': 18, 'NARRATIVE_NUMERAL_HARDCODE': 3, 'CAP_PRONOUN_MID_SENTENCE': 1, 'POST_COMMA_CAPITAL_PRONOUN': 1, 'ANSWER_LEAK': 1}
     - [STORY_RESOLUTION_NO_DRAWN] form=`(+ 1 2)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('7', '7'), resolution doesn't close the loop)
     - [STORY_RESOLUTION_NO_DRAWN] form=`(+ 1 2)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('8', '6'), resolution doesn't close the loop)
-    - [AS_ONE_WHO_CADENCE] form=`(+ 1 2)` — user_msg contains 'as one who…' / 'with the X of one who Y' template-output cadence
     - [STORY_RESOLUTION_NO_DRAWN] form=`(+ 1 2)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('9', '9'), resolution doesn't close the loop)
     - [STORY_RESOLUTION_NO_DRAWN] form=`(- 5 3)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('5', '8'), resolution doesn't close the loop)
     - [STORY_RESOLUTION_NO_DRAWN] form=`(- 5 3)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('8', '4'), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(- 5 3)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('9',), resolution doesn't close the loop)
 
 ### G1-14: Nested call evaluation
 
 - examples: 4
 - variety @ n=50: 1.00
-- issues: {'ANSWER_LEAK': 1, 'STORY_RESOLUTION_NO_DRAWN': 12, 'PRONOUN_BEFORE_NAME': 1, 'CLAUSE_STACK_OVERFLOW': 1, 'CAP_PRONOUN_MID_SENTENCE': 1, 'POST_COMMA_CAPITAL_PRONOUN': 1}
+- issues: {'ANSWER_LEAK': 1, 'STORY_RESOLUTION_NO_DRAWN': 12, 'PRONOUN_BEFORE_NAME': 1, 'CAP_PRONOUN_MID_SENTENCE': 1, 'POST_COMMA_CAPITAL_PRONOUN': 1}
     - [ANSWER_LEAK] form=`(+ 1 (* 2 3))` — answer 7 in narrative
     - [STORY_RESOLUTION_NO_DRAWN] form=`(+ 1 (* 2 3))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('7', '4', '8'), resolution doesn't close the loop)
     - [PRONOUN_BEFORE_NAME] form=`(+ 1 (* 2 3))` — sentence-initial 'She' appears before any named character is introduced
@@ -194,7 +194,7 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 6
 - variety @ n=50: 1.00
-- issues: {'STORY_RESOLUTION_NO_DRAWN': 14, 'PRONOUN_BEFORE_NAME': 2, 'CLAUSE_STACK_OVERFLOW': 1, 'CAP_PRONOUN_MID_SENTENCE': 2, 'POST_COMMA_CAPITAL_PRONOUN': 2, 'LOW_GROUNDING': 1, 'AS_ONE_WHO_CADENCE': 1}
+- issues: {'STORY_RESOLUTION_NO_DRAWN': 14, 'PRONOUN_BEFORE_NAME': 2, 'CAP_PRONOUN_MID_SENTENCE': 2, 'POST_COMMA_CAPITAL_PRONOUN': 2, 'LOW_GROUNDING': 1}
     - [STORY_RESOLUTION_NO_DRAWN] form=`(zero? 0)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('6',), resolution doesn't close the loop)
     - [STORY_RESOLUTION_NO_DRAWN] form=`(zero? 0)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('6',), resolution doesn't close the loop)
     - [STORY_RESOLUTION_NO_DRAWN] form=`(zero? 0)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('6',), resolution doesn't close the loop)
@@ -232,127 +232,125 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 6
 - variety @ n=50: 1.00
-- issues: {'NARRATIVE_NUMERAL_HARDCODE': 12, 'STORY_RESOLUTION_NO_DRAWN': 15, 'CLAUSE_STACK_OVERFLOW': 2, 'AS_ONE_WHO_CADENCE': 3, 'CAP_PRONOUN_MID_SENTENCE': 1, 'POST_COMMA_CAPITAL_PRONOUN': 1}
+- issues: {'NARRATIVE_NUMERAL_HARDCODE': 12, 'STORY_RESOLUTION_NO_DRAWN': 12, 'CLAUSE_STACK_OVERFLOW': 2, 'CAP_PRONOUN_MID_SENTENCE': 1, 'POST_COMMA_CAPITAL_PRONOUN': 1}
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(* 2 3 4)` — parametric example has hard-coded English numeral 'three numbers' in a story slot — the actual draws may differ from this fixed count
     - [STORY_RESOLUTION_NO_DRAWN] form=`(* 2 3 4)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('9', '7', '9'), resolution doesn't close the loop)
     - [CLAUSE_STACK_OVERFLOW] form=`(* 2 3 4)` — sentence with 5 commas reads as AI-output cadence: 'Vespasia only shook her\nhead, stepping deliberately, one foot before the next, a'
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(* 2 3 4)` — parametric example has hard-coded English numeral 'three numbers' in a story slot — the actual draws may differ from this fixed count
     - [STORY_RESOLUTION_NO_DRAWN] form=`(* 2 3 4)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('4', '3'), resolution doesn't close the loop)
-    - [AS_ONE_WHO_CADENCE] form=`(* 2 3 4)` — user_msg contains 'as one who…' / 'with the X of one who Y' template-output cadence
+    - [NARRATIVE_NUMERAL_HARDCODE] form=`(* 2 3 4)` — parametric example has hard-coded English numeral 'three numbers' in a story slot — the actual draws may differ from this fixed count
 
 ### G2-02: Comparison chains
 
 - examples: 5
 - variety @ n=50: 1.00
-- issues: {'AS_ONE_WHO_CADENCE': 2, 'NARRATIVE_NUMERAL_HARDCODE': 9, 'STORY_RESOLUTION_NO_DRAWN': 9, 'CAP_PRONOUN_MID_SENTENCE': 3, 'POST_COMMA_CAPITAL_PRONOUN': 3, 'PRONOUN_BEFORE_NAME': 2}
-    - [AS_ONE_WHO_CADENCE] form=`(< 1 2 3)` — user_msg contains 'as one who…' / 'with the X of one who Y' template-output cadence
-    - [AS_ONE_WHO_CADENCE] form=`(< 1 2 3)` — user_msg contains 'as one who…' / 'with the X of one who Y' template-output cadence
+- issues: {'NARRATIVE_NUMERAL_HARDCODE': 9, 'CAP_PRONOUN_MID_SENTENCE': 3, 'POST_COMMA_CAPITAL_PRONOUN': 3, 'STORY_RESOLUTION_NO_DRAWN': 6, 'PRONOUN_BEFORE_NAME': 2}
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(< 3 2 1)` — parametric example has hard-coded English numeral 'three piles' in a story slot — the actual draws may differ from this fixed count
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(< 3 2 1)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('4', '9', '7'), resolution doesn't close the loop)
     - [CAP_PRONOUN_MID_SENTENCE] form=`(< 3 2 1)` — ', He composed…' (capitalized pronoun mid-sentence after comma — should be lowercase)
     - [POST_COMMA_CAPITAL_PRONOUN] form=`(< 3 2 1)` — capitalized pronoun (He/She/They) immediately after a comma in a continuation clause — the story-scaffold template should use {X_he_she} (lowercase) here, not {X_he_she_cap}
+    - [NARRATIVE_NUMERAL_HARDCODE] form=`(< 3 2 1)` — parametric example has hard-coded English numeral 'three piles' in a story slot — the actual draws may differ from this fixed count
+    - [NARRATIVE_NUMERAL_HARDCODE] form=`(< 3 2 1)` — parametric example has hard-coded English numeral 'three piles' in a story slot — the actual draws may differ from this fixed count
+    - [NARRATIVE_NUMERAL_HARDCODE] form=`(<= 1 1 2)` — parametric example has hard-coded English numeral 'three piles' in a story slot — the actual draws may differ from this fixed count
 
 ### G2-03: not= and = with multiple args
 
 - examples: 5
 - variety @ n=50: 1.00
-- issues: {'AS_ONE_WHO_CADENCE': 3, 'CLAUSE_STACK_OVERFLOW': 3, 'STORY_RESOLUTION_NO_DRAWN': 10, 'CAP_PRONOUN_MID_SENTENCE': 1, 'POST_COMMA_CAPITAL_PRONOUN': 1}
-    - [AS_ONE_WHO_CADENCE] form=`(not= 1 2)` — user_msg contains 'as one who…' / 'with the X of one who Y' template-output cadence
+- issues: {'CLAUSE_STACK_OVERFLOW': 3, 'STORY_RESOLUTION_NO_DRAWN': 5, 'CAP_PRONOUN_MID_SENTENCE': 1, 'POST_COMMA_CAPITAL_PRONOUN': 1}
     - [CLAUSE_STACK_OVERFLOW] form=`(not= 1 2)` — sentence with 6 commas reads as AI-output cadence: 'Theophilus only shook his\nhead, her breath even, her step even, her thought even'
     - [STORY_RESOLUTION_NO_DRAWN] form=`(not= 1 1)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('7', '7'), resolution doesn't close the loop)
     - [STORY_RESOLUTION_NO_DRAWN] form=`(not= 1 1)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('8', '8'), resolution doesn't close the loop)
     - [STORY_RESOLUTION_NO_DRAWN] form=`(not= 1 1)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('4', '4'), resolution doesn't close the loop)
     - [STORY_RESOLUTION_NO_DRAWN] form=`(= 1 1 1)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('5', '5', '5'), resolution doesn't close the loop)
+    - [CLAUSE_STACK_OVERFLOW] form=`(= 1 1 1)` — sentence with 6 commas reads as AI-output cadence: '"To test whether 1, 1, and 1 are all equal, we must count — truly count, and the'
 
 ### G2-04: min and max
 
 - examples: 5
 - variety @ n=50: 1.00
-- issues: {'CAP_PRONOUN_MID_SENTENCE': 2, 'POST_COMMA_CAPITAL_PRONOUN': 2, 'AS_ONE_WHO_CADENCE': 2, 'NARRATIVE_NUMERAL_HARDCODE': 12, 'STORY_RESOLUTION_NO_DRAWN': 12, 'CLAUSE_STACK_OVERFLOW': 5}
+- issues: {'CAP_PRONOUN_MID_SENTENCE': 2, 'POST_COMMA_CAPITAL_PRONOUN': 2, 'NARRATIVE_NUMERAL_HARDCODE': 12, 'CLAUSE_STACK_OVERFLOW': 5}
     - [CAP_PRONOUN_MID_SENTENCE] form=`(min 1 2 3)` — ', She composed…' (capitalized pronoun mid-sentence after comma — should be lowercase)
     - [POST_COMMA_CAPITAL_PRONOUN] form=`(min 1 2 3)` — capitalized pronoun (He/She/They) immediately after a comma in a continuation clause — the story-scaffold template should use {X_he_she} (lowercase) here, not {X_he_she_cap}
-    - [AS_ONE_WHO_CADENCE] form=`(min 1 2 3)` — user_msg contains 'as one who…' / 'with the X of one who Y' template-output cadence
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(max 1 2 3)` — parametric example has hard-coded English numeral 'three piles' in a story slot — the actual draws may differ from this fixed count
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(max 1 2 3)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('6', '3'), resolution doesn't close the loop)
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(max 1 2 3)` — parametric example has hard-coded English numeral 'three piles' in a story slot — the actual draws may differ from this fixed count
+    - [NARRATIVE_NUMERAL_HARDCODE] form=`(max 1 2 3)` — parametric example has hard-coded English numeral 'three piles' in a story slot — the actual draws may differ from this fixed count
+    - [CLAUSE_STACK_OVERFLOW] form=`(max 1 2 3)` — sentence with 6 commas reads as AI-output cadence: '"To find the maximum of 1, 5, and 3, we must count — truly count, and the maximu'
 
 ### G2-05: quot, rem, mod
 
 - examples: 6
 - variety @ n=50: 1.00
-- issues: {'CAP_PRONOUN_MID_SENTENCE': 4, 'POST_COMMA_CAPITAL_PRONOUN': 4, 'PROCEDURAL_OPENER': 1, 'CLAUSE_STACK_OVERFLOW': 2, 'STORY_RESOLUTION_NO_DRAWN': 15, 'AS_ONE_WHO_CADENCE': 2, 'PRONOUN_BEFORE_NAME': 4, 'ANSWER_LEAK': 1}
+- issues: {'CAP_PRONOUN_MID_SENTENCE': 4, 'POST_COMMA_CAPITAL_PRONOUN': 4, 'PROCEDURAL_OPENER': 1, 'CLAUSE_STACK_OVERFLOW': 2, 'PRONOUN_BEFORE_NAME': 4, 'ANSWER_LEAK': 1}
     - [CAP_PRONOUN_MID_SENTENCE] form=`(quot 17 5)` — ', He composed…' (capitalized pronoun mid-sentence after comma — should be lowercase)
     - [POST_COMMA_CAPITAL_PRONOUN] form=`(quot 17 5)` — capitalized pronoun (He/She/They) immediately after a comma in a continuation clause — the story-scaffold template should use {X_he_she} (lowercase) here, not {X_he_she_cap}
     - [PROCEDURAL_OPENER] form=`(quot 17 5)` — user_msg jumps from fable-opener directly to 'To {goal}, [pronoun] composed ...' without a scene-setting sentence
     - [CLAUSE_STACK_OVERFLOW] form=`(quot 17 5)` — sentence with 6 commas reads as AI-output cadence: 'Theodoric only shook his\nhead, her breath even, her step even, her thought even,'
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(rem 17 5)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('16', '20'), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(rem 17 5)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('3', '19'), resolution doesn't close the loop)
+    - [CLAUSE_STACK_OVERFLOW] form=`(rem 17 5)` — sentence with 6 commas reads as AI-output cadence: 'Maximilian only shook his\nhead, her breath even, her step even, her thought even'
+    - [PRONOUN_BEFORE_NAME] form=`(mod 17 5)` — sentence-initial 'She' appears before any named character is introduced
 
 ### G2-06: inc and dec
 
 - examples: 5
 - variety @ n=50: 1.00
-- issues: {'AS_ONE_WHO_CADENCE': 3, 'PRONOUN_BEFORE_NAME': 1, 'CLAUSE_STACK_OVERFLOW': 2, 'STORY_RESOLUTION_NO_DRAWN': 7, 'CAP_PRONOUN_MID_SENTENCE': 1, 'POST_COMMA_CAPITAL_PRONOUN': 1, 'LOW_GROUNDING': 1}
-    - [AS_ONE_WHO_CADENCE] form=`(inc 5)` — user_msg contains 'as one who…' / 'with the X of one who Y' template-output cadence
+- issues: {'PRONOUN_BEFORE_NAME': 1, 'CLAUSE_STACK_OVERFLOW': 1, 'STORY_RESOLUTION_NO_DRAWN': 7, 'CAP_PRONOUN_MID_SENTENCE': 1, 'POST_COMMA_CAPITAL_PRONOUN': 1, 'LOW_GROUNDING': 1}
     - [PRONOUN_BEFORE_NAME] form=`(inc 5)` — sentence-initial 'She' appears before any named character is introduced
-    - [AS_ONE_WHO_CADENCE] form=`(inc 5)` — user_msg contains 'as one who…' / 'with the X of one who Y' template-output cadence
     - [CLAUSE_STACK_OVERFLOW] form=`(inc 5)` — sentence with 5 commas reads as AI-output cadence: 'Zerlina only shook her\nhead, stepping deliberately, one foot before the next, an'
     - [STORY_RESOLUTION_NO_DRAWN] form=`(dec 5)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('3',), resolution doesn't close the loop)
     - [STORY_RESOLUTION_NO_DRAWN] form=`(dec 5)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('8',), resolution doesn't close the loop)
+    - [CAP_PRONOUN_MID_SENTENCE] form=`(inc 0)` — ', He composed…' (capitalized pronoun mid-sentence after comma — should be lowercase)
+    - [POST_COMMA_CAPITAL_PRONOUN] form=`(inc 0)` — capitalized pronoun (He/She/They) immediately after a comma in a continuation clause — the story-scaffold template should use {X_he_she} (lowercase) here, not {X_he_she_cap}
 
 ### G2-07: Absolute value
 
 - examples: 4
 - variety @ n=50: 1.00
-- issues: {'STORY_RESOLUTION_NO_DRAWN': 11, 'CLAUSE_STACK_OVERFLOW': 3}
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(abs 5)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('8',), resolution doesn't close the loop)
+- issues: {'CLAUSE_STACK_OVERFLOW': 2, 'STORY_RESOLUTION_NO_DRAWN': 3}
     - [CLAUSE_STACK_OVERFLOW] form=`(abs 5)` — sentence with 5 commas reads as AI-output cadence: 'Euclid only shook his\nhead, her steps unhurried, her mind clear, and began sorti'
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(abs 5)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('6',), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(abs -5)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('-86',), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(abs -5)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('-53',), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(abs -5)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('-95',), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(abs (- 3 8))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('7',), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(abs (- 3 8))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('4', '3'), resolution doesn't close the loop)
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(abs (- 3 8))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('9',), resolution doesn't close the loop)
+    - [CLAUSE_STACK_OVERFLOW] form=`(abs (- 3 8))` — sentence with 5 commas reads as AI-output cadence: 'Sigismund only shook his\nhead, with steady, careful steps, and began sorting the'
 
 ### G2-08: Arithmetic on ratios
 
 - examples: 3
 - variety @ n=50: 1.00
-- issues: {'STORY_RESOLUTION_NO_DRAWN': 9, 'AS_ONE_WHO_CADENCE': 3, 'CAP_PRONOUN_MID_SENTENCE': 3, 'POST_COMMA_CAPITAL_PRONOUN': 3}
+- issues: {'STORY_RESOLUTION_NO_DRAWN': 9, 'CLAUSE_STACK_OVERFLOW': 1, 'CAP_PRONOUN_MID_SENTENCE': 3, 'POST_COMMA_CAPITAL_PRONOUN': 3}
     - [STORY_RESOLUTION_NO_DRAWN] form=`(+ 1/2 1/4)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('4',), resolution doesn't close the loop)
-    - [AS_ONE_WHO_CADENCE] form=`(+ 1/2 1/4)` — user_msg contains 'as one who…' / 'with the X of one who Y' template-output cadence
+    - [CLAUSE_STACK_OVERFLOW] form=`(+ 1/2 1/4)` — sentence with 5 commas reads as AI-output cadence: 'Konstantin only shook his\nhead, with steady, road-tested feet, and began sorting'
     - [STORY_RESOLUTION_NO_DRAWN] form=`(+ 1/2 1/4)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('4',), resolution doesn't close the loop)
     - [STORY_RESOLUTION_NO_DRAWN] form=`(+ 1/2 1/4)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('4',), resolution doesn't close the loop)
     - [STORY_RESOLUTION_NO_DRAWN] form=`(* 2/3 3/4)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('3', '3', '4'), resolution doesn't close the loop)
-    - [AS_ONE_WHO_CADENCE] form=`(* 2/3 3/4)` — user_msg contains 'as one who…' / 'with the X of one who Y' template-output cadence
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(* 2/3 3/4)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('3', '3', '4'), resolution doesn't close the loop)
 
 ### G2-09: Floats vs ints (the / operator)
 
 - examples: 3
 - variety @ n=50: 1.00
-- issues: {'STORY_RESOLUTION_NO_DRAWN': 9, 'PRONOUN_BEFORE_NAME': 2}
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(/ 10 2)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('13', '-15'), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(/ 10 2)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('12', '12'), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(/ 10 2)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('8', '17'), resolution doesn't close the loop)
+- issues: {'STORY_RESOLUTION_NO_DRAWN': 3, 'PRONOUN_BEFORE_NAME': 2}
     - [STORY_RESOLUTION_NO_DRAWN] form=`(/ 10 3)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('6', '6'), resolution doesn't close the loop)
     - [STORY_RESOLUTION_NO_DRAWN] form=`(/ 10 3)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('12', '4'), resolution doesn't close the loop)
     - [STORY_RESOLUTION_NO_DRAWN] form=`(/ 10 3)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('9',), resolution doesn't close the loop)
+    - [PRONOUN_BEFORE_NAME] form=`(/ 10 3)` — sentence-initial 'She' appears before any named character is introduced
+    - [PRONOUN_BEFORE_NAME] form=`(/ 1.0 2)` — sentence-initial 'She' appears before any named character is introduced
 
 ### G2-10: Powers via repeated multiplication
 
 - examples: 4
 - variety @ n=50: 1.00
-- issues: {'STORY_RESOLUTION_NO_DRAWN': 9, 'ANSWER_LEAK': 2, 'CAP_PRONOUN_MID_SENTENCE': 4, 'POST_COMMA_CAPITAL_PRONOUN': 4, 'PARAGRAPH_FRAGMENTATION': 4, 'AS_ONE_WHO_CADENCE': 1}
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(* 2 2 2)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('7', '7', '7'), resolution doesn't close the loop)
+- issues: {'ANSWER_LEAK': 2, 'CAP_PRONOUN_MID_SENTENCE': 4, 'POST_COMMA_CAPITAL_PRONOUN': 4, 'STORY_RESOLUTION_NO_DRAWN': 5, 'PARAGRAPH_FRAGMENTATION': 4}
     - [ANSWER_LEAK] form=`(* 5 5)` — answer 25 in narrative
     - [CAP_PRONOUN_MID_SENTENCE] form=`(* 5 5)` — ', He composed…' (capitalized pronoun mid-sentence after comma — should be lowercase)
     - [POST_COMMA_CAPITAL_PRONOUN] form=`(* 5 5)` — capitalized pronoun (He/She/They) immediately after a comma in a continuation clause — the story-scaffold template should use {X_he_she} (lowercase) here, not {X_he_she_cap}
     - [STORY_RESOLUTION_NO_DRAWN] form=`(* 5 5)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('6', '6'), resolution doesn't close the loop)
     - [PARAGRAPH_FRAGMENTATION] form=`(* 5 5)` — user_msg has 4 short (≤25-word) paragraphs in body — reads as a bullet list, not a story
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(* 5 5)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('4', '4'), resolution doesn't close the loop)
 
 ### G2-11: String concatenation with str
 
 - examples: 4
 - variety @ n=50: 1.00
-- issues: {'CAP_PRONOUN_MID_SENTENCE': 5, 'POST_COMMA_CAPITAL_PRONOUN': 5, 'STORY_RESOLUTION_NO_DRAWN': 12, 'PRONOUN_BEFORE_NAME': 2, 'PARAGRAPH_FRAGMENTATION': 1, 'NARRATIVE_NUMERAL_HARDCODE': 3, 'LOW_GROUNDING': 3}
+- issues: {'CAP_PRONOUN_MID_SENTENCE': 5, 'POST_COMMA_CAPITAL_PRONOUN': 5, 'STORY_RESOLUTION_NO_DRAWN': 9, 'PRONOUN_BEFORE_NAME': 2, 'PARAGRAPH_FRAGMENTATION': 1, 'NARRATIVE_NUMERAL_HARDCODE': 3, 'LOW_GROUNDING': 3}
     - [CAP_PRONOUN_MID_SENTENCE] form=`(str "ab" "cd")` — ', He composed…' (capitalized pronoun mid-sentence after comma — should be lowercase)
     - [POST_COMMA_CAPITAL_PRONOUN] form=`(str "ab" "cd")` — capitalized pronoun (He/She/They) immediately after a comma in a continuation clause — the story-scaffold template should use {X_he_she} (lowercase) here, not {X_he_she_cap}
     - [STORY_RESOLUTION_NO_DRAWN] form=`(str "ab" "cd")` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('candle', 'bridge'), resolution doesn't close the loop)
@@ -376,7 +374,7 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 6
 - variety @ n=50: 1.00
-- issues: {'LOW_GROUNDING': 12, 'POST_COMMA_CAPITAL_PRONOUN': 6, 'PRONOUN_BEFORE_NAME': 2, 'CAP_PRONOUN_MID_SENTENCE': 3, 'BOOL_LEAK_RESOLUTION': 1, 'PARAGRAPH_FRAGMENTATION': 2, 'NARRATIVE_NUMERAL_HARDCODE': 6, 'STORY_RESOLUTION_NO_DRAWN': 6}
+- issues: {'LOW_GROUNDING': 12, 'POST_COMMA_CAPITAL_PRONOUN': 6, 'PRONOUN_BEFORE_NAME': 2, 'CAP_PRONOUN_MID_SENTENCE': 3, 'BOOL_LEAK_RESOLUTION': 1, 'PARAGRAPH_FRAGMENTATION': 2, 'NARRATIVE_NUMERAL_HARDCODE': 6}
     - [LOW_GROUNDING] form=`(and true true)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [POST_COMMA_CAPITAL_PRONOUN] form=`(and true true)` — capitalized pronoun (He/She/They) immediately after a comma in a continuation clause — the story-scaffold template should use {X_he_she} (lowercase) here, not {X_he_she_cap}
     - [LOW_GROUNDING] form=`(and true true)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
@@ -388,7 +386,7 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 5
 - variety @ n=50: 0.99
-- issues: {'LOW_GROUNDING': 13, 'PRONOUN_BEFORE_NAME': 3, 'POST_COMMA_CAPITAL_PRONOUN': 4, 'CAP_PRONOUN_MID_SENTENCE': 2, 'BOOL_LEAK_RESOLUTION': 2, 'PARAGRAPH_FRAGMENTATION': 1, 'STORY_RESOLUTION_NO_DRAWN': 5}
+- issues: {'LOW_GROUNDING': 13, 'PRONOUN_BEFORE_NAME': 3, 'POST_COMMA_CAPITAL_PRONOUN': 4, 'CAP_PRONOUN_MID_SENTENCE': 2, 'BOOL_LEAK_RESOLUTION': 2, 'PARAGRAPH_FRAGMENTATION': 1, 'STORY_RESOLUTION_NO_DRAWN': 3}
     - [LOW_GROUNDING] form=`(not true)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [PRONOUN_BEFORE_NAME] form=`(not true)` — sentence-initial 'She' appears before any named character is introduced
     - [LOW_GROUNDING] form=`(not true)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
@@ -400,25 +398,25 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 4
 - variety @ n=50: 1.00
-- issues: {'STORY_RESOLUTION_NO_DRAWN': 10, 'CAP_PRONOUN_MID_SENTENCE': 4, 'POST_COMMA_CAPITAL_PRONOUN': 6, 'LOW_GROUNDING': 3, 'PRONOUN_BEFORE_NAME': 2}
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(if 0 1 0)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('9', '5', '9'), resolution doesn't close the loop)
+- issues: {'CAP_PRONOUN_MID_SENTENCE': 4, 'POST_COMMA_CAPITAL_PRONOUN': 6, 'LOW_GROUNDING': 3, 'PRONOUN_BEFORE_NAME': 2}
     - [CAP_PRONOUN_MID_SENTENCE] form=`(if 0 1 0)` — ', He composed…' (capitalized pronoun mid-sentence after comma — should be lowercase)
     - [POST_COMMA_CAPITAL_PRONOUN] form=`(if 0 1 0)` — capitalized pronoun (He/She/They) immediately after a comma in a continuation clause — the story-scaffold template should use {X_he_she} (lowercase) here, not {X_he_she_cap}
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(if 0 1 0)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('8', '4', '8'), resolution doesn't close the loop)
     - [CAP_PRONOUN_MID_SENTENCE] form=`(if 0 1 0)` — ', He composed…' (capitalized pronoun mid-sentence after comma — should be lowercase)
     - [POST_COMMA_CAPITAL_PRONOUN] form=`(if 0 1 0)` — capitalized pronoun (He/She/They) immediately after a comma in a continuation clause — the story-scaffold template should use {X_he_she} (lowercase) here, not {X_he_she_cap}
+    - [LOW_GROUNDING] form=`(if "" 1 0)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+    - [PRONOUN_BEFORE_NAME] form=`(if "" 1 0)` — sentence-initial 'She' appears before any named character is introduced
 
 ### G2-16: Truthy 0 and empty string
 
 - examples: 4
 - variety @ n=50: 1.00
-- issues: {'POST_COMMA_CAPITAL_PRONOUN': 2, 'STORY_RESOLUTION_NO_DRAWN': 6, 'PRONOUN_BEFORE_NAME': 4, 'LOW_GROUNDING': 9}
+- issues: {'POST_COMMA_CAPITAL_PRONOUN': 2, 'PRONOUN_BEFORE_NAME': 4, 'LOW_GROUNDING': 9, 'STORY_RESOLUTION_NO_DRAWN': 3}
     - [POST_COMMA_CAPITAL_PRONOUN] form=`(boolean 0)` — capitalized pronoun (He/She/They) immediately after a comma in a continuation clause — the story-scaffold template should use {X_he_she} (lowercase) here, not {X_he_she_cap}
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(boolean 0)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('6',), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(boolean 0)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('6',), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(boolean 0)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('6',), resolution doesn't close the loop)
     - [PRONOUN_BEFORE_NAME] form=`(boolean 0)` — sentence-initial 'She' appears before any named character is introduced
     - [LOW_GROUNDING] form=`(boolean "")` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(boolean "")` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('candle',), resolution doesn't close the loop)
+    - [LOW_GROUNDING] form=`(boolean "")` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(boolean "")` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('garnet',), resolution doesn't close the loop)
 
 ### G2-17: Keyword as function for map lookup
 
@@ -448,7 +446,7 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'CAP_PRONOUN_MID_SENTENCE': 2, 'POST_COMMA_CAPITAL_PRONOUN': 2, 'LOW_GROUNDING': 2, 'STORY_RESOLUTION_NO_DRAWN': 6, 'AS_ONE_WHO_CADENCE': 1, 'PRONOUN_BEFORE_NAME': 1, 'ANSWER_LEAK': 1}
+- issues: {'CAP_PRONOUN_MID_SENTENCE': 2, 'POST_COMMA_CAPITAL_PRONOUN': 2, 'LOW_GROUNDING': 2, 'STORY_RESOLUTION_NO_DRAWN': 6, 'PRONOUN_BEFORE_NAME': 1, 'ANSWER_LEAK': 1}
     - [CAP_PRONOUN_MID_SENTENCE] form=`(* 1000000 1000000)` — ', He composed…' (capitalized pronoun mid-sentence after comma — should be lowercase)
     - [POST_COMMA_CAPITAL_PRONOUN] form=`(* 1000000 1000000)` — capitalized pronoun (He/She/They) immediately after a comma in a continuation clause — the story-scaffold template should use {X_he_she} (lowercase) here, not {X_he_she_cap}
     - [LOW_GROUNDING] form=`(* 1000000 1000000)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
@@ -460,7 +458,7 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 3
 - variety @ n=50: 0.99
-- issues: {'LOW_GROUNDING': 6, 'STORY_RESOLUTION_NO_DRAWN': 9, 'CLAUSE_STACK_OVERFLOW': 1, 'LOWERCASE_CONCEPT_AFTER_PERIOD': 3, 'CAP_PRONOUN_MID_SENTENCE': 3, 'POST_COMMA_CAPITAL_PRONOUN': 3, 'PRONOUN_BEFORE_NAME': 3, 'DOUBLED_PLACE': 1}
+- issues: {'LOW_GROUNDING': 6, 'STORY_RESOLUTION_NO_DRAWN': 6, 'CLAUSE_STACK_OVERFLOW': 1, 'LOWERCASE_CONCEPT_AFTER_PERIOD': 3, 'CAP_PRONOUN_MID_SENTENCE': 3, 'POST_COMMA_CAPITAL_PRONOUN': 3, 'PRONOUN_BEFORE_NAME': 3, 'DOUBLED_PLACE': 1}
     - [LOW_GROUNDING] form=`(count [1 2 3])` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [STORY_RESOLUTION_NO_DRAWN] form=`(count [1 2 3])` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('8', '17'), resolution doesn't close the loop)
     - [CLAUSE_STACK_OVERFLOW] form=`(count [1 2 3])` — sentence with 6 commas reads as AI-output cadence: 'That is how to\ncount the elements in the vector containing 1, 2, and 3 — walk th'
@@ -472,25 +470,25 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 3
 - variety @ n=50: 1.00
-- issues: {'STORY_RESOLUTION_NO_DRAWN': 9, 'CAP_PRONOUN_MID_SENTENCE': 2, 'POST_COMMA_CAPITAL_PRONOUN': 2, 'SMALL_INT_LEAK': 1, 'PARAGRAPH_FRAGMENTATION': 1, 'PRONOUN_BEFORE_NAME': 1}
+- issues: {'STORY_RESOLUTION_NO_DRAWN': 3, 'CAP_PRONOUN_MID_SENTENCE': 2, 'POST_COMMA_CAPITAL_PRONOUN': 2, 'SMALL_INT_LEAK': 1, 'PARAGRAPH_FRAGMENTATION': 1, 'PRONOUN_BEFORE_NAME': 1}
     - [STORY_RESOLUTION_NO_DRAWN] form=`(count "tortoise")` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('thread',), resolution doesn't close the loop)
     - [CAP_PRONOUN_MID_SENTENCE] form=`(count "tortoise")` — ', He composed…' (capitalized pronoun mid-sentence after comma — should be lowercase)
     - [POST_COMMA_CAPITAL_PRONOUN] form=`(count "tortoise")` — capitalized pronoun (He/She/They) immediately after a comma in a continuation clause — the story-scaffold template should use {X_he_she} (lowercase) here, not {X_he_she_cap}
     - [STORY_RESOLUTION_NO_DRAWN] form=`(count "tortoise")` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('pewter',), resolution doesn't close the loop)
     - [STORY_RESOLUTION_NO_DRAWN] form=`(count "tortoise")` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('bridge',), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(count "hare")` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('river',), resolution doesn't close the loop)
+    - [CAP_PRONOUN_MID_SENTENCE] form=`(count "hare")` — ', She composed…' (capitalized pronoun mid-sentence after comma — should be lowercase)
 
 ### G2-22: Compose pure arithmetic (multi-step calculation)
 
 - examples: 3
 - variety @ n=50: 1.00
-- issues: {'STORY_RESOLUTION_NO_DRAWN': 7, 'CLAUSE_STACK_OVERFLOW': 1, 'ANSWER_LEAK': 2, 'CAP_PRONOUN_MID_SENTENCE': 2, 'POST_COMMA_CAPITAL_PRONOUN': 2}
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(- (* 5 4) 7)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('7', '8'), resolution doesn't close the loop)
+- issues: {'CLAUSE_STACK_OVERFLOW': 1, 'ANSWER_LEAK': 2, 'CAP_PRONOUN_MID_SENTENCE': 2, 'POST_COMMA_CAPITAL_PRONOUN': 2, 'STORY_RESOLUTION_NO_DRAWN': 2}
     - [CLAUSE_STACK_OVERFLOW] form=`(- (* 5 4) 7)` — sentence with 5 commas reads as AI-output cadence: '"To compute 7 times 8, then subtract 0, we must count — truly count, and the nes'
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(- (* 5 4) 7)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('8', '7'), resolution doesn't close the loop)
     - [ANSWER_LEAK] form=`(+ (* 3 8) (* 2 4))` — answer 32 in narrative
     - [CAP_PRONOUN_MID_SENTENCE] form=`(+ (* 3 8) (* 2 4))` — ', She composed…' (capitalized pronoun mid-sentence after comma — should be lowercase)
     - [POST_COMMA_CAPITAL_PRONOUN] form=`(+ (* 3 8) (* 2 4))` — capitalized pronoun (He/She/They) immediately after a comma in a continuation clause — the story-scaffold template should use {X_he_she} (lowercase) here, not {X_he_she_cap}
+    - [ANSWER_LEAK] form=`(+ (* 3 8) (* 2 4))` — answer 32 in narrative
+    - [CAP_PRONOUN_MID_SENTENCE] form=`(+ (* 3 8) (* 2 4))` — ', She composed…' (capitalized pronoun mid-sentence after comma — should be lowercase)
 
 ## Grade 3
 
@@ -544,7 +542,7 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'CAP_PRONOUN_MID_SENTENCE': 1, 'POST_COMMA_CAPITAL_PRONOUN': 1, 'LOW_GROUNDING': 4, 'STORY_RESOLUTION_NO_DRAWN': 6, 'PARAGRAPH_FRAGMENTATION': 1, 'CLAUSE_STACK_OVERFLOW': 1, 'AS_ONE_WHO_CADENCE': 1}
+- issues: {'CAP_PRONOUN_MID_SENTENCE': 1, 'POST_COMMA_CAPITAL_PRONOUN': 1, 'LOW_GROUNDING': 4, 'STORY_RESOLUTION_NO_DRAWN': 6, 'PARAGRAPH_FRAGMENTATION': 1, 'CLAUSE_STACK_OVERFLOW': 1}
     - [CAP_PRONOUN_MID_SENTENCE] form=`(do (def x 10) (let [x 99] x))` — ', He composed…' (capitalized pronoun mid-sentence after comma — should be lowercase)
     - [POST_COMMA_CAPITAL_PRONOUN] form=`(do (def x 10) (let [x 99] x))` — capitalized pronoun (He/She/They) immediately after a comma in a continuation clause — the story-scaffold template should use {X_he_she} (lowercase) here, not {X_he_she_cap}
     - [LOW_GROUNDING] form=`(do (def x 10) (let [x 99] x))` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
@@ -694,13 +692,13 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'STORY_RESOLUTION_NO_DRAWN': 4, 'LOW_GROUNDING': 1, 'AS_ONE_WHO_CADENCE': 1, 'PRONOUN_BEFORE_NAME': 1}
+- issues: {'STORY_RESOLUTION_NO_DRAWN': 4, 'LOW_GROUNDING': 1, 'PRONOUN_BEFORE_NAME': 1}
     - [STORY_RESOLUTION_NO_DRAWN] form=`(let [n 5] (* n n n))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('7',), resolution doesn't close the loop)
     - [LOW_GROUNDING] form=`(let [n 5] (* n n n))` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [STORY_RESOLUTION_NO_DRAWN] form=`(let [n 5] (* n n n))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('9',), resolution doesn't close the loop)
-    - [AS_ONE_WHO_CADENCE] form=`(* 5 5 5)` — user_msg contains 'as one who…' / 'with the X of one who Y' template-output cadence
     - [STORY_RESOLUTION_NO_DRAWN] form=`(* 5 5 5)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('8', '8', '8'), resolution doesn't close the loop)
     - [STORY_RESOLUTION_NO_DRAWN] form=`(* 5 5 5)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('6', '6', '6'), resolution doesn't close the loop)
+    - [PRONOUN_BEFORE_NAME] form=`(* 5 5 5)` — sentence-initial 'She' appears before any named character is introduced
 
 ## Grade 4
 
@@ -720,37 +718,37 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'CLAUSE_STACK_OVERFLOW': 2, 'LOW_GROUNDING': 3, 'STORY_RESOLUTION_NO_DRAWN': 4}
+- issues: {'CLAUSE_STACK_OVERFLOW': 2, 'LOW_GROUNDING': 3, 'STORY_RESOLUTION_NO_DRAWN': 2}
     - [CLAUSE_STACK_OVERFLOW] form=`(nth [10 20 30] 0)` — sentence with 6 commas reads as AI-output cadence: 'To get the element at index 0 of a vector containing 10, 20, and 30, produce a f'
     - [LOW_GROUNDING] form=`(nth [10 20 30] 0)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [STORY_RESOLUTION_NO_DRAWN] form=`(nth [10 20 30] 0)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('20', '4', '4'), resolution doesn't close the loop)
     - [STORY_RESOLUTION_NO_DRAWN] form=`(nth [10 20 30] 0)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('17', '19', '3'), resolution doesn't close the loop)
     - [LOW_GROUNDING] form=`(nth [10 20 30] 2)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(nth [10 20 30] 2)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('13', '14'), resolution doesn't close the loop)
+    - [LOW_GROUNDING] form=`(nth [10 20 30] 2)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
 
 ### G4-03: conj — append to vector
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'NARRATIVE_NUMERAL_HARDCODE': 3, 'LOW_GROUNDING': 4, 'STORY_RESOLUTION_NO_DRAWN': 5, 'FORM_LEAK': 1, 'CAP_PRONOUN_MID_SENTENCE': 1, 'POST_COMMA_CAPITAL_PRONOUN': 1}
+- issues: {'NARRATIVE_NUMERAL_HARDCODE': 3, 'LOW_GROUNDING': 4, 'FORM_LEAK': 1, 'CAP_PRONOUN_MID_SENTENCE': 1, 'POST_COMMA_CAPITAL_PRONOUN': 1, 'STORY_RESOLUTION_NO_DRAWN': 2}
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(conj [1 2] 3)` — parametric example has hard-coded English numeral 'three items' in a story slot — the actual draws may differ from this fixed count
     - [LOW_GROUNDING] form=`(conj [1 2] 3)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(conj [1 2] 3)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('16', '17', '6'), resolution doesn't close the loop)
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(conj [1 2] 3)` — parametric example has hard-coded English numeral 'three items' in a story slot — the actual draws may differ from this fixed count
     - [LOW_GROUNDING] form=`(conj [1 2] 3)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(conj [1 2] 3)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('4', '15'), resolution doesn't close the loop)
+    - [FORM_LEAK] form=`(conj [1 2] 3)` — form '(conj [1 2] 3)' appears in user_msg of a goal-style subject
+    - [CAP_PRONOUN_MID_SENTENCE] form=`(conj [1 2] 3)` — ', She composed…' (capitalized pronoun mid-sentence after comma — should be lowercase)
 
 ### G4-04: List literal
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'NARRATIVE_NUMERAL_HARDCODE': 3, 'STORY_RESOLUTION_NO_DRAWN': 6, 'CLAUSE_STACK_OVERFLOW': 2, 'AS_ONE_WHO_CADENCE': 1, 'CAP_PRONOUN_MID_SENTENCE': 2, 'POST_COMMA_CAPITAL_PRONOUN': 2, 'LOW_GROUNDING': 3, 'PARAGRAPH_FRAGMENTATION': 1}
+- issues: {'NARRATIVE_NUMERAL_HARDCODE': 3, 'STORY_RESOLUTION_NO_DRAWN': 6, 'CLAUSE_STACK_OVERFLOW': 2, 'CAP_PRONOUN_MID_SENTENCE': 2, 'POST_COMMA_CAPITAL_PRONOUN': 2, 'LOW_GROUNDING': 3, 'PARAGRAPH_FRAGMENTATION': 1}
     - [NARRATIVE_NUMERAL_HARDCODE] form=`'(1 2 3)` — parametric example has hard-coded English numeral 'three items' in a story slot — the actual draws may differ from this fixed count
     - [STORY_RESOLUTION_NO_DRAWN] form=`'(1 2 3)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('15', '14', '7'), resolution doesn't close the loop)
     - [CLAUSE_STACK_OVERFLOW] form=`'(1 2 3)` — sentence with 6 commas reads as AI-output cadence: 'To create a list containing 1, 2, and 3, produce a form that builds a new basket'
-    - [AS_ONE_WHO_CADENCE] form=`'(1 2 3)` — user_msg contains 'as one who…' / 'with the X of one who Y' template-output cadence
     - [CAP_PRONOUN_MID_SENTENCE] form=`'(1 2 3)` — ', She composed…' (capitalized pronoun mid-sentence after comma — should be lowercase)
     - [POST_COMMA_CAPITAL_PRONOUN] form=`'(1 2 3)` — capitalized pronoun (He/She/They) immediately after a comma in a continuation clause — the story-scaffold template should use {X_he_she} (lowercase) here, not {X_he_she_cap}
+    - [NARRATIVE_NUMERAL_HARDCODE] form=`'(1 2 3)` — parametric example has hard-coded English numeral 'three items' in a story slot — the actual draws may differ from this fixed count
 
 ### G4-05: cons — prepend to seq
 
@@ -778,7 +776,7 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'LOW_GROUNDING': 6, 'STORY_RESOLUTION_NO_DRAWN': 6, 'CAP_PRONOUN_MID_SENTENCE': 2, 'POST_COMMA_CAPITAL_PRONOUN': 2}
+- issues: {'LOW_GROUNDING': 6, 'STORY_RESOLUTION_NO_DRAWN': 3, 'CAP_PRONOUN_MID_SENTENCE': 2, 'POST_COMMA_CAPITAL_PRONOUN': 2}
     - [LOW_GROUNDING] form=`(get {:a 1 :b 2} :a)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [STORY_RESOLUTION_NO_DRAWN] form=`(get {:a 1 :b 2} :a)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('9', '5', '15'), resolution doesn't close the loop)
     - [CAP_PRONOUN_MID_SENTENCE] form=`(get {:a 1 :b 2} :a)` — ', She composed…' (capitalized pronoun mid-sentence after comma — should be lowercase)
@@ -790,13 +788,13 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'STORY_RESOLUTION_NO_DRAWN': 6, 'LOW_GROUNDING': 2, 'HIGH_LENGTH': 1, 'FORM_LEAK': 1, 'CAP_PRONOUN_MID_SENTENCE': 1, 'POST_COMMA_CAPITAL_PRONOUN': 1}
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(assoc {:a 1} :b 2)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('12', '20', '3'), resolution doesn't close the loop)
+- issues: {'LOW_GROUNDING': 2, 'HIGH_LENGTH': 1, 'FORM_LEAK': 1, 'CAP_PRONOUN_MID_SENTENCE': 1, 'POST_COMMA_CAPITAL_PRONOUN': 1}
     - [LOW_GROUNDING] form=`(assoc {:a 1} :b 2)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(assoc {:a 1} :b 2)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('18', '16', '12'), resolution doesn't close the loop)
     - [LOW_GROUNDING] form=`(assoc {:a 1} :b 2)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(assoc {:a 1} :b 2)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('19', '9', ':quince'), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(assoc {:a 1} :a 99)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('18', '19', '87'), resolution doesn't close the loop)
+    - [HIGH_LENGTH] form=`(assoc {:a 1} :a 99)` — user_msg 204 words
+    - [FORM_LEAK] form=`(assoc {:a 1} :a 99)` — form '(assoc {:a 1} :a 99)' appears in user_msg of a goal-style subject
+    - [CAP_PRONOUN_MID_SENTENCE] form=`(assoc {:a 1} :a 99)` — ', She composed…' (capitalized pronoun mid-sentence after comma — should be lowercase)
+    - [POST_COMMA_CAPITAL_PRONOUN] form=`(assoc {:a 1} :a 99)` — capitalized pronoun (He/She/They) immediately after a comma in a continuation clause — the story-scaffold template should use {X_he_she} (lowercase) here, not {X_he_she_cap}
 
 ### G4-09: dissoc — map remove key
 
@@ -836,19 +834,19 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'LOW_GROUNDING': 2, 'STORY_RESOLUTION_NO_DRAWN': 6, 'PRONOUN_BEFORE_NAME': 2, 'CLAUSE_STACK_OVERFLOW': 2, 'FORM_LEAK': 2, 'CAP_PRONOUN_MID_SENTENCE': 2, 'POST_COMMA_CAPITAL_PRONOUN': 2}
+- issues: {'LOW_GROUNDING': 2, 'PRONOUN_BEFORE_NAME': 2, 'CLAUSE_STACK_OVERFLOW': 2, 'FORM_LEAK': 2, 'CAP_PRONOUN_MID_SENTENCE': 2, 'POST_COMMA_CAPITAL_PRONOUN': 2}
     - [LOW_GROUNDING] form=`(contains? #{1 2 3} 2)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(contains? #{1 2 3} 2)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('11', '7', '15'), resolution doesn't close the loop)
     - [PRONOUN_BEFORE_NAME] form=`(contains? #{1 2 3} 2)` — sentence-initial 'She' appears before any named character is introduced
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(contains? #{1 2 3} 2)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('9', '4', '4'), resolution doesn't close the loop)
     - [CLAUSE_STACK_OVERFLOW] form=`(contains? #{1 2 3} 2)` — sentence with 6 commas reads as AI-output cadence: 'To check whether 2 is a member of a set containing 1, 2, and 3, produce a form t'
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(contains? #{1 2 3} 2)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('3', '16', '8'), resolution doesn't close the loop)
+    - [CLAUSE_STACK_OVERFLOW] form=`(contains? #{1 2 3} 2)` — sentence with 6 commas reads as AI-output cadence: 'To check whether 2 is a member of a set containing 1, 2, and 3, produce a form t'
+    - [FORM_LEAK] form=`(contains? #{1 2 3} 4)` — form '(contains? #{1 2 3} 4)' appears in user_msg of a goal-style subject
+    - [CAP_PRONOUN_MID_SENTENCE] form=`(contains? #{1 2 3} 4)` — ', He composed…' (capitalized pronoun mid-sentence after comma — should be lowercase)
 
 ### G4-13: count — universal
 
 - examples: 4
 - variety @ n=50: 1.00
-- issues: {'LOW_GROUNDING': 9, 'STORY_RESOLUTION_NO_DRAWN': 12, 'CLAUSE_STACK_OVERFLOW': 3, 'AS_ONE_WHO_CADENCE': 1}
+- issues: {'LOW_GROUNDING': 9, 'STORY_RESOLUTION_NO_DRAWN': 12, 'CLAUSE_STACK_OVERFLOW': 3}
     - [LOW_GROUNDING] form=`(count [1 2 3 4 5])` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [STORY_RESOLUTION_NO_DRAWN] form=`(count [1 2 3 4 5])` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('15', '15', '15'), resolution doesn't close the loop)
     - [STORY_RESOLUTION_NO_DRAWN] form=`(count [1 2 3 4 5])` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('13', '12', '18'), resolution doesn't close the loop)
@@ -884,13 +882,13 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'NARRATIVE_NUMERAL_HARDCODE': 3, 'STORY_RESOLUTION_NO_DRAWN': 3, 'AS_ONE_WHO_CADENCE': 1, 'LOW_GROUNDING': 4, 'PRONOUN_BEFORE_NAME': 1, 'FORM_LEAK': 1, 'CAP_PRONOUN_MID_SENTENCE': 1, 'POST_COMMA_CAPITAL_PRONOUN': 1}
+- issues: {'NARRATIVE_NUMERAL_HARDCODE': 3, 'STORY_RESOLUTION_NO_DRAWN': 3, 'LOW_GROUNDING': 4, 'PRONOUN_BEFORE_NAME': 1, 'FORM_LEAK': 1, 'CAP_PRONOUN_MID_SENTENCE': 1, 'POST_COMMA_CAPITAL_PRONOUN': 1}
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(into [] '(1 2 3))` — parametric example has hard-coded English numeral 'three elements' in a story slot — the actual draws may differ from this fixed count
     - [STORY_RESOLUTION_NO_DRAWN] form=`(into [] '(1 2 3))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('6', '12', '8'), resolution doesn't close the loop)
-    - [AS_ONE_WHO_CADENCE] form=`(into [] '(1 2 3))` — user_msg contains 'as one who…' / 'with the X of one who Y' template-output cadence
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(into [] '(1 2 3))` — parametric example has hard-coded English numeral 'three elements' in a story slot — the actual draws may differ from this fixed count
     - [LOW_GROUNDING] form=`(into [] '(1 2 3))` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [STORY_RESOLUTION_NO_DRAWN] form=`(into [] '(1 2 3))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('9', '18', '16'), resolution doesn't close the loop)
+    - [NARRATIVE_NUMERAL_HARDCODE] form=`(into [] '(1 2 3))` — parametric example has hard-coded English numeral 'three elements' in a story slot — the actual draws may differ from this fixed count
 
 ### G4-17: Immutability — assoc returns new
 
@@ -920,13 +918,13 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'CAP_PRONOUN_MID_SENTENCE': 2, 'POST_COMMA_CAPITAL_PRONOUN': 2, 'STORY_RESOLUTION_NO_DRAWN': 5, 'CLAUSE_STACK_OVERFLOW': 2, 'LOW_GROUNDING': 1, 'PRONOUN_BEFORE_NAME': 1}
+- issues: {'CAP_PRONOUN_MID_SENTENCE': 2, 'POST_COMMA_CAPITAL_PRONOUN': 2, 'CLAUSE_STACK_OVERFLOW': 2, 'LOW_GROUNDING': 1, 'PRONOUN_BEFORE_NAME': 1}
     - [CAP_PRONOUN_MID_SENTENCE] form=`(count (range 5))` — ', He composed…' (capitalized pronoun mid-sentence after comma — should be lowercase)
     - [POST_COMMA_CAPITAL_PRONOUN] form=`(count (range 5))` — capitalized pronoun (He/She/They) immediately after a comma in a continuation clause — the story-scaffold template should use {X_he_she} (lowercase) here, not {X_he_she_cap}
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(count (range 5))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('9',), resolution doesn't close the loop)
     - [CLAUSE_STACK_OVERFLOW] form=`(count (range 5))` — sentence with 5 commas reads as AI-output cadence: 'The milkmaid walked the market road, counting off each milestone: 0, 1, 2, 3, 4'
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(count (range 5))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('9',), resolution doesn't close the loop)
     - [CAP_PRONOUN_MID_SENTENCE] form=`(count (range 5))` — ', He composed…' (capitalized pronoun mid-sentence after comma — should be lowercase)
+    - [POST_COMMA_CAPITAL_PRONOUN] form=`(count (range 5))` — capitalized pronoun (He/She/They) immediately after a comma in a continuation clause — the story-scaffold template should use {X_he_she} (lowercase) here, not {X_he_she_cap}
+    - [LOW_GROUNDING] form=`(count (range 5))` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
 
 ### G4-20: Collection vs sequence
 
@@ -1005,7 +1003,7 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'LOWERCASE_CONCEPT_AFTER_PERIOD': 3, 'LOW_GROUNDING': 1, 'STORY_RESOLUTION_NO_DRAWN': 6, 'PRONOUN_BEFORE_NAME': 1}
+- issues: {'LOWERCASE_CONCEPT_AFTER_PERIOD': 3, 'LOW_GROUNDING': 1, 'STORY_RESOLUTION_NO_DRAWN': 3, 'PRONOUN_BEFORE_NAME': 1}
     - [LOWERCASE_CONCEPT_AFTER_PERIOD] form=`(case 2 1 :one 2 :two 3 :three :default)` — sentence-initial 'the X verb' (lowercase concept_phrase as subject after a period)
     - [LOW_GROUNDING] form=`(case 2 1 :one 2 :two 3 :three :default)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [STORY_RESOLUTION_NO_DRAWN] form=`(case 2 1 :one 2 :two 3 :three :default)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('8', '6', ':c'), resolution doesn't close the loop)
@@ -1143,7 +1141,7 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'NARRATIVE_NUMERAL_HARDCODE': 6, 'STORY_RESOLUTION_NO_DRAWN': 6, 'CLAUSE_STACK_OVERFLOW': 2, 'AS_ONE_WHO_CADENCE': 1, 'PARAMETRIC_LITERAL_NUMERALS': 3, 'LOW_GROUNDING': 2}
+- issues: {'NARRATIVE_NUMERAL_HARDCODE': 6, 'STORY_RESOLUTION_NO_DRAWN': 6, 'CLAUSE_STACK_OVERFLOW': 2, 'PARAMETRIC_LITERAL_NUMERALS': 3, 'LOW_GROUNDING': 2}
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(some even? [1 3 5 8 7])` — parametric example has hard-coded English numeral 'five counts' in a story slot — the actual draws may differ from this fixed count
     - [STORY_RESOLUTION_NO_DRAWN] form=`(some even? [1 3 5 8 7])` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('16', '8', '6'), resolution doesn't close the loop)
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(some even? [1 3 5 8 7])` — parametric example has hard-coded English numeral 'five counts' in a story slot — the actual draws may differ from this fixed count
@@ -1155,7 +1153,7 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'CAP_PRONOUN_MID_SENTENCE': 2, 'POST_COMMA_CAPITAL_PRONOUN': 2, 'BOOL_LEAK_RESOLUTION': 2, 'PARAMETRIC_LITERAL_NUMERALS': 6, 'NARRATIVE_NUMERAL_HARDCODE': 6, 'STORY_RESOLUTION_NO_DRAWN': 6, 'CLAUSE_STACK_OVERFLOW': 2, 'LOW_GROUNDING': 3, 'AS_ONE_WHO_CADENCE': 1}
+- issues: {'CAP_PRONOUN_MID_SENTENCE': 2, 'POST_COMMA_CAPITAL_PRONOUN': 2, 'BOOL_LEAK_RESOLUTION': 2, 'PARAMETRIC_LITERAL_NUMERALS': 6, 'NARRATIVE_NUMERAL_HARDCODE': 6, 'STORY_RESOLUTION_NO_DRAWN': 6, 'CLAUSE_STACK_OVERFLOW': 2, 'LOW_GROUNDING': 3}
     - [CAP_PRONOUN_MID_SENTENCE] form=`(every? pos? [1 2 3])` — ', He composed…' (capitalized pronoun mid-sentence after comma — should be lowercase)
     - [POST_COMMA_CAPITAL_PRONOUN] form=`(every? pos? [1 2 3])` — capitalized pronoun (He/She/They) immediately after a comma in a continuation clause — the story-scaffold template should use {X_he_she} (lowercase) here, not {X_he_she_cap}
     - [BOOL_LEAK_RESOLUTION] form=`(every? pos? [1 2 3])` — resolution leaks boolean answer 'true' — describe the verdict abstractly instead
@@ -1167,7 +1165,7 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'NARRATIVE_NUMERAL_HARDCODE': 6, 'LOW_GROUNDING': 2, 'STORY_RESOLUTION_NO_DRAWN': 6, 'CLAUSE_STACK_OVERFLOW': 5, 'AS_ONE_WHO_CADENCE': 1, 'CAP_PRONOUN_MID_SENTENCE': 1, 'POST_COMMA_CAPITAL_PRONOUN': 1, 'PRONOUN_BEFORE_NAME': 1}
+- issues: {'NARRATIVE_NUMERAL_HARDCODE': 6, 'LOW_GROUNDING': 2, 'STORY_RESOLUTION_NO_DRAWN': 6, 'CLAUSE_STACK_OVERFLOW': 5, 'CAP_PRONOUN_MID_SENTENCE': 1, 'POST_COMMA_CAPITAL_PRONOUN': 1, 'PRONOUN_BEFORE_NAME': 1}
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(take 3 [10 20 30 40 50])` — parametric example has hard-coded English numeral 'five counts' in a story slot — the actual draws may differ from this fixed count
     - [LOW_GROUNDING] form=`(take 3 [10 20 30 40 50])` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [STORY_RESOLUTION_NO_DRAWN] form=`(take 3 [10 20 30 40 50])` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('8', '17', '7'), resolution doesn't close the loop)
@@ -1179,7 +1177,7 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'PARAMETRIC_LITERAL_NUMERALS': 3, 'LOW_GROUNDING': 4, 'STORY_RESOLUTION_NO_DRAWN': 6, 'PRONOUN_BEFORE_NAME': 1, 'CLAUSE_STACK_OVERFLOW': 2, 'NARRATIVE_NUMERAL_HARDCODE': 3, 'AS_ONE_WHO_CADENCE': 1}
+- issues: {'PARAMETRIC_LITERAL_NUMERALS': 3, 'LOW_GROUNDING': 4, 'STORY_RESOLUTION_NO_DRAWN': 6, 'PRONOUN_BEFORE_NAME': 1, 'CLAUSE_STACK_OVERFLOW': 2, 'NARRATIVE_NUMERAL_HARDCODE': 3}
     - [PARAMETRIC_LITERAL_NUMERALS] form=`(distinct [1 1 2 3 3 4])` — parametric example has enumerated English numerals (one, two, three, …) hard-coded in a story slot — won't track the actual draws that {form_template} produces
     - [LOW_GROUNDING] form=`(distinct [1 1 2 3 3 4])` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [STORY_RESOLUTION_NO_DRAWN] form=`(distinct [1 1 2 3 3 4])` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('10', '14', '15'), resolution doesn't close the loop)
@@ -1406,13 +1404,13 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'STORY_RESOLUTION_NO_DRAWN': 6, 'PRONOUN_BEFORE_NAME': 3, 'LOW_GROUNDING': 3}
+- issues: {'STORY_RESOLUTION_NO_DRAWN': 3, 'PRONOUN_BEFORE_NAME': 3, 'LOW_GROUNDING': 3}
     - [STORY_RESOLUTION_NO_DRAWN] form=`(try (/ 1 0) (catch Exception e -1))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('4', '4', '-6'), resolution doesn't close the loop)
     - [PRONOUN_BEFORE_NAME] form=`(try (/ 1 0) (catch Exception e -1))` — sentence-initial 'She' appears before any named character is introduced
     - [STORY_RESOLUTION_NO_DRAWN] form=`(try (/ 1 0) (catch Exception e -1))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('-23',), resolution doesn't close the loop)
     - [STORY_RESOLUTION_NO_DRAWN] form=`(try (/ 1 0) (catch Exception e -1))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('7', '4', '-35'), resolution doesn't close the loop)
     - [LOW_GROUNDING] form=`(try 42 (catch Exception e :caught))` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(try 42 (catch Exception e :caught))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('33', ':gamma'), resolution doesn't close the loop)
+    - [PRONOUN_BEFORE_NAME] form=`(try 42 (catch Exception e :caught))` — sentence-initial 'She' appears before any named character is introduced
 
 ### G7-03: try / finally
 
@@ -1466,21 +1464,13 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'LOW_GROUNDING': 3, 'CAP_PRONOUN_MID_SENTENCE': 2, 'POST_COMMA_CAPITAL_PRONOUN': 2, 'STORY_RESOLUTION_NO_DRAWN': 3, 'DOUBLED_PLACE': 1}
+- issues: {'LOW_GROUNDING': 3, 'CAP_PRONOUN_MID_SENTENCE': 2, 'POST_COMMA_CAPITAL_PRONOUN': 2, 'DOUBLED_PLACE': 1}
     - [LOW_GROUNDING] form=`(do (assert (= 1 1)) 1)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [LOW_GROUNDING] form=`(do (assert (= 1 1)) 1)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [LOW_GROUNDING] form=`(do (assert (= 1 1)) 1)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [CAP_PRONOUN_MID_SENTENCE] form=`(try (assert (= 1 2)) (catch Throwable e 0))` — ', He composed…' (capitalized pronoun mid-sentence after comma — should be lowercase)
     - [POST_COMMA_CAPITAL_PRONOUN] form=`(try (assert (= 1 2)) (catch Throwable e 0))` — capitalized pronoun (He/She/They) immediately after a comma in a continuation clause — the story-scaffold template should use {X_he_she} (lowercase) here, not {X_he_she_cap}
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(try (assert (= 1 2)) (catch Throwable e 0))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('6', '7'), resolution doesn't close the loop)
-
-### G7-08: prn and pprint
-
-- examples: 2
-- variety @ n=50: 1.00
-- issues: {'AS_ONE_WHO_CADENCE': 2}
-    - [AS_ONE_WHO_CADENCE] form=`(with-out-str (prn :hare))` — user_msg contains 'as one who…' / 'with the X of one who Y' template-output cadence
-    - [AS_ONE_WHO_CADENCE] form=`(with-out-str (prn :hare))` — user_msg contains 'as one who…' / 'with the X of one who Y' template-output cadence
+    - [DOUBLED_PLACE] form=`(try (assert (= 1 2)) (catch Throwable e 0))` — location stutter: 'farm on the farm...'
 
 ### G7-09: tap>
 
@@ -1601,7 +1591,7 @@ tortoise
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'LOW_GROUNDING': 6, 'STORY_RESOLUTION_NO_DRAWN': 6, 'CAP_PRONOUN_MID_SENTENCE': 1, 'POST_COMMA_CAPITAL_PRONOUN': 1}
+- issues: {'LOW_GROUNDING': 6, 'STORY_RESOLUTION_NO_DRAWN': 3, 'CAP_PRONOUN_MID_SENTENCE': 1, 'POST_COMMA_CAPITAL_PRONOUN': 1}
     - [LOW_GROUNDING] form=`(:cmd {:cmd "ls" :args ["-l"]})` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [STORY_RESOLUTION_NO_DRAWN] form=`(:cmd {:cmd "ls" :args ["-l"]})` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('5', '16', '3'), resolution doesn't close the loop)
     - [LOW_GROUNDING] form=`(:cmd {:cmd "ls" :args ["-l"]})` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
@@ -1615,7 +1605,7 @@ tortoise
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'STORY_RESOLUTION_NO_DRAWN': 6, 'CAP_PRONOUN_MID_SENTENCE': 2, 'POST_COMMA_CAPITAL_PRONOUN': 2, 'LOW_GROUNDING': 3, 'PRONOUN_BEFORE_NAME': 1}
+- issues: {'STORY_RESOLUTION_NO_DRAWN': 3, 'CAP_PRONOUN_MID_SENTENCE': 2, 'POST_COMMA_CAPITAL_PRONOUN': 2, 'LOW_GROUNDING': 3, 'PRONOUN_BEFORE_NAME': 1}
     - [STORY_RESOLUTION_NO_DRAWN] form=`(defn speak [k] (cond (= k :hare) "swift" (= k :to` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':hare', ':tortoise', ':else'), resolution doesn't close the loop)
     - [STORY_RESOLUTION_NO_DRAWN] form=`(defn speak [k] (cond (= k :hare) "swift" (= k :to` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':hare', ':tortoise', ':else'), resolution doesn't close the loop)
     - [CAP_PRONOUN_MID_SENTENCE] form=`(defn speak [k] (cond (= k :hare) "swift" (= k :to` — ', She composed…' (capitalized pronoun mid-sentence after comma — should be lowercase)
@@ -1838,7 +1828,7 @@ tortoise
 - variety @ n=50: 1.00
 - issues: {'CONCEPT_PHRASE_COMMA_LIST': 6, 'CLAUSE_STACK_OVERFLOW': 6, 'LOW_GROUNDING': 2, 'CAP_PRONOUN_MID_SENTENCE': 2, 'POST_COMMA_CAPITAL_PRONOUN': 2, 'STORY_RESOLUTION_NO_DRAWN': 3}
     - [CONCEPT_PHRASE_COMMA_LIST] form=`(do (def a (atom 0)) (compare-and-set! a 0 1) @a)` — concept_phrase 'atom, CAS, deref' is a comma-list of bare tokens — rewrite as a noun phrase that flows into subplot prose
-    - [CLAUSE_STACK_OVERFLOW] form=`(do (def a (atom 0)) (compare-and-set! a 0 1) @a)` — sentence with 7 commas reads as AI-output cadence: "She said as a millwheel turns, slow and sure, the chalk's edge cool against her\n"
+    - [CLAUSE_STACK_OVERFLOW] form=`(do (def a (atom 0)) (compare-and-set! a 0 1) @a)` — sentence with 6 commas reads as AI-output cadence: "She said with the steady turn of a millwheel, the chalk's edge cool against her\n"
     - [LOW_GROUNDING] form=`(do (def a (atom 0)) (compare-and-set! a 0 1) @a)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [CONCEPT_PHRASE_COMMA_LIST] form=`(do (def a (atom 0)) (compare-and-set! a 0 1) @a)` — concept_phrase 'atom, CAS, deref' is a comma-list of bare tokens — rewrite as a noun phrase that flows into subplot prose
     - [CLAUSE_STACK_OVERFLOW] form=`(do (def a (atom 0)) (compare-and-set! a 0 1) @a)` — sentence with 5 commas reads as AI-output cadence: 'But to change it, atom, CAS, deref happens in one\nbreath: read the old number, a'
@@ -1891,7 +1881,7 @@ tortoise
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'LOW_GROUNDING': 5, 'PRONOUN_BEFORE_NAME': 1, 'CONCEPT_PHRASE_COMMA_LIST': 6, 'CLAUSE_STACK_OVERFLOW': 5, 'AS_ONE_WHO_CADENCE': 1}
+- issues: {'LOW_GROUNDING': 5, 'PRONOUN_BEFORE_NAME': 1, 'CONCEPT_PHRASE_COMMA_LIST': 6, 'CLAUSE_STACK_OVERFLOW': 5}
     - [LOW_GROUNDING] form=`(do (def a (atom 0)) (swap! a inc) @a)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [PRONOUN_BEFORE_NAME] form=`(do (def a (atom 0)) (swap! a inc) @a)` — sentence-initial 'She' appears before any named character is introduced
     - [CONCEPT_PHRASE_COMMA_LIST] form=`(do (def a (atom 0)) (swap! a inc) @a)` — concept_phrase 'atom, swap, deref' is a comma-list of bare tokens — rewrite as a noun phrase that flows into subplot prose
@@ -2097,25 +2087,25 @@ tortoise
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'STORY_RESOLUTION_NO_DRAWN': 6, 'CONCEPT_AS_VERB': 3, 'AS_ONE_WHO_CADENCE': 1, 'ANSWER_LEAK': 1, 'PRONOUN_BEFORE_NAME': 1}
+- issues: {'STORY_RESOLUTION_NO_DRAWN': 6, 'CONCEPT_AS_VERB': 3, 'ANSWER_LEAK': 1, 'PRONOUN_BEFORE_NAME': 1}
     - [STORY_RESOLUTION_NO_DRAWN] form=`(do (defn add-fn [a b] (+ a b)) (add-fn 3 4))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('6', '3'), resolution doesn't close the loop)
     - [CONCEPT_AS_VERB] form=`(do (defn add-fn [a b] (+ a b)) (add-fn 3 4))` — concept_phrase substituted into a finite-verb slot (e.g. 'must calling X', 'I applying Y')
     - [STORY_RESOLUTION_NO_DRAWN] form=`(do (defn add-fn [a b] (+ a b)) (add-fn 3 4))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('6',), resolution doesn't close the loop)
-    - [AS_ONE_WHO_CADENCE] form=`(do (defn add-fn [a b] (+ a b)) (add-fn 3 4))` — user_msg contains 'as one who…' / 'with the X of one who Y' template-output cadence
     - [ANSWER_LEAK] form=`(do (defn add-fn [a b] (+ a b)) (add-fn 3 4))` — answer 7 in narrative
     - [STORY_RESOLUTION_NO_DRAWN] form=`(do (defn add-fn [a b] (+ a b)) (add-fn 3 4))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('7', '5'), resolution doesn't close the loop)
+    - [CONCEPT_AS_VERB] form=`(do (defmacro add-mac [a b] `(+ ~a ~b)) (add-mac 3` — concept_phrase substituted into a finite-verb slot (e.g. 'must calling X', 'I applying Y')
 
 ### G10-09: Hygiene and gensym
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'LOW_GROUNDING': 5, 'PRONOUN_BEFORE_NAME': 1, 'STORY_RESOLUTION_NO_DRAWN': 3, 'AS_ONE_WHO_CADENCE': 1}
+- issues: {'LOW_GROUNDING': 5, 'PRONOUN_BEFORE_NAME': 1, 'STORY_RESOLUTION_NO_DRAWN': 3}
     - [LOW_GROUNDING] form=`(symbol? (gensym))` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [PRONOUN_BEFORE_NAME] form=`(symbol? (gensym))` — sentence-initial 'She' appears before any named character is introduced
     - [LOW_GROUNDING] form=`(symbol? (gensym))` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [LOW_GROUNDING] form=`(symbol? (gensym))` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [STORY_RESOLUTION_NO_DRAWN] form=`(let [a (gensym "x_") b (gensym "x_")] (= a b))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('x_', 'x_'), resolution doesn't close the loop)
-    - [AS_ONE_WHO_CADENCE] form=`(let [a (gensym "x_") b (gensym "x_")] (= a b))` — user_msg contains 'as one who…' / 'with the X of one who Y' template-output cadence
+    - [LOW_GROUNDING] form=`(let [a (gensym "x_") b (gensym "x_")] (= a b))` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
 
 ### G10-10: Anaphoric macros are confusing
 
@@ -2193,7 +2183,7 @@ tortoise
 
 - examples: 2
 - variety @ n=50: 0.99
-- issues: {'LOW_GROUNDING': 3, 'STORY_RESOLUTION_NO_DRAWN': 6, 'PRONOUN_BEFORE_NAME': 1, 'HIGH_LENGTH': 2}
+- issues: {'LOW_GROUNDING': 3, 'STORY_RESOLUTION_NO_DRAWN': 6, 'PRONOUN_BEFORE_NAME': 1}
     - [LOW_GROUNDING] form=`(do (defmacro with-tortoise-pace [& body] `(let [p` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [STORY_RESOLUTION_NO_DRAWN] form=`(do (defmacro with-tortoise-pace [& body] `(let [p` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('42', ':slow-and-steady'), resolution doesn't close the loop)
     - [LOW_GROUNDING] form=`(do (defmacro with-tortoise-pace [& body] `(let [p` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
@@ -2363,19 +2353,19 @@ tortoise
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'STORY_RESOLUTION_NO_DRAWN': 6, 'AS_ONE_WHO_CADENCE': 2, 'CAP_PRONOUN_MID_SENTENCE': 1, 'POST_COMMA_CAPITAL_PRONOUN': 1, 'CLAUSE_STACK_OVERFLOW': 3}
+- issues: {'STORY_RESOLUTION_NO_DRAWN': 6, 'CAP_PRONOUN_MID_SENTENCE': 1, 'POST_COMMA_CAPITAL_PRONOUN': 1, 'CLAUSE_STACK_OVERFLOW': 3}
     - [STORY_RESOLUTION_NO_DRAWN] form=`(into [] (map inc) [1 2 3])` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('3',), resolution doesn't close the loop)
     - [STORY_RESOLUTION_NO_DRAWN] form=`(into [] (map inc) [1 2 3])` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('3',), resolution doesn't close the loop)
-    - [AS_ONE_WHO_CADENCE] form=`(into [] (map inc) [1 2 3])` — user_msg contains 'as one who…' / 'with the X of one who Y' template-output cadence
     - [CAP_PRONOUN_MID_SENTENCE] form=`(into [] (map inc) [1 2 3])` — ', She composed…' (capitalized pronoun mid-sentence after comma — should be lowercase)
     - [POST_COMMA_CAPITAL_PRONOUN] form=`(into [] (map inc) [1 2 3])` — capitalized pronoun (He/She/They) immediately after a comma in a continuation clause — the story-scaffold template should use {X_he_she} (lowercase) here, not {X_he_she_cap}
     - [STORY_RESOLUTION_NO_DRAWN] form=`(into [] (map inc) [1 2 3])` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('3',), resolution doesn't close the loop)
+    - [CLAUSE_STACK_OVERFLOW] form=`(into [] (map inc) [1 2 3])` — sentence with 5 commas reads as AI-output cadence: 'To use the map-inc transducer with into to increment the vector containing 1, 2,'
 
 ### G12-02: Transducer composition
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'STORY_RESOLUTION_NO_DRAWN': 6, 'PRONOUN_BEFORE_NAME': 1, 'CLAUSE_STACK_OVERFLOW': 6, 'HIGH_LENGTH': 1, 'CAP_PRONOUN_MID_SENTENCE': 1, 'POST_COMMA_CAPITAL_PRONOUN': 1, 'AS_ONE_WHO_CADENCE': 1}
+- issues: {'STORY_RESOLUTION_NO_DRAWN': 6, 'PRONOUN_BEFORE_NAME': 1, 'CLAUSE_STACK_OVERFLOW': 6, 'HIGH_LENGTH': 1, 'CAP_PRONOUN_MID_SENTENCE': 1, 'POST_COMMA_CAPITAL_PRONOUN': 1}
     - [STORY_RESOLUTION_NO_DRAWN] form=`(into [] (comp (map inc) (filter even?)) [1 2 3 4]` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('3', '4'), resolution doesn't close the loop)
     - [PRONOUN_BEFORE_NAME] form=`(into [] (comp (map inc) (filter even?)) [1 2 3 4]` — sentence-initial 'She' appears before any named character is introduced
     - [CLAUSE_STACK_OVERFLOW] form=`(into [] (comp (map inc) (filter even?)) [1 2 3 4]` — sentence with 5 commas reads as AI-output cadence: '"To\ncompose map-inc and filter-even into a transducer pipeline, then apply it wi'
@@ -2387,13 +2377,13 @@ tortoise
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'STORY_RESOLUTION_NO_DRAWN': 6, 'AS_ONE_WHO_CADENCE': 2}
+- issues: {'STORY_RESOLUTION_NO_DRAWN': 6}
     - [STORY_RESOLUTION_NO_DRAWN] form=`(into #{} (map inc) [1 2 3])` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('3',), resolution doesn't close the loop)
     - [STORY_RESOLUTION_NO_DRAWN] form=`(into #{} (map inc) [1 2 3])` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('3',), resolution doesn't close the loop)
     - [STORY_RESOLUTION_NO_DRAWN] form=`(into #{} (map inc) [1 2 3])` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('3',), resolution doesn't close the loop)
     - [STORY_RESOLUTION_NO_DRAWN] form=`(into [] (take 3) (range 100))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('3', '100'), resolution doesn't close the loop)
     - [STORY_RESOLUTION_NO_DRAWN] form=`(into [] (take 3) (range 100))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('3', '100'), resolution doesn't close the loop)
-    - [AS_ONE_WHO_CADENCE] form=`(into [] (take 3) (range 100))` — user_msg contains 'as one who…' / 'with the X of one who Y' template-output cadence
+    - [STORY_RESOLUTION_NO_DRAWN] form=`(into [] (take 3) (range 100))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('3', '100'), resolution doesn't close the loop)
 
 ### G12-04: core.async introduction
 
@@ -2439,13 +2429,12 @@ tortoise
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'HEDGING_NEAR_FORM': 3, 'FOREIGN_FABLE_IMAGERY': 1, 'LOW_GROUNDING': 1, 'AS_ONE_WHO_CADENCE': 1}
+- issues: {'HEDGING_NEAR_FORM': 3, 'FOREIGN_FABLE_IMAGERY': 1, 'LOW_GROUNDING': 1}
     - [HEDGING_NEAR_FORM] form=`(= (+ 1 2) 3)` — hedge 'or something close to it' in user_msg — eval-deterministic narratives shouldn't hedge about the form's value
     - [FOREIGN_FABLE_IMAGERY] form=`(= (+ 1 2) 3)` — tortoise-hare-specific imagery 'leather notebook' leaks into milkmaid prose
     - [HEDGING_NEAR_FORM] form=`(= (+ 1 2) 3)` — hedge 'or something close to it' in user_msg — eval-deterministic narratives shouldn't hedge about the form's value
     - [LOW_GROUNDING] form=`(do "(deftest …), (is …), (testing …) are the core` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [HEDGING_NEAR_FORM] form=`(do "(deftest …), (is …), (testing …) are the core` — hedge 'or something close to it' in user_msg — eval-deterministic narratives shouldn't hedge about the form's value
-    - [AS_ONE_WHO_CADENCE] form=`(do "(deftest …), (is …), (testing …) are the core` — user_msg contains 'as one who…' / 'with the X of one who Y' template-output cadence
 
 ### G12-09: Test fixtures
 
@@ -2518,10 +2507,9 @@ tortoise
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'FOREIGN_FABLE_IMAGERY': 3, 'LOW_GROUNDING': 2, 'AS_ONE_WHO_CADENCE': 1}
+- issues: {'FOREIGN_FABLE_IMAGERY': 3, 'LOW_GROUNDING': 2}
     - [FOREIGN_FABLE_IMAGERY] form=`(do "Datomic and XTDB are immutable, time-aware da` — tortoise-hare-specific imagery 'small audience of forest creatures' leaks into milkmaid prose
     - [LOW_GROUNDING] form=`(do "Datomic and XTDB are immutable, time-aware da` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-    - [AS_ONE_WHO_CADENCE] form=`(do "Datomic and XTDB are immutable, time-aware da` — user_msg contains 'as one who…' / 'with the X of one who Y' template-output cadence
     - [FOREIGN_FABLE_IMAGERY] form=`(do "queries are written in datalog over EDN-shape` — tortoise-hare-specific imagery 'wooden sign nailed to a tree' leaks into milkmaid prose
     - [FOREIGN_FABLE_IMAGERY] form=`(do "queries are written in datalog over EDN-shape` — tortoise-hare-specific imagery 'small audience of forest creatures' leaks into milkmaid prose
     - [LOW_GROUNDING] form=`(do "queries are written in datalog over EDN-shape` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
@@ -2540,13 +2528,13 @@ tortoise
 
 - examples: 3
 - variety @ n=50: 1.00
-- issues: {'FOREIGN_FABLE_IMAGERY': 5, 'AS_ONE_WHO_CADENCE': 1, 'LOW_GROUNDING': 3}
+- issues: {'FOREIGN_FABLE_IMAGERY': 5, 'LOW_GROUNDING': 3}
     - [FOREIGN_FABLE_IMAGERY] form=`(do "good libraries expose data, then functions, t` — tortoise-hare-specific imagery 'moss-covered milestone' leaks into milkmaid prose
-    - [AS_ONE_WHO_CADENCE] form=`(do "good libraries expose data, then functions, t` — user_msg contains 'as one who…' / 'with the X of one who Y' template-output cadence
     - [FOREIGN_FABLE_IMAGERY] form=`(do "good libraries expose data, then functions, t` — tortoise-hare-specific imagery 'leather notebook' leaks into milkmaid prose
     - [LOW_GROUNDING] form=`(do "good libraries expose data, then functions, t` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [FOREIGN_FABLE_IMAGERY] form=`(do "small public API surface, plain data inputs, ` — tortoise-hare-specific imagery 'moss-covered milestone' leaks into milkmaid prose
     - [FOREIGN_FABLE_IMAGERY] form=`(= [1 2 3] (vec '(1 2 3)))` — tortoise-hare-specific imagery 'leather notebook' leaks into milkmaid prose
+    - [LOW_GROUNDING] form=`(= [1 2 3] (vec '(1 2 3)))` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
 
 ### G12-18: Clojure style guide
 
@@ -2565,20 +2553,19 @@ tortoise
 
 ### Issue counts (across all examples × 3 records)
 
-- **STORY_RESOLUTION_NO_DRAWN**: 967
+- **STORY_RESOLUTION_NO_DRAWN**: 830
 - **LOW_GROUNDING**: 643
 - **CAP_PRONOUN_MID_SENTENCE**: 209
 - **POST_COMMA_CAPITAL_PRONOUN**: 206
-- **CLAUSE_STACK_OVERFLOW**: 166
+- **CLAUSE_STACK_OVERFLOW**: 163
 - **PRONOUN_BEFORE_NAME**: 124
 - **FOREIGN_FABLE_IMAGERY**: 112
 - **NARRATIVE_NUMERAL_HARDCODE**: 108
 - **CONCEPT_PHRASE_COMMA_LIST**: 75
-- **AS_ONE_WHO_CADENCE**: 48
 - **CONCEPT_AS_VERB**: 39
-- **HIGH_LENGTH**: 36
+- **HIGH_LENGTH**: 34
 - **PARAMETRIC_LITERAL_NUMERALS**: 24
-- **FORM_DISPLAY_AND_FORM_NOUN**: 21
+- **FORM_DISPLAY_AND_FORM_NOUN**: 22
 - **LOWERCASE_CONCEPT_AFTER_PERIOD**: 19
 - **HEDGING_NEAR_FORM**: 16
 - **ANSWER_LEAK**: 15
@@ -2597,18 +2584,18 @@ tortoise
 
 | Grade | Subjects | Examples | Issues | Low-variety |
 |---|---|---|---|---|
-| 1 | 18 | 76 | 270 | — |
-| 2 | 22 | 88 | 496 | — |
-| 3 | 18 | 31 | 176 | — |
-| 4 | 20 | 39 | 276 | — |
-| 5 | 22 | 39 | 322 | — |
+| 1 | 18 | 76 | 260 | — |
+| 2 | 22 | 88 | 381 | — |
+| 3 | 18 | 31 | 174 | — |
+| 4 | 20 | 39 | 248 | — |
+| 5 | 22 | 39 | 315 | — |
 | 6 | 16 | 33 | 183 | — |
-| 7 | 18 | 36 | 180 | — |
-| 8 | 16 | 31 | 192 | — |
-| 9 | 18 | 34 | 293 | — |
-| 10 | 16 | 36 | 249 | — |
+| 7 | 18 | 36 | 169 | — |
+| 8 | 16 | 31 | 189 | — |
+| 9 | 18 | 34 | 292 | — |
+| 10 | 16 | 36 | 245 | — |
 | 11 | 14 | 29 | 128 | — |
-| 12 | 18 | 37 | 123 | — |
+| 12 | 18 | 37 | 115 | — |
 
 ### Sample issues by severity
 
@@ -2751,49 +2738,6 @@ A small audience of forest creatures had gathered near the orchard to watch
 Friederike attempt to outwit Theodelinda at reading the REPL.
 Theodelinda pointed to the literal false and read out the form aloud:
 `f...
-    ```
-
-#### AS_ONE_WHO_CADENCE
-
-- `G1-02` (form `12345`): user_msg contains 'as one who…' / 'with the X of one who Y' template-output cadence
-    ```
-    It is an old habit to count the worth of a thing before the thing has reached the buyer.
-
-"There is no need to evaluate that," Agata said, as one who has counted his victory before the running.
-"Anyone can see what the integer 100000000000 comes to." Apollonia, who
-near the hilltop had grown used to...
-    ```
-- `G1-05` (form `false`): user_msg contains 'as one who…' / 'with the X of one who Y' template-output cadence
-    ```
-    She had not yet sold the milk and yet had already chosen the ribbons she would wear at the dance.
-
-Czeslawa and Cassius stopped at the edge of the orchard where someone had
-written the literal false on a flat stone. Czeslawa, as one who has counted his victory before the running, declared
-that she c...
-    ```
-- `G1-05` (form `(= 1 2)`): user_msg contains 'as one who…' / 'with the X of one who Y' template-output cadence
-    ```
-    By the time Oksana had reached the second milestone in the orchard, the milk had become eggs, and the eggs a flock.
-
-Oksana chalked a wager on a flat stone near the orchard: whoever
-predicted the result of `(= 4 8)` would set the next race's
-distance. Valerian, as one who has all the day before her,...
-    ```
-- `G1-13` (form `(+ 1 2)`): user_msg contains 'as one who…' / 'with the X of one who Y' template-output cadence
-    ```
-    It happened near the farm, on the morning Tove took the milk to market and her thoughts ran ahead of her feet.
-
-She watched Ezekiel sort coins at the dairy table: copper in one pile, silver
-in another, gold in a third — three small heaps growing patient and even under his
-hands. "Ezekiel, how do you...
-    ```
-- `G1-13` (form `(* 4 5)`): user_msg contains 'as one who…' / 'with the X of one who Y' template-output cadence
-    ```
-    The sun had only just cleared the hedgerows when the day's first tally of imagined coins began.
-
-Every morning, Estrid carried a pail of milk to the dairy, imagining what the coins would
-total. She only smiled and said, "Come. Let us count the coins from yesterday's
-sales." Together they counted: on...
     ```
 
 #### STRING_AS_CHAR_MISCLAIM
@@ -3120,47 +3064,6 @@ The farmer had a four-dimensional arrangement of coins (a thought experiment): 5
 She needed to ...
     ```
 
-#### CLAUSE_STACK_OVERFLOW
-
-- `G1-14` (form `(- 100 (* 5 5))`): sentence with 5 commas reads as AI-output cadence: 'Philomena only shook her\nhead, as a tortoise walks, neither hurrying nor stoppin'
-    ```
-    on the road, where the lane bends past the old hedge, Sanda began to add up coins she had not yet earned.
-
-One afternoon, She found a cache of coins hidden in the dairy and tried to guess
-the fortune, with quiet steps, taking the long way, the dairy cool and the imagined market still far away. "Sure...
-    ```
-- `G1-16` (form `(pos? 7)`): sentence with 5 commas reads as AI-output cadence: 'Septimus only shook his\nhead, as a millwheel turns, slow and sure, and began sor'
-    ```
-    The road from the farm to the town was long, and a daydream could fit comfortably along its length.
-
-One afternoon, She found a cache of coins hidden in the dairy and tried to guess
-the fortune, with a laugh that carried over the field, the dairy cool and the imagined market still far away. "Surely ...
-    ```
-- `G2-01` (form `(* 2 3 4)`): sentence with 5 commas reads as AI-output cadence: 'Vespasia only shook her\nhead, stepping deliberately, one foot before the next, a'
-    ```
-    She had not yet sold the milk and yet had already chosen the ribbons she would wear at the dance.
-
-One afternoon, She found a cache of coins hidden in the dairy and tried to guess
-the fortune, boasting at every turn, the dairy cool and the imagined market still far away. "Surely I can
-see the total ...
-    ```
-- `G2-01` (form `(+ 1 2 3 4 5 6 7 8 9 10)`): sentence with 5 commas reads as AI-output cadence: 'Adelaide only shook her\nhead, as a tortoise walks, neither hurrying nor stopping'
-    ```
-    It was by the orchard, on a fair-weather morning, that Helena began the long walk to market.
-
-One afternoon, She found a cache of coins hidden in the dairy and tried to guess
-the fortune, his chest thrown out before him, the dairy cool and the imagined market still far away. "Surely I can
-see the to...
-    ```
-- `G2-03` (form `(not= 1 2)`): sentence with 6 commas reads as AI-output cadence: 'Theophilus only shook his\nhead, her breath even, her step even, her thought even'
-    ```
-    The sun had only just cleared the hedgerows when the day's first tally of imagined coins began.
-
-One afternoon, She found a cache of coins hidden in the dairy and tried to guess
-the fortune, his step bouncing with self-regard, the dairy cool and the imagined market still far away. "Surely I can
-see ...
-    ```
-
 #### PROCEDURAL_OPENER
 
 - `G1-17` (form `(+ 1 2)`): user_msg jumps from fable-opener directly to 'To {goal}, [pronoun] composed ...' without a scene-setting sentence
@@ -3229,6 +3132,46 @@ five milestones. I counted...
 She arrived at the market breathless. "How many coins do I have?" She asked.
 She counted on her fingers, looking back at each milestone. "I picked up bags at
 five milestones. I counted them all together..." ...
+    ```
+
+#### CLAUSE_STACK_OVERFLOW
+
+- `G2-01` (form `(* 2 3 4)`): sentence with 5 commas reads as AI-output cadence: 'Vespasia only shook her\nhead, stepping deliberately, one foot before the next, a'
+    ```
+    She had not yet sold the milk and yet had already chosen the ribbons she would wear at the dance.
+
+One afternoon, She found a cache of coins hidden in the dairy and tried to guess
+the fortune, boasting at every turn, the dairy cool and the imagined market still far away. "Surely I can
+see the total ...
+    ```
+- `G2-01` (form `(* 1 2 3 4 5)`): sentence with 5 commas reads as AI-output cadence: 'Horatio only shook his\nhead, with steady, road-tested feet, and began sorting th'
+    ```
+    Between the dairy and the marketplace stretched a road, a hill, and an entire life imagined into being.
+
+One afternoon, She found a cache of coins hidden in the dairy and tried to guess
+the fortune, with the easy swagger of a quick runner, the dairy cool and the imagined market still far away. "Sure...
+    ```
+- `G2-03` (form `(not= 1 2)`): sentence with 6 commas reads as AI-output cadence: 'Theophilus only shook his\nhead, her breath even, her step even, her thought even'
+    ```
+    The sun had only just cleared the hedgerows when the day's first tally of imagined coins began.
+
+One afternoon, She found a cache of coins hidden in the dairy and tried to guess
+the fortune, his step bouncing with self-regard, the dairy cool and the imagined market still far away. "Surely I can
+see ...
+    ```
+- `G2-03` (form `(= 1 1 1)`): sentence with 6 commas reads as AI-output cadence: '"To test whether 1, 1, and 1 are all equal, we must count — truly count, and the'
+    ```
+    Every step of the road carried the soft sound of liquid against tin and the louder sound of a daydream gathering speed.
+
+One afternoon, She found a cache of coins hidden in the dairy and tried to guess
+the fortune, as a young captain walks before his first battle, the dairy cool and the imagined mar...
+    ```
+- `G2-03` (form `(= 1 1 1)`): sentence with 6 commas reads as AI-output cadence: '"To test whether 1, 1, and 1 are all equal, we must count — truly count, and the'
+    ```
+    The sun had only just cleared the hedgerows when the day's first tally of imagined coins began.
+
+One afternoon, She found a cache of coins hidden in the dairy and tried to guess
+the fortune, with a pride that filled him from ear-tip to heel, the dairy cool and the imagined market still far away. "Su...
     ```
 
 #### PARAGRAPH_FRAGMENTATION

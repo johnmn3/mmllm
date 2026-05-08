@@ -20,7 +20,7 @@ from mmllm.aesop.curriculum.dog_shadow._metaphor_pools import (
 # Based on _GOAL_SUBPLOTS to ensure goal-driven design.
 _NAMING_SUBPLOTS: list[SubplotTemplate] = list(_GOAL_SUBPLOTS) + [
     SubplotTemplate("""\
-{tortoise_phrase} kept a small ledger {place} where every meaningful
+{tortoise}, {emo_patient} kept a small ledger {place} where every meaningful
 quantity got its own name. {tortoise_he_she_cap} pointed to today's
 entry, which required {goal_text}. {tortoise_he_she_cap} would write
 {concept_phrase} and let the REPL confirm."""),
@@ -28,7 +28,7 @@ entry, which required {goal_text}. {tortoise_he_she_cap} would write
     SubplotTemplate("""\
 "The key is to name your values carefully," {tortoise} said {place}.
 "To {goal_text}, you write {concept_phrase} and submit it to the REPL.
-That is the discipline." {hare_phrase} nodded, {emo_tired}."""),
+That is the discipline." {hare} nodded, {emo_tired}."""),
 ]
 
 
@@ -74,7 +74,7 @@ G3_01 = SubjectCurriculum(grade=3, subject_id="G3-01",
             ),
             resolution=(
                 'The REPL set the marker, then read it back as the form '
-                'directed, handing back the value the stone had recorded. '
+                'directed, handing back 42 the stone had recorded. '
                 'Any later dog along the bank would see the same name bound '
                 'to the same value.'
             ),
@@ -99,7 +99,7 @@ G3_01 = SubjectCurriculum(grade=3, subject_id="G3-01",
                 'the value 7 is pressed beside it.'
             ),
             resolution=(
-                'The REPL read the marker and returned the bound value. Any dog '
+                'The REPL read the marker and returned 7. Any dog '
                 'who looked for y would find what Rex had named.'
             ),
             tags=("story",),
@@ -139,7 +139,7 @@ G3_02 = SubjectCurriculum(grade=3, subject_id="G3-02",
                 'Patch deepened the carving and pressed a new weight beside '
                 'it — the binding overwritten. When the REPL looked up x, it '
                 'found the freshest mark, the most recent value that had been '
-                'carved into the stone.'
+                'carved into the stone — 99.'
             ),
             tags=("story",),
         ),
@@ -175,7 +175,7 @@ G3_03 = SubjectCurriculum(grade=3, subject_id="G3-03",
             ),
             resolution=(
                 'The REPL pulled from the mouth as the form directed and '
-                "handed back the running total. Past the crossing, Bell's "
+                "handed back 1. Past the crossing, Bell's "
                 'mouth was empty again — the binding had been in force only '
                 'for that stretch.'
             ),
@@ -207,7 +207,7 @@ G3_03 = SubjectCurriculum(grade=3, subject_id="G3-03",
             ),
             resolution=(
                 'The REPL read the jaws and computed the product of the count '
-                'with itself, handing back the verdict. Past the far shore, '
+                'with itself, handing back 10. Past the far shore, '
                 'Rex dropped the binding, and the name n meant nothing again.'
             ),
             tags=("story",),
@@ -236,7 +236,7 @@ G3_03 = SubjectCurriculum(grade=3, subject_id="G3-03",
                 'calling a is what happens when the form looks up the grip.'
             ),
             resolution=(
-                'The REPL read the bite and returned the value the mouth had '
+                'The REPL read the bite and returned 5 the mouth had '
                 'held. Bell stepped past the form\'s edge and released the '
                 'binding. The name a was gone.'
             ),
@@ -269,7 +269,7 @@ G3_04 = SubjectCurriculum(grade=3, subject_id="G3-04",
             ),
             resolution=(
                 'The REPL added the bound values and handed back the total. '
-                'Patch released the crossing.'
+                'Patch released the crossing — 2.'
             ),
             tags=("story",),
         ),
@@ -297,7 +297,7 @@ G3_04 = SubjectCurriculum(grade=3, subject_id="G3-04",
                 'the bound values, and the verdict is the difference.'
             ),
             resolution=(
-                'The REPL subtracted y from x and returned the result. Bell '
+                'The REPL subtracted y from x and returned 3. Bell '
                 'released both bones as she crossed.'
             ),
             tags=("story",),
@@ -323,7 +323,7 @@ G3_04 = SubjectCurriculum(grade=3, subject_id="G3-04",
             ),
             resolution=(
                 'The REPL added the bound values and returned the total. Rex '
-                'dropped the bones on the far bank.'
+                'dropped the bones on the far bank — 4.'
             ),
             tags=("story",),
         ),
@@ -355,7 +355,7 @@ G3_05 = SubjectCurriculum(grade=3, subject_id="G3-05",
             ),
             resolution=(
                 'The REPL read the jaws first and found x meant the grip, not the stone. '
-                'The shadow held only while the form ran. Bell released the bone.'
+                'The shadow held only while the form ran. Bell released the bone — 99.'
             ),
             tags=("story",),
         ),
@@ -379,7 +379,7 @@ G3_05 = SubjectCurriculum(grade=3, subject_id="G3-05",
             ),
             resolution=(
                 'The REPL read the jaws first and returned the grip. When the form ended, '
-                'the second lookup found the stone\'s value. The binding endured beyond the form.'
+                'the second lookup found the stone\'s value. The binding endured beyond the form — 99.'
             ),
             tags=("story",),
         ),
@@ -418,7 +418,7 @@ G3_06 = SubjectCurriculum(grade=3, subject_id="G3-06",
                 "The REPL read 5 from the first grip, doubled it for the "
                 "second grip's value, and held both inside the let's span. "
                 "When the form ended, the mouth opened — but b's count "
-                "had already come back."
+                "had already come back — 2."
             ),
             tags=("story",),
         ),
@@ -488,7 +488,7 @@ G3_07 = SubjectCurriculum(grade=3, subject_id="G3-07",
             resolution=(
                 'The REPL walked the trail end to end and handed back the '
                 'value at the last sniff. The trail itself, having served '
-                'Bell for that one walk, faded back into the bank.'
+                'Bell for that one walk, faded back into the bank — 4.'
             ),
             tags=("story",),
         ),
@@ -755,7 +755,7 @@ G3_12 = SubjectCurriculum(grade=3, subject_id="G3-12",
             ),
             resolution=(
                 'The REPL read the jaws first when it saw g inside the let, '
-                'added one, and returned the verdict. The shadow faded when the '
+                'added one, and returned 1. The shadow faded when the '
                 'form ended. The stone stood untouched — its mark would be read '
                 'again outside the let.'
             ),
@@ -792,7 +792,7 @@ G3_13 = SubjectCurriculum(grade=3, subject_id="G3-13",
             resolution=(
                 'The REPL walked the trail, followed each mark in order, but '
                 'returned only what the final sniff had revealed — the running '
-                'total that mattered was always what lay at the trail\'s end.'
+                'total that mattered was always what lay at the trail\'s end — 1.'
             ),
             tags=("story",),
         ),
@@ -828,7 +828,7 @@ G3_14 = SubjectCurriculum(grade=3, subject_id="G3-14",
             resolution=(
                 'The REPL traced the marks from first to last but handed back '
                 'only what the final scratch had spoken. The earlier marks had '
-                'been read and released.'
+                'been read and released — 3.'
             ),
             tags=("story",),
         ),
@@ -852,7 +852,7 @@ G3_14 = SubjectCurriculum(grade=3, subject_id="G3-14",
             ),
             resolution=(
                 'The REPL walked each trail and computed the sums, but returned only '
-                'the verdict of the final step.'
+                'the 3 of the final step.'
             ),
             tags=("story",),
         ),
@@ -887,7 +887,7 @@ G3_15 = SubjectCurriculum(grade=3, subject_id="G3-15",
             resolution=(
                 'The REPL executed the bark and heard the signal, but the return '
                 'value was the final grip — the separate value that had no echo, '
-                'only substance.'
+                'only substance — hi.'
             ),
             tags=("story",),
         ),
@@ -921,7 +921,7 @@ G3_16 = SubjectCurriculum(grade=3, subject_id="G3-16",
             ),
             resolution=(
                 'The REPL looked up the plus-sign inside the let and found not the '
-                'operator but the bound value — the shadow had claimed it for that '
+                'operator but the 99 — the shadow had claimed it for that '
                 'stretch. When the form ended, Patch released the grip.'
             ),
             tags=("story",),
@@ -952,7 +952,7 @@ G3_17 = SubjectCurriculum(grade=3, subject_id="G3-17",
                 'calls them, and the difference comes back.'
             ),
             resolution=(
-                'The REPL read the dashed names and computed the difference.'
+                'The REPL read the dashed names and computed the difference — 1.'
             ),
             tags=("story",),
         ),
@@ -987,7 +987,7 @@ G3_18 = SubjectCurriculum(grade=3, subject_id="G3-18",
             resolution=(
                 'The REPL read the grip, substituted it three times in the '
                 'multiplication, and returned the product. The name had made the form '
-                'clear; the binding lasted only for the crossing.'
+                'clear; the binding lasted only for the crossing — 5.'
             ),
             tags=("story",),
         ),
@@ -1015,7 +1015,7 @@ G3_18 = SubjectCurriculum(grade=3, subject_id="G3-18",
             ),
             resolution=(
                 'The REPL saw the literal values and multiplied them directly, '
-                'handing back the answer. No binding was needed; the form spoke for '
+                'handing back 5. No binding was needed; the form spoke for '
                 'itself.'
             ),
             tags=("story",),

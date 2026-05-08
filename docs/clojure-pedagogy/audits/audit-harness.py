@@ -1147,7 +1147,12 @@ def check_record(rec, sub, example):
         lits = _drawn_literals(form)
         if lits:
             res_text = example.resolution
-            has_lit = any(
+            # `{drawn.X}` placeholders are render-time substitutions that
+            # render the actual literal into the resolution prose, so they
+            # count as drawn-value grounding even though the literal is
+            # not a substring of the raw template text.
+            has_drawn_placeholder = "{drawn." in res_text
+            has_lit = has_drawn_placeholder or any(
                 (lit and lit in res_text) for lit in lits
             )
             if not has_lit:
@@ -1541,6 +1546,71 @@ def check_record(rec, sub, example):
         issues.append(("OUT_OF_REGISTER_VOCAB",
                         "user_msg uses an out-of-register word that "
                         "doesn't fit a children's-fable register"))
+
+    # ───── slice 2zrd (dog-shadow fixset3) detector additions ─────
+
+    # POLARITY_INVERSION — the dog-shadow polarity is fixed: hound is
+    # the patient evaluator, dog is the greedy/hasty one. A record
+    # that pairs `{hound} … {emo_greedy_phrase}` or `{dog} … {emo_patient_phrase}`
+    # has inverted the moral polarity. We catch the most distinctive
+    # polarity-leaks: a hound character paired with a greedy-emotion
+    # cue, or a dog character paired with a patience-emotion cue.
+    if sub.fable == "dog-shadow":
+        # Get the rendered hound and dog names from the record by
+        # reading the metadata; fall back to a regex sniff if needed.
+        # The hound character is the patient evaluator; the dog is
+        # the greedy grabber.
+        hound_greedy = re.search(
+            r"\b(?:Acorn|Bell|Banjo|Buster|Diesel|Latte|Patch|Pip|"
+            r"Pumpernickel|Rex|Sniff|Snowball|Sterling|Tiger|Zeke|"
+            r"Pepper|Cocoa|Maple|Hazel|Willow|Coal|Smoke|Ginger|"
+            r"Honey|Biscuit|Olive|Sage|Juniper|Birch|Cedar)\s+the\s+hound\b[^.]{0,180}\b"
+            r"(?:greedy|hasty|grabb|snatch|gluttonous|pleased with himself)\b",
+            user,
+            re.IGNORECASE,
+        )
+        if hound_greedy:
+            issues.append(("POLARITY_INVERSION",
+                            "hound character paired with greedy/hasty cue — "
+                            f"reverses dog-shadow polarity (matched: '{hound_greedy.group(0)[:60]}...')"))
+
+    # EMO_PHRASE_REPEAT — the same EMO-pool phrase rendered twice in
+    # one record. Templates each draw fresh from `scene.rng.choice(EMO_*)`;
+    # a repeat means two `{emo_X}` slots in the same template happened
+    # to draw the same phrase, OR an opener's hard-coded fragment
+    # collides with a body phrase. Either way it reads as redundant.
+    emo_phrases_seen = []
+    user_lower = user.lower()
+    for frag in _emo_fragments():
+        # Count exact substring occurrences. >1 means duplicate.
+        pos = 0
+        n = 0
+        while True:
+            i = user_lower.find(frag, pos)
+            if i < 0:
+                break
+            n += 1
+            pos = i + len(frag)
+        if n >= 2:
+            emo_phrases_seen.append(frag)
+            break  # one report is enough
+    if emo_phrases_seen:
+        issues.append(("EMO_PHRASE_REPEAT",
+                        f"EMO-pool fragment '{emo_phrases_seen[0][:24]}…' "
+                        f"appears 2+ times in user_msg — redundant grounding"))
+
+    # RESOLUTION_REPL_DOUBLED — story-tagged resolution mentions "REPL"
+    # two or more times. The K-7 storytelling guideline is: name the
+    # mechanic once per beat. Re-naming "The REPL did X, then the REPL
+    # did Y" bloats the prose without adding pedagogy. One REPL mention
+    # per resolution is plenty.
+    if "story" in getattr(example, "tags", ()) and example.resolution:
+        repl_count = len(re.findall(r"\bREPL\b", example.resolution))
+        if repl_count >= 2:
+            issues.append(("RESOLUTION_REPL_DOUBLED",
+                            f"story-tagged resolution mentions 'REPL' "
+                            f"{repl_count} times — name the mechanic once, "
+                            f"use pronoun/it/runtime/it for the second beat"))
 
     return issues
 
