@@ -18,7 +18,7 @@ from mmllm.aesop.curriculum.boy_wolf.grade_1 import (
 from mmllm.aesop.curriculum.boy_wolf._metaphor_pools import (
     _CIRCUIT_SUBPLOTS, _FORK_SUBPLOTS, _GATE_SUBPLOTS, _RECIPE_SUBPLOTS, _SIEVE_SUBPLOTS, _TALLYWALK_SUBPLOTS,
 )
-from mmllm.aesop.curriculum.boy_wolf._goals import GOALS
+from mmllm.aesop.curriculum.boy_wolf._goals import GOALS, get_goal
 
 
 _HOF_SUBPLOTS: list[SubplotTemplate] = list(_G1_SUBPLOTS) + [
@@ -48,7 +48,7 @@ def _ex(form, expected, concept, what, goal=None,
         form=form, expected=expected,
         concept_phrase=canon.get("concept", concept),
         question_what=canon.get("what", what),
-        goal_text=goal if goal is not None else canon.get("goal", ""),
+        goal_text=goal if goal is not None else get_goal(form, concept, what),
         scenario=scenario, need=need, mapping=mapping, resolution=resolution,
         tags=tags,
     )

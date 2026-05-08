@@ -1273,6 +1273,54 @@ def check_record(rec, sub, example):
                         "user_msg has canned 'the X the operation "
                         "produced' resolution boilerplate — tie it to "
                         "the fable's metaphor / drawn values"))
+    # ─────────── slice XOE6 (boy-wolf, Cat-K theme) detector additions ────────────
+
+    # EMPTY_GOAL_RENDERED — when the {goal_text} placeholder is empty
+    # but the template still wraps it in "To {goal_text}, X composed",
+    # the user_msg renders with the abandoned phrase "To , X composed"
+    # (or "To , he composed", "To , she composed"). Cat-A logical: this
+    # makes the sentence read as if a noun got dropped between "To"
+    # and the comma.
+    if re.search(r"\bTo\s*,\s*(?:he|she|they|[A-Z]\w+)\s+composed\b", user):
+        issues.append(("EMPTY_GOAL_RENDERED",
+                       "user_msg has 'To , <pronoun> composed' — the "
+                       "{goal_text} placeholder rendered empty (audited "
+                       "by boy-wolf XOE6)"))
+
+    # STRING_AS_CHAR_MISCLAIM — a record's form is a string literal
+    # ("foo") but the prose calls it "the character \\foo" (using
+    # Clojure's `\` char prefix). Cat-E semantic: the concept_phrase
+    # contradicts the form's actual type. Caught when reading G1-08
+    # records where the form was a multi-character string but the
+    # template's concept_phrase still used the char idiom.
+    code = (rec.code_str or "").strip()
+    if code.startswith('"') and code.endswith('"') and len(code) >= 4:
+        # form is a multi-char string. Look for "the character \X" or
+        # "the value \X" where X is a string fragment.
+        if re.search(r"\bthe character \\[a-zA-Z]{2,}", user):
+            issues.append(("STRING_AS_CHAR_MISCLAIM",
+                           "form is a multi-character string but the "
+                           "prose refers to it as a single character "
+                           r"(`the character \X` idiom)"))
+
+    # PARAGRAPH_FRAGMENTATION — 4+ very short paragraphs in a row
+    # each making one statement. Reads as a bullet-listed manual
+    # rather than a fable. Cat-K K-2 pacing failure (rendered when
+    # scenario / need / mapping / resolution slots each consume one
+    # short paragraph and the story-scaffold connector adds another).
+    paragraphs = [p for p in user.split("\n\n") if p.strip()]
+    if len(paragraphs) >= 5:
+        # Count short paragraphs (≤ 25 words) in the body
+        # (skipping the opener and the question line).
+        short_count = sum(
+            1 for p in paragraphs[1:-1]
+            if len(p.split()) <= 25
+        )
+        if short_count >= 4:
+            issues.append(("PARAGRAPH_FRAGMENTATION",
+                           f"user_msg has {short_count} short "
+                           "(≤25-word) paragraphs in body — reads "
+                           "as a bullet list, not a story"))
 
     return issues
 

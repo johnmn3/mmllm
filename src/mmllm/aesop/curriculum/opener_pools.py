@@ -262,7 +262,7 @@ OPENERS_BOY_WOLF: tuple[str, ...] = (
     "{place}, in the long grass above the village road, "
     "{primary_phrase} settled in for another slow afternoon.",
     "The villagers lived just down the slope from where "
-    "{primary_phrase} stood watch, and they trusted his voice.",
+    "{primary_phrase} stood watch, and they trusted that voice.",
     "When {primary} called out {place} the first time, the village "
     "came running, and the sheep stayed exactly as they were.",
     "{primary_phrase} had been told the rules plainly: cry only when "

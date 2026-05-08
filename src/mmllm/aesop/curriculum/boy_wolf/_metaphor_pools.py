@@ -109,6 +109,12 @@ _GOAL_SUBPLOTS = _GOAL_SUBPLOTS + [
     # patient/evaluator polarity), and the runtime is named "the
     # only judge that doesn't talk back" — long established trust
     # ↔ a stable runtime that returns the same value each time.
+    # Story-scaffold composer (rewritten Cat-K XOE6). The earlier
+    # version used "To {goal_text}, X composed …", which rendered
+    # "To , X composed …" when the example had no goal_text (atom
+    # subjects with story slots). The new wording uses {concept_phrase}
+    # alone in the action line and threads the patience as a manner
+    # adverb rather than a stitched-in phrase.
     SubplotTemplate(f"""\
 {{scenario}}
 
@@ -116,9 +122,9 @@ _GOAL_SUBPLOTS = _GOAL_SUBPLOTS + [
 
 {{mapping}}
 
-To {{goal_text}}, {{elder_he_she}}, {{emo_patient}}, composed \
-{{concept_phrase}} and submitted the form. The REPL — the only \
-judge that doesn't talk back — returned:
+{{elder_phrase}}, {{emo_patient}}, composed {{concept_phrase}} \
+and submitted the form. The REPL — the only judge that doesn't \
+talk back — returned:
 
 {{resolution}}""", fits_tags=("story",)),
 ]
@@ -239,14 +245,17 @@ back what the steps had produced."""),
 
     # 3. Last step is what the routine serves. (Body returns last form;
     #    type-neutral and pedagogically true for all drill-cards.)
+    #    Cat-K rewrite: make the "last step" rule concrete via the
+    #    village's own drill-card practice. Cat-J: {emo_patient} +
+    #    well-worn watchhouse wall (worn ↔ trusted reusable routine).
     SubplotTemplate("""\
-"In any drill-card," {elder_phrase} explained, "the last step is what
-you serve." {elder_he_she_cap} took the goal — to {goal_text} — and
-chalked the routine's steps in order on the watchhouse wall, knowing
-that whatever the final line evaluated to was what the runner would
-carry back. {elder_phrase} composed {concept_phrase}, submitted the form,
-and the REPL — discarding the earlier steps' values — handed back only
-the result from the last."""),
+"On any drill-card," {elder_phrase} said, {emo_patient}, smoothing
+chalk down the well-worn watchhouse wall, "only the last step is what
+the runner carries back. The earlier steps prepare the way; the last
+step is the answer." To {goal_text}, {elder_he_she} chalked the
+routine's steps in order and composed {concept_phrase}, submitted the
+form, and the REPL — discarding earlier steps' values — handed back
+only the result from the last."""),
 
     # 4. Drill-cards feeding into drill-cards — emphasizes the chained
     #    nature and how routines can be composed together.
@@ -436,11 +445,16 @@ prescribed."""),
 
     # 2. Atomic swap — read, apply, write, all in one motion.
     #    No race conditions.
+    #    Cat-K rewrite: dialogue grounded in a real village
+    #    procedure (two shepherds, one slate). Cat-J: {emo_patient}
+    #    + heavy slate (heavy ↔ accumulator weight) + cool stone
+    #    (cool ↔ stable persistent state).
     SubplotTemplate("""\
-"When I want to update the watchhouse slate," {elder_phrase} said, "I don't
-pick it up and walk away — I read the page, apply the change, and write it
-back, all in a single motion. If two shepherds arrive at once, the REPL
-makes sure only one of us goes through at a time." To {goal_text},
+"When I update the slate," {elder_phrase} said, {emo_patient}, the heavy
+slate cool against {elder_his_her} forearm, "I don't pick it up and walk
+away. I read the tally, apply the change, and write it back — one quick
+motion. If two of us arrive at once, the REPL holds one of us at the
+threshold so the slate is never half-written." To {goal_text},
 {elder_he_she} composed {concept_phrase} for the slate, submitted the
 form, and the REPL applied the update atomically."""),
 
@@ -545,19 +559,28 @@ properly — settled the matter, the heavy gates swinging exactly as the rule
 said, regardless of {shepherd_phrase}'s guess."""),
 
     # 2. The truthy-and-falsey-rule template — generic.
-    SubplotTemplate(""""Only two things in Clojure close the fold-gates," {elder_phrase} said: "nil
-and false. Everything else — zero, the empty string, an empty flock — opens
-them wide. The gate's verdict follows that rule exactly." To {goal_text},
+    #    Cat-K rewrite (was abstract list of values + flat closing).
+    #    Now: shepherd asks a real question, elder names the rule
+    #    plainly with two grounded examples, the form lands as the
+    #    answer to that question. Cat-J: {emo_patient} + heavy gate
+    #    timber (heavy ↔ short-circuit weight).
+    SubplotTemplate(""""Why did the gate stay shut?" {shepherd_phrase} asked. {elder_phrase},
+{emo_patient}, leaned on the heavy timber. "Two things and only two things
+close these gates: nil and false. An empty bucket, a zero-tally, a sleeping
+flock — every one of those still swings the gate open." To {goal_text},
 {elder_he_she} composed {concept_phrase}, submitted the form, and the REPL
-returned the value the gate had passed, true or false."""),
+returned the verdict the gate had carried."""),
 
     # 3. The first-closed-gate template — emphasizes short-circuiting.
     #    When multiple gates are chained, the first closed one stops the chain.
-    SubplotTemplate(""""You can't tell which way the fold-gates will swing by guessing," {elder_phrase}
-said. "You bring the value to the first gate, the runtime checks it, and if
-that gate closes, the chain stops — the rest of the gates never even see the
-value." To {goal_text}, {elder_he_she} composed {concept_phrase}, submitted
-the form, and the REPL — checking the gates in order — settled the matter
+    #    Cat-J: {emo_patient} + heavy timber. Cat-K trim: cleaner
+    #    explanation, less "the runtime checks it" filler.
+    SubplotTemplate(""""You can't guess which way the gates will swing," {elder_phrase} said,
+{emo_patient}, leaning on the heavy timber of the first fold-gate. "Bring
+the value to the first gate. If it shuts, the chain stops there — the gates
+behind it never see the value at all." To {goal_text}, {elder_he_she}
+composed {concept_phrase}, submitted the form, and the REPL — checking
+each gate in order, stopping at the first that closed — settled the matter
 exactly as the rule said."""),
 
     # 4. The stone-gates-boast-template — shepherd claims to know gate behavior;
@@ -571,11 +594,15 @@ properly — returned the verdict the gates actually gave."""),
 
     # 5. The gate-carries-the-value template — generic emphasis on the REPL
     #    returning the value the gate carries, not just true or false.
-    SubplotTemplate(""""The fold-gates carry the value through, not just a yes or a no,"
-{elder_phrase} said. "Whatever the gate's verdict, that's what the REPL hands
-back — sometimes a strict true or false, sometimes the very value that passed
-the test." To {goal_text}, {elder_he_she} composed {concept_phrase},
-submitted the form, and the REPL returned the value the gates had carried
+    #    Cat-K rewrite: shepherd's question motivates the elder's
+    #    answer; the gate-as-funnel image grounds the metaphor.
+    #    Cat-J: {emo_patient} + heavy timber.
+    SubplotTemplate(""""So the gate just says yes or no?" {shepherd_phrase} asked.
+{elder_phrase}, {emo_patient}, shook {elder_his_her} head and tapped the heavy
+timber. "Look closely. The gate carries the actual value through — sometimes
+a strict yes or no, sometimes the very thing that passed the test." To
+{goal_text}, {elder_he_she} composed {concept_phrase}, submitted the form,
+and the REPL returned the value the gates had carried
 through."""),
 ]
 
@@ -907,13 +934,17 @@ the foreign tool had produced."""),
 
     # 4. The two-worlds template — generic; the valley's own toolshed
     #    and the foreign one meet at the interop boundary.
+    #    Cat-K rewrite: ground the boundary in a real shepherd image.
+    #    Cat-J: {emo_patient} + the cool stone wall (cool ↔ stable
+    #    boundary).
     SubplotTemplate("""\
-"There's the village's own toolshed," {elder_phrase} said, "and
-there's the foreign one. The runtime moves a value across the
-boundary, calls the foreign tool, and brings the result back into
-the village." To {goal_text}, {elder_he_she} composed
-{concept_phrase}, submitted the form, and the REPL — bridging the
-two toolsheds — returned the value cleanly."""),
+{elder_phrase}, {emo_patient}, pointed past the cool stone wall behind
+the watchhouse to the smith's shed. "Our toolshed is on this side; the
+smith's is on that side. When we need a smith's tool, the runtime
+carries the value over the wall, asks the foreign tool to do its work,
+and carries the result back." To {goal_text}, {elder_he_she} composed
+{concept_phrase}, submitted the form, and the REPL — making the
+crossing cleanly — returned the value the foreign tool had produced."""),
 
     # 5. The shepherd-grabs-the-wrong-tool template — shepherd guesses,
     #    elder checks the toolshed labels carefully.
@@ -1009,21 +1040,31 @@ returned the value the rewritten form had produced."""),
 
     # 2. The rule-shapes-the-form template — generic; emphasizes
     #    that macros operate on forms, not values.
-    SubplotTemplate("""\"Here's the difference between a routine and a rule,"
-{elder_phrase} said. "A routine takes ingredients and makes a dish.
-A rule takes a *form* and makes a different *form* — only then does
-the runtime get to evaluate it." To {goal_text},
-{elder_he_she} composed {concept_phrase}, submitted the form,
-and the REPL — applying the rule to the form first, then evaluating —
-handed back the value the rewritten form had produced."""),
+    #    Cat-K rewrite: anchor the abstract distinction in a concrete
+    #    village scene (the watchhouse wall, fresh chalk). Cat-J:
+    #    {emo_patient} + cool clay slate (cool ↔ stable rewrite stage
+    #    that runs before evaluation).
+    SubplotTemplate("""\"Here's the difference between a recipe and a rewrite-rule,"
+{elder_phrase} said, {emo_patient}, fresh chalk in hand at the cool
+watchhouse slate. "A recipe takes ingredients and makes a dish. A
+rewrite-rule takes one form and produces a different form — only after
+that does the runtime evaluate the new form." To {goal_text},
+{elder_he_she} composed {concept_phrase}, submitted the form, and the
+REPL — applying the rule first, then evaluating the rewritten form —
+handed back the value."""),
 
     # 3. The runtime-applies-the-rule template — generic.
-    SubplotTemplate("""\"The order matters," {elder_phrase} said. "When a rule is involved,
-the runtime first reads through the form and applies the rule wherever
-it sees one — and only then does it evaluate the result." To
-{goal_text}, {elder_he_she} composed {concept_phrase}, submitted
-the form, and the REPL — rewriting first, evaluating second — returned
-the final value."""),
+    #    Cat-K rewrite: dialogue grounds the order in a real village
+    #    routine ("first the watchhouse rewrites the drill-card, then
+    #    the morning watch follows it"). Cat-J: {emo_patient} +
+    #    cool watchhouse slate.
+    SubplotTemplate("""\"Order matters here," {elder_phrase} said, {emo_patient},
+chalking on the cool watchhouse slate. "First the watchhouse rewrites
+every drill-card that names the rule. Only after that — every
+appearance of the rule expanded — does the morning watch follow what
+the rewritten cards say." To {goal_text}, {elder_he_she} composed
+{concept_phrase}, submitted the form, and the REPL — rewriting first,
+evaluating second — returned the final value."""),
 
     # 4. The Shepherd-claims-no-rule-needed template — generic fable
     #    beat.
@@ -1063,13 +1104,17 @@ _SCRIBE_SUBPLOTS: list[SubplotTemplate] = [
 
     # 1. The reading-conventions-of-the-form template — generic;
     #    works for comments, whitespace, parens, do, reader macros.
-    SubplotTemplate("""\"There are conventions for how the runtime *reads* a form,"
-{elder_phrase} said: "what counts as one token, what's just
-spacing, what gets ignored, what gets grouped together. The
-scribe and the reader both follow the same conventions." To
-{goal_text}, {elder_he_she} composed {concept_phrase},
-submitted the form, and the REPL — reading exactly by the
-conventions — returned the value the form had specified."""),
+    #    Cat-K rewrite: dialogue grounded in a real reading
+    #    moment (chalk on slate, the village's posted rules).
+    #    Cat-J: {emo_patient} + cool slate (cool ↔ stable read state).
+    SubplotTemplate("""\"The runtime reads our forms the way the watchhouse reads its
+posted notices," {elder_phrase} said, {emo_patient}, chalk in hand at
+the cool slate. "What counts as one word, what's just spacing, what
+should be ignored — every reader follows the same plain rules so the
+notice doesn't change between writing and reading." To
+{goal_text}, {elder_he_she} composed {concept_phrase}, submitted the
+form, and the REPL — reading exactly by those rules — returned the
+value the form had specified."""),
 
     # 2. The form-is-what-the-reader-sees template — generic.
     SubplotTemplate("""\"A form is what the reader sees," {elder_phrase} said,
@@ -1175,11 +1220,15 @@ answer that would do: the form-as-data, marked and unevaluated."""),
 
     # 6. The name and value are kept always distinct; symbols let you
     #    choose which one to work with. Generic emphasis without fable.
-    SubplotTemplate("""\"The chalk mark and the sheep are tools in a shepherd's hand,"
-{elder_phrase} said, drawing both on the slate. "Sometimes you want
-the mark — the symbol itself — and sometimes the value it points to.
-Clojure has both, and the runtime knows the difference." To
-{goal_text}, {elder_he_she} composed {concept_phrase},
+    # Cat-K rewrite: simpler, story-shaped — shepherd asks; elder
+    # demonstrates the mark/sheep distinction with a small concrete
+    # gesture. Cat-J: {emo_patient} + cool slate.
+    SubplotTemplate("""{shepherd_phrase} pointed at the chalk-mark `wolf` on the slate.
+"That's a wolf," {shepherd_he_she} said. {elder_phrase}, {emo_patient},
+shook {elder_his_her} head and pointed at the empty meadow beyond the
+pen: "That mark is the name of a wolf — not the wolf. Clojure keeps
+the two apart on purpose, and the form tells the runtime which one
+you want." To {goal_text}, {elder_he_she} composed {concept_phrase},
 submitted the form, and the REPL — choosing mark or value as the
 form asked — returned the answer the form had directed."""),
 ]

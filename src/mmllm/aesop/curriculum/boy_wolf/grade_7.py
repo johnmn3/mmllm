@@ -18,7 +18,7 @@ from mmllm.aesop.curriculum.boy_wolf.grade_1 import (
 from mmllm.aesop.curriculum.boy_wolf._metaphor_pools import (
     _SAFETYNET_SUBPLOTS, _SCROLL_SUBPLOTS, _TOOLSHED_SUBPLOTS,
 )
-from mmllm.aesop.curriculum.boy_wolf._goals import GOALS
+from mmllm.aesop.curriculum.boy_wolf._goals import GOALS, get_goal
 
 
 # ─────────────────────── grade-7 subplot extensions ───────────────────────
@@ -78,7 +78,7 @@ def _ex(form, expected, concept, what, goal=None,
         form=form, expected=expected,
         concept_phrase=canon.get("concept", concept),
         question_what=canon.get("what", what),
-        goal_text=goal if goal is not None else canon.get("goal", ""),
+        goal_text=goal if goal is not None else get_goal(form, concept, what),
         scenario=scenario, need=need, mapping=mapping, resolution=resolution,
         tags=tags,
     )
