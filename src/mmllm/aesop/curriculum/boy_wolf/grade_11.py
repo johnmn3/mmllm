@@ -349,7 +349,7 @@ G11_04 = SubjectCurriculum(
                 "The village's count function reaches into host data and counts the elements."
             ),
             resolution=(
-                'The form returned the character count and Tom understood the boundary was permeable. The form had been built around {drawn.a}, and the value came back accordingly.'
+                'The form returned the character count and Tom understood the boundary was permeable. The slate showed {drawn.a} in clear chalk, and the fold tally stood as the day record.'
             )),
         _ex('(count "flock")', 5,
             'the count of "flock"',
@@ -367,7 +367,7 @@ G11_04 = SubjectCurriculum(
                 "The village function is polymorphic; it knows how to count across the host boundary."
             ),
             resolution=(
-                "The answer came back: 5. Tom submitted the form and got the right answer. He saw that the village's tools could reach into the host's world cleanly, without special syntax. The form had been built around {drawn.a}, and the value came back accordingly."
+                "The answer came back: 5. Tom submitted the form and got the right answer. He saw that the village's tools could reach into the host's world cleanly, without special syntax. Carol marked {drawn.a} on the watchhouse beam, the lookout high above the valley quiet at last."
             )),
         _ex('(count "wolf")', 4,
             'the count of "wolf"',
@@ -385,7 +385,7 @@ G11_04 = SubjectCurriculum(
                 "The REPL bridges the boundary transparently."
             ),
             resolution=(
-                "The REPL returned 4. Tom had now called count on three different strings and gotten three correct answers. He understood that the village's tools had been designed to work across the host boundary all along. The form had been built around {drawn.a}, and the value came back accordingly."
+                "The REPL returned 4. Tom had now called count on three different strings and gotten three correct answers. He understood that the village's tools had been designed to work across the host boundary all along. The fold gate held tight against the count of {drawn.a}, slate cool under the elder hand."
             )),
         _ex('(count "elder")', 5,
             'the count of "elder"',
@@ -403,7 +403,7 @@ G11_04 = SubjectCurriculum(
                 "The function is general enough to handle any sequence the host provides."
             ),
             resolution=(
-                "The answer was 5. Tom had now moved past the fear of the boundary. The village's tools and the host's data spoke to each other smoothly, and the REPL made the translation happen without fuss. The form had been built around {drawn.a}, and the value came back accordingly."
+                "The answer was 5. Tom had now moved past the fear of the boundary. The village's tools and the host's data spoke to each other smoothly, and the REPL made the translation happen without fuss. Tom chalked {drawn.a} on the village notice, and the morning record stood for the next shepherd to read."
             )),
     ],
     subplots=_TOOLSHED_SUBPLOTS, plan_pool=_PLAN_G11,

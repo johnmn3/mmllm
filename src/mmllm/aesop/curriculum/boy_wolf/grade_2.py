@@ -101,7 +101,7 @@ G2_01 = SubjectCurriculum(
                 "grows with each step through the form."
             ),
             resolution=(
-                "the runtime returned 10, the morning's exact count, and Carol notched the tally-stick to match. The form had been built around {drawn.a}, and the value came back accordingly."
+                "the runtime returned 10, the morning's exact count, and Carol notched the tally-stick to match. The slate showed {drawn.a} in clear chalk, and the fold tally stood as the day record."
             )),
         _ex("(* 2 3 4)", 24,          "the product (* 2 3 4)",    "the result of (* 2 3 4)",
             scenario=(
@@ -120,7 +120,7 @@ G2_01 = SubjectCurriculum(
                 "again — each step scales the running total."
             ),
             resolution=(
-                "the verdict came back from the runtime, and the wool-basket's ledger matched what the slate had computed. The form had been built around {drawn.a}, and the value came back accordingly."
+                "the verdict came back from the runtime, and the wool-basket's ledger matched what the slate had computed. Carol marked {drawn.a} on the watchhouse beam, the lookout high above the valley quiet at last."
             )),
         _ex("(- 100 1 2 3)", 94,      "the chain (- 100 1 2 3)",  "the result of (- 100 1 2 3)",
             scenario=(
@@ -139,7 +139,7 @@ G2_01 = SubjectCurriculum(
                 "yields the running remainder."
             ),
             resolution=(
-                'the form returned 94, the true afternoon count, and the village ledger stood exactly as Carol had traced it. The form had been built around {drawn.a}, and the value came back accordingly.'
+                'the form returned 94, the true afternoon count, and the village ledger stood exactly as Carol had traced it. The fold gate held tight against the count of {drawn.a}, slate cool under the elder hand.'
             )),
         _ex("(+ 1 2 3 4 5 6 7 8 9 10)", 55,
             "the sum 1+2+...+10",       "the sum of integers 1 through 10",
@@ -159,7 +159,7 @@ G2_01 = SubjectCurriculum(
                 "until all ten inputs have been folded in."
             ),
             resolution=(
-                'the runtime settled on the true sum, and the slate recorded what the form had unveiled. The form had been built around {drawn.a}, and the value came back accordingly.'
+                'the runtime settled on the true sum, and the slate recorded what the form had unveiled. Tom chalked {drawn.a} on the village notice, and the morning record stood for the next shepherd to read.'
             )),
         _ex("(* 1 2 3 4 5)", 120,     "the product 1*2*3*4*5",    "the product of 1 through 5",
             scenario=(
@@ -178,7 +178,7 @@ G2_01 = SubjectCurriculum(
                 "multiplication scales the running product."
             ),
             resolution=(
-                "the form returned 120 as the commissions records demanded, and the smithy's tally matched the runtime's word. The form had been built around {drawn.a}, and the value came back accordingly."
+                "the form returned 120 as the commissions records demanded, and the smithy's tally matched the runtime's word. The lookout returned with {drawn.a} on his slate, the valley long behind him and the count plain."
             )),
         _ex("(+ 10 20 30)", 60,       "the sum (+ 10 20 30)",     "the sum of 10, 20, and 30",
             scenario=(
@@ -196,7 +196,7 @@ G2_01 = SubjectCurriculum(
                 "60 — the form walks through each wagon's count in sequence."
             ),
             resolution=(
-                'the form returned 60, the exact total, and the sheep-shed ledger was settled for the night. The form had been built around {drawn.a}, and the value came back accordingly.'
+                'the form returned 60, the exact total, and the sheep-shed ledger was settled for the night. The watchhouse warmed as the elder set {drawn.a} into the day record, the fold quiet by then.'
             )),
     ],
     subplots=_ACORN_SUBPLOTS, plan_pool=_PLAN_POOL,
@@ -225,7 +225,7 @@ G2_02 = SubjectCurriculum(
                 "the order is lighter than the next."
             ),
             resolution=(
-                'the form returned true, confirming the steady rise in weight that the scale itself had shown. The form had been built around {drawn.a}, and the value came back accordingly.'
+                'the form returned true, confirming the steady rise in weight that the scale itself had shown. {drawn.a} stood as the answer the fold required, slate, chalk, and a steady eye all in agreement.'
             )),
         _ex("(< 3 2 1)",  False, "the chain (< 3 2 1)",  "whether 3 < 2 < 1",
             scenario=(
@@ -244,7 +244,7 @@ G2_02 = SubjectCurriculum(
                 "of rise."
             ),
             resolution=(
-                'the form returned false, settling the truth: the weights fell rather than rose, and Carol marked the slate. The form had been built around {drawn.a}, and the value came back accordingly.'
+                'the form returned false, settling the truth: the weights fell rather than rose, and Carol marked the slate. The pasture tally settled at {drawn.a}, and Carol closed the day slate with that one number written clear.'
             )),
         _ex("(<= 1 1 2)", True,  "the chain (<= 1 1 2)", "whether 1 ≤ 1 ≤ 2",
             scenario=(
@@ -263,7 +263,7 @@ G2_02 = SubjectCurriculum(
                 "allows equals as well as increases."
             ),
             resolution=(
-                "the form settled at true, and the bundles' order stood confirmed on the ledger. The form had been built around {drawn.a}, and the value came back accordingly."
+                "the form settled at true, and the bundles' order stood confirmed on the ledger. The slate showed {drawn.a} in clear chalk, and the fold tally stood as the day record."
             )),
         _ex("(> 5 4 3 2 1)", True,
             "the chain (> 5 4 3 2 1)",
@@ -285,7 +285,7 @@ G2_02 = SubjectCurriculum(
                 "descent."
             ),
             resolution=(
-                'the form returned true, and the five sticks stood as proof of a descending order. The form had been built around {drawn.a}, and the value came back accordingly.'
+                'the form returned true, and the five sticks stood as proof of a descending order. Carol marked {drawn.a} on the watchhouse beam, the lookout high above the valley quiet at last.'
             )),
         _ex("(>= 3 3 2)", True,
             "the chain (>= 3 3 2)",
@@ -307,7 +307,7 @@ G2_02 = SubjectCurriculum(
                 "holds."
             ),
             resolution=(
-                'the form returned true, matching the tally-marks Carol had carved. The form had been built around {drawn.a}, and the value came back accordingly.'
+                'the form returned true, matching the tally-marks Carol had carved. The fold gate held tight against the count of {drawn.a}, slate cool under the elder hand.'
             )),
     ],
     subplots=_ACORN_SUBPLOTS, plan_pool=_PLAN_POOL,
@@ -335,7 +335,7 @@ G2_03 = SubjectCurriculum(
                 "they are not equal — one is lighter than the other."
             ),
             resolution=(
-                'the form returned true, confirming the two lambs had separate weights. The form had been built around {drawn.a}, and the value came back accordingly.'
+                'the form returned true, confirming the two lambs had separate weights. Tom chalked {drawn.a} on the village notice, and the morning record stood for the next shepherd to read.'
             )),
         _ex("(not= 1 1)",   False, "the form (not= 1 1)",   "whether 1 differs from 1",
             scenario=(
@@ -352,7 +352,7 @@ G2_03 = SubjectCurriculum(
                 "the form returns false and says no difference exists."
             ),
             resolution=(
-                'the form returned false, and the scale stood as trusted. The form had been built around {drawn.a}, and the value came back accordingly.'
+                'the form returned false, and the scale stood as trusted. The lookout returned with {drawn.a} on his slate, the valley long behind him and the count plain.'
             )),
         _ex("(= 1 1 1)",    True,  "the form (= 1 1 1)",    "whether all of 1,1,1 are equal",
             scenario=(
@@ -370,7 +370,7 @@ G2_03 = SubjectCurriculum(
                 "returns true."
             ),
             resolution=(
-                "the form returned true, confirming the lamb's steady count across the full day. The form had been built around {drawn.a}, and the value came back accordingly."
+                "the form returned true, confirming the lamb's steady count across the full day. The watchhouse warmed as the elder set {drawn.a} into the day record, the fold quiet by then."
             )),
         _ex("(= 1 1 2)",    False, "the form (= 1 1 2)",    "whether 1,1,2 are all equal",
             scenario=(
@@ -388,7 +388,7 @@ G2_03 = SubjectCurriculum(
                 "form returns false."
             ),
             resolution=(
-                'the form returned false, confirming the dusk entry was wrong, and the slate was corrected. The form had been built around {drawn.a}, and the value came back accordingly.'
+                'the form returned false, confirming the dusk entry was wrong, and the slate was corrected. {drawn.a} stood as the answer the fold required, slate, chalk, and a steady eye all in agreement.'
             )),
         _ex("(not= 1 1 2)", True,  "the form (not= 1 1 2)", "whether at least one of 1,1,2 differs",
             scenario=(
@@ -406,7 +406,7 @@ G2_03 = SubjectCurriculum(
                 "difference and returns true."
             ),
             resolution=(
-                'the form returned true, marking where the third count broke from the pattern. The form had been built around {drawn.a}, and the value came back accordingly.'
+                'the form returned true, marking where the third count broke from the pattern. The pasture tally settled at {drawn.a}, and Carol closed the day slate with that one number written clear.'
             )),
     ],
     subplots=_ACORN_SUBPLOTS, plan_pool=_PLAN_POOL,
@@ -435,7 +435,7 @@ G2_04 = SubjectCurriculum(
                 "step and returns it."
             ),
             resolution=(
-                'the form settled on 1, and the lightest lamb was chosen for the test. The form had been built around {drawn.a}, and the value came back accordingly.'
+                'the form settled on 1, and the lightest lamb was chosen for the test. The slate showed {drawn.a} in clear chalk, and the fold tally stood as the day record.'
             )),
         _ex("(max 1 2 3)",  3, "the form (max 1 2 3)",  "the maximum of 1, 2, 3",
             scenario=(
@@ -452,7 +452,7 @@ G2_04 = SubjectCurriculum(
                 "yields 3 — the form keeps the largest and returns it at the end."
             ),
             resolution=(
-                'the form returned 3, and the sticks were ranked for the ledger. The form had been built around {drawn.a}, and the value came back accordingly.'
+                'the form returned 3, and the sticks were ranked for the ledger. Carol marked {drawn.a} on the watchhouse beam, the lookout high above the valley quiet at last.'
             )),
         _ex("(min 7 3 9 1 5)", 1, "the form (min 7 3 9 1 5)", "the minimum of 7, 3, 9, 1, 5",
             scenario=(
@@ -470,7 +470,7 @@ G2_04 = SubjectCurriculum(
                 "progressively narrows to the smallest."
             ),
             resolution=(
-                'the form returned 1, the true minimum, and the basket was selected for the scale. The form had been built around {drawn.a}, and the value came back accordingly.'
+                'the form returned 1, the true minimum, and the basket was selected for the scale. The fold gate held tight against the count of {drawn.a}, slate cool under the elder hand.'
             )),
         _ex("(max 7 3 9 1 5)", 9, "the form (max 7 3 9 1 5)", "the maximum of 7, 3, 9, 1, 5",
             scenario=(
@@ -488,7 +488,7 @@ G2_04 = SubjectCurriculum(
                 "steadily finds the largest."
             ),
             resolution=(
-                'the form returned 9, confirming which pen needed the most care at sundown. The form had been built around {drawn.a}, and the value came back accordingly.'
+                'the form returned 9, confirming which pen needed the most care at sundown. Tom chalked {drawn.a} on the village notice, and the morning record stood for the next shepherd to read.'
             )),
         _ex("(min -3 -1 -5)", -5, "the form (min -3 -1 -5)", "the minimum of -3, -1, -5",
             scenario=(
@@ -508,7 +508,7 @@ G2_04 = SubjectCurriculum(
                 "from zero, so the form returns -5."
             ),
             resolution=(
-                'the form returned -5, the deepest loss, and the slate was adjusted for the evening tally. The form had been built around {drawn.a}, and the value came back accordingly.'
+                'the form returned -5, the deepest loss, and the slate was adjusted for the evening tally. The lookout returned with {drawn.a} on his slate, the valley long behind him and the count plain.'
             )),
     ],
     subplots=_ACORN_SUBPLOTS, plan_pool=_PLAN_POOL,
@@ -536,7 +536,7 @@ G2_05 = SubjectCurriculum(
                 "returns 3."
             ),
             resolution=(
-                'the form returned 3, the count of complete groups, and the shepherd knew how many full pens to fill. The form had been built around {drawn.a}, and the value came back accordingly.'
+                'the form returned 3, the count of complete groups, and the shepherd knew how many full pens to fill. The watchhouse warmed as the elder set {drawn.a} into the day record, the fold quiet by then.'
             )),
         _ex("(rem 17 5)",  2, "the remainder of 17 divided by 5", "the result of (rem 17 5)",
             scenario=(
@@ -555,7 +555,7 @@ G2_05 = SubjectCurriculum(
                 "complete groups."
             ),
             resolution=(
-                'the form returned 2, the exact remainder, and the slate recorded the unpaired lambs. The form had been built around {drawn.a}, and the value came back accordingly.'
+                'the form returned 2, the exact remainder, and the slate recorded the unpaired lambs. {drawn.a} stood as the answer the fold required, slate, chalk, and a steady eye all in agreement.'
             )),
         _ex("(mod 17 5)",  2, "17 mod 5",                          "the result of (mod 17 5)",
             scenario=(
@@ -573,7 +573,7 @@ G2_05 = SubjectCurriculum(
                 "repeating cycle."
             ),
             resolution=(
-                "the form returned 2, the day's cycle position, and the rotation schedule was kept. The form had been built around {drawn.a}, and the value came back accordingly."
+                "the form returned 2, the day's cycle position, and the rotation schedule was kept. The pasture tally settled at {drawn.a}, and Carol closed the day slate with that one number written clear."
             )),
         _ex("(quot 100 7)", 14, "the integer quotient of 100 and 7", "the result of (quot 100 7)",
             scenario=(
@@ -590,7 +590,7 @@ G2_05 = SubjectCurriculum(
                 "with a remainder left over — the form returns the quotient count."
             ),
             resolution=(
-                'the form returned the bundle count, confirming what the market ledger needed. The form had been built around {drawn.a}, and the value came back accordingly.'
+                'the form returned the bundle count, confirming what the market ledger needed. The slate showed {drawn.a} in clear chalk, and the fold tally stood as the day record.'
             )),
         _ex("(rem 100 7)",  2, "the remainder of 100 divided by 7", "the result of (rem 100 7)",
             scenario=(
@@ -607,7 +607,7 @@ G2_05 = SubjectCurriculum(
                 "form returns what doesn't bundle into sevens."
             ),
             resolution=(
-                'the form returned 2, the loose fleece count, and the price was adjusted accordingly. The form had been built around {drawn.a}, and the value came back accordingly.'
+                'the form returned 2, the loose fleece count, and the price was adjusted accordingly. Carol marked {drawn.a} on the watchhouse beam, the lookout high above the valley quiet at last.'
             )),
         _ex("(mod -7 3)",   2, "the form (mod -7 3)",              "the result of (mod -7 3)",
             scenario=(
@@ -626,7 +626,7 @@ G2_05 = SubjectCurriculum(
                 "falls in the range [0,3)."
             ),
             resolution=(
-                'the form returned 2, the correct cycle position for the negative adjustment. The form had been built around {drawn.a}, and the value came back accordingly.'
+                'the form returned 2, the correct cycle position for the negative adjustment. The fold gate held tight against the count of {drawn.a}, slate cool under the elder hand.'
             )),
     ],
     subplots=_ACORN_SUBPLOTS, plan_pool=_PLAN_POOL,
@@ -652,7 +652,7 @@ G2_06 = SubjectCurriculum(
                 "always returning the number plus one. Here, 5 becomes 6."
             ),
             resolution=(
-                'the form returned 6, and the tally-stick gained one more notch. The form had been built around {drawn.a}, and the value came back accordingly.'
+                'the form returned 6, and the tally-stick gained one more notch. Tom chalked {drawn.a} on the village notice, and the morning record stood for the next shepherd to read.'
             )),
         _ex("(dec 5)",  4, "the form (dec 5)",  "5 minus 1",
             scenario=(
@@ -668,7 +668,7 @@ G2_06 = SubjectCurriculum(
                 "function, always returning the number minus one. Here, 5 becomes 4."
             ),
             resolution=(
-                'the form returned 4, and the slate was corrected for the afternoon count. The form had been built around {drawn.a}, and the value came back accordingly.'
+                'the form returned 4, and the slate was corrected for the afternoon count. The lookout returned with {drawn.a} on his slate, the valley long behind him and the count plain.'
             )),
         _ex("(inc 0)",  1, "the form (inc 0)",  "the successor of 0",
             scenario=(
@@ -684,7 +684,7 @@ G2_06 = SubjectCurriculum(
                 "zero is 1, showing that the form works at the boundary."
             ),
             resolution=(
-                'the form returned 1, and the first notch was carved. The form had been built around {drawn.a}, and the value came back accordingly.'
+                'the form returned 1, and the first notch was carved. The watchhouse warmed as the elder set {drawn.a} into the day record, the fold quiet by then.'
             )),
         _ex("(dec 0)", -1, "the form (dec 0)",  "the predecessor of 0",
             scenario=(
@@ -700,7 +700,7 @@ G2_06 = SubjectCurriculum(
                 "becomes -1, showing the form extends to negative counts."
             ),
             resolution=(
-                'the form returned -1, and the slate recorded the debt. The form had been built around {drawn.a}, and the value came back accordingly.'
+                'the form returned -1, and the slate recorded the debt. {drawn.a} stood as the answer the fold required, slate, chalk, and a steady eye all in agreement.'
             )),
         _ex("(inc -1)", 0, "the form (inc -1)", "the successor of -1",
             scenario=(
@@ -717,7 +717,7 @@ G2_06 = SubjectCurriculum(
                 "returns to zero, showing the form balances the ledger."
             ),
             resolution=(
-                'the form returned 0, the debt was paid, and the slate stood clear. The form had been built around {drawn.a}, and the value came back accordingly.'
+                'the form returned 0, the debt was paid, and the slate stood clear. The pasture tally settled at {drawn.a}, and Carol closed the day slate with that one number written clear.'
             )),
     ],
     subplots=_ACORN_SUBPLOTS, plan_pool=_PLAN_POOL,
@@ -744,7 +744,7 @@ G2_07 = SubjectCurriculum(
                 "already positive, the form returns 5 unchanged."
             ),
             resolution=(
-                'the form returned 5, and the magnitude was recorded. The form had been built around {drawn.a}, and the value came back accordingly.'
+                'the form returned 5, and the magnitude was recorded. The slate showed {drawn.a} in clear chalk, and the fold tally stood as the day record.'
             )),
         _ex("(abs -5)",  5, "the form (abs -5)",  "the absolute value of -5",
             scenario=(
@@ -760,7 +760,7 @@ G2_07 = SubjectCurriculum(
                 "the form removes the minus and returns 5."
             ),
             resolution=(
-                'the form returned 5, the absolute magnitude, and the shipment was accounted for. The form had been built around {drawn.a}, and the value came back accordingly.'
+                'the form returned 5, the absolute magnitude, and the shipment was accounted for. Carol marked {drawn.a} on the watchhouse beam, the lookout high above the valley quiet at last.'
             )),
         _ex("(abs 0)",   0, "the form (abs 0)",   "the absolute value of 0",
             scenario=(
@@ -776,7 +776,7 @@ G2_07 = SubjectCurriculum(
                 "neutral point."
             ),
             resolution=(
-                'the form returned 0, confirming the slate stood at the origin. The form had been built around {drawn.a}, and the value came back accordingly.'
+                'the form returned 0, confirming the slate stood at the origin. The fold gate held tight against the count of {drawn.a}, slate cool under the elder hand.'
             )),
         _ex("(abs (- 3 8))", 5,
             "the form (abs (- 3 8))",
@@ -796,7 +796,7 @@ G2_07 = SubjectCurriculum(
                 "positive count."
             ),
             resolution=(
-                'the form returned 5, the true distance, and the route was calculated for the runner. The form had been built around {drawn.a}, and the value came back accordingly.'
+                'the form returned 5, the true distance, and the route was calculated for the runner. Tom chalked {drawn.a} on the village notice, and the morning record stood for the next shepherd to read.'
             )),
     ],
     subplots=_ACORN_SUBPLOTS, plan_pool=_PLAN_POOL,
@@ -858,7 +858,7 @@ G2_08 = SubjectCurriculum(
                 "— the form converts the whole to thirds and subtracts."
             ),
             resolution=(
-                'the form returned 2/3, the exact remainder, and the sale was recorded. The form had been built around {drawn.a}, and the value came back accordingly.'
+                'the form returned 2/3, the exact remainder, and the sale was recorded. The lookout returned with {drawn.a} on his slate, the valley long behind him and the count plain.'
             )),
     ],
     subplots=_ACORN_SUBPLOTS, plan_pool=_PLAN_POOL,
@@ -885,7 +885,7 @@ G2_09 = SubjectCurriculum(
                 "clean, the form returns an integer."
             ),
             resolution=(
-                'the form returned 5, and the pens were stocked equally. The form had been built around {drawn.a}, and the value came back accordingly.'
+                'the form returned 5, and the pens were stocked equally. The watchhouse warmed as the elder set {drawn.a} into the day record, the fold quiet by then.'
             )),
         _ex("(/ 10 3)", "10/3", "the form (/ 10 3)",
             "the exact rational result of (/ 10 3)",
@@ -904,7 +904,7 @@ G2_09 = SubjectCurriculum(
                 "precision."
             ),
             resolution=(
-                'the form returned 10/3, the exact amount per pen, and the ledger held the precise fraction. The form had been built around {drawn.a}, and the value came back accordingly.'
+                'the form returned 10/3, the exact amount per pen, and the ledger held the precise fraction. {drawn.a} stood as the answer the fold required, slate, chalk, and a steady eye all in agreement.'
             )),
         _ex("(/ 1.0 2)", 0.5, "the float division 1.0 ÷ 2",
             "the value of (/ 1.0 2)",
@@ -921,7 +921,7 @@ G2_09 = SubjectCurriculum(
                 "— the form preserves the float type through the operation."
             ),
             resolution=(
-                'the form returned 0.5, matching the decimal measurement system, and the precision was kept. The form had been built around {drawn.a}, and the value came back accordingly.'
+                'the form returned 0.5, matching the decimal measurement system, and the precision was kept. The pasture tally settled at {drawn.a}, and Carol closed the day slate with that one number written clear.'
             )),
     ],
     subplots=_ACORN_SUBPLOTS, plan_pool=_PLAN_POOL,
@@ -947,7 +947,7 @@ G2_10 = SubjectCurriculum(
                 "chains the repeated multiplication to find the third power."
             ),
             resolution=(
-                'the form returned 8, the exact volume, and the box-shed was stocked. The form had been built around {drawn.a}, and the value came back accordingly.'
+                'the form returned 8, the exact volume, and the box-shed was stocked. The slate showed {drawn.a} in clear chalk, and the fold tally stood as the day record.'
             )),
         _ex("(* 5 5)",   25,       "five squared", "5 squared",
             scenario=(
@@ -963,7 +963,7 @@ G2_10 = SubjectCurriculum(
                 "directly."
             ),
             resolution=(
-                'the form returned the exact area, and the garden plot was measured. The form had been built around {drawn.a}, and the value came back accordingly.'
+                'the form returned the exact area, and the garden plot was measured. Carol marked {drawn.a} on the watchhouse beam, the lookout high above the valley quiet at last.'
             )),
         _ex("(* 3 3 3 3)", 81,     "three to the fourth", "3 to the fourth power",
             scenario=(
@@ -980,7 +980,7 @@ G2_10 = SubjectCurriculum(
                 "again — the form walks through the fourth power step by step."
             ),
             resolution=(
-                'the form returned the total sack count, and the shipment was tallied. The form had been built around {drawn.a}, and the value came back accordingly.'
+                'the form returned the total sack count, and the shipment was tallied. The fold gate held tight against the count of {drawn.a}, slate cool under the elder hand.'
             )),
         _ex("(* 10 10)", 100,      "ten squared", "10 squared",
             scenario=(
@@ -996,7 +996,7 @@ G2_10 = SubjectCurriculum(
                 "appears twice in the multiplication."
             ),
             resolution=(
-                'the form returned the exact grid count, and the sketch was validated. The form had been built around {drawn.a}, and the value came back accordingly.'
+                'the form returned the exact grid count, and the sketch was validated. Tom chalked {drawn.a} on the village notice, and the morning record stood for the next shepherd to read.'
             )),
     ],
     subplots=_ACORN_SUBPLOTS, plan_pool=_PLAN_POOL,
@@ -1030,7 +1030,7 @@ G2_11 = SubjectCurriculum(
                 "is one continuous string."
             ),
             resolution=(
-                "the runtime returned the spliced cord and the village's slate carried the full word, exactly as the two pieces had promised. The form had been built around {drawn.a}, and the value came back accordingly."
+                "the runtime returned the spliced cord and the village's slate carried the full word, exactly as the two pieces had promised. The lookout returned with {drawn.a} on his slate, the valley long behind him and the count plain."
             )),
         _ex('(str "flock")', "flock",
             'the form (str "flock")', 'the value of (str "flock")',
@@ -1049,7 +1049,7 @@ G2_11 = SubjectCurriculum(
                 "the form returns the bead-string unchanged."
             ),
             resolution=(
-                'the form returned the bead-string as is, and the test passed. The form had been built around {drawn.a}, and the value came back accordingly.'
+                'the form returned the bead-string as is, and the test passed. The watchhouse warmed as the elder set {drawn.a} into the day record, the fold quiet by then.'
             )),
         _ex('(str "x" "y" "z")', "xyz",
             'the form (str "x" "y" "z")', 'the joined string "xyz"',
@@ -1066,7 +1066,7 @@ G2_11 = SubjectCurriculum(
                 "runtime splices `x` then `y` then `z` into one continuous bead-string."
             ),
             resolution=(
-                'the form returned the spliced cord as `xyz`, and the message was complete. The form had been built around {drawn.a}, and the value came back accordingly.'
+                'the form returned the spliced cord as `xyz`, and the message was complete. {drawn.a} stood as the answer the fold required, slate, chalk, and a steady eye all in agreement.'
             )),
         _ex('(str 1 "+" 2 "=" 3)', "1+2=3",
             'the form (str 1 "+" 2 "=" 3)', 'the joined string "1+2=3"',
@@ -1085,7 +1085,7 @@ G2_11 = SubjectCurriculum(
                 "— building the full equation string step by step."
             ),
             resolution=(
-                'the form returned the complete equation, and the slate held the joined statement. The form had been built around {drawn.a}, and the value came back accordingly.'
+                'the form returned the complete equation, and the slate held the joined statement. The pasture tally settled at {drawn.a}, and Carol closed the day slate with that one number written clear.'
             )),
     ],
     subplots=_BEADSTRING_SUBPLOTS, plan_pool=_PLAN_POOL,
@@ -1119,7 +1119,7 @@ G2_12 = SubjectCurriculum(
                 "The writing happens; the return is empty."
             ),
             resolution=(
-                'the form displayed the message and returned nothing — `nil` settled on the slate where a return value would have been. The form had been built around {drawn.a}, and the value came back accordingly.'           )),
+                'the form displayed the message and returned nothing — `nil` settled on the slate where a return value would have been. The slate showed {drawn.a} in clear chalk, and the fold tally stood as the day record.'           )),
         _ex('(print "x")', None,
             'the form (print "x")',
             'the return value of (print "x")',
@@ -1138,7 +1138,7 @@ G2_12 = SubjectCurriculum(
                 "the return is empty."
             ),
             resolution=(
-                'the form displayed the character and returned nothing — the slate held the message and the void where a value would be. The form had been built around {drawn.a}, and the value came back accordingly.'           )),
+                'the form displayed the character and returned nothing — the slate held the message and the void where a value would be. Carol marked {drawn.a} on the watchhouse beam, the lookout high above the valley quiet at last.'           )),
     ],
     subplots=_SCRIBE_SUBPLOTS, plan_pool=_PLAN_POOL,
 )
@@ -1237,7 +1237,7 @@ G2_13 = SubjectCurriculum(
                 "All pass, so the form returns the last value — 3."
             ),
             resolution=(
-                'the form returned 3, confirming all three counts were valid, and the tally stood complete. The form had been built around {drawn.a}, and the value came back accordingly.'
+                'the form returned 3, confirming all three counts were valid, and the tally stood complete. The fold gate held tight against the count of {drawn.a}, slate cool under the elder hand.'
             )),
         _ex("(or nil false 5)",  5,      "the form (or nil false 5)",
             "the value of (or nil false 5)",
@@ -1254,7 +1254,7 @@ G2_13 = SubjectCurriculum(
                 "It stops and returns 5, the first truthy value found."
             ),
             resolution=(
-                'the form returned 5, the winning option, and the search direction was clear. The form had been built around {drawn.a}, and the value came back accordingly.'
+                'the form returned 5, the winning option, and the search direction was clear. Tom chalked {drawn.a} on the village notice, and the morning record stood for the next shepherd to read.'
             )),
     ],
     subplots=_GATE_SUBPLOTS, plan_pool=_PLAN_POOL,
@@ -1328,7 +1328,7 @@ G2_14 = SubjectCurriculum(
                 "false — the zero is considered true, so its negation is false."
             ),
             resolution=(
-                'the form returned false, confirming that 0 was on the truthy side. The form had been built around {drawn.a}, and the value came back accordingly.'
+                'the form returned false, confirming that 0 was on the truthy side. The lookout returned with {drawn.a} on his slate, the valley long behind him and the count plain.'
             )),
         _ex("(not \"\")",  False, "the form (not \"\")",  "the value of (not \"\")",
             scenario=(
@@ -1345,7 +1345,7 @@ G2_14 = SubjectCurriculum(
                 "true, and its negation is false."
             ),
             resolution=(
-                'the form returned false, confirming the empty string was on the truthy side. The form had been built around {drawn.a}, and the value came back accordingly.'
+                'the form returned false, confirming the empty string was on the truthy side. The watchhouse warmed as the elder set {drawn.a} into the day record, the fold quiet by then.'
             )),
     ],
     subplots=_GATE_SUBPLOTS, plan_pool=_PLAN_POOL,
@@ -1373,7 +1373,7 @@ G2_15 = SubjectCurriculum(
                 "not false), so the form opens the truthy path and returns `:truthy`."
             ),
             resolution=(
-                'the form returned `:truthy`, confirming that 0 opens the truthy gate. The form had been built around {drawn.a}, and the value came back accordingly.'
+                'the form returned `:truthy`, confirming that 0 opens the truthy gate. {drawn.a} stood as the answer the fold required, slate, chalk, and a steady eye all in agreement.'
             )),
         _ex("(if \"\" :truthy :falsey)", ":truthy", "the form (if \"\" :truthy :falsey)",
             "which keyword (if \"\" :truthy :falsey) returns",
@@ -1392,7 +1392,7 @@ G2_15 = SubjectCurriculum(
                 "characters), so the form opens the truthy path and returns `:truthy`."
             ),
             resolution=(
-                'the form returned `:truthy`, confirming that even empty strings are truthy. The form had been built around {drawn.a}, and the value came back accordingly.'
+                'the form returned `:truthy`, confirming that even empty strings are truthy. The pasture tally settled at {drawn.a}, and Carol closed the day slate with that one number written clear.'
             )),
         _ex("(if nil :truthy :falsey)", ":falsey", "the form (if nil :truthy :falsey)",
             "which keyword (if nil :truthy :falsey) returns",
@@ -1409,7 +1409,7 @@ G2_15 = SubjectCurriculum(
                 "the form opens the falsey path and returns `:falsey`."
             ),
             resolution=(
-                'the form returned `:falsey`, confirming that nil triggers the falsey branch. The form had been built around {drawn.a}, and the value came back accordingly.'
+                'the form returned `:falsey`, confirming that nil triggers the falsey branch. The slate showed {drawn.a} in clear chalk, and the fold tally stood as the day record.'
             )),
         _ex("(if false :truthy :falsey)", ":falsey", "the form (if false :truthy :falsey)",
             "which keyword (if false :truthy :falsey) returns",
@@ -1426,7 +1426,7 @@ G2_15 = SubjectCurriculum(
                 "the falsey path and returns `:falsey`."
             ),
             resolution=(
-                'the form returned `:falsey`, confirming that false opens the falsey branch. The form had been built around {drawn.a}, and the value came back accordingly.'
+                'the form returned `:falsey`, confirming that false opens the falsey branch. Carol marked {drawn.a} on the watchhouse beam, the lookout high above the valley quiet at last.'
             )),
     ],
     subplots=_GATE_SUBPLOTS, plan_pool=_PLAN_POOL,
@@ -1452,7 +1452,7 @@ G2_16 = SubjectCurriculum(
                 "so the form returns `true`."
             ),
             resolution=(
-                'the form returned `true`, confirming that 0 is truthy. The form had been built around {drawn.a}, and the value came back accordingly.'
+                'the form returned `true`, confirming that 0 is truthy. The fold gate held tight against the count of {drawn.a}, slate cool under the elder hand.'
             )),
         _ex("(boolean \"\")", True, "the form (boolean \"\")", "the truthiness of the empty string",
             scenario=(
@@ -1468,7 +1468,7 @@ G2_16 = SubjectCurriculum(
                 "no characters), so the form returns `true`."
             ),
             resolution=(
-                'the form returned `true`, confirming that even empty strings are truthy. The form had been built around {drawn.a}, and the value came back accordingly.'
+                'the form returned `true`, confirming that even empty strings are truthy. Tom chalked {drawn.a} on the village notice, and the morning record stood for the next shepherd to read.'
             )),
         _ex("(boolean nil)", False, "the form (boolean nil)", "the truthiness of nil",
             scenario=(
@@ -1534,7 +1534,7 @@ G2_17 = SubjectCurriculum(
                 "back the count it holds."
             ),
             resolution=(
-                "the lookup returned 1 — the wolf-pouch's fleece count — without disturbing the rest of the basket. The form had been built around {drawn.a}, and the value came back accordingly."       )),
+                "the lookup returned 1 — the wolf-pouch's fleece count — without disturbing the rest of the basket. The lookout returned with {drawn.a} on his slate, the valley long behind him and the count plain."       )),
         _ex("(:flock {:wolf 1 :flock 2})", 2,
             "the form (:flock {:wolf 1 :flock 2})",
             "the value (:flock {:wolf 1 :flock 2}) returns",
@@ -1553,7 +1553,7 @@ G2_17 = SubjectCurriculum(
                 "inside — here, the count 2."
             ),
             resolution=(
-                "the lookup returned 2, the flock-pouch's count, and the basket remained undisturbed. The form had been built around {drawn.a}, and the value came back accordingly."
+                "the lookup returned 2, the flock-pouch's count, and the basket remained undisturbed. The watchhouse warmed as the elder set {drawn.a} into the day record, the fold quiet by then."
             )),
         _ex("(:missing {:wolf 1})", None,
             "the form (:missing {:wolf 1})",
@@ -1573,7 +1573,7 @@ G2_17 = SubjectCurriculum(
                 "breaking."
             ),
             resolution=(
-                'the lookup returned nil, signaling that the `:missing` pouch held nothing, and the search continued elsewhere. The form had been built around {drawn.a}, and the value came back accordingly.'
+                'the lookup returned nil, signaling that the `:missing` pouch held nothing, and the search continued elsewhere. {drawn.a} stood as the answer the fold required, slate, chalk, and a steady eye all in agreement.'
             )),
     ],
     subplots=_BASKET_SUBPLOTS, plan_pool=_PLAN_POOL,
@@ -1638,7 +1638,7 @@ G2_18 = SubjectCurriculum(
                 "result of running them."
             ),
             resolution=(
-                'the form returned the list [1 2 3], the structure itself, and the slate held the grouped numbers. The form had been built around {drawn.a}, and the value came back accordingly.'
+                'the form returned the list [1 2 3], the structure itself, and the slate held the grouped numbers. The pasture tally settled at {drawn.a}, and Carol closed the day slate with that one number written clear.'
             )),
     ],
     subplots=_CHALKMARK_SUBPLOTS, plan_pool=_PLAN_POOL,
@@ -1668,7 +1668,7 @@ G2_19 = SubjectCurriculum(
                 "promotes to a larger number type, preserving accuracy."
             ),
             resolution=(
-                'the form returned the exact answer, using the promoted number size. The form had been built around {drawn.a}, and the value came back accordingly.'
+                'the form returned the exact answer, using the promoted number size. The slate showed {drawn.a} in clear chalk, and the fold tally stood as the day record.'
             )),
         _ex("(+ 99999999999 1)", 100000000000,
             "the form (+ 99999999999 1)",
@@ -1687,7 +1687,7 @@ G2_19 = SubjectCurriculum(
                 "bigint, preserving the true sum."
             ),
             resolution=(
-                'the form returned the exact total, using the promoted type. The form had been built around {drawn.a}, and the value came back accordingly.'
+                'the form returned the exact total, using the promoted type. Carol marked {drawn.a} on the watchhouse beam, the lookout high above the valley quiet at last.'
             )),
     ],
     subplots=_ACORN_SUBPLOTS, plan_pool=_PLAN_POOL,
@@ -1720,7 +1720,7 @@ G2_20 = SubjectCurriculum(
                 "as the runtime steps through."
             ),
             resolution=(
-                "the stick carried 3 notches at the end of the walk — the morning's exact count, ready for the slate. The form had been built around {drawn.a}, and the value came back accordingly."           )),
+                "the stick carried 3 notches at the end of the walk — the morning's exact count, ready for the slate. The fold gate held tight against the count of {drawn.a}, slate cool under the elder hand."           )),
         _ex("(count \"hello\")",     5, "the count of \"hello\"",
             "the length of the string \"hello\"",
             scenario=(
@@ -1736,7 +1736,7 @@ G2_20 = SubjectCurriculum(
                 "per character. With five characters, the form returns 5."
             ),
             resolution=(
-                "the form returned 5, the exact character count, and the string's length was recorded. The form had been built around {drawn.a}, and the value came back accordingly."
+                "the form returned 5, the exact character count, and the string's length was recorded. Tom chalked {drawn.a} on the village notice, and the morning record stood for the next shepherd to read."
             )),
         _ex("(count [])",            0, "the count of an empty vector",
             "the count of an empty vector",
@@ -1753,7 +1753,7 @@ G2_20 = SubjectCurriculum(
                 "tally-stick gains no marks, so the form returns 0."
             ),
             resolution=(
-                'the form returned 0, confirming the row was empty, and the evening ledger was settled. The form had been built around {drawn.a}, and the value came back accordingly.'
+                'the form returned 0, confirming the row was empty, and the evening ledger was settled. The lookout returned with {drawn.a} on his slate, the valley long behind him and the count plain.'
             )),
     ],
     subplots=_TALLYWALK_SUBPLOTS, plan_pool=_PLAN_POOL,
@@ -1780,7 +1780,7 @@ G2_21 = SubjectCurriculum(
                 "With eight beads, the form returns 8."
             ),
             resolution=(
-                'the form returned 8, the exact length, and the word was measured. The form had been built around {drawn.a}, and the value came back accordingly.'
+                'the form returned 8, the exact length, and the word was measured. The watchhouse warmed as the elder set {drawn.a} into the day record, the fold quiet by then.'
             )),
         _ex("(count \"wolf\")",     4,  "the length of \"wolf\"",
             "the length of the string \"wolf\"",
@@ -1796,7 +1796,7 @@ G2_21 = SubjectCurriculum(
                 "`count` walks: w-o-l-f, four beads in the cord. The form returns 4."
             ),
             resolution=(
-                "the form returned 4, confirming 'wolf' was shorter than 'shepherd'. The form had been built around {drawn.a}, and the value came back accordingly."
+                "the form returned 4, confirming 'wolf' was shorter than 'shepherd'. {drawn.a} stood as the answer the fold required, slate, chalk, and a steady eye all in agreement."
             )),
         _ex("(subs \"shepherd\" 0 3)", "she",
             "the form (subs \"shepherd\" 0 3)",
@@ -1815,7 +1815,7 @@ G2_21 = SubjectCurriculum(
                 "take 3 beads (s, h, e). The form returns the spliced piece 'she'."
             ),
             resolution=(
-                "the form returned 'she', the first-three-character substring, and the piece was tied off. The form had been built around {drawn.a}, and the value came back accordingly."
+                "the form returned 'she', the first-three-character substring, and the piece was tied off. The pasture tally settled at {drawn.a}, and Carol closed the day slate with that one number written clear."
             )),
     ],
     subplots=_BEADSTRING_SUBPLOTS, plan_pool=_PLAN_POOL,
@@ -1845,7 +1845,7 @@ G2_22 = SubjectCurriculum(
                 "outer `-` then subtracts the strays from that product."
             ),
             resolution=(
-                'the form returned the exact evening tally, and the slate was updated with the true count. The form had been built around {drawn.a}, and the value came back accordingly.'
+                'the form returned the exact evening tally, and the slate was updated with the true count. The slate showed {drawn.a} in clear chalk, and the fold tally stood as the day record.'
             )),
         _ex("(+ (* 3 8) (* 2 4))", 32,
             "the sum of two products",
@@ -1863,7 +1863,7 @@ G2_22 = SubjectCurriculum(
                 "product, and the outer `+` sums them together."
             ),
             resolution=(
-                'the form returned the exact combined total, and the shipment was fully recorded. The form had been built around {drawn.a}, and the value came back accordingly.'
+                'the form returned the exact combined total, and the shipment was fully recorded. Carol marked {drawn.a} on the watchhouse beam, the lookout high above the valley quiet at last.'
             )),
         _ex("(quot (+ 100 50) 5)", 30,
             "the form (quot (+ 100 50) 5)",
@@ -1881,7 +1881,7 @@ G2_22 = SubjectCurriculum(
                 "150 by 5, yielding 30."
             ),
             resolution=(
-                'the form returned 30, the fair share per buyer, and the sale was settled. The form had been built around {drawn.a}, and the value came back accordingly.'
+                'the form returned 30, the fair share per buyer, and the sale was settled. The fold gate held tight against the count of {drawn.a}, slate cool under the elder hand.'
             )),
     ],
     subplots=_ACORN_SUBPLOTS, plan_pool=_PLAN_POOL,

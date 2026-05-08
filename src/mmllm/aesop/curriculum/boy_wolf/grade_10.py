@@ -145,7 +145,7 @@ G10_01 = SubjectCurriculum(
                 "No evaluation happens — the list just sits there as data."
             ),
             resolution=(
-                'the REPL returned the list unchanged: `1, 2, 3` — the quoted form held its shape without any procedure call. The form had been built around {drawn.a}, and the value came back accordingly.'           )),
+                'the REPL returned the list unchanged: `1, 2, 3` — the quoted form held its shape without any procedure call. The slate showed {drawn.a} in clear chalk, and the fold tally stood as the day record.'           )),
         _ex("(let [x 5] `(a ~x b))", ["a", 5, "b"],
             "a syntax-quoted list with one unquote",
             "the result of `(a ~x b) when x is 5",
@@ -415,7 +415,7 @@ G10_06 = SubjectCurriculum(
                 "With false, the `when` returns nil."
             ),
             resolution=(
-                'since the condition was true, the form ran the body and returned 3 — the last value in the sequence. The form had been built around {drawn.a}, and the value came back accordingly.'           )),
+                'since the condition was true, the form ran the body and returned 3 — the last value in the sequence. Carol marked {drawn.a} on the watchhouse beam, the lookout high above the valley quiet at last.'           )),
         _ex("(when false 1 2 3)", None,
             "the form (when false 1 2 3)",
             "what (when false 1 2 3) returns",
@@ -433,7 +433,7 @@ G10_06 = SubjectCurriculum(
                 "nothing after it is evaluated."
             ),
             resolution=(
-                'since the condition was false, the form skipped the body entirely and returned nil — no values in the sequence were computed. The form had been built around {drawn.a}, and the value came back accordingly.'         )),
+                'since the condition was false, the form skipped the body entirely and returned nil — no values in the sequence were computed. The fold gate held tight against the count of {drawn.a}, slate cool under the elder hand.'         )),
         _ex("(when-not false :ok)", ":ok",
             "the form (when-not false :ok)",
             "what (when-not false :ok) returns",
@@ -479,7 +479,7 @@ G10_07 = SubjectCurriculum(
                 "through three `inc` calls, each receiving it as the first argument."
             ),
             resolution=(
-                'starting with 5, each `inc` added 1, so the result was 8 — the value had threaded correctly through all three functions. The form had been built around {drawn.a}, and the value came back accordingly.'           )),
+                'starting with 5, each `inc` added 1, so the result was 8 — the value had threaded correctly through all three functions. Tom chalked {drawn.a} on the village notice, and the morning record stood for the next shepherd to read.'           )),
         _ex("(->> [1 2 3 4] (filter even?) (map inc) (reduce +))", 8,
             "a thread-last pipeline over [1 2 3 4]",
             "what the ->> pipeline returns",
@@ -493,7 +493,7 @@ G10_07 = SubjectCurriculum(
                 "`->>` threads the data as the last argument through each function."
             ),
             resolution=(
-                'The data flowed through the pipeline and produced the final result. The form had been built around {drawn.a}, and the value came back accordingly.'
+                'The data flowed through the pipeline and produced the final result. The lookout returned with {drawn.a} on his slate, the valley long behind him and the count plain.'
             )),
         _ex("(macroexpand '(-> x f g))", ["g", ["f", "x"]],
             "the expansion of (-> x f g)",
@@ -543,7 +543,7 @@ G10_08 = SubjectCurriculum(
                 "them to the function body where a is 3 and b is 4."
             ),
             resolution=(
-                'The function received the values and returned the expected result. The form had been built around {drawn.a}, and the value came back accordingly.'
+                'The function received the values and returned the expected result. The watchhouse warmed as the elder set {drawn.a} into the day record, the fold quiet by then.'
             )),
         _ex("(do (defmacro add-mac [a b] `(+ ~a ~b)) (add-mac 3 4))", 7,
             "a macro that emits the same addition form",
@@ -699,7 +699,7 @@ G10_11 = SubjectCurriculum(
                 "The quote reader macro `'` is shorthand for `quote`. The reader translates quoted forms so they are frozen before the runtime."
             ),
             resolution=(
-                'the reader translated the shorthand into the quoted form, so the REPL received a list of three numbers exactly as written. The form had been built around {drawn.a}, and the value came back accordingly.'
+                'the reader translated the shorthand into the quoted form, so the REPL received a list of three numbers exactly as written. {drawn.a} stood as the answer the fold required, slate, chalk, and a steady eye all in agreement.'
             )),
         _ex("(#(* % %) 6)", 36,
             "the #(...) reader macro for an anonymous fn",
@@ -926,7 +926,7 @@ G10_15 = SubjectCurriculum(
                 "to understand than a macro."
             ),
             resolution=(
-                'The function call worked perfectly. No macro overhead was needed. The form had been built around {drawn.a}, and the value came back accordingly.'
+                'The function call worked perfectly. No macro overhead was needed. The pasture tally settled at {drawn.a}, and Carol closed the day slate with that one number written clear.'
             )),
         _ex("(do \"prefer fn unless you must shape syntax\" "
             "(map inc [1 2 3]))", [2, 3, 4],
@@ -948,7 +948,7 @@ G10_15 = SubjectCurriculum(
                 "complexity — just function composition."
             ),
             resolution=(
-                'map applied inc to each number in [1 2 3] and returned [2 3 4] — the plain function had solved the problem elegantly. The form had been built around {drawn.a}, and the value came back accordingly.'           )),
+                'map applied inc to each number in [1 2 3] and returned [2 3 4] — the plain function had solved the problem elegantly. The slate showed {drawn.a} in clear chalk, and the fold tally stood as the day record.'           )),
     ],
     subplots=_REWRITERULE_SUBPLOTS, plan_pool=_PLAN_G10,
 )
