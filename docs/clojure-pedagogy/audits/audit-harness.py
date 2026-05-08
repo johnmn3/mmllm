@@ -1494,6 +1494,53 @@ def check_record(rec, sub, example):
         issues.append(("HEDGING_NEAR_FORM",
                         f"hedge {m.group(0)!r} in user_msg — eval-deterministic "
                         "narratives shouldn't hedge about the form's value"))
+    # ─────────── slice jDPM (dog-shadow) — Cat-K structural detectors ─
+
+    # CLAUSE_STACK_OVERFLOW (K-3) — a single sentence with 4+ comma-
+    # separated clauses, often produced by the "X did Y, with the Z of
+    # one who W, and the result of A, was B" template-output cadence.
+    # 5+ commas inside a single sentence is almost always a sign of
+    # template-output rhythm rather than fable prose.
+    for sentence in re.split(r"[.!?]\s+", user):
+        # Skip dialogue-quoted sentences (lots of internal commas
+        # legitimately) and Clojure form snippets.
+        if "`" in sentence or sentence.count('"') >= 2:
+            continue
+        n_commas = sentence.count(",")
+        if n_commas >= 5 and len(sentence) > 60:
+            issues.append(("CLAUSE_STACK_OVERFLOW",
+                            f"sentence with {n_commas} commas reads as "
+                            f"AI-output cadence: {sentence[:80]!r}"))
+            break
+
+    # AS_ONE_WHO_CADENCE (K-3) — the signature "as one who X" /
+    # "with the Y of one who Z" / "in the Z of one who Y" cadence is
+    # the most reliable AI-output signal in fable prose. A real
+    # children's-fable register uses concrete actions, not
+    # appositive-of-appositive structures.
+    if re.search(
+        r"\b(?:as one who|as a [a-z]+ who|with the [a-z ]+ of one who|"
+        r"in the [a-z ]+ of one who)\b",
+        user,
+    ):
+        issues.append(("AS_ONE_WHO_CADENCE",
+                        "user_msg contains 'as one who…' / 'with the X "
+                        "of one who Y' template-output cadence"))
+
+    # OUT_OF_REGISTER_VOCAB (K-5) — words that don't belong in a
+    # 5th-grade-reading-level fable: "thereby", "consequently",
+    # "henceforth", "hitherto", "ostensibly", "moreover",
+    # "notwithstanding", "purportedly", "qua", "wherein", "whereby".
+    if re.search(
+        r"\b(?:thereby|consequently|henceforth|hitherto|ostensibly|"
+        r"moreover|notwithstanding|purportedly|wherein|whereby|"
+        r"insofar|inasmuch|qua)\b",
+        user,
+        re.IGNORECASE,
+    ):
+        issues.append(("OUT_OF_REGISTER_VOCAB",
+                        "user_msg uses an out-of-register word that "
+                        "doesn't fit a children's-fable register"))
 
     return issues
 

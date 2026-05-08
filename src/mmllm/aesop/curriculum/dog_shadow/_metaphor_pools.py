@@ -1400,102 +1400,120 @@ _ROADSIGN_SUBPLOTS = _ROADSIGN_SUBPLOTS + [
 
 _SAFETYNET_SUBPLOTS = _SAFETYNET_SUBPLOTS + [
     _story(
-        "To {goal_text}, {hound_he_she} composed {concept_phrase} "
-        "and submitted the form. The REPL — log tested in advance — "
-        "handed back the value:"
+        "To {goal_text}, {hound_he_she}, {emo_cautious}, composed {concept_phrase} "
+        "with the practice-log laid out before the leap — every misstep "
+        "tested before the real crossing — and submitted the form. The "
+        "REPL handed back the value:"
     ),
 ]
 
 _SCROLL_SUBPLOTS = _SCROLL_SUBPLOTS + [
     _story(
-        "To {goal_text}, {hound_he_she} composed {concept_phrase} "
-        "and submitted the form. The REPL — claw to bark — completed "
-        "the message-bone work:"
+        "To {goal_text}, {hound_he_she}, {emo_patient}, composed {concept_phrase} "
+        "with the message-bone laid long enough to hold every word the "
+        "work would carry — and submitted the form. The REPL — claw to "
+        "bark — completed the message-bone work:"
     ),
 ]
 
 _GUILD_SUBPLOTS = _GUILD_SUBPLOTS + [
     _story(
-        "To {goal_text}, {hound_he_she} composed {concept_phrase} "
-        "and submitted the form. The REPL — checking the pack ledger — "
-        "dispatched cleanly:"
+        "To {goal_text}, {hound_he_she}, {emo_patient}, composed {concept_phrase} "
+        "with the pack ledger laid open — each member ready to answer "
+        "the same call in their own way — and submitted the form. The "
+        "REPL — checking the pack ledger — dispatched cleanly:"
     ),
 ]
 
 _SORTINGTABLE_SUBPLOTS = _SORTINGTABLE_SUBPLOTS + [
     _story(
-        "To {goal_text}, {hound_he_she} composed {concept_phrase} "
-        "and submitted the form. The REPL routed through the piles:"
+        "To {goal_text}, {hound_he_she}, {emo_patient}, composed {concept_phrase} "
+        "with the piles arranged by mark — each pile built for one kind "
+        "of bone — and submitted the form. The REPL routed through "
+        "the piles:"
     ),
 ]
 
 _CARRYINGCASE_SUBPLOTS = _CARRYINGCASE_SUBPLOTS + [
     _story(
-        "To {goal_text}, {hound_he_she} composed {concept_phrase} "
-        "and submitted the form. The REPL constructed the kennel-bag:"
+        "To {goal_text}, {hound_he_she}, {emo_patient}, composed {concept_phrase} "
+        "with the kennel-bag shaped to hold each piece in its own named "
+        "pocket — and submitted the form. The REPL constructed the "
+        "kennel-bag:"
     ),
 ]
 
 _TOOLSHED_SUBPLOTS = _TOOLSHED_SUBPLOTS + [
     _story(
-        "To {goal_text}, {hound_he_she} composed {concept_phrase} "
-        "and submitted the form. The REPL — calling into the "
-        "kennel-master's shed — returned:"
+        "To {goal_text}, {hound_he_she}, {emo_cautious}, composed {concept_phrase} "
+        "with the borrowed tool held the way the kennel-master had "
+        "shown — familiar shape, foreign mark — and submitted the "
+        "form. The REPL — calling into the kennel-master's shed — "
+        "returned:"
     ),
 ]
 
 _RUNNERAHEAD_SUBPLOTS = _RUNNERAHEAD_SUBPLOTS + [
     _story(
-        "To {goal_text}, {hound_he_she} composed {concept_phrase} "
-        "and submitted the form. The REPL coordinated the scout's "
-        "return:"
+        "To {goal_text}, {hound_he_she}, {emo_patient}, composed {concept_phrase} "
+        "with the scout already away down the long path — the answer "
+        "would catch up when it caught up — and submitted the form. "
+        "The REPL coordinated the scout's return:"
     ),
 ]
 
 _REWRITERULE_SUBPLOTS = _REWRITERULE_SUBPLOTS + [
     _story(
-        "To {goal_text}, {hound_he_she} composed {concept_phrase} "
-        "and submitted the form. The REPL — applying the rewrite, then "
+        "To {goal_text}, {hound_he_she}, {emo_patient}, composed {concept_phrase} "
+        "with the rule rewriting the shorthand into its full shape before "
+        "the run — what the runtime saw was already full size — and "
+        "submitted the form. The REPL — applying the rewrite, then "
         "evaluating the rewritten form — returned:"
     ),
 ]
 
 _SCRIBE_SUBPLOTS = _SCRIBE_SUBPLOTS + [
     _story(
-        "To {goal_text}, {hound_he_she} composed {concept_phrase} "
-        "and submitted the form. The REPL read by the conventions and "
-        "returned:"
+        "To {goal_text}, {hound_he_she}, {emo_cautious}, composed {concept_phrase} "
+        "with the bark cleared of stray scratches and only the form left "
+        "for the runtime to read — and submitted the form. The REPL "
+        "read by the conventions and returned:"
     ),
 ]
 
 _CHALKMARK_SUBPLOTS = _CHALKMARK_SUBPLOTS + [
     _story(
-        "To {goal_text}, {hound_he_she} composed {concept_phrase} "
-        "and submitted the form. The REPL — distinguishing scratch from "
-        "bone — returned:"
+        "To {goal_text}, {hound_he_she}, {emo_patient}, composed {concept_phrase} "
+        "with the scratch on the bark held distinct from the bone it "
+        "named — name and thing kept apart — and submitted the form. "
+        "The REPL — distinguishing scratch from bone — returned:"
     ),
 ]
 
 _TALLYWALK_SUBPLOTS = _TALLYWALK_SUBPLOTS + [
     _story(
-        "To {goal_text}, {hound_he_she} composed {concept_phrase} "
-        "and submitted the form. The REPL walked the bone-row carrying "
-        "the tally:"
+        "To {goal_text}, {hound_he_she}, {emo_patient}, composed {concept_phrase} "
+        "with the running tally heavy in the carrying — each bone added "
+        "to the count without dropping what came before — and "
+        "submitted the form. The REPL walked the bone-row carrying the "
+        "tally:"
     ),
 ]
 
 _BEADSTRING_SUBPLOTS = _BEADSTRING_SUBPLOTS + [
     _story(
-        "To {goal_text}, {hound_he_she} composed {concept_phrase} "
-        "and submitted the form. The REPL spliced or counted as the "
-        "form said:"
+        "To {goal_text}, {hound_he_she}, {emo_patient}, composed {concept_phrase} "
+        "with the bead-cord laid straight — every knot in its proper "
+        "place along the length — and submitted the form. The REPL "
+        "spliced or counted as the form said:"
     ),
 ]
 
 _CIRCUIT_SUBPLOTS = _CIRCUIT_SUBPLOTS + [
     _story(
-        "To {goal_text}, {hound_he_she} composed {concept_phrase} "
-        "and submitted the form. The REPL paced without growing the "
-        "trail:"
+        "To {goal_text}, {hound_he_she}, {emo_patient}, composed {concept_phrase} "
+        "with the same path walked again and again — no extra trail "
+        "laid down on each return — and submitted the form. The REPL "
+        "paced without growing the trail:"
     ),
 ]
