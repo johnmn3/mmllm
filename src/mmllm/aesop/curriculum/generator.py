@@ -444,14 +444,18 @@ CP_EMO_PATIENT = (
     "unbothered by the slow progress",
     "trusting the process, stone after stone",
     "unhurried, form after form",
+    "patient as the water rose",
+    "letting the count rise on its own",
+    "watching the level lift, drop by drop",
+    "deliberate, unhurried by the rising sun",
 )
 CP_EMO_PROUD = (
     "with a triumphant rattle of feathers",
     "head tilted confidently to one side",
     "ruffling up with certainty",
-    "clicking the beak in self-satisfaction",
+    "with a self-satisfied beak-click",
     "preening at the thought of knowing",
-    "cocking the head with certainty",
+    "with a confident tilt of the head",
 )
 
 

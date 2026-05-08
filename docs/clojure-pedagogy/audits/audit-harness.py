@@ -185,12 +185,27 @@ def check_record(rec, sub, example):
 
     # Bad place-preposition combos: "in the hilltop" (should be "on/atop"),
     # "in the road" (should be "on the road"), "in the farm" (should
-    # be "on/at the farm"), etc. Pitfall #22 family.
+    # be "on/at the farm"), "on the village/market" (should be at/in/near).
+    # Pitfall #22 family.
+    #
+    # The "in the X" cases use `(?!\w)` — they catch any "in the hilltop…"
+    # regardless of what follows (a hilltop never takes "in").
+    # The "on the {village|market}" cases must NOT match compound nouns
+    # like "on the market pitcher's clay" (idiomatic), so we require
+    # a phrase-terminator after the location (punctuation or end-of-line),
+    # which is what `place_phrase` produces.
     for bad in ("in the hilltop", "in the road", "in the beach",
                  "in the farm"):
         # Use word-boundary check so "in the farmyard" doesn't false-positive
         # on the "in the farm" pattern.
         if re.search(re.escape(bad) + r"(?!\w)", user):
+            issues.append(("BAD_PLACE_PREP", f"'{bad}' (wrong preposition)"))
+            break
+    for bad in ("on the village", "on the market"):
+        # Only flag when the phrase ends here (punctuation / end-of-line);
+        # don't fire on compound nouns ("on the market pitcher's").
+        if re.search(re.escape(bad) + r"\b(?=[\s]*(?:[.,;:!?]|$))",
+                     user, re.MULTILINE):
             issues.append(("BAD_PLACE_PREP", f"'{bad}' (wrong preposition)"))
             break
 
@@ -503,6 +518,43 @@ def check_record(rec, sub, example):
         issues.append(("INSISTED_THEY",
                         "boast subplot 'X insisted they already knew' reads as "
                         "plural after singular-named subject (pitfall #19)"))
+
+    # CAP_PRONOUN_MID_SENTENCE — capitalized pronoun (She/He/They)
+    # mid-sentence after a comma, typically from a `_he_she_cap`
+    # placeholder placed after a comma in a story-template.
+    # E.g., "To bind X, She composed..." should be "...she composed..."
+    # since the comma is mid-sentence, not a sentence boundary.
+    # Caught by looking for `, (She|He|They) <verb>` where the verb is
+    # one the templates use ("composed", "wrote", "submitted", etc.).
+    cap_mid_re = re.compile(
+        r",\s+(She|He|They)\s+"
+        r"(?:composed|wrote|submitted|chose|set|tested|checked|added|"
+        r"swapped|paused|brought|read|laid|scratched|extracted|built|"
+        r"intended|coordinated|reached|ran|dispatched|started|prepared)"
+        r"\b"
+    )
+    m = cap_mid_re.search(user)
+    if m:
+        issues.append(("CAP_PRONOUN_MID_SENTENCE",
+                       f"'{m.group(0)[:40]}…' (capitalized pronoun "
+                       "mid-sentence after comma — should be lowercase)"))
+
+    # DEFINITE_BODY_PART — bird-body participle phrases that prefix
+    # the body part with a definite article ("clicking the beak",
+    # "cocking the head"). The CP_EMO_PROUD pool used to ship these
+    # entries; the audit catches any future regression in the pool
+    # OR any new fable that copies the pattern.
+    body_part_re = re.compile(
+        r"\b(?:clicking|cocking|tilting|preening|fluffing|ruffling|"
+        r"tucking|spreading|opening|flicking|stretching|smoothing)"
+        r"\s+the\s+"
+        r"(?:beak|head|wings?|feathers?|tail|throat|crest)\b"
+    )
+    m = body_part_re.search(user)
+    if m:
+        issues.append(("DEFINITE_BODY_PART",
+                       f"'{m.group(0)}' (definite-article body-part "
+                       "in participle; use possessive-free phrasing)"))
 
     return issues
 
