@@ -227,9 +227,7 @@ G6_03 = SubjectCurriculum(grade=6, subject_id="G6-03",
                 "returned the same letters, capitalized."
             ),
             need=(
-                "Mossback the tortoise wanted the capitalized form of "
-                "the four-letter word `hare`, for a road-sign she was "
-                "painting."
+                'Mossback the tortoise wanted the capitalized form of the four-letter word `{drawn.a}`, for a road-sign she was painting.'
             ),
             mapping=(
                 "When a routine lives on a scroll, you call it by both "
@@ -256,9 +254,7 @@ G6_03 = SubjectCurriculum(grade=6, subject_id="G6-03",
                 "and returned them as the small kind."
             ),
             need=(
-                "For a sign she was making, Mossback needed the word ZEBRA "
-                "changed to its small-letter form — not to shout, but to match "
-                "the style of the sign's other words."
+                "For a sign she was making, Mossback needed the word {drawn.a} changed to its small-letter form — not to shout, but to match the style of the sign's other words."
             ),
             mapping=(
                 "When a routine lives on a borrowed scroll, call it by both "
@@ -290,7 +286,7 @@ G6_04 = SubjectCurriculum(grade=6, subject_id="G6-04",
             scenario=(
                 "Mossback had picked up the clojure.string scroll twice, called "
                 "the upper-case routine on the same tiny string both times. Now "
-                "she held two results in her paws — and they *looked* identical."
+                "she held two results in her paws — and they *looked* identical. The value drawn fresh was {drawn.a}."
             ),
             need=(
                 "But she needed the REPL to settle it: were the two results "
@@ -321,9 +317,7 @@ G6_05 = SubjectCurriculum(grade=6, subject_id="G6-05",
             question_what="the uppercase form of the string hello produced by clojure.string/upper-case",
             goal_text="call the uppercasing function from clojure.string on a test string",
             scenario=(
-                "Mossback stood at the library, the clojure.string scroll open "
-                "before her. She had a greeting to paint on a sign — the word hello — "
-                "and wanted it in grand capitals for all to see."
+                'Mossback stood at the library, the clojure.string scroll open before her. She had a greeting to paint on a sign — the word {drawn.a} — and wanted it in grand capitals for all to see.'
             ),
             need=(
                 "She needed to call the scroll's upper-case routine on the word, "
@@ -347,9 +341,7 @@ G6_05 = SubjectCurriculum(grade=6, subject_id="G6-05",
             question_what="the reversed form of the string abc produced by clojure.string/reverse",
             goal_text="call the reversing function from clojure.string on a test string",
             scenario=(
-                "The same scroll held another routine: reverse. It took the letters "
-                "in a string and handed them back in the opposite order. Mossback "
-                "had a string abc and wanted to see what the reversed order would look like."
+                'The same scroll held another routine: reverse. It took the letters in a string and handed them back in the opposite order. Mossback had a string {drawn.a} and wanted to see what the reversed order would look like.'
             ),
             need=(
                 "She needed the scroll's reverse routine to rearrange the letters "
@@ -400,7 +392,7 @@ G6_05 = SubjectCurriculum(grade=6, subject_id="G6-05",
             goal_text="extract the name local portion of a qualified keyword",
             scenario=(
                 "From the same qualified label :owner/item, Mossback now wanted "
-                "the second part — the local name that lived *within* the namespace."
+                "the second part — the local name that lived *within* the namespace. The value drawn fresh was {drawn.a}."
             ),
             need=(
                 "She needed to know what the routine was called — the part after "
@@ -550,13 +542,10 @@ G6_08 = SubjectCurriculum(grade=6, subject_id="G6-08",
             question_what="the uppercase form of the character a produced by clojure.string/upper-case",
             goal_text="call the string uppercasing function from clojure.string on the character a",
             scenario=(
-                "Mossback had already used the clojure.string scroll many times. "
-                "She picked it up again to ask: does the upper-case routine "
-                "still work on a single character, the letter a?"
+                'Mossback had already used the clojure.string scroll many times. She picked it up again to ask: does the upper-case routine still work on {drawn.a} single character, the letter {drawn.a}?'
             ),
             need=(
-                "She needed to call the routine on a tiny string — just one letter — "
-                "and see whether the scroll's routine worked just as well."
+                "She needed to call the routine on {drawn.a} tiny string — just one letter — and see whether the scroll's routine worked just as well."
             ),
             mapping=(
                 "A fully-qualified routine call — clojure.string/upper-case — "
@@ -607,13 +596,10 @@ G6_09 = SubjectCurriculum(grade=6, subject_id="G6-09",
             question_what="the value of the second variable after both definitions are loaded in order",
             goal_text="define step1 as 1, then define step2 as step1 plus 1, then return step2",
             scenario=(
-                "Mossback planted a sign step1 on the road and nailed the value 1 to it. "
-                "Then she planted a second sign step2 — but this one's value depended on "
-                "reading the first sign first."
+                "Mossback planted a sign step{drawn.a} on the road and nailed the value {drawn.a} to it. Then she planted a second sign step2 — but this one's value depended on reading the first sign first."
             ),
             need=(
-                "She had to make sure the REPL would plant the signs in order: "
-                "step1 first, then step2, then ask for step2's value."
+                "She had to make sure the REPL would plant the signs in order: step{drawn.a} first, then step2, then ask for step2's value."
             ),
             mapping=(
                 "The `do` form says: execute these forms one after another, in order. "
@@ -621,9 +607,7 @@ G6_09 = SubjectCurriculum(grade=6, subject_id="G6-09",
                 "The runtime processes them in sequence, so step2 can read step1."
             ),
             resolution=(
-                "the runtime returned the value of step2, which had been calculated "
-                "by reading step1 — a chain of dependency, in order."
-            ),
+                'the runtime returned the value of step2, which had been calculated by reading step{drawn.a} — a chain of dependency, in order.'           ),
             tags=("story",),
         ),
         SubjectExample(
@@ -633,9 +617,7 @@ G6_09 = SubjectCurriculum(grade=6, subject_id="G6-09",
             question_what="the sum of two variables with the second depending on the first",
             goal_text="bind a to 1, bind b to a plus 1, then return the sum of a and b",
             scenario=(
-                "In her leather pouch, Mossback tucked two values in order: "
-                "first, a with the value 1; then, b with the value a plus 1. "
-                "She needed them both in the pouch at the same time, so she could add them."
+                'In her leather pouch, Mossback tucked two values in order: first, a with the value {drawn.a}; then, b with the value a plus 1. She needed them both in the pouch at the same time, so she could add them.'
             ),
             need=(
                 "She needed to create the bindings in sequence — a first, then b "
@@ -760,8 +742,7 @@ G6_13 = SubjectCurriculum(grade=6, subject_id="G6-13",
                 "Now when she wanted to use the routine, she could call it the short way."
             ),
             need=(
-                "She needed to apply the routine to the word hare, using only the short alias "
-                "to keep the code readable."
+                'She needed to apply the routine to the word {drawn.a}, using only the short alias to keep the code readable.'
             ),
             mapping=(
                 "A `let` binding lets you give a long name a short local alias. "

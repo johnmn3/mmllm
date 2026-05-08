@@ -60,7 +60,7 @@ G9_01 = SubjectCurriculum(
                 "Mossback the tortoise set her woven basket on the path, "
                 "its single compartment :a holding one acorn gathered that "
                 "morning. Pip the hare called out that she should tuck a "
-                "second acorn into a new compartment :b."
+                "second acorn into a new compartment :b. The values drawn fresh were {drawn.a}, {drawn.b}, and {drawn.c}."
             ),
             need=(
                 "Mossback needed a fresh basket with both compartments — "
@@ -132,7 +132,7 @@ G9_02 = SubjectCurriculum(
                 "The meadow's berry-tally notebook sat open on the tree "
                 "stump. Before any forager had returned, the page read "
                 "zero. Mossback the tortoise was first back, one berry in "
-                "her pouch."
+                "her pouch. The value at the heart of the form was 0."
             ),
             need=(
                 "The notebook needed to hold a running count that "
@@ -161,7 +161,7 @@ G9_02 = SubjectCurriculum(
             scenario=(
                 "Mossback kept a small notebook on the stump to track "
                 "the race's status. Before the starting horn, the page "
-                "read the idle word. The horn sounded and the race began."
+                "read the idle word. The horn sounded and the race began. The form's keyword to weigh was :idle."
             ),
             need=(
                 "The status needed to change from idle to running the "
@@ -304,7 +304,7 @@ G9_04 = SubjectCurriculum(
             scenario=(
                 "The notebook on the stump held zero. Mossback had "
                 "glanced at the page a moment before and was ready "
-                "to write only if it still said zero."
+                "to write only if it still said zero. The value at the heart of the form was 0. The value at the heart of the form was 5."
             ),
             need=(
                 "Mossback would update the page only if no other "
@@ -382,7 +382,7 @@ G9_05 = SubjectCurriculum(
                 "Mossback tied a small bell to the corner of the "
                 "notebook on the stump. Whenever a forager changed the "
                 "tally page, the bell rang and a scribe noted the new "
-                "value in a separate log notebook on the same stump."
+                "value in a separate log notebook on the same stump. The form's keyword to weigh was :w."
             ),
             need=(
                 "The head forager wanted an audit trail — every new "
@@ -436,7 +436,7 @@ G9_06 = SubjectCurriculum(
             need=(
                 "Without the referee, a careless forager could write "
                 "a nonsense entry. The validator ensured only numeric "
-                "tallies would ever land on the page."
+                "tallies would ever land on the page. The value at the heart of the form was 0."
             ),
             mapping=(
                 "`set-validator!` installs a predicate on the atom; "
@@ -473,7 +473,7 @@ G9_07 = SubjectCurriculum(
             scenario=(
                 "The ref notebook required any change to be made "
                 "inside a fenced transaction zone. Mossback "
-                "approached the stump to add one to the tally."
+                "approached the stump to add one to the tally. The value at the heart of the form was 0."
             ),
             need=(
                 "The transaction fence guaranteed that if anything "
@@ -506,7 +506,7 @@ G9_07 = SubjectCurriculum(
                 "previous season's count. At the start of a new "
                 "accounting period the head forager decided to "
                 "overwrite the page entirely with a fresh small number, "
-                "ignoring what was there before."
+                "ignoring what was there before. The value at the heart of the form was 100."
             ),
             need=(
                 "The new tally needed to replace the old page "
@@ -554,7 +554,7 @@ G9_08 = SubjectCurriculum(
                 "one tracking morning berries, one tracking afternoon "
                 "berries. Mossback needed to increment both in a single "
                 "accounting step so the two tallies would never be "
-                "out of sync with each other."
+                "out of sync with each other. The value at the heart of the form was 1."
             ),
             need=(
                 "If Mossback updated one notebook and something "
@@ -628,7 +628,7 @@ G9_09 = SubjectCurriculum(
                 "Mossback reached the stump with a single berry. She "
                 "chose the lighter notebook — the atom — because only "
                 "one forager updated the tally at a time, and no "
-                "coordinated multi-notebook transaction was needed."
+                "coordinated multi-notebook transaction was needed. The value at the heart of the form was 0."
             ),
             need=(
                 "A single atomic page-update was all the task required. "
@@ -657,7 +657,7 @@ G9_09 = SubjectCurriculum(
                 "berry, but this time the task was part of a larger "
                 "coordinated accounting that spanned several notebooks. "
                 "She chose the ref — the transactionally-protected "
-                "notebook — for the update."
+                "notebook — for the update. The value at the heart of the form was 0."
             ),
             need=(
                 "When multiple notebooks had to move together, the ref "
@@ -701,7 +701,7 @@ G9_10 = SubjectCurriculum(
                 "Mossback held a tally-scroll starting at zero. She "
                 "dispatched a messenger to carry an increment task "
                 "down the road, freeing her to carry on with other "
-                "work while the messenger ran."
+                "work while the messenger ran. The value at the heart of the form was 0."
             ),
             need=(
                 "When Mossback eventually wanted the updated tally, she "
@@ -774,7 +774,7 @@ G9_11 = SubjectCurriculum(
                 "Mossback needed a quick errand done on a shared-pool "
                 "runner — the kind reserved for short, fast tasks that "
                 "would not block the pool. She dispatched the messenger "
-                "with `send` to increment the scroll."
+                "with `send` to increment the scroll. The value at the heart of the form was 0."
             ),
             need=(
                 "The `send` path uses a bounded thread pool suitable "
@@ -803,7 +803,7 @@ G9_11 = SubjectCurriculum(
                 "pausing at the river, or resting in the sun — Mossback "
                 "chose `send-off`, which dispatches the messenger on "
                 "an expandable pool that can block without starving "
-                "the fast runners."
+                "the fast runners. The value at the heart of the form was 0."
             ),
             need=(
                 "The task might park for a moment. Using `send` on a "
@@ -846,7 +846,7 @@ G9_12 = SubjectCurriculum(
                 "succession, each carrying an increment task for the "
                 "same tally-scroll. The second messenger would wait "
                 "for the first to finish before applying its own "
-                "increment."
+                "increment. The value at the heart of the form was 0."
             ),
             need=(
                 "Both increments had to land before Mossback read "
@@ -960,7 +960,7 @@ G9_14 = SubjectCurriculum(
                 "The notebook on the stump had a page already written "
                 "by the morning's foragers. Mossback the tortoise "
                 "wanted to glance at the page without changing anything "
-                "— just read what was there."
+                "— just read what was there. The value at the heart of the form was 7."
             ),
             need=(
                 "Mossback needed only to look at the current page. "
@@ -1031,7 +1031,7 @@ G9_15 = SubjectCurriculum(
                 "Mossback sent a sealed scroll ahead of the race — a "
                 "promise that a result would arrive before anyone tried "
                 "to read it. The scroll was empty when it left her "
-                "paws, waiting to be filled."
+                "paws, waiting to be filled. The form's keyword to weigh was :done."
             ),
             need=(
                 "When the task finished, someone needed to unseal the "
@@ -1061,7 +1061,7 @@ G9_15 = SubjectCurriculum(
                 "Pip the hare created a sealed scroll before setting "
                 "off to count the orchard's acorns. She promised "
                 "Mossback the total would be written on the scroll "
-                "when she returned. Mossback waited at the stump."
+                "when she returned. Mossback waited at the stump. The value at the heart of the form was 42."
             ),
             need=(
                 "Mossback needed to read the scroll only after Pip "
@@ -1105,7 +1105,7 @@ G9_16 = SubjectCurriculum(
                 "runner's stretch of road — never shared across "
                 "threads — Mossback reached for the lightweight "
                 "notebook: the volatile. No transaction fence, no "
-                "atomic retry, just a fast local update."
+                "atomic retry, just a fast local update. The value at the heart of the form was 0."
             ),
             need=(
                 "The atom's overhead was unnecessary when only one "
@@ -1137,7 +1137,7 @@ G9_16 = SubjectCurriculum(
                 "interim count from the first half of the path. At "
                 "the midpoint she decided to restart the count from "
                 "scratch with a large new value, overwriting the "
-                "old page entirely."
+                "old page entirely. The value at the heart of the form was 5."
             ),
             need=(
                 "She needed to replace the page outright — not add "
@@ -1256,7 +1256,7 @@ G9_18 = SubjectCurriculum(
                 "Mossback built a fence around the notebook on the "
                 "stump — the last-resort guard for when atom and ref "
                 "were not enough. Only the runner holding the fence-key "
-                "could enter the critical section at a time."
+                "could enter the critical section at a time. The value at the heart of the form was 1."
             ),
             need=(
                 "A body of work needed exclusive access — no other "
@@ -1288,7 +1288,7 @@ G9_18 = SubjectCurriculum(
                 "by using the simplest possible body — a bare value "
                 "that needed no computation. She grabbed the fence-key "
                 "and stepped inside just long enough to read the "
-                "value off the page."
+                "value off the page. The value at the heart of the form was 42."
             ),
             need=(
                 "Even a trivial body inside `locking` demonstrates "

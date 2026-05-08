@@ -1142,15 +1142,32 @@ def check_record(rec, sub, example):
     # generic "the REPL returned the value." Skips examples that don't
     # have story tags and skips when the form has no extractable
     # literals to begin with.
+    #
+    # Parametric examples (form_template + slots) interpolate drawn
+    # values via `{drawn.<slot>}` placeholders. A resolution that
+    # contains `{drawn.X}` IS closing the loop — the renderer will
+    # substitute the actual drawn value at render time. Treat any
+    # `{drawn.<slot>}` placeholder in the resolution as a positive
+    # signal so this detector doesn't penalize parametric authoring.
     if "story" in getattr(example, "tags", ()) and example.resolution:
         form = rec.code_str or ""
         lits = _drawn_literals(form)
         if lits:
             res_text = example.resolution
+            # A drawn-value reference closes the loop if ANY of the four
+            # story slots (scenario / need / mapping / resolution) contains
+            # either a form-literal or a `{drawn.<slot>}` placeholder.
+            slots_text = " ".join(filter(None, (
+                getattr(example, "scenario", ""),
+                getattr(example, "need", ""),
+                getattr(example, "mapping", ""),
+                res_text,
+            )))
             has_lit = any(
-                (lit and lit in res_text) for lit in lits
+                (lit and lit in slots_text) for lit in lits
             )
-            if not has_lit:
+            has_drawn_placeholder = "{drawn." in slots_text
+            if not has_lit and not has_drawn_placeholder:
                 issues.append(("STORY_RESOLUTION_NO_DRAWN",
                                 f"story-tagged example's resolution slot has no "
                                 f"drawn-value reference (form has literals "
