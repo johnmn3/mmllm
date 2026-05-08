@@ -74,7 +74,7 @@ mark."""),
 
     # 3. Patient-elder template — the elder demonstrates the discipline.
     SubplotTemplate("""\
-"To {goal_text}," {elder_phrase} said {place}, "the village agreed
+"To {goal_text}," {elder_phrase}, {emo_patient}, said {place}, "the village agreed
 years ago: write the form, submit it, take the runtime's word." The
 elder composed {concept_phrase} for {shepherd_phrase} to read,
 submitted the form to the REPL, and the answer came back as honest
@@ -236,7 +236,7 @@ the value the last step had produced."""),
     # 2. The drill-card as a named watch-routine; elder composes it
     #    carefully, letting the REPL follow the steps.
     SubplotTemplate("""\
-"A drill-card is only useful when it runs," {elder_phrase} said,
+"A drill-card is only useful when it runs," {elder_phrase}, {emo_patient}, said,
 holding up a slate-card from the watchhouse wall. "You write the steps,
 you bring the shepherds, the runtime does the rest." To {goal_text},
 {elder_he_she} composed {concept_phrase} as a named routine, submitted
@@ -260,7 +260,7 @@ only the result from the last."""),
     # 4. Drill-cards feeding into drill-cards — emphasizes the chained
     #    nature and how routines can be composed together.
     SubplotTemplate("""\
-"Drill-cards can feed into one another," {elder_phrase} said, spreading
+"Drill-cards can feed into one another," {elder_phrase}, {emo_patient}, said, spreading
 several slates on the watchhouse step. "What one card serves, the next
 can take as its ingredient — together they make a longer routine." To
 {goal_text}, {elder_he_she} composed {concept_phrase} as a chain of
@@ -323,7 +323,7 @@ clean from the steady weave."""),
     SubplotTemplate("""\
 A line of sheep had formed {place}, each one taking the next sheep's
 fleece in its mouth — head at the front, the rest trailing behind. "Many
-of our baskets are like this procession," {elder_phrase} said. "You can
+of our baskets are like this procession," {elder_phrase}, {emo_patient}, said. "You can
 grab the head, you can ask for the tail, you can put a new sheep at the
 front of the line." To {goal_text}, {elder_he_she} composed
 {concept_phrase}, submitted the form, and the REPL marched the procession
@@ -381,7 +381,7 @@ the REPL returned what the comb had let pass."""),
     #    the new-basket-out-the-other-side metaphor with a fleece-comb
     #    or wool-screen.
     SubplotTemplate("""\
-{elder_phrase} balanced a fleece-comb over an empty wool-basket. "The
+{elder_phrase}, {emo_patient}, balanced a fleece-comb over an empty wool-basket. "The
 fleeces go in at the top," {elder_he_she} said, "and the comb does its
 work — applying the rule, choosing or changing — and what lands in the
 basket below is the result." To {goal_text}, {elder_he_she} composed
@@ -390,7 +390,7 @@ REPL collected what fell into the receiving basket."""),
 
     # 3. Stacked combs — output of one feeds the next. (comp xform.)
     SubplotTemplate("""\
-{elder_phrase} stacked two fleece-combs one above the other, the output
+{elder_phrase}, {emo_patient}, stacked two fleece-combs one above the other, the output
 of the first feeding into the second. "What lands at the bottom,"
 {elder_he_she} said, "has been through both rules in order — applied as
 a single combined comb." To {goal_text}, {elder_he_she} composed
@@ -401,7 +401,7 @@ the form, and the REPL caught what the stack let pass."""),
     #    (into / into with xform.)
     SubplotTemplate("""\
 "You can pour the fleeces into any kind of basket you like,"
-{elder_phrase} said. "A row of locks, a unique-only pile, a bag of any
+{elder_phrase}, {emo_patient}, said. "A row of locks, a unique-only pile, a bag of any
 shape — the comb doesn't care; the receiver does." To {goal_text},
 {elder_he_she} composed {concept_phrase}, chose the right empty
 receiver, poured through the fleece-comb, submitted the form, and the
@@ -411,13 +411,12 @@ REPL packed the result into the basket of {elder_his_her} choosing."""),
     #    the comb; elder pours through carefully and the REPL proves the
     #    answer.
     SubplotTemplate("""\
-{shepherd_phrase} eyed the wool, {emo_proud}, and called out a guess about
-what would come out the other side of the fleece-comb without bothering
-to actually pour. {elder_phrase} shook {elder_his_her} head and went on
-with the work: to {goal_text}, {elder_he_she} composed {concept_phrase}
-as the comb's rule, poured the input through carefully, submitted the
-form, and the REPL returned the only answer that would do — the one the
-comb had actually produced."""),
+{shepherd_phrase} eyed the wool, {emo_proud}, and called out a guess
+about what would come out the other side of the fleece-comb.
+{elder_phrase} shook {elder_his_her} head and went on with the work.
+To {goal_text}, {elder_he_she} composed {concept_phrase} as the comb's
+rule and poured the input through. The REPL returned the only answer
+that would do — the one the comb had actually produced."""),
 ]
 
 
@@ -450,18 +449,18 @@ prescribed."""),
     #    + heavy slate (heavy ↔ accumulator weight) + cool stone
     #    (cool ↔ stable persistent state).
     SubplotTemplate("""\
-"When I update the slate," {elder_phrase} said, {emo_patient}, the heavy
-slate cool against {elder_his_her} forearm, "I don't pick it up and walk
-away. I read the tally, apply the change, and write it back — one quick
-motion. If two of us arrive at once, the REPL holds one of us at the
-threshold so the slate is never half-written." To {goal_text},
-{elder_he_she} composed {concept_phrase} for the slate, submitted the
-form, and the REPL applied the update atomically."""),
+{elder_phrase} held the heavy slate, {emo_patient}; the cool stone
+rested against {elder_his_her} forearm. "When I update the slate I
+don't pick it up and walk away. I read the tally, apply the change,
+and write it back — one quick motion. The REPL holds any second
+writer at the threshold so the slate is never half-written." To
+{goal_text}, {elder_he_she} composed {concept_phrase} for the slate,
+submitted the form, and the REPL applied the update atomically."""),
 
     # 3. The slate-and-the-stone-table — emphasizes the persistence
     #    of the slate between updates.
     SubplotTemplate("""\
-"The watchhouse slate stays on the stone table," {elder_phrase} said, "so
+"The watchhouse slate stays on the stone table," {elder_phrase}, {emo_patient}, said, "so
 any shepherd who passes can read what's on the page right now. The page
 changes only when someone writes — and only as the REPL allows." To
 {goal_text}, {elder_he_she} composed {concept_phrase}, submitted the
@@ -471,7 +470,7 @@ handed back the value the page had carried."""),
     # 4. The shared-tally template — generic emphasis that many shepherds
     #    can coordinate their updates on the same slate.
     SubplotTemplate("""\
-"Many shepherds can come and go past the table," {elder_phrase} said, "and
+"Many shepherds can come and go past the table," {elder_phrase}, {emo_patient}, said, "and
 each one's read or write must agree with the others. The REPL sees to that —
 no two writers stomp on each other's chalk." To {goal_text},
 {elder_he_she} composed {concept_phrase}, submitted the form, and the
@@ -505,7 +504,7 @@ runtime returned the number that had been there all along, settling the matter
 the patient way."""),
 
     # 2. The flock-grows-or-shrinks template — for inc/dec, +/-.
-    SubplotTemplate(""""Watch the flock," {elder_phrase} said, gesturing at the grazing sheep. "Every
+    SubplotTemplate(""""Watch the flock," {elder_phrase}, {emo_patient}, said, gesturing at the grazing sheep. "Every
 operation either adds a lamb, removes one, or combines what's already there —
 the flock grows or shrinks by exactly what you say." To {goal_text},
 {elder_he_she} composed {concept_phrase}, submitted the form, and the REPL
@@ -513,7 +512,7 @@ returned the new count, the flock settled into its new arrangement."""),
 
     # 3. The careful-count template — generic; the operation is whatever
     #    the form says, but the elder's care with numbers is the metaphor.
-    SubplotTemplate("""{elder_phrase} arranged the tally-stick {place}, careful with the count.
+    SubplotTemplate("""{elder_phrase}, {emo_patient}, arranged the tally-stick {place}, careful with the count.
 "Numbers in Clojure don't fudge," {elder_he_she} said. "Whatever you do —
 adding sheep to the count, subtracting, dividing wool-weight into shares with
 leftovers, comparing two flocks — the runtime gets it exactly right, every
@@ -532,7 +531,7 @@ the true count — which was not what {shepherd_phrase} had claimed."""),
 
     # 5. The exact-number template — generic; emphasizes that the REPL gives
     #    the exact count, no matter the operation.
-    SubplotTemplate(""""Whatever the flock looks like after the operation," {elder_phrase} said,
+    SubplotTemplate(""""Whatever the flock looks like after the operation," {elder_phrase}, {emo_patient}, said,
 "the runtime gives the exact count — small or large, remainder or whole, the
 answer is precise." To {goal_text}, {elder_he_she} composed {concept_phrase},
 submitted the form, and the REPL handed back the value, exactly as the operation
@@ -566,10 +565,10 @@ said, regardless of {shepherd_phrase}'s guess."""),
     #    timber (heavy ↔ short-circuit weight).
     SubplotTemplate(""""Why did the gate stay shut?" {shepherd_phrase} asked. {elder_phrase},
 {emo_patient}, leaned on the heavy timber. "Two things and only two things
-close these gates: nil and false. An empty bucket, a zero-tally, a sleeping
-flock — every one of those still swings the gate open." To {goal_text},
-{elder_he_she} composed {concept_phrase}, submitted the form, and the REPL
-returned the verdict the gate had carried."""),
+close these gates: nil and false. An empty bucket or a sleeping flock still
+swings the gate open." To {goal_text}, {elder_he_she} composed
+{concept_phrase}, submitted the form, and the REPL returned the verdict the
+gate had carried."""),
 
     # 3. The first-closed-gate template — emphasizes short-circuiting.
     #    When multiple gates are chained, the first closed one stops the chain.
@@ -629,7 +628,7 @@ condition properly — returned the value of the arm the form actually took.""")
     #    multi-arm branching. Type-neutral framing works for if (one stone),
     #    cond/case (many stones).
     SubplotTemplate("""The path {place} opened into a crossroads, each arm marked by a condition-stone.
-"Branching forms work like this," {elder_phrase} said: "the shepherd walks past
+"Branching forms work like this," {elder_phrase}, {emo_patient}, said: "the shepherd walks past
 the stones in order, takes the first arm whose stone says true, and the value of
 that arm is what comes back." To {goal_text}, {elder_he_she} composed
 {concept_phrase}, submitted the form, and the REPL took the right arm and
@@ -637,7 +636,7 @@ returned its value."""),
 
     # 3. The unwalked-arm template — generic emphasis that branches not taken
     #    don't run at all.
-    SubplotTemplate(""""What's important about a path-fork," {elder_phrase} said, "is that the arm not
+    SubplotTemplate(""""What's important about a path-fork," {elder_phrase}, {emo_patient}, said, "is that the arm not
 taken doesn't run at all. The runtime checks the condition, walks the right arm,
 and the unwalked arm is just left behind." To {goal_text}, {elder_he_she}
 composed {concept_phrase}, submitted the form, and the REPL — running only what
@@ -654,7 +653,7 @@ pointed to — returned the arm the fork had truly revealed."""),
 
     # 5. The condition-decides template — generic; emphasizes that the condition
     #    is what picks the arm, not the shepherd's hopes.
-    SubplotTemplate(""""It isn't the shepherd who picks the arm," {elder_phrase} said, "it's the
+    SubplotTemplate(""""It isn't the shepherd who picks the arm," {elder_phrase}, {emo_patient}, said, "it's the
 condition. Whatever the condition evaluates to, that decides." To {goal_text},
 {elder_he_she} composed {concept_phrase}, submitted the form, and the REPL
 — letting the condition decide — handed back the value of the arm the condition
@@ -678,7 +677,7 @@ fell short."""),
 
     # 2. The notices-stay-where-posted template — generic emphasis that bindings
     #    persist and any later code reads them.
-    SubplotTemplate(""""The good thing about a notice," {elder_phrase} said, "is that it stays where
+    SubplotTemplate(""""The good thing about a notice," {elder_phrase}, {emo_patient}, said, "is that it stays where
 you posted it. The next shepherd along the path reads what's there now —
 whatever the latest chalk says." To {goal_text}, {elder_he_she} composed
 {concept_phrase}, submitted the form, and the REPL — reading the notices as the
@@ -688,7 +687,7 @@ form directed — returned the value the notice-post had recorded."""),
     #    is a property of the village, doesn't claim a specific operation.
     SubplotTemplate("""A small wooden library stood {place}, its shelves stocked with scrolls — each
 scroll holding the notices for one stretch of the village. "Names live on
-scrolls," {elder_phrase} said: "to use a notice from a scroll, you make sure the
+scrolls," {elder_phrase}, {emo_patient}, said: "to use a notice from a scroll, you make sure the
 scroll is on the shelf where the REPL can find it." To {goal_text},
 {elder_he_she} composed {concept_phrase}, submitted the form, and the REPL
 — finding the right notice on the right scroll — returned the value the form
@@ -696,7 +695,7 @@ had asked for."""),
 
     # 4. The careful-naming template — generic emphasis on names being chosen
     #    and read with care.
-    SubplotTemplate(""""Naming is half the art," {elder_phrase} said, chalking a careful notice on
+    SubplotTemplate(""""Naming is half the art," {elder_phrase}, {emo_patient}, said, chalking a careful notice on
 slate. "A clear name at the notice-post tells every later shepherd what to
 expect; a careless one trips them up." To {goal_text}, {elder_he_she}
 composed {concept_phrase} with the right name in mind, submitted the form, and
@@ -730,7 +729,7 @@ answer the careful design had earned."""),
 
     # 2. The drills-cost-nothing template — REPL safety; mistakes here are
     #    learning chances, not disasters.
-    SubplotTemplate(""""This is the practice-pen," {elder_phrase} said {place}, gesturing wide. "A slip
+    SubplotTemplate(""""This is the practice-pen," {elder_phrase}, {emo_patient}, said {place}, gesturing wide. "A slip
 here costs nothing. Write a form, see what comes back, fix it, try again. The
 REPL is forgiving in a way that a real run with the flock is not." To
 {goal_text}, {elder_he_she} composed {concept_phrase}, submitted the form,
@@ -738,7 +737,7 @@ and the REPL returned the value — even if the form had been close to a mis-ste
 
     # 3. The error-and-recovery template — generic emphasis on the runtime
     #    catching errors and the work continuing.
-    SubplotTemplate(""""What matters when something goes wrong," {elder_phrase} said, "is that the work
+    SubplotTemplate(""""What matters when something goes wrong," {elder_phrase}, {emo_patient}, said, "is that the work
 can continue — the runtime catches the slip, takes the recovery path, and the
 answer comes back even when something inside the form went off the trail." To
 {goal_text}, {elder_he_she} composed {concept_phrase}, submitted the form,
@@ -756,7 +755,7 @@ caught the slip that {shepherd_phrase} had not foreseen."""),
 
     # 5. The discipline-of-checking template — generic; emphasizes care in
     #    error handling and assertions.
-    SubplotTemplate(""""There's a discipline to running safely," {elder_phrase} said, "and it starts
+    SubplotTemplate(""""There's a discipline to running safely," {elder_phrase}, {emo_patient}, said, "and it starts
 with checking — making sure the form does what it claims, catching what could go
 wrong before it does." To {goal_text}, {elder_he_she} composed
 {concept_phrase}, submitted the form, and the REPL — applying whatever check or
@@ -785,7 +784,7 @@ back what the log-book actually held."""),
     #    slurp/spit, line-seq, edn, JSON, prn, doc, etc.
     SubplotTemplate("""\
 "Reading and writing watch-roll scrolls is just like reading and
-writing forms," {elder_phrase} said. "You ask the runtime for what's
+writing forms," {elder_phrase}, {emo_patient}, said. "You ask the runtime for what's
 on the parchment, you write what you want recorded, and the work
 goes both ways through one quill." To {goal_text},
 {elder_he_she} composed {concept_phrase}, submitted the form,
@@ -796,7 +795,7 @@ writing had committed."""),
     #    discipline of handling external resources.
     SubplotTemplate("""\
 "The world outside the REPL is bigger than the REPL,"
-{elder_phrase} said, "and the log-book out there has its own
+{elder_phrase}, {emo_patient}, said, "and the log-book out there has its own
 discipline — open it carefully, handle it with care, close it when
 you're done." To {goal_text}, {elder_he_she} composed
 {concept_phrase}, submitted the form, and the REPL — handling the
@@ -816,7 +815,7 @@ scroll faithfully — returned the value the parchment had held."""),
     # 5. The two-worlds template — generic; the inside-the-REPL
     #    world and the outside-the-REPL world meet at the scroll.
     SubplotTemplate("""\
-"There's the world inside the REPL," {elder_phrase} said, "and the
+"There's the world inside the REPL," {elder_phrase}, {emo_patient}, said, "and the
 world outside it. Watch-roll scrolls are how the two meet — a value
 crosses out and becomes letters on parchment, or letters on parchment
 cross in and become a value again." To {goal_text},
@@ -859,7 +858,7 @@ species-specific value."""),
     # 3. The fellowship-ledger template — generic emphasis on the
     #    fellowship's record being how the runtime knows who's a member.
     SubplotTemplate("""\
-{elder_phrase} held up the fellowship ledger. "Membership is in
+{elder_phrase}, {emo_patient}, held up the fellowship ledger. "Membership is in
 this book," {elder_he_she} said: "the species, the methods they
 swear they can perform, and the actual answers each species gives.
 The runtime reads from the book whenever the call goes out." To
@@ -870,7 +869,7 @@ returned the right answer."""),
     # 4. The boundaries-of-the-fellowship template — generic emphasis
     #    that each fellowship has its own membership.
     SubplotTemplate("""\
-"Each fellowship has its own boundaries," {elder_phrase} said.
+"Each fellowship has its own boundaries," {elder_phrase}, {emo_patient}, said.
 "Belonging to the Shepherds' fellowship doesn't mean belonging to
 the Goatherds' fellowship — the runtime checks each separately, and
 only the right fellowship's answer comes back." To {goal_text},
@@ -925,7 +924,7 @@ computed."""),
     #    emphasis on host interop's discipline.
     SubplotTemplate("""\
 "Foreign tools work, but they need careful handling,"
-{elder_phrase} said. "Their labels are different, their calling
+{elder_phrase}, {emo_patient}, said. "Their labels are different, their calling
 conventions are different, and the runtime has to bridge between
 Clojure and the host every time." To {goal_text},
 {elder_he_she} composed {concept_phrase}, submitted the form,
@@ -992,7 +991,7 @@ finished."""),
     # 3. The patience-of-the-elder template — generic; the elder's
     #    willingness to wait for the runner is the fable beat.
     SubplotTemplate("""\
-"The hard part isn't sending the runner," {elder_phrase} said.
+"The hard part isn't sending the runner," {elder_phrase}, {emo_patient}, said.
 "The hard part is being patient enough to wait for the answer when
 it comes — not snatching too early, not giving up too soon. The
 runtime makes that easier than it sounds." To {goal_text},
@@ -1003,7 +1002,7 @@ runner's answer when the runner had it ready."""),
     # 4. The elder-coordinates template — generic; the runtime keeps
     #    track of each runner.
     SubplotTemplate("""\
-{elder_phrase} arranged a small relay {place}, runners and
+{elder_phrase}, {emo_patient}, arranged a small relay {place}, runners and
 messengers each in their place. "The runtime keeps track of who
 sent what and when each one finishes," {elder_he_she} said, "so
 the values come back in the right order, no matter how long each
@@ -1030,7 +1029,7 @@ delivered it."""),
 _REWRITERULE_SUBPLOTS: list[SubplotTemplate] = [
 
     # 1. The rewriting-shorthand template — `defmacro` introduction.
-    SubplotTemplate("""{elder_phrase} sat at a small writing desk {place}, slate and chalk
+    SubplotTemplate("""{elder_phrase}, {emo_patient}, sat at a small writing desk {place}, slate and chalk
 in hand. "A macro," {elder_he_she} said, "is a rule that rewrites
 the shorthand before the runtime ever sees it. You write the rule
 once, and any form that names it gets rewritten on the way in."
@@ -1117,7 +1116,7 @@ form, and the REPL — reading exactly by those rules — returned the
 value the form had specified."""),
 
     # 2. The form-is-what-the-reader-sees template — generic.
-    SubplotTemplate("""\"A form is what the reader sees," {elder_phrase} said,
+    SubplotTemplate("""\"A form is what the reader sees," {elder_phrase}, {emo_patient}, said,
 "after the conventions have been applied. Some marks count, some
 don't; some shapes are expanded before the runtime even gets a
 look. The form you write and the form the runtime evaluates
@@ -1146,13 +1145,12 @@ literally — returned the right value, while {shepherd}'s guess fell
 short."""),
 
     # 5. The form-as-it-is template — generic.
-    SubplotTemplate("""\"A form is what's actually there on the page," {elder_phrase}
-said, "after the conventions of writing and reading have done
-their work. The runtime sees the cleaned-up form, evaluates it,
-and gives back what it computes." To {goal_text},
-{elder_he_she} composed {concept_phrase}, submitted the
-form, and the REPL — taking the form exactly as it was — handed
-back the value."""),
+    SubplotTemplate("""\"A form is what's actually there on the page," {elder_phrase},
+{emo_patient}, said. "After the conventions of writing and reading
+have done their work, the runtime sees the cleaned-up form and gives
+back what it computes." To {goal_text}, {elder_he_she} composed
+{concept_phrase} and submitted it. The REPL took the form as it was
+and handed back the value."""),
 
     # 6. The shepherd claims the written form is wrong without reading;
     #    the elder reads it carefully and the REPL proves the answer.
@@ -1172,7 +1170,7 @@ the one the careful marks had specified."""),
 _CHALKMARK_SUBPLOTS: list[SubplotTemplate] = [
 
     # 1. The mark-on-the-slate template — symbols vs values.
-    SubplotTemplate("""{elder_phrase} pointed at a name chalked onto the slate {place},
+    SubplotTemplate("""{elder_phrase}, {emo_patient}, pointed at a name chalked onto the slate {place},
 then at an actual sheep standing in the fold. "The mark on the
 slate is the *name*; the sheep is the *value*. They are not
 the same thing — and Clojure lets you talk about either one."
@@ -1182,7 +1180,7 @@ value distinct — returned the right answer."""),
 
     # 2. The label-the-form template — `quote` / `'`.
     SubplotTemplate("""\"To talk about the form itself rather than evaluating it,"
-{elder_phrase} said, "you label the form with a chalk mark
+{elder_phrase}, {emo_patient}, said, "you label the form with a chalk mark
 in front. Quoting tells the runtime: don't evaluate this, just hand
 it back as the shape it is." To {goal_text}, {elder_he_she}
 composed {concept_phrase}, submitted the form, and the REPL —
@@ -1192,7 +1190,7 @@ respecting the chalk mark — returned the form unevaluated."""),
     #    emphasis on the distinction without claiming a specific
     #    quote/unquote arrangement.
     SubplotTemplate("""\"There's a difference between *labeling* the form and
-*evaluating* it," {elder_phrase} said. "Quote in any of its
+*evaluating* it," {elder_phrase}, {emo_patient}, said. "Quote in any of its
 shapes is the labeling — the runtime hands you back the form,
 not its value, unless you say otherwise." To {goal_text},
 {elder_he_she} composed {concept_phrase}, submitted the
@@ -1241,7 +1239,7 @@ _SORTINGTABLE_SUBPLOTS: list[SubplotTemplate] = [
 
     # 1. The sorting-gate template — `defmulti`.
     SubplotTemplate("""A wooden gate with three branching paths stood at the fold {place}.
-"Defmulti is a sorting-gate," {elder_phrase} said. "You decide
+"Defmulti is a sorting-gate," {elder_phrase}, {emo_patient}, said. "You decide
 what brand on each sheep to look at; the gate reads the brand and
 routes each sheep down the matching pen." To {goal_text},
 {elder_he_she} composed {concept_phrase}, submitted the
@@ -1249,7 +1247,7 @@ form, and the REPL — reading the sheep's brand, picking the
 gate — returned the value the right pen had produced."""),
 
     # 2. The brand-handling template — `defmethod`.
-    SubplotTemplate("""\"To add a pen to the sorting-gate," {elder_phrase} said,
+    SubplotTemplate("""\"To add a pen to the sorting-gate," {elder_phrase}, {emo_patient}, said,
 "you say what brand the pen handles and what the shepherds do
 when a sheep with that brand arrives." To {goal_text},
 {elder_he_she} composed {concept_phrase} for the right
@@ -1259,7 +1257,7 @@ dispatching the sheep — returned the pen-specific value."""),
     # 3. The runtime-reads-the-brand template — generic; the
     #    sorting-gate reads whatever the dispatch function returns
     #    and routes accordingly.
-    SubplotTemplate("""\"What the gate sorts by is up to you," {elder_phrase} said.
+    SubplotTemplate("""\"What the gate sorts by is up to you," {elder_phrase}, {emo_patient}, said.
 "You decide what to look at on each sheep — a brand, a fleece color, a
 mark, anything. The runtime reads it, finds the matching pen,
 and routes that one." To {goal_text}, {elder_he_she}
@@ -1269,7 +1267,7 @@ value the right pen had given."""),
 
     # 4. The flexible-routing template — generic emphasis on
     #    the open-dispatch nature.
-    SubplotTemplate("""\"The good thing about a sorting-gate," {elder_phrase} said,
+    SubplotTemplate("""\"The good thing about a sorting-gate," {elder_phrase}, {emo_patient}, said,
 "is that you can keep adding new pens whenever a new brand of
 sheep shows up. The original gate doesn't change; the runtime
 just learns one more route." To {goal_text},
@@ -1288,7 +1286,7 @@ correct pen."""),
 
     # 6. The elder sets up the sorting-gate with multiple dispatch paths;
     #    each sheep goes to its proper pen. Generic emphasis on routing.
-    SubplotTemplate("""{elder_phrase} stood at the sorting-gate {place}, watching each
+    SubplotTemplate("""{elder_phrase}, {emo_patient}, stood at the sorting-gate {place}, watching each
 sheep arrive marked. "Every animal gets its own pen," {elder_he_she}
 said, "not by guessing, but by reading the brand. The dispatch
 function is the reader; the gate is the router." To {goal_text},
@@ -1305,7 +1303,7 @@ _CARRYINGCASE_SUBPLOTS: list[SubplotTemplate] = [
 
     # 1. The labeled-compartments template — defrecord.
     SubplotTemplate("""\
-{elder_phrase} held up a small wooden tally-box {place}, its inside
+{elder_phrase}, {emo_patient}, held up a small wooden tally-box {place}, its inside
 divided into labeled pigeon-holes — one for count, one for weight,
 one for breed. "A defrecord is like this box," {elder_he_she} said:
 "named compartments holding specific things; a mark on the outside
@@ -1316,7 +1314,7 @@ the tally-box held."""),
 
     # 2. The bare-box template — deftype.
     SubplotTemplate("""\
-"A deftype is a barer tally-box," {elder_phrase} said. "Compartments,
+"A deftype is a barer tally-box," {elder_phrase}, {emo_patient}, said. "Compartments,
 a mark — no map-like behavior unless you ask for it. Faster, more
 focused, lighter in hand." To {goal_text}, {elder_he_she}
 composed {concept_phrase}, submitted the form, and the REPL —
@@ -1325,7 +1323,7 @@ inside."""),
 
     # 3. The reaching-into-a-compartment template — field access.
     SubplotTemplate("""\
-"To reach into a named compartment," {elder_phrase} explained,
+"To reach into a named compartment," {elder_phrase}, {emo_patient}, explained,
 "you ask for it by name. The box knows where each hole is; the
 runtime fetches what's inside cleanly." To {goal_text},
 {elder_he_she} composed {concept_phrase}, submitted the form,
@@ -1389,8 +1387,7 @@ the flock — returned the final tally."""),
 
     # 3. The simple-count template — count.
     SubplotTemplate("""\
-"The simplest tally-stick walk is just counting," {elder_phrase}
-said: "step along the flock, notch once per sheep, no other work.
+"The simplest tally-stick walk is just counting," {elder_phrase}, {emo_patient}, said: "step along the flock, notch once per sheep, no other work.
 The runtime does this the same way for any kind of collection."
 To {goal_text}, {elder_he_she} composed {concept_phrase},
 submitted the form, and the REPL — walking the row, notch by notch —
@@ -1424,7 +1421,7 @@ _BEADSTRING_SUBPLOTS: list[SubplotTemplate] = [
 
     # 1. The threading-beads template — string concat / subs.
     SubplotTemplate("""\
-{elder_phrase} held up a knotted tally-cord {place}, a long string
+{elder_phrase}, {emo_patient}, held up a knotted tally-cord {place}, a long string
 threaded with knots at intervals. "Strings in Clojure are like this,"
 {elder_he_she} said: "a cord of characters in order. Splice two cords
 together, and the threads join; cut a section out, and you get a
@@ -1434,7 +1431,7 @@ cutting as the form said — returned the new tally-cord."""),
 
     # 2. The counting-knots template — string length / substring.
     SubplotTemplate("""\
-"To count the knots on the cord," {elder_phrase} said, "walk your
+"To count the knots on the cord," {elder_phrase}, {emo_patient}, said, "walk your
 finger along from the start. Want a section? Hold at one knot and
 cut to another — you get a shorter thread, the original untouched."
 To {goal_text}, {elder_he_she} composed {concept_phrase},
@@ -1453,7 +1450,7 @@ returned the right answer."""),
 
     # 4. The immutability of the original template.
     SubplotTemplate("""\
-"Watch the tally-cord carefully," {elder_phrase} said, holding it up.
+"Watch the tally-cord carefully," {elder_phrase}, {emo_patient}, said, holding it up.
 "When I work with it, this cord stays exactly as it was — what I get
 back is a fresh cord with the change made, leaving the original
 untouched." To {goal_text}, {elder_he_she} composed
@@ -1478,7 +1475,7 @@ would allow: the one {shepherd} had not even thought to check."""),
 
 _CIRCUIT_SUBPLOTS: list[SubplotTemplate] = [
         # 1. The circuit-without-growing-the-trail template — recur.
-    SubplotTemplate("""{elder_phrase} walked the fence-line at dawn {place}, each lap
+    SubplotTemplate("""{elder_phrase}, {emo_patient}, walked the fence-line at dawn {place}, each lap
 returning to the same starting stone with fresh tallies in hand.
 "Recur is this circuit," {elder_he_she} said: "back to the top with
 new bindings, no extra trail laid down behind us." To {goal_text},
@@ -1487,7 +1484,7 @@ and the REPL — looping without growing the call-stack — returned
 the final value."""),
 
     # 2. The base-case template — termination.
-    SubplotTemplate("""\"Every circuit has a stopping condition," {elder_phrase} said.
+    SubplotTemplate("""\"Every circuit has a stopping condition," {elder_phrase}, {emo_patient}, said.
 "Without one, the walker goes round and round forever. With one, the
 walker knows when the circuit is done and the answer is the final
 tally." To {goal_text}, {elder_he_she} composed {concept_phrase},
@@ -1503,7 +1500,7 @@ and the REPL — looping the right number of times, then stopping —
 returned the value cleanly."""),
 
     # 4. The circuit-as-state-machine template.
-    SubplotTemplate("""\"Watch the fence-walk," {elder_phrase} said {place}. "Each lap
+    SubplotTemplate("""\"Watch the fence-walk," {elder_phrase}, {emo_patient}, said {place}. "Each lap
 brings new bindings — the tally changes, the path count changes, the
 walk moves forward by the logic we've composed." To {goal_text},
 {elder_he_she} composed {concept_phrase}, submitted the form,

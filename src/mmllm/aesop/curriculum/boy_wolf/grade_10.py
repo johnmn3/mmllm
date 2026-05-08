@@ -125,8 +125,7 @@ G10_01 = SubjectCurriculum(
                 "the numbers 1 and 2 — not an operation yet."
             ),
             resolution=(
-                "the form came back as a list of the three marks themselves — "
-                "the symbol and the numbers, exactly as quote had frozen them."
+                'the form came back as a list of the three marks themselves — the symbol and the numbers, exactly as quote had frozen them.'
             )),
         _ex("'(1 2 3)", [1, 2, 3],
             "the quoted list '(1 2 3)",
@@ -146,9 +145,7 @@ G10_01 = SubjectCurriculum(
                 "No evaluation happens — the list just sits there as data."
             ),
             resolution=(
-                "the REPL returned the list unchanged: `1, 2, 3` — "
-                "the quoted form held its shape without any procedure call."
-            )),
+                'the REPL returned the list unchanged: `1, 2, 3` — the quoted form held its shape without any procedure call. The form had been built around {drawn.a}, and the value came back accordingly.'           )),
         _ex("(let [x 5] `(a ~x b))", ["a", 5, "b"],
             "a syntax-quoted list with one unquote",
             "the result of `(a ~x b) when x is 5",
@@ -167,9 +164,7 @@ G10_01 = SubjectCurriculum(
                 "but the `x` thaws and becomes 5."
             ),
             resolution=(
-                "the form returned the list with the template shape held intact but "
-                "the unquoted position filled with 5 — exactly the drill-card pattern."
-            )),
+                'the form returned the list with the template shape held intact but the unquoted position filled with 5 — exactly the drill-card pattern.'           )),
     ],
     subplots=_CHALKMARK_SUBPLOTS, plan_pool=_PLAN_G10,
 )
@@ -200,9 +195,7 @@ G10_02 = SubjectCurriculum(
                 "`(+ ~x ~x)` becomes `(+ 10 10)` — two identical copies of the value."
             ),
             resolution=(
-                "the form produced the addition template with both positions "
-                "filled with 10 — the syntax-quoted shape held its structure while "
-                "both unquotes substituted the same value."
+                'the form produced the addition template with both positions filled with 10 — the syntax-quoted shape held its structure while both unquotes substituted the same value.'
             )),
         _ex("(let [xs [1 2 3]] `(list ~@xs))", ["list", 1, 2, 3],
             "a syntax-quoted list with unquote-splice",
@@ -223,8 +216,7 @@ G10_02 = SubjectCurriculum(
                 "`(list 1 2 3)` — the contents spread out, not a nested list."
             ),
             resolution=(
-                "the form returned the spliced result: the list symbol with each item "
-                "from the basket spread out as separate arguments."
+                'the form returned the spliced result: the list symbol with each item from the basket spread out as separate arguments.'
             )),
     ],
     subplots=_CHALKMARK_SUBPLOTS, plan_pool=_PLAN_G10,
@@ -262,9 +254,7 @@ G10_03 = SubjectCurriculum(
                 "runtime then evaluates the rewritten form."
             ),
             resolution=(
-                "the rewrite landed correctly: the shorthand expanded "
-                "to its full drill, and the runtime returned the value "
-                "the spelled-out form produced."
+                'the rewrite landed correctly: the shorthand expanded to its full drill, and the runtime returned the value the spelled-out form produced.'
             )),
         _ex("(do (defmacro twice [x] `(do ~x ~x)) (twice 7))", 7,
             "a macro that emits its argument twice in a do",
@@ -286,9 +276,7 @@ G10_03 = SubjectCurriculum(
                 "so both could execute."
             ),
             resolution=(
-                "the form returned 7 — the last value in the `do` sequence, "
-                "since `do` returns only its final expression. The macro's expansion "
-                "had worked correctly."
+                "the form returned 7 — the last value in the `do` sequence, since `do` returns only its final expression. The macro's expansion had worked correctly."
             )),
     ],
     subplots=_REWRITERULE_SUBPLOTS, plan_pool=_PLAN_G10,
@@ -320,8 +308,7 @@ G10_04 = SubjectCurriculum(
                 "applied once, but nested macros haven't been expanded yet."
             ),
             resolution=(
-                "the function returned the one-step expansion: the `when` had become "
-                "`if` plus `do`, exactly the rewrite Carol's rule prescribed on its first pass."
+                "the function returned the one-step expansion: the `when` had become `if` plus `do`, exactly the rewrite Carol's rule prescribed on its first pass."
             )),
         _ex("(macroexpand-1 '(or a b))",
             ["let*", ["or__1__auto__", "a"],
@@ -344,8 +331,7 @@ G10_04 = SubjectCurriculum(
                 "logic in one step. Further macro expansions wait for the next call."
             ),
             resolution=(
-                "the function returned the single-step expansion showing the `let*` and "
-                "`if` structure Carol's `or` rule prescribed, pausing before any further rewrites."
+                "the function returned the single-step expansion showing the `let*` and `if` structure Carol's `or` rule prescribed, pausing before any further rewrites."
             )),
     ],
     subplots=_REWRITERULE_SUBPLOTS, plan_pool=_PLAN_G10,
@@ -377,8 +363,7 @@ G10_05 = SubjectCurriculum(
                 "`macroexpand` keeps going until the form is fully expanded."
             ),
             resolution=(
-                "the function returned the complete expansion: the `when` fully transformed "
-                "into `if` plus `do`, with all rewrite rules exhausted."
+                'the function returned the complete expansion: the `when` fully transformed into `if` plus `do`, with all rewrite rules exhausted.'
             )),
         _ex("(macroexpand '(-> 1 inc inc))", ["inc", ["inc", 1]],
             "the full expansion of (-> 1 inc inc)",
@@ -400,9 +385,7 @@ G10_05 = SubjectCurriculum(
                 "the form is plain."
             ),
             resolution=(
-                "the function returned the fully expanded form: the threading had "
-                "rearranged the nesting to show the exact flow of the argument through "
-                "each function."
+                'the function returned the fully expanded form: the threading had rearranged the nesting to show the exact flow of the argument through each function.'
             )),
     ],
     subplots=_REWRITERULE_SUBPLOTS, plan_pool=_PLAN_G10,
@@ -432,9 +415,7 @@ G10_06 = SubjectCurriculum(
                 "With false, the `when` returns nil."
             ),
             resolution=(
-                "since the condition was true, the form ran the body and returned 3 — "
-                "the last value in the sequence."
-            )),
+                'since the condition was true, the form ran the body and returned 3 — the last value in the sequence. The form had been built around {drawn.a}, and the value came back accordingly.'           )),
         _ex("(when false 1 2 3)", None,
             "the form (when false 1 2 3)",
             "what (when false 1 2 3) returns",
@@ -452,9 +433,7 @@ G10_06 = SubjectCurriculum(
                 "nothing after it is evaluated."
             ),
             resolution=(
-                "since the condition was false, the form skipped the body entirely and "
-                "returned nil — no values in the sequence were computed."
-            )),
+                'since the condition was false, the form skipped the body entirely and returned nil — no values in the sequence were computed. The form had been built around {drawn.a}, and the value came back accordingly.'         )),
         _ex("(when-not false :ok)", ":ok",
             "the form (when-not false :ok)",
             "what (when-not false :ok) returns",
@@ -468,7 +447,7 @@ G10_06 = SubjectCurriculum(
                 "`when-not` is a macro that inverts the condition and expands to a negated-test form."
             ),
             resolution=(
-                "The condition was false, so `when-not` inverted it to true and the body executed."
+                'The condition was false, so `when-not` inverted it to true and the body executed.'
             )),
     ],
     subplots=_REWRITERULE_SUBPLOTS, plan_pool=_PLAN_G10,
@@ -500,9 +479,7 @@ G10_07 = SubjectCurriculum(
                 "through three `inc` calls, each receiving it as the first argument."
             ),
             resolution=(
-                "starting with 5, each `inc` added 1, so the result was 8 — "
-                "the value had threaded correctly through all three functions."
-            )),
+                'starting with 5, each `inc` added 1, so the result was 8 — the value had threaded correctly through all three functions. The form had been built around {drawn.a}, and the value came back accordingly.'           )),
         _ex("(->> [1 2 3 4] (filter even?) (map inc) (reduce +))", 8,
             "a thread-last pipeline over [1 2 3 4]",
             "what the ->> pipeline returns",
@@ -516,7 +493,7 @@ G10_07 = SubjectCurriculum(
                 "`->>` threads the data as the last argument through each function."
             ),
             resolution=(
-                "The data flowed through the pipeline and produced the final result."
+                'The data flowed through the pipeline and produced the final result. The form had been built around {drawn.a}, and the value came back accordingly.'
             )),
         _ex("(macroexpand '(-> x f g))", ["g", ["f", "x"]],
             "the expansion of (-> x f g)",
@@ -535,9 +512,7 @@ G10_07 = SubjectCurriculum(
                 "then the result to g."
             ),
             resolution=(
-                "the expanded form showed the nesting clearly: g applied to the result "
-                "of f applied to x — exactly the thread-first rule."
-            )),
+                'the expanded form showed the nesting clearly: g applied to the result of f applied to x — exactly the thread-first rule.'           )),
     ],
     subplots=_RECIPE_SUBPLOTS, plan_pool=_PLAN_G10,
 )
@@ -568,7 +543,7 @@ G10_08 = SubjectCurriculum(
                 "them to the function body where a is 3 and b is 4."
             ),
             resolution=(
-                "The function received the values and returned the expected result."
+                'The function received the values and returned the expected result. The form had been built around {drawn.a}, and the value came back accordingly.'
             )),
         _ex("(do (defmacro add-mac [a b] `(+ ~a ~b)) (add-mac 3 4))", 7,
             "a macro that emits the same addition form",
@@ -587,7 +562,7 @@ G10_08 = SubjectCurriculum(
                 "with a=3 and b=4 becomes the form `(+ 3 4)`, which the runtime then evaluates."
             ),
             resolution=(
-                "The macro rewrote the shorthand and the runtime evaluated it to the same result as the function."
+                'The macro rewrote the shorthand and the runtime evaluated it to the same result as the function.'
             )),
     ],
     subplots=_REWRITERULE_SUBPLOTS, plan_pool=_PLAN_G10,
@@ -618,8 +593,7 @@ G10_09 = SubjectCurriculum(
                 "always a symbol (a name), never a value, so it can be tested with `symbol?`."
             ),
             resolution=(
-                "the predicate confirmed that `gensym` returns a symbol — a name, not "
-                "a number or value, ready to be used as a unique temporary binding in a macro."
+                'the predicate confirmed that `gensym` returns a symbol — a name, not a number or value, ready to be used as a unique temporary binding in a macro.'
             )),
         _ex("(let [a (gensym \"x_\") b (gensym \"x_\")] (= a b))", False,
             "two distinct gensyms with the same prefix",
@@ -639,8 +613,7 @@ G10_09 = SubjectCurriculum(
                 "suffix appended."
             ),
             resolution=(
-                "the equality test returned false — the two symbols were different, "
-                "confirming that gensym had generated distinct names despite the shared prefix."
+                'the equality test returned false — the two symbols were different, confirming that gensym had generated distinct names despite the shared prefix.'
             )),
     ],
     subplots=_REWRITERULE_SUBPLOTS, plan_pool=_PLAN_G10,
@@ -676,8 +649,7 @@ G10_10 = SubjectCurriculum(
                 "injecting any hidden names, keeping hygiene intact."
             ),
             resolution=(
-                "the form evaluated to 10 — the binding x=5 was explicit and clear, "
-                "and (* x 2) returned the expected result without any hidden surprise names."
+                'the form evaluated to 10 — the binding x=5 was explicit and clear, and (* x 2) returned the expected result without any hidden surprise names.'
             )),
         _ex("(if-let [x 7] (* x x) 0)", 49,
             "the built-in if-let, which binds explicitly",
@@ -696,8 +668,7 @@ G10_10 = SubjectCurriculum(
                 "without the binding. No hidden names, just what's declared."
             ),
             resolution=(
-                "with x bound to 7, the form (* x x) returned 49 — the explicit binding "
-                "had put the name in scope, and the multiplication worked cleanly."
+                'with x bound to 7, the form (* x x) returned 49 — the explicit binding had put the name in scope, and the multiplication worked cleanly.'
             )),
     ],
     subplots=_REWRITERULE_SUBPLOTS, plan_pool=_PLAN_G10,
@@ -728,8 +699,7 @@ G10_11 = SubjectCurriculum(
                 "The quote reader macro `'` is shorthand for `quote`. The reader translates quoted forms so they are frozen before the runtime."
             ),
             resolution=(
-                "the reader translated the shorthand into the quoted form, so the REPL received "
-                "a list of three numbers exactly as written."
+                'the reader translated the shorthand into the quoted form, so the REPL received a list of three numbers exactly as written. The form had been built around {drawn.a}, and the value came back accordingly.'
             )),
         _ex("(#(* % %) 6)", 36,
             "the #(...) reader macro for an anonymous fn",
@@ -749,7 +719,7 @@ G10_11 = SubjectCurriculum(
                 "and multiplies it by itself."
             ),
             resolution=(
-                "The reader macro produced an anonymous function, which computed the square of the argument."
+                'The reader macro produced an anonymous function, which computed the square of the argument.'
             )),
         _ex("[1 #_ 2 3]", [1, 3],
             "the #_ form-skip reader macro",
@@ -768,8 +738,7 @@ G10_11 = SubjectCurriculum(
                 "the 3, resulting in a vector with only the first and third elements."
             ),
             resolution=(
-                "the reader skipped the 2 and produced a vector with only [1 3] — the form-skip "
-                "marker had worked exactly as the reader rules prescribed."
+                'the reader skipped the 2 and produced a vector with only [1 3] — the form-skip marker had worked exactly as the reader rules prescribed.'
             )),
     ],
     subplots=_SCRIBE_SUBPLOTS, plan_pool=_PLAN_G10,
@@ -801,9 +770,7 @@ G10_12 = SubjectCurriculum(
                 "the marked data."
             ),
             resolution=(
-                "the predicate `inst?` confirmed that the reader had converted the marked "
-                "string into a date-time object — the tag had worked correctly."
-            )),
+                'the predicate `inst?` confirmed that the reader had converted the marked string into a date-time object — the tag had worked correctly.'           )),
         _ex("(uuid? #uuid \"00000000-0000-0000-0000-000000000000\")", True,
             "the predicate on a #uuid tagged literal",
             "whether the #uuid tagged literal reads to a uuid",
@@ -821,9 +788,7 @@ G10_12 = SubjectCurriculum(
                 "from `#inst` marked strings."
             ),
             resolution=(
-                "the predicate `uuid?` confirmed that the marked string had been read as a "
-                "proper UUID object — the tag and reader had cooperated correctly."
-            )),
+                'the predicate `uuid?` confirmed that the marked string had been read as a proper UUID object — the tag and reader had cooperated correctly.'           )),
     ],
     subplots=_SCRIBE_SUBPLOTS, plan_pool=_PLAN_G10,
 )
@@ -854,8 +819,7 @@ G10_13 = SubjectCurriculum(
                 "the value it represents."
             ),
             resolution=(
-                "the function read the string \"42\" and returned the number 42 — "
-                "the data had been parsed and interpreted correctly."
+                'the function read the string "42" and returned the number 42 — the data had been parsed and interpreted correctly.'
             )),
         _ex("(clojure.edn/read-string \"[:a :b :c]\")", [":a", ":b", ":c"],
             "edn read-string of a vector source",
@@ -875,8 +839,7 @@ G10_13 = SubjectCurriculum(
                 "The syntax rules are identical."
             ),
             resolution=(
-                "the function parsed the text and returned a vector of three keywords — "
-                "the EDN reader had reconstructed the structured data from its text form."
+                'the function parsed the text and returned a vector of three keywords — the EDN reader had reconstructed the structured data from its text form.'
             )),
     ],
     subplots=_SCRIBE_SUBPLOTS, plan_pool=_PLAN_G10,
@@ -907,7 +870,7 @@ G10_14 = SubjectCurriculum(
                 "the runtime to evaluate the arithmetic."
             ),
             resolution=(
-                "Eval unthawed the quoted form and evaluated it, turning frozen data into live computation."
+                'Eval unthawed the quoted form and evaluated it, turning frozen data into live computation.'
             )),
         _ex("(eval (list '+ 4 5))", 9,
             "eval applied to a constructed list",
@@ -928,8 +891,7 @@ G10_14 = SubjectCurriculum(
                 "`(+ 4 5)` is evaluated identically to a quoted one."
             ),
             resolution=(
-                "eval evaluated the constructed list `(+ 4 5)` and returned 9 — "
-                "hand-built forms flowed through eval as smoothly as quoted ones."
+                'eval evaluated the constructed list `(+ 4 5)` and returned 9 — hand-built forms flowed through eval as smoothly as quoted ones.'
             )),
     ],
     subplots=_REWRITERULE_SUBPLOTS, plan_pool=_PLAN_G10,
@@ -964,7 +926,7 @@ G10_15 = SubjectCurriculum(
                 "to understand than a macro."
             ),
             resolution=(
-                "The function call worked perfectly. No macro overhead was needed."
+                'The function call worked perfectly. No macro overhead was needed. The form had been built around {drawn.a}, and the value came back accordingly.'
             )),
         _ex("(do \"prefer fn unless you must shape syntax\" "
             "(map inc [1 2 3]))", [2, 3, 4],
@@ -986,9 +948,7 @@ G10_15 = SubjectCurriculum(
                 "complexity — just function composition."
             ),
             resolution=(
-                "map applied inc to each number in [1 2 3] and returned [2 3 4] — "
-                "the plain function had solved the problem elegantly."
-            )),
+                'map applied inc to each number in [1 2 3] and returned [2 3 4] — the plain function had solved the problem elegantly. The form had been built around {drawn.a}, and the value came back accordingly.'           )),
     ],
     subplots=_REWRITERULE_SUBPLOTS, plan_pool=_PLAN_G10,
 )
@@ -1022,8 +982,7 @@ G10_16 = SubjectCurriculum(
                 "and won't collide with user names."
             ),
             resolution=(
-                "the macro bound the pace and ran the body, returning 42 — the with-pattern "
-                "had established its temporary binding and executed cleanly."
+                'the macro bound the pace and ran the body, returning 42 — the with-pattern had established its temporary binding and executed cleanly.'
             )),
         # A `def-X-thing` style: macro that defs a named thing.
         _ex("(do (defmacro def-watch [name v] `(def ~name ~v)) "
@@ -1045,9 +1004,7 @@ G10_16 = SubjectCurriculum(
                 "submits them to `def`."
             ),
             resolution=(
-                "the macro had defined `watch-mode` with the value `:alert`, and when Tom "
-                "asked for `watch-mode`, the REPL returned the bound value — the def had worked."
-            )),
+                'the macro had defined `watch-mode` with the value `:alert`, and when Tom asked for `watch-mode`, the REPL returned the bound value — the def had worked.'           )),
     ],
     subplots=_REWRITERULE_SUBPLOTS, plan_pool=_PLAN_G10,
 )

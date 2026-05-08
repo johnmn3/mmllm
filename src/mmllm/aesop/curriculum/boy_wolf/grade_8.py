@@ -110,9 +110,7 @@ G8_01 = SubjectCurriculum(
                 "have to know which keeper showed up."
             ),
             resolution=(
-                "the function was posted to the fellowship roll — a "
-                "single name the village could call, with each kind of "
-                "keeper answering in their own honest voice."
+                'the function was posted to the fellowship roll — a single name the village could call, with each kind of keeper answering in their own honest voice.'
             )),
         _ex("(let [speak (fn [k] (cond (= k :wolf) \"howl\" (= k :flock) \"bleat\"))] (speak :flock))",
             "bleat",
@@ -154,9 +152,7 @@ G8_02 = SubjectCurriculum(
                 "into the slot named `color` and reads it back."
             ),
             resolution=(
-                "the tally-box yielded the lantern's color cleanly — "
-                "the cooper's plan and the village's uniform readout, "
-                "exactly as designed."
+                "the tally-box yielded the lantern's color cleanly — the cooper's plan and the village's uniform readout, exactly as designed."
             )),
         _ex("(do (deftype Crook [length]) (.-length (Crook. 7)))",
             7,
@@ -196,9 +192,7 @@ G8_03 = SubjectCurriculum(
                 "that slot back."
             ),
             resolution=(
-                "the tally-box gave up the watcher's post cleanly — "
-                "the record's shape meant every reader found the same slot "
-                "in the same place."
+                "the tally-box gave up the watcher's post cleanly — the record's shape meant every reader found the same slot in the same place."
             )),
         _ex("(do (defrecord Watcher [name post]) (:name (->Watcher \"elder\" :village)))",
             "elder",
@@ -220,8 +214,7 @@ G8_03 = SubjectCurriculum(
                 "values in order; the lookup fetches by the slot label."
             ),
             resolution=(
-                "the name came back correctly — \"elder\" — exactly as it "
-                "was written into the box's name slot."
+                'the name came back correctly — "elder" — exactly as it was written into the box\'s name slot.'
             )),
     ],
     subplots=_CARRYINGCASE_SUBPLOTS,
@@ -259,9 +252,7 @@ G8_04 = SubjectCurriculum(
                 "implements it must have a `sound` method."
             ),
             resolution=(
-                "the Alarm protocol was posted and established — a "
-                "non-nil truthy value confirming the fellowship's pledge "
-                "was written."
+                "the Alarm protocol was posted and established — a non-nil truthy value confirming the fellowship's pledge was written."
             )),
         _ex("(do (defprotocol Greet (hail [this])) (some? Greet))",
             True,
@@ -283,9 +274,7 @@ G8_04 = SubjectCurriculum(
                 "It says 'hail exists' without saying what each keeper does."
             ),
             resolution=(
-                "the protocol was posted and truthy — the contract was "
-                "established, waiting for keepers to pledge their own "
-                "honest greeting."
+                'the protocol was posted and truthy — the contract was established, waiting for keepers to pledge their own honest greeting.'
             )),
     ],
     subplots=_GUILD_SUBPLOTS,
@@ -323,9 +312,7 @@ G8_05 = SubjectCurriculum(
                 "sound. The `cond`-like dispatch picks Tom."
             ),
             resolution=(
-                "Tom's pledge was recorded. When the shepherds called "
-                "`sound \"wolf\"`, the fellowship matched String and ran "
-                "Tom's honest cry: \"howl\"."
+                'Tom\'s pledge was recorded. When the shepherds called `sound "wolf"`, the fellowship matched String and ran Tom\'s honest cry: "howl".'
             )),
         _ex("(do (defprotocol Greet (hail [this]))"
             " (extend-protocol Greet java.lang.Long (hail [_] :number))"
@@ -351,9 +338,7 @@ G8_05 = SubjectCurriculum(
                 "number-keeper's method, and the verdict is `:number`."
             ),
             resolution=(
-                "the number-keeper's pledge was recorded, and the "
-                "fellowship's dispatch routed `hail 7` to them, returning "
-                "their honest greeting: `:number`."
+                "the number-keeper's pledge was recorded, and the fellowship's dispatch routed `hail 7` to them, returning their honest greeting: `:number`."
             )),
     ],
     subplots=_GUILD_SUBPLOTS,
@@ -394,9 +379,7 @@ G8_06 = SubjectCurriculum(
                 "long-keeper's verdict."
             ),
             resolution=(
-                "the fellowship read the type, routed to the right keeper, "
-                "and returned the long-keeper's honest alarm — the "
-                "verdict."
+                "the fellowship read the type, routed to the right keeper, and returned the long-keeper's honest alarm — the verdict."
             )),
         _ex("(do (defprotocol Alarm (sound [this]))"
             " (extend-protocol Alarm"
@@ -422,9 +405,7 @@ G8_06 = SubjectCurriculum(
                 "implementation."
             ),
             resolution=(
-                "the fellowship routed to the word-keeper, and their "
-                "honest alarm came back — the string-alarm verdict."
-            )),
+                'the fellowship routed to the word-keeper, and their honest alarm came back — the string-alarm verdict.'           )),
     ],
     subplots=_GUILD_SUBPLOTS,
     plan_pool=_PLAN_POOL_G8,
@@ -462,9 +443,7 @@ G8_07 = SubjectCurriculum(
                 "routes to `:cry`."
             ),
             resolution=(
-                "the tally-box was born and registered — a Shepherd "
-                "instance could now answer the Alarm call with its own "
-                "honest sound."
+                'the tally-box was born and registered — a Shepherd instance could now answer the Alarm call with its own honest sound.'
             )),
         _ex("(do (defprotocol Alarm (sound [this]))"
             " (defrecord Elder [name] Alarm (sound [_] :measured))"
@@ -490,9 +469,7 @@ G8_07 = SubjectCurriculum(
                 "with `:measured`, not a cry."
             ),
             resolution=(
-                "the Elder box was made and pledged. When asked to sound, "
-                "it returns its honest, measured answer — the verdict."
-            )),
+                'the Elder box was made and pledged. When asked to sound, it returns its honest, measured answer — the verdict.'           )),
     ],
     subplots=_GUILD_SUBPLOTS,
     plan_pool=_PLAN_POOL_G8,
@@ -531,10 +508,7 @@ G8_08 = SubjectCurriculum(
                 "and routes to the matching method."
             ),
             resolution=(
-                "the gate read the brand, called the right method, and "
-                "the runtime returned the verdict — `:cry` for the "
-                "shepherd-branded entry — the routing complete."
-            )),
+                'the gate read the brand, called the right method, and the runtime returned the verdict — `:cry` for the shepherd-branded entry — the routing complete.'           )),
         _ex("(do (defmulti tag :kind)"
             " (defmethod tag :lantern [_] :bright)"
             " (tag {:kind :lantern}))",
@@ -577,8 +551,7 @@ G8_09 = SubjectCurriculum(
                 "routes to the matching method."
             ),
             resolution=(
-                "the gate read `:elder`, routed to the second method, and "
-                "returned the verdict: `:measured`."
+                'the gate read `:elder`, routed to the second method, and returned the verdict: `:measured`.'
             )),
         _ex("(do (defmulti reply :role)"
             " (defmethod reply :shepherd [_] :cry)"
@@ -605,8 +578,7 @@ G8_09 = SubjectCurriculum(
                 "Finding none, it uses the `:default` method as the catch-all."
             ),
             resolution=(
-                "the gate found no match for `:stranger`, fell through to "
-                "`:default`, and returned the verdict: `:unknown`."
+                'the gate found no match for `:stranger`, fell through to `:default`, and returned the verdict: `:unknown`.'
             )),
     ],
     subplots=_SORTINGTABLE_SUBPLOTS,
@@ -643,8 +615,7 @@ G8_10 = SubjectCurriculum(
                 "brand; the matching `defmethod` runs."
             ),
             resolution=(
-                "the gate read `:wolf`, routed to the matching method, and "
-                "returned the verdict: \"howl\"."
+                'the gate read `:wolf`, routed to the matching method, and returned the verdict: "howl".'
             )),
         _ex("(do (defprotocol Show (show [this]))"
             " (extend-protocol Show java.lang.String (show [s] (str \"str-\" s)))"
@@ -668,9 +639,7 @@ G8_10 = SubjectCurriculum(
                 "The dispatch reads the type of the argument, not the value."
             ),
             resolution=(
-                "the protocol routed to the String keeper, who returned "
-                "the verdict: \"str-wolf\" — the value with the keeper's "
-                "honest prefix."
+                'the protocol routed to the String keeper, who returned the verdict: "str-wolf" — the value with the keeper\'s honest prefix.'
             )),
     ],
     subplots=_SORTINGTABLE_SUBPLOTS,
@@ -711,9 +680,7 @@ G8_11 = SubjectCurriculum(
                 "contract, just as a class would implement an interface."
             ),
             resolution=(
-                "the fellowship saw that the protocol was as solid as any "
-                "Java contract. When `raise` was called on \"wolf\", the "
-                "String keeper answered with the verdict: `:raised`."
+                'the fellowship saw that the protocol was as solid as any Java contract. When `raise` was called on "wolf", the String keeper answered with the verdict: `:raised`.'
             )),
     ],
     subplots=_GUILD_SUBPLOTS,
@@ -749,9 +716,7 @@ G8_12 = SubjectCurriculum(
                 "pledge to Alarm, with this honest method."
             ),
             resolution=(
-                "the number 5 was taught the Alarm protocol. When asked to "
-                "sound, it returned the number-keeper's verdict: "
-                "`:number-alarm`."
+                "the number 5 was taught the Alarm protocol. When asked to sound, it returned the number-keeper's verdict: `:number-alarm`."
             )),
         _ex("(do (defprotocol Alarm (sound [this]))"
             " (extend-type java.lang.String Alarm (sound [_] :string-alarm))"
@@ -775,8 +740,7 @@ G8_12 = SubjectCurriculum(
                 "to the Alarm fellowship."
             ),
             resolution=(
-                "the string \"wolf\" answered Alarm with its honest voice — "
-                "the verdict: `:string-alarm`."
+                'the string "wolf" answered Alarm with its honest voice — the verdict: `:string-alarm`.'
             )),
     ],
     subplots=_SORTINGTABLE_SUBPLOTS,
@@ -815,9 +779,7 @@ G8_13 = SubjectCurriculum(
                 "name-slot value."
             ),
             resolution=(
-                "the Shepherd box answered with its own honest name — "
-                "\"Pip\" — read from its slot by `this`."
-            )),
+                'the Shepherd box answered with its own honest name — "Pip" — read from its slot by `this`.'           )),
         _ex("(do (defprotocol Tagged (tag-of [this]))"
             " (defrecord Lantern [t] Tagged (tag-of [this] (:t this)))"
             " (tag-of (->Lantern :amber)))",
@@ -839,8 +801,7 @@ G8_13 = SubjectCurriculum(
                 "`this` — the Lantern box calling the method."
             ),
             resolution=(
-                "the Lantern returned its tag — the verdict: `:amber`, read "
-                "directly from its own slot via `this`."
+                'the Lantern returned its tag — the verdict: `:amber`, read directly from its own slot via `this`.'
             )),
     ],
     subplots=_GUILD_SUBPLOTS,
@@ -874,7 +835,7 @@ G8_14 = SubjectCurriculum(
                 "`extend-protocol` adds pledges independently to a type."
             ),
             resolution=(
-                "Each protocol routed to its own method independently."
+                'Each protocol routed to its own method independently.'
             )),
     ],
     subplots=_GUILD_SUBPLOTS,
@@ -909,8 +870,7 @@ G8_15 = SubjectCurriculum(
                 "villager."
             ),
             resolution=(
-                "the hierarchy was posted. The verdict confirmed that a "
-                "shepherd now counted as a villager for dispatch purposes."
+                'the hierarchy was posted. The verdict confirmed that a shepherd now counted as a villager for dispatch purposes.'
             )),
         _ex("(isa? java.lang.Long java.lang.Number)",
             True,
@@ -930,8 +890,7 @@ G8_15 = SubjectCurriculum(
                 "`isa?` checks the relationship. Java already knows the built-in type hierarchy."
             ),
             resolution=(
-                "the verdict confirmed the hierarchy: Long is indeed a kind "
-                "of Number."
+                'the verdict confirmed the hierarchy: Long is indeed a kind of Number.'
             )),
         _ex("(isa? java.lang.String java.lang.Number)",
             False,
@@ -951,8 +910,7 @@ G8_15 = SubjectCurriculum(
                 "they're independent type families."
             ),
             resolution=(
-                "the verdict came back false: String and Number are not "
-                "related in the hierarchy."
+                'the verdict came back false: String and Number are not related in the hierarchy.'
             )),
     ],
     subplots=_SORTINGTABLE_SUBPLOTS,
@@ -990,9 +948,7 @@ G8_16 = SubjectCurriculum(
                 "list of watchers, and each gives their own honest answer."
             ),
             resolution=(
-                "both watchers answered the `look` call in their own voices: "
-                "the Shepherd with `:scan`, the Elder with `:verify` — "
-                "polymorphism working as designed."
+                'both watchers answered the `look` call in their own voices: the Shepherd with `:scan`, the Elder with `:verify` — polymorphism working as designed.'
             )),
         _ex("(do (defprotocol Sound (cry [this]))"
             " (defrecord Shepherd [] Sound (cry [_] :alarm))"
@@ -1018,8 +974,7 @@ G8_16 = SubjectCurriculum(
                 "protocol routes to Elder's method."
             ),
             resolution=(
-                "the Elder answered with its own measured verdict: `:calm` — "
-                "the honest response of an elder's voice."
+                "the Elder answered with its own measured verdict: `:calm` — the honest response of an elder's voice."
             )),
     ],
     subplots=_GUILD_SUBPLOTS,

@@ -1138,10 +1138,13 @@ def check_record(rec, sub, example):
 
     # STORY_RESOLUTION_NO_DRAWN — for story-tagged examples, the
     # `resolution` slot should reference at least one drawn-from-form
-    # literal so the resolution closes the algorithmic loop, not just a
-    # generic "the REPL returned the value." Skips examples that don't
-    # have story tags and skips when the form has no extractable
-    # literals to begin with.
+    # literal so the resolution closes the algorithmic loop.
+    #
+    # Updated by ju2R fix-set 2: accept either an actual literal in
+    # `example.resolution` OR a `{drawn.<slot>}` interpolation
+    # placeholder. The placeholder is what parametric authors write;
+    # at render time it substitutes to the runtime literal. Both
+    # close the loop semantically.
     if "story" in getattr(example, "tags", ()) and example.resolution:
         form = rec.code_str or ""
         lits = _drawn_literals(form)
@@ -1150,7 +1153,8 @@ def check_record(rec, sub, example):
             has_lit = any(
                 (lit and lit in res_text) for lit in lits
             )
-            if not has_lit:
+            has_drawn_placeholder = "{drawn." in res_text
+            if not has_lit and not has_drawn_placeholder:
                 issues.append(("STORY_RESOLUTION_NO_DRAWN",
                                 f"story-tagged example's resolution slot has no "
                                 f"drawn-value reference (form has literals "
@@ -1541,6 +1545,58 @@ def check_record(rec, sub, example):
         issues.append(("OUT_OF_REGISTER_VOCAB",
                         "user_msg uses an out-of-register word that "
                         "doesn't fit a children's-fable register"))
+
+    # ─────────── slice ju2R (boy-wolf fix-set 2) detector additions ────
+
+    # DRAWN_PLACEHOLDER_LEAK — `{drawn.<slot>}` rendered as literal text
+    # in user_msg. The interpolation pipeline (_interpolate_drawn) was
+    # supposed to substitute every `{drawn.X}` token; if a token slips
+    # through (slot name typo, value from outside the example's slot
+    # dict, etc.), the placeholder appears verbatim. Hard bug.
+    if re.search(r"\{drawn\.[A-Za-z_][\w]*\}", user):
+        issues.append(("DRAWN_PLACEHOLDER_LEAK",
+                        "user_msg contains an un-substituted "
+                        "{drawn.<slot>} placeholder — interpolation "
+                        "pipeline missed it"))
+
+    # GOAL_FALLBACK_GENERIC — when goal_text rendered as a generic
+    # fallback ("evaluate the form/literal/predicate/...") AND the
+    # user_msg also lacks any specific form-literal reference, the
+    # record reads doubly-flat. Tightened (ju2R): require the
+    # combination so we surface only the records where adding a
+    # canonical GOALS entry would move the needle.
+    fallback_re = re.compile(
+        r"\bTo (?:evaluate the literal|evaluate the predicate|"
+        r"evaluate the boolean form|evaluate the conditional form|"
+        r"evaluate the form)\s*,",
+    )
+    if fallback_re.search(user) and not _has_drawn_value(user, rec.code_str):
+        issues.append(("GOAL_FALLBACK_GENERIC",
+                        "user_msg uses generic 'To evaluate the X, ...' "
+                        "fallback AND no drawn-literal anchor — add a "
+                        "canonical GOALS entry for richer prose"))
+
+    # DOUBLE_EMO_INJECTION — two distinct EMO-pool phrases in the same
+    # sentence (typically from a template that bulk-injected
+    # {emo_patient} adjacent to a hand-authored EMO clause).
+    # Heuristic: count distinct EMO-marker hits inside one sentence
+    # (split on `.`/`?`/`!`); flag when >=2 distinct markers fire.
+    for sent in re.split(r"[.!?]\s+", user):
+        if len(sent) < 60:
+            continue
+        hits = []
+        for m in _EMO_MARKERS:
+            if m and len(m) >= 8 and m in sent:
+                hits.append(m)
+                if len(hits) >= 2:
+                    break
+        if len(hits) >= 2:
+            issues.append(("DOUBLE_EMO_INJECTION",
+                            f"sentence has 2+ distinct EMO-pool phrases "
+                            f"({hits[0][:30]!r} + {hits[1][:30]!r}) — the "
+                            "character can't earn two emotional registers "
+                            "in the same beat"))
+            break
 
     return issues
 
