@@ -970,6 +970,76 @@ def check_record(rec, sub, example):
                                 f"drawn-value reference (form has literals "
                                 f"{lits[:3]!r}, resolution doesn't close the loop)"))
 
+    # ─────────── slice QTA5 (tortoise-hare) detector additions ─────────
+
+    # PROCEDURAL_OPENER — body jumps straight to "To {goal}, he/she
+    # composed ..." without any prior scene-setting sentence. After
+    # the fable opener line (first paragraph), the first content
+    # sentence should introduce a character / place; jumping
+    # immediately to "To X, she composed Y" reads like a stage
+    # direction, not a story. Detection: a `\n\nTo ` immediately
+    # followed by an action-clause within the first 350 chars of
+    # user_msg.
+    procedural_opener_re = re.compile(
+        r"^(?:[^\n]{1,300}\n\n)?To [^,\n]+,\s+(?:he|she|they)\s+"
+        r"(?:composed|wrote|chose|set|took|reached|laid|scratched|"
+        r"intended|coordinated|dispatched|built|read)",
+        re.IGNORECASE,
+    )
+    if procedural_opener_re.match(user):
+        issues.append(("PROCEDURAL_OPENER",
+                        "user_msg jumps from fable-opener directly to "
+                        "'To {goal}, [pronoun] composed ...' without a "
+                        "scene-setting sentence"))
+
+    # STIFF_DIALOGUE_TAG — 3+ DIALOGUE-attribution "said" tags in the
+    # same user_msg, no variation. Counts only attribution patterns
+    # ("[Name|pronoun] said", `," X said`, etc.), not "saying" inside
+    # an EMO phrase or "says true" inside metaphor prose.
+    said_attrib_re = re.compile(
+        r'(?:'
+        r'"\s*,?\s+(?:he|she|they|[A-Z][a-z]+)(?:\s+the\s+\w+)?\s+said\b'
+        r'|\b[A-Z][a-z]+(?:\s+the\s+\w+)?\s+said\b'
+        r'|\b(?:he|she|they)\s+said\b'
+        r'|\bsaid\s*,'
+        r')',
+    )
+    n_said = len(said_attrib_re.findall(user))
+    if n_said >= 3:
+        issues.append(("STIFF_DIALOGUE_TAG",
+                        f"user_msg has {n_said} 'said'-form attributions "
+                        "(stiff repetition; vary the speech verb)"))
+
+    # PRONOUN_BEFORE_NAME — a sentence-initial 'He'/'She'/'They'
+    # appears before any character name has been introduced in the
+    # user_msg. The pronoun has no antecedent. Detection: split into
+    # sentences; if the first sentence starting with "He"/"She"/
+    # "They" precedes any character name (look for "[Capital] the
+    # [species]" pattern, or any of the canonical names from the
+    # fable's character pool). For tortoise-hare the canonical names
+    # include: Mossback, Slowpoke, Furrow, Bough, Tuber, Snail,
+    # Rush, Daisy, Hopper, Whisker, Dash, Sprig, Polecat, Shuffle.
+    # Cheap test: search for "[A-Z][a-z]+ the (tortoise|hare)" and
+    # for sentence-initial "(He|She|They)" — flag if pronoun
+    # position < first-name position.
+    pronoun_match = re.search(r"(?:^|\.\s+|\n)(He|She|They)\s+\w", user)
+    name_match = re.search(
+        r"\b([A-Z][a-z]{2,})(?: the (?:tortoise|hare|crow|dog|hound|"
+        r"shepherd|elder|villager|farmer|milkmaid|ant|grasshopper))?\b",
+        user,
+    )
+    if (pronoun_match and name_match and
+            pronoun_match.start() < name_match.start()):
+        # Only flag when no character name appears in the first 200
+        # chars (otherwise the pronoun likely refers to a name set
+        # in dialogue, which is fine).
+        head = user[:200]
+        if not re.search(r"\b[A-Z][a-z]{2,}\s+the\s+\w+", head):
+            issues.append(("PRONOUN_BEFORE_NAME",
+                            f"sentence-initial '{pronoun_match.group(1)}' "
+                            "appears before any named character is "
+                            "introduced"))
+
     return issues
 
 

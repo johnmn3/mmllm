@@ -117,7 +117,7 @@ the pouch as the form told it to — handed back the value
     # 4. Substitution rule — wherever the form names the binding,
     #    the runtime reaches into the pouch.
     SubplotTemplate("""\
-"Wherever the form names the binding," {tortoise_phrase} explained,
+"Wherever the form names the binding," {tortoise_phrase}, {emo_patient}, explained,
 "the runtime reaches into the pouch and pulls out what was tucked
 there." {tortoise_he_she_cap} demonstrated by intending to
 {goal_text}: each mention of the bound name, {tortoise} said,
@@ -149,7 +149,7 @@ _RECIPE_SUBPLOTS: list[SubplotTemplate] = [
     #    Type-neutral — works for named, anonymous, multi-arg, etc.
     #    The {goal_text}/{concept_phrase} say which kind.
     SubplotTemplate("""\
-{tortoise_phrase} kept a small stack of recipe-cards by the road,
+{tortoise_phrase}, {emo_patient}, kept a small stack of recipe-cards by the road,
 each one a paw-step routine. "Recipes in Clojure are like these
 cards," {tortoise_he_she} said: "the ingredients go at the head,
 the steps in order, and the last step is what gets served." To
@@ -159,7 +159,7 @@ recipe and handed back the value the last step had produced."""),
 
     # 2. The recipe-as-runnable-routine — emphasizes the call site.
     SubplotTemplate("""\
-"A recipe is only useful when it runs," {tortoise_phrase} said,
+"A recipe is only useful when it runs," {tortoise_phrase}, {emo_patient}, said,
 holding up a card. "You write the steps, you bring the
 ingredients, the kitchen does the rest." To {goal_text},
 {tortoise_he_she} composed {concept_phrase}, submitted the
@@ -169,7 +169,7 @@ handed back what the steps had produced."""),
     # 3. Last step is what you serve. (Body returns last form;
     #    type-neutral and pedagogically true for all fn bodies.)
     SubplotTemplate("""\
-"In any recipe," {tortoise_phrase} explained, "the last step is
+"In any recipe," {tortoise_phrase}, {emo_patient}, explained, "the last step is
 what you serve." {tortoise_he_she_cap} took the goal — to
 {goal_text} — and wrote the routine's paw-steps in order, knowing
 that whatever the final line evaluated to was what the runner
@@ -182,7 +182,7 @@ handed back only the dish from the last."""),
     #    described as something that *can* happen, not as something
     #    the form is necessarily doing.
     SubplotTemplate("""\
-"Recipes can feed into one another," {tortoise_phrase} said,
+"Recipes can feed into one another," {tortoise_phrase}, {emo_patient}, said,
 spreading several cards on the path. "What one recipe serves, the
 next can take as its ingredient — together they make a longer
 routine." To {goal_text}, {tortoise_he_she} composed
@@ -212,7 +212,7 @@ _BASKET_SUBPLOTS: list[SubplotTemplate] = [
     #    operation, the basket stays as it was, the form returns
     #    the new arrangement.
     SubplotTemplate("""\
-{tortoise_phrase} pointed to a small basket on the path {place}.
+{tortoise_phrase}, {emo_patient}, pointed to a small basket on the path {place}.
 "Whatever I want to do with what's inside," {tortoise_he_she}
 said, "I read from the basket, work the change, and the basket
 itself stays as it was — what I get back is a fresh arrangement."
@@ -225,7 +225,7 @@ as the operation prescribed."""),
     #    (sets). The narrative is generic; goal_text says which.
     SubplotTemplate("""\
 "You can find what you want in a basket several ways,"
-{tortoise_phrase} said, gesturing at the woven shape:
+{tortoise_phrase}, {emo_patient}, said, gesturing at the woven shape:
 "by the tag pinned to it, by its place in line, or by simply
 asking whether it's there at all." To {goal_text},
 {tortoise_he_she} wrote {concept_phrase} for the basket,
@@ -239,7 +239,7 @@ exactly as the form directed."""),
 A line of animals had formed {place}, each one taking the next
 animal's tail in its paw — head at the front, the rest trailing
 behind. "Many of our baskets are like this procession,"
-{tortoise_phrase} said. "You can grab the head, you can ask for
+{tortoise_phrase}, {emo_patient}, said. "You can grab the head, you can ask for
 the tail, you can put a new animal at the front of the line."
 To {goal_text}, {tortoise_he_she} composed {concept_phrase},
 submitted the form, and the REPL marched the procession exactly
@@ -282,7 +282,7 @@ _NOTEBOOK_SUBPLOTS: list[SubplotTemplate] = [
     SubplotTemplate("""\
 A notebook lay open on a tree stump in the middle of the meadow.
 Any animal could walk up, read the page, or — carefully — update
-it. "Atoms are like this notebook," {tortoise_phrase} said. "You
+it. "Atoms are like this notebook," {tortoise_phrase}, {emo_patient}, said. "You
 can deref to read; you can swap! to write atomically, no matter
 who else is watching." To {goal_text}, {tortoise_he_she} composed
 {concept_phrase}, submitted the form, and let the REPL work the
@@ -290,7 +290,7 @@ notebook exactly as the form prescribed."""),
 
     # 2. Atomic swap — read, apply, write, all in one motion.
     SubplotTemplate("""\
-"When I want to update the notebook," {tortoise_phrase} said,
+"When I want to update the notebook," {tortoise_phrase}, {emo_patient}, said,
 "I don't pick it up and walk away — I read the page, apply the
 change, and write it back, all in a single motion. If two
 animals arrive at once, the runtime makes sure only one of us
@@ -301,7 +301,7 @@ and the REPL applied the update atomically."""),
     # 3. The notebook-and-the-quiet-stump — emphasizes the
     #    persistence of the notebook between updates.
     SubplotTemplate("""\
-"The notebook stays put on the stump," {tortoise_phrase} said,
+"The notebook stays put on the stump," {tortoise_phrase}, {emo_patient}, said,
 "so any animal who comes by can read what's on the page right
 now. The page changes only when someone writes — and only as the
 runtime allows." To {goal_text}, {tortoise_he_she} composed
@@ -312,8 +312,7 @@ value the page had carried."""),
     # 4. The shared-state template — generic emphasis that this is
     #    about coordinated updates among several animals.
     SubplotTemplate("""\
-"Many animals can come and go past the stump," {tortoise_phrase}
-said, "and each one's read or write must agree with the others.
+"Many animals can come and go past the stump," {tortoise_phrase}, {emo_patient}, said, "and each one's read or write must agree with the others.
 The runtime sees to that — no two writers stomp on each other's
 work." To {goal_text}, {tortoise_he_she} composed
 {concept_phrase}, submitted the form, and the REPL — coordinating
@@ -343,7 +342,7 @@ _SIEVE_SUBPLOTS: list[SubplotTemplate] = [
     #    (distinct). The rule attached at the sieve's mouth
     #    decides what happens to each pebble.
     SubplotTemplate("""\
-{tortoise_phrase} held up a sieve {place} — a paw-step rule
+{tortoise_phrase}, {emo_patient}, held up a sieve {place} — a paw-step rule
 attached at its mouth. "Whatever rule we hang on the sieve,"
 {tortoise_he_she} said, "the basket's pebbles pass through one
 at a time: some are changed, some kept, some dropped, depending
@@ -355,7 +354,7 @@ let through."""),
     # 2. The pour-through-and-collect template — generic emphasis
     #    on the new-basket-out-the-other-side metaphor.
     SubplotTemplate("""\
-{tortoise_phrase} balanced a sieve over an empty basket. "The
+{tortoise_phrase}, {emo_patient}, balanced a sieve over an empty basket. "The
 pebbles go in at the top," {tortoise_he_she} said, "and the
 sieve does its work — applying the rule, choosing or changing —
 and what lands in the basket below is the result." To
@@ -366,7 +365,7 @@ collected what fell into the receiving basket."""),
     # 3. Stacked sieves — output of one feeds the next.
     #    (comp xform.)
     SubplotTemplate("""\
-{tortoise_phrase} stacked two sieves one above the other, the
+{tortoise_phrase}, {emo_patient}, stacked two sieves one above the other, the
 output of the first feeding into the second. "What lands at the
 bottom," {tortoise_he_she} said, "has been through both rules in
 order — applied as a single combined sieve." To {goal_text},
@@ -378,7 +377,7 @@ REPL caught what the stack let through."""),
     #    (into / into with xform.)
     SubplotTemplate("""\
 "You can pour the result into any kind of basket you like,"
-{tortoise_phrase} said. "A row of pebbles, a unique-only
+{tortoise_phrase}, {emo_patient}, said. "A row of pebbles, a unique-only
 basket, a bag of any shape — the sieve doesn't care; the
 receiver does." To {goal_text}, {tortoise_he_she} composed
 {concept_phrase}, chose the right empty receiver, poured
@@ -407,7 +406,7 @@ _ACORN_SUBPLOTS: list[SubplotTemplate] = [
 
     # 1. The counting-acorns template — generic arithmetic frame.
     SubplotTemplate("""\
-{tortoise_phrase} laid acorns out on a flat stone {place}, sorting
+{tortoise_phrase}, {emo_patient}, laid acorns out on a flat stone {place}, sorting
 them into small heaps. "Numbers in Clojure are just like acorns in
 heaps," {tortoise_he_she} said: "you can count them, you can add
 two heaps together, you can divide one heap among several." To
@@ -417,7 +416,7 @@ whatever the operation had produced."""),
 
     # 2. The basket-grows-or-shrinks template — for inc/dec, +/-.
     SubplotTemplate("""\
-"Watch the basket," {tortoise_phrase} said, gesturing at a small
+"Watch the basket," {tortoise_phrase}, {emo_patient}, said, gesturing at a small
 heap of acorns. "Every operation either adds, takes away, or
 combines what's already there — the heap grows or shrinks by
 exactly what you say." To {goal_text}, {tortoise_he_she}
@@ -429,7 +428,7 @@ arrangement."""),
     #    is whatever the form says, but the Tortoise's care with the
     #    acorns is what the metaphor carries.
     SubplotTemplate("""\
-{tortoise_phrase} arranged a small heap of acorns {place},
+{tortoise_phrase}, {emo_patient}, arranged a small heap of acorns {place},
 careful with the count. "Numbers in Clojure don't fudge,"
 {tortoise_he_she} said. "Whatever you do — adding, subtracting,
 dividing into heaps with leftovers, comparing two piles — the
@@ -453,7 +452,7 @@ matter the patient way."""),
     #    REPL gives the exact number, no matter the operation.
     SubplotTemplate("""\
 "Whatever the heap looks like after the operation,"
-{tortoise_phrase} said, "the runtime gives the exact count —
+{tortoise_phrase}, {emo_patient}, said, "the runtime gives the exact count —
 small or large, fraction or whole, the answer is precise." To
 {goal_text}, {tortoise_he_she} composed {concept_phrase},
 submitted the form, and the REPL handed back the value, exactly
@@ -470,19 +469,20 @@ _GATE_SUBPLOTS: list[SubplotTemplate] = [
     #    test, equality, or short-circuit.
     SubplotTemplate("""\
 A small wooden gate stood across the trail {place}, swinging open
-or closed by the value the runner brought to it. "Boolean forms
-in Clojure are like gates," {tortoise_phrase} said. "The runtime
-checks the value, swings the gate, and what comes back is the
-gate's verdict." To {goal_text}, {tortoise_he_she} composed
+or closed by the value the runner brought to it. The gate was narrow
+— only one verdict could pass at a time, no halfway. "Boolean forms
+in Clojure are like gates," {tortoise_phrase} said, {emo_patient}.
+"The runtime checks the value, swings the gate, and what comes back
+is the gate's verdict." To {goal_text}, {tortoise_he_she} composed
 {concept_phrase}, submitted the form, and the REPL returned
 whatever the gate had decided."""),
 
     # 2. The truthy/falsey-rules template — generic.
     SubplotTemplate("""\
 "Only two things in Clojure close the gate," {tortoise_phrase}
-said: "nil and false. Everything else — zero, the empty string,
-an empty list — opens it. The gate's verdict follows that rule
-exactly." To {goal_text}, {tortoise_he_she} composed
+said, {emo_patient}: "nil and false. Everything else — zero, the
+empty string, an empty list — opens it. The gate's hinge is tight,
+the rule is fixed." To {goal_text}, {tortoise_he_she} composed
 {concept_phrase}, submitted the form, and the REPL returned the
 value the gate had passed, true or false."""),
 
@@ -490,7 +490,7 @@ value the gate had passed, true or false."""),
     #    runtime's decision being the only authority.
     SubplotTemplate("""\
 "You can't tell which way the gate will swing by guessing,"
-{tortoise_phrase} said. "You bring the value to the gate, the
+{tortoise_phrase}, {emo_patient}, said. "You bring the value to the gate, the
 runtime checks it, and the gate gives the only answer that
 matters." To {goal_text}, {tortoise_he_she} composed
 {concept_phrase}, submitted the form, and the REPL settled the
@@ -514,9 +514,10 @@ guess."""),
     #    returns the first truthy, etc.).
     SubplotTemplate("""\
 "The gate carries the value through, not just a yes or a no,"
-{tortoise_phrase} said. "Whatever the gate's verdict, that's what
-the runtime hands back — sometimes a strict true or false,
-sometimes the very value that passed the test." To {goal_text},
+{tortoise_phrase} said, {emo_patient}. "Whatever the gate's verdict,
+that's what the runtime hands back — sometimes a strict true or
+false, sometimes the very value that passed the test. The gate is
+narrow but it doesn't strip what walks through." To {goal_text},
 {tortoise_phrase} composed {concept_phrase}, submitted the form,
 and the REPL returned the value the gate had carried through."""),
 ]
@@ -532,12 +533,13 @@ _FORK_SUBPLOTS: list[SubplotTemplate] = [
     #    for if, when, cond, case alike.
     SubplotTemplate("""\
 The trail forked {place}, with one or more arms branching off and
-each arm marked with a condition. "Branching forms in Clojure are
-forks like this," {tortoise_phrase} said. "The runtime checks the
-condition, takes the matching arm, and only that arm's value
-comes back." To {goal_text}, {tortoise_he_she} composed
-{concept_phrase}, submitted the form, and the REPL — having
-taken the right arm — handed back its value."""),
+each arm marked with a condition. The arms led to different ends —
+the runner could only walk one. "Branching forms in Clojure are
+forks like this," {tortoise_phrase} said, {emo_patient}. "The
+runtime checks the condition, takes the matching arm, and only
+that arm's value comes back." To {goal_text}, {tortoise_he_she}
+composed {concept_phrase}, submitted the form, and the REPL —
+having taken the right arm — handed back its value."""),
 
     # 2. The crossroads template — applies to `cond` / `case` /
     #    multi-arm branching. Type-neutral framing: "the runner
@@ -545,24 +547,24 @@ taken the right arm — handed back its value."""),
     #    (many stones), case (matching tokens).
     SubplotTemplate("""\
 The trail {place} opened into a crossroads, each arm marked by a
-small condition-stone. "Branching forms work like this,"
-{tortoise_phrase} said: "the runner walks past the stones in
-order, takes the first arm whose stone says true, and the value
-of that arm is what comes back." To {goal_text},
-{tortoise_he_she} composed {concept_phrase}, submitted the
-form, and the REPL took the right arm and returned its
-value."""),
+small condition-stone. The day was hot and the wrong arm was a
+long way back. "Branching forms work like this," {tortoise_phrase}
+said, {emo_patient}: "the runner walks past the stones in order,
+takes the first arm whose stone says true, and the value of that
+arm is what comes back." To {goal_text}, {tortoise_he_she}
+composed {concept_phrase}, submitted the form, and the REPL took
+the right arm and returned its value."""),
 
     # 3. The unrun-arm template — generic emphasis that branches
     #    not taken don't run.
     SubplotTemplate("""\
-"What's important about a fork," {tortoise_phrase} said, "is
-that the arm not taken doesn't run at all. The runtime checks
-the condition, walks the right arm, and the unrun arm is just
-left behind." To {goal_text}, {tortoise_he_she} composed
-{concept_phrase}, submitted the form, and the REPL — running
-only what was needed — handed back the value of the chosen
-arm."""),
+"What's important about a fork," {tortoise_phrase} said,
+{emo_patient}, "is that the arm not taken doesn't run at all. The
+trail is long and effort is precious — the runtime checks the
+condition, walks the right arm, and the unrun arm is just left
+behind." To {goal_text}, {tortoise_he_she} composed
+{concept_phrase}, submitted the form, and the REPL — running only
+what was needed — handed back the value of the chosen arm."""),
 
     # 4. The Hare-tries-to-skip-the-condition template — Hare
     #    guesses which arm; Tortoise actually checks. Generic
@@ -580,11 +582,11 @@ value of the arm the form actually ran."""),
     #    the condition is what decides, not the runner's hopes.
     SubplotTemplate("""\
 "It isn't the runner who picks the arm," {tortoise_phrase} said,
-"it's the condition. Whatever the condition evaluates to, that
-decides." To {goal_text}, {tortoise_he_she} composed
-{concept_phrase}, submitted the form, and the REPL — letting the
-condition decide — handed back the value of the arm the
-condition had pointed at."""),
+{emo_patient}, "it's the condition. The trail is the trail; whatever
+the condition evaluates to, that decides which arm runs." To
+{goal_text}, {tortoise_he_she} composed {concept_phrase}, submitted
+the form, and the REPL — letting the condition decide — handed
+back the value of the arm the condition had pointed at."""),
 ]
 
 
@@ -595,24 +597,26 @@ _ROADSIGN_SUBPLOTS: list[SubplotTemplate] = [
 
     # 1. The posted-sign-on-the-road template — `def`.
     SubplotTemplate("""\
-{tortoise_phrase} drove a small wooden post {place} and nailed a
-fresh sign to it. "A def is a sign by the road," {tortoise_he_she}
-said. "Anyone passing reads the name, learns the value, and can
-refer to it later by name alone." To {goal_text},
-{tortoise_he_she} composed {concept_phrase}, submitted the
-form, and the REPL planted the sign — the name now bound to its
-value for any later runner along the road."""),
+{tortoise_phrase}, {emo_patient}, drove a small wooden post {place}
+and nailed a fresh sign to it. The post was set deep — once the
+sign was up it would last for every later runner. "A def is a sign
+by the road," {tortoise_he_she} said. "Anyone passing reads the
+name, learns the value, and can refer to it later by name alone."
+To {goal_text}, {tortoise_he_she} composed {concept_phrase},
+submitted the form, and the REPL planted the sign — the name now
+bound to its value for any later runner along the road."""),
 
     # 2. The signs-stay-where-posted template — generic emphasis
     #    that bindings persist on the road and any later runner
     #    reads them.
     SubplotTemplate("""\
-"The good thing about a sign," {tortoise_phrase} said, "is that
-it stays where you posted it. The next runner along the road
-reads what's there now — whatever the latest paint says." To
-{goal_text}, {tortoise_he_she} composed {concept_phrase},
-submitted the form, and the REPL — reading the signs as the form
-directed — returned the value the road had recorded."""),
+"The good thing about a sign," {tortoise_phrase} said, {emo_patient},
+"is that it stays where you posted it. The road is long but the
+sign holds; the next runner reads what's there now — whatever the
+latest paint says." To {goal_text}, {tortoise_he_she} composed
+{concept_phrase}, submitted the form, and the REPL — reading the
+signs as the form directed — returned the value the road had
+recorded."""),
 
     # 3. The roadside-library template — generic; the library of
     #    scrolls is a property of the world, doesn't claim a
@@ -620,23 +624,24 @@ directed — returned the value the road had recorded."""),
     SubplotTemplate("""\
 A small wooden library stood {place}, its shelves stocked with
 scrolls — each scroll holding the signs for one stretch of road.
-"Names live on scrolls," {tortoise_phrase} said: "to use a sign
-from a scroll, you make sure the scroll is on the shelf where the
-runtime can find it." To {goal_text}, {tortoise_he_she}
-composed {concept_phrase}, submitted the form, and the REPL —
-finding the right sign on the right scroll — returned the value
-the form had asked for."""),
+The shelves were many but the right one was easy to find when its
+name was clear. "Names live on scrolls," {tortoise_phrase} said,
+{emo_patient}: "to use a sign from a scroll, you make sure the
+scroll is on the shelf where the runtime can find it." To
+{goal_text}, {tortoise_he_she} composed {concept_phrase},
+submitted the form, and the REPL — finding the right sign on the
+right scroll — returned the value the form had asked for."""),
 
     # 4. The careful-naming template — generic emphasis on names
     #    being chosen and read carefully.
     SubplotTemplate("""\
-"Naming is half the art," {tortoise_phrase} said, sketching a
-careful sign in the dust. "A clear name on the road tells every
-later runner what to expect; a careless one trips them up." To
-{goal_text}, {tortoise_he_she} composed {concept_phrase} with
-the right name in mind, submitted the form, and the REPL —
-reading the name exactly — returned the value the sign had
-promised."""),
+"Naming is half the art," {tortoise_phrase} said, {emo_patient},
+sketching a careful sign in the dust. "The road is long and the
+runners who follow are many — a clear name tells every later
+runner what to expect; a careless one trips them up." To
+{goal_text}, {tortoise_he_she} composed {concept_phrase} with the
+right name in mind, submitted the form, and the REPL — reading
+the name exactly — returned the value the sign had promised."""),
 
     # 5. The Hare-misreads-the-sign template — Hare guesses,
     #    Tortoise reads carefully.
@@ -658,7 +663,7 @@ _SAFETYNET_SUBPLOTS: list[SubplotTemplate] = [
 
     # 1. The net-under-the-leap template — `try`/`catch`.
     SubplotTemplate("""\
-{tortoise_phrase} stretched a small net beneath a high jump
+{tortoise_phrase}, {emo_patient}, stretched a small net beneath a high jump
 {place}. "If the runner falls, the net catches them; the run
 doesn't end, only the path bends." To {goal_text},
 {tortoise_he_she} composed {concept_phrase}, submitted the
@@ -668,7 +673,7 @@ the patient way."""),
 
     # 2. The practice-meadow template — REPL safety; nil punning.
     SubplotTemplate("""\
-"This is the practice meadow," {tortoise_phrase} said {place},
+"This is the practice meadow," {tortoise_phrase}, {emo_patient}, said {place},
 gesturing wide. "A stumble here costs nothing. Type a form, see
 what comes back, fix it, try again. The REPL is forgiving in a
 way that a real race is not." To {goal_text}, {tortoise_he_she}
@@ -679,7 +684,7 @@ mis-step."""),
     # 3. The slip-and-recovery template — generic emphasis on
     #    the runtime catching errors and continuing.
     SubplotTemplate("""\
-"What matters when something goes wrong," {tortoise_phrase} said,
+"What matters when something goes wrong," {tortoise_phrase}, {emo_patient}, said,
 "is that the run can continue — the runtime catches the slip,
 takes the recovery path, and the answer comes back even when
 something inside the form went off the trail." To {goal_text},
@@ -689,7 +694,7 @@ value the recovery path had produced."""),
 
     # 4. The check-and-continue template — generic.
     SubplotTemplate("""\
-"There's a discipline to running safely," {tortoise_phrase} said,
+"There's a discipline to running safely," {tortoise_phrase}, {emo_patient}, said,
 "and it starts with checking — making sure the form does what it
 claims, catching what could go wrong before it does." To
 {goal_text}, {tortoise_he_she} composed {concept_phrase},
@@ -717,7 +722,7 @@ _SCROLL_SUBPLOTS: list[SubplotTemplate] = [
 
     # 1. The scroll-on-the-table template — reading and writing.
     SubplotTemplate("""\
-{tortoise_phrase} unrolled a long scroll {place}, dipping a quill
+{tortoise_phrase}, {emo_patient}, unrolled a long scroll {place}, dipping a quill
 into ink at the edge. "The world outside the REPL is scrolls,"
 {tortoise_he_she} said: "you read what they say, you write what
 you want to keep, and the runtime carries the words back and
@@ -729,7 +734,7 @@ what the scroll had said, or what the writing had committed."""),
     #    slurp/spit, line-seq, edn, JSON, prn, etc.
     SubplotTemplate("""\
 "Reading and writing scrolls is just like reading and writing
-forms," {tortoise_phrase} said. "You ask the runtime for what's
+forms," {tortoise_phrase}, {emo_patient}, said. "You ask the runtime for what's
 on the parchment, you write what you want recorded, and the work
 goes both ways through one quill." To {goal_text},
 {tortoise_he_she} composed {concept_phrase}, submitted the
@@ -740,7 +745,7 @@ what the writing had committed."""),
     #    discipline of handling external resources.
     SubplotTemplate("""\
 "The world outside the REPL is bigger than the REPL,"
-{tortoise_phrase} said, "and a scroll out there has its own
+{tortoise_phrase}, {emo_patient}, said, "and a scroll out there has its own
 discipline — open it carefully, handle it with care, close it
 when you're done." To {goal_text}, {tortoise_he_she}
 composed {concept_phrase}, submitted the form, and the REPL —
@@ -761,7 +766,7 @@ held."""),
     # 5. The two-worlds template — generic; the inside-the-REPL
     #    world and the outside-the-REPL world meet at the scroll.
     SubplotTemplate("""\
-"There's the world inside the REPL," {tortoise_phrase} said,
+"There's the world inside the REPL," {tortoise_phrase}, {emo_patient}, said,
 "and the world outside it. Scrolls are how the two meet — a value
 crosses out and becomes letters on parchment, or letters on
 parchment cross in and become a value again." To {goal_text},
@@ -778,7 +783,7 @@ _GUILD_SUBPLOTS: list[SubplotTemplate] = [
 
     # 1. The founding-the-guild template — `defprotocol`.
     SubplotTemplate("""\
-{tortoise_phrase} carved a small wooden sign {place}: "Runners'
+{tortoise_phrase}, {emo_patient}, carved a small wooden sign {place}: "Runners'
 Guild — any species may join." "A protocol is a guild,"
 {tortoise_he_she} said. "It lists what every member must be able
 to do — the methods. Any animal that can sign the book may claim
@@ -790,7 +795,7 @@ founded — handed back the guild's record."""),
     #    polymorphism's central idea without claiming a specific
     #    operation (defprotocol vs extend vs dispatch).
     SubplotTemplate("""\
-"What makes a guild useful," {tortoise_phrase} said, "is that
+"What makes a guild useful," {tortoise_phrase}, {emo_patient}, said, "is that
 the call is the same for every member, but each species answers
 in its own way. The runtime looks up which species the runner
 is, then runs that species' answer." To {goal_text},
@@ -801,7 +806,7 @@ the species-specific value."""),
     # 3. The guild-ledger template — generic emphasis on the
     #    guild's record being how the runtime knows who's a member.
     SubplotTemplate("""\
-{tortoise_phrase} held up the guild ledger. "Membership is in
+{tortoise_phrase}, {emo_patient}, held up the guild ledger. "Membership is in
 this book," {tortoise_he_she} said: "the species, the methods
 they swear they can perform, and the actual answers each species
 gives. The runtime reads from the book whenever the call goes
@@ -812,7 +817,7 @@ the ledger as it ran — returned the right answer."""),
     # 4. The boundaries-of-the-guild template — generic emphasis
     #    that each guild has its own membership.
     SubplotTemplate("""\
-"Each guild has its own boundaries," {tortoise_phrase} said.
+"Each guild has its own boundaries," {tortoise_phrase}, {emo_patient}, said.
 "Belonging to the Runners' guild doesn't mean belonging to the
 Singers' guild — the runtime checks each separately, and only
 the right guild's answer comes back." To {goal_text},
@@ -855,7 +860,7 @@ returned."""),
     #    {goal_text}/{concept_phrase} say which.
     SubplotTemplate("""\
 "Each tool in the foreign toolshed has its own label,"
-{tortoise_phrase} said, "and the right way to call it depends on
+{tortoise_phrase}, {emo_patient}, said, "and the right way to call it depends on
 which kind of tool it is — some held by an animal, some
 standard-issue called by the toolshed's name." To {goal_text},
 {tortoise_he_she} composed {concept_phrase} using the right
@@ -867,7 +872,7 @@ computed."""),
     #    emphasis on host interop's discipline.
     SubplotTemplate("""\
 "Foreign tools work, but they need careful handling,"
-{tortoise_phrase} said. "Their labels are different, their
+{tortoise_phrase}, {emo_patient}, said. "Their labels are different, their
 calling conventions are different, and the runtime has to bridge
 between Clojure and the host every time." To {goal_text},
 {tortoise_he_she} composed {concept_phrase}, submitted the
@@ -877,7 +882,7 @@ value the foreign tool had produced."""),
     # 4. The two-worlds template — generic; Clojure-side and
     #    host-side meet at the interop boundary.
     SubplotTemplate("""\
-"There's the meadow's own toolshed," {tortoise_phrase} said,
+"There's the meadow's own toolshed," {tortoise_phrase}, {emo_patient}, said,
 "and there's the foreign one. The runtime moves a value across
 the boundary, calls the foreign tool, and brings the result back
 into the meadow." To {goal_text}, {tortoise_he_she} composed
@@ -917,7 +922,7 @@ recipe yielded."""),
     #    that macros operate on forms, not values.
     SubplotTemplate("""\
 "Here's the difference between a rule and a recipe,"
-{tortoise_phrase} said. "A recipe takes ingredients and makes a
+{tortoise_phrase}, {emo_patient}, said. "A recipe takes ingredients and makes a
 dish. A rule takes a *form* and makes a different *form* — only
 then does the runtime get to evaluate it." To {goal_text},
 {tortoise_he_she} composed {concept_phrase}, submitted the
@@ -927,7 +932,7 @@ produced."""),
 
     # 3. The runtime-applies-the-rule template — generic.
     SubplotTemplate("""\
-"The order matters," {tortoise_phrase} said. "When a rule is
+"The order matters," {tortoise_phrase}, {emo_patient}, said. "When a rule is
 involved, the runtime first walks through the form and applies
 the rule wherever it sees one — and only then does it evaluate
 the result." To {goal_text}, {tortoise_he_she} composed
@@ -967,7 +972,7 @@ _SCRIBE_SUBPLOTS: list[SubplotTemplate] = [
     #    works for comments, whitespace, parens, do, reader macros.
     SubplotTemplate("""\
 "There are conventions for how the runtime *reads* a form,"
-{tortoise_phrase} said: "what counts as one token, what's just
+{tortoise_phrase}, {emo_patient}, said: "what counts as one token, what's just
 spacing, what gets ignored, what gets grouped together. The
 scribe and the reader both follow the same conventions." To
 {goal_text}, {tortoise_he_she} composed {concept_phrase},
@@ -976,7 +981,7 @@ conventions — returned the value the form had specified."""),
 
     # 2. The form-is-what-the-reader-sees template — generic.
     SubplotTemplate("""\
-"A form is what the reader sees," {tortoise_phrase} said,
+"A form is what the reader sees," {tortoise_phrase}, {emo_patient}, said,
 "after the conventions have been applied. Some marks count, some
 don't; some shapes are expanded before the runtime even gets a
 look. The form you write and the form the runtime evaluates
@@ -987,7 +992,7 @@ the value of what the conventions had produced."""),
 
     # 3. The careful-writing-careful-reading template — generic.
     SubplotTemplate("""\
-{tortoise_phrase} unrolled a small slate {place} and wrote
+{tortoise_phrase}, {emo_patient}, unrolled a small slate {place} and wrote
 slowly, paying attention to every mark. "The form has to be
 written so the reader can read it cleanly," {tortoise_he_she}
 said. "If the marks are right, the runtime gets the right form;
@@ -1008,8 +1013,7 @@ short."""),
 
     # 5. The form-as-it-is template — generic.
     SubplotTemplate("""\
-"A form is what's actually there on the page," {tortoise_phrase}
-said, "after the conventions of writing and reading have done
+"A form is what's actually there on the page," {tortoise_phrase}, {emo_patient}, said, "after the conventions of writing and reading have done
 their work. The runtime sees the cleaned-up form, evaluates it,
 and gives back what it computes." To {goal_text},
 {tortoise_he_she} composed {concept_phrase}, submitted the
@@ -1025,7 +1029,7 @@ _CHALKMARK_SUBPLOTS: list[SubplotTemplate] = [
 
     # 1. The mark-on-the-bark template — symbols vs values.
     SubplotTemplate("""\
-{tortoise_phrase} pointed at a name scratched into the bark
+{tortoise_phrase}, {emo_patient}, pointed at a name scratched into the bark
 {place}, then at an actual acorn lying on the path. "The mark on
 the bark is the *name*; the acorn is the *value*. They are not
 the same thing — and Clojure lets you talk about either one."
@@ -1036,7 +1040,7 @@ value distinct — returned the right answer."""),
     # 2. The label-the-list template — `quote` / `'`.
     SubplotTemplate("""\
 "To talk about the form itself rather than evaluating it,"
-{tortoise_phrase} said, "you label the form with a chalk mark
+{tortoise_phrase}, {emo_patient}, said, "you label the form with a chalk mark
 in front. Quoting tells the runtime: don't cook this, just hand
 it back as the shape it is." To {goal_text}, {tortoise_he_she}
 composed {concept_phrase}, submitted the form, and the REPL —
@@ -1047,7 +1051,7 @@ respecting the chalk mark — returned the form unevaluated."""),
     #    quote/unquote arrangement.
     SubplotTemplate("""\
 "There's a difference between *labeling* the form and
-*evaluating* it," {tortoise_phrase} said. "Quote in any of its
+*evaluating* it," {tortoise_phrase}, {emo_patient}, said. "Quote in any of its
 shapes is the labeling — the runtime hands you back the form,
 not its value, unless you say otherwise." To {goal_text},
 {tortoise_he_she} composed {concept_phrase}, submitted the
@@ -1073,7 +1077,7 @@ _RUNNERAHEAD_SUBPLOTS: list[SubplotTemplate] = [
 
     # 1. The runner-sent-ahead template — future / agent.
     SubplotTemplate("""\
-{tortoise_phrase} dispatched a young messenger down the long road
+{tortoise_phrase}, {emo_patient}, dispatched a young messenger down the long road
 {place}, work in paw. "The runner goes ahead while we keep on
 with our own business," {tortoise_he_she} said, "and when we
 need the result we ask the runner to hand it back." To
@@ -1085,7 +1089,7 @@ the result later — returned the value when it was ready."""),
     #    ahead eventually returns the value, however the
     #    coordination is arranged.
     SubplotTemplate("""\
-"Once you've sent the runner ahead," {tortoise_phrase} said, "you
+"Once you've sent the runner ahead," {tortoise_phrase}, {emo_patient}, said, "you
 keep on with your own work. The result will be there when you ask
 for it — sometimes you have to wait for the runner to be finished,
 sometimes you can keep arranging things until you need it." To
@@ -1098,7 +1102,7 @@ ready."""),
     #    Tortoise's willingness to wait for the runner is the
     #    fable beat.
     SubplotTemplate("""\
-"The hard part isn't sending the runner," {tortoise_phrase} said.
+"The hard part isn't sending the runner," {tortoise_phrase}, {emo_patient}, said.
 "The hard part is being patient enough to wait for the answer
 when it comes — not snatching too early, not giving up too soon.
 The runtime makes that easier than it sounds." To {goal_text},
@@ -1108,7 +1112,7 @@ the runner's answer when the runner had it ready."""),
 
     # 4. The Tortoise-coordinates template — generic.
     SubplotTemplate("""\
-{tortoise_phrase} arranged a small relay {place}, runners and
+{tortoise_phrase}, {emo_patient}, arranged a small relay {place}, runners and
 messengers each in their place. "The runtime keeps track of who
 sent what and when each one finishes," {tortoise_he_she} said,
 "so the values come back in the right order, no matter how long
@@ -1138,7 +1142,7 @@ _SORTINGTABLE_SUBPLOTS: list[SubplotTemplate] = [
     # 1. The sorting-table template — `defmulti`.
     SubplotTemplate("""\
 A long wooden table stood {place}, with several arms branching off
-its sides. "Defmulti is a sorting-table," {tortoise_phrase} said.
+its sides. "Defmulti is a sorting-table," {tortoise_phrase}, {emo_patient}, said.
 "You decide what stamp on the runner to look at; the table routes
 each runner down the matching arm." To {goal_text},
 {tortoise_he_she} composed {concept_phrase}, submitted the
@@ -1147,7 +1151,7 @@ arm — returned the value the right arm had produced."""),
 
     # 2. The branch-of-the-table template — `defmethod`.
     SubplotTemplate("""\
-"To add a branch to the sorting-table," {tortoise_phrase} said,
+"To add a branch to the sorting-table," {tortoise_phrase}, {emo_patient}, said,
 "you say what stamp the branch handles and what behavior runs
 when a runner with that stamp arrives." To {goal_text},
 {tortoise_he_she} composed {concept_phrase} for the right
@@ -1158,7 +1162,7 @@ dispatching the runner — returned the branch-specific value."""),
     #    sorting-table reads whatever the dispatch function returns
     #    and routes accordingly.
     SubplotTemplate("""\
-"What the table sorts by is up to you," {tortoise_phrase} said.
+"What the table sorts by is up to you," {tortoise_phrase}, {emo_patient}, said.
 "You decide what to look at on each runner — a tag, a kind, a
 field, anything. The runtime reads it, finds the matching arm,
 and runs that one." To {goal_text}, {tortoise_he_she}
@@ -1169,7 +1173,7 @@ value the right arm had given."""),
     # 4. The flexible-routing template — generic emphasis on
     #    the open-dispatch nature.
     SubplotTemplate("""\
-"The good thing about a sorting-table," {tortoise_phrase} said,
+"The good thing about a sorting-table," {tortoise_phrase}, {emo_patient}, said,
 "is that you can keep adding new arms whenever a new kind of
 runner shows up. The original table doesn't change; the runtime
 just learns one more route." To {goal_text},
@@ -1196,7 +1200,7 @@ _CARRYINGCASE_SUBPLOTS: list[SubplotTemplate] = [
 
     # 1. The labeled-compartments template — defrecord.
     SubplotTemplate("""\
-{tortoise_phrase} held up a small wooden case {place}, its inside
+{tortoise_phrase}, {emo_patient}, held up a small wooden case {place}, its inside
 divided into labeled compartments. "Defrecord makes a case like
 this," {tortoise_he_she} said: "named compartments holding
 specific things; a stamp on the outside saying what kind of case
@@ -1207,7 +1211,7 @@ held or carried."""),
 
     # 2. The bare-case template — deftype.
     SubplotTemplate("""\
-"A deftype is a barer case," {tortoise_phrase} said. "Compartments,
+"A deftype is a barer case," {tortoise_phrase}, {emo_patient}, said. "Compartments,
 a stamp — no map-like behavior unless you ask for it. Faster, more
 focused, less convenient." To {goal_text}, {tortoise_he_she}
 composed {concept_phrase}, submitted the form, and the REPL —
@@ -1217,7 +1221,7 @@ inside."""),
     # 3. The reaching-into-the-compartment template — field
     #    access.
     SubplotTemplate("""\
-"To reach into a labeled compartment," {tortoise_phrase} said,
+"To reach into a labeled compartment," {tortoise_phrase}, {emo_patient}, said,
 "you ask for it by name. The case knows where each compartment
 is; the runtime fetches it cleanly." To {goal_text},
 {tortoise_he_she} composed {concept_phrase}, submitted the
@@ -1243,8 +1247,7 @@ tally — returned the final number."""),
 
     # 2. The starting-tally template — reduce with init.
     SubplotTemplate("""\
-"You don't have to start the tally at zero," {tortoise_phrase}
-said, holding up a slate already inscribed with a number. "If you
+"You don't have to start the tally at zero," {tortoise_phrase}, {emo_patient}, said, holding up a slate already inscribed with a number. "If you
 start with a different value, the walk begins from there — the
 combine-step folds each pebble in from that starting point." To
 {goal_text}, {tortoise_he_she} composed {concept_phrase},
@@ -1254,7 +1257,7 @@ walking the row — returned the final value."""),
     # 3. The simple-count template — `count`.
     SubplotTemplate("""\
 "The simplest tally-walk is just counting,"
-{tortoise_phrase} said: "step along the row, add one at every
+{tortoise_phrase}, {emo_patient}, said: "step along the row, add one at every
 pebble, no other operation. The runtime does this for any
 collection — vector, list, map, string." To {goal_text},
 {tortoise_he_she} composed {concept_phrase}, submitted the
@@ -1270,7 +1273,7 @@ _BEADSTRING_SUBPLOTS: list[SubplotTemplate] = [
 
     # 1. The threading-beads template — `str` concat.
     SubplotTemplate("""\
-{tortoise_phrase} held up a string of small wooden beads {place}.
+{tortoise_phrase}, {emo_patient}, held up a string of small wooden beads {place}.
 "Strings in Clojure are like this," {tortoise_he_she} said: "a
 threaded line of characters, in order. Concat strings together,
 and the threads are spliced; cut a substring out, and you get a
@@ -1281,7 +1284,7 @@ cutting as the form said — returned the new bead-string."""),
     # 2. The counting-beads template — string length / substring.
     SubplotTemplate("""\
 "To count the beads, walk the thread,"
-{tortoise_phrase} said. "Want a section of beads? Cut from one
+{tortoise_phrase}, {emo_patient}, said. "Want a section of beads? Cut from one
 position to another and you get a smaller thread, the original
 untouched." To {goal_text}, {tortoise_he_she} composed
 {concept_phrase}, submitted the form, and the REPL — counting or
@@ -1315,8 +1318,7 @@ without growing the call-stack — returned the final value."""),
 
     # 2. The base-case template — termination.
     SubplotTemplate("""\
-"Every circuit has a stopping condition," {tortoise_phrase}
-said. "Without one, the runner walks forever. With one, the
+"Every circuit has a stopping condition," {tortoise_phrase}, {emo_patient}, said. "Without one, the runner walks forever. With one, the
 runner knows when the laps are done and the tally is the
 answer." To {goal_text}, {tortoise_he_she} composed
 {concept_phrase}, submitted the form, and the REPL — looping
