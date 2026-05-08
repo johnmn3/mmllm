@@ -38,7 +38,7 @@ class UnsupportedForm(ParseError): pass
 # Token regex: parens/brackets/braces, #{ for sets, strings, char lits,
 # numbers (incl. ratios + bigints), keywords, symbols, comments.
 _TOKEN_RE = re.compile(r"""
-    (?P<ws>      \s+                                           ) |
+    (?P<ws>      [\s,]+                                        ) |
     (?P<comment> ;[^\n]*                                       ) |
     (?P<lparen>  \(                                            ) |
     (?P<rparen>  \)                                            ) |

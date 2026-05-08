@@ -280,8 +280,10 @@ STR_SHORT = ScalarPool(
 
 
 def _kw(*xs):
-    """Wrap as Clojure-keyword strings."""
-    return tuple(f":{x}" for x in xs)
+    """Wrap as Clojure-keyword sentinels — `("__kw__", name)` tuples
+    so they round-trip through the evaluator and emit as `:name` in
+    both top-level and nested (dict-key, vector-element) positions."""
+    return tuple(("__kw__", x) for x in xs)
 
 
 KW_FRUIT = ScalarPool(
