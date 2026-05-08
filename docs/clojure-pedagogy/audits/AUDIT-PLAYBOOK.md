@@ -28,14 +28,21 @@ claude/audit-<fable-dash>-<short-tag>     # e.g. claude/audit-milkmaid-rN0v
 ```
 
 ```bash
-git fetch origin main
-git checkout -b claude/audit-<fable-dash>-<short-tag> origin/main
+git fetch origin claude/analyze-repo-status-rN0vt
+git checkout -b claude/audit-<fable-dash>-<short-tag> \
+    origin/claude/analyze-repo-status-rN0vt
 ```
 
-If the branch already exists, rebase onto current `main`:
+`claude/analyze-repo-status-rN0vt` is the integration branch for
+the parametric system + new pools + bb verifier + this playbook.
+It has not yet been merged to `main`, so you must base from this
+branch directly.
+
+If the branch already exists, rebase onto current integration:
 
 ```bash
-git fetch origin main && git rebase origin/main
+git fetch origin claude/analyze-repo-status-rN0vt
+git rebase origin/claude/analyze-repo-status-rN0vt
 ```
 
 Verify the toolchain works:
@@ -370,11 +377,11 @@ FABLE=<fable> python docs/clojure-pedagogy/audits/audit-harness.py
 
 ---
 
-## 6. Sync with main, retest, push (Step 5)
+## 6. Sync with the integration branch, retest, push (Step 5)
 
 ```bash
-git fetch origin main
-git rebase origin/main
+git fetch origin claude/analyze-repo-status-rN0vt
+git rebase origin/claude/analyze-repo-status-rN0vt
 ```
 
 If there are conflicts, resolve them carefully — your fixes should
@@ -483,10 +490,11 @@ docs/clojure-pedagogy/audits/audit-harness.py                    detectors live 
 ## Reference: dispatch model
 
 Each agent picks ONE fable and a random 6 of the 12 grades. Each
-agent's branch is independent and starts from current `main`.
-Multiple agents can audit the same fable on different random
-samples — overlapping papercut findings are expected and useful
-(the user dedups when collating).
+agent's branch starts from `claude/analyze-repo-status-rN0vt` (the
+parametric integration branch — not yet on `main`). Multiple
+agents can audit the same fable on different random samples;
+overlapping findings are expected and useful (the user dedups
+when collating).
 
 Branch naming: `claude/audit-<fable-dash>-<short-tag>` where
 `<short-tag>` is a 4-character random suffix to keep multiple

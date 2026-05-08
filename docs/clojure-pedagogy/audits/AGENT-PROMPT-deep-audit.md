@@ -45,9 +45,13 @@ Read the playbook end-to-end before starting. It explains:
 
 Workflow:
 
-  1. Check out your branch from latest main. Run all smoke tests +
-     FABLE=<your-fable> python docs/clojure-pedagogy/audits/audit-harness.py
-     to confirm the baseline is green.
+  1. Check out your branch from latest
+     `claude/analyze-repo-status-rN0vt` (this is the integration
+     branch carrying the parametric system, the new pools, the bb
+     verifier, and this playbook itself; it has not yet been merged
+     to main). Run all smoke tests + FABLE=<your-fable> python
+     docs/clojure-pedagogy/audits/audit-harness.py to confirm the
+     baseline is green.
 
   2. For each of the 6 grades you picked, generate ~5 records per
      example for every subject. ~80-120 records total per grade, so
@@ -73,9 +77,11 @@ Workflow:
      detectors should not regress. If either fails, the fix didn't
      land — investigate.
 
-  7. Rebase your branch onto latest main:
+  7. Rebase your branch onto latest
+     `claude/analyze-repo-status-rN0vt`:
 
-       git fetch origin main && git rebase origin/main
+       git fetch origin claude/analyze-repo-status-rN0vt
+       git rebase origin/claude/analyze-repo-status-rN0vt
 
      Re-run all smoke tests + the audit harness. Resolve conflicts
      carefully (typically additive merges work cleanly because each
