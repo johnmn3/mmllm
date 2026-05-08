@@ -83,33 +83,41 @@ said, pointing to {concept_phrase}. "You hand the form {form_display}
 to the runtime, and the runtime hands you back what it evaluates to —
 one stone, one rise of water." {hare}, {emo_tired}, agreed to try."""),
 
-    # 4. The audience template — a small flock of crows gather around
-    #    the pitcher to watch the next stone drop.
+    # 4. The audience template — a small flock of crows gathers around
+    #    the narrow-throated pitcher; the heat of the day makes the
+    #    challenge concrete (heat ↔ pressure on the runtime to settle;
+    #    narrow throat ↔ the bottleneck the form has to pass through).
     SubplotTemplate("""\
-A small flock of crows had gathered around the pitcher {place} to
-watch {hare_phrase} attempt to outwit {tortoise_phrase} at reading
-the REPL. {tortoise} pointed to {concept_phrase} and read the form
-aloud from the rim: {form_display}. The flock waited, beaks tilted,
-to see who would correctly write the form to submit."""),
+A small flock of crows had gathered around the narrow-throated
+pitcher {place} to watch {hare_phrase} attempt to outwit
+{tortoise_phrase} at reading the REPL. {tortoise}, {emo_patient},
+pointed to {concept_phrase} and read the form aloud from the warm
+clay rim: {form_display}. The flock waited, beaks tilted in the
+heat, to see who would correctly write the form to submit."""),
 
     # 5. The pitcher-pause template — hare lands at the pitcher and
     #    refuses to drop another stone until the question is settled.
+    #    The day-heat (emo_thirsty) maps to time-pressure on the form;
+    #    the gliding tortoise (emo_patient) maps to careful evaluation.
     SubplotTemplate("""\
 Halfway through the morning's stone-drop, {hare_phrase} perched on
-the pitcher's rim {place} and refused to drop another stone until
-someone could prove what the form {form_display} evaluated to.
-{hare} called it impossible. {tortoise_phrase}, gliding up unhurried,
-simply said: "Submit {concept_phrase} to the REPL. Whatever comes
-back is the answer.\""""),
+the pitcher's rim {place} and, {emo_thirsty}, refused to drop
+another stone until someone could prove what the form {form_display}
+evaluated to. {hare} called it impossible. {tortoise_phrase},
+gliding up {emo_patient}, simply said: "Submit {concept_phrase} to
+the REPL. Whatever comes back is the answer.\""""),
 
     # 6. The pitcher-tally template — tortoise keeps a careful
-    #    talon-scratched record on the pitcher's clay rim.
+    #    talon-scratched record on the pitcher's sun-warmed clay rim.
+    #    The deep cool of the clay (cool ↔ persistent state) and the
+    #    careful manner (emo_patient) ground the run-tally pattern.
     SubplotTemplate("""\
-{tortoise_phrase} had been keeping a careful talon-scratched stone-tally
-on the pitcher's rim of every form {tortoise_he_she} had successfully
-evaluated. {place_idx}, the next entry was {concept_phrase}.
-{hare_phrase} peered over {tortoise_his_her} wing at the form
-{form_display} and asked what it would come out to.""".replace("{place_idx}", "Today {place}")),
+{tortoise_phrase}, {emo_patient}, had been keeping a careful
+talon-scratched stone-tally on the pitcher's cool clay rim of every
+form {tortoise_he_she} had successfully evaluated. {place_idx},
+the next entry was {concept_phrase}. {hare_phrase} peered over
+{tortoise_his_her} wing at the form {form_display} and asked what
+it would come out to.""".replace("{place_idx}", "Today {place}")),
 
     # 7. The boast-and-rebuke template — Hare claims to know without
     #    dropping a stone; tortoise asks for the form to be submitted.
@@ -190,24 +198,30 @@ hands you back the value." {hare}, {emo_tired}, agreed to try
 writing it."""),
 
     # 4. The audience template — a small flock of crows waits at the
-    #    pitcher's rim to see the form written.
+    #    pitcher's rim. The heat of the day grounds the time-pressure
+    #    (heat ↔ urgency to find a value), the tortoise's calm grounds
+    #    the careful patience that produces the right form.
     SubplotTemplate("""\
-A small flock of crows had gathered around the pitcher {place} to
-watch {hare_phrase} attempt to outwit {tortoise_phrase} at writing
-the right form. The challenge: {goal_text}. {tortoise} reminded the
-flock that what mattered was writing {concept_phrase} carefully,
-then submitting it to the REPL — not guessing at the answer from
-the rim."""),
+A small flock of crows had gathered around the narrow-throated
+pitcher {place} to watch {hare_phrase} attempt to outwit
+{tortoise_phrase} at writing the right form. The challenge:
+{goal_text}. {tortoise}, {emo_patient}, reminded the flock that
+what mattered was writing {concept_phrase} carefully, then submitting
+it to the REPL — not guessing at the answer from the dry rim."""),
 
-    # 5. The race-pause template — pause mid-race for a goal-write.
+    # 5. The race-pause template — pause mid-flight for a goal-write.
     #    Fix: drop "write a form to {goal_text}"; reframe as
     #    "until someone could {goal_text} with a Clojure form".
+    #    The thirsty pause (emo_thirsty) maps to the urgency of needing
+    #    a return value; the patient walk (emo_patient) to the careful
+    #    composition that produces the form.
     SubplotTemplate("""\
-Halfway through the race, {hare_phrase} stopped {place} and refused
-to continue until someone could {goal_text} with a Clojure form.
-{hare} called the goal impossible. {tortoise_phrase}, walking up at
-{tortoise_his_her} usual pace, simply said: "Compose {concept_phrase};
-submit it. Whatever comes back is the answer.\""""),
+Halfway through the morning's stone-drop, {hare_phrase} perched on
+the pitcher's rim {place}, {emo_thirsty}, and refused to continue
+until someone could {goal_text} with a Clojure form. {hare} called
+the goal impossible. {tortoise_phrase}, gliding up {emo_patient},
+simply said: "Compose {concept_phrase}; submit it. Whatever comes
+back is the answer.\""""),
 
     # 6. The pitcher-tally template — Tortoise scratches goal/form
     #    pairs into the pitcher's clay rim with a talon.

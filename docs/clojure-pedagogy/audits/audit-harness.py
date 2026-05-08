@@ -555,6 +555,55 @@ def check_record(rec, sub, example):
                                f"'{ph}' leaks into {sub.fable} prose"))
                 break
 
+    # LOW_GROUNDING — Cat-J: a record that names the operation but
+    # doesn't FEEL it. Flag any record whose user_msg lacks BOTH:
+    #   (i)  a drawn-value reference — any literal lexeme from the
+    #        rendered form (a number, a keyword name, a quoted symbol,
+    #        a string body) appearing in the prose, AND
+    #   (ii) any phrase from the fable's emotion pools (EMO_PROUD,
+    #        EMO_PATIENT, EMO_THIRSTY, EMO_GREEDY, EMO_CONTENT,
+    #        EMO_REGRETFUL, EMO_DESPERATE, EMO_TIRED, EMO_HUNGRY).
+    # If neither anchor is present the prose reads as abstract
+    # restatement of the goal — the affirmative-grounding lift the
+    # crow-pitcher 0HIm slice's directive asks for.
+    code_str = getattr(rec, 'code_str', '') or ''
+    drawn_lexemes = set()
+    for tok in re.findall(r'[a-zA-Z][a-zA-Z0-9_-]{2,}|[0-9]{2,}', code_str):
+        if tok.lower() not in ("def", "let", "fn", "do", "if", "and",
+                               "or", "not", "when", "true", "false",
+                               "nil", "this", "case", "cond", "loop",
+                               "recur", "for"):
+            drawn_lexemes.add(tok)
+    has_drawn = any(lx in user for lx in drawn_lexemes)
+    has_emo = False
+    if not has_drawn:
+        # Lazy-import the emotion pools so the detector also runs on
+        # branches that don't yet have the new emotion_pools module.
+        try:
+            from mmllm.aesop.fables import (
+                EMO_PROUD, EMO_PATIENT, EMO_TIRED, EMO_HUNGRY,
+                EMO_GREEDY, EMO_CONTENT, EMO_REGRETFUL,
+                EMO_DESPERATE, EMO_THIRSTY,
+            )
+            from mmllm.aesop.curriculum.generator import (
+                CP_EMO_THIRSTY, CP_EMO_PATIENT, CP_EMO_PROUD,
+            )
+            EMO_ALL = (
+                tuple(EMO_PROUD) + tuple(EMO_PATIENT) + tuple(EMO_TIRED)
+                + tuple(EMO_HUNGRY) + tuple(EMO_GREEDY) + tuple(EMO_CONTENT)
+                + tuple(EMO_REGRETFUL) + tuple(EMO_DESPERATE)
+                + tuple(EMO_THIRSTY) + tuple(CP_EMO_THIRSTY)
+                + tuple(CP_EMO_PATIENT) + tuple(CP_EMO_PROUD)
+            )
+            has_emo = any(p in user for p in EMO_ALL if len(p) > 5)
+        except ImportError:
+            has_emo = True  # don't flag if pools unavailable
+    if not has_drawn and not has_emo:
+        issues.append(("LOW_GROUNDING",
+                       "user_msg lacks both a drawn-value reference "
+                       "and any emotion-pool phrase (Cat-J: prose "
+                       "names the operation but doesn't feel it)"))
+
     return issues
 
 
