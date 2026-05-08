@@ -504,6 +504,57 @@ def check_record(rec, sub, example):
                         "boast subplot 'X insisted they already knew' reads as "
                         "plural after singular-named subject (pitfall #19)"))
 
+    # PREDICATE_QUESTION_COLLISION — a Clojure predicate ends in ``?``,
+    # and when the question framing appends its own ``?`` or ``.`` the
+    # rendered text reads ``contains??``, ``empty??``, ``zero??.``,
+    # ``contains?.`` etc. Surfaced as a Cat-C papercut by the
+    # crow-pitcher 0HIm deep audit (G4-12, G4-14, G4-19). Only flag
+    # when the predicate ``?`` and the trailing punctuation are
+    # adjacent (no whitespace) — ``(symbol? ...)`` ellipses and
+    # similar inline code references are fine.
+    if re.search(r"\b\w+\?[?]", user) or re.search(r"\b\w+\?\.(?!\.)", user):
+        issues.append(("PREDICATE_QUESTION_COLLISION",
+                       "predicate-suffix ``?`` collides with the question "
+                       "framing's trailing ``?`` or ``.``"))
+
+    # WRONG_FABLE_LITERAL — a tortoise-hare-specific named character
+    # (Mossback, Shelly, Slowpoke, Pip, Bramble, Hopper, Whisker,
+    # Speedwick, Speedy, Zephyr) appears in a non-tortoise-hare
+    # record's user_msg. Either as a defrecord field-name string
+    # ((->Hare "Pip")) or in narrative prose ("the Hare pouch").
+    # Cat-E (semantic — wrong-fable imagery leakage). Tortoise-hare
+    # itself is exempt because those names are native there.
+    if sub.fable != "tortoise-hare":
+        for ghost in ("Mossback", "Shelly", "Slowpoke", "Pip",
+                      "Bramble", "Hopper", "Whisker", "Speedwick",
+                      "Speedy"):
+            if re.search(r"\b" + ghost + r"\b", user):
+                issues.append(("WRONG_FABLE_LITERAL",
+                               f"tortoise-hare ghost name '{ghost}' "
+                               f"appears in {sub.fable} user_msg"))
+                break
+
+    # FOREIGN_FABLE_IMAGERY — wrong-fable props in narrative prose.
+    # A non-tortoise-hare record renders text like "moss-covered
+    # milestone", "leather notebook", "twig in the path", "halfway
+    # through the race" — these are tortoise-hare's specific props /
+    # phrasings and read as imagery leakage in another fable. Cat-H
+    # (plot coherence). Caught by the crow-pitcher 0HIm deep audit
+    # in grade-1 _SHARED_SUBPLOTS templates inherited from TH.
+    if sub.fable != "tortoise-hare":
+        TH_IMAGERY = (
+            "moss-covered milestone",
+            "leather notebook",
+            "wooden sign nailed to a tree",
+            "small audience of forest creatures",
+        )
+        for ph in TH_IMAGERY:
+            if ph in user:
+                issues.append(("FOREIGN_FABLE_IMAGERY",
+                               f"tortoise-hare-specific imagery "
+                               f"'{ph}' leaks into {sub.fable} prose"))
+                break
+
     return issues
 
 

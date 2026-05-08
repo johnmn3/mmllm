@@ -461,22 +461,22 @@ G8_07 = SubjectCurriculum(
     examples=[
         SubjectExample(
             form=("(do (defprotocol Pace (speed [this]))"
-                  " (defrecord Hare [name] Pace (speed [_] :swift))"
-                  " (speed (->Hare \"Pip\"))"),
+                  " (defrecord Falcon [name] Pace (speed [_] :swift))"
+                  " (speed (->Falcon \"Aria\"))"),
             expected=":swift",
             concept_phrase="calling a protocol method on a record instance",
-            question_what="the value returned after defining protocol Pace with method speed, defining record Hare with one field name that implements Pace, then calling speed on a Hare instance",
-            goal_text="define a protocol Pace with method speed, define a record Hare that implements Pace, then call speed on a Hare instance",
+            question_what="the value returned after defining protocol Pace with method speed, defining record Falcon with one field name that implements Pace, then calling speed on a Falcon instance",
+            goal_text="define a protocol Pace with method speed, define a record Falcon that implements Pace, then call speed on a Falcon instance",
 
             scenario=(
                 "Caw posted the Pace guild charter on the rim at the farm's edge, "
-                "then wove a Hare pouch with a name slot that signed the charter "
-                "inline, pledging its own pace response. She packed 'Pip' inside "
-                "and called `speed`."
+                "then wove a Falcon-shaped carrying-pouch with a name slot that "
+                "signed the charter inline, pledging its own pace response. She "
+                "packed a name-stone inside and called `speed`."
             ),
             need=(
-                "She needed to confirm a Hare-typed pouch returned its own "
-                "pledged pace when the guild's `speed` call arrived."
+                "She needed to confirm a Falcon-typed carrying-pouch returned its "
+                "own pledged pace when the guild's `speed` call arrived."
             ),
             mapping=(
                 "`defrecord` with the protocol name inline stitches the guild "
@@ -484,26 +484,27 @@ G8_07 = SubjectCurriculum(
                 "type's built-in response without consulting a separate ledger row."
             ),
             resolution=(
-                "The Hare pouch answered the `speed` call with its pledged pace."
+                "The Falcon-shaped pouch answered the `speed` call with its pledged pace."
             ),
             tags=("story",),
         ),
         SubjectExample(
             form=("(do (defprotocol Pace (speed [this]))"
-                  " (defrecord Tortoise [name] Pace (speed [_] :steady))"
-                  " (speed (->Tortoise \"Shelly\"))"),
+                  " (defrecord Heron [name] Pace (speed [_] :steady))"
+                  " (speed (->Heron \"Vesper\"))"),
             expected=":steady",
             concept_phrase="calling a protocol method on a record instance",
-            question_what="the value returned after defining protocol Pace with method speed, defining record Tortoise with one field name that implements Pace, then calling speed on a Tortoise instance",
-            goal_text="define a protocol Pace with method speed, define a record Tortoise that implements Pace, then call speed on a Tortoise instance",
+            question_what="the value returned after defining protocol Pace with method speed, defining record Heron with one field name that implements Pace, then calling speed on a Heron instance",
+            goal_text="define a protocol Pace with method speed, define a record Heron that implements Pace, then call speed on a Heron instance",
 
             scenario=(
                 "Korvus posted the Pace guild charter on the pitcher at the "
-                "village, then wove a Tortoise pouch with a name slot that "
-                "pledged the guild inline. He packed 'Shelly' and called `speed`."
+                "village, then wove a Heron-shaped carrying-pouch with a name "
+                "slot that pledged the guild inline. He packed a name-stone and "
+                "called `speed`."
             ),
             need=(
-                "He needed to confirm the Tortoise pouch's own pace response "
+                "He needed to confirm the Heron-shaped pouch's own pace response "
                 "was returned when `speed` was called on it."
             ),
             mapping=(
@@ -512,7 +513,7 @@ G8_07 = SubjectCurriculum(
                 "on the type itself and returns its result."
             ),
             resolution=(
-                "The Tortoise pouch answered with the pace stitched into its own shape."
+                "The Heron-shaped pouch answered with the pace stitched into its own shape."
             ),
             tags=("story",),
         ),
@@ -855,17 +856,17 @@ G8_13 = SubjectCurriculum(
         # bodies — illustrate by capturing the field via this.
         SubjectExample(
             form=("(do (defprotocol Named (name-of [this]))"
-                  " (defrecord Hare [n] Named (name-of [this] (:n this)))"
-                  " (name-of (->Hare \"Zephyr\")))"),
+                  " (defrecord Falcon [n] Named (name-of [this] (:n this)))"
+                  " (name-of (->Falcon \"Zephyr\")))"),
             expected="Zephyr",
             concept_phrase="using this to access a field in a protocol method",
-            question_what="the value returned after defining protocol Named with method name-of, defining record Hare with field n that uses this to access the field in the implementation, then calling name-of on a Hare instance",
+            question_what="the value returned after defining protocol Named with method name-of, defining record Falcon with field n that uses this to access the field in the implementation, then calling name-of on a Falcon instance",
             goal_text="define a protocol Named with method name-of, define a record that uses this to access a field, then call the method",
 
             scenario=(
                 "Caw posted the Named guild charter at the garden pitcher. "
-                "She wove a Hare pouch with an 'n' slot pledging the guild — "
-                "its method using `this` to read the slot."
+                "She wove a Falcon-shaped pouch with an 'n' slot pledging the "
+                "guild — its method using `this` to read the slot."
             ),
             need=(
                 "She needed `this` to reach into the pouch and return "
@@ -1059,19 +1060,19 @@ G8_16 = SubjectCurriculum(
         # A small "many implementations behind one protocol" example.
         SubjectExample(
             form=("(do (defprotocol Move (step [this]))"
-                  " (defrecord Hare [] Move (step [_] :leap))"
-                  " (defrecord Tortoise [] Move (step [_] :plod))"
-                  " (mapv step [(->Hare) (->Tortoise)]))"),
+                  " (defrecord Falcon [] Move (step [_] :leap))"
+                  " (defrecord Heron [] Move (step [_] :plod))"
+                  " (mapv step [(->Falcon) (->Heron)]))"),
             expected=[":leap", ":plod"],
             concept_phrase="calling a polymorphic method on multiple record types",
-            question_what="the vector of results after defining protocol Move with method step, defining records Hare and Tortoise that both implement Move, then calling step via mapv on both instances",
-            goal_text="define a protocol Move with method step, define two record types Hare and Tortoise that each implement it, then call the method on both instances",
+            question_what="the vector of results after defining protocol Move with method step, defining records Falcon and Heron that both implement Move, then calling step via mapv on both instances",
+            goal_text="define a protocol Move with method step, define two record types Falcon and Heron that each implement it, then call the method on both instances",
 
             scenario=(
                 "Sable posted the Move guild charter on the pitcher's rim at "
-                "the village. Two pouches — Hare and Tortoise — each pledged "
-                "the guild with their own `step` response. She lined both up "
-                "and called `step` across the row."
+                "the village. Two carrying-pouches — Falcon-shaped and "
+                "Heron-shaped — each pledged the guild with their own `step` "
+                "response. She lined both up and called `step` across the row."
             ),
             need=(
                 "She needed each pouch to answer `step` with its own response "
@@ -1089,31 +1090,31 @@ G8_16 = SubjectCurriculum(
         ),
         SubjectExample(
             form=("(do (defprotocol Sound (cry [this]))"
-                  " (defrecord Hare [] Sound (cry [_] :thump))"
-                  " (defrecord Tortoise [] Sound (cry [_] :hiss))"
-                  " (cry (->Tortoise)))"),
+                  " (defrecord Falcon [] Sound (cry [_] :thump))"
+                  " (defrecord Heron [] Sound (cry [_] :hiss))"
+                  " (cry (->Heron)))"),
             expected=":hiss",
             concept_phrase="calling a polymorphic method on a record instance",
-            question_what="the value returned after defining protocol Sound with method cry, defining records Hare and Tortoise that both implement Sound, then calling cry on a Tortoise instance",
-            goal_text="define a protocol Sound with method cry, define two record types that implement it, then call the method on a Tortoise instance",
+            question_what="the value returned after defining protocol Sound with method cry, defining records Falcon and Heron that both implement Sound, then calling cry on a Heron instance",
+            goal_text="define a protocol Sound with method cry, define two record types that implement it, then call the method on a Heron instance",
 
             scenario=(
                 "Korvus posted the Sound guild charter on the pitcher at the "
-                "garden. Two pouches — Hare and Tortoise — pledged the guild "
-                "with separate `cry` responses. He picked up the Tortoise "
-                "pouch and called `cry` on it alone."
+                "garden. Two carrying-pouches — Falcon-shaped and Heron-shaped "
+                "— pledged the guild with separate `cry` responses. He picked "
+                "up the Heron pouch and called `cry` on it alone."
             ),
             need=(
-                "He needed only the Tortoise pouch's own `cry` response, "
-                "not the Hare's, despite both being guild members."
+                "He needed only the Heron pouch's own `cry` response, "
+                "not the Falcon's, despite both being guild members."
             ),
             mapping=(
                 "Both types are guild members, but dispatch is per-instance. "
-                "Calling `cry` on a Tortoise instance routes only to the "
-                "Tortoise method, returning its registered response."
+                "Calling `cry` on a Heron instance routes only to the "
+                "Heron method, returning its registered response."
             ),
             resolution=(
-                "The Tortoise pouch's `cry` response returned, the Hare's untouched."
+                "The Heron pouch's `cry` response returned, the Falcon's untouched."
             ),
             tags=("story",),
         ),
