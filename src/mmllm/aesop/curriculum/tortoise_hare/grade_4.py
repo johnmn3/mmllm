@@ -669,7 +669,7 @@ G4_12 = SubjectCurriculum(grade=4, subject_id="G4-12",
             ),
             resolution=(
                 "the REPL confirmed the kind was already present — "
-                "the basket returned true, membership verified."
+                "membership verified, no rummaging required."
             ),
             tags=("story",),
         ),
@@ -696,8 +696,8 @@ G4_12 = SubjectCurriculum(grade=4, subject_id="G4-12",
                 "signal the kind has not been seen yet."
             ),
             resolution=(
-                "the REPL returned false — kind 4 was not in the basket, "
-                "confirming it would be genuinely new if added."
+                "the REPL signalled the kind's absence from the basket — "
+                "if added, it would be genuinely new, no duplicate."
             ),
             tags=("story",),
         ),
@@ -869,8 +869,8 @@ G4_14 = SubjectCurriculum(grade=4, subject_id="G4-14",
                 "One stone fills the row."
             ),
             resolution=(
-                "the REPL returned false — the row held a stone and "
-                "was not empty, the question answered."
+                "the REPL signalled the row's non-empty state — even "
+                "one stone is enough to settle the question."
             ),
             tags=("story",),
         ),
@@ -1121,8 +1121,8 @@ G4_18 = SubjectCurriculum(grade=4, subject_id="G4-18",
                 "does not break equality."
             ),
             resolution=(
-                "the REPL returned true — the two arrangements held "
-                "the same members in the same order, equal as sequences."
+                "the REPL confirmed equality as sequences — the two "
+                "arrangements held the same members in the same order."
             ),
             tags=("story",),
         ),

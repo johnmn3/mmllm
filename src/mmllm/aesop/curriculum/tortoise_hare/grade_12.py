@@ -116,7 +116,8 @@ G12_01 = SubjectCurriculum(
             ),
             resolution=(
                 "each pebble emerged incremented by one, and the vector "
-                "caught the result: counts of 2, 3, and 4."
+                "caught the row of incremented counts in the same order "
+                "they had entered the sieve."
             ),
             tags=("story",),
         ),

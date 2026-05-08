@@ -743,8 +743,8 @@ G2_16 = SubjectCurriculum(
                 "all others, even zero and empty strings, convert to true."
             ),
             resolution=(
-                "the runtime confirmed zero's verdict: the conversion returned true — the gate "
-                "would open even with zero carved on the stone."
+                "the runtime confirmed zero's verdict — the gate's truth "
+                "rule opened even with zero carved on the stone."
             ),
             tags=("story",),
         ),
@@ -827,8 +827,9 @@ G2_18 = SubjectCurriculum(
                 "a symbol."
             ),
             resolution=(
-                "the runtime confirmed the chalk-mark was a symbol: the predicate returned true — "
-                "the quoted name 'hare' is indeed a symbol-object, not the hare itself."
+                "the runtime confirmed the chalk-mark's identity: the "
+                "quoted name 'hare' is indeed a symbol-object, not the "
+                "hare itself."
             ),
             tags=("story",),
         ),

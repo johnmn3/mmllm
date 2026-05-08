@@ -98,7 +98,7 @@ with the answer."""),
 "Whatever I tuck in here is in force only while the pouch is
 worn," {tortoise_he_she} said, "and only for the form that names
 the binding. Step past the form's edge and the pouch is empty
-again." To {goal_text}, {tortoise_he_she_cap} composed
+again." To {goal_text}, {tortoise_he_she} composed
 {concept_phrase} with the binding tucked in for that stretch,
 submitted it, and let the REPL read out the value the pouch had
 held."""),
@@ -131,7 +131,7 @@ value threaded into every place the binding had been named."""),
     SubplotTemplate("""\
 "Watch the pouch carefully," {tortoise_phrase} said {place}.
 "While the form's stretch of road runs, the pouch is full and
-the binding is yours." To {goal_text}, {tortoise_he_she_cap}
+the binding is yours." To {goal_text}, {tortoise_he_she}
 composed {concept_phrase} with the binding tucked safely inside,
 then submitted the form. The REPL returned the value, and the
 pouch — its work done — was empty again. {hare_phrase}, {emo_tired},
@@ -153,7 +153,7 @@ _RECIPE_SUBPLOTS: list[SubplotTemplate] = [
 each one a paw-step routine. "Recipes in Clojure are like these
 cards," {tortoise_he_she} said: "the ingredients go at the head,
 the steps in order, and the last step is what gets served." To
-{goal_text}, {tortoise_he_she_cap} wrote out {concept_phrase} on
+{goal_text}, {tortoise_he_she} wrote out {concept_phrase} on
 a fresh card, submitted the form, and the REPL followed the
 recipe and handed back the value the last step had produced."""),
 
@@ -162,7 +162,7 @@ recipe and handed back the value the last step had produced."""),
 "A recipe is only useful when it runs," {tortoise_phrase} said,
 holding up a card. "You write the steps, you bring the
 ingredients, the kitchen does the rest." To {goal_text},
-{tortoise_he_she_cap} composed {concept_phrase}, submitted the
+{tortoise_he_she} composed {concept_phrase}, submitted the
 form, and the REPL — taking the recipe and its ingredients —
 handed back what the steps had produced."""),
 
@@ -185,7 +185,7 @@ handed back only the dish from the last."""),
 "Recipes can feed into one another," {tortoise_phrase} said,
 spreading several cards on the path. "What one recipe serves, the
 next can take as its ingredient — together they make a longer
-routine." To {goal_text}, {tortoise_he_she_cap} composed
+routine." To {goal_text}, {tortoise_he_she} composed
 {concept_phrase}, submitted the form, and the REPL — walking
 through the recipe in order — handed back the value at the
 end."""),
@@ -216,7 +216,7 @@ _BASKET_SUBPLOTS: list[SubplotTemplate] = [
 "Whatever I want to do with what's inside," {tortoise_he_she}
 said, "I read from the basket, work the change, and the basket
 itself stays as it was — what I get back is a fresh arrangement."
-To {goal_text}, {tortoise_he_she_cap} composed {concept_phrase},
+To {goal_text}, {tortoise_he_she} composed {concept_phrase},
 submitted the form, and let the REPL handle the basket exactly
 as the operation prescribed."""),
 
@@ -228,7 +228,7 @@ as the operation prescribed."""),
 {tortoise_phrase} said, gesturing at the woven shape:
 "by the tag pinned to it, by its place in line, or by simply
 asking whether it's there at all." To {goal_text},
-{tortoise_he_she_cap} wrote {concept_phrase} for the basket,
+{tortoise_he_she} wrote {concept_phrase} for the basket,
 submitted the form, and the REPL applied the lookup or update
 exactly as the form directed."""),
 
@@ -252,7 +252,7 @@ as the form described."""),
 original basket. "Whatever I do to it, this one sits unchanged
 on the path — what I get back is a fresh basket with the change
 made, leaving the first one exactly where it was." To
-{goal_text}, {tortoise_he_she_cap} composed {concept_phrase},
+{goal_text}, {tortoise_he_she} composed {concept_phrase},
 submitted the form, and the REPL returned a new arrangement
 while the original waited, untouched. {hare_phrase}, {emo_tired},
 was beginning to see why nothing could be lost by trying."""),
@@ -294,7 +294,7 @@ notebook exactly as the form prescribed."""),
 "I don't pick it up and walk away — I read the page, apply the
 change, and write it back, all in a single motion. If two
 animals arrive at once, the runtime makes sure only one of us
-goes through at a time." To {goal_text}, {tortoise_he_she_cap}
+goes through at a time." To {goal_text}, {tortoise_he_she}
 composed {concept_phrase} for the notebook, submitted the form,
 and the REPL applied the update atomically."""),
 
@@ -304,7 +304,7 @@ and the REPL applied the update atomically."""),
 "The notebook stays put on the stump," {tortoise_phrase} said,
 "so any animal who comes by can read what's on the page right
 now. The page changes only when someone writes — and only as the
-runtime allows." To {goal_text}, {tortoise_he_she_cap} composed
+runtime allows." To {goal_text}, {tortoise_he_she} composed
 {concept_phrase}, submitted the form, and the REPL — reading
 or writing the notebook as the form prescribed — handed back the
 value the page had carried."""),
@@ -315,7 +315,7 @@ value the page had carried."""),
 "Many animals can come and go past the stump," {tortoise_phrase}
 said, "and each one's read or write must agree with the others.
 The runtime sees to that — no two writers stomp on each other's
-work." To {goal_text}, {tortoise_he_she_cap} composed
+work." To {goal_text}, {tortoise_he_she} composed
 {concept_phrase}, submitted the form, and the REPL — coordinating
 each access cleanly — handed back what the notebook now said."""),
 
@@ -347,7 +347,7 @@ _SIEVE_SUBPLOTS: list[SubplotTemplate] = [
 attached at its mouth. "Whatever rule we hang on the sieve,"
 {tortoise_he_she} said, "the basket's pebbles pass through one
 at a time: some are changed, some kept, some dropped, depending
-on the rule." To {goal_text}, {tortoise_he_she_cap} composed
+on the rule." To {goal_text}, {tortoise_he_she} composed
 {concept_phrase} as the sieve's rule, poured the basket through,
 submitted the form, and the REPL returned what the sieve had
 let through."""),
@@ -359,7 +359,7 @@ let through."""),
 pebbles go in at the top," {tortoise_he_she} said, "and the
 sieve does its work — applying the rule, choosing or changing —
 and what lands in the basket below is the result." To
-{goal_text}, {tortoise_he_she_cap} composed {concept_phrase},
+{goal_text}, {tortoise_he_she} composed {concept_phrase},
 poured the input through, submitted the form, and the REPL
 collected what fell into the receiving basket."""),
 
@@ -370,7 +370,7 @@ collected what fell into the receiving basket."""),
 output of the first feeding into the second. "What lands at the
 bottom," {tortoise_he_she} said, "has been through both rules in
 order — applied as a single combined sieve." To {goal_text},
-{tortoise_he_she_cap} composed {concept_phrase} as a stack of
+{tortoise_he_she} composed {concept_phrase} as a stack of
 sieves, poured the input through, submitted the form, and the
 REPL caught what the stack let through."""),
 
@@ -380,7 +380,7 @@ REPL caught what the stack let through."""),
 "You can pour the result into any kind of basket you like,"
 {tortoise_phrase} said. "A row of pebbles, a unique-only
 basket, a bag of any shape — the sieve doesn't care; the
-receiver does." To {goal_text}, {tortoise_he_she_cap} composed
+receiver does." To {goal_text}, {tortoise_he_she} composed
 {concept_phrase}, chose the right empty receiver, poured
 through the sieve, submitted the form, and the REPL packed the
 result into the basket of {tortoise_his_her} choosing."""),
@@ -411,7 +411,7 @@ _ACORN_SUBPLOTS: list[SubplotTemplate] = [
 them into small heaps. "Numbers in Clojure are just like acorns in
 heaps," {tortoise_he_she} said: "you can count them, you can add
 two heaps together, you can divide one heap among several." To
-{goal_text}, {tortoise_he_she_cap} composed {concept_phrase},
+{goal_text}, {tortoise_he_she} composed {concept_phrase},
 submitted the form, and let the REPL hand back the count of
 whatever the operation had produced."""),
 
@@ -420,7 +420,7 @@ whatever the operation had produced."""),
 "Watch the basket," {tortoise_phrase} said, gesturing at a small
 heap of acorns. "Every operation either adds, takes away, or
 combines what's already there — the heap grows or shrinks by
-exactly what you say." To {goal_text}, {tortoise_he_she_cap}
+exactly what you say." To {goal_text}, {tortoise_he_she}
 composed {concept_phrase}, submitted the form, and the REPL
 returned the new count, the heap settled into its new
 arrangement."""),
@@ -434,7 +434,7 @@ careful with the count. "Numbers in Clojure don't fudge,"
 {tortoise_he_she} said. "Whatever you do — adding, subtracting,
 dividing into heaps with leftovers, comparing two piles — the
 runtime gets it exactly right, every time." To {goal_text},
-{tortoise_he_she_cap} composed {concept_phrase}, submitted the
+{tortoise_he_she} composed {concept_phrase}, submitted the
 form, and the REPL handed back the precise number the operation
 called for."""),
 
@@ -455,7 +455,7 @@ matter the patient way."""),
 "Whatever the heap looks like after the operation,"
 {tortoise_phrase} said, "the runtime gives the exact count —
 small or large, fraction or whole, the answer is precise." To
-{goal_text}, {tortoise_he_she_cap} composed {concept_phrase},
+{goal_text}, {tortoise_he_she} composed {concept_phrase},
 submitted the form, and the REPL handed back the value, exactly
 as the operation had produced it."""),
 ]
@@ -473,7 +473,7 @@ A small wooden gate stood across the trail {place}, swinging open
 or closed by the value the runner brought to it. "Boolean forms
 in Clojure are like gates," {tortoise_phrase} said. "The runtime
 checks the value, swings the gate, and what comes back is the
-gate's verdict." To {goal_text}, {tortoise_he_she_cap} composed
+gate's verdict." To {goal_text}, {tortoise_he_she} composed
 {concept_phrase}, submitted the form, and the REPL returned
 whatever the gate had decided."""),
 
@@ -482,7 +482,7 @@ whatever the gate had decided."""),
 "Only two things in Clojure close the gate," {tortoise_phrase}
 said: "nil and false. Everything else — zero, the empty string,
 an empty list — opens it. The gate's verdict follows that rule
-exactly." To {goal_text}, {tortoise_he_she_cap} composed
+exactly." To {goal_text}, {tortoise_he_she} composed
 {concept_phrase}, submitted the form, and the REPL returned the
 value the gate had passed, true or false."""),
 
@@ -492,7 +492,7 @@ value the gate had passed, true or false."""),
 "You can't tell which way the gate will swing by guessing,"
 {tortoise_phrase} said. "You bring the value to the gate, the
 runtime checks it, and the gate gives the only answer that
-matters." To {goal_text}, {tortoise_he_she_cap} composed
+matters." To {goal_text}, {tortoise_he_she} composed
 {concept_phrase}, submitted the form, and the REPL settled the
 matter — the gate had swung exactly as the rule said."""),
 
@@ -535,7 +535,7 @@ The trail forked {place}, with one or more arms branching off and
 each arm marked with a condition. "Branching forms in Clojure are
 forks like this," {tortoise_phrase} said. "The runtime checks the
 condition, takes the matching arm, and only that arm's value
-comes back." To {goal_text}, {tortoise_he_she_cap} composed
+comes back." To {goal_text}, {tortoise_he_she} composed
 {concept_phrase}, submitted the form, and the REPL — having
 taken the right arm — handed back its value."""),
 
@@ -549,7 +549,7 @@ small condition-stone. "Branching forms work like this,"
 {tortoise_phrase} said: "the runner walks past the stones in
 order, takes the first arm whose stone says true, and the value
 of that arm is what comes back." To {goal_text},
-{tortoise_he_she_cap} composed {concept_phrase}, submitted the
+{tortoise_he_she} composed {concept_phrase}, submitted the
 form, and the REPL took the right arm and returned its
 value."""),
 
@@ -559,7 +559,7 @@ value."""),
 "What's important about a fork," {tortoise_phrase} said, "is
 that the arm not taken doesn't run at all. The runtime checks
 the condition, walks the right arm, and the unrun arm is just
-left behind." To {goal_text}, {tortoise_he_she_cap} composed
+left behind." To {goal_text}, {tortoise_he_she} composed
 {concept_phrase}, submitted the form, and the REPL — running
 only what was needed — handed back the value of the chosen
 arm."""),
@@ -581,7 +581,7 @@ value of the arm the form actually ran."""),
     SubplotTemplate("""\
 "It isn't the runner who picks the arm," {tortoise_phrase} said,
 "it's the condition. Whatever the condition evaluates to, that
-decides." To {goal_text}, {tortoise_he_she_cap} composed
+decides." To {goal_text}, {tortoise_he_she} composed
 {concept_phrase}, submitted the form, and the REPL — letting the
 condition decide — handed back the value of the arm the
 condition had pointed at."""),
@@ -599,7 +599,7 @@ _ROADSIGN_SUBPLOTS: list[SubplotTemplate] = [
 fresh sign to it. "A def is a sign by the road," {tortoise_he_she}
 said. "Anyone passing reads the name, learns the value, and can
 refer to it later by name alone." To {goal_text},
-{tortoise_he_she_cap} composed {concept_phrase}, submitted the
+{tortoise_he_she} composed {concept_phrase}, submitted the
 form, and the REPL planted the sign — the name now bound to its
 value for any later runner along the road."""),
 
@@ -610,7 +610,7 @@ value for any later runner along the road."""),
 "The good thing about a sign," {tortoise_phrase} said, "is that
 it stays where you posted it. The next runner along the road
 reads what's there now — whatever the latest paint says." To
-{goal_text}, {tortoise_he_she_cap} composed {concept_phrase},
+{goal_text}, {tortoise_he_she} composed {concept_phrase},
 submitted the form, and the REPL — reading the signs as the form
 directed — returned the value the road had recorded."""),
 
@@ -622,7 +622,7 @@ A small wooden library stood {place}, its shelves stocked with
 scrolls — each scroll holding the signs for one stretch of road.
 "Names live on scrolls," {tortoise_phrase} said: "to use a sign
 from a scroll, you make sure the scroll is on the shelf where the
-runtime can find it." To {goal_text}, {tortoise_he_she_cap}
+runtime can find it." To {goal_text}, {tortoise_he_she}
 composed {concept_phrase}, submitted the form, and the REPL —
 finding the right sign on the right scroll — returned the value
 the form had asked for."""),
@@ -633,7 +633,7 @@ the form had asked for."""),
 "Naming is half the art," {tortoise_phrase} said, sketching a
 careful sign in the dust. "A clear name on the road tells every
 later runner what to expect; a careless one trips them up." To
-{goal_text}, {tortoise_he_she_cap} composed {concept_phrase} with
+{goal_text}, {tortoise_he_she} composed {concept_phrase} with
 the right name in mind, submitted the form, and the REPL —
 reading the name exactly — returned the value the sign had
 promised."""),
@@ -661,7 +661,7 @@ _SAFETYNET_SUBPLOTS: list[SubplotTemplate] = [
 {tortoise_phrase} stretched a small net beneath a high jump
 {place}. "If the runner falls, the net catches them; the run
 doesn't end, only the path bends." To {goal_text},
-{tortoise_he_she_cap} composed {concept_phrase}, submitted the
+{tortoise_he_she} composed {concept_phrase}, submitted the
 form, and the REPL — net in place — caught the trouble and
 returned the value the catch-arm had specified, the run continuing
 the patient way."""),
@@ -671,7 +671,7 @@ the patient way."""),
 "This is the practice meadow," {tortoise_phrase} said {place},
 gesturing wide. "A stumble here costs nothing. Type a form, see
 what comes back, fix it, try again. The REPL is forgiving in a
-way that a real race is not." To {goal_text}, {tortoise_he_she_cap}
+way that a real race is not." To {goal_text}, {tortoise_he_she}
 composed {concept_phrase}, submitted the form, and the REPL
 returned the value — even if the form had been close to a
 mis-step."""),
@@ -683,7 +683,7 @@ mis-step."""),
 "is that the run can continue — the runtime catches the slip,
 takes the recovery path, and the answer comes back even when
 something inside the form went off the trail." To {goal_text},
-{tortoise_he_she_cap} composed {concept_phrase}, submitted the
+{tortoise_he_she} composed {concept_phrase}, submitted the
 form, and the REPL — handling the slip cleanly — returned the
 value the recovery path had produced."""),
 
@@ -692,7 +692,7 @@ value the recovery path had produced."""),
 "There's a discipline to running safely," {tortoise_phrase} said,
 "and it starts with checking — making sure the form does what it
 claims, catching what could go wrong before it does." To
-{goal_text}, {tortoise_he_she_cap} composed {concept_phrase},
+{goal_text}, {tortoise_he_she} composed {concept_phrase},
 submitted the form, and the REPL — applying whatever check or
 catch the form had asked for — returned the value the discipline
 had earned."""),
@@ -721,7 +721,7 @@ _SCROLL_SUBPLOTS: list[SubplotTemplate] = [
 into ink at the edge. "The world outside the REPL is scrolls,"
 {tortoise_he_she} said: "you read what they say, you write what
 you want to keep, and the runtime carries the words back and
-forth." To {goal_text}, {tortoise_he_she_cap} composed
+forth." To {goal_text}, {tortoise_he_she} composed
 {concept_phrase}, submitted the form, and the REPL handed back
 what the scroll had said, or what the writing had committed."""),
 
@@ -732,7 +732,7 @@ what the scroll had said, or what the writing had committed."""),
 forms," {tortoise_phrase} said. "You ask the runtime for what's
 on the parchment, you write what you want recorded, and the work
 goes both ways through one quill." To {goal_text},
-{tortoise_he_she_cap} composed {concept_phrase}, submitted the
+{tortoise_he_she} composed {concept_phrase}, submitted the
 form, and the REPL handed back what the scroll had said — or
 what the writing had committed."""),
 
@@ -742,7 +742,7 @@ what the writing had committed."""),
 "The world outside the REPL is bigger than the REPL,"
 {tortoise_phrase} said, "and a scroll out there has its own
 discipline — open it carefully, handle it with care, close it
-when you're done." To {goal_text}, {tortoise_he_she_cap}
+when you're done." To {goal_text}, {tortoise_he_she}
 composed {concept_phrase}, submitted the form, and the REPL —
 handling the scroll the runtime's careful way — returned the
 value the work had produced."""),
@@ -765,7 +765,7 @@ held."""),
 "and the world outside it. Scrolls are how the two meet — a value
 crosses out and becomes letters on parchment, or letters on
 parchment cross in and become a value again." To {goal_text},
-{tortoise_he_she_cap} composed {concept_phrase}, submitted the
+{tortoise_he_she} composed {concept_phrase}, submitted the
 form, and the REPL — bridging the two worlds — handed back the
 value the work had carried."""),
 ]
@@ -782,7 +782,7 @@ _GUILD_SUBPLOTS: list[SubplotTemplate] = [
 Guild — any species may join." "A protocol is a guild,"
 {tortoise_he_she} said. "It lists what every member must be able
 to do — the methods. Any animal that can sign the book may claim
-membership." To {goal_text}, {tortoise_he_she_cap} composed
+membership." To {goal_text}, {tortoise_he_she} composed
 {concept_phrase}, submitted the form, and the REPL — guild
 founded — handed back the guild's record."""),
 
@@ -794,7 +794,7 @@ founded — handed back the guild's record."""),
 the call is the same for every member, but each species answers
 in its own way. The runtime looks up which species the runner
 is, then runs that species' answer." To {goal_text},
-{tortoise_he_she_cap} composed {concept_phrase}, submitted the
+{tortoise_he_she} composed {concept_phrase}, submitted the
 form, and the REPL — dispatching to the right species — returned
 the species-specific value."""),
 
@@ -805,7 +805,7 @@ the species-specific value."""),
 this book," {tortoise_he_she} said: "the species, the methods
 they swear they can perform, and the actual answers each species
 gives. The runtime reads from the book whenever the call goes
-out." To {goal_text}, {tortoise_he_she_cap} composed
+out." To {goal_text}, {tortoise_he_she} composed
 {concept_phrase}, submitted the form, and the REPL — checking
 the ledger as it ran — returned the right answer."""),
 
@@ -816,7 +816,7 @@ the ledger as it ran — returned the right answer."""),
 "Belonging to the Runners' guild doesn't mean belonging to the
 Singers' guild — the runtime checks each separately, and only
 the right guild's answer comes back." To {goal_text},
-{tortoise_he_she_cap} composed {concept_phrase}, submitted the
+{tortoise_he_she} composed {concept_phrase}, submitted the
 form, and the REPL — respecting which guild was being called —
 returned the right value."""),
 
@@ -844,7 +844,7 @@ _TOOLSHED_SUBPLOTS: list[SubplotTemplate] = [
 pulled out a tool {tortoise_he_she} hadn't carved {tortoise_him_her}self
 — a tool from the host platform. "This isn't ours," {tortoise_he_she}
 said, "but we can call its methods directly: dot-prefix on the
-instance, or slash for static." To {goal_text}, {tortoise_he_she_cap}
+instance, or slash for static." To {goal_text}, {tortoise_he_she}
 composed {concept_phrase}, submitted the form, and the REPL —
 calling into the foreign tool — handed back what its method had
 returned."""),
@@ -858,7 +858,7 @@ returned."""),
 {tortoise_phrase} said, "and the right way to call it depends on
 which kind of tool it is — some held by an animal, some
 standard-issue called by the toolshed's name." To {goal_text},
-{tortoise_he_she_cap} composed {concept_phrase} using the right
+{tortoise_he_she} composed {concept_phrase} using the right
 calling convention, submitted the form, and the REPL — invoking
 the host tool by its label — returned the value the host had
 computed."""),
@@ -870,7 +870,7 @@ computed."""),
 {tortoise_phrase} said. "Their labels are different, their
 calling conventions are different, and the runtime has to bridge
 between Clojure and the host every time." To {goal_text},
-{tortoise_he_she_cap} composed {concept_phrase}, submitted the
+{tortoise_he_she} composed {concept_phrase}, submitted the
 form, and the REPL — making the bridge cleanly — handed back the
 value the foreign tool had produced."""),
 
@@ -880,7 +880,7 @@ value the foreign tool had produced."""),
 "There's the meadow's own toolshed," {tortoise_phrase} said,
 "and there's the foreign one. The runtime moves a value across
 the boundary, calls the foreign tool, and brings the result back
-into the meadow." To {goal_text}, {tortoise_he_she_cap} composed
+into the meadow." To {goal_text}, {tortoise_he_she} composed
 {concept_phrase}, submitted the form, and the REPL — bridging
 the two toolsheds — returned the value cleanly."""),
 
@@ -908,7 +908,7 @@ _REWRITERULE_SUBPLOTS: list[SubplotTemplate] = [
 paw. "A macro," {tortoise_he_she} said, "is a rule that rewrites
 the recipe before the runtime ever cooks it. You write the rule
 once, and any recipe that uses it gets rewritten on the way to
-the kitchen." To {goal_text}, {tortoise_he_she_cap} composed
+the kitchen." To {goal_text}, {tortoise_he_she} composed
 {concept_phrase}, submitted the form, and the REPL — first
 rewriting, then evaluating — returned the value the rewritten
 recipe yielded."""),
@@ -920,7 +920,7 @@ recipe yielded."""),
 {tortoise_phrase} said. "A recipe takes ingredients and makes a
 dish. A rule takes a *form* and makes a different *form* — only
 then does the runtime get to evaluate it." To {goal_text},
-{tortoise_he_she_cap} composed {concept_phrase}, submitted the
+{tortoise_he_she} composed {concept_phrase}, submitted the
 form, and the REPL — applying the rule to the form first, then
 evaluating — handed back the value the rewritten form had
 produced."""),
@@ -930,7 +930,7 @@ produced."""),
 "The order matters," {tortoise_phrase} said. "When a rule is
 involved, the runtime first walks through the form and applies
 the rule wherever it sees one — and only then does it evaluate
-the result." To {goal_text}, {tortoise_he_she_cap} composed
+the result." To {goal_text}, {tortoise_he_she} composed
 {concept_phrase}, submitted the form, and the REPL — rewriting
 first, evaluating second — returned the final value."""),
 
@@ -970,7 +970,7 @@ _SCRIBE_SUBPLOTS: list[SubplotTemplate] = [
 {tortoise_phrase} said: "what counts as one token, what's just
 spacing, what gets ignored, what gets grouped together. The
 scribe and the reader both follow the same conventions." To
-{goal_text}, {tortoise_he_she_cap} composed {concept_phrase},
+{goal_text}, {tortoise_he_she} composed {concept_phrase},
 submitted the form, and the REPL — reading exactly by the
 conventions — returned the value the form had specified."""),
 
@@ -981,7 +981,7 @@ conventions — returned the value the form had specified."""),
 don't; some shapes are expanded before the runtime even gets a
 look. The form you write and the form the runtime evaluates
 aren't always character-for-character the same." To
-{goal_text}, {tortoise_he_she_cap} composed {concept_phrase},
+{goal_text}, {tortoise_he_she} composed {concept_phrase},
 submitted the form, and the REPL — reading carefully — returned
 the value of what the conventions had produced."""),
 
@@ -991,7 +991,7 @@ the value of what the conventions had produced."""),
 slowly, paying attention to every mark. "The form has to be
 written so the reader can read it cleanly," {tortoise_he_she}
 said. "If the marks are right, the runtime gets the right form;
-if not, not." To {goal_text}, {tortoise_he_she_cap} composed
+if not, not." To {goal_text}, {tortoise_he_she} composed
 {concept_phrase}, submitted the form, and the REPL — reading
 exactly as written — returned the value cleanly."""),
 
@@ -1012,7 +1012,7 @@ short."""),
 said, "after the conventions of writing and reading have done
 their work. The runtime sees the cleaned-up form, evaluates it,
 and gives back what it computes." To {goal_text},
-{tortoise_he_she_cap} composed {concept_phrase}, submitted the
+{tortoise_he_she} composed {concept_phrase}, submitted the
 form, and the REPL — taking the form exactly as it was — handed
 back the value."""),
 ]
@@ -1029,7 +1029,7 @@ _CHALKMARK_SUBPLOTS: list[SubplotTemplate] = [
 {place}, then at an actual acorn lying on the path. "The mark on
 the bark is the *name*; the acorn is the *value*. They are not
 the same thing — and Clojure lets you talk about either one."
-To {goal_text}, {tortoise_he_she_cap} composed {concept_phrase},
+To {goal_text}, {tortoise_he_she} composed {concept_phrase},
 submitted the form, and the REPL — keeping the name and the
 value distinct — returned the right answer."""),
 
@@ -1038,7 +1038,7 @@ value distinct — returned the right answer."""),
 "To talk about the form itself rather than evaluating it,"
 {tortoise_phrase} said, "you label the form with a chalk mark
 in front. Quoting tells the runtime: don't cook this, just hand
-it back as the shape it is." To {goal_text}, {tortoise_he_she_cap}
+it back as the shape it is." To {goal_text}, {tortoise_he_she}
 composed {concept_phrase}, submitted the form, and the REPL —
 respecting the chalk mark — returned the form unevaluated."""),
 
@@ -1050,7 +1050,7 @@ respecting the chalk mark — returned the form unevaluated."""),
 *evaluating* it," {tortoise_phrase} said. "Quote in any of its
 shapes is the labeling — the runtime hands you back the form,
 not its value, unless you say otherwise." To {goal_text},
-{tortoise_he_she_cap} composed {concept_phrase}, submitted the
+{tortoise_he_she} composed {concept_phrase}, submitted the
 form, and the REPL — labeling exactly what the form asked for —
 returned the form-as-data, exactly as the marks had directed."""),
 
@@ -1077,7 +1077,7 @@ _RUNNERAHEAD_SUBPLOTS: list[SubplotTemplate] = [
 {place}, work in paw. "The runner goes ahead while we keep on
 with our own business," {tortoise_he_she} said, "and when we
 need the result we ask the runner to hand it back." To
-{goal_text}, {tortoise_he_she_cap} composed {concept_phrase},
+{goal_text}, {tortoise_he_she} composed {concept_phrase},
 submitted the form, and the REPL — sending the runner, fetching
 the result later — returned the value when it was ready."""),
 
@@ -1089,7 +1089,7 @@ the result later — returned the value when it was ready."""),
 keep on with your own work. The result will be there when you ask
 for it — sometimes you have to wait for the runner to be finished,
 sometimes you can keep arranging things until you need it." To
-{goal_text}, {tortoise_he_she_cap} composed {concept_phrase},
+{goal_text}, {tortoise_he_she} composed {concept_phrase},
 submitted the form, and the REPL — coordinating the runner the
 way the form prescribed — returned the value when it was
 ready."""),
@@ -1102,7 +1102,7 @@ ready."""),
 "The hard part is being patient enough to wait for the answer
 when it comes — not snatching too early, not giving up too soon.
 The runtime makes that easier than it sounds." To {goal_text},
-{tortoise_he_she_cap} composed {concept_phrase}, submitted the
+{tortoise_he_she} composed {concept_phrase}, submitted the
 form, and the REPL — coordinating the wait properly — returned
 the runner's answer when the runner had it ready."""),
 
@@ -1112,7 +1112,7 @@ the runner's answer when the runner had it ready."""),
 messengers each in their place. "The runtime keeps track of who
 sent what and when each one finishes," {tortoise_he_she} said,
 "so the values come back in the right order, no matter how long
-each runner takes." To {goal_text}, {tortoise_he_she_cap}
+each runner takes." To {goal_text}, {tortoise_he_she}
 composed {concept_phrase}, submitted the form, and the REPL —
 coordinating the relay — returned the right value at the right
 time."""),
@@ -1141,7 +1141,7 @@ A long wooden table stood {place}, with several arms branching off
 its sides. "Defmulti is a sorting-table," {tortoise_phrase} said.
 "You decide what stamp on the runner to look at; the table routes
 each runner down the matching arm." To {goal_text},
-{tortoise_he_she_cap} composed {concept_phrase}, submitted the
+{tortoise_he_she} composed {concept_phrase}, submitted the
 form, and the REPL — reading the runner's stamp, picking the
 arm — returned the value the right arm had produced."""),
 
@@ -1150,7 +1150,7 @@ arm — returned the value the right arm had produced."""),
 "To add a branch to the sorting-table," {tortoise_phrase} said,
 "you say what stamp the branch handles and what behavior runs
 when a runner with that stamp arrives." To {goal_text},
-{tortoise_he_she_cap} composed {concept_phrase} for the right
+{tortoise_he_she} composed {concept_phrase} for the right
 branch, submitted the form, and the REPL — adding the branch,
 dispatching the runner — returned the branch-specific value."""),
 
@@ -1161,7 +1161,7 @@ dispatching the runner — returned the branch-specific value."""),
 "What the table sorts by is up to you," {tortoise_phrase} said.
 "You decide what to look at on each runner — a tag, a kind, a
 field, anything. The runtime reads it, finds the matching arm,
-and runs that one." To {goal_text}, {tortoise_he_she_cap}
+and runs that one." To {goal_text}, {tortoise_he_she}
 composed {concept_phrase}, submitted the form, and the REPL —
 reading the stamp the dispatch function produced — returned the
 value the right arm had given."""),
@@ -1173,7 +1173,7 @@ value the right arm had given."""),
 "is that you can keep adding new arms whenever a new kind of
 runner shows up. The original table doesn't change; the runtime
 just learns one more route." To {goal_text},
-{tortoise_he_she_cap} composed {concept_phrase}, submitted the
+{tortoise_he_she} composed {concept_phrase}, submitted the
 form, and the REPL — routing through the table cleanly —
 returned the right value."""),
 
@@ -1200,7 +1200,7 @@ _CARRYINGCASE_SUBPLOTS: list[SubplotTemplate] = [
 divided into labeled compartments. "Defrecord makes a case like
 this," {tortoise_he_she} said: "named compartments holding
 specific things; a stamp on the outside saying what kind of case
-it is." To {goal_text}, {tortoise_he_she_cap} composed
+it is." To {goal_text}, {tortoise_he_she} composed
 {concept_phrase}, submitted the form, and the REPL — constructing
 the case, filling its compartments — returned the value the case
 held or carried."""),
@@ -1209,7 +1209,7 @@ held or carried."""),
     SubplotTemplate("""\
 "A deftype is a barer case," {tortoise_phrase} said. "Compartments,
 a stamp — no map-like behavior unless you ask for it. Faster, more
-focused, less convenient." To {goal_text}, {tortoise_he_she_cap}
+focused, less convenient." To {goal_text}, {tortoise_he_she}
 composed {concept_phrase}, submitted the form, and the REPL —
 constructing the bare case as specified — returned the value
 inside."""),
@@ -1220,7 +1220,7 @@ inside."""),
 "To reach into a labeled compartment," {tortoise_phrase} said,
 "you ask for it by name. The case knows where each compartment
 is; the runtime fetches it cleanly." To {goal_text},
-{tortoise_he_she_cap} composed {concept_phrase}, submitted the
+{tortoise_he_she} composed {concept_phrase}, submitted the
 form, and the REPL — opening the right compartment — returned
 exactly what was inside."""),
 ]
@@ -1237,7 +1237,7 @@ _TALLYWALK_SUBPLOTS: list[SubplotTemplate] = [
 time, a small slate in hand for the running tally. "Reduce is
 this walk," {tortoise_he_she} said: "at each pebble, you combine
 it into the tally; at the end, the tally is your answer." To
-{goal_text}, {tortoise_he_she_cap} composed {concept_phrase},
+{goal_text}, {tortoise_he_she} composed {concept_phrase},
 submitted the form, and the REPL — walking the row, carrying the
 tally — returned the final number."""),
 
@@ -1247,7 +1247,7 @@ tally — returned the final number."""),
 said, holding up a slate already inscribed with a number. "If you
 start with a different value, the walk begins from there — the
 combine-step folds each pebble in from that starting point." To
-{goal_text}, {tortoise_he_she_cap} composed {concept_phrase},
+{goal_text}, {tortoise_he_she} composed {concept_phrase},
 submitted the form, and the REPL — starting from the given tally,
 walking the row — returned the final value."""),
 
@@ -1257,7 +1257,7 @@ walking the row — returned the final value."""),
 {tortoise_phrase} said: "step along the row, add one at every
 pebble, no other operation. The runtime does this for any
 collection — vector, list, map, string." To {goal_text},
-{tortoise_he_she_cap} composed {concept_phrase}, submitted the
+{tortoise_he_she} composed {concept_phrase}, submitted the
 form, and the REPL — walking the row, counting the steps —
 returned the count."""),
 ]
@@ -1274,7 +1274,7 @@ _BEADSTRING_SUBPLOTS: list[SubplotTemplate] = [
 "Strings in Clojure are like this," {tortoise_he_she} said: "a
 threaded line of characters, in order. Concat strings together,
 and the threads are spliced; cut a substring out, and you get a
-shorter thread." To {goal_text}, {tortoise_he_she_cap} composed
+shorter thread." To {goal_text}, {tortoise_he_she} composed
 {concept_phrase}, submitted the form, and the REPL — splicing or
 cutting as the form said — returned the new bead-string."""),
 
@@ -1283,7 +1283,7 @@ cutting as the form said — returned the new bead-string."""),
 "To count the beads, walk the thread,"
 {tortoise_phrase} said. "Want a section of beads? Cut from one
 position to another and you get a smaller thread, the original
-untouched." To {goal_text}, {tortoise_he_she_cap} composed
+untouched." To {goal_text}, {tortoise_he_she} composed
 {concept_phrase}, submitted the form, and the REPL — counting or
 cutting — returned the answer the bead-thread had given up."""),
 
@@ -1309,7 +1309,7 @@ _CIRCUIT_SUBPLOTS: list[SubplotTemplate] = [
 each lap returning to the same starting point with a slightly
 different tally in hand. "Recur is this circuit," {tortoise_he_she}
 said: "back to the top with new bindings, no extra trail laid
-down behind us." To {goal_text}, {tortoise_he_she_cap} composed
+down behind us." To {goal_text}, {tortoise_he_she} composed
 {concept_phrase}, submitted the form, and the REPL — looping
 without growing the call-stack — returned the final value."""),
 
@@ -1318,7 +1318,7 @@ without growing the call-stack — returned the final value."""),
 "Every circuit has a stopping condition," {tortoise_phrase}
 said. "Without one, the runner walks forever. With one, the
 runner knows when the laps are done and the tally is the
-answer." To {goal_text}, {tortoise_he_she_cap} composed
+answer." To {goal_text}, {tortoise_he_she} composed
 {concept_phrase}, submitted the form, and the REPL — looping
 until the base case — returned the value the final lap
 produced."""),
@@ -1385,7 +1385,7 @@ def _story(connective_prose: str) -> SubplotTemplate:
 
 _POUCH_SUBPLOTS = _POUCH_SUBPLOTS + [
     _story(
-        "To {goal_text}, {tortoise_he_she_cap} composed {concept_phrase} "
+        "To {goal_text}, {tortoise_he_she} composed {concept_phrase} "
         "with the binding tucked safely into the pouch and submitted the "
         "form. The REPL pulled from the pouch as the form directed:"
     ),
@@ -1393,7 +1393,7 @@ _POUCH_SUBPLOTS = _POUCH_SUBPLOTS + [
 
 _RECIPE_SUBPLOTS = _RECIPE_SUBPLOTS + [
     _story(
-        "To {goal_text}, {tortoise_he_she_cap} wrote out {concept_phrase} "
+        "To {goal_text}, {tortoise_he_she} wrote out {concept_phrase} "
         "on a card and submitted the form. The REPL ran the recipe end "
         "to end:"
     ),
@@ -1401,7 +1401,7 @@ _RECIPE_SUBPLOTS = _RECIPE_SUBPLOTS + [
 
 _BASKET_SUBPLOTS = _BASKET_SUBPLOTS + [
     _story(
-        "To {goal_text}, {tortoise_he_she_cap} composed {concept_phrase} "
+        "To {goal_text}, {tortoise_he_she} composed {concept_phrase} "
         "for the basket and submitted the form. The REPL handed back the "
         "arrangement:"
     ),
@@ -1409,7 +1409,7 @@ _BASKET_SUBPLOTS = _BASKET_SUBPLOTS + [
 
 _SIEVE_SUBPLOTS = _SIEVE_SUBPLOTS + [
     _story(
-        "To {goal_text}, {tortoise_he_she_cap} composed {concept_phrase} "
+        "To {goal_text}, {tortoise_he_she} composed {concept_phrase} "
         "as the sieve's rule, poured the input through, and submitted "
         "the form. The REPL caught what landed below:"
     ),
@@ -1417,7 +1417,7 @@ _SIEVE_SUBPLOTS = _SIEVE_SUBPLOTS + [
 
 _NOTEBOOK_SUBPLOTS = _NOTEBOOK_SUBPLOTS + [
     _story(
-        "To {goal_text}, {tortoise_he_she_cap} composed {concept_phrase} "
+        "To {goal_text}, {tortoise_he_she} composed {concept_phrase} "
         "for the notebook and submitted the form. The REPL applied the "
         "update on the stump:"
     ),
@@ -1425,35 +1425,35 @@ _NOTEBOOK_SUBPLOTS = _NOTEBOOK_SUBPLOTS + [
 
 _ACORN_SUBPLOTS = _ACORN_SUBPLOTS + [
     _story(
-        "To {goal_text}, {tortoise_he_she_cap} composed {concept_phrase} "
+        "To {goal_text}, {tortoise_he_she} composed {concept_phrase} "
         "and submitted the form. The REPL counted out the answer:"
     ),
 ]
 
 _GATE_SUBPLOTS = _GATE_SUBPLOTS + [
     _story(
-        "To {goal_text}, {tortoise_he_she_cap} composed {concept_phrase} "
+        "To {goal_text}, {tortoise_he_she} composed {concept_phrase} "
         "and submitted the form. The REPL let the gates decide:"
     ),
 ]
 
 _FORK_SUBPLOTS = _FORK_SUBPLOTS + [
     _story(
-        "To {goal_text}, {tortoise_he_she_cap} composed {concept_phrase} "
+        "To {goal_text}, {tortoise_he_she} composed {concept_phrase} "
         "and submitted the form. The REPL took the right arm:"
     ),
 ]
 
 _ROADSIGN_SUBPLOTS = _ROADSIGN_SUBPLOTS + [
     _story(
-        "To {goal_text}, {tortoise_he_she_cap} composed {concept_phrase} "
+        "To {goal_text}, {tortoise_he_she} composed {concept_phrase} "
         "and submitted the form. The REPL read the signs and replied:"
     ),
 ]
 
 _SAFETYNET_SUBPLOTS = _SAFETYNET_SUBPLOTS + [
     _story(
-        "To {goal_text}, {tortoise_he_she_cap} composed {concept_phrase} "
+        "To {goal_text}, {tortoise_he_she} composed {concept_phrase} "
         "and submitted the form. The REPL — net in place — handed back "
         "the value:"
     ),
@@ -1461,7 +1461,7 @@ _SAFETYNET_SUBPLOTS = _SAFETYNET_SUBPLOTS + [
 
 _SCROLL_SUBPLOTS = _SCROLL_SUBPLOTS + [
     _story(
-        "To {goal_text}, {tortoise_he_she_cap} composed {concept_phrase} "
+        "To {goal_text}, {tortoise_he_she} composed {concept_phrase} "
         "and submitted the form. The REPL — quill in hand — completed "
         "the scroll-work:"
     ),
@@ -1469,7 +1469,7 @@ _SCROLL_SUBPLOTS = _SCROLL_SUBPLOTS + [
 
 _GUILD_SUBPLOTS = _GUILD_SUBPLOTS + [
     _story(
-        "To {goal_text}, {tortoise_he_she_cap} composed {concept_phrase} "
+        "To {goal_text}, {tortoise_he_she} composed {concept_phrase} "
         "and submitted the form. The REPL — checking the guild book — "
         "dispatched cleanly:"
     ),
@@ -1477,21 +1477,21 @@ _GUILD_SUBPLOTS = _GUILD_SUBPLOTS + [
 
 _SORTINGTABLE_SUBPLOTS = _SORTINGTABLE_SUBPLOTS + [
     _story(
-        "To {goal_text}, {tortoise_he_she_cap} composed {concept_phrase} "
+        "To {goal_text}, {tortoise_he_she} composed {concept_phrase} "
         "and submitted the form. The REPL routed through the table:"
     ),
 ]
 
 _CARRYINGCASE_SUBPLOTS = _CARRYINGCASE_SUBPLOTS + [
     _story(
-        "To {goal_text}, {tortoise_he_she_cap} composed {concept_phrase} "
+        "To {goal_text}, {tortoise_he_she} composed {concept_phrase} "
         "and submitted the form. The REPL constructed the case:"
     ),
 ]
 
 _TOOLSHED_SUBPLOTS = _TOOLSHED_SUBPLOTS + [
     _story(
-        "To {goal_text}, {tortoise_he_she_cap} composed {concept_phrase} "
+        "To {goal_text}, {tortoise_he_she} composed {concept_phrase} "
         "and submitted the form. The REPL — calling into the foreign "
         "toolshed — returned:"
     ),
@@ -1499,7 +1499,7 @@ _TOOLSHED_SUBPLOTS = _TOOLSHED_SUBPLOTS + [
 
 _RUNNERAHEAD_SUBPLOTS = _RUNNERAHEAD_SUBPLOTS + [
     _story(
-        "To {goal_text}, {tortoise_he_she_cap} composed {concept_phrase} "
+        "To {goal_text}, {tortoise_he_she} composed {concept_phrase} "
         "and submitted the form. The REPL coordinated the runner's "
         "return:"
     ),
@@ -1507,7 +1507,7 @@ _RUNNERAHEAD_SUBPLOTS = _RUNNERAHEAD_SUBPLOTS + [
 
 _REWRITERULE_SUBPLOTS = _REWRITERULE_SUBPLOTS + [
     _story(
-        "To {goal_text}, {tortoise_he_she_cap} composed {concept_phrase} "
+        "To {goal_text}, {tortoise_he_she} composed {concept_phrase} "
         "and submitted the form. The REPL — applying the rewrite, then "
         "evaluating the rewritten form — returned:"
     ),
@@ -1515,7 +1515,7 @@ _REWRITERULE_SUBPLOTS = _REWRITERULE_SUBPLOTS + [
 
 _SCRIBE_SUBPLOTS = _SCRIBE_SUBPLOTS + [
     _story(
-        "To {goal_text}, {tortoise_he_she_cap} composed {concept_phrase} "
+        "To {goal_text}, {tortoise_he_she} composed {concept_phrase} "
         "and submitted the form. The REPL read by the conventions and "
         "returned:"
     ),
@@ -1523,7 +1523,7 @@ _SCRIBE_SUBPLOTS = _SCRIBE_SUBPLOTS + [
 
 _CHALKMARK_SUBPLOTS = _CHALKMARK_SUBPLOTS + [
     _story(
-        "To {goal_text}, {tortoise_he_she_cap} composed {concept_phrase} "
+        "To {goal_text}, {tortoise_he_she} composed {concept_phrase} "
         "and submitted the form. The REPL — distinguishing label from "
         "value — returned:"
     ),
@@ -1531,7 +1531,7 @@ _CHALKMARK_SUBPLOTS = _CHALKMARK_SUBPLOTS + [
 
 _TALLYWALK_SUBPLOTS = _TALLYWALK_SUBPLOTS + [
     _story(
-        "To {goal_text}, {tortoise_he_she_cap} composed {concept_phrase} "
+        "To {goal_text}, {tortoise_he_she} composed {concept_phrase} "
         "and submitted the form. The REPL walked the row carrying the "
         "tally:"
     ),
@@ -1539,7 +1539,7 @@ _TALLYWALK_SUBPLOTS = _TALLYWALK_SUBPLOTS + [
 
 _BEADSTRING_SUBPLOTS = _BEADSTRING_SUBPLOTS + [
     _story(
-        "To {goal_text}, {tortoise_he_she_cap} composed {concept_phrase} "
+        "To {goal_text}, {tortoise_he_she} composed {concept_phrase} "
         "and submitted the form. The REPL spliced or counted as the "
         "form said:"
     ),
@@ -1547,7 +1547,7 @@ _BEADSTRING_SUBPLOTS = _BEADSTRING_SUBPLOTS + [
 
 _CIRCUIT_SUBPLOTS = _CIRCUIT_SUBPLOTS + [
     _story(
-        "To {goal_text}, {tortoise_he_she_cap} composed {concept_phrase} "
+        "To {goal_text}, {tortoise_he_she} composed {concept_phrase} "
         "and submitted the form. The REPL looped without growing the "
         "trail:"
     ),

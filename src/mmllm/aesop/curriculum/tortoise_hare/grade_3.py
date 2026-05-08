@@ -171,9 +171,9 @@ G3_03 = SubjectCurriculum(grade=3, subject_id="G3-03",
                 "binding is in force only for the form's stretch."
             ),
             resolution=(
-                "the pouch yielded 3, the +1 added a fourth acorn, and "
-                "the running total stood at 4 — exactly what the next "
-                "milestone needed."
+                "the pouch yielded its tucked count, the +1 added one "
+                "more acorn, and the running total — pouch already empty "
+                "again — was exactly what the next milestone needed."
             ),
             tags=("story",),
         ),

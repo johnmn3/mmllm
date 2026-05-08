@@ -505,7 +505,8 @@ G6_07 = SubjectCurriculum(grade=6, subject_id="G6-07",
                 "`(boolean ...)` converts that to an explicit true or false."
             ),
             resolution=(
-                "the runtime returned true, because the flag was there to find."
+                "the runtime affirmed the flag's presence — meta-lookup "
+                "found the privacy mark sitting on the var."
             ),
             tags=("story",),
         ),
@@ -528,7 +529,8 @@ G6_07 = SubjectCurriculum(grade=6, subject_id="G6-07",
                 "the extraction returns nil. When nil is converted to a boolean, it becomes false."
             ),
             resolution=(
-                "the runtime returned false, because no flag was there at all."
+                "the runtime found no flag at all — meta-lookup yielded "
+                "nothing, and the boolean conversion settled the matter."
             ),
             tags=("story",),
         ),
@@ -937,7 +939,8 @@ G6_16 = SubjectCurriculum(grade=6, subject_id="G6-16",
                 "a name is there — and if it's not in the basket, the answer is false."
             ),
             resolution=(
-                "the runtime returned false — clojure.set was not in the set she had borrowed."
+                "the runtime signalled the absence — clojure.set was not "
+                "in the set she had borrowed, no membership found."
             ),
             tags=("story",),
         ),

@@ -482,8 +482,8 @@ G11_07 = SubjectCurriculum(
                 "walking through them one by one."
             ),
             resolution=(
-                "the host returned 3, confirming the array held exactly three slots "
-                "in its row."
+                "the host confirmed the array's exact slot-count, the "
+                "row's length matching what had been allocated."
             ),
             tags=("story",),
         ),
@@ -568,8 +568,8 @@ G11_09 = SubjectCurriculum(
                 "Ordinary values like 1 and 2 don't overflow, so the sum is safe."
             ),
             resolution=(
-                "the host returned 3, the safe sum of 1 and 2, with overflow "
-                "checking standing ready."
+                "the host returned the safe sum of 1 and 2, overflow "
+                "checking standing ready in case it had been needed."
             ),
             tags=("story",),
         ),

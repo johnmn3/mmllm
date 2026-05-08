@@ -504,6 +504,105 @@ def check_record(rec, sub, example):
                         "boast subplot 'X insisted they already knew' reads as "
                         "plural after singular-named subject (pitfall #19)"))
 
+    # ─────────────────────── deep-audit slice GCVH additions ───────────────────────
+    # Detectors added by the tortoise-hare deep-audit (slice GCVH, 2026-05-08).
+    # Each surfaced ≥1 papercut pattern the existing detectors did not catch.
+
+    # POST_COMMA_CAPITAL_PRONOUN — capitalized pronoun (`He` / `She` /
+    # `They`) immediately following a comma that ends a phrase, where
+    # the next clause continues the same sentence. Symptom of using
+    # `{X_he_she_cap}` in story-scaffold connective prose:
+    #     `..., He composed the conditional, ...`
+    # Should be lowercase `{X_he_she}` since we are mid-sentence.
+    # The pattern is narrow: the cap pronoun is followed by a verb
+    # the metaphor-pool templates use ("composed", "wrote", "took",
+    # "scratched"). A loose "He"/"She"/"They" detector would generate
+    # too many false positives because they are valid sentence-starts.
+    if re.search(
+        r",\s+(?:He|She|They)\s+(?:composed|wrote|took|scratched|"
+        r"sketched|chalked|placed|sent|inspected|borrowed|pulled|"
+        r"drew|laid|stamped|threaded|walked|rolled|carved|spliced|"
+        r"hammered|reached|lined)\b",
+        user,
+    ):
+        issues.append(("POST_COMMA_CAPITAL_PRONOUN",
+                       "capitalized pronoun (He/She/They) immediately "
+                       "after a comma in a continuation clause — the "
+                       "story-scaffold template should use {X_he_she} "
+                       "(lowercase) here, not {X_he_she_cap}"))
+
+    # SMALL_INT_LEAK — the existing ANSWER_LEAK only fires for ints
+    # with `abs(expected) > 5`. Resolution slots can leak SMALL ints
+    # (1-5) when those digits are not in the form. E.g., G3-03 ex0
+    # form `(let [x 3] (+ x 1))`, expected `4`: the resolution
+    # `"the running total stood at 4"` leaks the answer.
+    # We restrict to ints in [1, 5] that are NOT in the form, AND
+    # the digit appears in user_msg following common "stood at",
+    # "came to", "settled at" leak phrases (to avoid false
+    # positives from numbers that are part of the form / setup).
+    if isinstance(example.expected, int) and 1 <= example.expected <= 5:
+        ans_str = str(example.expected)
+        if ans_str not in example.form:
+            leak_re = re.compile(
+                rf"\b(?:stood at|came to|settled at|equaled|gave|"
+                rf"yielded|returned|resolved to|amounted to|"
+                rf"ended at|came out to)\s+{ans_str}\b"
+            )
+            if leak_re.search(user):
+                issues.append(("SMALL_INT_LEAK",
+                               f"answer {ans_str} leaks via 'stood at "
+                               f"{ans_str}' / 'came to {ans_str}' / "
+                               f"'returned {ans_str}' phrasing in "
+                               f"resolution slot (small-int leak the "
+                               f"existing ANSWER_LEAK skips)"))
+
+    # COLLECTION_LEAK — when expected is a collection (list / tuple /
+    # set), the existing ANSWER_LEAK does not check element-by-element
+    # leaks. E.g., G12-01 ex0: form `(into [] (map inc) [1 2 3])`,
+    # expected `[2, 3, 4]`. Resolution `"counts of 2, 3, and 4"`
+    # leaks every element verbatim. We flag when the collection's
+    # elements appear in user_msg as a comma-separated enumeration
+    # (X, Y, and Z) AND at least one element is NOT in the form text.
+    # The "at least one" rule catches cases like form `[1 2 3]` →
+    # expected `[2, 3, 4]` where the model could otherwise have to
+    # compute `4` itself but the resolution gave it.
+    if isinstance(example.expected, (list, tuple, set)) and \
+       2 <= len(example.expected) <= 10:
+        elems = [str(x) for x in example.expected
+                 if isinstance(x, int) and abs(x) > 1]
+        # Only check int collections (string/keyword collections would
+        # have many false positives; keep this detector focused).
+        if len(elems) >= 2 and any(e not in example.form for e in elems):
+            # Are they all present in user_msg, comma-adjacent?
+            # We look for "X, Y" or "X, Y, and Z" patterns.
+            joined_re = r",\s*(?:and\s+)?".join(re.escape(e) for e in elems)
+            if re.search(joined_re, user):
+                issues.append(("COLLECTION_LEAK",
+                               f"elements of expected "
+                               f"{example.expected!r} appear "
+                               f"comma-separated in user_msg with "
+                               f"≥ 1 element absent from form "
+                               f"(collection answer leak)"))
+
+    # BOOL_LEAK_RESOLUTION — when expected is bool, the resolution slot
+    # may say "returned true" / "returned false" verbatim. The existing
+    # ANSWER_LEAK_PHRASE catches this only for nil. Booleans are easier
+    # to fall into because resolution authors naturally describe what
+    # came back. Pattern: the literal `true` / `false` after a
+    # resolution-leak phrase.
+    if isinstance(example.expected, bool):
+        word = "true" if example.expected else "false"
+        leak_re = re.compile(
+            rf"\b(?:returned|gave|yielded|came back|answered|"
+            rf"replied with|came to)\s+{word}\b"
+        )
+        if leak_re.search(user):
+            issues.append(("BOOL_LEAK_RESOLUTION",
+                           f"resolution leaks the boolean answer "
+                           f"{word!r} via 'returned {word}' / "
+                           f"'gave {word}' / etc. — describe the "
+                           f"verdict abstractly instead"))
+
     return issues
 
 

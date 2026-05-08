@@ -752,9 +752,9 @@ G10_09 = SubjectCurriculum(
                 "macro relies on when it builds the rewritten form."
             ),
             resolution=(
-                "the REPL returned true — `gensym` had produced a "
-                "proper symbol, safe to use as a scratch-name in "
-                "any macro expansion."
+                "the REPL confirmed the type-check — `gensym` had "
+                "produced a proper symbol, safe to use as a scratch-name "
+                "in any macro expansion."
             ),
             tags=("story",),
         ),
@@ -783,9 +783,9 @@ G10_09 = SubjectCurriculum(
                 "shadowing another's."
             ),
             resolution=(
-                "the REPL returned false — the two gensyms were not "
-                "equal, confirming each call produced a distinct "
-                "scratch-name safe from collision."
+                "the REPL confirmed the two gensyms were not equal — "
+                "each call had produced a distinct scratch-name safe "
+                "from collision."
             ),
             tags=("story",),
         ),
@@ -998,8 +998,8 @@ G10_12 = SubjectCurriculum(
                 "value."
             ),
             resolution=(
-                "the REPL returned true — the scribe's mark had "
-                "converted the string into a proper instant at read "
+                "the REPL confirmed the conversion — the scribe's mark "
+                "had turned the string into a proper instant at read "
                 "time, exactly as the convention promised."
             ),
             tags=("story",),
@@ -1026,8 +1026,8 @@ G10_12 = SubjectCurriculum(
                 "typed UUID value before the runtime touches the form."
             ),
             resolution=(
-                "the REPL returned true — the scribe's `#uuid` mark "
-                "had produced a proper UUID value at read time, "
+                "the REPL confirmed the type — the scribe's `#uuid` "
+                "mark had produced a proper UUID value at read time, "
                 "satisfying the predicate."
             ),
             tags=("story",),

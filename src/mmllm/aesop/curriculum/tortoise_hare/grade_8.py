@@ -287,7 +287,7 @@ G8_04 = SubjectCurriculum(
             ),
             resolution=(
                 "the runtime confirmed the guild was real — `some?` "
-                "returned true."
+                "found a non-nil var."
             ),
             tags=("story",),
         ),
