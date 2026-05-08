@@ -1214,6 +1214,66 @@ def check_record(rec, sub, example):
                        f"{user.lower().count('the village')} times "
                        "(noun-saturation tic — vary or drop)"))
 
+    # ─────── slice ncvo (crow_pitcher "make it make sense") detectors ───────
+
+    # CONCEPT_PHRASE_COMMA_LIST — `concept_phrase` rendered as 3+
+    # comma-separated bare tokens (no determiner / preposition / noun-
+    # phrase shape). Reads as a comma-list of operation names instead
+    # of a noun phrase the template can interpolate naturally.
+    # Examples caught: "atom, swap, deref" / "agent, send, await,
+    # deref" / "lock, locking, literal".
+    cp = example.concept_phrase or ""
+    cp_tokens = [t.strip() for t in cp.split(",")]
+    if len(cp_tokens) >= 3 and all(
+        len(t.split()) <= 3 and t and not re.match(
+            r"^(?:the|a|an|of|with|for|by|to|on|in|at|as|its|from|"
+            r"that|after|before|over|under|inside|past|along|through|"
+            r"whose|which)\b",
+            t.lower(),
+        )
+        for t in cp_tokens
+    ):
+        issues.append(("CONCEPT_PHRASE_COMMA_LIST",
+                        f"concept_phrase {cp!r} is a comma-list of bare "
+                        "tokens — rewrite as a noun phrase that flows "
+                        "into subplot prose"))
+
+    # AI_OUTPUT_CADENCE — sentences with the "with the X of one who Y"
+    # / "with the X of someone who Y" elaborate-clause-stack cadence.
+    # This pattern reads as model-generated rather than fable-prose;
+    # it usually accompanies tight clause-stacks that decorate without
+    # narrative work.
+    ai_cadence_re = re.compile(
+        r"\bwith the [a-z]+ of (?:one|someone|a [a-z]+|an [a-z]+) "
+        r"who\b",
+    )
+    if ai_cadence_re.search(user):
+        issues.append(("AI_OUTPUT_CADENCE",
+                        "user_msg has 'with the X of one who Y' "
+                        "elaborate-clause-stack cadence (reads like "
+                        "model output, not storybook prose)"))
+
+    # RESOLUTION_GENERIC — the user_msg's resolution beat is canned
+    # boilerplate ("the count of whatever the operation had produced",
+    # "the precise number the operation called for", "the value the
+    # operation had produced", etc.) that doesn't tie back to the
+    # fable's metaphor or the drawn values. Cat-K-6 (under-earned
+    # metaphor) source signal.
+    canned_resolution_re = re.compile(
+        r"\b(?:the (?:count|value|number|answer)) of (?:whatever|"
+        r"the operation|the runtime|the call) (?:[a-z]+ )?"
+        r"(?:had )?(?:produced|called for|returned|computed)"
+        r"|the precise (?:count|number|value|answer) "
+        r"the (?:operation|runtime|call) called for"
+        r"|the value the (?:operation|runtime|call) "
+        r"(?:had )?produced",
+    )
+    if canned_resolution_re.search(user):
+        issues.append(("RESOLUTION_GENERIC",
+                        "user_msg has canned 'the X the operation "
+                        "produced' resolution boilerplate — tie it to "
+                        "the fable's metaphor / drawn values"))
+
     return issues
 
 

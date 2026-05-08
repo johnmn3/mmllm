@@ -238,19 +238,23 @@ the answer while pebbles waited at hand."""),
     #    Fix: drop "write a form to {goal_text}"; reframe as
     #    "until someone could {goal_text} with a Clojure form".
     SubplotTemplate("""\
-Halfway through the race, {hare_phrase} stopped {place} and refused
-to continue until someone could {goal_text} with a Clojure form.
-{hare} called the goal impossible. {tortoise_phrase}, walking up at
+Halfway through the race, {hare_phrase}, {emo_proud}, stopped {place}
+and refused to continue until someone could {goal_text} with a
+Clojure form. The day was hot, {hare_his_her} throat dry, and the
+nearby pitcher's water still far below the narrow rim. {hare} called
+the goal impossible. {tortoise_phrase}, {emo_patient}, walking up at
 {tortoise_his_her} usual pace, simply said: "Compose {concept_phrase};
 submit it. Whatever comes back is the answer.\""""),
 
     # 6. The notebook template — Tortoise records goal/form pairs.
     SubplotTemplate("""\
-{tortoise_phrase} kept a small leather notebook of every goal
-{tortoise_he_she} had translated into a Clojure form. Today {place},
-the next entry was a goal: {goal_text}. {tortoise} sat with pen in
-hand, ready to compose {concept_phrase}, then let the REPL
-confirm the value."""),
+{tortoise_phrase}, {emo_patient}, kept a small leather notebook of
+every goal {tortoise_he_she} had translated into a Clojure form —
+each entry a pebble's worth of progress, the ledger's page-count
+rising slowly the way the pitcher's water rose with patient drops.
+Today {place}, the next entry was a goal: {goal_text}. {tortoise}
+sat with pen in hand, ready to compose {concept_phrase}, then let
+the REPL confirm the value."""),
 
     # 7. The boast-and-rebuke template — Hare boasts; Tortoise asks
     #    for the actual form. Fix: "To X is something anyone could
@@ -294,10 +298,12 @@ to rise a finger's width."""),
     #     answering, Tortoise's careful path wins. Moral lands.
     SubplotTemplate("""\
 The wager was set {place}: produce the value before the breeze had
-turned the next leaf. {hare_phrase} bolted into a flurry of
-guesses, calling out numbers and second-guessing {hare_him_her}self
-about whether the goal was to {goal_text} or something close to it.
-{tortoise_phrase}, who had simply walked to the slate and begun to
+turned the next leaf. The day was hot and the pitcher's water lay
+low; a wrong guess wasted the breeze and the whole pebble both.
+{hare_phrase}, {emo_proud}, bolted into a flurry of guesses, calling
+out numbers and second-guessing {hare_him_her}self about whether
+the goal was to {goal_text} or something close to it.
+{tortoise_phrase}, {emo_patient}, walked to the slate and began to
 write {concept_phrase}, finished the form, submitted it, and read
 the value off the REPL while {hare} was still arguing with the
 breeze. The race, like every other, went to the steady hand."""),
