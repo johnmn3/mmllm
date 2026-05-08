@@ -1824,3 +1824,53 @@ GOALS: dict[str, dict[str, str]] = {
         "goal":    'create an empty vector',
     },
 }
+
+
+def get_goal(form: str, concept: str, what: str) -> str:
+    """Look up goal_text for `form`.
+
+    Returns the canonical goal_text from GOALS if present, otherwise
+    derives a verb-phrase ONLY for explicit boy-wolf-specific
+    constructs that are missing (`defprotocol Alarm`,
+    `defmacro with-careful-watch`, type-hinted `(let [^…])`). Anything
+    else (including the broader metaphor-rich forms that already work
+    via canonical entries, atom forms, and parametric forms) stays on
+    its existing path with empty goal_text.
+
+    Audited by the boy-wolf XOE6 deep-audit slice.
+    """
+    canon = GOALS.get(form, {})
+    g = canon.get("goal", "")
+    if g:
+        return g
+    if not what or not form:
+        return ""
+    f = form.strip()
+    # Narrow allow-list: only synthesize for forms that are clearly
+    # metaphor-rich constructs (Clojure top-level definers + type-hint
+    # bindings). Atom-style forms (literal numbers, strings, simple
+    # arithmetic) stay on the {form_display} path. The check below
+    # tip-toes around FORM_LEAK / ANSWER_LEAK_STRING.
+    needs_synthesis = (
+        "defprotocol" in f
+        or "defmacro" in f
+        or "deftype" in f
+        or "defrecord" in f
+        or "defmulti" in f
+        or "extend-protocol" in f
+        or "extend-type" in f
+        or "let [^" in f  # type-hinted binding
+    )
+    if not needs_synthesis:
+        return ""
+    w = what.strip().rstrip("?").rstrip()
+    low = w.lower()
+    if low.startswith("whether "):
+        return f"determine {w}"
+    if low.startswith("what "):
+        return f"find {w}"
+    if low.startswith("which "):
+        return f"identify {w}"
+    if low.startswith("the "):
+        return f"compute {w}"
+    return f"compute {w}"
