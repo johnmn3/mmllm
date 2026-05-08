@@ -1346,7 +1346,23 @@ def _check_grounding(user, rec, issues):
 
 
 def per_example_records(sub, example, n: int, seed: int):
-    """Generate `n` records for ONE specific example by filtering."""
+    """Generate `n` records for ONE specific example.
+
+    Legacy examples (form_template empty): filter by code_str ==
+    example.form, since every record renders the same form string.
+
+    Parametric examples (form_template set): each record renders a
+    DIFFERENT form string drawn from slot pools, so equality
+    filtering never matches. Stride into generate_subject's output
+    instead — records are emitted in example-order, so example-index
+    gives us the right offset.
+    """
+    is_parametric = bool(getattr(example, "form_template", ""))
+    if is_parametric:
+        ex_idx = sub.examples.index(example)
+        recs = generate_subject(sub, n_per_example=n, seed=seed)
+        start = ex_idx * n
+        return recs[start:start + n]
     out = []
     s = seed
     while len(out) < n and s < seed + n * 50:
