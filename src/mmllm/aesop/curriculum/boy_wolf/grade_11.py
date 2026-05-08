@@ -713,7 +713,7 @@ G11_09 = SubjectCurriculum(
         # primitive level. Use a value-space form for the eval, narrate
         # the distinction.
         _ex("(+ 1 2)", 3,
-            "the form (+ 1 2) under default checked math",
+            "the expression (+ 1 2) under default checked math",
             "the result of (+ 1 2) under the default math regime"),
         _ex('(do "*unchecked-math* turns off overflow checking on prims" :studied)',
             ":studied",

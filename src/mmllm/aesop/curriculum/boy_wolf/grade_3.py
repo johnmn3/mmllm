@@ -642,20 +642,19 @@ G3_14 = SubjectCurriculum(grade=3, subject_id="G3-14",
             "the value of (do 1 2 3)",
             scenario=(
                 "Carol had written three numbers on her slate in a column: 1, "
-                "then 2, then 3. She asked Tom: if I ask the REPL to read "
-                "this whole sequence, what comes back?"
+                "then 2, then 3. She asked Tom: if I read this whole sequence, "
+                "what comes back?"
             ),
             need=(
                 "Tom needed to learn that `do` groups forms together, but only "
                 "the last one's answer is what the village hears."
             ),
             mapping=(
-                "The `do` form groups multiple forms. The REPL reads 1, then "
-                "2, then 3 in sequence. But it only returns the final "
-                "value: 3."
+                "The `do` form groups multiple forms. The runtime reads 1, then "
+                "2, then 3 in sequence. But only the final value comes back: 3."
             ),
             resolution=(
-                "the do form ran all three, returned 3, and Tom learned the REPL's rule for sequences. Carol marked {drawn.a} on the watchhouse beam, the lookout high above the valley quiet at last."
+                "the do form ran all three, returned 3, and Tom learned the rule for sequences. Carol marked {drawn.a} on the watchhouse beam, the lookout high above the valley quiet at last."
             )),
         _ex("(do (+ 1 1) (+ 2 2) (+ 3 3))", 6,
             "a do with three forms",
@@ -684,7 +683,7 @@ G3_15 = SubjectCurriculum(grade=3, subject_id="G3-15",
     subject_title="Side-effects in body", fable="boy-wolf",
     examples=[
         _ex("(do (println \"hi\") 42)", 42,
-            "the form (do (println \"hi\") 42)",
+            "the expression (do (println \"hi\") 42)",
             "the return value of the do",
             scenario=(
                 "Carol stood at the watchhouse and Tom came running. Carol "
@@ -702,7 +701,7 @@ G3_15 = SubjectCurriculum(grade=3, subject_id="G3-15",
                 "but only the last form's value is returned."
             ),
             resolution=(
-                "the do printed the greeting, then returned 42, and Tom knew the REPL's rule: side-effects do their work, but the final value is the return. Tom chalked {drawn.a} on the meadow folk notice, and the morning record stood for the next shepherd to read."
+                "the do printed the greeting, then returned 42, and Tom knew the rule: side-effects do their work, but the final value is the return. Tom chalked {drawn.a} on the meadow folk notice, and the morning record stood for the next shepherd to read."
             )),
     ], subplots=_RECIPE_SUBPLOTS, plan_pool=_PLAN_POOL_G3)
 

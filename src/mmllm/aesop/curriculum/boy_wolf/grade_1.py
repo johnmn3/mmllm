@@ -159,7 +159,7 @@ carry a verified entry."""),
 
     # 2c. Trust-ledger variant — the elder's pocket notebook.
     SubplotTemplate("""\
-{elder_phrase}, {emo_patient}, kept a small leather notebook of
+{elder_phrase}, {emo_patient}, kept a small slate-pocket of
 every expression the shepherds of the valley had actually evaluated —
 each entry slow as the rising sun, the page-count climbing only
 when the REPL had spoken. Today {place} the next entry was
@@ -586,7 +586,7 @@ G1_10 = SubjectCurriculum(
     examples=[
         # Comments are stripped by the reader; what remains evaluates.
         _ex("(+ 1 2) ; sum of one and two", 3,
-            "the form (+ 1 2) followed by a comment",
+            "the expression (+ 1 2) followed by a comment",
             "the result of (+ 1 2) ignoring the comment",
             scenario=(
                 "Carol had chalked an addition on the slate with a dashed "
@@ -638,7 +638,7 @@ G1_11 = SubjectCurriculum(
     fable="boy-wolf",
     examples=[
         _ex("(+    1    2)", 3,
-            "the form (+ 1 2) with extra spaces",
+            "the expression (+ 1 2) with extra spaces",
             "the result of the form",
             scenario=(
                 "Carol had written the form on the slate with extra space "
@@ -658,7 +658,7 @@ G1_11 = SubjectCurriculum(
             resolution=(
                 'the form evaluated to the sum, indifferent to the spacing — the runtime had seen only the operator and operands, nothing more. Tom chalked {drawn.a} on the watchhouse notice, and the morning record stood for the next shepherd to read.'           )),
         _ex("(+\n  1\n  2)", 3,
-            "the form (+ 1 2) split across lines",
+            "the expression (+ 1 2) split across lines",
             "the result of the form",
             scenario=(
                 "Carol had chalk-written an addition in a tall column on the "

@@ -21,6 +21,18 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 - issues: {'FORM_DISPLAY_AND_FORM_NOUN': 1}
     - [FORM_DISPLAY_AND_FORM_NOUN] form=`12345` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
 
+### G1-03: Ratios
+
+- examples: 5
+- variety @ n=50: 1.00
+- issues: {'CONCEPT_PHRASE_FORM_PREFIX': 9}
+    - [CONCEPT_PHRASE_FORM_PREFIX] form=`(+ 1/2 1/4)` — example.concept_phrase begins with 'the form (' — vary the noun phrase (use 'the expression', 'the call', or drop the prefix entirely)
+    - [CONCEPT_PHRASE_FORM_PREFIX] form=`(+ 1/2 1/4)` — example.concept_phrase begins with 'the form (' — vary the noun phrase (use 'the expression', 'the call', or drop the prefix entirely)
+    - [CONCEPT_PHRASE_FORM_PREFIX] form=`(+ 1/2 1/4)` — example.concept_phrase begins with 'the form (' — vary the noun phrase (use 'the expression', 'the call', or drop the prefix entirely)
+    - [CONCEPT_PHRASE_FORM_PREFIX] form=`(* 2 1/2)` — example.concept_phrase begins with 'the form (' — vary the noun phrase (use 'the expression', 'the call', or drop the prefix entirely)
+    - [CONCEPT_PHRASE_FORM_PREFIX] form=`(* 2 1/2)` — example.concept_phrase begins with 'the form (' — vary the noun phrase (use 'the expression', 'the call', or drop the prefix entirely)
+    - [CONCEPT_PHRASE_FORM_PREFIX] form=`(* 2 1/2)` — example.concept_phrase begins with 'the form (' — vary the noun phrase (use 'the expression', 'the call', or drop the prefix entirely)
+
 ### G1-05: Booleans
 
 - examples: 6
@@ -717,11 +729,9 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 4
 - variety @ n=50: 1.00
-- issues: {'STORY_RESOLUTION_NO_DRAWN': 3, 'LOW_GROUNDING': 1, 'STORY_SLOT_NOUN_REPEAT': 3}
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(clojure.string/reverse "abc")` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('abc',), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(clojure.string/reverse "abc")` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('abc',), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(clojure.string/reverse "abc")` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('abc',), resolution doesn't close the loop)
+- issues: {'LOW_GROUNDING': 1, 'STORY_SLOT_NOUN_REPEAT': 3}
     - [LOW_GROUNDING] form=`(namespace :owner/item)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
+    - [STORY_SLOT_NOUN_REPEAT] form=`(name :owner/item)` — the noun 'the slash' appears in all 4 story slots (scenario/need/mapping/resolution) — vary the imagery between beats
     - [STORY_SLOT_NOUN_REPEAT] form=`(name :owner/item)` — the noun 'the slash' appears in all 4 story slots (scenario/need/mapping/resolution) — vary the imagery between beats
     - [STORY_SLOT_NOUN_REPEAT] form=`(name :owner/item)` — the noun 'the slash' appears in all 4 story slots (scenario/need/mapping/resolution) — vary the imagery between beats
 
@@ -737,10 +747,7 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'STORY_RESOLUTION_NO_DRAWN': 3, 'HEDGING_NEAR_FORM': 1, 'CLAUSE_STACK_OVERFLOW': 1}
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(clojure.string/split "src:test" #":")` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':test', 'src:test'), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(clojure.string/split "src:test" #":")` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':test', 'src:test'), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(clojure.string/split "src:test" #":")` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':test', 'src:test'), resolution doesn't close the loop)
+- issues: {'HEDGING_NEAR_FORM': 1, 'CLAUSE_STACK_OVERFLOW': 1}
     - [HEDGING_NEAR_FORM] form=`(count ["src" "test" "resources"])` — hedge 'or something close to it' in user_msg — eval-deterministic narratives shouldn't hedge about the form's value
     - [CLAUSE_STACK_OVERFLOW] form=`(count ["src" "test" "resources"])` — sentence with 6 commas reads as AI-output cadence: 'Chatter the crow, unhurried, form after form, walked to the slate and began to\nw'
 
@@ -802,36 +809,19 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
     - [CLAUSE_STACK_OVERFLOW] form=`(try (assert (= 1 2)) (catch Throwable e 0))` — sentence with 5 commas reads as AI-output cadence: 'To assert that 5 equals 0, catch the failure, and return a numeric code, he comp'
     - [CLAUSE_STACK_OVERFLOW] form=`(try (assert (= 1 2)) (catch Throwable e 0))` — sentence with 5 commas reads as AI-output cadence: 'To assert that 5 equals 8, catch the failure, and return a numeric code, she com'
 
-### G7-08: prn and pprint
-
-- examples: 2
-- variety @ n=50: 1.00
-- issues: {'STORY_RESOLUTION_NO_DRAWN': 3}
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(with-out-str (prn :hare))` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':hare',), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(with-out-str (prn :hare))` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':hare',), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(with-out-str (prn :hare))` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':hare',), resolution doesn't close the loop)
-
 ### G7-09: tap>
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'STORY_RESOLUTION_NO_DRAWN': 3, 'PARAGRAPH_FRAGMENTATION': 1}
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(tap> :hello)` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':hello',), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(tap> :hello)` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':hello',), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(tap> :hello)` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':hello',), resolution doesn't close the loop)
+- issues: {'PARAGRAPH_FRAGMENTATION': 1}
     - [PARAGRAPH_FRAGMENTATION] form=`(tap> 42)` — user_msg has 4 short (≤25-word) paragraphs in body — reads as a bullet list, not a story
 
 ### G7-11: Reading stack traces
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'STORY_RESOLUTION_NO_DRAWN': 6, 'ANSWER_LEAK_STRING': 1}
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(try (throw (Exception. "oops")) (catch Exception ` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('oops',), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(try (throw (Exception. "oops")) (catch Exception ` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('oops',), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(try (throw (Exception. "oops")) (catch Exception ` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('oops',), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(try (throw (ex-info "trouble" {})) (catch Excepti` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('trouble',), resolution doesn't close the loop)
+- issues: {'ANSWER_LEAK_STRING': 1}
     - [ANSWER_LEAK_STRING] form=`(try (throw (ex-info "trouble" {})) (catch Excepti` — answer string 'trouble' appears in user_msg
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(try (throw (ex-info "trouble" {})) (catch Excepti` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('trouble',), resolution doesn't close the loop)
 
 ### G7-12: slurp and spit
 
@@ -842,41 +832,12 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 tortoise
 ")` — sentence with 5 commas reads as AI-output cadence: 'Flat stones are how the two meet — a value crosses out\nand becomes scratches on '
 
-### G7-13: line-seq
-
-- examples: 2
-- variety @ n=50: 1.00
-- issues: {'LOW_GROUNDING': 2, 'STORY_RESOLUTION_NO_DRAWN': 3}
-    - [LOW_GROUNDING] form=`(count (clojure.string/split-lines "a\nb\nc"))` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(count (clojure.string/split-lines "a\nb\nc"))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('a\\nb\\nc',), resolution doesn't close the loop)
-    - [LOW_GROUNDING] form=`(count (clojure.string/split-lines "a\nb\nc"))` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(count (clojure.string/split-lines "a\nb\nc"))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('a\\nb\\nc',), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(count (clojure.string/split-lines "a\nb\nc"))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('a\\nb\\nc',), resolution doesn't close the loop)
-
 ### G7-15: *in* and *out*
 
 - examples: 2
 - variety @ n=50: 1.00
 - issues: {'LOW_GROUNDING': 1}
     - [LOW_GROUNDING] form=`(with-out-str (println))` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-
-### G7-16: edn read
-
-- examples: 3
-- variety @ n=50: 1.00
-- issues: {'STORY_RESOLUTION_NO_DRAWN': 3}
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(clojure.edn/read-string "42")` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('42', '42'), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(clojure.edn/read-string "42")` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('42', '42'), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(clojure.edn/read-string "42")` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('42', '42'), resolution doesn't close the loop)
-
-### G7-17: JSON roundtrip
-
-- examples: 2
-- variety @ n=50: 1.00
-- issues: {'STORY_RESOLUTION_NO_DRAWN': 3}
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(clojure.edn/read-string (pr-str {:a 1 :b 2}))` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':a', ':b'), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(clojure.edn/read-string (pr-str {:a 1 :b 2}))` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':a', ':b'), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(clojure.edn/read-string (pr-str {:a 1 :b 2}))` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':a', ':b'), resolution doesn't close the loop)
 
 ### G7-18: Shell command
 
@@ -896,15 +857,6 @@ tortoise
 - variety @ n=50: 1.00
 - issues: {'LOW_GROUNDING': 1}
     - [LOW_GROUNDING] form=`(let [speak (fn [k] (cond (= k :hare) "swift" (= k` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-
-### G8-02: deftype introduction
-
-- examples: 2
-- variety @ n=50: 1.00
-- issues: {'STORY_RESOLUTION_NO_DRAWN': 3}
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(do (deftype Pebble [color]) (.-color (Pebble. "gr` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('grey',), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(do (deftype Pebble [color]) (.-color (Pebble. "gr` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('grey',), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(do (deftype Pebble [color]) (.-color (Pebble. "gr` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('grey',), resolution doesn't close the loop)
 
 ### G8-03: defrecord introduction
 
@@ -1249,11 +1201,8 @@ tortoise
 
 - examples: 3
 - variety @ n=50: 1.00
-- issues: {'CLAUSE_STACK_OVERFLOW': 1, 'STORY_RESOLUTION_NO_DRAWN': 3}
+- issues: {'CLAUSE_STACK_OVERFLOW': 1}
     - [CLAUSE_STACK_OVERFLOW] form=`(when true 1 2 3)` — sentence with 5 commas reads as AI-output cadence: 'You\nwrite the rule once, and any drop-order that calls it gets rewritten\non the '
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(when-not false :ok)` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':ok',), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(when-not false :ok)` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':ok',), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(when-not false :ok)` — story-tagged example's resolution slot has no drawn-value reference (form has literals (':ok',), resolution doesn't close the loop)
 
 ### G10-07: Threading macros revisited
 
@@ -1289,37 +1238,27 @@ tortoise
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'STORY_RESOLUTION_NO_DRAWN': 3, 'CLAUSE_STACK_OVERFLOW': 1, 'STORY_SLOT_NOUN_REPEAT': 3}
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(if-let [x 7] (* x x) 0)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('7',), resolution doesn't close the loop)
+- issues: {'CLAUSE_STACK_OVERFLOW': 1, 'STORY_SLOT_NOUN_REPEAT': 3}
     - [CLAUSE_STACK_OVERFLOW] form=`(if-let [x 7] (* x x) 0)` — sentence with 5 commas reads as AI-output cadence: 'You\nwrite the rule once, and any drop-order that calls it gets rewritten\non the '
     - [STORY_SLOT_NOUN_REPEAT] form=`(if-let [x 7] (* x x) 0)` — the noun 'the then-branch' appears in all 4 story slots (scenario/need/mapping/resolution) — vary the imagery between beats
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(if-let [x 7] (* x x) 0)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('7',), resolution doesn't close the loop)
     - [STORY_SLOT_NOUN_REPEAT] form=`(if-let [x 7] (* x x) 0)` — the noun 'the then-branch' appears in all 4 story slots (scenario/need/mapping/resolution) — vary the imagery between beats
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(if-let [x 7] (* x x) 0)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('7',), resolution doesn't close the loop)
+    - [STORY_SLOT_NOUN_REPEAT] form=`(if-let [x 7] (* x x) 0)` — the noun 'the then-branch' appears in all 4 story slots (scenario/need/mapping/resolution) — vary the imagery between beats
 
 ### G10-11: Reader macros overview
 
 - examples: 3
 - variety @ n=50: 1.00
-- issues: {'STORY_RESOLUTION_NO_DRAWN': 6, 'CLAUSE_STACK_OVERFLOW': 1}
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(#(* % %) 6)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('6',), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(#(* % %) 6)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('6',), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(#(* % %) 6)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('6',), resolution doesn't close the loop)
+- issues: {'CLAUSE_STACK_OVERFLOW': 1}
     - [CLAUSE_STACK_OVERFLOW] form=`(#(* % %) 6)` — sentence with 5 commas reads as AI-output cadence: 'The runtime sees the cleaned-up form,\nevaluates it, and gives back what it compu'
-    - [STORY_RESOLUTION_NO_DRAWN] form=`[1 #_ 2 3]` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('3',), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`[1 #_ 2 3]` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('3',), resolution doesn't close the loop)
 
 ### G10-12: Tagged literals
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'CLAUSE_STACK_OVERFLOW': 3, 'STORY_RESOLUTION_NO_DRAWN': 3}
+- issues: {'CLAUSE_STACK_OVERFLOW': 3}
     - [CLAUSE_STACK_OVERFLOW] form=`(inst? #inst "2024-01-01")` — sentence with 5 commas reads as AI-output cadence: 'The runtime sees the cleaned-up form,\nevaluates it, and gives back what it compu'
     - [CLAUSE_STACK_OVERFLOW] form=`(inst? #inst "2024-01-01")` — sentence with 5 commas reads as AI-output cadence: 'The runtime sees the cleaned-up form,\nevaluates it, and gives back what it compu'
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(uuid? #uuid "00000000-0000-0000-0000-000000000000` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('00000000', '-0000', '-0000'), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(uuid? #uuid "00000000-0000-0000-0000-000000000000` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('00000000', '-0000', '-0000'), resolution doesn't close the loop)
     - [CLAUSE_STACK_OVERFLOW] form=`(uuid? #uuid "00000000-0000-0000-0000-000000000000` — sentence with 5 commas reads as AI-output cadence: 'The runtime sees the cleaned-up form,\nevaluates it, and gives back what it compu'
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(uuid? #uuid "00000000-0000-0000-0000-000000000000` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('00000000', '-0000', '-0000'), resolution doesn't close the loop)
 
 ### G10-13: Data readers and EDN extension
 
@@ -1332,13 +1271,9 @@ tortoise
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'LOW_GROUNDING': 2, 'STORY_RESOLUTION_NO_DRAWN': 6, 'REPL_TRIPLE_VOICE': 1, 'CLAUSE_STACK_OVERFLOW': 1}
-    - [LOW_GROUNDING] form=`(eval '(+ 1 2 3))` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(eval '(+ 1 2 3))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('3',), resolution doesn't close the loop)
+- issues: {'REPL_TRIPLE_VOICE': 1, 'CLAUSE_STACK_OVERFLOW': 1}
     - [REPL_TRIPLE_VOICE] form=`(eval '(+ 1 2 3))` — user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(eval '(+ 1 2 3))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('3',), resolution doesn't close the loop)
     - [CLAUSE_STACK_OVERFLOW] form=`(eval '(+ 1 2 3))` — sentence with 5 commas reads as AI-output cadence: 'You\nwrite the rule once, and any drop-order that calls it gets rewritten\non the '
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(eval '(+ 1 2 3))` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('3',), resolution doesn't close the loop)
 
 ### G10-15: When not to write a macro
 
@@ -1351,13 +1286,11 @@ tortoise
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'STORY_RESOLUTION_NO_DRAWN': 3, 'CLAUSE_STACK_OVERFLOW': 2, 'ANSWER_LEAK_STRING': 1, 'PARAGRAPH_FRAGMENTATION': 1}
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(do (defmacro with-tortoise-pace [& body] `(let [p` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('42', ':slow-and-steady'), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(do (defmacro with-tortoise-pace [& body] `(let [p` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('42', ':slow-and-steady'), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(do (defmacro with-tortoise-pace [& body] `(let [p` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('42', ':slow-and-steady'), resolution doesn't close the loop)
+- issues: {'CLAUSE_STACK_OVERFLOW': 2, 'ANSWER_LEAK_STRING': 1, 'PARAGRAPH_FRAGMENTATION': 1}
     - [CLAUSE_STACK_OVERFLOW] form=`(do (defmacro with-tortoise-pace [& body] `(let [p` — sentence with 5 commas reads as AI-output cadence: 'You\nwrite the rule once, and any drop-order that calls it gets rewritten\non the '
     - [CLAUSE_STACK_OVERFLOW] form=`(do (defmacro def-pace [name v] `(def ~name ~v)) (` — sentence with 5 commas reads as AI-output cadence: 'You\nwrite the rule once, and any drop-order that calls it gets rewritten\non the '
     - [ANSWER_LEAK_STRING] form=`(do (defmacro def-pace [name v] `(def ~name ~v)) (` — answer string ':slow' appears in user_msg
+    - [PARAGRAPH_FRAGMENTATION] form=`(do (defmacro def-pace [name v] `(def ~name ~v)) (` — user_msg has 4 short (≤25-word) paragraphs in body — reads as a bullet list, not a story
 
 ## Grade 11
 
@@ -1373,13 +1306,10 @@ tortoise
 
 - examples: 3
 - variety @ n=50: 1.00
-- issues: {'CLAUSE_STACK_OVERFLOW': 3, 'STORY_RESOLUTION_NO_DRAWN': 3}
+- issues: {'CLAUSE_STACK_OVERFLOW': 3}
     - [CLAUSE_STACK_OVERFLOW] form=`(.toUpperCase "abc")` — sentence with 5 commas reads as AI-output cadence: 'Glint the crow, unhurried, form after form, found a different pitcher atop the h'
     - [CLAUSE_STACK_OVERFLOW] form=`(.startsWith "hare-tortoise" "hare")` — sentence with 5 commas reads as AI-output cadence: "The runtime moves a stone across the boundary, calls\nthe human's method, and bri"
     - [CLAUSE_STACK_OVERFLOW] form=`(.startsWith "hare-tortoise" "hare")` — sentence with 5 commas reads as AI-output cadence: "The runtime moves a stone across the boundary, calls\nthe human's method, and bri"
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(. "abc" toUpperCase)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('abc',), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(. "abc" toUpperCase)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('abc',), resolution doesn't close the loop)
-    - [STORY_RESOLUTION_NO_DRAWN] form=`(. "abc" toUpperCase)` — story-tagged example's resolution slot has no drawn-value reference (form has literals ('abc',), resolution doesn't close the loop)
 
 ### G11-03: Static method call
 
@@ -1570,8 +1500,7 @@ tortoise
 ### Issue counts (across all examples × 3 records)
 
 - **CLAUSE_STACK_OVERFLOW**: 265
-- **STORY_RESOLUTION_NO_DRAWN**: 57
-- **LOW_GROUNDING**: 52
+- **LOW_GROUNDING**: 48
 - **NUMERAL_LIST_IN_GOAL**: 48
 - **CONCEPT_AS_VERB**: 29
 - **STORY_SLOT_NOUN_REPEAT**: 21
@@ -1582,6 +1511,7 @@ tortoise
 - **ONLY_SHOOK_HEAD_TIC**: 14
 - **HEDGING_NEAR_FORM**: 11
 - **ANSWER_LEAK_STRING**: 10
+- **CONCEPT_PHRASE_FORM_PREFIX**: 9
 - **THE_FORM_OVERUSE**: 8
 - **ANSWER_LEAK**: 7
 - **STRING_AS_CHAR_MISCLAIM**: 6
@@ -1599,17 +1529,17 @@ tortoise
 
 | Grade | Subjects | Examples | Issues | Low-variety |
 |---|---|---|---|---|
-| 1 | 18 | 76 | 45 | — |
+| 1 | 18 | 76 | 54 | — |
 | 2 | 22 | 88 | 78 | — |
 | 3 | 18 | 31 | 33 | — |
 | 4 | 20 | 39 | 46 | — |
 | 5 | 22 | 39 | 87 | — |
-| 6 | 16 | 33 | 20 | — |
-| 7 | 18 | 36 | 41 | — |
-| 8 | 16 | 31 | 52 | — |
+| 6 | 16 | 33 | 14 | — |
+| 7 | 18 | 36 | 18 | — |
+| 8 | 16 | 31 | 49 | — |
 | 9 | 18 | 34 | 81 | — |
-| 10 | 16 | 36 | 71 | — |
-| 11 | 14 | 29 | 30 | — |
+| 10 | 16 | 36 | 45 | — |
+| 11 | 14 | 29 | 27 | — |
 | 12 | 18 | 37 | 38 | — |
 
 ### Sample issues by severity
@@ -1656,6 +1586,51 @@ A small audience of meadow birds had perched on the rim of a tall
 pitcher at the market to watch Cobalt the crow attempt to outwit
 Cackle the crow at reading the REPL. The day was hot, the water
 inside ...
+    ```
+
+#### CONCEPT_PHRASE_FORM_PREFIX
+
+- `G1-03` (form `(+ 1/2 1/4)`): example.concept_phrase begins with 'the form (' — vary the noun phrase (use 'the expression', 'the call', or drop the prefix entirely)
+    ```
+    It was the kind of summer that turned every shaded stone into a small kindness.
+
+At the foot of a tall pitcher at the village, Stoop the crow sketched a small
+wager into the dry dust: whoever guessed the result of `(+ 1/2 1/4)`
+first would claim the cool water lying low at the bottom. The throat
+was...
+    ```
+- `G1-03` (form `(+ 1/2 1/4)`): example.concept_phrase begins with 'the form (' — vary the noun phrase (use 'the expression', 'the call', or drop the prefix entirely)
+    ```
+    near the road, a single pitcher held the last of the water, and Bicker arrived too parched to be picky.
+
+At the foot of a tall pitcher on the road, Antimony the crow sketched a small
+wager into the dry dust: whoever guessed the result of `(+ 1/2 1/4)`
+first would claim the cool water lying low at th...
+    ```
+- `G1-03` (form `(+ 1/2 1/4)`): example.concept_phrase begins with 'the form (' — vary the noun phrase (use 'the expression', 'the call', or drop the prefix entirely)
+    ```
+    In a year when the wells ran low, a single jar of water was a small kingdom unto itself.
+
+Loft the crow, watching the level lift, drop by drop, had been keeping a small leather
+notebook of every form she had successfully evaluated —
+each page like a pebble in the pitcher's growing pile, raising the
+...
+    ```
+- `G1-03` (form `(* 2 1/2)`): example.concept_phrase begins with 'the form (' — vary the noun phrase (use 'the expression', 'the call', or drop the prefix entirely)
+    ```
+    The water sat at the bottom of the jar, deep enough to glimpse and far enough to tantalize.
+
+Cowl the crow and Buzz the crow stopped by the garden where someone had
+scratched the form (* 2 1/2) into the dust beside a tall pitcher. The day
+was hot, the throat of the pitcher was narrow, and the water ...
+    ```
+- `G1-03` (form `(* 2 1/2)`): example.concept_phrase begins with 'the form (' — vary the noun phrase (use 'the expression', 'the call', or drop the prefix entirely)
+    ```
+    When Vane landed by the garden wall, he saw the water and saw the distance, and stood very still.
+
+Halfway to the pitcher, Cloudshroud the crow, with a triumphant rattle of feathers, stopped on the hilltop
+and refused to take another step until someone could prove what the
+form `(* 8 1/2)` evaluated...
     ```
 
 #### REPEATED_OPENER_FRAGMENT
@@ -2297,50 +2272,6 @@ Caw stood at the pitcher's rim in the hilltop field, a circuit chalked beneath h
     On a long afternoon when even the bees had grown slow, a thirsty bird settled on the rim of a clay vessel.
 
 Caw stood at the pitcher's rim in the hilltop field, a circuit chalked beneath her feet: start with n=5 and accumulator=1. Each lap, multiply the accumulator by n, step n down by one — loop wi...
-    ```
-
-#### STORY_RESOLUTION_NO_DRAWN
-
-- `G6-05` (form `(clojure.string/reverse "abc")`): story-tagged example's resolution slot has no drawn-value reference (form has literals ('abc',), resolution doesn't close the loop)
-    ```
-    The kitchen garden had been lovingly kept, but the sun that year had been merciless and constant.
-
-Yowl the crow, with a triumphant rattle of feathers, glanced at the rim-carving in the meadow and
-called out what she thought it said without stopping to
-read carefully. The day was hot and the throat ...
-    ```
-- `G6-05` (form `(clojure.string/reverse "abc")`): story-tagged example's resolution slot has no drawn-value reference (form has literals ('abc',), resolution doesn't close the loop)
-    ```
-    In a year when the wells ran low, a single jar of water was a small kingdom unto itself.
-
-Insignia the crow, unbothered by the slow progress, pressed a talon-tip into the
-pitcher's clay rim by the village, carving a name with care. The clay was
-soft only briefly; once dry, the carving would last for...
-    ```
-- `G6-05` (form `(clojure.string/reverse "abc")`): story-tagged example's resolution slot has no drawn-value reference (form has literals ('abc',), resolution doesn't close the loop)
-    ```
-    near the meadow, where the heat shimmered above the stones, Puzzle began the slow business of solving thirst.
-
-"Naming is half the art," Puzzle the crow, calm and methodical, said, scoring a careful mark
-into the pitcher's clay. "A clear carving tells every later crow what to
-expect; a careless one ...
-    ```
-- `G6-11` (form `(clojure.string/split "src:test" #":")`): story-tagged example's resolution slot has no drawn-value reference (form has literals (':test', 'src:test'), resolution doesn't close the loop)
-    ```
-    Keen circled twice on the hilltop before settling on the rim of the old clay jar, eyes on the water below.
-
-A small audience of meadow birds had perched on the rim of the tall
-pitcher atop the hilltop to watch Symbol the crow attempt to outwit
-Keen the crow at writing the right form. The challenge:
-...
-    ```
-- `G6-11` (form `(clojure.string/split "src:test" #":")`): story-tagged example's resolution slot has no drawn-value reference (form has literals (':test', 'src:test'), resolution doesn't close the loop)
-    ```
-    In a long-dry season, Tempest found the pitcher at the village and began to consider it carefully.
-
-A clay tag tied around the tall pitcher's neck by the village carried a
-small puzzle. The challenge was simple: split a colon-separated classpath-like string into its individual entries. The day was
-h...
     ```
 
 #### STORY_SLOT_NOUN_REPEAT

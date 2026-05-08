@@ -6,64 +6,17 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 ## Grade 1
 
-### G1-02: Integer numbers
-
-- examples: 6
-- variety @ n=50: 1.00
-- issues: {'FOREIGN_FABLE_IMAGERY': 2}
-    - [FOREIGN_FABLE_IMAGERY] form=`-3` — tortoise-hare-specific imagery 'leather notebook' leaks into boy-wolf prose
-    - [FOREIGN_FABLE_IMAGERY] form=`-25` — tortoise-hare-specific imagery 'leather notebook' leaks into boy-wolf prose
-
-### G1-03: Ratios
-
-- examples: 5
-- variety @ n=50: 1.00
-- issues: {'FOREIGN_FABLE_IMAGERY': 1}
-    - [FOREIGN_FABLE_IMAGERY] form=`1/2` — tortoise-hare-specific imagery 'leather notebook' leaks into boy-wolf prose
-
-### G1-04: Strings
-
-- examples: 5
-- variety @ n=50: 1.00
-- issues: {'FOREIGN_FABLE_IMAGERY': 3}
-    - [FOREIGN_FABLE_IMAGERY] form=`"flock"` — tortoise-hare-specific imagery 'leather notebook' leaks into boy-wolf prose
-    - [FOREIGN_FABLE_IMAGERY] form=`"watch the meadow"` — tortoise-hare-specific imagery 'leather notebook' leaks into boy-wolf prose
-    - [FOREIGN_FABLE_IMAGERY] form=`"42"` — tortoise-hare-specific imagery 'leather notebook' leaks into boy-wolf prose
-
-### G1-05: Booleans
-
-- examples: 6
-- variety @ n=50: 1.00
-- issues: {'FOREIGN_FABLE_IMAGERY': 2}
-    - [FOREIGN_FABLE_IMAGERY] form=`(= 1 2)` — tortoise-hare-specific imagery 'leather notebook' leaks into boy-wolf prose
-    - [FOREIGN_FABLE_IMAGERY] form=`(< 3 5)` — tortoise-hare-specific imagery 'leather notebook' leaks into boy-wolf prose
-
-### G1-06: nil
-
-- examples: 5
-- variety @ n=50: 1.00
-- issues: {'FOREIGN_FABLE_IMAGERY': 2}
-    - [FOREIGN_FABLE_IMAGERY] form=`(nil? nil)` — tortoise-hare-specific imagery 'leather notebook' leaks into boy-wolf prose
-    - [FOREIGN_FABLE_IMAGERY] form=`(nil? false)` — tortoise-hare-specific imagery 'leather notebook' leaks into boy-wolf prose
-
-### G1-07: Keywords
-
-- examples: 5
-- variety @ n=50: 1.00
-- issues: {'FOREIGN_FABLE_IMAGERY': 1}
-    - [FOREIGN_FABLE_IMAGERY] form=`:alarm` — tortoise-hare-specific imagery 'leather notebook' leaks into boy-wolf prose
-
 ### G1-08: Characters
 
 - examples: 4
 - variety @ n=50: 1.00
-- issues: {'STRING_AS_CHAR_MISCLAIM': 7, 'FOREIGN_FABLE_IMAGERY': 3}
+- issues: {'STRING_AS_CHAR_MISCLAIM': 7}
     - [STRING_AS_CHAR_MISCLAIM] form=`\w` — form is a multi-character string but the prose refers to it as a single character (`the character \X` idiom)
     - [STRING_AS_CHAR_MISCLAIM] form=`\w` — form is a multi-character string but the prose refers to it as a single character (`the character \X` idiom)
-    - [FOREIGN_FABLE_IMAGERY] form=`\w` — tortoise-hare-specific imagery 'leather notebook' leaks into boy-wolf prose
     - [STRING_AS_CHAR_MISCLAIM] form=`\w` — form is a multi-character string but the prose refers to it as a single character (`the character \X` idiom)
     - [STRING_AS_CHAR_MISCLAIM] form=`\space` — form is a multi-character string but the prose refers to it as a single character (`the character \X` idiom)
     - [STRING_AS_CHAR_MISCLAIM] form=`\space` — form is a multi-character string but the prose refers to it as a single character (`the character \X` idiom)
+    - [STRING_AS_CHAR_MISCLAIM] form=`\T` — form is a multi-character string but the prose refers to it as a single character (`the character \X` idiom)
 
 ### G1-09: Symbols vs values
 
@@ -227,13 +180,12 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 4
 - variety @ n=50: 1.00
-- issues: {'FORM_DISPLAY_AND_FORM_NOUN': 2, 'GOAL_FALLBACK_GENERIC': 3, 'LOW_GROUNDING': 2}
-    - [FORM_DISPLAY_AND_FORM_NOUN] form=`(if "" :truthy :falsey)` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
-    - [FORM_DISPLAY_AND_FORM_NOUN] form=`(if "" :truthy :falsey)` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
+- issues: {'GOAL_FALLBACK_GENERIC': 3, 'LOW_GROUNDING': 2}
     - [GOAL_FALLBACK_GENERIC] form=`(if nil :truthy :falsey)` — user_msg uses generic 'To evaluate the X, ...' fallback AND no drawn-literal anchor — add a canonical GOALS entry for richer prose
     - [GOAL_FALLBACK_GENERIC] form=`(if nil :truthy :falsey)` — user_msg uses generic 'To evaluate the X, ...' fallback AND no drawn-literal anchor — add a canonical GOALS entry for richer prose
     - [LOW_GROUNDING] form=`(if nil :truthy :falsey)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
     - [GOAL_FALLBACK_GENERIC] form=`(if false :truthy :falsey)` — user_msg uses generic 'To evaluate the X, ...' fallback AND no drawn-literal anchor — add a canonical GOALS entry for richer prose
+    - [LOW_GROUNDING] form=`(if false :truthy :falsey)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
 
 ### G2-17: Keyword as function for map lookup
 
@@ -269,13 +221,12 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 3
 - variety @ n=50: 1.00
-- issues: {'ANSWER_LEAK': 1, 'FORM_DISPLAY_AND_FORM_NOUN': 3, 'SMALL_INT_LEAK': 1, 'THE_FORM_OVERUSE': 1}
+- issues: {'ANSWER_LEAK': 1, 'FORM_DISPLAY_AND_FORM_NOUN': 3, 'SMALL_INT_LEAK': 1}
     - [ANSWER_LEAK] form=`(count "shepherd")` — answer 8 in narrative
     - [FORM_DISPLAY_AND_FORM_NOUN] form=`(count "shepherd")` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
     - [SMALL_INT_LEAK] form=`(count "wolf")` — small-int answer 4 leaks via resolution-slot phrasing
     - [FORM_DISPLAY_AND_FORM_NOUN] form=`(count "wolf")` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
     - [FORM_DISPLAY_AND_FORM_NOUN] form=`(subs "shepherd" 0 3)` — user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
-    - [THE_FORM_OVERUSE] form=`(subs "shepherd" 0 3)` — `the form` appears 5 times in user_msg (template tic — vary references)
 
 ### G2-22: Compose pure arithmetic (multi-step calculation)
 
@@ -340,13 +291,13 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'ANSWER_LEAK': 2, 'NARRATIVE_NUMERAL_HARDCODE': 3, 'CLAUSE_STACK_OVERFLOW': 1}
+- issues: {'ANSWER_LEAK': 2, 'NARRATIVE_NUMERAL_HARDCODE': 3, 'BOY_WOLF_NOUN_SATURATION': 1, 'CLAUSE_STACK_OVERFLOW': 1}
     - [ANSWER_LEAK] form=`(do (defn add3 [a b c] (+ a b c)) (add3 1 2 3))` — answer 6 in narrative
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(do (defn add3 [a b c] (+ a b c)) (add3 1 2 3))` — parametric example has hard-coded English numeral 'three counts' in a story slot — the actual draws may differ from this fixed count
+    - [BOY_WOLF_NOUN_SATURATION] form=`(do (defn add3 [a b c] (+ a b c)) (add3 1 2 3))` — boy-wolf metaphor noun 'drill-card' appears 4× in user_msg — vary the imagery
     - [ANSWER_LEAK] form=`(do (defn add3 [a b c] (+ a b c)) (add3 1 2 3))` — answer 6 in narrative
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(do (defn add3 [a b c] (+ a b c)) (add3 1 2 3))` — parametric example has hard-coded English numeral 'three counts' in a story slot — the actual draws may differ from this fixed count
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(do (defn add3 [a b c] (+ a b c)) (add3 1 2 3))` — parametric example has hard-coded English numeral 'three counts' in a story slot — the actual draws may differ from this fixed count
-    - [CLAUSE_STACK_OVERFLOW] form=`(do (defn add3 [a b c] (+ a b c)) (add3 1 2 3))` — sentence with 6 commas reads as AI-output cadence: 'The earlier steps prepare the way; the last\nstep is the answer." To define a fun'
 
 ### G3-10: anonymous shorthand #()
 
@@ -367,16 +318,16 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 - examples: 1
 - variety @ n=50: 0.98
-- issues: {'HIGH_LENGTH': 1}
+- issues: {'HIGH_LENGTH': 1, 'BOY_WOLF_NOUN_SATURATION': 1}
     - [HIGH_LENGTH] form=`((fn [x] x x x 99) 1)` — user_msg 201 words
+    - [BOY_WOLF_NOUN_SATURATION] form=`((fn [x] x x x 99) 1)` — boy-wolf metaphor noun 'drill-card' appears 5× in user_msg — vary the imagery
 
 ### G3-14: do form
 
 - examples: 2
 - variety @ n=50: 1.00
-- issues: {'NARRATIVE_NUMERAL_HARDCODE': 3, 'REPL_TRIPLE_VOICE': 1, 'LOW_GROUNDING': 1}
+- issues: {'NARRATIVE_NUMERAL_HARDCODE': 3, 'LOW_GROUNDING': 1}
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(do 1 2 3)` — parametric example has hard-coded English numeral 'three numbers' in a story slot — the actual draws may differ from this fixed count
-    - [REPL_TRIPLE_VOICE] form=`(do 1 2 3)` — user_msg mentions 'REPL' 4 times — the REPL personification should appear at most twice per record (submit + return)
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(do 1 2 3)` — parametric example has hard-coded English numeral 'three numbers' in a story slot — the actual draws may differ from this fixed count
     - [NARRATIVE_NUMERAL_HARDCODE] form=`(do 1 2 3)` — parametric example has hard-coded English numeral 'three numbers' in a story slot — the actual draws may differ from this fixed count
     - [LOW_GROUNDING] form=`(do (+ 1 1) (+ 2 2) (+ 3 3))` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
@@ -1609,11 +1560,10 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 - **BOOL_LEAK_RESOLUTION**: 34
 - **ANSWER_LEAK_STRING**: 31
 - **GOAL_FALLBACK_GENERIC**: 30
-- **FORM_DISPLAY_AND_FORM_NOUN**: 24
 - **HIGH_LENGTH**: 24
+- **FORM_DISPLAY_AND_FORM_NOUN**: 22
 - **ANSWER_LEAK**: 15
-- **FOREIGN_FABLE_IMAGERY**: 14
-- **REPL_TRIPLE_VOICE**: 14
+- **REPL_TRIPLE_VOICE**: 13
 - **SMALL_INT_LEAK**: 8
 - **STRING_AS_CHAR_MISCLAIM**: 7
 - **PROCEDURAL_OPENER**: 7
@@ -1622,7 +1572,7 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 - **RESOLUTION_REPL_DOUBLED**: 3
 - **HONEST_JUDGE_REPEAT**: 3
 - **STORY_SLOT_NOUN_REPEAT**: 3
-- **THE_FORM_OVERUSE**: 1
+- **BOY_WOLF_NOUN_SATURATION**: 2
 - **UNFILLED_DRAWN_PLACEHOLDER**: 1
 - **DRAWN_PLACEHOLDER_LEAK**: 1
 - **WRONG_FABLE_LITERAL**: 1
@@ -1634,9 +1584,9 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 
 | Grade | Subjects | Examples | Issues | Low-variety |
 |---|---|---|---|---|
-| 1 | 18 | 80 | 50 | — |
-| 2 | 22 | 88 | 68 | — |
-| 3 | 18 | 31 | 29 | — |
+| 1 | 18 | 80 | 36 | — |
+| 2 | 22 | 88 | 65 | — |
+| 3 | 18 | 31 | 30 | — |
 | 4 | 20 | 39 | 55 | — |
 | 5 | 22 | 39 | 82 | — |
 | 6 | 16 | 33 | 33 | — |
@@ -1648,51 +1598,6 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 | 12 | 18 | 37 | 49 | — |
 
 ### Sample issues by severity
-
-#### FOREIGN_FABLE_IMAGERY
-
-- `G1-02` (form `-3`): tortoise-hare-specific imagery 'leather notebook' leaks into boy-wolf prose
-    ```
-    The villagers had agreed that any cry of wolf would bring them running with their sticks and lanterns.
-
-Ulvilda, without complaint, kept a small leather notebook of
-every expression the shepherds of the valley had actually evaluated —
-each entry slow as the rising sun, the page-count climbing only
-w...
-    ```
-- `G1-02` (form `-25`): tortoise-hare-specific imagery 'leather notebook' leaks into boy-wolf prose
-    ```
-    The villagers had agreed that any cry of wolf would bring them running with their sticks and lanterns.
-
-Gunhilda, with eyes always on the slate, kept a small leather notebook of
-every expression the shepherds of the valley had actually evaluated —
-each entry slow as the rising sun, the page-count cl...
-    ```
-- `G1-03` (form `1/2`): tortoise-hare-specific imagery 'leather notebook' leaks into boy-wolf prose
-    ```
-    The sheep had grazed peacefully all morning, and there was nothing at all the matter, which was exactly the problem.
-
-Gildas, with the calm of a long watch well kept, kept a small leather notebook of
-every expression the shepherds of the valley had actually evaluated —
-each entry slow as the rising ...
-    ```
-- `G1-04` (form `"flock"`): tortoise-hare-specific imagery 'leather notebook' leaks into boy-wolf prose
-    ```
-    Tunde was supposed to keep the sheep safe; instead, at the village, he kept inventing reasons for the village to run.
-
-Theodelinda, letting the runtime have the last word, kept a small leather notebook of
-every expression the shepherds of the valley had actually evaluated —
-each entry slow as the ri...
-    ```
-- `G1-04` (form `"watch the meadow"`): tortoise-hare-specific imagery 'leather notebook' leaks into boy-wolf prose
-    ```
-    at the farm, on a slope above the village, Yara watched his flock and his shadow grow longer.
-
-Walpurga, stepping deliberately, kept a small leather notebook of
-every expression the shepherds of the valley had actually evaluated —
-each entry slow as the rising sun, the page-count climbing only
-when ...
-    ```
 
 #### STRING_AS_CHAR_MISCLAIM
 
@@ -1716,9 +1621,10 @@ ones they had only ...
     ```
     Iarlaith was a clever boy, and by the forest cleverness had begun to look very much like trouble.
 
-Crispin, with steady, careful steps, kept a small leather notebook of
+Crispin, with steady, careful steps, kept a small slate-pocket of
 every expression the shepherds of the valley had actually evaluated —
-each entry slow as the rising sun, the page-count climbing on...
+each entry slow as the rising sun, the page-count climbing only
+w...
     ```
 - `G1-08` (form `\space`): form is a multi-character string but the prose refers to it as a single character (`the character \X` idiom)
     ```
@@ -1931,12 +1837,6 @@ simply began counting — to test whe...
 
 Carol had chalked a number on the watchhouse slate. Tom peered at it and asked whether that mark on the stone was the value itself or just a record. Tom had to understand that the runtime's return ...
     ```
-- `G3-14` (form `(do 1 2 3)`): user_msg mentions 'REPL' 4 times — the REPL personification should appear at most twice per record (submit + return)
-    ```
-    The pasture lay below a rocky lookout, and the sheep were easier to count than the hours.
-
-Carol had written three numbers on her slate in a column: 4, then 8, then 1. She asked Tom: if I ask the REPL to read this whole sequence, what comes back? Tom needed to learn that `do` groups forms together, ...
-    ```
 - `G6-05` (form `(clojure.string/reverse "flock")`): user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
     ```
     The wolves of those hills were rare but not absent, and the shepherds knew it was safer to be vigilant than clever.
@@ -1957,6 +1857,14 @@ The reeve had written a list of directories on a single scroll line, separated b
 Yolanda, with steady, careful steps, said, "and the log-book out there has its own
 discipline — open it carefully, handle it with care, close it when
 you're...
+    ```
+- `G7-08` (form `(with-out-str (prn 42))`): user_msg mentions 'REPL' 3 times — the REPL personification should appear at most twice per record (submit + return)
+    ```
+    Some games seem harmless until the moment they are needed in earnest, and then they cost everything.
+
+"The world outside the REPL is bigger than the REPL,"
+Theodoric, with the calm of a long watch well kept, said, "and the log-book out there has its own
+discipline — open it carefully, handle it with...
     ```
 
 #### SMALL_INT_LEAK
@@ -2092,17 +2000,17 @@ Carol wanted to write a single character `lichen` to the slate without moving to
 
 Carol wanted to write a single character `garnet` to the slate without moving to a new line. She asked what it would return. The character needed to appear, and the form's return value had to be...
     ```
-- `G2-15` (form `(if "" :truthy :falsey)`): user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
+- `G2-17` (form `(:flock {:wolf 1 :flock 2})`): user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
     ```
     The lambs were milling in the lower meadow when the boy first thought of the joke he should not have made.
 
-Carol wrote an empty string on the slate — zero characters, but a string nonetheless. She wanted to know which path the conditional would take. The gate needed to know if the empty string was ...
+Carol's wool-basket held the same two pouches: one for the wolf-fleeces, one for the flock-fleeces. Tom wanted the count from the flock-pouch. A clean lookup was needed without disturbing the ...
     ```
-- `G2-15` (form `(if "" :truthy :falsey)`): user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
+- `G2-21` (form `(count "shepherd")`): user_msg places `<form>` adjacent to a 'the form ...' noun-phrase reference within 120 chars — template tic that doubles the form reference (vary the second mention)
     ```
-    It happened in a quiet season, when the lambs were strong and the days were long enough to grow tired of.
+    The sheep had grazed peacefully all morning, and there was nothing at all the matter, which was exactly the problem.
 
-Carol wrote an empty string on the slate — zero characters, but a string nonetheless. She wanted to know which path the conditional would take. The gate needed to know if the empty string was g...
+Carol wrote the word 'willow' on the slate as a long bead-string. She wanted to count every bead in the cord. The string length mattered for labeling in the ledger. Tom said roughly ...
     ```
 
 #### ANSWER_LEAK_STRING
@@ -2138,15 +2046,6 @@ Carol posted a watch-order at the fold: if the lambs were restless today, Tom wa
 Carol marked east lambing-pens with numbers: 4 for north-fold lambs, 2 for south-fold, 7 for those born late. Tom held a tally-token marked with the number 2. The form would read the token...
     ```
 
-#### THE_FORM_OVERUSE
-
-- `G2-21` (form `(subs "shepherd" 0 3)`): `the form` appears 5 times in user_msg (template tic — vary references)
-    ```
-    When Gudrun called out by the orchard the first time, the village came running, and the sheep stayed exactly as they were.
-
-Carol held the bead-cord 'topaz' and wanted to cut a piece: starting from the first bead, taking three beads total. A substring (a cut piece) mattered for the message. Tom said...
-    ```
-
 #### HIGH_LENGTH
 
 - `G3-03` (form `(let [x 3] (+ x 1))`): user_msg 246 words
@@ -2178,6 +2077,21 @@ Carol had written a drill-card with three steps: read x, read x again, read x a 
     Long days alone with a flock can teach patience, or they can teach mischief, depending on the boy.
 
 Carol set up the fleece-comb at the watchhouse, an empty wool-basket beneath it. Three fleeces arrived from the morning shearing, threaded onto a rough cord ready to be fed through the comb. The villa...
+    ```
+
+#### BOY_WOLF_NOUN_SATURATION
+
+- `G3-09` (form `(do (defn add3 [a b c] (+ a b c)) (add3 1 2 3))`): boy-wolf metaphor noun 'drill-card' appears 4× in user_msg — vary the imagery
+    ```
+    Owain had a fine view by the woods, but a finer talent for stretching a quiet hour into a noisy one.
+
+Carol noticed shepherds constantly asking her to sum three separate counts — north, east, and fold — all morning. She decided to post a standing drill-card. A named routine would save time. The vill...
+    ```
+- `G3-13` (form `((fn [x] x x x 99) 1)`): boy-wolf metaphor noun 'drill-card' appears 5× in user_msg — vary the imagery
+    ```
+    On those slopes, trust was a thing the village extended freely, and a thing it could not afford to lose.
+
+Carol had written a drill-card with three steps: read x, read x again, read x a third time. But then she realized the final step should return 99 instead. Tom asked: if the drill-card lists many...
     ```
 
 #### NUMERAL_LIST_IN_GOAL

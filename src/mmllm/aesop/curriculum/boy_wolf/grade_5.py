@@ -289,7 +289,7 @@ G5_06 = SubjectCurriculum(grade=5, subject_id="G5-06",
 G5_07 = SubjectCurriculum(grade=5, subject_id="G5-07",
     subject_title="and / or as control flow", fable="boy-wolf",
     examples=[
-        _ex("(and 1 2 3)", 3, "the form (and 1 2 3) returns last truthy", "the last truthy value",
+        _ex("(and 1 2 3)", 3, "the expression (and 1 2 3) returns last truthy", "the last truthy value",
             scenario=(
                 "Three fold-gates stood in a row from pasture to the fold. "
                 "Carol told Tom: when all three gates open, you can pass. The "

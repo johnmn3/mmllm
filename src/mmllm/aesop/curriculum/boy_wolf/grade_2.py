@@ -1330,7 +1330,7 @@ G2_14 = SubjectCurriculum(
             resolution=(
                 'the call returned false, confirming that 0 was on the truthy side. The lookout returned with {drawn.a} on his slate, the valley long behind him and the count plain.'
             )),
-        _ex("(not \"\")",  False, "the form (not \"\")",  "the value of (not \"\")",
+        _ex("(not \"\")",  False, "the expression (not \"\")",  "the value of (not \"\")",
             scenario=(
                 "Carol wrote an empty string on the slate (no characters). She wanted "
                 "to know if that was falsey."
@@ -1375,7 +1375,7 @@ G2_15 = SubjectCurriculum(
             resolution=(
                 'the call returned `:truthy`, confirming that 0 opens the truthy gate. {drawn.a} stood as the answer the fold required, slate, chalk, and a steady eye all in agreement.'
             )),
-        _ex("(if \"\" :truthy :falsey)", ":truthy", "the form (if \"\" :truthy :falsey)",
+        _ex("(if \"\" :truthy :falsey)", ":truthy", "the expression (if \"\" :truthy :falsey)",
             "which keyword (if \"\" :truthy :falsey) returns",
             scenario=(
                 "Carol wrote an empty string on the slate — zero characters, "
@@ -1454,7 +1454,7 @@ G2_16 = SubjectCurriculum(
             resolution=(
                 'the call returned `true`, confirming that 0 is truthy. The fold gate held tight against the count of {drawn.a}, slate cool under the elder hand.'
             )),
-        _ex("(boolean \"\")", True, "the form (boolean \"\")", "the truthiness of the empty string",
+        _ex("(boolean \"\")", True, "the expression (boolean \"\")", "the truthiness of the empty string",
             scenario=(
                 "Carol wrote an empty string on the slate and wanted to convert it "
                 "to a boolean to test its truthiness."
@@ -1799,7 +1799,7 @@ G2_21 = SubjectCurriculum(
                 "the call returned 4, confirming 'wolf' was shorter than 'shepherd'. {drawn.a} stood as the answer the fold required, slate, chalk, and a steady eye all in agreement."
             )),
         _ex("(subs \"shepherd\" 0 3)", "she",
-            "the form (subs \"shepherd\" 0 3)",
+            "the expression (subs \"shepherd\" 0 3)",
             "the first three characters of \"shepherd\"",
             scenario=(
                 "Carol held the bead-cord 'shepherd' and wanted to cut a piece: "

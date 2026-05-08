@@ -607,7 +607,7 @@ G4_14 = SubjectCurriculum(grade=4, subject_id="G4-14",
             resolution=(
                 'the call returned false, showing the basket had changed from empty to occupied. The pasture tally settled at {drawn.a}, and Carol closed the day slate with that one number written clear.'
             )),
-        _ex("(empty? \"\")", True,  "the form (empty? \"\")", "whether the empty string is empty",
+        _ex("(empty? \"\")", True,  "the expression (empty? \"\")", "whether the empty string is empty",
             scenario=(
                 "Carol erased all the chalk from her slate at the watchhouse, "
                 "leaving it blank. She asked if the slate held any marks at all."
