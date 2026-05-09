@@ -1894,9 +1894,29 @@
    (load-checkpoint! m opt-dense opt-sparse nil ckpt-dir step))
   ([m opt-dense opt-sparse opt-sparse-net ckpt-dir step]
   (let [path  (str ckpt-dir "/step-" step)
-        saved (python/list (torch/load (str path "/dense.pt")))]
-    (doseq [[p s] (map vector (parameters m) saved)]
-      (.copy_ (.- p data) s))
+        saved (python/list (torch/load (str path "/dense.pt")))
+        ;; Tolerant load: zip param-list with saved tensors, skip
+        ;; mismatches (warn loudly) instead of crashing. This is the
+        ;; recovery path for "old ckpt has fewer / differently-ordered
+        ;; tensors than the new model"; affected new params stay at
+        ;; their build-time fresh init (typically zero-init or
+        ;; small-Gaussian, both safe).
+        n-skipped (python/list [0])]
+    (doseq [[i [p s]] (map-indexed vector (map vector (parameters m) saved))]
+      (try
+        (.copy_ (.- p data) s)
+        (catch python/Exception e
+          (.__setitem__ n-skipped 0 (inc (.__getitem__ n-skipped 0)))
+          (when (< (.__getitem__ n-skipped 0) 5)
+            (println (format "  WARN load-checkpoint: skip param %d (model %s vs saved %s) — %s"
+                             i
+                             (str (python/list (.- p shape)))
+                             (str (python/list (.- s shape)))
+                             (str e)))))))
+    (when (pos? (.__getitem__ n-skipped 0))
+      (println (format "  WARN load-checkpoint: %d/%d param tensors skipped due to shape mismatch (kept at fresh init)"
+                       (.__getitem__ n-skipped 0)
+                       (count saved))))
     (.load_state_dict opt-dense  (torch/load (str path "/opt-dense.pt")))
     (.load_state_dict opt-sparse (torch/load (str path "/opt-sparse.pt")))
     ;; NetBank's third-tier optimizer state. Optional on load — when an
