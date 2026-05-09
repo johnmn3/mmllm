@@ -1747,30 +1747,32 @@
 ;;; pre-ablation state from disk via fresh mmap).
 
 (defn ablation-step!
-  "Save Local V across all blocks, zero them, run eval-bpc, restore V.
-   Returns the ablated bpc (control bpc is read from the regular eval
-   that just preceded this call).
+  "Save Local V across all blocks (clone to CPU), zero them on GPU, run
+   eval-bpc, restore V from the CPU clone. Returns ablated bpc.
 
-   Phase 0-3 semantics preserved: ablation Δ measures the Local Bank's
-   contribution. NetBank (when enabled) is INTENTIONALLY left untouched
-   during ablation — cloning a second on-GPU 21.5GB bank V just to
-   restore it later would push past H100 80GB VRAM (live ~40GB +
-   2× clones = ~80GB). NetBank-only Δ would be a useful metric but
-   requires a separate code path (offload to CPU before clone, etc.).
+   Phase 0-3 semantics preserved: Δ measures Local Bank's contribution.
+   NetBank (when enabled) is left untouched during ablation. NetBank-only
+   Δ would be a separate metric requiring its own code path.
 
-   Cost: one extra eval-bpc pass + Local V clone (~18.8 GB transient
-   at sqrt_n=2048)."
+   The clone targets CPU (host RAM) instead of GPU VRAM — at sqrt_n=2048
+   the clone is 18.8 GB, which would push us past H100 80GB when
+   NetBank V is also GPU-resident. CPU has 1024 GB on the H100 container,
+   plenty of room. The CPU↔GPU restore copy at the end adds ~1 sec
+   (PCIe Gen4) but only fires every `ablate-every` steps."
   [m val-data T B max-toks]
-  (let [saved-local (mapv #(.. (:memory %) -V -weight detach clone)
-                          (:blocks m))]
+  (let [saved-local-cpu (mapv (fn [b]
+                                (-> (:memory b) (.- V) (.- weight)
+                                    .detach (.to "cpu" ** :copy true)))
+                              (:blocks m))]
     (try
       (doseq [b (:blocks m)] (.zero_bank (:memory b)))
       (let [r (eval-bpc m val-data T B max-toks)]
         (:bpc r))
       (finally
-        (doseq [[b s] (map vector (:blocks m) saved-local)]
+        (doseq [[b s] (map vector (:blocks m) saved-local-cpu)]
           (with [_ (torch/no_grad)]
-            (.copy_ (.- (.- (:memory b) V) weight) s)))))))
+            (.copy_ (.- (.- (:memory b) V) weight)
+                    (.to s (.- (.- (:memory b) V) weight) ** :non_blocking true))))))))
 
 ;;; ─────────────────────── train + eval text8 / enwik8 ───────────────────────
 
