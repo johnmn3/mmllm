@@ -2191,7 +2191,12 @@
    Designed to run for hours-days under Modal/tmux/nohup. Returns
    the trained model (mostly useful for in-process callers)."
   [config train-path val-path ckpt-dir log-path total-steps eval-every ckpt-every]
-  (let [m          (build-model config)
+  (let [;; Derive base-path from ckpt-dir (drop trailing .ckpts) so
+        ;; manifest / summary / publish-after can write sibling files.
+        base-path  (if (.endswith ckpt-dir ".ckpts")
+                     (subs ckpt-dir 0 (- (count ckpt-dir) (count ".ckpts")))
+                     ckpt-dir)
+        m          (build-model config)
         ;; MMLLM_MIX (optional) → multi-corpus weighted sampler.
         ;; Format: 'path1:w1,path2:w2,…'.  When set, `train-path` is
         ;; ignored for sampling — only val-path drives eval-bpc.
@@ -2201,17 +2206,24 @@
                          (torch/tensor (python/list (map second mix))
                                        ** :dtype torch/float))
         ;; Short label per corpus for the per-corpus loss line in step
-        ;; prints. Derives from the file path's basename (drop .bin /
-        ;; .train.bin suffix). E.g. /data/agent-corpus-v2/xlam.bin.train.bin
-        ;; → "xlam".
+        ;; prints. pick-mix has already loaded the tensors so we can't
+        ;; extract paths from `mix` (the [tensor weight] pairs); re-parse
+        ;; MMLLM_MIX from env to get the path strings, then derive a
+        ;; short label by basename. E.g. /data/agent-corpus-v2/xlam.bin
+        ;; .train.bin → "xlam".
         mix-labels   (when mix
-                       (python/list
-                         (for [[path _] mix]
-                           (-> path
-                               (.replace ".train.bin" "")
-                               (.replace ".bin" "")
-                               (.split "/")
-                               last))))
+                       (let [raw (.strip (.get (.- os environ) "MMLLM_MIX" ""))]
+                         (python/list
+                           (for [entry (.split raw ",")
+                                 :let  [entry (.strip entry)]
+                                 :when (pos? (count entry))]
+                             (let [colon (.rfind entry ":")
+                                   path  (.strip (subs entry 0 colon))
+                                   base  (.replace
+                                           (.replace path ".train.bin" "")
+                                           ".bin" "")
+                                   parts (.split base "/")]
+                               (.__getitem__ parts (- (count parts) 1)))))))
         corpus-tracker (when mix (make-corpus-tracker (count mix)))
         ;; Mutable cell for "wall-s at last 50-step print" — used to
         ;; compute rolling tokens/sec. Python list = 1-element ref.
