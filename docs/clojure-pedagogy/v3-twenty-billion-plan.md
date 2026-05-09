@@ -15,11 +15,19 @@ capability. This document is the runbook + tracker for the 20-phase
 
 ## Thesis
 
-Train-up the structural-output capability on a clean synthetic
-curriculum first (Phase 1-5: 5B tokens, fables-heavy), then
-gradually fold in real-world web text and code while holding the
-locked-in skills at floor weights so they don't decay (Phase
-6-20: 15B tokens, gradual broadening).
+Brute-force the format-anchor by ramping xLAM (Tool) hard. v2's
+format failure was the symptom of under-weighted xLAM in a noisy
+real-world mix. v3 inverts that: keep growing xLAM weight by
++5pp/phase until **either** the model starts passing structural
+agentic tests (format_validity climbs off zero) **or** Tool hits
+a 50% cap. As soon as the structural skill arrives, fade Tool
+back gradually to a 10% skill-keepalive floor, while Web
+(FineWeb-Edu) enters and grows to support general capability.
+
+Phase 0 (the first 1B, currently running) is fables-heavy from
+random init to anchor the byte-LM on the cleanest synthetic
+shape. Phases 1-11 ramp xLAM 2% → 50%. Phases 12-19 fade Tool
+back while folding in Web + more Code.
 
 No corpus changes weight by more than **±5 percentage points
 between adjacent phases** — so the gradient distribution shifts
@@ -30,35 +38,49 @@ smoothly across the 20B run, never violently.
 Columns are integer percentages summing to 100. Single H100 H/W
 session per phase, ~1.5-2 h, ~$5-6.
 
+### Ramp (Phase 0-11): xLAM grows aggressively, Fables yield
+
 | #  | tokens   | Fables | TS  | Cos | Web | Tool | Code | Notes |
 |----|----------|-------:|----:|----:|----:|-----:|-----:|---|
-|  1 |  0–1B    |   60   | 15  | 15  |  0  |  0   | 10   | format-anchor target: format_validity > 0.1 |
-|  2 |  1–2B    |   60   | 15  | 15  |  0  |  0   | 10   | hold; consolidate |
-|  3 |  2–3B    |   58   | 15  | 15  |  0  |  2   | 10   | xLAM (Tool) enters at 2% |
-|  4 |  3–4B    |   55   | 14  | 16  |  0  |  4   | 11   | Tool grows |
-|  5 |  4–5B    |   52   | 13  | 17  |  0  |  6   | 12   | continued ramps |
-|  6 |  5–6B    |   49   | 12  | 18  |  2  |  6   | 13   | **Decision gate A**: web (FineWeb-Edu) enters at 2% if format_validity > 0.5 |
-|  7 |  6–7B    |   45   | 12  | 18  |  4  |  7   | 14   | Fables fade begins |
-|  8 |  7–8B    |   42   | 11  | 18  |  6  |  7   | 16   | |
-|  9 |  8–9B    |   38   | 10  | 18  |  9  |  8   | 17   | Web grows |
-| 10 |  9–10B   |   34   | 10  | 18  | 12  |  8   | 18   | midpoint |
-| 11 | 10–11B   |   30   |  9  | 18  | 15  |  8   | 20   | **Decision gate B**: tool_args_match > 0.3? if not, hold P10 mix another 1B |
-| 12 | 11–12B   |   27   |  8  | 17  | 18  |  8   | 22   | code starts growing |
-| 13 | 12–13B   |   23   |  8  | 16  | 21  |  8   | 24   | |
-| 14 | 13–14B   |   20   |  7  | 15  | 23  |  8   | 27   | |
-| 15 | 14–15B   |   18   |  7  | 14  | 26  |  7   | 28   | |
-| 16 | 15–16B   |   16   |  6  | 13  | 28  |  7   | 30   | **Decision gate C**: ablation Δ still climbing? else may be saturating |
-| 17 | 16–17B   |   14   |  6  | 13  | 30  |  6   | 31   | |
-| 18 | 17–18B   |   12   |  5  | 12  | 32  |  6   | 33   | end-state lock-in begins |
-| 19 | 18–19B   |   11   |  5  | 12  | 33  |  6   | 33   | |
-| 20 | 19–20B   |   10   |  5  | 12  | 34  |  6   | 33   | end of curriculum |
+|  0 |  0–1B    |   60   | 15  | 15  |  0  |  0   | 10   | (running) format-anchor target: format_validity > 0.0 |
+|  1 |  1–2B    |   58   | 15  | 15  |  0  |  2   | 10   | xLAM enters |
+|  2 |  2–3B    |   54   | 15  | 15  |  0  |  6   | 10   | |
+|  3 |  3–4B    |   50   | 15  | 15  |  0  | 10   | 10   | |
+|  4 |  4–5B    |   45   | 15  | 15  |  0  | 15   | 10   | |
+|  5 |  5–6B    |   40   | 15  | 15  |  0  | 20   | 10   | **Early-exit check** (5B): if format_validity > 0.05 → jump to fade-back |
+|  6 |  6–7B    |   35   | 15  | 15  |  0  | 25   | 10   | |
+|  7 |  7–8B    |   30   | 15  | 15  |  0  | 30   | 10   | |
+|  8 |  8–9B    |   25   | 15  | 15  |  0  | 35   | 10   | |
+|  9 |  9–10B   |   20   | 15  | 15  |  0  | 40   | 10   | |
+| 10 | 10–11B   |   15   | 15  | 15  |  0  | 45   | 10   | |
+| 11 | 11–12B   |   10   | 15  | 15  |  0  | 50   | 10   | **Tool 50% cap**. Hold here if format still failing (architectural pivot warranted) |
 
-End-state weights at Phase 20: fables 10% (capstone-floor),
-TS 5% (grammar-floor), Cos 12% (textbook), Web 34% (general),
-Tool 6% (format-floor), Code 33% (working language). Total 100%.
+### Fade-back (Phase 12-19): Tool retreats, Web enters
 
-Maximum corpus shift between adjacent phases: 4 percentage
-points (smoother than the original 5pp budget).
+Assumes ramp completed at Phase 11 (Tool 50%). If ramp exited
+earlier at Phase X (5-10), jump into the fade-back table at the
+row where Tool matches what the ramp left at. The trajectory
+shape is the same; the entry point depends on when format passed.
+
+| #  | tokens   | Fables | TS  | Cos | Web | Tool | Code | Notes |
+|----|----------|-------:|----:|----:|----:|-----:|-----:|---|
+| 12 | 12–13B   |   12   | 15  | 15  |  3  | 45   | 10   | Web enters at 3%, Tool starts fading |
+| 13 | 13–14B   |   13   | 15  | 14  |  7  | 40   | 11   | |
+| 14 | 14–15B   |   13   | 14  | 14  | 11  | 35   | 13   | |
+| 15 | 15–16B   |   13   | 12  | 14  | 15  | 30   | 16   | **Decision gate B**: tool_args_match > 0.3? else hold an extra phase |
+| 16 | 16–17B   |   12   | 11  | 13  | 19  | 25   | 20   | |
+| 17 | 17–18B   |   12   |  9  | 13  | 23  | 20   | 23   | |
+| 18 | 18–19B   |   12   |  7  | 12  | 26  | 15   | 28   | **Decision gate C**: ablation Δ still climbing? else stop early |
+| 19 | 19–20B   |   11   |  6  | 12  | 30  | 10   | 31   | end-state, Tool at 10% skill-keepalive floor |
+
+End-state weights at Phase 19: fables 11% (capstone-floor),
+TS 6% (grammar-floor), Cos 12% (textbook), Web 30% (general),
+Tool 10% (skill-keepalive floor), Code 31% (working language).
+Total 100%.
+
+Maximum corpus shift between adjacent phases: 5 percentage
+points (Tool always shifts ±5 in the ramp/fade phases; other
+corpora shift ±0-3 to absorb).
 
 ## Corpus map (column → byte-bin paths)
 
@@ -83,7 +105,7 @@ scalar pools), and xLAM (= tiny-tool-call, which already provides
 varied tool names + arg shapes — the toy-catalog signal we'd
 otherwise have authored from scratch).
 
-## Pre-flight (one-time, before Phase 1)
+## Pre-flight (one-time, before Phase 0)
 
 1. Aesop curriculum byte-bin:
    ```bash
@@ -140,108 +162,123 @@ Each below is the `--mix` arg for that phase. Weights are
 percentages × 100 to keep integer arithmetic; the sampler
 normalizes.
 
+The Code split (10% total) within ramp phases is held constant
+at commitpackft-py:5, commitpackft-clj:2, magicoder:2,
+theorem-qa:1. In fade-back phases the Code budget grows; the
+table below shows a proportional split favoring py over clj.
+
 ```
-PHASE 1+2 (Fables 60, TS 15, Cos 15, Tool 0, Code 10):
+PHASE 0 (Fables 60, TS 15, Cos 15, Tool 0, Code 10):  ← currently running
 /data/aesop-curriculum.bin.train.bin:60,/data/tiny-stories.bin.train.bin:15,/data/agent-corpus-v2/cosmopedia.bin.train.bin:15,/data/agent-corpus-v2/commitpackft-py.bin.train.bin:5,/data/agent-corpus-v2/commitpackft-clj.bin.train.bin:2,/data/agent-corpus-v2/magicoder.bin.train.bin:2,/data/agent-corpus-v2/theorem-qa.bin.train.bin:1
 
-PHASE 3 (Fables 58, TS 15, Cos 15, Tool 2, Code 10):
+PHASE 1 (Fables 58, TS 15, Cos 15, Tool 2, Code 10):
 /data/aesop-curriculum.bin.train.bin:58,/data/tiny-stories.bin.train.bin:15,/data/agent-corpus-v2/cosmopedia.bin.train.bin:15,/data/agent-corpus-v2/xlam.bin.train.bin:2,/data/agent-corpus-v2/commitpackft-py.bin.train.bin:5,/data/agent-corpus-v2/commitpackft-clj.bin.train.bin:2,/data/agent-corpus-v2/magicoder.bin.train.bin:2,/data/agent-corpus-v2/theorem-qa.bin.train.bin:1
 
-PHASE 4 (Fables 55, TS 14, Cos 16, Tool 4, Code 11):
-/data/aesop-curriculum.bin.train.bin:55,/data/tiny-stories.bin.train.bin:14,/data/agent-corpus-v2/cosmopedia.bin.train.bin:16,/data/agent-corpus-v2/xlam.bin.train.bin:4,/data/agent-corpus-v2/commitpackft-py.bin.train.bin:6,/data/agent-corpus-v2/commitpackft-clj.bin.train.bin:2,/data/agent-corpus-v2/magicoder.bin.train.bin:2,/data/agent-corpus-v2/theorem-qa.bin.train.bin:1
+PHASE 2 (Fables 54, TS 15, Cos 15, Tool 6, Code 10):
+/data/aesop-curriculum.bin.train.bin:54,/data/tiny-stories.bin.train.bin:15,/data/agent-corpus-v2/cosmopedia.bin.train.bin:15,/data/agent-corpus-v2/xlam.bin.train.bin:6,/data/agent-corpus-v2/commitpackft-py.bin.train.bin:5,/data/agent-corpus-v2/commitpackft-clj.bin.train.bin:2,/data/agent-corpus-v2/magicoder.bin.train.bin:2,/data/agent-corpus-v2/theorem-qa.bin.train.bin:1
 
-PHASE 5 (Fables 52, TS 13, Cos 17, Tool 6, Code 12):
-/data/aesop-curriculum.bin.train.bin:52,/data/tiny-stories.bin.train.bin:13,/data/agent-corpus-v2/cosmopedia.bin.train.bin:17,/data/agent-corpus-v2/xlam.bin.train.bin:6,/data/agent-corpus-v2/commitpackft-py.bin.train.bin:6,/data/agent-corpus-v2/commitpackft-clj.bin.train.bin:3,/data/agent-corpus-v2/magicoder.bin.train.bin:2,/data/agent-corpus-v2/theorem-qa.bin.train.bin:1
+PHASE 3 (Fables 50, TS 15, Cos 15, Tool 10, Code 10):
+/data/aesop-curriculum.bin.train.bin:50,/data/tiny-stories.bin.train.bin:15,/data/agent-corpus-v2/cosmopedia.bin.train.bin:15,/data/agent-corpus-v2/xlam.bin.train.bin:10,/data/agent-corpus-v2/commitpackft-py.bin.train.bin:5,/data/agent-corpus-v2/commitpackft-clj.bin.train.bin:2,/data/agent-corpus-v2/magicoder.bin.train.bin:2,/data/agent-corpus-v2/theorem-qa.bin.train.bin:1
 
-PHASE 6 (Fables 49, TS 12, Cos 18, Web 2, Tool 6, Code 13):
-/data/aesop-curriculum.bin.train.bin:49,/data/tiny-stories.bin.train.bin:12,/data/agent-corpus-v2/cosmopedia.bin.train.bin:18,/data/agent-corpus-v2/fineweb-edu.bin.train.bin:2,/data/agent-corpus-v2/xlam.bin.train.bin:6,/data/agent-corpus-v2/commitpackft-py.bin.train.bin:7,/data/agent-corpus-v2/commitpackft-clj.bin.train.bin:3,/data/agent-corpus-v2/magicoder.bin.train.bin:2,/data/agent-corpus-v2/theorem-qa.bin.train.bin:1
+PHASE 4 (Fables 45, TS 15, Cos 15, Tool 15, Code 10):
+/data/aesop-curriculum.bin.train.bin:45,/data/tiny-stories.bin.train.bin:15,/data/agent-corpus-v2/cosmopedia.bin.train.bin:15,/data/agent-corpus-v2/xlam.bin.train.bin:15,/data/agent-corpus-v2/commitpackft-py.bin.train.bin:5,/data/agent-corpus-v2/commitpackft-clj.bin.train.bin:2,/data/agent-corpus-v2/magicoder.bin.train.bin:2,/data/agent-corpus-v2/theorem-qa.bin.train.bin:1
 
-PHASE 7 (Fables 45, TS 12, Cos 18, Web 4, Tool 7, Code 14):
-/data/aesop-curriculum.bin.train.bin:45,/data/tiny-stories.bin.train.bin:12,/data/agent-corpus-v2/cosmopedia.bin.train.bin:18,/data/agent-corpus-v2/fineweb-edu.bin.train.bin:4,/data/agent-corpus-v2/xlam.bin.train.bin:7,/data/agent-corpus-v2/commitpackft-py.bin.train.bin:7,/data/agent-corpus-v2/commitpackft-clj.bin.train.bin:3,/data/agent-corpus-v2/magicoder.bin.train.bin:3,/data/agent-corpus-v2/theorem-qa.bin.train.bin:1
+PHASE 5 (Fables 40, TS 15, Cos 15, Tool 20, Code 10):  ← Early-exit check
+/data/aesop-curriculum.bin.train.bin:40,/data/tiny-stories.bin.train.bin:15,/data/agent-corpus-v2/cosmopedia.bin.train.bin:15,/data/agent-corpus-v2/xlam.bin.train.bin:20,/data/agent-corpus-v2/commitpackft-py.bin.train.bin:5,/data/agent-corpus-v2/commitpackft-clj.bin.train.bin:2,/data/agent-corpus-v2/magicoder.bin.train.bin:2,/data/agent-corpus-v2/theorem-qa.bin.train.bin:1
 
-PHASE 8 (Fables 42, TS 11, Cos 18, Web 6, Tool 7, Code 16):
-/data/aesop-curriculum.bin.train.bin:42,/data/tiny-stories.bin.train.bin:11,/data/agent-corpus-v2/cosmopedia.bin.train.bin:18,/data/agent-corpus-v2/fineweb-edu.bin.train.bin:6,/data/agent-corpus-v2/xlam.bin.train.bin:7,/data/agent-corpus-v2/commitpackft-py.bin.train.bin:8,/data/agent-corpus-v2/commitpackft-clj.bin.train.bin:3,/data/agent-corpus-v2/magicoder.bin.train.bin:3,/data/agent-corpus-v2/theorem-qa.bin.train.bin:2
+PHASE 6 (Fables 35, TS 15, Cos 15, Tool 25, Code 10):
+/data/aesop-curriculum.bin.train.bin:35,/data/tiny-stories.bin.train.bin:15,/data/agent-corpus-v2/cosmopedia.bin.train.bin:15,/data/agent-corpus-v2/xlam.bin.train.bin:25,/data/agent-corpus-v2/commitpackft-py.bin.train.bin:5,/data/agent-corpus-v2/commitpackft-clj.bin.train.bin:2,/data/agent-corpus-v2/magicoder.bin.train.bin:2,/data/agent-corpus-v2/theorem-qa.bin.train.bin:1
 
-PHASE 9 (Fables 38, TS 10, Cos 18, Web 9, Tool 8, Code 17):
-/data/aesop-curriculum.bin.train.bin:38,/data/tiny-stories.bin.train.bin:10,/data/agent-corpus-v2/cosmopedia.bin.train.bin:18,/data/agent-corpus-v2/fineweb-edu.bin.train.bin:9,/data/agent-corpus-v2/xlam.bin.train.bin:8,/data/agent-corpus-v2/commitpackft-py.bin.train.bin:9,/data/agent-corpus-v2/commitpackft-clj.bin.train.bin:3,/data/agent-corpus-v2/magicoder.bin.train.bin:3,/data/agent-corpus-v2/theorem-qa.bin.train.bin:2
+PHASE 7 (Fables 30, TS 15, Cos 15, Tool 30, Code 10):
+/data/aesop-curriculum.bin.train.bin:30,/data/tiny-stories.bin.train.bin:15,/data/agent-corpus-v2/cosmopedia.bin.train.bin:15,/data/agent-corpus-v2/xlam.bin.train.bin:30,/data/agent-corpus-v2/commitpackft-py.bin.train.bin:5,/data/agent-corpus-v2/commitpackft-clj.bin.train.bin:2,/data/agent-corpus-v2/magicoder.bin.train.bin:2,/data/agent-corpus-v2/theorem-qa.bin.train.bin:1
 
-PHASE 10 (Fables 34, TS 10, Cos 18, Web 12, Tool 8, Code 18):
-/data/aesop-curriculum.bin.train.bin:34,/data/tiny-stories.bin.train.bin:10,/data/agent-corpus-v2/cosmopedia.bin.train.bin:18,/data/agent-corpus-v2/fineweb-edu.bin.train.bin:12,/data/agent-corpus-v2/xlam.bin.train.bin:8,/data/agent-corpus-v2/commitpackft-py.bin.train.bin:9,/data/agent-corpus-v2/commitpackft-clj.bin.train.bin:4,/data/agent-corpus-v2/magicoder.bin.train.bin:3,/data/agent-corpus-v2/theorem-qa.bin.train.bin:2
+PHASE 8 (Fables 25, TS 15, Cos 15, Tool 35, Code 10):
+/data/aesop-curriculum.bin.train.bin:25,/data/tiny-stories.bin.train.bin:15,/data/agent-corpus-v2/cosmopedia.bin.train.bin:15,/data/agent-corpus-v2/xlam.bin.train.bin:35,/data/agent-corpus-v2/commitpackft-py.bin.train.bin:5,/data/agent-corpus-v2/commitpackft-clj.bin.train.bin:2,/data/agent-corpus-v2/magicoder.bin.train.bin:2,/data/agent-corpus-v2/theorem-qa.bin.train.bin:1
 
-PHASE 11 (Fables 30, TS 9, Cos 18, Web 15, Tool 8, Code 20):
-/data/aesop-curriculum.bin.train.bin:30,/data/tiny-stories.bin.train.bin:9,/data/agent-corpus-v2/cosmopedia.bin.train.bin:18,/data/agent-corpus-v2/fineweb-edu.bin.train.bin:15,/data/agent-corpus-v2/xlam.bin.train.bin:8,/data/agent-corpus-v2/commitpackft-py.bin.train.bin:10,/data/agent-corpus-v2/commitpackft-clj.bin.train.bin:4,/data/agent-corpus-v2/magicoder.bin.train.bin:4,/data/agent-corpus-v2/theorem-qa.bin.train.bin:2
+PHASE 9 (Fables 20, TS 15, Cos 15, Tool 40, Code 10):
+/data/aesop-curriculum.bin.train.bin:20,/data/tiny-stories.bin.train.bin:15,/data/agent-corpus-v2/cosmopedia.bin.train.bin:15,/data/agent-corpus-v2/xlam.bin.train.bin:40,/data/agent-corpus-v2/commitpackft-py.bin.train.bin:5,/data/agent-corpus-v2/commitpackft-clj.bin.train.bin:2,/data/agent-corpus-v2/magicoder.bin.train.bin:2,/data/agent-corpus-v2/theorem-qa.bin.train.bin:1
 
-PHASE 12 (Fables 27, TS 8, Cos 17, Web 18, Tool 8, Code 22):
-/data/aesop-curriculum.bin.train.bin:27,/data/tiny-stories.bin.train.bin:8,/data/agent-corpus-v2/cosmopedia.bin.train.bin:17,/data/agent-corpus-v2/fineweb-edu.bin.train.bin:18,/data/agent-corpus-v2/xlam.bin.train.bin:8,/data/agent-corpus-v2/commitpackft-py.bin.train.bin:11,/data/agent-corpus-v2/commitpackft-clj.bin.train.bin:4,/data/agent-corpus-v2/magicoder.bin.train.bin:5,/data/agent-corpus-v2/theorem-qa.bin.train.bin:2
+PHASE 10 (Fables 15, TS 15, Cos 15, Tool 45, Code 10):
+/data/aesop-curriculum.bin.train.bin:15,/data/tiny-stories.bin.train.bin:15,/data/agent-corpus-v2/cosmopedia.bin.train.bin:15,/data/agent-corpus-v2/xlam.bin.train.bin:45,/data/agent-corpus-v2/commitpackft-py.bin.train.bin:5,/data/agent-corpus-v2/commitpackft-clj.bin.train.bin:2,/data/agent-corpus-v2/magicoder.bin.train.bin:2,/data/agent-corpus-v2/theorem-qa.bin.train.bin:1
 
-PHASE 13 (Fables 23, TS 8, Cos 16, Web 21, Tool 8, Code 24):
-/data/aesop-curriculum.bin.train.bin:23,/data/tiny-stories.bin.train.bin:8,/data/agent-corpus-v2/cosmopedia.bin.train.bin:16,/data/agent-corpus-v2/fineweb-edu.bin.train.bin:21,/data/agent-corpus-v2/xlam.bin.train.bin:8,/data/agent-corpus-v2/commitpackft-py.bin.train.bin:12,/data/agent-corpus-v2/commitpackft-clj.bin.train.bin:5,/data/agent-corpus-v2/magicoder.bin.train.bin:5,/data/agent-corpus-v2/theorem-qa.bin.train.bin:2
+PHASE 11 (Fables 10, TS 15, Cos 15, Tool 50, Code 10):  ← Tool cap
+/data/aesop-curriculum.bin.train.bin:10,/data/tiny-stories.bin.train.bin:15,/data/agent-corpus-v2/cosmopedia.bin.train.bin:15,/data/agent-corpus-v2/xlam.bin.train.bin:50,/data/agent-corpus-v2/commitpackft-py.bin.train.bin:5,/data/agent-corpus-v2/commitpackft-clj.bin.train.bin:2,/data/agent-corpus-v2/magicoder.bin.train.bin:2,/data/agent-corpus-v2/theorem-qa.bin.train.bin:1
 
-PHASE 14 (Fables 20, TS 7, Cos 15, Web 23, Tool 8, Code 27):
-/data/aesop-curriculum.bin.train.bin:20,/data/tiny-stories.bin.train.bin:7,/data/agent-corpus-v2/cosmopedia.bin.train.bin:15,/data/agent-corpus-v2/fineweb-edu.bin.train.bin:23,/data/agent-corpus-v2/xlam.bin.train.bin:8,/data/agent-corpus-v2/commitpackft-py.bin.train.bin:14,/data/agent-corpus-v2/commitpackft-clj.bin.train.bin:5,/data/agent-corpus-v2/magicoder.bin.train.bin:5,/data/agent-corpus-v2/theorem-qa.bin.train.bin:3
+PHASE 12 (Fables 12, TS 15, Cos 15, Web 3, Tool 45, Code 10):  ← Fade-back begins; Web enters
+/data/aesop-curriculum.bin.train.bin:12,/data/tiny-stories.bin.train.bin:15,/data/agent-corpus-v2/cosmopedia.bin.train.bin:15,/data/agent-corpus-v2/fineweb-edu.bin.train.bin:3,/data/agent-corpus-v2/xlam.bin.train.bin:45,/data/agent-corpus-v2/commitpackft-py.bin.train.bin:5,/data/agent-corpus-v2/commitpackft-clj.bin.train.bin:2,/data/agent-corpus-v2/magicoder.bin.train.bin:2,/data/agent-corpus-v2/theorem-qa.bin.train.bin:1
 
-PHASE 15 (Fables 18, TS 7, Cos 14, Web 26, Tool 7, Code 28):
-/data/aesop-curriculum.bin.train.bin:18,/data/tiny-stories.bin.train.bin:7,/data/agent-corpus-v2/cosmopedia.bin.train.bin:14,/data/agent-corpus-v2/fineweb-edu.bin.train.bin:26,/data/agent-corpus-v2/xlam.bin.train.bin:7,/data/agent-corpus-v2/commitpackft-py.bin.train.bin:14,/data/agent-corpus-v2/commitpackft-clj.bin.train.bin:5,/data/agent-corpus-v2/magicoder.bin.train.bin:6,/data/agent-corpus-v2/theorem-qa.bin.train.bin:3
+PHASE 13 (Fables 13, TS 15, Cos 14, Web 7, Tool 40, Code 11):
+/data/aesop-curriculum.bin.train.bin:13,/data/tiny-stories.bin.train.bin:15,/data/agent-corpus-v2/cosmopedia.bin.train.bin:14,/data/agent-corpus-v2/fineweb-edu.bin.train.bin:7,/data/agent-corpus-v2/xlam.bin.train.bin:40,/data/agent-corpus-v2/commitpackft-py.bin.train.bin:6,/data/agent-corpus-v2/commitpackft-clj.bin.train.bin:2,/data/agent-corpus-v2/magicoder.bin.train.bin:2,/data/agent-corpus-v2/theorem-qa.bin.train.bin:1
 
-PHASE 16 (Fables 16, TS 6, Cos 13, Web 28, Tool 7, Code 30):
-/data/aesop-curriculum.bin.train.bin:16,/data/tiny-stories.bin.train.bin:6,/data/agent-corpus-v2/cosmopedia.bin.train.bin:13,/data/agent-corpus-v2/fineweb-edu.bin.train.bin:28,/data/agent-corpus-v2/xlam.bin.train.bin:7,/data/agent-corpus-v2/commitpackft-py.bin.train.bin:15,/data/agent-corpus-v2/commitpackft-clj.bin.train.bin:6,/data/agent-corpus-v2/magicoder.bin.train.bin:6,/data/agent-corpus-v2/theorem-qa.bin.train.bin:3
+PHASE 14 (Fables 13, TS 14, Cos 14, Web 11, Tool 35, Code 13):
+/data/aesop-curriculum.bin.train.bin:13,/data/tiny-stories.bin.train.bin:14,/data/agent-corpus-v2/cosmopedia.bin.train.bin:14,/data/agent-corpus-v2/fineweb-edu.bin.train.bin:11,/data/agent-corpus-v2/xlam.bin.train.bin:35,/data/agent-corpus-v2/commitpackft-py.bin.train.bin:7,/data/agent-corpus-v2/commitpackft-clj.bin.train.bin:3,/data/agent-corpus-v2/magicoder.bin.train.bin:2,/data/agent-corpus-v2/theorem-qa.bin.train.bin:1
 
-PHASE 17 (Fables 14, TS 6, Cos 13, Web 30, Tool 6, Code 31):
-/data/aesop-curriculum.bin.train.bin:14,/data/tiny-stories.bin.train.bin:6,/data/agent-corpus-v2/cosmopedia.bin.train.bin:13,/data/agent-corpus-v2/fineweb-edu.bin.train.bin:30,/data/agent-corpus-v2/xlam.bin.train.bin:6,/data/agent-corpus-v2/commitpackft-py.bin.train.bin:15,/data/agent-corpus-v2/commitpackft-clj.bin.train.bin:6,/data/agent-corpus-v2/magicoder.bin.train.bin:7,/data/agent-corpus-v2/theorem-qa.bin.train.bin:3
+PHASE 15 (Fables 13, TS 12, Cos 14, Web 15, Tool 30, Code 16):  ← Decision gate B
+/data/aesop-curriculum.bin.train.bin:13,/data/tiny-stories.bin.train.bin:12,/data/agent-corpus-v2/cosmopedia.bin.train.bin:14,/data/agent-corpus-v2/fineweb-edu.bin.train.bin:15,/data/agent-corpus-v2/xlam.bin.train.bin:30,/data/agent-corpus-v2/commitpackft-py.bin.train.bin:9,/data/agent-corpus-v2/commitpackft-clj.bin.train.bin:3,/data/agent-corpus-v2/magicoder.bin.train.bin:3,/data/agent-corpus-v2/theorem-qa.bin.train.bin:1
 
-PHASE 18 (Fables 12, TS 5, Cos 12, Web 32, Tool 6, Code 33):
-/data/aesop-curriculum.bin.train.bin:12,/data/tiny-stories.bin.train.bin:5,/data/agent-corpus-v2/cosmopedia.bin.train.bin:12,/data/agent-corpus-v2/fineweb-edu.bin.train.bin:32,/data/agent-corpus-v2/xlam.bin.train.bin:6,/data/agent-corpus-v2/commitpackft-py.bin.train.bin:16,/data/agent-corpus-v2/commitpackft-clj.bin.train.bin:7,/data/agent-corpus-v2/magicoder.bin.train.bin:7,/data/agent-corpus-v2/theorem-qa.bin.train.bin:3
+PHASE 16 (Fables 12, TS 11, Cos 13, Web 19, Tool 25, Code 20):
+/data/aesop-curriculum.bin.train.bin:12,/data/tiny-stories.bin.train.bin:11,/data/agent-corpus-v2/cosmopedia.bin.train.bin:13,/data/agent-corpus-v2/fineweb-edu.bin.train.bin:19,/data/agent-corpus-v2/xlam.bin.train.bin:25,/data/agent-corpus-v2/commitpackft-py.bin.train.bin:11,/data/agent-corpus-v2/commitpackft-clj.bin.train.bin:4,/data/agent-corpus-v2/magicoder.bin.train.bin:3,/data/agent-corpus-v2/theorem-qa.bin.train.bin:2
 
-PHASE 19 (Fables 11, TS 5, Cos 12, Web 33, Tool 6, Code 33):
-/data/aesop-curriculum.bin.train.bin:11,/data/tiny-stories.bin.train.bin:5,/data/agent-corpus-v2/cosmopedia.bin.train.bin:12,/data/agent-corpus-v2/fineweb-edu.bin.train.bin:33,/data/agent-corpus-v2/xlam.bin.train.bin:6,/data/agent-corpus-v2/commitpackft-py.bin.train.bin:16,/data/agent-corpus-v2/commitpackft-clj.bin.train.bin:7,/data/agent-corpus-v2/magicoder.bin.train.bin:7,/data/agent-corpus-v2/theorem-qa.bin.train.bin:3
+PHASE 17 (Fables 12, TS 9, Cos 13, Web 23, Tool 20, Code 23):
+/data/aesop-curriculum.bin.train.bin:12,/data/tiny-stories.bin.train.bin:9,/data/agent-corpus-v2/cosmopedia.bin.train.bin:13,/data/agent-corpus-v2/fineweb-edu.bin.train.bin:23,/data/agent-corpus-v2/xlam.bin.train.bin:20,/data/agent-corpus-v2/commitpackft-py.bin.train.bin:13,/data/agent-corpus-v2/commitpackft-clj.bin.train.bin:5,/data/agent-corpus-v2/magicoder.bin.train.bin:3,/data/agent-corpus-v2/theorem-qa.bin.train.bin:2
 
-PHASE 20 (Fables 10, TS 5, Cos 12, Web 34, Tool 6, Code 33):
-/data/aesop-curriculum.bin.train.bin:10,/data/tiny-stories.bin.train.bin:5,/data/agent-corpus-v2/cosmopedia.bin.train.bin:12,/data/agent-corpus-v2/fineweb-edu.bin.train.bin:34,/data/agent-corpus-v2/xlam.bin.train.bin:6,/data/agent-corpus-v2/commitpackft-py.bin.train.bin:16,/data/agent-corpus-v2/commitpackft-clj.bin.train.bin:7,/data/agent-corpus-v2/magicoder.bin.train.bin:7,/data/agent-corpus-v2/theorem-qa.bin.train.bin:3
+PHASE 18 (Fables 12, TS 7, Cos 12, Web 26, Tool 15, Code 28):  ← Decision gate C
+/data/aesop-curriculum.bin.train.bin:12,/data/tiny-stories.bin.train.bin:7,/data/agent-corpus-v2/cosmopedia.bin.train.bin:12,/data/agent-corpus-v2/fineweb-edu.bin.train.bin:26,/data/agent-corpus-v2/xlam.bin.train.bin:15,/data/agent-corpus-v2/commitpackft-py.bin.train.bin:15,/data/agent-corpus-v2/commitpackft-clj.bin.train.bin:6,/data/agent-corpus-v2/magicoder.bin.train.bin:4,/data/agent-corpus-v2/theorem-qa.bin.train.bin:3
+
+PHASE 19 (Fables 11, TS 6, Cos 12, Web 30, Tool 10, Code 31):  ← end-state
+/data/aesop-curriculum.bin.train.bin:11,/data/tiny-stories.bin.train.bin:6,/data/agent-corpus-v2/cosmopedia.bin.train.bin:12,/data/agent-corpus-v2/fineweb-edu.bin.train.bin:30,/data/agent-corpus-v2/xlam.bin.train.bin:10,/data/agent-corpus-v2/commitpackft-py.bin.train.bin:16,/data/agent-corpus-v2/commitpackft-clj.bin.train.bin:7,/data/agent-corpus-v2/magicoder.bin.train.bin:5,/data/agent-corpus-v2/theorem-qa.bin.train.bin:3
 ```
 
 ## Decision gates
 
-Three checkpoints where the operator decides whether to proceed,
-hold the current mix for another phase, or pivot.
+The strategy is **data-gated**: at the end of every ramp phase
+(1-11) the operator checks format_validity, and the moment it
+crawls off zero, the run jumps from the ramp into the fade-back.
+Three named checkpoints below mark the structural decisions.
 
-### Gate A — end of Phase 5 (5B)
+### Early-exit check — every ramp phase
 
-Read `/data/aesop-v3.bin.eval.jsonl` for the latest entries.
-Required:
+Read `/data/aesop-v3.bin.eval.jsonl` for the latest `eval_battery`
+rows on `xlam` (and secondarily `commitpackft-py`). Trigger
+fade-back the moment:
 
-- `format_validity ≥ 0.5` on at least one of (xLAM, commitpackft-py)
-- `tool_name_match ≥ 0.3` on xLAM
-- BPC trajectory monotonically declining on Cos / TS / Web
+- `format_validity ≥ 0.05` on xLAM, **or**
+- `tool_name_match ≥ 0.20` on xLAM (even with format_validity
+  still 0 — name matching means the JSON shape is partially
+  formed)
 
-If all three: proceed to Phase 6 (introduce Web).
+If triggered at end of ramp phase N: launch Phase 12 next (the
+fade-back's first row). The fade-back assumes the entry Tool
+weight is whatever the ramp left at; if you exited at Phase 5
+(Tool 20%), launch the row from the fade-back table that has
+Tool=20% next, NOT the literal Phase 12 row. The doc's table
+shows the canonical post-cap fade; for an early exit, find the
+row whose Tool % matches your exit and continue from there.
 
-If `format_validity < 0.3` after 5B: **HOLD** the Phase 5 mix for
-another 1B (60→55→50% fables for one more session). The format
-anchor needs more saturation before broadening.
+If neither triggered by end of Phase 11 (Tool=50%): you've
+exhausted the "more xLAM" lever. **HOLD** at Phase 11 mix for
+ONE more 1B (Phase 11.5) before declaring architectural failure
+and pivoting to v3.1 (bigger bank or chat-template revision).
 
-If `format_validity < 0.1` after 7B even with hold: structural
-failure. Pivot back to a fables-only run for diagnosis or revisit
-the chat-template (the v2 findings imply the byte-LM may not be
-learning the `<|asst|>\n → {` transition without higher-density
-format-anchor signal).
+### Decision gate B — end of Phase 15 (15B if no early exit)
 
-### Gate B — end of Phase 11 (11B)
-
-Required:
+Required (mid fade-back, Tool at 30%):
 
 - `format_validity ≥ 0.8` on xLAM
 - `tool_args_match ≥ 0.3` on xLAM
 - `exact_match ≥ 0.1` on commitpackft-py
 
-If all three: proceed to Phase 12 (continue widening).
+If all three: proceed to Phase 16.
 
-If only `format_validity` is met: **HOLD** at Phase 11 mix for
-another 1B (give tool_args_match more time to climb).
+If only `format_validity` is met: **HOLD** at Phase 15 mix for
+another 1B (give tool_args_match more time to climb before
+fading Tool further).
 
-If `format_validity < 0.5`: Phase 5 gate retroactively failed.
-Roll back to the latest pre-Gate-A ckpt and re-think.
+If `format_validity < 0.5`: the ramp didn't actually consolidate
+the structural skill. Roll back to the latest pre-fade ckpt and
+hold the ramp's peak mix longer.
 
-### Gate C — end of Phase 16 (16B)
+### Decision gate C — end of Phase 18 (18B)
 
 Required:
 
@@ -250,10 +287,10 @@ Required:
 - BPC on FineWeb-Edu ≤ 1.6
 - `exact_match ≥ 0.25` on commitpackft-py
 
-If all three: proceed to Phase 17. Continue gentle wind-down.
+If all three: proceed to Phase 19 (end-state lock-in).
 
 If Δ has plateaued: model has saturated current architecture.
-Stop at Phase 16 and consider v3.1 with bigger bank
+Stop at Phase 18 and consider v3.1 with bigger bank
 (`sqrt_n=4096 fp16`, ~37 GB) per `parallelization-and-bank-sizing.md`.
 
 ## Differential learning rates (router vs bank)
@@ -264,21 +301,22 @@ queries to good bank rows, further updates risk regressing the
 router as semantic content shifts. Cool the dense lr after ~9-12B
 tokens; cool the bank lr only at the very end.
 
-Until the implementation lands (queued for "before Phase 10"),
-both `lr_dense_mult` and `lr_bank_mult` are `1.0` (the unified
-single-lr behavior of `train_with_bank --lr` today). After the
-split lands and the Phase 11-12 empirical test confirms the
-hypothesis, switch to the schedule below.
+Implementation has landed (`MMLLM_LR_DENSE_MULT` /
+`MMLLM_LR_BANK_MULT` env vars; `--lr-dense-mult` /
+`--lr-bank-mult` CLI flags on `train_with_bank`). Defaults
+remain `1.0` / `1.0` so Phase 0-8 are unchanged from a
+single-lr regime. After the Phase 10-11 empirical test confirms
+the hypothesis, switch to the schedule below.
 
 | phase     | tokens   | lr_dense_mult | lr_bank_mult |
 |----------:|---------:|--------------:|-------------:|
-| 1-9       |  0-9B    |          1.0  |         1.0  |
-| 10-12     |  9-12B   |          0.7  |         1.0  |
-| 13-15     | 12-15B   |          0.4  |         1.0  |
-| 16-18     | 15-18B   |          0.2  |         0.7  |
-| 19-20     | 18-20B   |          0.1  |         0.3  |
+| 0-8       |  0-9B    |          1.0  |         1.0  |
+| 9-11      |  9-12B   |          0.7  |         1.0  |
+| 12-14     | 12-15B   |          0.4  |         1.0  |
+| 15-17     | 15-18B   |          0.2  |         0.7  |
+| 18-19     | 18-20B   |          0.1  |         0.3  |
 
-Adoption is contingent on the Phase 11-12 fork test (one 1B
+Adoption is contingent on the Phase 10-11 fork test (one 1B
 side-run with `lr_dense_mult=0.5` against the main run; compare
 ablation Δ + format_validity + BPC).
 
@@ -288,28 +326,28 @@ Update this table after each session. `eval-watcher` writes the
 metric snapshots; pull them via `progress_report` or read the
 last 50 lines of `<base>.eval.jsonl` directly.
 
-| Phase | Status      | Date       | wall-h | $    | step at end | lr_d_mult | lr_b_mult | format_validity | tool_args_match | BPC web | BPC cos | ablation Δ | Notes |
-|------:|-------------|------------|-------:|-----:|------------:|----------:|----------:|----------------:|----------------:|--------:|--------:|-----------:|---|
-|     1 | pending     |            |        |      |             |         |         |                 |                 |         |         |            |   |
-|     2 | pending     |            |        |      |             |         |         |                 |                 |         |         |            |   |
-|     3 | pending     |            |        |      |             |         |         |                 |                 |         |         |            |   |
-|     4 | pending     |            |        |      |             |         |         |                 |                 |         |         |            |   |
-|     5 | pending     | (gate A)   |        |      |             |         |         |                 |                 |         |         |            |   |
-|     6 | pending     |            |        |      |             |         |         |                 |                 |         |         |            |   |
-|     7 | pending     |            |        |      |             |         |         |                 |                 |         |         |            |   |
-|     8 | pending     |            |        |      |             |         |         |                 |                 |         |         |            |   |
-|     9 | pending     |            |        |      |             |         |         |                 |                 |         |         |            |   |
-|    10 | pending     |            |        |      |             |         |         |                 |                 |         |         |            |   |
-|    11 | pending     | (gate B)   |        |      |             |         |         |                 |                 |         |         |            |   |
-|    12 | pending     |            |        |      |             |         |         |                 |                 |         |         |            |   |
-|    13 | pending     |            |        |      |             |         |         |                 |                 |         |         |            |   |
-|    14 | pending     |            |        |      |             |         |         |                 |                 |         |         |            |   |
-|    15 | pending     |            |        |      |             |         |         |                 |                 |         |         |            |   |
-|    16 | pending     | (gate C)   |        |      |             |         |         |                 |                 |         |         |            |   |
-|    17 | pending     |            |        |      |             |         |         |                 |                 |         |         |            |   |
-|    18 | pending     |            |        |      |             |         |         |                 |                 |         |         |            |   |
-|    19 | pending     |            |        |      |             |         |         |                 |                 |         |         |            |   |
-|    20 | pending     | (end)      |        |      |             |         |         |                 |                 |         |         |            |   |
+| Phase | Tool % | Status      | Date       | wall-h | $    | step at end | lr_d_mult | lr_b_mult | format_validity | tool_args_match | BPC web | BPC cos | ablation Δ | Notes |
+|------:|-------:|-------------|------------|-------:|-----:|------------:|----------:|----------:|----------------:|----------------:|--------:|--------:|-----------:|---|
+|     0 |   0    | running     | 2026-05-09 |        |      |             |     1.0   |     1.0   |          0.0    |          0.0    |   2.29  |   1.70  |  +2.31     | format-anchor entry |
+|     1 |   2    | pending     |            |        |      |             |     1.0   |     1.0   |                 |                 |         |         |            | xLAM enters |
+|     2 |   6    | pending     |            |        |      |             |     1.0   |     1.0   |                 |                 |         |         |            |   |
+|     3 |  10    | pending     |            |        |      |             |     1.0   |     1.0   |                 |                 |         |         |            |   |
+|     4 |  15    | pending     |            |        |      |             |     1.0   |     1.0   |                 |                 |         |         |            |   |
+|     5 |  20    | pending     | early-exit?|        |      |             |     1.0   |     1.0   |                 |                 |         |         |            | check format_validity |
+|     6 |  25    | pending     |            |        |      |             |     1.0   |     1.0   |                 |                 |         |         |            |   |
+|     7 |  30    | pending     |            |        |      |             |     1.0   |     1.0   |                 |                 |         |         |            |   |
+|     8 |  35    | pending     |            |        |      |             |     1.0   |     1.0   |                 |                 |         |         |            |   |
+|     9 |  40    | pending     |            |        |      |             |     0.7   |     1.0   |                 |                 |         |         |            | dense lr cools |
+|    10 |  45    | pending     |            |        |      |             |     0.7   |     1.0   |                 |                 |         |         |            |   |
+|    11 |  50    | pending     | (Tool cap) |        |      |             |     0.7   |     1.0   |                 |                 |         |         |            | architectural pivot if format still 0 |
+|    12 |  45    | pending     | fade-back  |        |      |             |     0.4   |     1.0   |                 |                 |         |         |            | Web enters at 3% |
+|    13 |  40    | pending     |            |        |      |             |     0.4   |     1.0   |                 |                 |         |         |            |   |
+|    14 |  35    | pending     |            |        |      |             |     0.4   |     1.0   |                 |                 |         |         |            |   |
+|    15 |  30    | pending     | (gate B)   |        |      |             |     0.2   |     0.7   |                 |                 |         |         |            |   |
+|    16 |  25    | pending     |            |        |      |             |     0.2   |     0.7   |                 |                 |         |         |            |   |
+|    17 |  20    | pending     |            |        |      |             |     0.2   |     0.7   |                 |                 |         |         |            |   |
+|    18 |  15    | pending     | (gate C)   |        |      |             |     0.1   |     0.3   |                 |                 |         |         |            |   |
+|    19 |  10    | pending     | (end)      |        |      |             |     0.1   |     0.3   |                 |                 |         |         |            | skill-keepalive floor |
 
 ## Budget estimate
 
@@ -341,7 +379,7 @@ last 50 lines of `<base>.eval.jsonl` directly.
    dynamic. This is gentler than v2's "session 3 reshape to 40%
    xLAM" which clearly burned BPC on every other dataset (v2
    findings line 70-83).
-3. **Bank Δ flatline before Phase 16**: the bank may saturate at
+3. **Bank Δ flatline before Phase 18**: the bank may saturate at
    sqrt_n=2048 with this much data. Gate C handles this — pivot
    to v3.1 with a bigger bank (`sqrt_n=4096 fp16`, ~37 GB) per
    `parallelization-and-bank-sizing.md`.
@@ -350,9 +388,10 @@ last 50 lines of `<base>.eval.jsonl` directly.
 
 1. Confirm `prepare_for_prod` + `build_aesop_curriculum` have run
    (`modal volume ls mmllm-data /agent-corpus-v2`).
-2. Launch Phase 1:
+2. Launch the next phase (substitute the desired phase number):
    ```bash
-   MIX="$(grep '^PHASE 1' docs/clojure-pedagogy/v3-twenty-billion-plan.md | head -1 | cut -d':' -f2-)"
+   PHASE=1
+   MIX="$(grep "^PHASE ${PHASE} " docs/clojure-pedagogy/v3-twenty-billion-plan.md | head -1 | cut -d':' -f2-)"
    modal run --detach modal_app.py::train_with_bank \
      --base /data/aesop-v3.bin --bank /data/aesop-v3-bank \
      --total-steps 1000000 --max-hours 2.5 \
