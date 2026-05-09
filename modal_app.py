@@ -524,7 +524,9 @@ def _run_train_long(total_steps, eval_every, ckpt_every, device, lr,
                     bank_query_mode="plain", long_tier_mix="sum",
                     bank_feedback_mode="plain", ablate_every=0,
                     max_hours=0.0, mix="",
-                    lr_dense_mult=1.0, lr_bank_mult=1.0):
+                    lr_dense_mult=1.0, lr_bank_mult=1.0,
+                    z_loss_coef=0.0, mtp_coef=0.0,
+                    slot_log_every=0, dead_slot_reinit=False):
     """Shared body. All knobs threaded via env vars (MMLLM_DEVICE,
     MMLLM_LR, MMLLM_BATCH, MMLLM_SQRT_N, MMLLM_CPU_OFFLOAD,
     MMLLM_BANK_ON_GPU, MMLLM_SYNC_EVERY, MMLLM_VOLUME_NAME,
@@ -583,7 +585,11 @@ def _run_train_long(total_steps, eval_every, ckpt_every, device, lr,
            "MMLLM_BANK_QUERY_MODE":    bank_query_mode,
            "MMLLM_LONG_TIER_MIX":      long_tier_mix,
            "MMLLM_BANK_FEEDBACK_MODE": bank_feedback_mode,
-           "MMLLM_ABLATE_EVERY":       str(ablate_every)}
+           "MMLLM_ABLATE_EVERY":       str(ablate_every),
+           "MMLLM_Z_LOSS_COEF":        str(z_loss_coef),
+           "MMLLM_MTP_COEF":           str(mtp_coef),
+           "MMLLM_SLOT_LOG_EVERY":     str(slot_log_every),
+           "MMLLM_DEAD_SLOT_REINIT":   "true" if dead_slot_reinit else "false"}
     if sqrt_n is not None:
         env["MMLLM_SQRT_N"] = str(sqrt_n)
     if cpu_offload:
@@ -644,6 +650,10 @@ def train_with_bank(
     long_tier_mix: str = "sum",          # 'sum' | 'scalar' | 'switch' — see mmllm.gating
     bank_feedback_mode: str = "plain",   # 'plain' | 'feedback' — see mmllm.bank_feedback
     ablate_every: int = 0,               # >0 = log Δ trajectory every N steps; 0 disables
+    z_loss_coef: float = 0.0,            # ST-MoE-style query z-loss on K_a/K_b (1e-5 typical)
+    mtp_coef: float = 0.0,               # multi-byte-prediction t+2 aux head coefficient (0.25 typical)
+    slot_log_every: int = 0,             # log per-layer PKM slot-utilization entropy every N steps
+    dead_slot_reinit: bool = False,      # at slot-log events, reinit dead K_a/K_b rows + their V slice
     base: str = "/data/text8",
     bank: str = "/data/bank",
     corpus_base: str = "",               # if set and != base, symlink corpus splits
@@ -718,6 +728,10 @@ def train_with_bank(
         mix=mix,
         lr_dense_mult=lr_dense_mult,
         lr_bank_mult=lr_bank_mult,
+        z_loss_coef=z_loss_coef,
+        mtp_coef=mtp_coef,
+        slot_log_every=slot_log_every,
+        dead_slot_reinit=dead_slot_reinit,
     )
     if publish_after:
         # Spawn publish on its own container (uses publish_image w/ gh CLI).
