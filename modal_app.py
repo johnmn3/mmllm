@@ -1702,6 +1702,43 @@ def prepare_bank(bank_path: str = "/data/shared-bank",
     print(
         f"done — total bank size {result['total_bytes']/1e9:.2f} GB", flush=True
     )
+
+
+@app.function(
+    image=image,
+    volumes={"/data": volume},
+    timeout=7200,                  # NetBank can be 80+GB; init takes longer
+    cpu=8.0,
+    memory=32768,
+)
+def prepare_netbank(bank_path: str = "/data/aesop-v3-bank-net",
+                    sqrt_n: int = 8192,
+                    c_net: int = 64,
+                    n_layers: int = 5,
+                    dtype: str = "fp32"):
+    """Pre-create + initialize NetBank V mmap files (one per layer).
+    Idempotent: existing correctly-sized files are kept.
+
+    At sqrt_n=8192 + c_net=64 + fp32 = 17.2 GB per layer × 5 = 85.9 GB.
+    Run once before the first NetBank-enabled training launch so the
+    first session doesn't burn 10-20 min on Gaussian init.
+    """
+    import sys
+    sys.path.insert(0, "/code/src")
+    from mmllm.netbank import prepare_netbank_files
+    print(
+        f"=== prepare_netbank {bank_path} sqrt_n={sqrt_n} c_net={c_net} "
+        f"dtype={dtype} n_layers={n_layers} ===",
+        flush=True,
+    )
+    result = prepare_netbank_files(bank_path, n_layers, sqrt_n, c_net, dtype)
+    for p in result["paths"]:
+        cached = "cached" if p["cached"] else "created"
+        print(f"  {p['path']}  ({p['bytes']/1e9:.2f} GB, {cached})", flush=True)
+    volume.commit()
+    print(
+        f"done — total netbank size {result['total_bytes']/1e9:.2f} GB", flush=True
+    )
     return result
 
 
