@@ -1029,7 +1029,28 @@
                :k-proj-l :v-proj-l
                :o-proj :gate-proj :up-proj :down-proj
                :long-gate :bank-query :bank-feedback :memory]]
-      (.eval (get b k)))))
+      (.eval (get b k)))
+    (when-let [nb (:netbank b)] (.eval nb)))
+  (when-let [mh (:mtp-head m)] (.eval mh)))
+
+(defn- set-train-mode! [m]
+  "Inverse of set-eval-mode!. Call before every train step so the
+   model's training-mode flags get restored after any intermediate
+   eval-bpc / ablation / sample call. Without this, Local Bank's
+   `if self.training:` guards (slot tracking, z-loss accumulator)
+   silently disable themselves after the first eval and the bank
+   trains with no regularizer + zero diagnostics."
+  (.train (:tok-emb m))
+  (.train (:norm-final m))
+  (doseq [b (:blocks m)]
+    (doseq [k [:norm1 :norm2 :q-proj
+               :k-proj-s :v-proj-s
+               :k-proj-l :v-proj-l
+               :o-proj :gate-proj :up-proj :down-proj
+               :long-gate :bank-query :bank-feedback :memory]]
+      (.train (get b k)))
+    (when-let [nb (:netbank b)] (.train nb)))
+  (when-let [mh (:mtp-head m)] (.train mh)))
 
 (defn sample
   "Generate `n` characters after `prompt`. Threads BOTH short cache
@@ -2174,6 +2195,12 @@
                                (set-opt-lr! opt-sparse (* cur-lr b-mult))
                                (when opt-sparse-net
                                  (set-opt-lr! opt-sparse-net (* cur-lr n-mult)))))
+                ;; Restore training-mode flags. eval-bpc and ablation-step!
+                ;; flip submodules to eval mode but never flip them back —
+                ;; without this call, Local Bank's `if self.training:`
+                ;; guards (slot tracking, z-loss) silently disable after
+                ;; the first eval. Cheap (~5µs).
+                _      (set-train-mode! m)
                 B-cur (pick-batch)
                 [x y] (if mix
                         (mix-batch mix-tensors mix-weights-t B-cur T)
