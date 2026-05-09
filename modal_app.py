@@ -2674,7 +2674,10 @@ def run_eval_battery(
     timeout=86400,         # Modal caps at 24 h per invocation; the watcher's
                            # outer loop is idempotent (`<log_path>.seen.txt`)
                            # so just relaunch it daily for multi-day runs.
-    gpu="A10G",
+    gpu="L4",              # 24GB VRAM (fits sqrt_n=2048 fp32 bank at 18.8GB);
+                           # cheaper + better available than A10G. Bank fits
+                           # on-GPU; with bank_on_gpu=False the watcher would
+                           # work on T4/16GB at the cost of PCIe-per-query.
     memory=32768,
 )
 def eval_watcher(
