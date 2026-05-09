@@ -38,22 +38,29 @@ smoothly across the 20B run, never violently.
 Columns are integer percentages summing to 100. Single H100 H/W
 session per phase, ~1.5-2 h, ~$5-6.
 
-### Ramp (Phase 0-11): xLAM grows aggressively, Fables yield
+### Ramp (compressed): brute-force to xLAM 50% in 3 phases
 
-| #  | tokens   | Fables | TS  | Cos | Web | Tool | Code | Notes |
-|----|----------|-------:|----:|----:|----:|-----:|-----:|---|
-|  0 |  0–1B    |   60   | 15  | 15  |  0  |  0   | 10   | (running) format-anchor target: format_validity > 0.0 |
-|  1 |  1–2B    |   58   | 15  | 15  |  0  |  2   | 10   | xLAM enters |
-|  2 |  2–3B    |   54   | 15  | 15  |  0  |  6   | 10   | |
-|  3 |  3–4B    |   50   | 15  | 15  |  0  | 10   | 10   | |
-|  4 |  4–5B    |   45   | 15  | 15  |  0  | 15   | 10   | |
-|  5 |  5–6B    |   40   | 15  | 15  |  0  | 20   | 10   | **Early-exit check** (5B): if format_validity > 0.05 → jump to fade-back |
-|  6 |  6–7B    |   35   | 15  | 15  |  0  | 25   | 10   | |
-|  7 |  7–8B    |   30   | 15  | 15  |  0  | 30   | 10   | |
-|  8 |  8–9B    |   25   | 15  | 15  |  0  | 35   | 10   | |
-|  9 |  9–10B   |   20   | 15  | 15  |  0  | 40   | 10   | |
-| 10 | 10–11B   |   15   | 15  | 15  |  0  | 45   | 10   | |
-| 11 | 11–12B   |   10   | 15  | 15  |  0  | 50   | 10   | **Tool 50% cap**. Hold here if format still failing (architectural pivot warranted) |
+The ±5pp/phase budget was too cautious for the format-anchor
+problem. v3 uses a compressed ramp: introduce xLAM at 2% to
+prime the embedding, then jump directly to 50% by Phase 3.
+
+| #  | tokens     | Fables | TS  | Cos | Web | Tool | Code | Notes |
+|----|------------|-------:|----:|----:|----:|-----:|-----:|---|
+|  0 | 0–0.5B     |   60   | 15  | 15  |  0  |  0   | 10   | (done) format-anchor target: format_validity > 0.0 |
+|  1 | 0.5–1.1B   |   58   | 15  | 15  |  0  |  2   | 10   | (done) xLAM enters; format_validity unchanged |
+|  2 | 1.1–1.4B   |   54   | 15  | 15  |  0  |  6   | 10   | (stopped early at step 80k — too cautious) |
+|  3 | 1.4–2.0B   |   20   | 10  | 10  |  0  | 50   | 10   | **xLAM 50% cap**: brute-force structural learning |
+|  4 |  2-3B      |   20   | 10  | 10  |  0  | 50   | 10   | hold if format_validity still 0; else start fade |
+|  5 |  3-4B      |   20   | 10  | 10  |  0  | 50   | 10   | continued hold if needed |
+
+**Hold policy at 50%**: stay at the Phase 3 mix until *either*
+`format_validity ≥ 0.05` triggers fade-back, *or* ablation Δ has
+plateaued for 3 consecutive eval batteries (signal of bank
+saturation → architectural pivot to v3.1).
+
+If format still 0 after 4-5 phases at 50% Tool, that's evidence
+the ~70M-class capacity is the ceiling; fall back to v3.1 with
+sqrt_n=4096 fp16 (~37GB bank) before continuing the curriculum.
 
 ### Fade-back (Phase 12-19): Tool retreats, Web enters
 
@@ -177,8 +184,8 @@ PHASE 1 (Fables 58, TS 15, Cos 15, Tool 2, Code 10):
 PHASE 2 (Fables 54, TS 15, Cos 15, Tool 6, Code 10):
 /data/aesop-curriculum.bin.train.bin:54,/data/tiny-stories.bin.train.bin:15,/data/agent-corpus-v2/cosmopedia.bin.train.bin:15,/data/agent-corpus-v2/xlam.bin.train.bin:6,/data/agent-corpus-v2/commitpackft-py.bin.train.bin:5,/data/agent-corpus-v2/commitpackft-clj.bin.train.bin:2,/data/agent-corpus-v2/magicoder.bin.train.bin:2,/data/agent-corpus-v2/theorem-qa.bin.train.bin:1
 
-PHASE 3 (Fables 50, TS 15, Cos 15, Tool 10, Code 10):
-/data/aesop-curriculum.bin.train.bin:50,/data/tiny-stories.bin.train.bin:15,/data/agent-corpus-v2/cosmopedia.bin.train.bin:15,/data/agent-corpus-v2/xlam.bin.train.bin:10,/data/agent-corpus-v2/commitpackft-py.bin.train.bin:5,/data/agent-corpus-v2/commitpackft-clj.bin.train.bin:2,/data/agent-corpus-v2/magicoder.bin.train.bin:2,/data/agent-corpus-v2/theorem-qa.bin.train.bin:1
+PHASE 3 (Fables 20, TS 10, Cos 10, Tool 50, Code 10):  ← 50% cap brute-force
+/data/aesop-curriculum.bin.train.bin:20,/data/tiny-stories.bin.train.bin:10,/data/agent-corpus-v2/cosmopedia.bin.train.bin:10,/data/agent-corpus-v2/xlam.bin.train.bin:50,/data/agent-corpus-v2/commitpackft-py.bin.train.bin:5,/data/agent-corpus-v2/commitpackft-clj.bin.train.bin:2,/data/agent-corpus-v2/magicoder.bin.train.bin:2,/data/agent-corpus-v2/theorem-qa.bin.train.bin:1
 
 PHASE 4 (Fables 45, TS 15, Cos 15, Tool 15, Code 10):
 /data/aesop-curriculum.bin.train.bin:45,/data/tiny-stories.bin.train.bin:15,/data/agent-corpus-v2/cosmopedia.bin.train.bin:15,/data/agent-corpus-v2/xlam.bin.train.bin:15,/data/agent-corpus-v2/commitpackft-py.bin.train.bin:5,/data/agent-corpus-v2/commitpackft-clj.bin.train.bin:2,/data/agent-corpus-v2/magicoder.bin.train.bin:2,/data/agent-corpus-v2/theorem-qa.bin.train.bin:1
@@ -330,8 +337,8 @@ last 50 lines of `<base>.eval.jsonl` directly.
 |------:|-------:|-------------|------------|-------:|-----:|------------:|----------:|----------:|----------------:|----------------:|--------:|--------:|-----------:|---|
 |     0 |   0    | done        | 2026-05-09 |  2.56  |  ~5  |     33,733  |     1.0   |     1.0   |          0.0    |          0.0    |   2.20  |   1.63  |  +2.31     | format-anchor cold (expected; 0% xLAM); bank Δ healthy |
 |     1 |   2    | done        | 2026-05-09 |  2.56  |  ~5  |     66,716  |     1.0   |     1.0   |          0.0    |          0.0    |   2.12  |   1.53  |  +5.50     | xLAM 2% — too sparse to move format; bank Δ doubled |
-|     2 |   6    | pending     |            |        |      |             |     1.0   |     1.0   |                 |                 |         |         |            |   |
-|     3 |  10    | pending     |            |        |      |             |     1.0   |     1.0   |                 |                 |         |         |            |   |
+|     2 |   6    | stopped     | 2026-05-09 |  ~1.0  |  ~2  |     ~80k    |     1.0   |     1.0   |          0.0    |          0.0    |   2.10  |   1.52  |  +5.25     | killed early — ramp too cautious; bank Δ flatlining |
+|     3 |  50    | running     | 2026-05-09 |        |      |             |     1.0   |     1.0   |                 |                 |         |         |            | brute-force xLAM 50% jump (6→50, +44pp) |
 |     4 |  15    | pending     |            |        |      |             |     1.0   |     1.0   |                 |                 |         |         |            |   |
 |     5 |  20    | pending     | early-exit?|        |      |             |     1.0   |     1.0   |                 |                 |         |         |            | check format_validity |
 |     6 |  25    | pending     |            |        |      |             |     1.0   |     1.0   |                 |                 |         |         |            |   |
