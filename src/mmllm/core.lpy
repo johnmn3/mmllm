@@ -261,6 +261,29 @@
   []
   (python/int (.get (.- os environ) "MMLLM_ABLATE_EVERY" "0")))
 
+(defn pick-slot-log-every
+  "Resolve interval (in training steps) between PKM slot-utilization
+   logs + optional dead-slot reinit. Reads MMLLM_SLOT_LOG_EVERY
+   (default 0 = disabled).
+
+   Each event reads each PKM layer's hit counters, logs entropy /
+   dead-count to log.jsonl, then resets counters. If
+   MMLLM_DEAD_SLOT_REINIT=true is also set, dead rows (hits=0 over
+   the window) are re-initialized with small Gaussian noise.
+
+   Recommended: equal to ckpt-every (one slot snapshot per ckpt).
+   0 disables."
+  []
+  (python/int (.get (.- os environ) "MMLLM_SLOT_LOG_EVERY" "0")))
+
+(defn pick-dead-slot-reinit?
+  "Reads MMLLM_DEAD_SLOT_REINIT (default 'false'). When true, the
+   slot-log event also calls reinit_dead_slots() on each PKM layer
+   to redistribute capacity to never-selected rows."
+  []
+  (let [v (.lower (.get (.- os environ) "MMLLM_DEAD_SLOT_REINIT" "false"))]
+    (.__contains__ #{"1" "true" "yes"} v)))
+
 (defn pick-max-hours
   "Resolve session wall-time cap, in hours. Reads MMLLM_MAX_HOURS
    (float, default 0 = no cap). When > 0, train-long checkpoints
@@ -611,6 +634,16 @@
     (.to (get block k) device))
   block)
 
+(defn pick-mtp-coef
+  "Coefficient on the multi-token-prediction (t+2) auxiliary loss.
+   Reads MMLLM_MTP_COEF (default 0.0 = disabled). When > 0, an
+   independent linear head predicts the byte two positions ahead;
+   its CE loss is added to the main t+1 loss with this coefficient.
+   Meta MTP 2024 + recent byte-LM work suggest 0.25-0.5 for byte
+   models; start small (0.25) and tune up if it helps."
+  []
+  (python/float (.get (.- os environ) "MMLLM_MTP_COEF" "0.0")))
+
 (defn build-model
   [{:keys [d-model n-heads n-short-heads n-long-heads
            n-short-kv-heads
@@ -621,7 +654,13 @@
           "n-short-heads must be divisible by n-short-kv-heads")
   (let [head-dim   (quot d-model n-heads)
         [cos sin]  (build-rope-cache (or max-pos seq-len) head-dim rope-theta)
-        device     (pick-device)]
+        device     (pick-device)
+        ;; Aux MTP head — only constructed when MMLLM_MTP_COEF > 0 so
+        ;; default models stay parameter-identical to pre-MTP code and
+        ;; old ckpts load cleanly. Goes AT THE END of (parameters m)
+        ;; for positional-ckpt-load compatibility.
+        mtp-head   (when (pos? (pick-mtp-coef))
+                     (.to (nn/Linear d-model vocab-size ** :bias false) device))]
     {:config     config
      :device     device
      :tok-emb    (.to (nn/Embedding vocab-size d-model) device)
@@ -629,14 +668,19 @@
                            (range n-layers)))
      :norm-final (.to (nn/RMSNorm d-model) device)
      :rope-cos   (.to cos device)
-     :rope-sin   (.to sin device)}))
+     :rope-sin   (.to sin device)
+     :mtp-head   mtp-head}))
 
 (defn parameters
   "DENSE learnable parameters — these route to AdamW. Excludes the
    memory bank V.weight per block (sparse — see sparse-parameters).
-   The LM head is weight-tied to tok-emb so doesn't appear separately."
+   The LM head is weight-tied to tok-emb so doesn't appear separately.
+
+   The optional `:mtp-head` (multi-token-prediction t+2 aux head) is
+   appended at the END so positional ckpt loading from a pre-MTP ckpt
+   still aligns; the new mtp-head stays at fresh init on first load."
   [m]
-  (let [{:keys [tok-emb blocks norm-final]} m
+  (let [{:keys [tok-emb blocks norm-final mtp-head]} m
         block-params (fn [b]
                        (concat
                         (mapcat #(python/list (.parameters (get b %)))
@@ -649,7 +693,8 @@
                         (.dense_parameters (:memory b))))]
     (concat (python/list (.parameters tok-emb))
             (mapcat block-params blocks)
-            (python/list (.parameters norm-final)))))
+            (python/list (.parameters norm-final))
+            (when mtp-head (python/list (.parameters mtp-head))))))
 
 (defn sparse-parameters
   "SPARSE learnable parameters — route to SparseAdam. Backward
@@ -669,7 +714,7 @@
   ([m tokens short-caches] (forward m tokens short-caches nil false))
   ([m tokens short-caches long-caches] (forward m tokens short-caches long-caches false))
   ([m tokens short-caches long-caches skip-bank?]
-   (let [{:keys [tok-emb blocks norm-final rope-cos rope-sin]} m
+   (let [{:keys [tok-emb blocks norm-final rope-cos rope-sin mtp-head]} m
          n-layers     (count blocks)
          short-caches (or short-caches (vec (repeat n-layers nil)))
          long-caches  (or long-caches  (vec (repeat n-layers nil)))]
@@ -678,9 +723,14 @@
             out-short []
             out-long  []]
        (if (= i n-layers)
-         (let [x      (norm-final x)
-               logits (torch/matmul x (.t (.- tok-emb weight)))]
-           [logits out-short out-long])
+         (let [x          (norm-final x)
+               logits     (torch/matmul x (.t (.- tok-emb weight)))
+               ;; Multi-token-prediction aux logits: independent linear
+               ;; head from the same final hidden state. Used by
+               ;; train-step to compute t+2 CE loss when MMLLM_MTP_COEF
+               ;; > 0; nil and skipped otherwise.
+               aux-logits (when mtp-head (mtp-head x))]
+           [logits out-short out-long aux-logits])
          (let [block      (nth blocks i)
                sc         (nth short-caches i)
                lc         (nth long-caches  i)
@@ -713,21 +763,70 @@
       [(.narrow win 1 0 T)
        (.narrow win 1 1 T)])))
 
+(defn pick-z-loss-coef
+  "Coefficient on the PKM query z-loss term. Reads MMLLM_Z_LOSS_COEF
+   (default 1e-5). 0 disables. ST-MoE uses 1e-3 for whole-model
+   router z; PKM has more sub-key matmuls per query so a smaller
+   coefficient is appropriate."
+  []
+  (python/float (.get (.- os environ) "MMLLM_Z_LOSS_COEF" "1e-5")))
+
+(defn collect-z-loss
+  "Sum the per-layer z-loss terms accumulated by ProductKeyMemory.forward
+   on the most recent forward pass. Returns a scalar tensor on the
+   model device, or 0.0 when disabled / no PKM forward in this pass."
+  [m]
+  (let [coef (pick-z-loss-coef)]
+    (if (zero? coef)
+      0.0
+      (let [terms (->> (:blocks m)
+                       (map (fn [b] (.- (:memory b) last_z_loss)))
+                       (filter some?))]
+        (if (empty? terms)
+          0.0
+          (* coef (reduce + terms)))))))
+
+(defn collect-mtp-loss
+  "Compute the multi-token-prediction (t+2) auxiliary CE loss when
+   `aux-logits` is non-nil, scaled by MMLLM_MTP_COEF. The aux head
+   at position p predicts byte at p+2; we score the inner T-1
+   positions (positions [0..T-2] of aux logits paired with y[1..T-1])
+   since the t+2 target for position T-1 is outside the window.
+
+   Returns a scalar tensor when active, 0.0 otherwise."
+  [aux-logits y T]
+  (if (nil? aux-logits)
+    0.0
+    (let [coef            (pick-mtp-coef)
+          aux-logits-trim (.narrow aux-logits 1 0 (- T 1))
+          y-trim          (.narrow y 1 1 (- T 1))]
+      (* coef (F/cross_entropy
+               (.reshape aux-logits-trim -1 vocab-size)
+               (.reshape y-trim -1))))))
+
 (defn train-step
   [m opt-dense opt-sparse x y]
   (let [device       (:device m)
         x            (.to x device)
         y            (.to y device)
-        [logits _ _] (forward m x)
-        loss         (F/cross_entropy
+        [logits _ _ aux-logits] (forward m x)
+        T            (.size y 1)
+        ce-loss      (F/cross_entropy
                       (.reshape logits -1 vocab-size)
-                      (.reshape y -1))]
+                      (.reshape y -1))
+        z-loss       (collect-z-loss m)
+        mtp-loss     (collect-mtp-loss aux-logits y T)
+        ;; Sum non-zero terms; numerics matter — adding a Python 0.0 to
+        ;; a tensor would coerce to a fp tensor scalar of value 0, fine.
+        loss         (cond-> ce-loss
+                       (not (number? z-loss))   (+ z-loss)
+                       (not (number? mtp-loss)) (+ mtp-loss))]
     (.zero_grad opt-dense)
     (.zero_grad opt-sparse)
     (.backward loss)
     (.step opt-dense)
     (.step opt-sparse)
-    (.item loss)))
+    (.item ce-loss)))
 
 (defn train
   "Train on the toy corpus. Returns the trained model.
@@ -1698,6 +1797,8 @@
         start-step   (or (latest-checkpoint-step ckpt-dir) 0)
         sync-every   (pick-sync-every)
         ablate-every (pick-ablate-every)
+        slot-every   (pick-slot-log-every)
+        slot-reinit? (pick-dead-slot-reinit?)
         ;; Grab the Modal Volume reference unconditionally — used
         ;; for both (a) Hogwild bank sync (gated by sync-every and
         ;; mmap-backed bank) AND (b) durable ckpt commits (always-
@@ -1885,6 +1986,29 @@
                     (append-jsonl! log-path
                                    (format "{\"step\":%d,\"event\":\"ablation_intermediate\",\"control_bpc\":%.4f,\"ablated_bpc\":%.4f,\"delta_bpc\":%.4f,\"ablation_s\":%.2f,\"wall_s\":%.1f}"
                                            step' ctrl abl-bpc delta dt (- (time/time) t0)))))))
+            ;; PKM slot utilization log + optional dead-slot reinit.
+            ;; Each PKM layer's hit counters cover the window since the
+            ;; last reset; we log per-layer entropy and dead-row counts,
+            ;; reinit dead rows if enabled, then reset counters.
+            (when (and (pos? slot-every) (zero? (mod step' slot-every)))
+              (doseq [[i blk] (map-indexed vector (:blocks m))]
+                (let [mem (:memory blk)
+                      st  (.slot_usage_stats mem)
+                      d-a (.get st "dead_a")
+                      d-b (.get st "dead_b")
+                      ea  (or (.get st "entropy_a") 0.0)
+                      eb  (or (.get st "entropy_b") 0.0)
+                      em  (or (.get st "entropy_a_max") 0.0)
+                      reinit-summary
+                      (if slot-reinit?
+                        (.reinit_dead_slots mem)
+                        nil)
+                      n-a (if reinit-summary (.get reinit-summary "n_ka_reinit") 0)
+                      n-b (if reinit-summary (.get reinit-summary "n_kb_reinit") 0)]
+                  (append-jsonl! log-path
+                                 (format "{\"step\":%d,\"event\":\"slot_usage\",\"layer\":%d,\"dead_a\":%d,\"dead_b\":%d,\"entropy_a\":%.3f,\"entropy_b\":%.3f,\"entropy_max\":%.3f,\"reinit_a\":%d,\"reinit_b\":%d,\"wall_s\":%.1f}"
+                                         step' i d-a d-b ea eb em n-a n-b (- (time/time) t0)))
+                  (.reset_slot_usage mem))))
             (when (zero? (mod step' ckpt-every))
               (save-checkpoint! m opt-dense opt-sparse ckpt-dir step' volume)
               (println (format "  ── ckpt at step %d ──" step')))
