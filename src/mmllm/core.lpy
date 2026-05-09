@@ -115,9 +115,40 @@
 
 (defn pick-lr
   "Resolve learning rate. Reads MMLLM_LR (float string,
-   default 3e-3). Applied to BOTH AdamW (dense) and SparseAdam (V)."
+   default 3e-3). The unified peak lr; per-component multipliers
+   (`pick-lr-dense-mult` / `pick-lr-bank-mult`) decouple dense
+   (router) and bank (semantic content) update intensities."
   []
   (python/float (.get (.- os environ) "MMLLM_LR" "3e-3")))
+
+(defn pick-lr-dense-mult
+  "Multiplier on the dense-side (AdamW) lr. Reads
+   MMLLM_LR_DENSE_MULT (float, default 1.0). Combined with
+   `pick-lr` to produce the AdamW peak lr. See
+   `docs/router-bank-lr-decoupling.md` for the differential-decay
+   schedule (cool the dense / router lr after ~9-12B tokens while
+   the bank / expert lr stays at 1.0×)."
+  []
+  (python/float (.get (.- os environ) "MMLLM_LR_DENSE_MULT" "1.0")))
+
+(defn pick-lr-bank-mult
+  "Multiplier on the bank-side (SparseAdam) lr. Reads
+   MMLLM_LR_BANK_MULT (float, default 1.0). Combined with
+   `pick-lr` to produce the SparseAdam peak lr. Cooled only at the
+   very end of training (15B+ in the v3 plan; near 100B in an
+   extended run)."
+  []
+  (python/float (.get (.- os environ) "MMLLM_LR_BANK_MULT" "1.0")))
+
+(defn pick-lr-dense
+  "Effective dense (AdamW) peak lr = pick-lr × pick-lr-dense-mult."
+  []
+  (* (pick-lr) (pick-lr-dense-mult)))
+
+(defn pick-lr-bank
+  "Effective bank (SparseAdam) peak lr = pick-lr × pick-lr-bank-mult."
+  []
+  (* (pick-lr) (pick-lr-bank-mult)))
 
 (defn pick-batch
   "Resolve training batch size. Reads MMLLM_BATCH (int string,
@@ -708,8 +739,8 @@
   ([config steps]
    (let [m          (build-model config)
          data       (encode toy-text)
-         opt-dense  (optim/AdamW    (python/list (parameters m))        ** :lr (pick-lr))
-         opt-sparse ((pick-sparse-optimizer) (python/list (sparse-parameters m)) ** :lr (pick-lr))
+         opt-dense  (optim/AdamW    (python/list (parameters m))        ** :lr (pick-lr-dense))
+         opt-sparse ((pick-sparse-optimizer) (python/list (sparse-parameters m)) ** :lr (pick-lr-bank))
          T          (:seq-len config)
          sqrt-n     (pick-sqrt-n config)
          bank-n     (* sqrt-n sqrt-n)
@@ -1150,8 +1181,8 @@
   [config steps corpus-path]
   (let [m          (build-model config)
         data       (corp/load-as-tensor corpus-path)
-        opt-dense  (optim/AdamW    (python/list (parameters m))         ** :lr (pick-lr))
-        opt-sparse ((pick-sparse-optimizer) (python/list (sparse-parameters m)) ** :lr (pick-lr))
+        opt-dense  (optim/AdamW    (python/list (parameters m))         ** :lr (pick-lr-dense))
+        opt-sparse ((pick-sparse-optimizer) (python/list (sparse-parameters m)) ** :lr (pick-lr-bank))
         T          (:seq-len config)
         sqrt-n     (pick-sqrt-n config)
         bank-n     (* sqrt-n sqrt-n)
@@ -1659,8 +1690,8 @@
         train-data (when (nil? mix)
                      (corp/load-as-tensor train-path ** :use_mmap true))
         val-data   (corp/load-as-tensor val-path)
-        opt-dense  (optim/AdamW    (python/list (parameters m))         ** :lr (pick-lr))
-        opt-sparse ((pick-sparse-optimizer) (python/list (sparse-parameters m)) ** :lr (pick-lr))
+        opt-dense  (optim/AdamW    (python/list (parameters m))         ** :lr (pick-lr-dense))
+        opt-sparse ((pick-sparse-optimizer) (python/list (sparse-parameters m)) ** :lr (pick-lr-bank))
         T          (:seq-len config)
         sqrt-n     (pick-sqrt-n config)
         bank-n     (* sqrt-n sqrt-n)
@@ -1785,16 +1816,19 @@
             m)
           :else
           (let [warmup     (pick-lr-warmup)
-                ;; Apply lr schedule (no-op when warmup == 0). Both
-                ;; AdamW (dense) and SparseAdam/CPUOffloadSparseAdam (V)
-                ;; track the same lr — sqrt-batch scaling already baked
-                ;; into MMLLM_LR.
+                ;; Apply lr schedule (no-op when warmup == 0). The cosine
+                ;; schedule shape is unified (one cur-lr value), but each
+                ;; optimizer sees its own component multiplier on top —
+                ;; AdamW gets pick-lr-dense-mult, SparseAdam gets
+                ;; pick-lr-bank-mult. See docs/router-bank-lr-decoupling.md.
                 _          (when (pos? warmup)
                              (let [cur-lr (lr-at-step step total-steps
                                                       (pick-lr) warmup
-                                                      (pick-lr-min))]
-                               (set-opt-lr! opt-dense  cur-lr)
-                               (set-opt-lr! opt-sparse cur-lr)))
+                                                      (pick-lr-min))
+                                   d-mult (pick-lr-dense-mult)
+                                   b-mult (pick-lr-bank-mult)]
+                               (set-opt-lr! opt-dense  (* cur-lr d-mult))
+                               (set-opt-lr! opt-sparse (* cur-lr b-mult))))
                 B-cur (pick-batch)
                 [x y] (if mix
                         (mix-batch mix-tensors mix-weights-t B-cur T)
@@ -1806,9 +1840,15 @@
               (let [cur-lr (if (pos? warmup)
                              (lr-at-step step total-steps
                                          (pick-lr) warmup (pick-lr-min))
-                             (pick-lr))]
-                (println (format "  step %d  loss %.3f  lr %.2e  (%.1fs)"
-                                 step' loss cur-lr (- (time/time) t0)))))
+                             (pick-lr))
+                    d-mult (pick-lr-dense-mult)
+                    b-mult (pick-lr-bank-mult)]
+                (if (and (= 1.0 d-mult) (= 1.0 b-mult))
+                  (println (format "  step %d  loss %.3f  lr %.2e  (%.1fs)"
+                                   step' loss cur-lr (- (time/time) t0)))
+                  (println (format "  step %d  loss %.3f  lr_d %.2e  lr_b %.2e  (%.1fs)"
+                                   step' loss (* cur-lr d-mult) (* cur-lr b-mult)
+                                   (- (time/time) t0))))))
             ;; Cross-worker bank sync. Has to happen AFTER the optimizer
             ;; step (so dirty rows from this step are flushed) and outside
             ;; train-step's autograd graph. We sync before eval/ckpt so
@@ -1923,8 +1963,8 @@
    Loss is masked to only the last val-len positions per sequence."
   [config steps key-len val-len]
   (let [m          (build-model config)
-        opt-dense  (optim/AdamW    (python/list (parameters m))         ** :lr (pick-lr))
-        opt-sparse ((pick-sparse-optimizer) (python/list (sparse-parameters m)) ** :lr (pick-lr))
+        opt-dense  (optim/AdamW    (python/list (parameters m))         ** :lr (pick-lr-dense))
+        opt-sparse ((pick-sparse-optimizer) (python/list (sparse-parameters m)) ** :lr (pick-lr-bank))
         T          (:seq-len config)
         d-len      (- T (* 2 key-len) (* 2 val-len))]
     (println (format "train-copy: %d steps; T=%d, key=%d, val=%d, distractor=%d (loss masked to recall)"

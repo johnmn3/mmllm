@@ -523,13 +523,20 @@ def _run_train_long(total_steps, eval_every, ckpt_every, device, lr,
                     lr_warmup=0, lr_min=None,
                     bank_query_mode="plain", long_tier_mix="sum",
                     bank_feedback_mode="plain", ablate_every=0,
-                    max_hours=0.0, mix=""):
+                    max_hours=0.0, mix="",
+                    lr_dense_mult=1.0, lr_bank_mult=1.0):
     """Shared body. All knobs threaded via env vars (MMLLM_DEVICE,
     MMLLM_LR, MMLLM_BATCH, MMLLM_SQRT_N, MMLLM_CPU_OFFLOAD,
     MMLLM_BANK_ON_GPU, MMLLM_SYNC_EVERY, MMLLM_VOLUME_NAME,
-    MMLLM_LR_WARMUP, MMLLM_LR_MIN, MMLLM_BANK_QUERY_MODE,
-    MMLLM_LONG_TIER_MIX, MMLLM_BANK_FEEDBACK_MODE) so the basilisp
-    CLI stays unchanged.
+    MMLLM_LR_WARMUP, MMLLM_LR_MIN, MMLLM_LR_DENSE_MULT,
+    MMLLM_LR_BANK_MULT, MMLLM_BANK_QUERY_MODE, MMLLM_LONG_TIER_MIX,
+    MMLLM_BANK_FEEDBACK_MODE) so the basilisp CLI stays unchanged.
+
+    `lr_dense_mult` / `lr_bank_mult` decouple the AdamW (dense /
+    router) and SparseAdam (bank / experts) lrs from the unified
+    peak `lr`. Default 1.0 / 1.0 = legacy behaviour. See
+    docs/router-bank-lr-decoupling.md for the differential-decay
+    schedule (cool dense after ~9-12B tokens; cool bank later).
 
     `bank_on_gpu=False` switches to the CPUPinnedEmbedding path —
     bank V lives in the mmap'd file, cross-device gather happens
@@ -566,6 +573,8 @@ def _run_train_long(total_steps, eval_every, ckpt_every, device, lr,
     env = {**os.environ,
            "MMLLM_DEVICE": device,
            "MMLLM_LR":     str(lr),
+           "MMLLM_LR_DENSE_MULT": str(lr_dense_mult),
+           "MMLLM_LR_BANK_MULT":  str(lr_bank_mult),
            "MMLLM_BATCH":  str(batch),
            "MMLLM_BANK_ON_GPU": "true" if bank_on_gpu else "false",
            "MMLLM_SYNC_EVERY":  str(sync_every),
@@ -586,7 +595,8 @@ def _run_train_long(total_steps, eval_every, ckpt_every, device, lr,
     if mix:
         env["MMLLM_MIX"] = mix
     print(
-        f"=== train-long device={device} B={batch} lr={lr} sqrt_n={sqrt_n} "
+        f"=== train-long device={device} B={batch} lr={lr} "
+        f"lr_dense_mult={lr_dense_mult} lr_bank_mult={lr_bank_mult} sqrt_n={sqrt_n} "
         f"cpu_offload={cpu_offload} bank_on_gpu={bank_on_gpu} "
         f"sync_every={sync_every} volume={volume_name} "
         f"lr_warmup={lr_warmup} lr_min={lr_min} "
@@ -623,6 +633,8 @@ def train_with_bank(
     eval_every: int = 1000,
     ckpt_every: int = 5000,
     lr: float = 1.4e-3,         # peak lr — sqrt(128/64)-scaled from prior B=64/lr=1e-3 best
+    lr_dense_mult: float = 1.0, # multiplier on AdamW (dense / router) lr — see docs/router-bank-lr-decoupling.md
+    lr_bank_mult: float = 1.0,  # multiplier on SparseAdam (bank / experts) lr
     batch: int = 128,           # per-token throughput plateau zone; smoother gradients
     sqrt_n: int = 0,            # 0 = config default; pass 2048 for ~18.8 GB bank
     cpu_offload: bool = False,  # CPU-offload SparseAdam state → frees ~38 GB GPU VRAM
@@ -704,6 +716,8 @@ def train_with_bank(
         ablate_every=ablate_every,
         max_hours=max_hours,
         mix=mix,
+        lr_dense_mult=lr_dense_mult,
+        lr_bank_mult=lr_bank_mult,
     )
     if publish_after:
         # Spawn publish on its own container (uses publish_image w/ gh CLI).
@@ -1657,6 +1671,8 @@ def train_with_bank_worker(
     eval_every: int = 1000,
     ckpt_every: int = 5000,
     lr: float = 1.4e-3,
+    lr_dense_mult: float = 1.0,
+    lr_bank_mult: float = 1.0,
     batch: int = 128,
     sqrt_n: int = 2048,
     bank: str = "/data/shared-bank",
@@ -1709,6 +1725,8 @@ def train_with_bank_worker(
         bank_query_mode=bank_query_mode,
         long_tier_mix=long_tier_mix,
         bank_feedback_mode=bank_feedback_mode,
+        lr_dense_mult=lr_dense_mult,
+        lr_bank_mult=lr_bank_mult,
     )
 
 
@@ -1718,6 +1736,8 @@ def train_multi(n_trainers: int = 4,
                 eval_every: int = 1000,
                 ckpt_every: int = 5000,
                 lr: float = 1.4e-3,
+                lr_dense_mult: float = 1.0,
+                lr_bank_mult: float = 1.0,
                 batch: int = 128,
                 sqrt_n: int = 2048,
                 bank: str = "/data/shared-bank",
@@ -1756,6 +1776,8 @@ def train_multi(n_trainers: int = 4,
             eval_every=eval_every,
             ckpt_every=ckpt_every,
             lr=lr,
+            lr_dense_mult=lr_dense_mult,
+            lr_bank_mult=lr_bank_mult,
             batch=batch,
             sqrt_n=sqrt_n,
             bank=bank,
@@ -1784,6 +1806,8 @@ def train_multi_b(bases: str = "/data/text8,/data/pile-github.bin",
                   eval_every: int = 1000,
                   ckpt_every: int = 5000,
                   lr: float = 1.4e-3,
+                  lr_dense_mult: float = 1.0,
+                  lr_bank_mult: float = 1.0,
                   batch: int = 128,
                   sqrt_n: int = 2048,
                   bank: str = "/data/shared-bank-b",
@@ -1824,6 +1848,8 @@ def train_multi_b(bases: str = "/data/text8,/data/pile-github.bin",
             eval_every=eval_every,
             ckpt_every=ckpt_every,
             lr=lr,
+            lr_dense_mult=lr_dense_mult,
+            lr_bank_mult=lr_bank_mult,
             batch=batch,
             sqrt_n=sqrt_n,
             bank=bank,
