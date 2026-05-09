@@ -256,34 +256,60 @@ If Δ has plateaued: model has saturated current architecture.
 Stop at Phase 16 and consider v3.1 with bigger bank
 (`sqrt_n=4096 fp16`, ~37 GB) per `parallelization-and-bank-sizing.md`.
 
+## Differential learning rates (router vs bank)
+
+The hypothesis (see `docs/router-bank-lr-decoupling.md`): once the
+dense modules — q-projection + K_a/K_b — have learned to route
+queries to good bank rows, further updates risk regressing the
+router as semantic content shifts. Cool the dense lr after ~9-12B
+tokens; cool the bank lr only at the very end.
+
+Until the implementation lands (queued for "before Phase 10"),
+both `lr_dense_mult` and `lr_bank_mult` are `1.0` (the unified
+single-lr behavior of `train_with_bank --lr` today). After the
+split lands and the Phase 11-12 empirical test confirms the
+hypothesis, switch to the schedule below.
+
+| phase     | tokens   | lr_dense_mult | lr_bank_mult |
+|----------:|---------:|--------------:|-------------:|
+| 1-9       |  0-9B    |          1.0  |         1.0  |
+| 10-12     |  9-12B   |          0.7  |         1.0  |
+| 13-15     | 12-15B   |          0.4  |         1.0  |
+| 16-18     | 15-18B   |          0.2  |         0.7  |
+| 19-20     | 18-20B   |          0.1  |         0.3  |
+
+Adoption is contingent on the Phase 11-12 fork test (one 1B
+side-run with `lr_dense_mult=0.5` against the main run; compare
+ablation Δ + format_validity + BPC).
+
 ## Per-phase tracker
 
 Update this table after each session. `eval-watcher` writes the
 metric snapshots; pull them via `progress_report` or read the
 last 50 lines of `<base>.eval.jsonl` directly.
 
-| Phase | Status      | Date       | wall-h | $    | step at end | format_validity | tool_args_match | BPC web | BPC cos | ablation Δ | Notes |
-|------:|-------------|------------|-------:|-----:|------------:|----------------:|----------------:|--------:|--------:|-----------:|---|
-|     1 | pending     |            |        |      |             |                 |                 |         |         |            |   |
-|     2 | pending     |            |        |      |             |                 |                 |         |         |            |   |
-|     3 | pending     |            |        |      |             |                 |                 |         |         |            |   |
-|     4 | pending     |            |        |      |             |                 |                 |         |         |            |   |
-|     5 | pending     | (gate A)   |        |      |             |                 |                 |         |         |            |   |
-|     6 | pending     |            |        |      |             |                 |                 |         |         |            |   |
-|     7 | pending     |            |        |      |             |                 |                 |         |         |            |   |
-|     8 | pending     |            |        |      |             |                 |                 |         |         |            |   |
-|     9 | pending     |            |        |      |             |                 |                 |         |         |            |   |
-|    10 | pending     |            |        |      |             |                 |                 |         |         |            |   |
-|    11 | pending     | (gate B)   |        |      |             |                 |                 |         |         |            |   |
-|    12 | pending     |            |        |      |             |                 |                 |         |         |            |   |
-|    13 | pending     |            |        |      |             |                 |                 |         |         |            |   |
-|    14 | pending     |            |        |      |             |                 |                 |         |         |            |   |
-|    15 | pending     |            |        |      |             |                 |                 |         |         |            |   |
-|    16 | pending     | (gate C)   |        |      |             |                 |                 |         |         |            |   |
-|    17 | pending     |            |        |      |             |                 |                 |         |         |            |   |
-|    18 | pending     |            |        |      |             |                 |                 |         |         |            |   |
-|    19 | pending     |            |        |      |             |                 |                 |         |         |            |   |
-|    20 | pending     | (end)      |        |      |             |                 |                 |         |         |            |   |
+| Phase | Status      | Date       | wall-h | $    | step at end | lr_d_mult | lr_b_mult | format_validity | tool_args_match | BPC web | BPC cos | ablation Δ | Notes |
+|------:|-------------|------------|-------:|-----:|------------:|----------:|----------:|----------------:|----------------:|--------:|--------:|-----------:|---|
+|     1 | pending     |            |        |      |             |         |         |                 |                 |         |         |            |   |
+|     2 | pending     |            |        |      |             |         |         |                 |                 |         |         |            |   |
+|     3 | pending     |            |        |      |             |         |         |                 |                 |         |         |            |   |
+|     4 | pending     |            |        |      |             |         |         |                 |                 |         |         |            |   |
+|     5 | pending     | (gate A)   |        |      |             |         |         |                 |                 |         |         |            |   |
+|     6 | pending     |            |        |      |             |         |         |                 |                 |         |         |            |   |
+|     7 | pending     |            |        |      |             |         |         |                 |                 |         |         |            |   |
+|     8 | pending     |            |        |      |             |         |         |                 |                 |         |         |            |   |
+|     9 | pending     |            |        |      |             |         |         |                 |                 |         |         |            |   |
+|    10 | pending     |            |        |      |             |         |         |                 |                 |         |         |            |   |
+|    11 | pending     | (gate B)   |        |      |             |         |         |                 |                 |         |         |            |   |
+|    12 | pending     |            |        |      |             |         |         |                 |                 |         |         |            |   |
+|    13 | pending     |            |        |      |             |         |         |                 |                 |         |         |            |   |
+|    14 | pending     |            |        |      |             |         |         |                 |                 |         |         |            |   |
+|    15 | pending     |            |        |      |             |         |         |                 |                 |         |         |            |   |
+|    16 | pending     | (gate C)   |        |      |             |         |         |                 |                 |         |         |            |   |
+|    17 | pending     |            |        |      |             |         |         |                 |                 |         |         |            |   |
+|    18 | pending     |            |        |      |             |         |         |                 |                 |         |         |            |   |
+|    19 | pending     |            |        |      |             |         |         |                 |                 |         |         |            |   |
+|    20 | pending     | (end)      |        |      |             |         |         |                 |                 |         |         |            |   |
 
 ## Budget estimate
 
