@@ -499,11 +499,20 @@ class ProductKeyMemory(nn.Module):
         self.last_z_loss: torch.Tensor | None = None
 
     def dense_parameters(self):
-        """Parameters with dense gradients (route to AdamW). q_norm.weight
-        is appended at the end so positional ckpt loading from a pre-q_norm
-        ckpt still matches K_a/K_b correctly; the new q_norm.weight stays
-        at its fresh-init value (scale 1.0) on first load."""
-        return [self.K_a, self.K_b, self.q_norm.weight]
+        """Parameters with dense gradients (route to AdamW). Returns ONLY
+        K_a/K_b — q_norm.weight is exposed separately via `q_norm_parameters`
+        so the train-loop can place it at the END of the model's flat
+        parameter list (after all blocks' core params). Positional ckpt
+        load from a pre-q_norm ckpt then aligns cleanly across all
+        per-block tensors; q_norm stays at fresh init (scale 1.0) on
+        first load."""
+        return [self.K_a, self.K_b]
+
+    def q_norm_parameters(self):
+        """Just q_norm.weight, separate from dense_parameters so it can be
+        placed at the end of the model's flat param list for backward-
+        compat loading of pre-q_norm ckpts."""
+        return [self.q_norm.weight]
 
     def sparse_parameters(self):
         """Parameters with sparse gradients (route to SparseAdam)."""

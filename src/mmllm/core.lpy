@@ -789,7 +789,7 @@
         cleanly into a NetBank-enabled model)"
   [m]
   (let [{:keys [tok-emb blocks norm-final mtp-head]} m
-        ;; CORE block params (excluding long-gate which is appended at end)
+        ;; CORE block params (K_a/K_b only from memory — q_norm goes at end)
         core-params (fn [b]
                       (concat
                        (mapcat #(python/list (.parameters (get b %)))
@@ -798,9 +798,10 @@
                                 :k-proj-l :v-proj-l
                                 :o-proj :gate-proj :up-proj :down-proj
                                 :bank-query :bank-feedback])
-                       ;; memory: K_a, K_b dense; q_norm.weight at end
-                       ;; (V.weight is sparse, see sparse-parameters)
+                       ;; memory's K_a, K_b only; q_norm at END below
                        (.dense_parameters (:memory b))))
+        memory-q-norm (fn [b]
+                        (.q_norm_parameters (:memory b)))
         gate-params (fn [b]
                       (python/list (.parameters (:long-gate b))))
         netbank-params (fn [b]
@@ -810,6 +811,9 @@
             (mapcat core-params blocks)
             (python/list (.parameters norm-final))
             (when mtp-head (python/list (.parameters mtp-head)))
+            ;; everything below is "added later" — appended at end so
+            ;; positional ckpt-load from a ckpt without these stays aligned
+            (mapcat memory-q-norm blocks)
             (mapcat gate-params blocks)
             (mapcat netbank-params blocks))))
 
