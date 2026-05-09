@@ -979,6 +979,15 @@
          loss         (cond-> ce-loss
                         (not (number? z-loss))   (+ z-loss)
                         (not (number? mtp-loss)) (+ mtp-loss))]
+     ;; Hard-abort on NaN/Inf loss before backward — a degenerate step
+     ;; would propagate NaN into all params, opt state, and bank V; the
+     ;; ckpt-save next event would then persist a poisoned model. Raising
+     ;; here gives `train-long`'s try/finally a chance to checkpoint
+     ;; pre-poisoning and exit non-zero so the operator notices.
+     (when (or (.item (.isnan loss)) (.item (.isinf loss)))
+       (throw (python/RuntimeError
+                (format "train-step aborted: loss=%s (ce=%s) is NaN or Inf — model may be poisoned"
+                        (.item loss) (.item ce-loss)))))
      (.zero_grad opt-dense)
      (.zero_grad opt-sparse)
      (when opt-sparse-net (.zero_grad opt-sparse-net))
@@ -1433,6 +1442,39 @@
             [ten (python/float w-str)]))))))
 
 
+(defn make-corpus-tracker
+  "Per-corpus rolling loss tracker. Returns a Python dict whose values
+   are deque-style ring buffers of recent losses per corpus index.
+
+   `n-corpora`: how many corpora the mix has (sets up that many slots).
+   `window`: rolling window size (default 50 — matches step-print cadence)."
+  [n-corpora & {:keys [window] :or {window 50}}]
+  (let [from-collections (python/__import__ "collections")
+        deque-cls        (.- from-collections deque)
+        d (python/dict)]
+    (doseq [i (range n-corpora)]
+      (.__setitem__ d i (deque-cls ** :maxlen window)))
+    {:dq d :n n-corpora :window window}))
+
+(defn record-corpus-loss!
+  "Append a loss value to corpus `idx`'s rolling buffer."
+  [tracker idx loss]
+  (when (and tracker (>= idx 0) (< idx (:n tracker)))
+    (.append (.__getitem__ (:dq tracker) idx) loss)))
+
+(defn corpus-loss-summary
+  "Snapshot per-corpus mean loss over the rolling window. Returns
+   a Python list of [idx, n_seen, mean_loss] tuples for every corpus
+   that has at least one loss recorded. Skips empty buckets."
+  [tracker]
+  (let [out (python/list)]
+    (doseq [i (range (:n tracker))]
+      (let [dq (.__getitem__ (:dq tracker) i)
+            n  (count dq)]
+        (when (pos? n)
+          (.append out (python/tuple [i n (/ (sum dq) (python/float n))])))))
+    out))
+
 (defn mix-batch
   "One (x y) batch drawn from the weighted mix. Picks ONE corpus per
    batch (chunky mixing — proportions hold across many batches).
@@ -1440,11 +1482,16 @@
    `mix-tensors`: list of 1-D byte tensors (mmap'd).
    `mix-weights-t`: 1-D fp32 tensor of weights, same length as
    mix-tensors. Pre-built once at train-long startup so the hot
-   loop only does the multinomial draw."
+   loop only does the multinomial draw.
+
+   Returns [x y idx] — `idx` is the corpus index this batch came from,
+   used by the trainer to attribute loss back to a specific corpus
+   (rolling per-corpus loss window in step prints)."
   [mix-tensors mix-weights-t B T]
-  (let [idx (.item (torch/multinomial mix-weights-t 1))
-        ten (nth mix-tensors idx)]
-    (batch ten B T)))
+  (let [idx     (.item (torch/multinomial mix-weights-t 1))
+        ten     (nth mix-tensors idx)
+        [x y]   (batch ten B T)]
+    [x y idx]))
 
 ;;; ─────────────────────── train on a real corpus ───────────────────────
 
@@ -2002,6 +2049,135 @@
     (.write f (str line "\n"))
     (.close f)))
 
+(defn- git-rev []
+  "Capture current git HEAD SHA. Empty string on failure."
+  (try
+    (let [subp (python/__import__ "subprocess")
+          res  (.run subp (python/list ["git" "rev-parse" "HEAD"])
+                     ** :capture_output true :text true :timeout 2)]
+      (if (zero? (.- res returncode))
+        (.strip (.- res stdout))
+        ""))
+    (catch python/Exception _ "")))
+
+(defn- preflight!
+  "Sanity-check the run's preconditions BEFORE the training loop starts.
+   Catches missing corpus paths, OOM-likely VRAM forecasts, and cost
+   forecasts > $50 (operator should set MMLLM_CONFIRM_COST=1 to opt in).
+   Throws on hard failures, prints WARN on soft."
+  [config train-path val-path mix total-steps]
+  (let [os-mod  (python/__import__ "os")
+        torch-mod (python/__import__ "torch")
+        ;; 1. Corpora exist
+        paths   (concat
+                  [val-path]
+                  (when train-path [train-path])
+                  (when mix (map first mix)))
+        missing (vec (filter #(not (.exists (.- os-mod path) %)) paths))]
+    (when (seq missing)
+      (throw (python/RuntimeError
+               (format "preflight: missing corpus paths:\n  %s"
+                       (.join "\n  " (python/list missing))))))
+    ;; 2. VRAM forecast (rough: model + activations + opt state)
+    (try
+      (when (.is_available (.- torch-mod cuda))
+        (let [free-bytes  (first (.mem_get_info (.- torch-mod cuda)))
+              free-gb     (/ free-bytes 1.073741824e9)]
+          (println (format "  preflight: free VRAM = %.1f GB" free-gb))
+          (when (< free-gb 5.0)
+            (println (format "  WARN preflight: only %.1f GB VRAM free; may OOM during training"
+                             free-gb)))))
+      (catch python/Exception _ nil))
+    ;; 3. Cost forecast — H100 ~$5.50/hr; estimate from total-steps × est-step-time
+    (let [max-hours-env (python/float (.get (.- (python/__import__ "os") environ)
+                                            "MMLLM_MAX_HOURS" "0"))
+          est-cost      (* (max max-hours-env 0.0) 5.50)
+          confirm       (.lower (.get (.- (python/__import__ "os") environ)
+                                      "MMLLM_CONFIRM_COST" "0"))]
+      (if (zero? max-hours-env)
+        (println "  preflight: no MMLLM_MAX_HOURS cap — train-long will run until total-steps")
+        (println (format "  preflight: budget cap = %.1f h × $5.50/h = $%.2f"
+                         max-hours-env est-cost)))
+      (when (and (> est-cost 50.0)
+                 (not (.__contains__ #{"1" "true" "yes"} confirm)))
+        (println (format "  WARN preflight: forecast $%.2f exceeds $50; set MMLLM_CONFIRM_COST=1 to silence"
+                         est-cost))))
+    ;; 4. Mix summary if applicable
+    (when mix
+      (println (format "  preflight: mix has %d corpora" (count mix)))
+      (doseq [[i [path w]] (map-indexed vector mix)]
+        (println (format "    [%2d] %5.1fpp  %s" i (* 100.0 w) path))))
+    (println "  preflight: OK")))
+
+(defn- print-session-summary
+  "Final banner at clean session end (max_hours or step-cap). Reads
+   recent ckpt info + cost + token count + recent eval and prints a
+   condensed report card."
+  [m start-step end-step base-path log-path t0 tracker]
+  (try
+    (let [wall-s    (- (time/time) t0)
+          hours     (/ wall-s 3600.0)
+          n-tokens  (try (.- tracker n_tokens) (catch python/Exception _ 0))
+          tps       (if (pos? wall-s) (/ n-tokens wall-s) 0.0)
+          cost-usd  (* hours 5.50)
+          steps     (- end-step start-step)
+          per-tok-c (if (pos? n-tokens) (* (/ cost-usd n-tokens) 1e6) 0.0)]
+      (println "")
+      (println "  ═══════════════ session summary ═══════════════")
+      (println (format "    base:       %s" base-path))
+      (println (format "    steps:      %d → %d (+%d)"
+                       start-step end-step steps))
+      (println (format "    tokens:     %.1f M  (%.1fk tok/s avg)"
+                       (/ n-tokens 1e6) (/ tps 1000.0)))
+      (println (format "    wall:       %.2f h" hours))
+      (println (format "    cost:       $%.2f  ($%.3f/M tokens)"
+                       cost-usd per-tok-c))
+      (println "  ═══════════════════════════════════════════════"))
+    (catch python/Exception e
+      (println (format "  WARN print-session-summary failed: %s" e)))))
+
+(defn- write-run-manifest!
+  "At train-long startup, write base.manifest.json with the resolved
+   config + git SHA + relevant MMLLM_* env vars + launch timestamp.
+   Also append a `manifest` event to log.jsonl. This is the run's
+   reproducibility record — without it, resume from a ckpt + new env
+   var would be a silent config change."
+  [base-path config log-path total-steps eval-every ckpt-every]
+  (try
+    (let [json   (python/__import__ "json")
+          time-m (python/__import__ "time")
+          path   (str base-path ".manifest.json")
+          env-snap (python/dict)
+          _       (doseq [k (python/list (.- (python/__import__ "os") environ))]
+                    (when (.startswith k "MMLLM_")
+                      (.__setitem__ env-snap k
+                                    (.get (.- (python/__import__ "os") environ) k))))
+          ts-str  (.strftime time-m "%Y-%m-%dT%H:%M:%SZ" (.gmtime time-m))
+          sha     (git-rev)
+          payload (python/dict)]
+      (.__setitem__ payload "ts"           ts-str)
+      (.__setitem__ payload "git_sha"      sha)
+      (.__setitem__ payload "base_path"    base-path)
+      (.__setitem__ payload "total_steps"  total-steps)
+      (.__setitem__ payload "eval_every"   eval-every)
+      (.__setitem__ payload "ckpt_every"   ckpt-every)
+      (.__setitem__ payload "env"          env-snap)
+      (let [cfg-d (python/dict)]
+        (doseq [[k v] (seq config)]
+          (.__setitem__ cfg-d (str k) (str v)))
+        (.__setitem__ payload "config" cfg-d))
+      (let [f (python/open path "w")]
+        (.write f (.dumps json payload ** :indent 2))
+        (.close f))
+      (let [sha-short (if (>= (count sha) 8) (subs sha 0 8) sha)]
+        (println (format "  manifest: %s (git=%s)" path sha-short)))
+      (when log-path
+        (append-jsonl! log-path
+                       (format "{\"event\":\"manifest\",\"ts\":\"%s\",\"git_sha\":\"%s\",\"total_steps\":%d}"
+                               ts-str sha total-steps))))
+    (catch python/Exception e
+      (println (format "  WARN: write-run-manifest! failed: %s" e)))))
+
 (defn train-long
   "Long-running training with periodic eval + checkpoint + resume.
 
@@ -2024,6 +2200,22 @@
         mix-weights-t (when mix
                          (torch/tensor (python/list (map second mix))
                                        ** :dtype torch/float))
+        ;; Short label per corpus for the per-corpus loss line in step
+        ;; prints. Derives from the file path's basename (drop .bin /
+        ;; .train.bin suffix). E.g. /data/agent-corpus-v2/xlam.bin.train.bin
+        ;; → "xlam".
+        mix-labels   (when mix
+                       (python/list
+                         (for [[path _] mix]
+                           (-> path
+                               (.replace ".train.bin" "")
+                               (.replace ".bin" "")
+                               (.split "/")
+                               last))))
+        corpus-tracker (when mix (make-corpus-tracker (count mix)))
+        ;; Mutable cell for "wall-s at last 50-step print" — used to
+        ;; compute rolling tokens/sec. Python list = 1-element ref.
+        prev-print-s-ref (python/list [0.0])
         ;; Train file may be many GB — use_mmap=True keeps it on disk
         ;; (uint8 view, .long()-cast per batch). Pre-load val (typically
         ;; ≤500 MB) directly as int64 so eval-bpc's repeated narrow()
@@ -2059,6 +2251,11 @@
         volume     (get-modal-volume (pick-volume-name))
         do-sync?   (and volume (pos? sync-every) (:memory-mmap-path config))]
     (os/makedirs ckpt-dir ** :exist_ok true)
+    ;; Pre-flight: validate paths, forecast cost, fail fast on missing data.
+    (preflight! config train-path val-path mix total-steps)
+    ;; Reproducibility: write manifest with config + git SHA + env vars
+    ;; before any training happens. No-op if write fails (warn only).
+    (write-run-manifest! base-path config log-path total-steps eval-every ckpt-every)
     (when (pos? start-step)
       (println (format "  resuming from checkpoint at step %d" start-step))
       (load-checkpoint! m opt-dense opt-sparse opt-sparse-net ckpt-dir start-step))
@@ -2176,6 +2373,7 @@
               (append-jsonl! log-path
                              (format "{\"step\":%d,\"event\":\"session_end\",\"reason\":\"max_hours\",\"hours\":%.3f,\"wall_s\":%.1f}"
                                      step hrs (- (time/time) t0))))
+            (print-session-summary m start-step step base-path log-path t0 tracker)
             m)
           :else
           (let [warmup     (pick-lr-warmup)
@@ -2202,41 +2400,72 @@
                 ;; the first eval. Cheap (~5µs).
                 _      (set-train-mode! m)
                 B-cur (pick-batch)
-                [x y] (if mix
-                        (mix-batch mix-tensors mix-weights-t B-cur T)
-                        (batch train-data B-cur T))
+                [x y corpus-idx] (if mix
+                                   (mix-batch mix-tensors mix-weights-t B-cur T)
+                                   (let [[x y] (batch train-data B-cur T)] [x y nil]))
                 loss  (train-step m opt-dense opt-sparse opt-sparse-net x y)
                 _     (.add_tokens tracker (* B-cur T))
+                ;; Per-corpus loss tracker — running window of last 50
+                ;; losses per corpus index. Used by the 50-step print to
+                ;; show which corpora are easy / hard. nil idx = no-mix
+                ;; mode (single corpus from `train-data`); skip update.
+                _     (when corpus-idx
+                        (record-corpus-loss! corpus-tracker corpus-idx loss))
                 step' (inc step)]
             (when (zero? (mod step' 50))
-              (let [cur-lr   (if (pos? warmup)
-                               (lr-at-step step total-steps
-                                           (pick-lr) warmup (pick-lr-min))
-                               (pick-lr))
-                    d-mult   (pick-lr-dense-mult)
-                    b-mult   (pick-lr-bank-mult)
-                    n-mult   (pick-lr-net-mult)
-                    has-net? (some? opt-sparse-net)]
-                (cond
-                  ;; All-1.0 multipliers and no NetBank → minimal one-lr line
-                  (and (= 1.0 d-mult) (= 1.0 b-mult) (not has-net?))
-                  (println (format "  step %d  loss %.3f  lr %.2e  (%.1fs)"
-                                   step' loss cur-lr (- (time/time) t0)))
-                  ;; Two-tier (dense + local bank) with differential mults
-                  (not has-net?)
-                  (println (format "  step %d  loss %.3f  lr_dense %.2e  lr_bank %.2e  (%.1fs)"
-                                   step' loss
-                                   (* cur-lr d-mult)
-                                   (* cur-lr b-mult)
-                                   (- (time/time) t0)))
-                  ;; Three-tier (dense + local + netbank): full transparency
-                  :else
-                  (println (format "  step %d  loss %.3f  lr_dense %.2e  lr_bank %.2e  lr_net %.2e  (%.1fs)"
-                                   step' loss
-                                   (* cur-lr d-mult)
-                                   (* cur-lr b-mult)
-                                   (* cur-lr n-mult)
-                                   (- (time/time) t0))))))
+              (let [cur-lr     (if (pos? warmup)
+                                 (lr-at-step step total-steps
+                                             (pick-lr) warmup (pick-lr-min))
+                                 (pick-lr))
+                    d-mult     (pick-lr-dense-mult)
+                    b-mult     (pick-lr-bank-mult)
+                    n-mult     (pick-lr-net-mult)
+                    has-net?   (some? opt-sparse-net)
+                    wall-s     (- (time/time) t0)
+                    n-tokens   (* B-cur T 50)        ; ~tokens since last print
+                    prev-s     (.__getitem__ prev-print-s-ref 0)
+                    delta-s    (max 0.001 (- wall-s prev-s))
+                    tps        (/ n-tokens delta-s)
+                    _          (.__setitem__ prev-print-s-ref 0 wall-s)
+                    vram-gb    (try (/ (cuda/memory_allocated) 1.073741824e9)
+                                    (catch python/Exception _ 0.0))
+                    cost-usd   (* (/ wall-s 3600.0) 5.50)        ; H100 ~$5.50/h Modal
+                    ;; Per-corpus loss summary (only when mix is set)
+                    corp-summary (when corpus-tracker
+                                   (corpus-loss-summary corpus-tracker))
+                    ;; Build the lr substring
+                    lr-str (cond
+                             (and (= 1.0 d-mult) (= 1.0 b-mult) (not has-net?))
+                             (format "lr=%.2e" cur-lr)
+                             (not has-net?)
+                             (format "lr_d=%.2e lr_b=%.2e"
+                                     (* cur-lr d-mult) (* cur-lr b-mult))
+                             :else
+                             (format "lr_d=%.2e lr_b=%.2e lr_n=%.2e"
+                                     (* cur-lr d-mult)
+                                     (* cur-lr b-mult)
+                                     (* cur-lr n-mult)))]
+                ;; Main step line — fixed-width fields, easy to grep
+                (println (format "step %6d | loss %.3f | tps %.1fk | vram %.1fgb | $%.2f | wall %.0fs | %s"
+                                 step' loss
+                                 (/ tps 1000.0)
+                                 vram-gb
+                                 cost-usd
+                                 wall-s
+                                 lr-str))
+                ;; Per-corpus loss line (only when mix and >=1 corpus has data)
+                (when (and corp-summary (pos? (count corp-summary)))
+                  (let [parts (python/list)]
+                    (doseq [t corp-summary]
+                      (let [i      (.__getitem__ t 0)
+                            mean-l (.__getitem__ t 2)
+                            label  (when mix-labels (nth mix-labels i))]
+                        (.append parts (format "%s=%.2f" (or label (str "c" i)) mean-l))))
+                    (println (str "         by-corpus[ema50]: "
+                                  (.join " " parts)))))
+                ;; (placeholder for any future per-step JSONL emit if we
+                ;; decide to surface tps / vram / cost into log.jsonl)
+                nil))
             ;; Cross-worker bank sync. Has to happen AFTER the optimizer
             ;; step (so dirty rows from this step are flushed) and outside
             ;; train-step's autograd graph. We sync before eval/ckpt so
