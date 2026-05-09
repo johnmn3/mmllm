@@ -2002,11 +2002,11 @@ PROD_CAPS = {
     # follow-up: byte-level format anchor needs more API-schema variety
     # than xLAM alone provides).
     "glaive-funcall":     ( 500_000_000,    20_000_000, 20_000_000),  # ~251MB raw HF → ~500MB after templating
-    "hermes-funcall":     ( 200_000_000,    10_000_000, 10_000_000),  # smaller, ~10-100k records
-    "toolace":            ( 100_000_000,    10_000_000, 10_000_000),  # 11.3k records, ~26k API pool
+    "hermes-funcall":     ( 200_000_000,     2_000_000,  2_000_000),  # smaller, ~10-100k records — small val/test
+    "toolace":            ( 100_000_000,     1_000_000,  1_000_000),  # 11.3k records, ~26k API pool — small splits
     # Format-only warmup: same source as xlam, args masked. Used for
     # short pre-mix saturation phases; no HF redownload, just retemplate.
-    "format-anchor":      ( 100_000_000,    10_000_000, 10_000_000),  # SAME src as xlam, smaller cap
+    "format-anchor":      ( 100_000_000,     1_000_000,  1_000_000),  # SAME src as xlam, ~13MB after value-masking
 }
 
 
