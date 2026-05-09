@@ -1747,39 +1747,30 @@
 ;;; pre-ablation state from disk via fresh mmap).
 
 (defn ablation-step!
-  "Save Local+NetBank V across all blocks, zero them, run eval-bpc,
-   restore V. Returns the ablated bpc (control bpc is read from the
-   regular eval that just preceded this call). Both banks are bit-
-   identical after return.
+  "Save Local V across all blocks, zero them, run eval-bpc, restore V.
+   Returns the ablated bpc (control bpc is read from the regular eval
+   that just preceded this call).
 
-   Cost: one extra eval-bpc pass + transient ~bank-size clone in RAM.
-   At sqrt_n=2048 that's ~18.8 GB transient (Local), plus per-layer
-   net.V clone if NetBank is enabled (~8.6 GB at sqrt_n=8192/c_net=64).
+   Phase 0-3 semantics preserved: ablation Δ measures the Local Bank's
+   contribution. NetBank (when enabled) is INTENTIONALLY left untouched
+   during ablation — cloning a second on-GPU 21.5GB bank V just to
+   restore it later would push past H100 80GB VRAM (live ~40GB +
+   2× clones = ~80GB). NetBank-only Δ would be a useful metric but
+   requires a separate code path (offload to CPU before clone, etc.).
 
-   Phase 4+ semantics: ablation Δ measures the COMBINED Local+NetBank
-   contribution. The Δ jumps vs prior phases when NetBank turns on;
-   that's expected — it's measuring a different quantity now."
+   Cost: one extra eval-bpc pass + Local V clone (~18.8 GB transient
+   at sqrt_n=2048)."
   [m val-data T B max-toks]
   (let [saved-local (mapv #(.. (:memory %) -V -weight detach clone)
-                          (:blocks m))
-        saved-net   (mapv (fn [b]
-                            (when-let [nb (:netbank b)]
-                              (.. nb -V -weight detach clone)))
                           (:blocks m))]
     (try
-      (doseq [b (:blocks m)]
-        (.zero_bank (:memory b))
-        (when-let [nb (:netbank b)] (.zero_bank nb)))
+      (doseq [b (:blocks m)] (.zero_bank (:memory b)))
       (let [r (eval-bpc m val-data T B max-toks)]
         (:bpc r))
       (finally
         (doseq [[b s] (map vector (:blocks m) saved-local)]
           (with [_ (torch/no_grad)]
-            (.copy_ (.- (.- (:memory b) V) weight) s)))
-        (doseq [[b s] (map vector (:blocks m) saved-net)]
-          (when (and s (:netbank b))
-            (with [_ (torch/no_grad)]
-              (.copy_ (.- (.- (:netbank b) V) weight) s))))))))
+            (.copy_ (.- (.- (:memory b) V) weight) s)))))))
 
 ;;; ─────────────────────── train + eval text8 / enwik8 ───────────────────────
 
@@ -2135,10 +2126,8 @@
                   (append-jsonl! log-path
                                  (format "{\"step\":%d,\"event\":\"bank_saved\",\"bank_path\":\"%s\",\"wall_s\":%.1f}"
                                          step bank-path (- (time/time) t0)))))
-              (println "  ── ablation: zeroing bank V (Local + NetBank) across all 5 blocks ──")
-              (doseq [b (:blocks m)]
-                (.zero_bank (:memory b))
-                (when-let [nb (:netbank b)] (.zero_bank nb)))
+              (println "  ── ablation: zeroing Local Bank V across all 5 blocks (NetBank kept active) ──")
+              (doseq [b (:blocks m)] (.zero_bank (:memory b)))
               (println "  ── eval at end (ablation: bank zeroed) ──")
               (let [r-abl (eval-bpc m val-data T 16 100000)
                     delta (- (:bpc r-abl) (:bpc r-ctrl))]
