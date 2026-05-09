@@ -369,6 +369,57 @@ def prepare_pile_github(max_bytes: int = 5_000_000_000,
 @app.function(
     image=image,
     volumes={"/data": volume},
+    timeout=21600,   # up to 6 h — generation is single-process, ~few-K rec/s
+    cpu=4.0,
+    memory=16384,
+)
+def build_aesop_curriculum(out_path:      str = "/data/aesop-curriculum.bin",
+                           n_per_example: int = 200,
+                           seed:          int = 0,
+                           val_bytes:     int = 50_000_000,
+                           test_bytes:    int = 50_000_000):
+    """Generate the K-12 Clojure curriculum byte-bin on Modal.
+
+    Walks every (fable, grade, subject, example) across the 5
+    Phase-C-complete fables and writes `n_per_example` records per
+    example. Default n=200 → ~1.2M records / ~600 MB byte-bin —
+    sized to fill the 60% fable share of a 1B-token training run.
+
+    Output layout matches all other corpora on the volume:
+      <out_path>           flat byte stream
+      <out_path>.train.bin
+      <out_path>.val.bin
+      <out_path>.test.bin
+
+    Each record is rendered through DEFAULT_TEMPLATE (sys + user +
+    asst, with `\\n<|end|>\\n` closers) — same shape as every
+    other formatter in mmllm.datasets, so the byte-bin is a
+    drop-in for `--mix`.
+    """
+    import subprocess
+    from pathlib import Path
+    print(f"=== build-aesop-curriculum n_per_example={n_per_example} "
+          f"seed={seed} → {out_path} ===", flush=True)
+    Path(out_path).parent.mkdir(parents=True, exist_ok=True)
+    subprocess.run(
+        ["python", "-m", "mmllm.aesop.generate",
+         "--curriculum",
+         "--out", out_path,
+         "--n", str(n_per_example),
+         "--seed", str(seed),
+         "--val-bytes", str(val_bytes),
+         "--test-bytes", str(test_bytes)],
+        check=True,
+    )
+    volume.commit()
+    final_size = Path(out_path).stat().st_size
+    print(f"done — aesop-curriculum prepared on volume "
+          f"({final_size/1e9:.2f} GB)", flush=True)
+
+
+@app.function(
+    image=image,
+    volumes={"/data": volume},
     timeout=3600,
     cpu=4.0,
     memory=16384,
