@@ -770,33 +770,47 @@
    memory bank V.weight per block (sparse — see sparse-parameters).
    The LM head is weight-tied to tok-emb so doesn't appear separately.
 
-   The optional `:mtp-head` (multi-token-prediction t+2 aux head) is
-   appended at the END so positional ckpt loading from a pre-MTP ckpt
-   still aligns; the new mtp-head stays at fresh init on first load.
-   Same convention for NetBank dense params (K_a/K_b/q_norm/expander)
-   — appended at the very end so an old ckpt's positional load doesn't
-   misalign onto NetBank's K_a."
+   Backward-compat ordering: anything that may have ZERO params in a
+   prior ckpt's gate config (e.g. SumGate had 0, SwitchGate has 2)
+   is appended at the END of the list. That way switching to a gate
+   with MORE params doesn't shift the positional map of all the
+   tensors that come after it — old ckpt's K_a/K_b/q_norm don't get
+   misaligned onto the new gate's gate_proj.
+
+   Order:
+     1. tok-emb
+     2. per-block CORE (norm1, norm2, q/k/s/v/l-projs, FFN, bank-query,
+        bank-feedback, memory's dense params)
+     3. norm-final
+     4. mtp-head (optional, at END so pre-MTP ckpts load cleanly)
+     5. per-block long-gate (at END for the same reason — SumGate→
+        SwitchGate transition would otherwise misalign)
+     6. per-block netbank dense (at END so a pre-NetBank ckpt loads
+        cleanly into a NetBank-enabled model)"
   [m]
   (let [{:keys [tok-emb blocks norm-final mtp-head]} m
-        block-params (fn [b]
-                       (concat
-                        (mapcat #(python/list (.parameters (get b %)))
-                                [:norm1 :norm2 :q-proj
-                                 :k-proj-s :v-proj-s
-                                 :k-proj-l :v-proj-l
-                                 :o-proj :gate-proj :up-proj :down-proj
-                                 :long-gate :bank-query :bank-feedback])
-                        ;; memory: K_a, K_b are dense; V.weight is sparse
-                        (.dense_parameters (:memory b))))
+        ;; CORE block params (excluding long-gate which is appended at end)
+        core-params (fn [b]
+                      (concat
+                       (mapcat #(python/list (.parameters (get b %)))
+                               [:norm1 :norm2 :q-proj
+                                :k-proj-s :v-proj-s
+                                :k-proj-l :v-proj-l
+                                :o-proj :gate-proj :up-proj :down-proj
+                                :bank-query :bank-feedback])
+                       ;; memory: K_a, K_b dense; q_norm.weight at end
+                       ;; (V.weight is sparse, see sparse-parameters)
+                       (.dense_parameters (:memory b))))
+        gate-params (fn [b]
+                      (python/list (.parameters (:long-gate b))))
         netbank-params (fn [b]
                          (when-let [nb (:netbank b)]
                            (.dense_parameters nb)))]
     (concat (python/list (.parameters tok-emb))
-            (mapcat block-params blocks)
+            (mapcat core-params blocks)
             (python/list (.parameters norm-final))
             (when mtp-head (python/list (.parameters mtp-head)))
-            ;; NetBank dense params at the very end — keeps old ckpts
-            ;; loadable when MMLLM_NETBANK_ENABLED toggles on/off.
+            (mapcat gate-params blocks)
             (mapcat netbank-params blocks))))
 
 (defn sparse-parameters
