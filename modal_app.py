@@ -604,7 +604,13 @@ def _run_train_long(total_steps, eval_every, ckpt_every, device, lr,
            "MMLLM_NET_DELAY_MS_MIN":   str(netbank_delay_ms_min),
            "MMLLM_NET_DELAY_MS_MAX":   str(netbank_delay_ms_max),
            "MMLLM_NET_BANK_ON_GPU":    "true" if netbank_on_gpu else "false",
-           "MMLLM_LR_NET_MULT":        str(lr_net_mult)}
+           "MMLLM_LR_NET_MULT":        str(lr_net_mult),
+           # Expandable allocator avoids the fragmentation pattern that
+           # OOM'd Phase 4 at the first ablation: the allocator was holding
+           # ~17 GB of cached-but-unallocated memory it couldn't reuse for
+           # a 4 GB request. expandable_segments lets PyTorch grow segments
+           # rather than allocate fixed-size chunks.
+           "PYTORCH_CUDA_ALLOC_CONF":  "expandable_segments:True"}
     if netbank_path is not None:
         env["MMLLM_NET_BANK_PATH"] = netbank_path
     if sqrt_n is not None:
