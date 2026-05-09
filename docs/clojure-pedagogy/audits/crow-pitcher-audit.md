@@ -690,9 +690,9 @@ Auto-generated audit — each subject's examples checked at 3 records per exampl
 - variety @ n=50: 1.00
 - issues: {'LOW_GROUNDING': 1, 'STORY_SLOT_NOUN_REPEAT': 3}
     - [LOW_GROUNDING] form=`(namespace :owner/item)` — user_msg lacks both a form-literal anchor and an EMO-pool phrase — no environmental grounding
-    - [STORY_SLOT_NOUN_REPEAT] form=`(name :owner/item)` — the noun 'the slash' appears in all 4 story slots (scenario/need/mapping/resolution) — vary the imagery between beats
-    - [STORY_SLOT_NOUN_REPEAT] form=`(name :owner/item)` — the noun 'the slash' appears in all 4 story slots (scenario/need/mapping/resolution) — vary the imagery between beats
-    - [STORY_SLOT_NOUN_REPEAT] form=`(name :owner/item)` — the noun 'the slash' appears in all 4 story slots (scenario/need/mapping/resolution) — vary the imagery between beats
+    - [STORY_SLOT_NOUN_REPEAT] form=`(name :owner/item)` — the noun 'the local name' appears in all 4 story slots (scenario/need/mapping/resolution) — vary the imagery between beats
+    - [STORY_SLOT_NOUN_REPEAT] form=`(name :owner/item)` — the noun 'the local name' appears in all 4 story slots (scenario/need/mapping/resolution) — vary the imagery between beats
+    - [STORY_SLOT_NOUN_REPEAT] form=`(name :owner/item)` — the noun 'the local name' appears in all 4 story slots (scenario/need/mapping/resolution) — vary the imagery between beats
 
 ### G6-11: Classpath
 
@@ -1974,7 +1974,7 @@ Caw stood at the pitcher's rim in the hilltop field, a circuit chalked beneath h
 
 #### STORY_SLOT_NOUN_REPEAT
 
-- `G6-05` (form `(name :owner/item)`): the noun 'the slash' appears in all 4 story slots (scenario/need/mapping/resolution) — vary the imagery between beats
+- `G6-05` (form `(name :owner/item)`): the noun 'the local name' appears in all 4 story slots (scenario/need/mapping/resolution) — vary the imagery between beats
     ```
     The water sat at the bottom of the jar, deep enough to glimpse and far enough to tantalize.
 
@@ -1982,7 +1982,7 @@ Korvus inspected the same two-part keyword stone at the market: shelf's name bef
 
 He needed th...
     ```
-- `G6-05` (form `(name :owner/item)`): the noun 'the slash' appears in all 4 story slots (scenario/need/mapping/resolution) — vary the imagery between beats
+- `G6-05` (form `(name :owner/item)`): the noun 'the local name' appears in all 4 story slots (scenario/need/mapping/resolution) — vary the imagery between beats
     ```
     In a year when the wells ran low, a single jar of water was a small kingdom unto itself.
 
@@ -1990,7 +1990,7 @@ Murk the crow, patient as the water rose, pressed a talon-tip into the
 pitcher's clay rim near the orchard, carving a name with care. The clay was
 soft only briefly; once dry, the carving would last for every l...
     ```
-- `G6-05` (form `(name :owner/item)`): the noun 'the slash' appears in all 4 story slots (scenario/need/mapping/resolution) — vary the imagery between beats
+- `G6-05` (form `(name :owner/item)`): the noun 'the local name' appears in all 4 story slots (scenario/need/mapping/resolution) — vary the imagery between beats
     ```
     Some problems cannot be hurried; they only respond to the slow addition of small things.
 
