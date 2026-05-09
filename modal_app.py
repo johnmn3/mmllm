@@ -526,7 +526,12 @@ def _run_train_long(total_steps, eval_every, ckpt_every, device, lr,
                     max_hours=0.0, mix="",
                     lr_dense_mult=1.0, lr_bank_mult=1.0,
                     z_loss_coef=0.0, mtp_coef=0.0,
-                    slot_log_every=0, dead_slot_reinit=False):
+                    slot_log_every=0, dead_slot_reinit=False,
+                    netbank_enabled=False, netbank_path=None,
+                    netbank_sqrt_n=8192, netbank_c_net=64,
+                    netbank_top_k=64, netbank_sub_top_k=64,
+                    netbank_delay_ms_min=1.0, netbank_delay_ms_max=10.0,
+                    lr_net_mult=1.0):
     """Shared body. All knobs threaded via env vars (MMLLM_DEVICE,
     MMLLM_LR, MMLLM_BATCH, MMLLM_SQRT_N, MMLLM_CPU_OFFLOAD,
     MMLLM_BANK_ON_GPU, MMLLM_SYNC_EVERY, MMLLM_VOLUME_NAME,
@@ -589,7 +594,17 @@ def _run_train_long(total_steps, eval_every, ckpt_every, device, lr,
            "MMLLM_Z_LOSS_COEF":        str(z_loss_coef),
            "MMLLM_MTP_COEF":           str(mtp_coef),
            "MMLLM_SLOT_LOG_EVERY":     str(slot_log_every),
-           "MMLLM_DEAD_SLOT_REINIT":   "true" if dead_slot_reinit else "false"}
+           "MMLLM_DEAD_SLOT_REINIT":   "true" if dead_slot_reinit else "false",
+           "MMLLM_NETBANK_ENABLED":    "true" if netbank_enabled else "false",
+           "MMLLM_NET_SQRT_N":         str(netbank_sqrt_n),
+           "MMLLM_NET_C_NET":          str(netbank_c_net),
+           "MMLLM_NET_TOP_K":          str(netbank_top_k),
+           "MMLLM_NET_SUB_TOP_K":      str(netbank_sub_top_k),
+           "MMLLM_NET_DELAY_MS_MIN":   str(netbank_delay_ms_min),
+           "MMLLM_NET_DELAY_MS_MAX":   str(netbank_delay_ms_max),
+           "MMLLM_LR_NET_MULT":        str(lr_net_mult)}
+    if netbank_path is not None:
+        env["MMLLM_NET_BANK_PATH"] = netbank_path
     if sqrt_n is not None:
         env["MMLLM_SQRT_N"] = str(sqrt_n)
     if cpu_offload:
@@ -654,6 +669,15 @@ def train_with_bank(
     mtp_coef: float = 0.0,               # multi-byte-prediction t+2 aux head coefficient (0.25 typical)
     slot_log_every: int = 0,             # log per-layer PKM slot-utilization entropy every N steps
     dead_slot_reinit: bool = False,      # at slot-log events, reinit dead K_a/K_b rows + their V slice
+    netbank_enabled: bool = False,       # enable the off-machine "long-term memory" tier (NetBank)
+    netbank_path: str = "",              # mmap path prefix; defaults to <bank>+'-net' if unset
+    netbank_sqrt_n: int = 8192,          # NetBank side length (entries = sqrt_n²); 8192 → 67M entries
+    netbank_c_net: int = 64,             # NetBank V bottleneck dim (rows stored as c_net latents)
+    netbank_top_k: int = 64,             # rows retrieved per NetBank query (larger payload)
+    netbank_sub_top_k: int = 64,         # sub-keys retained per K_a/K_b half before re-rank
+    netbank_delay_ms_min: float = 1.0,   # min simulated WAN delay per NetBank forward (ms)
+    netbank_delay_ms_max: float = 10.0,  # max simulated WAN delay (uniform random in [min, max])
+    lr_net_mult: float = 1.0,            # multiplier on NetBank's SparseAdam lr
     base: str = "/data/text8",
     bank: str = "/data/bank",
     corpus_base: str = "",               # if set and != base, symlink corpus splits
@@ -732,6 +756,15 @@ def train_with_bank(
         mtp_coef=mtp_coef,
         slot_log_every=slot_log_every,
         dead_slot_reinit=dead_slot_reinit,
+        netbank_enabled=netbank_enabled,
+        netbank_path=(netbank_path or None),
+        netbank_sqrt_n=netbank_sqrt_n,
+        netbank_c_net=netbank_c_net,
+        netbank_top_k=netbank_top_k,
+        netbank_sub_top_k=netbank_sub_top_k,
+        netbank_delay_ms_min=netbank_delay_ms_min,
+        netbank_delay_ms_max=netbank_delay_ms_max,
+        lr_net_mult=lr_net_mult,
     )
     if publish_after:
         # Spawn publish on its own container (uses publish_image w/ gh CLI).

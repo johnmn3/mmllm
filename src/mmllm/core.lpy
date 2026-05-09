@@ -34,6 +34,7 @@
            [torch.nn.functional :as F]
            [torch.optim :as optim]
            [mmllm.memory :as mem]
+           [mmllm.netbank :as netb]
            [mmllm.corpus :as corp]
            [mmllm.artifacts :as art]
            [mmllm.gating :as gate]
@@ -149,6 +150,84 @@
   "Effective bank (SparseAdam) peak lr = pick-lr × pick-lr-bank-mult."
   []
   (* (pick-lr) (pick-lr-bank-mult)))
+
+;;; ─────────────────────── NetBank (off-machine long-term memory tier) ───────────────────────
+
+(defn pick-netbank-enabled?
+  "Whether the NetBank tier is active for this run. Reads
+   MMLLM_NETBANK_ENABLED (default 'false'). When false the model is
+   strictly two-tier (SDPA + Local Bank) and existing ckpts load
+   identically to pre-NetBank code."
+  []
+  (let [v (.lower (.get (.- os environ) "MMLLM_NETBANK_ENABLED" "false"))]
+    (.__contains__ #{"1" "true" "yes"} v)))
+
+(defn pick-netbank-sqrt-n
+  "Side length of NetBank (entries = sqrt_n²). Reads MMLLM_NET_SQRT_N
+   (default 8192 → 67M entries). Independent of Local Bank's sqrt_n."
+  []
+  (python/int (.get (.- os environ) "MMLLM_NET_SQRT_N" "8192")))
+
+(defn pick-netbank-c-net
+  "Bottleneck dim of NetBank V (rows stored as c_net latents, expanded
+   to q_dim by a learned Linear). Reads MMLLM_NET_C_NET (default 64)."
+  []
+  (python/int (.get (.- os environ) "MMLLM_NET_C_NET" "64")))
+
+(defn pick-netbank-top-k
+  "Rows retrieved per NetBank query (larger payload amortizes the
+   simulated round-trip). Reads MMLLM_NET_TOP_K (default 64)."
+  []
+  (python/int (.get (.- os environ) "MMLLM_NET_TOP_K" "64")))
+
+(defn pick-netbank-sub-top-k
+  "Sub-keys retained per K_a/K_b half before re-rank. Reads
+   MMLLM_NET_SUB_TOP_K (default 64). Capped to sqrt_n inside NetBank."
+  []
+  (python/int (.get (.- os environ) "MMLLM_NET_SUB_TOP_K" "64")))
+
+(defn pick-netbank-delay-min
+  "Minimum simulated WAN delay per NetBank forward, in milliseconds.
+   Reads MMLLM_NET_DELAY_MS_MIN (default 1.0). Set both min and max
+   to 0 to disable the delay."
+  []
+  (python/float (.get (.- os environ) "MMLLM_NET_DELAY_MS_MIN" "1.0")))
+
+(defn pick-netbank-delay-max
+  "Maximum simulated WAN delay per NetBank forward, in milliseconds.
+   Reads MMLLM_NET_DELAY_MS_MAX (default 10.0)."
+  []
+  (python/float (.get (.- os environ) "MMLLM_NET_DELAY_MS_MAX" "10.0")))
+
+(defn pick-netbank-dtype
+  "NetBank V dtype. Reads MMLLM_NET_DTYPE (default 'fp32'). fp16
+   available but causes SparseAdam underflow/overflow on small models;
+   use fp32 until we ship a mixed-precision optimizer."
+  []
+  (.lower (.get (.- os environ) "MMLLM_NET_DTYPE" "fp32")))
+
+(defn pick-netbank-path
+  "Per-layer mmap path prefix for NetBank V. Reads MMLLM_NET_BANK_PATH;
+   if unset, derive from <bank>+'-net' so a `--bank /data/foo` flow
+   gets `/data/foo-net.<i>.bin`. Empty string or nil bank-path → returns
+   nil (NetBank V uses an in-RAM nn.Embedding, not mmap)."
+  [bank-path]
+  (or (.get (.- os environ) "MMLLM_NET_BANK_PATH")
+      (when (and bank-path (not (zero? (count bank-path))))
+        (str bank-path "-net"))))
+
+(defn pick-lr-net-mult
+  "Multiplier on NetBank's SparseAdam lr. Reads MMLLM_LR_NET_MULT
+   (default 1.0). Default Phase-4 schedule: 5.0 (half of Local Bank's
+   10.0). Cooled later in the curriculum like Local but on a separate
+   schedule."
+  []
+  (python/float (.get (.- os environ) "MMLLM_LR_NET_MULT" "1.0")))
+
+(defn pick-lr-net
+  "Effective NetBank (SparseAdam) peak lr = pick-lr × pick-lr-net-mult."
+  []
+  (* (pick-lr) (pick-lr-net-mult)))
 
 (defn pick-batch
   "Resolve training batch size. Reads MMLLM_BATCH (int string,
@@ -545,7 +624,7 @@
   ([block x cos sin short-cache long-cache skip-bank?]
    (let [{:keys [norm1 norm2
                  q-proj k-proj-s v-proj-s k-proj-l v-proj-l o-proj
-                 memory long-gate bank-query bank-feedback
+                 memory netbank long-gate bank-query bank-feedback
                  gate-proj up-proj down-proj
                  n-heads n-short-heads n-long-heads
                  n-short-kv-heads n-long-kv-heads head-dim max-t
@@ -559,7 +638,8 @@
        n-short-kv-heads n-long-kv-heads head-dim max-t
        short-window long-window
        x cos sin short-cache long-cache
-       ** :skip_bank skip-bank?))))
+       ** :skip_bank skip-bank?
+       :netbank netbank))))
 
 (defn build-block
   [{:keys [d-model n-heads n-short-heads n-long-heads
@@ -619,19 +699,33 @@
      :memory    (memory-cls q-dim sqrt-n
                             ** :top_k     memory-top-k
                             :sub_top_k memory-sub-top-k
-                            :mmap_path path)}))
+                            :mmap_path path)
+     :netbank   (when (pick-netbank-enabled?)
+                  (netb/NetBank q-dim
+                                ** :sqrt_n       (pick-netbank-sqrt-n)
+                                :c_net           (pick-netbank-c-net)
+                                :top_k           (pick-netbank-top-k)
+                                :sub_top_k       (pick-netbank-sub-top-k)
+                                :mmap_path       (when-let [base (pick-netbank-path memory-mmap-path)]
+                                                   (str base "." block-idx ".bin"))
+                                :delay_ms_min    (pick-netbank-delay-min)
+                                :delay_ms_max    (pick-netbank-delay-max)
+                                :dtype           (pick-netbank-dtype)))}))
 
 ;;; ─────────────────────── model ───────────────────────
 
 (defn- block-to-device!
-  "Move every nn.Module child of a block to `device`. ProductKeyMemory's
-   V is a CPUPinnedEmbedding whose _apply is a no-op, so its mmap-backed
-   weight stays on CPU even when device='cuda' — only K_a, K_b move."
+  "Move every nn.Module child of a block to `device`. ProductKeyMemory and
+   NetBank both wrap their V tensors in CPUPinnedEmbedding-style modules
+   whose `_apply` no-ops; the parent module's recursive .to() walks into
+   K_a/K_b/q_norm/expander but skips V, leaving the mmap on CPU."
   [block device]
   (doseq [k [:norm1 :norm2 :q-proj :k-proj-s :v-proj-s :k-proj-l :v-proj-l
              :o-proj :gate-proj :up-proj :down-proj
              :long-gate :bank-query :bank-feedback :memory]]
     (.to (get block k) device))
+  (when-let [nb (:netbank block)]
+    (.to nb device))
   block)
 
 (defn pick-mtp-coef
@@ -678,7 +772,10 @@
 
    The optional `:mtp-head` (multi-token-prediction t+2 aux head) is
    appended at the END so positional ckpt loading from a pre-MTP ckpt
-   still aligns; the new mtp-head stays at fresh init on first load."
+   still aligns; the new mtp-head stays at fresh init on first load.
+   Same convention for NetBank dense params (K_a/K_b/q_norm/expander)
+   — appended at the very end so an old ckpt's positional load doesn't
+   misalign onto NetBank's K_a."
   [m]
   (let [{:keys [tok-emb blocks norm-final mtp-head]} m
         block-params (fn [b]
@@ -690,18 +787,48 @@
                                  :o-proj :gate-proj :up-proj :down-proj
                                  :long-gate :bank-query :bank-feedback])
                         ;; memory: K_a, K_b are dense; V.weight is sparse
-                        (.dense_parameters (:memory b))))]
+                        (.dense_parameters (:memory b))))
+        netbank-params (fn [b]
+                         (when-let [nb (:netbank b)]
+                           (.dense_parameters nb)))]
     (concat (python/list (.parameters tok-emb))
             (mapcat block-params blocks)
             (python/list (.parameters norm-final))
-            (when mtp-head (python/list (.parameters mtp-head))))))
+            (when mtp-head (python/list (.parameters mtp-head)))
+            ;; NetBank dense params at the very end — keeps old ckpts
+            ;; loadable when MMLLM_NETBANK_ENABLED toggles on/off.
+            (mapcat netbank-params blocks))))
 
 (defn sparse-parameters
-  "SPARSE learnable parameters — route to SparseAdam. Backward
-   produces sparse gradients via nn.Embedding(sparse=True), so
-   only the touched rows get updated (and written back to mmap)."
+  "Local Bank sparse params — route to opt-sparse (SparseAdam).
+   See `netbank-sparse-parameters` for the third-tier route."
   [m]
   (mapcat #(.sparse_parameters (:memory %)) (:blocks m)))
+
+(defn netbank-sparse-parameters
+  "NetBank V.weight per block — route to opt-sparse-net (third
+   SparseAdam) with its own lr (pick-lr-net). Empty list when NetBank
+   is disabled, so the caller can skip optimizer construction without
+   special-casing."
+  [m]
+  (mapcat (fn [b] (when-let [nb (:netbank b)] (.sparse_parameters nb)))
+          (:blocks m)))
+
+(defn warm-start-netbanks-from-local!
+  "Per-block, copy Local Bank's K_a/K_b into the corresponding NetBank's
+   first `local.sqrt_n` rows. Bootstraps NetBank's retrieval geometry
+   from Local's so queries that score highly against Local also score
+   highly against the corresponding NetBank rows from step 0.
+   No-op when NetBank is disabled. Called by train-long when the resume
+   path detects a missing opt-sparse-net.pt (i.e. NetBank just turned on
+   for an existing dense-only run)."
+  [m]
+  (doseq [[i b] (map-indexed vector (:blocks m))]
+    (when-let [nb (:netbank b)]
+      (.warm_start_from nb
+                        (.- (:memory b) K_a)
+                        (.- (:memory b) K_b))
+      (println (format "  NetBank[layer %d] warm-started from Local K_a/K_b" i)))))
 
 (defn forward
   "Run the model.
@@ -805,28 +932,32 @@
                (.reshape y-trim -1))))))
 
 (defn train-step
-  [m opt-dense opt-sparse x y]
-  (let [device       (:device m)
-        x            (.to x device)
-        y            (.to y device)
-        [logits _ _ aux-logits] (forward m x)
-        T            (.size y 1)
-        ce-loss      (F/cross_entropy
-                      (.reshape logits -1 vocab-size)
-                      (.reshape y -1))
-        z-loss       (collect-z-loss m)
-        mtp-loss     (collect-mtp-loss aux-logits y T)
-        ;; Sum non-zero terms; numerics matter — adding a Python 0.0 to
-        ;; a tensor would coerce to a fp tensor scalar of value 0, fine.
-        loss         (cond-> ce-loss
-                       (not (number? z-loss))   (+ z-loss)
-                       (not (number? mtp-loss)) (+ mtp-loss))]
-    (.zero_grad opt-dense)
-    (.zero_grad opt-sparse)
-    (.backward loss)
-    (.step opt-dense)
-    (.step opt-sparse)
-    (.item ce-loss)))
+  ([m opt-dense opt-sparse x y]
+   (train-step m opt-dense opt-sparse nil x y))
+  ([m opt-dense opt-sparse opt-sparse-net x y]
+   (let [device       (:device m)
+         x            (.to x device)
+         y            (.to y device)
+         [logits _ _ aux-logits] (forward m x)
+         T            (.size y 1)
+         ce-loss      (F/cross_entropy
+                       (.reshape logits -1 vocab-size)
+                       (.reshape y -1))
+         z-loss       (collect-z-loss m)
+         mtp-loss     (collect-mtp-loss aux-logits y T)
+         ;; Sum non-zero terms; numerics matter — adding a Python 0.0 to
+         ;; a tensor would coerce to a fp tensor scalar of value 0, fine.
+         loss         (cond-> ce-loss
+                        (not (number? z-loss))   (+ z-loss)
+                        (not (number? mtp-loss)) (+ mtp-loss))]
+     (.zero_grad opt-dense)
+     (.zero_grad opt-sparse)
+     (when opt-sparse-net (.zero_grad opt-sparse-net))
+     (.backward loss)
+     (.step opt-dense)
+     (.step opt-sparse)
+     (when opt-sparse-net (.step opt-sparse-net))
+     (.item ce-loss))))
 
 (defn train
   "Train on the toy corpus. Returns the trained model.
@@ -1587,23 +1718,39 @@
 ;;; pre-ablation state from disk via fresh mmap).
 
 (defn ablation-step!
-  "Save bank V across all blocks, zero them, run eval-bpc, restore V.
-   Returns the ablated bpc (control bpc is read from the regular eval
-   that just preceded this call). Bank is bit-identical after return.
+  "Save Local+NetBank V across all blocks, zero them, run eval-bpc,
+   restore V. Returns the ablated bpc (control bpc is read from the
+   regular eval that just preceded this call). Both banks are bit-
+   identical after return.
 
    Cost: one extra eval-bpc pass + transient ~bank-size clone in RAM.
-   At sqrt_n=2048 that's ~18.8 GB transient (5 layers × 3.76 GB)."
+   At sqrt_n=2048 that's ~18.8 GB transient (Local), plus per-layer
+   net.V clone if NetBank is enabled (~8.6 GB at sqrt_n=8192/c_net=64).
+
+   Phase 4+ semantics: ablation Δ measures the COMBINED Local+NetBank
+   contribution. The Δ jumps vs prior phases when NetBank turns on;
+   that's expected — it's measuring a different quantity now."
   [m val-data T B max-toks]
-  (let [saved (mapv #(.. (:memory %) -V -weight detach clone)
-                    (:blocks m))]
+  (let [saved-local (mapv #(.. (:memory %) -V -weight detach clone)
+                          (:blocks m))
+        saved-net   (mapv (fn [b]
+                            (when-let [nb (:netbank b)]
+                              (.. nb -V -weight detach clone)))
+                          (:blocks m))]
     (try
-      (doseq [b (:blocks m)] (.zero_bank (:memory b)))
+      (doseq [b (:blocks m)]
+        (.zero_bank (:memory b))
+        (when-let [nb (:netbank b)] (.zero_bank nb)))
       (let [r (eval-bpc m val-data T B max-toks)]
         (:bpc r))
       (finally
-        (doseq [[b s] (map vector (:blocks m) saved)]
+        (doseq [[b s] (map vector (:blocks m) saved-local)]
           (with [_ (torch/no_grad)]
-            (.copy_ (.- (.- (:memory b) V) weight) s)))))))
+            (.copy_ (.- (.- (:memory b) V) weight) s)))
+        (doseq [[b s] (map vector (:blocks m) saved-net)]
+          (when (and s (:netbank b))
+            (with [_ (torch/no_grad)]
+              (.copy_ (.- (.- (:netbank b) V) weight) s))))))))
 
 ;;; ─────────────────────── train + eval text8 / enwik8 ───────────────────────
 
@@ -1674,8 +1821,10 @@
    crash mid-run loses any writes since the last commit. If `volume`
    is nil (non-Modal env or local dev), the commit step is skipped."
   ([m opt-dense opt-sparse ckpt-dir step]
-   (save-checkpoint! m opt-dense opt-sparse ckpt-dir step nil))
+   (save-checkpoint! m opt-dense opt-sparse nil ckpt-dir step nil))
   ([m opt-dense opt-sparse ckpt-dir step volume]
+   (save-checkpoint! m opt-dense opt-sparse nil ckpt-dir step volume))
+  ([m opt-dense opt-sparse opt-sparse-net ckpt-dir step volume]
    (let [path (str ckpt-dir "/step-" step)]
      (os/makedirs path ** :exist_ok true)
      (torch/save (python/list (for [p (parameters m)]
@@ -1683,6 +1832,12 @@
                  (str path "/dense.pt"))
      (torch/save (.state_dict opt-dense)  (str path "/opt-dense.pt"))
      (torch/save (.state_dict opt-sparse) (str path "/opt-sparse.pt"))
+     ;; NetBank's third optimizer state, only when NetBank is enabled.
+     ;; NetBank V doesn't need a separate save — it's mmap-backed at
+     ;; <base>-net.<i>.bin and every sparse-grad update writes through.
+     (when opt-sparse-net
+       (torch/save (.state_dict opt-sparse-net)
+                   (str path "/opt-sparse-net.pt")))
      ;; Save bank V to a fixed per-layer path (overwrite in place).
      ;; Skip on errors so a bank-save hiccup doesn't lose the dense
      ;; ckpt — but log loudly because the resume will be bad.
@@ -1721,13 +1876,21 @@
    first-ever save aborted), V stays at whatever build-model
    initialized it to and emits a loud warning — this is the failure
    mode that cost us 80k steps of bank training on the 5B+fb run."
-  [m opt-dense opt-sparse ckpt-dir step]
+  ([m opt-dense opt-sparse ckpt-dir step]
+   (load-checkpoint! m opt-dense opt-sparse nil ckpt-dir step))
+  ([m opt-dense opt-sparse opt-sparse-net ckpt-dir step]
   (let [path  (str ckpt-dir "/step-" step)
         saved (python/list (torch/load (str path "/dense.pt")))]
     (doseq [[p s] (map vector (parameters m) saved)]
       (.copy_ (.- p data) s))
     (.load_state_dict opt-dense  (torch/load (str path "/opt-dense.pt")))
     (.load_state_dict opt-sparse (torch/load (str path "/opt-sparse.pt")))
+    ;; NetBank's third-tier optimizer state. Optional on load — when an
+    ;; old (pre-NetBank) ckpt is being resumed and NetBank is now enabled,
+    ;; the file won't exist; opt-sparse-net stays at fresh init and
+    ;; SparseAdam adapts from there.
+    (when (and opt-sparse-net (os.path/exists (str path "/opt-sparse-net.pt")))
+      (.load_state_dict opt-sparse-net (torch/load (str path "/opt-sparse-net.pt"))))
     ;; Restore bank V if the bank-latest files exist. If they don't,
     ;; warn loudly — this is silent-data-loss territory otherwise.
     (let [bank-files (vec
@@ -1742,7 +1905,7 @@
           (println (format "  bank V restored from %s/bank-latest.{0..%d}.bin"
                            ckpt-dir (dec (count (:blocks m))))))
         (println (format "  WARN: bank V files missing in %s — V stays at random init.\n        Bank will need to retrain from scratch (the opt-state's m, v will\n        push it forward, but dense will see a useless bank for thousands of steps)."
-                         ckpt-dir))))))
+                         ckpt-dir)))))))
 
 (defn latest-checkpoint-step
   "Largest N for which <ckpt-dir>/step-N/ exists, or nil. Used on
@@ -1791,6 +1954,15 @@
         val-data   (corp/load-as-tensor val-path)
         opt-dense  (optim/AdamW    (python/list (parameters m))         ** :lr (pick-lr-dense))
         opt-sparse ((pick-sparse-optimizer) (python/list (sparse-parameters m)) ** :lr (pick-lr-bank))
+        ;; Third optimizer: NetBank's V_net. Constructed only when
+        ;; NetBank is enabled AND has sparse params (otherwise SparseAdam
+        ;; on an empty list errors). Tracks pick-lr-net for its peak lr,
+        ;; cooled independently from opt-sparse on the same cosine
+        ;; schedule with its own multiplier.
+        net-sparse-params (python/list (netbank-sparse-parameters m))
+        opt-sparse-net (when (pos? (count net-sparse-params))
+                         ((pick-sparse-optimizer) net-sparse-params
+                          ** :lr (pick-lr-net)))
         T          (:seq-len config)
         sqrt-n     (pick-sqrt-n config)
         bank-n     (* sqrt-n sqrt-n)
@@ -1810,7 +1982,18 @@
     (os/makedirs ckpt-dir ** :exist_ok true)
     (when (pos? start-step)
       (println (format "  resuming from checkpoint at step %d" start-step))
-      (load-checkpoint! m opt-dense opt-sparse ckpt-dir start-step))
+      (load-checkpoint! m opt-dense opt-sparse opt-sparse-net ckpt-dir start-step))
+    ;; NetBank warm-start trigger: if NetBank is enabled but the resume
+    ;; ckpt didn't contain opt-sparse-net.pt (i.e., NetBank is being
+    ;; turned on for the first time on an existing dense-only run), copy
+    ;; Local Bank's K_a/K_b into NetBank's first 2048 rows so retrieval
+    ;; geometry is bootstrapped instead of cold.
+    (when (and opt-sparse-net
+               (or (zero? start-step)
+                   (not (os.path/exists
+                          (str ckpt-dir "/step-" start-step "/opt-sparse-net.pt")))))
+      (println "  NetBank: opt-sparse-net.pt missing — warm-starting from Local Bank")
+      (warm-start-netbanks-from-local! m))
     (when (>= start-step total-steps)
       ;; Silent skip is the bug we hit on the first sync smoke: a stale
       ;; ckpt from a prior longer run made start-step exceed the new
@@ -1862,7 +2045,7 @@
         (cond
           (>= step total-steps)
           (do
-            (save-checkpoint! m opt-dense opt-sparse ckpt-dir step volume)
+            (save-checkpoint! m opt-dense opt-sparse opt-sparse-net ckpt-dir step volume)
             (println (format "training complete at step %d" step))
             ;; Inline bank ablation: eval (control), zero V across all blocks,
             ;; eval (ablation), report Δ. The Δ tells us how much of the
@@ -1887,8 +2070,10 @@
                   (append-jsonl! log-path
                                  (format "{\"step\":%d,\"event\":\"bank_saved\",\"bank_path\":\"%s\",\"wall_s\":%.1f}"
                                          step bank-path (- (time/time) t0)))))
-              (println "  ── ablation: zeroing bank V across all 5 blocks ──")
-              (doseq [b (:blocks m)] (.zero_bank (:memory b)))
+              (println "  ── ablation: zeroing bank V (Local + NetBank) across all 5 blocks ──")
+              (doseq [b (:blocks m)]
+                (.zero_bank (:memory b))
+                (when-let [nb (:netbank b)] (.zero_bank nb)))
               (println "  ── eval at end (ablation: bank zeroed) ──")
               (let [r-abl (eval-bpc m val-data T 16 100000)
                     delta (- (:bpc r-abl) (:bpc r-ctrl))]
@@ -1907,7 +2092,7 @@
           ;; out of time).
           (and max-seconds (>= (- (time/time) t0) max-seconds))
           (do
-            (save-checkpoint! m opt-dense opt-sparse ckpt-dir step volume)
+            (save-checkpoint! m opt-dense opt-sparse opt-sparse-net ckpt-dir step volume)
             (let [hrs (/ (- (time/time) t0) 3600.0)]
               (println (format "  ── session timeout at %.2f h / step %d — checkpointed and exiting ──"
                                hrs step))
@@ -1927,14 +2112,17 @@
                                                       (pick-lr) warmup
                                                       (pick-lr-min))
                                    d-mult (pick-lr-dense-mult)
-                                   b-mult (pick-lr-bank-mult)]
+                                   b-mult (pick-lr-bank-mult)
+                                   n-mult (pick-lr-net-mult)]
                                (set-opt-lr! opt-dense  (* cur-lr d-mult))
-                               (set-opt-lr! opt-sparse (* cur-lr b-mult))))
+                               (set-opt-lr! opt-sparse (* cur-lr b-mult))
+                               (when opt-sparse-net
+                                 (set-opt-lr! opt-sparse-net (* cur-lr n-mult)))))
                 B-cur (pick-batch)
                 [x y] (if mix
                         (mix-batch mix-tensors mix-weights-t B-cur T)
                         (batch train-data B-cur T))
-                loss  (train-step m opt-dense opt-sparse x y)
+                loss  (train-step m opt-dense opt-sparse opt-sparse-net x y)
                 _     (.add_tokens tracker (* B-cur T))
                 step' (inc step)]
             (when (zero? (mod step' 50))
@@ -1992,6 +2180,7 @@
             ;; reinit dead rows if enabled, then reset counters.
             (when (and (pos? slot-every) (zero? (mod step' slot-every)))
               (doseq [[i blk] (map-indexed vector (:blocks m))]
+                ;; Local Bank slot stats
                 (let [mem (:memory blk)
                       st  (.slot_usage_stats mem)
                       d-a (.get st "dead_a")
@@ -2006,11 +2195,29 @@
                       n-a (if reinit-summary (.get reinit-summary "n_ka_reinit") 0)
                       n-b (if reinit-summary (.get reinit-summary "n_kb_reinit") 0)]
                   (append-jsonl! log-path
-                                 (format "{\"step\":%d,\"event\":\"slot_usage\",\"layer\":%d,\"dead_a\":%d,\"dead_b\":%d,\"entropy_a\":%.3f,\"entropy_b\":%.3f,\"entropy_max\":%.3f,\"reinit_a\":%d,\"reinit_b\":%d,\"wall_s\":%.1f}"
+                                 (format "{\"step\":%d,\"event\":\"slot_usage\",\"tier\":\"local\",\"layer\":%d,\"dead_a\":%d,\"dead_b\":%d,\"entropy_a\":%.3f,\"entropy_b\":%.3f,\"entropy_max\":%.3f,\"reinit_a\":%d,\"reinit_b\":%d,\"wall_s\":%.1f}"
                                          step' i d-a d-b ea eb em n-a n-b (- (time/time) t0)))
-                  (.reset_slot_usage mem))))
+                  (.reset_slot_usage mem))
+                ;; NetBank slot stats (when enabled)
+                (when-let [nb (:netbank blk)]
+                  (let [st  (.slot_usage_stats nb)
+                        d-a (.get st "dead_a")
+                        d-b (.get st "dead_b")
+                        ea  (or (.get st "entropy_a") 0.0)
+                        eb  (or (.get st "entropy_b") 0.0)
+                        em  (or (.get st "entropy_a_max") 0.0)
+                        reinit-summary
+                        (if slot-reinit?
+                          (.reinit_dead_slots nb)
+                          nil)
+                        n-a (if reinit-summary (.get reinit-summary "n_ka_reinit") 0)
+                        n-b (if reinit-summary (.get reinit-summary "n_kb_reinit") 0)]
+                    (append-jsonl! log-path
+                                   (format "{\"step\":%d,\"event\":\"slot_usage\",\"tier\":\"net\",\"layer\":%d,\"dead_a\":%d,\"dead_b\":%d,\"entropy_a\":%.3f,\"entropy_b\":%.3f,\"entropy_max\":%.3f,\"reinit_a\":%d,\"reinit_b\":%d,\"wall_s\":%.1f}"
+                                           step' i d-a d-b ea eb em n-a n-b (- (time/time) t0)))
+                    (.reset_slot_usage nb)))))
             (when (zero? (mod step' ckpt-every))
-              (save-checkpoint! m opt-dense opt-sparse ckpt-dir step' volume)
+              (save-checkpoint! m opt-dense opt-sparse opt-sparse-net ckpt-dir step' volume)
               (println (format "  ── ckpt at step %d ──" step')))
             (recur step'))))
         (finally
