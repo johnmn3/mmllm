@@ -2066,14 +2066,15 @@
    forecasts > $50 (operator should set MMLLM_CONFIRM_COST=1 to opt in).
    Throws on hard failures, prints WARN on soft."
   [config train-path val-path mix total-steps]
-  (let [os-mod  (python/__import__ "os")
-        torch-mod (python/__import__ "torch")
-        ;; 1. Corpora exist
+  (let [torch-mod (python/__import__ "torch")
+        ;; 1. Validate training-required paths exist. Mix paths are
+        ;; already checked by pick-mix's load-as-tensor call (would
+        ;; have raised before reaching here), so we only verify the
+        ;; val-path + the train-path used in no-mix mode.
         paths   (concat
-                  [val-path]
-                  (when train-path [train-path])
-                  (when mix (map first mix)))
-        missing (vec (filter #(not (.exists (.- os-mod path) %)) paths))]
+                  (when val-path [val-path])
+                  (when (and (nil? mix) train-path) [train-path]))
+        missing (vec (filter #(not (os.path/exists %)) paths))]
     (when (seq missing)
       (throw (python/RuntimeError
                (format "preflight: missing corpus paths:\n  %s"
