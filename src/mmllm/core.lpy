@@ -1917,14 +1917,30 @@
       (println (format "  WARN load-checkpoint: %d/%d param tensors skipped due to shape mismatch (kept at fresh init)"
                        (.__getitem__ n-skipped 0)
                        (count saved))))
-    (.load_state_dict opt-dense  (torch/load (str path "/opt-dense.pt")))
-    (.load_state_dict opt-sparse (torch/load (str path "/opt-sparse.pt")))
+    ;; Optimizer state load is also tolerant — when the param topology
+    ;; changed (new gate / NetBank added), the saved state has fewer
+    ;; param groups than the live optimizer. PyTorch's load_state_dict
+    ;; raises ValueError in that case; we catch it and continue with
+    ;; fresh-init optimizer state. The first few thousand steps will
+    ;; have stronger gradients (no Adam momentum smoothing on new
+    ;; params), but training restabilizes quickly.
+    (try
+      (.load_state_dict opt-dense  (torch/load (str path "/opt-dense.pt")))
+      (catch python/Exception e
+        (println (format "  WARN load-checkpoint: opt-dense state skipped (topology change?) — %s" (str e)))))
+    (try
+      (.load_state_dict opt-sparse (torch/load (str path "/opt-sparse.pt")))
+      (catch python/Exception e
+        (println (format "  WARN load-checkpoint: opt-sparse state skipped — %s" (str e)))))
     ;; NetBank's third-tier optimizer state. Optional on load — when an
     ;; old (pre-NetBank) ckpt is being resumed and NetBank is now enabled,
     ;; the file won't exist; opt-sparse-net stays at fresh init and
     ;; SparseAdam adapts from there.
     (when (and opt-sparse-net (os.path/exists (str path "/opt-sparse-net.pt")))
-      (.load_state_dict opt-sparse-net (torch/load (str path "/opt-sparse-net.pt"))))
+      (try
+        (.load_state_dict opt-sparse-net (torch/load (str path "/opt-sparse-net.pt")))
+        (catch python/Exception e
+          (println (format "  WARN load-checkpoint: opt-sparse-net state skipped — %s" (str e))))))
     ;; Restore bank V if the bank-latest files exist. If they don't,
     ;; warn loudly — this is silent-data-loss territory otherwise.
     (let [bank-files (vec
