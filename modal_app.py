@@ -1998,6 +1998,15 @@ PROD_CAPS = {
     # error capture) if the token is missing or license unaccepted.
     "xlam":               ( 200_000_000,    10_000_000, 10_000_000),  # GATED — Salesforce/xlam-function-calling-60k
     "the-stack-clj":      (2_000_000_000,    20_000_000, 20_000_000),  # GATED — bigcode/the-stack-dedup (v1) clojure
+    # Tool-call diversity additions (per docs/router-bank-lr-decoupling
+    # follow-up: byte-level format anchor needs more API-schema variety
+    # than xLAM alone provides).
+    "glaive-funcall":     ( 500_000_000,    20_000_000, 20_000_000),  # ~251MB raw HF → ~500MB after templating
+    "hermes-funcall":     ( 200_000_000,    10_000_000, 10_000_000),  # smaller, ~10-100k records
+    "toolace":            ( 100_000_000,    10_000_000, 10_000_000),  # 11.3k records, ~26k API pool
+    # Format-only warmup: same source as xlam, args masked. Used for
+    # short pre-mix saturation phases; no HF redownload, just retemplate.
+    "format-anchor":      ( 100_000_000,    10_000_000, 10_000_000),  # SAME src as xlam, smaller cap
 }
 
 

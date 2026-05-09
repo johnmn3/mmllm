@@ -59,6 +59,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable, Iterable, Iterator
@@ -200,6 +201,294 @@ def fmt_xlam(rec: dict, tpl: ChatTemplate = DEFAULT_TEMPLATE) -> "str | None":
     return (
         tpl.system(sys_msg)
         + tpl.user(query)
+        + tpl.assistant(asst_body)
+    )
+
+
+_GLAIVE_FUNCALL_RE = re.compile(
+    r"<functioncall>\s*(\{.*?\})\s*</functioncall>", re.DOTALL
+)
+_HERMES_TOOLCALL_RE = re.compile(
+    r"<tool_call>\s*(\{.*?\})\s*</tool_call>", re.DOTALL
+)
+
+
+def _normalize_tool_call_dict(d: dict) -> "dict | None":
+    """Coerce a vendor-specific tool-call dict into our canonical
+    {name, args} shape. Returns None if not parseable.
+
+    Inputs we see in the wild:
+      Glaive:   {"name": "X", "arguments": "{json-string}"}
+      Hermes:   {"name": "X", "arguments": {parsed-json}}
+      OpenAI:   {"name": "X", "arguments": "{json-string}"}
+      ToolACE:  {"name": "X", "arguments": {...}}  (sometimes "args")
+    """
+    if not isinstance(d, dict):
+        return None
+    name = d.get("name") or d.get("tool")
+    if not name:
+        return None
+    args = d.get("arguments")
+    if args is None:
+        args = d.get("args")
+    if args is None:
+        args = {}
+    # Glaive's "arguments" is often a JSON-encoded STRING; parse it.
+    if isinstance(args, str):
+        try:
+            args = json.loads(args)
+        except json.JSONDecodeError:
+            # Some entries have malformed JSON in arguments; keep the
+            # string as-is so the model still sees the structure.
+            args = {"_raw": args}
+    if not isinstance(args, dict):
+        args = {"value": args}
+    return {"name": name, "args": args}
+
+
+def fmt_glaive(rec: dict, tpl: ChatTemplate = DEFAULT_TEMPLATE) -> "str | None":
+    """Glaive-function-calling-v2 (glaiveai/glaive-function-calling-v2).
+
+    Schema: chat is a single big string with role-prefixed turns,
+    plus a `system` field containing the tool catalog.
+
+    The assistant turn embeds tool calls inside <functioncall>{json}</functioncall>
+    XML wrappers. We MUST strip the wrappers before emitting — leaving
+    them in would teach the byte-LM the wrong anchor (our anchor is
+    `<|asst|>\\n` immediately followed by raw JSON, no XML).
+
+    Output: standard system + (multi) user/asst/tool turns. For asst
+    turns whose body contains a <functioncall>, replace the wrapper +
+    inner JSON with our canonical {"tool_calls":[{...}]}; everything
+    outside the wrapper is dropped to keep the anchor adjacency clean.
+    """
+    chat = rec.get("chat")
+    sys_field = rec.get("system")
+    if not isinstance(chat, str) or not chat.strip():
+        return None
+    sys_msg = sys_field.strip() if isinstance(sys_field, str) and sys_field.strip() else \
+              "You are a tool-using assistant."
+
+    # Glaive's chat string uses literal "USER:", "ASSISTANT:", "FUNCTION RESPONSE:"
+    # role prefixes. Split on them.
+    role_re = re.compile(r"\b(USER|ASSISTANT|FUNCTION RESPONSE):\s*")
+    parts = role_re.split(chat)
+    # split returns ['', 'USER', '<text>', 'ASSISTANT', '<text>', ...]
+    if len(parts) < 3:
+        return None
+
+    out = [tpl.system(sys_msg)]
+    i = 1
+    saw_asst = False
+    while i + 1 < len(parts):
+        role = parts[i].strip()
+        body = parts[i + 1].strip()
+        i += 2
+        if not body:
+            continue
+        if role == "USER":
+            out.append(tpl.user(body))
+        elif role == "ASSISTANT":
+            m = _GLAIVE_FUNCALL_RE.search(body)
+            if m:
+                try:
+                    inner = json.loads(m.group(1))
+                except json.JSONDecodeError:
+                    continue
+                norm = _normalize_tool_call_dict(inner)
+                if norm is None:
+                    continue
+                # Emit ONLY the canonical JSON in the asst turn — drop the
+                # natural-language preface and anything outside the
+                # <functioncall> wrapper. Keeps `<|asst|>\n` adjacent to `{`.
+                out.append(tpl.assistant(json.dumps({"tool_calls": [norm]})))
+                saw_asst = True
+            else:
+                # Plain assistant text turn (no tool call)
+                out.append(tpl.assistant(body))
+                saw_asst = True
+        elif role == "FUNCTION RESPONSE":
+            out.append(tpl.tool(body))
+    if not saw_asst:
+        return None
+    return "".join(out)
+
+
+def fmt_hermes_funcall(rec: dict, tpl: ChatTemplate = DEFAULT_TEMPLATE) -> "str | None":
+    """NousResearch/hermes-function-calling-v1 (any subset).
+
+    Schema (typical): conversations = [{"from": "system"/"human"/"gpt"/"tool",
+                                         "value": "<text>"}].
+
+    The assistant turns ('gpt') wrap tool calls in <tool_call>{json}</tool_call>
+    XML. Same problem and same fix as Glaive — strip the wrapper, emit
+    raw canonical JSON adjacent to <|asst|>\\n.
+    """
+    convs = rec.get("conversations") or rec.get("messages")
+    if not isinstance(convs, list) or not convs:
+        return None
+
+    out = []
+    saw_asst = False
+    for turn in convs:
+        if not isinstance(turn, dict):
+            continue
+        role = (turn.get("from") or turn.get("role") or "").lower()
+        body = turn.get("value") or turn.get("content")
+        if not isinstance(body, str) or not body.strip():
+            continue
+        body = body.strip()
+        if role in ("system",):
+            out.append(tpl.system(body))
+        elif role in ("human", "user"):
+            out.append(tpl.user(body))
+        elif role in ("gpt", "assistant"):
+            m = _HERMES_TOOLCALL_RE.search(body)
+            if m:
+                try:
+                    inner = json.loads(m.group(1))
+                except json.JSONDecodeError:
+                    continue
+                norm = _normalize_tool_call_dict(inner)
+                if norm is None:
+                    continue
+                out.append(tpl.assistant(json.dumps({"tool_calls": [norm]})))
+                saw_asst = True
+            else:
+                out.append(tpl.assistant(body))
+                saw_asst = True
+        elif role in ("tool", "function"):
+            out.append(tpl.tool(body))
+    if not saw_asst:
+        return None
+    return "".join(out)
+
+
+def fmt_toolace(rec: dict, tpl: ChatTemplate = DEFAULT_TEMPLATE) -> "str | None":
+    """Team-ACE/ToolACE.
+
+    Schema: conversations = [{"from": "system"/"user"/"assistant"/"tool",
+                              "value": "<text>"}]. Some splits use
+    `messages` with `role` instead of `from`.
+
+    Assistant tool-call turns: body is a JSON-encoded LIST of calls
+    (no XML wrapper, but the whole body is the JSON list, not our
+    {"tool_calls": [...]} object). We detect a leading `[` and convert.
+
+    Plain assistant text turns are emitted verbatim. ToolACE has very
+    diverse API schemas (~26k pool) — that's the diversity benefit.
+    """
+    convs = rec.get("conversations") or rec.get("messages")
+    if not isinstance(convs, list) or not convs:
+        return None
+
+    out = []
+    saw_asst = False
+    for turn in convs:
+        if not isinstance(turn, dict):
+            continue
+        role = (turn.get("from") or turn.get("role") or "").lower()
+        body = turn.get("value") or turn.get("content")
+        if not isinstance(body, str) or not body.strip():
+            continue
+        body = body.strip()
+        if role == "system":
+            out.append(tpl.system(body))
+        elif role in ("user", "human"):
+            out.append(tpl.user(body))
+        elif role in ("assistant", "gpt"):
+            # ToolACE's assistant tool-call turns are a JSON list of dicts.
+            if body.startswith("[") and "name" in body[:200]:
+                try:
+                    parsed = json.loads(body)
+                except json.JSONDecodeError:
+                    out.append(tpl.assistant(body))
+                    saw_asst = True
+                    continue
+                if isinstance(parsed, list):
+                    norms = [
+                        n for n in (_normalize_tool_call_dict(c) for c in parsed)
+                        if n is not None
+                    ]
+                    if norms:
+                        out.append(
+                            tpl.assistant(json.dumps({"tool_calls": norms}))
+                        )
+                        saw_asst = True
+                        continue
+            # Fallback: plain text assistant turn
+            out.append(tpl.assistant(body))
+            saw_asst = True
+        elif role in ("tool", "function"):
+            out.append(tpl.tool(body))
+    if not saw_asst:
+        return None
+    return "".join(out)
+
+
+def fmt_format_anchor(rec: dict, tpl: ChatTemplate = DEFAULT_TEMPLATE) -> "str | None":
+    """Format-only warmup variant.
+
+    Takes any tool-call record (xLAM/Glaive/ToolACE) and replaces the
+    argument VALUES with placeholders while keeping argument NAMES
+    and the JSON skeleton intact. The model sees the same structural
+    pattern over and over with different surface content stripped:
+
+        {"tool_calls":[{"name":"<TOOL>","args":{"a":"X","b":0,"c":[]}}]}
+
+    Goal (Schema-RL / SLOT 2025): hammer the schema skeleton into the
+    byte distribution before content learning, so format_validity can
+    crawl off zero. Trains on `xlam` records (preferred — most uniform).
+    """
+    query   = rec.get("query") or rec.get("instruction") or "What's the answer?"
+    ans_s   = rec.get("answers")
+    if not ans_s:
+        return None
+    try:
+        answers = json.loads(ans_s) if isinstance(ans_s, str) else ans_s
+    except json.JSONDecodeError:
+        return None
+    if not isinstance(answers, list) or not answers:
+        return None
+
+    norm_calls = []
+    for a in answers:
+        if not isinstance(a, dict):
+            continue
+        name = a.get("name") or a.get("tool")
+        if not name:
+            continue
+        args = a.get("arguments") or a.get("args") or {}
+        if isinstance(args, str):
+            try:
+                args = json.loads(args)
+            except json.JSONDecodeError:
+                args = {}
+        if not isinstance(args, dict):
+            args = {}
+        # Replace each value with a placeholder of matching type
+        masked = {}
+        for k, v in args.items():
+            if isinstance(v, bool):
+                masked[k] = False
+            elif isinstance(v, (int, float)):
+                masked[k] = 0
+            elif isinstance(v, list):
+                masked[k] = []
+            elif isinstance(v, dict):
+                masked[k] = {}
+            else:
+                masked[k] = "X"
+        # Keep the tool name (low cardinality, helps anchor) but drop
+        # the user query content
+        norm_calls.append({"name": name, "args": masked})
+    if not norm_calls:
+        return None
+
+    asst_body = json.dumps({"tool_calls": norm_calls})
+    return (
+        tpl.system("You are a tool-using assistant.")
+        + tpl.user("Q.")
         + tpl.assistant(asst_body)
     )
 
@@ -506,6 +795,45 @@ DATASET_REGISTRY = {
         "formatter": fmt_xlam,
         "kind":      "sft",
         "notes":     "60k JSON tool-call traces, single + parallel calls",
+    },
+    "glaive-funcall": {
+        "hf_name":   "glaiveai/glaive-function-calling-v2",
+        "hf_config": None,
+        "split":     "train",
+        "formatter": fmt_glaive,
+        "kind":      "sft",
+        "notes":     "113k function-call dialogues; <functioncall> XML "
+                     "wrappers stripped to canonical {tool_calls:[...]}",
+    },
+    "hermes-funcall": {
+        "hf_name":   "NousResearch/hermes-function-calling-v1",
+        "hf_config": None,
+        "split":     "train",
+        "formatter": fmt_hermes_funcall,
+        "kind":      "sft",
+        "notes":     "Hermes function-call corpus; <tool_call> XML "
+                     "wrappers stripped to canonical {tool_calls:[...]}",
+    },
+    "toolace": {
+        "hf_name":   "Team-ACE/ToolACE",
+        "hf_config": None,
+        "split":     "train",
+        "formatter": fmt_toolace,
+        "kind":      "sft",
+        "notes":     "11.3k synth tool-call dialogues, ~26k API pool — "
+                     "highest schema diversity",
+    },
+    "format-anchor": {
+        # Format-only warmup: re-uses xLAM records but masks argument
+        # values. Schema-RL / SLOT 2025: hammer the JSON skeleton into
+        # the byte distribution before content learning. Same HF source
+        # as `xlam`; only the formatter differs.
+        "hf_name":   "Salesforce/xlam-function-calling-60k",
+        "hf_config": None,
+        "split":     "train",
+        "formatter": fmt_format_anchor,
+        "kind":      "sft",
+        "notes":     "Schema-skeleton warmup (xLAM records, args masked)",
     },
     "magicoder": {
         "hf_name":   "ise-uiuc/Magicoder-Evol-Instruct-110K",
