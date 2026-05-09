@@ -1761,11 +1761,32 @@
     (when ckpt-step
       (let [path  (str ckpt-dir "/step-" ckpt-step)
             saved (python/list (torch/load (str path "/dense.pt")
-                                           ** :map_location device))]
+                                           ** :map_location device))
+            ;; Tolerant load: skip+warn on shape mismatch (mirrors
+            ;; load-checkpoint!). Eval's model topology may differ from
+            ;; the trainer's (e.g. MTP head only present if MMLLM_MTP_COEF
+            ;; > 0; switch gate / NetBank only if respective env flags
+            ;; on). Skipping aligns with "use whatever's compatible,
+            ;; leave the rest at fresh init for components that aren't
+            ;; relevant to eval anyway".
+            n-skipped (python/list [0])]
         (println (format "  loaded ckpt: %s (%d dense param tensors)"
                          path (count saved)))
-        (doseq [[p s] (map vector (parameters m) saved)]
-          (.copy_ (.- p data) s))
+        (doseq [[i [p s]] (map-indexed vector (map vector (parameters m) saved))]
+          (try
+            (.copy_ (.- p data) s)
+            (catch python/Exception e
+              (.__setitem__ n-skipped 0 (inc (.__getitem__ n-skipped 0)))
+              (when (< (.__getitem__ n-skipped 0) 5)
+                (println (format "  WARN eval-load: skip param %d (model %s vs saved %s) — %s"
+                                 i
+                                 (str (python/list (.- p shape)))
+                                 (str (python/list (.- s shape)))
+                                 (str e)))))))
+        (when (pos? (.__getitem__ n-skipped 0))
+          (println (format "  WARN eval-load: %d/%d param tensors skipped due to shape mismatch"
+                           (.__getitem__ n-skipped 0)
+                           (count saved))))
         (doseq [[i b] (map-indexed vector (:blocks m))]
           (try
             (.load_from_mmap (:memory b)
