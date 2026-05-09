@@ -2180,17 +2180,33 @@
                 _     (.add_tokens tracker (* B-cur T))
                 step' (inc step)]
             (when (zero? (mod step' 50))
-              (let [cur-lr (if (pos? warmup)
-                             (lr-at-step step total-steps
-                                         (pick-lr) warmup (pick-lr-min))
-                             (pick-lr))
-                    d-mult (pick-lr-dense-mult)
-                    b-mult (pick-lr-bank-mult)]
-                (if (and (= 1.0 d-mult) (= 1.0 b-mult))
+              (let [cur-lr   (if (pos? warmup)
+                               (lr-at-step step total-steps
+                                           (pick-lr) warmup (pick-lr-min))
+                               (pick-lr))
+                    d-mult   (pick-lr-dense-mult)
+                    b-mult   (pick-lr-bank-mult)
+                    n-mult   (pick-lr-net-mult)
+                    has-net? (some? opt-sparse-net)]
+                (cond
+                  ;; All-1.0 multipliers and no NetBank → minimal one-lr line
+                  (and (= 1.0 d-mult) (= 1.0 b-mult) (not has-net?))
                   (println (format "  step %d  loss %.3f  lr %.2e  (%.1fs)"
                                    step' loss cur-lr (- (time/time) t0)))
-                  (println (format "  step %d  loss %.3f  lr_d %.2e  lr_b %.2e  (%.1fs)"
-                                   step' loss (* cur-lr d-mult) (* cur-lr b-mult)
+                  ;; Two-tier (dense + local bank) with differential mults
+                  (not has-net?)
+                  (println (format "  step %d  loss %.3f  lr_dense %.2e  lr_bank %.2e  (%.1fs)"
+                                   step' loss
+                                   (* cur-lr d-mult)
+                                   (* cur-lr b-mult)
+                                   (- (time/time) t0)))
+                  ;; Three-tier (dense + local + netbank): full transparency
+                  :else
+                  (println (format "  step %d  loss %.3f  lr_dense %.2e  lr_bank %.2e  lr_net %.2e  (%.1fs)"
+                                   step' loss
+                                   (* cur-lr d-mult)
+                                   (* cur-lr b-mult)
+                                   (* cur-lr n-mult)
                                    (- (time/time) t0))))))
             ;; Cross-worker bank sync. Has to happen AFTER the optimizer
             ;; step (so dirty rows from this step are flushed) and outside
