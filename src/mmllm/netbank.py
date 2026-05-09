@@ -133,7 +133,8 @@ class NetBank(nn.Module):
                  mmap_path: str | None = None,
                  delay_ms_min: float = 1.0,
                  delay_ms_max: float = 10.0,
-                 dtype: str = "fp32"):
+                 dtype: str = "fp32",
+                 bank_on_gpu: bool = False):
         super().__init__()
         assert q_dim % 2 == 0, "q_dim must be even"
         assert c_net <= q_dim, "c_net (bottleneck dim) must be <= q_dim"
@@ -150,6 +151,7 @@ class NetBank(nn.Module):
         self.delay_ms_min = float(delay_ms_min)
         self.delay_ms_max = float(delay_ms_max)
         self.dtype_str = dtype
+        self.bank_on_gpu = bool(bank_on_gpu)
 
         # Query normalization (PEER 2024) — separate from Local's q_norm
         # since each tier learns its own scale.
@@ -168,20 +170,35 @@ class NetBank(nn.Module):
         self.expander = nn.Linear(c_net, q_dim, bias=False)
         nn.init.normal_(self.expander.weight, mean=0.0, std=1.0 / (c_net ** 0.5))
 
-        # V_net: sparse Embedding, mmap-backed in prod-flow. Wrapped in
-        # CPUPinnedEmbedding so parent .to(device) leaves V on CPU — V
-        # IS the off-machine tier, by definition not GPU-resident. Default
-        # dtype fp32 for SparseAdam numerical stability (fp16 SparseAdam
-        # state underflows / overflows easily); fp16 opt-in via dtype="fp16"
-        # once we ship a mixed-precision optimizer.
-        if mmap_path is not None:
+        # V_net storage. Three modes:
+        #
+        #   bank_on_gpu=True (training-fast path): plain nn.Embedding,
+        #   parent .to(cuda) moves V to VRAM. No mmap, no FUSE. Sized to
+        #   fit alongside Local Bank in 80GB VRAM (sqrt_n=4096+c_net=64
+        #   fp32 → 21.5GB total for NetBank). The 1-10ms simulated
+        #   delay still fires per forward to keep the model calibrated
+        #   to the production WAN-latency tier; the storage just isn't
+        #   actually off-machine during training.
+        #
+        #   bank_on_gpu=False, mmap_path set: CPUPinnedEmbedding wrapping
+        #   the mmap. parent .to(cuda) skips V (stays at host RAM /
+        #   FUSE). Truer to the "off-machine" simulation but adds real
+        #   FUSE latency on top of the simulated WAN delay.
+        #
+        #   bank_on_gpu=False, mmap_path=None: unit-test only — plain
+        #   nn.Embedding allocated wherever the parent ends up.
+        torch_dt = _DTYPE_MAP[dtype][1]
+        if self.bank_on_gpu:
+            self.V = nn.Embedding(self.n, c_net, sparse=True, dtype=torch_dt)
+            with torch.no_grad():
+                self.V.weight.normal_(0, 0.02)
+        elif mmap_path is not None:
             v_tensor = _mmap_value_tensor_typed(mmap_path, self.n, c_net, dtype)
             self.V = CPUPinnedEmbedding.from_pretrained(
                 v_tensor, freeze=False, sparse=True,
             )
         else:
-            # Unit-test path: no mmap, no CPU-pinning. Plain nn.Embedding.
-            torch_dt = _DTYPE_MAP[dtype][1]
+            # Unit-test path: no mmap, no CPU-pinning, plain nn.Embedding.
             self.V = nn.Embedding(self.n, c_net, sparse=True, dtype=torch_dt)
             with torch.no_grad():
                 self.V.weight.normal_(0, 0.02)

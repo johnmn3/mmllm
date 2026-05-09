@@ -531,6 +531,7 @@ def _run_train_long(total_steps, eval_every, ckpt_every, device, lr,
                     netbank_sqrt_n=8192, netbank_c_net=64,
                     netbank_top_k=64, netbank_sub_top_k=64,
                     netbank_delay_ms_min=1.0, netbank_delay_ms_max=10.0,
+                    netbank_on_gpu=False,
                     lr_net_mult=1.0):
     """Shared body. All knobs threaded via env vars (MMLLM_DEVICE,
     MMLLM_LR, MMLLM_BATCH, MMLLM_SQRT_N, MMLLM_CPU_OFFLOAD,
@@ -602,6 +603,7 @@ def _run_train_long(total_steps, eval_every, ckpt_every, device, lr,
            "MMLLM_NET_SUB_TOP_K":      str(netbank_sub_top_k),
            "MMLLM_NET_DELAY_MS_MIN":   str(netbank_delay_ms_min),
            "MMLLM_NET_DELAY_MS_MAX":   str(netbank_delay_ms_max),
+           "MMLLM_NET_BANK_ON_GPU":    "true" if netbank_on_gpu else "false",
            "MMLLM_LR_NET_MULT":        str(lr_net_mult)}
     if netbank_path is not None:
         env["MMLLM_NET_BANK_PATH"] = netbank_path
@@ -677,6 +679,7 @@ def train_with_bank(
     netbank_sub_top_k: int = 64,         # sub-keys retained per K_a/K_b half before re-rank
     netbank_delay_ms_min: float = 1.0,   # min simulated WAN delay per NetBank forward (ms)
     netbank_delay_ms_max: float = 10.0,  # max simulated WAN delay (uniform random in [min, max])
+    netbank_on_gpu: bool = False,        # NetBank V on GPU VRAM (training-fast) vs CPU mmap (production-realism)
     lr_net_mult: float = 1.0,            # multiplier on NetBank's SparseAdam lr
     base: str = "/data/text8",
     bank: str = "/data/bank",
@@ -764,6 +767,7 @@ def train_with_bank(
         netbank_sub_top_k=netbank_sub_top_k,
         netbank_delay_ms_min=netbank_delay_ms_min,
         netbank_delay_ms_max=netbank_delay_ms_max,
+        netbank_on_gpu=netbank_on_gpu,
         lr_net_mult=lr_net_mult,
     )
     if publish_after:

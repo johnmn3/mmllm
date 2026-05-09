@@ -206,6 +206,16 @@
   []
   (.lower (.get (.- os environ) "MMLLM_NET_DTYPE" "fp32")))
 
+(defn pick-netbank-on-gpu?
+  "Whether NetBank V lives in GPU VRAM (training-fast) vs host-RAM mmap
+   (production-realism). Reads MMLLM_NET_BANK_ON_GPU (default 'false').
+   On GPU: no FUSE / mmap latency, just the simulated 1-10ms delay.
+   At sqrt_n=4096 + c_net=64 + fp32 = 21.5 GB on top of Local's 18.8 GB,
+   fits H100 80GB with ~40GB headroom for activations."
+  []
+  (let [v (.lower (.get (.- os environ) "MMLLM_NET_BANK_ON_GPU" "false"))]
+    (.__contains__ #{"1" "true" "yes"} v)))
+
 (defn pick-netbank-path
   "Per-layer mmap path prefix for NetBank V. Reads MMLLM_NET_BANK_PATH;
    if unset, derive from <bank>+'-net' so a `--bank /data/foo` flow
@@ -710,7 +720,8 @@
                                                    (str base "." block-idx ".bin"))
                                 :delay_ms_min    (pick-netbank-delay-min)
                                 :delay_ms_max    (pick-netbank-delay-max)
-                                :dtype           (pick-netbank-dtype)))}))
+                                :dtype           (pick-netbank-dtype)
+                                :bank_on_gpu     (pick-netbank-on-gpu?)))}))
 
 ;;; ─────────────────────── model ───────────────────────
 
