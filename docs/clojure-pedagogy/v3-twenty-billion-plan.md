@@ -329,7 +329,7 @@ last 50 lines of `<base>.eval.jsonl` directly.
 | Phase | Tool % | Status      | Date       | wall-h | $    | step at end | lr_d_mult | lr_b_mult | format_validity | tool_args_match | BPC web | BPC cos | ablation Δ | Notes |
 |------:|-------:|-------------|------------|-------:|-----:|------------:|----------:|----------:|----------------:|----------------:|--------:|--------:|-----------:|---|
 |     0 |   0    | done        | 2026-05-09 |  2.56  |  ~5  |     33,733  |     1.0   |     1.0   |          0.0    |          0.0    |   2.20  |   1.63  |  +2.31     | format-anchor cold (expected; 0% xLAM); bank Δ healthy |
-|     1 |   2    | pending     |            |        |      |             |     1.0   |     1.0   |                 |                 |         |         |            | xLAM enters |
+|     1 |   2    | done        | 2026-05-09 |  2.56  |  ~5  |     66,716  |     1.0   |     1.0   |          0.0    |          0.0    |   2.12  |   1.53  |  +5.50     | xLAM 2% — too sparse to move format; bank Δ doubled |
 |     2 |   6    | pending     |            |        |      |             |     1.0   |     1.0   |                 |                 |         |         |            |   |
 |     3 |  10    | pending     |            |        |      |             |     1.0   |     1.0   |                 |                 |         |         |            |   |
 |     4 |  15    | pending     |            |        |      |             |     1.0   |     1.0   |                 |                 |         |         |            |   |
