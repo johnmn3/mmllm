@@ -279,6 +279,137 @@ def smoke_test(seed: int = 0) -> None:
     )
 
 
+# ─────────────────────── curriculum corpus ───────────────────────
+
+
+CURRICULUM_FABLES = (
+    "tortoise_hare", "crow_pitcher", "milkmaid", "boy_wolf", "dog_shadow",
+)
+
+
+def generate_curriculum_corpus(
+    out_path:        str | os.PathLike,
+    n_per_example:   int  = 200,
+    seed:            int  = 0,
+    val_bytes:       int  = 50_000_000,
+    test_bytes:     int  = 50_000_000,
+    do_split:        bool = True,
+    fables:          tuple = CURRICULUM_FABLES,
+    grades:          tuple = tuple(range(1, 13)),
+    verbose:         bool = True,
+) -> dict:
+    """Walk every (fable, grade, subject, example) in the K-12 Clojure
+    curriculum and write `n_per_example` records to a byte-bin.
+
+    Output layout matches `generate_corpus` (the classic-fable
+    generator) so the byte-bin is a drop-in for `--mix`:
+
+      <out_path>           flat byte stream
+      <out_path>.train.bin
+      <out_path>.val.bin
+      <out_path>.test.bin
+
+    Each record is rendered through DEFAULT_TEMPLATE (sys + user +
+    asst, with `\\n<|end|>\\n` closers) — same shape as every other
+    formatter in mmllm.datasets.
+
+    Default coverage (5 fables × 12 grades × ~20 subjects × ~5
+    examples × 200 records ≈ 1.2M records ≈ ~600 MB byte-bin) is
+    sized to fill the 60% fable share of a 1B-token training run.
+    Bump `n_per_example` for larger corpora.
+    """
+    import importlib
+
+    from mmllm.aesop.curriculum.generator import generate_subject
+
+    out = Path(out_path)
+    out.parent.mkdir(parents=True, exist_ok=True)
+
+    rng = random.Random(seed)
+    seen_hashes: set[str] = set()
+    fable_counts:   Counter = Counter()
+    chapter_counts: Counter = Counter()
+    n_collisions = 0
+    n_verify_fail = 0
+    n_written     = 0
+    bytes_written = 0
+
+    sep = b"\n\n"
+    t0 = time.time()
+    if verbose:
+        print(f"  curriculum generate → {out_path}",
+              flush=True)
+        print(f"    fables={list(fables)}  grades={list(grades)}  "
+              f"n_per_example={n_per_example}  seed={seed}",
+              flush=True)
+
+    with open(out, "wb") as fout:
+        for fable in fables:
+            for grade in grades:
+                try:
+                    mod = importlib.import_module(
+                        f"mmllm.aesop.curriculum.{fable}.grade_{grade}")
+                except ImportError:
+                    continue
+                subjects = getattr(mod, "SUBJECTS", {})
+                for sid, sub in subjects.items():
+                    seed_for_subject = seed + hash((fable, sid)) % (2**31)
+                    try:
+                        recs = generate_subject(
+                            sub, n_per_example=n_per_example,
+                            seed=seed_for_subject)
+                    except Exception as e:
+                        n_verify_fail += 1
+                        if verbose and n_verify_fail < 5:
+                            print(f"    skip (gen err): {fable}/{sid}: {e}",
+                                  flush=True)
+                        continue
+                    for rec in recs:
+                        rendered = render_record(rec)
+                        buf = rendered.encode("utf-8", errors="replace")
+                        h = hashlib.sha1(buf).hexdigest()
+                        if h in seen_hashes:
+                            n_collisions += 1
+                            continue
+                        seen_hashes.add(h)
+                        fout.write(buf + sep)
+                        bytes_written += len(buf) + len(sep)
+                        fable_counts[rec.fable] += 1
+                        chapter_counts[f"{rec.fable}/{rec.chapter}"] += 1
+                        n_written += 1
+                        if verbose and n_written % 10000 == 0:
+                            rate = n_written / (time.time() - t0 + 1e-9)
+                            print(f"    {n_written} records "
+                                  f"({rate:.0f} rec/s) "
+                                  f"{_h(bytes_written)} written",
+                                  flush=True)
+
+    elapsed = time.time() - t0
+    print(f"  done: {n_written} records / {_h(bytes_written)} in "
+          f"{elapsed:.1f}s ({n_written/max(elapsed,1e-9):.0f} rec/s)  "
+          f"[{n_collisions} dedup collisions, {n_verify_fail} gen fails]",
+          flush=True)
+
+    splits = None
+    if do_split:
+        from mmllm.corpus import split_pile_github
+        splits = split_pile_github(str(out), val_bytes, test_bytes)
+        if verbose:
+            print(f"  splits: {splits}", flush=True)
+
+    return {
+        "out_path":      str(out),
+        "n_records":     n_written,
+        "bytes":         bytes_written,
+        "n_collisions":  n_collisions,
+        "n_verify_fail": n_verify_fail,
+        "fable_counts":  dict(fable_counts),
+        "chapter_counts": dict(chapter_counts),
+        "elapsed_s":     elapsed,
+        "splits":        splits,
+    }
+
+
 # ─────────────────────── CLI ───────────────────────
 
 
@@ -294,6 +425,11 @@ def _main() -> int:
                    help="run module smoke instead of generating")
     p.add_argument("--inspect", type=int, default=0,
                    help="dump N rendered records to stdout for review")
+    # Curriculum mode (K-12 Clojure curriculum across 5 fables).
+    p.add_argument("--curriculum", action="store_true",
+                   help="generate the K-12 curriculum corpus (5 fables × "
+                        "12 grades) instead of the classic-fable mix; "
+                        "uses --n as n_per_example")
     args = p.parse_args()
     if args.smoke:
         _fables_smoke()
@@ -312,14 +448,24 @@ def _main() -> int:
     if not args.out:
         p.error("--out is required (unless --smoke or --inspect)")
         return 2
-    stats = generate_corpus(
-        out_path=args.out,
-        n_records=args.n,
-        seed=args.seed,
-        val_bytes=args.val_bytes,
-        test_bytes=args.test_bytes,
-        do_split=not args.no_split,
-    )
+    if args.curriculum:
+        stats = generate_curriculum_corpus(
+            out_path=args.out,
+            n_per_example=args.n,
+            seed=args.seed,
+            val_bytes=args.val_bytes,
+            test_bytes=args.test_bytes,
+            do_split=not args.no_split,
+        )
+    else:
+        stats = generate_corpus(
+            out_path=args.out,
+            n_records=args.n,
+            seed=args.seed,
+            val_bytes=args.val_bytes,
+            test_bytes=args.test_bytes,
+            do_split=not args.no_split,
+        )
     print(json.dumps(stats, indent=2, default=str))
     return 0
 

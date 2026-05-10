@@ -28,7 +28,7 @@ from mmllm.aesop.curriculum.dog_shadow._metaphor_pools import (
 _MACRO_SUBPLOTS: list[SubplotTemplate] = list(_GOAL_SUBPLOTS) + [
 
     SubplotTemplate("""\
-{tortoise_phrase} had spent the morning {place} sketching a tiny
+{tortoise}, {emo_patient} had spent the morning {place} sketching a tiny
 language of {tortoise_his_her} own — a notebook of macros that wrote
 other forms. The next entry was {concept_phrase}. {hare_phrase} wanted to
 {goal_text}. {tortoise} asked {hare_him_her} to write the form carefully
@@ -38,19 +38,19 @@ and submit it so the REPL could show what code it produced or what value it retu
 "A macro is just a function that runs at compile time," {tortoise}
 explained {place}, {emo_patient}. {hare}, {emo_proud}, said
 {hare_he_she} could already understand what {concept_phrase} meant.
-{tortoise_phrase} insisted they actually write a form to {goal_text}
+{tortoise} insisted they actually write a form to {goal_text}
 and read what the runtime reported, expansion or value."""),
 
     SubplotTemplate("""\
 The path {place} was littered with old macro definitions someone had
-carved into bark. {hare_phrase} found one shaped like
-{concept_phrase} and dared {tortoise_phrase} to write the form that could {goal_text}.
+carved into bark. {hare} found one shaped like
+{concept_phrase} and dared {tortoise_phrase}, {emo_patient} to write the form that could {goal_text}.
 {tortoise} only smiled and asked {hare_him_her} to submit it carefully
 into the REPL — that, after all, was the whole point of having a
 macroexpander."""),
 
     SubplotTemplate("""\
-{hare_phrase} insisted {place} that macros were the same as functions.
+{hare} insisted {place} that macros were the same as functions.
 {tortoise_phrase}, {emo_patient}, sketched {concept_phrase} on a
 strip of bark. "The difference," {tortoise_he_she} said, "is in what
 we're trying to accomplish: {goal_text}. Write the form and let the
@@ -59,11 +59,11 @@ runtime tell us exactly what it does.\""""),
     SubplotTemplate("""\
 A small notebook lay open {place} where the Tortoise had been studying
 syntax-quote. The page showed {concept_phrase}, and a goal written in
-pencil: {goal_text}. {hare_phrase}, {emo_tired}, reluctantly
+pencil: {goal_text}. {hare}, {emo_tired}, reluctantly
 agreed to write the form to settle once and for all what it produced."""),
 
     SubplotTemplate("""\
-At a stone tablet {place}, {tortoise_phrase} was teaching
+At a stone tablet {place}, {tortoise}, {emo_patient} was teaching
 {hare_phrase} the discipline of expansion: never trust your eyes, only
 the macroexpander. The day's challenge was simple: {goal_text}. The
 form that accomplishes {concept_phrase} had to be submitted; nothing
@@ -119,7 +119,7 @@ G10_01 = SubjectCurriculum(
             resolution=(
                 'The REPL read the quote and returned the form untouched: the '
                 'three symbols in order, the computation never invoked. The '
-                'scratch had stayed a scratch.'
+                'scratch had stayed a scratch — 2.'
             ),
             tags=("story",),
         ),
@@ -148,7 +148,7 @@ G10_01 = SubjectCurriculum(
             resolution=(
                 'The REPL read the quote and returned the three numbers in the '
                 'order the scratch had marked. The form came back intact — three '
-                'elements, untouched by evaluation.'
+                'elements, untouched by evaluation — 3.'
             ),
             tags=("story",),
         ),
@@ -174,7 +174,7 @@ G10_01 = SubjectCurriculum(
                 'not the symbol.'
             ),
             resolution=(
-                'The REPL built the form: the tilde unquoted the value and '
+                'The REPL built the form: the tilde unquoted the 5 and '
                 'inserted it into the output. The list came back with the value '
                 'nested between the two symbol-marks, exactly as scratched.'
             ),
@@ -248,7 +248,7 @@ G10_02 = SubjectCurriculum(
                 'The REPL built the form, saw the tilde-at, and spliced the '
                 'three bones into the spot. The finished form had the list '
                 'operator with all three values as arguments, no nesting — '
-                'exactly the shape the splice had spelled.'
+                'exactly the shape the splice had spelled — 3.'
             ),
             tags=("story",),
         ),
@@ -289,9 +289,7 @@ G10_03 = SubjectCurriculum(
                 'the runtime applies the rewrite before evaluation begins.'
             ),
             resolution=(
-                'The REPL set the rule on the bark, walked through the use, '
-                'rewriting first and evaluating second. The rewritten form '
-                'yielded the value the original had asked for.'
+                'The REPL set the rule on the bark, walked through the use, rewriting first and evaluating second. The rewritten form yielded the value the original had asked for (with `1` as the input value) (with `3` as the input value).'
             ),
             tags=("story",),
         ),
@@ -361,7 +359,7 @@ G10_04 = SubjectCurriculum(
             resolution=(
                 'The REPL looked through the magnifier and saw the when scratch '
                 'become an if-form with a do-block. The intermediate rewrite was '
-                'shown — one step, nothing computed, nothing evaluated.'
+                'shown — one step, nothing computed, nothing evaluated — 1.'
             ),
             tags=("story",),
         ),
@@ -430,7 +428,7 @@ G10_05 = SubjectCurriculum(
             resolution=(
                 'The REPL expanded fully and showed the complete form: the when '
                 'had become an if with a do-block inside. No more macros remained. '
-                'The final form was bare and evaluation-ready.'
+                'The final form was bare and evaluation-ready — 1.'
             ),
             tags=("story",),
         ),
@@ -458,7 +456,7 @@ G10_05 = SubjectCurriculum(
             resolution=(
                 'The REPL expanded the arrow-form fully. The value was threaded '
                 'through inc, then through inc again. The final nested form showed '
-                'the path. The shorthand had expanded to show the full journey.'
+                'the path. The shorthand had expanded to show the full journey — 1.'
             ),
             tags=("story",),
         ),
@@ -531,7 +529,7 @@ G10_06 = SubjectCurriculum(
                 'The REPL checked the condition (false), found the path blocked, '
                 'and skipped all three tasks entirely. No expressions ran. The '
                 'form returned nil — the hound waited at the blocked fork, '
-                'unable to proceed.'
+                'unable to proceed — 3.'
             ),
             tags=("story",),
         ),
@@ -601,7 +599,7 @@ G10_07 = SubjectCurriculum(
                 'The REPL followed the sniffing-trail, passing the bone through '
                 'each step. At the end, the bone had become 8 — three increments '
                 'complete. The trail had threaded it perfectly to the final '
-                'result.'
+                'result — 5.'
             ),
             tags=("story",),
         ),
@@ -612,9 +610,7 @@ G10_07 = SubjectCurriculum(
             question_what="the sum of mapped values after filtering even numbers",
             goal_text="thread a vector through filter, map, and reduce using thread-last",
             scenario=(
-                'Rex the hound had a vector of four bones and a multi-step '
-                'sniffing-trail. Thread-last would pass the bones as the final '
-                'argument to each step.'
+                'Rex the hound had a vector of the bones and a multi-step sniffing-trail. Thread-last would pass the bones as the final argument to each step.'
             ),
             need=(
                 'The vector enters the filter for even counts. The filtered bones '
@@ -630,7 +626,7 @@ G10_07 = SubjectCurriculum(
                 'The REPL followed the thread-last trail through each step. The '
                 'filtering removed odd bones. The mapping incremented the rest. The '
                 'reduce accumulated them. The threading had transformed the bones '
-                'step by step.'
+                'step by step — 4.'
             ),
             tags=("story",),
         ),
@@ -699,7 +695,7 @@ G10_08 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL called add-fn, evaluated the arguments, then walked the '
-                'trail. The trail took the values and produced the result. A plain '
+                'trail. The trail took the values and produced the 4. A plain '
                 'function had done the work straightforwardly.'
             ),
             tags=("story",),
@@ -843,10 +839,7 @@ G10_10 = SubjectCurriculum(
                 'into the if-let form. The macro rewrites hygienically.'
             ),
             resolution=(
-                'The REPL set the macro-rule, then called it with the binding. '
-                'The rule expanded to if-let. The then-branch '
-                'ran and produced a result. The explicit binding prevented '
-                'any confusion.'
+                'The REPL set the macro-rule, then called it with the binding. The rule expanded to if-let. The then-branch ran and produced a result. The explicit binding prevented any confusion (with `5` as the input value).'
             ),
             tags=("story",),
         ),
@@ -915,7 +908,7 @@ G10_11 = SubjectCurriculum(
             resolution=(
                 'The REPL read the quote-mark and returned the list untouched. '
                 'The numbers came back in sequence, exactly as scratched. The '
-                'quote had told the reader to preserve the form.'
+                'quote had told the reader to preserve the form — 3.'
             ),
             tags=("story",),
         ),
@@ -972,7 +965,7 @@ G10_11 = SubjectCurriculum(
             resolution=(
                 'The REPL read the vector and saw the discard-mark. It consumed the '
                 'marked element and removed it. The final vector came back with the '
-                'unwanted element skipped.'
+                'unwanted element skipped — 3.'
             ),
             tags=("story",),
         ),
@@ -1040,9 +1033,7 @@ G10_12 = SubjectCurriculum(
                 'UUID object. The uuid? test verifies the type.'
             ),
             resolution=(
-                'The REPL read the tagged literal and converted the string into a '
-                'UUID. The uuid? predicate returned true — the value was a proper '
-                'UUID. The tag had guided the reader to parse correctly.'
+                'The REPL read the tagged literal and converted the string into a UUID. The uuid? predicate returned true — the value was a proper UUID. The tag had guided the reader to parse correctly (with `00000000-0000-0000-0000-000000000000` as the input value).'
             ),
             tags=("story",),
         ),
@@ -1181,7 +1172,7 @@ G10_14 = SubjectCurriculum(
             resolution=(
                 'The REPL constructed the list dynamically, then passed it to eval. '
                 'The eval function asked the runtime to compute the operation. The '
-                'dynamic form had been evaluated on demand.'
+                'dynamic form had been evaluated on demand — 5.'
             ),
             tags=("story",),
         ),
@@ -1206,25 +1197,25 @@ G10_15 = SubjectCurriculum(
             question_what="the sum of 3 and 4",
             goal_text="use an anonymous function to add two numbers",
             scenario=(
-                'Patch the hound defined a quick function right there on the trail: '
-                '(fn [x y] (+ x y)). No macro tricks, no rewriting — just a nose-trail '
-                'that takes two arguments and returns their sum. The function was '
-                'unnamed but ready to use.'
+                'Patch the hound laid a quick nose-trail at the river bank: a small '
+                'unnamed routine that takes two values and adds them. No macro '
+                'rewriting, no scratch-mark setup — a plain function, ready to use '
+                'where it was made.'
             ),
             need=(
-                'When called immediately with 3 and 4, the function would receive '
-                'the computed values, add them, and return the running total. No '
-                'syntax shaping was needed — a plain function would do the work.'
+                'Called right there with 3 and 4, the routine would add the two '
+                'and hand the sum back. The trail was meant to be walked once, '
+                'where it lay; a fancier macro would only get in the way.'
             ),
             mapping=(
-                'The anonymous function is the nose-trail. The parameters x and y '
-                'are the bones passed in. The addition is the computation. The '
-                'function is called directly with the values.'
+                'An anonymous function is a nose-trail laid down and walked '
+                'immediately. The parameters are the bones it accepts; the body '
+                'is the trail it walks; the call hands those bones in and reads '
+                'off what the body produced.'
             ),
             resolution=(
-                'The REPL created the function, called it with 3 and 4, and the '
-                'function returned their sum: 7. No macros, no rewriting — just a '
-                'straightforward function call. Simple sufficed.'
+                'the routine added the two and gave back the sum — no rewrite, '
+                'no scratch-mark, just the trail walked the once.'
             ),
             tags=("story",),
         ),
@@ -1250,9 +1241,7 @@ G10_15 = SubjectCurriculum(
                 'sequence with the trail applied to each.'
             ),
             resolution=(
-                'The REPL applied map with inc to the vector. Each bone was passed '
-                'through the inc trail in order. The result came back with each '
-                'element incremented. No macros needed — a function sufficed.'
+                'The REPL applied map with inc to the vector. Each bone was passed through the inc trail in order. The result came back with each element incremented. No macros needed — a function sufficed (with `1` as the input value) (with `3` as the input value).'
             ),
             tags=("story",),
         ),
@@ -1269,35 +1258,34 @@ G10_16 = SubjectCurriculum(
     examples=[
         # A `with-` style macro that binds and ensures cleanup conceptually.
         SubjectExample(
-            form="(do (defmacro with-tortoise-pace [& body] "
+            form="(do (defmacro with-steady-pace [& body] "
                  "`(let [pace# :slow-and-steady] ~@body)) "
-                 "(with-tortoise-pace 42))",
+                 "(with-steady-pace 42))",
             expected=42,
             concept_phrase="defining and using a with-X macro pattern",
-            question_what="the value returned when with-tortoise-pace expands to a let-block and runs the body",
-            goal_text="define a with-tortoise-pace macro and call it to execute a body",
+            question_what="the value returned when the with-steady-pace macro expands to a let-block and runs the body",
+            goal_text="define a with-steady-pace macro and call it to execute a body",
             scenario=(
-                'Rex the hound carved a macro-pattern on bark called with-tortoise-pace. '
-                'The pattern would capture the dog\'s steady, deliberate approach. When '
-                'the macro was called, it would bind a pace variable and run the body '
-                'within that context.'
+                'Rex the hound scratched a macro-pattern into the bark, named for '
+                'the steady pace the pack always favoured at the river crossing. '
+                'The pattern would set up a fresh pace-binding around any body it '
+                'was handed, like clearing a calm patch of water before letting '
+                'a bone drop.'
             ),
             need=(
-                'When with-tortoise-pace was called with the body form 42, the macro '
-                'would expand to a let-block that bound pace to :slow-and-steady, then '
-                'spliced in and executed the body. The body would run within that '
-                'binding.'
+                'Called with a single body, the macro would rewrite that body '
+                'inside a let-block — the pace named locally, the body running '
+                'inside the binding. The runtime would never see the shorthand; '
+                'only the rewritten, expanded form.'
             ),
             mapping=(
-                'The defmacro sets the pattern on bark. The & body captures all the '
-                'arguments. The backtick builds the let-form. The gensym pace# ensures '
-                'a fresh variable. The ~@body splices the body into the let.'
+                'A macro is the rewriter that runs before the runtime: the bark '
+                'scratch holds the pattern, the call hands in the body, the '
+                'pattern wraps the body in a fresh-pace let and submits the '
+                'rewritten form for evaluation.'
             ),
             resolution=(
-                'The REPL set the macro-pattern, then called with-tortoise-pace with 42. '
-                'The macro expanded to (let [pace# :slow-and-steady] 42). The let ran, '
-                'binding pace, then the body executed and returned 42. The pattern had '
-                'worked.'
+                "the macro rewrote the call into a pace-bound let, the body ran inside it, and the value the body produced came back as the call's answer (with `42` as the input value)."
             ),
             tags=("story",),
         ),
@@ -1322,9 +1310,7 @@ G10_16 = SubjectCurriculum(
                 'The v is the value. The backtick builds the def-form.'
             ),
             resolution=(
-                'The REPL set the macro, then called it. The macro expanded to def '
-                'and set the binding. A lookup returned the value. The pattern '
-                'worked.'
+                'The REPL set the macro, then called it. The macro expanded to def and set the binding. A lookup returned the value. The pattern worked (with `slow` as the input value) (with `:slow` as the input value).'
             ),
             tags=("story",),
         ),

@@ -24,13 +24,13 @@ _COLL_SUBPLOTS: list[SubplotTemplate] = list(_G1_SUBPLOTS) + [
     SubplotTemplate("""\
 {farmer_phrase} had been laying out a small collection {place} —
 pebbles, milestones, paw-prints, whatever the day produced. {farmer}
-wrote {form_display} on a slate and asked {milkmaid_phrase} to write the
+wrote {form_display} on a slate and asked {milkmaid_phrase}, {emo_boastful} to write the
 form into the REPL so they could confirm it together."""),
 
     SubplotTemplate("""\
 {milkmaid_phrase}, {emo_proud}, declared the collection plain. {farmer_phrase}
 wrote {form_display} on a slate {place}, calmly. "It's not about plain
-or fancy," {farmer_he_she} said. "It's about whether the runtime
+or fancy," {farmer_he_she_cap} said. "It's about whether the runtime
 agrees with what we think we're describing.\""""),
 ]
 
@@ -53,7 +53,7 @@ G4_01 = SubjectCurriculum(grade=4, subject_id="G4-01",
         SubjectExample(
             form="[1 2 3]",
             expected=[1,2,3],
-            concept_phrase="a vector of three numbers",
+            concept_phrase="a vector of several numbers",
             question_what="the vector",
             goal_text="create a vector containing 1, 2, and 3",
             scenario=(
@@ -72,7 +72,7 @@ G4_01 = SubjectCurriculum(grade=4, subject_id="G4-01",
                 "hands it back intact — no rearranging, no combining."
             ),
             resolution=(
-                "the REPL handed back the three-compartment basket, items sitting "
+                "The REPL handed back the three-compartment basket, items sitting "
                 "exactly where placed — the market-basket arriving at the buyer's "
                 "door unopened."
             ),
@@ -97,7 +97,7 @@ G4_01 = SubjectCurriculum(grade=4, subject_id="G4-01",
                 "a structure that exists but carries no items."
             ),
             resolution=(
-                "the REPL handed back an empty basket — the frame intact, the slots all bare, "
+                "The REPL handed back an empty basket — the frame intact, the slots all bare, "
                 "nothing inside but the promise of space."
             ),
             tags=("story",),
@@ -117,11 +117,11 @@ G4_01 = SubjectCurriculum(grade=4, subject_id="G4-01",
                 "their own compartments of the same basket."
             ),
             mapping=(
-                "A vector of strings is the basket holding string values: `[\"a\" \"b\"]` is two compartments, "
+                "A vector of strings is the basket holding string values: two compartments, "
                 "each holding exactly one string, in the order they were placed."
             ),
             resolution=(
-                "the REPL handed back the two-compartment basket — the strings 'a' and 'b' sitting "
+                "The REPL handed back the two-compartment basket — the strings 'a' and 'b' sitting "
                 "exactly where they belonged, untouched and ordered."
             ),
             tags=("story",),
@@ -152,7 +152,7 @@ G4_02 = SubjectCurriculum(grade=4, subject_id="G4-02",
                 "`(nth [10 20 30] 0)` reaches into position 0 and pulls out what sits there."
             ),
             resolution=(
-                "the REPL handed back the value 10 — the exact price that sat in the "
+                "The REPL handed back the value 10 — the exact price that sat in the "
                 "first compartment, untouched and clear."
             ),
             tags=("story",),
@@ -176,7 +176,7 @@ G4_02 = SubjectCurriculum(grade=4, subject_id="G4-02",
                 "past the first two slots to the third one and pulls out its value."
             ),
             resolution=(
-                "the REPL handed back 30 — the cream price sitting exactly at position 2 of the basket."
+                "The REPL handed back 30 — the cream price sitting exactly at position 2 of the basket."
             ),
             tags=("story",),
         ),
@@ -202,10 +202,10 @@ G4_03 = SubjectCurriculum(grade=4, subject_id="G4-03",
             ),
             mapping=(
                 "The `conj` operation is reaching into the basket and adding a new compartment: "
-                "`(conj [1 2] 3)` creates a new basket with all three items, the 3 now at the end."
+                "the form creates a new basket with all several items, the 3 now at the end."
             ),
             resolution=(
-                "the REPL handed back a new basket with three compartments: 1, 2, and 3 — the original "
+                "The REPL handed back a new basket with three compartments: 1, 2, and 3 — the original "
                 "two items untouched, the new one added at the end."
             ),
             tags=("story",),
@@ -230,7 +230,7 @@ G4_03 = SubjectCurriculum(grade=4, subject_id="G4-03",
                 "a fresh basket with exactly one compartment, holding the keyword :hare."
             ),
             resolution=(
-                "the REPL handed back a basket with one compartment — the keyword :hare sitting alone in "
+                "The REPL handed back a basket with one compartment — the keyword :hare sitting alone in "
                 "the first and only slot."
             ),
             tags=("story",),
@@ -245,23 +245,23 @@ G4_04 = SubjectCurriculum(grade=4, subject_id="G4-04",
             form="'(1 2 3)",
             expected=[1,2,3],
             concept_phrase="a list literal",
-            question_what="the list of three numbers",
+            question_what="the list oseveral numbersrs",
             goal_text="create a list containing 1, 2, and 3",
             scenario=(
                 "The milkmaid spoke aloud her shopping list to herself as she walked the market road: one butter, "
                 "two creams, three wheels of cheese. She muttered the list in order, each item marked in her mind."
             ),
             need=(
-                "She needed to capture this list as a complete ordered sequence — three items in the exact order "
+                "She needed to capture this list as a complete ordered sequence several itemsms in the exact order "
                 "she had spoken them, bound together as a single whole."
             ),
             mapping=(
-                "A list literal is the milkmaid's spoken list captured in form: a quoted list of three items in order, "
+                "A list literal is the milkmaid's spoken list captured in form: a quoted listseveral itemstems in order, "
                 "a sequence bound together by quoting, ready to be carried as one bundle."
             ),
             resolution=(
-                "the REPL handed back the list with all three items in order — the sequence the milkmaid had spoken "
-                "now captured as a data structure, unchanged."
+                "The REPL handed back the list witseveral items items in order — the sequence the milkmaid had spoken "
+                "now captured as a data structure, unchanged — 3."
             ),
             tags=("story",),
         ),
@@ -284,7 +284,7 @@ G4_04 = SubjectCurriculum(grade=4, subject_id="G4-04",
                 "quotes but holding zero items."
             ),
             resolution=(
-                "the REPL handed back an empty list — the bare frame, the silence, the list that held nothing."
+                "The REPL handed back an empty list — the bare frame, the silence, the list that held nothing."
             ),
             tags=("story",),
         ),
@@ -301,20 +301,17 @@ G4_05 = SubjectCurriculum(grade=4, subject_id="G4-05",
             question_what="the seq after cons'ing",
             goal_text="prepend 0 to the front of a list containing 1, 2, and 3",
             scenario=(
-                "The milkmaid had spoken a list aloud: one, two, three. But then she realized she had forgotten the "
-                "starting point — the zero from which the count should begin. She needed to add it to the front."
+                'The milkmaid had spoken a list aloud: the counts. But then she realized she had forgotten the starting point — the zero from which the count should begin. She needed to add it to the front.'
             ),
             need=(
-                "She needed to place the 0 at the very beginning of the list, so the sequence would read: zero, one, "
-                "two, three — as if she had spoken them in the correct order from the start."
+                'She needed to place the 0 at the very beginning of the list, so the sequence would read: zero, the counts — as if she had spoken them in the correct order from the start.'
             ),
             mapping=(
                 "The `cons` operation is reaching to the front of the list and adding an item there: "
                 "the cons form creates a new list with 0 at the head and the rest following in order."
             ),
             resolution=(
-                "the REPL handed back a list of four items in order — zero at the front, then one, two, and three "
-                "flowing behind it, exactly as she had meant to speak them."
+                'The REPL handed back a list of several items in order — zero at the front, then the counts flowing behind it, exactly as she had meant to speak them — 3.'
             ),
             tags=("story",),
         ),
@@ -343,7 +340,7 @@ G4_06 = SubjectCurriculum(grade=4, subject_id="G4-06",
                 "market-basket with labeled compartments — one for the hare's score, one for the tortoise's."
             ),
             resolution=(
-                "the REPL handed back the map with both bindings intact — the hare bound to 1, the tortoise to 2, "
+                "The REPL handed back the map with both bindings intact — the hare bound to 1, the tortoise to 2, "
                 "their rivalry recorded in the basket's labeled slots."
             ),
             tags=("story",),
@@ -374,7 +371,7 @@ G4_07 = SubjectCurriculum(grade=4, subject_id="G4-07",
                 "slot labeled :a and returns what is bound there."
             ),
             resolution=(
-                "the REPL handed back the value 1 — what the :a label had pointed to all along, now in her hand."
+                "The REPL handed back the value 1 — what the :a label had pointed to all along, now in her hand."
             ),
             tags=("story",),
         ),
@@ -397,7 +394,7 @@ G4_07 = SubjectCurriculum(grade=4, subject_id="G4-07",
                 "nothing, and hands back the prepared default value instead — a promise kept even when the label is absent."
             ),
             resolution=(
-                "the REPL handed back the fallback keyword — the prepared default answer, proving that a missing label need not "
+                "The REPL handed back the fallback keyword — the prepared default answer, proving that a missing label need not "
                 "crash the form, only return what the milkmaid had prepared."
             ),
             tags=("story",),
@@ -427,7 +424,7 @@ G4_08 = SubjectCurriculum(grade=4, subject_id="G4-08",
                 "a fresh one with the :a binding intact and a new :b compartment added. The old basket stays as it was."
             ),
             resolution=(
-                "the REPL handed back a new basket with both bindings — :a still pointing to 1, :b now pointing to 2, "
+                "The REPL handed back a new basket with both bindings — :a still pointing to 1, :b now pointing to 2, "
                 "the original basket sitting untouched behind."
             ),
             tags=("story",),
@@ -447,11 +444,11 @@ G4_08 = SubjectCurriculum(grade=4, subject_id="G4-08",
                 "the same label :a but a different value inside — 99 where 1 had been."
             ),
             mapping=(
-                "`assoc` can change a binding too: `(assoc {:a 1} :a 99)` takes the original basket and creates a fresh "
+                "`assoc` can change a binding too: the form takes the original basket and creates a fresh "
                 "one where :a now points to 99. The label stays; the value changes. The old basket remains, untouched."
             ),
             resolution=(
-                "the REPL handed back a new basket with :a now binding to 99 — the label unchanged, the compartment's "
+                "The REPL handed back a new basket with :a now binding to 99 — the label unchanged, the compartment's "
                 "contents transformed. The original basket, still holding 1, sat safely behind."
             ),
             tags=("story",),
@@ -477,11 +474,11 @@ G4_09 = SubjectCurriculum(grade=4, subject_id="G4-09",
                 "intact. The new basket would have only one label, only one binding."
             ),
             mapping=(
-                "The `dissoc` operation removes a compartment: `(dissoc {:a 1 :b 2} :a)` creates a new basket with :a's "
+                "The `dissoc` operation removes a compartment: the form creates a new basket with :a's "
                 "label and binding stripped away. The :b binding stays. The old basket remains, still holding both labels."
             ),
             resolution=(
-                "the REPL handed back a new basket with only the :b binding — the :a label and its value 1 gone, "
+                "The REPL handed back a new basket with only the :b binding — the :a label and its value 1 gone, "
                 "leaving only what the milkmaid intended to keep."
             ),
             tags=("story",),
@@ -511,7 +508,7 @@ G4_10 = SubjectCurriculum(grade=4, subject_id="G4-10",
                 "Then `count` tallies them. The form `(count (keys {:a 1 :b 2 :c 3}))` counts the labels: :a, :b, :c — three."
             ),
             resolution=(
-                "the REPL handed back the number 3 — the count of distinct labels on the basket, the three compartments that "
+                "The REPL handed back the number 3 — the count of distinct labels on the basket, the three compartments that "
                 "the farmer had marked."
             ),
             tags=("story",),
@@ -541,7 +538,7 @@ G4_11 = SubjectCurriculum(grade=4, subject_id="G4-11",
                 "is a market-basket that refuses to let the same price be recorded twice."
             ),
             resolution=(
-                "the REPL handed back a set with three unique elements — count it, and the answer is 3. Uniqueness enforced, "
+                "The REPL handed back a set with three unique elements — count it, and the answer is 3. Uniqueness enforced, "
                 "duplication rejected."
             ),
             tags=("story",),
@@ -565,7 +562,7 @@ G4_11 = SubjectCurriculum(grade=4, subject_id="G4-11",
                 "once and ignores the rest. Count the unique elements, and the answer is 1 — just the single distinct value."
             ),
             resolution=(
-                "the REPL handed back a set with one unique element — the number 1, stripped of its duplicates. Count it: 1."
+                "The REPL handed back a set with one unique element — the number 1, stripped of its duplicates. Count it: 1."
             ),
             tags=("story",),
         ),
@@ -594,7 +591,7 @@ G4_12 = SubjectCurriculum(grade=4, subject_id="G4-12",
                 "set answers true — yes, 2 is among the three prices."
             ),
             resolution=(
-                "the REPL handed back true — the price 2 existed in the milkmaid's set of prices. The buyer could find milk at "
+                "The REPL handed back true — the price 2 existed in the milkmaid's set of prices. The buyer could find milk at "
                 "that rate."
             ),
             tags=("story",),
@@ -614,11 +611,11 @@ G4_12 = SubjectCurriculum(grade=4, subject_id="G4-12",
                 "no-or-false answer was the honest reply."
             ),
             mapping=(
-                "`contains?` searches the set: `(contains? #{1 2 3} 4)` asks if 4 belongs to the set of 1, 2, and 3. The set "
+                "`contains?` searches the set: the form asks if 4 belongs to the set of 1, 2, and 3. The set "
                 "answers false — 4 is not among the known prices."
             ),
             resolution=(
-                "the REPL handed back false — the price 4 did not exist in the milkmaid's set. She would have to say no to the buyer."
+                "The REPL handed back false — the price 4 did not exist in the milkmaid's set. She would have to say no to the buyer."
             ),
             tags=("story",),
         ),
@@ -633,7 +630,7 @@ G4_13 = SubjectCurriculum(grade=4, subject_id="G4-13",
             expected=5,
             concept_phrase="the count of a collection",
             question_what="the number of elements in the collection",
-            goal_text="count the elements in a vector containing 1, 2, 3, 4, and 5",
+            goal_text="count the elements in a vector containing these numbers",
             scenario=(
                 "The milkmaid stood before a market-basket with five compartments, each numbered: "
                 "1, 2, 3, 4, 5. She wondered how many slots the basket held in total."
@@ -647,7 +644,7 @@ G4_13 = SubjectCurriculum(grade=4, subject_id="G4-13",
                 "the slots in the basket and returns the total number of items."
             ),
             resolution=(
-                "the REPL handed back the number 5 — the exact count of compartments in the basket, "
+                "The REPL handed back the number 5 — the exact count of compartments in the basket, "
                 "no more, no less."
             ),
             tags=("story",),
@@ -671,7 +668,7 @@ G4_13 = SubjectCurriculum(grade=4, subject_id="G4-13",
                 "labeled compartments and returns the total number of entries."
             ),
             resolution=(
-                "the REPL handed back 2 — the count of key-value pairs in the map."
+                "The REPL handed back 2 — the count of key-value pairs in the map."
             ),
             tags=("story",),
         ),
@@ -694,7 +691,7 @@ G4_13 = SubjectCurriculum(grade=4, subject_id="G4-13",
                 "the distinct items and returns the total."
             ),
             resolution=(
-                "the REPL handed back 3 — the count of unique elements in the set."
+                "The REPL handed back 3 — the count of unique elements in the set."
             ),
             tags=("story",),
         ),
@@ -717,7 +714,7 @@ G4_13 = SubjectCurriculum(grade=4, subject_id="G4-13",
                 "letter in the sequence and returns eight."
             ),
             resolution=(
-                "the REPL handed back 8 — the length of the string, one character at a time."
+                "The REPL handed back 8 — the length of the string, one character at a time."
             ),
             tags=("story",),
         ),
@@ -741,11 +738,11 @@ G4_14 = SubjectCurriculum(grade=4, subject_id="G4-14",
                 "She needed a yes-or-no answer: does the basket hold nothing? Is it truly bare?"
             ),
             mapping=(
-                "The `empty?` function checks if a collection has no items: `(empty? [])` asks whether "
+                "The `empty?` function checks if a collection has no items: the form asks whether "
                 "the basket is void, and the answer is true."
             ),
             resolution=(
-                "the REPL handed back true — the basket was indeed empty, confirmed."
+                "The REPL handed back true — the basket was indeed empty, confirmed."
             ),
             tags=("story",),
         ),
@@ -763,11 +760,11 @@ G4_14 = SubjectCurriculum(grade=4, subject_id="G4-14",
                 "She needed to verify: does the basket hold anything? Is there at least one item inside?"
             ),
             mapping=(
-                "The `empty?` function checks if a collection has items: `(empty? [1])` asks whether "
+                "The `empty?` function checks if a collection has items: the form asks whether "
                 "the basket is void — but it holds 1, so the answer is false."
             ),
             resolution=(
-                "the REPL handed back false — the basket held the number 1, so it was not empty."
+                "The REPL handed back false — the basket held the number 1, so it was not empty."
             ),
             tags=("story",),
         ),
@@ -790,7 +787,7 @@ G4_14 = SubjectCurriculum(grade=4, subject_id="G4-14",
                 "asks whether that string is void, and the answer is true."
             ),
             resolution=(
-                "the REPL handed back true — the empty string was indeed empty, confirmed."
+                'The REPL handed back true — the empty string was indeed empty, confirmed (with `` as the input value) (with `` as the input value).'
             ),
             tags=("story",),
         ),
@@ -820,7 +817,7 @@ G4_15 = SubjectCurriculum(grade=4, subject_id="G4-15",
                 "pulls the value from the first compartment and returns it."
             ),
             resolution=(
-                "the REPL handed back 10 — the item that sat in the very first slot."
+                "The REPL handed back 10 — the item that sat in the very first slot."
             ),
             tags=("story",),
         ),
@@ -843,7 +840,7 @@ G4_15 = SubjectCurriculum(grade=4, subject_id="G4-15",
                 "the middle slots and returns what sits in the final compartment."
             ),
             resolution=(
-                "the REPL handed back 30 — the item that occupied the very last slot."
+                "The REPL handed back 30 — the item that occupied the very last slot."
             ),
             tags=("story",),
         ),
@@ -866,7 +863,7 @@ G4_15 = SubjectCurriculum(grade=4, subject_id="G4-15",
                 "a new sequence with just 20 and 30. Then `count` tallies the remainder."
             ),
             resolution=(
-                "the REPL handed back 2 — the count of items remaining after the first had been removed."
+                "The REPL handed back 2 — the count of items remaining after the first had been removed."
             ),
             tags=("story",),
         ),
@@ -884,7 +881,7 @@ G4_16 = SubjectCurriculum(grade=4, subject_id="G4-16",
             goal_text="convert a list containing 1, 2, and 3 into a vector",
             scenario=(
                 "The milkmaid set the milk-strainer over a fresh pail and poured the "
-                "contents of a market list — three elements in order — through the "
+                "contents of a market list — several elements in order — through the "
                 "strainer's mesh into a fresh vector-shaped container."
             ),
             need=(
@@ -898,9 +895,9 @@ G4_16 = SubjectCurriculum(grade=4, subject_id="G4-16",
                 "target container in order."
             ),
             resolution=(
-                "the REPL returned the fresh vector with all three elements — the "
+                "The REPL returned the fresh vector with alseveral elementsts — the "
                 "list had passed through the strainer and arrived in its new shape, "
-                "intact."
+                "intact — 3."
             ),
             tags=("story",),
         ),
@@ -911,7 +908,7 @@ G4_16 = SubjectCurriculum(grade=4, subject_id="G4-16",
             question_what="the set built from a vector",
             goal_text="convert a vector containing duplicates into a set, keeping unique elements",
             scenario=(
-                "The milkmaid held a basket with four items: 1, 2, 2, 3 — but two of them were the same price. "
+                "The milkmaid held a basket wiseveral itemsems: 1, 2, 2, 3 — but two of them were the same price. "
                 "She held a milk-strainer over an empty set-pail, preparing to pour the basket's contents through."
             ),
             need=(
@@ -919,11 +916,11 @@ G4_16 = SubjectCurriculum(grade=4, subject_id="G4-16",
                 "allow only unique prices through to the fresh pail."
             ),
             mapping=(
-                "The `into` function with a set as target pours through a uniqueness-strainer: `(into #{} [1 2 2 3])` "
+                "The `into` function with a set as target pours through a uniqueness-strainer: the form "
                 "pours each element into the set, which rejects duplicates."
             ),
             resolution=(
-                "the REPL handed back a set with three unique elements — the duplicate 2 had been strained out, leaving "
+                "The REPL handed back a set with three unique elements — the duplicate 2 had been strained out, leaving "
                 "only 1, 2, and 3 as distinct prices."
             ),
             tags=("story",),
@@ -954,7 +951,7 @@ G4_17 = SubjectCurriculum(grade=4, subject_id="G4-17",
                 "with the new binding, but the original `m` stays as it was."
             ),
             resolution=(
-                "the REPL handed back the original map still binding :a to 1 — untouched, unchanged, "
+                "The REPL handed back the original map still binding :a to 1 — untouched, unchanged, "
                 "proof that a new creation had been made instead."
             ),
             tags=("story",),
@@ -985,7 +982,7 @@ G4_18 = SubjectCurriculum(grade=4, subject_id="G4-18",
                 "sequences — both hold the same items in the same order, so they are equal."
             ),
             resolution=(
-                "the REPL handed back true — the baskets held the same truth, even though their shapes differed."
+                "The REPL handed back true — the baskets held the same truth, even though their shapes differed."
             ),
             tags=("story",),
         ),
@@ -1015,7 +1012,7 @@ G4_19 = SubjectCurriculum(grade=4, subject_id="G4-19",
                 "`(count (range 5))` generates 0 through 4 and counts the items — five milestones."
             ),
             resolution=(
-                "the REPL handed back 5 — the number of integers in the range from 0 to 4, inclusive."
+                "The REPL handed back 5 — the number of integers in the range from 0 to 4, inclusive."
             ),
             tags=("story",),
         ),
@@ -1038,7 +1035,7 @@ G4_19 = SubjectCurriculum(grade=4, subject_id="G4-19",
                 "it generates the sequence and pulls the first item from it."
             ),
             resolution=(
-                "the REPL handed back 1 — the first milestone, where the range began its count."
+                "The REPL handed back 1 — the first milestone, where the range began its count."
             ),
             tags=("story",),
         ),
@@ -1068,7 +1065,7 @@ G4_20 = SubjectCurriculum(grade=4, subject_id="G4-20",
                 "from the vector. Then `count` tallies the items."
             ),
             resolution=(
-                "the REPL handed back 3 — the count of elements in the sequence, the same as the basket's compartments."
+                "The REPL handed back 3 — the count of elements in the sequence, the same as the basket's compartments."
             ),
             tags=("story",),
         ),
@@ -1091,7 +1088,7 @@ G4_20 = SubjectCurriculum(grade=4, subject_id="G4-20",
                 "a sequence from nothing, and the result is empty — no stream at all."
             ),
             resolution=(
-                "the REPL handed back nil — no sequence could flow from an empty basket, so the runtime returned nothing."
+                "The REPL handed back nil — no sequence could flow from an empty basket, so the runtime returned nothing."
             ),
             tags=("story",),
         ),

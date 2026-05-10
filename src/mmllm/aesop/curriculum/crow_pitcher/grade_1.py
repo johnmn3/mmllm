@@ -40,35 +40,44 @@ _SHARED_SUBPLOTS: list[SubplotTemplate] = [
     #    they evaluate it carefully. The student writes the form.
     SubplotTemplate("""\
 {hare_phrase} and {tortoise_phrase} stopped {place} where someone had
-written {concept_phrase} on a flat stone. {hare}, {emo_proud}, declared
-that {hare_he_she} could see the answer at a glance. {tortoise},
-{emo_patient}, suggested they actually evaluate the form {form_display}
-in the REPL and read off whatever it returned."""),
+scratched {concept_phrase} into the dust beside a tall pitcher. The day
+was hot, the throat of the pitcher was narrow, and the water inside lay
+low. {hare}, {emo_proud}, declared {hare_he_she} could see the answer
+at a glance. {tortoise}, {emo_patient}, said the narrow throat was a
+bottleneck — only the form, dropped in patiently like a pebble, would
+raise the water — and suggested they actually evaluate the form
+{form_display} in the REPL and read off whatever it returned."""),
 
     # 2. The wager template — bets on what the form returns.
     #    Three near-equivalent variants of the wager-setup line, picked
     #    so the same wager-template doesn't always read as "drew a wager
     #    in the dust" verbatim (cosmetic variety).
     SubplotTemplate("""\
-At a moss-covered milestone {place}, {hare_phrase} sketched a small
-wager into the path: whoever guessed the result of {form_display}
-first would win the right to set the next race. {tortoise_phrase},
-{emo_patient}, said it was simpler to type the form into the REPL
-than to argue about {concept_phrase}."""),
+At the foot of a tall pitcher {place}, {hare_phrase} sketched a small
+wager into the dry dust: whoever guessed the result of {form_display}
+first would claim the cool water lying low at the bottom. The throat
+was narrow — a bottleneck for any answer that came in too fast.
+{tortoise_phrase}, {emo_patient}, said it was simpler to drop the form
+into the REPL like a careful pebble than to argue about
+{concept_phrase} on a hot day."""),
 
-    # 2b. wager variant — chalk on stone
+    # 2b. wager variant — chalk on a smooth pebble
     SubplotTemplate("""\
-{hare_phrase} chalked a wager on a flat stone {place}: whoever
-predicted the result of {form_display} would set the next race's
-distance. {tortoise_phrase}, {emo_patient}, said it would be simpler
-to type the form into the REPL than to bicker about {concept_phrase}."""),
+{hare_phrase} chalked a wager on a smooth round pebble {place}: whoever
+predicted the result of {form_display} would drop {hare_his_her} pebble
+in the pitcher first. The water at the bottom was cool but very low,
+and a wrong guess sent a pebble in for nothing. {tortoise_phrase},
+{emo_patient}, said it would be simpler to drop the form into the REPL
+than to bicker about {concept_phrase} while the day grew hotter."""),
 
-    # 2c. wager variant — twig in the path
+    # 2c. wager variant — twig in the dust beside the pitcher
     SubplotTemplate("""\
-With a twig, {hare_phrase} marked out a wager {place}: whoever
-guessed the result of {form_display} first would win the right to
-choose the next contest. {tortoise_phrase}, {emo_patient}, said it
-was easier to ask the REPL about {concept_phrase} than to argue."""),
+With a twig, {hare_phrase} marked out a wager in the dust beside the
+pitcher {place}: whoever guessed the result of {form_display} first
+would win the right to choose the next pebble to drop. The pitcher's
+rim was high, the water far below, and every wasted guess made the
+shadows feel longer. {tortoise_phrase}, {emo_patient}, said it was
+easier to ask the REPL about {concept_phrase} than to argue."""),
 
     # 3. The teacher template — Tortoise is gently correcting Hare.
     #    NOTE: drops the "from a recent sprint" tail because EMO_TIRED
@@ -76,9 +85,12 @@ was easier to ask the REPL about {concept_phrase} than to argue."""),
     #    produced "from sprinting from a recent sprint" awkwardness.
     SubplotTemplate("""\
 {tortoise_phrase} had been trying to teach {hare_phrase} how the REPL
-works. "Look here," {tortoise_he_she} said, pointing to
-{concept_phrase}. "You hand the form {form_display} to the runtime, and
-the runtime hands you back what it evaluates to." {hare}, {emo_tired},
+works. The day was hot and the water in the nearby pitcher far below
+the narrow rim — a fitting backdrop for a lesson about patience.
+"Look here," {tortoise_he_she} said, {emo_patient}, pointing to
+{concept_phrase}. "You hand the form {form_display} to the runtime,
+the runtime evaluates step by step like pebbles dropping past the
+narrow throat, and you read off what it returns." {hare}, {emo_tired},
 agreed to try."""),
 
     # 4. The audience template — small forest creatures watch and learn.
@@ -87,11 +99,14 @@ agreed to try."""),
     #    equality (= 1 1)" / "the predicate (zero? 0)" don't fit
     #    "read aloud" semantically (you read FORMS aloud, not types).
     SubplotTemplate("""\
-A small audience of forest creatures had gathered {place} to watch
-{hare_phrase} attempt to outwit {tortoise_phrase} at reading the REPL.
-{tortoise} pointed to {concept_phrase} and read out the form aloud:
-{form_display}. The crowd waited to see who would correctly write
-the form to submit."""),
+A small audience of meadow birds had perched on the rim of a tall
+pitcher {place} to watch {hare_phrase} attempt to outwit
+{tortoise_phrase} at reading the REPL. The day was hot, the water
+inside lay cool but unreachable, and the answer was plain — every
+onlooker craned a head down the narrow throat to see. {tortoise},
+{emo_patient}, pointed to {concept_phrase} and read out the form
+aloud: {form_display}. The crowd waited to see who would correctly
+write the form to submit."""),
 
     # 5. The race-pause template — hare pauses mid-race, tortoise catches up
     #    via careful evaluation.
@@ -100,19 +115,27 @@ the form to submit."""),
     #    "They called it impossible." reads as plural-subject right after
     #    a singular "Pip the hare stopped" introduction.
     SubplotTemplate("""\
-Halfway through the race, {hare_phrase} stopped {place} and refused to
-continue until someone could prove what the form {form_display}
-evaluated to. {hare} called it impossible.
-{tortoise_phrase}, walking up at her usual pace, simply said: "Submit
-{concept_phrase} to the REPL. Whatever comes back is the answer.\""""),
+Halfway to the pitcher, {hare_phrase}, {emo_proud}, stopped {place}
+and refused to take another step until someone could prove what the
+form {form_display} evaluated to. The day was hot, {hare_his_her}
+throat dry, and the water in the pitcher's narrow throat still far
+below the rim. {hare} called the answer impossible to know.
+{tortoise_phrase}, {emo_patient}, walking up at {tortoise_his_her}
+usual pace, simply said: "Submit {concept_phrase} to the REPL.
+Whatever comes back is the answer — the water will rise pebble by
+pebble.\""""),
 
     # 6. The notebook template — the tortoise keeps a careful ledger.
     SubplotTemplate("""\
-{tortoise_phrase} had been keeping a small leather notebook of every
-form {tortoise_he_she} had successfully evaluated. {place_idx}, the
-next entry was {concept_phrase}. {hare_phrase} peered over
-{tortoise_his_her} shoulder at the form {form_display} and asked what
-it would come out to.""".replace("{place_idx}", "Today {place}")),
+{tortoise_phrase}, {emo_patient}, had been keeping a small leather
+notebook of every form {tortoise_he_she} had successfully evaluated —
+each page like a pebble in the pitcher's growing pile, raising the
+ledger's water-level of known answers a little further each time.
+The notebook was nearly full, the day was hot, and the answer plain
+on each careful entry. {place_idx}, the next entry was
+{concept_phrase}. {hare_phrase}, {emo_proud}, peered over
+{tortoise_his_her} shoulder at the form {form_display} and asked
+what it would come out to.""".replace("{place_idx}", "Today {place}")),
 
     # 7. The boast-and-rebuke template — Hare claims to know without checking.
     #    NOTE: uses {hare_him_her} (object case) for "asked X to ..."; uses
@@ -121,19 +144,24 @@ it would come out to.""".replace("{place_idx}", "Today {place}")),
     #    parse as adverbial — without the comma, "said boasting" reads
     #    as agrammatical.
     SubplotTemplate("""\
-"There is no need to evaluate that," {hare_phrase} said, {emo_proud}.
-"Anyone can see what {concept_phrase} comes to." {tortoise_phrase}, who
-{place} had grown used to such claims, asked {hare_him_her} to actually
-write the form {form_display} and submit it to the REPL — just to be
-sure."""),
+"There is no need to evaluate that," {hare_phrase} said, {emo_proud},
+the throat dry and the water at the pitcher's bottom still out of
+reach. "Anyone can see what {concept_phrase} comes to." {tortoise_phrase},
+who {place} had grown used to such claims, said {emo_patient} that the
+narrow throat punished hasty answers, and asked {hare_him_her} to
+actually write the form {form_display} and submit it to the REPL —
+just to be sure."""),
 
     # 8. The puzzle-on-the-path template — they find a riddle on a sign.
     SubplotTemplate("""\
-A wooden sign nailed to a tree {place} carried a puzzle. The riddle
-was simple: it asked the reader to evaluate {form_display}. {hare}
-laughed, {emo_proud}, and declared it too easy. {tortoise} said
-patiently that the only way to be sure of {concept_phrase} was to put
-it in the REPL."""),
+A clay tag tied around the tall pitcher's neck {place} carried a
+puzzle. The riddle was simple: it asked the reader to evaluate
+{form_display}. The day was hot, the water at the bottom cool but
+narrow-throated, and a wrong guess sent a useless pebble in.
+{hare} laughed, {emo_proud}, and declared it too easy. {tortoise}
+said, {emo_patient}, that the only honest way to be sure of
+{concept_phrase} — and to keep the rising pile of pebbles
+purposeful — was to put it in the REPL."""),
 ]
 
 
@@ -178,12 +206,13 @@ the value really was."""),
     #    Fix: drop "write a form to" verb-on-verb collision; use
     #    "produce a form whose evaluation would" (noun-clause framing).
     SubplotTemplate("""\
-At a moss-covered milestone {place}, {hare_phrase} sketched a small
-wager into the path: whoever could produce a form whose evaluation
-would {goal_text} ahead of the other would win the right to set
-the next race. {tortoise_phrase}, {emo_patient}, said it was
-simpler to write {concept_phrase} carefully than to guess at the
-answer."""),
+At the foot of the tall pitcher {place}, {hare_phrase} sketched a
+small wager into the dust: whoever could produce a form whose
+evaluation would {goal_text} ahead of the other would win the cool
+water lying low at the bottom. The throat was narrow — a hard
+bottleneck for any rushed answer. {tortoise_phrase}, {emo_patient},
+said it was simpler to write {concept_phrase} carefully than to
+guess at the answer while the day grew hotter."""),
 
     # 3. The teacher template — Tortoise teaches goal → form.
     #    Fix: "; submit that to the REPL" instead of "and submit it".
@@ -196,30 +225,36 @@ writing it."""),
 
     # 4. The audience template — onlookers wait to see the form written.
     SubplotTemplate("""\
-A small audience of forest creatures had gathered {place} to watch
-{hare_phrase} attempt to outwit {tortoise_phrase} at writing the
-right form. The challenge: {goal_text}. {tortoise} reminded the
-crowd that what mattered was writing {concept_phrase} carefully,
-then submitting it to the REPL — not guessing aloud at the
-answer."""),
+A small audience of meadow birds had perched on the rim of the tall
+pitcher {place} to watch {hare_phrase} attempt to outwit
+{tortoise_phrase} at writing the right form. The challenge:
+{goal_text}. The day was hot, the water below the rim cool but
+unreachable, and the throat was narrow. {tortoise}, {emo_patient},
+reminded the crowd that what mattered was writing {concept_phrase}
+carefully, then submitting it to the REPL — not guessing aloud at
+the answer while pebbles waited at hand."""),
 
     # 5. The race-pause template — pause mid-race for a goal-write.
     #    Fix: drop "write a form to {goal_text}"; reframe as
     #    "until someone could {goal_text} with a Clojure form".
     SubplotTemplate("""\
-Halfway through the race, {hare_phrase} stopped {place} and refused
-to continue until someone could {goal_text} with a Clojure form.
-{hare} called the goal impossible. {tortoise_phrase}, walking up at
+Halfway through the race, {hare_phrase}, {emo_proud}, stopped {place}
+and refused to continue until someone could {goal_text} with a
+Clojure form. The day was hot, {hare_his_her} throat dry, and the
+nearby pitcher's water still far below the narrow rim. {hare} called
+the goal impossible. {tortoise_phrase}, {emo_patient}, walking up at
 {tortoise_his_her} usual pace, simply said: "Compose {concept_phrase};
 submit it. Whatever comes back is the answer.\""""),
 
     # 6. The notebook template — Tortoise records goal/form pairs.
     SubplotTemplate("""\
-{tortoise_phrase} kept a small leather notebook of every goal
-{tortoise_he_she} had translated into a Clojure form. Today {place},
-the next entry was a goal: {goal_text}. {tortoise} sat with pen in
-hand, ready to compose {concept_phrase}, then let the REPL
-confirm the value."""),
+{tortoise_phrase}, {emo_patient}, kept a small bark-strip ledger of
+every goal {tortoise_he_she} had translated into a Clojure form —
+each entry a pebble's worth of progress, the ledger's mark-count
+rising slowly the way the pitcher's water rose with patient drops.
+Today {place}, the next entry was a goal: {goal_text}. {tortoise}
+sat with pen in hand, ready to compose {concept_phrase}, then let
+the REPL confirm the value."""),
 
     # 7. The boast-and-rebuke template — Hare boasts; Tortoise asks
     #    for the actual form. Fix: "To X is something anyone could
@@ -234,34 +269,41 @@ just to be sure."""),
 
     # 8. The puzzle-on-the-path template — a sign poses the goal.
     SubplotTemplate("""\
-A wooden sign nailed to a tree {place} carried a small puzzle. The
-challenge was simple: {goal_text}. {hare} laughed, {emo_proud}, and
-declared it too easy. {tortoise} said patiently that the only way
-to be sure of {concept_phrase} was to write the form and put it
-in the REPL — not to guess at the value from the goal alone."""),
+A clay tag tied around the tall pitcher's neck {place} carried a
+small puzzle. The challenge was simple: {goal_text}. The day was
+hot, the water at the pitcher's bottom cool but narrow-throated.
+{hare} laughed, {emo_proud}, and declared it too easy. {tortoise}
+said, {emo_patient}, that the only way to be sure of
+{concept_phrase} was to write the form and put it in the REPL —
+not to guess at the value from the goal alone, like a pebble flung
+without aim."""),
 
     # 9. The Hare-stumbles template — Hare's hurry betrays him; the
     #    Tortoise's careful form returns the value first. Delivers
     #    the fable's moral (vanity vs. steadiness) directly.
     SubplotTemplate("""\
-"This is nothing," {hare_phrase} scoffed, {emo_proud}. "I can
-{goal_text} in my sleep." {hare} grabbed a stick and dashed off a
-few characters in the dust — but a paren went missing, an operand
-fell out of place, and the form did not even read as Clojure.
+"This is nothing," {hare_phrase} scoffed, {emo_proud}, the day hot
+and the throat dry. "I can {goal_text} in my sleep." {hare} grabbed
+a stick and dashed off a few characters in the dust — but a paren
+went missing, an operand fell out of place, and the form did not
+even read as Clojure. The pitcher stood narrow and tall, the water
+inside still as far below as a bad guess could leave it.
 {tortoise_phrase}, {emo_patient}, had already written
-{concept_phrase} on a flat stone, neat and unhurried, and
+{concept_phrase} on a smooth pebble, neat and unhurried, and
 submitted it to the REPL. The value came back as quietly as
-{tortoise_he_she} had written. The hares of the meadow looked
-between the two slates: only {tortoise_his_her} had run."""),
+{tortoise_he_she} had written, and the water in the pitcher seemed
+to rise a finger's width."""),
 
     # 10. The race-against-the-REPL template — wager on speed-of-
     #     answering, Tortoise's careful path wins. Moral lands.
     SubplotTemplate("""\
 The wager was set {place}: produce the value before the breeze had
-turned the next leaf. {hare_phrase} bolted into a flurry of
-guesses, calling out numbers and second-guessing {hare_him_her}self
-about whether the goal was to {goal_text} or something close to it.
-{tortoise_phrase}, who had simply walked to the slate and begun to
+turned the next leaf. The day was hot and the pitcher's water lay
+low; a wrong guess wasted the breeze and the whole pebble both.
+{hare_phrase}, {emo_proud}, bolted into a flurry of guesses, calling
+out numbers and second-guessing {hare_him_her}self about whether
+the goal was to {goal_text} or something close to it.
+{tortoise_phrase}, {emo_patient}, walked to the slate and began to
 write {concept_phrase}, finished the form, submitted it, and read
 the value off the REPL while {hare} was still arguing with the
 breeze. The race, like every other, went to the steady hand."""),
@@ -553,7 +595,7 @@ G1_09 = SubjectCurriculum(
             ),
             resolution=(
                 "The gate returned the negative verdict: a bare stone-count "
-                "is no chalk mark."
+                "is no chalk mark. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -606,8 +648,7 @@ G1_09 = SubjectCurriculum(
                 "together and confirms the match."
             ),
             resolution=(
-                "The gate closed in agreement: two identical chalk marks are "
-                "equal, the confirmation returned."
+                'The gate closed in agreement: two identical chalk marks are equal, the confirmation returned (with `hare` as the input value).'
             ),
             tags=("story",),
         ),
@@ -647,7 +688,7 @@ G1_10 = SubjectCurriculum(
             ),
             resolution=(
                 "The sum arrived unchanged, the marginal note never "
-                "entering the water, exactly as the scribe intended."
+                "entering the water, exactly as the scribe intended. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -674,7 +715,7 @@ G1_10 = SubjectCurriculum(
             ),
             resolution=(
                 "The count returned unchanged, the note never entering the water, "
-                "just as the double mark promised."
+                "just as the double mark promised. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -713,7 +754,7 @@ G1_11 = SubjectCurriculum(
             ),
             resolution=(
                 "The expected sum returned, the extra spacing having vanished "
-                "before the form ever reached the pitcher."
+                "before the form ever reached the pitcher. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -740,7 +781,7 @@ G1_11 = SubjectCurriculum(
             ),
             resolution=(
                 "The correct sum returned, the line breaks invisible to the "
-                "runtime just as any other spacing would be."
+                "runtime just as any other spacing would be. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -779,7 +820,7 @@ G1_12 = SubjectCurriculum(
             ),
             resolution=(
                 "The sum returned, the parens having grouped the form cleanly "
-                "without adding any multiplication."
+                "without adding any multiplication. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -806,7 +847,7 @@ G1_12 = SubjectCurriculum(
             ),
             resolution=(
                 "The nested product returned, the inner sum resolved before "
-                "the outer multiplication ever ran."
+                "the outer multiplication ever ran. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -845,7 +886,7 @@ G1_13 = SubjectCurriculum(
             ),
             resolution=(
                 "The two handfuls combined, the water rising to the "
-                "expected notch at beak-reach."
+                "expected notch at beak-reach. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -863,16 +904,16 @@ G1_13 = SubjectCurriculum(
             ),
             need=(
                 "She needed the runtime to return the count of what remained "
-                "after the three stones were lifted away."
+                "after the the stones were lifted away."
             ),
             mapping=(
-                "`-` removes the second stone-count from the first. Five stones "
+                "`-` removes the second stone-count from the first. the stones "
                 "less three gives the smaller heap; the runtime counts what's left "
                 "and returns it as the water-level."
             ),
             resolution=(
                 "The remaining count returned, the heap diminished by exactly "
-                "the stones lifted away."
+                "the stones lifted away. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -885,7 +926,7 @@ G1_13 = SubjectCurriculum(
 
             scenario=(
                 "Korvus arranged four rows of stones on the hilltop pitcher's "
-                "rim, five stones in each row, tallying how many stones he would "
+                "rim, the stones in each row, tallying how many stones he would "
                 "need in total before dropping them all at once."
             ),
             need=(
@@ -894,12 +935,12 @@ G1_13 = SubjectCurriculum(
             ),
             mapping=(
                 "`*` repeats the addition of the first count as many times as "
-                "the second count says. Four rows of five stones gives the full "
+                "the second count says. Four rows of the stones gives the full "
                 "heap; the runtime returns the exact product."
             ),
             resolution=(
                 "The total stone-count returned, the full heap tallied without "
-                "a single stone miscounted."
+                "a single stone miscounted. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -911,7 +952,7 @@ G1_13 = SubjectCurriculum(
             goal_text="divide 10 by 2",
 
             scenario=(
-                "Sable stood at the garden pitcher's rim with ten stones and "
+                "Sable stood at the garden pitcher's rim with the stones and "
                 "two waiting spots on the clay, sorting the pile evenly into "
                 "both spots before counting what each portion held."
             ),
@@ -921,12 +962,12 @@ G1_13 = SubjectCurriculum(
             ),
             mapping=(
                 "`/` divides the first stone-count into as many equal parts as "
-                "the second count says. Ten stones split evenly into two portions "
+                "the second count says. the stones split evenly into two portions "
                 "gives the per-portion count the runtime returns."
             ),
             resolution=(
                 "The even-split count returned, each portion holding the same "
-                "number of stones."
+                "number of stones. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -938,7 +979,7 @@ G1_13 = SubjectCurriculum(
             goal_text="add 7 and 8",
 
             scenario=(
-                "Caw crouched at the orchard pitcher's rim, seven stones in "
+                "Caw crouched at the orchard pitcher's rim, the stones in "
                 "her left talon and eight in her right, both handfuls poised "
                 "above the water."
             ),
@@ -953,7 +994,7 @@ G1_13 = SubjectCurriculum(
             ),
             resolution=(
                 "The combined count returned, both handfuls measured together "
-                "in a single stone-count call."
+                "in a single stone-count call. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -979,8 +1020,7 @@ G1_13 = SubjectCurriculum(
                 "and returns as the water-level."
             ),
             resolution=(
-                "The remainder returned, the heap diminished and the count "
-                "precise."
+                'The remainder returned, the heap diminished and the count precise (with `20` as the input value).'
             ),
             tags=("story",),
         ),
@@ -1005,7 +1045,7 @@ G1_14 = SubjectCurriculum(
 
             scenario=(
                 "Sable stood at the meadow pitcher's rim with one loose stone "
-                "and two small groups of three stones each, the grouped stones "
+                "and two small groups of the stones each, the grouped stones "
                 "nested inside the outer count like a bag within a bag."
             ),
             need=(
@@ -1019,7 +1059,7 @@ G1_14 = SubjectCurriculum(
             ),
             resolution=(
                 "The outer sum returned, the inner product having resolved "
-                "before the addition ever ran."
+                "before the addition ever ran. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -1032,7 +1072,7 @@ G1_14 = SubjectCurriculum(
 
             scenario=(
                 "Korvus arranged two small heaps on the farm pitcher's rim — "
-                "one of three stones summed from two groups, another of seven "
+                "one of the stones summed from two groups, another of seven "
                 "summed from two groups — before multiplying the resolved heaps together."
             ),
             need=(
@@ -1046,7 +1086,7 @@ G1_14 = SubjectCurriculum(
             ),
             resolution=(
                 "The product returned, both nested sums resolved and then "
-                "multiplied by the outer call."
+                "multiplied by the outer call. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -1073,7 +1113,7 @@ G1_14 = SubjectCurriculum(
             ),
             resolution=(
                 "The diminished count returned, the inner product resolved "
-                "and removed from the outer pile."
+                "and removed from the outer pile. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -1100,7 +1140,7 @@ G1_14 = SubjectCurriculum(
             ),
             resolution=(
                 "The combined total returned, both inner products resolved and "
-                "then added together by the outer call."
+                "then added together by the outer call. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -1139,7 +1179,7 @@ G1_15 = SubjectCurriculum(
             ),
             resolution=(
                 "true — both gates closed in agreement, the counts identical, "
-                "the confirmation dropping into the pitcher."
+                "the confirmation dropping into the pitcher. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -1166,7 +1206,7 @@ G1_15 = SubjectCurriculum(
             ),
             resolution=(
                 "The gate returned the negative verdict: the counts differed, "
-                "the arms refusing to close together."
+                "the arms refusing to close together. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -1193,7 +1233,7 @@ G1_15 = SubjectCurriculum(
             ),
             resolution=(
                 "The gate confirmed agreement: the two letter-marks matched "
-                "and the arms closed together."
+                "and the arms closed together. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -1220,7 +1260,7 @@ G1_15 = SubjectCurriculum(
             ),
             resolution=(
                 "The gate confirmed the match: both colon-prefixed name-stones "
-                "were identical, the arms closing in agreement."
+                "were identical, the arms closing in agreement. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -1247,7 +1287,7 @@ G1_15 = SubjectCurriculum(
             ),
             resolution=(
                 "The gate returned the rejection: the two name-stones were "
-                "distinct, the arms unable to close together."
+                "distinct, the arms unable to close together. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -1264,17 +1304,17 @@ G1_15 = SubjectCurriculum(
                 "all four to the gate at the same time."
             ),
             need=(
-                "Sable needed the gate to confirm all four stones carried "
+                "Sable needed the gate to confirm all the stones carried "
                 "identical counts — a multi-stone check, not just a pair."
             ),
             mapping=(
                 "`=` accepts any number of arguments and confirms all equal. "
-                "Four stones each carrying the count one pass the gate-arms "
+                "the stones each carrying the count one pass the gate-arms "
                 "in sequence; every comparison matches."
             ),
             resolution=(
-                "The gate confirmed unanimous agreement: all four stone-counts "
-                "matched, the arms closing with each comparison."
+                "The gate confirmed unanimous agreement: all the stone-counts "
+                "matched, the arms closing with each comparison. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -1313,7 +1353,7 @@ G1_16 = SubjectCurriculum(
             ),
             resolution=(
                 "The positive verdict returned: the empty talon held the zero "
-                "count, confirmed by the predicate."
+                "count, confirmed by the predicate. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -1330,17 +1370,17 @@ G1_16 = SubjectCurriculum(
                 "despite the obvious weight in her grip."
             ),
             need=(
-                "She needed the runtime to report whether five stones in "
+                "She needed the runtime to report whether the stones in "
                 "the talon could ever pass the empty-talon test."
             ),
             mapping=(
-                "`zero?` checks for the empty notch only. Five stones is a "
+                "`zero?` checks for the empty notch only. the stones is a "
                 "non-empty count; the predicate finds the talon occupied and "
                 "returns the negative verdict without hesitation."
             ),
             resolution=(
-                "The negative verdict returned: five stones is not zero, "
-                "the talon far from empty."
+                "The negative verdict returned: the stones is not zero, "
+                "the talon far from empty. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -1352,21 +1392,21 @@ G1_16 = SubjectCurriculum(
             goal_text="check whether 7 is positive using pos?",
 
             scenario=(
-                "Sable placed seven stones above the zero-notch scratch on the "
+                "Sable placed the stones above the zero-notch scratch on the "
                 "meadow pitcher's rim — clearly on the positive side of the "
                 "mark — and submitted the positive-check to the runtime."
             ),
             need=(
-                "Sable needed the runtime to confirm whether seven stones "
-                "above the zero-notch satisfied the positive-side test."
+                "Sable needed the runtime to confirm whether the stones "
+                "above the zero-notch satisfied the positive-side test. (with {drawn.a} folded in)"
             ),
             mapping=(
                 "`pos?` checks whether the stone-count sits above the zero-notch. "
-                "Seven stones land squarely on the positive side; "
+                "the stones land squarely on the positive side; "
                 "the predicate confirms the verdict."
             ),
             resolution=(
-                "The positive verdict returned: seven stones above the notch "
+                "The positive verdict returned: the stones above the notch "
                 "satisfied the positive-side test."
             ),
             tags=("story",),
@@ -1393,8 +1433,7 @@ G1_16 = SubjectCurriculum(
                 "and returns the negative verdict."
             ),
             resolution=(
-                "The negative verdict returned: a below-zero count does not "
-                "pass the positive-side test."
+                'The negative verdict returned: a below-zero count does not pass the positive-side test (with `-2` as the input value).'
             ),
             tags=("story",),
         ),
@@ -1421,7 +1460,7 @@ G1_16 = SubjectCurriculum(
             ),
             resolution=(
                 "The positive verdict returned: a below-zero count satisfies "
-                "the negative-side test as expected."
+                "the negative-side test. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -1433,21 +1472,21 @@ G1_16 = SubjectCurriculum(
             goal_text="check whether 4 is negative using neg?",
 
             scenario=(
-                "Korvus held four stones clearly above the zero-notch at the "
+                "Korvus held the stones clearly above the zero-notch at the "
                 "market pitcher's rim and put the negative-side test to the "
                 "runtime despite the count sitting in positive territory."
             ),
             need=(
-                "He needed the runtime to confirm whether four stones above "
-                "zero could pass the below-zero test."
+                "He needed the runtime to confirm whether the stones above "
+                "zero could pass the below-zero test. (with {drawn.a} folded in)"
             ),
             mapping=(
                 "`neg?` only passes counts that sit below the zero-notch. "
-                "Four stones above the mark are on the positive side; "
+                "the stones above the mark are on the positive side; "
                 "the predicate finds the count above the line and rejects it."
             ),
             resolution=(
-                "The negative verdict returned: four stones above zero do not "
+                "The negative verdict returned: the stones above zero do not "
                 "satisfy the below-zero test."
             ),
             tags=("story",),
@@ -1488,7 +1527,7 @@ G1_17 = SubjectCurriculum(
             ),
             resolution=(
                 "The literal value rose in the water, returned by the REPL "
-                "as the form's own value."
+                "as the form's own value. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -1515,7 +1554,7 @@ G1_17 = SubjectCurriculum(
             ),
             resolution=(
                 "The sum rose in the water, returned directly by the REPL "
-                "as the form's evaluated value."
+                "as the form's evaluated value. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -1553,8 +1592,8 @@ G1_18 = SubjectCurriculum(
                 "value as usual, the moss untouched and the pitcher undisturbed."
             ),
             resolution=(
-                "The expected sum returned cleanly, the moss never needed, "
-                "the REPL untroubled by the safety pad beneath."
+                "The expected sum came back, the moss never needed, "
+                "the REPL untroubled by the safety pad beneath. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -1567,7 +1606,7 @@ G1_18 = SubjectCurriculum(
 
             scenario=(
                 "Korvus laid a wide moss pad beneath the hilltop pitcher, "
-                "then arranged seven rows of six stones on the rim, ready to "
+                "then arranged seven rows of the stones on the rim, ready to "
                 "drop the product-form with the safety net in place."
             ),
             need=(
@@ -1581,7 +1620,7 @@ G1_18 = SubjectCurriculum(
             ),
             resolution=(
                 "The full product returned, the moss untouched, the pitcher's "
-                "water rising to the correct level."
+                "water rising to the correct level. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),

@@ -426,6 +426,14 @@ class ProductKeyMemory(nn.Module):
         self.sub_top_k = min(sub_top_k, sqrt_n)
         self.mmap_path = mmap_path
 
+        # Query normalization before sub-key lookup. Lample 2019 + PEER 2024
+        # both find this is critical for slot utilization at large bank size:
+        # without it, queries cluster in a low-dim subspace and most rows are
+        # never selected. We use RMSNorm (matches the rest of the model);
+        # PEER originally used BatchNorm. q_norm runs on the full q_dim
+        # then we split into halves — gives both q_a and q_b consistent scale.
+        self.q_norm = nn.RMSNorm(q_dim)
+
         # Sub-key matrices — small, always RAM, follow parent device
         self.K_a = nn.Parameter(torch.randn(sqrt_n, self.sub_dim) * 0.02)
         self.K_b = nn.Parameter(torch.randn(sqrt_n, self.sub_dim) * 0.02)
@@ -478,9 +486,33 @@ class ProductKeyMemory(nn.Module):
             with torch.no_grad():
                 self.V.weight.normal_(0, 0.02)
 
+        # Slot-usage tracking. K_a/K_b sub-key hit counts per row over a
+        # rolling window — used by `reinit_dead_slots()` to find rows
+        # never (or rarely) selected and re-init them, and by metrics
+        # to log per-layer utilization entropy. register_buffer so they
+        # survive .to(device) but aren't optimized.
+        self.register_buffer("ka_hits", torch.zeros(sqrt_n, dtype=torch.long), persistent=False)
+        self.register_buffer("kb_hits", torch.zeros(sqrt_n, dtype=torch.long), persistent=False)
+        # `last_z_loss` is set every forward to the query z-loss term
+        # (logsumexp²) for K_a + K_b — picked up by the train loop and
+        # added to the main loss with a small coefficient (~1e-5).
+        self.last_z_loss: torch.Tensor | None = None
+
     def dense_parameters(self):
-        """Parameters with dense gradients (route to AdamW)."""
+        """Parameters with dense gradients (route to AdamW). Returns ONLY
+        K_a/K_b — q_norm.weight is exposed separately via `q_norm_parameters`
+        so the train-loop can place it at the END of the model's flat
+        parameter list (after all blocks' core params). Positional ckpt
+        load from a pre-q_norm ckpt then aligns cleanly across all
+        per-block tensors; q_norm stays at fresh init (scale 1.0) on
+        first load."""
         return [self.K_a, self.K_b]
+
+    def q_norm_parameters(self):
+        """Just q_norm.weight, separate from dense_parameters so it can be
+        placed at the end of the model's flat param list for backward-
+        compat loading of pre-q_norm ckpts."""
+        return [self.q_norm.weight]
 
     def sparse_parameters(self):
         """Parameters with sparse gradients (route to SparseAdam)."""
@@ -490,6 +522,107 @@ class ProductKeyMemory(nn.Module):
         """Zero V.weight in-place (ablation utility)."""
         with torch.no_grad():
             self.V.weight.zero_()
+
+    def slot_usage_stats(self) -> dict:
+        """Per-layer utilization summary computed from the rolling hit
+        counters. Returns:
+          - dead_a/dead_b: # of K_a/K_b rows with zero hits in the window
+          - entropy_a/entropy_b: Shannon entropy of normalized hit dist
+            (max = log2(sqrt_n) ≈ 11 for sqrt_n=2048; uniform = max)
+          - kl_uniform: KL(hits_norm || uniform), 0 if perfectly uniform
+        Caller should reset_slot_usage() after reading to start a new
+        window.
+        """
+        with torch.no_grad():
+            ka_total = self.ka_hits.sum().item()
+            kb_total = self.kb_hits.sum().item()
+            stats = {
+                "dead_a":     int((self.ka_hits == 0).sum().item()),
+                "dead_b":     int((self.kb_hits == 0).sum().item()),
+                "ka_total":   ka_total,
+                "kb_total":   kb_total,
+            }
+            if ka_total > 0:
+                pa = self.ka_hits.float() / ka_total
+                pa_pos = pa[pa > 0]
+                ent_a = -(pa_pos * pa_pos.log2()).sum().item()
+                stats["entropy_a"]      = ent_a
+                stats["entropy_a_max"]  = float(torch.tensor(self.sqrt_n).log2())
+            if kb_total > 0:
+                pb = self.kb_hits.float() / kb_total
+                pb_pos = pb[pb > 0]
+                ent_b = -(pb_pos * pb_pos.log2()).sum().item()
+                stats["entropy_b"]      = ent_b
+            return stats
+
+    def reset_slot_usage(self) -> None:
+        """Zero the hit counters. Call after reading slot_usage_stats()
+        to start a fresh window."""
+        with torch.no_grad():
+            self.ka_hits.zero_()
+            self.kb_hits.zero_()
+
+    def reinit_dead_slots(self, hit_threshold: int = 0,
+                          k_init_scale: float = 0.02,
+                          v_init_scale: float = 0.02) -> dict:
+        """Find K_a/K_b rows below `hit_threshold` and re-init with small
+        Gaussian noise. Lample 2019 + PEER 2024 use this as the PKM
+        analog to MoE load-balancing — periodic kick to redistribute
+        unused capacity. Returns a dict with the count of rows touched.
+
+        For dead K_a row i: also reset all V rows i*sqrt_n..(i+1)*sqrt_n
+        (the entire i-th K_b stripe) since those are unreachable when
+        K_a[i] is the dead key. Same for dead K_b.
+
+        NOTE: V reset only happens when the bank is GPU-resident (no mmap).
+        With mmap-backed V we'd need to flush dirty pages — skipped for
+        now; in practice the slot-collapse problem is most severe early
+        in training when bank_on_gpu=True is the typical config.
+        """
+        with torch.no_grad():
+            ka_dead_mask = self.ka_hits <= hit_threshold
+            kb_dead_mask = self.kb_hits <= hit_threshold
+            n_a = int(ka_dead_mask.sum().item())
+            n_b = int(kb_dead_mask.sum().item())
+            if n_a > 0:
+                noise_a = torch.randn(
+                    n_a, self.sub_dim, device=self.K_a.device, dtype=self.K_a.dtype,
+                ) * k_init_scale
+                self.K_a.data[ka_dead_mask] = noise_a
+            if n_b > 0:
+                noise_b = torch.randn(
+                    n_b, self.sub_dim, device=self.K_b.device, dtype=self.K_b.dtype,
+                ) * k_init_scale
+                self.K_b.data[kb_dead_mask] = noise_b
+            # Reset corresponding V rows (only when V on GPU)
+            if self._storage is None and (n_a > 0 or n_b > 0):
+                ka_dead_idx = ka_dead_mask.nonzero(as_tuple=True)[0]
+                kb_dead_idx = kb_dead_mask.nonzero(as_tuple=True)[0]
+                # i in unreachable set if i//sqrt_n in ka_dead OR i%sqrt_n in kb_dead.
+                # Build index tensor of unreachable V rows. Cap to avoid OOM
+                # in pathological cases.
+                rows_to_reset = []
+                if len(ka_dead_idx) > 0:
+                    base = ka_dead_idx.unsqueeze(-1) * self.sqrt_n
+                    offsets = torch.arange(self.sqrt_n, device=base.device)
+                    rows_to_reset.append((base + offsets).flatten())
+                if len(kb_dead_idx) > 0:
+                    base = torch.arange(self.sqrt_n, device=kb_dead_idx.device) * self.sqrt_n
+                    rows = (base.unsqueeze(-1) + kb_dead_idx.unsqueeze(0)).flatten()
+                    rows_to_reset.append(rows)
+                if rows_to_reset:
+                    all_rows = torch.unique(torch.cat(rows_to_reset))
+                    # Cap reset to avoid touching > 25% of V at once
+                    cap = self.n // 4
+                    if all_rows.numel() > cap:
+                        perm = torch.randperm(all_rows.numel(), device=all_rows.device)[:cap]
+                        all_rows = all_rows[perm]
+                    noise_v = torch.randn(
+                        all_rows.numel(), self.q_dim,
+                        device=self.V.weight.device, dtype=self.V.weight.dtype,
+                    ) * v_init_scale
+                    self.V.weight.data[all_rows] = noise_v
+            return {"n_ka_reinit": n_a, "n_kb_reinit": n_b}
 
     def sync_bank(self, volume) -> dict:
         """Sync this layer's bank to/from a Modal Volume (or any
@@ -585,14 +718,41 @@ class ProductKeyMemory(nn.Module):
         boundary so the sparse gradient lands on V on its native device.
         """
         B, T, D = q.shape
+        q = self.q_norm(q)
         q_a = q[..., :self.sub_dim]
         q_b = q[..., self.sub_dim:]
 
         # Sub-key search — on q's device (K_a, K_b follow the parent module)
         scores_a = q_a @ self.K_a.T
         scores_b = q_b @ self.K_b.T
+
+        # Query z-loss: penalty on logsumexp magnitude of sub-key scores.
+        # Cheap stability term from ST-MoE; keeps query magnitudes from
+        # drifting into numerically unstable regimes during long runs.
+        # The training loop reads `last_z_loss` and adds it to the main
+        # loss with a small coefficient (~1e-5). Only computed in training
+        # mode to skip the per-step overhead during eval.
+        if self.training:
+            lse_a = torch.logsumexp(scores_a, dim=-1)
+            lse_b = torch.logsumexp(scores_b, dim=-1)
+            self.last_z_loss = (lse_a.square().mean() + lse_b.square().mean())
+        else:
+            self.last_z_loss = None
+
         top_a_s, top_a_i = scores_a.topk(self.sub_top_k, dim=-1)
         top_b_s, top_b_i = scores_b.topk(self.sub_top_k, dim=-1)
+
+        # Update sub-key hit counters for slot-utilization metrics +
+        # dead-slot reinit. Only in training mode; bincount on each pass
+        # is cheap (sqrt_n=2048 buckets, ~B*T*sub_top_k inputs).
+        if self.training:
+            with torch.no_grad():
+                self.ka_hits.add_(
+                    torch.bincount(top_a_i.view(-1), minlength=self.sqrt_n)
+                )
+                self.kb_hits.add_(
+                    torch.bincount(top_b_i.view(-1), minlength=self.sqrt_n)
+                )
 
         # Outer-sum scores; index via i = i_a * sqrt_n + i_b
         combined_scores = (top_a_s.unsqueeze(-1) + top_b_s.unsqueeze(-2))
@@ -904,6 +1064,10 @@ class Int8ProductKeyMemory(nn.Module):
         self.sub_top_k = min(sub_top_k, sqrt_n)
         self.mmap_path = mmap_path
 
+        # Query normalization — must match ProductKeyMemory so int8
+        # inference picks up the trained q_norm.weight from the dense ckpt.
+        self.q_norm = nn.RMSNorm(q_dim)
+
         # Sub-key matrices — same as fp32 path
         self.K_a = nn.Parameter(torch.randn(sqrt_n, self.sub_dim) * 0.02)
         self.K_b = nn.Parameter(torch.randn(sqrt_n, self.sub_dim) * 0.02)
@@ -1000,6 +1164,7 @@ class Int8ProductKeyMemory(nn.Module):
         int8 → fp32 dequantization at the gather step.
         """
         B, T, D = q.shape
+        q = self.q_norm(q)
         q_a = q[..., :self.sub_dim]
         q_b = q[..., self.sub_dim:]
 

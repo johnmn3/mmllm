@@ -72,8 +72,8 @@ G9_01 = SubjectCurriculum(
                 "end reads what the original basket still holds."
             ),
             resolution=(
-                "the REPL returned the original basket unchanged — the new compartment "
-                "lived only in the fresh basket, and the first pail stayed sealed."
+                "The REPL returned the original basket unchanged — the new compartment "
+                "lived only in the fresh basket, and the first pail stayed sealed — :b."
             ),
             tags=("story",),
         ),
@@ -99,8 +99,8 @@ G9_01 = SubjectCurriculum(
                 "original three-pail row that was never altered."
             ),
             resolution=(
-                "the REPL returned the original three-pail row — the fourth pail "
-                "existed only in the new row, and the first row remained intact."
+                "The REPL returned the original three-pail row — the fourth pail "
+                "existed only in the new row, and the first row remained intact — 4."
             ),
             tags=("story",),
         ),
@@ -140,7 +140,7 @@ G9_02 = SubjectCurriculum(
                 "slate says now."
             ),
             resolution=(
-                "the REPL read the slate and returned 1 — one delivery tallied, the "
+                "The REPL read the slate and returned the result — one delivery tallied, the "
                 "slate faithfully updated after the first pail left the door."
             ),
             tags=("story",),
@@ -167,9 +167,9 @@ G9_02 = SubjectCurriculum(
                 "`@` reads what the slate says after the overwrite."
             ),
             resolution=(
-                "the REPL read the slate and returned the new status — the idle "
+                "The REPL read the slate and returned the new status — the idle "
                 "mark was gone, replaced in a single chalk stroke, and the dairy "
-                "door showed the current state."
+                "door showed the current state — :running."
             ),
             tags=("story",),
         ),
@@ -188,7 +188,7 @@ G9_03 = SubjectCurriculum(
         SubjectExample(
             form="(do (def a (atom 0)) (swap! a inc) @a)",
             expected=1,
-            concept_phrase="atom, swap, and deref",
+            concept_phrase="the atom updated with swap and read with deref",
             question_what="the running tally on the page after one foraging contribution",
             goal_text="set up a shared notebook starting at 0, atomically add one to its page, then read the page",
             scenario=(
@@ -207,15 +207,14 @@ G9_03 = SubjectCurriculum(
                 "next number. `@` reads what the slate says now."
             ),
             resolution=(
-                "the REPL read the slate and returned the updated count — one "
-                "pail tallied, the chalk mark correct after the first delivery."
+                'The REPL read the slate and returned the updated count — one pail tallied, the chalk mark correct after the first delivery (with `0` as the input value).'
             ),
             tags=("story",),
         ),
         SubjectExample(
             form="(do (def a (atom 10)) (swap! a + 5) @a)",
             expected=15,
-            concept_phrase="atom, swap, deref",
+            concept_phrase="the atom-swap-deref pattern",
             question_what="the value returned by dereferencing a after defining a as an atom holding 10 and swapping it via + 5",
             goal_text="construct an atom holding 10, atomically swap it by applying + to 5, and dereference the result",
             scenario=(
@@ -234,7 +233,7 @@ G9_03 = SubjectCurriculum(
                 "after the chalk-update is complete."
             ),
             resolution=(
-                "the REPL read the slate and returned the combined count — the "
+                "The REPL read the slate and returned the combined count — the "
                 "second batch was absorbed and the tally reflected the full "
                 "morning's deliveries."
             ),
@@ -243,7 +242,7 @@ G9_03 = SubjectCurriculum(
         SubjectExample(
             form="(do (def a (atom :start)) (reset! a :done) @a)",
             expected=":done",
-            concept_phrase="atom, reset, deref",
+            concept_phrase="the atom reset and read",
             question_what="the value returned by dereferencing a after defining a as an atom holding a start keyword and resetting it to done",
             goal_text="construct an atom holding a start keyword, atomically reset it to a done keyword, and dereference the result",
             scenario=(
@@ -262,9 +261,9 @@ G9_03 = SubjectCurriculum(
                 "what the slate says after the overwrite."
             ),
             resolution=(
-                "the REPL read the slate and returned the new status — the round "
+                "The REPL read the slate and returned the new status — the round "
                 "was marked complete, the old word erased and replaced in one "
-                "unbroken motion."
+                "unbroken motion — :done."
             ),
             tags=("story",),
         ),
@@ -284,7 +283,7 @@ G9_04 = SubjectCurriculum(
         SubjectExample(
             form="(do (def a (atom 0)) (compare-and-set! a 0 1) @a)",
             expected=1,
-            concept_phrase="atom, CAS, deref",
+            concept_phrase="the atom with compare-and-set",
             question_what="the value returned by dereferencing a after defining a as an atom holding 0 and performing a successful compare-and-set to 1",
             goal_text="construct an atom holding 0, perform a compare-and-set checking for 0 and setting to 1, and dereference",
             scenario=(
@@ -301,15 +300,14 @@ G9_04 = SubjectCurriculum(
                 "writes only when they match. `@` reads the slate after the attempt."
             ),
             resolution=(
-                "the REPL read the slate and returned the updated count — the marks "
-                "matched and the chalk-update succeeded."
+                'The REPL read the slate and returned the updated count — the marks matched and the chalk-update succeeded (with `0` as the input value).'
             ),
             tags=("story",),
         ),
         SubjectExample(
             form="(do (def a (atom 5)) (compare-and-set! a 0 99) @a)",
             expected=5,
-            concept_phrase="atom, failed CAS, deref",
+            concept_phrase="the atom with a failed compare-and-set",
             question_what="the value returned by dereferencing a after defining a as an atom holding 5 and attempting a compare-and-set that fails",
             goal_text="construct an atom holding 5, perform a compare-and-set checking for 0 and setting to 99, and dereference",
             scenario=(
@@ -327,8 +325,8 @@ G9_04 = SubjectCurriculum(
                 "value still held there."
             ),
             resolution=(
-                "the REPL read the slate and returned the original count — the "
-                "failed compare left the tally exactly as the other farmer wrote it."
+                "The REPL read the slate and returned the original count — the "
+                "failed compare left the tally exactly as the other farmer wrote it — 99."
             ),
             tags=("story",),
         ),
@@ -372,8 +370,7 @@ G9_05 = SubjectCurriculum(
                 "it onto the log-slate. `@log` reads what the log-slate collected."
             ),
             resolution=(
-                "the REPL read the log-slate and returned its collected entries — "
-                "every update had been captured by the watcher."
+                'The REPL read the log-slate and returned its collected entries — every update had been captured by the watcher (with `:w` as the input value).'
             ),
             tags=("story",),
         ),
@@ -417,8 +414,7 @@ G9_06 = SubjectCurriculum(
                 "`@` reads what the slate holds after the validated chalk-update."
             ),
             resolution=(
-                "the REPL read the slate and returned the updated count — the "
-                "chalk-update passed the door-rule, and the tally advanced safely."
+                'The REPL read the slate and returned the updated count — the chalk-update passed the door-rule, and the tally advanced safely (with `0` as the input value).'
             ),
             tags=("story",),
         ),
@@ -438,7 +434,7 @@ G9_07 = SubjectCurriculum(
         SubjectExample(
             form="(do (def r (ref 0)) (dosync (alter r inc)) @r)",
             expected=1,
-            concept_phrase="ref, dosync, alter, deref",
+            concept_phrase="the ref altered inside dosync",
             question_what="the value returned by dereferencing r after defining a ref holding 0, performing a transactional alter via inc, and dereferencing",
             goal_text="construct a ref holding 0, perform a transactional alter by applying inc inside dosync, and dereference",
             scenario=(
@@ -455,15 +451,14 @@ G9_07 = SubjectCurriculum(
                 "applies `inc` inside it. `@` reads the slate after the window closes."
             ),
             resolution=(
-                "the REPL read the slate and returned the updated count — the "
-                "transactional chalk-update completed safely."
+                'The REPL read the slate and returned the updated count — the transactional chalk-update completed safely (with `0` as the input value).'
             ),
             tags=("story",),
         ),
         SubjectExample(
             form="(do (def r (ref 100)) (dosync (ref-set r 7)) @r)",
             expected=7,
-            concept_phrase="ref, dosync, ref-set, deref",
+            concept_phrase="the ref reset inside dosync",
             question_what="the value returned by dereferencing r after defining a ref holding 100, setting it to 7 inside dosync, and dereferencing",
             goal_text="construct a ref holding 100, perform a transactional ref-set to 7 inside dosync, and dereference",
             scenario=(
@@ -480,8 +475,8 @@ G9_07 = SubjectCurriculum(
                 "writes the new value in one locked motion. `@` reads the result."
             ),
             resolution=(
-                "the REPL read the slate and returned the new count — the old mark "
-                "was replaced in a single transactional stroke."
+                "The REPL read the slate and returned the new count — the old mark "
+                "was replaced in a single transactional stroke — 7."
             ),
             tags=("story",),
         ),
@@ -525,15 +520,14 @@ G9_08 = SubjectCurriculum(
                 "Both slates are updated atomically — either both advance, or neither does."
             ),
             resolution=(
-                "the REPL read both slates and returned the updated pair — each "
-                "tally had advanced by one inside the single coordinated transaction."
+                'The REPL read both slates and returned the updated pair — each tally had advanced by one inside the single coordinated transaction (with `1` as the input value).'
             ),
             tags=("story",),
         ),
         SubjectExample(
             form="(do (def r (ref 10)) (dosync (alter r + 5)) @r)",
             expected=15,
-            concept_phrase="ref, dosync, alter, deref",
+            concept_phrase="the ref altered inside dosync",
             question_what="the value returned by dereferencing r after defining a ref holding 10, performing a transactional alter via + 5, and dereferencing",
             goal_text="construct a ref holding 10, perform a transactional alter by applying + with 5 inside dosync, and dereference",
             scenario=(
@@ -552,7 +546,7 @@ G9_08 = SubjectCurriculum(
                 "window. `@` reads what the slate holds after the transaction closes."
             ),
             resolution=(
-                "the REPL read the slate and returned the combined count — the "
+                "The REPL read the slate and returned the combined count — the "
                 "five afternoon pails were added safely in one locked stroke."
             ),
             tags=("story",),
@@ -573,7 +567,7 @@ G9_09 = SubjectCurriculum(
         SubjectExample(
             form="(do (def a (atom 0)) (swap! a inc) @a)",
             expected=1,
-            concept_phrase="atom, swap, deref",
+            concept_phrase="the atom-swap-deref pattern",
             question_what="the value returned by dereferencing a after defining an atom holding 0, swapping it via inc, and dereferencing",
             goal_text="construct an atom holding 0, atomically swap it by applying inc, and dereference",
             scenario=(
@@ -592,15 +586,14 @@ G9_09 = SubjectCurriculum(
                 "internal coordination. `@` reads the slate afterward."
             ),
             resolution=(
-                "the REPL read the atom slate and returned the incremented count — "
-                "the solo chalk-update succeeded with no transaction required."
+                'The REPL read the atom slate and returned the incremented count — the solo chalk-update succeeded with no transaction required (with `0` as the input value).'
             ),
             tags=("story",),
         ),
         SubjectExample(
             form="(do (def r (ref 0)) (dosync (alter r inc)) @r)",
             expected=1,
-            concept_phrase="ref, dosync, alter, deref",
+            concept_phrase="the ref altered inside dosync",
             question_what="the value returned by dereferencing r after defining a ref holding 0, altering it via inc inside dosync, and dereferencing",
             goal_text="construct a ref holding 0, perform a transactional alter by applying inc inside dosync, and dereference",
             scenario=(
@@ -619,8 +612,7 @@ G9_09 = SubjectCurriculum(
                 "the slate after the window closes."
             ),
             resolution=(
-                "the REPL read the ref slate and returned the same incremented count "
-                "as the atom — same result, different coordination mechanism."
+                'The REPL read the ref slate and returned the same incremented count as the atom — same result, different coordination mechanism (with `0` as the input value).'
             ),
             tags=("story",),
         ),
@@ -640,7 +632,7 @@ G9_10 = SubjectCurriculum(
         SubjectExample(
             form="(do (def ag (agent 0)) (send ag inc) (await ag) @ag)",
             expected=1,
-            concept_phrase="agent, send, await, deref",
+            concept_phrase="the agent updated with send and read after await",
             question_what="the value returned by dereferencing ag after defining an agent holding 0, sending inc asynchronously, awaiting, and dereferencing",
             goal_text="construct an agent holding 0, asynchronously send inc to it, await its completion, and dereference",
             scenario=(
@@ -660,16 +652,14 @@ G9_10 = SubjectCurriculum(
                 "reads the answer the runner brought back."
             ),
             resolution=(
-                "the REPL read the agent's final tally — the runner had arrived, "
-                "applied `inc`, and the count was waiting when the milkmaid came "
-                "to collect it."
+                "The REPL read the agent's final tally — the runner had arrived, applied `inc`, and the count was waiting when the milkmaid came to collect it (with `0` as the input value)."
             ),
             tags=("story",),
         ),
         SubjectExample(
             form="(do (def ag (agent 5)) (send ag + 10) (await ag) @ag)",
             expected=15,
-            concept_phrase="agent, send, await, deref",
+            concept_phrase="the agent updated with send and read after await",
             question_what="the value returned by dereferencing ag after defining an agent holding 5, sending + 10 asynchronously, awaiting, and dereferencing",
             goal_text="construct an agent holding 5, asynchronously send + with 10 to it, await its completion, and dereference",
             scenario=(
@@ -688,7 +678,7 @@ G9_10 = SubjectCurriculum(
                 "reads the total the runner brought back."
             ),
             resolution=(
-                "the REPL read the agent's final count — the runner arrived, applied "
+                "The REPL read the agent's final count — the runner arrived, applied "
                 "the addition, and the combined tally was waiting at the gate."
             ),
             tags=("story",),
@@ -708,7 +698,7 @@ G9_11 = SubjectCurriculum(
         SubjectExample(
             form="(do (def ag (agent 0)) (send ag inc) (await ag) @ag)",
             expected=1,
-            concept_phrase="agent, send, await, deref",
+            concept_phrase="the agent updated with send and read after await",
             question_what="the value returned by dereferencing ag after defining an agent holding 0, using send to dispatch inc, awaiting, and dereferencing",
             goal_text="construct an agent holding 0, use send to asynchronously apply inc, await its completion, and dereference",
             scenario=(
@@ -725,15 +715,14 @@ G9_11 = SubjectCurriculum(
                 "quick tasks; `await` waits at the gate; `@` reads the result."
             ),
             resolution=(
-                "the REPL read the agent's count — the runner completed the task "
-                "and reported back the updated tally."
+                "The REPL read the agent's count — the runner completed the task and reported back the updated tally (with `0` as the input value)."
             ),
             tags=("story",),
         ),
         SubjectExample(
             form="(do (def ag (agent 0)) (send-off ag inc) (await ag) @ag)",
             expected=1,
-            concept_phrase="agent, send-off, await, deref",
+            concept_phrase="the agent with send-off awaited and read",
             question_what="the value returned by dereferencing ag after defining an agent holding 0, using send-off to dispatch inc, awaiting, and dereferencing",
             goal_text="construct an agent holding 0, use send-off to asynchronously apply inc, await its completion, and dereference",
             scenario=(
@@ -751,8 +740,7 @@ G9_11 = SubjectCurriculum(
                 "the result."
             ),
             resolution=(
-                "the REPL read the agent's count — the runner finished along its "
-                "own road and reported back the same incremented tally."
+                "The REPL read the agent's count — the runner finished along its own road and reported back the same incremented tally (with `0` as the input value)."
             ),
             tags=("story",),
         ),
@@ -771,7 +759,7 @@ G9_12 = SubjectCurriculum(
         SubjectExample(
             form="(do (def ag (agent 0)) (send ag inc) (send ag inc) (await ag) @ag)",
             expected=2,
-            concept_phrase="agent, double send, await, deref",
+            concept_phrase="the agent receiving two sends awaited and read",
             question_what="the value returned by dereferencing ag after defining an agent holding 0, sending inc twice asynchronously, awaiting, and dereferencing",
             goal_text="construct an agent holding 0, asynchronously send inc twice, synchronize with await, and dereference",
             scenario=(
@@ -791,8 +779,7 @@ G9_12 = SubjectCurriculum(
                 "until both deliveries are done. `@` reads the final tally."
             ),
             resolution=(
-                "the REPL read the agent's tally — both increments had been "
-                "applied in sequence, and the count reflected both deliveries."
+                "The REPL read the agent's tally — both increments had been applied in sequence, and the count reflected both deliveries (with `0` as the input value)."
             ),
             tags=("story",),
         ),
@@ -811,7 +798,7 @@ G9_13 = SubjectCurriculum(
         SubjectExample(
             form="@(future (+ 1 2))",
             expected=3,
-            concept_phrase="future, add, deref",
+            concept_phrase="the future computing addition then awaited",
             question_what="the value the messenger returns from adding 1 and 2",
             goal_text="dispatch a runner to compute the sum of 1 and 2; later, ask the runner for the answer",
             scenario=(
@@ -830,15 +817,14 @@ G9_13 = SubjectCurriculum(
                 "for the runner to return and reads the answer brought back."
             ),
             resolution=(
-                "the REPL read the future and returned the sum — the runner had "
-                "completed the addition along the market road and reported back."
+                'The REPL read the future and returned the sum — the runner had completed the addition along the market road and reported back (with `1` as the input value).'
             ),
             tags=("story",),
         ),
         SubjectExample(
             form="@(future (* 6 7))",
             expected=42,
-            concept_phrase="future, multiply, deref",
+            concept_phrase="the future computing multiplication then awaited",
             question_what="the value returned by dereferencing a future that multiplies 6 and 7",
             goal_text="construct a future that multiplies 6 and 7, and dereference it",
             scenario=(
@@ -857,8 +843,8 @@ G9_13 = SubjectCurriculum(
                 "at the stall and reads the product brought back."
             ),
             resolution=(
-                "the REPL read the future and returned the product — the runner "
-                "had completed the multiplication and the answer was waiting."
+                "The REPL read the future and returned the product — the runner "
+                "had completed the multiplication and the answer was waiting — 7."
             ),
             tags=("story",),
         ),
@@ -895,8 +881,8 @@ G9_14 = SubjectCurriculum(
                 "is currently chalked there."
             ),
             resolution=(
-                "the REPL read the slate and returned the current mark — the @ "
-                "shorthand glanced at the slate and brought back what was chalked."
+                "The REPL read the slate and returned the current mark — the @ "
+                "shorthand glanced at the slate and brought back what was chalked — 7."
             ),
             tags=("story",),
         ),
@@ -922,8 +908,8 @@ G9_14 = SubjectCurriculum(
                 "both look at the same slate and return the same value."
             ),
             resolution=(
-                "the REPL read the slate and returned the current mark — the full "
-                "`deref` call reached the same answer as the @ shorthand."
+                "The REPL read the slate and returned the current mark — the full "
+                "`deref` call reached the same answer as the @ shorthand — 7."
             ),
             tags=("story",),
         ),
@@ -942,7 +928,7 @@ G9_15 = SubjectCurriculum(
         SubjectExample(
             form="(do (def p (promise)) (deliver p :done) @p)",
             expected=":done",
-            concept_phrase="promise, deliver, deref",
+            concept_phrase="the promise delivered and awaited",
             question_what="the value returned by dereferencing a promise after defining it, delivering a keyword to it, and dereferencing",
             goal_text="construct a promise, deliver a completion keyword to it, and dereference to get the delivered value",
             scenario=(
@@ -961,15 +947,15 @@ G9_15 = SubjectCurriculum(
                 "reads what the runner received after the word was delivered."
             ),
             resolution=(
-                "the REPL read the promise and returned the delivered word — the "
-                "runner had received the signal and brought it back to the gate."
+                "The REPL read the promise and returned the delivered word — the "
+                "runner had received the signal and brought it back to the gate — :done."
             ),
             tags=("story",),
         ),
         SubjectExample(
             form="(do (def p (promise)) (deliver p 42) @p)",
             expected=42,
-            concept_phrase="promise, deliver, deref",
+            concept_phrase="the promise delivered and awaited",
             question_what="the value returned by dereferencing a promise after defining it, delivering a number to it, and dereferencing",
             goal_text="construct a promise, deliver 42 to it, and dereference to get the delivered value",
             scenario=(
@@ -989,8 +975,8 @@ G9_15 = SubjectCurriculum(
                 "the runner to return and reads the number on the slip."
             ),
             resolution=(
-                "the REPL read the promise and returned the delivered number — the "
-                "runner received the filled slip and brought the count back."
+                "The REPL read the promise and returned the delivered number — the "
+                "runner received the filled slip and brought the count back — 42."
             ),
             tags=("story",),
         ),
@@ -1009,7 +995,7 @@ G9_16 = SubjectCurriculum(
         SubjectExample(
             form="(do (def v (volatile! 0)) (vswap! v inc) @v)",
             expected=1,
-            concept_phrase="volatile, vswap, deref",
+            concept_phrase="the volatile updated with vswap and read",
             question_what="the value returned by dereferencing v after defining a volatile holding 0, performing a non-transactional swap via inc, and dereferencing",
             goal_text="construct a volatile holding 0, perform a non-transactional swap by applying inc, and dereference",
             scenario=(
@@ -1028,15 +1014,14 @@ G9_16 = SubjectCurriculum(
                 "what the slate holds after the fast update."
             ),
             resolution=(
-                "the REPL read the volatile slate and returned the updated count — "
-                "the fast chalk-update completed without heavier coordination."
+                'The REPL read the volatile slate and returned the updated count — the fast chalk-update completed without heavier coordination (with `0` as the input value).'
             ),
             tags=("story",),
         ),
         SubjectExample(
             form="(do (def v (volatile! 5)) (vreset! v 99) @v)",
             expected=99,
-            concept_phrase="volatile, vreset, deref",
+            concept_phrase="the volatile reset and read",
             question_what="the value returned by dereferencing v after defining a volatile holding 5, performing a non-transactional reset to 99, and dereferencing",
             goal_text="construct a volatile holding 5, perform a non-transactional reset to 99, and dereference",
             scenario=(
@@ -1056,8 +1041,8 @@ G9_16 = SubjectCurriculum(
                 "the new mark after the fast overwrite."
             ),
             resolution=(
-                "the REPL read the volatile slate and returned the new value — the "
-                "old mark was gone, replaced in a single fast stroke."
+                "The REPL read the volatile slate and returned the new value — the "
+                "old mark was gone, replaced in a single fast stroke — 99."
             ),
             tags=("story",),
         ),
@@ -1076,7 +1061,7 @@ G9_17 = SubjectCurriculum(
         SubjectExample(
             form="(do (def ^:dynamic *p* 1) (binding [*p* 99] *p*))",
             expected=99,
-            concept_phrase="dynamic var, binding, read",
+            concept_phrase="the dynamic var rebound and read",
             question_what="the value of the dynamic var when read inside the binding form after defining it and rebinding",
             goal_text="define a dynamic var *p* as 1, use binding to rebind it to 99, and read its value inside",
             scenario=(
@@ -1094,15 +1079,15 @@ G9_17 = SubjectCurriculum(
                 "run's private value."
             ),
             resolution=(
-                "the REPL read the dynamic var inside the binding and returned the "
-                "temporary mark — the cover was in place."
+                "The REPL read the dynamic var inside the binding and returned the "
+                "temporary mark — the cover was in place — :dynamic."
             ),
             tags=("story",),
         ),
         SubjectExample(
             form="(do (def ^:dynamic *p* 1) (binding [*p* 99] *p*) *p*)",
             expected=1,
-            concept_phrase="dynamic var, binding, read after",
+            concept_phrase="the dynamic var rebound and read after",
             question_what="the value of the dynamic var when read after the binding form unwound",
             goal_text="define a dynamic var *p* as 1, use binding to rebind it to 99 inside, and read its value after binding exits",
             scenario=(
@@ -1120,8 +1105,8 @@ G9_17 = SubjectCurriculum(
                 "original default."
             ),
             resolution=(
-                "the REPL read the dynamic var after the binding unwound and "
-                "returned the default — the permanent slate was unchanged."
+                "The REPL read the dynamic var after the binding unwound and "
+                "returned the default — the permanent slate was unchanged — :dynamic."
             ),
             tags=("story",),
         ),
@@ -1141,7 +1126,7 @@ G9_18 = SubjectCurriculum(
         SubjectExample(
             form="(do (def lock (Object.)) (locking lock (+ 1 2)))",
             expected=3,
-            concept_phrase="lock, locking, arithmetic",
+            concept_phrase="the lock guarding arithmetic",
             question_what="the value returned by evaluating an addition inside a locked critical section after creating a monitor and acquiring the lock",
             goal_text="create an object to use as a monitor, acquire the lock, and evaluate an addition inside",
             scenario=(
@@ -1160,15 +1145,14 @@ G9_18 = SubjectCurriculum(
                 "thread can enter while the padlock is held."
             ),
             resolution=(
-                "the REPL returned the result of the addition — the critical section "
-                "ran safely under the padlock, and the lock was released afterward."
+                'The REPL returned the result of the addition — the critical section ran safely under the padlock, and the lock was released afterward (with `1` as the input value).'
             ),
             tags=("story",),
         ),
         SubjectExample(
             form="(do (def lock (Object.)) (locking lock 42))",
             expected=42,
-            concept_phrase="lock, locking, literal",
+            concept_phrase="the lock guarding a literal",
             question_what="the literal value returned by evaluating it inside a locked critical section after creating a monitor and acquiring the lock",
             goal_text="create an object to use as a monitor, acquire the lock, and evaluate a literal inside",
             scenario=(
@@ -1187,8 +1171,8 @@ G9_18 = SubjectCurriculum(
                 "releases — the padlock is the guard, not the answer."
             ),
             resolution=(
-                "the REPL returned the literal from inside the locked section — the "
-                "padlock held, the body was evaluated, and the value came back."
+                "The REPL returned the literal from inside the locked section — the "
+                "padlock held, the body was evaluated, and the value came back — 42."
             ),
             tags=("story",),
         ),

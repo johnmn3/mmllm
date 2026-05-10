@@ -52,8 +52,8 @@ G5_01 = SubjectCurriculum(grade=5, subject_id="G5-01",
                 "never visited; the pail never splits."
             ),
             resolution=(
-                "the REPL walked the left branch — the condition was true, the pail "
-                "rolled down the chosen lane, and the other lane was never entered."
+                "The REPL walked the left branch — the condition was true, the pail "
+                "rolled down the chosen lane, and the other lane was never entered — :b."
             ),
             tags=("story",),
         ),
@@ -79,9 +79,9 @@ G5_01 = SubjectCurriculum(grade=5, subject_id="G5-01",
                 "lane; the left was never walked."
             ),
             resolution=(
-                "the REPL walked the right branch — the false condition sent "
+                "The REPL walked the right branch — the false condition sent "
                 "the pail down the chosen lane, and the other lane was never "
-                "entered."
+                "entered — :b."
             ),
             tags=("story",),
         ),
@@ -103,11 +103,11 @@ G5_01 = SubjectCurriculum(grade=5, subject_id="G5-01",
             ),
             mapping=(
                 "`if` is the road fork: the comparison `(> 5 3)` is the "
-                "sign the fork reads. Because it came back true, the left "
+                "sign the fork reads. Because it came back with the verdict, the left "
                 "lane opened and the right was left untouched."
             ),
             resolution=(
-                "the REPL walked the left branch — the comparison was true, "
+                "The REPL walked the left branch — the comparison was true, "
                 "the fork chose the first lane, and the pail rolled through "
                 "without doubling back."
             ),
@@ -143,9 +143,9 @@ G5_02 = SubjectCurriculum(grade=5, subject_id="G5-02",
                 "combined step."
             ),
             resolution=(
-                "the REPL returned the sum of the one base coin and the "
+                "The REPL returned the sum of the one base coin and the "
                 "lane the true fork chose — a single combined value from "
-                "one nested read."
+                "one nested read — 20."
             ),
             tags=("story",),
         ),
@@ -178,9 +178,9 @@ G5_03 = SubjectCurriculum(grade=5, subject_id="G5-03",
                 "when false, the fork closes and the REPL gets back nothing."
             ),
             resolution=(
-                "the REPL walked the forward lane — the true condition "
+                "The REPL walked the forward lane — the true condition "
                 "opened the one-sided fork and the pail passed through as "
-                "written."
+                "written — yes — :yes."
             ),
             tags=("story",),
         ),
@@ -206,8 +206,8 @@ G5_03 = SubjectCurriculum(grade=5, subject_id="G5-03",
                 "receives nothing rather than an alternative."
             ),
             resolution=(
-                "the REPL returned nothing — the false sign closed the "
-                "single forward lane and the pail stayed at the fork."
+                "The REPL returned nothing — the false sign closed the "
+                "single forward lane and the pail stayed at the fork — yes — :yes."
             ),
             tags=("story",),
         ),
@@ -231,7 +231,7 @@ G5_04 = SubjectCurriculum(grade=5, subject_id="G5-04",
             ),
             need=(
                 "She needed to read the stones in order and enter the first "
-                "lane whose stone came back true — skipping all earlier "
+                "lane whose stone came back with the verdict — skipping all earlier "
                 "closed forks, never doubling back."
             ),
             mapping=(
@@ -240,7 +240,7 @@ G5_04 = SubjectCurriculum(grade=5, subject_id="G5-04",
                 "opens that lane; the rest are never walked."
             ),
             resolution=(
-                "the REPL entered the second fork's lane — the first stone "
+                "The REPL entered the second fork's lane — the first stone "
                 "was false, the second was true, and the pail rolled through "
                 "that branch without reaching the fallback."
             ),
@@ -274,7 +274,7 @@ G5_05 = SubjectCurriculum(grade=5, subject_id="G5-05",
                 "the `:else` stone opens the last lane unconditionally."
             ),
             resolution=(
-                "the REPL entered the fallback lane — both earlier stones were false, "
+                "The REPL entered the fallback lane — both earlier stones were false, "
                 "so the pail rolled through the `:else` lane and the walk was complete."
             ),
             tags=("story",),
@@ -292,9 +292,7 @@ G5_06 = SubjectCurriculum(grade=5, subject_id="G5-06",
             question_what="the matched branch",
             goal_text="match the value 2 against clauses and return the corresponding value",
             scenario=(
-                "The milkmaid reached a signpost on the road to market. The post listed "
-                "three lanes: one for the buyer who wanted one pail, one for the buyer "
-                "who wanted two, one for three. Her pail count was two."
+                'The milkmaid reached a signpost on the road to market. The post listed three lanes: one for the buyer who wanted one pail, one for the buyer who wanted the counts for three. Her pail count was two.'
             ),
             need=(
                 "She needed the signpost to read her pail count and direct her pail "
@@ -306,8 +304,8 @@ G5_06 = SubjectCurriculum(grade=5, subject_id="G5-06",
                 "walked; only the one with a matching marker."
             ),
             resolution=(
-                "the REPL took the matching lane — the pail count matched the second "
-                "marker, and the pail rolled through that lane alone."
+                "The REPL took the matching lane — the pail count matched the second "
+                "marker, and the pail rolled through that lane alone — :default."
             ),
             tags=("story",),
         ),
@@ -333,8 +331,8 @@ G5_06 = SubjectCurriculum(grade=5, subject_id="G5-06",
                 "lane accepts the pail unconditionally."
             ),
             resolution=(
-                "the REPL took the default lane — no listed marker matched the count, "
-                "so the pail rolled through the final open lane to market."
+                "The REPL took the default lane — no listed marker matched the count, "
+                "so the pail rolled through the final open lane to market — :default."
             ),
             tags=("story",),
         ),
@@ -366,8 +364,8 @@ G5_07 = SubjectCurriculum(grade=5, subject_id="G5-07",
                 "passes through. The first falsy value closes the gate early."
             ),
             resolution=(
-                "the REPL returned the last latch's value — every latch held, the gate "
-                "opened fully, and the final value came through."
+                "The REPL returned the last latch's value — every latch held, the gate "
+                "opened fully, and the final value came through — 3."
             ),
             tags=("story",),
         ),
@@ -379,7 +377,7 @@ G5_07 = SubjectCurriculum(grade=5, subject_id="G5-07",
             goal_text="return the first truthy value from a sequence of values",
             scenario=(
                 "The milkmaid stood at a farmyard gate with three latch-checks in "
-                "sequence. The first latch returned nothing; the second returned false. "
+                "sequence. The first latch returned nothing; the second returned the verdict. "
                 "The third bore a keyword mark."
             ),
             need=(
@@ -393,8 +391,8 @@ G5_07 = SubjectCurriculum(grade=5, subject_id="G5-07",
                 "and its value passes through immediately."
             ),
             resolution=(
-                "the REPL returned the first truthy latch's keyword value — the gate stopped "
-                "at the third latch and passed that value through without checking further."
+                "The REPL returned the first truthy latch's keyword value — the gate stopped "
+                "at the third latch and passed that value through without checking further — :found."
             ),
             tags=("story",),
         ),
@@ -412,7 +410,7 @@ G5_08 = SubjectCurriculum(grade=5, subject_id="G5-08",
             goal_text="negate the result of checking whether 1 is greater than 2",
             scenario=(
                 "At the farmyard gate, the milkmaid found a latch-check: was one pail "
-                "more than two? The inner check came back false — one was not greater "
+                "more than two? The inner check came back with the verdict — one was not greater "
                 "than two. A `not` sign hung on the gate's outer frame."
             ),
             need=(
@@ -425,8 +423,8 @@ G5_08 = SubjectCurriculum(grade=5, subject_id="G5-08",
                 "a false gate. The comparison runs first, then the flip."
             ),
             resolution=(
-                "the REPL returned the flipped result — the inner comparison was false, "
-                "and `not` reversed it so the gate opened with `true`."
+                "The REPL returned the flipped result — the inner comparison was false, "
+                "and `not` reversed it so the gate opened with `true` — 2."
             ),
             tags=("story",),
         ),
@@ -458,7 +456,7 @@ G5_09 = SubjectCurriculum(grade=5, subject_id="G5-09",
                 "on the wall; it is handed directly to the caller and used once."
             ),
             resolution=(
-                "the REPL returned the count after two applications of `inc` — two "
+                "The REPL returned the count after two applications of `inc` — two "
                 "steps of the recipe card run in sequence, exactly as written."
             ),
             tags=("story",),
@@ -491,8 +489,8 @@ G5_10 = SubjectCurriculum(grade=5, subject_id="G5-10",
                 "collection below. Every piece passes through, none are skipped."
             ),
             resolution=(
-                "the REPL returned the transformed sequence — each element came through "
-                "the `inc` strainer one increment larger, collected in order."
+                "The REPL returned the transformed sequence — each element came through "
+                "the `inc` strainer one increment larger, collected in order — 3."
             ),
             tags=("story",),
         ),
@@ -501,10 +499,10 @@ G5_10 = SubjectCurriculum(grade=5, subject_id="G5-10",
             expected=[1,4,9,16],
             concept_phrase="mapping a squaring operation over a vector",
             question_what="the sequence produced by mapping a squaring rule over the vector containing 1, 2, 3, and 4",
-            goal_text="apply a squaring operation to each element of the vector containing 1, 2, 3, and 4, returning a sequence",
+            goal_text="apply a squaring operation to each element of the vector [1 2 3 4] returning a sequence",
             scenario=(
                 "The milkmaid fitted a squaring rule to her milk-strainer and poured "
-                "four counts through it: one, two, three, four. Each piece would come "
+                "several counts through it: one, two, three, four. Each piece would come "
                 "out multiplied by itself on the far side."
             ),
             need=(
@@ -518,8 +516,8 @@ G5_10 = SubjectCurriculum(grade=5, subject_id="G5-10",
                 "sequence below. Every piece passes through unchanged in position."
             ),
             resolution=(
-                "the REPL returned the squared sequence — each element came through "
-                "multiplied by itself, collected in the original order."
+                "The REPL returned the squared sequence — each element came through "
+                "multiplied by itself, collected in the original order — 4."
             ),
             tags=("story",),
         ),
@@ -534,11 +532,9 @@ G5_11 = SubjectCurriculum(grade=5, subject_id="G5-11",
             expected=[2,4],
             concept_phrase="filtering even elements from a vector",
             question_what="the sequence produced by filtering even? over the vector containing 1, 2, 3, and 4",
-            goal_text="keep the even elements from the vector containing 1, 2, 3, and 4",
+            goal_text="keep the even elements from the vector [1 2 3 4]",
             scenario=(
-                "The milkmaid set her milk-strainer over the pail and poured four "
-                "counts through: one, two, three, four. The strainer's mesh was set "
-                "to let only even counts pass to the collection below."
+                "The milkmaid set her milk-strainer over the pail and poured four counts through: the counts. The strainer's mesh was set to let only even counts pass to the collection below."
             ),
             need=(
                 "She needed the strainer to hold back the odd counts and let only "
@@ -550,7 +546,7 @@ G5_11 = SubjectCurriculum(grade=5, subject_id="G5-11",
                 "those that fail are held back and never enter the collection."
             ),
             resolution=(
-                "the REPL returned the filtered sequence — only the even counts passed "
+                "The REPL returned the filtered sequence — only the even counts passed — 4 "
                 "through the strainer's mesh, collected in order."
             ),
             tags=("story",),
@@ -560,7 +556,7 @@ G5_11 = SubjectCurriculum(grade=5, subject_id="G5-11",
             expected=[1,2],
             concept_phrase="filtering positive elements from a vector",
             question_what="the sequence produced by filtering pos? over the vector containing -2, -1, 0, 1, and 2",
-            goal_text="keep the positive elements from the vector containing -2, -1, 0, 1, and 2",
+            goal_text="keep the positive elements from the vector containing these numbers",
             scenario=(
                 "Five counts passed through the milkmaid's strainer: two that read "
                 "below zero, one at zero, two above zero. The strainer's rule was to "
@@ -577,7 +573,7 @@ G5_11 = SubjectCurriculum(grade=5, subject_id="G5-11",
                 "zero fall through into the resulting sequence."
             ),
             resolution=(
-                "the REPL returned the filtered sequence — only the positive counts "
+                "The REPL returned the filtered sequence — only the positive counts — 2 — -1. "
                 "cleared the strainer's mesh and entered the collection."
             ),
             tags=("story",),
@@ -593,7 +589,7 @@ G5_12 = SubjectCurriculum(grade=5, subject_id="G5-12",
             expected=10,
             concept_phrase="the fold operation",
             question_what="the running tally after walking 1, 2, 3, 4 with + as the combine step",
-            goal_text="walk the row of pebbles 1, 2, 3, 4 carrying a tally that combines each with + into the running total",
+            goal_text="walk the row of pebbles these numbers carrying a tally that combines each with + into the running total",
             scenario=(
                 "The milkmaid walked to market counting coins step by step: one coin "
                 "at the first stall, two at the second, three at the third, four at "
@@ -610,8 +606,8 @@ G5_12 = SubjectCurriculum(grade=5, subject_id="G5-12",
                 "running total with the `+` step until the row is done."
             ),
             resolution=(
-                "the REPL returned the accumulated total — the tally the milkmaid "
-                "had built coin by coin across all four stalls."
+                "The REPL returned the accumulated total — the tally the milkmaid "
+                "had built coin by coin across all four stalls — 4."
             ),
             tags=("story",),
         ),
@@ -620,15 +616,13 @@ G5_12 = SubjectCurriculum(grade=5, subject_id="G5-12",
             expected=120,
             concept_phrase="the fold operation",
             question_what="the product produced by walking 1, 2, 3, 4, 5 with * as the combine step",
-            goal_text="fold * over the vector containing 1, 2, 3, 4, and 5, computing their product",
+            goal_text="fold * over the vector containing these numbers, computing their product",
             scenario=(
-                "The milkmaid walked five stations on the tally-walk, multiplying "
-                "the running product by each station's count in turn: one, two, three, "
-                "four, five. The product grew with every step."
+                "The milkmaid walked five stations on the tally-walk, multiplying the running product by each station's count in turn: the counts. The product grew with every step."
             ),
             need=(
                 "She needed to step through all five stations, multiply the running "
-                "product by each new count, and carry the result forward — a "
+                "product by each new count, and carry the 5 forward — a "
                 "multiplication tally-walk across the whole row."
             ),
             mapping=(
@@ -637,7 +631,7 @@ G5_12 = SubjectCurriculum(grade=5, subject_id="G5-12",
                 "the running product one step at a time."
             ),
             resolution=(
-                "the REPL returned the accumulated product — the total the milkmaid "
+                "The REPL returned the accumulated product — the total the milkmaid "
                 "had multiplied together step by step across all five stations."
             ),
             tags=("story",),
@@ -646,8 +640,8 @@ G5_12 = SubjectCurriculum(grade=5, subject_id="G5-12",
             form="(reduce max [3 1 4 1 5 9 2 6])",
             expected=9,
             concept_phrase="the fold operation",
-            question_what="the largest pebble found by walking 3, 1, 4, 1, 5, 9, 2, 6 with max as the combine step",
-            goal_text="fold max over the vector containing 3, 1, 4, 1, 5, 9, 2, and 6, finding the maximum",
+            question_what="the largest pebble found by walking [3 1 4 1 5 9 2 6] with max as the combine step",
+            goal_text="fold max over the vector containing these numbers, finding the maximum",
             scenario=(
                 "The milkmaid walked eight market stalls, tally-slate in hand, keeping "
                 "a running note of the highest coin count she had seen. At each stall "
@@ -662,10 +656,10 @@ G5_12 = SubjectCurriculum(grade=5, subject_id="G5-12",
             mapping=(
                 "`reduce` with `max` is the peak-finding tally-walk: at each step the "
                 "milkmaid compares the running best to the new count and keeps the "
-                "larger one. After the last stall, the running best is the answer."
+                "larger one. After the last stall, the running best is the 6."
             ),
             resolution=(
-                "the REPL returned the highest count found — the running maximum the "
+                "The REPL returned the highest count found — the running maximum the "
                 "milkmaid carried through every stall on the tally-walk."
             ),
             tags=("story",),
@@ -698,7 +692,7 @@ G5_13 = SubjectCurriculum(grade=5, subject_id="G5-13",
                 "each stall's coins are folded in with `+` from there."
             ),
             resolution=(
-                "the REPL returned the accumulated total — the opening count plus all "
+                "The REPL returned the accumulated total — the opening count plus all — 3 "
                 "three stalls' coins combined into the final tally."
             ),
             tags=("story",),
@@ -725,8 +719,8 @@ G5_13 = SubjectCurriculum(grade=5, subject_id="G5-13",
                 "is nothing to fold over."
             ),
             resolution=(
-                "the REPL returned the initial value unchanged — the empty row left "
-                "the opening tally untouched, and that was the answer."
+                "The REPL returned the initial value unchanged — the empty row left "
+                "the opening tally untouched, and that was the 0."
             ),
             tags=("story",),
         ),
@@ -741,11 +735,9 @@ G5_14 = SubjectCurriculum(grade=5, subject_id="G5-14",
             expected=10,
             concept_phrase="applying + to vector elements",
             question_what="the result of spreading the basket of 1, 2, 3, 4 as ingredients into +",
-            goal_text="apply + to the elements of the vector containing 1, 2, 3, and 4",
+            goal_text="apply + to the elements of the vector [1 2 3 4]",
             scenario=(
-                "The milkmaid arrived at market with a market-basket holding four "
-                "counts: one coin, two, three, four. She needed to pass all of them "
-                "at once to the `+` recipe rather than handing each count in separately."
+                'The milkmaid arrived at market with a market-basket holding four counts: one coin, the counts. She needed to pass all of them at once to the `+` recipe rather than handing each count in separately.'
             ),
             need=(
                 "She needed to spread the basket's contents out as individual "
@@ -758,8 +750,8 @@ G5_14 = SubjectCurriculum(grade=5, subject_id="G5-14",
                 "`+` tallies them all in one call."
             ),
             resolution=(
-                "the REPL returned the total — the basket's four counts spread into "
-                "`+` and tallied together in a single step."
+                "The REPL returned the total — the basketseveral countsnts spread into "
+                "`+` and tallied together in a single step — 4."
             ),
             tags=("story",),
         ),
@@ -768,7 +760,7 @@ G5_14 = SubjectCurriculum(grade=5, subject_id="G5-14",
             expected=5,
             concept_phrase="applying max to vector elements",
             question_what="the largest count found after spreading the basket of 3, 1, 4, 1, 5 into max",
-            goal_text="apply max to the elements of the vector containing 3, 1, 4, 1, and 5",
+            goal_text="apply max to the elements of the vector containing these numbers",
             scenario=(
                 "The milkmaid's market-basket held five coin counts from five different "
                 "buyers. She needed to find the highest count by spreading all five "
@@ -785,8 +777,8 @@ G5_14 = SubjectCurriculum(grade=5, subject_id="G5-14",
                 "the largest of all of them."
             ),
             resolution=(
-                "the REPL returned the highest count — the basket's elements spread "
-                "into `max`, which returned the largest value found."
+                "The REPL returned the highest count — the basket's elements spread "
+                "into `max`, which returned the largest value found — 5."
             ),
             tags=("story",),
         ),
@@ -818,7 +810,7 @@ G5_15 = SubjectCurriculum(grade=5, subject_id="G5-15",
                 "chained this way increment the input twice in one composed step."
             ),
             resolution=(
-                "the REPL returned the value after two increments — the two `inc` "
+                "The REPL returned the result after two increments — the two `inc` "
                 "cards ran in sequence, each stepping the count once."
             ),
             tags=("story",),
@@ -841,11 +833,11 @@ G5_15 = SubjectCurriculum(grade=5, subject_id="G5-15",
             ),
             mapping=(
                 "`comp` with `str` and `inc` clips the cards right-to-left: `inc` "
-                "runs first, incrementing the number; then `str` converts the result "
+                "runs first, incrementing the number; then `str` converts the 9 "
                 "to a string. The two-card chain runs as one composed pail-step."
             ),
             resolution=(
-                "the REPL returned the string form of the incremented count — `inc` "
+                "The REPL returned the string form of the incremented count — `inc` "
                 "ran first, `str` second, and the combined card produced the ledger entry."
             ),
             tags=("story",),
@@ -878,8 +870,8 @@ G5_16 = SubjectCurriculum(grade=5, subject_id="G5-16",
                 "the remaining ones. The two arguments combine when the card is called."
             ),
             resolution=(
-                "the REPL returned the total — the pre-loaded ten and the supplied "
-                "five combined by the partially-applied `+` card."
+                "The REPL returned the total — the pre-loaded ten and the supplied "
+                "five combined by the partially-applied `+` card — 5."
             ),
             tags=("story",),
         ),
@@ -891,7 +883,7 @@ G5_16 = SubjectCurriculum(grade=5, subject_id="G5-16",
             goal_text="apply a partially applied multiplication to each element of the vector containing 1, 2, and 3",
             scenario=(
                 "The farmer pre-filled a pail-steps card for `*` with the multiplier "
-                "three already loaded. The milkmaid then poured three counts through "
+                "three already loaded. The milkmaid then poured several counts through "
                 "the strainer with that half-loaded card as the rule."
             ),
             need=(
@@ -905,8 +897,8 @@ G5_16 = SubjectCurriculum(grade=5, subject_id="G5-16",
                 "the baked-in three as it passes through."
             ),
             resolution=(
-                "the REPL returned the transformed sequence — each element multiplied "
-                "by three via the partially-applied card passed through the strainer."
+                "The REPL returned the transformed sequence — each element multiplied "
+                "by three via the partially-applied card passed through the strainer — 3."
             ),
             tags=("story",),
         ),
@@ -935,7 +927,7 @@ G5_17 = SubjectCurriculum(grade=5, subject_id="G5-17",
                 "one vector. Both recipes run on the same input."
             ),
             resolution=(
-                "the REPL returned both results collected into a vector."
+                "The REPL returned both results collected into a vector — 5."
             ),
             tags=("story",),
         ),
@@ -950,11 +942,9 @@ G5_18 = SubjectCurriculum(grade=5, subject_id="G5-18",
             expected=True,
             concept_phrase="checking if any element satisfies a predicate",
             question_what="whether any pebble in 1, 3, 5, 8, 7 passes the even? sieve",
-            goal_text="check if any element in the vector containing 1, 3, 5, 8, and 7 is even",
+            goal_text="check if any element in the vector containing these numbers is even",
             scenario=(
-                "The milkmaid held her milk-strainer over the pail and let five counts "
-                "pass through the `even?` rule one at a time: one, three, five, eight, "
-                "seven. She was looking for the first count that cleared the mesh."
+                'The milkmaid held her milk-strainer over the pail and let five counts pass through the `even?` rule one at a time: the counts. She was looking for the first count that cleared the mesh.'
             ),
             need=(
                 "She needed to know whether any count at all passed the even? rule — "
@@ -967,8 +957,8 @@ G5_18 = SubjectCurriculum(grade=5, subject_id="G5-18",
                 "the rule, that element's truthy value comes back immediately."
             ),
             resolution=(
-                "the REPL returned the truthy value of the first passing element — "
-                "at least one count passed the even? strainer, and `some` stopped there."
+                "The REPL returned the truthy value of the first passing element — "
+                "at least one count passed the even? strainer, and `some` stopped there — 7."
             ),
             tags=("story",),
         ),
@@ -979,13 +969,11 @@ G5_18 = SubjectCurriculum(grade=5, subject_id="G5-18",
             question_what="whether any pebble in 1, 2, 3 passes the neg? sieve",
             goal_text="check if any element in the vector containing 1, 2, and 3 is negative",
             scenario=(
-                "The milkmaid held the `neg?` strainer over the pail and let three "
-                "counts pass through: one, two, three. None of the counts were "
-                "below zero; the strainer mesh never opened for any of them."
+                'The milkmaid held the `neg?` strainer over the pail and let three counts pass through: the counts. None of the counts were below zero; the strainer mesh never opened for any of them.'
             ),
             need=(
                 "She needed to know whether any count at all was negative — but "
-                "after all three counts were checked, none had passed the mesh "
+                "after alseveral countsts were checked, none had passed the mesh "
                 "and the strainer found nothing."
             ),
             mapping=(
@@ -994,8 +982,8 @@ G5_18 = SubjectCurriculum(grade=5, subject_id="G5-18",
                 "fails, `some` returns nothing at all."
             ),
             resolution=(
-                "the REPL returned nothing — no element passed the neg? strainer, "
-                "so `some` found no truthy value and the pail came back empty-handed."
+                "The REPL returned nothing — no element passed the neg? strainer, "
+                "so `some` found no truthy value and the pail came back empty-handed — 3."
             ),
             tags=("story",),
         ),
@@ -1012,14 +1000,12 @@ G5_19 = SubjectCurriculum(grade=5, subject_id="G5-19",
             question_what="whether every pebble in 1, 2, 3 passes the pos? sieve",
             goal_text="check if all elements in the vector containing 1, 2, and 3 are positive",
             scenario=(
-                "The milkmaid held the `pos?` strainer over the pail and let three "
-                "counts pass through: one, two, three. She watched each piece hit the "
-                "mesh — all of them were above zero."
+                'The milkmaid held the `pos?` strainer over the pail and let three counts pass through: the counts. She watched each piece hit the mesh — all of them were above zero.'
             ),
             need=(
                 "She needed to know whether every single count passed the positive "
                 "rule — not just one, but all three without exception. A single "
-                "failure would close the answer."
+                "failure would close the 3."
             ),
             mapping=(
                 "`every?` is the all-or-nothing strainer: it checks every element "
@@ -1027,8 +1013,8 @@ G5_19 = SubjectCurriculum(grade=5, subject_id="G5-19",
                 "confirm the whole collection cleared the mesh."
             ),
             resolution=(
-                "the REPL confirmed that every element passed — all three counts were "
-                "positive, and the all-or-nothing strainer returned true."
+                "The REPL confirmed that every element passed — several countsunts were "
+                "positive, and the all-or-nothing strainer returned the verdict."
             ),
             tags=("story",),
         ),
@@ -1039,22 +1025,20 @@ G5_19 = SubjectCurriculum(grade=5, subject_id="G5-19",
             question_what="whether every pebble in 1, 2, 3 passes the even? sieve",
             goal_text="check if all elements in the vector containing 1, 2, and 3 are even",
             scenario=(
-                "The milkmaid held the `even?` strainer over the pail and let three "
-                "counts through: one, two, three. The first count hit the mesh — "
-                "one is odd — and the strainer closed immediately."
+                'The milkmaid held the `even?` strainer over the pail and let three counts through: the counts. The first count hit the mesh — one is odd — and the strainer closed immediately.'
             ),
             need=(
-                "She needed every count to pass the even? rule for the answer to "
+                "She needed every count to pass the even? rule for the 3 to "
                 "hold. The moment the first count failed the mesh, the answer was "
                 "settled and the rest did not matter."
             ),
             mapping=(
                 "`every?` stops as soon as one element fails the rule: the first "
                 "odd count hit the strainer mesh, closed it, and the strainer "
-                "returned false without testing the remaining elements."
+                "returned the verdict without testing the remaining elements."
             ),
             resolution=(
-                "the REPL returned false — not every count cleared the even? mesh, "
+                "The REPL returned the verdict — not every count cleared the even? mesh, "
                 "so the all-or-nothing strainer closed the moment the first one failed."
             ),
             tags=("story",),
@@ -1070,7 +1054,7 @@ G5_20 = SubjectCurriculum(grade=5, subject_id="G5-20",
             expected=[10,20,30],
             concept_phrase="taking elements from a sequence",
             question_what="the sequence produced by taking 3 elements from the row of 10, 20, 30, 40, 50",
-            goal_text="take the first 3 elements from the vector containing 10, 20, 30, 40, and 50",
+            goal_text="take the first 3 elements from the vector containing these numbers",
             scenario=(
                 "The milkmaid set her strainer over the pail and let five counts "
                 "enter the mesh one by one: ten, twenty, thirty, forty, fifty. The "
@@ -1087,8 +1071,8 @@ G5_20 = SubjectCurriculum(grade=5, subject_id="G5-20",
                 "stops. Elements beyond that count never pass."
             ),
             resolution=(
-                "the REPL returned the first three elements — the strainer collected "
-                "the leading portion of the sequence and closed after the count was met."
+                "The REPL returned the first several elements — the strainer collected "
+                "the leading portion of the sequence and closed after the count was met — 50."
             ),
             tags=("story",),
         ),
@@ -1097,7 +1081,7 @@ G5_20 = SubjectCurriculum(grade=5, subject_id="G5-20",
             expected=[30,40,50],
             concept_phrase="dropping elements from a sequence",
             question_what="the sequence produced by dropping 2 elements from the row of 10, 20, 30, 40, 50",
-            goal_text="drop the first 2 elements from the vector containing 10, 20, 30, 40, and 50",
+            goal_text="drop the first 2 elements from the vector containing these numbers",
             scenario=(
                 "The milkmaid poured five counts toward her strainer: ten, twenty, "
                 "thirty, forty, fifty. The strainer was set to block the first two "
@@ -1114,8 +1098,8 @@ G5_20 = SubjectCurriculum(grade=5, subject_id="G5-20",
                 "collection below."
             ),
             resolution=(
-                "the REPL returned the remaining elements — the strainer blocked the "
-                "leading two and passed the rest of the sequence through."
+                "The REPL returned the remaining elements — the strainer blocked the "
+                "leading two and passed the rest of the sequence through — 50."
             ),
             tags=("story",),
         ),
@@ -1129,12 +1113,10 @@ G5_21 = SubjectCurriculum(grade=5, subject_id="G5-21",
             form="(distinct [1 1 2 3 3 4])",
             expected=[1,2,3,4],
             concept_phrase="removing duplicates from a sequence",
-            question_what="the sequence produced by passing 1, 1, 2, 3, 3, 4 through the dedup-sieve",
-            goal_text="remove duplicate elements from the vector containing 1, 1, 2, 3, 3, and 4",
+            question_what="the sequence produced by passing [1 1 2 3 3 4] through the dedup-sieve",
+            goal_text="remove duplicate elements from the vector containing these numbers",
             scenario=(
-                "The milkmaid's pail held six coin counts with repeats: one, one, two, "
-                "three, three, four. She set a dedup-strainer over the pail to remove "
-                "every repeated count before sending the tally to market."
+                "The milkmaid's pail held six coin counts with repeats: the counts. She set a dedup-strainer over the pail to remove every repeated count before sending the tally to market."
             ),
             need=(
                 "She needed the strainer to let each count through only on its first "
@@ -1146,8 +1128,8 @@ G5_21 = SubjectCurriculum(grade=5, subject_id="G5-21",
                 "with every repeated count removed."
             ),
             resolution=(
-                "the REPL returned the deduplicated sequence — each unique count "
-                "passed through once, and all repeats were held back by the strainer."
+                "The REPL returned the deduplicated sequence — each unique count "
+                "passed through once, and all repeats were held back by the strainer — 4."
             ),
             tags=("story",),
         ),
@@ -1158,7 +1140,7 @@ G5_21 = SubjectCurriculum(grade=5, subject_id="G5-21",
             question_what="the sequence produced by sorting the row of 3, 1, 2 into ascending order",
             goal_text="sort the vector containing 3, 1, and 2 in ascending order",
             scenario=(
-                "The milkmaid tipped three counts out of her pail in the order they "
+                "The milkmaid tseveral countscounts out of her pail in the order they "
                 "had landed: three first, then one, then two. She needed them arranged "
                 "from smallest to largest before she could present the tally at market."
             ),
@@ -1173,8 +1155,8 @@ G5_21 = SubjectCurriculum(grade=5, subject_id="G5-21",
                 "The original order is replaced by the natural order."
             ),
             resolution=(
-                "the REPL returned the sorted sequence — the three counts came back "
-                "arranged from smallest to largest, ready for the market tally."
+                "The REPL returned the sorted sequencseveral countse counts came back "
+                "arranged from smallest to largest, ready for the market tally — 2 — 3."
             ),
             tags=("story",),
         ),
@@ -1207,8 +1189,8 @@ G5_22 = SubjectCurriculum(grade=5, subject_id="G5-22",
                 "sends her back to the circuit's start without growing the path."
             ),
             resolution=(
-                "the REPL returned the accumulated product of all five laps — the "
-                "tally the milkmaid had built one station at a time."
+                "The REPL returned the accumulated product of all five laps — the "
+                "tally the milkmaid had built one station at a time — 5."
             ),
             tags=("story",),
         ),

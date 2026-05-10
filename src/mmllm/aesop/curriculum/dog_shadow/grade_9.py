@@ -76,7 +76,7 @@ G9_01 = SubjectCurriculum(
             resolution=(
                 'The REPL showed the original cache unchanged — still just '
                 'the :a slot with one bone. The new slot :b had been added '
-                'to a copy in the REPL\'s paw, not to the cache Bell held.'
+                'to a copy in the REPL\'s paw, not to the cache Bell held — b.'
             ),
             tags=("story",),
         ),
@@ -87,9 +87,7 @@ G9_01 = SubjectCurriculum(
             question_what="the original vector after conj returns a new vector",
             goal_text="bind a vector v, call conj to add 4 to a new vector, then return the unchanged v",
             scenario=(
-                'Rex the hound lined up three bones by the stream bank. He '
-                'considered adding a fourth, but wondered if the original '
-                'would hold steady.'
+                'Rex the hound lined up the bones by the stream bank. He considered adding a fourth, but wondered if the original would hold steady.'
             ),
             need=(
                 'He wanted conj to leave his bones untouched while building a '
@@ -100,8 +98,7 @@ G9_01 = SubjectCurriculum(
                 'and asking for v shows the original stayed put.'
             ),
             resolution=(
-                'The REPL returned the original row of three bones. The fourth '
-                'had been conjoined to a copy, not to the row Rex held.'
+                'The REPL returned the original row of the bones. The fourth had been conjoined to a copy, not to the row Rex held — 4.'
             ),
             tags=("story",),
         ),
@@ -146,7 +143,7 @@ G9_02 = SubjectCurriculum(
                 'The REPL applied the update atomically, scratched the new '
                 'tally into the stone, and handed back what the stone now '
                 'read. Any later dog at the bank would see the same updated '
-                'count.'
+                'count — 0.'
             ),
             tags=("story",),
         ),
@@ -174,9 +171,7 @@ G9_02 = SubjectCurriculum(
                 'dereferencing asks the stone for what it now says.'
             ),
             resolution=(
-                'The REPL reset the stone from idle to running and handed '
-                'back the new keyword. The running status was now clear to '
-                'any pack member who read the bank.'
+                'The REPL reset the stone from idle to running and handed back the new keyword. The running status was now clear to any pack member who read the bank — running (with `:idle` as the input value).'
             ),
             tags=("story",),
         ),
@@ -195,7 +190,7 @@ G9_03 = SubjectCurriculum(
         SubjectExample(
             form="(do (def a (atom 0)) (swap! a inc) @a)",
             expected=1,
-            concept_phrase="atom, swap, and deref",
+            concept_phrase="the swap-then-deref pattern on an atom",
             question_what="the running tally on the page after one foraging contribution",
             goal_text="set up a shared notebook starting at 0, atomically add one to its page, then read the page",
             scenario=(
@@ -219,14 +214,14 @@ G9_03 = SubjectCurriculum(
             resolution=(
                 'The REPL swapped the zero to one in a single stroke, and '
                 'the page showed the new tally. Each bone added would '
-                'increment the count further, safely, one at a time.'
+                'increment the count further, safely, one at a time — 0.'
             ),
             tags=("story",),
         ),
         SubjectExample(
             form="(do (def a (atom 10)) (swap! a + 5) @a)",
             expected=15,
-            concept_phrase="atom, swap, deref",
+            concept_phrase="the swap-then-deref pattern on an atom",
             question_what="the value returned by dereferencing a after defining a as an atom holding 10 and swapping it via + 5",
             goal_text="construct an atom holding 10, atomically swap it by applying + to 5, and dereference the result",
             scenario=(
@@ -249,14 +244,14 @@ G9_03 = SubjectCurriculum(
             resolution=(
                 'The REPL swapped the 10 to 15 by applying plus-five, and '
                 'the stone showed the new running total. The count was now '
-                'accurate and safe from any race.'
+                'accurate and safe from any race — 5.'
             ),
             tags=("story",),
         ),
         SubjectExample(
             form="(do (def a (atom :start)) (reset! a :done) @a)",
             expected=":done",
-            concept_phrase="atom, reset, deref",
+            concept_phrase="the reset-then-deref pattern on an atom",
             question_what="the value returned by dereferencing a after defining a as an atom holding a start keyword and resetting it to done",
             goal_text="construct an atom holding a start keyword, atomically reset it to a done keyword, and dereference the result",
             scenario=(
@@ -279,7 +274,7 @@ G9_03 = SubjectCurriculum(
             resolution=(
                 'The REPL reset the stone to :done in one atomic pulse, and '
                 'the page showed the new status. The pack could read the '
-                'change clearly and move to their rest.'
+                'change clearly and move to their rest — done.'
             ),
             tags=("story",),
         ),
@@ -299,7 +294,7 @@ G9_04 = SubjectCurriculum(
         SubjectExample(
             form="(do (def a (atom 0)) (compare-and-set! a 0 1) @a)",
             expected=1,
-            concept_phrase="atom, CAS, deref",
+            concept_phrase="the compare-and-set pattern on an atom",
             question_what="the value returned by dereferencing a after defining a as an atom holding 0 and performing a successful compare-and-set to 1",
             goal_text="construct an atom holding 0, perform a compare-and-set checking for 0 and setting to 1, and dereference",
             scenario=(
@@ -316,14 +311,14 @@ G9_04 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL checked the stone, found zero, and swapped it to one '
-                'atomically. The dereference showed the new count.'
+                'atomically. The dereference showed the new count — 1.'
             ),
             tags=("story",),
         ),
         SubjectExample(
             form="(do (def a (atom 5)) (compare-and-set! a 0 99) @a)",
             expected=5,
-            concept_phrase="atom, failed CAS, deref",
+            concept_phrase="the failed-CAS pattern on an atom",
             question_what="the value returned by dereferencing a after defining a as an atom holding 5 and attempting a compare-and-set that fails",
             goal_text="construct an atom holding 5, perform a compare-and-set checking for 0 and setting to 99, and dereference",
             scenario=(
@@ -341,7 +336,7 @@ G9_04 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL checked the stone, found 5 not zero, and refused the '
-                'swap. The stone remained unchanged.'
+                'swap. The stone remained unchanged — 99.'
             ),
             tags=("story",),
         ),
@@ -384,8 +379,7 @@ G9_05 = SubjectCurriculum(
                 'holding a vector, add-watch sets a function that fires on change.'
             ),
             resolution=(
-                'The REPL attached the watch, then swapped the tally. The watch '
-                'fired and appended the new value. The log showed the record.'
+                'The REPL attached the watch, then swapped the tally. The watch fired and appended the new value. The log showed the record (with `:w` as the input value).'
             ),
             tags=("story",),
         ),
@@ -432,10 +426,7 @@ G9_06 = SubjectCurriculum(
                 'the validator before committing the new value.'
             ),
             resolution=(
-                'The REPL set the validator, then swapped the stone by '
-                'applying inc. The guard checked the result — one is a number '
-                '— and the swap succeeded. The dereference showed the stone '
-                'held the count, protected by the rule.'
+                'The REPL set the validator, then swapped the stone by applying inc. The guard checked the result — one is a number — and the swap succeeded. The dereference showed the stone held the count, protected by the rule (with `0` as the input value).'
             ),
             tags=("story",),
         ),
@@ -455,7 +446,7 @@ G9_07 = SubjectCurriculum(
         SubjectExample(
             form="(do (def r (ref 0)) (dosync (alter r inc)) @r)",
             expected=1,
-            concept_phrase="ref, dosync, alter, deref",
+            concept_phrase="the dosync-alter-deref pattern on a ref",
             question_what="the value returned by dereferencing r after defining a ref holding 0, performing a transactional alter via inc, and dereferencing",
             goal_text="construct a ref holding 0, perform a transactional alter by applying inc inside dosync, and dereference",
             scenario=(
@@ -481,14 +472,14 @@ G9_07 = SubjectCurriculum(
                 'The REPL opened the dosync fence, altered the page from '
                 'zero to one inside the transaction, committed the change, '
                 'and handed back what the page now held. The zero became one '
-                'safely within the fence.'
+                'safely within the fence — 0.'
             ),
             tags=("story",),
         ),
         SubjectExample(
             form="(do (def r (ref 100)) (dosync (ref-set r 7)) @r)",
             expected=7,
-            concept_phrase="ref, dosync, ref-set, deref",
+            concept_phrase="the dosync-ref-set-deref pattern on a ref",
             question_what="the value returned by dereferencing r after defining a ref holding 100, setting it to 7 inside dosync, and dereferencing",
             goal_text="construct a ref holding 100, perform a transactional ref-set to 7 inside dosync, and dereference",
             scenario=(
@@ -512,7 +503,7 @@ G9_07 = SubjectCurriculum(
             resolution=(
                 "The page showed the fresh small tally — the old "
                 "season's count was gone, replaced cleanly within "
-                "the transaction."
+                "the transaction — 7."
             ),
             tags=("story",),
         ),
@@ -552,15 +543,14 @@ G9_08 = SubjectCurriculum(
                 'coordinates both changes, alter applies inc to each page.'
             ),
             resolution=(
-                'The REPL opened the dosync, altered both pages, and committed '
-                'together. Both values advanced safely inside the transaction.'
+                'The REPL opened the dosync, altered both pages, and committed together. Both values advanced safely inside the transaction (with `1` as the input value).'
             ),
             tags=("story",),
         ),
         SubjectExample(
             form="(do (def r (ref 10)) (dosync (alter r + 5)) @r)",
             expected=15,
-            concept_phrase="ref, dosync, alter, deref",
+            concept_phrase="the dosync-alter-deref pattern on a ref",
             question_what="the value returned by dereferencing r after defining a ref holding 10, performing a transactional alter via + 5, and dereferencing",
             goal_text="construct a ref holding 10, perform a transactional alter by applying + with 5 inside dosync, and dereference",
             scenario=(
@@ -583,7 +573,7 @@ G9_08 = SubjectCurriculum(
             resolution=(
                 'The REPL opened the dosync, altered the page from ten to '
                 'fifteen by adding five, committed the change, and handed '
-                'back the new count. The transaction was complete and safe.'
+                'back the new count. The transaction was complete and safe — 5.'
             ),
             tags=("story",),
         ),
@@ -603,7 +593,7 @@ G9_09 = SubjectCurriculum(
         SubjectExample(
             form="(do (def a (atom 0)) (swap! a inc) @a)",
             expected=1,
-            concept_phrase="atom, swap, deref",
+            concept_phrase="the swap-then-deref pattern on an atom",
             question_what="the value returned by dereferencing a after defining an atom holding 0, swapping it via inc, and dereferencing",
             goal_text="construct an atom holding 0, atomically swap it by applying inc, and dereference",
             scenario=(
@@ -625,14 +615,14 @@ G9_09 = SubjectCurriculum(
             resolution=(
                 'The REPL swapped the stone from zero to one atomically, and '
                 'the dereference showed the new count. The atom was simple, '
-                'fast, and safe for a standalone tally.'
+                'fast, and safe for a standalone tally — 0.'
             ),
             tags=("story",),
         ),
         SubjectExample(
             form="(do (def r (ref 0)) (dosync (alter r inc)) @r)",
             expected=1,
-            concept_phrase="ref, dosync, alter, deref",
+            concept_phrase="the dosync-alter-deref pattern on a ref",
             question_what="the value returned by dereferencing r after defining a ref holding 0, altering it via inc inside dosync, and dereferencing",
             goal_text="construct a ref holding 0, perform a transactional alter by applying inc inside dosync, and dereference",
             scenario=(
@@ -654,7 +644,7 @@ G9_09 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL opened the dosync, altered the page from zero to '
-                'one inside the fence, and handed back the result. The ref '
+                'one inside the fence, and handed back 0. The ref '
                 'was ready for coordinated transactions anytime.'
             ),
             tags=("story",),
@@ -675,7 +665,7 @@ G9_10 = SubjectCurriculum(
         SubjectExample(
             form="(do (def ag (agent 0)) (send ag inc) (await ag) @ag)",
             expected=1,
-            concept_phrase="agent, send, await, deref",
+            concept_phrase="the send-await-deref pattern on an agent",
             question_what="the value returned by dereferencing ag after defining an agent holding 0, sending inc asynchronously, awaiting, and dereferencing",
             goal_text="construct an agent holding 0, asynchronously send inc to it, await its completion, and dereference",
             scenario=(
@@ -696,7 +686,7 @@ G9_10 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL coordinated the scout, awaited its completion, '
-                'and handed back the value the scout had delivered. Bell '
+                'and handed back 0 the scout had delivered. Bell '
                 'read it without snatching too early.'
             ),
             tags=("story",),
@@ -704,7 +694,7 @@ G9_10 = SubjectCurriculum(
         SubjectExample(
             form="(do (def ag (agent 5)) (send ag + 10) (await ag) @ag)",
             expected=15,
-            concept_phrase="agent, send, await, deref",
+            concept_phrase="the send-await-deref pattern on an agent",
             question_what="the value returned by dereferencing ag after defining an agent holding 5, sending + 10 asynchronously, awaiting, and dereferencing",
             goal_text="construct an agent holding 5, asynchronously send + with 10 to it, await its completion, and dereference",
             scenario=(
@@ -728,7 +718,7 @@ G9_10 = SubjectCurriculum(
             resolution=(
                 'The REPL sent the instruction, the scout worked asynchronously '
                 'adding 10 to 5, await brought Patch back into sync with the '
-                'result, and the dereference showed the final tally of fifteen.'
+                'result, and the dereference showed the final tally of fifteen — 10.'
             ),
             tags=("story",),
         ),
@@ -747,7 +737,7 @@ G9_11 = SubjectCurriculum(
         SubjectExample(
             form="(do (def ag (agent 0)) (send ag inc) (await ag) @ag)",
             expected=1,
-            concept_phrase="agent, send, await, deref",
+            concept_phrase="the send-await-deref pattern on an agent",
             question_what="the value returned by dereferencing ag after defining an agent holding 0, using send to dispatch inc, awaiting, and dereferencing",
             goal_text="construct an agent holding 0, use send to asynchronously apply inc, await its completion, and dereference",
             scenario=(
@@ -769,14 +759,14 @@ G9_11 = SubjectCurriculum(
             resolution=(
                 'The REPL sent the instruction on a quick thread, the scout '
                 'applied inc to zero, await brought synchronization, and the '
-                'dereference returned one.'
+                'dereference returned one — 0.'
             ),
             tags=("story",),
         ),
         SubjectExample(
             form="(do (def ag (agent 0)) (send-off ag inc) (await ag) @ag)",
             expected=1,
-            concept_phrase="agent, send-off, await, deref",
+            concept_phrase="the send-off-await-deref pattern on an agent",
             question_what="the value returned by dereferencing ag after defining an agent holding 0, using send-off to dispatch inc, awaiting, and dereferencing",
             goal_text="construct an agent holding 0, use send-off to asynchronously apply inc, await its completion, and dereference",
             scenario=(
@@ -798,7 +788,7 @@ G9_11 = SubjectCurriculum(
             resolution=(
                 'The REPL sent the instruction on a blocking thread, the '
                 'scout applied inc to zero, await brought synchronization, '
-                'and the dereference returned one.'
+                'and the dereference returned one — 0.'
             ),
             tags=("story",),
         ),
@@ -817,7 +807,7 @@ G9_12 = SubjectCurriculum(
         SubjectExample(
             form="(do (def ag (agent 0)) (send ag inc) (send ag inc) (await ag) @ag)",
             expected=2,
-            concept_phrase="agent, double send, await, deref",
+            concept_phrase="the double-send-await-deref pattern on an agent",
             question_what="the value returned by dereferencing ag after defining an agent holding 0, sending inc twice asynchronously, awaiting, and dereferencing",
             goal_text="construct an agent holding 0, asynchronously send inc twice, synchronize with await, and dereference",
             scenario=(
@@ -842,7 +832,7 @@ G9_12 = SubjectCurriculum(
                 'The REPL queued both inc instructions on the agent, the '
                 'scout ran through both steps asynchronously, await brought '
                 'synchronization when both finished, and the dereference '
-                'showed two.'
+                'showed two — 0.'
             ),
             tags=("story",),
         ),
@@ -861,7 +851,7 @@ G9_13 = SubjectCurriculum(
         SubjectExample(
             form="@(future (+ 1 2))",
             expected=3,
-            concept_phrase="future, add, deref",
+            concept_phrase="the deref pattern on an addition future",
             question_what="the value the messenger returns from adding 1 and 2",
             goal_text="dispatch a runner to compute the sum of 1 and 2; later, ask the runner for the answer",
             scenario=(
@@ -884,7 +874,7 @@ G9_13 = SubjectCurriculum(
             resolution=(
                 'The REPL sent the runner with the addition task. The scout '
                 'computed one plus two as it raced forward. When Bell '
-                'dereferenced the future, she received the result the scout had '
+                'dereferenced the future, she received the 2 the scout had '
                 'gathered: the running total of three.'
             ),
             tags=("story",),
@@ -892,7 +882,7 @@ G9_13 = SubjectCurriculum(
         SubjectExample(
             form="@(future (* 6 7))",
             expected=42,
-            concept_phrase="future, multiply, deref",
+            concept_phrase="the deref pattern on a multiplication future",
             question_what="the value returned by dereferencing a future that multiplies 6 and 7",
             goal_text="construct a future that multiplies 6 and 7, and dereference it",
             scenario=(
@@ -909,7 +899,7 @@ G9_13 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL sent the scout to compute six times seven. When Rex '
-                'dereferenced the future, the scout delivered forty-two.'
+                'dereferenced the future, the scout delivered forty-two — 7.'
             ),
             tags=("story",),
         ),
@@ -944,7 +934,7 @@ G9_14 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL created the atom. When Bell used @, it handed back the '
-                'value the stone carried.'
+                'value the stone carried — 7.'
             ),
             tags=("story",),
         ),
@@ -968,7 +958,7 @@ G9_14 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL created the atom. When Patch called deref, it returned '
-                'the value the stone carried.'
+                'the 7 the stone carried.'
             ),
             tags=("story",),
         ),
@@ -987,7 +977,7 @@ G9_15 = SubjectCurriculum(
         SubjectExample(
             form="(do (def p (promise)) (deliver p :done) @p)",
             expected=":done",
-            concept_phrase="promise, deliver, deref",
+            concept_phrase="the deliver-then-deref pattern on a promise",
             question_what="the value returned by dereferencing a promise after defining it, delivering a keyword to it, and dereferencing",
             goal_text="construct a promise, deliver a completion keyword to it, and dereference to get the delivered value",
             scenario=(
@@ -1004,14 +994,14 @@ G9_15 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL created the promise. The scout finished and delivered '
-                ':done. When Bell dereferenced, she got the answer.'
+                ':done. When Bell dereferenced, she got the done.'
             ),
             tags=("story",),
         ),
         SubjectExample(
             form="(do (def p (promise)) (deliver p 42) @p)",
             expected=42,
-            concept_phrase="promise, deliver, deref",
+            concept_phrase="the deliver-then-deref pattern on a promise",
             question_what="the value returned by dereferencing a promise after defining it, delivering a number to it, and dereferencing",
             goal_text="construct a promise, deliver 42 to it, and dereference to get the delivered value",
             scenario=(
@@ -1028,7 +1018,7 @@ G9_15 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL created the promise. The scout ran, counted, and '
-                'delivered the number. When Rex dereferenced, he got the count.'
+                'delivered the number. When Rex dereferenced, he got the count — 42.'
             ),
             tags=("story",),
         ),
@@ -1047,7 +1037,7 @@ G9_16 = SubjectCurriculum(
         SubjectExample(
             form="(do (def v (volatile! 0)) (vswap! v inc) @v)",
             expected=1,
-            concept_phrase="volatile, vswap, deref",
+            concept_phrase="the vswap-then-deref pattern on a volatile",
             question_what="the value returned by dereferencing v after defining a volatile holding 0, performing a non-transactional swap via inc, and dereferencing",
             goal_text="construct a volatile holding 0, perform a non-transactional swap by applying inc, and dereference",
             scenario=(
@@ -1064,14 +1054,14 @@ G9_16 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL vswapped zero to one. The volatile was the lightest '
-                'way to hold a mutable value.'
+                'way to hold a mutable value — 0.'
             ),
             tags=("story",),
         ),
         SubjectExample(
             form="(do (def v (volatile! 5)) (vreset! v 99) @v)",
             expected=99,
-            concept_phrase="volatile, vreset, deref",
+            concept_phrase="the vreset-then-deref pattern on a volatile",
             question_what="the value returned by dereferencing v after defining a volatile holding 5, performing a non-transactional reset to 99, and dereferencing",
             goal_text="construct a volatile holding 5, perform a non-transactional reset to 99, and dereference",
             scenario=(
@@ -1088,7 +1078,7 @@ G9_16 = SubjectCurriculum(
             ),
             resolution=(
                 'The REPL vreset five to ninety-nine in one stroke. The volatile '
-                'was the fastest way.'
+                'was the fastest way — 99.'
             ),
             tags=("story",),
         ),
@@ -1107,7 +1097,7 @@ G9_17 = SubjectCurriculum(
         SubjectExample(
             form="(do (def ^:dynamic *p* 1) (binding [*p* 99] *p*))",
             expected=99,
-            concept_phrase="dynamic var, binding, read",
+            concept_phrase="the binding-then-read pattern on a dynamic var",
             question_what="the value of the dynamic var when read inside the binding form after defining it and rebinding",
             goal_text="define a dynamic var *p* as 1, use binding to rebind it to 99, and read its value inside",
             scenario=(
@@ -1123,15 +1113,14 @@ G9_17 = SubjectCurriculum(
                 'rebind, reading shows the bound value.'
             ),
             resolution=(
-                'Inside binding, *p* was ninety-nine. When the form ended, the '
-                'original scent returned.'
+                'Inside binding, *p* was ninety-nine. When the form ended, the original scent returned — dynamic (with `99` as the input value).'
             ),
             tags=("story",),
         ),
         SubjectExample(
             form="(do (def ^:dynamic *p* 1) (binding [*p* 99] *p*) *p*)",
             expected=1,
-            concept_phrase="dynamic var, binding, read after",
+            concept_phrase="the binding-then-read-after pattern on a dynamic var",
             question_what="the value of the dynamic var when read after the binding form unwound",
             goal_text="define a dynamic var *p* as 1, use binding to rebind it to 99 inside, and read its value after binding exits",
             scenario=(
@@ -1148,8 +1137,7 @@ G9_17 = SubjectCurriculum(
                 'resets it to ninety-nine, the second read shows original returned.'
             ),
             resolution=(
-                'The REPL set permanent scent to one. Inside binding, *p* was '
-                'ninety-nine. When unwound, the second read caught the original.'
+                'The REPL set permanent scent to one. Inside binding, *p* was ninety-nine. When unwound, the second read caught the original — dynamic (with `99` as the input value).'
             ),
             tags=("story",),
         ),
@@ -1169,7 +1157,7 @@ G9_18 = SubjectCurriculum(
         SubjectExample(
             form="(do (def lock (Object.)) (locking lock (+ 1 2)))",
             expected=3,
-            concept_phrase="lock, locking, arithmetic",
+            concept_phrase="the locking-block pattern around arithmetic",
             question_what="the value returned by evaluating an addition inside a locked critical section after creating a monitor and acquiring the lock",
             goal_text="create an object to use as a monitor, acquire the lock, and evaluate an addition inside",
             scenario=(
@@ -1192,14 +1180,14 @@ G9_18 = SubjectCurriculum(
             resolution=(
                 'The REPL acquired the monitor stone, held it while adding one '
                 'and two together, and released it when the work was done. The '
-                'arithmetic was safe from any concurrent access.'
+                'arithmetic was safe from any concurrent access — 2.'
             ),
             tags=("story",),
         ),
         SubjectExample(
             form="(do (def lock (Object.)) (locking lock 42))",
             expected=42,
-            concept_phrase="lock, locking, literal",
+            concept_phrase="the locking-block pattern around a literal",
             question_what="the literal value returned by evaluating it inside a locked critical section after creating a monitor and acquiring the lock",
             goal_text="create an object to use as a monitor, acquire the lock, and evaluate a literal inside",
             scenario=(
@@ -1223,7 +1211,7 @@ G9_18 = SubjectCurriculum(
                 'The REPL created the monitor and acquired the lock. Inside the '
                 'locked form, the literal forty-two was evaluated safely. When '
                 'the locking completed, the monitor was released and other dogs '
-                'could proceed.'
+                'could proceed — 42.'
             ),
             tags=("story",),
         ),

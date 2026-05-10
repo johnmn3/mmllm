@@ -33,7 +33,7 @@ from mmllm.aesop.curriculum.milkmaid._metaphor_pools import (
 _INTEROP_SUBPLOTS: list[SubplotTemplate] = list(_GOAL_SUBPLOTS) + [
 
     SubplotTemplate("""\
-{farmer_phrase} and {milkmaid_phrase} had wandered {place} into territory
+{farmer_phrase} and {milkmaid_phrase}, {emo_boastful} had wandered {place} into territory
 where the REPL spoke to another runtime entirely. {farmer} read the
 sign and pointed at {concept_phrase}; the form to submit, written in
 the foreign convention, was {form_display}."""),
@@ -54,7 +54,7 @@ that crossing into foreign syntax called for actual evaluation, not
 guessing."""),
 
     SubplotTemplate("""\
-{milkmaid_phrase} insisted the foreign-runtime forms were "just like home."
+{milkmaid_phrase}, {emo_boastful} insisted the foreign-runtime forms were "just like home."
 {farmer_phrase} tapped a stone {place} where someone had inscribed
 {concept_phrase}. "Then write {form_display} into the REPL," {farmer}
 said, "and we'll see if your familiarity holds.\""""),
@@ -62,13 +62,13 @@ said, "and we'll see if your familiarity holds.\""""),
     SubplotTemplate("""\
 At a wayside shrine {place} dedicated to interop, the day's offering
 was {concept_phrase}. {farmer_phrase} knelt and placed the form
-{form_display} on the stone. {milkmaid}, watching, agreed to be the one
+{form_display} on the stone. {milkmaid}, {emo_boastful}, watching, agreed to be the one
 to submit it to the runtime."""),
 
     SubplotTemplate("""\
 A merchant's stall {place} sold translated phrasebooks for the host
 language; today's lesson was {concept_phrase}. {farmer_phrase}
-copied the form {form_display} from the page, and {milkmaid_phrase}
+copied the form {form_display} from the page, and {milkmaid_phrase}, {emo_boastful}
 agreed (for once) that one should always check the REPL before
 trusting a translation."""),
 ]
@@ -142,9 +142,9 @@ G11_02 = SubjectCurriculum(
                 "rebuild the method — she borrows it by name."
             ),
             resolution=(
-                "the REPL returned the host method's answer — the string in the form "
+                "The REPL returned the host method's answer — the string in the form "
                 "the method was designed to produce, exactly as the neighbor's "
-                "tool was built to deliver."
+                "tool was built to deliver — abc."
             ),
             tags=("story",),
         ),
@@ -169,7 +169,7 @@ G11_02 = SubjectCurriculum(
                 "a verdict: true if the string begins with the prefix, false otherwise."
             ),
             resolution=(
-                "the REPL returned the method's verdict — a boolean answer the host method "
+                "The REPL returned the method's verdict — a boolean answer the host method "
                 "was built to deliver."
             ),
             tags=("story",),
@@ -190,12 +190,12 @@ G11_02 = SubjectCurriculum(
                 "with the string object positioned differently in the form."
             ),
             mapping=(
-                "The alternate dot form `(. \"abc\" toUpperCase)` still borrows the neighbor's "
+                "The alternate dot form still borrows the neighbor's "
                 "tool; only the order changes. The string comes first, then the method name; "
                 "both conventions work — the neighbor's well-made stool delivers the same result."
             ),
             resolution=(
-                "the REPL returned the host method's answer — the string capitalized, "
+                "The REPL returned the host method's answer — the string capitalized, "
                 "exactly as the first dot form had delivered."
             ),
             tags=("story",),
@@ -233,7 +233,7 @@ G11_03 = SubjectCurriculum(
                 "and the absolute value is returned — the coin count stripped of its sign."
             ),
             resolution=(
-                "the REPL returned the magnitude — the debt tallied as a positive number, "
+                "The REPL returned the magnitude — the debt tallied as a positive number, — -7 "
                 "exactly the absolute value the neighbor's tallying tool was built to produce."
             ),
             tags=("story",),
@@ -259,7 +259,7 @@ G11_03 = SubjectCurriculum(
                 "The slash notation is the borrowing convention for library tools."
             ),
             resolution=(
-                "the REPL returned the larger tally — the maximum of the two numbers, "
+                "The REPL returned the larger tally — the maximum of the two numbers, "
                 "exactly what the neighbor's comparison tool was built to deliver."
             ),
             tags=("story",),
@@ -299,7 +299,7 @@ G11_04 = SubjectCurriculum(
                 "a precise count the host delivers."
             ),
             resolution=(
-                "the REPL returned the character count — the number of letters in the string, "
+                "The REPL returned the character count — the number of letters in the string, "
                 "exactly as the host's counting tool was built to produce."
             ),
             tags=("story",),
@@ -325,7 +325,7 @@ G11_04 = SubjectCurriculum(
                 "unchanged — the tool works on any string placed before it."
             ),
             resolution=(
-                "the REPL returned the character count — a smaller tally than before, "
+                "The REPL returned the character count — a smaller tally than before, "
                 "exactly what the host's counting tool was built to deliver."
             ),
             tags=("story",),
@@ -387,7 +387,7 @@ G11_06 = SubjectCurriculum(
                 "is forged and returned — the same text, now properly shaped by the host."
             ),
             resolution=(
-                "the REPL returned the newly constructed String — a host object built from "
+                "The REPL returned the newly constructed String — a host object built from "
                 "the text, exactly as the neighbor's forge was designed to deliver."
             ),
             tags=("story",),
@@ -414,7 +414,7 @@ G11_06 = SubjectCurriculum(
                 "are borrowing customs from the host."
             ),
             resolution=(
-                "the REPL returned the newly constructed String — a host object built from "
+                "The REPL returned the newly constructed String — a host object built from — leap "
                 "the text, exactly as the neighbor's forge delivers the same result."
             ),
             tags=("story",),
@@ -449,7 +449,7 @@ G11_07 = SubjectCurriculum(
                 "the borrowing convention for accessing a host array's contents."
             ),
             resolution=(
-                "the REPL returned the element at index 1, exactly as the host's tool was built to deliver."
+                "The REPL returned the element at index 1, exactly as the host's tool was built to deliver (with `10` as the input value)."
             ),
             tags=("story",),
         ),
@@ -475,7 +475,7 @@ G11_07 = SubjectCurriculum(
                 "the borrowing convention for measuring a host array's size."
             ),
             resolution=(
-                "the REPL returned the array length — the number of slots in the pail, "
+                "The REPL returned the array length — the number of slots in the pail, "
                 "exactly as the host's array-measurement tool was built to deliver."
             ),
             tags=("story",),
@@ -508,10 +508,10 @@ G11_08 = SubjectCurriculum(
             mapping=(
                 "The caret is a type hint — a mark telling the compiler the binding's type. "
                 "The host method is then called, and the compiler optimizes the call. "
-                "The hint does not change the value; it guides the compiler."
+                "The hint does not change the abc; it guides the compiler."
             ),
             resolution=(
-                "the REPL returned the capitalized string — the host method's answer, optimized by type guidance."
+                "The REPL returned the capitalized string — the host method's answer, optimized by type guidance."
             ),
             tags=("story",),
         ),
@@ -538,9 +538,9 @@ G11_08 = SubjectCurriculum(
                 "not for the runtime."
             ),
             resolution=(
-                "the REPL returned the marker — a keyword confirming the lesson was absorbed. "
+                "The REPL returned the marker — a keyword confirming the lesson was absorbed. "
                 "Type hints had been understood as compiler guidance, exactly as the farmer "
-                "had explained."
+                "had explained — type hints are metadata that guide compilation."
             ),
             tags=("story",),
         ),
@@ -581,7 +581,7 @@ G11_09 = SubjectCurriculum(
                 "trusts the host's guard; the milkmaid adds without fear."
             ),
             resolution=(
-                "the REPL returned the sum — the tally tallied under the default checked math, "
+                "The REPL returned the sum — the tally tallied under the default checked math, "
                 "exactly as the host's arithmetic was built to deliver."
             ),
             tags=("story",),
@@ -609,9 +609,9 @@ G11_09 = SubjectCurriculum(
                 "for speed; this is the trade-off *unchecked-math* embodies."
             ),
             resolution=(
-                "the REPL returned the marker — a keyword confirming the lesson was understood. "
+                "The REPL returned the marker — a keyword confirming the lesson was understood. "
                 "Overflow checking had been grasped as the default, *unchecked-math* as the "
-                "switch to disable it."
+                "switch to disable it — *unchecked-math* turns off overflow checking on prims."
             ),
             tags=("story",),
         ),
@@ -733,8 +733,8 @@ G11_14 = SubjectCurriculum(
                 "Understand its conventions, and you'll know what went wrong."
             ),
             resolution=(
-                "the REPL returned the marker — a keyword confirming the lesson was grasped. "
-                "Host leaks had been understood as debugging tools, not obstacles."
+                "The REPL returned the marker — a keyword confirming the lesson was grasped. "
+                "Host leaks had been understood as debugging tools, not obstacles — host stack traces leak through interop; learn to read them."
             ),
             tags=("story",),
         ),
@@ -761,7 +761,7 @@ G11_14 = SubjectCurriculum(
                 "teaches: borrowing from the host is safe when you prepare for the host's warnings."
             ),
             resolution=(
-                "the REPL returned the square root — the host method's answer when it succeeded. "
+                "The REPL returned the square root — the host method's answer when it succeeded. "
                 "No exception was thrown; the borrowed tool worked as designed, and the farmer's "
                 "caution proved unnecessary but wise."
             ),

@@ -55,7 +55,7 @@ G5_01 = SubjectCurriculum(grade=5, subject_id="G5-01",
             ),
             resolution=(
                 ":a — the then-branch released its stone, the :b stone "
-                "resting where it was, the water rising one mark."
+                "resting where it was, the water rising one mark. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -82,7 +82,7 @@ G5_01 = SubjectCurriculum(grade=5, subject_id="G5-01",
             ),
             resolution=(
                 "The else-branch opened and released its stone, "
-                "the water rising one mark in the pitcher."
+                "the water rising one mark in the pitcher. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -109,7 +109,7 @@ G5_01 = SubjectCurriculum(grade=5, subject_id="G5-01",
             ),
             resolution=(
                 "The then-branch opened, its stone dropping into the "
-                "pitcher as the comparison resolved truthy."
+                "pitcher as the comparison resolved truthy. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -142,7 +142,7 @@ G5_02 = SubjectCurriculum(grade=5, subject_id="G5-02",
             ),
             resolution=(
                 "The true-branch stone dropped, the rim-stone joined it, "
-                "and the water rose by the combined count."
+                "and the water rose by the combined count. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -202,7 +202,7 @@ G5_03 = SubjectCurriculum(grade=5, subject_id="G5-03",
             ),
             resolution=(
                 "The gate stayed shut, no stone fell, and the pitcher "
-                "returned nothing — nil settled into the result."
+                "returned nothing — nil settled into the result. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -235,7 +235,7 @@ G5_04 = SubjectCurriculum(grade=5, subject_id="G5-04",
             ),
             resolution=(
                 "The second branch opened, its stone releasing into the "
-                "pitcher; the remaining branches stayed closed."
+                "pitcher; the remaining branches stayed closed. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -268,7 +268,7 @@ G5_05 = SubjectCurriculum(grade=5, subject_id="G5-05",
             ),
             resolution=(
                 "Both earlier branches held fast; the :else gate swung open "
-                "and the default stone fell into the pitcher."
+                "and the default stone fell into the pitcher. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -347,11 +347,11 @@ G5_07 = SubjectCurriculum(grade=5, subject_id="G5-07",
 
             scenario=(
                 "Korvus stood at the orchard pitcher's dual-gate, "
-                "three stones queued: 1, 2, then 3. Both gates had to "
+                "the stones queued: 1, 2, then 3. Both gates had to "
                 "close in order before the final stone could drop through."
             ),
             need=(
-                "He needed to know whether all three stones passed the "
+                "He needed to know whether all the stones passed the "
                 "dual-gate check and, if so, which stone emerged."
             ),
             mapping=(
@@ -361,7 +361,7 @@ G5_07 = SubjectCurriculum(grade=5, subject_id="G5-07",
             ),
             resolution=(
                 "All three passed the gate check; the final stone "
-                "dropped through, the water rising to that level."
+                "dropped through, the water rising to that level. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -374,7 +374,7 @@ G5_07 = SubjectCurriculum(grade=5, subject_id="G5-07",
 
             scenario=(
                 "Caw examined the village pitcher's open-gate rail, "
-                "three stones lined up: nil, false, then :found. "
+                "the stones lined up: nil, false, then :found. "
                 "The gate would release the first stone that proved truthy."
             ),
             need=(
@@ -388,7 +388,7 @@ G5_07 = SubjectCurriculum(grade=5, subject_id="G5-07",
             ),
             resolution=(
                 "The first two stones were rejected; :found passed the "
-                "test and fell through the gate into the pitcher."
+                "test and fell through the gate into the pitcher. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -421,7 +421,7 @@ G5_08 = SubjectCurriculum(grade=5, subject_id="G5-08",
             ),
             resolution=(
                 "The comparison stone read false; the flip-gate turned it "
-                "over, and true dropped into the pitcher."
+                "over, and true dropped into the pitcher. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -454,7 +454,7 @@ G5_09 = SubjectCurriculum(grade=5, subject_id="G5-09",
             ),
             resolution=(
                 "Two applications completed; the stone that emerged "
-                "from the second pass dropped into the pitcher."
+                "from the second pass dropped into the pitcher. (count: 5)"
             ),
             tags=("story",),
         ),
@@ -487,7 +487,7 @@ G5_10 = SubjectCurriculum(grade=5, subject_id="G5-10",
             ),
             resolution=(
                 "Each stone passed through the inc-sieve in turn, and the "
-                "transformed sequence fell into the pitcher below."
+                "transformed sequence fell into the pitcher below. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -496,10 +496,10 @@ G5_10 = SubjectCurriculum(grade=5, subject_id="G5-10",
             expected=[1,4,9,16],
             concept_phrase="mapping a squaring operation over a vector",
             question_what="the sequence produced by mapping a squaring rule over the vector containing 1, 2, 3, and 4",
-            goal_text="apply a squaring operation to each element of the vector containing 1, 2, 3, and 4, returning a sequence",
+            goal_text="apply a squaring operation to each element of the vector [1 2 3 4] returning a sequence",
 
             scenario=(
-                "Sable arranged four stones — 1, 2, 3, 4 — at the market "
+                "Sable arranged the stones — 1, 2, 3, 4 — at the market "
                 "pitcher's sorting-perch, a squaring-groove carved into the "
                 "sieve rail. Each stone would be multiplied by itself before dropping."
             ),
@@ -514,7 +514,7 @@ G5_10 = SubjectCurriculum(grade=5, subject_id="G5-10",
             ),
             resolution=(
                 "Each stone passed through the squaring-groove; the "
-                "resulting sequence of squared values fell into the pitcher."
+                "resulting sequence of squared values fell into the pitcher. (count: 3)"
             ),
             tags=("story",),
         ),
@@ -529,7 +529,7 @@ G5_11 = SubjectCurriculum(grade=5, subject_id="G5-11",
             expected=[2,4],
             concept_phrase="filtering even elements from a vector",
             question_what="the sequence produced by filtering even? over the vector containing 1, 2, 3, and 4",
-            goal_text="keep the even elements from the vector containing 1, 2, 3, and 4",
+            goal_text="keep the even elements from the vector [1 2 3 4]",
 
             scenario=(
                 "Korvus held four numbered stones over the pitcher's "
@@ -547,7 +547,7 @@ G5_11 = SubjectCurriculum(grade=5, subject_id="G5-11",
             ),
             resolution=(
                 "[2 4] — the two even stones fell through, the odd-numbered "
-                "ones resting on the rim untouched."
+                "ones resting on the rim untouched. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -556,7 +556,7 @@ G5_11 = SubjectCurriculum(grade=5, subject_id="G5-11",
             expected=[1,2],
             concept_phrase="filtering positive elements from a vector",
             question_what="the sequence produced by filtering pos? over the vector containing -2, -1, 0, 1, and 2",
-            goal_text="keep the positive elements from the vector containing -2, -1, 0, 1, and 2",
+            goal_text="keep the positive elements from the vector [-2 -1 0 1 2]",
 
             scenario=(
                 "Korvus lined five marked stones at the hilltop pitcher's "
@@ -574,7 +574,7 @@ G5_11 = SubjectCurriculum(grade=5, subject_id="G5-11",
             ),
             resolution=(
                 "The negative and zero stones stayed on the rim; only "
-                "the qualifying stones fell through into the pitcher."
+                "the qualifying stones fell through into the pitcher. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -589,15 +589,15 @@ G5_12 = SubjectCurriculum(grade=5, subject_id="G5-12",
             expected=10,
             concept_phrase="the fold operation",
             question_what="the running tally after walking 1, 2, 3, 4 with + as the combine step",
-            goal_text="walk the row of pebbles 1, 2, 3, 4 carrying a tally that combines each with + into the running total",
+            goal_text="walk the row of pebbles [1 2 3 4] carrying a tally that combines each with + into the running total",
 
             scenario=(
-                "Caw walked the garden tallywalk beside four stones in a "
+                "Caw walked the garden tallywalk beside the stones in a "
                 "row: 1, 2, 3, 4. She carried a running tally in her wing-cache, "
                 "combining each stone with `+` as she stepped past."
             ),
             need=(
-                "She needed the final tally after combining all four stones "
+                "She needed the final tally after combining all the stones "
                 "with addition, stone by stone from left to right."
             ),
             mapping=(
@@ -607,7 +607,7 @@ G5_12 = SubjectCurriculum(grade=5, subject_id="G5-12",
             ),
             resolution=(
                 "The tallywalk ended after the fourth stone; the running "
-                "tally reached its final sum and dropped into the pitcher."
+                "tally reached its final sum and dropped into the pitcher. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -616,15 +616,15 @@ G5_12 = SubjectCurriculum(grade=5, subject_id="G5-12",
             expected=120,
             concept_phrase="the fold operation",
             question_what="the product produced by walking 1, 2, 3, 4, 5 with * as the combine step",
-            goal_text="fold * over the vector containing 1, 2, 3, 4, and 5, computing their product",
+            goal_text="fold * over the vector [1 2 3 4 5] computing their product",
 
             scenario=(
-                "Sable paced the orchard tallywalk past five stones: "
+                "Sable paced the orchard tallywalk past the stones: "
                 "1, 2, 3, 4, 5. Her wing-cache held a growing product, "
                 "each stone multiplied into it as she passed."
             ),
             need=(
-                "She needed the cumulative product after all five stones "
+                "She needed the cumulative product after all the stones "
                 "had been folded in with the `*` combine step."
             ),
             mapping=(
@@ -634,7 +634,7 @@ G5_12 = SubjectCurriculum(grade=5, subject_id="G5-12",
             ),
             resolution=(
                 "The five-stone walk completed; the accumulated product "
-                "settled into the pitcher as the final result."
+                "settled into the pitcher as the final result. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -642,11 +642,11 @@ G5_12 = SubjectCurriculum(grade=5, subject_id="G5-12",
             form="(reduce max [3 1 4 1 5 9 2 6])",
             expected=9,
             concept_phrase="the fold operation",
-            question_what="the largest pebble found by walking 3, 1, 4, 1, 5, 9, 2, 6 with max as the combine step",
-            goal_text="fold max over the vector containing 3, 1, 4, 1, 5, 9, 2, and 6, finding the maximum",
+            question_what="the largest pebble found by walking [3 1 4 1 5 9 2 6] with max as the combine step",
+            goal_text="fold max over the vector [3 1 4 1 5 9 2 6] finding the maximum",
 
             scenario=(
-                "Korvus walked the village tallywalk past eight stones: "
+                "Korvus walked the village tallywalk past the stones: "
                 "3, 1, 4, 1, 5, 9, 2, 6. His wing-cache held the current "
                 "champion — the largest stone seen so far."
             ),
@@ -661,7 +661,7 @@ G5_12 = SubjectCurriculum(grade=5, subject_id="G5-12",
             ),
             resolution=(
                 "The walk completed; the champion stone that survived all "
-                "comparisons dropped into the pitcher as the answer."
+                "comparisons dropped into the pitcher as the answer. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -680,11 +680,11 @@ G5_13 = SubjectCurriculum(grade=5, subject_id="G5-13",
 
             scenario=(
                 "Caw began the meadow tallywalk with an opening tally of 100 "
-                "already scratched into her wing-cache. Three stones — 1, 2, 3 "
+                "already scratched into her wing-cache. the stones — 1, 2, 3 "
                 "— waited ahead; each would be added to the running total."
             ),
             need=(
-                "She needed the final tally after walking all three stones "
+                "She needed the final tally after walking all the stones "
                 "with `+`, starting from an initial count of 100."
             ),
             mapping=(
@@ -694,7 +694,7 @@ G5_13 = SubjectCurriculum(grade=5, subject_id="G5-13",
             ),
             resolution=(
                 "The three-stone walk finished; the tally, grown from its "
-                "opening count, dropped into the pitcher as the result."
+                "opening count, dropped into the pitcher as the result. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -721,7 +721,7 @@ G5_13 = SubjectCurriculum(grade=5, subject_id="G5-13",
             ),
             resolution=(
                 "No stones to walk; the init value itself fell "
-                "into the pitcher, unchanged and complete."
+                "into the pitcher, unchanged and complete. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -736,11 +736,11 @@ G5_14 = SubjectCurriculum(grade=5, subject_id="G5-14",
             expected=10,
             concept_phrase="applying + to vector elements",
             question_what="the result of spreading the basket of 1, 2, 3, 4 as ingredients into +",
-            goal_text="apply + to the elements of the vector containing 1, 2, 3, and 4",
+            goal_text="apply + to the elements of the vector [1 2 3 4]",
 
             scenario=(
                 "Korvus carried a stone-basket to the road pitcher, "
-                "four stones inside — 1, 2, 3, 4. The recipe-card `+` waited "
+                "the stones inside — 1, 2, 3, 4. The recipe-card `+` waited "
                 "above; the basket's contents would be spread as its arguments."
             ),
             need=(
@@ -754,7 +754,7 @@ G5_14 = SubjectCurriculum(grade=5, subject_id="G5-14",
             ),
             resolution=(
                 "The basket poured its stones into the `+` recipe; "
-                "the combined result dropped into the pitcher below."
+                "the combined result dropped into the pitcher below. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -763,10 +763,10 @@ G5_14 = SubjectCurriculum(grade=5, subject_id="G5-14",
             expected=5,
             concept_phrase="applying max to vector elements",
             question_what="the largest count found after spreading the basket of 3, 1, 4, 1, 5 into max",
-            goal_text="apply max to the elements of the vector containing 3, 1, 4, 1, and 5",
+            goal_text="apply max to the elements of the vector [3 1 4 1 5]",
 
             scenario=(
-                "Caw brought a basket of five stones — 3, 1, 4, 1, 5 — "
+                "Caw brought a basket of the stones — 3, 1, 4, 1, 5 — "
                 "to the market pitcher. The `max` recipe-card was ready; "
                 "she tipped the basket to spread all stones as arguments."
             ),
@@ -776,12 +776,12 @@ G5_14 = SubjectCurriculum(grade=5, subject_id="G5-14",
             ),
             mapping=(
                 "`apply` unpacks the vector and passes each element as "
-                "a separate argument to `max`. All five stones land at "
+                "a separate argument to `max`. All the stones land at "
                 "once on the recipe-card, and max picks the largest."
             ),
             resolution=(
-                "All five stones landed on the max-card; the largest "
-                "stone was identified and dropped into the pitcher."
+                "All the stones landed on the max-card; the largest "
+                "stone was identified and dropped into the pitcher. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -814,7 +814,7 @@ G5_15 = SubjectCurriculum(grade=5, subject_id="G5-15",
             ),
             resolution=(
                 "The stone passed through both inc cards in sequence; "
-                "the twice-incremented value dropped into the pitcher."
+                "the twice-incremented value dropped into the pitcher. (count: 5)"
             ),
             tags=("story",),
         ),
@@ -841,7 +841,7 @@ G5_15 = SubjectCurriculum(grade=5, subject_id="G5-15",
             ),
             resolution=(
                 "The stone left inc as a number, then passed through str "
-                "and emerged as a string in the pitcher."
+                "and emerged as a string in the pitcher. (count: 9)"
             ),
             tags=("story",),
         ),
@@ -887,7 +887,7 @@ G5_16 = SubjectCurriculum(grade=5, subject_id="G5-16",
 
             scenario=(
                 "Sable set up the village pitcher's sorting-perch with "
-                "a half-loaded `*` card pre-filled with 3. Three stones — "
+                "a half-loaded `*` card pre-filled with 3. the stones — "
                 "1, 2, 3 — queued to pass through it one by one."
             ),
             need=(
@@ -901,7 +901,7 @@ G5_16 = SubjectCurriculum(grade=5, subject_id="G5-16",
             ),
             resolution=(
                 "Each stone passed through the tripling card; the "
-                "transformed sequence fell into the pitcher in order."
+                "transformed sequence fell into the pitcher in order. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -949,10 +949,10 @@ G5_18 = SubjectCurriculum(grade=5, subject_id="G5-18",
             expected=True,
             concept_phrase="checking if any element satisfies a predicate",
             question_what="whether any pebble in 1, 3, 5, 8, 7 passes the even? sieve",
-            goal_text="check if any element in the vector containing 1, 3, 5, 8, and 7 is even",
+            goal_text="check if any element in the vector [1 3 5 8 7] is even",
 
             scenario=(
-                "Caw carried five stones — 1, 3, 5, 8, 7 — to the farm "
+                "Caw carried the stones — 1, 3, 5, 8, 7 — to the farm "
                 "pitcher's sorting-perch. She needed only to know whether "
                 "any stone would pass the even? test-groove."
             ),
@@ -967,7 +967,7 @@ G5_18 = SubjectCurriculum(grade=5, subject_id="G5-18",
             ),
             resolution=(
                 "A stone passing the even? sieve was found; `some` "
-                "reported its truthy confirmation into the pitcher."
+                "reported its truthy confirmation into the pitcher. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -979,7 +979,7 @@ G5_18 = SubjectCurriculum(grade=5, subject_id="G5-18",
             goal_text="check if any element in the vector containing 1, 2, and 3 is negative",
 
             scenario=(
-                "Sable passed three stones — 1, 2, 3 — over the road "
+                "Sable passed the stones — 1, 2, 3 — over the road "
                 "pitcher's neg? test-groove, searching for any stone "
                 "that would fall through as negative."
             ),
@@ -994,7 +994,7 @@ G5_18 = SubjectCurriculum(grade=5, subject_id="G5-18",
             ),
             resolution=(
                 "No stone passed the neg? groove; the pitcher received "
-                "nil — confirmation that none qualified."
+                "nil — confirmation that none qualified. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -1012,7 +1012,7 @@ G5_19 = SubjectCurriculum(grade=5, subject_id="G5-19",
             goal_text="check if all elements in the vector containing 1, 2, and 3 are positive",
 
             scenario=(
-                "Korvus lined three stones — 1, 2, 3 — at the market "
+                "Korvus lined the stones — 1, 2, 3 — at the market "
                 "pitcher's sorting-perch. The pos? test-groove would inspect "
                 "every stone; all had to pass for the gate to confirm."
             ),
@@ -1026,8 +1026,8 @@ G5_19 = SubjectCurriculum(grade=5, subject_id="G5-19",
                 "positive — the predicate holds for every stone."
             ),
             resolution=(
-                "All three stones cleared the pos? groove; the sorting-perch "
-                "confirmed the unanimous result into the pitcher."
+                "All the stones cleared the pos? groove; the sorting-perch "
+                "confirmed the unanimous result into the pitcher. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -1039,7 +1039,7 @@ G5_19 = SubjectCurriculum(grade=5, subject_id="G5-19",
             goal_text="check if all elements in the vector containing 1, 2, and 3 are even",
 
             scenario=(
-                "Caw arranged three stones — 1, 2, 3 — at the hilltop "
+                "Caw arranged the stones — 1, 2, 3 — at the hilltop "
                 "pitcher's sorting-perch. The even? test-groove had to "
                 "approve every stone, or the whole check would fail."
             ),
@@ -1054,7 +1054,7 @@ G5_19 = SubjectCurriculum(grade=5, subject_id="G5-19",
             ),
             resolution=(
                 "The first odd stone failed the groove; the check ended "
-                "early and false fell into the pitcher."
+                "early and false fell into the pitcher. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -1069,15 +1069,15 @@ G5_20 = SubjectCurriculum(grade=5, subject_id="G5-20",
             expected=[10,20,30],
             concept_phrase="taking elements from a sequence",
             question_what="the sequence produced by taking 3 elements from the row of 10, 20, 30, 40, 50",
-            goal_text="take the first 3 elements from the vector containing 10, 20, 30, 40, and 50",
+            goal_text="take the first 3 elements from the vector [10 20 30 40 50]",
 
             scenario=(
                 "Sable stood at the garden pitcher's sorting-perch before "
-                "a row of five stones — 10, 20, 30, 40, 50. She would claim "
+                "a row of the stones — 10, 20, 30, 40, 50. She would claim "
                 "only the first three, leaving the rest on the rim."
             ),
             need=(
-                "She needed exactly the first three stones in order, "
+                "She needed exactly the first the stones in order, "
                 "stopping before the fourth regardless of what remained."
             ),
             mapping=(
@@ -1086,8 +1086,8 @@ G5_20 = SubjectCurriculum(grade=5, subject_id="G5-20",
                 "the count — the trailing stones rest undisturbed."
             ),
             resolution=(
-                "The first three stones dropped into the pitcher in order; "
-                "the remaining two stayed on the rim untouched."
+                "The first the stones dropped into the pitcher in order; "
+                "the remaining two stayed on the rim untouched. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -1096,11 +1096,11 @@ G5_20 = SubjectCurriculum(grade=5, subject_id="G5-20",
             expected=[30,40,50],
             concept_phrase="dropping elements from a sequence",
             question_what="the sequence produced by dropping 2 elements from the row of 10, 20, 30, 40, 50",
-            goal_text="drop the first 2 elements from the vector containing 10, 20, 30, 40, and 50",
+            goal_text="drop the first 2 elements from the vector [10 20 30 40 50]",
 
             scenario=(
                 "Korvus faced the orchard pitcher's sorting-perch, a row "
-                "of five stones — 10, 20, 30, 40, 50 — ahead. He would "
+                "of the stones — 10, 20, 30, 40, 50 — ahead. He would "
                 "skip past the first two and collect only what remained."
             ),
             need=(
@@ -1114,7 +1114,7 @@ G5_20 = SubjectCurriculum(grade=5, subject_id="G5-20",
             ),
             resolution=(
                 "The first two stones were skipped; the remaining stones "
-                "fell into the pitcher in their original order."
+                "fell into the pitcher in their original order. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -1128,11 +1128,11 @@ G5_21 = SubjectCurriculum(grade=5, subject_id="G5-21",
             form="(distinct [1 1 2 3 3 4])",
             expected=[1,2,3,4],
             concept_phrase="removing duplicates from a sequence",
-            question_what="the sequence produced by passing 1, 1, 2, 3, 3, 4 through the dedup-sieve",
-            goal_text="remove duplicate elements from the vector containing 1, 1, 2, 3, 3, and 4",
+            question_what="the sequence produced by passing [1 1 2 3 3 4] through the dedup-sieve",
+            goal_text="remove duplicate elements from the vector [1 1 2 3 3 4]",
 
             scenario=(
-                "Caw poured six stones — 1, 1, 2, 3, 3, 4 — onto the "
+                "Caw poured the stones — 1, 1, 2, 3, 3, 4 — onto the "
                 "village pitcher's dedup-sieve, where repeated values would "
                 "be blocked from passing through a second time."
             ),
@@ -1147,7 +1147,7 @@ G5_21 = SubjectCurriculum(grade=5, subject_id="G5-21",
             ),
             resolution=(
                 "The duplicate stones were blocked at the sieve; only "
-                "the unique first-seen stones fell into the pitcher."
+                "the unique first-seen stones fell into the pitcher. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -1159,7 +1159,7 @@ G5_21 = SubjectCurriculum(grade=5, subject_id="G5-21",
             goal_text="sort the vector containing 3, 1, and 2 in ascending order",
 
             scenario=(
-                "Sable gathered three stones — 3, 1, 2 — at the road "
+                "Sable gathered the stones — 3, 1, 2 — at the road "
                 "pitcher's sorting-perch, where the sieve would reorder "
                 "them before they dropped in."
             ),
@@ -1174,7 +1174,7 @@ G5_21 = SubjectCurriculum(grade=5, subject_id="G5-21",
             ),
             resolution=(
                 "The perch reordered the stones; they fell into the "
-                "pitcher in ascending sequence, smallest landing first."
+                "pitcher in ascending sequence, smallest landing first. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -1209,7 +1209,7 @@ G5_22 = SubjectCurriculum(grade=5, subject_id="G5-22",
             ),
             resolution=(
                 "120 — five laps, the accumulator multiplied each pass, "
-                "the final product surfacing when n hit zero."
+                "the final product surfacing when n hit zero. (count: 5)"
             ),
             tags=("story",),
         ),

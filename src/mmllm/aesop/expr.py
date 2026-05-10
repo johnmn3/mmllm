@@ -58,6 +58,7 @@ class Lit(Expr):
     value: Any
     is_kw: bool = False  # treat str as Clojure keyword (`:foo`)
     is_set: bool = False # treat list as Clojure set (`#{...}`)
+    is_char: bool = False # str came from `\X` Clojure char literal (vs `"X"`)
 
     def eval(self, env: dict) -> Any:
         if self.is_kw:
@@ -102,10 +103,16 @@ class App(Expr):
     inline: bool = True  # render single-line by default
 
     def eval(self, env: dict) -> Any:
+        evaled = [a.eval(env) for a in self.args]
         f = OPS.get(self.op)
-        if f is None:
-            raise NameError(f"unknown op: {self.op}")
-        return f([a.eval(env) for a in self.args], env)
+        if f is not None:
+            return f(evaled, env)
+        # Fall back to env-bound callables (defn / let-bound fn).
+        if self.op in env:
+            ef = env[self.op]
+            if callable(ef):
+                return ef(evaled)
+        raise NameError(f"unknown op: {self.op}")
 
     def emit(self, indent: int = 0) -> str:
         if not self.args:
@@ -277,6 +284,28 @@ class Do(Expr):
 
 
 @dataclass
+class Try(Expr):
+    """try / catch. body executes; on exception, bind to `binding` and
+    evaluate `handler`."""
+    body:    Expr
+    binding: str
+    handler: Expr
+
+    def eval(self, env: dict) -> Any:
+        try:
+            return self.body.eval(env)
+        except Exception as exc:
+            sub = dict(env)
+            sub[self.binding] = exc
+            return self.handler.eval(sub)
+
+    def emit(self, indent: int = 0) -> str:
+        b = self.body.emit(indent + 5)
+        h = self.handler.emit(indent + 5)
+        return f"(try {b} (catch Exception {self.binding} {h}))"
+
+
+@dataclass
 class Thread(Expr):
     """Threading macro. style='->' or '->>'."""
     style: str
@@ -319,14 +348,21 @@ def _truthy(v: Any) -> bool:
 
 
 def _emit_value(v: Any, *, is_kw: bool = False, is_set: bool = False) -> str:
+    from fractions import Fraction
     if is_kw:
         return f":{v}"
+    # Sentinels round-tripped from eval.
+    if isinstance(v, tuple) and len(v) == 2:
+        if v[0] == "__kw__":  return f":{v[1]}"
+        if v[0] == "__sym__": return f"'{v[1]}"
     if v is None:
         return "nil"
     if v is True:
         return "true"
     if v is False:
         return "false"
+    if isinstance(v, Fraction):
+        return f"{v.numerator}/{v.denominator}"
     if isinstance(v, str):
         # Clojure string: escape backslash + double-quote.
         esc = v.replace("\\", "\\\\").replace('"', '\\"')
@@ -381,8 +417,19 @@ def _op_times(args, _):
         out *= x
     return out
 def _op_div(args, _):
+    """Integer args produce a Fraction (Clojure ratio); float args
+    produce a float. Matches Clojure's promoting `/` semantics."""
+    from fractions import Fraction
     if len(args) == 1:
-        return 1 / args[0]
+        a = args[0]
+        if isinstance(a, int) and not isinstance(a, bool):
+            return Fraction(1, a)
+        return 1 / a
+    if all(isinstance(x, int) and not isinstance(x, bool) for x in args):
+        out = Fraction(args[0])
+        for x in args[1:]:
+            out = out / x
+        return int(out) if out.denominator == 1 else out
     out = args[0]
     for x in args[1:]:
         out = out / x
@@ -446,7 +493,9 @@ def _op_repeat(args, _):
     return [v] * n
 def _op_take(args, _):    n, xs = args; return list(xs[:n])
 def _op_drop(args, _):    n, xs = args; return list(xs[n:])
-def _op_count(args, _):   return len(args[0])
+def _op_count(args, _):
+    v = args[0]
+    return 0 if v is None else len(v)
 def _op_first(args, _):
     xs = args[0]
     return xs[0] if xs else None
@@ -590,6 +639,423 @@ def _op_str_split(args, _):
     return s.split(sep)
 
 
+# ─────────────────────── Type predicates ───────────────────────
+
+
+def _is_kw(v):  return isinstance(v, tuple) and len(v) == 2 and v[0] == "__kw__"
+def _is_sym(v): return isinstance(v, tuple) and len(v) == 2 and v[0] == "__sym__"
+
+
+def _op_nil_q(args, _):       return args[0] is None
+def _op_some_q(args, _):      return args[0] is not None
+def _op_true_q(args, _):      return args[0] is True
+def _op_false_q(args, _):     return args[0] is False
+def _op_keyword_q(args, _):   return _is_kw(args[0])
+def _op_symbol_q(args, _):    return _is_sym(args[0])
+def _op_string_q(args, _):    return isinstance(args[0], str) and not _is_kw(args[0]) and not _is_sym(args[0])
+def _op_number_q(args, _):
+    v = args[0]
+    if isinstance(v, bool):  return False
+    from fractions import Fraction
+    return isinstance(v, (int, float, Fraction))
+def _op_integer_q(args, _):
+    v = args[0]
+    return isinstance(v, int) and not isinstance(v, bool)
+def _op_ratio_q(args, _):
+    from fractions import Fraction
+    return isinstance(args[0], Fraction)
+def _op_float_q(args, _):     return isinstance(args[0], float)
+def _op_char_q(args, _):
+    v = args[0]
+    return isinstance(v, str) and len(v) == 1 and not _is_kw(v) and not _is_sym(v)
+def _op_boolean_q(args, _):   return isinstance(args[0], bool)
+def _op_list_q(args, _):      return isinstance(args[0], list)
+def _op_vector_q(args, _):    return isinstance(args[0], list)  # Clojure can distinguish; we treat as list
+def _op_map_q(args, _):       return isinstance(args[0], dict)
+def _op_set_q(args, _):       return isinstance(args[0], (set, frozenset))
+def _op_coll_q(args, _):      return isinstance(args[0], (list, dict, set, frozenset))
+def _op_seq_q(args, _):       return isinstance(args[0], (list, tuple)) and not _is_kw(args[0]) and not _is_sym(args[0])
+def _op_seqable_q(args, _):
+    v = args[0]
+    return v is None or isinstance(v, (list, dict, set, frozenset, str, tuple))
+def _op_fn_q(args, _):        return callable(args[0])
+def _op_assoc_q(args, _):
+    return isinstance(args[0], dict) or isinstance(args[0], list)
+
+
+# ─────────────────────── More collection ops ───────────────────────
+
+
+def _op_seq(args, _):
+    v = args[0]
+    if v is None:                return None
+    if isinstance(v, dict):      return list(v.items()) if v else None
+    if hasattr(v, "__len__"):    return list(v) if len(v) else None
+    return list(v)
+
+
+def _op_nth(args, _):
+    coll, idx = args[0], args[1]
+    default = args[2] if len(args) > 2 else None
+    try:
+        return coll[idx]
+    except (IndexError, KeyError):
+        if len(args) > 2: return default
+        raise
+
+
+def _op_concat(args, _):
+    out = []
+    for x in args:
+        if x is None: continue
+        out.extend(list(x))
+    return out
+
+
+def _op_interpose(args, _):
+    sep, coll = args
+    coll = list(coll)
+    if not coll: return []
+    out = [coll[0]]
+    for x in coll[1:]:
+        out.append(sep)
+        out.append(x)
+    return out
+
+
+def _op_interleave(args, _):
+    if not args: return []
+    seqs = [list(s) for s in args]
+    if not seqs: return []
+    n = min(len(s) for s in seqs)
+    out = []
+    for i in range(n):
+        for s in seqs:
+            out.append(s[i])
+    return out
+
+
+def _op_flatten(args, _):
+    def _walk(x):
+        if isinstance(x, (list, tuple)):
+            for y in x:
+                yield from _walk(y)
+        else:
+            yield x
+    return list(_walk(args[0]))
+
+
+def _op_frequencies(args, _):
+    out = {}
+    for x in args[0]:
+        key = tuple(x) if isinstance(x, list) else x
+        out[key] = out.get(key, 0) + 1
+    return out
+
+
+def _op_group_by(args, _):
+    f, coll = args
+    out = {}
+    for x in coll:
+        k = f([x])
+        out.setdefault(k, []).append(x)
+    return out
+
+
+def _op_not_empty(args, _):
+    v = args[0]
+    return v if v else None
+
+
+def _op_second(args, _):
+    v = args[0]
+    return v[1] if len(v) > 1 else None
+
+
+def _op_nthrest(args, _):
+    return list(args[0][args[1]:])
+
+
+def _op_take_while(args, _):
+    f, coll = args
+    out = []
+    for x in coll:
+        if not f([x]):
+            break
+        out.append(x)
+    return out
+
+
+def _op_drop_while(args, _):
+    f, coll = args
+    coll = list(coll)
+    i = 0
+    while i < len(coll) and f([coll[i]]):
+        i += 1
+    return coll[i:]
+
+
+def _op_remove(args, _):
+    f, coll = args
+    return [x for x in coll if not f([x])]
+
+
+def _op_some(args, _):
+    """`(some pred coll)` — returns the first truthy `pred(x)` value
+    for x in coll, else nil. Common in Clojure for "any matches."""
+    f, coll = args
+    for x in coll:
+        v = f([x])
+        if _truthy(v):
+            return v
+    return None
+
+
+def _op_every(args, _):
+    f, coll = args
+    return all(_truthy(f([x])) for x in coll)
+
+
+def _op_not_any(args, _):
+    f, coll = args
+    return not any(_truthy(f([x])) for x in coll)
+
+
+def _op_cons(args, _):
+    x, coll = args
+    if coll is None:
+        return [x]
+    return [x] + list(coll)
+
+
+def _op_keep(args, _):
+    f, coll = args
+    out = []
+    for x in coll:
+        v = f([x])
+        if v is not None:
+            out.append(v)
+    return out
+
+
+def _op_juxt(args, _):
+    funcs = args
+    def _juxt_fn(in_args):
+        return [f(list(in_args)) for f in funcs]
+    return _juxt_fn
+
+
+def _op_complement(args, _):
+    f = args[0]
+    return lambda in_args: not _truthy(f(list(in_args)))
+
+
+def _op_constantly(args, _):
+    val = args[0]
+    return lambda in_args: val
+
+
+def _op_identity(args, _):
+    return args[0]
+
+
+def _op_max_key(args, _):
+    f, *coll = args
+    if len(coll) == 1:
+        coll = coll[0]
+    return max(coll, key=lambda x: f([x]))
+
+
+def _op_min_key(args, _):
+    f, *coll = args
+    if len(coll) == 1:
+        coll = coll[0]
+    return min(coll, key=lambda x: f([x]))
+
+
+def _op_partition_by(args, _):
+    f, coll = args
+    out = []
+    cur = []
+    last_key = object()  # sentinel
+    for x in coll:
+        k = f([x])
+        if k != last_key and cur:
+            out.append(cur)
+            cur = []
+        cur.append(x)
+        last_key = k
+    if cur:
+        out.append(cur)
+    return out
+
+
+def _op_sort_by(args, _):
+    f, coll = args
+    return sorted(coll, key=lambda x: f([x]))
+
+
+def _op_iterate(args, _):
+    # (iterate f x) → infinite seq; we cap at 100 for safety
+    f, x = args
+    out = [x]
+    for _ in range(100):
+        x = f([x])
+        out.append(x)
+    return out
+
+
+def _op_repeatedly(args, _):
+    if len(args) == 2:
+        n, f = args
+        return [f([]) for _ in range(n)]
+    raise ValueError("repeatedly without n is unbounded")
+
+
+def _op_zipmap(args, _):
+    keys, vals = args
+    return {k: v for k, v in zip(keys, vals)}
+
+
+def _op_select_keys(args, _):
+    m, ks = args
+    return {k: m[k] for k in ks if k in m}
+
+
+def _op_update(args, env):
+    m, k, f, *rest = args
+    new = dict(m)
+    new[k] = f([m.get(k), *rest])
+    return new
+
+
+def _op_count_kw(args, _):
+    """count behaves on nil → 0."""
+    v = args[0]
+    return 0 if v is None else len(v)
+
+
+# ─────────────────────── String/IO ops ───────────────────────
+
+
+def _op_println(args, _):
+    # Side-effect-free: return nil. The model never sees stdout.
+    return None
+
+
+def _op_print(args, _):    return None
+def _op_pr(args, _):       return None
+def _op_prn(args, _):      return None
+def _op_newline(args, _):  return None
+
+
+def _op_str_starts(args, _):
+    s, prefix = args
+    return s.startswith(prefix)
+
+
+def _op_str_ends(args, _):
+    s, suffix = args
+    return s.endswith(suffix)
+
+
+def _op_str_includes(args, _):
+    s, sub = args
+    return sub in s
+
+
+def _op_str_replace(args, _):
+    s, a, b = args
+    return s.replace(a, b)
+
+
+def _op_str_trim(args, _):
+    return args[0].strip()
+
+
+def _op_str_blank(args, _):
+    v = args[0]
+    return v is None or v == "" or (isinstance(v, str) and v.strip() == "")
+
+
+def _op_count_chars(args, _):
+    return len(args[0])
+
+
+def _op_subs(args, _):
+    s = args[0]
+    if len(args) == 2:
+        return s[args[1]:]
+    return s[args[1]:args[2]]
+
+
+def _op_boolean(args, _):
+    """Clojure's `boolean` coercion: nil and false → false; everything
+    else → true."""
+    v = args[0]
+    return _truthy(v)
+
+
+def _op_symbol(args, _):
+    if len(args) == 1:
+        return ("__sym__", args[0])
+    return ("__sym__", f"{args[0]}/{args[1]}")
+
+
+def _op_keyword(args, _):
+    if len(args) == 1:
+        v = args[0]
+        if isinstance(v, str):
+            return ("__kw__", v)
+        if isinstance(v, tuple) and len(v) == 2 and v[0] in ("__kw__", "__sym__"):
+            return ("__kw__", v[1])
+    return ("__kw__", f"{args[0]}/{args[1]}")
+
+
+def _op_name(args, _):
+    v = args[0]
+    if isinstance(v, tuple) and len(v) == 2 and v[0] in ("__kw__", "__sym__"):
+        return v[1]
+    if isinstance(v, str):
+        return v
+    raise TypeError(f"name expects keyword/symbol/string, got {v!r}")
+
+
+def _op_namespace(args, _):
+    v = args[0]
+    if isinstance(v, tuple) and len(v) == 2 and v[0] in ("__kw__", "__sym__"):
+        if "/" in v[1]:
+            return v[1].split("/", 1)[0]
+        return None
+    return None
+
+
+# ─────────────────────── Keyword-as-fn / map-as-fn / set-as-fn ─────────────
+
+
+def _op_kw_lookup(args, _):
+    """Keyword-as-function for map lookup: (:k m) → (get m :k).
+    Identified by the parser when it sees a keyword in head position."""
+    if len(args) == 2:
+        kw, m = args
+        if isinstance(m, dict):
+            return m.get(kw)
+        return None
+    if len(args) == 3:
+        kw, m, dflt = args
+        if isinstance(m, dict):
+            return m.get(kw, dflt)
+        return dflt
+    raise ValueError("keyword-as-fn takes 1-2 args after the keyword")
+
+
+# ─────────────────────── case ───────────────────────
+
+
+# Note: `case` is implemented in the parser by lowering to Cond — see
+# form_parser. No runtime op needed.
+
+
 OPS: dict[str, Callable[[list[Any], dict], Any]] = {
     "+":  _op_plus, "-": _op_minus, "*": _op_times, "/": _op_div,
     "quot": _op_quot, "rem": _op_rem, "mod": _op_mod,
@@ -621,10 +1087,54 @@ OPS: dict[str, Callable[[list[Any], dict], Any]] = {
     "contains?": _op_contains,
 
     "str": _op_str,
-    "clojure.string/upper-case": _op_str_upper,
-    "clojure.string/lower-case": _op_str_lower,
-    "clojure.string/join":       _op_str_join,
-    "clojure.string/split":      _op_str_split,
+    "clojure.string/upper-case":  _op_str_upper,
+    "clojure.string/lower-case":  _op_str_lower,
+    "clojure.string/join":        _op_str_join,
+    "clojure.string/split":       _op_str_split,
+    "clojure.string/starts-with?": _op_str_starts,
+    "clojure.string/ends-with?":   _op_str_ends,
+    "clojure.string/includes?":    _op_str_includes,
+    "clojure.string/replace":      _op_str_replace,
+    "clojure.string/trim":         _op_str_trim,
+    "clojure.string/blank?":       _op_str_blank,
+
+    "nil?": _op_nil_q, "some?": _op_some_q,
+    "true?": _op_true_q, "false?": _op_false_q,
+    "keyword?": _op_keyword_q, "symbol?": _op_symbol_q,
+    "string?": _op_string_q, "number?": _op_number_q,
+    "integer?": _op_integer_q, "int?": _op_integer_q,
+    "ratio?": _op_ratio_q, "float?": _op_float_q,
+    "char?": _op_char_q, "boolean?": _op_boolean_q,
+    "list?": _op_list_q, "vector?": _op_vector_q,
+    "map?": _op_map_q, "set?": _op_set_q,
+    "coll?": _op_coll_q, "seq?": _op_seq_q,
+    "seqable?": _op_seqable_q, "fn?": _op_fn_q,
+    "associative?": _op_assoc_q,
+
+    "seq": _op_seq, "nth": _op_nth, "second": _op_second,
+    "concat": _op_concat, "interpose": _op_interpose,
+    "interleave": _op_interleave, "flatten": _op_flatten,
+    "frequencies": _op_frequencies, "group-by": _op_group_by,
+    "not-empty": _op_not_empty, "nthrest": _op_nthrest,
+    "take-while": _op_take_while, "drop-while": _op_drop_while,
+    "remove": _op_remove, "iterate": _op_iterate,
+    "repeatedly": _op_repeatedly, "zipmap": _op_zipmap,
+    "select-keys": _op_select_keys, "update": _op_update,
+    "some": _op_some, "every?": _op_every, "not-any?": _op_not_any,
+    "cons": _op_cons, "keep": _op_keep, "juxt": _op_juxt,
+    "complement": _op_complement, "constantly": _op_constantly,
+    "identity": _op_identity,
+    "max-key": _op_max_key, "min-key": _op_min_key,
+    "partition-by": _op_partition_by, "sort-by": _op_sort_by,
+
+    "println": _op_println, "print": _op_print,
+    "pr": _op_pr, "prn": _op_prn, "newline": _op_newline,
+
+    "subs": _op_subs, "boolean": _op_boolean,
+    "symbol": _op_symbol, "keyword": _op_keyword,
+    "name": _op_name, "namespace": _op_namespace,
+
+    "__kw_lookup__": _op_kw_lookup,
 }
 
 

@@ -191,11 +191,17 @@ class EnergyTracker:
         self._t0 = time.time()
         # Try CodeCarbon first.
         try:
+            import logging as _logging
             from codecarbon import EmissionsTracker  # type: ignore
+            # Silence codecarbon's per-15s INFO chatter — we only want
+            # the start/stop summary lines, not the running power readings.
+            # Affects every codecarbon.* logger globally for the process.
+            _logging.getLogger("codecarbon").setLevel(_logging.WARNING)
             self._cc_tracker = EmissionsTracker(
                 project_name=self.label,
                 save_to_file=False,                  # we don't want emissions.csv
                 logging_logger=None,
+                log_level="warning",                 # also suppresses tracker's own info logs
                 tracking_mode="process",
                 allow_multiple_runs=True,
             )

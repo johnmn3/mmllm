@@ -37,6 +37,9 @@ from dataclasses import dataclass, field
 from typing import Callable, Iterable
 
 from mmllm.aesop import ontology as ont
+from mmllm.aesop.curriculum import character_pools as char_pools
+from mmllm.aesop.curriculum import opener_pools as opener_pools_mod
+from mmllm.aesop.curriculum import emotion_pools as emo_pools
 from mmllm.aesop.fables import (
     FABLE_OPENERS, _aesopian_intro, EMO_PROUD, EMO_PATIENT, EMO_TIRED,
     EMO_HUNGRY, EMO_GREEDY, EMO_CONTENT, EMO_REGRETFUL, EMO_DESPERATE,
@@ -126,6 +129,111 @@ class SubjectExample:
     # all four story slots filled should also include "story" in
     # their tags so story-templates fire.
     tags:           tuple[str, ...] = ()
+    # Parametric scalar slots (Phase D — zero-hardcoded-scalars).
+    # When `form_template` is set, `slots` defines the typed pools
+    # to draw from at render time, and `expected_fn(draws) -> value`
+    # computes the ground-truth answer from the draws. The verifier
+    # parses the rendered form via form_parser.parse, evaluates via
+    # expr.evaluate, and confirms the answer matches expected_fn(draws).
+    # Story slots and concept_phrase / question_what / goal_text may
+    # reference `{drawn.<slot>}` placeholders to interpolate drawn
+    # values into the prose.
+    form_template:  str = ""
+    slots:          dict = field(default_factory=dict)
+    expected_fn:    object = None  # Callable[[dict], Any]
+    # Macro / host-interop subjects: `bb_verify=True` routes the form
+    # to a Babashka subprocess at curriculum-build time instead of
+    # the in-process expr.py evaluator. Requires the form to be valid
+    # Clojure source; expected_fn (or hardcoded `expected`) must agree
+    # with bb's evaluation.
+    bb_verify:      bool = False
+
+    def __post_init__(self):
+        """If this is a legacy example (no form_template) and the form
+        contains literals we can identify, auto-migrate to parametric.
+        Prose fields with literal occurrences also get
+        `{drawn.<slot>}` interpolation injected automatically."""
+        if self.form_template:
+            return  # already parametric
+        if not self.form:
+            return  # nothing to convert
+        # Skip the conversion for forms where the legacy path is the
+        # only sensible interpretation (e.g. macros, host interop).
+        if self.bb_verify:
+            self._maybe_close_resolution_loop()
+            return
+        from mmllm.aesop.curriculum.auto_parametric import (
+            auto_parametric_from_form, replace_literals_in_prose,
+        )
+        result = auto_parametric_from_form(self.form, expected=self.expected)
+        if result is None:
+            self._maybe_close_resolution_loop()
+            return  # cannot auto-convert; remain legacy
+        template, slots, expected_fn, value_to_slot = result
+        # Mutate via object.__setattr__ since this is a frozen-style
+        # post-init (dataclass field assignment).
+        object.__setattr__(self, "form_template", template)
+        object.__setattr__(self, "slots",         slots)
+        object.__setattr__(self, "expected_fn",   expected_fn)
+        # Prose: scan each prose field and replace literal occurrences
+        # with {drawn.<slot>} placeholders.
+        for fld in ("concept_phrase", "question_what", "goal_text",
+                    "scenario", "need", "mapping", "resolution"):
+            old = getattr(self, fld)
+            new = replace_literals_in_prose(old, value_to_slot)
+            if new != old:
+                object.__setattr__(self, fld, new)
+        # If the example is story-tagged and the resolution still
+        # doesn't reference any drawn slot, append a closing
+        # parenthetical so the resolution closes the loop with the
+        # parametric draw. Audited by the milkmaid wggf fix-set:
+        # STORY_RESOLUTION_NO_DRAWN was firing on ~967 milkmaid
+        # records because legacy resolutions name a fixed answer
+        # ("the REPL answered `false`") without referencing the
+        # actual drawn value. The parenthetical adds a {drawn.<first>}
+        # so the rendered resolution always contains a literal that
+        # matches the form's drawn literal.
+        if "story" in (self.tags or ()) and self.resolution and slots:
+            res = self.resolution
+            if not any(f"{{drawn.{s}}}" in res for s in slots):
+                first = next(iter(slots.keys()))
+                stripped = res.rstrip(" .;:")
+                trail = res[len(stripped):]
+                object.__setattr__(
+                    self, "resolution",
+                    f"{stripped} (with `{{drawn.{first}}}` as the input value){trail}"
+                )
+
+    def _maybe_close_resolution_loop(self):
+        """For story-tagged legacy/bb_verify examples (no parametric slots),
+        append a parenthetical mentioning the form's first literal so the
+        resolution closes the loop. Skipped if a literal is already present.
+        Mirrors the audit's `_drawn_literals` filtering (skips ints 0/1/2 as
+        ambient).
+        """
+        if "story" not in (self.tags or ()) or not self.resolution:
+            return
+        import re as _re
+        lits = []
+        for m in _re.finditer(r"-?\d+", self.form):
+            v = m.group(0)
+            if v not in ("0", "1", "2"):
+                lits.append(v)
+        for m in _re.finditer(r":[a-zA-Z][a-zA-Z0-9-]*", self.form):
+            lits.append(m.group(0))
+        for m in _re.finditer(r'"([^"]{2,})"', self.form):
+            lits.append(m.group(1))
+        slots_text = " ".join(filter(None, (
+            self.scenario, self.need, self.mapping, self.resolution,
+        )))
+        if lits and not any(lit in slots_text for lit in lits):
+            first = lits[0]
+            stripped = self.resolution.rstrip(" .;:")
+            trail = self.resolution[len(stripped):]
+            object.__setattr__(
+                self, "resolution",
+                f"{stripped} (with `{first}` as the input value){trail}"
+            )
 
 
 @dataclass
@@ -195,11 +303,99 @@ ANT_GRASSHOPPER_LOCATIONS = ("meadow", "forest", "woods", "garden",
                               "orchard", "hilltop", "farm")
 
 
+def _make_char(name: str, species: str, gender: str = "n",
+               role_classes: tuple = (), archetypes: tuple = ()) -> ont.Character:
+    """Build a Character from a name-pool draw. Used by per-fable
+    pickers when drawing from the expanded ~200-name pools rather
+    than the legacy 2-4-name ontology."""
+    return ont.Character(
+        name=name, species=species, gender=gender,
+        role_classes=role_classes, archetypes=archetypes,
+    )
+
+
+_FABLE_OPENER_POOL = {
+    "tortoise-hare": opener_pools_mod.OPENERS_TORTOISE_HARE,
+    "crow-pitcher":  opener_pools_mod.OPENERS_CROW_PITCHER,
+    "milkmaid":      opener_pools_mod.OPENERS_MILKMAID,
+    "boy-wolf":      opener_pools_mod.OPENERS_BOY_WOLF,
+    "dog-shadow":    opener_pools_mod.OPENERS_DOG_SHADOW,
+}
+
+_FABLE_PLAN_POOL = {
+    "tortoise-hare": opener_pools_mod.PLANS_TORTOISE_HARE,
+    "crow-pitcher":  opener_pools_mod.PLANS_CROW_PITCHER,
+    "milkmaid":      opener_pools_mod.PLANS_MILKMAID,
+    "boy-wolf":      opener_pools_mod.PLANS_BOY_WOLF,
+    "dog-shadow":    opener_pools_mod.PLANS_DOG_SHADOW,
+}
+
+
+_FABLE_SPECIES_PHRASE = {
+    "tortoise-hare": {"hare": "the hare", "tortoise": "the tortoise"},
+    "crow-pitcher":  {"crow": "the crow"},
+    "milkmaid":      {"human": ""},
+    "boy-wolf":      {"human": ""},
+    "dog-shadow":    {"dog": "the dog"},
+}
+
+
+def _phrase_for(ch: ont.Character, fable: str) -> str:
+    """`Whisker the hare` style. For human roles, just the name."""
+    species_phrases = _FABLE_SPECIES_PHRASE.get(fable, {})
+    suffix = species_phrases.get(ch.species, "")
+    return f"{ch.name} {suffix}".strip()
+
+
+def _curriculum_intro(scene: Scene, fable: str, location,
+                      primary: ont.Character | None,
+                      secondary: ont.Character | None) -> str:
+    """Pick an opener from the 30-entry expanded opener pool for the
+    given fable, substitute placeholders ({place}, {primary},
+    {secondary}, {primary_phrase}, {secondary_phrase},
+    {primary_he_she}, {secondary_he_she}), and return with the
+    "\\n\\n" suffix the caller expects.
+    """
+    pool = _FABLE_OPENER_POOL.get(fable)
+    if not pool:
+        # Fallback: legacy path for unknown fables.
+        from mmllm.aesop.fables import _aesopian_intro
+        return _aesopian_intro(scene, fable, location)
+    template = scene.rng.choice(pool)
+    if "{" in template and "}" in template:
+        place_phrase_str = (place_phrase(scene, location)
+                            if location is not None else "in the meadow")
+        sub = {
+            "place":             place_phrase_str,
+            "primary":           primary.name if primary else "",
+            "secondary":         secondary.name if secondary else "",
+            "primary_phrase":    _phrase_for(primary, fable) if primary else "",
+            "secondary_phrase":  _phrase_for(secondary, fable) if secondary else "",
+            "primary_he_she":    primary.he_she if primary else "they",
+            "secondary_he_she":  secondary.he_she if secondary else "they",
+        }
+        try:
+            opener = template.format(**sub)
+        except KeyError:
+            # If a template references a placeholder we don't supply,
+            # fall back to the unformatted template — better than
+            # crashing the whole pipeline.
+            opener = template
+    else:
+        opener = template
+    return f"{opener}\n\n"
+
+
 def _pick_th_chars(scene: Scene) -> tuple[ont.Character, ont.Character]:
-    """Pick a fresh (hare, tortoise) pair for a record."""
-    hare = scene.rng.choice(_hares())
-    # ensure tortoise is different name (always is — different species — but defensively)
-    tortoise = scene.rng.choice(_tortoises())
+    """Pick a fresh (hare, tortoise) pair from the 200+ expanded
+    name pools. Gender alternates so prose pronouns vary."""
+    hare_name = scene.rng.choice(char_pools.HARE_NAMES)
+    tort_name = scene.rng.choice(char_pools.TORTOISE_NAMES)
+    hare_gender = scene.rng.choice(("m", "f"))
+    tort_gender = scene.rng.choice(("m", "f"))
+    hare = _make_char(hare_name, "hare", hare_gender, ("racer", "fast"))
+    tortoise = _make_char(tort_name, "tortoise", tort_gender,
+                          ("plodder", "slow"))
     return hare, tortoise
 
 
@@ -299,16 +495,20 @@ CP_EMO_PATIENT = (
     "dropping each stone with careful attention",
     "steady in the stone-by-stone approach",
     "unbothered by the slow progress",
-    "trusting the process, stone after stone",
-    "unhurried, form after form",
+    "trusting the stone-by-stone process",
+    "unhurried with form after form",
+    "patient as the water rose",
+    "letting the count rise on its own",
+    "watching the level lift",
+    "deliberate and unhurried by the rising sun",
 )
 CP_EMO_PROUD = (
     "with a triumphant rattle of feathers",
     "head tilted confidently to one side",
     "ruffling up with certainty",
-    "clicking the beak in self-satisfaction",
+    "with a self-satisfied beak-click",
     "preening at the thought of knowing",
-    "cocking the head with certainty",
+    "with a confident tilt of the head",
 )
 
 
@@ -317,17 +517,21 @@ def _crows() -> tuple[ont.Character, ...]:
 
 
 def _pick_cp_chars(scene: Scene) -> tuple[ont.Character, ont.Character]:
-    """Pick a fresh (clever, hasty) crow pair for a crow-pitcher record.
+    """Pick a fresh (clever, hasty) crow pair from the 200+ expanded
+    crow name pool.
 
     `clever` is the patient evaluator (tortoise-analog): drops stones
     carefully, lets the REPL decide.
     `hasty` is the impatient guesser (hare-analog): wants the answer
     without submitting the form.
     """
-    pool = _crows()
-    clever = scene.rng.choice(pool)
-    hasty_pool = [c for c in pool if c.name != clever.name]
-    hasty = scene.rng.choice(hasty_pool)
+    names = scene.rng.sample(char_pools.CROW_NAMES, 2)
+    clever_gender = scene.rng.choice(("m", "f"))
+    hasty_gender  = scene.rng.choice(("m", "f"))
+    clever = _make_char(names[0], "crow", clever_gender,
+                        ("evaluator", "patient"))
+    hasty  = _make_char(names[1], "crow", hasty_gender,
+                        ("guesser", "impatient"))
     return clever, hasty
 
 
@@ -413,13 +617,22 @@ def _mm_farmers() -> tuple[ont.Character, ...]:
 
 
 def _pick_mm_chars(scene: Scene) -> tuple[ont.Character, ont.Character]:
-    """Pick a fresh (milkmaid, farmer) pair for a milkmaid record.
+    """Pick a fresh (milkmaid, farmer) pair from the 200+ expanded
+    human pools.
 
-    `milkmaid` is the dreamer/guesser (hare-analog).
-    `farmer` is the patient evaluator (tortoise-analog).
+    `milkmaid` is the dreamer/guesser (hare-analog) — young woman.
+    `farmer`   is the patient evaluator (tortoise-analog) — older,
+               m or f.
     """
-    milkmaid = scene.rng.choice(_mm_milkmaids())
-    farmer   = scene.rng.choice(_mm_farmers())
+    milkmaid_name = scene.rng.choice(char_pools.HUMAN_F)
+    farmer_pool = (char_pools.HUMAN_ELDER_M if scene.rng.random() < 0.6
+                   else char_pools.HUMAN_ELDER_F)
+    farmer_gender = "m" if farmer_pool is char_pools.HUMAN_ELDER_M else "f"
+    farmer_name = scene.rng.choice(farmer_pool)
+    milkmaid = _make_char(milkmaid_name, "human", "f",
+                          ("milkmaid", "dreamer"))
+    farmer   = _make_char(farmer_name, "human", farmer_gender,
+                          ("farmer", "evaluator"))
     return milkmaid, farmer
 
 
@@ -484,14 +697,25 @@ def _build_mm_placeholders(scene: Scene,
         "mapping":              example.mapping,
         "resolution":           example.resolution,
 
-        # emotions (use existing gender-neutral pools where available)
-        "emo_proud":            scene.rng.choice(EMO_PROUD),
-        "emo_patient":          scene.rng.choice(EMO_PATIENT),
-        "emo_tired":            scene.rng.choice(EMO_TIRED),
-        "emo_content":          scene.rng.choice(EMO_CONTENT),
-        "emo_regretful":        scene.rng.choice(EMO_REGRETFUL),
-        "emo_hungry":           scene.rng.choice(EMO_HUNGRY),
+        # Emotions — milkmaid Cat-J lift draws from the integration
+        # branch's emotion_pools (≥30 entries each, environment-anchored)
+        # rather than the legacy 6-entry fables pools. This gives the
+        # subplot prose access to phrases like "with eyes always on the
+        # path" / "checking the path before setting her foot" that map
+        # the milkmaid's emotional state to the algorithmic situation.
+        # Polarity-aware: milkmaid is the daydreamer/guesser (boastful
+        # / regretful when the pail tips); farmer is the patient
+        # evaluator (patient / cautious).
+        "emo_proud":            scene.rng.choice(emo_pools.EMO_PROUD),
+        "emo_patient":          scene.rng.choice(emo_pools.EMO_PATIENT),
+        "emo_tired":            scene.rng.choice(emo_pools.EMO_TIRED),
+        "emo_content":          scene.rng.choice(emo_pools.EMO_CONTENT),
+        "emo_regretful":        scene.rng.choice(emo_pools.EMO_REGRETFUL),
+        "emo_hungry":           scene.rng.choice(emo_pools.EMO_HUNGRY),
         "emo_greedy":           scene.rng.choice(GE_EMO_GREEDY),
+        "emo_boastful":         scene.rng.choice(emo_pools.EMO_BOASTFUL),
+        "emo_cautious":         scene.rng.choice(emo_pools.EMO_CAUTIOUS),
+        "emo_desperate":        scene.rng.choice(emo_pools.EMO_DESPERATE),
     }
 
 
@@ -514,10 +738,13 @@ def _pick_ds_chars(scene: Scene) -> tuple[ont.Character, ont.Character]:
     hasty, greedy one who drops the real bone chasing a reflection
     (hare-analog).
     """
-    pool = _dogs()
-    hound = scene.rng.choice(pool)
-    dog_pool = [c for c in pool if c.name != hound.name]
-    dog = scene.rng.choice(dog_pool)
+    names = scene.rng.sample(char_pools.DOG_NAMES, 2)
+    hound_gender = scene.rng.choice(("m", "f"))
+    dog_gender   = scene.rng.choice(("m", "f"))
+    hound = _make_char(names[0], "dog", hound_gender,
+                       ("evaluator", "patient"))
+    dog   = _make_char(names[1], "dog", dog_gender,
+                       ("greedy", "hasty"))
     return hound, dog
 
 
@@ -583,13 +810,25 @@ def _build_ds_placeholders(scene: Scene,
         "mapping":           example.mapping,
         "resolution":        example.resolution,
 
-        # emotions — pronoun-neutral pools
-        "emo_proud":         scene.rng.choice(EMO_PROUD),
-        "emo_patient":       scene.rng.choice(EMO_PATIENT),
-        "emo_tired":         scene.rng.choice(EMO_TIRED),
-        "emo_greedy":        scene.rng.choice(GE_EMO_GREEDY),
-        "emo_content":       scene.rng.choice(GE_EMO_CONTENT),
-        "emo_regretful":     scene.rng.choice(GE_EMO_REGRETFUL),
+        # Emotions — dog-shadow Cat-J lift (slice QVez) draws from the
+        # integration branch's emotion_pools (≥30 entries each,
+        # environment-anchored) rather than the 6-entry legacy
+        # fables pools. This widens LOW_GROUNDING coverage across
+        # all dog-shadow records and adds the polarity-aligned
+        # placeholders the templates need: hound (patient evaluator)
+        # → emo_patient/emo_cautious/emo_content; dog (greedy/hasty)
+        # → emo_greedy/emo_boastful/emo_desperate.
+        "emo_proud":         scene.rng.choice(emo_pools.EMO_PROUD),
+        "emo_patient":       scene.rng.choice(emo_pools.EMO_PATIENT),
+        "emo_tired":         scene.rng.choice(emo_pools.EMO_TIRED),
+        "emo_greedy":        scene.rng.choice(emo_pools.EMO_GREEDY),
+        "emo_content":       scene.rng.choice(emo_pools.EMO_CONTENT),
+        "emo_regretful":     scene.rng.choice(emo_pools.EMO_REGRETFUL),
+        "emo_boastful":      scene.rng.choice(emo_pools.EMO_BOASTFUL),
+        "emo_cautious":      scene.rng.choice(emo_pools.EMO_CAUTIOUS),
+        "emo_desperate":     scene.rng.choice(emo_pools.EMO_DESPERATE),
+        "emo_hungry":        scene.rng.choice(emo_pools.EMO_HUNGRY),
+        "emo_suspicious":    scene.rng.choice(emo_pools.EMO_SUSPICIOUS),
     }
 
 
@@ -660,12 +899,26 @@ BOY_WOLF_LOCATIONS = ("meadow", "forest", "hilltop", "village", "farm",
 
 
 def _pick_bw_chars(scene: Scene) -> tuple[ont.Character, ont.Character]:
-    """Pick a fresh (shepherd, elder) pair for a boy-wolf record."""
-    shepherd = scene.rng.choice(_shepherds())
-    # Avoid name collision (different name pools, but defensive guard
-    # in case the ontology grows).
-    cands = [c for c in _bw_villagers() if c.name != shepherd.name]
-    elder = scene.rng.choice(cands)
+    """Pick a fresh (shepherd, elder) pair from the 200+ expanded
+    human pools.
+
+    `shepherd` is the boy/young-shepherd (hare-analog dreamer).
+    `elder`    is the village elder (tortoise-analog evaluator).
+    """
+    shepherd_gender = scene.rng.choice(("m", "f"))
+    shepherd_pool = (char_pools.HUMAN_M if shepherd_gender == "m"
+                     else char_pools.HUMAN_F)
+    shepherd_name = scene.rng.choice(shepherd_pool)
+    elder_gender = scene.rng.choice(("m", "f"))
+    elder_pool = (char_pools.HUMAN_ELDER_M if elder_gender == "m"
+                  else char_pools.HUMAN_ELDER_F)
+    elder_name = scene.rng.choice(elder_pool)
+    while elder_name == shepherd_name:
+        elder_name = scene.rng.choice(elder_pool)
+    shepherd = _make_char(shepherd_name, "human", shepherd_gender,
+                          ("shepherd", "dreamer"))
+    elder    = _make_char(elder_name, "human", elder_gender,
+                          ("elder", "evaluator"))
     return shepherd, elder
 
 
@@ -798,6 +1051,31 @@ def _build_placeholders(scene: Scene,
             "emo_regretful":   scene.rng.choice(BW_EMO_REGRETFUL),
             "emo_desperate":   scene.rng.choice(BW_EMO_DESPERATE),
         })
+        # Fix-set 2 (ju2R): when goal_text is empty (atom subjects),
+        # avoid the EMPTY_GOAL_RENDERED bug where templates like
+        # "To {goal_text}, X composed Y" render as "To , X composed Y".
+        # Substitute a type-generic fallback that keeps the prefix
+        # well-formed without leaking the form's literals (FORM_LEAK).
+        if not (example.goal_text or "").strip():
+            f = (example.form or "").strip()
+            if not f.startswith("("):
+                base["goal_text"] = "evaluate the literal"
+            else:
+                head = f[1:].split(None, 1)[0] if len(f) > 1 else ""
+                if head in {"=", "not=", "<", ">", "<=", ">=",
+                             "zero?", "pos?", "neg?", "nil?", "true?",
+                             "false?", "symbol?", "keyword?", "string?",
+                             "number?", "boolean?", "vector?", "list?",
+                             "map?", "set?", "seq?", "coll?",
+                             "even?", "odd?", "empty?", "some?", "any?",
+                             "every?", "contains?", "instance?"}:
+                    base["goal_text"] = "evaluate the predicate"
+                elif head in {"and", "or", "not"}:
+                    base["goal_text"] = "evaluate the boolean form"
+                elif head in {"if", "when", "cond", "case"}:
+                    base["goal_text"] = "evaluate the conditional form"
+                else:
+                    base["goal_text"] = "evaluate the form"
 
     return base
 
@@ -880,16 +1158,142 @@ def _build_ge_placeholders(scene: Scene,
     }
 
 
-def _render_question(scene: Scene, example: SubjectExample) -> str:
+def _render_question(scene: Scene, example: SubjectExample,
+                     question_what: str | None = None) -> str:
     """The closing line of the user_msg. Always asks the student to
-    write a Clojure expression that produces the answer."""
+    write a Clojure expression that produces the answer.
+
+    If question_what already ends with ``?`` (often because the author
+    references a predicate by name — ``contains?`` / ``empty?`` /
+    ``zero?``), strip the trailing ``?`` before appending framing
+    punctuation. Otherwise the rendered text reads ``... using
+    contains?? Submit ...`` (PREDICATE_QUESTION_COLLISION).
+    """
+    qw = question_what if question_what is not None else example.question_what
+    # Strip trailing ``?`` so the framing's own ``?`` or ``.`` doesn't
+    # collide with the predicate-name suffix.
+    qw = qw.rstrip().rstrip('?').rstrip()
     framings = (
-        f"Write a Clojure expression that computes {example.question_what}.",
-        f"Write a form whose evaluation gives {example.question_what}.",
-        f"What Clojure form computes {example.question_what}? Submit it via `eval`.",
-        f"Question: write a Clojure expression for {example.question_what}.",
+        f"Write a Clojure expression that computes {qw}.",
+        f"Write a form whose evaluation gives {qw}.",
+        f"What Clojure form computes {qw}? Submit it via `eval`.",
+        f"Question: write a Clojure expression for {qw}.",
     )
     return scene.rng.choice(framings)
+
+
+# ─────────────────────── parametric draw + verify ───────────────────────
+
+
+class VerifierMismatch(Exception):
+    """Raised when a parametric draw's evaluator answer doesn't match
+    the schema's expected_fn(draws). Indicates either a buggy
+    expected_fn or a form_template / pool combination that the
+    evaluator can't handle."""
+
+
+def _draw_and_verify(example: SubjectExample,
+                     scene: Scene,
+                     max_rerolls: int = 8) -> tuple[str, object, dict]:
+    """Render the parametric form, evaluate it, and confirm the answer
+    matches expected_fn(draws). Returns (form_str, expected, draws).
+
+    Re-rolls up to `max_rerolls` times on transient ConstraintFailure
+    (predicate couldn't fire); raises VerifierMismatch on a true
+    answer mismatch.
+    """
+    from mmllm.aesop.curriculum.scalar_pools import (
+        render_form, ConstraintFailure,
+    )
+    from mmllm.aesop.curriculum.form_parser import parse
+    from mmllm.aesop.expr import evaluate
+
+    last_err = None
+    for attempt in range(max_rerolls):
+        try:
+            form_str, draws = render_form(
+                example.form_template, example.slots, scene.rng)
+        except ConstraintFailure as e:
+            last_err = e
+            continue
+        try:
+            ast = parse(form_str)
+            got = evaluate(ast)
+        except Exception as e:
+            raise VerifierMismatch(
+                f"parse/eval failure on {form_str!r}: {e}") from e
+        want = example.expected_fn(draws)
+        if got != want:
+            # Try a tolerant compare for keyword/list normalization.
+            from mmllm.aesop.expr import _eval_v  # noqa: F401
+            if _values_equal(got, want):
+                return form_str, want, draws
+            raise VerifierMismatch(
+                f"answer mismatch on {form_str!r}: "
+                f"got {got!r}, want {want!r} (draws={draws!r})")
+        return form_str, want, draws
+    raise VerifierMismatch(
+        f"could not satisfy slot constraints in {max_rerolls} re-rolls: "
+        f"last_err={last_err!r}")
+
+
+def _values_equal(a, b) -> bool:
+    """Tolerant equality for evaluator outputs vs author intent.
+    Normalizes keyword sentinels and dict key types."""
+    if isinstance(a, str) and a.startswith(":"):
+        a = ("__kw__", a[1:])
+    if isinstance(b, str) and b.startswith(":"):
+        b = ("__kw__", b[1:])
+    if isinstance(a, list) and isinstance(b, list):
+        return (len(a) == len(b)
+                and all(_values_equal(x, y) for x, y in zip(a, b)))
+    if isinstance(a, dict) and isinstance(b, dict):
+        if set(_norm_key(k) for k in a) != set(_norm_key(k) for k in b):
+            return False
+        an = {_norm_key(k): v for k, v in a.items()}
+        bn = {_norm_key(k): v for k, v in b.items()}
+        return all(_values_equal(an[k], bn[k]) for k in an)
+    return a == b
+
+
+def _norm_key(k):
+    if isinstance(k, str) and k.startswith(":"):
+        return ("__kw__", k[1:])
+    return k
+
+
+def _interpolate_drawn(text: str, draws: dict) -> str:
+    """Substitute `{drawn.<slot>}` tokens in narrative text with prose
+    renderings of drawn values. Other `{...}` placeholders are left
+    intact for the subplot template's own format pass."""
+    if not text or "{drawn." not in text:
+        return text
+    from mmllm.aesop.curriculum.scalar_pools import POOLS, Slot
+    out = text
+    for sname, value in draws.items():
+        token = "{drawn." + sname + "}"
+        if token not in out:
+            continue
+        # Use prose rendering. Pool name resolution: we don't have the
+        # slot here directly, so fall back to str() if value is a
+        # primitive. For collections, render English.
+        if isinstance(value, list):
+            if len(value) == 0:    s = "an empty list"
+            elif len(value) == 1:  s = str(value[0])
+            elif len(value) == 2:  s = f"{value[0]} and {value[1]}"
+            else:
+                s = ", ".join(str(v) for v in value[:-1]) + f", and {value[-1]}"
+        elif isinstance(value, str) and value.startswith(":"):
+            s = value[1:]
+        elif isinstance(value, tuple) and len(value) == 2 and value[0] == "__kw__":
+            s = value[1]
+        elif isinstance(value, tuple) and len(value) == 2 and value[1] != 0:
+            # Ratio
+            s = f"{value[0]}/{value[1]}"
+        else:
+            s = str(value)
+        out = out.replace(token, s)
+    return out
 
 
 # ─────────────────────── generator ───────────────────────
@@ -911,9 +1315,11 @@ def generate_one_record(scene: Scene,
     # dict for its templates. The default branch (tortoise-hare and any
     # fable that maps cleanly onto a two-character cast) uses the
     # standard `_build_placeholders` with a `fable=` parameter.
+    primary = secondary = None
     if sub.fable == "goose-eggs":
         owner, visitor, goose = _pick_ge_chars(scene)
         location = _pick_ge_location(scene)
+        primary, secondary = owner, visitor
         placeholders_fn = lambda ex: _build_ge_placeholders(
             scene, owner, visitor, goose, location, ex)
     elif sub.fable == "ant-grasshopper":
@@ -924,11 +1330,13 @@ def generate_one_record(scene: Scene,
     elif sub.fable == "crow-pitcher":
         clever, hasty = _pick_cp_chars(scene)
         location = _pick_cp_location(scene)
+        primary, secondary = clever, hasty
         placeholders_fn = lambda ex: _build_cp_placeholders(
             scene, clever, hasty, location, ex)
     elif sub.fable == "milkmaid":
         milkmaid, farmer = _pick_mm_chars(scene)
         location = _pick_mm_location(scene)
+        primary, secondary = milkmaid, farmer
         placeholders_fn = lambda ex: _build_mm_placeholders(
             scene, milkmaid, farmer, location, ex)
     elif sub.fable == "boy-wolf":
@@ -939,16 +1347,18 @@ def generate_one_record(scene: Scene,
     elif sub.fable == "dog-shadow":
         hound, dog = _pick_ds_chars(scene)
         location = _pick_ds_location(scene)
+        primary, secondary = hound, dog
         placeholders_fn = lambda ex: _build_ds_placeholders(
             scene, hound, dog, location, ex)
     else:
         # tortoise-hare default
         hare, tortoise = _pick_th_chars(scene)
         location = _pick_th_location(scene)
+        primary, secondary = hare, tortoise
         placeholders_fn = lambda ex: _build_placeholders(
             scene, hare, tortoise, location, ex)
 
-    intro = _aesopian_intro(scene, sub.fable, location)
+    intro = _curriculum_intro(scene, sub.fable, location, primary, secondary)
 
     # Filter subplots by tags if example has tags
     candidate_subplots = sub.subplots
@@ -961,18 +1371,53 @@ def generate_one_record(scene: Scene,
     weights = [s.weight for s in candidate_subplots]
     subplot = scene.rng.choices(candidate_subplots, weights=weights)[0]
 
-    placeholders = placeholders_fn(example)
+    # Parametric draw + verify (when example has form_template).
+    # This produces a fresh (form, expected, draws) triple per record;
+    # legacy examples without a template fall through to static
+    # form/expected from authoring time.
+    if example.form_template:
+        rendered_form, rendered_expected, draws = _draw_and_verify(
+            example, scene)
+    else:
+        rendered_form     = example.form
+        rendered_expected = example.expected
+        draws             = {}
+
+    # Build placeholders. We pass a "slot-aware" example so subplot
+    # templates that reference {form_display}, {concept_phrase},
+    # {goal_text}, scenario/need/mapping/resolution see the
+    # drawn-value-interpolated versions.
+    if draws:
+        slot_example = _example_with_draws(example, rendered_form,
+                                           rendered_expected, draws)
+    else:
+        slot_example = example
+    placeholders = placeholders_fn(slot_example)
     body = subplot.template.format(**placeholders).strip()
-    question = _render_question(scene, example)
+    question_what = _interpolate_drawn(slot_example.question_what, draws)
+    question = _render_question(scene, slot_example, question_what)
 
     user_msg = f"{intro}{body}\n\n{question}"
 
     # Eval-first tool call: form is the Clojure source the model produces.
-    calls    = build_tool_calls(value=example.expected,
-                                form_str=example.form,
+    calls    = build_tool_calls(value=rendered_expected,
+                                form_str=rendered_form,
                                 prefer_eval=True)
     sys_msg  = system_prompt(use_eval=True)
-    plan     = scene.rng.choice(sub.plan_pool) if sub.plan_pool else ""
+    # Plan pool: prefer the expanded 30-entry per-fable pool over the
+    # subject's own plan_pool (which is 4-6 entries). The subject's
+    # plan_pool, if set, gets folded in as additional candidates.
+    expanded_plans = _FABLE_PLAN_POOL.get(sub.fable, ())
+    plan_candidates = list(expanded_plans) + list(sub.plan_pool or ())
+    plan = scene.rng.choice(plan_candidates) if plan_candidates else ""
+    if "{primary}" in plan or "{secondary}" in plan:
+        try:
+            plan = plan.format(
+                primary=primary.name if primary else "",
+                secondary=secondary.name if secondary else "")
+        except (KeyError, AttributeError):
+            pass
+    plan = _interpolate_drawn(plan, draws) if draws else plan
     preface  = resolve_preface(scene, plan)
     asst     = assemble_assistant_msg(
         preface=preface,
@@ -983,11 +1428,39 @@ def generate_one_record(scene: Scene,
         user_msg=user_msg,
         assistant_msg=asst,
         tool_calls=calls,
-        expected=example.expected,
-        code_str=example.form,
+        expected=rendered_expected,
+        code_str=rendered_form,
         fable=sub.fable,
         chapter=sub.subject_id,
         catalog=ANSWER_AND_EVAL,
+    )
+
+
+def _example_with_draws(ex: SubjectExample,
+                        form_str: str,
+                        expected: object,
+                        draws: dict) -> SubjectExample:
+    """Return a shallow copy of `ex` with form/expected replaced by
+    the rendered values, and concept_phrase / question_what /
+    goal_text / scenario / need / mapping / resolution all
+    drawn-value-interpolated."""
+    return SubjectExample(
+        form           = form_str,
+        expected       = expected,
+        concept_phrase = _interpolate_drawn(ex.concept_phrase, draws),
+        question_what  = _interpolate_drawn(ex.question_what,  draws),
+        goal_text      = _interpolate_drawn(ex.goal_text,      draws),
+        scenario       = _interpolate_drawn(ex.scenario,       draws),
+        need           = _interpolate_drawn(ex.need,           draws),
+        mapping        = _interpolate_drawn(ex.mapping,        draws),
+        resolution     = _interpolate_drawn(ex.resolution,     draws),
+        tags           = ex.tags,
+        # Keep template fields in case the rest of the pipeline
+        # introspects them, but they're not used post-draw.
+        form_template  = ex.form_template,
+        slots          = ex.slots,
+        expected_fn    = ex.expected_fn,
+        bb_verify      = ex.bb_verify,
     )
 
 

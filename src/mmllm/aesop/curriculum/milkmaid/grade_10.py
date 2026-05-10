@@ -30,7 +30,7 @@ _MACRO_SUBPLOTS: list[SubplotTemplate] = list(_GOAL_SUBPLOTS) + [
     SubplotTemplate("""\
 {farmer_phrase} had spent the morning {place} sketching a tiny
 language of {farmer_his_her} own — a notebook of macros that wrote
-other forms. The next entry was {concept_phrase}. {milkmaid_phrase} wanted to
+other forms. The next entry was {concept_phrase}. {milkmaid_phrase}, {emo_boastful} wanted to
 {goal_text}. {farmer} asked {milkmaid_him_her} to write the form carefully
 and submit it so the REPL could show what code it produced or what value it returned."""),
 
@@ -43,7 +43,7 @@ and read what the runtime reported, expansion or value."""),
 
     SubplotTemplate("""\
 The path {place} was littered with old macro definitions someone had
-carved into bark. {milkmaid_phrase} found one shaped like
+carved into bark. {milkmaid_phrase}, {emo_boastful} found one shaped like
 {concept_phrase} and dared {farmer_phrase} to write the form that could {goal_text}.
 {farmer} only smiled and asked {milkmaid_him_her} to submit it carefully
 into the REPL — that, after all, was the whole point of having a
@@ -52,7 +52,7 @@ macroexpander."""),
     SubplotTemplate("""\
 {milkmaid_phrase} insisted {place} that macros were the same as functions.
 {farmer_phrase}, {emo_patient}, sketched {concept_phrase} on a
-strip of bark. "The difference," {farmer_he_she} said, "is in what
+strip of bark. "The difference," {farmer_he_she_cap} said, "is in what
 we're trying to accomplish: {goal_text}. Write the form and let the
 runtime tell us exactly what it does.\""""),
 
@@ -64,7 +64,7 @@ agreed to write the form to settle once and for all what it produced."""),
 
     SubplotTemplate("""\
 At a stone tablet {place}, {farmer_phrase} was teaching
-{milkmaid_phrase} the discipline of expansion: never trust your eyes, only
+{milkmaid_phrase}, {emo_boastful} the discipline of expansion: never trust your eyes, only
 the macroexpander. The day's challenge was simple: {goal_text}. The
 form that accomplishes {concept_phrase} had to be submitted; nothing
 else would do."""),
@@ -116,17 +116,16 @@ G10_01 = SubjectCurriculum(
                 "the value. The mark and the milk are never the same thing."
             ),
             resolution=(
-                "The REPL handed back the chalk mark itself — a list of the symbol "
-                "and its two arguments, with no arithmetic performed."
+                'The REPL handed back the chalk mark itself — a list of the symbol and its two arguments, with no arithmetic performed (with `1` as the input value).'
             ),
             tags=("story",),
         ),
         SubjectExample(
             form="'(1 2 3)",
             expected=[1, 2, 3],
-            concept_phrase="the quoted list with three numbers",
+            concept_phrase="the quoted list with several numbers",
             question_what="the result of quoting a three-element list",
-            goal_text="quote a list of three numbers so it returns the form itself",
+            goal_text="quote a list of several numbers so it returns the form itself",
             scenario=(
                 "Three tally-marks were chalked on the dairy wall beside three pails. "
                 "The milkmaid read the marks aloud but never lifted a lid. The farmer "
@@ -144,7 +143,7 @@ G10_01 = SubjectCurriculum(
             ),
             resolution=(
                 "The REPL returned the three marks exactly as written, a sealed "
-                "list with no pail opened and no value computed."
+                "list with no pail opened and no value computed — 3."
             ),
             tags=("story",),
         ),
@@ -172,7 +171,7 @@ G10_01 = SubjectCurriculum(
             resolution=(
                 "The REPL filled the template: the two chalk marks stayed as "
                 "symbols and the hole received the value bound to `x`, returning "
-                "a three-element list."
+                "a three-element list — 5."
             ),
             tags=("story",),
         ),
@@ -212,7 +211,7 @@ G10_02 = SubjectCurriculum(
             resolution=(
                 "The REPL returned the completed template — the addition mark "
                 "followed by the poured value appearing twice, exactly as the "
-                "two holes had been filled."
+                "two holes had been filled — 10."
             ),
             tags=("story",),
         ),
@@ -242,7 +241,7 @@ G10_02 = SubjectCurriculum(
             ),
             resolution=(
                 "The REPL returned the expanded template — the list label followed "
-                "by each of the three elements laid out individually, exactly as "
+                "by each of the several elements laid out individually, exactly as "
                 "the splice had poured them in."
             ),
             tags=("story",),
@@ -282,7 +281,7 @@ G10_03 = SubjectCurriculum(
                 "never `my-when`."
             ),
             resolution=(
-                "the REPL evaluated the expanded form and returned the last body "
+                "The REPL evaluated the expanded form and returned the last body "
                 "expression — the rewrite had run silently before the runtime "
                 "arrived, and the result came back cleanly."
             ),
@@ -420,9 +419,7 @@ G10_05 = SubjectCurriculum(
                 "is blank of shorthands by the time the runtime arrives."
             ),
             resolution=(
-                "The REPL returned the fully expanded form — the `if` "
-                "with its `do` body, with no macro shorthand remaining "
-                "for the runtime to intercept."
+                'The REPL returned the fully expanded form — the `if` with its `do` body, with no macro shorthand remaining for the runtime to intercept (with `1` as the input value).'
             ),
             tags=("story",),
         ),
@@ -495,7 +492,7 @@ G10_06 = SubjectCurriculum(
             resolution=(
                 "The REPL evaluated the expanded form and returned the "
                 "value of the final body expression — the rewrite had "
-                "already happened silently before evaluation began."
+                "already happened silently before evaluation began — 3."
             ),
             tags=("story",),
         ),
@@ -526,7 +523,7 @@ G10_06 = SubjectCurriculum(
             resolution=(
                 "The REPL returned the absent value — the form had "
                 "expanded to a dead branch, and the runtime confirmed "
-                "that nothing was computed."
+                "that nothing was computed — 3."
             ),
             tags=("story",),
         ),
@@ -553,7 +550,7 @@ G10_06 = SubjectCurriculum(
             ),
             resolution=(
                 "The REPL returned the keyword from the body — the inverted "
-                "guard had opened the branch exactly as the rewrite directed."
+                "guard had opened the branch exactly as the rewrite directed — :ok."
             ),
             tags=("story",),
         ),
@@ -595,7 +592,7 @@ G10_07 = SubjectCurriculum(
             resolution=(
                 "The REPL returned the final measure after all three "
                 "steps had poured forward — the pail-steps card had "
-                "composed the recipe exactly as written."
+                "composed the recipe exactly as written — 5."
             ),
             tags=("story",),
         ),
@@ -626,7 +623,7 @@ G10_07 = SubjectCurriculum(
             resolution=(
                 "The REPL returned the single reduced measure — the "
                 "pail-steps card had filtered, mapped, and folded the "
-                "collection exactly as the three steps described."
+                "collection exactly as the three steps described — 4."
             ),
             tags=("story",),
         ),
@@ -699,7 +696,7 @@ G10_08 = SubjectCurriculum(
             resolution=(
                 "The REPL returned the sum — the function had received "
                 "the two evaluated measures and poured them together "
-                "exactly as the recipe card described."
+                "exactly as the recipe card described — 4."
             ),
             tags=("story",),
         ),
@@ -731,7 +728,7 @@ G10_08 = SubjectCurriculum(
                 "The REPL evaluated the expanded addition form and "
                 "returned the same sum — the rewrite had happened "
                 "silently before evaluation, leaving only the plain "
-                "arithmetic for the runtime."
+                "arithmetic for the runtime — 4."
             ),
             tags=("story",),
         ),
@@ -803,9 +800,7 @@ G10_09 = SubjectCurriculum(
                 "the full marks and finds them unequal."
             ),
             resolution=(
-                "The REPL returned the inequality verdict — the two "
-                "fresh marks were not identical, confirming that each "
-                "stamp press produced a genuinely distinct label."
+                'The REPL returned the inequality verdict — the two fresh marks were not identical, confirming that each stamp press produced a genuinely distinct label (with `x_` as the input value).'
             ),
             tags=("story",),
         ),
@@ -849,9 +844,7 @@ G10_10 = SubjectCurriculum(
                 "and safe. No surprise label appears in the rewrite."
             ),
             resolution=(
-                "The REPL evaluated the expanded `if-let` form and "
-                "returned the value from the then-branch — the hygienic "
-                "rewrite had passed the binding through cleanly."
+                'The REPL evaluated the expanded `if-let` form and returned the value from the then-branch — the hygienic rewrite had passed the binding through cleanly (with `5` as the input value).'
             ),
             tags=("story",),
         ),
@@ -882,7 +875,7 @@ G10_10 = SubjectCurriculum(
             resolution=(
                 "The REPL evaluated the then-branch after the binding "
                 "succeeded and returned the product — the explicit name "
-                "had been available throughout without any shadowing."
+                "had been available throughout without any shadowing — 7."
             ),
             tags=("story",),
         ),
@@ -903,7 +896,7 @@ G10_11 = SubjectCurriculum(
             expected=[1, 2, 3],
             concept_phrase="using the quote reader macro",
             question_what="the form read by the quote reader",
-            goal_text="use the quote reader macro to read a list of three numbers",
+            goal_text="use the quote reader macro to read a list of several numbers",
             scenario=(
                 "The scribe had chalked an apostrophe mark on the dairy "
                 "wall before a row of tally numbers. The milkmaid asked "
@@ -920,9 +913,9 @@ G10_11 = SubjectCurriculum(
                 "The runtime receives a sealed list, never the shorthand."
             ),
             resolution=(
-                "The REPL returned the three numbers as a sealed list — the "
+                "The REPL returned the several numbers as a sealed list — the "
                 "reader had expanded the mark and the runtime handed the "
-                "data back unevaluated."
+                "data back unevaluated — 3."
             ),
             tags=("story",),
         ),
@@ -953,7 +946,7 @@ G10_11 = SubjectCurriculum(
             resolution=(
                 "The REPL called the generated function with the argument "
                 "and returned the squared result — the reader's expansion "
-                "had produced a working recipe card before evaluation."
+                "had produced a working recipe card before evaluation — 6."
             ),
             tags=("story",),
         ),
@@ -983,7 +976,7 @@ G10_11 = SubjectCurriculum(
             ),
             resolution=(
                 "The REPL returned the vector with only two elements — "
-                "the middle tally had been struck before the runtime "
+                "the middle tally had been struck before the runtime — 3. "
                 "arrived, exactly as the scribe's discard mark directed."
             ),
             tags=("story",),
@@ -1025,9 +1018,7 @@ G10_12 = SubjectCurriculum(
                 "label tells the reader how to transform the raw string."
             ),
             resolution=(
-                "The REPL confirmed the predicate's verdict — the reader "
-                "had produced a genuine instant from the tagged string, "
-                "and the type check returned the affirmative."
+                "The REPL confirmed the predicate's verdict — the reader had produced a genuine instant from the tagged string, and the type check returned the affirmative (with `2024-01-01` as the input value)."
             ),
             tags=("story",),
         ),
@@ -1056,9 +1047,7 @@ G10_12 = SubjectCurriculum(
                 "determines how the raw text is transformed."
             ),
             resolution=(
-                "The REPL confirmed the predicate's verdict — the reader "
-                "had built a proper uuid from the tagged string, and "
-                "the type check returned the affirmative."
+                "The REPL confirmed the predicate's verdict — the reader had built a proper uuid from the tagged string, and the type check returned the affirmative (with `00000000-0000-0000-0000-000000000000` as the input value)."
             ),
             tags=("story",),
         ),
@@ -1099,9 +1088,7 @@ G10_13 = SubjectCurriculum(
                 "runtime, turning the written mark into live data."
             ),
             resolution=(
-                "The REPL returned the parsed number — the scribe's "
-                "reader had converted the textual tally mark into a "
-                "typed integer the runtime could use directly."
+                "The REPL returned the parsed number — the scribe's reader had converted the textual tally mark into a typed integer the runtime could use directly (with `42` as the input value)."
             ),
             tags=("story",),
         ),
@@ -1130,9 +1117,7 @@ G10_13 = SubjectCurriculum(
                 "the written marks into live typed data."
             ),
             resolution=(
-                "The REPL returned the parsed vector of keywords — the "
-                "scribe's reader had converted the textual bracket marks "
-                "into structured data the runtime could work with."
+                "The REPL returned the parsed vector of keywords — the scribe's reader had converted the textual bracket marks into structured data the runtime could work with (with `:a` as the input value)."
             ),
             tags=("story",),
         ),
@@ -1174,7 +1159,7 @@ G10_14 = SubjectCurriculum(
             resolution=(
                 "The REPL evaluated the unsealed form and returned the "
                 "computed sum — the chalk mark had been treated as a "
-                "live addition, with the pail finally opened."
+                "live addition, with the pail finally opened — 3."
             ),
             tags=("story",),
         ),
@@ -1205,7 +1190,7 @@ G10_14 = SubjectCurriculum(
             resolution=(
                 "The REPL evaluated the dynamically assembled form and "
                 "returned the sum — the constructed chalk marks had been "
-                "treated as live code by the runtime opener."
+                "treated as live code by the runtime opener — 5."
             ),
             tags=("story",),
         ),
@@ -1248,9 +1233,7 @@ G10_15 = SubjectCurriculum(
                 "farmer's rewrite rule would be overkill."
             ),
             resolution=(
-                "The REPL evaluated the anonymous function call and "
-                "returned the sum — the plain recipe card had done "
-                "the job without any macro rewriting at all."
+                'The REPL evaluated the anonymous function call and returned the sum — the plain recipe card had done the job without any macro rewriting at all (with `3` as the input value).'
             ),
             tags=("story",),
         ),
@@ -1280,9 +1263,7 @@ G10_15 = SubjectCurriculum(
                 "the form shape needs no transformation."
             ),
             resolution=(
-                "The REPL returned the collection of incremented values "
-                "— the plain function had walked each element without "
-                "any macro expansion being needed."
+                'The REPL returned the collection of incremented values — the plain function had walked each element without any macro expansion being needed (with `1` as the input value) (with `3` as the input value).'
             ),
             tags=("story",),
         ),
@@ -1325,9 +1306,7 @@ G10_16 = SubjectCurriculum(
                 "and the body runs as if inside a prepared pail."
             ),
             resolution=(
-                "The REPL evaluated the expanded `let` block and "
-                "returned the body's final value — the context rewrite "
-                "had prepared the pail and the body ran cleanly inside."
+                "The REPL evaluated the expanded `let` block and returned the body's final value — the context rewrite had prepared the pail and the body ran cleanly inside (with `42` as the input value)."
             ),
             tags=("story",),
         ),
@@ -1358,9 +1337,7 @@ G10_16 = SubjectCurriculum(
                 "the binding on the market-board before evaluation."
             ),
             resolution=(
-                "The REPL evaluated the expanded `def` and then looked "
-                "up the posted name, returning the keyword value — the "
-                "market-board had been chalked by the rewrite rule."
+                'The REPL evaluated the expanded `def` and then looked up the posted name, returning the keyword value — the market-board had been chalked by the rewrite rule (with `slow` as the input value) (with `:slow` as the input value).'
             ),
             tags=("story",),
         ),

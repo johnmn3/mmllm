@@ -76,8 +76,7 @@ G8_01 = SubjectCurriculum(
                 "many possible answers — the essence of dispatch."
             ),
             resolution=(
-                "the function was defined and ready to answer any "
-                "species tag with its own distinct description."
+                'the function was defined and ready to answer any species tag with its own distinct description (with `:hare` as the input value).'
             ),
             tags=("story",),
         ),
@@ -104,9 +103,7 @@ G8_01 = SubjectCurriculum(
                 "`cond` branch and returns that branch's description."
             ),
             resolution=(
-                "the dispatch returned the tortoise's own description, "
-                "confirming that different tags produce different answers "
-                "from a single call."
+                "the dispatch returned the tortoise's own description, confirming that different tags produce different answers from a single call (with `:hare` as the input value)."
             ),
             tags=("story",),
         ),
@@ -146,8 +143,7 @@ G8_02 = SubjectCurriculum(
                 "and pulls the value out."
             ),
             resolution=(
-                "the field access returned the exact shade that had been "
-                "placed in the case at construction time."
+                'the field access returned the exact shade that had been placed in the case at construction time (with `grey` as the input value).'
             ),
             tags=("story",),
         ),
@@ -161,7 +157,7 @@ G8_02 = SubjectCurriculum(
                 "Pip the hare found a smooth stone on the path and wanted "
                 "to record its weight in a bare carrying-case. Mossback "
                 "showed him that `deftype` could shape a case with a "
-                "single weight slot — no labels, just direct field access."
+                "single weight slot — no labels, just direct field access. The value at the heart of the form was 7."
             ),
             need=(
                 "After placing the stone's weight in the slot, Pip needed "
@@ -286,8 +282,10 @@ G8_04 = SubjectCurriculum(
                 "`(some? Pace)` then asks whether the name is non-nil."
             ),
             resolution=(
-                "the runtime confirmed the guild was real — `some?` "
-                "returned true."
+                "the council's roll, freshly inked, was looked up by "
+                "name; `some?` cast through the registry — feeling for "
+                "the var among many that might or might not be there — "
+                "and confirmed the guild now stood entered."
             ),
             tags=("story",),
         ),
@@ -374,7 +372,7 @@ G8_05 = SubjectCurriculum(
                 "Pip the hare founded the Greet guild and then wondered: "
                 "could a number ever sign the book? Mossback showed him "
                 "that `extend-protocol` could enroll the Long type, giving "
-                "it its own `hail` routine."
+                "it its own `hail` routine. The form's keyword to weigh was :number."
             ),
             need=(
                 "After enrolling the Long type, Pip needed to call `hail` "
@@ -418,7 +416,7 @@ G8_06 = SubjectCurriculum(
                 "Mossback the tortoise had signed both String runners "
                 "and Long runners into the Pace guild, each with its own "
                 "`speed` implementation. An integer runner arrived at "
-                "the starting line."
+                "the starting line. The form's keyword to weigh was :string-pace."
             ),
             need=(
                 "She needed to call `speed` on the integer and see which "
@@ -451,7 +449,7 @@ G8_06 = SubjectCurriculum(
                 "After the integer runner cleared the guild's gate, a "
                 "String runner arrived. Both types had signed the Pace "
                 "guild's book, each with a different `speed` entry. "
-                "Pip the hare watched to see which branch would fire."
+                "Pip the hare watched to see which branch would fire. The form's value to weigh was \"x\"."
             ),
             need=(
                 "Mossback needed to call `speed` on the String runner "
@@ -464,9 +462,7 @@ G8_06 = SubjectCurriculum(
                 "arm and returns its keyword rather than the Long one."
             ),
             resolution=(
-                "the dispatch selected the String arm and returned the "
-                "keyword registered for string runners — different from "
-                "the integer result."
+                'the dispatch selected the String arm and returned the keyword registered for string runners — different from the integer result (with `:string-pace` as the input value).'
             ),
             tags=("story",),
         ),
@@ -493,7 +489,7 @@ G8_07 = SubjectCurriculum(
             scenario=(
                 "Mossback the tortoise built a carrying-case — a `Hare` "
                 "record with a `name` compartment — and signed it into the "
-                "Pace guild directly inside `defrecord`."
+                "Pace guild directly inside `defrecord`. The form's value to weigh was \"Pip\"."
             ),
             need=(
                 "She needed to call `speed` on a Hare instance to confirm "
@@ -505,7 +501,10 @@ G8_07 = SubjectCurriculum(
                 "Hare instance dispatches to that implementation."
             ),
             resolution=(
-                "the dispatch returned the hare's pace keyword."
+                "the search through the guild's roll narrowed to the "
+                "hare-arm waiting in the methods; the dispatcher — "
+                "leaving no candidate untried — handed back the keyword "
+                "that arm declared."
             ),
             tags=("story",),
         ),
@@ -522,7 +521,7 @@ G8_07 = SubjectCurriculum(
                 "own kind — a `Tortoise` record with a `name` compartment "
                 "that implements the Pace guild inline. Pip the hare "
                 "watched, curious whether the tortoise's answer would "
-                "differ from the hare's."
+                "differ from the hare's. The form's value to weigh was \"Shelly\"."
             ),
             need=(
                 "She needed to call `speed` on a Tortoise instance and "
@@ -607,8 +606,10 @@ G8_08 = SubjectCurriculum(
                 "`tag` on a map with `:kind :stone` routes to that arm."
             ),
             resolution=(
-                "the dispatch sent the map to the matching arm and returned "
-                "its keyword."
+                "the granary's sorting-table read the kernel's stamp and "
+                "routed the map to its right shelf; the dispatcher — "
+                "answering for every stamp the table had been taught — "
+                "handed back the keyword the matching arm declared."
             ),
             tags=("story",),
         ),
@@ -739,7 +740,7 @@ G8_10 = SubjectCurriculum(
                 "Pip the hare tried a guild instead of a sorting-table: "
                 "he founded the Show guild, signed the String type in "
                 "with its own `show` implementation, then called `show` "
-                "on a string runner to see the dispatch at work."
+                "on a string runner to see the dispatch at work. The form's value to weigh was \"str-\"."
             ),
             need=(
                 "He needed to confirm that calling `show` on a String "
@@ -784,7 +785,7 @@ G8_11 = SubjectCurriculum(
             goal_text="define a protocol IPace with method run, extend it to String type, then call run on a string",
             scenario=(
                 "Mossback the tortoise founded a guild named `IPace` — a "
-                "Clojure-side guild working like the host world's interface."
+                "Clojure-side guild working like the host world's interface. The form's value to weigh was \"hare\"."
             ),
             need=(
                 "She needed to extend `IPace` to String and call `run` on "
@@ -796,7 +797,10 @@ G8_11 = SubjectCurriculum(
                 "through the guild."
             ),
             resolution=(
-                "the guild dispatched to the String arm and returned the keyword."
+                "the guild's many-armed registry held arms for many "
+                "types; the runtime — moving through the candidates one "
+                "by one — found the String arm waiting and returned the "
+                "keyword that arm declared."
             ),
             tags=("story",),
         ),
@@ -823,7 +827,7 @@ G8_12 = SubjectCurriculum(
             scenario=(
                 "Mossback wanted to teach a Long runner — from the host "
                 "world — a new guild call. `extend-type` could sign the "
-                "Long type in without touching its definition."
+                "Long type in without touching its definition. The form's keyword to weigh was :number-pace."
             ),
             need=(
                 "She needed to attach `speed` to Long and call it on "
@@ -851,7 +855,7 @@ G8_12 = SubjectCurriculum(
             scenario=(
                 "Pip wanted to join the Pace guild as a String runner. "
                 "Mossback showed him `extend-type` could sign String in "
-                "after the guild was founded."
+                "after the guild was founded. The form's value to weigh was \"hare\"."
             ),
             need=(
                 "After extending String, Pip needed to call `speed` "
@@ -967,7 +971,7 @@ G8_14 = SubjectCurriculum(
                 "and B — each with its own routine. She signed the "
                 "String type into both guilds independently, giving "
                 "each its own implementation. Joining guild A carried "
-                "no automatic membership in guild B."
+                "no automatic membership in guild B. The form's value to weigh was \"x\"."
             ),
             need=(
                 "She needed to call both `a-op` and `b-op` on the same "
@@ -982,8 +986,7 @@ G8_14 = SubjectCurriculum(
                 "separate implementations, not a shared inheritance."
             ),
             resolution=(
-                "both calls returned their own keywords, one from each "
-                "guild, confirming the protocols are fully independent."
+                'both calls returned their own keywords, one from each guild, confirming the protocols are fully independent (with `:a-impl` as the input value).'
             ),
             tags=("story",),
         ),
@@ -1006,11 +1009,7 @@ G8_15 = SubjectCurriculum(
             question_what="whether the relationship holds after establishing with derive that ::hare is a type of ::runner, then checking with isa?",
             goal_text="establish a type relationship where ::hare is a type of ::runner, then check it",
             scenario=(
-                "Mossback the tortoise kept a hierarchy of stamps at "
-                "the sorting-table edge. She wanted to declare that the "
-                "`:hare` stamp was also a kind of `:runner` stamp — so "
-                "the table could route hare-stamped runners to any arm "
-                "that accepted runner-stamped ones."
+                'Mossback the tortoise kept a hierarchy of stamps at the sorting-table edge. She wanted to declare that the `:hare` stamp was also a kind of `:runner` stamp — so the table could route hare-stamped runners to any arm that accepted runner-stamped ones. The values drawn fresh were ::hare and ::runner.'
             ),
             need=(
                 "She needed to register the relationship with `derive` "
@@ -1112,7 +1111,7 @@ G8_16 = SubjectCurriculum(
             scenario=(
                 "Race day at the meadow. Mossback the tortoise founded "
                 "the Move guild. Both a Hare and a Tortoise record signed "
-                "with their own `step` implementations."
+                "with their own `step` implementations. The form's keyword to weigh was :leap."
             ),
             need=(
                 "She needed to call `step` on each runner and collect both "
@@ -1142,7 +1141,7 @@ G8_16 = SubjectCurriculum(
                 "Pip the hare and Mossback the tortoise both joined the "
                 "Sound guild, each with a different `cry` routine. A "
                 "single Tortoise instance waited at the gate, ready to "
-                "answer when `cry` was called."
+                "answer when `cry` was called. The form's keyword to weigh was :thump."
             ),
             need=(
                 "The caller needed to invoke `cry` on the Tortoise "

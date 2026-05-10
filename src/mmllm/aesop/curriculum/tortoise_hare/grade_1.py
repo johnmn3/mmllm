@@ -89,9 +89,9 @@ agreed to try."""),
     SubplotTemplate("""\
 A small audience of forest creatures had gathered {place} to watch
 {hare_phrase} attempt to outwit {tortoise_phrase} at reading the REPL.
-{tortoise} pointed to {concept_phrase} and read out the form aloud:
-{form_display}. The crowd waited to see who would correctly write
-the form to submit."""),
+{tortoise}, {emo_patient}, pointed to {concept_phrase} and read out the
+form aloud: {form_display}. The crowd waited to see who would correctly
+write the form to submit."""),
 
     # 5. The race-pause template — hare pauses mid-race, tortoise catches up
     #    via careful evaluation.
@@ -100,19 +100,19 @@ the form to submit."""),
     #    "They called it impossible." reads as plural-subject right after
     #    a singular "Pip the hare stopped" introduction.
     SubplotTemplate("""\
-Halfway through the race, {hare_phrase} stopped {place} and refused to
-continue until someone could prove what the form {form_display}
-evaluated to. {hare} called it impossible.
+Halfway through the race, {hare_phrase}, {emo_proud}, stopped {place}
+and refused to continue until someone could prove what the form
+{form_display} evaluated to. {hare} called it impossible.
 {tortoise_phrase}, walking up at her usual pace, simply said: "Submit
 {concept_phrase} to the REPL. Whatever comes back is the answer.\""""),
 
     # 6. The notebook template — the tortoise keeps a careful ledger.
     SubplotTemplate("""\
-{tortoise_phrase} had been keeping a small leather notebook of every
-form {tortoise_he_she} had successfully evaluated. {place_idx}, the
-next entry was {concept_phrase}. {hare_phrase} peered over
-{tortoise_his_her} shoulder at the form {form_display} and asked what
-it would come out to.""".replace("{place_idx}", "Today {place}")),
+{tortoise_phrase}, {emo_patient}, had been keeping a small leather
+notebook of every form {tortoise_he_she} had successfully evaluated.
+{place_idx}, the next entry was {concept_phrase}. {hare_phrase} peered
+over {tortoise_his_her} shoulder at the form {form_display} and asked
+what it would come out to.""".replace("{place_idx}", "Today {place}")),
 
     # 7. The boast-and-rebuke template — Hare claims to know without checking.
     #    NOTE: uses {hare_him_her} (object case) for "asked X to ..."; uses
@@ -198,28 +198,28 @@ writing it."""),
     SubplotTemplate("""\
 A small audience of forest creatures had gathered {place} to watch
 {hare_phrase} attempt to outwit {tortoise_phrase} at writing the
-right form. The challenge: {goal_text}. {tortoise} reminded the
-crowd that what mattered was writing {concept_phrase} carefully,
-then submitting it to the REPL — not guessing aloud at the
-answer."""),
+right form. The challenge: {goal_text}. {tortoise}, {emo_patient},
+reminded the crowd that what mattered was writing {concept_phrase}
+carefully, then submitting it to the REPL — not guessing aloud at
+the answer."""),
 
     # 5. The race-pause template — pause mid-race for a goal-write.
     #    Fix: drop "write a form to {goal_text}"; reframe as
     #    "until someone could {goal_text} with a Clojure form".
     SubplotTemplate("""\
-Halfway through the race, {hare_phrase} stopped {place} and refused
-to continue until someone could {goal_text} with a Clojure form.
-{hare} called the goal impossible. {tortoise_phrase}, walking up at
-{tortoise_his_her} usual pace, simply said: "Compose {concept_phrase};
-submit it. Whatever comes back is the answer.\""""),
+Halfway through the race, {hare_phrase}, {emo_proud}, stopped {place}
+and refused to continue until someone could {goal_text} with a Clojure
+form. {hare} called the goal impossible. {tortoise_phrase}, walking up
+at {tortoise_his_her} usual pace, simply said: "Compose
+{concept_phrase}; submit it. Whatever comes back is the answer.\""""),
 
     # 6. The notebook template — Tortoise records goal/form pairs.
     SubplotTemplate("""\
-{tortoise_phrase} kept a small leather notebook of every goal
-{tortoise_he_she} had translated into a Clojure form. Today {place},
-the next entry was a goal: {goal_text}. {tortoise} sat with pen in
-hand, ready to compose {concept_phrase}, then let the REPL
-confirm the value."""),
+{tortoise_phrase}, {emo_patient}, kept a small leather notebook of
+every goal {tortoise_he_she} had translated into a Clojure form.
+Today {place}, the next entry was a goal: {goal_text}. {tortoise} sat
+with pen in hand, ready to compose {concept_phrase}, then let the
+REPL confirm the value."""),
 
     # 7. The boast-and-rebuke template — Hare boasts; Tortoise asks
     #    for the actual form. Fix: "To X is something anyone could
@@ -258,13 +258,13 @@ between the two slates: only {tortoise_his_her} had run."""),
     #     answering, Tortoise's careful path wins. Moral lands.
     SubplotTemplate("""\
 The wager was set {place}: produce the value before the breeze had
-turned the next leaf. {hare_phrase} bolted into a flurry of
-guesses, calling out numbers and second-guessing {hare_him_her}self
-about whether the goal was to {goal_text} or something close to it.
-{tortoise_phrase}, who had simply walked to the slate and begun to
-write {concept_phrase}, finished the form, submitted it, and read
-the value off the REPL while {hare} was still arguing with the
-breeze. The race, like every other, went to the steady hand."""),
+turned the next leaf. {hare_phrase}, {emo_proud}, bolted into a flurry
+of guesses. {hare_he_she_cap} called out numbers and second-guessed
+{hare_him_her}self about whether the goal was to {goal_text}.
+{tortoise_phrase}, {emo_patient}, simply walked to the slate.
+{tortoise_he_she_cap} wrote {concept_phrase} and finished the form.
+The REPL handed back the value while {hare} was still arguing with
+the breeze. The race went to the steady hand."""),
 
     # 11. The wrong-guess-then-form template — Hare blurts a guess at
     #     the answer (deliberately abstract — no actual value leaks),
@@ -539,10 +539,7 @@ G1_09 = SubjectCurriculum(
             question_what="whether an integer is a symbol",
             goal_text="ask whether the integer 42 is a symbol, using the symbol? predicate",
             scenario=(
-                "Pip the hare picked up a stone with the number 42 "
-                "scratched into it and held it beside a bark-strip "
-                "labelled 'count. Shelly the tortoise needed to know "
-                "which of the two was a name and which was a value."
+                "Pip the hare picked up a stone with the number {drawn.a} scratched into it and held it beside a bark-strip labelled 'count. Shelly the tortoise needed to know which of the two was a name and which was a value."
             ),
             need=(
                 "Without asking the runtime, the two risked arguing all "
@@ -555,8 +552,7 @@ G1_09 = SubjectCurriculum(
                 "the falsey verdict."
             ),
             resolution=(
-                "the runtime confirmed that 42 is not a symbol: the "
-                "integer is a value, not a name scratched on bark."
+                'the runtime confirmed that {drawn.a} is not a symbol: the integer is a value, not a name scratched on bark.'
             ),
             tags=("story",),
         ),
@@ -567,10 +563,7 @@ G1_09 = SubjectCurriculum(
             question_what="whether a string is a symbol",
             goal_text="ask whether a string of letters is a symbol, using the symbol? predicate",
             scenario=(
-                "Mossback had laid two things side by side on a flat "
-                "stone: a chalk mark that read 'tortoise, and a piece "
-                "of bark bearing the word \"tortoise\" pressed in ink — "
-                "a proper string, not a symbol."
+                'Mossback had laid two things side by side on a flat stone: a chalk mark that read \'{drawn.a}, and a piece of bark bearing the word "{drawn.a}" pressed in ink — a proper string, not a symbol.'
             ),
             need=(
                 "She needed the runtime to settle which kind each was, "
@@ -638,7 +631,7 @@ G1_10 = SubjectCurriculum(
                 "Slowpoke the tortoise had scratched an addition on "
                 "the trail-stone and, beside it, added a small note "
                 "after a semicolon explaining what the form computed — "
-                "a scribe's marginal gloss."
+                "a scribe's marginal gloss. The values drawn fresh were {drawn.a} and {drawn.b}."
             ),
             need=(
                 "Pip the hare needed to know what the form returned, "
@@ -667,7 +660,7 @@ G1_10 = SubjectCurriculum(
                 "Mossback had etched a number on a flat stone and "
                 "after a double semicolon had written a scribe's "
                 "note naming what the number meant — a second style "
-                "of marginal annotation the scribe used for emphasis."
+                "of marginal annotation the scribe used for emphasis. The value drawn fresh was {drawn.a}."
             ),
             need=(
                 "Bramble the hare needed the value the runtime would "
@@ -708,7 +701,7 @@ G1_11 = SubjectCurriculum(
                 "Pip the hare had written an addition on the path-stone "
                 "with wide gaps between the tokens — extra spaces where "
                 "the chalk had skipped. Mossback looked it over and "
-                "said the form was still readable."
+                "said the form was still readable. The values drawn fresh were {drawn.a} and {drawn.b}."
             ),
             need=(
                 "Pip needed to know whether the extra whitespace changed "
@@ -739,7 +732,7 @@ G1_11 = SubjectCurriculum(
                 "lines on a broad leaf — the operator on the first, "
                 "each argument indented on its own line below. Hopper "
                 "the hare wondered whether the line-breaks would confuse "
-                "the reader."
+                "the reader. The values drawn fresh were {drawn.a} and {drawn.b}."
             ),
             need=(
                 "Hopper needed to know whether the runtime read forms "
@@ -777,10 +770,7 @@ G1_12 = SubjectCurriculum(
             question_what="the result of adding 2 and 3",
             goal_text="add 2 and 3",
             scenario=(
-                "Mossback the tortoise chalked a small expression on the "
-                "path: the plus-mark, then 2, then 3, all wrapped in a "
-                "single set of parens. Pip the hare paused — was the "
-                "answer 6 (parens means multiply, surely?), or maybe 23?"
+                'Mossback the tortoise chalked a small expression on the path: the plus-mark, then {drawn.a}, then {drawn.b}, all wrapped in a single set of parens. Pip the hare paused — was the answer 6 (parens means multiply, surely?), or maybe 23?'
             ),
             need=(
                 "Mossback wanted to show that the parens are fence-posts, "
@@ -788,14 +778,10 @@ G1_12 = SubjectCurriculum(
                 "together as one form, nothing more."
             ),
             mapping=(
-                "Parens in Clojure group: the first token inside is the "
-                "operator (`+`), the rest are arguments (2, 3). The "
-                "runtime applies + to 2 and 3 — the parens themselves "
-                "do no math."
+                'Parens in Clojure group: the first token inside is the operator (`+`), the rest are arguments ({drawn.a}, {drawn.b}). The runtime applies + to {drawn.a} and {drawn.b} — the parens themselves do no math.'
             ),
             resolution=(
-                "the runtime applied + to 2 and 3 and returned 5 — not "
-                "6, not 23, just the sum the form had asked for."
+                'the runtime applied + to {drawn.a} and {drawn.b} and returned the result — not 6, not 23, just the sum the form had asked for.'
             ),
             tags=("story",),
         ),
@@ -806,11 +792,7 @@ G1_12 = SubjectCurriculum(
             question_what="the result of multiplying a nested sum by 3",
             goal_text="multiply the sum of 1 and 2 by 3",
             scenario=(
-                "Mossback chalked two nested fences on the path: an "
-                "inner fence holding the plus-mark, 1, and 2, and an "
-                "outer fence holding the star-mark, the inner fence, "
-                "and 3. Pip counted the parens and declared the result "
-                "must be enormous."
+                'Mossback chalked two nested fences on the path: an inner fence holding the plus-mark, {drawn.a}, and {drawn.b}, and an outer fence holding the star-mark, the inner fence, and 3. Pip counted the parens and declared the result must be enormous.'
             ),
             need=(
                 "Mossback needed to show that each set of parens is "
@@ -819,10 +801,7 @@ G1_12 = SubjectCurriculum(
                 "argument."
             ),
             mapping=(
-                "Inner parens group first: `(+ 1 2)` resolves to its "
-                "sum. The outer parens then group `*`, that sum, and 3 "
-                "— multiplying them together. The fence-posts mark "
-                "order, not multiplication."
+                'Inner parens group first: `(+ {drawn.a} {drawn.b})` resolves to its sum. The outer parens then group `*`, that sum, and {drawn.c} — multiplying them together. The fence-posts mark order, not multiplication.'
             ),
             resolution=(
                 "the runtime resolved the inner group first, then "
@@ -850,9 +829,7 @@ G1_13 = SubjectCurriculum(
             question_what="the sum of 1 and 2",
             goal_text="add 1 and 2",
             scenario=(
-                "Mossback had sorted this morning's acorns into two "
-                "small heaps beside the trail — one heap of 1 and "
-                "another of 2."
+                "Mossback had sorted this morning's acorns into two small heaps beside the trail — one heap of {drawn.a} and another of 2."
             ),
             need=(
                 "She needed the running total before deciding whether "
@@ -876,9 +853,7 @@ G1_13 = SubjectCurriculum(
             question_what="the difference of 5 and 3",
             goal_text="subtract 3 from 5",
             scenario=(
-                "Pip the hare had counted 5 acorns set aside for the "
-                "midday rest. Hopper had already taken 3 to his side "
-                "of the log before Pip noticed."
+                'Pip the hare had counted {drawn.a} acorns set aside for the midday rest. Hopper had already taken {drawn.b} to his side of the log before Pip noticed.'
             ),
             need=(
                 "Pip needed to know how many remained so he could "
@@ -902,9 +877,7 @@ G1_13 = SubjectCurriculum(
             question_what="the product of 4 and 5",
             goal_text="multiply 4 by 5",
             scenario=(
-                "Shelly the tortoise had arranged her acorn-gathering "
-                "in 4 equal rows of 5 acorns each along the meadow's "
-                "edge, each row the same size."
+                "Shelly the tortoise had arranged her acorn-gathering in {drawn.a} equal rows of {drawn.b} acorns each along the meadow's edge, each row the same size."
             ),
             need=(
                 "She needed the full count of acorns without adding "
@@ -912,9 +885,7 @@ G1_13 = SubjectCurriculum(
                 "quickest path."
             ),
             mapping=(
-                "`*` computes the repeated sum: 4 rows of 5 is the "
-                "same as adding 5 four times. The runtime returns "
-                "that total directly."
+                '`*` computes the repeated sum: {drawn.a} rows of {drawn.b} is the same as adding {drawn.b} four times. The runtime returns that total directly.'
             ),
             resolution=(
                 "the runtime returned the total count across all "
@@ -929,9 +900,7 @@ G1_13 = SubjectCurriculum(
             question_what="the quotient of 10 and 2",
             goal_text="divide 10 by 2",
             scenario=(
-                "Mossback and Pip had gathered a shared heap of 10 "
-                "acorns. They agreed to split the heap into 2 equal "
-                "shares, one for each of them."
+                'Mossback and Pip had gathered a shared heap of {drawn.a} acorns. They agreed to split the heap into {drawn.b} equal shares, one for each of them.'
             ),
             need=(
                 "Mossback needed to know exactly how many acorns each "
@@ -955,9 +924,7 @@ G1_13 = SubjectCurriculum(
             question_what="the sum of 7 and 8",
             goal_text="add 7 and 8",
             scenario=(
-                "Bramble the hare had counted 7 acorns beneath the "
-                "oak and 8 more under the elm. Both heaps sat in "
-                "separate leaf-cups at the edge of the path."
+                'Bramble the hare had counted {drawn.a} acorns beneath the oak and {drawn.b} more under the elm. Both heaps sat in separate leaf-cups at the edge of the path.'
             ),
             need=(
                 "Bramble needed the combined count to report back to "
@@ -981,9 +948,7 @@ G1_13 = SubjectCurriculum(
             question_what="the difference of 20 and 7",
             goal_text="subtract 7 from 20",
             scenario=(
-                "Slowpoke the tortoise had stockpiled 20 acorns near "
-                "the hollow log. During the night, squirrels had "
-                "carried off 7 of them."
+                'Slowpoke the tortoise had stockpiled {drawn.a} acorns near the hollow log. During the night, squirrels had carried off {drawn.b} of them.'
             ),
             need=(
                 "Slowpoke needed the remaining count before deciding "
@@ -1019,19 +984,14 @@ G1_14 = SubjectCurriculum(
             question_what="the sum of 1 with the product of 2 and 3",
             goal_text="add 1 to the product of 2 and 3",
             scenario=(
-                "Mossback had set out 1 lone acorn from yesterday "
-                "and 2 rows of 3 freshly gathered acorns beside it. "
-                "She needed to count everything together."
+                'Mossback had set out {drawn.a} lone acorn from yesterday and {drawn.b} rows of {drawn.c} freshly gathered acorns beside it. She needed to count everything together.'
             ),
             need=(
                 "The rows had to be counted as a group first — their "
                 "combined total then joined with the single acorn."
             ),
             mapping=(
-                "The inner `(* 2 3)` computes the rows' total first; "
-                "that result becomes the second argument to the outer "
-                "`+`. Inner heaps resolve before the outer addition "
-                "runs."
+                "The inner `(* {drawn.b} {drawn.c})` computes the rows' total first; that result becomes the second argument to the outer `+`. Inner heaps resolve before the outer addition runs."
             ),
             resolution=(
                 "the runtime resolved the inner product first, then "
@@ -1046,10 +1006,7 @@ G1_14 = SubjectCurriculum(
             question_what="the product of two nested sums",
             goal_text="multiply the sum of 1 and 2 by the sum of 3 and 4",
             scenario=(
-                "Pip the hare described two separate acorn-gathering "
-                "rounds: the morning round collected 1 and 2 acorns, "
-                "the afternoon round collected 3 and 4. He wanted to "
-                "arrange both round-totals in equal-sized rows."
+                'Pip the hare described two separate acorn-gathering rounds: the morning round collected {drawn.a} and {drawn.b} acorns, the afternoon round collected {drawn.c} and 4. He wanted to arrange both round-totals in equal-sized rows.'
             ),
             need=(
                 "Each round's total had to be known before the row "
@@ -1074,20 +1031,14 @@ G1_14 = SubjectCurriculum(
             question_what="100 minus a nested product",
             goal_text="subtract the product of 5 and 5 from 100",
             scenario=(
-                "Shelly the tortoise had a stockpile of 100 acorns. "
-                "Hopper had agreed to take 5 rows of 5 away for the "
-                "winter cache — a square portion of the pile."
-            ),
+                'Shelly the tortoise had a stockpile of {drawn.a} acorns. Hopper had agreed to take {drawn.b} rows of {drawn.b} away for the winter cache — a square portion of the pile.'           ),
             need=(
                 "Shelly needed to know what would remain after Hopper "
                 "took his square portion, so she could plan the week's "
                 "meals."
             ),
             mapping=(
-                "The inner `(* 5 5)` computes how many acorns Hopper "
-                "takes; the outer `-` removes that amount from the "
-                "full stockpile. Inner product resolves before the "
-                "subtraction runs."
+                'The inner `(* {drawn.b} {drawn.b})` computes how many acorns Hopper takes; the outer `-` removes that amount from the full stockpile. Inner product resolves before the subtraction runs.'
             ),
             resolution=(
                 "the runtime computed Hopper's portion first, then "
@@ -1102,10 +1053,7 @@ G1_14 = SubjectCurriculum(
             question_what="the sum of two nested products",
             goal_text="add the product of 2 and 3 to the product of 4 and 5",
             scenario=(
-                "Mossback gathered from two oak groves: the near "
-                "grove yielded 2 rows of 3 acorns, the far grove "
-                "yielded 4 rows of 5. She needed both grove-totals "
-                "combined."
+                'Mossback gathered from two oak groves: the near grove yielded {drawn.a} rows of {drawn.b} acorns, the far grove yielded {drawn.c} rows of 5. She needed both grove-totals combined.'
             ),
             need=(
                 "Each grove's count had to be computed as a product "
@@ -1142,10 +1090,7 @@ G1_15 = SubjectCurriculum(
             question_what="whether 1 equals 1",
             goal_text="test whether 1 equals 1 with =",
             scenario=(
-                "At the wooden gate blocking the trail, Mossback "
-                "painted a tally of 1 on each gatepost. Pip demanded "
-                "to know whether the two tallies were the same before "
-                "the gate would swing open."
+                'At the wooden gate blocking the trail, Mossback painted a tally of {drawn.a} on each gatepost. Pip demanded to know whether the two tallies were the same before the gate would swing open.'
             ),
             need=(
                 "The gate only opened when both sides matched — "
@@ -1158,8 +1103,9 @@ G1_15 = SubjectCurriculum(
                 "verdict; if any differ, it stops."
             ),
             resolution=(
-                "the runtime let the gate swing: both sides matched, "
-                "so the truthy verdict came back."
+                "both sides of the gate matched as plainly as the nose "
+                "on her face; the runtime — easily, the answer plain — "
+                "let the gate open and the truthy verdict came back."
             ),
             tags=("story",),
         ),
@@ -1170,10 +1116,7 @@ G1_15 = SubjectCurriculum(
             question_what="whether 1 equals 2",
             goal_text="test whether 1 equals 2 with =",
             scenario=(
-                "The same wooden gate stood on the trail, but now the "
-                "two gateposts bore different tallies — 1 on the left, "
-                "2 on the right. Hopper the hare insisted they were "
-                "close enough."
+                'The same wooden gate stood on the trail, but now the two gateposts bore different tallies — {drawn.a} on the left, {drawn.b} on the right. Hopper the hare insisted they were close enough.'
             ),
             need=(
                 "Mossback needed the runtime's ruling on whether "
@@ -1181,9 +1124,7 @@ G1_15 = SubjectCurriculum(
                 "pass on an exact match."
             ),
             mapping=(
-                "`=` is strict: different values on the gateposts "
-                "stop the gate. 1 and 2 are distinct, so the gate "
-                "returns the falsey verdict and stays closed."
+                '`=` is strict: different values on the gateposts stop the gate. {drawn.a} and {drawn.b} are distinct, so the gate returns the falsey verdict and stays closed.'
             ),
             resolution=(
                 "the runtime closed the gate: the two values were "
@@ -1198,10 +1139,7 @@ G1_15 = SubjectCurriculum(
             question_what="whether two equal strings are equal",
             goal_text='test whether the string "a" equals itself with =',
             scenario=(
-                "Two bark-strips each bore the single letter \"a\" "
-                "pressed in ink, one on each gatepost of the trail "
-                "gate. Bramble the hare said one might be a different "
-                "shade of ink."
+                'Two bark-strips each bore the single letter "{drawn.{drawn.a}}" pressed in ink, one on each gatepost of the trail gate. Bramble the hare said one might be {drawn.a} different shade of ink.'
             ),
             need=(
                 "Shelly needed to know whether the runtime considered "
@@ -1228,7 +1166,7 @@ G1_15 = SubjectCurriculum(
             scenario=(
                 "Two trail-markers each bore the label :hare — the "
                 "keyword that every gate on this stretch checked "
-                "before letting a runner through. Pip had carved both."
+                "before letting a runner through. Pip had carved both. The value drawn fresh was {drawn.a}."
             ),
             need=(
                 "The gate keeper needed the runtime's word that both "
@@ -1255,7 +1193,7 @@ G1_15 = SubjectCurriculum(
                 "The left gatepost of the trail gate was marked "
                 ":hare and the right one was marked :tortoise. "
                 "Hopper felt the labels were similar enough and "
-                "tried to push through."
+                "tried to push through. The values drawn fresh were {drawn.a} and {drawn.b}."
             ),
             need=(
                 "Mossback needed the runtime's ruling: were the two "
@@ -1280,10 +1218,7 @@ G1_15 = SubjectCurriculum(
             question_what="whether four 1s are all equal",
             goal_text="test with = whether four 1s are all equal",
             scenario=(
-                "The long stretch of trail had four gateposts in a "
-                "row, each bearing a tally of 1 scratched by Mossback "
-                "to mark the equal-length stages. Every post had to "
-                "match for the path to be declared uniform."
+                'The long stretch of trail had four gateposts in a row, each bearing a tally of {drawn.a} scratched by Mossback to mark the equal-length stages. Every post had to match for the path to be declared uniform.'
             ),
             need=(
                 "Pip needed the runtime's ruling across all four posts "
@@ -1322,7 +1257,7 @@ G1_16 = SubjectCurriculum(
             scenario=(
                 "Mossback counted the acorns remaining in her morning "
                 "heap and found none — the heap had been emptied. She "
-                "needed to confirm the count was truly nothing."
+                "needed to confirm the count was truly nothing. The value drawn fresh was {drawn.a}."
             ),
             need=(
                 "Before announcing the heap was gone, she needed the "
@@ -1347,19 +1282,13 @@ G1_16 = SubjectCurriculum(
             question_what="whether 5 is zero",
             goal_text="check whether 5 is zero using zero?",
             scenario=(
-                "Pip the hare counted 5 acorns left in his heap after "
-                "the morning's sharing. He thought the heap might be "
-                "empty and wanted a quick check."
+                "Pip the hare counted {drawn.a} acorns left in his heap after the morning's sharing. He thought the heap might be empty and wanted a quick check."
             ),
             need=(
-                "Without asking the runtime, Pip might mistakenly "
-                "declare the heap empty and walk off, leaving 5 "
-                "acorns behind."
+                'Without asking the runtime, Pip might mistakenly declare the heap empty and walk off, leaving {drawn.a} acorns behind.'
             ),
             mapping=(
-                "`zero?` checks for an exactly empty pile. A count of "
-                "5 is not zero — the heap is not empty — so the "
-                "predicate returns the falsey verdict."
+                '`zero?` checks for an exactly empty pile. A count of {drawn.a} is not zero — the heap is not empty — so the predicate returns the falsey verdict.'
             ),
             resolution=(
                 "the runtime replied that the count was not zero: the "
@@ -1375,19 +1304,14 @@ G1_16 = SubjectCurriculum(
             question_what="whether 7 is positive",
             goal_text="check whether 7 is positive using pos?",
             scenario=(
-                "Shelly the tortoise counted 7 acorns gathered from "
-                "beneath the elm. Before adding them to the shared "
-                "heap, she wanted to confirm the count was a genuine "
-                "gain."
+                'Shelly the tortoise counted {drawn.a} acorns gathered from beneath the elm. Before adding them to the shared heap, she wanted to confirm the count was a genuine gain.'
             ),
             need=(
                 "Only a positive count warranted adding to the heap; "
                 "the runtime had to confirm the tally was above zero."
             ),
             mapping=(
-                "`pos?` asks whether the count is greater than zero — "
-                "a real addition to the pile. A count of 7 is above "
-                "zero, so the truthy verdict comes back."
+                '`pos?` asks whether the count is greater than zero — a real addition to the pile. A count of {drawn.a} is above zero, so the truthy verdict comes back.'
             ),
             resolution=(
                 "the runtime confirmed the count was above zero, "
@@ -1405,7 +1329,7 @@ G1_16 = SubjectCurriculum(
                 "Hopper the hare reported a shortfall: the heap count "
                 "had gone negative — 2 acorns owed rather than "
                 "owned. Mossback needed to know whether the tally "
-                "still counted as a gain."
+                "still counted as a gain. The value drawn fresh was {drawn.a}."
             ),
             need=(
                 "If the tally was not positive, the heap entry should "
@@ -1432,7 +1356,7 @@ G1_16 = SubjectCurriculum(
             scenario=(
                 "Bramble the hare had borrowed 3 acorns last season "
                 "and the debt appeared as a negative count in Mossback's "
-                "tally. Mossback needed to flag it as a true shortfall."
+                "tally. Mossback needed to flag it as a true shortfall. The value drawn fresh was {drawn.a}."
             ),
             need=(
                 "Before marking the tally as a debt, she needed "
@@ -1457,21 +1381,13 @@ G1_16 = SubjectCurriculum(
             question_what="whether 4 is negative",
             goal_text="check whether 4 is negative using neg?",
             scenario=(
-                "Slowpoke the tortoise tallied 4 acorns added to the "
-                "shared heap. Pip claimed the tally must be negative "
-                "because of yesterday's borrowing — Slowpoke was not "
-                "sure."
+                "Slowpoke the tortoise tallied {drawn.a} acorns added to the shared heap. Pip claimed the tally must be negative because of yesterday's borrowing — Slowpoke was not sure."
             ),
             need=(
-                "Slowpoke needed the runtime to rule on the sign: a "
-                "count of 4 either was or was not a deficit, and only "
-                "the predicate could say."
+                'Slowpoke needed the runtime to rule on the sign: a count of {drawn.a} either was or was not a deficit, and only the predicate could say.'
             ),
             mapping=(
-                "`neg?` checks whether the count is below zero. A "
-                "count of 4 is above zero — a surplus, not a deficit "
-                "— so the predicate returns the falsey verdict."
-            ),
+                '`neg?` checks whether the count is below zero. A count of {drawn.a} is above zero — a surplus, not a deficit — so the predicate returns the falsey verdict.'           ),
             resolution=(
                 "the runtime returned the falsey verdict: the count "
                 "was positive, not a shortfall."
@@ -1497,11 +1413,7 @@ G1_17 = SubjectCurriculum(
             question_what="the value 42 returned by the REPL",
             goal_text="submit the integer 42 so the REPL returns it",
             scenario=(
-                "Mossback the tortoise had handed the scribe a "
-                "stone with the number 42 carved on it. The scribe "
-                "read it, then placed the stone's value back on the "
-                "table — not announcing it aloud, but setting it "
-                "where it could be read."
+                "Mossback the tortoise had handed the scribe a stone with the number {drawn.a} carved on it. The scribe read it, then placed the stone's value back on the table — not announcing it aloud, but setting it where it could be read."
             ),
             need=(
                 "Pip the hare needed to know whether the scribe "
@@ -1529,7 +1441,7 @@ G1_17 = SubjectCurriculum(
                 "Shelly the tortoise submitted an addition to the "
                 "scribe. The scribe computed the sum, then set the "
                 "result-stone where it could be read — no announcement, "
-                "just the value placed quietly on the table."
+                "just the value placed quietly on the table. The values drawn fresh were {drawn.a} and {drawn.b}."
             ),
             need=(
                 "Hopper the hare needed the sum available for the "
@@ -1570,7 +1482,7 @@ G1_18 = SubjectCurriculum(
                 "Pip the hare had been afraid to try anything in "
                 "the REPL since the last time a mistyped form threw "
                 "an error. Mossback had strung a safety net beneath "
-                "the practice-meadow — a stumble there cost nothing."
+                "the practice-meadow — a stumble there cost nothing. The values drawn fresh were {drawn.a} and {drawn.b}."
             ),
             need=(
                 "Pip needed to submit a first form to feel how the "
@@ -1600,7 +1512,7 @@ G1_18 = SubjectCurriculum(
                 "Hopper the hare tried a second form in the "
                 "practice-meadow, still wary after a previous mis-step "
                 "had bounced off the net. Shelly stood nearby, net "
-                "confirmed in place."
+                "confirmed in place. The values drawn fresh were {drawn.a} and {drawn.b}."
             ),
             need=(
                 "Hopper needed to build confidence that the net "

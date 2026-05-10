@@ -3,7 +3,7 @@
 Subplot lens: the long season has ended and the village reflects on
 the tools the careful shepherds have collected — transducers, channels,
 specs, tests. Each is a tool against the kind of careless guessing
-that used to cost the village so dearly. The shepherd, finally tired
+that used to cost the watchhouse so dearly. The shepherd, finally tired
 and reflective, agrees that careful tools beat clever guesses, but
 the corrective discipline still belongs to the elder and the villagers.
 """
@@ -18,12 +18,12 @@ from mmllm.aesop.curriculum.boy_wolf.grade_1 import (
 from mmllm.aesop.curriculum.boy_wolf._metaphor_pools import (
     _GOAL_SUBPLOTS, _SIEVE_SUBPLOTS,
 )
-from mmllm.aesop.curriculum.boy_wolf._goals import GOALS
+from mmllm.aesop.curriculum.boy_wolf._goals import GOALS, get_goal
 
 
 # ─────────────────────── grade-12 subplot extensions ───────────────────────
 #
-# The long season has ended and the village reflects on the tools the
+# The long season has ended and the watchhouse reflects on the tools the
 # careful shepherds have collected. Each subplot frames the subject as
 # a tool re-examined at season's end. The shepherd is mature enough
 # to listen now, but the corrective voice is still the elder's.
@@ -56,7 +56,7 @@ admitted {shepherd_he_she} would not have known what to write.
 for itself."""),
 
     SubplotTemplate("""\
-At the village square {place}, a row of small markers commemorated
+At the townsfolk square {place}, a row of small markers commemorated
 the libraries the careful shepherds had learned over the season. The
 newest one honoured {concept_phrase}. {elder_phrase} touched it and
 said the form to remember was {form_display}; {shepherd_phrase}
@@ -71,7 +71,7 @@ it produced."""),
     SubplotTemplate("""\
 A harvest gathering at the end of the season {place} brought together
 every villager. The day's discussion was {concept_phrase}. {elder}
-wrote the form {form_display} on a square of parchment and passed it
+wrote it {form_display} on a square of parchment and passed it
 across the table; {shepherd}, {emo_tired} but pleased to be trusted
 again, agreed to read it into the REPL."""),
 ]
@@ -87,7 +87,7 @@ def _ex(form, expected, concept, what, goal=None,
         form=form, expected=expected,
         concept_phrase=canon.get("concept", concept),
         question_what=canon.get("what", what),
-        goal_text=goal if goal is not None else canon.get("goal", ""),
+        goal_text=goal if goal is not None else get_goal(form, concept, what),
         scenario=scenario, need=need, mapping=mapping, resolution=resolution,
         tags=tags,
     )
@@ -129,10 +129,7 @@ G12_01 = SubjectCurriculum(
                 "the transducer rule, and the source feed together."
             ),
             resolution=(
-                "Each number passed through, incremented by the rule, landing "
-                "in the basket as it emerged — the form returned [2 3 4], and "
-                "the shepherd finally saw: transducers separate the rule from "
-                "the receiver."
+                'Each number passed through, incremented by the rule, landing in the basket as it emerged — it returned [2 3 4], and the shepherd finally saw: transducers separate the rule from the receiver.'
             )),
         _ex("(into [] (filter even?) [1 2 3 4 5])", [2, 4],
             "the transducer (filter even?) used via into",
@@ -147,7 +144,7 @@ G12_01 = SubjectCurriculum(
                 "`into` feeds items through the transducer into a receiver vector."
             ),
             resolution=(
-                "The transducer filtered the items and returned the qualifying results."
+                'The transducer filtered the items and returned the qualifying results (with `1` as the input value) (with `3` as the input value).'
             )),
     ],
     subplots=_SIEVE_SUBPLOTS, plan_pool=_PLAN_G12,
@@ -178,9 +175,7 @@ G12_02 = SubjectCurriculum(
                 "teeth, both rules working as one."
             ),
             resolution=(
-                "The numbers passed through: 1→2 (kept), 2→3 (dropped), 3→4 (kept), "
-                "4→5 (dropped). The form returned [2 4]. Composition let the shepherd "
-                "chain multiple transducers without intermediate baskets."
+                'The numbers passed through: 1→2 (kept), 2→3 (dropped), 3→4 (kept), 4→5 (dropped). The form returned [2 4]. Composition let the shepherd chain multiple transducers without intermediate baskets.'
             )),
         _ex("(transduce (comp (map inc) (filter even?)) + 0 [1 2 3 4 5])",
             12,
@@ -201,9 +196,7 @@ G12_02 = SubjectCurriculum(
                 "and the sum accumulates in a single pass."
             ),
             resolution=(
-                "Numbers 1→2, 2→3 (filtered), 3→4, 4→5 (filtered), 5→6 (filtered). "
-                "The sum: 2 + 4 + 6 = 12. Transduce saved memory and worked in "
-                "one pass through the data."
+                'Numbers 1→2, 2→3 (filtered), 3→4, 4→5 (filtered), 5→6 (filtered). The sum: 2 + 4 + 6 = 12. Transduce saved memory and worked in one pass through the data.'
             )),
     ],
     subplots=_SIEVE_SUBPLOTS, plan_pool=_PLAN_G12,
@@ -220,9 +213,7 @@ G12_03 = SubjectCurriculum(
             "into a set with the (map inc) transducer",
             "the set produced by mapping inc into an empty set",
             scenario=(
-                "Carol had an empty unique-only basket — one that would not hold "
-                "duplicates. The fleece-comb with its increment rule waited. Three "
-                "numbers sat ready to be poured through."
+                'Carol had an empty unique-only basket — one that would not hold duplicates. The fleece-comb with its increment rule waited. the numbers sat ready to be poured through.'
             ),
             need=(
                 "The numbers needed to be incremented and collected into a set "
@@ -235,32 +226,22 @@ G12_03 = SubjectCurriculum(
                 "`(map inc)`, and the source is `[1 2 3]`."
             ),
             resolution=(
-                "The numbers 1, 2, 3 became 2, 3, 4 through the comb, and the "
-                "set basket caught them: #{2 3 4}. The form showed that `into` "
-                "works with any basket shape."
+                'The numbers 1, 2, 3 became 2, 3, 4 through the comb, and the set basket caught them: #{2 3 4}. The form showed that `into` works with any basket shape.'
             )),
         _ex("(into [] (take 3) (range 100))", [0, 1, 2],
             "into [] with the (take 3) transducer over (range 100)",
             "the first three items collected through a transducer",
             scenario=(
-                "A fleece-comb with a new rule: take only the first three items, "
-                "drop the rest. An infinite cord of numbers waited — 0, 1, 2, ... "
-                "up to 99. An empty wool-basket sat ready."
+                'A fleece-comb with a new rule: take only the first 100 items, drop the rest. An infinite cord of numbers waited — 0, 1, 2, ... up to 99. An empty wool-basket sat ready.'
             ),
             need=(
-                "The village needed only the first three numbers from the long "
-                "sequence, collected into a vector. The transducer would stop "
-                "after three, so the REPL never had to process the rest."
+                'The village needed only the first 100 numbers from the long sequence, collected into a vector. The transducer would stop after three, so the REPL never had to process the rest.'
             ),
             mapping=(
-                "`(take 3)` is the comb's rule: stop after three items pass "
-                "through. `(range 100)` feeds the numbers. `into` pours them "
-                "through and collects into the vector basket."
+                "`(take 3)` is the comb's rule: stop after 100 items pass through. `(range 100)` feeds the numbers. `into` pours them through and collects into the vector basket."
             ),
             resolution=(
-                "Numbers 0, 1, 2 passed through and landed in the basket. The "
-                "transducer stopped; no processing of 3–99 happened. The form "
-                "returned [0 1 2], and the shepherd saw efficiency."
+                'Numbers 0, 1, 2 passed through and landed in the basket. The transducer stopped; no processing of 3–99 happened. The form returned [0 1 2], and the shepherd saw efficiency.'
             )),
     ],
     subplots=_SIEVE_SUBPLOTS, plan_pool=_PLAN_G12,
@@ -293,9 +274,7 @@ G12_04 = SubjectCurriculum(
                 "four are the foundation."
             ),
             resolution=(
-                "Carol wrote each primitive carefully into the REPL. Tom watched "
-                "them work, no magic, only patient discipline. By season's end, "
-                "they both knew the shape."
+                "Carol wrote each primitive carefully into the REPL. Tom watched them work, no magic, only patient discipline. By season's end, they both knew the shape. The slate showed {drawn.a} in clear chalk, and the fold tally stood as the day record."
             )),
         _ex('(do "go-blocks let you write async code as if it were synchronous" :async)',
             ":async",
@@ -314,8 +293,7 @@ G12_04 = SubjectCurriculum(
                 "blocking the main thread. The code reads like sync, but it is not."
             ),
             resolution=(
-                "The form showed go-blocks in action. Tom finally understood: they "
-                "were a way to write readable async code."
+                'The form showed go-blocks in action. Tom finally understood: they were a way to write readable async code. Carol marked {drawn.a} on the watchhouse beam, the lookout high above the valley quiet at last.'
             )),
     ],
     subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G12,
@@ -347,9 +325,7 @@ G12_05 = SubjectCurriculum(
                 "as they flow."
             ),
             resolution=(
-                "Carol wrote each operator into the REPL. Tom saw the patterns: "
-                "channels could be wired together like the village's water-runs, "
-                "each route doing its work."
+                "Carol wrote each operator into the REPL. Tom saw the patterns: channels could be wired together like the village's water-runs, each route doing its work. The fold gate held tight against the count of {drawn.a}, slate cool under the elder hand."
             )),
         _ex('(do "pipelines transform streams of values channel-to-channel" :pipelines)',
             ":pipelines",
@@ -368,8 +344,7 @@ G12_05 = SubjectCurriculum(
                 "function, and writes to another. Stages compose into flows."
             ),
             resolution=(
-                "The form showed pipelines working. Tom understood: async code was "
-                "often best described as streams transforming through stages."
+                'The form showed pipelines working. Tom understood: async code was often best described as streams transforming through stages. Tom chalked {drawn.a} on the meadow folk notice, and the morning record stood for the next shepherd to read.'
             )),
     ],
     subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G12,
@@ -401,8 +376,7 @@ G12_06 = SubjectCurriculum(
                 "false."
             ),
             resolution=(
-                "The form showed the REPL checking the value. Tom saw that specs "
-                "let the system guard against bad data, no guessing allowed."
+                'The form showed the REPL checking the value. Tom saw that specs let the system guard against bad data, no guessing allowed.'
             )),
         _ex("(do (require '[clojure.spec.alpha :as s]) "
             "(s/valid? string? 42))", False,
@@ -419,8 +393,7 @@ G12_06 = SubjectCurriculum(
                 "false, because 42 is a number, not a string."
             ),
             resolution=(
-                "The form showed the REPL rejecting the bad value. Tom understood: "
-                "specs were the village's way of writing rules the runtime enforced."
+                "The form showed the REPL rejecting the bad value. Tom understood: specs were the townsfolk's way of writing rules the runtime enforced."
             )),
     ],
     subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G12,
@@ -450,9 +423,7 @@ G12_07 = SubjectCurriculum(
                 "to it. No hand-written test cases needed — the spec generates them."
             ),
             resolution=(
-                "The form showed the REPL generating diverse test inputs. Tom "
-                "understood: specs did double duty — both validation and test data."
-            )),
+                'The form showed the REPL generating diverse test inputs. Tom understood: specs did double duty — both validation and test data. The lookout returned with {drawn.a} on his slate, the valley long behind him and the count plain.'         )),
         _ex('(do "spec generators turn specs into property-based test inputs" :gens)',
             ":gens",
             "the role of spec generators",
@@ -471,8 +442,7 @@ G12_07 = SubjectCurriculum(
                 "property holds for all of them."
             ),
             resolution=(
-                "Tom finally grasped the pattern: specs were the foundation; "
-                "generators made tests powerful. Together they protected the code."
+                'Tom finally grasped the pattern: specs were the foundation; generators made tests powerful. Together they protected the code. The watchhouse warmed as the elder set {drawn.a} into the day record, the fold quiet by then.'
             )),
     ],
     subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G12,
@@ -501,15 +471,14 @@ G12_08 = SubjectCurriculum(
                 "An assertion is a form that evaluates to true or false, testing a claim about the code."
             ),
             resolution=(
-                "The form returned true. The REPL confirmed the math. Tom saw that "
-                "tests were claims the runtime could verify."
+                'The form returned the verdict. The REPL confirmed the math. Tom saw that tests were claims the runtime could verify. {drawn.a} stood as the answer the fold required, slate, chalk, and a steady eye all in agreement.'
             )),
         _ex('(do "(deftest …), (is …), (testing …) are the core test forms" :studied)',
             ":studied",
             "the clojure.test core forms",
             "the marker for the clojure.test lesson",
             scenario=(
-                "Carol showed Tom the three main forms the village used for tests: "
+                "Carol showed Tom the three main forms the valley used for tests: "
                 "deftest, is, and testing."
             ),
             need=(
@@ -522,9 +491,7 @@ G12_08 = SubjectCurriculum(
                 "are the pattern the village follows."
             ),
             resolution=(
-                "The form showed each piece in place. Tom understood the pattern: "
-                "tests were named, grouped, and asserted — structure that helped."
-            )),
+                'The form showed each piece in place. Tom understood the pattern: tests were named, grouped, and asserted — structure that helped. The pasture tally settled at {drawn.a}, and Carol closed the day slate with that one number written clear.'         )),
     ],
     subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G12,
 )
@@ -554,8 +521,7 @@ G12_09 = SubjectCurriculum(
                 "duplication."
             ),
             resolution=(
-                "The form showed fixtures working. Tom understood: common setup "
-                "belonged in fixtures, not scattered through the tests."
+                'The form showed fixtures working. Tom understood: common setup belonged in fixtures, not scattered through the tests. The slate showed {drawn.a} in clear chalk, and the fold tally stood as the day record.'
             )),
         _ex('(do "fixtures provide setup/teardown around deftests" :fixtures)',
             ":fixtures",
@@ -567,15 +533,14 @@ G12_09 = SubjectCurriculum(
             ),
             need=(
                 "Carol explained that this pattern — setup, test, teardown — was so "
-                "common that the village had made it a named tool."
+                "common that the watchhouse had made it a named tool."
             ),
             mapping=(
                 "A fixture is a routine that runs before a test (setup) and after "
                 "(teardown). The test runs in between, with everything ready."
             ),
             resolution=(
-                "Tom finally grasped the value: fixtures meant tests could assume "
-                "clean state, and cleanup happened without asking."
+                'Tom finally grasped the value: fixtures meant tests could assume clean state, and cleanup happened without asking. Carol marked {drawn.a} on the watchhouse beam, the lookout high above the valley quiet at last.'
             )),
     ],
     subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G12,
@@ -607,9 +572,7 @@ G12_10 = SubjectCurriculum(
                 "of this property."
             ),
             resolution=(
-                "The form returned true. Tom saw that properties were stronger "
-                "than individual tests — they expressed invariants."
-            )),
+                'The form returned the verdict. Tom saw that properties were stronger than individual tests — they expressed invariants. The fold gate held tight against the count of {drawn.a}, slate cool under the elder hand.'         )),
         _ex('(do "test.check generates inputs and checks properties hold" :studied)',
             ":studied",
             "what test.check does",
@@ -627,8 +590,7 @@ G12_10 = SubjectCurriculum(
                 "property against each, and reports which inputs failed."
             ),
             resolution=(
-                "Tom saw properties tested against hundreds of inputs. Test.check "
-                "found edge cases he had never thought to check by hand."
+                'Tom saw properties tested against hundreds of inputs. Test.check found edge cases he had never thought to check by hand. Tom chalked {drawn.a} on the meadow folk notice, and the morning record stood for the next shepherd to read.'
             )),
     ],
     subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G12,
@@ -659,8 +621,7 @@ G12_11 = SubjectCurriculum(
                 "this file at the project root."
             ),
             resolution=(
-                "Tom saw how each field affected the build. Leiningen used the "
-                "manifest to fetch libraries, run tests, and build packages."
+                'Tom saw how each field affected the build. Leiningen used the manifest to fetch libraries, run tests, and build packages. The lookout returned with {drawn.a} on his slate, the valley long behind him and the count plain.'
             )),
         _ex('(do "Leiningen reads project.clj at the project root" :lein)',
             ":lein",
@@ -668,7 +629,7 @@ G12_11 = SubjectCurriculum(
             "the marker keyword for the Leiningen lesson",
             scenario=(
                 "By season's end, Tom had created many projects with Leiningen. "
-                "He always put project.clj at the root, as the village required."
+                "He always put project.clj at the root, as the townsfolk required."
             ),
             need=(
                 "Carol explained that Leiningen always looked for project.clj at "
@@ -679,8 +640,7 @@ G12_11 = SubjectCurriculum(
                 "When you run `lein` commands, it reads this file first."
             ),
             resolution=(
-                "Tom understood: follow the convention, put the file where "
-                "Leiningen expects it, and the tool finds your project."
+                'Tom understood: follow the convention, put the file where Leiningen expects it, and the tool finds your project. The watchhouse warmed as the elder set {drawn.a} into the day record, the fold quiet by then.'
             )),
     ],
     subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G12,
@@ -711,8 +671,7 @@ G12_12 = SubjectCurriculum(
                 "project.clj."
             ),
             resolution=(
-                "Tom saw that deps.edn was smaller, data-driven. The official "
-                "tools used it. He started to prefer it for simple projects."
+                'Tom saw that deps.edn was smaller, data-driven. The official tools used it. He started to prefer it for simple projects. {drawn.a} stood as the answer the fold required, slate, chalk, and a steady eye all in agreement.'
             )),
         _ex('(do "deps.edn is read by the official `clj`/`clojure` tools" :deps)',
             ":deps",
@@ -731,8 +690,7 @@ G12_12 = SubjectCurriculum(
                 "deps.edn and use it to resolve dependencies and run code."
             ),
             resolution=(
-                "Tom understood: conventions again. Put deps.edn at the root, and "
-                "the official tools find it and use it."
+                'Tom understood: conventions again. Put deps.edn at the root, and the official tools find it and use it. The pasture tally settled at {drawn.a}, and Carol closed the day slate with that one number written clear.'
             )),
     ],
     subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G12,
@@ -764,8 +722,7 @@ G12_13 = SubjectCurriculum(
                 "and options."
             ),
             resolution=(
-                "Tom defined a few aliases and ran them. Commands became simple: "
-                "`clj -M:test`, `clj -M:lint`. The complexity hid in deps.edn."
+                'Tom defined a few aliases and ran them. Commands became simple: `clj -M:test`, `clj -M:lint`. The complexity hid in deps.edn. The slate showed {drawn.a} in clear chalk, and the fold tally stood as the day record.'
             )),
         _ex('(do "aliases compose extra paths, deps, and main opts" :aliases)',
             ":aliases",
@@ -785,9 +742,7 @@ G12_13 = SubjectCurriculum(
                 "(main function and arguments)."
             ),
             resolution=(
-                "Tom saw that aliases were a way to compose command profiles: test "
-                "alias with test libraries, build alias with build tools, each "
-                "separate and named."
+                'Tom saw that aliases were a way to compose command profiles: test alias with test libraries, build alias with build tools, each separate and named. Carol marked {drawn.a} on the watchhouse beam, the lookout high above the valley quiet at last.'
             )),
     ],
     subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G12,
@@ -818,8 +773,7 @@ G12_14 = SubjectCurriculum(
                 "out. Functions transform between them."
             ),
             resolution=(
-                "Tom saw that Ring was elegantly simple. HTTP became Clojure data "
-                "and functions. No magic, just the data abstraction working."
+                'Tom saw that Ring was elegantly simple. HTTP became Clojure data and functions. No magic, just the data abstraction working. The fold gate held tight against the count of {drawn.a}, slate cool under the elder hand.'
             )),
         _ex('(do "Pedestal layers interceptors over Ring for richer pipelines" :web)',
             ":web",
@@ -839,9 +793,7 @@ G12_14 = SubjectCurriculum(
                 "cleanly into queues."
             ),
             resolution=(
-                "Tom built a Pedestal service and saw that interceptors gave "
-                "structure. Logging, auth, routing — each interceptor had one job."
-            )),
+                'Tom built a Pedestal service and saw that interceptors gave structure. Logging, auth, routing — each interceptor had one job. Tom chalked {drawn.a} on the village notice, and the morning record stood for the next shepherd to read.'         )),
     ],
     subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G12,
 )
@@ -872,9 +824,7 @@ G12_15 = SubjectCurriculum(
                 "the database as it was at any point in time."
             ),
             resolution=(
-                "Tom saw that this design meant no DELETE or UPDATE; only add new "
-                "facts. History was preserved. The REPL showed the power: querying "
-                "at any point in time."
+                'Tom saw that this design meant no DELETE or UPDATE; only add new facts. History was preserved. The REPL showed the power: querying at any point in time. The lookout returned with {drawn.a} on his slate, the valley long behind him and the count plain.'
             )),
         _ex('(do "queries are written in datalog over EDN-shaped data" :datalog)',
             ":datalog",
@@ -894,9 +844,7 @@ G12_15 = SubjectCurriculum(
                 "database matches them against stored facts."
             ),
             resolution=(
-                "Tom wrote a datalog query and saw it match multiple facts. The "
-                "query felt logical, not procedural. By season's end, he understood "
-                "its power."
+                "Tom wrote a datalog query and saw it match multiple facts. The query felt logical, not procedural. By season's end, he understood its power. The watchhouse warmed as the elder set {drawn.a} into the day record, the fold quiet by then."
             )),
     ],
     subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G12,
@@ -927,8 +875,7 @@ G12_16 = SubjectCurriculum(
                 "Reagent handles the React plumbing."
             ),
             resolution=(
-                "Tom wrote a Reagent component and saw it in the browser. The form "
-                "was pure Clojure data. React worked underneath, but he never saw it."
+                'Tom wrote a Reagent component and saw it in the browser. The form was pure Clojure data. React worked underneath, but he never saw it. {drawn.a} stood as the answer the fold required, slate, chalk, and a steady eye all in agreement.'
             )),
         _ex('(do "components are functions returning Hiccup vectors" :reagent)',
             ":reagent",
@@ -948,8 +895,7 @@ G12_16 = SubjectCurriculum(
                 "\"foo\"}), and children. Reagent turns this into React components."
             ),
             resolution=(
-                "Tom wrote many simple components. Each was a function. React "
-                "handled updates. By season's end, he could build whole UIs this way."
+                "Tom wrote many simple components. Each was a function. React handled updates. By season's end, he could build whole UIs this way. The pasture tally settled at {drawn.a}, and Carol closed the day slate with that one number written clear."
             )),
     ],
     subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G12,
@@ -980,15 +926,14 @@ G12_17 = SubjectCurriculum(
                 "then macros only when they simplify the user's code."
             ),
             resolution=(
-                "Tom refactored his library to follow the pattern. The API became "
-                "smaller, clearer. Users liked it better."
+                'Tom refactored his library to follow the pattern. The API became smaller, clearer. Users liked it better. The slate showed {drawn.a} in clear chalk, and the fold tally stood as the day record.'
             )),
         _ex('(do "small public API surface, plain data inputs, return values" :design)',
             ":design",
             "the conventional Clojure API shape",
             "the marker keyword for the API-shape lesson",
             scenario=(
-                "Carol showed Tom the libraries the village used most. Every one "
+                "Carol showed Tom the libraries the meadow folk used most. Every one "
                 "had a small, focused API."
             ),
             need=(
@@ -1001,8 +946,7 @@ G12_17 = SubjectCurriculum(
                 "objects, no magic. Easy to test, compose, and understand."
             ),
             resolution=(
-                "Tom's second library was half the size and twice as useful. The "
-                "village adopted it because it was predictable."
+                "Tom's second library was half the size and twice as useful. The village adopted it because it was predictable. Carol marked {drawn.a} on the watchhouse beam, the lookout high above the valley quiet at last."
             )),
         _ex("(= [1 2 3] (vec '(1 2 3)))", True,
             "a tiny example of a data-first conversion at the API edge",
@@ -1012,7 +956,7 @@ G12_17 = SubjectCurriculum(
                 "to a vector. Plain data in, plain data out."
             ),
             need=(
-                "This is the API shape the village trusted: no wrappers, no objects, "
+                "This is the API shape the valley trusted: no wrappers, no objects, "
                 "just the data transformation."
             ),
             mapping=(
@@ -1021,8 +965,7 @@ G12_17 = SubjectCurriculum(
                 "what they get."
             ),
             resolution=(
-                "Tom saw the power: libraries that work with plain data are easier "
-                "to use, test, and compose with other code."
+                'Tom saw the power: libraries that work with plain data are easier to use, test, and compose with other code (with `1` as the input value) (with `3` as the input value).'
             )),
     ],
     subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G12,
@@ -1041,7 +984,7 @@ G12_18 = SubjectCurriculum(
             "the marker for the style-guide lesson",
             scenario=(
                 "The season had nearly ended. Carol and Tom reviewed the code Tom "
-                "had written. They checked it against the village's style guide."
+                "had written. They checked it against the valley's style guide."
             ),
             need=(
                 "Tom had written names in camelCase, indented with four spaces. "
@@ -1050,11 +993,10 @@ G12_18 = SubjectCurriculum(
             mapping=(
                 "Clojure style: kebab-case names (like my-function), two-space "
                 "indent, and threading operators (-> and ->>) for deep nesting. "
-                "These make code readable to every shepherd in the village."
+                "These make code readable to every shepherd in the watchhouse."
             ),
             resolution=(
-                "Tom reformatted his code to match the guide. It looked cleaner. "
-                "By season's end, he wrote in style without thinking."
+                "Tom reformatted his code to match the guide. It looked cleaner. By season's end, he wrote in style without thinking. The fold gate held tight against the count of {drawn.a}, slate cool under the elder hand."
             )),
         _ex('(do "prefer pure functions, name predicates with ?, danger! ops with !" :style)',
             ":style",
@@ -1074,9 +1016,7 @@ G12_18 = SubjectCurriculum(
                 "warns readers: be careful, this one changes something."
             ),
             resolution=(
-                "Tom renamed his functions. Now a reader could glance at the name "
-                "and know: this one just reads data, this one might change it. The "
-                "naming was its own documentation."
+                'Tom renamed his functions. Now a reader could glance at the name and know: this one just reads data, this one might change it. The naming was its own documentation. Tom chalked {drawn.a} on the watchhouse notice, and the morning record stood for the next shepherd to read.'
             )),
     ],
     subplots=_GOAL_SUBPLOTS, plan_pool=_PLAN_G12,

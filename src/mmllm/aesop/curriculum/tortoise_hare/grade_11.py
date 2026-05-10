@@ -158,7 +158,7 @@ G11_02 = SubjectCurriculum(
             scenario=(
                 "The tortoise had inscribed two phrases in the dust: one read "
                 "'hare-tortoise' and another read just 'hare'. She wanted to know "
-                "if the longer phrase began with the shorter one."
+                "if the longer phrase began with the shorter one. The form's value to weigh was \"hare-tortoise\"."
             ),
             need=(
                 "Rather than laboriously comparing letter by letter, she reached "
@@ -185,7 +185,7 @@ G11_02 = SubjectCurriculum(
             scenario=(
                 "Mossback had learned to call the host's toUpperCase using dot-prefix "
                 "on the string. But she noticed the host allowed another syntax — "
-                "dot placed before the method name instead of before the instance."
+                "dot placed before the method name instead of before the instance. The form's value to weigh was \"abc\"."
             ),
             need=(
                 "She wanted to test whether this alternate form worked just as well, "
@@ -221,9 +221,7 @@ G11_03 = SubjectCurriculum(
             question_what="the absolute value of the integer -7 produced by calling the static host method Math/abs via slash notation",
             goal_text="call the static host method Math/abs with the argument -7",
             scenario=(
-                "The tortoise was holding a thermometer that read negative seven. "
-                "She wanted the absolute distance from zero — not the negative sign, "
-                "just the magnitude."
+                'The tortoise was holding a thermometer that read negative seven. She wanted the absolute distance from zero — not the negative sign, just the magnitude. The value drawn fresh was -7.'
             ),
             need=(
                 "Rather than manually removing the sign, she turned to the host's "
@@ -248,9 +246,7 @@ G11_03 = SubjectCurriculum(
             question_what="the maximum value of the integers 3 and 9 produced by calling the static host method Math/max via slash notation",
             goal_text="call the static host method Math/max to find the larger of two numbers",
             scenario=(
-                "Pip the hare had run two races, recording speeds of 3 units and "
-                "9 units. The tortoise wanted to find which speed was faster — "
-                "the larger of the two."
+                'Pip the hare had run two races, recording speeds of 3 units and 9 units. The tortoise wanted to find which speed was faster — the larger of the two.'
             ),
             need=(
                 "Rather than eyeball the numbers, she called on the host's static "
@@ -263,8 +259,7 @@ G11_03 = SubjectCurriculum(
                 "summoned by toolshed-name, slash, and method-name."
             ),
             resolution=(
-                "the host compared the two speeds and returned 9 — the larger, "
-                "confirming Pip's second sprint had been faster."
+                "the host compared the two speeds and returned 9 — the larger, confirming Pip's second sprint had been faster."
             ),
             tags=("story",),
         ),
@@ -303,8 +298,7 @@ G11_04 = SubjectCurriculum(
                 "Called as `(count string)`, it answers the length question directly."
             ),
             resolution=(
-                "the host counted out eight letters in her name, and the tortoise "
-                "had her answer without lifting a paw."
+                'the host counted out eight letters in her name, and the {drawn.a} had her answer without lifting a paw.'
             ),
             tags=("story",),
         ),
@@ -315,8 +309,7 @@ G11_04 = SubjectCurriculum(
             question_what='the number of characters in the string hare via the count function',
             goal_text="count the characters in another string",
             scenario=(
-                "Pip the hare's name was written beside Mossback's. She wanted to "
-                "count his name too, using the same routine."
+                "Pip the {drawn.a}'s name was written beside Mossback's. She wanted to count his name too, using the same routine."
             ),
             need=(
                 "The same `count` tool works on any string, so the tortoise could "
@@ -402,9 +395,7 @@ G11_06 = SubjectCurriculum(
             question_what='the newly constructed String object created from a text argument via the new keyword',
             goal_text="construct a host String object using the new keyword",
             scenario=(
-                "The tortoise wanted to construct another String, this time from "
-                "the letters 'jump'. She knew the dot-construct worked, but the "
-                "host also offered an alternate form: the `new` keyword."
+                "The tortoise wanted to construct another String, this time from the letters 'jump'. She knew the dot-construct worked, but the host also offered an alternate form: the `new` keyword."
             ),
             need=(
                 "Testing the alternate construction syntax, she wanted to confirm "
@@ -416,8 +407,7 @@ G11_06 = SubjectCurriculum(
                 "only the syntax order changes."
             ),
             resolution=(
-                "the host built a fresh String from 'jump', proving the alternate "
-                "`new` keyword invokes the same constructor as dot-construct."
+                "the host built a fresh String from 'jump', proving the alternate `new` keyword invokes the same constructor as dot-construct."
             ),
             tags=("story",),
         ),
@@ -440,9 +430,7 @@ G11_07 = SubjectCurriculum(
             question_what="the element at index 1 of the int-array [10 20 30] via the aget function",
             goal_text="access an element in a host array by index",
             scenario=(
-                "The tortoise constructed a host primitive array — a row of "
-                "integers arranged side by side: 10, 20, 30. She wanted to reach in "
-                "and pluck out the element at position 1 (the second position)."
+                'The tortoise constructed a host primitive array — a row of integers arranged side by side: 10, 20, 30. She wanted to reach in and pluck out the element at position 20 (the second position).'
             ),
             need=(
                 "Host arrays store values in fixed positions, numbered from zero. "
@@ -450,13 +438,10 @@ G11_07 = SubjectCurriculum(
                 "`aget` (array-get) routine."
             ),
             mapping=(
-                "The `aget` function takes a host array and an index, returning the "
-                "element at that position. `(aget a 1)` reads position 1 from array "
-                "`a`, where position 0 is the first element, position 1 the second."
+                'The `aget` function takes a host array and an index, returning the element at that position. `(aget a 20)` reads position 20 from array `a`, where position 0 is the first element, position 20 the second.'
             ),
             resolution=(
-                "the host returned the value at position 1 — the number 20 — "
-                "plucked from its place in the row."
+                'the host returned the value at position 20 — the number 20 — plucked from its place in the row.'
             ),
             tags=("story",),
         ),
@@ -467,9 +452,7 @@ G11_07 = SubjectCurriculum(
             question_what="the length of the int-array [1 2 3] via the alength function",
             goal_text="get the length of a host array",
             scenario=(
-                "The tortoise built another host array — this time holding "
-                "three integers: 1, 2, 3. She wanted to know how many positions "
-                "the array held."
+                'The tortoise built another host array — this time holding three integers: 1, 2, 3. She wanted to know how many positions the array held. The value drawn fresh was 1.'
             ),
             need=(
                 "Like strings and sequences, host arrays have a length — a tool to "
@@ -482,8 +465,8 @@ G11_07 = SubjectCurriculum(
                 "walking through them one by one."
             ),
             resolution=(
-                "the host returned 3, confirming the array held exactly three slots "
-                "in its row."
+                "the host confirmed the array's exact slot-count, the "
+                "row's length matching what had been allocated."
             ),
             tags=("story",),
         ),
@@ -508,7 +491,7 @@ G11_08 = SubjectCurriculum(
             scenario=(
                 "The tortoise bound the string 'abc' to a name and wanted to call "
                 "the host's toUpperCase method on it. But she wanted to mark the "
-                "binding with a small tag telling the host what kind of tool it was."
+                "binding with a small tag telling the host what kind of tool it was. The form's value to weigh was \"abc\"."
             ),
             need=(
                 "A type hint — a small mark on the binding — guides the host's "
@@ -563,13 +546,10 @@ G11_09 = SubjectCurriculum(
                 "operation to succeed). By default, the host checks."
             ),
             mapping=(
-                "The `+` form runs with checked arithmetic by default — if the sum "
-                "would overflow the host's primitive size, the host catches it. "
-                "Ordinary values like 1 and 2 don't overflow, so the sum is safe."
+                "The `+` form runs with checked arithmetic by default — if the sum would overflow the host's primitive size, the host catches it. Ordinary values like {drawn.a} and {drawn.b} don't overflow, so the sum is safe."
             ),
             resolution=(
-                "the host returned 3, the safe sum of 1 and 2, with overflow "
-                "checking standing ready."
+                'the host returned the safe sum of {drawn.a} and {drawn.b}, overflow checking standing ready in case it had been needed.'
             ),
             tags=("story",),
         ),
@@ -685,10 +665,7 @@ G11_14 = SubjectCurriculum(
             question_what="the square root of 4 produced by the static host method Math/sqrt via slash notation when the call succeeds",
             goal_text="wrap a static host method call in error handling",
             scenario=(
-                "The tortoise wanted to compute the square root of 4 using the "
-                "host's Math/sqrt routine. But she knew that calling into the host "
-                "sometimes raised errors — and she wanted to guard against them."
-            ),
+                "The tortoise wanted to compute the square root of 4 using the host's Math/sqrt routine. But she knew that calling into the host sometimes raised errors — and she wanted to guard against them."           ),
             need=(
                 "When host methods are called, exceptions can leak through the "
                 "interop boundary. A try/catch wrapper catches those exceptions, "
@@ -700,8 +677,7 @@ G11_14 = SubjectCurriculum(
                 "If the host call succeeds, the value passes through."
             ),
             resolution=(
-                "the host computed the square root of 4 (the value 2.0) without "
-                "raising an error, so the try passed the result through cleanly."
+                'the host computed the square root of 4 (the value 2.0) without raising an error, so the try passed the result through cleanly.'
             ),
             tags=("story",),
         ),

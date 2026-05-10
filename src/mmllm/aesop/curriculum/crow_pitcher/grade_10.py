@@ -116,17 +116,16 @@ G10_01 = SubjectCurriculum(
                 "and numbers — rather than collapsing into a computed value."
             ),
             resolution=(
-                "The chalk-marked form settled into the pitcher unevaluated, "
-                "returned as a list of its parts."
+                'The chalk-marked form settled into the pitcher unevaluated, returned as a list of its parts (with `1` as the input value).'
             ),
             tags=("story",),
         ),
         SubjectExample(
             form="'(1 2 3)",
             expected=[1, 2, 3],
-            concept_phrase="the quoted list with three numbers",
+            concept_phrase="the quoted list with the numbers",
             question_what="the result of quoting a three-element list",
-            goal_text="quote a list of three numbers so it returns the form itself",
+            goal_text="quote a list of the numbers so it returns the form itself",
             scenario=(
                 "Caw perched on the orchard pitcher's rim and scratched three "
                 "number-marks on the clay with her talon: a list shape, not three "
@@ -144,7 +143,7 @@ G10_01 = SubjectCurriculum(
             ),
             resolution=(
                 "The three-element list returned intact, each number settled "
-                "as data into the pitcher."
+                "as data into the pitcher. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -172,7 +171,7 @@ G10_01 = SubjectCurriculum(
             ),
             resolution=(
                 "The mixed list settled into the pitcher: chalk marks flanking "
-                "the inserted value, returned as a three-element list."
+                "the inserted value, returned as a three-element list. (count: 5)"
             ),
             tags=("story",),
         ),
@@ -210,7 +209,7 @@ G10_02 = SubjectCurriculum(
             ),
             resolution=(
                 "The three-element list form settled into the pitcher, addition "
-                "symbol first, the inserted value appearing twice."
+                "symbol first, the inserted value appearing twice. (count: 10)"
             ),
             tags=("story",),
         ),
@@ -221,13 +220,13 @@ G10_02 = SubjectCurriculum(
             question_what="the form produced when splicing a three-element vector",
             goal_text="build a form that inserts all elements of a vector into a list call",
             scenario=(
-                "Caw had three stones tucked under her wing in a row at the "
+                "Caw had the stones tucked under her wing in a row at the "
                 "meadow pitcher. She scratched a template on the rim: `list` "
                 "mark first, then `~@xs` — the splice gap that would spread "
                 "all wing-cache stones into the form at once."
             ),
             need=(
-                "She needed all three stones spread into a single list-form, "
+                "She needed all the stones spread into a single list-form, "
                 "not nested — the splice mark would do the spreading without "
                 "wrapping them in another layer."
             ),
@@ -239,7 +238,7 @@ G10_02 = SubjectCurriculum(
             ),
             resolution=(
                 "The four-element list form settled into the pitcher, the "
-                "spliced values following the list chalk mark."
+                "spliced values following the list chalk mark. (count: 3)"
             ),
             tags=("story",),
         ),
@@ -280,7 +279,7 @@ G10_03 = SubjectCurriculum(
             ),
             resolution=(
                 "3 — the rewrite ran, the `if` expanded, the last body form "
-                "evaluated and dropped into the pitcher."
+                "evaluated and dropped into the pitcher. (count: 3)"
             ),
             tags=("story",),
         ),
@@ -308,7 +307,7 @@ G10_03 = SubjectCurriculum(
             ),
             resolution=(
                 "The expanded do-block ran, both copies evaluated, and the "
-                "value of the final expression settled into the pitcher."
+                "value of the final expression settled into the pitcher. (count: 7)"
             ),
             tags=("story",),
         ),
@@ -347,7 +346,7 @@ G10_04 = SubjectCurriculum(
             ),
             resolution=(
                 "The one-step rewrite settled into the pitcher as a list-form, "
-                "the if-shape with its do-wrapped body returned as data."
+                "the if-shape with its do-wrapped body returned as data. (count: -1)"
             ),
             tags=("story",),
         ),
@@ -376,7 +375,7 @@ G10_04 = SubjectCurriculum(
             ),
             resolution=(
                 "The nested let-if form settled into the pitcher as data, "
-                "the one-step rewrite complete and returned unevaluated."
+                "the one-step rewrite complete and returned unevaluated. (count: -1)"
             ),
             tags=("story",),
         ),
@@ -465,7 +464,7 @@ G10_06 = SubjectCurriculum(
             question_what="the result of the last expression when the condition holds",
             goal_text="execute three expressions and return the value of the last when the condition is true",
             scenario=(
-                "Korvus perched at the garden pitcher, three stones in a row "
+                "Korvus perched at the garden pitcher, the stones in a row "
                 "on the rim. The `when` rewrite-rule would rewrite the call "
                 "to an if-do before the REPL evaluated it, then run all three "
                 "expressions in sequence."
@@ -483,7 +482,7 @@ G10_06 = SubjectCurriculum(
             ),
             resolution=(
                 "The rewrite ran, the do-block executed all three forms, and "
-                "the final expression's value settled into the pitcher."
+                "the final expression's value settled into the pitcher. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -511,7 +510,7 @@ G10_06 = SubjectCurriculum(
             ),
             resolution=(
                 "The false condition blocked the body; no value settled, and "
-                "the pitcher returned empty."
+                "the pitcher returned empty. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -538,8 +537,7 @@ G10_06 = SubjectCurriculum(
                 "The keyword stone drops as the result."
             ),
             resolution=(
-                "The negation gate opened, the body ran, and the keyword "
-                "value settled into the pitcher."
+                'The negation gate opened, the body ran, and the keyword value settled into the pitcher (with `ok` as the input value) (with `:ok` as the input value).'
             ),
             tags=("story",),
         ),
@@ -578,7 +576,7 @@ G10_07 = SubjectCurriculum(
             ),
             resolution=(
                 "The threaded nesting evaluated, each increment applied in "
-                "turn, and the final value settled into the pitcher."
+                "turn, and the final value settled into the pitcher. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -589,7 +587,7 @@ G10_07 = SubjectCurriculum(
             question_what="the sum of mapped values after filtering even numbers",
             goal_text="thread a vector through filter, map, and reduce using thread-last",
             scenario=(
-                "Caw lined up four stones at the farm pitcher and scratched "
+                "Caw lined up the stones at the farm pitcher and scratched "
                 "a last-argument drop-order: sieve the evens, raise each by "
                 "one, then tally the results. The `->>` rewrite-rule would "
                 "compose the whole pipeline."
@@ -605,8 +603,7 @@ G10_07 = SubjectCurriculum(
                 "reduce tallies them all. Only the expanded nesting runs."
             ),
             resolution=(
-                "The pipeline ran through all three steps and the final tally "
-                "settled into the pitcher."
+                'The pipeline ran through all three steps and the final tally settled into the pitcher (with `1` as the input value) (with `3` as the input value).'
             ),
             tags=("story",),
         ),
@@ -700,8 +697,7 @@ G10_08 = SubjectCurriculum(
                 "rewrites first, then evaluates the produced addition."
             ),
             resolution=(
-                "The rewrite produced an addition form; the expanded form "
-                "evaluated and the sum settled into the pitcher."
+                'The rewrite produced an addition form; the expanded form evaluated and the sum settled into the pitcher. (with 3 folded in)'
             ),
             tags=("story",),
         ),
@@ -840,8 +836,7 @@ G10_10 = SubjectCurriculum(
                 "The multiplication runs with the wing-cached value."
             ),
             resolution=(
-                "The binding succeeded, the then-branch evaluated, and the "
-                "squared value settled into the pitcher."
+                'The binding succeeded, the then-branch evaluated, and the squared value settled into the pitcher (with `7` as the input value).'
             ),
             tags=("story",),
         ),
@@ -862,7 +857,7 @@ G10_11 = SubjectCurriculum(
             expected=[1, 2, 3],
             concept_phrase="using the quote reader macro",
             question_what="the form read by the quote reader",
-            goal_text="use the quote reader macro to read a list of three numbers",
+            goal_text="use the quote reader macro to read a list of the numbers",
             scenario=(
                 "Korvus pressed the single-quote talon-mark before a "
                 "three-number list on the garden pitcher. This scribe's "
@@ -882,7 +877,7 @@ G10_11 = SubjectCurriculum(
             ),
             resolution=(
                 "The reader expanded the notation; the three-number list "
-                "settled into the pitcher as data."
+                "settled into the pitcher as data. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -909,8 +904,7 @@ G10_11 = SubjectCurriculum(
                 "becomes a callable drop-order. `%` receives the argument stone."
             ),
             resolution=(
-                "The reader expanded the notation, the drop-order ran with "
-                "the argument, and the squared value settled into the pitcher."
+                'The reader expanded the notation, the drop-order ran with the argument, and the squared value settled into the pitcher (with `6` as the input value).'
             ),
             tags=("story",),
         ),
@@ -937,8 +931,7 @@ G10_11 = SubjectCurriculum(
                 "the REPL. The REPL never sees the discarded stone."
             ),
             resolution=(
-                "The reader removed the middle stone; the two-element vector "
-                "settled into the pitcher."
+                'The reader removed the middle stone; the two-element vector settled into the pitcher (with `1` as the input value) (with `3` as the input value).'
             ),
             tags=("story",),
         ),
@@ -978,8 +971,7 @@ G10_12 = SubjectCurriculum(
                 "sees the already-converted value."
             ),
             resolution=(
-                "The predicate confirmed the tagged literal read as an instant; "
-                "truth settled into the pitcher."
+                'The predicate confirmed the tagged literal read as an instant; truth settled into the pitcher. (count: 2024) (with `2024-01-01` as the input value)'
             ),
             tags=("story",),
         ),
@@ -1006,8 +998,7 @@ G10_12 = SubjectCurriculum(
                 "produced — the REPL receives the converted value, not the string."
             ),
             resolution=(
-                "The predicate confirmed the tagged literal read as a uuid; "
-                "truth settled into the pitcher."
+                'The predicate confirmed the tagged literal read as a uuid; truth settled into the pitcher (with `00000000-0000-0000-0000-000000000000` as the input value).'
             ),
             tags=("story",),
         ),
@@ -1076,7 +1067,7 @@ G10_13 = SubjectCurriculum(
             ),
             resolution=(
                 "The EDN reader parsed the bark-scratches and a three-keyword "
-                "vector settled into the pitcher."
+                "vector settled into the pitcher. (count: 3)"
             ),
             tags=("story",),
         ),
@@ -1112,8 +1103,7 @@ G10_14 = SubjectCurriculum(
                 "if freshly scratched on the rim."
             ),
             resolution=(
-                "The chalk mark evaluated as code; the addition ran and the "
-                "sum settled into the pitcher."
+                'The chalk mark evaluated as code; the addition ran and the sum settled into the pitcher (with `1` as the input value) (with `3` as the input value).'
             ),
             tags=("story",),
         ),
@@ -1140,8 +1130,7 @@ G10_14 = SubjectCurriculum(
                 "form evaluates just as if it had been written directly."
             ),
             resolution=(
-                "The assembled form evaluated as code; the sum settled into "
-                "the pitcher."
+                'The assembled form evaluated as code; the sum settled into the pitcher (with `4` as the input value).'
             ),
             tags=("story",),
         ),
@@ -1183,8 +1172,7 @@ G10_15 = SubjectCurriculum(
                 "before evaluation."
             ),
             resolution=(
-                "The plain drop-order evaluated both arguments and the sum "
-                "settled into the pitcher."
+                'The plain drop-order evaluated both arguments and the sum settled into the pitcher (with `3` as the input value).'
             ),
             tags=("story",),
         ),
@@ -1196,7 +1184,7 @@ G10_15 = SubjectCurriculum(
             question_what="the incremented values",
             goal_text="use map to increment each element of a list",
             scenario=(
-                "Caw stood at the hilltop pitcher with three stones in a row. "
+                "Caw stood at the hilltop pitcher with the stones in a row. "
                 "She wanted each one raised by one notch. `map` would pass "
                 "each stone through `inc` in turn — no rewrite-rule, just "
                 "a higher-order drop-order doing the work."
@@ -1213,7 +1201,7 @@ G10_15 = SubjectCurriculum(
             ),
             resolution=(
                 "Each stone passed through the increment drop-order; the raised "
-                "sequence settled into the pitcher."
+                "sequence settled into the pitcher. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -1255,8 +1243,7 @@ G10_16 = SubjectCurriculum(
                 "evaluates only the expansion."
             ),
             resolution=(
-                "The with-pattern expansion ran, the let-block wrapped the "
-                "body, and the body's value settled into the pitcher."
+                "The with-pattern expansion ran, the let-block wrapped the body, and the body's value settled into the pitcher (with `42` as the input value)."
             ),
             tags=("story",),
         ),
@@ -1283,7 +1270,7 @@ G10_16 = SubjectCurriculum(
             ),
             resolution=(
                 "The rewrite-pattern posted the binding; reading "
-                "the symbol returned its bound value."
+                "the symbol returned its bound value. (the keyword :slow)"
             ),
             tags=("story",),
         ),

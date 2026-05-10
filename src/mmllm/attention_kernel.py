@@ -26,7 +26,31 @@ Phase-1c semantics preserved:
 """
 from __future__ import annotations
 
+import os
 from typing import Optional
+
+
+def _bank_repeat_n() -> int:
+    """How many iterative refinement passes through Local Bank to run
+    per forward. Reads MMLLM_BANK_REPEAT_N (default 1 = no iteration,
+    legacy behavior). When > 1, feeds the previous iteration's mem_out
+    back into bank_q (scaled by MMLLM_BANK_REPEAT_ALPHA) and re-queries
+    the bank. Cost scales linearly: ~+1 PKM lookup per extra repeat.
+    Tier-3 spike #7+8."""
+    try:
+        return max(1, int(os.environ.get("MMLLM_BANK_REPEAT_N", "1")))
+    except ValueError:
+        return 1
+
+
+def _bank_repeat_alpha() -> float:
+    """Scale on the previous iteration's mem_out when feeding it back
+    into bank_q. Reads MMLLM_BANK_REPEAT_ALPHA (default 0.1). Small
+    so iterative refinement converges; too high diverges."""
+    try:
+        return float(os.environ.get("MMLLM_BANK_REPEAT_ALPHA", "0.1"))
+    except ValueError:
+        return 0.1
 
 import torch
 import torch.nn.functional as F
@@ -121,6 +145,7 @@ def attention(
     short_cache: Optional[tuple], long_cache: Optional[tuple],
     *,
     skip_bank: bool = False,
+    netbank=None,
 ) -> tuple:
     """Three-tier attention with hard-split Q heads.
 
@@ -135,6 +160,11 @@ def attention(
     multiplies the SDPA path by sigmoid(Q·w), so output is
     `gate · attn_l_sdpa` instead of `gate · attn_l_sdpa + (1-gate) · 0`,
     which is the same thing.
+
+    `netbank` (optional): NetBank module for the third long-tier source.
+    When provided, queried with the same bank_query as Local; result is
+    passed as the 4th argument to long_gate (which switches to its
+    3-way path). When None, gates fall back to 2-way.
     """
     B = x.size(0)
     T = x.size(1)
@@ -220,10 +250,12 @@ def attention(
     else:
         attn_l_sdpa = F.scaled_dot_product_attention(q_long, k_l_rep, v_l_rep)
 
-    # LONG tier (b): bank retrieval (semantic memory). Phase-5 draft
-    # mode skips this entirely — saves the bank's K_a/K_b matmuls,
-    # top-K, and gather. Required for SwitchGate's gate(1-gate)
-    # combiner to produce only the SDPA contribution.
+    # LONG tier (b/c): retrieval. (b) is the local PKM bank (semantic /
+    # working memory); (c) is NetBank (off-machine long-term memory),
+    # only present when `netbank` is non-None. Phase-5 draft mode skips
+    # both — saves the bank-side matmuls + gather + simulated network
+    # latency. Required for SwitchGate's gate(1-gate) combiner to produce
+    # only the SDPA contribution.
     if skip_bank:
         attn_l = attn_l_sdpa
     else:
@@ -235,9 +267,24 @@ def attention(
         ctx_mod = bank_query(x)
         bank_q = q_long_flat + ctx_mod if ctx_mod is not None else q_long_flat
         mem_out = memory(bank_q)
+        # Iterative refinement on Local Bank — feed the previous output
+        # back into bank_q and re-query, N times. Lets Local "deliberate"
+        # at structural-decision positions. N=1 is identity (legacy).
+        n_repeat = _bank_repeat_n()
+        if n_repeat > 1:
+            alpha = _bank_repeat_alpha()
+            for _ in range(n_repeat - 1):
+                bank_q = bank_q + alpha * mem_out
+                mem_out = memory(bank_q)
         attn_l_mem = mem_out.reshape(B, T, n_long_heads, head_dim).transpose(1, 2)
-        # Combine the two long-tier sources via the configured gate
-        attn_l = long_gate(q_long, attn_l_sdpa, attn_l_mem)
+        # NetBank queries off-machine. Same query vector as Local; the
+        # gate decides per-token how much to weight each source.
+        if netbank is not None:
+            net_out = netbank(bank_q)
+            attn_l_net = net_out.reshape(B, T, n_long_heads, head_dim).transpose(1, 2)
+            attn_l = long_gate(q_long, attn_l_sdpa, attn_l_mem, attn_l_net)
+        else:
+            attn_l = long_gate(q_long, attn_l_sdpa, attn_l_mem)
 
     # Concat short + long head outputs, project
     attn = torch.cat([attn_s, attn_l], dim=1)
@@ -261,11 +308,14 @@ def block_forward(
     x: torch.Tensor, cos: torch.Tensor, sin: torch.Tensor,
     short_cache: Optional[tuple], long_cache: Optional[tuple],
     skip_bank: bool = False,
+    netbank=None,
 ) -> tuple:
     """Pre-norm decoder block with three-tier attention + SwiGLU FFN.
 
     `skip_bank=True` (Phase-5 draft mode) routes through to the
-    attention kernel; bank PKM lookup is skipped."""
+    attention kernel; bank PKM lookup is skipped.
+    `netbank` (optional): NetBank module for the off-machine long-term
+    memory tier. When non-None, attention uses the 3-way long_gate path."""
     attn_out, new_s, new_l = attention(
         q_proj, k_proj_s, v_proj_s, k_proj_l, v_proj_l, o_proj,
         memory, long_gate, bank_query, bank_feedback,
@@ -274,6 +324,7 @@ def block_forward(
         short_window, long_window,
         norm1(x), cos, sin, short_cache, long_cache,
         skip_bank=skip_bank,
+        netbank=netbank,
     )
     x = x + attn_out
     x_norm = norm2(x)

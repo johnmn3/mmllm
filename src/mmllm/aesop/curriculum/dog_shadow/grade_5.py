@@ -57,9 +57,7 @@ G5_01 = SubjectCurriculum(grade=5, subject_id="G5-01",
                 'the REPL hands back.'
             ),
             resolution=(
-                'The REPL read the condition, took the matching arm, and '
-                'handed back its value. The other arm remained unrun, the '
-                'path beneath it untouched.'
+                'The REPL read the condition, took the matching arm, and handed back its value. The other arm remained unrun, the path beneath it untouched (with `:a` as the input value).'
             ),
             tags=("story",),
         ),
@@ -87,9 +85,7 @@ G5_01 = SubjectCurriculum(grade=5, subject_id="G5-01",
                 'takes only the chosen arm.'
             ),
             resolution=(
-                'The REPL read the false stone, took the downstream arm, '
-                'and handed back its value. The upstream arm had never been '
-                'sniffed. The decision was final.'
+                'The REPL read the false stone, took the downstream arm, and handed back its value. The upstream arm had never been sniffed. The decision was final (with `:a` as the input value).'
             ),
             tags=("story",),
         ),
@@ -100,10 +96,7 @@ G5_01 = SubjectCurriculum(grade=5, subject_id="G5-01",
             question_what="the if's branch",
             goal_text="choose between :a and :b based on whether 5 is greater than 3",
             scenario=(
-                'The path forked again, this time by the river bank. A new '
-                'stone at the fork held a test: is 5 bigger than 3? Bell '
-                'the hound checked the marks. The test read true — five '
-                'bones stacked higher than three.'
+                'The path forked again, this time by the river bank. A new stone at the fork held a test: is 5 bigger than 3? Bell the hound checked the marks. The test read true — {drawn.a} bones stacked higher than three.'
             ),
             need=(
                 'She wanted to take the right arm without guessing. The test '
@@ -191,9 +184,7 @@ G5_03 = SubjectCurriculum(grade=5, subject_id="G5-03",
                 'is returned — not a default branch, but an empty mouth.'
             ),
             resolution=(
-                'The REPL read the true stone and handed back the value. The '
-                'silence-on-false rule is why when has only one arm: you get '
-                'the answer or you get nothing.'
+                'The REPL read the true stone and handed back yes. The silence-on-false rule is why when has only one arm: you get the answer or you get nothing (with `:yes` as the input value).'
             ),
             tags=("story",),
         ),
@@ -223,7 +214,7 @@ G5_03 = SubjectCurriculum(grade=5, subject_id="G5-03",
             resolution=(
                 'The REPL read the false stone, found no arm to take, and handed '
                 "back nothing. The when-form's contract is simple: true gives the "
-                'value, false gives silence.'
+                'value, false gives silence — yes.'
             ),
             tags=("story",),
         ),
@@ -383,7 +374,7 @@ G5_07 = SubjectCurriculum(grade=5, subject_id="G5-07",
                 'The REPL walked the first gate, found it truthy, walked the second, '
                 'found it truthy, walked the third, found it truthy, and handed back '
                 "the last gate's value. All gates had opened. The final value was the "
-                'answer.'
+                'answer — 3.'
             ),
             tags=("story",),
         ),
@@ -410,10 +401,7 @@ G5_07 = SubjectCurriculum(grade=5, subject_id="G5-07",
                 'value.'
             ),
             resolution=(
-                'The REPL walked the first gate, found it falsey, walked the second, '
-                'found it falsey, walked the third, found it truthy, and handed back '
-                'that value immediately. The walk had stopped at the first open gate. '
-                'The answer was certain.'
+                'The REPL walked the first gate, found it falsey, walked the second, found it falsey, walked the third, found it truthy, and handed back that value immediately. The walk had stopped at the first open gate. The answer was certain (with `:found` as the input value).'
             ),
             tags=("story",),
         ),
@@ -448,7 +436,7 @@ G5_08 = SubjectCurriculum(grade=5, subject_id="G5-08",
             resolution=(
                 'The REPL evaluated the comparison and found it false. The not-form '
                 'flipped that false to true and handed back the inverted verdict. The '
-                'negation was complete.'
+                'negation was complete — 2.'
             ),
             tags=("story",),
         ),
@@ -790,7 +778,7 @@ G5_14 = SubjectCurriculum(grade=5, subject_id="G5-14",
             resolution=(
                 'The REPL unpacked the basket, took the four bones as arguments, '
                 'followed the + recipe through all of them, and handed back the '
-                'sum. The applied recipe was complete.'
+                'sum. The applied recipe was complete — 4.'
             ),
             tags=("story",),
         ),
@@ -817,7 +805,7 @@ G5_14 = SubjectCurriculum(grade=5, subject_id="G5-14",
             resolution=(
                 'The REPL unpacked the basket, took all five bones as arguments, '
                 'followed the max recipe, and handed back the largest. The applied '
-                'recipe was complete.'
+                'recipe was complete — 5.'
             ),
             tags=("story",),
         ),
@@ -1117,18 +1105,13 @@ G5_20 = SubjectCurriculum(grade=5, subject_id="G5-20",
                 'stay behind on the near bank.'
             ),
             need=(
-                'He wanted just the first three bones from the row. Take counts off the '
-                'first n bones and passes only those through the sieve.'
+                'He wanted just the first {drawn.a} bones from the row. Take counts off the first n bones and passes only those through the sieve.'
             ),
             mapping=(
-                'The take-form is the sieve-gap. The input row is 10, 20, 30, 40, 50. '
-                'The count is 3. Take lets the first three bones through and holds the '
-                'rest back.'
+                'The take-form is the sieve-gap. The input row is 10, 20, 30, 40, 50. The count is 3. Take lets the first {drawn.a} bones through and holds the rest back.'
             ),
             resolution=(
-                'The REPL poured bones 10, 20, 30 through the gap and let the rest fall '
-                'back. The far bank caught the first three bones. The sieve-pour was '
-                'complete.'
+                'The REPL poured bones 10, 20, 30 through the gap and let the rest fall back. The far bank caught the first {drawn.a} bones. The sieve-pour was complete.'
             ),
             tags=("story",),
         ),
@@ -1251,10 +1234,7 @@ G5_22 = SubjectCurriculum(grade=5, subject_id="G5-22",
                 'supplies.'
             ),
             resolution=(
-                'The REPL paced the bank the right number of times, then '
-                'stopped at the base case, and handed back the final tally. '
-                'The trail beneath the pacing had not grown — the '
-                'call-stack was exactly as it began.'
+                'The REPL paced the bank the right number of times, then stopped at the base case, and handed back the final tally. The trail beneath the pacing had not grown — the call-stack was exactly as it began — 1 (with `5` as the input value).'
             ),
             tags=("story",),
         ),

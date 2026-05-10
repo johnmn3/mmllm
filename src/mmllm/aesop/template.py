@@ -480,9 +480,13 @@ def place_phrase(scene: "Scene", location: ont.Location) -> str:
         prep = scene.rng.choice(("on", "near", "by"))
     elif name == "river bank":
         prep = scene.rng.choice(("on", "near", "by", "along"))
-    elif name in ("farm", "market", "village"):
-        # "in the farm/market/village" sounds wrong; these take "on/at/near".
+    elif name == "farm":
+        # Farms are work-spaces ("on the farm" is idiomatic), not interiors.
         prep = scene.rng.choice(("on", "at", "near", "by"))
+    elif name in ("market", "village"):
+        # Markets and villages are zones one is "at / in / near", not "on".
+        # ("on the village" / "on the market" reads as standing-atop.)
+        prep = scene.rng.choice(("at", "in", "near", "by"))
     else:
         prep = scene.rng.choice(("in", "near", "at the edge of", "by"))
     return f"{prep} {location.article} {name}"

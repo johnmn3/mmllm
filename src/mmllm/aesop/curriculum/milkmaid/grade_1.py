@@ -50,11 +50,12 @@ in the REPL and read off whatever it returned."""),
     #    so the same wager-template doesn't always read as "drew a wager
     #    in the dust" verbatim (cosmetic variety).
     SubplotTemplate("""\
-At a moss-covered milestone {place}, {milkmaid_phrase} sketched a small
-wager into the path: whoever guessed the result of {form_display}
-first would win the right to set the next race. {farmer_phrase},
-{emo_patient}, said it was simpler to type the form into the REPL
-than to argue about {concept_phrase}."""),
+At a wayside post on the road to market {place}, {milkmaid_phrase}
+sketched a small wager in the dust: whoever guessed the result of
+{form_display} first would carry the heavier pail to market.
+{farmer_phrase}, {emo_patient}, said it was simpler to type the
+form into the REPL than to argue about {concept_phrase} with a
+pail of warm milk balanced on her head."""),
 
     # 2b. wager variant — chalk on stone
     SubplotTemplate("""\
@@ -76,7 +77,7 @@ was easier to ask the REPL about {concept_phrase} than to argue."""),
     #    produced "from sprinting from a recent sprint" awkwardness.
     SubplotTemplate("""\
 {farmer_phrase} had been trying to teach {milkmaid_phrase} how the REPL
-works. "Look here," {farmer_he_she} said, pointing to
+works. "Look here," {farmer_he_she_cap} said, pointing to
 {concept_phrase}. "You hand the form {form_display} to the runtime, and
 the runtime hands you back what it evaluates to." {milkmaid}, {emo_tired},
 agreed to try."""),
@@ -87,11 +88,12 @@ agreed to try."""),
     #    equality (= 1 1)" / "the predicate (zero? 0)" don't fit
     #    "read aloud" semantically (you read FORMS aloud, not types).
     SubplotTemplate("""\
-A small audience of forest creatures had gathered {place} to watch
-{milkmaid_phrase} attempt to outwit {farmer_phrase} at reading the REPL.
-{farmer} pointed to {concept_phrase} and read out the form aloud:
-{form_display}. The crowd waited to see who would correctly write
-the form to submit."""),
+A handful of market-goers had gathered around the dairy cart
+{place} to watch {milkmaid_phrase}, {emo_boastful} attempt to outwit
+{farmer_phrase} at reading the REPL. {farmer} pointed to
+{concept_phrase} and read out the form aloud: {form_display}.
+The neighbors waited, pails on the cart still warm, to see who
+would correctly write the form to submit."""),
 
     # 5. The race-pause template — hare pauses mid-race, tortoise catches up
     #    via careful evaluation.
@@ -100,7 +102,7 @@ the form to submit."""),
     #    "They called it impossible." reads as plural-subject right after
     #    a singular "Pip the hare stopped" introduction.
     SubplotTemplate("""\
-Halfway through the race, {milkmaid_phrase} stopped {place} and refused to
+Halfway through the race, {milkmaid_phrase}, {emo_boastful} stopped {place} and refused to
 continue until someone could prove what the form {form_display}
 evaluated to. {milkmaid} called it impossible.
 {farmer_phrase}, walking up at her usual pace, simply said: "Submit
@@ -108,9 +110,10 @@ evaluated to. {milkmaid} called it impossible.
 
     # 6. The notebook template — the tortoise keeps a careful ledger.
     SubplotTemplate("""\
-{farmer_phrase} had been keeping a small leather notebook of every
-form {farmer_he_she} had successfully evaluated. {place_idx}, the
-next entry was {concept_phrase}. {milkmaid_phrase} peered over
+{farmer_phrase} had been keeping a careful chalk-tally on the dairy
+slate of every form {farmer_he_she} had successfully evaluated —
+each entry one more notch toward a steady reckoning. {place_idx},
+the next entry was {concept_phrase}. {milkmaid_phrase}, {emo_boastful} peered over
 {farmer_his_her} shoulder at the form {form_display} and asked what
 it would come out to.""".replace("{place_idx}", "Today {place}")),
 
@@ -127,11 +130,11 @@ it would come out to.""".replace("{place_idx}", "Today {place}")),
 write the form {form_display} and submit it to the REPL — just to be
 sure."""),
 
-    # 8. The puzzle-on-the-path template — they find a riddle on a sign.
+    # 8. The market-board template — a price-board posts a riddle.
     SubplotTemplate("""\
-A wooden sign nailed to a tree {place} carried a puzzle. The riddle
-was simple: it asked the reader to evaluate {form_display}. {milkmaid}
-laughed, {emo_proud}, and declared it too easy. {farmer} said
+A chalk-board nailed beside the market stall {place} carried a puzzle.
+The riddle was simple: it asked the reader to evaluate {form_display}.
+{milkmaid} laughed, {emo_proud}, and declared it too easy. {farmer} said
 patiently that the only way to be sure of {concept_phrase} was to put
 it in the REPL."""),
 ]
@@ -178,48 +181,49 @@ the value really was."""),
     #    Fix: drop "write a form to" verb-on-verb collision; use
     #    "produce a form whose evaluation would" (noun-clause framing).
     SubplotTemplate("""\
-At a moss-covered milestone {place}, {milkmaid_phrase} sketched a small
-wager into the path: whoever could produce a form whose evaluation
-would {goal_text} ahead of the other would win the right to set
-the next race. {farmer_phrase}, {emo_patient}, said it was
+At the wayside post on the road to market {place}, {milkmaid_phrase}
+sketched a small wager in the dust: whoever could produce a form
+whose evaluation would {goal_text} ahead of the other would carry
+the heavier pail home. {farmer_phrase}, {emo_patient}, said it was
 simpler to write {concept_phrase} carefully than to guess at the
-answer."""),
+answer with a pail balanced precariously on the head."""),
 
     # 3. The teacher template — Farmer teaches goal → form.
     #    Fix: "; submit that to the REPL" instead of "and submit it".
     SubplotTemplate("""\
 {farmer_phrase} had been teaching {milkmaid_phrase} how to translate a
-goal into a Clojure form. "If you want to {goal_text}," {farmer_he_she}
+goal into a Clojure form. "If you want to {goal_text}," {farmer_he_she_cap}
 said, "you write {concept_phrase}; submit that to the REPL, and it
 hands you back the value." {milkmaid}, {emo_tired}, agreed to try
 writing it."""),
 
-    # 4. The audience template — onlookers wait to see the form written.
+    # 4. The audience template — market-goers watch the form written.
     SubplotTemplate("""\
-A small audience of forest creatures had gathered {place} to watch
-{milkmaid_phrase} attempt to outwit {farmer_phrase} at writing the
-right form. The challenge: {goal_text}. {farmer} reminded the
-crowd that what mattered was writing {concept_phrase} carefully,
-then submitting it to the REPL — not guessing aloud at the
-answer."""),
+A handful of market-goers had gathered around the dairy cart
+{place} to watch {milkmaid_phrase}, {emo_boastful} attempt to outwit
+{farmer_phrase} at writing the right form. The challenge:
+{goal_text}. {farmer} reminded the neighbors that what mattered
+was writing {concept_phrase} carefully, then submitting it to
+the REPL — not guessing aloud at the answer with the pails still
+warm in the cart."""),
 
     # 5. The race-pause template — pause mid-race for a goal-write.
     #    Fix: drop "write a form to {goal_text}"; reframe as
     #    "until someone could {goal_text} with a Clojure form".
     SubplotTemplate("""\
-Halfway through the race, {milkmaid_phrase} stopped {place} and refused
+Halfway through the race, {milkmaid_phrase}, {emo_boastful} stopped {place} and refused
 to continue until someone could {goal_text} with a Clojure form.
 {milkmaid} called the goal impossible. {farmer_phrase}, walking up at
 {farmer_his_her} usual pace, simply said: "Compose {concept_phrase};
 submit it. Whatever comes back is the answer.\""""),
 
-    # 6. The notebook template — Farmer records goal/form pairs.
+    # 6. The dairy-slate template — Farmer records goal/form pairs.
     SubplotTemplate("""\
-{farmer_phrase} kept a small leather notebook of every goal
-{farmer_he_she} had translated into a Clojure form. Today {place},
-the next entry was a goal: {goal_text}. {farmer} sat with pen in
-hand, ready to compose {concept_phrase}, then let the REPL
-confirm the value."""),
+{farmer_phrase}, {emo_patient} kept a careful chalk-tally on the dairy slate of
+every goal {farmer_he_she} had translated into a Clojure form.
+Today {place}, the next entry was a goal: {goal_text}. {farmer}
+stood by the slate with chalk in hand, ready to compose
+{concept_phrase}, then let the REPL confirm the value."""),
 
     # 7. The boast-and-rebuke template — Milkmaid boasts; Farmer asks
     #    for the actual form. Fix: "To X is something anyone could
@@ -232,13 +236,15 @@ who {place} had grown used to such claims, asked {milkmaid_him_her} to
 actually write {concept_phrase}, then submit it to the REPL —
 just to be sure."""),
 
-    # 8. The puzzle-on-the-path template — a sign poses the goal.
+    # 8. The market-board-puzzle template — a price-board posts the goal.
     SubplotTemplate("""\
-A wooden sign nailed to a tree {place} carried a small puzzle. The
-challenge was simple: {goal_text}. {milkmaid} laughed, {emo_proud}, and
-declared it too easy. {farmer} said patiently that the only way
-to be sure of {concept_phrase} was to write the form and put it
-in the REPL — not to guess at the value from the goal alone."""),
+A chalk-board nailed beside the market stall {place} carried a small
+puzzle. The challenge was simple: {goal_text}. {milkmaid} laughed,
+{emo_proud}, and declared it too easy. {farmer} said patiently that
+the only way to be sure of {concept_phrase} was to write the form
+and put it in the REPL — not to guess at the value from the goal
+alone, the way a daydreamer guesses the value of a pail before
+reaching market."""),
 
     # 9. The Milkmaid-stumbles template — Milkmaid's hurry betrays him; the
     #    Farmer's careful form returns the value first. Delivers
@@ -251,14 +257,14 @@ fell out of place, and the form did not even read as Clojure.
 {farmer_phrase}, {emo_patient}, had already written
 {concept_phrase} on a flat stone, neat and unhurried, and
 submitted it to the REPL. The value came back as quietly as
-{farmer_he_she} had written. The hares of the meadow looked
+{farmer_he_she_cap} had written. The hares of the meadow looked
 between the two slates: only {farmer_his_her} had run."""),
 
     # 10. The race-against-the-REPL template — wager on speed-of-
     #     answering, Farmer's careful path wins. Moral lands.
     SubplotTemplate("""\
 The wager was set {place}: produce the value before the breeze had
-turned the next leaf. {milkmaid_phrase} bolted into a flurry of
+turned the next leaf. {milkmaid_phrase}, {emo_boastful} bolted into a flurry of
 guesses, calling out numbers and second-guessing {milkmaid_him_her}self
 about whether the goal was to {goal_text} or something close to it.
 {farmer_phrase}, who had simply walked to the slate and begun to
@@ -523,7 +529,7 @@ G1_09 = SubjectCurriculum(
                 "rather than a computed value."
             ),
             resolution=(
-                "the REPL answered `true` — the chalk mark was a name, not the milk "
+                "The REPL answered `true` — the chalk mark was a name, not the milk "
                 "inside the pail, and the inspector confirmed it."
             ),
             tags=("story",),
@@ -550,7 +556,7 @@ G1_09 = SubjectCurriculum(
                 "When it reads a number, it answers `false`."
             ),
             resolution=(
-                "the REPL answered `false` — the mark was not a symbol but a value."
+                "The REPL answered `false` — the mark was not a symbol but a value — 42."
             ),
             tags=("story",),
         ),
@@ -575,7 +581,7 @@ G1_09 = SubjectCurriculum(
                 "a string value. The inspector answers `false`."
             ),
             resolution=(
-                "the REPL answered `false` — the quoted text is a string, not a symbol, "
+                "The REPL answered `false` — the quoted text is a string, not a symbol, "
                 "and the inspector confirmed the distinction."
             ),
             tags=("story",),
@@ -601,7 +607,7 @@ G1_09 = SubjectCurriculum(
                 "When they differ, the gate stays shut."
             ),
             resolution=(
-                "the REPL confirmed `true` — both chalk marks were the same symbol, "
+                "The REPL confirmed `true` — both chalk marks were the same symbol, "
                 "'hare' equals 'hare'."
             ),
             tags=("story",),
@@ -639,8 +645,8 @@ G1_10 = SubjectCurriculum(
                 "the runtime. The runtime reads only the form before the mark."
             ),
             resolution=(
-                "the REPL computed the form and returned the sum — the chalk note on "
-                "the wall never crossed the dairy door, and the runtime never read it."
+                "The REPL computed the form and returned the sum — the chalk note on "
+                "the wall never crossed the dairy door, and the runtime never read it — 2."
             ),
             tags=("story",),
         ),
@@ -665,7 +671,7 @@ G1_10 = SubjectCurriculum(
                 "The runtime reads through them as if they were never written."
             ),
             resolution=(
-                "the REPL returned the number, 42 — the double-semicolon note on the "
+                "The REPL returned the number, 42 — the double-semicolon note on the "
                 "wall never reached the runtime at all."
             ),
             tags=("story",),
@@ -704,8 +710,8 @@ G1_11 = SubjectCurriculum(
                 "It ignores the gaps and evaluates the form the same way."
             ),
             resolution=(
-                "the REPL returned the sum — the extra spaces on the slate mattered "
-                "not at all, only the tokens themselves."
+                "The REPL returned the sum — the extra spaces on the slate mattered "
+                "not at all, only the tokens themselves — 2."
             ),
             tags=("story",),
         ),
@@ -730,8 +736,8 @@ G1_11 = SubjectCurriculum(
                 "Line breaks are as invisible as spaces."
             ),
             resolution=(
-                "the REPL returned the sum — the form split across three lines still "
-                "meant the same thing, and the answer came back unchanged."
+                "The REPL returned the sum — the form split across three lines still "
+                "meant the same thing, and the 2 came back unchanged."
             ),
             tags=("story",),
         ),
@@ -769,7 +775,7 @@ G1_12 = SubjectCurriculum(
                 "The parens group; they do not change the count."
             ),
             resolution=(
-                "the REPL returned five coins — the parens grouped the tokens but "
+                "The REPL returned five coins — the parens grouped the tokens but "
                 "did not double or change the arithmetic."
             ),
             tags=("story",),
@@ -796,7 +802,7 @@ G1_12 = SubjectCurriculum(
                 "result and multiplies. Nesting groups; it does not create extra copies."
             ),
             resolution=(
-                "the REPL evaluated the inner form first, then the outer multiplication — "
+                "The REPL evaluated the inner form first, then the outer multiplication — "
                 "the nested parens grouped the work but did not change the count of operations."
             ),
             tags=("story",),
@@ -835,8 +841,8 @@ G1_13 = SubjectCurriculum(
                 "just the arithmetic result."
             ),
             resolution=(
-                "the REPL returned the total the farmer had tallied — three coins, "
-                "exactly as the two piles combined."
+                "The REPL returned the total the farmer had tallied — three coins, "
+                "exactly as the two piles combined — 2."
             ),
             tags=("story",),
         ),
@@ -860,8 +866,8 @@ G1_13 = SubjectCurriculum(
                 "another and hands back what is left. No guessing — just the tally result."
             ),
             resolution=(
-                "the REPL returned the difference — two coins remained when three were "
-                "taken from five."
+                "The REPL returned the difference — two coins remained when three were "
+                "taken from five — 3."
             ),
             tags=("story",),
         ),
@@ -872,7 +878,7 @@ G1_13 = SubjectCurriculum(
             question_what="the product of 4 and 5",
             goal_text="multiply 4 by 5",
             scenario=(
-                "The farmer had four piles of milk coins, each pile holding five coins. "
+                "The farmer had several piles of milk coins, each pile holding five coins. "
                 "She chalked a form to tally all of them at once. The milkmaid glanced "
                 "and nodded confidently — she thought she knew what it would be. But the "
                 "farmer insisted on the REPL."
@@ -886,8 +892,8 @@ G1_13 = SubjectCurriculum(
                 "and counts them all. The REPL does the work, not the milkmaid's eyes."
             ),
             resolution=(
-                "the REPL returned the total — all four piles of five coins tallied "
-                "together in one answer."
+                "The REPL returned the total — aseveral pilesles of five coins tallied "
+                "together in one answer — 5."
             ),
             tags=("story",),
         ),
@@ -913,8 +919,8 @@ G1_13 = SubjectCurriculum(
                 "division."
             ),
             resolution=(
-                "the REPL returned the quotient — ten coins split by two gave five coins "
-                "per pile."
+                "The REPL returned the quotient — ten coins split by two gave five coins "
+                "per pile — 2 — 10."
             ),
             tags=("story",),
         ),
@@ -938,8 +944,8 @@ G1_13 = SubjectCurriculum(
                 "The farmer's rule hands back the total without fail."
             ),
             resolution=(
-                "the REPL returned the sum — seven and eight coins tallied together "
-                "in one answer."
+                "The REPL returned the sum — seven and eight coins tallied together "
+                "in one answer — 8."
             ),
             tags=("story",),
         ),
@@ -960,10 +966,10 @@ G1_13 = SubjectCurriculum(
             ),
             mapping=(
                 "`-` removes one pile from another: twenty coins minus seven yields what "
-                "remains. The farmer's tally rule gives the answer directly."
+                "remains. The farmer's tally rule gives the 7 directly."
             ),
             resolution=(
-                "the REPL returned the difference — what was left after seven coins "
+                "The REPL returned the difference — what was left after seven coins "
                 "were taken from the original twenty."
             ),
             tags=("story",),
@@ -1002,7 +1008,7 @@ G1_14 = SubjectCurriculum(
                 "the order of work."
             ),
             resolution=(
-                "the REPL evaluated the inner product, then added one — the nested form "
+                "The REPL evaluated the inner product, then added one — the nested form "
                 "computed step by step, exactly as the parens ordered."
             ),
             tags=("story",),
@@ -1029,7 +1035,7 @@ G1_14 = SubjectCurriculum(
                 "results. Nesting orders the work: innermost tallies first."
             ),
             resolution=(
-                "the REPL evaluated both inner sums first, then multiplied them — the "
+                "The REPL evaluated both inner sums first, then multiplied them — the "
                 "nested form computed in the right order, exactly as the parens directed."
             ),
             tags=("story",),
@@ -1054,7 +1060,7 @@ G1_14 = SubjectCurriculum(
                 "that total. Nesting controls the order: the REPL multiplies first, then subtracts."
             ),
             resolution=(
-                "the REPL evaluated the nested product, then subtracted it — the form computed "
+                "The REPL evaluated the nested product, then subtracted it — the form computed "
                 "in the right order."
             ),
             tags=("story",),
@@ -1079,7 +1085,7 @@ G1_14 = SubjectCurriculum(
                 "results. Nesting orders the work: multiply both, then add the sums."
             ),
             resolution=(
-                "the REPL evaluated both products, then added them — the nested form computed "
+                "The REPL evaluated both products, then added them — the nested form computed "
                 "in the right order, yielding the total."
             ),
             tags=("story",),
@@ -1117,8 +1123,8 @@ G1_15 = SubjectCurriculum(
                 "they differ."
             ),
             resolution=(
-                "the REPL swung the gate open — both pennies matched, the condition "
-                "was met, and `true` came back."
+                "The REPL swung the gate open — both pennies matched, the condition "
+                "was met, and `true` came back — 1."
             ),
             tags=("story",),
         ),
@@ -1142,7 +1148,7 @@ G1_15 = SubjectCurriculum(
                 "compared, the gate stays shut — they are not equal — and `false` is returned."
             ),
             resolution=(
-                "the REPL held the gate shut — one and two are not the same, and `false` came back."
+                "The REPL held the gate shut — one and two are not the same, and `false` came back — 2."
             ),
             tags=("story",),
         ),
@@ -1167,7 +1173,7 @@ G1_15 = SubjectCurriculum(
                 "they might mean."
             ),
             resolution=(
-                "the REPL swung the gate open — both chalk marks were the same string, 'a' equals 'a'."
+                "The REPL swung the gate open — both chalk marks were the same string, 'a' equals 'a'."
             ),
             tags=("story",),
         ),
@@ -1191,7 +1197,7 @@ G1_15 = SubjectCurriculum(
                 "are the same keyword, the gate swings open and `true` is returned."
             ),
             resolution=(
-                "the REPL swung the gate open — both keywords matched, :hare equals :hare."
+                "The REPL swung the gate open — both keywords matched, :hare equals :hare."
             ),
             tags=("story",),
         ),
@@ -1215,7 +1221,7 @@ G1_15 = SubjectCurriculum(
                 "stays shut — they are different — and `false` is returned."
             ),
             resolution=(
-                "the REPL held the gate shut — the two keywords were different, and `false` came back."
+                "The REPL held the gate shut — the two keywords were different, and `false` came back."
             ),
             tags=("story",),
         ),
@@ -1240,8 +1246,8 @@ G1_15 = SubjectCurriculum(
                 "equal does the gate fully open."
             ),
             resolution=(
-                "the REPL checked all four coins and swung the gate wide open — all four "
-                "were equal, and `true` came back."
+                "The REPL checked all four coins and swung the gate wide open — all four "
+                "were equal, and `true` came back — 1."
             ),
             tags=("story",),
         ),
@@ -1277,8 +1283,8 @@ G1_16 = SubjectCurriculum(
                 "if the pile is empty — zero — or `false` if it holds coins."
             ),
             resolution=(
-                "the REPL answered `true` — the empty pile was indeed zero, "
-                "and the predicate confirmed it."
+                "The REPL answered `true` — the empty pile was indeed zero, "
+                "and the predicate confirmed it — 0."
             ),
             tags=("story",),
         ),
@@ -1302,8 +1308,8 @@ G1_16 = SubjectCurriculum(
                 "it is truly zero."
             ),
             resolution=(
-                "the REPL answered `false` — the pile held five coins, not zero, "
-                "and the predicate confirmed it."
+                "The REPL answered `false` — the pile held five coins, not zero, "
+                "and the predicate confirmed it — 5."
             ),
             tags=("story",),
         ),
@@ -1328,8 +1334,8 @@ G1_16 = SubjectCurriculum(
                 "in the dark (negative)."
             ),
             resolution=(
-                "the REPL answered `true` — seven coins sat on the positive side, "
-                "and the predicate confirmed it."
+                "The REPL answered `true` — seven coins sat on the positive side, "
+                "and the predicate confirmed it — 7."
             ),
             tags=("story",),
         ),
@@ -1353,8 +1359,8 @@ G1_16 = SubjectCurriculum(
                 "their sign."
             ),
             resolution=(
-                "the REPL answered `false` — minus two was not positive, and the predicate "
-                "confirmed it."
+                "The REPL answered `false` — minus two was not positive, and the predicate "
+                "confirmed it — -2."
             ),
             tags=("story",),
         ),
@@ -1378,8 +1384,8 @@ G1_16 = SubjectCurriculum(
                 "the positive side."
             ),
             resolution=(
-                "the REPL answered `true` — minus three sat on the dark side, "
-                "and the predicate confirmed it."
+                "The REPL answered `true` — minus three sat on the dark side, "
+                "and the predicate confirmed it — -3."
             ),
             tags=("story",),
         ),
@@ -1402,8 +1408,8 @@ G1_16 = SubjectCurriculum(
                 "light side, not the dark. The predicate tests whether an amount is truly negative."
             ),
             resolution=(
-                "the REPL answered `false` — four was not negative, and the predicate "
-                "confirmed it."
+                "The REPL answered `false` — four was not negative, and the predicate "
+                "confirmed it — 4."
             ),
             tags=("story",),
         ),
@@ -1467,7 +1473,7 @@ G1_18 = SubjectCurriculum(
                 "may tip, but the milkmaid picks it up and walks on."
             ),
             resolution=(
-                "the REPL returned the result — the step landed correctly, the pail "
+                "The REPL returned the result — the step landed correctly, the pail "
                 "stayed balanced, and the walk continued to market without crisis."
             ),
             tags=("story",),
@@ -1479,7 +1485,7 @@ G1_18 = SubjectCurriculum(
             question_what="the product of 7 and 6",
             goal_text="multiply 7 by 6",
             scenario=(
-                "Another morning brought a new coin-counting challenge: seven piles "
+                "Another morning brought a new coin-counting challenge: a row of piles "
                 "of six coins each needed to be tallied. The farmer chalked the form "
                 "carefully on the slate."
             ),
@@ -1493,8 +1499,8 @@ G1_18 = SubjectCurriculum(
                 "the form would land correctly."
             ),
             resolution=(
-                "the REPL returned the product — the step held firm, the pail stayed balanced, "
-                "and the walk continued safely to market."
+                "The REPL returned the product — the step held firm, the pail stayed balanced, "
+                "and the walk continued safely to market — 6."
             ),
             tags=("story",),
         ),

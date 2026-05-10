@@ -20,7 +20,7 @@ from mmllm.aesop.curriculum.milkmaid._metaphor_pools import (
 # Based on _GOAL_SUBPLOTS to ensure goal-driven design.
 _NAMING_SUBPLOTS: list[SubplotTemplate] = list(_GOAL_SUBPLOTS) + [
     SubplotTemplate("""\
-{farmer_phrase} kept a small ledger {place} where every meaningful
+{farmer_phrase}, {emo_patient} kept a small ledger {place} where every meaningful
 quantity got its own name. {farmer_he_she_cap} pointed to today's
 entry, which required {goal_text}. {farmer_he_she_cap} would write
 {concept_phrase} and let the REPL confirm."""),
@@ -61,7 +61,7 @@ G3_01 = SubjectCurriculum(grade=3, subject_id="G3-01",
             ),
             need=(
                 "Any buyer who walked up and read x from the board needed to receive "
-                "the value that had been posted — the board had to hold the name "
+                "the 42 that had been posted — the board had to hold the name "
                 "permanently and return it on demand."
             ),
             mapping=(
@@ -98,7 +98,7 @@ G3_01 = SubjectCurriculum(grade=3, subject_id="G3-01",
             ),
             resolution=(
                 "The REPL read y from the board and returned the coin-count that "
-                "had been nailed there — the market-board delivered the name."
+                "had been nailed there — the market-board delivered the name — 7."
             ),
             tags=("story",),
         ),
@@ -131,7 +131,7 @@ G3_02 = SubjectCurriculum(grade=3, subject_id="G3-02",
             ),
             resolution=(
                 "The REPL returned the figure from the second card — the board "
-                "held the most-recently-nailed name, and the redefinition stood."
+                "held the most-recently-nailed name, and the redefinition stood — 99."
             ),
             tags=("story",),
         ),
@@ -162,7 +162,7 @@ G3_03 = SubjectCurriculum(grade=3, subject_id="G3-03",
                 "When the body ends, the pocket is put away and `x` ceases to exist."
             ),
             resolution=(
-                "the REPL returned 4 — the count from the pocket incremented by one, "
+                "The REPL returned the result — the count from the pocket incremented by one, "
                 "the pocket now set aside at the road's end."
             ),
             tags=("story",),
@@ -248,7 +248,7 @@ G3_04 = SubjectCurriculum(grade=3, subject_id="G3-04",
             ),
             resolution=(
                 "The REPL returned the combined tally from both pocket compartments "
-                "— the two counts summed, the pocket set aside."
+                "— the two counts summed, the pocket set aside — 2."
             ),
             tags=("story",),
         ),
@@ -275,7 +275,7 @@ G3_04 = SubjectCurriculum(grade=3, subject_id="G3-04",
             ),
             resolution=(
                 "The REPL returned the difference of the two pocket values — "
-                "the subtraction completed, both pockets emptied."
+                "the subtraction completed, both pockets emptied — 3."
             ),
             tags=("story",),
         ),
@@ -291,9 +291,7 @@ G3_04 = SubjectCurriculum(grade=3, subject_id="G3-04",
                 "start with its own count for the day."
             ),
             need=(
-                "She needed to reach into all three pouches and sum the three "
-                "counts inside the body, then let every pouch go empty when "
-                "the form closed."
+                'She needed to reach into all three pouches and sum the {drawn.b} counts inside the body, then let every pouch go empty when the form closed.'
             ),
             mapping=(
                 "`let` opens three apron-pockets: a, b, and c each hold one "
@@ -301,8 +299,8 @@ G3_04 = SubjectCurriculum(grade=3, subject_id="G3-04",
                 "All three pockets are unpicked when the body ends."
             ),
             resolution=(
-                "The REPL returned the total of all three pocket values — the "
-                "three counts summed, every pouch emptied at road's end."
+                "The REPL returned the total of all three pocket values — the — 4 "
+                "several counts summed, every pouch emptied at road's end."
             ),
             tags=("story",),
         ),
@@ -331,7 +329,7 @@ G3_05 = SubjectCurriculum(grade=3, subject_id="G3-05",
                 "The pocket wins while it exists."
             ),
             resolution=(
-                "The REPL returned the pocket value — the shadowing held."
+                "The REPL returned the pocket value — the shadowing held — 99."
             ),
             tags=("story",),
         ),
@@ -359,7 +357,7 @@ G3_05 = SubjectCurriculum(grade=3, subject_id="G3-05",
             ),
             resolution=(
                 "The REPL returned the board's original posting — the pocket "
-                "had emptied, and the market-board reclaimed x unchanged."
+                "had emptied, and the market-board reclaimed x unchanged — 99."
             ),
             tags=("story",),
         ),
@@ -394,7 +392,7 @@ G3_06 = SubjectCurriculum(grade=3, subject_id="G3-06",
             ),
             resolution=(
                 "The REPL returned the second pocket value — b had been "
-                "filled from a, and the chain of slots delivered the result."
+                "filled from a, and the chain of slots delivered the 2 — 5."
             ),
             tags=("story",),
         ),
@@ -419,7 +417,7 @@ G3_06 = SubjectCurriculum(grade=3, subject_id="G3-06",
             ),
             resolution=(
                 "The REPL returned the final value — the chain of three "
-                "slots had each drawn from the last."
+                "slots had each drawn from the last — 2 — 3."
             ),
             tags=("story",),
         ),
@@ -447,7 +445,7 @@ G3_07 = SubjectCurriculum(grade=3, subject_id="G3-07",
                 "`(+ x 1)` is the step. Passing a count runs it."
             ),
             resolution=(
-                "The REPL returned the incremented count."
+                "The REPL returned the incremented count — 4."
             ),
             tags=("story",),
         ),
@@ -469,7 +467,7 @@ G3_07 = SubjectCurriculum(grade=3, subject_id="G3-07",
                 "the step. Passing two counts runs it."
             ),
             resolution=(
-                "The REPL returned the product."
+                "The REPL returned the product — 4."
             ),
             tags=("story",),
         ),
@@ -490,14 +488,14 @@ G3_08 = SubjectCurriculum(grade=3, subject_id="G3-08",
                 "and a step that summed all three."
             ),
             need=(
-                "The buyer passed three counts in and needed the total back."
+                "The buyer passeseveral countsts in and needed the total back."
             ),
             mapping=(
                 "`fn` is the card: `[a b c]` are the slots, `(+ a b c)` is "
-                "the summing step. Passing three counts runs it."
+                "the summing step. Passseveral countsunts runs it."
             ),
             resolution=(
-                "The REPL returned the combined total."
+                "The REPL returned the combined total — 3."
             ),
             tags=("story",),
         ),
@@ -531,7 +529,7 @@ G3_09 = SubjectCurriculum(grade=3, subject_id="G3-09",
             ),
             resolution=(
                 "The REPL returned the doubled count — the named card on the "
-                "board had run its step and sent the result back to the buyer."
+                "board had run its step and sent the result back to the buyer — 5."
             ),
             tags=("story",),
         ),
@@ -550,7 +548,7 @@ G3_09 = SubjectCurriculum(grade=3, subject_id="G3-09",
             need=(
                 "A buyer arrived with three separate counts and needed their "
                 "sum; she walked to the board, called add3, and handed the "
-                "three counts in one after another."
+                "counts in one after another."
             ),
             mapping=(
                 "`defn` nails the named card to the board: `[a b c]` are the "
@@ -593,7 +591,7 @@ G3_10 = SubjectCurriculum(grade=3, subject_id="G3-10",
             ),
             resolution=(
                 "The REPL returned the incremented count — the shorthand "
-                "scrap had run its step just as a full card would have."
+                "scrap had run its step just as a full card would have — 5."
             ),
             tags=("story",),
         ),
@@ -621,7 +619,7 @@ G3_10 = SubjectCurriculum(grade=3, subject_id="G3-10",
             ),
             resolution=(
                 "The REPL returned the product of the two counts — the "
-                "shorthand scrap had multiplied them and sent the result back."
+                "shorthand scrap had multiplied them and sent the result back — 4."
             ),
             tags=("story",),
         ),
@@ -650,7 +648,7 @@ G3_11 = SubjectCurriculum(grade=3, subject_id="G3-11",
                 "a)`. Every mention of a yields the same count."
             ),
             resolution=(
-                "The REPL returned the pocket value added to itself."
+                "The REPL returned the pocket value added to itself — 7."
             ),
             tags=("story",),
         ),
@@ -677,7 +675,7 @@ G3_11 = SubjectCurriculum(grade=3, subject_id="G3-11",
                 "resolve to the same passed-in count."
             ),
             resolution=(
-                "The REPL returned the count multiplied by itself — the "
+                "The REPL returned the count multiplied by itself — the — 6 "
                 "nameless card's double-draw had squared the input correctly."
             ),
             tags=("story",),
@@ -712,7 +710,7 @@ G3_12 = SubjectCurriculum(grade=3, subject_id="G3-12",
             ),
             resolution=(
                 "The REPL returned the pocket value incremented by one — the "
-                "apron-pocket had won over the market-board inside the body."
+                "apron-pocket had won over the market-board inside the body — 1 — 99."
             ),
             tags=("story",),
         ),
@@ -742,7 +740,7 @@ G3_13 = SubjectCurriculum(grade=3, subject_id="G3-13",
                 "to the caller."
             ),
             resolution=(
-                "The REPL returned the final value."
+                "The REPL returned the final value — 1 — 99."
             ),
             tags=("story",),
         ),
@@ -777,7 +775,7 @@ G3_14 = SubjectCurriculum(grade=3, subject_id="G3-14",
             ),
             resolution=(
                 "The REPL returned the last mark's value — the earlier marks "
-                "had been read and set aside, and only the final one came back."
+                "had been read and set aside, and only the final one came back — 3."
             ),
             tags=("story",),
         ),
@@ -806,7 +804,7 @@ G3_14 = SubjectCurriculum(grade=3, subject_id="G3-14",
             ),
             resolution=(
                 "The REPL returned the final sum — the two earlier additions "
-                "had run and been set aside, and only the last result came back."
+                "had run and been set aside, and only the last result came back — 3."
             ),
             tags=("story",),
         ),
@@ -830,7 +828,7 @@ G3_15 = SubjectCurriculum(grade=3, subject_id="G3-15",
             ),
             need=(
                 "The ringing of the bell was meant to be heard, not returned; "
-                "only the coin-tally at the end of the sequence was the value "
+                "only the coin-tally at the end of the sequence was the hi "
                 "the buyer needed to take away."
             ),
             mapping=(
@@ -876,7 +874,7 @@ G3_16 = SubjectCurriculum(grade=3, subject_id="G3-16",
             ),
             resolution=(
                 "The REPL returned the pocket value — the operator name had "
-                "been shadowed by the pocket, and the local binding came back."
+                "been shadowed by the pocket, and the local binding came back — 99."
             ),
             tags=("story",),
         ),
@@ -911,7 +909,7 @@ G3_17 = SubjectCurriculum(grade=3, subject_id="G3-17",
             resolution=(
                 "The REPL returned the difference of the two pocket values — "
                 "the hyphenated names had resolved correctly and the subtraction "
-                "came back."
+                "came back — 1 — 4."
             ),
             tags=("story",),
         ),
@@ -946,7 +944,7 @@ G3_18 = SubjectCurriculum(grade=3, subject_id="G3-18",
             ),
             resolution=(
                 "The REPL returned the count multiplied by itself twice — "
-                "the pocket had been drawn on three times and the cube came back."
+                "the pocket had been drawn on three times and the cube came back — 5."
             ),
             tags=("story",),
         ),
@@ -975,7 +973,7 @@ G3_18 = SubjectCurriculum(grade=3, subject_id="G3-18",
             resolution=(
                 "The REPL returned the same cube as the pocket version — "
                 "inline values worked just as well when the figure was only "
-                "written out directly."
+                "written out directly — 5."
             ),
             tags=("story",),
         ),

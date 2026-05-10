@@ -31,14 +31,20 @@
            [torch.amp :as amp]
            [torch.cuda :as cuda]
            [torch.nn :as nn]
+           [torch.nn.utils :as nn-utils]
            [torch.nn.functional :as F]
            [torch.optim :as optim]
            [mmllm.memory :as mem]
+           [mmllm.netbank :as netb]
            [mmllm.corpus :as corp]
            [mmllm.artifacts :as art]
            [mmllm.gating :as gate]
            [mmllm.bank_query :as bq]
            [mmllm.bank_feedback :as bfb]
+           [mmllm.router_smarts :as rs]
+           [mmllm.sparse_per_row :as spr]
+           [mmllm.fim :as fim]
+           [mmllm.fim.generator :as fim-gen]
            [mmllm.metrics :as metrics]
            [mmllm.runtime :as rt]
            [mmllm.attention_kernel :as kernel]
@@ -115,9 +121,203 @@
 
 (defn pick-lr
   "Resolve learning rate. Reads MMLLM_LR (float string,
-   default 3e-3). Applied to BOTH AdamW (dense) and SparseAdam (V)."
+   default 3e-3). The unified peak lr; per-component multipliers
+   (`pick-lr-dense-mult` / `pick-lr-bank-mult`) decouple dense
+   (router) and bank (semantic content) update intensities."
   []
   (python/float (.get (.- os environ) "MMLLM_LR" "3e-3")))
+
+(defn- mult-cosine-interp
+  "Cosine-interpolate between `start` and `end` over (warmup, total]
+   training. Inside the warmup window, return `start`. After total,
+   return `end`. Used by the *_mult-at-step schedule resolvers below
+   to ramp/cool LR multipliers across a run."
+  [start end step total warmup]
+  (cond
+    (= start end)  start
+    (zero? total)  start
+    (< step warmup) start
+    (>= step total) end
+    :else (let [progress (/ (python/float (- step warmup))
+                            (python/float (- total warmup)))
+                cos-half (* 0.5 (+ 1.0 (math/cos (* (.- math pi) progress))))]
+            (+ end (* (- start end) cos-half)))))
+
+(defn pick-lr-dense-mult
+  "Multiplier on the dense-side (AdamW) lr. Reads
+   MMLLM_LR_DENSE_MULT (float, default 1.0). Combined with
+   `pick-lr` to produce the AdamW peak lr. See
+   `docs/router-bank-lr-decoupling.md` for the differential-decay
+   schedule (cool the dense / router lr after ~9-12B tokens while
+   the bank / expert lr stays at 1.0×).
+
+   Arity 2 — `(step total)` — returns the cosine-scheduled value
+   between MMLLM_LR_DENSE_MULT and MMLLM_LR_DENSE_MULT_END (defaults
+   to start if unset, i.e. constant). Warmup re-uses MMLLM_LR_WARMUP."
+  ([] (python/float (.get (.- os environ) "MMLLM_LR_DENSE_MULT" "1.0")))
+  ([step total]
+   (let [start  (pick-lr-dense-mult)
+         end    (python/float (.get (.- os environ) "MMLLM_LR_DENSE_MULT_END" (str start)))
+         ;; pick-lr-warmup defined later in this file; inline the env
+         ;; read to keep forward references out of the analyzer's path.
+         warmup (python/int (.get (.- os environ) "MMLLM_LR_WARMUP" "0"))]
+     (mult-cosine-interp start end step total warmup))))
+
+(defn pick-lr-bank-mult
+  "Multiplier on the bank-side (SparseAdam) lr. Reads
+   MMLLM_LR_BANK_MULT (float, default 1.0). Combined with
+   `pick-lr` to produce the SparseAdam peak lr. Cooled only at the
+   very end of training (15B+ in the v3 plan; near 100B in an
+   extended run).
+
+   Arity 2 — `(step total)` — returns the cosine-scheduled value
+   between MMLLM_LR_BANK_MULT and MMLLM_LR_BANK_MULT_END. T1
+   consolidation: set END < START (e.g. 10 → 1) so Local Bank's lr
+   cools as training progresses, freeing NetBank to keep absorbing
+   while Local stops chasing new patterns."
+  ([] (python/float (.get (.- os environ) "MMLLM_LR_BANK_MULT" "1.0")))
+  ([step total]
+   (let [start  (pick-lr-bank-mult)
+         end    (python/float (.get (.- os environ) "MMLLM_LR_BANK_MULT_END" (str start)))
+         ;; pick-lr-warmup defined later in this file; inline the env
+         ;; read to keep forward references out of the analyzer's path.
+         warmup (python/int (.get (.- os environ) "MMLLM_LR_WARMUP" "0"))]
+     (mult-cosine-interp start end step total warmup))))
+
+(defn pick-lr-dense
+  "Effective dense (AdamW) peak lr = pick-lr × pick-lr-dense-mult."
+  []
+  (* (pick-lr) (pick-lr-dense-mult)))
+
+(defn pick-lr-bank
+  "Effective bank (SparseAdam) peak lr = pick-lr × pick-lr-bank-mult."
+  []
+  (* (pick-lr) (pick-lr-bank-mult)))
+
+;;; ─────────────────────── NetBank (off-machine long-term memory tier) ───────────────────────
+
+(defn pick-netbank-enabled?
+  "Whether the NetBank tier is active for this run. Reads
+   MMLLM_NETBANK_ENABLED (default 'false'). When false the model is
+   strictly two-tier (SDPA + Local Bank) and existing ckpts load
+   identically to pre-NetBank code."
+  []
+  (let [v (.lower (.get (.- os environ) "MMLLM_NETBANK_ENABLED" "false"))]
+    (.__contains__ #{"1" "true" "yes"} v)))
+
+(defn pick-netbank-sqrt-n
+  "Side length of NetBank (entries = sqrt_n²). Reads MMLLM_NET_SQRT_N
+   (default 8192 → 67M entries). Independent of Local Bank's sqrt_n."
+  []
+  (python/int (.get (.- os environ) "MMLLM_NET_SQRT_N" "8192")))
+
+(defn pick-netbank-c-net
+  "Bottleneck dim of NetBank V (rows stored as c_net latents, expanded
+   to q_dim by a learned Linear). Reads MMLLM_NET_C_NET (default 64)."
+  []
+  (python/int (.get (.- os environ) "MMLLM_NET_C_NET" "64")))
+
+(defn pick-netbank-top-k
+  "Rows retrieved per NetBank query (larger payload amortizes the
+   simulated round-trip). Reads MMLLM_NET_TOP_K (default 64)."
+  []
+  (python/int (.get (.- os environ) "MMLLM_NET_TOP_K" "64")))
+
+(defn pick-netbank-sub-top-k
+  "Sub-keys retained per K_a/K_b half before re-rank. Reads
+   MMLLM_NET_SUB_TOP_K (default 64). Capped to sqrt_n inside NetBank."
+  []
+  (python/int (.get (.- os environ) "MMLLM_NET_SUB_TOP_K" "64")))
+
+(defn pick-netbank-delay-min
+  "Minimum simulated WAN delay per NetBank forward, in milliseconds.
+   Reads MMLLM_NET_DELAY_MS_MIN (default 1.0). Set both min and max
+   to 0 to disable the delay."
+  []
+  (python/float (.get (.- os environ) "MMLLM_NET_DELAY_MS_MIN" "1.0")))
+
+(defn pick-netbank-delay-max
+  "Maximum simulated WAN delay per NetBank forward, in milliseconds.
+   Reads MMLLM_NET_DELAY_MS_MAX (default 10.0)."
+  []
+  (python/float (.get (.- os environ) "MMLLM_NET_DELAY_MS_MAX" "10.0")))
+
+(defn pick-netbank-dtype
+  "NetBank V dtype. Reads MMLLM_NET_DTYPE (default 'fp32'). fp16
+   available but causes SparseAdam underflow/overflow on small models;
+   use fp32 until we ship a mixed-precision optimizer."
+  []
+  (.lower (.get (.- os environ) "MMLLM_NET_DTYPE" "fp32")))
+
+(defn pick-netbank-on-gpu?
+  "Whether NetBank V lives in GPU VRAM (training-fast) vs host-RAM mmap
+   (production-realism). Reads MMLLM_NET_BANK_ON_GPU (default 'false').
+   On GPU: no FUSE / mmap latency, just the simulated 1-10ms delay.
+   At sqrt_n=4096 + c_net=64 + fp32 = 21.5 GB on top of Local's 18.8 GB,
+   fits H100 80GB with ~40GB headroom for activations."
+  []
+  (let [v (.lower (.get (.- os environ) "MMLLM_NET_BANK_ON_GPU" "false"))]
+    (.__contains__ #{"1" "true" "yes"} v)))
+
+(defn pick-netbank-path
+  "Per-layer mmap path prefix for NetBank V. Reads MMLLM_NET_BANK_PATH;
+   if unset, derive from <bank>+'-net' so a `--bank /data/foo` flow
+   gets `/data/foo-net.<i>.bin`. Empty string or nil bank-path → returns
+   nil (NetBank V uses an in-RAM nn.Embedding, not mmap)."
+  [bank-path]
+  (or (.get (.- os environ) "MMLLM_NET_BANK_PATH")
+      (when (and bank-path (not (zero? (count bank-path))))
+        (str bank-path "-net"))))
+
+(defn pick-lr-kab-mult
+  "Multiplier on K_a/K_b's lr (the bank's 'addressing' weights). Reads
+   MMLLM_LR_KAB_MULT (default = MMLLM_LR_DENSE_MULT, i.e. K_a/K_b live
+   in the same group as core dense and use lr_dense_mult). When set
+   to a different value, build-time `make-opt-dense` puts K_a/K_b in a
+   separate AdamW param group with its own lr × kab-mult.
+
+   Rationale (#3 spike): K_a/K_b learn the bank's structural addressing
+   (when to retrieve which slot). V learns content. Decoupling the two
+   lets K-side hill-climb structure faster than V's slower content
+   updates. Standard PKM tip.
+
+   Arity 2 — `(step total)` — cosine-scheduled to MMLLM_LR_KAB_MULT_END."
+  ([] (python/float (.get (.- os environ) "MMLLM_LR_KAB_MULT"
+                          (str (pick-lr-dense-mult)))))
+  ([step total]
+   (let [start  (pick-lr-kab-mult)
+         end    (python/float (.get (.- os environ) "MMLLM_LR_KAB_MULT_END" (str start)))
+         warmup (python/int (.get (.- os environ) "MMLLM_LR_WARMUP" "0"))]
+     (mult-cosine-interp start end step total warmup))))
+
+(defn pick-lr-kab
+  "Effective K_a/K_b lr = pick-lr × pick-lr-kab-mult."
+  []
+  (* (pick-lr) (pick-lr-kab-mult)))
+
+(defn pick-lr-net-mult
+  "Multiplier on NetBank's SparseAdam lr. Reads MMLLM_LR_NET_MULT
+   (default 1.0). Default Phase-4 schedule: 5.0 (half of Local Bank's
+   10.0). Cooled later in the curriculum like Local but on a separate
+   schedule.
+
+   Arity 2 — `(step total)` — returns the cosine-scheduled value
+   between MMLLM_LR_NET_MULT and MMLLM_LR_NET_MULT_END. T1 plan: set
+   END > START (e.g. 5 → 10) so NetBank's lr ramps UP as Local cools,
+   absorbing the relative training pressure as Local consolidates."
+  ([] (python/float (.get (.- os environ) "MMLLM_LR_NET_MULT" "1.0")))
+  ([step total]
+   (let [start  (pick-lr-net-mult)
+         end    (python/float (.get (.- os environ) "MMLLM_LR_NET_MULT_END" (str start)))
+         ;; pick-lr-warmup defined later in this file; inline the env
+         ;; read to keep forward references out of the analyzer's path.
+         warmup (python/int (.get (.- os environ) "MMLLM_LR_WARMUP" "0"))]
+     (mult-cosine-interp start end step total warmup))))
+
+(defn pick-lr-net
+  "Effective NetBank (SparseAdam) peak lr = pick-lr × pick-lr-net-mult."
+  []
+  (* (pick-lr) (pick-lr-net-mult)))
 
 (defn pick-batch
   "Resolve training batch size. Reads MMLLM_BATCH (int string,
@@ -193,6 +393,16 @@
   (doseq [pg (.- opt param_groups)]
     (.__setitem__ pg "lr" lr)))
 
+(defn set-opt-lrs!
+  "Set lr per param group. `lrs` is a list of floats, one per group
+   (in declaration order). Used when the optimizer has multiple groups
+   with independent schedules (e.g. core dense + K_a/K_b)."
+  [opt lrs]
+  (let [pgs (python/list (.- opt param_groups))]
+    (doseq [i (range (count pgs))]
+      (when (< i (count lrs))
+        (.__setitem__ (.__getitem__ pgs i) "lr" (nth lrs i))))))
+
 (defn pick-sync-every
   "Resolve cross-worker bank sync interval, in training steps.
    Reads MMLLM_SYNC_EVERY (int, default 0 = sync disabled).
@@ -229,6 +439,29 @@
    the trajectory aligns with the checkpoint history. 0 disables."
   []
   (python/int (.get (.- os environ) "MMLLM_ABLATE_EVERY" "0")))
+
+(defn pick-slot-log-every
+  "Resolve interval (in training steps) between PKM slot-utilization
+   logs + optional dead-slot reinit. Reads MMLLM_SLOT_LOG_EVERY
+   (default 0 = disabled).
+
+   Each event reads each PKM layer's hit counters, logs entropy /
+   dead-count to log.jsonl, then resets counters. If
+   MMLLM_DEAD_SLOT_REINIT=true is also set, dead rows (hits=0 over
+   the window) are re-initialized with small Gaussian noise.
+
+   Recommended: equal to ckpt-every (one slot snapshot per ckpt).
+   0 disables."
+  []
+  (python/int (.get (.- os environ) "MMLLM_SLOT_LOG_EVERY" "0")))
+
+(defn pick-dead-slot-reinit?
+  "Reads MMLLM_DEAD_SLOT_REINIT (default 'false'). When true, the
+   slot-log event also calls reinit_dead_slots() on each PKM layer
+   to redistribute capacity to never-selected rows."
+  []
+  (let [v (.lower (.get (.- os environ) "MMLLM_DEAD_SLOT_REINIT" "false"))]
+    (.__contains__ #{"1" "true" "yes"} v)))
 
 (defn pick-max-hours
   "Resolve session wall-time cap, in hours. Reads MMLLM_MAX_HOURS
@@ -413,6 +646,46 @@
          :n-long-heads      10
          :n-short-kv-heads  1))
 
+(def default-config-cpu-tiny
+  "CPU-trainable tiny config for community fan-out training.
+
+   Targets a ~16 GB RAM box with a few GB of disk: Local Bank fits in
+   RAM (~200 MB V + 200 MB optimizer state); NetBank is mmap'd to disk
+   so only touched rows page in. Dense trunk is ~5-8 M params.
+
+   Sizing math (per-layer):
+     q-dim       = 4 long heads × 32 head-dim = 128
+     Local V     = 256² × 128 × 4 ≈ 33.5 MB / layer × 4 = 134 MB
+     Local opt   = same shape    ≈ 134 MB
+     NetBank V   = 1024² × 32 × 4 ≈ 128 MB / layer × 4 = 512 MB on disk
+     dense       = ~6 M params × 4 × 3 (Adam state) = ~72 MB
+
+   Total RAM: ~500-700 MB steady state.
+   Total disk: ~600 MB (NetBank V mmap files).
+
+   Use with the `train-cpu` CLI verb (preserves all 9 spike knobs;
+   defaults conservative)."
+  {:d-model            192
+   :n-heads            6
+   :n-short-heads      2
+   :n-long-heads       4
+   :n-short-kv-heads   1
+   :n-long-kv-heads    1
+   :n-layers           4
+   :seq-len            128
+   :max-pos            512
+   :d-ff               768
+   :rope-theta         10000.0
+   :memory-sqrt-n      256
+   :memory-top-k       16
+   :memory-sub-top-k   16
+   :memory-mmap-path   nil
+   :bank-query-mode    nil
+   :bank-feedback-mode nil
+   :long-tier-mix      nil
+   :short-window       nil
+   :long-window        nil})
+
 ;;; ─────────────────────── RoPE (used only on the short tier) ───────────────────────
 
 (defn build-rope-cache
@@ -476,6 +749,237 @@
       short-window long-window
       x cos sin short-cache long-cache)))
 
+;;; ─────────────────────── router smarts (focal CE + importance head + carry) ───────────────────────
+
+(defn pick-focal-gamma
+  "Focal-loss gamma exponent. Reads MMLLM_FOCAL_GAMMA (default 0.0 =
+   plain CE). 2.0 is the standard focal default (Lin et al 2017): hard
+   bytes get up-weighted via (1-p)^2, easy bytes get down-weighted.
+   Cheap (~+1% per-step compute). 0 disables → reduces to flat CE."
+  []
+  (python/float (.get (.- os environ) "MMLLM_FOCAL_GAMMA" "0.0")))
+
+(defn pick-importance-head?
+  "Whether to construct & use the LearnedImportanceHead. Reads
+   MMLLM_IMPORTANCE_HEAD (default 'false'). When true, a Linear(d_model,
+   1) head produces a per-position multiplier on top of focal CE.
+   Self-supervised. Adds 1 dense param tensor per model."
+  []
+  (let [v (.lower (.get (.- os environ) "MMLLM_IMPORTANCE_HEAD" "false"))]
+    (.__contains__ #{"1" "true" "yes"} v)))
+
+(defn pick-nan-guard?
+  "Whether forward should NaN-check at every block boundary +
+   logits. Reads MMLLM_NAN_GUARD (default 'false'). Opt-in because
+   the .isnan().any() call adds a sync per layer (~1% throughput
+   hit). On detection: raises RuntimeError with the specific layer
+   index that first produced NaN, instead of the unhelpful
+   `loss=nan` abort that says nothing about WHERE the NaN started."
+  []
+  (let [v (.lower (.get (.- os environ) "MMLLM_NAN_GUARD" "false"))]
+    (.__contains__ #{"1" "true" "yes"} v)))
+
+(defn nan-guard!
+  "Check tensor for NaN/Inf and raise with `tag` on detection. No-op
+   when t is None (e.g., aux-logits in non-MTP mode). Caller decides
+   whether to call (gated by `pick-nan-guard?`).
+
+   On detection: also prints a tensor stats summary (NaN count, Inf
+   count, finite-min/max, mean of finite entries) so the caller has
+   localized info about how bad the corruption is. This is purely
+   diagnostic; total tensor scan adds <1ms even for the largest
+   tensor in the model."
+  [tag t]
+  (when t
+    (let [has-nan (.item (.any (.isnan t)))
+          has-inf (.item (.any (.isinf t)))]
+      (when (or has-nan has-inf)
+        (let [n-nan    (.item (.sum (.isnan t)))
+              n-inf    (.item (.sum (.isinf t)))
+              numel    (.numel t)
+              finite-mask (torch/isfinite t)
+              n-finite (.item (.sum finite-mask))
+              finite-stats (if (pos? n-finite)
+                             (let [t-finite (.masked_select t finite-mask)]
+                               (format "finite[min=%.3e max=%.3e mean=%.3e]"
+                                       (.item (.amin t-finite))
+                                       (.item (.amax t-finite))
+                                       (.item (.mean t-finite))))
+                             "no finite entries")]
+          (println (format "  ⚠ nan-guard FIRED: tag=%s numel=%d nan=%d inf=%d %s"
+                           tag numel n-nan n-inf finite-stats))
+          (throw (python/RuntimeError
+                   (format "nan-guard: tensor %s has NaN/Inf — forward path corrupted" tag))))))))
+
+(defn pick-log-param-norms?
+  "Whether to log per-param L∞/L2 norms at slot-log events. Reads
+   MMLLM_LOG_PARAM_NORMS (default 'false'). Opt-in because the walk
+   over all named tensors adds a sync at log-time. Useful for
+   identifying slow drift in any specific param tensor."
+  []
+  (let [v (.lower (.get (.- os environ) "MMLLM_LOG_PARAM_NORMS" "false"))]
+    (.__contains__ #{"1" "true" "yes"} v)))
+
+(defn pick-replay-every
+  "Run a frozen-Local replay step every N training steps. Reads
+   MMLLM_REPLAY_EVERY (default 0 = disabled). When > 0, train-long
+   maintains a CPU-side circular buffer of (x, y) batches whose
+   plain-CE was below MMLLM_REPLAY_THRESHOLD (mastered positions),
+   and every N main steps samples one batch and runs an extra
+   train-step with Local Bank's gradients zeroed before the
+   optimizer step. Goal: Net trains directly on patterns Local
+   already mastered, accelerating consolidation."
+  []
+  (python/int (.get (.- os environ) "MMLLM_REPLAY_EVERY" "0")))
+
+(defn pick-replay-buffer-size
+  "Maximum number of (x, y) batches kept in the replay buffer.
+   Reads MMLLM_REPLAY_BUFFER_SIZE (default 256). Each batch is on
+   CPU; at B=128 T=128 int64 that's ~2 MB per batch, ~512 MB total
+   for 256 — fits comfortably in CPU host RAM."
+  []
+  (python/int (.get (.- os environ) "MMLLM_REPLAY_BUFFER_SIZE" "256")))
+
+(defn pick-replay-threshold
+  "Plain-CE threshold below which a training batch is considered
+   'mastered' and pushed to the replay buffer. Reads
+   MMLLM_REPLAY_THRESHOLD (default 0.5). Lower = more selective; the
+   buffer fills with only the most-confidently-predicted batches."
+  []
+  (python/float (.get (.- os environ) "MMLLM_REPLAY_THRESHOLD" "0.5")))
+
+(defn freeze-local-grads!
+  "Zero out the gradient on every Local Bank parameter (K_a, K_b,
+   q_norm, V) across all blocks. Used during a replay step to keep
+   Local Bank frozen while NetBank, dense projections, and the carry
+   update from the replay batch's gradient. Safe to call after
+   .backward() and before opt.step() — zeroed gradients become no-ops
+   in the optimizer step."
+  [m]
+  (doseq [b (:blocks m)]
+    (let [mem (:memory b)]
+      (doseq [p (python/list (.parameters mem))]
+        (when-let [g (.- p grad)]
+          (.zero_ g))))))
+
+(defn pick-distill-coef
+  "Coefficient on the Net→Local distillation aux loss. Reads
+   MMLLM_DISTILL_COEF (default 0.0 = disabled). When > 0, train-step
+   walks every 3-way SwitchGate, pulls last_net_out and last_local_out,
+   and adds `coef · MSE(net_out, local_out.detach())` averaged across
+   blocks to the backward loss. Local is detached so only Net learns to
+   mimic Local; combined with cosine-scheduled lr_bank_mult and lr_net
+   _mult, this drives the cerebellum-style consolidation: Net learns
+   to predict Local's contribution, gate shifts toward Net, Local frees
+   capacity. Suggested ramp 0 → 0.05 over training (cap small to avoid
+   over-constraining Net). 0 keeps the run distillation-free."
+  []
+  (python/float (.get (.- os environ) "MMLLM_DISTILL_COEF" "0.0")))
+
+(defn pick-alpha-net-enabled?
+  "Whether to attach a per-layer learnable alpha_net scalar (per long
+   head) on each SwitchGate's Net-output path. Compensates for the
+   c_net=64 bottleneck + expander-init magnitude loss that leaves Net's
+   contribution small in absolute terms despite high gate weight. Init
+   = 1.0 (identity); learns to amplify Net's effective contribution.
+   Reads MMLLM_ALPHA_NET (default 'false' for back-compat). Stored as
+   block.long-gate.alpha_net so position-aligned ckpt-load doesn't
+   shift; included in (parameters m) at the END for the same reason."
+  []
+  (let [v (.lower (.get (.- os environ) "MMLLM_ALPHA_NET" "false"))]
+    (.__contains__ #{"1" "true" "yes"} v)))
+
+(defn pick-distill-direction-only?
+  "When true, distillation MSE is computed on UNIT-NORMALIZED Net &
+   Local outputs — Net learns Local's direction, not magnitude. Avoids
+   the failure mode where Net minimizes MSE by shrinking its output to
+   match Local's, leaving the gate routing to a tiny-magnitude tier
+   that contributes little. Reads MMLLM_DISTILL_DIRECTION_ONLY (default
+   'false' — preserves existing magnitude-aware MSE)."
+  []
+  (let [v (.lower (.get (.- os environ) "MMLLM_DISTILL_DIRECTION_ONLY" "false"))]
+    (.__contains__ #{"1" "true" "yes"} v)))
+
+(defn collect-distill-loss
+  "Walk every 3-way SwitchGate in the model, pull last_local_out and
+   last_net_out, compute mean(MSE(net, local.detach())) across blocks,
+   scaled by coef. Returns 0.0 when coef=0 OR when no SwitchGate has
+   stashed outputs yet (e.g. NetBank disabled, 2-way mode, or first
+   forward not done).
+
+   When MMLLM_DISTILL_DIRECTION_ONLY=true, both tensors are normalized
+   to unit RMS along the feature dim before MSE — Net learns direction
+   from Local but is free to set its own magnitude. This avoids the
+   pathology observed at step 50000 of the xlam-90 run where Net's V
+   tensor ended up 2-7x smaller magnitude than Local's, leaving the
+   gate routing to a low-magnitude tier."
+  [m]
+  (let [coef    (pick-distill-coef)
+        dir-only (pick-distill-direction-only?)
+        eps      1e-6]
+    (if (zero? coef)
+      0.0
+      (let [losses (->> (:blocks m)
+                        (map (fn [b]
+                               ;; Only SwitchGate stashes these; SumGate /
+                               ;; ScalarGate / 2-way SwitchGate lack them.
+                               ;; getattr-with-default keeps this a no-op
+                               ;; outside 3-way switch mode.
+                               (let [g  (:long-gate b)
+                                     lo (python/getattr g "last_local_out" nil)
+                                     no (python/getattr g "last_net_out" nil)]
+                                 (when (and lo no)
+                                   (if dir-only
+                                     ;; Direction-only: divide each by its
+                                     ;; per-position norm before MSE. Net
+                                     ;; learns Local's direction; magnitude
+                                     ;; is left to the gate × output path.
+                                     (let [lo-d   (.detach lo)
+                                           lo-n   (.add (.norm lo-d ** :dim -1 :keepdim true) eps)
+                                           no-n   (.add (.norm no  ** :dim -1 :keepdim true) eps)]
+                                       (F/mse_loss (.div no no-n)
+                                                   (.div lo-d lo-n)))
+                                     (F/mse_loss no (.detach lo)))))))
+                        (filter some?))]
+        (if (empty? losses)
+          0.0
+          (* coef (/ (reduce + losses) (python/float (count losses)))))))))
+
+(defn pick-grad-clip-max-norm
+  "Max global norm for dense-parameter gradient clipping (AdamW only;
+   SparseAdam's per-row updates are localized and don't suffer the
+   same single-step blow-up mode). Reads MMLLM_GRAD_CLIP (default 0.0
+   = disabled). Standard ML hygiene; 1.0 is a reasonable default
+   when enabling. Prevents the 'one bad batch → huge grad → optimizer
+   step explodes a param to inf → next forward NaNs' failure mode."
+  []
+  (python/float (.get (.- os environ) "MMLLM_GRAD_CLIP" "0.0")))
+
+(defn pick-importance-aux-coef
+  "Coefficient on the IH self-supervised aux loss (MSE between IH
+   output and detached per_pos_ce). Reads MMLLM_IMPORTANCE_AUX
+   (default 1.0). 0 disables aux training (IH stays at init bias).
+   This is the v2 IH knob — replaces the old MMLLM_IMPORTANCE_REG
+   regularizer which never worked (v1 IH had a sign bug)."
+  []
+  (python/float (.get (.- os environ) "MMLLM_IMPORTANCE_AUX" "1.0")))
+
+(defn pick-carry-enabled?
+  "Whether to insert MultiTimescaleCarry per block. Reads
+   MMLLM_CARRY_ENABLED (default 'false'). 4 EMAs per block at log-spaced
+   decay rates. ~10-15% throughput hit. Init: gate zero → identity at
+   step 0; gradient differentiates over training."
+  []
+  (let [v (.lower (.get (.- os environ) "MMLLM_CARRY_ENABLED" "false"))]
+    (.__contains__ #{"1" "true" "yes"} v)))
+
+(defn pick-carry-n-clocks
+  "Number of EMAs per MultiTimescaleCarry block. Reads
+   MMLLM_CARRY_N_CLOCKS (default 4). Decay rates are hardcoded at
+   [0.5, 0.875, 0.96875, 0.992] when n_clocks=4."
+  []
+  (python/int (.get (.- os environ) "MMLLM_CARRY_N_CLOCKS" "4")))
+
 ;;; ─────────────────────── decoder block ───────────────────────
 
 (defn block-forward
@@ -491,21 +995,29 @@
   ([block x cos sin short-cache long-cache skip-bank?]
    (let [{:keys [norm1 norm2
                  q-proj k-proj-s v-proj-s k-proj-l v-proj-l o-proj
-                 memory long-gate bank-query bank-feedback
-                 gate-proj up-proj down-proj
+                 memory netbank long-gate bank-query bank-feedback
+                 gate-proj up-proj down-proj carry
                  n-heads n-short-heads n-long-heads
                  n-short-kv-heads n-long-kv-heads head-dim max-t
-                 short-window long-window]} block]
-     (kernel/block_forward
-       norm1 norm2
-       q-proj k-proj-s v-proj-s k-proj-l v-proj-l o-proj
-       memory long-gate bank-query bank-feedback
-       gate-proj up-proj down-proj
-       n-heads n-short-heads n-long-heads
-       n-short-kv-heads n-long-kv-heads head-dim max-t
-       short-window long-window
-       x cos sin short-cache long-cache
-       ** :skip_bank skip-bank?))))
+                 short-window long-window]} block
+         [x' s' l'] (kernel/block_forward
+                      norm1 norm2
+                      q-proj k-proj-s v-proj-s k-proj-l v-proj-l o-proj
+                      memory long-gate bank-query bank-feedback
+                      gate-proj up-proj down-proj
+                      n-heads n-short-heads n-long-heads
+                      n-short-kv-heads n-long-kv-heads head-dim max-t
+                      short-window long-window
+                      x cos sin short-cache long-cache
+                      ** :skip_bank skip-bank?
+                      :netbank netbank)]
+     ;; Multi-timescale carry as a post-block residual delta. Carry's
+     ;; gate is zero-init so at step 0 this is identity (no behavior
+     ;; change vs no-carry); training pushes the gate to mix EMAs at
+     ;; ~1/5/22/86-token half-lives back into the stream.
+     (if carry
+       [(carry x') s' l']
+       [x' s' l']))))
 
 (defn build-block
   [{:keys [d-model n-heads n-short-heads n-long-heads
@@ -559,26 +1071,173 @@
      :down-proj (nn/Linear d-ff    d-model ** :bias false)
      :short-window      sw
      :long-window       lw
-     :long-gate     (gate/build_gate         gate-kind n-long-heads head-dim)
+     :long-gate     (let [g (gate/build_gate gate-kind n-long-heads head-dim)]
+                      ;; Optional per-head learnable scale on Net's path.
+                      ;; Attached to the gate AFTER construction (so it's
+                      ;; not part of SwitchGate's declaration-order params,
+                      ;; which would shift positional ckpt-load alignment).
+                      ;; Surfaces as a fresh tensor in (parameters m) at
+                      ;; the END of the param list — see `alpha-net-params`.
+                      (when (and (= gate-kind "switch") (pick-alpha-net-enabled?))
+                        (.__setattr__ g "alpha_net"
+                                      (nn/Parameter (torch/ones n-long-heads))))
+                      g)
      :bank-query    (bq/build_bank_query     bq-kind   d-model      q-dim)
      :bank-feedback (bfb/build_bank_feedback fb-kind   d-model      q-dim)
      :memory    (memory-cls q-dim sqrt-n
                             ** :top_k     memory-top-k
                             :sub_top_k memory-sub-top-k
-                            :mmap_path path)}))
+                            :mmap_path path)
+     :netbank   (when (pick-netbank-enabled?)
+                  (netb/NetBank q-dim
+                                ** :sqrt_n       (pick-netbank-sqrt-n)
+                                :c_net           (pick-netbank-c-net)
+                                :top_k           (pick-netbank-top-k)
+                                :sub_top_k       (pick-netbank-sub-top-k)
+                                :mmap_path       (when-let [base (pick-netbank-path memory-mmap-path)]
+                                                   (str base "." block-idx ".bin"))
+                                :delay_ms_min    (pick-netbank-delay-min)
+                                :delay_ms_max    (pick-netbank-delay-max)
+                                :dtype           (pick-netbank-dtype)
+                                :bank_on_gpu     (pick-netbank-on-gpu?)))
+     ;; Optional MultiTimescaleCarry — per-block "brain-stem clocks"
+     ;; residual at log-uniform decay rates. Zero-init gate → identity at
+     ;; step 0 so adding to an existing ckpt is behavior-preserving;
+     ;; gradient differentiates over training. nil when disabled.
+     :carry     (when (pick-carry-enabled?)
+                  (rs/MultiTimescaleCarry d-model (pick-carry-n-clocks)))}))
 
 ;;; ─────────────────────── model ───────────────────────
 
 (defn- block-to-device!
-  "Move every nn.Module child of a block to `device`. ProductKeyMemory's
-   V is a CPUPinnedEmbedding whose _apply is a no-op, so its mmap-backed
-   weight stays on CPU even when device='cuda' — only K_a, K_b move."
+  "Move every nn.Module child of a block to `device`. ProductKeyMemory and
+   NetBank both wrap their V tensors in CPUPinnedEmbedding-style modules
+   whose `_apply` no-ops; the parent module's recursive .to() walks into
+   K_a/K_b/q_norm/expander but skips V, leaving the mmap on CPU."
   [block device]
   (doseq [k [:norm1 :norm2 :q-proj :k-proj-s :v-proj-s :k-proj-l :v-proj-l
              :o-proj :gate-proj :up-proj :down-proj
              :long-gate :bank-query :bank-feedback :memory]]
     (.to (get block k) device))
+  (when-let [nb (:netbank block)]
+    (.to nb device))
+  (when-let [c (:carry block)]
+    (.to c device))
   block)
+
+(def ^:private DELIM_BYTES
+  "JSON structural delimiter byte values. Intentionally excludes whitespace
+   (space, tab) since JSON allows arbitrary whitespace and including it
+   would dilute the structural signal. Defined here (above first user)
+   so basilisp's analyzer doesn't hit a forward reference."
+  #{(python/int 0x7B)   ;; {
+    (python/int 0x7D)   ;; }
+    (python/int 0x5B)   ;; [
+    (python/int 0x5D)   ;; ]
+    (python/int 0x3A)   ;; :
+    (python/int 0x2C)   ;; ,
+    (python/int 0x22)   ;; "
+    (python/int 0x0A)}) ;; newline
+
+(defn pick-fim-loss-mask-middle-only?
+  "When true, train-step zeroes per-position CE outside the
+   `<|fim_mid|>...<|fim_eom|>` span on each example. Examples without
+   FIM markers (raw causal docs in a mixed corpus) keep full CE
+   everywhere. Reads MMLLM_FIM_LOSS_MASK_MIDDLE_ONLY (default 'false').
+   Forces the model to focus its gradient on middle-fill prediction;
+   prefix and suffix become conditioning context only."
+  []
+  (let [v (.lower (.get (.- os environ) "MMLLM_FIM_LOSS_MASK_MIDDLE_ONLY" "false"))]
+    (.__contains__ #{"1" "true" "yes"} v)))
+
+(defn pick-schema-mask-weight
+  "Per-position CE weight multiplier for 'commit' positions — positions
+   where the PREVIOUS byte was a structural JSON delimiter. Reads
+   MMLLM_SCHEMA_MASK_WEIGHT (default 1.0 = disabled). Values > 1.0
+   up-weight the loss on bytes immediately after `{`, `:`, `,`, etc.
+   Approximates schema-masked teacher forcing without a real grammar
+   parser. Tier-3 spike #5."
+  []
+  (python/float (.get (.- os environ) "MMLLM_SCHEMA_MASK_WEIGHT" "1.0")))
+
+(defn ^:private schema-mask-of
+  "x: (B, T) int64 → (B, T) float weight tensor. Position t gets weight
+   w (= MMLLM_SCHEMA_MASK_WEIGHT) if x[t-1] is in DELIM_BYTES, else 1.0.
+   Position 0 always weight 1.0 (no preceding byte). Used to multiply
+   per-position CE."
+  [x w]
+  (let [delim-shifted (torch/zeros_like x ** :dtype torch/bool)
+        prev          (.narrow x 1 0 (- (.size x 1) 1))]   ;; x[:, :-1]
+    ;; Build a mask: prev is in DELIM_BYTES → True
+    (let [prev-mask (torch/zeros_like prev ** :dtype torch/bool)]
+      (doseq [b DELIM_BYTES] (.logical_or_ prev-mask (.eq prev b)))
+      ;; Shift by one so that position t (in result) flags x[t-1]
+      (.copy_ (.narrow delim-shifted 1 1 (- (.size x 1) 1)) prev-mask))
+    (-> (.float delim-shifted)
+        (.mul (- w 1.0))
+        (.add 1.0))))
+
+(defn pick-pause-bytes
+  "Number of pause-byte 'thinking' positions to prepend to training
+   batches with probability MMLLM_PAUSE_PROB. Reads MMLLM_PAUSE_BYTES
+   (default 0 = disabled). When > 0, with probability pause-prob the
+   first N bytes of each input sequence are replaced with the pause
+   byte (default value 0x00). Targets give the model extra 'forward
+   passes' before predicting real content — at inference, prepend N
+   pause bytes to the prompt to give Local Bank time to deliberate
+   before committing to structural output. Tier-3 spike #9."
+  []
+  (python/int (.get (.- os environ) "MMLLM_PAUSE_BYTES" "0")))
+
+(defn pick-pause-prob
+  "Probability per training batch of injecting pause-byte prefix.
+   Reads MMLLM_PAUSE_PROB (default 0.5). 0 = always insert; 1 = never
+   skip; 0.5 = half of batches get pauses, half don't."
+  []
+  (python/float (.get (.- os environ) "MMLLM_PAUSE_PROB" "0.5")))
+
+(defn pick-pause-byte-val
+  "Byte value used for pause filling. Reads MMLLM_PAUSE_BYTE_VAL
+   (default 0 = NUL). Pick a byte that's rare in actual training data
+   so model learns to treat it as a pause marker, not as content."
+  []
+  (python/int (.get (.- os environ) "MMLLM_PAUSE_BYTE_VAL" "0")))
+
+(defn ^:private maybe-inject-pause-prefix!
+  "Mutate x in-place: with probability `prob`, replace the first
+   `n` bytes of every sequence in x with `pause-val`. y is left
+   untouched — model still predicts the original next-byte sequence,
+   just with pause bytes as input prefix instead of real content."
+  [x n prob pause-val]
+  (when (and (pos? n) (< (.item (torch/rand 1)) prob))
+    (let [pause-tensor (torch/full (python/tuple [(.size x 0) n])
+                                    pause-val
+                                    ** :dtype (.- x dtype)
+                                    :device (.- x device))]
+      (.copy_ (.narrow x 1 0 n) pause-tensor)))
+  x)
+
+(defn pick-delim-aux-coef
+  "Coefficient on the JSON-delimiter auxiliary head's BCE loss. Reads
+   MMLLM_DELIM_AUX_COEF (default 0.0 = disabled). When > 0, a Linear
+   (d_model, 1) head over the final hidden state predicts whether the
+   NEXT byte is a JSON structural delimiter ({ } [ ] : , \" \\n).
+   Auxiliary loss = BCEWithLogits(head(x), is_delim(y)). Forces the
+   trunk's hidden state to encode JSON parse state — which Local Bank
+   can then leverage when retrieving structural patterns. 0.05-0.1 is
+   a reasonable initial cap. Tier-2 spike #4 from the upgrade plan."
+  []
+  (python/float (.get (.- os environ) "MMLLM_DELIM_AUX_COEF" "0.0")))
+
+(defn pick-mtp-coef
+  "Coefficient on the multi-token-prediction (t+2) auxiliary loss.
+   Reads MMLLM_MTP_COEF (default 0.0 = disabled). When > 0, an
+   independent linear head predicts the byte two positions ahead;
+   its CE loss is added to the main t+1 loss with this coefficient.
+   Meta MTP 2024 + recent byte-LM work suggest 0.25-0.5 for byte
+   models; start small (0.25) and tune up if it helps."
+  []
+  (python/float (.get (.- os environ) "MMLLM_MTP_COEF" "0.0")))
 
 (defn build-model
   [{:keys [d-model n-heads n-short-heads n-long-heads
@@ -590,42 +1249,199 @@
           "n-short-heads must be divisible by n-short-kv-heads")
   (let [head-dim   (quot d-model n-heads)
         [cos sin]  (build-rope-cache (or max-pos seq-len) head-dim rope-theta)
-        device     (pick-device)]
-    {:config     config
-     :device     device
-     :tok-emb    (.to (nn/Embedding vocab-size d-model) device)
-     :blocks     (vec (map #(block-to-device! (build-block config %) device)
-                           (range n-layers)))
-     :norm-final (.to (nn/RMSNorm d-model) device)
-     :rope-cos   (.to cos device)
-     :rope-sin   (.to sin device)}))
+        device     (pick-device)
+        ;; Aux MTP head — only constructed when MMLLM_MTP_COEF > 0 so
+        ;; default models stay parameter-identical to pre-MTP code and
+        ;; old ckpts load cleanly. Goes AT THE END of (parameters m)
+        ;; for positional-ckpt-load compatibility.
+        mtp-head   (when (pos? (pick-mtp-coef))
+                     (.to (nn/Linear d-model vocab-size ** :bias false) device))
+        ;; Optional LearnedImportanceHead — Linear(d_model, 1) over the
+        ;; final hidden state, softplus-transformed → per-position loss
+        ;; multiplier. Self-supervised by the loss itself (regularized to
+        ;; mean=1). Zero-init weights → softplus(0) ≈ 0.69 ≈ const at
+        ;; step 0; differentiates over training. Goes at END of
+        ;; (parameters m) for ckpt back-compat.
+        importance-head (when (pick-importance-head?)
+                          (.to (rs/LearnedImportanceHead d-model) device))
+        ;; JSON-delimiter aux head — Linear(d_model, 1) over final hidden
+        ;; state. Predicts whether the NEXT byte is a structural JSON
+        ;; delimiter. Zero-init so adds no signal at step 0 (back-compat).
+        ;; Goes at END of (parameters m) for positional ckpt-load.
+        delim-head (when (pos? (pick-delim-aux-coef))
+                     (let [h (nn/Linear d-model 1 ** :bias true)]
+                       (with [_ (torch/no_grad)]
+                         (.zero_ (.- (.- h weight) data))
+                         (.zero_ (.- (.- h bias)   data)))
+                       (.to h device)))]
+    {:config          config
+     :device          device
+     :tok-emb         (.to (nn/Embedding vocab-size d-model) device)
+     :blocks          (vec (map #(block-to-device! (build-block config %) device)
+                                (range n-layers)))
+     :norm-final      (.to (nn/RMSNorm d-model) device)
+     :rope-cos        (.to cos device)
+     :rope-sin        (.to sin device)
+     :mtp-head        mtp-head
+     :importance-head importance-head
+     :delim-head      delim-head
+     ;; Mutable metrics stash for visibility into router-smarts /
+     ;; consolidation aux losses. train-step writes the most recent
+     ;; distill_loss; train-long writes replay_loss after the periodic
+     ;; replay step. Read at print and slot-log time.
+     :metrics         (python/dict {"distill_loss" 0.0
+                                    "replay_loss"  0.0
+                                    "replay_buf_n" 0
+                                    "delim_loss"   0.0})}))
 
 (defn parameters
   "DENSE learnable parameters — these route to AdamW. Excludes the
    memory bank V.weight per block (sparse — see sparse-parameters).
-   The LM head is weight-tied to tok-emb so doesn't appear separately."
+   The LM head is weight-tied to tok-emb so doesn't appear separately.
+
+   Backward-compat ordering: anything that may have ZERO params in a
+   prior ckpt's gate config (e.g. SumGate had 0, SwitchGate has 2)
+   is appended at the END of the list. That way switching to a gate
+   with MORE params doesn't shift the positional map of all the
+   tensors that come after it — old ckpt's K_a/K_b/q_norm don't get
+   misaligned onto the new gate's gate_proj.
+
+   Order:
+     1. tok-emb
+     2. per-block CORE (norm1, norm2, q/k/s/v/l-projs, FFN, bank-query,
+        bank-feedback, memory's dense params)
+     3. norm-final
+     4. mtp-head (optional, at END so pre-MTP ckpts load cleanly)
+     5. per-block long-gate (at END for the same reason — SumGate→
+        SwitchGate transition would otherwise misalign)
+     6. per-block netbank dense (at END so a pre-NetBank ckpt loads
+        cleanly into a NetBank-enabled model)
+     7. importance-head (at END — added in router-smarts work)
+     8. per-block carry gate (at END — added in router-smarts work)"
   [m]
-  (let [{:keys [tok-emb blocks norm-final]} m
-        block-params (fn [b]
-                       (concat
-                        (mapcat #(python/list (.parameters (get b %)))
-                                [:norm1 :norm2 :q-proj
-                                 :k-proj-s :v-proj-s
-                                 :k-proj-l :v-proj-l
-                                 :o-proj :gate-proj :up-proj :down-proj
-                                 :long-gate :bank-query :bank-feedback])
-                        ;; memory: K_a, K_b are dense; V.weight is sparse
-                        (.dense_parameters (:memory b))))]
+  (let [{:keys [tok-emb blocks norm-final mtp-head importance-head delim-head]} m
+        ;; CORE block params (K_a/K_b only from memory — q_norm goes at end)
+        core-params (fn [b]
+                      (concat
+                       (mapcat #(python/list (.parameters (get b %)))
+                               [:norm1 :norm2 :q-proj
+                                :k-proj-s :v-proj-s
+                                :k-proj-l :v-proj-l
+                                :o-proj :gate-proj :up-proj :down-proj
+                                :bank-query :bank-feedback])
+                       ;; memory's K_a, K_b only; q_norm at END below
+                       (.dense_parameters (:memory b))))
+        memory-q-norm (fn [b]
+                        (.q_norm_parameters (:memory b)))
+        gate-params (fn [b]
+                      ;; Exclude alpha_net (added later as a SwitchGate
+                      ;; attribute) from this position so position-aligned
+                      ;; ckpt-load doesn't shift. alpha_net surfaces in
+                      ;; alpha-net-params at the END of (parameters m).
+                      (->> (.named_parameters (:long-gate b))
+                           python/list
+                           (filter (fn [t] (not= (.__getitem__ t 0) "alpha_net")))
+                           (map (fn [t] (.__getitem__ t 1)))
+                           python/list))
+        netbank-params (fn [b]
+                         (when-let [nb (:netbank b)]
+                           (.dense_parameters nb)))
+        carry-params (fn [b]
+                       (when-let [c (:carry b)]
+                         (python/list (.parameters c))))
+        alpha-net-params (fn [b]
+                           ;; SwitchGate.alpha_net (per-block, optional).
+                           ;; nil/None when not enabled or not a SwitchGate.
+                           (let [g (:long-gate b)
+                                 a (python/getattr g "alpha_net" nil)]
+                             (when (and a (python/isinstance a nn/Parameter))
+                               [a])))]
     (concat (python/list (.parameters tok-emb))
-            (mapcat block-params blocks)
-            (python/list (.parameters norm-final)))))
+            (mapcat core-params blocks)
+            (python/list (.parameters norm-final))
+            (when mtp-head (python/list (.parameters mtp-head)))
+            ;; everything below is "added later" — appended at end so
+            ;; positional ckpt-load from a ckpt without these stays aligned
+            (mapcat memory-q-norm blocks)
+            (mapcat gate-params blocks)
+            (mapcat netbank-params blocks)
+            ;; router-smarts additions go at the very end so a ckpt
+            ;; saved before these features can still load positionally.
+            (when importance-head
+              (python/list (.parameters importance-head)))
+            (mapcat carry-params blocks)
+            ;; alpha_net (per-SwitchGate per-head) — last so even
+            ;; ckpts from before this feature exists load cleanly.
+            (mapcat alpha-net-params blocks)
+            ;; JSON-delimiter aux head — at END for back-compat.
+            (when delim-head (python/list (.parameters delim-head))))))
+
+(defn- kab-parameters
+  "Per-block K_a / K_b parameters. Returned as a flat Python list for
+   the AdamW K_a/K_b sub-group when MMLLM_LR_KAB_MULT differs from
+   MMLLM_LR_DENSE_MULT. Each block's :memory has K_a, K_b directly."
+  [m]
+  (python/list
+    (mapcat (fn [b] [(.- (:memory b) K_a)
+                     (.- (:memory b) K_b)])
+            (:blocks m))))
+
+(defn make-opt-dense
+  "Build the AdamW optimizer for dense (router) params. When
+   MMLLM_LR_KAB_MULT == MMLLM_LR_DENSE_MULT: single-group (back-compat).
+   When different: K_a/K_b move to a separate group (index 1) with
+   their own lr; everything else stays in group 0. Train loop uses
+   `set-opt-lrs!` to update both groups per-step. Returns the AdamW.
+
+   Identifying K_a/K_b in `(parameters m)` — they're tensors with the
+   same `id()` as the ones returned by `kab-parameters`. Using a Python
+   set of object ids dedupes across the parameters list."
+  [m]
+  (let [d-mult (pick-lr-dense-mult)
+        k-mult (pick-lr-kab-mult)]
+    (if (= d-mult k-mult)
+      (optim/AdamW (python/list (parameters m)) ** :lr (pick-lr-dense))
+      (let [kab-list   (kab-parameters m)
+            kab-id-set (python/set (python/list (map python/id kab-list)))
+            all-list   (python/list (parameters m))
+            core-list  (python/list (filter (fn [p] (not (.__contains__ kab-id-set
+                                                                          (python/id p))))
+                                            all-list))]
+        (optim/AdamW
+          (python/list [(python/dict {"params" core-list "lr" (pick-lr-dense)})
+                        (python/dict {"params" kab-list  "lr" (pick-lr-kab)})])
+          ** :lr (pick-lr-dense))))))
 
 (defn sparse-parameters
-  "SPARSE learnable parameters — route to SparseAdam. Backward
-   produces sparse gradients via nn.Embedding(sparse=True), so
-   only the touched rows get updated (and written back to mmap)."
+  "Local Bank sparse params — route to opt-sparse (SparseAdam).
+   See `netbank-sparse-parameters` for the third-tier route."
   [m]
   (mapcat #(.sparse_parameters (:memory %)) (:blocks m)))
+
+(defn netbank-sparse-parameters
+  "NetBank V.weight per block — route to opt-sparse-net (third
+   SparseAdam) with its own lr (pick-lr-net). Empty list when NetBank
+   is disabled, so the caller can skip optimizer construction without
+   special-casing."
+  [m]
+  (mapcat (fn [b] (when-let [nb (:netbank b)] (.sparse_parameters nb)))
+          (:blocks m)))
+
+(defn warm-start-netbanks-from-local!
+  "Per-block, copy Local Bank's K_a/K_b into the corresponding NetBank's
+   first `local.sqrt_n` rows. Bootstraps NetBank's retrieval geometry
+   from Local's so queries that score highly against Local also score
+   highly against the corresponding NetBank rows from step 0.
+   No-op when NetBank is disabled. Called by train-long when the resume
+   path detects a missing opt-sparse-net.pt (i.e. NetBank just turned on
+   for an existing dense-only run)."
+  [m]
+  (doseq [[i b] (map-indexed vector (:blocks m))]
+    (when-let [nb (:netbank b)]
+      (.warm_start_from nb
+                        (.- (:memory b) K_a)
+                        (.- (:memory b) K_b))
+      (println (format "  NetBank[layer %d] warm-started from Local K_a/K_b" i)))))
 
 (defn forward
   "Run the model.
@@ -638,22 +1454,37 @@
   ([m tokens short-caches] (forward m tokens short-caches nil false))
   ([m tokens short-caches long-caches] (forward m tokens short-caches long-caches false))
   ([m tokens short-caches long-caches skip-bank?]
-   (let [{:keys [tok-emb blocks norm-final rope-cos rope-sin]} m
+   (let [{:keys [tok-emb blocks norm-final rope-cos rope-sin mtp-head]} m
          n-layers     (count blocks)
          short-caches (or short-caches (vec (repeat n-layers nil)))
-         long-caches  (or long-caches  (vec (repeat n-layers nil)))]
+         long-caches  (or long-caches  (vec (repeat n-layers nil)))
+         guard?       (pick-nan-guard?)
+         x0           (tok-emb tokens)]
+     (when guard? (nan-guard! "tok-emb" x0))
      (loop [i         0
-            x         (tok-emb tokens)
+            x         x0
             out-short []
             out-long  []]
        (if (= i n-layers)
-         (let [x      (norm-final x)
-               logits (torch/matmul x (.t (.- tok-emb weight)))]
-           [logits out-short out-long])
+         (let [x'         (norm-final x)
+               _          (when guard? (nan-guard! "norm-final" x'))
+               logits     (torch/matmul x' (.t (.- tok-emb weight)))
+               _          (when guard? (nan-guard! "logits" logits))
+               ;; Multi-token-prediction aux logits: independent linear
+               ;; head from the same final hidden state. Used by
+               ;; train-step to compute t+2 CE loss when MMLLM_MTP_COEF
+               ;; > 0; nil and skipped otherwise.
+               aux-logits (when mtp-head (mtp-head x'))
+               _          (when (and guard? aux-logits) (nan-guard! "aux-logits" aux-logits))]
+           ;; 5th element `x'` (post-norm-final hidden state) is consumed
+           ;; only by train-step's importance-head path. All other
+           ;; callers destructure 3-4 elements and silently ignore it.
+           [logits out-short out-long aux-logits x'])
          (let [block      (nth blocks i)
                sc         (nth short-caches i)
                lc         (nth long-caches  i)
                [x' s' l'] (block-forward block x rope-cos rope-sin sc lc skip-bank?)]
+           (when guard? (nan-guard! (format "block-%d-out" i) x'))
            (recur (inc i) x' (conj out-short s') (conj out-long l'))))))))
 
 ;;; ─────────────────────── training ───────────────────────
@@ -682,21 +1513,203 @@
       [(.narrow win 1 0 T)
        (.narrow win 1 1 T)])))
 
+(defn pick-z-loss-coef
+  "Coefficient on the PKM query z-loss term. Reads MMLLM_Z_LOSS_COEF
+   (default 1e-5). 0 disables. ST-MoE uses 1e-3 for whole-model
+   router z; PKM has more sub-key matmuls per query so a smaller
+   coefficient is appropriate."
+  []
+  (python/float (.get (.- os environ) "MMLLM_Z_LOSS_COEF" "1e-5")))
+
+(defn collect-z-loss
+  "Sum the per-layer z-loss terms accumulated by ProductKeyMemory.forward
+   on the most recent forward pass. Returns a scalar tensor on the
+   model device, or 0.0 when disabled / no PKM forward in this pass."
+  [m]
+  (let [coef (pick-z-loss-coef)]
+    (if (zero? coef)
+      0.0
+      (let [terms (->> (:blocks m)
+                       (map (fn [b] (.- (:memory b) last_z_loss)))
+                       (filter some?))]
+        (if (empty? terms)
+          0.0
+          (* coef (reduce + terms)))))))
+
+(defn collect-mtp-loss
+  "Compute the multi-token-prediction (t+2) auxiliary CE loss when
+   `aux-logits` is non-nil, scaled by MMLLM_MTP_COEF. The aux head
+   at position p predicts byte at p+2; we score the inner T-1
+   positions (positions [0..T-2] of aux logits paired with y[1..T-1])
+   since the t+2 target for position T-1 is outside the window.
+
+   Returns a scalar tensor when active, 0.0 otherwise."
+  [aux-logits y T]
+  (if (nil? aux-logits)
+    0.0
+    (let [coef            (pick-mtp-coef)
+          aux-logits-trim (.narrow aux-logits 1 0 (- T 1))
+          y-trim          (.narrow y 1 1 (- T 1))]
+      (* coef (F/cross_entropy
+               (.reshape aux-logits-trim -1 vocab-size)
+               (.reshape y-trim -1))))))
+
+(defn ^:private delim-mask-for
+  "y: (B, T) int64 byte tokens → (B, T) float bool mask: 1.0 where the
+   byte is in DELIM_BYTES, 0.0 otherwise. Used as BCE target for the
+   delimiter aux head."
+  [y]
+  ;; Build OR over the delimiter set: y == 0x7B | y == 0x7D | …
+  (let [mask (torch/zeros_like y ** :dtype torch/bool)]
+    (doseq [b DELIM_BYTES]
+      (.logical_or_ mask (.eq y b)))
+    (.float mask)))
+
+(defn collect-delim-loss
+  "Compute the JSON-delimiter aux head's BCE loss when the head is
+   present and MMLLM_DELIM_AUX_COEF > 0.
+
+   delim-head produces (B, T, 1) logit per position over the trunk's
+   final hidden state. Target: 1.0 where y[t] is a structural delim,
+   0.0 otherwise. BCEWithLogits handles sigmoid internally for stability.
+
+   Returns scaled scalar tensor (active) or 0.0 (disabled / nil head)."
+  [m final-x y]
+  (let [coef (pick-delim-aux-coef)
+        head (:delim-head m)]
+    (if (or (zero? coef) (nil? head))
+      0.0
+      (let [logits (.squeeze (head final-x) -1)   ;; (B, T)
+            target (delim-mask-for y)             ;; (B, T)
+            loss   (F/binary_cross_entropy_with_logits logits target)]
+        (* coef loss)))))
+
 (defn train-step
-  [m opt-dense opt-sparse x y]
-  (let [device       (:device m)
-        x            (.to x device)
-        y            (.to y device)
-        [logits _ _] (forward m x)
-        loss         (F/cross_entropy
-                      (.reshape logits -1 vocab-size)
-                      (.reshape y -1))]
-    (.zero_grad opt-dense)
-    (.zero_grad opt-sparse)
-    (.backward loss)
-    (.step opt-dense)
-    (.step opt-sparse)
-    (.item loss)))
+  ([m opt-dense opt-sparse x y]
+   (train-step m opt-dense opt-sparse nil x y false))
+  ([m opt-dense opt-sparse opt-sparse-net x y]
+   (train-step m opt-dense opt-sparse opt-sparse-net x y false))
+  ([m opt-dense opt-sparse opt-sparse-net x y freeze-local?]
+   (let [device       (:device m)
+         x            (.to x device)
+         y            (.to y device)
+         [logits _ _ aux-logits final-x] (forward m x)
+         T            (.size y 1)
+         ;; Router-smarts loss path. focal_ce with gamma=0 reduces to
+         ;; plain CE, so this is behavior-preserving when no env vars
+         ;; are set. When MMLLM_FOCAL_GAMMA > 0, hard bytes get up-
+         ;; weighted via (1-p)^gamma. When MMLLM_IMPORTANCE_HEAD=true,
+         ;; an additional self-supervised per-position multiplier kicks
+         ;; in (regularized to mean=1).
+         gamma        (pick-focal-gamma)
+         logits-flat  (.reshape logits -1 vocab-size)
+         y-flat       (.reshape y -1)
+         per-pos-ce   (rs/focal_ce logits-flat y-flat
+                                   ** :gamma gamma :reduction "none")
+         ;; #5 spike: schema-mask weight on positions immediately after
+         ;; a JSON delimiter byte. Default w=1.0 (no-op). When > 1.0,
+         ;; up-weights CE on "commit" positions where the byte right
+         ;; before was `{` `:` `,` `"` `]` `}` `[` or newline.
+         schema-w     (pick-schema-mask-weight)
+         per-pos-ce   (if (= schema-w 1.0)
+                        per-pos-ce
+                        (let [w-mask (.reshape (schema-mask-of x schema-w) -1)]
+                          (.mul per-pos-ce w-mask)))
+         ;; FIM loss mask: when MMLLM_FIM_LOSS_MASK_MIDDLE_ONLY=true,
+         ;; zero per-position CE outside <|fim_mid|>...<|fim_eom|>. Examples
+         ;; without those markers (non-FIM batches) get all-1 mask, no-op.
+         per-pos-ce   (if (pick-fim-loss-mask-middle-only?)
+                        (let [fim-mask (.to (fim/fim_loss_mask x) (.- per-pos-ce device))]
+                          (.mul per-pos-ce (.reshape fim-mask -1)))
+                        per-pos-ce)
+         ih           (:importance-head m)
+         ce-loss      (if ih
+                        (let [imp-raw  (ih final-x)
+                              imp-flat (.reshape imp-raw -1)]
+                          ;; v2: IH is a detached, mean-1-normalized
+                          ;; multiplier on per_pos_ce (no grad from main
+                          ;; loss into IH) PLUS a separate aux MSE that
+                          ;; trains IH to predict per_pos_ce. See
+                          ;; rs/importance_weighted_loss for path
+                          ;; semantics. Replaces the v1 design which had
+                          ;; a sign bug — gradient pushed IH down on
+                          ;; hard bytes, collapsing training signal to 0.
+                          (rs/importance_weighted_loss
+                            per-pos-ce imp-flat
+                            ** :aux_coef (pick-importance-aux-coef)))
+                        (.mean per-pos-ce))
+         ;; Plain CE for operator-facing prints + per-corpus tracker.
+         ;; The focal+IH-weighted ce-loss is what backward sees, but it
+         ;; isn't directly comparable to historical (pre-router-smarts)
+         ;; train-loss / val_bpc numbers because (a) IH's softplus(0) ≈
+         ;; 0.69 multiplier and (b) focal's (1-p)^γ down-weighting of
+         ;; easy bytes both shrink the printed scalar in misleading
+         ;; ways. plain-ce is computed cheaply from the same logits we
+         ;; already have and reflects "what would CE have been without
+         ;; router-smarts" — directly comparable to phases 0-N.
+         plain-ce     (F/cross_entropy logits-flat y-flat)
+         z-loss       (collect-z-loss m)
+         mtp-loss     (collect-mtp-loss aux-logits y T)
+         distill-loss (collect-distill-loss m)
+         delim-loss   (collect-delim-loss m final-x y)
+         ;; Stash distill / delim losses on :metrics for printer / JSONL.
+         _            (when-let [metrics (:metrics m)]
+                        (.__setitem__ metrics "distill_loss"
+                                      (if (number? distill-loss)
+                                        (python/float distill-loss)
+                                        (.item distill-loss)))
+                        (.__setitem__ metrics "delim_loss"
+                                      (if (number? delim-loss)
+                                        (python/float delim-loss)
+                                        (.item delim-loss))))
+         ;; Sum non-zero terms; numerics matter — adding a Python 0.0 to
+         ;; a tensor would coerce to a fp tensor scalar of value 0, fine.
+         loss         (cond-> ce-loss
+                        (not (number? z-loss))       (+ z-loss)
+                        (not (number? mtp-loss))     (+ mtp-loss)
+                        (not (number? distill-loss)) (+ distill-loss)
+                        (not (number? delim-loss))   (+ delim-loss))]
+     ;; Hard-abort on NaN/Inf loss before backward — a degenerate step
+     ;; would propagate NaN into all params, opt state, and bank V; the
+     ;; ckpt-save next event would then persist a poisoned model. Raising
+     ;; here gives `train-long`'s try/finally a chance to checkpoint
+     ;; pre-poisoning and exit non-zero so the operator notices.
+     (when (or (.item (.isnan loss)) (.item (.isinf loss)))
+       (throw (python/RuntimeError
+                (format "train-step aborted: loss=%s (ce=%s plain=%s) is NaN or Inf — model may be poisoned"
+                        (.item loss) (.item ce-loss) (.item plain-ce)))))
+     (.zero_grad opt-dense)
+     (.zero_grad opt-sparse)
+     (when opt-sparse-net (.zero_grad opt-sparse-net))
+     (.backward loss)
+     ;; #1 spike: cold-row gradient boost on Local Bank V. No-op when
+     ;; MMLLM_BANK_COLD_BOOST=0. Applied after backward, before opt step,
+     ;; so SparseAdam's update sees the rescaled gradient.
+     (doseq [b (:blocks m)]
+       (spr/boost_cold_row_grads_ (:memory b)))
+     ;; P3 replay path: zero Local Bank's grads after backward but
+     ;; before optimizer.step() so the replay update flows only into
+     ;; NetBank, dense projections, and carry — Local stays frozen on
+     ;; mastered patterns it's already learned.
+     (when freeze-local? (freeze-local-grads! m))
+     ;; Gradient clipping on the AdamW (dense / router) param group.
+     ;; SparseAdam's per-row updates on bank V are robust to single
+     ;; large grads (the update is localized per touched row) so we
+     ;; skip clipping there. We pull the dense params from opt-dense
+     ;; itself: param_groups[0]["params"] is the canonical handle
+     ;; already grouped for the optimizer, so we don't re-derive
+     ;; from the model on every step.
+     (let [max-norm (pick-grad-clip-max-norm)]
+       (when (pos? max-norm)
+         (nn-utils/clip_grad_norm_
+           (.__getitem__ (nth (.- opt-dense param_groups) 0) "params")
+           max-norm)))
+     (.step opt-dense)
+     (.step opt-sparse)
+     (when opt-sparse-net (.step opt-sparse-net))
+     ;; Return plain CE — comparable to historical numbers. The
+     ;; focal+IH-weighted loss is internal to backward.
+     (.item plain-ce))))
 
 (defn train
   "Train on the toy corpus. Returns the trained model.
@@ -708,8 +1721,8 @@
   ([config steps]
    (let [m          (build-model config)
          data       (encode toy-text)
-         opt-dense  (optim/AdamW    (python/list (parameters m))        ** :lr (pick-lr))
-         opt-sparse ((pick-sparse-optimizer) (python/list (sparse-parameters m)) ** :lr (pick-lr))
+         opt-dense  (optim/AdamW    (python/list (parameters m))        ** :lr (pick-lr-dense))
+         opt-sparse ((pick-sparse-optimizer) (python/list (sparse-parameters m)) ** :lr (pick-lr-bank))
          T          (:seq-len config)
          sqrt-n     (pick-sqrt-n config)
          bank-n     (* sqrt-n sqrt-n)
@@ -739,7 +1752,32 @@
                :k-proj-l :v-proj-l
                :o-proj :gate-proj :up-proj :down-proj
                :long-gate :bank-query :bank-feedback :memory]]
-      (.eval (get b k)))))
+      (.eval (get b k)))
+    (when-let [nb (:netbank b)] (.eval nb))
+    (when-let [c (:carry b)] (.eval c)))
+  (when-let [mh (:mtp-head m)] (.eval mh))
+  (when-let [ih (:importance-head m)] (.eval ih)))
+
+(defn- set-train-mode! [m]
+  "Inverse of set-eval-mode!. Call before every train step so the
+   model's training-mode flags get restored after any intermediate
+   eval-bpc / ablation / sample call. Without this, Local Bank's
+   `if self.training:` guards (slot tracking, z-loss accumulator)
+   silently disable themselves after the first eval and the bank
+   trains with no regularizer + zero diagnostics."
+  (.train (:tok-emb m))
+  (.train (:norm-final m))
+  (doseq [b (:blocks m)]
+    (doseq [k [:norm1 :norm2 :q-proj
+               :k-proj-s :v-proj-s
+               :k-proj-l :v-proj-l
+               :o-proj :gate-proj :up-proj :down-proj
+               :long-gate :bank-query :bank-feedback :memory]]
+      (.train (get b k)))
+    (when-let [nb (:netbank b)] (.train nb))
+    (when-let [c (:carry b)] (.train c)))
+  (when-let [mh (:mtp-head m)] (.train mh))
+  (when-let [ih (:importance-head m)] (.train ih)))
 
 (defn sample
   "Generate `n` characters after `prompt`. Threads BOTH short cache
@@ -1059,15 +2097,24 @@
     (println (format "  eval-agent[%s]: ckpt=%s test=%s n=%d gen=%d"
                      eval-name (or ckpt-step "init") eval-test-path
                      n-samples gen-len))
-    (let [samples (python/list (ev/iter_eval_samples eval-test-path
-                                                     ** :max_samples n-samples))]
+    (let [;; Cap prompt bytes at model's max-pos minus gen-len so we
+          ;; don't blow past the RoPE cache. cpu-tiny's max-pos=512
+          ;; while default-config's is 1024 — both must work.
+          max-pos       (:max-pos config)
+          max-prompt    (max 64 (- max-pos gen-len 8))
+          samples (python/list (ev/iter_eval_samples eval-test-path
+                                                     ** :max_samples n-samples
+                                                     :max_prompt_bytes max-prompt))
+          verbose?      (= (.get (.- os environ) "MMLLM_AGENT_EVAL_VERBOSE" "false") "true")]
+      (println (format "  iter_eval_samples returned %d samples (max_prompt_bytes=%d)"
+                       (count samples) max-prompt))
       (if (zero? (count samples))
         (println "  no samples in eval set — skipping")
         (let [t0          (time/time)
               predictions (python/list)
               golds       (python/list)
               end-mark    (.- ds/DEFAULT_TEMPLATE end)]
-          (doseq [s samples]
+          (doseq [[idx s] (map-indexed vector samples)]
             (let [prompt    (.- s prompt)
                   gold      (.- s gold)
                   ;; Greedy decode for format-critical evals — at byte
@@ -1084,6 +2131,11 @@
                   pred      (if (>= end-idx 0)
                               (subs gen-only 0 end-idx)
                               gen-only)]
+              (when verbose?
+                (println (format "  [sample %d/%d] gold-len=%d pred-len=%d"
+                                 idx (count samples) (count gold) (count pred)))
+                (println (format "    PRED: %s" (python/repr pred)))
+                (println (format "    GOLD: %s" (python/repr gold))))
               (.append predictions pred)
               (.append golds gold)))
           (let [results (ev/score_predictions predictions golds)
@@ -1122,6 +2174,39 @@
             [ten (python/float w-str)]))))))
 
 
+(defn make-corpus-tracker
+  "Per-corpus rolling loss tracker. Returns a Python dict whose values
+   are deque-style ring buffers of recent losses per corpus index.
+
+   `n-corpora`: how many corpora the mix has (sets up that many slots).
+   `window`: rolling window size (default 50 — matches step-print cadence)."
+  [n-corpora & {:keys [window] :or {window 50}}]
+  (let [from-collections (python/__import__ "collections")
+        deque-cls        (.- from-collections deque)
+        d (python/dict)]
+    (doseq [i (range n-corpora)]
+      (.__setitem__ d i (deque-cls ** :maxlen window)))
+    {:dq d :n n-corpora :window window}))
+
+(defn record-corpus-loss!
+  "Append a loss value to corpus `idx`'s rolling buffer."
+  [tracker idx loss]
+  (when (and tracker (>= idx 0) (< idx (:n tracker)))
+    (.append (.__getitem__ (:dq tracker) idx) loss)))
+
+(defn corpus-loss-summary
+  "Snapshot per-corpus mean loss over the rolling window. Returns
+   a Python list of [idx, n_seen, mean_loss] tuples for every corpus
+   that has at least one loss recorded. Skips empty buckets."
+  [tracker]
+  (let [out (python/list)]
+    (doseq [i (range (:n tracker))]
+      (let [dq (.__getitem__ (:dq tracker) i)
+            n  (count dq)]
+        (when (pos? n)
+          (.append out (python/tuple [i n (/ (sum dq) (python/float n))])))))
+    out))
+
 (defn mix-batch
   "One (x y) batch drawn from the weighted mix. Picks ONE corpus per
    batch (chunky mixing — proportions hold across many batches).
@@ -1129,11 +2214,16 @@
    `mix-tensors`: list of 1-D byte tensors (mmap'd).
    `mix-weights-t`: 1-D fp32 tensor of weights, same length as
    mix-tensors. Pre-built once at train-long startup so the hot
-   loop only does the multinomial draw."
+   loop only does the multinomial draw.
+
+   Returns [x y idx] — `idx` is the corpus index this batch came from,
+   used by the trainer to attribute loss back to a specific corpus
+   (rolling per-corpus loss window in step prints)."
   [mix-tensors mix-weights-t B T]
-  (let [idx (.item (torch/multinomial mix-weights-t 1))
-        ten (nth mix-tensors idx)]
-    (batch ten B T)))
+  (let [idx     (.item (torch/multinomial mix-weights-t 1))
+        ten     (nth mix-tensors idx)
+        [x y]   (batch ten B T)]
+    [x y idx]))
 
 ;;; ─────────────────────── train on a real corpus ───────────────────────
 
@@ -1150,8 +2240,8 @@
   [config steps corpus-path]
   (let [m          (build-model config)
         data       (corp/load-as-tensor corpus-path)
-        opt-dense  (optim/AdamW    (python/list (parameters m))         ** :lr (pick-lr))
-        opt-sparse ((pick-sparse-optimizer) (python/list (sparse-parameters m)) ** :lr (pick-lr))
+        opt-dense  (optim/AdamW    (python/list (parameters m))         ** :lr (pick-lr-dense))
+        opt-sparse ((pick-sparse-optimizer) (python/list (sparse-parameters m)) ** :lr (pick-lr-bank))
         T          (:seq-len config)
         sqrt-n     (pick-sqrt-n config)
         bank-n     (* sqrt-n sqrt-n)
@@ -1403,11 +2493,32 @@
     (when ckpt-step
       (let [path  (str ckpt-dir "/step-" ckpt-step)
             saved (python/list (torch/load (str path "/dense.pt")
-                                           ** :map_location device))]
+                                           ** :map_location device))
+            ;; Tolerant load: skip+warn on shape mismatch (mirrors
+            ;; load-checkpoint!). Eval's model topology may differ from
+            ;; the trainer's (e.g. MTP head only present if MMLLM_MTP_COEF
+            ;; > 0; switch gate / NetBank only if respective env flags
+            ;; on). Skipping aligns with "use whatever's compatible,
+            ;; leave the rest at fresh init for components that aren't
+            ;; relevant to eval anyway".
+            n-skipped (python/list [0])]
         (println (format "  loaded ckpt: %s (%d dense param tensors)"
                          path (count saved)))
-        (doseq [[p s] (map vector (parameters m) saved)]
-          (.copy_ (.- p data) s))
+        (doseq [[i [p s]] (map-indexed vector (map vector (parameters m) saved))]
+          (try
+            (.copy_ (.- p data) s)
+            (catch python/Exception e
+              (.__setitem__ n-skipped 0 (inc (.__getitem__ n-skipped 0)))
+              (when (< (.__getitem__ n-skipped 0) 5)
+                (println (format "  WARN eval-load: skip param %d (model %s vs saved %s) — %s"
+                                 i
+                                 (str (python/list (.- p shape)))
+                                 (str (python/list (.- s shape)))
+                                 (str e)))))))
+        (when (pos? (.__getitem__ n-skipped 0))
+          (println (format "  WARN eval-load: %d/%d param tensors skipped due to shape mismatch"
+                           (.__getitem__ n-skipped 0)
+                           (count saved))))
         (doseq [[i b] (map-indexed vector (:blocks m))]
           (try
             (.load_from_mmap (:memory b)
@@ -1457,23 +2568,90 @@
 ;;; pre-ablation state from disk via fresh mmap).
 
 (defn ablation-step!
-  "Save bank V across all blocks, zero them, run eval-bpc, restore V.
-   Returns the ablated bpc (control bpc is read from the regular eval
-   that just preceded this call). Bank is bit-identical after return.
+  "Save Local V across all blocks (clone to CPU), zero them on GPU, run
+   eval-bpc, restore V from the CPU clone. Returns ablated bpc.
 
-   Cost: one extra eval-bpc pass + transient ~bank-size clone in RAM.
-   At sqrt_n=2048 that's ~18.8 GB transient (5 layers × 3.76 GB)."
+   Phase 0-3 semantics preserved: Δ measures Local Bank's contribution.
+   NetBank (when enabled) is left untouched during ablation. NetBank-only
+   Δ would be a separate metric requiring its own code path.
+
+   The clone targets CPU (host RAM) instead of GPU VRAM — at sqrt_n=2048
+   the clone is 18.8 GB, which would push us past H100 80GB when
+   NetBank V is also GPU-resident. CPU has 1024 GB on the H100 container,
+   plenty of room. The CPU↔GPU restore copy at the end adds ~1 sec
+   (PCIe Gen4) but only fires every `ablate-every` steps."
   [m val-data T B max-toks]
-  (let [saved (mapv #(.. (:memory %) -V -weight detach clone)
-                    (:blocks m))]
+  (let [saved-local-cpu (mapv (fn [b]
+                                (-> (:memory b) (.- V) (.- weight)
+                                    .detach (.to "cpu" ** :copy true)))
+                              (:blocks m))]
     (try
       (doseq [b (:blocks m)] (.zero_bank (:memory b)))
       (let [r (eval-bpc m val-data T B max-toks)]
         (:bpc r))
       (finally
-        (doseq [[b s] (map vector (:blocks m) saved)]
+        (doseq [[b s] (map vector (:blocks m) saved-local-cpu)]
           (with [_ (torch/no_grad)]
-            (.copy_ (.- (.- (:memory b) V) weight) s)))))))
+            (.copy_ (.- (.- (:memory b) V) weight)
+                    (.to s (.- (.- (:memory b) V) weight) ** :non_blocking true))))))))
+
+(defn ablation-step-net!
+  "Same pattern as ablation-step! but zeros NetBank V (not Local Bank).
+   No-op (returns nil) when NetBank is disabled. Returns ablated bpc.
+
+   Together with ablation-step! this gives Δ_local and Δ_net as separate
+   metrics — answers 'how much is short-term memory carrying' vs 'how
+   much is long-term memory carrying' independently."
+  [m val-data T B max-toks]
+  (let [blocks-with-net (filter :netbank (:blocks m))]
+    (when (seq blocks-with-net)
+      (let [saved-net-cpu (mapv (fn [b]
+                                  (-> (:netbank b) (.- V) (.- weight)
+                                      .detach (.to "cpu" ** :copy true)))
+                                blocks-with-net)]
+        (try
+          (doseq [b blocks-with-net] (.zero_bank (:netbank b)))
+          (let [r (eval-bpc m val-data T B max-toks)]
+            (:bpc r))
+          (finally
+            (doseq [[b s] (map vector blocks-with-net saved-net-cpu)]
+              (with [_ (torch/no_grad)]
+                (.copy_ (.- (.- (:netbank b) V) weight)
+                        (.to s (.- (.- (:netbank b) V) weight) ** :non_blocking true))))))))))
+
+(defn ablation-step-both!
+  "Zero BOTH Local V and NetBank V across all blocks, run eval-bpc,
+   restore both. Returns ablated bpc when at least one tier is present.
+
+   Δ_both vs Δ_local + Δ_net tells us about interaction between the two
+   tiers — superadditive Δ means the tiers carry overlapping signal
+   (one can compensate for the other); subadditive means complementary
+   (each carries unique signal that the other can't replace)."
+  [m val-data T B max-toks]
+  (let [blocks (:blocks m)
+        blocks-with-net (filter :netbank blocks)
+        saved-local-cpu (mapv (fn [b]
+                                (-> (:memory b) (.- V) (.- weight)
+                                    .detach (.to "cpu" ** :copy true)))
+                              blocks)
+        saved-net-cpu (mapv (fn [b]
+                              (-> (:netbank b) (.- V) (.- weight)
+                                  .detach (.to "cpu" ** :copy true)))
+                            blocks-with-net)]
+    (try
+      (doseq [b blocks] (.zero_bank (:memory b)))
+      (doseq [b blocks-with-net] (.zero_bank (:netbank b)))
+      (let [r (eval-bpc m val-data T B max-toks)]
+        (:bpc r))
+      (finally
+        (doseq [[b s] (map vector blocks saved-local-cpu)]
+          (with [_ (torch/no_grad)]
+            (.copy_ (.- (.- (:memory b) V) weight)
+                    (.to s (.- (.- (:memory b) V) weight) ** :non_blocking true))))
+        (doseq [[b s] (map vector blocks-with-net saved-net-cpu)]
+          (with [_ (torch/no_grad)]
+            (.copy_ (.- (.- (:netbank b) V) weight)
+                    (.to s (.- (.- (:netbank b) V) weight) ** :non_blocking true))))))))
 
 ;;; ─────────────────────── train + eval text8 / enwik8 ───────────────────────
 
@@ -1544,8 +2722,10 @@
    crash mid-run loses any writes since the last commit. If `volume`
    is nil (non-Modal env or local dev), the commit step is skipped."
   ([m opt-dense opt-sparse ckpt-dir step]
-   (save-checkpoint! m opt-dense opt-sparse ckpt-dir step nil))
+   (save-checkpoint! m opt-dense opt-sparse nil ckpt-dir step nil))
   ([m opt-dense opt-sparse ckpt-dir step volume]
+   (save-checkpoint! m opt-dense opt-sparse nil ckpt-dir step volume))
+  ([m opt-dense opt-sparse opt-sparse-net ckpt-dir step volume]
    (let [path (str ckpt-dir "/step-" step)]
      (os/makedirs path ** :exist_ok true)
      (torch/save (python/list (for [p (parameters m)]
@@ -1553,6 +2733,12 @@
                  (str path "/dense.pt"))
      (torch/save (.state_dict opt-dense)  (str path "/opt-dense.pt"))
      (torch/save (.state_dict opt-sparse) (str path "/opt-sparse.pt"))
+     ;; NetBank's third optimizer state, only when NetBank is enabled.
+     ;; NetBank V doesn't need a separate save — it's mmap-backed at
+     ;; <base>-net.<i>.bin and every sparse-grad update writes through.
+     (when opt-sparse-net
+       (torch/save (.state_dict opt-sparse-net)
+                   (str path "/opt-sparse-net.pt")))
      ;; Save bank V to a fixed per-layer path (overwrite in place).
      ;; Skip on errors so a bank-save hiccup doesn't lose the dense
      ;; ckpt — but log loudly because the resume will be bad.
@@ -1591,13 +2777,57 @@
    first-ever save aborted), V stays at whatever build-model
    initialized it to and emits a loud warning — this is the failure
    mode that cost us 80k steps of bank training on the 5B+fb run."
-  [m opt-dense opt-sparse ckpt-dir step]
+  ([m opt-dense opt-sparse ckpt-dir step]
+   (load-checkpoint! m opt-dense opt-sparse nil ckpt-dir step))
+  ([m opt-dense opt-sparse opt-sparse-net ckpt-dir step]
   (let [path  (str ckpt-dir "/step-" step)
-        saved (python/list (torch/load (str path "/dense.pt")))]
-    (doseq [[p s] (map vector (parameters m) saved)]
-      (.copy_ (.- p data) s))
-    (.load_state_dict opt-dense  (torch/load (str path "/opt-dense.pt")))
-    (.load_state_dict opt-sparse (torch/load (str path "/opt-sparse.pt")))
+        saved (python/list (torch/load (str path "/dense.pt")))
+        ;; Tolerant load: zip param-list with saved tensors, skip
+        ;; mismatches (warn loudly) instead of crashing. This is the
+        ;; recovery path for "old ckpt has fewer / differently-ordered
+        ;; tensors than the new model"; affected new params stay at
+        ;; their build-time fresh init (typically zero-init or
+        ;; small-Gaussian, both safe).
+        n-skipped (python/list [0])]
+    (doseq [[i [p s]] (map-indexed vector (map vector (parameters m) saved))]
+      (try
+        (.copy_ (.- p data) s)
+        (catch python/Exception e
+          (.__setitem__ n-skipped 0 (inc (.__getitem__ n-skipped 0)))
+          (when (< (.__getitem__ n-skipped 0) 5)
+            (println (format "  WARN load-checkpoint: skip param %d (model %s vs saved %s) — %s"
+                             i
+                             (str (python/list (.- p shape)))
+                             (str (python/list (.- s shape)))
+                             (str e)))))))
+    (when (pos? (.__getitem__ n-skipped 0))
+      (println (format "  WARN load-checkpoint: %d/%d param tensors skipped due to shape mismatch (kept at fresh init)"
+                       (.__getitem__ n-skipped 0)
+                       (count saved))))
+    ;; Optimizer state load is also tolerant — when the param topology
+    ;; changed (new gate / NetBank added), the saved state has fewer
+    ;; param groups than the live optimizer. PyTorch's load_state_dict
+    ;; raises ValueError in that case; we catch it and continue with
+    ;; fresh-init optimizer state. The first few thousand steps will
+    ;; have stronger gradients (no Adam momentum smoothing on new
+    ;; params), but training restabilizes quickly.
+    (try
+      (.load_state_dict opt-dense  (torch/load (str path "/opt-dense.pt")))
+      (catch python/Exception e
+        (println (format "  WARN load-checkpoint: opt-dense state skipped (topology change?) — %s" (str e)))))
+    (try
+      (.load_state_dict opt-sparse (torch/load (str path "/opt-sparse.pt")))
+      (catch python/Exception e
+        (println (format "  WARN load-checkpoint: opt-sparse state skipped — %s" (str e)))))
+    ;; NetBank's third-tier optimizer state. Optional on load — when an
+    ;; old (pre-NetBank) ckpt is being resumed and NetBank is now enabled,
+    ;; the file won't exist; opt-sparse-net stays at fresh init and
+    ;; SparseAdam adapts from there.
+    (when (and opt-sparse-net (os.path/exists (str path "/opt-sparse-net.pt")))
+      (try
+        (.load_state_dict opt-sparse-net (torch/load (str path "/opt-sparse-net.pt")))
+        (catch python/Exception e
+          (println (format "  WARN load-checkpoint: opt-sparse-net state skipped — %s" (str e))))))
     ;; Restore bank V if the bank-latest files exist. If they don't,
     ;; warn loudly — this is silent-data-loss territory otherwise.
     (let [bank-files (vec
@@ -1612,7 +2842,7 @@
           (println (format "  bank V restored from %s/bank-latest.{0..%d}.bin"
                            ckpt-dir (dec (count (:blocks m))))))
         (println (format "  WARN: bank V files missing in %s — V stays at random init.\n        Bank will need to retrain from scratch (the opt-state's m, v will\n        push it forward, but dense will see a useless bank for thousands of steps)."
-                         ckpt-dir))))))
+                         ckpt-dir)))))))
 
 (defn latest-checkpoint-step
   "Largest N for which <ckpt-dir>/step-N/ exists, or nil. Used on
@@ -1630,6 +2860,136 @@
     (.write f (str line "\n"))
     (.close f)))
 
+(defn- git-rev []
+  "Capture current git HEAD SHA. Empty string on failure."
+  (try
+    (let [subp (python/__import__ "subprocess")
+          res  (.run subp (python/list ["git" "rev-parse" "HEAD"])
+                     ** :capture_output true :text true :timeout 2)]
+      (if (zero? (.- res returncode))
+        (.strip (.- res stdout))
+        ""))
+    (catch python/Exception _ "")))
+
+(defn- preflight!
+  "Sanity-check the run's preconditions BEFORE the training loop starts.
+   Catches missing corpus paths, OOM-likely VRAM forecasts, and cost
+   forecasts > $50 (operator should set MMLLM_CONFIRM_COST=1 to opt in).
+   Throws on hard failures, prints WARN on soft."
+  [config train-path val-path mix total-steps]
+  (let [torch-mod (python/__import__ "torch")
+        ;; 1. Validate training-required paths exist. Mix paths are
+        ;; already checked by pick-mix's load-as-tensor call (would
+        ;; have raised before reaching here), so we only verify the
+        ;; val-path + the train-path used in no-mix mode.
+        paths   (concat
+                  (when val-path [val-path])
+                  (when (and (nil? mix) train-path) [train-path]))
+        missing (vec (filter #(not (os.path/exists %)) paths))]
+    (when (seq missing)
+      (throw (python/RuntimeError
+               (format "preflight: missing corpus paths:\n  %s"
+                       (.join "\n  " (python/list missing))))))
+    ;; 2. VRAM forecast (rough: model + activations + opt state)
+    (try
+      (when (.is_available (.- torch-mod cuda))
+        (let [free-bytes  (first (.mem_get_info (.- torch-mod cuda)))
+              free-gb     (/ free-bytes 1.073741824e9)]
+          (println (format "  preflight: free VRAM = %.1f GB" free-gb))
+          (when (< free-gb 5.0)
+            (println (format "  WARN preflight: only %.1f GB VRAM free; may OOM during training"
+                             free-gb)))))
+      (catch python/Exception _ nil))
+    ;; 3. Cost forecast — H100 ~$5.50/hr; estimate from total-steps × est-step-time
+    (let [max-hours-env (python/float (.get (.- (python/__import__ "os") environ)
+                                            "MMLLM_MAX_HOURS" "0"))
+          est-cost      (* (max max-hours-env 0.0) 5.50)
+          confirm       (.lower (.get (.- (python/__import__ "os") environ)
+                                      "MMLLM_CONFIRM_COST" "0"))]
+      (if (zero? max-hours-env)
+        (println "  preflight: no MMLLM_MAX_HOURS cap — train-long will run until total-steps")
+        (println (format "  preflight: budget cap = %.1f h × $5.50/h = $%.2f"
+                         max-hours-env est-cost)))
+      (when (and (> est-cost 50.0)
+                 (not (.__contains__ #{"1" "true" "yes"} confirm)))
+        (println (format "  WARN preflight: forecast $%.2f exceeds $50; set MMLLM_CONFIRM_COST=1 to silence"
+                         est-cost))))
+    ;; 4. Mix summary if applicable
+    (when mix
+      (println (format "  preflight: mix has %d corpora" (count mix)))
+      (doseq [[i [path w]] (map-indexed vector mix)]
+        (println (format "    [%2d] %5.1fpp  %s" i (* 100.0 w) path))))
+    (println "  preflight: OK")))
+
+(defn- print-session-summary
+  "Final banner at clean session end (max_hours or step-cap). Reads
+   recent ckpt info + cost + token count + recent eval and prints a
+   condensed report card."
+  [m start-step end-step base-path log-path t0 tracker]
+  (try
+    (let [wall-s    (- (time/time) t0)
+          hours     (/ wall-s 3600.0)
+          n-tokens  (try (.- tracker n_tokens) (catch python/Exception _ 0))
+          tps       (if (pos? wall-s) (/ n-tokens wall-s) 0.0)
+          cost-usd  (* hours 5.50)
+          steps     (- end-step start-step)
+          per-tok-c (if (pos? n-tokens) (* (/ cost-usd n-tokens) 1e6) 0.0)]
+      (println "")
+      (println "  ═══════════════ session summary ═══════════════")
+      (println (format "    base:       %s" base-path))
+      (println (format "    steps:      %d → %d (+%d)"
+                       start-step end-step steps))
+      (println (format "    tokens:     %.1f M  (%.1fk tok/s avg)"
+                       (/ n-tokens 1e6) (/ tps 1000.0)))
+      (println (format "    wall:       %.2f h" hours))
+      (println (format "    cost:       $%.2f  ($%.3f/M tokens)"
+                       cost-usd per-tok-c))
+      (println "  ═══════════════════════════════════════════════"))
+    (catch python/Exception e
+      (println (format "  WARN print-session-summary failed: %s" e)))))
+
+(defn- write-run-manifest!
+  "At train-long startup, write base.manifest.json with the resolved
+   config + git SHA + relevant MMLLM_* env vars + launch timestamp.
+   Also append a `manifest` event to log.jsonl. This is the run's
+   reproducibility record — without it, resume from a ckpt + new env
+   var would be a silent config change."
+  [base-path config log-path total-steps eval-every ckpt-every]
+  (try
+    (let [json   (python/__import__ "json")
+          time-m (python/__import__ "time")
+          path   (str base-path ".manifest.json")
+          env-snap (python/dict)
+          _       (doseq [k (python/list (.- (python/__import__ "os") environ))]
+                    (when (.startswith k "MMLLM_")
+                      (.__setitem__ env-snap k
+                                    (.get (.- (python/__import__ "os") environ) k))))
+          ts-str  (.strftime time-m "%Y-%m-%dT%H:%M:%SZ" (.gmtime time-m))
+          sha     (git-rev)
+          payload (python/dict)]
+      (.__setitem__ payload "ts"           ts-str)
+      (.__setitem__ payload "git_sha"      sha)
+      (.__setitem__ payload "base_path"    base-path)
+      (.__setitem__ payload "total_steps"  total-steps)
+      (.__setitem__ payload "eval_every"   eval-every)
+      (.__setitem__ payload "ckpt_every"   ckpt-every)
+      (.__setitem__ payload "env"          env-snap)
+      (let [cfg-d (python/dict)]
+        (doseq [[k v] (seq config)]
+          (.__setitem__ cfg-d (str k) (str v)))
+        (.__setitem__ payload "config" cfg-d))
+      (let [f (python/open path "w")]
+        (.write f (.dumps json payload ** :indent 2))
+        (.close f))
+      (let [sha-short (if (>= (count sha) 8) (subs sha 0 8) sha)]
+        (println (format "  manifest: %s (git=%s)" path sha-short)))
+      (when log-path
+        (append-jsonl! log-path
+                       (format "{\"event\":\"manifest\",\"ts\":\"%s\",\"git_sha\":\"%s\",\"total_steps\":%d}"
+                               ts-str sha total-steps))))
+    (catch python/Exception e
+      (println (format "  WARN: write-run-manifest! failed: %s" e)))))
+
 (defn train-long
   "Long-running training with periodic eval + checkpoint + resume.
 
@@ -1643,7 +3003,12 @@
    Designed to run for hours-days under Modal/tmux/nohup. Returns
    the trained model (mostly useful for in-process callers)."
   [config train-path val-path ckpt-dir log-path total-steps eval-every ckpt-every]
-  (let [m          (build-model config)
+  (let [;; Derive base-path from ckpt-dir (drop trailing .ckpts) so
+        ;; manifest / summary / publish-after can write sibling files.
+        base-path  (if (.endswith ckpt-dir ".ckpts")
+                     (subs ckpt-dir 0 (- (count ckpt-dir) (count ".ckpts")))
+                     ckpt-dir)
+        m          (build-model config)
         ;; MMLLM_MIX (optional) → multi-corpus weighted sampler.
         ;; Format: 'path1:w1,path2:w2,…'.  When set, `train-path` is
         ;; ignored for sampling — only val-path drives eval-bpc.
@@ -1652,6 +3017,42 @@
         mix-weights-t (when mix
                          (torch/tensor (python/list (map second mix))
                                        ** :dtype torch/float))
+        ;; Short label per corpus for the per-corpus loss line in step
+        ;; prints. pick-mix has already loaded the tensors so we can't
+        ;; extract paths from `mix` (the [tensor weight] pairs); re-parse
+        ;; MMLLM_MIX from env to get the path strings, then derive a
+        ;; short label by basename. E.g. /data/agent-corpus-v2/xlam.bin
+        ;; .train.bin → "xlam".
+        mix-labels   (when mix
+                       (let [raw (.strip (.get (.- os environ) "MMLLM_MIX" ""))]
+                         (python/list
+                           (for [entry (.split raw ",")
+                                 :let  [entry (.strip entry)]
+                                 :when (pos? (count entry))]
+                             (let [colon (.rfind entry ":")
+                                   path  (.strip (subs entry 0 colon))
+                                   base  (.replace
+                                           (.replace path ".train.bin" "")
+                                           ".bin" "")
+                                   parts (.split base "/")]
+                               (.__getitem__ parts (- (count parts) 1)))))))
+        corpus-tracker (when mix (make-corpus-tracker (count mix)))
+        ;; Mutable cell for "wall-s at last 50-step print" — used to
+        ;; compute rolling tokens/sec. Python list = 1-element ref.
+        prev-print-s-ref (python/list [0.0])
+        ;; Mutable cell for Δ_local baseline (captured at first ablation
+        ;; event of the run). consolidation_index = (baseline - current)
+        ;; / baseline tells us if Local's importance is dropping (Net
+        ;; consolidating) or growing (routing-absorption warning).
+        delta-local-baseline-ref (python/list [nil])
+        ;; P3 replay buffer state. Mutable Python list of (x_cpu, y_cpu)
+        ;; tuples representing batches whose plain-CE was below the
+        ;; replay threshold (i.e. positions Local has already mastered).
+        ;; Replay step every `replay-every` main steps with frozen Local.
+        replay-every     (pick-replay-every)
+        replay-cap       (pick-replay-buffer-size)
+        replay-thresh    (pick-replay-threshold)
+        replay-buf       (python/list [])
         ;; Train file may be many GB — use_mmap=True keeps it on disk
         ;; (uint8 view, .long()-cast per batch). Pre-load val (typically
         ;; ≤500 MB) directly as int64 so eval-bpc's repeated narrow()
@@ -1659,14 +3060,28 @@
         train-data (when (nil? mix)
                      (corp/load-as-tensor train-path ** :use_mmap true))
         val-data   (corp/load-as-tensor val-path)
-        opt-dense  (optim/AdamW    (python/list (parameters m))         ** :lr (pick-lr))
-        opt-sparse ((pick-sparse-optimizer) (python/list (sparse-parameters m)) ** :lr (pick-lr))
+        ;; opt-dense: single-group AdamW unless MMLLM_LR_KAB_MULT differs
+        ;; from MMLLM_LR_DENSE_MULT, in which case K_a/K_b move to a
+        ;; separate group with its own lr (#3 spike). See make-opt-dense.
+        opt-dense  (make-opt-dense m)
+        opt-sparse ((pick-sparse-optimizer) (python/list (sparse-parameters m)) ** :lr (pick-lr-bank))
+        ;; Third optimizer: NetBank's V_net. Constructed only when
+        ;; NetBank is enabled AND has sparse params (otherwise SparseAdam
+        ;; on an empty list errors). Tracks pick-lr-net for its peak lr,
+        ;; cooled independently from opt-sparse on the same cosine
+        ;; schedule with its own multiplier.
+        net-sparse-params (python/list (netbank-sparse-parameters m))
+        opt-sparse-net (when (pos? (count net-sparse-params))
+                         ((pick-sparse-optimizer) net-sparse-params
+                          ** :lr (pick-lr-net)))
         T          (:seq-len config)
         sqrt-n     (pick-sqrt-n config)
         bank-n     (* sqrt-n sqrt-n)
         start-step   (or (latest-checkpoint-step ckpt-dir) 0)
         sync-every   (pick-sync-every)
         ablate-every (pick-ablate-every)
+        slot-every   (pick-slot-log-every)
+        slot-reinit? (pick-dead-slot-reinit?)
         ;; Grab the Modal Volume reference unconditionally — used
         ;; for both (a) Hogwild bank sync (gated by sync-every and
         ;; mmap-backed bank) AND (b) durable ckpt commits (always-
@@ -1676,9 +3091,25 @@
         volume     (get-modal-volume (pick-volume-name))
         do-sync?   (and volume (pos? sync-every) (:memory-mmap-path config))]
     (os/makedirs ckpt-dir ** :exist_ok true)
+    ;; Pre-flight: validate paths, forecast cost, fail fast on missing data.
+    (preflight! config train-path val-path mix total-steps)
+    ;; Reproducibility: write manifest with config + git SHA + env vars
+    ;; before any training happens. No-op if write fails (warn only).
+    (write-run-manifest! base-path config log-path total-steps eval-every ckpt-every)
     (when (pos? start-step)
       (println (format "  resuming from checkpoint at step %d" start-step))
-      (load-checkpoint! m opt-dense opt-sparse ckpt-dir start-step))
+      (load-checkpoint! m opt-dense opt-sparse opt-sparse-net ckpt-dir start-step))
+    ;; NetBank warm-start trigger: if NetBank is enabled but the resume
+    ;; ckpt didn't contain opt-sparse-net.pt (i.e., NetBank is being
+    ;; turned on for the first time on an existing dense-only run), copy
+    ;; Local Bank's K_a/K_b into NetBank's first 2048 rows so retrieval
+    ;; geometry is bootstrapped instead of cold.
+    (when (and opt-sparse-net
+               (or (zero? start-step)
+                   (not (os.path/exists
+                          (str ckpt-dir "/step-" start-step "/opt-sparse-net.pt")))))
+      (println "  NetBank: opt-sparse-net.pt missing — warm-starting from Local Bank")
+      (warm-start-netbanks-from-local! m))
     (when (>= start-step total-steps)
       ;; Silent skip is the bug we hit on the first sync smoke: a stale
       ;; ckpt from a prior longer run made start-step exceed the new
@@ -1730,7 +3161,7 @@
         (cond
           (>= step total-steps)
           (do
-            (save-checkpoint! m opt-dense opt-sparse ckpt-dir step volume)
+            (save-checkpoint! m opt-dense opt-sparse opt-sparse-net ckpt-dir step volume)
             (println (format "training complete at step %d" step))
             ;; Inline bank ablation: eval (control), zero V across all blocks,
             ;; eval (ablation), report Δ. The Δ tells us how much of the
@@ -1755,7 +3186,7 @@
                   (append-jsonl! log-path
                                  (format "{\"step\":%d,\"event\":\"bank_saved\",\"bank_path\":\"%s\",\"wall_s\":%.1f}"
                                          step bank-path (- (time/time) t0)))))
-              (println "  ── ablation: zeroing bank V across all 5 blocks ──")
+              (println "  ── ablation: zeroing Local Bank V across all 5 blocks (NetBank kept active) ──")
               (doseq [b (:blocks m)] (.zero_bank (:memory b)))
               (println "  ── eval at end (ablation: bank zeroed) ──")
               (let [r-abl (eval-bpc m val-data T 16 100000)
@@ -1775,40 +3206,163 @@
           ;; out of time).
           (and max-seconds (>= (- (time/time) t0) max-seconds))
           (do
-            (save-checkpoint! m opt-dense opt-sparse ckpt-dir step volume)
+            (save-checkpoint! m opt-dense opt-sparse opt-sparse-net ckpt-dir step volume)
             (let [hrs (/ (- (time/time) t0) 3600.0)]
               (println (format "  ── session timeout at %.2f h / step %d — checkpointed and exiting ──"
                                hrs step))
               (append-jsonl! log-path
                              (format "{\"step\":%d,\"event\":\"session_end\",\"reason\":\"max_hours\",\"hours\":%.3f,\"wall_s\":%.1f}"
                                      step hrs (- (time/time) t0))))
+            (print-session-summary m start-step step base-path log-path t0 tracker)
             m)
           :else
           (let [warmup     (pick-lr-warmup)
-                ;; Apply lr schedule (no-op when warmup == 0). Both
-                ;; AdamW (dense) and SparseAdam/CPUOffloadSparseAdam (V)
-                ;; track the same lr — sqrt-batch scaling already baked
-                ;; into MMLLM_LR.
+                ;; Apply lr schedule (no-op when warmup == 0). The cosine
+                ;; schedule shape is unified (one cur-lr value), but each
+                ;; optimizer sees its own component multiplier on top —
+                ;; AdamW gets pick-lr-dense-mult, SparseAdam gets
+                ;; pick-lr-bank-mult. See docs/router-bank-lr-decoupling.md.
                 _          (when (pos? warmup)
+                             ;; Apply scheduled multipliers (arity-2 form).
+                             ;; Identical to old behavior when *_MULT_END is
+                             ;; unset (mult-cosine-interp returns start when
+                             ;; start==end). When set, cosine-interpolates
+                             ;; from start to end across (warmup, total-steps].
                              (let [cur-lr (lr-at-step step total-steps
                                                       (pick-lr) warmup
-                                                      (pick-lr-min))]
-                               (set-opt-lr! opt-dense  cur-lr)
-                               (set-opt-lr! opt-sparse cur-lr)))
+                                                      (pick-lr-min))
+                                   d-mult (pick-lr-dense-mult step total-steps)
+                                   k-mult (pick-lr-kab-mult   step total-steps)
+                                   b-mult (pick-lr-bank-mult  step total-steps)
+                                   n-mult (pick-lr-net-mult   step total-steps)]
+                               ;; If opt-dense has 2 groups (K_a/K_b separated
+                               ;; via make-opt-dense), use the grouped setter;
+                               ;; otherwise the single-lr setter (back-compat).
+                               (if (= 2 (count (.- opt-dense param_groups)))
+                                 (set-opt-lrs! opt-dense
+                                               [(* cur-lr d-mult) (* cur-lr k-mult)])
+                                 (set-opt-lr!  opt-dense (* cur-lr d-mult)))
+                               (set-opt-lr! opt-sparse (* cur-lr b-mult))
+                               (when opt-sparse-net
+                                 (set-opt-lr! opt-sparse-net (* cur-lr n-mult)))))
+                ;; Restore training-mode flags. eval-bpc and ablation-step!
+                ;; flip submodules to eval mode but never flip them back —
+                ;; without this call, Local Bank's `if self.training:`
+                ;; guards (slot tracking, z-loss) silently disable after
+                ;; the first eval. Cheap (~5µs).
+                _      (set-train-mode! m)
                 B-cur (pick-batch)
-                [x y] (if mix
-                        (mix-batch mix-tensors mix-weights-t B-cur T)
-                        (batch train-data B-cur T))
-                loss  (train-step m opt-dense opt-sparse x y)
+                [x y corpus-idx] (if mix
+                                   (mix-batch mix-tensors mix-weights-t B-cur T)
+                                   (let [[x y] (batch train-data B-cur T)] [x y nil]))
+                ;; #9 spike: with probability `pause-prob`, replace
+                ;; the first `pause-n` bytes of x with the pause byte.
+                ;; In-place mutation; y untouched.
+                _     (when (pos? (pick-pause-bytes))
+                        (maybe-inject-pause-prefix!
+                          x (pick-pause-bytes) (pick-pause-prob) (pick-pause-byte-val)))
+                loss  (train-step m opt-dense opt-sparse opt-sparse-net x y)
                 _     (.add_tokens tracker (* B-cur T))
+                ;; Per-corpus loss tracker — running window of last 50
+                ;; losses per corpus index. Used by the 50-step print to
+                ;; show which corpora are easy / hard. nil idx = no-mix
+                ;; mode (single corpus from `train-data`); skip update.
+                _     (when corpus-idx
+                        (record-corpus-loss! corpus-tracker corpus-idx loss))
+                ;; P3 replay-buffer push: any step whose plain CE landed
+                ;; below replay-thresh is considered "mastered" and saved
+                ;; to the buffer for later replay. Both x and y are
+                ;; cloned to CPU to avoid GPU memory growth.
+                _     (when (and (pos? replay-every) (< loss replay-thresh))
+                        (.append replay-buf
+                                 (python/tuple [(.to (.detach x) "cpu" ** :copy true)
+                                                (.to (.detach y) "cpu" ** :copy true)]))
+                        (when (> (count replay-buf) replay-cap)
+                          (.pop replay-buf 0)))
+                ;; P3 replay step: every replay-every main steps, sample
+                ;; one buffered batch and run a frozen-Local train-step.
+                ;; Net + dense + carry update; Local Bank stays put.
+                ;; Captured replay loss + buffer size go to :metrics.
+                _     (do
+                        (when-let [metrics (:metrics m)]
+                          (.__setitem__ metrics "replay_buf_n" (count replay-buf)))
+                        (when (and (pos? replay-every)
+                                   (zero? (mod (inc step) replay-every))
+                                   (pos? (count replay-buf)))
+                          (let [idx     (.item (torch/randint 0 (count replay-buf) (python/tuple [])))
+                                [xr yr] (.__getitem__ replay-buf idx)
+                                _       (set-train-mode! m)
+                                r-loss  (train-step m opt-dense opt-sparse opt-sparse-net xr yr true)]
+                            (when-let [metrics (:metrics m)]
+                              (.__setitem__ metrics "replay_loss" (python/float r-loss))))))
                 step' (inc step)]
             (when (zero? (mod step' 50))
-              (let [cur-lr (if (pos? warmup)
-                             (lr-at-step step total-steps
-                                         (pick-lr) warmup (pick-lr-min))
-                             (pick-lr))]
-                (println (format "  step %d  loss %.3f  lr %.2e  (%.1fs)"
-                                 step' loss cur-lr (- (time/time) t0)))))
+              (let [cur-lr     (if (pos? warmup)
+                                 (lr-at-step step total-steps
+                                             (pick-lr) warmup (pick-lr-min))
+                                 (pick-lr))
+                    d-mult     (pick-lr-dense-mult step total-steps)
+                    b-mult     (pick-lr-bank-mult  step total-steps)
+                    n-mult     (pick-lr-net-mult   step total-steps)
+                    has-net?   (some? opt-sparse-net)
+                    wall-s     (- (time/time) t0)
+                    n-tokens   (* B-cur T 50)        ; ~tokens since last print
+                    prev-s     (.__getitem__ prev-print-s-ref 0)
+                    delta-s    (max 0.001 (- wall-s prev-s))
+                    tps        (/ n-tokens delta-s)
+                    _          (.__setitem__ prev-print-s-ref 0 wall-s)
+                    vram-gb    (try (/ (cuda/memory_allocated) 1.073741824e9)
+                                    (catch python/Exception _ 0.0))
+                    cost-usd   (* (/ wall-s 3600.0) 5.50)        ; H100 ~$5.50/h Modal
+                    ;; Per-corpus loss summary (only when mix is set)
+                    corp-summary (when corpus-tracker
+                                   (corpus-loss-summary corpus-tracker))
+                    ;; Build the lr substring
+                    lr-str (cond
+                             (and (= 1.0 d-mult) (= 1.0 b-mult) (not has-net?))
+                             (format "lr=%.2e" cur-lr)
+                             (not has-net?)
+                             (format "lr_d=%.2e lr_b=%.2e"
+                                     (* cur-lr d-mult) (* cur-lr b-mult))
+                             :else
+                             (format "lr_d=%.2e lr_b=%.2e lr_n=%.2e"
+                                     (* cur-lr d-mult)
+                                     (* cur-lr b-mult)
+                                     (* cur-lr n-mult)))]
+                ;; Main step line — fixed-width fields, easy to grep
+                (println (format "step %6d | loss %.3f | tps %.1fk | vram %.1fgb | $%.2f | wall %.0fs | %s"
+                                 step' loss
+                                 (/ tps 1000.0)
+                                 vram-gb
+                                 cost-usd
+                                 wall-s
+                                 lr-str))
+                ;; Per-corpus loss line (only when mix and >=1 corpus has data)
+                (when (and corp-summary (pos? (count corp-summary)))
+                  (let [parts (python/list)]
+                    (doseq [t corp-summary]
+                      (let [i      (.__getitem__ t 0)
+                            mean-l (.__getitem__ t 2)
+                            label  (when mix-labels (nth mix-labels i))]
+                        (.append parts (format "%s=%.2f" (or label (str "c" i)) mean-l))))
+                    (println (str "         by-corpus[ema50]: "
+                                  (.join " " parts)))))
+                ;; Router-metrics line — distill/replay aux losses. Only
+                ;; printed when at least one is active (distill_coef > 0
+                ;; or replay_every > 0). Tells you whether the
+                ;; consolidation mechanisms are doing meaningful work
+                ;; alongside the main CE.
+                (when (or (pos? (pick-distill-coef))
+                          (pos? replay-every)
+                          (pos? (pick-delim-aux-coef)))
+                  (let [metrics (:metrics m)
+                        d-loss  (or (.get metrics "distill_loss") 0.0)
+                        r-loss  (or (.get metrics "replay_loss")  0.0)
+                        buf-n   (or (.get metrics "replay_buf_n") 0)
+                        x-loss  (or (.get metrics "delim_loss")   0.0)]
+                    (println (format "         router-metrics: distill=%.4f  replay=%.4f  replay_buf=%d/%d  delim=%.4f"
+                                     d-loss r-loss buf-n replay-cap x-loss))))
+                nil))
             ;; Cross-worker bank sync. Has to happen AFTER the optimizer
             ;; step (so dirty rows from this step are flushed) and outside
             ;; train-step's autograd graph. We sync before eval/ckpt so
@@ -1835,18 +3389,181 @@
                 ;; Reuses the just-computed control bpc; runs one extra
                 ;; eval-bpc with V zeroed and then restores V in-place.
                 (when (and (pos? ablate-every) (zero? (mod step' ablate-every)))
-                  (let [t-abl   (time/time)
-                        ctrl    (:bpc r)
-                        abl-bpc (ablation-step! m val-data T 16 50000)
-                        delta   (- abl-bpc ctrl)
-                        dt      (- (time/time) t-abl)]
-                    (println (format "  ── ablation Δ at step %d: ctrl=%.4f abl=%.4f Δ=%+.4f (%.1fs) ──"
-                                     step' ctrl abl-bpc delta dt))
+                  (let [t-abl     (time/time)
+                        ctrl      (:bpc r)
+                        ;; Δ_local: zero Local V only
+                        abl-l     (ablation-step! m val-data T 16 50000)
+                        d-l       (- abl-l ctrl)
+                        ;; Δ_net: zero NetBank V only (nil if NetBank disabled)
+                        abl-n     (ablation-step-net! m val-data T 16 50000)
+                        d-n       (when abl-n (- abl-n ctrl))
+                        ;; Δ_both: zero BOTH (only run when NetBank present;
+                        ;; otherwise it would equal Δ_local trivially)
+                        abl-b     (when abl-n (ablation-step-both! m val-data T 16 50000))
+                        d-b       (when abl-b (- abl-b ctrl))
+                        dt        (- (time/time) t-abl)
+                        ;; P4 consolidation index — capture first Δ_local
+                        ;; as baseline; report relative drop on subsequent
+                        ;; events. Positive = Net is taking over Local
+                        ;; (consolidation working). Negative = Local is
+                        ;; getting MORE essential (routing-absorption).
+                        baseline  (.__getitem__ delta-local-baseline-ref 0)
+                        _         (when (nil? baseline)
+                                    (.__setitem__ delta-local-baseline-ref 0 d-l))
+                        baseline2 (.__getitem__ delta-local-baseline-ref 0)
+                        cons-idx  (when (and baseline2 (> (python/abs baseline2) 1e-6))
+                                    (/ (- baseline2 d-l) baseline2))]
+                    (println (format "  ── ablation Δ at step %d: ctrl=%.4f"
+                                     step' ctrl))
+                    (println (format "       Δ_local: %.4f → %+.4f" abl-l d-l))
+                    (when abl-n
+                      (println (format "       Δ_net:   %.4f → %+.4f" abl-n d-n))
+                      (println (format "       Δ_both:  %.4f → %+.4f  (synergy: %+.4f)"
+                                       abl-b d-b (- d-b (+ d-l d-n)))))
+                    (when cons-idx
+                      (println (format "       consolidation_idx: %+.4f  (baseline Δ_local=%+.4f)"
+                                       cons-idx baseline2)))
+                    (println (format "       wall: %.1fs" dt))
                     (append-jsonl! log-path
-                                   (format "{\"step\":%d,\"event\":\"ablation_intermediate\",\"control_bpc\":%.4f,\"ablated_bpc\":%.4f,\"delta_bpc\":%.4f,\"ablation_s\":%.2f,\"wall_s\":%.1f}"
-                                           step' ctrl abl-bpc delta dt (- (time/time) t0)))))))
+                                   (format "{\"step\":%d,\"event\":\"ablation_intermediate\",\"control_bpc\":%.4f,\"ablated_bpc\":%.4f,\"delta_bpc\":%.4f,\"delta_local\":%.4f,\"delta_net\":%s,\"delta_both\":%s,\"consolidation_idx\":%s,\"baseline_delta_local\":%s,\"ablation_s\":%.2f,\"wall_s\":%.1f}"
+                                           step'
+                                           ctrl abl-l d-l   ;; legacy fields = Local-only (back-compat)
+                                           d-l
+                                           (if d-n (format "%.4f" d-n) "null")
+                                           (if d-b (format "%.4f" d-b) "null")
+                                           (if cons-idx (format "%.4f" cons-idx) "null")
+                                           (if baseline2 (format "%.4f" baseline2) "null")
+                                           dt (- (time/time) t0)))))))
+            ;; PKM slot utilization log + optional dead-slot reinit.
+            ;; Each PKM layer's hit counters cover the window since the
+            ;; last reset; we log per-layer entropy and dead-row counts,
+            ;; reinit dead rows if enabled, then reset counters.
+            (when (and (pos? slot-every) (zero? (mod step' slot-every)))
+              (doseq [[i blk] (map-indexed vector (:blocks m))]
+                ;; Local Bank slot stats
+                (let [mem (:memory blk)
+                      st  (.slot_usage_stats mem)
+                      d-a (.get st "dead_a")
+                      d-b (.get st "dead_b")
+                      ea  (or (.get st "entropy_a") 0.0)
+                      eb  (or (.get st "entropy_b") 0.0)
+                      em  (or (.get st "entropy_a_max") 0.0)
+                      reinit-summary
+                      (if slot-reinit?
+                        (.reinit_dead_slots mem)
+                        nil)
+                      n-a (if reinit-summary (.get reinit-summary "n_ka_reinit") 0)
+                      n-b (if reinit-summary (.get reinit-summary "n_kb_reinit") 0)]
+                  (append-jsonl! log-path
+                                 (format "{\"step\":%d,\"event\":\"slot_usage\",\"tier\":\"local\",\"layer\":%d,\"dead_a\":%d,\"dead_b\":%d,\"entropy_a\":%.3f,\"entropy_b\":%.3f,\"entropy_max\":%.3f,\"reinit_a\":%d,\"reinit_b\":%d,\"wall_s\":%.1f}"
+                                         step' i d-a d-b ea eb em n-a n-b (- (time/time) t0)))
+                  ;; Per-row Local V touch-count distribution (#1 spike
+                  ;; visibility). Lazy-init buffer; only populated when
+                  ;; MMLLM_BANK_COLD_BOOST is on (since the boost code is
+                  ;; what creates _per_row_touches). Otherwise no-op.
+                  (let [V-weight (.- (.- mem V) weight)
+                        touches  (python/getattr V-weight "_per_row_touches" nil)]
+                    (when touches
+                      (let [tf       (.float touches)
+                            mean-v   (.item (.mean tf))
+                            std-v    (.item (.std tf))
+                            mx       (.item (.amax touches))
+                            n-rows   (.numel touches)
+                            n-nz     (.item (.sum (.gt touches 0)))
+                            pct-nz   (* 100.0 (/ (python/float n-nz) n-rows))
+                            kth      (.kthvalue tf (python/int (* 0.95 n-rows)))
+                            p95      (.item (.- kth values))]
+                        (append-jsonl! log-path
+                                       (format "{\"step\":%d,\"event\":\"row_touch_dist\",\"tier\":\"local\",\"layer\":%d,\"mean\":%.2f,\"std\":%.2f,\"max\":%d,\"p95\":%.2f,\"pct_nonzero\":%.2f,\"wall_s\":%.1f}"
+                                               step' i mean-v std-v mx p95 pct-nz (- (time/time) t0))))))
+                  (.reset_slot_usage mem))
+                ;; NetBank slot stats (when enabled)
+                (when-let [nb (:netbank blk)]
+                  (let [st  (.slot_usage_stats nb)
+                        d-a (.get st "dead_a")
+                        d-b (.get st "dead_b")
+                        ea  (or (.get st "entropy_a") 0.0)
+                        eb  (or (.get st "entropy_b") 0.0)
+                        em  (or (.get st "entropy_a_max") 0.0)
+                        reinit-summary
+                        (if slot-reinit?
+                          (.reinit_dead_slots nb)
+                          nil)
+                        n-a (if reinit-summary (.get reinit-summary "n_ka_reinit") 0)
+                        n-b (if reinit-summary (.get reinit-summary "n_kb_reinit") 0)]
+                    (append-jsonl! log-path
+                                   (format "{\"step\":%d,\"event\":\"slot_usage\",\"tier\":\"net\",\"layer\":%d,\"dead_a\":%d,\"dead_b\":%d,\"entropy_a\":%.3f,\"entropy_b\":%.3f,\"entropy_max\":%.3f,\"reinit_a\":%d,\"reinit_b\":%d,\"wall_s\":%.1f}"
+                                           step' i d-a d-b ea eb em n-a n-b (- (time/time) t0)))
+                    (.reset_slot_usage nb))))
+              ;; Per-param norm log — gated by MMLLM_LOG_PARAM_NORMS.
+              ;; Walks named tensor groups, writes L∞/L2 per group.
+              ;; Identifies which param tensor (if any) is drifting
+              ;; toward inf so we can localize the source of NaN.
+              (when (pick-log-param-norms?)
+                (let [t-now    (- (time/time) t0)
+                      log-norm! (fn [tag t]
+                                  (when t
+                                    (let [linf (.item (.amax (.abs t)))
+                                          l2   (.item (.norm t))]
+                                      (append-jsonl! log-path
+                                        (format "{\"step\":%d,\"event\":\"param_norms\",\"tag\":\"%s\",\"linf\":%.4e,\"l2\":%.4e,\"wall_s\":%.1f}"
+                                                step' tag linf l2 t-now)))))]
+                  (log-norm! "tok-emb" (.- (:tok-emb m) weight))
+                  (log-norm! "norm-final" (.- (:norm-final m) weight))
+                  (when-let [mh (:mtp-head m)]
+                    (log-norm! "mtp-head" (.- mh weight)))
+                  (when-let [ih (:importance-head m)]
+                    (log-norm! "ih-proj-w" (.- (.- ih proj) weight))
+                    (log-norm! "ih-proj-b" (.- (.- ih proj) bias)))
+                  (doseq [[i blk] (map-indexed vector (:blocks m))]
+                    (log-norm! (format "blk%d-q-proj" i) (.- (:q-proj blk) weight))
+                    (log-norm! (format "blk%d-k-proj-l" i) (.- (:k-proj-l blk) weight))
+                    (log-norm! (format "blk%d-v-proj-l" i) (.- (:v-proj-l blk) weight))
+                    (log-norm! (format "blk%d-o-proj" i) (.- (:o-proj blk) weight))
+                    (log-norm! (format "blk%d-gate-proj" i) (.- (:gate-proj blk) weight))
+                    (log-norm! (format "blk%d-down-proj" i) (.- (:down-proj blk) weight))
+                    (log-norm! (format "blk%d-mem-Ka" i) (.- (:memory blk) K_a))
+                    (log-norm! (format "blk%d-mem-Kb" i) (.- (:memory blk) K_b))
+                    (log-norm! (format "blk%d-mem-V" i) (.- (.- (:memory blk) V) weight))
+                    (when-let [nb (:netbank blk)]
+                      (log-norm! (format "blk%d-net-Ka" i) (.- nb K_a))
+                      (log-norm! (format "blk%d-net-Kb" i) (.- nb K_b))
+                      (log-norm! (format "blk%d-net-V" i) (.- (.- nb V) weight))
+                      (log-norm! (format "blk%d-net-expander" i) (.- (.- nb expander) weight)))
+                    (when-let [c (:carry blk)]
+                      (log-norm! (format "blk%d-carry-gate" i) (.- (.- c gate) weight))))))
+              ;; Single-line router-metrics JSONL event so dashboards
+              ;; can plot distill_loss / replay_loss / replay_buf size
+              ;; over time. Cheap — reads from in-memory dict.
+              (let [metrics (:metrics m)
+                    t-now   (- (time/time) t0)]
+                (when metrics
+                  (append-jsonl! log-path
+                    (format "{\"step\":%d,\"event\":\"router_metrics\",\"distill_loss\":%.6e,\"replay_loss\":%.6e,\"replay_buf_n\":%d,\"replay_cap\":%d,\"delim_loss\":%.6e,\"wall_s\":%.1f}"
+                            step'
+                            (or (.get metrics "distill_loss") 0.0)
+                            (or (.get metrics "replay_loss")  0.0)
+                            (or (.get metrics "replay_buf_n") 0)
+                            replay-cap
+                            (or (.get metrics "delim_loss")   0.0)
+                            t-now))))
+              ;; Per-layer SwitchGate distribution log. Each block's
+              ;; long-gate's most recent forward stored mean (sdpa, local,
+              ;; net) weights. Trend over training shows tier consolidation
+              ;; (e.g., as NetBank learns, net_frac should grow at the
+              ;; expense of local_frac on stable corpora).
+              (let [t-now (- (time/time) t0)]
+                (doseq [[i blk] (map-indexed vector (:blocks m))]
+                  (let [gd (.- (:long-gate blk) last_gate_dist)]
+                    (when gd
+                      (let [s (python/float (.__getitem__ gd 0))
+                            l (python/float (.__getitem__ gd 1))
+                            n (python/float (.__getitem__ gd 2))]
+                        (append-jsonl! log-path
+                          (format "{\"step\":%d,\"event\":\"gate_dist\",\"layer\":%d,\"sdpa\":%.4f,\"local\":%.4f,\"net\":%.4f,\"wall_s\":%.1f}"
+                                  step' i s l n t-now))))))))
             (when (zero? (mod step' ckpt-every))
-              (save-checkpoint! m opt-dense opt-sparse ckpt-dir step' volume)
+              (save-checkpoint! m opt-dense opt-sparse opt-sparse-net ckpt-dir step' volume)
               (println (format "  ── ckpt at step %d ──" step')))
             (recur step'))))
         (finally
@@ -1923,8 +3640,8 @@
    Loss is masked to only the last val-len positions per sequence."
   [config steps key-len val-len]
   (let [m          (build-model config)
-        opt-dense  (optim/AdamW    (python/list (parameters m))         ** :lr (pick-lr))
-        opt-sparse ((pick-sparse-optimizer) (python/list (sparse-parameters m)) ** :lr (pick-lr))
+        opt-dense  (optim/AdamW    (python/list (parameters m))         ** :lr (pick-lr-dense))
+        opt-sparse ((pick-sparse-optimizer) (python/list (sparse-parameters m)) ** :lr (pick-lr-bank))
         T          (:seq-len config)
         d-len      (- T (* 2 key-len) (* 2 val-len))]
     (println (format "train-copy: %d steps; T=%d, key=%d, val=%d, distractor=%d (loss masked to recall)"
@@ -2065,6 +3782,118 @@
                         (train-long cfg2 train-path val-path ckpt-dir log-path
                                     total eval-every ckpt-every)
                         (println "done."))
+      "fim-eval"      (let [ckpt-dir  (or (second args) "/tmp/mmllm-cpu/fim-corpus.ckpts")
+                            eval-path (or (nth args 2 nil) "/tmp/mmllm-cpu/fim-eval.jsonl")
+                            ckpt-step (when (nth args 3 nil)
+                                        (python/int (nth args 3 nil)))
+                            fim-eval  (python/__import__ "mmllm.fim.eval" ** :fromlist (python/list ["run_fim_eval" "print_summary"]))
+                            ;; Build a fresh CPU model with cpu-tiny config + load the ckpt
+                            cfg2      (assoc default-config-cpu-tiny
+                                             :memory-mmap-path "/tmp/mmllm-cpu/fim-eval-bank")]
+                        (.__setitem__ (.- os environ) "MMLLM_DEVICE" "cpu")
+                        (.__setitem__ (.- os environ) "MMLLM_BANK_ON_GPU" "false")
+                        (let [m            (build-model cfg2)
+                              opt-dense    (optim/AdamW (python/list (parameters m)) ** :lr 1e-3)
+                              opt-sparse   (optim/SparseAdam (python/list (sparse-parameters m)) ** :lr 1e-3)
+                              ckpt-dir-py  (python/str ckpt-dir)
+                              ;; Resolve ckpt step (latest if not specified)
+                              actual-step  (or ckpt-step
+                                               (let [os-py    (python/__import__ "os")
+                                                     re-py    (python/__import__ "re")
+                                                     entries  (python/list (.listdir os-py ckpt-dir-py))
+                                                     step-dirs (python/list (filter (fn [n] (.startswith n "step-")) entries))
+                                                     steps    (python/list (map (fn [n] (python/int (.replace n "step-" ""))) step-dirs))]
+                                                 (if (zero? (count steps))
+                                                   (do (println "no ckpts found at " ckpt-dir-py) (sys/exit 1))
+                                                   (apply max steps))))]
+                          (println (format "  fim-eval: ckpt=%s/step-%d  eval=%s"
+                                           ckpt-dir actual-step eval-path))
+                          (load-checkpoint! m opt-dense opt-sparse ckpt-dir actual-step)
+                          (set-eval-mode! m)
+                          (let [result (.run_fim_eval fim-eval m forward eval-path ** :device "cpu")]
+                            (.print_summary fim-eval result))))
+      "fim-build-corpus" (let [language     (or (second args) "generic")
+                               source-root  (or (nth args 2 nil) "/tmp/mmllm-cpu/sources")
+                               output-pref  (or (nth args 3 nil) "/tmp/mmllm-cpu/fim-corpus")
+                               fim-ratio    (python/float (or (nth args 4 nil) "0.5"))
+                               psm-ratio    (python/float (or (nth args 5 nil) "0.5"))
+                               rng-seed     (python/int   (or (nth args 6 nil) "0"))
+                               fim-gen-py   (python/__import__ "mmllm.fim.generator"
+                                                                ** :fromlist (python/list ["LANGUAGE_EXTENSIONS"
+                                                                                            "build_fim_corpus"
+                                                                                            "collect_source_files"]))
+                               exts         (.get (.- fim-gen-py LANGUAGE_EXTENSIONS)
+                                                  language (python/tuple))
+                               paths        (.collect_source_files fim-gen-py source-root
+                                                                   ** :extensions exts)]
+                           (println (format "  fim-build-corpus  language=%s  source=%s  out=%s"
+                                            language source-root output-pref))
+                           (println (format "    found %d source files (extensions=%s)"
+                                            (count paths) (str exts)))
+                           (when (zero? (count paths))
+                             (println "    no source files found; aborting") (sys/exit 1))
+                           (let [stats (.build_fim_corpus fim-gen-py
+                                          (python/list paths) output-pref
+                                          ** :language language
+                                          :fim_ratio fim-ratio
+                                          :psm_ratio psm-ratio
+                                          :rng_seed rng-seed)]
+                             (println (format "  done. stats: %s" (python/dict stats)))))
+      "train-fim"     (let [base       (or (second args) "/tmp/mmllm-cpu/fim-corpus")
+                            mpath      (or (nth args 2 nil) "/tmp/mmllm-cpu/fim-bank")
+                            total      (python/int (or (nth args 3 nil) 5000))
+                            eval-every (python/int (or (nth args 4 nil) 500))
+                            ckpt-every (python/int (or (nth args 5 nil) 1000))]
+                        ;; train-fim wraps train-cpu but force-enables the
+                        ;; FIM loss mask so the model trains only on middle
+                        ;; bytes. All other knobs (focal, IH, carry, distill,
+                        ;; replay, alpha_net, NetBank, ...) still respected.
+                        (.__setitem__ (.- os environ) "MMLLM_FIM_LOSS_MASK_MIDDLE_ONLY" "true")
+                        (println (format "  train-fim: FIM_LOSS_MASK_MIDDLE_ONLY=true forced"))
+                        (let [train-path (str base ".train.bin")
+                              val-path   (str base ".val.bin")
+                              ckpt-dir   (str base ".ckpts")
+                              log-path   (str base ".log.jsonl")
+                              cfg2       (assoc default-config-cpu-tiny
+                                                :memory-mmap-path mpath)]
+                          (.__setitem__ (.- os environ) "MMLLM_DEVICE" "cpu")
+                          (when (nil? (.get (.- os environ) "MMLLM_BATCH"))
+                            (.__setitem__ (.- os environ) "MMLLM_BATCH" "4"))
+                          (when (nil? (.get (.- os environ) "MMLLM_BANK_ON_GPU"))
+                            (.__setitem__ (.- os environ) "MMLLM_BANK_ON_GPU" "false"))
+                          (train-long cfg2 train-path val-path ckpt-dir log-path
+                                      total eval-every ckpt-every)
+                          (println "done.")))
+      "train-cpu"     (let [base       (or (second args) "/tmp/mmllm-cpu/corpus.bin")
+                            mpath      (or (nth args 2 nil) "/tmp/mmllm-cpu/bank")
+                            total      (python/int (or (nth args 3 nil) 5000))
+                            eval-every (python/int (or (nth args 4 nil) 1000))
+                            ckpt-every (python/int (or (nth args 5 nil) 1000))
+                            train-path (str base ".train.bin")
+                            val-path   (str base ".val.bin")
+                            ckpt-dir   (str base ".ckpts")
+                            log-path   (str base ".log.jsonl")
+                            cfg2       (assoc default-config-cpu-tiny
+                                              :memory-mmap-path mpath)]
+                        ;; Force CPU device + tiny batch in-process so
+                        ;; the operator doesn't have to remember to set
+                        ;; MMLLM_DEVICE / MMLLM_BATCH. Other knobs
+                        ;; (focal, IH, carry, etc.) still respected via env.
+                        (.__setitem__ (.- os environ) "MMLLM_DEVICE" "cpu")
+                        (when (nil? (.get (.- os environ) "MMLLM_BATCH"))
+                          (.__setitem__ (.- os environ) "MMLLM_BATCH" "4"))
+                        ;; Force the bank V to mmap-backed CPUPinnedEmbedding
+                        ;; on CPU runs. Otherwise the GPU-resident default
+                        ;; logs "V will live on GPU" misleadingly and ignores
+                        ;; the user's mmap_path. Operator can still override
+                        ;; by setting MMLLM_BANK_ON_GPU explicitly.
+                        (when (nil? (.get (.- os environ) "MMLLM_BANK_ON_GPU"))
+                          (.__setitem__ (.- os environ) "MMLLM_BANK_ON_GPU" "false"))
+                        (println (format "  train-cpu: cfg=cpu-tiny corpus=%s bank=%s total=%d"
+                                         base mpath total))
+                        (train-long cfg2 train-path val-path ckpt-dir log-path
+                                    total eval-every ckpt-every)
+                        (println "done."))
       "bench"         (let [base      (or (second args) "/data/pile-github.bin")
                             ckpt-step (when (nth args 2 nil) (python/int (nth args 2 nil)))
                             bank-path (or (nth args 3 nil) "/data/pile-bank-3tier")
@@ -2168,13 +3997,26 @@
                          eval-name  (or (nth args 5 nil) "agent")
                          n-samples  (python/int (or (nth args 6 nil) 50))
                          gen-len    (python/int (or (nth args 7 nil) 512))
-                         log-path   (or (nth args 8 nil) (str base ".eval.jsonl"))]
-                     ;; cfg matches what train-long uses (default-config when
-                     ;; second-arg-of-`mmllm` isn't 'long'). Critical: eval
-                     ;; loads the trained dense.pt into a freshly-built
-                     ;; model — if the configs disagree on q-dim / n-heads
-                     ;; the .copy_ in the param-loader hits a shape mismatch.
-                     (eval-agent cfg base ckpt bank eval-path
+                         log-path   (or (nth args 8 nil) (str base ".eval.jsonl"))
+                         ;; Auto-detect cpu-tiny ckpts (train-fim / train-cpu).
+                         ;; dense.pt[0] is tok_emb of shape (256, d-model).
+                         ;; If d-model=192 use cpu-tiny; else default-config.
+                         ;; Critical: loading dense.pt into a wrong-shape
+                         ;; freshly-built model hits a `.copy_` shape mismatch.
+                         eval-cfg   (if ckpt
+                                      (let [path (str base ".ckpts/step-" ckpt "/dense.pt")
+                                            saved (try (python/list (torch/load path ** :map_location "cpu" :weights_only false))
+                                                       (catch python/Exception _ nil))
+                                            tok-emb (when saved (.__getitem__ saved 0))
+                                            dmodel  (when tok-emb (.__getitem__ (.- tok-emb shape) 1))]
+                                        (cond
+                                          (= dmodel 192) default-config-cpu-tiny
+                                          :else cfg))
+                                      cfg)]
+                     (when (not (identical? eval-cfg cfg))
+                       (println (format "  eval-agent: auto-selected cpu-tiny config (d-model=%d)"
+                                        (:d-model eval-cfg))))
+                     (eval-agent eval-cfg base ckpt bank eval-path
                                  eval-name n-samples gen-len log-path))
       "eval-bpc-on-path" (let [base       (or (second args) "/tmp/agent")
                                ckpt       (when (nth args 2 nil)
@@ -2205,7 +4047,8 @@
       (do (println "usage: mmllm {train|sample|compare|train-mmap|probe")
           (println "                  |build-corpus|clone-clojure|train-corpus")
           (println "                  |fetch-text8|fetch-enwik8|split-text8|train-text8")
-          (println "                  |train-long")
+          (println "                  |train-cpu|train-long")
+          (println "                  |fim-build-corpus|train-fim|fim-eval")
           (println "                  |bench|bench-batch|bench-spec")
           (println "                  |fetch-artifacts|bank-quantize")
           (println "                  |fetch-pile-github|split-pile-github")
@@ -2227,6 +4070,15 @@
           (println "  train-long   [base-path] [mmap-path] [total-steps] [eval-every] [ckpt-every]")
           (println "                                           (long-running: periodic eval-bpc, ckpt every N, resume from")
           (println "                                            <base>.ckpts/ on restart. Designed for Modal/long boxes.)")
+          (println "  fim-build-corpus [language] [source-root] [output-prefix] [fim-ratio] [psm-ratio] [seed]")
+          (println "                                           (build FIM train/val/test from raw source files;")
+          (println "                                            language picks splitter: json|clojure|python|generic.)")
+          (println "  train-fim [base] [bank-path] [total-steps] [eval-every] [ckpt-every]")
+          (println "                                           (FIM training — forces MMLLM_FIM_LOSS_MASK_MIDDLE_ONLY=true;")
+          (println "                                            same telemetry/ckpt pipeline as train-cpu.)")
+          (println "  fim-eval  [ckpt-dir] [eval-jsonl] [step]")
+          (println "                                           (FIM-bpc + FIM-exact on the eval JSONL produced by")
+          (println "                                            scripts/build_fim_eval.py; per-language summary.)")
           (println "  bench        [base] [ckpt-step] [bank-path] [n-warm] [n-time]")
           (println "                                           (B=1 inference tok/sec on trained checkpoint)")
           (println "  bench-batch  [base] [ckpt-step] [bank-path] [n-warm] [n-time] [B]")

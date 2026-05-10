@@ -369,6 +369,57 @@ def prepare_pile_github(max_bytes: int = 5_000_000_000,
 @app.function(
     image=image,
     volumes={"/data": volume},
+    timeout=21600,   # up to 6 h — generation is single-process, ~few-K rec/s
+    cpu=4.0,
+    memory=16384,
+)
+def build_aesop_curriculum(out_path:      str = "/data/aesop-curriculum.bin",
+                           n_per_example: int = 200,
+                           seed:          int = 0,
+                           val_bytes:     int = 50_000_000,
+                           test_bytes:    int = 50_000_000):
+    """Generate the K-12 Clojure curriculum byte-bin on Modal.
+
+    Walks every (fable, grade, subject, example) across the 5
+    Phase-C-complete fables and writes `n_per_example` records per
+    example. Default n=200 → ~1.2M records / ~600 MB byte-bin —
+    sized to fill the 60% fable share of a 1B-token training run.
+
+    Output layout matches all other corpora on the volume:
+      <out_path>           flat byte stream
+      <out_path>.train.bin
+      <out_path>.val.bin
+      <out_path>.test.bin
+
+    Each record is rendered through DEFAULT_TEMPLATE (sys + user +
+    asst, with `\\n<|end|>\\n` closers) — same shape as every
+    other formatter in mmllm.datasets, so the byte-bin is a
+    drop-in for `--mix`.
+    """
+    import subprocess
+    from pathlib import Path
+    print(f"=== build-aesop-curriculum n_per_example={n_per_example} "
+          f"seed={seed} → {out_path} ===", flush=True)
+    Path(out_path).parent.mkdir(parents=True, exist_ok=True)
+    subprocess.run(
+        ["python", "-m", "mmllm.aesop.generate",
+         "--curriculum",
+         "--out", out_path,
+         "--n", str(n_per_example),
+         "--seed", str(seed),
+         "--val-bytes", str(val_bytes),
+         "--test-bytes", str(test_bytes)],
+        check=True,
+    )
+    volume.commit()
+    final_size = Path(out_path).stat().st_size
+    print(f"done — aesop-curriculum prepared on volume "
+          f"({final_size/1e9:.2f} GB)", flush=True)
+
+
+@app.function(
+    image=image,
+    volumes={"/data": volume},
     timeout=3600,
     cpu=4.0,
     memory=16384,
@@ -472,13 +523,58 @@ def _run_train_long(total_steps, eval_every, ckpt_every, device, lr,
                     lr_warmup=0, lr_min=None,
                     bank_query_mode="plain", long_tier_mix="sum",
                     bank_feedback_mode="plain", ablate_every=0,
-                    max_hours=0.0, mix=""):
+                    max_hours=0.0, mix="",
+                    lr_dense_mult=1.0, lr_bank_mult=1.0,
+                    z_loss_coef=0.0, mtp_coef=0.0,
+                    slot_log_every=0, dead_slot_reinit=False,
+                    netbank_enabled=False, netbank_path=None,
+                    netbank_sqrt_n=8192, netbank_c_net=64,
+                    netbank_top_k=64, netbank_sub_top_k=64,
+                    netbank_delay_ms_min=1.0, netbank_delay_ms_max=10.0,
+                    netbank_on_gpu=False,
+                    lr_net_mult=1.0,
+                    lr_dense_mult_end=None,
+                    lr_bank_mult_end=None,
+                    lr_net_mult_end=None,
+                    focal_gamma=0.0,
+                    importance_head=False,
+                    importance_aux=1.0,
+                    carry_enabled=False,
+                    carry_n_clocks=4,
+                    grad_clip=0.0,
+                    nan_guard=False,
+                    log_param_norms=False,
+                    distill_coef=0.0,
+                    distill_direction_only=False,
+                    alpha_net=False,
+                    replay_every=0,
+                    replay_buffer_size=256,
+                    replay_threshold=0.5,
+                    # 9-spike upgrade plan (#1-#9)
+                    lr_kab_mult=None,            # #3 — K_a/K_b separate LR
+                    lr_kab_mult_end=None,
+                    delim_aux_coef=0.0,          # #4 — JSON-delimiter aux head
+                    schema_mask_weight=1.0,      # #5 — schema-mask CE weight
+                    pause_bytes=0,               # #9 — pause-byte prefix
+                    pause_prob=0.5,
+                    pause_byte_val=0,
+                    bank_repeat_n=1,             # #7+#8 — Local Bank iter refinement
+                    bank_repeat_alpha=0.1,
+                    bank_cold_boost=0.0,         # #1 — cold-row gradient boost
+                    bank_cold_boost_eps=1.0,
+                    phase_label=""):
     """Shared body. All knobs threaded via env vars (MMLLM_DEVICE,
     MMLLM_LR, MMLLM_BATCH, MMLLM_SQRT_N, MMLLM_CPU_OFFLOAD,
     MMLLM_BANK_ON_GPU, MMLLM_SYNC_EVERY, MMLLM_VOLUME_NAME,
-    MMLLM_LR_WARMUP, MMLLM_LR_MIN, MMLLM_BANK_QUERY_MODE,
-    MMLLM_LONG_TIER_MIX, MMLLM_BANK_FEEDBACK_MODE) so the basilisp
-    CLI stays unchanged.
+    MMLLM_LR_WARMUP, MMLLM_LR_MIN, MMLLM_LR_DENSE_MULT,
+    MMLLM_LR_BANK_MULT, MMLLM_BANK_QUERY_MODE, MMLLM_LONG_TIER_MIX,
+    MMLLM_BANK_FEEDBACK_MODE) so the basilisp CLI stays unchanged.
+
+    `lr_dense_mult` / `lr_bank_mult` decouple the AdamW (dense /
+    router) and SparseAdam (bank / experts) lrs from the unified
+    peak `lr`. Default 1.0 / 1.0 = legacy behaviour. See
+    docs/router-bank-lr-decoupling.md for the differential-decay
+    schedule (cool dense after ~9-12B tokens; cool bank later).
 
     `bank_on_gpu=False` switches to the CPUPinnedEmbedding path —
     bank V lives in the mmap'd file, cross-device gather happens
@@ -515,6 +611,8 @@ def _run_train_long(total_steps, eval_every, ckpt_every, device, lr,
     env = {**os.environ,
            "MMLLM_DEVICE": device,
            "MMLLM_LR":     str(lr),
+           "MMLLM_LR_DENSE_MULT": str(lr_dense_mult),
+           "MMLLM_LR_BANK_MULT":  str(lr_bank_mult),
            "MMLLM_BATCH":  str(batch),
            "MMLLM_BANK_ON_GPU": "true" if bank_on_gpu else "false",
            "MMLLM_SYNC_EVERY":  str(sync_every),
@@ -523,7 +621,67 @@ def _run_train_long(total_steps, eval_every, ckpt_every, device, lr,
            "MMLLM_BANK_QUERY_MODE":    bank_query_mode,
            "MMLLM_LONG_TIER_MIX":      long_tier_mix,
            "MMLLM_BANK_FEEDBACK_MODE": bank_feedback_mode,
-           "MMLLM_ABLATE_EVERY":       str(ablate_every)}
+           "MMLLM_ABLATE_EVERY":       str(ablate_every),
+           "MMLLM_Z_LOSS_COEF":        str(z_loss_coef),
+           "MMLLM_MTP_COEF":           str(mtp_coef),
+           "MMLLM_SLOT_LOG_EVERY":     str(slot_log_every),
+           "MMLLM_DEAD_SLOT_REINIT":   "true" if dead_slot_reinit else "false",
+           "MMLLM_NETBANK_ENABLED":    "true" if netbank_enabled else "false",
+           "MMLLM_NET_SQRT_N":         str(netbank_sqrt_n),
+           "MMLLM_NET_C_NET":          str(netbank_c_net),
+           "MMLLM_NET_TOP_K":          str(netbank_top_k),
+           "MMLLM_NET_SUB_TOP_K":      str(netbank_sub_top_k),
+           "MMLLM_NET_DELAY_MS_MIN":   str(netbank_delay_ms_min),
+           "MMLLM_NET_DELAY_MS_MAX":   str(netbank_delay_ms_max),
+           "MMLLM_NET_BANK_ON_GPU":    "true" if netbank_on_gpu else "false",
+           "MMLLM_LR_NET_MULT":        str(lr_net_mult),
+           # Per-multiplier END values for cosine schedules. None → use
+           # the start value (constant; backward-compat). When set, lr
+           # mult cosine-interpolates from start → end across (warmup,
+           # total_steps]. T1 plan: bank 10→1, net 5→10 to drive
+           # consolidation: Local cools as Net ramps up.
+           "MMLLM_LR_DENSE_MULT_END":  str(lr_dense_mult_end if lr_dense_mult_end is not None else lr_dense_mult),
+           "MMLLM_LR_BANK_MULT_END":   str(lr_bank_mult_end  if lr_bank_mult_end  is not None else lr_bank_mult),
+           "MMLLM_LR_NET_MULT_END":    str(lr_net_mult_end   if lr_net_mult_end   is not None else lr_net_mult),
+           # Router-smarts (focal CE + importance head + multi-timescale
+           # carry). Defaults are no-op (focal_gamma=0 → plain CE,
+           # importance_head=false, carry_enabled=false). Each is opt-in
+           # via env var so old runs / ckpts stay parameter-identical.
+           "MMLLM_FOCAL_GAMMA":        str(focal_gamma),
+           "MMLLM_IMPORTANCE_HEAD":    "true" if importance_head else "false",
+           "MMLLM_IMPORTANCE_AUX":     str(importance_aux),
+           "MMLLM_CARRY_ENABLED":      "true" if carry_enabled else "false",
+           "MMLLM_CARRY_N_CLOCKS":     str(carry_n_clocks),
+           "MMLLM_GRAD_CLIP":          str(grad_clip),
+           "MMLLM_NAN_GUARD":          "true" if nan_guard else "false",
+           "MMLLM_LOG_PARAM_NORMS":    "true" if log_param_norms else "false",
+           "MMLLM_DISTILL_COEF":       str(distill_coef),
+           "MMLLM_DISTILL_DIRECTION_ONLY": "true" if distill_direction_only else "false",
+           "MMLLM_ALPHA_NET":          "true" if alpha_net else "false",
+           "MMLLM_REPLAY_EVERY":       str(replay_every),
+           "MMLLM_REPLAY_BUFFER_SIZE": str(replay_buffer_size),
+           "MMLLM_REPLAY_THRESHOLD":   str(replay_threshold),
+           # 9-spike upgrade plan env knobs
+           "MMLLM_LR_KAB_MULT":        str(lr_kab_mult)     if lr_kab_mult     is not None else str(lr_dense_mult),
+           "MMLLM_LR_KAB_MULT_END":    str(lr_kab_mult_end) if lr_kab_mult_end is not None else (str(lr_kab_mult) if lr_kab_mult is not None else str(lr_dense_mult)),
+           "MMLLM_DELIM_AUX_COEF":     str(delim_aux_coef),
+           "MMLLM_SCHEMA_MASK_WEIGHT": str(schema_mask_weight),
+           "MMLLM_PAUSE_BYTES":        str(pause_bytes),
+           "MMLLM_PAUSE_PROB":         str(pause_prob),
+           "MMLLM_PAUSE_BYTE_VAL":     str(pause_byte_val),
+           "MMLLM_BANK_REPEAT_N":      str(bank_repeat_n),
+           "MMLLM_BANK_REPEAT_ALPHA":  str(bank_repeat_alpha),
+           "MMLLM_BANK_COLD_BOOST":    str(bank_cold_boost),
+           "MMLLM_BANK_COLD_BOOST_EPS":str(bank_cold_boost_eps),
+           "MMLLM_PHASE_LABEL":        phase_label,
+           # Expandable allocator avoids the fragmentation pattern that
+           # OOM'd Phase 4 at the first ablation: the allocator was holding
+           # ~17 GB of cached-but-unallocated memory it couldn't reuse for
+           # a 4 GB request. expandable_segments lets PyTorch grow segments
+           # rather than allocate fixed-size chunks.
+           "PYTORCH_CUDA_ALLOC_CONF":  "expandable_segments:True"}
+    if netbank_path is not None:
+        env["MMLLM_NET_BANK_PATH"] = netbank_path
     if sqrt_n is not None:
         env["MMLLM_SQRT_N"] = str(sqrt_n)
     if cpu_offload:
@@ -534,8 +692,11 @@ def _run_train_long(total_steps, eval_every, ckpt_every, device, lr,
         env["MMLLM_MAX_HOURS"] = str(max_hours)
     if mix:
         env["MMLLM_MIX"] = mix
+    phase_label = os.environ.get("MMLLM_PHASE_LABEL", "(no phase label)")
+    print(f"=== PHASE LABEL: {phase_label} ===", flush=True)
     print(
-        f"=== train-long device={device} B={batch} lr={lr} sqrt_n={sqrt_n} "
+        f"=== train-long device={device} B={batch} lr={lr} "
+        f"lr_dense_mult={lr_dense_mult} lr_bank_mult={lr_bank_mult} sqrt_n={sqrt_n} "
         f"cpu_offload={cpu_offload} bank_on_gpu={bank_on_gpu} "
         f"sync_every={sync_every} volume={volume_name} "
         f"lr_warmup={lr_warmup} lr_min={lr_min} "
@@ -543,6 +704,9 @@ def _run_train_long(total_steps, eval_every, ckpt_every, device, lr,
         f"bank_feedback_mode={bank_feedback_mode} "
         f"ablate_every={ablate_every} max_hours={max_hours} "
         f"mix={'(set)' if mix else '(none)'} "
+        f"focal_gamma={focal_gamma} importance_head={importance_head} "
+        f"carry_enabled={carry_enabled} carry_n_clocks={carry_n_clocks} "
+        f"grad_clip={grad_clip} "
         f"total={total_steps} eval-every={eval_every} "
         f"ckpt-every={ckpt_every} base={base} ===",
         flush=True,
@@ -572,6 +736,8 @@ def train_with_bank(
     eval_every: int = 1000,
     ckpt_every: int = 5000,
     lr: float = 1.4e-3,         # peak lr — sqrt(128/64)-scaled from prior B=64/lr=1e-3 best
+    lr_dense_mult: float = 1.0, # multiplier on AdamW (dense / router) lr — see docs/router-bank-lr-decoupling.md
+    lr_bank_mult: float = 1.0,  # multiplier on SparseAdam (bank / experts) lr
     batch: int = 128,           # per-token throughput plateau zone; smoother gradients
     sqrt_n: int = 0,            # 0 = config default; pass 2048 for ~18.8 GB bank
     cpu_offload: bool = False,  # CPU-offload SparseAdam state → frees ~38 GB GPU VRAM
@@ -581,6 +747,51 @@ def train_with_bank(
     long_tier_mix: str = "sum",          # 'sum' | 'scalar' | 'switch' — see mmllm.gating
     bank_feedback_mode: str = "plain",   # 'plain' | 'feedback' — see mmllm.bank_feedback
     ablate_every: int = 0,               # >0 = log Δ trajectory every N steps; 0 disables
+    z_loss_coef: float = 0.0,            # ST-MoE-style query z-loss on K_a/K_b (1e-5 typical)
+    mtp_coef: float = 0.0,               # multi-byte-prediction t+2 aux head coefficient (0.25 typical)
+    slot_log_every: int = 0,             # log per-layer PKM slot-utilization entropy every N steps
+    dead_slot_reinit: bool = False,      # at slot-log events, reinit dead K_a/K_b rows + their V slice
+    netbank_enabled: bool = False,       # enable the off-machine "long-term memory" tier (NetBank)
+    netbank_path: str = "",              # mmap path prefix; defaults to <bank>+'-net' if unset
+    netbank_sqrt_n: int = 8192,          # NetBank side length (entries = sqrt_n²); 8192 → 67M entries
+    netbank_c_net: int = 64,             # NetBank V bottleneck dim (rows stored as c_net latents)
+    netbank_top_k: int = 64,             # rows retrieved per NetBank query (larger payload)
+    netbank_sub_top_k: int = 64,         # sub-keys retained per K_a/K_b half before re-rank
+    netbank_delay_ms_min: float = 1.0,   # min simulated WAN delay per NetBank forward (ms)
+    netbank_delay_ms_max: float = 10.0,  # max simulated WAN delay (uniform random in [min, max])
+    netbank_on_gpu: bool = False,        # NetBank V on GPU VRAM (training-fast) vs CPU mmap (production-realism)
+    lr_net_mult: float = 1.0,            # multiplier on NetBank's SparseAdam lr
+    lr_dense_mult_end: float = -1.0,     # cosine-schedule end for AdamW lr mult; -1 = use start (constant)
+    lr_bank_mult_end:  float = -1.0,     # cosine-schedule end for SparseAdam lr mult; T1 default = 1.0
+    lr_net_mult_end:   float = -1.0,     # cosine-schedule end for NetBank SparseAdam lr mult; T1 default = 10.0
+    # ── router-smarts (mid-brain enrichments) ──
+    focal_gamma: float = 0.0,            # focal CE exponent: 0 = plain CE, 2 = up-weight hard bytes
+    importance_head: bool = False,       # learned per-position difficulty predictor (decoupled from main loss; mean-1 multiplier)
+    importance_aux: float = 1.0,         # coefficient on IH self-supervised aux MSE; 0 = freeze IH at init
+    carry_enabled: bool = False,         # per-block MultiTimescaleCarry (4 EMAs, log-spaced decays)
+    carry_n_clocks: int = 4,             # number of EMAs per carry block
+    grad_clip: float = 0.0,              # max global L2 norm for AdamW gradient clipping (0 = disabled, 1.0 standard)
+    nan_guard: bool = False,             # forward-pass NaN check at each block + logits — aborts with layer-id on first NaN
+    log_param_norms: bool = False,       # at each slot_log_every event, write per-param L∞/L2 norms to log.jsonl
+    distill_coef: float = 0.0,           # P2': aux MSE coef driving Net to mimic Local's attention output (0 = disabled)
+    distill_direction_only: bool = False,# normalize Net & Local to unit-norm before MSE (Net learns Local's direction, not magnitude)
+    alpha_net: bool = False,             # per-head learnable scale on Net's path in SwitchGate (compensates for Net's smaller magnitude)
+    replay_every: int = 0,               # P3: every N main steps run a frozen-Local replay step on a buffered mastered batch (0 = disabled)
+    replay_buffer_size: int = 256,       # P3: max (x, y) batches kept in replay buffer (CPU)
+    replay_threshold: float = 0.5,       # P3: plain-CE below which a batch is pushed to the buffer (mastered-position selector)
+    # — 9-spike upgrade plan knobs (default off / no-op) —
+    lr_kab_mult: float = -1.0,           # #3: K_a/K_b separate LR mult; -1 = use lr_dense_mult (single group)
+    lr_kab_mult_end: float = -1.0,       # #3: cosine end for kab; -1 = use lr_kab_mult (constant)
+    delim_aux_coef: float = 0.0,         # #4: JSON-delimiter aux head's BCE coef (0 = disabled)
+    schema_mask_weight: float = 1.0,     # #5: per-position CE weight on positions after a JSON delimiter (1.0 = disabled)
+    pause_bytes: int = 0,                # #9: number of pause bytes to prepend to training batches (0 = disabled)
+    pause_prob: float = 0.5,             # #9: per-batch probability of pause prefix injection
+    pause_byte_val: int = 0,             # #9: byte value for pause filler (0 = NUL)
+    bank_repeat_n: int = 1,              # #7+8: Local Bank iterative refinement passes per forward (1 = no iter, legacy)
+    bank_repeat_alpha: float = 0.1,      # #7+8: scale on prev mem_out fed back into bank_q
+    bank_cold_boost: float = 0.0,        # #1: cold-row gradient boost on Local V (0 = disabled)
+    bank_cold_boost_eps: float = 1.0,    # #1: smoothing in `1 + boost / (eps + count)`
+    phase_label: str = "",               # human-readable tag for this run (printed at startup, recorded in manifest)
     base: str = "/data/text8",
     bank: str = "/data/bank",
     corpus_base: str = "",               # if set and != base, symlink corpus splits
@@ -653,6 +864,52 @@ def train_with_bank(
         ablate_every=ablate_every,
         max_hours=max_hours,
         mix=mix,
+        lr_dense_mult=lr_dense_mult,
+        lr_bank_mult=lr_bank_mult,
+        z_loss_coef=z_loss_coef,
+        mtp_coef=mtp_coef,
+        slot_log_every=slot_log_every,
+        dead_slot_reinit=dead_slot_reinit,
+        netbank_enabled=netbank_enabled,
+        netbank_path=(netbank_path or None),
+        netbank_sqrt_n=netbank_sqrt_n,
+        netbank_c_net=netbank_c_net,
+        netbank_top_k=netbank_top_k,
+        netbank_sub_top_k=netbank_sub_top_k,
+        netbank_delay_ms_min=netbank_delay_ms_min,
+        netbank_delay_ms_max=netbank_delay_ms_max,
+        netbank_on_gpu=netbank_on_gpu,
+        lr_net_mult=lr_net_mult,
+        lr_dense_mult_end=(None if lr_dense_mult_end < 0 else lr_dense_mult_end),
+        lr_bank_mult_end =(None if lr_bank_mult_end  < 0 else lr_bank_mult_end),
+        lr_net_mult_end  =(None if lr_net_mult_end   < 0 else lr_net_mult_end),
+        focal_gamma=focal_gamma,
+        importance_head=importance_head,
+        importance_aux=importance_aux,
+        carry_enabled=carry_enabled,
+        carry_n_clocks=carry_n_clocks,
+        grad_clip=grad_clip,
+        nan_guard=nan_guard,
+        log_param_norms=log_param_norms,
+        distill_coef=distill_coef,
+        distill_direction_only=distill_direction_only,
+        alpha_net=alpha_net,
+        replay_every=replay_every,
+        replay_buffer_size=replay_buffer_size,
+        replay_threshold=replay_threshold,
+        # 9-spike knobs (-1 sentinels mean "use default")
+        lr_kab_mult     =(None if lr_kab_mult     < 0 else lr_kab_mult),
+        lr_kab_mult_end =(None if lr_kab_mult_end < 0 else lr_kab_mult_end),
+        delim_aux_coef  =delim_aux_coef,
+        schema_mask_weight=schema_mask_weight,
+        pause_bytes     =pause_bytes,
+        pause_prob      =pause_prob,
+        pause_byte_val  =pause_byte_val,
+        bank_repeat_n   =bank_repeat_n,
+        bank_repeat_alpha=bank_repeat_alpha,
+        bank_cold_boost =bank_cold_boost,
+        bank_cold_boost_eps=bank_cold_boost_eps,
+        phase_label    =phase_label,
     )
     if publish_after:
         # Spawn publish on its own container (uses publish_image w/ gh CLI).
@@ -1590,6 +1847,43 @@ def prepare_bank(bank_path: str = "/data/shared-bank",
     print(
         f"done — total bank size {result['total_bytes']/1e9:.2f} GB", flush=True
     )
+
+
+@app.function(
+    image=image,
+    volumes={"/data": volume},
+    timeout=7200,                  # NetBank can be 80+GB; init takes longer
+    cpu=8.0,
+    memory=32768,
+)
+def prepare_netbank(bank_path: str = "/data/aesop-v3-bank-net",
+                    sqrt_n: int = 8192,
+                    c_net: int = 64,
+                    n_layers: int = 5,
+                    dtype: str = "fp32"):
+    """Pre-create + initialize NetBank V mmap files (one per layer).
+    Idempotent: existing correctly-sized files are kept.
+
+    At sqrt_n=8192 + c_net=64 + fp32 = 17.2 GB per layer × 5 = 85.9 GB.
+    Run once before the first NetBank-enabled training launch so the
+    first session doesn't burn 10-20 min on Gaussian init.
+    """
+    import sys
+    sys.path.insert(0, "/code/src")
+    from mmllm.netbank import prepare_netbank_files
+    print(
+        f"=== prepare_netbank {bank_path} sqrt_n={sqrt_n} c_net={c_net} "
+        f"dtype={dtype} n_layers={n_layers} ===",
+        flush=True,
+    )
+    result = prepare_netbank_files(bank_path, n_layers, sqrt_n, c_net, dtype)
+    for p in result["paths"]:
+        cached = "cached" if p["cached"] else "created"
+        print(f"  {p['path']}  ({p['bytes']/1e9:.2f} GB, {cached})", flush=True)
+    volume.commit()
+    print(
+        f"done — total netbank size {result['total_bytes']/1e9:.2f} GB", flush=True
+    )
     return result
 
 
@@ -1606,6 +1900,8 @@ def train_with_bank_worker(
     eval_every: int = 1000,
     ckpt_every: int = 5000,
     lr: float = 1.4e-3,
+    lr_dense_mult: float = 1.0,
+    lr_bank_mult: float = 1.0,
     batch: int = 128,
     sqrt_n: int = 2048,
     bank: str = "/data/shared-bank",
@@ -1658,6 +1954,8 @@ def train_with_bank_worker(
         bank_query_mode=bank_query_mode,
         long_tier_mix=long_tier_mix,
         bank_feedback_mode=bank_feedback_mode,
+        lr_dense_mult=lr_dense_mult,
+        lr_bank_mult=lr_bank_mult,
     )
 
 
@@ -1667,6 +1965,8 @@ def train_multi(n_trainers: int = 4,
                 eval_every: int = 1000,
                 ckpt_every: int = 5000,
                 lr: float = 1.4e-3,
+                lr_dense_mult: float = 1.0,
+                lr_bank_mult: float = 1.0,
                 batch: int = 128,
                 sqrt_n: int = 2048,
                 bank: str = "/data/shared-bank",
@@ -1705,6 +2005,8 @@ def train_multi(n_trainers: int = 4,
             eval_every=eval_every,
             ckpt_every=ckpt_every,
             lr=lr,
+            lr_dense_mult=lr_dense_mult,
+            lr_bank_mult=lr_bank_mult,
             batch=batch,
             sqrt_n=sqrt_n,
             bank=bank,
@@ -1733,6 +2035,8 @@ def train_multi_b(bases: str = "/data/text8,/data/pile-github.bin",
                   eval_every: int = 1000,
                   ckpt_every: int = 5000,
                   lr: float = 1.4e-3,
+                  lr_dense_mult: float = 1.0,
+                  lr_bank_mult: float = 1.0,
                   batch: int = 128,
                   sqrt_n: int = 2048,
                   bank: str = "/data/shared-bank-b",
@@ -1773,6 +2077,8 @@ def train_multi_b(bases: str = "/data/text8,/data/pile-github.bin",
             eval_every=eval_every,
             ckpt_every=ckpt_every,
             lr=lr,
+            lr_dense_mult=lr_dense_mult,
+            lr_bank_mult=lr_bank_mult,
             batch=batch,
             sqrt_n=sqrt_n,
             bank=bank,
@@ -1921,6 +2227,15 @@ PROD_CAPS = {
     # error capture) if the token is missing or license unaccepted.
     "xlam":               ( 200_000_000,    10_000_000, 10_000_000),  # GATED — Salesforce/xlam-function-calling-60k
     "the-stack-clj":      (2_000_000_000,    20_000_000, 20_000_000),  # GATED — bigcode/the-stack-dedup (v1) clojure
+    # Tool-call diversity additions (per docs/router-bank-lr-decoupling
+    # follow-up: byte-level format anchor needs more API-schema variety
+    # than xLAM alone provides).
+    "glaive-funcall":     ( 500_000_000,    20_000_000, 20_000_000),  # ~251MB raw HF → ~500MB after templating
+    "hermes-funcall":     ( 200_000_000,     2_000_000,  2_000_000),  # smaller, ~10-100k records — small val/test
+    "toolace":            ( 100_000_000,     1_000_000,  1_000_000),  # 11.3k records, ~26k API pool — small splits
+    # Format-only warmup: same source as xlam, args masked. Used for
+    # short pre-mix saturation phases; no HF redownload, just retemplate.
+    "format-anchor":      ( 100_000_000,     1_000_000,  1_000_000),  # SAME src as xlam, ~13MB after value-masking
 }
 
 
@@ -2453,7 +2768,11 @@ def _do_eval_battery(base, ckpt_step, bank, log_path,
                      bpc_evals, agent_evals, n_samples, gen_len,
                      bank_query_mode="plain",
                      bank_feedback_mode="plain",
-                     long_tier_mix="sum"):
+                     long_tier_mix="sum",
+                     focal_gamma=0.0,
+                     importance_head=False,
+                     carry_enabled=False,
+                     carry_n_clocks=4):
     """Body of the eval battery — factored so eval_watcher can call it
     directly (no nested-Modal-function dispatch). Returns the resolved
     ckpt_step (since callers may pass 0 = latest)."""
@@ -2493,6 +2812,18 @@ def _do_eval_battery(base, ckpt_step, bank, log_path,
     env["MMLLM_BANK_QUERY_MODE"]    = bank_query_mode
     env["MMLLM_BANK_FEEDBACK_MODE"] = bank_feedback_mode
     env["MMLLM_LONG_TIER_MIX"]      = long_tier_mix
+    # Router-smarts arch knobs MUST match training. If trainer used
+    # --carry-enabled and the eval container builds without it, the
+    # carry params in the ckpt are silently dropped by tolerant load
+    # and the model runs without its multi-timescale residual — eval
+    # bpc reads way higher than train val_bpc. Same for --importance-
+    # head (loads but is unused if not constructed) and --focal-gamma
+    # (eval doesn't use focal at inference, but threading the env var
+    # keeps the model definition symmetric).
+    env["MMLLM_FOCAL_GAMMA"]        = str(focal_gamma)
+    env["MMLLM_IMPORTANCE_HEAD"]    = "true" if importance_head else "false"
+    env["MMLLM_CARRY_ENABLED"]      = "true" if carry_enabled else "false"
+    env["MMLLM_CARRY_N_CLOCKS"]     = str(carry_n_clocks)
     env["PYTORCH_CUDA_ALLOC_CONF"]  = "expandable_segments:True"
 
     print(f"=== eval battery base={base} ckpt={ckpt_step} log={log_p} ===",
@@ -2597,7 +2928,10 @@ def run_eval_battery(
     timeout=86400,         # Modal caps at 24 h per invocation; the watcher's
                            # outer loop is idempotent (`<log_path>.seen.txt`)
                            # so just relaunch it daily for multi-day runs.
-    gpu="A10G",
+    gpu="L4",              # 24GB VRAM (fits sqrt_n=2048 fp32 bank at 18.8GB);
+                           # cheaper + better available than A10G. Bank fits
+                           # on-GPU; with bank_on_gpu=False the watcher would
+                           # work on T4/16GB at the cost of PCIe-per-query.
     memory=32768,
 )
 def eval_watcher(
@@ -2619,6 +2953,10 @@ def eval_watcher(
     n_samples:   int  = 50,
     gen_len:     int  = 256,    # default 256 fits max_pos=1024 + max_prompt_bytes=768 with margin
     max_idle_polls: int = 0,                       # 0 = infinite; else stop after N empty polls
+    focal_gamma:    float = 0.0,
+    importance_head: bool = False,
+    carry_enabled:   bool = False,
+    carry_n_clocks:  int  = 4,
 ):
     """Poll <base>.ckpts/ for new step-<N> dirs and eval each one.
 
@@ -2689,6 +3027,10 @@ def eval_watcher(
                     bank_query_mode=bank_query_mode,
                     bank_feedback_mode=bank_feedback_mode,
                     long_tier_mix=long_tier_mix,
+                    focal_gamma=focal_gamma,
+                    importance_head=importance_head,
+                    carry_enabled=carry_enabled,
+                    carry_n_clocks=carry_n_clocks,
                 )
             except Exception as e:
                 print(f"    WARN: ckpt {s} eval errored: {e} — skipping",

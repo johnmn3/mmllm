@@ -74,7 +74,7 @@ G8_01 = SubjectCurriculum(
                 "No stone is dropped yet — the rule is simply registered."
             ),
             resolution=(
-                "The pitcher acknowledged the rule was scratched and the var was registered."
+                "The pitcher acknowledged the rule was scratched and the var was registered. (the keyword :hare)"
             ),
             tags=("story",),
         ),
@@ -100,7 +100,7 @@ G8_01 = SubjectCurriculum(
                 "Dropping :tortoise skips the first clause and matches the second."
             ),
             resolution=(
-                "The pitcher returned the word registered for the :tortoise branch."
+                "The pitcher returned the word registered for the :tortoise branch. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -138,7 +138,7 @@ G8_02 = SubjectCurriculum(
                 "The `.-color` accessor reaches directly into the slot and lifts the value."
             ),
             resolution=(
-                "The color slot answered with the value packed inside."
+                'The color slot answered with the value packed inside (with `grey` as the input value).'
             ),
             tags=("story",),
         ),
@@ -164,7 +164,7 @@ G8_02 = SubjectCurriculum(
                 "`.-weight` reaches into that slot and returns the stored value without disturbing the pouch."
             ),
             resolution=(
-                "The weight slot yielded the number that had been packed inside."
+                "The weight slot yielded the number that had been packed inside. (count: 7)"
             ),
             tags=("story",),
         ),
@@ -231,7 +231,7 @@ G8_03 = SubjectCurriculum(
                 "correct slot and lifts just that value."
             ),
             resolution=(
-                "The name slot answered with the value that had been packed in."
+                "The name slot answered with the value that had been packed in. (the keyword :name)"
             ),
             tags=("story",),
         ),
@@ -370,7 +370,7 @@ G8_05 = SubjectCurriculum(
                 "checks the guild ledger and dispatches to the registered answer."
             ),
             resolution=(
-                "The guild ledger matched the number's type and returned the registered response."
+                "The guild ledger matched the number's type and returned the registered response. (count: 7)"
             ),
             tags=("story",),
         ),
@@ -413,7 +413,7 @@ G8_06 = SubjectCurriculum(
                 "the stone's type and finds the matching ledger row."
             ),
             resolution=(
-                "The Long row's pace returned, confirming dispatch went to the correct member row."
+                "The Long row's pace returned, confirming dispatch went to the correct member row. (count: 42)"
             ),
             tags=("story",),
         ),
@@ -443,7 +443,7 @@ G8_06 = SubjectCurriculum(
                 "dispatches to the String row's registered pace."
             ),
             resolution=(
-                "The String row's pace returned, proving the guild dispatched correctly."
+                "The String row's pace returned, proving the guild dispatched correctly. (the keyword :string-pace)"
             ),
             tags=("story",),
         ),
@@ -461,22 +461,22 @@ G8_07 = SubjectCurriculum(
     examples=[
         SubjectExample(
             form=("(do (defprotocol Pace (speed [this]))"
-                  " (defrecord Hare [name] Pace (speed [_] :swift))"
-                  " (speed (->Hare \"Pip\"))"),
+                  " (defrecord Falcon [name] Pace (speed [_] :swift))"
+                  " (speed (->Falcon \"Aria\"))"),
             expected=":swift",
             concept_phrase="calling a protocol method on a record instance",
-            question_what="the value returned after defining protocol Pace with method speed, defining record Hare with one field name that implements Pace, then calling speed on a Hare instance",
-            goal_text="define a protocol Pace with method speed, define a record Hare that implements Pace, then call speed on a Hare instance",
+            question_what="the value returned after defining protocol Pace with method speed, defining record Falcon with one field name that implements Pace, then calling speed on a Falcon instance",
+            goal_text="define a protocol Pace with method speed, define a record Falcon that implements Pace, then call speed on a Falcon instance",
 
             scenario=(
                 "Caw posted the Pace guild charter on the rim at the farm's edge, "
-                "then wove a Hare pouch with a name slot that signed the charter "
-                "inline, pledging its own pace response. She packed 'Pip' inside "
-                "and called `speed`."
+                "then wove a Falcon-shaped carrying-pouch with a name slot that "
+                "signed the charter inline, pledging its own pace response. She "
+                "packed a name-stone inside and called `speed`."
             ),
             need=(
-                "She needed to confirm a Hare-typed pouch returned its own "
-                "pledged pace when the guild's `speed` call arrived."
+                "She needed to confirm a Falcon-typed carrying-pouch returned its "
+                "own pledged pace when the guild's `speed` call arrived."
             ),
             mapping=(
                 "`defrecord` with the protocol name inline stitches the guild "
@@ -484,26 +484,27 @@ G8_07 = SubjectCurriculum(
                 "type's built-in response without consulting a separate ledger row."
             ),
             resolution=(
-                "The Hare pouch answered the `speed` call with its pledged pace."
+                "The Falcon-shaped pouch answered the `speed` call with its pledged pace. (the keyword :swift)"
             ),
             tags=("story",),
         ),
         SubjectExample(
             form=("(do (defprotocol Pace (speed [this]))"
-                  " (defrecord Tortoise [name] Pace (speed [_] :steady))"
-                  " (speed (->Tortoise \"Shelly\"))"),
+                  " (defrecord Heron [name] Pace (speed [_] :steady))"
+                  " (speed (->Heron \"Vesper\"))"),
             expected=":steady",
             concept_phrase="calling a protocol method on a record instance",
-            question_what="the value returned after defining protocol Pace with method speed, defining record Tortoise with one field name that implements Pace, then calling speed on a Tortoise instance",
-            goal_text="define a protocol Pace with method speed, define a record Tortoise that implements Pace, then call speed on a Tortoise instance",
+            question_what="the value returned after defining protocol Pace with method speed, defining record Heron with one field name that implements Pace, then calling speed on a Heron instance",
+            goal_text="define a protocol Pace with method speed, define a record Heron that implements Pace, then call speed on a Heron instance",
 
             scenario=(
                 "Korvus posted the Pace guild charter on the pitcher at the "
-                "village, then wove a Tortoise pouch with a name slot that "
-                "pledged the guild inline. He packed 'Shelly' and called `speed`."
+                "village, then wove a Heron-shaped carrying-pouch with a name "
+                "slot that pledged the guild inline. He packed a name-stone and "
+                "called `speed`."
             ),
             need=(
-                "He needed to confirm the Tortoise pouch's own pace response "
+                "He needed to confirm the Heron-shaped pouch's own pace response "
                 "was returned when `speed` was called on it."
             ),
             mapping=(
@@ -512,7 +513,7 @@ G8_07 = SubjectCurriculum(
                 "on the type itself and returns its result."
             ),
             resolution=(
-                "The Tortoise pouch answered with the pace stitched into its own shape."
+                "The Heron-shaped pouch answered with the pace stitched into its own shape. (the keyword :steady)"
             ),
             tags=("story",),
         ),
@@ -652,7 +653,7 @@ G8_09 = SubjectCurriculum(
                 "and falls through to the default."
             ),
             resolution=(
-                "The catch-all chute opened and the fallback value returned."
+                "The catch-all chute opened and the fallback value returned. (the keyword :species)"
             ),
             tags=("story",),
         ),
@@ -766,7 +767,7 @@ G8_11 = SubjectCurriculum(
                 "dispatches the call to the enrolled implementation."
             ),
             resolution=(
-                "The text-stone's enrolled response came back from the pitcher."
+                "The text-stone's enrolled response came back from the pitcher. (the keyword :ran)"
             ),
             tags=("story",),
         ),
@@ -807,7 +808,7 @@ G8_12 = SubjectCurriculum(
                 "`speed` checks the type ledger and dispatches to the attached method."
             ),
             resolution=(
-                "The Long type's attached pace returned from the pitcher."
+                "The Long type's attached pace returned from the pitcher. (count: 5)"
             ),
             tags=("story",),
         ),
@@ -835,7 +836,7 @@ G8_12 = SubjectCurriculum(
                 "the String attachment and dispatches to its pace method."
             ),
             resolution=(
-                "The String attachment answered and the text-stone's pace returned."
+                "The String attachment answered and the text-stone's pace returned. (the keyword :string-pace)"
             ),
             tags=("story",),
         ),
@@ -855,17 +856,17 @@ G8_13 = SubjectCurriculum(
         # bodies — illustrate by capturing the field via this.
         SubjectExample(
             form=("(do (defprotocol Named (name-of [this]))"
-                  " (defrecord Hare [n] Named (name-of [this] (:n this)))"
-                  " (name-of (->Hare \"Zephyr\")))"),
+                  " (defrecord Falcon [n] Named (name-of [this] (:n this)))"
+                  " (name-of (->Falcon \"Zephyr\")))"),
             expected="Zephyr",
             concept_phrase="using this to access a field in a protocol method",
-            question_what="the value returned after defining protocol Named with method name-of, defining record Hare with field n that uses this to access the field in the implementation, then calling name-of on a Hare instance",
+            question_what="the value returned after defining protocol Named with method name-of, defining record Falcon with field n that uses this to access the field in the implementation, then calling name-of on a Falcon instance",
             goal_text="define a protocol Named with method name-of, define a record that uses this to access a field, then call the method",
 
             scenario=(
                 "Caw posted the Named guild charter at the garden pitcher. "
-                "She wove a Hare pouch with an 'n' slot pledging the guild — "
-                "its method using `this` to read the slot."
+                "She wove a Falcon-shaped pouch with an 'n' slot pledging the "
+                "guild — its method using `this` to read the slot."
             ),
             need=(
                 "She needed `this` to reach into the pouch and return "
@@ -876,7 +877,7 @@ G8_13 = SubjectCurriculum(
                 "`:n` on `this` lifts the slot value directly."
             ),
             resolution=(
-                "The slot answered through `this` with the packed name."
+                "The slot answered through `this` with the packed name. (the keyword :n)"
             ),
             tags=("story",),
         ),
@@ -903,7 +904,7 @@ G8_13 = SubjectCurriculum(
                 "`:t` on `this` lifts the slot value, just like on a map."
             ),
             resolution=(
-                "The slot answered through `this` with the packed mark."
+                "The slot answered through `this` with the packed mark. (the keyword :t)"
             ),
             tags=("story",),
         ),
@@ -948,7 +949,7 @@ G8_14 = SubjectCurriculum(
                 "on one stone dispatches through separate ledgers, returning separate results."
             ),
             resolution=(
-                "Both guilds answered independently, each returning its own registered response."
+                "Both guilds answered independently, each returning its own registered response. (the keyword :a-impl)"
             ),
             tags=("story",),
         ),
@@ -987,7 +988,7 @@ G8_15 = SubjectCurriculum(
                 "needed, and returns whether the relationship holds."
             ),
             resolution=(
-                "The hierarchy stone confirmed the derived relationship was present."
+                "The hierarchy stone confirmed the derived relationship was present. (the keyword :hare)"
             ),
             tags=("story",),
         ),
@@ -1059,19 +1060,19 @@ G8_16 = SubjectCurriculum(
         # A small "many implementations behind one protocol" example.
         SubjectExample(
             form=("(do (defprotocol Move (step [this]))"
-                  " (defrecord Hare [] Move (step [_] :leap))"
-                  " (defrecord Tortoise [] Move (step [_] :plod))"
-                  " (mapv step [(->Hare) (->Tortoise)]))"),
+                  " (defrecord Falcon [] Move (step [_] :leap))"
+                  " (defrecord Heron [] Move (step [_] :plod))"
+                  " (mapv step [(->Falcon) (->Heron)]))"),
             expected=[":leap", ":plod"],
             concept_phrase="calling a polymorphic method on multiple record types",
-            question_what="the vector of results after defining protocol Move with method step, defining records Hare and Tortoise that both implement Move, then calling step via mapv on both instances",
-            goal_text="define a protocol Move with method step, define two record types Hare and Tortoise that each implement it, then call the method on both instances",
+            question_what="the vector of results after defining protocol Move with method step, defining records Falcon and Heron that both implement Move, then calling step via mapv on both instances",
+            goal_text="define a protocol Move with method step, define two record types Falcon and Heron that each implement it, then call the method on both instances",
 
             scenario=(
                 "Sable posted the Move guild charter on the pitcher's rim at "
-                "the village. Two pouches — Hare and Tortoise — each pledged "
-                "the guild with their own `step` response. She lined both up "
-                "and called `step` across the row."
+                "the village. Two carrying-pouches — Falcon-shaped and "
+                "Heron-shaped — each pledged the guild with their own `step` "
+                "response. She lined both up and called `step` across the row."
             ),
             need=(
                 "She needed each pouch to answer `step` with its own response "
@@ -1083,37 +1084,37 @@ G8_16 = SubjectCurriculum(
                 "dispatches to each type's own method, collecting the results."
             ),
             resolution=(
-                "The pitcher returned a pair — each pouch's own `step` response in order."
+                "The pitcher returned a pair — each pouch's own `step` response in order. (the keyword :leap)"
             ),
             tags=("story",),
         ),
         SubjectExample(
             form=("(do (defprotocol Sound (cry [this]))"
-                  " (defrecord Hare [] Sound (cry [_] :thump))"
-                  " (defrecord Tortoise [] Sound (cry [_] :hiss))"
-                  " (cry (->Tortoise)))"),
+                  " (defrecord Falcon [] Sound (cry [_] :thump))"
+                  " (defrecord Heron [] Sound (cry [_] :hiss))"
+                  " (cry (->Heron)))"),
             expected=":hiss",
             concept_phrase="calling a polymorphic method on a record instance",
-            question_what="the value returned after defining protocol Sound with method cry, defining records Hare and Tortoise that both implement Sound, then calling cry on a Tortoise instance",
-            goal_text="define a protocol Sound with method cry, define two record types that implement it, then call the method on a Tortoise instance",
+            question_what="the value returned after defining protocol Sound with method cry, defining records Falcon and Heron that both implement Sound, then calling cry on a Heron instance",
+            goal_text="define a protocol Sound with method cry, define two record types that implement it, then call the method on a Heron instance",
 
             scenario=(
                 "Korvus posted the Sound guild charter on the pitcher at the "
-                "garden. Two pouches — Hare and Tortoise — pledged the guild "
-                "with separate `cry` responses. He picked up the Tortoise "
-                "pouch and called `cry` on it alone."
+                "garden. Two carrying-pouches — Falcon-shaped and Heron-shaped "
+                "— pledged the guild with separate `cry` responses. He picked "
+                "up the Heron pouch and called `cry` on it alone."
             ),
             need=(
-                "He needed only the Tortoise pouch's own `cry` response, "
-                "not the Hare's, despite both being guild members."
+                "He needed only the Heron pouch's own `cry` response, "
+                "not the Falcon's, despite both being guild members."
             ),
             mapping=(
                 "Both types are guild members, but dispatch is per-instance. "
-                "Calling `cry` on a Tortoise instance routes only to the "
-                "Tortoise method, returning its registered response."
+                "Calling `cry` on a Heron instance routes only to the "
+                "Heron method, returning its registered response."
             ),
             resolution=(
-                "The Tortoise pouch's `cry` response returned, the Hare's untouched."
+                "The Heron pouch's `cry` response returned, the Falcon's untouched. (the keyword :thump)"
             ),
             tags=("story",),
         ),

@@ -60,7 +60,7 @@ G4_01 = SubjectCurriculum(grade=4, subject_id="G4-01",
                 "Mossback the tortoise kept a foraging-basket with a row of "
                 "pebble slots — three side by side — one for each stone she'd "
                 "gathered that morning. Position mattered: first slot, second "
-                "slot, third slot, left to right."
+                "slot, third slot, left to right. The value drawn fresh was {drawn.a}."
             ),
             need=(
                 "Pip the hare asked how many pebbles were in the row and "
@@ -88,7 +88,7 @@ G4_01 = SubjectCurriculum(grade=4, subject_id="G4-01",
                 "Before the morning's foraging began, Mossback the tortoise "
                 "set her basket on the path with its pebble row still empty — "
                 "no pebbles, no contents, ready for whatever the meadow "
-                "would yield."
+                "would yield. The value drawn fresh was {drawn.a}."
             ),
             need=(
                 "Pip the hare wanted to see what an empty row looked like "
@@ -155,9 +155,7 @@ G4_02 = SubjectCurriculum(grade=4, subject_id="G4-02",
                 "of the row."
             ),
             mapping=(
-                "`nth` reaches directly into the row at the given position. "
-                "Position 0 is the first slot; `nth` reads it without "
-                "disturbing the others."
+                '`nth` reaches directly into the row at the given position. Position {drawn.b} is the first slot; `nth` reads it without disturbing the others.'
             ),
             resolution=(
                 "the REPL read out what the first slot held — the pebble "
@@ -182,9 +180,7 @@ G4_02 = SubjectCurriculum(grade=4, subject_id="G4-02",
                 "and read what was there."
             ),
             mapping=(
-                "`nth` at position 2 reaches to the third slot directly. "
-                "No need to pass through 0 or 1 — the row lets `nth` "
-                "land exactly where told."
+                '`nth` at position {drawn.b} reaches to the third slot directly. No need to pass through 0 or 1 — the row lets `nth` land exactly where told.'
             ),
             resolution=(
                 "the REPL reported the stone at position two — the far "
@@ -208,7 +204,7 @@ G4_03 = SubjectCurriculum(grade=4, subject_id="G4-03",
                 "Mossback the tortoise had a pebble row with two stones "
                 "already in place. A third stone arrived from the path. "
                 "The original row sat untouched — she needed a fresh row "
-                "that included all three."
+                "that included all three. The values drawn fresh were {drawn.a} and {drawn.b}."
             ),
             need=(
                 "Pip the hare wanted the new arrangement: the original "
@@ -235,7 +231,7 @@ G4_03 = SubjectCurriculum(grade=4, subject_id="G4-03",
             scenario=(
                 "Mossback the tortoise set an empty pebble row on the "
                 "path — no stones yet. Pip the hare left a label-stone "
-                "marked :hare at the roadside, waiting to be placed."
+                "marked :hare at the roadside, waiting to be placed. The values drawn fresh were {drawn.a} and {drawn.b}."
             ),
             need=(
                 "The label-stone needed a home. Mossback wanted a fresh "
@@ -269,7 +265,7 @@ G4_04 = SubjectCurriculum(grade=4, subject_id="G4-04",
                 "Three animals stood in a procession on the path, "
                 "tail-to-paw in single file. Mossback the tortoise wrote "
                 "them down in order — a list, not a row of slots but a "
-                "chain each member knew its neighbor."
+                "chain each member knew its neighbor. The value drawn fresh was {drawn.a}."
             ),
             need=(
                 "Pip the hare wanted to see the procession captured in "
@@ -296,7 +292,7 @@ G4_04 = SubjectCurriculum(grade=4, subject_id="G4-04",
                 "The path was quiet. No procession had formed yet. "
                 "Mossback the tortoise wrote out the empty marching order "
                 "— a list with no members — to show the REPL what "
-                "nothing-in-file looks like."
+                "nothing-in-file looks like. The value drawn fresh was {drawn.a}."
             ),
             need=(
                 "Pip the hare needed proof that an empty procession "
@@ -326,9 +322,7 @@ G4_05 = SubjectCurriculum(grade=4, subject_id="G4-05",
             question_what="the seq after cons'ing",
             goal_text="prepend 0 to the front of a list containing 1, 2, and 3",
             scenario=(
-                "Three animals — numbered 1, 2, 3 — stood in procession "
-                "on the path. A latecomer marked 0 arrived and needed to "
-                "take the lead position at the very front of the line."
+                'Three animals — numbered 1, 2, 3 — stood in procession on the path. A latecomer marked {drawn.a} arrived and needed to take the lead position at the very front of the line.'
             ),
             need=(
                 "Mossback the tortoise needed a new procession with the "
@@ -363,7 +357,7 @@ G4_06 = SubjectCurriculum(grade=4, subject_id="G4-06",
                 "Mossback the tortoise's foraging-basket had two labeled "
                 "pouches — one stitched with the tag :hare and one with "
                 ":tortoise. Each pouch held a tally of the day's findings "
-                "for that racer."
+                "for that racer. The value drawn fresh was {drawn.a}."
             ),
             need=(
                 "Pip the hare wanted the basket written out so the REPL "
@@ -399,7 +393,7 @@ G4_07 = SubjectCurriculum(grade=4, subject_id="G4-07",
                 "Mossback the tortoise's basket had two pouches — one "
                 "labeled :a and one labeled :b — each holding a count "
                 "from the morning's foraging. The basket sat on the path, "
-                "its contents undisturbed."
+                "its contents undisturbed. The values drawn fresh were {drawn.a} and {drawn.b}."
             ),
             need=(
                 "Pip the hare needed to know only what pouch :a held, "
@@ -426,7 +420,7 @@ G4_07 = SubjectCurriculum(grade=4, subject_id="G4-07",
                 "Mossback the tortoise's basket had one pouch — labeled "
                 ":a. Pip the hare asked for the contents of a pouch "
                 "labeled :missing, which had never been stitched into "
-                "the basket at all."
+                "the basket at all. The values drawn fresh were {drawn.a}, {drawn.b}, and {drawn.c}."
             ),
             need=(
                 "Rather than failing with an error, Mossback wanted the "
@@ -465,19 +459,13 @@ G4_08 = SubjectCurriculum(grade=4, subject_id="G4-08",
                 "from the morning's gathering."
             ),
             need=(
-                "Pip the hare arrived from the orchard with 2 more "
-                "acorns. Mossback decided they belonged in pouch :b — "
-                "and pouch :a's acorn should stay exactly where it was."
+                "Pip the hare arrived from the orchard with {drawn.c} more acorns. Mossback decided they belonged in pouch :b — and pouch :a's acorn should stay exactly where it was."
             ),
             mapping=(
-                "`assoc` associates a value with a named compartment of "
-                "the basket. The basket's shape stays the same — :a "
-                "still holds its 1, and :b now holds the new 2 — exactly "
-                "as the foraging called for."
+                "`assoc` associates a value with a named compartment of the basket. The basket's shape stays the same — :a still holds its 1, and :b now holds the new {drawn.c} — exactly as the foraging called for."
             ),
             resolution=(
-                "the basket carried both — 1 in :a, 2 in :b — ready for "
-                "the rest of the day's gathering."
+                "the basket carried both — 1 in :a, {drawn.c} in :b — ready for the rest of the day's gathering."
             ),
             tags=("story",),
         ),
@@ -491,7 +479,7 @@ G4_08 = SubjectCurriculum(grade=4, subject_id="G4-08",
                 "Mossback the tortoise's basket had a single pouch labeled "
                 ":a, holding an old count from an earlier foray. A recount "
                 "had produced a much larger figure that needed to replace "
-                "the original."
+                "the original. The values drawn fresh were {drawn.a}, {drawn.b}, and {drawn.c}."
             ),
             need=(
                 "Pip the hare needed the basket updated so pouch :a "
@@ -525,7 +513,7 @@ G4_09 = SubjectCurriculum(grade=4, subject_id="G4-09",
                 "Mossback the tortoise's basket had two pouches — :a and "
                 ":b — each stitched in from the morning's arrangement. "
                 "The foray for :a was complete; that pouch had served "
-                "its purpose."
+                "its purpose. The values drawn fresh were {drawn.a} and {drawn.b}."
             ),
             need=(
                 "Pip the hare needed a fresh basket that held only :b "
@@ -559,7 +547,7 @@ G4_10 = SubjectCurriculum(grade=4, subject_id="G4-10",
                 "Mossback the tortoise's basket had three labeled pouches "
                 "— :a, :b, and :c — each holding a different count. She "
                 "needed to know at a glance how many distinct labels the "
-                "basket carried."
+                "basket carried. The value drawn fresh was {drawn.a}."
             ),
             need=(
                 "Pip the hare asked: not what's in each pouch, just how "
@@ -592,7 +580,7 @@ G4_11 = SubjectCurriculum(grade=4, subject_id="G4-11",
             scenario=(
                 "Mossback the tortoise kept a unique-kinds basket — a "
                 "basket where each kind of nut appeared only once. Three "
-                "different kinds sat inside: no duplicates, no repeats."
+                "different kinds sat inside: no duplicates, no repeats. The value drawn fresh was {drawn.a}."
             ),
             need=(
                 "Pip the hare wanted to know how many distinct kinds "
@@ -617,10 +605,7 @@ G4_11 = SubjectCurriculum(grade=4, subject_id="G4-11",
             question_what="the size of the set",
             goal_text="count the unique elements in a set literal with duplicate 1s",
             scenario=(
-                "Mossback the tortoise wrote a set with the same kind "
-                "listed three times over. The unique-kinds basket, by "
-                "its rule, would keep only one of any kind no matter "
-                "how many were offered."
+                'Mossback the tortoise wrote a set with the same kind listed three times over. The unique-kinds basket, by its rule, would keep only one of any kind no matter how many were offered. The value drawn fresh was 1.'
             ),
             need=(
                 "Pip the hare expected the basket to stay true to its "
@@ -651,15 +636,10 @@ G4_12 = SubjectCurriculum(grade=4, subject_id="G4-12",
             question_what="whether an element is in the set using contains?",
             goal_text="check whether 2 is a member of a set containing 1, 2, and 3",
             scenario=(
-                "Mossback the tortoise's unique-kinds basket held three "
-                "kinds — kinds 1, 2, and 3. Pip the hare arrived with "
-                "kind 2 and wanted to know if it was already present "
-                "before adding a duplicate."
+                "Mossback the tortoise's unique-kinds basket held three kinds — kinds 1, {drawn.b}, and 3. Pip the hare arrived with kind {drawn.b} and wanted to know if it was already present before adding a duplicate."
             ),
             need=(
-                "Mossback needed a yes-or-no answer: is kind 2 already "
-                "in the basket? The basket's rule depended on knowing "
-                "this first."
+                "Mossback needed a yes-or-no answer: is kind {drawn.b} already in the basket? The basket's rule depended on knowing this first."
             ),
             mapping=(
                 "`contains?` asks the unique-kinds basket whether a "
@@ -669,7 +649,7 @@ G4_12 = SubjectCurriculum(grade=4, subject_id="G4-12",
             ),
             resolution=(
                 "the REPL confirmed the kind was already present — "
-                "the basket returned true, membership verified."
+                "membership verified, no rummaging required."
             ),
             tags=("story",),
         ),
@@ -680,15 +660,10 @@ G4_12 = SubjectCurriculum(grade=4, subject_id="G4-12",
             question_what="whether an element is in the set using contains?",
             goal_text="check whether 4 is a member of a set containing 1, 2, and 3",
             scenario=(
-                "Mossback the tortoise's unique-kinds basket held three "
-                "kinds. Pip the hare arrived with kind 4 and asked "
-                "whether that kind was already somewhere inside before "
-                "claiming it was new."
+                "Mossback the tortoise's unique-kinds basket held three kinds. Pip the hare arrived with kind {drawn.b} and asked whether that kind was already somewhere inside before claiming it was new."
             ),
             need=(
-                "Before declaring kind 4 novel, Mossback needed to check "
-                "the basket and confirm it truly was absent — not just "
-                "assumed to be."
+                'Before declaring kind {drawn.b} novel, Mossback needed to check the basket and confirm it truly was absent — not just assumed to be.'
             ),
             mapping=(
                 "`contains?` checks the basket for the given kind. If "
@@ -696,8 +671,8 @@ G4_12 = SubjectCurriculum(grade=4, subject_id="G4-12",
                 "signal the kind has not been seen yet."
             ),
             resolution=(
-                "the REPL returned false — kind 4 was not in the basket, "
-                "confirming it would be genuinely new if added."
+                "the REPL signalled the kind's absence from the basket — "
+                "if added, it would be genuinely new, no duplicate."
             ),
             tags=("story",),
         ),
@@ -712,12 +687,12 @@ G4_13 = SubjectCurriculum(grade=4, subject_id="G4-13",
             expected=5,
             concept_phrase="the count of a collection",
             question_what="the number of elements in the collection",
-            goal_text="count the elements in a vector containing 1, 2, 3, 4, and 5",
+            goal_text="count the elements in the vector [1 2 3 4 5]",
             scenario=(
                 "Mossback the tortoise's pebble row held five stones "
                 "laid out in order. She had lost track of the total and "
                 "needed the REPL to confirm the count without her "
-                "counting by hand."
+                "counting by hand. The value drawn fresh was {drawn.a}."
             ),
             need=(
                 "Pip the hare wagered the row had more than four stones. "
@@ -757,8 +732,7 @@ G4_13 = SubjectCurriculum(grade=4, subject_id="G4-13",
                 "entry."
             ),
             resolution=(
-                "the REPL returned the pair count — confirming how many "
-                "distinct label-and-contents pairs the basket held."
+                'the REPL returned the pair count — confirming how many distinct label-and-contents pairs the basket held (with `:a` as the input value).'
             ),
             tags=("story",),
         ),
@@ -772,7 +746,7 @@ G4_13 = SubjectCurriculum(grade=4, subject_id="G4-13",
                 "Mossback the tortoise's unique-kinds basket held several "
                 "keyword stones. She needed to know how many distinct kinds "
                 "were present — `count` would give that without listing "
-                "each one."
+                "each one. The value drawn fresh was {drawn.a}."
             ),
             need=(
                 "Pip the hare asked for the total number of unique members "
@@ -795,19 +769,14 @@ G4_13 = SubjectCurriculum(grade=4, subject_id="G4-13",
             question_what="the number of characters in the string",
             goal_text="count the characters in the string tortoise",
             scenario=(
-                "Mossback the tortoise had scratched her name — "
-                "\"tortoise\" — into a bark chip. Pip the hare claimed "
-                "the name was shorter than it looked; Mossback was "
-                "certain it was longer."
+                'Mossback the {drawn.a} had scratched her name — "{drawn.a}" — into a bark chip. Pip the hare claimed the name was shorter than it looked; Mossback was certain it was longer.'
             ),
             need=(
                 "They needed the REPL to count every letter in the name "
                 "so neither had to count on their claws."
             ),
             mapping=(
-                "`count` works on strings too — it treats each character "
-                "as a member of the collection and tallies them. "
-                "\"tortoise\" has one character per letter."
+                '`count` works on strings too — it treats each character as a member of the collection and tallies them. "{drawn.a}" has one character per letter.'
             ),
             resolution=(
                 "the REPL returned the character count — the full "
@@ -830,7 +799,7 @@ G4_14 = SubjectCurriculum(grade=4, subject_id="G4-14",
             scenario=(
                 "Mossback the tortoise set her pebble row on the path "
                 "before the foray began. No stones had been placed yet "
-                "— the row was bare."
+                "— the row was bare. The value drawn fresh was {drawn.a}."
             ),
             need=(
                 "Pip the hare needed to confirm the row was truly empty "
@@ -856,7 +825,7 @@ G4_14 = SubjectCurriculum(grade=4, subject_id="G4-14",
             scenario=(
                 "Mossback the tortoise's pebble row had one stone in "
                 "its first slot — placed earlier in the morning. The "
-                "row was not bare, but Pip the hare was unsure."
+                "row was not bare, but Pip the hare was unsure. The value drawn fresh was {drawn.a}."
             ),
             need=(
                 "Pip the hare needed to know whether the row was still "
@@ -869,8 +838,8 @@ G4_14 = SubjectCurriculum(grade=4, subject_id="G4-14",
                 "One stone fills the row."
             ),
             resolution=(
-                "the REPL returned false — the row held a stone and "
-                "was not empty, the question answered."
+                "the REPL signalled the row's non-empty state — even "
+                "one stone is enough to settle the question."
             ),
             tags=("story",),
         ),
@@ -881,24 +850,16 @@ G4_14 = SubjectCurriculum(grade=4, subject_id="G4-14",
             question_what="whether the string is empty using empty?",
             goal_text="test whether an empty string is empty",
             scenario=(
-                "Mossback the tortoise picked up a blank bark chip — "
-                "nothing scratched on it, not a single letter. Pip "
-                "the hare wanted to confirm it was truly blank before "
-                "writing on it."
+                'Mossback the tortoise picked up a blank bark chip {drawn.a}—{drawn.a} nothing scratched on it, not a single letter. Pip the hare wanted to confirm it was truly blank before writing on it.'
             ),
             need=(
-                "They needed the REPL to verify the bark chip held no "
-                "characters at all — an empty-string check before "
-                "committing any marks."
+                'They needed the REPL to verify the bark chip held no characters at all {drawn.a}—{drawn.a} an empty-string check before committing any marks.'
             ),
             mapping=(
-                "`empty?` works on strings as collections of characters. "
-                "A string with no characters is empty; the answer is "
-                "true."
+                '{drawn.a}`empty?{drawn.a}` works on strings as collections of characters. A string with no characters is empty; the answer is true.'
             ),
             resolution=(
-                "the REPL confirmed the bark chip was blank — no "
-                "characters, empty string, safe to write on."
+                'the REPL confirmed the bark chip was blank {drawn.a}—{drawn.a} no characters, empty string, safe to write on.'
             ),
             tags=("story",),
         ),
@@ -918,7 +879,7 @@ G4_15 = SubjectCurriculum(grade=4, subject_id="G4-15",
                 "Mossback the tortoise's pebble row held three stones "
                 "in order. The first stone — the one at the head of "
                 "the row — was the one she needed to read without "
-                "disturbing the rest."
+                "disturbing the rest. The value drawn fresh was {drawn.a}."
             ),
             need=(
                 "Pip the hare needed only the leading stone. Mossback "
@@ -945,7 +906,7 @@ G4_15 = SubjectCurriculum(grade=4, subject_id="G4-15",
             scenario=(
                 "Mossback the tortoise's pebble row held three stones. "
                 "The final stone — at the far end of the row — was the "
-                "one she needed, without stepping through the others."
+                "one she needed, without stepping through the others. The value drawn fresh was {drawn.a}."
             ),
             need=(
                 "Pip the hare needed only the trailing stone. Mossback "
@@ -973,7 +934,7 @@ G4_15 = SubjectCurriculum(grade=4, subject_id="G4-15",
                 "Mossback the tortoise's pebble row had three stones. "
                 "The leading stone had been claimed — she wanted to "
                 "know how many remained in the row after the head "
-                "was gone."
+                "was gone. The value drawn fresh was {drawn.a}."
             ),
             need=(
                 "Pip the hare needed the count of the tail — the stones "
@@ -1007,7 +968,7 @@ G4_16 = SubjectCurriculum(grade=4, subject_id="G4-16",
                 "Mossback the tortoise had a procession of three animals "
                 "walking tail-to-paw, and an empty pebble row waiting "
                 "below a sieve. She needed to pour the procession through "
-                "so the row would collect them in order."
+                "so the row would collect them in order. The values drawn fresh were {drawn.a} and {drawn.b}."
             ),
             need=(
                 "Pip the hare wanted the members as an ordered row, not "
@@ -1033,10 +994,7 @@ G4_16 = SubjectCurriculum(grade=4, subject_id="G4-16",
             question_what="the set built from a vector",
             goal_text="convert a vector containing duplicates into a set, keeping unique elements",
             scenario=(
-                "Mossback the tortoise's pebble row had four stones, but "
-                "one kind appeared twice. She held an empty unique-kinds "
-                "basket below the sieve, ready to catch only what was "
-                "genuinely new."
+                "Mossback the tortoise's pebble row had four stones, but one kind appeared twice. She held an empty unique-kinds basket below the sieve, ready to catch only what was genuinely new. The values drawn fresh were 1 and 2."
             ),
             need=(
                 "Pip the hare wanted the unique kinds only — no repeats. "
@@ -1049,8 +1007,7 @@ G4_16 = SubjectCurriculum(grade=4, subject_id="G4-16",
                 "through; duplicates are absorbed, unique kinds land."
             ),
             resolution=(
-                "the REPL returned the unique-kinds basket — only the "
-                "distinct members inside, duplicates sieved away."
+                'the REPL returned the unique-kinds basket — only the distinct members inside, duplicates sieved away (with `3` as the input value).'
             ),
             tags=("story",),
         ),
@@ -1071,7 +1028,7 @@ G4_17 = SubjectCurriculum(grade=4, subject_id="G4-17",
                 "inside. She set the basket on the path and bound it "
                 "to the name m. Then `assoc` produced a fresh basket "
                 "with an updated pouch — but Mossback asked for m, "
-                "not the fresh one."
+                "not the fresh one. The values drawn fresh were {drawn.a}, {drawn.b}, and {drawn.c}."
             ),
             need=(
                 "Pip the hare expected the original basket to have "
@@ -1107,7 +1064,7 @@ G4_18 = SubjectCurriculum(grade=4, subject_id="G4-18",
                 "Mossback the tortoise held two arrangements of the same "
                 "three members — one laid out in a pebble row, the other "
                 "walking in a procession. Pip the hare thought the two "
-                "were different because their containers differed."
+                "were different because their containers differed. The value drawn fresh was {drawn.a}."
             ),
             need=(
                 "Mossback needed the REPL to judge whether content "
@@ -1121,8 +1078,8 @@ G4_18 = SubjectCurriculum(grade=4, subject_id="G4-18",
                 "does not break equality."
             ),
             resolution=(
-                "the REPL returned true — the two arrangements held "
-                "the same members in the same order, equal as sequences."
+                "the REPL confirmed equality as sequences — the two "
+                "arrangements held the same members in the same order."
             ),
             tags=("story",),
         ),
@@ -1142,7 +1099,7 @@ G4_19 = SubjectCurriculum(grade=4, subject_id="G4-19",
                 "Mossback the tortoise needed to mark out a stretch of "
                 "path with numbered milestones starting from zero. She "
                 "asked `range` to generate the milestone numbers and "
-                "then needed to know how many milestones would appear."
+                "then needed to know how many milestones would appear. The value drawn fresh was {drawn.a}."
             ),
             need=(
                 "Pip the hare needed the count before laying stones — "
@@ -1178,9 +1135,7 @@ G4_19 = SubjectCurriculum(grade=4, subject_id="G4-19",
                 "the first milestone without walking the whole range."
             ),
             mapping=(
-                "`range 1 100` generates a sequence beginning at 1. "
-                "`first` reaches to the head of that sequence and "
-                "returns the opening milestone."
+                '`range {drawn.a} {drawn.b}` generates a sequence beginning at 1. `first` reaches to the head of that sequence and returns the opening milestone.'
             ),
             resolution=(
                 "the REPL returned the first milestone — the opening "
@@ -1213,7 +1168,7 @@ G4_20 = SubjectCurriculum(grade=4, subject_id="G4-20",
             ),
             mapping=(
                 "`seq` converts a collection into a generic sequence. "
-                "`count` then tallies the sequence's members. The row "
+                "`count` then tallies the sequence's members. The row  The value drawn fresh was {drawn.a}."
                 "had three elements; the sequence carries those same "
                 "three."
             ),
@@ -1234,7 +1189,7 @@ G4_20 = SubjectCurriculum(grade=4, subject_id="G4-20",
                 "Mossback the tortoise's pebble row was empty — no "
                 "stones, nothing inside. Pip the hare wanted to know "
                 "what `seq` would hand back when given nothing to "
-                "work with."
+                "work with. The value drawn fresh was {drawn.a}."
             ),
             need=(
                 "They needed to discover: does `seq` on an empty row "

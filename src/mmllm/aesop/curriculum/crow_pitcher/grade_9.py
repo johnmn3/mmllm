@@ -74,7 +74,7 @@ G9_01 = SubjectCurriculum(
             ),
             resolution=(
                 "The pitcher returned the original basket — proof the first "
-                "stone was never disturbed."
+                "stone was never disturbed. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -86,7 +86,7 @@ G9_01 = SubjectCurriculum(
             goal_text="bind a vector v, call conj to add 4 to a new vector, then return the unchanged v",
 
             scenario=(
-                "Caw lined up three stones on the pitcher's rim at the "
+                "Caw lined up the stones on the pitcher's rim at the "
                 "orchard, then pressed a fourth stone into a fresh row "
                 "beside them. Her original three-stone row stayed exactly "
                 "as she had placed it."
@@ -102,7 +102,7 @@ G9_01 = SubjectCurriculum(
             ),
             resolution=(
                 "The pitcher showed the original three-stone row, "
-                "confirming no stone had moved."
+                "confirming no stone had moved. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -142,8 +142,7 @@ G9_02 = SubjectCurriculum(
                 "new mark. `@counter` reads the mark back from the clay."
             ),
             resolution=(
-                "The clay face showed the updated tally — one visit "
-                "recorded, the counter holding its new mark."
+                'The clay face showed the updated tally — one visit recorded, the counter holding its new mark (with `0` as the input value).'
             ),
             tags=("story",),
         ),
@@ -172,7 +171,7 @@ G9_02 = SubjectCurriculum(
             ),
             resolution=(
                 "The clay face returned the new state label, confirming "
-                "the transition had taken hold."
+                "the transition had taken hold. (the keyword :idle)"
             ),
             tags=("story",),
         ),
@@ -191,7 +190,7 @@ G9_03 = SubjectCurriculum(
         SubjectExample(
             form="(do (def a (atom 0)) (swap! a inc) @a)",
             expected=1,
-            concept_phrase="atom, swap, and deref",
+            concept_phrase="the atom updated atomically via swap! and read by deref",
             question_what="the running tally on the page after one foraging contribution",
             goal_text="set up a shared notebook starting at 0, atomically add one to its page, then read the page",
 
@@ -212,15 +211,14 @@ G9_03 = SubjectCurriculum(
                 "the current tally from the clay."
             ),
             resolution=(
-                "1 — the tally, incremented once by the swap, read back "
-                "from the clay face."
+                '1 — the tally, incremented once by the swap, read back from the clay face (with `0` as the input value).'
             ),
             tags=("story",),
         ),
         SubjectExample(
             form="(do (def a (atom 10)) (swap! a + 5) @a)",
             expected=15,
-            concept_phrase="atom, swap, deref",
+            concept_phrase="the atom updated atomically and then read",
             question_what="the value returned by dereferencing a after defining a as an atom holding 10 and swapping it via + 5",
             goal_text="construct an atom holding 10, atomically swap it by applying + to 5, and dereference the result",
 
@@ -232,7 +230,7 @@ G9_03 = SubjectCurriculum(
             ),
             need=(
                 "He needed to read the clay face and confirm the tally "
-                "reflected the full count after the addition."
+                "reflected the full count after the addition. (count: 10)"
             ),
             mapping=(
                 "`atom` holds the running count on the clay. `swap!` with "
@@ -248,7 +246,7 @@ G9_03 = SubjectCurriculum(
         SubjectExample(
             form="(do (def a (atom :start)) (reset! a :done) @a)",
             expected=":done",
-            concept_phrase="atom, reset, deref",
+            concept_phrase="the atom reset to a new value and then read",
             question_what="the value returned by dereferencing a after defining a as an atom holding a start keyword and resetting it to done",
             goal_text="construct an atom holding a start keyword, atomically reset it to a done keyword, and dereference the result",
 
@@ -269,7 +267,7 @@ G9_03 = SubjectCurriculum(
             ),
             resolution=(
                 "The pitcher returned the new label from the clay, "
-                "confirming the session mark had been replaced."
+                "confirming the session mark had been replaced. (the keyword :start)"
             ),
             tags=("story",),
         ),
@@ -289,7 +287,7 @@ G9_04 = SubjectCurriculum(
         SubjectExample(
             form="(do (def a (atom 0)) (compare-and-set! a 0 1) @a)",
             expected=1,
-            concept_phrase="atom, CAS, deref",
+            concept_phrase="the atom updated via compare-and-set and read",
             question_what="the value returned by dereferencing a after defining a as an atom holding 0 and performing a successful compare-and-set to 1",
             goal_text="construct an atom holding 0, perform a compare-and-set checking for 0 and setting to 1, and dereference",
 
@@ -309,15 +307,14 @@ G9_04 = SubjectCurriculum(
                 "if they match. `@a` then reads the result from the clay."
             ),
             resolution=(
-                "The pitcher returned the new mark from the clay face, "
-                "confirming the conditional swap had succeeded."
+                'The pitcher returned the new mark from the clay face, confirming the conditional swap had succeeded (with `0` as the input value).'
             ),
             tags=("story",),
         ),
         SubjectExample(
             form="(do (def a (atom 5)) (compare-and-set! a 0 99) @a)",
             expected=5,
-            concept_phrase="atom, failed CAS, deref",
+            concept_phrase="the atom guarded by a compare-and-set whose expected value did not match",
             question_what="the value returned by dereferencing a after defining a as an atom holding 5 and attempting a compare-and-set that fails",
             goal_text="construct an atom holding 5, perform a compare-and-set checking for 0 and setting to 99, and dereference",
 
@@ -338,7 +335,7 @@ G9_04 = SubjectCurriculum(
             ),
             resolution=(
                 "The pitcher returned the original mark — the clay was "
-                "untouched because the comparison had failed."
+                "untouched because the comparison had failed. (count: 5)"
             ),
             tags=("story",),
         ),
@@ -386,7 +383,7 @@ G9_05 = SubjectCurriculum(
             ),
             resolution=(
                 "The pitcher returned the log tally — a single entry "
-                "showing the change that the sentinel had captured."
+                "showing the change that the sentinel had captured. (the keyword :w)"
             ),
             tags=("story",),
         ),
@@ -431,8 +428,7 @@ G9_06 = SubjectCurriculum(
                 "`swap!` with `inc` passes, and `@a` reads the result."
             ),
             resolution=(
-                "The pitcher returned the updated tally — the rule was "
-                "satisfied and the new mark settled into the clay."
+                'The pitcher returned the updated tally — the rule was satisfied and the new mark settled into the clay (with `0` as the input value).'
             ),
             tags=("story",),
         ),
@@ -452,7 +448,7 @@ G9_07 = SubjectCurriculum(
         SubjectExample(
             form="(do (def r (ref 0)) (dosync (alter r inc)) @r)",
             expected=1,
-            concept_phrase="ref, dosync, alter, deref",
+            concept_phrase="the ref altered inside a transaction and read",
             question_what="the value returned by dereferencing r after defining a ref holding 0, performing a transactional alter via inc, and dereferencing",
             goal_text="construct a ref holding 0, perform a transactional alter by applying inc inside dosync, and dereference",
 
@@ -472,15 +468,14 @@ G9_07 = SubjectCurriculum(
                 "and seals the change. `@r` reads the committed tally."
             ),
             resolution=(
-                "The pitcher returned the tally from inside the safe-box, "
-                "showing the transaction had committed cleanly."
+                'The pitcher returned the tally from inside the safe-box, showing the transaction had committed cleanly (with `0` as the input value).'
             ),
             tags=("story",),
         ),
         SubjectExample(
             form="(do (def r (ref 100)) (dosync (ref-set r 7)) @r)",
             expected=7,
-            concept_phrase="ref, dosync, ref-set, deref",
+            concept_phrase="the ref reset inside a transaction and read",
             question_what="the value returned by dereferencing r after defining a ref holding 100, setting it to 7 inside dosync, and dereferencing",
             goal_text="construct a ref holding 100, perform a transactional ref-set to 7 inside dosync, and dereference",
 
@@ -501,7 +496,7 @@ G9_07 = SubjectCurriculum(
             ),
             resolution=(
                 "The pitcher returned the newly set tally from the safe-box, "
-                "confirming the old mark was gone."
+                "confirming the old mark was gone. (count: 100)"
             ),
             tags=("story",),
         ),
@@ -545,15 +540,14 @@ G9_08 = SubjectCurriculum(
                 "`[@a @b]` reads the pair of updated marks."
             ),
             resolution=(
-                "The pitcher returned both tallies side by side, each "
-                "advanced by one in the same sealed transaction."
+                'The pitcher returned both tallies side by side, each advanced by one in the same sealed transaction (with `1` as the input value).'
             ),
             tags=("story",),
         ),
         SubjectExample(
             form="(do (def r (ref 10)) (dosync (alter r + 5)) @r)",
             expected=15,
-            concept_phrase="ref, dosync, alter, deref",
+            concept_phrase="the ref altered inside a transaction and read",
             question_what="the value returned by dereferencing r after defining a ref holding 10, performing a transactional alter via + 5, and dereferencing",
             goal_text="construct a ref holding 10, perform a transactional alter by applying + with 5 inside dosync, and dereference",
 
@@ -574,7 +568,7 @@ G9_08 = SubjectCurriculum(
             ),
             resolution=(
                 "The pitcher returned the combined tally from the safe-box, "
-                "showing the addition had committed in the transaction."
+                "showing the addition had committed in the transaction. (count: 10)"
             ),
             tags=("story",),
         ),
@@ -594,7 +588,7 @@ G9_09 = SubjectCurriculum(
         SubjectExample(
             form="(do (def a (atom 0)) (swap! a inc) @a)",
             expected=1,
-            concept_phrase="atom, swap, deref",
+            concept_phrase="the atom updated atomically and then read",
             question_what="the value returned by dereferencing a after defining an atom holding 0, swapping it via inc, and dereferencing",
             goal_text="construct an atom holding 0, atomically swap it by applying inc, and dereference",
 
@@ -614,15 +608,14 @@ G9_09 = SubjectCurriculum(
                 "atomically. `@a` reads the mark back from the face."
             ),
             resolution=(
-                "The pitcher returned the mark from the clay, updated by "
-                "the direct swap without any enclosing transaction."
+                'The pitcher returned the mark from the clay, updated by the direct swap without any enclosing transaction (with `0` as the input value).'
             ),
             tags=("story",),
         ),
         SubjectExample(
             form="(do (def r (ref 0)) (dosync (alter r inc)) @r)",
             expected=1,
-            concept_phrase="ref, dosync, alter, deref",
+            concept_phrase="the ref altered inside a transaction and read",
             question_what="the value returned by dereferencing r after defining a ref holding 0, altering it via inc inside dosync, and dereferencing",
             goal_text="construct a ref holding 0, perform a transactional alter by applying inc inside dosync, and dereference",
 
@@ -642,8 +635,7 @@ G9_09 = SubjectCurriculum(
                 "coordinated. `@r` reads the committed mark."
             ),
             resolution=(
-                "The pitcher returned the same updated mark as the atom "
-                "path — identical result, different mechanism."
+                'The pitcher returned the same updated mark as the atom path — identical result, different mechanism (with `0` as the input value).'
             ),
             tags=("story",),
         ),
@@ -663,7 +655,7 @@ G9_10 = SubjectCurriculum(
         SubjectExample(
             form="(do (def ag (agent 0)) (send ag inc) (await ag) @ag)",
             expected=1,
-            concept_phrase="agent, send, await, deref",
+            concept_phrase="the agent sent a function asynchronously, awaited, and read",
             question_what="the value returned by dereferencing ag after defining an agent holding 0, sending inc asynchronously, awaiting, and dereferencing",
             goal_text="construct an agent holding 0, asynchronously send inc to it, await its completion, and dereference",
 
@@ -683,15 +675,14 @@ G9_10 = SubjectCurriculum(
                 "returns. `@` dereferences the final tally from the agent."
             ),
             resolution=(
-                "1 — the scout returned with the incremented count, the "
-                "tally settling into the pitcher's depth."
+                "1 — the scout returned with the incremented count, the tally settling into the pitcher's depth (with `0` as the input value)."
             ),
             tags=("story",),
         ),
         SubjectExample(
             form="(do (def ag (agent 5)) (send ag + 10) (await ag) @ag)",
             expected=15,
-            concept_phrase="agent, send, await, deref",
+            concept_phrase="the agent sent a function asynchronously, awaited, and read",
             question_what="the value returned by dereferencing ag after defining an agent holding 5, sending + 10 asynchronously, awaiting, and dereferencing",
             goal_text="construct an agent holding 5, asynchronously send + with 10 to it, await its completion, and dereference",
 
@@ -712,7 +703,7 @@ G9_10 = SubjectCurriculum(
             ),
             resolution=(
                 "The pitcher returned the scout's final tally — the "
-                "combined count after the addition completed on the road."
+                "combined count after the addition completed on the road. (count: 5)"
             ),
             tags=("story",),
         ),
@@ -731,7 +722,7 @@ G9_11 = SubjectCurriculum(
         SubjectExample(
             form="(do (def ag (agent 0)) (send ag inc) (await ag) @ag)",
             expected=1,
-            concept_phrase="agent, send, await, deref",
+            concept_phrase="the agent sent a function asynchronously, awaited, and read",
             question_what="the value returned by dereferencing ag after defining an agent holding 0, using send to dispatch inc, awaiting, and dereferencing",
             goal_text="construct an agent holding 0, use send to asynchronously apply inc, await its completion, and dereference",
 
@@ -751,15 +742,14 @@ G9_11 = SubjectCurriculum(
                 "the scout lands. `@ag` reads the tally it carried back."
             ),
             resolution=(
-                "The pitcher returned the scout's tally, confirming the "
-                "short-task send had completed and the count was updated."
+                "The pitcher returned the scout's tally, confirming the short-task send had completed and the count was updated (with `0` as the input value)."
             ),
             tags=("story",),
         ),
         SubjectExample(
             form="(do (def ag (agent 0)) (send-off ag inc) (await ag) @ag)",
             expected=1,
-            concept_phrase="agent, send-off, await, deref",
+            concept_phrase="the agent dispatched via send-off, awaited, and read",
             question_what="the value returned by dereferencing ag after defining an agent holding 0, using send-off to dispatch inc, awaiting, and dereferencing",
             goal_text="construct an agent holding 0, use send-off to asynchronously apply inc, await its completion, and dereference",
 
@@ -779,8 +769,7 @@ G9_11 = SubjectCurriculum(
                 "return. `@ag` reads the tally the scout carried back."
             ),
             resolution=(
-                "The pitcher returned the scout's tally — the long-task "
-                "route and the short-task route yielded the same result."
+                "The pitcher returned the scout's tally — the long-task route and the short-task route yielded the same result (with `0` as the input value)."
             ),
             tags=("story",),
         ),
@@ -799,7 +788,7 @@ G9_12 = SubjectCurriculum(
         SubjectExample(
             form="(do (def ag (agent 0)) (send ag inc) (send ag inc) (await ag) @ag)",
             expected=2,
-            concept_phrase="agent, double send, await, deref",
+            concept_phrase="the agent sent two updates in succession, awaited, and read",
             question_what="the value returned by dereferencing ag after defining an agent holding 0, sending inc twice asynchronously, awaiting, and dereferencing",
             goal_text="construct an agent holding 0, asynchronously send inc twice, synchronize with await, and dereference",
 
@@ -819,8 +808,7 @@ G9_12 = SubjectCurriculum(
                 "completely. `@ag` then reads the fully updated tally."
             ),
             resolution=(
-                "The pitcher returned the scout's tally after both "
-                "missions completed — both increments accounted for."
+                "The pitcher returned the scout's tally after both missions completed — both increments accounted for (with `0` as the input value)."
             ),
             tags=("story",),
         ),
@@ -839,7 +827,7 @@ G9_13 = SubjectCurriculum(
         SubjectExample(
             form="@(future (+ 1 2))",
             expected=3,
-            concept_phrase="future, add, deref",
+            concept_phrase="the addition wrapped in a future and dereferenced",
             question_what="the value the messenger returns from adding 1 and 2",
             goal_text="dispatch a runner to compute the sum of 1 and 2; later, ask the runner for the answer",
 
@@ -859,15 +847,14 @@ G9_13 = SubjectCurriculum(
                 "lands and then reads the value it carries back."
             ),
             resolution=(
-                "The pitcher returned the scout's computed answer — the "
-                "sum delivered the moment the scout touched down."
+                "The pitcher returned the scout's computed answer — the sum delivered the moment the scout touched down (with `1` as the input value)."
             ),
             tags=("story",),
         ),
         SubjectExample(
             form="@(future (* 6 7))",
             expected=42,
-            concept_phrase="future, multiply, deref",
+            concept_phrase="the multiplication wrapped in a future and dereferenced",
             question_what="the value returned by dereferencing a future that multiplies 6 and 7",
             goal_text="construct a future that multiplies 6 and 7, and dereference it",
 
@@ -888,7 +875,7 @@ G9_13 = SubjectCurriculum(
             ),
             resolution=(
                 "The pitcher returned the product the scout computed — "
-                "the multiplication result delivered on landing."
+                "the multiplication result delivered on landing. (count: 6)"
             ),
             tags=("story",),
         ),
@@ -928,7 +915,7 @@ G9_14 = SubjectCurriculum(
             ),
             resolution=(
                 "The pitcher returned the mark on the clay — the tally "
-                "read back exactly as scratched, using the @ shorthand."
+                "read back exactly as scratched, using the @ shorthand. (count: 7)"
             ),
             tags=("story",),
         ),
@@ -956,7 +943,7 @@ G9_14 = SubjectCurriculum(
             ),
             resolution=(
                 "The pitcher returned the same mark as the shorthand form "
-                "— the seven strokes, read via the full deref call."
+                "— the seven strokes, read via the full deref call. (count: 7)"
             ),
             tags=("story",),
         ),
@@ -975,7 +962,7 @@ G9_15 = SubjectCurriculum(
         SubjectExample(
             form="(do (def p (promise)) (deliver p :done) @p)",
             expected=":done",
-            concept_phrase="promise, deliver, deref",
+            concept_phrase="the promise delivered a value and then dereferenced",
             question_what="the value returned by dereferencing a promise after defining it, delivering a keyword to it, and dereferencing",
             goal_text="construct a promise, deliver a completion keyword to it, and dereference to get the delivered value",
 
@@ -996,14 +983,14 @@ G9_15 = SubjectCurriculum(
             ),
             resolution=(
                 "The pitcher returned the token from the pouch — the "
-                "delivered value, present and readable after sealing."
+                "delivered value, present and readable after sealing. (the keyword :done)"
             ),
             tags=("story",),
         ),
         SubjectExample(
             form="(do (def p (promise)) (deliver p 42) @p)",
             expected=42,
-            concept_phrase="promise, deliver, deref",
+            concept_phrase="the promise delivered a value and then dereferenced",
             question_what="the value returned by dereferencing a promise after defining it, delivering a number to it, and dereferencing",
             goal_text="construct a promise, deliver 42 to it, and dereference to get the delivered value",
 
@@ -1024,7 +1011,7 @@ G9_15 = SubjectCurriculum(
             ),
             resolution=(
                 "The pitcher returned the count from the sealed pouch — "
-                "the number tally present the moment it was delivered."
+                "the number tally present the moment it was delivered. (count: 42)"
             ),
             tags=("story",),
         ),
@@ -1043,7 +1030,7 @@ G9_16 = SubjectCurriculum(
         SubjectExample(
             form="(do (def v (volatile! 0)) (vswap! v inc) @v)",
             expected=1,
-            concept_phrase="volatile, vswap, deref",
+            concept_phrase="the volatile updated by vswap! and read",
             question_what="the value returned by dereferencing v after defining a volatile holding 0, performing a non-transactional swap via inc, and dereferencing",
             goal_text="construct a volatile holding 0, perform a non-transactional swap by applying inc, and dereference",
 
@@ -1063,15 +1050,14 @@ G9_16 = SubjectCurriculum(
                 "it directly. `@v` reads the mark back from the clay."
             ),
             resolution=(
-                "The pitcher returned the updated mark from the clay — "
-                "the lightweight swap had written it without any transaction."
+                'The pitcher returned the updated mark from the clay — the lightweight swap had written it without any transaction (with `0` as the input value).'
             ),
             tags=("story",),
         ),
         SubjectExample(
             form="(do (def v (volatile! 5)) (vreset! v 99) @v)",
             expected=99,
-            concept_phrase="volatile, vreset, deref",
+            concept_phrase="the volatile reset by vreset! and read",
             question_what="the value returned by dereferencing v after defining a volatile holding 5, performing a non-transactional reset to 99, and dereferencing",
             goal_text="construct a volatile holding 5, perform a non-transactional reset to 99, and dereference",
 
@@ -1092,7 +1078,7 @@ G9_16 = SubjectCurriculum(
             ),
             resolution=(
                 "The pitcher returned the new mark from the clay — the "
-                "old strokes fully replaced by the lightweight reset."
+                "old strokes fully replaced by the lightweight reset. (count: 5)"
             ),
             tags=("story",),
         ),
@@ -1111,7 +1097,7 @@ G9_17 = SubjectCurriculum(
         SubjectExample(
             form="(do (def ^:dynamic *p* 1) (binding [*p* 99] *p*))",
             expected=99,
-            concept_phrase="dynamic var, binding, read",
+            concept_phrase="the dynamic var rebound inside a binding form and read",
             question_what="the value of the dynamic var when read inside the binding form after defining it and rebinding",
             goal_text="define a dynamic var *p* as 1, use binding to rebind it to 99, and read its value inside",
 
@@ -1132,14 +1118,14 @@ G9_17 = SubjectCurriculum(
             ),
             resolution=(
                 "The pitcher returned the locally chalked value — the "
-                "rebinding visible inside the alcove, not the global mark."
+                "rebinding visible inside the alcove, not the global mark. (count: 99)"
             ),
             tags=("story",),
         ),
         SubjectExample(
             form="(do (def ^:dynamic *p* 1) (binding [*p* 99] *p*) *p*)",
             expected=1,
-            concept_phrase="dynamic var, binding, read after",
+            concept_phrase="the dynamic var rebound inside a binding form, read inside, then read again outside",
             question_what="the value of the dynamic var when read after the binding form unwound",
             goal_text="define a dynamic var *p* as 1, use binding to rebind it to 99 inside, and read its value after binding exits",
 
@@ -1161,7 +1147,7 @@ G9_17 = SubjectCurriculum(
             ),
             resolution=(
                 "The pitcher returned the global chalk mark — the original "
-                "value restored after the binding form exited."
+                "value restored after the binding form exited. (count: 99)"
             ),
             tags=("story",),
         ),
@@ -1181,7 +1167,7 @@ G9_18 = SubjectCurriculum(
         SubjectExample(
             form="(do (def lock (Object.)) (locking lock (+ 1 2)))",
             expected=3,
-            concept_phrase="lock, locking, arithmetic",
+            concept_phrase="the arithmetic evaluated inside a critical section guarded by locking",
             question_what="the value returned by evaluating an addition inside a locked critical section after creating a monitor and acquiring the lock",
             goal_text="create an object to use as a monitor, acquire the lock, and evaluate an addition inside",
 
@@ -1201,15 +1187,14 @@ G9_18 = SubjectCurriculum(
                 "the body. The result of the body is returned on release."
             ),
             resolution=(
-                "The pitcher returned the sum produced within the gate — "
-                "the addition completed safely behind the locked section."
+                'The pitcher returned the sum produced within the gate — the addition completed safely behind the locked section (with `1` as the input value).'
             ),
             tags=("story",),
         ),
         SubjectExample(
             form="(do (def lock (Object.)) (locking lock 42))",
             expected=42,
-            concept_phrase="lock, locking, literal",
+            concept_phrase="the literal value evaluated inside a critical section guarded by locking",
             question_what="the literal value returned by evaluating it inside a locked critical section after creating a monitor and acquiring the lock",
             goal_text="create an object to use as a monitor, acquire the lock, and evaluate a literal inside",
 
@@ -1230,7 +1215,7 @@ G9_18 = SubjectCurriculum(
             ),
             resolution=(
                 "The pitcher returned the literal tally from inside the "
-                "gate — the value present when the lock was released."
+                "gate — the value present when the lock was released. (count: 42)"
             ),
             tags=("story",),
         ),

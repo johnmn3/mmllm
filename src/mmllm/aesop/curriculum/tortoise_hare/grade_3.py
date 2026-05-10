@@ -55,10 +55,7 @@ G3_01 = SubjectCurriculum(grade=3, subject_id="G3-01",
             question_what="the value of x after using def to bind x to 42",
             goal_text="bind x to 42 and return it",
             scenario=(
-                "A wooden sign had been posted at the road's edge "
-                "near Mossback's morning route. She took her chisel "
-                "and carved the name x into the sign, pressing 42 "
-                "acorns' worth of value beneath it."
+                "A wooden sign had been posted at the road's edge near Mossback's morning route. She took her chisel and carved the name x into the sign, pressing {drawn.a} acorns' worth of value beneath it."
             ),
             need=(
                 "Mossback needed every traveller on the road to know "
@@ -73,8 +70,9 @@ G3_01 = SubjectCurriculum(grade=3, subject_id="G3-01",
                 "posted — here, 42."
             ),
             resolution=(
-                "the sign returned exactly the count carved into "
-                "it, confirming the posting took hold."
+                "the sign held its name on the long road; the runtime, "
+                "minding each step, returned exactly what the chisel had "
+                "carved beneath the name."
             ),
             tags=("story",),
         ),
@@ -85,10 +83,7 @@ G3_01 = SubjectCurriculum(grade=3, subject_id="G3-01",
             question_what="the value of y after using def to bind y to 7",
             goal_text="bind y to 7 and return it",
             scenario=(
-                "Mossback paused at the library of scrolls she kept "
-                "beside the road. She unrolled a fresh scroll and "
-                "inscribed the name y at the top, noting its value "
-                "as 7 beside it."
+                'Mossback paused at the library of scrolls she kept beside the road. She unrolled a fresh scroll and inscribed the name y at the top, noting its value as {drawn.a} beside it.'
             ),
             need=(
                 "She would consult that scroll further along and "
@@ -101,8 +96,7 @@ G3_01 = SubjectCurriculum(grade=3, subject_id="G3-01",
                 "that same scroll and returns the recorded value."
             ),
             resolution=(
-                "the scroll answered with 7 — the value Mossback "
-                "had inscribed at the start of the stretch."
+                'the scroll answered with {drawn.a} — the value Mossback had inscribed at the start of the stretch.'
             ),
             tags=("story",),
         ),
@@ -119,10 +113,7 @@ G3_02 = SubjectCurriculum(grade=3, subject_id="G3-02",
             question_what="the value of x after redefining it with def from 1 to 99",
             goal_text="bind x to 1, then redefine it as 99 and return it",
             scenario=(
-                "Mossback had posted x on the road's sign with a "
-                "count of 1 acorn, but a messenger arrived mid-route "
-                "with a correction: the count was really 99. She "
-                "took her chisel and carved the new value over the old."
+                "Mossback had posted x on the road's sign with a count of {drawn.a} acorn, but a messenger arrived mid-route with a correction: the count was really 99. She took her chisel and carved the new value over the old."
             ),
             need=(
                 "The old count had to be replaced entirely; a stale "
@@ -153,10 +144,7 @@ G3_03 = SubjectCurriculum(grade=3, subject_id="G3-03",
             question_what="the running total after binding x to 3 and adding 1",
             goal_text="bind a value of 3 to a local name x for one stretch, then return that value plus one",
             scenario=(
-                "Mossback the tortoise had been counting along a stretch "
-                "of road. She set a single pebble — worth 3 acorns — into "
-                "the small leather pouch tied at her hip and gave the "
-                "pouch's contents the local name x."
+                "Mossback the tortoise had been counting along a stretch of road. She set a single pebble — worth {drawn.a} acorns — into the small leather pouch tied at her hip and gave the pouch's contents the local name x."
             ),
             need=(
                 "Just past the next milestone she'd want the running "
@@ -165,16 +153,10 @@ G3_03 = SubjectCurriculum(grade=3, subject_id="G3-03",
                 "nothing again."
             ),
             mapping=(
-                "`let` binds a value into a pouch named locally for the "
-                "stretch of one form. Inside `(+ x 1)`, x means 3; "
-                "outside the form, x is empty and unknown again. The "
-                "binding is in force only for the form's stretch."
+                "`let` binds a value into a pouch named locally for the stretch of one form. Inside `(+ x {drawn.b})`, x means {drawn.a}; outside the form, x is empty and unknown again. The binding is in force only for the form's stretch."
             ),
             resolution=(
-                "the pouch yielded 3, the +1 added a fourth acorn, and "
-                "the running total stood at 4 — exactly what the next "
-                "milestone needed."
-            ),
+                'the pouch yielded its tucked count, the +{drawn.b} added one more acorn, and the running total — pouch already empty again — was exactly what the next milestone needed.'           ),
             tags=("story",),
         ),
         SubjectExample(
@@ -184,10 +166,7 @@ G3_03 = SubjectCurriculum(grade=3, subject_id="G3-03",
             question_what="multiplying n by itself after binding n locally to 10 via let",
             goal_text="bind n to 10 and compute n squared",
             scenario=(
-                "Mossback counted out 10 acorns and tucked them into "
-                "the leather pouch at her hip, naming that count n. "
-                "She needed to know what n rows of n acorns each "
-                "would amount to before she reached the oak grove."
+                'Mossback counted out {drawn.a} acorns and tucked them into the leather pouch at her hip, naming that count n. She needed to know what n rows of n acorns each would amount to before she reached the oak grove.'
             ),
             need=(
                 "The grove keeper expected a square tally. Without "
@@ -195,14 +174,9 @@ G3_03 = SubjectCurriculum(grade=3, subject_id="G3-03",
                 "recount the same number twice without any anchor."
             ),
             mapping=(
-                "`let` locks n into the pouch as 10 for the span of "
-                "the body. Inside `(* n n)`, both occurrences of n "
-                "draw from the same pouch — the same 10."
-            ),
+                '`let` locks n into the pouch as {drawn.a} for the span of the body. Inside `(* n n)`, both occurrences of n draw from the same pouch — the same 10.'           ),
             resolution=(
-                "the pouch supplied 10 twice over, the multiplication "
-                "settled at the square of the bound count, and the "
-                "grove keeper accepted the tally."
+                'the pouch supplied {drawn.a} twice over, the multiplication settled at the square of the bound count, and the grove keeper accepted the tally.'
             ),
             tags=("story",),
         ),
@@ -213,9 +187,7 @@ G3_03 = SubjectCurriculum(grade=3, subject_id="G3-03",
             question_what="the value of a after binding it locally to 5 via let",
             goal_text="bind a to 5 and return it",
             scenario=(
-                "Mossback slipped 5 acorns into her pouch and named "
-                "that store a, intending to report the count at the "
-                "checkpoint just ahead without any further arithmetic."
+                'Mossback slipped {drawn.a} acorns into her pouch and named that store a, intending to report the count at the checkpoint just ahead without any further arithmetic.'
             ),
             need=(
                 "The checkpoint needed the raw count as stored — no "
@@ -223,9 +195,7 @@ G3_03 = SubjectCurriculum(grade=3, subject_id="G3-03",
                 "what Mossback said it did."
             ),
             mapping=(
-                "`let` binds 5 to the name a for the body's stretch. "
-                "The body is simply a, so the REPL opens the pouch "
-                "and returns whatever it finds inside."
+                "`let` binds {drawn.a} to the name a for the body's stretch. The body is simply a, so the REPL opens the pouch and returns whatever it finds inside."
             ),
             resolution=(
                 "the pouch opened and delivered the exact count "
@@ -246,10 +216,7 @@ G3_04 = SubjectCurriculum(grade=3, subject_id="G3-04",
             question_what="adding a and b after binding both via let to 1 and 2",
             goal_text="bind a to 1 and b to 2, then add them",
             scenario=(
-                "Mossback was at a flat stone on her morning round. "
-                "She tied two pebbles into the pouches on her hip — "
-                "one worth a count of 1 acorn, named a, and the "
-                "other worth 2 acorns, named b."
+                'Mossback was at a flat stone on her morning round. She tied two pebbles into the pouches on her hip — one worth a count of {drawn.a} acorn, named a, and the other worth {drawn.b} acorns, named b.'
             ),
             need=(
                 "She needed both counts in hand at the same moment "
@@ -274,8 +241,7 @@ G3_04 = SubjectCurriculum(grade=3, subject_id="G3-04",
             question_what="subtracting y from x after binding via let to 5 and 3",
             goal_text="bind x to 5 and y to 3, then subtract y from x",
             scenario=(
-                "Mossback loaded two pouches: x with 5 acorns, y "
-                "with 3. She needed the gap between the two counts."
+                'Mossback loaded two pouches: x with {drawn.a} acorns, y with 3. She needed the gap between the two counts.'
             ),
             need=(
                 "Both names had to be live at once for the "
@@ -283,9 +249,7 @@ G3_04 = SubjectCurriculum(grade=3, subject_id="G3-04",
                 "computation without a reference count."
             ),
             mapping=(
-                "`let` binds x to 5 and y to 3 simultaneously. "
-                "Inside `(- x y)`, each name draws from its own "
-                "pouch and the subtraction returns their difference."
+                '`let` binds x to {drawn.a} and y to {drawn.b} simultaneously. Inside `(- x y)`, each name draws from its own pouch and the subtraction returns their difference.'
             ),
             resolution=(
                 "the two pouches discharged and the gap settled "
@@ -300,10 +264,7 @@ G3_04 = SubjectCurriculum(grade=3, subject_id="G3-04",
             question_what="adding a, b, and c after binding via let to 2, 3, and 4",
             goal_text="bind a to 2, b to 3, c to 4, and add them",
             scenario=(
-                "Mossback prepared three pouches before setting out: "
-                "a with 2 acorns, b with 3, and c with 4. She needed "
-                "the full combined count for the provisioner waiting "
-                "at the far end of the stretch."
+                'Mossback prepared three pouches before setting out: a with {drawn.a} acorns, b with {drawn.b}, and c with 4. She needed the full combined count for the provisioner waiting at the far end of the stretch.'
             ),
             need=(
                 "The provisioner required all three sub-tallies added "
@@ -334,11 +295,7 @@ G3_05 = SubjectCurriculum(grade=3, subject_id="G3-05",
             question_what="the value of x inside the let scope where it shadows the def binding",
             goal_text="define x at the top level, then shadow it locally and return the inner value",
             scenario=(
-                "Mossback had already posted x on the road's sign "
-                "with a count of 10. For a short detour she tied a "
-                "fresh pouch at her hip labeled x, stuffed with 99 "
-                "acorns — a higher count for just this side-path."
-            ),
+                "Mossback had already posted x on the road's sign with a count of 10. For a short detour she tied a fresh pouch at her hip labeled x, stuffed with {drawn.b} acorns — a higher count for just this side-path."           ),
             need=(
                 "On the detour, she needed the local count, not the "
                 "posted one. The road's sign was still there, but "
@@ -364,10 +321,7 @@ G3_05 = SubjectCurriculum(grade=3, subject_id="G3-05",
             question_what="the value of x in the outer scope after the let scope ends",
             goal_text="define x, shadow it in a let, then look up x again in the outer scope",
             scenario=(
-                "Mossback posted x at 10 on the road sign, then "
-                "walked a detour where her hip-pouch shadowed x "
-                "with 99. When she returned to the main road, the "
-                "pouch was empty; only the road sign stood."
+                'Mossback posted x at {drawn.a} on the road sign, then walked a detour where her hip-pouch shadowed x with 99. When she returned to the main road, the pouch was empty; only the road sign stood.'
             ),
             need=(
                 "Back on the main road, she needed the original "
@@ -401,10 +355,7 @@ G3_06 = SubjectCurriculum(grade=3, subject_id="G3-06",
             question_what="the value of b, bound to twice a via let, after a is bound to 5",
             goal_text="bind a to 5, then bind b to twice a, and return b",
             scenario=(
-                "Mossback loaded her first pouch, a, with 5 acorns. "
-                "She then fastened a second pouch, b, and filled it "
-                "by doubling whatever a held — reading a's count "
-                "before sealing b shut."
+                "Mossback loaded her first pouch, a, with {drawn.a} acorns. She then fastened a second pouch, b, and filled it by doubling whatever a held — reading a's count before sealing b shut."
             ),
             need=(
                 "The second pouch's size depended on the first. "
@@ -412,9 +363,7 @@ G3_06 = SubjectCurriculum(grade=3, subject_id="G3-06",
                 "so the order of loading mattered entirely."
             ),
             mapping=(
-                "In a `let`, bindings are processed left to right: "
-                "a is set to 5 first; b is then computed as twice a, "
-                "using the a already in the pouch. The body returns b."
+                'In a `let`, bindings are processed left to right: a is set to {drawn.a} first; b is then computed as twice a, using the a already in the pouch. The body returns b.'
             ),
             resolution=(
                 "the second pouch held the doubled count — the "
@@ -429,10 +378,7 @@ G3_06 = SubjectCurriculum(grade=3, subject_id="G3-06",
             question_what="the value of c, bound via let to twice b, after a is 3 and b is a+1",
             goal_text="bind a to 3, b to a+1, c to 2*b, and return c",
             scenario=(
-                "Mossback prepared three pouches in order: a held 3 "
-                "acorns, then b was filled with one more than a, and "
-                "finally c was loaded with twice whatever b held. "
-                "Each pouch drew from the one before it."
+                'Mossback prepared three pouches in order: a held {drawn.a} acorns, then b was filled with one more than a, and finally c was loaded with twice whatever b held. Each pouch drew from the one before it.'
             ),
             need=(
                 "The final count in c was what the ledger required, "
@@ -567,9 +513,7 @@ G3_09 = SubjectCurriculum(grade=3, subject_id="G3-09",
                 "recipe now needed twice its salt."
             ),
             need=(
-                "Mossback wanted a doubling routine written once and "
-                "posted under a name any cook could shout — tonight's "
-                "first reach being 5 pinches of salt."
+                "Mossback wanted a doubling routine written once and posted under a name any cook could shout — tonight's first reach being {drawn.b} pinches of salt."
             ),
             mapping=(
                 "`defn` writes the routine on a recipe-card and posts "
@@ -578,9 +522,7 @@ G3_09 = SubjectCurriculum(grade=3, subject_id="G3-09",
                 "parameter `x` is the quantity the cook brings."
             ),
             resolution=(
-                "the named recipe ran on 5 and handed back twice "
-                "that — exactly what the doubled crowd would need."
-            ),
+                'the named recipe ran on {drawn.b} and handed back twice that — exactly what the doubled crowd would need.'           ),
             tags=("story",),
         ),
         SubjectExample(
@@ -590,10 +532,7 @@ G3_09 = SubjectCurriculum(grade=3, subject_id="G3-09",
             question_what="the result of calling the function add3, defined via defn to add three arguments, with 1, 2, and 3",
             goal_text="define a function add3 that adds three arguments, then call it with 1, 2, and 3",
             scenario=(
-                "Three ingredient buckets arrived at Mossback's "
-                "kitchen — each with a different portion. She wrote "
-                "a three-slot pooling routine on a card and posted "
-                "it on the wall under the name add3 for any cook to use."
+                "Three ingredient buckets arrived at Mossback's kitchen — each with a different portion. She wrote a three-slot pooling routine on a card and posted it on the wall under the name add{drawn.c} for any cook to use."
             ),
             need=(
                 "The kitchen would receive deliveries of three "
@@ -601,10 +540,7 @@ G3_09 = SubjectCurriculum(grade=3, subject_id="G3-09",
                 "to pool them rather than tallying freehand each time."
             ),
             mapping=(
-                "`defn` posts the three-slot card under the name "
-                "add3. Calling `(add3 1 2 3)` slots the three "
-                "deliveries into a, b, and c and sums them per "
-                "the posted recipe."
+                '`defn` posts the three-slot card under the name add3. Calling `(add{drawn.c} {drawn.a} {drawn.b} {drawn.c})` slots the three deliveries into a, b, and c and sums them per the posted recipe.'
             ),
             resolution=(
                 "the named recipe accepted the three portions and "
@@ -690,10 +626,7 @@ G3_11 = SubjectCurriculum(grade=3, subject_id="G3-11",
             question_what="the result of adding a to itself after binding a locally to 7 via let",
             goal_text="bind a to 7 and add a to itself",
             scenario=(
-                "Mossback loaded her pouch with 7 acorns and named "
-                "that count a. She needed to add the count to itself "
-                "— the same pouch reached for twice — to report the "
-                "combined total at the next marker."
+                'Mossback loaded her pouch with {drawn.a} acorns and named that count a. She needed to add the count to itself — the same pouch reached for twice — to report the combined total at the next marker.'
             ),
             need=(
                 "Both summands were the same named quantity. Without "
@@ -701,10 +634,7 @@ G3_11 = SubjectCurriculum(grade=3, subject_id="G3-11",
                 "the number separately each time she reached for it."
             ),
             mapping=(
-                "The substitution rule says: everywhere a appears, "
-                "replace it with its bound value. `(+ a a)` becomes "
-                "`(+ 7 7)` — the pouch consulted once per occurrence."
-            ),
+                'The substitution rule says: everywhere a appears, replace it with its bound value. `(+ a a)` becomes `(+ {drawn.a} {drawn.a})` — the pouch consulted once per occurrence.'           ),
             resolution=(
                 "the pouch was drawn from twice and the two draws "
                 "combined into the total Mossback reported at the marker."
@@ -753,10 +683,7 @@ G3_12 = SubjectCurriculum(grade=3, subject_id="G3-12",
             question_what="the result of adding 1 to g, computed inside a let where g is locally bound to 99, shadowing the top-level def",
             goal_text="define g at the top level, shadow it in a let with a different value, and compute g+1 inside the let",
             scenario=(
-                "The road sign at the trailhead read g = 5. Mossback "
-                "slipped onto a side-path and tied a fresh pouch "
-                "at her hip labeled g, loaded with 99 acorns. She "
-                "needed g plus one more while on the side-path."
+                'The road sign at the trailhead read g = 5. Mossback slipped onto a side-path and tied a fresh pouch at her hip labeled g, loaded with {drawn.b} acorns. She needed g plus one more while on the side-path.'
             ),
             need=(
                 "On the side-path the local pouch mattered, not the "
@@ -764,10 +691,7 @@ G3_12 = SubjectCurriculum(grade=3, subject_id="G3-12",
                 "the nearer source or it would use the wrong count."
             ),
             mapping=(
-                "Inside the `let`, g is looked up in the local "
-                "scope first — the hip pouch, not the road sign. "
-                "`(+ g 1)` uses the local 99 and adds one more "
-                "acorn to it."
+                'Inside the `let`, g is looked up in the local scope first — the hip pouch, not the road sign. `(+ g {drawn.c})` uses the local {drawn.b} and adds one more acorn to it.'
             ),
             resolution=(
                 "the side-path computation drew from the local "
@@ -823,10 +747,7 @@ G3_14 = SubjectCurriculum(grade=3, subject_id="G3-14",
             question_what="the final value evaluated by do from the sequence",
             goal_text="evaluate a sequence of values and return the last one",
             scenario=(
-                "The scribe at the trailhead read three entries "
-                "aloud in order — 1, then 2, then 3 — as Mossback "
-                "listened. Each entry was acknowledged in turn, "
-                "but only the last one was recorded as the verdict."
+                'The scribe at the trailhead read three entries aloud in order — {drawn.a}, then {drawn.b}, then {drawn.c} — as Mossback listened. Each entry was acknowledged in turn, but only the last one was recorded as the verdict.'
             ),
             need=(
                 "The ledger entry required the final number in the "
@@ -854,7 +775,7 @@ G3_14 = SubjectCurriculum(grade=3, subject_id="G3-14",
                 "The scribe worked through three arithmetic tallies "
                 "in the order Mossback dictated: one plus one, then "
                 "two plus two, then three plus three. Each result "
-                "was computed, but only the last mattered for the log."
+                "was computed, but only the last mattered for the log. The values drawn fresh were {drawn.a}, {drawn.b}, and {drawn.c}."
             ),
             need=(
                 "The log required the result of the final computation "
@@ -887,10 +808,7 @@ G3_15 = SubjectCurriculum(grade=3, subject_id="G3-15",
             question_what="the final value evaluated by do, ignoring the intermediate println side-effect",
             goal_text="execute a print statement for side-effects, then return a different value",
             scenario=(
-                "Mossback had two things to do at the checkpoint: "
-                "call out a greeting to the gatekeeper (a side "
-                "task, not a counted item), and then present the "
-                "count of 42 acorns that was her official delivery."
+                'Mossback had two things to do at the checkpoint: call out a greeting to the gatekeeper (a side task, not a counted item), and then present the count of {drawn.b} acorns that was her official delivery.'
             ),
             need=(
                 "The greeting had to happen first, but the ledger "
@@ -898,10 +816,7 @@ G3_15 = SubjectCurriculum(grade=3, subject_id="G3-15",
                 "was real work but left no number in the tally."
             ),
             mapping=(
-                "`println` is the greeting — a side-effect that "
-                "runs and produces no countable value. The `42` "
-                "that follows is the last form in `do`, so it "
-                "becomes the value the REPL returns."
+                '`println` is the greeting — a side-effect that runs and produces no countable value. The `{drawn.b}` that follows is the last form in `do`, so it becomes the value the REPL returns.'
             ),
             resolution=(
                 "the greeting rang out and was heard, then the "
@@ -923,10 +838,7 @@ G3_16 = SubjectCurriculum(grade=3, subject_id="G3-16",
             question_what="the value locally bound to the + operator via let",
             goal_text="shadow the plus operator with a local binding and return the bound value",
             scenario=(
-                "Mossback tied a pouch labeled `+` at her hip and "
-                "filled it with 99 acorns for one short stretch. "
-                "The road sign already used that name, but the "
-                "pouch was nearer."
+                'Mossback tied a pouch labeled `+` at her hip and filled it with {drawn.a} acorns for one short stretch. The road sign already used that name, but the pouch was nearer.'
             ),
             need=(
                 "She wanted to confirm that the local pouch "
@@ -957,10 +869,7 @@ G3_17 = SubjectCurriculum(grade=3, subject_id="G3-17",
             question_what="the result of subtracting tortoise-speed from hare-speed after binding both via let",
             goal_text="bind hare-speed to 4 and tortoise-speed to 1, then compute their difference",
             scenario=(
-                "Two signs appeared on the road, each following the "
-                "meadow's kebab-case convention: hare-speed at 4 "
-                "paces per mark and tortoise-speed at 1. Mossback "
-                "needed to post both clearly before computing the gap."
+                "Two signs appeared on the road, each following the meadow's kebab-case convention: hare-speed at {drawn.a} paces per mark and tortoise-speed at 1. Mossback needed to post both clearly before computing the gap."
             ),
             need=(
                 "The gap between the two speeds was what the race "
@@ -969,10 +878,7 @@ G3_17 = SubjectCurriculum(grade=3, subject_id="G3-17",
                 "confusion between the two."
             ),
             mapping=(
-                "`let` binds hare-speed to 4 and tortoise-speed to "
-                "1. The kebab-case names follow the meadow's posting "
-                "convention. `(- hare-speed tortoise-speed)` reads "
-                "both signs and subtracts."
+                "`let` binds hare-speed to {drawn.a} and tortoise-speed to 1. The kebab-case names follow the meadow's posting convention. `(- hare-speed tortoise-speed)` reads both signs and subtracts."
             ),
             resolution=(
                 "the two clearly labeled signs were consulted and "
@@ -994,10 +900,7 @@ G3_18 = SubjectCurriculum(grade=3, subject_id="G3-18",
             question_what="the result of multiplying n by itself three times after binding n locally to 5 via let",
             goal_text="bind n to 5 and compute n cubed",
             scenario=(
-                "Mossback needed to compute a cube from a single "
-                "count. She loaded her pouch with 5 acorns and named "
-                "it n, then drew from that same pouch three times "
-                "over for the multiplication."
+                'Mossback needed to compute a cube from a single count. She loaded her pouch with {drawn.a} acorns and named it n, then drew from that same pouch three times over for the multiplication.'
             ),
             need=(
                 "Writing the literal count three times in a row "
@@ -1006,10 +909,7 @@ G3_18 = SubjectCurriculum(grade=3, subject_id="G3-18",
                 "was the disciplined approach."
             ),
             mapping=(
-                "`let` binds n to 5 once. The body `(* n n n)` "
-                "reaches into the pouch three times, each time "
-                "finding 5. The cube is computed through the single "
-                "named source."
+                '`let` binds n to {drawn.a} once. The body `(* n n n)` reaches into the pouch three times, each time finding 5. The cube is computed through the single named source.'
             ),
             resolution=(
                 "the pouch was consulted three times and the triple "
@@ -1035,10 +935,7 @@ G3_18 = SubjectCurriculum(grade=3, subject_id="G3-18",
                 "form was shorter and just as clear."
             ),
             mapping=(
-                "Inline literals bypass the pouch entirely — the "
-                "three 5s are written directly in the form. The "
-                "REPL multiplies them without any binding or "
-                "name-lookup step."
+                'Inline literals bypass the pouch entirely — the three {drawn.a}s are written directly in the form. The REPL multiplies them without any binding or name-lookup step.'
             ),
             resolution=(
                 "the three inline values combined into the same "

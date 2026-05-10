@@ -186,7 +186,7 @@ GOALS: dict[str, dict[str, str]] = {
     '(+ 1 2) ; sum of one and two': {
         "concept": 'the addition with a trailing comment',
         "what":    'the result, ignoring the comment',
-        "goal":    'add 1 and 2, with a single-semicolon trailing comment',
+        "goal":    'add 1 and 2 with a trailing comment',
     },
     '(+ 10 20 30)': {
         "concept": 'the sum of three numbers',
@@ -416,12 +416,12 @@ GOALS: dict[str, dict[str, str]] = {
     '(apply + [1 2 3 4])': {
         "concept": 'applying + to vector elements',
         "what":    'the result of spreading the basket of 1, 2, 3, 4 as ingredients into +',
-        "goal":    'apply + to the elements of the vector containing 1, 2, 3, and 4',
+        "goal":    'apply + to the elements of the vector [1 2 3 4]',
     },
     '(apply max [3 1 4 1 5])': {
         "concept": 'applying max to vector elements',
         "what":    'the largest count found after spreading the basket of 3, 1, 4, 1, 5 into max',
-        "goal":    'apply max to the elements of the vector containing 3, 1, 4, 1, and 5',
+        "goal":    'apply max to the elements of the vector [3 1 4 1 5]',
     },
     '(assoc {:a 1} :a 99)': {
         "concept": 'the assoc operation',
@@ -611,7 +611,7 @@ GOALS: dict[str, dict[str, str]] = {
     '(count [1 2 3 4 5])': {
         "concept": 'the count of a collection',
         "what":    'the number of elements in the collection',
-        "goal":    'count the elements in a vector containing 1, 2, 3, 4, and 5',
+        "goal":    'count the elements in the vector [1 2 3 4 5]',
     },
     '(count [1 2 3])': {
         "concept": 'the count operation',
@@ -650,8 +650,8 @@ GOALS: dict[str, dict[str, str]] = {
     },
     '(distinct [1 1 2 3 3 4])': {
         "concept": 'removing duplicates from a sequence',
-        "what":    'the sequence produced by passing 1, 1, 2, 3, 3, 4 through the dedup-sieve',
-        "goal":    'remove duplicate elements from the vector containing 1, 1, 2, 3, 3, and 4',
+        "what":    'the sequence produced by passing [1 1 2 3 3 4] through the dedup-sieve',
+        "goal":    'remove duplicate elements from the vector [1 1 2 3 3 4]',
     },
     '(do "#?(:clj … :cljs …) selects a form per host at read time" :studied)': {
         "concept": 'selecting code by host at read time',
@@ -874,17 +874,17 @@ GOALS: dict[str, dict[str, str]] = {
         "goal":    'evaluate three arithmetic expressions in sequence and return the result of the last one',
     },
     '(do (def ^:dynamic *p* 1) (binding [*p* 99] *p*) *p*)': {
-        "concept": 'dynamic var, binding, read after',
+        "concept": 'the dynamic var rebound inside a binding form, read inside, then read again outside',
         "what":    'the value of the dynamic var when read after the binding form unwound',
         "goal":    'define a dynamic var *p* as 1, use binding to rebind it to 99 inside, and read its value after binding exits',
     },
     '(do (def ^:dynamic *p* 1) (binding [*p* 99] *p*))': {
-        "concept": 'dynamic var, binding, read',
+        "concept": 'the dynamic var rebound inside a binding form and read',
         "what":    'the value of the dynamic var when read inside the binding form after defining it and rebinding',
         "goal":    'define a dynamic var *p* as 1, use binding to rebind it to 99, and read its value inside',
     },
     '(do (def a (atom 0)) (compare-and-set! a 0 1) @a)': {
-        "concept": 'atom, CAS, deref',
+        "concept": 'the atom updated via compare-and-set and read',
         "what":    'the value returned by dereferencing a after defining a as an atom holding 0 and performing a successful compare-and-set to 1',
         "goal":    'construct an atom holding 0, perform a compare-and-set checking for 0 and setting to 1, and dereference',
     },
@@ -899,17 +899,17 @@ GOALS: dict[str, dict[str, str]] = {
         "goal":    'construct an atom holding 0, set a number? validator on it, atomically swap by applying inc, and dereference',
     },
     '(do (def a (atom 0)) (swap! a inc) @a)': {
-        "concept": 'atom, swap, deref',
+        "concept": 'the atom updated atomically and then read',
         "what":    'the value returned by dereferencing a after defining an atom holding 0, swapping it via inc, and dereferencing',
         "goal":    'construct an atom holding 0, atomically swap it by applying inc, and dereference',
     },
     '(do (def a (atom 10)) (swap! a + 5) @a)': {
-        "concept": 'atom, swap, deref',
+        "concept": 'the atom updated atomically and then read',
         "what":    'the value returned by dereferencing a after defining a as an atom holding 10 and swapping it via + 5',
         "goal":    'construct an atom holding 10, atomically swap it by applying + to 5, and dereference the result',
     },
     '(do (def a (atom 5)) (compare-and-set! a 0 99) @a)': {
-        "concept": 'atom, failed CAS, deref',
+        "concept": 'the atom guarded by a compare-and-set whose expected value did not match',
         "what":    'the value returned by dereferencing a after defining a as an atom holding 5 and attempting a compare-and-set that fails',
         "goal":    'construct an atom holding 5, perform a compare-and-set checking for 0 and setting to 99, and dereference',
     },
@@ -924,7 +924,7 @@ GOALS: dict[str, dict[str, str]] = {
         "goal":    'construct an atom holding 7 and dereference it using @',
     },
     '(do (def a (atom :start)) (reset! a :done) @a)': {
-        "concept": 'atom, reset, deref',
+        "concept": 'the atom reset to a new value and then read',
         "what":    'the value returned by dereferencing a after defining a as an atom holding a start keyword and resetting it to done',
         "goal":    'construct an atom holding a start keyword, atomically reset it to a done keyword, and dereference the result',
     },
@@ -934,22 +934,22 @@ GOALS: dict[str, dict[str, str]] = {
         "goal":    'construct refs a and b, perform a coordinated transaction that alters both by applying inc, and dereference both',
     },
     '(do (def ag (agent 0)) (send ag inc) (await ag) @ag)': {
-        "concept": 'agent, send, await, deref',
+        "concept": 'the agent sent a function asynchronously, awaited, and read',
         "what":    'the value returned by dereferencing ag after defining an agent holding 0, using send to dispatch inc, awaiting, and dereferencing',
         "goal":    'construct an agent holding 0, use send to asynchronously apply inc, await its completion, and dereference',
     },
     '(do (def ag (agent 0)) (send ag inc) (send ag inc) (await ag) @ag)': {
-        "concept": 'agent, double send, await, deref',
+        "concept": 'the agent sent two updates in succession, awaited, and read',
         "what":    'the value returned by dereferencing ag after defining an agent holding 0, sending inc twice asynchronously, awaiting, and dereferencing',
         "goal":    'construct an agent holding 0, asynchronously send inc twice, synchronize with await, and dereference',
     },
     '(do (def ag (agent 0)) (send-off ag inc) (await ag) @ag)': {
-        "concept": 'agent, send-off, await, deref',
+        "concept": 'the agent dispatched via send-off, awaited, and read',
         "what":    'the value returned by dereferencing ag after defining an agent holding 0, using send-off to dispatch inc, awaiting, and dereferencing',
         "goal":    'construct an agent holding 0, use send-off to asynchronously apply inc, await its completion, and dereference',
     },
     '(do (def ag (agent 5)) (send ag + 10) (await ag) @ag)': {
-        "concept": 'agent, send, await, deref',
+        "concept": 'the agent sent a function asynchronously, awaited, and read',
         "what":    'the value returned by dereferencing ag after defining an agent holding 5, sending + 10 asynchronously, awaiting, and dereferencing',
         "goal":    'construct an agent holding 5, asynchronously send + with 10 to it, await its completion, and dereference',
     },
@@ -964,22 +964,22 @@ GOALS: dict[str, dict[str, str]] = {
         "goal":    'define g at the top level, shadow it in a let with a different value, and compute g+1 inside the let',
     },
     '(do (def lock (Object.)) (locking lock (+ 1 2)))': {
-        "concept": 'lock, locking, arithmetic',
+        "concept": 'the arithmetic evaluated inside a critical section guarded by locking',
         "what":    'the value returned by evaluating an addition inside a locked critical section after creating a monitor and acquiring the lock',
         "goal":    'create an object to use as a monitor, acquire the lock, and evaluate an addition inside',
     },
     '(do (def lock (Object.)) (locking lock 42))': {
-        "concept": 'lock, locking, literal',
+        "concept": 'the literal value evaluated inside a critical section guarded by locking',
         "what":    'the literal value returned by evaluating it inside a locked critical section after creating a monitor and acquiring the lock',
         "goal":    'create an object to use as a monitor, acquire the lock, and evaluate a literal inside',
     },
     '(do (def p (promise)) (deliver p 42) @p)': {
-        "concept": 'promise, deliver, deref',
+        "concept": 'the promise delivered a value and then dereferenced',
         "what":    'the value returned by dereferencing a promise after defining it, delivering a number to it, and dereferencing',
         "goal":    'construct a promise, deliver 42 to it, and dereference to get the delivered value',
     },
     '(do (def p (promise)) (deliver p :done) @p)': {
-        "concept": 'promise, deliver, deref',
+        "concept": 'the promise delivered a value and then dereferenced',
         "what":    'the value returned by dereferencing a promise after defining it, delivering a keyword to it, and dereferencing',
         "goal":    'construct a promise, deliver a completion keyword to it, and dereference to get the delivered value',
     },
@@ -989,17 +989,17 @@ GOALS: dict[str, dict[str, str]] = {
         "goal":    'construct an atom holding an idle value as progress, atomically reset it to running, and dereference the result',
     },
     '(do (def r (ref 0)) (dosync (alter r inc)) @r)': {
-        "concept": 'ref, dosync, alter, deref',
+        "concept": 'the ref altered inside a transaction and read',
         "what":    'the value returned by dereferencing r after defining a ref holding 0, altering it via inc inside dosync, and dereferencing',
         "goal":    'construct a ref holding 0, perform a transactional alter by applying inc inside dosync, and dereference',
     },
     '(do (def r (ref 10)) (dosync (alter r + 5)) @r)': {
-        "concept": 'ref, dosync, alter, deref',
+        "concept": 'the ref altered inside a transaction and read',
         "what":    'the value returned by dereferencing r after defining a ref holding 10, performing a transactional alter via + 5, and dereferencing',
         "goal":    'construct a ref holding 10, perform a transactional alter by applying + with 5 inside dosync, and dereference',
     },
     '(do (def r (ref 100)) (dosync (ref-set r 7)) @r)': {
-        "concept": 'ref, dosync, ref-set, deref',
+        "concept": 'the ref reset inside a transaction and read',
         "what":    'the value returned by dereferencing r after defining a ref holding 100, setting it to 7 inside dosync, and dereferencing',
         "goal":    'construct a ref holding 100, perform a transactional ref-set to 7 inside dosync, and dereference',
     },
@@ -1009,12 +1009,12 @@ GOALS: dict[str, dict[str, str]] = {
         "goal":    'define step1 as 1, then define step2 as step1 plus 1, then return step2',
     },
     '(do (def v (volatile! 0)) (vswap! v inc) @v)': {
-        "concept": 'volatile, vswap, deref',
+        "concept": 'the volatile updated by vswap! and read',
         "what":    'the value returned by dereferencing v after defining a volatile holding 0, performing a non-transactional swap via inc, and dereferencing',
         "goal":    'construct a volatile holding 0, perform a non-transactional swap by applying inc, and dereference',
     },
     '(do (def v (volatile! 5)) (vreset! v 99) @v)': {
-        "concept": 'volatile, vreset, deref',
+        "concept": 'the volatile reset by vreset! and read',
         "what":    'the value returned by dereferencing v after defining a volatile holding 5, performing a non-transactional reset to 99, and dereferencing',
         "goal":    'construct a volatile holding 5, perform a non-transactional reset to 99, and dereference',
     },
@@ -1116,7 +1116,7 @@ GOALS: dict[str, dict[str, str]] = {
     '(drop 2 [10 20 30 40 50])': {
         "concept": 'dropping elements from a sequence',
         "what":    'the sequence produced by dropping 2 elements from the row of 10, 20, 30, 40, 50',
-        "goal":    'drop the first 2 elements from the vector containing 10, 20, 30, 40, and 50',
+        "goal":    'drop the first 2 elements from the vector [10 20 30 40 50]',
     },
     '(empty? "")': {
         "concept": 'checking if a string is empty',
@@ -1156,12 +1156,12 @@ GOALS: dict[str, dict[str, str]] = {
     '(filter even? [1 2 3 4])': {
         "concept": 'filtering even elements from a vector',
         "what":    'the sequence produced by filtering even? over the vector containing 1, 2, 3, and 4',
-        "goal":    'keep the even elements from the vector containing 1, 2, 3, and 4',
+        "goal":    'keep the even elements from the vector [1 2 3 4]',
     },
     '(filter pos? [-2 -1 0 1 2])': {
         "concept": 'filtering positive elements from a vector',
         "what":    'the sequence produced by filtering pos? over the vector containing -2, -1, 0, 1, and 2',
-        "goal":    'keep the positive elements from the vector containing -2, -1, 0, 1, and 2',
+        "goal":    'keep the positive elements from the vector [-2 -1 0 1 2]',
     },
     '(first (range 1 100))': {
         "concept": 'getting the first element of a range',
@@ -1251,12 +1251,12 @@ GOALS: dict[str, dict[str, str]] = {
     '(into [] (comp (map inc) (filter even?)) [1 2 3 4])': {
         "concept": 'the composed transducer pipeline of map-inc then filter-even',
         "what":    'the vector result of reifying the composed transducer via into, applying map-inc then filter-even to the vector containing 1, 2, 3, 4',
-        "goal":    'compose map-inc and filter-even into a transducer pipeline, then apply it with into to the vector containing 1, 2, 3, 4',
+        "goal":    'compose map-inc and filter-even into a transducer pipeline; apply it with into to the vector [1 2 3 4]',
     },
     '(into [] (filter even?) [1 2 3 4 5])': {
         "concept": 'the filter-even transducer applied via into',
         "what":    'the vector of even elements reified via into with the filter-even transducer applied to the vector containing 1, 2, 3, 4, 5',
-        "goal":    'use the filter-even transducer with into to keep only the even numbers from the vector containing 1, 2, 3, 4, 5',
+        "goal":    'use the filter-even transducer with into to keep only the even numbers from the vector [1 2 3 4 5]',
     },
     '(into [] (map inc) [1 2 3])': {
         "concept": 'the map-inc transducer applied via into',
@@ -1421,7 +1421,7 @@ GOALS: dict[str, dict[str, str]] = {
     '(map #(* % %) [1 2 3 4])': {
         "concept": 'mapping a squaring operation over a vector',
         "what":    'the sequence produced by mapping a squaring rule over the vector containing 1, 2, 3, and 4',
-        "goal":    'apply a squaring operation to each element of the vector containing 1, 2, 3, and 4, returning a sequence',
+        "goal":    'apply a squaring operation to each element of the vector [1 2 3 4] returning a sequence',
     },
     '(map (partial * 3) [1 2 3])': {
         "concept": 'mapping partial multiplication over a vector',
@@ -1606,7 +1606,7 @@ GOALS: dict[str, dict[str, str]] = {
     '(reduce * [1 2 3 4 5])': {
         "concept": 'the fold operation',
         "what":    'the product produced by walking 1, 2, 3, 4, 5 with * as the combine step',
-        "goal":    'fold * over the vector containing 1, 2, 3, 4, and 5, computing their product',
+        "goal":    'fold * over the vector [1 2 3 4 5] computing their product',
     },
     '(reduce + 0 [])': {
         "concept": 'the fold with initial value over empty sequence',
@@ -1621,12 +1621,12 @@ GOALS: dict[str, dict[str, str]] = {
     '(reduce + [1 2 3 4])': {
         "concept": 'the fold operation',
         "what":    'the running tally after walking 1, 2, 3, 4 with + as the combine step',
-        "goal":    'walk the row of pebbles 1, 2, 3, 4 carrying a tally that combines each with + into the running total',
+        "goal":    'walk the row of pebbles [1 2 3 4] carrying a tally that combines each with + into the running total',
     },
     '(reduce max [3 1 4 1 5 9 2 6])': {
         "concept": 'the fold operation',
-        "what":    'the largest pebble found by walking 3, 1, 4, 1, 5, 9, 2, 6 with max as the combine step',
-        "goal":    'fold max over the vector containing 3, 1, 4, 1, 5, 9, 2, and 6, finding the maximum',
+        "what":    'the largest pebble found by walking [3 1 4 1 5 9 2 6] with max as the combine step',
+        "goal":    'fold max over the vector [3 1 4 1 5 9 2 6] finding the maximum',
     },
     '(rem 100 7)': {
         "concept": 'the remainder',
@@ -1646,7 +1646,7 @@ GOALS: dict[str, dict[str, str]] = {
     '(some even? [1 3 5 8 7])': {
         "concept": 'checking if any element satisfies a predicate',
         "what":    'whether any pebble in 1, 3, 5, 8, 7 passes the even? sieve',
-        "goal":    'check if any element in the vector containing 1, 3, 5, 8, and 7 is even',
+        "goal":    'check if any element in the vector [1 3 5 8 7] is even',
     },
     '(some neg? [1 2 3])': {
         "concept": 'checking if any element satisfies a predicate',
@@ -1686,7 +1686,7 @@ GOALS: dict[str, dict[str, str]] = {
     '(take 3 [10 20 30 40 50])': {
         "concept": 'taking elements from a sequence',
         "what":    'the sequence produced by taking 3 elements from the row of 10, 20, 30, 40, 50',
-        "goal":    'take the first 3 elements from the vector containing 10, 20, 30, 40, and 50',
+        "goal":    'take the first 3 elements from the vector [10 20 30 40 50]',
     },
     '(tap> 42)': {
         "concept": 'the result of tapping a number into the tap pool',
@@ -1701,7 +1701,7 @@ GOALS: dict[str, dict[str, str]] = {
     '(transduce (comp (map inc) (filter even?)) + 0 [1 2 3 4 5])': {
         "concept": 'the composed transducer summing the incremented-then-filtered elements',
         "what":    'the sum accumulated via transduce using the composed transducer of map-inc then filter-even, starting from 0, applied to the vector containing 1, 2, 3, 4, 5',
-        "goal":    'compose map-inc and filter-even, then use transduce to sum the kept elements from the vector containing 1, 2, 3, 4, 5, starting from 0',
+        "goal":    'compose map-inc and filter-even; use transduce to sum the kept elements from the vector [1 2 3 4 5] starting from 0',
     },
     '(try (Math/sqrt 4) (catch Exception _ :err))': {
         "concept": 'catching exceptions from a host method call',
@@ -1794,12 +1794,12 @@ GOALS: dict[str, dict[str, str]] = {
         "goal":    'submit the integer 42 with a double-semicolon trailing comment',
     },
     '@(future (* 6 7))': {
-        "concept": 'future, multiply, deref',
+        "concept": 'the multiplication wrapped in a future and dereferenced',
         "what":    'the value returned by dereferencing a future that multiplies 6 and 7',
         "goal":    'construct a future that multiplies 6 and 7, and dereference it',
     },
     '@(future (+ 1 2))': {
-        "concept": 'future, add, deref',
+        "concept": 'the addition wrapped in a future and dereferenced',
         "what":    'the value the messenger returns from adding 1 and 2',
         "goal":    'dispatch a runner to compute the sum of 1 and 2; later, ask the runner for the answer',
     },
@@ -1823,4 +1823,176 @@ GOALS: dict[str, dict[str, str]] = {
         "what":    'the empty vector',
         "goal":    'create an empty vector',
     },
+
+    # ── slice yTpz: per-form GOALS for the most common atom-form
+    #    GOAL_FALLBACK_GENERIC offenders (G1-01..G1-09 and beyond).
+    #    Each entry replaces the generic "evaluate the literal /
+    #    predicate / form" fallback with a concrete verb-phrase that
+    #    flows naturally into "To {goal_text}, X composed Y" templates.
+    "(quote wolf)": {
+        "concept": 'the quote special form on the symbol wolf',
+        "what":    'the quoted symbol wolf',
+        "goal":    'use quote to obtain the symbol wolf without evaluating it',
+    },
+    "(symbol? 'wolf)": {
+        "concept": 'the symbol predicate on a quoted name',
+        "what":    'whether the quoted form is a symbol',
+        "goal":    'test whether the quoted form is a symbol',
+    },
+    "(symbol? 'java.util.Date)": {
+        "concept": 'the symbol predicate on a quoted host name',
+        "what":    'whether the host class name is a symbol',
+        "goal":    'test whether the quoted host class name is a symbol',
+    },
+    "(name 'village.shepherd)": {
+        "concept": 'the name lookup on a quoted symbol',
+        "what":    'the unqualified portion of the symbol',
+        "goal":    'extract the unqualified name from the quoted symbol',
+    },
+    "(name 'java.util.Date)": {
+        "concept": 'the name lookup on a host class symbol',
+        "what":    'the unqualified portion of the host class name',
+        "goal":    'extract the unqualified name from the host class symbol',
+    },
+    "(namespace :village/shepherd)": {
+        "concept": 'the namespace lookup on a qualified keyword',
+        "what":    'the namespace portion of the qualified keyword',
+        "goal":    'extract the namespace from the qualified keyword',
+    },
+    "(map name ['village.shepherd 'village.elder])": {
+        "concept": 'mapping name across a list of symbols',
+        "what":    'the list of unqualified names',
+        "goal":    'apply name across the two qualified symbols and collect the results',
+    },
+    "(count ['village.shepherd 'village.elder 'village.wolf])": {
+        "concept": 'counting a vector of qualified symbols',
+        "what":    'the number of items in the vector',
+        "goal":    'count the number of qualified symbols in the vector',
+    },
+    "(:wolf {:wolf 1 :flock 2})": {
+        "concept": 'keyword lookup on a map',
+        "what":    'the value associated with the wolf key',
+        "goal":    'look up the wolf key in the map by invoking the keyword',
+    },
+    "(clojure.string/lower-case \"WOLF\")": {
+        "concept": 'lowercasing a string with clojure.string/lower-case',
+        "what":    'the lower-cased form of the input string',
+        "goal":    'lowercase the alarm string with clojure.string/lower-case',
+    },
+    "(clojure.string/reverse \"flock\")": {
+        "concept": 'reversing a string with clojure.string/reverse',
+        "what":    'the reversed form of the input string',
+        "goal":    'reverse the flock string with clojure.string/reverse',
+    },
+    "(count \"wolf\\nshepherd\\n\")": {
+        "concept": 'counting characters in a multi-line string',
+        "what":    'the total character count including newlines',
+        "goal":    'count every character in the multi-line alarm string',
+    },
+    "(.startsWith \"shepherd-elder\" \"shepherd\")": {
+        "concept": 'host-method check for a string prefix',
+        "what":    'whether the compound name begins with shepherd',
+        "goal":    'test whether the compound name begins with the shepherd prefix',
+    },
+    "(try (/ 1 0) (catch Exception e :caught))": {
+        "concept": 'a try form with a catch returning a sentinel keyword',
+        "what":    'the value the catch branch returns',
+        "goal":    'catch the divide-by-zero error and return the caught keyword',
+    },
+    "(let [flock-size 8 stray-count 2] (- flock-size stray-count))": {
+        "concept": 'a let-bound subtraction of flock and stray counts',
+        "what":    'the remaining flock after subtracting strays',
+        "goal":    'bind flock-size and stray-count, then subtract strays from the flock',
+    },
+    "(let [a (int-array [5 10 15])] (aget a 0))": {
+        "concept": 'binding a host int-array and reading the first slot',
+        "what":    'the value at the first array index',
+        "goal":    'bind a host int-array and read its first slot with aget',
+    },
+    "(= 1 1)": {
+        "concept": 'the equality check on two equal integers',
+        "what":    'whether 1 equals 1',
+        "goal":    'test whether 1 equals 1 with =',
+    },
+    "(= 1 2)": {
+        "concept": 'the equality check on two distinct integers',
+        "what":    'whether 1 equals 2',
+        "goal":    'test whether 1 equals 2 with =',
+    },
+    "(= 'village.shepherd 'village.shepherd)": {
+        "concept": 'the equality check on two identical qualified symbols',
+        "what":    'whether the two qualified symbols are equal',
+        "goal":    'test whether the two qualified shepherd symbols are equal',
+    },
+    # ─────── round3 group4 (V7dL): per-form GOALS for atom subjects
+    # that previously fell back to "evaluate the literal/predicate/..."
+    # Skipped: forms whose answer-string IS a literal substring of the
+    # form (FORM_LEAK / ANSWER_LEAK_STRING risk), e.g. (= :wolf :wolf)
+    # answers ":wolf" which is in the form. Those keep the placeholder
+    # fallback path with empty goal_text.
+    "(:missing {:wolf 1})": {
+        "concept": 'looking up an absent key in a small map',
+        "what":    'what comes back when a key is not in the map',
+        "goal":    'look up an absent key in a one-entry map and observe the runtime result',
+    },
+    "(count ['village.shepherd 'village.elder 'village.flock])": {
+        "concept": 'counting the elements of a quoted-symbol vector',
+        "what":    'how many elements the vector holds',
+        "goal":    'count the elements in a vector of qualified shepherd symbols',
+    },
+    "(last  [10 20 30])": {
+        "concept": 'the last element of a vector',
+        "what":    'what last returns from a small vector',
+        "goal":    'fetch the last element of a small vector via last',
+    },
+    "(symbol? 'village.flock)": {
+        "concept": 'the symbol-predicate on a qualified name',
+        "what":    'whether a qualified quoted name is a symbol',
+        "goal":    'test whether a qualified quoted name is a symbol',
+    },
 }
+
+
+def get_goal(form: str, concept: str, what: str) -> str:
+    """Look up goal_text for `form`.
+
+    Returns the canonical goal_text from GOALS if present, otherwise
+    derives a verb-phrase ONLY for explicit boy-wolf-specific
+    constructs that are missing (`defprotocol Alarm`,
+    `defmacro with-careful-watch`, type-hinted `(let [^…])`). Anything
+    else (including the broader metaphor-rich forms that already work
+    via canonical entries, atom forms, and parametric forms) stays on
+    its existing path with empty goal_text.
+
+    Audited by the boy-wolf XOE6 deep-audit slice.
+    """
+    canon = GOALS.get(form, {})
+    g = canon.get("goal", "")
+    if g:
+        return g
+    if not what or not form:
+        return ""
+    f = form.strip()
+    needs_synthesis = (
+        "defprotocol" in f
+        or "defmacro" in f
+        or "deftype" in f
+        or "defrecord" in f
+        or "defmulti" in f
+        or "extend-protocol" in f
+        or "extend-type" in f
+        or "let [^" in f  # type-hinted binding
+    )
+    if not needs_synthesis:
+        return ""
+    w = what.strip().rstrip("?").rstrip()
+    low = w.lower()
+    if low.startswith("whether "):
+        return f"determine {w}"
+    if low.startswith("what "):
+        return f"find {w}"
+    if low.startswith("which "):
+        return f"identify {w}"
+    if low.startswith("the "):
+        return f"compute {w}"
+    return f"compute {w}"

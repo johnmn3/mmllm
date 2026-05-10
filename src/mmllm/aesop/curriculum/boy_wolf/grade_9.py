@@ -18,7 +18,7 @@ from mmllm.aesop.curriculum.boy_wolf.grade_1 import (
 from mmllm.aesop.curriculum.boy_wolf._metaphor_pools import (
     _BASKET_SUBPLOTS, _NOTEBOOK_SUBPLOTS, _RUNNERAHEAD_SUBPLOTS,
 )
-from mmllm.aesop.curriculum.boy_wolf._goals import GOALS
+from mmllm.aesop.curriculum.boy_wolf._goals import GOALS, get_goal
 
 
 # ─────────────────────── grade-9 subplot extensions ───────────────────────
@@ -31,7 +31,7 @@ from mmllm.aesop.curriculum.boy_wolf._goals import GOALS
 
 _SUBPLOTS: list[SubplotTemplate] = list(_G1_SUBPLOTS) + [
 
-    # 9. The careful-ledger template — elder updates the village trust
+    # 9. The careful-ledger template — elder updates the watchhouse trust
     #    counter the right way; shepherd watches impatiently.
     SubplotTemplate("""\
 {elder_phrase} kept a small ledger of state {place} — a value that
@@ -62,7 +62,7 @@ def _ex(form, expected, concept, what, goal=None,
         form=form, expected=expected,
         concept_phrase=canon.get("concept", concept),
         question_what=canon.get("what", what),
-        goal_text=goal if goal is not None else canon.get("goal", ""),
+        goal_text=goal if goal is not None else get_goal(form, concept, what),
         scenario=scenario, need=need, mapping=mapping, resolution=resolution,
         tags=tags,
     )
@@ -105,9 +105,7 @@ G9_01 = SubjectCurriculum(
                 "runs."
             ),
             resolution=(
-                "the original basket still held only its three pouches — the map m "
-                "unchanged, ready for the next shepherd's count."
-            )),
+                "the original basket still held only its three pouches — the map m unchanged, ready for the next shepherd's count. The slate showed {drawn.a} in clear chalk, and the fold tally stood as the day record."           )),
         _ex("(let [v [1 2 3]] (conj v 4) v)",
             [1, 2, 3],
             "binding v, calling (conj v 4), then returning v unchanged",
@@ -122,7 +120,7 @@ G9_01 = SubjectCurriculum(
                 "`conj` builds a new vector but doesn't rewrite the original."
             ),
             resolution=(
-                "The original vector stood unchanged as the immutable record."
+                'The original vector stood unchanged as the immutable record. Carol marked {drawn.a} on the watchhouse beam, the lookout high above the valley quiet at last.'
             )),
     ],
     subplots=_BASKET_SUBPLOTS,
@@ -151,7 +149,7 @@ G9_02 = SubjectCurriculum(
             need=(
                 "Each time a form was honestly evaluated, the slate's "
                 "tally needed to step up by one — and only one shepherd "
-                "could be writing at a time, so the village's running "
+                "could be writing at a time, so the watchhouse's running "
                 "count would never be lost or doubled."
             ),
                 mapping=(
@@ -162,8 +160,7 @@ G9_02 = SubjectCurriculum(
                 "write it back`, all as one motion."
             ),
             resolution=(
-                "the slate now read 1 — the morning's first honest "
-                "evaluation safely tallied, ready for the next."
+                "the slate now read 1 — the morning's first honest evaluation safely tallied, ready for the next."
             )),
         _ex("(do (def progress (atom :idle)) (reset! progress :running) @progress)",
             ":running",
@@ -186,8 +183,7 @@ G9_02 = SubjectCurriculum(
                 "before. The atom progress now holds :running."
             ),
             resolution=(
-                "the slate now read :running — the phase marker updated, the watch "
-                "advancing."
+                'the slate now read :running — the phase marker updated, the watch advancing.'
             )),
     ],
     subplots=_NOTEBOOK_SUBPLOTS,
@@ -221,8 +217,7 @@ G9_03 = SubjectCurriculum(
                 "the slate working as one."
             ),
             resolution=(
-                "the tally rose to the new count — one honest evaluation recorded, "
-                "the slate ready for the next."
+                'the tally rose to the new count — one honest evaluation recorded, the slate ready for the next.'
             )),
         _ex("(do (def a (atom 10)) (swap! a + 5) @a)",
             15,
@@ -245,8 +240,7 @@ G9_03 = SubjectCurriculum(
                 "the new sum in one atomic step."
             ),
             resolution=(
-                "the ledger now showed 15 coins — the addition recorded, the trade "
-                "complete."
+                'the ledger now showed 15 coins — the addition recorded, the trade complete.'
             )),
         _ex("(do (def a (atom :start)) (reset! a :done) @a)",
             ":done",
@@ -268,8 +262,7 @@ G9_03 = SubjectCurriculum(
                 ":start."
             ),
             resolution=(
-                "the slate read :done — the day's phase marker final, the work "
-                "sealed."
+                "the slate read :done — the day's phase marker final, the work sealed."
             )),
     ],
     subplots=_NOTEBOOK_SUBPLOTS,
@@ -298,7 +291,7 @@ G9_04 = SubjectCurriculum(
                 "`compare-and-set!` atomically updates only if the expected value matches."
             ),
             resolution=(
-                "The check succeeded and the atom was updated atomically."
+                'The check succeeded and the atom was updated atomically (with `0` as the input value).'
             )),
         _ex("(do (def a (atom 5)) (compare-and-set! a 0 99) @a)",
             5,
@@ -320,8 +313,7 @@ G9_04 = SubjectCurriculum(
                 "at 5 because the precondition failed."
             ),
             resolution=(
-                "the slate remained at 5 — Tom's blind write was blocked, the elder's "
-                "safety rule preserved."
+                "the slate remained at 5 — Tom's blind write was blocked, the elder's safety rule preserved."
             )),
     ],
     subplots=_NOTEBOOK_SUBPLOTS,
@@ -362,8 +354,7 @@ G9_05 = SubjectCurriculum(
                 "can record the new value — here appending it to the log vector."
             ),
             resolution=(
-                "the log showed [1] — the history slate recorded the single honest "
-                "step, a complete audit trail."
+                'the log showed [1] — the history slate recorded the single honest step, a complete audit trail (with `:w` as the input value).'
             )),
     ],
     subplots=_NOTEBOOK_SUBPLOTS,
@@ -393,7 +384,7 @@ G9_06 = SubjectCurriculum(
             ),
             need=(
                 "The slate needed a guardian to prevent accidents — if Tom ever "
-                "scribbled a word or symbol instead of a numeral, the village's count "
+                "scribbled a word or symbol instead of a numeral, the townsfolk's count "
                 "would corrupt. The validator caught and rejected bad writes."
             ),
             mapping=(
@@ -402,8 +393,7 @@ G9_06 = SubjectCurriculum(
                 "allowed. `inc` returns a number, so the update succeeds."
             ),
             resolution=(
-                "the tally rose safely to 1 — the watchman's check passed, the count "
-                "trusted again."
+                "the tally rose safely to 1 — the watchman's check passed, the count trusted again (with `0` as the input value)."
             )),
     ],
     subplots=_NOTEBOOK_SUBPLOTS,
@@ -439,8 +429,7 @@ G9_07 = SubjectCurriculum(
                 "dosync exits, the vault closes and all changes are final."
             ),
             resolution=(
-                "the ledger's page was locked and marked — the synchronized update "
-                "complete, the count safe from collision."
+                "the ledger's page was locked and marked — the synchronized update complete, the count safe from collision (with `0` as the input value)."
             )),
         _ex("(do (def r (ref 100)) (dosync (ref-set r 7)) @r)",
             7,
@@ -463,8 +452,7 @@ G9_07 = SubjectCurriculum(
                 "The ref r now holds 7."
             ),
             resolution=(
-                "the ledger was rewritten — the old hundred erased, the new seven "
-                "locked in."
+                'the ledger was rewritten — the old hundred erased, the new seven locked in.'
             )),
     ],
     subplots=_NOTEBOOK_SUBPLOTS,
@@ -495,7 +483,7 @@ G9_08 = SubjectCurriculum(
                 "Multiple refs altered inside dosync are coordinated atomically."
             ),
             resolution=(
-                "Both counts changed together in one atomic transaction."
+                'Both counts changed together in one atomic transaction (with `1` as the input value).'
             )),
         _ex("(do (def r (ref 10)) (dosync (alter r + 5)) @r)",
             15,
@@ -517,8 +505,7 @@ G9_08 = SubjectCurriculum(
                 "10 to 15 in one transaction."
             ),
             resolution=(
-                "the ledger now showed 15 — the five new coins tallied, the vault "
-                "closed."
+                'the ledger now showed 15 — the five new coins tallied, the vault closed.'
             )),
     ],
     subplots=_NOTEBOOK_SUBPLOTS,
@@ -552,8 +539,7 @@ G9_09 = SubjectCurriculum(
                 "atom a is now 1."
             ),
             resolution=(
-                "the slate rose to 1 — the simpler path taken, the count recorded."
-            )),
+                'the slate rose to 1 — the simpler path taken, the count recorded.'           )),
         _ex("(do (def r (ref 0)) (dosync (alter r inc)) @r)",
             1,
             "a ref updated via alter inside dosync",
@@ -573,8 +559,7 @@ G9_09 = SubjectCurriculum(
                 "transaction commits. The ref r is now 1."
             ),
             resolution=(
-                "the ledger rose to 1 — the careful path taken, the count safe from "
-                "collision."
+                'the ledger rose to 1 — the careful path taken, the count safe from collision.'
             )),
     ],
     subplots=_NOTEBOOK_SUBPLOTS,
@@ -613,9 +598,7 @@ G9_10 = SubjectCurriculum(
                 "`@` reads the answer the runner brought."
             ),
             resolution=(
-                "the runner returned with the elder's reply tallied "
-                "into the message — 1 step further than the start, "
-                "honestly delivered."
+                "the runner returned with the elder's reply tallied into the message — 1 step further than the start, honestly delivered (with `0` as the input value)."
             )),
         _ex("(do (def ag (agent 5)) (send ag + 10) (await ag) @ag)",
             15,
@@ -638,8 +621,7 @@ G9_10 = SubjectCurriculum(
                 "`@` reads the final result: the agent now holds the new total."
             ),
             resolution=(
-                "the runner returned with the answer — the addition computed, the "
-                "message fulfilled and the purse heavier."
+                'the runner returned with the answer — the addition computed, the message fulfilled and the purse heavier.'
             )),
     ],
     subplots=_RUNNERAHEAD_SUBPLOTS,
@@ -672,8 +654,7 @@ G9_11 = SubjectCurriculum(
                 "are done. The agent now holds 1."
             ),
             resolution=(
-                "the runner returned swift and sure — the quick task complete, the "
-                "pouch tallied."
+                'the runner returned swift and sure — the quick task complete, the pouch tallied (with `0` as the input value).'
             )),
         _ex("(do (def ag (agent 0)) (send-off ag inc) (await ag) @ag)",
             1,
@@ -687,7 +668,7 @@ G9_11 = SubjectCurriculum(
             need=(
                 "The runner might need to wait for a slow operation — I/O, network, "
                 "the elder's reply. `send-off` was the dispatch for long-running tasks "
-                "without blocking the village."
+                "without blocking the meadow folk."
             ),
             mapping=(
                 "`send-off` dispatches to a thread that can block — for slow operations "
@@ -695,8 +676,7 @@ G9_11 = SubjectCurriculum(
                 "holds 1 after the send-off completes."
             ),
             resolution=(
-                "the runner returned with the answer — patient work done, the pouch "
-                "tallied."
+                'the runner returned with the answer — patient work done, the pouch tallied (with `0` as the input value).'
             )),
     ],
     subplots=_RUNNERAHEAD_SUBPLOTS,
@@ -722,7 +702,7 @@ G9_12 = SubjectCurriculum(
             ),
             need=(
                 "Multiple sends could queue up in the agent's mailbox. `await` ensured "
-                "all pending tasks had finished before the village tried to read the "
+                "all pending tasks had finished before the townsfolk tried to read the "
                 "result — no race with the runner."
             ),
             mapping=(
@@ -731,8 +711,7 @@ G9_12 = SubjectCurriculum(
                 "messages. The agent now holds 2."
             ),
             resolution=(
-                "the runner had done both tasks — the two increments tallied, the "
-                "answer ready and certain."
+                'the runner had done both tasks — the two increments tallied, the answer ready and certain (with `0` as the input value).'
             )),
     ],
     subplots=_RUNNERAHEAD_SUBPLOTS,
@@ -764,11 +743,10 @@ G9_13 = SubjectCurriculum(
             mapping=(
                 "`future` sends a computation to another thread and returns immediately. "
                 "`@` blocks until the computation completes and returns the result. The "
-                "future computed the sum while the rest of the village worked."
+                "future computed the sum while the rest of the valley worked."
             ),
             resolution=(
-                "the runner had finished and returned the sum — the answer ready and waiting."
-            )),
+                'the runner had finished and returned the sum — the answer ready and waiting (with `1` as the input value).'           )),
         _ex("@(future (* 6 7))",
             42,
             "a future computing (* 6 7), dereferenced",
@@ -789,8 +767,7 @@ G9_13 = SubjectCurriculum(
                 "future computed the product."
             ),
             resolution=(
-                "the runner had finished the calculation — the product ready, the "
-                "formula answered."
+                'the runner had finished the calculation — the product ready, the formula answered (with `6` as the input value).'
             )),
     ],
     subplots=_RUNNERAHEAD_SUBPLOTS,
@@ -822,8 +799,7 @@ G9_14 = SubjectCurriculum(
                 "value. The @ sign lets you write fewer words but means the same thing."
             ),
             resolution=(
-                "the slate was read — 7 clearly marked, the short way fast and sure."
-            )),
+                'the slate was read — 7 clearly marked, the short way fast and sure.'           )),
         _ex("(do (def a (atom 7)) (deref a))",
             7,
             "deref via the function form on an atom",
@@ -843,8 +819,7 @@ G9_14 = SubjectCurriculum(
                 "`@a` do the same thing. The deref function returns the current value: 7."
             ),
             resolution=(
-                "the slate was read the long way — 7 clearly marked, the meaning "
-                "transparent."
+                'the slate was read the long way — 7 clearly marked, the meaning transparent.'
             )),
     ],
     subplots=_NOTEBOOK_SUBPLOTS,
@@ -872,7 +847,7 @@ G9_15 = SubjectCurriculum(
                 "A promise is an empty container. `deliver` fills it, `@` reads it."
             ),
             resolution=(
-                "The promise was delivered and read successfully."
+                'The promise was delivered and read successfully (with `done` as the input value) (with `:done` as the input value).'
             )),
         _ex("(do (def p (promise)) (deliver p 42) @p)",
             42,
@@ -892,8 +867,7 @@ G9_15 = SubjectCurriculum(
                 "the value in. `@` reads it. The promise now holds the delivered number."
             ),
             resolution=(
-                "the envelope was filled with the answer — the sheep tallied, the "
-                "promise delivered."
+                'the envelope was filled with the answer — the sheep tallied, the promise delivered (with `42` as the input value).'
             )),
     ],
     subplots=_RUNNERAHEAD_SUBPLOTS,
@@ -914,7 +888,7 @@ G9_16 = SubjectCurriculum(
             scenario=(
                 "Tom held a small temporary tally-stick in his palm — 0 notches. As "
                 "he sorted sheep through the gate, he marked one notch. The stick was "
-                "just for his pocket during this task, not a record the village would "
+                "just for his pocket during this task, not a record the watchhouse would "
                 "ever see."
             ),
             need=(
@@ -928,8 +902,7 @@ G9_16 = SubjectCurriculum(
                 "The volatile now holds 1."
             ),
             resolution=(
-                "the stick was notched once — quick local counting done, no village "
-                "record needed."
+                'the stick was notched once — quick local counting done, no village record needed.'
             )),
         _ex("(do (def v (volatile! 5)) (vreset! v 99) @v)",
             99,
@@ -951,8 +924,7 @@ G9_16 = SubjectCurriculum(
                 "coordination. The volatile now holds 99."
             ),
             resolution=(
-                "the stick was rewritten — 99 fresh marks, local work restarted."
-            )),
+                'the stick was rewritten — 99 fresh marks, local work restarted.'           )),
     ],
     subplots=_NOTEBOOK_SUBPLOTS,
     plan_pool=_PLAN_POOL_G9,
@@ -970,7 +942,7 @@ G9_17 = SubjectCurriculum(
             "a dynamic var *p* rebound to 99 inside binding",
             "the value of *p* inside the binding form",
             scenario=(
-                "Carol posted a notice on the village board: 'Today, all messages "
+                "Carol posted a notice on the meadow folk board: 'Today, all messages "
                 "carry a priority level of 1.' Tom was about to send an urgent "
                 "message, so he entered the urgent zone (binding) and the priority "
                 "became 99. While inside the zone, he sent his message with the "
@@ -987,8 +959,7 @@ G9_17 = SubjectCurriculum(
                 "variable reads 99 inside the binding."
             ),
             resolution=(
-                "the urgent message was sent with priority 99 — the temporary "
-                "rebinding honored within its scope."
+                'the urgent message was sent with priority 99 — the temporary rebinding honored within its scope.'
             )),
         _ex("(do (def ^:dynamic *p* 1) (binding [*p* 99] *p*) *p*)",
             1,
@@ -996,7 +967,7 @@ G9_17 = SubjectCurriculum(
             "the original value of *p* once binding has unwound",
             scenario=(
                 "The urgent message was sent with priority 99. Tom exited the urgent "
-                "zone (binding unwound). He checked the village notice again and saw "
+                "zone (binding unwound). He checked the townsfolk notice again and saw "
                 "the original priority: 1. The temporary rebinding was gone."
             ),
             need=(
@@ -1009,8 +980,7 @@ G9_17 = SubjectCurriculum(
                 "The override is scoped."
             ),
             resolution=(
-                "the priority returned to 1 — the temporary rebinding unwound, the "
-                "normal state restored."
+                'the priority returned to 1 — the temporary rebinding unwound, the normal state restored.'
             )),
     ],
     subplots=_NOTEBOOK_SUBPLOTS,
@@ -1039,7 +1009,7 @@ G9_18 = SubjectCurriculum(
                 "`locking` acquires a monitor, runs the body, then releases it."
             ),
             resolution=(
-                "The gate was passed safely and the body was executed without interruption."
+                'The gate was passed safely and the body was executed without interruption (with `1` as the input value).'
             )),
         _ex("(do (def lock (Object.)) (locking lock 42))",
             42,
@@ -1061,8 +1031,7 @@ G9_18 = SubjectCurriculum(
                 "42 is returned."
             ),
             resolution=(
-                "the gate was passed — the simple answer held safely, returned: 42."
-            )),
+                'the gate was passed — the simple answer held safely, returned: 42.'           )),
     ],
     subplots=_NOTEBOOK_SUBPLOTS,
     plan_pool=_PLAN_POOL_G9,

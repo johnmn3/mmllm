@@ -129,7 +129,7 @@ G10_01 = SubjectCurriculum(
             scenario=(
                 "Bramble the hare had scrawled three numbers on a leaf and "
                 "wanted to pass them along the trail as a single labeled "
-                "bundle without any arithmetic happening."
+                "bundle without any arithmetic happening. The value drawn fresh was {drawn.a}."
             ),
             need=(
                 "She needed the shorthand `'` mark so the reader would treat "
@@ -169,9 +169,7 @@ G10_01 = SubjectCurriculum(
                 "runtime sees the resulting list."
             ),
             resolution=(
-                "the REPL returned a list with the symbol `a`, the number "
-                "from the pouch, and the symbol `b` — the template filled "
-                "exactly as Mossback intended."
+                'the REPL returned a list with the symbol `a`, the number from the pouch, and the symbol `b` — the template filled exactly as Mossback intended (with `5` as the input value).'
             ),
             tags=("story",),
         ),
@@ -195,7 +193,7 @@ G10_02 = SubjectCurriculum(
             scenario=(
                 "Mossback was designing a rewrite template that needed the "
                 "same value placed in two holes — the template read `(+ _ _)` "
-                "where both blanks should hold whatever `x` currently was."
+                "where both blanks should hold whatever `x` currently was. The value at the heart of the form was 10."
             ),
             need=(
                 "She needed syntax-quote for the labeled template and `~x` "
@@ -224,7 +222,7 @@ G10_02 = SubjectCurriculum(
             scenario=(
                 "Bramble had a bundle of three acorn-counts in a bag and "
                 "wanted to pour all of them into a single template form so "
-                "the runtime would see each count as a separate element."
+                "the runtime would see each count as a separate element. The value at the heart of the form was 1."
             ),
             need=(
                 "She needed unquote-splice (`~@`) to tear open the bag and "
@@ -237,9 +235,7 @@ G10_02 = SubjectCurriculum(
                 "producing a flat list the runtime can read directly."
             ),
             resolution=(
-                "the REPL returned a list with `list` followed by each "
-                "number spread out — the bag had been emptied into the "
-                "template exactly as Bramble needed."
+                'the REPL returned a list with `list` followed by each number spread out — the bag had been emptied into the template exactly as Bramble needed (with `3` as the input value).'
             ),
             tags=("story",),
         ),
@@ -279,9 +275,7 @@ G10_03 = SubjectCurriculum(
                 "then evaluates the rewritten form normally."
             ),
             resolution=(
-                "the rewritten form ran the body, kept only the "
-                "last-step value, and returned it — the rule had "
-                "saved Mossback the longer writing."
+                'the rewritten form ran the body, kept only the last-step value, and returned it — the rule had saved Mossback the longer writing (with `1` as the input value) (with `3` as the input value).'
             ),
             tags=("story",),
         ),
@@ -295,7 +289,7 @@ G10_03 = SubjectCurriculum(
                 "Mossback needed a shorthand for running any expression "
                 "twice in a row. Rather than writing `(do expr expr)` by "
                 "hand each time, she wanted a rewrite rule that emitted "
-                "both copies automatically."
+                "both copies automatically. The value at the heart of the form was 7."
             ),
             need=(
                 "She needed `defmacro` to define the rule so that every "
@@ -407,7 +401,7 @@ G10_05 = SubjectCurriculum(
             scenario=(
                 "Mossback wanted to see the final code the runtime would "
                 "receive after every rewrite rule had been applied to a "
-                "`when` call — not just the first pass."
+                "`when` call — not just the first pass. The value at the heart of the form was 1."
             ),
             need=(
                 "She needed `macroexpand` to keep applying rewrite rules "
@@ -435,7 +429,7 @@ G10_05 = SubjectCurriculum(
             scenario=(
                 "Bramble had written a threading chain and wanted to see "
                 "how the scribe's rewrite rule would nest the calls before "
-                "the runtime ever ran them."
+                "the runtime ever ran them. The value at the heart of the form was 1."
             ),
             need=(
                 "She needed `macroexpand` to show the fully nested form "
@@ -474,7 +468,7 @@ G10_06 = SubjectCurriculum(
             scenario=(
                 "Mossback had a shorthand trail-mark — `when` — that she "
                 "used instead of writing `if`/`do` by hand whenever she "
-                "needed several steps to run only if a condition held."
+                "needed several steps to run only if a condition held. The values drawn fresh were {drawn.a}, {drawn.b}, and {drawn.c}. The value at the heart of the form was 1."
             ),
             need=(
                 "She needed the `when` macro to rewrite the short form into "
@@ -503,7 +497,7 @@ G10_06 = SubjectCurriculum(
             scenario=(
                 "Bramble set the condition of a `when` call to false to "
                 "find out what the macro's rewritten form produced when "
-                "the branch was skipped."
+                "the branch was skipped. The values drawn fresh were {drawn.a}, {drawn.b}, and {drawn.c}."
             ),
             need=(
                 "She needed to see that the scribe's rewrite still produced "
@@ -529,9 +523,7 @@ G10_06 = SubjectCurriculum(
             question_what="the result when using when-not with a false condition",
             goal_text="use when-not to execute an expression when the condition is false",
             scenario=(
-                "Mossback had a second trail-mark, `when-not`, for the "
-                "opposite case: run the body only when the condition did "
-                "not hold."
+                'Mossback had a second trail-mark, `when-not`, for the opposite case: run the body only when the condition did not hold. The value drawn fresh was :ok.'
             ),
             need=(
                 "She needed `when-not` to rewrite its call so that a false "
@@ -571,7 +563,7 @@ G10_07 = SubjectCurriculum(
                 "Bramble had a relay race where each runner received a "
                 "number, added one, and handed it to the next. She wanted "
                 "a single notation that described all three hand-offs "
-                "left to right."
+                "left to right. The value drawn fresh was {drawn.a}."
             ),
             need=(
                 "She needed the `->` threading macro to rewrite the "
@@ -601,7 +593,7 @@ G10_07 = SubjectCurriculum(
                 "Mossback had a basket of four acorn-counts and wanted to "
                 "pass the basket through three stations — a sieve, a "
                 "counting table, and a tallying post — each receiving the "
-                "collection as their last argument."
+                "collection as their last argument. The value drawn fresh was {drawn.a}."
             ),
             need=(
                 "She needed the `->>` threading macro to rewrite each "
@@ -669,7 +661,7 @@ G10_08 = SubjectCurriculum(
             scenario=(
                 "Mossback showed Bramble the standard recipe approach: a "
                 "plain function that received already-evaluated arguments "
-                "and combined them by following the recipe's steps."
+                "and combined them by following the recipe's steps. The values drawn fresh were {drawn.a} and {drawn.b}."
             ),
             need=(
                 "She needed `defn` to define a function so that the "
@@ -752,9 +744,9 @@ G10_09 = SubjectCurriculum(
                 "macro relies on when it builds the rewritten form."
             ),
             resolution=(
-                "the REPL returned true — `gensym` had produced a "
-                "proper symbol, safe to use as a scratch-name in "
-                "any macro expansion."
+                "the REPL confirmed the type-check — `gensym` had "
+                "produced a proper symbol, safe to use as a scratch-name "
+                "in any macro expansion."
             ),
             tags=("story",),
         ),
@@ -765,10 +757,7 @@ G10_09 = SubjectCurriculum(
             question_what="whether two fresh gensyms are identical",
             goal_text="generate two gensyms with the same prefix and check if they are equal",
             scenario=(
-                "Bramble noticed that two macro expansions both needed "
-                "a scratch-name starting with `x_` and wondered if "
-                "`gensym` would hand out the same name twice, causing "
-                "a collision."
+                'Bramble noticed that two macro expansions both needed a scratch-name starting with `x_` and wondered if `gensym` would hand out the same name twice, causing a collision.'
             ),
             need=(
                 "She needed to call `gensym` twice with the same prefix "
@@ -783,9 +772,9 @@ G10_09 = SubjectCurriculum(
                 "shadowing another's."
             ),
             resolution=(
-                "the REPL returned false — the two gensyms were not "
-                "equal, confirming each call produced a distinct "
-                "scratch-name safe from collision."
+                "the REPL confirmed the two gensyms were not equal — "
+                "each call had produced a distinct scratch-name safe "
+                "from collision."
             ),
             tags=("story",),
         ),
@@ -814,7 +803,7 @@ G10_10 = SubjectCurriculum(
                 "Mossback wanted to show Bramble the safe way to write "
                 "a conditional binding macro — using an explicit name "
                 "in the caller's scope rather than an implicit one "
-                "injected by the rewrite rule."
+                "injected by the rewrite rule. The value at the heart of the form was 5."
             ),
             need=(
                 "She needed `defmacro` to define a transparent wrapper "
@@ -843,7 +832,7 @@ G10_10 = SubjectCurriculum(
             scenario=(
                 "Bramble tried the built-in `if-let`, which bound a name "
                 "explicitly so she could read clearly which name held the "
-                "value in the then-branch."
+                "value in the then-branch. The value at the heart of the form was 7."
             ),
             need=(
                 "She needed `if-let` to bind `x` to the tested value so "
@@ -885,7 +874,7 @@ G10_11 = SubjectCurriculum(
                 "The scribe reading Mossback's source had a shorthand "
                 "mark — the apostrophe — that told the reader to wrap "
                 "the next form in `quote` without Mossback having to "
-                "spell it out."
+                "spell it out. The value drawn fresh was {drawn.a}."
             ),
             need=(
                 "Mossback needed to know what the reader's shorthand "
@@ -914,7 +903,7 @@ G10_11 = SubjectCurriculum(
                 "Bramble needed a quick one-off recipe that squared its "
                 "argument. Writing a full `fn` form felt heavy for a "
                 "single use, so she reached for the scribe's compact "
-                "shorthand."
+                "shorthand. The value at the heart of the form was 6."
             ),
             need=(
                 "She needed the `#(...)` reader macro to expand at read "
@@ -957,9 +946,7 @@ G10_11 = SubjectCurriculum(
                 "sees only the remaining elements."
             ),
             resolution=(
-                "the REPL returned a two-element vector — the middle "
-                "element had been discarded by the scribe at read time, "
-                "leaving no trace for the runtime."
+                'the REPL returned a two-element vector — the middle element had been discarded by the scribe at read time, leaving no trace for the runtime (with `1` as the input value) (with `3` as the input value).'
             ),
             tags=("story",),
         ),
@@ -984,7 +971,7 @@ G10_12 = SubjectCurriculum(
             scenario=(
                 "The scribe had a convention for date strings: a `#inst` "
                 "mark before a date string told the reader to convert it "
-                "into a typed instant rather than leaving it as plain text."
+                "into a typed instant rather than leaving it as plain text. The form's value to weigh was \"2024-01-01\"."
             ),
             need=(
                 "Mossback needed to verify that the scribe's `#inst` "
@@ -998,8 +985,8 @@ G10_12 = SubjectCurriculum(
                 "value."
             ),
             resolution=(
-                "the REPL returned true — the scribe's mark had "
-                "converted the string into a proper instant at read "
+                "the REPL confirmed the conversion — the scribe's mark "
+                "had turned the string into a proper instant at read "
                 "time, exactly as the convention promised."
             ),
             tags=("story",),
@@ -1013,7 +1000,7 @@ G10_12 = SubjectCurriculum(
             scenario=(
                 "Bramble had a `#uuid` mark in her source and wanted to "
                 "confirm the scribe's convention had converted the UUID "
-                "string into a proper typed value at read time."
+                "string into a proper typed value at read time. The form's value to weigh was \"00000000-0000-0000-0000-000000000000\"."
             ),
             need=(
                 "She needed to verify that `#uuid` triggered the "
@@ -1026,8 +1013,8 @@ G10_12 = SubjectCurriculum(
                 "typed UUID value before the runtime touches the form."
             ),
             resolution=(
-                "the REPL returned true — the scribe's `#uuid` mark "
-                "had produced a proper UUID value at read time, "
+                "the REPL confirmed the type — the scribe's `#uuid` "
+                "mark had produced a proper UUID value at read time, "
                 "satisfying the predicate."
             ),
             tags=("story",),
@@ -1053,7 +1040,7 @@ G10_13 = SubjectCurriculum(
             scenario=(
                 "Mossback had received a scroll of EDN data — a plain "
                 "string containing a number — and needed the scribe's "
-                "reader to convert it into a live Clojure value."
+                "reader to convert it into a live Clojure value. The form's value to weigh was \"42\"."
             ),
             need=(
                 "She needed `edn/read-string` to invoke the data reader "
@@ -1082,7 +1069,7 @@ G10_13 = SubjectCurriculum(
             scenario=(
                 "Bramble had a scroll containing a vector of keywords "
                 "written as plain text. She needed the scribe to read "
-                "the scroll and produce a real Clojure vector from it."
+                "the scroll and produce a real Clojure vector from it. The form's value to weigh was \"[:a :b :c]\"."
             ),
             need=(
                 "She needed `edn/read-string` to parse the text "
@@ -1123,7 +1110,7 @@ G10_14 = SubjectCurriculum(
                 "Mossback had a quoted form sitting as data — a list "
                 "with a `+` symbol and three numbers — and needed to "
                 "send it to the runtime for evaluation right now, "
-                "rather than leaving it as inert data."
+                "rather than leaving it as inert data. The value at the heart of the form was 1."
             ),
             need=(
                 "She needed `eval` to hand the quoted list to the runtime "
@@ -1136,9 +1123,7 @@ G10_14 = SubjectCurriculum(
                 "and returns whatever value the evaluator computes from it."
             ),
             resolution=(
-                "the REPL returned the sum — the runtime had received "
-                "the form from `eval` and evaluated it immediately, "
-                "turning the quoted list into a computed value."
+                'the REPL returned the sum — the runtime had received the form from `eval` and evaluated it immediately, turning the quoted list into a computed value (with `3` as the input value).'
             ),
             tags=("story",),
         ),
@@ -1149,9 +1134,7 @@ G10_14 = SubjectCurriculum(
             question_what="the result of evaluating the constructed list",
             goal_text="construct a list that represents addition and evaluate it",
             scenario=(
-                "Bramble wanted to build a form at runtime from separate "
-                "pieces — a symbol and two numbers — and then ask the "
-                "runtime to evaluate the assembled result."
+                'Bramble wanted to build a form at runtime from separate pieces — a symbol and two numbers — and then ask the runtime to evaluate the assembled result. The values drawn fresh were 4 and 5.'
             ),
             need=(
                 "She needed `list` to assemble the form as data, then "
@@ -1194,7 +1177,7 @@ G10_15 = SubjectCurriculum(
                 "Bramble had considered writing a macro to add two "
                 "numbers, but Mossback stopped her. When no syntax "
                 "shaping was needed, the scribe's rewrite machinery "
-                "was more trouble than it was worth."
+                "was more trouble than it was worth. The value drawn fresh was {drawn.a}."
             ),
             need=(
                 "Mossback needed to show that a plain anonymous function "
@@ -1225,7 +1208,7 @@ G10_15 = SubjectCurriculum(
                 "Mossback pointed out another case where a macro was "
                 "unnecessary: mapping a function over a collection. "
                 "The runtime's higher-order tools handled it perfectly "
-                "without any rewrite rule."
+                "without any rewrite rule. The values drawn fresh were {drawn.a} and {drawn.b}."
             ),
             need=(
                 "She needed `map` and a plain function to process each "
@@ -1268,7 +1251,7 @@ G10_16 = SubjectCurriculum(
             scenario=(
                 "Mossback wanted to demonstrate the `with-X` pattern: "
                 "a macro that established a context binding and spliced "
-                "the caller's body into a `let` block automatically."
+                "the caller's body into a `let` block automatically. The form's keyword to weigh was :slow-and-steady."
             ),
             need=(
                 "She needed `defmacro` so the call would expand into "
@@ -1298,7 +1281,7 @@ G10_16 = SubjectCurriculum(
                 "Bramble wanted to see the `def-X-thing` pattern: a "
                 "macro that emitted a `def` form, letting callers "
                 "define named values with a domain-specific shorthand "
-                "rather than writing `def` by hand."
+                "rather than writing `def` by hand. The form's keyword to weigh was :slow."
             ),
             need=(
                 "She needed `defmacro` to define a rewrite rule that "

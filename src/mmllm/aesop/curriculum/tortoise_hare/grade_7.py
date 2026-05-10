@@ -84,7 +84,7 @@ G7_01 = SubjectCurriculum(grade=7, subject_id="G7-01",
                 "Mossback the tortoise stood at the edge of the practice "
                 "meadow, about to leap a narrow ditch. She knew the jump "
                 "might go wrong — so she had a safety net stretched "
-                "underneath before she launched."
+                "underneath before she launched. The form's value to weigh was \"bad\"."
             ),
             need=(
                 "If the leap threw her sideways, the net had to catch "
@@ -118,15 +118,10 @@ G7_02 = SubjectCurriculum(grade=7, subject_id="G7-02",
             question_what="the value the catch arm returns when the divide-by-zero throw is caught",
             goal_text="attempt to divide 1 by 0; when the runtime throws, catch the Exception and return -1 from the catch arm",
             scenario=(
-                "Mossback the tortoise was about to ask the runtime "
-                "for the result of dividing 1 acorn into 0 piles — a "
-                "division she knew would throw, because dividing by "
-                "zero isn't a thing the runtime can do."
+                "Mossback the tortoise was about to ask the runtime for the result of dividing {drawn.a} acorn into {drawn.b} piles — a division she knew would throw, because dividing by zero isn't a thing the runtime can do."
             ),
             need=(
-                "She didn't want the throw to end the run. She wanted "
-                "the form to come back with -1 as a placeholder so the "
-                "rest of the work could continue."
+                "She didn't want the throw to end the run. She wanted the form to come back with {drawn.c} as a placeholder so the rest of the work could continue."
             ),
             mapping=(
                 "`try`/`catch` is a net beneath the leap. The throw "
@@ -135,9 +130,7 @@ G7_02 = SubjectCurriculum(grade=7, subject_id="G7-02",
                 "what the form yields — here, the placeholder -1."
             ),
             resolution=(
-                "the throw happened, the catch caught it, and the form "
-                "yielded -1 — the placeholder Mossback had specified."
-            ),
+                'the throw happened, the catch caught it, and the form yielded {drawn.c} — the placeholder Mossback had specified.'           ),
             tags=("story",),
         ),
         SubjectExample(
@@ -150,7 +143,7 @@ G7_02 = SubjectCurriculum(grade=7, subject_id="G7-02",
                 "Hare had bet that the safety net would always activate "
                 "— that the catch-arm was the only path a form ever "
                 "took. Mossback disagreed and set up a simple trial: "
-                "a plain number inside a `try`, with a catch-arm ready."
+                "a plain number inside a `try`, with a catch-arm ready. The values drawn fresh were {drawn.a} and {drawn.b}."
             ),
             need=(
                 "She wanted to show Hare that when the leap goes "
@@ -182,10 +175,7 @@ G7_03 = SubjectCurriculum(grade=7, subject_id="G7-03",
             question_what="what the try block returns when finally runs",
             goal_text="evaluate a number in a try block, then run a finally clause for cleanup",
             scenario=(
-                "Mossback the tortoise always folded her safety net "
-                "after each practice jump, no matter how the leap "
-                "went. She asked the runtime to do the same: carry out "
-                "the cleanup step after the form, regardless of outcome."
+                'Mossback the tortoise always folded her safety net after each practice jump, no matter how the leap went. She asked the runtime to do the same: carry out the cleanup step after the form, regardless of outcome. The values drawn fresh were 7 and :cleanup.'
             ),
             need=(
                 "She needed the cleanup to run reliably while the "
@@ -210,10 +200,7 @@ G7_03 = SubjectCurriculum(grade=7, subject_id="G7-03",
             question_what="what the outer catch handler returns after the inner finally runs",
             goal_text="evaluate a division by zero with an inner finally clause, caught by an outer handler",
             scenario=(
-                "Mossback set up two nets — an inner one with a cleanup "
-                "flag, and an outer one that would catch anything the "
-                "inner net missed. The inner practice ditch held an "
-                "impossible division."
+                'Mossback set up two nets — an inner one with a cleanup flag, and an outer one that would catch anything the inner net missed. The inner practice ditch held an impossible division. The values drawn fresh were 1, 0, :ran, and -1.'
             ),
             need=(
                 "The inner net's cleanup had to run before the throw "
@@ -247,10 +234,7 @@ G7_04 = SubjectCurriculum(grade=7, subject_id="G7-04",
             question_what="what data map is attached to the ex-info",
             goal_text="throw an ex-info with attached data and extract the data map from the caught exception",
             scenario=(
-                "Mossback's alarm horn carried a data-map slip for "
-                "extra context — not just a sound but a note describing "
-                "what went wrong. She needed to recover that note "
-                "after the catch-arm caught the alarm."
+                "Mossback's alarm horn carried a data-map slip for extra context — not just a sound but a note describing what went wrong. She needed to recover that note after the catch-arm caught the alarm. The values drawn fresh were bad and :a."
             ),
             need=(
                 "The slip had to come off the horn intact so she "
@@ -275,10 +259,7 @@ G7_04 = SubjectCurriculum(grade=7, subject_id="G7-04",
             question_what="what value is at a specific key in the ex-info's data",
             goal_text="throw an ex-info with data, catch it, and extract the value at key :k",
             scenario=(
-                "The slip of paper tied to Mossback's alarm horn had "
-                "several labeled compartments. After catching the horn, "
-                "she needed only the note in one specific compartment — "
-                "the one labeled `:k`."
+                "The slip of paper tied to Mossback's alarm horn had several labeled compartments. After catching the horn, she needed only the note in one specific compartment — the one labeled `:k`. The values drawn fresh were x, :k, and :v."
             ),
             need=(
                 "Pulling the entire data map was more than she needed; "
@@ -342,7 +323,7 @@ G7_05 = SubjectCurriculum(grade=7, subject_id="G7-05",
                 "Hare insisted that zero acorns was the same as no "
                 "acorns — an empty pouch and a pouch with zero were "
                 "equivalent. Mossback shook her head and put the "
-                "question to the runtime."
+                "question to the runtime. The value drawn fresh was {drawn.a}."
             ),
             need=(
                 "She wanted the runtime to decide: is the number zero "
@@ -494,10 +475,7 @@ G7_07 = SubjectCurriculum(grade=7, subject_id="G7-07",
             question_what="what is returned after the assertion succeeds",
             goal_text="assert that 1 equals 1, then return a numeric code",
             scenario=(
-                "Mossback always checked that the starting line was "
-                "correctly marked before beginning any timed run. The "
-                "assertion was her chalk-mark inspection: if the marks "
-                "matched, the run could proceed."
+                'Mossback always checked that the starting line was correctly marked before beginning any timed run. The assertion was her chalk-mark inspection: if the marks matched, the run could proceed. The value drawn fresh was 1.'
             ),
             need=(
                 "She needed the inspection to pass silently and let the "
@@ -525,7 +503,7 @@ G7_07 = SubjectCurriculum(grade=7, subject_id="G7-07",
                 "Hare had drawn the starting marks incorrectly — the "
                 "two chalk numbers did not match. The assertion caught "
                 "the mismatch immediately. A safety net was ready to "
-                "catch the resulting alarm."
+                "catch the resulting alarm. The values drawn fresh were {drawn.a}, {drawn.b}, and {drawn.c}."
             ),
             need=(
                 "The alarm had to be caught outside so the run could "
@@ -559,10 +537,7 @@ G7_08 = SubjectCurriculum(grade=7, subject_id="G7-08",
             question_what="what string is produced when printing the number 42",
             goal_text="print the number 42 and capture the output string",
             scenario=(
-                "Mossback the tortoise had announced the day's acorn "
-                "count in a loud voice — `prn`-style, readable by the "
-                "REPL — and she wanted to capture the exact words "
-                "on a scroll rather than letting them vanish into the air."
+                "Mossback the tortoise had announced the day's acorn count in a loud voice — `prn`-style, readable by the REPL — and she wanted to capture the exact words on a scroll rather than letting them vanish into the air. The value drawn fresh was 42."
             ),
             need=(
                 "She needed the announcement as a string she could "
@@ -589,10 +564,7 @@ G7_08 = SubjectCurriculum(grade=7, subject_id="G7-08",
             question_what="what string is produced when printing a keyword",
             goal_text="print the keyword :hare and capture the output string",
             scenario=(
-                "Hare had shouted his own name as a keyword — colon "
-                "and all — during the morning announcements. Mossback "
-                "wanted to preserve the exact text of the shout on "
-                "a scroll so she could check it later."
+                'Hare had shouted his own name as a keyword — colon and all — during the morning announcements. Mossback wanted to preserve the exact text of the shout on a scroll so she could check it later. The value drawn fresh was :hare.'
             ),
             need=(
                 "The announcement had to be captured as a string "
@@ -626,10 +598,7 @@ G7_09 = SubjectCurriculum(grade=7, subject_id="G7-09",
             question_what="what tap> returns when sending a value",
             goal_text="send a keyword into the tap pool",
             scenario=(
-                "Mossback the tortoise kept a quiet listener at the "
-                "edge of the meadow — a watcher who would receive any "
-                "value she whispered its way. She wanted to whisper "
-                "a greeting without interrupting the main run."
+                'Mossback the tortoise kept a quiet listener at the edge of the meadow — a watcher who would receive any value she whispered its way. She wanted to whisper a greeting without interrupting the main run. The value drawn fresh was :hello.'
             ),
             need=(
                 "The whisper had to reach the listener and confirm "
@@ -656,10 +625,7 @@ G7_09 = SubjectCurriculum(grade=7, subject_id="G7-09",
             question_what="what tap> returns when sending a number",
             goal_text="send a number into the tap pool",
             scenario=(
-                "During a count of the day's acorns, Mossback wanted "
-                "to whisper the running tally to the listener at the "
-                "meadow's edge — for observation only — without "
-                "changing what the main form returned."
+                "During a count of the day's acorns, Mossback wanted to whisper the running tally to the listener at the meadow's edge — for observation only — without changing what the main form returned. The value drawn fresh was 42."
             ),
             need=(
                 "She needed the tally to reach the listener while the "
@@ -748,9 +714,7 @@ G7_11 = SubjectCurriculum(grade=7, subject_id="G7-11",
                 "ring."
             ),
             resolution=(
-                "the message text came back from the caught exception, "
-                "and Mossback had the context she needed to diagnose "
-                "the stumble."
+                'the message text came back from the caught exception, and Mossback had the context she needed to diagnose the stumble (with `oops` as the input value).'
             ),
             tags=("story",),
         ),
@@ -802,7 +766,7 @@ G7_12 = SubjectCurriculum(grade=7, subject_id="G7-12",
             scenario=(
                 "Mossback the tortoise had a small two-line message on "
                 "a scroll — the word `hare` on one line, `tortoise` on "
-                "the next, each line ending with a newline-mark."
+                "the next, each line ending with a newline-mark. The value drawn fresh was {drawn.a}."
             ),
             need=(
                 "She wanted to know whether the message would fit in "
@@ -831,7 +795,7 @@ G7_12 = SubjectCurriculum(grade=7, subject_id="G7-12",
                 "Mossback had a scroll with three short entries, each "
                 "on its own line. She wanted to process each entry "
                 "separately, but the scroll handed them to her as "
-                "one long string with newline-marks between them."
+                "one long string with newline-marks between them. The form's value to weigh was \"a\nb\nc\"."
             ),
             need=(
                 "She needed the scroll's contents split at each "
@@ -844,9 +808,7 @@ G7_12 = SubjectCurriculum(grade=7, subject_id="G7-12",
                 "and returns a vector of the pieces between them."
             ),
             resolution=(
-                "the scroll's entries came back as a vector of "
-                "separate strings — each line its own element, "
-                "ready for individual handling."
+                "the scroll's entries came back as a vector of separate strings — each line its own element, ready for individual handling (with `a\\nb\\nc` as the input value)."
             ),
             tags=("story",),
         ),
@@ -865,10 +827,7 @@ G7_13 = SubjectCurriculum(grade=7, subject_id="G7-13",
             question_what="how many lines are in the text",
             goal_text="count the lines in a multi-line string",
             scenario=(
-                "Mossback had received a scroll with an unknown number "
-                "of entries. Before processing she needed a line count "
-                "so she could allocate the right number of pouches "
-                "for the results."
+                'Mossback had received a scroll with an unknown number of entries. Before processing she needed a line count so she could allocate the right number of pouches for the results. The value drawn fresh was a\\nb\\nc.'
             ),
             need=(
                 "She wanted the total number of lines — not the lines "
@@ -894,10 +853,7 @@ G7_13 = SubjectCurriculum(grade=7, subject_id="G7-13",
             question_what="what the initial line is",
             goal_text="get the initial line from splitting a multi-line string",
             scenario=(
-                "Mossback's scroll had a header line at the top — "
-                "the most important entry — followed by a continuation. "
-                "She needed to read only the opening line without "
-                "unrolling the entire scroll."
+                "Mossback's scroll had a header line at the top — the most important entry — followed by a continuation. She needed to read only the opening line without unrolling the entire scroll. The value drawn fresh was first\\nsecond."
             ),
             need=(
                 "She wanted just the header string — the opening "
@@ -932,10 +888,7 @@ G7_14 = SubjectCurriculum(grade=7, subject_id="G7-14",
             question_what="what output is captured within the scope",
             goal_text="capture the output of printing within a resource-scoped block",
             scenario=(
-                "Mossback needed to unroll a scroll, write Hare's name "
-                "on it with a newline, and then roll the scroll back up "
-                "cleanly — all in one scoped action. The scroll had to "
-                "be handed back as a string, not left open."
+                "Mossback needed to unroll a scroll, write Hare's name on it with a newline, and then roll the scroll back up cleanly — all in one scoped action. The scroll had to be handed back as a string, not left open. The value drawn fresh was hare."
             ),
             need=(
                 "She needed the scroll-write scoped so the scroll was "
@@ -969,10 +922,7 @@ G7_15 = SubjectCurriculum(grade=7, subject_id="G7-15",
             question_what="what is captured when output is redirected",
             goal_text="redirect the output stream and capture what is printed",
             scenario=(
-                "Mossback knew the meadow had a loud-voice channel — "
-                "`*out*` — that every `print` call wrote to. She wanted "
-                "to redirect that channel into a scroll temporarily "
-                "so she could inspect what was written."
+                'Mossback knew the meadow had a loud-voice channel — `*out*` — that every `print` call wrote to. She wanted to redirect that channel into a scroll temporarily so she could inspect what was written. The value drawn fresh was x.'
             ),
             need=(
                 "She needed the redirected output as a string so the "
@@ -1037,7 +987,7 @@ G7_16 = SubjectCurriculum(grade=7, subject_id="G7-16",
                 "Mossback received a scroll whose contents were written "
                 "in EDN — the data notation the meadow uses for "
                 "structured scrolls. The scroll held a single number "
-                "written in plain characters."
+                "written in plain characters. The form's value to weigh was \"42\"."
             ),
             need=(
                 "She needed to convert the characters on the scroll "
@@ -1065,7 +1015,7 @@ G7_16 = SubjectCurriculum(grade=7, subject_id="G7-16",
                 "A scroll arrived from the supply post with a map "
                 "of resource allocations written in EDN notation — "
                 "curly braces, keywords, and numbers. Mossback wanted "
-                "to turn the scroll's text into a live map."
+                "to turn the scroll's text into a live map. The form's value to weigh was \"{:a 1}\"."
             ),
             need=(
                 "She needed the EDN text converted to a real Clojure "
@@ -1093,7 +1043,7 @@ G7_16 = SubjectCurriculum(grade=7, subject_id="G7-16",
                 "The day's race roster arrived on a scroll as an EDN "
                 "vector of participant keywords — square brackets, "
                 "colon-prefixed names. Mossback needed it as a "
-                "real vector to loop over."
+                "real vector to loop over. The form's value to weigh was \"[:hare :tortoise]\"."
             ),
             need=(
                 "She needed the roster converted from its string form "
@@ -1130,7 +1080,7 @@ G7_17 = SubjectCurriculum(grade=7, subject_id="G7-17",
                 "Mossback needed to send a resource map across the "
                 "meadow — write it onto a scroll with `pr-str`, hand "
                 "the scroll to a runner, then read it back from the "
-                "scroll on the other side with `read-string`."
+                "scroll on the other side with `read-string`. The form's keyword to weigh was :a."
             ),
             need=(
                 "She needed the recovered map to be identical to "
@@ -1159,7 +1109,7 @@ G7_17 = SubjectCurriculum(grade=7, subject_id="G7-17",
                 "Mossback's lap-count vector — three numbers from the "
                 "morning's practice — needed to be written onto a "
                 "scroll, handed across the meadow, and read back "
-                "as a working vector."
+                "as a working vector. The value at the heart of the form was 1."
             ),
             need=(
                 "She needed the vector to survive the scroll journey "
@@ -1173,8 +1123,7 @@ G7_17 = SubjectCurriculum(grade=7, subject_id="G7-17",
                 "through the roundtrip."
             ),
             resolution=(
-                "the lap counts came back in order — the scroll "
-                "journey was lossless, and the tally was intact."
+                'the lap counts came back in order — the scroll journey was lossless, and the tally was intact (with `3` as the input value).'
             ),
             tags=("story",),
         ),
@@ -1197,7 +1146,7 @@ G7_18 = SubjectCurriculum(grade=7, subject_id="G7-18",
                 "Mossback had borrowed a tool from the host toolshed "
                 "by writing a descriptor map — a ticket with the tool's "
                 "name and its arguments. Before dispatching the request "
-                "she wanted to confirm the tool name on the ticket."
+                "she wanted to confirm the tool name on the ticket. The values drawn fresh were {drawn.a} and {drawn.b}."
             ),
             need=(
                 "She needed to read the `:cmd` field from the "
@@ -1226,7 +1175,7 @@ G7_18 = SubjectCurriculum(grade=7, subject_id="G7-18",
                 "The toolshed ticket for the echo tool had an arguments "
                 "vector attached. Mossback needed to count how many "
                 "arguments were packed into the ticket before "
-                "dispatching it to the host."
+                "dispatching it to the host. The values drawn fresh were {drawn.a} and {drawn.b}."
             ),
             need=(
                 "She wanted the argument count as a number so she "

@@ -11,3 +11,8 @@ build/
 .clj-kondo/.cache/
 .lsp/
 .portal/
+
+# accidental relative-path mmap artifacts (from a smoke run that resolved
+# bank-path="" to "" prefixes in cwd). Real banks live under /data on Modal.
+/.[0-9].bin
+/-net.[0-9].bin

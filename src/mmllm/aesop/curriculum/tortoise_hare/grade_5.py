@@ -40,7 +40,7 @@ G5_01 = SubjectCurriculum(grade=5, subject_id="G5-01",
             scenario=(
                 "The trail split into two arms — the left arm marked :a, "
                 "the right arm marked :b. A stone at the fork was carved "
-                "with the word `true`."
+                "with the word `true`. The values drawn fresh were {drawn.a} and {drawn.b}."
             ),
             need=(
                 "Mossback the tortoise needed to know which arm the "
@@ -52,8 +52,10 @@ G5_01 = SubjectCurriculum(grade=5, subject_id="G5-01",
                 "Here the stone reads `true`, so the first arm is taken."
             ),
             resolution=(
-                "the runtime took the first arm and returned the value "
-                "that arm carried."
+                "the trail forked cold and clear; the truthy stone sent "
+                "the runner down the first arm, and the runtime — letting "
+                "one step settle before the next — handed back the value "
+                "that arm carried, the other lane left walked-past."
             ),
             tags=("story",),
         ),
@@ -66,7 +68,7 @@ G5_01 = SubjectCurriculum(grade=5, subject_id="G5-01",
             scenario=(
                 "The same forked trail — left arm :a, right arm :b — "
                 "but this time the condition-stone at the split was "
-                "carved with the word `false`."
+                "carved with the word `false`. The values drawn fresh were {drawn.a} and {drawn.b}."
             ),
             need=(
                 "Mossback wanted to know which arm the runtime would "
@@ -90,18 +92,14 @@ G5_01 = SubjectCurriculum(grade=5, subject_id="G5-01",
             question_what="the if's branch",
             goal_text="choose between :a and :b based on whether 5 is greater than 3",
             scenario=(
-                "The trail forked near a mossy boulder. The condition-stone "
-                "at the split was carved `(> 5 3)` — a comparison between "
-                "two pebble-counts left there by a previous traveller."
+                'The trail forked near a mossy boulder. The condition-stone at the split was carved `(> {drawn.a} {drawn.b})` — a comparison between two pebble-counts left there by a previous traveller.'
             ),
             need=(
                 "Before taking a step, Mossback needed the runtime to "
                 "test the stone's comparison and pick the correct arm."
             ),
             mapping=(
-                "`if` evaluates the condition first. `(> 5 3)` is true, "
-                "so the fork resolves to the first arm; the second arm "
-                "is never entered."
+                '`if` evaluates the condition first. `(> {drawn.a} {drawn.b})` is true, so the fork resolves to the first arm; the second arm is never entered.'
             ),
             resolution=(
                 "the comparison proved true, the first arm was taken, "
@@ -132,11 +130,7 @@ G5_02 = SubjectCurriculum(grade=5, subject_id="G5-02",
                 "the basket plus whichever amount the fork-gate released."
             ),
             mapping=(
-                "`if` is the fork-gate — it returns `10` when the "
-                "condition is true, `20` when false. The outer `+` "
-                "then adds that result to the fixed `1` in the basket. "
-                "Here the condition-stone reads `true`, so the gate "
-                "drops ten."
+                '`if` is the fork-gate — it returns `{drawn.b}` when the condition is true, `{drawn.c}` when false. The outer `+` then adds that result to the fixed `{drawn.a}` in the basket. Here the condition-stone reads `true`, so the gate drops ten.'
             ),
             resolution=(
                 "the gate released ten acorns; added to the one already "
@@ -160,7 +154,7 @@ G5_03 = SubjectCurriculum(grade=5, subject_id="G5-03",
                 "A single-arm fork stood at the edge of the meadow. "
                 "There was no second path — the arm led forward only "
                 "if the condition-stone was true; otherwise nothing "
-                "happened at all."
+                "happened at all. The value drawn fresh was {drawn.a}."
             ),
             need=(
                 "Mossback wanted to know what the runtime returned when "
@@ -188,7 +182,7 @@ G5_03 = SubjectCurriculum(grade=5, subject_id="G5-03",
             scenario=(
                 "The same one-armed fork — arm labeled :yes — but the "
                 "condition-stone carved into the post read `false` this "
-                "time. The arm led nowhere the runtime could go."
+                "time. The arm led nowhere the runtime could go. The value drawn fresh was {drawn.a}."
             ),
             need=(
                 "Mossback needed to know what the runtime produced when "
@@ -200,8 +194,10 @@ G5_03 = SubjectCurriculum(grade=5, subject_id="G5-03",
                 "the Clojure nil, the empty-handed result."
             ),
             resolution=(
-                "the arm was closed; the runtime turned back empty-handed "
-                "and returned nothing."
+                "the trail's gate stood closed at the test; the body-arm "
+                "was never walked, and the runtime — minding the order "
+                "without skipping — turned back empty-handed, the "
+                "closed-gate verdict spoken by silence."
             ),
             tags=("story",),
         ),
@@ -218,9 +214,7 @@ G5_04 = SubjectCurriculum(grade=5, subject_id="G5-04",
             question_what="the value of the first arm whose stone reads true",
             goal_text="walk three condition-stones in order, taking the arm whose stone first reads true",
             scenario=(
-                "The trail forked into three arms, each marked by a "
-                "small condition-stone — the first carved `(= 1 2)`, "
-                "the second `(= 1 1)`, the third `:else`."
+                'The trail forked into three arms, each marked by a small condition-stone — the first carved `(= {drawn.a} {drawn.b})`, the second `(= {drawn.a} {drawn.a})`, the third `:else`.'
             ),
             need=(
                 "Mossback the tortoise wanted the runtime to walk the "
@@ -234,8 +228,10 @@ G5_04 = SubjectCurriculum(grade=5, subject_id="G5-04",
                 "reached."
             ),
             resolution=(
-                "the runtime took the second arm and returned :b, the "
-                "value that arm carried."
+                "the runtime walked past the failed first stone, found "
+                "the second stone's test true, and — minding each part "
+                "in its turn — handed back the value of the second arm, "
+                "no further arms consulted."
             ),
             tags=("story",),
         ),
@@ -255,7 +251,7 @@ G5_05 = SubjectCurriculum(grade=5, subject_id="G5-05",
                 "The trail forked three times. The first stone read "
                 "`false`; the second also read `false`. At the end "
                 "of the row stood a final post marked `:else` — the "
-                "catch-all arm that was always open."
+                "catch-all arm that was always open. The values drawn fresh were {drawn.a}, {drawn.b}, and {drawn.c}."
             ),
             need=(
                 "Mossback needed the runtime to walk the stones in "
@@ -289,24 +285,16 @@ G5_06 = SubjectCurriculum(grade=5, subject_id="G5-06",
             question_what="the matched branch",
             goal_text="match the value 2 against clauses and return the corresponding value",
             scenario=(
-                "Three numbered gates stood along the path, each "
-                "bearing a tag: gate 1 carried :one, gate 2 carried "
-                ":two, gate 3 carried :three. A final unlabelled gate "
-                "at the end carried :default."
+                'Three numbered gates stood along the path, each bearing a tag: gate {drawn.b} carried :one, gate {drawn.a} carried :two, gate {drawn.e} carried :three. A final unlabelled gate at the end carried :default.'
             ),
             need=(
-                "Mossback arrived carrying the number 2 and needed "
-                "to know which gate's tag the runtime would return."
+                "Mossback arrived carrying the number {drawn.a} and needed to know which gate's tag the runtime would return."
             ),
             mapping=(
-                "`case` compares the key value against each literal "
-                "in turn. The key `2` matches the second gate, so "
-                "its tag is returned; the other gates and the "
-                "default are never opened."
+                '`case` compares the key value against each literal in turn. The key `{drawn.a}` matches the second gate, so its tag is returned; the other gates and the default are never opened.'
             ),
             resolution=(
-                "the key matched gate 2; the runtime returned the "
-                "tag attached to that gate."
+                'the key matched gate {drawn.a}; the runtime returned the tag attached to that gate.'
             ),
             tags=("story",),
         ),
@@ -317,20 +305,13 @@ G5_06 = SubjectCurriculum(grade=5, subject_id="G5-06",
             question_what="the default branch",
             goal_text="match the value 99 against clauses and return the default when no match is found",
             scenario=(
-                "Two numbered gates — 1 and 2 — stood on the path "
-                "with their tags. At the very end waited a gate with "
-                "no number at all, labeled :default."
+                'Two numbered gates — {drawn.b} and {drawn.d} — stood on the path with their tags. At the very end waited a gate with no number at all, labeled :default.'
             ),
             need=(
-                "Mossback arrived carrying the number 99 — a key "
-                "that matched neither numbered gate. She needed to "
-                "know where the runtime would go."
+                'Mossback arrived carrying the number {drawn.a} — a key that matched neither numbered gate. She needed to know where the runtime would go.'
             ),
             mapping=(
-                "`case` scans the numbered gates in order. Neither "
-                "1 nor 2 matches 99, so both are passed. The "
-                "un-numbered default gate is then taken, returning "
-                "its tag."
+                '`case` scans the numbered gates in order. Neither {drawn.b} nor {drawn.d} matches {drawn.a}, so both are passed. The un-numbered default gate is then taken, returning its tag.'
             ),
             resolution=(
                 "no numbered gate matched; the runtime reached the "
@@ -351,9 +332,7 @@ G5_07 = SubjectCurriculum(grade=5, subject_id="G5-07",
             question_what="the last truthy value",
             goal_text="return the last value when all values are truthy",
             scenario=(
-                "Three wooden gates stood in a row on the trail — "
-                "each one labeled with a value: the first `1`, the "
-                "second `2`, the third `3`. All three were swung open."
+                'Three wooden gates stood in a row on the trail — each one labeled with a value: the first `{drawn.a}`, the second `{drawn.b}`, the third `{drawn.c}`. All three were swung open.'
             ),
             need=(
                 "Mossback needed to walk through all three gates and "
@@ -419,14 +398,10 @@ G5_08 = SubjectCurriculum(grade=5, subject_id="G5-08",
                 "was true, the flip-gate shut tight (false)."
             ),
             need=(
-                "Mossback needed to know what the flip-gate returned "
-                "after reading the carved comparison `(> 1 2)`."
+                'Mossback needed to know what the flip-gate returned after reading the carved comparison `(> {drawn.a} {drawn.b})`.'
             ),
             mapping=(
-                "`not` wraps the inner comparison. `(> 1 2)` is false "
-                "because 1 is not greater than 2. `not` flips that "
-                "result — false becomes the opposite."
-            ),
+                '`not` wraps the inner comparison. `(> {drawn.a} {drawn.b})` is false because {drawn.a} is not greater than 2. `not` flips that result — false becomes the opposite.'           ),
             resolution=(
                 "the inner comparison was false; the flip-gate inverted "
                 "it and the gate returned the opposite truth value."
@@ -509,7 +484,7 @@ G5_10 = SubjectCurriculum(grade=5, subject_id="G5-10",
             expected=[1,4,9,16],
             concept_phrase="mapping a squaring operation over a vector",
             question_what="the sequence produced by mapping a squaring rule over the vector containing 1, 2, 3, and 4",
-            goal_text="apply a squaring operation to each element of the vector containing 1, 2, 3, and 4, returning a sequence",
+            goal_text="apply a squaring operation to each element of the vector [1 2 3 4] returning a sequence",
             scenario=(
                 "A row of four acorn-caps lay on the flat stone — "
                 "counts of 1, 2, 3, and 4. A second sieve waited, "
@@ -545,11 +520,11 @@ G5_11 = SubjectCurriculum(grade=5, subject_id="G5-11",
             expected=[2,4],
             concept_phrase="filtering even elements from a vector",
             question_what="the sequence produced by filtering even? over the vector containing 1, 2, 3, and 4",
-            goal_text="keep the even elements from the vector containing 1, 2, 3, and 4",
+            goal_text="keep the even elements from the vector [1 2 3 4]",
             scenario=(
                 "A row of four pebbles — counts 1, 2, 3, and 4 — "
                 "approached a sieve whose mesh let through only even "
-                "counts. Odd ones were caught and held back."
+                "counts. Odd ones were caught and held back. The value drawn fresh was {drawn.a}."
             ),
             need=(
                 "Mossback needed to collect only the pebbles whose "
@@ -573,11 +548,11 @@ G5_11 = SubjectCurriculum(grade=5, subject_id="G5-11",
             expected=[1,2],
             concept_phrase="filtering positive elements from a vector",
             question_what="the sequence produced by filtering pos? over the vector containing -2, -1, 0, 1, and 2",
-            goal_text="keep the positive elements from the vector containing -2, -1, 0, 1, and 2",
+            goal_text="keep the positive elements from the vector [-2 -1 0 1 2]",
             scenario=(
                 "Five pebbles lay in a row — counts -2, -1, 0, 1, "
                 "and 2. A sieve with the `pos?` rule waited: only "
-                "pebbles with a strictly positive count would pass."
+                "pebbles with a strictly positive count would pass. The value drawn fresh was {drawn.a}."
             ),
             need=(
                 "Bramble the hare needed to pour the row through "
@@ -608,10 +583,10 @@ G5_12 = SubjectCurriculum(grade=5, subject_id="G5-12",
             expected=10,
             concept_phrase="the fold operation",
             question_what="the running tally after walking 1, 2, 3, 4 with + as the combine step",
-            goal_text="walk the row of pebbles 1, 2, 3, 4 carrying a tally that combines each with + into the running total",
+            goal_text="walk the row of pebbles [1 2 3 4] carrying a tally that combines each with + into the running total",
             scenario=(
                 "A row of four small pebbles lay along the path — "
-                "counts of 1, 2, 3, and 4 from four foraging trips."
+                "counts of 1, 2, 3, and 4 from four foraging trips. The value drawn fresh was {drawn.a}."
             ),
             need=(
                 "Mossback the tortoise wanted the grand total of the "
@@ -637,11 +612,11 @@ G5_12 = SubjectCurriculum(grade=5, subject_id="G5-12",
             expected=120,
             concept_phrase="the fold operation",
             question_what="the product produced by walking 1, 2, 3, 4, 5 with * as the combine step",
-            goal_text="fold * over the vector containing 1, 2, 3, 4, and 5, computing their product",
+            goal_text="fold * over the vector [1 2 3 4 5] computing their product",
             scenario=(
                 "A row of five pebbles lay along the path — counts "
                 "1, 2, 3, 4, and 5 from five foraging trips. Mossback "
-                "needed a running product rather than a running sum."
+                "needed a running product rather than a running sum. The value drawn fresh was {drawn.a}."
             ),
             need=(
                 "She would walk the row carrying a tally that "
@@ -664,13 +639,13 @@ G5_12 = SubjectCurriculum(grade=5, subject_id="G5-12",
             form="(reduce max [3 1 4 1 5 9 2 6])",
             expected=9,
             concept_phrase="the fold operation",
-            question_what="the largest pebble found by walking 3, 1, 4, 1, 5, 9, 2, 6 with max as the combine step",
-            goal_text="fold max over the vector containing 3, 1, 4, 1, 5, 9, 2, and 6, finding the maximum",
+            question_what="the largest pebble found by walking [3 1 4 1 5 9 2 6] with max as the combine step",
+            goal_text="fold max over the vector [3 1 4 1 5 9 2 6] finding the maximum",
             scenario=(
                 "Eight pebbles of varying size lay along the trail. "
                 "Mossback wanted the largest without lifting all eight "
                 "at once — she would carry the current champion and "
-                "compare it to each new pebble as she walked."
+                "compare it to each new pebble as she walked. The value drawn fresh was {drawn.a}."
             ),
             need=(
                 "Walking the row with `max` as the combine step "
@@ -703,10 +678,7 @@ G5_13 = SubjectCurriculum(grade=5, subject_id="G5-13",
             question_what="the sum produced by walking 1, 2, 3 with + and an opening tally of 100",
             goal_text="fold + over the vector containing 1, 2, 3 starting from an initial accumulator of 100",
             scenario=(
-                "Mossback set out already carrying a tally of 100 "
-                "acorns in her basket — the count from yesterday's "
-                "haul. Three more pebbles lay along today's path, "
-                "labeled 1, 2, and 3."
+                "Mossback set out already carrying a tally of {drawn.a} acorns in her basket — the count from yesterday's haul. Three more pebbles lay along today's path, labeled 1, 2, and 3. The value drawn fresh was {drawn.a}."
             ),
             need=(
                 "She wanted to walk today's row and add each "
@@ -721,9 +693,7 @@ G5_13 = SubjectCurriculum(grade=5, subject_id="G5-13",
                 "to right until the row is done."
             ),
             resolution=(
-                "the three pebbles were walked into the tally "
-                "that began at 100, producing the combined total "
-                "of all four values."
+                'the three pebbles were walked into the tally that began at {drawn.a}, producing the combined total of all four values.'
             ),
             tags=("story",),
         ),
@@ -734,9 +704,7 @@ G5_13 = SubjectCurriculum(grade=5, subject_id="G5-13",
             question_what="the tally returned when walking an empty row with + and an opening tally of 0",
             goal_text="fold + over an empty sequence starting from an initial accumulator of 0",
             scenario=(
-                "Mossback arrived at an empty patch of trail — no "
-                "pebbles lay on it at all. She was already carrying "
-                "a tally of 0 in her basket before the walk began."
+                'Mossback arrived at an empty patch of trail — no pebbles lay on it at all. She was already carrying a tally of {drawn.a} in her basket before the walk began.'
             ),
             need=(
                 "With no pebbles to walk, she needed to know what "
@@ -766,12 +734,12 @@ G5_14 = SubjectCurriculum(grade=5, subject_id="G5-14",
             expected=10,
             concept_phrase="applying + to vector elements",
             question_what="the result of spreading the basket of 1, 2, 3, 4 as ingredients into +",
-            goal_text="apply + to the elements of the vector containing 1, 2, 3, and 4",
+            goal_text="apply + to the elements of the vector [1 2 3 4]",
             scenario=(
                 "A recipe-card for `+` was pinned at the post. "
                 "Beside it sat a basket holding four acorns — counts "
                 "1, 2, 3, and 4. `apply` would spread the basket's "
-                "contents as individual ingredients into the recipe."
+                "contents as individual ingredients into the recipe. The value drawn fresh was {drawn.a}."
             ),
             need=(
                 "Mossback needed to know the total that came out "
@@ -795,12 +763,12 @@ G5_14 = SubjectCurriculum(grade=5, subject_id="G5-14",
             expected=5,
             concept_phrase="applying max to vector elements",
             question_what="the largest count found after spreading the basket of 3, 1, 4, 1, 5 into max",
-            goal_text="apply max to the elements of the vector containing 3, 1, 4, 1, and 5",
+            goal_text="apply max to the elements of the vector [3 1 4 1 5]",
             scenario=(
                 "Five pebbles sat in a basket — counts 3, 1, 4, 1, "
                 "and 5. A `max` recipe-card waited at the post, "
                 "ready to receive all five pebbles at once and "
-                "return the largest."
+                "return the largest. The value drawn fresh was {drawn.a}."
             ),
             need=(
                 "Bramble the hare needed the largest pebble-count "
@@ -924,11 +892,7 @@ G5_16 = SubjectCurriculum(grade=5, subject_id="G5-16",
             question_what="the sequence produced by mapping the half-loaded * card pre-filled with 3 over the vector containing 1, 2, and 3",
             goal_text="apply a partially applied multiplication to each element of the vector containing 1, 2, and 3",
             scenario=(
-                "A row of three acorns — counts 1, 2, and 3 — "
-                "waited at the sieve. The sieve's rule was a "
-                "half-loaded recipe: `*` with the first slot "
-                "pre-filled with `3`, ready to triple whatever "
-                "acorn came through."
+                "A row of three acorns — counts 1, 2, and {drawn.a} — waited at the sieve. The sieve's rule was a half-loaded recipe: `*` with the first slot pre-filled with `{drawn.a}`, ready to triple whatever acorn came through."
             ),
             need=(
                 "Mossback needed to pour the row through the "
@@ -936,10 +900,7 @@ G5_16 = SubjectCurriculum(grade=5, subject_id="G5-16",
                 "on the other side."
             ),
             mapping=(
-                "`partial` fixes the first argument of `*` as `3`. "
-                "The resulting one-slot recipe is given to `map` "
-                "as the sieve rule. Each acorn-count is multiplied "
-                "by 3 as it passes through."
+                '`partial` fixes the first argument of `*` as `{drawn.a}`. The resulting one-slot recipe is given to `map` as the sieve rule. Each acorn-count is multiplied by {drawn.a} as it passes through.'
             ),
             resolution=(
                 "all three acorns passed through the tripling-sieve "
@@ -994,12 +955,12 @@ G5_18 = SubjectCurriculum(grade=5, subject_id="G5-18",
             expected=True,
             concept_phrase="checking if any element satisfies a predicate",
             question_what="whether any pebble in 1, 3, 5, 8, 7 passes the even? sieve",
-            goal_text="check if any element in the vector containing 1, 3, 5, 8, and 7 is even",
+            goal_text="check if any element in the vector [1 3 5 8 7] is even",
             scenario=(
                 "Five pebbles lay in a row — counts 1, 3, 5, 8, and "
                 "7. A checking-sieve with the `even?` rule stood at "
                 "the end, able to stop at the first pebble that "
-                "passed the rule."
+                "passed the rule. The value drawn fresh was {drawn.a}."
             ),
             need=(
                 "Mossback needed to know whether at least one pebble "
@@ -1015,7 +976,7 @@ G5_18 = SubjectCurriculum(grade=5, subject_id="G5-18",
             resolution=(
                 "a pebble in the row passed the even? rule; `some` "
                 "stopped there and returned a truthy result "
-                "confirming the find."
+                "confirming the find. The value drawn fresh was {drawn.a}."
             ),
             tags=("story",),
         ),
@@ -1064,7 +1025,7 @@ G5_19 = SubjectCurriculum(grade=5, subject_id="G5-19",
                 "Three pebbles — counts 1, 2, and 3 — lined up at "
                 "the all-or-nothing sieve. Its `pos?` rule would "
                 "pass the whole row only if every pebble satisfied "
-                "the rule; one failure would close the gate."
+                "the rule; one failure would close the gate. The value drawn fresh was {drawn.a}."
             ),
             need=(
                 "Mossback needed to know whether every pebble in "
@@ -1094,7 +1055,7 @@ G5_19 = SubjectCurriculum(grade=5, subject_id="G5-19",
                 "Three pebbles — counts 1, 2, and 3 — lined up at "
                 "the all-or-nothing sieve. Its `even?` rule required "
                 "every pebble to be even; one odd pebble would "
-                "close the gate immediately."
+                "close the gate immediately. The value drawn fresh was {drawn.a}."
             ),
             need=(
                 "Bramble needed to know whether the entire row "
@@ -1125,12 +1086,9 @@ G5_20 = SubjectCurriculum(grade=5, subject_id="G5-20",
             expected=[10,20,30],
             concept_phrase="taking elements from a sequence",
             question_what="the sequence produced by taking 3 elements from the row of 10, 20, 30, 40, 50",
-            goal_text="take the first 3 elements from the vector containing 10, 20, 30, 40, and 50",
+            goal_text="take the first 3 elements from the vector [10 20 30 40 50]",
             scenario=(
-                "Five pebbles lay in a row — counts 10, 20, 30, 40, "
-                "and 50. A counting-sieve stood at the front with "
-                "a gauge set to 3: it would let the first three "
-                "pebbles through and hold the rest back."
+                'Five pebbles lay in a row — counts 10, 20, 30, 40, and 50. A counting-sieve stood at the front with a gauge set to {drawn.a}: it would let the first three pebbles through and hold the rest back.'
             ),
             need=(
                 "Mossback needed only the first three pebbles "
@@ -1144,9 +1102,7 @@ G5_20 = SubjectCurriculum(grade=5, subject_id="G5-20",
                 "containing only those first elements."
             ),
             resolution=(
-                "the gauge stopped the sieve after three pebbles; "
-                "the first three counts came through as the "
-                "new row."
+                'the gauge stopped the sieve after three pebbles; the first {drawn.a} counts came through as the new row.'
             ),
             tags=("story",),
         ),
@@ -1155,12 +1111,9 @@ G5_20 = SubjectCurriculum(grade=5, subject_id="G5-20",
             expected=[30,40,50],
             concept_phrase="dropping elements from a sequence",
             question_what="the sequence produced by dropping 2 elements from the row of 10, 20, 30, 40, 50",
-            goal_text="drop the first 2 elements from the vector containing 10, 20, 30, 40, and 50",
+            goal_text="drop the first 2 elements from the vector [10 20 30 40 50]",
             scenario=(
-                "The same five pebbles — counts 10, 20, 30, 40, "
-                "and 50. A skip-sieve stood at the front with "
-                "its counter set to 2: it would skip the first two "
-                "pebbles and let the rest through."
+                'The same five pebbles — counts 10, 20, 30, 40, and 50. A skip-sieve stood at the front with its counter set to {drawn.a}: it would skip the first two pebbles and let the rest through.'
             ),
             need=(
                 "Bramble needed to know which pebbles remained "
@@ -1188,13 +1141,13 @@ G5_21 = SubjectCurriculum(grade=5, subject_id="G5-21",
             form="(distinct [1 1 2 3 3 4])",
             expected=[1,2,3,4],
             concept_phrase="removing duplicates from a sequence",
-            question_what="the sequence produced by passing 1, 1, 2, 3, 3, 4 through the dedup-sieve",
-            goal_text="remove duplicate elements from the vector containing 1, 1, 2, 3, 3, and 4",
+            question_what="the sequence produced by passing [1 1 2 3 3 4] through the dedup-sieve",
+            goal_text="remove duplicate elements from the vector [1 1 2 3 3 4]",
             scenario=(
                 "Six pebbles lay in a row — counts 1, 1, 2, 3, 3, "
                 "and 4 — with two duplicate pairs. A dedup-sieve "
                 "stood at the end: the first time a count passed "
-                "through it was kept; any repeat was held back."
+                "through it was kept; any repeat was held back. The value drawn fresh was {drawn.a}."
             ),
             need=(
                 "Mossback needed a row of unique counts and wanted "
@@ -1225,7 +1178,7 @@ G5_21 = SubjectCurriculum(grade=5, subject_id="G5-21",
                 "counts 3, 1, and 2, in no particular order. "
                 "A sorting-tray waited beside them: drop the "
                 "pebbles in and they would slide into ascending "
-                "order on their own."
+                "order on their own. The value drawn fresh was {drawn.a}."
             ),
             need=(
                 "Bramble needed the pebbles arranged from smallest "
@@ -1274,8 +1227,8 @@ G5_22 = SubjectCurriculum(grade=5, subject_id="G5-22",
                 "`(zero? n)` returns `acc`."
             ),
             resolution=(
-                "five laps later the step counter reached zero and the "
-                "tally — 5! — came back."
+                "lap after lap on the compact circuit, the counter fell "
+                "while the tally grew; the accumulated product came back."
             ),
             tags=("story",),
         ),

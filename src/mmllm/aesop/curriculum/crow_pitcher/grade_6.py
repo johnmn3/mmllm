@@ -115,8 +115,7 @@ G6_01 = SubjectCurriculum(grade=6, subject_id="G6-01",
                 "only the symbol-hood is shed."
             ),
             resolution=(
-                "The pitcher handed back the dotted path as a string, "
-                "the full designation now readable plain text."
+                'The pitcher handed back the dotted path as a string, the full designation now readable plain text (with `clojure.string` as the input value).'
             ),
             tags=("story",),
         ),
@@ -179,8 +178,7 @@ G6_02 = SubjectCurriculum(grade=6, subject_id="G6-02",
                 "segments arrives as an identical string, dots included."
             ),
             resolution=(
-                "The pitcher returned the dotted namespace path as a "
-                "string, ready for comparison against the copybook index."
+                'The pitcher returned the dotted namespace path as a string, ready for comparison against the copybook index (with `race.tortoise` as the input value).'
             ),
             tags=("story",),
         ),
@@ -209,8 +207,7 @@ G6_02 = SubjectCurriculum(grade=6, subject_id="G6-02",
                 "checks every scratch."
             ),
             resolution=(
-                "The pitcher confirmed the two carvings matched — the "
-                "merge could proceed without risk."
+                'The pitcher confirmed the two carvings matched — the merge could proceed without risk (with `race.tortoise` as the input value).'
             ),
             tags=("story",),
         ),
@@ -249,7 +246,7 @@ G6_03 = SubjectCurriculum(grade=6, subject_id="G6-03",
             ),
             resolution=(
                 "The pitcher returned the four letters in their capital "
-                "form, the fully-qualified call resolved cleanly."
+                "form, the fully-qualified call resolved cleanly. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -279,7 +276,7 @@ G6_03 = SubjectCurriculum(grade=6, subject_id="G6-03",
             ),
             resolution=(
                 "The pitcher returned the five letters in their lowercase "
-                "form, the shelf call reaching exactly the right groove."
+                "form, the shelf call reaching exactly the right groove. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -318,7 +315,7 @@ G6_04 = SubjectCurriculum(grade=6, subject_id="G6-04",
             ),
             resolution=(
                 "The pitcher confirmed both calls matched — the same "
-                "shelf reached twice returned the same capitalized result."
+                "shelf reached twice returned the same capitalized result. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -355,7 +352,7 @@ G6_05 = SubjectCurriculum(grade=6, subject_id="G6-05",
             ),
             resolution=(
                 "The pitcher returned the five letters in capitals, the "
-                "fully-qualified path guiding the runtime to the right groove."
+                "fully-qualified path guiding the runtime to the right groove. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -384,8 +381,7 @@ G6_05 = SubjectCurriculum(grade=6, subject_id="G6-05",
                 "The slash is the bridge between shelf and groove."
             ),
             resolution=(
-                "The pitcher returned the three-bead string with the order "
-                "reversed, the shelf call completing cleanly."
+                'The pitcher returned the three-bead string with the order reversed, the shelf call completing cleanly (with `abc` as the input value).'
             ),
             tags=("story",),
         ),
@@ -415,7 +411,7 @@ G6_05 = SubjectCurriculum(grade=6, subject_id="G6-05",
             ),
             resolution=(
                 "The pitcher returned the namespace portion — "
-                "the shelf's name carved before the slash."
+                "the shelf's name carved before the slash. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -445,7 +441,7 @@ G6_05 = SubjectCurriculum(grade=6, subject_id="G6-05",
             ),
             resolution=(
                 "The pitcher returned the local name — the portion after "
-                "the slash, stripped of its namespace prefix."
+                "the slash, stripped of its namespace prefix. (the keyword :owner)"
             ),
             tags=("story",),
         ),
@@ -483,7 +479,7 @@ G6_06 = SubjectCurriculum(grade=6, subject_id="G6-06",
             ),
             resolution=(
                 "The pitcher confirmed the private flag was present — "
-                "the marginal note showed true, the symbol marked internal."
+                "the marginal note showed true, the symbol marked internal. (the keyword :private)"
             ),
             tags=("story",),
         ),
@@ -513,7 +509,7 @@ G6_06 = SubjectCurriculum(grade=6, subject_id="G6-06",
             ),
             resolution=(
                 "The pitcher returned nil — no private mark in the "
-                "margin, the plain symbol carrying no access restriction."
+                "margin, the plain symbol carrying no access restriction. (the keyword :private)"
             ),
             tags=("story",),
         ),
@@ -550,8 +546,8 @@ G6_07 = SubjectCurriculum(grade=6, subject_id="G6-07",
                 "gating stone lands on the internal shelf."
             ),
             resolution=(
-                "The pitcher returned true — the private mark firmed "
-                "into a clean boolean, the internal shelf confirmed."
+                "The REPL confirmed the predicate held — — the private mark firmed "
+                "into a clean boolean, the internal shelf confirmed. (the keyword :private)"
             ),
             tags=("story",),
         ),
@@ -580,8 +576,8 @@ G6_07 = SubjectCurriculum(grade=6, subject_id="G6-07",
                 "of the rim."
             ),
             resolution=(
-                "The pitcher returned false — no private mark meant "
-                "nil, and nil firmed into a clean false."
+                "The REPL signalled the predicate did not hold — — no private mark meant "
+                "nil, and nil firmed into a clean false. (the keyword :private)"
             ),
             tags=("story",),
         ),
@@ -620,7 +616,7 @@ G6_08 = SubjectCurriculum(grade=6, subject_id="G6-08",
             ),
             resolution=(
                 "The pitcher returned the single letter capitalized — "
-                "the shelf reachable, the dependency path loop-free."
+                "the shelf reachable, the dependency path loop-free. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -649,8 +645,7 @@ G6_08 = SubjectCurriculum(grade=6, subject_id="G6-08",
                 "same carving, same symbol."
             ),
             resolution=(
-                "The pitcher confirmed the two dotted paths were equal "
-                "— no hidden aliasing, the same namespace named once."
+                'The pitcher confirmed the two dotted paths were equal — no hidden aliasing, the same namespace named once (with `a.b` as the input value).'
             ),
             tags=("story",),
         ),
@@ -688,7 +683,7 @@ G6_09 = SubjectCurriculum(grade=6, subject_id="G6-09",
             ),
             resolution=(
                 "The pitcher returned the second stone's count — "
-                "each name found before it was needed."
+                "each name found before it was needed. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -718,7 +713,7 @@ G6_09 = SubjectCurriculum(grade=6, subject_id="G6-09",
             ),
             resolution=(
                 "The pitcher returned the sum — ordered bindings "
-                "resolved cleanly, each tuck found before it was needed."
+                "resolved cleanly, each tuck found before it was needed. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -756,7 +751,7 @@ G6_10 = SubjectCurriculum(grade=6, subject_id="G6-10",
             ),
             resolution=(
                 "The pitcher returned the inner dependency map — "
-                "the nested contents at :deps, the outer shell gone."
+                "the nested contents at :deps, the outer shell gone. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -786,7 +781,7 @@ G6_10 = SubjectCurriculum(grade=6, subject_id="G6-10",
             ),
             resolution=(
                 "The pitcher returned the first directory name — "
-                "the two-step path reaching the value cleanly."
+                "the two-step path reaching the value cleanly. (the keyword :paths)"
             ),
             tags=("story",),
         ),
@@ -823,9 +818,7 @@ G6_11 = SubjectCurriculum(grade=6, subject_id="G6-11",
                 "becomes its own stone."
             ),
             resolution=(
-                "The pitcher returned a vector of two separate "
-                "directory-name strings, the colon bead consumed "
-                "in the cut."
+                'The pitcher returned a vector of two separate directory-name strings, the colon bead consumed in the cut (with `:test` as the input value).'
             ),
             tags=("story",),
         ),
@@ -849,7 +842,7 @@ G6_11 = SubjectCurriculum(grade=6, subject_id="G6-11",
             ),
             mapping=(
                 "`count` walks the vector and tallies each element. "
-                "Three stones in the row means `count` returns three. "
+                "the stones in the row means `count` returns three. "
                 "The tally is the number of stones, not their names."
             ),
             resolution=(
@@ -891,8 +884,7 @@ G6_12 = SubjectCurriculum(grade=6, subject_id="G6-12",
                 "what each symbol is called."
             ),
             resolution=(
-                "The pitcher returned the count of namespace stones — "
-                "three files confirmed in the project roster."
+                'The pitcher returned the count of namespace stones — three files confirmed in the project roster (with `race.tortoise` as the input value).'
             ),
             tags=("story",),
         ),
@@ -921,8 +913,7 @@ G6_12 = SubjectCurriculum(grade=6, subject_id="G6-12",
                 "of plain strings, one per original stone."
             ),
             resolution=(
-                "The pitcher returned both dotted paths as strings — "
-                "wrappers shed, the strings ready for the index."
+                'The pitcher returned both dotted paths as strings — wrappers shed, the strings ready for the index (with `race.tortoise` as the input value).'
             ),
             tags=("story",),
         ),
@@ -959,7 +950,7 @@ G6_13 = SubjectCurriculum(grade=6, subject_id="G6-13",
             ),
             resolution=(
                 "The pitcher returned the four letters capitalized — "
-                "the alias and full path reached the same groove."
+                "the alias and full path reached the same groove. (with {drawn.a} folded in)"
             ),
             tags=("story",),
         ),
@@ -996,8 +987,7 @@ G6_14 = SubjectCurriculum(grade=6, subject_id="G6-14",
                 "returns the answer."
             ),
             resolution=(
-                "The pitcher confirmed the human-potter label was a "
-                "symbol — the kind-mark matched, the import path valid."
+                'The pitcher confirmed the human-potter label was a symbol — the kind-mark matched, the import path valid (with `java.util.List` as the input value).'
             ),
             tags=("story",),
         ),
@@ -1026,8 +1016,7 @@ G6_14 = SubjectCurriculum(grade=6, subject_id="G6-14",
                 "is shed; the label text remains."
             ),
             resolution=(
-                "The pitcher returned the three-part dotted name as "
-                "a plain string, ready for the import registry."
+                'The pitcher returned the three-part dotted name as a plain string, ready for the import registry (with `java.util.Map` as the input value).'
             ),
             tags=("story",),
         ),
@@ -1066,7 +1055,7 @@ G6_15 = SubjectCurriculum(grade=6, subject_id="G6-15",
             ),
             resolution=(
                 "The pitcher returned the docstring from the margin — "
-                "the talon-inscribed note retrieved intact."
+                "the talon-inscribed note retrieved intact. (the keyword :doc)"
             ),
             tags=("story",),
         ),
@@ -1097,7 +1086,7 @@ G6_15 = SubjectCurriculum(grade=6, subject_id="G6-15",
             resolution=(
                 "The pitcher returned the author's name from the "
                 "marginal note — the talon-inscription retrieved, "
-                "the copybook credit confirmed."
+                "the copybook credit confirmed. (the keyword :author)"
             ),
             tags=("story",),
         ),
@@ -1134,8 +1123,7 @@ G6_16 = SubjectCurriculum(grade=6, subject_id="G6-16",
                 "otherwise."
             ),
             resolution=(
-                "The pitcher confirmed the stone was present — "
-                "the require still in use, the shelf still needed."
+                'The pitcher confirmed the stone was present — the require still in use, the shelf still needed (with `clojure.string` as the input value).'
             ),
             tags=("story",),
         ),
@@ -1164,8 +1152,7 @@ G6_16 = SubjectCurriculum(grade=6, subject_id="G6-16",
                 "stones; the set-shelf stone was not among them."
             ),
             resolution=(
-                "The pitcher returned false — the set-shelf stone was "
-                "absent, the unused require confirmed for removal."
+                'The REPL signalled the predicate did not hold — — the set-shelf stone was absent, the unused require confirmed for removal (with `clojure.string` as the input value).'
             ),
             tags=("story",),
         ),
