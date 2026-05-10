@@ -42,6 +42,7 @@
            [mmllm.bank_query :as bq]
            [mmllm.bank_feedback :as bfb]
            [mmllm.router_smarts :as rs]
+           [mmllm.sparse_per_row :as spr]
            [mmllm.metrics :as metrics]
            [mmllm.runtime :as rt]
            [mmllm.attention_kernel :as kernel]
@@ -266,6 +267,32 @@
       (when (and bank-path (not (zero? (count bank-path))))
         (str bank-path "-net"))))
 
+(defn pick-lr-kab-mult
+  "Multiplier on K_a/K_b's lr (the bank's 'addressing' weights). Reads
+   MMLLM_LR_KAB_MULT (default = MMLLM_LR_DENSE_MULT, i.e. K_a/K_b live
+   in the same group as core dense and use lr_dense_mult). When set
+   to a different value, build-time `make-opt-dense` puts K_a/K_b in a
+   separate AdamW param group with its own lr × kab-mult.
+
+   Rationale (#3 spike): K_a/K_b learn the bank's structural addressing
+   (when to retrieve which slot). V learns content. Decoupling the two
+   lets K-side hill-climb structure faster than V's slower content
+   updates. Standard PKM tip.
+
+   Arity 2 — `(step total)` — cosine-scheduled to MMLLM_LR_KAB_MULT_END."
+  ([] (python/float (.get (.- os environ) "MMLLM_LR_KAB_MULT"
+                          (str (pick-lr-dense-mult)))))
+  ([step total]
+   (let [start  (pick-lr-kab-mult)
+         end    (python/float (.get (.- os environ) "MMLLM_LR_KAB_MULT_END" (str start)))
+         warmup (python/int (.get (.- os environ) "MMLLM_LR_WARMUP" "0"))]
+     (mult-cosine-interp start end step total warmup))))
+
+(defn pick-lr-kab
+  "Effective K_a/K_b lr = pick-lr × pick-lr-kab-mult."
+  []
+  (* (pick-lr) (pick-lr-kab-mult)))
+
 (defn pick-lr-net-mult
   "Multiplier on NetBank's SparseAdam lr. Reads MMLLM_LR_NET_MULT
    (default 1.0). Default Phase-4 schedule: 5.0 (half of Local Bank's
@@ -363,6 +390,16 @@
   [opt lr]
   (doseq [pg (.- opt param_groups)]
     (.__setitem__ pg "lr" lr)))
+
+(defn set-opt-lrs!
+  "Set lr per param group. `lrs` is a list of floats, one per group
+   (in declaration order). Used when the optimizer has multiple groups
+   with independent schedules (e.g. core dense + K_a/K_b)."
+  [opt lrs]
+  (let [pgs (python/list (.- opt param_groups))]
+    (doseq [i (range (count pgs))]
+      (when (< i (count lrs))
+        (.__setitem__ (.__getitem__ pgs i) "lr" (nth lrs i))))))
 
 (defn pick-sync-every
   "Resolve cross-worker bank sync interval, in training steps.
@@ -1046,6 +1083,99 @@
     (.to c device))
   block)
 
+(def ^:private DELIM_BYTES
+  "JSON structural delimiter byte values. Intentionally excludes whitespace
+   (space, tab) since JSON allows arbitrary whitespace and including it
+   would dilute the structural signal. Defined here (above first user)
+   so basilisp's analyzer doesn't hit a forward reference."
+  #{(python/int 0x7B)   ;; {
+    (python/int 0x7D)   ;; }
+    (python/int 0x5B)   ;; [
+    (python/int 0x5D)   ;; ]
+    (python/int 0x3A)   ;; :
+    (python/int 0x2C)   ;; ,
+    (python/int 0x22)   ;; "
+    (python/int 0x0A)}) ;; newline
+
+(defn pick-schema-mask-weight
+  "Per-position CE weight multiplier for 'commit' positions — positions
+   where the PREVIOUS byte was a structural JSON delimiter. Reads
+   MMLLM_SCHEMA_MASK_WEIGHT (default 1.0 = disabled). Values > 1.0
+   up-weight the loss on bytes immediately after `{`, `:`, `,`, etc.
+   Approximates schema-masked teacher forcing without a real grammar
+   parser. Tier-3 spike #5."
+  []
+  (python/float (.get (.- os environ) "MMLLM_SCHEMA_MASK_WEIGHT" "1.0")))
+
+(defn ^:private schema-mask-of
+  "x: (B, T) int64 → (B, T) float weight tensor. Position t gets weight
+   w (= MMLLM_SCHEMA_MASK_WEIGHT) if x[t-1] is in DELIM_BYTES, else 1.0.
+   Position 0 always weight 1.0 (no preceding byte). Used to multiply
+   per-position CE."
+  [x w]
+  (let [delim-shifted (torch/zeros_like x ** :dtype torch/bool)
+        prev          (.narrow x 1 0 (- (.size x 1) 1))]   ;; x[:, :-1]
+    ;; Build a mask: prev is in DELIM_BYTES → True
+    (let [prev-mask (torch/zeros_like prev ** :dtype torch/bool)]
+      (doseq [b DELIM_BYTES] (.logical_or_ prev-mask (.eq prev b)))
+      ;; Shift by one so that position t (in result) flags x[t-1]
+      (.copy_ (.narrow delim-shifted 1 1 (- (.size x 1) 1)) prev-mask))
+    (-> (.float delim-shifted)
+        (.mul (- w 1.0))
+        (.add 1.0))))
+
+(defn pick-pause-bytes
+  "Number of pause-byte 'thinking' positions to prepend to training
+   batches with probability MMLLM_PAUSE_PROB. Reads MMLLM_PAUSE_BYTES
+   (default 0 = disabled). When > 0, with probability pause-prob the
+   first N bytes of each input sequence are replaced with the pause
+   byte (default value 0x00). Targets give the model extra 'forward
+   passes' before predicting real content — at inference, prepend N
+   pause bytes to the prompt to give Local Bank time to deliberate
+   before committing to structural output. Tier-3 spike #9."
+  []
+  (python/int (.get (.- os environ) "MMLLM_PAUSE_BYTES" "0")))
+
+(defn pick-pause-prob
+  "Probability per training batch of injecting pause-byte prefix.
+   Reads MMLLM_PAUSE_PROB (default 0.5). 0 = always insert; 1 = never
+   skip; 0.5 = half of batches get pauses, half don't."
+  []
+  (python/float (.get (.- os environ) "MMLLM_PAUSE_PROB" "0.5")))
+
+(defn pick-pause-byte-val
+  "Byte value used for pause filling. Reads MMLLM_PAUSE_BYTE_VAL
+   (default 0 = NUL). Pick a byte that's rare in actual training data
+   so model learns to treat it as a pause marker, not as content."
+  []
+  (python/int (.get (.- os environ) "MMLLM_PAUSE_BYTE_VAL" "0")))
+
+(defn ^:private maybe-inject-pause-prefix!
+  "Mutate x in-place: with probability `prob`, replace the first
+   `n` bytes of every sequence in x with `pause-val`. y is left
+   untouched — model still predicts the original next-byte sequence,
+   just with pause bytes as input prefix instead of real content."
+  [x n prob pause-val]
+  (when (and (pos? n) (< (.item (torch/rand 1)) prob))
+    (let [pause-tensor (torch/full (python/tuple [(.size x 0) n])
+                                    pause-val
+                                    ** :dtype (.- x dtype)
+                                    :device (.- x device))]
+      (.copy_ (.narrow x 1 0 n) pause-tensor)))
+  x)
+
+(defn pick-delim-aux-coef
+  "Coefficient on the JSON-delimiter auxiliary head's BCE loss. Reads
+   MMLLM_DELIM_AUX_COEF (default 0.0 = disabled). When > 0, a Linear
+   (d_model, 1) head over the final hidden state predicts whether the
+   NEXT byte is a JSON structural delimiter ({ } [ ] : , \" \\n).
+   Auxiliary loss = BCEWithLogits(head(x), is_delim(y)). Forces the
+   trunk's hidden state to encode JSON parse state — which Local Bank
+   can then leverage when retrieving structural patterns. 0.05-0.1 is
+   a reasonable initial cap. Tier-2 spike #4 from the upgrade plan."
+  []
+  (python/float (.get (.- os environ) "MMLLM_DELIM_AUX_COEF" "0.0")))
+
 (defn pick-mtp-coef
   "Coefficient on the multi-token-prediction (t+2) auxiliary loss.
    Reads MMLLM_MTP_COEF (default 0.0 = disabled). When > 0, an
@@ -1080,7 +1210,17 @@
         ;; step 0; differentiates over training. Goes at END of
         ;; (parameters m) for ckpt back-compat.
         importance-head (when (pick-importance-head?)
-                          (.to (rs/LearnedImportanceHead d-model) device))]
+                          (.to (rs/LearnedImportanceHead d-model) device))
+        ;; JSON-delimiter aux head — Linear(d_model, 1) over final hidden
+        ;; state. Predicts whether the NEXT byte is a structural JSON
+        ;; delimiter. Zero-init so adds no signal at step 0 (back-compat).
+        ;; Goes at END of (parameters m) for positional ckpt-load.
+        delim-head (when (pos? (pick-delim-aux-coef))
+                     (let [h (nn/Linear d-model 1 ** :bias true)]
+                       (with [_ (torch/no_grad)]
+                         (.zero_ (.- (.- h weight) data))
+                         (.zero_ (.- (.- h bias)   data)))
+                       (.to h device)))]
     {:config          config
      :device          device
      :tok-emb         (.to (nn/Embedding vocab-size d-model) device)
@@ -1091,13 +1231,15 @@
      :rope-sin        (.to sin device)
      :mtp-head        mtp-head
      :importance-head importance-head
+     :delim-head      delim-head
      ;; Mutable metrics stash for visibility into router-smarts /
      ;; consolidation aux losses. train-step writes the most recent
      ;; distill_loss; train-long writes replay_loss after the periodic
      ;; replay step. Read at print and slot-log time.
      :metrics         (python/dict {"distill_loss" 0.0
                                     "replay_loss"  0.0
-                                    "replay_buf_n" 0})}))
+                                    "replay_buf_n" 0
+                                    "delim_loss"   0.0})}))
 
 (defn parameters
   "DENSE learnable parameters — these route to AdamW. Excludes the
@@ -1124,7 +1266,7 @@
      7. importance-head (at END — added in router-smarts work)
      8. per-block carry gate (at END — added in router-smarts work)"
   [m]
-  (let [{:keys [tok-emb blocks norm-final mtp-head importance-head]} m
+  (let [{:keys [tok-emb blocks norm-final mtp-head importance-head delim-head]} m
         ;; CORE block params (K_a/K_b only from memory — q_norm goes at end)
         core-params (fn [b]
                       (concat
@@ -1177,7 +1319,45 @@
             (mapcat carry-params blocks)
             ;; alpha_net (per-SwitchGate per-head) — last so even
             ;; ckpts from before this feature exists load cleanly.
-            (mapcat alpha-net-params blocks))))
+            (mapcat alpha-net-params blocks)
+            ;; JSON-delimiter aux head — at END for back-compat.
+            (when delim-head (python/list (.parameters delim-head))))))
+
+(defn- kab-parameters
+  "Per-block K_a / K_b parameters. Returned as a flat Python list for
+   the AdamW K_a/K_b sub-group when MMLLM_LR_KAB_MULT differs from
+   MMLLM_LR_DENSE_MULT. Each block's :memory has K_a, K_b directly."
+  [m]
+  (python/list
+    (mapcat (fn [b] [(.- (:memory b) K_a)
+                     (.- (:memory b) K_b)])
+            (:blocks m))))
+
+(defn make-opt-dense
+  "Build the AdamW optimizer for dense (router) params. When
+   MMLLM_LR_KAB_MULT == MMLLM_LR_DENSE_MULT: single-group (back-compat).
+   When different: K_a/K_b move to a separate group (index 1) with
+   their own lr; everything else stays in group 0. Train loop uses
+   `set-opt-lrs!` to update both groups per-step. Returns the AdamW.
+
+   Identifying K_a/K_b in `(parameters m)` — they're tensors with the
+   same `id()` as the ones returned by `kab-parameters`. Using a Python
+   set of object ids dedupes across the parameters list."
+  [m]
+  (let [d-mult (pick-lr-dense-mult)
+        k-mult (pick-lr-kab-mult)]
+    (if (= d-mult k-mult)
+      (optim/AdamW (python/list (parameters m)) ** :lr (pick-lr-dense))
+      (let [kab-list   (kab-parameters m)
+            kab-id-set (python/set (python/list (map python/id kab-list)))
+            all-list   (python/list (parameters m))
+            core-list  (python/list (filter (fn [p] (not (.__contains__ kab-id-set
+                                                                          (python/id p))))
+                                            all-list))]
+        (optim/AdamW
+          (python/list [(python/dict {"params" core-list "lr" (pick-lr-dense)})
+                        (python/dict {"params" kab-list  "lr" (pick-lr-kab)})])
+          ** :lr (pick-lr-dense))))))
 
 (defn sparse-parameters
   "Local Bank sparse params — route to opt-sparse (SparseAdam).
@@ -1321,6 +1501,36 @@
                (.reshape aux-logits-trim -1 vocab-size)
                (.reshape y-trim -1))))))
 
+(defn ^:private delim-mask-for
+  "y: (B, T) int64 byte tokens → (B, T) float bool mask: 1.0 where the
+   byte is in DELIM_BYTES, 0.0 otherwise. Used as BCE target for the
+   delimiter aux head."
+  [y]
+  ;; Build OR over the delimiter set: y == 0x7B | y == 0x7D | …
+  (let [mask (torch/zeros_like y ** :dtype torch/bool)]
+    (doseq [b DELIM_BYTES]
+      (.logical_or_ mask (.eq y b)))
+    (.float mask)))
+
+(defn collect-delim-loss
+  "Compute the JSON-delimiter aux head's BCE loss when the head is
+   present and MMLLM_DELIM_AUX_COEF > 0.
+
+   delim-head produces (B, T, 1) logit per position over the trunk's
+   final hidden state. Target: 1.0 where y[t] is a structural delim,
+   0.0 otherwise. BCEWithLogits handles sigmoid internally for stability.
+
+   Returns scaled scalar tensor (active) or 0.0 (disabled / nil head)."
+  [m final-x y]
+  (let [coef (pick-delim-aux-coef)
+        head (:delim-head m)]
+    (if (or (zero? coef) (nil? head))
+      0.0
+      (let [logits (.squeeze (head final-x) -1)   ;; (B, T)
+            target (delim-mask-for y)             ;; (B, T)
+            loss   (F/binary_cross_entropy_with_logits logits target)]
+        (* coef loss)))))
+
 (defn train-step
   ([m opt-dense opt-sparse x y]
    (train-step m opt-dense opt-sparse nil x y false))
@@ -1343,6 +1553,15 @@
          y-flat       (.reshape y -1)
          per-pos-ce   (rs/focal_ce logits-flat y-flat
                                    ** :gamma gamma :reduction "none")
+         ;; #5 spike: schema-mask weight on positions immediately after
+         ;; a JSON delimiter byte. Default w=1.0 (no-op). When > 1.0,
+         ;; up-weights CE on "commit" positions where the byte right
+         ;; before was `{` `:` `,` `"` `]` `}` `[` or newline.
+         schema-w     (pick-schema-mask-weight)
+         per-pos-ce   (if (= schema-w 1.0)
+                        per-pos-ce
+                        (let [w-mask (.reshape (schema-mask-of x schema-w) -1)]
+                          (.mul per-pos-ce w-mask)))
          ih           (:importance-head m)
          ce-loss      (if ih
                         (let [imp-raw  (ih final-x)
@@ -1372,21 +1591,24 @@
          z-loss       (collect-z-loss m)
          mtp-loss     (collect-mtp-loss aux-logits y T)
          distill-loss (collect-distill-loss m)
-         ;; Stash distill loss on the model's :metrics dict for the
-         ;; train-long printer / JSONL logger. Tensor (active distill)
-         ;; goes through .item; constant 0.0 (disabled or no SwitchGate
-         ;; outputs stashed) writes 0.0.
+         delim-loss   (collect-delim-loss m final-x y)
+         ;; Stash distill / delim losses on :metrics for printer / JSONL.
          _            (when-let [metrics (:metrics m)]
                         (.__setitem__ metrics "distill_loss"
                                       (if (number? distill-loss)
                                         (python/float distill-loss)
-                                        (.item distill-loss))))
+                                        (.item distill-loss)))
+                        (.__setitem__ metrics "delim_loss"
+                                      (if (number? delim-loss)
+                                        (python/float delim-loss)
+                                        (.item delim-loss))))
          ;; Sum non-zero terms; numerics matter — adding a Python 0.0 to
          ;; a tensor would coerce to a fp tensor scalar of value 0, fine.
          loss         (cond-> ce-loss
                         (not (number? z-loss))       (+ z-loss)
                         (not (number? mtp-loss))     (+ mtp-loss)
-                        (not (number? distill-loss)) (+ distill-loss))]
+                        (not (number? distill-loss)) (+ distill-loss)
+                        (not (number? delim-loss))   (+ delim-loss))]
      ;; Hard-abort on NaN/Inf loss before backward — a degenerate step
      ;; would propagate NaN into all params, opt state, and bank V; the
      ;; ckpt-save next event would then persist a poisoned model. Raising
@@ -1400,6 +1622,11 @@
      (.zero_grad opt-sparse)
      (when opt-sparse-net (.zero_grad opt-sparse-net))
      (.backward loss)
+     ;; #1 spike: cold-row gradient boost on Local Bank V. No-op when
+     ;; MMLLM_BANK_COLD_BOOST=0. Applied after backward, before opt step,
+     ;; so SparseAdam's update sees the rescaled gradient.
+     (doseq [b (:blocks m)]
+       (spr/boost_cold_row_grads_ (:memory b)))
      ;; P3 replay path: zero Local Bank's grads after backward but
      ;; before optimizer.step() so the replay update flows only into
      ;; NetBank, dense projections, and carry — Local stays frozen on
@@ -2759,7 +2986,10 @@
         train-data (when (nil? mix)
                      (corp/load-as-tensor train-path ** :use_mmap true))
         val-data   (corp/load-as-tensor val-path)
-        opt-dense  (optim/AdamW    (python/list (parameters m))         ** :lr (pick-lr-dense))
+        ;; opt-dense: single-group AdamW unless MMLLM_LR_KAB_MULT differs
+        ;; from MMLLM_LR_DENSE_MULT, in which case K_a/K_b move to a
+        ;; separate group with its own lr (#3 spike). See make-opt-dense.
+        opt-dense  (make-opt-dense m)
         opt-sparse ((pick-sparse-optimizer) (python/list (sparse-parameters m)) ** :lr (pick-lr-bank))
         ;; Third optimizer: NetBank's V_net. Constructed only when
         ;; NetBank is enabled AND has sparse params (otherwise SparseAdam
@@ -2928,9 +3158,16 @@
                                                       (pick-lr) warmup
                                                       (pick-lr-min))
                                    d-mult (pick-lr-dense-mult step total-steps)
+                                   k-mult (pick-lr-kab-mult   step total-steps)
                                    b-mult (pick-lr-bank-mult  step total-steps)
                                    n-mult (pick-lr-net-mult   step total-steps)]
-                               (set-opt-lr! opt-dense  (* cur-lr d-mult))
+                               ;; If opt-dense has 2 groups (K_a/K_b separated
+                               ;; via make-opt-dense), use the grouped setter;
+                               ;; otherwise the single-lr setter (back-compat).
+                               (if (= 2 (count (.- opt-dense param_groups)))
+                                 (set-opt-lrs! opt-dense
+                                               [(* cur-lr d-mult) (* cur-lr k-mult)])
+                                 (set-opt-lr!  opt-dense (* cur-lr d-mult)))
                                (set-opt-lr! opt-sparse (* cur-lr b-mult))
                                (when opt-sparse-net
                                  (set-opt-lr! opt-sparse-net (* cur-lr n-mult)))))
@@ -2944,6 +3181,12 @@
                 [x y corpus-idx] (if mix
                                    (mix-batch mix-tensors mix-weights-t B-cur T)
                                    (let [[x y] (batch train-data B-cur T)] [x y nil]))
+                ;; #9 spike: with probability `pause-prob`, replace
+                ;; the first `pause-n` bytes of x with the pause byte.
+                ;; In-place mutation; y untouched.
+                _     (when (pos? (pick-pause-bytes))
+                        (maybe-inject-pause-prefix!
+                          x (pick-pause-bytes) (pick-pause-prob) (pick-pause-byte-val)))
                 loss  (train-step m opt-dense opt-sparse opt-sparse-net x y)
                 _     (.add_tokens tracker (* B-cur T))
                 ;; Per-corpus loss tracker — running window of last 50
@@ -3035,13 +3278,16 @@
                 ;; or replay_every > 0). Tells you whether the
                 ;; consolidation mechanisms are doing meaningful work
                 ;; alongside the main CE.
-                (when (or (pos? (pick-distill-coef)) (pos? replay-every))
+                (when (or (pos? (pick-distill-coef))
+                          (pos? replay-every)
+                          (pos? (pick-delim-aux-coef)))
                   (let [metrics (:metrics m)
                         d-loss  (or (.get metrics "distill_loss") 0.0)
                         r-loss  (or (.get metrics "replay_loss")  0.0)
-                        buf-n   (or (.get metrics "replay_buf_n") 0)]
-                    (println (format "         router-metrics: distill=%.4f  replay=%.4f  replay_buf=%d/%d"
-                                     d-loss r-loss buf-n replay-cap))))
+                        buf-n   (or (.get metrics "replay_buf_n") 0)
+                        x-loss  (or (.get metrics "delim_loss")   0.0)]
+                    (println (format "         router-metrics: distill=%.4f  replay=%.4f  replay_buf=%d/%d  delim=%.4f"
+                                     d-loss r-loss buf-n replay-cap x-loss))))
                 nil))
             ;; Cross-worker bank sync. Has to happen AFTER the optimizer
             ;; step (so dirty rows from this step are flushed) and outside
@@ -3200,12 +3446,13 @@
                     t-now   (- (time/time) t0)]
                 (when metrics
                   (append-jsonl! log-path
-                    (format "{\"step\":%d,\"event\":\"router_metrics\",\"distill_loss\":%.6e,\"replay_loss\":%.6e,\"replay_buf_n\":%d,\"replay_cap\":%d,\"wall_s\":%.1f}"
+                    (format "{\"step\":%d,\"event\":\"router_metrics\",\"distill_loss\":%.6e,\"replay_loss\":%.6e,\"replay_buf_n\":%d,\"replay_cap\":%d,\"delim_loss\":%.6e,\"wall_s\":%.1f}"
                             step'
                             (or (.get metrics "distill_loss") 0.0)
                             (or (.get metrics "replay_loss")  0.0)
                             (or (.get metrics "replay_buf_n") 0)
                             replay-cap
+                            (or (.get metrics "delim_loss")   0.0)
                             t-now))))
               ;; Per-layer SwitchGate distribution log. Each block's
               ;; long-gate's most recent forward stored mean (sdpa, local,

@@ -26,7 +26,31 @@ Phase-1c semantics preserved:
 """
 from __future__ import annotations
 
+import os
 from typing import Optional
+
+
+def _bank_repeat_n() -> int:
+    """How many iterative refinement passes through Local Bank to run
+    per forward. Reads MMLLM_BANK_REPEAT_N (default 1 = no iteration,
+    legacy behavior). When > 1, feeds the previous iteration's mem_out
+    back into bank_q (scaled by MMLLM_BANK_REPEAT_ALPHA) and re-queries
+    the bank. Cost scales linearly: ~+1 PKM lookup per extra repeat.
+    Tier-3 spike #7+8."""
+    try:
+        return max(1, int(os.environ.get("MMLLM_BANK_REPEAT_N", "1")))
+    except ValueError:
+        return 1
+
+
+def _bank_repeat_alpha() -> float:
+    """Scale on the previous iteration's mem_out when feeding it back
+    into bank_q. Reads MMLLM_BANK_REPEAT_ALPHA (default 0.1). Small
+    so iterative refinement converges; too high diverges."""
+    try:
+        return float(os.environ.get("MMLLM_BANK_REPEAT_ALPHA", "0.1"))
+    except ValueError:
+        return 0.1
 
 import torch
 import torch.nn.functional as F
@@ -243,6 +267,15 @@ def attention(
         ctx_mod = bank_query(x)
         bank_q = q_long_flat + ctx_mod if ctx_mod is not None else q_long_flat
         mem_out = memory(bank_q)
+        # Iterative refinement on Local Bank — feed the previous output
+        # back into bank_q and re-query, N times. Lets Local "deliberate"
+        # at structural-decision positions. N=1 is identity (legacy).
+        n_repeat = _bank_repeat_n()
+        if n_repeat > 1:
+            alpha = _bank_repeat_alpha()
+            for _ in range(n_repeat - 1):
+                bank_q = bank_q + alpha * mem_out
+                mem_out = memory(bank_q)
         attn_l_mem = mem_out.reshape(B, T, n_long_heads, head_dim).transpose(1, 2)
         # NetBank queries off-machine. Same query vector as Local; the
         # gate decides per-token how much to weight each source.

@@ -549,7 +549,19 @@ def _run_train_long(total_steps, eval_every, ckpt_every, device, lr,
                     alpha_net=False,
                     replay_every=0,
                     replay_buffer_size=256,
-                    replay_threshold=0.5):
+                    replay_threshold=0.5,
+                    # 9-spike upgrade plan (#1-#9)
+                    lr_kab_mult=None,            # #3 — K_a/K_b separate LR
+                    lr_kab_mult_end=None,
+                    delim_aux_coef=0.0,          # #4 — JSON-delimiter aux head
+                    schema_mask_weight=1.0,      # #5 — schema-mask CE weight
+                    pause_bytes=0,               # #9 — pause-byte prefix
+                    pause_prob=0.5,
+                    pause_byte_val=0,
+                    bank_repeat_n=1,             # #7+#8 — Local Bank iter refinement
+                    bank_repeat_alpha=0.1,
+                    bank_cold_boost=0.0,         # #1 — cold-row gradient boost
+                    bank_cold_boost_eps=1.0):
     """Shared body. All knobs threaded via env vars (MMLLM_DEVICE,
     MMLLM_LR, MMLLM_BATCH, MMLLM_SQRT_N, MMLLM_CPU_OFFLOAD,
     MMLLM_BANK_ON_GPU, MMLLM_SYNC_EVERY, MMLLM_VOLUME_NAME,
@@ -648,6 +660,18 @@ def _run_train_long(total_steps, eval_every, ckpt_every, device, lr,
            "MMLLM_REPLAY_EVERY":       str(replay_every),
            "MMLLM_REPLAY_BUFFER_SIZE": str(replay_buffer_size),
            "MMLLM_REPLAY_THRESHOLD":   str(replay_threshold),
+           # 9-spike upgrade plan env knobs
+           "MMLLM_LR_KAB_MULT":        str(lr_kab_mult)     if lr_kab_mult     is not None else str(lr_dense_mult),
+           "MMLLM_LR_KAB_MULT_END":    str(lr_kab_mult_end) if lr_kab_mult_end is not None else (str(lr_kab_mult) if lr_kab_mult is not None else str(lr_dense_mult)),
+           "MMLLM_DELIM_AUX_COEF":     str(delim_aux_coef),
+           "MMLLM_SCHEMA_MASK_WEIGHT": str(schema_mask_weight),
+           "MMLLM_PAUSE_BYTES":        str(pause_bytes),
+           "MMLLM_PAUSE_PROB":         str(pause_prob),
+           "MMLLM_PAUSE_BYTE_VAL":     str(pause_byte_val),
+           "MMLLM_BANK_REPEAT_N":      str(bank_repeat_n),
+           "MMLLM_BANK_REPEAT_ALPHA":  str(bank_repeat_alpha),
+           "MMLLM_BANK_COLD_BOOST":    str(bank_cold_boost),
+           "MMLLM_BANK_COLD_BOOST_EPS":str(bank_cold_boost_eps),
            # Expandable allocator avoids the fragmentation pattern that
            # OOM'd Phase 4 at the first ablation: the allocator was holding
            # ~17 GB of cached-but-unallocated memory it couldn't reuse for
@@ -751,6 +775,18 @@ def train_with_bank(
     replay_every: int = 0,               # P3: every N main steps run a frozen-Local replay step on a buffered mastered batch (0 = disabled)
     replay_buffer_size: int = 256,       # P3: max (x, y) batches kept in replay buffer (CPU)
     replay_threshold: float = 0.5,       # P3: plain-CE below which a batch is pushed to the buffer (mastered-position selector)
+    # — 9-spike upgrade plan knobs (default off / no-op) —
+    lr_kab_mult: float = -1.0,           # #3: K_a/K_b separate LR mult; -1 = use lr_dense_mult (single group)
+    lr_kab_mult_end: float = -1.0,       # #3: cosine end for kab; -1 = use lr_kab_mult (constant)
+    delim_aux_coef: float = 0.0,         # #4: JSON-delimiter aux head's BCE coef (0 = disabled)
+    schema_mask_weight: float = 1.0,     # #5: per-position CE weight on positions after a JSON delimiter (1.0 = disabled)
+    pause_bytes: int = 0,                # #9: number of pause bytes to prepend to training batches (0 = disabled)
+    pause_prob: float = 0.5,             # #9: per-batch probability of pause prefix injection
+    pause_byte_val: int = 0,             # #9: byte value for pause filler (0 = NUL)
+    bank_repeat_n: int = 1,              # #7+8: Local Bank iterative refinement passes per forward (1 = no iter, legacy)
+    bank_repeat_alpha: float = 0.1,      # #7+8: scale on prev mem_out fed back into bank_q
+    bank_cold_boost: float = 0.0,        # #1: cold-row gradient boost on Local V (0 = disabled)
+    bank_cold_boost_eps: float = 1.0,    # #1: smoothing in `1 + boost / (eps + count)`
     base: str = "/data/text8",
     bank: str = "/data/bank",
     corpus_base: str = "",               # if set and != base, symlink corpus splits
@@ -856,6 +892,18 @@ def train_with_bank(
         replay_every=replay_every,
         replay_buffer_size=replay_buffer_size,
         replay_threshold=replay_threshold,
+        # 9-spike knobs (-1 sentinels mean "use default")
+        lr_kab_mult     =(None if lr_kab_mult     < 0 else lr_kab_mult),
+        lr_kab_mult_end =(None if lr_kab_mult_end < 0 else lr_kab_mult_end),
+        delim_aux_coef  =delim_aux_coef,
+        schema_mask_weight=schema_mask_weight,
+        pause_bytes     =pause_bytes,
+        pause_prob      =pause_prob,
+        pause_byte_val  =pause_byte_val,
+        bank_repeat_n   =bank_repeat_n,
+        bank_repeat_alpha=bank_repeat_alpha,
+        bank_cold_boost =bank_cold_boost,
+        bank_cold_boost_eps=bank_cold_boost_eps,
     )
     if publish_after:
         # Spawn publish on its own container (uses publish_image w/ gh CLI).
