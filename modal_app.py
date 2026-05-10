@@ -538,7 +538,9 @@ def _run_train_long(total_steps, eval_every, ckpt_every, device, lr,
                     importance_aux=1.0,
                     carry_enabled=False,
                     carry_n_clocks=4,
-                    grad_clip=0.0):
+                    grad_clip=0.0,
+                    nan_guard=False,
+                    log_param_norms=False):
     """Shared body. All knobs threaded via env vars (MMLLM_DEVICE,
     MMLLM_LR, MMLLM_BATCH, MMLLM_SQRT_N, MMLLM_CPU_OFFLOAD,
     MMLLM_BANK_ON_GPU, MMLLM_SYNC_EVERY, MMLLM_VOLUME_NAME,
@@ -621,6 +623,8 @@ def _run_train_long(total_steps, eval_every, ckpt_every, device, lr,
            "MMLLM_CARRY_ENABLED":      "true" if carry_enabled else "false",
            "MMLLM_CARRY_N_CLOCKS":     str(carry_n_clocks),
            "MMLLM_GRAD_CLIP":          str(grad_clip),
+           "MMLLM_NAN_GUARD":          "true" if nan_guard else "false",
+           "MMLLM_LOG_PARAM_NORMS":    "true" if log_param_norms else "false",
            # Expandable allocator avoids the fragmentation pattern that
            # OOM'd Phase 4 at the first ablation: the allocator was holding
            # ~17 GB of cached-but-unallocated memory it couldn't reuse for
@@ -713,6 +717,8 @@ def train_with_bank(
     carry_enabled: bool = False,         # per-block MultiTimescaleCarry (4 EMAs, log-spaced decays)
     carry_n_clocks: int = 4,             # number of EMAs per carry block
     grad_clip: float = 0.0,              # max global L2 norm for AdamW gradient clipping (0 = disabled, 1.0 standard)
+    nan_guard: bool = False,             # forward-pass NaN check at each block + logits — aborts with layer-id on first NaN
+    log_param_norms: bool = False,       # at each slot_log_every event, write per-param L∞/L2 norms to log.jsonl
     base: str = "/data/text8",
     bank: str = "/data/bank",
     corpus_base: str = "",               # if set and != base, symlink corpus splits
@@ -807,6 +813,8 @@ def train_with_bank(
         carry_enabled=carry_enabled,
         carry_n_clocks=carry_n_clocks,
         grad_clip=grad_clip,
+        nan_guard=nan_guard,
+        log_param_norms=log_param_norms,
     )
     if publish_after:
         # Spawn publish on its own container (uses publish_image w/ gh CLI).

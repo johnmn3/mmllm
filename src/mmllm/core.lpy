@@ -640,6 +640,38 @@
   (let [v (.lower (.get (.- os environ) "MMLLM_IMPORTANCE_HEAD" "false"))]
     (.__contains__ #{"1" "true" "yes"} v)))
 
+(defn pick-nan-guard?
+  "Whether forward should NaN-check at every block boundary +
+   logits. Reads MMLLM_NAN_GUARD (default 'false'). Opt-in because
+   the .isnan().any() call adds a sync per layer (~1% throughput
+   hit). On detection: raises RuntimeError with the specific layer
+   index that first produced NaN, instead of the unhelpful
+   `loss=nan` abort that says nothing about WHERE the NaN started."
+  []
+  (let [v (.lower (.get (.- os environ) "MMLLM_NAN_GUARD" "false"))]
+    (.__contains__ #{"1" "true" "yes"} v)))
+
+(defn nan-guard!
+  "Check tensor for NaN/Inf and raise with `tag` on detection. No-op
+   when t is None (e.g., aux-logits in non-MTP mode). Caller decides
+   whether to call (gated by `pick-nan-guard?`)."
+  [tag t]
+  (when t
+    (let [bad? (or (.item (.any (.isnan t)))
+                   (.item (.any (.isinf t))))]
+      (when bad?
+        (throw (python/RuntimeError
+                 (format "nan-guard: tensor %s has NaN/Inf — forward path corrupted" tag)))))))
+
+(defn pick-log-param-norms?
+  "Whether to log per-param L∞/L2 norms at slot-log events. Reads
+   MMLLM_LOG_PARAM_NORMS (default 'false'). Opt-in because the walk
+   over all named tensors adds a sync at log-time. Useful for
+   identifying slow drift in any specific param tensor."
+  []
+  (let [v (.lower (.get (.- os environ) "MMLLM_LOG_PARAM_NORMS" "false"))]
+    (.__contains__ #{"1" "true" "yes"} v)))
+
 (defn pick-grad-clip-max-norm
   "Max global norm for dense-parameter gradient clipping (AdamW only;
    SparseAdam's per-row updates are localized and don't suffer the
@@ -963,27 +995,34 @@
    (let [{:keys [tok-emb blocks norm-final rope-cos rope-sin mtp-head]} m
          n-layers     (count blocks)
          short-caches (or short-caches (vec (repeat n-layers nil)))
-         long-caches  (or long-caches  (vec (repeat n-layers nil)))]
+         long-caches  (or long-caches  (vec (repeat n-layers nil)))
+         guard?       (pick-nan-guard?)
+         x0           (tok-emb tokens)]
+     (when guard? (nan-guard! "tok-emb" x0))
      (loop [i         0
-            x         (tok-emb tokens)
+            x         x0
             out-short []
             out-long  []]
        (if (= i n-layers)
-         (let [x          (norm-final x)
-               logits     (torch/matmul x (.t (.- tok-emb weight)))
+         (let [x'         (norm-final x)
+               _          (when guard? (nan-guard! "norm-final" x'))
+               logits     (torch/matmul x' (.t (.- tok-emb weight)))
+               _          (when guard? (nan-guard! "logits" logits))
                ;; Multi-token-prediction aux logits: independent linear
                ;; head from the same final hidden state. Used by
                ;; train-step to compute t+2 CE loss when MMLLM_MTP_COEF
                ;; > 0; nil and skipped otherwise.
-               aux-logits (when mtp-head (mtp-head x))]
-           ;; 5th element `x` (post-norm-final hidden state) is consumed
+               aux-logits (when mtp-head (mtp-head x'))
+               _          (when (and guard? aux-logits) (nan-guard! "aux-logits" aux-logits))]
+           ;; 5th element `x'` (post-norm-final hidden state) is consumed
            ;; only by train-step's importance-head path. All other
            ;; callers destructure 3-4 elements and silently ignore it.
-           [logits out-short out-long aux-logits x])
+           [logits out-short out-long aux-logits x'])
          (let [block      (nth blocks i)
                sc         (nth short-caches i)
                lc         (nth long-caches  i)
                [x' s' l'] (block-forward block x rope-cos rope-sin sc lc skip-bank?)]
+           (when guard? (nan-guard! (format "block-%d-out" i) x'))
            (recur (inc i) x' (conj out-short s') (conj out-long l'))))))))
 
 ;;; ─────────────────────── training ───────────────────────
@@ -2722,7 +2761,44 @@
                     (append-jsonl! log-path
                                    (format "{\"step\":%d,\"event\":\"slot_usage\",\"tier\":\"net\",\"layer\":%d,\"dead_a\":%d,\"dead_b\":%d,\"entropy_a\":%.3f,\"entropy_b\":%.3f,\"entropy_max\":%.3f,\"reinit_a\":%d,\"reinit_b\":%d,\"wall_s\":%.1f}"
                                            step' i d-a d-b ea eb em n-a n-b (- (time/time) t0)))
-                    (.reset_slot_usage nb)))))
+                    (.reset_slot_usage nb))))
+              ;; Per-param norm log — gated by MMLLM_LOG_PARAM_NORMS.
+              ;; Walks named tensor groups, writes L∞/L2 per group.
+              ;; Identifies which param tensor (if any) is drifting
+              ;; toward inf so we can localize the source of NaN.
+              (when (pick-log-param-norms?)
+                (let [t-now    (- (time/time) t0)
+                      log-norm! (fn [tag t]
+                                  (when t
+                                    (let [linf (.item (.amax (.abs t)))
+                                          l2   (.item (.norm t))]
+                                      (append-jsonl! log-path
+                                        (format "{\"step\":%d,\"event\":\"param_norms\",\"tag\":\"%s\",\"linf\":%.4e,\"l2\":%.4e,\"wall_s\":%.1f}"
+                                                step' tag linf l2 t-now)))))]
+                  (log-norm! "tok-emb" (.- (:tok-emb m) weight))
+                  (log-norm! "norm-final" (.- (:norm-final m) weight))
+                  (when-let [mh (:mtp-head m)]
+                    (log-norm! "mtp-head" (.- mh weight)))
+                  (when-let [ih (:importance-head m)]
+                    (log-norm! "ih-proj-w" (.- (.- ih proj) weight))
+                    (log-norm! "ih-proj-b" (.- (.- ih proj) bias)))
+                  (doseq [[i blk] (map-indexed vector (:blocks m))]
+                    (log-norm! (format "blk%d-q-proj" i) (.- (:q-proj blk) weight))
+                    (log-norm! (format "blk%d-k-proj-l" i) (.- (:k-proj-l blk) weight))
+                    (log-norm! (format "blk%d-v-proj-l" i) (.- (:v-proj-l blk) weight))
+                    (log-norm! (format "blk%d-o-proj" i) (.- (:o-proj blk) weight))
+                    (log-norm! (format "blk%d-gate-proj" i) (.- (:gate-proj blk) weight))
+                    (log-norm! (format "blk%d-down-proj" i) (.- (:down-proj blk) weight))
+                    (log-norm! (format "blk%d-mem-Ka" i) (.- (:memory blk) K_a))
+                    (log-norm! (format "blk%d-mem-Kb" i) (.- (:memory blk) K_b))
+                    (log-norm! (format "blk%d-mem-V" i) (.- (.- (:memory blk) V) weight))
+                    (when-let [nb (:netbank blk)]
+                      (log-norm! (format "blk%d-net-Ka" i) (.- nb K_a))
+                      (log-norm! (format "blk%d-net-Kb" i) (.- nb K_b))
+                      (log-norm! (format "blk%d-net-V" i) (.- (.- nb V) weight))
+                      (log-norm! (format "blk%d-net-expander" i) (.- (.- nb expander) weight)))
+                    (when-let [c (:carry blk)]
+                      (log-norm! (format "blk%d-carry-gate" i) (.- (.- c gate) weight)))))))
             (when (zero? (mod step' ckpt-every))
               (save-checkpoint! m opt-dense opt-sparse opt-sparse-net ckpt-dir step' volume)
               (println (format "  ── ckpt at step %d ──" step')))
