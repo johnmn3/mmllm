@@ -741,6 +741,48 @@
   (let [v (.lower (.get (.- os environ) "MMLLM_LOG_PARAM_NORMS" "false"))]
     (.__contains__ #{"1" "true" "yes"} v)))
 
+(defn pick-replay-every
+  "Run a frozen-Local replay step every N training steps. Reads
+   MMLLM_REPLAY_EVERY (default 0 = disabled). When > 0, train-long
+   maintains a CPU-side circular buffer of (x, y) batches whose
+   plain-CE was below MMLLM_REPLAY_THRESHOLD (mastered positions),
+   and every N main steps samples one batch and runs an extra
+   train-step with Local Bank's gradients zeroed before the
+   optimizer step. Goal: Net trains directly on patterns Local
+   already mastered, accelerating consolidation."
+  []
+  (python/int (.get (.- os environ) "MMLLM_REPLAY_EVERY" "0")))
+
+(defn pick-replay-buffer-size
+  "Maximum number of (x, y) batches kept in the replay buffer.
+   Reads MMLLM_REPLAY_BUFFER_SIZE (default 256). Each batch is on
+   CPU; at B=128 T=128 int64 that's ~2 MB per batch, ~512 MB total
+   for 256 — fits comfortably in CPU host RAM."
+  []
+  (python/int (.get (.- os environ) "MMLLM_REPLAY_BUFFER_SIZE" "256")))
+
+(defn pick-replay-threshold
+  "Plain-CE threshold below which a training batch is considered
+   'mastered' and pushed to the replay buffer. Reads
+   MMLLM_REPLAY_THRESHOLD (default 0.5). Lower = more selective; the
+   buffer fills with only the most-confidently-predicted batches."
+  []
+  (python/float (.get (.- os environ) "MMLLM_REPLAY_THRESHOLD" "0.5")))
+
+(defn freeze-local-grads!
+  "Zero out the gradient on every Local Bank parameter (K_a, K_b,
+   q_norm, V) across all blocks. Used during a replay step to keep
+   Local Bank frozen while NetBank, dense projections, and the carry
+   update from the replay batch's gradient. Safe to call after
+   .backward() and before opt.step() — zeroed gradients become no-ops
+   in the optimizer step."
+  [m]
+  (doseq [b (:blocks m)]
+    (let [mem (:memory b)]
+      (doseq [p (python/list (.parameters mem))]
+        (when-let [g (.- p grad)]
+          (.zero_ g))))))
+
 (defn pick-distill-coef
   "Coefficient on the Net→Local distillation aux loss. Reads
    MMLLM_DISTILL_COEF (default 0.0 = disabled). When > 0, train-step
@@ -767,9 +809,13 @@
       0.0
       (let [losses (->> (:blocks m)
                         (map (fn [b]
-                               (let [g (:long-gate b)
-                                     lo (.- g last_local_out)
-                                     no (.- g last_net_out)]
+                               ;; Only SwitchGate stashes these; SumGate /
+                               ;; ScalarGate / 2-way SwitchGate lack them.
+                               ;; getattr-with-default keeps this a no-op
+                               ;; outside 3-way switch mode.
+                               (let [g  (:long-gate b)
+                                     lo (python/getattr g "last_local_out" nil)
+                                     no (python/getattr g "last_net_out" nil)]
                                  (when (and lo no)
                                    (F/mse_loss no (.detach lo))))))
                         (filter some?))]
@@ -1199,8 +1245,10 @@
 
 (defn train-step
   ([m opt-dense opt-sparse x y]
-   (train-step m opt-dense opt-sparse nil x y))
+   (train-step m opt-dense opt-sparse nil x y false))
   ([m opt-dense opt-sparse opt-sparse-net x y]
+   (train-step m opt-dense opt-sparse opt-sparse-net x y false))
+  ([m opt-dense opt-sparse opt-sparse-net x y freeze-local?]
    (let [device       (:device m)
          x            (.to x device)
          y            (.to y device)
@@ -1265,6 +1313,11 @@
      (.zero_grad opt-sparse)
      (when opt-sparse-net (.zero_grad opt-sparse-net))
      (.backward loss)
+     ;; P3 replay path: zero Local Bank's grads after backward but
+     ;; before optimizer.step() so the replay update flows only into
+     ;; NetBank, dense projections, and carry — Local stays frozen on
+     ;; mastered patterns it's already learned.
+     (when freeze-local? (freeze-local-grads! m))
      ;; Gradient clipping on the AdamW (dense / router) param group.
      ;; SparseAdam's per-row updates on bank V are robust to single
      ;; large grads (the update is localized per touched row) so we
@@ -2599,6 +2652,19 @@
         ;; Mutable cell for "wall-s at last 50-step print" — used to
         ;; compute rolling tokens/sec. Python list = 1-element ref.
         prev-print-s-ref (python/list [0.0])
+        ;; Mutable cell for Δ_local baseline (captured at first ablation
+        ;; event of the run). consolidation_index = (baseline - current)
+        ;; / baseline tells us if Local's importance is dropping (Net
+        ;; consolidating) or growing (routing-absorption warning).
+        delta-local-baseline-ref (python/list [nil])
+        ;; P3 replay buffer state. Mutable Python list of (x_cpu, y_cpu)
+        ;; tuples representing batches whose plain-CE was below the
+        ;; replay threshold (i.e. positions Local has already mastered).
+        ;; Replay step every `replay-every` main steps with frozen Local.
+        replay-every     (pick-replay-every)
+        replay-cap       (pick-replay-buffer-size)
+        replay-thresh    (pick-replay-threshold)
+        replay-buf       (python/list [])
         ;; Train file may be many GB — use_mmap=True keeps it on disk
         ;; (uint8 view, .long()-cast per batch). Pre-load val (typically
         ;; ≤500 MB) directly as int64 so eval-bpc's repeated narrow()
@@ -2799,6 +2865,26 @@
                 ;; mode (single corpus from `train-data`); skip update.
                 _     (when corpus-idx
                         (record-corpus-loss! corpus-tracker corpus-idx loss))
+                ;; P3 replay-buffer push: any step whose plain CE landed
+                ;; below replay-thresh is considered "mastered" and saved
+                ;; to the buffer for later replay. Both x and y are
+                ;; cloned to CPU to avoid GPU memory growth.
+                _     (when (and (pos? replay-every) (< loss replay-thresh))
+                        (.append replay-buf
+                                 (python/tuple [(.to (.detach x) "cpu" ** :copy true)
+                                                (.to (.detach y) "cpu" ** :copy true)]))
+                        (when (> (count replay-buf) replay-cap)
+                          (.pop replay-buf 0)))
+                ;; P3 replay step: every replay-every main steps, sample
+                ;; one buffered batch and run a frozen-Local train-step.
+                ;; Net + dense + carry update; Local Bank stays put.
+                _     (when (and (pos? replay-every)
+                                 (zero? (mod (inc step) replay-every))
+                                 (pos? (count replay-buf)))
+                        (let [idx     (.item (torch/randint 0 (count replay-buf) (python/tuple [])))
+                              [xr yr] (.__getitem__ replay-buf idx)]
+                          (set-train-mode! m)
+                          (train-step m opt-dense opt-sparse opt-sparse-net xr yr true)))
                 step' (inc step)]
             (when (zero? (mod step' 50))
               (let [cur-lr     (if (pos? warmup)
@@ -2892,7 +2978,18 @@
                         ;; otherwise it would equal Δ_local trivially)
                         abl-b     (when abl-n (ablation-step-both! m val-data T 16 50000))
                         d-b       (when abl-b (- abl-b ctrl))
-                        dt        (- (time/time) t-abl)]
+                        dt        (- (time/time) t-abl)
+                        ;; P4 consolidation index — capture first Δ_local
+                        ;; as baseline; report relative drop on subsequent
+                        ;; events. Positive = Net is taking over Local
+                        ;; (consolidation working). Negative = Local is
+                        ;; getting MORE essential (routing-absorption).
+                        baseline  (.__getitem__ delta-local-baseline-ref 0)
+                        _         (when (nil? baseline)
+                                    (.__setitem__ delta-local-baseline-ref 0 d-l))
+                        baseline2 (.__getitem__ delta-local-baseline-ref 0)
+                        cons-idx  (when (and baseline2 (> (python/abs baseline2) 1e-6))
+                                    (/ (- baseline2 d-l) baseline2))]
                     (println (format "  ── ablation Δ at step %d: ctrl=%.4f"
                                      step' ctrl))
                     (println (format "       Δ_local: %.4f → %+.4f" abl-l d-l))
@@ -2900,14 +2997,19 @@
                       (println (format "       Δ_net:   %.4f → %+.4f" abl-n d-n))
                       (println (format "       Δ_both:  %.4f → %+.4f  (synergy: %+.4f)"
                                        abl-b d-b (- d-b (+ d-l d-n)))))
+                    (when cons-idx
+                      (println (format "       consolidation_idx: %+.4f  (baseline Δ_local=%+.4f)"
+                                       cons-idx baseline2)))
                     (println (format "       wall: %.1fs" dt))
                     (append-jsonl! log-path
-                                   (format "{\"step\":%d,\"event\":\"ablation_intermediate\",\"control_bpc\":%.4f,\"ablated_bpc\":%.4f,\"delta_bpc\":%.4f,\"delta_local\":%.4f,\"delta_net\":%s,\"delta_both\":%s,\"ablation_s\":%.2f,\"wall_s\":%.1f}"
+                                   (format "{\"step\":%d,\"event\":\"ablation_intermediate\",\"control_bpc\":%.4f,\"ablated_bpc\":%.4f,\"delta_bpc\":%.4f,\"delta_local\":%.4f,\"delta_net\":%s,\"delta_both\":%s,\"consolidation_idx\":%s,\"baseline_delta_local\":%s,\"ablation_s\":%.2f,\"wall_s\":%.1f}"
                                            step'
                                            ctrl abl-l d-l   ;; legacy fields = Local-only (back-compat)
                                            d-l
                                            (if d-n (format "%.4f" d-n) "null")
                                            (if d-b (format "%.4f" d-b) "null")
+                                           (if cons-idx (format "%.4f" cons-idx) "null")
+                                           (if baseline2 (format "%.4f" baseline2) "null")
                                            dt (- (time/time) t0)))))))
             ;; PKM slot utilization log + optional dead-slot reinit.
             ;; Each PKM layer's hit counters cover the window since the

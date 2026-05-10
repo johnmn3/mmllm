@@ -544,7 +544,10 @@ def _run_train_long(total_steps, eval_every, ckpt_every, device, lr,
                     grad_clip=0.0,
                     nan_guard=False,
                     log_param_norms=False,
-                    distill_coef=0.0):
+                    distill_coef=0.0,
+                    replay_every=0,
+                    replay_buffer_size=256,
+                    replay_threshold=0.5):
     """Shared body. All knobs threaded via env vars (MMLLM_DEVICE,
     MMLLM_LR, MMLLM_BATCH, MMLLM_SQRT_N, MMLLM_CPU_OFFLOAD,
     MMLLM_BANK_ON_GPU, MMLLM_SYNC_EVERY, MMLLM_VOLUME_NAME,
@@ -638,6 +641,9 @@ def _run_train_long(total_steps, eval_every, ckpt_every, device, lr,
            "MMLLM_NAN_GUARD":          "true" if nan_guard else "false",
            "MMLLM_LOG_PARAM_NORMS":    "true" if log_param_norms else "false",
            "MMLLM_DISTILL_COEF":       str(distill_coef),
+           "MMLLM_REPLAY_EVERY":       str(replay_every),
+           "MMLLM_REPLAY_BUFFER_SIZE": str(replay_buffer_size),
+           "MMLLM_REPLAY_THRESHOLD":   str(replay_threshold),
            # Expandable allocator avoids the fragmentation pattern that
            # OOM'd Phase 4 at the first ablation: the allocator was holding
            # ~17 GB of cached-but-unallocated memory it couldn't reuse for
@@ -736,6 +742,9 @@ def train_with_bank(
     nan_guard: bool = False,             # forward-pass NaN check at each block + logits — aborts with layer-id on first NaN
     log_param_norms: bool = False,       # at each slot_log_every event, write per-param L∞/L2 norms to log.jsonl
     distill_coef: float = 0.0,           # P2': aux MSE coef driving Net to mimic Local's attention output (0 = disabled)
+    replay_every: int = 0,               # P3: every N main steps run a frozen-Local replay step on a buffered mastered batch (0 = disabled)
+    replay_buffer_size: int = 256,       # P3: max (x, y) batches kept in replay buffer (CPU)
+    replay_threshold: float = 0.5,       # P3: plain-CE below which a batch is pushed to the buffer (mastered-position selector)
     base: str = "/data/text8",
     bank: str = "/data/bank",
     corpus_base: str = "",               # if set and != base, symlink corpus splits
@@ -836,6 +845,9 @@ def train_with_bank(
         nan_guard=nan_guard,
         log_param_norms=log_param_norms,
         distill_coef=distill_coef,
+        replay_every=replay_every,
+        replay_buffer_size=replay_buffer_size,
+        replay_threshold=replay_threshold,
     )
     if publish_after:
         # Spawn publish on its own container (uses publish_image w/ gh CLI).
