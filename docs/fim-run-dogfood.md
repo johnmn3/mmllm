@@ -1,14 +1,14 @@
-# FIM run dogfood — JSON single-language POC
+# FIM training contribution — JSON single-language POC
 
-Paste everything below the `---` into a fresh Claude Code session. ~4 hours on CPU.
+Standard FIM (fill-in-the-middle) training contribution for the mmllm
+project. Tests whether bidirectional structural conditioning (prefix +
+suffix) helps the model emit valid JSON tool-call envelopes — the
+open question driving the project right now. Full hypothesis in
+`docs/fim-plan.md`.
 
----
+~4 hours on CPU.
 
-Hey! Could you run a FIM training experiment for the mmllm project?
-Tests whether giving the model both prefix and suffix (FIM) helps it
-emit valid JSON tool-call envelopes. Should take ~4 hours on CPU.
-
-Six commands. Just run them top to bottom.
+## Run
 
 ```bash
 # 1. Get JSON source data (xlam tool-call corpus)
@@ -36,17 +36,28 @@ mmllm train-fim /tmp/mmllm-cpu/fim-json /tmp/mmllm-cpu/fim-bank 10000 1000 1000
 python scripts/build_fim_eval.py
 mmllm fim-eval /tmp/mmllm-cpu/fim-json.ckpts /tmp/mmllm-cpu/fim-eval.jsonl 10000
 
-# 6. Agent eval — the headline number is format_validity
+# 6. Agent eval — headline number is format_validity
 mmllm eval-agent /tmp/mmllm-cpu/fim-json 10000 /tmp/mmllm-cpu/fim-bank \
     /tmp/mmllm-cpu/sources/xlam.test.bin xlam 100 256
 ```
 
-When done, drop the printed FIM-eval table and the agent-eval result
-into `docs/journal/<date>-fim-run-json-10k.md`, commit on your
-dispatched branch, and push.
+## What success looks like
 
-One-line summary back to me: `format_validity = <X>`, FIM-bpc overall,
-and your gut read on whether the hypothesis (FIM fixes the
-format_validity=0 problem) looks alive or dead.
+| metric                 | random baseline | success target |
+|------------------------|-----------------|----------------|
+| FIM-bpc overall        | ~7              | < 2            |
+| FIM-exact overall      | 0%              | > 5%           |
+| **agent format_validity** | **0.000**    | **> 0.0**      |
 
-Thanks!
+`format_validity` moving off zero — even trivially — is the
+headline. That's the hypothesis test.
+
+## What to commit
+
+Drop the printed FIM-eval table + agent-eval output into a journal
+entry under `docs/journal/<date>-fim-run-json-10k.md`. Add a
+`meta.json` next to it (format in `WORKERS.md`). Commit on the
+current branch and push.
+
+To merge into the shared community core, also add a row to
+`WORKERS.md` per its instructions and open a PR.
