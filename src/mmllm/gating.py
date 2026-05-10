@@ -94,6 +94,12 @@ class SwitchGate(nn.Module):
         self.gate_proj = nn.Parameter(torch.zeros(n_long_heads, head_dim))
         # 3-way path. Output 3 logits per (head, position) → softmax.
         self.gate_proj_3 = nn.Parameter(torch.zeros(n_long_heads, 3, head_dim))
+        # alpha_net is owned by the parent block (not by SwitchGate) so
+        # that adding it doesn't shift positional ckpt-load alignment for
+        # params declared after gate_proj_3. The block sets it after
+        # construction; defaults to None until set, in which case forward
+        # runs with α=1 (identity).
+        self.alpha_net: nn.Parameter | None = None
         self.last_gate_dist = None  # tuple (sdpa, local, net) of floats or None
         self.last_local_out = None  # (B, H, T, D) tensor or None — for distillation
         self.last_net_out   = None  # (B, H, T, D) tensor or None — for distillation
@@ -126,6 +132,11 @@ class SwitchGate(nn.Module):
         w0 = weights[..., 0].unsqueeze(-1)
         w1 = weights[..., 1].unsqueeze(-1)
         w2 = weights[..., 2].unsqueeze(-1)
+        # Per-head alpha_net (shape: H) → (1, H, 1, 1) broadcast over
+        # (B, H, T, D). When None (back-compat), runs with α=1.
+        if self.alpha_net is not None:
+            alpha = self.alpha_net.view(1, -1, 1, 1)
+            net_out = alpha * net_out
         return w0 * sdpa_out + w1 * mem_out + w2 * net_out
 
 

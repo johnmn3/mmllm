@@ -545,6 +545,8 @@ def _run_train_long(total_steps, eval_every, ckpt_every, device, lr,
                     nan_guard=False,
                     log_param_norms=False,
                     distill_coef=0.0,
+                    distill_direction_only=False,
+                    alpha_net=False,
                     replay_every=0,
                     replay_buffer_size=256,
                     replay_threshold=0.5):
@@ -641,6 +643,8 @@ def _run_train_long(total_steps, eval_every, ckpt_every, device, lr,
            "MMLLM_NAN_GUARD":          "true" if nan_guard else "false",
            "MMLLM_LOG_PARAM_NORMS":    "true" if log_param_norms else "false",
            "MMLLM_DISTILL_COEF":       str(distill_coef),
+           "MMLLM_DISTILL_DIRECTION_ONLY": "true" if distill_direction_only else "false",
+           "MMLLM_ALPHA_NET":          "true" if alpha_net else "false",
            "MMLLM_REPLAY_EVERY":       str(replay_every),
            "MMLLM_REPLAY_BUFFER_SIZE": str(replay_buffer_size),
            "MMLLM_REPLAY_THRESHOLD":   str(replay_threshold),
@@ -742,6 +746,8 @@ def train_with_bank(
     nan_guard: bool = False,             # forward-pass NaN check at each block + logits — aborts with layer-id on first NaN
     log_param_norms: bool = False,       # at each slot_log_every event, write per-param L∞/L2 norms to log.jsonl
     distill_coef: float = 0.0,           # P2': aux MSE coef driving Net to mimic Local's attention output (0 = disabled)
+    distill_direction_only: bool = False,# normalize Net & Local to unit-norm before MSE (Net learns Local's direction, not magnitude)
+    alpha_net: bool = False,             # per-head learnable scale on Net's path in SwitchGate (compensates for Net's smaller magnitude)
     replay_every: int = 0,               # P3: every N main steps run a frozen-Local replay step on a buffered mastered batch (0 = disabled)
     replay_buffer_size: int = 256,       # P3: max (x, y) batches kept in replay buffer (CPU)
     replay_threshold: float = 0.5,       # P3: plain-CE below which a batch is pushed to the buffer (mastered-position selector)
@@ -845,6 +851,8 @@ def train_with_bank(
         nan_guard=nan_guard,
         log_param_norms=log_param_norms,
         distill_coef=distill_coef,
+        distill_direction_only=distill_direction_only,
+        alpha_net=alpha_net,
         replay_every=replay_every,
         replay_buffer_size=replay_buffer_size,
         replay_threshold=replay_threshold,

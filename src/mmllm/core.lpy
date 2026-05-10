@@ -797,14 +797,47 @@
   []
   (python/float (.get (.- os environ) "MMLLM_DISTILL_COEF" "0.0")))
 
+(defn pick-alpha-net-enabled?
+  "Whether to attach a per-layer learnable alpha_net scalar (per long
+   head) on each SwitchGate's Net-output path. Compensates for the
+   c_net=64 bottleneck + expander-init magnitude loss that leaves Net's
+   contribution small in absolute terms despite high gate weight. Init
+   = 1.0 (identity); learns to amplify Net's effective contribution.
+   Reads MMLLM_ALPHA_NET (default 'false' for back-compat). Stored as
+   block.long-gate.alpha_net so position-aligned ckpt-load doesn't
+   shift; included in (parameters m) at the END for the same reason."
+  []
+  (let [v (.lower (.get (.- os environ) "MMLLM_ALPHA_NET" "false"))]
+    (.__contains__ #{"1" "true" "yes"} v)))
+
+(defn pick-distill-direction-only?
+  "When true, distillation MSE is computed on UNIT-NORMALIZED Net &
+   Local outputs — Net learns Local's direction, not magnitude. Avoids
+   the failure mode where Net minimizes MSE by shrinking its output to
+   match Local's, leaving the gate routing to a tiny-magnitude tier
+   that contributes little. Reads MMLLM_DISTILL_DIRECTION_ONLY (default
+   'false' — preserves existing magnitude-aware MSE)."
+  []
+  (let [v (.lower (.get (.- os environ) "MMLLM_DISTILL_DIRECTION_ONLY" "false"))]
+    (.__contains__ #{"1" "true" "yes"} v)))
+
 (defn collect-distill-loss
   "Walk every 3-way SwitchGate in the model, pull last_local_out and
    last_net_out, compute mean(MSE(net, local.detach())) across blocks,
    scaled by coef. Returns 0.0 when coef=0 OR when no SwitchGate has
    stashed outputs yet (e.g. NetBank disabled, 2-way mode, or first
-   forward not done)."
+   forward not done).
+
+   When MMLLM_DISTILL_DIRECTION_ONLY=true, both tensors are normalized
+   to unit RMS along the feature dim before MSE — Net learns direction
+   from Local but is free to set its own magnitude. This avoids the
+   pathology observed at step 50000 of the xlam-90 run where Net's V
+   tensor ended up 2-7x smaller magnitude than Local's, leaving the
+   gate routing to a low-magnitude tier."
   [m]
-  (let [coef (pick-distill-coef)]
+  (let [coef    (pick-distill-coef)
+        dir-only (pick-distill-direction-only?)
+        eps      1e-6]
     (if (zero? coef)
       0.0
       (let [losses (->> (:blocks m)
@@ -817,7 +850,17 @@
                                      lo (python/getattr g "last_local_out" nil)
                                      no (python/getattr g "last_net_out" nil)]
                                  (when (and lo no)
-                                   (F/mse_loss no (.detach lo))))))
+                                   (if dir-only
+                                     ;; Direction-only: divide each by its
+                                     ;; per-position norm before MSE. Net
+                                     ;; learns Local's direction; magnitude
+                                     ;; is left to the gate × output path.
+                                     (let [lo-d   (.detach lo)
+                                           lo-n   (.add (.norm lo-d ** :dim -1 :keepdim true) eps)
+                                           no-n   (.add (.norm no  ** :dim -1 :keepdim true) eps)]
+                                       (F/mse_loss (.div no no-n)
+                                                   (.div lo-d lo-n)))
+                                     (F/mse_loss no (.detach lo)))))))
                         (filter some?))]
         (if (empty? losses)
           0.0
@@ -949,7 +992,17 @@
      :down-proj (nn/Linear d-ff    d-model ** :bias false)
      :short-window      sw
      :long-window       lw
-     :long-gate     (gate/build_gate         gate-kind n-long-heads head-dim)
+     :long-gate     (let [g (gate/build_gate gate-kind n-long-heads head-dim)]
+                      ;; Optional per-head learnable scale on Net's path.
+                      ;; Attached to the gate AFTER construction (so it's
+                      ;; not part of SwitchGate's declaration-order params,
+                      ;; which would shift positional ckpt-load alignment).
+                      ;; Surfaces as a fresh tensor in (parameters m) at
+                      ;; the END of the param list — see `alpha-net-params`.
+                      (when (and (= gate-kind "switch") (pick-alpha-net-enabled?))
+                        (.__setattr__ g "alpha_net"
+                                      (nn/Parameter (torch/ones n-long-heads))))
+                      g)
      :bank-query    (bq/build_bank_query     bq-kind   d-model      q-dim)
      :bank-feedback (bfb/build_bank_feedback fb-kind   d-model      q-dim)
      :memory    (memory-cls q-dim sqrt-n
@@ -1086,13 +1139,28 @@
         memory-q-norm (fn [b]
                         (.q_norm_parameters (:memory b)))
         gate-params (fn [b]
-                      (python/list (.parameters (:long-gate b))))
+                      ;; Exclude alpha_net (added later as a SwitchGate
+                      ;; attribute) from this position so position-aligned
+                      ;; ckpt-load doesn't shift. alpha_net surfaces in
+                      ;; alpha-net-params at the END of (parameters m).
+                      (->> (.named_parameters (:long-gate b))
+                           python/list
+                           (filter (fn [t] (not= (.__getitem__ t 0) "alpha_net")))
+                           (map (fn [t] (.__getitem__ t 1)))
+                           python/list))
         netbank-params (fn [b]
                          (when-let [nb (:netbank b)]
                            (.dense_parameters nb)))
         carry-params (fn [b]
                        (when-let [c (:carry b)]
-                         (python/list (.parameters c))))]
+                         (python/list (.parameters c))))
+        alpha-net-params (fn [b]
+                           ;; SwitchGate.alpha_net (per-block, optional).
+                           ;; nil/None when not enabled or not a SwitchGate.
+                           (let [g (:long-gate b)
+                                 a (python/getattr g "alpha_net" nil)]
+                             (when (and a (python/isinstance a nn/Parameter))
+                               [a])))]
     (concat (python/list (.parameters tok-emb))
             (mapcat core-params blocks)
             (python/list (.parameters norm-final))
@@ -1106,7 +1174,10 @@
             ;; saved before these features can still load positionally.
             (when importance-head
               (python/list (.parameters importance-head)))
-            (mapcat carry-params blocks))))
+            (mapcat carry-params blocks)
+            ;; alpha_net (per-SwitchGate per-head) — last so even
+            ;; ckpts from before this feature exists load cleanly.
+            (mapcat alpha-net-params blocks))))
 
 (defn sparse-parameters
   "Local Bank sparse params — route to opt-sparse (SparseAdam).
