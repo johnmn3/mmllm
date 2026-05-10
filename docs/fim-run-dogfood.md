@@ -11,6 +11,11 @@ open question driving the project right now. Full hypothesis in
 ## Run
 
 ```bash
+# 0. Auth — xlam is HF-gated. Get a read token at hf.co/settings/tokens
+#    and substitute it below. (For dogfood dispatches, paste a token
+#    in before sending; contributors use their own.)
+export HF_TOKEN=hf_YOUR_READ_TOKEN_HERE
+
 # 1. Get JSON source data (xlam tool-call corpus)
 mmllm prepare-hf-dataset xlam /tmp/mmllm-cpu/sources/xlam 200000000 5000000 5000000
 
