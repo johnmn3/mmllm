@@ -79,47 +79,89 @@ def focal_ce(logits: torch.Tensor, y: torch.Tensor,
 # ─────────────────────── learned importance head ───────────────────────
 
 class LearnedImportanceHead(nn.Module):
-    """Per-position importance multiplier. A single Linear(d_model, 1)
-    over the model's final hidden state, passed through softplus to
-    produce a positive weight. Used as a per-position multiplier on
-    top of focal CE.
+    """Per-position difficulty predictor — Linear(d_model, 1) + softplus
+    over the model's final hidden state. Output is a non-negative scalar
+    per position, intended to estimate how hard the next-byte prediction
+    is at that position.
 
-    Self-supervision: positions where the model's prediction was
-    consistently wrong push the head's output up (because gradient
-    favors more weight on high-error positions). Positions where
-    prediction is easy push the head's output toward 1 (the regularizer
-    pulls it). Result: learned structural detector.
+    DESIGN — read carefully (v1 had a degenerate bug; this is v2):
 
-    Init: zero weights → softplus(0) ≈ 0.69 ≈ const. Behavior at step 0
-    is "all positions weighted equally at ~0.69" — slightly less than
-    plain CE-mean. As training progresses, the head differentiates."""
+      * IH is trained via a SEPARATE aux loss (MSE against detached
+        per_pos_ce), not via the main loss it modulates. The
+        train-step decouples the two paths so the optimizer can't
+        learn to suppress IH output to "free" loss reduction.
+
+      * As a multiplier on the main loss, IH is ALSO detached and
+        re-normalized to mean=1 per batch. Detach prevents gradient
+        flow from main loss into IH. Mean-1 normalization preserves
+        the total loss magnitude so IH only RE-BALANCES per-position
+        weight — easy bytes get < 1×, hard bytes get > 1×.
+
+      * Bias init = inverse_softplus(1.0) = ln(e - 1) ≈ 0.5413 so
+        softplus(0 + bias) ≈ 1.0 at step 0. Matches "uniform mean-1
+        weight" baseline: identical to plain mean CE before IH starts
+        differentiating. (v1 had bias=0 → output ≈ 0.69 → loss looked
+        ~30% lower than plain CE — confusing.)
+
+    v1 bug for posterity: gradient on IH from main loss `imp·CE` is
+    `per_pos_ce`, which is positive. Optimizer minimized loss by
+    pushing IH DOWN on hard bytes (the opposite of intent). Net
+    effect was IH collapsed toward 0 on hard bytes, training signal
+    vanished, model drifted into NaN."""
+
+    # Inverse of softplus at y=1: x such that ln(1 + e^x) = 1.
+    # Solve: e^x = e - 1, x = ln(e - 1) ≈ 0.5413.
+    _BIAS_INIT = 0.5413248546129181
 
     def __init__(self, d_model: int):
         super().__init__()
-        self.proj = nn.Linear(d_model, 1, bias=False)
+        self.proj = nn.Linear(d_model, 1, bias=True)
         nn.init.zeros_(self.proj.weight)
+        nn.init.constant_(self.proj.bias, self._BIAS_INIT)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        """x: (B, T, d_model) → (B, T) softplus-transformed importance.
+        """x: (B, T, d_model) → (B, T) softplus-transformed difficulty.
         softplus is a smooth >0 activation so the multiplier is always
         positive and differentiable everywhere."""
         return F.softplus(self.proj(x)).squeeze(-1)
 
 
 def importance_weighted_loss(per_pos_ce: torch.Tensor,
-                             importance: torch.Tensor,
-                             reg_coef: float = 1e-4) -> torch.Tensor:
-    """Combine per-position focal CE with per-position importance weights.
-    per_pos_ce: (B, T) — focal_ce(reduction='none') flattened over batch.
-    importance: (B, T) — output of LearnedImportanceHead.
-    reg_coef:    scale on (importance - 1)^2 regularizer that keeps the
-                 head from running away. Without it the head trivially
-                 maximizes weight on easiest bytes (free loss reduction).
+                             importance_raw: torch.Tensor,
+                             aux_coef: float = 1.0,
+                             eps: float = 1e-8) -> torch.Tensor:
+    """v2 importance-weighted loss with decoupled gradient paths.
 
-    Returns scalar loss = mean(importance * per_pos_ce) + reg."""
-    weighted = importance * per_pos_ce
-    reg = reg_coef * (importance - 1.0).pow(2).mean()
-    return weighted.mean() + reg
+    Args
+    ----
+    per_pos_ce     : (N,) — per-position CE loss (with grad; flows back
+                     through the model's logits).
+    importance_raw : (N,) — IH(final_x) output (with grad; flows back
+                     ONLY through the aux MSE, NOT through the main
+                     loss multiplication).
+    aux_coef       : scale on the IH self-supervised aux loss.
+                     1.0 is a reasonable default (per-position MSE
+                     between IH and per_pos_ce; same units as CE).
+    eps            : numerical floor on imp_used.mean() before
+                     dividing — prevents 0/0 if IH predicts 0.
+
+    Returns scalar loss = main_weighted_mean + aux_coef · ih_aux_mse.
+
+    Path semantics:
+      * imp_used = importance_raw.detach() / max(mean(imp_used), eps)
+        → mean = 1, all positive, NO grad path back to IH.
+      * weighted = imp_used · per_pos_ce  (grad path: per_pos_ce only)
+      * aux = MSE(importance_raw, per_pos_ce.detach())  (grad path: IH only)
+
+    Result: IH learns to predict per-position CE; that prediction is
+    used (detached, mean-1) as a re-balancing weight; main optimizer
+    sees a per-position-reweighted CE that conserves total magnitude."""
+    imp_detached = importance_raw.detach()
+    imp_mean = imp_detached.mean().clamp(min=eps)
+    imp_used = imp_detached / imp_mean                        # mean = 1, no grad
+    weighted_main = (imp_used * per_pos_ce).mean()            # grad → CE / model
+    ih_aux = F.mse_loss(importance_raw, per_pos_ce.detach())  # grad → IH only
+    return weighted_main + aux_coef * ih_aux
 
 
 # ─────────────────────── multi-timescale carry ───────────────────────

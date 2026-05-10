@@ -639,12 +639,14 @@
   (let [v (.lower (.get (.- os environ) "MMLLM_IMPORTANCE_HEAD" "false"))]
     (.__contains__ #{"1" "true" "yes"} v)))
 
-(defn pick-importance-reg-coef
-  "Regularization coef on (importance - 1)^2. Keeps the head from
-   running away (otherwise it'd trivially weight easy bytes high to
-   reduce loss). Reads MMLLM_IMPORTANCE_REG (default 1e-4)."
+(defn pick-importance-aux-coef
+  "Coefficient on the IH self-supervised aux loss (MSE between IH
+   output and detached per_pos_ce). Reads MMLLM_IMPORTANCE_AUX
+   (default 1.0). 0 disables aux training (IH stays at init bias).
+   This is the v2 IH knob — replaces the old MMLLM_IMPORTANCE_REG
+   regularizer which never worked (v1 IH had a sign bug)."
   []
-  (python/float (.get (.- os environ) "MMLLM_IMPORTANCE_REG" "1e-4")))
+  (python/float (.get (.- os environ) "MMLLM_IMPORTANCE_AUX" "1.0")))
 
 (defn pick-carry-enabled?
   "Whether to insert MultiTimescaleCarry per block. Reads
@@ -1062,11 +1064,19 @@
                                    ** :gamma gamma :reduction "none")
          ih           (:importance-head m)
          ce-loss      (if ih
-                        (let [imp     (ih final-x)
-                              imp-flat (.reshape imp -1)]
+                        (let [imp-raw  (ih final-x)
+                              imp-flat (.reshape imp-raw -1)]
+                          ;; v2: IH is a detached, mean-1-normalized
+                          ;; multiplier on per_pos_ce (no grad from main
+                          ;; loss into IH) PLUS a separate aux MSE that
+                          ;; trains IH to predict per_pos_ce. See
+                          ;; rs/importance_weighted_loss for path
+                          ;; semantics. Replaces the v1 design which had
+                          ;; a sign bug — gradient pushed IH down on
+                          ;; hard bytes, collapsing training signal to 0.
                           (rs/importance_weighted_loss
                             per-pos-ce imp-flat
-                            ** :reg_coef (pick-importance-reg-coef)))
+                            ** :aux_coef (pick-importance-aux-coef)))
                         (.mean per-pos-ce))
          ;; Plain CE for operator-facing prints + per-corpus tracker.
          ;; The focal+IH-weighted ce-loss is what backward sees, but it

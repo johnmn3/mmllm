@@ -535,7 +535,7 @@ def _run_train_long(total_steps, eval_every, ckpt_every, device, lr,
                     lr_net_mult=1.0,
                     focal_gamma=0.0,
                     importance_head=False,
-                    importance_reg=1e-4,
+                    importance_aux=1.0,
                     carry_enabled=False,
                     carry_n_clocks=4):
     """Shared body. All knobs threaded via env vars (MMLLM_DEVICE,
@@ -616,7 +616,7 @@ def _run_train_long(total_steps, eval_every, ckpt_every, device, lr,
            # via env var so old runs / ckpts stay parameter-identical.
            "MMLLM_FOCAL_GAMMA":        str(focal_gamma),
            "MMLLM_IMPORTANCE_HEAD":    "true" if importance_head else "false",
-           "MMLLM_IMPORTANCE_REG":     str(importance_reg),
+           "MMLLM_IMPORTANCE_AUX":     str(importance_aux),
            "MMLLM_CARRY_ENABLED":      "true" if carry_enabled else "false",
            "MMLLM_CARRY_N_CLOCKS":     str(carry_n_clocks),
            # Expandable allocator avoids the fragmentation pattern that
@@ -705,8 +705,8 @@ def train_with_bank(
     lr_net_mult: float = 1.0,            # multiplier on NetBank's SparseAdam lr
     # ── router-smarts (mid-brain enrichments) ──
     focal_gamma: float = 0.0,            # focal CE exponent: 0 = plain CE, 2 = up-weight hard bytes
-    importance_head: bool = False,       # learned per-position loss multiplier (Linear(d_model, 1) + softplus)
-    importance_reg: float = 1e-4,        # regularizer on (importance - 1)^2; keeps the head from running away
+    importance_head: bool = False,       # learned per-position difficulty predictor (decoupled from main loss; mean-1 multiplier)
+    importance_aux: float = 1.0,         # coefficient on IH self-supervised aux MSE; 0 = freeze IH at init
     carry_enabled: bool = False,         # per-block MultiTimescaleCarry (4 EMAs, log-spaced decays)
     carry_n_clocks: int = 4,             # number of EMAs per carry block
     base: str = "/data/text8",
@@ -799,7 +799,7 @@ def train_with_bank(
         lr_net_mult=lr_net_mult,
         focal_gamma=focal_gamma,
         importance_head=importance_head,
-        importance_reg=importance_reg,
+        importance_aux=importance_aux,
         carry_enabled=carry_enabled,
         carry_n_clocks=carry_n_clocks,
     )
