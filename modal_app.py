@@ -537,7 +537,8 @@ def _run_train_long(total_steps, eval_every, ckpt_every, device, lr,
                     importance_head=False,
                     importance_aux=1.0,
                     carry_enabled=False,
-                    carry_n_clocks=4):
+                    carry_n_clocks=4,
+                    grad_clip=0.0):
     """Shared body. All knobs threaded via env vars (MMLLM_DEVICE,
     MMLLM_LR, MMLLM_BATCH, MMLLM_SQRT_N, MMLLM_CPU_OFFLOAD,
     MMLLM_BANK_ON_GPU, MMLLM_SYNC_EVERY, MMLLM_VOLUME_NAME,
@@ -619,6 +620,7 @@ def _run_train_long(total_steps, eval_every, ckpt_every, device, lr,
            "MMLLM_IMPORTANCE_AUX":     str(importance_aux),
            "MMLLM_CARRY_ENABLED":      "true" if carry_enabled else "false",
            "MMLLM_CARRY_N_CLOCKS":     str(carry_n_clocks),
+           "MMLLM_GRAD_CLIP":          str(grad_clip),
            # Expandable allocator avoids the fragmentation pattern that
            # OOM'd Phase 4 at the first ablation: the allocator was holding
            # ~17 GB of cached-but-unallocated memory it couldn't reuse for
@@ -649,6 +651,7 @@ def _run_train_long(total_steps, eval_every, ckpt_every, device, lr,
         f"mix={'(set)' if mix else '(none)'} "
         f"focal_gamma={focal_gamma} importance_head={importance_head} "
         f"carry_enabled={carry_enabled} carry_n_clocks={carry_n_clocks} "
+        f"grad_clip={grad_clip} "
         f"total={total_steps} eval-every={eval_every} "
         f"ckpt-every={ckpt_every} base={base} ===",
         flush=True,
@@ -709,6 +712,7 @@ def train_with_bank(
     importance_aux: float = 1.0,         # coefficient on IH self-supervised aux MSE; 0 = freeze IH at init
     carry_enabled: bool = False,         # per-block MultiTimescaleCarry (4 EMAs, log-spaced decays)
     carry_n_clocks: int = 4,             # number of EMAs per carry block
+    grad_clip: float = 0.0,              # max global L2 norm for AdamW gradient clipping (0 = disabled, 1.0 standard)
     base: str = "/data/text8",
     bank: str = "/data/bank",
     corpus_base: str = "",               # if set and != base, symlink corpus splits
@@ -802,6 +806,7 @@ def train_with_bank(
         importance_aux=importance_aux,
         carry_enabled=carry_enabled,
         carry_n_clocks=carry_n_clocks,
+        grad_clip=grad_clip,
     )
     if publish_after:
         # Spawn publish on its own container (uses publish_image w/ gh CLI).

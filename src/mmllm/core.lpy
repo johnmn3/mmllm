@@ -31,6 +31,7 @@
            [torch.amp :as amp]
            [torch.cuda :as cuda]
            [torch.nn :as nn]
+           [torch.nn.utils :as nn-utils]
            [torch.nn.functional :as F]
            [torch.optim :as optim]
            [mmllm.memory :as mem]
@@ -639,6 +640,16 @@
   (let [v (.lower (.get (.- os environ) "MMLLM_IMPORTANCE_HEAD" "false"))]
     (.__contains__ #{"1" "true" "yes"} v)))
 
+(defn pick-grad-clip-max-norm
+  "Max global norm for dense-parameter gradient clipping (AdamW only;
+   SparseAdam's per-row updates are localized and don't suffer the
+   same single-step blow-up mode). Reads MMLLM_GRAD_CLIP (default 0.0
+   = disabled). Standard ML hygiene; 1.0 is a reasonable default
+   when enabling. Prevents the 'one bad batch → huge grad → optimizer
+   step explodes a param to inf → next forward NaNs' failure mode."
+  []
+  (python/float (.get (.- os environ) "MMLLM_GRAD_CLIP" "0.0")))
+
 (defn pick-importance-aux-coef
   "Coefficient on the IH self-supervised aux loss (MSE between IH
    output and detached per_pos_ce). Reads MMLLM_IMPORTANCE_AUX
@@ -1108,6 +1119,18 @@
      (.zero_grad opt-sparse)
      (when opt-sparse-net (.zero_grad opt-sparse-net))
      (.backward loss)
+     ;; Gradient clipping on the AdamW (dense / router) param group.
+     ;; SparseAdam's per-row updates on bank V are robust to single
+     ;; large grads (the update is localized per touched row) so we
+     ;; skip clipping there. We pull the dense params from opt-dense
+     ;; itself: param_groups[0]["params"] is the canonical handle
+     ;; already grouped for the optimizer, so we don't re-derive
+     ;; from the model on every step.
+     (let [max-norm (pick-grad-clip-max-norm)]
+       (when (pos? max-norm)
+         (nn-utils/clip_grad_norm_
+           (.__getitem__ (nth (.- opt-dense param_groups) 0) "params")
+           max-norm)))
      (.step opt-dense)
      (.step opt-sparse)
      (when opt-sparse-net (.step opt-sparse-net))
