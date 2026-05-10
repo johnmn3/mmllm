@@ -79,6 +79,13 @@ class SwitchGate(nn.Module):
     gate weights `(sdpa_frac, local_frac, net_frac)` averaged over
     (B, H, T). 2-way fills net_frac with NaN. None until first forward.
     Logged at slot-log events to track tier-utilization drift over time.
+
+    Distillation hooks: in 3-way mode also stashes `last_local_out` and
+    `last_net_out` (the raw per-tier attention contributions, shape
+    (B, H, T, D)) so train-step can compute a Net→Local distillation
+    loss across all blocks. Both still in the autograd graph; train-step
+    detaches Local in the loss path so only Net learns to mimic Local.
+    Cleared after each forward to avoid stale tensors holding GPU memory.
     """
 
     def __init__(self, n_long_heads: int, head_dim: int):
@@ -88,6 +95,8 @@ class SwitchGate(nn.Module):
         # 3-way path. Output 3 logits per (head, position) → softmax.
         self.gate_proj_3 = nn.Parameter(torch.zeros(n_long_heads, 3, head_dim))
         self.last_gate_dist = None  # tuple (sdpa, local, net) of floats or None
+        self.last_local_out = None  # (B, H, T, D) tensor or None — for distillation
+        self.last_net_out   = None  # (B, H, T, D) tensor or None — for distillation
 
     def forward(self, q_long, sdpa_out, mem_out, net_out=None):
         if net_out is None:
@@ -109,6 +118,11 @@ class SwitchGate(nn.Module):
                 float(mean_w[1].item()),
                 float(mean_w[2].item()),
             )
+        # Stash per-tier attention outputs (still in autograd graph) so
+        # train-step can compute Net→Local distillation across all blocks.
+        # Detach happens in train-step's loss path, not here.
+        self.last_local_out = mem_out
+        self.last_net_out   = net_out
         w0 = weights[..., 0].unsqueeze(-1)
         w1 = weights[..., 1].unsqueeze(-1)
         w2 = weights[..., 2].unsqueeze(-1)

@@ -124,24 +124,62 @@
   []
   (python/float (.get (.- os environ) "MMLLM_LR" "3e-3")))
 
+(defn- mult-cosine-interp
+  "Cosine-interpolate between `start` and `end` over (warmup, total]
+   training. Inside the warmup window, return `start`. After total,
+   return `end`. Used by the *_mult-at-step schedule resolvers below
+   to ramp/cool LR multipliers across a run."
+  [start end step total warmup]
+  (cond
+    (= start end)  start
+    (zero? total)  start
+    (< step warmup) start
+    (>= step total) end
+    :else (let [progress (/ (python/float (- step warmup))
+                            (python/float (- total warmup)))
+                cos-half (* 0.5 (+ 1.0 (math/cos (* (.- math pi) progress))))]
+            (+ end (* (- start end) cos-half)))))
+
 (defn pick-lr-dense-mult
   "Multiplier on the dense-side (AdamW) lr. Reads
    MMLLM_LR_DENSE_MULT (float, default 1.0). Combined with
    `pick-lr` to produce the AdamW peak lr. See
    `docs/router-bank-lr-decoupling.md` for the differential-decay
    schedule (cool the dense / router lr after ~9-12B tokens while
-   the bank / expert lr stays at 1.0×)."
-  []
-  (python/float (.get (.- os environ) "MMLLM_LR_DENSE_MULT" "1.0")))
+   the bank / expert lr stays at 1.0×).
+
+   Arity 2 — `(step total)` — returns the cosine-scheduled value
+   between MMLLM_LR_DENSE_MULT and MMLLM_LR_DENSE_MULT_END (defaults
+   to start if unset, i.e. constant). Warmup re-uses MMLLM_LR_WARMUP."
+  ([] (python/float (.get (.- os environ) "MMLLM_LR_DENSE_MULT" "1.0")))
+  ([step total]
+   (let [start  (pick-lr-dense-mult)
+         end    (python/float (.get (.- os environ) "MMLLM_LR_DENSE_MULT_END" (str start)))
+         ;; pick-lr-warmup defined later in this file; inline the env
+         ;; read to keep forward references out of the analyzer's path.
+         warmup (python/int (.get (.- os environ) "MMLLM_LR_WARMUP" "0"))]
+     (mult-cosine-interp start end step total warmup))))
 
 (defn pick-lr-bank-mult
   "Multiplier on the bank-side (SparseAdam) lr. Reads
    MMLLM_LR_BANK_MULT (float, default 1.0). Combined with
    `pick-lr` to produce the SparseAdam peak lr. Cooled only at the
    very end of training (15B+ in the v3 plan; near 100B in an
-   extended run)."
-  []
-  (python/float (.get (.- os environ) "MMLLM_LR_BANK_MULT" "1.0")))
+   extended run).
+
+   Arity 2 — `(step total)` — returns the cosine-scheduled value
+   between MMLLM_LR_BANK_MULT and MMLLM_LR_BANK_MULT_END. T1
+   consolidation: set END < START (e.g. 10 → 1) so Local Bank's lr
+   cools as training progresses, freeing NetBank to keep absorbing
+   while Local stops chasing new patterns."
+  ([] (python/float (.get (.- os environ) "MMLLM_LR_BANK_MULT" "1.0")))
+  ([step total]
+   (let [start  (pick-lr-bank-mult)
+         end    (python/float (.get (.- os environ) "MMLLM_LR_BANK_MULT_END" (str start)))
+         ;; pick-lr-warmup defined later in this file; inline the env
+         ;; read to keep forward references out of the analyzer's path.
+         warmup (python/int (.get (.- os environ) "MMLLM_LR_WARMUP" "0"))]
+     (mult-cosine-interp start end step total warmup))))
 
 (defn pick-lr-dense
   "Effective dense (AdamW) peak lr = pick-lr × pick-lr-dense-mult."
@@ -232,9 +270,20 @@
   "Multiplier on NetBank's SparseAdam lr. Reads MMLLM_LR_NET_MULT
    (default 1.0). Default Phase-4 schedule: 5.0 (half of Local Bank's
    10.0). Cooled later in the curriculum like Local but on a separate
-   schedule."
-  []
-  (python/float (.get (.- os environ) "MMLLM_LR_NET_MULT" "1.0")))
+   schedule.
+
+   Arity 2 — `(step total)` — returns the cosine-scheduled value
+   between MMLLM_LR_NET_MULT and MMLLM_LR_NET_MULT_END. T1 plan: set
+   END > START (e.g. 5 → 10) so NetBank's lr ramps UP as Local cools,
+   absorbing the relative training pressure as Local consolidates."
+  ([] (python/float (.get (.- os environ) "MMLLM_LR_NET_MULT" "1.0")))
+  ([step total]
+   (let [start  (pick-lr-net-mult)
+         end    (python/float (.get (.- os environ) "MMLLM_LR_NET_MULT_END" (str start)))
+         ;; pick-lr-warmup defined later in this file; inline the env
+         ;; read to keep forward references out of the analyzer's path.
+         warmup (python/int (.get (.- os environ) "MMLLM_LR_WARMUP" "0"))]
+     (mult-cosine-interp start end step total warmup))))
 
 (defn pick-lr-net
   "Effective NetBank (SparseAdam) peak lr = pick-lr × pick-lr-net-mult."
@@ -691,6 +740,42 @@
   []
   (let [v (.lower (.get (.- os environ) "MMLLM_LOG_PARAM_NORMS" "false"))]
     (.__contains__ #{"1" "true" "yes"} v)))
+
+(defn pick-distill-coef
+  "Coefficient on the Net→Local distillation aux loss. Reads
+   MMLLM_DISTILL_COEF (default 0.0 = disabled). When > 0, train-step
+   walks every 3-way SwitchGate, pulls last_net_out and last_local_out,
+   and adds `coef · MSE(net_out, local_out.detach())` averaged across
+   blocks to the backward loss. Local is detached so only Net learns to
+   mimic Local; combined with cosine-scheduled lr_bank_mult and lr_net
+   _mult, this drives the cerebellum-style consolidation: Net learns
+   to predict Local's contribution, gate shifts toward Net, Local frees
+   capacity. Suggested ramp 0 → 0.05 over training (cap small to avoid
+   over-constraining Net). 0 keeps the run distillation-free."
+  []
+  (python/float (.get (.- os environ) "MMLLM_DISTILL_COEF" "0.0")))
+
+(defn collect-distill-loss
+  "Walk every 3-way SwitchGate in the model, pull last_local_out and
+   last_net_out, compute mean(MSE(net, local.detach())) across blocks,
+   scaled by coef. Returns 0.0 when coef=0 OR when no SwitchGate has
+   stashed outputs yet (e.g. NetBank disabled, 2-way mode, or first
+   forward not done)."
+  [m]
+  (let [coef (pick-distill-coef)]
+    (if (zero? coef)
+      0.0
+      (let [losses (->> (:blocks m)
+                        (map (fn [b]
+                               (let [g (:long-gate b)
+                                     lo (.- g last_local_out)
+                                     no (.- g last_net_out)]
+                                 (when (and lo no)
+                                   (F/mse_loss no (.detach lo))))))
+                        (filter some?))]
+        (if (empty? losses)
+          0.0
+          (* coef (/ (reduce + losses) (python/float (count losses)))))))))
 
 (defn pick-grad-clip-max-norm
   "Max global norm for dense-parameter gradient clipping (AdamW only;
@@ -1160,11 +1245,13 @@
          plain-ce     (F/cross_entropy logits-flat y-flat)
          z-loss       (collect-z-loss m)
          mtp-loss     (collect-mtp-loss aux-logits y T)
+         distill-loss (collect-distill-loss m)
          ;; Sum non-zero terms; numerics matter — adding a Python 0.0 to
          ;; a tensor would coerce to a fp tensor scalar of value 0, fine.
          loss         (cond-> ce-loss
-                        (not (number? z-loss))   (+ z-loss)
-                        (not (number? mtp-loss)) (+ mtp-loss))]
+                        (not (number? z-loss))       (+ z-loss)
+                        (not (number? mtp-loss))     (+ mtp-loss)
+                        (not (number? distill-loss)) (+ distill-loss))]
      ;; Hard-abort on NaN/Inf loss before backward — a degenerate step
      ;; would propagate NaN into all params, opt state, and bank V; the
      ;; ckpt-save next event would then persist a poisoned model. Raising
@@ -2679,12 +2766,17 @@
                 ;; AdamW gets pick-lr-dense-mult, SparseAdam gets
                 ;; pick-lr-bank-mult. See docs/router-bank-lr-decoupling.md.
                 _          (when (pos? warmup)
+                             ;; Apply scheduled multipliers (arity-2 form).
+                             ;; Identical to old behavior when *_MULT_END is
+                             ;; unset (mult-cosine-interp returns start when
+                             ;; start==end). When set, cosine-interpolates
+                             ;; from start to end across (warmup, total-steps].
                              (let [cur-lr (lr-at-step step total-steps
                                                       (pick-lr) warmup
                                                       (pick-lr-min))
-                                   d-mult (pick-lr-dense-mult)
-                                   b-mult (pick-lr-bank-mult)
-                                   n-mult (pick-lr-net-mult)]
+                                   d-mult (pick-lr-dense-mult step total-steps)
+                                   b-mult (pick-lr-bank-mult  step total-steps)
+                                   n-mult (pick-lr-net-mult   step total-steps)]
                                (set-opt-lr! opt-dense  (* cur-lr d-mult))
                                (set-opt-lr! opt-sparse (* cur-lr b-mult))
                                (when opt-sparse-net
@@ -2713,9 +2805,9 @@
                                  (lr-at-step step total-steps
                                              (pick-lr) warmup (pick-lr-min))
                                  (pick-lr))
-                    d-mult     (pick-lr-dense-mult)
-                    b-mult     (pick-lr-bank-mult)
-                    n-mult     (pick-lr-net-mult)
+                    d-mult     (pick-lr-dense-mult step total-steps)
+                    b-mult     (pick-lr-bank-mult  step total-steps)
+                    n-mult     (pick-lr-net-mult   step total-steps)
                     has-net?   (some? opt-sparse-net)
                     wall-s     (- (time/time) t0)
                     n-tokens   (* B-cur T 50)        ; ~tokens since last print

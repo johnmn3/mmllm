@@ -533,6 +533,9 @@ def _run_train_long(total_steps, eval_every, ckpt_every, device, lr,
                     netbank_delay_ms_min=1.0, netbank_delay_ms_max=10.0,
                     netbank_on_gpu=False,
                     lr_net_mult=1.0,
+                    lr_dense_mult_end=None,
+                    lr_bank_mult_end=None,
+                    lr_net_mult_end=None,
                     focal_gamma=0.0,
                     importance_head=False,
                     importance_aux=1.0,
@@ -540,7 +543,8 @@ def _run_train_long(total_steps, eval_every, ckpt_every, device, lr,
                     carry_n_clocks=4,
                     grad_clip=0.0,
                     nan_guard=False,
-                    log_param_norms=False):
+                    log_param_norms=False,
+                    distill_coef=0.0):
     """Shared body. All knobs threaded via env vars (MMLLM_DEVICE,
     MMLLM_LR, MMLLM_BATCH, MMLLM_SQRT_N, MMLLM_CPU_OFFLOAD,
     MMLLM_BANK_ON_GPU, MMLLM_SYNC_EVERY, MMLLM_VOLUME_NAME,
@@ -613,6 +617,14 @@ def _run_train_long(total_steps, eval_every, ckpt_every, device, lr,
            "MMLLM_NET_DELAY_MS_MAX":   str(netbank_delay_ms_max),
            "MMLLM_NET_BANK_ON_GPU":    "true" if netbank_on_gpu else "false",
            "MMLLM_LR_NET_MULT":        str(lr_net_mult),
+           # Per-multiplier END values for cosine schedules. None → use
+           # the start value (constant; backward-compat). When set, lr
+           # mult cosine-interpolates from start → end across (warmup,
+           # total_steps]. T1 plan: bank 10→1, net 5→10 to drive
+           # consolidation: Local cools as Net ramps up.
+           "MMLLM_LR_DENSE_MULT_END":  str(lr_dense_mult_end if lr_dense_mult_end is not None else lr_dense_mult),
+           "MMLLM_LR_BANK_MULT_END":   str(lr_bank_mult_end  if lr_bank_mult_end  is not None else lr_bank_mult),
+           "MMLLM_LR_NET_MULT_END":    str(lr_net_mult_end   if lr_net_mult_end   is not None else lr_net_mult),
            # Router-smarts (focal CE + importance head + multi-timescale
            # carry). Defaults are no-op (focal_gamma=0 → plain CE,
            # importance_head=false, carry_enabled=false). Each is opt-in
@@ -625,6 +637,7 @@ def _run_train_long(total_steps, eval_every, ckpt_every, device, lr,
            "MMLLM_GRAD_CLIP":          str(grad_clip),
            "MMLLM_NAN_GUARD":          "true" if nan_guard else "false",
            "MMLLM_LOG_PARAM_NORMS":    "true" if log_param_norms else "false",
+           "MMLLM_DISTILL_COEF":       str(distill_coef),
            # Expandable allocator avoids the fragmentation pattern that
            # OOM'd Phase 4 at the first ablation: the allocator was holding
            # ~17 GB of cached-but-unallocated memory it couldn't reuse for
@@ -710,6 +723,9 @@ def train_with_bank(
     netbank_delay_ms_max: float = 10.0,  # max simulated WAN delay (uniform random in [min, max])
     netbank_on_gpu: bool = False,        # NetBank V on GPU VRAM (training-fast) vs CPU mmap (production-realism)
     lr_net_mult: float = 1.0,            # multiplier on NetBank's SparseAdam lr
+    lr_dense_mult_end: float = -1.0,     # cosine-schedule end for AdamW lr mult; -1 = use start (constant)
+    lr_bank_mult_end:  float = -1.0,     # cosine-schedule end for SparseAdam lr mult; T1 default = 1.0
+    lr_net_mult_end:   float = -1.0,     # cosine-schedule end for NetBank SparseAdam lr mult; T1 default = 10.0
     # ── router-smarts (mid-brain enrichments) ──
     focal_gamma: float = 0.0,            # focal CE exponent: 0 = plain CE, 2 = up-weight hard bytes
     importance_head: bool = False,       # learned per-position difficulty predictor (decoupled from main loss; mean-1 multiplier)
@@ -719,6 +735,7 @@ def train_with_bank(
     grad_clip: float = 0.0,              # max global L2 norm for AdamW gradient clipping (0 = disabled, 1.0 standard)
     nan_guard: bool = False,             # forward-pass NaN check at each block + logits — aborts with layer-id on first NaN
     log_param_norms: bool = False,       # at each slot_log_every event, write per-param L∞/L2 norms to log.jsonl
+    distill_coef: float = 0.0,           # P2': aux MSE coef driving Net to mimic Local's attention output (0 = disabled)
     base: str = "/data/text8",
     bank: str = "/data/bank",
     corpus_base: str = "",               # if set and != base, symlink corpus splits
@@ -807,6 +824,9 @@ def train_with_bank(
         netbank_delay_ms_max=netbank_delay_ms_max,
         netbank_on_gpu=netbank_on_gpu,
         lr_net_mult=lr_net_mult,
+        lr_dense_mult_end=(None if lr_dense_mult_end < 0 else lr_dense_mult_end),
+        lr_bank_mult_end =(None if lr_bank_mult_end  < 0 else lr_bank_mult_end),
+        lr_net_mult_end  =(None if lr_net_mult_end   < 0 else lr_net_mult_end),
         focal_gamma=focal_gamma,
         importance_head=importance_head,
         importance_aux=importance_aux,
@@ -815,6 +835,7 @@ def train_with_bank(
         grad_clip=grad_clip,
         nan_guard=nan_guard,
         log_param_norms=log_param_norms,
+        distill_coef=distill_coef,
     )
     if publish_after:
         # Spawn publish on its own container (uses publish_image w/ gh CLI).
