@@ -40,6 +40,7 @@
            [mmllm.gating :as gate]
            [mmllm.bank_query :as bq]
            [mmllm.bank_feedback :as bfb]
+           [mmllm.router_smarts :as rs]
            [mmllm.metrics :as metrics]
            [mmllm.runtime :as rt]
            [mmllm.attention_kernel :as kernel]
@@ -619,6 +620,48 @@
       short-window long-window
       x cos sin short-cache long-cache)))
 
+;;; ─────────────────────── router smarts (focal CE + importance head + carry) ───────────────────────
+
+(defn pick-focal-gamma
+  "Focal-loss gamma exponent. Reads MMLLM_FOCAL_GAMMA (default 0.0 =
+   plain CE). 2.0 is the standard focal default (Lin et al 2017): hard
+   bytes get up-weighted via (1-p)^2, easy bytes get down-weighted.
+   Cheap (~+1% per-step compute). 0 disables → reduces to flat CE."
+  []
+  (python/float (.get (.- os environ) "MMLLM_FOCAL_GAMMA" "0.0")))
+
+(defn pick-importance-head?
+  "Whether to construct & use the LearnedImportanceHead. Reads
+   MMLLM_IMPORTANCE_HEAD (default 'false'). When true, a Linear(d_model,
+   1) head produces a per-position multiplier on top of focal CE.
+   Self-supervised. Adds 1 dense param tensor per model."
+  []
+  (let [v (.lower (.get (.- os environ) "MMLLM_IMPORTANCE_HEAD" "false"))]
+    (.__contains__ #{"1" "true" "yes"} v)))
+
+(defn pick-importance-reg-coef
+  "Regularization coef on (importance - 1)^2. Keeps the head from
+   running away (otherwise it'd trivially weight easy bytes high to
+   reduce loss). Reads MMLLM_IMPORTANCE_REG (default 1e-4)."
+  []
+  (python/float (.get (.- os environ) "MMLLM_IMPORTANCE_REG" "1e-4")))
+
+(defn pick-carry-enabled?
+  "Whether to insert MultiTimescaleCarry per block. Reads
+   MMLLM_CARRY_ENABLED (default 'false'). 4 EMAs per block at log-spaced
+   decay rates. ~10-15% throughput hit. Init: gate zero → identity at
+   step 0; gradient differentiates over training."
+  []
+  (let [v (.lower (.get (.- os environ) "MMLLM_CARRY_ENABLED" "false"))]
+    (.__contains__ #{"1" "true" "yes"} v)))
+
+(defn pick-carry-n-clocks
+  "Number of EMAs per MultiTimescaleCarry block. Reads
+   MMLLM_CARRY_N_CLOCKS (default 4). Decay rates are hardcoded at
+   [0.5, 0.875, 0.96875, 0.992] when n_clocks=4."
+  []
+  (python/int (.get (.- os environ) "MMLLM_CARRY_N_CLOCKS" "4")))
+
 ;;; ─────────────────────── decoder block ───────────────────────
 
 (defn block-forward
@@ -635,21 +678,28 @@
    (let [{:keys [norm1 norm2
                  q-proj k-proj-s v-proj-s k-proj-l v-proj-l o-proj
                  memory netbank long-gate bank-query bank-feedback
-                 gate-proj up-proj down-proj
+                 gate-proj up-proj down-proj carry
                  n-heads n-short-heads n-long-heads
                  n-short-kv-heads n-long-kv-heads head-dim max-t
-                 short-window long-window]} block]
-     (kernel/block_forward
-       norm1 norm2
-       q-proj k-proj-s v-proj-s k-proj-l v-proj-l o-proj
-       memory long-gate bank-query bank-feedback
-       gate-proj up-proj down-proj
-       n-heads n-short-heads n-long-heads
-       n-short-kv-heads n-long-kv-heads head-dim max-t
-       short-window long-window
-       x cos sin short-cache long-cache
-       ** :skip_bank skip-bank?
-       :netbank netbank))))
+                 short-window long-window]} block
+         [x' s' l'] (kernel/block_forward
+                      norm1 norm2
+                      q-proj k-proj-s v-proj-s k-proj-l v-proj-l o-proj
+                      memory long-gate bank-query bank-feedback
+                      gate-proj up-proj down-proj
+                      n-heads n-short-heads n-long-heads
+                      n-short-kv-heads n-long-kv-heads head-dim max-t
+                      short-window long-window
+                      x cos sin short-cache long-cache
+                      ** :skip_bank skip-bank?
+                      :netbank netbank)]
+     ;; Multi-timescale carry as a post-block residual delta. Carry's
+     ;; gate is zero-init so at step 0 this is identity (no behavior
+     ;; change vs no-carry); training pushes the gate to mix EMAs at
+     ;; ~1/5/22/86-token half-lives back into the stream.
+     (if carry
+       [(carry x') s' l']
+       [x' s' l']))))
 
 (defn build-block
   [{:keys [d-model n-heads n-short-heads n-long-heads
@@ -721,7 +771,13 @@
                                 :delay_ms_min    (pick-netbank-delay-min)
                                 :delay_ms_max    (pick-netbank-delay-max)
                                 :dtype           (pick-netbank-dtype)
-                                :bank_on_gpu     (pick-netbank-on-gpu?)))}))
+                                :bank_on_gpu     (pick-netbank-on-gpu?)))
+     ;; Optional MultiTimescaleCarry — per-block "brain-stem clocks"
+     ;; residual at log-uniform decay rates. Zero-init gate → identity at
+     ;; step 0 so adding to an existing ckpt is behavior-preserving;
+     ;; gradient differentiates over training. nil when disabled.
+     :carry     (when (pick-carry-enabled?)
+                  (rs/MultiTimescaleCarry d-model (pick-carry-n-clocks)))}))
 
 ;;; ─────────────────────── model ───────────────────────
 
@@ -737,6 +793,8 @@
     (.to (get block k) device))
   (when-let [nb (:netbank block)]
     (.to nb device))
+  (when-let [c (:carry block)]
+    (.to c device))
   block)
 
 (defn pick-mtp-coef
@@ -765,16 +823,25 @@
         ;; old ckpts load cleanly. Goes AT THE END of (parameters m)
         ;; for positional-ckpt-load compatibility.
         mtp-head   (when (pos? (pick-mtp-coef))
-                     (.to (nn/Linear d-model vocab-size ** :bias false) device))]
-    {:config     config
-     :device     device
-     :tok-emb    (.to (nn/Embedding vocab-size d-model) device)
-     :blocks     (vec (map #(block-to-device! (build-block config %) device)
-                           (range n-layers)))
-     :norm-final (.to (nn/RMSNorm d-model) device)
-     :rope-cos   (.to cos device)
-     :rope-sin   (.to sin device)
-     :mtp-head   mtp-head}))
+                     (.to (nn/Linear d-model vocab-size ** :bias false) device))
+        ;; Optional LearnedImportanceHead — Linear(d_model, 1) over the
+        ;; final hidden state, softplus-transformed → per-position loss
+        ;; multiplier. Self-supervised by the loss itself (regularized to
+        ;; mean=1). Zero-init weights → softplus(0) ≈ 0.69 ≈ const at
+        ;; step 0; differentiates over training. Goes at END of
+        ;; (parameters m) for ckpt back-compat.
+        importance-head (when (pick-importance-head?)
+                          (.to (rs/LearnedImportanceHead d-model) device))]
+    {:config          config
+     :device          device
+     :tok-emb         (.to (nn/Embedding vocab-size d-model) device)
+     :blocks          (vec (map #(block-to-device! (build-block config %) device)
+                                (range n-layers)))
+     :norm-final      (.to (nn/RMSNorm d-model) device)
+     :rope-cos        (.to cos device)
+     :rope-sin        (.to sin device)
+     :mtp-head        mtp-head
+     :importance-head importance-head}))
 
 (defn parameters
   "DENSE learnable parameters — these route to AdamW. Excludes the
@@ -797,9 +864,11 @@
      5. per-block long-gate (at END for the same reason — SumGate→
         SwitchGate transition would otherwise misalign)
      6. per-block netbank dense (at END so a pre-NetBank ckpt loads
-        cleanly into a NetBank-enabled model)"
+        cleanly into a NetBank-enabled model)
+     7. importance-head (at END — added in router-smarts work)
+     8. per-block carry gate (at END — added in router-smarts work)"
   [m]
-  (let [{:keys [tok-emb blocks norm-final mtp-head]} m
+  (let [{:keys [tok-emb blocks norm-final mtp-head importance-head]} m
         ;; CORE block params (K_a/K_b only from memory — q_norm goes at end)
         core-params (fn [b]
                       (concat
@@ -817,7 +886,10 @@
                       (python/list (.parameters (:long-gate b))))
         netbank-params (fn [b]
                          (when-let [nb (:netbank b)]
-                           (.dense_parameters nb)))]
+                           (.dense_parameters nb)))
+        carry-params (fn [b]
+                       (when-let [c (:carry b)]
+                         (python/list (.parameters c))))]
     (concat (python/list (.parameters tok-emb))
             (mapcat core-params blocks)
             (python/list (.parameters norm-final))
@@ -826,7 +898,12 @@
             ;; positional ckpt-load from a ckpt without these stays aligned
             (mapcat memory-q-norm blocks)
             (mapcat gate-params blocks)
-            (mapcat netbank-params blocks))))
+            (mapcat netbank-params blocks)
+            ;; router-smarts additions go at the very end so a ckpt
+            ;; saved before these features can still load positionally.
+            (when importance-head
+              (python/list (.parameters importance-head)))
+            (mapcat carry-params blocks))))
 
 (defn sparse-parameters
   "Local Bank sparse params — route to opt-sparse (SparseAdam).
@@ -886,7 +963,10 @@
                ;; train-step to compute t+2 CE loss when MMLLM_MTP_COEF
                ;; > 0; nil and skipped otherwise.
                aux-logits (when mtp-head (mtp-head x))]
-           [logits out-short out-long aux-logits])
+           ;; 5th element `x` (post-norm-final hidden state) is consumed
+           ;; only by train-step's importance-head path. All other
+           ;; callers destructure 3-4 elements and silently ignore it.
+           [logits out-short out-long aux-logits x])
          (let [block      (nth blocks i)
                sc         (nth short-caches i)
                lc         (nth long-caches  i)
@@ -967,11 +1047,27 @@
    (let [device       (:device m)
          x            (.to x device)
          y            (.to y device)
-         [logits _ _ aux-logits] (forward m x)
+         [logits _ _ aux-logits final-x] (forward m x)
          T            (.size y 1)
-         ce-loss      (F/cross_entropy
-                       (.reshape logits -1 vocab-size)
-                       (.reshape y -1))
+         ;; Router-smarts loss path. focal_ce with gamma=0 reduces to
+         ;; plain CE, so this is behavior-preserving when no env vars
+         ;; are set. When MMLLM_FOCAL_GAMMA > 0, hard bytes get up-
+         ;; weighted via (1-p)^gamma. When MMLLM_IMPORTANCE_HEAD=true,
+         ;; an additional self-supervised per-position multiplier kicks
+         ;; in (regularized to mean=1).
+         gamma        (pick-focal-gamma)
+         logits-flat  (.reshape logits -1 vocab-size)
+         y-flat       (.reshape y -1)
+         per-pos-ce   (rs/focal_ce logits-flat y-flat
+                                   ** :gamma gamma :reduction "none")
+         ih           (:importance-head m)
+         ce-loss      (if ih
+                        (let [imp     (ih final-x)
+                              imp-flat (.reshape imp -1)]
+                          (rs/importance_weighted_loss
+                            per-pos-ce imp-flat
+                            ** :reg_coef (pick-importance-reg-coef)))
+                        (.mean per-pos-ce))
          z-loss       (collect-z-loss m)
          mtp-loss     (collect-mtp-loss aux-logits y T)
          ;; Sum non-zero terms; numerics matter — adding a Python 0.0 to
@@ -1039,8 +1135,10 @@
                :o-proj :gate-proj :up-proj :down-proj
                :long-gate :bank-query :bank-feedback :memory]]
       (.eval (get b k)))
-    (when-let [nb (:netbank b)] (.eval nb)))
-  (when-let [mh (:mtp-head m)] (.eval mh)))
+    (when-let [nb (:netbank b)] (.eval nb))
+    (when-let [c (:carry b)] (.eval c)))
+  (when-let [mh (:mtp-head m)] (.eval mh))
+  (when-let [ih (:importance-head m)] (.eval ih)))
 
 (defn- set-train-mode! [m]
   "Inverse of set-eval-mode!. Call before every train step so the
@@ -1058,8 +1156,10 @@
                :o-proj :gate-proj :up-proj :down-proj
                :long-gate :bank-query :bank-feedback :memory]]
       (.train (get b k)))
-    (when-let [nb (:netbank b)] (.train nb)))
-  (when-let [mh (:mtp-head m)] (.train mh)))
+    (when-let [nb (:netbank b)] (.train nb))
+    (when-let [c (:carry b)] (.train c)))
+  (when-let [mh (:mtp-head m)] (.train mh))
+  (when-let [ih (:importance-head m)] (.train ih)))
 
 (defn sample
   "Generate `n` characters after `prompt`. Threads BOTH short cache

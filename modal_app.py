@@ -532,7 +532,12 @@ def _run_train_long(total_steps, eval_every, ckpt_every, device, lr,
                     netbank_top_k=64, netbank_sub_top_k=64,
                     netbank_delay_ms_min=1.0, netbank_delay_ms_max=10.0,
                     netbank_on_gpu=False,
-                    lr_net_mult=1.0):
+                    lr_net_mult=1.0,
+                    focal_gamma=0.0,
+                    importance_head=False,
+                    importance_reg=1e-4,
+                    carry_enabled=False,
+                    carry_n_clocks=4):
     """Shared body. All knobs threaded via env vars (MMLLM_DEVICE,
     MMLLM_LR, MMLLM_BATCH, MMLLM_SQRT_N, MMLLM_CPU_OFFLOAD,
     MMLLM_BANK_ON_GPU, MMLLM_SYNC_EVERY, MMLLM_VOLUME_NAME,
@@ -605,6 +610,15 @@ def _run_train_long(total_steps, eval_every, ckpt_every, device, lr,
            "MMLLM_NET_DELAY_MS_MAX":   str(netbank_delay_ms_max),
            "MMLLM_NET_BANK_ON_GPU":    "true" if netbank_on_gpu else "false",
            "MMLLM_LR_NET_MULT":        str(lr_net_mult),
+           # Router-smarts (focal CE + importance head + multi-timescale
+           # carry). Defaults are no-op (focal_gamma=0 → plain CE,
+           # importance_head=false, carry_enabled=false). Each is opt-in
+           # via env var so old runs / ckpts stay parameter-identical.
+           "MMLLM_FOCAL_GAMMA":        str(focal_gamma),
+           "MMLLM_IMPORTANCE_HEAD":    "true" if importance_head else "false",
+           "MMLLM_IMPORTANCE_REG":     str(importance_reg),
+           "MMLLM_CARRY_ENABLED":      "true" if carry_enabled else "false",
+           "MMLLM_CARRY_N_CLOCKS":     str(carry_n_clocks),
            # Expandable allocator avoids the fragmentation pattern that
            # OOM'd Phase 4 at the first ablation: the allocator was holding
            # ~17 GB of cached-but-unallocated memory it couldn't reuse for
@@ -633,6 +647,8 @@ def _run_train_long(total_steps, eval_every, ckpt_every, device, lr,
         f"bank_feedback_mode={bank_feedback_mode} "
         f"ablate_every={ablate_every} max_hours={max_hours} "
         f"mix={'(set)' if mix else '(none)'} "
+        f"focal_gamma={focal_gamma} importance_head={importance_head} "
+        f"carry_enabled={carry_enabled} carry_n_clocks={carry_n_clocks} "
         f"total={total_steps} eval-every={eval_every} "
         f"ckpt-every={ckpt_every} base={base} ===",
         flush=True,
@@ -687,6 +703,12 @@ def train_with_bank(
     netbank_delay_ms_max: float = 10.0,  # max simulated WAN delay (uniform random in [min, max])
     netbank_on_gpu: bool = False,        # NetBank V on GPU VRAM (training-fast) vs CPU mmap (production-realism)
     lr_net_mult: float = 1.0,            # multiplier on NetBank's SparseAdam lr
+    # ── router-smarts (mid-brain enrichments) ──
+    focal_gamma: float = 0.0,            # focal CE exponent: 0 = plain CE, 2 = up-weight hard bytes
+    importance_head: bool = False,       # learned per-position loss multiplier (Linear(d_model, 1) + softplus)
+    importance_reg: float = 1e-4,        # regularizer on (importance - 1)^2; keeps the head from running away
+    carry_enabled: bool = False,         # per-block MultiTimescaleCarry (4 EMAs, log-spaced decays)
+    carry_n_clocks: int = 4,             # number of EMAs per carry block
     base: str = "/data/text8",
     bank: str = "/data/bank",
     corpus_base: str = "",               # if set and != base, symlink corpus splits
@@ -775,6 +797,11 @@ def train_with_bank(
         netbank_delay_ms_max=netbank_delay_ms_max,
         netbank_on_gpu=netbank_on_gpu,
         lr_net_mult=lr_net_mult,
+        focal_gamma=focal_gamma,
+        importance_head=importance_head,
+        importance_reg=importance_reg,
+        carry_enabled=carry_enabled,
+        carry_n_clocks=carry_n_clocks,
     )
     if publish_after:
         # Spawn publish on its own container (uses publish_image w/ gh CLI).
