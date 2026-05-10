@@ -1068,6 +1068,16 @@
                             per-pos-ce imp-flat
                             ** :reg_coef (pick-importance-reg-coef)))
                         (.mean per-pos-ce))
+         ;; Plain CE for operator-facing prints + per-corpus tracker.
+         ;; The focal+IH-weighted ce-loss is what backward sees, but it
+         ;; isn't directly comparable to historical (pre-router-smarts)
+         ;; train-loss / val_bpc numbers because (a) IH's softplus(0) ≈
+         ;; 0.69 multiplier and (b) focal's (1-p)^γ down-weighting of
+         ;; easy bytes both shrink the printed scalar in misleading
+         ;; ways. plain-ce is computed cheaply from the same logits we
+         ;; already have and reflects "what would CE have been without
+         ;; router-smarts" — directly comparable to phases 0-N.
+         plain-ce     (F/cross_entropy logits-flat y-flat)
          z-loss       (collect-z-loss m)
          mtp-loss     (collect-mtp-loss aux-logits y T)
          ;; Sum non-zero terms; numerics matter — adding a Python 0.0 to
@@ -1082,8 +1092,8 @@
      ;; pre-poisoning and exit non-zero so the operator notices.
      (when (or (.item (.isnan loss)) (.item (.isinf loss)))
        (throw (python/RuntimeError
-                (format "train-step aborted: loss=%s (ce=%s) is NaN or Inf — model may be poisoned"
-                        (.item loss) (.item ce-loss)))))
+                (format "train-step aborted: loss=%s (ce=%s plain=%s) is NaN or Inf — model may be poisoned"
+                        (.item loss) (.item ce-loss) (.item plain-ce)))))
      (.zero_grad opt-dense)
      (.zero_grad opt-sparse)
      (when opt-sparse-net (.zero_grad opt-sparse-net))
@@ -1091,7 +1101,9 @@
      (.step opt-dense)
      (.step opt-sparse)
      (when opt-sparse-net (.step opt-sparse-net))
-     (.item ce-loss))))
+     ;; Return plain CE — comparable to historical numbers. The
+     ;; focal+IH-weighted loss is internal to backward.
+     (.item plain-ce))))
 
 (defn train
   "Train on the toy corpus. Returns the trained model.
