@@ -177,17 +177,29 @@ class MultiTimescaleCarry(nn.Module):
     span from "what just happened" to "what was happening 100 tokens
     ago" with logarithmic granularity.
 
-    Init: gate weights = zero → gate output = zero for all positions
-    and all clocks → carry residual = 0 → module is exact identity at
-    step 0. Gate is a raw Linear (no softmax), so the per-clock weight
-    can be any sign and any magnitude; gradient differentiates it over
-    training. (We tried softmax and discovered it gives uniform [0.25,
-    0.25, 0.25, 0.25] over zero logits — non-zero carry at init,
-    breaking ckpt back-compat. Raw linear avoids this trap.)
+    Init: gate weights = zero AND output scalar α = zero → gate output
+    is zero AND scaled-residual is zero at step 0 → exact identity.
+    Differentiable through both gate and α; both grow during training.
 
-    Cost: O(T) recurrence per block (can't be parallelized over T due
-    to the EMA recursion). At T=128 this is 128 sequential ops per
-    block × n_layers — a few percent throughput penalty vs no-carry."""
+    Magnitude bound: without normalization, the EMA scales with x's
+    magnitude (decay=0.992 ema → mean of last ~86 x_t), so a non-zero
+    gate would make carry ≈ gate · x. Then `x + carry ≈ (1+gate)·x`
+    is multiplicative, and across 5 layers per forward × many forwards
+    this produces exponential growth in x → eventual overflow at the
+    deepest block. Empirically: NaN at block-4-out by step ~18700 in
+    a real training run with carry on.
+
+    Fix: RMSNorm the carry residual before adding back, and gate the
+    whole thing by a zero-init learnable scalar α. RMSNorm bounds the
+    residual to unit-RMS regardless of EMA magnitude; α grows linearly
+    during training so the additive contribution to x is `α · O(1)`,
+    not `O(x)`. Linear (not exponential) growth across layers.
+
+    v1 used softmax over zero gate logits → uniform weights → non-zero
+    carry at init, broke ckpt back-compat. v2 dropped softmax (raw
+    linear gate, zero-init → carry=0 at init). v3 (this version) adds
+    out-norm + α to bound steady-state magnitude — carry is still
+    exact identity at init."""
 
     def __init__(self, d_model: int, n_clocks: int = 4):
         super().__init__()
@@ -207,9 +219,28 @@ class MultiTimescaleCarry(nn.Module):
             decays = torch.tensor([0.5, 0.875, 0.96875, 0.992], dtype=torch.float32)
         self.register_buffer("decays", decays)
         # Per-position gate that picks which clocks to mix at each step.
-        # Zero-init so module starts as identity (uniform gate × zero EMAs).
+        # Small-random init (NOT zero) so gate(x) · ema is nonzero at
+        # step 0 — that's what gives `out_norm.weight` a nonzero
+        # gradient. If gate were zero AND out_norm.weight were zero,
+        # the entire carry path would be `0 · 0 = 0` and BOTH grads
+        # would also be zero — module permanently stuck. Small std
+        # keeps initial residual magnitude small after norm × weight.
         self.gate = nn.Linear(d_model, n_clocks, bias=False)
-        nn.init.zeros_(self.gate.weight)
+        nn.init.normal_(self.gate.weight, std=0.01)
+        # RMSNorm on the carry residual. Two roles:
+        #
+        #   1. Bound residual magnitude to ~|weight|·unit-RMS regardless
+        #      of EMA size. Breaks the multiplicative-on-x feedback loop
+        #      that caused block-4-out NaN at step ~18700.
+        #
+        #   2. The norm's `weight` parameter starts at 0 (overridden
+        #      below) so the residual is exact 0 at step 0 — module
+        #      is identity at init. The weight itself has a nonzero
+        #      gradient on the first backward (via dL/dweight = dL/dy
+        #      · normalized_carry), so the optimizer can grow it during
+        #      training and the carry comes online smoothly.
+        self.out_norm = nn.RMSNorm(d_model)
+        nn.init.zeros_(self.out_norm.weight)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """x: (B, T, d_model) → (B, T, d_model) with carry residual added.
@@ -234,7 +265,11 @@ class MultiTimescaleCarry(nn.Module):
             carry_t = (w_t * ema).sum(dim=1)            # (B, D)
             out_carry.append(carry_t)
         out_carry = torch.stack(out_carry, dim=1)       # (B, T, D)
-        return x + out_carry
+        # Bound the residual magnitude regardless of EMA size. With
+        # out_norm.weight zero-init, the residual is exact 0 at init
+        # (identity); weight grows during training and the carry comes
+        # online smoothly with bounded magnitude.
+        return x + self.out_norm(out_carry)
 
 
 def build_carry_modules(d_model: int, n_layers: int,
