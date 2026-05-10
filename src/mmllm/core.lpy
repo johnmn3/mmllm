@@ -3383,6 +3383,25 @@
                   (append-jsonl! log-path
                                  (format "{\"step\":%d,\"event\":\"slot_usage\",\"tier\":\"local\",\"layer\":%d,\"dead_a\":%d,\"dead_b\":%d,\"entropy_a\":%.3f,\"entropy_b\":%.3f,\"entropy_max\":%.3f,\"reinit_a\":%d,\"reinit_b\":%d,\"wall_s\":%.1f}"
                                          step' i d-a d-b ea eb em n-a n-b (- (time/time) t0)))
+                  ;; Per-row Local V touch-count distribution (#1 spike
+                  ;; visibility). Lazy-init buffer; only populated when
+                  ;; MMLLM_BANK_COLD_BOOST is on (since the boost code is
+                  ;; what creates _per_row_touches). Otherwise no-op.
+                  (let [V-weight (.- (.- mem V) weight)
+                        touches  (python/getattr V-weight "_per_row_touches" nil)]
+                    (when touches
+                      (let [tf       (.float touches)
+                            mean-v   (.item (.mean tf))
+                            std-v    (.item (.std tf))
+                            mx       (.item (.amax touches))
+                            n-rows   (.numel touches)
+                            n-nz     (.item (.sum (.gt touches 0)))
+                            pct-nz   (* 100.0 (/ (python/float n-nz) n-rows))
+                            kth      (.kthvalue tf (python/int (* 0.95 n-rows)))
+                            p95      (.item (.- kth values))]
+                        (append-jsonl! log-path
+                                       (format "{\"step\":%d,\"event\":\"row_touch_dist\",\"tier\":\"local\",\"layer\":%d,\"mean\":%.2f,\"std\":%.2f,\"max\":%d,\"p95\":%.2f,\"pct_nonzero\":%.2f,\"wall_s\":%.1f}"
+                                               step' i mean-v std-v mx p95 pct-nz (- (time/time) t0))))))
                   (.reset_slot_usage mem))
                 ;; NetBank slot stats (when enabled)
                 (when-let [nb (:netbank blk)]

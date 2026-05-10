@@ -561,7 +561,8 @@ def _run_train_long(total_steps, eval_every, ckpt_every, device, lr,
                     bank_repeat_n=1,             # #7+#8 — Local Bank iter refinement
                     bank_repeat_alpha=0.1,
                     bank_cold_boost=0.0,         # #1 — cold-row gradient boost
-                    bank_cold_boost_eps=1.0):
+                    bank_cold_boost_eps=1.0,
+                    phase_label=""):
     """Shared body. All knobs threaded via env vars (MMLLM_DEVICE,
     MMLLM_LR, MMLLM_BATCH, MMLLM_SQRT_N, MMLLM_CPU_OFFLOAD,
     MMLLM_BANK_ON_GPU, MMLLM_SYNC_EVERY, MMLLM_VOLUME_NAME,
@@ -672,6 +673,7 @@ def _run_train_long(total_steps, eval_every, ckpt_every, device, lr,
            "MMLLM_BANK_REPEAT_ALPHA":  str(bank_repeat_alpha),
            "MMLLM_BANK_COLD_BOOST":    str(bank_cold_boost),
            "MMLLM_BANK_COLD_BOOST_EPS":str(bank_cold_boost_eps),
+           "MMLLM_PHASE_LABEL":        phase_label,
            # Expandable allocator avoids the fragmentation pattern that
            # OOM'd Phase 4 at the first ablation: the allocator was holding
            # ~17 GB of cached-but-unallocated memory it couldn't reuse for
@@ -690,6 +692,8 @@ def _run_train_long(total_steps, eval_every, ckpt_every, device, lr,
         env["MMLLM_MAX_HOURS"] = str(max_hours)
     if mix:
         env["MMLLM_MIX"] = mix
+    phase_label = os.environ.get("MMLLM_PHASE_LABEL", "(no phase label)")
+    print(f"=== PHASE LABEL: {phase_label} ===", flush=True)
     print(
         f"=== train-long device={device} B={batch} lr={lr} "
         f"lr_dense_mult={lr_dense_mult} lr_bank_mult={lr_bank_mult} sqrt_n={sqrt_n} "
@@ -787,6 +791,7 @@ def train_with_bank(
     bank_repeat_alpha: float = 0.1,      # #7+8: scale on prev mem_out fed back into bank_q
     bank_cold_boost: float = 0.0,        # #1: cold-row gradient boost on Local V (0 = disabled)
     bank_cold_boost_eps: float = 1.0,    # #1: smoothing in `1 + boost / (eps + count)`
+    phase_label: str = "",               # human-readable tag for this run (printed at startup, recorded in manifest)
     base: str = "/data/text8",
     bank: str = "/data/bank",
     corpus_base: str = "",               # if set and != base, symlink corpus splits
@@ -904,6 +909,7 @@ def train_with_bank(
         bank_repeat_alpha=bank_repeat_alpha,
         bank_cold_boost =bank_cold_boost,
         bank_cold_boost_eps=bank_cold_boost_eps,
+        phase_label    =phase_label,
     )
     if publish_after:
         # Spawn publish on its own container (uses publish_image w/ gh CLI).
