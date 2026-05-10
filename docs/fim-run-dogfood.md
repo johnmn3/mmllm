@@ -8,6 +8,12 @@ open question driving the project right now. Full hypothesis in
 
 ~4 hours on CPU.
 
+**Scope**: just run the commands. If something errors or the output
+looks wrong, note it in the journal and move on. Don't patch tools or
+write diagnostics mid-run — those are separate PRs against the
+pipeline, not part of this contribution. Negative / weird results are
+useful data; we want them captured, not fixed away.
+
 ## Run
 
 ```bash
