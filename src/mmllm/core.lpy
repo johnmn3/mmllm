@@ -654,14 +654,34 @@
 (defn nan-guard!
   "Check tensor for NaN/Inf and raise with `tag` on detection. No-op
    when t is None (e.g., aux-logits in non-MTP mode). Caller decides
-   whether to call (gated by `pick-nan-guard?`)."
+   whether to call (gated by `pick-nan-guard?`).
+
+   On detection: also prints a tensor stats summary (NaN count, Inf
+   count, finite-min/max, mean of finite entries) so the caller has
+   localized info about how bad the corruption is. This is purely
+   diagnostic; total tensor scan adds <1ms even for the largest
+   tensor in the model."
   [tag t]
   (when t
-    (let [bad? (or (.item (.any (.isnan t)))
-                   (.item (.any (.isinf t))))]
-      (when bad?
-        (throw (python/RuntimeError
-                 (format "nan-guard: tensor %s has NaN/Inf — forward path corrupted" tag)))))))
+    (let [has-nan (.item (.any (.isnan t)))
+          has-inf (.item (.any (.isinf t)))]
+      (when (or has-nan has-inf)
+        (let [n-nan    (.item (.sum (.isnan t)))
+              n-inf    (.item (.sum (.isinf t)))
+              numel    (.numel t)
+              finite-mask (torch/isfinite t)
+              n-finite (.item (.sum finite-mask))
+              finite-stats (if (pos? n-finite)
+                             (let [t-finite (.masked_select t finite-mask)]
+                               (format "finite[min=%.3e max=%.3e mean=%.3e]"
+                                       (.item (.amin t-finite))
+                                       (.item (.amax t-finite))
+                                       (.item (.mean t-finite))))
+                             "no finite entries")]
+          (println (format "  ⚠ nan-guard FIRED: tag=%s numel=%d nan=%d inf=%d %s"
+                           tag numel n-nan n-inf finite-stats))
+          (throw (python/RuntimeError
+                   (format "nan-guard: tensor %s has NaN/Inf — forward path corrupted" tag))))))))
 
 (defn pick-log-param-norms?
   "Whether to log per-param L∞/L2 norms at slot-log events. Reads
