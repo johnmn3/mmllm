@@ -72,25 +72,36 @@ mmllm-workers/
     meta.json           ← {"tokens_trained": N, "steps": N, "label": "..."}
 ```
 
-Once you've trained, upload your `step-N/dense.pt` plus a small
-`meta.json` describing your run. Use HF Hub's web UI or:
+Once you've trained, upload **only** `step-N/dense.pt` (~9 MB) plus a
+small `meta.json` describing your run. Do **not** upload `opt-*.pt` —
+those are per-worker optimizer state, never merged, and would waste
+~270 MB of upload bandwidth per contribution.
 
 ```bash
+# Stage just the upload payload (NOT the whole step-N dir)
+mkdir -p /tmp/mmllm-upload/<your-handle>/step-5000
+cp /tmp/mmllm-cpu/corpus.ckpts/step-5000/dense.pt \
+   /tmp/mmllm-upload/<your-handle>/step-5000/dense.pt
+cat > /tmp/mmllm-upload/<your-handle>/meta.json <<EOF
+{"tokens_trained": 1280000, "steps": 5000, "label": "<your-handle>"}
+EOF
+
+# Upload via HF Hub
 pip install huggingface_hub
 python -c "
 from huggingface_hub import HfApi
 api = HfApi()
 api.upload_folder(
-    folder_path='/tmp/mmllm-cpu/corpus.ckpts/step-5000',
-    path_in_repo='<your-handle>/step-5000',
+    folder_path='/tmp/mmllm-upload/<your-handle>',
+    path_in_repo='<your-handle>',
     repo_id='<TBD>/mmllm-workers',
     repo_type='dataset',
 )
 "
 ```
 
-Write a `meta.json` with at least `{"tokens_trained": 1280000,
-"steps": 5000, "label": "<your-handle>"}` so the harvester can weight
+The `meta.json` should have at least `{"tokens_trained": N, "steps": N,
+"label": "<your-handle>"}` so the harvester can weight
 your contribution proportionally.
 
 ## Running the harvester locally
