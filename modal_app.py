@@ -2673,7 +2673,11 @@ def _do_eval_battery(base, ckpt_step, bank, log_path,
                      bpc_evals, agent_evals, n_samples, gen_len,
                      bank_query_mode="plain",
                      bank_feedback_mode="plain",
-                     long_tier_mix="sum"):
+                     long_tier_mix="sum",
+                     focal_gamma=0.0,
+                     importance_head=False,
+                     carry_enabled=False,
+                     carry_n_clocks=4):
     """Body of the eval battery — factored so eval_watcher can call it
     directly (no nested-Modal-function dispatch). Returns the resolved
     ckpt_step (since callers may pass 0 = latest)."""
@@ -2713,6 +2717,18 @@ def _do_eval_battery(base, ckpt_step, bank, log_path,
     env["MMLLM_BANK_QUERY_MODE"]    = bank_query_mode
     env["MMLLM_BANK_FEEDBACK_MODE"] = bank_feedback_mode
     env["MMLLM_LONG_TIER_MIX"]      = long_tier_mix
+    # Router-smarts arch knobs MUST match training. If trainer used
+    # --carry-enabled and the eval container builds without it, the
+    # carry params in the ckpt are silently dropped by tolerant load
+    # and the model runs without its multi-timescale residual — eval
+    # bpc reads way higher than train val_bpc. Same for --importance-
+    # head (loads but is unused if not constructed) and --focal-gamma
+    # (eval doesn't use focal at inference, but threading the env var
+    # keeps the model definition symmetric).
+    env["MMLLM_FOCAL_GAMMA"]        = str(focal_gamma)
+    env["MMLLM_IMPORTANCE_HEAD"]    = "true" if importance_head else "false"
+    env["MMLLM_CARRY_ENABLED"]      = "true" if carry_enabled else "false"
+    env["MMLLM_CARRY_N_CLOCKS"]     = str(carry_n_clocks)
     env["PYTORCH_CUDA_ALLOC_CONF"]  = "expandable_segments:True"
 
     print(f"=== eval battery base={base} ckpt={ckpt_step} log={log_p} ===",
@@ -2842,6 +2858,10 @@ def eval_watcher(
     n_samples:   int  = 50,
     gen_len:     int  = 256,    # default 256 fits max_pos=1024 + max_prompt_bytes=768 with margin
     max_idle_polls: int = 0,                       # 0 = infinite; else stop after N empty polls
+    focal_gamma:    float = 0.0,
+    importance_head: bool = False,
+    carry_enabled:   bool = False,
+    carry_n_clocks:  int  = 4,
 ):
     """Poll <base>.ckpts/ for new step-<N> dirs and eval each one.
 
@@ -2912,6 +2932,10 @@ def eval_watcher(
                     bank_query_mode=bank_query_mode,
                     bank_feedback_mode=bank_feedback_mode,
                     long_tier_mix=long_tier_mix,
+                    focal_gamma=focal_gamma,
+                    importance_head=importance_head,
+                    carry_enabled=carry_enabled,
+                    carry_n_clocks=carry_n_clocks,
                 )
             except Exception as e:
                 print(f"    WARN: ckpt {s} eval errored: {e} — skipping",
