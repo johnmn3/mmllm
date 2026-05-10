@@ -12,8 +12,20 @@ in this repo and dispatch.
 
 You are dispatched to execute one full FIM training cycle on the mmllm
 project and report whether the central FIM hypothesis holds at this
-scale. Do not refactor the pipeline; it's wired and smoke-tested. Your
-job is to **run the experiment and report the numbers**.
+scale. The FIM pipeline (CLI verbs, splitters, loss mask, eval harness)
+already exists in this repo's history — your job is to **find it, get
+it working on your branch, then run the experiment and report the
+numbers**. Do not reimplement FIM infrastructure from scratch; but
+also do not bail just because the verbs aren't on your current branch
+yet — the code is somewhere reachable (a sibling branch or remote),
+and pulling it in is normal setup work, not scope creep.
+
+**Default disposition: make forward progress.** If a step fails in a
+way that has an obvious next probe (try another branch, reinstall the
+package, fall back to a smaller corpus, halve the LR), take it. Only
+stop-and-report if you've genuinely exhausted reasonable options or
+the run hit something destructive. The user prefers a partial report
+with caveats over a clean abort.
 
 ## The hypothesis
 
@@ -42,14 +54,38 @@ fails — the CLI verbs are stable.
 Total wall budget: **3–6 hours on a modern CPU**. If you blow past 8h
 without reaching step 4, abort and report.
 
-### Step 0 — Verify pipeline is wired
+### Step 0 — Verify pipeline is wired (and get it wired if it isn't)
 
 ```bash
 mmllm 2>&1 | grep -E "fim-build-corpus|train-fim|fim-eval"
 ```
 
-Should print three FIM verbs. If not, the FIM module isn't installed —
-abort and report.
+Should print three FIM verbs. If empty, the FIM code exists in this
+repo's history but not on your current branch yet. Find it and pull
+it in:
+
+```bash
+# 1. Locate the FIM branch (it'll be a claude/* branch with "fim" or
+#    "analyze-repo" in the name; the marker bytes <|fim_pre|> are a
+#    reliable grep target)
+git fetch --all --quiet
+git branch -r | grep -iE "fim|analyze-repo"
+git log --all --oneline --grep="FIM" | head -10
+
+# 2. Merge it in (replace BRANCH with what you found above)
+git merge --no-edit origin/BRANCH
+
+# 3. Re-install so the new CLI verbs register
+pip install -e . --quiet
+
+# 4. Re-verify
+mmllm 2>&1 | grep -E "fim-build-corpus|train-fim|fim-eval"
+```
+
+If after a merge + reinstall the verbs still don't show, try
+`pip install -e . --force-reinstall --quiet` (basilisp sometimes
+caches). Only stop and report if you've tried merging every plausible
+branch AND a force reinstall AND the verbs still aren't there.
 
 ### Step 1 — Acquire JSON source data
 
