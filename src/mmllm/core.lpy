@@ -644,6 +644,46 @@
          :n-long-heads      10
          :n-short-kv-heads  1))
 
+(def default-config-cpu-tiny
+  "CPU-trainable tiny config for community fan-out training.
+
+   Targets a ~16 GB RAM box with a few GB of disk: Local Bank fits in
+   RAM (~200 MB V + 200 MB optimizer state); NetBank is mmap'd to disk
+   so only touched rows page in. Dense trunk is ~5-8 M params.
+
+   Sizing math (per-layer):
+     q-dim       = 4 long heads × 32 head-dim = 128
+     Local V     = 256² × 128 × 4 ≈ 33.5 MB / layer × 4 = 134 MB
+     Local opt   = same shape    ≈ 134 MB
+     NetBank V   = 1024² × 32 × 4 ≈ 128 MB / layer × 4 = 512 MB on disk
+     dense       = ~6 M params × 4 × 3 (Adam state) = ~72 MB
+
+   Total RAM: ~500-700 MB steady state.
+   Total disk: ~600 MB (NetBank V mmap files).
+
+   Use with the `train-cpu` CLI verb (preserves all 9 spike knobs;
+   defaults conservative)."
+  {:d-model            192
+   :n-heads            6
+   :n-short-heads      2
+   :n-long-heads       4
+   :n-short-kv-heads   1
+   :n-long-kv-heads    1
+   :n-layers           4
+   :seq-len            128
+   :max-pos            512
+   :d-ff               768
+   :rope-theta         10000.0
+   :memory-sqrt-n      256
+   :memory-top-k       16
+   :memory-sub-top-k   16
+   :memory-mmap-path   nil
+   :bank-query-mode    nil
+   :bank-feedback-mode nil
+   :long-tier-mix      nil
+   :short-window       nil
+   :long-window        nil})
+
 ;;; ─────────────────────── RoPE (used only on the short tier) ───────────────────────
 
 (defn build-rope-cache
@@ -3705,6 +3745,29 @@
                             ckpt-dir   (str base ".ckpts")
                             log-path   (str base ".log.jsonl")
                             cfg2       (if mpath (assoc cfg :memory-mmap-path mpath) cfg)]
+                        (train-long cfg2 train-path val-path ckpt-dir log-path
+                                    total eval-every ckpt-every)
+                        (println "done."))
+      "train-cpu"     (let [base       (or (second args) "/tmp/mmllm-cpu/corpus.bin")
+                            mpath      (or (nth args 2 nil) "/tmp/mmllm-cpu/bank")
+                            total      (python/int (or (nth args 3 nil) 5000))
+                            eval-every (python/int (or (nth args 4 nil) 1000))
+                            ckpt-every (python/int (or (nth args 5 nil) 1000))
+                            train-path (str base ".train.bin")
+                            val-path   (str base ".val.bin")
+                            ckpt-dir   (str base ".ckpts")
+                            log-path   (str base ".log.jsonl")
+                            cfg2       (assoc default-config-cpu-tiny
+                                              :memory-mmap-path mpath)]
+                        ;; Force CPU device + tiny batch in-process so
+                        ;; the operator doesn't have to remember to set
+                        ;; MMLLM_DEVICE / MMLLM_BATCH. Other knobs
+                        ;; (focal, IH, carry, etc.) still respected via env.
+                        (.__setitem__ (.- os environ) "MMLLM_DEVICE" "cpu")
+                        (when (nil? (.get (.- os environ) "MMLLM_BATCH"))
+                          (.__setitem__ (.- os environ) "MMLLM_BATCH" "4"))
+                        (println (format "  train-cpu: cfg=cpu-tiny corpus=%s bank=%s total=%d"
+                                         base mpath total))
                         (train-long cfg2 train-path val-path ckpt-dir log-path
                                     total eval-every ckpt-every)
                         (println "done."))
