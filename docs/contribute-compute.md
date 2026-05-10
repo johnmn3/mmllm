@@ -53,9 +53,25 @@ mmllm train-cpu /tmp/mmllm-cpu/corpus /tmp/mmllm-cpu/bank 5000 1000 1000
 ls /tmp/mmllm-cpu/corpus.ckpts/
 ```
 
-`train-cpu` automatically forces `MMLLM_DEVICE=cpu` and a small batch.
+`train-cpu` automatically forces `MMLLM_DEVICE=cpu`,
+`MMLLM_BANK_ON_GPU=false` (mmap-backed bank V), and a small batch.
 Other knobs (focal_gamma, importance_head, carry_enabled, distill_coef,
 delim_aux_coef, etc.) are still respected via env var.
+
+**Expected progress on the community corpus:**
+
+| steps | wall (modern CPU) | typical loss | typical val_bpc |
+|---|---|---|---|
+| 100  | ~30 sec | ~5–8       | ~7   |
+| 500  | ~3–5 min | ~4–6       | ~5–7 |
+| 5000 | ~30–60 min | ~1–3       | ~1–3 |
+| 50000| many hours | <1 (overfit risk on this tiny corpus) | <1 |
+
+Numbers are very rough — depends on CPU. The community corpus is only
+~1.5 MB of training data; with B=4 T=128 (~512 tokens/step), 500 steps
+sees only ~256k tokens — much less than typical LM training. Don't
+expect strong convergence at 500 steps; that's a pipeline-test budget,
+not a meaningful training run. Use 5k+ steps for actual contribution.
 
 ## Submitting your contribution
 

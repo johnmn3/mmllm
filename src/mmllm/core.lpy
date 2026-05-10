@@ -3766,6 +3766,13 @@
                         (.__setitem__ (.- os environ) "MMLLM_DEVICE" "cpu")
                         (when (nil? (.get (.- os environ) "MMLLM_BATCH"))
                           (.__setitem__ (.- os environ) "MMLLM_BATCH" "4"))
+                        ;; Force the bank V to mmap-backed CPUPinnedEmbedding
+                        ;; on CPU runs. Otherwise the GPU-resident default
+                        ;; logs "V will live on GPU" misleadingly and ignores
+                        ;; the user's mmap_path. Operator can still override
+                        ;; by setting MMLLM_BANK_ON_GPU explicitly.
+                        (when (nil? (.get (.- os environ) "MMLLM_BANK_ON_GPU"))
+                          (.__setitem__ (.- os environ) "MMLLM_BANK_ON_GPU" "false"))
                         (println (format "  train-cpu: cfg=cpu-tiny corpus=%s bank=%s total=%d"
                                          base mpath total))
                         (train-long cfg2 train-path val-path ckpt-dir log-path
