@@ -50,11 +50,21 @@ def focal_ce(logits: torch.Tensor, y: torch.Tensor,
     (p_correct → 0) and approaches 0 for well-predicted bytes
     (p_correct → 1), so easy bytes contribute less to the gradient
     and hard bytes dominate. No special-case logic for any specific
-    byte position — fully data-driven."""
+    byte position — fully data-driven.
+
+    Numerical guard: log_p_true is clamped to >= -50 before use.
+    Without this, an extremely peaked softmax (log p_true → -∞ when
+    a bank lookup or projection produces a huge logit gap) produces
+    NaN in backward via the `p_true * log_p_true = 0 * -∞` term in
+    the gradient of `(1-p)^γ * log p`. Clamping at -50 keeps loss
+    finite (bounded by ~50) and eliminates the NaN path. This was
+    seen empirically: at step 18050 the loaded ckpt produced a
+    pathological logit distribution that triggered the NaN guard."""
     log_p = F.log_softmax(logits, dim=-1)                       # (..., V)
-    # Gather log p for the true class
+    # Gather log p for the true class, then clamp away -inf path.
     log_p_true = log_p.gather(-1, y.unsqueeze(-1)).squeeze(-1)   # (...,)
-    p_true = log_p_true.exp().clamp(0.0, 1.0)
+    log_p_true = log_p_true.clamp(min=-50.0)
+    p_true = log_p_true.exp()                                    # in [exp(-50), 1]
     weight = (1.0 - p_true).pow(gamma)                          # (...,)
     loss = -(weight * log_p_true)                               # (...,)
     if reduction == "mean":
