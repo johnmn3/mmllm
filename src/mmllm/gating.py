@@ -74,6 +74,11 @@ class SwitchGate(nn.Module):
     Both `gate_proj` (2-way) and `gate_proj_3` (3-way) are stored so the
     same module supports either branch depending on whether net_out is
     provided. Both are zero-init → balanced mix at step 0.
+
+    Diagnostic: stores `last_gate_dist`, the most recent forward's mean
+    gate weights `(sdpa_frac, local_frac, net_frac)` averaged over
+    (B, H, T). 2-way fills net_frac with NaN. None until first forward.
+    Logged at slot-log events to track tier-utilization drift over time.
     """
 
     def __init__(self, n_long_heads: int, head_dim: int):
@@ -82,18 +87,28 @@ class SwitchGate(nn.Module):
         self.gate_proj = nn.Parameter(torch.zeros(n_long_heads, head_dim))
         # 3-way path. Output 3 logits per (head, position) → softmax.
         self.gate_proj_3 = nn.Parameter(torch.zeros(n_long_heads, 3, head_dim))
+        self.last_gate_dist = None  # tuple (sdpa, local, net) of floats or None
 
     def forward(self, q_long, sdpa_out, mem_out, net_out=None):
         if net_out is None:
             # q_long: (B, H, T, D); gate_proj: (H, D); logits: (B, H, T)
             logits = torch.einsum("bhtd,hd->bht", q_long, self.gate_proj)
-            gate = torch.sigmoid(logits).unsqueeze(-1)
-            return gate * sdpa_out + (1.0 - gate) * mem_out
+            gate = torch.sigmoid(logits)
+            with torch.no_grad():
+                g_mean = float(gate.mean().item())
+                self.last_gate_dist = (g_mean, 1.0 - g_mean, float("nan"))
+            return gate.unsqueeze(-1) * sdpa_out + (1.0 - gate).unsqueeze(-1) * mem_out
         # 3-way: q_long: (B, H, T, D); gate_proj_3: (H, 3, D); logits: (B, H, T, 3)
         logits = torch.einsum("bhtd,hkd->bhtk", q_long, self.gate_proj_3)
         weights = F.softmax(logits, dim=-1)                       # (B, H, T, 3)
-        w0 = weights[..., 0:1].unsqueeze(-1)                      # (B, H, T, 1, 1)? no, (B,H,T,1)
-        # Reshape to (B, H, T, 1) per source so they broadcast against (B,H,T,D)
+        with torch.no_grad():
+            # Average over (B, H, T) → 3 floats summing to 1.
+            mean_w = weights.mean(dim=(0, 1, 2))
+            self.last_gate_dist = (
+                float(mean_w[0].item()),
+                float(mean_w[1].item()),
+                float(mean_w[2].item()),
+            )
         w0 = weights[..., 0].unsqueeze(-1)
         w1 = weights[..., 1].unsqueeze(-1)
         w2 = weights[..., 2].unsqueeze(-1)

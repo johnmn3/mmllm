@@ -2067,6 +2067,64 @@
             (.copy_ (.- (.- (:memory b) V) weight)
                     (.to s (.- (.- (:memory b) V) weight) ** :non_blocking true))))))))
 
+(defn ablation-step-net!
+  "Same pattern as ablation-step! but zeros NetBank V (not Local Bank).
+   No-op (returns nil) when NetBank is disabled. Returns ablated bpc.
+
+   Together with ablation-step! this gives Δ_local and Δ_net as separate
+   metrics — answers 'how much is short-term memory carrying' vs 'how
+   much is long-term memory carrying' independently."
+  [m val-data T B max-toks]
+  (let [blocks-with-net (filter :netbank (:blocks m))]
+    (when (seq blocks-with-net)
+      (let [saved-net-cpu (mapv (fn [b]
+                                  (-> (:netbank b) (.- V) (.- weight)
+                                      .detach (.to "cpu" ** :copy true)))
+                                blocks-with-net)]
+        (try
+          (doseq [b blocks-with-net] (.zero_bank (:netbank b)))
+          (let [r (eval-bpc m val-data T B max-toks)]
+            (:bpc r))
+          (finally
+            (doseq [[b s] (map vector blocks-with-net saved-net-cpu)]
+              (with [_ (torch/no_grad)]
+                (.copy_ (.- (.- (:netbank b) V) weight)
+                        (.to s (.- (.- (:netbank b) V) weight) ** :non_blocking true))))))))))
+
+(defn ablation-step-both!
+  "Zero BOTH Local V and NetBank V across all blocks, run eval-bpc,
+   restore both. Returns ablated bpc when at least one tier is present.
+
+   Δ_both vs Δ_local + Δ_net tells us about interaction between the two
+   tiers — superadditive Δ means the tiers carry overlapping signal
+   (one can compensate for the other); subadditive means complementary
+   (each carries unique signal that the other can't replace)."
+  [m val-data T B max-toks]
+  (let [blocks (:blocks m)
+        blocks-with-net (filter :netbank blocks)
+        saved-local-cpu (mapv (fn [b]
+                                (-> (:memory b) (.- V) (.- weight)
+                                    .detach (.to "cpu" ** :copy true)))
+                              blocks)
+        saved-net-cpu (mapv (fn [b]
+                              (-> (:netbank b) (.- V) (.- weight)
+                                  .detach (.to "cpu" ** :copy true)))
+                            blocks-with-net)]
+    (try
+      (doseq [b blocks] (.zero_bank (:memory b)))
+      (doseq [b blocks-with-net] (.zero_bank (:netbank b)))
+      (let [r (eval-bpc m val-data T B max-toks)]
+        (:bpc r))
+      (finally
+        (doseq [[b s] (map vector blocks saved-local-cpu)]
+          (with [_ (torch/no_grad)]
+            (.copy_ (.- (.- (:memory b) V) weight)
+                    (.to s (.- (.- (:memory b) V) weight) ** :non_blocking true))))
+        (doseq [[b s] (map vector blocks-with-net saved-net-cpu)]
+          (with [_ (torch/no_grad)]
+            (.copy_ (.- (.- (:netbank b) V) weight)
+                    (.to s (.- (.- (:netbank b) V) weight) ** :non_blocking true))))))))
+
 ;;; ─────────────────────── train + eval text8 / enwik8 ───────────────────────
 
 (defn train-text8
@@ -2730,16 +2788,35 @@
                 ;; Reuses the just-computed control bpc; runs one extra
                 ;; eval-bpc with V zeroed and then restores V in-place.
                 (when (and (pos? ablate-every) (zero? (mod step' ablate-every)))
-                  (let [t-abl   (time/time)
-                        ctrl    (:bpc r)
-                        abl-bpc (ablation-step! m val-data T 16 50000)
-                        delta   (- abl-bpc ctrl)
-                        dt      (- (time/time) t-abl)]
-                    (println (format "  ── ablation Δ at step %d: ctrl=%.4f abl=%.4f Δ=%+.4f (%.1fs) ──"
-                                     step' ctrl abl-bpc delta dt))
+                  (let [t-abl     (time/time)
+                        ctrl      (:bpc r)
+                        ;; Δ_local: zero Local V only
+                        abl-l     (ablation-step! m val-data T 16 50000)
+                        d-l       (- abl-l ctrl)
+                        ;; Δ_net: zero NetBank V only (nil if NetBank disabled)
+                        abl-n     (ablation-step-net! m val-data T 16 50000)
+                        d-n       (when abl-n (- abl-n ctrl))
+                        ;; Δ_both: zero BOTH (only run when NetBank present;
+                        ;; otherwise it would equal Δ_local trivially)
+                        abl-b     (when abl-n (ablation-step-both! m val-data T 16 50000))
+                        d-b       (when abl-b (- abl-b ctrl))
+                        dt        (- (time/time) t-abl)]
+                    (println (format "  ── ablation Δ at step %d: ctrl=%.4f"
+                                     step' ctrl))
+                    (println (format "       Δ_local: %.4f → %+.4f" abl-l d-l))
+                    (when abl-n
+                      (println (format "       Δ_net:   %.4f → %+.4f" abl-n d-n))
+                      (println (format "       Δ_both:  %.4f → %+.4f  (synergy: %+.4f)"
+                                       abl-b d-b (- d-b (+ d-l d-n)))))
+                    (println (format "       wall: %.1fs" dt))
                     (append-jsonl! log-path
-                                   (format "{\"step\":%d,\"event\":\"ablation_intermediate\",\"control_bpc\":%.4f,\"ablated_bpc\":%.4f,\"delta_bpc\":%.4f,\"ablation_s\":%.2f,\"wall_s\":%.1f}"
-                                           step' ctrl abl-bpc delta dt (- (time/time) t0)))))))
+                                   (format "{\"step\":%d,\"event\":\"ablation_intermediate\",\"control_bpc\":%.4f,\"ablated_bpc\":%.4f,\"delta_bpc\":%.4f,\"delta_local\":%.4f,\"delta_net\":%s,\"delta_both\":%s,\"ablation_s\":%.2f,\"wall_s\":%.1f}"
+                                           step'
+                                           ctrl abl-l d-l   ;; legacy fields = Local-only (back-compat)
+                                           d-l
+                                           (if d-n (format "%.4f" d-n) "null")
+                                           (if d-b (format "%.4f" d-b) "null")
+                                           dt (- (time/time) t0)))))))
             ;; PKM slot utilization log + optional dead-slot reinit.
             ;; Each PKM layer's hit counters cover the window since the
             ;; last reset; we log per-layer entropy and dead-row counts,
@@ -2818,7 +2895,22 @@
                       (log-norm! (format "blk%d-net-V" i) (.- (.- nb V) weight))
                       (log-norm! (format "blk%d-net-expander" i) (.- (.- nb expander) weight)))
                     (when-let [c (:carry blk)]
-                      (log-norm! (format "blk%d-carry-gate" i) (.- (.- c gate) weight)))))))
+                      (log-norm! (format "blk%d-carry-gate" i) (.- (.- c gate) weight))))))
+              ;; Per-layer SwitchGate distribution log. Each block's
+              ;; long-gate's most recent forward stored mean (sdpa, local,
+              ;; net) weights. Trend over training shows tier consolidation
+              ;; (e.g., as NetBank learns, net_frac should grow at the
+              ;; expense of local_frac on stable corpora).
+              (let [t-now (- (time/time) t0)]
+                (doseq [[i blk] (map-indexed vector (:blocks m))]
+                  (let [gd (.- (:long-gate blk) last_gate_dist)]
+                    (when gd
+                      (let [s (python/float (.__getitem__ gd 0))
+                            l (python/float (.__getitem__ gd 1))
+                            n (python/float (.__getitem__ gd 2))]
+                        (append-jsonl! log-path
+                          (format "{\"step\":%d,\"event\":\"gate_dist\",\"layer\":%d,\"sdpa\":%.4f,\"local\":%.4f,\"net\":%.4f,\"wall_s\":%.1f}"
+                                  step' i s l n t-now))))))))
             (when (zero? (mod step' ckpt-every))
               (save-checkpoint! m opt-dense opt-sparse opt-sparse-net ckpt-dir step' volume)
               (println (format "  ── ckpt at step %d ──" step')))
