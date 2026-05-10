@@ -43,6 +43,8 @@
            [mmllm.bank_feedback :as bfb]
            [mmllm.router_smarts :as rs]
            [mmllm.sparse_per_row :as spr]
+           [mmllm.fim :as fim]
+           [mmllm.fim.generator :as fim-gen]
            [mmllm.metrics :as metrics]
            [mmllm.runtime :as rt]
            [mmllm.attention_kernel :as kernel]
@@ -1137,6 +1139,17 @@
     (python/int 0x22)   ;; "
     (python/int 0x0A)}) ;; newline
 
+(defn pick-fim-loss-mask-middle-only?
+  "When true, train-step zeroes per-position CE outside the
+   `<|fim_mid|>...<|fim_eom|>` span on each example. Examples without
+   FIM markers (raw causal docs in a mixed corpus) keep full CE
+   everywhere. Reads MMLLM_FIM_LOSS_MASK_MIDDLE_ONLY (default 'false').
+   Forces the model to focus its gradient on middle-fill prediction;
+   prefix and suffix become conditioning context only."
+  []
+  (let [v (.lower (.get (.- os environ) "MMLLM_FIM_LOSS_MASK_MIDDLE_ONLY" "false"))]
+    (.__contains__ #{"1" "true" "yes"} v)))
+
 (defn pick-schema-mask-weight
   "Per-position CE weight multiplier for 'commit' positions — positions
    where the PREVIOUS byte was a structural JSON delimiter. Reads
@@ -1602,6 +1615,13 @@
                         per-pos-ce
                         (let [w-mask (.reshape (schema-mask-of x schema-w) -1)]
                           (.mul per-pos-ce w-mask)))
+         ;; FIM loss mask: when MMLLM_FIM_LOSS_MASK_MIDDLE_ONLY=true,
+         ;; zero per-position CE outside <|fim_mid|>...<|fim_eom|>. Examples
+         ;; without those markers (non-FIM batches) get all-1 mask, no-op.
+         per-pos-ce   (if (pick-fim-loss-mask-middle-only?)
+                        (let [fim-mask (.to (fim/fim_loss_mask x) (.- per-pos-ce device))]
+                          (.mul per-pos-ce (.reshape fim-mask -1)))
+                        per-pos-ce)
          ih           (:importance-head m)
          ce-loss      (if ih
                         (let [imp-raw  (ih final-x)
@@ -3748,6 +3768,88 @@
                         (train-long cfg2 train-path val-path ckpt-dir log-path
                                     total eval-every ckpt-every)
                         (println "done."))
+      "fim-eval"      (let [ckpt-dir  (or (second args) "/tmp/mmllm-cpu/fim-corpus.ckpts")
+                            eval-path (or (nth args 2 nil) "/tmp/mmllm-cpu/fim-eval.jsonl")
+                            ckpt-step (when (nth args 3 nil)
+                                        (python/int (nth args 3 nil)))
+                            fim-eval  (python/__import__ "mmllm.fim.eval" ** :fromlist (python/list ["run_fim_eval" "print_summary"]))
+                            ;; Build a fresh CPU model with cpu-tiny config + load the ckpt
+                            cfg2      (assoc default-config-cpu-tiny
+                                             :memory-mmap-path "/tmp/mmllm-cpu/fim-eval-bank")]
+                        (.__setitem__ (.- os environ) "MMLLM_DEVICE" "cpu")
+                        (.__setitem__ (.- os environ) "MMLLM_BANK_ON_GPU" "false")
+                        (let [m            (build-model cfg2)
+                              opt-dense    (optim/AdamW (python/list (parameters m)) ** :lr 1e-3)
+                              opt-sparse   (optim/SparseAdam (python/list (sparse-parameters m)) ** :lr 1e-3)
+                              ckpt-dir-py  (python/str ckpt-dir)
+                              ;; Resolve ckpt step (latest if not specified)
+                              actual-step  (or ckpt-step
+                                               (let [os-py    (python/__import__ "os")
+                                                     re-py    (python/__import__ "re")
+                                                     entries  (python/list (.listdir os-py ckpt-dir-py))
+                                                     step-dirs (python/list (filter (fn [n] (.startswith n "step-")) entries))
+                                                     steps    (python/list (map (fn [n] (python/int (.replace n "step-" ""))) step-dirs))]
+                                                 (if (zero? (count steps))
+                                                   (do (println "no ckpts found at " ckpt-dir-py) (sys/exit 1))
+                                                   (apply max steps))))]
+                          (println (format "  fim-eval: ckpt=%s/step-%d  eval=%s"
+                                           ckpt-dir actual-step eval-path))
+                          (load-checkpoint! m opt-dense opt-sparse ckpt-dir actual-step)
+                          (set-eval-mode! m)
+                          (let [result (.run_fim_eval fim-eval m forward eval-path ** :device "cpu")]
+                            (.print_summary fim-eval result))))
+      "fim-build-corpus" (let [language     (or (second args) "generic")
+                               source-root  (or (nth args 2 nil) "/tmp/mmllm-cpu/sources")
+                               output-pref  (or (nth args 3 nil) "/tmp/mmllm-cpu/fim-corpus")
+                               fim-ratio    (python/float (or (nth args 4 nil) "0.5"))
+                               psm-ratio    (python/float (or (nth args 5 nil) "0.5"))
+                               rng-seed     (python/int   (or (nth args 6 nil) "0"))
+                               fim-gen-py   (python/__import__ "mmllm.fim.generator"
+                                                                ** :fromlist (python/list ["LANGUAGE_EXTENSIONS"
+                                                                                            "build_fim_corpus"
+                                                                                            "collect_source_files"]))
+                               exts         (.get (.- fim-gen-py LANGUAGE_EXTENSIONS)
+                                                  language (python/tuple))
+                               paths        (.collect_source_files fim-gen-py source-root
+                                                                   ** :extensions exts)]
+                           (println (format "  fim-build-corpus  language=%s  source=%s  out=%s"
+                                            language source-root output-pref))
+                           (println (format "    found %d source files (extensions=%s)"
+                                            (count paths) (str exts)))
+                           (when (zero? (count paths))
+                             (println "    no source files found; aborting") (sys/exit 1))
+                           (let [stats (.build_fim_corpus fim-gen-py
+                                          (python/list paths) output-pref
+                                          ** :language language
+                                          :fim_ratio fim-ratio
+                                          :psm_ratio psm-ratio
+                                          :rng_seed rng-seed)]
+                             (println (format "  done. stats: %s" (python/dict stats)))))
+      "train-fim"     (let [base       (or (second args) "/tmp/mmllm-cpu/fim-corpus")
+                            mpath      (or (nth args 2 nil) "/tmp/mmllm-cpu/fim-bank")
+                            total      (python/int (or (nth args 3 nil) 5000))
+                            eval-every (python/int (or (nth args 4 nil) 500))
+                            ckpt-every (python/int (or (nth args 5 nil) 1000))]
+                        ;; train-fim wraps train-cpu but force-enables the
+                        ;; FIM loss mask so the model trains only on middle
+                        ;; bytes. All other knobs (focal, IH, carry, distill,
+                        ;; replay, alpha_net, NetBank, ...) still respected.
+                        (.__setitem__ (.- os environ) "MMLLM_FIM_LOSS_MASK_MIDDLE_ONLY" "true")
+                        (println (format "  train-fim: FIM_LOSS_MASK_MIDDLE_ONLY=true forced"))
+                        (let [train-path (str base ".train.bin")
+                              val-path   (str base ".val.bin")
+                              ckpt-dir   (str base ".ckpts")
+                              log-path   (str base ".log.jsonl")
+                              cfg2       (assoc default-config-cpu-tiny
+                                                :memory-mmap-path mpath)]
+                          (.__setitem__ (.- os environ) "MMLLM_DEVICE" "cpu")
+                          (when (nil? (.get (.- os environ) "MMLLM_BATCH"))
+                            (.__setitem__ (.- os environ) "MMLLM_BATCH" "4"))
+                          (when (nil? (.get (.- os environ) "MMLLM_BANK_ON_GPU"))
+                            (.__setitem__ (.- os environ) "MMLLM_BANK_ON_GPU" "false"))
+                          (train-long cfg2 train-path val-path ckpt-dir log-path
+                                      total eval-every ckpt-every)
+                          (println "done.")))
       "train-cpu"     (let [base       (or (second args) "/tmp/mmllm-cpu/corpus.bin")
                             mpath      (or (nth args 2 nil) "/tmp/mmllm-cpu/bank")
                             total      (python/int (or (nth args 3 nil) 5000))
@@ -3918,7 +4020,8 @@
       (do (println "usage: mmllm {train|sample|compare|train-mmap|probe")
           (println "                  |build-corpus|clone-clojure|train-corpus")
           (println "                  |fetch-text8|fetch-enwik8|split-text8|train-text8")
-          (println "                  |train-long")
+          (println "                  |train-cpu|train-long")
+          (println "                  |fim-build-corpus|train-fim|fim-eval")
           (println "                  |bench|bench-batch|bench-spec")
           (println "                  |fetch-artifacts|bank-quantize")
           (println "                  |fetch-pile-github|split-pile-github")
@@ -3940,6 +4043,15 @@
           (println "  train-long   [base-path] [mmap-path] [total-steps] [eval-every] [ckpt-every]")
           (println "                                           (long-running: periodic eval-bpc, ckpt every N, resume from")
           (println "                                            <base>.ckpts/ on restart. Designed for Modal/long boxes.)")
+          (println "  fim-build-corpus [language] [source-root] [output-prefix] [fim-ratio] [psm-ratio] [seed]")
+          (println "                                           (build FIM train/val/test from raw source files;")
+          (println "                                            language picks splitter: json|clojure|python|generic.)")
+          (println "  train-fim [base] [bank-path] [total-steps] [eval-every] [ckpt-every]")
+          (println "                                           (FIM training — forces MMLLM_FIM_LOSS_MASK_MIDDLE_ONLY=true;")
+          (println "                                            same telemetry/ckpt pipeline as train-cpu.)")
+          (println "  fim-eval  [ckpt-dir] [eval-jsonl] [step]")
+          (println "                                           (FIM-bpc + FIM-exact on the eval JSONL produced by")
+          (println "                                            scripts/build_fim_eval.py; per-language summary.)")
           (println "  bench        [base] [ckpt-step] [bank-path] [n-warm] [n-time]")
           (println "                                           (B=1 inference tok/sec on trained checkpoint)")
           (println "  bench-batch  [base] [ckpt-step] [bank-path] [n-warm] [n-time] [B]")

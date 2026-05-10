@@ -35,8 +35,31 @@ Usage:
     --output  ./core-merged \\
     --weighted-by tokens_trained
 
+  # FIM-aware merge — weight workers by measured FIM-bpc (lower = better)
+  python -m mmllm.harvester \\
+    --workers ./workers \\
+    --output  ./core-merged \\
+    --weighted-by fim_quality
+
   # Modal — same logic, run inside a Modal function
   modal run modal_app.py::harvest --workers /data/workers --output /data/core
+
+FIM workers should populate `meta.fim` in their worker meta.json:
+
+    {
+      "tokens_trained": 5120000,
+      "steps": 10000,
+      "label": "your-handle",
+      "fim": {
+        "language": "clojure",
+        "fim_ratio": 0.5,
+        "splitter": "clojure-form-boundary",
+        "fim_eval_bpc": 1.42,
+        "fim_eval_exact_pct": 12.3
+      }
+    }
+
+See docs/fim-plan.md §4 for the language-specialization merge story.
 """
 from __future__ import annotations
 
@@ -93,13 +116,34 @@ def find_worker_ckpts(workers_dir: Path) -> list[dict]:
 
 
 def _weight_for(meta: dict, mode: str) -> float:
-    """Compute a worker's averaging weight from its meta.json."""
+    """Compute a worker's averaging weight from its meta.json.
+
+    Modes:
+      - uniform: 1.0 for every worker
+      - tokens_trained: meta.tokens_trained (proxy for compute spent)
+      - steps: meta.steps
+      - fim_bpc: 1 / max(meta.fim.fim_eval_bpc, 0.1) — lower bpc is
+        better consolidation, so reward it linearly. Workers without
+        meta.fim.fim_eval_bpc get weight 0 (excluded from FIM merge).
+      - fim_quality: tokens_trained / max(meta.fim.fim_eval_bpc, 0.1)
+        — combine compute spent with measured quality."""
     if mode == "uniform":
         return 1.0
     if mode == "tokens_trained":
         return float(meta.get("tokens_trained") or 1)
     if mode == "steps":
         return float(meta.get("steps") or 1)
+    if mode == "fim_bpc":
+        bpc = (meta.get("fim") or {}).get("fim_eval_bpc")
+        if bpc is None:
+            return 0.0
+        return 1.0 / max(float(bpc), 0.1)
+    if mode == "fim_quality":
+        tokens = float(meta.get("tokens_trained") or 1)
+        bpc = (meta.get("fim") or {}).get("fim_eval_bpc")
+        if bpc is None:
+            return 0.0
+        return tokens / max(float(bpc), 0.1)
     raise ValueError(f"unknown weighted-by mode: {mode!r}")
 
 
@@ -114,13 +158,19 @@ def fedavg_dense(workers: list[dict], weighted_by: str = "tokens_trained") -> li
     for w in workers:
         wt = _weight_for(w["meta"], weighted_by)
         if wt <= 0:
-            print(f"  skip {w['worker_id']}: weight<=0 ({wt})")
+            print(f"  skip {w['worker_id']}: weight<=0 ({wt})  "
+                  f"(check meta.json — fim modes need meta.fim.fim_eval_bpc)")
             continue
         tensors = torch.load(w["dense_path"], map_location="cpu")
         weights.append(wt)
         arrays.append(list(tensors))
-        print(f"  load {w['worker_id']:20s}  step={w['step']:>6}  weight={wt:>10.0f}  "
-              f"#tensors={len(tensors)}")
+        fim = (w["meta"].get("fim") or {})
+        fim_str = (f"  fim-bpc={fim['fim_eval_bpc']:.2f}"
+                   if fim.get("fim_eval_bpc") is not None else "")
+        lang = fim.get("language", "")
+        lang_str = f"  lang={lang}" if lang else ""
+        print(f"  load {w['worker_id']:20s}  step={w['step']:>6}  weight={wt:>10.2f}  "
+              f"#tensors={len(tensors)}{lang_str}{fim_str}")
 
     if not arrays:
         raise RuntimeError("no usable worker checkpoints found")
@@ -238,12 +288,31 @@ def harvest(workers_dir: Path, output_dir: Path,
     # NetBank merge (if any worker carries it)
     netbank_merged = merge_netbank_files(workers, output_dir, weighted_by=weighted_by)
 
+    # Aggregate FIM stats across workers (if any reported)
+    fim_workers = [w for w in workers
+                   if (w["meta"].get("fim") or {}).get("fim_eval_bpc") is not None]
+    fim_summary: dict | None = None
+    if fim_workers:
+        langs = sorted({(w["meta"].get("fim") or {}).get("language", "?")
+                        for w in fim_workers})
+        bpcs = [(w["meta"]["fim"]["fim_eval_bpc"]) for w in fim_workers]
+        fim_summary = {
+            "n_fim_workers":  len(fim_workers),
+            "languages":      langs,
+            "fim_bpc_min":    min(bpcs),
+            "fim_bpc_max":    max(bpcs),
+            "fim_bpc_mean":   sum(bpcs) / len(bpcs),
+        }
+        print(f"  FIM stats: {len(fim_workers)} workers across languages={langs}; "
+              f"bpc range [{min(bpcs):.2f}..{max(bpcs):.2f}]")
+
     summary = {
         "ts":             time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         "n_workers":      len(workers),
         "output_step":    output_step,
         "weighted_by":    weighted_by,
         "netbank_merged": netbank_merged,
+        "fim":            fim_summary,
         "sources": [
             {"worker_id": w["worker_id"], "step": w["step"], "meta": w["meta"]}
             for w in workers
@@ -261,9 +330,11 @@ def cli() -> None:
     ap.add_argument("--output", required=True, type=Path,
                     help="directory to write merged step-N/dense.pt + bank-net-latest.<i>.bin")
     ap.add_argument("--weighted-by",
-                    choices=["uniform", "tokens_trained", "steps"],
+                    choices=["uniform", "tokens_trained", "steps",
+                             "fim_bpc", "fim_quality"],
                     default="tokens_trained",
-                    help="how to weight workers in the FedAvg average")
+                    help="how to weight workers in the FedAvg average. "
+                         "fim_bpc and fim_quality require meta.fim.fim_eval_bpc.")
     ap.add_argument("--step", type=int, default=None,
                     help="output step number (default: max worker step)")
     args = ap.parse_args()

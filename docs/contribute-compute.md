@@ -216,6 +216,90 @@ shared substrate.
   loses some of the local optimization the workers did. Expect
   several rounds to see meaningful improvement.
 
+## Contributing FIM (fill-in-the-middle) training
+
+The current focus of the project is FIM training — see
+`docs/fim-plan.md` for the rationale. The hypothesis: byte-level
+causal LM fits perplexity but produces 0 valid JSON tool-call
+envelopes because it lacks bidirectional structural conditioning.
+FIM training fixes that by giving the model both prefix and suffix
+when filling structural middles.
+
+If you want your contribution to maximize impact right now, run FIM
+training on a language you care about:
+
+```bash
+# 1. Collect source files in one tree (skip if you already have one)
+#    For Clojure:
+mkdir -p /tmp/fim-sources && cp -r ~/code/clojure-projects/**/*.clj /tmp/fim-sources/
+#    For Python:
+mkdir -p /tmp/fim-sources && cp -r ~/code/python-projects/**/*.py /tmp/fim-sources/
+#    For JSON (especially tool-call corpora):
+mkdir -p /tmp/fim-sources && cp -r ~/data/json-tool-calls/*.json /tmp/fim-sources/
+
+# 2. Build a FIM corpus (fim_ratio=0.7 → 70% of examples are FIM,
+#    psm_ratio=0.5 → half PSM, half SPM mode)
+mmllm fim-build-corpus clojure /tmp/fim-sources /tmp/mmllm-cpu/fim-clj 0.7 0.5 42
+
+# 3. Train with FIM loss masking (only middle bytes scored)
+mmllm train-fim /tmp/mmllm-cpu/fim-clj /tmp/mmllm-cpu/fim-bank 10000 1000 1000
+
+# 4. Build the eval JSONL and measure your FIM-bpc + FIM-exact
+python scripts/build_fim_eval.py /tmp/mmllm-cpu/fim-eval.jsonl
+mmllm fim-eval /tmp/mmllm-cpu/fim-clj.ckpts /tmp/mmllm-cpu/fim-eval.jsonl
+```
+
+The `fim-eval` step prints a per-language table. Record the bpc and
+exact% for your trained language and include them in your upload
+meta.json:
+
+```json
+{
+  "tokens_trained": 5120000,
+  "steps": 10000,
+  "label": "<your-handle>",
+  "fim": {
+    "language": "clojure",
+    "fim_ratio": 0.7,
+    "splitter": "clojure-form-boundary",
+    "fim_eval_bpc": 1.42,
+    "fim_eval_exact_pct": 12.3
+  }
+}
+```
+
+Then run the harvester with the FIM-aware weight function:
+
+```bash
+python -m mmllm.harvester \
+  --workers ./workers \
+  --output  ./core-merged \
+  --weighted-by fim_quality   # tokens / max(fim_eval_bpc, 0.1)
+```
+
+Workers without `meta.fim.fim_eval_bpc` are skipped under
+`fim_quality` / `fim_bpc` modes — so existing causal-LM workers
+still merge under the default `tokens_trained` mode but are
+excluded from FIM-focused merges.
+
+Finally, add a row to `WORKERS.md` advertising your contribution.
+
+### Per-language splitter availability
+
+| Language | Splitter status | Notes |
+|---|---|---|
+| `json`     | structural (value-boundary state machine) | great for tool-call envelopes |
+| `clojure`  | structural (paren-depth tracking, string/comment-aware) | finds sub-forms |
+| `python`   | block-boundary (def/class) | coarse |
+| `javascript`/`typescript`/`rust`/`go`/`java`/`c`/`cpp` | falls back to `generic` (random byte cut) | adding language splitters is a great PR |
+| `generic`  | random byte cut between (min_middle, max_middle) | works for any data |
+
+To add a new language splitter, drop a file in
+`src/mmllm/fim/splitters/<lang>.py` exposing `split(doc, rng) →
+(i, j) | None`, then register it in
+`src/mmllm/fim/splitters/__init__.py::SPLITTERS`. See
+`json_split.py` for a structurally-aware example.
+
 ## Roadmap
 
 - v1 (now): per-worker training + local harvester + dense FedAvg
