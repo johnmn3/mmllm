@@ -1037,7 +1037,14 @@
      :rope-cos        (.to cos device)
      :rope-sin        (.to sin device)
      :mtp-head        mtp-head
-     :importance-head importance-head}))
+     :importance-head importance-head
+     ;; Mutable metrics stash for visibility into router-smarts /
+     ;; consolidation aux losses. train-step writes the most recent
+     ;; distill_loss; train-long writes replay_loss after the periodic
+     ;; replay step. Read at print and slot-log time.
+     :metrics         (python/dict {"distill_loss" 0.0
+                                    "replay_loss"  0.0
+                                    "replay_buf_n" 0})}))
 
 (defn parameters
   "DENSE learnable parameters — these route to AdamW. Excludes the
@@ -1294,6 +1301,15 @@
          z-loss       (collect-z-loss m)
          mtp-loss     (collect-mtp-loss aux-logits y T)
          distill-loss (collect-distill-loss m)
+         ;; Stash distill loss on the model's :metrics dict for the
+         ;; train-long printer / JSONL logger. Tensor (active distill)
+         ;; goes through .item; constant 0.0 (disabled or no SwitchGate
+         ;; outputs stashed) writes 0.0.
+         _            (when-let [metrics (:metrics m)]
+                        (.__setitem__ metrics "distill_loss"
+                                      (if (number? distill-loss)
+                                        (python/float distill-loss)
+                                        (.item distill-loss))))
          ;; Sum non-zero terms; numerics matter — adding a Python 0.0 to
          ;; a tensor would coerce to a fp tensor scalar of value 0, fine.
          loss         (cond-> ce-loss
@@ -2878,13 +2894,19 @@
                 ;; P3 replay step: every replay-every main steps, sample
                 ;; one buffered batch and run a frozen-Local train-step.
                 ;; Net + dense + carry update; Local Bank stays put.
-                _     (when (and (pos? replay-every)
-                                 (zero? (mod (inc step) replay-every))
-                                 (pos? (count replay-buf)))
-                        (let [idx     (.item (torch/randint 0 (count replay-buf) (python/tuple [])))
-                              [xr yr] (.__getitem__ replay-buf idx)]
-                          (set-train-mode! m)
-                          (train-step m opt-dense opt-sparse opt-sparse-net xr yr true)))
+                ;; Captured replay loss + buffer size go to :metrics.
+                _     (do
+                        (when-let [metrics (:metrics m)]
+                          (.__setitem__ metrics "replay_buf_n" (count replay-buf)))
+                        (when (and (pos? replay-every)
+                                   (zero? (mod (inc step) replay-every))
+                                   (pos? (count replay-buf)))
+                          (let [idx     (.item (torch/randint 0 (count replay-buf) (python/tuple [])))
+                                [xr yr] (.__getitem__ replay-buf idx)
+                                _       (set-train-mode! m)
+                                r-loss  (train-step m opt-dense opt-sparse opt-sparse-net xr yr true)]
+                            (when-let [metrics (:metrics m)]
+                              (.__setitem__ metrics "replay_loss" (python/float r-loss))))))
                 step' (inc step)]
             (when (zero? (mod step' 50))
               (let [cur-lr     (if (pos? warmup)
@@ -2937,8 +2959,18 @@
                         (.append parts (format "%s=%.2f" (or label (str "c" i)) mean-l))))
                     (println (str "         by-corpus[ema50]: "
                                   (.join " " parts)))))
-                ;; (placeholder for any future per-step JSONL emit if we
-                ;; decide to surface tps / vram / cost into log.jsonl)
+                ;; Router-metrics line — distill/replay aux losses. Only
+                ;; printed when at least one is active (distill_coef > 0
+                ;; or replay_every > 0). Tells you whether the
+                ;; consolidation mechanisms are doing meaningful work
+                ;; alongside the main CE.
+                (when (or (pos? (pick-distill-coef)) (pos? replay-every))
+                  (let [metrics (:metrics m)
+                        d-loss  (or (.get metrics "distill_loss") 0.0)
+                        r-loss  (or (.get metrics "replay_loss")  0.0)
+                        buf-n   (or (.get metrics "replay_buf_n") 0)]
+                    (println (format "         router-metrics: distill=%.4f  replay=%.4f  replay_buf=%d/%d"
+                                     d-loss r-loss buf-n replay-cap))))
                 nil))
             ;; Cross-worker bank sync. Has to happen AFTER the optimizer
             ;; step (so dirty rows from this step are flushed) and outside
@@ -3090,6 +3122,20 @@
                       (log-norm! (format "blk%d-net-expander" i) (.- (.- nb expander) weight)))
                     (when-let [c (:carry blk)]
                       (log-norm! (format "blk%d-carry-gate" i) (.- (.- c gate) weight))))))
+              ;; Single-line router-metrics JSONL event so dashboards
+              ;; can plot distill_loss / replay_loss / replay_buf size
+              ;; over time. Cheap — reads from in-memory dict.
+              (let [metrics (:metrics m)
+                    t-now   (- (time/time) t0)]
+                (when metrics
+                  (append-jsonl! log-path
+                    (format "{\"step\":%d,\"event\":\"router_metrics\",\"distill_loss\":%.6e,\"replay_loss\":%.6e,\"replay_buf_n\":%d,\"replay_cap\":%d,\"wall_s\":%.1f}"
+                            step'
+                            (or (.get metrics "distill_loss") 0.0)
+                            (or (.get metrics "replay_loss")  0.0)
+                            (or (.get metrics "replay_buf_n") 0)
+                            replay-cap
+                            t-now))))
               ;; Per-layer SwitchGate distribution log. Each block's
               ;; long-gate's most recent forward stored mean (sdpa, local,
               ;; net) weights. Trend over training shows tier consolidation
