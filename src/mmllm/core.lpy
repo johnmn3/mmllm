@@ -921,6 +921,33 @@
   (let [v (.lower (.get (.- os environ) "MMLLM_ALPHA_NET" "false"))]
     (.__contains__ #{"1" "true" "yes"} v)))
 
+(defn pick-gate-net-default?
+  "Whether SwitchGate uses Net-default + straight-through Bernoulli-gated
+   Local. Reads MMLLM_GATE_NET_DEFAULT (default 'false').
+
+   When true, the block builder attaches two params to each SwitchGate
+   after construction (same alignment-safe pattern as alpha_net):
+
+     local_active_proj: (n_long_heads, head_dim)  — zero init
+     local_active_bias: (n_long_heads,)           — init -2.0
+
+   At each forward, the gate computes per-(B,H,T) Bernoulli decisions
+   on whether Local fires for that query. Net and sdpa always run.
+   Local only contributes when the Bernoulli sample is 1 (training:
+   stochastic; inference: deterministic threshold at 0.5). The surviving
+   gate weights are renormalized so they sum to 1.
+
+   Initial firing rate sigmoid(-2.0) ≈ 12% — Net is the default; Local
+   is on-demand. Gradient flows through the straight-through trick
+   (forward = hard 0/1, backward = sigmoid grad).
+
+   Position-aligned ckpt-load: the new params surface at the END of
+   (parameters m) via local-gate-params, so old ckpts (round-2..7)
+   load cleanly into a Net-default-enabled model."
+  []
+  (let [v (.lower (.get (.- os environ) "MMLLM_GATE_NET_DEFAULT" "false"))]
+    (.__contains__ #{"1" "true" "yes"} v)))
+
 (defn pick-distill-direction-only?
   "When true, distillation MSE is computed on UNIT-NORMALIZED Net &
    Local outputs — Net learns Local's direction, not magnitude. Avoids
@@ -1113,6 +1140,14 @@
                       (when (and (= gate-kind "switch") (pick-alpha-net-enabled?))
                         (.__setattr__ g "alpha_net"
                                       (nn/Parameter (torch/ones n-long-heads))))
+                      ;; Net-default Bernoulli routing — same alignment-safe
+                      ;; pattern as alpha_net. proj zero-init, bias init -2.0
+                      ;; so sigmoid(-2.0) ≈ 12% initial Local firing rate.
+                      (when (and (= gate-kind "switch") (pick-gate-net-default?))
+                        (.__setattr__ g "local_active_proj"
+                                      (nn/Parameter (torch/zeros n-long-heads head-dim)))
+                        (.__setattr__ g "local_active_bias"
+                                      (nn/Parameter (.fill_ (torch/empty n-long-heads) -2.0))))
                       g)
      :bank-query    (bq/build_bank_query     bq-kind   d-model      q-dim)
      :bank-feedback (bfb/build_bank_feedback fb-kind   d-model      q-dim)
@@ -1366,13 +1401,19 @@
         memory-q-norm (fn [b]
                         (.q_norm_parameters (:memory b)))
         gate-params (fn [b]
-                      ;; Exclude alpha_net (added later as a SwitchGate
-                      ;; attribute) from this position so position-aligned
-                      ;; ckpt-load doesn't shift. alpha_net surfaces in
-                      ;; alpha-net-params at the END of (parameters m).
+                      ;; Exclude alpha_net, local_active_proj, local_active_bias
+                      ;; (all added later as SwitchGate attributes) from this
+                      ;; position so position-aligned ckpt-load doesn't shift.
+                      ;; They surface at the END of (parameters m) via the
+                      ;; corresponding "added later" collectors below.
                       (->> (.named_parameters (:long-gate b))
                            python/list
-                           (filter (fn [t] (not= (.__getitem__ t 0) "alpha_net")))
+                           (filter (fn [t]
+                                     (not (.__contains__
+                                            #{"alpha_net"
+                                              "local_active_proj"
+                                              "local_active_bias"}
+                                            (.__getitem__ t 0)))))
                            (map (fn [t] (.__getitem__ t 1)))
                            python/list))
         netbank-params (fn [b]
@@ -1387,7 +1428,18 @@
                            (let [g (:long-gate b)
                                  a (python/getattr g "alpha_net" nil)]
                              (when (and a (python/isinstance a nn/Parameter))
-                               [a])))]
+                               [a])))
+        local-gate-params (fn [b]
+                            ;; SwitchGate.local_active_proj + local_active_bias
+                            ;; (per-block, optional — present when
+                            ;; MMLLM_GATE_NET_DEFAULT=true). Appended at the
+                            ;; very end so pre-Net-default ckpts load cleanly.
+                            (let [g  (:long-gate b)
+                                  lp (python/getattr g "local_active_proj" nil)
+                                  lb (python/getattr g "local_active_bias" nil)]
+                              (concat
+                                (when (and lp (python/isinstance lp nn/Parameter)) [lp])
+                                (when (and lb (python/isinstance lb nn/Parameter)) [lb]))))]
     (concat (python/list (.parameters tok-emb))
             (mapcat core-params blocks)
             (python/list (.parameters norm-final))
@@ -1405,6 +1457,10 @@
             ;; alpha_net (per-SwitchGate per-head) — last so even
             ;; ckpts from before this feature exists load cleanly.
             (mapcat alpha-net-params blocks)
+            ;; SwitchGate.local_active_proj + local_active_bias (Net-default
+            ;; Bernoulli routing) — appended after alpha-net so pre-Net-
+            ;; default ckpts (round-2..7) still load cleanly.
+            (mapcat local-gate-params blocks)
             ;; JSON-delimiter aux head — at END for back-compat.
             (when delim-head (python/list (.parameters delim-head))))))
 

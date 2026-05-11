@@ -100,9 +100,24 @@ class SwitchGate(nn.Module):
         # construction; defaults to None until set, in which case forward
         # runs with α=1 (identity).
         self.alpha_net: nn.Parameter | None = None
-        self.last_gate_dist = None  # tuple (sdpa, local, net) of floats or None
-        self.last_local_out = None  # (B, H, T, D) tensor or None — for distillation
-        self.last_net_out   = None  # (B, H, T, D) tensor or None — for distillation
+        # Net-default Bernoulli routing — attached after construction by the
+        # block builder when MMLLM_GATE_NET_DEFAULT=true, same pattern as
+        # alpha_net so ckpt-load alignment isn't shifted. When both are
+        # None, forward runs the legacy 3-way softmax mix unchanged.
+        #
+        # local_active_proj: (n_long_heads, head_dim) — produces the per-
+        # (B, H, T) logit for "Local should fire on this query".
+        # local_active_bias: (n_long_heads,) — additive bias on that logit.
+        # Init plan (set by block builder): proj=zeros, bias=-2.0 so the
+        # initial Bernoulli firing rate is sigmoid(-2.0) ≈ 12% per query.
+        # Net is the default (always runs); Local fires for ~12% of queries
+        # at step 0, gate then learns from gradients.
+        self.local_active_proj: nn.Parameter | None = None
+        self.local_active_bias: nn.Parameter | None = None
+        self.last_gate_dist = None      # tuple (sdpa, local, net) of floats or None
+        self.last_local_out = None      # (B, H, T, D) tensor or None — for distillation
+        self.last_net_out   = None      # (B, H, T, D) tensor or None — for distillation
+        self.last_local_firing_rate = None  # float — mean Bernoulli decision in last forward
 
     def forward(self, q_long, sdpa_out, mem_out, net_out=None):
         if net_out is None:
@@ -116,28 +131,72 @@ class SwitchGate(nn.Module):
         # 3-way: q_long: (B, H, T, D); gate_proj_3: (H, 3, D); logits: (B, H, T, 3)
         logits = torch.einsum("bhtd,hkd->bhtk", q_long, self.gate_proj_3)
         weights = F.softmax(logits, dim=-1)                       # (B, H, T, 3)
-        with torch.no_grad():
-            # Average over (B, H, T) → 3 floats summing to 1.
-            mean_w = weights.mean(dim=(0, 1, 2))
-            self.last_gate_dist = (
-                float(mean_w[0].item()),
-                float(mean_w[1].item()),
-                float(mean_w[2].item()),
-            )
-        # Stash per-tier attention outputs (still in autograd graph) so
-        # train-step can compute Net→Local distillation across all blocks.
-        # Detach happens in train-step's loss path, not here.
-        self.last_local_out = mem_out
-        self.last_net_out   = net_out
-        w0 = weights[..., 0].unsqueeze(-1)
-        w1 = weights[..., 1].unsqueeze(-1)
-        w2 = weights[..., 2].unsqueeze(-1)
-        # Per-head alpha_net (shape: H) → (1, H, 1, 1) broadcast over
-        # (B, H, T, D). When None (back-compat), runs with α=1.
+        # Per-head alpha_net scaling on Net's path (attached after construction).
         if self.alpha_net is not None:
             alpha = self.alpha_net.view(1, -1, 1, 1)
             net_out = alpha * net_out
-        return w0 * sdpa_out + w1 * mem_out + w2 * net_out
+        # Stash per-tier outputs (still in autograd graph) for distillation.
+        self.last_local_out = mem_out
+        self.last_net_out   = net_out
+
+        # Legacy 3-way: full softmax mix (Net-default Bernoulli not attached).
+        if self.local_active_proj is None:
+            with torch.no_grad():
+                mean_w = weights.mean(dim=(0, 1, 2))
+                self.last_gate_dist = (
+                    float(mean_w[0].item()),
+                    float(mean_w[1].item()),
+                    float(mean_w[2].item()),
+                )
+                self.last_local_firing_rate = 1.0
+            w0 = weights[..., 0].unsqueeze(-1)
+            w1 = weights[..., 1].unsqueeze(-1)
+            w2 = weights[..., 2].unsqueeze(-1)
+            return w0 * sdpa_out + w1 * mem_out + w2 * net_out
+
+        # Net-default path: straight-through Bernoulli gate on Local. Net
+        # and sdpa always contribute; Local only fires when the gate says
+        # so. The gate weights are renormalized so the surviving tiers
+        # sum to 1 (when Local is skipped, sdpa+net share the full mass).
+        #
+        # local_logit: (B, H, T)
+        local_logit = (torch.einsum("bhtd,hd->bht", q_long, self.local_active_proj)
+                       + self.local_active_bias.view(1, -1, 1))
+        local_prob = torch.sigmoid(local_logit)                   # (B, H, T)
+        if self.training:
+            # Stochastic Bernoulli sample so the gradient sees diverse decisions.
+            rand = torch.rand_like(local_prob)
+            local_hard = (local_prob > rand).float()
+        else:
+            # Deterministic threshold at inference.
+            local_hard = (local_prob > 0.5).float()
+        # Straight-through: forward uses the hard 0/1 decision; backward
+        # gets the sigmoid's smooth gradient through local_prob. The
+        # `hard + soft - soft.detach()` trick keeps the value=hard and
+        # ∂value/∂x = ∂soft/∂x.
+        local_decision = local_hard + local_prob - local_prob.detach()  # (B, H, T)
+
+        # Apply decision to Local's gate weight, then renormalize the
+        # 3-way mass over the surviving tiers.
+        w_sdpa  = weights[..., 0]                                 # (B, H, T)
+        w_local = weights[..., 1] * local_decision                # zero where decision=0
+        w_net   = weights[..., 2]
+        total   = w_sdpa + w_local + w_net + 1e-6
+        w_sdpa  = w_sdpa  / total
+        w_local = w_local / total
+        w_net   = w_net   / total
+
+        with torch.no_grad():
+            self.last_gate_dist = (
+                float(w_sdpa.mean().item()),
+                float(w_local.mean().item()),
+                float(w_net.mean().item()),
+            )
+            self.last_local_firing_rate = float(local_hard.mean().item())
+
+        return (w_sdpa.unsqueeze(-1)  * sdpa_out
+              + w_local.unsqueeze(-1) * mem_out
+              + w_net.unsqueeze(-1)   * net_out)
 
 
 def build_gate(kind: str, n_long_heads: int, head_dim: int) -> nn.Module:
