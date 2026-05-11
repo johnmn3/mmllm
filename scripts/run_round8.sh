@@ -270,27 +270,27 @@ cat > "$JOURNAL" <<EOF
 - resumes from \`core/round-6/step-5000\` (the FedAvg merge: fim_eval=5.804, fmt=0.110).
 
 ## Setup
-- date (UTC): \$(date -u)
+- date (UTC): $(date -u)
 - handle: ${HANDLE}
-- resume from: \${RESUME_FROM:-}
-- NetBank: sqrt_n=\${MMLLM_NET_SQRT_N}, c_net=\${MMLLM_NET_C_NET}
+- resume from: ${RESUME_FROM:-}
+- NetBank: sqrt_n=${MMLLM_NET_SQRT_N}, c_net=${MMLLM_NET_C_NET}
 
 ## Results
-See: \${WORKER_DIR}/meta.json
+See: ${WORKER_DIR}/meta.json
 
 ## Train log tail
 \`\`\`
-\$(tail -25 "\$TRAIN_LOG")
+$(tail -25 "$TRAIN_LOG")
 \`\`\`
 
 ## FIM eval
 \`\`\`
-\$(cat "\$FIM_EVAL_LOG")
+$(cat "$FIM_EVAL_LOG")
 \`\`\`
 
 ## Agent eval
 \`\`\`
-\$(cat "\$AGENT_EVAL_LOG")
+$(cat "$AGENT_EVAL_LOG")
 \`\`\`
 
 ## Narrative
@@ -309,6 +309,20 @@ else
   BRANCH=$(git branch --show-current)
   git add "$WORKER_DIR" "$JOURNAL"
   git commit -m "round-8 worker: ${HANDLE} (distill restored, LRs corrected)"
-  git push -u origin "$BRANCH"
-  echo "── DONE ──  $HANDLE on $BRANCH"
+  # Push-race retry: parallel workers regularly race on this branch.
+  # If push is rejected (non-fast-forward), rebase on origin and retry.
+  for attempt in 1 2 3 4 5; do
+    if git push -u origin "$BRANCH"; then
+      echo "── DONE ──  $HANDLE on $BRANCH (push attempt $attempt)"
+      break
+    fi
+    if [ "$attempt" = "5" ]; then
+      echo "── FAILED ──  push rejected after 5 attempts" >&2
+      exit 1
+    fi
+    echo "── push race: rebasing and retrying (attempt $((attempt + 1))/5) ──"
+    sleep "$attempt"
+    git fetch origin "$BRANCH"
+    git pull --rebase origin "$BRANCH" || { echo "rebase failed" >&2; exit 1; }
+  done
 fi
