@@ -143,19 +143,19 @@ peak `lr`:
 
 ```
        MMLLM_LR_DENSE_MULT  → AdamW(d_model trunk) lr
-                            ─── round-9 default 0.5   (5% of bank lr)
+                            ─── round-9 re-run 0.05 → 0.005 (cosine)
        MMLLM_LR_KAB_MULT    → AdamW(K_a, K_b) lr  (#3 spike)
                             ─── default = LR_DENSE_MULT (single group)
        MMLLM_LR_BANK_MULT   → SparseAdam(Local V) lr
                             ─── round-9 default 10.0  (cortex high-LR)
        MMLLM_LR_NET_MULT    → SparseAdam(NetBank V) lr
-                            ─── round-9 default  0.5  (cerebellum slow early)
+                            ─── round-9 re-run 0.001 → 1.0 (cosine)
 
        Each multiplier supports cosine scheduling via *_END:
-         round-9 schedule:
-           lr_bank_mult flat 10 → 10        (cortex stays plastic)
-           lr_net_mult  cosines 0.5 → 5.0   (cerebellum ramps late)
-           lr_dense_mult flat 0.5 → 0.5     (trunk barely moves)
+         round-9 re-run schedule:
+           lr_bank_mult  flat   10    → 10       (cortex stays plastic)
+           lr_net_mult   cosine  0.001 → 1.0     (cerebellum near-frozen early)
+           lr_dense_mult cosine  0.05  → 0.005   (trunk barely moves, decays)
 ```
 
 The SCHEDULE encodes the central consolidation hypothesis: cortex hill-
@@ -166,16 +166,19 @@ moves so it doesn't absorb work the banks should be doing.
 
 Per-tier reasoning:
 
-- **Cortex (Local) high LR throughout the early/mid phases.** Local is
-  the fast hill-climber; high LR lets it move on the current task
-  distribution.
-- **Cerebellum (Net) cosine 0.5 → 5.0.** Round-8 evidence: flat low LR
-  (0.5 throughout) left Net's V barely moving across cycles even as
-  distill flowed. Net's V is meant to be sticky early (don't overwrite
-  the round-6 harvest with noisy gradients) and plastic late (absorb
-  Local's accumulated content once there's something to transfer).
-- **Trunk 5% of bank LR.** Trunk weights are ~1% the size of the banks;
-  high LR there absorbs work the banks should carry. Keep it slow.
+- **Cortex (Local) high LR throughout.** Local is the fast hill-climber;
+  high LR lets it move on the current task distribution.
+- **Cerebellum (Net) cosine 0.001 → 1.0.** Near-zero start prevents Net's
+  V from drifting while distill's target ≈ −sdpa (Local≈0 at init).
+  Lower peak (1.0 not 5.0) because direction-only residual distill drives
+  Net's *direction* explicitly — Net doesn't need a large LR to chase
+  unbounded residual magnitudes.
+- **Trunk cosine 0.05 → 0.005.** Round-9 re-run worker 1's diagnosis:
+  the residual `(local − sdpa)` shrinks across the run because the dense
+  trunk absorbs whatever Local adds. Pinning the trunk LR very low (and
+  decaying it further) preserves the residual signal for Net to learn
+  from. Trunk weights are ~1% the size of the banks; high LR there would
+  absorb work the banks should carry.
 
 ---
 
@@ -218,13 +221,25 @@ Knobs:
 - `MMLLM_DISTILL_COEF` — overall scale (default 0.0 = off). Round-5
   used 0.1; round-8 evidence (`distill_loss ~ 5e-4` floor → ~5e-5
   effective gradient on Net, three orders below the main loss) drove
-  a round-9 raise to 1.0.
+  a round-9 raise to 1.0. Also schedulable: `MMLLM_DISTILL_COEF_END`
+  sets the end-of-run target value and the coefficient is
+  cosine-interpolated across training. Round-9 re-run uses 0.0 → 1.0
+  so the coefficient stays near-zero during the wake window when
+  Local≈0 makes the target ≈ −sdpa (anti-sdpa basin risk), and
+  engages only after Local has accumulated real content.
 - `MMLLM_DISTILL_TARGET` — `'residual'` (default) or `'local'`. See
   above; residual subtracts sdpa so Net learns Local's unique add.
 - `MMLLM_DISTILL_DIRECTION_ONLY` — when true, target and net are
   RMS-normalized before MSE so Net learns the target's *direction*
   only. Stacks with the target choice (direction of the residual is
-  the direction Local adds beyond sdpa).
+  the direction Local adds beyond sdpa). **Recommended `true` when
+  using `target=residual`**: bounds Net's V magnitude. Round-9 re-run
+  data showed magnitude-aware residual distill destabilized training
+  around step 3000-3500 in some workers (Net's V grew unbounded to
+  match the unbounded-magnitude residual; ctrl_bpc spiked when small
+  routing perturbations swung net_out's large magnitude wildly).
+  Direction-only keeps the unique-add signal but caps Net's response
+  magnitude — handled instead by `alpha_net` × gate weight (bounded).
 
 ### 1b. Net-default Bernoulli gate (round-9)
 

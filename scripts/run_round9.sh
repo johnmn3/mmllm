@@ -82,46 +82,56 @@ export MMLLM_ALPHA_NET=true
 # Initial firing rate sigmoid(-2.0) ≈ 12%; gate learns from gradient.
 export MMLLM_GATE_NET_DEFAULT=true
 
-# ── Distillation (delta 2 + cosine schedule) ────────────────────────────────
+# ── Distillation (residual target + direction-only + cosine schedule) ──────
 # Coefficient 0.0 (start) → 1.0 (end), cosine-scheduled across the run.
+# Target: (local_out − sdpa_out).detach() — Net learns Local's unique
+# contribution beyond sdpa, not Local's full output (round-5/8 twin basin).
+# Direction-only: Net matches the *direction* of the residual; magnitude is
+# set independently by α_net × gate weight (both bounded).
 #
-# Why schedule rather than flat: with target=residual at init, Local≈0,
-# so target ≈ −sdpa. Plastic Net + constant coef=1.0 from step 1 drove
-# Net into an anti-sdpa basin (round-9 redo, step 500: ctrl_bpc spiked
-# 0.30→1.06 from destructive interference between sdpa and Net=−sdpa).
-# Distill should only engage once Local has actually accumulated content
-# — start at 0, ramp up so the back half does the consolidation work.
+# Why direction-only on top of residual: round-9 re-runs showed two failure
+# modes with magnitude-aware residual distill:
+#
+#   1. Early (steps 250-500, search_info worker): Local≈0 so target ≈
+#      −sdpa. Net's V drifts toward anti-sdpa direction → gate sums
+#      sdpa+Net partially cancel → ctrl_bpc spike (0.30→1.06).
+#   2. Late (steps 3000+, comm/productivity workers): residual magnitude
+#      grows unbounded. Net's V grows to match → small perturbations
+#      swing net_out massively → dense path destabilizes → ctrl_bpc
+#      explodes (0.31→2.71 in 250 steps for comm worker).
+#
+# Direction-only addresses both: target direction is bounded (unit vector),
+# Net's V doesn't need to grow unboundedly to match. Workers 3 (media) and
+# 4 (ops) showed the architectural fix works (Δ_net 0.28–0.34 sustained);
+# direction-only removes the magnitude pathway that destabilized others.
+#
+# Combined with the schedule (low coef early), Net stays near init while
+# Local accumulates real content, then engages with bounded magnitude.
 export MMLLM_DISTILL_COEF=0.0
 export MMLLM_DISTILL_COEF_END=1.0
-export MMLLM_DISTILL_DIRECTION_ONLY=false
-# Round-10 architectural fix (default in core.lpy is already 'residual').
-# Target = (local_out − sdpa_out).detach(). Net learns Local's UNIQUE
-# contribution beyond sdpa, not Local's full output. Without this,
-# magnitude-aware distill drives Net to twin Local; if Local ≈ sdpa+ε,
-# Net learns sdpa, becomes a Local twin, Δ_net collapses (the round-5/
-# 8/9 redundancy basin). Worker 2's diagnosis applied.
 export MMLLM_DISTILL_TARGET=residual
+export MMLLM_DISTILL_DIRECTION_ONLY=true
 
 # ── Replay ──────────────────────────────────────────────────────────────────
 export MMLLM_REPLAY_EVERY=10
 export MMLLM_REPLAY_BUFFER_SIZE=256
 export MMLLM_REPLAY_THRESHOLD=0.5
 
-# ── LR balance (delta 3 — LR_NET cosine, near-zero start) ──────────────────
-# Local: high LR, flat (hill-climb throughout wake)
-# Net:   cosine 0.001× → 5×. Near-zero start prevents Net's V from
-#        moving while distill target = (local − sdpa) ≈ −sdpa (poisonous
-#        early). By the time LR_NET has ramped enough to matter, Local
-#        has accumulated content and target is a real residual. Round-9
-#        used 0.5× start and saw Net drift into anti-sdpa direction by
-#        step 250 — the warmup needs to keep Net frozen, not just slow.
-# Trunk: 5% of bank, flat
+# ── LR balance (round-9 re-run iteration) ──────────────────────────────────
+# Local: high LR, flat — hill-climbs throughout the wake phase.
+# Net:   cosine 0.001× → 1× (was 0.001× → 5×). Lower peak because
+#        direction-only distill drives Net's direction explicitly; Net's
+#        V doesn't need a large LR to chase the residual's magnitude.
+# Trunk: cosine 0.05× → 0.005× (was 0.5× flat). Worker 1 ("shrinking
+#        target") finding: residual `(local − sdpa)` shrinks as dense
+#        absorbs Local's add. Very-low dense LR + cosine decay prevents
+#        the trunk from undoing Local's contribution to the residual.
 export MMLLM_LR_BANK_MULT=10.0
 export MMLLM_LR_BANK_MULT_END=10.0
 export MMLLM_LR_NET_MULT=0.001
-export MMLLM_LR_NET_MULT_END=5.0
-export MMLLM_LR_DENSE_MULT=0.5
-export MMLLM_LR_DENSE_MULT_END=0.5
+export MMLLM_LR_NET_MULT_END=1.0
+export MMLLM_LR_DENSE_MULT=0.05
+export MMLLM_LR_DENSE_MULT_END=0.005
 export MMLLM_LR=3e-3
 export MMLLM_LR_MIN=3e-3
 
