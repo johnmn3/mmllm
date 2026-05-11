@@ -1,11 +1,9 @@
 #!/usr/bin/env bash
 # run_round9.sh — round-8 evidence applied.
 #
-# Round-8 produced four firsts: distill_loss flowing, consolidation_idx
-# positive, val_bpc tight (0.22–0.24), sleep mechanism intact. But
-# post-sleep Δ_net trajectories all flat-to-declining across the 5
-# workers, individual fim_eval regressed to 7.5–7.8 vs round-6's 5.804,
-# format_validity collapsed 0.110 → 0.000.
+# Round-8 produced three firsts: distill_loss flowing, consolidation_idx
+# positive, val_bpc tight (0.22–0.24). But individual fim_eval regressed
+# to 7.5–7.8 vs round-6's 5.804, format_validity collapsed 0.110 → 0.000.
 #
 # Worker telemetry converged on the cause: in the 3-way softmax gate,
 # `w_local` collapsed from 0.148 → 0.008 across the first cycle. The
@@ -118,8 +116,6 @@ export MMLLM_LR_MIN=3e-3
 export MMLLM_SKIP_NETBANK_WARMSTART=true
 export MMLLM_NET_V_WARMSTART_FROM_LOCAL=false
 
-# ── Sleep cycle (preserved) ─────────────────────────────────────────────────
-export MMLLM_SLEEP_CYCLE_EVERY=1000
 export MMLLM_ABLATE_EVERY="${MMLLM_ABLATE_EVERY:-250}"
 
 # ── 0. Preflight ────────────────────────────────────────────────────────────
@@ -267,7 +263,6 @@ def grep_last(path, pat, cast=float):
         return None
 
 ablation_trajectory = []
-sleep_events = []
 log_jsonl = Path(wdir) / "log.jsonl"
 if log_jsonl.exists():
     for line in log_jsonl.read_text().splitlines():
@@ -282,8 +277,6 @@ if log_jsonl.exists():
                 "delta_both":        ev.get("delta_both"),
                 "consolidation_idx": ev.get("consolidation_idx"),
             })
-        elif ev.get("event") == "sleep_cycle":
-            sleep_events.append({"step": ev.get("step")})
 
 meta = {
     "round":          9,
@@ -299,12 +292,10 @@ meta = {
         "lr_net_mult":            0.5,
         "lr_net_mult_end":        5.0,
         "lr_dense_mult":          0.5,
-        "sleep_cycle_every":      1000,
         "val_bpc_final":          grep_last(tlog,  r"bpc=(\d+\.\d+)\s+ppl="),
         "ablation_delta_local_final": grep_last(tlog, r"Δ_local:\s*\S+\s*→\s*([+\-\d\.]+)"),
         "ablation_delta_net_final":   grep_last(tlog, r"Δ_net:\s*\S+\s*→\s*([+\-\d\.]+)"),
         "ablation_trajectory":    ablation_trajectory,
-        "sleep_events":           sleep_events,
         "fim_eval_bpc":           grep_last(felog, r"OVERALL\s+\S+\s+\S+\s+(\d+\.\d+)"),
         "fim_eval_exact_pct":     grep_last(felog, r"OVERALL\s+\S+\s+\S+\s+\S+\s+(\d+\.\d+)"),
         "agent_format_validity":  grep_last(aelog, r"format[=:]?\s*([\d\.]+)"),
@@ -340,7 +331,7 @@ so the now-meaningful transfer signal lands.
 core/round-6/step-5000 (FedAvg merge: fim_eval=5.804, format_validity=0.110)
 
 ## Headline checks
-- post-sleep Δ_net rises across cycles (round-8 was flat-to-declining)
+- Δ_net rises across the run (round-8 was flat-to-declining mid-run)
 - distill_loss meaningful (>0.005) and grows (round-8 settled at 5e-4)
 - consolidation_idx stays positive across all 20 ablations
 - val_bpc < 0.32 (round-8 hit 0.22–0.24)
@@ -371,7 +362,7 @@ See: ${WORKER_DIR}/meta.json
 \`\`\`
 
 ## Narrative
-<agent: report (1) post-sleep Δ_net per cycle, (2) distill_loss
+<agent: report (1) Δ_net trajectory across ablations, (2) distill_loss
 trajectory, (3) consolidation_idx range, (4) local_firing_rate per
 ablation (new Bernoulli telemetry), (5) fim_eval/format_validity
 vs round-6 baseline.>

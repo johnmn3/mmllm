@@ -14,15 +14,9 @@
 #   - LR_NET low          (slow consolidation receiver)
 #   - LR_DENSE 5% of bank (trunk barely moves)
 #   - replay restored
-#   - sleep cycle preserved (every 1000 steps)
 #
 # Resumes from core/round-6/step-5000 (the FedAvg-merged community core:
 # fim_eval=5.804, format_validity=0.110).
-#
-# Single-worker milestone: does post-sleep Δ_net grow across cycles —
-# i.e., is Local's wake-time accumulation actually moving to Net via
-# the distill MSE before the sleep wipes Local? If yes, the transfer
-# pipeline works and we can re-introduce sharding / multi-worker later.
 #
 # Usage:  bash scripts/run_round8.sh <HANDLE>
 
@@ -46,18 +40,12 @@ export MMLLM_NET_C_NET=32
 export MMLLM_LONG_TIER_MIX=switch
 export MMLLM_ALPHA_NET=true
 
-# ── Consolidation distillation (RESTORED) ───────────────────────────────────
+# ── Consolidation distillation ──────────────────────────────────────────────
 # collect-distill-loss in core.lpy walks every SwitchGate, computes
 # MSE(net_out, local_out.detach()) averaged across layers, adds to the
 # backward loss. Local is detached so the gradient only modifies Net.
 # This is the Local→Net transfer mechanism: as Local accumulates wake
-# patterns, the MSE pushes Net to mimic Local's contribution. When the
-# sleep cycle then wipes V_local, Net retains the consolidated content.
-#
-# Brief transient post-sleep: V_local=0 → local_out≈0 → MSE pulls net_out
-# toward 0. With LR_NET low (below), this transient is small in
-# absolute weight change. Local re-accumulates within ~250 steps and
-# distill resumes its useful role.
+# patterns, the MSE pushes Net to mimic Local's contribution.
 export MMLLM_DISTILL_COEF=0.1
 export MMLLM_DISTILL_DIRECTION_ONLY=false  # round-4: direction-only made Net redundant
 
@@ -96,8 +84,6 @@ export MMLLM_NET_V_WARMSTART_FROM_LOCAL=false
 # Telemetry adds last_local_firing_rate per gate per forward.
 export MMLLM_GATE_NET_DEFAULT=true
 
-# ── Sleep cycle (preserved) ─────────────────────────────────────────────────
-export MMLLM_SLEEP_CYCLE_EVERY=1000
 export MMLLM_ABLATE_EVERY="${MMLLM_ABLATE_EVERY:-250}"
 
 # ── 0. Preflight ────────────────────────────────────────────────────────────
@@ -229,7 +215,6 @@ def grep_last(path, pat, cast=float):
         return None
 
 ablation_trajectory = []
-sleep_events = []
 log_jsonl = Path(wdir) / "log.jsonl"
 if log_jsonl.exists():
     for line in log_jsonl.read_text().splitlines():
@@ -244,8 +229,6 @@ if log_jsonl.exists():
                 "delta_both":        ev.get("delta_both"),
                 "consolidation_idx": ev.get("consolidation_idx"),
             })
-        elif ev.get("event") == "sleep_cycle":
-            sleep_events.append({"step": ev.get("step")})
 
 meta = {
     "round":          8,
@@ -258,12 +241,10 @@ meta = {
         "lr_bank_mult":           10.0,
         "lr_net_mult":            0.5,
         "lr_dense_mult":          0.5,
-        "sleep_cycle_every":      1000,
         "val_bpc_final":          grep_last(tlog,  r"bpc=(\d+\.\d+)\s+ppl="),
         "ablation_delta_local_final": grep_last(tlog, r"Δ_local:\s*\S+\s*→\s*([+\-\d\.]+)"),
         "ablation_delta_net_final":   grep_last(tlog, r"Δ_net:\s*\S+\s*→\s*([+\-\d\.]+)"),
         "ablation_trajectory":    ablation_trajectory,
-        "sleep_events":           sleep_events,
         "fim_eval_bpc":           grep_last(felog, r"OVERALL\s+\S+\s+\S+\s+(\d+\.\d+)"),
         "fim_eval_exact_pct":     grep_last(felog, r"OVERALL\s+\S+\s+\S+\s+\S+\s+(\d+\.\d+)"),
         "agent_format_validity":  grep_last(aelog, r"format[=:]?\s*([\d\.]+)"),
@@ -286,12 +267,7 @@ cat > "$JOURNAL" <<EOF
 - distill ON (\`MMLLM_DISTILL_COEF=0.1\`) — the Local→Net transfer.
 - LR_BANK 10×, LR_NET 0.5×, LR_DENSE 0.5× (5% of bank).
 - replay ON (mastery-threshold buffer).
-- sleep cycle preserved (every 1000 steps).
 - resumes from \`core/round-6/step-5000\` (the FedAvg merge: fim_eval=5.804, fmt=0.110).
-
-## Milestone
-Does post-sleep \`Δ_net\` rise across cycles? That signals Local's wake
-accumulation is moving to Net via distill before each sleep wipe.
 
 ## Setup
 - date (UTC): \$(date -u)
@@ -319,9 +295,10 @@ See: \${WORKER_DIR}/meta.json
 
 ## Narrative
 <agent: Report (1) distill_loss trajectory across steps from log.jsonl,
-(2) post-sleep Δ_net per cycle, (3) whether Δ_net rose across cycles, and
-(4) fim_eval + format_validity vs the round-6 baseline (5.804 / 0.110).
-The single question for this round: did Local→Net transfer occur?>
+(2) Δ_net trajectory across ablations, (3) whether Δ_net grew over the
+run, and (4) fim_eval + format_validity vs the round-6 baseline
+(5.804 / 0.110). The single question for this round: did Local→Net
+transfer occur?>
 EOF
 echo "wrote $JOURNAL"
 

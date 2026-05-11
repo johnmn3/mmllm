@@ -166,9 +166,9 @@ moves so it doesn't absorb work the banks should be doing.
 
 Per-tier reasoning:
 
-- **Cortex (Local) high LR throughout.** The forgetting term zeroes V at
-  every sleep, so Local always has fresh territory to climb. High LR
-  lets it move fast on the new wake-phase patterns.
+- **Cortex (Local) high LR throughout the early/mid phases.** Local is
+  the fast hill-climber; high LR lets it move on the current task
+  distribution.
 - **Cerebellum (Net) cosine 0.5 → 5.0.** Round-8 evidence: flat low LR
   (0.5 throughout) left Net's V barely moving across cycles even as
   distill flowed. Net's V is meant to be sticky early (don't overwrite
@@ -204,9 +204,8 @@ mechanisms to drive transfer.
 Cerebellum learns to mimic cortex's attention output. Detached on the
 cortex side so cortex doesn't try to imitate cerebellum. Local's
 contribution is the *target*; Net's V cells get gradient to produce
-matching output. As Local accumulates wake-phase content between
-sleeps, distill copies that content into Net before the next sleep
-wipes Local — the actual transfer mechanism.
+matching output. As Local hill-climbs new content, distill copies
+that content into Net — the actual transfer mechanism.
 
 Knobs:
 - `MMLLM_DISTILL_COEF` — overall scale (default 0.0 = off). Round-5 used
@@ -218,22 +217,7 @@ Knobs:
   Round-4 finding: direction-only made Net redundant with Local at 99.95%
   cosine; magnitude-aware (default `false`) breaks that redundancy basin.
 
-### 1b. Sleep cycle (forgetting term)
-
-Every `MMLLM_SLEEP_CYCLE_EVERY` steps (round-8: 1000), `V_local := 0`
-across all blocks. K_a/K_b are preserved so routing geometry survives;
-only the value table is wiped. This forces the consolidation flow:
-between sleeps, Local accumulates novel wake-phase content and distill
-copies it to Net; at sleep, Local is reset and starts hunting for the
-next layer of patterns Net doesn't yet cover.
-
-The forgetting term is what makes "cortex frees that slot for the next
-novel pattern" mechanical rather than aspirational — without it, Local
-just keeps growing, ages into a duplicate of Net, and the two tiers
-converge to redundant local minima of the same loss (round-5
-redundancy basin).
-
-### 1c. Net-default Bernoulli gate (round-9)
+### 1b. Net-default Bernoulli gate (round-9)
 
 Round-8 evidence: in the 3-way softmax gate, `w_local` collapses from
 ~0.15 to ~0.01 within the first cycle. The optimizer routes around
