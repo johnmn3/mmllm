@@ -87,6 +87,15 @@ export MMLLM_LR_MIN=3e-3
 export MMLLM_SKIP_NETBANK_WARMSTART=true
 export MMLLM_NET_V_WARMSTART_FROM_LOCAL=false
 
+# ── Net-default routing (straight-through Bernoulli Local) ──────────────────
+# SwitchGate runs Net + sdpa unconditionally and gates Local on a per-
+# (B, H, T) Bernoulli decision. Init bias=-2.0 → sigmoid(-2.0) ≈ 12% of
+# queries fire Local at step 0. Net is structurally the default; Local
+# is on-demand for "things Net doesn't cover yet". Gate is end-to-end
+# trainable via straight-through (forward=hard 0/1, backward=sigmoid grad).
+# Telemetry adds last_local_firing_rate per gate per forward.
+export MMLLM_GATE_NET_DEFAULT=true
+
 # ── Sleep cycle (preserved) ─────────────────────────────────────────────────
 export MMLLM_SLEEP_CYCLE_EVERY=1000
 export MMLLM_ABLATE_EVERY="${MMLLM_ABLATE_EVERY:-250}"
