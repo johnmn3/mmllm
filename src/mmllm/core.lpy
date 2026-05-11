@@ -3153,12 +3153,26 @@
     ;; turned on for the first time on an existing dense-only run), copy
     ;; Local Bank's K_a/K_b into NetBank's first 2048 rows so retrieval
     ;; geometry is bootstrapped instead of cold.
+    ;;
+    ;; Round-7 override: when the resume seed carries a harvested NetBank V
+    ;; (loaded via fp16 expansion to the runtime mmap before train-long
+    ;; starts), the warm-start would OVERWRITE that harvested content with
+    ;; a fresh projection of Local V — destroying the cross-worker
+    ;; consolidation the harvester just produced. Set
+    ;; MMLLM_SKIP_NETBANK_WARMSTART=true to suppress the warm-start when
+    ;; NetBank V was pre-populated externally.
     (when (and opt-sparse-net
+               (not (= "true" (.lower (.get (.- os environ)
+                                            "MMLLM_SKIP_NETBANK_WARMSTART" "false"))))
                (or (zero? start-step)
                    (not (os.path/exists
                           (str ckpt-dir "/step-" start-step "/opt-sparse-net.pt")))))
       (println "  NetBank: opt-sparse-net.pt missing — warm-starting from Local Bank")
       (warm-start-netbanks-from-local! m))
+    (when (and opt-sparse-net
+               (= "true" (.lower (.get (.- os environ)
+                                       "MMLLM_SKIP_NETBANK_WARMSTART" "false"))))
+      (println "  NetBank: MMLLM_SKIP_NETBANK_WARMSTART=true — using NetBank V as already mmap'd (likely from harvester)"))
     (when (>= start-step total-steps)
       ;; Silent skip is the bug we hit on the first sync smoke: a stale
       ;; ckpt from a prior longer run made start-step exceed the new

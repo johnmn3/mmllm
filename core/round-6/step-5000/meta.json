@@ -1,0 +1,20 @@
+{
+  "round": 6,
+  "tokens_trained": 12800000,
+  "steps": 5000,
+  "label": "round-6 community core",
+  "sources": ["round6-a (xWXmA)", "round6-a (MtYFP)", "round6-a (bGYD9)", "round6-a (T3giJ)", "round6-ctyiz"],
+  "n_workers": 5,
+  "merge_method": "FedAvg uniform across dense + NetBank V",
+  "fim": {
+    "fim_eval_bpc": 5.804,
+    "agent_format_validity": 0.110,
+    "best_individual_fim_eval": {"worker": "ctyiz", "bpc": 6.204},
+    "best_individual_format_validity": {"worker": "xWXmA", "value": 0.020}
+  },
+  "notes": [
+    "First merged core that beats every individual worker on BOTH headline metrics.",
+    "format_validity jumped 5.5× from xWXmA's 0.020 to the merged 0.110 — first non-trivial cross-tier signal.",
+    "Distillation harvest (Gaussian + real-query) matched FedAvg but didn't exceed it — workers ran identical corpus so ensemble averages = no unique content to combine. Round-7 sharded-corpus experiment will test whether merge benefit grows when workers truly diverge."
+  ]
+}
