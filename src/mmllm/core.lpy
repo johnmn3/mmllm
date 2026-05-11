@@ -863,18 +863,32 @@
           (.zero_ g))))))
 
 (defn pick-distill-coef
-  "Coefficient on the Net→Local distillation aux loss. Reads
-   MMLLM_DISTILL_COEF (default 0.0 = disabled). When > 0, train-step
-   walks every 3-way SwitchGate, pulls last_net_out and last_local_out,
-   and adds `coef · MSE(net_out, local_out.detach())` averaged across
-   blocks to the backward loss. Local is detached so only Net learns to
-   mimic Local; combined with cosine-scheduled lr_bank_mult and lr_net
-   _mult, this drives the cerebellum-style consolidation: Net learns
-   to predict Local's contribution, gate shifts toward Net, Local frees
-   capacity. Suggested ramp 0 → 0.05 over training (cap small to avoid
-   over-constraining Net). 0 keeps the run distillation-free."
-  []
-  (python/float (.get (.- os environ) "MMLLM_DISTILL_COEF" "0.0")))
+  "Coefficient on the Net→Local distillation aux loss.
+
+   Arity 0 — returns the start (or constant) value. Reads
+   MMLLM_DISTILL_COEF (default 0.0 = disabled).
+
+   Arity 2 — `(step total)` — returns the cosine-scheduled value
+   between MMLLM_DISTILL_COEF and MMLLM_DISTILL_COEF_END.
+
+   Why schedule: with target=residual at init Local≈0, so target ≈
+   −sdpa. Plastic Net + constant coef=1.0 from step 1 drives Net
+   into an anti-sdpa basin (round-9 redo: ctrl_bpc spiked 0.30→1.06
+   at step 500 from destructive interference). Distill should only
+   fire once Local has actually accumulated content — set
+   MMLLM_DISTILL_COEF=0 and MMLLM_DISTILL_COEF_END=1.0 so distill
+   ramps up over the run, mirroring the LR_NET cosine.
+
+   When > 0, train-step walks every 3-way SwitchGate, pulls
+   last_net_out and the residual/local target, and adds
+   `coef · MSE(net_out, target.detach())` averaged across blocks
+   to the backward loss."
+  ([] (python/float (.get (.- os environ) "MMLLM_DISTILL_COEF" "0.0")))
+  ([step total]
+   (let [start  (pick-distill-coef)
+         end    (python/float (.get (.- os environ) "MMLLM_DISTILL_COEF_END" (str start)))
+         warmup (python/int (.get (.- os environ) "MMLLM_LR_WARMUP" "0"))]
+     (mult-cosine-interp start end step total warmup))))
 
 (defn pick-alpha-net-enabled?
   "Whether to attach a per-layer learnable alpha_net scalar (per long
@@ -959,9 +973,21 @@
    When MMLLM_DISTILL_DIRECTION_ONLY=true, both target and net are
    RMS-normalized before MSE — Net learns the target's direction only.
    Stacks with target-mode (direction of the residual is still the
-   direction Local adds beyond sdpa)."
+   direction Local adds beyond sdpa).
+
+   Coefficient is cosine-scheduled when train-long has stashed
+   current_step + total_steps in (:metrics m). Otherwise falls back
+   to the constant MMLLM_DISTILL_COEF. Schedule reason: at init Local≈0
+   so target ≈ −sdpa; with a flat coef Net is driven into an anti-sdpa
+   basin within hundreds of steps. The ramp lets distill stay near-off
+   while Local accumulates, then engage in the back half."
   [m]
-  (let [coef    (pick-distill-coef)
+  (let [metrics (:metrics m)
+        step    (when metrics (.get metrics "current_step" nil))
+        total   (when metrics (.get metrics "total_steps"  nil))
+        coef    (if (and step total (pos? total))
+                  (pick-distill-coef (python/int step) (python/int total))
+                  (pick-distill-coef))
         dir-only (pick-distill-direction-only?)
         target-kind (pick-distill-target)
         eps      1e-6]
@@ -3370,6 +3396,14 @@
                 _     (when (pos? (pick-pause-bytes))
                         (maybe-inject-pause-prefix!
                           x (pick-pause-bytes) (pick-pause-prob) (pick-pause-byte-val)))
+                ;; Stash current step + total on metrics so collect-distill-loss
+                ;; can read the cosine-scheduled coefficient. Avoids threading
+                ;; step/total through train-step's signature. `step'` (inc step)
+                ;; is bound later in this let; use `step` (loop var) which is
+                ;; in scope here.
+                _     (when-let [metrics (:metrics m)]
+                        (.__setitem__ metrics "current_step" step)
+                        (.__setitem__ metrics "total_steps"  total-steps))
                 loss  (train-step m opt-dense opt-sparse opt-sparse-net x y)
                 _     (.add_tokens tracker (* B-cur T))
                 ;; Per-corpus loss tracker — running window of last 50

@@ -82,13 +82,17 @@ export MMLLM_ALPHA_NET=true
 # Initial firing rate sigmoid(-2.0) ≈ 12%; gate learns from gradient.
 export MMLLM_GATE_NET_DEFAULT=true
 
-# ── Distillation (delta 2) ──────────────────────────────────────────────────
-# Coefficient 0.1 → 1.0. Round-8 workers logged distill_loss ~5e-4,
-# yielding ~5e-5 effective gradient on Net at coef=0.1 — three orders
-# of magnitude under the main loss. With the Bernoulli gate keeping
-# Local's contribution meaningful, raise the coefficient so Net's
-# distill update is on the same order as its CE update.
-export MMLLM_DISTILL_COEF=1.0
+# ── Distillation (delta 2 + cosine schedule) ────────────────────────────────
+# Coefficient 0.0 (start) → 1.0 (end), cosine-scheduled across the run.
+#
+# Why schedule rather than flat: with target=residual at init, Local≈0,
+# so target ≈ −sdpa. Plastic Net + constant coef=1.0 from step 1 drove
+# Net into an anti-sdpa basin (round-9 redo, step 500: ctrl_bpc spiked
+# 0.30→1.06 from destructive interference between sdpa and Net=−sdpa).
+# Distill should only engage once Local has actually accumulated content
+# — start at 0, ramp up so the back half does the consolidation work.
+export MMLLM_DISTILL_COEF=0.0
+export MMLLM_DISTILL_COEF_END=1.0
 export MMLLM_DISTILL_DIRECTION_ONLY=false
 # Round-10 architectural fix (default in core.lpy is already 'residual').
 # Target = (local_out − sdpa_out).detach(). Net learns Local's UNIQUE
@@ -103,16 +107,18 @@ export MMLLM_REPLAY_EVERY=10
 export MMLLM_REPLAY_BUFFER_SIZE=256
 export MMLLM_REPLAY_THRESHOLD=0.5
 
-# ── LR balance (delta 3 — LR_NET cosine) ────────────────────────────────────
+# ── LR balance (delta 3 — LR_NET cosine, near-zero start) ──────────────────
 # Local: high LR, flat (hill-climb throughout wake)
-# Net:   cosine 0.5× → 5×. Slow consolidation receiver early when there's
-#        nothing for Local to transfer yet; fast consolidator late when
-#        distill has accumulated content to absorb. Round-8 flat 0.5×
-#        left Net's V barely moving.
+# Net:   cosine 0.001× → 5×. Near-zero start prevents Net's V from
+#        moving while distill target = (local − sdpa) ≈ −sdpa (poisonous
+#        early). By the time LR_NET has ramped enough to matter, Local
+#        has accumulated content and target is a real residual. Round-9
+#        used 0.5× start and saw Net drift into anti-sdpa direction by
+#        step 250 — the warmup needs to keep Net frozen, not just slow.
 # Trunk: 5% of bank, flat
 export MMLLM_LR_BANK_MULT=10.0
 export MMLLM_LR_BANK_MULT_END=10.0
-export MMLLM_LR_NET_MULT=0.5
+export MMLLM_LR_NET_MULT=0.001
 export MMLLM_LR_NET_MULT_END=5.0
 export MMLLM_LR_DENSE_MULT=0.5
 export MMLLM_LR_DENSE_MULT_END=0.5
