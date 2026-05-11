@@ -117,17 +117,26 @@ export MMLLM_REPLAY_EVERY=10
 export MMLLM_REPLAY_BUFFER_SIZE=256
 export MMLLM_REPLAY_THRESHOLD=0.5
 
-# ── LR balance (round-9 re-run iteration) ──────────────────────────────────
-# Local: high LR, flat — hill-climbs throughout the wake phase.
-# Net:   cosine 0.001× → 1× (was 0.001× → 5×). Lower peak because
-#        direction-only distill drives Net's direction explicitly; Net's
-#        V doesn't need a large LR to chase the residual's magnitude.
-# Trunk: cosine 0.05× → 0.005× (was 0.5× flat). Worker 1 ("shrinking
-#        target") finding: residual `(local − sdpa)` shrinks as dense
-#        absorbs Local's add. Very-low dense LR + cosine decay prevents
-#        the trunk from undoing Local's contribution to the residual.
+# ── LR balance — wake → consolidate temporal sequence ──────────────────────
+# Local: cosine 10× → 0.001×. High during wake (Local hill-climbs new
+#        content), cools to effectively-frozen by end so it stops
+#        accumulating once distill has had time to copy its content into
+#        Net. Symmetric with the LR_NET ramp below — Local hands off as
+#        Net takes over.
+# Net:   cosine 0.001× → 1×. Near-zero start prevents Net's V from
+#        drifting while target = (local − sdpa) is poisonous (Local≈0).
+#        Plastic late once Local has accumulated content worth absorbing.
+# Trunk: cosine 0.05× → 0.005×. Very-low dense LR + further decay so the
+#        residual `(local − sdpa)` doesn't shrink (worker 1's "shrinking
+#        target" finding — dense absorbs Local's add otherwise).
+#
+# The prior round-9 redo had LR_BANK_MULT flat at 10× throughout — Local
+# never stopped being plastic, so Δ_local and Δ_net converged to parity
+# (Local keeps growing in parallel with Net) rather than executing the
+# wake→consolidate handoff. This iteration adds Local cooling to drive
+# the temporal separation.
 export MMLLM_LR_BANK_MULT=10.0
-export MMLLM_LR_BANK_MULT_END=10.0
+export MMLLM_LR_BANK_MULT_END=0.001
 export MMLLM_LR_NET_MULT=0.001
 export MMLLM_LR_NET_MULT_END=1.0
 export MMLLM_LR_DENSE_MULT=0.05

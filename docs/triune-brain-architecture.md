@@ -143,18 +143,18 @@ peak `lr`:
 
 ```
        MMLLM_LR_DENSE_MULT  → AdamW(d_model trunk) lr
-                            ─── round-9 re-run 0.05 → 0.005 (cosine)
+                            ─── round-9 v3: 0.05 → 0.005 (cosine)
        MMLLM_LR_KAB_MULT    → AdamW(K_a, K_b) lr  (#3 spike)
                             ─── default = LR_DENSE_MULT (single group)
        MMLLM_LR_BANK_MULT   → SparseAdam(Local V) lr
-                            ─── round-9 default 10.0  (cortex high-LR)
+                            ─── round-9 v3: 10.0 → 0.001 (cosine — cools off)
        MMLLM_LR_NET_MULT    → SparseAdam(NetBank V) lr
-                            ─── round-9 re-run 0.001 → 1.0 (cosine)
+                            ─── round-9 v3: 0.001 → 1.0 (cosine — ramps up)
 
        Each multiplier supports cosine scheduling via *_END:
-         round-9 re-run schedule:
-           lr_bank_mult  flat   10    → 10       (cortex stays plastic)
-           lr_net_mult   cosine  0.001 → 1.0     (cerebellum near-frozen early)
+         round-9 v3 schedule (wake → consolidate):
+           lr_bank_mult  cosine 10    → 0.001    (cortex cools to off)
+           lr_net_mult   cosine  0.001 → 1.0     (cerebellum frozen → plastic)
            lr_dense_mult cosine  0.05  → 0.005   (trunk barely moves, decays)
 ```
 
@@ -166,14 +166,19 @@ moves so it doesn't absorb work the banks should be doing.
 
 Per-tier reasoning:
 
-- **Cortex (Local) high LR throughout.** Local is the fast hill-climber;
-  high LR lets it move on the current task distribution.
+- **Cortex (Local) cosine 10 → 0.001.** High during wake (Local hill-
+  climbs the current task distribution), cools to effectively-frozen by
+  end. The cooling drives the consolidation handoff: once Local stops
+  accumulating, distill has time to copy what Local has into Net, and
+  the gate can shift routing toward Net for those patterns. The prior
+  round-9 redo kept Local flat at 10× and saw Δ_local / Δ_net converge
+  to parity rather than the wake→consolidate sequential transfer.
 - **Cerebellum (Net) cosine 0.001 → 1.0.** Near-zero start prevents Net's
   V from drifting while distill's target ≈ −sdpa (Local≈0 at init).
-  Lower peak (1.0 not 5.0) because direction-only residual distill drives
-  Net's *direction* explicitly — Net doesn't need a large LR to chase
-  unbounded residual magnitudes.
-- **Trunk cosine 0.05 → 0.005.** Round-9 re-run worker 1's diagnosis:
+  Symmetric ramp-up vs Local's cool-down. Lower peak (1.0 not 5.0) since
+  direction-only residual distill drives Net's *direction* explicitly —
+  Net doesn't need a large LR to chase unbounded residual magnitudes.
+- **Trunk cosine 0.05 → 0.005.** Round-9 redo worker 1's diagnosis:
   the residual `(local − sdpa)` shrinks across the run because the dense
   trunk absorbs whatever Local adds. Pinning the trunk LR very low (and
   decaying it further) preserves the residual signal for Net to learn
