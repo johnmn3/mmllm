@@ -440,6 +440,38 @@
   []
   (python/int (.get (.- os environ) "MMLLM_ABLATE_EVERY" "0")))
 
+(defn pick-sleep-every
+  "Resolve interval (in training steps) between sleep cycles.
+
+   Sleep = zero V_local across all blocks (NetBank and dense
+   untouched). Premise from the round-5→6 deep-dive: Local and Net
+   converge to the same function when distill pulls Net toward
+   Local's output, and Local then masks Net under normal routing.
+   Result: Δ_net pins at noise floor (~0.0004) even when Net has
+   learned useful content underneath.
+
+   Spike test at the round-5 step-5000 ckpt confirmed this. Zeroing
+   V_local and continuing to train (LR_BANK=tiny, distill=0) pushed
+   Δ_net from 0.0004 → 0.65+ within 250 steps as the gate rerouted
+   to Net. Net's masked capacity (~0.4 bpc at step 5000) grew with
+   continued training, reaching ~0.74 at step 5250.
+
+   Sleep cycle generalizes that to multi-event training: every N
+   steps, zero V_local. Local's K_a/K_b (routing keys) stay intact
+   so retrieval geometry is preserved; only the value table is
+   wiped. Local relearns from CE loss, but now the loss signal is
+   dominated by patterns Net+sdpa don't cover (Net has densified
+   over the prior cycle) — so Local naturally develops a
+   complementary specialization rather than re-converging onto
+   Net's region. Net consolidates across cycles.
+
+   Reads MMLLM_SLEEP_CYCLE_EVERY (default 0 = disabled).
+   Skips step 0 (no point sleeping before training starts).
+   Pairs well with MMLLM_DISTILL_COEF=0 — distill with V_local=0
+   pulls Net toward zero, which is the wrong direction."
+  []
+  (python/int (.get (.- os environ) "MMLLM_SLEEP_CYCLE_EVERY" "0")))
+
 (defn pick-slot-log-every
   "Resolve interval (in training steps) between PKM slot-utilization
    logs + optional dead-slot reinit. Reads MMLLM_SLOT_LOG_EVERY
@@ -3096,6 +3128,7 @@
         start-step   (or (latest-checkpoint-step ckpt-dir) 0)
         sync-every   (pick-sync-every)
         ablate-every (pick-ablate-every)
+        sleep-every  (pick-sleep-every)
         slot-every   (pick-slot-log-every)
         slot-reinit? (pick-dead-slot-reinit?)
         ;; Grab the Modal Volume reference unconditionally — used
@@ -3162,7 +3195,10 @@
                          ablate-every))
         (when (pos? (mod ablate-every eval-every))
           (println (format "    WARN: ablate-every (%d) is not a multiple of eval-every (%d); ablation steps that don't align with eval steps will be skipped."
-                           ablate-every eval-every)))))
+                           ablate-every eval-every))))
+      (when (pos? sleep-every)
+        (println (format "  sleep: V_local zeroed every %d steps (triune-brain forgetting term)"
+                         sleep-every))))
     (let [t0          (time/time)
           en-label    (str "train-long:" train-path)
           tracker     (metrics/EnergyTracker ** :label en-label :device (:device m))
@@ -3468,6 +3504,25 @@
                                            (if cons-idx (format "%.4f" cons-idx) "null")
                                            (if baseline2 (format "%.4f" baseline2) "null")
                                            dt (- (time/time) t0)))))))
+            ;; Sleep cycle: zero V_local periodically. The triune-brain
+            ;; forgetting term — round-5 deep-dive showed Local masks
+            ;; Net's contribution because both learn the same function
+            ;; under distill. Zeroing V_local frees the gate to route
+            ;; to Net, and Net's masked capacity becomes the new
+            ;; Δ_net signal. K_a/K_b (routing keys) are preserved, so
+            ;; Local relearns from CE loss but specializes on what
+            ;; Net+sdpa don't cover (since Net has densified over the
+            ;; prior cycle).
+            ;;
+            ;; Fires AFTER ablation so the ablation captures the
+            ;; pre-sleep state; the next ablation captures post-sleep.
+            ;; Skips step 0 — no point sleeping before any training.
+            (when (and (pos? sleep-every) (pos? step') (zero? (mod step' sleep-every)))
+              (println (format "  ── sleep at step %d: V_local ← 0 across all blocks ──" step'))
+              (doseq [b (:blocks m)] (.zero_bank (:memory b)))
+              (append-jsonl! log-path
+                             (format "{\"step\":%d,\"event\":\"sleep_cycle\",\"wall_s\":%.1f}"
+                                     step' (- (time/time) t0))))
             ;; PKM slot utilization log + optional dead-slot reinit.
             ;; Each PKM layer's hit counters cover the window since the
             ;; last reset; we log per-layer entropy and dead-row counts,
