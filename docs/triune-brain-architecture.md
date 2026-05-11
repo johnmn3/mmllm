@@ -143,37 +143,39 @@ peak `lr`:
 
 ```
        MMLLM_LR_DENSE_MULT  → AdamW(d_model trunk) lr
-                            ─── default 1.0
+                            ─── round-9 default 0.5   (5% of bank lr)
        MMLLM_LR_KAB_MULT    → AdamW(K_a, K_b) lr  (#3 spike)
                             ─── default = LR_DENSE_MULT (single group)
        MMLLM_LR_BANK_MULT   → SparseAdam(Local V) lr
-                            ─── default 10.0   (cortex high-LR)
+                            ─── round-9 default 10.0  (cortex high-LR)
        MMLLM_LR_NET_MULT    → SparseAdam(NetBank V) lr
-                            ─── default  5.0   (cerebellum slower)
+                            ─── round-9 default  0.5  (cerebellum slow early)
 
        Each multiplier supports cosine scheduling via *_END:
-         lr_bank_mult cosines 10 → 1     (cortex cools)
-         lr_net_mult  cosines  5 → 10    (cerebellum ramps)
-       across the run, driving consolidation by schedule alone (P1).
+         round-9 schedule:
+           lr_bank_mult flat 10 → 10        (cortex stays plastic)
+           lr_net_mult  cosines 0.5 → 5.0   (cerebellum ramps late)
+           lr_dense_mult flat 0.5 → 0.5     (trunk barely moves)
 ```
 
-The SCHEDULE encodes the central consolidation hypothesis:
+The SCHEDULE encodes the central consolidation hypothesis: cortex hill-
+climbs hard throughout the run; cerebellum is a slow receiver early
+(when there's nothing for Local to transfer yet) and a fast consolidator
+late (when distill has accumulated content to absorb). The trunk barely
+moves so it doesn't absorb work the banks should be doing.
 
-```
-   training step       cortex LR     cerebellum LR    cortex grad
-   ─────────────────────────────────────────────────────────────
-   start (warmup)      14e-3 (10×)   7.0e-3 (5×)      large
-   ─────────────────────────────────────────────────────────────
-   mid-run             8.5e-3 (6×)   8.5e-3 (6×)      ramping down
-   ─────────────────────────────────────────────────────────────
-   end-of-run          1.4e-3 (1×)   14e-3 (10×)      small
-                       (cortex stops chasing      (cerebellum still
-                        new patterns; NetBank      absorbing)
-                        owns the terrain.)
-```
+Per-tier reasoning:
 
-This is the "lr-as-consolidation" mechanism (research synthesis tier T1).
-Mechanical, requires no new model code.
+- **Cortex (Local) high LR throughout.** The forgetting term zeroes V at
+  every sleep, so Local always has fresh territory to climb. High LR
+  lets it move fast on the new wake-phase patterns.
+- **Cerebellum (Net) cosine 0.5 → 5.0.** Round-8 evidence: flat low LR
+  (0.5 throughout) left Net's V barely moving across cycles even as
+  distill flowed. Net's V is meant to be sticky early (don't overwrite
+  the round-6 harvest with noisy gradients) and plastic late (absorb
+  Local's accumulated content once there's something to transfer).
+- **Trunk 5% of bank LR.** Trunk weights are ~1% the size of the banks;
+  high LR there absorbs work the banks should carry. Keep it slow.
 
 ---
 
@@ -192,16 +194,66 @@ mechanisms to drive transfer.
                                                     ┐
      gate(q) decides routing weights    ───────────►│ main forward
      attn_l  = w0·sdpa + w1·mem_out + w2·net_out   ─┘
-                                                    
+
                                                     ┐
      aux loss:                                      │ distillation
-     |normalize(net_out) − normalize(mem_out).det()|² ── path
+     coef · |net_out − mem_out.detach()|²            ── path
                                                     ┘
 ```
 
-Cerebellum learns to mimic cortex's attention output **direction**
-(MMLLM_DISTILL_DIRECTION_ONLY=true). Detached on the cortex side so
-cortex doesn't try to imitate cerebellum.
+Cerebellum learns to mimic cortex's attention output. Detached on the
+cortex side so cortex doesn't try to imitate cerebellum. Local's
+contribution is the *target*; Net's V cells get gradient to produce
+matching output. As Local accumulates wake-phase content between
+sleeps, distill copies that content into Net before the next sleep
+wipes Local — the actual transfer mechanism.
+
+Knobs:
+- `MMLLM_DISTILL_COEF` — overall scale (default 0.0 = off). Round-5 used
+  0.1; round-8 evidence (`distill_loss ~ 5e-4` floor → ~5e-5 effective
+  gradient on Net, three orders below the main loss) drove a round-9
+  raise to 1.0.
+- `MMLLM_DISTILL_DIRECTION_ONLY` — when true, both tensors are
+  RMS-normalized before MSE so Net learns Local's *direction* only.
+  Round-4 finding: direction-only made Net redundant with Local at 99.95%
+  cosine; magnitude-aware (default `false`) breaks that redundancy basin.
+
+### 1b. Sleep cycle (forgetting term)
+
+Every `MMLLM_SLEEP_CYCLE_EVERY` steps (round-8: 1000), `V_local := 0`
+across all blocks. K_a/K_b are preserved so routing geometry survives;
+only the value table is wiped. This forces the consolidation flow:
+between sleeps, Local accumulates novel wake-phase content and distill
+copies it to Net; at sleep, Local is reset and starts hunting for the
+next layer of patterns Net doesn't yet cover.
+
+The forgetting term is what makes "cortex frees that slot for the next
+novel pattern" mechanical rather than aspirational — without it, Local
+just keeps growing, ages into a duplicate of Net, and the two tiers
+converge to redundant local minima of the same loss (round-5
+redundancy basin).
+
+### 1c. Net-default Bernoulli gate (round-9)
+
+Round-8 evidence: in the 3-way softmax gate, `w_local` collapses from
+~0.15 to ~0.01 within the first cycle. The optimizer routes around
+Local; distill's target shrinks with it; Net's gradient starves on a
+vanishing input.
+
+When `MMLLM_GATE_NET_DEFAULT=true`, SwitchGate switches to a hybrid:
+- Net + sdpa run unconditionally and always feed the next layer.
+- Local fires per (B, H, T) Bernoulli decision computed from `q_long`.
+  Sigmoid init bias = -2.0 so ~12% of queries invoke Local at step 0.
+- Training: straight-through Bernoulli (forward = hard 0/1, backward
+  = sigmoid grad); inference: deterministic threshold at 0.5.
+- The 3-way softmax weights are renormalized over the surviving tiers
+  when Local is skipped, so the routing mass always sums to 1.
+
+There is no `w_local` for the optimizer to collapse — Local is invoked
+explicitly when the gate decides this query needs it, otherwise it
+contributes zero. The recurrent feedback between Net's output and the
+gate's routing decision (the original motivation for the 3-way mixer)
+is preserved because Net always runs.
 
 ### 2. α_net per-head scale on Net's path (#C)
 

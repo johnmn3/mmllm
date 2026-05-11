@@ -77,6 +77,14 @@ def layer_telemetry(layer_idx: int, netbank, memory, gate) -> dict:
         a = getattr(gate, "alpha_net", None)
         if a is not None:
             entry["alpha_net_mean"] = float(a.detach().mean().item())
+        # local_firing_rate: mean Bernoulli decision per (B, H, T) forward,
+        # present only when MMLLM_GATE_NET_DEFAULT=true. Diagnoses whether
+        # the gate invokes Local on most queries (saturated near 1),
+        # rarely (collapsed near 0), or selectively (target: rises with
+        # corpus complexity, drops as Net consolidates patterns).
+        fr = getattr(gate, "last_local_firing_rate", None)
+        if fr is not None:
+            entry["local_firing_rate"] = _safe_float(fr)
     return entry
 
 
