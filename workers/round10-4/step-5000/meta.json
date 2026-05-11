@@ -1,0 +1,196 @@
+{
+  "round": 10,
+  "tokens_trained": 2560000,
+  "steps": 5000,
+  "label": "round10-4",
+  "corpus": "full xlam (18539 docs)",
+  "fim": {
+    "resume_from": "core/round-6/step-5000 (FedAvg merge baseline)",
+    "lr_bank_mult_start": 50.0,
+    "lr_bank_mult_end": 0.001,
+    "lr_net_mult": "0.001 \u2192 1.0 cosine",
+    "lr_dense_mult": "0.05 \u2192 0.005 cosine",
+    "distill_coef": "0.0 \u2192 1.0 cosine",
+    "distill_target": "residual",
+    "distill_direction_only": true,
+    "gate_net_default": true,
+    "val_bpc_final": 0.3084,
+    "ablation_delta_local_final": 0.0068,
+    "ablation_delta_net_final": 0.0532,
+    "ablation_trajectory": [
+      {
+        "step": 250,
+        "kind": "ablation_intermediate",
+        "delta_local": -0.0076,
+        "delta_net": 0.0679,
+        "delta_both": 0.0485,
+        "consolidation_idx": -0.0
+      },
+      {
+        "step": 500,
+        "kind": "ablation_intermediate",
+        "delta_local": 0.0015,
+        "delta_net": 0.0599,
+        "delta_both": 0.0574,
+        "consolidation_idx": 1.1957
+      },
+      {
+        "step": 750,
+        "kind": "ablation_intermediate",
+        "delta_local": 0.0044,
+        "delta_net": 0.061,
+        "delta_both": 0.0625,
+        "consolidation_idx": 1.5819
+      },
+      {
+        "step": 1000,
+        "kind": "ablation_intermediate",
+        "delta_local": 0.0025,
+        "delta_net": 0.062,
+        "delta_both": 0.0602,
+        "consolidation_idx": 1.326
+      },
+      {
+        "step": 1250,
+        "kind": "ablation_intermediate",
+        "delta_local": 0.0037,
+        "delta_net": 0.0615,
+        "delta_both": 0.0626,
+        "consolidation_idx": 1.4929
+      },
+      {
+        "step": 1500,
+        "kind": "ablation_intermediate",
+        "delta_local": 0.0054,
+        "delta_net": 0.0598,
+        "delta_both": 0.0637,
+        "consolidation_idx": 1.7039
+      },
+      {
+        "step": 1750,
+        "kind": "ablation_intermediate",
+        "delta_local": 0.0057,
+        "delta_net": 0.0586,
+        "delta_both": 0.0635,
+        "consolidation_idx": 1.7485
+      },
+      {
+        "step": 2000,
+        "kind": "ablation_intermediate",
+        "delta_local": 0.0086,
+        "delta_net": 0.0548,
+        "delta_both": 0.0648,
+        "consolidation_idx": 2.1254
+      },
+      {
+        "step": 2250,
+        "kind": "ablation_intermediate",
+        "delta_local": 0.0063,
+        "delta_net": 0.0555,
+        "delta_both": 0.0617,
+        "consolidation_idx": 1.8257
+      },
+      {
+        "step": 2500,
+        "kind": "ablation_intermediate",
+        "delta_local": 0.0039,
+        "delta_net": 0.0572,
+        "delta_both": 0.0587,
+        "consolidation_idx": 1.507
+      },
+      {
+        "step": 2750,
+        "kind": "ablation_intermediate",
+        "delta_local": 0.0069,
+        "delta_net": 0.0549,
+        "delta_both": 0.0609,
+        "consolidation_idx": 1.9046
+      },
+      {
+        "step": 3000,
+        "kind": "ablation_intermediate",
+        "delta_local": 0.0059,
+        "delta_net": 0.0546,
+        "delta_both": 0.0598,
+        "consolidation_idx": 1.7745
+      },
+      {
+        "step": 3250,
+        "kind": "ablation_intermediate",
+        "delta_local": 0.0075,
+        "delta_net": 0.0527,
+        "delta_both": 0.0612,
+        "consolidation_idx": 1.9882
+      },
+      {
+        "step": 3500,
+        "kind": "ablation_intermediate",
+        "delta_local": 0.007,
+        "delta_net": 0.0534,
+        "delta_both": 0.0608,
+        "consolidation_idx": 1.9227
+      },
+      {
+        "step": 3750,
+        "kind": "ablation_intermediate",
+        "delta_local": 0.0072,
+        "delta_net": 0.0533,
+        "delta_both": 0.061,
+        "consolidation_idx": 1.9469
+      },
+      {
+        "step": 4000,
+        "kind": "ablation_intermediate",
+        "delta_local": 0.0071,
+        "delta_net": 0.0533,
+        "delta_both": 0.0609,
+        "consolidation_idx": 1.9334
+      },
+      {
+        "step": 4250,
+        "kind": "ablation_intermediate",
+        "delta_local": 0.007,
+        "delta_net": 0.0531,
+        "delta_both": 0.0606,
+        "consolidation_idx": 1.9265
+      },
+      {
+        "step": 4500,
+        "kind": "ablation_intermediate",
+        "delta_local": 0.0074,
+        "delta_net": 0.0532,
+        "delta_both": 0.0609,
+        "consolidation_idx": 1.9671
+      },
+      {
+        "step": 4750,
+        "kind": "ablation_intermediate",
+        "delta_local": 0.0074,
+        "delta_net": 0.0528,
+        "delta_both": 0.0611,
+        "consolidation_idx": 1.975
+      },
+      {
+        "step": 5000,
+        "kind": "ablation_intermediate",
+        "delta_local": 0.0068,
+        "delta_net": 0.0532,
+        "delta_both": 0.0602,
+        "consolidation_idx": 1.8983
+      },
+      {
+        "step": 5000,
+        "kind": "ablation",
+        "delta_local": null,
+        "delta_net": null,
+        "delta_both": null,
+        "consolidation_idx": null
+      }
+    ],
+    "fim_eval_bpc": 5.985,
+    "fim_eval_exact_pct": 0.0,
+    "agent_format_validity": 0.0,
+    "agent_name_match": 0.0,
+    "agent_args_match": 0.0
+  }
+}
