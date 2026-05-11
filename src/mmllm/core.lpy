@@ -3233,34 +3233,35 @@
             m)
           :else
           (let [warmup     (pick-lr-warmup)
-                ;; Apply lr schedule (no-op when warmup == 0). The cosine
-                ;; schedule shape is unified (one cur-lr value), but each
-                ;; optimizer sees its own component multiplier on top —
-                ;; AdamW gets pick-lr-dense-mult, SparseAdam gets
-                ;; pick-lr-bank-mult. See docs/router-bank-lr-decoupling.md.
-                _          (when (pos? warmup)
-                             ;; Apply scheduled multipliers (arity-2 form).
-                             ;; Identical to old behavior when *_MULT_END is
-                             ;; unset (mult-cosine-interp returns start when
-                             ;; start==end). When set, cosine-interpolates
-                             ;; from start to end across (warmup, total-steps].
-                             (let [cur-lr (lr-at-step step total-steps
-                                                      (pick-lr) warmup
-                                                      (pick-lr-min))
-                                   d-mult (pick-lr-dense-mult step total-steps)
-                                   k-mult (pick-lr-kab-mult   step total-steps)
-                                   b-mult (pick-lr-bank-mult  step total-steps)
-                                   n-mult (pick-lr-net-mult   step total-steps)]
-                               ;; If opt-dense has 2 groups (K_a/K_b separated
-                               ;; via make-opt-dense), use the grouped setter;
-                               ;; otherwise the single-lr setter (back-compat).
-                               (if (= 2 (count (.- opt-dense param_groups)))
-                                 (set-opt-lrs! opt-dense
-                                               [(* cur-lr d-mult) (* cur-lr k-mult)])
-                                 (set-opt-lr!  opt-dense (* cur-lr d-mult)))
-                               (set-opt-lr! opt-sparse (* cur-lr b-mult))
-                               (when opt-sparse-net
-                                 (set-opt-lr! opt-sparse-net (* cur-lr n-mult)))))
+                ;; Apply lr schedule unconditionally. lr-at-step returns
+                ;; max-lr when warmup=0, and mult-cosine-interp returns
+                ;; start when start==end, so this is safe at warmup=0.
+                ;;
+                ;; Bug (round-1..4): the previous `(when (pos? warmup)
+                ;; ...)` wrapper silently silenced every round's LR
+                ;; schedule because MMLLM_LR_WARMUP defaults to 0 and
+                ;; run_round2.sh didn't set it. The schedule values
+                ;; were COMPUTED for the per-step print line but never
+                ;; APPLIED to the optimizer — log showed lr_b=3e-2 while
+                ;; opt-sparse.param_groups[0].lr stayed at base 3e-3.
+                ;; Sleep-cycle LR rotation was a ghost across 4 rounds.
+                _          (let [cur-lr (lr-at-step step total-steps
+                                                    (pick-lr) warmup
+                                                    (pick-lr-min))
+                                  d-mult (pick-lr-dense-mult step total-steps)
+                                  k-mult (pick-lr-kab-mult   step total-steps)
+                                  b-mult (pick-lr-bank-mult  step total-steps)
+                                  n-mult (pick-lr-net-mult   step total-steps)]
+                              ;; If opt-dense has 2 groups (K_a/K_b separated
+                              ;; via make-opt-dense), use the grouped setter;
+                              ;; otherwise the single-lr setter (back-compat).
+                              (if (= 2 (count (.- opt-dense param_groups)))
+                                (set-opt-lrs! opt-dense
+                                              [(* cur-lr d-mult) (* cur-lr k-mult)])
+                                (set-opt-lr!  opt-dense (* cur-lr d-mult)))
+                              (set-opt-lr! opt-sparse (* cur-lr b-mult))
+                              (when opt-sparse-net
+                                (set-opt-lr! opt-sparse-net (* cur-lr n-mult))))
                 ;; Restore training-mode flags. eval-bpc and ablation-step!
                 ;; flip submodules to eval mode but never flip them back —
                 ;; without this call, Local Bank's `if self.training:`

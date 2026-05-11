@@ -39,7 +39,11 @@ export MMLLM_ALPHA_NET=true
 # Distill: every train step, push Local's attention output into NetBank
 # (direction-only — less brittle than L2 magnitude matching).
 export MMLLM_DISTILL_COEF=0.1
-export MMLLM_DISTILL_DIRECTION_ONLY=true
+# Round-4 deep-dive: direction-only=true aligns Net's direction to Local
+# at 99.95% cosine, makes Net redundant with Local, alpha_net decays
+# per-head, V can never grow magnitude. Switching to magnitude-aware
+# distill puts MSE pressure on ||V|| too — breaks the redundancy basin.
+export MMLLM_DISTILL_DIRECTION_ONLY=false
 
 # Replay: when Local has mastered a position (plain-CE < threshold),
 # stash it in a replay buffer and re-train on it periodically. Stops
@@ -115,12 +119,49 @@ fi
 # `(when (pos? start-step) ...)` so a step-0 ckpt is silently ignored
 # and training falls through to random init. Round-3 lost the experiment
 # to exactly this bug.
+#
+# ALSO: nuke any leftover step-N dirs from a prior round on this box,
+# then stage step-1. core.lpy's `latest-checkpoint-step` picks the
+# HIGHEST step-N it finds, so a stale step-5000 from a previous round
+# would shadow the staged round-2 community core. Round-4's first
+# dispatch hit exactly this — agent had to manually clean state.
 if [ -n "${RESUME_FROM:-}" ] && [ -f "${RESUME_FROM}" ]; then
+  rm -rf "${FIM_BASE}.ckpts"
   mkdir -p "${FIM_BASE}.ckpts/step-1"
   cp "${RESUME_FROM}" "${FIM_BASE}.ckpts/step-1/dense.pt"
   # Touch a step.txt so train-long picks step-1 as latest unambiguously
   echo 1 > "${FIM_BASE}.ckpts/step-1/step.txt"
-  echo "  resuming from ${RESUME_FROM} (staged at step-1)"
+  echo "  resuming from ${RESUME_FROM} (staged at step-1; ckpts dir wiped first)"
+
+  # NetBank V persistence (round-4 deep-dive finding):
+  # The community core may ship per-layer bank-net-latest.{i}.fp16.bin
+  # files alongside dense.pt. Expand them to fp32 at the runtime mmap
+  # path (<bank-path>-net.{i}.bin) so NetBank V is carried forward
+  # across rounds rather than re-randomized every dispatch.
+  RESUME_DIR=$(dirname "${RESUME_FROM}")
+  python3 - "${RESUME_DIR}" "/tmp/mmllm-cpu/fim-bank" <<'PY'
+import sys, numpy as np
+from pathlib import Path
+resume_dir = Path(sys.argv[1])
+bank_base  = sys.argv[2]
+restored = 0
+for fp16_file in sorted(resume_dir.glob("bank-net-latest.*.fp16.bin")):
+    parts = fp16_file.name.split(".")
+    if len(parts) < 4: continue
+    try:    layer = int(parts[1])
+    except: continue
+    arr16 = np.fromfile(fp16_file, dtype=np.float16)
+    out   = Path(f"{bank_base}-net.{layer}.bin")
+    out.parent.mkdir(parents=True, exist_ok=True)
+    arr16.astype(np.float32).tofile(out)
+    restored += 1
+    print(f"  NetBank V layer {layer} restored from community core "
+          f"({out.stat().st_size/1e6:.1f} MB fp32 expanded from {fp16_file.stat().st_size/1e6:.1f} MB fp16)")
+if restored == 0:
+    print(f"  no bank-net-latest.*.fp16.bin in {resume_dir} — NetBank V will start from K_a/K_b warm-start + random V")
+else:
+    print(f"  ✓ {restored} NetBank V layers carried forward from community core")
+PY
 fi
 
 # ── 3. Train ────────────────────────────────────────────────────────────────
@@ -151,11 +192,37 @@ mmllm eval-agent "$FIM_BASE" "${TOTAL_STEPS}" "$BANK_BASE" \
 WORKER_DIR="workers/$HANDLE/step-${TOTAL_STEPS}"
 mkdir -p "$WORKER_DIR"
 cp "${FIM_BASE}.ckpts/step-${TOTAL_STEPS}/dense.pt" "$WORKER_DIR/dense.pt"
-# DO NOT ship the NetBank V binaries — each per-layer fp32 file is
-# ~128 MB at sqrt_n=1024 × c_net=32, well over GitHub's 100 MB blob
-# limit. WORKERS.md says only dense.pt + meta.json belong in the
-# contribution payload anyway. Round-3 dispatches hit HTTP 413 from
-# the orig `cp ${BANK_BASE}-net.*.bin "$WORKER_DIR/"` line; removed.
+
+# NetBank V persistence (round-4 deep-dive finding): without these
+# files in the worker payload, the harvester has nothing to merge for
+# NetBank, no community core gets bank-net files, every round
+# retrains V from scratch and consolidation can never accumulate.
+#
+# fp32 files are 128 MB each at sqrt_n=1024 × c_net=32 — over GitHub's
+# 100 MB blob limit. Convert to fp16 for the upload (precision loss is
+# negligible for retrieval values; SparseAdam already operates on
+# in-memory fp32 during training). Resume code in the next round will
+# expand back to fp32 in /tmp before the model loads.
+python3 - "${BANK_BASE}" "${WORKER_DIR}" <<'PY'
+import sys, numpy as np
+from pathlib import Path
+bank_base = sys.argv[1]
+wdir      = Path(sys.argv[2])
+shipped   = 0
+for src in sorted(Path("/tmp/mmllm-cpu").glob(f"{Path(bank_base).name}-net.*.bin")):
+    parts = src.name.split(".")
+    try:    layer = int(parts[1])
+    except: continue
+    arr32 = np.fromfile(src, dtype=np.float32)
+    dst   = wdir / f"bank-net-latest.{layer}.fp16.bin"
+    arr32.astype(np.float16).tofile(dst)
+    shipped += 1
+    print(f"  staged NetBank V layer {layer}: {dst.name} "
+          f"({dst.stat().st_size/1e6:.1f} MB fp16 from {src.stat().st_size/1e6:.1f} MB fp32)")
+if shipped == 0:
+    print(f"  no NetBank V files at {bank_base}-net.*.bin — NetBank either disabled or no training happened")
+PY
+
 # Preserve the structured train log — every ablation / eval / router /
 # slot_usage event lives in here. This is the canonical record of
 # knowledge moving through Local → Net.
