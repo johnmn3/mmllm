@@ -149,7 +149,11 @@ def main() -> int:
     ap.add_argument("--batch-size", type=int, default=4)
     ap.add_argument("--seq-len", type=int, default=128)
     ap.add_argument("--query-scale", type=float, default=1.0,
-                    help="std of Gaussian query distribution; real q_long has unit-ish variance after q_norm")
+                    help="(unused when --captured-queries is set) std of Gaussian query distribution")
+    ap.add_argument("--captured-queries", type=Path, default=None,
+                    help="path to a .pt file produced by scripts/capture_queries.py — "
+                         "list[Tensor] of real q_long per layer. When set, distill samples "
+                         "from this pool instead of generating Gaussian noise.")
     ap.add_argument("--lr-v",    type=float, default=1e-2,
                     help="SparseAdam LR for student V (the main distillation target)")
     ap.add_argument("--lr-kab",  type=float, default=1e-4,
@@ -205,19 +209,40 @@ def main() -> int:
     opt_v   = torch.optim.SparseAdam(v_params,   lr=args.lr_v)
     opt_kab = torch.optim.AdamW    (kab_params, lr=args.lr_kab)
 
+    # Optional: load captured real queries
+    captured_pool = None
+    if args.captured_queries is not None:
+        captured_pool = torch.load(args.captured_queries, map_location="cpu",
+                                    weights_only=False)
+        print(f"\nLoaded captured queries from {args.captured_queries}:")
+        for layer, t in enumerate(captured_pool):
+            if t is None:
+                print(f"  layer {layer}: None (skipped)")
+            else:
+                print(f"  layer {layer}: {tuple(t.shape)}  std={t.std().item():.4f}  mean={t.mean().item():.4f}")
+
     # Distillation loop
+    qmode = ("captured" if captured_pool is not None
+             else f"gaussian(scale={args.query_scale})")
     print(f"distilling: steps={args.steps}  B={args.batch_size}  "
-          f"T={args.seq_len}  q_scale={args.query_scale}  "
+          f"T={args.seq_len}  q={qmode}  "
           f"lr_v={args.lr_v}  lr_kab={args.lr_kab}")
     t0 = time.time()
     for step in range(1, args.steps + 1):
-        # Random Gaussian queries — same shape and rough distribution as
-        # the q_long_flat that hits NetBank.forward in the real model.
-        # Per layer (allows the loss to factorize): generate independently.
+        # Per layer (allows the loss to factorize across NetBanks): generate
+        # or sample queries independently.
         total_loss = torch.zeros((), dtype=torch.float32)
         per_layer_losses = []
         for layer in range(N_LAYERS):
-            q = torch.randn(args.batch_size, args.seq_len, Q_DIM) * args.query_scale
+            if captured_pool is not None and captured_pool[layer] is not None:
+                # Sample B (B, T, q_dim) rows uniformly from the pool. Each
+                # row is one captured forward pass at a real position.
+                pool = captured_pool[layer]
+                n_pool = pool.shape[0]
+                idx = torch.randint(0, n_pool, (args.batch_size,))
+                q = pool[idx]                              # (B, T, q_dim)
+            else:
+                q = torch.randn(args.batch_size, args.seq_len, Q_DIM) * args.query_scale
 
             with torch.no_grad():
                 teacher_outs = torch.stack(
