@@ -1,0 +1,203 @@
+{
+  "ts": "2026-05-11T01:42:30Z",
+  "n_workers": 5,
+  "output_step": 20000,
+  "weighted_by": "fim_quality",
+  "netbank_merged": false,
+  "fim": {
+    "n_fim_workers": 2,
+    "languages": [
+      "json"
+    ],
+    "fim_bpc_min": 3.58,
+    "fim_bpc_max": 9.235,
+    "fim_bpc_mean": 6.4075
+  },
+  "sources": [
+    {
+      "worker_id": "round2-a",
+      "step": 20000,
+      "meta": {
+        "tokens_trained": 10240000,
+        "steps": 20000,
+        "label": "round2-a",
+        "round": 2,
+        "resumed_from": "round-1 step-10000 (local, not yet published as community core)",
+        "fim": {
+          "language": "json",
+          "fim_ratio": 0.7,
+          "psm_ratio": 0.5,
+          "splitter": "json-value-boundary",
+          "source_corpus": "glaive-function-calling-v2 (xlam HF-gated, placeholder token in prompt)",
+          "n_fim_examples": 13930,
+          "n_causal_examples": 6070,
+          "train_bytes": 30765235,
+          "fim_eval_bpc": 3.58,
+          "fim_eval_exact_pct": 0.0,
+          "fim_eval_json_bpc": 2.955,
+          "fim_eval_json_exact_pct": 0.0,
+          "fim_eval_clojure_bpc": 4.653,
+          "fim_eval_python_bpc": 4.385,
+          "fim_eval_generic_bpc": 3.326,
+          "val_bpc_final_control": 1.0626,
+          "val_bpc_final_local_zeroed": 4.69,
+          "ablation_delta_local_end_of_run": 3.6274,
+          "ablation_delta_local_at_step_20000_intermediate": 3.7618,
+          "ablation_delta_net_at_step_20000_intermediate": 0.0005,
+          "ablation_delta_both_at_step_20000_intermediate": 3.7705,
+          "ablation_delta_local_at_step_11000": 2.1097,
+          "ablation_delta_net_at_step_11000": -0.0005,
+          "ablation_delta_net_trajectory": {
+            "11000": -0.0005,
+            "12000": -0.0002,
+            "13000": -0.0005,
+            "14000": -0.0014,
+            "15000": -0.0002,
+            "16000": -0.0017,
+            "17000": -0.0006,
+            "18000": -0.0,
+            "19000": 0.0001,
+            "20000": 0.0005
+          },
+          "consolidation_idx_final": -0.7831,
+          "agent_eval_corpus": "glaive.test.bin",
+          "agent_eval_n_samples_used": 10,
+          "agent_eval_n_samples_attempted": 100,
+          "agent_eval_gen_len": 128,
+          "agent_format_validity": 0.0,
+          "agent_name_match": 0.0,
+          "agent_args_match": 0.0,
+          "schedule": {
+            "MMLLM_LR_WARMUP": 15000,
+            "MMLLM_LR_BANK_MULT": 10,
+            "MMLLM_LR_BANK_MULT_END": 1,
+            "MMLLM_LR_NET_MULT": 1,
+            "MMLLM_LR_NET_MULT_END": 10,
+            "MMLLM_NETBANK_ENABLED": true,
+            "MMLLM_NET_SQRT_N": 1024,
+            "MMLLM_NET_C_NET": 32,
+            "MMLLM_NET_DTYPE": "fp32",
+            "MMLLM_ABLATE_EVERY": 1000
+          },
+          "wall_time_train_s": 3540,
+          "decision": "\u0394_net crossed zero (-0.0005 \u2192 +0.0005) over the 10k-step sleep cycle but stayed within noise. Headline target (\u0394_net > 0) technically met but signal is not robust \u2014 NetBank V hasn't accumulated enough mass to contribute meaningfully even after the LR ramp. \u0394_local strengthened (+2.11 \u2192 +3.76) and val_bpc dropped substantially (1.57 \u2192 1.06). consolidation_idx went MORE negative (Local more essential, not less) \u2014 opposite of intended consolidation direction."
+        }
+      }
+    },
+    {
+      "worker_id": "round2-b",
+      "step": 10000,
+      "meta": {
+        "tokens_trained": 5120000,
+        "steps": 10000,
+        "label": "round2-b",
+        "fim": {
+          "language": "json",
+          "fim_ratio": 0.7,
+          "psm_ratio": 0.5,
+          "splitter": "json-value-boundary",
+          "source_corpus": "synthetic-xlam (real Salesforce/xlam-function-calling-60k is HF-gated; my round-1 prep_xlam_synth.py output reused)",
+          "n_fim_examples": 12944,
+          "n_causal_examples": 5712,
+          "n_input_docs": 18656,
+          "train_bytes": 12381744,
+          "val_bytes": 1103030,
+          "test_bytes": 1028492,
+          "val_bpc_final": 0.1601,
+          "val_bpc_local_zeroed_netbank_kept": 0.1835,
+          "delta_local": 0.0234,
+          "delta_net": null,
+          "delta_net_note": "Train-long's built-in ablation only zeroes Local Bank (NetBank kept active). \u0394_net (NetBank-zeroed, Local kept) is not measured by the on-shelf ablation. Per round-2 spec rule 'no mid-run pipeline patches', not implementing a custom \u0394_net here.",
+          "train_loss_final": 0.108,
+          "fim_eval_bpc": 9.235,
+          "fim_eval_exact_pct": 0.0,
+          "fim_eval_json_bpc": 5.92,
+          "fim_eval_json_exact_pct": 0.0,
+          "fim_eval_clojure_bpc": 14.468,
+          "fim_eval_python_bpc": 13.052,
+          "fim_eval_generic_bpc": 10.612,
+          "agent_eval_corpus": "synthetic-xlam.test.bin",
+          "agent_eval_n_samples_attempted": 100,
+          "agent_eval_n_samples_used": 100,
+          "agent_eval_gen_len": 64,
+          "agent_eval_gen_len_note": "spec asked for gen_len=256 but cpu-tiny max_pos=512 capped max_prompt_bytes at 248, returning 0 usable samples. Dropped gen_len to 64 \u2192 max_prompt_bytes=440 \u2192 all 100 synth-xlam prompts fit. Same constraint the round-1 dogfood worker hit on glaive.",
+          "agent_format_validity": 0.0,
+          "agent_name_match": 0.0,
+          "agent_args_match": 0.0,
+          "agent_exact_match": 0.0,
+          "wall_time_train_s": 3797,
+          "wall_time_agent_eval_s": 250,
+          "tps_train": 1500,
+          "tps_agent_eval_singlestream": 26
+        },
+        "schedule": {
+          "MMLLM_LR": "3e-3",
+          "MMLLM_LR_WARMUP": 7500,
+          "MMLLM_LR_BANK_MULT": 10.0,
+          "MMLLM_LR_BANK_MULT_END": 0.1,
+          "MMLLM_LR_NET_MULT": 0.1,
+          "MMLLM_LR_NET_MULT_END": 10.0,
+          "crossover_step": 7500,
+          "sleep_cycle_steps": 2500,
+          "MMLLM_NETBANK_ENABLED": true,
+          "MMLLM_NET_SQRT_N": 1024,
+          "MMLLM_NET_C_NET": 32
+        },
+        "config": {
+          "d_model": 192,
+          "n_layers": 4,
+          "n_short_heads": 2,
+          "n_long_heads": 4,
+          "memory_sqrt_n": 256,
+          "memory_top_k": 16,
+          "seq_len": 128,
+          "max_pos": 512,
+          "batch": 4,
+          "device": "cpu"
+        },
+        "lineage": {
+          "round1_starting_point_path": "core/round-1/step-60/dense.pt",
+          "round1_starting_point_used": false,
+          "round1_starting_point_note": "Path core/round-1/step-60/dense.pt does not exist in merged main; round-2 trained from random init.",
+          "resumed_from_step": 0
+        },
+        "deviations": [
+          "synthetic xLAM source (real corpus is HF-gated; matches round-1 dogfood's glaive fallback in spirit)",
+          "trained from random init (round-1 community-core ckpt at core/round-1/step-60/dense.pt does not exist on merged main)",
+          "\u0394_net not measured (train-long's built-in ablation only zeroes Local Bank; no on-shelf NetBank-zeroed eval)",
+          "agent eval gen_len reduced 256 \u2192 64 to fit cpu-tiny max_pos=512 prompt budget"
+        ],
+        "journal": "docs/journal/2026-05-10-round2-round2-a.md",
+        "branch": "claude/fim-json-training-xWXmA",
+        "note_orig_label": "pushed as round2-a on claude/fim-json-training-xWXmA; renamed at harvest to disambiguate"
+      }
+    },
+    {
+      "worker_id": "worker-1",
+      "step": 60,
+      "meta": {
+        "tokens_trained": 30720,
+        "steps": 60,
+        "label": "worker-1"
+      }
+    },
+    {
+      "worker_id": "worker-2",
+      "step": 60,
+      "meta": {
+        "tokens_trained": 30720,
+        "steps": 60,
+        "label": "worker-2"
+      }
+    },
+    {
+      "worker_id": "worker-3",
+      "step": 60,
+      "meta": {
+        "tokens_trained": 30720,
+        "steps": 60,
+        "label": "worker-3"
+      }
+    }
+  ]
+}

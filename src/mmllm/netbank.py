@@ -234,16 +234,24 @@ class NetBank(nn.Module):
     # ─────────────────────── warm-start ───────────────────────
 
     def warm_start_from(self, local_K_a: torch.Tensor,
-                        local_K_b: torch.Tensor) -> None:
-        """Copy a Local Bank's K_a/K_b into the first `local.sqrt_n` rows
-        of NetBank's K_a/K_b. Bootstraps the retrieval geometry so that
-        queries that score highly against a Local row also score highly
+                        local_K_b: torch.Tensor,
+                        local_V: "torch.Tensor | None" = None) -> None:
+        """Copy a Local Bank's K_a/K_b (and optionally V) into the first
+        `local.sqrt_n` rows of NetBank. Bootstraps the retrieval geometry
+        so queries that score highly against a Local row also score highly
         against the corresponding NetBank row from step 0.
 
-        Caller passes Local Bank's K_a / K_b *parameters* (not state-dict
-        tensors). Done in-place; remaining NetBank rows stay at the random
-        init from __init__. V_net is NOT warm-started — it stays random and
-        learns via gradient descent through the expander."""
+        K_a/K_b share dtype/shape between Local and NetBank, so they
+        copy directly.
+
+        V_net has the learned-bottleneck shape (n, c_net) while Local's
+        V is (n, q_dim) with q_dim >> c_net. When `local_V` is provided,
+        we project it down to c_net via the expander's left-pseudoinverse:
+        the V_net values we pick are the least-squares solution to
+        `expander(V_net) ≈ local_V`, so at step 0 the retrieved+expanded
+        NetBank output approximates Local's V on the warm-started rows.
+
+        Pass local_V=None to keep the v1 behavior (V stays random)."""
         with torch.no_grad():
             local_n = local_K_a.shape[0]
             n_copy = min(local_n, self.sqrt_n)
@@ -253,6 +261,19 @@ class NetBank(nn.Module):
             self.K_b.data[:n_copy].copy_(
                 local_K_b.data[:n_copy].to(self.K_b.dtype).to(self.K_b.device)
             )
+            if local_V is not None:
+                # Local V is (n_local, q_dim). Project to (n_local, c_net)
+                # via the expander pseudo-inverse so expander(V_net) ≈ V_local
+                # on warm-started rows at step 0.
+                v_local = local_V[:n_copy].to(self.expander.weight.dtype).to(
+                    self.expander.weight.device)
+                # expander.weight is (q_dim, c_net); pinv is (c_net, q_dim)
+                W_pinv = torch.linalg.pinv(self.expander.weight)
+                # (n_copy, q_dim) @ (q_dim, c_net) = (n_copy, c_net)
+                v_warm = v_local @ W_pinv.T
+                # Write into the V embedding's weight tensor
+                v_dst = self.V.weight if hasattr(self.V, "weight") else self.V
+                v_dst.data[:n_copy].copy_(v_warm.to(v_dst.dtype).to(v_dst.device))
 
     # ─────────────────────── forward ───────────────────────
 

@@ -1432,16 +1432,32 @@
    first `local.sqrt_n` rows. Bootstraps NetBank's retrieval geometry
    from Local's so queries that score highly against Local also score
    highly against the corresponding NetBank rows from step 0.
+
+   When MMLLM_NET_V_WARMSTART_FROM_LOCAL=true, also project Local's V
+   tensor through the NetBank expander's pseudo-inverse and copy into
+   NetBank's V[:n_copy]. Gives NetBank trained CONTENT at step 0, not
+   just trained addressing — addresses round-2's finding that Δ_net
+   stays at the noise floor because V starts random.
+
    No-op when NetBank is disabled. Called by train-long when the resume
    path detects a missing opt-sparse-net.pt (i.e. NetBank just turned on
    for an existing dense-only run)."
   [m]
-  (doseq [[i b] (map-indexed vector (:blocks m))]
-    (when-let [nb (:netbank b)]
-      (.warm_start_from nb
-                        (.- (:memory b) K_a)
-                        (.- (:memory b) K_b))
-      (println (format "  NetBank[layer %d] warm-started from Local K_a/K_b" i)))))
+  (let [warm-V? (= "true" (.lower (.get (.- os environ)
+                                        "MMLLM_NET_V_WARMSTART_FROM_LOCAL"
+                                        "false")))]
+    (doseq [[i b] (map-indexed vector (:blocks m))]
+      (when-let [nb (:netbank b)]
+        (if warm-V?
+          (.warm_start_from nb
+                            (.- (:memory b) K_a)
+                            (.- (:memory b) K_b)
+                            ** :local_V (.- (.- (:memory b) V) weight))
+          (.warm_start_from nb
+                            (.- (:memory b) K_a)
+                            (.- (:memory b) K_b)))
+        (println (format "  NetBank[layer %d] warm-started from Local K_a/K_b%s"
+                         i (if warm-V? " + V (projected)" "")))))))
 
 (defn forward
   "Run the model.
