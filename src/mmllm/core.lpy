@@ -1018,7 +1018,19 @@
                         (filter some?))]
         (if (empty? losses)
           0.0
-          (* coef (/ (reduce + losses) (python/float (count losses)))))))))
+          (let [raw-mse (/ (reduce + losses) (python/float (count losses)))]
+            ;; Stash the pre-coef raw MSE on metrics so we can see the
+            ;; mechanism-side convergence (Net catching up to Local's
+            ;; residual direction) independently of the cosine coef ramp.
+            ;; Without this, the only reported distill_loss is coef×raw_mse,
+            ;; which rises naturally with the coef schedule even when raw
+            ;; MSE is flat or falling.
+            (when metrics
+              (.__setitem__ metrics "distill_loss_raw"
+                            (if (number? raw-mse)
+                              (python/float raw-mse)
+                              (.item (.detach raw-mse)))))
+            (* coef raw-mse)))))))
 
 (defn pick-grad-clip-max-norm
   "Max global norm for dense-parameter gradient clipping (AdamW only;
@@ -3499,12 +3511,16 @@
                           (pos? replay-every)
                           (pos? (pick-delim-aux-coef)))
                   (let [metrics (:metrics m)
-                        d-loss  (or (.get metrics "distill_loss") 0.0)
-                        r-loss  (or (.get metrics "replay_loss")  0.0)
-                        buf-n   (or (.get metrics "replay_buf_n") 0)
-                        x-loss  (or (.get metrics "delim_loss")   0.0)]
-                    (println (format "         router-metrics: distill=%.4f  replay=%.4f  replay_buf=%d/%d  delim=%.4f"
-                                     d-loss r-loss buf-n replay-cap x-loss))))
+                        d-loss  (or (.get metrics "distill_loss")     0.0)
+                        d-raw   (or (.get metrics "distill_loss_raw") 0.0)
+                        r-loss  (or (.get metrics "replay_loss")      0.0)
+                        buf-n   (or (.get metrics "replay_buf_n")     0)
+                        x-loss  (or (.get metrics "delim_loss")       0.0)]
+                    ;; distill_raw is pre-coef MSE — tells us whether Net is
+                    ;; converging to the target (raw falls) vs the cosine
+                    ;; schedule artifact making coef-scaled distill rise.
+                    (println (format "         router-metrics: distill=%.4f (raw=%.4f)  replay=%.4f  replay_buf=%d/%d  delim=%.4f"
+                                     d-loss d-raw r-loss buf-n replay-cap x-loss))))
                 nil))
             ;; Cross-worker bank sync. Has to happen AFTER the optimizer
             ;; step (so dirty rows from this step are flushed) and outside
