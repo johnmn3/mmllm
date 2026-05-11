@@ -117,6 +117,10 @@ class SwitchGate(nn.Module):
         self.last_gate_dist = None      # tuple (sdpa, local, net) of floats or None
         self.last_local_out = None      # (B, H, T, D) tensor or None — for distillation
         self.last_net_out   = None      # (B, H, T, D) tensor or None — for distillation
+        self.last_sdpa_out  = None      # (B, H, T, D) tensor or None — for residual distillation
+                                        #   target = (local_out - sdpa_out).detach() — Net learns
+                                        #   Local's UNIQUE contribution beyond sdpa, not Local's
+                                        #   full output (the round-5 redundancy basin).
         self.last_local_firing_rate = None  # float — mean Bernoulli decision in last forward
 
     def forward(self, q_long, sdpa_out, mem_out, net_out=None):
@@ -136,8 +140,15 @@ class SwitchGate(nn.Module):
             alpha = self.alpha_net.view(1, -1, 1, 1)
             net_out = alpha * net_out
         # Stash per-tier outputs (still in autograd graph) for distillation.
+        # last_sdpa_out enables residual-target distill: target =
+        # (local - sdpa).detach() so Net learns Local's UNIQUE contribution
+        # beyond sdpa, not Local's full output. Without that subtraction,
+        # distill MSE(net, local) pulls Net to mimic Local; if Local is
+        # already mostly sdpa+epsilon, Net learns sdpa, and Δ_net collapses
+        # (the round-5 / round-8 redundancy basin).
         self.last_local_out = mem_out
         self.last_net_out   = net_out
+        self.last_sdpa_out  = sdpa_out
 
         # Legacy 3-way: full softmax mix (Net-default Bernoulli not attached).
         if self.local_active_proj is None:

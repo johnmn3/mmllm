@@ -90,6 +90,13 @@ export MMLLM_GATE_NET_DEFAULT=true
 # distill update is on the same order as its CE update.
 export MMLLM_DISTILL_COEF=1.0
 export MMLLM_DISTILL_DIRECTION_ONLY=false
+# Round-10 architectural fix (default in core.lpy is already 'residual').
+# Target = (local_out − sdpa_out).detach(). Net learns Local's UNIQUE
+# contribution beyond sdpa, not Local's full output. Without this,
+# magnitude-aware distill drives Net to twin Local; if Local ≈ sdpa+ε,
+# Net learns sdpa, becomes a Local twin, Δ_net collapses (the round-5/
+# 8/9 redundancy basin). Worker 2's diagnosis applied.
+export MMLLM_DISTILL_TARGET=residual
 
 # ── Replay ──────────────────────────────────────────────────────────────────
 export MMLLM_REPLAY_EVERY=10

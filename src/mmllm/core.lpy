@@ -927,22 +927,43 @@
   (let [v (.lower (.get (.- os environ) "MMLLM_DISTILL_DIRECTION_ONLY" "false"))]
     (.__contains__ #{"1" "true" "yes"} v)))
 
-(defn collect-distill-loss
-  "Walk every 3-way SwitchGate in the model, pull last_local_out and
-   last_net_out, compute mean(MSE(net, local.detach())) across blocks,
-   scaled by coef. Returns 0.0 when coef=0 OR when no SwitchGate has
-   stashed outputs yet (e.g. NetBank disabled, 2-way mode, or first
-   forward not done).
+(defn pick-distill-target
+  "What Net's distill MSE targets. Reads MMLLM_DISTILL_TARGET — one of
+   'local' or 'residual' (default 'residual').
 
-   When MMLLM_DISTILL_DIRECTION_ONLY=true, both tensors are normalized
-   to unit RMS along the feature dim before MSE — Net learns direction
-   from Local but is free to set its own magnitude. This avoids the
-   pathology observed at step 50000 of the xlam-90 run where Net's V
-   tensor ended up 2-7x smaller magnitude than Local's, leaving the
-   gate routing to a low-magnitude tier."
+   'local'    — target = local_out.detach(). Net mimics Local's full
+                output. Round-5/8/9 pathology: when Local's output is
+                mostly sdpa+ε, Net learns sdpa, becomes Local's twin,
+                Δ_net collapses to noise.
+
+   'residual' — target = (local_out - sdpa_out).detach(). Net learns
+                Local's UNIQUE contribution beyond sdpa, not Local's
+                full output. The shared sdpa floor is subtracted out
+                so Net can't twin Local by replicating sdpa. This is
+                Worker 2's diagnosis from the round-9 reports — the
+                round-10 architectural fix."
+  []
+  (let [v (.lower (.get (.- os environ) "MMLLM_DISTILL_TARGET" "residual"))]
+    (if (.__contains__ #{"residual" "local"} v) v "residual")))
+
+(defn collect-distill-loss
+  "Walk every 3-way SwitchGate in the model, pull last_local_out,
+   last_net_out, (and last_sdpa_out when target='residual'), compute
+   mean(MSE(net, target.detach())) across blocks, scaled by coef.
+   Returns 0.0 when coef=0 OR when no SwitchGate has stashed outputs
+   yet (e.g. NetBank disabled, 2-way mode, or first forward not done).
+
+   Target is set by MMLLM_DISTILL_TARGET ∈ {'local', 'residual'}.
+   See pick-distill-target for the per-mode behavior.
+
+   When MMLLM_DISTILL_DIRECTION_ONLY=true, both target and net are
+   RMS-normalized before MSE — Net learns the target's direction only.
+   Stacks with target-mode (direction of the residual is still the
+   direction Local adds beyond sdpa)."
   [m]
   (let [coef    (pick-distill-coef)
         dir-only (pick-distill-direction-only?)
+        target-kind (pick-distill-target)
         eps      1e-6]
     (if (zero? coef)
       0.0
@@ -950,23 +971,24 @@
                         (map (fn [b]
                                ;; Only SwitchGate stashes these; SumGate /
                                ;; ScalarGate / 2-way SwitchGate lack them.
-                               ;; getattr-with-default keeps this a no-op
-                               ;; outside 3-way switch mode.
                                (let [g  (:long-gate b)
                                      lo (python/getattr g "last_local_out" nil)
-                                     no (python/getattr g "last_net_out" nil)]
+                                     no (python/getattr g "last_net_out" nil)
+                                     so (python/getattr g "last_sdpa_out" nil)]
                                  (when (and lo no)
-                                   (if dir-only
-                                     ;; Direction-only: divide each by its
-                                     ;; per-position norm before MSE. Net
-                                     ;; learns Local's direction; magnitude
-                                     ;; is left to the gate × output path.
-                                     (let [lo-d   (.detach lo)
-                                           lo-n   (.add (.norm lo-d ** :dim -1 :keepdim true) eps)
-                                           no-n   (.add (.norm no  ** :dim -1 :keepdim true) eps)]
-                                       (F/mse_loss (.div no no-n)
-                                                   (.div lo-d lo-n)))
-                                     (F/mse_loss no (.detach lo)))))))
+                                   ;; Build the target tensor per mode. For
+                                   ;; 'residual', subtract sdpa from local so
+                                   ;; Net only chases what Local adds beyond
+                                   ;; the always-on attention path.
+                                   (let [tgt (if (and (= target-kind "residual") so)
+                                               (.sub (.detach lo) (.detach so))
+                                               (.detach lo))]
+                                     (if dir-only
+                                       (let [tgt-n (.add (.norm tgt ** :dim -1 :keepdim true) eps)
+                                             no-n  (.add (.norm no  ** :dim -1 :keepdim true) eps)]
+                                         (F/mse_loss (.div no no-n)
+                                                     (.div tgt tgt-n)))
+                                       (F/mse_loss no tgt)))))))
                         (filter some?))]
         (if (empty? losses)
           0.0

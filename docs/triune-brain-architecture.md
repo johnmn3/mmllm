@@ -196,26 +196,35 @@ mechanisms to drive transfer.
      attn_l  = w0·sdpa + w1·mem_out + w2·net_out   ─┘
 
                                                     ┐
-     aux loss:                                      │ distillation
-     coef · |net_out − mem_out.detach()|²            ── path
+     aux loss (target='residual', default):         │ distillation
+     coef · |net_out − (mem_out − sdpa_out).detach()|²── path
                                                     ┘
 ```
 
-Cerebellum learns to mimic cortex's attention output. Detached on the
-cortex side so cortex doesn't try to imitate cerebellum. Local's
-contribution is the *target*; Net's V cells get gradient to produce
-matching output. As Local hill-climbs new content, distill copies
-that content into Net — the actual transfer mechanism.
+Cerebellum learns the **unique contribution** Local adds beyond the
+always-on attention path. The sdpa baseline is subtracted from Local's
+output before MSE so Net can't twin Local by replicating what sdpa
+already provides. Without that subtraction (target='local', legacy),
+when Local's output is mostly sdpa + ε, Net learns sdpa, becomes
+Local's twin, and `Δ_net` collapses — the round-5 / round-8 redundancy
+basin. Worker 2's diagnosis from round-9 reports; the round-10
+architectural fix.
+
+Both Local and sdpa are detached so the gradient only modifies Net.
+As Local hill-climbs new content, distill copies the *Local-unique*
+part into Net — the actual transfer mechanism.
 
 Knobs:
-- `MMLLM_DISTILL_COEF` — overall scale (default 0.0 = off). Round-5 used
-  0.1; round-8 evidence (`distill_loss ~ 5e-4` floor → ~5e-5 effective
-  gradient on Net, three orders below the main loss) drove a round-9
-  raise to 1.0.
-- `MMLLM_DISTILL_DIRECTION_ONLY` — when true, both tensors are
-  RMS-normalized before MSE so Net learns Local's *direction* only.
-  Round-4 finding: direction-only made Net redundant with Local at 99.95%
-  cosine; magnitude-aware (default `false`) breaks that redundancy basin.
+- `MMLLM_DISTILL_COEF` — overall scale (default 0.0 = off). Round-5
+  used 0.1; round-8 evidence (`distill_loss ~ 5e-4` floor → ~5e-5
+  effective gradient on Net, three orders below the main loss) drove
+  a round-9 raise to 1.0.
+- `MMLLM_DISTILL_TARGET` — `'residual'` (default) or `'local'`. See
+  above; residual subtracts sdpa so Net learns Local's unique add.
+- `MMLLM_DISTILL_DIRECTION_ONLY` — when true, target and net are
+  RMS-normalized before MSE so Net learns the target's *direction*
+  only. Stacks with the target choice (direction of the residual is
+  the direction Local adds beyond sdpa).
 
 ### 1b. Net-default Bernoulli gate (round-9)
 
