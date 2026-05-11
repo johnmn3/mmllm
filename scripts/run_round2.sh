@@ -5,7 +5,7 @@
 #
 # Does preflight → corpus → train → eval → stage → commit → push.
 # Refuses to start anything expensive if preflight fails. Captures
-# all measured numbers into workers/<HANDLE>/step-5000/meta.json.
+# all measured numbers into workers/<HANDLE>/step-${TOTAL_STEPS}/meta.json.
 # Agent's job is dispatch this, watch it run, then write narrative
 # into the journal stub it leaves behind.
 
@@ -24,6 +24,16 @@ cd "$ROOT"
 export MMLLM_NETBANK_ENABLED=true
 export MMLLM_NET_SQRT_N=1024   # ~512 MB on disk; fits a 4-vCPU box
 export MMLLM_NET_C_NET=32
+
+# ── 3-way SwitchGate + alpha_net (REQUIRED for consolidation to actually
+#    happen — without these the long-gate is SumGate, which just adds
+#    sdpa + mem + net with equal weight and exposes no routing decision.
+#    Crucially, SumGate doesn't stash last_local_out / last_net_out, so
+#    MMLLM_DISTILL_COEF has nothing to compute against → distill loss
+#    silently stays at 0. Rounds 1/2/3 all ran with SumGate and saw
+#    Δ_net ≈ 0 across every ablation as a result.) ────────────────────────
+export MMLLM_LONG_TIER_MIX=switch
+export MMLLM_ALPHA_NET=true
 
 # ── Consolidation knobs (this is how knowledge flows Local → Net) ───────────
 # Distill: every train step, push Local's attention output into NetBank
@@ -67,7 +77,8 @@ export MMLLM_NET_V_WARMSTART_FROM_LOCAL=true
 # Local V, evals; zeros Net V, evals; zeros both, evals; restores.
 # This is the canonical instrumentation for "movement of knowledge into
 # Local then into Net". Without it we'd only get a single end-of-run point.
-export MMLLM_ABLATE_EVERY=1000
+# Overridable so smoke runs at smaller TOTAL_STEPS can scale this down.
+export MMLLM_ABLATE_EVERY="${MMLLM_ABLATE_EVERY:-1000}"
 
 # ── 0. Preflight (fail-loud, fail-cheap) ────────────────────────────────────
 bash scripts/preflight_fim_run.sh || { echo "preflight failed; aborting" >&2; exit 1; }
@@ -100,10 +111,16 @@ if [ ! -f "${FIM_BASE}.train.bin" ]; then
 fi
 
 # ── 2. Resume seed (preflight set RESUME_FROM if available) ─────────────────
+# IMPORTANT: stage at step-1, NOT step-0. core.lpy's resume gate is
+# `(when (pos? start-step) ...)` so a step-0 ckpt is silently ignored
+# and training falls through to random init. Round-3 lost the experiment
+# to exactly this bug.
 if [ -n "${RESUME_FROM:-}" ] && [ -f "${RESUME_FROM}" ]; then
-  mkdir -p "${FIM_BASE}.ckpts/step-0"
-  cp "${RESUME_FROM}" "${FIM_BASE}.ckpts/step-0/dense.pt"
-  echo "  resuming from ${RESUME_FROM}"
+  mkdir -p "${FIM_BASE}.ckpts/step-1"
+  cp "${RESUME_FROM}" "${FIM_BASE}.ckpts/step-1/dense.pt"
+  # Touch a step.txt so train-long picks step-1 as latest unambiguously
+  echo 1 > "${FIM_BASE}.ckpts/step-1/step.txt"
+  echo "  resuming from ${RESUME_FROM} (staged at step-1)"
 fi
 
 # ── 3. Train ────────────────────────────────────────────────────────────────
@@ -111,7 +128,11 @@ BANK_BASE=/tmp/mmllm-cpu/fim-bank
 TRAIN_LOG=/tmp/mmllm-cpu/round2-${HANDLE}.train.log
 # 5k steps: ~30-45 min wall on CPU with the full consolidation stack
 # (distill + replay + 5 ablation events). Keeps a dispatch under an hour.
-mmllm train-fim "$FIM_BASE" "$BANK_BASE" 5000 1000 1000 2>&1 | tee "$TRAIN_LOG"
+# Smoke runs can override via env. Production dispatches leave these alone.
+TOTAL_STEPS="${MMLLM_TOTAL_STEPS:-5000}"
+EVAL_EVERY="${MMLLM_EVAL_EVERY:-1000}"
+CKPT_EVERY="${MMLLM_CKPT_EVERY:-1000}"
+mmllm train-fim "$FIM_BASE" "$BANK_BASE" "$TOTAL_STEPS" "$EVAL_EVERY" "$CKPT_EVERY" 2>&1 | tee "$TRAIN_LOG"
 
 # ── 4. Evals ────────────────────────────────────────────────────────────────
 FIM_EVAL_JSONL=/tmp/mmllm-cpu/fim-eval.jsonl
@@ -120,27 +141,33 @@ if [ ! -f "$FIM_EVAL_JSONL" ]; then
 fi
 
 FIM_EVAL_LOG=/tmp/mmllm-cpu/round2-${HANDLE}.fim-eval.txt
-mmllm fim-eval "${FIM_BASE}.ckpts" "$FIM_EVAL_JSONL" 5000 2>&1 | tee "$FIM_EVAL_LOG"
+mmllm fim-eval "${FIM_BASE}.ckpts" "$FIM_EVAL_JSONL" "${TOTAL_STEPS}" 2>&1 | tee "$FIM_EVAL_LOG"
 
 AGENT_EVAL_LOG=/tmp/mmllm-cpu/round2-${HANDLE}.agent-eval.txt
-mmllm eval-agent "$FIM_BASE" 5000 "$BANK_BASE" \
+mmllm eval-agent "$FIM_BASE" "${TOTAL_STEPS}" "$BANK_BASE" \
     "$SRC/xlam-synth.test.bin" xlam 100 256 2>&1 | tee "$AGENT_EVAL_LOG" || true
 
 # ── 5. Extract numbers, write meta.json + journal stub ──────────────────────
-WORKER_DIR="workers/$HANDLE/step-5000"
+WORKER_DIR="workers/$HANDLE/step-${TOTAL_STEPS}"
 mkdir -p "$WORKER_DIR"
-cp "${FIM_BASE}.ckpts/step-5000/dense.pt" "$WORKER_DIR/dense.pt"
-# NetBank V files (per-layer) — best-effort
-cp ${BANK_BASE}-net.*.bin "$WORKER_DIR/" 2>/dev/null || true
+cp "${FIM_BASE}.ckpts/step-${TOTAL_STEPS}/dense.pt" "$WORKER_DIR/dense.pt"
+# DO NOT ship the NetBank V binaries — each per-layer fp32 file is
+# ~128 MB at sqrt_n=1024 × c_net=32, well over GitHub's 100 MB blob
+# limit. WORKERS.md says only dense.pt + meta.json belong in the
+# contribution payload anyway. Round-3 dispatches hit HTTP 413 from
+# the orig `cp ${BANK_BASE}-net.*.bin "$WORKER_DIR/"` line; removed.
 # Preserve the structured train log — every ablation / eval / router /
 # slot_usage event lives in here. This is the canonical record of
 # knowledge moving through Local → Net.
 cp "${FIM_BASE}.log.jsonl" "$WORKER_DIR/log.jsonl" 2>/dev/null || true
 
-python3 - "$HANDLE" "$TRAIN_LOG" "$FIM_EVAL_LOG" "$AGENT_EVAL_LOG" "$WORKER_DIR" <<'PY'
+python3 - "$HANDLE" "$TRAIN_LOG" "$FIM_EVAL_LOG" "$AGENT_EVAL_LOG" "$WORKER_DIR" "$TOTAL_STEPS" <<'PY'
 import json, re, sys
 from pathlib import Path
-handle, tlog, felog, aelog, wdir = sys.argv[1:6]
+handle, tlog, felog, aelog, wdir, total_steps = sys.argv[1:7]
+total_steps = int(total_steps)
+# Training: B=4, T=128 — match what train-fim uses on cpu-tiny default
+tokens_trained = total_steps * 4 * 128
 
 def grep_last(path, pat, cast=float):
     try:
@@ -159,9 +186,14 @@ if log_jsonl.exists():
             ev = json.loads(line)
         except Exception:
             continue
-        if ev.get("event") == "ablation":
+        # Mid-training ablation events are tagged "ablation_intermediate";
+        # the end-of-run event is "ablation". Capture both so the
+        # trajectory is complete. (Round-3 dispatches missed every
+        # mid-training event because the parser only matched "ablation".)
+        if ev.get("event") in ("ablation", "ablation_intermediate"):
             ablation_trajectory.append({
                 "step":              ev.get("step"),
+                "kind":              ev.get("event"),
                 "delta_local":       ev.get("delta_local"),
                 "delta_net":         ev.get("delta_net"),
                 "delta_both":        ev.get("delta_both"),
@@ -169,8 +201,8 @@ if log_jsonl.exists():
             })
 
 meta = {
-    "tokens_trained": 2_560_000,
-    "steps": 5_000,
+    "tokens_trained": tokens_trained,
+    "steps":          total_steps,
     "label":          handle,
     "fim": {
         "language":           "json",
@@ -179,12 +211,17 @@ meta = {
         "splitter":           "json-value-boundary",
         "source_corpus":      "synthetic-xlam (scripts/prep_xlam_synth.py)",
 
-        # End-of-run scalars
-        "val_bpc_final":      grep_last(tlog,  r"val_bpc.*?(\d+\.\d+)"),
-        "ablation_delta_local_final": grep_last(tlog, r"Δ_local\s*=\s*([\-\d\.]+)"),
-        "ablation_delta_net_final":   grep_last(tlog, r"Δ_net\s*=\s*([\-\d\.]+)"),
+        # End-of-run scalars (regexes match the actual log line formats):
+        # eval-bpc prints  "bpc=2.3264  ppl=5.02  over N tokens"
+        # ablation prints  "Δ_local: 2.3205 → +0.3422"  (delta is after the arrow)
+        "val_bpc_final":      grep_last(tlog,  r"bpc=(\d+\.\d+)\s+ppl="),
+        "ablation_delta_local_final": grep_last(tlog, r"Δ_local:\s*\S+\s*→\s*([+\-\d\.]+)"),
+        "ablation_delta_net_final":   grep_last(tlog, r"Δ_net:\s*\S+\s*→\s*([+\-\d\.]+)"),
 
-        # Trajectory across training — this is the cross-round signal
+        # Trajectory across training — this is the cross-round signal.
+        # Authoritative source: log.jsonl ablation events (parsed above).
+        # The scalars from the train-log regex are a fallback for runs
+        # that didn't emit ablation events.
         "ablation_trajectory": ablation_trajectory,
 
         # Cross-run comparable evals (deterministic shared sets)
@@ -211,7 +248,7 @@ cat > "$JOURNAL" <<EOF
 - date (UTC): $(date -u)
 - handle: ${HANDLE}
 - resume from: ${RESUME_FROM:-random init}
-- NetBank: enabled, sqrt_n=${MMLLM_NET_SQRT_N}, c_net=${MMLLM_NET_C}
+- NetBank: enabled, sqrt_n=${MMLLM_NET_SQRT_N}, c_net=${MMLLM_NET_C_NET}
 
 ## Results
 See: ${WORKER_DIR}/meta.json
@@ -236,10 +273,15 @@ $(cat "$AGENT_EVAL_LOG")
 EOF
 echo "wrote $JOURNAL"
 
-# ── 7. Commit + push ────────────────────────────────────────────────────────
-BRANCH=$(git branch --show-current)
-git add "$WORKER_DIR" "$JOURNAL"
-git commit -m "round-2 worker: ${HANDLE}"
-git push -u origin "$BRANCH"
-
-echo "── DONE ──  $HANDLE on $BRANCH"
+# ── 7. Commit + push (set MMLLM_SKIP_COMMIT=true to dry-run; smoke tests
+#       use this to exercise the full pipeline without polluting the repo) ──
+if [ "${MMLLM_SKIP_COMMIT:-false}" = "true" ]; then
+  echo "── SKIP-COMMIT ──  artifacts staged at $WORKER_DIR and $JOURNAL"
+  echo "── DONE ──  $HANDLE (commit skipped via MMLLM_SKIP_COMMIT)"
+else
+  BRANCH=$(git branch --show-current)
+  git add "$WORKER_DIR" "$JOURNAL"
+  git commit -m "round-2 worker: ${HANDLE}"
+  git push -u origin "$BRANCH"
+  echo "── DONE ──  $HANDLE on $BRANCH"
+fi

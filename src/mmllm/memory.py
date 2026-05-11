@@ -497,6 +497,11 @@ class ProductKeyMemory(nn.Module):
         # (logsumexp²) for K_a + K_b — picked up by the train loop and
         # added to the main loss with a small coefficient (~1e-5).
         self.last_z_loss: torch.Tensor | None = None
+        # Paired with NetBank.last_output_norm — mean L2 norm of this
+        # tier's residual contribution per (B,T) position, captured at
+        # the end of forward(). Compare Local vs Net to see if NetBank
+        # is being adopted as a tier.
+        self.last_output_norm: float = 0.0
 
     def dense_parameters(self):
         """Parameters with dense gradients (route to AdamW). Returns ONLY
@@ -793,7 +798,16 @@ class ProductKeyMemory(nn.Module):
             values = self.V(top_global)                            # (B, T, top_k, D)
 
         weights = F.softmax(top_scores, dim=-1).unsqueeze(-1)
-        return (weights * values).sum(dim=-2)
+        out = (weights * values).sum(dim=-2)
+        # Instrumentation paired with NetBank.last_output_norm — gives a
+        # direct Local-vs-Net residual-contribution comparison. If Local
+        # has norm ~5 and Net has norm ~0.01, the gate isn't adopting
+        # NetBank regardless of V initialization.
+        with torch.no_grad():
+            self.last_output_norm = float(
+                out.detach().pow(2).sum(-1).sqrt().mean().item()
+            )
+        return out
 
 
 # ─────────────────────── madvise prefetch helper (Phase 4b) ───────────────────────

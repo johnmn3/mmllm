@@ -33,13 +33,16 @@ for f in scripts/prep_xlam_synth.py scripts/build_fim_eval.py; do
 done
 
 # 3. Round-N community core to resume from
+# Ensure target dir exists BEFORE writing to it (round-3 dispatches hit
+# a "no such file or directory" because the mkdir was only in the
+# else-branch). Idempotent — always mkdir, then proceed.
+mkdir -p /tmp/mmllm-cpu
 LATEST_ROUND=$(ls -d core/round-*/step-* 2>/dev/null | sort -V | tail -1)
 if [ -n "${LATEST_ROUND}" ] && [ -f "${LATEST_ROUND}/dense.pt" ]; then
   green "community core: ${LATEST_ROUND}/dense.pt ($(du -h "${LATEST_ROUND}/dense.pt" | cut -f1))"
   echo  "RESUME_FROM=${LATEST_ROUND}/dense.pt" > /tmp/mmllm-cpu/preflight.env
 else
   yellow "no community core found under core/round-*/  — will start from random init"
-  mkdir -p /tmp/mmllm-cpu
   echo  "RESUME_FROM=" > /tmp/mmllm-cpu/preflight.env
 fi
 

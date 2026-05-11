@@ -213,6 +213,13 @@ class NetBank(nn.Module):
         )
         # z-loss accumulator, picked up by train-step
         self.last_z_loss: torch.Tensor | None = None
+        # Instrumentation: written at the end of forward(). Mean L2 norm of
+        # NetBank's residual contribution per (B,T) position. The headline
+        # diagnostic for "is NetBank actually being adopted as a function
+        # tier?" — if last_output_norm stays tiny while Local Bank's
+        # equivalent grows, the gate / V / routing is collapsing the
+        # NetBank path regardless of how V was initialized.
+        self.last_output_norm: float = 0.0
 
     # ─────────────────────── parameter routing ───────────────────────
 
@@ -292,9 +299,10 @@ class NetBank(nn.Module):
           - z-loss accumulator + slot-usage hits tracked (training only)
           - V_net rows are c_net-dim fp16; we expand to q_dim via the
             learned expander after the gather
-          - blocking simulated network delay (training + eval)
+          - blocking simulated network delay (training only — production
+            inference shouldn't pay a synthetic latency tax)
         """
-        if self.delay_ms_max > 0:
+        if self.training and self.delay_ms_max > 0:
             self._simulate_delay()
 
         B, T, D = q.shape
@@ -324,16 +332,25 @@ class NetBank(nn.Module):
                     torch.bincount(top_b_i.view(-1), minlength=self.sqrt_n)
                 )
 
-        # Outer-sum re-rank, same as ProductKeyMemory
+        # Outer-sum re-rank, same as ProductKeyMemory — but DON'T materialize
+        # the full (B, T, sub_top_k²) global-index tensor. The full tensor is
+        # ~4 MB at sub_top_k=64 and accounts for >7 ms / call on CPU. Instead
+        # we compute the cross-product of *scores* only (small), take final
+        # top_k of that, then recover the global indices by indexing back
+        # into top_a_i / top_b_i for just the surviving top_k positions.
         combined_scores = (top_a_s.unsqueeze(-1) + top_b_s.unsqueeze(-2))
         combined_scores = combined_scores.flatten(-2)
 
-        idx_a = top_a_i.unsqueeze(-1).expand(-1, -1, -1, self.sub_top_k)
-        idx_b = top_b_i.unsqueeze(-2).expand(-1, -1, self.sub_top_k, -1)
-        combined_idx = (idx_a * self.sqrt_n + idx_b).flatten(-2)
-
         top_scores, top_local = combined_scores.topk(self.top_k, dim=-1)
-        top_global = combined_idx.gather(-1, top_local)            # (B, T, top_k)
+
+        # `top_local` indexes into the flat sub_top_k² combined grid.
+        # Decompose back into (a_within, b_within) and gather the *global*
+        # key indices from top_a_i / top_b_i — small (B,T,top_k) gathers.
+        a_within = torch.div(top_local, self.sub_top_k, rounding_mode="floor")
+        b_within = top_local - a_within * self.sub_top_k
+        top_a_global = top_a_i.gather(-1, a_within)                # (B, T, top_k)
+        top_b_global = top_b_i.gather(-1, b_within)
+        top_global   = top_a_global * self.sqrt_n + top_b_global
 
         # Cross-device gather: V_net is fp16 CPU-mmap. Move indices to V's
         # device, gather rows there, ship results back up to q's device,
@@ -347,11 +364,27 @@ class NetBank(nn.Module):
         else:
             latent = self.V(top_global).float()
 
-        # Bottleneck → q_dim expansion
-        values = self.expander(latent)                             # (B, T, top_k, q_dim)
+        # Bottleneck → q_dim expansion. Fold the softmax weighting INTO the
+        # weighted-sum via einsum instead of materializing the (B,T,top_k,q_dim)
+        # `values` tensor and multiplying it elementwise by broadcasted softmax
+        # weights. The naive version costs ~4 ms / call from the extra
+        # allocation + broadcast; einsum does the contraction in one pass.
+        weights = F.softmax(top_scores, dim=-1)                    # (B, T, top_k)
+        # latent: (B,T,top_k,c_net); expander.weight: (q_dim,c_net)
+        # out = sum_k weights[b,t,k] * (latent[b,t,k,:] @ expander.weight.T) + bias_scaled
+        # Equivalent and avoids the intermediate (B,T,top_k,q_dim) allocation:
+        weighted_latent = torch.einsum("btkc,btk->btc", latent, weights)
+        out = self.expander(weighted_latent)
 
-        weights = F.softmax(top_scores, dim=-1).unsqueeze(-1)
-        return (weights * values).sum(dim=-2)
+        # ── instrumentation: "is NetBank actually producing signal?" ──
+        # Mean L2 norm of NetBank output per (B,T) position. Compare against
+        # Local Bank's same metric to see if NetBank is contributing
+        # anything to the residual stream.
+        with torch.no_grad():
+            self.last_output_norm = float(
+                out.detach().pow(2).sum(-1).sqrt().mean().item()
+            )
+        return out
 
     # ─────────────────────── slot-usage helpers ───────────────────────
 

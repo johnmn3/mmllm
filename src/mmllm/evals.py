@@ -213,7 +213,11 @@ def score_sample(prediction: str, gold: str) -> SampleScore:
     if pred_call and gold_call:
         pc = pred_call.get("tool_calls", [])
         gc = gold_call.get("tool_calls", [])
-        if pc and gc:
+        # Defensive: tool_calls might decode as ["foo", "bar"] when the
+        # model emits a malformed envelope. Only do dict-key compares
+        # when both first entries are actually dicts; otherwise treat
+        # name/args as not-match (format_valid still set independently).
+        if pc and gc and isinstance(pc[0], dict) and isinstance(gc[0], dict):
             name_ok = (pc[0].get("name") == gc[0].get("name"))
             args_ok = (pc[0].get("args") == gc[0].get("args"))
 

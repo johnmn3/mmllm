@@ -3405,6 +3405,23 @@
                 ;; Reuses the just-computed control bpc; runs one extra
                 ;; eval-bpc with V zeroed and then restores V in-place.
                 (when (and (pos? ablate-every) (zero? (mod step' ablate-every)))
+                  ;; Capture per-layer NetBank telemetry BEFORE the ablation
+                  ;; block zeros Local/Net V — last_output_norm is set by the
+                  ;; most recent forward (the control eval-bpc), so reads
+                  ;; here reflect the live banks, not the zeroed ones.
+                  (let [telem-mod (python/__import__ "mmllm.telemetry"
+                                                     ** :fromlist
+                                                     (python/list ["layer_telemetry" "to_event_json"]))
+                        entries (python/list
+                                  (map (fn [iv]
+                                         (let [i (first iv) b (second iv)]
+                                           (.layer_telemetry telem-mod i
+                                                             (:netbank b)
+                                                             (:memory b)
+                                                             (:long-gate b))))
+                                       (map-indexed vector (:blocks m))))]
+                    (append-jsonl! log-path
+                                   (.to_event_json telem-mod step' entries)))
                   (let [t-abl     (time/time)
                         ctrl      (:bpc r)
                         ;; Δ_local: zero Local V only
