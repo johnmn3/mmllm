@@ -258,6 +258,10 @@ def attention(
     # only the SDPA contribution.
     if skip_bank:
         attn_l = attn_l_sdpa
+    elif memory is None and netbank is None:
+        # Asymmetric architecture: this layer has neither bank. Pass
+        # through the SDPA tier unchanged.
+        attn_l = attn_l_sdpa
     else:
         q_long_flat = (
             q_long.transpose(1, 2)
@@ -266,23 +270,30 @@ def attention(
         )
         ctx_mod = bank_query(x)
         bank_q = q_long_flat + ctx_mod if ctx_mod is not None else q_long_flat
-        mem_out = memory(bank_q)
-        # Iterative refinement on Local Bank — feed the previous output
-        # back into bank_q and re-query, N times. Lets Local "deliberate"
-        # at structural-decision positions. N=1 is identity (legacy).
-        n_repeat = _bank_repeat_n()
-        if n_repeat > 1:
-            alpha = _bank_repeat_alpha()
-            for _ in range(n_repeat - 1):
-                bank_q = bank_q + alpha * mem_out
-                mem_out = memory(bank_q)
-        attn_l_mem = mem_out.reshape(B, T, n_long_heads, head_dim).transpose(1, 2)
+        attn_l_mem = None
+        if memory is not None:
+            mem_out = memory(bank_q)
+            # Iterative refinement on Local Bank — feed the previous output
+            # back into bank_q and re-query, N times. Lets Local "deliberate"
+            # at structural-decision positions. N=1 is identity (legacy).
+            n_repeat = _bank_repeat_n()
+            if n_repeat > 1:
+                alpha = _bank_repeat_alpha()
+                for _ in range(n_repeat - 1):
+                    bank_q = bank_q + alpha * mem_out
+                    mem_out = memory(bank_q)
+            attn_l_mem = mem_out.reshape(B, T, n_long_heads, head_dim).transpose(1, 2)
         # NetBank queries off-machine. Same query vector as Local; the
         # gate decides per-token how much to weight each source.
         if netbank is not None:
             net_out = netbank(bank_q)
             attn_l_net = net_out.reshape(B, T, n_long_heads, head_dim).transpose(1, 2)
-            attn_l = long_gate(q_long, attn_l_sdpa, attn_l_mem, attn_l_net)
+            if attn_l_mem is not None:
+                attn_l = long_gate(q_long, attn_l_sdpa, attn_l_mem, attn_l_net)
+            else:
+                # Net-only layer (no Local Bank). Gate sees sdpa + net.
+                # Pass mem_out=None; SwitchGate handles that branch.
+                attn_l = long_gate(q_long, attn_l_sdpa, None, attn_l_net)
         else:
             attn_l = long_gate(q_long, attn_l_sdpa, attn_l_mem)
 

@@ -229,6 +229,32 @@
   []
   (python/int (.get (.- os environ) "MMLLM_NET_SUB_TOP_K" "64")))
 
+(defn pick-local-bank-layers
+  "Set of transformer-layer indices that get a Local Bank attached.
+   Other layers run with `:memory = None` and the long-tier mix degrades
+   to 2-way (sdpa + Net) at those layers.
+
+   Reads MMLLM_LOCAL_BANK_LAYERS as a comma-separated int list. If unset,
+   falls back to the config's :local-bank-layers. If neither is provided,
+   defaults to ALL layers (preserves pre-asymmetric behavior).
+
+   Usage examples:
+     MMLLM_LOCAL_BANK_LAYERS=\"0,1,2,12,20,29,30,31\"   ; 8 of 32 layers
+     MMLLM_LOCAL_BANK_LAYERS=\"\"                       ; no Local anywhere"
+  [config]
+  (let [env-val (.get (.- os environ) "MMLLM_LOCAL_BANK_LAYERS")]
+    (cond
+      env-val
+      (python/set (filter #(not (nil? %))
+                          (map (fn [s] (try (python/int (.strip s))
+                                            (catch python/Exception _ nil)))
+                               (.split env-val ","))))
+      (:local-bank-layers config)
+      (python/set (:local-bank-layers config))
+      :else
+      ;; Default: all n-layers (backward-compatible with pre-asymmetric).
+      (python/set (range (:n-layers config))))))
+
 (defn pick-memory-top-k
   "Final retrieved entries per query from the Local bank. Reads
    MMLLM_MEMORY_TOP_K if set; otherwise falls back to the value
@@ -691,7 +717,14 @@
    :n-long-heads       4
    :n-short-kv-heads   1
    :n-long-kv-heads    1
-   :n-layers           4
+   :n-layers           32
+   ;; Asymmetric bank distribution: NetBank at every layer (32 total),
+   ;; Local Bank only at a subset for capability/cost balance. Positions
+   ;; chosen: first-3 (raw signal in, fastest plastic), last-3 (output
+   ;; refinement, where wide context resolves), and 2 spaced through
+   ;; the middle (cross-domain handoff). Override via env:
+   ;;   MMLLM_LOCAL_BANK_LAYERS="0,1,2,12,20,29,30,31"
+   :local-bank-layers  [0 1 2 12 20 29 30 31]
    :seq-len            128
    :max-pos            512
    :d-ff               768
@@ -877,7 +910,7 @@
    in the optimizer step."
   [m]
   (doseq [b (:blocks m)]
-    (let [mem (:memory b)]
+    (when-let [mem (:memory b)]
       (doseq [p (python/list (.parameters mem))]
         (when-let [g (.- p grad)]
           (.zero_ g))))))
@@ -1260,7 +1293,12 @@
                       ;; Net-default Bernoulli routing — same alignment-safe
                       ;; pattern as alpha_net. proj zero-init, bias init -2.0
                       ;; so sigmoid(-2.0) ≈ 12% initial Local firing rate.
-                      (when (and (= gate-kind "switch") (pick-gate-net-default?))
+                      ;; Skip on layers without a Local Bank (no routing decision
+                      ;; to make at those layers — the gate runs in 2-way
+                      ;; sdpa+net mode there).
+                      (when (and (= gate-kind "switch")
+                                 (pick-gate-net-default?)
+                                 (.__contains__ (pick-local-bank-layers config) block-idx))
                         (.__setattr__ g "local_active_proj"
                                       (nn/Parameter (torch/zeros n-long-heads head-dim)))
                         (.__setattr__ g "local_active_bias"
@@ -1268,10 +1306,14 @@
                       g)
      :bank-query    (bq/build_bank_query     bq-kind   d-model      q-dim)
      :bank-feedback (bfb/build_bank_feedback fb-kind   d-model      q-dim)
-     :memory    (memory-cls q-dim sqrt-n
-                            ** :top_k     (pick-memory-top-k memory-top-k)
-                            :sub_top_k (pick-memory-sub-top-k memory-sub-top-k)
-                            :mmap_path path)
+     ;; Local Bank only at the layers selected by pick-local-bank-layers.
+     ;; At other layers `:memory` is nil and the long-tier mix uses just
+     ;; sdpa + Net (handled in attention_kernel and SwitchGate).
+     :memory    (when (.__contains__ (pick-local-bank-layers config) block-idx)
+                  (memory-cls q-dim sqrt-n
+                              ** :top_k     (pick-memory-top-k memory-top-k)
+                              :sub_top_k (pick-memory-sub-top-k memory-sub-top-k)
+                              :mmap_path path))
      :netbank   (when (pick-netbank-enabled?)
                   (netb/NetBank q-dim
                                 ** :sqrt_n       (pick-netbank-sqrt-n)
@@ -1513,10 +1555,13 @@
                                 :k-proj-l :v-proj-l
                                 :o-proj :gate-proj :up-proj :down-proj
                                 :bank-query :bank-feedback])
-                       ;; memory's K_a, K_b only; q_norm at END below
-                       (.dense_parameters (:memory b))))
+                       ;; memory's K_a, K_b only; q_norm at END below.
+                       ;; Skip when this block has no Local Bank attached
+                       ;; (asymmetric :local-bank-layers config).
+                       (when-let [mem (:memory b)] (.dense_parameters mem))))
         memory-q-norm (fn [b]
-                        (.q_norm_parameters (:memory b)))
+                        (when-let [mem (:memory b)]
+                          (.q_norm_parameters mem)))
         gate-params (fn [b]
                       ;; Exclude alpha_net, local_active_proj, local_active_bias
                       ;; (all added later as SwitchGate attributes) from this
@@ -1584,11 +1629,13 @@
 (defn- kab-parameters
   "Per-block K_a / K_b parameters. Returned as a flat Python list for
    the AdamW K_a/K_b sub-group when MMLLM_LR_KAB_MULT differs from
-   MMLLM_LR_DENSE_MULT. Each block's :memory has K_a, K_b directly."
+   MMLLM_LR_DENSE_MULT. Each block's :memory has K_a, K_b directly.
+   Skips blocks without a Local Bank (asymmetric :local-bank-layers)."
   [m]
   (python/list
-    (mapcat (fn [b] [(.- (:memory b) K_a)
-                     (.- (:memory b) K_b)])
+    (mapcat (fn [b]
+              (when-let [mem (:memory b)]
+                [(.- mem K_a) (.- mem K_b)]))
             (:blocks m))))
 
 (defn make-opt-dense
@@ -1619,9 +1666,12 @@
 
 (defn sparse-parameters
   "Local Bank sparse params — route to opt-sparse (SparseAdam).
-   See `netbank-sparse-parameters` for the third-tier route."
+   See `netbank-sparse-parameters` for the third-tier route.
+   Skips blocks without a Local Bank (asymmetric :local-bank-layers)."
   [m]
-  (mapcat #(.sparse_parameters (:memory %)) (:blocks m)))
+  (mapcat (fn [b]
+            (when-let [mem (:memory b)] (.sparse_parameters mem)))
+          (:blocks m)))
 
 (defn netbank-sparse-parameters
   "NetBank V.weight per block — route to opt-sparse-net (third
@@ -1653,14 +1703,18 @@
                                         "false")))]
     (doseq [[i b] (map-indexed vector (:blocks m))]
       (when-let [nb (:netbank b)]
-        (if warm-V?
-          (.warm_start_from nb
-                            (.- (:memory b) K_a)
-                            (.- (:memory b) K_b)
-                            ** :local_V (.- (.- (:memory b) V) weight))
-          (.warm_start_from nb
-                            (.- (:memory b) K_a)
-                            (.- (:memory b) K_b)))
+        ;; Warm-start needs a Local Bank to copy K_a/K_b from. Layers
+        ;; without one skip warm-start (Net-only layers in the
+        ;; asymmetric architecture).
+        (when-let [mem (:memory b)]
+          (if warm-V?
+            (.warm_start_from nb
+                              (.- mem K_a)
+                              (.- mem K_b)
+                              ** :local_V (.- (.- mem V) weight))
+            (.warm_start_from nb
+                              (.- mem K_a)
+                              (.- mem K_b))))
         (println (format "  NetBank[layer %d] warm-started from Local K_a/K_b%s"
                          i (if warm-V? " + V (projected)" "")))))))
 
@@ -1751,7 +1805,9 @@
     (if (zero? coef)
       0.0
       (let [terms (->> (:blocks m)
-                       (map (fn [b] (.- (:memory b) last_z_loss)))
+                       (map (fn [b]
+                              (when-let [mem (:memory b)]
+                                (.- mem last_z_loss))))
                        (filter some?))]
         (if (empty? terms)
           0.0
@@ -1907,7 +1963,8 @@
      ;; MMLLM_BANK_COLD_BOOST=0. Applied after backward, before opt step,
      ;; so SparseAdam's update sees the rescaled gradient.
      (doseq [b (:blocks m)]
-       (spr/boost_cold_row_grads_ (:memory b)))
+       (when-let [mem (:memory b)]
+         (spr/boost_cold_row_grads_ mem)))
      ;; P3 replay path: zero Local Bank's grads after backward but
      ;; before optimizer.step() so the replay update flows only into
      ;; NetBank, dense projections, and carry — Local stays frozen on
@@ -2305,12 +2362,13 @@
         ;; trashes the agent eval entirely. See eval-bpc-on-path
         ;; comment for full diagnosis.
         (doseq [[i b] (map-indexed vector (:blocks m))]
-          (try
-            (.load_from_mmap (:memory b)
-                             (str ckpt-dir "/bank-latest." i ".bin"))
-            (catch python/Exception e
-              (println (format "  WARN: bank V layer %d load failed (%s) — using random init"
-                               i e)))))
+          (when-let [mem (:memory b)]
+            (try
+              (.load_from_mmap mem
+                               (str ckpt-dir "/bank-latest." i ".bin"))
+              (catch python/Exception e
+                (println (format "  WARN: bank V layer %d load failed (%s) — using random init"
+                                 i e))))))
         (println (format "  bank V load attempted from %s/bank-latest.{0..%d}.bin"
                          ckpt-dir (dec (count (:blocks m)))))))
     (set-eval-mode! m)
@@ -2577,12 +2635,13 @@
         ;; session-end this is exact; for in-flight intermediate ckpts
         ;; it's the closest available bank state.
         (doseq [[i b] (map-indexed vector (:blocks m))]
-          (try
-            (.load_from_mmap (:memory b)
-                             (str ckpt-dir "/bank-latest." i ".bin"))
-            (catch python/Exception e
-              (println (format "  WARN: bank V layer %d load failed (%s) — using random init"
-                               i e)))))
+          (when-let [mem (:memory b)]
+            (try
+              (.load_from_mmap mem
+                               (str ckpt-dir "/bank-latest." i ".bin"))
+              (catch python/Exception e
+                (println (format "  WARN: bank V layer %d load failed (%s) — using random init"
+                                 i e))))))
         (println (format "  bank V load attempted from %s/bank-latest.{0..%d}.bin"
                          ckpt-dir (dec (count (:blocks m)))))))
     (set-eval-mode! m)
@@ -2741,12 +2800,13 @@
                            (.__getitem__ n-skipped 0)
                            (count saved))))
         (doseq [[i b] (map-indexed vector (:blocks m))]
-          (try
-            (.load_from_mmap (:memory b)
-                             (str ckpt-dir "/bank-latest." i ".bin"))
-            (catch python/Exception e
-              (println (format "  WARN: bank V layer %d load failed (%s) — using random init"
-                               i e)))))
+          (when-let [mem (:memory b)]
+            (try
+              (.load_from_mmap mem
+                               (str ckpt-dir "/bank-latest." i ".bin"))
+              (catch python/Exception e
+                (println (format "  WARN: bank V layer %d load failed (%s) — using random init"
+                                 i e))))))
         (println (format "  bank V load attempted from %s/bank-latest.{0..%d}.bin"
                          ckpt-dir (dec (count (:blocks m)))))))
     (set-eval-mode! m)
@@ -2835,17 +2895,19 @@
    not N_blocks × V (which OOMs on the 15 GiB sandbox at production
    bank sizes)."
   [m val-data T B max-toks]
-  (let [blocks (:blocks m)
+  ;; Asymmetric :local-bank-layers — only blocks with a Local Bank
+  ;; participate. Zip backup-paths with the SAME filtered block list.
+  (let [blocks-with-local (filter :memory (:blocks m))
         backup-paths (mapv (fn [b]
                              (let [p (save-v-to-disk (:memory b) "local")]
                                (.zero_bank (:memory b))
                                p))
-                           blocks)]
+                           blocks-with-local)]
     (try
       (let [r (eval-bpc m val-data T B max-toks)]
         (:bpc r))
       (finally
-        (doseq [[b p] (map vector blocks backup-paths)]
+        (doseq [[b p] (map vector blocks-with-local backup-paths)]
           (restore-v-from-disk! (:memory b) p))
         (unlink-paths! backup-paths)))))
 
@@ -2882,12 +2944,13 @@
    (each carries unique signal that the other can't replace)."
   [m val-data T B max-toks]
   (let [blocks (:blocks m)
-        blocks-with-net (filter :netbank blocks)
+        blocks-with-local (filter :memory blocks)
+        blocks-with-net   (filter :netbank blocks)
         local-paths (mapv (fn [b]
                             (let [p (save-v-to-disk (:memory b) "both-local")]
                               (.zero_bank (:memory b))
                               p))
-                          blocks)
+                          blocks-with-local)
         net-paths (mapv (fn [b]
                           (let [p (save-v-to-disk (:netbank b) "both-net")]
                             (.zero_bank (:netbank b))
@@ -2897,7 +2960,7 @@
       (let [r (eval-bpc m val-data T B max-toks)]
         (:bpc r))
       (finally
-        (doseq [[b p] (map vector blocks local-paths)]
+        (doseq [[b p] (map vector blocks-with-local local-paths)]
           (restore-v-from-disk! (:memory b) p))
         (doseq [[b p] (map vector blocks-with-net net-paths)]
           (restore-v-from-disk! (:netbank b) p))
@@ -3003,8 +3066,9 @@
      (when (not lite-ckpt?)
        (try
          (doseq [[i b] (map-indexed vector (:blocks m))]
-           (.save_to_mmap (:memory b)
-                          (str ckpt-dir "/bank-latest." i ".bin")))
+           (when-let [mem (:memory b)]
+             (.save_to_mmap mem
+                            (str ckpt-dir "/bank-latest." i ".bin"))))
          (catch python/Exception e
            (println (format "  WARN: bank V save failed at step %d: %s — "
                             step e))
@@ -3096,8 +3160,9 @@
       (if all-present?
         (do
           (doseq [[i b] (map-indexed vector (:blocks m))]
-            (.load_from_mmap (:memory b)
-                             (str ckpt-dir "/bank-latest." i ".bin")))
+            (when-let [mem (:memory b)]
+              (.load_from_mmap mem
+                             (str ckpt-dir "/bank-latest." i ".bin"))))
           (println (format "  bank V restored from %s/bank-latest.{0..%d}.bin"
                            ckpt-dir (dec (count (:blocks m))))))
         (println (format "  WARN: bank V files missing in %s — V stays at random init.\n        Bank will need to retrain from scratch (the opt-state's m, v will\n        push it forward, but dense will see a useless bank for thousands of steps)."
@@ -3463,16 +3528,17 @@
                 (println (format "  ── saving trained bank to %s.<i>.bin ──" bank-path))
                 (let [t-save (time/time)]
                   (doseq [[i b] (map-indexed vector (:blocks m))]
-                    (let [path (str bank-path "." i ".bin")
-                          n    (.save_to_mmap (:memory b) path)]
-                      (println (format "    block %d → %s (%.2f GB)"
-                                       i path (/ n 1.073741824e9)))))
+                    (when-let [mem (:memory b)]
+                      (let [path (str bank-path "." i ".bin")
+                            n    (.save_to_mmap mem path)]
+                        (println (format "    block %d → %s (%.2f GB)"
+                                         i path (/ n 1.073741824e9))))))
                   (println (format "    bank saved in %.1fs" (- (time/time) t-save)))
                   (append-jsonl! log-path
                                  (format "{\"step\":%d,\"event\":\"bank_saved\",\"bank_path\":\"%s\",\"wall_s\":%.1f}"
                                          step bank-path (- (time/time) t0)))))
-              (println "  ── ablation: zeroing Local Bank V across all 5 blocks (NetBank kept active) ──")
-              (doseq [b (:blocks m)] (.zero_bank (:memory b)))
+              (println "  ── ablation: zeroing Local Bank V (NetBank kept active) ──")
+              (doseq [b (:blocks m)] (when-let [mem (:memory b)] (.zero_bank mem)))
               (println "  ── eval at end (ablation: bank zeroed) ──")
               (let [r-abl (eval-bpc m val-data T 16 100000)
                     delta (- (:bpc r-abl) (:bpc r-ctrl))]

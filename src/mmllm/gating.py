@@ -40,6 +40,9 @@ class SumGate(nn.Module):
         super().__init__()
 
     def forward(self, q_long, sdpa_out, mem_out, net_out=None):
+        # Asymmetric architecture: mem_out=None on Net-only layers.
+        if mem_out is None:
+            return sdpa_out if net_out is None else sdpa_out + net_out
         if net_out is None:
             return sdpa_out + mem_out
         return sdpa_out + mem_out + net_out
@@ -58,6 +61,12 @@ class ScalarGate(nn.Module):
 
     def forward(self, q_long, sdpa_out, mem_out, net_out=None):
         a = self.alpha.view(1, -1, 1, 1)
+        # Asymmetric architecture: mem_out=None on Net-only layers.
+        if mem_out is None:
+            if net_out is None:
+                return a * sdpa_out
+            c = self.gamma.view(1, -1, 1, 1)
+            return a * sdpa_out + c * net_out
         b = self.beta.view(1, -1, 1, 1)
         if net_out is None:
             return a * sdpa_out + b * mem_out
@@ -124,6 +133,20 @@ class SwitchGate(nn.Module):
         self.last_local_firing_rate = None  # float — mean Bernoulli decision in last forward
 
     def forward(self, q_long, sdpa_out, mem_out, net_out=None):
+        # Asymmetric architecture: layers without a Local Bank pass
+        # mem_out=None. Reduce to a 2-way (sdpa + net) sigmoid mix using
+        # the same gate_proj head — semantically "how much should this
+        # layer trust Net vs SDPA?".
+        if mem_out is None and net_out is not None:
+            logits = torch.einsum("bhtd,hd->bht", q_long, self.gate_proj)
+            gate = torch.sigmoid(logits)
+            with torch.no_grad():
+                g_mean = float(gate.mean().item())
+                self.last_gate_dist = (g_mean, float("nan"), 1.0 - g_mean)
+            if self.alpha_net is not None:
+                alpha = self.alpha_net.view(1, -1, 1, 1)
+                net_out = alpha * net_out
+            return gate.unsqueeze(-1) * sdpa_out + (1.0 - gate).unsqueeze(-1) * net_out
         if net_out is None:
             # q_long: (B, H, T, D); gate_proj: (H, D); logits: (B, H, T)
             logits = torch.einsum("bhtd,hd->bht", q_long, self.gate_proj)
