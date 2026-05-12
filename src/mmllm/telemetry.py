@@ -63,7 +63,19 @@ def layer_telemetry(layer_idx: int, netbank, memory, gate) -> dict:
         "layer":          int(layer_idx),
         "local_out_norm": _safe_float(getattr(memory, "last_output_norm", 0.0)),
     }
+    # Feature-count proxy: unique pages touched in each bank's mmap storage
+    # since model init. Each page covers `page_rows` V rows (default 1024).
+    # A rough lower bound on accumulated "feature units" — informs adaptive
+    # bank sizing across runs (start small, grow to fit observed feature
+    # count). Only present when the bank uses a PagedMmapStorage; otherwise
+    # the field is omitted.
+    mem_storage = getattr(memory, "_storage", None)
+    if mem_storage is not None and hasattr(mem_storage, "n_dirty_pages"):
+        entry["local_touched_pages"] = int(mem_storage.n_dirty_pages())
     if netbank is not None:
+        net_storage = getattr(netbank, "_storage", None)
+        if net_storage is not None and hasattr(net_storage, "n_dirty_pages"):
+            entry["net_touched_pages"] = int(net_storage.n_dirty_pages())
         entry["net_out_norm"]      = _safe_float(getattr(netbank, "last_output_norm", 0.0))
         entry["net_v_grad_norm"]   = _grad_norm(netbank.V.weight)
         entry["net_ka_grad_norm"]  = _grad_norm(netbank.K_a)
