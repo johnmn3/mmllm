@@ -1,11 +1,8 @@
 #!/usr/bin/env bash
-# run_spoon_lengths.sh — 4 single-spoon runs from baseline at 50, 100, 200, 600 steps.
+# run_spoon_lengths.sh — LR_BANK_MULT sweep at 50, 100, 200, 600.
+# 4 single-spoon runs from baseline at 100 steps each.
 # Production-scale banks: 1 GB V_local + 2 GB V_net.
-# No chain, no resume — each spoon starts from round-6 trunk + zero banks.
-# Reports per-spoon final ablation (Δ_local, Δ_net, Δ_both).
-#
-# Tests how much V_local / V_net accumulate as a function of training
-# duration on bigger banks.
+# Tests how high LR_BANK_MULT can go on bigger banks before destabilizing.
 
 set -e
 
@@ -29,7 +26,7 @@ export MMLLM_DISTILL_DIRECTION_ONLY=true
 export MMLLM_DISTILL_MAGNITUDE_COEF=0.0
 export MMLLM_DISTILL_MAGNITUDE_COEF_END=1.0
 export MMLLM_DISTILL_MAGNITUDE_CLAMP=10.0
-export MMLLM_LR_BANK_MULT=30.0
+# MMLLM_LR_BANK_MULT is the swept variable — set per-run inside run_spoon.
 export MMLLM_LR_BANK_MULT_END=0.001
 export MMLLM_LR_NET_MULT=0.001
 export MMLLM_LR_NET_MULT_END=0.1
@@ -50,20 +47,23 @@ ROUND6_BASE=/home/user/mmllm/core/round-6/step-5000
 
 SUMMARY=/tmp/mmllm-cpu/spoon-lengths.summary.log
 : > "$SUMMARY"
-echo "step_len,Δ_local,Δ_net,Δ_both,ctrl_bpc" >> "$SUMMARY"
+echo "lr_mult,Δ_local,Δ_net,Δ_both,ctrl_bpc" >> "$SUMMARY"
+
+# Fixed step length per spoon (100 steps); only LR_BANK_MULT varies.
+STEP_LEN=100
+WARMUP_STEPS=70
+ABLATE_EVERY=25
+
+export MMLLM_LR_WARMUP=$WARMUP_STEPS
+export MMLLM_ABLATE_EVERY=$ABLATE_EVERY
 
 run_spoon() {
-  local step_len=$1
-  local warmup_steps=$((step_len * 70 / 100))
-  local ablate_every=$((step_len / 4))
-  [ "$ablate_every" -lt 25 ] && ablate_every=$step_len   # for step_len=50, ablate only at end (step 50)
-
-  export MMLLM_LR_WARMUP=$warmup_steps
-  export MMLLM_ABLATE_EVERY=$ablate_every
+  local lr_mult=$1
+  export MMLLM_LR_BANK_MULT=$lr_mult
 
   echo ""
   echo "═══════════════════════════════════════════════════════════════"
-  echo "  SPOON  step_len=$step_len  warmup=$warmup_steps  ablate_every=$ablate_every"
+  echo "  SPOON  LR_BANK_MULT=$lr_mult  step_len=$STEP_LEN  warmup=$WARMUP_STEPS"
   echo "═══════════════════════════════════════════════════════════════"
 
   # Reset state for each spoon (fresh baseline).
@@ -90,17 +90,17 @@ for i in range(4):
 print("  V_local + V_net zero-initialized")
 PY
 
-  local TRAIN_LOG=/tmp/mmllm-cpu/spoon-len-${step_len}.train.log
-  local TOTAL=$((step_len + 1))
-  local CKPT_EVERY=$((step_len + 10))   # don't fire (lite ckpt safety)
-  mmllm train-fim "$FIM_BASE" "$BANK_BASE" "$TOTAL" "$ablate_every" "$CKPT_EVERY" 2>&1 | tee "$TRAIN_LOG" \
+  local TRAIN_LOG=/tmp/mmllm-cpu/spoon-lr-${lr_mult}.train.log
+  local TOTAL=$((STEP_LEN + 1))
+  local CKPT_EVERY=$((STEP_LEN + 10))   # don't fire (lite ckpt safety)
+  mmllm train-fim "$FIM_BASE" "$BANK_BASE" "$TOTAL" "$ABLATE_EVERY" "$CKPT_EVERY" 2>&1 | tee "$TRAIN_LOG" \
     | grep -E "ablation Δ at step|Δ_local|Δ_net|Δ_both|training complete|step .*lr_b" || true
 
   # Extract final ablation values from the structured log.
-  python3 - "$step_len" >> "$SUMMARY" <<'PY'
+  python3 - "$lr_mult" >> "$SUMMARY" <<'PY'
 import sys, json
 from pathlib import Path
-step_len = int(sys.argv[1])
+lr_mult = sys.argv[1]
 log = Path("/tmp/mmllm-cpu/fim-json-v3.log.jsonl")
 last = None
 for line in log.read_text().splitlines():
@@ -109,14 +109,14 @@ for line in log.read_text().splitlines():
     if ev.get("event") == "ablation_intermediate":
         last = ev
 if last is None:
-    print(f"{step_len},,,,(no ablation)")
+    print(f"{lr_mult},,,,(no ablation)")
 else:
-    print(f"{step_len},{last['delta_local']:.4f},{last['delta_net']:.4f},{last['delta_both']:.4f},{last['control_bpc']:.4f}")
+    print(f"{lr_mult},{last['delta_local']:.4f},{last['delta_net']:.4f},{last['delta_both']:.4f},{last['control_bpc']:.4f}")
 PY
 }
 
-for step_len in 50 100 200 600; do
-  run_spoon "$step_len"
+for lr_mult in 50 100 200 600; do
+  run_spoon "$lr_mult"
 done
 
 echo ""
