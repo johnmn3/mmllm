@@ -770,6 +770,53 @@
    :short-window       nil
    :long-window        nil})
 
+(def default-config-cpu-mini
+  "Mini-trunk variant of cpu-tiny: same 32-layer asymmetric Local/Net
+   architecture, but with the dense backbone shrunk ~10× to test
+   whether a smaller trunk forces the bank tier to actually get adopted.
+
+   Sizing math:
+     d-model = 32, d-ff = 128, head-dim = 8
+     n-heads = 4 = 2 short + 2 long
+     q-dim   = 2 long heads × 8 head-dim = 16 (vs cpu-tiny's 128 — 8× smaller)
+
+   Per-block dense:
+     Q + O proj          : 32² × 2 = 2,048
+     K_s + V_s + K_l + V_l (head_dim=8 each): 32 × 8 × 4 = 1,024
+     FFN (gate + up + down at d_ff=128)     : 32 × 128 × 3 = 12,288
+     norms + small heads                    : ~200
+                                              ─────────
+     per-block                                ≈ 15.5 k
+   × 32 blocks                               ≈ 500 k dense params
+   = ~2 MB at fp32 (vs cpu-tiny's ~17.5 M ≈ 70 MB — 35× reduction)
+
+   The asymmetric Local-Bank layer set is unchanged so existing trunks
+   and the chain runner still slot in cleanly. The bank-side shape (V
+   per row × q-dim) shrinks proportionally with q-dim: V_local per
+   layer × trunk at sqrt_n=226 is 226² × 16 × 4 = 3.3 MB (vs 26 MB at
+   cpu-tiny's q-dim=128)."
+  {:d-model            32
+   :n-heads            4
+   :n-short-heads      2
+   :n-long-heads       2
+   :n-short-kv-heads   1
+   :n-long-kv-heads    1
+   :n-layers           32
+   :local-bank-layers  [0 1 2 12 20 29 30 31]
+   :seq-len            128
+   :max-pos            512
+   :d-ff               128
+   :rope-theta         10000.0
+   :memory-sqrt-n      256
+   :memory-top-k       16
+   :memory-sub-top-k   16
+   :memory-mmap-path   nil
+   :bank-query-mode    nil
+   :bank-feedback-mode nil
+   :long-tier-mix      nil
+   :short-window       nil
+   :long-window        nil})
+
 ;;; ─────────────────────── RoPE (used only on the short tier) ───────────────────────
 
 (defn build-rope-cache
@@ -4403,6 +4450,34 @@
                           (train-long cfg2 train-path val-path ckpt-dir log-path
                                       total eval-every ckpt-every)
                           (println "done.")))
+      "train-fim-mini" (let [base       (or (second args) "/tmp/mmllm-cpu/fim-corpus")
+                             mpath      (or (nth args 2 nil) "/tmp/mmllm-cpu/fim-bank")
+                             total      (python/int (or (nth args 3 nil) 5000))
+                             eval-every (python/int (or (nth args 4 nil) 500))
+                             ckpt-every (python/int (or (nth args 5 nil) 1000))]
+                         ;; Same FIM-mask-forcing wrapper as train-fim, but
+                         ;; uses default-config-cpu-mini (d_model=32, d_ff=128,
+                         ;; ~500k dense params — ~35× smaller trunk). Same
+                         ;; 32-layer asymmetric Local/Net layout, same q_dim
+                         ;; bank shapes scaled by q_dim=16. Designed for
+                         ;; "does the bank tier get adopted when the trunk
+                         ;; isn't capable enough to solve FIM alone?" spike.
+                         (.__setitem__ (.- os environ) "MMLLM_FIM_LOSS_MASK_MIDDLE_ONLY" "true")
+                         (println (format "  train-fim-mini: FIM_LOSS_MASK_MIDDLE_ONLY=true forced; cfg=cpu-mini"))
+                         (let [train-path (str base ".train.bin")
+                               val-path   (str base ".val.bin")
+                               ckpt-dir   (str base ".ckpts")
+                               log-path   (str base ".log.jsonl")
+                               cfg2       (assoc default-config-cpu-mini
+                                                 :memory-mmap-path mpath)]
+                           (.__setitem__ (.- os environ) "MMLLM_DEVICE" "cpu")
+                           (when (nil? (.get (.- os environ) "MMLLM_BATCH"))
+                             (.__setitem__ (.- os environ) "MMLLM_BATCH" "4"))
+                           (when (nil? (.get (.- os environ) "MMLLM_BANK_ON_GPU"))
+                             (.__setitem__ (.- os environ) "MMLLM_BANK_ON_GPU" "false"))
+                           (train-long cfg2 train-path val-path ckpt-dir log-path
+                                       total eval-every ckpt-every)
+                           (println "done.")))
       "train-cpu"     (let [base       (or (second args) "/tmp/mmllm-cpu/corpus.bin")
                             mpath      (or (nth args 2 nil) "/tmp/mmllm-cpu/bank")
                             total      (python/int (or (nth args 3 nil) 5000))
@@ -4620,6 +4695,10 @@
           (println "  train-fim [base] [bank-path] [total-steps] [eval-every] [ckpt-every]")
           (println "                                           (FIM training — forces MMLLM_FIM_LOSS_MASK_MIDDLE_ONLY=true;")
           (println "                                            same telemetry/ckpt pipeline as train-cpu.)")
+          (println "  train-fim-mini [base] [bank-path] [total-steps] [eval-every] [ckpt-every]")
+          (println "                                           (same as train-fim but uses default-config-cpu-mini —")
+          (println "                                            d_model=32, d_ff=128, q_dim=16, ~500k dense params;")
+          (println "                                            test bank-tier adoption with a sub-capable trunk.)")
           (println "  fim-eval  [ckpt-dir] [eval-jsonl] [step]")
           (println "                                           (FIM-bpc + FIM-exact on the eval JSONL produced by")
           (println "                                            scripts/build_fim_eval.py; per-language summary.)")
