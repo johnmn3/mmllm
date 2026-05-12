@@ -2031,8 +2031,9 @@
                :k-proj-s :v-proj-s
                :k-proj-l :v-proj-l
                :o-proj :gate-proj :up-proj :down-proj
-               :long-gate :bank-query :bank-feedback :memory]]
+               :long-gate :bank-query :bank-feedback]]
       (.eval (get b k)))
+    (when-let [mem (:memory b)] (.eval mem))
     (when-let [nb (:netbank b)] (.eval nb))
     (when-let [c (:carry b)] (.eval c)))
   (when-let [mh (:mtp-head m)] (.eval mh))
@@ -2052,8 +2053,9 @@
                :k-proj-s :v-proj-s
                :k-proj-l :v-proj-l
                :o-proj :gate-proj :up-proj :down-proj
-               :long-gate :bank-query :bank-feedback :memory]]
+               :long-gate :bank-query :bank-feedback]]
       (.train (get b k)))
+    (when-let [mem (:memory b)] (.train mem))
     (when-let [nb (:netbank b)] (.train nb))
     (when-let [c (:carry b)] (.train c)))
   (when-let [mh (:mtp-head m)] (.train mh))
