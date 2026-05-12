@@ -3714,18 +3714,24 @@
                                  (format "{\"step\":%d,\"event\":\"bank_saved\",\"bank_path\":\"%s\",\"wall_s\":%.1f}"
                                          step bank-path (- (time/time) t0)))))
               (println "  ── ablation: zeroing Local Bank V (NetBank kept active) ──")
-              (doseq [b (:blocks m)] (when-let [mem (:memory b)] (.zero_bank mem)))
+              ;; Use ablation-step! (save → zero → eval → restore) so V_local
+              ;; ends up back in memory AND on its mmap-backed file at the
+              ;; trained-content state. The previous inline (zero_bank → eval)
+              ;; left V_local at exactly zero on disk because the mmap-backed
+              ;; V.weight was wiped in-place. ablation-step! backs V up to a
+              ;; temp .pt before zeroing and copy_'s it back after eval, so
+              ;; the post-run on-disk bank reflects training.
               (println "  ── eval at end (ablation: bank zeroed) ──")
-              (let [r-abl (eval-bpc m val-data T 16 100000)
-                    delta (- (:bpc r-abl) (:bpc r-ctrl))]
+              (let [abl-bpc (ablation-step! m val-data T 16 100000)
+                    delta   (- abl-bpc (:bpc r-ctrl))]
                 (println (format "  ════ ablation summary ════"))
                 (println (format "    control  bpc=%.4f ppl=%.2f" (:bpc r-ctrl) (:ppl r-ctrl)))
-                (println (format "    ablated  bpc=%.4f ppl=%.2f" (:bpc r-abl)  (:ppl r-abl)))
+                (println (format "    ablated  bpc=%.4f"           abl-bpc))
                 (println (format "    Δ bpc    %+.4f  (positive = bank carries signal; near 0 = bank is dead weight)"
                                  delta))
                 (append-jsonl! log-path
                                (format "{\"step\":%d,\"event\":\"ablation\",\"control_bpc\":%.4f,\"ablated_bpc\":%.4f,\"delta_bpc\":%.4f,\"wall_s\":%.1f}"
-                                       step (:bpc r-ctrl) (:bpc r-abl) delta (- (time/time) t0)))))
+                                       step (:bpc r-ctrl) abl-bpc delta (- (time/time) t0)))))
             m)
           ;; Session-timeout branch: budget-bounded slow-walk training.
           ;; Save ckpt and exit cleanly so the next session resumes from

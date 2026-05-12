@@ -201,14 +201,20 @@ class SwitchGate(nn.Module):
             # Stochastic Bernoulli sample so the gradient sees diverse decisions.
             rand = torch.rand_like(local_prob)
             local_hard = (local_prob > rand).float()
+            # Straight-through: forward uses the hard 0/1 decision; backward
+            # gets the sigmoid's smooth gradient through local_prob. The
+            # `hard + soft - soft.detach()` trick keeps the value=hard and
+            # ∂value/∂x = ∂soft/∂x.
+            local_decision = local_hard + local_prob - local_prob.detach()
         else:
-            # Deterministic threshold at inference.
-            local_hard = (local_prob > 0.5).float()
-        # Straight-through: forward uses the hard 0/1 decision; backward
-        # gets the sigmoid's smooth gradient through local_prob. The
-        # `hard + soft - soft.detach()` trick keeps the value=hard and
-        # ∂value/∂x = ∂soft/∂x.
-        local_decision = local_hard + local_prob - local_prob.detach()  # (B, H, T)
+            # Eval mode: use the expected (smooth) value of the training-time
+            # stochastic gate. E[local_decision | training] = local_prob,
+            # because local_hard ~ Bernoulli(local_prob). Using local_prob
+            # directly here makes eval deterministic AND non-degenerate: the
+            # previous `(local_prob > 0.5)` thresholded to exactly 0 at
+            # bias=-2.0 (the init), so Local never fired in eval and the
+            # ablation Δ_local was always zero regardless of V_local content.
+            local_decision = local_prob
 
         # Apply decision to Local's gate weight, then renormalize the
         # 3-way mass over the surviving tiers.
