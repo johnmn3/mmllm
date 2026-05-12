@@ -132,7 +132,8 @@ PY
   echo "  → spawning trunk $t (B=$BATCH_SIZE, threads=$MMLLM_NUM_THREADS)"
   TOTAL=$((STEP_LEN + 1))
   CKPT_EVERY=$((STEP_LEN + 10))   # don't fire — lite ckpt + no save mid-run
-  mmllm train-fim "$FIM_BASE" "$BANK_BASE" "$TOTAL" "$ABLATE_EVERY" "$CKPT_EVERY" \
+  EVAL_EVERY=$MMLLM_ABLATE_EVERY
+  mmllm train-fim "$FIM_BASE" "$BANK_BASE" "$TOTAL" "$EVAL_EVERY" "$CKPT_EVERY" \
     >"$TRAIN_LOG" 2>&1 &
   PIDS+=($!)
   LOGS+=("$TRAIN_LOG")
