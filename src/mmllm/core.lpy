@@ -3721,17 +3721,36 @@
               ;; V.weight was wiped in-place. ablation-step! backs V up to a
               ;; temp .pt before zeroing and copy_'s it back after eval, so
               ;; the post-run on-disk bank reflects training.
-              (println "  ── eval at end (ablation: bank zeroed) ──")
-              (let [abl-bpc (ablation-step! m val-data T 16 100000)
-                    delta   (- abl-bpc (:bpc r-ctrl))]
+              ;;
+              ;; Also run ablation-step-net! and ablation-step-both! so the
+              ;; end-of-train summary reports Δ_local, Δ_net, and Δ_both —
+              ;; matching the intermediate-ablation event format. This is
+              ;; what answers "did distillation work" (Δ_net) and "do the
+              ;; two banks combine constructively" (Δ_both vs sum of pieces).
+              (let [ctrl     (:bpc r-ctrl)
+                    abl-l    (ablation-step!     m val-data T 16 100000)
+                    d-l      (- abl-l ctrl)
+                    abl-n    (ablation-step-net! m val-data T 16 100000)
+                    d-n      (when abl-n (- abl-n ctrl))
+                    abl-b    (when abl-n (ablation-step-both! m val-data T 16 100000))
+                    d-b      (when abl-b (- abl-b ctrl))]
                 (println (format "  ════ ablation summary ════"))
-                (println (format "    control  bpc=%.4f ppl=%.2f" (:bpc r-ctrl) (:ppl r-ctrl)))
-                (println (format "    ablated  bpc=%.4f"           abl-bpc))
-                (println (format "    Δ bpc    %+.4f  (positive = bank carries signal; near 0 = bank is dead weight)"
-                                 delta))
+                (println (format "    control  bpc=%.4f ppl=%.2f" ctrl (:ppl r-ctrl)))
+                (println (format "    Δ_local: %.4f → %+.4f" abl-l d-l))
+                (when abl-n
+                  (println (format "    Δ_net:   %.4f → %+.4f" abl-n d-n)))
+                (when abl-b
+                  (let [synergy (- d-b (+ d-l (or d-n 0.0)))]
+                    (println (format "    Δ_both:  %.4f → %+.4f  (synergy: %+.4f)"
+                                     abl-b d-b synergy))))
                 (append-jsonl! log-path
-                               (format "{\"step\":%d,\"event\":\"ablation\",\"control_bpc\":%.4f,\"ablated_bpc\":%.4f,\"delta_bpc\":%.4f,\"wall_s\":%.1f}"
-                                       step (:bpc r-ctrl) abl-bpc delta (- (time/time) t0)))))
+                               (format "{\"step\":%d,\"event\":\"ablation\",\"control_bpc\":%.4f,\"ablated_local_bpc\":%.4f,\"delta_local\":%.4f,\"ablated_net_bpc\":%s,\"delta_net\":%s,\"ablated_both_bpc\":%s,\"delta_both\":%s,\"wall_s\":%.1f}"
+                                       step ctrl abl-l d-l
+                                       (if abl-n (format "%.4f" abl-n) "null")
+                                       (if d-n   (format "%.4f" d-n)   "null")
+                                       (if abl-b (format "%.4f" abl-b) "null")
+                                       (if d-b   (format "%.4f" d-b)   "null")
+                                       (- (time/time) t0)))))
             m)
           ;; Session-timeout branch: budget-bounded slow-walk training.
           ;; Save ckpt and exit cleanly so the next session resumes from
