@@ -180,6 +180,25 @@ class PagedMmapStorage:
         self.page_rows = page_rows
         self.n_pages = (n + page_rows - 1) // page_rows
         self._dirty_pages: set[int] = set()
+        # Tiered residence: cap the number of *pages* held in RAM via
+        # an LRU eviction list. Set via MMLLM_BANK_RESIDENT_BYTES (per-
+        # bank cap in bytes). When unset (default), no cap — kernel page
+        # cache uses its own LRU under memory pressure only. When set
+        # smaller than the bank's full byte size, pages outside the LRU
+        # set are MADV_DONTNEED'd, forcing them back to disk; next access
+        # to them takes a page fault.
+        #
+        # The page_rows×dim×4 bytes determine actual per-page byte size.
+        import os as _os
+        resident_bytes = int(_os.environ.get("MMLLM_BANK_RESIDENT_BYTES", "0"))
+        if resident_bytes > 0:
+            bytes_per_page = page_rows * dim * 4  # fp32 row stride × page_rows
+            self._resident_pages_cap = max(1, resident_bytes // bytes_per_page)
+        else:
+            self._resident_pages_cap = 0  # 0 = no cap
+        # LRU order: most-recently-used at the end. Dedup on insert.
+        from collections import OrderedDict as _OrderedDict
+        self._lru_pages: "_OrderedDict[int, None]" = _OrderedDict()
         # `_tensor` is what we hand out via .tensor. After remap, its
         # storage gets swapped via Tensor.set_(). However, when the
         # caller wraps this tensor in a Parameter (e.g.
@@ -285,12 +304,18 @@ class PagedMmapStorage:
         self._owners.append(tensor)
 
     def track_dirty_rows(self, row_indices: torch.Tensor) -> int:
-        """Mark pages containing these row indices as dirty.
+        """Mark pages containing these row indices as dirty AND update the
+        LRU residency set.
 
         Called from forward() at lookup time — every row we touch is
         guaranteed to receive a sparse-grad update on backward, so
         flagging at lookup is both correct and cheap (no extra GPU↔CPU
         sync; the indices are already on hand).
+
+        When MMLLM_BANK_RESIDENT_BYTES is set, this method also evicts
+        the oldest pages once the LRU exceeds the byte cap, by issuing
+        MADV_DONTNEED on their byte range. Evicted pages are reloaded
+        from disk on next access (page fault via the existing mmap).
 
         Returns the number of newly-flagged pages (for logging).
         """
@@ -300,7 +325,46 @@ class PagedMmapStorage:
         # even when the same page is touched many times per step.
         pages = (flat // self.page_rows).unique().tolist()
         self._dirty_pages.update(pages)
+        # Update LRU: move touched pages to "most recent". OrderedDict's
+        # move_to_end + popitem(last=False) gives O(1) LRU ops.
+        if self._resident_pages_cap > 0:
+            for p in pages:
+                self._lru_pages.pop(p, None)
+                self._lru_pages[p] = None
+            # Evict oldest pages until under cap.
+            while len(self._lru_pages) > self._resident_pages_cap:
+                old_page, _ = self._lru_pages.popitem(last=False)
+                self._evict_page(old_page)
         return len(self._dirty_pages) - before
+
+    def _evict_page(self, page_idx: int) -> None:
+        """Issue MADV_DONTNEED on the byte range of one page.
+
+        Next access pages it back in from disk via the existing mmap.
+        Used by the LRU eviction path to keep resident set bounded.
+        """
+        if self._array is None:
+            return
+        mm = getattr(self._array, "_mmap", None)
+        if mm is None or not hasattr(mm, "madvise"):
+            return
+        try:
+            mm_dontneed = _mmap_module.MADV_DONTNEED
+        except AttributeError:
+            return
+        bytes_per_page = self.page_rows * self.dim * 4
+        off = page_idx * bytes_per_page
+        length = bytes_per_page
+        # Last page may be partial; clamp length to file end.
+        total_size = self.n * self.dim * 4
+        if off + length > total_size:
+            length = total_size - off
+        if length <= 0:
+            return
+        try:
+            mm.madvise(mm_dontneed, off, length)
+        except OSError:
+            pass  # kernel may reject some advise ops; benign
 
     def n_dirty_pages(self) -> int:
         return len(self._dirty_pages)
