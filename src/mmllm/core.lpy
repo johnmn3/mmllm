@@ -1343,8 +1343,10 @@
   [block device]
   (doseq [k [:norm1 :norm2 :q-proj :k-proj-s :v-proj-s :k-proj-l :v-proj-l
              :o-proj :gate-proj :up-proj :down-proj
-             :long-gate :bank-query :bank-feedback :memory]]
+             :long-gate :bank-query :bank-feedback]]
     (.to (get block k) device))
+  ;; :memory is conditional under the asymmetric :local-bank-layers config.
+  (when-let [mem (:memory block)] (.to mem device))
   (when-let [nb (:netbank block)]
     (.to nb device))
   (when-let [c (:carry block)]
