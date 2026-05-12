@@ -109,13 +109,10 @@ PY
   echo "  → training (100 steps, ablate every 25)"
   mmllm train-fim "$FIM_BASE" "$BANK_BASE" 101 25 100 2>&1 | tee /tmp/mmllm-cpu/spoon-r${round_num}.train.log | grep -E "ablation Δ|Δ_local|Δ_net|Δ_both|training complete" || true
 
-  # Archive this round's end-state.
+  # Archive this round's end-state. Skip V_local (it's zeroed each round
+  # anyway, so no need to preserve it). Only V_net and dense flow forward.
   local ROUND_DIR="$ARCHIVE_ROOT/round-${round_num}"
   mkdir -p "$ROUND_DIR"
-  cp "${BANK_BASE}.0.bin"        "$ROUND_DIR/V_local.0.bin"
-  cp "${BANK_BASE}.1.bin"        "$ROUND_DIR/V_local.1.bin"
-  cp "${BANK_BASE}.2.bin"        "$ROUND_DIR/V_local.2.bin"
-  cp "${BANK_BASE}.3.bin"        "$ROUND_DIR/V_local.3.bin"
   cp "${BANK_BASE}-net.0.bin"    "$ROUND_DIR/V_net.0.bin"
   cp "${BANK_BASE}-net.1.bin"    "$ROUND_DIR/V_net.1.bin"
   cp "${BANK_BASE}-net.2.bin"    "$ROUND_DIR/V_net.2.bin"
