@@ -982,9 +982,24 @@
      loss = (1-mag_coef) * MSE(net/||net||, tgt/||tgt||)
           +    mag_coef  * MSE(||net||, clamp(||tgt||, max=clamp))
 
-   Reads MMLLM_DISTILL_MAGNITUDE_COEF (default 0.0)."
-  []
-  (python/float (.get (.- os environ) "MMLLM_DISTILL_MAGNITUDE_COEF" "0.0")))
+   Arity 0 — returns the start (or constant) value. Reads
+   MMLLM_DISTILL_MAGNITUDE_COEF (default 0.0).
+
+   Arity 2 — `(step total)` — cosine-scheduled between
+   MMLLM_DISTILL_MAGNITUDE_COEF and MMLLM_DISTILL_MAGNITUDE_COEF_END.
+   Lets the loss shape itself transition smoothly from pure-direction
+   (early) to magnitude-aware (late), mirroring the wake/sleep LR
+   schedule: during wake direction-only keeps Net's V bounded while
+   Local accumulates, during sleep the magnitude term opens up so
+   Net's V can grow to carry Local's contribution scale."
+  ([] (python/float (.get (.- os environ) "MMLLM_DISTILL_MAGNITUDE_COEF" "0.0")))
+  ([step total]
+   (let [start  (pick-distill-magnitude-coef)
+         end    (python/float (.get (.- os environ)
+                                     "MMLLM_DISTILL_MAGNITUDE_COEF_END"
+                                     (str start)))
+         warmup (python/int (.get (.- os environ) "MMLLM_LR_WARMUP" "0"))]
+     (mult-cosine-interp start end step total warmup))))
 
 (defn pick-distill-magnitude-clamp
   "Upper bound on per-position target L2 norm used by the magnitude
