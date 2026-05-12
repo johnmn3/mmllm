@@ -401,13 +401,29 @@
 (defn pick-sparse-optimizer
   "Return the class to use for the bank's optimizer.
 
-   When MMLLM_CPU_OFFLOAD=true, returns CPUOffloadSparseAdam,
-   which keeps m/v moments on host RAM (frees ~38 GB GPU VRAM at
-   sqrt_n=2048). Default: stock torch.optim.SparseAdam."
+   MMLLM_SPARSE_OPT (preferred — explicit choice):
+     'adam'     → torch.optim.SparseAdam (default)
+     'adam-cpu' → mmllm.optim.CPUOffloadSparseAdam
+                  (touched-row-sparse m/v on host RAM; required at N>1
+                  to avoid the dense state allocation)
+     'sgd'      → mmllm.optim.CPUSparseSGD
+                  (no m/v state at all; smallest possible — useful when
+                  even the touched-row-sparse Adam state hits the
+                  per-trunk ceiling on a small box. Noisier dynamics.)
+
+   MMLLM_CPU_OFFLOAD=true is the legacy knob for 'adam-cpu'; respected
+   when MMLLM_SPARSE_OPT is unset, so the previous behavior is preserved."
   []
-  (if (= "true" (.lower (.get (.- os environ) "MMLLM_CPU_OFFLOAD" "false")))
-    vbopt/CPUOffloadSparseAdam
-    optim/SparseAdam))
+  (let [explicit (.lower (.get (.- os environ) "MMLLM_SPARSE_OPT" ""))]
+    (cond
+      (= explicit "sgd")      vbopt/CPUSparseSGD
+      (= explicit "adam-cpu") vbopt/CPUOffloadSparseAdam
+      (= explicit "adam")     optim/SparseAdam
+      :else
+      ;; Legacy: MMLLM_CPU_OFFLOAD=true → CPUOffloadSparseAdam.
+      (if (= "true" (.lower (.get (.- os environ) "MMLLM_CPU_OFFLOAD" "false")))
+        vbopt/CPUOffloadSparseAdam
+        optim/SparseAdam))))
 
 (defn pick-lr-warmup
   "Resolve linear warmup steps. Reads MMLLM_LR_WARMUP (default 0

@@ -182,3 +182,62 @@ class CPUOffloadSparseAdam(torch.optim.Optimizer):
                 p.data.index_add_(0, indices_gpu, delta_cpu.to(p.device))
 
         return loss
+
+
+class CPUSparseSGD(torch.optim.Optimizer):
+    """Plain SGD for sparse-grad parameters. No m, v moments — just
+    `p[i] -= lr * grad[i]` for each touched row. Zero per-param state,
+    the lightest possible sparse update.
+
+    Designed as a drop-in for `CPUOffloadSparseAdam` when the bank's
+    optimizer-state memory becomes the cliff. At N=16 trunks × bank
+    sqrt_n=226 × q_dim=128 × 8 Local layers, SparseAdam state runs
+    ~6.7 GB (m + v at full touch); CPUSparseSGD runs 0 GB. The
+    training dynamics get noisier (no momentum), but for a Hogwild-
+    style consolidation many trunks distill into a shared V_net the
+    averaging may compensate.
+
+    Same constructor surface as torch.optim.SparseAdam — lr only. Use
+    by setting MMLLM_SPARSE_OPT=sgd; pick-sparse-optimizer routes to
+    this class.
+    """
+
+    def __init__(self, params, lr: float = 1e-3):
+        if lr <= 0:
+            raise ValueError(f"lr must be positive: {lr}")
+        defaults = dict(lr=lr)
+        super().__init__(params, defaults)
+
+    @torch.no_grad()
+    def step(self, closure=None):
+        loss = None
+        if closure is not None:
+            with torch.enable_grad():
+                loss = closure()
+
+        for group in self.param_groups:
+            lr = group["lr"]
+
+            for p in group["params"]:
+                if p.grad is None:
+                    continue
+                grad = p.grad
+                if not grad.is_sparse:
+                    raise RuntimeError(
+                        "CPUSparseSGD only handles sparse grads "
+                        f"(got dense grad on a parameter of shape {tuple(p.shape)})"
+                    )
+
+                grad = grad.coalesce()
+                indices = grad._indices()[0]              # 1-D row indices, grad.device
+                values  = grad._values()                  # (nnz, dim), grad.device
+
+                # Match parameter device + dtype before in-place scatter.
+                # p may be mmap-backed fp32 on CPU while grad is fp32 on GPU.
+                indices_p = indices.to(p.device)
+                values_p  = values.to(device=p.device, dtype=p.dtype)
+                # In-place: p[indices_p] += -lr * values_p  (with duplicate-
+                # index summation, already coalesced so unique).
+                p.data.index_add_(0, indices_p, values_p, alpha=-lr)
+
+        return loss
