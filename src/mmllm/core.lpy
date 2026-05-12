@@ -229,6 +229,26 @@
   []
   (python/int (.get (.- os environ) "MMLLM_NET_SUB_TOP_K" "64")))
 
+(defn pick-memory-top-k
+  "Final retrieved entries per query from the Local bank. Reads
+   MMLLM_MEMORY_TOP_K if set; otherwise falls back to the value
+   passed in (typically the config's :memory-top-k).
+
+   At larger sqrt_n the default top_k under-samples V — at sqrt_n=720
+   with top_k=16, each query touches only 0.003% of V rows; the bank
+   can't populate. Scale top_k with sqrt_n to keep per-row touch rate
+   comparable across bank sizes."
+  [config-default]
+  (let [env-val (.get (.- os environ) "MMLLM_MEMORY_TOP_K")]
+    (if env-val (python/int env-val) config-default)))
+
+(defn pick-memory-sub-top-k
+  "Sub-keys retained per K_a/K_b half in product-key search of the Local
+   bank. Reads MMLLM_MEMORY_SUB_TOP_K if set; otherwise the config default."
+  [config-default]
+  (let [env-val (.get (.- os environ) "MMLLM_MEMORY_SUB_TOP_K")]
+    (if env-val (python/int env-val) config-default)))
+
 (defn pick-netbank-delay-min
   "Minimum simulated WAN delay per NetBank forward, in milliseconds.
    Reads MMLLM_NET_DELAY_MS_MIN (default 1.0). Set both min and max
@@ -1249,8 +1269,8 @@
      :bank-query    (bq/build_bank_query     bq-kind   d-model      q-dim)
      :bank-feedback (bfb/build_bank_feedback fb-kind   d-model      q-dim)
      :memory    (memory-cls q-dim sqrt-n
-                            ** :top_k     memory-top-k
-                            :sub_top_k memory-sub-top-k
+                            ** :top_k     (pick-memory-top-k memory-top-k)
+                            :sub_top_k (pick-memory-sub-top-k memory-sub-top-k)
                             :mmap_path path)
      :netbank   (when (pick-netbank-enabled?)
                   (netb/NetBank q-dim
