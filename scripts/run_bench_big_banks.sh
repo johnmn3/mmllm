@@ -31,6 +31,12 @@ export MMLLM_SKIP_NETBANK_WARMSTART=true
 export MMLLM_NET_V_WARMSTART_FROM_LOCAL=false
 export MMLLM_LITE_CKPT=false       # NEED full ckpt this time so bench can load opt-* placeholders
 
+# CRITICAL: keep banks on CPU/mmap, NOT GPU. memory.py defaults
+# MMLLM_BANK_ON_GPU="true" — we want false for "banks on disk" inference.
+export MMLLM_BANK_ON_GPU=false
+export MMLLM_NET_BANK_ON_GPU=false
+export MMLLM_DEVICE=cpu
+
 FIM_BASE=/tmp/mmllm-cpu/fim-json-v3
 BANK_BASE=/tmp/mmllm-cpu/fim-bank-v3
 ROUND6_BASE=/home/user/mmllm/core/round-6/step-5000

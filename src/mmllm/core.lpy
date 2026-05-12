@@ -4201,8 +4201,13 @@
                             ckpt-step (when (nth args 2 nil) (python/int (nth args 2 nil)))
                             bank-path (or (nth args 3 nil) "/data/pile-bank-3tier")
                             n-warm    (python/int (or (nth args 4 nil) 50))
-                            n-time    (python/int (or (nth args 5 nil) 500))]
-                        (bench-inference cfg base ckpt-step bank-path n-warm n-time)
+                            n-time    (python/int (or (nth args 5 nil) 500))
+                            ;; bench must use the same config the training
+                            ;; pipeline does (cpu-tiny). Default `cfg` is
+                            ;; default-config (d_model=384) which mismatches
+                            ;; ckpts saved by train-fim / train-cpu.
+                            bench-cfg default-config-cpu-tiny]
+                        (bench-inference bench-cfg base ckpt-step bank-path n-warm n-time)
                         (println "done."))
       "bench-spec"    (let [base      (or (second args) "/data/pile-github.bin")
                             ckpt-step (when (nth args 2 nil) (python/int (nth args 2 nil)))
