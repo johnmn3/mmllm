@@ -47,23 +47,20 @@ export MMLLM_NET_SUB_TOP_K=8
 # N_TRUNKS: the new knob. Routes per-batch-row gathers into V_local slices.
 export MMLLM_N_TRUNKS=$N_TRUNKS
 
-# Sparse-optimizer state: REQUIRED at N>1. Stock torch.optim.SparseAdam
-# allocates DENSE (V_local_total × q_dim × 4) × 2 moments — at N=16 that's
-# 6.7 GB just for V_local optimizer state, before any activations.
+# Sparse-optimizer state. Defaults to sgd here because at N≥16 on a
+# 15 GB box, both adam variants OOM mid-training as the per-row m/v
+# state for V_local approaches 6.7 GB. SGD has zero state.
 #
 # Three options via MMLLM_SPARSE_OPT (caller-overridable):
-#   adam-cpu (default here): mmllm.optim.CPUOffloadSparseAdam — touched-
+#   sgd (default here):      mmllm.optim.CPUSparseSGD — zero state.
+#                            Noisier than Adam but fits at any N.
+#   adam-cpu:                mmllm.optim.CPUOffloadSparseAdam — touched-
 #                            row-sparse m/v on host RAM; ~500 MB at
 #                            spoon scale, scales with unique rows ×
-#                            q_dim × 8 bytes × N.
-#   sgd:                     mmllm.optim.CPUSparseSGD — zero state.
-#                            Noisier than Adam but fits any N. Worth
-#                            testing whether Hogwild's many-trunks-into-
-#                            one-V_net averaging compensates for the
-#                            missing momentum.
+#                            q_dim × 8 bytes × N. Safe at N≤8 on this box.
 #   adam:                    stock torch.optim.SparseAdam (dense state).
 #                            DON'T use at N>1 — guaranteed OOM.
-export MMLLM_SPARSE_OPT="${MMLLM_SPARSE_OPT:-adam-cpu}"
+export MMLLM_SPARSE_OPT="${MMLLM_SPARSE_OPT:-sgd}"
 
 # Spike-6 recipe (restored verbatim from run_asym_spoon.sh / round-10-2).
 # SwitchGate + GATE_NET_DEFAULT (Bernoulli-Local, the round-9 fix for
