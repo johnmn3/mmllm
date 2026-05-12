@@ -129,12 +129,13 @@ PY
 # Round 1: fresh from baseline (V_local zero, V_net seed).
 run_round 1 BASELINE ZERO FP16_SEED
 
-# Rounds 2-5: chain from previous (V_local + V_net carried forward).
+# Rounds 2-5: V_local zeroed each round (fresh hill climber);
+# V_net carried forward (consolidating bank); dense carried forward.
 for r in 2 3 4 5; do
   prev=$((r - 1))
   run_round "$r" \
     "$ARCHIVE_ROOT/round-${prev}/dense.pt" \
-    "$ARCHIVE_ROOT/round-${prev}/V_local" \
+    ZERO \
     "$ARCHIVE_ROOT/round-${prev}/V_net"
 done
 
