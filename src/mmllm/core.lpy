@@ -2768,33 +2768,66 @@
 ;;; mid-ablation only damages the in-memory mmap (next run sees the
 ;;; pre-ablation state from disk via fresh mmap).
 
+;;; Disk-backed ablation backup. The original code cloned every block's V
+;;; to host RAM via .to("cpu", copy=true), which at sqrt_n=2500 puts 3-4 GB
+;;; of clones in memory simultaneously while ALSO holding the original
+;;; mmap'd V. On a 15 GiB sandbox that aggregates to OOM.
+;;;
+;;; Disk-streamed variant: torch.save each block to /tmp BEFORE zeroing
+;;; (so the save reads from the still-valid mmap'd V), then zero in-place.
+;;; At restore, torch.load one block at a time, copy_ into V's mmap,
+;;; immediately drop the loaded tensor. Peak extra RAM = 1 block's V.
+;;;
+;;; Memory: V_local block = sqrt_n² × q_dim × 4 = ~256 MB at sqrt_n=720.
+;;; V_net block = sqrt_n² × c_net × 4 = ~768 MB at sqrt_n=2500.
+;;; Cleanup is in `finally` so a crash mid-ablation still removes
+;;; the temp files.
+
+(defn- save-v-to-disk
+  "Serialize a bank's V.weight to a temp file path. Returns the path.
+   Caller is responsible for unlinking on cleanup."
+  [bank tag]
+  (let [uuid-mod (python/__import__ "uuid")
+        path (str "/tmp/mmllm-cpu/abl-" tag "-" (.- (.uuid4 uuid-mod) hex) ".pt")
+        w (.- (.- bank V) weight)]
+    (torch/save (.detach w) path)
+    path))
+
+(defn- restore-v-from-disk!
+  "Load a backup .pt file and copy_ its contents into bank.V.weight.
+   The loaded tensor goes out of scope immediately so RAM is freed."
+  [bank path]
+  (let [backup (torch/load path)]
+    (with [_ (torch/no_grad)]
+      (.copy_ (.- (.- bank V) weight) backup))))
+
+(defn- unlink-paths! [paths]
+  (let [os-mod (python/__import__ "os")]
+    (doseq [p paths]
+      (try (.unlink os-mod p) (catch python/Exception _ nil)))))
+
 (defn ablation-step!
-  "Save Local V across all blocks (clone to CPU), zero them on GPU, run
-   eval-bpc, restore V from the CPU clone. Returns ablated bpc.
+  "Save Local V across all blocks to disk, zero them in-place, run
+   eval-bpc, restore V from the disk backups. Returns ablated bpc.
 
-   Phase 0-3 semantics preserved: Δ measures Local Bank's contribution.
-   NetBank (when enabled) is left untouched during ablation. NetBank-only
-   Δ would be a separate metric requiring its own code path.
-
-   The clone targets CPU (host RAM) instead of GPU VRAM — at sqrt_n=2048
-   the clone is 18.8 GB, which would push us past H100 80GB when
-   NetBank V is also GPU-resident. CPU has 1024 GB on the H100 container,
-   plenty of room. The CPU↔GPU restore copy at the end adds ~1 sec
-   (PCIe Gen4) but only fires every `ablate-every` steps."
+   Disk-streamed backup (vs. the original in-RAM clone) keeps the
+   ablation's extra-memory peak at 1 block's V (~256 MB at sqrt_n=720),
+   not N_blocks × V (which OOMs on the 15 GiB sandbox at production
+   bank sizes)."
   [m val-data T B max-toks]
-  (let [saved-local-cpu (mapv (fn [b]
-                                (-> (:memory b) (.- V) (.- weight)
-                                    .detach (.to "cpu" ** :copy true)))
-                              (:blocks m))]
+  (let [blocks (:blocks m)
+        backup-paths (mapv (fn [b]
+                             (let [p (save-v-to-disk (:memory b) "local")]
+                               (.zero_bank (:memory b))
+                               p))
+                           blocks)]
     (try
-      (doseq [b (:blocks m)] (.zero_bank (:memory b)))
       (let [r (eval-bpc m val-data T B max-toks)]
         (:bpc r))
       (finally
-        (doseq [[b s] (map vector (:blocks m) saved-local-cpu)]
-          (with [_ (torch/no_grad)]
-            (.copy_ (.- (.- (:memory b) V) weight)
-                    (.to s (.- (.- (:memory b) V) weight) ** :non_blocking true))))))))
+        (doseq [[b p] (map vector blocks backup-paths)]
+          (restore-v-from-disk! (:memory b) p))
+        (unlink-paths! backup-paths)))))
 
 (defn ablation-step-net!
   "Same pattern as ablation-step! but zeros NetBank V (not Local Bank).
@@ -2806,19 +2839,18 @@
   [m val-data T B max-toks]
   (let [blocks-with-net (filter :netbank (:blocks m))]
     (when (seq blocks-with-net)
-      (let [saved-net-cpu (mapv (fn [b]
-                                  (-> (:netbank b) (.- V) (.- weight)
-                                      .detach (.to "cpu" ** :copy true)))
-                                blocks-with-net)]
+      (let [backup-paths (mapv (fn [b]
+                                 (let [p (save-v-to-disk (:netbank b) "net")]
+                                   (.zero_bank (:netbank b))
+                                   p))
+                               blocks-with-net)]
         (try
-          (doseq [b blocks-with-net] (.zero_bank (:netbank b)))
           (let [r (eval-bpc m val-data T B max-toks)]
             (:bpc r))
           (finally
-            (doseq [[b s] (map vector blocks-with-net saved-net-cpu)]
-              (with [_ (torch/no_grad)]
-                (.copy_ (.- (.- (:netbank b) V) weight)
-                        (.to s (.- (.- (:netbank b) V) weight) ** :non_blocking true))))))))))
+            (doseq [[b p] (map vector blocks-with-net backup-paths)]
+              (restore-v-from-disk! (:netbank b) p))
+            (unlink-paths! backup-paths)))))))
 
 (defn ablation-step-both!
   "Zero BOTH Local V and NetBank V across all blocks, run eval-bpc,
@@ -2831,28 +2863,25 @@
   [m val-data T B max-toks]
   (let [blocks (:blocks m)
         blocks-with-net (filter :netbank blocks)
-        saved-local-cpu (mapv (fn [b]
-                                (-> (:memory b) (.- V) (.- weight)
-                                    .detach (.to "cpu" ** :copy true)))
-                              blocks)
-        saved-net-cpu (mapv (fn [b]
-                              (-> (:netbank b) (.- V) (.- weight)
-                                  .detach (.to "cpu" ** :copy true)))
-                            blocks-with-net)]
+        local-paths (mapv (fn [b]
+                            (let [p (save-v-to-disk (:memory b) "both-local")]
+                              (.zero_bank (:memory b))
+                              p))
+                          blocks)
+        net-paths (mapv (fn [b]
+                          (let [p (save-v-to-disk (:netbank b) "both-net")]
+                            (.zero_bank (:netbank b))
+                            p))
+                        blocks-with-net)]
     (try
-      (doseq [b blocks] (.zero_bank (:memory b)))
-      (doseq [b blocks-with-net] (.zero_bank (:netbank b)))
       (let [r (eval-bpc m val-data T B max-toks)]
         (:bpc r))
       (finally
-        (doseq [[b s] (map vector blocks saved-local-cpu)]
-          (with [_ (torch/no_grad)]
-            (.copy_ (.- (.- (:memory b) V) weight)
-                    (.to s (.- (.- (:memory b) V) weight) ** :non_blocking true))))
-        (doseq [[b s] (map vector blocks-with-net saved-net-cpu)]
-          (with [_ (torch/no_grad)]
-            (.copy_ (.- (.- (:netbank b) V) weight)
-                    (.to s (.- (.- (:netbank b) V) weight) ** :non_blocking true))))))))
+        (doseq [[b p] (map vector blocks local-paths)]
+          (restore-v-from-disk! (:memory b) p))
+        (doseq [[b p] (map vector blocks-with-net net-paths)]
+          (restore-v-from-disk! (:netbank b) p))
+        (unlink-paths! (concat local-paths net-paths))))))
 
 ;;; ─────────────────────── train + eval text8 / enwik8 ───────────────────────
 
