@@ -24,7 +24,7 @@ cd "$ROOT"
 
 # Production-scale bank sizes.
 export MMLLM_SQRT_N=720
-export MMLLM_NET_SQRT_N=2500
+export MMLLM_NET_SQRT_N=2000
 export MMLLM_NET_C_NET=32
 
 # Spike-6 recipe.
@@ -52,6 +52,13 @@ export MMLLM_REPLAY_BUFFER_SIZE=256
 export MMLLM_REPLAY_THRESHOLD=0.5
 export MMLLM_SKIP_NETBANK_WARMSTART=true
 export MMLLM_NET_V_WARMSTART_FROM_LOCAL=false
+# Skip opt-state + bank-latest writes at ckpt time. The chain replays
+# the schedule fresh each round so Adam moments aren't needed for
+# resume, and V banks are already on disk via the live mmap path.
+# At sqrt_n=720 V_local + sqrt_n=2500 V_net, the full ckpt is ~12 GB
+# (opt-sparse-net 5 GB + opt-sparse 2 GB + bank-latest 4 GB); lite
+# ckpt is ~16 MB (just dense.pt). Critical on a 7 GB-free sandbox.
+export MMLLM_LITE_CKPT=true
 
 FIM_BASE=/tmp/mmllm-cpu/fim-json-v3
 BANK_BASE=/tmp/mmllm-cpu/fim-bank-v3
@@ -97,7 +104,7 @@ run_round() {
 import sys, numpy as np
 bank_base = sys.argv[1]; resume_v_net = sys.argv[2]
 SQRT_LOCAL = 720;   Q_DIM = 128
-SQRT_NET   = 2500;  C_NET = 32
+SQRT_NET   = 2000;  C_NET = 32
 for i in range(4):
     a = np.memmap(f"{bank_base}.{i}.bin", dtype=np.float32, mode="w+",
                   shape=(SQRT_LOCAL * SQRT_LOCAL, Q_DIM))

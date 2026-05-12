@@ -2956,30 +2956,39 @@
   ([m opt-dense opt-sparse ckpt-dir step volume]
    (save-checkpoint! m opt-dense opt-sparse nil ckpt-dir step volume))
   ([m opt-dense opt-sparse opt-sparse-net ckpt-dir step volume]
-   (let [path (str ckpt-dir "/step-" step)]
+   (let [path (str ckpt-dir "/step-" step)
+         ;; MMLLM_LITE_CKPT=true skips the big optimizer state files
+         ;; (opt-sparse-net at sqrt_n=2500 is ~5 GB; opt-sparse for
+         ;; V_local at sqrt_n=720 is ~2 GB) AND the bank-latest copies
+         ;; (mmap'd V is already on disk via its own path). Useful for
+         ;; disk-constrained sandboxes when each round is a fresh
+         ;; schedule replay that doesn't need Adam moments to resume.
+         lite-ckpt? (= "true" (.lower (.get (.- os environ) "MMLLM_LITE_CKPT" "false")))]
      (os/makedirs path ** :exist_ok true)
      (torch/save (python/list (for [p (parameters m)]
                                 (.detach (.clone (.- p data)))))
                  (str path "/dense.pt"))
-     (torch/save (.state_dict opt-dense)  (str path "/opt-dense.pt"))
-     (torch/save (.state_dict opt-sparse) (str path "/opt-sparse.pt"))
-     ;; NetBank's third optimizer state, only when NetBank is enabled.
-     ;; NetBank V doesn't need a separate save — it's mmap-backed at
-     ;; <base>-net.<i>.bin and every sparse-grad update writes through.
-     (when opt-sparse-net
-       (torch/save (.state_dict opt-sparse-net)
-                   (str path "/opt-sparse-net.pt")))
+     (when (not lite-ckpt?)
+       (torch/save (.state_dict opt-dense)  (str path "/opt-dense.pt"))
+       (torch/save (.state_dict opt-sparse) (str path "/opt-sparse.pt"))
+       ;; NetBank's third optimizer state, only when NetBank is enabled.
+       ;; NetBank V doesn't need a separate save — it's mmap-backed at
+       ;; <base>-net.<i>.bin and every sparse-grad update writes through.
+       (when opt-sparse-net
+         (torch/save (.state_dict opt-sparse-net)
+                     (str path "/opt-sparse-net.pt"))))
      ;; Save bank V to a fixed per-layer path (overwrite in place).
      ;; Skip on errors so a bank-save hiccup doesn't lose the dense
      ;; ckpt — but log loudly because the resume will be bad.
-     (try
-       (doseq [[i b] (map-indexed vector (:blocks m))]
-         (.save_to_mmap (:memory b)
-                        (str ckpt-dir "/bank-latest." i ".bin")))
-       (catch python/Exception e
-         (println (format "  WARN: bank V save failed at step %d: %s — "
-                          step e))
-         (println (format "        resume from this ckpt will get random V."))))
+     (when (not lite-ckpt?)
+       (try
+         (doseq [[i b] (map-indexed vector (:blocks m))]
+           (.save_to_mmap (:memory b)
+                          (str ckpt-dir "/bank-latest." i ".bin")))
+         (catch python/Exception e
+           (println (format "  WARN: bank V save failed at step %d: %s — "
+                            step e))
+           (println (format "        resume from this ckpt will get random V.")))))
      (let [f (python/open (str path "/step.txt") "w")]
        (.write f (str step))
        (.close f))
