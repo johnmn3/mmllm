@@ -164,7 +164,13 @@ print(f"  banks gaussian-init'd (scale={INIT_SCALE}): 8 V_local × {n_trunks} tr
 PY
 
 # train-fim args: total-steps eval-every ckpt-every
-# eval-every set to STEP_LEN+1 so eval-bpc never fires mid-training; the
-# end-of-train ablation (in train-long after the step loop) still runs.
-# ckpt-every set high so no mid-run ckpt — MMLLM_LITE_CKPT=true anyway.
-mmllm train-fim "$FIM_BASE" "$BANK_BASE" $((STEP_LEN + 1)) $((STEP_LEN + 1)) $((STEP_LEN + 10))
+# When MMLLM_ABLATE_EVERY is set > 0, also set eval-every to the same
+# cadence so the per-step ablation block (which gates on
+# `pos? ablate-every` AND `zero? (mod step eval-every)`) actually fires.
+# Otherwise both are set > STEPS so only the end-of-train ablation runs.
+if [ "${MMLLM_ABLATE_EVERY:-0}" -gt 0 ]; then
+  EVAL_EVERY=$MMLLM_ABLATE_EVERY
+else
+  EVAL_EVERY=$((STEP_LEN + 1))
+fi
+mmllm train-fim "$FIM_BASE" "$BANK_BASE" $((STEP_LEN + 1)) $EVAL_EVERY $((STEP_LEN + 10))
