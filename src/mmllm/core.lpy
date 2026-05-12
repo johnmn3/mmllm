@@ -960,6 +960,41 @@
   (let [v (.lower (.get (.- os environ) "MMLLM_DISTILL_TARGET" "residual"))]
     (if (.__contains__ #{"residual" "local"} v) v "residual")))
 
+(defn pick-distill-magnitude-coef
+  "Weight on the magnitude component of distill (default 0.0).
+
+   When MMLLM_DISTILL_DIRECTION_ONLY=true and this coef is 0, the loss
+   is pure direction-match (round-9 v3 behavior): Net rotates its V to
+   point in the target's direction but ||V|| barely moves. That's the
+   stability fix but it broke the consolidation transfer — Net can be
+   perfectly direction-aligned with Local's residual and still
+   contribute essentially zero to the gate-mixed output because its
+   magnitude is too small.
+
+   Setting magnitude-coef > 0 adds a parallel MSE term on the raw
+   magnitudes (per-position L2 norm), so Net's V grows toward the
+   target's magnitude *as well as* its direction. Use with
+   MMLLM_DISTILL_MAGNITUDE_CLAMP to bound the target magnitude — that
+   prevents the round-9 v2 explosion mode where unbounded residual
+   pulled Net's V into instability.
+
+   Composite loss when direction-only + magnitude-coef > 0:
+     loss = (1-mag_coef) * MSE(net/||net||, tgt/||tgt||)
+          +    mag_coef  * MSE(||net||, clamp(||tgt||, max=clamp))
+
+   Reads MMLLM_DISTILL_MAGNITUDE_COEF (default 0.0)."
+  []
+  (python/float (.get (.- os environ) "MMLLM_DISTILL_MAGNITUDE_COEF" "0.0")))
+
+(defn pick-distill-magnitude-clamp
+  "Upper bound on per-position target L2 norm used by the magnitude
+   term of the distill loss. Prevents Net's V from being pulled toward
+   an unbounded residual magnitude (the round-9 v2 explosion mode).
+
+   Reads MMLLM_DISTILL_MAGNITUDE_CLAMP (default 0.0 = no clamp)."
+  []
+  (python/float (.get (.- os environ) "MMLLM_DISTILL_MAGNITUDE_CLAMP" "0.0")))
+
 (defn collect-distill-loss
   "Walk every 3-way SwitchGate in the model, pull last_local_out,
    last_net_out, (and last_sdpa_out when target='residual'), compute
@@ -990,6 +1025,8 @@
                   (pick-distill-coef))
         dir-only (pick-distill-direction-only?)
         target-kind (pick-distill-target)
+        mag-coef    (pick-distill-magnitude-coef)
+        mag-clamp   (pick-distill-magnitude-clamp)
         eps      1e-6]
     (if (zero? coef)
       0.0
@@ -1010,10 +1047,27 @@
                                                (.sub (.detach lo) (.detach so))
                                                (.detach lo))]
                                      (if dir-only
-                                       (let [tgt-n (.add (.norm tgt ** :dim -1 :keepdim true) eps)
-                                             no-n  (.add (.norm no  ** :dim -1 :keepdim true) eps)]
-                                         (F/mse_loss (.div no no-n)
-                                                     (.div tgt tgt-n)))
+                                       ;; Direction-only base loss. Per-position
+                                       ;; norm normalization; Net learns target's
+                                       ;; direction, magnitude is decoupled.
+                                       (let [tgt-n   (.add (.norm tgt ** :dim -1 :keepdim true) eps)
+                                             no-n    (.add (.norm no  ** :dim -1 :keepdim true) eps)
+                                             dir-mse (F/mse_loss (.div no no-n)
+                                                                 (.div tgt tgt-n))]
+                                         (if (pos? mag-coef)
+                                           ;; Composite: blend direction + magnitude.
+                                           ;; mag term pulls ||net|| toward ||target||
+                                           ;; (clamped to mag-clamp if >0). Net's V
+                                           ;; can grow magnitude → actually transfers
+                                           ;; Local's contribution scale, which the
+                                           ;; pure direction-only mode could not.
+                                           (let [tgt-mag  (if (pos? mag-clamp)
+                                                            (.clamp tgt-n ** :max mag-clamp)
+                                                            tgt-n)
+                                                 mag-mse  (F/mse_loss no-n (.detach tgt-mag))]
+                                             (+ (* (- 1.0 mag-coef) dir-mse)
+                                                (* mag-coef         mag-mse)))
+                                           dir-mse))
                                        (F/mse_loss no tgt)))))))
                         (filter some?))]
         (if (empty? losses)
