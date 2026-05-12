@@ -85,7 +85,7 @@ echo "=== Stage 3: bench inference (B=1, n_warm=64, n_time=256) ==="
 WATCHER=$!
 trap "kill $WATCHER 2>/dev/null" EXIT
 
-mmllm bench "$FIM_BASE" 1 "$BANK_BASE" 64 256 2>&1 | tail -40
+mmllm bench "$FIM_BASE" 2 "$BANK_BASE" 64 256 2>&1 | tail -40
 
 kill $WATCHER 2>/dev/null
 echo ""
