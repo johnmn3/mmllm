@@ -52,20 +52,29 @@ export MMLLM_N_TRUNKS=$N_TRUNKS
 export MMLLM_BATCH=1                   # B_per_trunk; B_eff = N_TRUNKS × 1 = 16 at N=16
 export MMLLM_SPARSE_OPT=sgd            # zero V_local opt state
 
-# Bank-engagement recipe. See run_shared_trunk.sh for the full rationale.
-# Sum gate (no learned dilution), no Bernoulli-Local (eval-mode would
-# always skip Local at bias=-2.0), bank LR holds at 1× through training.
+# Spike-6 recipe (verbatim from run_asym_spoon.sh / round-10-2). DO NOT
+# REMOVE INDIVIDUAL ENTRIES — each was added to address a documented
+# failure mode (round-7..10 narratives in docs/journal/).
 export MMLLM_NETBANK_ENABLED=true
-export MMLLM_LONG_TIER_MIX=sum
-export MMLLM_LR_BANK_MULT=10.0
-export MMLLM_LR_BANK_MULT_END=1.0
-export MMLLM_LR_NET_MULT=1.0
-export MMLLM_LR_NET_MULT_END=1.0
+export MMLLM_LONG_TIER_MIX=switch
+export MMLLM_ALPHA_NET=true
+export MMLLM_GATE_NET_DEFAULT=true
+export MMLLM_DISTILL_COEF=0.5
+export MMLLM_DISTILL_COEF_END=5.0
+export MMLLM_DISTILL_TARGET=residual
+export MMLLM_DISTILL_DIRECTION_ONLY=true
+export MMLLM_DISTILL_MAGNITUDE_COEF=0.0
+export MMLLM_DISTILL_MAGNITUDE_COEF_END=1.0
+export MMLLM_DISTILL_MAGNITUDE_CLAMP=10.0
+export MMLLM_LR_BANK_MULT=30.0
+export MMLLM_LR_BANK_MULT_END=0.001
+export MMLLM_LR_NET_MULT=0.001
+export MMLLM_LR_NET_MULT_END=0.1
 export MMLLM_LR_DENSE_MULT=0.05
 export MMLLM_LR_DENSE_MULT_END=0.005
 export MMLLM_LR=3e-3
 export MMLLM_LR_MIN=3e-3
-export MMLLM_LR_WARMUP=$((STEPS * 20 / 100))
+export MMLLM_LR_WARMUP=$((STEPS * 70 / 100))
 export MMLLM_REPLAY_EVERY=10
 export MMLLM_REPLAY_BUFFER_SIZE=256
 export MMLLM_REPLAY_THRESHOLD=0.5
@@ -123,26 +132,21 @@ run_round() {
   echo 1 > "${FIM_BASE}.ckpts/step-1/step.txt"
   python3 -c "import torch; torch.save({}, '${FIM_BASE}.ckpts/step-1/opt-sparse-net.pt')"
 
-  # Stage V_net. Round 1 Gaussian-inits (scale 0.02) a fresh V_net — the
-  # round-6 fp16 seed has shape sqrt_n=1024 × c_net=32 × 4 layers, which
-  # doesn't match our current sqrt_n=64 × 32 layers; reshaping it isn't
-  # well-defined. Gaussian (not zero) lets V_net contribute non-zero
-  # output from step 0 so gradient can shape it. Subsequent rounds carry
-  # forward the previous round's V_net.
+  # Stage V_net. Round 1 zero-inits a fresh V_net (the round-6 fp16 seed
+  # has shape sqrt_n=1024 × c_net=32 × 4 layers, which doesn't match our
+  # current sqrt_n=64 × 32 layers; reshaping isn't well-defined, so we
+  # start NetBank from zero). Subsequent rounds carry V_net forward.
   if [ "$resume_v_net" = "FRESH" ]; then
     python3 - "${BANK_BASE}" <<'PY'
 import sys, numpy as np
 bank_base = sys.argv[1]
 SQRT_NET = 64;  C_NET = 32
 N_LAYERS = 32
-INIT_SCALE = 0.02
-rng = np.random.default_rng(42)
 for layer in range(N_LAYERS):
     arr = np.memmap(f"{bank_base}-net.{layer}.bin", dtype=np.float32,
                     mode="w+", shape=(SQRT_NET * SQRT_NET, C_NET))
-    arr[:] = (rng.standard_normal(arr.shape) * INIT_SCALE).astype(np.float32)
-    arr.flush()
-print(f"  V_net: gaussian-init (scale={INIT_SCALE}) 32 layers × 64²×32 = 16 MB total")
+    arr[:] = 0.0; arr.flush()
+print(f"  V_net: zero-init 32 layers × 64²×32 = 16 MB total")
 PY
   else
     for i in $NET_LAYERS; do
@@ -151,9 +155,9 @@ PY
     echo "  V_net: carried forward from $(basename $(dirname $resume_v_net))"
   fi
 
-  # Stage V_local — Gaussian-init each round (hill-climber pattern; the
-  # bank starts fresh and accumulates content from training, but at small
-  # Gaussian rather than exact zero so gradient can shape V from step 1).
+  # Stage V_local — zero-init per round (hill-climber pattern; bank wakes
+  # from empty each spoon, accumulates content during training, sleep
+  # wipes back to zero before the next round).
   # Shape: (N_TRUNKS × sqrt_n², q_dim) per layer × 8 Local Bank layers.
   python3 - "${BANK_BASE}" "${N_TRUNKS}" <<'PY'
 import sys, numpy as np
@@ -163,18 +167,12 @@ SQRT_LOCAL = 226;  Q_DIM = 128
 LOCAL_LAYERS = [0, 1, 2, 12, 20, 29, 30, 31]
 n_per_trunk = SQRT_LOCAL * SQRT_LOCAL
 n_total     = n_trunks * n_per_trunk
-INIT_SCALE = 0.02
-rng = np.random.default_rng(42)
-CHUNK = 4096
 for layer in LOCAL_LAYERS:
     arr = np.memmap(f"{bank_base}.{layer}.bin", dtype=np.float32,
                     mode="w+", shape=(n_total, Q_DIM))
-    for s in range(0, n_total, CHUNK):
-        e = min(s + CHUNK, n_total)
-        arr[s:e] = (rng.standard_normal((e - s, Q_DIM)) * INIT_SCALE).astype(np.float32)
-    arr.flush()
+    arr[:] = 0.0; arr.flush()
 PY
-  echo "  V_local: gaussian-init (scale=0.02) 8 layers × $N_TRUNKS trunks × 226²×128"
+  echo "  V_local: zero-init 8 layers × $N_TRUNKS trunks × 226²×128"
 
   # Train. eval-every set > STEPS so no mid-training eval fires; the
   # end-of-train ablation (in train-long after the step loop) still runs.

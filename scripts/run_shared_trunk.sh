@@ -65,37 +65,32 @@ export MMLLM_N_TRUNKS=$N_TRUNKS
 #                            DON'T use at N>1 — guaranteed OOM.
 export MMLLM_SPARSE_OPT="${MMLLM_SPARSE_OPT:-adam-cpu}"
 
-# Bank-engagement recipe (replaces the SwitchGate / GATE_NET_DEFAULT recipe
-# inherited from spike-6 spoons). Rationale:
-#
-#  - LONG_TIER_MIX=sum: out = sdpa + mem + net. With V_local=V_net=0 at
-#    init, this is just sdpa (no dilution). As banks accumulate content
-#    they additively contribute. The alternative (SwitchGate softmax-mix)
-#    starts as 1/3·sdpa + 0 + 0 = sdpa/3, which forces the gate to push
-#    weight back toward sdpa just to recover the un-banked baseline —
-#    visible in the chain log as gate_w_sdpa drifting 0.50 → 0.61.
-#  - No GATE_NET_DEFAULT: that env var attaches a Bernoulli to Local
-#    (bias=-2.0, sigmoid(-2)=12% fire). Eval mode uses a deterministic
-#    threshold (>0.5), so Local *never* fires during eval-bpc → ablation
-#    measures Δ_local=0 regardless of V_local content. The chain's
-#    "local_firing_rate=0" was a measurement artifact from eval-mode
-#    threshold, not a training-mode reality.
-#  - No DISTILL_*: SumGate has no last_local_out / last_net_out stashes,
-#    so distill is a no-op anyway.
-#  - LR_BANK_MULT_END=1.0 (was 0.001): the bank cosine-cooled by ~1000×
-#    by end of training in the old recipe — V_local accumulation froze
-#    long before learning could converge. Hold at 1× throughout.
+# Spike-6 recipe (restored verbatim from run_asym_spoon.sh / round-10-2).
+# SwitchGate + GATE_NET_DEFAULT (Bernoulli-Local, the round-9 fix for
+# 3-way gate collapse), residual direction-only distill (the consolidator
+# path), cosine LR schedules (Local wakes/cools, Net ramps up). DO NOT
+# REMOVE INDIVIDUAL ENTRIES WITHOUT EXPLICIT AUTHORIZATION — each was
+# added to fix a specific failure mode documented in docs/journal/.
 export MMLLM_NETBANK_ENABLED=true
-export MMLLM_LONG_TIER_MIX=sum
-export MMLLM_LR_BANK_MULT=10.0
-export MMLLM_LR_BANK_MULT_END=1.0
-export MMLLM_LR_NET_MULT=1.0
-export MMLLM_LR_NET_MULT_END=1.0
+export MMLLM_LONG_TIER_MIX=switch
+export MMLLM_ALPHA_NET=true
+export MMLLM_GATE_NET_DEFAULT=true
+export MMLLM_DISTILL_COEF=0.5
+export MMLLM_DISTILL_COEF_END=5.0
+export MMLLM_DISTILL_TARGET=residual
+export MMLLM_DISTILL_DIRECTION_ONLY=true
+export MMLLM_DISTILL_MAGNITUDE_COEF=0.0
+export MMLLM_DISTILL_MAGNITUDE_COEF_END=1.0
+export MMLLM_DISTILL_MAGNITUDE_CLAMP=10.0
+export MMLLM_LR_BANK_MULT=30.0
+export MMLLM_LR_BANK_MULT_END=0.001
+export MMLLM_LR_NET_MULT=0.001
+export MMLLM_LR_NET_MULT_END=0.1
 export MMLLM_LR_DENSE_MULT=0.05
 export MMLLM_LR_DENSE_MULT_END=0.005
 export MMLLM_LR=3e-3
 export MMLLM_LR_MIN=3e-3
-export MMLLM_LR_WARMUP=$((STEP_LEN * 20 / 100))
+export MMLLM_LR_WARMUP=$((STEP_LEN * 70 / 100))
 export MMLLM_REPLAY_EVERY=10
 export MMLLM_REPLAY_BUFFER_SIZE=256
 export MMLLM_REPLAY_THRESHOLD=0.5
@@ -131,13 +126,8 @@ python3 -c "import torch; torch.save({}, '${FIM_BASE}.ckpts/step-1/opt-sparse-ne
 # Bank init: per-trunk V_local files sized (N_TRUNKS * sqrt_n² , q_dim),
 # per-layer V_net files sized (sqrt_n_net² , c_net). Local files contain
 # N_TRUNKS contiguous slices laid out (trunk0_rows, trunk1_rows, …).
-#
-# Gaussian-init (scale 0.02) — matches mmllm.memory._mmap_value_tensor's
-# default. Zero-init would prevent the bank from contributing at step 0
-# (mem_out=0 → ∂loss/∂V via the gather chain ends up scaled by zero where
-# V appears as a softmax-weighted sum), so V can't bootstrap. With small
-# Gaussian init the bank has a real (if tiny) contribution that gradient
-# can push on from step 1.
+# Zero-init matches the asym_spoon / spike-6 launcher pattern — Local
+# Bank wakes from empty each spoon, sleep cycle wipes between rounds.
 python3 - "$BANK_BASE" "$N_TRUNKS" <<'PY'
 import numpy as np, sys
 bank_base = sys.argv[1]
@@ -147,23 +137,15 @@ SQRT_NET   = 64;   C_NET = 32
 LOCAL_LAYERS = [0, 1, 2, 12, 20, 29, 30, 31]
 n_per_trunk = SQRT_LOCAL * SQRT_LOCAL
 local_n = n_trunks * n_per_trunk
-INIT_SCALE = 0.02
-rng = np.random.default_rng(42)
 for i in LOCAL_LAYERS:
     a = np.memmap(f"{bank_base}.{i}.bin", dtype=np.float32, mode="w+",
                   shape=(local_n, Q_DIM))
-    # Chunked write to bound peak transient at chunk_rows × q_dim × 8 bytes.
-    CHUNK = 4096
-    for s in range(0, local_n, CHUNK):
-        e = min(s + CHUNK, local_n)
-        a[s:e] = (rng.standard_normal((e - s, Q_DIM)) * INIT_SCALE).astype(np.float32)
-    a.flush()
+    a[:] = 0.0; a.flush()
 for i in range(32):
     a = np.memmap(f"{bank_base}-net.{i}.bin", dtype=np.float32, mode="w+",
                   shape=(SQRT_NET * SQRT_NET, C_NET))
-    a[:] = (rng.standard_normal(a.shape) * INIT_SCALE).astype(np.float32)
-    a.flush()
-print(f"  banks gaussian-init'd (scale={INIT_SCALE}): 8 V_local × {n_trunks} trunks, 32 V_net")
+    a[:] = 0.0; a.flush()
+print(f"  banks zero-init'd: 8 V_local × {n_trunks} trunks, 32 V_net (shared)")
 PY
 
 # train-fim args: total-steps eval-every ckpt-every

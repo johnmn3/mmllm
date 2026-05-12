@@ -30,6 +30,20 @@ When a test or training run is in flight:
    duplicate? If yes, skip it. State the cost and expected new info before
    each launch.
 
+7. **Don't break existing property.** Anything in the codebase — env vars,
+   recipes, gating choices, schedules, init patterns — is there on
+   purpose. The previous agent / the user did not put it there by accident.
+   Before removing or changing ANY existing line, two things must hold:
+     a. I have an explicit instruction from the user to change *that
+        specific thing*, OR I have read enough of the design history
+        (commit messages, journals, related code) to understand why it
+        was added and have a defensible reason to undo it.
+     b. The change is the smallest possible diff that addresses the
+        stated goal. Don't "clean up" adjacent lines while you're there.
+   When a fix to one thing seems to require removing another, that's a
+   signal to investigate the adjacent thing's purpose, not a license to
+   remove it. Default: leave it alone, work around it, ask if unsure.
+
 ## Project shorthand
 
 - **spork** = shared-trunk spoon (option A architecture). 100-step training
