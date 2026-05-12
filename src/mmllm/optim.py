@@ -1,28 +1,26 @@
-"""Custom optimizer with CPU-offloaded sparse state for mmllm.
+"""Custom optimizer with CPU-offloaded, TOUCHED-ROW-SPARSE state.
 
-PyTorch's stock `torch.optim.SparseAdam` keeps the m, v moments on the
-same device as the parameter. For our 18.8 GB bank V on GPU, that's
-~38 GB of GPU VRAM consumed by Adam moments — half the A100-80GB.
+PyTorch's stock `torch.optim.SparseAdam` keeps the m, v moments at the
+parameter's FULL shape, even though only some rows receive grad. For
+our V_net at sqrt_n=5600/c_net=32, that's 16 GB × 2 = 32 GB of state
+allocation on first .step() — OOMs a 15 GiB sandbox.
 
-This module ships `CPUOffloadSparseAdam`, a drop-in replacement that
-keeps state on the host (`device='cpu'`) while V.weight stays on GPU.
-Each `.step()`:
+This module ships `CPUOffloadSparseAdam`, which keeps state on the host
+(`device='cpu'`) AND only allocates state for rows that actually receive
+gradient. Each `.step()`:
 
-  1. Reads sparse grad off GPU (only touched rows).
-  2. Coalesces; pulls (indices, values) to CPU via single .to('cpu').
-  3. Looks up state[indices] on CPU, computes Adam update on CPU.
-  4. Writes new (m, v) back to CPU state at the same indices.
-  5. Sends the per-row delta back to GPU; applies in-place to V.
+  1. Reads sparse grad (only touched rows).
+  2. Coalesces; pulls (indices, values) to CPU.
+  3. Maps each touched V-row to a position in m_buf/v_buf, allocating
+     a new zero-row on first touch (m_buf and v_buf grow over time).
+  4. Adam update on CPU using m_buf[buf_idx], v_buf[buf_idx].
+  5. Writes new (m, v) back at the same buf positions.
+  6. Sends the per-row delta back to the param device; applies in-place.
 
-Per-step cross-device transfer is bounded by touched-row count × dim,
-which is the same as the sparse grad we'd send anyway — no asymptotic
-overhead vs on-GPU SparseAdam, just one extra CPU round-trip in
-exchange for ~38 GB of GPU memory back.
-
-Memory math at sqrt_n=2048:
-  - V on GPU: 4.2M × 224 × 4 = 3.76 GB / layer × 5 = 18.8 GB
-  - state on CPU: same shape × 2 (m, v) = 37.6 GB / 5 layers
-  - Need ~64 GB host RAM to hold state across all 5 layers.
+Memory scales with TOUCHED-row count × dim × 4 bytes × 2 (m + v), NOT
+the bank's full shape. For a 100-step run with top_k=256, B=4, T=128
+across 4 layers, that's ~5M touches × ~256 bytes ≈ 1.3 GB — vs the
+dense-state version's 32 GB at V_net=16 GB.
 """
 
 from __future__ import annotations
@@ -47,23 +45,31 @@ class CPUOffloadSparseAdam(torch.optim.Optimizer):
         super().__init__(params, defaults)
 
     def load_state_dict(self, state_dict):
-        """Restore optimizer state, then force m / v moments back to
-        CPU.
+        """Restore optimizer state.
 
-        torch.optim.Optimizer.load_state_dict auto-moves loaded state
-        tensors to the corresponding parameter's device — which is the
-        right default for in-VRAM optimizers but defeats the whole
-        point of CPU-offloading. The ckpt was saved with m / v on CPU
-        (`CPUOffloadSparseAdam` keeps them there during training);
-        without this override the loaded state lands on CUDA, causing
-        a device-mismatch crash on the next .step() call mixing
-        CUDA m_old with CPU values_cpu.
+        Old ckpts saved with the dense-state version had keys "m" and "v"
+        as full V-shape tensors. This sparse-state version uses "m_buf",
+        "v_buf", and "row_to_buf" — incompatible layouts. We skip the
+        load when we detect the old format and fall back to fresh state
+        (training resumes with Adam moments at zero, which is what fresh
+        init would have been anyway for any new run).
         """
+        # Detect old-format state and skip.
+        old_format = False
+        for pid, st in (state_dict.get("state", {}) or {}).items():
+            if isinstance(st, dict) and ("m" in st or "v" in st) and "m_buf" not in st:
+                old_format = True
+                break
+        if old_format:
+            # Don't load — state stays empty, next step() lazy-inits the
+            # new sparse buffers.
+            return
         super().load_state_dict(state_dict)
+        # Force all CPU residence on loaded sparse state too.
         for group in self.param_groups:
             for p in group["params"]:
                 state = self.state.get(p, {})
-                for key in ("m", "v"):
+                for key in ("m_buf", "v_buf"):
                     t = state.get(key)
                     if t is not None and t.device.type != "cpu":
                         state[key] = t.to("cpu")
@@ -92,10 +98,22 @@ class CPUOffloadSparseAdam(torch.optim.Optimizer):
 
                 state = self.state[p]
                 if len(state) == 0:
-                    # Lazy init state on CPU. Same dtype/shape as p but on host.
+                    # Sparse-state init: store m and v as growing CPU
+                    # tensors of touched rows only. row_to_buf is a Python
+                    # dict mapping V-row index → row position in m_buf/v_buf.
+                    # First touch of a row appends a zero-row to the buffers.
+                    #
+                    # Memory scales with TOUCHED rows × dim × 4 bytes × 2
+                    # (m + v), not bank size. For a 100-step training run
+                    # touching ~5M unique rows at c_net=32, that's ~1.3 GB —
+                    # vs the dense-state version's V_net-size × 2 (32 GB
+                    # at sqrt_n=5600).
                     state["step"] = 0
-                    state["m"] = torch.zeros(p.shape, dtype=p.dtype, device="cpu")
-                    state["v"] = torch.zeros(p.shape, dtype=p.dtype, device="cpu")
+                    state["m_buf"] = torch.zeros((0, p.shape[-1]),
+                                                 dtype=p.dtype, device="cpu")
+                    state["v_buf"] = torch.zeros((0, p.shape[-1]),
+                                                 dtype=p.dtype, device="cpu")
+                    state["row_to_buf"] = {}  # int → int
 
                 state["step"] += 1
                 step_count = state["step"]
@@ -110,12 +128,35 @@ class CPUOffloadSparseAdam(torch.optim.Optimizer):
                 indices_cpu = indices_gpu.to("cpu", non_blocking=False)
                 values_cpu = values_gpu.to("cpu", non_blocking=False)
 
-                m = state["m"]  # (n, dim) CPU
-                v = state["v"]
+                row_to_buf = state["row_to_buf"]
+                m_buf = state["m_buf"]
+                v_buf = state["v_buf"]
+
+                # Map V-row indices → m_buf positions, allocating new
+                # rows for first-touched indices.
+                indices_list = indices_cpu.tolist()
+                buf_idx_list = []
+                new_rows_count = 0
+                for vrow in indices_list:
+                    bidx = row_to_buf.get(vrow)
+                    if bidx is None:
+                        bidx = m_buf.shape[0] + new_rows_count
+                        row_to_buf[vrow] = bidx
+                        new_rows_count += 1
+                    buf_idx_list.append(bidx)
+                if new_rows_count > 0:
+                    # Grow m_buf and v_buf by new_rows_count zero rows.
+                    zero_pad = torch.zeros((new_rows_count, p.shape[-1]),
+                                           dtype=p.dtype, device="cpu")
+                    m_buf = torch.cat([m_buf, zero_pad], dim=0)
+                    v_buf = torch.cat([v_buf, zero_pad.clone()], dim=0)
+                    state["m_buf"] = m_buf
+                    state["v_buf"] = v_buf
+                buf_idx = torch.tensor(buf_idx_list, dtype=torch.long, device="cpu")
 
                 # Pull old moments for the touched rows.
-                m_old = m[indices_cpu]
-                v_old = v[indices_cpu]
+                m_old = m_buf[buf_idx]
+                v_old = v_buf[buf_idx]
 
                 # Adam update (on CPU).
                 m_new = m_old.mul(beta1).add_(values_cpu, alpha=1 - beta1)
@@ -131,9 +172,9 @@ class CPUOffloadSparseAdam(torch.optim.Optimizer):
                 # Per-row update delta (on CPU).
                 delta_cpu = -lr * m_hat / (v_hat.sqrt().add_(eps))
 
-                # Write moments back to CPU state.
-                m[indices_cpu] = m_new
-                v[indices_cpu] = v_new
+                # Write moments back to CPU state at their buf positions.
+                m_buf[buf_idx] = m_new
+                v_buf[buf_idx] = v_new
 
                 # Apply the delta to the parameter on its native device.
                 # index_add_ handles duplicate indices correctly (already
