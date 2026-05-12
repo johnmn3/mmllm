@@ -32,6 +32,10 @@ export MMLLM_LR=3e-3
 export MMLLM_LR_MIN=3e-3
 export MMLLM_LR_WARMUP=700
 
+export MMLLM_REPLAY_EVERY=10
+export MMLLM_REPLAY_BUFFER_SIZE=256
+export MMLLM_REPLAY_THRESHOLD=0.5
+
 export MMLLM_SKIP_NETBANK_WARMSTART=true
 export MMLLM_NET_V_WARMSTART_FROM_LOCAL=false
 export MMLLM_ABLATE_EVERY=100
@@ -52,11 +56,21 @@ python3 - "${ROUND6_BASE}" "${BANK_BASE}" <<'PY'
 import sys, numpy as np
 from pathlib import Path
 src_dir = Path(sys.argv[1]); bank_base = sys.argv[2]
+# V_net from round-6 fp16 seed (expand to fp32)
 for fp16_file in sorted(src_dir.glob("bank-net-latest.*.fp16.bin")):
     layer = int(fp16_file.name.split(".")[1])
     arr16 = np.fromfile(fp16_file, dtype=np.float16)
     Path(f"{bank_base}-net.{layer}.bin").write_bytes(arr16.astype(np.float32).tobytes())
     print(f"  V_net layer {layer} restored from fp16 seed")
+# V_local explicitly zero-init (65536 entries × 128 head_dim) — matches the
+# original spike staging. Without this, train-fim falls back to random init,
+# which gives the Bernoulli gate a "Local is hurting" signal from step 1 and
+# locks Local out per-layer.
+for i in range(4):
+    arr = np.memmap(f"{bank_base}.{i}.bin", dtype=np.float32, mode="w+", shape=(65536, 128))
+    arr[:] = 0.0
+    arr.flush()
+    print(f"  V_local layer {i} zero-initialized (65536 × 128)")
 PY
 
 mmllm train-fim "$FIM_BASE" "$BANK_BASE" 1001 100 1000 2>&1 | tee /tmp/mmllm-cpu/spike6.train.log
