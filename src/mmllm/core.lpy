@@ -2661,54 +2661,75 @@
   "Compute bytes-per-character on a held-out byte tensor. Returns
    {:bpc :ppl :n-tokens :n-windows}. `max-tokens` caps total
    tokens predicted so eval stays bounded on big held-out splits
-   — pass nil for the whole tensor."
+   — pass nil for the whole tensor.
+
+   At N_TRUNKS > 1, every eval batch row is assigned a trunk_id
+   round-robin (row i → trunk i mod N). This means each trunk's
+   V_local slice is exercised in proportion to its share of the
+   batch, so the ablation Δ measures pooled trunk performance
+   rather than just trunk-0's contribution. trunk_ids is built
+   deterministically from row index, so control and ablated eval
+   passes see the SAME routing — the Δ between them is the actual
+   bank-tier signal, not trunk-assignment noise."
   ([m data T] (eval-bpc m data T 16 100000))
   ([m data T B max-tokens]
    (set-eval-mode! m)
    (torch/set_grad_enabled false)
-   (try
-     (let [N        (.size data 0)
-           cap-toks (or max-tokens N)
-           wins-cap (quot cap-toks T)
-           n-wins   (min (quot (- N 1) T) wins-cap)
-           usable   (* n-wins T)
-           x-flat   (.narrow data 0 0 usable)
-           y-flat   (.narrow data 0 1 usable)
-           x-wins   (.reshape x-flat n-wins T)
-           y-wins   (.reshape y-flat n-wins T)]
-       (println (format "  eval-bpc: %d windows × T=%d, B=%d (cap=%d toks)"
-                        n-wins T B (* n-wins T)))
-       (loop [i      0
-              total  0.0
-              n-toks 0
-              logged 0]
-         (if (>= i n-wins)
-           (let [nll (/ total n-toks)
-                 bpc (/ nll LN2)
-                 ppl (math/exp nll)]
-             (println (format "    bpc=%.4f  ppl=%.2f  over %d tokens"
-                              bpc ppl n-toks))
-             {:bpc bpc :ppl ppl :n-tokens n-toks :n-windows n-wins})
-           (let [device    (:device m)
-                 end       (min (+ i B) n-wins)
-                 bsz       (- end i)
-                 xb        (.to (.narrow x-wins 0 i bsz) device)
-                 yb        (.to (.narrow y-wins 0 i bsz) device)
-                 [logits _ _] (forward m xb)
-                 loss      (F/cross_entropy
-                            (.reshape logits -1 vocab-size)
-                            (.reshape yb -1)
-                            ** :reduction "sum")
-                 bsz-toks  (* bsz T)
-                 total'    (+ total (.item loss))
-                 n-toks'   (+ n-toks bsz-toks)
-                 logged'   (+ logged bsz)]
-             (when (>= logged' 256)
-               (println (format "      %d/%d windows  running bpc=%.4f"
-                                end n-wins (/ (/ total' n-toks') LN2))))
-             (recur end total' n-toks' (mod logged' 256))))))
-     (finally
-       (torch/set_grad_enabled true)))))
+   (let [n-trunks (pick-n-trunks)]
+     (try
+       (let [N        (.size data 0)
+             cap-toks (or max-tokens N)
+             wins-cap (quot cap-toks T)
+             n-wins   (min (quot (- N 1) T) wins-cap)
+             usable   (* n-wins T)
+             x-flat   (.narrow data 0 0 usable)
+             y-flat   (.narrow data 0 1 usable)
+             x-wins   (.reshape x-flat n-wins T)
+             y-wins   (.reshape y-flat n-wins T)]
+         (println (format "  eval-bpc: %d windows × T=%d, B=%d (cap=%d toks)%s"
+                          n-wins T B (* n-wins T)
+                          (if (> n-trunks 1)
+                            (format " trunk-round-robin N=%d" n-trunks)
+                            "")))
+         (loop [i      0
+                total  0.0
+                n-toks 0
+                logged 0]
+           (if (>= i n-wins)
+             (let [nll (/ total n-toks)
+                   bpc (/ nll LN2)
+                   ppl (math/exp nll)]
+               (println (format "    bpc=%.4f  ppl=%.2f  over %d tokens"
+                                bpc ppl n-toks))
+               {:bpc bpc :ppl ppl :n-tokens n-toks :n-windows n-wins})
+             (let [device    (:device m)
+                   end       (min (+ i B) n-wins)
+                   bsz       (- end i)
+                   xb        (.to (.narrow x-wins 0 i bsz) device)
+                   yb        (.to (.narrow y-wins 0 i bsz) device)
+                   ;; Per-batch-row trunk routing for N>1. Window i in
+                   ;; the eval split → trunk (i mod N_TRUNKS). Deterministic
+                   ;; so control and ablated eval passes are aligned.
+                   trunk-ids (when (> n-trunks 1)
+                               (.to (.remainder
+                                      (torch/arange i end ** :dtype torch/long)
+                                      n-trunks)
+                                    device))
+                   [logits _ _] (forward m xb nil nil false trunk-ids)
+                   loss      (F/cross_entropy
+                              (.reshape logits -1 vocab-size)
+                              (.reshape yb -1)
+                              ** :reduction "sum")
+                   bsz-toks  (* bsz T)
+                   total'    (+ total (.item loss))
+                   n-toks'   (+ n-toks bsz-toks)
+                   logged'   (+ logged bsz)]
+               (when (>= logged' 256)
+                 (println (format "      %d/%d windows  running bpc=%.4f"
+                                  end n-wins (/ (/ total' n-toks') LN2))))
+               (recur end total' n-toks' (mod logged' 256))))))
+       (finally
+         (torch/set_grad_enabled true))))))
 
 (defn eval-bpc-on-path
   "Run eval-bpc against an arbitrary held-out byte tensor at <test-path>,

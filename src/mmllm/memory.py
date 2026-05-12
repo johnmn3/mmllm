@@ -757,10 +757,29 @@ class ProductKeyMemory(nn.Module):
         file per layer, overwritten each ckpt) so the on-disk cost
         is bounded to ~bank size, not per-step accumulating.
 
-        Returns total bytes written.
+        Self-overwrite guard: when `path` is the SAME file that V's
+        live mmap is already bound to (the bank_on_gpu=False + mmap
+        case), there's nothing to do — V.weight is the on-disk file's
+        content. Opening it again as mode='w+' would truncate, which
+        leaves the live mmap's pages stale and the copy reads zeros,
+        which then propagate to disk. Just flush and return early.
+
+        Returns total bytes written (or expected_bytes when the live
+        mmap is already the destination).
         """
         n, dim = self.V.weight.shape
         expected_bytes = n * dim * 4  # float32
+        # If V is already mmap-backed at this path, the bank is already
+        # on disk — flush the OS page cache and return.
+        if self._storage is not None:
+            try:
+                live_path = os.path.realpath(self._storage.path)
+                want_path = os.path.realpath(path)
+            except OSError:
+                live_path = want_path = None
+            if live_path == want_path:
+                self._storage.flush() if hasattr(self._storage, "flush") else None
+                return expected_bytes
         os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
         # Pull to CPU once; chunk the write so we don't peak at 2× memory.
         weight_cpu = self.V.weight.detach().to("cpu", copy=False).numpy()
