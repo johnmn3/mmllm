@@ -9,6 +9,10 @@ export MMLLM_DEVICE=cpu
 export MMLLM_BANK_ON_GPU=false
 export MMLLM_NET_BANK_ON_GPU=false
 export MMLLM_SKIP_NETBANK_WARMSTART=true
+# CRITICAL: NetBank sqrt_n defaults to 8192 in the env-var picker
+# (8 GB V_net = OOM). Pin to round-6 baseline 1024.
+export MMLLM_NET_SQRT_N=1024
+export MMLLM_NET_C_NET=32
 
 FIM_BASE=/tmp/mmllm-cpu/fim-iso
 BANK_BASE=/tmp/mmllm-cpu/fim-bank-iso
