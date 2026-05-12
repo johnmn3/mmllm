@@ -7,11 +7,15 @@
 #   MMLLM_SPARSE_OPT=sgd (zero V_local opt state — N-independent memory)
 #   32-layer asymmetric arch, Local at 8 layers, NetBank at all 32
 #
-# Round 1 starts fresh from round-6 baseline:
+# Round 1 starts from round-6 baseline:
 #   - dense.pt copied from /home/user/mmllm/core/round-6/step-5000
+#     (40/86 dense param tensors skip-load due to shape mismatch — the
+#     bank K_a/K_b projection shapes differ between round-6 and the
+#     asym config; non-bank dense weights load cleanly.)
 #   - V_local: zero-init at (N_TRUNKS * sqrt_n², q_dim) shape
-#   - V_net: seeded from round-6's bank-net-latest.{0..3}.fp16.bin
-#     (replicated across all 32 NetBank layers since round-6 only has 4)
+#   - V_net:   zero-init at (sqrt_n_net², c_net) shape × 32 layers.
+#     We can't reuse round-6's fp16 NetBank (sqrt_n=1024 × c_net=32 × 4
+#     layers) — shape doesn't match our sqrt_n=64 × 32-layer config.
 #
 # Rounds 2..N inherit dense.pt + V_net from the previous round;
 # V_local is re-zeroed each round (matches the spike-6 hill-climber +
@@ -125,21 +129,18 @@ run_round() {
   echo 1 > "${FIM_BASE}.ckpts/step-1/step.txt"
   python3 -c "import torch; torch.save({}, '${FIM_BASE}.ckpts/step-1/opt-sparse-net.pt')"
 
-  # Stage V_net. Round 1 reads round-6's fp16 NetBank seed for the first
-  # 4 layers, replicates it across all 32 to seed the asymmetric arch.
-  # Subsequent rounds carry forward the previous round's V_net.
-  if [ "$resume_v_net" = "FP16_SEED" ]; then
-    python3 - "${ROUND6_BASE}" "${BANK_BASE}" <<'PY'
+  # Stage V_net. Round 1 zero-inits a fresh V_net (the round-6 fp16 seed
+  # has shape sqrt_n=1024 × c_net=32 × 4 layers, which doesn't match our
+  # current sqrt_n=64 × 32 layers; reshaping it isn't well-defined, so
+  # we start NetBank from zero). MMLLM_SKIP_NETBANK_WARMSTART=true also
+  # suppresses the in-process K_a/K_b warm-start path. Subsequent rounds
+  # carry forward the previous round's V_net.
+  if [ "$resume_v_net" = "FRESH" ]; then
+    python3 - "${BANK_BASE}" <<'PY'
 import sys, numpy as np
-from pathlib import Path
-src_dir = Path(sys.argv[1]); bank_base = sys.argv[2]
+bank_base = sys.argv[1]
 SQRT_NET = 64;  C_NET = 32
 N_LAYERS = 32
-# round-6 fp16 files: bank-net-latest.{0..3}.fp16.bin (4 layers × 1024² × 32 fp16).
-# Our config is sqrt_n=64 + 32 layers; we need fresh zero-init for all 32
-# layers at the new (64²=4096, 32) shape. The FP16 seed shape doesn't match,
-# so we zero-init here and rely on the K_a/K_b warm-start path (disabled
-# here via MMLLM_SKIP_NETBANK_WARMSTART=true; NetBank starts at random V).
 for layer in range(N_LAYERS):
     arr = np.memmap(f"{bank_base}-net.{layer}.bin", dtype=np.float32,
                     mode="w+", shape=(SQRT_NET * SQRT_NET, C_NET))
@@ -193,8 +194,9 @@ PY
   echo "  → archived to $ROUND_DIR"
 }
 
-# Round 1: BASELINE warm-start.
-run_round 1 BASELINE FP16_SEED
+# Round 1: dense warm-start from round-6, NetBank fresh (shape mismatch
+# with round-6 prevents direct seed transfer; see run_round's V_net path).
+run_round 1 BASELINE FRESH
 
 # Subsequent rounds: carry dense + V_net forward.
 for r in $(seq 2 $N_ROUNDS); do
