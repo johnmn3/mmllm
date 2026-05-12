@@ -39,7 +39,7 @@ export MMLLM_DISTILL_DIRECTION_ONLY=true
 export MMLLM_DISTILL_MAGNITUDE_COEF=0.0
 export MMLLM_DISTILL_MAGNITUDE_COEF_END=1.0
 export MMLLM_DISTILL_MAGNITUDE_CLAMP=10.0
-export MMLLM_LR_BANK_MULT=10.0
+export MMLLM_LR_BANK_MULT=30.0
 export MMLLM_LR_BANK_MULT_END=0.001
 export MMLLM_LR_NET_MULT=0.001
 export MMLLM_LR_NET_MULT_END=0.1
@@ -155,10 +155,13 @@ have_best=0
 
 for round_num in 1 2 3 4 5 6 7 8 9 10; do
   if [ "$have_best" = "0" ]; then
-    dnet=$(run_round "$round_num" "$step_len" BASELINE ZERO)
+    dnet=$(run_round "$round_num" "$step_len" BASELINE ZERO | tail -1)
   else
-    dnet=$(run_round "$round_num" "$step_len" "$BEST_ARCHIVE/dense.pt" "$BEST_ARCHIVE/V_net")
+    dnet=$(run_round "$round_num" "$step_len" "$BEST_ARCHIVE/dense.pt" "$BEST_ARCHIVE/V_net" | tail -1)
   fi
+  # Sanitize: strip whitespace, default to 0 if extraction returned empty.
+  dnet=$(echo "$dnet" | tr -d '[:space:]')
+  if [ -z "$dnet" ]; then dnet=0; fi
 
   is_better=$(python3 -c "print(1 if float('$dnet') > float('$best_dnet') else 0)")
   if [ "$is_better" = "1" ]; then
