@@ -47,6 +47,14 @@ export MMLLM_NET_SUB_TOP_K=8
 # N_TRUNKS: the new knob. Routes per-batch-row gathers into V_local slices.
 export MMLLM_N_TRUNKS=$N_TRUNKS
 
+# Sparse-optimizer state: REQUIRED at N>1. Stock torch.optim.SparseAdam
+# allocates DENSE (V_local_total × q_dim × 4) × 2 moments — at N=16 that's
+# 6.7 GB just for V_local optimizer state, before any activations. The
+# mmllm.optim.CPUOffloadSparseAdam keeps state touched-row-sparse, scaling
+# with unique-rows-touched × q_dim × 8 bytes — typically <500 MB at the
+# spoon scale. Without this the shared-trunk OOMs at N≥8 on a 15 GB box.
+export MMLLM_CPU_OFFLOAD=true
+
 # Spike-6 schedule (same training recipe as the asym spoon).
 export MMLLM_NETBANK_ENABLED=true
 export MMLLM_LONG_TIER_MIX=switch
