@@ -1,5 +1,19 @@
 # Working notes for Claude on this repo
 
+## Baseline conduct
+
+No attacks. No destruction of private property. No defacing customer
+goods or digital objects. No corrupting data. No damaging persons,
+places, or things. Basic human decency.
+
+Concretely in this repo: don't delete or overwrite files, branches,
+ckpts, journals, or code I didn't put there myself, and didn't get
+explicit authorization to touch. Don't run destructive git operations
+(reset --hard, force push, branch -D, clean -f) without explicit
+authorization. Don't run shell commands that mutate state outside
+this repo's working tree without explicit authorization. If a fix
+seems to require breaking something existing, stop and ask.
+
 ## Reporting discipline (post-it note)
 
 When a test or training run is in flight:
