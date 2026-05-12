@@ -90,6 +90,26 @@ export MMLLM_LR_DENSE_MULT_END=0.005
 export MMLLM_LR=3e-3
 export MMLLM_LR_MIN=3e-3
 
+# ── Init warmup (NEW — addresses round-10 LR-sweep U-curve) ────────────────
+# Round-10 evidence: every high-LR worker (20/30/40/50) had Δ_local go
+# NEGATIVE for some window — zeroing Local actively improved bpc. Cause:
+# Local's V got hit with full peak LR from step 0 while V was still
+# random; updates kicked V into chaotic regimes faster than coherent
+# gradient signal could establish. LR=20 stayed negative for 2750 steps;
+# LR=30 never fully recovered.
+#
+# MMLLM_LR_WARMUP=N applies linear ramp 0 → max-lr over N steps to the
+# global LR. The per-tier multipliers stay at start values during this
+# window (per mult-cosine-interp), so effective Local LR = (warmup-
+# ramped global) × MMLLM_LR_BANK_MULT. By the end of warmup, Local has
+# accumulated coherent V at gradually-rising LR; the cosine cooldown
+# then takes over from peak.
+#
+# 500 steps = 10% of the 5000-step run. By step 250 (first ablation),
+# effective Local LR is 50% of peak — below the chaos threshold the
+# round-10 sweep exposed.
+export MMLLM_LR_WARMUP=500
+
 # ── Resume contract (preserve harvested NetBank V) ─────────────────────────
 export MMLLM_SKIP_NETBANK_WARMSTART=true
 export MMLLM_NET_V_WARMSTART_FROM_LOCAL=false
