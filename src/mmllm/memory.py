@@ -479,13 +479,21 @@ class ProductKeyMemory(nn.Module):
 
     def __init__(self, q_dim: int, sqrt_n: int,
                  top_k: int = 16, sub_top_k: int = 32,
-                 mmap_path: str | None = None):
+                 mmap_path: str | None = None,
+                 n_trunks: int = 1):
         super().__init__()
         assert q_dim % 2 == 0, "q_dim must be even"
+        assert n_trunks >= 1, f"n_trunks must be >= 1, got {n_trunks}"
         self.q_dim = q_dim
         self.sub_dim = q_dim // 2
         self.sqrt_n = sqrt_n
-        self.n = sqrt_n * sqrt_n
+        # Per-trunk addressable row count = sqrt_n². With n_trunks>1, V holds
+        # n_trunks copies of this row space — different (i_a, i_b) → same
+        # per-trunk row, but each trunk_id has its own slice. Routing inside
+        # forward() adds (trunk_id * n_per_trunk) to top_global before gather.
+        self.n_per_trunk = sqrt_n * sqrt_n
+        self.n_trunks = n_trunks
+        self.n = n_trunks * self.n_per_trunk
         self.top_k = top_k
         self.sub_top_k = min(sub_top_k, sqrt_n)
         self.mmap_path = mmap_path
@@ -680,7 +688,19 @@ class ProductKeyMemory(nn.Module):
                     rows = (base.unsqueeze(-1) + kb_dead_idx.unsqueeze(0)).flatten()
                     rows_to_reset.append(rows)
                 if rows_to_reset:
-                    all_rows = torch.unique(torch.cat(rows_to_reset))
+                    # Dead-key rows are in [0, n_per_trunk). With n_trunks>1,
+                    # broadcast across all trunks so each trunk's slice gets
+                    # the same dead-row noise refresh (K_a/K_b are shared, so
+                    # unreachability is shared too).
+                    per_trunk_rows = torch.unique(torch.cat(rows_to_reset))
+                    if self.n_trunks > 1:
+                        trunk_offsets = (torch.arange(self.n_trunks,
+                                                      device=per_trunk_rows.device)
+                                         * self.n_per_trunk)
+                        all_rows = (per_trunk_rows.unsqueeze(0)
+                                    + trunk_offsets.unsqueeze(-1)).flatten()
+                    else:
+                        all_rows = per_trunk_rows
                     # Cap reset to avoid touching > 25% of V at once
                     cap = self.n // 4
                     if all_rows.numel() > cap:
@@ -777,8 +797,17 @@ class ProductKeyMemory(nn.Module):
         del arr
         return expected_bytes
 
-    def forward(self, q: torch.Tensor) -> torch.Tensor:
+    def forward(self, q: torch.Tensor,
+                trunk_ids: torch.Tensor | None = None) -> torch.Tensor:
         """q: (B, T, q_dim) → (B, T, q_dim) softmax-weighted retrieval.
+
+        `trunk_ids` (optional, (B,) long): per-batch-row routing into V's
+        per-trunk slices. When n_trunks > 1, the gather is offset by
+        `trunk_ids[i] * n_per_trunk` for batch row i, so each row reads
+        from its trunk's V slice while sharing K_a, K_b, q_norm. Pass None
+        when n_trunks == 1 (the offset would be 0 anyway). The sub-key
+        scoring stays unchanged — same addressing scheme across trunks;
+        only the value bank specializes.
 
         When V.weight is on a different device than q (e.g. q on cuda
         while V is CPU-pinned mmap), the top_k indices are moved to
@@ -833,7 +862,16 @@ class ProductKeyMemory(nn.Module):
 
         # Top-K from candidates — still on q's device
         top_scores, top_local = combined_scores.topk(self.top_k, dim=-1)
-        top_global = combined_idx.gather(-1, top_local)            # (B, T, top_k)
+        top_global = combined_idx.gather(-1, top_local)            # (B, T, top_k); per-trunk row in [0, n_per_trunk)
+
+        # Multi-trunk routing: offset each batch row's indices by its trunk's
+        # base row. After this, top_global indexes into the flat (N*n_per_trunk,
+        # q_dim) V — each batch row hits its own trunk's slice. At N=1 this is
+        # skipped (offset would be 0). trunk_ids must be a (B,) long tensor.
+        if self.n_trunks > 1 and trunk_ids is not None:
+            offsets = (trunk_ids.to(device=top_global.device, dtype=top_global.dtype)
+                                * self.n_per_trunk).view(B, 1, 1)
+            top_global = top_global + offsets
 
         # Cross-device V gather: when V is pinned to CPU but q is on GPU,
         # move only top_k indices over (~64 KB), gather rows on V's
