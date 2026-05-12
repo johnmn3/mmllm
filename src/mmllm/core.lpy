@@ -268,6 +268,21 @@
   (let [env-val (.get (.- os environ) "MMLLM_MEMORY_TOP_K")]
     (if env-val (python/int env-val) config-default)))
 
+(defn pick-n-trunks
+  "Number of Local Bank trunks for shared-trunk multi-stream training.
+   Reads MMLLM_N_TRUNKS (default 1 = single trunk, legacy behavior).
+
+   When > 1, every block's Local Bank V_local is sized (N*sqrt_n², q_dim)
+   and per-batch-row trunk_ids route each row to its own V_local slice.
+   Dense weights, K_a/K_b, and NetBank stay shared across trunks — the
+   bank values are the only thing that specializes per trunk. The training
+   batch is built as N×B_per_trunk content-sharded windows, with trunk_ids
+   = [0]*B_per_trunk ++ [1]*B_per_trunk ++ … so each trunk hill-climbs on
+   a disjoint slice of the corpus while the shared trunk averages dense
+   gradients across all N sources."
+  []
+  (python/int (.get (.- os environ) "MMLLM_N_TRUNKS" "1")))
+
 (defn pick-memory-sub-top-k
   "Sub-keys retained per K_a/K_b half in product-key search of the Local
    bank. Reads MMLLM_MEMORY_SUB_TOP_K if set; otherwise the config default."
@@ -1198,10 +1213,15 @@
    traceable). Returns (x_out, new-short-cache, new-long-cache).
 
    `skip-bank?` (Phase-5 draft mode) — pass true to bypass the PKM
-   bank lookup at the long-tier. ~17% lower FLOPs per layer."
+   bank lookup at the long-tier. ~17% lower FLOPs per layer.
+
+   `trunk-ids` (optional, (B,) long torch tensor): per-batch-row
+   routing into Local Bank's per-trunk V slices. nil at n-trunks=1."
   ([block x cos sin short-cache long-cache]
-   (block-forward block x cos sin short-cache long-cache false))
+   (block-forward block x cos sin short-cache long-cache false nil))
   ([block x cos sin short-cache long-cache skip-bank?]
+   (block-forward block x cos sin short-cache long-cache skip-bank? nil))
+  ([block x cos sin short-cache long-cache skip-bank? trunk-ids]
    (let [{:keys [norm1 norm2
                  q-proj k-proj-s v-proj-s k-proj-l v-proj-l o-proj
                  memory netbank long-gate bank-query bank-feedback
@@ -1219,7 +1239,8 @@
                       short-window long-window
                       x cos sin short-cache long-cache
                       ** :skip_bank skip-bank?
-                      :netbank netbank)]
+                      :netbank netbank
+                      :trunk_ids trunk-ids)]
      ;; Multi-timescale carry as a post-block residual delta. Carry's
      ;; gate is zero-init so at step 0 this is identity (no behavior
      ;; change vs no-carry); training pushes the gate to mix EMAs at
@@ -1313,7 +1334,8 @@
                   (memory-cls q-dim sqrt-n
                               ** :top_k     (pick-memory-top-k memory-top-k)
                               :sub_top_k (pick-memory-sub-top-k memory-sub-top-k)
-                              :mmap_path path))
+                              :mmap_path path
+                              :n_trunks  (pick-n-trunks)))
      :netbank   (when (pick-netbank-enabled?)
                   (netb/NetBank q-dim
                                 ** :sqrt_n       (pick-netbank-sqrt-n)
@@ -1726,11 +1748,14 @@
      short-caches: nil OR vector of n-layers per-layer [k v]
      long-caches:  nil OR vector of n-layers per-layer [k v]
      skip-bank?:   Phase-5 draft mode — bypass PKM lookup
+     trunk-ids:    (B,) long torch tensor or nil — per-batch-row Local
+                   Bank V_local trunk routing. nil at n-trunks=1.
    Returns [logits new-short-caches new-long-caches]."
-  ([m tokens] (forward m tokens nil nil false))
-  ([m tokens short-caches] (forward m tokens short-caches nil false))
-  ([m tokens short-caches long-caches] (forward m tokens short-caches long-caches false))
-  ([m tokens short-caches long-caches skip-bank?]
+  ([m tokens] (forward m tokens nil nil false nil))
+  ([m tokens short-caches] (forward m tokens short-caches nil false nil))
+  ([m tokens short-caches long-caches] (forward m tokens short-caches long-caches false nil))
+  ([m tokens short-caches long-caches skip-bank?] (forward m tokens short-caches long-caches skip-bank? nil))
+  ([m tokens short-caches long-caches skip-bank? trunk-ids]
    (let [{:keys [tok-emb blocks norm-final rope-cos rope-sin mtp-head]} m
          n-layers     (count blocks)
          short-caches (or short-caches (vec (repeat n-layers nil)))
@@ -1760,7 +1785,7 @@
          (let [block      (nth blocks i)
                sc         (nth short-caches i)
                lc         (nth long-caches  i)
-               [x' s' l'] (block-forward block x rope-cos rope-sin sc lc skip-bank?)]
+               [x' s' l'] (block-forward block x rope-cos rope-sin sc lc skip-bank? trunk-ids)]
            (when guard? (nan-guard! (format "block-%d-out" i) x'))
            (recur (inc i) x' (conj out-short s') (conj out-long l'))))))))
 
@@ -1789,6 +1814,44 @@
     (let [win (.long (torch/stack rows))]
       [(.narrow win 1 0 T)
        (.narrow win 1 1 T)])))
+
+(defn batch-multi-trunk
+  "Content-sharded multi-trunk batch sampler. Splits `data` into
+   `n-trunks` contiguous byte ranges (trunk t gets bytes
+   [t*N/n_trunks, (t+1)*N/n_trunks)) and samples `B-per-trunk` windows
+   from each range. Returns [x, y, trunk-ids] where:
+
+     x, y       : (n-trunks * B-per-trunk, T) int64 token windows
+     trunk-ids  : (n-trunks * B-per-trunk,) long, value = which trunk
+
+   Row layout: [trunk0×B_per_trunk, trunk1×B_per_trunk, …]. The model's
+   Local Bank uses trunk-ids to route each row's bank gather into its
+   trunk's V slice; the shared trunk (dense weights, K_a, K_b, NetBank)
+   sees gradients summed across all rows.
+
+   At n-trunks=1, equivalent to `(batch data B-per-trunk T)` with a
+   zero trunk-ids vector — kept as a separate function so the legacy
+   path stays free of multi-trunk overhead."
+  [data n-trunks B-per-trunk T]
+  (let [N             (.size data 0)
+        per-trunk-N   (quot N n-trunks)
+        rows          (python/list)
+        ids           (python/list)]
+    (doseq [t (range n-trunks)]
+      (let [t-start  (* t per-trunk-N)
+            t-end    (- (+ t-start per-trunk-N) T 1)
+            t-len    (- t-end t-start)
+            offs     (.add (torch/randint 0 t-len (python/tuple [B-per-trunk])
+                                          ** :dtype torch/long)
+                           t-start)]
+        (doseq [i (.tolist offs)]
+          (.append rows (.narrow data 0 i (+ T 1)))
+          (.append ids  t))))
+    (let [win        (.long (torch/stack rows))
+          trunk-ids  (torch/tensor ids ** :dtype torch/long)]
+      [(.narrow win 1 0 T)
+       (.narrow win 1 1 T)
+       trunk-ids])))
 
 (defn pick-z-loss-coef
   "Coefficient on the PKM query z-loss term. Reads MMLLM_Z_LOSS_COEF
@@ -1865,14 +1928,17 @@
 
 (defn train-step
   ([m opt-dense opt-sparse x y]
-   (train-step m opt-dense opt-sparse nil x y false))
+   (train-step m opt-dense opt-sparse nil x y false nil))
   ([m opt-dense opt-sparse opt-sparse-net x y]
-   (train-step m opt-dense opt-sparse opt-sparse-net x y false))
+   (train-step m opt-dense opt-sparse opt-sparse-net x y false nil))
   ([m opt-dense opt-sparse opt-sparse-net x y freeze-local?]
+   (train-step m opt-dense opt-sparse opt-sparse-net x y freeze-local? nil))
+  ([m opt-dense opt-sparse opt-sparse-net x y freeze-local? trunk-ids]
    (let [device       (:device m)
          x            (.to x device)
          y            (.to y device)
-         [logits _ _ aux-logits final-x] (forward m x)
+         trunk-ids    (when trunk-ids (.to trunk-ids device))
+         [logits _ _ aux-logits final-x] (forward m x nil nil false trunk-ids)
          T            (.size y 1)
          ;; Router-smarts loss path. focal_ce with gamma=0 reduces to
          ;; plain CE, so this is behavior-preserving when no env vars
@@ -3608,9 +3674,26 @@
                 ;; the first eval. Cheap (~5µs).
                 _      (set-train-mode! m)
                 B-cur (pick-batch)
-                [x y corpus-idx] (if mix
-                                   (mix-batch mix-tensors mix-weights-t B-cur T)
-                                   (let [[x y] (batch train-data B-cur T)] [x y nil]))
+                n-trunks (pick-n-trunks)
+                ;; Multi-trunk content-sharded batch sampling. When N>1,
+                ;; B-cur is interpreted as B-per-trunk and the final batch
+                ;; is (N*B-per-trunk, T) with trunk-ids: (N*B-per-trunk,).
+                ;; Disabled with mix-corpora (combining content shards
+                ;; with weighted corpus mix is future work).
+                _ (when (and (> n-trunks 1) mix)
+                    (throw (python/RuntimeError
+                             "MMLLM_N_TRUNKS>1 is not yet supported with MMLLM_MIX")))
+                [x y corpus-idx trunk-ids]
+                    (cond
+                      mix
+                        (let [[x y idx] (mix-batch mix-tensors mix-weights-t B-cur T)]
+                          [x y idx nil])
+                      (> n-trunks 1)
+                        (let [[x y tids] (batch-multi-trunk train-data n-trunks B-cur T)]
+                          [x y nil tids])
+                      :else
+                        (let [[x y] (batch train-data B-cur T)]
+                          [x y nil nil]))
                 ;; #9 spike: with probability `pause-prob`, replace
                 ;; the first `pause-n` bytes of x with the pause byte.
                 ;; In-place mutation; y untouched.
@@ -3625,8 +3708,11 @@
                 _     (when-let [metrics (:metrics m)]
                         (.__setitem__ metrics "current_step" step)
                         (.__setitem__ metrics "total_steps"  total-steps))
-                loss  (train-step m opt-dense opt-sparse opt-sparse-net x y)
-                _     (.add_tokens tracker (* B-cur T))
+                loss  (train-step m opt-dense opt-sparse opt-sparse-net x y false trunk-ids)
+                ;; n-trunks > 1 multiplies the effective batch by N: each
+                ;; trunk contributes B-cur rows. Token count for the energy
+                ;; tracker scales the same way.
+                _     (.add_tokens tracker (* B-cur T (max 1 n-trunks)))
                 ;; Per-corpus loss tracker — running window of last 50
                 ;; losses per corpus index. Used by the 50-step print to
                 ;; show which corpora are easy / hard. nil idx = no-mix

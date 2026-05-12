@@ -146,6 +146,7 @@ def attention(
     *,
     skip_bank: bool = False,
     netbank=None,
+    trunk_ids: Optional[torch.Tensor] = None,
 ) -> tuple:
     """Three-tier attention with hard-split Q heads.
 
@@ -272,7 +273,7 @@ def attention(
         bank_q = q_long_flat + ctx_mod if ctx_mod is not None else q_long_flat
         attn_l_mem = None
         if memory is not None:
-            mem_out = memory(bank_q)
+            mem_out = memory(bank_q, trunk_ids=trunk_ids)
             # Iterative refinement on Local Bank — feed the previous output
             # back into bank_q and re-query, N times. Lets Local "deliberate"
             # at structural-decision positions. N=1 is identity (legacy).
@@ -281,7 +282,7 @@ def attention(
                 alpha = _bank_repeat_alpha()
                 for _ in range(n_repeat - 1):
                     bank_q = bank_q + alpha * mem_out
-                    mem_out = memory(bank_q)
+                    mem_out = memory(bank_q, trunk_ids=trunk_ids)
             attn_l_mem = mem_out.reshape(B, T, n_long_heads, head_dim).transpose(1, 2)
         # NetBank queries off-machine. Same query vector as Local; the
         # gate decides per-token how much to weight each source.
@@ -320,6 +321,7 @@ def block_forward(
     short_cache: Optional[tuple], long_cache: Optional[tuple],
     skip_bank: bool = False,
     netbank=None,
+    trunk_ids: Optional[torch.Tensor] = None,
 ) -> tuple:
     """Pre-norm decoder block with three-tier attention + SwiGLU FFN.
 
@@ -336,6 +338,7 @@ def block_forward(
         norm1(x), cos, sin, short_cache, long_cache,
         skip_bank=skip_bank,
         netbank=netbank,
+        trunk_ids=trunk_ids,
     )
     x = x + attn_out
     x_norm = norm2(x)

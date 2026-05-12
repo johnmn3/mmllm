@@ -1169,9 +1169,18 @@ class Int8ProductKeyMemory(nn.Module):
 
     def __init__(self, q_dim: int, sqrt_n: int,
                  top_k: int = 16, sub_top_k: int = 32,
-                 mmap_path: str | None = None):
+                 mmap_path: str | None = None,
+                 n_trunks: int = 1):
         super().__init__()
         assert q_dim % 2 == 0, "q_dim must be even"
+        # Int8 path is inference-only; multi-trunk only matters at training,
+        # where the fp32 ProductKeyMemory is the one in use. Accept the
+        # kwarg so memory-cls stays polymorphic, but assert N=1 — at
+        # inference each request runs on a single trunk's bank.
+        assert n_trunks == 1, (
+            f"Int8ProductKeyMemory only supports n_trunks=1 (inference path), "
+            f"got n_trunks={n_trunks}"
+        )
         self.q_dim = q_dim
         self.sub_dim = q_dim // 2
         self.sqrt_n = sqrt_n
