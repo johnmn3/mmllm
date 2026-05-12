@@ -56,10 +56,6 @@ export MMLLM_LR_MIN=3e-3
 export MMLLM_LR_WARMUP=0
 
 # Replay (matched to spike 6).
-export MMLLM_REPLAY_EVERY=10
-export MMLLM_REPLAY_BUFFER_SIZE=256
-export MMLLM_REPLAY_THRESHOLD=0.5
-
 # Skip NetBank warmstart — we want spike 6's V_net to flow through untouched.
 export MMLLM_SKIP_NETBANK_WARMSTART=true
 export MMLLM_NET_V_WARMSTART_FROM_LOCAL=false
