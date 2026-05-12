@@ -101,9 +101,12 @@ export MMLLM_REPLAY_BUFFER_SIZE=256
 export MMLLM_REPLAY_THRESHOLD=0.5
 export MMLLM_SKIP_NETBANK_WARMSTART=true
 export MMLLM_NET_V_WARMSTART_FROM_LOCAL=false
-# Ablation policy: end-only. ABLATE_EVERY=0 disables mid-training ablations;
-# the end-of-train ablation in train-long still fires unconditionally.
-export MMLLM_ABLATE_EVERY=0
+# Ablation policy: end-only by default (ABLATE_EVERY=0 disables mid-
+# training ablations; the end-of-train ablation in train-long still
+# fires unconditionally). Caller can override by exporting the env var
+# before invoking — useful when you want trajectory data, e.g.
+#   MMLLM_ABLATE_EVERY=25 bash scripts/run_shared_trunk.sh 16 1 100
+export MMLLM_ABLATE_EVERY="${MMLLM_ABLATE_EVERY:-0}"
 export MMLLM_LITE_CKPT=true
 # Per-trunk batch size — train-long reads MMLLM_BATCH as B-per-trunk
 # when MMLLM_N_TRUNKS>1.
