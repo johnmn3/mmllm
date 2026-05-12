@@ -87,11 +87,10 @@ ln -sf "$(readlink -f /tmp/mmllm-cpu/fim-json-v3.test.bin)"  "${FIM_BASE}.test.b
 
 rm -rf "${FIM_BASE}.ckpts" "${FIM_BASE}.log.jsonl"
 rm -f  "${BANK_BASE}".*.bin "${BANK_BASE}"-net.*.bin
-mkdir -p "${FIM_BASE}.ckpts/step-1"
-# Don't copy round-6 dense.pt — cpu-mini's parameter shapes don't match
-# cpu-tiny's. Let train-long start with a fresh dense init.
-echo 1 > "${FIM_BASE}.ckpts/step-1/step.txt"
-python3 -c "import torch; torch.save({}, '${FIM_BASE}.ckpts/step-1/opt-sparse-net.pt')"
+mkdir -p "${FIM_BASE}.ckpts"
+# Don't seed a step-1 directory — cpu-mini's parameter shapes don't
+# match round-6's dense.pt, so we have nothing to resume from. Empty
+# ckpts/ → train-long starts at step 0 with fresh dense init.
 
 # Bank init at q_dim=16 (cpu-mini's q_dim), per-trunk slices for V_local
 # laid out (trunk0_rows, trunk1_rows, …). Zero-init matches the spike-6
