@@ -535,6 +535,16 @@ class ProductKeyMemory(nn.Module):
         # multi-container Hogwild becomes feasible on Modal Volumes.
         self._storage: PagedMmapStorage | None = None
 
+        # Cross-N migration: if mmap_path exists at the N=1 byte size while
+        # this instance is N>1, tile the old contents across all N trunks
+        # in-place (replicate trunk-0's V into trunks 1..N-1). Without
+        # this, PagedMmapStorage._init_file_if_missing would silently
+        # overwrite the old bank with a fresh Gaussian at the new size.
+        if mmap_path is not None and self.n_trunks > 1:
+            self._maybe_migrate_v_file_to_n_trunks(
+                mmap_path, self.n_per_trunk, self.n_trunks, q_dim,
+            )
+
         if mmap_path is not None and not bank_on_gpu:
             self._storage = PagedMmapStorage(mmap_path, self.n, q_dim)
             self.V = CPUPinnedEmbedding.from_pretrained(
@@ -772,6 +782,12 @@ class ProductKeyMemory(nn.Module):
         (n × q_dim × 4 bytes), so a stale or wrong-config bank file
         fails loud rather than silently corrupting V.
 
+        Cross-N migration: when the on-disk file is at the N=1 byte size
+        (n_per_trunk × q_dim × 4) but this instance is n_trunks>1, load
+        once and tile across all trunks — old single-trunk content gets
+        replicated to seed every trunk's V identically. They then diverge
+        during training.
+
         Returns total bytes read.
         """
         n, dim = self.V.weight.shape
@@ -779,6 +795,26 @@ class ProductKeyMemory(nn.Module):
         if not os.path.exists(path):
             raise FileNotFoundError(f"bank checkpoint not found: {path}")
         actual_bytes = os.path.getsize(path)
+        # Cross-N migration path: on-disk file at N=1 size, model at N>1.
+        n_per_trunk_bytes = self.n_per_trunk * dim * 4
+        if (actual_bytes == n_per_trunk_bytes
+                and expected_bytes == self.n_trunks * n_per_trunk_bytes
+                and self.n_trunks > 1):
+            print(
+                f"  ckpt migration: {path} is N=1 size ({actual_bytes} B); "
+                f"tiling to N={self.n_trunks} ({expected_bytes} B) in V.weight"
+            )
+            arr = np.memmap(path, dtype=np.float32, mode="r",
+                            shape=(self.n_per_trunk, dim))
+            with torch.no_grad():
+                src = torch.from_numpy(np.asarray(arr))  # (n_per_trunk, dim)
+                src_dev = src.to(self.V.weight.device)
+                # Tile across the N-axis by repeating row block N times.
+                self.V.weight.data.view(
+                    self.n_trunks, self.n_per_trunk, dim
+                ).copy_(src_dev.unsqueeze(0).expand(self.n_trunks, -1, -1))
+            del arr
+            return actual_bytes
         if actual_bytes != expected_bytes:
             raise ValueError(
                 f"bank checkpoint {path} has {actual_bytes} bytes; "
@@ -796,6 +832,57 @@ class ProductKeyMemory(nn.Module):
             self.V.weight.data.copy_(src.to(self.V.weight.device))
         del arr
         return expected_bytes
+
+    @staticmethod
+    def _maybe_migrate_v_file_to_n_trunks(path: str,
+                                          n_per_trunk: int,
+                                          n_trunks: int,
+                                          q_dim: int) -> None:
+        """Tile an old N=1-shaped V mmap file in-place to N-trunk shape.
+
+        No-op when:
+          - the file doesn't exist (PagedMmapStorage will Gaussian-init)
+          - the file is already at the N-trunk size
+          - the file is at neither the N=1 nor the N-trunk size (let the
+            downstream init/load raise — wrong sqrt_n or q_dim)
+
+        When the file is at the N=1 size, atomically rewrite to N-trunk
+        size by reading the contents, allocating a sibling tmp file at
+        the new size, tiling, fsync'ing, and renaming over the original.
+        Subsequent PagedMmapStorage opens see a file at the right size
+        and skip its Gaussian-init.
+        """
+        n1_bytes  = n_per_trunk * q_dim * 4
+        nN_bytes  = n_trunks * n1_bytes
+        if not os.path.exists(path):
+            return
+        actual = os.path.getsize(path)
+        if actual == nN_bytes:
+            return  # already migrated / freshly created at new size
+        if actual != n1_bytes:
+            return  # not the N=1 size either; let downstream raise
+        print(
+            f"  bank migration: {path} from N=1 ({n1_bytes} B) to "
+            f"N={n_trunks} ({nN_bytes} B) — tiling trunk-0 into all trunks"
+        )
+        # Read old contents into a CPU-resident copy so the source mmap
+        # can be closed before we rewrite the file.
+        old_arr = np.memmap(path, dtype=np.float32, mode="r",
+                            shape=(n_per_trunk, q_dim))
+        old_data = np.array(old_arr)  # owning copy
+        if hasattr(old_arr, "_mmap") and old_arr._mmap is not None:
+            old_arr._mmap.close()
+        del old_arr
+        tmp_path = path + ".migrating"
+        new_arr = np.memmap(tmp_path, dtype=np.float32, mode="w+",
+                            shape=(n_trunks * n_per_trunk, q_dim))
+        for t in range(n_trunks):
+            new_arr[t * n_per_trunk:(t + 1) * n_per_trunk] = old_data
+        new_arr.flush()
+        if hasattr(new_arr, "_mmap") and new_arr._mmap is not None:
+            new_arr._mmap.close()
+        del new_arr
+        os.replace(tmp_path, path)
 
     def forward(self, q: torch.Tensor,
                 trunk_ids: torch.Tensor | None = None) -> torch.Tensor:

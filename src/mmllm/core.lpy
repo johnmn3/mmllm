@@ -2574,6 +2574,28 @@
         [x y]   (batch ten B T)]
     [x y idx]))
 
+(defn mix-batch-multi-trunk
+  "Multi-trunk variant of `mix-batch`. Picks ONE corpus per batch
+   (preserves chunky-mix semantics + per-corpus loss attribution), then
+   content-shards that corpus into N contiguous byte ranges and samples
+   B-per-trunk windows from each.
+
+   Returns [x y idx trunk-ids] where:
+     x, y       : (N * B-per-trunk, T)
+     idx        : single corpus index for the whole batch
+     trunk-ids  : (N * B-per-trunk,) long, with value = trunk row owner.
+
+   The compound semantic: each step's batch contains rows from one corpus
+   (so per-corpus loss tracking still works) AND the N trunks specialize
+   on disjoint slices of that corpus (so hill-climbing diversity is
+   preserved). Across many batches, each trunk sees the full mix weighted
+   the same way as the single-trunk path."
+  [mix-tensors mix-weights-t n-trunks B-per-trunk T]
+  (let [idx           (.item (torch/multinomial mix-weights-t 1))
+        ten           (nth mix-tensors idx)
+        [x y tids]    (batch-multi-trunk ten n-trunks B-per-trunk T)]
+    [x y idx tids]))
+
 ;;; ─────────────────────── train on a real corpus ───────────────────────
 
 (defn train-corpus
@@ -3678,13 +3700,14 @@
                 ;; Multi-trunk content-sharded batch sampling. When N>1,
                 ;; B-cur is interpreted as B-per-trunk and the final batch
                 ;; is (N*B-per-trunk, T) with trunk-ids: (N*B-per-trunk,).
-                ;; Disabled with mix-corpora (combining content shards
-                ;; with weighted corpus mix is future work).
-                _ (when (and (> n-trunks 1) mix)
-                    (throw (python/RuntimeError
-                             "MMLLM_N_TRUNKS>1 is not yet supported with MMLLM_MIX")))
+                ;; mix-batch-multi-trunk preserves chunky-mix semantics
+                ;; (one corpus per batch) while content-sharding that
+                ;; corpus across the N trunks.
                 [x y corpus-idx trunk-ids]
                     (cond
+                      (and mix (> n-trunks 1))
+                        (mix-batch-multi-trunk mix-tensors mix-weights-t
+                                               n-trunks B-cur T)
                       mix
                         (let [[x y idx] (mix-batch mix-tensors mix-weights-t B-cur T)]
                           [x y idx nil])
@@ -3723,10 +3746,17 @@
                 ;; below replay-thresh is considered "mastered" and saved
                 ;; to the buffer for later replay. Both x and y are
                 ;; cloned to CPU to avoid GPU memory growth.
+                ;;
+                ;; At n-trunks > 1 we also stash trunk-ids so the replay
+                ;; routes each row back to the trunk that mastered it;
+                ;; otherwise replay items would all collapse into trunk-0.
                 _     (when (and (pos? replay-every) (< loss replay-thresh))
                         (.append replay-buf
-                                 (python/tuple [(.to (.detach x) "cpu" ** :copy true)
-                                                (.to (.detach y) "cpu" ** :copy true)]))
+                                 (python/tuple
+                                   [(.to (.detach x) "cpu" ** :copy true)
+                                    (.to (.detach y) "cpu" ** :copy true)
+                                    (when trunk-ids
+                                      (.to (.detach trunk-ids) "cpu" ** :copy true))]))
                         (when (> (count replay-buf) replay-cap)
                           (.pop replay-buf 0)))
                 ;; P3 replay step: every replay-every main steps, sample
@@ -3739,10 +3769,11 @@
                         (when (and (pos? replay-every)
                                    (zero? (mod (inc step) replay-every))
                                    (pos? (count replay-buf)))
-                          (let [idx     (.item (torch/randint 0 (count replay-buf) (python/tuple [])))
-                                [xr yr] (.__getitem__ replay-buf idx)
-                                _       (set-train-mode! m)
-                                r-loss  (train-step m opt-dense opt-sparse opt-sparse-net xr yr true)]
+                          (let [idx         (.item (torch/randint 0 (count replay-buf) (python/tuple [])))
+                                [xr yr tr]  (.__getitem__ replay-buf idx)
+                                _           (set-train-mode! m)
+                                r-loss      (train-step m opt-dense opt-sparse opt-sparse-net
+                                                        xr yr true tr)]
                             (when-let [metrics (:metrics m)]
                               (.__setitem__ metrics "replay_loss" (python/float r-loss))))))
                 step' (inc step)]
