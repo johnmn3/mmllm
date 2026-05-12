@@ -214,6 +214,8 @@ class SwitchGate(nn.Module):
             # previous `(local_prob > 0.5)` thresholded to exactly 0 at
             # bias=-2.0 (the init), so Local never fired in eval and the
             # ablation Δ_local was always zero regardless of V_local content.
+            # local_hard tracks the expected fire-rate for telemetry below.
+            local_hard = local_prob
             local_decision = local_prob
 
         # Apply decision to Local's gate weight, then renormalize the
