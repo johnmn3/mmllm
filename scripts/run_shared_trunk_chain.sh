@@ -73,10 +73,13 @@ export MMLLM_REPLAY_BUFFER_SIZE=256
 export MMLLM_REPLAY_THRESHOLD=0.5
 export MMLLM_SKIP_NETBANK_WARMSTART=true
 export MMLLM_NET_V_WARMSTART_FROM_LOCAL=false
-# Mid-training ablations every 25 steps so the chain trajectory is
-# inspectable (Δ_local and Δ_net per ablation point). End-of-train
-# ablation always fires unconditionally.
-export MMLLM_ABLATE_EVERY=25
+# Ablation policy: end-only. ABLATE_EVERY=0 disables mid-training ablations;
+# the end-of-train ablation in train-long still fires unconditionally per
+# round. This matches the shared-trunk recipe (run_shared_trunk.sh) — mid-
+# ablations add ~45s of eval-bpc each plus a memory spike to ~15 GB, which
+# is dead overhead given the per-round end-ablation already gives us the
+# Δ_local / Δ_net trajectory across rounds.
+export MMLLM_ABLATE_EVERY=0
 export MMLLM_LITE_CKPT=true
 
 FIM_BASE=/tmp/mmllm-cpu/fim-shared-trunk-chain
@@ -167,14 +170,15 @@ for layer in LOCAL_LAYERS:
 PY
   echo "  V_local: zero-init 8 layers × $N_TRUNKS trunks × 226²×128"
 
-  # Train. Ablate-every=25, ckpt-every > total so no mid-run ckpt fires
-  # (MMLLM_LITE_CKPT=true keeps end-ckpt small).
+  # Train. eval-every set > STEPS so no mid-training eval fires; the
+  # end-of-train ablation (in train-long after the step loop) still runs.
+  # ckpt-every > STEPS so no mid-run ckpt fires (LITE_CKPT keeps end-ckpt small).
   echo "  → training $STEPS steps…"
   local TRAIN_LOG="$ARCHIVE_ROOT/round-${round_num}.train.log"
   mmllm train-fim "$FIM_BASE" "$BANK_BASE" \
-        $((STEPS + 1)) 25 $((STEPS + 10)) 2>&1 \
+        $((STEPS + 1)) $((STEPS + 1)) $((STEPS + 10)) 2>&1 \
     | tee "$TRAIN_LOG" \
-    | grep --line-buffered -E "ablation Δ at step|Δ_local|Δ_net|Δ_both|control  bpc|ablated  bpc|Δ bpc|training complete" \
+    | grep --line-buffered -E "control  bpc|ablated  bpc|Δ bpc|training complete" \
     || true
 
   # Archive end-state.
