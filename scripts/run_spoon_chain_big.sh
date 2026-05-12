@@ -26,6 +26,12 @@ cd "$ROOT"
 export MMLLM_SQRT_N=720
 export MMLLM_NET_SQRT_N=2000
 export MMLLM_NET_C_NET=32
+# Scaled top_k / sub_top_k — proportional to bank-area increase, so
+# per-step V-row coverage matches cpu-tiny (12.5% Local / 3.3% Net).
+export MMLLM_MEMORY_TOP_K=128
+export MMLLM_MEMORY_SUB_TOP_K=45
+export MMLLM_NET_TOP_K=256
+export MMLLM_NET_SUB_TOP_K=128
 
 # Spike-6 recipe.
 export MMLLM_NETBANK_ENABLED=true
