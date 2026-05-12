@@ -24,7 +24,10 @@ cd "$ROOT"
 
 # Production-scale bank sizes.
 export MMLLM_SQRT_N=720
-export MMLLM_NET_SQRT_N=2000
+export MMLLM_NET_SQRT_N=5600         # 16 GB V_net (was 2 GB at 2000)
+# Use sparse-state CPUOffloadSparseAdam — only allocates Adam moments
+# for touched rows. Dense-state SparseAdam would OOM at 32 GB.
+export MMLLM_CPU_OFFLOAD=true
 export MMLLM_NET_C_NET=32
 # Scaled top_k / sub_top_k — proportional to bank-area increase, so
 # per-step V-row coverage matches cpu-tiny (12.5% Local / 3.3% Net).
@@ -110,7 +113,7 @@ run_round() {
 import sys, numpy as np
 bank_base = sys.argv[1]; resume_v_net = sys.argv[2]
 SQRT_LOCAL = 720;   Q_DIM = 128
-SQRT_NET   = 2000;  C_NET = 32
+SQRT_NET   = 5600;  C_NET = 32
 for i in range(4):
     a = np.memmap(f"{bank_base}.{i}.bin", dtype=np.float32, mode="w+",
                   shape=(SQRT_LOCAL * SQRT_LOCAL, Q_DIM))
