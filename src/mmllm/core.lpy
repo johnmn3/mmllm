@@ -3330,7 +3330,19 @@
         ;; cooled independently from opt-sparse on the same cosine
         ;; schedule with its own multiplier.
         net-sparse-params (python/list (netbank-sparse-parameters m))
-        opt-sparse-net (when (pos? (count net-sparse-params))
+        ;; MMLLM_SKIP_OPT_NET=true skips initializing opt-sparse-net.
+        ;; SparseAdam (and CPUOffloadSparseAdam) allocate dense state
+        ;; (m, v moments) at V.weight's shape on first step — for
+        ;; V_net at sqrt_n=5600/c_net=32 that's 16 GB × 2 = 32 GB anon
+        ;; RAM, OOMs a 15 GiB sandbox. Useful when running train-fim
+        ;; ONLY to materialize a fresh-shape dense.pt for bench/eval —
+        ;; V_net just stays where it is (mmap'd to disk) and won't
+        ;; receive gradients during the materialization run.
+        skip-opt-net? (= "true" (.lower (.get (.- os environ)
+                                              "MMLLM_SKIP_OPT_NET"
+                                              "false")))
+        opt-sparse-net (when (and (not skip-opt-net?)
+                                  (pos? (count net-sparse-params)))
                          ((pick-sparse-optimizer) net-sparse-params
                           ** :lr (pick-lr-net)))
         T          (:seq-len config)

@@ -70,7 +70,10 @@ echo "=== Disk after bank allocation ==="
 df -h / | head -3
 
 # Materialize ckpt with right shapes.
-MMLLM_LITE_CKPT=true mmllm train-fim "$FIM_BASE" "$BANK_BASE" 2 99 1 2>&1 | tail -5
+# Skip opt-sparse-net init — at sqrt_n=5600 it allocates 32 GB of dense
+# state on first step (m + v moments at V.weight's shape) and OOMs us.
+# For ckpt materialization we just need dense.pt; V stays on disk.
+MMLLM_LITE_CKPT=true MMLLM_SKIP_OPT_NET=true mmllm train-fim "$FIM_BASE" "$BANK_BASE" 2 99 1 2>&1 | tail -5
 
 echo ""
 echo "=== Stage 2: drop OS page cache (banks now cold-from-disk) ==="
