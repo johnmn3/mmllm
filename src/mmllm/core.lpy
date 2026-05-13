@@ -554,6 +554,20 @@
   []
   (python/float (.get (.- os environ) "MMLLM_MAX_HOURS" "0")))
 
+(defn pick-max-steps
+  "Resolve hard step cap. Reads MMLLM_MAX_STEPS (int, default 0 = no cap).
+   When > 0, train-long checkpoints and exits cleanly at step == max-steps,
+   even if total-steps is higher.
+
+   Use case: build a base ckpt at a known step (e.g. step 70 of a 100-step
+   recipe) for sweep iteration on later-stage knobs. Total-steps remains
+   the schedule's reference point (so LR/distill cosines evaluate as if
+   the full run will continue), but execution halts at max-steps and saves
+   a resumable ckpt. Subsequent runs resume from that ckpt with overrides
+   on the back-half knobs only."
+  []
+  (python/int (.get (.- os environ) "MMLLM_MAX_STEPS" "0")))
+
 (defn pick-long-tier-mix
   "Resolve how the long-tier KV-cache SDPA path and the bank-V
    retrieval path get combined inside attention. Reads
@@ -3677,10 +3691,14 @@
           en-label    (str "train-long:" train-path)
           tracker     (metrics/EnergyTracker ** :label en-label :device (:device m))
           max-hours   (pick-max-hours)
-          max-seconds (when (pos? max-hours) (* max-hours 3600.0))]
+          max-seconds (when (pos? max-hours) (* max-hours 3600.0))
+          max-steps   (pick-max-steps)]
       (when (pos? max-hours)
         (println (format "  session cap: %.2f h (MMLLM_MAX_HOURS) — will checkpoint and exit cleanly when reached"
                          max-hours)))
+      (when (pos? max-steps)
+        (println (format "  step cap: max-steps=%d (MMLLM_MAX_STEPS) — will checkpoint and exit cleanly at this step"
+                         max-steps)))
       (.start tracker)
       (try
         (loop [step start-step]
@@ -3765,6 +3783,21 @@
               (append-jsonl! log-path
                              (format "{\"step\":%d,\"event\":\"session_end\",\"reason\":\"max_hours\",\"hours\":%.3f,\"wall_s\":%.1f}"
                                      step hrs (- (time/time) t0))))
+            (print-session-summary m start-step step base-path log-path t0 tracker)
+            m)
+          ;; Step-cap branch: hit MMLLM_MAX_STEPS. Save ckpt + exit clean.
+          ;; Used to build a "step-N base ckpt" for sweep iteration on
+          ;; back-half knobs. Skip end-of-train ablation; the resume run
+          ;; (started from this ckpt) does its own ablation when it
+          ;; completes total-steps.
+          (and (pos? max-steps) (>= step max-steps))
+          (do
+            (save-checkpoint! m opt-dense opt-sparse opt-sparse-net ckpt-dir step volume)
+            (println (format "  ── step cap reached at step %d (MMLLM_MAX_STEPS=%d) — checkpointed and exiting ──"
+                             step max-steps))
+            (append-jsonl! log-path
+                           (format "{\"step\":%d,\"event\":\"session_end\",\"reason\":\"max_steps\",\"wall_s\":%.1f}"
+                                   step (- (time/time) t0)))
             (print-session-summary m start-step step base-path log-path t0 tracker)
             m)
           :else
