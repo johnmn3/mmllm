@@ -131,8 +131,35 @@ Also: CPUSparseSGD with index_add_(-lr * grad) has been observed moving
 V by < 0.1% even at lr_b = 6e-2 wake plateau, on cpu-tiny + N=1 +
 Gaussian σ=0.02 init. The gradient magnitude relative to init magnitude
 is what determines net movement — small grads × small lr × small steps
-= no meaningful displacement. If V isn't moving, the recipe is wrong,
-not the optimizer.
+= no meaningful displacement.
+
+**Fixed 2026-05-13.** Reverted MMLLM_SPARSE_OPT default from `sgd` back
+to `adam-cpu` in run_shared_trunk.sh. Comparison at 100 steps cpu-tiny
+N=1 B=4, identical recipe and Gaussian-init banks otherwise:
+
+  | optimizer | V_local moved% | Δ_local end | Δ_net end | ctrl bpc |
+  |-----------|----------------|-------------|-----------|----------|
+  | sgd       | 0.00%          | +0.0006     | +0.0022   | 4.60     |
+  | adam-cpu  | 373.80%        | +1.6838     | +0.0011   | 3.78     |
+
+sgd's "Δ_net=+0.0022" was the false-positive contribution from
+Gaussian-init V × trained K_a/K_b × trained gates — V_net itself never
+moved. With adam-cpu, V_local is real (max|v|=3-6 vs Gaussian σ=0.02
+init, 400× growth in 100 steps) and Δ_local is meaningful.
+
+Net distillation transfer is still weak even with adam-cpu (V_net
+local-attached layers moved 4.81% vs net-only 2.45% — asymmetric
+signature is present but Δ_net stays at ~+0.001). Root cause:
+MMLLM_SKIP_NETBANK_WARMSTART=true keeps Net's K_a/K_b random, so Net
+retrieves at different addresses than Local. Distill MSE pushes V_net at
+Net's row addresses, which don't align with Local's — V_net learns
+averaged Local content at the wrong rows. Fixing requires either
+enabling warm-start or wiring distill to push K_a/K_b alignment — both
+are recipe-level changes that need user sign-off.
+
+sgd is still available as `MMLLM_SPARSE_OPT=sgd` for N>8 OOM cases, but
+the distillation effectively breaks at that setting. Document the
+trade-off in any launcher script that targets shared-trunk N>8.
 
 ## Active workstreams
 

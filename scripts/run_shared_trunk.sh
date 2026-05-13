@@ -52,15 +52,28 @@ export MMLLM_N_TRUNKS=$N_TRUNKS
 # state for V_local approaches 6.7 GB. SGD has zero state.
 #
 # Three options via MMLLM_SPARSE_OPT (caller-overridable):
-#   sgd (default here):      mmllm.optim.CPUSparseSGD — zero state.
-#                            Noisier than Adam but fits at any N.
-#   adam-cpu:                mmllm.optim.CPUOffloadSparseAdam — touched-
+#   adam-cpu (default here): mmllm.optim.CPUOffloadSparseAdam — touched-
 #                            row-sparse m/v on host RAM; ~500 MB at
 #                            spoon scale, scales with unique rows ×
 #                            q_dim × 8 bytes × N. Safe at N≤8 on this box.
+#                            REQUIRED for the recipe to actually train V:
+#                            CPUSparseSGD's pure `index_add_(-lr * grad)`
+#                            doesn't move V when lr * grad << init scale,
+#                            which is the regime distill produces. With
+#                            sgd, distill_loss fires every step but V_net
+#                            stays at init (cos(V_final, V_seed) = 1.0,
+#                            Δ_net ≈ noise). Adam normalizes per-row step
+#                            magnitude → V actually moves → Δ_local goes
+#                            from +0.0006 (sgd) to +1.68 (adam) at 100
+#                            steps. See CLAUDE.md "Δ-ablation is NOT proof".
+#   sgd:                     mmllm.optim.CPUSparseSGD — zero state.
+#                            Fits at any N but cripples distillation as
+#                            described above. ONLY use when adam-cpu OOMs
+#                            (N>8 on a 15 GiB sandbox). Override with
+#                            `MMLLM_SPARSE_OPT=sgd bash …`.
 #   adam:                    stock torch.optim.SparseAdam (dense state).
 #                            DON'T use at N>1 — guaranteed OOM.
-export MMLLM_SPARSE_OPT="${MMLLM_SPARSE_OPT:-sgd}"
+export MMLLM_SPARSE_OPT="${MMLLM_SPARSE_OPT:-adam-cpu}"
 
 # Spike-6 recipe (restored verbatim from run_asym_spoon.sh / round-10-2).
 # SwitchGate + GATE_NET_DEFAULT (Bernoulli-Local, the round-9 fix for
