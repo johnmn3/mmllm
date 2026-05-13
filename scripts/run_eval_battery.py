@@ -35,8 +35,11 @@ from pathlib import Path
 
 def K(s): return bkw.keyword(s)
 
-INF_BASE = "/tmp/mmllm-cpu/inf-spork.fim"
-INF_BANK = "/tmp/mmllm-cpu/inf-spork.bank"
+# Paths can be overridden via env vars so this script handles any harvest
+# (R20, R30, R40, ...). Defaults preserve the original cpu-mini harvest path.
+INF_BASE = os.environ.get("MMLLM_INF_BASE", "/tmp/mmllm-cpu/inf-spork.fim")
+INF_BANK = os.environ.get("MMLLM_INF_BANK", "/tmp/mmllm-cpu/inf-spork.bank")
+OUT_JSONL = os.environ.get("MMLLM_BATTERY_OUT", "workers/dispatcher/harvest-5way/eval_battery.jsonl")
 BATTERY = "/tmp/mmllm-cpu/battery"
 EVAL_TOKEN_CAP = 100_000   # bytes per dataset eval
 SEQ_LEN = 128
@@ -118,7 +121,7 @@ for key, notes in DATASETS:
     row = next((r for r in rows[1:] if r[0] == key), None)
     if row and row[1] not in ("err", "missing"):
         log.append({"dataset": key, "bpc": float(row[1]), "ppl": float(row[2]), "kind": "bpc"})
-out = Path("workers/dispatcher/harvest-5way/eval_battery.jsonl")
+out = Path(OUT_JSONL)
 out.parent.mkdir(parents=True, exist_ok=True)
 with out.open("w") as f:
     for e in log:
