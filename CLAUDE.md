@@ -93,6 +93,47 @@ When reporting mid-train ablations:
   the distillation transfer fraction). Δ_local is expected to be
   approximately frozen.
 
+## Δ-ablation is NOT proof that the bank's V learned anything
+
+Caught lying about this on 2026-05-13. When V_local / V_net are
+Gaussian-initialized, the **ablation Δ can be non-zero even when V
+literally has not moved from seed init** (cos(V_current, V_seed)=1.000000,
+L2(Δ)/L2(init) < 0.1%). The Δ signal comes from THREE places, only one
+of which is V training:
+
+  (a) The Gaussian-init V itself contributes to retrieval. Zeroing it
+      removes that contribution → non-zero Δ regardless of training.
+  (b) K_a / K_b sub-key matrices are dense params (in opt-dense, NOT in
+      opt-sparse), trained at lr_d_mult. The retrieval pattern evolves
+      every step even if V is frozen.
+  (c) SwitchGate's gate_proj_3 is dense, trained every step. The model
+      learns to ROUTE mass through Local / Net based on context — the
+      gate output changes even with frozen V.
+
+Δ_local > 0 / Δ_net > 0 only proves "some part of the bank tier matters."
+To prove "bank V was trained" you need to additionally check, AFTER
+end-of-train save/restore is complete:
+
+  python3 -c '
+  import numpy as np
+  curr = np.memmap(<bank_path>, ...).copy()
+  init = <regenerate seed Gaussian with same seed>
+  l2d = np.linalg.norm(curr - init)
+  cos = np.dot(curr.ravel(), init.ravel()) / (norm(curr) * norm(init))
+  print(f"moved% = {l2d / np.linalg.norm(init):.4%}  cos = {cos:.6f}")
+  '
+
+If `cos ≈ 1.000000` and `moved% < 1%`, V hasn't been trained meaningfully.
+The Δ you reported was false positive from (a)+(b)+(c). Don't claim
+"distillation works" or "Local is learning" until V has moved.
+
+Also: CPUSparseSGD with index_add_(-lr * grad) has been observed moving
+V by < 0.1% even at lr_b = 6e-2 wake plateau, on cpu-tiny + N=1 +
+Gaussian σ=0.02 init. The gradient magnitude relative to init magnitude
+is what determines net movement — small grads × small lr × small steps
+= no meaningful displacement. If V isn't moving, the recipe is wrong,
+not the optimizer.
+
 ## Active workstreams
 
 - Shared-trunk option A is implemented and verified — `tests/test_shared_trunk.py`
