@@ -56,21 +56,20 @@ export MMLLM_DISTILL_MAGNITUDE_COEF=0.0
 export MMLLM_DISTILL_MAGNITUDE_COEF_END=1.0
 export MMLLM_DISTILL_MAGNITUDE_CLAMP=10.0
 export MMLLM_LR_BANK_MULT=3.0          # CLAMPED from spike-6's 30.0:
-                                        # with base LR=1e-1, 30× = effective
-                                        # lr_b=3.0 which Adam-pushes V_local
-                                        # by ~3.0 magnitude per step ≈ 150σ
-                                        # of the 0.02 Gaussian init in 50
-                                        # steps → V_local saturates and the
-                                        # model routes around it. 3× gives
-                                        # effective lr_b=0.3, comparable to
-                                        # the sweep window's effective range.
+                                        # at base LR=3e-2, 3× gives effective
+                                        # lr_b=0.09 — matches the proven
+                                        # baseline (LR=3e-3 × 30 = 0.09)
+                                        # where Local trained meaningfully.
+                                        # At spike-6's 30× the effective
+                                        # lr_b would be 0.9 (10× baseline),
+                                        # which over-pushes V_local.
 export MMLLM_LR_BANK_MULT_END=0.001
 export MMLLM_LR_NET_MULT=0.001
-export MMLLM_LR_NET_MULT_END=5.0     # stack-1e-1-5.0 winning knob
+export MMLLM_LR_NET_MULT_END=5.0     # stack-3e-2-5.0 winning knob
 export MMLLM_LR_DENSE_MULT=0.05
 export MMLLM_LR_DENSE_MULT_END=0.005
-export MMLLM_LR=1e-1                  # stack-1e-1-5.0 base LR
-export MMLLM_LR_MIN=1e-1
+export MMLLM_LR=3e-2                  # stack-3e-2-5.0 base LR (chain mode)
+export MMLLM_LR_MIN=3e-2
 export MMLLM_LR_WARMUP=$((STEPS * 70 / 100))
 export MMLLM_REPLAY_EVERY=10
 export MMLLM_REPLAY_BUFFER_SIZE=256
@@ -98,8 +97,8 @@ for split in train val test; do
 done
 
 echo "═══════════════════════════════════════════════════════════════"
-echo "  CHAIN (stack-1e-1-5.0)  rounds=$N_ROUNDS  steps=$STEPS/round"
-echo "  recipe: adam-cpu + Gaussian init + warm-start + LR=1e-1 + LR_NET_MULT_END=5.0"
+echo "  CHAIN (stack-3e-2-5.0)  rounds=$N_ROUNDS  steps=$STEPS/round"
+echo "  recipe: adam-cpu + Gaussian init + warm-start + LR=3e-2 + LR_BANK_MULT=3 + LR_NET_MULT_END=5.0"
 echo "  archive: $ARCHIVE_ROOT"
 echo "═══════════════════════════════════════════════════════════════"
 
