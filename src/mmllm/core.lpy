@@ -3785,11 +3785,13 @@
                                      step hrs (- (time/time) t0))))
             (print-session-summary m start-step step base-path log-path t0 tracker)
             m)
-          ;; Step-cap branch: hit MMLLM_MAX_STEPS. Save ckpt + exit clean.
-          ;; Used to build a "step-N base ckpt" for sweep iteration on
-          ;; back-half knobs. Skip end-of-train ablation; the resume run
-          ;; (started from this ckpt) does its own ablation when it
-          ;; completes total-steps.
+          ;; Step-cap branch: hit MMLLM_MAX_STEPS. Save ckpt + run a Δ
+          ;; ablation snapshot (control / Δ_local / Δ_net / Δ_both) then
+          ;; exit clean. Used to build a "step-N base ckpt" for sweep
+          ;; iteration AND to measure front-half (Local-phase) signal
+          ;; accumulation: a step-70 ablation tells us how much V_local
+          ;; has actually pulled in (the upper bound on what can distill
+          ;; into V_net in the back half).
           (and (pos? max-steps) (>= step max-steps))
           (do
             (save-checkpoint! m opt-dense opt-sparse opt-sparse-net ckpt-dir step volume)
@@ -3798,6 +3800,33 @@
             (append-jsonl! log-path
                            (format "{\"step\":%d,\"event\":\"session_end\",\"reason\":\"max_steps\",\"wall_s\":%.1f}"
                                    step (- (time/time) t0)))
+            ;; Inline ablation at the cap step. Mirrors the end-of-train
+            ;; ablation block (save-V → zero → eval → restore for each tier,
+            ;; collective Δ across all bank layers) so step-N base ckpts
+            ;; are comparable to the end-of-train ablations.
+            (println "  ── ablation Δ at step cap ──")
+            (let [r-ctrl (eval-bpc m val-data T 16 100000)
+                  ctrl   (:bpc r-ctrl)
+                  abl-l  (ablation-step!     m val-data T 16 100000)
+                  d-l    (- abl-l ctrl)
+                  abl-n  (ablation-step-net! m val-data T 16 100000)
+                  d-n    (when abl-n (- abl-n ctrl))
+                  abl-b  (when abl-n (ablation-step-both! m val-data T 16 100000))
+                  d-b    (when abl-b (- abl-b ctrl))]
+              (println (format "    control  bpc=%.4f ppl=%.2f" ctrl (:ppl r-ctrl)))
+              (println (format "    Δ_local: %.4f → %+.4f" abl-l d-l))
+              (when abl-n
+                (println (format "    Δ_net:   %.4f → %+.4f" abl-n d-n)))
+              (when abl-b
+                (let [synergy (- d-b (+ d-l (or d-n 0.0)))]
+                  (println (format "    Δ_both:  %.4f → %+.4f  (synergy: %+.4f)"
+                                   abl-b d-b synergy))))
+              (append-jsonl! log-path
+                             (format "{\"step\":%d,\"event\":\"ablation_at_cap\",\"control_bpc\":%.4f,\"delta_local\":%.4f,\"delta_net\":%s,\"delta_both\":%s,\"wall_s\":%.1f}"
+                                     step ctrl d-l
+                                     (if d-n (format "%.4f" d-n) "null")
+                                     (if d-b (format "%.4f" d-b) "null")
+                                     (- (time/time) t0))))
             (print-session-summary m start-step step base-path log-path t0 tracker)
             m)
           :else
