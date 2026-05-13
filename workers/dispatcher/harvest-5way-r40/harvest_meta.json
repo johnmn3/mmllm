@@ -1,0 +1,59 @@
+{
+  "target_round": 40,
+  "n_workers": 5,
+  "workers": [
+    {
+      "handle": "claude-chaindiverse-T3giJ",
+      "branch": "claude/chaindiverse-claude-chaindiverse-T3giJ-r40",
+      "ctrl_bpc": 1.2126
+    },
+    {
+      "handle": "claude-ext",
+      "branch": "claude/chaindiverse-claude-ext-r40",
+      "ctrl_bpc": 1.2049
+    },
+    {
+      "handle": "opus47",
+      "branch": "claude/chaindiverse-opus47-r40",
+      "ctrl_bpc": 1.2075
+    },
+    {
+      "handle": "opus47-may13",
+      "branch": "claude/chaindiverse-opus47-may13-r40",
+      "ctrl_bpc": 1.2066
+    },
+    {
+      "handle": "round31to40",
+      "branch": "claude/chaindiverse-round31to40-r40",
+      "ctrl_bpc": 1.2057
+    }
+  ],
+  "best_worker": "claude-ext",
+  "worker_ctrl_bpc_mean": 1.20746,
+  "worker_ctrl_bpc_best": 1.2049,
+  "dense_cos": {
+    "mean": 0.996218991279602,
+    "min": 0.9949576258659363,
+    "max": 0.9966424107551575,
+    "n_params": 570480,
+    "n_tensors": 618
+  },
+  "vnet_cos": {
+    "0": {
+      "mean": 0.8728192329406739,
+      "min": 0.8537765145301819,
+      "max": 0.8843847513198853
+    },
+    "12": {
+      "mean": 0.9195732772350311,
+      "min": 0.8932515978813171,
+      "max": 0.9437189102172852
+    },
+    "31": {
+      "mean": 0.8435156941413879,
+      "min": 0.8329296708106995,
+      "max": 0.8582361340522766
+    }
+  },
+  "extended_from": "workers/dispatcher/harvest-Nway-r30/round-30"
+}
