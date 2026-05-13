@@ -22,15 +22,28 @@ the bank's full shape. For a 100-step run with top_k=256, B=4, T=128
 across 4 layers, that's ~5M touches × ~256 bytes ≈ 1.3 GB — vs the
 dense-state version's 32 GB at V_net=16 GB.
 
-Per-trunk LR scaling on V_local:
-  MMLLM_LR_TRUNK_MULTS="2.0,1.5,1.0,0.7,0.5,0.3,0.2,0.1"
-  Comma-separated floats. When set, V_local's per-row delta is scaled
-  by the trunk's mult — trunk index for row r = r // (sqrt_local**2).
-  Tiled to N_TRUNKS via modulo if the list is shorter. Only applies
-  to parameters whose row count is divisible by sqrt_local**2 and >1
-  trunk's worth — i.e. V_local. V_net's (sqrt_n**2, c_net) shape is
-  left unscaled. Use to break trunk symmetry: fast trunks consolidate
-  high-novelty features quickly, slow trunks accumulate stable patterns.
+V_local LR — router as low-level primitive:
+  V_local rows are what each router-routed retrieval returns. The
+  router itself (K_a/K_b/SwitchGate) lives in opt-dense at
+  lr_d_mult=0.05; conceptually V_local is also part of the routing
+  primitive — it should train SLOWLY (the routed-to values change
+  little; the V_net it eventually distills into is what should
+  consolidate). Defaults applied here:
+
+    MMLLM_LR_LOCAL_MULT (default 0.05) — global V_local multiplier.
+      Applied to every V_local update in the bank optimizer. Drops
+      V_local's effective LR from bank_lr × 1.0 (~9e-2 at peak) to
+      bank_lr × 0.05 (~4.5e-3 at peak) — comparable to dense group.
+      Set =1.0 to recover the old high-LR behavior for A/B testing.
+
+    MMLLM_LR_LAYER_MULTS="m0,m1,...,m7" — optional per-layer override.
+      Stacked on top of LOCAL_MULT. E.g. LOCAL_MULT=0.05 + LAYER_MULTS
+      "2.0,1.5,..." gives effective bank_lr × 0.05 × m_i for layer i.
+      Tiled via modulo when shorter than the number of Local layers.
+
+  Only applies to parameters whose row count is divisible by sqrt_local**2
+  (the trunk-shaped layout of V_local). V_net's (sqrt_n**2, c_net) shape
+  has a different aspect and is left unscaled.
 """
 
 from __future__ import annotations
@@ -39,13 +52,37 @@ import os
 import torch
 
 
-def _get_trunk_mults():
-    """Parse MMLLM_LR_TRUNK_MULTS env var into a 1-D CPU tensor of
-    multipliers, or None if unset/empty. Cached per-process — env var
-    is read once."""
-    cached = getattr(_get_trunk_mults, "_cache", _SENTINEL := object())
+def _get_local_default_mult():
+    """V_local global default multiplier. Without this, V_local trains
+    at the bank LR (lr_b_mult=3.0 × base = 9e-2 at peak), which is the
+    wrong magnitude for the router primitive — routers should train
+    SLOW (they're a low-level primitive; the V values they retrieve
+    are what should change fast, not the routing decisions). Default
+    0.05 puts V_local at ~4.5e-3 at peak — ~20× below bank, comparable
+    to the dense (K_a/K_b/SwitchGate) group at 0.05.
+
+    Override via MMLLM_LR_LOCAL_MULT (e.g. set =1.0 to recover the old
+    high-LR behavior for A/B testing)."""
+    cached = getattr(_get_local_default_mult, "_cache", _SENTINEL := object())
     if cached is _SENTINEL:
-        raw = os.environ.get("MMLLM_LR_TRUNK_MULTS", "").strip()
+        raw = os.environ.get("MMLLM_LR_LOCAL_MULT", "").strip()
+        try:
+            cached = float(raw) if raw else 0.05
+        except Exception:
+            cached = 0.05
+        _get_local_default_mult._cache = cached
+    return cached
+
+
+def _get_layer_mults():
+    """Parse MMLLM_LR_LAYER_MULTS env var into a 1-D CPU tensor of
+    per-layer multipliers, or None if unset/empty. Stacked ON TOP of
+    the LOCAL_MULT global — so e.g. setting MMLLM_LR_LAYER_MULTS=2.0,...
+    with default MMLLM_LR_LOCAL_MULT=0.05 yields V_local layer 0 at
+    effective bank_lr × 0.05 × 2.0 = bank_lr × 0.1. Cached per-process."""
+    cached = getattr(_get_layer_mults, "_cache", _SENTINEL := object())
+    if cached is _SENTINEL:
+        raw = os.environ.get("MMLLM_LR_LAYER_MULTS", "").strip()
         if not raw:
             cached = None
         else:
@@ -54,31 +91,19 @@ def _get_trunk_mults():
                 cached = torch.tensor(vals, dtype=torch.float32) if vals else None
             except Exception:
                 cached = None
-        _get_trunk_mults._cache = cached
+        _get_layer_mults._cache = cached
     return cached
 
 
-def _per_row_trunk_mult(indices_cpu, n_rows_total, sqrt_local):
-    """Return a (nnz, 1) tensor of per-row trunk multipliers for the
-    touched `indices_cpu`, or None if this param isn't V_local or
-    MMLLM_LR_TRUNK_MULTS is unset.
-
-    A param is V_local iff its row count divides cleanly into >1 trunks
-    of size sqrt_local**2."""
-    mults = _get_trunk_mults()
-    if mults is None:
-        return None
+def _is_v_local(p_shape_0, sqrt_local):
+    """A param is V_local iff its row count divides cleanly into >1
+    trunks of size sqrt_local**2. V_net's (sqrt_n**2, c_net) has
+    sqrt_n^2 rows; for cpu-mini that's 4096 vs sqrt_local^2 = 51076 —
+    not divisible, so V_net falls through."""
     rows_per_trunk = sqrt_local * sqrt_local
-    if n_rows_total % rows_per_trunk != 0:
-        return None
-    n_trunks = n_rows_total // rows_per_trunk
-    if n_trunks < 2:
-        return None
-    # Tile the mults list to n_trunks via modulo (short lists cycle).
-    trunk_mults = mults[torch.arange(n_trunks) % len(mults)]
-    # Map each touched row → its trunk index → per-row multiplier.
-    trunk_idx = indices_cpu // rows_per_trunk
-    return trunk_mults[trunk_idx].unsqueeze(-1)
+    if p_shape_0 % rows_per_trunk != 0:
+        return False
+    return p_shape_0 // rows_per_trunk >= 2
 
 
 class CPUOffloadSparseAdam(torch.optim.Optimizer):
@@ -134,6 +159,11 @@ class CPUOffloadSparseAdam(torch.optim.Optimizer):
             with torch.enable_grad():
                 loss = closure()
 
+        layer_mults = _get_layer_mults()
+        local_default_mult = _get_local_default_mult()
+        sqrt_local = int(os.environ.get("MMLLM_SQRT_N", "226"))
+        v_local_counter = 0
+
         for group in self.param_groups:
             beta1, beta2 = group["betas"]
             lr = group["lr"]
@@ -148,6 +178,19 @@ class CPUOffloadSparseAdam(torch.optim.Optimizer):
                         "CPUOffloadSparseAdam only handles sparse grads "
                         f"(got dense grad on a parameter of shape {tuple(p.shape)})"
                     )
+
+                # V_local effective multiplier:
+                #   local_default_mult (slows the router-routed values to a
+                #   low-LR primitive) × per-layer_mult (if set; defaults 1.0).
+                # V_net's shape doesn't match _is_v_local and passes through
+                # at multiplier 1.0 (unchanged from bank's lr_b_mult).
+                layer_mult = 1.0
+                if _is_v_local(p.shape[0], sqrt_local):
+                    per_layer = 1.0
+                    if layer_mults is not None:
+                        per_layer = float(layer_mults[v_local_counter % len(layer_mults)])
+                    layer_mult = local_default_mult * per_layer
+                    v_local_counter += 1
 
                 state = self.state[p]
                 if len(state) == 0:
@@ -222,17 +265,11 @@ class CPUOffloadSparseAdam(torch.optim.Optimizer):
                 m_hat = m_new.div(bc1)
                 v_hat = v_new.div(bc2)
 
-                # Per-row update delta (on CPU).
-                delta_cpu = -lr * m_hat / (v_hat.sqrt().add_(eps))
-
-                # Per-trunk LR scaling (MMLLM_LR_TRUNK_MULTS). Applied
-                # only when this param is V_local — V_net's row count
-                # doesn't divide into trunks of sqrt_local**2 and the
-                # helper returns None.
-                sqrt_local = int(os.environ.get("MMLLM_SQRT_N", "226"))
-                row_mult = _per_row_trunk_mult(indices_cpu, p.shape[0], sqrt_local)
-                if row_mult is not None:
-                    delta_cpu = delta_cpu * row_mult
+                # Per-row update delta (on CPU). Per-layer LR scaling
+                # for V_local: scalar multiply on the whole delta (the
+                # layer_mult is the same for every touched row of this
+                # param). For V_net, layer_mult is 1.0.
+                delta_cpu = (-lr * layer_mult) * m_hat / (v_hat.sqrt().add_(eps))
 
                 # Write moments back to CPU state at their buf positions.
                 m_buf[buf_idx] = m_new
@@ -277,6 +314,11 @@ class CPUSparseSGD(torch.optim.Optimizer):
             with torch.enable_grad():
                 loss = closure()
 
+        layer_mults = _get_layer_mults()
+        local_default_mult = _get_local_default_mult()
+        sqrt_local = int(os.environ.get("MMLLM_SQRT_N", "226"))
+        v_local_counter = 0
+
         for group in self.param_groups:
             lr = group["lr"]
 
@@ -290,6 +332,15 @@ class CPUSparseSGD(torch.optim.Optimizer):
                         f"(got dense grad on a parameter of shape {tuple(p.shape)})"
                     )
 
+                # V_local: local_default_mult × per-layer_mult; V_net: 1.0.
+                layer_mult = 1.0
+                if _is_v_local(p.shape[0], sqrt_local):
+                    per_layer = 1.0
+                    if layer_mults is not None:
+                        per_layer = float(layer_mults[v_local_counter % len(layer_mults)])
+                    layer_mult = local_default_mult * per_layer
+                    v_local_counter += 1
+
                 grad = grad.coalesce()
                 indices = grad._indices()[0]              # 1-D row indices, grad.device
                 values  = grad._values()                  # (nnz, dim), grad.device
@@ -299,16 +350,8 @@ class CPUSparseSGD(torch.optim.Optimizer):
                 indices_p = indices.to(p.device)
                 values_p  = values.to(device=p.device, dtype=p.dtype)
 
-                # Per-trunk LR scaling (MMLLM_LR_TRUNK_MULTS). Applied
-                # only when this param is V_local; V_net is left unscaled.
-                sqrt_local = int(os.environ.get("MMLLM_SQRT_N", "226"))
-                indices_cpu = indices.to("cpu") if indices.device.type != "cpu" else indices
-                row_mult = _per_row_trunk_mult(indices_cpu, p.shape[0], sqrt_local)
-                if row_mult is not None:
-                    values_p = values_p * row_mult.to(values_p.device, dtype=values_p.dtype)
-
-                # In-place: p[indices_p] += -lr * values_p  (with duplicate-
-                # index summation, already coalesced so unique).
-                p.data.index_add_(0, indices_p, values_p, alpha=-lr)
+                # In-place: p[indices_p] += -lr * layer_mult * values_p
+                # (with duplicate-index summation, already coalesced so unique).
+                p.data.index_add_(0, indices_p, values_p, alpha=-lr * layer_mult)
 
         return loss

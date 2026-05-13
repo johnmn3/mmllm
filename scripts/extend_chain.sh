@@ -17,8 +17,10 @@ if [ ! -d "$ARCHIVE_ROOT" ]; then
   exit 2
 fi
 
-# Find the highest existing round.
-START_FROM=$(ls -d "$ARCHIVE_ROOT"/round-* 2>/dev/null | grep -oE 'round-[0-9]+' | grep -oE '[0-9]+' | sort -n | tail -1)
+# Find the highest existing round. Trailing slash restricts to directories
+# (otherwise round-N.train.log files would be matched and the round number
+# parsed from them — which silently breaks the resume after a partial run).
+START_FROM=$(ls -1d "$ARCHIVE_ROOT"/round-*/ 2>/dev/null | grep -oE 'round-[0-9]+' | grep -oE '[0-9]+' | sort -n | tail -1)
 if [ -z "$START_FROM" ]; then
   echo "ERROR: no round-N dirs in $ARCHIVE_ROOT" >&2
   exit 2
