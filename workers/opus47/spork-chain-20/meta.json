@@ -1,0 +1,10 @@
+{
+  "handle": "opus47",
+  "config": "cpu-mini-N16",
+  "recipe": "stack-3e-2-5.0+mag-coef-on",
+  "n_rounds_extended": 10,
+  "n_rounds_total": 20,
+  "extended_from": "workers/dispatcher/spork-chain-10",
+  "branch_base": "claude/fim-training-cycle-T3giJ",
+  "git_sha": "1cca6e8bddc675f833cb413c0a035de47ed5a9d0"
+}

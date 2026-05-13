@@ -1,0 +1,13 @@
+{
+  "handle": "round11to20",
+  "config": "cpu-mini-N16",
+  "recipe": "stack-3e-2-5.0+mag-coef-on",
+  "n_rounds_extended": 10,
+  "n_rounds_total": 20,
+  "extended_from": "workers/dispatcher/spork-chain-10",
+  "branch_base": "claude/fim-training-cycle-T3giJ",
+  "git_sha": "0ede6d74e7ef7534baf141f0751b20e705c35e80",
+  "final_ctrl_bpc": 1.2241,
+  "final_delta_net": 0.1827,
+  "final_delta_both": 0.1824
+}
