@@ -66,6 +66,33 @@ When a test or training run is in flight:
 - **chain** = N sporks back-to-back, V_local zero-init each round, V_net
   and dense.pt carried forward across rounds.
 
+## What to watch in a 100-step run — and when
+
+The wake/sleep schedule has TWO phases. Don't conflate them. Don't call a
+bank "mute" because you looked at the wrong tier at the wrong time.
+
+- **Steps 0 → ~70 (Local phase).** Bank LR is high (warmup ramp-up, then
+  30× wake plateau). Net LR is essentially zero. Distill coef is at its
+  floor. The hill climber is filling **Local Bank** in this window.
+  → **Δ_local is the signal.** Δ_net is *expected* to be zero here. Don't
+  report Δ_net = 0 as a finding during the Local phase — that's the
+  design, not a problem.
+
+- **Steps ~70 → 100 (Distillation / Net phase).** lr_b cosines down to
+  0.001× (Local freezes). lr_n ramps up to 0.1× (Net wakes). Distill
+  coef rises toward DISTILL_COEF_END. Whatever Local accumulated in
+  phase 1 should now flow into Net via the MSE distillation loss.
+  → **Δ_net is the signal.** A successful run shows Δ_net rising from
+  ~0 toward Δ_local during this window. The end-of-train summary's
+  Δ_net is the headline number.
+
+When reporting mid-train ablations:
+- Pre-step-70 events: lead with Δ_local. Mention Δ_net only if it's
+  unexpectedly nonzero.
+- Post-step-70 events: lead with Δ_net (and Δ_net / Δ_local ratio as
+  the distillation transfer fraction). Δ_local is expected to be
+  approximately frozen.
+
 ## Active workstreams
 
 - Shared-trunk option A is implemented and verified — `tests/test_shared_trunk.py`
