@@ -1,3 +1,3 @@
-{"dataset": "glaive-fim-val", "bpc": 1.4813052631584582, "ppl": 2.792012234031297, "kind": "reference"}
-{"dataset": "cosmopedia", "bpc": 3.007, "ppl": 8.039, "kind": "bpc"}
-{"dataset": "fineweb-edu", "bpc": 3.2156, "ppl": 9.29, "kind": "bpc"}
+{"dataset": "glaive-fim-val", "bpc": 1.4813162726906126, "ppl": 2.792033540589428, "kind": "reference"}
+{"dataset": "cosmopedia", "bpc": 3.0071, "ppl": 8.039, "kind": "bpc"}
+{"dataset": "fineweb-edu", "bpc": 3.2157, "ppl": 9.29, "kind": "bpc"}
