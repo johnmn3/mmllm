@@ -140,9 +140,10 @@ class SwitchGate(nn.Module):
         if mem_out is None and net_out is not None:
             logits = torch.einsum("bhtd,hd->bht", q_long, self.gate_proj)
             gate = torch.sigmoid(logits)
-            with torch.no_grad():
-                g_mean = float(gate.mean().item())
-                self.last_gate_dist = (g_mean, float("nan"), 1.0 - g_mean)
+            if self.training:
+                with torch.no_grad():
+                    g_mean = float(gate.mean().item())
+                    self.last_gate_dist = (g_mean, float("nan"), 1.0 - g_mean)
             if self.alpha_net is not None:
                 alpha = self.alpha_net.view(1, -1, 1, 1)
                 net_out = alpha * net_out
@@ -151,9 +152,10 @@ class SwitchGate(nn.Module):
             # q_long: (B, H, T, D); gate_proj: (H, D); logits: (B, H, T)
             logits = torch.einsum("bhtd,hd->bht", q_long, self.gate_proj)
             gate = torch.sigmoid(logits)
-            with torch.no_grad():
-                g_mean = float(gate.mean().item())
-                self.last_gate_dist = (g_mean, 1.0 - g_mean, float("nan"))
+            if self.training:
+                with torch.no_grad():
+                    g_mean = float(gate.mean().item())
+                    self.last_gate_dist = (g_mean, 1.0 - g_mean, float("nan"))
             return gate.unsqueeze(-1) * sdpa_out + (1.0 - gate).unsqueeze(-1) * mem_out
         # 3-way: q_long: (B, H, T, D); gate_proj_3: (H, 3, D); logits: (B, H, T, 3)
         logits = torch.einsum("bhtd,hkd->bhtk", q_long, self.gate_proj_3)
@@ -169,20 +171,27 @@ class SwitchGate(nn.Module):
         # distill MSE(net, local) pulls Net to mimic Local; if Local is
         # already mostly sdpa+epsilon, Net learns sdpa, and Δ_net collapses
         # (the round-5 / round-8 redundancy basin).
-        self.last_local_out = mem_out
-        self.last_net_out   = net_out
-        self.last_sdpa_out  = sdpa_out
+        #
+        # ONLY needed at training time. At inference these tensors are
+        # never read — and stashing the full (B,H,T,D) tensors holds them
+        # alive past the forward (memory pressure) and tying them to the
+        # autograd graph in eval is wasted work.
+        if self.training:
+            self.last_local_out = mem_out
+            self.last_net_out   = net_out
+            self.last_sdpa_out  = sdpa_out
 
         # Legacy 3-way: full softmax mix (Net-default Bernoulli not attached).
         if self.local_active_proj is None:
-            with torch.no_grad():
-                mean_w = weights.mean(dim=(0, 1, 2))
-                self.last_gate_dist = (
-                    float(mean_w[0].item()),
-                    float(mean_w[1].item()),
-                    float(mean_w[2].item()),
-                )
-                self.last_local_firing_rate = 1.0
+            if self.training:
+                with torch.no_grad():
+                    mean_w = weights.mean(dim=(0, 1, 2))
+                    self.last_gate_dist = (
+                        float(mean_w[0].item()),
+                        float(mean_w[1].item()),
+                        float(mean_w[2].item()),
+                    )
+                    self.last_local_firing_rate = 1.0
             w0 = weights[..., 0].unsqueeze(-1)
             w1 = weights[..., 1].unsqueeze(-1)
             w2 = weights[..., 2].unsqueeze(-1)
@@ -228,13 +237,14 @@ class SwitchGate(nn.Module):
         w_local = w_local / total
         w_net   = w_net   / total
 
-        with torch.no_grad():
-            self.last_gate_dist = (
-                float(w_sdpa.mean().item()),
-                float(w_local.mean().item()),
-                float(w_net.mean().item()),
-            )
-            self.last_local_firing_rate = float(local_hard.mean().item())
+        if self.training:
+            with torch.no_grad():
+                self.last_gate_dist = (
+                    float(w_sdpa.mean().item()),
+                    float(w_local.mean().item()),
+                    float(w_net.mean().item()),
+                )
+                self.last_local_firing_rate = float(local_hard.mean().item())
 
         return (w_sdpa.unsqueeze(-1)  * sdpa_out
               + w_local.unsqueeze(-1) * mem_out
