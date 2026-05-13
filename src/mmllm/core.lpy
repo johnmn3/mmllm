@@ -1197,18 +1197,27 @@
         target-kind (pick-distill-target)
         mag-coef    (pick-distill-magnitude-coef)
         mag-clamp   (pick-distill-magnitude-clamp)
+        ;; Per-layer ablation gate (set by probe-distill-gate! at the
+        ;; Local→Net handoff). When present, only blocks whose index is
+        ;; in this set contribute to the distill MSE — the others stay
+        ;; at their step-70 Net state, untouched by the distill update.
+        ;; nil = no gating (all blocks contribute, default behavior).
+        gate     (when metrics (.get metrics "distill_gate_indices" nil))
         eps      1e-6]
     (if (zero? coef)
       0.0
-      (let [losses (->> (:blocks m)
-                        (map (fn [b]
+      (let [losses (->> (map-indexed vector (:blocks m))
+                        (map (fn [[i b]]
                                ;; Only SwitchGate stashes these; SumGate /
                                ;; ScalarGate / 2-way SwitchGate lack them.
                                (let [g  (:long-gate b)
                                      lo (python/getattr g "last_local_out" nil)
                                      no (python/getattr g "last_net_out" nil)
-                                     so (python/getattr g "last_sdpa_out" nil)]
-                                 (when (and lo no)
+                                     so (python/getattr g "last_sdpa_out" nil)
+                                     ;; Skip this block when gate is set
+                                     ;; and this block's index isn't in it.
+                                     gated-out? (and gate (not (.__contains__ gate i)))]
+                                 (when (and lo no (not gated-out?))
                                    ;; Build the target tensor per mode. For
                                    ;; 'residual', subtract sdpa from local so
                                    ;; Net only chases what Local adds beyond
@@ -3166,6 +3175,70 @@
           (restore-v-from-disk! (:netbank b) p))
         (unlink-paths! (concat local-paths net-paths))))))
 
+(defn- probe-loss
+  "Lightweight single-batch forward + plain CE on (x, y). No backward,
+   no optimizer. Returns a Python float. Used by probe-distill-gate! to
+   measure per-layer ablation Δ without the full eval-bpc cost.
+
+   ~50-100ms per call at cpu-mini."
+  [m x y]
+  (set-eval-mode! m)
+  (with [_ (torch/no_grad)]
+    (let [device  (:device m)
+          x       (.to x device)
+          y       (.to y device)
+          [logits _ _ _ _] (forward m x nil nil false nil)
+          logits-flat (.reshape logits -1 vocab-size)
+          y-flat      (.reshape y -1)]
+      (.item (F/cross_entropy logits-flat y-flat)))))
+
+(defn probe-distill-gate!
+  "Per-Local-layer ablation gate for the distill loss.
+
+   For each block with :memory: backup V_local, zero it, single-batch
+   forward+CE on (x,y), restore. Records per-layer Δ_loss (ablated −
+   baseline). Layers with Δ > MMLLM_DISTILL_GATE_THRESHOLD (default 0.0)
+   were HELPING (zeroing them HURT) — those are gated IN. The gate-in
+   set is stashed on (:metrics m) as 'distill_gate_indices'; per-layer
+   Δs go to 'distill_gate_deltas'.
+
+   collect-distill-loss respects the gate when set, filtering the
+   distill MSE to only gated-in blocks.
+
+   Total cost: ~1s per probe at cpu-mini, 8 Local layers. Designed for
+   a one-shot call at the Local→Net handoff (around step = MMLLM_LR_WARMUP).
+
+   Restores eval/train mode is the caller's job — this returns having
+   left the model in EVAL mode (set-eval-mode! was called by probe-loss)."
+  [m x y]
+  (let [thresh   (python/float (.get (.- os environ) "MMLLM_DISTILL_GATE_THRESHOLD" "0.0"))
+        baseline (probe-loss m x y)
+        results  (vec
+                   (for [[i b] (map-indexed vector (:blocks m))
+                         :when (:memory b)]
+                     (let [bp (save-v-to-disk (:memory b) (str "gate-" i))]
+                       (.zero_bank (:memory b))
+                       (try
+                         (let [abl-loss (probe-loss m x y)
+                               delta    (- abl-loss baseline)]
+                           [i delta])
+                         (finally
+                           (restore-v-from-disk! (:memory b) bp)
+                           (unlink-paths! [bp]))))))
+        gate-in  (->> results
+                      (filter (fn [[_ d]] (> d thresh)))
+                      (mapv first))]
+    (when-let [metrics (:metrics m)]
+      (let [py-deltas (python/dict)
+            py-gate   (python/set)]
+        (doseq [[i d] results]
+          (.__setitem__ py-deltas i (python/float d)))
+        (doseq [i gate-in]
+          (.add py-gate i))
+        (.__setitem__ metrics "distill_gate_deltas"  py-deltas)
+        (.__setitem__ metrics "distill_gate_indices" py-gate)))
+    {:baseline baseline :deltas results :gate-in gate-in}))
+
 ;;; ─────────────────────── train + eval text8 / enwik8 ───────────────────────
 
 (defn train-text8
@@ -3914,6 +3987,34 @@
                 _     (when-let [metrics (:metrics m)]
                         (.__setitem__ metrics "current_step" step)
                         (.__setitem__ metrics "total_steps"  total-steps))
+                ;; One-shot per-layer ablation gate probe at the
+                ;; Local→Net handoff. When MMLLM_DISTILL_GATE_BY_ABLATION
+                ;; is set true, this runs ONCE at step == MMLLM_LR_WARMUP
+                ;; (or MMLLM_DISTILL_GATE_STEP if set). Probes each Local
+                ;; layer's contribution on the current (x,y) batch and
+                ;; gates distill MSE to only the layers that were
+                ;; helping. ~1s overhead, one-shot per run.
+                _     (when (and (.lower (.get (.- os environ) "MMLLM_DISTILL_GATE_BY_ABLATION" "false"))
+                                 (= (.lower (.get (.- os environ) "MMLLM_DISTILL_GATE_BY_ABLATION" "false")) "true"))
+                        (let [probe-step (python/int (.get (.- os environ) "MMLLM_DISTILL_GATE_STEP"
+                                                          (str (python/int (.get (.- os environ) "MMLLM_LR_WARMUP" "0")))))]
+                          (when (= step probe-step)
+                            (println (format "  [step %d] running distill-gate ablation probe …" step))
+                            (let [t0  (.time (python/__import__ "time"))
+                                  res (probe-distill-gate! m x y)
+                                  dt  (- (.time (python/__import__ "time")) t0)]
+                              (set-train-mode! m)   ;; probe-loss left us in eval mode
+                              (println (format "    baseline_loss=%.4f  Δ per layer: %s"
+                                               (:baseline res)
+                                               (.join " "
+                                                      (mapv (fn [[i d]]
+                                                              (format "L%d=%+.4f" i d))
+                                                            (:deltas res)))))
+                              (println (format "    gate-in: %d/%d layers — indices %s  (probe wall %.2fs)"
+                                               (count (:gate-in res))
+                                               (count (:deltas res))
+                                               (str (:gate-in res))
+                                               dt))))))
                 loss  (train-step m opt-dense opt-sparse opt-sparse-net x y false trunk-ids)
                 ;; n-trunks > 1 multiplies the effective batch by N: each
                 ;; trunk contributes B-cur rows. Token count for the energy
