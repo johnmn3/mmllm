@@ -70,6 +70,7 @@ export MMLLM_REPLAY_BUFFER_SIZE=256
 export MMLLM_REPLAY_THRESHOLD=0.5
 export MMLLM_ABLATE_EVERY=0
 export MMLLM_SKIP_NETBANK_WARMSTART=true     # extending — V_net is carried forward; don't re-warm
+export MMLLM_ABLATION_EVAL_CAP="${MMLLM_ABLATION_EVAL_CAP:-25000}"
 unset MMLLM_LITE_CKPT
 unset MMLLM_MAX_STEPS
 
