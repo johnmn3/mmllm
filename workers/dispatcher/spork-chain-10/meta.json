@@ -1,0 +1,27 @@
+{
+  "handle": "dispatcher",
+  "config": "cpu-mini-N16",
+  "recipe": "stack-3e-2-5.0+mag-coef-on",
+  "n_rounds_completed": 10,
+  "branch_base": "claude/fim-training-cycle-T3giJ",
+  "round_10": {
+    "ctrl_bpc": 1.5991,
+    "delta_local": -0.001,
+    "delta_net": 0.2205,
+    "delta_both": 0.2201,
+    "synergy": 0.0006
+  },
+  "wall_per_round_s": [
+    287,
+    282,
+    286,
+    286,
+    285,
+    230,
+    228,
+    227,
+    217,
+    216
+  ],
+  "note": "End-state of a 10-round cpu-mini \u00d7 N=16 chain at stack-3e-2-5.0 + mag-coef-on. Next worker EXTENDS from this state via scripts/extend_chain.sh \u2014 do NOT start a parallel chain from scratch."
+}
