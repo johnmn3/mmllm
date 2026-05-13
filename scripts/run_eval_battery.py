@@ -55,6 +55,7 @@ DATASETS = [
     ("toolace",          "* function-call corpus (replaces xlam — ToolACE)"),
     ("tiny-stories",     "TinyStories — simple English grammar"),
     ("aesop-fables",     "in-house aesop-fables (Clojure code + JSON tool-calls)"),
+    ("open-web-math",    "OpenWebMath — math reasoning (proofs, math.SE, lecture notes)"),
 ]
 
 # Build the model

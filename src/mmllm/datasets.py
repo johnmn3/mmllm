@@ -580,17 +580,17 @@ def fmt_the_stack_v2(rec: dict, max_file_bytes: int = 32768,
     return tpl.system(sys_msg) + tpl.assistant(content)
 
 
-def fmt_open_web_math(rec: dict) -> "str | None":
+def fmt_open_web_math(rec: dict, tpl: ChatTemplate = DEFAULT_TEMPLATE) -> "str | None":
     """OpenWebMath (open-web-math/open-web-math).
 
     14.7B-token corpus of mathematical text scraped from the web —
-    proofs, derivations, math.SE answers, lecture notes. Pretraining-
-    style: just the `text` field. Carries the formal-reasoning signal
-    we want present throughout training, not just at the end."""
+    proofs, derivations, math.SE answers, lecture notes. Wrapped in
+    ChatTemplate envelope to match the rest of the corpus mix — see
+    fmt_cosmopedia comment for the rationale."""
     txt = rec.get("text")
     if not txt:
         return None
-    return txt
+    return tpl.system("You are a math tutor working through a problem step by step.") + tpl.assistant(txt)
 
 
 def fmt_algebraic_stack(rec: dict) -> "str | None":

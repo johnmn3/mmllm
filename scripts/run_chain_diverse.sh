@@ -13,12 +13,13 @@
 #
 # Training mix (MMLLM_MIX env, weights sum-normalized to 1 by sampler):
 #   25  glaive-fim-v3      JSON tool-calls (FIM-format, in-domain)
-#   15  cosmopedia         English textbook (chat-wrapped)
-#   15  fineweb-edu        English web (chat-wrapped)
+#   10  cosmopedia         English textbook (chat-wrapped)
+#   10  fineweb-edu        English web (chat-wrapped)
 #   10  magicoder          Python instruction code (already chat-wrapped)
 #   10  hermes-funcall     function-call corpus (chat-wrapped)
 #   10  toolace            function-call corpus (chat-wrapped)
 #   10  aesop-fables       in-house Clojure + tool-calls (chat-wrapped)
+#   10  open-web-math      math reasoning (proofs, math.SE, lecture notes; chat-wrapped)
 #    5  tiny-stories       simple English grammar (chat-wrapped)
 #
 # fim_loss_mask handles mixed corpora correctly: FIM-marked records
@@ -47,13 +48,13 @@ if [ -z "$HIGHEST" ]; then
 fi
 echo "Starting from $ARCHIVE/round-${HIGHEST}"
 
-# ── 8-corpus mix ──
+# ── 9-corpus mix ──
 B=/tmp/mmllm-cpu/battery
 G=/tmp/mmllm-cpu/fim-json-v3.train.bin
-export MMLLM_MIX="${G}:25,${B}/cosmopedia.train.bin:15,${B}/fineweb-edu.train.bin:15,${B}/magicoder.train.bin:10,${B}/hermes-funcall.train.bin:10,${B}/toolace.train.bin:10,${B}/aesop-fables.bin.train.bin:10,${B}/tiny-stories.train.bin:5"
+export MMLLM_MIX="${G}:25,${B}/cosmopedia.train.bin:10,${B}/fineweb-edu.train.bin:10,${B}/magicoder.train.bin:10,${B}/hermes-funcall.train.bin:10,${B}/toolace.train.bin:10,${B}/aesop-fables.bin.train.bin:10,${B}/open-web-math.train.bin:10,${B}/tiny-stories.train.bin:5"
 
 echo "═══════════════════════════════════════════════════════════════"
-echo "  CHAIN-DIVERSE: extending harvested round-20 with 8-corpus mix"
+echo "  CHAIN-DIVERSE: extending highest staged round with 9-corpus mix"
 echo "  N_MORE=$N_MORE  STEPS=$STEPS  archive=$ARCHIVE"
 echo "═══════════════════════════════════════════════════════════════"
 echo "  mix weights:"

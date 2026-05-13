@@ -19,7 +19,8 @@ import argparse, json, sys
 from pathlib import Path
 
 DATASETS = ["glaive-fim-val", "cosmopedia", "fineweb-edu", "magicoder",
-            "hermes-funcall", "toolace", "tiny-stories", "aesop-fables"]
+            "hermes-funcall", "toolace", "tiny-stories", "aesop-fables",
+            "open-web-math"]
 
 def load_jsonl(p):
     out = {}
