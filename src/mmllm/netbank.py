@@ -377,13 +377,15 @@ class NetBank(nn.Module):
         out = self.expander(weighted_latent)
 
         # ── instrumentation: "is NetBank actually producing signal?" ──
-        # Mean L2 norm of NetBank output per (B,T) position. Compare against
-        # Local Bank's same metric to see if NetBank is contributing
-        # anything to the residual stream.
-        with torch.no_grad():
-            self.last_output_norm = float(
-                out.detach().pow(2).sum(-1).sqrt().mean().item()
-            )
+        # Mean L2 norm of NetBank output per (B,T) position. ONLY in
+        # training mode — at inference this is a per-layer CPU sync
+        # (~30µs × 32 layers × tok = real fraction of decode wall) with
+        # no functional value (telemetry consumer is the training loop).
+        if self.training:
+            with torch.no_grad():
+                self.last_output_norm = float(
+                    out.detach().pow(2).sum(-1).sqrt().mean().item()
+                )
         return out
 
     # ─────────────────────── slot-usage helpers ───────────────────────

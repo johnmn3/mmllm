@@ -1021,13 +1021,16 @@ class ProductKeyMemory(nn.Module):
         weights = F.softmax(top_scores, dim=-1).unsqueeze(-1)
         out = (weights * values).sum(dim=-2)
         # Instrumentation paired with NetBank.last_output_norm — gives a
-        # direct Local-vs-Net residual-contribution comparison. If Local
-        # has norm ~5 and Net has norm ~0.01, the gate isn't adopting
-        # NetBank regardless of V initialization.
-        with torch.no_grad():
-            self.last_output_norm = float(
-                out.detach().pow(2).sum(-1).sqrt().mean().item()
-            )
+        # direct Local-vs-Net residual-contribution comparison. ONLY in
+        # training mode: at inference .item() is a per-layer CPU sync
+        # that was ~30µs × 3200 PKM calls / decode = 5% of wall, with
+        # zero functional value (telemetry only read by training-loop
+        # callers and the sweep ablation logs).
+        if self.training:
+            with torch.no_grad():
+                self.last_output_norm = float(
+                    out.detach().pow(2).sum(-1).sqrt().mean().item()
+                )
         return out
 
 
