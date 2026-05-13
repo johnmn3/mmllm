@@ -168,3 +168,56 @@ trade-off in any launcher script that targets shared-trunk N>8.
 - Follow-ups in todo: thread trunk_ids through eval-bpc (so ablation
   measures the N-trunk pool not just trunk-0); fix save_to_mmap
   self-overwrite at end-of-train.
+
+## Winning bank-engagement recipes (sweep results, 2026-05-13)
+
+Established via the sweep_distill infrastructure (scripts/build_distill_base.sh
++ scripts/sweep_distill.sh, resume-from-step-70 iteration). All numbers
+from cpu-tiny N=1 B=4 100-step runs with adam-cpu sparse optimizer +
+warm-start enabled + Gaussian σ=0.02 bank init.
+
+Baseline (spike-6 verbatim) was: ctrl bpc=3.78, Δ_local=+1.64,
+Δ_net=+0.0018, synergy=+0.008 (Net effectively not training).
+
+Two Pareto-optimal recipes, depending on what we need from the trained model:
+
+### **stack-3e-2-5.0** — "end-of-spork model" / best raw bpc
+Overrides on top of spike-6:
+  - MMLLM_LR=3e-2  (10× baseline; with LR_MIN=3e-2)
+  - MMLLM_LR_NET_MULT_END=5.0 (50× baseline 0.1)
+
+Result: ctrl bpc=**2.59** (-32% vs baseline), Δ_local=+1.07, Δ_net=+0.052
+(29× baseline), Δ_both=+1.30, synergy=+0.18. Balanced — both banks
+contribute, Net has started absorbing Local's role but hasn't taken over.
+
+Use when: deploying the spork as a standalone trained model. Best
+language-modeling bpc.
+
+### **stack-1e-1-5.0** — "chain-round seed" / peak Net consolidation
+Overrides on top of spike-6:
+  - MMLLM_LR=1e-1  (33× baseline; with LR_MIN=1e-1)
+  - MMLLM_LR_NET_MULT_END=5.0
+
+Result: ctrl bpc=2.80, Δ_local=**+0.52** (Local mostly silent),
+Δ_net=**+0.33** (185× baseline), Δ_both=+1.19, synergy=+0.34. Net has
+absorbed most of Local's role — exactly what a chain round needs so
+the next round's V_local-reset doesn't lose the learned features.
+
+Use when: this spork is round-N of a chain and we want V_net to be the
+durable carrier of features across rounds. The slightly higher ctrl
+bpc (2.80 vs 2.59) is the cost of consolidation; we eat that locally
+to gain durability across rounds.
+
+### Future inference model
+When we eventually package an inference checkpoint, we want
+stack-3e-2-5.0 settings for the FINAL spork (best raw bpc), preceded
+by some number of stack-1e-1-5.0 chain rounds (so V_net carries
+consolidated features through). The inference model's V_local is then
+reset to small Gaussian and won't be trained at inf time — Net carries
+the learned content.
+
+### Knobs that DON'T matter (saturated)
+At this scale, neither MMLLM_DISTILL_COEF_END (5→20→50 all give same
+Δ_net) nor MMLLM_DISTILL_MAGNITUDE_COEF (off vs on=1.0 same) affects
+Δ_net. The distill MSE gradient is already plenty; what's gated is
+V_net's per-step movement, controlled by LR_NET_MULT × base LR.
