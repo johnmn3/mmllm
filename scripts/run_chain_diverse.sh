@@ -53,6 +53,21 @@ B=/tmp/mmllm-cpu/battery
 G=/tmp/mmllm-cpu/fim-json-v3.train.bin
 export MMLLM_MIX="${G}:25,${B}/cosmopedia.train.bin:10,${B}/fineweb-edu.train.bin:10,${B}/magicoder.train.bin:10,${B}/hermes-funcall.train.bin:10,${B}/toolace.train.bin:10,${B}/aesop-fables.bin.train.bin:10,${B}/open-web-math.train.bin:10,${B}/tiny-stories.train.bin:5"
 
+# ── V-shape per-layer V_local LR multipliers ──
+# Sweep winner (Arm G): deep V — 7× hot at edges (layers 0, 7), 1× cold at
+# trough (layer 4), monotonic ascent/descent in between. Mean 4.125, span
+# 1×–7×. On a 1-round probe off the R70 harvest this configuration produced
+# the highest Δ_net (+0.1556 vs +0.1123 baseline) and the only positive
+# synergy (+0.0002) in a 6-arm sweep (uniform, monotonic, multiple V's).
+# Architectural reading: edge layers see raw embedding / near-output features
+# with high gradient signal; middle layers carry stable consolidating
+# representations and should evolve slowly. LOCAL_MULT=1.0 here pairs with
+# the V-shape to match the architecture the spike was run under.
+# Operators can override either env var pre-launch.
+: "${MMLLM_LR_LOCAL_MULT:=1.0}"
+: "${MMLLM_LR_LAYER_MULTS:=7.0,5.0,3.0,2.0,1.0,3.0,5.0,7.0}"
+export MMLLM_LR_LOCAL_MULT MMLLM_LR_LAYER_MULTS
+
 echo "═══════════════════════════════════════════════════════════════"
 echo "  CHAIN-DIVERSE: extending highest staged round with 9-corpus mix"
 echo "  N_MORE=$N_MORE  STEPS=$STEPS  archive=$ARCHIVE"
