@@ -69,7 +69,7 @@ def main():
     core.set_eval_mode__BANG__(m)
     torch.set_grad_enabled(False)
 
-    # ---------- Quality: eval-bpc ----------
+    # ---------- Quality: eval-bpc (basilisp path — single-shot eval) ----------
     print("\n  ── eval-bpc on val ──")
     val_path = f"{base}.val.bin"
     import mmllm.corpus as corp
@@ -82,22 +82,29 @@ def main():
     ppl = r.val_at(K("ppl"))
     print(f"  eval bpc={bpc:.4f}  ppl={ppl:.4f}  over 25000 tokens  wall={dt_eval:.1f}s")
 
-    # ---------- TPS benchmark: B=1 (decode) + B=16 (parallel) ----------
+    # ---------- TPS benchmark: TWO paths for comparison ----------
+    # 1. basilisp sample_batch (the existing CLI path)
+    # 2. pure-Python forward via mmllm.inference (skips basilisp dispatch)
+    from mmllm.inference import unpack_model, bench_decode
+    bundle = unpack_model(m)
     prompt = "the quick brown fox jumps over the lazy dog. "
+
     for B, n_warm, n_time in [(1, 20, 100), (16, 10, 50)]:
         print(f"\n  ── TPS bench B={B}  warm={n_warm} time={n_time} ──")
-        # Warmup (not timed)
+
+        # --- basilisp path
         core.sample_batch(m, prompt, n_warm, B)
-        # Timed
         t0 = time.time()
         core.sample_batch(m, prompt, n_time, B)
-        dt = time.time() - t0
-        per_seq = n_time / dt
-        agg = B * per_seq
-        ms = 1000.0 * dt / n_time
-        print(f"  RESULT B={B}: {n_time} tokens in {dt:.3f}s")
-        print(f"    per-sequence: {per_seq:.2f} tok/sec  ({ms:.2f} ms/tok)")
-        print(f"    aggregate:    {agg:.2f} tok/sec  ({B} × per-seq)")
+        dt_bas = time.time() - t0
+        per_bas = n_time / dt_bas
+        agg_bas = B * per_bas
+        print(f"  basilisp:    per_seq={per_bas:7.2f} tok/s  agg={agg_bas:8.2f} tok/s  ({1000*dt_bas/n_time:5.1f} ms/tok)")
+
+        # --- pure-Python path
+        r = bench_decode(bundle, prompt, n_warm, n_time, B)
+        speedup = r["per_seq_tps"] / per_bas
+        print(f"  pure-Python: per_seq={r['per_seq_tps']:7.2f} tok/s  agg={r['aggregate_tps']:8.2f} tok/s  ({r['ms_per_tok']:5.1f} ms/tok)  → {speedup:.2f}× basilisp")
 
 
 if __name__ == "__main__":
