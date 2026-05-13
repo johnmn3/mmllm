@@ -104,8 +104,20 @@ export MMLLM_LR_WARMUP=$((STEP_LEN * 70 / 100))
 export MMLLM_REPLAY_EVERY=10
 export MMLLM_REPLAY_BUFFER_SIZE=256
 export MMLLM_REPLAY_THRESHOLD=0.5
-export MMLLM_SKIP_NETBANK_WARMSTART=true
-export MMLLM_NET_V_WARMSTART_FROM_LOCAL=false
+# NetBank warm-start: copy Local's K_a/K_b into NetBank's first 2048 rows
+# so retrieval geometry is bootstrapped instead of cold. Without this,
+# Net's K_a/K_b stay random while Local trains, so Net retrieves at
+# different addresses than Local — distill MSE pushes V_net at Net's
+# rows, which don't align with Local's. V_net learns averaged Local
+# content at random rows = diluted, Δ_net stays at noise.
+#
+# Previous setting `MMLLM_SKIP_NETBANK_WARMSTART=true` was a round-7
+# carry-over for harvester-seeded runs (where externally-loaded V_net
+# would be clobbered by the warm-start). For fresh starts there's
+# nothing to clobber, so default to enabled. Set explicitly to "true"
+# only when the run seeds V_net from a harvester output.
+export MMLLM_SKIP_NETBANK_WARMSTART="${MMLLM_SKIP_NETBANK_WARMSTART:-false}"
+export MMLLM_NET_V_WARMSTART_FROM_LOCAL="${MMLLM_NET_V_WARMSTART_FROM_LOCAL:-true}"
 # Ablation policy: end-only by default (ABLATE_EVERY=0 disables mid-
 # training ablations; the end-of-train ablation in train-long still
 # fires unconditionally). Caller can override by exporting the env var
@@ -131,7 +143,14 @@ rm -f  "${BANK_BASE}".*.bin "${BANK_BASE}"-net.*.bin
 mkdir -p "${FIM_BASE}.ckpts/step-1"
 cp "${ROUND6_BASE}/dense.pt" "${FIM_BASE}.ckpts/step-1/dense.pt"
 echo 1 > "${FIM_BASE}.ckpts/step-1/step.txt"
-python3 -c "import torch; torch.save({}, '${FIM_BASE}.ckpts/step-1/opt-sparse-net.pt')"
+# Don't seed an empty opt-sparse-net.pt at step-1 — train-long's NetBank
+# warm-start gate fires only when (start-step == 0) OR (the step-N/opt-
+# sparse-net.pt file doesn't exist). Seeding an empty {} satisfied the
+# existence check and blocked warm-start, leaving Net's K_a/K_b random
+# while Local's trained — distill couldn't transfer because retrieval
+# addresses didn't align. Absence triggers warm-start; opt-sparse-net
+# state initializes fresh either way (load-checkpoint warns 'param_groups'
+# missing and falls back to fresh state).
 
 # Bank init: per-trunk V_local files sized (N_TRUNKS * sqrt_n² , q_dim),
 # per-layer V_net files sized (sqrt_n_net² , c_net). Local files contain
