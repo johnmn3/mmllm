@@ -15,9 +15,9 @@ ROOT=$(git rev-parse --show-toplevel); cd "$ROOT"
 OUT=/tmp/mmllm-cpu/battery
 mkdir -p "$OUT"
 
-MAX=$((200 * 1024 * 1024))    # 200 MB total per dataset
-VAL=$((50 * 1024 * 1024))     # 50 MB val
-TEST=$((50 * 1024 * 1024))    # 50 MB test
+MAX=$((20 * 1024 * 1024))     # 20 MB cap (these are SFT-scale, smaller than pretrain corpora)
+VAL=$((2 * 1024 * 1024))      # 2 MB val
+TEST=$((2 * 1024 * 1024))     # 2 MB test
 
 for key in hermes-funcall toolace magicoder; do
   out="${OUT}/${key}"
