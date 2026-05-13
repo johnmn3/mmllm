@@ -44,7 +44,11 @@ export MMLLM_NET_TOP_K=64
 export MMLLM_NET_SUB_TOP_K=8
 export MMLLM_N_TRUNKS=$N_TRUNKS
 export MMLLM_SPARSE_OPT=adam-cpu
-export MMLLM_BATCH="${MMLLM_BATCH:-4}"  # per-trunk; B_eff = N_TRUNKS × 4 = 64
+export MMLLM_BATCH="${MMLLM_BATCH:-2}"  # per-trunk; B_eff = N_TRUNKS × 2 = 32
+                                        # B=4 OOMs at 16 GB RSS on this
+                                        # sandbox due to attention matrices
+                                        # at (B_eff × T × T × n_heads). B=2
+                                        # is the safe doubled-batch.
 export MMLLM_ABLATION_EVAL_CAP="${MMLLM_ABLATION_EVAL_CAP:-25000}"
                                         # 25k tokens still gives 4dp on
                                         # Δ_net ~+0.17 (well above noise)
