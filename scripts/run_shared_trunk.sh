@@ -123,8 +123,14 @@ python3 -c "import torch; torch.save({}, '${FIM_BASE}.ckpts/step-1/opt-sparse-ne
 # Bank init: per-trunk V_local files sized (N_TRUNKS * sqrt_n² , q_dim),
 # per-layer V_net files sized (sqrt_n_net² , c_net). Local files contain
 # N_TRUNKS contiguous slices laid out (trunk0_rows, trunk1_rows, …).
-# Zero-init matches the asym_spoon / spike-6 launcher pattern — Local
-# Bank wakes from empty each spoon, sleep cycle wipes between rounds.
+#
+# Gaussian-init (scale 0.02) — matches mmllm.memory._mmap_value_tensor's
+# default. Bug #3 of the 5 bank-engagement bugs (commit 85a507a's commit
+# msg) was that zero-init makes ∂loss/∂V = 0 wherever V appears as a
+# softmax-weighted sum — V can't bootstrap, banks stay near-zero, and
+# ablation Δ_local stays at 0 regardless of how many steps we train.
+# Small Gaussian gives V a real (if tiny) contribution at step 0 so the
+# gradient signal can shape it from step 1.
 python3 - "$BANK_BASE" "$N_TRUNKS" <<'PY'
 import numpy as np, sys
 bank_base = sys.argv[1]
@@ -134,15 +140,22 @@ SQRT_NET   = 64;   C_NET = 32
 LOCAL_LAYERS = [0, 1, 2, 12, 20, 29, 30, 31]
 n_per_trunk = SQRT_LOCAL * SQRT_LOCAL
 local_n = n_trunks * n_per_trunk
+INIT_SCALE = 0.02
+rng = np.random.default_rng(42)
 for i in LOCAL_LAYERS:
     a = np.memmap(f"{bank_base}.{i}.bin", dtype=np.float32, mode="w+",
                   shape=(local_n, Q_DIM))
-    a[:] = 0.0; a.flush()
+    CHUNK = 4096
+    for s in range(0, local_n, CHUNK):
+        e = min(s + CHUNK, local_n)
+        a[s:e] = (rng.standard_normal((e - s, Q_DIM)) * INIT_SCALE).astype(np.float32)
+    a.flush()
 for i in range(32):
     a = np.memmap(f"{bank_base}-net.{i}.bin", dtype=np.float32, mode="w+",
                   shape=(SQRT_NET * SQRT_NET, C_NET))
-    a[:] = 0.0; a.flush()
-print(f"  banks zero-init'd: 8 V_local × {n_trunks} trunks, 32 V_net (shared)")
+    a[:] = (rng.standard_normal(a.shape) * INIT_SCALE).astype(np.float32)
+    a.flush()
+print(f"  banks gaussian-init'd (scale={INIT_SCALE}): 8 V_local × {n_trunks} trunks, 32 V_net")
 PY
 
 # train-fim args: total-steps eval-every ckpt-every
