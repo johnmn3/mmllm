@@ -255,17 +255,20 @@ alone (end-of-round ablation 120s → 30s, +19% wall reduction).
 **Inference is different.** Added `pkm_full_forward` (a one-shot kernel
 fusing score → topk → outer-sum-topk → gather → softmax-weighted-sum)
 that activates in PKM.forward / NetBank.forward when (a) not training AND
-(b) HAS_CPP_KERNELS AND (c) V on CPU fp32. Bench on 10-round chain
-end-state (cpu-mini, B=1 decode):
+(b) HAS_CPP_KERNELS AND (c) V on CPU fp32. Also gated all training-only
+telemetry (last_z_loss, last_output_norm, last_gate_dist, last_local_*,
+ka_hits / kb_hits bincount counters, last_local_out / last_net_out /
+last_sdpa_out tensor stashes) behind `if self.training:`. Bench on
+10-round chain end-state (cpu-mini, B=1 decode):
 
-  | path                              | tok/s | ms/tok |
-  |-----------------------------------|------:|-------:|
-  | basilisp + Python PKM             |  13.1 |   76.4 |
-  | basilisp + C++ fused PKM          |  15.1 |   66.3 |
-  | pure-Python forward + Python PKM  |  21.4 |   46.9 |
-  | pure-Python forward + C++ fused   |  24.4 |   41.0 |
+  | path                                          | tok/s | ms/tok |
+  |-----------------------------------------------|------:|-------:|
+  | basilisp + Python PKM                         |  13.1 |   76.4 |
+  | pure-Python forward + Python PKM              |  21.4 |   46.9 |
+  | pure-Python + C++ fused PKM                   |  24.4 |   41.0 |
+  | pure-Python + C++ fused + gating telemetry gated | 27.19 | 36.8 |
 
-Total 1.85× from baseline. B=16 aggregate: 145 → 270 tok/s (also 1.86×).
+Total **2.07×** from baseline. B=16 aggregate: 145 → 294 tok/s (2.03×).
 
 Per-PKM-call: 591 µs → 127 µs (4.6× on Local), 546 µs → 128 µs (4.25× on
 Net). End-to-end gain capped by Amdahl: PKM was 38% of decode wall, so
