@@ -21,11 +21,64 @@ Memory scales with TOUCHED-row count × dim × 4 bytes × 2 (m + v), NOT
 the bank's full shape. For a 100-step run with top_k=256, B=4, T=128
 across 4 layers, that's ~5M touches × ~256 bytes ≈ 1.3 GB — vs the
 dense-state version's 32 GB at V_net=16 GB.
+
+Per-trunk LR scaling on V_local:
+  MMLLM_LR_TRUNK_MULTS="2.0,1.5,1.0,0.7,0.5,0.3,0.2,0.1"
+  Comma-separated floats. When set, V_local's per-row delta is scaled
+  by the trunk's mult — trunk index for row r = r // (sqrt_local**2).
+  Tiled to N_TRUNKS via modulo if the list is shorter. Only applies
+  to parameters whose row count is divisible by sqrt_local**2 and >1
+  trunk's worth — i.e. V_local. V_net's (sqrt_n**2, c_net) shape is
+  left unscaled. Use to break trunk symmetry: fast trunks consolidate
+  high-novelty features quickly, slow trunks accumulate stable patterns.
 """
 
 from __future__ import annotations
 
+import os
 import torch
+
+
+def _get_trunk_mults():
+    """Parse MMLLM_LR_TRUNK_MULTS env var into a 1-D CPU tensor of
+    multipliers, or None if unset/empty. Cached per-process — env var
+    is read once."""
+    cached = getattr(_get_trunk_mults, "_cache", _SENTINEL := object())
+    if cached is _SENTINEL:
+        raw = os.environ.get("MMLLM_LR_TRUNK_MULTS", "").strip()
+        if not raw:
+            cached = None
+        else:
+            try:
+                vals = [float(x) for x in raw.split(",") if x.strip()]
+                cached = torch.tensor(vals, dtype=torch.float32) if vals else None
+            except Exception:
+                cached = None
+        _get_trunk_mults._cache = cached
+    return cached
+
+
+def _per_row_trunk_mult(indices_cpu, n_rows_total, sqrt_local):
+    """Return a (nnz, 1) tensor of per-row trunk multipliers for the
+    touched `indices_cpu`, or None if this param isn't V_local or
+    MMLLM_LR_TRUNK_MULTS is unset.
+
+    A param is V_local iff its row count divides cleanly into >1 trunks
+    of size sqrt_local**2."""
+    mults = _get_trunk_mults()
+    if mults is None:
+        return None
+    rows_per_trunk = sqrt_local * sqrt_local
+    if n_rows_total % rows_per_trunk != 0:
+        return None
+    n_trunks = n_rows_total // rows_per_trunk
+    if n_trunks < 2:
+        return None
+    # Tile the mults list to n_trunks via modulo (short lists cycle).
+    trunk_mults = mults[torch.arange(n_trunks) % len(mults)]
+    # Map each touched row → its trunk index → per-row multiplier.
+    trunk_idx = indices_cpu // rows_per_trunk
+    return trunk_mults[trunk_idx].unsqueeze(-1)
 
 
 class CPUOffloadSparseAdam(torch.optim.Optimizer):
@@ -172,6 +225,15 @@ class CPUOffloadSparseAdam(torch.optim.Optimizer):
                 # Per-row update delta (on CPU).
                 delta_cpu = -lr * m_hat / (v_hat.sqrt().add_(eps))
 
+                # Per-trunk LR scaling (MMLLM_LR_TRUNK_MULTS). Applied
+                # only when this param is V_local — V_net's row count
+                # doesn't divide into trunks of sqrt_local**2 and the
+                # helper returns None.
+                sqrt_local = int(os.environ.get("MMLLM_SQRT_N", "226"))
+                row_mult = _per_row_trunk_mult(indices_cpu, p.shape[0], sqrt_local)
+                if row_mult is not None:
+                    delta_cpu = delta_cpu * row_mult
+
                 # Write moments back to CPU state at their buf positions.
                 m_buf[buf_idx] = m_new
                 v_buf[buf_idx] = v_new
@@ -236,6 +298,15 @@ class CPUSparseSGD(torch.optim.Optimizer):
                 # p may be mmap-backed fp32 on CPU while grad is fp32 on GPU.
                 indices_p = indices.to(p.device)
                 values_p  = values.to(device=p.device, dtype=p.dtype)
+
+                # Per-trunk LR scaling (MMLLM_LR_TRUNK_MULTS). Applied
+                # only when this param is V_local; V_net is left unscaled.
+                sqrt_local = int(os.environ.get("MMLLM_SQRT_N", "226"))
+                indices_cpu = indices.to("cpu") if indices.device.type != "cpu" else indices
+                row_mult = _per_row_trunk_mult(indices_cpu, p.shape[0], sqrt_local)
+                if row_mult is not None:
+                    values_p = values_p * row_mult.to(values_p.device, dtype=values_p.dtype)
+
                 # In-place: p[indices_p] += -lr * values_p  (with duplicate-
                 # index summation, already coalesced so unique).
                 p.data.index_add_(0, indices_p, values_p, alpha=-lr)
