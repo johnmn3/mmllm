@@ -42,13 +42,14 @@ EVAL_TOKEN_CAP = 100_000   # bytes per dataset eval
 SEQ_LEN = 128
 B = 16
 
-# Datasets in the battery + their notes
+# Datasets in the battery + their notes. Stars mark non-gated substitutes
+# for default_eval_battery items that were inaccessible on this sandbox.
 DATASETS = [
     ("cosmopedia",       "synthetic English textbook (BPC)"),
     ("fineweb-edu",      "curated English web (BPC)"),
-    ("the-stack-v2-py",  "Python code (BPC)"),
-    ("commitpackft-py",  "commits → Edit tool calls (BPC; agentic eval pending)"),
-    ("xlam",             "JSON function-call traces (BPC; agentic eval pending)"),
+    ("magicoder",        "* Python instruction code (replaces the-stack-v2-py)"),
+    ("hermes-funcall",   "* function-call corpus (replaces xlam — Hermes)"),
+    ("toolace",          "* function-call corpus (replaces xlam — ToolACE)"),
 ]
 
 # Build the model
