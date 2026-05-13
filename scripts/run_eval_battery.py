@@ -50,6 +50,8 @@ DATASETS = [
     ("magicoder",        "* Python instruction code (replaces the-stack-v2-py)"),
     ("hermes-funcall",   "* function-call corpus (replaces xlam — Hermes)"),
     ("toolace",          "* function-call corpus (replaces xlam — ToolACE)"),
+    ("tiny-stories",     "TinyStories — simple English grammar"),
+    ("aesop-fables",     "in-house aesop-fables (Clojure code + JSON tool-calls)"),
 ]
 
 # Build the model
