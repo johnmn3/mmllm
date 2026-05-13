@@ -55,7 +55,15 @@ export MMLLM_DISTILL_DIRECTION_ONLY=true
 export MMLLM_DISTILL_MAGNITUDE_COEF=0.0
 export MMLLM_DISTILL_MAGNITUDE_COEF_END=1.0
 export MMLLM_DISTILL_MAGNITUDE_CLAMP=10.0
-export MMLLM_LR_BANK_MULT=30.0
+export MMLLM_LR_BANK_MULT=3.0          # CLAMPED from spike-6's 30.0:
+                                        # with base LR=1e-1, 30× = effective
+                                        # lr_b=3.0 which Adam-pushes V_local
+                                        # by ~3.0 magnitude per step ≈ 150σ
+                                        # of the 0.02 Gaussian init in 50
+                                        # steps → V_local saturates and the
+                                        # model routes around it. 3× gives
+                                        # effective lr_b=0.3, comparable to
+                                        # the sweep window's effective range.
 export MMLLM_LR_BANK_MULT_END=0.001
 export MMLLM_LR_NET_MULT=0.001
 export MMLLM_LR_NET_MULT_END=5.0     # stack-1e-1-5.0 winning knob
