@@ -68,7 +68,11 @@ export MMLLM_REPLAY_THRESHOLD=0.5
 export MMLLM_SKIP_NETBANK_WARMSTART="${MMLLM_SKIP_NETBANK_WARMSTART:-false}"
 export MMLLM_NET_V_WARMSTART_FROM_LOCAL="${MMLLM_NET_V_WARMSTART_FROM_LOCAL:-true}"
 export MMLLM_ABLATE_EVERY=0
-export MMLLM_LITE_CKPT=true
+# NB: LITE_CKPT NOT set — we need full opt state at step 70 so the sweep
+# resume has Adam moments for opt-dense / opt-sparse / opt-sparse-net.
+# Without these, the first ~5-10 sweep steps run with fresh Adam moments
+# (effectively larger initial steps), which distorts the schedule
+# continuity and Δ_net comparisons across sweeps.
 export MMLLM_MAX_STEPS=70                   # ← the cap
 
 ROUND6_BASE=/home/user/mmllm/core/round-6/step-5000
