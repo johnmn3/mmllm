@@ -79,6 +79,13 @@ echo "════════════════════════�
 echo "  Eval (bpc) + TPS bench"
 echo "═══════════════════════════════════════════════════════════════"
 
+# C++ PKM kernels are net 0 at training time (cpu-mini scale) but a
+# real win at INFERENCE — pkm_full_forward fuses the whole PKM forward
+# (score → topk → outer-sum-topk → gather → softmax-weighted-sum) into
+# one kernel call, ~4.5× per-PKM-call vs Python, ~1.2× end-to-end after
+# Amdahl. Enable for the inf-spork run.
+export MMLLM_ENABLE_PKM_CPP=true
+
 # Set the same env as cpu-mini training (so build-model picks the
 # right shapes when we call it from Python).
 export MMLLM_DEVICE=cpu

@@ -222,7 +222,7 @@ At this scale, neither MMLLM_DISTILL_COEF_END (5→20→50 all give same
 Δ_net. The distill MSE gradient is already plenty; what's gated is
 V_net's per-step movement, controlled by LR_NET_MULT × base LR.
 
-## PKM C++ kernels — inert at cpu-mini, latent at cpu-tiny
+## PKM C++ kernels — inert at training, real win at inference
 
 Built F2 (parallel-memcpy row gather) + F3 (fused outer-sum + heap top-K)
 as a C++ torch extension (`src/mmllm/_pkm_kernels.cpp`,
@@ -249,5 +249,30 @@ not yet tested. The 4× larger gather + 4× larger temp should make the
 parallel memcpy + skip-the-temp wins materialize. Verify before claiming
 speedup on that config.
 
-Real speedup at cpu-mini came from MMLLM_ABLATION_EVAL_CAP=25000 alone
-(end-of-round ablation 120s → 30s, +19% wall reduction).
+Real training-side speedup at cpu-mini came from MMLLM_ABLATION_EVAL_CAP=25000
+alone (end-of-round ablation 120s → 30s, +19% wall reduction).
+
+**Inference is different.** Added `pkm_full_forward` (a one-shot kernel
+fusing score → topk → outer-sum-topk → gather → softmax-weighted-sum)
+that activates in PKM.forward / NetBank.forward when (a) not training AND
+(b) HAS_CPP_KERNELS AND (c) V on CPU fp32. Bench on 10-round chain
+end-state (cpu-mini, B=1 decode):
+
+  | path                              | tok/s | ms/tok |
+  |-----------------------------------|------:|-------:|
+  | basilisp + Python PKM             |  13.1 |   76.4 |
+  | basilisp + C++ fused PKM          |  15.1 |   66.3 |
+  | pure-Python forward + Python PKM  |  21.4 |   46.9 |
+  | pure-Python forward + C++ fused   |  24.4 |   41.0 |
+
+Total 1.85× from baseline. B=16 aggregate: 145 → 270 tok/s (also 1.86×).
+
+Per-PKM-call: 591 µs → 127 µs (4.6× on Local), 546 µs → 128 µs (4.25× on
+Net). End-to-end gain capped by Amdahl: PKM was 38% of decode wall, so
+4.5× kernel speedup tops out at ~1.42× total. We get ~1.16× from the
+kernel alone; the remaining 1.6× comes from skipping basilisp + Module
+dispatch.
+
+Default opt-in: scripts/build_inf_spork.sh sets MMLLM_ENABLE_PKM_CPP=true.
+Set to false to force the Python fallback. Training scripts leave it
+unset so they default to off (where the kernels are net 0 / safe).
