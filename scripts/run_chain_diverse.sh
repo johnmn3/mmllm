@@ -1,11 +1,15 @@
 #!/usr/bin/env bash
-# run_chain_diverse.sh — extend the harvested round-20 chain by 10 more
-# rounds (21-30) using an 8-corpus diverse training mix instead of
-# Glaive-only.
+# run_chain_diverse.sh — extend a staged chain by N more rounds using
+# an 8-corpus diverse training mix instead of Glaive-only.
 #
-# Starting state: /tmp/mmllm-cpu/chain-diverse/round-20/ — the 5-way
-# FedAvg harvest of the 4 workers' round-20 states + dense.pt:
-#   ctrl_bpc=1.1764 ppl=2.26  (the best model state we have so far)
+# Starting state: the highest existing round-N/ under $ARCHIVE. The
+# dispatcher stages a FedAvg-harvested checkpoint there before launching.
+# Known starting points:
+#   round-20 (4-way FedAvg of dispatcher's spork-chain-10 extension):
+#     ctrl_bpc=1.1764 ppl=2.26
+#   round-30 (5-way FedAvg of chain-diverse-30 extension; Glaive-val
+#     bpc=1.4375; OOD mean -22% vs round-20 harvest):
+#     workers/dispatcher/harvest-5way-r30/round-30/
 #
 # Training mix (MMLLM_MIX env, weights sum-normalized to 1 by sampler):
 #   25  glaive-fim-v3      JSON tool-calls (FIM-format, in-domain)
@@ -25,7 +29,7 @@
 # sweep battery — see CLAUDE.md "Winning bank-engagement recipes").
 #
 # Usage:  bash scripts/run_chain_diverse.sh [N_MORE] [STEPS]
-#         N_MORE: rounds to add past round-20; default 10 (→ round 30)
+#         N_MORE: rounds to add past the highest staged round; default 10
 #         STEPS:  training steps per round; default 100
 
 set -e
@@ -35,10 +39,13 @@ ARCHIVE=/tmp/mmllm-cpu/chain-diverse
 N_MORE="${1:-10}"
 STEPS="${2:-100}"
 
-if [ ! -d "$ARCHIVE/round-20" ]; then
-  echo "ERROR: $ARCHIVE/round-20 not staged. Run stage script first." >&2
+# Find the highest existing round (extend_chain.sh does the same).
+HIGHEST=$(ls -d "$ARCHIVE"/round-* 2>/dev/null | grep -oE 'round-[0-9]+' | grep -oE '[0-9]+' | sort -n | tail -1)
+if [ -z "$HIGHEST" ]; then
+  echo "ERROR: no round-N dirs in $ARCHIVE. Stage a starting round first." >&2
   exit 2
 fi
+echo "Starting from $ARCHIVE/round-${HIGHEST}"
 
 # ── 8-corpus mix ──
 B=/tmp/mmllm-cpu/battery
