@@ -32,7 +32,12 @@ import torch.nn.functional as F
 # so the .so is built once per host and reused across processes. The first
 # build takes ~15s; subsequent imports are near-instant.
 #
-# MMLLM_DISABLE_PKM_CPP=true forces the Python fallback (for testing).
+# Default is OFF — at cpu-mini scale the kernels deliver ~0 speedup
+# (V=3.3 MB / outer-sum temp=8 MB are already cache-fast; the autograd
+# Function + sparse_coo_tensor wrapper overhead eats whatever the C++
+# saves). Set MMLLM_ENABLE_PKM_CPP=true to opt in — useful for cpu-tiny
+# scale (V=26 MB) or for any future config where the kernels show
+# benefit. See CLAUDE.md "PKM C++ kernels" for the benchmark.
 # ------------------------------------------------------------------ #
 import os as _os
 from pathlib import Path as _Path
@@ -40,7 +45,7 @@ from pathlib import Path as _Path
 _pkm_kernels = None
 HAS_CPP_KERNELS = False
 
-if _os.environ.get("MMLLM_DISABLE_PKM_CPP", "").lower() != "true":
+if _os.environ.get("MMLLM_ENABLE_PKM_CPP", "").lower() == "true":
     try:
         from . import _pkm_kernels as _prebuilt  # type: ignore[attr-defined]
         _pkm_kernels = _prebuilt
