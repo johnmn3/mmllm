@@ -1,0 +1,84 @@
+{
+  "target_round": 60,
+  "n_workers": 10,
+  "workers": [
+    {
+      "handle": "chain-extender",
+      "branch": "claude/chaindiverse-chain-extender-r60",
+      "ctrl_bpc": 1.1217
+    },
+    {
+      "handle": "claude-chaindiverse-T3giJ",
+      "branch": "claude/chaindiverse-claude-chaindiverse-T3giJ-r60",
+      "ctrl_bpc": 1.102
+    },
+    {
+      "handle": "claude-ext",
+      "branch": "claude/chaindiverse-claude-ext-r60",
+      "ctrl_bpc": 1.118
+    },
+    {
+      "handle": "claude-r60ext",
+      "branch": "claude/chaindiverse-claude-r60ext-r60",
+      "ctrl_bpc": 1.1359
+    },
+    {
+      "handle": "kbk3y",
+      "branch": "claude/chaindiverse-kbk3y-r60",
+      "ctrl_bpc": 1.1032
+    },
+    {
+      "handle": "opus47",
+      "branch": "claude/chaindiverse-opus47-r60",
+      "ctrl_bpc": 1.1419
+    },
+    {
+      "handle": "opus47-1m",
+      "branch": "claude/chaindiverse-opus47-1m-r60",
+      "ctrl_bpc": 1.1167
+    },
+    {
+      "handle": "opus47-may13",
+      "branch": "claude/chaindiverse-opus47-may13-r60",
+      "ctrl_bpc": 1.1364
+    },
+    {
+      "handle": "round51to60",
+      "branch": "claude/chaindiverse-round51to60-r60",
+      "ctrl_bpc": 1.1099
+    },
+    {
+      "handle": "round51to60-XWlpt",
+      "branch": "claude/chaindiverse-round51to60-XWlpt-r60",
+      "ctrl_bpc": 1.1176
+    }
+  ],
+  "best_worker": "claude-chaindiverse-T3giJ",
+  "worker_ctrl_bpc_mean": 1.1203299999999998,
+  "worker_ctrl_bpc_best": 1.102,
+  "dense_cos": {
+    "mean": 0.9973518186145358,
+    "min": 0.9969648122787476,
+    "max": 0.9976586103439331,
+    "n_params": 570480,
+    "n_tensors": 618
+  },
+  "vnet_cos": {
+    "0": {
+      "mean": 0.9457093609703912,
+      "min": 0.9092567563056946,
+      "max": 0.9640558958053589
+    },
+    "12": {
+      "mean": 0.9605116128921509,
+      "min": 0.926021933555603,
+      "max": 0.9745069742202759
+    },
+    "31": {
+      "mean": 0.9208874530262418,
+      "min": 0.904398500919342,
+      "max": 0.9342503547668457
+    }
+  },
+  "extended_from": "workers/dispatcher/harvest-Nway-r50/round-50"
+}
