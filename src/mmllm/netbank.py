@@ -46,6 +46,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from mmllm.memory import CPUPinnedEmbedding
+from mmllm._pkm_autograd import HAS_CPP_KERNELS, netbank_inference_forward
 
 
 _DTYPE_MAP = {
@@ -304,6 +305,21 @@ class NetBank(nn.Module):
         """
         if self.training and self.delay_ms_max > 0:
             self._simulate_delay()
+
+        # Inference fast path: one C++ call fuses score → sub-topk →
+        # outer-sum-topk → gather → softmax → weighted-sum into a single
+        # entry point, then Python applies the (small) expander linear.
+        # Drops ~30 ATen-op dispatches + Python orchestration per layer.
+        # Only safe when not training (no autograd recording in C++) and
+        # V is on CPU fp32 (only path the fused kernel supports).
+        #
+        # Skips: training z-loss, sub-key hit counters, last_output_norm
+        # .item() telemetry — all training-only side effects.
+        if (not self.training
+                and HAS_CPP_KERNELS
+                and self.V.weight.is_cpu
+                and self.V.weight.dtype == torch.float32):
+            return netbank_inference_forward(self, q)
 
         B, T, D = q.shape
         q = self.q_norm(q)

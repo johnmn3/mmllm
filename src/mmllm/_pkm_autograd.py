@@ -212,3 +212,121 @@ class PKMFusedTopK(torch.autograd.Function):
 
         # Order matches forward signature: top_a_s, top_a_i, top_b_s, top_b_i, sqrt_n, top_k
         return grad_a_s, None, grad_b_s, None, None, None
+
+
+# ============================================================ #
+# F-FULL — fused inference-only one-shot PKM forward
+# ============================================================ #
+# Reusable empty (0,) int64 tensor passed when no multi-trunk offset is
+# needed. Allocated once at module import, never mutated. The C++ kernel
+# treats `.numel() == 0` as "no offsets" and skips the per-batch add.
+_EMPTY_OFFSETS: "torch.Tensor | None" = None
+
+
+def _get_empty_offsets() -> torch.Tensor:
+    global _EMPTY_OFFSETS
+    if _EMPTY_OFFSETS is None:
+        _EMPTY_OFFSETS = torch.empty((0,), dtype=torch.int64)
+    return _EMPTY_OFFSETS
+
+
+def pkm_inference_forward(
+    memory_module,
+    q: torch.Tensor,
+    trunk_ids: "torch.Tensor | None" = None,
+) -> torch.Tensor:
+    """One-shot fused PKM forward — inference-only fast path.
+
+    Pulls K_a, K_b, V.weight, top_k, sub_top_k, sub_dim, n_trunks,
+    n_per_trunk from `memory_module` (a ProductKeyMemory or NetBank-tier
+    PKM) and calls `_pkm_kernels.pkm_full_forward` exactly once.
+    Returns the (B, T, q_dim) output. Drops top_global — inference
+    doesn't use it.
+
+    CONTRACT: caller must be under torch.no_grad() / module.training=False.
+    The C++ kernel uses NoGradGuard internally but the Python boundary
+    still won't track the inputs for backward; using this in a training
+    loop would silently break grad flow.
+
+    Falls back to memory_module.forward(q, trunk_ids) when:
+      - HAS_CPP_KERNELS is False (extension didn't build)
+      - V isn't on CPU (e.g. CUDA training; the fused kernel is CPU-only)
+      - any input dtype isn't fp32 (we assume the bank is fp32 throughout)
+    """
+    V_weight = memory_module.V.weight
+    if (not HAS_CPP_KERNELS
+            or not V_weight.is_cpu
+            or V_weight.dtype != torch.float32):
+        # Fallback: full Python path. Use the existing forward() so the
+        # behavior matches exactly. Caller is responsible for no_grad.
+        return memory_module(q, trunk_ids=trunk_ids)
+
+    # Q-norm via the functional API. The Module's .__call__ adds ~5 µs of
+    # dispatch overhead per call; functional is the same math without it.
+    # Matches Python forward exactly: self.q_norm(q) = F.rms_norm(q,
+    # (q.shape[-1],), self.q_norm.weight, self.q_norm.eps).
+    qn = memory_module.q_norm
+    q_normed = F.rms_norm(q, (q.shape[-1],), qn.weight, qn.eps)
+
+    # Multi-trunk offsets. Pass empty tensor when n_trunks == 1 or when
+    # no trunk_ids were supplied (single-trunk default).
+    if memory_module.n_trunks > 1 and trunk_ids is not None:
+        offsets = (trunk_ids.to(dtype=torch.int64)
+                            * memory_module.n_per_trunk).contiguous()
+    else:
+        offsets = _get_empty_offsets()
+
+    out, _top_global = _pkm_kernels.pkm_full_forward(
+        q_normed.contiguous(),
+        memory_module.K_a.detach().contiguous(),
+        memory_module.K_b.detach().contiguous(),
+        V_weight.detach().contiguous() if not V_weight.is_contiguous() else V_weight.detach(),
+        int(memory_module.sub_top_k),
+        int(memory_module.top_k),
+        offsets,
+    )
+    return out
+
+
+def netbank_inference_forward(
+    netbank_module,
+    q: torch.Tensor,
+) -> torch.Tensor:
+    """One-shot fused NetBank forward — inference-only fast path.
+
+    NetBank differs from ProductKeyMemory:
+      - V_net stores c_net-dim bottleneck latents (not q_dim).
+      - The weighted-sum output (B, T, c_net) is projected back to q_dim
+        by a learned linear `expander` (Linear(c_net, q_dim)).
+      - No multi-trunk routing (NetBank is a single shared tier).
+      - No simulated network delay at inference.
+
+    The C++ kernel handles V row width independent of q_dim, so it can
+    return the (B, T, c_net) tensor in one fused call; the caller (this
+    function) then runs the small Linear forward.
+
+    Falls back to netbank_module.forward(q) when:
+      - HAS_CPP_KERNELS is False
+      - V isn't CPU fp32 (e.g. fp16 / cuda)
+    """
+    V_weight = netbank_module.V.weight
+    if (not HAS_CPP_KERNELS
+            or not V_weight.is_cpu
+            or V_weight.dtype != torch.float32):
+        return netbank_module(q)
+
+    # Functional q_norm (skip Module dispatch).
+    qn = netbank_module.q_norm
+    q_normed = F.rms_norm(q, (q.shape[-1],), qn.weight, qn.eps)
+
+    out_latent, _top_global = _pkm_kernels.pkm_full_forward(
+        q_normed.contiguous(),
+        netbank_module.K_a.detach().contiguous(),
+        netbank_module.K_b.detach().contiguous(),
+        V_weight.detach().contiguous() if not V_weight.is_contiguous() else V_weight.detach(),
+        int(netbank_module.sub_top_k),
+        int(netbank_module.top_k),
+        _get_empty_offsets(),
+    )
+    # out_latent: (B, T, c_net) → expand to q_dim via the learned linear.
+    return netbank_module.expander(out_latent)

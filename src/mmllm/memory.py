@@ -48,7 +48,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from ._pkm_autograd import HAS_CPP_KERNELS, PKMGather, PKMFusedTopK
+from ._pkm_autograd import HAS_CPP_KERNELS, PKMGather, PKMFusedTopK, pkm_inference_forward
 
 
 def _mmap_value_tensor(path: str, n: int, dim: int,
@@ -923,6 +923,22 @@ class ProductKeyMemory(nn.Module):
         tensor is moved to q's device. Autograd handles the .to()
         boundary so the sparse gradient lands on V on its native device.
         """
+        # Inference fast path: one C++ call fuses score → sub-topk →
+        # outer-sum-topk → gather → softmax → weighted-sum. Drops ~30
+        # ATen-op dispatches + Python-orchestration overhead per layer.
+        # Only safe when not training (no autograd recording in C++) and
+        # V is on CPU fp32 (the only path the fused kernel supports).
+        #
+        # Skips: training z-loss, sub-key hit counters, dirty-row
+        # tracking, .item() telemetry — all training-only side effects.
+        # last_z_loss / last_output_norm stay at their previous values
+        # (typically None / unread at inference).
+        if (not self.training
+                and HAS_CPP_KERNELS
+                and self.V.weight.is_cpu
+                and self.V.weight.dtype == torch.float32):
+            return pkm_inference_forward(self, q, trunk_ids=trunk_ids)
+
         B, T, D = q.shape
         q = self.q_norm(q)
         q_a = q[..., :self.sub_dim]
