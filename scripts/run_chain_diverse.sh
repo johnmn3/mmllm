@@ -61,10 +61,13 @@ echo "  mix weights:"
 echo "$MMLLM_MIX" | tr ',' '\n' | sed 's/^/    /'
 echo ""
 
-# Sanity-check every corpus exists
+# Sanity-check every corpus exists. Use process substitution so `fail`
+# remains in the parent shell (vs `echo | while` which puts the loop in
+# a subshell and loses the assignment — that was the bug that let
+# rounds 41-50 launch with open-web-math missing and crash in 5-75s).
 echo "  corpus paths:"
 fail=0
-echo "$MMLLM_MIX" | tr ',' '\n' | while IFS=: read -r path weight; do
+while IFS=: read -r path weight; do
   if [ -f "$path" ]; then
     sz=$(du -h "$path" | awk '{print $1}')
     echo "    OK  ${sz}  w=${weight}  ${path}"
@@ -72,7 +75,13 @@ echo "$MMLLM_MIX" | tr ',' '\n' | while IFS=: read -r path weight; do
     echo "    MISSING  w=${weight}  ${path}"
     fail=1
   fi
-done
+done < <(echo "$MMLLM_MIX" | tr ',' '\n')
+if [ "$fail" = "1" ]; then
+  echo ""
+  echo "ERROR: one or more MMLLM_MIX corpora missing." >&2
+  echo "  Run: bash scripts/prep_chain_diverse_corpora.sh" >&2
+  exit 3
+fi
 
 # Hand off to extend_chain.sh — it picks up MMLLM_MIX from env automatically
 # (pick-mix in core.lpy reads it). extend_chain.sh's recipe defaults

@@ -1,0 +1,49 @@
+{
+  "target_round": 50,
+  "n_workers": 3,
+  "workers": [
+    {
+      "handle": "claude-chaindiverse-T3giJ",
+      "branch": "claude/chaindiverse-claude-chaindiverse-T3giJ-r50",
+      "ctrl_bpc": 1.15
+    },
+    {
+      "handle": "claude-ext",
+      "branch": "claude/chaindiverse-claude-ext-r50",
+      "ctrl_bpc": 1.1319
+    },
+    {
+      "handle": "round41to50",
+      "branch": "claude/chaindiverse-round41to50-r50",
+      "ctrl_bpc": 1.2036
+    }
+  ],
+  "best_worker": "claude-ext",
+  "worker_ctrl_bpc_mean": 1.1618333333333333,
+  "worker_ctrl_bpc_best": 1.1319,
+  "dense_cos": {
+    "mean": 0.9966635306676229,
+    "min": 0.9964243173599243,
+    "max": 0.9968968629837036,
+    "n_params": 570480,
+    "n_tensors": 618
+  },
+  "vnet_cos": {
+    "0": {
+      "mean": 0.9002873500188192,
+      "min": 0.893271267414093,
+      "max": 0.9088660478591919
+    },
+    "12": {
+      "mean": 0.9507934053738912,
+      "min": 0.9446040391921997,
+      "max": 0.9559212327003479
+    },
+    "31": {
+      "mean": 0.8974886933962504,
+      "min": 0.8857049942016602,
+      "max": 0.9083769917488098
+    }
+  },
+  "extended_from": "workers/dispatcher/harvest-Nway-r40/round-40"
+}

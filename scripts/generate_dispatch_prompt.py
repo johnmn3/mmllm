@@ -104,7 +104,7 @@ def write_prompt(current, next_n, n_workers, out_path, harvest_dir, prior_dir):
     lines.append("ls scripts/run_chain_diverse.sh                   # the runner (auto-discovers highest round)")
     lines.append("ls scripts/extend_chain.sh                        # which run_chain_diverse.sh hands off to")
     lines.append("ls scripts/prep_chain_diverse_corpora.sh          # idempotent corpus prep")
-    lines.append(f"ls scripts/stage_chain_diverse_round{current}.sh  # idempotent stager for round-{current}")
+    lines.append(f"ls scripts/stage_chain_diverse.sh                # generic stager (takes round arg)")
     lines.append("```")
     lines.append("")
 
@@ -122,7 +122,7 @@ def write_prompt(current, next_n, n_workers, out_path, harvest_dir, prior_dir):
     lines.append(f"## Stage the harvested round-{current} state")
     lines.append("")
     lines.append("```bash")
-    lines.append(f"bash scripts/stage_chain_diverse_round{current}.sh")
+    lines.append(f"bash scripts/stage_chain_diverse.sh {current}")
     lines.append("```")
     lines.append("")
     lines.append(f"Copies `{harvest_dir}/round-{current}/` → `/tmp/mmllm-cpu/chain-diverse/round-{current}/`.")

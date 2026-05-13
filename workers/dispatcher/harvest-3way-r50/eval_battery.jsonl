@@ -1,0 +1,9 @@
+{"dataset": "glaive-fim-val", "bpc": 1.3115431871019452, "ppl": 2.4820689398474545, "kind": "reference"}
+{"dataset": "cosmopedia", "bpc": 2.2324, "ppl": 4.699, "kind": "bpc"}
+{"dataset": "fineweb-edu", "bpc": 2.5087, "ppl": 5.691, "kind": "bpc"}
+{"dataset": "magicoder", "bpc": 2.4517, "ppl": 5.471, "kind": "bpc"}
+{"dataset": "hermes-funcall", "bpc": 2.3278, "ppl": 5.02, "kind": "bpc"}
+{"dataset": "toolace", "bpc": 2.2366, "ppl": 4.713, "kind": "bpc"}
+{"dataset": "tiny-stories", "bpc": 2.2706, "ppl": 4.825, "kind": "bpc"}
+{"dataset": "aesop-fables", "bpc": 1.4187, "ppl": 2.673, "kind": "bpc"}
+{"dataset": "open-web-math", "bpc": 2.6563, "ppl": 6.304, "kind": "bpc"}
