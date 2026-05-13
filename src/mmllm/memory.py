@@ -48,6 +48,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+from ._pkm_autograd import HAS_CPP_KERNELS, PKMGather, PKMFusedTopK
+
 
 def _mmap_value_tensor(path: str, n: int, dim: int,
                        init_scale: float = 0.02,
@@ -958,17 +960,20 @@ class ProductKeyMemory(nn.Module):
                     torch.bincount(top_b_i.view(-1), minlength=self.sqrt_n)
                 )
 
-        # Outer-sum scores; index via i = i_a * sqrt_n + i_b
-        combined_scores = (top_a_s.unsqueeze(-1) + top_b_s.unsqueeze(-2))
-        combined_scores = combined_scores.flatten(-2)
-
-        idx_a = top_a_i.unsqueeze(-1).expand(-1, -1, -1, self.sub_top_k)
-        idx_b = top_b_i.unsqueeze(-2).expand(-1, -1, self.sub_top_k, -1)
-        combined_idx = (idx_a * self.sqrt_n + idx_b).flatten(-2)
-
-        # Top-K from candidates — still on q's device
-        top_scores, top_local = combined_scores.topk(self.top_k, dim=-1)
-        top_global = combined_idx.gather(-1, top_local)            # (B, T, top_k); per-trunk row in [0, n_per_trunk)
+        # F3: fused outer-sum + top-K. C++ kernel scans S² pairs with a
+        # per-row min-heap, skipping the (B, T, sub_top_k²) temp. Python
+        # fallback when extension didn't build or V isn't on CPU.
+        if HAS_CPP_KERNELS and top_a_s.is_cpu:
+            top_scores, top_global = PKMFusedTopK.apply(
+                top_a_s, top_a_i, top_b_s, top_b_i, self.sqrt_n, self.top_k,
+            )
+        else:
+            combined_scores = (top_a_s.unsqueeze(-1) + top_b_s.unsqueeze(-2)).flatten(-2)
+            idx_a = top_a_i.unsqueeze(-1).expand(-1, -1, -1, self.sub_top_k)
+            idx_b = top_b_i.unsqueeze(-2).expand(-1, -1, self.sub_top_k, -1)
+            combined_idx = (idx_a * self.sqrt_n + idx_b).flatten(-2)
+            top_scores, top_local = combined_scores.topk(self.top_k, dim=-1)
+            top_global = combined_idx.gather(-1, top_local)          # (B, T, top_k); per-trunk row in [0, n_per_trunk)
 
         # Multi-trunk routing: offset each batch row's indices by its trunk's
         # base row. After this, top_global indexes into the flat (N*n_per_trunk,
@@ -998,12 +1003,20 @@ class ProductKeyMemory(nn.Module):
                 # get a sparse-grad update on backward). Cheap — we
                 # already have the indices on CPU after the .to() hop.
                 self._storage.track_dirty_rows(top_global_v)
-            values_v = self.V(top_global_v)                        # (B, T, top_k, D) on V's device
+            # F2: contiguous-block gather with parallel memcpy. Replaces
+            # F.embedding's per-row aten::index_select. CPU-only path.
+            if HAS_CPP_KERNELS and v_device.type == "cpu":
+                values_v = PKMGather.apply(self.V.weight, top_global_v)
+            else:
+                values_v = self.V(top_global_v)                    # (B, T, top_k, D) on V's device
             values = values_v.to(q.device)
         else:
             if self._storage is not None:
                 self._storage.track_dirty_rows(top_global)
-            values = self.V(top_global)                            # (B, T, top_k, D)
+            if HAS_CPP_KERNELS and v_device.type == "cpu":
+                values = PKMGather.apply(self.V.weight, top_global)
+            else:
+                values = self.V(top_global)                        # (B, T, top_k, D)
 
         weights = F.softmax(top_scores, dim=-1).unsqueeze(-1)
         out = (weights * values).sum(dim=-2)

@@ -23,15 +23,45 @@ import torch
 import torch.nn.functional as F
 
 # ------------------------------------------------------------------ #
-# Import guard. _pkm_kernels lives next to memory.py inside the
-# package; setup.py drops the .so into src/mmllm/.
+# Build guard. Two paths:
+#   (a) prebuilt _pkm_kernels.so next to memory.py (from setup.py path)
+#   (b) JIT-compile via torch.utils.cpp_extension.load() on first import.
+# We try (a) first; fall back to (b); fall back to pure Python.
+#
+# JIT cache lives under TORCH_EXTENSIONS_DIR (default ~/.cache/torch_extensions/),
+# so the .so is built once per host and reused across processes. The first
+# build takes ~15s; subsequent imports are near-instant.
+#
+# MMLLM_DISABLE_PKM_CPP=true forces the Python fallback (for testing).
 # ------------------------------------------------------------------ #
-try:
-    from . import _pkm_kernels  # type: ignore[attr-defined]
-    HAS_CPP_KERNELS = True
-except ImportError:
-    _pkm_kernels = None
-    HAS_CPP_KERNELS = False
+import os as _os
+from pathlib import Path as _Path
+
+_pkm_kernels = None
+HAS_CPP_KERNELS = False
+
+if _os.environ.get("MMLLM_DISABLE_PKM_CPP", "").lower() != "true":
+    try:
+        from . import _pkm_kernels as _prebuilt  # type: ignore[attr-defined]
+        _pkm_kernels = _prebuilt
+        HAS_CPP_KERNELS = True
+    except ImportError:
+        # JIT-compile from the .cpp source bundled next to this file.
+        try:
+            from torch.utils.cpp_extension import load as _torch_load
+            _src = _Path(__file__).parent / "_pkm_kernels.cpp"
+            if _src.exists():
+                _pkm_kernels = _torch_load(
+                    name="_pkm_kernels",
+                    sources=[str(_src)],
+                    extra_cflags=["-fopenmp", "-O3", "-march=native", "-std=c++17"],
+                    extra_ldflags=["-fopenmp"],
+                    verbose=False,
+                )
+                HAS_CPP_KERNELS = True
+        except Exception:  # noqa: BLE001 — JIT build failure → fall back
+            _pkm_kernels = None
+            HAS_CPP_KERNELS = False
 
 
 # ============================================================ #
