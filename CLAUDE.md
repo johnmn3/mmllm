@@ -221,3 +221,33 @@ At this scale, neither MMLLM_DISTILL_COEF_END (5→20→50 all give same
 Δ_net) nor MMLLM_DISTILL_MAGNITUDE_COEF (off vs on=1.0 same) affects
 Δ_net. The distill MSE gradient is already plenty; what's gated is
 V_net's per-step movement, controlled by LR_NET_MULT × base LR.
+
+## PKM C++ kernels — inert at cpu-mini, latent at cpu-tiny
+
+Built F2 (parallel-memcpy row gather) + F3 (fused outer-sum + heap top-K)
+as a C++ torch extension (`src/mmllm/_pkm_kernels.cpp`,
+`_pkm_autograd.py`, JIT-built via `torch.utils.cpp_extension.load()`
+on first import, cached under ~/.cache/torch_extensions). Numerically
+bit-exact vs `F.embedding`/`torch.topk` (ties aside).
+
+**A/B at cpu-mini × N=16, 1 round, same recipe (2026-05-13):**
+  - C++ on:  231s wall
+  - C++ off: 229s wall
+
+**Net speedup: 0% at cpu-mini.** The kernels don't hurt either, but the
+autograd Function + sparse_coo_tensor wrapper overhead eats the gain
+on small tensors (V=3.3 MB, outer-sum temp=8 MB). Pure F.embedding +
+torch.topk are already cache-fast at this size.
+
+Wired into `memory.py:ProductKeyMemory.forward` behind `HAS_CPP_KERNELS`
+guard; Python fallback is preserved bit-for-bit (and is what cpu-mini
+effectively uses since C++ doesn't win). Set
+`MMLLM_DISABLE_PKM_CPP=true` to force the Python path explicitly.
+
+**Latent benefit at cpu-tiny** (q_dim=128 → V=26 MB, outer-sum temp=32 MB):
+not yet tested. The 4× larger gather + 4× larger temp should make the
+parallel memcpy + skip-the-temp wins materialize. Verify before claiming
+speedup on that config.
+
+Real speedup at cpu-mini came from MMLLM_ABLATION_EVAL_CAP=25000 alone
+(end-of-round ablation 120s → 30s, +19% wall reduction).
