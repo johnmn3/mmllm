@@ -20,6 +20,37 @@ R60 harvest → R70 harvest (5-way FedAvg of last wave, all 7 OOD datasets):
 
 Every dataset improved including Glaive. You're stacking another 10 rounds on top.
 
+## New this wave: V-shape per-layer V_local LR
+
+A 6-arm 1-round sweep off R70 (uniform, ramps, V-shapes, monotonic) found
+that staggered per-layer LRs on V_local — with **edge layers hot, middle
+layer cold** — push Net consolidation harder without breaking ctrl_bpc.
+The winning config (Arm G) is now the default in `run_chain_diverse.sh`:
+
+```
+MMLLM_LR_LOCAL_MULT=1.0
+MMLLM_LR_LAYER_MULTS=7.0,5.0,3.0,2.0,1.0,3.0,5.0,7.0
+```
+
+(Layer 0 + layer 7 at 7×, layer 4 trough at 1×; deep V.)
+
+Spike result vs uniform-LR baseline (R70 → R71, 1 round):
+
+| arm | mults                              | ctrl_bpc | Δ_net    | synergy  |
+|-----|------------------------------------|----------|----------|----------|
+| A   | uniform 1.0 (baseline)             | 1.0643   | +0.1123  | +0.0001  |
+| G   | **7,5,3,2,1,3,5,7 (V-shape)**      | **1.0651** | **+0.1556** | **+0.0002** |
+
+ctrl_bpc within noise of baseline (+0.0008); Δ_net **+0.044 higher**; first
+**positive synergy** of the sweep. Architectural reading: edge layers (0, 7)
+see raw input / near-output features with strong gradient signal — they
+benefit from hot LR. Middle layers carry stable consolidating representations
+and should evolve slowly.
+
+You don't need to set these env vars; `run_chain_diverse.sh` exports them
+automatically. To override (e.g. fall back to uniform LR for comparison),
+set MMLLM_LR_LAYER_MULTS yourself before launching.
+
 Read `CLAUDE.md` first; it defines spork / chain / Δ_local / Δ_net,
 lists conduct rules ("don't delete or overwrite files I didn't put
 there" applies — your archive at `/tmp/mmllm-cpu/chain-diverse/` is
