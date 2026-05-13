@@ -44,7 +44,13 @@ export MMLLM_NET_TOP_K=64
 export MMLLM_NET_SUB_TOP_K=8
 export MMLLM_N_TRUNKS=$N_TRUNKS
 export MMLLM_SPARSE_OPT=adam-cpu
-export MMLLM_BATCH=1                    # per-trunk; B_eff = N_TRUNKS × 1
+export MMLLM_BATCH="${MMLLM_BATCH:-4}"  # per-trunk; B_eff = N_TRUNKS × 4 = 64
+export MMLLM_ABLATION_EVAL_CAP="${MMLLM_ABLATION_EVAL_CAP:-25000}"
+                                        # 25k tokens still gives 4dp on
+                                        # Δ_net ~+0.17 (well above noise)
+                                        # but takes 25% of the 100k cap's
+                                        # wall time. Halves the
+                                        # end-of-round ablation block.
 
 export MMLLM_NETBANK_ENABLED=true
 export MMLLM_LONG_TIER_MIX=switch

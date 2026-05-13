@@ -568,6 +568,16 @@
   []
   (python/int (.get (.- os environ) "MMLLM_MAX_STEPS" "0")))
 
+(defn pick-ablation-eval-cap
+  "Token-cap used by ablation-step! / -net! / -both! eval-bpc passes.
+   Reads MMLLM_ABLATION_EVAL_CAP (int, default arg). Used to trade
+   off ablation precision for wall time — at cpu-mini scale where
+   Δ_net is +0.17 (well above noise), a 25k cap measures the Δ
+   accurately in ~25% the time of the 100k default."
+  ([] (pick-ablation-eval-cap 100000))
+  ([default-cap]
+   (python/int (.get (.- os environ) "MMLLM_ABLATION_EVAL_CAP" (str default-cap)))))
+
 (defn pick-long-tier-mix
   "Resolve how the long-tier KV-cache SDPA path and the bank-V
    retrieval path get combined inside attention. Reads
@@ -3711,7 +3721,7 @@
             ;; eval (ablation), report Δ. The Δ tells us how much of the
             ;; model's BPC depends on the trained memory bank.
             (println "  ── eval at end (control: bank trained) ──")
-            (let [r-ctrl (eval-bpc m val-data T 16 100000)]
+            (let [r-ctrl (eval-bpc m val-data T 16 (pick-ablation-eval-cap))]
               (append-jsonl! log-path
                              (format "{\"step\":%d,\"event\":\"final\",\"val_bpc\":%.4f,\"val_ppl\":%.4f,\"wall_s\":%.1f}"
                                      step (:bpc r-ctrl) (:ppl r-ctrl) (- (time/time) t0)))
@@ -3745,12 +3755,13 @@
               ;; matching the intermediate-ablation event format. This is
               ;; what answers "did distillation work" (Δ_net) and "do the
               ;; two banks combine constructively" (Δ_both vs sum of pieces).
-              (let [ctrl     (:bpc r-ctrl)
-                    abl-l    (ablation-step!     m val-data T 16 100000)
+              (let [eval-cap (pick-ablation-eval-cap)
+                    ctrl     (:bpc r-ctrl)
+                    abl-l    (ablation-step!     m val-data T 16 eval-cap)
                     d-l      (- abl-l ctrl)
-                    abl-n    (ablation-step-net! m val-data T 16 100000)
+                    abl-n    (ablation-step-net! m val-data T 16 eval-cap)
                     d-n      (when abl-n (- abl-n ctrl))
-                    abl-b    (when abl-n (ablation-step-both! m val-data T 16 100000))
+                    abl-b    (when abl-n (ablation-step-both! m val-data T 16 eval-cap))
                     d-b      (when abl-b (- abl-b ctrl))]
                 (println (format "  ════ ablation summary ════"))
                 (println (format "    control  bpc=%.4f ppl=%.2f" ctrl (:ppl r-ctrl)))
@@ -3805,13 +3816,14 @@
             ;; collective Δ across all bank layers) so step-N base ckpts
             ;; are comparable to the end-of-train ablations.
             (println "  ── ablation Δ at step cap ──")
-            (let [r-ctrl (eval-bpc m val-data T 16 100000)
+            (let [eval-cap (pick-ablation-eval-cap)
+                  r-ctrl (eval-bpc m val-data T 16 eval-cap)
                   ctrl   (:bpc r-ctrl)
-                  abl-l  (ablation-step!     m val-data T 16 100000)
+                  abl-l  (ablation-step!     m val-data T 16 eval-cap)
                   d-l    (- abl-l ctrl)
-                  abl-n  (ablation-step-net! m val-data T 16 100000)
+                  abl-n  (ablation-step-net! m val-data T 16 eval-cap)
                   d-n    (when abl-n (- abl-n ctrl))
-                  abl-b  (when abl-n (ablation-step-both! m val-data T 16 100000))
+                  abl-b  (when abl-n (ablation-step-both! m val-data T 16 eval-cap))
                   d-b    (when abl-b (- abl-b ctrl))]
               (println (format "    control  bpc=%.4f ppl=%.2f" ctrl (:ppl r-ctrl)))
               (println (format "    Δ_local: %.4f → %+.4f" abl-l d-l))
@@ -4037,7 +4049,7 @@
                                        step' dirty nlay dt (- (time/time) t0)))))
             (when (zero? (mod step' eval-every))
               (println (format "  ── eval at step %d ──" step'))
-              (let [r (eval-bpc m val-data T 16 50000)]
+              (let [r (eval-bpc m val-data T 16 (pick-ablation-eval-cap 50000))]
                 (append-jsonl! log-path
                                (format "{\"step\":%d,\"event\":\"eval\",\"loss\":%.4f,\"val_bpc\":%.4f,\"val_ppl\":%.4f,\"wall_s\":%.1f}"
                                        step' loss (:bpc r) (:ppl r) (- (time/time) t0)))
@@ -4063,16 +4075,17 @@
                     (append-jsonl! log-path
                                    (.to_event_json telem-mod step' entries)))
                   (let [t-abl     (time/time)
+                        eval-cap  (pick-ablation-eval-cap 50000)
                         ctrl      (:bpc r)
                         ;; Δ_local: zero Local V only
-                        abl-l     (ablation-step! m val-data T 16 50000)
+                        abl-l     (ablation-step! m val-data T 16 eval-cap)
                         d-l       (- abl-l ctrl)
                         ;; Δ_net: zero NetBank V only (nil if NetBank disabled)
-                        abl-n     (ablation-step-net! m val-data T 16 50000)
+                        abl-n     (ablation-step-net! m val-data T 16 eval-cap)
                         d-n       (when abl-n (- abl-n ctrl))
                         ;; Δ_both: zero BOTH (only run when NetBank present;
                         ;; otherwise it would equal Δ_local trivially)
-                        abl-b     (when abl-n (ablation-step-both! m val-data T 16 50000))
+                        abl-b     (when abl-n (ablation-step-both! m val-data T 16 eval-cap))
                         d-b       (when abl-b (- abl-b ctrl))
                         dt        (- (time/time) t-abl)
                         ;; P4 consolidation index — capture first Δ_local
