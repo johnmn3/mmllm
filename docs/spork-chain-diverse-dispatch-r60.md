@@ -1,7 +1,7 @@
-# Chain-diverse dispatch (rounds 51 → 60, 8-corpus mix, off R50 harvest)
+# Chain-diverse dispatch (rounds 51 → 60, 9-corpus mix, off R50 harvest)
 
 You are extending the chain by 10 more rounds (round 51 → round 60)
-**off the harvested round-50 state** with the same 8-corpus diverse
+**off the harvested round-50 state** with the same 9-corpus diverse
 training mix that produced the previous wave's harvest.
 
 R40 harvest → R50 harvest (5-way FedAvg of last wave, all 7 OOD datasets):
@@ -48,7 +48,7 @@ ls scripts/stage_chain_diverse.sh                # generic stager (takes round a
 
 ## Pre-flight: corpora
 
-Same 8-corpus mix as the previous wave (corpora byte-identical to prior).
+Same 9-corpus mix as the previous wave (corpora byte-identical to prior).
 
 ```bash
 bash scripts/prep_chain_diverse_corpora.sh
@@ -73,7 +73,7 @@ bash scripts/run_chain_diverse.sh 10 100
 ```
 
 `run_chain_diverse.sh` auto-discovers the highest existing round, sets `MMLLM_MIX` for the
-8-corpus weighted sampler, and hands off to `extend_chain.sh` for 10 more rounds at 100 steps each.
+9-corpus weighted sampler, and hands off to `extend_chain.sh` for 10 more rounds at 100 steps each.
 Total wall: ~30–50 min at cpu-mini scale.
 
 DO NOT pass env overrides. The mix weights, recipe, and ablation cap are baked in.
@@ -119,7 +119,7 @@ cat > "$DEST/meta.json" <<EOF
   "handle": "$HANDLE",
   "config": "cpu-mini-N16",
   "recipe": "stack-3e-2-5.0+mag-coef-on",
-  "mix": "8-corpus diverse (glaive:25 cosmopedia:15 fineweb-edu:15 magicoder:10 hermes-funcall:10 toolace:10 aesop:10 tiny-stories:5)",
+  "mix": "9-corpus diverse (glaive:25 cosmopedia:10 fineweb-edu:10 magicoder:10 hermes-funcall:10 toolace:10 aesop:10 open-web-math:10 tiny-stories:5)",
   "n_rounds_extended": 10,
   "n_rounds_total": 60,
   "extended_from": "workers/dispatcher/harvest-3way-r50/round-50 (3-way FedAvg; Glaive-val=1.3115)",

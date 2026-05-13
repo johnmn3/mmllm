@@ -46,10 +46,10 @@ def write_prompt(current, next_n, n_workers, out_path, harvest_dir, prior_dir):
     prior = load_jsonl(prior_dir / "eval_battery.jsonl") if prior_dir else {}
 
     lines = []
-    lines.append(f"# Chain-diverse dispatch (rounds {current + 1} → {next_n}, 8-corpus mix, off R{current} harvest)")
+    lines.append(f"# Chain-diverse dispatch (rounds {current + 1} → {next_n}, 9-corpus mix, off R{current} harvest)")
     lines.append("")
     lines.append(f"You are extending the chain by 10 more rounds (round {current + 1} → round {next_n})")
-    lines.append(f"**off the harvested round-{current} state** with the same 8-corpus diverse")
+    lines.append(f"**off the harvested round-{current} state** with the same 9-corpus diverse")
     lines.append("training mix that produced the previous wave's harvest.")
     lines.append("")
 
@@ -110,7 +110,7 @@ def write_prompt(current, next_n, n_workers, out_path, harvest_dir, prior_dir):
 
     lines.append("## Pre-flight: corpora")
     lines.append("")
-    lines.append("Same 8-corpus mix as the previous wave (corpora byte-identical to prior).")
+    lines.append("Same 9-corpus mix as the previous wave (corpora byte-identical to prior).")
     lines.append("")
     lines.append("```bash")
     lines.append("bash scripts/prep_chain_diverse_corpora.sh")
@@ -137,7 +137,7 @@ def write_prompt(current, next_n, n_workers, out_path, harvest_dir, prior_dir):
     lines.append("```")
     lines.append("")
     lines.append("`run_chain_diverse.sh` auto-discovers the highest existing round, sets `MMLLM_MIX` for the")
-    lines.append("8-corpus weighted sampler, and hands off to `extend_chain.sh` for 10 more rounds at 100 steps each.")
+    lines.append("9-corpus weighted sampler, and hands off to `extend_chain.sh` for 10 more rounds at 100 steps each.")
     lines.append("Total wall: ~30–50 min at cpu-mini scale.")
     lines.append("")
     lines.append("DO NOT pass env overrides. The mix weights, recipe, and ablation cap are baked in.")
@@ -194,7 +194,7 @@ def write_prompt(current, next_n, n_workers, out_path, harvest_dir, prior_dir):
     lines.append("  \"handle\": \"$HANDLE\",")
     lines.append("  \"config\": \"cpu-mini-N16\",")
     lines.append("  \"recipe\": \"stack-3e-2-5.0+mag-coef-on\",")
-    lines.append("  \"mix\": \"8-corpus diverse (glaive:25 cosmopedia:15 fineweb-edu:15 magicoder:10 hermes-funcall:10 toolace:10 aesop:10 tiny-stories:5)\",")
+    lines.append("  \"mix\": \"9-corpus diverse (glaive:25 cosmopedia:10 fineweb-edu:10 magicoder:10 hermes-funcall:10 toolace:10 aesop:10 open-web-math:10 tiny-stories:5)\",")
     lines.append("  \"n_rounds_extended\": 10,")
     lines.append(f"  \"n_rounds_total\": {next_n},")
     if glaive_bpc:
