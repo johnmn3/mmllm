@@ -55,7 +55,11 @@ echo "── 1. discovering worker branches (content scan, dedup by handle) ─�
 mkdir -p "$STAGE"
 git fetch origin --prune 2>/dev/null || true
 
-# Build the candidate branch list, A then B then catch-all C minus dupes.
+# Marker subdir name varies across waves:
+#   R30-R90: workers/<handle>/chain-diverse-${TARGET}/
+#   R91+:    workers/<handle>/chain-design-r${TARGET}/  (the design-sized wave)
+# We accept both; the per-worker src_prefix is discovered from the tree.
+MARKER_RE="chain-(diverse-${TARGET}|design-r${TARGET})"
 CAND_A=$(git branch -r 2>&1 | grep -oE "origin/claude/chaindiverse-[^[:space:]]+-r${TARGET}\$" | sort)
 CAND_B=$(git branch -r 2>&1 | grep -oE "origin/claude/extend-chain-rounds-${PRIOR_NEXT}-${TARGET}-[^[:space:]]+\$" | sort)
 # Catch-all: any branch with the marker file in its tree (excluding A and B).
@@ -65,7 +69,7 @@ CAND_C=""
 for br in $(git branch -r 2>&1 | grep -oE "origin/claude/[^[:space:]]+\$" | grep -v "$(echo "$CAND_A $CAND_B" | tr ' ' '|')" | sort); do
   if git cat-file -e "${br}:workers" 2>/dev/null; then
     # Has a workers/ dir; check if it has the marker file for this round
-    if git ls-tree -r --name-only "$br" 2>/dev/null | grep -qE "^workers/[^/]+/chain-diverse-${TARGET}/V_net\.0\.bin\$"; then
+    if git ls-tree -r --name-only "$br" 2>/dev/null | grep -qE "^workers/[^/]+/${MARKER_RE}/V_net\.0\.bin\$"; then
       CAND_C="${CAND_C}${br}
 "
     fi
@@ -75,23 +79,24 @@ CAND_C=$(echo "$CAND_C" | grep -v "^$" | sort)
 
 # Combine candidate branches in priority order.
 declare -A HANDLE_TO_BRANCH=()
+declare -A HANDLE_TO_MARKER=()      # handle → "chain-diverse-${TARGET}" or "chain-design-r${TARGET}"
 mapfile -t ALL_CAND < <(printf '%s\n%s\n%s\n' "$CAND_A" "$CAND_B" "$CAND_C" | grep -v "^$")
 
 for br in "${ALL_CAND[@]}"; do
   br_short="${br#origin/}"
-  # Find every handle in this branch's tree that has the marker file
-  mapfile -t br_handles < <(
-    git ls-tree -r --name-only "$br" 2>/dev/null \
-      | grep -oE "^workers/[^/]+/chain-diverse-${TARGET}/V_net\.0\.bin\$" \
-      | sed -E "s|^workers/([^/]+)/chain-diverse-${TARGET}/V_net\.0\.bin|\1|" \
-      | sort -u
-  )
-  for h in "${br_handles[@]}"; do
+  # Each marker-bearing path in this branch's tree → (handle, marker).
+  while IFS=$'\t' read -r h marker; do
     [ -z "$h" ] && continue
     if [ -z "${HANDLE_TO_BRANCH[$h]:-}" ]; then
       HANDLE_TO_BRANCH[$h]="$br_short"
+      HANDLE_TO_MARKER[$h]="$marker"
     fi
-  done
+  done < <(
+    git ls-tree -r --name-only "$br" 2>/dev/null \
+      | grep -oE "^workers/[^/]+/${MARKER_RE}/V_net\.0\.bin\$" \
+      | sed -E "s|^workers/([^/]+)/(chain-(diverse-${TARGET}|design-r${TARGET}))/V_net\.0\.bin|\1\t\2|" \
+      | sort -u
+  )
 done
 
 if [ ${#HANDLE_TO_BRANCH[@]} -eq 0 ]; then
@@ -99,52 +104,92 @@ if [ ${#HANDLE_TO_BRANCH[@]} -eq 0 ]; then
   exit 2
 fi
 
-# Write the discovered manifest (handle:branch per line, sorted).
+# Write the discovered manifest (handle:branch:marker per line, sorted).
 MANIFEST="$STAGE/.manifest"
 > "$MANIFEST"
 for h in $(printf '%s\n' "${!HANDLE_TO_BRANCH[@]}" | sort); do
-  echo "${h}:${HANDLE_TO_BRANCH[$h]}" >> "$MANIFEST"
+  echo "${h}:${HANDLE_TO_BRANCH[$h]}:${HANDLE_TO_MARKER[$h]}" >> "$MANIFEST"
 done
 N_WORKERS=$(wc -l < "$MANIFEST")
 echo "  found ${N_WORKERS} workers:"
-while IFS=: read -r h br; do
-  echo "    - ${h}  ←  ${br}"
+while IFS=: read -r h br marker; do
+  echo "    - ${h}  ←  ${br}  (${marker})"
 done < "$MANIFEST"
 
-# 2. Fetch each canonical branch with retry.
+# 2 + 3. Per-worker streaming: fetch → extract → leave on disk → next.
+# (Disk discipline: with 20+ workers × ~1.25 GB published artifacts each,
+# extracting all in /tmp before harvest peaks at 25+ GB. We keep that
+# in-place size budget but reclaim .git/objects every few workers via
+# git gc so the *.git* half of the pressure doesn't compound.)
+#
+# Each worker publishes:
+#   workers/<handle>/<marker>/V_net.{0..31}.bin    (32 × 32 MB = 1 GB)
+#   workers/<handle>/<marker>/dense.pt             (~3 MB)
+#   workers/<handle>/<marker>/opt-sparse-net.{0..31}.pt + .meta.pt
+#                                                  (32 × 2-13 MB + meta ≈ 242 MB)
+#   workers/<handle>/<marker>/round-${TARGET}.log.jsonl
 echo ""
-echo "── 2. fetching ${N_WORKERS} canonical worker branches (with retry) ──"
-while IFS=: read -r h br; do
-  echo "  fetching ${br}"
+echo "── 2+3. fetching + extracting ${N_WORKERS} workers (with retry) ──"
+w_idx=0
+while IFS=: read -r h br marker; do
+  w_idx=$((w_idx + 1))
+  echo "  [${w_idx}/${N_WORKERS}] ${h} ← ${br} (${marker})"
+  # Fetch with retry.
   for i in 1 2 3 4; do
     if git fetch origin "$br" 2>&1 | tail -1 | grep -qE "(FETCH_HEAD|up to date|new branch)"; then
       break
     fi
     case $i in 1) sleep 2;; 2) sleep 4;; 3) sleep 8;; 4) sleep 16;; esac
   done
-done < "$MANIFEST"
 
-# 3. Extract artifacts per worker.
-echo ""
-echo "── 3. extracting per-worker artifacts to ${STAGE}/<handle>/ ──"
-while IFS=: read -r h br; do
   dst="$STAGE/$h"
-  src_prefix="workers/${h}/chain-diverse-${TARGET}"
+  src_prefix="workers/${h}/${marker}"
   mkdir -p "$dst"
+
+  # V_net layers.
   for i in $(seq 0 31); do
     git show "origin/${br}:${src_prefix}/V_net.${i}.bin" > "$dst/V_net.${i}.bin" 2>/dev/null
-    [ ! -s "$dst/V_net.${i}.bin" ] && echo "    WARN ${h} V_net.${i} empty" && rm -f "$dst/V_net.${i}.bin"
+    [ ! -s "$dst/V_net.${i}.bin" ] && echo "      WARN V_net.${i} empty" && rm -f "$dst/V_net.${i}.bin"
   done
-  git show "origin/${br}:${src_prefix}/dense.pt"          > "$dst/dense.pt" 2>/dev/null
-  git show "origin/${br}:${src_prefix}/opt-sparse-net.pt" > "$dst/opt-sparse-net.pt" 2>/dev/null
+  # Dense.
+  git show "origin/${br}:${src_prefix}/dense.pt" > "$dst/dense.pt" 2>/dev/null
+
+  # opt-sparse-net: prefer chunks (R91+ format), fall back to legacy single-file (R20-R90).
+  git show "origin/${br}:${src_prefix}/opt-sparse-net.meta.pt" > "$dst/opt-sparse-net.meta.pt" 2>/dev/null
+  if [ -s "$dst/opt-sparse-net.meta.pt" ]; then
+    for i in $(seq 0 31); do
+      git show "origin/${br}:${src_prefix}/opt-sparse-net.${i}.pt" > "$dst/opt-sparse-net.${i}.pt" 2>/dev/null
+      [ ! -s "$dst/opt-sparse-net.${i}.pt" ] && rm -f "$dst/opt-sparse-net.${i}.pt"
+    done
+    n_opt_chunks=$(ls "$dst"/opt-sparse-net.*.pt 2>/dev/null | grep -v meta | wc -l)
+    opt_desc="opt-chunks ${n_opt_chunks}/32"
+  else
+    rm -f "$dst/opt-sparse-net.meta.pt"
+    git show "origin/${br}:${src_prefix}/opt-sparse-net.pt" > "$dst/opt-sparse-net.pt" 2>/dev/null
+    [ ! -s "$dst/opt-sparse-net.pt" ] && rm -f "$dst/opt-sparse-net.pt"
+    opt_desc="opt-single $([ -f "$dst/opt-sparse-net.pt" ] && echo present || echo absent)"
+  fi
+
+  # Per-round log.
   git show "origin/${br}:${src_prefix}/round-${TARGET}.log.jsonl" > "$dst/round-${TARGET}.log.jsonl" 2>/dev/null || true
+
   n_vnet=$(ls "$dst"/V_net.*.bin 2>/dev/null | wc -l)
-  echo "  ${h}: ${n_vnet}/32 V_net + dense + opt + log"
+  echo "      ${n_vnet}/32 V_net + dense + ${opt_desc} + log"
+
+  # Reclaim .git/objects every 4 workers — keeps the .git side of disk
+  # pressure flat at ~5 GB rather than growing linearly to 25+ GB.
+  if [ $((w_idx % 4)) -eq 0 ] && [ $w_idx -lt $N_WORKERS ]; then
+    git gc --auto --quiet 2>/dev/null || true
+  fi
 done < "$MANIFEST"
+
+# Final gc before harvest — frees any remaining loose objects before
+# harvest_chain.py loads everything from /tmp.
+git gc --auto --quiet 2>/dev/null || true
 
 # 4. FedAvg + publish.
 echo ""
-echo "── 4. FedAvg V_net + dense + V_local Gaussian init + publish to workers/dispatcher/ ──"
+echo "── 4. FedAvg V_net + dense + opt-state + V_local Gaussian init + publish ──"
 python3 scripts/harvest_chain.py "$TARGET" --publish
 
 # 5. Stage to inf-spork-r${TARGET}.* for the battery.
