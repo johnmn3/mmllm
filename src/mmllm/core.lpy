@@ -1197,72 +1197,114 @@
         target-kind (pick-distill-target)
         mag-coef    (pick-distill-magnitude-coef)
         mag-clamp   (pick-distill-magnitude-clamp)
-        ;; Per-layer ablation gate (set by probe-distill-gate! at the
-        ;; Local→Net handoff). When present, only blocks whose index is
-        ;; in this set contribute to the distill MSE — the others stay
-        ;; at their step-70 Net state, untouched by the distill update.
-        ;; nil = no gating (all blocks contribute, default behavior).
-        gate     (when metrics (.get metrics "distill_gate_indices" nil))
+        ;; Per-layer distill gating (set by probe-distill-gate! at the
+        ;; Local→Net handoff). Two forms:
+        ;;   gate-weights : {block_idx → float}  continuous weighting.
+        ;;     Each block's distill MSE is multiplied by its weight before
+        ;;     averaging. Weights normalized so mean=1 — preserves the
+        ;;     global MMLLM_DISTILL_COEF magnitude.
+        ;;   gate-indices : set of block indices  binary include/exclude.
+        ;;     Used as fallback when weights aren't set.
+        ;; Both nil = no gating (default).
+        gate-weights (when metrics (.get metrics "distill_gate_weights" nil))
+        gate         (when (and metrics (nil? gate-weights))
+                       (.get metrics "distill_gate_indices" nil))
         eps      1e-6]
     (if (zero? coef)
       0.0
-      ;; Hot path (gate==nil): inlined exactly as before this commit
-      ;; — no closure construction per call, no map-indexed, no
-      ;; destructure. Slow path (gate set, post-probe distill steps
-      ;; only) uses a closure for the gated-membership check.
-      (let [losses (if (nil? gate)
-                     (->> (:blocks m)
-                          (map (fn [b]
-                                 (let [g  (:long-gate b)
-                                       lo (python/getattr g "last_local_out" nil)
-                                       no (python/getattr g "last_net_out" nil)
-                                       so (python/getattr g "last_sdpa_out" nil)]
-                                   (when (and lo no)
-                                     (let [tgt (if (and (= target-kind "residual") so)
-                                                 (.sub (.detach lo) (.detach so))
-                                                 (.detach lo))]
-                                       (if dir-only
-                                         (let [tgt-n   (.add (.norm tgt ** :dim -1 :keepdim true) eps)
-                                               no-n    (.add (.norm no  ** :dim -1 :keepdim true) eps)
-                                               dir-mse (F/mse_loss (.div no no-n)
-                                                                   (.div tgt tgt-n))]
-                                           (if (pos? mag-coef)
-                                             (let [tgt-mag (if (pos? mag-clamp)
-                                                             (.clamp tgt-n ** :max mag-clamp)
-                                                             tgt-n)
-                                                   mag-mse (F/mse_loss no-n (.detach tgt-mag))]
-                                               (+ (* (- 1.0 mag-coef) dir-mse)
-                                                  (* mag-coef         mag-mse)))
-                                             dir-mse))
-                                         (F/mse_loss no tgt)))))))
-                          (filter some?))
-                     ;; Gate-set path — filter first, then per-block loss.
-                     (->> (map-indexed vector (:blocks m))
-                          (filter (fn [[i _]] (.__contains__ gate i)))
-                          (map (fn [[_ b]]
-                                 (let [g  (:long-gate b)
-                                       lo (python/getattr g "last_local_out" nil)
-                                       no (python/getattr g "last_net_out" nil)
-                                       so (python/getattr g "last_sdpa_out" nil)]
-                                   (when (and lo no)
-                                     (let [tgt (if (and (= target-kind "residual") so)
-                                                 (.sub (.detach lo) (.detach so))
-                                                 (.detach lo))]
-                                       (if dir-only
-                                         (let [tgt-n   (.add (.norm tgt ** :dim -1 :keepdim true) eps)
-                                               no-n    (.add (.norm no  ** :dim -1 :keepdim true) eps)
-                                               dir-mse (F/mse_loss (.div no no-n)
-                                                                   (.div tgt tgt-n))]
-                                           (if (pos? mag-coef)
-                                             (let [tgt-mag (if (pos? mag-clamp)
-                                                             (.clamp tgt-n ** :max mag-clamp)
-                                                             tgt-n)
-                                                   mag-mse (F/mse_loss no-n (.detach tgt-mag))]
-                                               (+ (* (- 1.0 mag-coef) dir-mse)
-                                                  (* mag-coef         mag-mse)))
-                                             dir-mse))
-                                         (F/mse_loss no tgt)))))))
-                          (filter some?)))]
+      ;; Three paths:
+      ;;   gate-weights set: continuous per-layer weighting (each block's
+      ;;     MSE multiplied by its weight before averaging).
+      ;;   gate set: binary include/exclude.
+      ;;   neither set: original hot path (all blocks contribute equally).
+      (let [losses
+            (cond
+              ;; Weighted path: per-layer continuous multiplier.
+              (some? gate-weights)
+              (->> (map-indexed vector (:blocks m))
+                   (map (fn [[i b]]
+                          (let [w (.get gate-weights i 0.0)]
+                            (when (> w 0.0)
+                              (let [g  (:long-gate b)
+                                    lo (python/getattr g "last_local_out" nil)
+                                    no (python/getattr g "last_net_out" nil)
+                                    so (python/getattr g "last_sdpa_out" nil)]
+                                (when (and lo no)
+                                  (let [tgt (if (and (= target-kind "residual") so)
+                                              (.sub (.detach lo) (.detach so))
+                                              (.detach lo))
+                                        base-mse
+                                        (if dir-only
+                                          (let [tgt-n   (.add (.norm tgt ** :dim -1 :keepdim true) eps)
+                                                no-n    (.add (.norm no  ** :dim -1 :keepdim true) eps)
+                                                dir-mse (F/mse_loss (.div no no-n)
+                                                                    (.div tgt tgt-n))]
+                                            (if (pos? mag-coef)
+                                              (let [tgt-mag (if (pos? mag-clamp)
+                                                              (.clamp tgt-n ** :max mag-clamp)
+                                                              tgt-n)
+                                                    mag-mse (F/mse_loss no-n (.detach tgt-mag))]
+                                                (+ (* (- 1.0 mag-coef) dir-mse)
+                                                   (* mag-coef         mag-mse)))
+                                              dir-mse))
+                                          (F/mse_loss no tgt))]
+                                    (* w base-mse))))))))
+                   (filter some?))
+              ;; Binary gate path.
+              (some? gate)
+              (->> (map-indexed vector (:blocks m))
+                   (filter (fn [[i _]] (.__contains__ gate i)))
+                   (map (fn [[_ b]]
+                          (let [g  (:long-gate b)
+                                lo (python/getattr g "last_local_out" nil)
+                                no (python/getattr g "last_net_out" nil)
+                                so (python/getattr g "last_sdpa_out" nil)]
+                            (when (and lo no)
+                              (let [tgt (if (and (= target-kind "residual") so)
+                                          (.sub (.detach lo) (.detach so))
+                                          (.detach lo))]
+                                (if dir-only
+                                  (let [tgt-n   (.add (.norm tgt ** :dim -1 :keepdim true) eps)
+                                        no-n    (.add (.norm no  ** :dim -1 :keepdim true) eps)
+                                        dir-mse (F/mse_loss (.div no no-n)
+                                                            (.div tgt tgt-n))]
+                                    (if (pos? mag-coef)
+                                      (let [tgt-mag (if (pos? mag-clamp)
+                                                      (.clamp tgt-n ** :max mag-clamp)
+                                                      tgt-n)
+                                            mag-mse (F/mse_loss no-n (.detach tgt-mag))]
+                                        (+ (* (- 1.0 mag-coef) dir-mse)
+                                           (* mag-coef         mag-mse)))
+                                      dir-mse))
+                                  (F/mse_loss no tgt)))))))
+                   (filter some?))
+              ;; Fast path: no gating.
+              :else
+              (->> (:blocks m)
+                   (map (fn [b]
+                          (let [g  (:long-gate b)
+                                lo (python/getattr g "last_local_out" nil)
+                                no (python/getattr g "last_net_out" nil)
+                                so (python/getattr g "last_sdpa_out" nil)]
+                            (when (and lo no)
+                              (let [tgt (if (and (= target-kind "residual") so)
+                                          (.sub (.detach lo) (.detach so))
+                                          (.detach lo))]
+                                (if dir-only
+                                  (let [tgt-n   (.add (.norm tgt ** :dim -1 :keepdim true) eps)
+                                        no-n    (.add (.norm no  ** :dim -1 :keepdim true) eps)
+                                        dir-mse (F/mse_loss (.div no no-n)
+                                                            (.div tgt tgt-n))]
+                                    (if (pos? mag-coef)
+                                      (let [tgt-mag (if (pos? mag-clamp)
+                                                      (.clamp tgt-n ** :max mag-clamp)
+                                                      tgt-n)
+                                            mag-mse (F/mse_loss no-n (.detach tgt-mag))]
+                                        (+ (* (- 1.0 mag-coef) dir-mse)
+                                           (* mag-coef         mag-mse)))
+                                      dir-mse))
+                                  (F/mse_loss no tgt)))))))
+                   (filter some?)))]
         (if (empty? losses)
           0.0
           (let [raw-mse (/ (reduce + losses) (python/float (count losses)))]
@@ -3191,8 +3233,8 @@
 
 (defn- probe-loss
   "Lightweight single-batch forward + plain CE on (x, y). No backward,
-   no optimizer. Returns a Python float. Used by probe-distill-gate! to
-   measure per-layer ablation Δ without the full eval-bpc cost.
+   no optimizer. Returns a Python float. Used by the ablation-mode
+   variant of probe-distill-gate! to measure per-layer Δ via CE delta.
 
    Caller must put the model in eval mode + set torch.no_grad — this
    function does NEITHER (hoist out of the inner loop for speed).
@@ -3206,76 +3248,152 @@
         y-flat      (.reshape y -1)]
     (.item (F/cross_entropy logits-flat y-flat))))
 
+(defn- v-local-movement
+  "Per-layer V_local 'how much did it move from Gaussian init?' signal.
+
+   V_local is initialized with std=0.02 Gaussian (see ProductKeyMemory's
+   init at memory.py:571). For a Gaussian, E[|X|] = σ·sqrt(2/π) ≈ 0.01596.
+   After training, rows that received gradient updates grow beyond this;
+   untouched rows stay at the Gaussian baseline. mean(|V_local|) over the
+   whole layer is therefore a direct signal of how much that layer's
+   V_local actually moved.
+
+   Returns per-layer mean-abs-V, indexed by block position. ~1ms total.
+
+   Layers with high mean-abs → rows moved → distillable content.
+   Layers near the Gaussian baseline (0.016) → barely trained → noise."
+  [m]
+  (vec
+    (for [[i b] (map-indexed vector (:blocks m))
+          :when (:memory b)]
+      (let [w (.- (.- (:memory b) V) weight)
+            mean-abs (.item (.mean (.abs w)))]
+        [i (python/float mean-abs)]))))
+
 (defn probe-distill-gate!
-  "Per-Local-layer ablation gate for the distill loss.
+  "Per-Local-layer gate for the distill loss. Two signal modes:
 
-   For each block with :memory: backup V_local, zero it, forward+CE
-   on each probe batch (averaged), restore. Records per-layer Δ_loss
-   (ablated_loss_mean − baseline_loss_mean). Layers passing the
-   selection rule are gated IN; others are filtered out of the
-   distill MSE by collect-distill-loss.
+   MMLLM_DISTILL_GATE_SIGNAL=movement (default — fast, robust):
+     Per-layer signal = mean(|V_local|). Compares actual V to Gaussian
+     init baseline (E[|N(0, 0.02)|] ≈ 0.016). Layers whose mean-abs
+     significantly exceeds the baseline have rows that moved; rank by
+     this. ~1ms total. Does NOT use the `batches` argument.
 
-   Selection rule:
-     If MMLLM_DISTILL_GATE_TOP_K (default 0) > 0:
-       sort layers by Δ descending; keep top K.
+   MMLLM_DISTILL_GATE_SIGNAL=ablation:
+     Original mode. Backup V_local, zero it, forward+CE on probe
+     batches, restore. Per-layer Δ = ablated_loss − baseline_loss.
+     Found empirically to be at the noise floor at step 70 — V_local
+     hasn't accumulated enough mass for ablation-on-loss to discriminate.
+     Kept available for comparison. Requires the eval-mode + no_grad
+     bracketing managed by the caller.
+
+   Selection rule (both modes):
+     MMLLM_DISTILL_GATE_TOP_K (default 0) > 0:
+       sort layers by signal descending; keep top K.
      Otherwise:
-       keep layers with Δ > MMLLM_DISTILL_GATE_THRESHOLD (default 0.0).
+       keep layers with signal > MMLLM_DISTILL_GATE_THRESHOLD.
+       For movement: threshold defaults to 0.016 (the Gaussian-init
+         baseline) — anything above this means rows moved.
+       For ablation: threshold defaults to 0.0.
 
-   Probe batches: caller passes a non-empty seq of (x, y) tuples. Each
-   forward pass is one batch's worth of tokens; deltas are averaged
-   across batches. More batches = less noise, more cost.
+   MMLLM_DISTILL_GATE_INVERT=true takes the complement of the primary
+   selection — gate IN everyone EXCEPT the primary set.
 
    Stashed on (:metrics m):
-     distill_gate_deltas   {block_idx → mean Δ}
-     distill_gate_indices  set of gate-in block indices
-
-   The caller is responsible for putting the model in eval mode + no_grad
-   BEFORE invoking, and restoring train mode after. This function does
-   not toggle modes (hoisted out to avoid 8× recursion through 32 blocks
-   on every probe-loss call)."
+     distill_gate_deltas   {block_idx → signal value}
+     distill_gate_indices  set of gate-in block indices"
   [m batches]
-  (let [thresh    (python/float (.get (.- os environ) "MMLLM_DISTILL_GATE_THRESHOLD" "0.0"))
+  (let [signal-mode (.lower (.get (.- os environ) "MMLLM_DISTILL_GATE_SIGNAL" "movement"))
+        ;; Threshold default depends on signal:
+        ;;   movement: 0.016 (Gaussian baseline)
+        ;;   ablation: 0.0   (positive ablation cost)
+        default-thresh (if (= signal-mode "movement") "0.016" "0.0")
+        thresh    (python/float (.get (.- os environ) "MMLLM_DISTILL_GATE_THRESHOLD" default-thresh))
         top-k     (python/int  (.get (.- os environ) "MMLLM_DISTILL_GATE_TOP_K" "0"))
-        ;; Baseline loss averaged over all probe batches.
-        baseline  (let [losses (mapv (fn [[x y]] (probe-loss m x y)) batches)]
-                    (/ (reduce + losses) (python/float (count losses))))
-        results   (vec
-                    (for [[i b] (map-indexed vector (:blocks m))
-                          :when (:memory b)]
-                      (let [bp (save-v-to-disk (:memory b) (str "gate-" i))]
-                        (.zero_bank (:memory b))
-                        (try
-                          (let [losses    (mapv (fn [[x y]] (probe-loss m x y)) batches)
-                                abl-mean  (/ (reduce + losses) (python/float (count losses)))
-                                delta     (- abl-mean baseline)]
-                            [i delta])
-                          (finally
-                            (restore-v-from-disk! (:memory b) bp)
-                            (unlink-paths! [bp]))))))
-        gate-in   (if (pos? top-k)
-                    ;; Top-K mode: take K layers with the largest Δ
-                    ;; (most helpful = biggest ablation cost), regardless
-                    ;; of sign. Fallback for when threshold-mode gates
-                    ;; everything out (e.g. unconverged V_local where
-                    ;; all Δs are near zero or slightly negative).
+        ;; Baseline value used for logging. movement: Gaussian E[|X|]
+        ;; threshold. ablation: averaged probe-loss across batches.
+        baseline  (if (= signal-mode "movement")
+                    (python/float 0.016)
+                    (let [losses (mapv (fn [[x y]] (probe-loss m x y)) batches)]
+                      (/ (reduce + losses) (python/float (count losses)))))
+        ;; Per-layer signal. movement: V-state, no forward passes.
+        ;; ablation: per-layer CE-loss delta on the probe batches.
+        results
+        (if (= signal-mode "movement")
+          (v-local-movement m)
+          (vec
+            (for [[i b] (map-indexed vector (:blocks m))
+                  :when (:memory b)]
+              (let [bp (save-v-to-disk (:memory b) (str "gate-" i))]
+                (.zero_bank (:memory b))
+                (try
+                  (let [losses    (mapv (fn [[x y]] (probe-loss m x y)) batches)
+                        abl-mean  (/ (reduce + losses) (python/float (count losses)))
+                        delta     (- abl-mean baseline)]
+                    [i delta])
+                  (finally
+                    (restore-v-from-disk! (:memory b) bp)
+                    (unlink-paths! [bp])))))))
+        invert?   (= (.lower (.get (.- os environ) "MMLLM_DISTILL_GATE_INVERT" "false")) "true")
+        ;; Compute the "primary" gate set first per the original rule:
+        ;;   top-K>0:   layers with largest Δ (most helpful)
+        ;;   threshold: layers with Δ > thresh
+        primary   (if (pos? top-k)
                     (->> results
                          (sort-by (fn [[_ d]] (- d)))
                          (take top-k)
                          (mapv first))
-                    ;; Threshold mode (default): all layers with Δ > thresh.
                     (->> results
                          (filter (fn [[_ d]] (> d thresh)))
-                         (mapv first)))]
+                         (mapv first)))
+        ;; If MMLLM_DISTILL_GATE_INVERT=true, take the COMPLEMENT — gate
+        ;; in every Local layer EXCEPT the primary set. Useful when the
+        ;; gate's discrimination is signed correctly but the "helpers"
+        ;; the probe finds are actually the noise (and the layers with
+        ;; near-zero Δ are the ones we should be distilling from).
+        ;; Discovered empirically: at step 70, V_local hasn't accumulated
+        ;; enough for ablation-on-loss to register a clear "helps" signal;
+        ;; layers with tiny positive Δ tend to be flukes, while layers
+        ;; with near-zero Δ are doing fine.
+        gate-in   (if invert?
+                    (->> results
+                         (mapv first)
+                         (remove (set primary))
+                         vec)
+                    primary)
+        ;; MMLLM_DISTILL_GATE_WEIGHTED=true → continuous per-layer weights
+        ;; instead of binary include/exclude. Weight ∝ max(0, signal - thresh).
+        ;; Normalized so that mean(weights over Local layers) = 1.0, which
+        ;; preserves the global MMLLM_DISTILL_COEF schedule's magnitude.
+        ;; Layers near the threshold (e.g. Gaussian baseline for movement
+        ;; signal) get weight ≈ 0; most-active layers get weight > 1.
+        weighted? (= (.lower (.get (.- os environ) "MMLLM_DISTILL_GATE_WEIGHTED" "false")) "true")
+        per-layer-weight
+        (when weighted?
+          (let [raw   (mapv (fn [[i d]] [i (max 0.0 (- d thresh))]) results)
+                total (reduce + (mapv second raw))
+                ;; Normalize to mean=1 over the Local layers (raw mean × N / sum).
+                ;; If all weights are 0 (no layer above thresh), keep zeros.
+                n-loc (python/float (count raw))
+                scale (if (> total 0.0) (/ n-loc total) 0.0)]
+            (mapv (fn [[i w]] [i (python/float (* w scale))]) raw)))]
     (when-let [metrics (:metrics m)]
       (let [py-deltas (python/dict)
-            py-gate   (python/set)]
+            py-gate   (python/set)
+            py-weights (python/dict)]
         (doseq [[i d] results]
           (.__setitem__ py-deltas i (python/float d)))
         (doseq [i gate-in]
           (.add py-gate i))
+        (when per-layer-weight
+          (doseq [[i w] per-layer-weight]
+            (.__setitem__ py-weights i w)))
         (.__setitem__ metrics "distill_gate_deltas"  py-deltas)
-        (.__setitem__ metrics "distill_gate_indices" py-gate)))
-    {:baseline baseline :deltas results :gate-in gate-in}))
+        (.__setitem__ metrics "distill_gate_indices" py-gate)
+        (when per-layer-weight
+          (.__setitem__ metrics "distill_gate_weights" py-weights))))
+    {:baseline baseline :deltas results :gate-in gate-in
+     :weights per-layer-weight}))
 
 ;;; ─────────────────────── train + eval text8 / enwik8 ───────────────────────
 
@@ -3823,7 +3941,13 @@
                             (python/int (.get (.- os environ) "MMLLM_DISTILL_GATE_STEP"
                                               (str (python/int (.get (.- os environ) "MMLLM_LR_WARMUP" "0"))))))
           gate-n-batches  (when gate-enabled?
-                            (python/int (.get (.- os environ) "MMLLM_DISTILL_GATE_PROBE_BATCHES" "1")))]
+                            (python/int (.get (.- os environ) "MMLLM_DISTILL_GATE_PROBE_BATCHES" "1")))
+          ;; Probe batch size override. Training runs at B=1 at cpu-mini,
+          ;; which gives the probe only 128 tokens per batch — far too few
+          ;; to exercise the ~2% of V_local rows that 70 sparse-gradient
+          ;; steps actually touched. Default 16 → 16× more probe coverage.
+          gate-probe-B    (when gate-enabled?
+                            (python/int (.get (.- os environ) "MMLLM_DISTILL_GATE_PROBE_B" "16")))]
       (when (pos? max-hours)
         (println (format "  session cap: %.2f h (MMLLM_MAX_HOURS) — will checkpoint and exit cleanly when reached"
                          max-hours)))
@@ -4041,23 +4165,28 @@
                 ;; the per-step check here is a single boolean AND a single
                 ;; integer comparison. See defs at the (let [t0 ...]) above.
                 _     (when (and gate-enabled? (= step gate-probe-step))
-                        (let [more-batches (vec
-                                             (for [_ (range (max 0 (dec gate-n-batches)))]
-                                               (cond
-                                                 (and mix (> n-trunks 1))
-                                                   (let [[x2 y2 _ _] (mix-batch-multi-trunk
-                                                                        mix-tensors mix-weights-t
-                                                                        n-trunks B-cur T)]
-                                                     [x2 y2])
-                                                 mix
-                                                   (let [[x2 y2 _] (mix-batch mix-tensors mix-weights-t B-cur T)]
-                                                     [x2 y2])
-                                                 :else
-                                                   (let [[x2 y2] (batch train-data B-cur T)]
-                                                     [x2 y2]))))
-                              batches   (vec (cons [x y] more-batches))]
-                          (println (format "  [step %d] running distill-gate ablation probe (n_batches=%d) …"
-                                           step gate-n-batches))
+                        ;; Probe uses gate-probe-B (default 16, vs training B-cur=1)
+                        ;; so each probe batch exercises 16× more tokens and queries
+                        ;; more V_local rows. With B=16 × T=128 × n_batches the
+                        ;; probe touches enough rows that the trained ~2% have a
+                        ;; chance of being hit.
+                        (let [pB (max 1 gate-probe-B)
+                              batches (vec
+                                        (for [_ (range gate-n-batches)]
+                                          (cond
+                                            (and mix (> n-trunks 1))
+                                              (let [[x2 y2 _ _] (mix-batch-multi-trunk
+                                                                   mix-tensors mix-weights-t
+                                                                   n-trunks pB T)]
+                                                [x2 y2])
+                                            mix
+                                              (let [[x2 y2 _] (mix-batch mix-tensors mix-weights-t pB T)]
+                                                [x2 y2])
+                                            :else
+                                              (let [[x2 y2] (batch train-data pB T)]
+                                                [x2 y2]))))]
+                          (println (format "  [step %d] running distill-gate ablation probe (n_batches=%d, B=%d) …"
+                                           step gate-n-batches pB))
                           (let [tp0  (.time (python/__import__ "time"))
                                 _    (set-eval-mode! m)
                                 res  (with [_ (torch/no_grad)]
