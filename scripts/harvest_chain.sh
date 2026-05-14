@@ -28,6 +28,25 @@
 set -e
 ROOT=$(git rev-parse --show-toplevel); cd "$ROOT"
 
+# Pick a Python with numpy + torch. System python3 on some boxes is bare;
+# fall back to a project venv if one exists. Setting PYTHON via env var
+# overrides discovery for one-off runs.
+if [ -z "${PYTHON:-}" ]; then
+  for cand in \
+      "$ROOT/.venv/bin/python" \
+      "$ROOT/papers/spiral-quant/.venv/bin/python" \
+      "$(command -v python3)"; do
+    if [ -x "$cand" ] && "$cand" -c 'import numpy, torch' 2>/dev/null; then
+      PYTHON="$cand"; break
+    fi
+  done
+fi
+if [ -z "${PYTHON:-}" ]; then
+  echo "ERROR: no Python with numpy + torch found. Set PYTHON=/path/to/python" >&2
+  exit 2
+fi
+echo "  python: $PYTHON"
+
 TARGET="${1:?target round required (e.g. 40 for harvesting R31-R40 wave)}"
 PRIOR=$((TARGET - 10))
 PRIOR_NEXT=$((PRIOR + 1))
@@ -53,54 +72,52 @@ echo "════════════════════════�
 echo ""
 echo "── 1. discovering worker branches (content scan, dedup by handle) ──"
 mkdir -p "$STAGE"
-git fetch origin --prune 2>/dev/null || true
 
-# Marker subdir name varies across waves:
-#   R30-R90: workers/<handle>/chain-diverse-${TARGET}/
-#   R91+:    workers/<handle>/chain-design-r${TARGET}/  (the design-sized wave)
-# We accept both; the per-worker src_prefix is discovered from the tree.
-MARKER_RE="chain-(diverse-${TARGET}|design-r${TARGET})"
-CAND_A=$(git branch -r 2>&1 | grep -oE "origin/claude/chaindiverse-[^[:space:]]+-r${TARGET}\$" | sort)
-CAND_B=$(git branch -r 2>&1 | grep -oE "origin/claude/extend-chain-rounds-${PRIOR_NEXT}-${TARGET}-[^[:space:]]+\$" | sort)
-# Catch-all: any branch with the marker file in its tree (excluding A and B).
-# We avoid scanning every branch eagerly; agents that name-violate both patterns
-# are the residual to find. ls-remote'd refs only — git ls-tree is cheap.
-CAND_C=""
-for br in $(git branch -r 2>&1 | grep -oE "origin/claude/[^[:space:]]+\$" | grep -v "$(echo "$CAND_A $CAND_B" | tr ' ' '|')" | sort); do
-  if git cat-file -e "${br}:workers" 2>/dev/null; then
-    # Has a workers/ dir; check if it has the marker file for this round
-    if git ls-tree -r --name-only "$br" 2>/dev/null | grep -qE "^workers/[^/]+/${MARKER_RE}/V_net\.0\.bin\$"; then
-      CAND_C="${CAND_C}${br}
-"
-    fi
+# Discovery via `git ls-remote` (refs only — no objects fetched). This
+# replaces the prior `git branch -r` scan which silently returns nothing
+# on a shallow clone (the `--prune` fetch doesn't pull new branches that
+# weren't already tracked). ls-remote works regardless of clone state.
+#
+# Marker subdir name is inferred from TARGET:
+#   R30-R90:  workers/<handle>/chain-diverse-${TARGET}/
+#   R91+:     workers/<handle>/chain-design-r${TARGET}/  (design-sized wave)
+# A worker that uses the other marker for its round won't be picked up —
+# this is acceptable since all waves at a given round use one convention.
+if [ "$TARGET" -ge 91 ]; then
+  MARKER="chain-design-r${TARGET}"
+else
+  MARKER="chain-diverse-${TARGET}"
+fi
+echo "  using marker subdir: ${MARKER}"
+
+REMOTE_REFS=$(git ls-remote origin 2>&1 | awk '{print $2}' | grep -E "^refs/heads/")
+CAND_A=$(echo "$REMOTE_REFS" | grep -oE "refs/heads/claude/chaindiverse-[^[:space:]]+-r${TARGET}\$" \
+         | sed 's|refs/heads/||' | sort)
+CAND_B=$(echo "$REMOTE_REFS" | grep -oE "refs/heads/claude/extend-chain-rounds-${PRIOR_NEXT}-${TARGET}-[^[:space:]]+\$" \
+         | sed 's|refs/heads/||' | sort)
+
+# Handle inference: chaindiverse-<HANDLE>-r${TARGET} → <HANDLE>
+declare -A HANDLE_TO_BRANCH=()
+declare -A HANDLE_TO_MARKER=()
+for br in $CAND_A; do
+  h=$(echo "$br" | sed -E "s|^claude/chaindiverse-(.+)-r${TARGET}\$|\1|")
+  if [ -z "${HANDLE_TO_BRANCH[$h]:-}" ]; then
+    HANDLE_TO_BRANCH[$h]="$br"
+    HANDLE_TO_MARKER[$h]="$MARKER"
   fi
 done
-CAND_C=$(echo "$CAND_C" | grep -v "^$" | sort)
-
-# Combine candidate branches in priority order.
-declare -A HANDLE_TO_BRANCH=()
-declare -A HANDLE_TO_MARKER=()      # handle → "chain-diverse-${TARGET}" or "chain-design-r${TARGET}"
-mapfile -t ALL_CAND < <(printf '%s\n%s\n%s\n' "$CAND_A" "$CAND_B" "$CAND_C" | grep -v "^$")
-
-for br in "${ALL_CAND[@]}"; do
-  br_short="${br#origin/}"
-  # Each marker-bearing path in this branch's tree → (handle, marker).
-  while IFS=$'\t' read -r h marker; do
-    [ -z "$h" ] && continue
-    if [ -z "${HANDLE_TO_BRANCH[$h]:-}" ]; then
-      HANDLE_TO_BRANCH[$h]="$br_short"
-      HANDLE_TO_MARKER[$h]="$marker"
-    fi
-  done < <(
-    git ls-tree -r --name-only "$br" 2>/dev/null \
-      | grep -oE "^workers/[^/]+/${MARKER_RE}/V_net\.0\.bin\$" \
-      | sed -E "s|^workers/([^/]+)/(chain-(diverse-${TARGET}|design-r${TARGET}))/V_net\.0\.bin|\1\t\2|" \
-      | sort -u
-  )
+for br in $CAND_B; do
+  # extend-chain-rounds-<PRIOR_NEXT>-<TARGET>-<TAIL>
+  h=$(echo "$br" | sed -E "s|^claude/extend-chain-rounds-${PRIOR_NEXT}-${TARGET}-(.+)\$|\1|")
+  if [ -z "${HANDLE_TO_BRANCH[$h]:-}" ]; then
+    HANDLE_TO_BRANCH[$h]="$br"
+    HANDLE_TO_MARKER[$h]="$MARKER"
+  fi
 done
 
 if [ ${#HANDLE_TO_BRANCH[@]} -eq 0 ]; then
-  echo "ERROR: no worker branches found containing workers/<handle>/chain-diverse-${TARGET}/V_net.0.bin" >&2
+  echo "ERROR: no worker branches matching pattern claude/chaindiverse-*-r${TARGET} or" >&2
+  echo "       claude/extend-chain-rounds-${PRIOR_NEXT}-${TARGET}-* on origin." >&2
   exit 2
 fi
 
@@ -115,6 +132,27 @@ echo "  found ${N_WORKERS} workers:"
 while IFS=: read -r h br marker; do
   echo "    - ${h}  ←  ${br}  (${marker})"
 done < "$MANIFEST"
+
+# Reference V_net for sparse-delta encoding. Workers that pushed full
+# V_net.{0..31}.bin (legacy format, pre-rewrite) are converted to deltas
+# on the harvester side: subtract this reference, sparsify, fold into the
+# row-aware accumulator. Workers that already pushed delta chunks skip
+# the conversion. Either way, the accumulator path is row-aware after
+# this point — the dilution bug in naive V_net mean is bypassed even for
+# legacy workers.
+REFERENCE_DIR=""
+for cand in workers/dispatcher/harvest-*-r${PRIOR}/round-${PRIOR} \
+            workers/dispatcher/harvest-cooked-r${PRIOR}/round-${PRIOR}; do
+  if [ -d "$cand" ] && [ -f "$cand/V_net.0.bin" ]; then
+    REFERENCE_DIR="$cand"; break
+  fi
+done
+if [ -n "$REFERENCE_DIR" ]; then
+  echo "  reference V_net (for on-the-fly delta encoding): ${REFERENCE_DIR}"
+else
+  echo "  no local reference V_net found at workers/dispatcher/harvest-*-r${PRIOR}/round-${PRIOR}"
+  echo "  legacy workers will fall through to naive-mean FedAvg (dilution bug applies)"
+fi
 
 # 2-4. Streaming harvest: per-worker fetch → extract → fold-into-accumulator
 # → delete worker dir → git gc. Peak disk stays at ~one-worker (~1.25 GB)
@@ -145,26 +183,45 @@ while IFS=: read -r h br marker; do
   src_prefix="workers/${h}/${marker}"
   mkdir -p "$dst"
 
-  # V_net layers.
-  for i in $(seq 0 31); do
-    git show "origin/${br}:${src_prefix}/V_net.${i}.bin" > "$dst/V_net.${i}.bin" 2>/dev/null
-    [ ! -s "$dst/V_net.${i}.bin" ] && echo "    WARN V_net.${i} empty" && rm -f "$dst/V_net.${i}.bin"
-  done
+  # V_net path: prefer sparse delta (delta-sparse-net.meta.pt + per-pid
+  # chunks, ~10-50 MB total) if the worker pushed one. Fall back to
+  # legacy full V_net.{0..31}.bin (1 GB) only if no delta meta is
+  # present in the worker's tree.
+  #
+  # All `git show` probes need `|| true` under `set -e` — git show
+  # against a non-existent path exits 128 and would kill the script.
+  git show "origin/${br}:${src_prefix}/delta-sparse-net.meta.pt" > "$dst/delta-sparse-net.meta.pt" 2>/dev/null || true
+  if [ -s "$dst/delta-sparse-net.meta.pt" ]; then
+    for i in $(seq 0 31); do
+      git show "origin/${br}:${src_prefix}/delta-sparse-net.${i}.pt" > "$dst/delta-sparse-net.${i}.pt" 2>/dev/null || true
+      [ ! -s "$dst/delta-sparse-net.${i}.pt" ] && rm -f "$dst/delta-sparse-net.${i}.pt"
+    done
+    n_delta_chunks=$(ls "$dst"/delta-sparse-net.[0-9]*.pt 2>/dev/null | wc -l)
+    vnet_desc="delta-chunks ${n_delta_chunks}/32"
+  else
+    rm -f "$dst/delta-sparse-net.meta.pt"
+    for i in $(seq 0 31); do
+      git show "origin/${br}:${src_prefix}/V_net.${i}.bin" > "$dst/V_net.${i}.bin" 2>/dev/null || true
+      [ ! -s "$dst/V_net.${i}.bin" ] && rm -f "$dst/V_net.${i}.bin"
+    done
+    n_vnet=$(ls "$dst"/V_net.*.bin 2>/dev/null | wc -l)
+    vnet_desc="full V_net ${n_vnet}/32"
+  fi
   # Dense.
-  git show "origin/${br}:${src_prefix}/dense.pt" > "$dst/dense.pt" 2>/dev/null
+  git show "origin/${br}:${src_prefix}/dense.pt" > "$dst/dense.pt" 2>/dev/null || true
 
   # opt-sparse-net: prefer chunks (R91+), fall back to legacy single-file.
-  git show "origin/${br}:${src_prefix}/opt-sparse-net.meta.pt" > "$dst/opt-sparse-net.meta.pt" 2>/dev/null
+  git show "origin/${br}:${src_prefix}/opt-sparse-net.meta.pt" > "$dst/opt-sparse-net.meta.pt" 2>/dev/null || true
   if [ -s "$dst/opt-sparse-net.meta.pt" ]; then
     for i in $(seq 0 31); do
-      git show "origin/${br}:${src_prefix}/opt-sparse-net.${i}.pt" > "$dst/opt-sparse-net.${i}.pt" 2>/dev/null
+      git show "origin/${br}:${src_prefix}/opt-sparse-net.${i}.pt" > "$dst/opt-sparse-net.${i}.pt" 2>/dev/null || true
       [ ! -s "$dst/opt-sparse-net.${i}.pt" ] && rm -f "$dst/opt-sparse-net.${i}.pt"
     done
     n_opt_chunks=$(ls "$dst"/opt-sparse-net.[0-9]*.pt 2>/dev/null | wc -l)
     opt_desc="opt-chunks ${n_opt_chunks}/32"
   else
     rm -f "$dst/opt-sparse-net.meta.pt"
-    git show "origin/${br}:${src_prefix}/opt-sparse-net.pt" > "$dst/opt-sparse-net.pt" 2>/dev/null
+    git show "origin/${br}:${src_prefix}/opt-sparse-net.pt" > "$dst/opt-sparse-net.pt" 2>/dev/null || true
     [ ! -s "$dst/opt-sparse-net.pt" ] && rm -f "$dst/opt-sparse-net.pt"
     opt_desc="opt-single $([ -f "$dst/opt-sparse-net.pt" ] && echo present || echo absent)"
   fi
@@ -172,13 +229,52 @@ while IFS=: read -r h br marker; do
   # Per-round log → harvest-side reads it for ctrl_bpc reporting.
   git show "origin/${br}:${src_prefix}/round-${TARGET}.log.jsonl" > "$dst/round-${TARGET}.log.jsonl" 2>/dev/null || true
 
-  n_vnet=$(ls "$dst"/V_net.*.bin 2>/dev/null | wc -l)
-  echo "    extracted: ${n_vnet}/32 V_net + dense + ${opt_desc}"
+  # Stash the worker's meta.json so finalize can recover the wave's
+  # reference V_net path (extended_from). Worker dirs get rm'd after
+  # stream-update folds them in, so we copy the meta to the accumulator.
+  git show "origin/${br}:${src_prefix}/meta.json" > "$dst/meta.json" 2>/dev/null || true
+  if [ -s "$dst/meta.json" ] && [ ! -f "$ACCUM/.first-worker-meta.json" ]; then
+    cp "$dst/meta.json" "$ACCUM/.first-worker-meta.json"
+  fi
+
+  echo "    extracted: ${vnet_desc} + dense + ${opt_desc}"
+
+  # Skip workers that didn't produce any usable artifacts. Happens when
+  # a branch named -r${TARGET} actually only pushed an earlier round's
+  # marker dir (e.g. kbykh-r101 has workers/kbykh/chain-diverse-100/
+  # not workers/kbykh/chain-design-r101/). Without this guard, an empty
+  # extract reaches stream-update which then fails on the 0-byte
+  # dense.pt with EOFError.
+  if [ ! -s "$dst/dense.pt" ]; then
+    echo "    WARN: dense.pt missing/empty — worker did not push to ${src_prefix}"
+    echo "    skipping ${h} and shedding its git refs"
+    rm -rf "$dst"
+    git update-ref -d "refs/remotes/origin/${br}" 2>/dev/null || true
+    rm -f .git/FETCH_HEAD
+    continue
+  fi
+
+  # On-the-fly delta conversion for legacy full-V_net workers.
+  # If the worker pushed V_net.{i}.bin AND we have a reference, compute
+  # delta sparse-encode and drop the V_net.bin files. The stream-update
+  # call below then takes the row-aware delta path automatically (it
+  # detects delta-sparse-net.meta.pt first). This gives legacy workers
+  # the same row-aware FedAvg semantics as native-delta workers and
+  # drops /tmp from ~1 GB → ~60 MB per worker mid-fold.
+  if [ -n "$REFERENCE_DIR" ] && [ ! -f "$dst/delta-sparse-net.meta.pt" ] \
+     && ls "$dst"/V_net.*.bin >/dev/null 2>&1; then
+    echo "    → encoding sparse delta on-the-fly vs ${REFERENCE_DIR}"
+    "$PYTHON" scripts/_delta_sparse_net.py encode \
+      "$REFERENCE_DIR" "$dst" "$dst" 2>&1 | sed 's/^/      /'
+    rm -f "$dst"/V_net.*.bin
+    vnet_desc="${vnet_desc} → delta-on-the-fly"
+    echo "    /tmp worker dir after conversion: $(du -sh $dst 2>&1 | awk '{print $1}')"
+  fi
 
   # Pull ctrl_bpc out of the log for the accumulator's bpcs dict.
   CTRL_BPC=""
   if [ -f "$dst/round-${TARGET}.log.jsonl" ]; then
-    CTRL_BPC=$(python3 -c "
+    CTRL_BPC=$("$PYTHON" -c "
 import json,sys
 for line in open('$dst/round-${TARGET}.log.jsonl'):
     try: ev = json.loads(line)
@@ -191,24 +287,73 @@ for line in open('$dst/round-${TARGET}.log.jsonl'):
   [ -n "$CTRL_BPC" ] && CTRL_ARGS="--ctrl-bpc $CTRL_BPC"
 
   # Fold into streaming accumulator.
-  python3 scripts/harvest_chain.py --mode=stream-update "$ACCUM" "$dst" "$h" $CTRL_ARGS
+  "$PYTHON" scripts/harvest_chain.py --mode=stream-update "$ACCUM" "$dst" "$h" $CTRL_ARGS
 
-  # Free this worker's /tmp and reclaim git objects so peak disk stays low.
+  # Free this worker's /tmp AND shed its git objects from .git/objects/.
+  # The two are independent — /tmp is the extracted-files staging dir,
+  # .git/objects is where `git fetch origin <branch>` deposited the
+  # worker's pack (~1.25 GB per worker in legacy mode). Without aggressive
+  # pruning we accumulate every worker's pack and hit OOM-disk on shallow
+  # repos before reaching N=8.
   rm -rf "$dst"
-  if [ $((w_idx % 4)) -eq 0 ] && [ $w_idx -lt $N_WORKERS ]; then
-    git gc --auto --quiet 2>/dev/null || true
+  git update-ref -d "refs/remotes/origin/${br}" 2>/dev/null || true
+  # Reset FETCH_HEAD so it doesn't keep this worker's commit reachable.
+  rm -f .git/FETCH_HEAD
+  # Per-worker prune (not just every 4). --prune=now ignores the 2-week
+  # grace period so unreferenced objects from the deleted branch go away.
+  # `--quiet` keeps the log clean; `2>/dev/null` swallows benign warnings.
+  git gc --prune=now --quiet 2>&1 | tail -3 || true
+  if [ $w_idx -lt $N_WORKERS ]; then
+    df_avail=$(df -m --output=avail /tmp | tail -1 | tr -d ' ')
+    echo "    /tmp free after worker: ${df_avail} MB"
+    if [ "$df_avail" -lt 1500 ]; then
+      echo "    WARN: /tmp free below 1.5 GB — next worker may fail mid-fetch" >&2
+    fi
   fi
 done < "$MANIFEST"
 
 # Finalize: divide accumulator sums by N, write harvested outputs, publish.
+# Delta-mode workers need a reference V_net to add their merged delta back
+# on top of. The reference is whatever this wave was extended from. We
+# auto-discover via two paths in priority order:
+#   1. Any worker's meta.json "extended_from" field (most authoritative).
+#   2. Glob workers/dispatcher/harvest-*-r${PRIOR}/round-${PRIOR}/ (covers
+#      both the typical harvest-Nway and the one-off harvest-cooked layout).
+# Pass-through if no delta workers were folded (legacy mode is fine).
+REFERENCE_DIR=""
+# (1) First worker's meta.json "extended_from" is authoritative.
+if [ -f "$ACCUM/.first-worker-meta.json" ]; then
+  cand=$("$PYTHON" -c "
+import json
+try:
+    m = json.load(open('$ACCUM/.first-worker-meta.json'))
+    print(m.get('extended_from', '').split(' ')[0])
+except: pass
+" 2>/dev/null)
+  if [ -n "$cand" ] && [ -d "$cand" ]; then
+    REFERENCE_DIR="$cand"
+  fi
+fi
+# (2) Glob fallback covers both harvest-Nway and one-off harvest-cooked.
+if [ -z "$REFERENCE_DIR" ]; then
+  for cand in workers/dispatcher/harvest-*-r${PRIOR}/round-${PRIOR} \
+              workers/dispatcher/harvest-cooked-r${PRIOR}/round-${PRIOR}; do
+    if [ -d "$cand" ]; then
+      REFERENCE_DIR="$cand"; break
+    fi
+  done
+fi
 echo ""
 echo "── 5. stream-finalize: divide by N=${N_WORKERS}, write outputs, publish ──"
-python3 scripts/harvest_chain.py --mode=stream-finalize "$TARGET" "$ACCUM" --publish
+echo "    reference V_net dir: ${REFERENCE_DIR:-<none, legacy full-V_net mode only>}"
+REF_ARGS=""
+[ -n "$REFERENCE_DIR" ] && REF_ARGS="--reference-dir $REFERENCE_DIR"
+"$PYTHON" scripts/harvest_chain.py --mode=stream-finalize "$TARGET" "$ACCUM" --publish $REF_ARGS
 
 # 6. Stage to inf-spork-r${TARGET}.* for the battery.
 echo ""
 echo "── 6. staging harvested → inf-spork-r${TARGET} format ──"
-python3 scripts/stage_inf_spork.py "$TARGET"
+"$PYTHON" scripts/stage_inf_spork.py "$TARGET"
 
 # 7. Run battery.
 echo ""
@@ -218,12 +363,12 @@ MMLLM_ENABLE_PKM_CPP=true \
   MMLLM_INF_BASE="/tmp/mmllm-cpu/inf-spork-r${TARGET}.fim" \
   MMLLM_INF_BANK="/tmp/mmllm-cpu/inf-spork-r${TARGET}.bank" \
   MMLLM_BATTERY_OUT="$BATTERY_OUT" \
-  python3 scripts/run_eval_battery.py 2>&1 | tail -30
+  "$PYTHON" scripts/run_eval_battery.py 2>&1 | tail -30
 
 # 8. Generate results.md with comparison to prior.
 echo ""
 echo "── 8. generating results.md (R${PRIOR} vs R${TARGET}) ──"
-python3 scripts/generate_harvest_results.py "$PRIOR" "$TARGET" --n-workers "$N_WORKERS"
+"$PYTHON" scripts/generate_harvest_results.py "$PRIOR" "$TARGET" --n-workers "$N_WORKERS"
 
 # 9. Generate next-round dispatch prompt.
 NEXT=$((TARGET + 10))
@@ -231,7 +376,7 @@ DISPATCH_OUT="docs/spork-chain-diverse-dispatch-r${NEXT}.md"
 if [ -f scripts/generate_dispatch_prompt.py ]; then
   echo ""
   echo "── 9. generating dispatch prompt for R${TARGET}→R${NEXT} ──"
-  python3 scripts/generate_dispatch_prompt.py "$TARGET" "$NEXT" --n-workers "$N_WORKERS" \
+  "$PYTHON" scripts/generate_dispatch_prompt.py "$TARGET" "$NEXT" --n-workers "$N_WORKERS" \
     --out "$DISPATCH_OUT"
 else
   echo "  (skipping — scripts/generate_dispatch_prompt.py not present yet)"
