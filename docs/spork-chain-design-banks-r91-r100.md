@@ -79,6 +79,32 @@ ls scripts/extend_chain.sh
 ls scripts/prep_chain_diverse_corpora.sh
 ```
 
+## Pre-flight: free disk
+
+Each round writes ~1.3 GB to `/tmp/mmllm-cpu/chain-diverse/round-N/` at
+design-sized banks. 10 rounds = ~13 GB. Plus the corpora (~3 GB) and the
+training scratch (~2 GB). If a stale prior chain is still on disk from
+a previous worker session, you can run out mid-wave.
+
+**Before starting, clean up any stale state:**
+
+```bash
+df -h /tmp                                    # check free
+# Drop any prior chain archive — these are local-only scratch, not
+# anything we need to preserve. The published starting state lives
+# under workers/dispatcher/, which we never touch.
+rm -rf /tmp/mmllm-cpu/chain-diverse           # any prior wave's archive
+rm -rf /tmp/mmllm-cpu/chain-diverse-1gb       # the cook's old name
+rm -rf /tmp/mmllm-cpu/fim-chain-stack.ckpts   # last round's live ckpt
+rm -rf /tmp/mmllm-cpu/fim-distill-build-*     # any sweep scratch
+rm -f  /tmp/mmllm-cpu/harvested-r*.bank*.bin  # any prior harvest dump
+rm -f  /tmp/mmllm-cpu/harvested-r*.dense.pt
+df -h /tmp                                    # confirm cleared
+```
+
+If `/tmp` shows <20 GB free after this, abort and ask the dispatcher
+before continuing — a wave needs ~15 GB headroom.
+
 ## Pre-flight: corpora
 
 ```bash
@@ -115,6 +141,35 @@ bash scripts/run_chain_diverse.sh 10 100
 MMLLM_DISTILL_GATE_*, then hands off to `extend_chain.sh` for 10
 rounds at 100 steps each. With design-sized banks, expect per-round
 wall ≈ 200-300s (vs 150-230s at the stub size). Total wall: 40-60 min.
+
+## Live reporting (don't go silent for 40 min)
+
+Per CLAUDE.md's "Reporting discipline" section. Arm a Monitor over the
+training log filter — every signal line wakes you, and each one is one
+short chat message back:
+
+```bash
+# (run in background — Monitor wakes you when grep matches)
+tail -F /tmp/mmllm-cpu/chain-diverse/round-*.train.log \
+  | grep --line-buffered -E \
+    "step|eval|ablation|control|Δ_local|Δ_net|training complete|wall|Traceback|RuntimeError|AssertionError|ZeroDivisionError|Killed|OOM|FAILED|WARN|NaN"
+```
+
+For each notification fire one brief chat message:
+
+- **Per-round header** (`── ROUND N ──`): "starting round N off prev_dense"
+- **Step prints during training** (every ~20 steps): "round N step S: loss=L lr=R"
+- **Ablation summary** (post step 70): a line with ctrl_bpc, Δ_local,
+  Δ_net, Δ_both, synergy
+- **Round complete**: wall_s + 1-line digest
+- **Any failure mode**: full traceback excerpt + abort
+
+Don't batch. Don't wait for the end. The dispatcher reads these live
+to know whether to fold your run in.
+
+If a round's training NaNs or `ctrl_bpc` climbs above 2.0, abort the
+remaining rounds and publish what you have — partial results beat
+zero.
 
 ## Watch for
 

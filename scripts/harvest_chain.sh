@@ -116,24 +116,23 @@ while IFS=: read -r h br marker; do
   echo "    - ${h}  ←  ${br}  (${marker})"
 done < "$MANIFEST"
 
-# 2 + 3. Per-worker streaming: fetch → extract → leave on disk → next.
-# (Disk discipline: with 20+ workers × ~1.25 GB published artifacts each,
-# extracting all in /tmp before harvest peaks at 25+ GB. We keep that
-# in-place size budget but reclaim .git/objects every few workers via
-# git gc so the *.git* half of the pressure doesn't compound.)
-#
-# Each worker publishes:
-#   workers/<handle>/<marker>/V_net.{0..31}.bin    (32 × 32 MB = 1 GB)
-#   workers/<handle>/<marker>/dense.pt             (~3 MB)
-#   workers/<handle>/<marker>/opt-sparse-net.{0..31}.pt + .meta.pt
-#                                                  (32 × 2-13 MB + meta ≈ 242 MB)
-#   workers/<handle>/<marker>/round-${TARGET}.log.jsonl
+# 2-4. Streaming harvest: per-worker fetch → extract → fold-into-accumulator
+# → delete worker dir → git gc. Peak disk stays at ~one-worker (~1.25 GB)
+# plus accumulator state (~2 GB) regardless of N. This replaces the
+# old "extract everything to /tmp then load all 25 GB at once" path
+# which hit OOM/disk limits at N≥10.
+ACCUM="$STAGE/.accum"
+rm -rf "$ACCUM"
+mkdir -p "$ACCUM"
+
 echo ""
-echo "── 2+3. fetching + extracting ${N_WORKERS} workers (with retry) ──"
+echo "── 2-4. streaming harvest of ${N_WORKERS} workers ──"
 w_idx=0
 while IFS=: read -r h br marker; do
   w_idx=$((w_idx + 1))
-  echo "  [${w_idx}/${N_WORKERS}] ${h} ← ${br} (${marker})"
+  echo ""
+  echo "[${w_idx}/${N_WORKERS}] ${h} ← ${br} (${marker})"
+
   # Fetch with retry.
   for i in 1 2 3 4; do
     if git fetch origin "$br" 2>&1 | tail -1 | grep -qE "(FETCH_HEAD|up to date|new branch)"; then
@@ -149,19 +148,19 @@ while IFS=: read -r h br marker; do
   # V_net layers.
   for i in $(seq 0 31); do
     git show "origin/${br}:${src_prefix}/V_net.${i}.bin" > "$dst/V_net.${i}.bin" 2>/dev/null
-    [ ! -s "$dst/V_net.${i}.bin" ] && echo "      WARN V_net.${i} empty" && rm -f "$dst/V_net.${i}.bin"
+    [ ! -s "$dst/V_net.${i}.bin" ] && echo "    WARN V_net.${i} empty" && rm -f "$dst/V_net.${i}.bin"
   done
   # Dense.
   git show "origin/${br}:${src_prefix}/dense.pt" > "$dst/dense.pt" 2>/dev/null
 
-  # opt-sparse-net: prefer chunks (R91+ format), fall back to legacy single-file (R20-R90).
+  # opt-sparse-net: prefer chunks (R91+), fall back to legacy single-file.
   git show "origin/${br}:${src_prefix}/opt-sparse-net.meta.pt" > "$dst/opt-sparse-net.meta.pt" 2>/dev/null
   if [ -s "$dst/opt-sparse-net.meta.pt" ]; then
     for i in $(seq 0 31); do
       git show "origin/${br}:${src_prefix}/opt-sparse-net.${i}.pt" > "$dst/opt-sparse-net.${i}.pt" 2>/dev/null
       [ ! -s "$dst/opt-sparse-net.${i}.pt" ] && rm -f "$dst/opt-sparse-net.${i}.pt"
     done
-    n_opt_chunks=$(ls "$dst"/opt-sparse-net.*.pt 2>/dev/null | grep -v meta | wc -l)
+    n_opt_chunks=$(ls "$dst"/opt-sparse-net.[0-9]*.pt 2>/dev/null | wc -l)
     opt_desc="opt-chunks ${n_opt_chunks}/32"
   else
     rm -f "$dst/opt-sparse-net.meta.pt"
@@ -170,36 +169,50 @@ while IFS=: read -r h br marker; do
     opt_desc="opt-single $([ -f "$dst/opt-sparse-net.pt" ] && echo present || echo absent)"
   fi
 
-  # Per-round log.
+  # Per-round log → harvest-side reads it for ctrl_bpc reporting.
   git show "origin/${br}:${src_prefix}/round-${TARGET}.log.jsonl" > "$dst/round-${TARGET}.log.jsonl" 2>/dev/null || true
 
   n_vnet=$(ls "$dst"/V_net.*.bin 2>/dev/null | wc -l)
-  echo "      ${n_vnet}/32 V_net + dense + ${opt_desc} + log"
+  echo "    extracted: ${n_vnet}/32 V_net + dense + ${opt_desc}"
 
-  # Reclaim .git/objects every 4 workers — keeps the .git side of disk
-  # pressure flat at ~5 GB rather than growing linearly to 25+ GB.
+  # Pull ctrl_bpc out of the log for the accumulator's bpcs dict.
+  CTRL_BPC=""
+  if [ -f "$dst/round-${TARGET}.log.jsonl" ]; then
+    CTRL_BPC=$(python3 -c "
+import json,sys
+for line in open('$dst/round-${TARGET}.log.jsonl'):
+    try: ev = json.loads(line)
+    except: continue
+    if ev.get('event') == 'ablation' and ev.get('control_bpc') is not None:
+        print(ev['control_bpc']); break
+" 2>/dev/null || true)
+  fi
+  CTRL_ARGS=""
+  [ -n "$CTRL_BPC" ] && CTRL_ARGS="--ctrl-bpc $CTRL_BPC"
+
+  # Fold into streaming accumulator.
+  python3 scripts/harvest_chain.py --mode=stream-update "$ACCUM" "$dst" "$h" $CTRL_ARGS
+
+  # Free this worker's /tmp and reclaim git objects so peak disk stays low.
+  rm -rf "$dst"
   if [ $((w_idx % 4)) -eq 0 ] && [ $w_idx -lt $N_WORKERS ]; then
     git gc --auto --quiet 2>/dev/null || true
   fi
 done < "$MANIFEST"
 
-# Final gc before harvest — frees any remaining loose objects before
-# harvest_chain.py loads everything from /tmp.
-git gc --auto --quiet 2>/dev/null || true
-
-# 4. FedAvg + publish.
+# Finalize: divide accumulator sums by N, write harvested outputs, publish.
 echo ""
-echo "── 4. FedAvg V_net + dense + opt-state + V_local Gaussian init + publish ──"
-python3 scripts/harvest_chain.py "$TARGET" --publish
+echo "── 5. stream-finalize: divide by N=${N_WORKERS}, write outputs, publish ──"
+python3 scripts/harvest_chain.py --mode=stream-finalize "$TARGET" "$ACCUM" --publish
 
-# 5. Stage to inf-spork-r${TARGET}.* for the battery.
+# 6. Stage to inf-spork-r${TARGET}.* for the battery.
 echo ""
-echo "── 5. staging harvested → inf-spork-r${TARGET} format ──"
+echo "── 6. staging harvested → inf-spork-r${TARGET} format ──"
 python3 scripts/stage_inf_spork.py "$TARGET"
 
-# 6. Run battery.
+# 7. Run battery.
 echo ""
-echo "── 6. running 7-dataset eval battery ──"
+echo "── 7. running 7-dataset eval battery ──"
 BATTERY_OUT="workers/dispatcher/harvest-${N_WORKERS}way-r${TARGET}/eval_battery.jsonl"
 MMLLM_ENABLE_PKM_CPP=true \
   MMLLM_INF_BASE="/tmp/mmllm-cpu/inf-spork-r${TARGET}.fim" \
@@ -207,27 +220,27 @@ MMLLM_ENABLE_PKM_CPP=true \
   MMLLM_BATTERY_OUT="$BATTERY_OUT" \
   python3 scripts/run_eval_battery.py 2>&1 | tail -30
 
-# 7. Generate results.md with comparison to prior.
+# 8. Generate results.md with comparison to prior.
 echo ""
-echo "── 7. generating results.md (R${PRIOR} vs R${TARGET}) ──"
+echo "── 8. generating results.md (R${PRIOR} vs R${TARGET}) ──"
 python3 scripts/generate_harvest_results.py "$PRIOR" "$TARGET" --n-workers "$N_WORKERS"
 
-# 8. Generate next-round dispatch prompt.
+# 9. Generate next-round dispatch prompt.
 NEXT=$((TARGET + 10))
 DISPATCH_OUT="docs/spork-chain-diverse-dispatch-r${NEXT}.md"
 if [ -f scripts/generate_dispatch_prompt.py ]; then
   echo ""
-  echo "── 8. generating dispatch prompt for R${TARGET}→R${NEXT} ──"
+  echo "── 9. generating dispatch prompt for R${TARGET}→R${NEXT} ──"
   python3 scripts/generate_dispatch_prompt.py "$TARGET" "$NEXT" --n-workers "$N_WORKERS" \
     --out "$DISPATCH_OUT"
 else
   echo "  (skipping — scripts/generate_dispatch_prompt.py not present yet)"
 fi
 
-# 9. Commit + push.
+# 10. Commit + push.
 if [ "$PUSH" = "true" ]; then
   echo ""
-  echo "── 9. committing + pushing to ${DISPATCHER_BRANCH} ──"
+  echo "── 10. committing + pushing to ${DISPATCHER_BRANCH} ──"
   git add scripts/ workers/dispatcher/ docs/ 2>/dev/null || true
   if git diff --cached --quiet; then
     echo "  (no changes to commit)"

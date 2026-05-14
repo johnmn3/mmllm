@@ -1,27 +1,46 @@
 """Generic N-way FedAvg harvest of chain-diverse worker endpoints.
 
-Replaces the per-round harvest_5way_r${N}.py scripts. Takes a target
-round number, auto-discovers worker handles from the staging dir, runs
-FedAvg on V_net + dense, picks best worker's opt-state, and writes
-harvested artifacts to two places:
-
-  1. /tmp/mmllm-cpu/harvested-r${TARGET}.{dense.pt,bank-net.*.bin,bank.*.bin}
-     — for the verify+battery step
-  2. (optionally) workers/dispatcher/harvest-${N}way-r${TARGET}/round-${TARGET}/
-     — published starting state for the next dispatch wave
+Two modes:
+  batch  (default): load ALL workers from /tmp/mmllm-cpu/harvest-r${T}/<h>/
+                    into memory at once, FedAvg, write outputs. Fine up to
+                    ~5 workers; at N=20 worker artifacts total ~25 GB so the
+                    /tmp side hits disk pressure.
+  stream: per-worker incremental accumulator on disk. The orchestrator
+                    fetches + extracts one worker, calls --mode=stream-update
+                    to fold it in, then deletes the worker dir. After all
+                    workers, --mode=stream-finalize divides sums by N and
+                    writes the harvested outputs. Peak /tmp = one worker
+                    (~1.25 GB) + accumulator (~2 GB) regardless of N.
 
 Worker layout expected at staging dir (orchestrator populates this):
   /tmp/mmllm-cpu/harvest-r${TARGET}/<handle>/
     V_net.{0..31}.bin
     dense.pt
-    opt-sparse-net.pt
-    round-${TARGET}.log.jsonl   (optional, used for best-worker pick)
+    opt-sparse-net.{0..31}.pt + opt-sparse-net.meta.pt   (R91+ chunked)
+      or
+    opt-sparse-net.pt                                    (R20-R90 legacy)
+    round-${TARGET}.log.jsonl   (optional, used for ctrl_bpc reporting)
 
 Usage:
-  python3 scripts/harvest_chain.py <target_round> [--publish]
+  Batch mode:
+    python3 scripts/harvest_chain.py <target_round> [--publish]
 
-  --publish: also stage the harvested artifacts into workers/dispatcher/
-             so they're committable.
+  Stream mode (orchestrator fuses fetch+extract+update per worker):
+    python3 scripts/harvest_chain.py --mode=stream-update \\
+                                     <accum_dir> <worker_dir> <handle>
+    python3 scripts/harvest_chain.py --mode=stream-finalize \\
+                                     <target_round> <accum_dir> [--publish]
+
+  --publish: also stage the harvested artifacts into workers/dispatcher/.
+
+Accumulator layout (stream mode, under accum_dir/):
+  meta.json                  {count, workers: [], target_round, bpcs}
+  V_net.<i>.sum.bin          float32 mmap, shape (1024², 8), running V_net sum
+  dense.sum.pt               list of running-sum tensors
+  opt-pid-<i>.accum.pt       per-V_net-layer Adam state accumulator:
+                               {row_to_idx, m_buf (sum), v_buf (sum),
+                                counts (per-row), step}
+  opt-param_groups.pt        param_groups skeleton (taken from worker 1)
 """
 import argparse, json, os, sys, numpy as np, torch
 from pathlib import Path
@@ -206,7 +225,307 @@ def publish_to_dispatcher(stage_dir, workers, best_handle, target_round,
         print(f"  staged 32× V_net + dense.pt (no opt-sparse-net state across workers)")
     return publish_dir
 
+# ─── Streaming accumulator ────────────────────────────────────────────
+# State on disk in <accum_dir>/, updated one worker at a time. Keeps peak
+# /tmp at ~one worker + accumulator regardless of total N workers.
+
+def _accum_load_meta(accum_dir):
+    p = accum_dir / "meta.json"
+    if p.exists():
+        return json.loads(p.read_text())
+    return {"count": 0, "workers": [], "target_round": None, "bpcs": {}}
+
+def _accum_save_meta(accum_dir, meta):
+    (accum_dir / "meta.json").write_text(json.dumps(meta, indent=2) + "\n")
+
+# V_net per-layer running sum mmap. CHUNK keeps per-update temp under
+# ~30 MB even at sqrt_n=1024 (1M rows × 8 dims × 4 B = 32 MB / layer).
+_VNET_CHUNK = 1024 * 1024
+
+def _stream_update_v_net(accum_dir, worker_dir):
+    for i in range(32):
+        wfn = worker_dir / f"V_net.{i}.bin"
+        if not wfn.exists():
+            continue
+        sfn = accum_dir / f"V_net.{i}.sum.bin"
+        w = np.memmap(wfn, dtype=np.float32, mode="r",
+                      shape=(SQRT_NET * SQRT_NET, C_NET))
+        if not sfn.exists():
+            s = np.memmap(sfn, dtype=np.float32, mode="w+",
+                          shape=(SQRT_NET * SQRT_NET, C_NET))
+            s[:] = w[:]
+            s.flush()
+        else:
+            s = np.memmap(sfn, dtype=np.float32, mode="r+",
+                          shape=(SQRT_NET * SQRT_NET, C_NET))
+            for off in range(0, SQRT_NET * SQRT_NET, _VNET_CHUNK):
+                end = min(off + _VNET_CHUNK, SQRT_NET * SQRT_NET)
+                s[off:end] += w[off:end]
+            s.flush()
+
+def _stream_update_dense(accum_dir, worker_dir):
+    wfn = worker_dir / "dense.pt"
+    if not wfn.exists():
+        return
+    worker_dense = list(torch.load(wfn, map_location="cpu", weights_only=False))
+    sfn = accum_dir / "dense.sum.pt"
+    if not sfn.exists():
+        torch.save([t.clone() if hasattr(t, "clone") else t
+                    for t in worker_dense], sfn)
+    else:
+        accum_dense = list(torch.load(sfn, map_location="cpu", weights_only=False))
+        for i, (a, w) in enumerate(zip(accum_dense, worker_dense)):
+            if (hasattr(a, "shape") and hasattr(w, "shape")
+                    and a.shape == w.shape):
+                accum_dense[i] = a + w
+        torch.save(accum_dense, sfn)
+
+def _stream_update_one_pid_opt(accum_path, worker_state):
+    """Fold one worker's per-pid Adam state into the per-pid accumulator.
+
+    Accumulator holds running SUMS (not means) of m and v, plus a per-row
+    touch count. Finalize divides by per-row count, yielding the row-aware
+    FedAvg semantics: rows touched by k workers → mean over those k.
+    """
+    if not worker_state["row_to_buf"]:
+        return
+    dim = worker_state["m_buf"].shape[-1]
+    if accum_path.exists():
+        acc = torch.load(accum_path, map_location="cpu", weights_only=False)
+        row_to_idx = acc["row_to_idx"]
+        m_buf = acc["m_buf"]
+        v_buf = acc["v_buf"]
+        counts = acc["counts"]
+        step = max(acc.get("step", 0), worker_state.get("step", 0))
+    else:
+        row_to_idx = {}
+        m_buf = torch.zeros((0, dim), dtype=torch.float32)
+        v_buf = torch.zeros((0, dim), dtype=torch.float32)
+        counts = torch.zeros((0,), dtype=torch.long)
+        step = worker_state.get("step", 0)
+
+    # Partition worker rows into update-existing vs append-new.
+    upd_dst, upd_src, new_vrows, new_src = [], [], [], []
+    for vrow, bidx in worker_state["row_to_buf"].items():
+        idx = row_to_idx.get(vrow)
+        if idx is not None:
+            upd_dst.append(idx); upd_src.append(bidx)
+        else:
+            new_vrows.append(vrow); new_src.append(bidx)
+
+    if upd_dst:
+        dst_t = torch.tensor(upd_dst, dtype=torch.long)
+        src_t = torch.tensor(upd_src, dtype=torch.long)
+        m_buf.index_add_(0, dst_t, worker_state["m_buf"][src_t].to(torch.float32))
+        v_buf.index_add_(0, dst_t, worker_state["v_buf"][src_t].to(torch.float32))
+        counts.index_add_(0, dst_t, torch.ones(len(dst_t), dtype=torch.long))
+
+    if new_vrows:
+        src_t = torch.tensor(new_src, dtype=torch.long)
+        new_m = worker_state["m_buf"][src_t].to(torch.float32).clone()
+        new_v = worker_state["v_buf"][src_t].to(torch.float32).clone()
+        new_c = torch.ones(len(new_vrows), dtype=torch.long)
+        start_idx = m_buf.shape[0]
+        for i, vrow in enumerate(new_vrows):
+            row_to_idx[vrow] = start_idx + i
+        m_buf = torch.cat([m_buf, new_m], dim=0)
+        v_buf = torch.cat([v_buf, new_v], dim=0)
+        counts = torch.cat([counts, new_c], dim=0)
+
+    torch.save({"row_to_idx": row_to_idx, "m_buf": m_buf, "v_buf": v_buf,
+                "counts": counts, "step": step}, accum_path)
+
+def _stream_update_opt(accum_dir, worker_dir):
+    """Fold one worker's opt-sparse-net chunks into the per-pid accumulators.
+
+    If the worker pushed legacy single-file opt-sparse-net.pt instead of
+    chunks, split it in place first so the rest of the path is uniform.
+    """
+    meta_path = worker_dir / "opt-sparse-net.meta.pt"
+    if not meta_path.exists():
+        legacy = worker_dir / "opt-sparse-net.pt"
+        if not legacy.exists():
+            return
+        from subprocess import run
+        run([sys.executable,
+             str(Path(__file__).resolve().parent / "_opt_sparse_net_chunk.py"),
+             "split", str(legacy), str(worker_dir)], check=True)
+        if not meta_path.exists():
+            return
+
+    meta = torch.load(meta_path, map_location="cpu", weights_only=False)
+    pids = meta["pids"]
+    pg_path = accum_dir / "opt-param_groups.pt"
+    if not pg_path.exists():
+        torch.save(meta["param_groups"], pg_path)
+
+    for pid in pids:
+        wcp = worker_dir / f"opt-sparse-net.{pid}.pt"
+        if not wcp.exists():
+            continue
+        wstate = torch.load(wcp, map_location="cpu", weights_only=False)
+        accum_p = accum_dir / f"opt-pid-{pid}.accum.pt"
+        _stream_update_one_pid_opt(accum_p, wstate)
+
+def stream_update(accum_dir, worker_dir, handle, ctrl_bpc=None):
+    accum_dir = Path(accum_dir); worker_dir = Path(worker_dir)
+    accum_dir.mkdir(parents=True, exist_ok=True)
+    meta = _accum_load_meta(accum_dir)
+    print(f"  stream-update[{meta['count']+1}]: {handle}")
+    _stream_update_v_net(accum_dir, worker_dir)
+    _stream_update_dense(accum_dir, worker_dir)
+    _stream_update_opt(accum_dir, worker_dir)
+    meta["count"] += 1
+    meta["workers"].append(handle)
+    if ctrl_bpc is not None:
+        meta["bpcs"][handle] = ctrl_bpc
+    _accum_save_meta(accum_dir, meta)
+    n_vnet = sum(1 for i in range(32)
+                 if (accum_dir / f"V_net.{i}.sum.bin").exists())
+    n_opt = sum(1 for i in range(32)
+                if (accum_dir / f"opt-pid-{i}.accum.pt").exists())
+    print(f"    accum now: V_net {n_vnet}/32 sum-mmaps, "
+          f"opt-state {n_opt}/32 row accumulators")
+
+def stream_finalize(accum_dir, target, harvested_prefix, harvested_dense,
+                    publish=False, repo_root=None):
+    accum_dir = Path(accum_dir)
+    meta = _accum_load_meta(accum_dir)
+    N = meta["count"]
+    if N == 0:
+        print("finalize: no workers accumulated", file=sys.stderr); sys.exit(2)
+    print(f"\n=== Stream finalize: dividing by N={N} workers ===")
+    for h in meta["workers"]:
+        bpc = meta["bpcs"].get(h)
+        mark = f" ctrl_bpc={bpc:.4f}" if bpc is not None else ""
+        print(f"  - {h}{mark}")
+
+    # V_net mean per layer.
+    print("\n=== V_net mean ===")
+    for i in range(32):
+        sfn = accum_dir / f"V_net.{i}.sum.bin"
+        if not sfn.exists():
+            print(f"  layer {i}: missing accum mmap"); continue
+        s = np.memmap(sfn, dtype=np.float32, mode="r",
+                      shape=(SQRT_NET * SQRT_NET, C_NET))
+        out = np.memmap(f"{harvested_prefix}-net.{i}.bin",
+                        dtype=np.float32, mode="w+",
+                        shape=(SQRT_NET * SQRT_NET, C_NET))
+        for off in range(0, SQRT_NET * SQRT_NET, _VNET_CHUNK):
+            end = min(off + _VNET_CHUNK, SQRT_NET * SQRT_NET)
+            out[off:end] = s[off:end] / N
+        out.flush()
+        if i in [0, 12, 31]:
+            mx = float(np.abs(np.array(out[:1024])).max())
+            print(f"  layer {i:2d}: sampled max|v| = {mx:.3f}")
+
+    # Dense mean.
+    print("\n=== Dense mean ===")
+    sfn = accum_dir / "dense.sum.pt"
+    accum_dense = list(torch.load(sfn, map_location="cpu", weights_only=False))
+    merged, n_params = [], 0
+    for t in accum_dense:
+        if hasattr(t, "numel"):
+            m = t / N
+            merged.append(m); n_params += m.numel()
+        else:
+            merged.append(t)
+    torch.save(merged, harvested_dense)
+    print(f"  {len(merged)} tensors, {n_params:,} params → {harvested_dense}")
+
+    # V_local Gaussian re-init.
+    v_local_gaussian(harvested_prefix)
+
+    print(f"\n=== READY: {harvested_prefix}.* ===")
+
+    if not publish:
+        return
+
+    # Publish chunked opt-state from per-pid accumulators (divide
+    # m_buf and v_buf by per-row counts).
+    pg_path = accum_dir / "opt-param_groups.pt"
+    publish_dir = (repo_root / f"workers/dispatcher/harvest-{N}way-r{target}"
+                              / f"round-{target}")
+    publish_dir.mkdir(parents=True, exist_ok=True)
+    print(f"\n=== Publishing to {publish_dir} ===")
+    import shutil
+    for i in range(32):
+        src = f"{harvested_prefix}-net.{i}.bin"
+        if Path(src).exists():
+            shutil.copy(src, publish_dir / f"V_net.{i}.bin")
+    shutil.copy(harvested_dense, publish_dir / "dense.pt")
+
+    if pg_path.exists():
+        param_groups = torch.load(pg_path, map_location="cpu", weights_only=False)
+        pids_done = []
+        for pid in range(32):
+            accum_p = accum_dir / f"opt-pid-{pid}.accum.pt"
+            if not accum_p.exists():
+                continue
+            acc = torch.load(accum_p, map_location="cpu", weights_only=False)
+            counts = acc["counts"].clamp(min=1).to(torch.float32)
+            final = {
+                "step": acc["step"],
+                "m_buf": acc["m_buf"] / counts.unsqueeze(-1),
+                "v_buf": acc["v_buf"] / counts.unsqueeze(-1),
+                "row_to_buf": acc["row_to_idx"],
+            }
+            torch.save(final, publish_dir / f"opt-sparse-net.{pid}.pt")
+            pids_done.append(pid)
+        torch.save({"param_groups": param_groups, "pids": pids_done},
+                   publish_dir / "opt-sparse-net.meta.pt")
+        print(f"  staged 32× V_net + dense + {len(pids_done)} opt-state chunks + meta")
+    else:
+        print(f"  staged 32× V_net + dense.pt (no opt-state accumulators)")
+
+    harvest_meta = {
+        "target_round": target,
+        "n_workers": N,
+        "workers": [
+            {"handle": h,
+             "branch": f"claude/chaindiverse-{h}-r{target}",
+             "ctrl_bpc": meta["bpcs"].get(h)}
+            for h in meta["workers"]
+        ],
+        "worker_ctrl_bpc_mean": (sum(meta["bpcs"].values()) / len(meta["bpcs"]))
+                                if meta["bpcs"] else None,
+        "worker_ctrl_bpc_best": min(meta["bpcs"].values()) if meta["bpcs"] else None,
+        "extended_from": (f"workers/dispatcher/harvest-Nway-r{target - 10}/round-{target - 10}"
+                          if target > 20 else "workers/dispatcher/spork-chain-10/round-10"),
+    }
+    meta_out = publish_dir.parent / "harvest_meta.json"
+    meta_out.write_text(json.dumps(harvest_meta, indent=2) + "\n")
+    print(f"  wrote {meta_out}")
+
 def main():
+    # Stream-mode dispatch goes through dedicated arg-parsers; legacy
+    # batch mode (target_round positional + --publish) keeps the old shape.
+    if len(sys.argv) >= 2 and sys.argv[1] == "--mode=stream-update":
+        ap = argparse.ArgumentParser()
+        ap.add_argument("--mode", required=True)
+        ap.add_argument("accum_dir")
+        ap.add_argument("worker_dir")
+        ap.add_argument("handle")
+        ap.add_argument("--ctrl-bpc", type=float, default=None)
+        a = ap.parse_args()
+        stream_update(a.accum_dir, a.worker_dir, a.handle, a.ctrl_bpc)
+        return
+
+    if len(sys.argv) >= 2 and sys.argv[1] == "--mode=stream-finalize":
+        ap = argparse.ArgumentParser()
+        ap.add_argument("--mode", required=True)
+        ap.add_argument("target_round", type=int)
+        ap.add_argument("accum_dir")
+        ap.add_argument("--publish", action="store_true")
+        a = ap.parse_args()
+        target = a.target_round
+        repo_root = Path(__file__).resolve().parent.parent
+        harvested_prefix = f"/tmp/mmllm-cpu/harvested-r{target}.bank"
+        harvested_dense = f"/tmp/mmllm-cpu/harvested-r{target}.dense.pt"
+        stream_finalize(a.accum_dir, target, harvested_prefix, harvested_dense,
+                        publish=a.publish, repo_root=repo_root)
+        return
+
     ap = argparse.ArgumentParser()
     ap.add_argument("target_round", type=int, help="e.g. 40 for harvesting R31-R40 wave")
     ap.add_argument("--publish", action="store_true",
