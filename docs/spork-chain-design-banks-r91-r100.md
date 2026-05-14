@@ -60,8 +60,11 @@ git checkout origin/claude/fim-training-cycle-T3giJ -- \
   src/ scripts/ tests/ CLAUDE.md docs/ workers/dispatcher/
 pip install -e . --quiet
 
-ls workers/dispatcher/harvest-cooked-r91/round-91/  # 34 files: 32× V_net (32 MB each)
-                                                    # + dense.pt + opt-sparse-net.pt
+ls workers/dispatcher/harvest-cooked-r91/round-91/  # 33 files: 32× V_net (32 MB) + dense.pt
+# opt-sparse-net.pt is NOT included — at the new V_net size it grew to
+# 230 MB which exceeds the remote's 100 MB per-file limit.
+# extend_chain.sh initializes an empty opt-sparse-net.pt for you on
+# missing-resume; minor loss of Adam moment warmth, no functional issue.
 ls scripts/run_chain_diverse.sh
 ls scripts/extend_chain.sh
 ls scripts/prep_chain_diverse_corpora.sh
