@@ -66,6 +66,24 @@ When a test or training run is in flight:
 - **chain** = N sporks back-to-back, V_local zero-init each round, V_net
   and dense.pt carried forward across rounds.
 
+## TERMINOLOGY — DO NOT CONFUSE
+
+The N=16 entities within each Local layer are **routers**, not "trunks".
+Don't call them trunks. Ever. 16 routers per local bank.
+
+## DESIGNED BANK SIZES — STAMPED HERE
+
+  NetBank (V_net):  1 GB total
+  Local Bank:       100 MB total      (8 local banks in training)
+  Routers:          1 MB each × 16    = 16 MB
+
+Net > Local. Net is the durable, expansive long-term tier; Local is the
+smaller, faster, ephemeral one. Anything that shrinks Net below 1 GB
+or grows Local above 100 MB is an architectural regression.
+
+History: shrinking V_net to 4 MB stub in extend_chain.sh@c1dac9f9
+silently wasted 9 harvests of compute (R20-R90). Don't.
+
 ## What to watch in a 100-step run — and when
 
 The wake/sleep schedule has TWO phases. Don't conflate them. Don't call a

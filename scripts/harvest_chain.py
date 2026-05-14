@@ -26,7 +26,11 @@ Usage:
 import argparse, json, os, sys, numpy as np, torch
 from pathlib import Path
 
-SQRT_NET, C_NET = 64, 8
+# NetBank V_net per layer: sqrt_n² × c_net × 4 bytes
+#   1024² × 8 × 4 = 33.5 MB / layer → 1.07 GB across 32 layers
+# Designed: NetBank 1 GB total. Operating at 64/8 was a 256× shrink
+# (4 MB total) — fixed in commit after R90.
+SQRT_NET, C_NET = 1024, 8
 SQRT_LOCAL, Q_DIM = 226, 16
 LOCAL_LAYERS = [0, 1, 2, 12, 20, 29, 30, 31]
 N_TRUNKS = 16

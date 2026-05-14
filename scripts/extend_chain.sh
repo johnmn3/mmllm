@@ -34,11 +34,27 @@ echo "  steps/round=$STEPS"
 echo "═══════════════════════════════════════════════════════════════"
 
 # Recipe — must match the original chain.
+#
+# ┌──────────────────────────────────────────────────────────┐
+# │  DESIGNED BANK SIZES — stamped here so I don't forget    │
+# │    NetBank V_net   total          1 GB    (~32 MB/layer)  │
+# │    Local Bank V_loc total       100 MB                   │
+# │    Routers (16)    each           1 MB                   │
+# │  Net > Local. Net is the DURABLE long-term memory.       │
+# │  Anything that shrinks Net below 1 GB is a regression.   │
+# └──────────────────────────────────────────────────────────┘
 export MMLLM_DEVICE=cpu
 export MMLLM_BANK_ON_GPU=false
 export MMLLM_NET_BANK_ON_GPU=false
-export MMLLM_SQRT_N=226
-export MMLLM_NET_SQRT_N=64
+# Local Bank sized so each router is 1 MB:
+#   per-router V: sqrt_local² × q_dim × 4B = 128² × 16 × 4 = 1.05 MB
+#   16 routers / local bank = 16 MB per layer
+#   8 local banks in training = 128 MB total (≈ designed 100 MB)
+export MMLLM_SQRT_N=128
+# NetBank sized for ~1 GB total across 32 layers:
+#   per layer: sqrt_n² × c_net × 4B = 1024² × 8 × 4 = 33.5 MB
+#   32 layers = 1.07 GB total (= designed 1 GB)
+export MMLLM_NET_SQRT_N=1024
 export MMLLM_NET_C_NET=8
 export MMLLM_MEMORY_TOP_K=16
 export MMLLM_MEMORY_SUB_TOP_K=16
@@ -81,8 +97,8 @@ BANK_BASE=/tmp/mmllm-cpu/fim-bank-chain-stack
 
 LOCAL_LAYERS=(0 1 2 12 20 29 30 31)
 NET_LAYERS=$(seq 0 31)
-SQRT_LOCAL=226;  Q_DIM=16
-SQRT_NET=64;     C_NET=8
+SQRT_LOCAL=128;  Q_DIM=16
+SQRT_NET=1024;   C_NET=8
 INIT_SCALE=0.02
 
 mkdir -p "$(dirname $FIM_BASE)"

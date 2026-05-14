@@ -65,11 +65,14 @@ export MMLLM_MIX="${G}:25,${B}/cosmopedia.train.bin:10,${B}/fineweb-edu.train.bi
 # CLEAR per-layer movement footprint (mean|V_local| ranges 0.0160-0.0228)
 # that the movement-gate (below) can discriminate cleanly.
 #
-# LOCAL_MULT=1.0 keeps V_local at bank-tier base LR (recovers pre-router-
-# low-LR behavior; the trunk mults shape distribution).
-: "${MMLLM_LR_LOCAL_MULT:=1.0}"
+# Router LR is LOW by design (routers = low-level primitives).
+# Don't override MMLLM_LR_LOCAL_MULT — optim.py defaults it to 0.05
+# (which puts effective V_local LR at bank_lr × 0.05 ≈ 4.5e-3 at peak,
+# 20× below bank, comparable to dense). The R71-R90 waves had this
+# silently jacked back up to 1.0 by this very script — a bug. Fixed:
+# we now let the optim.py default stand.
 : "${MMLLM_LR_LAYER_MULTS:=7.0,3.0,1.0,0.5,0.3,0.7,2.0,5.0}"
-export MMLLM_LR_LOCAL_MULT MMLLM_LR_LAYER_MULTS
+export MMLLM_LR_LAYER_MULTS
 
 # ── Movement-signal distill gate ──
 # Per-layer mean(|V_local|) vs Gaussian-init baseline 0.016. Used as a
