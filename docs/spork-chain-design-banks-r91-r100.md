@@ -157,26 +157,28 @@ cat > "$DEST/meta.json" <<EOF
 EOF
 ```
 
-Push (the V_net.bin files are now 32 MB each × 32 = 1 GB. Chunk if
-needed):
+Push. **Don't include opt-sparse-net.pt** — at the new bank size it's
+~230 MB which exceeds the remote's 100 MB per-file limit. Dispatcher
+will pick the best worker's opt state from local-only files if needed;
+your published state is V_net + dense + per-round logs.
+
+V_net.bin files are 32 MB each × 32 = 1 GB. Chunk in 2-3 commits:
 
 ```bash
 git checkout -b "claude/chaindiverse-${HANDLE}-r101" 2>/dev/null \
   || git checkout "claude/chaindiverse-${HANDLE}-r101"
-git add "$DEST"
-git commit -m "chain-design rounds 92-101 (design-sized banks) — final_ctrl=<...>"
 
-# If push fails on size limit, chunk:
-#   git rm --cached "$DEST"/V_net.{16..31}.bin "$DEST"/opt-sparse-net.pt
-#   git commit --amend --no-edit
-#   git push -u origin "claude/chaindiverse-${HANDLE}-r101"
-#   git add "$DEST"/V_net.{16..31}.bin
-#   git commit -m "...part2"
-#   git push
-#   git add "$DEST"/opt-sparse-net.pt
-#   git commit -m "...part3"
-#   git push
+# Part 1: V_net 0-15 + dense + logs + meta
+git add "$DEST"/V_net.{0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15}.bin \
+        "$DEST"/dense.pt "$DEST"/meta.json "$DEST"/round-*.log.jsonl \
+        "$DEST"/wall.tsv 2>/dev/null
+git commit -m "chain-design rounds 92-101 (part 1/2) — final_ctrl=<...>"
 git push -u origin "claude/chaindiverse-${HANDLE}-r101"
+
+# Part 2: V_net 16-31
+git add "$DEST"/V_net.{16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31}.bin
+git commit -m "chain-design rounds 92-101 (part 2/2) V_net 16-31"
+git push
 ```
 
 ## What to report back
