@@ -4,21 +4,54 @@ You are extending the chain by 10 more rounds (round 81 → round 90)
 **off the harvested round-80 state** with the same 9-corpus diverse
 training mix that produced the previous wave's harvest.
 
-R70 harvest → R80 harvest (5-way FedAvg of last wave, all 7 OOD datasets):
+R70 harvest → R80 harvest (14-way FedAvg of last wave, all 9 datasets):
 
 | dataset            | R70 harvest | R80 harvest | Δ bpc   | Δ %     |
 |--------------------|------------:|------------:|--------:|--------:|
-| glaive-fim-val     |      1.2125 | **1.2368**  | +0.024  |  +2.0%  |
-| cosmopedia         |      2.1081 | **2.1394**  | +0.031  |  +1.5%  |
-| fineweb-edu        |      2.4038 | **2.4306**  | +0.027  |  +1.1%  |
-| magicoder          |      2.3140 | **2.3244**  | +0.010  |  +0.4%  |
-| hermes-funcall     |      2.1900 | **2.2148**  | +0.025  |  +1.1%  |
-| toolace            |      2.0566 | **2.0901**  | +0.034  |  +1.6%  |
-| tiny-stories       |      2.1255 | **2.1565**  | +0.031  |  +1.5%  |
-| aesop-fables       |      1.2913 | **1.3123**  | +0.021  |  +1.6%  |
-| open-web-math      |      2.5122 | **2.5225**  | +0.010  |  +0.4%  |
+| glaive-fim-val     |      1.2125 |   1.2368    | +0.024  |  +2.0%  |
+| cosmopedia         |      2.1081 |   2.1394    | +0.031  |  +1.5%  |
+| fineweb-edu        |      2.4038 |   2.4306    | +0.027  |  +1.1%  |
+| magicoder          |      2.3140 |   2.3244    | +0.010  |  +0.4%  |
+| hermes-funcall     |      2.1900 |   2.2148    | +0.025  |  +1.1%  |
+| toolace            |      2.0566 |   2.0901    | +0.034  |  +1.6%  |
+| tiny-stories       |      2.1255 |   2.1565    | +0.031  |  +1.5%  |
+| aesop-fables       |      1.2913 |   1.3123    | +0.021  |  +1.6%  |
+| open-web-math      |      2.5122 |   2.5225    | +0.010  |  +0.4%  |
 
-Every dataset improved including Glaive. You're stacking another 10 rounds on top.
+**Every dataset REGRESSED.** This is the chain's first wave-level
+regression after 6 consecutive improving waves (R20→R70 averaged -7%
+OOD per wave). The R71-R80 wave used a symmetric V-shape per-layer
+LR (`7,5,3,2,1,3,5,7`) that wasn't right for chain extension — the
+high-LR edge layers diverged across workers (V_net layer-0 cos
+dropped from 0.97 to 0.85), and FedAvg of divergent worker basins
+underperformed the prior consensus state.
+
+## What's new for R81–R90
+
+Two recipe changes baked into `run_chain_diverse.sh` defaults:
+
+1. **Asymmetric V mults**: `7,3,1,0.5,0.3,0.7,2,5` (mean 2.44, span
+   0.3×–7×) — sharper trough than the symmetric V, less heat on the
+   tail layers. At 1-round comparison this produces a clean per-layer
+   movement footprint (mean|V_local| ranges 0.0160-0.0228 vs Gaussian
+   baseline 0.0160) without the symmetric V's hot-edge divergence.
+
+2. **Movement-signal distill gate**:
+   `MMLLM_DISTILL_GATE_BY_ABLATION=true`,
+   `MMLLM_DISTILL_GATE_SIGNAL=movement`.
+   At step 70 the gate computes per-layer mean|V_local|. With
+   threshold default 0.016 (Gaussian E[|X|]), all layers above
+   baseline are gated in. Probe wall: ~0.1s (vs 100s+ for ablation
+   gate). 1-round comparison on the asymmetric mults:
+   ```
+   gate OFF: ctrl_bpc 1.0879  Δ_net +0.1375
+   gate ON:  ctrl_bpc 1.0769  Δ_net +0.1484
+   ```
+   +0.011 Δ_net direction-consistent across runs (single-round noise
+   ±0.025). This wave tests whether that compounds over 10 rounds.
+
+You don't need to set these env vars — `run_chain_diverse.sh` exports
+them automatically. Operators can override either via shell env.
 
 Read `CLAUDE.md` first; it defines spork / chain / Δ_local / Δ_net,
 lists conduct rules ("don't delete or overwrite files I didn't put

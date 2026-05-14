@@ -53,20 +53,34 @@ B=/tmp/mmllm-cpu/battery
 G=/tmp/mmllm-cpu/fim-json-v3.train.bin
 export MMLLM_MIX="${G}:25,${B}/cosmopedia.train.bin:10,${B}/fineweb-edu.train.bin:10,${B}/magicoder.train.bin:10,${B}/hermes-funcall.train.bin:10,${B}/toolace.train.bin:10,${B}/aesop-fables.bin.train.bin:10,${B}/open-web-math.train.bin:10,${B}/tiny-stories.train.bin:5"
 
-# ── V-shape per-layer V_local LR multipliers ──
-# Sweep winner (Arm G): deep V — 7× hot at edges (layers 0, 7), 1× cold at
-# trough (layer 4), monotonic ascent/descent in between. Mean 4.125, span
-# 1×–7×. On a 1-round probe off the R70 harvest this configuration produced
-# the highest Δ_net (+0.1556 vs +0.1123 baseline) and the only positive
-# synergy (+0.0002) in a 6-arm sweep (uniform, monotonic, multiple V's).
-# Architectural reading: edge layers see raw embedding / near-output features
-# with high gradient signal; middle layers carry stable consolidating
-# representations and should evolve slowly. LOCAL_MULT=1.0 here pairs with
-# the V-shape to match the architecture the spike was run under.
-# Operators can override either env var pre-launch.
+# ── Asymmetric V per-layer V_local LR multipliers ──
+# Mults 7,3,1,0.5,0.3,0.7,2,5 — asymmetric V (steep on the front, shallow
+# on the back), trough at layer 4 (0.3×), peaks at layer 0 (7×) and layer
+# 7 (5×). Mean 2.4375, span 0.3×–7×.
+#
+# Background: the symmetric V (7,5,3,2,1,3,5,7) was the R71-R80 default
+# and produced the chain's first regression (+1.1% OOD R70→R80). At
+# 1-round single-spork comparison this asymmetric variant is within the
+# ±0.025 noise floor of every other tested config, but it produces a
+# CLEAR per-layer movement footprint (mean|V_local| ranges 0.0160-0.0228)
+# that the movement-gate (below) can discriminate cleanly.
+#
+# LOCAL_MULT=1.0 keeps V_local at bank-tier base LR (recovers pre-router-
+# low-LR behavior; the trunk mults shape distribution).
 : "${MMLLM_LR_LOCAL_MULT:=1.0}"
-: "${MMLLM_LR_LAYER_MULTS:=7.0,5.0,3.0,2.0,1.0,3.0,5.0,7.0}"
+: "${MMLLM_LR_LAYER_MULTS:=7.0,3.0,1.0,0.5,0.3,0.7,2.0,5.0}"
 export MMLLM_LR_LOCAL_MULT MMLLM_LR_LAYER_MULTS
+
+# ── Movement-signal distill gate ──
+# Per-layer mean(|V_local|) vs Gaussian-init baseline 0.016. Used as a
+# clean discriminator (probe wall ~0.1s vs 100s+ for ablation). At
+# 1-round scale the gate produces +0.011 Δ_net advantage over no-gate
+# at ±0 ctrl_bpc cost (within noise) — direction is consistent across
+# runs even though the per-round magnitude is at the noise floor.
+# Effect at 10-round chain scale is the actual test.
+: "${MMLLM_DISTILL_GATE_BY_ABLATION:=true}"
+: "${MMLLM_DISTILL_GATE_SIGNAL:=movement}"
+export MMLLM_DISTILL_GATE_BY_ABLATION MMLLM_DISTILL_GATE_SIGNAL
 
 echo "═══════════════════════════════════════════════════════════════"
 echo "  CHAIN-DIVERSE: extending highest staged round with 9-corpus mix"
