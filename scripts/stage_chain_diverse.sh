@@ -1,42 +1,59 @@
 #!/usr/bin/env bash
-# stage_chain_diverse.sh — copy the dispatcher's harvested round-${ROUND}
-# state into /tmp/mmllm-cpu/chain-diverse/round-${ROUND}/ so
-# run_chain_diverse.sh can pick it up as the chain's starting round.
+# stage_chain_diverse.sh — copy the dispatcher's current reference state
+# into /tmp/mmllm-cpu/chain-diverse/round-${ROUND}/ so run_chain_diverse.sh
+# can pick it up as the chain's starting round.
 #
-# Replaces the per-round stage_chain_diverse_round{20,30,40,...}.sh
-# scripts. Auto-discovers the source at:
-#   workers/dispatcher/harvest-*way-r${ROUND}/round-${ROUND}/
+# Two modes:
+#   bash stage_chain_diverse.sh           # no arg: follow workers/dispatcher/current/
+#                                          symlink (the latest harvest's round dir)
+#   bash stage_chain_diverse.sh <round>   # explicit: harvest-*way-r<round>/round-<round>/
 #
-# Idempotent — skips if destination already populated with 34 files.
-#
-# Usage:  bash scripts/stage_chain_diverse.sh <round>
+# Idempotent — skips if destination already populated.
 
 set -e
 ROOT=$(git rev-parse --show-toplevel); cd "$ROOT"
 
-ROUND="${1:?round number required (e.g. 40 or 50)}"
-DST="/tmp/mmllm-cpu/chain-diverse/round-${ROUND}"
-
-# Find source dir: workers/dispatcher/harvest-{N}way-r${ROUND}/round-${ROUND}/
-SRC=$(ls -d workers/dispatcher/harvest-*way-r${ROUND}/round-${ROUND} 2>/dev/null | head -1)
-if [ -z "$SRC" ] || [ ! -d "$SRC" ]; then
-  echo "ERROR: no source dir matching workers/dispatcher/harvest-*way-r${ROUND}/round-${ROUND}/" >&2
-  echo "       pull origin/claude/fim-training-cycle-T3giJ and confirm the files are present." >&2
-  exit 2
+if [ -z "${1:-}" ]; then
+  CURRENT="workers/dispatcher/current"
+  if [ ! -L "$CURRENT" ] && [ ! -d "$CURRENT" ]; then
+    echo "ERROR: no round arg given and workers/dispatcher/current/ doesn't exist." >&2
+    echo "       Either pass a round number or pull the dispatcher branch which" >&2
+    echo "       maintains the symlink." >&2
+    exit 2
+  fi
+  SRC=$(readlink -f "$CURRENT")
+  ROUND=$(basename "$SRC" | sed -E 's/^round-([0-9]+)$/\1/')
+  if [ -z "$ROUND" ]; then
+    echo "ERROR: $CURRENT does not resolve to a round-N dir (got $SRC)" >&2
+    exit 2
+  fi
+  echo "  using dispatcher current → $SRC (round $ROUND)"
+else
+  ROUND="$1"
+  SRC=$(ls -d workers/dispatcher/harvest-*way-r${ROUND}/round-${ROUND} \
+              workers/dispatcher/harvest-cooked-r${ROUND}/round-${ROUND} 2>/dev/null | head -1)
+  if [ -z "$SRC" ] || [ ! -d "$SRC" ]; then
+    echo "ERROR: no source dir matching workers/dispatcher/harvest-*-r${ROUND}/round-${ROUND}/" >&2
+    exit 2
+  fi
 fi
 
+DST="/tmp/mmllm-cpu/chain-diverse/round-${ROUND}"
+
 n_src=$(ls -1 "$SRC" 2>/dev/null | wc -l)
-if [ "$n_src" -ne 34 ]; then
-  echo "ERROR: $SRC has $n_src files; expected 34 (32× V_net + dense.pt + opt-sparse-net.pt)" >&2
+# Layout 1: 34 files (legacy single-file opt-sparse-net.pt, R20-R90 era)
+# Layout 2: 66 files (chunked opt-sparse-net + meta, R91+ design-banks era)
+if [ "$n_src" -lt 34 ]; then
+  echo "ERROR: $SRC has $n_src files; expected ≥34 (32× V_net + dense.pt + opt-state)" >&2
   exit 2
 fi
 
 mkdir -p "$DST"
 n_dst=$(ls -1 "$DST" 2>/dev/null | wc -l)
-if [ "$n_dst" -eq 34 ]; then
-  echo "[skip] $DST already populated with 34 files"
+if [ "$n_dst" -ge "$n_src" ]; then
+  echo "[skip] $DST already populated with $n_dst files"
 else
-  echo "  copying $SRC → $DST …"
+  echo "  copying $SRC → $DST ($n_src files)…"
   cp "$SRC"/* "$DST"/
   echo "  done: $(ls -1 $DST | wc -l) files, $(du -sh $DST | awk '{print $1}')"
 fi

@@ -47,11 +47,91 @@ if [ -z "${PYTHON:-}" ]; then
 fi
 echo "  python: $PYTHON"
 
-TARGET="${1:?target round required (e.g. 40 for harvesting R31-R40 wave)}"
+# Argument modes:
+#   bash harvest_chain.sh                # auto: discover unprocessed
+#                                          claude/chaindiverse-* branches, group
+#                                          by their last published round, harvest
+#                                          the highest round's group.
+#   bash harvest_chain.sh <target_round> # explicit: harvest only branches whose
+#                                          marker dir is at <target_round>.
+#   bash harvest_chain.sh [<target>] --no-push   # build artifacts but don't push.
+MANIFEST_FILE="workers/dispatcher/.harvest-manifest.json"
+
+PUSH=true
+case "$#" in
+  0) TARGET="" ;;
+  1)
+    if [ "$1" = "--no-push" ]; then TARGET=""; PUSH=false
+    else TARGET="$1"
+    fi
+    ;;
+  *)
+    TARGET="$1"
+    [ "$2" = "--no-push" ] && PUSH=false
+    ;;
+esac
+
+# Auto-discover TARGET if no arg was given. Lists unprocessed
+# chaindiverse-* branches via ls-remote, peeks at each branch's tree to
+# find its marker round (cheap: partial-clone --filter=blob:none), then
+# picks the highest round. Branches already recorded in
+# .harvest-manifest.json (by sha) are skipped.
+if [ -z "$TARGET" ]; then
+  echo "── auto-discovering target round from unprocessed branches ──"
+  REMOTE_REFS=$(git ls-remote origin "refs/heads/claude/chaindiverse-*" 2>&1)
+  if [ -z "$REMOTE_REFS" ]; then
+    echo "  no claude/chaindiverse-* branches on origin"
+    exit 0
+  fi
+  if [ -f "$MANIFEST_FILE" ]; then
+    PROCESSED_SHAS=$("$PYTHON" -c "
+import json
+m = json.load(open('$MANIFEST_FILE'))
+print('\n'.join(m.get('processed', {}).keys()))
+" 2>/dev/null)
+  else
+    PROCESSED_SHAS=""
+  fi
+  # Filter to unprocessed (branch_sha not in manifest).
+  declare -A UNPROCESSED_BR=()      # br_short → sha
+  while read -r sha ref; do
+    [ -z "$sha" ] && continue
+    if echo "$PROCESSED_SHAS" | grep -qFx "$sha"; then continue; fi
+    br="${ref#refs/heads/}"
+    UNPROCESSED_BR["$br"]="$sha"
+  done <<< "$REMOTE_REFS"
+  if [ ${#UNPROCESSED_BR[@]} -eq 0 ]; then
+    echo "  all claude/chaindiverse-* branches already in $MANIFEST_FILE"
+    exit 0
+  fi
+  echo "  ${#UNPROCESSED_BR[@]} unprocessed branch(es); peeking trees to find rounds…"
+  declare -A BRANCH_ROUND=()
+  for br in "${!UNPROCESSED_BR[@]}"; do
+    git fetch origin "$br" --filter=blob:none --depth=1 2>&1 \
+      | tail -1 | grep -qE "(FETCH_HEAD|new branch|up to date)" || {
+        echo "    WARN: fetch failed for $br, skipping"; continue
+      }
+    marker=$(git ls-tree -r --name-only "origin/$br" 2>/dev/null \
+      | grep -oE "workers/[^/]+/chain-(diverse-[0-9]+|design-r[0-9]+)/" \
+      | head -1)
+    if [ -z "$marker" ]; then
+      echo "    WARN: no chain-* marker dir in $br tree, skipping"
+      continue
+    fi
+    round=$(echo "$marker" | grep -oE "[0-9]+" | tail -1)
+    BRANCH_ROUND["$br"]="$round"
+    echo "    $br → round $round"
+  done
+  if [ ${#BRANCH_ROUND[@]} -eq 0 ]; then
+    echo "  no branches with usable marker dirs"
+    exit 0
+  fi
+  TARGET=$(printf '%s\n' "${BRANCH_ROUND[@]}" | sort -n | tail -1)
+  echo "  selected TARGET=$TARGET (highest round among unprocessed branches)"
+fi
+
 PRIOR=$((TARGET - 10))
 PRIOR_NEXT=$((PRIOR + 1))
-PUSH=true
-[ "$2" = "--no-push" ] && PUSH=false
 
 STAGE=/tmp/mmllm-cpu/harvest-r${TARGET}
 DISPATCHER_BRANCH=$(git rev-parse --abbrev-ref HEAD)
@@ -91,12 +171,49 @@ fi
 echo "  using marker subdir: ${MARKER}"
 
 REMOTE_REFS=$(git ls-remote origin 2>&1 | awk '{print $2}' | grep -E "^refs/heads/")
+
+# Candidate branches at this TARGET:
+#   A) claude/chaindiverse-<handle>-r${TARGET}            (old wave-suffixed naming)
+#   B) claude/extend-chain-rounds-${PRIOR_NEXT}-${TARGET}-* (legacy alt naming)
+#   C) claude/chaindiverse-<handle>-<UTC_TS>              (new wave-agnostic naming,
+#                                                          target inferred from tree)
 CAND_A=$(echo "$REMOTE_REFS" | grep -oE "refs/heads/claude/chaindiverse-[^[:space:]]+-r${TARGET}\$" \
          | sed 's|refs/heads/||' | sort)
 CAND_B=$(echo "$REMOTE_REFS" | grep -oE "refs/heads/claude/extend-chain-rounds-${PRIOR_NEXT}-${TARGET}-[^[:space:]]+\$" \
          | sed 's|refs/heads/||' | sort)
+# Catch wave-agnostic branches (chaindiverse-<HANDLE>-<UTC_TS>) whose tree
+# contains the TARGET marker dir but whose names don't encode the round.
+# If auto-discovery already populated BRANCH_ROUND, reuse it (cheap). If
+# TARGET was passed explicitly with no auto-discovery, do partial-clone
+# fetches here to peek trees.
+CAND_C=""
+A_OR_B_PIPED=$(printf '%s\n%s\n' "$CAND_A" "$CAND_B" | grep -v '^$' | tr '\n' '|' | sed 's/|$//')
+if [ "${#BRANCH_ROUND[@]:-0}" -gt 0 ]; then
+  # Reuse the auto-discovery scan.
+  for br in "${!BRANCH_ROUND[@]}"; do
+    if [ "${BRANCH_ROUND[$br]}" != "$TARGET" ]; then continue; fi
+    if [ -n "$A_OR_B_PIPED" ] && echo "$br" | grep -qE "^($A_OR_B_PIPED)\$"; then continue; fi
+    CAND_C="${CAND_C}${br}
+"
+  done
+else
+  # Explicit TARGET passed; do a fresh partial-clone scan over all chaindiverse-*.
+  ALL_CHAINDIV=$(echo "$REMOTE_REFS" | grep -oE "refs/heads/claude/chaindiverse-[^[:space:]]+\$" \
+                 | sed 's|refs/heads/||' | sort -u)
+  for br in $ALL_CHAINDIV; do
+    if [ -n "$A_OR_B_PIPED" ] && echo "$br" | grep -qE "^($A_OR_B_PIPED)\$"; then continue; fi
+    git fetch origin "$br" --filter=blob:none --depth=1 2>&1 | tail -1 | \
+      grep -qE "(FETCH_HEAD|new branch|up to date)" || continue
+    if git ls-tree -r --name-only "origin/$br" 2>/dev/null \
+       | grep -qE "^workers/[^/]+/${MARKER}/V_net\.0\.bin\$"; then
+      CAND_C="${CAND_C}${br}
+"
+    fi
+  done
+fi
+CAND_C=$(echo "$CAND_C" | grep -v "^$" | sort)
 
-# Handle inference: chaindiverse-<HANDLE>-r${TARGET} → <HANDLE>
+# Handle inference. Three patterns:
 declare -A HANDLE_TO_BRANCH=()
 declare -A HANDLE_TO_MARKER=()
 for br in $CAND_A; do
@@ -107,8 +224,16 @@ for br in $CAND_A; do
   fi
 done
 for br in $CAND_B; do
-  # extend-chain-rounds-<PRIOR_NEXT>-<TARGET>-<TAIL>
   h=$(echo "$br" | sed -E "s|^claude/extend-chain-rounds-${PRIOR_NEXT}-${TARGET}-(.+)\$|\1|")
+  if [ -z "${HANDLE_TO_BRANCH[$h]:-}" ]; then
+    HANDLE_TO_BRANCH[$h]="$br"
+    HANDLE_TO_MARKER[$h]="$MARKER"
+  fi
+done
+for br in $CAND_C; do
+  # claude/chaindiverse-<HANDLE>-<UTC_TS> → strip trailing -YYYYMMDD-HHMMSS suffix.
+  # Falls back to stripping nothing if no timestamp present.
+  h=$(echo "$br" | sed -E "s|^claude/chaindiverse-(.+)-[0-9]{8}-[0-9]{6}\$|\1|;s|^claude/chaindiverse-(.+)\$|\1|")
   if [ -z "${HANDLE_TO_BRANCH[$h]:-}" ]; then
     HANDLE_TO_BRANCH[$h]="$br"
     HANDLE_TO_MARKER[$h]="$MARKER"
@@ -370,6 +495,50 @@ echo ""
 echo "── 8. generating results.md (R${PRIOR} vs R${TARGET}) ──"
 "$PYTHON" scripts/generate_harvest_results.py "$PRIOR" "$TARGET" --n-workers "$N_WORKERS"
 
+# 8a. Update workers/dispatcher/current → this harvest's round dir, and
+# record the folded branches' SHAs in .harvest-manifest.json so the
+# auto-discovery mode skips them next time.
+echo ""
+echo "── 8a. updating dispatcher current symlink + manifest ──"
+HARVEST_REL="harvest-${N_WORKERS}way-r${TARGET}/round-${TARGET}"
+ln -snf "$HARVEST_REL" "workers/dispatcher/current"
+echo "  workers/dispatcher/current → $HARVEST_REL"
+
+"$PYTHON" - <<PY
+import json, os, datetime
+manifest = "$MANIFEST_FILE"
+ts = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+target = int("$TARGET")
+m = {}
+if os.path.exists(manifest):
+    m = json.load(open(manifest))
+m.setdefault("processed", {})
+# Resolve each handle in the manifest file to its branch + SHA, fold in.
+import subprocess
+for line in open("$MANIFEST"):
+    line = line.strip()
+    if not line:
+        continue
+    handle, branch, marker = line.split(":")
+    sha = subprocess.check_output(
+        ["git", "ls-remote", "origin", "refs/heads/" + branch],
+        text=True).split()[0] if branch else ""
+    if not sha:
+        continue
+    m["processed"][sha] = {
+        "branch": branch,
+        "handle": handle,
+        "round": target,
+        "harvested_at": ts,
+    }
+os.makedirs(os.path.dirname(manifest), exist_ok=True)
+with open(manifest, "w") as f:
+    json.dump(m, f, indent=2, sort_keys=True)
+    f.write("\n")
+print(f"  recorded {len(open('$MANIFEST').readlines())} branch(es) in {manifest}")
+print(f"  total processed: {len(m['processed'])}")
+PY
+
 # 9. Generate next-round dispatch prompt.
 NEXT=$((TARGET + 10))
 DISPATCH_OUT="docs/spork-chain-diverse-dispatch-r${NEXT}.md"
@@ -386,7 +555,7 @@ fi
 if [ "$PUSH" = "true" ]; then
   echo ""
   echo "── 10. committing + pushing to ${DISPATCHER_BRANCH} ──"
-  git add scripts/ workers/dispatcher/ docs/ 2>/dev/null || true
+  git add scripts/ workers/dispatcher/ docs/ "$MANIFEST_FILE" 2>/dev/null || true
   if git diff --cached --quiet; then
     echo "  (no changes to commit)"
   else
