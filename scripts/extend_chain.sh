@@ -111,7 +111,9 @@ run_round() {
   local round_num=$1
   local resume_dense=$2
   local resume_v_net=$3
-  local resume_opt_net=$4
+  local resume_opt_net=$4    # path to single-file opt-sparse-net.pt, OR
+                             # path to dir containing opt-sparse-net.meta.pt
+                             # + opt-sparse-net.<i>.pt chunks (see below).
 
   echo ""
   echo "── ROUND $round_num ─────────────────────────────────────────"
@@ -122,7 +124,14 @@ run_round() {
   mkdir -p "${FIM_BASE}.ckpts/step-1"
   cp "$resume_dense" "${FIM_BASE}.ckpts/step-1/dense.pt"
   echo 1 > "${FIM_BASE}.ckpts/step-1/step.txt"
-  if [ -f "$resume_opt_net" ]; then
+  # opt-sparse-net resume: at design-sized V_net the file is ~230 MB
+  # which exceeds GitHub's 100 MB per-file limit. We split per-layer
+  # (32 chunks × 2-13 MB) for publish + harvest, and merge on resume.
+  # Legacy single-file is still accepted for back-compat.
+  if [ -d "$resume_opt_net" ] && [ -f "$resume_opt_net/opt-sparse-net.meta.pt" ]; then
+    python3 scripts/_opt_sparse_net_chunk.py merge \
+      "$resume_opt_net" "${FIM_BASE}.ckpts/step-1/opt-sparse-net.pt"
+  elif [ -f "$resume_opt_net" ]; then
     cp "$resume_opt_net" "${FIM_BASE}.ckpts/step-1/opt-sparse-net.pt"
   else
     python3 -c "import torch; torch.save({}, '${FIM_BASE}.ckpts/step-1/opt-sparse-net.pt')"
@@ -167,7 +176,13 @@ PY
   done
   local LATEST=$(ls -1d "${FIM_BASE}.ckpts/step-"* 2>/dev/null | grep -E "step-[0-9]+$" | sort -t- -k2 -n | tail -1)
   cp "$LATEST/dense.pt"          "$ROUND_DIR/dense.pt"
-  [ -f "$LATEST/opt-sparse-net.pt" ] && cp "$LATEST/opt-sparse-net.pt" "$ROUND_DIR/opt-sparse-net.pt"
+  # Split opt-sparse-net.pt into per-layer chunks so the round dir is
+  # publishable under GitHub's 100 MB/file limit. The chunked layout is
+  # what the next-round resume + harvest_chain.py expect.
+  if [ -f "$LATEST/opt-sparse-net.pt" ]; then
+    python3 scripts/_opt_sparse_net_chunk.py split \
+      "$LATEST/opt-sparse-net.pt" "$ROUND_DIR" 2>&1 | sed 's/^/    /'
+  fi
   cp "${FIM_BASE}.log.jsonl"     "$ROUND_DIR/log.jsonl" 2>/dev/null || true
 
   echo "  ── round $round_num ablation summary (wall ${elapsed}s) ──"
@@ -177,15 +192,22 @@ PY
 
 for r in $(seq $((START_FROM + 1)) $END_AT); do
   prev=$((r - 1))
-  prev_opt_net="$ARCHIVE_ROOT/round-${prev}/opt-sparse-net.pt"
-  if [ ! -f "$prev_opt_net" ]; then
-    touch_file="$ARCHIVE_ROOT/round-${prev}/opt-sparse-net.empty.pt"
+  prev_dir="$ARCHIVE_ROOT/round-${prev}"
+  # Prefer chunked opt-sparse-net.{i}.pt if present (the new format);
+  # fall back to legacy single-file; else pass empty marker to trigger
+  # fresh Adam moments in run_round.
+  if [ -f "$prev_dir/opt-sparse-net.meta.pt" ]; then
+    prev_opt_net="$prev_dir"          # dir → run_round merges chunks
+  elif [ -f "$prev_dir/opt-sparse-net.pt" ]; then
+    prev_opt_net="$prev_dir/opt-sparse-net.pt"
+  else
+    touch_file="$prev_dir/opt-sparse-net.empty.pt"
     python3 -c "import torch; torch.save({}, '$touch_file')"
     prev_opt_net="$touch_file"
   fi
   run_round "$r" \
-    "$ARCHIVE_ROOT/round-${prev}/dense.pt" \
-    "$ARCHIVE_ROOT/round-${prev}/V_net" \
+    "$prev_dir/dense.pt" \
+    "$prev_dir/V_net" \
     "$prev_opt_net"
 done
 

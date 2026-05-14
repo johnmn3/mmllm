@@ -60,11 +60,20 @@ git checkout origin/claude/fim-training-cycle-T3giJ -- \
   src/ scripts/ tests/ CLAUDE.md docs/ workers/dispatcher/
 pip install -e . --quiet
 
-ls workers/dispatcher/harvest-cooked-r91/round-91/  # 33 files: 32× V_net (32 MB) + dense.pt
-# opt-sparse-net.pt is NOT included — at the new V_net size it grew to
-# 230 MB which exceeds the remote's 100 MB per-file limit.
-# extend_chain.sh initializes an empty opt-sparse-net.pt for you on
-# missing-resume; minor loss of Adam moment warmth, no functional issue.
+ls workers/dispatcher/harvest-cooked-r91/round-91/ | wc -l   # 66 files:
+#   32× V_net.{0..31}.bin       (32 MB each, 1 GB total)
+#    1  dense.pt
+#   32× opt-sparse-net.{0..31}.pt   (per-V_net-layer Adam state chunks,
+#                                    2-13 MB each, 242 MB total)
+#    1  opt-sparse-net.meta.pt   (param_groups + pid list)
+#
+# At design-sized V_net the single opt-sparse-net.pt is ~230 MB which
+# exceeds GitHub's 100 MB per-file limit. We split per-V_net-layer; each
+# chunk is well under the limit and the layout aligns with the FedAvg
+# the harvester already does on V_net (row-aware: union of touched
+# V-rows, per-row mean over the workers that touched each row).
+# extend_chain.sh merges chunks back into a single opt-sparse-net.pt
+# at resume time; you don't need to manage this directly.
 ls scripts/run_chain_diverse.sh
 ls scripts/extend_chain.sh
 ls scripts/prep_chain_diverse_corpora.sh
@@ -92,7 +101,7 @@ round provided you keep the latest two.
 ARCHIVE=/tmp/mmllm-cpu/chain-diverse
 mkdir -p "$ARCHIVE/round-91"
 cp workers/dispatcher/harvest-cooked-r91/round-91/* "$ARCHIVE/round-91/"
-ls "$ARCHIVE/round-91/" | wc -l   # 34
+ls "$ARCHIVE/round-91/" | wc -l   # 66
 du -sh "$ARCHIVE/round-91/"        # ~1.3 GB
 ```
 
@@ -129,9 +138,14 @@ DEST="workers/$HANDLE/chain-design-r101"
 mkdir -p "$DEST"
 ARCHIVE=/tmp/mmllm-cpu/chain-diverse
 
-cp "$ARCHIVE"/round-101/V_net.*.bin       "$DEST/"
-cp "$ARCHIVE"/round-101/dense.pt          "$DEST/"
-cp "$ARCHIVE"/round-101/opt-sparse-net.pt "$DEST/" 2>/dev/null || true
+cp "$ARCHIVE"/round-101/V_net.*.bin            "$DEST/"
+cp "$ARCHIVE"/round-101/dense.pt               "$DEST/"
+# opt-sparse-net is now chunked per V_net layer (32 chunks + meta,
+# 2-13 MB each) so it can pass GitHub's 100 MB per-file limit.
+# extend_chain.sh produces these chunks at the end of each round; the
+# harvester FedAvgs them across workers (row-aware merge — union of
+# touched V-rows, per-row mean over the workers that touched each row).
+cp "$ARCHIVE"/round-101/opt-sparse-net.*.pt    "$DEST/" 2>/dev/null || true
 
 for r in $(seq 92 101); do
   cp "$ARCHIVE/round-$r/log.jsonl" "$DEST/round-$r.log.jsonl" 2>/dev/null || true
@@ -157,21 +171,18 @@ cat > "$DEST/meta.json" <<EOF
 EOF
 ```
 
-Push. **Don't include opt-sparse-net.pt** — at the new bank size it's
-~230 MB which exceeds the remote's 100 MB per-file limit. Dispatcher
-will pick the best worker's opt state from local-only files if needed;
-your published state is V_net + dense + per-round logs.
-
-V_net.bin files are 32 MB each × 32 = 1 GB. Chunk in 2-3 commits:
+V_net.bin files are 32 MB each × 32 = 1 GB. Plus dense.pt + ~240 MB
+of opt-sparse-net chunks. Chunk the push in 2 commits to keep each
+commit under ~700 MB.
 
 ```bash
 git checkout -b "claude/chaindiverse-${HANDLE}-r101" 2>/dev/null \
   || git checkout "claude/chaindiverse-${HANDLE}-r101"
 
-# Part 1: V_net 0-15 + dense + logs + meta
+# Part 1: V_net 0-15 + dense + opt-state chunks + logs + meta
 git add "$DEST"/V_net.{0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15}.bin \
         "$DEST"/dense.pt "$DEST"/meta.json "$DEST"/round-*.log.jsonl \
-        "$DEST"/wall.tsv 2>/dev/null
+        "$DEST"/wall.tsv "$DEST"/opt-sparse-net.*.pt 2>/dev/null
 git commit -m "chain-design rounds 92-101 (part 1/2) — final_ctrl=<...>"
 git push -u origin "claude/chaindiverse-${HANDLE}-r101"
 

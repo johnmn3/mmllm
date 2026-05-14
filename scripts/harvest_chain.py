@@ -141,11 +141,55 @@ def v_local_gaussian(out_prefix):
         a.flush()
     print(f"  {len(LOCAL_LAYERS)} layers × {N_TRUNKS} trunks, q_dim={Q_DIM}")
 
+def fedavg_opt_sparse_net(stage_dir, workers, out_dir):
+    """Row-aware FedAvg of opt-sparse-net chunks across workers.
+
+    Each worker publishes its end-of-wave opt-sparse-net.{0..31}.pt
+    chunks (per-V_net-layer Adam state) plus opt-sparse-net.meta.pt.
+    Per-layer merge: union of touched V-rows, per-row mean over the
+    workers that touched it. See scripts/_opt_sparse_net_chunk.py for
+    details; we delegate to its `fedavg` helper.
+
+    Back-compat: if a worker has a legacy single-file opt-sparse-net.pt
+    instead of chunks, split it in place under the worker dir so it can
+    join the merge.
+    """
+    chunk_dirs = []
+    for h in workers:
+        wd = stage_dir / h
+        meta = wd / "opt-sparse-net.meta.pt"
+        legacy = wd / "opt-sparse-net.pt"
+        if meta.exists():
+            chunk_dirs.append(str(wd))
+        elif legacy.exists():
+            print(f"  {h}: legacy single-file opt-sparse-net.pt — splitting in place")
+            from subprocess import run
+            run([sys.executable,
+                 str(Path(__file__).resolve().parent / "_opt_sparse_net_chunk.py"),
+                 "split", str(legacy), str(wd)], check=True)
+            chunk_dirs.append(str(wd))
+        else:
+            print(f"  {h}: no opt-sparse-net (chunks or single-file) — skipping")
+    if not chunk_dirs:
+        print("  no workers had opt-sparse-net state; skipping fedavg")
+        return None
+    out_dir.mkdir(parents=True, exist_ok=True)
+    from subprocess import run
+    run([sys.executable,
+         str(Path(__file__).resolve().parent / "_opt_sparse_net_chunk.py"),
+         "fedavg", str(out_dir), *chunk_dirs], check=True)
+    return out_dir
+
 def publish_to_dispatcher(stage_dir, workers, best_handle, target_round,
                           harvested_prefix, harvested_dense, repo_root):
-    """Copy harvested V_net + dense + best-worker's opt-state under
+    """Copy harvested V_net + dense + chunked fedavg'd opt-state under
     workers/dispatcher/harvest-${N}way-r${TARGET}/round-${TARGET}/.
-    Returns the path to round-${TARGET}/."""
+    Returns the path to round-${TARGET}/.
+
+    opt-sparse-net is published as chunks (opt-sparse-net.{0..31}.pt +
+    opt-sparse-net.meta.pt) rather than a single 230 MB file — single-file
+    exceeds GitHub's 100 MB per-file limit at design-sized V_net.
+    extend_chain.sh handles the chunked layout on resume."""
     n = len(workers)
     publish_dir = repo_root / f"workers/dispatcher/harvest-{n}way-r{target_round}" / f"round-{target_round}"
     publish_dir.mkdir(parents=True, exist_ok=True)
@@ -155,9 +199,11 @@ def publish_to_dispatcher(stage_dir, workers, best_handle, target_round,
         shutil.copy(f"{harvested_prefix}-net.{i}.bin",
                     publish_dir / f"V_net.{i}.bin")
     shutil.copy(harvested_dense, publish_dir / "dense.pt")
-    shutil.copy(stage_dir / best_handle / "opt-sparse-net.pt",
-                publish_dir / "opt-sparse-net.pt")
-    print(f"  staged 32× V_net + dense.pt + {best_handle}'s opt-sparse-net.pt")
+    opt_result = fedavg_opt_sparse_net(stage_dir, workers, publish_dir)
+    if opt_result is not None:
+        print(f"  staged 32× V_net + dense.pt + {len(workers)}-way FedAvg opt-sparse-net chunks")
+    else:
+        print(f"  staged 32× V_net + dense.pt (no opt-sparse-net state across workers)")
     return publish_dir
 
 def main():
