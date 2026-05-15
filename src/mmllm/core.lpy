@@ -820,20 +820,31 @@
    layer × trunk at sqrt_n=226 is 226² × 16 × 4 = 3.3 MB (vs 26 MB at
    cpu-tiny's q-dim=128)."
   {:d-model            32
-   :n-heads            4
-   :n-short-heads      2
-   :n-long-heads       2
+   ;; n-heads = 8 (split 4 short + 4 long) at head-dim=4. d-model and
+   ;; per-block dense-param count unchanged from the original 4×8 layout
+   ;; (q-dim = n-long-heads × head-dim = 4 × 4 = 16 stays at 16). The
+   ;; reshuffle gives the router 2× independent query channels into the
+   ;; banks without changing param count — same dense, wider routing.
+   :n-heads            8
+   :n-short-heads      4
+   :n-long-heads       4
    :n-short-kv-heads   1
    :n-long-kv-heads    1
    :n-layers           32
    :local-bank-layers  [0 1 2 12 20 29 30 31]
-   :seq-len            128
-   :max-pos            512
+   ;; seq-len + max-pos doubled to 256 / 2048: longer training context
+   ;; and RoPE cache for inference with longer prompts. Trivial memory
+   ;; cost; doubles per-step compute proportionally.
+   :seq-len            256
+   :max-pos            2048
    :d-ff               128
    :rope-theta         10000.0
    :memory-sqrt-n      256
-   :memory-top-k       16
-   :memory-sub-top-k   16
+   ;; Retrieval bandwidth defaults (overridden by extend_chain.sh env
+   ;; vars for production chain training). Widened so the per-query info
+   ;; pulled from each tier scales with the bank capacity at design size.
+   :memory-top-k       64
+   :memory-sub-top-k   64
    :memory-mmap-path   nil
    :bank-query-mode    nil
    :bank-feedback-mode nil
