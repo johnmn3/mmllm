@@ -14,26 +14,70 @@ documents the wake/sleep schedule, and lists the conduct rules
 archive at `/tmp/mmllm-cpu/chain-diverse/` is yours; everything in
 `workers/dispatcher/` is not).
 
-## What's new vs prior waves
+## What's new vs prior waves (and what got reverted)
 
-The chain just got scaled up (`commit 7e45963`) — retrieval
-bandwidth widened 8× and RoPE base widened 50× for the 1M-context
-prep. Defaults baked into `scripts/extend_chain.sh`:
+The recent scale-up commit (`7e45963`) intended to widen retrieval
+bandwidth 8×. It accidentally also reshuffled `n-heads 4→16` in
+cpu-mini, which silently broke checkpoint loading (saved dense.pt
+has K/V proj shape `(8, 32)`; the reshuffled model expected `(2, 32)`
+→ 240/618 dense tensors silently re-init from scratch per resume).
+
+**The first wave-2 attempt produced three failure reports — none
+trained.** The reshuffle has been reverted; cpu-mini is back at
+`n-heads=4, head-dim=8` and the saved dense.pt now loads cleanly
+(618/618 shapes match).
+
+Defaults baked into `scripts/extend_chain.sh` (these CAN be overridden
+via env; see "Memory budget" below):
 
 ```
 MMLLM_SQRT_N=128            # Local Bank per-router 1 MB × 16 routers × 8 banks = 128 MB
 MMLLM_NET_SQRT_N=1024       # NetBank 33.5 MB × 32 layers = 1.07 GB
 MMLLM_NET_C_NET=8
-MMLLM_MEMORY_TOP_K=128      # Local retrieval bandwidth (was 16)
+MMLLM_MEMORY_TOP_K=128      # Local retrieval bandwidth
 MMLLM_MEMORY_SUB_TOP_K=128
-MMLLM_NET_TOP_K=512         # Net retrieval bandwidth (was 64) — 8× scale
+MMLLM_NET_TOP_K=512         # Net retrieval bandwidth
 MMLLM_NET_SUB_TOP_K=64
 MMLLM_N_TRUNKS=16
+MMLLM_BATCH=16
 rope-theta=500000           # Llama-3 base for long-context extensibility
 seq-len=1024  max-pos=8192
+n-heads=4 (head-dim=8)      # REVERTED from the broken n-heads=16
 ```
 
-DO NOT override these — they're the wave's experimental contract.
+## Memory budget — KNOW YOUR ENVELOPE
+
+The PKM outer-sum allocation in `memory.py:987` is:
+
+    [B × T × SUB_TOP_K × SUB_TOP_K × 4 bytes]   per call
+
+At default `B=16, T=1024, SUB_TOP_K=128`:
+
+    16 × 1024 × 128 × 128 × 4 = 17.2 GB        ← single alloc
+
+That's bigger than a 15-16 GB container. **If your container has
+less than ~24 GB RAM, you MUST lower one or both of B and SUB_TOP_K.**
+Recommended starting points by container size:
+
+| container RAM | MMLLM_BATCH | MMLLM_MEMORY_SUB_TOP_K | MMLLM_NET_SUB_TOP_K |
+|--------------:|:-----------:|:----------------------:|:-------------------:|
+| **15-16 GB**  | 4           | 32                     | 32                  |
+| **24 GB**     | 8           | 64                     | 48                  |
+| **32+ GB**    | 16 (default)| 128 (default)          | 64 (default)        |
+
+Lowering B reduces tokens/step proportionally; lowering SUB_TOP_K
+narrows retrieval bandwidth. Both are acceptable trade-offs for fitting
+the box. The TOP_K (not SUB_TOP_K) values are the recipe contract;
+keep MMLLM_NET_TOP_K=512 and MMLLM_MEMORY_TOP_K=128 if at all possible.
+
+Pass overrides via env BEFORE invoking the script:
+
+```bash
+MMLLM_BATCH=4 MMLLM_MEMORY_SUB_TOP_K=32 MMLLM_NET_SUB_TOP_K=32 \
+  bash scripts/run_chain_diverse.sh 10 20
+```
+
+The script uses `: ${VAR:=default}` so env-passed values win.
 
 ## Setup
 
@@ -53,26 +97,41 @@ ls scripts/extend_chain.sh
 ls scripts/prep_chain_diverse_corpora.sh
 ```
 
-## Pre-flight: free disk
+### If `git fetch` times out
 
-Each round writes ~1.3 GB to `/tmp/mmllm-cpu/chain-diverse/round-N/` at
-design-sized banks. 10 rounds = ~13 GB before the per-round prune
-kicks in (commit `52a238f` keeps only the last two round dirs live).
-Plus corpora (~3 GB) and training scratch (~2 GB).
+The branch HEAD carries ~1.3 GB of binary bank artifacts. If your
+proxy can't handle the pack, do a partial fetch and pull the binary
+blobs separately:
 
 ```bash
-df -h /tmp                                  # need >=20 GB free
-# Drop any stale chain archive — local-only scratch, not preserved.
+git fetch origin claude/fim-training-cycle-T3giJ \
+  --filter=blob:limit=20M --depth=1
+git checkout origin/claude/fim-training-cycle-T3giJ -- \
+  src/ scripts/ tests/ CLAUDE.md docs/
+
+# Now pull the dispatcher harvest's binaries one at a time:
+mkdir -p workers/dispatcher/harvest-5way-r10/round-10
+for i in $(seq 0 31); do
+  git cat-file -p "origin/claude/fim-training-cycle-T3giJ:workers/dispatcher/harvest-5way-r10/round-10/V_net.${i}.bin" \
+    > "workers/dispatcher/harvest-5way-r10/round-10/V_net.${i}.bin"
+done
+# Repeat for opt-sparse-net.*.pt, dense.pt, opt-sparse-net.meta.pt.
+```
+
+## Pre-flight: free disk
+
+Each round writes ~1.3 GB to `/tmp/mmllm-cpu/chain-diverse/round-N/`.
+Per-round prune in `extend_chain.sh` (commit `52a238f`) keeps live
+state at ~3 GB by dropping round-(N-2) after round-N starts.
+
+```bash
+df -h /tmp                                  # want >=20 GB free
 rm -rf /tmp/mmllm-cpu/chain-diverse
-rm -rf /tmp/mmllm-cpu/chain-diverse-1gb
 rm -rf /tmp/mmllm-cpu/fim-chain-stack.ckpts
-rm -rf /tmp/mmllm-cpu/fim-distill-build-*
 rm -f  /tmp/mmllm-cpu/harvested-r*.bank*.bin
 rm -f  /tmp/mmllm-cpu/harvested-r*.dense.pt
 df -h /tmp
 ```
-
-If `/tmp` shows <20 GB free, abort and ask the dispatcher first.
 
 ## Pre-flight: corpora
 
@@ -97,16 +156,21 @@ du -sh "$ARCHIVE/round-10/"        # ~1.3 GB
 ## Run (rounds 11 → 20)
 
 ```bash
+# Pass any RAM-tuning env vars BEFORE the script. On 15 GB containers:
+MMLLM_BATCH=4 MMLLM_MEMORY_SUB_TOP_K=32 MMLLM_NET_SUB_TOP_K=32 \
+  bash scripts/run_chain_diverse.sh 10 20
+
+# On 32+ GB containers, just:
 bash scripts/run_chain_diverse.sh 10 20
 ```
 
 `run_chain_diverse.sh` exports MMLLM_MIX + MMLLM_LR_LAYER_MULTS +
 MMLLM_DISTILL_GATE_*, then hands off to `extend_chain.sh` for 10
-rounds at 100 steps each. Expect per-round wall ≈ 200-300s.
-Total wall: 40-60 min.
+rounds at 100 steps each.
 
-DO NOT pass env overrides. The mix weights, recipe, and ablation
-cap are baked in.
+Per-round wall depends on (B × T × layers × banks):
+- 15 GB + B=4: expect ~600-900s/round, ~2 hr total
+- 32 GB + B=16: expect ~200-300s/round, ~40-60 min total
 
 ## Live reporting (don't go silent for an hour)
 
@@ -130,17 +194,21 @@ For each notification fire one short message back:
 If a round NaNs or `ctrl_bpc` climbs above 2.0, abort the remaining
 rounds and publish what you have — partial results beat zero.
 
+**If your first round OOMs**, don't keep iterating silently. Stop,
+report the OOM with the alloc size, and either drop one tier on the
+recommended table or ask the dispatcher.
+
 ## Watch for
 
-- Round 11's `ctrl_bpc` on the diverse mix should sit in roughly
-  [0.85, 1.10] (continuing from harvest mean 0.8973).
+- The first WARN line on resume should say
+  `0/618 param tensors skipped due to shape mismatch` (or no warn at
+  all). If it says 240/618, the head-dim revert didn't make it into
+  your checkout — `git pull` again before running.
+- Round 11's `ctrl_bpc` should sit in roughly [0.85, 1.10]
+  (continuing from harvest mean 0.8973).
 - **Δ_net should be positive across most rounds** at this wave —
-  V_net was populated by the prior wave at the scaled-up bandwidth,
-  so distillation has somewhere to go.
-- Each round writes ~1.3 GB. The per-round prune in `extend_chain.sh`
-  (commit `52a238f`) keeps `/tmp/mmllm-cpu/chain-diverse/` at ~3 GB
-  by dropping round-(N-2)'s V_net/dense/opt-state after round-N
-  starts. Don't disable it.
+  V_net was populated by the prior wave, so distillation has
+  somewhere to go.
 
 ## Publish your result
 
@@ -164,23 +232,21 @@ cp "$ARCHIVE/wall.tsv" "$DEST/" 2>/dev/null || true
 cat > "$DEST/meta.json" <<EOF
 {
   "handle": "$HANDLE",
-  "config": "cpu-mini-N16 design banks, sparse-delta publish, wave-2 scaled",
+  "config": "cpu-mini-N16 design banks, sparse-delta publish, wave-2 (n-heads=4 reverted)",
   "recipe": "stack-3e-2-5.0+mag-coef-on+asym-V+movement-gate+design-banks+wide-retrieval",
   "mix": "9-corpus diverse (glaive:25 cosmopedia:10 fineweb-edu:10 magicoder:10 hermes-funcall:10 toolace:10 aesop:10 open-web-math:10 tiny-stories:5)",
   "wave_kind": "generalist",
   "n_rounds_trained": 10,
+  "container_ram_gb": <fill-in>,
+  "MMLLM_BATCH": <fill-in>,
+  "MMLLM_MEMORY_SUB_TOP_K": <fill-in>,
+  "MMLLM_NET_SUB_TOP_K": <fill-in>,
   "extended_from": "workers/dispatcher/harvest-5way-r10/round-10 (5-way FedAvg; wave-1 ctrl_bpc mean 0.8973)",
   "branch_base": "claude/fim-training-cycle-T3giJ",
   "git_sha": "$(git rev-parse HEAD)"
 }
 EOF
 ```
-
-Use **sparse-delta** publish (smaller push, recommended). Each V_net
-layer has only the touched rows shipped as `delta-sparse-net.<i>.pt`
-plus a `delta-sparse-net.meta.pt`. The script that does this is
-`scripts/publish_sparse_delta.py` (already wired into `extend_chain.sh`
-at end-of-round).
 
 ```bash
 git checkout -b "claude/chaindiverse-${HANDLE}-r2-10" 2>/dev/null \
@@ -196,17 +262,20 @@ If the push 413/502s, split V_net into 2 commits.
 ## What to report back
 
 1. Per-round table: wall_s, ctrl_bpc, Δ_local, Δ_net, Δ_both, synergy.
-2. Gate probe output at step 70 of each round (movement signal).
+2. Gate probe output at step 70 of each round.
 3. Branch name `claude/chaindiverse-<HANDLE>-r2-10`.
+4. The B / SUB_TOP_K values you ran at, and container RAM.
 
 Dispatcher will harvest via `bash scripts/harvest_chain.sh 2-10`.
 
-## Hard rules
+## Hard rules (these are real)
 
-- DO NOT override the recipe (mix, mults, gate, bank sizes). The
-  scaled defaults ARE the experimental contract.
-- DO publish even on partial failure — a few completed rounds
-  + logs is more valuable than a missing run.
-- DO NOT touch `workers/dispatcher/`.
-- DO NOT delete or overwrite anyone else's `workers/<other-handle>/`
-  directories. The branch sandbox protects this; don't fight it.
+- DO NOT change MMLLM_MIX (the corpus weights), MMLLM_LR_LAYER_MULTS,
+  MMLLM_DISTILL_GATE_*, bank sizes, n-heads, head-dim, or n-trunks.
+  Those ARE the architecture / recipe contract.
+- B and SUB_TOP_K ARE tunable to fit RAM. Document what you ran at.
+- DO publish on partial failure — a few completed rounds + logs
+  is more valuable than a missing run.
+- DO NOT touch `workers/dispatcher/` or anyone else's `workers/<h>/`.
+- If your first OOM is unrecoverable, publish a meta.json with
+  `status: failed` and `n_rounds_trained: 0` so the dispatcher knows.

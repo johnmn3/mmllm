@@ -15,26 +15,61 @@ next wave's reference state.
 Read `CLAUDE.md` first — defines spork / chain / Δ_local / Δ_net,
 wake/sleep schedule, conduct rules.
 
-## What's new vs prior waves
+## What's new vs prior waves (and what got reverted)
 
-The chain just got scaled up (`commit 7e45963`) — retrieval bandwidth
-widened 8× and RoPE base widened 50× for 1M-context prep. Defaults
-baked into `scripts/extend_chain.sh`:
+The recent scale-up commit (`7e45963`) intended to widen retrieval
+bandwidth 8×. It accidentally also reshuffled `n-heads 4→16` in
+cpu-mini, which silently broke checkpoint loading (saved dense.pt
+has K/V proj shape `(8, 32)`; the reshuffled model expected `(2, 32)`
+→ 240/618 dense tensors silently re-init from scratch per resume).
+
+**The first wave-2 attempt produced three failure reports — none
+trained.** The reshuffle has been reverted; cpu-mini is back at
+`n-heads=4, head-dim=8` and the saved dense.pt now loads cleanly
+(618/618 shapes match).
+
+Defaults baked into `scripts/extend_chain.sh` (these CAN be overridden
+via env; see "Memory budget" below):
 
 ```
 MMLLM_SQRT_N=128            # Local Bank per-router 1 MB × 16 routers × 8 banks = 128 MB
 MMLLM_NET_SQRT_N=1024       # NetBank 33.5 MB × 32 layers = 1.07 GB
 MMLLM_NET_C_NET=8
-MMLLM_MEMORY_TOP_K=128      # Local retrieval bandwidth (was 16)
+MMLLM_MEMORY_TOP_K=128      # Local retrieval bandwidth
 MMLLM_MEMORY_SUB_TOP_K=128
-MMLLM_NET_TOP_K=512         # Net retrieval bandwidth (was 64) — 8× scale
+MMLLM_NET_TOP_K=512         # Net retrieval bandwidth
 MMLLM_NET_SUB_TOP_K=64
 MMLLM_N_TRUNKS=16
-rope-theta=500000           # Llama-3 base for long-context extensibility
+MMLLM_BATCH=16
+rope-theta=500000
 seq-len=1024  max-pos=8192
+n-heads=4 (head-dim=8)      # REVERTED from the broken n-heads=16
 ```
 
-DO NOT override these.
+## Memory budget — KNOW YOUR ENVELOPE
+
+The PKM outer-sum allocation is `[B × T × SUB_TOP_K² × 4B]` per call.
+At default `B=16, T=1024, SUB_TOP_K=128` that's **17 GB** for a single
+alloc, exceeding a 15-16 GB container. Recommended starting points:
+
+| container RAM | MMLLM_BATCH | MMLLM_MEMORY_SUB_TOP_K | MMLLM_NET_SUB_TOP_K |
+|--------------:|:-----------:|:----------------------:|:-------------------:|
+| **15-16 GB**  | 4           | 32                     | 32                  |
+| **24 GB**     | 8           | 64                     | 48                  |
+| **32+ GB**    | 16 (default)| 128 (default)          | 64 (default)        |
+
+TOP_K values (`MMLLM_MEMORY_TOP_K=128`, `MMLLM_NET_TOP_K=512`) are
+the bandwidth contract — keep them at default. SUB_TOP_K and B are
+your two memory throttles.
+
+Pass overrides via env BEFORE invoking the script:
+
+```bash
+MMLLM_BATCH=4 MMLLM_MEMORY_SUB_TOP_K=32 MMLLM_NET_SUB_TOP_K=32 \
+  bash scripts/extend_chain.sh 10 20
+```
+
+The script uses `: ${VAR:=default}` so env-passed values win.
 
 ## Setup
 
@@ -49,15 +84,31 @@ ls scripts/extend_chain.sh
 ls scripts/build_glaive_fim_corpus.sh
 ```
 
-## Pre-flight: free disk
+### If `git fetch` times out
 
-Each round writes ~1.3 GB. Per-round prune (commit `52a238f`)
-keeps live state at ~3 GB, but you still need headroom for the
-corpus (~150 MB) and the publish output (~250 MB sparse-delta).
+The branch HEAD carries ~1.3 GB of binary bank artifacts. If your
+proxy can't handle the pack, do a partial fetch and pull the binary
+blobs separately:
+
+```bash
+git fetch origin claude/fim-training-cycle-T3giJ \
+  --filter=blob:limit=20M --depth=1
+git checkout origin/claude/fim-training-cycle-T3giJ -- \
+  src/ scripts/ tests/ CLAUDE.md docs/
+
+mkdir -p workers/dispatcher/harvest-5way-r10/round-10
+for i in $(seq 0 31); do
+  git cat-file -p "origin/claude/fim-training-cycle-T3giJ:workers/dispatcher/harvest-5way-r10/round-10/V_net.${i}.bin" \
+    > "workers/dispatcher/harvest-5way-r10/round-10/V_net.${i}.bin"
+done
+# Repeat for opt-sparse-net.*.pt, dense.pt, opt-sparse-net.meta.pt.
+```
+
+## Pre-flight: free disk
 
 ```bash
 df -h /tmp                                    # want >=15 GB free
-rm -rf /tmp/mmllm-cpu/chain-diverse           # any prior wave's archive
+rm -rf /tmp/mmllm-cpu/chain-diverse
 rm -rf /tmp/mmllm-cpu/fim-chain-stack.ckpts
 rm -f  /tmp/mmllm-cpu/harvested-r*.bank*.bin
 rm -f  /tmp/mmllm-cpu/harvested-r*.dense.pt
@@ -72,8 +123,7 @@ Only the FIM corpus is needed:
 bash scripts/build_glaive_fim_corpus.sh
 ```
 
-Idempotent — skips any step whose output exists. ~5-15 min if
-fully cold (HF download + unpack + tokenize). Outputs:
+Idempotent. ~5-15 min cold (HF download + unpack + tokenize). Outputs:
 
 ```
 /tmp/mmllm-cpu/fim-json-v3.train.bin   (~110 MB)
@@ -99,23 +149,24 @@ the 9-corpus mix) and invoke `extend_chain.sh` directly with
 ```bash
 export MMLLM_MIX="/tmp/mmllm-cpu/fim-json-v3.train.bin:100"
 # Layer-LR mults: same as the 9-corpus runner (V-shape — hot endpoints).
-# These are the documented winners from the bandwidth-knob sweep; don't
-# change them.
 export MMLLM_LR_LAYER_MULTS="7.0,3.0,1.0,0.5,0.3,0.7,2.0,5.0"
 export MMLLM_DISTILL_GATE_MIN=0.05
 export MMLLM_DISTILL_GATE_MAX=1.0
 export MMLLM_DISTILL_GATE_TEMP=0.5
+
+# On 15-16 GB containers add the memory throttles:
+# export MMLLM_BATCH=4 MMLLM_MEMORY_SUB_TOP_K=32 MMLLM_NET_SUB_TOP_K=32
 
 bash scripts/extend_chain.sh 10 20
 ```
 
 `extend_chain.sh 10 20` means "extend from round-10 up to and
 including round-20" — picks up the staged round-10 state, trains
-rounds 11..20 at 100 steps each. Expected per-round wall ≈ 200-300s,
-total 40-60 min.
+rounds 11..20 at 100 steps each.
 
-DO NOT pass any other env overrides (LR, recipe, bank size). The
-defaults in `extend_chain.sh` are the recipe.
+Per-round wall depends on (B × T × layers × banks):
+- 15 GB + B=4: expect ~600-900s/round, ~2 hr total
+- 32 GB + B=16: expect ~200-300s/round, ~40-60 min total
 
 ## Live reporting
 
@@ -136,15 +187,22 @@ One short chat message per signal line:
 - **Any failure mode**: traceback excerpt + abort
 
 If a round NaNs or `ctrl_bpc` climbs above 1.5, abort and publish
-what you have — partial results beat zero.
+what you have.
+
+**If your first round OOMs**, don't keep iterating silently. Stop,
+report the OOM size, and either drop one tier on the recommended
+table or ask the dispatcher.
 
 ## Watch for
 
+- The first WARN line on resume should say
+  `0/618 param tensors skipped due to shape mismatch` (or no warn at
+  all). If it says 240/618, the head-dim revert didn't make it into
+  your checkout — `git pull` again before running.
 - Round 11's `ctrl_bpc` on FIM should sit near ~0.82 (wave-1 FIM
   specialists' end-of-train). Don't abort if it sits in [0.7, 1.0].
 - **Δ_net should rise across the wave** — V_net was populated by
-  the prior wave at the scaled-up bandwidth, distillation has
-  somewhere to go.
+  the prior wave, distillation has somewhere to go.
 - FIM-only is a NARROWER mix than the 9-corpus generalist. Δ_local
   will be larger than the generalist case (the bank specializes
   on Glaive JSON syntax). Expected and intended.
@@ -159,8 +217,6 @@ DEST="workers/$HANDLE/chain-design-r2-10"
 mkdir -p "$DEST"
 ARCHIVE=/tmp/mmllm-cpu/chain-diverse
 
-# extend_chain.sh writes sparse-delta + meta into round-20/ at end-of-train.
-# Copy those instead of the full V_net (much smaller push, recommended).
 cp "$ARCHIVE"/round-20/delta-sparse-net.*.pt   "$DEST/"
 cp "$ARCHIVE"/round-20/dense.pt                "$DEST/"
 cp "$ARCHIVE"/round-20/opt-sparse-net.*.pt     "$DEST/" 2>/dev/null || true
@@ -173,11 +229,15 @@ cp "$ARCHIVE/wall.tsv" "$DEST/" 2>/dev/null || true
 cat > "$DEST/meta.json" <<EOF
 {
   "handle": "$HANDLE",
-  "config": "cpu-mini-N16 design banks, sparse-delta publish, wave-2 scaled",
+  "config": "cpu-mini-N16 design banks, sparse-delta publish, wave-2 (n-heads=4 reverted)",
   "recipe": "stack-3e-2-5.0+mag-coef-on+asym-V+movement-gate+design-banks+wide-retrieval",
   "mix": "FIM-only (fim-json-v3 / Glaive in-domain JSON tool-calls)",
   "wave_kind": "fim-specialist",
   "n_rounds_trained": 10,
+  "container_ram_gb": <fill-in>,
+  "MMLLM_BATCH": <fill-in>,
+  "MMLLM_MEMORY_SUB_TOP_K": <fill-in>,
+  "MMLLM_NET_SUB_TOP_K": <fill-in>,
   "extended_from": "workers/dispatcher/harvest-5way-r10/round-10 (5-way FedAvg; wave-1 ctrl_bpc mean 0.8973)",
   "branch_base": "claude/fim-training-cycle-T3giJ",
   "git_sha": "$(git rev-parse HEAD)"
@@ -186,8 +246,7 @@ EOF
 ```
 
 Use the **`fim-` branch prefix** so the dispatcher can identify your
-wave kind from the branch name alone (separate from the in-meta
-`wave_kind` field — both are checked):
+wave kind from the branch name alone:
 
 ```bash
 git checkout -b "claude/chaindiverse-fim-${HANDLE}-r2-10" 2>/dev/null \
@@ -205,14 +264,17 @@ If the push 413/502s, split into 2-3 commits.
 1. Per-round table: wall_s, ctrl_bpc, Δ_local, Δ_net, Δ_both, synergy.
 2. Gate probe output at step 70 of each round.
 3. Branch name `claude/chaindiverse-fim-<HANDLE>-r2-10`.
+4. The B / SUB_TOP_K values you ran at, and container RAM.
 
 Dispatcher will harvest via `bash scripts/harvest_chain.sh 2-10`.
 
-## Hard rules
+## Hard rules (these are real)
 
-- DO NOT override the recipe (mults, gate, bank sizes). The scaled
-  defaults ARE the contract.
-- DO NOT add other corpora — FIM-only is the specialization point
-  of this prompt. If you want a generalist, take the other prompt.
+- DO NOT change MMLLM_MIX (FIM-only is the specialization point),
+  MMLLM_LR_LAYER_MULTS, MMLLM_DISTILL_GATE_*, bank sizes, n-heads,
+  head-dim, or n-trunks.
+- B and SUB_TOP_K ARE tunable to fit RAM. Document what you ran at.
 - DO publish on partial failure.
 - DO NOT touch `workers/dispatcher/` or anyone else's `workers/<h>/`.
+- If your first OOM is unrecoverable, publish a meta.json with
+  `status: failed` and `n_rounds_trained: 0` so the dispatcher knows.

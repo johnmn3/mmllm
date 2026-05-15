@@ -46,55 +46,65 @@ echo "════════════════════════�
 export MMLLM_DEVICE=cpu
 export MMLLM_BANK_ON_GPU=false
 export MMLLM_NET_BANK_ON_GPU=false
+# Knobs below are wave defaults but can be overridden by passing the env
+# var BEFORE invoking this script. Birds with constrained RAM (15-16 GB
+# containers) typically lower MMLLM_BATCH and SUB_TOP_K to fit; see
+# comments next to each knob for the memory math.
+#
 # Local Bank sized so each router is 1 MB:
 #   per-router V: sqrt_local² × q_dim × 4B = 128² × 16 × 4 = 1.05 MB
 #   16 routers / local bank = 16 MB per layer
 #   8 local banks in training = 128 MB total (≈ designed 100 MB)
-export MMLLM_SQRT_N=128
+: ${MMLLM_SQRT_N:=128}        ; export MMLLM_SQRT_N
 # NetBank sized for ~1 GB total across 32 layers:
 #   per layer: sqrt_n² × c_net × 4B = 1024² × 8 × 4 = 33.5 MB
 #   32 layers = 1.07 GB total (= designed 1 GB)
-export MMLLM_NET_SQRT_N=1024
-export MMLLM_NET_C_NET=8
+: ${MMLLM_NET_SQRT_N:=1024}   ; export MMLLM_NET_SQRT_N
+: ${MMLLM_NET_C_NET:=8}       ; export MMLLM_NET_C_NET
 # Retrieval bandwidth — 8× the original cpu-mini defaults. Size-neutral
 # (no bank-size impact). Total info pulled per query (fp32):
 #   Local: memory-top-k × q_dim = 128 × 16  = 2048
 #   Net:   net-top-k × c_net    = 512 × 8   = 4096
 # = 6144 fp32 per query, comparable to ~3 Gemma attention heads worth
 # of per-token bandwidth.
-export MMLLM_MEMORY_TOP_K=128
-export MMLLM_MEMORY_SUB_TOP_K=128
-export MMLLM_NET_TOP_K=512
-export MMLLM_NET_SUB_TOP_K=64
-export MMLLM_N_TRUNKS=16
-export MMLLM_SPARSE_OPT=adam-cpu
+#
+# RAM cost: outer-sum alloc per call is B × T × SUB_TOP_K² × 4B.
+# At default B=16, T=1024, SUB_TOP_K=128 → 17 GB single alloc.
+# 15-16 GB containers MUST lower B and/or SUB_TOP_K. Recommended for
+# 15 GB: MMLLM_BATCH=4 MMLLM_MEMORY_SUB_TOP_K=32 MMLLM_NET_SUB_TOP_K=32.
+: ${MMLLM_MEMORY_TOP_K:=128}     ; export MMLLM_MEMORY_TOP_K
+: ${MMLLM_MEMORY_SUB_TOP_K:=128} ; export MMLLM_MEMORY_SUB_TOP_K
+: ${MMLLM_NET_TOP_K:=512}        ; export MMLLM_NET_TOP_K
+: ${MMLLM_NET_SUB_TOP_K:=64}     ; export MMLLM_NET_SUB_TOP_K
+: ${MMLLM_N_TRUNKS:=16}          ; export MMLLM_N_TRUNKS
+: ${MMLLM_SPARSE_OPT:=adam-cpu}  ; export MMLLM_SPARSE_OPT
 # Training throughput — 16× tokens/step at same model size.
-export MMLLM_BATCH=16
-export MMLLM_NETBANK_ENABLED=true
-export MMLLM_LONG_TIER_MIX=switch
-export MMLLM_ALPHA_NET=true
-export MMLLM_GATE_NET_DEFAULT=true
-export MMLLM_DISTILL_COEF=0.5
-export MMLLM_DISTILL_COEF_END=5.0
-export MMLLM_DISTILL_TARGET=residual
-export MMLLM_DISTILL_DIRECTION_ONLY=true
-export MMLLM_DISTILL_MAGNITUDE_COEF=1.0
-export MMLLM_DISTILL_MAGNITUDE_COEF_END=1.0
-export MMLLM_DISTILL_MAGNITUDE_CLAMP=10.0
-export MMLLM_LR_BANK_MULT=3.0
-export MMLLM_LR_BANK_MULT_END=0.001
-export MMLLM_LR_NET_MULT=0.001
-export MMLLM_LR_NET_MULT_END=5.0
-export MMLLM_LR_DENSE_MULT=0.05
-export MMLLM_LR_DENSE_MULT_END=0.005
-export MMLLM_LR=3e-2
-export MMLLM_LR_MIN=3e-2
+: ${MMLLM_BATCH:=16}             ; export MMLLM_BATCH
+: ${MMLLM_NETBANK_ENABLED:=true} ; export MMLLM_NETBANK_ENABLED
+: ${MMLLM_LONG_TIER_MIX:=switch} ; export MMLLM_LONG_TIER_MIX
+: ${MMLLM_ALPHA_NET:=true}       ; export MMLLM_ALPHA_NET
+: ${MMLLM_GATE_NET_DEFAULT:=true}; export MMLLM_GATE_NET_DEFAULT
+: ${MMLLM_DISTILL_COEF:=0.5}     ; export MMLLM_DISTILL_COEF
+: ${MMLLM_DISTILL_COEF_END:=5.0} ; export MMLLM_DISTILL_COEF_END
+: ${MMLLM_DISTILL_TARGET:=residual}      ; export MMLLM_DISTILL_TARGET
+: ${MMLLM_DISTILL_DIRECTION_ONLY:=true}  ; export MMLLM_DISTILL_DIRECTION_ONLY
+: ${MMLLM_DISTILL_MAGNITUDE_COEF:=1.0}   ; export MMLLM_DISTILL_MAGNITUDE_COEF
+: ${MMLLM_DISTILL_MAGNITUDE_COEF_END:=1.0}; export MMLLM_DISTILL_MAGNITUDE_COEF_END
+: ${MMLLM_DISTILL_MAGNITUDE_CLAMP:=10.0} ; export MMLLM_DISTILL_MAGNITUDE_CLAMP
+: ${MMLLM_LR_BANK_MULT:=3.0}     ; export MMLLM_LR_BANK_MULT
+: ${MMLLM_LR_BANK_MULT_END:=0.001}; export MMLLM_LR_BANK_MULT_END
+: ${MMLLM_LR_NET_MULT:=0.001}    ; export MMLLM_LR_NET_MULT
+: ${MMLLM_LR_NET_MULT_END:=5.0}  ; export MMLLM_LR_NET_MULT_END
+: ${MMLLM_LR_DENSE_MULT:=0.05}   ; export MMLLM_LR_DENSE_MULT
+: ${MMLLM_LR_DENSE_MULT_END:=0.005}; export MMLLM_LR_DENSE_MULT_END
+: ${MMLLM_LR:=3e-2}              ; export MMLLM_LR
+: ${MMLLM_LR_MIN:=3e-2}          ; export MMLLM_LR_MIN
 export MMLLM_LR_WARMUP=$((STEPS * 70 / 100))
-export MMLLM_REPLAY_EVERY=10
-export MMLLM_REPLAY_BUFFER_SIZE=256
-export MMLLM_REPLAY_THRESHOLD=0.5
-export MMLLM_ABLATE_EVERY=0
-export MMLLM_SKIP_NETBANK_WARMSTART=true     # extending — V_net is carried forward; don't re-warm
+: ${MMLLM_REPLAY_EVERY:=10}      ; export MMLLM_REPLAY_EVERY
+: ${MMLLM_REPLAY_BUFFER_SIZE:=256}; export MMLLM_REPLAY_BUFFER_SIZE
+: ${MMLLM_REPLAY_THRESHOLD:=0.5} ; export MMLLM_REPLAY_THRESHOLD
+: ${MMLLM_ABLATE_EVERY:=0}       ; export MMLLM_ABLATE_EVERY
+: ${MMLLM_SKIP_NETBANK_WARMSTART:=true}; export MMLLM_SKIP_NETBANK_WARMSTART     # extending — V_net is carried forward; don't re-warm
 export MMLLM_ABLATION_EVAL_CAP="${MMLLM_ABLATION_EVAL_CAP:-25000}"
 unset MMLLM_LITE_CKPT
 unset MMLLM_MAX_STEPS

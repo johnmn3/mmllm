@@ -820,17 +820,18 @@
    layer × trunk at sqrt_n=226 is 226² × 16 × 4 = 3.3 MB (vs 26 MB at
    cpu-tiny's q-dim=128)."
   {:d-model            32
-   ;; n-heads = 16 (split 8 short + 8 long) at head-dim=2. d-model and
-   ;; per-block dense-param count unchanged from the original 4×8 layout
-   ;; (q-dim = n-long-heads × head-dim = 8 × 2 = 16 stays at 16). The
-   ;; reshuffle gives the router 4× independent query channels into the
-   ;; banks without changing param count — same dense, wider routing.
-   ;; Per-head expressivity is low (head-dim=2 means RoPE has only one
-   ;; freq per head) — this is the cpu-mini d_model=32 ceiling. When the
-   ;; dense scales up later, head-dim should grow back to 8+.
-   :n-heads            16
-   :n-short-heads      8
-   :n-long-heads       8
+   ;; n-heads = 4 (split 2 short + 2 long) at head-dim=8. The original
+   ;; cpu-mini layout (commit 0530af6). DON'T reshuffle this without
+   ;; resetting the chain — head_dim governs K/V proj shape via
+   ;; (d_model × n_kv_heads × head_dim), and saved dense.pt checkpoints
+   ;; have head_dim=8-shaped K/V tensors. Reshuffling to head_dim=4 or 2
+   ;; broke 240/618 dense params on resume in commits 414ea97 / 7e45963
+   ;; (caught 2026-05-15; reverted here). The "wider routing" argument
+   ;; for reshuffling was wrong — bandwidth lives in TOP_K env vars,
+   ;; not in n_heads geometry. q-dim = n-long-heads × head-dim = 2 × 8 = 16.
+   :n-heads            4
+   :n-short-heads      2
+   :n-long-heads       2
    :n-short-kv-heads   1
    :n-long-kv-heads    1
    :n-layers           32
