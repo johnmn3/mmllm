@@ -44,6 +44,30 @@
       "harvested_at": "2026-05-15T05:25:23Z",
       "round": 121
     },
+    "765cf22acee8600659bd24812fdf2ad09d334fe9": {
+      "branch": "claude/chaindiverse-extendVGt8X-20260515-074831",
+      "handle": "extendVGt8X",
+      "harvested_at": "2026-05-15T09:18:59Z",
+      "round": 10
+    },
+    "80b282cbb1f03423fea560293bbb691e7b8298e9": {
+      "branch": "claude/chaindiverse-fim-cQUhK-20260515-074300",
+      "handle": "cQUhK",
+      "harvested_at": "2026-05-15T09:18:59Z",
+      "round": 10
+    },
+    "961f78cf2162a90a4aee4c1a4acd3a9e2a2495fa": {
+      "branch": "claude/chaindiverse-dispatcher-QhqK0-20260515-072546",
+      "handle": "dispatcher-QhqK0",
+      "harvested_at": "2026-05-15T09:18:59Z",
+      "round": 10
+    },
+    "9acc3291ed205cb5d138d2024f87c53a00dbd350": {
+      "branch": "claude/chaindiverse-fim-ZniT6-20260515-072157",
+      "handle": "ZniT6",
+      "harvested_at": "2026-05-15T09:18:59Z",
+      "round": 10
+    },
     "9fd058e29f25a39918afde0af0e249ab7967c440": {
       "branch": "claude/chaindiverse-claude-chaindiverse-T3giJ-r111",
       "handle": "claude-chaindiverse-T3giJ",
@@ -67,6 +91,12 @@
       "handle": "bWADV",
       "harvested_at": "2026-05-15T05:25:23Z",
       "round": 121
+    },
+    "c7fa92e52fedc29c784af2d04ac43d283ac2fa62": {
+      "branch": "claude/chaindiverse-claude-20260515-071817",
+      "handle": "claude",
+      "harvested_at": "2026-05-15T09:18:59Z",
+      "round": 10
     },
     "ce2dce218162c86d3dd071149526461e5e20e808": {
       "branch": "claude/chaindiverse-extend-O5PRU-20260515-033038",
