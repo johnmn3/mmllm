@@ -113,7 +113,7 @@ print('\n'.join(m.get('processed', {}).keys()))
         echo "    WARN: fetch failed for $br, skipping"; continue
       }
     marker=$(git ls-tree -r --name-only "origin/$br" 2>/dev/null \
-      | grep -oE "workers/[^/]+/chain-(diverse-[0-9]+|design-r[0-9]+)/" \
+      | grep -oE "workers/[^/]+/chain-(diverse-[0-9]+|design-r[0-9]+(-[0-9]+)?)/" \
       | head -1)
     if [ -z "$marker" ]; then
       echo "    WARN: no chain-* marker dir in $br tree, skipping"
@@ -136,7 +136,12 @@ print('\n'.join(m.get('processed', {}).keys()))
   echo "  selected TARGET=$TARGET (highest round among unprocessed branches)"
 fi
 
-PRIOR=$((TARGET - 10))
+# PRIOR = wave-relative round just-prior. For wave-prefixed targets
+# like "2-10" (wave 2, round 10 of that wave), the worker extended from
+# "<prior-wave>-r10" (the reference produced by the previous wave's
+# harvest). Bash arithmetic on the LAST numeric segment of TARGET:
+TARGET_ROUND="${TARGET##*-}"   # "2-10" -> "10";  "10" -> "10"
+PRIOR=$((TARGET_ROUND - 10))
 PRIOR_NEXT=$((PRIOR + 1))
 
 STAGE=/tmp/mmllm-cpu/harvest-r${TARGET}
@@ -292,16 +297,26 @@ done < "$MANIFEST"
 # this point — the dilution bug in naive V_net mean is bypassed even for
 # legacy workers.
 REFERENCE_DIR=""
-for cand in workers/dispatcher/harvest-*-r${PRIOR}/round-${PRIOR} \
-            workers/dispatcher/harvest-cooked-r${PRIOR}/round-${PRIOR}; do
-  if [ -d "$cand" ] && [ -f "$cand/V_net.0.bin" ]; then
-    REFERENCE_DIR="$cand"; break
+# Try `current` first (covers wave-prefixed targets where PRIOR=0):
+if [ -L workers/dispatcher/current ] || [ -d workers/dispatcher/current ]; then
+  cand_cur=$(readlink -f workers/dispatcher/current 2>/dev/null)
+  if [ -d "$cand_cur" ] && [ -f "$cand_cur/V_net.0.bin" ]; then
+    REFERENCE_DIR="$cand_cur"
   fi
-done
+fi
+# Fall back to the legacy r${PRIOR} glob if `current` isn't set.
+if [ -z "$REFERENCE_DIR" ]; then
+  for cand in workers/dispatcher/harvest-*-r${PRIOR}/round-${PRIOR} \
+              workers/dispatcher/harvest-cooked-r${PRIOR}/round-${PRIOR}; do
+    if [ -d "$cand" ] && [ -f "$cand/V_net.0.bin" ]; then
+      REFERENCE_DIR="$cand"; break
+    fi
+  done
+fi
 if [ -n "$REFERENCE_DIR" ]; then
   echo "  reference V_net (for on-the-fly delta encoding): ${REFERENCE_DIR}"
 else
-  echo "  no local reference V_net found at workers/dispatcher/harvest-*-r${PRIOR}/round-${PRIOR}"
+  echo "  no local reference V_net found at workers/dispatcher/{current,harvest-*-r${PRIOR}}/round-${PRIOR}"
   echo "  legacy workers will fall through to naive-mean FedAvg (dilution bug applies)"
 fi
 
