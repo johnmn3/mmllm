@@ -345,3 +345,51 @@ def block_forward(
     ffn_out = down_proj(F.silu(gate_proj(x_norm)) * up_proj(x_norm))
     x = x + ffn_out
     return x, new_s, new_l
+
+
+def checkpointed_block_forward(
+    norm1, norm2,
+    q_proj, k_proj_s, v_proj_s, k_proj_l, v_proj_l, o_proj,
+    memory, long_gate, bank_query, bank_feedback,
+    gate_proj, up_proj, down_proj,
+    n_heads, n_short_heads, n_long_heads,
+    n_short_kv_heads, n_long_kv_heads,
+    head_dim, max_t, short_window, long_window,
+    x, cos, sin, short_cache, long_cache,
+    skip_bank=False, netbank=None, trunk_ids=None,
+):
+    """Gradient-checkpoint wrapper around `block_forward`.
+
+    Same positional signature as `block_forward` so basilisp's
+    destructure-then-call shim can target either function. Returns
+    ONLY x_out — drops (short_cache, long_cache) outputs since
+    train-step discards them. Single-tensor return avoids
+    torch.utils.checkpoint's non-determinism check tripping on
+    block_forward's mixed tensor+tuple return.
+
+    Crucially, this is a top-level Python function (NOT a basilisp
+    closure inside loop/recur). Each call's arguments live in their
+    own Python locals, so the inner `_fn` closure cell holds the
+    correct per-iteration values. A closure defined directly inside
+    basilisp's `loop` shares cells across iterations (late-binding),
+    so every checkpoint's backward recompute ends up using the LAST
+    iteration's block — producing shape mismatches between the
+    saved forward tensors and the recomputed ones.
+    """
+    import torch.utils.checkpoint as _ckpt
+
+    def _fn(x_arg):
+        x_out, _s, _l = block_forward(
+            norm1, norm2,
+            q_proj, k_proj_s, v_proj_s, k_proj_l, v_proj_l, o_proj,
+            memory, long_gate, bank_query, bank_feedback,
+            gate_proj, up_proj, down_proj,
+            n_heads, n_short_heads, n_long_heads,
+            n_short_kv_heads, n_long_kv_heads,
+            head_dim, max_t, short_window, long_window,
+            x_arg, cos, sin, short_cache, long_cache,
+            skip_bank=skip_bank, netbank=netbank, trunk_ids=trunk_ids,
+        )
+        return x_out
+
+    return _ckpt.checkpoint(_fn, x, use_reentrant=False)

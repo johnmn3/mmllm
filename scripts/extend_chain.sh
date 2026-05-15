@@ -68,18 +68,33 @@ export MMLLM_NET_BANK_ON_GPU=false
 # = 6144 fp32 per query, comparable to ~3 Gemma attention heads worth
 # of per-token bandwidth.
 #
-# RAM cost: outer-sum alloc per call is B × T × SUB_TOP_K² × 4B.
-# At default B=16, T=1024, SUB_TOP_K=128 → 17 GB single alloc.
-# 15-16 GB containers MUST lower B and/or SUB_TOP_K. Recommended for
-# 15 GB: MMLLM_BATCH=4 MMLLM_MEMORY_SUB_TOP_K=32 MMLLM_NET_SUB_TOP_K=32.
+# RAM cost: the per-block activation snapshot at effective batch
+# N_TRUNKS×MMLLM_BATCH=16 (with current defaults) and full bandwidth
+# is ~450 MB × 32 layers ≈ 14 GB without gradient checkpointing.
+# MMLLM_GRAD_CHECKPOINT=true (set below) drops each block's
+# intermediates after the block returns and recomputes them during
+# backward — fits the recipe in ~24 GB containers. Tight (<= 16 GB)
+# containers may still OOM during backward at this bandwidth; they
+# need either smaller NET_TOP_K (recipe change) or further refactor.
 : ${MMLLM_MEMORY_TOP_K:=128}     ; export MMLLM_MEMORY_TOP_K
 : ${MMLLM_MEMORY_SUB_TOP_K:=128} ; export MMLLM_MEMORY_SUB_TOP_K
 : ${MMLLM_NET_TOP_K:=512}        ; export MMLLM_NET_TOP_K
 : ${MMLLM_NET_SUB_TOP_K:=64}     ; export MMLLM_NET_SUB_TOP_K
+# N_TRUNKS is a misnomer — these are the 16 ROUTERS per Local Bank
+# layer (1 MB each × 16 = 16 MB; CLAUDE.md "16 routers per local bank").
+# The dense backbone is a SINGLE shared trunk; only the env var is
+# misnamed. Renaming requires a coordinated change across core.lpy +
+# scripts + ckpt manifests, deferred.
 : ${MMLLM_N_TRUNKS:=16}          ; export MMLLM_N_TRUNKS
 : ${MMLLM_SPARSE_OPT:=adam-cpu}  ; export MMLLM_SPARSE_OPT
-# Training throughput — 16× tokens/step at same model size.
-: ${MMLLM_BATCH:=16}             ; export MMLLM_BATCH
+# MMLLM_BATCH is per-ROUTER. Effective training batch is
+# MMLLM_N_TRUNKS × MMLLM_BATCH (i.e. 16 × 1 = 16 here). The wave-2
+# commit 7e45963 bumped this 1→16 thinking it controlled total batch;
+# that produced an effective batch of 256, which combined with the 8×
+# bandwidth bump from the same commit needed ~32 GB peak RAM. The
+# wave-1 effective batch of 16 already came from MMLLM_BATCH=1 ×
+# N_TRUNKS=16, so this default reverts to that.
+: ${MMLLM_BATCH:=1}              ; export MMLLM_BATCH
 : ${MMLLM_NETBANK_ENABLED:=true} ; export MMLLM_NETBANK_ENABLED
 : ${MMLLM_LONG_TIER_MIX:=switch} ; export MMLLM_LONG_TIER_MIX
 : ${MMLLM_ALPHA_NET:=true}       ; export MMLLM_ALPHA_NET
@@ -105,6 +120,14 @@ export MMLLM_LR_WARMUP=$((STEPS * 70 / 100))
 : ${MMLLM_REPLAY_THRESHOLD:=0.5} ; export MMLLM_REPLAY_THRESHOLD
 : ${MMLLM_ABLATE_EVERY:=0}       ; export MMLLM_ABLATE_EVERY
 : ${MMLLM_SKIP_NETBANK_WARMSTART:=true}; export MMLLM_SKIP_NETBANK_WARMSTART     # extending — V_net is carried forward; don't re-warm
+# Per-block gradient checkpointing: drops each block's intermediates
+# (NetBank latent, Local-PKM combined_scores, SDPA scratch) after the
+# block returns and recomputes them during backward. ~30% wall hit,
+# ~16-32× lower peak RAM. Without this, the wave-2 bandwidth recipe
+# (NET_TOP_K=512, MEMORY_SUB_TOP_K=128) doesn't fit common containers
+# — the 32-layer activation snapshot reaches ~36 GB at effective batch
+# 16 and ~576 GB at the default effective batch of 256.
+: ${MMLLM_GRAD_CHECKPOINT:=true} ; export MMLLM_GRAD_CHECKPOINT
 export MMLLM_ABLATION_EVAL_CAP="${MMLLM_ABLATION_EVAL_CAP:-25000}"
 unset MMLLM_LITE_CKPT
 unset MMLLM_MAX_STEPS

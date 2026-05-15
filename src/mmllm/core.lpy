@@ -960,6 +960,29 @@
   (let [v (.lower (.get (.- os environ) "MMLLM_NAN_GUARD" "false"))]
     (.__contains__ #{"1" "true" "yes"} v)))
 
+(defn pick-grad-checkpoint?
+  "Whether `forward` should wrap each block in
+   torch.utils.checkpoint.checkpoint. Reads MMLLM_GRAD_CHECKPOINT
+   (default 'false').
+
+   When true and grad is enabled, each block's intermediates
+   (NetBank latent, Local-PKM combined_scores, SDPA scratch, …)
+   are dropped after the block returns and recomputed during
+   backward. Trades ~30% wall time for ~16-32× lower peak RAM:
+   the 32 layers' activation snapshot is replaced by 32 small
+   per-block input tensors plus one block's intermediates live
+   at a time during backward.
+
+   Required for wave-2's NET_TOP_K=512 / MEMORY_SUB_TOP_K=128
+   recipe to fit on common containers — without checkpointing
+   the activation snapshot is ~36 GB at effective batch 16 and
+   ~576 GB at the wave-2 default effective batch of 256.
+
+   Skipped at eval (no grad → no backward → nothing to save)."
+  []
+  (let [v (.lower (.get (.- os environ) "MMLLM_GRAD_CHECKPOINT" "false"))]
+    (.__contains__ #{"1" "true" "yes"} v)))
+
 (defn nan-guard!
   "Check tensor for NaN/Inf and raise with `tag` on detection. No-op
    when t is None (e.g., aux-logits in non-MTP mode). Caller decides
@@ -1407,7 +1430,26 @@
                  n-heads n-short-heads n-long-heads
                  n-short-kv-heads n-long-kv-heads head-dim max-t
                  short-window long-window]} block
-         [x' s' l'] (kernel/block_forward
+         ;; Gradient checkpointing branch: when MMLLM_GRAD_CHECKPOINT
+         ;; is true AND grad is enabled (training, not eval), route
+         ;; through kernel/checkpointed_block_forward. That helper is
+         ;; a top-level Python function — taking the destructured
+         ;; block fields as arguments — so each call's inner closure
+         ;; gets a FRESH Python local for `block`, avoiding the
+         ;; late-binding bug that would happen if we tried to close
+         ;; over `block` from a basilisp `loop` (Clojure's `loop`
+         ;; compiles to a Python while-loop with shared cells; every
+         ;; per-iter closure ends up pointing at the LAST block by
+         ;; the time backward runs the recompute).
+         ;;
+         ;; Returns only x_out (no KV-cache outputs). Train-step
+         ;; discards short/long caches anyway, so this is fine and
+         ;; lets checkpoint's saved-tensor tracker see a single
+         ;; tensor return — no false-positive non-determinism trips
+         ;; on the original mixed tensor+tuple return.
+         ckpt?      (and (pick-grad-checkpoint?) (torch/is_grad_enabled))]
+     (if ckpt?
+       (let [x-ckpt (kernel/checkpointed_block_forward
                       norm1 norm2
                       q-proj k-proj-s v-proj-s k-proj-l v-proj-l o-proj
                       memory long-gate bank-query bank-feedback
@@ -1418,14 +1460,31 @@
                       x cos sin short-cache long-cache
                       ** :skip_bank skip-bank?
                       :netbank netbank
-                      :trunk_ids trunk-ids)]
-     ;; Multi-timescale carry as a post-block residual delta. Carry's
-     ;; gate is zero-init so at step 0 this is identity (no behavior
-     ;; change vs no-carry); training pushes the gate to mix EMAs at
-     ;; ~1/5/22/86-token half-lives back into the stream.
-     (if carry
-       [(carry x') s' l']
-       [x' s' l']))))
+                      :trunk_ids trunk-ids)
+             ;; Carry applied OUTSIDE checkpoint — it's cheap and we
+             ;; don't need its tiny intermediates re-materialized.
+             x'     (if carry (carry x-ckpt) x-ckpt)]
+         [x' nil nil])
+       (let [[x' s' l'] (kernel/block_forward
+                          norm1 norm2
+                          q-proj k-proj-s v-proj-s k-proj-l v-proj-l o-proj
+                          memory long-gate bank-query bank-feedback
+                          gate-proj up-proj down-proj
+                          n-heads n-short-heads n-long-heads
+                          n-short-kv-heads n-long-kv-heads head-dim max-t
+                          short-window long-window
+                          x cos sin short-cache long-cache
+                          ** :skip_bank skip-bank?
+                          :netbank netbank
+                          :trunk_ids trunk-ids)]
+         ;; Multi-timescale carry as a post-block residual delta.
+         ;; Carry's gate is zero-init so at step 0 this is identity
+         ;; (no behavior change vs no-carry); training pushes the
+         ;; gate to mix EMAs at ~1/5/22/86-token half-lives back
+         ;; into the stream.
+         (if carry
+           [(carry x') s' l']
+           [x' s' l']))))))
 
 (defn build-block
   [{:keys [d-model n-heads n-short-heads n-long-heads

@@ -38,42 +38,56 @@ MMLLM_MEMORY_TOP_K=128      # Local retrieval bandwidth
 MMLLM_MEMORY_SUB_TOP_K=128
 MMLLM_NET_TOP_K=512         # Net retrieval bandwidth
 MMLLM_NET_SUB_TOP_K=64
-MMLLM_N_TRUNKS=16
-MMLLM_BATCH=16
+MMLLM_N_TRUNKS=16           # 16 ROUTERS per Local Bank (env var is misnamed;
+                            # CLAUDE.md: "16 routers per local bank, not trunks").
+                            # There is ONE shared trunk (the dense backbone).
+MMLLM_BATCH=1               # PER-ROUTER batch. Effective training batch =
+                            # MMLLM_N_TRUNKS × MMLLM_BATCH = 16. Wave-2's old
+                            # MMLLM_BATCH=16 was a misunderstanding — it
+                            # produced effective batch 256 (16× over wave-1).
+MMLLM_GRAD_CHECKPOINT=true  # Per-block gradient checkpointing. Drops each
+                            # block's intermediates after the block returns
+                            # and recomputes during backward. ~30% wall hit,
+                            # ~10× lower peak RAM. Required for the wave-2
+                            # bandwidth recipe to fit common containers.
 rope-theta=500000           # Llama-3 base for long-context extensibility
 seq-len=1024  max-pos=8192
 n-heads=4 (head-dim=8)      # REVERTED from the broken n-heads=16
 ```
 
-## Memory budget — KNOW YOUR ENVELOPE
+## Memory budget
 
-The PKM outer-sum allocation in `memory.py:987` is:
+The wave-2 bandwidth recipe needs **24+ GB** to run comfortably (full
+forward + backward at effective batch 16). 32+ GB containers can scale
+MMLLM_BATCH up to 2-4 for higher throughput.
 
-    [B × T × SUB_TOP_K × SUB_TOP_K × 4 bytes]   per call
+Knobs explained:
 
-At default `B=16, T=1024, SUB_TOP_K=128`:
+- **`MMLLM_BATCH`** is per-ROUTER; effective batch = `MMLLM_N_TRUNKS × MMLLM_BATCH`.
+  Default = 1 → effective 16. Set to 2 for effective 32 (32 GB containers),
+  4 for effective 64 (48+ GB).
+- **`MMLLM_GRAD_CHECKPOINT=true`** (default) cuts peak forward RAM ~10×
+  by dropping each block's `combined_scores / latent / SDPA scratch`
+  after the block returns and recomputing during backward. Pure compute
+  trade-off (~30% wall hit). Set to `false` only on 64+ GB containers
+  where the wall savings matter more than the headroom.
+- **TOP_K** values (`MMLLM_MEMORY_TOP_K=128`, `MMLLM_NET_TOP_K=512`)
+  are the bandwidth contract — keep them at default unless your
+  container can't hold the per-block forward at all.
 
-    16 × 1024 × 128 × 128 × 4 = 17.2 GB        ← single alloc
+### Containers below 24 GB
 
-That's bigger than a 15-16 GB container. **If your container has
-less than ~24 GB RAM, you MUST lower one or both of B and SUB_TOP_K.**
-Recommended starting points by container size:
-
-| container RAM | MMLLM_BATCH | MMLLM_MEMORY_SUB_TOP_K | MMLLM_NET_SUB_TOP_K |
-|--------------:|:-----------:|:----------------------:|:-------------------:|
-| **15-16 GB**  | 4           | 32                     | 32                  |
-| **24 GB**     | 8           | 64                     | 48                  |
-| **32+ GB**    | 16 (default)| 128 (default)          | 64 (default)        |
-
-Lowering B reduces tokens/step proportionally; lowering SUB_TOP_K
-narrows retrieval bandwidth. Both are acceptable trade-offs for fitting
-the box. The TOP_K (not SUB_TOP_K) values are the recipe contract;
-keep MMLLM_NET_TOP_K=512 and MMLLM_MEMORY_TOP_K=128 if at all possible.
+Wave-2's bandwidth (NET_TOP_K=512) is the binding constraint. Even with
+checkpointing on and MMLLM_BATCH=1, the per-block backward recompute at
+this bandwidth approaches the 16 GB envelope. Birds on 15-16 GB
+containers can't safely run wave-2 default — please skip this wave or
+report your container size so we can scope a smaller-bandwidth tier.
 
 Pass overrides via env BEFORE invoking the script:
 
 ```bash
-MMLLM_BATCH=4 MMLLM_MEMORY_SUB_TOP_K=32 MMLLM_NET_SUB_TOP_K=32 \
+# 32 GB container — increase effective batch to 32 for higher throughput
+MMLLM_BATCH=2 \
   bash scripts/run_chain_diverse.sh 10 20
 ```
 
@@ -271,7 +285,9 @@ Dispatcher will harvest via `bash scripts/harvest_chain.sh 2-10`.
 ## Hard rules (these are real)
 
 - DO NOT change MMLLM_MIX (the corpus weights), MMLLM_LR_LAYER_MULTS,
-  MMLLM_DISTILL_GATE_*, bank sizes, n-heads, head-dim, or n-trunks.
+  MMLLM_DISTILL_GATE_*, bank sizes, n-heads, head-dim, or n-routers
+  (MMLLM_N_TRUNKS is misnamed — it controls routers, not trunks;
+  there's only one trunk, the dense backbone).
   Those ARE the architecture / recipe contract.
 - B and SUB_TOP_K ARE tunable to fit RAM. Document what you ran at.
 - DO publish on partial failure — a few completed rounds + logs

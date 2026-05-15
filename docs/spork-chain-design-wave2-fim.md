@@ -39,37 +39,59 @@ MMLLM_MEMORY_TOP_K=128      # Local retrieval bandwidth
 MMLLM_MEMORY_SUB_TOP_K=128
 MMLLM_NET_TOP_K=512         # Net retrieval bandwidth
 MMLLM_NET_SUB_TOP_K=64
-MMLLM_N_TRUNKS=16
-MMLLM_BATCH=16
+MMLLM_N_TRUNKS=16           # 16 ROUTERS per Local Bank (env var is misnamed;
+                            # CLAUDE.md: "16 routers per local bank, not trunks").
+                            # There is ONE shared trunk (the dense backbone).
+MMLLM_BATCH=1               # PER-ROUTER batch. Effective training batch =
+                            # MMLLM_N_TRUNKS × MMLLM_BATCH = 16. Wave-2's old
+                            # MMLLM_BATCH=16 was a misunderstanding — it
+                            # produced effective batch 256 (16× over wave-1).
+MMLLM_GRAD_CHECKPOINT=true  # Per-block gradient checkpointing. Drops each
+                            # block's intermediates after the block returns
+                            # and recomputes during backward. ~30% wall hit,
+                            # ~10× lower peak RAM. Required for the wave-2
+                            # bandwidth recipe to fit common containers.
 rope-theta=500000
 seq-len=1024  max-pos=8192
 n-heads=4 (head-dim=8)      # REVERTED from the broken n-heads=16
 ```
 
-## Memory budget — KNOW YOUR ENVELOPE
+## Memory budget
 
-The PKM outer-sum allocation is `[B × T × SUB_TOP_K² × 4B]` per call.
-At default `B=16, T=1024, SUB_TOP_K=128` that's **17 GB** for a single
-alloc, exceeding a 15-16 GB container. Recommended starting points:
+The wave-2 bandwidth recipe needs **24+ GB** to run comfortably (full
+forward + backward at effective batch 16). 32+ GB containers can scale
+MMLLM_BATCH up to 2-4 for higher throughput.
 
-| container RAM | MMLLM_BATCH | MMLLM_MEMORY_SUB_TOP_K | MMLLM_NET_SUB_TOP_K |
-|--------------:|:-----------:|:----------------------:|:-------------------:|
-| **15-16 GB**  | 4           | 32                     | 32                  |
-| **24 GB**     | 8           | 64                     | 48                  |
-| **32+ GB**    | 16 (default)| 128 (default)          | 64 (default)        |
+Knobs explained:
 
-TOP_K values (`MMLLM_MEMORY_TOP_K=128`, `MMLLM_NET_TOP_K=512`) are
-the bandwidth contract — keep them at default. SUB_TOP_K and B are
-your two memory throttles.
+- **`MMLLM_BATCH`** is per-ROUTER; effective batch = `MMLLM_N_TRUNKS × MMLLM_BATCH`.
+  Default = 1 → effective 16. Set to 2 for effective 32 (32 GB containers),
+  4 for effective 64 (48+ GB).
+- **`MMLLM_GRAD_CHECKPOINT=true`** (default) cuts peak forward RAM ~10×
+  by dropping each block's `combined_scores / latent / SDPA scratch`
+  after the block returns and recomputing during backward. Pure compute
+  trade-off (~30% wall hit). Set to `false` only on 64+ GB containers
+  where the wall savings matter more than the headroom.
+- **TOP_K** values (`MMLLM_MEMORY_TOP_K=128`, `MMLLM_NET_TOP_K=512`)
+  are the bandwidth contract — keep them at default unless your
+  container can't hold the per-block forward at all.
 
 Pass overrides via env BEFORE invoking the script:
 
 ```bash
-MMLLM_BATCH=4 MMLLM_MEMORY_SUB_TOP_K=32 MMLLM_NET_SUB_TOP_K=32 \
+MMLLM_BATCH=2 \
   bash scripts/extend_chain.sh 10 20
 ```
 
 The script uses `: ${VAR:=default}` so env-passed values win.
+
+### Containers below 24 GB
+
+Wave-2's bandwidth (NET_TOP_K=512) is the binding constraint. Even with
+checkpointing on and MMLLM_BATCH=1, the per-block backward recompute at
+this bandwidth approaches the 16 GB envelope. Birds on 15-16 GB
+containers can't safely run wave-2 default — please skip this wave or
+report your container size so we can scope a smaller-bandwidth tier.
 
 ## Setup
 
@@ -272,8 +294,10 @@ Dispatcher will harvest via `bash scripts/harvest_chain.sh 2-10`.
 
 - DO NOT change MMLLM_MIX (FIM-only is the specialization point),
   MMLLM_LR_LAYER_MULTS, MMLLM_DISTILL_GATE_*, bank sizes, n-heads,
-  head-dim, or n-trunks.
-- B and SUB_TOP_K ARE tunable to fit RAM. Document what you ran at.
+  head-dim, or n-routers (MMLLM_N_TRUNKS is misnamed — controls
+  routers, not trunks; there's only one trunk, the dense backbone).
+- MMLLM_BATCH (per-router) and MMLLM_GRAD_CHECKPOINT are tunable
+  to fit RAM. Document what you ran at.
 - DO publish on partial failure.
 - DO NOT touch `workers/dispatcher/` or anyone else's `workers/<h>/`.
 - If your first OOM is unrecoverable, publish a meta.json with
