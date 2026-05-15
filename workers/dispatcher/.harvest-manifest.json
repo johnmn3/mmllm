@@ -1,10 +1,34 @@
 {
   "processed": {
+    "210ad93b5e604a712f77138195b0acee9e59103a": {
+      "branch": "claude/chaindiverse-dispatcher-Ne688-20260515-030055",
+      "handle": "dispatcher-Ne688",
+      "harvested_at": "2026-05-15T05:25:23Z",
+      "round": 121
+    },
+    "347e7d33d80c94dee77e004414ceaa27d04cc840": {
+      "branch": "claude/chaindiverse-fim-claude-fim-specialist-20260515-032025",
+      "handle": "claude-fim-specialist",
+      "harvested_at": "2026-05-15T05:25:23Z",
+      "round": 121
+    },
     "3856b1a71e3664eb69b893c921bc67ddd298ab6d": {
       "branch": "claude/chaindiverse-opus47-r111",
       "handle": "opus47",
       "harvested_at": "2026-05-15T01:56:08Z",
       "round": 111
+    },
+    "582fcf5251773e934d6d428914f10c0b0fbd6dfd": {
+      "branch": "claude/chaindiverse-fim-TljTE-20260515-032012",
+      "handle": "TljTE",
+      "harvested_at": "2026-05-15T05:25:23Z",
+      "round": 121
+    },
+    "636d3665fb8fe0e8f54a233e8578b52040486c1c": {
+      "branch": "claude/chaindiverse-fim-claude-fim-E3Zyd-20260515-034146",
+      "handle": "claude-fim-E3Zyd",
+      "harvested_at": "2026-05-15T05:25:23Z",
+      "round": 121
     },
     "9fd058e29f25a39918afde0af0e249ab7967c440": {
       "branch": "claude/chaindiverse-claude-chaindiverse-T3giJ-r111",
@@ -23,6 +47,24 @@
       "handle": "opus47-may13",
       "harvested_at": "2026-05-15T01:56:08Z",
       "round": 111
+    },
+    "b9956708f5f2ce35370292e0c596c2f34528b419": {
+      "branch": "claude/chaindiverse-fim-bWADV-20260515-032851",
+      "handle": "bWADV",
+      "harvested_at": "2026-05-15T05:25:23Z",
+      "round": 121
+    },
+    "ce2dce218162c86d3dd071149526461e5e20e808": {
+      "branch": "claude/chaindiverse-extend-O5PRU-20260515-033038",
+      "handle": "extend-O5PRU",
+      "harvested_at": "2026-05-15T05:25:23Z",
+      "round": 121
+    },
+    "e1e05ea0338da0cb2970d9221131d4549082284b": {
+      "branch": "claude/chaindiverse-extend-34wbO-20260515-041453",
+      "handle": "extend-34wbO",
+      "harvested_at": "2026-05-15T05:25:23Z",
+      "round": 121
     }
   }
 }

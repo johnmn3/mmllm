@@ -1,0 +1,44 @@
+{
+  "target_round": 121,
+  "n_workers": 7,
+  "workers": [
+    {
+      "handle": "TljTE",
+      "branch": "claude/chaindiverse-TljTE-r121",
+      "ctrl_bpc": 0.8408
+    },
+    {
+      "handle": "bWADV",
+      "branch": "claude/chaindiverse-bWADV-r121",
+      "ctrl_bpc": 0.8432
+    },
+    {
+      "handle": "claude-fim-E3Zyd",
+      "branch": "claude/chaindiverse-claude-fim-E3Zyd-r121",
+      "ctrl_bpc": 0.8418
+    },
+    {
+      "handle": "claude-fim-specialist",
+      "branch": "claude/chaindiverse-claude-fim-specialist-r121",
+      "ctrl_bpc": 0.8503
+    },
+    {
+      "handle": "dispatcher-Ne688",
+      "branch": "claude/chaindiverse-dispatcher-Ne688-r121",
+      "ctrl_bpc": 0.9523
+    },
+    {
+      "handle": "extend-34wbO",
+      "branch": "claude/chaindiverse-extend-34wbO-r121",
+      "ctrl_bpc": 0.9522
+    },
+    {
+      "handle": "extend-O5PRU",
+      "branch": "claude/chaindiverse-extend-O5PRU-r121",
+      "ctrl_bpc": 0.9587
+    }
+  ],
+  "worker_ctrl_bpc_mean": 0.8913285714285715,
+  "worker_ctrl_bpc_best": 0.8408,
+  "extended_from": "workers/dispatcher/harvest-Nway-r111/round-111"
+}
