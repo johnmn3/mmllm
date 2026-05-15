@@ -22,12 +22,13 @@ if [ -z "${1:-}" ]; then
     exit 2
   fi
   SRC=$(readlink -f "$CURRENT")
-  ROUND=$(basename "$SRC" | sed -E 's/^round-([0-9]+)$/\1/')
-  if [ -z "$ROUND" ]; then
-    echo "ERROR: $CURRENT does not resolve to a round-N dir (got $SRC)" >&2
-    exit 2
-  fi
-  echo "  using dispatcher current → $SRC (round $ROUND)"
+  # Wave-agnostic mode: stage the reference as round-0/ regardless of the
+  # source's absolute round number. extend_chain.sh then trains round-1
+  # through round-10, so the worker's chat outputs and log files use
+  # wave-relative numbering ("Round 1 done", "Round 2 done", …) instead
+  # of leaking the dispatcher's absolute wave counter.
+  ROUND=0
+  echo "  using dispatcher current → $SRC (wave-relative round-0)"
 else
   ROUND="$1"
   SRC=$(ls -d workers/dispatcher/harvest-*way-r${ROUND}/round-${ROUND} \

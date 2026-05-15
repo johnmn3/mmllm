@@ -163,11 +163,16 @@ mkdir -p "$STAGE"
 #   R91+:     workers/<handle>/chain-design-r${TARGET}/  (design-sized wave)
 # A worker that uses the other marker for its round won't be picked up —
 # this is acceptable since all waves at a given round use one convention.
-if [ "$TARGET" -ge 91 ]; then
-  MARKER="chain-design-r${TARGET}"
-else
-  MARKER="chain-diverse-${TARGET}"
-fi
+# Marker subdir name. Workers publish to:
+#   workers/<handle>/chain-design-r${LAST}/
+# where LAST is the highest round in the worker's local archive. In
+# wave-agnostic mode workers stage the reference as round-0 and train
+# round-1..10, so LAST=10 universally. Legacy waves had absolute round
+# numbers (R30-R90 used `chain-diverse-${TARGET}`, R91+ used
+# `chain-design-r${TARGET}`); those are all already harvested and in
+# the manifest, so this script only needs to recognize the current
+# `chain-design-r${TARGET}` form.
+MARKER="chain-design-r${TARGET}"
 echo "  using marker subdir: ${MARKER}"
 
 REMOTE_REFS=$(git ls-remote origin 2>&1 | awk '{print $2}' | grep -E "^refs/heads/")
