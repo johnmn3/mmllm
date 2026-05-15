@@ -106,6 +106,7 @@ print('\n'.join(m.get('processed', {}).keys()))
   fi
   echo "  ${#UNPROCESSED_BR[@]} unprocessed branch(es); peeking trees to find rounds…"
   declare -A BRANCH_ROUND=()
+  declare -A BRANCH_HANDLE=()    # tree-derived handle (handles fim- prefix etc)
   for br in "${!UNPROCESSED_BR[@]}"; do
     git fetch origin "$br" --filter=blob:none --depth=1 2>&1 \
       | tail -1 | grep -qE "(FETCH_HEAD|new branch|up to date)" || {
@@ -119,8 +120,13 @@ print('\n'.join(m.get('processed', {}).keys()))
       continue
     fi
     round=$(echo "$marker" | grep -oE "[0-9]+" | tail -1)
+    # Extract the actual worker dir name from the tree, not from the
+    # branch name. Branch names may carry a category prefix (fim-, etc.)
+    # that's not part of the handle on disk.
+    handle=$(echo "$marker" | sed -E 's|^workers/([^/]+)/.*|\1|')
     BRANCH_ROUND["$br"]="$round"
-    echo "    $br → round $round"
+    BRANCH_HANDLE["$br"]="$handle"
+    echo "    $br → round $round, handle $handle"
   done
   if [ ${#BRANCH_ROUND[@]} -eq 0 ]; then
     echo "  no branches with usable marker dirs"
@@ -236,9 +242,15 @@ for br in $CAND_B; do
   fi
 done
 for br in $CAND_C; do
-  # claude/chaindiverse-<HANDLE>-<UTC_TS> → strip trailing -YYYYMMDD-HHMMSS suffix.
-  # Falls back to stripping nothing if no timestamp present.
-  h=$(echo "$br" | sed -E "s|^claude/chaindiverse-(.+)-[0-9]{8}-[0-9]{6}\$|\1|;s|^claude/chaindiverse-(.+)\$|\1|")
+  # Prefer the tree-derived handle (BRANCH_HANDLE) when auto-discovery
+  # populated it — branch names may carry a category prefix (fim-, etc.)
+  # that's not part of the worker dir on disk. Fall back to the branch-
+  # name regex if BRANCH_HANDLE is unset (explicit-TARGET mode).
+  if [ -n "${BRANCH_HANDLE[$br]:-}" ]; then
+    h="${BRANCH_HANDLE[$br]}"
+  else
+    h=$(echo "$br" | sed -E "s|^claude/chaindiverse-(.+)-[0-9]{8}-[0-9]{6}\$|\1|;s|^claude/chaindiverse-(.+)\$|\1|")
+  fi
   if [ -z "${HANDLE_TO_BRANCH[$h]:-}" ]; then
     HANDLE_TO_BRANCH[$h]="$br"
     HANDLE_TO_MARKER[$h]="$MARKER"
@@ -427,20 +439,17 @@ for line in open('$dst/round-${TARGET}.log.jsonl'):
   # repos before reaching N=8.
   rm -rf "$dst"
   git update-ref -d "refs/remotes/origin/${br}" 2>/dev/null || true
-  # Reset FETCH_HEAD so it doesn't keep this worker's commit reachable.
   rm -f .git/FETCH_HEAD
-  # Per-worker prune (not just every 4). --prune=now ignores the 2-week
-  # grace period so unreferenced objects from the deleted branch go away.
-  # `--quiet` keeps the log clean; `2>/dev/null` swallows benign warnings.
-  git gc --prune=now --quiet 2>&1 | tail -3 || true
-  if [ $w_idx -lt $N_WORKERS ]; then
-    df_avail=$(df -m --output=avail /tmp | tail -1 | tr -d ' ')
-    echo "    /tmp free after worker: ${df_avail} MB"
-    if [ "$df_avail" -lt 1500 ]; then
-      echo "    WARN: /tmp free below 1.5 GB — next worker may fail mid-fetch" >&2
-    fi
-  fi
 done < "$MANIFEST"
+
+# Bulk gc once after all workers folded. With sparse-delta workers each
+# adding ~50 MB after pack-dedup, 7 workers ≈ 350 MB — `git gc --auto`
+# will skip the repack unless it actually crosses git's loose-object
+# threshold. The expensive --prune=now full repack from per-worker gc
+# was a legacy-format (1.25 GB worker) mitigation that's no longer needed.
+echo ""
+echo "── 4a. bulk gc --auto (only runs if git thinks it's needed) ──"
+git gc --auto --quiet 2>&1 | tail -3 || true
 
 # Finalize: divide accumulator sums by N, write harvested outputs, publish.
 # Delta-mode workers need a reference V_net to add their merged delta back
