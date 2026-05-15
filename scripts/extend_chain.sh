@@ -56,22 +56,20 @@ export MMLLM_SQRT_N=128
 #   32 layers = 1.07 GB total (= designed 1 GB)
 export MMLLM_NET_SQRT_N=1024
 export MMLLM_NET_C_NET=8
-# Retrieval bandwidth — widened to match bank capacity at the design
-# sizes (Local 128 MB, Net 1 GB). These are size-neutral knobs; they
-# control how much info per query the dense pulls from each tier.
-# Total retrieved per query (fp32):
-#   Local: memory-top-k × q_dim = 64 × 16  = 1024
-#   Net:   net-top-k × c_net    = 256 × 8  = 2048
-# = 3072 fp32 per query, comparable to one Gemma attention head's
-# per-token bandwidth (256 dim × 8 heads = 2048 dense, plus residual).
-export MMLLM_MEMORY_TOP_K=64
-export MMLLM_MEMORY_SUB_TOP_K=64
-export MMLLM_NET_TOP_K=256
-export MMLLM_NET_SUB_TOP_K=32
+# Retrieval bandwidth — 8× the original cpu-mini defaults. Size-neutral
+# (no bank-size impact). Total info pulled per query (fp32):
+#   Local: memory-top-k × q_dim = 128 × 16  = 2048
+#   Net:   net-top-k × c_net    = 512 × 8   = 4096
+# = 6144 fp32 per query, comparable to ~3 Gemma attention heads worth
+# of per-token bandwidth.
+export MMLLM_MEMORY_TOP_K=128
+export MMLLM_MEMORY_SUB_TOP_K=128
+export MMLLM_NET_TOP_K=512
+export MMLLM_NET_SUB_TOP_K=64
 export MMLLM_N_TRUNKS=16
 export MMLLM_SPARSE_OPT=adam-cpu
-# Training throughput — 8× tokens/step at same model size.
-export MMLLM_BATCH=8
+# Training throughput — 16× tokens/step at same model size.
+export MMLLM_BATCH=16
 export MMLLM_NETBANK_ENABLED=true
 export MMLLM_LONG_TIER_MIX=switch
 export MMLLM_ALPHA_NET=true
