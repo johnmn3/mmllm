@@ -188,7 +188,7 @@ CAND_B=$(echo "$REMOTE_REFS" | grep -oE "refs/heads/claude/extend-chain-rounds-$
 # fetches here to peek trees.
 CAND_C=""
 A_OR_B_PIPED=$(printf '%s\n%s\n' "$CAND_A" "$CAND_B" | grep -v '^$' | tr '\n' '|' | sed 's/|$//')
-if [ "${#BRANCH_ROUND[@]:-0}" -gt 0 ]; then
+if [ "${#BRANCH_ROUND[@]}" -gt 0 ]; then
   # Reuse the auto-discovery scan.
   for br in "${!BRANCH_ROUND[@]}"; do
     if [ "${BRANCH_ROUND[$br]}" != "$TARGET" ]; then continue; fi
@@ -475,31 +475,12 @@ REF_ARGS=""
 [ -n "$REFERENCE_DIR" ] && REF_ARGS="--reference-dir $REFERENCE_DIR"
 "$PYTHON" scripts/harvest_chain.py --mode=stream-finalize "$TARGET" "$ACCUM" --publish $REF_ARGS
 
-# 6. Stage to inf-spork-r${TARGET}.* for the battery.
-echo ""
-echo "── 6. staging harvested → inf-spork-r${TARGET} format ──"
-"$PYTHON" scripts/stage_inf_spork.py "$TARGET"
-
-# 7. Run battery.
-echo ""
-echo "── 7. running 7-dataset eval battery ──"
-BATTERY_OUT="workers/dispatcher/harvest-${N_WORKERS}way-r${TARGET}/eval_battery.jsonl"
-MMLLM_ENABLE_PKM_CPP=true \
-  MMLLM_INF_BASE="/tmp/mmllm-cpu/inf-spork-r${TARGET}.fim" \
-  MMLLM_INF_BANK="/tmp/mmllm-cpu/inf-spork-r${TARGET}.bank" \
-  MMLLM_BATTERY_OUT="$BATTERY_OUT" \
-  "$PYTHON" scripts/run_eval_battery.py 2>&1 | tail -30
-
-# 8. Generate results.md with comparison to prior.
-echo ""
-echo "── 8. generating results.md (R${PRIOR} vs R${TARGET}) ──"
-"$PYTHON" scripts/generate_harvest_results.py "$PRIOR" "$TARGET" --n-workers "$N_WORKERS"
-
-# 8a. Update workers/dispatcher/current → this harvest's round dir, and
+# 5a. Update workers/dispatcher/current → this harvest's round dir, and
 # record the folded branches' SHAs in .harvest-manifest.json so the
-# auto-discovery mode skips them next time.
+# auto-discovery mode skips them next time. Done before the battery so
+# a battery failure doesn't lose the symlink/manifest state.
 echo ""
-echo "── 8a. updating dispatcher current symlink + manifest ──"
+echo "── 5a. updating dispatcher current symlink + manifest ──"
 HARVEST_REL="harvest-${N_WORKERS}way-r${TARGET}/round-${TARGET}"
 ln -snf "$HARVEST_REL" "workers/dispatcher/current"
 echo "  workers/dispatcher/current → $HARVEST_REL"
@@ -513,7 +494,6 @@ m = {}
 if os.path.exists(manifest):
     m = json.load(open(manifest))
 m.setdefault("processed", {})
-# Resolve each handle in the manifest file to its branch + SHA, fold in.
 import subprocess
 for line in open("$MANIFEST"):
     line = line.strip()
@@ -538,6 +518,26 @@ with open(manifest, "w") as f:
 print(f"  recorded {len(open('$MANIFEST').readlines())} branch(es) in {manifest}")
 print(f"  total processed: {len(m['processed'])}")
 PY
+
+# 6. Stage to inf-spork-r${TARGET}.* for the battery.
+echo ""
+echo "── 6. staging harvested → inf-spork-r${TARGET} format ──"
+"$PYTHON" scripts/stage_inf_spork.py "$TARGET"
+
+# 7. Run battery.
+echo ""
+echo "── 7. running 7-dataset eval battery ──"
+BATTERY_OUT="workers/dispatcher/harvest-${N_WORKERS}way-r${TARGET}/eval_battery.jsonl"
+MMLLM_ENABLE_PKM_CPP=true \
+  MMLLM_INF_BASE="/tmp/mmllm-cpu/inf-spork-r${TARGET}.fim" \
+  MMLLM_INF_BANK="/tmp/mmllm-cpu/inf-spork-r${TARGET}.bank" \
+  MMLLM_BATTERY_OUT="$BATTERY_OUT" \
+  "$PYTHON" scripts/run_eval_battery.py 2>&1 | tail -30
+
+# 8. Generate results.md with comparison to prior.
+echo ""
+echo "── 8. generating results.md (R${PRIOR} vs R${TARGET}) ──"
+"$PYTHON" scripts/generate_harvest_results.py "$PRIOR" "$TARGET" --n-workers "$N_WORKERS"
 
 # 9. Generate next-round dispatch prompt.
 NEXT=$((TARGET + 10))
