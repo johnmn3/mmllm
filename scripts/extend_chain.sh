@@ -195,6 +195,25 @@ PY
   echo "  ── round $round_num ablation summary (wall ${elapsed}s) ──"
   grep -A 4 "ablation summary" "$TRAIN_LOG" || echo "    (no ablation in log)"
   echo "$round_num $elapsed" >> "$ARCHIVE_ROOT/wall.tsv"
+
+  # Disk hygiene: once this round's log.jsonl exists, round-(N-2)'s
+  # weights are no longer needed for resume (extend_chain.sh's resume
+  # only reads from round-(N-1)). Strip its V_net/dense/opt-state files
+  # but keep log.jsonl so the per-round table stays intact.
+  #
+  # At design banks, each round dir is ~1.4 GB. Without this prune, a
+  # 10-round wave peaks at ~14 GB under /tmp/mmllm-cpu/chain-diverse/.
+  # With it, peak is ~3 GB (round-(N-1) + round-N live) plus ~0.1 GB
+  # of trailing logs+dense_skeletons across all completed rounds.
+  local stale=$((round_num - 2))
+  if [ "$stale" -ge 1 ]; then
+    local STALE_DIR="$ARCHIVE_ROOT/round-${stale}"
+    if [ -d "$STALE_DIR" ] && [ -f "$STALE_DIR/log.jsonl" ]; then
+      rm -f "$STALE_DIR"/V_net.*.bin \
+            "$STALE_DIR"/dense.pt \
+            "$STALE_DIR"/opt-sparse-net.*.pt 2>/dev/null
+    fi
+  fi
 }
 
 for r in $(seq $((START_FROM + 1)) $END_AT); do

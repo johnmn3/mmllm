@@ -1,5 +1,12 @@
 {
   "processed": {
+    "0ac96f9f83274ba674f24290968266ed37487a38": {
+      "branch": "claude/chaindiverse-wFirh-r111",
+      "handle": "wFirh",
+      "harvested_at": "2026-05-15T08:05:30Z",
+      "note": "skipped: extended r101 ref, not current r121",
+      "round": 111
+    },
     "210ad93b5e604a712f77138195b0acee9e59103a": {
       "branch": "claude/chaindiverse-dispatcher-Ne688-20260515-030055",
       "handle": "dispatcher-Ne688",
@@ -23,6 +30,13 @@
       "handle": "TljTE",
       "harvested_at": "2026-05-15T05:25:23Z",
       "round": 121
+    },
+    "5898b4ced1c7dd53297eb20a5dd3b9ca78c650df": {
+      "branch": "claude/chaindiverse-opus47-sdp-r111",
+      "handle": "opus47-sdp",
+      "harvested_at": "2026-05-15T08:05:30Z",
+      "note": "skipped: extended r101 ref, not current r121",
+      "round": 111
     },
     "636d3665fb8fe0e8f54a233e8578b52040486c1c": {
       "branch": "claude/chaindiverse-fim-claude-fim-E3Zyd-20260515-034146",

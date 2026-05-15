@@ -209,16 +209,25 @@ if [ "${#BRANCH_ROUND[@]}" -gt 0 ]; then
   done
 else
   # Explicit TARGET passed; do a fresh partial-clone scan over all chaindiverse-*.
+  declare -A BRANCH_HANDLE=()    # populated here too so the handle-resolution
+                                 # path below uses tree-derived handles.
   ALL_CHAINDIV=$(echo "$REMOTE_REFS" | grep -oE "refs/heads/claude/chaindiverse-[^[:space:]]+\$" \
                  | sed 's|refs/heads/||' | sort -u)
   for br in $ALL_CHAINDIV; do
     if [ -n "$A_OR_B_PIPED" ] && echo "$br" | grep -qE "^($A_OR_B_PIPED)\$"; then continue; fi
     git fetch origin "$br" --filter=blob:none --depth=1 2>&1 | tail -1 | \
       grep -qE "(FETCH_HEAD|new branch|up to date)" || continue
-    if git ls-tree -r --name-only "origin/$br" 2>/dev/null \
-       | grep -qE "^workers/[^/]+/${MARKER}/V_net\.0\.bin\$"; then
+    # Accept either format the worker may have published in:
+    #   legacy: workers/<h>/<MARKER>/V_net.0.bin
+    #   sparse-delta: workers/<h>/<MARKER>/delta-sparse-net.meta.pt
+    marker_path=$(git ls-tree -r --name-only "origin/$br" 2>/dev/null \
+      | grep -E "^workers/[^/]+/${MARKER}/(V_net\.0\.bin|delta-sparse-net\.meta\.pt)\$" \
+      | head -1)
+    if [ -n "$marker_path" ]; then
       CAND_C="${CAND_C}${br}
 "
+      handle=$(echo "$marker_path" | sed -E 's|^workers/([^/]+)/.*|\1|')
+      BRANCH_HANDLE["$br"]="$handle"
     fi
   done
 fi
