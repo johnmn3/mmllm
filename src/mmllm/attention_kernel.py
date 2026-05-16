@@ -30,6 +30,56 @@ import os
 from typing import Optional
 
 
+def _compute_block_distill_inline(gate):
+    """Per-block distillation MSE, computed inside the (potentially
+    checkpointed) block forward scope so its autograd graph is part of
+    the block's checkpointed return rather than a side-stash on the gate
+    module. Reads gate.last_local_out / last_net_out / last_sdpa_out
+    that the 3-way SwitchGate path just set, then immediately CLEARS
+    those attributes so the autograd graph isn't pinned alive past the
+    block. The returned scalar is what gets summed across blocks.
+
+    Mirrors the standard path of core.lpy's collect-distill-loss (no
+    per-layer gate-weights / gate-indices — those experimental knobs
+    aren't supported through this fast path; if MMLLM_DISTILL_GATE_*
+    is set, set MMLLM_GRAD_CHECKPOINT=false and use the old collector).
+
+    Returns scalar tensor with autograd, or None when no distill term
+    applies (2-way gate, or last_X not set)."""
+    import torch.nn.functional as F
+    lo = getattr(gate, "last_local_out", None)
+    no = getattr(gate, "last_net_out",   None)
+    so = getattr(gate, "last_sdpa_out",  None)
+    # Clear immediately — having attempted to read them, we no longer
+    # want the gate to pin them alive after we return.
+    gate.last_local_out = None
+    gate.last_net_out   = None
+    gate.last_sdpa_out  = None
+    if lo is None or no is None:
+        return None
+    target_kind = os.environ.get("MMLLM_DISTILL_TARGET", "residual")
+    dir_only    = os.environ.get("MMLLM_DISTILL_DIRECTION_ONLY", "false").lower() in ("1", "true", "yes")
+    try: mag_coef = float(os.environ.get("MMLLM_DISTILL_MAGNITUDE_COEF", "0.0"))
+    except ValueError: mag_coef = 0.0
+    try: mag_clamp = float(os.environ.get("MMLLM_DISTILL_MAGNITUDE_CLAMP", "0.0"))
+    except ValueError: mag_clamp = 0.0
+    eps = 1e-6
+    if target_kind == "residual" and so is not None:
+        tgt = lo.detach() - so.detach()
+    else:
+        tgt = lo.detach()
+    if dir_only:
+        tgt_n = tgt.norm(dim=-1, keepdim=True) + eps
+        no_n  = no.norm(dim=-1, keepdim=True)  + eps
+        dir_mse = F.mse_loss(no / no_n, tgt / tgt_n)
+        if mag_coef > 0:
+            tgt_mag = tgt_n.clamp(max=mag_clamp) if mag_clamp > 0 else tgt_n
+            mag_mse = F.mse_loss(no_n, tgt_mag.detach())
+            return (1.0 - mag_coef) * dir_mse + mag_coef * mag_mse
+        return dir_mse
+    return F.mse_loss(no, tgt)
+
+
 def _bank_repeat_n() -> int:
     """How many iterative refinement passes through Local Bank to run
     per forward. Reads MMLLM_BANK_REPEAT_N (default 1 = no iteration,
@@ -170,6 +220,20 @@ def attention(
     B = x.size(0)
     T = x.size(1)
 
+    # Clear any stale aux-loss stashes from prior step. Some attention
+    # paths (skip_bank, 2-way gate on Net-only layers, …) don't reset
+    # these; without an explicit clear, _compute_block_distill_inline
+    # at end-of-attention would read tensors from a previous batch
+    # whose autograd graph has been freed by backward — yielding either
+    # a stale-grad scalar or a no-grad scalar that wrongly contributes
+    # to the distill total.
+    if long_gate is not None:
+        long_gate.last_local_out = None
+        long_gate.last_net_out   = None
+        long_gate.last_sdpa_out  = None
+    if memory is not None:
+        memory.last_z_loss = None
+
     # Bank → dense feedback (PlainFeedback returns None → identity)
     fb_delta = bank_feedback(x, memory)
     x_for_q = x + fb_delta if fb_delta is not None else x
@@ -298,12 +362,44 @@ def attention(
         else:
             attn_l = long_gate(q_long, attn_l_sdpa, attn_l_mem)
 
+    # Per-block aux losses (distill MSE + z_loss). When grad-checkpointing
+    # is OFF, collect them here (with autograd alive) and return them
+    # through the block_forward chain so train-step doesn't need a
+    # second pass over module-side .last_X stashes.
+    # When grad-checkpointing is ON, skip — threading an autograd-alive
+    # scalar through the checkpointed function's return alongside x_out
+    # keeps the upstream context (NetBank.forward / Local-PKM.forward
+    # intermediates) alive (PyTorch cannot independently checkpoint
+    # multiple outputs with shared upstream graphs). Aux losses are
+    # therefore disabled when MMLLM_GRAD_CHECKPOINT=true. Always clear
+    # the module-side stashes so they don't pin autograd alive past
+    # this block.
+    grad_ckpt = os.environ.get("MMLLM_GRAD_CHECKPOINT", "false").lower() in ("1", "true", "yes")
+    if grad_ckpt:
+        # Clear stashes only — don't carry their autograd graphs out.
+        if long_gate is not None:
+            long_gate.last_local_out = None
+            long_gate.last_net_out   = None
+            long_gate.last_sdpa_out  = None
+        if memory is not None:
+            memory.last_z_loss = None
+        distill_term = None
+        z_term       = None
+    else:
+        distill_term = _compute_block_distill_inline(long_gate) if long_gate is not None else None
+        z_term = None
+        if memory is not None:
+            zlz = getattr(memory, "last_z_loss", None)
+            memory.last_z_loss = None
+            if zlz is not None:
+                z_term = zlz
+
     # Concat short + long head outputs, project
     attn = torch.cat([attn_s, attn_l], dim=1)
     out = attn.transpose(1, 2).contiguous().reshape(B, T, n_heads * head_dim)
     out = o_proj(out)
 
-    return out, new_short_cache, new_long_cache
+    return out, new_short_cache, new_long_cache, distill_term, z_term
 
 
 # ── block forward (pre-norm + attention + SwiGLU FFN + residuals) ──
@@ -329,7 +425,7 @@ def block_forward(
     attention kernel; bank PKM lookup is skipped.
     `netbank` (optional): NetBank module for the off-machine long-term
     memory tier. When non-None, attention uses the 3-way long_gate path."""
-    attn_out, new_s, new_l = attention(
+    attn_out, new_s, new_l, distill_term, z_term = attention(
         q_proj, k_proj_s, v_proj_s, k_proj_l, v_proj_l, o_proj,
         memory, long_gate, bank_query, bank_feedback,
         n_heads, n_short_heads, n_long_heads,
@@ -344,7 +440,11 @@ def block_forward(
     x_norm = norm2(x)
     ffn_out = down_proj(F.silu(gate_proj(x_norm)) * up_proj(x_norm))
     x = x + ffn_out
-    return x, new_s, new_l
+    # Per-block aux losses returned alongside x so their autograd
+    # graphs flow through the (potentially checkpointed) block_forward
+    # return rather than being pinned alive on module-side .last_X
+    # attributes. See `attention` body for how these are collected.
+    return x, new_s, new_l, distill_term, z_term
 
 
 def checkpointed_block_forward(
@@ -375,11 +475,21 @@ def checkpointed_block_forward(
     so every checkpoint's backward recompute ends up using the LAST
     iteration's block — producing shape mismatches between the
     saved forward tensors and the recomputed ones.
-    """
+
+    Returns `(x_out, None, None)` — distill_term / z_term are NOT
+    threaded through the checkpoint return because doing so keeps
+    upstream context alive (PyTorch cannot independently checkpoint
+    multiple outputs with shared upstream graphs; the saved-tensor
+    hooks fall back to retaining the shared intermediates). When
+    grad-checkpointing is on, the aux losses are intentionally
+    disabled by attention setting them to None — see the comment
+    in `attention` above the per-block aux-loss collection.
+    The (short_cache, long_cache) outputs are dropped (train-step
+    discards them) so checkpoint sees only one tensor output."""
     import torch.utils.checkpoint as _ckpt
 
     def _fn(x_arg):
-        x_out, _s, _l = block_forward(
+        x_out, _s, _l, _d, _z = block_forward(
             norm1, norm2,
             q_proj, k_proj_s, v_proj_s, k_proj_l, v_proj_l, o_proj,
             memory, long_gate, bank_query, bank_feedback,
@@ -392,4 +502,6 @@ def checkpointed_block_forward(
         )
         return x_out
 
-    return _ckpt.checkpoint(_fn, x, use_reentrant=False)
+    x_ckpt = _ckpt.checkpoint(_fn, x, use_reentrant=False)
+    # Match the 3-tuple shape callers expect.
+    return x_ckpt, None, None

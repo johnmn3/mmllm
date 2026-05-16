@@ -1449,7 +1449,8 @@
          ;; on the original mixed tensor+tuple return.
          ckpt?      (and (pick-grad-checkpoint?) (torch/is_grad_enabled))]
      (if ckpt?
-       (let [x-ckpt (kernel/checkpointed_block_forward
+       (let [[x-ckpt distill-term z-term]
+                    (kernel/checkpointed_block_forward
                       norm1 norm2
                       q-proj k-proj-s v-proj-s k-proj-l v-proj-l o-proj
                       memory long-gate bank-query bank-feedback
@@ -1464,8 +1465,9 @@
              ;; Carry applied OUTSIDE checkpoint — it's cheap and we
              ;; don't need its tiny intermediates re-materialized.
              x'     (if carry (carry x-ckpt) x-ckpt)]
-         [x' nil nil])
-       (let [[x' s' l'] (kernel/block_forward
+         [x' nil nil distill-term z-term])
+       (let [[x' s' l' distill-term z-term]
+                          (kernel/block_forward
                           norm1 norm2
                           q-proj k-proj-s v-proj-s k-proj-l v-proj-l o-proj
                           memory long-gate bank-query bank-feedback
@@ -1483,8 +1485,8 @@
          ;; gate to mix EMAs at ~1/5/22/86-token half-lives back
          ;; into the stream.
          (if carry
-           [(carry x') s' l']
-           [x' s' l']))))))
+           [(carry x') s' l' distill-term z-term]
+           [x' s' l' distill-term z-term]))))))
 
 (defn build-block
   [{:keys [d-model n-heads n-short-heads n-long-heads
@@ -2003,7 +2005,19 @@
      (loop [i         0
             x         x0
             out-short []
-            out-long  []]
+            out-long  []
+            ;; Aux-loss accumulators: distill MSE and Local-PKM z-loss
+            ;; flow through the block_forward return chain instead of
+            ;; module-side .last_X stashes — see attention_kernel's
+            ;; `attention` body for the collect-and-clear logic. We
+            ;; accumulate them here as we walk the blocks so the totals
+            ;; ride forward's return and train-step doesn't need a
+            ;; second pass via collect-z-loss / collect-distill-loss.
+            ;; Start at 0 (python int); the first non-nil block term
+            ;; promotes the accumulator to a scalar tensor, after which
+            ;; subsequent + ops are tensor-scalar adds.
+            distill-acc 0
+            z-acc       0]
        (if (= i n-layers)
          (let [x'         (norm-final x)
                _          (when guard? (nan-guard! "norm-final" x'))
@@ -2015,16 +2029,24 @@
                ;; > 0; nil and skipped otherwise.
                aux-logits (when mtp-head (mtp-head x'))
                _          (when (and guard? aux-logits) (nan-guard! "aux-logits" aux-logits))]
-           ;; 5th element `x'` (post-norm-final hidden state) is consumed
-           ;; only by train-step's importance-head path. All other
-           ;; callers destructure 3-4 elements and silently ignore it.
-           [logits out-short out-long aux-logits x'])
+           ;; Return slots:
+           ;;   0 logits          5 distill_total (scalar tensor or 0)
+           ;;   1 short_caches    6 z_total       (scalar tensor or 0)
+           ;;   2 long_caches
+           ;;   3 aux_logits
+           ;;   4 final_x         — only train-step's importance-head
+           ;;                       path consumes >=5th element; older
+           ;;                       callers destructure 3-4 and ignore.
+           [logits out-short out-long aux-logits x' distill-acc z-acc])
          (let [block      (nth blocks i)
                sc         (nth short-caches i)
                lc         (nth long-caches  i)
-               [x' s' l'] (block-forward block x rope-cos rope-sin sc lc skip-bank? trunk-ids)]
+               [x' s' l' distill-term z-term]
+                          (block-forward block x rope-cos rope-sin sc lc skip-bank? trunk-ids)]
            (when guard? (nan-guard! (format "block-%d-out" i) x'))
-           (recur (inc i) x' (conj out-short s') (conj out-long l'))))))))
+           (recur (inc i) x' (conj out-short s') (conj out-long l')
+                  (if distill-term (+ distill-acc distill-term) distill-acc)
+                  (if z-term       (+ z-acc       z-term)       z-acc))))))))
 
 ;;; ─────────────────────── training ───────────────────────
 
@@ -2175,7 +2197,8 @@
          x            (.to x device)
          y            (.to y device)
          trunk-ids    (when trunk-ids (.to trunk-ids device))
-         [logits _ _ aux-logits final-x] (forward m x nil nil false trunk-ids)
+         [logits _ _ aux-logits final-x distill-total z-total]
+                      (forward m x nil nil false trunk-ids)
          T            (.size y 1)
          ;; Router-smarts loss path. focal_ce with gamma=0 reduces to
          ;; plain CE, so this is behavior-preserving when no env vars
@@ -2230,9 +2253,38 @@
          ;; already have and reflects "what would CE have been without
          ;; router-smarts" — directly comparable to phases 0-N.
          plain-ce     (F/cross_entropy logits-flat y-flat)
-         z-loss       (collect-z-loss m)
+         ;; Aux losses now flow through `forward`'s return chain
+         ;; (distill-total, z-total) instead of module-side .last_X
+         ;; stashes. This is what makes gradient checkpointing actually
+         ;; reduce backward RAM — the stashes used to keep autograd
+         ;; alive on each block's intermediates past the block's
+         ;; checkpoint scope. See attention_kernel's `attention` body
+         ;; for how each block contributes its per-layer term.
+         ;;
+         ;; Apply coefficients here. z-total is the sum across local
+         ;; banks (collect-z-loss used mean; we keep sum since the
+         ;; coef is operator-tuned and the count is fixed at 8).
+         ;; distill-total is the sum across 3-way gate layers (8 of
+         ;; the 32 in the asymmetric architecture); divide by 8 to
+         ;; match the mean semantics that collect-distill-loss had.
+         z-coef       (pick-z-loss-coef)
+         z-loss       (if (and (zero? z-coef)
+                               (or (number? z-total) (= 0 z-total)))
+                        0.0
+                        (* z-coef z-total))
+         d-coef       (let [metrics (:metrics m)
+                            step    (when metrics (.get metrics "current_step" nil))
+                            total   (when metrics (.get metrics "total_steps"  nil))]
+                        (if (and step total (pos? (python/int total)))
+                          (pick-distill-coef (python/int step) (python/int total))
+                          (pick-distill-coef)))
+         n-distill-layers 8 ;; number of 3-way gate (= local-bank) layers
+         distill-loss (if (or (zero? d-coef)
+                              (number? distill-total)
+                              (= 0 distill-total))
+                        0.0
+                        (* d-coef (/ distill-total (python/float n-distill-layers))))
          mtp-loss     (collect-mtp-loss aux-logits y T)
-         distill-loss (collect-distill-loss m)
          delim-loss   (collect-delim-loss m final-x y)
          ;; Stash distill / delim losses on :metrics for printer / JSONL.
          _            (when-let [metrics (:metrics m)]

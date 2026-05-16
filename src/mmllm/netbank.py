@@ -330,9 +330,14 @@ class NetBank(nn.Module):
         scores_b = q_b @ self.K_b.T
 
         if self.training:
-            lse_a = torch.logsumexp(scores_a, dim=-1)
-            lse_b = torch.logsumexp(scores_b, dim=-1)
-            self.last_z_loss = lse_a.square().mean() + lse_b.square().mean()
+            # z_loss is not collected for NetBank — collect-z-loss reads
+            # only from Local PKM (:memory). Computing it with autograd
+            # alive holds scores_a/b past the block forward, defeating
+            # gradient checkpointing. Detach so this is telemetry-only.
+            with torch.no_grad():
+                lse_a = torch.logsumexp(scores_a, dim=-1)
+                lse_b = torch.logsumexp(scores_b, dim=-1)
+                self.last_z_loss = lse_a.square().mean() + lse_b.square().mean()
         else:
             self.last_z_loss = None
 
