@@ -104,6 +104,7 @@ def _bank_repeat_alpha() -> float:
 
 import torch
 import torch.nn.functional as F
+import torch.utils.checkpoint as _torch_checkpoint
 
 
 # ── RoPE helpers (Python copy of the basilisp ones) ──
@@ -276,17 +277,34 @@ def attention(
     #   T>1 verify (cache+K-batch): custom mask — query i attends to
     #                              keys [0..prev_short+i]; this is the
     #                              speculative-decoding case (Phase-5)
+    # SDPA wraps: in TRAINING mode, the math backend (CPU's only path)
+    # materializes the full (B, H, T, T) attn-weights tensor and retains
+    # it for backward — 8 MB / call × 32 layers × 2 (short+long) = 8 GB
+    # at B=16, T=1024. Wrapping each SDPA in torch.utils.checkpoint with
+    # use_reentrant=False discards that tensor at forward and recomputes
+    # it during backward (~2× SDPA wall on that path; SDPA is ~10% of
+    # block compute so total wall hit is small). Skipped at inference
+    # (no_grad) and when block-level grad-ckpt is on (outer scope
+    # already handles it). The `is_causal` arg can't be a kwarg to
+    # checkpoint, so it's bound via a closure.
+    _wrap_sdpa = bool(
+        os.environ.get("MMLLM_SDPA_CHECKPOINT", "true").lower() in ("1", "true", "yes")
+    ) and torch.is_grad_enabled()
+    def _sdpa(q_, k_, v_, *, is_causal=False, attn_mask=None):
+        if _wrap_sdpa:
+            return _torch_checkpoint.checkpoint(
+                lambda q__, k__, v__: F.scaled_dot_product_attention(
+                    q__, k__, v__, is_causal=is_causal, attn_mask=attn_mask),
+                q_, k_, v_, use_reentrant=False)
+        return F.scaled_dot_product_attention(q_, k_, v_, is_causal=is_causal, attn_mask=attn_mask)
+
     if short_cache is None and T > 1:
-        attn_s = F.scaled_dot_product_attention(
-            q_short_r, k_s_rep, v_s_rep, is_causal=True,
-        )
+        attn_s = _sdpa(q_short_r, k_s_rep, v_s_rep, is_causal=True)
     elif short_cache is not None and T > 1:
-        attn_s = F.scaled_dot_product_attention(
-            q_short_r, k_s_rep, v_s_rep,
-            attn_mask=_verify_mask(T, k_s_rep.size(2), q_short_r.dtype, q_short_r.device),
-        )
+        attn_s = _sdpa(q_short_r, k_s_rep, v_s_rep,
+                       attn_mask=_verify_mask(T, k_s_rep.size(2), q_short_r.dtype, q_short_r.device))
     else:
-        attn_s = F.scaled_dot_product_attention(q_short_r, k_s_rep, v_s_rep)
+        attn_s = _sdpa(q_short_r, k_s_rep, v_s_rep)
 
     # LONG tier (a): set-style SDPA over per-conversation cache (no RoPE)
     new_long_cache = append_kv_to_buffer(
@@ -304,16 +322,12 @@ def attention(
     k_l_rep = k_l_full.repeat_interleave(repeat_l, dim=1)
     v_l_rep = v_l_full.repeat_interleave(repeat_l, dim=1)
     if long_cache is None and T > 1:
-        attn_l_sdpa = F.scaled_dot_product_attention(
-            q_long, k_l_rep, v_l_rep, is_causal=True,
-        )
+        attn_l_sdpa = _sdpa(q_long, k_l_rep, v_l_rep, is_causal=True)
     elif long_cache is not None and T > 1:
-        attn_l_sdpa = F.scaled_dot_product_attention(
-            q_long, k_l_rep, v_l_rep,
-            attn_mask=_verify_mask(T, k_l_rep.size(2), q_long.dtype, q_long.device),
-        )
+        attn_l_sdpa = _sdpa(q_long, k_l_rep, v_l_rep,
+                            attn_mask=_verify_mask(T, k_l_rep.size(2), q_long.dtype, q_long.device))
     else:
-        attn_l_sdpa = F.scaled_dot_product_attention(q_long, k_l_rep, v_l_rep)
+        attn_l_sdpa = _sdpa(q_long, k_l_rep, v_l_rep)
 
     # LONG tier (b/c): retrieval. (b) is the local PKM bank (semantic /
     # working memory); (c) is NetBank (off-machine long-term memory),
