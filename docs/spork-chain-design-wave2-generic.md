@@ -77,29 +77,30 @@ Knobs explained:
 
 ### Recommended tier table
 
-Verified on this 15 GB box at e8c0907 (post-grad-checkpoint fix):
-
 | container RAM | MMLLM_BATCH | MMLLM_NET_TOP_K | MMLLM_NET_SUB_TOP_K | MMLLM_GRAD_CHECKPOINT | distill |
 |--------------:|:-----------:|:---------------:|:-------------------:|:---------------------:|:-------:|
-| **15-16 GB**  | 1 (default) | **256** (½×)    | 16                  | true (default)        | off     |
+| **15-16 GB**  | —           | —               | —                   | —                     | —       |
+|               | not supported for 100-step chain extension at this round. |||||
 | **24 GB**     | 1 (default) | 512 (default)   | 64 (default)        | true (default)        | off     |
 | **32+ GB**    | 2           | 512 (default)   | 64 (default)        | false                 | on      |
 
-Notes on the 15-16 GB tier: NET_TOP_K=256 is half the wave-2 bandwidth
-contract (4× wave-1's NET_TOP_K=64 rather than 8×) — this is a
-recipe variant, not the full wave-2 recipe. Verified end-to-end on
-this box: ctrl bpc=2.01, Δ_net=+0.03 at 1 step on round-10 seed.
-Per-block forward delta with grad-checkpointing was 35-160 MB
-(vs 450 MB without) at this config. Backward fits the envelope
-because NET_TOP_K halving roughly halves the per-block recompute.
+Note on 15-16 GB: a 1-step smoke at the e8c0907 fix fit comfortably (288 MB
+peak), but at 100-step rounds the per-step memory grows past the box
+envelope — the carried-forward `opt-sparse-net.pt` (345 MB on disk → ~1-3
+GB live with Python dict overhead) plus per-step row_to_buf growth in
+sparse Adam pushes ~10 GB by mid-round even at wave-1 bandwidth. The
+proper fix is to compact the opt-state representation (replace the
+Python `row_to_buf` dict with a torch int64 buffer); not done in this
+session. Until then, the 15-16 GB tier can't run chain extension past
+round 10. Skip this wave on tight containers.
+
+Old version of this section (e8c0907 → 34cdacc) incorrectly claimed
+NET_TOP_K=256 fits 15 GB based on a 1-step smoke — that was insufficient
+validation.
 
 Pass overrides via env BEFORE invoking the script:
 
 ```bash
-# 15-16 GB container — half-bandwidth recipe variant (fits the box)
-MMLLM_NET_TOP_K=256 MMLLM_NET_SUB_TOP_K=16 \
-  bash scripts/run_chain_diverse.sh 10 20
-
 # 32 GB container — increase effective batch to 32 for higher throughput
 MMLLM_BATCH=2 \
   bash scripts/run_chain_diverse.sh 10 20
