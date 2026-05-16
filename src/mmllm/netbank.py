@@ -46,7 +46,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from mmllm.memory import CPUPinnedEmbedding
-from mmllm._pkm_autograd import HAS_CPP_KERNELS, netbank_inference_forward
+from mmllm._pkm_autograd import HAS_CPP_KERNELS, PKMFusedTopK, netbank_inference_forward
 
 
 _DTYPE_MAP = {
@@ -353,25 +353,29 @@ class NetBank(nn.Module):
                     torch.bincount(top_b_i.view(-1), minlength=self.sqrt_n)
                 )
 
-        # Outer-sum re-rank, same as ProductKeyMemory — but DON'T materialize
-        # the full (B, T, sub_top_k²) global-index tensor. The full tensor is
-        # ~4 MB at sub_top_k=64 and accounts for >7 ms / call on CPU. Instead
-        # we compute the cross-product of *scores* only (small), take final
-        # top_k of that, then recover the global indices by indexing back
-        # into top_a_i / top_b_i for just the surviving top_k positions.
-        combined_scores = (top_a_s.unsqueeze(-1) + top_b_s.unsqueeze(-2))
-        combined_scores = combined_scores.flatten(-2)
-
-        top_scores, top_local = combined_scores.topk(self.top_k, dim=-1)
-
-        # `top_local` indexes into the flat sub_top_k² combined grid.
-        # Decompose back into (a_within, b_within) and gather the *global*
-        # key indices from top_a_i / top_b_i — small (B,T,top_k) gathers.
-        a_within = torch.div(top_local, self.sub_top_k, rounding_mode="floor")
-        b_within = top_local - a_within * self.sub_top_k
-        top_a_global = top_a_i.gather(-1, a_within)                # (B, T, top_k)
-        top_b_global = top_b_i.gather(-1, b_within)
-        top_global   = top_a_global * self.sqrt_n + top_b_global
+        # Outer-sum re-rank. The Python path materializes a
+        # (B, T, sub_top_k²) `combined_scores` tensor which is the
+        # dominant per-call activation at training time (4-256 MB per
+        # call depending on B, T, sub_top_k). PKMFusedTopK is a C++
+        # kernel that scans the S² outer-sum with a per-row min-heap,
+        # skipping the temp entirely; identical autograd to the Python
+        # path. Same kernel as Local PKM (memory.py:982) — the math
+        # is generic across NetBank and Local PKM.
+        if HAS_CPP_KERNELS and top_a_s.is_cpu:
+            top_scores, top_global = PKMFusedTopK.apply(
+                top_a_s, top_a_i, top_b_s, top_b_i, self.sqrt_n, self.top_k,
+            )
+        else:
+            combined_scores = (top_a_s.unsqueeze(-1) + top_b_s.unsqueeze(-2)).flatten(-2)
+            top_scores, top_local = combined_scores.topk(self.top_k, dim=-1)
+            # `top_local` indexes into the flat sub_top_k² combined grid.
+            # Decompose back into (a_within, b_within) and gather the *global*
+            # key indices from top_a_i / top_b_i — small (B,T,top_k) gathers.
+            a_within = torch.div(top_local, self.sub_top_k, rounding_mode="floor")
+            b_within = top_local - a_within * self.sub_top_k
+            top_a_global = top_a_i.gather(-1, a_within)                # (B, T, top_k)
+            top_b_global = top_b_i.gather(-1, b_within)
+            top_global   = top_a_global * self.sqrt_n + top_b_global
 
         # Cross-device gather: V_net is fp16 CPU-mmap. Move indices to V's
         # device, gather rows there, ship results back up to q's device,
