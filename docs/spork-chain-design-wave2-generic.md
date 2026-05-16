@@ -77,26 +77,29 @@ Knobs explained:
 
 ### Recommended tier table
 
-| container RAM | MMLLM_BATCH | MMLLM_NET_TOP_K | MMLLM_NET_SUB_TOP_K | MMLLM_GRAD_CHECKPOINT | distill |
-|--------------:|:-----------:|:---------------:|:-------------------:|:---------------------:|:-------:|
-| **15-16 GB**  | —           | —               | —                   | —                     | —       |
-|               | not supported for 100-step chain extension at this round. |||||
-| **24 GB**     | 1 (default) | 512 (default)   | 64 (default)        | true (default)        | off     |
-| **32+ GB**    | 2           | 512 (default)   | 64 (default)        | false                 | on      |
+| container RAM | MMLLM_BATCH | MMLLM_NET_TOP_K | MMLLM_NET_SUB_TOP_K | MMLLM_MEMORY_TOP_K | MMLLM_MEMORY_SUB_TOP_K | MMLLM_GRAD_CHECKPOINT | distill |
+|--------------:|:-----------:|:---------------:|:-------------------:|:------------------:|:----------------------:|:---------------------:|:-------:|
+| **15-16 GB**  | 1 (default) | **64** (wave-1) | 8                   | **16** (wave-1)    | 16                     | **false**             | on      |
+| **24 GB**     | 1 (default) | 512 (default)   | 64 (default)        | 128 (default)      | 128 (default)          | true (default)        | off     |
+| **32+ GB**    | 2           | 512 (default)   | 64 (default)        | 128 (default)      | 128 (default)          | false                 | on      |
 
-Note on 15-16 GB: a 1-step smoke at the e8c0907 fix fit comfortably (288 MB
-peak), but at 100-step rounds the per-step memory grows past the box
-envelope — the carried-forward `opt-sparse-net.pt` (345 MB on disk → ~1-3
-GB live with Python dict overhead) plus per-step row_to_buf growth in
-sparse Adam pushes ~10 GB by mid-round even at wave-1 bandwidth. The
-proper fix is to compact the opt-state representation (replace the
-Python `row_to_buf` dict with a torch int64 buffer); not done in this
-session. Until then, the 15-16 GB tier can't run chain extension past
-round 10. Skip this wave on tight containers.
+Verified on a 15 GB box at e8c0907 fix: the 15-16 GB row's wave-1-bandwidth
+recipe ran a full 100-step round + 4 ablation evals in 1127s wall, producing
+ctrl bpc=0.7835, Δ_net=+0.0116 (NetBank is contributing). The full wave-2
+bandwidth (NET_TOP_K=512) doesn't fit 15 GB even with grad-checkpointing
+because the carried-forward `opt-sparse-net.pt` deserializes to ~1-3 GB of
+Python-dict overhead (sparse Adam's `row_to_buf` is a `{int → int}` dict
+that grows per touched row), and the per-step row-touch rate at NET_TOP_K=512
+grows that footprint another ~5-7 GB through the round. The 15-16 GB tier
+uses wave-1 bandwidth knobs (NET_TOP_K=64, MEMORY_TOP_K=16, sub=8/16) where
+the row-touch rate is 4-8× slower, leaving headroom for the optimizer state
+to grow within budget. Grad-checkpointing is OFF at this tier — at wave-1
+bandwidth the activation snapshot is already small, and the ~2× wall hit
+from CPU-side recompute isn't worth it.
 
-Old version of this section (e8c0907 → 34cdacc) incorrectly claimed
-NET_TOP_K=256 fits 15 GB based on a 1-step smoke — that was insufficient
-validation.
+Note: the 15-16 GB row is a recipe variant, not the wave-2 contract —
+bandwidth is wave-1's (3 Gemma heads' worth → 1 Gemma head's worth).
+Birds running it should report the tier they used.
 
 Pass overrides via env BEFORE invoking the script:
 
