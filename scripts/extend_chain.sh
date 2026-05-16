@@ -77,9 +77,27 @@ export MMLLM_NET_BANK_ON_GPU=false
 # containers may still OOM during backward at this bandwidth; they
 # need either smaller NET_TOP_K (recipe change) or further refactor.
 : ${MMLLM_MEMORY_TOP_K:=128}     ; export MMLLM_MEMORY_TOP_K
-: ${MMLLM_MEMORY_SUB_TOP_K:=128} ; export MMLLM_MEMORY_SUB_TOP_K
+# SUB_TOP_K bounds: sub² must be ≥ TOP_K (topk picks top-K from sub²
+# elements). At MEMORY_TOP_K=128, sub_min = ceil(sqrt(128)) = 12; at
+# NET_TOP_K=512, sub_min = ceil(sqrt(512)) = 23. Using sub=24 keeps both
+# legal and cuts the materialized outer-sum tensor from 1 GB to 36 MB
+# per local layer (vs the old default 128 → sub²=16384, where the
+# (B×T×sub²×4B) tensor was the dominant per-layer activation at full
+# wave-2 batch). The C++ PKMFusedTopK kernel (enabled below) skips
+# this temp entirely on the Local PKM path; NetBank has no equivalent
+# kernel yet, so its sub_top_k value still matters there.
+: ${MMLLM_MEMORY_SUB_TOP_K:=24}  ; export MMLLM_MEMORY_SUB_TOP_K
 : ${MMLLM_NET_TOP_K:=512}        ; export MMLLM_NET_TOP_K
-: ${MMLLM_NET_SUB_TOP_K:=64}     ; export MMLLM_NET_SUB_TOP_K
+: ${MMLLM_NET_SUB_TOP_K:=24}     ; export MMLLM_NET_SUB_TOP_K
+# Enable the C++ PKM kernel for the Local PKM path. The kernel does
+# fused outer-sum + top-K with a per-row min-heap, skipping the
+# (B, T, sub²) materialization that's the Local PKM's biggest single
+# activation tensor at training time. CLAUDE.md flagged 0% wall
+# speedup at cpu-mini × the old wave-1 recipe — but at wave-2's
+# higher bandwidth (and especially at higher MMLLM_MEMORY_SUB_TOP_K
+# values, where the temp grows quadratically), the memory benefit is
+# substantial. Bit-exact vs Python path (modulo top-K ties).
+: ${MMLLM_ENABLE_PKM_CPP:=true}  ; export MMLLM_ENABLE_PKM_CPP
 # N_TRUNKS is a misnomer — these are the 16 ROUTERS per Local Bank
 # layer (1 MB each × 16 = 16 MB; CLAUDE.md "16 routers per local bank").
 # The dense backbone is a SINGLE shared trunk; only the env var is

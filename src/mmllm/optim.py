@@ -143,7 +143,16 @@ class CPUOffloadSparseAdam(torch.optim.Optimizer):
             # new sparse buffers.
             return
         super().load_state_dict(state_dict)
-        # Force all CPU residence on loaded sparse state too.
+        # Force all CPU residence on loaded sparse state too AND
+        # convert any old-format dict `row_to_buf` to the new dense
+        # torch.long lookup tensor. The dense lookup is `p.shape[0]`
+        # entries (V-rows), with -1 marking unallocated. Old ckpts had
+        # `row_to_buf: dict[int, int]` of TOUCHED rows only — that
+        # version was the source of GB-scale Python-dict overhead that
+        # OOM'd the 15 GB tier mid-round. Converting on load means
+        # existing harvested opt-sparse-net.pt files (saved with the
+        # dict format) keep working; the next save writes the new
+        # tensor format.
         for group in self.param_groups:
             for p in group["params"]:
                 state = self.state.get(p, {})
@@ -151,6 +160,17 @@ class CPUOffloadSparseAdam(torch.optim.Optimizer):
                     t = state.get(key)
                     if t is not None and t.device.type != "cpu":
                         state[key] = t.to("cpu")
+                rtb = state.get("row_to_buf")
+                if isinstance(rtb, dict):
+                    buf_lookup = torch.full((p.shape[0],), -1,
+                                            dtype=torch.long, device="cpu")
+                    if rtb:
+                        rows  = torch.tensor(list(rtb.keys()),   dtype=torch.long)
+                        bidxs = torch.tensor(list(rtb.values()), dtype=torch.long)
+                        buf_lookup[rows] = bidxs
+                    state["row_to_buf"] = buf_lookup
+                elif isinstance(rtb, torch.Tensor) and rtb.device.type != "cpu":
+                    state["row_to_buf"] = rtb.to("cpu")
 
     @torch.no_grad()
     def step(self, closure=None):
@@ -194,22 +214,31 @@ class CPUOffloadSparseAdam(torch.optim.Optimizer):
 
                 state = self.state[p]
                 if len(state) == 0:
-                    # Sparse-state init: store m and v as growing CPU
-                    # tensors of touched rows only. row_to_buf is a Python
-                    # dict mapping V-row index → row position in m_buf/v_buf.
-                    # First touch of a row appends a zero-row to the buffers.
+                    # Sparse-state init: m_buf / v_buf are growing CPU
+                    # tensors that hold moments for ONLY touched rows.
+                    # row_to_buf is a row-indexed long tensor mapping
+                    # V-row index → row position in m_buf/v_buf, with
+                    # -1 marking "this row hasn't been touched yet."
                     #
-                    # Memory scales with TOUCHED rows × dim × 4 bytes × 2
-                    # (m + v), not bank size. For a 100-step training run
-                    # touching ~5M unique rows at c_net=32, that's ~1.3 GB —
-                    # vs the dense-state version's V_net-size × 2 (32 GB
-                    # at sqrt_n=5600).
+                    # The tensor's full V-row-count size is a constant
+                    # upfront cost (p.shape[0] × 8 B) — for V_net at
+                    # sqrt_n²=1M, c_net=8, that's 8 MB / layer × 32 layers
+                    # = 256 MB. Earlier versions used a Python dict
+                    # `{int → int}`, which grew at ~240 bytes / touched
+                    # row × 32 layers — a few GB at ~100-step training
+                    # rounds, and unbounded across rounds in a chain.
+                    # The dense tensor lookup pays the constant cost
+                    # upfront but caps the memory and vectorizes the
+                    # gradient-to-buf-idx mapping below (was a Python
+                    # for-loop, now one tensor index).
                     state["step"] = 0
                     state["m_buf"] = torch.zeros((0, p.shape[-1]),
                                                  dtype=p.dtype, device="cpu")
                     state["v_buf"] = torch.zeros((0, p.shape[-1]),
                                                  dtype=p.dtype, device="cpu")
-                    state["row_to_buf"] = {}  # int → int
+                    state["row_to_buf"] = torch.full((p.shape[0],), -1,
+                                                    dtype=torch.long,
+                                                    device="cpu")
 
                 state["step"] += 1
                 step_count = state["step"]
@@ -225,30 +254,27 @@ class CPUOffloadSparseAdam(torch.optim.Optimizer):
                 values_cpu = values_gpu.to("cpu", non_blocking=False)
 
                 row_to_buf = state["row_to_buf"]
+
+                # Vectorized V-row → m_buf-position lookup. -1 entries
+                # mark first-touched rows; we allocate new m_buf/v_buf
+                # rows for them and update the lookup tensor.
+                buf_idx = row_to_buf[indices_cpu]                  # (nnz,) long
+                new_mask = buf_idx == -1
+                if bool(new_mask.any().item()):
+                    n_new = int(new_mask.sum().item())
+                    new_v_rows = indices_cpu[new_mask]
+                    cur_buf_size = state["m_buf"].shape[0]
+                    new_buf_idx = torch.arange(cur_buf_size,
+                                               cur_buf_size + n_new,
+                                               dtype=torch.long, device="cpu")
+                    row_to_buf[new_v_rows] = new_buf_idx
+                    buf_idx[new_mask] = new_buf_idx
+                    zero_pad = torch.zeros((n_new, p.shape[-1]),
+                                           dtype=p.dtype, device="cpu")
+                    state["m_buf"] = torch.cat([state["m_buf"], zero_pad], dim=0)
+                    state["v_buf"] = torch.cat([state["v_buf"], zero_pad.clone()], dim=0)
                 m_buf = state["m_buf"]
                 v_buf = state["v_buf"]
-
-                # Map V-row indices → m_buf positions, allocating new
-                # rows for first-touched indices.
-                indices_list = indices_cpu.tolist()
-                buf_idx_list = []
-                new_rows_count = 0
-                for vrow in indices_list:
-                    bidx = row_to_buf.get(vrow)
-                    if bidx is None:
-                        bidx = m_buf.shape[0] + new_rows_count
-                        row_to_buf[vrow] = bidx
-                        new_rows_count += 1
-                    buf_idx_list.append(bidx)
-                if new_rows_count > 0:
-                    # Grow m_buf and v_buf by new_rows_count zero rows.
-                    zero_pad = torch.zeros((new_rows_count, p.shape[-1]),
-                                           dtype=p.dtype, device="cpu")
-                    m_buf = torch.cat([m_buf, zero_pad], dim=0)
-                    v_buf = torch.cat([v_buf, zero_pad.clone()], dim=0)
-                    state["m_buf"] = m_buf
-                    state["v_buf"] = v_buf
-                buf_idx = torch.tensor(buf_idx_list, dtype=torch.long, device="cpu")
 
                 # Pull old moments for the touched rows.
                 m_old = m_buf[buf_idx]
