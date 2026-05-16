@@ -282,13 +282,17 @@ def attention(
     # it for backward — 8 MB / call × 32 layers × 2 (short+long) = 8 GB
     # at B=16, T=1024. Wrapping each SDPA in torch.utils.checkpoint with
     # use_reentrant=False discards that tensor at forward and recomputes
-    # it during backward (~2× SDPA wall on that path; SDPA is ~10% of
-    # block compute so total wall hit is small). Skipped at inference
-    # (no_grad) and when block-level grad-ckpt is on (outer scope
-    # already handles it). The `is_causal` arg can't be a kwarg to
-    # checkpoint, so it's bound via a closure.
+    # it during backward, saving 8 GB.
+    #
+    # OPT-IN via MMLLM_SDPA_CHECKPOINT (default false). On CPU, the
+    # recompute is the ENTIRE SDPA forward (no flash backend, just the
+    # math kernel), which empirically costs ~20× per-step wall (38s/step
+    # vs the unwrapped 1.7s/step at cpu-mini × wave-1 bandwidth). The
+    # 8 GB saved is only worth that wall hit on tight containers, OR
+    # when the model runs on GPU where pytorch's flash backend makes
+    # the recompute cheap. Default off so CPU training stays usable.
     _wrap_sdpa = bool(
-        os.environ.get("MMLLM_SDPA_CHECKPOINT", "true").lower() in ("1", "true", "yes")
+        os.environ.get("MMLLM_SDPA_CHECKPOINT", "false").lower() in ("1", "true", "yes")
     ) and torch.is_grad_enabled()
     def _sdpa(q_, k_, v_, *, is_causal=False, attn_mask=None):
         if _wrap_sdpa:
