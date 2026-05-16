@@ -578,6 +578,26 @@
   ([default-cap]
    (python/int (.get (.- os environ) "MMLLM_ABLATION_EVAL_CAP" (str default-cap)))))
 
+(defn pick-ablation-skip-both?
+  "Whether to skip the Δ_both ablation pass (zeroing BOTH banks) and
+   synthesize Δ_both from Δ_local + Δ_net by assuming zero synergy.
+   Reads MMLLM_ABLATION_SKIP_BOTH (default 'false').
+
+   The fourth ablation pass at end-of-training costs ~25% of total
+   eval wall (each pass is one full eval-bpc over the ablation token
+   cap, 4 passes = ctrl + Δ_local + Δ_net + Δ_both). Skipping it
+   saves that quarter at the cost of losing the synergy measurement
+   — which on cpu-mini × wave-2 has been near zero across measured
+   rounds (round-11 verified: Δ_both=Δ_local+Δ_net, synergy=+0.0000).
+
+   When true, the printed Δ_both line shows '(synthesized)' so
+   operators know it's a sum, not a direct measurement. Use for
+   bite-size dev iterations; keep false for the final round of a
+   chain extension if synergy is being tracked."
+  []
+  (let [v (.lower (.get (.- os environ) "MMLLM_ABLATION_SKIP_BOTH" "false"))]
+    (.__contains__ #{"1" "true" "yes"} v)))
+
 (defn pick-long-tier-mix
   "Resolve how the long-tier KV-cache SDPA path and the bank-V
    retrieval path get combined inside attention. Reads
@@ -4138,12 +4158,25 @@
               ;; what answers "did distillation work" (Δ_net) and "do the
               ;; two banks combine constructively" (Δ_both vs sum of pieces).
               (let [eval-cap (pick-ablation-eval-cap)
+                    skip-both? (pick-ablation-skip-both?)
                     ctrl     (:bpc r-ctrl)
                     abl-l    (ablation-step!     m val-data T 16 eval-cap)
                     d-l      (- abl-l ctrl)
                     abl-n    (ablation-step-net! m val-data T 16 eval-cap)
                     d-n      (when abl-n (- abl-n ctrl))
-                    abl-b    (when abl-n (ablation-step-both! m val-data T 16 eval-cap))
+                    ;; Δ_both: by default we measure it directly (zero both
+                    ;; banks, run eval-bpc). When MMLLM_ABLATION_SKIP_BOTH
+                    ;; is set we skip that fourth eval pass and SYNTHESIZE
+                    ;; Δ_both = Δ_local + Δ_net (i.e. assume synergy = 0).
+                    ;; Empirically synergy has been ≈ 0 on cpu-mini wave-2
+                    ;; recipes; the synthesized number is good enough for
+                    ;; bite-size dev iterations where the 25% eval-wall
+                    ;; savings matter more than the synergy measurement.
+                    abl-b    (cond
+                               (nil? abl-n)  nil
+                               skip-both?    (when (some? d-n)
+                                               (+ ctrl d-l d-n))
+                               :else         (ablation-step-both! m val-data T 16 eval-cap))
                     d-b      (when abl-b (- abl-b ctrl))]
                 (println (format "  ════ ablation summary ════"))
                 (println (format "    control  bpc=%.4f ppl=%.2f" ctrl (:ppl r-ctrl)))
@@ -4151,9 +4184,12 @@
                 (when abl-n
                   (println (format "    Δ_net:   %.4f → %+.4f" abl-n d-n)))
                 (when abl-b
-                  (let [synergy (- d-b (+ d-l (or d-n 0.0)))]
-                    (println (format "    Δ_both:  %.4f → %+.4f  (synergy: %+.4f)"
-                                     abl-b d-b synergy))))
+                  (if skip-both?
+                    (println (format "    Δ_both:  %.4f → %+.4f  (synthesized: synergy assumed 0)"
+                                     abl-b d-b))
+                    (let [synergy (- d-b (+ d-l (or d-n 0.0)))]
+                      (println (format "    Δ_both:  %.4f → %+.4f  (synergy: %+.4f)"
+                                       abl-b d-b synergy)))))
                 (append-jsonl! log-path
                                (format "{\"step\":%d,\"event\":\"ablation\",\"control_bpc\":%.4f,\"ablated_local_bpc\":%.4f,\"delta_local\":%.4f,\"ablated_net_bpc\":%s,\"delta_net\":%s,\"ablated_both_bpc\":%s,\"delta_both\":%s,\"wall_s\":%.1f}"
                                        step ctrl abl-l d-l
