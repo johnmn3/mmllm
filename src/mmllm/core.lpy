@@ -568,20 +568,60 @@
   []
   (python/int (.get (.- os environ) "MMLLM_MAX_STEPS" "0")))
 
+(defn pick-ablation-quick?
+  "Bundle env for fast ablation. Reads MMLLM_ABLATION_QUICK
+   (default 'false'). When true, implies:
+     - MMLLM_ABLATION_SKIP_LOCAL=true  (skip the Δ_local pass; report ~0)
+     - MMLLM_ABLATION_SKIP_BOTH=true   (synthesize Δ_both from parts)
+     - MMLLM_ABLATION_EVAL_CAP=2500    (10× smaller token budget)
+   Net effect: 1 ctrl pass + 1 Δ_net pass at 2500 tokens each ≈ 5%
+   of the default eval-phase wall. Trade-off: Δ_net noise floor goes
+   from ~0.002 bpc → ~0.02 bpc. Use for bite-size dev rounds where
+   recognizing the recipe works is the goal; keep false for the
+   final production round of a chain extension where the published
+   Δ_net trend across rounds needs precision."
+  []
+  (let [v (.lower (.get (.- os environ) "MMLLM_ABLATION_QUICK" "false"))]
+    (.__contains__ #{"1" "true" "yes"} v)))
+
 (defn pick-ablation-eval-cap
   "Token-cap used by ablation-step! / -net! / -both! eval-bpc passes.
    Reads MMLLM_ABLATION_EVAL_CAP (int, default arg). Used to trade
    off ablation precision for wall time — at cpu-mini scale where
    Δ_net is +0.17 (well above noise), a 25k cap measures the Δ
-   accurately in ~25% the time of the 100k default."
+   accurately in ~25% the time of the 100k default. When
+   MMLLM_ABLATION_QUICK=true, the cap drops to 2500 (one batch of
+   2-3 windows) — Δ_net noise rises from ~0.002 bpc to ~0.02 bpc,
+   acceptable for bite-size dev iterations."
   ([] (pick-ablation-eval-cap 100000))
   ([default-cap]
-   (python/int (.get (.- os environ) "MMLLM_ABLATION_EVAL_CAP" (str default-cap)))))
+   (let [env-cap (.get (.- os environ) "MMLLM_ABLATION_EVAL_CAP" nil)
+         quick?  (pick-ablation-quick?)]
+     (cond
+       (some? env-cap) (python/int env-cap)
+       quick?          2500
+       :else           (python/int default-cap)))))
+
+(defn pick-ablation-skip-local?
+  "Whether to skip the Δ_local ablation pass and report Δ_local ≈ 0
+   without measuring. Reads MMLLM_ABLATION_SKIP_LOCAL (default
+   'false'); also implied by MMLLM_ABLATION_QUICK=true.
+
+   Right after a chain-extension round starts, V_local is reset to
+   fresh Gaussian (extend_chain.sh re-initializes it). The 20- to
+   100-step training schedule in a chain round doesn't move V_local
+   enough to register a meaningful Δ_local — measured 0.0000 at
+   round-11. Skipping the pass saves 25% of eval wall."
+  []
+  (let [v (.lower (.get (.- os environ) "MMLLM_ABLATION_SKIP_LOCAL" "false"))]
+    (or (pick-ablation-quick?)
+        (.__contains__ #{"1" "true" "yes"} v))))
 
 (defn pick-ablation-skip-both?
   "Whether to skip the Δ_both ablation pass (zeroing BOTH banks) and
    synthesize Δ_both from Δ_local + Δ_net by assuming zero synergy.
-   Reads MMLLM_ABLATION_SKIP_BOTH (default 'false').
+   Reads MMLLM_ABLATION_SKIP_BOTH (default 'false');
+   also implied by MMLLM_ABLATION_QUICK=true.
 
    The fourth ablation pass at end-of-training costs ~25% of total
    eval wall (each pass is one full eval-bpc over the ablation token
@@ -596,7 +636,8 @@
    chain extension if synergy is being tracked."
   []
   (let [v (.lower (.get (.- os environ) "MMLLM_ABLATION_SKIP_BOTH" "false"))]
-    (.__contains__ #{"1" "true" "yes"} v)))
+    (or (pick-ablation-quick?)
+        (.__contains__ #{"1" "true" "yes"} v))))
 
 (defn pick-long-tier-mix
   "Resolve how the long-tier KV-cache SDPA path and the bank-V
@@ -4157,11 +4198,20 @@
               ;; matching the intermediate-ablation event format. This is
               ;; what answers "did distillation work" (Δ_net) and "do the
               ;; two banks combine constructively" (Δ_both vs sum of pieces).
-              (let [eval-cap (pick-ablation-eval-cap)
-                    skip-both? (pick-ablation-skip-both?)
+              (let [eval-cap   (pick-ablation-eval-cap)
+                    skip-local? (pick-ablation-skip-local?)
+                    skip-both?  (pick-ablation-skip-both?)
                     ctrl     (:bpc r-ctrl)
-                    abl-l    (ablation-step!     m val-data T 16 eval-cap)
-                    d-l      (- abl-l ctrl)
+                    ;; Δ_local: V_local was reset to fresh Gaussian at the
+                    ;; start of this chain-extension round. A 20- to 100-step
+                    ;; training schedule barely moves V_local; the measured
+                    ;; Δ_local is near zero on every measured wave-2 round
+                    ;; (round-11 verified: 0.0000). With SKIP_LOCAL set we
+                    ;; skip the pass and report a placeholder; saves 25% of
+                    ;; eval wall.
+                    abl-l    (when (not skip-local?)
+                               (ablation-step! m val-data T 16 eval-cap))
+                    d-l      (if abl-l (- abl-l ctrl) 0.0)
                     abl-n    (ablation-step-net! m val-data T 16 eval-cap)
                     d-n      (when abl-n (- abl-n ctrl))
                     ;; Δ_both: by default we measure it directly (zero both
@@ -4180,7 +4230,9 @@
                     d-b      (when abl-b (- abl-b ctrl))]
                 (println (format "  ════ ablation summary ════"))
                 (println (format "    control  bpc=%.4f ppl=%.2f" ctrl (:ppl r-ctrl)))
-                (println (format "    Δ_local: %.4f → %+.4f" abl-l d-l))
+                (if skip-local?
+                  (println (format "    Δ_local: (skipped — V_local fresh-init, assumed ≈0)"))
+                  (println (format "    Δ_local: %.4f → %+.4f" abl-l d-l)))
                 (when abl-n
                   (println (format "    Δ_net:   %.4f → %+.4f" abl-n d-n)))
                 (when abl-b
@@ -4191,8 +4243,10 @@
                       (println (format "    Δ_both:  %.4f → %+.4f  (synergy: %+.4f)"
                                        abl-b d-b synergy)))))
                 (append-jsonl! log-path
-                               (format "{\"step\":%d,\"event\":\"ablation\",\"control_bpc\":%.4f,\"ablated_local_bpc\":%.4f,\"delta_local\":%.4f,\"ablated_net_bpc\":%s,\"delta_net\":%s,\"ablated_both_bpc\":%s,\"delta_both\":%s,\"wall_s\":%.1f}"
-                                       step ctrl abl-l d-l
+                               (format "{\"step\":%d,\"event\":\"ablation\",\"control_bpc\":%.4f,\"ablated_local_bpc\":%s,\"delta_local\":%.4f,\"ablated_net_bpc\":%s,\"delta_net\":%s,\"ablated_both_bpc\":%s,\"delta_both\":%s,\"wall_s\":%.1f}"
+                                       step ctrl
+                                       (if abl-l (format "%.4f" abl-l) "null")
+                                       d-l
                                        (if abl-n (format "%.4f" abl-n) "null")
                                        (if d-n   (format "%.4f" d-n)   "null")
                                        (if abl-b (format "%.4f" abl-b) "null")
