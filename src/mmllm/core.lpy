@@ -3429,6 +3429,64 @@
           (restore-v-from-disk! (:netbank b) p))
         (unlink-paths! (concat local-paths net-paths))))))
 
+(defn quick-ablate-on-path
+  "Standalone QUICK ablation against a trained round: ctrl + Δ_net + synthesized
+   Δ_both (Δ_local skipped). Loads dense.pt from <ckpt-dir>/step-<step>/, leaves
+   Memory + NetBank V on their existing mmap-backed files (so the on-disk state
+   from the just-trained round is what gets ablated).
+
+   Used by extend_chain.sh / interactive smoke runs that want the ablation
+   signal on an already-trained round without paying the cost of another
+   training pass through train-long. Eval cap is taken from
+   MMLLM_ABLATION_EVAL_CAP (default 2500 under MMLLM_ABLATION_QUICK)."
+  [config base-path ckpt-step bank-path test-path]
+  (let [cfg      (assoc config :memory-mmap-path bank-path)
+        m        (build-model cfg)
+        device   (:device m)
+        ckpt-dir (str base-path ".ckpts")]
+    (when ckpt-step
+      (let [path      (str ckpt-dir "/step-" ckpt-step)
+            saved     (python/list (torch/load (str path "/dense.pt")
+                                               ** :map_location device))
+            n-skipped (python/list [0])]
+        (println (format "  loaded ckpt: %s (%d dense param tensors)"
+                         path (count saved)))
+        (doseq [[i [p s]] (map-indexed vector (map vector (parameters m) saved))]
+          (try
+            (.copy_ (.- p data) s)
+            (catch python/Exception e
+              (.__setitem__ n-skipped 0 (inc (.__getitem__ n-skipped 0)))
+              (when (< (.__getitem__ n-skipped 0) 3)
+                (println (format "  WARN load-ckpt: skip param %d (model %s vs saved %s)"
+                                 i
+                                 (str (python/list (.- p shape)))
+                                 (str (python/list (.- s shape)))))))))
+        (when (pos? (.__getitem__ n-skipped 0))
+          (println (format "  WARN load-ckpt: %d/%d param tensors skipped (kept at fresh init)"
+                           (.__getitem__ n-skipped 0) (count saved))))))
+    (set-eval-mode! m)
+    (torch/set_grad_enabled false)
+    (let [data     (corp/load-as-tensor test-path)
+          T-seq    (:seq-len cfg)
+          eval-cap (pick-ablation-eval-cap)
+          t0       (time/time)
+          ctrl-r   (eval-bpc m data T-seq 16 eval-cap)
+          ctrl-bpc (:bpc ctrl-r)
+          ctrl-ppl (:ppl ctrl-r)
+          abl-n    (ablation-step-net! m data T-seq 16 eval-cap)
+          delta-n  (when abl-n (- abl-n ctrl-bpc))
+          delta-b  delta-n
+          wall     (- (time/time) t0)]
+      (println (format "  quick-ablate: cap=%d wall=%.1fs" eval-cap wall))
+      (println (format "    ctrl bpc=%.4f ppl=%.2f n_tokens=%d"
+                       ctrl-bpc ctrl-ppl (:n-tokens ctrl-r)))
+      (when abl-n
+        (println (format "    Δ_net:    %.4f → %+.4f (ablated bpc=%.4f)"
+                         ctrl-bpc delta-n abl-n)))
+      (when delta-b
+        (println (format "    Δ_both:   %.4f → %+.4f (synthesized = Δ_local + Δ_net, Δ_local skipped)"
+                         ctrl-bpc delta-b))))))
+
 (defn- probe-loss
   "Lightweight single-batch forward + plain CE on (x, y). No backward,
    no optimizer. Returns a Python float. Used by the ablation-mode
@@ -5264,6 +5322,21 @@
                            ;; Same config-match invariant as eval-agent.
                            (eval-bpc-on-path cfg base ckpt bank
                                              eval-path eval-name log-path))
+      "quick-ablate" (let [base       (or (second args) "/tmp/mmllm-cpu/fim-chain-stack")
+                           ckpt       (when (nth args 2 nil)
+                                        (python/int (nth args 2 nil)))
+                           bank       (or (nth args 3 nil) "/tmp/mmllm-cpu/fim-bank-chain-stack")
+                           eval-path  (or (nth args 4 nil) (str base ".val.bin"))
+                           cfg2       (assoc default-config-cpu-mini
+                                             :memory-mmap-path bank)]
+                       (.__setitem__ (.- os environ) "MMLLM_DEVICE" "cpu")
+                       (when (nil? (.get (.- os environ) "MMLLM_BATCH"))
+                         (.__setitem__ (.- os environ) "MMLLM_BATCH" "4"))
+                       (when (nil? (.get (.- os environ) "MMLLM_BANK_ON_GPU"))
+                         (.__setitem__ (.- os environ) "MMLLM_BANK_ON_GPU" "false"))
+                       (when (nil? (.get (.- os environ) "MMLLM_ABLATION_QUICK"))
+                         (.__setitem__ (.- os environ) "MMLLM_ABLATION_QUICK" "true"))
+                       (quick-ablate-on-path cfg2 base ckpt bank eval-path))
       "eval-battery-on-ckpt" (let [base        (or (second args) "/tmp/agent")
                                    ckpt        (when (nth args 2 nil)
                                                  (python/int (nth args 2 nil)))
