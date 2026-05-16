@@ -79,19 +79,34 @@ Knobs explained:
 Pass overrides via env BEFORE invoking the script:
 
 ```bash
+# 15-16 GB container — half-bandwidth recipe variant (fits the box)
+MMLLM_NET_TOP_K=256 MMLLM_NET_SUB_TOP_K=16 \
+  bash scripts/extend_chain.sh 10 20
+
+# 32 GB container — increase effective batch to 32 for higher throughput
 MMLLM_BATCH=2 \
   bash scripts/extend_chain.sh 10 20
 ```
 
 The script uses `: ${VAR:=default}` so env-passed values win.
 
-### Containers below 24 GB
+### Recommended tier table
 
-Wave-2's bandwidth (NET_TOP_K=512) is the binding constraint. Even with
-checkpointing on and MMLLM_BATCH=1, the per-block backward recompute at
-this bandwidth approaches the 16 GB envelope. Birds on 15-16 GB
-containers can't safely run wave-2 default — please skip this wave or
-report your container size so we can scope a smaller-bandwidth tier.
+Verified on this 15 GB box at e8c0907 (post-grad-checkpoint fix):
+
+| container RAM | MMLLM_BATCH | MMLLM_NET_TOP_K | MMLLM_NET_SUB_TOP_K | MMLLM_GRAD_CHECKPOINT | distill |
+|--------------:|:-----------:|:---------------:|:-------------------:|:---------------------:|:-------:|
+| **15-16 GB**  | 1 (default) | **256** (½×)    | 16                  | true (default)        | off     |
+| **24 GB**     | 1 (default) | 512 (default)   | 64 (default)        | true (default)        | off     |
+| **32+ GB**    | 2           | 512 (default)   | 64 (default)        | false                 | on      |
+
+Notes on the 15-16 GB tier: NET_TOP_K=256 is half the wave-2 bandwidth
+contract (4× wave-1's NET_TOP_K=64 rather than 8×) — this is a
+recipe variant, not the full wave-2 recipe. Verified end-to-end on
+this box: ctrl bpc=2.01, Δ_net=+0.03 at 1 step on round-10 seed.
+Per-block forward delta with grad-checkpointing was 35-160 MB
+(vs 450 MB without) at this config. Backward fits the envelope
+because NET_TOP_K halving roughly halves the per-block recompute.
 
 ## Setup
 
