@@ -252,11 +252,20 @@ class CPUOffloadSparseAdam(torch.optim.Optimizer):
                     # upfront but caps the memory and vectorizes the
                     # gradient-to-buf-idx mapping below (was a Python
                     # for-loop, now one tensor index).
+                    # m_buf has a logical size (state["m_buf_used"]) and
+                    # a physical capacity (state["m_buf"].shape[0]). When
+                    # capacity is exhausted, grow geometrically (×2) so
+                    # the cat amortizes to O(1) per row over a round.
+                    # The previous design cat'd every step, which was
+                    # O(touched_rows²) total over N steps and dominated
+                    # opt-sparse-net wall (~26% of step time at the
+                    # wave-2 recipe).
                     state["step"] = 0
                     state["m_buf"] = torch.zeros((0, p.shape[-1]),
                                                  dtype=p.dtype, device="cpu")
                     state["v_buf"] = torch.zeros((0, p.shape[-1]),
                                                  dtype=p.dtype, device="cpu")
+                    state["m_buf_used"] = 0
                     state["row_to_buf"] = torch.full((p.shape[0],), -1,
                                                     dtype=torch.long,
                                                     device="cpu")
@@ -284,16 +293,25 @@ class CPUOffloadSparseAdam(torch.optim.Optimizer):
                 if bool(new_mask.any().item()):
                     n_new = int(new_mask.sum().item())
                     new_v_rows = indices_cpu[new_mask]
-                    cur_buf_size = state["m_buf"].shape[0]
-                    new_buf_idx = torch.arange(cur_buf_size,
-                                               cur_buf_size + n_new,
+                    cur_used = state.get("m_buf_used", state["m_buf"].shape[0])
+                    cur_cap  = state["m_buf"].shape[0]
+                    needed   = cur_used + n_new
+                    if needed > cur_cap:
+                        # Geometric growth (×2, or exactly what's needed —
+                        # whichever is larger). One cat per growth event
+                        # instead of one cat per step.
+                        new_cap = max(needed, cur_cap * 2, 64)
+                        grow = new_cap - cur_cap
+                        zero_pad = torch.zeros((grow, p.shape[-1]),
+                                               dtype=p.dtype, device="cpu")
+                        state["m_buf"] = torch.cat([state["m_buf"], zero_pad], dim=0)
+                        state["v_buf"] = torch.cat([state["v_buf"], zero_pad.clone()], dim=0)
+                    new_buf_idx = torch.arange(cur_used,
+                                               cur_used + n_new,
                                                dtype=torch.long, device="cpu")
                     row_to_buf[new_v_rows] = new_buf_idx
                     buf_idx[new_mask] = new_buf_idx
-                    zero_pad = torch.zeros((n_new, p.shape[-1]),
-                                           dtype=p.dtype, device="cpu")
-                    state["m_buf"] = torch.cat([state["m_buf"], zero_pad], dim=0)
-                    state["v_buf"] = torch.cat([state["v_buf"], zero_pad.clone()], dim=0)
+                    state["m_buf_used"] = cur_used + n_new
                 m_buf = state["m_buf"]
                 v_buf = state["v_buf"]
 
