@@ -82,16 +82,24 @@ MMLLM_BWD_SKIP_FRAC_LOCAL=0.0      # local layers always backward
 
 ## Memory budget
 
-Same as wave-2; the 24+ GB tier is the contract for default bandwidth.
-The bwd-skip knob frees ~33% step wall without changing peak RAM.
+The wave-3 contract is `NET_TOP_K=512` / `MEMORY_TOP_K=128` — these
+are the bandwidth values the recipe was tuned on. **Do not lower
+them.** If your container can't run the contract bandwidth, do not
+run this wave; smaller-container variants produce non-comparable
+numbers and pollute the FedAvg harvest.
 
-| container RAM | MMLLM_BATCH | MMLLM_NET_TOP_K | MMLLM_NET_SUB_TOP_K | MMLLM_MEMORY_TOP_K | MMLLM_MEMORY_SUB_TOP_K | MMLLM_GRAD_CHECKPOINT |
-|--------------:|:-----------:|:---------------:|:-------------------:|:------------------:|:----------------------:|:---------------------:|
-| **15-16 GB**  | 1           | 64 (wave-1)     | 8                   | 16 (wave-1)        | 16                     | false                 |
-| **24 GB**     | 1 (default) | 512 (default)   | 64 (default)        | 128 (default)      | 128 (default)          | true (default)        |
-| **32+ GB**    | 2           | 512 (default)   | 64 (default)        | 128 (default)      | 128 (default)          | false                 |
+`MMLLM_BATCH` and the `SUB_TOP_K` knobs are the legitimate tuning
+levers — they trade throughput for RAM without changing retrieval
+fidelity. The bwd-skip lever (`MMLLM_BWD_SKIP_FRAC_NET_ONLY=1.0`)
+frees ~33% step wall without changing peak RAM either.
 
-B and SUB_TOP_K are tunable to fit RAM. Document what you ran at.
+| container RAM | MMLLM_BATCH | MMLLM_NET_SUB_TOP_K | MMLLM_MEMORY_SUB_TOP_K | MMLLM_GRAD_CHECKPOINT |
+|--------------:|:-----------:|:-------------------:|:----------------------:|:---------------------:|
+| **24 GB**     | 1 (default) | 64 (default)        | 128 (default)          | true (default)        |
+| **32+ GB**    | 2           | 64 (default)        | 128 (default)          | false                 |
+
+`NET_TOP_K=512` and `MEMORY_TOP_K=128` are fixed by the recipe
+contract — they're not in the table because they're not tunable.
 
 ## Setup
 
@@ -159,18 +167,13 @@ MMLLM_BWD_SKIP_FRAC_LOCAL=0.0 \
   bash scripts/run_chain_diverse.sh 10 7
 ```
 
-On a 15 GB container with reduced bandwidth:
-
-```bash
-MMLLM_BWD_SKIP_FRAC_NET_ONLY=1.0 MMLLM_BWD_SKIP_FRAC_LOCAL=0.0 \
-MMLLM_BATCH=4 MMLLM_MEMORY_SUB_TOP_K=32 MMLLM_NET_SUB_TOP_K=32 \
-MMLLM_NET_TOP_K=64 MMLLM_MEMORY_TOP_K=16 MMLLM_GRAD_CHECKPOINT=false \
-  bash scripts/run_chain_diverse.sh 10 7
-```
+On a 32+ GB container, you may bump `MMLLM_BATCH=2` (effective batch 32)
+for higher throughput. Do not override `MMLLM_NET_TOP_K` or
+`MMLLM_MEMORY_TOP_K` — those are the recipe contract.
 
 Per-round wall (7 steps each + ablation eval) — much faster than wave-2:
 - 24 GB + default bandwidth: ~45-75s/round, ~10-15 min total
-- 15 GB + wave-1 bandwidth: ~60-110s/round, ~15-20 min total
+- 32+ GB + B=2: ~30-50s/round, ~7-10 min total
 
 ## Live reporting
 
@@ -277,9 +280,17 @@ for the merge.
 - DO NOT change MMLLM_MIX, MMLLM_LR_LAYER_MULTS, MMLLM_DISTILL_GATE_*,
   bank sizes, n-heads, head-dim, n-routers. Those are the recipe
   contract.
+- DO NOT change **MMLLM_NET_TOP_K (=512)** or
+  **MMLLM_MEMORY_TOP_K (=128)**. These are the retrieval-bandwidth
+  contract — the architecture knob that produced wave-1/2 numbers.
+  Lowering them (to e.g. wave-1's 64/16) is a *different recipe*, not
+  a "smaller-container variant". If your container can't fit the
+  contract bandwidth at any tunable `MMLLM_BATCH` / `SUB_TOP_K`, do
+  not run this wave — non-contract numbers pollute the FedAvg harvest.
 - DO NOT change MMLLM_BWD_SKIP_FRAC_NET_ONLY (=1.0) or
   MMLLM_BWD_SKIP_FRAC_LOCAL (=0.0). That's the wave-3 contract.
-- B and SUB_TOP_K ARE tunable to fit RAM. Document what you ran.
+- `MMLLM_BATCH` and `*_SUB_TOP_K` are tunable to fit RAM. Document
+  what you ran.
 - DO publish on partial failure — partial results beat zero.
 - DO NOT touch `workers/dispatcher/` or anyone else's `workers/<h>/`.
 - If your first round OOMs unrecoverably, publish a meta.json with
