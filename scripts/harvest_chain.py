@@ -557,6 +557,18 @@ def stream_finalize(accum_dir, target, harvested_prefix, harvested_dense,
             sys.exit(2)
     if reference_dir is not None:
         reference_dir = Path(reference_dir)
+        # Sanity check up front rather than per-layer fallback-to-zero.
+        # If --reference-dir was passed but doesn't actually contain a full
+        # V_net.bin (e.g. a sparse-delta-only harvest mis-pointed as ref),
+        # bail loudly instead of producing delta-on-zero output that pretends
+        # to be ref+delta. Caller should fix the path or pass the right one.
+        if using_delta and not (reference_dir / "V_net.0.bin").exists():
+            print(f"ERROR: --reference-dir={reference_dir} has no V_net.0.bin.",
+                  file=sys.stderr)
+            print("  Sparse-delta workers need a full V_net.{0..31}.bin "
+                  "reference. The path you passed is sparse-delta or empty.",
+                  file=sys.stderr)
+            sys.exit(2)
 
     n_rows = SQRT_NET * SQRT_NET
     for i in range(32):

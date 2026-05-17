@@ -493,19 +493,29 @@ try:
     print(m.get('extended_from', '').split(' ')[0])
 except: pass
 " 2>/dev/null)
-  if [ -n "$cand" ] && [ -d "$cand" ]; then
+  if [ -n "$cand" ] && [ -d "$cand" ] && [ -f "$cand/V_net.0.bin" ]; then
     REFERENCE_DIR="$cand"
   fi
 fi
-# (2) Glob fallback covers both harvest-Nway and one-off harvest-cooked.
+# (2) Glob across ALL prior harvests for a dir with V_net.bin — the chain's
+# delta-encode reference is whatever harvest carries the full V_net, not
+# necessarily the most-recent one (which may itself be sparse-delta and
+# therefore unsuitable as a reference). Walk descending by round; first
+# match wins. Covers both harvest-Nway and one-off harvest-cooked layouts.
 if [ -z "$REFERENCE_DIR" ]; then
-  for cand in workers/dispatcher/harvest-*-r${PRIOR}/round-${PRIOR} \
-              workers/dispatcher/harvest-cooked-r${PRIOR}/round-${PRIOR}; do
-    if [ -d "$cand" ]; then
+  for cand in $(ls -1d workers/dispatcher/harvest-*-r*/round-*/ \
+                       workers/dispatcher/harvest-cooked-r*/round-*/ \
+                       2>/dev/null \
+               | sed 's|/$||' \
+               | awk -F/round- '{print $2 "\t" $0}' \
+               | sort -rn | cut -f2-); do
+    if [ -d "$cand" ] && [ -f "$cand/V_net.0.bin" ]; then
       REFERENCE_DIR="$cand"; break
     fi
   done
 fi
+# If REFERENCE_DIR is still empty and any worker pushed sparse-delta,
+# the python finalize will exit 2 with a clear error of its own.
 echo ""
 echo "── 5. stream-finalize: divide by N=${N_WORKERS}, write outputs, publish ──"
 echo "    reference V_net dir: ${REFERENCE_DIR:-<none, legacy full-V_net mode only>}"
