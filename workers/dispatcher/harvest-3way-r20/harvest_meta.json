@@ -1,0 +1,28 @@
+{
+  "target_round": 20,
+  "n_workers": 3,
+  "workers": [
+    {
+      "handle": "ab52T",
+      "branch": "claude/chainlen7-ab52T-r2-10",
+      "ctrl_bpc": 1.8507
+    },
+    {
+      "handle": "KswgK",
+      "branch": "claude/chainlen7-KswgK-r2-10",
+      "ctrl_bpc": 1.8951
+    },
+    {
+      "handle": "o6Aqf",
+      "branch": "claude/extend-chain-training-o6Aqf",
+      "ctrl_bpc": 1.9124
+    }
+  ],
+  "worker_ctrl_bpc_mean": 1.8861,
+  "worker_ctrl_bpc_best": 1.8507,
+  "extended_from": "workers/dispatcher/harvest-5way-r10/round-10",
+  "wave": "chain-design-wave-3-len7",
+  "recipe": "length-7 rounds, bwd-skip-net=1.0, 9-corpus mix",
+  "round_length_steps": 7,
+  "n_rounds_per_worker": 10
+}

@@ -280,6 +280,30 @@ def _stream_update_dense(accum_dir, worker_dir):
                 accum_dense[i] = a + w
         torch.save(accum_dense, sfn)
 
+def _row_to_buf_items(r2b):
+    """Yield (v_row, buf_idx) pairs from either format the worker may
+    have saved `row_to_buf` in.
+
+    Legacy: Python dict `{int → int}`. Iterated via `.items()`.
+    Current: 1-D LongTensor of shape (V_rows,) where entry i = buf_idx
+    if row i was touched, else -1. (See CPUOffloadSparseAdam init
+    in src/mmllm/optim.py — the dict was replaced with a tensor to
+    cap memory at p.shape[0] × 8 B instead of growing unboundedly.)
+
+    Returns: dict-like sequence of (vrow, bidx) pairs. Empty if no
+    rows were touched."""
+    if isinstance(r2b, torch.Tensor):
+        mask = (r2b >= 0)
+        if not bool(mask.any().item()):
+            return []
+        v_idxs = torch.nonzero(mask, as_tuple=False).squeeze(-1)
+        b_vals = r2b[v_idxs]
+        return [(int(v_idxs[i].item()), int(b_vals[i].item()))
+                for i in range(v_idxs.shape[0])]
+    # Legacy dict path.
+    return list(r2b.items()) if r2b else []
+
+
 def _stream_update_one_pid_opt(accum_path, worker_state):
     """Fold one worker's per-pid Adam state into the per-pid accumulator.
 
@@ -287,7 +311,8 @@ def _stream_update_one_pid_opt(accum_path, worker_state):
     touch count. Finalize divides by per-row count, yielding the row-aware
     FedAvg semantics: rows touched by k workers → mean over those k.
     """
-    if not worker_state["row_to_buf"]:
+    pairs = _row_to_buf_items(worker_state["row_to_buf"])
+    if not pairs:
         return
     dim = worker_state["m_buf"].shape[-1]
     if accum_path.exists():
@@ -306,7 +331,7 @@ def _stream_update_one_pid_opt(accum_path, worker_state):
 
     # Partition worker rows into update-existing vs append-new.
     upd_dst, upd_src, new_vrows, new_src = [], [], [], []
-    for vrow, bidx in worker_state["row_to_buf"].items():
+    for vrow, bidx in pairs:
         idx = row_to_idx.get(vrow)
         if idx is not None:
             upd_dst.append(idx); upd_src.append(bidx)
@@ -357,7 +382,8 @@ def _stream_update_one_pid_delta(accum_path, worker_state):
     Same row-aware semantics as _stream_update_one_pid_opt: rows touched
     by k of N workers get averaged over those k at finalize time.
     """
-    if not worker_state["row_to_buf"]:
+    pairs = _row_to_buf_items(worker_state["row_to_buf"])
+    if not pairs:
         return
     dim = worker_state["delta_buf"].shape[-1]
     if accum_path.exists():
@@ -371,7 +397,7 @@ def _stream_update_one_pid_delta(accum_path, worker_state):
         counts = torch.zeros((0,), dtype=torch.long)
 
     upd_dst, upd_src, new_vrows, new_src = [], [], [], []
-    for vrow, bidx in worker_state["row_to_buf"].items():
+    for vrow, bidx in pairs:
         idx = row_to_idx.get(vrow)
         if idx is not None:
             upd_dst.append(idx); upd_src.append(bidx)

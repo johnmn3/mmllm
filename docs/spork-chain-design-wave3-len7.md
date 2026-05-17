@@ -164,7 +164,7 @@ After round 20:
 
 ```bash
 HANDLE="<your-handle>"
-DEST="workers/$HANDLE/chain-design-len7-r2-10"
+DEST="workers/$HANDLE/chain-design-r20"
 mkdir -p "$DEST"
 ARCHIVE=/tmp/mmllm-cpu/chain-diverse
 
@@ -195,12 +195,12 @@ cat > "$DEST/meta.json" <<EOF
 }
 EOF
 
-git checkout -b "claude/chainlen7-${HANDLE}-r2-10" 2>/dev/null \
-  || git checkout "claude/chainlen7-${HANDLE}-r2-10"
+git checkout -b "claude/chaindiverse-${HANDLE}-r20" 2>/dev/null \
+  || git checkout "claude/chaindiverse-${HANDLE}-r20"
 
 git add "$DEST"
 git commit -m "chain-design wave-3 len7 rounds 11-20 — final_ctrl=<...>"
-git push -u origin "claude/chainlen7-${HANDLE}-r2-10"
+git push -u origin "claude/chaindiverse-${HANDLE}-r20"
 ```
 
 If push 413/502s, split V_net into 2 commits.
@@ -208,7 +208,7 @@ If push 413/502s, split V_net into 2 commits.
 ## What to report back
 
 1. Per-round table: wall_s, ctrl_bpc, Δ_local, Δ_net, Δ_both, synergy.
-2. Branch name `claude/chainlen7-<HANDLE>-r2-10`.
+2. Branch name `claude/chaindiverse-<HANDLE>-r20`.
 3. Did `MMLLM_BWD_SKIP_FRAC_NET_ONLY=1.0` measurably drop per-step
    wall vs wave-2? (rough number is fine — compare wall.tsv to any
    prior wave-2 publish you have.)
@@ -216,10 +216,10 @@ If push 413/502s, split V_net into 2 commits.
 **Dispatcher will auto-harvest** once enough workers (≥3) publish:
 
 ```bash
-bash scripts/harvest_chain.sh len7-r2-10   # FedAvg across submitted branches
+bash scripts/harvest_chain.sh 20   # FedAvg across submitted branches
 ```
 
-The orchestrator polls for `claude/chainlen7-*-r2-10` branches and
+The orchestrator polls for `claude/chaindiverse-*-r20` branches and
 fires the harvester when the quorum is met. No worker action needed
 for the merge.
 
