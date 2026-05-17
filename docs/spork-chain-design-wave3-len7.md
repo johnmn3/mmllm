@@ -163,15 +163,27 @@ Per CLAUDE.md "Reporting discipline" — one short message per signal:
 After round 20:
 
 ```bash
-HANDLE="<your-handle>"
+HANDLE="<your-handle>"     # lowercase, no spaces
 DEST="workers/$HANDLE/chain-design-r20"
 mkdir -p "$DEST"
-ARCHIVE=/tmp/mmllm-cpu/chain-diverse
 
-cp "$ARCHIVE"/round-20/V_net.*.bin            "$DEST/"
+ARCHIVE=/tmp/mmllm-cpu/chain-diverse
+REFERENCE=workers/dispatcher/harvest-5way-r10/round-10  # wave-start V_net (shared)
+
+# Sparse-delta encode V_net = current - reference. Workers touch only
+# a fraction of V_net's rows, so this produces ~10-50 MB total instead
+# of the 1.07 GB a full V_net.{0..31}.bin push would cost. The harvester
+# row-aware-merges deltas + adds back reference at finalize time;
+# untouched rows pass through unchanged.
+# See scripts/_delta_sparse_net.py for the format.
+python3 scripts/_delta_sparse_net.py encode \
+  "$REFERENCE" "$ARCHIVE"/round-20 "$DEST"
+
+# dense + chunked opt-state alongside the delta.
 cp "$ARCHIVE"/round-20/dense.pt               "$DEST/"
 cp "$ARCHIVE"/round-20/opt-sparse-net.*.pt    "$DEST/" 2>/dev/null || true
 
+# Per-round training logs
 for r in $(seq 11 20); do
   cp "$ARCHIVE/round-$r/log.jsonl" "$DEST/round-$r.log.jsonl" 2>/dev/null || true
 done
@@ -194,16 +206,21 @@ cat > "$DEST/meta.json" <<EOF
   "git_sha": "$(git rev-parse HEAD)"
 }
 EOF
+```
 
+Push to your own branch (sparse-delta payload is ~10-50 MB total —
+single commit, no chunking):
+
+```bash
 git checkout -b "claude/chaindiverse-${HANDLE}-r20" 2>/dev/null \
   || git checkout "claude/chaindiverse-${HANDLE}-r20"
 
-git add "$DEST"
-git commit -m "chain-design wave-3 len7 rounds 11-20 — final_ctrl=<...>"
+git add "$DEST"/delta-sparse-net.*.pt "$DEST"/dense.pt \
+        "$DEST"/opt-sparse-net.*.pt "$DEST"/meta.json \
+        "$DEST"/round-*.log.jsonl "$DEST"/wall.tsv 2>/dev/null
+git commit -m "chain-design wave-3 len7 rounds 11-20 (sparse-delta) — final_ctrl=<...>"
 git push -u origin "claude/chaindiverse-${HANDLE}-r20"
 ```
-
-If push 413/502s, split V_net into 2 commits.
 
 ## What to report back
 
