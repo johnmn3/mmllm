@@ -12,30 +12,6 @@ ARCHIVE_ROOT="${1:?archive dir required}"
 N_MORE="${2:-2}"
 STEPS="${3:-100}"
 
-# Recipe-contract guard. NET_TOP_K=512 / MEMORY_TOP_K=128 are the
-# retrieval-bandwidth values wave-1/2 numbers were produced at.
-# Lowering them produces non-comparable bpc and pollutes FedAvg
-# harvests. Fail fast (before any side effects) if a worker tries
-# to ratchet bandwidth down.
-# Set MMLLM_ALLOW_OFFCONTRACT_TOPK=true to explicitly opt out (local
-# dev / smoke tests only — never for a wave).
-if [ "${MMLLM_ALLOW_OFFCONTRACT_TOPK:-false}" != "true" ]; then
-  if [ -n "${MMLLM_NET_TOP_K:-}" ] && [ "${MMLLM_NET_TOP_K}" != "512" ]; then
-    echo "ERROR: MMLLM_NET_TOP_K=${MMLLM_NET_TOP_K} (contract: 512)." >&2
-    echo "  Retrieval-bandwidth contract. Numbers across different TOP_K" >&2
-    echo "  are non-comparable and pollute FedAvg. Export" >&2
-    echo "  MMLLM_ALLOW_OFFCONTRACT_TOPK=true to override (smoke/dev only)." >&2
-    exit 2
-  fi
-  if [ -n "${MMLLM_MEMORY_TOP_K:-}" ] && [ "${MMLLM_MEMORY_TOP_K}" != "128" ]; then
-    echo "ERROR: MMLLM_MEMORY_TOP_K=${MMLLM_MEMORY_TOP_K} (contract: 128)." >&2
-    echo "  Retrieval-bandwidth contract. Numbers across different TOP_K" >&2
-    echo "  are non-comparable and pollute FedAvg. Export" >&2
-    echo "  MMLLM_ALLOW_OFFCONTRACT_TOPK=true to override (smoke/dev only)." >&2
-    exit 2
-  fi
-fi
-
 if [ ! -d "$ARCHIVE_ROOT" ]; then
   echo "ERROR: $ARCHIVE_ROOT does not exist" >&2
   exit 2

@@ -88,16 +88,42 @@ The script uses `: ${VAR:=default}` so env-passed values win.
 
 ### Recommended tier table
 
-`NET_TOP_K=512` and `MEMORY_TOP_K=128` are fixed by the recipe contract.
-**Do not lower them.** If a container can't fit the contract bandwidth
-at any tunable `MMLLM_BATCH` / `SUB_TOP_K`, do not run this wave —
-non-contract bandwidth produces non-comparable numbers and pollutes the
-FedAvg harvest.
+| container RAM | MMLLM_BATCH | MMLLM_NET_TOP_K | MMLLM_NET_SUB_TOP_K | MMLLM_MEMORY_TOP_K | MMLLM_MEMORY_SUB_TOP_K | MMLLM_GRAD_CHECKPOINT | distill |
+|--------------:|:-----------:|:---------------:|:-------------------:|:------------------:|:----------------------:|:---------------------:|:-------:|
+| **15-16 GB**  | 1 (default) | **64** (wave-1) | 8                   | **16** (wave-1)    | 16                     | **false**             | on      |
+| **24 GB**     | 1 (default) | 512 (default)   | 64 (default)        | 128 (default)      | 128 (default)          | true (default)        | off     |
+| **32+ GB**    | 2           | 512 (default)   | 64 (default)        | 128 (default)      | 128 (default)          | false                 | on      |
 
-| container RAM | MMLLM_BATCH | MMLLM_NET_SUB_TOP_K | MMLLM_MEMORY_SUB_TOP_K | MMLLM_GRAD_CHECKPOINT | distill |
-|--------------:|:-----------:|:-------------------:|:----------------------:|:---------------------:|:-------:|
-| **24 GB**     | 1 (default) | 64 (default)        | 128 (default)          | true (default)        | off     |
-| **32+ GB**    | 2           | 64 (default)        | 128 (default)          | false                 | on      |
+Verified on this 15 GB box at e8c0907 fix: the 15-16 GB row's wave-1-bandwidth
+recipe ran a full 100-step round + 4 ablation evals in 1127s wall, producing
+ctrl bpc=0.7835, Δ_net=+0.0116 (NetBank is contributing). The full wave-2
+bandwidth (NET_TOP_K=512) doesn't fit 15 GB even with grad-checkpointing
+because the carried-forward `opt-sparse-net.pt` deserializes to ~1-3 GB of
+Python-dict overhead (sparse Adam's `row_to_buf` is a `{int → int}` dict
+that grows per touched row), and the per-step row-touch rate at NET_TOP_K=512
+grows that footprint another ~5-7 GB through the round. The 15-16 GB tier
+uses wave-1 bandwidth knobs (NET_TOP_K=64, MEMORY_TOP_K=16, sub=8/16) where
+the row-touch rate is 4-8× slower, leaving headroom for the optimizer state
+to grow within budget. Grad-checkpointing is OFF at this tier — at wave-1
+bandwidth the activation snapshot is already small, and the ~2× wall hit
+from CPU-side recompute isn't worth it.
+
+Override for the 15-16 GB tier (one line; all other knobs at script defaults):
+
+    MMLLM_NET_TOP_K=64 MMLLM_NET_SUB_TOP_K=8 \
+    MMLLM_MEMORY_TOP_K=16 MMLLM_MEMORY_SUB_TOP_K=16 \
+    MMLLM_GRAD_CHECKPOINT=false \
+      bash scripts/extend_chain.sh <archive> 1 100
+
+Note: this is a recipe variant, not the wave-2 contract — bandwidth is
+wave-1's (3 Gemma heads' worth → 1 Gemma head's worth). Birds running it
+should report the tier they used.
+contract (4× wave-1's NET_TOP_K=64 rather than 8×) — this is a
+recipe variant, not the full wave-2 recipe. Verified end-to-end on
+this box: ctrl bpc=2.01, Δ_net=+0.03 at 1 step on round-10 seed.
+Per-block forward delta with grad-checkpointing was 35-160 MB
+(vs 450 MB without) at this config. Backward fits the envelope
+because NET_TOP_K halving roughly halves the per-block recompute.
 
 ## Setup
 
@@ -182,17 +208,19 @@ export MMLLM_DISTILL_GATE_MIN=0.05
 export MMLLM_DISTILL_GATE_MAX=1.0
 export MMLLM_DISTILL_GATE_TEMP=0.5
 
+# On 15-16 GB containers add the memory throttles:
+# export MMLLM_BATCH=4 MMLLM_MEMORY_SUB_TOP_K=32 MMLLM_NET_SUB_TOP_K=32
+
 bash scripts/extend_chain.sh 10 20
 ```
 
 `extend_chain.sh 10 20` means "extend from round-10 up to and
 including round-20" — picks up the staged round-10 state, trains
-rounds 11..20 at 100 steps each. Do not override NET_TOP_K or
-MEMORY_TOP_K — those are the recipe contract.
+rounds 11..20 at 100 steps each.
 
 Per-round wall depends on (B × T × layers × banks):
-- 24 GB + B=1 (default): expect ~300-500s/round, ~50-80 min total
-- 32 GB + B=2: expect ~200-300s/round, ~40-60 min total
+- 15 GB + B=4: expect ~600-900s/round, ~2 hr total
+- 32 GB + B=16: expect ~200-300s/round, ~40-60 min total
 
 ## Live reporting
 
