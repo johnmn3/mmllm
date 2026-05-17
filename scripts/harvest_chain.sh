@@ -297,10 +297,16 @@ done < "$MANIFEST"
 # this point — the dilution bug in naive V_net mean is bypassed even for
 # legacy workers.
 REFERENCE_DIR=""
-# Try `current` first (covers wave-prefixed targets where PRIOR=0):
+# Try `current` first (covers wave-prefixed targets where PRIOR=0).
+# Safety: never accept a `current` that points at the CURRENT target's
+# own harvest dir — that's a leftover from a prior failed attempt at
+# the same target, and using it as the reference produces self-referential
+# garbage (the prior attempt's bogus output becomes the "ground truth"
+# this attempt builds on top of).
 if [ -L workers/dispatcher/current ] || [ -d workers/dispatcher/current ]; then
   cand_cur=$(readlink -f workers/dispatcher/current 2>/dev/null)
-  if [ -d "$cand_cur" ] && [ -f "$cand_cur/V_net.0.bin" ]; then
+  if [ -d "$cand_cur" ] && [ -f "$cand_cur/V_net.0.bin" ] \
+     && [[ "$cand_cur" != */harvest-*-r${TARGET}/round-${TARGET} ]]; then
     REFERENCE_DIR="$cand_cur"
   fi
 fi
@@ -513,6 +519,36 @@ if [ -z "$REFERENCE_DIR" ]; then
       REFERENCE_DIR="$cand"; break
     fi
   done
+fi
+# (3) If still no full V_net reference in the working tree, restore the
+# chain anchor from git history. The team intentionally dropped
+# `workers/dispatcher/harvest-5way-r10/round-10/` from HEAD in commit
+# c6504b0 ("disk cleanup; recoverable from git history") — the blobs
+# persist at commit 8608bc3e and are reachable from this branch's
+# ancestry. Sparse-delta workers are encoded against this anchor; without
+# it the harvester can't reconstruct V_net = reference + delta.
+if [ -z "$REFERENCE_DIR" ]; then
+  ANCHOR_COMMIT=8608bc3e
+  ANCHOR_PATH=workers/dispatcher/harvest-5way-r10/round-10
+  echo "  no V_net reference in working tree; restoring chain anchor from ${ANCHOR_COMMIT}"
+  # Local checkout first — works if blobs are reachable. If only some
+  # blobs are local (partial-fetch leftovers, gc pruned), the checkout
+  # silently materializes a partial dir. Verify by counting V_net files
+  # and force an unfiltered fetch when incomplete.
+  git checkout "$ANCHOR_COMMIT" -- "$ANCHOR_PATH/" 2>/dev/null || true
+  N_VNET=$(ls "$ANCHOR_PATH"/V_net.*.bin 2>/dev/null | wc -l)
+  if [ "$N_VNET" -lt 32 ]; then
+    echo "  partial anchor (${N_VNET}/32 V_net blobs local); forcing unfiltered fetch"
+    timeout 600 git fetch origin "$ANCHOR_COMMIT" --depth=1 --no-filter 2>&1 | tail -2
+    git checkout "$ANCHOR_COMMIT" -- "$ANCHOR_PATH/" 2>/dev/null || true
+    N_VNET=$(ls "$ANCHOR_PATH"/V_net.*.bin 2>/dev/null | wc -l)
+  fi
+  if [ "$N_VNET" -eq 32 ]; then
+    REFERENCE_DIR="$ANCHOR_PATH"
+    echo "  restored ← ${ANCHOR_PATH} (32/32 V_net blobs)"
+  else
+    echo "  WARN: restored only ${N_VNET}/32 V_net blobs; finalize will fail"
+  fi
 fi
 # If REFERENCE_DIR is still empty and any worker pushed sparse-delta,
 # the python finalize will exit 2 with a clear error of its own.
