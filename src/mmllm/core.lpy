@@ -25,6 +25,7 @@
   (:import sys
            math
            os
+           random
            time
            contextlib
            torch
@@ -445,19 +446,41 @@
   "Linear warmup + cosine decay. Returns the lr to use at step s.
    When warmup == 0 returns max-lr (constant — backward compat).
 
-   Schedule shape:
-     0 ≤ s < warmup        : linearly ramp 0 → max-lr
-     warmup ≤ s < total    : cosine decay max-lr → min-lr
-     s ≥ total             : min-lr (defensive; loop should have exited)"
+   Schedule shape (relative to MMLLM_LR_ROUND_BASE, default 0):
+     round_base ≤ s < warmup : linearly ramp floor → max-lr
+     warmup     ≤ s < total  : cosine decay max-lr → min-lr
+     s ≥ total               : min-lr (defensive; loop should have exited)
+
+   MMLLM_LR_ROUND_BASE: absolute step at which the current chain round
+   started. Subtracted from `s` and `warmup` before the ramp math so
+   each round gets a fresh linear warmup over its first
+   (warmup - round_base) steps. Without this, resuming from step N ≫ 0
+   makes `s/warmup` ≈ 1.0 on every step and the ramp is degenerate.
+   Default 0 = legacy behavior (ramp uses absolute step).
+
+   MMLLM_LR_RAMP_FLOOR: fraction of max-lr to use as the minimum of
+   the linear-warmup ramp (default 0.0 = ramp from zero, the textbook
+   transformer warmup). 0.1 means step 0 of a round starts at 10% of
+   peak — useful for very short chain rounds where a from-zero ramp
+   wastes the first step entirely."
   [s total max-lr warmup min-lr]
-  (cond
-    (zero? warmup) max-lr
-    (< s warmup)   (* max-lr (/ (python/float s) (python/float warmup)))
-    (>= s total)   min-lr
-    :else (let [progress (/ (python/float (- s warmup))
-                            (python/float (- total warmup)))
-                cos-half (* 0.5 (+ 1.0 (math/cos (* (.- math pi) progress))))]
-            (+ min-lr (* (- max-lr min-lr) cos-half)))))
+  (let [round-base (python/int
+                     (.get (.- os environ) "MMLLM_LR_ROUND_BASE" "0"))
+        floor      (try (python/float
+                          (.get (.- os environ) "MMLLM_LR_RAMP_FLOOR" "0.0"))
+                        (catch python/ValueError _ 0.0))
+        s-eff      (max 0 (- s round-base))
+        warmup-eff (max 0 (- warmup round-base))]
+    (cond
+      (zero? warmup-eff) max-lr
+      (< s-eff warmup-eff) (let [progress (/ (python/float s-eff)
+                                             (python/float warmup-eff))]
+                             (* max-lr (max floor progress)))
+      (>= s total) min-lr
+      :else (let [progress (/ (python/float (- s warmup))
+                              (python/float (- total warmup)))
+                  cos-half (* 0.5 (+ 1.0 (math/cos (* (.- math pi) progress))))]
+              (+ min-lr (* (- max-lr min-lr) cos-half))))))
 
 (defn set-opt-lr!
   "Mutate every param group of `opt` to have lr=`lr`. Used inside
@@ -1466,6 +1489,44 @@
   []
   (python/int (.get (.- os environ) "MMLLM_CARRY_N_CLOCKS" "4")))
 
+(defn pick-bwd-skip-frac-net-only
+  "Probability that any given net-only block (no Local Memory; just
+   NetBank) will run inside torch.no_grad on a training step, so its
+   internal compute receives no gradient.
+
+   Stochastic-depth-in-backward: skips the block's entire backward
+   graph (attention + FFN + NetBank gather all elided for that step).
+   The residual addition happens OUTSIDE the no_grad context so the
+   upstream x's gradient chain stays alive and earlier blocks still
+   backward normally.
+
+   MMLLM_BWD_SKIP_FRAC_NET_ONLY: float in [0, 1]. Default 0.0 = off.
+   1.0 means every net-only block (24 of 32 at the default layer
+   assignment) skips its backward each step."
+  []
+  (try
+    (max 0.0 (min 1.0 (python/float
+                        (.get (.- os environ)
+                              "MMLLM_BWD_SKIP_FRAC_NET_ONLY" "0.0"))))
+    (catch python/ValueError _
+      0.0)))
+
+(defn pick-bwd-skip-frac-local
+  "Probability that any given Local layer (one of the 8 carrying
+   V_local + SwitchGate + distill) will run inside torch.no_grad on
+   a training step. Default 0.0 = always backward, never skip — these
+   layers carry the distillation pathway whose training we don't want
+   to randomly drop. Set MMLLM_BWD_SKIP_FRAC_LOCAL>0 to extend the
+   bwd-skip lever to local layers (faster steps, more aggressive
+   risk to training signal)."
+  []
+  (try
+    (max 0.0 (min 1.0 (python/float
+                        (.get (.- os environ)
+                              "MMLLM_BWD_SKIP_FRAC_LOCAL" "0.0"))))
+    (catch python/ValueError _
+      0.0)))
+
 ;;; ─────────────────────── decoder block ───────────────────────
 
 (defn block-forward
@@ -1508,7 +1569,22 @@
          ;; lets checkpoint's saved-tensor tracker see a single
          ;; tensor return — no false-positive non-determinism trips
          ;; on the original mixed tensor+tuple return.
-         ckpt?      (and (pick-grad-checkpoint?) (torch/is_grad_enabled))]
+         ckpt?      (and (pick-grad-checkpoint?) (torch/is_grad_enabled))
+         ;; Stochastic-depth-in-backward gate. Skipped blocks run their
+         ;; forward inside torch.no_grad — output is still computed
+         ;; (residual unchanged) but no autograd graph is built, so
+         ;; backward through the block's internals is elided entirely.
+         ;; Block's params don't update this step; over many steps every
+         ;; block trains in expectation.
+         ;;
+         ;; Net-only layers (memory == nil) and Local layers consult
+         ;; separate fractions, so the operator can keep V_local +
+         ;; SwitchGate + distill always-on while skipping the cheaper
+         ;; net-only blocks.
+         skip-bwd?  (and (torch/is_grad_enabled)
+                         (if (nil? memory)
+                           (< (random/random) (pick-bwd-skip-frac-net-only))
+                           (< (random/random) (pick-bwd-skip-frac-local))))]
      (if ckpt?
        (let [[x-ckpt distill-term z-term]
                     (kernel/checkpointed_block_forward
@@ -1522,7 +1598,8 @@
                       x cos sin short-cache long-cache
                       ** :skip_bank skip-bank?
                       :netbank netbank
-                      :trunk_ids trunk-ids)
+                      :trunk_ids trunk-ids
+                      :skip_bwd skip-bwd?)
              ;; Carry applied OUTSIDE checkpoint — it's cheap and we
              ;; don't need its tiny intermediates re-materialized.
              x'     (if carry (carry x-ckpt) x-ckpt)]
@@ -1539,7 +1616,8 @@
                           x cos sin short-cache long-cache
                           ** :skip_bank skip-bank?
                           :netbank netbank
-                          :trunk_ids trunk-ids)]
+                          :trunk_ids trunk-ids
+                          :skip_bwd skip-bwd?)]
          ;; Multi-timescale carry as a post-block residual delta.
          ;; Carry's gate is zero-init so at step 0 this is identity
          ;; (no behavior change vs no-carry); training pushes the

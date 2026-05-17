@@ -436,13 +436,44 @@ def block_forward(
     skip_bank: bool = False,
     netbank=None,
     trunk_ids: Optional[torch.Tensor] = None,
+    skip_bwd: bool = False,
 ) -> tuple:
     """Pre-norm decoder block with three-tier attention + SwiGLU FFN.
 
     `skip_bank=True` (Phase-5 draft mode) routes through to the
     attention kernel; bank PKM lookup is skipped.
     `netbank` (optional): NetBank module for the off-machine long-term
-    memory tier. When non-None, attention uses the 3-way long_gate path."""
+    memory tier. When non-None, attention uses the 3-way long_gate path.
+
+    `skip_bwd=True` runs the entire block (attention + FFN) inside a
+    `torch.no_grad()` context — no autograd graph is built for the
+    block's internal compute, so backward never traverses these params.
+    The block's contribution is added to `x` OUTSIDE the no_grad context
+    so `x`'s upstream gradient chain remains alive and earlier blocks
+    still backward normally. Stochastic-depth-in-backward."""
+    if skip_bwd:
+        with torch.no_grad():
+            attn_out, new_s, new_l, _d, _z = attention(
+                q_proj, k_proj_s, v_proj_s, k_proj_l, v_proj_l, o_proj,
+                memory, long_gate, bank_query, bank_feedback,
+                n_heads, n_short_heads, n_long_heads,
+                n_short_kv_heads, n_long_kv_heads, head_dim, max_t,
+                short_window, long_window,
+                norm1(x), cos, sin, short_cache, long_cache,
+                skip_bank=skip_bank,
+                netbank=netbank,
+                trunk_ids=trunk_ids,
+            )
+            x_tmp = x + attn_out
+            x_norm = norm2(x_tmp)
+            ffn_out = down_proj(F.silu(gate_proj(x_norm)) * up_proj(x_norm))
+            combined = attn_out + ffn_out
+        # Outside no_grad — `combined` is a no-grad tensor (leaf); `x`
+        # still has its grad_fn. The addition produces an output whose
+        # backward propagates only to x. Block's internal params are
+        # untouched by autograd.
+        x_out = x + combined
+        return x_out, new_s, new_l, None, None
     attn_out, new_s, new_l, distill_term, z_term = attention(
         q_proj, k_proj_s, v_proj_s, k_proj_l, v_proj_l, o_proj,
         memory, long_gate, bank_query, bank_feedback,
@@ -475,6 +506,7 @@ def checkpointed_block_forward(
     head_dim, max_t, short_window, long_window,
     x, cos, sin, short_cache, long_cache,
     skip_bank=False, netbank=None, trunk_ids=None,
+    skip_bwd: bool = False,
 ):
     """Gradient-checkpoint wrapper around `block_forward`.
 
@@ -504,6 +536,23 @@ def checkpointed_block_forward(
     in `attention` above the per-block aux-loss collection.
     The (short_cache, long_cache) outputs are dropped (train-step
     discards them) so checkpoint sees only one tensor output."""
+    # When skip_bwd is set, route directly through block_forward (which
+    # has its own no-grad branch). No point checkpointing a no-grad
+    # forward — the recompute on backward would never fire.
+    if skip_bwd:
+        x_out, _s, _l, _d, _z = block_forward(
+            norm1, norm2,
+            q_proj, k_proj_s, v_proj_s, k_proj_l, v_proj_l, o_proj,
+            memory, long_gate, bank_query, bank_feedback,
+            gate_proj, up_proj, down_proj,
+            n_heads, n_short_heads, n_long_heads,
+            n_short_kv_heads, n_long_kv_heads,
+            head_dim, max_t, short_window, long_window,
+            x, cos, sin, short_cache, long_cache,
+            skip_bank=skip_bank, netbank=netbank, trunk_ids=trunk_ids,
+            skip_bwd=True,
+        )
+        return x_out, None, None
     import torch.utils.checkpoint as _ckpt
 
     def _fn(x_arg):
