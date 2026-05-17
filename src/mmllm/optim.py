@@ -156,10 +156,24 @@ class CPUOffloadSparseAdam(torch.optim.Optimizer):
         for group in self.param_groups:
             for p in group["params"]:
                 state = self.state.get(p, {})
+                # Coerce m_buf / v_buf to CPU + float dtype matching the
+                # parameter. Shape may drift across topology changes
+                # (different sub_top_k, different bank rows touched) —
+                # if it does, drop the buffer rather than load stale.
                 for key in ("m_buf", "v_buf"):
                     t = state.get(key)
-                    if t is not None and t.device.type != "cpu":
-                        state[key] = t.to("cpu")
+                    if t is None:
+                        continue
+                    if t.device.type != "cpu":
+                        t = t.to("cpu")
+                    if t.dtype != p.dtype:
+                        t = t.to(dtype=p.dtype)
+                    if t.ndim == 2 and t.shape[-1] != p.shape[-1]:
+                        # Topology mismatch — discard, next step() will
+                        # re-grow from scratch.
+                        t = torch.zeros((0, p.shape[-1]),
+                                        dtype=p.dtype, device="cpu")
+                    state[key] = t
                 rtb = state.get("row_to_buf")
                 if isinstance(rtb, dict):
                     buf_lookup = torch.full((p.shape[0],), -1,
@@ -169,8 +183,15 @@ class CPUOffloadSparseAdam(torch.optim.Optimizer):
                         bidxs = torch.tensor(list(rtb.values()), dtype=torch.long)
                         buf_lookup[rows] = bidxs
                     state["row_to_buf"] = buf_lookup
-                elif isinstance(rtb, torch.Tensor) and rtb.device.type != "cpu":
-                    state["row_to_buf"] = rtb.to("cpu")
+                elif isinstance(rtb, torch.Tensor):
+                    # Force CPU + torch.long. row_to_buf is a row-index
+                    # lookup; if a stale ckpt saved it as float (legacy
+                    # bug), index_put on line ~270 will raise dtype
+                    # mismatch on the first first-touched-row of the
+                    # next step. Coerce here so the run survives the
+                    # next save/load cycle as well.
+                    state["row_to_buf"] = rtb.to(device="cpu",
+                                                 dtype=torch.long)
 
     @torch.no_grad()
     def step(self, closure=None):
