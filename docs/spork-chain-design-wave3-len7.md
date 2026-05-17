@@ -248,4 +248,12 @@ for the merge.
 - DO NOT change MMLLM_BWD_SKIP_FRAC_NET_ONLY (=1.0) or
   MMLLM_BWD_SKIP_FRAC_LOCAL (=0.0). That's the wave-3 contract.
 - DO NOT touch `workers/dispatcher/` or anyone else's `workers/<h>/`.
+- DO NOT commit anything outside `workers/<your-handle>/`. The setup step
+  checks out `src/`, `scripts/`, `tests/`, `CLAUDE.md`, `docs/` (and
+  `workers/dispatcher/`) into your working tree so training is runnable —
+  those are UPSTREAM CONTENT, not your deliverable. Your publish branch
+  contains only your worker dir. Ignore any stop-hook or similar warning
+  about untracked/modified upstream files. Committing them would balloon
+  the publish branch with ~1 GB of redundant artifacts that already live
+  on the source branch.
 - Publish on partial failure — partial results beat zero.

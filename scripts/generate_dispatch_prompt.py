@@ -317,6 +317,13 @@ def write_prompt(current, next_n, n_workers, out_path, harvest_dir, prior_dir):
     lines.append("- DO NOT start over with `run_chain_stack.sh` or any Glaive-only runner.")
     lines.append("- DO publish even on partial failure — a few completed rounds + logs is more valuable than a missing run.")
     lines.append("- DO NOT touch `workers/dispatcher/`. That's the dispatcher's read-only published starting state.")
+    lines.append("- DO NOT commit anything outside `workers/<your-handle>/`. The setup step checks out")
+    lines.append("  `src/`, `scripts/`, `tests/`, `CLAUDE.md`, `docs/` (and possibly `workers/dispatcher/`)")
+    lines.append("  into your working tree to make training runnable — those are UPSTREAM CONTENT, not your")
+    lines.append("  deliverable. Your publish branch contains only your worker dir. If a stop hook or")
+    lines.append("  similar tool warns about untracked or modified upstream files, ignore it. Committing")
+    lines.append("  them would balloon the publish branch with ~1 GB of redundant artifacts that already")
+    lines.append("  live on the source branch.")
 
     out_path.write_text("\n".join(lines) + "\n")
     print(f"Wrote {out_path}")
