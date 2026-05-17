@@ -1,0 +1,34 @@
+{
+  "target_round": 13,
+  "n_workers": 4,
+  "workers": [
+    {
+      "handle": "Ie25p",
+      "branch": "claude/chaindiverse-Ie25p-r13",
+      "ctrl_bpc": 2.096
+    },
+    {
+      "handle": "eyeQd",
+      "branch": "claude/chaindiverse-eyeQd-r13",
+      "ctrl_bpc": 2.1688
+    },
+    {
+      "handle": "l8EGt",
+      "branch": "claude/chaindiverse-l8EGt-r13",
+      "ctrl_bpc": 2.1161
+    },
+    {
+      "handle": "x8q8p",
+      "branch": "claude/chaindiverse-x8q8p-r13",
+      "ctrl_bpc": 2.1483
+    }
+  ],
+  "worker_ctrl_bpc_mean": 2.1323,
+  "worker_ctrl_bpc_best": 2.096,
+  "extended_from": "workers/dispatcher/harvest-5way-r10/round-10",
+  "wave": "chain-design-wave-3-smoke-r13",
+  "recipe": "length-7 rounds \u00d7 3, bwd-skip-net=1.0, 9-corpus mix",
+  "round_length_steps": 7,
+  "n_rounds_per_worker": 3,
+  "format": "sparse-delta (vs workers/dispatcher/harvest-5way-r10/round-10 reference)"
+}
