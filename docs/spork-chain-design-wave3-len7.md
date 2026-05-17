@@ -1,18 +1,29 @@
-# Chain-design wave-3 dispatch — round-length-10 spork chain
+# Chain-design wave-3 dispatch — round-length-7 spork chain
 
-You are extending the chain by **10 rounds of 10 steps each** (= 100
+You are extending the chain by **10 rounds of 7 steps each** (= 70
 training steps total) off the harvested round-10 state
 (`workers/dispatcher/harvest-5way-r10/round-10`), continuing the
 9-corpus diverse mix.
 
-This wave is much lighter than wave-2 (10 rounds × **10** steps vs
-wave-2's 10 × 100). The round-length-10 recipe was selected from the
-CPU sweep at length=3,4,5,6,7,10 — longer rounds gave better ctrl
-monotonically, with length-10 the strongest sampled point and a clean
-30-step-budget reference (length-7 R3 = 11.95, length-6 R5 = 10.63,
-length-10 R2 ≈ 13.97 at 21 trained steps before this run extends).
-Wave-3's job is to confirm the recipe carries to the production
-9-corpus mix at the full V_net design size.
+This wave is much lighter than wave-2 (10 rounds × **7** steps vs
+wave-2's 10 × 100). Round-length-7 was selected as the CPU sweep
+optimum at a fixed compute budget — length-7 (4 rounds, 28 steps)
+beat length-6 (5 rounds, 30 steps) and length-10 (3 rounds, 30 steps)
+on ctrl:
+
+| round-length | rounds | steps | ctrl  | Δ_net |
+|--------------|-------:|------:|------:|------:|
+| 6            | 5      | 30    | 10.63 | +0.59 |
+| **7**        | 4      | 28    | **10.28** | +0.82 |
+| 10           | 3      | 30    | 11.38 | +0.40 |
+
+The "longer always wins ctrl" trend from length=3-to-7 broke at
+length-10: with only 3 rounds, V_local got 2 fewer diversity-
+injection resets, and that cost overtook the per-round LB-hill-climb
+gain. Length-7 sits at the sweet spot — long enough rounds for V_local
+to learn, frequent enough resets to inject diversity. Wave-3's job is
+to confirm the recipe carries to the production 9-corpus mix at the
+full V_net design size.
 
 Read `CLAUDE.md` first — it defines spork / chain / Δ_local / Δ_net,
 wake/sleep, and the "don't touch other workers' dirs" rule.
@@ -30,9 +41,10 @@ Three code changes landed since wave-2:
 2. **Round-relative warmup ramp** (`MMLLM_LR_ROUND_BASE`).
    `extend_chain.sh` already resets the step counter to 1 each
    round, so the existing `MMLLM_LR_WARMUP=$((STEPS * 70 / 100))`
-   logic now produces a real linear ramp across the first 7 of each
-   round's 10 steps. No new env var to set — falls out of the round
-   reset.
+   logic now produces a real linear ramp across the first 4 steps
+   of each round (= ⌊7 × 0.7⌋ = 4 at STEPS=7), then cosine decay
+   for the remaining 3. No new env var to set — falls out of the
+   round reset.
 3. **Tolerant `load_state_dict`** in `mmllm.optim`. The chain's
    first-touched-row Adam allocator (`row_to_buf`) had a dtype-drift
    bug that crashed round 2 of a CPU smoke when `row_to_buf` was
@@ -138,13 +150,13 @@ cp workers/dispatcher/harvest-5way-r10/round-10/* "$ARCHIVE/round-10/"
 ls "$ARCHIVE/round-10/" | wc -l   # 66
 ```
 
-## Run (rounds 11 → 20, STEPS=10)
+## Run (rounds 11 → 20, STEPS=7)
 
 ```bash
-# Wave-3 knobs in env, then 10 more rounds × 10 steps each.
+# Wave-3 knobs in env, then 10 more rounds × 7 steps each.
 MMLLM_BWD_SKIP_FRAC_NET_ONLY=1.0 \
 MMLLM_BWD_SKIP_FRAC_LOCAL=0.0 \
-  bash scripts/run_chain_diverse.sh 10 10
+  bash scripts/run_chain_diverse.sh 10 7
 ```
 
 On a 15 GB container with reduced bandwidth:
@@ -153,12 +165,12 @@ On a 15 GB container with reduced bandwidth:
 MMLLM_BWD_SKIP_FRAC_NET_ONLY=1.0 MMLLM_BWD_SKIP_FRAC_LOCAL=0.0 \
 MMLLM_BATCH=4 MMLLM_MEMORY_SUB_TOP_K=32 MMLLM_NET_SUB_TOP_K=32 \
 MMLLM_NET_TOP_K=64 MMLLM_MEMORY_TOP_K=16 MMLLM_GRAD_CHECKPOINT=false \
-  bash scripts/run_chain_diverse.sh 10 10
+  bash scripts/run_chain_diverse.sh 10 7
 ```
 
-Per-round wall (10 steps each + ablation eval) — much faster than wave-2:
-- 24 GB + default bandwidth: ~60-100s/round, ~15-20 min total
-- 15 GB + wave-1 bandwidth: ~80-150s/round, ~20-30 min total
+Per-round wall (7 steps each + ablation eval) — much faster than wave-2:
+- 24 GB + default bandwidth: ~45-75s/round, ~10-15 min total
+- 15 GB + wave-1 bandwidth: ~60-110s/round, ~15-20 min total
 
 ## Live reporting
 
@@ -186,9 +198,9 @@ rounds and publish what you have.
 - **Δ_net positive** across most rounds — V_net was populated by wave-1
   + wave-2's harvest, so distillation has somewhere to go.
 - **First step of each round** should LR-ramp from a fraction of peak
-  (≈ 1/7 at step 1, ≈ 7/7 by step 7). If it looks flat at peak the
-  whole round, your `extend_chain.sh` is older than the wave-3 cut —
-  `git pull` and retry.
+  (≈ 1/4 at step 1, peak by step 4, cosine decay through step 7).
+  If it looks flat at peak the whole round, your `extend_chain.sh`
+  is older than the wave-3 cut — `git pull` and retry.
 
 ## Publish your result
 
@@ -196,7 +208,7 @@ After round 20:
 
 ```bash
 HANDLE="<your-handle>"
-DEST="workers/$HANDLE/chain-design-len10-r2-10"
+DEST="workers/$HANDLE/chain-design-len7-r2-10"
 mkdir -p "$DEST"
 ARCHIVE=/tmp/mmllm-cpu/chain-diverse
 
@@ -212,10 +224,10 @@ cp "$ARCHIVE/wall.tsv" "$DEST/" 2>/dev/null || true
 cat > "$DEST/meta.json" <<EOF
 {
   "handle": "$HANDLE",
-  "wave": "chain-design-wave-3-len10",
+  "wave": "chain-design-wave-3-len7",
   "config": "cpu-mini-N16 design banks, sparse-delta publish, wave-2 cont (n-heads=4)",
   "recipe": "stack-3e-2-5.0+mag-coef-on+asym-V+movement-gate+design-banks+wide-retrieval+bwd-skip-netonly-1.0",
-  "round_length_steps": 10,
+  "round_length_steps": 7,
   "n_rounds_trained": 10,
   "mix": "9-corpus diverse",
   "wave_kind": "generalist",
@@ -231,12 +243,12 @@ cat > "$DEST/meta.json" <<EOF
 }
 EOF
 
-git checkout -b "claude/chainlen10-${HANDLE}-r2-10" 2>/dev/null \
-  || git checkout "claude/chainlen10-${HANDLE}-r2-10"
+git checkout -b "claude/chainlen7-${HANDLE}-r2-10" 2>/dev/null \
+  || git checkout "claude/chainlen7-${HANDLE}-r2-10"
 
 git add "$DEST"
-git commit -m "chain-design wave-3 len10 rounds 11-20 — final_ctrl=<...>"
-git push -u origin "claude/chainlen10-${HANDLE}-r2-10"
+git commit -m "chain-design wave-3 len7 rounds 11-20 — final_ctrl=<...>"
+git push -u origin "claude/chainlen7-${HANDLE}-r2-10"
 ```
 
 If push 413/502s, split V_net into 2 commits.
@@ -245,7 +257,7 @@ If push 413/502s, split V_net into 2 commits.
 
 1. Per-round table: wall_s, ctrl_bpc, Δ_local, Δ_net, Δ_both, synergy.
 2. The B / SUB_TOP_K values you ran at, and container RAM.
-3. Branch name `claude/chainlen10-<HANDLE>-r2-10`.
+3. Branch name `claude/chainlen7-<HANDLE>-r2-10`.
 4. Did `MMLLM_BWD_SKIP_FRAC_NET_ONLY=1.0` measurably drop per-step
    wall vs wave-2? (rough number is fine — compare wall.tsv to any
    prior wave-2 publish you have.)
@@ -253,10 +265,10 @@ If push 413/502s, split V_net into 2 commits.
 **Dispatcher will auto-harvest** once enough workers (≥3) publish:
 
 ```bash
-bash scripts/harvest_chain.sh len10-r2-10   # FedAvg across submitted branches
+bash scripts/harvest_chain.sh len7-r2-10   # FedAvg across submitted branches
 ```
 
-The orchestrator polls for `claude/chainlen10-*-r2-10` branches and
+The orchestrator polls for `claude/chainlen7-*-r2-10` branches and
 fires the harvester when the quorum is met. No worker action needed
 for the merge.
 
