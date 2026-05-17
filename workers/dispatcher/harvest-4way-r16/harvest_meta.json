@@ -1,0 +1,28 @@
+{
+  "target_round": 16,
+  "n_workers": 4,
+  "workers": [
+    {
+      "handle": "DQhyT",
+      "branch": "claude/chaindiverse-DQhyT-r16"
+    },
+    {
+      "handle": "mpvJA",
+      "branch": "claude/chaindiverse-mpvJA-r16"
+    },
+    {
+      "handle": "psH7R",
+      "branch": "claude/chaindiverse-psH7R-r16"
+    },
+    {
+      "handle": "wdhuA",
+      "branch": "claude/chaindiverse-wdhuA-r16"
+    }
+  ],
+  "worker_ctrl_bpc_mean": 2.0151250000000003,
+  "worker_ctrl_bpc_best": 1.9671,
+  "extended_from": "workers/dispatcher/harvest-4way-r13/round-13 (sparse-delta vs harvest-5way-r10/round-10)",
+  "wave": "chain-design-wave-3-smoke-r16",
+  "recipe": "length-7 rounds, bwd-skip-net=1.0, 9-corpus mix",
+  "reference_dir": "workers/dispatcher/harvest-5way-r10/round-10"
+}
