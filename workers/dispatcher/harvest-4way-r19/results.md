@@ -7,11 +7,11 @@ extension wave (rounds 17–19, 8-corpus mix).
 
 | handle                       | branch                                                | R19 ctrl_bpc |
 |------------------------------|-------------------------------------------------------|-------------:|
-| svcsS                        | claude/extend-smoke-cycle-r19-svcsS                   |       2.0889 |
-| OyvWT                        | claude/extend-smoke-cycle-r19-OyvWT                   |       n/a |
-| rOJa8                        | claude/extend-smoke-cycle-r19-rOJa8                   |       n/a |
-| wVDpR                        | claude/extend-smoke-cycle-r19-wVDpR                   |       n/a |
-| **mean**                     |                                                       |   **2.0889** |
+| svcsS                        | claude/extend-smoke-cycle-r19-svcsS                   |       1.9374 |
+| wVDpR                        | claude/extend-smoke-cycle-r19-wVDpR                   |       1.9424 |
+| rOJa8                        | claude/extend-smoke-cycle-r19-rOJa8                   |       1.9556 |
+| OyvWT                        | claude/extend-smoke-cycle-r19-OyvWT                   |       1.9889 |
+| **mean**                     |                                                       |   **1.9561** |
 
 ## Worker ctrl_bpc: R16 → R19
 
@@ -19,8 +19,8 @@ Per-worker training-val ctrl_bpc (not a fixed eval — each worker's own trainin
 
 | metric        | prior (R16 ) | this  (R19 ) | Δ      |
 |---------------|---------------:|---------------:|-------:|
-| ctrl_bpc mean |         2.0151 |         2.0889 | +0.0738 |
-| ctrl_bpc best |         1.9671 |         2.0889 | +0.1218 |
+| ctrl_bpc mean |         2.0151 |         1.9561 | -0.0590 |
+| ctrl_bpc best |         1.9671 |         1.9374 | -0.0297 |
 
 ## Battery eval: not run
 
