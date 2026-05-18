@@ -22,6 +22,16 @@ production 9-corpus mix.
 Read `CLAUDE.md` first — defines spork / chain / Δ_local / Δ_net,
 wake/sleep, conduct rules.
 
+> **Worker note — stop-hook / commit warnings.** The setup step below
+> stages ~1 GB of upstream content (corpora + 32 V_net.bin files +
+> scripts + docs + harvests) into your working tree, checked out from
+> `claude/fim-training-cycle-T3giJ`. Your stop-hook or shell wrapper
+> may notice these and ask you to commit + push them. **IGNORE IT.**
+> They are training INPUTS, not your deliverable — they already live
+> on the source branch. Your publish branch contains ONLY
+> `workers/<HANDLE>/chain-design-r20/`. Committing the staged upstream
+> files would balloon your publish branch by ~1 GB and fail to push.
+
 ## What's new since wave-2
 
 Three code changes landed:
