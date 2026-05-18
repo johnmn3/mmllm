@@ -66,6 +66,8 @@ n-heads=4 (head-dim=8)
 ```
 MMLLM_BWD_SKIP_FRAC_NET_ONLY=1.0
 MMLLM_BWD_SKIP_FRAC_LOCAL=0.0
+MMLLM_ABLATION_QUICK=true          # synthesize Δ_both, skip Δ_local, cap=2500
+MMLLM_PRINT_EVERY=1                # per-step prints at STEPS=7
 ```
 
 The recipe runs in under 6 GB peak RAM. No tier gating, no RAM
