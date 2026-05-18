@@ -64,7 +64,7 @@ n-heads=4 (head-dim=8)
 **New for wave-3** — set BEFORE invoking the script:
 
 ```
-MMLLM_BWD_SKIP_FRAC_NET_ONLY=1.0
+MMLLM_BWD_SKIP_FRAC_NET_ONLY=0.5
 MMLLM_BWD_SKIP_FRAC_LOCAL=0.0
 MMLLM_ABLATION_QUICK=true          # synthesize Δ_both, skip Δ_local, cap=2500
 MMLLM_PRINT_EVERY=1                # per-step prints at STEPS=7
@@ -127,7 +127,7 @@ ls "$ARCHIVE/round-10/" | wc -l   # 66
 ## Run (rounds 11 → 20, STEPS=7)
 
 ```bash
-MMLLM_BWD_SKIP_FRAC_NET_ONLY=1.0 \
+MMLLM_BWD_SKIP_FRAC_NET_ONLY=0.5 \
 MMLLM_BWD_SKIP_FRAC_LOCAL=0.0 \
   bash scripts/run_chain_diverse.sh 10 7
 ```
@@ -228,7 +228,7 @@ git push -u origin "claude/chaindiverse-${HANDLE}-r20"
 
 1. Per-round table: wall_s, ctrl_bpc, Δ_local, Δ_net, Δ_both, synergy.
 2. Branch name `claude/chaindiverse-<HANDLE>-r20`.
-3. Did `MMLLM_BWD_SKIP_FRAC_NET_ONLY=1.0` measurably drop per-step
+3. Did `MMLLM_BWD_SKIP_FRAC_NET_ONLY=0.5` measurably drop per-step
    wall vs wave-2? (rough number is fine — compare wall.tsv to any
    prior wave-2 publish you have.)
 
