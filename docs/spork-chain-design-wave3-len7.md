@@ -201,7 +201,7 @@ cat > "$DEST/meta.json" <<EOF
   "n_rounds_trained": 10,
   "mix": "9-corpus diverse",
   "wave_kind": "generalist",
-  "MMLLM_BWD_SKIP_FRAC_NET_ONLY": "1.0",
+  "MMLLM_BWD_SKIP_FRAC_NET_ONLY": "0.5",
   "MMLLM_BWD_SKIP_FRAC_LOCAL": "0.0",
   "extended_from": "workers/dispatcher/harvest-5way-r10/round-10",
   "branch_base": "claude/fim-training-cycle-T3giJ",
@@ -247,7 +247,7 @@ for the merge.
 - DO NOT change MMLLM_MIX, MMLLM_LR_LAYER_MULTS, MMLLM_DISTILL_GATE_*,
   bank sizes, n-heads, head-dim, n-routers. Those are the recipe
   contract.
-- DO NOT change MMLLM_BWD_SKIP_FRAC_NET_ONLY (=1.0) or
+- DO NOT change MMLLM_BWD_SKIP_FRAC_NET_ONLY (=0.5) or
   MMLLM_BWD_SKIP_FRAC_LOCAL (=0.0). That's the wave-3 contract.
 - DO NOT touch `workers/dispatcher/` or anyone else's `workers/<h>/`.
 - DO NOT commit anything outside `workers/<your-handle>/`. The setup step
