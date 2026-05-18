@@ -36,18 +36,28 @@ echo "  This script commits only workers/$HANDLE/ at the end."
 ROOT=$(git rev-parse --show-toplevel)
 cd "$ROOT"
 
-# 1) Ensure source + prior harvests + pre-staged corpora are on disk.
+# 1) Ensure source + prior harvests + pre-staged corpora + pre-built
+# wheels are on disk.
 echo "▶ syncing branch state…"
 git fetch origin claude/fim-training-cycle-T3giJ --depth=1 2>&1 | tail -1
 git checkout origin/claude/fim-training-cycle-T3giJ -- \
   src/ scripts/ tests/ CLAUDE.md docs/ \
   workers/dispatcher/harvest-5way-r10/ \
   workers/dispatcher/harvest-3way-r22/ \
-  workers/dispatcher/corpora/ 2>&1 | tail -1
+  workers/dispatcher/corpora/ \
+  workers/dispatcher/deps/ 2>&1 | tail -1
 
-# 2) Deps.
-echo "▶ installing deps…"
-pip install -e . --quiet
+# 2) Deps — install from pre-built wheels on the branch (no PyPI fetch).
+#    The torch wheel is committed as 95 MB .part-NN chunks (GH 100 MB
+#    file limit); reassemble it before install.
+echo "▶ installing deps from workers/dispatcher/deps/wheels (offline)…"
+WHEELS=workers/dispatcher/deps/wheels
+for prefix in "$WHEELS"/*.part-00; do
+  [ -f "$prefix" ] || continue
+  base="${prefix%.part-00}"
+  [ -f "$base" ] || cat "${base}".part-?? > "$base"
+done
+pip install --no-index --find-links="$WHEELS" -e . --quiet
 
 # 3) Corpora are pre-staged on the branch (no HF download, no prep step).
 # Bins over GitHub's 100 MB per-file limit are committed as 95 MB
