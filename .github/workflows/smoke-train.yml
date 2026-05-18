@@ -1,0 +1,75 @@
+name: smoke-train
+
+on:
+  workflow_dispatch:
+    inputs:
+      handle:
+        description: "Worker handle (5-char). Leave blank for random."
+        required: false
+        default: ""
+      n_rounds:
+        description: "Rounds to train"
+        required: false
+        default: "3"
+      steps_per_round:
+        description: "Steps per round"
+        required: false
+        default: "7"
+
+# GITHUB_TOKEN with contents:write so the worker can push its
+# claude/smoke-r22-<HANDLE> branch back to origin.
+permissions:
+  contents: write
+
+jobs:
+  train:
+    runs-on: ubuntu-latest
+    # The default 6-hour timeout is generous; cap at 90 min to fail fast
+    # if a wave hangs.
+    timeout-minutes: 90
+
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+        with:
+          # Pin to the working branch — this is where smoke.sh + the
+          # chain anchor + prior harvests live.
+          ref: claude/fim-training-cycle-T3giJ
+          # actions/checkout@v4 persists the GITHUB_TOKEN as a git
+          # credential so subsequent fetch + push work without extra
+          # setup. Keep that default.
+          persist-credentials: true
+          # Full history isn't needed; --depth=1 is fine. smoke.sh fetches
+          # specific refs as needed.
+          fetch-depth: 1
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Configure git identity
+        run: |
+          git config user.name  "smoke-train CI"
+          git config user.email "smoke-train@github-actions.local"
+
+      - name: Run smoke worker
+        env:
+          MMLLM_HANDLE: ${{ inputs.handle }}
+          MMLLM_N_ROUNDS: ${{ inputs.n_rounds }}
+          MMLLM_STEPS_PER_ROUND: ${{ inputs.steps_per_round }}
+        run: |
+          bash scripts/smoke.sh
+
+      - name: Upload training logs as artifact (always — even on failure)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: training-logs-${{ github.run_id }}
+          path: |
+            /tmp/mmllm-cpu/chain-diverse/round-*.train.log
+            /tmp/mmllm-cpu/chain-diverse/round-*/log.jsonl
+            /tmp/mmllm-cpu/chain-diverse/wall.tsv
+          if-no-files-found: ignore
+          retention-days: 7

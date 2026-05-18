@@ -55,19 +55,23 @@ export MMLLM_BWD_SKIP_FRAC_NET_ONLY=0.5
 export MMLLM_BWD_SKIP_FRAC_LOCAL=0.0
 export MMLLM_ABLATION_QUICK=true
 export MMLLM_PRINT_EVERY=1
-echo "▶ training 3 rounds × 7 steps (~22 min wall)…"
-bash scripts/run_chain_diverse.sh 3 7
+N_ROUNDS="${MMLLM_N_ROUNDS:-3}"
+STEPS="${MMLLM_STEPS_PER_ROUND:-7}"
+START_ROUND=19   # chain head this script extends from
+END_ROUND=$((START_ROUND + N_ROUNDS))
+echo "▶ training $N_ROUNDS rounds × $STEPS steps (r$START_ROUND → r$END_ROUND)…"
+bash scripts/run_chain_diverse.sh "$N_ROUNDS" "$STEPS"
 
 # 6) Publish as sparse-delta vs r10 anchor.
 echo "▶ encoding sparse delta + publishing…"
-DEST="workers/$HANDLE/chain-design-r22"
+DEST="workers/$HANDLE/chain-design-r$END_ROUND"
 mkdir -p "$DEST"
 python3 scripts/_delta_sparse_net.py encode \
   workers/dispatcher/harvest-5way-r10/round-10 \
-  "$ARCHIVE/round-22" "$DEST" 2>&1 | tail -2
-cp "$ARCHIVE"/round-22/dense.pt            "$DEST/"
-cp "$ARCHIVE"/round-22/opt-sparse-net.*.pt "$DEST/" 2>/dev/null || true
-for r in 20 21 22; do
+  "$ARCHIVE/round-$END_ROUND" "$DEST" 2>&1 | tail -2
+cp "$ARCHIVE/round-$END_ROUND/dense.pt"            "$DEST/"
+cp "$ARCHIVE/round-$END_ROUND"/opt-sparse-net.*.pt "$DEST/" 2>/dev/null || true
+for r in $(seq $((START_ROUND + 1)) "$END_ROUND"); do
   cp "$ARCHIVE/round-$r/log.jsonl" "$DEST/round-$r.log.jsonl" 2>/dev/null || true
 done
 cp "$ARCHIVE/wall.tsv" "$DEST/" 2>/dev/null || true
@@ -76,7 +80,7 @@ cp "$ARCHIVE/wall.tsv" "$DEST/" 2>/dev/null || true
 FINAL_CTRL=$(python3 -c "
 import json
 try:
-    for line in open('$ARCHIVE/round-22/log.jsonl'):
+    for line in open('$ARCHIVE/round-$END_ROUND/log.jsonl'):
         e = json.loads(line)
         if e.get('event') == 'ablation':
             print(f\"{e.get('control_bpc'):.4f}\")
@@ -86,10 +90,10 @@ except: print('unknown')
 cat > "$DEST/meta.json" <<EOF
 {
   "handle": "$HANDLE",
-  "wave": "smoke-r22",
-  "extended_from": "workers/dispatcher/harvest-4way-r19/round-19 (sparse-delta vs harvest-5way-r10/round-10)",
-  "round_length_steps": 7,
-  "n_rounds_trained": 3,
+  "wave": "smoke-r$END_ROUND",
+  "extended_from": "workers/dispatcher/harvest-4way-r$START_ROUND/round-$START_ROUND (sparse-delta vs harvest-5way-r10/round-10)",
+  "round_length_steps": $STEPS,
+  "n_rounds_trained": $N_ROUNDS,
   "final_ctrl_bpc": "$FINAL_CTRL",
   "MMLLM_BWD_SKIP_FRAC_NET_ONLY": "0.5",
   "MMLLM_BWD_SKIP_FRAC_LOCAL": "0.0",
@@ -99,13 +103,13 @@ cat > "$DEST/meta.json" <<EOF
 }
 EOF
 
-BR="claude/smoke-r22-$HANDLE"
+BR="claude/smoke-r$END_ROUND-$HANDLE"
 echo "▶ committing + pushing to origin/$BR…"
 git checkout -b "$BR" 2>/dev/null || git checkout "$BR"
 git add "$DEST"/delta-sparse-net.*.pt "$DEST"/dense.pt \
         "$DEST"/opt-sparse-net.*.pt "$DEST"/meta.json \
         "$DEST"/round-*.log.jsonl "$DEST"/wall.tsv 2>/dev/null
-git commit -m "smoke-r22 $HANDLE — final_ctrl=$FINAL_CTRL"
+git commit -m "smoke-r$END_ROUND $HANDLE — final_ctrl=$FINAL_CTRL"
 for i in 1 2 3 4; do
   if git push -u origin "$BR" 2>&1 | tail -1 | grep -q -E "rejected|hung|error"; then
     sleep $((i * 4))
