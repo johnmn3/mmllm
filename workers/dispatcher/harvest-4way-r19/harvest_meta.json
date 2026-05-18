@@ -1,0 +1,41 @@
+{
+  "target_round": 19,
+  "n_workers": 4,
+  "workers": [
+    {
+      "handle": "OyvWT",
+      "branch": "claude/extend-smoke-cycle-r19-OyvWT",
+      "ctrl_bpc": 1.9889,
+      "delta_local": -0.0,
+      "delta_net": 0.0097
+    },
+    {
+      "handle": "rOJa8",
+      "branch": "claude/extend-smoke-cycle-r19-rOJa8",
+      "ctrl_bpc": 1.9556,
+      "delta_local": -0.0,
+      "delta_net": 0.005
+    },
+    {
+      "handle": "svcsS",
+      "branch": "claude/extend-smoke-cycle-r19-svcsS",
+      "ctrl_bpc": 1.9374,
+      "delta_local": -0.0001,
+      "delta_net": 0.0101
+    },
+    {
+      "handle": "wVDpR",
+      "branch": "claude/extend-smoke-cycle-r19-wVDpR",
+      "ctrl_bpc": 1.9424,
+      "delta_local": -0.0,
+      "delta_net": 0.012
+    }
+  ],
+  "worker_ctrl_bpc_mean": 1.9561,
+  "worker_ctrl_bpc_best": 1.9374,
+  "extended_from": "workers/dispatcher/harvest-4way-r16/round-16 (sparse-delta vs harvest-5way-r10/round-10)",
+  "wave": "chain-design-wave-3-smoke-r19",
+  "recipe": "length-7 rounds, bwd-skip-net=1.0 (TAINTED \u2014 should be 0.5), 9-corpus mix",
+  "reference_dir": "workers/dispatcher/harvest-5way-r10/round-10",
+  "note": "Trained at MMLLM_BWD_SKIP_FRAC_NET_ONLY=1.0 \u2014 only the 8 local-bank layers advanced; the 24 net-only layers stayed bit-exact to the r10 anchor. The recipe is corrected to 0.5 for future waves (commit 45bdebe)."
+}

@@ -143,37 +143,47 @@ peak `lr`:
 
 ```
        MMLLM_LR_DENSE_MULT  → AdamW(d_model trunk) lr
-                            ─── default 1.0
+                            ─── round-9 v3: 0.05 → 0.005 (cosine)
        MMLLM_LR_KAB_MULT    → AdamW(K_a, K_b) lr  (#3 spike)
                             ─── default = LR_DENSE_MULT (single group)
        MMLLM_LR_BANK_MULT   → SparseAdam(Local V) lr
-                            ─── default 10.0   (cortex high-LR)
+                            ─── round-9 v3: 10.0 → 0.001 (cosine — cools off)
        MMLLM_LR_NET_MULT    → SparseAdam(NetBank V) lr
-                            ─── default  5.0   (cerebellum slower)
+                            ─── round-9 v3: 0.001 → 1.0 (cosine — ramps up)
 
        Each multiplier supports cosine scheduling via *_END:
-         lr_bank_mult cosines 10 → 1     (cortex cools)
-         lr_net_mult  cosines  5 → 10    (cerebellum ramps)
-       across the run, driving consolidation by schedule alone (P1).
+         round-9 v3 schedule (wake → consolidate):
+           lr_bank_mult  cosine 10    → 0.001    (cortex cools to off)
+           lr_net_mult   cosine  0.001 → 1.0     (cerebellum frozen → plastic)
+           lr_dense_mult cosine  0.05  → 0.005   (trunk barely moves, decays)
 ```
 
-The SCHEDULE encodes the central consolidation hypothesis:
+The SCHEDULE encodes the central consolidation hypothesis: cortex hill-
+climbs hard throughout the run; cerebellum is a slow receiver early
+(when there's nothing for Local to transfer yet) and a fast consolidator
+late (when distill has accumulated content to absorb). The trunk barely
+moves so it doesn't absorb work the banks should be doing.
 
-```
-   training step       cortex LR     cerebellum LR    cortex grad
-   ─────────────────────────────────────────────────────────────
-   start (warmup)      14e-3 (10×)   7.0e-3 (5×)      large
-   ─────────────────────────────────────────────────────────────
-   mid-run             8.5e-3 (6×)   8.5e-3 (6×)      ramping down
-   ─────────────────────────────────────────────────────────────
-   end-of-run          1.4e-3 (1×)   14e-3 (10×)      small
-                       (cortex stops chasing      (cerebellum still
-                        new patterns; NetBank      absorbing)
-                        owns the terrain.)
-```
+Per-tier reasoning:
 
-This is the "lr-as-consolidation" mechanism (research synthesis tier T1).
-Mechanical, requires no new model code.
+- **Cortex (Local) cosine 10 → 0.001.** High during wake (Local hill-
+  climbs the current task distribution), cools to effectively-frozen by
+  end. The cooling drives the consolidation handoff: once Local stops
+  accumulating, distill has time to copy what Local has into Net, and
+  the gate can shift routing toward Net for those patterns. The prior
+  round-9 redo kept Local flat at 10× and saw Δ_local / Δ_net converge
+  to parity rather than the wake→consolidate sequential transfer.
+- **Cerebellum (Net) cosine 0.001 → 1.0.** Near-zero start prevents Net's
+  V from drifting while distill's target ≈ −sdpa (Local≈0 at init).
+  Symmetric ramp-up vs Local's cool-down. Lower peak (1.0 not 5.0) since
+  direction-only residual distill drives Net's *direction* explicitly —
+  Net doesn't need a large LR to chase unbounded residual magnitudes.
+- **Trunk cosine 0.05 → 0.005.** Round-9 redo worker 1's diagnosis:
+  the residual `(local − sdpa)` shrinks across the run because the dense
+  trunk absorbs whatever Local adds. Pinning the trunk LR very low (and
+  decaying it further) preserves the residual signal for Net to learn
+  from. Trunk weights are ~1% the size of the banks; high LR there would
+  absorb work the banks should carry.
 
 ---
 
@@ -192,16 +202,71 @@ mechanisms to drive transfer.
                                                     ┐
      gate(q) decides routing weights    ───────────►│ main forward
      attn_l  = w0·sdpa + w1·mem_out + w2·net_out   ─┘
-                                                    
+
                                                     ┐
-     aux loss:                                      │ distillation
-     |normalize(net_out) − normalize(mem_out).det()|² ── path
+     aux loss (target='residual', default):         │ distillation
+     coef · |net_out − (mem_out − sdpa_out).detach()|²── path
                                                     ┘
 ```
 
-Cerebellum learns to mimic cortex's attention output **direction**
-(MMLLM_DISTILL_DIRECTION_ONLY=true). Detached on the cortex side so
-cortex doesn't try to imitate cerebellum.
+Cerebellum learns the **unique contribution** Local adds beyond the
+always-on attention path. The sdpa baseline is subtracted from Local's
+output before MSE so Net can't twin Local by replicating what sdpa
+already provides. Without that subtraction (target='local', legacy),
+when Local's output is mostly sdpa + ε, Net learns sdpa, becomes
+Local's twin, and `Δ_net` collapses — the round-5 / round-8 redundancy
+basin. Worker 2's diagnosis from round-9 reports; the round-10
+architectural fix.
+
+Both Local and sdpa are detached so the gradient only modifies Net.
+As Local hill-climbs new content, distill copies the *Local-unique*
+part into Net — the actual transfer mechanism.
+
+Knobs:
+- `MMLLM_DISTILL_COEF` — overall scale (default 0.0 = off). Round-5
+  used 0.1; round-8 evidence (`distill_loss ~ 5e-4` floor → ~5e-5
+  effective gradient on Net, three orders below the main loss) drove
+  a round-9 raise to 1.0. Also schedulable: `MMLLM_DISTILL_COEF_END`
+  sets the end-of-run target value and the coefficient is
+  cosine-interpolated across training. Round-9 re-run uses 0.0 → 1.0
+  so the coefficient stays near-zero during the wake window when
+  Local≈0 makes the target ≈ −sdpa (anti-sdpa basin risk), and
+  engages only after Local has accumulated real content.
+- `MMLLM_DISTILL_TARGET` — `'residual'` (default) or `'local'`. See
+  above; residual subtracts sdpa so Net learns Local's unique add.
+- `MMLLM_DISTILL_DIRECTION_ONLY` — when true, target and net are
+  RMS-normalized before MSE so Net learns the target's *direction*
+  only. Stacks with the target choice (direction of the residual is
+  the direction Local adds beyond sdpa). **Recommended `true` when
+  using `target=residual`**: bounds Net's V magnitude. Round-9 re-run
+  data showed magnitude-aware residual distill destabilized training
+  around step 3000-3500 in some workers (Net's V grew unbounded to
+  match the unbounded-magnitude residual; ctrl_bpc spiked when small
+  routing perturbations swung net_out's large magnitude wildly).
+  Direction-only keeps the unique-add signal but caps Net's response
+  magnitude — handled instead by `alpha_net` × gate weight (bounded).
+
+### 1b. Net-default Bernoulli gate (round-9)
+
+Round-8 evidence: in the 3-way softmax gate, `w_local` collapses from
+~0.15 to ~0.01 within the first cycle. The optimizer routes around
+Local; distill's target shrinks with it; Net's gradient starves on a
+vanishing input.
+
+When `MMLLM_GATE_NET_DEFAULT=true`, SwitchGate switches to a hybrid:
+- Net + sdpa run unconditionally and always feed the next layer.
+- Local fires per (B, H, T) Bernoulli decision computed from `q_long`.
+  Sigmoid init bias = -2.0 so ~12% of queries invoke Local at step 0.
+- Training: straight-through Bernoulli (forward = hard 0/1, backward
+  = sigmoid grad); inference: deterministic threshold at 0.5.
+- The 3-way softmax weights are renormalized over the surviving tiers
+  when Local is skipped, so the routing mass always sums to 1.
+
+There is no `w_local` for the optimizer to collapse — Local is invoked
+explicitly when the gate decides this query needs it, otherwise it
+contributes zero. The recurrent feedback between Net's output and the
+gate's routing decision (the original motivation for the 3-way mixer)
+is preserved because Net always runs.
 
 ### 2. α_net per-head scale on Net's path (#C)
 

@@ -207,56 +207,78 @@ def fedavg_dense(workers: list[dict], weighted_by: str = "tokens_trained") -> li
 
 def merge_netbank_files(workers: list[dict], output_dir: Path,
                        weighted_by: str = "tokens_trained") -> bool:
-    """If workers carry per-layer NetBank V mmap files (named
-    `bank-net-latest.<i>.bin` in the worker's step-N directory), produce
-    a weighted average and write to <output>/bank-net-latest.<i>.bin.
+    """If workers carry per-layer NetBank V mmap files, produce a weighted
+    average and write to the output dir. NetBank V is the shared
+    cerebellum — averaging it across workers IS the consolidation step.
+    Local Bank V is NOT merged (per-worker cortex).
 
-    NetBank V is the shared cerebellum — averaging it across workers IS
-    the consolidation step. Local Bank V is NOT merged (per-worker cortex).
+    Recognizes two file conventions:
+      bank-net-latest.{i}.bin       — fp32 (legacy, ~128 MB at sqrt_n=1024)
+      bank-net-latest.{i}.fp16.bin  — fp16 (round-5+, ~64 MB, fits in
+                                            GitHub's 100 MB blob limit)
+    Detected by filename suffix. Output preserves whichever the inputs
+    used (all-fp16 → fp16 out; mixed or all-fp32 → fp32 out).
 
     Returns True if any files were merged."""
+    import numpy as np
+
     # Scan for NetBank files in each worker's latest step-N dir
-    per_layer_files: dict[int, list[tuple[Path, float]]] = {}
+    per_layer_files: dict[int, list[tuple[Path, float, str]]] = {}
     for w in workers:
         wt = _weight_for(w["meta"], weighted_by)
         if wt <= 0:
             continue
         step_dir = w["dense_path"].parent
+        # Prefer .fp16.bin if present (newer convention); fall back to .bin.
+        # Don't double-count: if both exist for the same layer, pick fp16.
+        fp16_layers = set()
+        for f in step_dir.glob("bank-net-latest.*.fp16.bin"):
+            try:    layer = int(f.name.split(".")[1])
+            except: continue
+            per_layer_files.setdefault(layer, []).append((f, wt, "fp16"))
+            fp16_layers.add(layer)
         for f in step_dir.glob("bank-net-latest.*.bin"):
-            try:
-                layer = int(f.name.split(".")[1])
-            except (ValueError, IndexError):
-                continue
-            per_layer_files.setdefault(layer, []).append((f, wt))
+            if ".fp16.bin" in f.name: continue   # already handled
+            try:    layer = int(f.name.split(".")[1])
+            except: continue
+            if layer in fp16_layers: continue    # prefer the fp16 we already grabbed
+            per_layer_files.setdefault(layer, []).append((f, wt, "fp32"))
 
     if not per_layer_files:
         return False
 
     output_dir.mkdir(parents=True, exist_ok=True)
-    for layer, file_weights in sorted(per_layer_files.items()):
-        # Determine shape from first file's size (raw fp32 bytes / 4)
-        # — we don't have a header. Trust the first worker as canonical.
-        first_path, _ = file_weights[0]
-        # We don't know rows × cols a priori; require all files same byte size.
-        sizes = {f.stat().st_size for f, _ in file_weights}
-        if len(sizes) > 1:
-            print(f"  WARN: layer {layer} NetBank file sizes differ {sizes} — using first only")
-            (output_dir / f"bank-net-latest.{layer}.bin").write_bytes(first_path.read_bytes())
+    for layer, entries in sorted(per_layer_files.items()):
+        # All inputs for a given layer must have matching element-count
+        # (different bytes-per-element is fine — fp16 vs fp32 distinguish).
+        def _n_elems(path: Path, dt: str) -> int:
+            bpe = 2 if dt == "fp16" else 4
+            return path.stat().st_size // bpe
+        n_set = {_n_elems(f, dt) for f, _, dt in entries}
+        if len(n_set) > 1:
+            first_path, _, _ = entries[0]
+            print(f"  WARN: layer {layer} NetBank element-counts differ {n_set} — using worker[0] unchanged")
+            (output_dir / first_path.name).write_bytes(first_path.read_bytes())
             continue
-
-        size = first_path.stat().st_size
-        n_floats = size // 4
-        total_w = sum(w for _, w in file_weights)
-        # Weighted average — read each as fp32 mmap, accumulate.
-        import numpy as np
-        acc = np.zeros(n_floats, dtype=np.float32)
-        for fp, wt in file_weights:
-            arr = np.fromfile(fp, dtype=np.float32, count=n_floats)
+        n_elems = n_set.pop()
+        total_w = sum(w for _, w, _ in entries)
+        # Weighted average in fp32 regardless of input dtype, for numerical safety.
+        acc = np.zeros(n_elems, dtype=np.float32)
+        for fp, wt, dt in entries:
+            np_dt = np.float16 if dt == "fp16" else np.float32
+            arr = np.fromfile(fp, dtype=np_dt, count=n_elems).astype(np.float32)
             acc += arr * (wt / total_w)
-        out_path = output_dir / f"bank-net-latest.{layer}.bin"
-        acc.tofile(out_path)
-        print(f"  NetBank layer {layer}: {len(file_weights)} workers → {out_path} "
-              f"({size / 1024**2:.1f} MB)")
+        # Output dtype: if ALL inputs were fp16, write fp16; otherwise fp32.
+        all_fp16 = all(dt == "fp16" for _, _, dt in entries)
+        if all_fp16:
+            out_path = output_dir / f"bank-net-latest.{layer}.fp16.bin"
+            acc.astype(np.float16).tofile(out_path)
+        else:
+            out_path = output_dir / f"bank-net-latest.{layer}.bin"
+            acc.tofile(out_path)
+        size_mb = out_path.stat().st_size / 1024**2
+        print(f"  NetBank layer {layer}: {len(entries)} workers → {out_path.name} "
+              f"({size_mb:.1f} MB)")
     return True
 
 

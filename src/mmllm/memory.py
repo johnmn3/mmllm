@@ -48,6 +48,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+from ._pkm_autograd import HAS_CPP_KERNELS, PKMGather, PKMFusedTopK, pkm_inference_forward
+
 
 def _mmap_value_tensor(path: str, n: int, dim: int,
                        init_scale: float = 0.02,
@@ -180,6 +182,25 @@ class PagedMmapStorage:
         self.page_rows = page_rows
         self.n_pages = (n + page_rows - 1) // page_rows
         self._dirty_pages: set[int] = set()
+        # Tiered residence: cap the number of *pages* held in RAM via
+        # an LRU eviction list. Set via MMLLM_BANK_RESIDENT_BYTES (per-
+        # bank cap in bytes). When unset (default), no cap — kernel page
+        # cache uses its own LRU under memory pressure only. When set
+        # smaller than the bank's full byte size, pages outside the LRU
+        # set are MADV_DONTNEED'd, forcing them back to disk; next access
+        # to them takes a page fault.
+        #
+        # The page_rows×dim×4 bytes determine actual per-page byte size.
+        import os as _os
+        resident_bytes = int(_os.environ.get("MMLLM_BANK_RESIDENT_BYTES", "0"))
+        if resident_bytes > 0:
+            bytes_per_page = page_rows * dim * 4  # fp32 row stride × page_rows
+            self._resident_pages_cap = max(1, resident_bytes // bytes_per_page)
+        else:
+            self._resident_pages_cap = 0  # 0 = no cap
+        # LRU order: most-recently-used at the end. Dedup on insert.
+        from collections import OrderedDict as _OrderedDict
+        self._lru_pages: "_OrderedDict[int, None]" = _OrderedDict()
         # `_tensor` is what we hand out via .tensor. After remap, its
         # storage gets swapped via Tensor.set_(). However, when the
         # caller wraps this tensor in a Parameter (e.g.
@@ -285,12 +306,18 @@ class PagedMmapStorage:
         self._owners.append(tensor)
 
     def track_dirty_rows(self, row_indices: torch.Tensor) -> int:
-        """Mark pages containing these row indices as dirty.
+        """Mark pages containing these row indices as dirty AND update the
+        LRU residency set.
 
         Called from forward() at lookup time — every row we touch is
         guaranteed to receive a sparse-grad update on backward, so
         flagging at lookup is both correct and cheap (no extra GPU↔CPU
         sync; the indices are already on hand).
+
+        When MMLLM_BANK_RESIDENT_BYTES is set, this method also evicts
+        the oldest pages once the LRU exceeds the byte cap, by issuing
+        MADV_DONTNEED on their byte range. Evicted pages are reloaded
+        from disk on next access (page fault via the existing mmap).
 
         Returns the number of newly-flagged pages (for logging).
         """
@@ -300,7 +327,46 @@ class PagedMmapStorage:
         # even when the same page is touched many times per step.
         pages = (flat // self.page_rows).unique().tolist()
         self._dirty_pages.update(pages)
+        # Update LRU: move touched pages to "most recent". OrderedDict's
+        # move_to_end + popitem(last=False) gives O(1) LRU ops.
+        if self._resident_pages_cap > 0:
+            for p in pages:
+                self._lru_pages.pop(p, None)
+                self._lru_pages[p] = None
+            # Evict oldest pages until under cap.
+            while len(self._lru_pages) > self._resident_pages_cap:
+                old_page, _ = self._lru_pages.popitem(last=False)
+                self._evict_page(old_page)
         return len(self._dirty_pages) - before
+
+    def _evict_page(self, page_idx: int) -> None:
+        """Issue MADV_DONTNEED on the byte range of one page.
+
+        Next access pages it back in from disk via the existing mmap.
+        Used by the LRU eviction path to keep resident set bounded.
+        """
+        if self._array is None:
+            return
+        mm = getattr(self._array, "_mmap", None)
+        if mm is None or not hasattr(mm, "madvise"):
+            return
+        try:
+            mm_dontneed = _mmap_module.MADV_DONTNEED
+        except AttributeError:
+            return
+        bytes_per_page = self.page_rows * self.dim * 4
+        off = page_idx * bytes_per_page
+        length = bytes_per_page
+        # Last page may be partial; clamp length to file end.
+        total_size = self.n * self.dim * 4
+        if off + length > total_size:
+            length = total_size - off
+        if length <= 0:
+            return
+        try:
+            mm.madvise(mm_dontneed, off, length)
+        except OSError:
+            pass  # kernel may reject some advise ops; benign
 
     def n_dirty_pages(self) -> int:
         return len(self._dirty_pages)
@@ -415,13 +481,21 @@ class ProductKeyMemory(nn.Module):
 
     def __init__(self, q_dim: int, sqrt_n: int,
                  top_k: int = 16, sub_top_k: int = 32,
-                 mmap_path: str | None = None):
+                 mmap_path: str | None = None,
+                 n_trunks: int = 1):
         super().__init__()
         assert q_dim % 2 == 0, "q_dim must be even"
+        assert n_trunks >= 1, f"n_trunks must be >= 1, got {n_trunks}"
         self.q_dim = q_dim
         self.sub_dim = q_dim // 2
         self.sqrt_n = sqrt_n
-        self.n = sqrt_n * sqrt_n
+        # Per-trunk addressable row count = sqrt_n². With n_trunks>1, V holds
+        # n_trunks copies of this row space — different (i_a, i_b) → same
+        # per-trunk row, but each trunk_id has its own slice. Routing inside
+        # forward() adds (trunk_id * n_per_trunk) to top_global before gather.
+        self.n_per_trunk = sqrt_n * sqrt_n
+        self.n_trunks = n_trunks
+        self.n = n_trunks * self.n_per_trunk
         self.top_k = top_k
         self.sub_top_k = min(sub_top_k, sqrt_n)
         self.mmap_path = mmap_path
@@ -463,6 +537,16 @@ class ProductKeyMemory(nn.Module):
         # multi-container Hogwild becomes feasible on Modal Volumes.
         self._storage: PagedMmapStorage | None = None
 
+        # Cross-N migration: if mmap_path exists at the N=1 byte size while
+        # this instance is N>1, tile the old contents across all N trunks
+        # in-place (replicate trunk-0's V into trunks 1..N-1). Without
+        # this, PagedMmapStorage._init_file_if_missing would silently
+        # overwrite the old bank with a fresh Gaussian at the new size.
+        if mmap_path is not None and self.n_trunks > 1:
+            self._maybe_migrate_v_file_to_n_trunks(
+                mmap_path, self.n_per_trunk, self.n_trunks, q_dim,
+            )
+
         if mmap_path is not None and not bank_on_gpu:
             self._storage = PagedMmapStorage(mmap_path, self.n, q_dim)
             self.V = CPUPinnedEmbedding.from_pretrained(
@@ -497,6 +581,11 @@ class ProductKeyMemory(nn.Module):
         # (logsumexp²) for K_a + K_b — picked up by the train loop and
         # added to the main loss with a small coefficient (~1e-5).
         self.last_z_loss: torch.Tensor | None = None
+        # Paired with NetBank.last_output_norm — mean L2 norm of this
+        # tier's residual contribution per (B,T) position, captured at
+        # the end of forward(). Compare Local vs Net to see if NetBank
+        # is being adopted as a tier.
+        self.last_output_norm: float = 0.0
 
     def dense_parameters(self):
         """Parameters with dense gradients (route to AdamW). Returns ONLY
@@ -611,7 +700,19 @@ class ProductKeyMemory(nn.Module):
                     rows = (base.unsqueeze(-1) + kb_dead_idx.unsqueeze(0)).flatten()
                     rows_to_reset.append(rows)
                 if rows_to_reset:
-                    all_rows = torch.unique(torch.cat(rows_to_reset))
+                    # Dead-key rows are in [0, n_per_trunk). With n_trunks>1,
+                    # broadcast across all trunks so each trunk's slice gets
+                    # the same dead-row noise refresh (K_a/K_b are shared, so
+                    # unreachability is shared too).
+                    per_trunk_rows = torch.unique(torch.cat(rows_to_reset))
+                    if self.n_trunks > 1:
+                        trunk_offsets = (torch.arange(self.n_trunks,
+                                                      device=per_trunk_rows.device)
+                                         * self.n_per_trunk)
+                        all_rows = (per_trunk_rows.unsqueeze(0)
+                                    + trunk_offsets.unsqueeze(-1)).flatten()
+                    else:
+                        all_rows = per_trunk_rows
                     # Cap reset to avoid touching > 25% of V at once
                     cap = self.n // 4
                     if all_rows.numel() > cap:
@@ -658,10 +759,29 @@ class ProductKeyMemory(nn.Module):
         file per layer, overwritten each ckpt) so the on-disk cost
         is bounded to ~bank size, not per-step accumulating.
 
-        Returns total bytes written.
+        Self-overwrite guard: when `path` is the SAME file that V's
+        live mmap is already bound to (the bank_on_gpu=False + mmap
+        case), there's nothing to do — V.weight is the on-disk file's
+        content. Opening it again as mode='w+' would truncate, which
+        leaves the live mmap's pages stale and the copy reads zeros,
+        which then propagate to disk. Just flush and return early.
+
+        Returns total bytes written (or expected_bytes when the live
+        mmap is already the destination).
         """
         n, dim = self.V.weight.shape
         expected_bytes = n * dim * 4  # float32
+        # If V is already mmap-backed at this path, the bank is already
+        # on disk — flush the OS page cache and return.
+        if self._storage is not None:
+            try:
+                live_path = os.path.realpath(self._storage.path)
+                want_path = os.path.realpath(path)
+            except OSError:
+                live_path = want_path = None
+            if live_path == want_path:
+                self._storage.flush() if hasattr(self._storage, "flush") else None
+                return expected_bytes
         os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
         # Pull to CPU once; chunk the write so we don't peak at 2× memory.
         weight_cpu = self.V.weight.detach().to("cpu", copy=False).numpy()
@@ -683,6 +803,12 @@ class ProductKeyMemory(nn.Module):
         (n × q_dim × 4 bytes), so a stale or wrong-config bank file
         fails loud rather than silently corrupting V.
 
+        Cross-N migration: when the on-disk file is at the N=1 byte size
+        (n_per_trunk × q_dim × 4) but this instance is n_trunks>1, load
+        once and tile across all trunks — old single-trunk content gets
+        replicated to seed every trunk's V identically. They then diverge
+        during training.
+
         Returns total bytes read.
         """
         n, dim = self.V.weight.shape
@@ -690,6 +816,26 @@ class ProductKeyMemory(nn.Module):
         if not os.path.exists(path):
             raise FileNotFoundError(f"bank checkpoint not found: {path}")
         actual_bytes = os.path.getsize(path)
+        # Cross-N migration path: on-disk file at N=1 size, model at N>1.
+        n_per_trunk_bytes = self.n_per_trunk * dim * 4
+        if (actual_bytes == n_per_trunk_bytes
+                and expected_bytes == self.n_trunks * n_per_trunk_bytes
+                and self.n_trunks > 1):
+            print(
+                f"  ckpt migration: {path} is N=1 size ({actual_bytes} B); "
+                f"tiling to N={self.n_trunks} ({expected_bytes} B) in V.weight"
+            )
+            arr = np.memmap(path, dtype=np.float32, mode="r",
+                            shape=(self.n_per_trunk, dim))
+            with torch.no_grad():
+                src = torch.from_numpy(np.asarray(arr))  # (n_per_trunk, dim)
+                src_dev = src.to(self.V.weight.device)
+                # Tile across the N-axis by repeating row block N times.
+                self.V.weight.data.view(
+                    self.n_trunks, self.n_per_trunk, dim
+                ).copy_(src_dev.unsqueeze(0).expand(self.n_trunks, -1, -1))
+            del arr
+            return actual_bytes
         if actual_bytes != expected_bytes:
             raise ValueError(
                 f"bank checkpoint {path} has {actual_bytes} bytes; "
@@ -708,8 +854,68 @@ class ProductKeyMemory(nn.Module):
         del arr
         return expected_bytes
 
-    def forward(self, q: torch.Tensor) -> torch.Tensor:
+    @staticmethod
+    def _maybe_migrate_v_file_to_n_trunks(path: str,
+                                          n_per_trunk: int,
+                                          n_trunks: int,
+                                          q_dim: int) -> None:
+        """Tile an old N=1-shaped V mmap file in-place to N-trunk shape.
+
+        No-op when:
+          - the file doesn't exist (PagedMmapStorage will Gaussian-init)
+          - the file is already at the N-trunk size
+          - the file is at neither the N=1 nor the N-trunk size (let the
+            downstream init/load raise — wrong sqrt_n or q_dim)
+
+        When the file is at the N=1 size, atomically rewrite to N-trunk
+        size by reading the contents, allocating a sibling tmp file at
+        the new size, tiling, fsync'ing, and renaming over the original.
+        Subsequent PagedMmapStorage opens see a file at the right size
+        and skip its Gaussian-init.
+        """
+        n1_bytes  = n_per_trunk * q_dim * 4
+        nN_bytes  = n_trunks * n1_bytes
+        if not os.path.exists(path):
+            return
+        actual = os.path.getsize(path)
+        if actual == nN_bytes:
+            return  # already migrated / freshly created at new size
+        if actual != n1_bytes:
+            return  # not the N=1 size either; let downstream raise
+        print(
+            f"  bank migration: {path} from N=1 ({n1_bytes} B) to "
+            f"N={n_trunks} ({nN_bytes} B) — tiling trunk-0 into all trunks"
+        )
+        # Read old contents into a CPU-resident copy so the source mmap
+        # can be closed before we rewrite the file.
+        old_arr = np.memmap(path, dtype=np.float32, mode="r",
+                            shape=(n_per_trunk, q_dim))
+        old_data = np.array(old_arr)  # owning copy
+        if hasattr(old_arr, "_mmap") and old_arr._mmap is not None:
+            old_arr._mmap.close()
+        del old_arr
+        tmp_path = path + ".migrating"
+        new_arr = np.memmap(tmp_path, dtype=np.float32, mode="w+",
+                            shape=(n_trunks * n_per_trunk, q_dim))
+        for t in range(n_trunks):
+            new_arr[t * n_per_trunk:(t + 1) * n_per_trunk] = old_data
+        new_arr.flush()
+        if hasattr(new_arr, "_mmap") and new_arr._mmap is not None:
+            new_arr._mmap.close()
+        del new_arr
+        os.replace(tmp_path, path)
+
+    def forward(self, q: torch.Tensor,
+                trunk_ids: torch.Tensor | None = None) -> torch.Tensor:
         """q: (B, T, q_dim) → (B, T, q_dim) softmax-weighted retrieval.
+
+        `trunk_ids` (optional, (B,) long): per-batch-row routing into V's
+        per-trunk slices. When n_trunks > 1, the gather is offset by
+        `trunk_ids[i] * n_per_trunk` for batch row i, so each row reads
+        from its trunk's V slice while sharing K_a, K_b, q_norm. Pass None
+        when n_trunks == 1 (the offset would be 0 anyway). The sub-key
+        scoring stays unchanged — same addressing scheme across trunks;
+        only the value bank specializes.
 
         When V.weight is on a different device than q (e.g. q on cuda
         while V is CPU-pinned mmap), the top_k indices are moved to
@@ -717,6 +923,22 @@ class ProductKeyMemory(nn.Module):
         tensor is moved to q's device. Autograd handles the .to()
         boundary so the sparse gradient lands on V on its native device.
         """
+        # Inference fast path: one C++ call fuses score → sub-topk →
+        # outer-sum-topk → gather → softmax → weighted-sum. Drops ~30
+        # ATen-op dispatches + Python-orchestration overhead per layer.
+        # Only safe when not training (no autograd recording in C++) and
+        # V is on CPU fp32 (the only path the fused kernel supports).
+        #
+        # Skips: training z-loss, sub-key hit counters, dirty-row
+        # tracking, .item() telemetry — all training-only side effects.
+        # last_z_loss / last_output_norm stay at their previous values
+        # (typically None / unread at inference).
+        if (not self.training
+                and HAS_CPP_KERNELS
+                and self.V.weight.is_cpu
+                and self.V.weight.dtype == torch.float32):
+            return pkm_inference_forward(self, q, trunk_ids=trunk_ids)
+
         B, T, D = q.shape
         q = self.q_norm(q)
         q_a = q[..., :self.sub_dim]
@@ -754,17 +976,29 @@ class ProductKeyMemory(nn.Module):
                     torch.bincount(top_b_i.view(-1), minlength=self.sqrt_n)
                 )
 
-        # Outer-sum scores; index via i = i_a * sqrt_n + i_b
-        combined_scores = (top_a_s.unsqueeze(-1) + top_b_s.unsqueeze(-2))
-        combined_scores = combined_scores.flatten(-2)
+        # F3: fused outer-sum + top-K. C++ kernel scans S² pairs with a
+        # per-row min-heap, skipping the (B, T, sub_top_k²) temp. Python
+        # fallback when extension didn't build or V isn't on CPU.
+        if HAS_CPP_KERNELS and top_a_s.is_cpu:
+            top_scores, top_global = PKMFusedTopK.apply(
+                top_a_s, top_a_i, top_b_s, top_b_i, self.sqrt_n, self.top_k,
+            )
+        else:
+            combined_scores = (top_a_s.unsqueeze(-1) + top_b_s.unsqueeze(-2)).flatten(-2)
+            idx_a = top_a_i.unsqueeze(-1).expand(-1, -1, -1, self.sub_top_k)
+            idx_b = top_b_i.unsqueeze(-2).expand(-1, -1, self.sub_top_k, -1)
+            combined_idx = (idx_a * self.sqrt_n + idx_b).flatten(-2)
+            top_scores, top_local = combined_scores.topk(self.top_k, dim=-1)
+            top_global = combined_idx.gather(-1, top_local)          # (B, T, top_k); per-trunk row in [0, n_per_trunk)
 
-        idx_a = top_a_i.unsqueeze(-1).expand(-1, -1, -1, self.sub_top_k)
-        idx_b = top_b_i.unsqueeze(-2).expand(-1, -1, self.sub_top_k, -1)
-        combined_idx = (idx_a * self.sqrt_n + idx_b).flatten(-2)
-
-        # Top-K from candidates — still on q's device
-        top_scores, top_local = combined_scores.topk(self.top_k, dim=-1)
-        top_global = combined_idx.gather(-1, top_local)            # (B, T, top_k)
+        # Multi-trunk routing: offset each batch row's indices by its trunk's
+        # base row. After this, top_global indexes into the flat (N*n_per_trunk,
+        # q_dim) V — each batch row hits its own trunk's slice. At N=1 this is
+        # skipped (offset would be 0). trunk_ids must be a (B,) long tensor.
+        if self.n_trunks > 1 and trunk_ids is not None:
+            offsets = (trunk_ids.to(device=top_global.device, dtype=top_global.dtype)
+                                * self.n_per_trunk).view(B, 1, 1)
+            top_global = top_global + offsets
 
         # Cross-device V gather: when V is pinned to CPU but q is on GPU,
         # move only top_k indices over (~64 KB), gather rows on V's
@@ -785,15 +1019,35 @@ class ProductKeyMemory(nn.Module):
                 # get a sparse-grad update on backward). Cheap — we
                 # already have the indices on CPU after the .to() hop.
                 self._storage.track_dirty_rows(top_global_v)
-            values_v = self.V(top_global_v)                        # (B, T, top_k, D) on V's device
+            # F2: contiguous-block gather with parallel memcpy. Replaces
+            # F.embedding's per-row aten::index_select. CPU-only path.
+            if HAS_CPP_KERNELS and v_device.type == "cpu":
+                values_v = PKMGather.apply(self.V.weight, top_global_v)
+            else:
+                values_v = self.V(top_global_v)                    # (B, T, top_k, D) on V's device
             values = values_v.to(q.device)
         else:
             if self._storage is not None:
                 self._storage.track_dirty_rows(top_global)
-            values = self.V(top_global)                            # (B, T, top_k, D)
+            if HAS_CPP_KERNELS and v_device.type == "cpu":
+                values = PKMGather.apply(self.V.weight, top_global)
+            else:
+                values = self.V(top_global)                        # (B, T, top_k, D)
 
         weights = F.softmax(top_scores, dim=-1).unsqueeze(-1)
-        return (weights * values).sum(dim=-2)
+        out = (weights * values).sum(dim=-2)
+        # Instrumentation paired with NetBank.last_output_norm — gives a
+        # direct Local-vs-Net residual-contribution comparison. ONLY in
+        # training mode: at inference .item() is a per-layer CPU sync
+        # that was ~30µs × 3200 PKM calls / decode = 5% of wall, with
+        # zero functional value (telemetry only read by training-loop
+        # callers and the sweep ablation logs).
+        if self.training:
+            with torch.no_grad():
+                self.last_output_norm = float(
+                    out.detach().pow(2).sum(-1).sqrt().mean().item()
+                )
+        return out
 
 
 # ─────────────────────── madvise prefetch helper (Phase 4b) ───────────────────────
@@ -1053,9 +1307,18 @@ class Int8ProductKeyMemory(nn.Module):
 
     def __init__(self, q_dim: int, sqrt_n: int,
                  top_k: int = 16, sub_top_k: int = 32,
-                 mmap_path: str | None = None):
+                 mmap_path: str | None = None,
+                 n_trunks: int = 1):
         super().__init__()
         assert q_dim % 2 == 0, "q_dim must be even"
+        # Int8 path is inference-only; multi-trunk only matters at training,
+        # where the fp32 ProductKeyMemory is the one in use. Accept the
+        # kwarg so memory-cls stays polymorphic, but assert N=1 — at
+        # inference each request runs on a single trunk's bank.
+        assert n_trunks == 1, (
+            f"Int8ProductKeyMemory only supports n_trunks=1 (inference path), "
+            f"got n_trunks={n_trunks}"
+        )
         self.q_dim = q_dim
         self.sub_dim = q_dim // 2
         self.sqrt_n = sqrt_n

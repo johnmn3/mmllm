@@ -510,26 +510,31 @@ def fmt_magicoder(rec: dict, tpl: ChatTemplate = DEFAULT_TEMPLATE) -> "str | Non
     )
 
 
-def fmt_cosmopedia(rec: dict) -> "str | None":
+def fmt_cosmopedia(rec: dict, tpl: ChatTemplate = DEFAULT_TEMPLATE) -> "str | None":
     """Cosmopedia-v2 (HuggingFaceTB/cosmopedia-v2).
 
-    Pretraining-style synthetic textbook content. No chat wrapping —
-    just the raw text, separated by blank lines downstream. Field
-    name varies across configs; try common ones."""
+    Pretraining-style synthetic textbook content. Wrapped in ChatTemplate
+    as a single assistant turn with a routing-hint system message so the
+    byte distribution at training time matches the other (SFT/agentic)
+    corpora — the model sees `<|sys|>...<|asst|>...<|end|>` envelopes
+    everywhere, never bare text. The system message lets the model
+    route on "this is textbook-style content" vs other domains."""
     txt = rec.get("text") or rec.get("content") or rec.get("article")
     if not txt:
         return None
-    return txt
+    return tpl.system("You are a textbook author. Produce clear, accurate prose.") + tpl.assistant(txt)
 
 
-def fmt_fineweb_edu(rec: dict) -> "str | None":
+def fmt_fineweb_edu(rec: dict, tpl: ChatTemplate = DEFAULT_TEMPLATE) -> "str | None":
     """FineWeb-Edu (HuggingFaceFW/fineweb-edu).
 
-    Pretraining-style web text, educational filter. Plain `text` field."""
+    Pretraining-style web text, educational filter. Wrapped in
+    ChatTemplate envelope to match the rest of the corpus mix — see
+    fmt_cosmopedia comment for the rationale."""
     txt = rec.get("text")
     if not txt:
         return None
-    return txt
+    return tpl.system("You are a writer producing educational web content.") + tpl.assistant(txt)
 
 
 def fmt_tiny_stories(rec: dict) -> "str | None":
@@ -543,39 +548,49 @@ def fmt_tiny_stories(rec: dict) -> "str | None":
     aesop-capstone synthetic corpus for joint code/structure/narrative
     grounding).
 
-    Schema: just `text` field with the story body. No chat-template
-    wrapping — pretraining-style consumption."""
+    Schema: just `text` field with the story body. Wrapped in
+    ChatTemplate envelope to match the rest of the corpus mix — see
+    fmt_cosmopedia comment for the rationale."""
     txt = rec.get("text")
     if not txt:
         return None
-    return txt
+    return DEFAULT_TEMPLATE.system("You are telling a short children's story.") + DEFAULT_TEMPLATE.assistant(txt)
 
 
-def fmt_the_stack_v2(rec: dict, max_file_bytes: int = 32768) -> "str | None":
+def fmt_the_stack_v2(rec: dict, max_file_bytes: int = 32768,
+                     tpl: ChatTemplate = DEFAULT_TEMPLATE) -> "str | None":
     """The Stack v2 (bigcode/the-stack-v2-dedup).
 
-    Pretraining-style code. Field is `content`. Cap at max_file_bytes
-    — long files (auto-generated, vendored libs) eat the corpus
-    budget without much signal."""
+    Pretraining-style code. Field is `content`. Cap at max_file_bytes —
+    long files (auto-generated, vendored libs) eat the corpus budget
+    without much signal. Wrapped in ChatTemplate envelope to match the
+    rest of the corpus mix — see fmt_cosmopedia comment for rationale.
+
+    The lang_or_path metadata (when present) goes in the system message
+    so the model can route on language/path context — useful since
+    Python looks very different from Markdown looks very different from
+    shell scripts."""
     content = rec.get("content") or rec.get("text")
     if not content:
         return None
     if len(content) > max_file_bytes:
         return None
-    return content
+    lang = rec.get("lang") or rec.get("language") or rec.get("path") or ""
+    sys_msg = f"You are a code author. Source file ({lang})." if lang else "You are a code author."
+    return tpl.system(sys_msg) + tpl.assistant(content)
 
 
-def fmt_open_web_math(rec: dict) -> "str | None":
+def fmt_open_web_math(rec: dict, tpl: ChatTemplate = DEFAULT_TEMPLATE) -> "str | None":
     """OpenWebMath (open-web-math/open-web-math).
 
     14.7B-token corpus of mathematical text scraped from the web —
-    proofs, derivations, math.SE answers, lecture notes. Pretraining-
-    style: just the `text` field. Carries the formal-reasoning signal
-    we want present throughout training, not just at the end."""
+    proofs, derivations, math.SE answers, lecture notes. Wrapped in
+    ChatTemplate envelope to match the rest of the corpus mix — see
+    fmt_cosmopedia comment for the rationale."""
     txt = rec.get("text")
     if not txt:
         return None
-    return txt
+    return tpl.system("You are a math tutor working through a problem step by step.") + tpl.assistant(txt)
 
 
 def fmt_algebraic_stack(rec: dict) -> "str | None":

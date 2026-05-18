@@ -366,7 +366,9 @@ Operational env vars:
 | `MMLLM_LR_WARMUP` | `0` | linear-warmup steps; >0 enables cosine decay to lr/10 over remaining steps |
 | `MMLLM_LR_MIN` | `lr/10` | cosine floor when warmup > 0 |
 | `MMLLM_BANK_ON_GPU` | `true` | bank V on GPU vs mmap-backed CPU (see Storage modes) |
-| `MMLLM_CPU_OFFLOAD` | `false` | SparseAdam state on CPU instead of GPU |
+| `MMLLM_CPU_OFFLOAD` | `false` | legacy alias for `MMLLM_SPARSE_OPT=adam-cpu`. When `MMLLM_SPARSE_OPT` is unset and this is `true`, the bank optimizer is `CPUOffloadSparseAdam` |
+| `MMLLM_SPARSE_OPT` | unset | bank optimizer choice — `adam` (stock SparseAdam; dense m/v state), `adam-cpu` (`CPUOffloadSparseAdam`; touched-row-sparse m/v on CPU), or `sgd` (`CPUSparseSGD`; zero state). At `N_TRUNKS>1` `adam` will OOM; use `adam-cpu` or `sgd`. Takes precedence over `MMLLM_CPU_OFFLOAD`. |
+| `MMLLM_N_TRUNKS` | `1` | shared-trunk multi-stream training (option A). When >1, Local Bank V is sized `(N×sqrt_n², q_dim)` and per-batch-row `trunk_ids` route each row to its own slice. Dense weights + K_a/K_b + NetBank stay shared. Batch interpretation: `MMLLM_BATCH` becomes B-per-trunk; effective batch = N × B-per-trunk. Old N=1 ckpts auto-migrate to (1×n, q_dim) shape on load. |
 | `MMLLM_SHORT_WINDOW` | unset | sliding-window cap on short-tier KV cache (RoPE-safe) |
 | `MMLLM_LONG_WINDOW` | unset | sliding-window cap on long-tier in-RAM KV cache |
 | `MMLLM_ABLATE_EVERY` | `0` | log Δ trajectory every N steps; must be a multiple of eval-every |

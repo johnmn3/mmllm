@@ -30,6 +30,56 @@ import os
 from typing import Optional
 
 
+def _compute_block_distill_inline(gate):
+    """Per-block distillation MSE, computed inside the (potentially
+    checkpointed) block forward scope so its autograd graph is part of
+    the block's checkpointed return rather than a side-stash on the gate
+    module. Reads gate.last_local_out / last_net_out / last_sdpa_out
+    that the 3-way SwitchGate path just set, then immediately CLEARS
+    those attributes so the autograd graph isn't pinned alive past the
+    block. The returned scalar is what gets summed across blocks.
+
+    Mirrors the standard path of core.lpy's collect-distill-loss (no
+    per-layer gate-weights / gate-indices — those experimental knobs
+    aren't supported through this fast path; if MMLLM_DISTILL_GATE_*
+    is set, set MMLLM_GRAD_CHECKPOINT=false and use the old collector).
+
+    Returns scalar tensor with autograd, or None when no distill term
+    applies (2-way gate, or last_X not set)."""
+    import torch.nn.functional as F
+    lo = getattr(gate, "last_local_out", None)
+    no = getattr(gate, "last_net_out",   None)
+    so = getattr(gate, "last_sdpa_out",  None)
+    # Clear immediately — having attempted to read them, we no longer
+    # want the gate to pin them alive after we return.
+    gate.last_local_out = None
+    gate.last_net_out   = None
+    gate.last_sdpa_out  = None
+    if lo is None or no is None:
+        return None
+    target_kind = os.environ.get("MMLLM_DISTILL_TARGET", "residual")
+    dir_only    = os.environ.get("MMLLM_DISTILL_DIRECTION_ONLY", "false").lower() in ("1", "true", "yes")
+    try: mag_coef = float(os.environ.get("MMLLM_DISTILL_MAGNITUDE_COEF", "0.0"))
+    except ValueError: mag_coef = 0.0
+    try: mag_clamp = float(os.environ.get("MMLLM_DISTILL_MAGNITUDE_CLAMP", "0.0"))
+    except ValueError: mag_clamp = 0.0
+    eps = 1e-6
+    if target_kind == "residual" and so is not None:
+        tgt = lo.detach() - so.detach()
+    else:
+        tgt = lo.detach()
+    if dir_only:
+        tgt_n = tgt.norm(dim=-1, keepdim=True) + eps
+        no_n  = no.norm(dim=-1, keepdim=True)  + eps
+        dir_mse = F.mse_loss(no / no_n, tgt / tgt_n)
+        if mag_coef > 0:
+            tgt_mag = tgt_n.clamp(max=mag_clamp) if mag_clamp > 0 else tgt_n
+            mag_mse = F.mse_loss(no_n, tgt_mag.detach())
+            return (1.0 - mag_coef) * dir_mse + mag_coef * mag_mse
+        return dir_mse
+    return F.mse_loss(no, tgt)
+
+
 def _bank_repeat_n() -> int:
     """How many iterative refinement passes through Local Bank to run
     per forward. Reads MMLLM_BANK_REPEAT_N (default 1 = no iteration,
@@ -54,6 +104,7 @@ def _bank_repeat_alpha() -> float:
 
 import torch
 import torch.nn.functional as F
+import torch.utils.checkpoint as _torch_checkpoint
 
 
 # ── RoPE helpers (Python copy of the basilisp ones) ──
@@ -146,6 +197,7 @@ def attention(
     *,
     skip_bank: bool = False,
     netbank=None,
+    trunk_ids: Optional[torch.Tensor] = None,
 ) -> tuple:
     """Three-tier attention with hard-split Q heads.
 
@@ -168,6 +220,20 @@ def attention(
     """
     B = x.size(0)
     T = x.size(1)
+
+    # Clear any stale aux-loss stashes from prior step. Some attention
+    # paths (skip_bank, 2-way gate on Net-only layers, …) don't reset
+    # these; without an explicit clear, _compute_block_distill_inline
+    # at end-of-attention would read tensors from a previous batch
+    # whose autograd graph has been freed by backward — yielding either
+    # a stale-grad scalar or a no-grad scalar that wrongly contributes
+    # to the distill total.
+    if long_gate is not None:
+        long_gate.last_local_out = None
+        long_gate.last_net_out   = None
+        long_gate.last_sdpa_out  = None
+    if memory is not None:
+        memory.last_z_loss = None
 
     # Bank → dense feedback (PlainFeedback returns None → identity)
     fb_delta = bank_feedback(x, memory)
@@ -211,17 +277,38 @@ def attention(
     #   T>1 verify (cache+K-batch): custom mask — query i attends to
     #                              keys [0..prev_short+i]; this is the
     #                              speculative-decoding case (Phase-5)
+    # SDPA wraps: in TRAINING mode, the math backend (CPU's only path)
+    # materializes the full (B, H, T, T) attn-weights tensor and retains
+    # it for backward — 8 MB / call × 32 layers × 2 (short+long) = 8 GB
+    # at B=16, T=1024. Wrapping each SDPA in torch.utils.checkpoint with
+    # use_reentrant=False discards that tensor at forward and recomputes
+    # it during backward, saving 8 GB.
+    #
+    # OPT-IN via MMLLM_SDPA_CHECKPOINT (default false). On CPU, the
+    # recompute is the ENTIRE SDPA forward (no flash backend, just the
+    # math kernel), which empirically costs ~20× per-step wall (38s/step
+    # vs the unwrapped 1.7s/step at cpu-mini × wave-1 bandwidth). The
+    # 8 GB saved is only worth that wall hit on tight containers, OR
+    # when the model runs on GPU where pytorch's flash backend makes
+    # the recompute cheap. Default off so CPU training stays usable.
+    _wrap_sdpa = bool(
+        os.environ.get("MMLLM_SDPA_CHECKPOINT", "false").lower() in ("1", "true", "yes")
+    ) and torch.is_grad_enabled()
+    def _sdpa(q_, k_, v_, *, is_causal=False, attn_mask=None):
+        if _wrap_sdpa:
+            return _torch_checkpoint.checkpoint(
+                lambda q__, k__, v__: F.scaled_dot_product_attention(
+                    q__, k__, v__, is_causal=is_causal, attn_mask=attn_mask),
+                q_, k_, v_, use_reentrant=False)
+        return F.scaled_dot_product_attention(q_, k_, v_, is_causal=is_causal, attn_mask=attn_mask)
+
     if short_cache is None and T > 1:
-        attn_s = F.scaled_dot_product_attention(
-            q_short_r, k_s_rep, v_s_rep, is_causal=True,
-        )
+        attn_s = _sdpa(q_short_r, k_s_rep, v_s_rep, is_causal=True)
     elif short_cache is not None and T > 1:
-        attn_s = F.scaled_dot_product_attention(
-            q_short_r, k_s_rep, v_s_rep,
-            attn_mask=_verify_mask(T, k_s_rep.size(2), q_short_r.dtype, q_short_r.device),
-        )
+        attn_s = _sdpa(q_short_r, k_s_rep, v_s_rep,
+                       attn_mask=_verify_mask(T, k_s_rep.size(2), q_short_r.dtype, q_short_r.device))
     else:
-        attn_s = F.scaled_dot_product_attention(q_short_r, k_s_rep, v_s_rep)
+        attn_s = _sdpa(q_short_r, k_s_rep, v_s_rep)
 
     # LONG tier (a): set-style SDPA over per-conversation cache (no RoPE)
     new_long_cache = append_kv_to_buffer(
@@ -239,16 +326,12 @@ def attention(
     k_l_rep = k_l_full.repeat_interleave(repeat_l, dim=1)
     v_l_rep = v_l_full.repeat_interleave(repeat_l, dim=1)
     if long_cache is None and T > 1:
-        attn_l_sdpa = F.scaled_dot_product_attention(
-            q_long, k_l_rep, v_l_rep, is_causal=True,
-        )
+        attn_l_sdpa = _sdpa(q_long, k_l_rep, v_l_rep, is_causal=True)
     elif long_cache is not None and T > 1:
-        attn_l_sdpa = F.scaled_dot_product_attention(
-            q_long, k_l_rep, v_l_rep,
-            attn_mask=_verify_mask(T, k_l_rep.size(2), q_long.dtype, q_long.device),
-        )
+        attn_l_sdpa = _sdpa(q_long, k_l_rep, v_l_rep,
+                            attn_mask=_verify_mask(T, k_l_rep.size(2), q_long.dtype, q_long.device))
     else:
-        attn_l_sdpa = F.scaled_dot_product_attention(q_long, k_l_rep, v_l_rep)
+        attn_l_sdpa = _sdpa(q_long, k_l_rep, v_l_rep)
 
     # LONG tier (b/c): retrieval. (b) is the local PKM bank (semantic /
     # working memory); (c) is NetBank (off-machine long-term memory),
@@ -258,6 +341,10 @@ def attention(
     # only the SDPA contribution.
     if skip_bank:
         attn_l = attn_l_sdpa
+    elif memory is None and netbank is None:
+        # Asymmetric architecture: this layer has neither bank. Pass
+        # through the SDPA tier unchanged.
+        attn_l = attn_l_sdpa
     else:
         q_long_flat = (
             q_long.transpose(1, 2)
@@ -266,32 +353,71 @@ def attention(
         )
         ctx_mod = bank_query(x)
         bank_q = q_long_flat + ctx_mod if ctx_mod is not None else q_long_flat
-        mem_out = memory(bank_q)
-        # Iterative refinement on Local Bank — feed the previous output
-        # back into bank_q and re-query, N times. Lets Local "deliberate"
-        # at structural-decision positions. N=1 is identity (legacy).
-        n_repeat = _bank_repeat_n()
-        if n_repeat > 1:
-            alpha = _bank_repeat_alpha()
-            for _ in range(n_repeat - 1):
-                bank_q = bank_q + alpha * mem_out
-                mem_out = memory(bank_q)
-        attn_l_mem = mem_out.reshape(B, T, n_long_heads, head_dim).transpose(1, 2)
+        attn_l_mem = None
+        if memory is not None:
+            mem_out = memory(bank_q, trunk_ids=trunk_ids)
+            # Iterative refinement on Local Bank — feed the previous output
+            # back into bank_q and re-query, N times. Lets Local "deliberate"
+            # at structural-decision positions. N=1 is identity (legacy).
+            n_repeat = _bank_repeat_n()
+            if n_repeat > 1:
+                alpha = _bank_repeat_alpha()
+                for _ in range(n_repeat - 1):
+                    bank_q = bank_q + alpha * mem_out
+                    mem_out = memory(bank_q, trunk_ids=trunk_ids)
+            attn_l_mem = mem_out.reshape(B, T, n_long_heads, head_dim).transpose(1, 2)
         # NetBank queries off-machine. Same query vector as Local; the
         # gate decides per-token how much to weight each source.
         if netbank is not None:
             net_out = netbank(bank_q)
             attn_l_net = net_out.reshape(B, T, n_long_heads, head_dim).transpose(1, 2)
-            attn_l = long_gate(q_long, attn_l_sdpa, attn_l_mem, attn_l_net)
+            if attn_l_mem is not None:
+                attn_l = long_gate(q_long, attn_l_sdpa, attn_l_mem, attn_l_net)
+            else:
+                # Net-only layer (no Local Bank). Gate sees sdpa + net.
+                # Pass mem_out=None; SwitchGate handles that branch.
+                attn_l = long_gate(q_long, attn_l_sdpa, None, attn_l_net)
         else:
             attn_l = long_gate(q_long, attn_l_sdpa, attn_l_mem)
+
+    # Per-block aux losses (distill MSE + z_loss). When grad-checkpointing
+    # is OFF, collect them here (with autograd alive) and return them
+    # through the block_forward chain so train-step doesn't need a
+    # second pass over module-side .last_X stashes.
+    # When grad-checkpointing is ON, skip — threading an autograd-alive
+    # scalar through the checkpointed function's return alongside x_out
+    # keeps the upstream context (NetBank.forward / Local-PKM.forward
+    # intermediates) alive (PyTorch cannot independently checkpoint
+    # multiple outputs with shared upstream graphs). Aux losses are
+    # therefore disabled when MMLLM_GRAD_CHECKPOINT=true. Always clear
+    # the module-side stashes so they don't pin autograd alive past
+    # this block.
+    grad_ckpt = os.environ.get("MMLLM_GRAD_CHECKPOINT", "false").lower() in ("1", "true", "yes")
+    if grad_ckpt:
+        # Clear stashes only — don't carry their autograd graphs out.
+        if long_gate is not None:
+            long_gate.last_local_out = None
+            long_gate.last_net_out   = None
+            long_gate.last_sdpa_out  = None
+        if memory is not None:
+            memory.last_z_loss = None
+        distill_term = None
+        z_term       = None
+    else:
+        distill_term = _compute_block_distill_inline(long_gate) if long_gate is not None else None
+        z_term = None
+        if memory is not None:
+            zlz = getattr(memory, "last_z_loss", None)
+            memory.last_z_loss = None
+            if zlz is not None:
+                z_term = zlz
 
     # Concat short + long head outputs, project
     attn = torch.cat([attn_s, attn_l], dim=1)
     out = attn.transpose(1, 2).contiguous().reshape(B, T, n_heads * head_dim)
     out = o_proj(out)
 
-    return out, new_short_cache, new_long_cache
+    return out, new_short_cache, new_long_cache, distill_term, z_term
 
 
 # ── block forward (pre-norm + attention + SwiGLU FFN + residuals) ──
@@ -309,14 +435,46 @@ def block_forward(
     short_cache: Optional[tuple], long_cache: Optional[tuple],
     skip_bank: bool = False,
     netbank=None,
+    trunk_ids: Optional[torch.Tensor] = None,
+    skip_bwd: bool = False,
 ) -> tuple:
     """Pre-norm decoder block with three-tier attention + SwiGLU FFN.
 
     `skip_bank=True` (Phase-5 draft mode) routes through to the
     attention kernel; bank PKM lookup is skipped.
     `netbank` (optional): NetBank module for the off-machine long-term
-    memory tier. When non-None, attention uses the 3-way long_gate path."""
-    attn_out, new_s, new_l = attention(
+    memory tier. When non-None, attention uses the 3-way long_gate path.
+
+    `skip_bwd=True` runs the entire block (attention + FFN) inside a
+    `torch.no_grad()` context — no autograd graph is built for the
+    block's internal compute, so backward never traverses these params.
+    The block's contribution is added to `x` OUTSIDE the no_grad context
+    so `x`'s upstream gradient chain remains alive and earlier blocks
+    still backward normally. Stochastic-depth-in-backward."""
+    if skip_bwd:
+        with torch.no_grad():
+            attn_out, new_s, new_l, _d, _z = attention(
+                q_proj, k_proj_s, v_proj_s, k_proj_l, v_proj_l, o_proj,
+                memory, long_gate, bank_query, bank_feedback,
+                n_heads, n_short_heads, n_long_heads,
+                n_short_kv_heads, n_long_kv_heads, head_dim, max_t,
+                short_window, long_window,
+                norm1(x), cos, sin, short_cache, long_cache,
+                skip_bank=skip_bank,
+                netbank=netbank,
+                trunk_ids=trunk_ids,
+            )
+            x_tmp = x + attn_out
+            x_norm = norm2(x_tmp)
+            ffn_out = down_proj(F.silu(gate_proj(x_norm)) * up_proj(x_norm))
+            combined = attn_out + ffn_out
+        # Outside no_grad — `combined` is a no-grad tensor (leaf); `x`
+        # still has its grad_fn. The addition produces an output whose
+        # backward propagates only to x. Block's internal params are
+        # untouched by autograd.
+        x_out = x + combined
+        return x_out, new_s, new_l, None, None
+    attn_out, new_s, new_l, distill_term, z_term = attention(
         q_proj, k_proj_s, v_proj_s, k_proj_l, v_proj_l, o_proj,
         memory, long_gate, bank_query, bank_feedback,
         n_heads, n_short_heads, n_long_heads,
@@ -325,9 +483,92 @@ def block_forward(
         norm1(x), cos, sin, short_cache, long_cache,
         skip_bank=skip_bank,
         netbank=netbank,
+        trunk_ids=trunk_ids,
     )
     x = x + attn_out
     x_norm = norm2(x)
     ffn_out = down_proj(F.silu(gate_proj(x_norm)) * up_proj(x_norm))
     x = x + ffn_out
-    return x, new_s, new_l
+    # Per-block aux losses returned alongside x so their autograd
+    # graphs flow through the (potentially checkpointed) block_forward
+    # return rather than being pinned alive on module-side .last_X
+    # attributes. See `attention` body for how these are collected.
+    return x, new_s, new_l, distill_term, z_term
+
+
+def checkpointed_block_forward(
+    norm1, norm2,
+    q_proj, k_proj_s, v_proj_s, k_proj_l, v_proj_l, o_proj,
+    memory, long_gate, bank_query, bank_feedback,
+    gate_proj, up_proj, down_proj,
+    n_heads, n_short_heads, n_long_heads,
+    n_short_kv_heads, n_long_kv_heads,
+    head_dim, max_t, short_window, long_window,
+    x, cos, sin, short_cache, long_cache,
+    skip_bank=False, netbank=None, trunk_ids=None,
+    skip_bwd: bool = False,
+):
+    """Gradient-checkpoint wrapper around `block_forward`.
+
+    Same positional signature as `block_forward` so basilisp's
+    destructure-then-call shim can target either function. Returns
+    ONLY x_out — drops (short_cache, long_cache) outputs since
+    train-step discards them. Single-tensor return avoids
+    torch.utils.checkpoint's non-determinism check tripping on
+    block_forward's mixed tensor+tuple return.
+
+    Crucially, this is a top-level Python function (NOT a basilisp
+    closure inside loop/recur). Each call's arguments live in their
+    own Python locals, so the inner `_fn` closure cell holds the
+    correct per-iteration values. A closure defined directly inside
+    basilisp's `loop` shares cells across iterations (late-binding),
+    so every checkpoint's backward recompute ends up using the LAST
+    iteration's block — producing shape mismatches between the
+    saved forward tensors and the recomputed ones.
+
+    Returns `(x_out, None, None)` — distill_term / z_term are NOT
+    threaded through the checkpoint return because doing so keeps
+    upstream context alive (PyTorch cannot independently checkpoint
+    multiple outputs with shared upstream graphs; the saved-tensor
+    hooks fall back to retaining the shared intermediates). When
+    grad-checkpointing is on, the aux losses are intentionally
+    disabled by attention setting them to None — see the comment
+    in `attention` above the per-block aux-loss collection.
+    The (short_cache, long_cache) outputs are dropped (train-step
+    discards them) so checkpoint sees only one tensor output."""
+    # When skip_bwd is set, route directly through block_forward (which
+    # has its own no-grad branch). No point checkpointing a no-grad
+    # forward — the recompute on backward would never fire.
+    if skip_bwd:
+        x_out, _s, _l, _d, _z = block_forward(
+            norm1, norm2,
+            q_proj, k_proj_s, v_proj_s, k_proj_l, v_proj_l, o_proj,
+            memory, long_gate, bank_query, bank_feedback,
+            gate_proj, up_proj, down_proj,
+            n_heads, n_short_heads, n_long_heads,
+            n_short_kv_heads, n_long_kv_heads,
+            head_dim, max_t, short_window, long_window,
+            x, cos, sin, short_cache, long_cache,
+            skip_bank=skip_bank, netbank=netbank, trunk_ids=trunk_ids,
+            skip_bwd=True,
+        )
+        return x_out, None, None
+    import torch.utils.checkpoint as _ckpt
+
+    def _fn(x_arg):
+        x_out, _s, _l, _d, _z = block_forward(
+            norm1, norm2,
+            q_proj, k_proj_s, v_proj_s, k_proj_l, v_proj_l, o_proj,
+            memory, long_gate, bank_query, bank_feedback,
+            gate_proj, up_proj, down_proj,
+            n_heads, n_short_heads, n_long_heads,
+            n_short_kv_heads, n_long_kv_heads,
+            head_dim, max_t, short_window, long_window,
+            x_arg, cos, sin, short_cache, long_cache,
+            skip_bank=skip_bank, netbank=netbank, trunk_ids=trunk_ids,
+        )
+        return x_out
+
+    x_ckpt = _ckpt.checkpoint(_fn, x, use_reentrant=False)
+    # Match the 3-tuple shape callers expect.
+    return x_ckpt, None, None

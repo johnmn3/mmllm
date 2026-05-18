@@ -46,6 +46,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from mmllm.memory import CPUPinnedEmbedding
+from mmllm._pkm_autograd import HAS_CPP_KERNELS, PKMFusedTopK, netbank_inference_forward
 
 
 _DTYPE_MAP = {
@@ -213,6 +214,13 @@ class NetBank(nn.Module):
         )
         # z-loss accumulator, picked up by train-step
         self.last_z_loss: torch.Tensor | None = None
+        # Instrumentation: written at the end of forward(). Mean L2 norm of
+        # NetBank's residual contribution per (B,T) position. The headline
+        # diagnostic for "is NetBank actually being adopted as a function
+        # tier?" — if last_output_norm stays tiny while Local Bank's
+        # equivalent grows, the gate / V / routing is collapsing the
+        # NetBank path regardless of how V was initialized.
+        self.last_output_norm: float = 0.0
 
     # ─────────────────────── parameter routing ───────────────────────
 
@@ -234,16 +242,24 @@ class NetBank(nn.Module):
     # ─────────────────────── warm-start ───────────────────────
 
     def warm_start_from(self, local_K_a: torch.Tensor,
-                        local_K_b: torch.Tensor) -> None:
-        """Copy a Local Bank's K_a/K_b into the first `local.sqrt_n` rows
-        of NetBank's K_a/K_b. Bootstraps the retrieval geometry so that
-        queries that score highly against a Local row also score highly
+                        local_K_b: torch.Tensor,
+                        local_V: "torch.Tensor | None" = None) -> None:
+        """Copy a Local Bank's K_a/K_b (and optionally V) into the first
+        `local.sqrt_n` rows of NetBank. Bootstraps the retrieval geometry
+        so queries that score highly against a Local row also score highly
         against the corresponding NetBank row from step 0.
 
-        Caller passes Local Bank's K_a / K_b *parameters* (not state-dict
-        tensors). Done in-place; remaining NetBank rows stay at the random
-        init from __init__. V_net is NOT warm-started — it stays random and
-        learns via gradient descent through the expander."""
+        K_a/K_b share dtype/shape between Local and NetBank, so they
+        copy directly.
+
+        V_net has the learned-bottleneck shape (n, c_net) while Local's
+        V is (n, q_dim) with q_dim >> c_net. When `local_V` is provided,
+        we project it down to c_net via the expander's left-pseudoinverse:
+        the V_net values we pick are the least-squares solution to
+        `expander(V_net) ≈ local_V`, so at step 0 the retrieved+expanded
+        NetBank output approximates Local's V on the warm-started rows.
+
+        Pass local_V=None to keep the v1 behavior (V stays random)."""
         with torch.no_grad():
             local_n = local_K_a.shape[0]
             n_copy = min(local_n, self.sqrt_n)
@@ -253,6 +269,19 @@ class NetBank(nn.Module):
             self.K_b.data[:n_copy].copy_(
                 local_K_b.data[:n_copy].to(self.K_b.dtype).to(self.K_b.device)
             )
+            if local_V is not None:
+                # Local V is (n_local, q_dim). Project to (n_local, c_net)
+                # via the expander pseudo-inverse so expander(V_net) ≈ V_local
+                # on warm-started rows at step 0.
+                v_local = local_V[:n_copy].to(self.expander.weight.dtype).to(
+                    self.expander.weight.device)
+                # expander.weight is (q_dim, c_net); pinv is (c_net, q_dim)
+                W_pinv = torch.linalg.pinv(self.expander.weight)
+                # (n_copy, q_dim) @ (q_dim, c_net) = (n_copy, c_net)
+                v_warm = v_local @ W_pinv.T
+                # Write into the V embedding's weight tensor
+                v_dst = self.V.weight if hasattr(self.V, "weight") else self.V
+                v_dst.data[:n_copy].copy_(v_warm.to(v_dst.dtype).to(v_dst.device))
 
     # ─────────────────────── forward ───────────────────────
 
@@ -271,10 +300,26 @@ class NetBank(nn.Module):
           - z-loss accumulator + slot-usage hits tracked (training only)
           - V_net rows are c_net-dim fp16; we expand to q_dim via the
             learned expander after the gather
-          - blocking simulated network delay (training + eval)
+          - blocking simulated network delay (training only — production
+            inference shouldn't pay a synthetic latency tax)
         """
-        if self.delay_ms_max > 0:
+        if self.training and self.delay_ms_max > 0:
             self._simulate_delay()
+
+        # Inference fast path: one C++ call fuses score → sub-topk →
+        # outer-sum-topk → gather → softmax → weighted-sum into a single
+        # entry point, then Python applies the (small) expander linear.
+        # Drops ~30 ATen-op dispatches + Python orchestration per layer.
+        # Only safe when not training (no autograd recording in C++) and
+        # V is on CPU fp32 (only path the fused kernel supports).
+        #
+        # Skips: training z-loss, sub-key hit counters, last_output_norm
+        # .item() telemetry — all training-only side effects.
+        if (not self.training
+                and HAS_CPP_KERNELS
+                and self.V.weight.is_cpu
+                and self.V.weight.dtype == torch.float32):
+            return netbank_inference_forward(self, q)
 
         B, T, D = q.shape
         q = self.q_norm(q)
@@ -285,9 +330,14 @@ class NetBank(nn.Module):
         scores_b = q_b @ self.K_b.T
 
         if self.training:
-            lse_a = torch.logsumexp(scores_a, dim=-1)
-            lse_b = torch.logsumexp(scores_b, dim=-1)
-            self.last_z_loss = lse_a.square().mean() + lse_b.square().mean()
+            # z_loss is not collected for NetBank — collect-z-loss reads
+            # only from Local PKM (:memory). Computing it with autograd
+            # alive holds scores_a/b past the block forward, defeating
+            # gradient checkpointing. Detach so this is telemetry-only.
+            with torch.no_grad():
+                lse_a = torch.logsumexp(scores_a, dim=-1)
+                lse_b = torch.logsumexp(scores_b, dim=-1)
+                self.last_z_loss = lse_a.square().mean() + lse_b.square().mean()
         else:
             self.last_z_loss = None
 
@@ -303,16 +353,29 @@ class NetBank(nn.Module):
                     torch.bincount(top_b_i.view(-1), minlength=self.sqrt_n)
                 )
 
-        # Outer-sum re-rank, same as ProductKeyMemory
-        combined_scores = (top_a_s.unsqueeze(-1) + top_b_s.unsqueeze(-2))
-        combined_scores = combined_scores.flatten(-2)
-
-        idx_a = top_a_i.unsqueeze(-1).expand(-1, -1, -1, self.sub_top_k)
-        idx_b = top_b_i.unsqueeze(-2).expand(-1, -1, self.sub_top_k, -1)
-        combined_idx = (idx_a * self.sqrt_n + idx_b).flatten(-2)
-
-        top_scores, top_local = combined_scores.topk(self.top_k, dim=-1)
-        top_global = combined_idx.gather(-1, top_local)            # (B, T, top_k)
+        # Outer-sum re-rank. The Python path materializes a
+        # (B, T, sub_top_k²) `combined_scores` tensor which is the
+        # dominant per-call activation at training time (4-256 MB per
+        # call depending on B, T, sub_top_k). PKMFusedTopK is a C++
+        # kernel that scans the S² outer-sum with a per-row min-heap,
+        # skipping the temp entirely; identical autograd to the Python
+        # path. Same kernel as Local PKM (memory.py:982) — the math
+        # is generic across NetBank and Local PKM.
+        if HAS_CPP_KERNELS and top_a_s.is_cpu:
+            top_scores, top_global = PKMFusedTopK.apply(
+                top_a_s, top_a_i, top_b_s, top_b_i, self.sqrt_n, self.top_k,
+            )
+        else:
+            combined_scores = (top_a_s.unsqueeze(-1) + top_b_s.unsqueeze(-2)).flatten(-2)
+            top_scores, top_local = combined_scores.topk(self.top_k, dim=-1)
+            # `top_local` indexes into the flat sub_top_k² combined grid.
+            # Decompose back into (a_within, b_within) and gather the *global*
+            # key indices from top_a_i / top_b_i — small (B,T,top_k) gathers.
+            a_within = torch.div(top_local, self.sub_top_k, rounding_mode="floor")
+            b_within = top_local - a_within * self.sub_top_k
+            top_a_global = top_a_i.gather(-1, a_within)                # (B, T, top_k)
+            top_b_global = top_b_i.gather(-1, b_within)
+            top_global   = top_a_global * self.sqrt_n + top_b_global
 
         # Cross-device gather: V_net is fp16 CPU-mmap. Move indices to V's
         # device, gather rows there, ship results back up to q's device,
@@ -326,11 +389,29 @@ class NetBank(nn.Module):
         else:
             latent = self.V(top_global).float()
 
-        # Bottleneck → q_dim expansion
-        values = self.expander(latent)                             # (B, T, top_k, q_dim)
+        # Bottleneck → q_dim expansion. Fold the softmax weighting INTO the
+        # weighted-sum via einsum instead of materializing the (B,T,top_k,q_dim)
+        # `values` tensor and multiplying it elementwise by broadcasted softmax
+        # weights. The naive version costs ~4 ms / call from the extra
+        # allocation + broadcast; einsum does the contraction in one pass.
+        weights = F.softmax(top_scores, dim=-1)                    # (B, T, top_k)
+        # latent: (B,T,top_k,c_net); expander.weight: (q_dim,c_net)
+        # out = sum_k weights[b,t,k] * (latent[b,t,k,:] @ expander.weight.T) + bias_scaled
+        # Equivalent and avoids the intermediate (B,T,top_k,q_dim) allocation:
+        weighted_latent = torch.einsum("btkc,btk->btc", latent, weights)
+        out = self.expander(weighted_latent)
 
-        weights = F.softmax(top_scores, dim=-1).unsqueeze(-1)
-        return (weights * values).sum(dim=-2)
+        # ── instrumentation: "is NetBank actually producing signal?" ──
+        # Mean L2 norm of NetBank output per (B,T) position. ONLY in
+        # training mode — at inference this is a per-layer CPU sync
+        # (~30µs × 32 layers × tok = real fraction of decode wall) with
+        # no functional value (telemetry consumer is the training loop).
+        if self.training:
+            with torch.no_grad():
+                self.last_output_norm = float(
+                    out.detach().pow(2).sum(-1).sqrt().mean().item()
+                )
+        return out
 
     # ─────────────────────── slot-usage helpers ───────────────────────
 
