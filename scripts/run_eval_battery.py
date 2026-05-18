@@ -74,12 +74,18 @@ for p, s in zip(core.parameters(m), saved):
 core.set_eval_mode__BANG__(m)
 torch.set_grad_enabled(False)
 
-# Reference: in-domain Glaive FIM
-print("\nWarmup: in-domain Glaive FIM val …")
-glaive_val = corp.load_as_tensor("/tmp/mmllm-cpu/fim-json-v3.val.bin")
-t0 = time.time()
-glaive = core.eval_bpc(m, glaive_val, SEQ_LEN, B, EVAL_TOKEN_CAP)
-print(f"  glaive-fim-val: bpc={glaive.val_at(K('bpc')):.4f} ppl={glaive.val_at(K('ppl')):.4f}  wall={time.time()-t0:.1f}s")
+# Reference: in-domain Glaive FIM (skip gracefully when corpus isn't built)
+glaive = None
+glaive_path = Path("/tmp/mmllm-cpu/fim-json-v3.val.bin")
+if glaive_path.exists():
+    print("\nWarmup: in-domain Glaive FIM val …")
+    glaive_val = corp.load_as_tensor(str(glaive_path))
+    t0 = time.time()
+    glaive = core.eval_bpc(m, glaive_val, SEQ_LEN, B, EVAL_TOKEN_CAP)
+    print(f"  glaive-fim-val: bpc={glaive.val_at(K('bpc')):.4f} ppl={glaive.val_at(K('ppl')):.4f}  wall={time.time()-t0:.1f}s")
+else:
+    print(f"\nWarmup: in-domain Glaive FIM val SKIPPED ({glaive_path} not on disk)")
+    print("  build via `bash scripts/prep_chain_diverse_corpora.sh` to enable.")
 
 # Run each battery dataset
 print(f"\n=== Battery (eval cap = {EVAL_TOKEN_CAP:,} bytes, B={B}, T={SEQ_LEN}) ===\n")
@@ -109,7 +115,10 @@ print()
 print("=" * 96)
 print(f"{'dataset':<22} | {'bpc':>8} | {'ppl':>8} | {'n_bytes':>9} | {'wall':>5} | notes")
 print("-" * 96)
-print(f"{'glaive-fim-val':<22} | {glaive.val_at(K('bpc')):>8.4f} | {glaive.val_at(K('ppl')):>8.3f} | {'in-domain':>9} | {'-':>5} | training set (reference)")
+if glaive is not None:
+    print(f"{'glaive-fim-val':<22} | {glaive.val_at(K('bpc')):>8.4f} | {glaive.val_at(K('ppl')):>8.3f} | {'in-domain':>9} | {'-':>5} | training set (reference)")
+else:
+    print(f"{'glaive-fim-val':<22} | {'skipped':>8} | {'-':>8} | {'-':>9} | {'-':>5} | corpus not built")
 for r in rows[1:]:
     print(f"{r[0]:<22} | {r[1]:>8} | {r[2]:>8} | {r[3]:>9} | {r[4]:>5} | {r[5]}")
 print("=" * 96)
@@ -117,7 +126,8 @@ print("=" * 96)
 # Save to a JSONL
 import json
 log = []
-log.append({"dataset": "glaive-fim-val", "bpc": float(glaive.val_at(K("bpc"))), "ppl": float(glaive.val_at(K("ppl"))), "kind": "reference"})
+if glaive is not None:
+    log.append({"dataset": "glaive-fim-val", "bpc": float(glaive.val_at(K("bpc"))), "ppl": float(glaive.val_at(K("ppl"))), "kind": "reference"})
 for key, notes in DATASETS:
     row = next((r for r in rows[1:] if r[0] == key), None)
     if row and row[1] not in ("err", "missing"):

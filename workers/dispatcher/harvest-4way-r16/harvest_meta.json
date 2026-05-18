@@ -4,19 +4,23 @@
   "workers": [
     {
       "handle": "DQhyT",
-      "branch": "claude/chaindiverse-DQhyT-r16"
+      "branch": "claude/chaindiverse-DQhyT-r16",
+      "ctrl_bpc": 1.9963
     },
     {
       "handle": "mpvJA",
-      "branch": "claude/chaindiverse-mpvJA-r16"
+      "branch": "claude/chaindiverse-mpvJA-r16",
+      "ctrl_bpc": 1.9671
     },
     {
       "handle": "psH7R",
-      "branch": "claude/chaindiverse-psH7R-r16"
+      "branch": "claude/chaindiverse-psH7R-r16",
+      "ctrl_bpc": 2.0082
     },
     {
       "handle": "wdhuA",
-      "branch": "claude/chaindiverse-wdhuA-r16"
+      "branch": "claude/chaindiverse-wdhuA-r16",
+      "ctrl_bpc": 2.0889
     }
   ],
   "worker_ctrl_bpc_mean": 2.0151250000000003,
