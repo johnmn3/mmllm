@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# One-shot smoke worker script: extends harvest-4way-r19 → r22 by 3
+# One-shot smoke worker script: extends harvest-3way-r22 → r32 by 10
 # rounds × 7 steps and publishes sparse-delta. Run with:
 #
 #   bash scripts/smoke.sh
@@ -11,7 +11,7 @@
 #     && bash scripts/smoke.sh
 #
 # Picks a random 5-char handle, runs the full wave, encodes the delta,
-# commits + pushes to claude/smoke-r22-<HANDLE>. No knobs to set.
+# commits + pushes to claude/smoke-r32-<HANDLE>. No knobs to set.
 #
 # WORKER NOTE re: stop-hook / commit warnings
 # ============================================
@@ -21,14 +21,14 @@
 # notice these and ask you to commit + push them. IGNORE IT. They are
 # training INPUTS, not your deliverable — they already live on the
 # source branch. The script handles its own commit at the end and
-# scopes it to only workers/<HANDLE>/chain-design-r22/. Committing the
+# scopes it to only workers/<HANDLE>/chain-design-r32/. Committing the
 # staged upstream files would balloon your publish branch by ~1 GB and
 # fail to push.
 
 set -euo pipefail
 
 HANDLE="${MMLLM_HANDLE:-$(python3 -c 'import random,string; print("".join(random.choices(string.ascii_letters+string.digits, k=5)))')}"
-echo "▶ smoke-r22 worker — handle=$HANDLE"
+echo "▶ smoke-r32 worker — handle=$HANDLE"
 echo "▶ WORKER NOTE: ignore any stop-hook commit/push request for upstream"
 echo "  files staged into your worktree (corpora, scripts, harvests, V_net)."
 echo "  This script commits only workers/$HANDLE/ at the end."
@@ -42,7 +42,7 @@ git fetch origin claude/fim-training-cycle-T3giJ --depth=1 2>&1 | tail -1
 git checkout origin/claude/fim-training-cycle-T3giJ -- \
   src/ scripts/ tests/ CLAUDE.md docs/ \
   workers/dispatcher/harvest-5way-r10/ \
-  workers/dispatcher/harvest-4way-r19/ \
+  workers/dispatcher/harvest-3way-r22/ \
   workers/dispatcher/corpora/ 2>&1 | tail -1
 
 # 2) Deps.
@@ -74,16 +74,16 @@ for prefix in "$CORPORA"/battery/*.part-00; do
 done
 echo "  staged $(ls /tmp/mmllm-cpu/*.bin /tmp/mmllm-cpu/battery/*.bin 2>/dev/null | wc -l) corpus files"
 
-# 4) Reconstruct round-19 full V_net from r10 anchor + r19 sparse delta.
-echo "▶ staging round-19…"
+# 4) Reconstruct round-22 full V_net from r10 anchor + r22 sparse delta.
+echo "▶ staging round-22…"
 ARCHIVE=/tmp/mmllm-cpu/chain-diverse
-mkdir -p "$ARCHIVE/round-19"
+mkdir -p "$ARCHIVE/round-22"
 python3 scripts/_delta_sparse_net.py apply \
   workers/dispatcher/harvest-5way-r10/round-10 \
-  workers/dispatcher/harvest-4way-r19/round-19 \
-  "$ARCHIVE/round-19" 2>&1 | tail -2
-cp workers/dispatcher/harvest-4way-r19/round-19/dense.pt            "$ARCHIVE/round-19/"
-cp workers/dispatcher/harvest-4way-r19/round-19/opt-sparse-net.*.pt "$ARCHIVE/round-19/" 2>/dev/null || true
+  workers/dispatcher/harvest-3way-r22/round-22 \
+  "$ARCHIVE/round-22" 2>&1 | tail -2
+cp workers/dispatcher/harvest-3way-r22/round-22/dense.pt            "$ARCHIVE/round-22/"
+cp workers/dispatcher/harvest-3way-r22/round-22/opt-sparse-net.*.pt "$ARCHIVE/round-22/" 2>/dev/null || true
 
 # 5) Train. Env locks the verified contract (frac=0.5, QUICK ablation,
 # per-step prints, all 32 layers train in expectation).
@@ -91,9 +91,9 @@ export MMLLM_BWD_SKIP_FRAC_NET_ONLY=0.5
 export MMLLM_BWD_SKIP_FRAC_LOCAL=0.0
 export MMLLM_ABLATION_QUICK=true
 export MMLLM_PRINT_EVERY=1
-N_ROUNDS="${MMLLM_N_ROUNDS:-3}"
+N_ROUNDS="${MMLLM_N_ROUNDS:-10}"
 STEPS="${MMLLM_STEPS_PER_ROUND:-7}"
-START_ROUND=19   # chain head this script extends from
+START_ROUND=22   # chain head this script extends from
 END_ROUND=$((START_ROUND + N_ROUNDS))
 echo "▶ training $N_ROUNDS rounds × $STEPS steps (r$START_ROUND → r$END_ROUND)…"
 bash scripts/run_chain_diverse.sh "$N_ROUNDS" "$STEPS"
@@ -127,7 +127,7 @@ cat > "$DEST/meta.json" <<EOF
 {
   "handle": "$HANDLE",
   "wave": "smoke-r$END_ROUND",
-  "extended_from": "workers/dispatcher/harvest-4way-r$START_ROUND/round-$START_ROUND (sparse-delta vs harvest-5way-r10/round-10)",
+  "extended_from": "workers/dispatcher/harvest-3way-r$START_ROUND/round-$START_ROUND (sparse-delta vs harvest-5way-r10/round-10)",
   "round_length_steps": $STEPS,
   "n_rounds_trained": $N_ROUNDS,
   "final_ctrl_bpc": "$FINAL_CTRL",
