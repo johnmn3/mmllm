@@ -15,7 +15,7 @@
 
 set -euo pipefail
 
-HANDLE="${MMLLM_HANDLE:-$(tr -dc 'A-Za-z0-9' </dev/urandom | head -c5)}"
+HANDLE="${MMLLM_HANDLE:-$(python3 -c 'import random,string; print("".join(random.choices(string.ascii_letters+string.digits, k=5)))')}"
 echo "▶ smoke-r22 worker — handle=$HANDLE"
 
 ROOT=$(git rev-parse --show-toplevel)
