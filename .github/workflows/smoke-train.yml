@@ -17,7 +17,7 @@ on:
         default: "7"
 
 # GITHUB_TOKEN with contents:write so the worker can push its
-# claude/smoke-r22-<HANDLE> branch back to origin.
+# claude/smoke-r<END>-<HANDLE> branch back to origin.
 permissions:
   contents: write
 
