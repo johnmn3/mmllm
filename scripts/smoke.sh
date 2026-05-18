@@ -149,6 +149,20 @@ git reset HEAD > /dev/null 2>&1 || true
 git add "$DEST"/delta-sparse-net.*.pt "$DEST"/dense.pt \
         "$DEST"/opt-sparse-net.*.pt "$DEST"/meta.json \
         "$DEST"/round-*.log.jsonl "$DEST"/wall.tsv 2>/dev/null
+# Tripwire: fail loud if anything outside $DEST/ ended up staged.
+# If a future agent "rebuilds the commit" by hand, this prevents the
+# 1-GB-upload retry-storm we saw on smoke-r22-tklXe.
+STAGED_OUTSIDE=$(git diff --cached --name-only | grep -v "^$DEST/" || true)
+if [ -n "$STAGED_OUTSIDE" ]; then
+  echo "ERROR: files staged outside $DEST/ — refusing to commit." >&2
+  echo "$STAGED_OUTSIDE" | head -20 >&2
+  echo "(...and $(echo "$STAGED_OUTSIDE" | wc -l) total)" >&2
+  echo "These are upstream INPUTS, not your deliverable. Run:" >&2
+  echo "  git reset HEAD" >&2
+  echo "  git add $DEST/" >&2
+  echo "  git commit -m '...' && git push -u origin $BR" >&2
+  exit 1
+fi
 git commit -m "smoke-r$END_ROUND $HANDLE — final_ctrl=$FINAL_CTRL"
 for i in 1 2 3 4; do
   if git push -u origin "$BR" 2>&1 | tail -1 | grep -q -E "rejected|hung|error"; then
