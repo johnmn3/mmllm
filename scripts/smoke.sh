@@ -21,22 +21,43 @@ echo "▶ smoke-r22 worker — handle=$HANDLE"
 ROOT=$(git rev-parse --show-toplevel)
 cd "$ROOT"
 
-# 1) Ensure source + prior harvests are on disk.
+# 1) Ensure source + prior harvests + pre-staged corpora are on disk.
 echo "▶ syncing branch state…"
 git fetch origin claude/fim-training-cycle-T3giJ --depth=1 2>&1 | tail -1
 git checkout origin/claude/fim-training-cycle-T3giJ -- \
   src/ scripts/ tests/ CLAUDE.md docs/ \
   workers/dispatcher/harvest-5way-r10/ \
-  workers/dispatcher/harvest-4way-r19/ 2>&1 | tail -1
+  workers/dispatcher/harvest-4way-r19/ \
+  workers/dispatcher/corpora/ 2>&1 | tail -1
 
 # 2) Deps.
 echo "▶ installing deps…"
 pip install -e . --quiet
-pip install datasets --quiet   # not in pyproject yet
 
-# 3) Corpora (idempotent; ~2-3 min cold).
-echo "▶ preparing corpora…"
-bash scripts/prep_chain_diverse_corpora.sh
+# 3) Corpora are pre-staged on the branch (no HF download, no prep step).
+# Bins over GitHub's 100 MB per-file limit are committed as 95 MB
+# .part-NN chunks; cat them back together at /tmp.
+echo "▶ staging corpora from branch (no download)…"
+CORPORA=workers/dispatcher/corpora
+mkdir -p /tmp/mmllm-cpu/battery
+for f in "$CORPORA"/*.bin; do
+  [ -f "$f" ] && cp "$f" "/tmp/mmllm-cpu/$(basename "$f")"
+done
+for f in "$CORPORA"/battery/*.bin; do
+  [ -f "$f" ] && cp "$f" "/tmp/mmllm-cpu/battery/$(basename "$f")"
+done
+# Reassemble split bins from .part-?? chunks.
+for prefix in "$CORPORA"/*.part-00; do
+  [ -f "$prefix" ] || continue
+  base="${prefix%.part-00}"
+  cat "${base}".part-?? > "/tmp/mmllm-cpu/$(basename "$base")"
+done
+for prefix in "$CORPORA"/battery/*.part-00; do
+  [ -f "$prefix" ] || continue
+  base="${prefix%.part-00}"
+  cat "${base}".part-?? > "/tmp/mmllm-cpu/battery/$(basename "$base")"
+done
+echo "  staged $(ls /tmp/mmllm-cpu/*.bin /tmp/mmllm-cpu/battery/*.bin 2>/dev/null | wc -l) corpus files"
 
 # 4) Reconstruct round-19 full V_net from r10 anchor + r19 sparse delta.
 echo "▶ staging round-19…"
