@@ -83,6 +83,8 @@ jobs:
           TARGET_ROUND: ${{ inputs.target_round }}
           # PR_REFS is unset (empty) if the fork-PR step was skipped.
           PR_REFS: ${{ env.PR_REFS || '' }}
+          # gh CLI auth (for enumerating forks of upstream).
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           bash scripts/harvest_action.sh "$TARGET_ROUND" $PR_REFS
           # Pull the new harvest dir name out so the artifact step
