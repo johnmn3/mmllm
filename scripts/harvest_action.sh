@@ -73,6 +73,7 @@ mkdir -p "$WORK"
 
 HANDLES=()
 BIRD_DIRS=()
+KEPT_REFS=()
 for ref in "${BIRD_REFS[@]}"; do
   echo "▶ processing $ref…"
   case "$ref" in
@@ -119,6 +120,7 @@ for ref in "${BIRD_REFS[@]}"; do
   echo "    extracted $N_FILES files"
   HANDLES+=("$HANDLE")
   BIRD_DIRS+=("$WORK/$HANDLE")
+  KEPT_REFS+=("$ref")
 done
 
 N=${#BIRD_DIRS[@]}
@@ -168,7 +170,7 @@ HARVEST_DIR="workers/dispatcher/harvest-${WAYS}-r${TARGET_ROUND}"
 
 # Build meta + results.md via Python: pull each bird's ctrl_bpc + the
 # previous harvest's ctrl_bpc, compute mean/best/Δ, print + write.
-python3 - "$TARGET_ROUND" "$N" "$HARVEST_DIR" "$WORK" "${HANDLES[@]}" :: "${BIRD_REFS[@]}" <<'PYEOF'
+python3 - "$TARGET_ROUND" "$N" "$HARVEST_DIR" "$WORK" "${HANDLES[@]}" :: "${KEPT_REFS[@]}" <<'PYEOF'
 import json, os, sys, glob, datetime
 
 target = int(sys.argv[1])
