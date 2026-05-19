@@ -43,12 +43,35 @@ _rounds_in_branch() {
 # one line per (fork, branch) as "fork|branch".
 UPSTREAM_REPO="${MMLLM_UPSTREAM_REPO:-johnmn3/mmllm}"
 _list_fork_branches() {
-  command -v gh > /dev/null 2>&1 || return 0
-  for fork in $(gh api "repos/${UPSTREAM_REPO}/forks?per_page=100" --jq '.[].full_name' 2>/dev/null); do
-    for br in $(gh api "repos/${fork}/branches?per_page=100" --jq '.[] | select(.name | startswith("claude/train-")) | .name' 2>/dev/null); do
+  if ! command -v gh > /dev/null 2>&1; then
+    echo "  [_list_fork_branches] gh CLI not available — skipping fork scan" >&2
+    return 0
+  fi
+  local forks_out
+  forks_out=$(gh api "repos/${UPSTREAM_REPO}/forks?per_page=100" --jq '.[].full_name' 2>&1)
+  if [ $? -ne 0 ]; then
+    echo "  [_list_fork_branches] gh api forks failed:" >&2
+    echo "  $forks_out" | head -3 >&2
+    return 0
+  fi
+  local n_forks=0
+  for fork in $forks_out; do
+    n_forks=$((n_forks + 1))
+    local br_out
+    br_out=$(gh api "repos/${fork}/branches?per_page=100" --jq '.[] | select(.name | startswith("claude/train-")) | .name' 2>&1)
+    if [ $? -ne 0 ]; then
+      echo "  [_list_fork_branches] gh api branches failed for $fork:" >&2
+      echo "  $br_out" | head -3 >&2
+      continue
+    fi
+    local n_branches=0
+    for br in $br_out; do
+      n_branches=$((n_branches + 1))
       echo "${fork}|${br}"
     done
+    echo "  [_list_fork_branches] $fork → $n_branches claude/train-* branches" >&2
   done
+  echo "  [_list_fork_branches] enumerated $n_forks fork(s) of $UPSTREAM_REPO" >&2
 }
 
 # Helper: fetch (fork, branch) into a local ref so the rest of the
