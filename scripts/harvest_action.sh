@@ -76,12 +76,12 @@ if [ -z "$TARGET_ROUND" ]; then
   echo "▶ auto-detecting latest unharvested round…"
   ROUNDS_FROM_NAME=$( ( git ls-remote origin 'refs/heads/claude/smoke-r*' 2>/dev/null
                         git ls-remote origin 'refs/heads/claude/train-r*' 2>/dev/null ) \
-    | grep -oE '(smoke|train)-r[0-9]+' | sed -E 's/^(smoke|train)-r//')
+    | grep -oE '(smoke|train)-r[0-9]+' | sed -E 's/^(smoke|train)-r//' || true)
   # Stable per-bird branches: claude/train-* that ISN'T the interim
   # claude/train-r<N>-* form. Peek into each tree for chain-design-r<N>.
-  STABLE_BRANCHES=$(git ls-remote origin 'refs/heads/claude/train-*' 2>/dev/null \
+  STABLE_BRANCHES=$( ( git ls-remote origin 'refs/heads/claude/train-*' 2>/dev/null \
     | awk '{print $2}' | sed 's|^refs/heads/||' \
-    | grep -vE '^claude/train-r[0-9]+-')
+    | grep -vE '^claude/train-r[0-9]+-' ) || true)
   ROUNDS_FROM_TREE=""
   for br in $STABLE_BRANCHES; do
     rs=$(_rounds_in_branch "$br")
@@ -131,9 +131,9 @@ while read -r line; do
 done < <( git ls-remote origin "refs/heads/claude/smoke-r${TARGET_ROUND}-*" 2>/dev/null
           git ls-remote origin "refs/heads/claude/train-r${TARGET_ROUND}-*" 2>/dev/null )
 # Stable per-bird branches on origin
-STABLE_BRANCHES=$(git ls-remote origin 'refs/heads/claude/train-*' 2>/dev/null \
+STABLE_BRANCHES=$( ( git ls-remote origin 'refs/heads/claude/train-*' 2>/dev/null \
   | awk '{print $2}' | sed 's|^refs/heads/||' \
-  | grep -vE '^claude/train-r[0-9]+-')
+  | grep -vE '^claude/train-r[0-9]+-' ) || true)
 for br in $STABLE_BRANCHES; do
   rs=$(_rounds_in_branch "$br")
   if echo "$rs" | grep -qx "$TARGET_ROUND"; then
