@@ -74,17 +74,28 @@ mkdir -p "$WORK"
 HANDLES=()
 BIRD_DIRS=()
 for ref in "${BIRD_REFS[@]}"; do
+  echo "▶ processing $ref…"
   case "$ref" in
     origin/claude/*)
       BRANCH="${ref#origin/}"
-      echo "▶ fetching $BRANCH…"
+      echo "    fetching $BRANCH…"
       git fetch origin "$BRANCH" --depth=1 2>&1 | tail -1 || true
       ;;
   esac
-  # Find the bird's handle by inspecting the tree
-  HANDLE=$(git ls-tree -r --name-only "$ref" 2>/dev/null \
+  # Resolve ref → tree. If ls-tree fails (PR fetch went sideways,
+  # malformed ref, etc.) skip with a visible error instead of dying.
+  TREE=""
+  if ! TREE=$(git ls-tree -r --name-only "$ref" 2>&1); then
+    echo "  WARN: git ls-tree failed for $ref:" >&2
+    echo "  $TREE" >&2
+    echo "  skipping" >&2
+    continue
+  fi
+  # Find the bird's handle. Pipeline wrapped in '|| true' so a no-match
+  # (empty HANDLE) doesn't trigger set -e via pipefail.
+  HANDLE=$(echo "$TREE" \
     | grep -oE "^workers/[^/]+/chain-design-r${TARGET_ROUND}/" \
-    | head -1 | sed 's|^workers/||;s|/.*||')
+    | head -1 | sed 's|^workers/||;s|/.*||' || true)
   if [ -z "$HANDLE" ]; then
     echo "  WARN: $ref has no workers/<HANDLE>/chain-design-r${TARGET_ROUND}/ — skipping"
     continue
