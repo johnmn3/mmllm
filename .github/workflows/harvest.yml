@@ -1,4 +1,4 @@
-name: harvest
+name: harvest sporks
 
 on:
   # Manual: pick a round + optional fork PRs to merge in.

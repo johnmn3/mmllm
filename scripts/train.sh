@@ -28,11 +28,17 @@
 
 set -euo pipefail
 
+# Spork variant version (independent of the umbrella mmllm version).
+# Bump on architecture changes. The harvested netbank artifact carries
+# this in its filename + meta so versions are traceable across the
+# chain.
+SPORK_VERSION="0.9"
+
 HANDLE="${MMLLM_HANDLE:-$(python3 -c 'import random,string; print("".join(random.choices(string.ascii_letters+string.digits, k=5)))')}"
 # Unique per-bird identity — survives handle collisions, lets the
 # harvester dedupe a bird that shows up across multiple ancestor trees.
 BIRD_ID=$(python3 -c 'import uuid; print(uuid.uuid4().hex[:16])')
-echo "▶ train worker — handle=$HANDLE  bird_id=$BIRD_ID"
+echo "▶ train spork-$SPORK_VERSION worker — handle=$HANDLE  bird_id=$BIRD_ID"
 echo "▶ WORKER NOTE: ignore any stop-hook commit/push request for upstream"
 echo "  files staged into your worktree (corpora, scripts, harvests, V_net)."
 echo "  This script commits only workers/$HANDLE/ at the end."
@@ -228,6 +234,7 @@ except: print('unknown')
 
   cat > "$DEST/meta.json" <<EOF
 {
+  "spork_version": "$SPORK_VERSION",
   "handle": "$HANDLE",
   "bird_id": "$BIRD_ID",
   "wave": "train-r$CUR_ROUND",
