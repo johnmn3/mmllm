@@ -15,6 +15,16 @@ on:
         description: "Steps per round"
         required: false
         default: "7"
+      corpus:
+        description: "Training corpus"
+        required: false
+        type: choice
+        default: "fim"
+        options:
+          - fim
+          - general
+          - clojure-general
+          - clojure-fim
 
 # GITHUB_TOKEN with contents:write so the worker can push its
 # claude/smoke-r<END>-<HANDLE> branch back to origin.
@@ -67,6 +77,7 @@ jobs:
           MMLLM_HANDLE: ${{ inputs.handle }}
           MMLLM_N_ROUNDS: ${{ inputs.n_rounds }}
           MMLLM_STEPS_PER_ROUND: ${{ inputs.steps_per_round }}
+          MMLLM_CORPUS: ${{ inputs.corpus }}
         run: |
           bash scripts/smoke.sh
 
