@@ -27,15 +27,39 @@ TARGET_ROUND="${1:-}"
 shift || true
 EXTRA_REFS=("$@")
 
+# Helper: peek at a remote branch tree (fetches if not local) and emit
+# every chain-design-r<N>/ round number present. Used by both
+# auto-detect (round → ?) and discovery (round → branches).
+_rounds_in_branch() {
+  local br="$1"
+  git fetch origin "$br" --depth=1 >/dev/null 2>&1 || return 0
+  git ls-tree -r --name-only "origin/$br" 2>/dev/null \
+    | grep -oE 'chain-design-r[0-9]+' | sed 's/chain-design-r//' | sort -un
+}
+
 # --- 1) Auto-detect target round if not specified --------------------
-# We match both the legacy claude/smoke-r<N>-* naming and the current
-# claude/train-r<N>-* naming so historical birds remain harvestable.
+# Branch flavors we accept:
+#   claude/smoke-r<N>-*           legacy, round in name
+#   claude/train-r<N>-*           interim, round in name
+#   claude/train-<bird_id>-<H>    current stable per-bird, round in tree
 if [ -z "$TARGET_ROUND" ]; then
   echo "▶ auto-detecting latest unharvested round…"
-  ALL_ROUNDS=$( ( git ls-remote origin 'refs/heads/claude/smoke-r*' 2>/dev/null
-                  git ls-remote origin 'refs/heads/claude/train-r*' 2>/dev/null ) \
-    | grep -oE '(smoke|train)-r[0-9]+' | sed -E 's/^(smoke|train)-r//' | sort -un)
-  echo "  train/smoke-r rounds on origin: $(echo "$ALL_ROUNDS" | tr '\n' ' ')"
+  ROUNDS_FROM_NAME=$( ( git ls-remote origin 'refs/heads/claude/smoke-r*' 2>/dev/null
+                        git ls-remote origin 'refs/heads/claude/train-r*' 2>/dev/null ) \
+    | grep -oE '(smoke|train)-r[0-9]+' | sed -E 's/^(smoke|train)-r//')
+  # Stable per-bird branches: claude/train-* that ISN'T the interim
+  # claude/train-r<N>-* form. Peek into each tree for chain-design-r<N>.
+  STABLE_BRANCHES=$(git ls-remote origin 'refs/heads/claude/train-*' 2>/dev/null \
+    | awk '{print $2}' | sed 's|^refs/heads/||' \
+    | grep -vE '^claude/train-r[0-9]+-')
+  ROUNDS_FROM_TREE=""
+  for br in $STABLE_BRANCHES; do
+    rs=$(_rounds_in_branch "$br")
+    [ -n "$rs" ] && ROUNDS_FROM_TREE="$ROUNDS_FROM_TREE $rs"
+  done
+  ALL_ROUNDS=$( ( echo "$ROUNDS_FROM_NAME"; echo "$ROUNDS_FROM_TREE" ) \
+    | tr ' ' '\n' | grep -E '^[0-9]+$' | sort -un)
+  echo "  rounds visible on origin: $(echo "$ALL_ROUNDS" | tr '\n' ' ')"
   for R in $(echo "$ALL_ROUNDS" | tac); do
     if ! compgen -G "workers/dispatcher/harvest-*-r${R}" > /dev/null 2>&1; then
       TARGET_ROUND=$R
@@ -51,13 +75,27 @@ fi
 echo "▶ target round: $TARGET_ROUND"
 
 # --- 2) Discover bird branches for this round ------------------------
-# Match both claude/smoke-r<N>-* (legacy) and claude/train-r<N>-* (new).
+# Three sources:
+#   (a) claude/smoke-r<T>-*  legacy branches whose name encodes T
+#   (b) claude/train-r<T>-*  interim branches whose name encodes T
+#   (c) claude/train-<id>-*  stable per-bird branches whose latest
+#                            commit's tree contains chain-design-r<T>/
 BIRD_REFS=()
 while read -r line; do
   ref=$(echo "$line" | awk '{print $2}' | sed 's|^refs/heads/|origin/|')
   [ -n "$ref" ] && BIRD_REFS+=("$ref")
 done < <( git ls-remote origin "refs/heads/claude/smoke-r${TARGET_ROUND}-*" 2>/dev/null
           git ls-remote origin "refs/heads/claude/train-r${TARGET_ROUND}-*" 2>/dev/null )
+# Stable per-bird branches: scan trees for chain-design-r<TARGET>/
+STABLE_BRANCHES=$(git ls-remote origin 'refs/heads/claude/train-*' 2>/dev/null \
+  | awk '{print $2}' | sed 's|^refs/heads/||' \
+  | grep -vE '^claude/train-r[0-9]+-')
+for br in $STABLE_BRANCHES; do
+  rs=$(_rounds_in_branch "$br")
+  if echo "$rs" | grep -qx "$TARGET_ROUND"; then
+    BIRD_REFS+=("origin/$br")
+  fi
+done
 
 for ref in "${EXTRA_REFS[@]}"; do
   BIRD_REFS+=("$ref")
@@ -194,17 +232,42 @@ def safe_float(x):
     try: return float(x)
     except: return None
 
-# Per-bird ctrl_bpc from each meta.json
+# Per-bird ctrl_bpc + identity + step count from each meta.json
 birds = []
+direct_contributions = []
+ancestor_set = set()
 for h, br in zip(handles, branches):
     meta_path = f"{work}/{h}/meta.json"
     bpc = None
+    bird_id = None
+    n_steps = None
+    extended_from = None
     try:
         m = json.load(open(meta_path))
         bpc = safe_float(m.get("final_ctrl_bpc"))
+        bird_id = m.get("bird_id")
+        n_steps = m.get("n_total_steps")
+        if n_steps is None:
+            # Older meta — derive from n_rounds_trained × round_length_steps
+            nr = m.get("n_rounds_trained")
+            rs = m.get("round_length_steps")
+            if isinstance(nr, (int, float)) and isinstance(rs, (int, float)):
+                n_steps = int(nr) * int(rs)
+        extended_from = m.get("extended_from_harvest")
     except Exception:
         pass
     birds.append({"handle": h, "branch": br, "ctrl_bpc": bpc})
+    # Fall back to (handle, branch) as identity if no bird_id was set
+    # (legacy birds). That's still unique enough for dedupe across runs.
+    direct_contributions.append({
+        "bird_id": bird_id or f"legacy:{br}",
+        "handle":  h,
+        "branch":  br,
+        "n_steps": n_steps,
+        "ctrl_bpc": bpc,
+    })
+    if extended_from:
+        ancestor_set.add(extended_from)
 
 valid_bpcs = [b["ctrl_bpc"] for b in birds if b["ctrl_bpc"] is not None]
 mean_bpc = sum(valid_bpcs) / len(valid_bpcs) if valid_bpcs else None
@@ -234,6 +297,57 @@ for d in sorted(glob.glob("workers/dispatcher/harvest-*-r*"),
     prev = {"round": n, "dir": d, "mean": mean, "best": best}
     break
 
+# Walk ancestor harvest tree(s), deduping by bird_id, summing steps.
+# Handles multi-tree merges (multiple ancestor_harvests per harvest)
+# and legacy harvests (no direct_contributions field → 0 contribution
+# from that level, but ancestor walk continues).
+ancestor_harvests = sorted(ancestor_set)
+
+def _walk_steps(start_dirs):
+    visited_ids = set()
+    visited_birds = []  # for transparency in meta
+    queue = list(start_dirs)
+    seen_dirs = set()
+    while queue:
+        d = queue.pop()
+        if d in seen_dirs: continue
+        seen_dirs.add(d)
+        meta_p = f"{d}/harvest_meta.json"
+        if not os.path.exists(meta_p): continue
+        try: m = json.load(open(meta_p))
+        except: continue
+        for c in m.get("direct_contributions", []):
+            bid = c.get("bird_id")
+            steps = c.get("n_steps")
+            if not bid or steps is None: continue
+            if bid in visited_ids: continue
+            visited_ids.add(bid)
+            visited_birds.append({"bird_id": bid, "handle": c.get("handle"),
+                                  "n_steps": steps, "from": d})
+        # Follow ancestors (list-form). Legacy schema may have
+        # 'previous_harvest.dir' as a single scalar — fall back.
+        ancs = m.get("ancestor_harvests")
+        if not ancs:
+            ph = m.get("previous_harvest")
+            if isinstance(ph, dict) and ph.get("dir"):
+                ancs = [ph["dir"]]
+        for a in (ancs or []):
+            queue.append(a)
+    return visited_ids, visited_birds
+
+# Account for this harvest's own contributions first, then walk ancestors.
+own_ids = {c["bird_id"]: c.get("n_steps") or 0 for c in direct_contributions}
+own_steps = sum(s for s in own_ids.values())
+anc_ids, anc_birds = _walk_steps(ancestor_harvests)
+# Dedupe: remove from the ancestor sum any bird_id that also appears
+# in this harvest's direct contributions (shouldn't happen normally,
+# but defensive).
+dedup_anc_steps = sum(b["n_steps"] for b in anc_birds
+                      if b["bird_id"] not in own_ids)
+cumulative_total_steps = own_steps + dedup_anc_steps
+cumulative_unique_birds = len(own_ids) + sum(
+    1 for b in anc_birds if b["bird_id"] not in own_ids)
+
 # Per-round trajectory from the best bird's logs (lowest ctrl_bpc)
 best_bird = min((b for b in birds if b["ctrl_bpc"] is not None),
                 key=lambda b: b["ctrl_bpc"], default=None)
@@ -262,6 +376,10 @@ meta_out = {
     "worker_ctrl_bpc_mean": round(mean_bpc, 4) if mean_bpc is not None else None,
     "worker_ctrl_bpc_best": round(best_bpc, 4) if best_bpc is not None else None,
     "previous_harvest": prev,
+    "direct_contributions": direct_contributions,
+    "ancestor_harvests": ancestor_harvests,
+    "cumulative_total_steps": cumulative_total_steps,
+    "cumulative_unique_birds": cumulative_unique_birds,
     "harvested_at": datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
     "harvester": "scripts/harvest_action.sh (GH Action)",
     "note": "Lean harvest — sparse deltas + averaged dense only, no opt-state.",
@@ -303,6 +421,15 @@ if trajectory:
         dn = f"{t['delta_net']:+.4f}" if t["delta_net"] is not None else "—"
         lines.append(f"| {t['round']} | {ws} | {cb} | {dn} |")
 
+lines.append(f"\n## Cumulative training contribution\n")
+lines.append(f"- This harvest: **{own_steps} steps** from {len(own_ids)} bird(s)")
+lines.append(f"- Across full ancestry (deduped by bird_id): "
+             f"**{cumulative_total_steps} steps** from {cumulative_unique_birds} unique bird(s)")
+if ancestor_harvests:
+    lines.append("- Ancestor harvest(s):")
+    for a in ancestor_harvests:
+        lines.append(f"  - `{a}`")
+
 lines.append(f"\n## Output\n")
 lines.append(f"`{harvest_dir}/round-{target}/`:")
 lines.append(f"- `delta-sparse-net.{{0..31}}.pt` (row-aware FedAvg merge of {n_workers} workers)")
@@ -329,6 +456,11 @@ if prev and prev["mean"] is not None and mean_bpc is not None:
     print(f"    mean: {prev['mean']:.4f} → {mean_bpc:.4f}  (Δ {mean_bpc - prev['mean']:+.4f})")
     if best_bpc and prev["best"]:
         print(f"    best: {prev['best']:.4f} → {best_bpc:.4f}  (Δ {best_bpc - prev['best']:+.4f})")
+print()
+print(f"  this harvest contributed:    {own_steps:>6} steps from {len(own_ids)} bird(s)")
+print(f"  cumulative across ancestry:  {cumulative_total_steps:>6} steps from {cumulative_unique_birds} unique bird(s)")
+if ancestor_harvests:
+    print(f"  ancestor harvest(s):         {', '.join(ancestor_harvests)}")
 print("═" * 60)
 PYEOF
 

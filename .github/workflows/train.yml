@@ -1,6 +1,7 @@
 name: train
 
 on:
+  # Manual trigger via the Actions tab. Inputs are the per-bird knobs.
   workflow_dispatch:
     inputs:
       handle:
@@ -25,18 +26,29 @@ on:
           - general
           - clojure-general
           - clojure-fim
+  # Cron auto-train: every 6 hours. Workflow inputs aren't available
+  # from the schedule trigger — we use the defaults baked into the
+  # script (n_rounds=5, steps=7, corpus=fim, random handle). Each tick
+  # auto-detects the latest harvest on origin/main as the chain head,
+  # so the bird always starts from the freshest available state.
+  schedule:
+    - cron: "0 */6 * * *"
 
-# GITHUB_TOKEN with contents:write so the worker can push its
-# claude/train-r<END>-<HANDLE> branch back to origin.
+# GITHUB_TOKEN needs contents:write to push the bird branch and
+# pull-requests:write to open + update the per-bird PR.
 permissions:
   contents: write
+  pull-requests: write
 
 jobs:
   train:
     runs-on: ubuntu-latest
-    # The default 6-hour timeout is generous; cap at 90 min to fail fast
-    # if a wave hangs.
-    timeout-minutes: 90
+    # GH free-tier cap is 6 hours per job; we use the full window so
+    # birds with longer N_ROUNDS don't time out partway through.
+    # Combined with the incremental per-round push in train.sh, even
+    # if the runner is killed at the timeout the latest completed
+    # round is already on origin.
+    timeout-minutes: 360
 
     steps:
       - name: Checkout upstream main (works on forks too)
