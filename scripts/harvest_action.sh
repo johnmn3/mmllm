@@ -205,24 +205,28 @@ valid_bpcs = [b["ctrl_bpc"] for b in birds if b["ctrl_bpc"] is not None]
 mean_bpc = sum(valid_bpcs) / len(valid_bpcs) if valid_bpcs else None
 best_bpc = min(valid_bpcs) if valid_bpcs else None
 
-# Find the previous harvest (highest harvest-*-r<N> with N < target)
+# Find the previous harvest (highest harvest-*-r<N> with N < target).
+# Sort by extracted round number, not lexicographically — otherwise
+# harvest-5way-r10 sorts before harvest-3way-r22 in string order.
+def _round_of(d):
+    try: return int(d.rsplit("-r", 1)[-1])
+    except: return -1
 prev = None
-for d in sorted(glob.glob("workers/dispatcher/harvest-*-r*"), reverse=True):
-    n = d.rsplit("-r", 1)[-1]
-    try: n = int(n)
-    except: continue
-    if n >= target: continue
+for d in sorted(glob.glob("workers/dispatcher/harvest-*-r*"),
+                key=_round_of, reverse=True):
+    n = _round_of(d)
+    if n < 0 or n >= target: continue
     meta = f"{d}/harvest_meta.json"
     if not os.path.exists(meta): continue
     try:
         prev_meta = json.load(open(meta))
     except: continue
-    prev = {
-        "round": n,
-        "dir": d,
-        "mean": safe_float(prev_meta.get("worker_ctrl_bpc_mean")),
-        "best": safe_float(prev_meta.get("worker_ctrl_bpc_best")),
-    }
+    mean = safe_float(prev_meta.get("worker_ctrl_bpc_mean"))
+    best = safe_float(prev_meta.get("worker_ctrl_bpc_best"))
+    # Skip older harvests that predate the worker_ctrl_bpc_mean field —
+    # they have no comparable number for our delta.
+    if mean is None and best is None: continue
+    prev = {"round": n, "dir": d, "mean": mean, "best": best}
     break
 
 # Per-round trajectory from the best bird's logs (lowest ctrl_bpc)
