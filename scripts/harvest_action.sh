@@ -20,6 +20,11 @@
 
 set -euo pipefail
 
+# Spork variant version — should match train.sh's SPORK_VERSION. The
+# harvested netbank artifact carries this in a `spork-<ver>-r<round>.json`
+# manifest at the top of each harvest dir.
+SPORK_VERSION="0.9"
+
 ROOT=$(git rev-parse --show-toplevel)
 cd "$ROOT"
 
@@ -180,22 +185,21 @@ done
 echo "▶ scanning forks of $UPSTREAM_REPO for round-$TARGET_ROUND birds…"
 while IFS='|' read -r fork br; do
   [ -z "$fork" ] && continue
-  local_ref=$(_fetch_fork_branch "$fork" "$br") || continue
+  echo "  checking $fork/$br…"
+  if ! local_ref=$(_fetch_fork_branch "$fork" "$br"); then
+    echo "    skip — _fetch_fork_branch failed"
+    continue
+  fi
+  # Test in if-condition context so set -e doesn't fire on no-match.
   if git ls-tree -r --name-only "$local_ref" 2>/dev/null \
       | grep -qE "^workers/[^/]+/chain-design-r${TARGET_ROUND}/"; then
     BIRD_REFS+=("$local_ref")
-    echo "  fork bird: $fork/$br"
+    echo "    ✓ fork bird at canonical path"
   else
-    # Help diagnose mismatches: show what chain-design-r* paths
-    # the bird's tree actually has.
-    bird_rounds=$(git ls-tree -r --name-only "$local_ref" 2>/dev/null \
+    rounds_at=$(git ls-tree -r --name-only "$local_ref" 2>/dev/null \
       | sed -nE 's|^workers/[^/]+/chain-design-r([0-9]+)/.*|\1|p' \
-      | sort -un | tr '\n' ' ')
-    other_paths=$(git ls-tree -r --name-only "$local_ref" 2>/dev/null \
-      | grep -E 'chain-design-r[0-9]+' \
-      | grep -vE '^workers/[^/]+/chain-design-r[0-9]+/' \
-      | head -3 | tr '\n' ' ')
-    echo "  fork skip: $fork/$br — has bird rounds [${bird_rounds:-none}], other chain-design-r paths: ${other_paths:-(none)}"
+      | sort -un | tr '\n' ' ' || true)
+    echo "    skip — no chain-design-r${TARGET_ROUND}/ at canonical path (tree has: ${rounds_at:-none})"
   fi
 done < <(_list_fork_branches)
 
@@ -315,16 +319,17 @@ HARVEST_DIR="workers/dispatcher/harvest-${WAYS}-r${TARGET_ROUND}"
 
 # Build meta + results.md via Python: pull each bird's ctrl_bpc + the
 # previous harvest's ctrl_bpc, compute mean/best/Δ, print + write.
-python3 - "$TARGET_ROUND" "$N" "$HARVEST_DIR" "$WORK" "${HANDLES[@]}" :: "${KEPT_REFS[@]}" <<'PYEOF'
+python3 - "$SPORK_VERSION" "$TARGET_ROUND" "$N" "$HARVEST_DIR" "$WORK" "${HANDLES[@]}" :: "${KEPT_REFS[@]}" <<'PYEOF'
 import json, os, sys, glob, datetime
 
-target = int(sys.argv[1])
-n_workers = int(sys.argv[2])
-harvest_dir = sys.argv[3]
-work = sys.argv[4]
+spork_version = sys.argv[1]
+target = int(sys.argv[2])
+n_workers = int(sys.argv[3])
+harvest_dir = sys.argv[4]
+work = sys.argv[5]
 
 # Split remaining args at "::" sentinel into handles + branches
-rest = sys.argv[5:]
+rest = sys.argv[6:]
 sep = rest.index("::")
 handles = rest[:sep]
 branches = rest[sep+1:]
@@ -471,6 +476,7 @@ if best_bird:
 
 # Write harvest_meta.json
 meta_out = {
+    "spork_version": spork_version,
     "target_round": target,
     "n_workers": n_workers,
     "wave": f"train-r{target}",
@@ -488,6 +494,31 @@ meta_out = {
 }
 with open(f"{harvest_dir}/harvest_meta.json", "w") as f:
     json.dump(meta_out, f, indent=2)
+
+# Write the spork manifest file. Named with the spork version + target
+# round so the artifact is identifiable on disk and in tarballs.
+# Points at the netbank components inside this harvest dir.
+spork_manifest = {
+    "spork_version": spork_version,
+    "round": target,
+    "harvested_at": meta_out["harvested_at"],
+    "n_workers": n_workers,
+    "worker_ctrl_bpc_mean": meta_out.get("worker_ctrl_bpc_mean"),
+    "worker_ctrl_bpc_best": meta_out.get("worker_ctrl_bpc_best"),
+    "cumulative_total_steps": cumulative_total_steps,
+    "cumulative_unique_birds": cumulative_unique_birds,
+    "netbank_files": {
+        "dense":  f"round-{target}/dense.pt",
+        "delta_sparse_net": [f"round-{target}/delta-sparse-net.{i}.pt" for i in range(32)],
+        "delta_sparse_net_meta": f"round-{target}/delta-sparse-net.meta.pt",
+        "reference_anchor": "workers/dispatcher/harvest-5way-r10/round-10",
+    },
+    "ancestor_harvests": ancestor_harvests,
+    "harvester": meta_out["harvester"],
+}
+manifest_name = f"spork-{spork_version}-r{target}.json"
+with open(f"{harvest_dir}/{manifest_name}", "w") as f:
+    json.dump(spork_manifest, f, indent=2)
 
 # Write results.md
 lines = []
