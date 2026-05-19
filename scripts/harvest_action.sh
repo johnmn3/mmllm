@@ -139,38 +139,163 @@ torch.save(avg, f"{out}/dense.pt")
 print(f"  dense.pt averaged from {len(denses)}/{len(birds)} birds → {out}/dense.pt ({os.path.getsize(out+'/dense.pt')/1e6:.1f} MB)")
 PYEOF
 
-# --- 5) Harvest meta -------------------------------------------------
+# --- 5) Harvest meta + results.md -----------------------------------
 HARVEST_DIR="workers/dispatcher/harvest-${WAYS}-r${TARGET_ROUND}"
 
-# Pull each bird's ctrl_bpc + branch from its meta.json
-BIRDS_JSON="["
-for i in "${!HANDLES[@]}"; do
-  h="${HANDLES[$i]}"
-  br="${BIRD_REFS[$i]}"
-  ctrl=$(python3 -c "
-import json
-try:
-    print(json.load(open('$WORK/$h/meta.json')).get('final_ctrl_bpc', 'unknown'))
-except: print('unknown')
-" 2>/dev/null)
-  [ $i -gt 0 ] && BIRDS_JSON+=","
-  BIRDS_JSON+="
-    {\"handle\": \"$h\", \"branch\": \"$br\", \"ctrl_bpc\": \"$ctrl\"}"
-done
-BIRDS_JSON+="
-  ]"
+# Build meta + results.md via Python: pull each bird's ctrl_bpc + the
+# previous harvest's ctrl_bpc, compute mean/best/Δ, print + write.
+python3 - "$TARGET_ROUND" "$N" "$HARVEST_DIR" "$WORK" "${HANDLES[@]}" :: "${BIRD_REFS[@]}" <<'PYEOF'
+import json, os, sys, glob, datetime
 
-cat > "$HARVEST_DIR/harvest_meta.json" <<EOF
-{
-  "target_round": $TARGET_ROUND,
-  "n_workers": $N,
-  "wave": "smoke-r${TARGET_ROUND}",
-  "workers": $BIRDS_JSON,
-  "harvested_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
-  "harvester": "scripts/harvest_action.sh (GH Action)",
-  "note": "Lean harvest — sparse deltas + averaged dense only, no opt-state. Bird branches retain opt-state if needed for warmstart."
+target = int(sys.argv[1])
+n_workers = int(sys.argv[2])
+harvest_dir = sys.argv[3]
+work = sys.argv[4]
+
+# Split remaining args at "::" sentinel into handles + branches
+rest = sys.argv[5:]
+sep = rest.index("::")
+handles = rest[:sep]
+branches = rest[sep+1:]
+assert len(handles) == len(branches) == n_workers
+
+def safe_float(x):
+    try: return float(x)
+    except: return None
+
+# Per-bird ctrl_bpc from each meta.json
+birds = []
+for h, br in zip(handles, branches):
+    meta_path = f"{work}/{h}/meta.json"
+    bpc = None
+    try:
+        m = json.load(open(meta_path))
+        bpc = safe_float(m.get("final_ctrl_bpc"))
+    except Exception:
+        pass
+    birds.append({"handle": h, "branch": br, "ctrl_bpc": bpc})
+
+valid_bpcs = [b["ctrl_bpc"] for b in birds if b["ctrl_bpc"] is not None]
+mean_bpc = sum(valid_bpcs) / len(valid_bpcs) if valid_bpcs else None
+best_bpc = min(valid_bpcs) if valid_bpcs else None
+
+# Find the previous harvest (highest harvest-*-r<N> with N < target)
+prev = None
+for d in sorted(glob.glob("workers/dispatcher/harvest-*-r*"), reverse=True):
+    n = d.rsplit("-r", 1)[-1]
+    try: n = int(n)
+    except: continue
+    if n >= target: continue
+    meta = f"{d}/harvest_meta.json"
+    if not os.path.exists(meta): continue
+    try:
+        prev_meta = json.load(open(meta))
+    except: continue
+    prev = {
+        "round": n,
+        "dir": d,
+        "mean": safe_float(prev_meta.get("worker_ctrl_bpc_mean")),
+        "best": safe_float(prev_meta.get("worker_ctrl_bpc_best")),
+    }
+    break
+
+# Per-round trajectory from the best bird's logs (lowest ctrl_bpc)
+best_bird = min((b for b in birds if b["ctrl_bpc"] is not None),
+                key=lambda b: b["ctrl_bpc"], default=None)
+trajectory = []
+if best_bird:
+    log_files = sorted(glob.glob(f"{work}/{best_bird['handle']}/round-*.log.jsonl"))
+    for lf in log_files:
+        r = int(lf.rsplit("round-", 1)[-1].split(".")[0])
+        wall, ctrl, dnet = None, None, None
+        for line in open(lf):
+            try: e = json.loads(line)
+            except: continue
+            if e.get("event") == "ablation":
+                ctrl = e.get("control_bpc")
+                dnet = e.get("delta_net")
+                wall = e.get("wall_s")
+        if ctrl is not None:
+            trajectory.append({"round": r, "wall_s": wall, "ctrl_bpc": ctrl, "delta_net": dnet})
+
+# Write harvest_meta.json
+meta_out = {
+    "target_round": target,
+    "n_workers": n_workers,
+    "wave": f"smoke-r{target}",
+    "workers": birds,
+    "worker_ctrl_bpc_mean": round(mean_bpc, 4) if mean_bpc is not None else None,
+    "worker_ctrl_bpc_best": round(best_bpc, 4) if best_bpc is not None else None,
+    "previous_harvest": prev,
+    "harvested_at": datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
+    "harvester": "scripts/harvest_action.sh (GH Action)",
+    "note": "Lean harvest — sparse deltas + averaged dense only, no opt-state.",
 }
-EOF
+with open(f"{harvest_dir}/harvest_meta.json", "w") as f:
+    json.dump(meta_out, f, indent=2)
+
+# Write results.md
+lines = []
+lines.append(f"# harvest-{n_workers}way-r{target} — sparse-delta merge of {n_workers} birds\n")
+lines.append("## Worker endpoints\n")
+lines.append("| handle | branch | R{0} ctrl_bpc |".format(target))
+lines.append("|--------|--------|--------------:|")
+for b in sorted(birds, key=lambda x: (x["ctrl_bpc"] is None, x["ctrl_bpc"])):
+    bpc_str = f"{b['ctrl_bpc']:.4f}" if b["ctrl_bpc"] is not None else "—"
+    lines.append(f"| {b['handle']} | {b['branch']} | {bpc_str} |")
+if mean_bpc is not None:
+    lines.append(f"| **mean** | | **{mean_bpc:.4f}** |")
+    lines.append(f"| **best** | | **{best_bpc:.4f}** |")
+
+if prev and prev["mean"] is not None and mean_bpc is not None:
+    delta_mean = mean_bpc - prev["mean"]
+    delta_best = best_bpc - prev["best"] if (best_bpc and prev["best"]) else None
+    lines.append(f"\n## Chain progression R{prev['round']} → R{target}\n")
+    lines.append(f"Previous harvest: `{prev['dir']}`\n")
+    lines.append("| metric         | prior          | this           | Δ        |")
+    lines.append("|----------------|---------------:|---------------:|---------:|")
+    lines.append(f"| ctrl_bpc mean  | {prev['mean']:.4f}         | {mean_bpc:.4f}         | {delta_mean:+.4f} |")
+    if delta_best is not None:
+        lines.append(f"| ctrl_bpc best  | {prev['best']:.4f}         | {best_bpc:.4f}         | {delta_best:+.4f} |")
+
+if trajectory:
+    lines.append(f"\n## Per-round trajectory (best bird: {best_bird['handle']})\n")
+    lines.append("| round | wall_s | ctrl_bpc | Δ_net   |")
+    lines.append("|-------|-------:|---------:|--------:|")
+    for t in trajectory:
+        ws = f"{t['wall_s']:.0f}" if t["wall_s"] is not None else "—"
+        cb = f"{t['ctrl_bpc']:.4f}" if t["ctrl_bpc"] is not None else "—"
+        dn = f"{t['delta_net']:+.4f}" if t["delta_net"] is not None else "—"
+        lines.append(f"| {t['round']} | {ws} | {cb} | {dn} |")
+
+lines.append(f"\n## Output\n")
+lines.append(f"`{harvest_dir}/round-{target}/`:")
+lines.append(f"- `delta-sparse-net.{{0..31}}.pt` (row-aware FedAvg merge of {n_workers} workers)")
+lines.append(f"- `dense.pt` (averaged across {n_workers} birds)")
+lines.append(f"- Reference for delta encoding: `workers/dispatcher/harvest-5way-r10/round-10`\n")
+
+with open(f"{harvest_dir}/results.md", "w") as f:
+    f.write("\n".join(lines) + "\n")
+
+# Print summary to stdout for the workflow log
+print()
+print("═" * 60)
+print(f"  HARVEST SUMMARY — r{target} ({n_workers} birds)")
+print("═" * 60)
+for b in sorted(birds, key=lambda x: (x["ctrl_bpc"] is None, x["ctrl_bpc"])):
+    bpc_str = f"{b['ctrl_bpc']:.4f}" if b["ctrl_bpc"] is not None else "—"
+    print(f"  {b['handle']:8s}  ctrl_bpc={bpc_str}  ({b['branch']})")
+if mean_bpc is not None:
+    print(f"  {'mean':8s}  ctrl_bpc={mean_bpc:.4f}")
+    print(f"  {'best':8s}  ctrl_bpc={best_bpc:.4f}")
+if prev and prev["mean"] is not None and mean_bpc is not None:
+    print()
+    print(f"  vs r{prev['round']} ({prev['dir']}):")
+    print(f"    mean: {prev['mean']:.4f} → {mean_bpc:.4f}  (Δ {mean_bpc - prev['mean']:+.4f})")
+    if best_bpc and prev["best"]:
+        print(f"    best: {prev['best']:.4f} → {best_bpc:.4f}  (Δ {best_bpc - prev['best']:+.4f})")
+print("═" * 60)
+PYEOF
 
 echo "▶ harvest done:"
 echo "  dir: $HARVEST_DIR"

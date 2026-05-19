@@ -1,0 +1,18 @@
+{
+  "target_round": 22,
+  "n_workers": 3,
+  "workers": [
+    {"handle": "Qblru", "branch": "claude/smoke-r22-Qblru", "ctrl_bpc": 1.2928},
+    {"handle": "tklXe", "branch": "claude/smoke-r22-tklXe", "ctrl_bpc": 1.3138},
+    {"handle": "pGOfE", "branch": "claude/smoke-r22-pGOfE", "ctrl_bpc": 1.3421}
+  ],
+  "worker_ctrl_bpc_mean": 1.3162,
+  "worker_ctrl_bpc_best": 1.2928,
+  "extended_from": "workers/dispatcher/harvest-4way-r19/round-19 (sparse-delta vs harvest-5way-r10/round-10)",
+  "wave": "smoke-r22",
+  "recipe": "length-7 rounds, bwd-skip-net=0.5 (CORRECT), 9-corpus mix",
+  "reference_dir": "workers/dispatcher/harvest-5way-r10/round-10",
+  "round_length_steps": 7,
+  "n_rounds_trained": 3,
+  "note": "All 3 birds trained at MMLLM_BWD_SKIP_FRAC_NET_ONLY=0.5 — full 32-layer training. ctrl_bpc dropped 1.9561 (r19) → 1.3162 (r22) = -0.64 across 3 rounds. Qblru pushed without opt-sparse-net; opt-state averaged from tklXe + pGOfE only. A 4th bird (XvNVp) crashed without producing r22 output; a 5th was reported crashed."
+}

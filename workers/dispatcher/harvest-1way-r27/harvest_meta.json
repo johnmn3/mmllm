@@ -1,0 +1,11 @@
+{
+  "target_round": 27,
+  "n_workers": 1,
+  "wave": "smoke-r27",
+  "workers": [
+    {"handle": "kbfTW", "branch": "origin/claude/smoke-r27-kbfTW", "ctrl_bpc": "1.1133"}
+  ],
+  "harvested_at": "2026-05-19T01:04:45Z",
+  "harvester": "scripts/harvest_action.sh (GH Action)",
+  "note": "Lean harvest — sparse deltas + averaged dense only, no opt-state. Bird branches retain opt-state if needed for warmstart."
+}
