@@ -1,6 +1,7 @@
 name: harvest
 
 on:
+  # Manual: pick a round + optional fork PRs to merge in.
   workflow_dispatch:
     inputs:
       target_round:
@@ -11,6 +12,13 @@ on:
         description: "Comma-separated PR numbers from forks to merge in (e.g., '12,13'). Optional."
         required: false
         default: ""
+  # Cron auto-harvest: every 3 hours. With no inputs, harvest_action.sh
+  # auto-detects the highest unharvested round (across legacy smoke-r*,
+  # interim train-r<N>-*, and stable per-bird train-<id>-* branches)
+  # and merges every bird currently sitting at that round. If there's
+  # no unharvested round, the script exits 0 quietly.
+  schedule:
+    - cron: "0 */3 * * *"
 
 permissions:
   contents: write
