@@ -1,0 +1,93 @@
+name: harvest
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_round:
+        description: "Round to harvest. Leave blank to auto-detect latest unharvested smoke-r<N> wave."
+        required: false
+        default: ""
+      pr_numbers:
+        description: "Comma-separated PR numbers from forks to merge in (e.g., '12,13'). Optional."
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+
+jobs:
+  harvest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout working branch
+        uses: actions/checkout@v4
+        with:
+          ref: claude/fim-training-cycle-T3giJ
+          persist-credentials: true
+          fetch-depth: 1
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          # No pip cache — install offline from on-branch wheels.
+
+      - name: Configure git identity
+        run: |
+          git config user.name  "harvest CI"
+          git config user.email "harvest@github-actions.local"
+
+      - name: Install deps from on-branch wheels (offline)
+        run: |
+          WHEELS=workers/dispatcher/deps/wheels
+          for prefix in "$WHEELS"/*.part-00; do
+            [ -f "$prefix" ] || continue
+            base="${prefix%.part-00}"
+            [ -f "$base" ] || cat "${base}".part-?? > "$base"
+          done
+          pip install --no-index --find-links="$WHEELS" -e . --quiet
+
+      - name: Fetch fork PRs (if any)
+        if: ${{ inputs.pr_numbers != '' }}
+        run: |
+          PR_REFS=""
+          for PR in $(echo "${{ inputs.pr_numbers }}" | tr ',' ' '); do
+            echo "▶ fetching PR #$PR"
+            # fetch the PR head into a local pr-<N> ref
+            git fetch origin "pull/$PR/head:pr-$PR" 2>&1 | tail -1
+            PR_REFS="$PR_REFS pr-$PR"
+          done
+          echo "PR_REFS=$PR_REFS" >> $GITHUB_ENV
+
+      - name: Run harvest
+        env:
+          TARGET_ROUND: ${{ inputs.target_round }}
+          # PR_REFS is unset (empty) if the fork-PR step was skipped.
+          PR_REFS: ${{ env.PR_REFS || '' }}
+        run: |
+          bash scripts/harvest_action.sh "$TARGET_ROUND" $PR_REFS
+
+      - name: Commit + push harvest
+        run: |
+          git add workers/dispatcher/harvest-*-r*/
+          if git diff --cached --quiet; then
+            echo "▶ no harvest changes to commit (already up to date?)"
+            exit 0
+          fi
+          # Pull the new harvest dir name for the commit msg
+          NEW_DIR=$(git diff --cached --name-only \
+            | grep -oE 'workers/dispatcher/harvest-[0-9]+way-r[0-9]+' \
+            | sort -u | head -1)
+          git commit -m "harvest: $NEW_DIR (auto, via harvest.yml workflow)"
+          git push origin claude/fim-training-cycle-T3giJ
+
+      - name: Upload harvest as artifact (always — even on failure)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: harvest-${{ github.run_id }}
+          path: workers/dispatcher/harvest-*-r*/
+          if-no-files-found: ignore
+          retention-days: 14
