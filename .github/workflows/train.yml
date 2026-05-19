@@ -1,6 +1,7 @@
 name: train
 
 on:
+  # Manual trigger via the Actions tab. Inputs are the per-bird knobs.
   workflow_dispatch:
     inputs:
       handle:
@@ -25,6 +26,13 @@ on:
           - general
           - clojure-general
           - clojure-fim
+  # Cron auto-train: every 6 hours. Workflow inputs aren't available
+  # from the schedule trigger — we use the defaults baked into the
+  # script (n_rounds=5, steps=7, corpus=fim, random handle). Each tick
+  # auto-detects the latest harvest on origin/main as the chain head,
+  # so the bird always starts from the freshest available state.
+  schedule:
+    - cron: "0 */6 * * *"
 
 # GITHUB_TOKEN needs contents:write to push the bird branch and
 # pull-requests:write to open + update the per-bird PR.
