@@ -165,46 +165,69 @@ case "$CORPUS" in
     exit 2
     ;;
 esac
-echo "▶ training $N_ROUNDS rounds × $STEPS steps (r$START_ROUND → r$END_ROUND) on corpus=$CORPUS…"
-bash scripts/run_chain_diverse.sh "$N_ROUNDS" "$STEPS"
+# 6) Train + publish round-by-round so a runner-timeout kill still
+#    leaves the last-completed round on origin (no full-loss after
+#    50-min jobs). Single stable branch per bird, single PR per bird.
 
-# 6) Publish as sparse-delta vs r10 anchor.
-echo "▶ encoding sparse delta + publishing…"
-DEST="workers/$HANDLE/chain-design-r$END_ROUND"
-mkdir -p "$DEST"
-python3 scripts/_delta_sparse_net.py encode \
-  workers/dispatcher/harvest-5way-r10/round-10 \
-  "$ARCHIVE/round-$END_ROUND" "$DEST" 2>&1 | tail -2
-cp "$ARCHIVE/round-$END_ROUND/dense.pt"            "$DEST/"
-cp "$ARCHIVE/round-$END_ROUND"/opt-sparse-net.*.pt "$DEST/" 2>/dev/null || true
-for r in $(seq $((START_ROUND + 1)) "$END_ROUND"); do
-  cp "$ARCHIVE/round-$r/log.jsonl" "$DEST/round-$r.log.jsonl" 2>/dev/null || true
-done
-cp "$ARCHIVE/wall.tsv" "$DEST/" 2>/dev/null || true
+# Branch name encodes bird_id (16 hex chars) so we don't collide on
+# duplicate handles. The round number lives inside the tree (in the
+# chain-design-r<N>/ dir), not in the branch name.
+BR="claude/train-${BIRD_ID:0:8}-${HANDLE}"
+echo "▶ stable per-bird branch: $BR"
+echo "▶ training round-by-round (push + PR-update after each round)…"
 
-# Pull final ctrl from the last round's log for the commit message.
-FINAL_CTRL=$(python3 -c "
+# Initial branch checkout. If origin already has it (e.g., we're
+# resuming), fast-forward; otherwise create fresh.
+git checkout -b "$BR" 2>/dev/null || git checkout "$BR"
+
+PR_NUM=""
+PREV_DEST=""
+FINAL_CTRL="unknown"
+
+for ((step = 1; step <= N_ROUNDS; step++)); do
+  CUR_ROUND=$((START_ROUND + step))
+  echo "── round $step/$N_ROUNDS  (r$CUR_ROUND) ──────────────────────────"
+
+  # run_chain_diverse.sh extends the highest staged round by 1 each call
+  bash scripts/run_chain_diverse.sh 1 "$STEPS"
+
+  # Build this round's publish dir
+  DEST="workers/$HANDLE/chain-design-r$CUR_ROUND"
+  mkdir -p "$DEST"
+  python3 scripts/_delta_sparse_net.py encode \
+    workers/dispatcher/harvest-5way-r10/round-10 \
+    "$ARCHIVE/round-$CUR_ROUND" "$DEST" 2>&1 | tail -2
+  cp "$ARCHIVE/round-$CUR_ROUND/dense.pt"            "$DEST/"
+  cp "$ARCHIVE/round-$CUR_ROUND"/opt-sparse-net.*.pt "$DEST/" 2>/dev/null || true
+  for r in $(seq $((START_ROUND + 1)) "$CUR_ROUND"); do
+    cp "$ARCHIVE/round-$r/log.jsonl" "$DEST/round-$r.log.jsonl" 2>/dev/null || true
+  done
+  cp "$ARCHIVE/wall.tsv" "$DEST/" 2>/dev/null || true
+
+  # ctrl_bpc from THIS round's ablation
+  FINAL_CTRL=$(python3 -c "
 import json
 try:
-    for line in open('$ARCHIVE/round-$END_ROUND/log.jsonl'):
+    for line in open('$ARCHIVE/round-$CUR_ROUND/log.jsonl'):
         e = json.loads(line)
         if e.get('event') == 'ablation':
             print(f\"{e.get('control_bpc'):.4f}\")
 except: print('unknown')
 " | tail -1)
 
-cat > "$DEST/meta.json" <<EOF
+  cat > "$DEST/meta.json" <<EOF
 {
   "handle": "$HANDLE",
   "bird_id": "$BIRD_ID",
-  "wave": "train-r$END_ROUND",
+  "wave": "train-r$CUR_ROUND",
   "extended_from": "$CHAIN_HEAD_PATH/round-$START_ROUND (sparse-delta vs harvest-5way-r10/round-10)",
   "extended_from_harvest": "$CHAIN_HEAD_PATH",
   "start_round": $START_ROUND,
-  "end_round": $END_ROUND,
+  "end_round": $CUR_ROUND,
   "round_length_steps": $STEPS,
-  "n_rounds_trained": $N_ROUNDS,
-  "n_total_steps": $((N_ROUNDS * STEPS)),
+  "n_rounds_trained": $step,
+  "n_rounds_target": $N_ROUNDS,
+  "n_total_steps": $((step * STEPS)),
   "final_ctrl_bpc": "$FINAL_CTRL",
   "corpus": "$CORPUS",
   "MMLLM_BWD_SKIP_FRAC_NET_ONLY": "0.5",
@@ -215,40 +238,75 @@ cat > "$DEST/meta.json" <<EOF
 }
 EOF
 
-BR="claude/train-r$END_ROUND-$HANDLE"
-echo "▶ committing + pushing to origin/$BR…"
-git checkout -b "$BR" 2>/dev/null || git checkout "$BR"
-# The earlier `git checkout origin/<branch> -- <paths>` staged ~1 GB of
-# upstream content (corpora, scripts, harvests) into the index. Clear
-# the index so the publish commit contains ONLY workers/<HANDLE>/...
-git reset HEAD > /dev/null 2>&1 || true
-git add "$DEST"/delta-sparse-net.*.pt "$DEST"/dense.pt \
-        "$DEST"/opt-sparse-net.*.pt "$DEST"/meta.json \
-        "$DEST"/round-*.log.jsonl "$DEST"/wall.tsv 2>/dev/null
-# Tripwire: fail loud if anything outside $DEST/ ended up staged.
-# If a future agent "rebuilds the commit" by hand, this prevents the
-# 1-GB-upload retry-storm we saw on claude/smoke-r22-tklXe (legacy).
-STAGED_OUTSIDE=$(git diff --cached --name-only | grep -v "^$DEST/" || true)
-if [ -n "$STAGED_OUTSIDE" ]; then
-  echo "ERROR: files staged outside $DEST/ — refusing to commit." >&2
-  echo "$STAGED_OUTSIDE" | head -20 >&2
-  echo "(...and $(echo "$STAGED_OUTSIDE" | wc -l) total)" >&2
-  echo "These are upstream INPUTS, not your deliverable. Run:" >&2
-  echo "  git reset HEAD" >&2
-  echo "  git add $DEST/" >&2
-  echo "  git commit -m '...' && git push -u origin $BR" >&2
-  exit 1
-fi
-git commit -m "train-r$END_ROUND $HANDLE — final_ctrl=$FINAL_CTRL"
-for i in 1 2 3 4; do
-  if git push -u origin "$BR" 2>&1 | tail -1 | grep -q -E "rejected|hung|error"; then
-    sleep $((i * 4))
-    continue
+  # Clear the index of upstream-staged files, then stage only this
+  # round's $DEST and (if exists) the deletion of the previous round's
+  # $DEST so the branch's tree stays ~one round's payload (~140 MB)
+  # instead of growing linearly with N_ROUNDS.
+  git reset HEAD > /dev/null 2>&1 || true
+  if [ -n "$PREV_DEST" ] && [ "$PREV_DEST" != "$DEST" ] && [ -e "$PREV_DEST" ]; then
+    git rm -rf "$PREV_DEST" > /dev/null 2>&1 || rm -rf "$PREV_DEST"
+    git add -u "$PREV_DEST" 2>/dev/null || true
   fi
-  break
+  git add "$DEST"/delta-sparse-net.*.pt "$DEST"/dense.pt \
+          "$DEST"/opt-sparse-net.*.pt "$DEST"/meta.json \
+          "$DEST"/round-*.log.jsonl "$DEST"/wall.tsv 2>/dev/null
+
+  # Tripwire — only the worker's own dir tree may be staged.
+  STAGED_OUTSIDE=$(git diff --cached --name-only | grep -v "^workers/$HANDLE/" || true)
+  if [ -n "$STAGED_OUTSIDE" ]; then
+    echo "ERROR: files staged outside workers/$HANDLE/ — refusing." >&2
+    echo "$STAGED_OUTSIDE" | head -10 >&2
+    exit 1
+  fi
+
+  git commit -m "train-r$CUR_ROUND $HANDLE — step $step/$N_ROUNDS, final_ctrl=$FINAL_CTRL" --quiet
+
+  for i in 1 2 3 4; do
+    if git push -u origin "$BR" 2>&1 | tail -1 | grep -q -E "rejected|hung|error"; then
+      sleep $((i * 4)); continue
+    fi
+    break
+  done
+  echo "    pushed r$CUR_ROUND to origin/$BR"
+
+  # Open the PR on first successful round (draft); subsequent rounds
+  # auto-update the PR via push. We never need to rebind HEAD.
+  if [ -z "$PR_NUM" ] && command -v gh > /dev/null 2>&1; then
+    PR_BODY=$(printf '%s\n' \
+      "**Bird training in progress.** Pushes after every round so" \
+      "partial work survives runner timeouts." \
+      "" \
+      "- Handle: \`$HANDLE\`" \
+      "- Bird ID: \`$BIRD_ID\`" \
+      "- Corpus: \`$CORPUS\`" \
+      "- Extended from: \`$CHAIN_HEAD_PATH\` (r$START_ROUND)" \
+      "- Target rounds: $N_ROUNDS  (\`STEPS=$STEPS\`)" \
+      "" \
+      "Latest commit's chain-design-r<N>/ dir shows the round actually" \
+      "achieved. The PR title is updated when training finishes." )
+    CREATE_OUT=$(gh pr create --base main --head "$BR" --draft \
+      --title "[bird $HANDLE] training in progress  ($step/$N_ROUNDS, r$CUR_ROUND)" \
+      --body "$PR_BODY" 2>&1) && PR_NUM=$(echo "$CREATE_OUT" | grep -oE '/pull/[0-9]+' | grep -oE '[0-9]+' | head -1)
+    if [ -n "$PR_NUM" ]; then
+      echo "    opened draft PR #$PR_NUM"
+    else
+      echo "    (PR open skipped — gh pr create returned: $(echo "$CREATE_OUT" | tail -1))"
+    fi
+  fi
+
+  PREV_DEST="$DEST"
 done
 
-echo "✓ DONE: branch $BR pushed. final_ctrl=$FINAL_CTRL"
+# Loop done — mark PR ready + finalize title.
+END_ROUND_ACTUAL=$((START_ROUND + N_ROUNDS))
+if [ -n "$PR_NUM" ] && command -v gh > /dev/null 2>&1; then
+  gh pr ready "$PR_NUM" 2>&1 | tail -1 || true
+  gh pr edit "$PR_NUM" \
+    --title "[bird $HANDLE] train r$END_ROUND_ACTUAL — ctrl_bpc=$FINAL_CTRL  ($N_ROUNDS×$STEPS steps, $CORPUS)" \
+    2>&1 | tail -1 || true
+fi
+
+echo "✓ DONE: $N_ROUNDS rounds complete. branch=$BR  PR=#${PR_NUM:-none}  final_ctrl=$FINAL_CTRL"
 
 # ── Celebration sequence ─────────────────────────────────────────────
 # Pull the chain-head's ctrl_bpc from the harvest meta we trained off
