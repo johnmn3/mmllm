@@ -106,7 +106,46 @@ N_ROUNDS="${MMLLM_N_ROUNDS:-5}"
 STEPS="${MMLLM_STEPS_PER_ROUND:-7}"
 START_ROUND=22   # chain head this script extends from
 END_ROUND=$((START_ROUND + N_ROUNDS))
-echo "▶ training $N_ROUNDS rounds × $STEPS steps (r$START_ROUND → r$END_ROUND)…"
+
+# Pick the training mix from MMLLM_CORPUS. Default is 'fim' (the
+# 9-corpus FIM-heavy mix currently shipping). Workers can pick a
+# different mix to specialize the model's exposure for the next harvest
+# round.
+CORPUS="${MMLLM_CORPUS:-fim}"
+B=/tmp/mmllm-cpu/battery
+G=/tmp/mmllm-cpu/fim-json-v3.train.bin
+case "$CORPUS" in
+  fim)
+    # 9-corpus FIM-heavy: 25% glaive-fim-v3 + 8 batteries
+    export MMLLM_MIX="${G}:25,${B}/cosmopedia.train.bin:10,${B}/fineweb-edu.train.bin:10,${B}/magicoder.train.bin:10,${B}/hermes-funcall.train.bin:10,${B}/toolace.train.bin:10,${B}/aesop-fables.bin.train.bin:10,${B}/open-web-math.train.bin:10,${B}/tiny-stories.train.bin:5"
+    ;;
+  general)
+    # 8-corpus general: drop FIM-weighted glaive, rebalance toward
+    # English / code / math / story diversity. aesop-fables retained
+    # because it carries the in-house Clojure + tool-call mix.
+    export MMLLM_MIX="${B}/cosmopedia.train.bin:15,${B}/fineweb-edu.train.bin:15,${B}/magicoder.train.bin:15,${B}/hermes-funcall.train.bin:10,${B}/toolace.train.bin:10,${B}/aesop-fables.bin.train.bin:10,${B}/open-web-math.train.bin:15,${B}/tiny-stories.train.bin:10"
+    ;;
+  clojure-general)
+    # Pure clojure code corpus (loubnabnl/clojure_checks `content`
+    # field). Tokenizes to ~17 MB; mixed with the broader battery so
+    # the model still sees English/math/code variety alongside the
+    # clojure focus. Clojure weighted heavily.
+    export MMLLM_MIX="${B}/clojure-general.train.bin:40,${B}/cosmopedia.train.bin:10,${B}/fineweb-edu.train.bin:10,${B}/magicoder.train.bin:10,${B}/aesop-fables.bin.train.bin:15,${B}/open-web-math.train.bin:10,${B}/tiny-stories.train.bin:5"
+    ;;
+  clojure-fim)
+    # Clojure edit-pair corpus (loubnabnl/clojure_checks content→
+    # new_content as JSON Edit tool calls). FIM-loss-mask trains on
+    # the edit payload only. Mixed similarly to fim corpus but with
+    # clojure-fim replacing glaive-fim-v3 as the FIM-weighted anchor.
+    export MMLLM_MIX="${B}/clojure-fim.train.bin:30,${B}/clojure-general.train.bin:10,${B}/cosmopedia.train.bin:10,${B}/fineweb-edu.train.bin:10,${B}/magicoder.train.bin:10,${B}/hermes-funcall.train.bin:10,${B}/toolace.train.bin:10,${B}/aesop-fables.bin.train.bin:5,${B}/tiny-stories.train.bin:5"
+    ;;
+  *)
+    echo "ERROR: unknown corpus '$CORPUS'." >&2
+    echo "  Valid: fim, general, clojure-general (TODO), clojure-fim (TODO)" >&2
+    exit 2
+    ;;
+esac
+echo "▶ training $N_ROUNDS rounds × $STEPS steps (r$START_ROUND → r$END_ROUND) on corpus=$CORPUS…"
 bash scripts/run_chain_diverse.sh "$N_ROUNDS" "$STEPS"
 
 # 6) Publish as sparse-delta vs r10 anchor.
@@ -184,3 +223,95 @@ for i in 1 2 3 4; do
 done
 
 echo "✓ DONE: branch $BR pushed. final_ctrl=$FINAL_CTRL"
+
+# ── Celebration sequence ─────────────────────────────────────────────
+# Pull the chain-head's ctrl_bpc from the harvest meta we trained off
+# of, and the per-round trajectory from the worker's own logs. Compute
+# the bpc reduction this bird contributed to the community model.
+python3 - "$START_ROUND" "$END_ROUND" "$HANDLE" "$CORPUS" "$BR" "$ARCHIVE" \
+  workers/dispatcher/harvest-3way-r${START_ROUND}/harvest_meta.json <<'PYEOF'
+import json, sys, glob, math
+
+start_r   = int(sys.argv[1])
+end_r     = int(sys.argv[2])
+handle    = sys.argv[3]
+corpus    = sys.argv[4]
+br        = sys.argv[5]
+archive   = sys.argv[6]
+chain_meta = sys.argv[7]
+
+# Chain head bpc (the round we extended from)
+start_bpc = None
+try:
+    m = json.load(open(chain_meta))
+    start_bpc = m.get("worker_ctrl_bpc_mean") or m.get("worker_ctrl_bpc_best")
+    if isinstance(start_bpc, str):
+        start_bpc = float(start_bpc)
+except Exception:
+    pass
+
+# Per-round trajectory from our own logs
+traj = []
+for r in range(start_r + 1, end_r + 1):
+    p = f"{archive}/round-{r}/log.jsonl"
+    try:
+        for line in open(p):
+            e = json.loads(line)
+            if e.get("event") == "ablation":
+                traj.append({"r": r, "wall": e.get("wall_s"),
+                             "ctrl": e.get("control_bpc"),
+                             "dnet": e.get("delta_net")})
+    except FileNotFoundError:
+        pass
+
+end_bpc = traj[-1]["ctrl"] if traj else None
+
+# Banner
+W = 64
+def line(c="═"): return c * W
+def center(s):
+    pad = max(0, (W - len(s)) // 2)
+    return " " * pad + s
+
+print()
+print(line())
+print(center("✨  Thank you for contributing to mmllm  ✨"))
+print(line())
+print()
+print(f"  handle:        {handle}")
+print(f"  corpus:        {corpus}")
+print(f"  rounds:        r{start_r + 1} → r{end_r}  ({end_r - start_r} rounds)")
+print(f"  branch:        {br}")
+print()
+
+if start_bpc is not None and end_bpc is not None:
+    delta = start_bpc - end_bpc
+    pct   = 100.0 * delta / start_bpc if start_bpc > 0 else 0.0
+    print("  Your contribution to the community model:")
+    print(f"    before training:   ctrl_bpc = {start_bpc:.4f}  (chain head at r{start_r})")
+    print(f"    after training:    ctrl_bpc = {end_bpc:.4f}  (your r{end_r})")
+    if delta > 0:
+        print(f"    improvement:       Δ = -{delta:.4f} bits/char  ({pct:.1f}% reduction)")
+    elif delta < 0:
+        print(f"    drift:             Δ = +{-delta:.4f} bits/char  (regression — happens; the FedAvg corrects)")
+    else:
+        print(f"    Δ = 0 — exact tie")
+    print()
+    if traj:
+        print("  Per-round trajectory:")
+        print("    round | wall_s | ctrl_bpc | Δ_net")
+        print("    ------|--------|----------|--------")
+        for t in traj:
+            ws = f"{t['wall']:.0f}" if t["wall"] is not None else "—"
+            cb = f"{t['ctrl']:.4f}" if t["ctrl"] is not None else "—"
+            dn = f"{t['dnet']:+.4f}" if t["dnet"] is not None else "—"
+            print(f"    {t['r']:>5} | {ws:>6} | {cb:>8} | {dn:>7}")
+        print()
+
+print("  When the harvest workflow merges your bird with others'")
+print("  (row-aware FedAvg), your delta becomes part of the durable")
+print("  community V_net that every future bird builds from.")
+print()
+print("  Compute donated. Thank you 🙏")
+print(line())
+PYEOF

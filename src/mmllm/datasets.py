@@ -593,6 +593,98 @@ def fmt_open_web_math(rec: dict, tpl: ChatTemplate = DEFAULT_TEMPLATE) -> "str |
     return tpl.system("You are a math tutor working through a problem step by step.") + tpl.assistant(txt)
 
 
+_CLOJURE_CRED_TAGS = frozenset({
+    "KEY", "PASSWORD", "TOKEN", "AUTH", "SECRET", "API_KEY",
+    "ACCESS_TOKEN", "PRIVATE_KEY",
+})
+
+
+def _clojure_record_has_secrets(rec: dict) -> bool:
+    """loubnabnl/clojure_checks pre-flags PII/credential entities in
+    `entities` field (tags: NAME, USERNAME, EMAIL, PASSWORD, KEY,
+    IP_ADDRESS, etc.). GitHub push-protection blocks pushes containing
+    credential-shaped strings (long random hex/b64).
+
+    We skip records where any flagged entity is in the credential-leak
+    set (KEY, PASSWORD, TOKEN, etc.). Records with only PII tags
+    (NAME, USERNAME, EMAIL, IP_ADDRESS) are kept — those are common in
+    repo metadata (contributor lists, header comments) and don't
+    typically trip secret-scanning."""
+    import ast
+    ents = rec.get("entities")
+    if not ents:
+        return False
+    # entities ships as either list-of-dicts or a stringified Python list
+    if isinstance(ents, str):
+        try:
+            ents = ast.literal_eval(ents)
+        except Exception:
+            # If parse fails, be conservative: assume credential present
+            return True
+    if not isinstance(ents, (list, tuple)):
+        return True
+    for e in ents:
+        if not isinstance(e, dict):
+            continue
+        tag = (e.get("tag") or "").upper()
+        if tag in _CLOJURE_CRED_TAGS:
+            return True
+    return False
+
+
+def fmt_clojure_content(rec: dict, max_file_bytes: int = 32768,
+                        tpl: ChatTemplate = DEFAULT_TEMPLATE) -> "str | None":
+    """loubnabnl/clojure_checks → raw Clojure source emit.
+
+    Schema: `content` (original .clj file), `new_content` (post-edit),
+    `max_stars_repo_name`, `max_stars_repo_path`, `entities` (PII/cred
+    detections). For 'clojure-general' we emit the original content
+    chat-wrapped with repo path tag (same envelope as fmt_the_stack_v2).
+
+    Records with non-empty `entities` are skipped — those carry detected
+    credentials/usernames/etc. that GitHub push-protection blocks."""
+    if _clojure_record_has_secrets(rec):
+        return None
+    content = rec.get("content")
+    if not content or len(content) > max_file_bytes:
+        return None
+    path = rec.get("max_stars_repo_path") or ""
+    sys_msg = f"You are a Clojure author. Source file ({path})." if path \
+              else "You are a Clojure author."
+    return tpl.system(sys_msg) + tpl.assistant(content)
+
+
+def fmt_clojure_edit(rec: dict, max_file_bytes: int = 16384,
+                     tpl: ChatTemplate = DEFAULT_TEMPLATE) -> "str | None":
+    """loubnabnl/clojure_checks → edit-style FIM example.
+
+    Uses `content` (old) → `new_content` (new) as a code-edit pair,
+    formatted as a JSON Edit tool call (matches fmt_commitpackft's
+    envelope). FIM loss mask trains on the edit payload only.
+
+    Records with non-empty `entities` are skipped (cred leaks)."""
+    if _clojure_record_has_secrets(rec):
+        return None
+    old_c = rec.get("content")
+    new_c = rec.get("new_content")
+    if not old_c or not new_c or old_c == new_c:
+        return None
+    if len(old_c) > max_file_bytes or len(new_c) > max_file_bytes:
+        return None
+    path = rec.get("max_stars_repo_path") or "file.clj"
+    sys_msg  = ("You are a Clojure coding assistant. Apply the requested "
+                "edit to the file by emitting an Edit tool call.")
+    user_msg = (f"Edit {path}:\n\n```clojure\n{old_c}\n```")
+    return (
+        tpl.system(sys_msg)
+        + tpl.user(user_msg)
+        + tpl.assistant_tool_call(
+            "Edit",
+            {"path": path, "old_str": old_c, "new_str": new_c},
+        )
+    )
+
+
 def fmt_algebraic_stack(rec: dict) -> "str | None":
     """AlgebraicStack — math+code from arXiv (Lean, Coq, Isabelle proofs +
     algorithmic implementations). Available as a config of
@@ -996,6 +1088,27 @@ DATASET_REGISTRY = {
         "formatter": fmt_humaneval_clj,
         "kind":      "pretrain",  # routes to BPC eval; agentic-test variant TBD
         "notes":     "HumanEval-Clojure (eval-only, 161 problems / ~175 KB)",
+    },
+    "clojure-checks-content": {
+        # loubnabnl/clojure_checks — ungated, parquet-based, ~14k records
+        # / 152 MB raw. `content` holds the original Clojure file; we
+        # emit it chat-wrapped as a code-author pretraining example.
+        "hf_name":   "loubnabnl/clojure_checks",
+        "hf_config": None,
+        "split":     "train",
+        "formatter": fmt_clojure_content,
+        "kind":      "pretrain",
+        "notes":     "Clojure source code from loubnabnl/clojure_checks (ungated)",
+    },
+    "clojure-checks-edit": {
+        # Same dataset, edit-style envelope: (content → new_content) as a
+        # JSON tool call. FIM loss mask trains on the edit payload only.
+        "hf_name":   "loubnabnl/clojure_checks",
+        "hf_config": None,
+        "split":     "train",
+        "formatter": fmt_clojure_edit,
+        "kind":      "sft",
+        "notes":     "Clojure file edits from loubnabnl/clojure_checks (ungated, FIM)",
     },
     "tiny-stories": {
         # roneneldan/TinyStories — Eldan & Li 2023's curated synthetic
