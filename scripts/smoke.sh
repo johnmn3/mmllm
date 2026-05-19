@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
-# One-shot smoke worker script: extends harvest-3way-r22 → r27 by 5
-# rounds × 7 steps and publishes sparse-delta. Run with:
+# One-shot smoke worker script: auto-detects the highest
+# workers/dispatcher/harvest-*-r<N>/round-<N> dir on upstream main as
+# the chain head, extends it by N more rounds × STEPS steps, and
+# publishes the sparse-delta result. Run with:
 #
 #   bash scripts/smoke.sh
 #
@@ -41,10 +43,24 @@ cd "$ROOT"
 echo "▶ syncing branch state from upstream…"
 UPSTREAM=https://github.com/johnmn3/mmllm.git
 git fetch "$UPSTREAM" main --depth=1 2>&1 | tail -1
+
+# Auto-detect the chain head — highest workers/dispatcher/harvest-*-r<N>
+# dir on upstream main. Forks will automatically pick up the latest
+# harvest each time the workflow runs.
+CHAIN_HEAD_PATH=$(git ls-tree -d --name-only FETCH_HEAD workers/dispatcher/ 2>/dev/null \
+  | grep -oE 'workers/dispatcher/harvest-[0-9]+way-r[0-9]+$' \
+  | awk -F'-r' '{print $NF " " $0}' | sort -n | tail -1 | awk '{print $2}')
+if [ -z "$CHAIN_HEAD_PATH" ]; then
+  echo "ERROR: no harvest-*-r<N> dirs found on upstream main" >&2
+  exit 2
+fi
+START_ROUND=$(echo "$CHAIN_HEAD_PATH" | grep -oE '[0-9]+$')
+echo "  chain head: $CHAIN_HEAD_PATH (round $START_ROUND)"
+
 git checkout FETCH_HEAD -- \
   src/ scripts/ tests/ CLAUDE.md docs/ \
   workers/dispatcher/harvest-5way-r10/ \
-  workers/dispatcher/harvest-3way-r22/ \
+  "$CHAIN_HEAD_PATH/" \
   workers/dispatcher/corpora/ \
   workers/dispatcher/deps/ 2>&1 | tail -1
 
@@ -85,16 +101,17 @@ for prefix in "$CORPORA"/battery/*.part-00; do
 done
 echo "  staged $(ls /tmp/mmllm-cpu/*.bin /tmp/mmllm-cpu/battery/*.bin 2>/dev/null | wc -l) corpus files"
 
-# 4) Reconstruct round-22 full V_net from r10 anchor + r22 sparse delta.
-echo "▶ staging round-22…"
+# 4) Reconstruct round-$START_ROUND full V_net from r10 anchor + that
+#    round's sparse delta (chain head auto-detected above).
+echo "▶ staging round-$START_ROUND…"
 ARCHIVE=/tmp/mmllm-cpu/chain-diverse
-mkdir -p "$ARCHIVE/round-22"
+mkdir -p "$ARCHIVE/round-$START_ROUND"
 python3 scripts/_delta_sparse_net.py apply \
   workers/dispatcher/harvest-5way-r10/round-10 \
-  workers/dispatcher/harvest-3way-r22/round-22 \
-  "$ARCHIVE/round-22" 2>&1 | tail -2
-cp workers/dispatcher/harvest-3way-r22/round-22/dense.pt            "$ARCHIVE/round-22/"
-cp workers/dispatcher/harvest-3way-r22/round-22/opt-sparse-net.*.pt "$ARCHIVE/round-22/" 2>/dev/null || true
+  "$CHAIN_HEAD_PATH/round-$START_ROUND" \
+  "$ARCHIVE/round-$START_ROUND" 2>&1 | tail -2
+cp "$CHAIN_HEAD_PATH/round-$START_ROUND/dense.pt"            "$ARCHIVE/round-$START_ROUND/"
+cp "$CHAIN_HEAD_PATH/round-$START_ROUND"/opt-sparse-net.*.pt "$ARCHIVE/round-$START_ROUND/" 2>/dev/null || true
 
 # 5) Train. Env locks the verified contract (frac=0.5, QUICK ablation,
 # per-step prints, all 32 layers train in expectation).
@@ -104,7 +121,7 @@ export MMLLM_ABLATION_QUICK=true
 export MMLLM_PRINT_EVERY=1
 N_ROUNDS="${MMLLM_N_ROUNDS:-5}"
 STEPS="${MMLLM_STEPS_PER_ROUND:-7}"
-START_ROUND=22   # chain head this script extends from
+# START_ROUND was set in step (1) from the auto-detected chain head.
 END_ROUND=$((START_ROUND + N_ROUNDS))
 
 # Pick the training mix from MMLLM_CORPUS. Default is 'fim' (the
@@ -177,7 +194,7 @@ cat > "$DEST/meta.json" <<EOF
 {
   "handle": "$HANDLE",
   "wave": "smoke-r$END_ROUND",
-  "extended_from": "workers/dispatcher/harvest-3way-r$START_ROUND/round-$START_ROUND (sparse-delta vs harvest-5way-r10/round-10)",
+  "extended_from": "$CHAIN_HEAD_PATH/round-$START_ROUND (sparse-delta vs harvest-5way-r10/round-10)",
   "round_length_steps": $STEPS,
   "n_rounds_trained": $N_ROUNDS,
   "final_ctrl_bpc": "$FINAL_CTRL",
@@ -229,7 +246,7 @@ echo "✓ DONE: branch $BR pushed. final_ctrl=$FINAL_CTRL"
 # of, and the per-round trajectory from the worker's own logs. Compute
 # the bpc reduction this bird contributed to the community model.
 python3 - "$START_ROUND" "$END_ROUND" "$HANDLE" "$CORPUS" "$BR" "$ARCHIVE" \
-  workers/dispatcher/harvest-3way-r${START_ROUND}/harvest_meta.json <<'PYEOF'
+  "$CHAIN_HEAD_PATH/harvest_meta.json" <<'PYEOF'
 import json, sys, glob, math
 
 start_r   = int(sys.argv[1])
