@@ -136,10 +136,10 @@ if [ -z "$TARGET_ROUND" ]; then
       echo "  [fork-scan] $fork/$br → rounds: $(echo "$rs" | tr '\n' ' ')"
     fi
   done < <(_list_fork_branches)
-  ALL_ROUNDS=$( ( echo "$ROUNDS_FROM_NAME"
-                  echo "$ROUNDS_FROM_TREE"
-                  echo "$ROUNDS_FROM_FORKS" ) \
-    | tr ' ' '\n' | grep -E '^[0-9]+$' | sort -un)
+  ALL_ROUNDS=$( ( ( echo "$ROUNDS_FROM_NAME"
+                    echo "$ROUNDS_FROM_TREE"
+                    echo "$ROUNDS_FROM_FORKS" ) \
+    | tr ' ' '\n' | grep -E '^[0-9]+$' | sort -un ) || true)
   echo "  rounds visible (origin + forks): $(echo "$ALL_ROUNDS" | tr '\n' ' ')"
   for R in $(echo "$ALL_ROUNDS" | tac); do
     if ! compgen -G "workers/dispatcher/harvest-*-r${R}" > /dev/null 2>&1; then
@@ -190,27 +190,17 @@ while IFS='|' read -r fork br; do
     echo "    skip — _fetch_fork_branch failed"
     continue
   fi
-  # Test in if-condition context so set -e doesn't fire on no-match.
-  if git ls-tree -r --name-only "$local_ref" 2>/dev/null \
-      | grep -qE "^workers/[^/]+/chain-design-r${TARGET_ROUND}/"; then
+  # Use sed (same code path as auto-detect, known to work) to extract
+  # all rounds present at canonical workers/<H>/chain-design-r<N>/
+  # paths; then check whether TARGET_ROUND is in that set.
+  canonical_rounds=$(git ls-tree -r --name-only "$local_ref" 2>/dev/null \
+    | sed -nE 's|^workers/[^/]+/chain-design-r([0-9]+)/.*|\1|p' \
+    | sort -un || true)
+  if echo "$canonical_rounds" | grep -qx "$TARGET_ROUND"; then
     BIRD_REFS+=("$local_ref")
-    echo "    ✓ fork bird at canonical path"
+    echo "    ✓ fork bird (canonical rounds: $(echo "$canonical_rounds" | tr '\n' ' '))"
   else
-    # Show the literal matching paths so we can debug regex / structure
-    # mismatches when sed found rounds but grep didn't match canonical.
-    matches=$(git ls-tree -r --name-only "$local_ref" 2>/dev/null \
-      | grep -E "chain-design-r${TARGET_ROUND}" | head -3 || true)
-    rounds_at=$(git ls-tree -r --name-only "$local_ref" 2>/dev/null \
-      | sed -nE 's|^workers/[^/]+/chain-design-r([0-9]+)/.*|\1|p' \
-      | sort -un | tr '\n' ' ' || true)
-    echo "    skip — no chain-design-r${TARGET_ROUND}/ at canonical path"
-    echo "         rounds at canonical: ${rounds_at:-none}"
-    echo "         lines containing 'chain-design-r${TARGET_ROUND}' (up to 3):"
-    if [ -n "$matches" ]; then
-      echo "$matches" | sed 's/^/           /'
-    else
-      echo "           (none)"
-    fi
+    echo "    skip — TARGET_ROUND=$TARGET_ROUND not in canonical rounds: $(echo "$canonical_rounds" | tr '\n' ' '|| echo none)"
   fi
 done < <(_list_fork_branches)
 
