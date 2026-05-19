@@ -1,18 +1,18 @@
 #!/usr/bin/env bash
-# Harvest a smoke-r<N> wave: row-aware FedAvg merge of all bird deltas
+# Harvest a train-r<N> wave: row-aware FedAvg merge of all bird deltas
 # + dense average. Output to workers/dispatcher/harvest-<W>way-r<N>/.
 #
 # Usage:
 #   bash scripts/harvest_action.sh [target_round] [extra_ref ...]
 #
 # If target_round is empty, auto-detects the latest unharvested round:
-# the highest N with origin/claude/smoke-r<N>-* branches but no
+# the highest N with origin/claude/{train,smoke}-r<N>-* branches but no
 # corresponding workers/dispatcher/harvest-*-r<N>/ dir on this branch.
 #
 # extra_ref args are passed as additional refs to harvest from (e.g.,
 # "pr-12" for a fetched fork PR ref). They must contain a bird payload
 # at workers/<HANDLE>/chain-design-r<TARGET>/ with the same layout as
-# a smoke.sh publish.
+# a train.sh publish.
 #
 # Output is intentionally lean — sparse deltas + averaged dense only,
 # no opt-state. Bird branches retain opt-state if anyone needs it for
@@ -28,11 +28,14 @@ shift || true
 EXTRA_REFS=("$@")
 
 # --- 1) Auto-detect target round if not specified --------------------
+# We match both the legacy claude/smoke-r<N>-* naming and the current
+# claude/train-r<N>-* naming so historical birds remain harvestable.
 if [ -z "$TARGET_ROUND" ]; then
   echo "▶ auto-detecting latest unharvested round…"
-  ALL_ROUNDS=$(git ls-remote origin 'refs/heads/claude/smoke-r*' 2>/dev/null \
-    | grep -oE 'smoke-r[0-9]+' | sed 's/smoke-r//' | sort -un)
-  echo "  smoke-r rounds on origin: $(echo "$ALL_ROUNDS" | tr '\n' ' ')"
+  ALL_ROUNDS=$( ( git ls-remote origin 'refs/heads/claude/smoke-r*' 2>/dev/null
+                  git ls-remote origin 'refs/heads/claude/train-r*' 2>/dev/null ) \
+    | grep -oE '(smoke|train)-r[0-9]+' | sed -E 's/^(smoke|train)-r//' | sort -un)
+  echo "  train/smoke-r rounds on origin: $(echo "$ALL_ROUNDS" | tr '\n' ' ')"
   for R in $(echo "$ALL_ROUNDS" | tac); do
     if ! compgen -G "workers/dispatcher/harvest-*-r${R}" > /dev/null 2>&1; then
       TARGET_ROUND=$R
@@ -48,11 +51,13 @@ fi
 echo "▶ target round: $TARGET_ROUND"
 
 # --- 2) Discover bird branches for this round ------------------------
+# Match both claude/smoke-r<N>-* (legacy) and claude/train-r<N>-* (new).
 BIRD_REFS=()
 while read -r line; do
   ref=$(echo "$line" | awk '{print $2}' | sed 's|^refs/heads/|origin/|')
   [ -n "$ref" ] && BIRD_REFS+=("$ref")
-done < <(git ls-remote origin "refs/heads/claude/smoke-r${TARGET_ROUND}-*" 2>/dev/null)
+done < <( git ls-remote origin "refs/heads/claude/smoke-r${TARGET_ROUND}-*" 2>/dev/null
+          git ls-remote origin "refs/heads/claude/train-r${TARGET_ROUND}-*" 2>/dev/null )
 
 for ref in "${EXTRA_REFS[@]}"; do
   BIRD_REFS+=("$ref")
@@ -252,7 +257,7 @@ if best_bird:
 meta_out = {
     "target_round": target,
     "n_workers": n_workers,
-    "wave": f"smoke-r{target}",
+    "wave": f"train-r{target}",
     "workers": birds,
     "worker_ctrl_bpc_mean": round(mean_bpc, 4) if mean_bpc is not None else None,
     "worker_ctrl_bpc_best": round(best_bpc, 4) if best_bpc is not None else None,

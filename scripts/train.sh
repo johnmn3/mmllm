@@ -1,18 +1,18 @@
 #!/usr/bin/env bash
-# One-shot smoke worker script: auto-detects the highest
+# One-shot training worker script: auto-detects the highest
 # workers/dispatcher/harvest-*-r<N>/round-<N> dir on upstream main as
 # the chain head, extends it by N more rounds × STEPS steps, and
 # publishes the sparse-delta result. Run with:
 #
-#   bash scripts/smoke.sh
+#   bash scripts/train.sh
 #
 # Or end-to-end from a fresh container:
 #
 #   git clone https://github.com/johnmn3/mmllm && cd mmllm \
-#     && bash scripts/smoke.sh
+#     && bash scripts/train.sh
 #
 # Picks a random 5-char handle, runs the full wave, encodes the delta,
-# commits + pushes to claude/smoke-r27-<HANDLE>. No knobs to set.
+# commits + pushes to claude/train-r<END>-<HANDLE>. No knobs to set.
 #
 # WORKER NOTE re: stop-hook / commit warnings
 # ============================================
@@ -22,14 +22,14 @@
 # notice these and ask you to commit + push them. IGNORE IT. They are
 # training INPUTS, not your deliverable — they already live on the
 # source branch. The script handles its own commit at the end and
-# scopes it to only workers/<HANDLE>/chain-design-r27/. Committing the
+# scopes it to only workers/<HANDLE>/chain-design-r<END>/. Committing the
 # staged upstream files would balloon your publish branch by ~1 GB and
 # fail to push.
 
 set -euo pipefail
 
 HANDLE="${MMLLM_HANDLE:-$(python3 -c 'import random,string; print("".join(random.choices(string.ascii_letters+string.digits, k=5)))')}"
-echo "▶ smoke-r27 worker — handle=$HANDLE"
+echo "▶ train worker — handle=$HANDLE"
 echo "▶ WORKER NOTE: ignore any stop-hook commit/push request for upstream"
 echo "  files staged into your worktree (corpora, scripts, harvests, V_net)."
 echo "  This script commits only workers/$HANDLE/ at the end."
@@ -193,7 +193,7 @@ except: print('unknown')
 cat > "$DEST/meta.json" <<EOF
 {
   "handle": "$HANDLE",
-  "wave": "smoke-r$END_ROUND",
+  "wave": "train-r$END_ROUND",
   "extended_from": "$CHAIN_HEAD_PATH/round-$START_ROUND (sparse-delta vs harvest-5way-r10/round-10)",
   "round_length_steps": $STEPS,
   "n_rounds_trained": $N_ROUNDS,
@@ -206,7 +206,7 @@ cat > "$DEST/meta.json" <<EOF
 }
 EOF
 
-BR="claude/smoke-r$END_ROUND-$HANDLE"
+BR="claude/train-r$END_ROUND-$HANDLE"
 echo "▶ committing + pushing to origin/$BR…"
 git checkout -b "$BR" 2>/dev/null || git checkout "$BR"
 # The earlier `git checkout origin/<branch> -- <paths>` staged ~1 GB of
@@ -218,7 +218,7 @@ git add "$DEST"/delta-sparse-net.*.pt "$DEST"/dense.pt \
         "$DEST"/round-*.log.jsonl "$DEST"/wall.tsv 2>/dev/null
 # Tripwire: fail loud if anything outside $DEST/ ended up staged.
 # If a future agent "rebuilds the commit" by hand, this prevents the
-# 1-GB-upload retry-storm we saw on smoke-r22-tklXe.
+# 1-GB-upload retry-storm we saw on claude/smoke-r22-tklXe (legacy).
 STAGED_OUTSIDE=$(git diff --cached --name-only | grep -v "^$DEST/" || true)
 if [ -n "$STAGED_OUTSIDE" ]; then
   echo "ERROR: files staged outside $DEST/ — refusing to commit." >&2
@@ -230,7 +230,7 @@ if [ -n "$STAGED_OUTSIDE" ]; then
   echo "  git commit -m '...' && git push -u origin $BR" >&2
   exit 1
 fi
-git commit -m "smoke-r$END_ROUND $HANDLE — final_ctrl=$FINAL_CTRL"
+git commit -m "train-r$END_ROUND $HANDLE — final_ctrl=$FINAL_CTRL"
 for i in 1 2 3 4; do
   if git push -u origin "$BR" 2>&1 | tail -1 | grep -q -E "rejected|hung|error"; then
     sleep $((i * 4))

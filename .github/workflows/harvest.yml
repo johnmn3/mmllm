@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       target_round:
-        description: "Round to harvest. Leave blank to auto-detect latest unharvested smoke-r<N> wave."
+        description: "Round to harvest. Leave blank to auto-detect latest unharvested train-r<N> wave."
         required: false
         default: ""
       pr_numbers:
