@@ -29,19 +29,26 @@ jobs:
     timeout-minutes: 90
 
     steps:
-      - name: Checkout branch
+      - name: Checkout upstream main (works on forks too)
         uses: actions/checkout@v4
         with:
-          # Pin to the working branch — this is where smoke.sh + the
-          # chain anchor + prior harvests live.
-          ref: claude/fim-training-cycle-T3giJ
-          # actions/checkout@v4 persists the GITHUB_TOKEN as a git
-          # credential so subsequent fetch + push work without extra
-          # setup. Keep that default.
-          persist-credentials: true
-          # Full history isn't needed; --depth=1 is fine. smoke.sh fetches
-          # specific refs as needed.
+          # Always read from upstream johnmn3/mmllm so a fresh fork
+          # doesn't need to mirror the branch state.
+          repository: johnmn3/mmllm
+          ref: main
+          # Don't persist upstream credentials — we re-point origin to
+          # the running repo below so the bird push lands there.
+          persist-credentials: false
           fetch-depth: 1
+
+      - name: Point origin at the running repo (fork or upstream)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # The default GITHUB_TOKEN has contents:write on whatever
+          # repo is running the workflow. Push the bird there.
+          git remote set-url origin \
+            "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git"
 
       - name: Set up Python
         uses: actions/setup-python@v5

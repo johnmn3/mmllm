@@ -7,7 +7,6 @@
 # Or end-to-end from a fresh container:
 #
 #   git clone https://github.com/johnmn3/mmllm && cd mmllm \
-#     && git checkout claude/fim-training-cycle-T3giJ \
 #     && bash scripts/smoke.sh
 #
 # Picks a random 5-char handle, runs the full wave, encodes the delta,
@@ -16,8 +15,8 @@
 # WORKER NOTE re: stop-hook / commit warnings
 # ============================================
 # Step (1) below stages ~1 GB of upstream content (corpora + 32 V_net.bin
-# files + scripts + docs) into your working tree from
-# claude/fim-training-cycle-T3giJ. Your stop-hook or shell wrapper may
+# files + scripts + docs) into your working tree from upstream
+# johnmn3/mmllm:main. Your stop-hook or shell wrapper may
 # notice these and ask you to commit + push them. IGNORE IT. They are
 # training INPUTS, not your deliverable — they already live on the
 # source branch. The script handles its own commit at the end and
@@ -37,10 +36,12 @@ ROOT=$(git rev-parse --show-toplevel)
 cd "$ROOT"
 
 # 1) Ensure source + prior harvests + pre-staged corpora + pre-built
-# wheels are on disk.
-echo "▶ syncing branch state…"
-git fetch origin claude/fim-training-cycle-T3giJ --depth=1 2>&1 | tail -1
-git checkout origin/claude/fim-training-cycle-T3giJ -- \
+# wheels are on disk. Always fetch from upstream johnmn3/mmllm so this
+# works on forks (where `origin` may point at the fork's repo).
+echo "▶ syncing branch state from upstream…"
+UPSTREAM=https://github.com/johnmn3/mmllm.git
+git fetch "$UPSTREAM" main --depth=1 2>&1 | tail -1
+git checkout FETCH_HEAD -- \
   src/ scripts/ tests/ CLAUDE.md docs/ \
   workers/dispatcher/harvest-5way-r10/ \
   workers/dispatcher/harvest-3way-r22/ \
@@ -144,7 +145,7 @@ cat > "$DEST/meta.json" <<EOF
   "MMLLM_BWD_SKIP_FRAC_NET_ONLY": "0.5",
   "MMLLM_BWD_SKIP_FRAC_LOCAL": "0.0",
   "MMLLM_ABLATION_QUICK": "true",
-  "branch_base": "claude/fim-training-cycle-T3giJ",
+  "branch_base": "main",
   "git_sha": "$(git rev-parse HEAD)"
 }
 EOF

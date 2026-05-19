@@ -21,12 +21,20 @@ jobs:
     timeout-minutes: 30
 
     steps:
-      - name: Checkout working branch
+      - name: Checkout upstream main (works on forks too)
         uses: actions/checkout@v4
         with:
-          ref: claude/fim-training-cycle-T3giJ
-          persist-credentials: true
+          repository: johnmn3/mmllm
+          ref: main
+          persist-credentials: false
           fetch-depth: 1
+
+      - name: Point origin at the running repo (fork or upstream)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git remote set-url origin \
+            "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git"
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -81,7 +89,7 @@ jobs:
             | grep -oE 'workers/dispatcher/harvest-[0-9]+way-r[0-9]+' \
             | sort -u | head -1)
           git commit -m "harvest: $NEW_DIR (auto, via harvest.yml workflow)"
-          git push origin claude/fim-training-cycle-T3giJ
+          git push origin HEAD:main
 
       - name: Upload harvest as artifact (always — even on failure)
         if: always()
