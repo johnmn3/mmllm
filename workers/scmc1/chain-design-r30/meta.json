@@ -1,0 +1,13 @@
+{
+  "handle": "scmc1",
+  "wave": "train-r30",
+  "extended_from": "workers/dispatcher/harvest-2way-r27/round-27 (sparse-delta vs harvest-5way-r10/round-10)",
+  "round_length_steps": 7,
+  "n_rounds_trained": 3,
+  "final_ctrl_bpc": "1.0827",
+  "MMLLM_BWD_SKIP_FRAC_NET_ONLY": "0.5",
+  "MMLLM_BWD_SKIP_FRAC_LOCAL": "0.0",
+  "MMLLM_ABLATION_QUICK": "true",
+  "branch_base": "main",
+  "git_sha": "4d0e55aafe9c7acd0f74193e4cf62d2afcadd5da"
+}
