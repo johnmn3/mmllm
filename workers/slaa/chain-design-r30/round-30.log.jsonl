@@ -1,0 +1,6 @@
+{"event":"manifest","ts":"2026-05-19T15:11:48Z","git_sha":"4d0e55aafe9c7acd0f74193e4cf62d2afcadd5da","total_steps":8}
+{"step":8,"event":"eval","loss":2.1847,"val_bpc":1.1270,"val_ppl":2.1840,"wall_s":492.4}
+{"step":8,"event":"final","val_bpc":1.1270,"val_ppl":2.1840,"wall_s":506.8}
+{"step":8,"event":"bank_saved","bank_path":"/tmp/mmllm-cpu/fim-bank-chain-stack","wall_s":506.8}
+{"step":8,"event":"ablation","control_bpc":1.1270,"ablated_local_bpc":null,"delta_local":0.0000,"ablated_net_bpc":1.1337,"delta_net":0.0067,"ablated_both_bpc":1.1337,"delta_both":0.0067,"wall_s":524.5}
+{"event":"training_energy","backend":"wall","wall_s":524.5,"kwh":0.009471,"gco2eq":5.173,"n_tokens":114688,"j_per_tok":0.297276,"tok_per_s":218.65,"peak_w":65.0,"peak_vram_gb":0.000,"total_vram_gb":0.000,"vram_idle_kwh_estimate":0.000000,"pue":1.150,"grid_g_per_kwh":475.0}
