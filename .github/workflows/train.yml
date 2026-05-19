@@ -11,7 +11,7 @@ on:
       n_rounds:
         description: "Rounds to train"
         required: false
-        default: "3"
+        default: "10"
       steps_per_round:
         description: "Steps per round"
         required: false
