@@ -48,10 +48,11 @@ if [ -z "$HIGHEST" ]; then
 fi
 echo "Starting from $ARCHIVE/round-${HIGHEST}"
 
-# ── 9-corpus mix ──
+# ── Default 9-corpus FIM mix (callers can override MMLLM_MIX) ──
 B=/tmp/mmllm-cpu/battery
 G=/tmp/mmllm-cpu/fim-json-v3.train.bin
-export MMLLM_MIX="${G}:25,${B}/cosmopedia.train.bin:10,${B}/fineweb-edu.train.bin:10,${B}/magicoder.train.bin:10,${B}/hermes-funcall.train.bin:10,${B}/toolace.train.bin:10,${B}/aesop-fables.bin.train.bin:10,${B}/open-web-math.train.bin:10,${B}/tiny-stories.train.bin:5"
+: "${MMLLM_MIX:=${G}:25,${B}/cosmopedia.train.bin:10,${B}/fineweb-edu.train.bin:10,${B}/magicoder.train.bin:10,${B}/hermes-funcall.train.bin:10,${B}/toolace.train.bin:10,${B}/aesop-fables.bin.train.bin:10,${B}/open-web-math.train.bin:10,${B}/tiny-stories.train.bin:5}"
+export MMLLM_MIX
 
 # ── Asymmetric V per-layer V_local LR multipliers ──
 # Mults 7,3,1,0.5,0.3,0.7,2,5 — asymmetric V (steep on the front, shallow

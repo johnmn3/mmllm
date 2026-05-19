@@ -106,7 +106,38 @@ N_ROUNDS="${MMLLM_N_ROUNDS:-5}"
 STEPS="${MMLLM_STEPS_PER_ROUND:-7}"
 START_ROUND=22   # chain head this script extends from
 END_ROUND=$((START_ROUND + N_ROUNDS))
-echo "▶ training $N_ROUNDS rounds × $STEPS steps (r$START_ROUND → r$END_ROUND)…"
+
+# Pick the training mix from MMLLM_CORPUS. Default is 'fim' (the
+# 9-corpus FIM-heavy mix currently shipping). Workers can pick a
+# different mix to specialize the model's exposure for the next harvest
+# round.
+CORPUS="${MMLLM_CORPUS:-fim}"
+B=/tmp/mmllm-cpu/battery
+G=/tmp/mmllm-cpu/fim-json-v3.train.bin
+case "$CORPUS" in
+  fim)
+    # 9-corpus FIM-heavy: 25% glaive-fim-v3 + 8 batteries
+    export MMLLM_MIX="${G}:25,${B}/cosmopedia.train.bin:10,${B}/fineweb-edu.train.bin:10,${B}/magicoder.train.bin:10,${B}/hermes-funcall.train.bin:10,${B}/toolace.train.bin:10,${B}/aesop-fables.bin.train.bin:10,${B}/open-web-math.train.bin:10,${B}/tiny-stories.train.bin:5"
+    ;;
+  general)
+    # 8-corpus general: drop FIM-weighted glaive, rebalance toward
+    # English / code / math / story diversity. aesop-fables retained
+    # because it carries the in-house Clojure + tool-call mix.
+    export MMLLM_MIX="${B}/cosmopedia.train.bin:15,${B}/fineweb-edu.train.bin:15,${B}/magicoder.train.bin:15,${B}/hermes-funcall.train.bin:10,${B}/toolace.train.bin:10,${B}/aesop-fables.bin.train.bin:10,${B}/open-web-math.train.bin:15,${B}/tiny-stories.train.bin:10"
+    ;;
+  clojure-general|clojure-fim)
+    echo "ERROR: corpus '$CORPUS' not yet tokenized on the branch." >&2
+    echo "  Source data + tokenization pipeline still TBD." >&2
+    echo "  Pick 'fim' or 'general' for now." >&2
+    exit 2
+    ;;
+  *)
+    echo "ERROR: unknown corpus '$CORPUS'." >&2
+    echo "  Valid: fim, general, clojure-general (TODO), clojure-fim (TODO)" >&2
+    exit 2
+    ;;
+esac
+echo "▶ training $N_ROUNDS rounds × $STEPS steps (r$START_ROUND → r$END_ROUND) on corpus=$CORPUS…"
 bash scripts/run_chain_diverse.sh "$N_ROUNDS" "$STEPS"
 
 # 6) Publish as sparse-delta vs r10 anchor.
