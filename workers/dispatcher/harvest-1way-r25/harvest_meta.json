@@ -1,0 +1,35 @@
+{
+  "target_round": 25,
+  "n_workers": 1,
+  "wave": "train-r25",
+  "workers": [
+    {
+      "handle": "blah1",
+      "branch": "origin/claude/smoke-r25-blah1",
+      "ctrl_bpc": 1.1872
+    }
+  ],
+  "worker_ctrl_bpc_mean": 1.1872,
+  "worker_ctrl_bpc_best": 1.1872,
+  "previous_harvest": {
+    "round": 22,
+    "dir": "workers/dispatcher/harvest-3way-r22",
+    "mean": 1.3162,
+    "best": 1.2928
+  },
+  "direct_contributions": [
+    {
+      "bird_id": "legacy:origin/claude/smoke-r25-blah1",
+      "handle": "blah1",
+      "branch": "origin/claude/smoke-r25-blah1",
+      "n_steps": 21,
+      "ctrl_bpc": 1.1872
+    }
+  ],
+  "ancestor_harvests": [],
+  "cumulative_total_steps": 21,
+  "cumulative_unique_birds": 1,
+  "harvested_at": "2026-05-19T21:14:54Z",
+  "harvester": "scripts/harvest_action.sh (GH Action)",
+  "note": "Lean harvest \u2014 sparse deltas + averaged dense only, no opt-state."
+}
