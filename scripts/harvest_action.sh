@@ -196,10 +196,21 @@ while IFS='|' read -r fork br; do
     BIRD_REFS+=("$local_ref")
     echo "    ✓ fork bird at canonical path"
   else
+    # Show the literal matching paths so we can debug regex / structure
+    # mismatches when sed found rounds but grep didn't match canonical.
+    matches=$(git ls-tree -r --name-only "$local_ref" 2>/dev/null \
+      | grep -E "chain-design-r${TARGET_ROUND}" | head -3 || true)
     rounds_at=$(git ls-tree -r --name-only "$local_ref" 2>/dev/null \
       | sed -nE 's|^workers/[^/]+/chain-design-r([0-9]+)/.*|\1|p' \
       | sort -un | tr '\n' ' ' || true)
-    echo "    skip — no chain-design-r${TARGET_ROUND}/ at canonical path (tree has: ${rounds_at:-none})"
+    echo "    skip — no chain-design-r${TARGET_ROUND}/ at canonical path"
+    echo "         rounds at canonical: ${rounds_at:-none}"
+    echo "         lines containing 'chain-design-r${TARGET_ROUND}' (up to 3):"
+    if [ -n "$matches" ]; then
+      echo "$matches" | sed 's/^/           /'
+    else
+      echo "           (none)"
+    fi
   fi
 done < <(_list_fork_branches)
 
