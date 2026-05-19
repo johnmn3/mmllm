@@ -27,15 +27,39 @@ TARGET_ROUND="${1:-}"
 shift || true
 EXTRA_REFS=("$@")
 
+# Helper: peek at a remote branch tree (fetches if not local) and emit
+# every chain-design-r<N>/ round number present. Used by both
+# auto-detect (round → ?) and discovery (round → branches).
+_rounds_in_branch() {
+  local br="$1"
+  git fetch origin "$br" --depth=1 >/dev/null 2>&1 || return 0
+  git ls-tree -r --name-only "origin/$br" 2>/dev/null \
+    | grep -oE 'chain-design-r[0-9]+' | sed 's/chain-design-r//' | sort -un
+}
+
 # --- 1) Auto-detect target round if not specified --------------------
-# We match both the legacy claude/smoke-r<N>-* naming and the current
-# claude/train-r<N>-* naming so historical birds remain harvestable.
+# Branch flavors we accept:
+#   claude/smoke-r<N>-*           legacy, round in name
+#   claude/train-r<N>-*           interim, round in name
+#   claude/train-<bird_id>-<H>    current stable per-bird, round in tree
 if [ -z "$TARGET_ROUND" ]; then
   echo "▶ auto-detecting latest unharvested round…"
-  ALL_ROUNDS=$( ( git ls-remote origin 'refs/heads/claude/smoke-r*' 2>/dev/null
-                  git ls-remote origin 'refs/heads/claude/train-r*' 2>/dev/null ) \
-    | grep -oE '(smoke|train)-r[0-9]+' | sed -E 's/^(smoke|train)-r//' | sort -un)
-  echo "  train/smoke-r rounds on origin: $(echo "$ALL_ROUNDS" | tr '\n' ' ')"
+  ROUNDS_FROM_NAME=$( ( git ls-remote origin 'refs/heads/claude/smoke-r*' 2>/dev/null
+                        git ls-remote origin 'refs/heads/claude/train-r*' 2>/dev/null ) \
+    | grep -oE '(smoke|train)-r[0-9]+' | sed -E 's/^(smoke|train)-r//')
+  # Stable per-bird branches: claude/train-* that ISN'T the interim
+  # claude/train-r<N>-* form. Peek into each tree for chain-design-r<N>.
+  STABLE_BRANCHES=$(git ls-remote origin 'refs/heads/claude/train-*' 2>/dev/null \
+    | awk '{print $2}' | sed 's|^refs/heads/||' \
+    | grep -vE '^claude/train-r[0-9]+-')
+  ROUNDS_FROM_TREE=""
+  for br in $STABLE_BRANCHES; do
+    rs=$(_rounds_in_branch "$br")
+    [ -n "$rs" ] && ROUNDS_FROM_TREE="$ROUNDS_FROM_TREE $rs"
+  done
+  ALL_ROUNDS=$( ( echo "$ROUNDS_FROM_NAME"; echo "$ROUNDS_FROM_TREE" ) \
+    | tr ' ' '\n' | grep -E '^[0-9]+$' | sort -un)
+  echo "  rounds visible on origin: $(echo "$ALL_ROUNDS" | tr '\n' ' ')"
   for R in $(echo "$ALL_ROUNDS" | tac); do
     if ! compgen -G "workers/dispatcher/harvest-*-r${R}" > /dev/null 2>&1; then
       TARGET_ROUND=$R
@@ -51,13 +75,27 @@ fi
 echo "▶ target round: $TARGET_ROUND"
 
 # --- 2) Discover bird branches for this round ------------------------
-# Match both claude/smoke-r<N>-* (legacy) and claude/train-r<N>-* (new).
+# Three sources:
+#   (a) claude/smoke-r<T>-*  legacy branches whose name encodes T
+#   (b) claude/train-r<T>-*  interim branches whose name encodes T
+#   (c) claude/train-<id>-*  stable per-bird branches whose latest
+#                            commit's tree contains chain-design-r<T>/
 BIRD_REFS=()
 while read -r line; do
   ref=$(echo "$line" | awk '{print $2}' | sed 's|^refs/heads/|origin/|')
   [ -n "$ref" ] && BIRD_REFS+=("$ref")
 done < <( git ls-remote origin "refs/heads/claude/smoke-r${TARGET_ROUND}-*" 2>/dev/null
           git ls-remote origin "refs/heads/claude/train-r${TARGET_ROUND}-*" 2>/dev/null )
+# Stable per-bird branches: scan trees for chain-design-r<TARGET>/
+STABLE_BRANCHES=$(git ls-remote origin 'refs/heads/claude/train-*' 2>/dev/null \
+  | awk '{print $2}' | sed 's|^refs/heads/||' \
+  | grep -vE '^claude/train-r[0-9]+-')
+for br in $STABLE_BRANCHES; do
+  rs=$(_rounds_in_branch "$br")
+  if echo "$rs" | grep -qx "$TARGET_ROUND"; then
+    BIRD_REFS+=("origin/$br")
+  fi
+done
 
 for ref in "${EXTRA_REFS[@]}"; do
   BIRD_REFS+=("$ref")
