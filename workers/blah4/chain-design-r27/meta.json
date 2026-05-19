@@ -1,0 +1,13 @@
+{
+  "handle": "blah4",
+  "wave": "smoke-r27",
+  "extended_from": "workers/dispatcher/harvest-3way-r22/round-22 (sparse-delta vs harvest-5way-r10/round-10)",
+  "round_length_steps": 7,
+  "n_rounds_trained": 5,
+  "final_ctrl_bpc": "1.1073",
+  "MMLLM_BWD_SKIP_FRAC_NET_ONLY": "0.5",
+  "MMLLM_BWD_SKIP_FRAC_LOCAL": "0.0",
+  "MMLLM_ABLATION_QUICK": "true",
+  "branch_base": "main",
+  "git_sha": "9bc4b798c3feda7b33e03ba0404357a330daf628"
+}
