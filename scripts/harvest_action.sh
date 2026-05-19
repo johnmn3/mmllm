@@ -28,13 +28,15 @@ shift || true
 EXTRA_REFS=("$@")
 
 # Helper: peek at a remote branch tree (fetches if not local) and emit
-# every chain-design-r<N>/ round number present. Used by both
-# auto-detect (round → ?) and discovery (round → branches).
+# every chain-design-r<N>/ round number present at the
+# workers/<HANDLE>/chain-design-r<N>/ canonical bird-payload path.
+# Used by both auto-detect (round → ?) and discovery (round → branches).
 _rounds_in_branch() {
   local br="$1"
   git fetch origin "$br" --depth=1 >/dev/null 2>&1 || return 0
   git ls-tree -r --name-only "origin/$br" 2>/dev/null \
-    | grep -oE 'chain-design-r[0-9]+' | sed 's/chain-design-r//' | sort -un
+    | sed -nE 's|^workers/[^/]+/chain-design-r([0-9]+)/.*|\1|p' \
+    | sort -un
 }
 
 # Helper: list (fork/full_name, branch_name) pairs across forks of the
@@ -118,9 +120,16 @@ if [ -z "$TARGET_ROUND" ]; then
   while IFS='|' read -r fork br; do
     [ -z "$fork" ] && continue
     local_ref=$(_fetch_fork_branch "$fork" "$br") || continue
+    # Strict: only count rounds at the canonical bird-payload path
+    # workers/<HANDLE>/chain-design-r<N>/ so auto-detect agrees with
+    # step-2 discovery.
     rs=$(git ls-tree -r --name-only "$local_ref" 2>/dev/null \
-      | grep -oE 'chain-design-r[0-9]+' | sed 's/chain-design-r//' | sort -un)
-    [ -n "$rs" ] && ROUNDS_FROM_FORKS="$ROUNDS_FROM_FORKS $rs"
+      | sed -nE 's|^workers/[^/]+/chain-design-r([0-9]+)/.*|\1|p' \
+      | sort -un)
+    if [ -n "$rs" ]; then
+      ROUNDS_FROM_FORKS="$ROUNDS_FROM_FORKS $rs"
+      echo "  [fork-scan] $fork/$br → rounds: $(echo "$rs" | tr '\n' ' ')"
+    fi
   done < <(_list_fork_branches)
   ALL_ROUNDS=$( ( echo "$ROUNDS_FROM_NAME"
                   echo "$ROUNDS_FROM_TREE"
@@ -176,6 +185,17 @@ while IFS='|' read -r fork br; do
       | grep -qE "^workers/[^/]+/chain-design-r${TARGET_ROUND}/"; then
     BIRD_REFS+=("$local_ref")
     echo "  fork bird: $fork/$br"
+  else
+    # Help diagnose mismatches: show what chain-design-r* paths
+    # the bird's tree actually has.
+    bird_rounds=$(git ls-tree -r --name-only "$local_ref" 2>/dev/null \
+      | sed -nE 's|^workers/[^/]+/chain-design-r([0-9]+)/.*|\1|p' \
+      | sort -un | tr '\n' ' ')
+    other_paths=$(git ls-tree -r --name-only "$local_ref" 2>/dev/null \
+      | grep -E 'chain-design-r[0-9]+' \
+      | grep -vE '^workers/[^/]+/chain-design-r[0-9]+/' \
+      | head -3 | tr '\n' ' ')
+    echo "  fork skip: $fork/$br — has bird rounds [${bird_rounds:-none}], other chain-design-r paths: ${other_paths:-(none)}"
   fi
 done < <(_list_fork_branches)
 
