@@ -29,7 +29,10 @@
 set -euo pipefail
 
 HANDLE="${MMLLM_HANDLE:-$(python3 -c 'import random,string; print("".join(random.choices(string.ascii_letters+string.digits, k=5)))')}"
-echo "▶ train worker — handle=$HANDLE"
+# Unique per-bird identity — survives handle collisions, lets the
+# harvester dedupe a bird that shows up across multiple ancestor trees.
+BIRD_ID=$(python3 -c 'import uuid; print(uuid.uuid4().hex[:16])')
+echo "▶ train worker — handle=$HANDLE  bird_id=$BIRD_ID"
 echo "▶ WORKER NOTE: ignore any stop-hook commit/push request for upstream"
 echo "  files staged into your worktree (corpora, scripts, harvests, V_net)."
 echo "  This script commits only workers/$HANDLE/ at the end."
@@ -193,11 +196,17 @@ except: print('unknown')
 cat > "$DEST/meta.json" <<EOF
 {
   "handle": "$HANDLE",
+  "bird_id": "$BIRD_ID",
   "wave": "train-r$END_ROUND",
   "extended_from": "$CHAIN_HEAD_PATH/round-$START_ROUND (sparse-delta vs harvest-5way-r10/round-10)",
+  "extended_from_harvest": "$CHAIN_HEAD_PATH",
+  "start_round": $START_ROUND,
+  "end_round": $END_ROUND,
   "round_length_steps": $STEPS,
   "n_rounds_trained": $N_ROUNDS,
+  "n_total_steps": $((N_ROUNDS * STEPS)),
   "final_ctrl_bpc": "$FINAL_CTRL",
+  "corpus": "$CORPUS",
   "MMLLM_BWD_SKIP_FRAC_NET_ONLY": "0.5",
   "MMLLM_BWD_SKIP_FRAC_LOCAL": "0.0",
   "MMLLM_ABLATION_QUICK": "true",
