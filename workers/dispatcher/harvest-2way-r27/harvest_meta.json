@@ -1,0 +1,28 @@
+{
+  "target_round": 27,
+  "n_workers": 2,
+  "wave": "smoke-r27",
+  "workers": [
+    {
+      "handle": "kbfTW",
+      "branch": "origin/claude/smoke-r27-kbfTW",
+      "ctrl_bpc": 1.1133
+    },
+    {
+      "handle": "blah4",
+      "branch": "pr-2",
+      "ctrl_bpc": 1.1073
+    }
+  ],
+  "worker_ctrl_bpc_mean": 1.1103,
+  "worker_ctrl_bpc_best": 1.1073,
+  "previous_harvest": {
+    "round": 19,
+    "dir": "workers/dispatcher/harvest-4way-r19",
+    "mean": 1.9561,
+    "best": 1.9374
+  },
+  "harvested_at": "2026-05-19T08:11:39Z",
+  "harvester": "scripts/harvest_action.sh (GH Action)",
+  "note": "Lean harvest \u2014 sparse deltas + averaged dense only, no opt-state."
+}
