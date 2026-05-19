@@ -37,6 +37,36 @@ _rounds_in_branch() {
     | grep -oE 'chain-design-r[0-9]+' | sed 's/chain-design-r//' | sort -un
 }
 
+# Helper: list (fork/full_name, branch_name) pairs across forks of the
+# upstream repo, filtered to claude/train-* branches. Requires gh CLI
+# (preinstalled on GH-hosted runners; auto-uses GITHUB_TOKEN). Emits
+# one line per (fork, branch) as "fork|branch".
+UPSTREAM_REPO="${MMLLM_UPSTREAM_REPO:-johnmn3/mmllm}"
+_list_fork_branches() {
+  command -v gh > /dev/null 2>&1 || return 0
+  for fork in $(gh api "repos/${UPSTREAM_REPO}/forks?per_page=100" --jq '.[].full_name' 2>/dev/null); do
+    for br in $(gh api "repos/${fork}/branches?per_page=100" --jq '.[] | select(.name | startswith("claude/train-")) | .name' 2>/dev/null); do
+      echo "${fork}|${br}"
+    done
+  done
+}
+
+# Helper: fetch (fork, branch) into a local ref so the rest of the
+# script can treat it like any other ref. Echoes the local-ref name on
+# success, returns non-zero on failure.
+_fetch_fork_branch() {
+  local fork="$1"
+  local br="$2"
+  local safe
+  safe=$(echo "${fork}/${br}" | tr '/. ' '-' | tr -cd 'a-zA-Z0-9-' | cut -c1-60)
+  local local_ref="fork-${safe}"
+  if git fetch "https://github.com/${fork}.git" "${br}:refs/heads/${local_ref}" --depth=1 >/dev/null 2>&1; then
+    echo "$local_ref"
+    return 0
+  fi
+  return 1
+}
+
 # --- 1) Auto-detect target round if not specified --------------------
 # Branch flavors we accept:
 #   claude/smoke-r<N>-*           legacy, round in name
@@ -57,9 +87,21 @@ if [ -z "$TARGET_ROUND" ]; then
     rs=$(_rounds_in_branch "$br")
     [ -n "$rs" ] && ROUNDS_FROM_TREE="$ROUNDS_FROM_TREE $rs"
   done
-  ALL_ROUNDS=$( ( echo "$ROUNDS_FROM_NAME"; echo "$ROUNDS_FROM_TREE" ) \
+  # Same scan across forks of upstream
+  ROUNDS_FROM_FORKS=""
+  echo "  scanning forks of $UPSTREAM_REPO…"
+  while IFS='|' read -r fork br; do
+    [ -z "$fork" ] && continue
+    local_ref=$(_fetch_fork_branch "$fork" "$br") || continue
+    rs=$(git ls-tree -r --name-only "$local_ref" 2>/dev/null \
+      | grep -oE 'chain-design-r[0-9]+' | sed 's/chain-design-r//' | sort -un)
+    [ -n "$rs" ] && ROUNDS_FROM_FORKS="$ROUNDS_FROM_FORKS $rs"
+  done < <(_list_fork_branches)
+  ALL_ROUNDS=$( ( echo "$ROUNDS_FROM_NAME"
+                  echo "$ROUNDS_FROM_TREE"
+                  echo "$ROUNDS_FROM_FORKS" ) \
     | tr ' ' '\n' | grep -E '^[0-9]+$' | sort -un)
-  echo "  rounds visible on origin: $(echo "$ALL_ROUNDS" | tr '\n' ' ')"
+  echo "  rounds visible (origin + forks): $(echo "$ALL_ROUNDS" | tr '\n' ' ')"
   for R in $(echo "$ALL_ROUNDS" | tac); do
     if ! compgen -G "workers/dispatcher/harvest-*-r${R}" > /dev/null 2>&1; then
       TARGET_ROUND=$R
@@ -75,18 +117,20 @@ fi
 echo "▶ target round: $TARGET_ROUND"
 
 # --- 2) Discover bird branches for this round ------------------------
-# Three sources:
+# Four sources:
 #   (a) claude/smoke-r<T>-*  legacy branches whose name encodes T
 #   (b) claude/train-r<T>-*  interim branches whose name encodes T
-#   (c) claude/train-<id>-*  stable per-bird branches whose latest
-#                            commit's tree contains chain-design-r<T>/
+#   (c) claude/train-<id>-*  stable per-bird branches on origin whose
+#                            latest commit has chain-design-r<T>/
+#   (d) claude/train-*       on FORKS of $UPSTREAM_REPO whose latest
+#                            commit has chain-design-r<T>/
 BIRD_REFS=()
 while read -r line; do
   ref=$(echo "$line" | awk '{print $2}' | sed 's|^refs/heads/|origin/|')
   [ -n "$ref" ] && BIRD_REFS+=("$ref")
 done < <( git ls-remote origin "refs/heads/claude/smoke-r${TARGET_ROUND}-*" 2>/dev/null
           git ls-remote origin "refs/heads/claude/train-r${TARGET_ROUND}-*" 2>/dev/null )
-# Stable per-bird branches: scan trees for chain-design-r<TARGET>/
+# Stable per-bird branches on origin
 STABLE_BRANCHES=$(git ls-remote origin 'refs/heads/claude/train-*' 2>/dev/null \
   | awk '{print $2}' | sed 's|^refs/heads/||' \
   | grep -vE '^claude/train-r[0-9]+-')
@@ -96,6 +140,19 @@ for br in $STABLE_BRANCHES; do
     BIRD_REFS+=("origin/$br")
   fi
 done
+
+# Fork branches: scan every public fork of $UPSTREAM_REPO for train
+# branches and include any whose tree has chain-design-r<TARGET>/.
+echo "▶ scanning forks of $UPSTREAM_REPO for round-$TARGET_ROUND birds…"
+while IFS='|' read -r fork br; do
+  [ -z "$fork" ] && continue
+  local_ref=$(_fetch_fork_branch "$fork" "$br") || continue
+  if git ls-tree -r --name-only "$local_ref" 2>/dev/null \
+      | grep -qE "^workers/[^/]+/chain-design-r${TARGET_ROUND}/"; then
+    BIRD_REFS+=("$local_ref")
+    echo "  fork bird: $fork/$br"
+  fi
+done < <(_list_fork_branches)
 
 for ref in "${EXTRA_REFS[@]}"; do
   BIRD_REFS+=("$ref")
