@@ -1,4 +1,4 @@
-name: smoke-train
+name: train
 
 on:
   workflow_dispatch:
@@ -27,7 +27,7 @@ on:
           - clojure-fim
 
 # GITHUB_TOKEN with contents:write so the worker can push its
-# claude/smoke-r<END>-<HANDLE> branch back to origin.
+# claude/train-r<END>-<HANDLE> branch back to origin.
 permissions:
   contents: write
 
@@ -64,22 +64,22 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-          # No pip cache — smoke.sh installs offline from wheels checked
+          # No pip cache — train.sh installs offline from wheels checked
           # into workers/dispatcher/deps/wheels on the branch.
 
       - name: Configure git identity
         run: |
-          git config user.name  "smoke-train CI"
-          git config user.email "smoke-train@github-actions.local"
+          git config user.name  "train CI"
+          git config user.email "train@github-actions.local"
 
-      - name: Run smoke worker
+      - name: Run train worker
         env:
           MMLLM_HANDLE: ${{ inputs.handle }}
           MMLLM_N_ROUNDS: ${{ inputs.n_rounds }}
           MMLLM_STEPS_PER_ROUND: ${{ inputs.steps_per_round }}
           MMLLM_CORPUS: ${{ inputs.corpus }}
         run: |
-          bash scripts/smoke.sh
+          bash scripts/train.sh
 
       - name: Upload training logs as artifact (always — even on failure)
         if: always()
