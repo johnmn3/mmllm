@@ -131,7 +131,18 @@ END_ROUND=$((START_ROUND + N_ROUNDS))
 # 9-corpus FIM-heavy mix currently shipping). Workers can pick a
 # different mix to specialize the model's exposure for the next harvest
 # round.
-CORPUS="${MMLLM_CORPUS:-fim}"
+# Pick the training mix. Order of precedence:
+#   1. MMLLM_CORPUS env var set explicitly (manual workflow_dispatch
+#      with a corpus chosen from the dropdown).
+#   2. Empty/unset (cron-triggered schedule run, or someone running
+#      train.sh by hand without setting it) → random choice across
+#      all four corpora for diversity in the chain.
+if [ -n "${MMLLM_CORPUS:-}" ]; then
+  CORPUS="$MMLLM_CORPUS"
+else
+  CORPUS=$(python3 -c "import random; print(random.choice(['fim','general','clojure-general','clojure-fim']))")
+  echo "▶ corpus auto-selected at random: $CORPUS"
+fi
 B=/tmp/mmllm-cpu/battery
 G=/tmp/mmllm-cpu/fim-json-v3.train.bin
 case "$CORPUS" in
