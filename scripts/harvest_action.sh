@@ -43,24 +43,26 @@ _rounds_in_branch() {
 # one line per (fork, branch) as "fork|branch".
 UPSTREAM_REPO="${MMLLM_UPSTREAM_REPO:-johnmn3/mmllm}"
 _list_fork_branches() {
+  echo "  [_list_fork_branches] starting…" >&2
   if ! command -v gh > /dev/null 2>&1; then
     echo "  [_list_fork_branches] gh CLI not available — skipping fork scan" >&2
     return 0
   fi
-  local forks_out
-  forks_out=$(gh api "repos/${UPSTREAM_REPO}/forks?per_page=100" --jq '.[].full_name' 2>&1)
-  if [ $? -ne 0 ]; then
-    echo "  [_list_fork_branches] gh api forks failed:" >&2
-    echo "  $forks_out" | head -3 >&2
+  echo "  [_list_fork_branches] gh CLI present; calling forks API…" >&2
+  local forks_out=""
+  # Wrap the substitution in 'if ! ...; then' so set -e doesn't kill us
+  # silently when gh exits non-zero (auth fail, rate limit, etc).
+  if ! forks_out=$(gh api "repos/${UPSTREAM_REPO}/forks?per_page=100" --jq '.[].full_name' 2>&1); then
+    echo "  [_list_fork_branches] gh api forks FAILED:" >&2
+    echo "  $forks_out" | head -5 >&2
     return 0
   fi
   local n_forks=0
   for fork in $forks_out; do
     n_forks=$((n_forks + 1))
-    local br_out
-    br_out=$(gh api "repos/${fork}/branches?per_page=100" --jq '.[] | select(.name | startswith("claude/train-")) | .name' 2>&1)
-    if [ $? -ne 0 ]; then
-      echo "  [_list_fork_branches] gh api branches failed for $fork:" >&2
+    local br_out=""
+    if ! br_out=$(gh api "repos/${fork}/branches?per_page=100" --jq '.[] | select(.name | startswith("claude/train-")) | .name' 2>&1); then
+      echo "  [_list_fork_branches] gh api branches FAILED for $fork:" >&2
       echo "  $br_out" | head -3 >&2
       continue
     fi
