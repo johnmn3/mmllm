@@ -70,12 +70,19 @@ jobs:
           echo "PR_REFS=$PR_REFS" >> $GITHUB_ENV
 
       - name: Run harvest
+        id: harvest
         env:
           TARGET_ROUND: ${{ inputs.target_round }}
           # PR_REFS is unset (empty) if the fork-PR step was skipped.
           PR_REFS: ${{ env.PR_REFS || '' }}
         run: |
           bash scripts/harvest_action.sh "$TARGET_ROUND" $PR_REFS
+          # Pull the new harvest dir name out so the artifact step
+          # uploads ONLY that, not every prior harvest dir on the branch.
+          NEW_DIR=$(ls -d workers/dispatcher/harvest-*-r*/ 2>/dev/null \
+            | xargs -n1 -I {} bash -c 'echo "$(git log -1 --format=%ct -- {}) {}"' \
+            | sort -rn | head -1 | awk '{print $2}')
+          echo "new_dir=$NEW_DIR" >> $GITHUB_OUTPUT
 
       - name: Commit + push harvest
         run: |
@@ -84,18 +91,17 @@ jobs:
             echo "▶ no harvest changes to commit (already up to date?)"
             exit 0
           fi
-          # Pull the new harvest dir name for the commit msg
           NEW_DIR=$(git diff --cached --name-only \
             | grep -oE 'workers/dispatcher/harvest-[0-9]+way-r[0-9]+' \
             | sort -u | head -1)
           git commit -m "harvest: $NEW_DIR (auto, via harvest.yml workflow)"
           git push origin HEAD:main
 
-      - name: Upload harvest as artifact (always — even on failure)
-        if: always()
+      - name: Upload only the new harvest dir as artifact
+        if: always() && steps.harvest.outputs.new_dir != ''
         uses: actions/upload-artifact@v4
         with:
           name: harvest-${{ github.run_id }}
-          path: workers/dispatcher/harvest-*-r*/
+          path: ${{ steps.harvest.outputs.new_dir }}
           if-no-files-found: ignore
           retention-days: 14

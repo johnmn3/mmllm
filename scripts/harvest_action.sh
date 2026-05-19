@@ -78,7 +78,7 @@ for ref in "${BIRD_REFS[@]}"; do
     origin/claude/*)
       BRANCH="${ref#origin/}"
       echo "▶ fetching $BRANCH…"
-      git fetch origin "$BRANCH" --depth=1 2>&1 | tail -1
+      git fetch origin "$BRANCH" --depth=1 2>&1 | tail -1 || true
       ;;
   esac
   # Find the bird's handle by inspecting the tree
@@ -91,8 +91,21 @@ for ref in "${BIRD_REFS[@]}"; do
   fi
   echo "  handle: $HANDLE"
   mkdir -p "$WORK/$HANDLE"
-  git archive "$ref" "workers/$HANDLE/chain-design-r${TARGET_ROUND}/" 2>/dev/null \
-    | tar -x -C "$WORK/$HANDLE/" --strip-components=3
+  # Errors visible; if archive can't read the tree (shallow fetch
+  # missing blobs, etc.) we want to know which bird and why.
+  if ! git archive "$ref" "workers/$HANDLE/chain-design-r${TARGET_ROUND}/" \
+       | tar -x -C "$WORK/$HANDLE/" --strip-components=3; then
+    echo "  WARN: git archive | tar failed for $ref — skipping" >&2
+    rm -rf "$WORK/$HANDLE"
+    continue
+  fi
+  N_FILES=$(ls "$WORK/$HANDLE/" 2>/dev/null | wc -l)
+  if [ "$N_FILES" -eq 0 ]; then
+    echo "  WARN: extracted 0 files for $ref — skipping" >&2
+    rm -rf "$WORK/$HANDLE"
+    continue
+  fi
+  echo "    extracted $N_FILES files"
   HANDLES+=("$HANDLE")
   BIRD_DIRS+=("$WORK/$HANDLE")
 done
