@@ -266,13 +266,16 @@ if [ $N -eq 0 ]; then
 fi
 
 # Cap N birds per harvest run. Empirically the GH free-tier runner
-# starts SIGTERM-ing this step somewhere between 5-7 birds (cumulative
-# git fetch / cgroup / network pressure — exact cause not pinned). A
-# half dozen is the safe budget; unharvested birds at the same round
-# are dropped from THIS run and would need a follow-up harvest run
-# triggered AT the same target_round to pick them up. Override via
-# MMLLM_MAX_BIRDS_PER_HARVEST.
-MAX_BIRDS="${MMLLM_MAX_BIRDS_PER_HARVEST:-6}"
+# starts having trouble at higher bird counts:
+#   - Push size scales with N (5-bird → ~150 MB; 6-bird r36 hit the
+#     HTTP-proxy sideband-disconnect range and the push hung).
+#   - Some legacy SIGTERM/disk-pressure interactions also got worse
+#     past ~5 birds.
+# 3-bird harvests (r20, r22) pushed cleanly historically — that's the
+# known-working setting. Unharvested birds at the same round get
+# picked up on subsequent runs (auto re-harvest at the same round).
+# Override via MMLLM_MAX_BIRDS_PER_HARVEST.
+MAX_BIRDS="${MMLLM_MAX_BIRDS_PER_HARVEST:-3}"
 if [ $N -gt $MAX_BIRDS ]; then
   echo "▶ found $N birds — capping at $MAX_BIRDS for this run"
   echo "  keeping:"
