@@ -34,6 +34,7 @@ on:
   # Hourly is faster than the bird wall (~75 min), so runs overlap —
   # that's intentional, they FedAvg-merge at harvest time.
   schedule:
+    # Every hour at minute 0 UTC.
     - cron: "0 * * * *"
 
 # GITHUB_TOKEN needs contents:write to push the bird branch and
