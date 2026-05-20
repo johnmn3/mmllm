@@ -272,7 +272,7 @@ fi
 # are dropped from THIS run and would need a follow-up harvest run
 # triggered AT the same target_round to pick them up. Override via
 # MMLLM_MAX_BIRDS_PER_HARVEST.
-MAX_BIRDS="${MMLLM_MAX_BIRDS_PER_HARVEST:-4}"
+MAX_BIRDS="${MMLLM_MAX_BIRDS_PER_HARVEST:-6}"
 if [ $N -gt $MAX_BIRDS ]; then
   echo "▶ found $N birds — capping at $MAX_BIRDS for this run"
   echo "  keeping:"
