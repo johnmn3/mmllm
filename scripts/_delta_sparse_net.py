@@ -201,11 +201,16 @@ def fedavg(out_dir, worker_dirs):
 
     Writes merged delta to out_dir/ in the same chunk format.
 
-    Memory: streams workers one at a time per pid instead of loading
-    all into a list. Peak memory ≈ delta_sum + one worker's payload
-    instead of delta_sum + N workers'. Matters at N≥10 on 7-GB free
-    runners.
+    Memory: streams workers one at a time per pid. After each load we
+    drop the reference and force gc; without that, pytorch's CPU
+    caching allocator holds onto storages and memory grows linearly
+    with bird count even though we never hold more than one bird's
+    payload at a time logically.
     """
+    import gc, resource
+    def _rss_mb():
+        return resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024.0
+
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     worker_dirs = [Path(w) for w in worker_dirs]
@@ -220,9 +225,14 @@ def fedavg(out_dir, worker_dirs):
         if m["sqrt_net"] != metas[0]["sqrt_net"] or m["c_net"] != metas[0]["c_net"]:
             print(f"fedavg: shape mismatch at {w}", file=sys.stderr); sys.exit(2)
     torch.save(metas[0], meta_path(out_dir))
-
     c_net = metas[0]["c_net"]
-    for pid in pids:
+    del metas
+    gc.collect()
+
+    print(f"fedavg: starting {len(pids)}-pid merge across "
+          f"{len(worker_dirs)} workers (peak RSS so far: {_rss_mb():.0f} MB)")
+
+    for pid_idx, pid in enumerate(pids):
         # Pass 1: collect the union of touched rows. Load each worker
         # one at a time, take just the keys, drop the rest immediately.
         union_set = set()
@@ -235,7 +245,8 @@ def fedavg(out_dir, worker_dirs):
             if d.get("row_to_buf"):
                 union_set.update(d["row_to_buf"].keys())
                 worker_paths.append(p)
-            del d  # explicit GC hint
+            del d
+        gc.collect()
 
         if not worker_paths:
             torch.save({"delta_buf": torch.zeros((0, c_net), dtype=torch.float32),
@@ -248,6 +259,8 @@ def fedavg(out_dir, worker_dirs):
         new_r2b = {vrow: i for i, vrow in enumerate(union)}
         delta_sum = torch.zeros((R, c_net), dtype=torch.float32)
         counts = torch.zeros((R,), dtype=torch.long)
+        del union_set, union  # we have new_r2b; the source sets are no longer needed
+        gc.collect()
 
         # Pass 2: stream each worker's delta into the accumulator,
         # dropping the loaded payload immediately after use.
@@ -262,15 +275,23 @@ def fedavg(out_dir, worker_dirs):
                     dst_rows.append(new_r2b[vrow])
                 src_t = torch.tensor(src_rows, dtype=torch.long)
                 dst_t = torch.tensor(dst_rows, dtype=torch.long)
-                delta_sum.index_add_(0, dst_t,
-                                     s["delta_buf"][src_t].to(torch.float32))
+                contrib = s["delta_buf"][src_t].to(torch.float32)
+                delta_sum.index_add_(0, dst_t, contrib)
                 counts.index_add_(0, dst_t, torch.ones(len(dst_t), dtype=torch.long))
-            del s  # drop the worker's payload before loading the next
+                del contrib, src_t, dst_t, src_rows, dst_rows
+            del s, r2b
+            gc.collect()
 
         # Per-row mean over the workers that touched it.
         delta_merged = delta_sum / counts.unsqueeze(1).to(torch.float32)
         torch.save({"delta_buf": delta_merged, "row_to_buf": new_r2b},
                    pid_path(out_dir, pid))
+        del delta_sum, counts, delta_merged, new_r2b
+        gc.collect()
+
+        if pid_idx % 8 == 0 or pid_idx == len(pids) - 1:
+            print(f"  pid {pid_idx + 1}/{len(pids)}: R={R}, "
+                  f"workers={len(worker_paths)}, RSS={_rss_mb():.0f} MB")
 
     print(f"fedavg: merged {len(worker_dirs)} workers' deltas → {out_dir}")
 
