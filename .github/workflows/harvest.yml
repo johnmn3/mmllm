@@ -31,13 +31,24 @@ permissions:
 
 jobs:
   harvest:
-    # Only auto-run on upstream. Manual workflow_dispatch on any fork
-    # still works (the != 'schedule' check is true for manual triggers).
-    if: github.event_name != 'schedule' || github.repository == 'johnmn3/mmllm'
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    # Compose an explicit "is_active_run" expression once; every
+    # downstream step gates on it. We DON'T use a job-level `if:`
+    # because that's correlated with GH's scheduler-cache going
+    # stale after YAML changes.
+    env:
+      UPSTREAM_REPO: "johnmn3/mmllm"
 
     steps:
+      - name: Banner
+        run: |
+          echo "event=${{ github.event_name }}  repo=${{ github.repository }}"
+          if [ "${{ github.event_name }}" = "schedule" ] && \
+             [ "${{ github.repository }}" != "${{ env.UPSTREAM_REPO }}" ]; then
+            echo "→ scheduled trigger on a fork — will skip the actual harvest step."
+          fi
+
       - name: Checkout upstream main (works on forks too)
         uses: actions/checkout@v4
         with:
@@ -88,6 +99,9 @@ jobs:
 
       - name: Run harvest
         id: harvest
+        # Skip on scheduled triggers from forks — cron auto-harvest is
+        # upstream-only. workflow_dispatch always runs.
+        if: ${{ github.event_name != 'schedule' || github.repository == env.UPSTREAM_REPO }}
         env:
           TARGET_ROUND: ${{ inputs.target_round }}
           # PR_REFS is unset (empty) if the fork-PR step was skipped.
@@ -104,6 +118,7 @@ jobs:
           echo "new_dir=$NEW_DIR" >> $GITHUB_OUTPUT
 
       - name: Commit + push harvest
+        if: ${{ github.event_name != 'schedule' || github.repository == env.UPSTREAM_REPO }}
         run: |
           git add workers/dispatcher/harvest-*-r*/
           if git diff --cached --quiet; then

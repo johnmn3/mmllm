@@ -200,6 +200,11 @@ def fedavg(out_dir, worker_dirs):
     """Row-aware FedAvg across workers' delta chunks.
 
     Writes merged delta to out_dir/ in the same chunk format.
+
+    Memory: streams workers one at a time per pid instead of loading
+    all into a list. Peak memory ≈ delta_sum + one worker's payload
+    instead of delta_sum + N workers'. Matters at N≥10 on 7-GB free
+    runners.
     """
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -218,37 +223,49 @@ def fedavg(out_dir, worker_dirs):
 
     c_net = metas[0]["c_net"]
     for pid in pids:
-        states = []
+        # Pass 1: collect the union of touched rows. Load each worker
+        # one at a time, take just the keys, drop the rest immediately.
+        union_set = set()
+        worker_paths = []
         for w in worker_dirs:
             p = pid_path(w, pid)
-            if p.exists():
-                d = torch.load(p, map_location="cpu", weights_only=False)
-                if d["row_to_buf"]:
-                    states.append(d)
-        if not states:
+            if not p.exists():
+                continue
+            d = torch.load(p, map_location="cpu", weights_only=False)
+            if d.get("row_to_buf"):
+                union_set.update(d["row_to_buf"].keys())
+                worker_paths.append(p)
+            del d  # explicit GC hint
+
+        if not worker_paths:
             torch.save({"delta_buf": torch.zeros((0, c_net), dtype=torch.float32),
                         "row_to_buf": {}},
                        pid_path(out_dir, pid))
             continue
 
-        # Union of touched rows.
-        union = sorted({vrow for s in states for vrow in s["row_to_buf"].keys()})
+        union = sorted(union_set)
         R = len(union)
         new_r2b = {vrow: i for i, vrow in enumerate(union)}
         delta_sum = torch.zeros((R, c_net), dtype=torch.float32)
         counts = torch.zeros((R,), dtype=torch.long)
 
-        for s in states:
-            src_rows = []
-            dst_rows = []
-            for vrow, bidx in s["row_to_buf"].items():
-                src_rows.append(bidx)
-                dst_rows.append(new_r2b[vrow])
-            src_t = torch.tensor(src_rows, dtype=torch.long)
-            dst_t = torch.tensor(dst_rows, dtype=torch.long)
-            delta_sum.index_add_(0, dst_t,
-                                 s["delta_buf"][src_t].to(torch.float32))
-            counts.index_add_(0, dst_t, torch.ones(len(dst_t), dtype=torch.long))
+        # Pass 2: stream each worker's delta into the accumulator,
+        # dropping the loaded payload immediately after use.
+        for p in worker_paths:
+            s = torch.load(p, map_location="cpu", weights_only=False)
+            r2b = s.get("row_to_buf") or {}
+            if r2b:
+                src_rows = []
+                dst_rows = []
+                for vrow, bidx in r2b.items():
+                    src_rows.append(bidx)
+                    dst_rows.append(new_r2b[vrow])
+                src_t = torch.tensor(src_rows, dtype=torch.long)
+                dst_t = torch.tensor(dst_rows, dtype=torch.long)
+                delta_sum.index_add_(0, dst_t,
+                                     s["delta_buf"][src_t].to(torch.float32))
+                counts.index_add_(0, dst_t, torch.ones(len(dst_t), dtype=torch.long))
+            del s  # drop the worker's payload before loading the next
 
         # Per-row mean over the workers that touched it.
         delta_merged = delta_sum / counts.unsqueeze(1).to(torch.float32)
