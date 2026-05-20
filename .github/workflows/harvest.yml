@@ -12,19 +12,28 @@ on:
         description: "Comma-separated PR numbers from forks to merge in (e.g., '12,13'). Optional."
         required: false
         default: ""
-  # Cron auto-harvest: every 3 hours. With no inputs, harvest_action.sh
+  # Cron auto-harvest: every hour. With no inputs, harvest_action.sh
   # auto-detects the highest unharvested round (across legacy smoke-r*,
-  # interim train-r<N>-*, and stable per-bird train-<id>-* branches)
-  # and merges every bird currently sitting at that round. If there's
-  # no unharvested round, the script exits 0 quietly.
+  # interim train-r<N>-*, stable per-bird train-<id>-* branches on
+  # origin, and every public fork's train-* branches) and merges every
+  # bird currently at that round. If nothing's unharvested, the script
+  # exits 0 quietly.
+  #
+  # Guard at the job level: scheduled triggers only run on the upstream
+  # johnmn3/mmllm repo. Forks that enable the workflow can still trigger
+  # it manually via workflow_dispatch, but they won't waste compute on
+  # hourly auto-runs that would just duplicate upstream's harvest.
   schedule:
-    - cron: "0 */3 * * *"
+    - cron: "0 * * * *"
 
 permissions:
   contents: write
 
 jobs:
   harvest:
+    # Only auto-run on upstream. Manual workflow_dispatch on any fork
+    # still works (the != 'schedule' check is true for manual triggers).
+    if: github.event_name != 'schedule' || github.repository == 'johnmn3/mmllm'
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
