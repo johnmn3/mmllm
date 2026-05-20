@@ -154,6 +154,8 @@ if [ -z "$TARGET_ROUND" ]; then
   fi
 fi
 echo "▶ target round: $TARGET_ROUND"
+echo "▶ disk state before harvest:"
+df -h / /tmp 2>&1 | head -5 | sed 's/^/    /'
 
 # --- 2) Discover bird branches for this round ------------------------
 # Four sources:
@@ -255,8 +257,13 @@ for ref in "${BIRD_REFS[@]}"; do
   mkdir -p "$WORK/$HANDLE"
   # Errors visible; if archive can't read the tree (shallow fetch
   # missing blobs, etc.) we want to know which bird and why.
+  # We use delta-sparse-net.* + dense.pt + meta + logs. The
+  # opt-sparse-net.*.pt files (~half the bird's payload) are unused
+  # by the harvest — exclude them so /tmp doesn't blow up on big
+  # N-bird harvests.
   if ! git archive "$ref" "workers/$HANDLE/chain-design-r${TARGET_ROUND}/" \
-       | tar -x -C "$WORK/$HANDLE/" --strip-components=3; then
+       | tar -x -C "$WORK/$HANDLE/" --strip-components=3 \
+         --exclude='opt-sparse-net.*'; then
     echo "  WARN: git archive | tar failed for $ref — skipping" >&2
     rm -rf "$WORK/$HANDLE"
     continue
@@ -284,6 +291,9 @@ WAYS="${N}way"
 OUT="workers/dispatcher/harvest-${WAYS}-r${TARGET_ROUND}/round-${TARGET_ROUND}"
 mkdir -p "$OUT"
 
+echo "▶ disk state after extracts:"
+df -h / /tmp 2>&1 | head -5 | sed 's/^/    /'
+du -sh "$WORK" 2>&1 | sed 's/^/    work-dir: /'
 echo "▶ FedAvg merging delta-sparse-net across $N birds…"
 python3 scripts/_delta_sparse_net.py fedavg "$OUT" "${BIRD_DIRS[@]}" 2>&1 | tail -3
 

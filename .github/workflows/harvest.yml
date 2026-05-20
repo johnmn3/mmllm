@@ -75,7 +75,26 @@ jobs:
           git config user.name  "harvest CI"
           git config user.email "harvest@github-actions.local"
 
+      - name: Free disk (drop unused pre-installed tool caches)
+        # ubuntu-latest comes with ~30+ GB of pre-installed runtimes
+        # (Android SDK, .NET, Java, Haskell, etc.). We don't use any
+        # of them; freeing them gives us comfortable headroom for
+        # 10+ bird extracts.
+        if: ${{ github.event_name != 'schedule' || github.repository == env.UPSTREAM_REPO }}
+        run: |
+          echo "▶ before free:"
+          df -h /
+          sudo rm -rf /usr/share/dotnet /usr/share/swift \
+                      /usr/local/lib/android /opt/ghc \
+                      /opt/hostedtoolcache/CodeQL \
+                      /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk \
+                      /opt/hostedtoolcache/Ruby \
+                      /opt/hostedtoolcache/go 2>/dev/null || true
+          echo "▶ after free:"
+          df -h /
+
       - name: Install deps from on-branch wheels (offline)
+        if: ${{ github.event_name != 'schedule' || github.repository == env.UPSTREAM_REPO }}
         run: |
           WHEELS=workers/dispatcher/deps/wheels
           for prefix in "$WHEELS"/*.part-00; do
