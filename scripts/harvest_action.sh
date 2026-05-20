@@ -119,12 +119,18 @@ if [ -z "$TARGET_ROUND" ]; then
     rs=$(_rounds_in_branch "$br")
     [ -n "$rs" ] && ROUNDS_FROM_TREE="$ROUNDS_FROM_TREE $rs"
   done
-  # Same scan across forks of upstream
+  # Same scan across forks of upstream. We populate FORK_REFS_CACHE
+  # here so step-2 discovery (below) can REUSE the fetched local refs
+  # instead of calling _list_fork_branches + _fetch_fork_branch again
+  # — that duplication previously did ~16 fork fetches per harvest run
+  # and contributed to the runner SIGTERM threshold.
   ROUNDS_FROM_FORKS=""
+  FORK_REFS_CACHE=""   # one "fork|br|local_ref" per line, '\n' separated
   echo "  scanning forks of $UPSTREAM_REPO…"
   while IFS='|' read -r fork br; do
     [ -z "$fork" ] && continue
     local_ref=$(_fetch_fork_branch "$fork" "$br") || continue
+    FORK_REFS_CACHE="${FORK_REFS_CACHE}${fork}|${br}|${local_ref}"$'\n'
     # Strict: only count rounds at the canonical bird-payload path
     # workers/<HANDLE>/chain-design-r<N>/ so auto-detect agrees with
     # step-2 discovery.
@@ -208,27 +214,46 @@ done
 
 # Fork branches: scan every public fork of $UPSTREAM_REPO for train
 # branches and include any whose tree has chain-design-r<TARGET>/.
+# If we ran auto-detect above we already enumerated and fetched
+# everything into FORK_REFS_CACHE — reuse that. If TARGET_ROUND was
+# passed as a workflow input (skipping auto-detect), enumerate fresh.
 echo "▶ scanning forks of $UPSTREAM_REPO for round-$TARGET_ROUND birds…"
-while IFS='|' read -r fork br; do
-  [ -z "$fork" ] && continue
-  echo "  checking $fork/$br…"
-  if ! local_ref=$(_fetch_fork_branch "$fork" "$br"); then
-    echo "    skip — _fetch_fork_branch failed"
-    continue
-  fi
-  # Use sed (same code path as auto-detect, known to work) to extract
-  # all rounds present at canonical workers/<H>/chain-design-r<N>/
-  # paths; then check whether TARGET_ROUND is in that set.
-  canonical_rounds=$(git ls-tree -r --name-only "$local_ref" 2>/dev/null \
-    | sed -nE 's|^workers/[^/]+/chain-design-r([0-9]+)/.*|\1|p' \
-    | sort -un || true)
-  if echo "$canonical_rounds" | grep -qx "$TARGET_ROUND"; then
-    BIRD_REFS+=("$local_ref")
-    echo "    ✓ fork bird (canonical rounds: $(echo "$canonical_rounds" | tr '\n' ' '))"
-  else
-    echo "    skip — TARGET_ROUND=$TARGET_ROUND not in canonical rounds: $(echo "$canonical_rounds" | tr '\n' ' '|| echo none)"
-  fi
-done < <(_list_fork_branches)
+if [ -n "${FORK_REFS_CACHE:-}" ]; then
+  echo "  (reusing $(echo "$FORK_REFS_CACHE" | grep -c .) fork refs from auto-detect — skipping re-enumeration)"
+  CACHE_SRC=$(printf '%s' "$FORK_REFS_CACHE")
+  while IFS='|' read -r fork br local_ref; do
+    [ -z "$fork" ] && continue
+    echo "  checking $fork/$br…"
+    canonical_rounds=$(git ls-tree -r --name-only "$local_ref" 2>/dev/null \
+      | sed -nE 's|^workers/[^/]+/chain-design-r([0-9]+)/.*|\1|p' \
+      | sort -un || true)
+    if echo "$canonical_rounds" | grep -qx "$TARGET_ROUND"; then
+      BIRD_REFS+=("$local_ref")
+      echo "    ✓ fork bird (canonical rounds: $(echo "$canonical_rounds" | tr '\n' ' '))"
+    else
+      echo "    skip — TARGET_ROUND=$TARGET_ROUND not in canonical rounds: $(echo "$canonical_rounds" | tr '\n' ' '|| echo none)"
+    fi
+  done <<< "$CACHE_SRC"
+else
+  # Auto-detect was skipped (user passed TARGET_ROUND). Enumerate now.
+  while IFS='|' read -r fork br; do
+    [ -z "$fork" ] && continue
+    echo "  checking $fork/$br…"
+    if ! local_ref=$(_fetch_fork_branch "$fork" "$br"); then
+      echo "    skip — _fetch_fork_branch failed"
+      continue
+    fi
+    canonical_rounds=$(git ls-tree -r --name-only "$local_ref" 2>/dev/null \
+      | sed -nE 's|^workers/[^/]+/chain-design-r([0-9]+)/.*|\1|p' \
+      | sort -un || true)
+    if echo "$canonical_rounds" | grep -qx "$TARGET_ROUND"; then
+      BIRD_REFS+=("$local_ref")
+      echo "    ✓ fork bird (canonical rounds: $(echo "$canonical_rounds" | tr '\n' ' '))"
+    else
+      echo "    skip — TARGET_ROUND=$TARGET_ROUND not in canonical rounds: $(echo "$canonical_rounds" | tr '\n' ' '|| echo none)"
+    fi
+  done < <(_list_fork_branches)
+fi
 
 for ref in "${EXTRA_REFS[@]}"; do
   BIRD_REFS+=("$ref")
@@ -247,7 +272,7 @@ fi
 # are dropped from THIS run and would need a follow-up harvest run
 # triggered AT the same target_round to pick them up. Override via
 # MMLLM_MAX_BIRDS_PER_HARVEST.
-MAX_BIRDS="${MMLLM_MAX_BIRDS_PER_HARVEST:-6}"
+MAX_BIRDS="${MMLLM_MAX_BIRDS_PER_HARVEST:-4}"
 if [ $N -gt $MAX_BIRDS ]; then
   echo "▶ found $N birds — capping at $MAX_BIRDS for this run"
   echo "  keeping:"
@@ -272,6 +297,13 @@ mkdir -p "$WORK"
 HANDLES=()
 BIRD_DIRS=()
 KEPT_REFS=()
+_bird_diag() {
+  # Show wall clock, runner disk, and runner memory between birds so
+  # if we get SIGTERMed we can see which resource ran out.
+  echo "    [diag] $(date -u +%H:%M:%S)  rss=$(awk '/VmRSS/{print $2"kB"}' /proc/self/status 2>/dev/null || echo '?')  free=$(free -m 2>/dev/null | awk '/^Mem:/{print $4"M"}' || echo '?')  disk=$(df -h /tmp 2>/dev/null | awk 'NR==2{print $4}' || echo '?')  packs=$(find .git/objects/pack -name '*.pack' 2>/dev/null | wc -l)"
+}
+
+_bird_diag
 for ref in "${BIRD_REFS[@]}"; do
   echo "▶ processing $ref…"
   case "$ref" in
@@ -324,6 +356,11 @@ for ref in "${BIRD_REFS[@]}"; do
   HANDLES+=("$HANDLE")
   BIRD_DIRS+=("$WORK/$HANDLE")
   KEPT_REFS+=("$ref")
+  _bird_diag
+  # Compact .git after each bird so the per-fetch pack accumulation
+  # doesn't grow unbounded. --auto is conservative; only repacks if
+  # over the threshold.
+  git gc --auto --quiet 2>/dev/null || true
 done
 
 N=${#BIRD_DIRS[@]}
