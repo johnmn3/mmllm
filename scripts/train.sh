@@ -75,15 +75,20 @@ git checkout FETCH_HEAD -- \
 
 # 2) Deps — install from pre-built wheels on the branch (no PyPI fetch).
 #    The torch wheel is committed as 95 MB .part-NN chunks (GH 100 MB
-#    file limit); reassemble it before install.
+#    file limit); reassemble it into /tmp before install so the
+#    worktree stays clean (otherwise the reassembled wheel ends up
+#    getting picked up by any future `git add workers/dispatcher/`).
 echo "▶ installing deps from workers/dispatcher/deps/wheels (offline)…"
 WHEELS=workers/dispatcher/deps/wheels
+STAGE=/tmp/wheels-staged
+mkdir -p "$STAGE"
+cp "$WHEELS"/*.whl "$STAGE"/ 2>/dev/null || true
 for prefix in "$WHEELS"/*.part-00; do
   [ -f "$prefix" ] || continue
-  base="${prefix%.part-00}"
-  [ -f "$base" ] || cat "${base}".part-?? > "$base"
+  base=$(basename "${prefix%.part-00}")
+  cat "$WHEELS/${base}".part-?? > "$STAGE/$base"
 done
-pip install --no-index --find-links="$WHEELS" -e . --quiet
+pip install --no-index --find-links="$STAGE" -e . --quiet
 
 # 3) Corpora are pre-staged on the branch (no HF download, no prep step).
 # Bins over GitHub's 100 MB per-file limit are committed as 95 MB

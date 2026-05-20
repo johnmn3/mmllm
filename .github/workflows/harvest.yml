@@ -99,13 +99,19 @@ jobs:
       - name: Install deps from on-branch wheels (offline)
         if: ${{ github.event_name != 'schedule' || github.repository == env.UPSTREAM_REPO }}
         run: |
+          # Reassemble split wheels into /tmp (NOT the worktree, which
+          # would let `git add` pick them up). pip install reads from
+          # the combined --find-links directory.
           WHEELS=workers/dispatcher/deps/wheels
+          STAGE=/tmp/wheels-staged
+          mkdir -p "$STAGE"
+          cp "$WHEELS"/*.whl "$STAGE"/ 2>/dev/null || true
           for prefix in "$WHEELS"/*.part-00; do
             [ -f "$prefix" ] || continue
-            base="${prefix%.part-00}"
-            [ -f "$base" ] || cat "${base}".part-?? > "$base"
+            base=$(basename "${prefix%.part-00}")
+            cat "$WHEELS/${base}".part-?? > "$STAGE/$base"
           done
-          pip install --no-index --find-links="$WHEELS" -e . --quiet
+          pip install --no-index --find-links="$STAGE" -e . --quiet
 
       - name: Fetch fork PRs (if any)
         if: ${{ inputs.pr_numbers != '' }}
@@ -142,19 +148,44 @@ jobs:
       - name: Commit + push harvest
         if: ${{ github.event_name != 'schedule' || github.repository == env.UPSTREAM_REPO }}
         run: |
-          # -A picks up both the new harvest dir AND the deletion of
-          # any superseded harvest-*-r<R> dirs (the re-harvest path).
+          # Tight scope: only add harvest dirs. -A so any superseded
+          # harvest-*-r<R>/ dirs (the re-harvest path) get staged as
+          # deletions too. Do NOT `git add workers/dispatcher/` — that
+          # picks up unrelated worktree pollution (e.g. the reassembled
+          # torch wheel that pip install leaves behind in deps/wheels).
+          # Deletions of superseded harvest dirs are already staged by
+          # harvest_action.sh's `git rm -rf`.
           git add -A workers/dispatcher/harvest-*-r*/ 2>/dev/null || true
-          git add workers/dispatcher/ 2>/dev/null || true
           if git diff --cached --quiet; then
             echo "▶ no harvest changes to commit (already up to date?)"
             exit 0
+          fi
+          # Sanity check: nothing outside workers/dispatcher/harvest-*-r*/
+          # should be staged. If it is, bail loudly instead of pushing
+          # a ballooned commit.
+          STAGED_OUTSIDE=$(git diff --cached --name-only \
+            | grep -vE '^workers/dispatcher/harvest-[0-9]+way-r[0-9]+/' || true)
+          if [ -n "$STAGED_OUTSIDE" ]; then
+            echo "ERROR: $(echo "$STAGED_OUTSIDE" | wc -l) files staged outside harvest dirs:" >&2
+            echo "$STAGED_OUTSIDE" | head -10 >&2
+            exit 1
           fi
           NEW_DIR=$(git diff --cached --name-only \
             | grep -oE 'workers/dispatcher/harvest-[0-9]+way-r[0-9]+' \
             | sort -u | head -1)
           git commit -m "harvest: $NEW_DIR (auto, via harvest.yml workflow)"
-          git push origin HEAD:main
+          # Retry push with exponential backoff — proxy disconnects on
+          # large pushes (HTTP 408) are transient; the chunked pack
+          # transfer succeeds on retry.
+          for i in 1 2 3 4 5; do
+            if git push origin HEAD:main 2>&1 | tee /tmp/push.out | tail -3; then
+              if ! grep -qE 'rejected|hung|408|disconnect|RPC failed' /tmp/push.out; then
+                break
+              fi
+            fi
+            echo "▶ push attempt $i failed; retrying in $((i * 8))s…"
+            sleep $((i * 8))
+          done
 
       - name: Upload only the new harvest dir as artifact
         if: always() && steps.harvest.outputs.new_dir != ''
