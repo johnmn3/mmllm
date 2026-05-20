@@ -196,79 +196,26 @@ def apply(reference_dir, delta_dir, out_dir):
     print(f"apply: reconstructed {len(meta['pids'])} V_net layers → {out_dir}")
 
 
-def _fedavg_one_pid(out_dir, pid, c_net, worker_dirs):
-    """Merge a single pid's contributions across all workers. Designed
-    to be invoked as a subprocess so the OS reclaims all memory when
-    we return. Don't share state with anything else.
-    """
-    out_dir = Path(out_dir)
-    pid = int(pid)
-    c_net = int(c_net)
-    worker_dirs = [Path(w) for w in worker_dirs]
-
-    union_set = set()
-    worker_paths = []
-    for w in worker_dirs:
-        p = pid_path(w, pid)
-        if not p.exists():
-            continue
-        d = torch.load(p, map_location="cpu", weights_only=False)
-        if d.get("row_to_buf"):
-            union_set.update(d["row_to_buf"].keys())
-            worker_paths.append(p)
-        del d
-
-    if not worker_paths:
-        torch.save({"delta_buf": torch.zeros((0, c_net), dtype=torch.float32),
-                    "row_to_buf": {}},
-                   pid_path(out_dir, pid))
-        return
-
-    union = sorted(union_set)
-    R = len(union)
-    new_r2b = {vrow: i for i, vrow in enumerate(union)}
-    delta_sum = torch.zeros((R, c_net), dtype=torch.float32)
-    counts = torch.zeros((R,), dtype=torch.long)
-    del union_set, union
-
-    for p in worker_paths:
-        s = torch.load(p, map_location="cpu", weights_only=False)
-        r2b = s.get("row_to_buf") or {}
-        if r2b:
-            src_rows = []
-            dst_rows = []
-            for vrow, bidx in r2b.items():
-                src_rows.append(bidx)
-                dst_rows.append(new_r2b[vrow])
-            src_t = torch.tensor(src_rows, dtype=torch.long)
-            dst_t = torch.tensor(dst_rows, dtype=torch.long)
-            contrib = s["delta_buf"][src_t].to(torch.float32)
-            delta_sum.index_add_(0, dst_t, contrib)
-            counts.index_add_(0, dst_t, torch.ones(len(dst_t), dtype=torch.long))
-        del s
-
-    delta_merged = delta_sum / counts.unsqueeze(1).to(torch.float32)
-    torch.save({"delta_buf": delta_merged, "row_to_buf": new_r2b},
-               pid_path(out_dir, pid))
-
-
 def fedavg(out_dir, worker_dirs):
     """Row-aware FedAvg across workers' delta chunks.
 
-    Bounds memory by invoking _fedavg_one_pid in a fresh subprocess
-    for each of the 32 pids. The OS reclaims all memory between pids,
-    immune to pytorch caching-allocator quirks, pickle deserialization
-    surges, or memory fragmentation that has bitten in-process loops.
-    Subprocess overhead is ~100ms/pid × 32 = ~3s — trivial vs. the
-    actual merge time.
+    Writes merged delta to out_dir/ in the same chunk format.
+
+    Memory: streams workers one at a time per pid. After each load we
+    drop the reference and force gc; without that, pytorch's CPU
+    caching allocator holds onto storages and memory grows linearly
+    with bird count even though we never hold more than one bird's
+    payload at a time logically.
     """
-    import subprocess
+    import gc, resource
+    def _rss_mb():
+        return resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024.0
+
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     worker_dirs = [Path(w) for w in worker_dirs]
 
-    # Read+verify metas, write merged meta. Done in the parent process
-    # because it's small and only runs once per harvest.
+    # Use first worker's meta as the template; sanity-check the rest.
     metas = [torch.load(meta_path(w), map_location="cpu", weights_only=False)
              for w in worker_dirs]
     pids = metas[0]["pids"]
@@ -279,19 +226,72 @@ def fedavg(out_dir, worker_dirs):
             print(f"fedavg: shape mismatch at {w}", file=sys.stderr); sys.exit(2)
     torch.save(metas[0], meta_path(out_dir))
     c_net = metas[0]["c_net"]
+    del metas
+    gc.collect()
 
-    print(f"fedavg: merging {len(pids)} pids across {len(worker_dirs)} workers"
-          f" via subprocess-per-pid")
+    print(f"fedavg: starting {len(pids)}-pid merge across "
+          f"{len(worker_dirs)} workers (peak RSS so far: {_rss_mb():.0f} MB)")
+
     for pid_idx, pid in enumerate(pids):
-        cmd = [sys.executable, __file__, "fedavg-pid",
-               str(out_dir), str(pid), str(c_net)] + [str(w) for w in worker_dirs]
-        result = subprocess.run(cmd)
-        if result.returncode != 0:
-            print(f"fedavg: pid {pid} subprocess failed (exit {result.returncode})",
-                  file=sys.stderr)
-            sys.exit(result.returncode)
+        # Pass 1: collect the union of touched rows. Load each worker
+        # one at a time, take just the keys, drop the rest immediately.
+        union_set = set()
+        worker_paths = []
+        for w in worker_dirs:
+            p = pid_path(w, pid)
+            if not p.exists():
+                continue
+            d = torch.load(p, map_location="cpu", weights_only=False)
+            if d.get("row_to_buf"):
+                union_set.update(d["row_to_buf"].keys())
+                worker_paths.append(p)
+            del d
+        gc.collect()
+
+        if not worker_paths:
+            torch.save({"delta_buf": torch.zeros((0, c_net), dtype=torch.float32),
+                        "row_to_buf": {}},
+                       pid_path(out_dir, pid))
+            continue
+
+        union = sorted(union_set)
+        R = len(union)
+        new_r2b = {vrow: i for i, vrow in enumerate(union)}
+        delta_sum = torch.zeros((R, c_net), dtype=torch.float32)
+        counts = torch.zeros((R,), dtype=torch.long)
+        del union_set, union  # we have new_r2b; the source sets are no longer needed
+        gc.collect()
+
+        # Pass 2: stream each worker's delta into the accumulator,
+        # dropping the loaded payload immediately after use.
+        for p in worker_paths:
+            s = torch.load(p, map_location="cpu", weights_only=False)
+            r2b = s.get("row_to_buf") or {}
+            if r2b:
+                src_rows = []
+                dst_rows = []
+                for vrow, bidx in r2b.items():
+                    src_rows.append(bidx)
+                    dst_rows.append(new_r2b[vrow])
+                src_t = torch.tensor(src_rows, dtype=torch.long)
+                dst_t = torch.tensor(dst_rows, dtype=torch.long)
+                contrib = s["delta_buf"][src_t].to(torch.float32)
+                delta_sum.index_add_(0, dst_t, contrib)
+                counts.index_add_(0, dst_t, torch.ones(len(dst_t), dtype=torch.long))
+                del contrib, src_t, dst_t, src_rows, dst_rows
+            del s, r2b
+            gc.collect()
+
+        # Per-row mean over the workers that touched it.
+        delta_merged = delta_sum / counts.unsqueeze(1).to(torch.float32)
+        torch.save({"delta_buf": delta_merged, "row_to_buf": new_r2b},
+                   pid_path(out_dir, pid))
+        del delta_sum, counts, delta_merged, new_r2b
+        gc.collect()
+
         if pid_idx % 8 == 0 or pid_idx == len(pids) - 1:
-            print(f"  pid {pid_idx + 1}/{len(pids)} done")
+            print(f"  pid {pid_idx + 1}/{len(pids)}: R={R}, "
+                  f"workers={len(worker_paths)}, RSS={_rss_mb():.0f} MB")
 
     print(f"fedavg: merged {len(worker_dirs)} workers' deltas → {out_dir}")
 
@@ -306,9 +306,6 @@ def _cli():
         apply(sys.argv[2], sys.argv[3], sys.argv[4])
     elif cmd == "fedavg" and len(sys.argv) >= 4:
         fedavg(sys.argv[2], sys.argv[3:])
-    elif cmd == "fedavg-pid" and len(sys.argv) >= 6:
-        # Internal subprocess entry point. Args: out_dir pid c_net worker_dirs...
-        _fedavg_one_pid(sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5:])
     else:
         print(__doc__); sys.exit(2)
 
