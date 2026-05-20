@@ -11,7 +11,7 @@ on:
       n_rounds:
         description: "Rounds to train"
         required: false
-        default: "10"
+        default: "5"
       steps_per_round:
         description: "Steps per round"
         required: false
@@ -26,13 +26,15 @@ on:
           - general
           - clojure-general
           - clojure-fim
-  # Cron auto-train: every 6 hours. Workflow inputs aren't available
+  # Cron auto-train: every hour. Workflow inputs aren't available
   # from the schedule trigger — we use the defaults baked into the
-  # script (n_rounds=5, steps=7, corpus=fim, random handle). Each tick
-  # auto-detects the latest harvest on origin/main as the chain head,
-  # so the bird always starts from the freshest available state.
+  # script (n_rounds=5, steps=7, random corpus, random handle). Each
+  # tick auto-detects the latest harvest on origin/main as the chain
+  # head so the bird always starts from the freshest available state.
+  # Hourly is faster than the bird wall (~75 min), so runs overlap —
+  # that's intentional, they FedAvg-merge at harvest time.
   schedule:
-    - cron: "0 */6 * * *"
+    - cron: "0 * * * *"
 
 # GITHUB_TOKEN needs contents:write to push the bird branch and
 # pull-requests:write to open + update the per-bird PR.
