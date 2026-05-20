@@ -139,7 +139,10 @@ jobs:
       - name: Commit + push harvest
         if: ${{ github.event_name != 'schedule' || github.repository == env.UPSTREAM_REPO }}
         run: |
-          git add workers/dispatcher/harvest-*-r*/
+          # -A picks up both the new harvest dir AND the deletion of
+          # any superseded harvest-*-r<R> dirs (the re-harvest path).
+          git add -A workers/dispatcher/harvest-*-r*/ 2>/dev/null || true
+          git add workers/dispatcher/ 2>/dev/null || true
           if git diff --cached --quiet; then
             echo "▶ no harvest changes to commit (already up to date?)"
             exit 0

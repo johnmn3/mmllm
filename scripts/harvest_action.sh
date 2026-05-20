@@ -136,14 +136,38 @@ if [ -z "$TARGET_ROUND" ]; then
       echo "  [fork-scan] $fork/$br → rounds: $(echo "$rs" | tr '\n' ' ')"
     fi
   done < <(_list_fork_branches)
-  ALL_ROUNDS=$( ( ( echo "$ROUNDS_FROM_NAME"
-                    echo "$ROUNDS_FROM_TREE"
-                    echo "$ROUNDS_FROM_FORKS" ) \
-    | tr ' ' '\n' | grep -E '^[0-9]+$' | sort -un ) || true)
+  # Counts per round across ALL sources (each (branch, round) pair
+  # contributes one occurrence). Used both for ALL_ROUNDS (unique sorted)
+  # and for the "more birds available than previously merged?" check.
+  ROUND_COUNTS=$( ( ( echo "$ROUNDS_FROM_NAME"
+                      echo "$ROUNDS_FROM_TREE"
+                      echo "$ROUNDS_FROM_FORKS" ) \
+    | tr ' ' '\n' | grep -E '^[0-9]+$' | sort -n | uniq -c ) || true)
+  ALL_ROUNDS=$(echo "$ROUND_COUNTS" | awk '{print $2}' | grep -E '^[0-9]+$' || true)
   echo "  rounds visible (origin + forks): $(echo "$ALL_ROUNDS" | tr '\n' ' ')"
+  # Pick the highest round that's either un-harvested OR has more birds
+  # available than the existing harvest dir(s) at that round merged.
+  # Re-harvesting the same round on a later run is how the 6-bird cap
+  # picks up the slack — each subsequent run merges more birds at the
+  # same round until N(available) ≤ N(previously merged).
   for R in $(echo "$ALL_ROUNDS" | tac); do
-    if ! compgen -G "workers/dispatcher/harvest-*-r${R}" > /dev/null 2>&1; then
+    avail=$(echo "$ROUND_COUNTS" | awk -v r="$R" '$2 == r {print $1}' | head -1)
+    avail=${avail:-0}
+    prev_n=$(python3 -c "
+import json, glob, os, sys
+ns = []
+for d in glob.glob('workers/dispatcher/harvest-*-r${R}'):
+    p = os.path.join(d, 'harvest_meta.json')
+    if os.path.exists(p):
+        try: ns.append(json.load(open(p)).get('n_workers', 0))
+        except Exception: pass
+print(max(ns) if ns else 0)
+" 2>/dev/null || echo 0)
+    if [ "$avail" -gt "$prev_n" ]; then
       TARGET_ROUND=$R
+      if [ "$prev_n" -gt 0 ]; then
+        echo "▶ re-harvest candidate: r$R has $avail birds available, $prev_n previously merged"
+      fi
       break
     fi
   done
@@ -215,7 +239,29 @@ if [ $N -eq 0 ]; then
   echo "ERROR: no birds found for round $TARGET_ROUND" >&2
   exit 1
 fi
-echo "▶ found $N birds:"
+
+# Cap N birds per harvest run. Empirically the GH free-tier runner
+# starts SIGTERM-ing this step somewhere between 5-7 birds (cumulative
+# git fetch / cgroup / network pressure — exact cause not pinned). A
+# half dozen is the safe budget; unharvested birds at the same round
+# are dropped from THIS run and would need a follow-up harvest run
+# triggered AT the same target_round to pick them up. Override via
+# MMLLM_MAX_BIRDS_PER_HARVEST.
+MAX_BIRDS="${MMLLM_MAX_BIRDS_PER_HARVEST:-6}"
+if [ $N -gt $MAX_BIRDS ]; then
+  echo "▶ found $N birds — capping at $MAX_BIRDS for this run"
+  echo "  keeping:"
+  for i in $(seq 0 $((MAX_BIRDS - 1))); do
+    echo "    - ${BIRD_REFS[$i]}"
+  done
+  echo "  skipping (re-run harvest to pick these up):"
+  for i in $(seq $MAX_BIRDS $((N - 1))); do
+    echo "    - ${BIRD_REFS[$i]}"
+  done
+  BIRD_REFS=("${BIRD_REFS[@]:0:$MAX_BIRDS}")
+  N=$MAX_BIRDS
+fi
+echo "▶ processing $N bird(s):"
 for ref in "${BIRD_REFS[@]}"; do echo "  - $ref"; done
 
 # --- 3) Fetch each bird, extract chain-design-r<N> dir ---------------
@@ -626,6 +672,23 @@ echo "▶ harvest done:"
 echo "  dir: $HARVEST_DIR"
 echo "  files: $(ls "$OUT" | wc -l)"
 echo "  size: $(du -sh "$HARVEST_DIR" | cut -f1)"
+
+# Remove superseded harvest dirs at the same round. The 6-bird cap +
+# re-harvest behavior produces a new harvest-Nway-rX with larger N
+# each iteration; the previous (smaller-N) dirs become obsolete. We
+# git-rm them so origin/main doesn't accumulate cruft and train.sh's
+# chain-head detection only sees one dir per round.
+for old in workers/dispatcher/harvest-*-r${TARGET_ROUND}; do
+  [ -d "$old" ] || continue
+  [ "$old" = "$HARVEST_DIR" ] && continue
+  old_n=$(python3 -c "
+import json
+try: print(json.load(open('$old/harvest_meta.json')).get('n_workers', '?'))
+except: print('?')
+" 2>/dev/null || echo '?')
+  echo "  removing superseded harvest: $old (was ${old_n}-way)"
+  git rm -rf "$old" > /dev/null 2>&1 || rm -rf "$old"
+done
 
 # Clean up working dir to free runner disk
 rm -rf "$WORK"
