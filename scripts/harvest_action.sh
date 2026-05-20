@@ -297,32 +297,46 @@ du -sh "$WORK" 2>&1 | sed 's/^/    work-dir: /'
 echo "▶ FedAvg merging delta-sparse-net across $N birds…"
 python3 scripts/_delta_sparse_net.py fedavg "$OUT" "${BIRD_DIRS[@]}" 2>&1 | tail -3
 
-echo "▶ averaging dense.pt across $N birds…"
+echo "▶ averaging dense.pt across $N birds (streaming)…"
 python3 - "$OUT" "${BIRD_DIRS[@]}" <<'PYEOF'
-import torch, os, sys
+import torch, os, sys, gc
 out = sys.argv[1]
 birds = sys.argv[2:]
 
-denses = []
+# Stream: load one bird's dense, accumulate, drop. Peak memory = one
+# bird (~5 MB) + running sum (~5 MB) instead of N × 5 MB.
+sum_dense = None
+template_dtypes = None
+n = 0
 for b in birds:
     p = f"{b}/dense.pt"
-    if os.path.exists(p):
-        denses.append(torch.load(p, map_location="cpu", weights_only=False))
-if not denses:
+    if not os.path.exists(p):
+        continue
+    d = torch.load(p, map_location="cpu", weights_only=False)
+    if sum_dense is None:
+        template_dtypes = [v.dtype if isinstance(v, torch.Tensor) else None for v in d]
+        sum_dense = [v.float().clone() if isinstance(v, torch.Tensor) else v for v in d]
+    else:
+        for i in range(len(d)):
+            if isinstance(d[i], torch.Tensor):
+                sum_dense[i] = sum_dense[i] + d[i].float()
+    n += 1
+    del d
+    gc.collect()
+
+if n == 0:
     print("  WARN: no dense.pt found across birds")
     sys.exit(0)
 
-n = len(denses[0])
-assert all(len(d) == n for d in denses), f"len mismatch: {[len(d) for d in denses]}"
 avg = []
-for i in range(n):
-    vals = [d[i] for d in denses]
-    if isinstance(vals[0], torch.Tensor):
-        avg.append((sum(v.float() for v in vals) / len(vals)).to(vals[0].dtype))
+for i in range(len(sum_dense)):
+    if isinstance(sum_dense[i], torch.Tensor):
+        avg.append((sum_dense[i] / n).to(template_dtypes[i]))
     else:
-        avg.append(vals[0])
+        avg.append(sum_dense[i])
 torch.save(avg, f"{out}/dense.pt")
-print(f"  dense.pt averaged from {len(denses)}/{len(birds)} birds → {out}/dense.pt ({os.path.getsize(out+'/dense.pt')/1e6:.1f} MB)")
+print(f"  dense.pt averaged from {n}/{len(birds)} birds → "
+      f"{out}/dense.pt ({os.path.getsize(out+'/dense.pt')/1e6:.1f} MB)")
 PYEOF
 
 # --- 5) Harvest meta + results.md -----------------------------------
