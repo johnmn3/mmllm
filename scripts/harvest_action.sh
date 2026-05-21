@@ -303,12 +303,36 @@ KEPT_REFS=()
 _bird_diag() {
   # Show wall clock, runner disk, and runner memory between birds so
   # if we get SIGTERMed we can see which resource ran out.
-  echo "    [diag] $(date -u +%H:%M:%S)  rss=$(awk '/VmRSS/{print $2"kB"}' /proc/self/status 2>/dev/null || echo '?')  free=$(free -m 2>/dev/null | awk '/^Mem:/{print $4"M"}' || echo '?')  disk=$(df -h /tmp 2>/dev/null | awk 'NR==2{print $4}' || echo '?')  packs=$(find .git/objects/pack -name '*.pack' 2>/dev/null | wc -l)"
+  # MemAvailable is the kernel's estimate of usable RAM (free + reclaimable
+  # cache); `free` column on its own undercounts since pip-installing torch
+  # leaves multi-GB in page cache.
+  local mem_avail=$(awk '/MemAvailable/{print int($2/1024)"M"}' /proc/meminfo 2>/dev/null || echo '?')
+  local mem_free=$(awk '/MemFree/{print int($2/1024)"M"}' /proc/meminfo 2>/dev/null || echo '?')
+  local mem_cache=$(awk '/^Cached/{print int($2/1024)"M"}' /proc/meminfo 2>/dev/null || echo '?')
+  echo "    [diag] $(date -u +%H:%M:%S)  rss=$(awk '/VmRSS/{print $2"kB"}' /proc/self/status 2>/dev/null || echo '?')  avail=${mem_avail}  free=${mem_free}  cache=${mem_cache}  disk=$(df -h /tmp 2>/dev/null | awk 'NR==2{print $4}' || echo '?')  packs=$(find .git/objects/pack -name '*.pack' 2>/dev/null | wc -l)"
 }
+
+# Drop page caches BEFORE the bird loop. The wheel-install step leaves
+# multi-GB of torch + deps in the kernel page cache. The cache is
+# reclaimable in theory, but git fetch's allocations don't wait for
+# reclaim and OOM-kill instead — observed dying at bird 2's fetch with
+# free=200M (true MemAvailable likely much higher but git can't see
+# that). Forcing eviction once at the top of the loop gives us a clean
+# floor of true free RAM for the duration of the loop.
+echo "▶ dropping page caches to free pip-install residue…"
+sync 2>/dev/null || true
+sudo sh -c 'echo 3 > /proc/sys/vm/drop_caches' 2>/dev/null || \
+  echo "  (drop_caches failed — no sudo or sysfs not writable; continuing anyway)"
 
 _bird_diag
 for ref in "${BIRD_REFS[@]}"; do
   echo "▶ processing $ref…"
+  # Bird N's fetch typically OOMs when prior birds + previous step
+  # residue have filled enough page cache that git's allocations can't
+  # land. Drop caches between birds so each fetch starts from a clean
+  # memory floor.
+  sync 2>/dev/null || true
+  sudo sh -c 'echo 3 > /proc/sys/vm/drop_caches' 2>/dev/null || true
   case "$ref" in
     origin/claude/*)
       BRANCH="${ref#origin/}"
