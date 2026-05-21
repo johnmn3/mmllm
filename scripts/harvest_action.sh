@@ -360,10 +360,6 @@ for ref in "${BIRD_REFS[@]}"; do
   BIRD_DIRS+=("$WORK/$HANDLE")
   KEPT_REFS+=("$ref")
   _bird_diag
-  # Compact .git after each bird so the per-fetch pack accumulation
-  # doesn't grow unbounded. --auto is conservative; only repacks if
-  # over the threshold.
-  git gc --auto --quiet 2>/dev/null || true
 done
 
 N=${#BIRD_DIRS[@]}
