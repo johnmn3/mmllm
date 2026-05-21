@@ -107,6 +107,20 @@ _fetch_fork_branch() {
   return 1
 }
 
+# --- 0) Fold any sibling harvest arms before this round's bird-merge -
+# scripts/_delta_sparse_net.py fedavg can merge multiple delta dirs in
+# the same format harvest dirs already use. consolidate_siblings.py
+# walks workers/dispatcher/, finds leaf harvest dirs (not yet an
+# ancestor of any other), and if there's more than one leaf within a
+# round of the top, folds them into a new harvest-fold<N>way-r<R>/
+# dir. The new round's bird-merge below will then pick the fold as
+# "previous harvest" (the heredoc picker prefers fold dirs on ties).
+# Opt-out: set MMLLM_SKIP_FOLD=1.
+if [ -z "${MMLLM_SKIP_FOLD:-}" ]; then
+  echo "▶ checking for sibling harvest arms to fold…"
+  python3 scripts/consolidate_siblings.py auto 2>&1 | sed 's/^/  /'
+fi
+
 # --- 1) Auto-detect target round if not specified --------------------
 # Branch flavors we accept:
 #   claude/smoke-r<N>-*           legacy, round in name
@@ -432,8 +446,14 @@ def _round_of(d):
     try: return int(d.rsplit("-r", 1)[-1])
     except: return -1
 prev = None
+# Tiebreak: when two harvest dirs share a round, prefer the fold (a
+# cross-arm consolidation done by consolidate_siblings.py) over the
+# raw sibling harvest dirs. The fold transitively includes its inputs'
+# bird-deltas; the raw siblings each contain only one arm.
 for d in sorted(glob.glob("workers/dispatcher/harvest-*-r*"),
-                key=_round_of, reverse=True):
+                key=lambda x: (_round_of(x),
+                               1 if "/harvest-fold" in x else 0),
+                reverse=True):
     n = _round_of(d)
     if n < 0 or n >= target: continue
     meta = f"{d}/harvest_meta.json"
