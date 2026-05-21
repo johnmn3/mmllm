@@ -111,9 +111,16 @@ if [ -z "$TARGET_ROUND" ]; then
     | grep -oE '(smoke|train)-r[0-9]+' | sed -E 's/^(smoke|train)-r//' || true)
   # Stable per-bird branches: claude/train-* that ISN'T the interim
   # claude/train-r<N>-* form. Peek into each tree for chain-design-r<N>.
+  # Cap to MMLLM_MAX_BIRDS_PER_HARVEST branches — each _rounds_in_branch
+  # does a `git fetch --depth=1` (~1 GB pack) and 15+ accumulated stable
+  # branches × 1 GB was OOMing the runner before bird extraction even
+  # started. The fork-scan below also contributes rounds, so we don't
+  # need every origin branch to find the latest unharvested round.
+  STABLE_BRANCH_SAMPLE="${MMLLM_MAX_BIRDS_PER_HARVEST:-3}"
   STABLE_BRANCHES=$( ( git ls-remote origin 'refs/heads/claude/train-*' 2>/dev/null \
     | awk '{print $2}' | sed 's|^refs/heads/||' \
-    | grep -vE '^claude/train-r[0-9]+-' ) || true)
+    | grep -vE '^claude/train-r[0-9]+-' \
+    | head -"$STABLE_BRANCH_SAMPLE" ) || true)
   ROUNDS_FROM_TREE=""
   for br in $STABLE_BRANCHES; do
     rs=$(_rounds_in_branch "$br")
@@ -169,10 +176,17 @@ while read -r line; do
   [ -n "$ref" ] && BIRD_REFS+=("$ref")
 done < <( git ls-remote origin "refs/heads/claude/smoke-r${TARGET_ROUND}-*" 2>/dev/null
           git ls-remote origin "refs/heads/claude/train-r${TARGET_ROUND}-*" 2>/dev/null )
-# Stable per-bird branches on origin
+# Stable per-bird branches on origin — same cap as step 1 so we
+# inspect at most MMLLM_MAX_BIRDS_PER_HARVEST branches total. If step
+# 1 ran auto-detect, these are the same branches it already fetched
+# (so this loop's _rounds_in_branch fetches are no-ops). If
+# TARGET_ROUND was passed manually (step 1 skipped), these are fresh
+# fetches but still bounded.
+STABLE_BRANCH_SAMPLE="${MMLLM_MAX_BIRDS_PER_HARVEST:-3}"
 STABLE_BRANCHES=$( ( git ls-remote origin 'refs/heads/claude/train-*' 2>/dev/null \
   | awk '{print $2}' | sed 's|^refs/heads/||' \
-  | grep -vE '^claude/train-r[0-9]+-' ) || true)
+  | grep -vE '^claude/train-r[0-9]+-' \
+  | head -"$STABLE_BRANCH_SAMPLE" ) || true)
 for br in $STABLE_BRANCHES; do
   rs=$(_rounds_in_branch "$br")
   if echo "$rs" | grep -qx "$TARGET_ROUND"; then
