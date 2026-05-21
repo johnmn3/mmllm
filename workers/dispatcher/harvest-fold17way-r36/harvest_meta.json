@@ -1,0 +1,238 @@
+{
+  "spork_version": "0.9",
+  "target_round": 36,
+  "n_workers": 17,
+  "wave": "fold-r36-mega",
+  "workers": [
+    {
+      "handle": "0CjdM",
+      "branch": "train-dff88572-0CjdM",
+      "ctrl_bpc": 1.0126
+    },
+    {
+      "handle": "1ah1i",
+      "branch": "train-7f81a31a-1ah1i",
+      "ctrl_bpc": 1.1524
+    },
+    {
+      "handle": "3l9vK",
+      "branch": "train-c6af3d35-3l9vK",
+      "ctrl_bpc": 1.2336
+    },
+    {
+      "handle": "E3NoP",
+      "branch": "train-b4827362-E3NoP",
+      "ctrl_bpc": 1.1725
+    },
+    {
+      "handle": "FmYdP",
+      "branch": "train-b3fa9c9d-FmYdP",
+      "ctrl_bpc": 1.166
+    },
+    {
+      "handle": "HjyYS",
+      "branch": "train-ee69a851-HjyYS",
+      "ctrl_bpc": 1.0954
+    },
+    {
+      "handle": "IYINg",
+      "branch": "train-94bdb050-IYINg",
+      "ctrl_bpc": 1.0156
+    },
+    {
+      "handle": "IgfYM",
+      "branch": "train-c4669772-IgfYM",
+      "ctrl_bpc": 1.0346
+    },
+    {
+      "handle": "OEbNR",
+      "branch": "train-f756860f-OEbNR",
+      "ctrl_bpc": 1.1747
+    },
+    {
+      "handle": "QWyjW",
+      "branch": "train-ac24c4a3-QWyjW",
+      "ctrl_bpc": 1.1126
+    },
+    {
+      "handle": "bccSP",
+      "branch": "train-19ea2995-bccSP",
+      "ctrl_bpc": 1.123
+    },
+    {
+      "handle": "cua3D",
+      "branch": "train-6d90a4a9-cua3D",
+      "ctrl_bpc": 1.1166
+    },
+    {
+      "handle": "iuah5",
+      "branch": "train-a3bb21c8-iuah5",
+      "ctrl_bpc": 1.162
+    },
+    {
+      "handle": "oQeuA",
+      "branch": "train-0ec357cb-oQeuA",
+      "ctrl_bpc": 1.1527
+    },
+    {
+      "handle": "qGhOx",
+      "branch": "train-24b5e7d1-qGhOx",
+      "ctrl_bpc": 0.9619
+    },
+    {
+      "handle": "sfBW4",
+      "branch": "train-b3a93857-sfBW4",
+      "ctrl_bpc": 1.098
+    },
+    {
+      "handle": "vsIrH",
+      "branch": "train-d54f4fe7-vsIrH",
+      "ctrl_bpc": 1.1056
+    }
+  ],
+  "worker_ctrl_bpc_mean": 1.1112,
+  "worker_ctrl_bpc_best": 0.9619,
+  "previous_harvest": null,
+  "direct_contributions": [
+    {
+      "bird_id": "dff885721dac4657",
+      "handle": "0CjdM",
+      "n_steps": 35,
+      "ctrl_bpc": 1.0126
+    },
+    {
+      "bird_id": "7f81a31ab329455c",
+      "handle": "1ah1i",
+      "n_steps": 35,
+      "ctrl_bpc": 1.1524
+    },
+    {
+      "bird_id": "c6af3d35e9dc40f2",
+      "handle": "3l9vK",
+      "n_steps": 35,
+      "ctrl_bpc": 1.2336
+    },
+    {
+      "bird_id": "b4827362cd404e05",
+      "handle": "E3NoP",
+      "n_steps": 35,
+      "ctrl_bpc": 1.1725
+    },
+    {
+      "bird_id": "b3fa9c9db5714632",
+      "handle": "FmYdP",
+      "n_steps": 35,
+      "ctrl_bpc": 1.166
+    },
+    {
+      "bird_id": "ee69a8519e1048b2",
+      "handle": "HjyYS",
+      "n_steps": 35,
+      "ctrl_bpc": 1.0954
+    },
+    {
+      "bird_id": "94bdb050653844f3",
+      "handle": "IYINg",
+      "n_steps": 35,
+      "ctrl_bpc": 1.0156
+    },
+    {
+      "bird_id": "c4669772b16c423a",
+      "handle": "IgfYM",
+      "n_steps": 35,
+      "ctrl_bpc": 1.0346
+    },
+    {
+      "bird_id": "f756860f033349da",
+      "handle": "OEbNR",
+      "n_steps": 35,
+      "ctrl_bpc": 1.1747
+    },
+    {
+      "bird_id": "ac24c4a32db34b4b",
+      "handle": "QWyjW",
+      "n_steps": 35,
+      "ctrl_bpc": 1.1126
+    },
+    {
+      "bird_id": "19ea2995e5324b25",
+      "handle": "bccSP",
+      "n_steps": 35,
+      "ctrl_bpc": 1.123
+    },
+    {
+      "bird_id": "6d90a4a97dcb44b5",
+      "handle": "cua3D",
+      "n_steps": 35,
+      "ctrl_bpc": 1.1166
+    },
+    {
+      "bird_id": "a3bb21c892fa4e94",
+      "handle": "iuah5",
+      "n_steps": 35,
+      "ctrl_bpc": 1.162
+    },
+    {
+      "bird_id": "0ec357cb8ccc4100",
+      "handle": "oQeuA",
+      "n_steps": 35,
+      "ctrl_bpc": 1.1527
+    },
+    {
+      "bird_id": "24b5e7d1d7c8411d",
+      "handle": "qGhOx",
+      "n_steps": 35,
+      "ctrl_bpc": 0.9619
+    },
+    {
+      "bird_id": "b3a938573c40441e",
+      "handle": "sfBW4",
+      "n_steps": 35,
+      "ctrl_bpc": 1.098
+    },
+    {
+      "bird_id": "d54f4fe7f0244653",
+      "handle": "vsIrH",
+      "n_steps": 35,
+      "ctrl_bpc": 1.1056
+    }
+  ],
+  "ancestor_harvests": [
+    "workers/dispatcher/harvest-3way-r35",
+    "workers/dispatcher/harvest-3way-r36",
+    "workers/dispatcher/harvest-2way-r31",
+    "workers/dispatcher/harvest-1way-r30"
+  ],
+  "cumulative_total_steps": 616,
+  "cumulative_unique_birds": 18,
+  "harvested_at": "2026-05-21T12:44:27Z",
+  "harvester": "scripts/consolidate_siblings.py (mega-fold of all r36 birds, manual)",
+  "note": "Mega cross-arm fold: every train-* branch with r36 bird payload, FedAvg'd row-aware. Captures qGhOx@r36=0.9619 (best single bird, stranded until now), plus 13 other unharvested r36 contributors. ctrl_bpc fields reflect input birds; this fold did no fresh training.",
+  "consolidation_of": [
+    "workers/0CjdM/chain-design-r36 (raw bird)",
+    "workers/1ah1i/chain-design-r36 (raw bird)",
+    "workers/3l9vK/chain-design-r36 (raw bird)",
+    "workers/E3NoP/chain-design-r36 (raw bird)",
+    "workers/FmYdP/chain-design-r36 (raw bird)",
+    "workers/HjyYS/chain-design-r36 (raw bird)",
+    "workers/IYINg/chain-design-r36 (raw bird)",
+    "workers/IgfYM/chain-design-r36 (raw bird)",
+    "workers/OEbNR/chain-design-r36 (raw bird)",
+    "workers/QWyjW/chain-design-r36 (raw bird)",
+    "workers/bccSP/chain-design-r36 (raw bird)",
+    "workers/cua3D/chain-design-r36 (raw bird)",
+    "workers/iuah5/chain-design-r36 (raw bird)",
+    "workers/oQeuA/chain-design-r36 (raw bird)",
+    "workers/qGhOx/chain-design-r36 (raw bird)",
+    "workers/sfBW4/chain-design-r36 (raw bird)",
+    "workers/vsIrH/chain-design-r36 (raw bird)"
+  ],
+  "measured_ctrl_bpc_on_fim_val": 1.0254,
+  "measured_eval": {
+    "corpus": "fim-json-v3.val.bin",
+    "T": 1024,
+    "B": 16,
+    "cap": 25000,
+    "wall_s": 60.7
+  }
+}
