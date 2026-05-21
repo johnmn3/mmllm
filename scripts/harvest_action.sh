@@ -38,7 +38,11 @@ EXTRA_REFS=("$@")
 # Used by both auto-detect (round → ?) and discovery (round → branches).
 _rounds_in_branch() {
   local br="$1"
-  git fetch origin "$br" --depth=1 >/dev/null 2>&1 || return 0
+  # --filter=blob:none: fetch trees + commits only, skip the ~1 GB of
+  # bird-payload blobs. We only need the path names here, not their
+  # contents — `git ls-tree --name-only` works fine with blob:none.
+  # Cuts the per-branch fetch from ~1 GB to ~1-5 MB.
+  git fetch origin "$br" --depth=1 --filter=blob:none >/dev/null 2>&1 || return 0
   git ls-tree -r --name-only "origin/$br" 2>/dev/null \
     | sed -nE 's|^workers/[^/]+/chain-design-r([0-9]+)/.*|\1|p' \
     | sort -un
@@ -92,7 +96,11 @@ _fetch_fork_branch() {
   local safe
   safe=$(echo "${fork}/${br}" | tr '/. ' '-' | tr -cd 'a-zA-Z0-9-' | cut -c1-60)
   local local_ref="fork-${safe}"
-  if git fetch "https://github.com/${fork}.git" "${br}:refs/heads/${local_ref}" --depth=1 >/dev/null 2>&1; then
+  # --filter=blob:none: fetch trees + commits only, skip blobs.
+  # If this fork bird is later picked for extraction in step 3, git
+  # archive will lazy-fetch the needed blobs on demand (partial-clone
+  # promisor remote semantics — set automatically by --filter).
+  if git fetch "https://github.com/${fork}.git" "${br}:refs/heads/${local_ref}" --depth=1 --filter=blob:none >/dev/null 2>&1; then
     echo "$local_ref"
     return 0
   fi
@@ -287,8 +295,12 @@ for ref in "${BIRD_REFS[@]}"; do
   mkdir -p "$WORK/$HANDLE"
   # Errors visible; if archive can't read the tree (shallow fetch
   # missing blobs, etc.) we want to know which bird and why.
+  # Exclude opt-sparse-net.*.pt — they're ~400 MB per bird (optimizer
+  # state) and we don't use them in FedAvg. The merge only needs
+  # delta-sparse-net.*.pt + dense.pt + meta + logs. (Per c4cb5982.)
   if ! git archive "$ref" "workers/$HANDLE/chain-design-r${TARGET_ROUND}/" \
-       | tar -x -C "$WORK/$HANDLE/" --strip-components=3; then
+       | tar -x -C "$WORK/$HANDLE/" --strip-components=3 \
+         --exclude='opt-sparse-net.*'; then
     echo "  WARN: git archive | tar failed for $ref — skipping" >&2
     rm -rf "$WORK/$HANDLE"
     continue
