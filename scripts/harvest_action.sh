@@ -119,18 +119,12 @@ if [ -z "$TARGET_ROUND" ]; then
     rs=$(_rounds_in_branch "$br")
     [ -n "$rs" ] && ROUNDS_FROM_TREE="$ROUNDS_FROM_TREE $rs"
   done
-  # Same scan across forks of upstream. We populate FORK_REFS_CACHE
-  # here so step-2 discovery (below) can REUSE the fetched local refs
-  # instead of calling _list_fork_branches + _fetch_fork_branch again
-  # — that duplication previously did ~16 fork fetches per harvest run
-  # and contributed to the runner SIGTERM threshold.
+  # Same scan across forks of upstream
   ROUNDS_FROM_FORKS=""
-  FORK_REFS_CACHE=""   # one "fork|br|local_ref" per line, '\n' separated
   echo "  scanning forks of $UPSTREAM_REPO…"
   while IFS='|' read -r fork br; do
     [ -z "$fork" ] && continue
     local_ref=$(_fetch_fork_branch "$fork" "$br") || continue
-    FORK_REFS_CACHE="${FORK_REFS_CACHE}${fork}|${br}|${local_ref}"$'\n'
     # Strict: only count rounds at the canonical bird-payload path
     # workers/<HANDLE>/chain-design-r<N>/ so auto-detect agrees with
     # step-2 discovery.
@@ -142,38 +136,14 @@ if [ -z "$TARGET_ROUND" ]; then
       echo "  [fork-scan] $fork/$br → rounds: $(echo "$rs" | tr '\n' ' ')"
     fi
   done < <(_list_fork_branches)
-  # Counts per round across ALL sources (each (branch, round) pair
-  # contributes one occurrence). Used both for ALL_ROUNDS (unique sorted)
-  # and for the "more birds available than previously merged?" check.
-  ROUND_COUNTS=$( ( ( echo "$ROUNDS_FROM_NAME"
-                      echo "$ROUNDS_FROM_TREE"
-                      echo "$ROUNDS_FROM_FORKS" ) \
-    | tr ' ' '\n' | grep -E '^[0-9]+$' | sort -n | uniq -c ) || true)
-  ALL_ROUNDS=$(echo "$ROUND_COUNTS" | awk '{print $2}' | grep -E '^[0-9]+$' || true)
+  ALL_ROUNDS=$( ( ( echo "$ROUNDS_FROM_NAME"
+                    echo "$ROUNDS_FROM_TREE"
+                    echo "$ROUNDS_FROM_FORKS" ) \
+    | tr ' ' '\n' | grep -E '^[0-9]+$' | sort -un ) || true)
   echo "  rounds visible (origin + forks): $(echo "$ALL_ROUNDS" | tr '\n' ' ')"
-  # Pick the highest round that's either un-harvested OR has more birds
-  # available than the existing harvest dir(s) at that round merged.
-  # Re-harvesting the same round on a later run is how the 6-bird cap
-  # picks up the slack — each subsequent run merges more birds at the
-  # same round until N(available) ≤ N(previously merged).
   for R in $(echo "$ALL_ROUNDS" | tac); do
-    avail=$(echo "$ROUND_COUNTS" | awk -v r="$R" '$2 == r {print $1}' | head -1)
-    avail=${avail:-0}
-    prev_n=$(python3 -c "
-import json, glob, os, sys
-ns = []
-for d in glob.glob('workers/dispatcher/harvest-*-r${R}'):
-    p = os.path.join(d, 'harvest_meta.json')
-    if os.path.exists(p):
-        try: ns.append(json.load(open(p)).get('n_workers', 0))
-        except Exception: pass
-print(max(ns) if ns else 0)
-" 2>/dev/null || echo 0)
-    if [ "$avail" -gt "$prev_n" ]; then
+    if ! compgen -G "workers/dispatcher/harvest-*-r${R}" > /dev/null 2>&1; then
       TARGET_ROUND=$R
-      if [ "$prev_n" -gt 0 ]; then
-        echo "▶ re-harvest candidate: r$R has $avail birds available, $prev_n previously merged"
-      fi
       break
     fi
   done
@@ -184,8 +154,6 @@ print(max(ns) if ns else 0)
   fi
 fi
 echo "▶ target round: $TARGET_ROUND"
-echo "▶ disk state before harvest:"
-df -h / /tmp 2>&1 | head -5 | sed 's/^/    /'
 
 # --- 2) Discover bird branches for this round ------------------------
 # Four sources:
@@ -214,46 +182,27 @@ done
 
 # Fork branches: scan every public fork of $UPSTREAM_REPO for train
 # branches and include any whose tree has chain-design-r<TARGET>/.
-# If we ran auto-detect above we already enumerated and fetched
-# everything into FORK_REFS_CACHE — reuse that. If TARGET_ROUND was
-# passed as a workflow input (skipping auto-detect), enumerate fresh.
 echo "▶ scanning forks of $UPSTREAM_REPO for round-$TARGET_ROUND birds…"
-if [ -n "${FORK_REFS_CACHE:-}" ]; then
-  echo "  (reusing $(echo "$FORK_REFS_CACHE" | grep -c .) fork refs from auto-detect — skipping re-enumeration)"
-  CACHE_SRC=$(printf '%s' "$FORK_REFS_CACHE")
-  while IFS='|' read -r fork br local_ref; do
-    [ -z "$fork" ] && continue
-    echo "  checking $fork/$br…"
-    canonical_rounds=$(git ls-tree -r --name-only "$local_ref" 2>/dev/null \
-      | sed -nE 's|^workers/[^/]+/chain-design-r([0-9]+)/.*|\1|p' \
-      | sort -un || true)
-    if echo "$canonical_rounds" | grep -qx "$TARGET_ROUND"; then
-      BIRD_REFS+=("$local_ref")
-      echo "    ✓ fork bird (canonical rounds: $(echo "$canonical_rounds" | tr '\n' ' '))"
-    else
-      echo "    skip — TARGET_ROUND=$TARGET_ROUND not in canonical rounds: $(echo "$canonical_rounds" | tr '\n' ' '|| echo none)"
-    fi
-  done <<< "$CACHE_SRC"
-else
-  # Auto-detect was skipped (user passed TARGET_ROUND). Enumerate now.
-  while IFS='|' read -r fork br; do
-    [ -z "$fork" ] && continue
-    echo "  checking $fork/$br…"
-    if ! local_ref=$(_fetch_fork_branch "$fork" "$br"); then
-      echo "    skip — _fetch_fork_branch failed"
-      continue
-    fi
-    canonical_rounds=$(git ls-tree -r --name-only "$local_ref" 2>/dev/null \
-      | sed -nE 's|^workers/[^/]+/chain-design-r([0-9]+)/.*|\1|p' \
-      | sort -un || true)
-    if echo "$canonical_rounds" | grep -qx "$TARGET_ROUND"; then
-      BIRD_REFS+=("$local_ref")
-      echo "    ✓ fork bird (canonical rounds: $(echo "$canonical_rounds" | tr '\n' ' '))"
-    else
-      echo "    skip — TARGET_ROUND=$TARGET_ROUND not in canonical rounds: $(echo "$canonical_rounds" | tr '\n' ' '|| echo none)"
-    fi
-  done < <(_list_fork_branches)
-fi
+while IFS='|' read -r fork br; do
+  [ -z "$fork" ] && continue
+  echo "  checking $fork/$br…"
+  if ! local_ref=$(_fetch_fork_branch "$fork" "$br"); then
+    echo "    skip — _fetch_fork_branch failed"
+    continue
+  fi
+  # Use sed (same code path as auto-detect, known to work) to extract
+  # all rounds present at canonical workers/<H>/chain-design-r<N>/
+  # paths; then check whether TARGET_ROUND is in that set.
+  canonical_rounds=$(git ls-tree -r --name-only "$local_ref" 2>/dev/null \
+    | sed -nE 's|^workers/[^/]+/chain-design-r([0-9]+)/.*|\1|p' \
+    | sort -un || true)
+  if echo "$canonical_rounds" | grep -qx "$TARGET_ROUND"; then
+    BIRD_REFS+=("$local_ref")
+    echo "    ✓ fork bird (canonical rounds: $(echo "$canonical_rounds" | tr '\n' ' '))"
+  else
+    echo "    skip — TARGET_ROUND=$TARGET_ROUND not in canonical rounds: $(echo "$canonical_rounds" | tr '\n' ' '|| echo none)"
+  fi
+done < <(_list_fork_branches)
 
 for ref in "${EXTRA_REFS[@]}"; do
   BIRD_REFS+=("$ref")
@@ -265,32 +214,25 @@ if [ $N -eq 0 ]; then
   exit 1
 fi
 
-# Cap N birds per harvest run. Empirically the GH free-tier runner
-# starts having trouble at higher bird counts:
-#   - Push size scales with N (5-bird → ~150 MB; 6-bird r36 hit the
-#     HTTP-proxy sideband-disconnect range and the push hung).
-#   - Some legacy SIGTERM/disk-pressure interactions also got worse
-#     past ~5 birds.
-# 3-bird harvests (r20, r22) pushed cleanly historically — that's the
-# known-working setting. Unharvested birds at the same round get
-# picked up on subsequent runs (auto re-harvest at the same round).
-# Override via MMLLM_MAX_BIRDS_PER_HARVEST.
+# Cap N birds per harvest run. Without a cap, each accumulated origin
+# bird branch triggers a ~1 GB pack fetch via _rounds_in_branch and
+# the runner OOMs. The MAX_BIRDS=3 setting matches the historical
+# 3-way harvests (r20, r22) that pushed clean. Override via
+# MMLLM_MAX_BIRDS_PER_HARVEST. Unharvested birds at the same round
+# are picked up on a subsequent run (cron retries hourly).
 MAX_BIRDS="${MMLLM_MAX_BIRDS_PER_HARVEST:-3}"
 if [ $N -gt $MAX_BIRDS ]; then
   echo "▶ found $N birds — capping at $MAX_BIRDS for this run"
   echo "  keeping:"
-  for i in $(seq 0 $((MAX_BIRDS - 1))); do
-    echo "    - ${BIRD_REFS[$i]}"
-  done
+  for i in $(seq 0 $((MAX_BIRDS - 1))); do echo "    - ${BIRD_REFS[$i]}"; done
   echo "  skipping (re-run harvest to pick these up):"
-  for i in $(seq $MAX_BIRDS $((N - 1))); do
-    echo "    - ${BIRD_REFS[$i]}"
-  done
+  for i in $(seq $MAX_BIRDS $((N - 1))); do echo "    - ${BIRD_REFS[$i]}"; done
   BIRD_REFS=("${BIRD_REFS[@]:0:$MAX_BIRDS}")
   N=$MAX_BIRDS
+else
+  echo "▶ found $N birds:"
+  for ref in "${BIRD_REFS[@]}"; do echo "  - $ref"; done
 fi
-echo "▶ processing $N bird(s):"
-for ref in "${BIRD_REFS[@]}"; do echo "  - $ref"; done
 
 # --- 3) Fetch each bird, extract chain-design-r<N> dir ---------------
 WORK=/tmp/harvest-r${TARGET_ROUND}
@@ -300,39 +242,8 @@ mkdir -p "$WORK"
 HANDLES=()
 BIRD_DIRS=()
 KEPT_REFS=()
-_bird_diag() {
-  # Show wall clock, runner disk, and runner memory between birds so
-  # if we get SIGTERMed we can see which resource ran out.
-  # MemAvailable is the kernel's estimate of usable RAM (free + reclaimable
-  # cache); `free` column on its own undercounts since pip-installing torch
-  # leaves multi-GB in page cache.
-  local mem_avail=$(awk '/MemAvailable/{print int($2/1024)"M"}' /proc/meminfo 2>/dev/null || echo '?')
-  local mem_free=$(awk '/MemFree/{print int($2/1024)"M"}' /proc/meminfo 2>/dev/null || echo '?')
-  local mem_cache=$(awk '/^Cached/{print int($2/1024)"M"}' /proc/meminfo 2>/dev/null || echo '?')
-  echo "    [diag] $(date -u +%H:%M:%S)  rss=$(awk '/VmRSS/{print $2"kB"}' /proc/self/status 2>/dev/null || echo '?')  avail=${mem_avail}  free=${mem_free}  cache=${mem_cache}  disk=$(df -h /tmp 2>/dev/null | awk 'NR==2{print $4}' || echo '?')  packs=$(find .git/objects/pack -name '*.pack' 2>/dev/null | wc -l)"
-}
-
-# Drop page caches BEFORE the bird loop. The wheel-install step leaves
-# multi-GB of torch + deps in the kernel page cache. The cache is
-# reclaimable in theory, but git fetch's allocations don't wait for
-# reclaim and OOM-kill instead — observed dying at bird 2's fetch with
-# free=200M (true MemAvailable likely much higher but git can't see
-# that). Forcing eviction once at the top of the loop gives us a clean
-# floor of true free RAM for the duration of the loop.
-echo "▶ dropping page caches to free pip-install residue…"
-sync 2>/dev/null || true
-sudo sh -c 'echo 3 > /proc/sys/vm/drop_caches' 2>/dev/null || \
-  echo "  (drop_caches failed — no sudo or sysfs not writable; continuing anyway)"
-
-_bird_diag
 for ref in "${BIRD_REFS[@]}"; do
   echo "▶ processing $ref…"
-  # Bird N's fetch typically OOMs when prior birds + previous step
-  # residue have filled enough page cache that git's allocations can't
-  # land. Drop caches between birds so each fetch starts from a clean
-  # memory floor.
-  sync 2>/dev/null || true
-  sudo sh -c 'echo 3 > /proc/sys/vm/drop_caches' 2>/dev/null || true
   case "$ref" in
     origin/claude/*)
       BRANCH="${ref#origin/}"
@@ -362,13 +273,8 @@ for ref in "${BIRD_REFS[@]}"; do
   mkdir -p "$WORK/$HANDLE"
   # Errors visible; if archive can't read the tree (shallow fetch
   # missing blobs, etc.) we want to know which bird and why.
-  # We use delta-sparse-net.* + dense.pt + meta + logs. The
-  # opt-sparse-net.*.pt files (~half the bird's payload) are unused
-  # by the harvest — exclude them so /tmp doesn't blow up on big
-  # N-bird harvests.
   if ! git archive "$ref" "workers/$HANDLE/chain-design-r${TARGET_ROUND}/" \
-       | tar -x -C "$WORK/$HANDLE/" --strip-components=3 \
-         --exclude='opt-sparse-net.*'; then
+       | tar -x -C "$WORK/$HANDLE/" --strip-components=3; then
     echo "  WARN: git archive | tar failed for $ref — skipping" >&2
     rm -rf "$WORK/$HANDLE"
     continue
@@ -383,7 +289,6 @@ for ref in "${BIRD_REFS[@]}"; do
   HANDLES+=("$HANDLE")
   BIRD_DIRS+=("$WORK/$HANDLE")
   KEPT_REFS+=("$ref")
-  _bird_diag
 done
 
 N=${#BIRD_DIRS[@]}
@@ -397,52 +302,35 @@ WAYS="${N}way"
 OUT="workers/dispatcher/harvest-${WAYS}-r${TARGET_ROUND}/round-${TARGET_ROUND}"
 mkdir -p "$OUT"
 
-echo "▶ disk state after extracts:"
-df -h / /tmp 2>&1 | head -5 | sed 's/^/    /'
-du -sh "$WORK" 2>&1 | sed 's/^/    work-dir: /'
 echo "▶ FedAvg merging delta-sparse-net across $N birds…"
 python3 scripts/_delta_sparse_net.py fedavg "$OUT" "${BIRD_DIRS[@]}" 2>&1 | tail -3
 
-echo "▶ averaging dense.pt across $N birds (streaming)…"
+echo "▶ averaging dense.pt across $N birds…"
 python3 - "$OUT" "${BIRD_DIRS[@]}" <<'PYEOF'
-import torch, os, sys, gc
+import torch, os, sys
 out = sys.argv[1]
 birds = sys.argv[2:]
 
-# Stream: load one bird's dense, accumulate, drop. Peak memory = one
-# bird (~5 MB) + running sum (~5 MB) instead of N × 5 MB.
-sum_dense = None
-template_dtypes = None
-n = 0
+denses = []
 for b in birds:
     p = f"{b}/dense.pt"
-    if not os.path.exists(p):
-        continue
-    d = torch.load(p, map_location="cpu", weights_only=False)
-    if sum_dense is None:
-        template_dtypes = [v.dtype if isinstance(v, torch.Tensor) else None for v in d]
-        sum_dense = [v.float().clone() if isinstance(v, torch.Tensor) else v for v in d]
-    else:
-        for i in range(len(d)):
-            if isinstance(d[i], torch.Tensor):
-                sum_dense[i] = sum_dense[i] + d[i].float()
-    n += 1
-    del d
-    gc.collect()
-
-if n == 0:
+    if os.path.exists(p):
+        denses.append(torch.load(p, map_location="cpu", weights_only=False))
+if not denses:
     print("  WARN: no dense.pt found across birds")
     sys.exit(0)
 
+n = len(denses[0])
+assert all(len(d) == n for d in denses), f"len mismatch: {[len(d) for d in denses]}"
 avg = []
-for i in range(len(sum_dense)):
-    if isinstance(sum_dense[i], torch.Tensor):
-        avg.append((sum_dense[i] / n).to(template_dtypes[i]))
+for i in range(n):
+    vals = [d[i] for d in denses]
+    if isinstance(vals[0], torch.Tensor):
+        avg.append((sum(v.float() for v in vals) / len(vals)).to(vals[0].dtype))
     else:
-        avg.append(sum_dense[i])
+        avg.append(vals[0])
 torch.save(avg, f"{out}/dense.pt")
-print(f"  dense.pt averaged from {n}/{len(birds)} birds → "
-      f"{out}/dense.pt ({os.path.getsize(out+'/dense.pt')/1e6:.1f} MB)")
+print(f"  dense.pt averaged from {len(denses)}/{len(birds)} birds → {out}/dense.pt ({os.path.getsize(out+'/dense.pt')/1e6:.1f} MB)")
 PYEOF
 
 # --- 5) Harvest meta + results.md -----------------------------------
@@ -732,23 +620,6 @@ echo "▶ harvest done:"
 echo "  dir: $HARVEST_DIR"
 echo "  files: $(ls "$OUT" | wc -l)"
 echo "  size: $(du -sh "$HARVEST_DIR" | cut -f1)"
-
-# Remove superseded harvest dirs at the same round. The 6-bird cap +
-# re-harvest behavior produces a new harvest-Nway-rX with larger N
-# each iteration; the previous (smaller-N) dirs become obsolete. We
-# git-rm them so origin/main doesn't accumulate cruft and train.sh's
-# chain-head detection only sees one dir per round.
-for old in workers/dispatcher/harvest-*-r${TARGET_ROUND}; do
-  [ -d "$old" ] || continue
-  [ "$old" = "$HARVEST_DIR" ] && continue
-  old_n=$(python3 -c "
-import json
-try: print(json.load(open('$old/harvest_meta.json')).get('n_workers', '?'))
-except: print('?')
-" 2>/dev/null || echo '?')
-  echo "  removing superseded harvest: $old (was ${old_n}-way)"
-  git rm -rf "$old" > /dev/null 2>&1 || rm -rf "$old"
-done
 
 # Clean up working dir to free runner disk
 rm -rf "$WORK"
