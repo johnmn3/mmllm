@@ -1,0 +1,99 @@
+{
+  "spork_version": "0.9",
+  "target_round": 36,
+  "n_workers": 6,
+  "wave": "fold-r36",
+  "workers": [
+    {
+      "handle": "oQeuA",
+      "branch": "origin/claude/train-0ec357cb-oQeuA",
+      "ctrl_bpc": 1.1527
+    },
+    {
+      "handle": "bccSP",
+      "branch": "origin/claude/train-19ea2995-bccSP",
+      "ctrl_bpc": 1.123
+    },
+    {
+      "handle": "HjyYS",
+      "branch": "fork-SeniorCareMarket-mmllm-claude-train-ee69a851-HjyYS",
+      "ctrl_bpc": 1.0954
+    },
+    {
+      "handle": "qGhOx",
+      "branch": "origin/claude/train-24b5e7d1-qGhOx",
+      "ctrl_bpc": 1.0027
+    },
+    {
+      "handle": "Iixhi",
+      "branch": "fork-SeniorCareMarket-mmllm-claude-train-2b64bdaf-Iixhi",
+      "ctrl_bpc": 1.167
+    },
+    {
+      "handle": "rARVw",
+      "branch": "fork-joly-os-mmllm-claude-train-94b400a4-rARVw",
+      "ctrl_bpc": 1.1818
+    }
+  ],
+  "worker_ctrl_bpc_mean": 1.1204,
+  "worker_ctrl_bpc_best": 1.0027,
+  "previous_harvest": null,
+  "direct_contributions": [
+    {
+      "bird_id": "0ec357cb8ccc4100",
+      "handle": "oQeuA",
+      "branch": "origin/claude/train-0ec357cb-oQeuA",
+      "n_steps": 35,
+      "ctrl_bpc": 1.1527
+    },
+    {
+      "bird_id": "19ea2995e5324b25",
+      "handle": "bccSP",
+      "branch": "origin/claude/train-19ea2995-bccSP",
+      "n_steps": 35,
+      "ctrl_bpc": 1.123
+    },
+    {
+      "bird_id": "ee69a8519e1048b2",
+      "handle": "HjyYS",
+      "branch": "fork-SeniorCareMarket-mmllm-claude-train-ee69a851-HjyYS",
+      "n_steps": 35,
+      "ctrl_bpc": 1.0954
+    },
+    {
+      "bird_id": "24b5e7d1d7c8411d",
+      "handle": "qGhOx",
+      "branch": "origin/claude/train-24b5e7d1-qGhOx",
+      "n_steps": 28,
+      "ctrl_bpc": 1.0027
+    },
+    {
+      "bird_id": "2b64bdafbcdf451d",
+      "handle": "Iixhi",
+      "branch": "fork-SeniorCareMarket-mmllm-claude-train-2b64bdaf-Iixhi",
+      "n_steps": 35,
+      "ctrl_bpc": 1.167
+    },
+    {
+      "bird_id": "94b400a4fad847d4",
+      "handle": "rARVw",
+      "branch": "fork-joly-os-mmllm-claude-train-94b400a4-rARVw",
+      "n_steps": 35,
+      "ctrl_bpc": 1.1818
+    }
+  ],
+  "ancestor_harvests": [
+    "workers/dispatcher/harvest-3way-r35",
+    "workers/dispatcher/harvest-3way-r36"
+  ],
+  "cumulative_total_steps": 224,
+  "cumulative_unique_birds": 7,
+  "harvested_at": "2026-05-21T03:59:11Z",
+  "harvester": "scripts/consolidate_siblings.py (cross-arm fold)",
+  "note": "Cross-arm fold of sibling harvest dirs. delta-sparse-net is row-aware FedAvg-merged across input arms; dense.pt is per-element mean. ctrl_bpc reflects the input arms' birds; this fold did no fresh training of its own.",
+  "consolidation_of": [
+    "workers/dispatcher/harvest-3way-r35",
+    "workers/dispatcher/harvest-3way-r36"
+  ],
+  "round_gap_across_inputs": 1
+}

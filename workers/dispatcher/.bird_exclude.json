@@ -1,0 +1,20 @@
+{
+  "_doc": "Quarantine list for raw-birds fold (consolidate_siblings.py). Bird IDs in 'excluded_bird_ids' are skipped during cross-arm fold. Birds in 'candidates' are flagged for review — promote one to 'excluded_bird_ids' once confirmed a real regression rather than noise floor.",
+  "excluded_bird_ids": [],
+  "candidates": [
+    {
+      "bird_id": "d9432097f0d2480d",
+      "handle": "WwR8i",
+      "round_observed": 46,
+      "delta_net_observed": -0.0031,
+      "reason": "Δ_net negative at r46. Single observation; within ~±0.005 noise floor by absolute magnitude but slightly outside. Promote only if regression repeats across ≥2 rounds."
+    },
+    {
+      "bird_id": "9b959a2dee594c23",
+      "handle": "LO5VT",
+      "round_observed": 46,
+      "delta_net_observed": -0.0015,
+      "reason": "Δ_net negative at r46. Comfortably within noise floor. Probably keep folded; flag for review if a later round shows ≤-0.005."
+    }
+  ]
+}

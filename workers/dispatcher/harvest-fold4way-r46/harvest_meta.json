@@ -1,0 +1,73 @@
+{
+  "spork_version": "0.9",
+  "target_round": 46,
+  "n_workers": 4,
+  "wave": "fold-r46-rawbirds",
+  "workers": [
+    {
+      "handle": "xPume",
+      "branch": "origin/claude/train-187df731-xPume",
+      "ctrl_bpc": 0.9623
+    },
+    {
+      "handle": "N5rrl",
+      "branch": "origin/claude/train-49cc9651-N5rrl",
+      "ctrl_bpc": 1.1299
+    },
+    {
+      "handle": "LO5VT",
+      "branch": "origin/claude/train-9b959a2d-LO5VT",
+      "ctrl_bpc": 1.1617
+    },
+    {
+      "handle": "WwR8i",
+      "branch": "origin/claude/train-d9432097-WwR8i",
+      "ctrl_bpc": 1.1526
+    }
+  ],
+  "worker_ctrl_bpc_mean": 1.1016,
+  "worker_ctrl_bpc_best": 0.9623,
+  "previous_harvest": {
+    "round": 41,
+    "dir": "workers/dispatcher/harvest-fold4way-r41"
+  },
+  "direct_contributions": [
+    {
+      "bird_id": "187df7310f244560",
+      "handle": "xPume",
+      "branch": "origin/claude/train-187df731-xPume",
+      "n_steps": 35,
+      "ctrl_bpc": 0.9623
+    },
+    {
+      "bird_id": "49cc96516e3a4a5b",
+      "handle": "N5rrl",
+      "branch": "origin/claude/train-49cc9651-N5rrl",
+      "n_steps": 35,
+      "ctrl_bpc": 1.1299
+    },
+    {
+      "bird_id": "9b959a2dee594c23",
+      "handle": "LO5VT",
+      "branch": "origin/claude/train-9b959a2d-LO5VT",
+      "n_steps": 35,
+      "ctrl_bpc": 1.1617
+    },
+    {
+      "bird_id": "d9432097f0d2480d",
+      "handle": "WwR8i",
+      "branch": "origin/claude/train-d9432097-WwR8i",
+      "n_steps": 35,
+      "ctrl_bpc": 1.1526
+    }
+  ],
+  "ancestor_harvests": [
+    "workers/dispatcher/harvest-fold4way-r41"
+  ],
+  "cumulative_total_steps": 910,
+  "cumulative_unique_birds": 28,
+  "harvested_at": "2026-05-22T02:47:54Z",
+  "harvester": "scripts/consolidate_siblings.py raw-birds (inclusive fold)",
+  "note": "Inclusive raw-bird fold: every origin/claude/train-* branch with chain-design-r46/ payload was discovered, fetched, and FedAvg'd in. Replaces the cron's MAX_BIRDS=3-capped selection. Honors workers/dispatcher/.bird_exclude.json quarantine list.",
+  "quarantine_excluded": []
+}

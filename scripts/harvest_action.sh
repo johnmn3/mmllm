@@ -107,6 +107,20 @@ _fetch_fork_branch() {
   return 1
 }
 
+# --- 0) Fold any sibling harvest arms before this round's bird-merge -
+# scripts/_delta_sparse_net.py fedavg can merge multiple delta dirs in
+# the same format harvest dirs already use. consolidate_siblings.py
+# walks workers/dispatcher/, finds leaf harvest dirs (not yet an
+# ancestor of any other), and if there's more than one leaf within a
+# round of the top, folds them into a new harvest-fold<N>way-r<R>/
+# dir. The new round's bird-merge below will then pick the fold as
+# "previous harvest" (the heredoc picker prefers fold dirs on ties).
+# Opt-out: set MMLLM_SKIP_FOLD=1.
+if [ -z "${MMLLM_SKIP_FOLD:-}" ]; then
+  echo "▶ checking for sibling harvest arms to fold…"
+  python3 scripts/consolidate_siblings.py auto 2>&1 | sed 's/^/  /'
+fi
+
 # --- 1) Auto-detect target round if not specified --------------------
 # Branch flavors we accept:
 #   claude/smoke-r<N>-*           legacy, round in name
@@ -169,6 +183,34 @@ if [ -z "$TARGET_ROUND" ]; then
   fi
 fi
 echo "▶ target round: $TARGET_ROUND"
+
+# --- 1.5) Inclusive raw-birds fold for target round ------------------
+# consolidate_siblings.py raw-birds discovers every
+# origin/claude/train-* branch with chain-design-r<TARGET_ROUND>/
+# payload and FedAvgs all of them using streaming row-aware FedAvg
+# (verified at 17 birds, peak RSS ~615 MB — fits the 120-min cron's
+# memory budget). Output: harvest-fold<N>way-r<TARGET_ROUND>/.
+#
+# This runs ALONGSIDE the legacy step 2-5 path below (which still
+# produces harvest-<M>way-r<TARGET_ROUND>/ under the MAX_BIRDS=3 cap).
+# Both coexist. The "previous harvest" picker tiebreak prefers folds
+# with higher way counts, so future workers extend from the inclusive
+# fold automatically.
+#
+# Limitations: raw-birds discovers origin branches only — fork birds
+# still go through the legacy path's gh-CLI fork scan. If a round has
+# only fork-bird contributions, the legacy path is what produces a
+# harvest. Most rounds have multiple origin contributors, so the fold
+# typically captures the bulk.
+#
+# Set MMLLM_SKIP_RAW_BIRDS=1 to skip (e.g. for fork-only rounds where
+# the legacy path is the only producer).
+if [ -z "${MMLLM_SKIP_RAW_BIRDS:-}" ]; then
+  echo "▶ raw-birds inclusive fold for r${TARGET_ROUND}…"
+  if ! python3 scripts/consolidate_siblings.py raw-birds "$TARGET_ROUND" 2>&1 | sed 's/^/  /'; then
+    echo "  WARN: raw-birds fold failed; continuing with legacy capped path"
+  fi
+fi
 
 # --- 2) Discover bird branches for this round ------------------------
 # Four sources:
@@ -431,9 +473,21 @@ best_bpc = min(valid_bpcs) if valid_bpcs else None
 def _round_of(d):
     try: return int(d.rsplit("-r", 1)[-1])
     except: return -1
+import re as _re
+def _way_count(d):
+    m = _re.search(r"(\d+)way-r", d)
+    return int(m.group(1)) if m else 0
 prev = None
+# Tiebreak when two harvest dirs share a round:
+#  (round, is_fold, way_count) — fold beats raw, more-birds-folded wins.
+# The fold transitively includes its inputs' bird-deltas; the raw
+# siblings each contain only one arm. Among folds, the one with more
+# birds folded in is the more complete state.
 for d in sorted(glob.glob("workers/dispatcher/harvest-*-r*"),
-                key=_round_of, reverse=True):
+                key=lambda x: (_round_of(x),
+                               1 if "/harvest-fold" in x else 0,
+                               _way_count(x)),
+                reverse=True):
     n = _round_of(d)
     if n < 0 or n >= target: continue
     meta = f"{d}/harvest_meta.json"
