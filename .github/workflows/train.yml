@@ -26,6 +26,15 @@ on:
           - general
           - clojure-general
           - clojure-fim
+      rewarm_netbank_keys:
+        description: "One-shot copy Local's K_a/K_b into Net's first sqrt_local rows at run start (V untouched). Use to break the random-K_a/K_b cycle."
+        required: false
+        type: boolean
+        default: false
+      k_align_coef:
+        description: "Ongoing MSE alignment loss coef between Net and Local K_a/K_b. 0=off (default). Try 0.001-0.01 to keep keys pulled toward Local's after rewarm."
+        required: false
+        default: "0.0"
   # Cron auto-train: every hour. Workflow inputs aren't available
   # from the schedule trigger — we use the defaults baked into the
   # script (n_rounds=5, steps=7, random corpus, random handle). Each
@@ -93,6 +102,8 @@ jobs:
           MMLLM_N_ROUNDS: ${{ inputs.n_rounds }}
           MMLLM_STEPS_PER_ROUND: ${{ inputs.steps_per_round }}
           MMLLM_CORPUS: ${{ inputs.corpus }}
+          MMLLM_REWARM_NETBANK_KEYS: ${{ inputs.rewarm_netbank_keys }}
+          MMLLM_K_ALIGN_COEF: ${{ inputs.k_align_coef }}
         run: |
           bash scripts/train.sh
 

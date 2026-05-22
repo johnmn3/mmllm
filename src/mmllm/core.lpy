@@ -1454,6 +1454,61 @@
                               (.item (.detach raw-mse)))))
             (* coef raw-mse)))))))
 
+(defn pick-k-align-coef
+  "MMLLM_K_ALIGN_COEF — coefficient for the ongoing K_a/K_b alignment
+   MSE between Net and Local. Default 0.0 = disabled (no extra loss
+   term, no extra compute).
+
+   Set to a small positive value (~1e-3 to 1e-2) to keep Net's K_a/K_b
+   bootstrap rows gently pulled toward Local's after a one-shot
+   MMLLM_REWARM_NETBANK_KEYS=true. Breaks the cyclic random-K_a/K_b →
+   gate-suppresses-Net → no-gradient-to-K_a/K_b trap flagged in
+   CLAUDE.md."
+  []
+  (python/float (.get (.- os environ) "MMLLM_K_ALIGN_COEF" "0.0")))
+
+(defn collect-k-align-loss
+  "MSE alignment loss between Net's first min(local.sqrt_n, net.sqrt_n)
+   rows of K_a/K_b and Local's K_a/K_b (detached). Pulls Net's
+   bootstrap rows toward Local's retrieval geometry every step.
+
+   Returns 0.0 when MMLLM_K_ALIGN_COEF=0 (the default) or when no
+   block has both a Local and a Net bank.
+
+   Scope: layers in :local-bank-layers (8 of 32 in cpu-mini's
+   asymmetric architecture). Net's K_a/K_b beyond row sqrt_local
+   stays free to learn independent addressing — alignment only
+   anchors the bootstrap rows.
+
+   Loss formula, per block with both Local+Net:
+     n = min(local.sqrt_n, net.sqrt_n)
+     mse_a = mse(net.K_a[:n], local.K_a[:n].detach())
+     mse_b = mse(net.K_b[:n], local.K_b[:n].detach())
+   Returned as coef × mean_over_blocks(mse_a + mse_b)."
+  [m]
+  (let [coef (pick-k-align-coef)]
+    (if (zero? coef)
+      0.0
+      (let [losses (->> (:blocks m)
+                        (keep (fn [b]
+                                (let [nb  (:netbank b)
+                                      mem (:memory b)]
+                                  (when (and nb mem)
+                                    (let [n-copy (python/min (.- mem sqrt_n) (.- nb sqrt_n))
+                                          local-K_a (.detach (.- mem K_a))
+                                          local-K_b (.detach (.- mem K_b))
+                                          mse_a (F/mse_loss
+                                                  (.narrow (.- nb K_a) 0 0 n-copy)
+                                                  (.narrow local-K_a 0 0 n-copy))
+                                          mse_b (F/mse_loss
+                                                  (.narrow (.- nb K_b) 0 0 n-copy)
+                                                  (.narrow local-K_b 0 0 n-copy))]
+                                      (+ mse_a mse_b))))))
+                        (into []))]
+        (if (empty? losses)
+          0.0
+          (* coef (/ (reduce + losses) (python/float (count losses)))))))))
+
 (defn pick-grad-clip-max-norm
   "Max global norm for dense-parameter gradient clipping (AdamW only;
    SparseAdam's per-row updates are localized and don't suffer the
@@ -2120,6 +2175,28 @@
         (println (format "  NetBank[layer %d] warm-started from Local K_a/K_b%s"
                          i (if warm-V? " + V (projected)" "")))))))
 
+(defn rewarm-netbank-keys-only!
+  "Like warm-start-netbanks-from-local! but ALWAYS with local_V=None —
+   refresh only Net's K_a/K_b retrieval geometry, leave V_net's
+   harvested content untouched.
+
+   Used for one-shot K_a/K_b realignment on a chain whose Net's keys
+   have drifted from Local's (random-init at chain genesis + cyclic
+   gate-suppression keeping them misaligned, per CLAUDE.md
+   'MMLLM_SKIP_NETBANK_WARMSTART=true keeps Net's K_a/K_b random').
+   Triggered via MMLLM_REWARM_NETBANK_KEYS=true in train-long.
+
+   Pairs with MMLLM_K_ALIGN_COEF (ongoing distill-style pressure) so
+   that after the one-shot kick, Net's K_a/K_b doesn't drift back."
+  [m]
+  (doseq [[i b] (map-indexed vector (:blocks m))]
+    (when-let [nb (:netbank b)]
+      (when-let [mem (:memory b)]
+        (.warm_start_from nb
+                          (.- mem K_a)
+                          (.- mem K_b))
+        (println (format "  NetBank[layer %d] K_a/K_b realigned from Local (V untouched)" i))))))
+
 (defn forward
   "Run the model.
      tokens:       (B, T) int64
@@ -2425,7 +2502,13 @@
                         (* d-coef (/ distill-total (python/float n-distill-layers))))
          mtp-loss     (collect-mtp-loss aux-logits y T)
          delim-loss   (collect-delim-loss m final-x y)
-         ;; Stash distill / delim losses on :metrics for printer / JSONL.
+         ;; K_a/K_b alignment between Net and Local — no-op when
+         ;; MMLLM_K_ALIGN_COEF=0 (the default). When enabled, pulls
+         ;; Net's first sqrt_local rows of K_a/K_b toward Local's
+         ;; (detached) every step. Pairs with one-shot
+         ;; MMLLM_REWARM_NETBANK_KEYS=true at run start.
+         k-align-loss (collect-k-align-loss m)
+         ;; Stash distill / delim / k-align losses on :metrics for printer / JSONL.
          _            (when-let [metrics (:metrics m)]
                         (.__setitem__ metrics "distill_loss"
                                       (if (number? distill-loss)
@@ -2434,14 +2517,19 @@
                         (.__setitem__ metrics "delim_loss"
                                       (if (number? delim-loss)
                                         (python/float delim-loss)
-                                        (.item delim-loss))))
+                                        (.item delim-loss)))
+                        (.__setitem__ metrics "k_align_loss"
+                                      (if (number? k-align-loss)
+                                        (python/float k-align-loss)
+                                        (.item k-align-loss))))
          ;; Sum non-zero terms; numerics matter — adding a Python 0.0 to
          ;; a tensor would coerce to a fp tensor scalar of value 0, fine.
          loss         (cond-> ce-loss
-                        (not (number? z-loss))       (+ z-loss)
-                        (not (number? mtp-loss))     (+ mtp-loss)
-                        (not (number? distill-loss)) (+ distill-loss)
-                        (not (number? delim-loss))   (+ delim-loss))]
+                        (not (number? z-loss))         (+ z-loss)
+                        (not (number? mtp-loss))       (+ mtp-loss)
+                        (not (number? distill-loss))   (+ distill-loss)
+                        (not (number? delim-loss))     (+ delim-loss)
+                        (not (number? k-align-loss))   (+ k-align-loss))]
      ;; Hard-abort on NaN/Inf loss before backward — a degenerate step
      ;; would propagate NaN into all params, opt state, and bank V; the
      ;; ckpt-save next event would then persist a poisoned model. Raising
@@ -4223,6 +4311,17 @@
                (= "true" (.lower (.get (.- os environ)
                                        "MMLLM_SKIP_NETBANK_WARMSTART" "false"))))
       (println "  NetBank: MMLLM_SKIP_NETBANK_WARMSTART=true — using NetBank V as already mmap'd (likely from harvester)"))
+    ;; One-shot K_a/K_b realignment, V untouched.
+    ;; Bypasses the SKIP_NETBANK_WARMSTART guard AND the opt-sparse-net.pt
+    ;; existence check — fires UNCONDITIONALLY when MMLLM_REWARM_NETBANK_KEYS=true.
+    ;; Use this for ONE worker run to break the random-K_a/K_b ↔
+    ;; gate-suppresses-Net feedback loop. Pair with MMLLM_K_ALIGN_COEF
+    ;; (>0) to keep the realignment from drifting back.
+    (when (and opt-sparse-net
+               (= "true" (.lower (.get (.- os environ)
+                                       "MMLLM_REWARM_NETBANK_KEYS" "false"))))
+      (println "  NetBank: MMLLM_REWARM_NETBANK_KEYS=true — K_a/K_b realignment from Local (V untouched)")
+      (rewarm-netbank-keys-only! m))
     (when (>= start-step total-steps)
       ;; Silent skip is the bug we hit on the first sync smoke: a stale
       ;; ckpt from a prior longer run made start-step exceed the new
