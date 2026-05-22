@@ -56,9 +56,23 @@ git fetch "$UPSTREAM" main --depth=1 2>&1 | tail -1
 # Auto-detect the chain head — highest workers/dispatcher/harvest-*-r<N>
 # dir on upstream main. Forks will automatically pick up the latest
 # harvest each time the workflow runs.
+#
+# Regex accepts both legacy `harvest-<N>way-r<R>` (cron output) and
+# `harvest-fold<N>way-r<R>` (inclusive raw-birds fold output). When
+# both exist at the same R, the fold has more bird contributions
+# folded in — we prefer it via the secondary sort below.
 CHAIN_HEAD_PATH=$(git ls-tree -d --name-only FETCH_HEAD workers/dispatcher/ 2>/dev/null \
-  | grep -oE 'workers/dispatcher/harvest-[0-9]+way-r[0-9]+$' \
-  | awk -F'-r' '{print $NF " " $0}' | sort -n | tail -1 | awk '{print $2}')
+  | grep -oE 'workers/dispatcher/harvest-(fold)?[0-9]+way-r[0-9]+$' \
+  | awk -F'-r' '{
+      n_r = $NF
+      # parse "<prefix>way-r<n_r>" — extract way count + "fold?" flag
+      pre = $0; sub(/-r[0-9]+$/, "", pre)
+      is_fold = (pre ~ /-fold[0-9]+way$/) ? 1 : 0
+      way = pre; sub(/.*-(fold)?/, "", way); sub(/way$/, "", way)
+      # sort key: round, then is_fold (prefer fold), then way count
+      printf "%d %d %d %s\n", n_r, is_fold, way, $0
+    }' \
+  | sort -k1,1n -k2,2n -k3,3n | tail -1 | awk '{print $4}')
 if [ -z "$CHAIN_HEAD_PATH" ]; then
   echo "ERROR: no harvest-*-r<N> dirs found on upstream main" >&2
   exit 2

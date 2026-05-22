@@ -184,6 +184,34 @@ if [ -z "$TARGET_ROUND" ]; then
 fi
 echo "▶ target round: $TARGET_ROUND"
 
+# --- 1.5) Inclusive raw-birds fold for target round ------------------
+# consolidate_siblings.py raw-birds discovers every
+# origin/claude/train-* branch with chain-design-r<TARGET_ROUND>/
+# payload and FedAvgs all of them using streaming row-aware FedAvg
+# (verified at 17 birds, peak RSS ~615 MB — fits the 120-min cron's
+# memory budget). Output: harvest-fold<N>way-r<TARGET_ROUND>/.
+#
+# This runs ALONGSIDE the legacy step 2-5 path below (which still
+# produces harvest-<M>way-r<TARGET_ROUND>/ under the MAX_BIRDS=3 cap).
+# Both coexist. The "previous harvest" picker tiebreak prefers folds
+# with higher way counts, so future workers extend from the inclusive
+# fold automatically.
+#
+# Limitations: raw-birds discovers origin branches only — fork birds
+# still go through the legacy path's gh-CLI fork scan. If a round has
+# only fork-bird contributions, the legacy path is what produces a
+# harvest. Most rounds have multiple origin contributors, so the fold
+# typically captures the bulk.
+#
+# Set MMLLM_SKIP_RAW_BIRDS=1 to skip (e.g. for fork-only rounds where
+# the legacy path is the only producer).
+if [ -z "${MMLLM_SKIP_RAW_BIRDS:-}" ]; then
+  echo "▶ raw-birds inclusive fold for r${TARGET_ROUND}…"
+  if ! python3 scripts/consolidate_siblings.py raw-birds "$TARGET_ROUND" 2>&1 | sed 's/^/  /'; then
+    echo "  WARN: raw-birds fold failed; continuing with legacy capped path"
+  fi
+fi
+
 # --- 2) Discover bird branches for this round ------------------------
 # Four sources:
 #   (a) claude/smoke-r<T>-*  legacy branches whose name encodes T
