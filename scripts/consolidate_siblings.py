@@ -28,17 +28,30 @@ Usage:
         delta-sparse-net.meta.pt} + harvest_meta.json. out_dir must not
         already exist.
 
-Round-gap policy: gap > 1 across inputs is rejected. The lower-round
-arm's delta references a V_net one round behind the higher-round
-arm's; row-aware FedAvg of the two is approximate at gap=1 (matches
-scripts/harvest_action.sh's tolerance for birds with divergent
-extended_from_harvest) but degrades fast beyond that.
+    python3 scripts/consolidate_siblings.py raw-birds <round> [--out OUT] [--extra-ref REF ...]
+        Auto-discover every origin/claude/train-* branch with a
+        chain-design-r<round>/ bird payload, fetch + extract each, and
+        fold them into one harvest dir. Honors the quarantine list at
+        workers/dispatcher/.bird_exclude.json (bird_ids listed there
+        are skipped). --extra-ref accepts additional refs (e.g. fork
+        branches fetched separately) and includes them in the fold.
+        This is the operational pattern that replaces "cron picks 3
+        birds and leaves the rest stranded" — every published bird at
+        the round gets folded in.
+
+Round-gap policy: gap > 1 across inputs is rejected for the `merge`
+mode. The lower-round arm's delta references a V_net one round behind
+the higher-round arm's; row-aware FedAvg of the two is approximate at
+gap=1 (matches scripts/harvest_action.sh's tolerance for birds with
+divergent extended_from_harvest) but degrades fast beyond that.
 """
 
 import datetime
 import glob
 import json
 import os
+import re
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -56,6 +69,30 @@ def _round_of(name):
         return int(name.rsplit("-r", 1)[-1])
     except Exception:
         return -1
+
+
+def _way_count(name):
+    """harvest-3way-r36 -> 3; harvest-fold17way-r36 -> 17; otherwise 0.
+
+    Used as a tiebreak when picking a "previous harvest" among multiple
+    candidates at the same round — prefer the one with more bird
+    contributions folded in.
+    """
+    m = re.search(r"(\d+)way-r", name)
+    return int(m.group(1)) if m else 0
+
+
+def _picker_key(d):
+    """Sort key for picking the best 'previous harvest' candidate at a round.
+
+    Tuple (round, is_fold, way_count). Higher wins in reverse sort:
+      - higher round first
+      - among equal rounds, fold harvests beat raw harvests
+      - among equal-round folds, the one with more birds wins
+    """
+    return (_round_of(d),
+            1 if "/harvest-fold" in d else 0,
+            _way_count(d))
 
 
 def _load_meta(harvest_dir):
@@ -329,6 +366,365 @@ def fold(out_dir, harvest_dirs):
     print("=" * 60)
 
 
+def _load_quarantine():
+    """Return set of bird_ids listed in workers/dispatcher/.bird_exclude.json.
+
+    Empty set if the file doesn't exist or can't be parsed. JSON shape:
+        {"excluded_bird_ids": [
+            {"bird_id": "...", "reason": "...", "added_at": "ISO8601"}
+        ]}
+    """
+    p = Path(DISPATCHER_DIR) / ".bird_exclude.json"
+    if not p.exists():
+        return set()
+    try:
+        data = json.loads(p.read_text())
+        return {entry["bird_id"] for entry in data.get("excluded_bird_ids", [])
+                if entry.get("bird_id")}
+    except Exception as e:
+        print(f"  WARN: couldn't parse {p}: {e}", file=sys.stderr)
+        return set()
+
+
+def _discover_origin_branches_at_round(round_n):
+    """Return [(handle, branch_name)] for origin/claude/train-* branches that
+    contain workers/<handle>/chain-design-r<round_n>/dense.pt.
+
+    Probes with --filter=blob:none to keep fetches cheap (~1-5 MB per branch).
+    The full blobs come later, only for selected branches.
+    """
+    result = []
+    try:
+        out = subprocess.check_output(
+            ["git", "ls-remote", "origin", "claude/train-*"],
+            text=True, stderr=subprocess.DEVNULL,
+        )
+    except subprocess.CalledProcessError:
+        return result
+
+    for line in out.strip().split("\n"):
+        if not line.strip():
+            continue
+        parts = line.split()
+        if len(parts) != 2:
+            continue
+        ref = parts[1].replace("refs/heads/", "")
+        m = re.match(r"claude/train-[a-f0-9]+-(\w+)$", ref)
+        if not m:
+            continue
+        handle = m.group(1)
+        # Probe trees (filter=blob:none keeps it small)
+        try:
+            subprocess.run(
+                ["git", "fetch", "origin", ref,
+                 "--depth=1", "--filter=blob:none", "-q"],
+                check=True, stderr=subprocess.DEVNULL,
+            )
+            ls = subprocess.check_output(
+                ["git", "ls-tree", "-r", "--name-only", f"origin/{ref}"],
+                text=True, stderr=subprocess.DEVNULL,
+            )
+        except subprocess.CalledProcessError:
+            continue
+        target = f"workers/{handle}/chain-design-r{round_n}/dense.pt"
+        if target in ls:
+            result.append((handle, ref))
+    return result
+
+
+def _fetch_and_extract_bird(branch_ref, handle, round_n, dst_root, full_remote=None):
+    """git archive | tar the bird's chain-design-r<round>/ tree to dst_root/handle/.
+
+    branch_ref is the origin/<branch> form OR a local ref name for fork branches
+    fetched separately. If full_remote is provided we fetch with blobs first.
+    Returns (dst_path, n_files) or (None, 0) on failure.
+    """
+    dst = Path(dst_root) / handle
+    dst.mkdir(parents=True, exist_ok=True)
+    archive_src = branch_ref
+    if branch_ref.startswith("origin/"):
+        # Re-fetch with blobs this time so git archive has the .pt contents
+        try:
+            subprocess.run(
+                ["git", "fetch", "origin",
+                 branch_ref.replace("origin/", ""), "--depth=1", "-q"],
+                check=True, stderr=subprocess.DEVNULL,
+            )
+        except subprocess.CalledProcessError:
+            shutil.rmtree(dst, ignore_errors=True)
+            return None, 0
+    try:
+        archive = subprocess.Popen(
+            ["git", "archive", archive_src,
+             f"workers/{handle}/chain-design-r{round_n}/"],
+            stdout=subprocess.PIPE,
+        )
+        tar = subprocess.Popen(
+            ["tar", "-x", "-C", str(dst),
+             "--strip-components=3", "--exclude=opt-sparse-net.*"],
+            stdin=archive.stdout,
+        )
+        archive.stdout.close()
+        tar.communicate()
+        archive.wait()
+    except Exception as e:
+        print(f"  WARN extract failed for {handle}: {e}", file=sys.stderr)
+        shutil.rmtree(dst, ignore_errors=True)
+        return None, 0
+    n_files = len(list(dst.iterdir()))
+    if n_files == 0:
+        shutil.rmtree(dst, ignore_errors=True)
+        return None, 0
+    return dst, n_files
+
+
+def fold_raw_birds(round_n, out_dir=None, extra_refs=()):
+    """Discover + fold every train-* branch's r<round_n> bird payload.
+
+    extra_refs: additional refs to include (already fetched into the local
+    repo with blobs available — e.g. fork branches fetched manually).
+    Each extra_ref is given as the branch/ref name; handle is inferred from
+    the chain-design-r<round_n>/ tree path.
+
+    Output dir defaults to workers/dispatcher/harvest-fold<N>way-r<round_n>/
+    where N is the count of birds that actually got folded in.
+    """
+    quarantine = _load_quarantine()
+    print(f"▶ raw-birds fold for round r{round_n}")
+    if quarantine:
+        print(f"  quarantine: {len(quarantine)} bird_id(s) excluded")
+
+    work_root = Path(f"/tmp/birds-r{round_n}")
+    if work_root.exists():
+        shutil.rmtree(work_root)
+    work_root.mkdir(parents=True)
+
+    print(f"▶ scanning origin/claude/train-* for r{round_n} payloads…")
+    branches = _discover_origin_branches_at_round(round_n)
+    print(f"  found {len(branches)} branch(es) on origin")
+
+    # Also add extra_refs (fork branches the caller pre-fetched).
+    bird_specs = [(handle, f"origin/{br}") for handle, br in branches]
+    for ref in extra_refs:
+        try:
+            ls = subprocess.check_output(
+                ["git", "ls-tree", "-r", "--name-only", ref],
+                text=True, stderr=subprocess.DEVNULL,
+            )
+        except subprocess.CalledProcessError:
+            print(f"  WARN: extra-ref {ref} not fetchable", file=sys.stderr)
+            continue
+        for line in ls.split("\n"):
+            m = re.match(rf"workers/(\w+)/chain-design-r{round_n}/dense\.pt$", line)
+            if m:
+                bird_specs.append((m.group(1), ref))
+                break
+
+    bird_dirs = []
+    direct_contribs = []
+    excluded_log = []
+    for handle, ref in bird_specs:
+        dst, n = _fetch_and_extract_bird(ref, handle, round_n, work_root)
+        if dst is None:
+            continue
+        meta_p = dst / "meta.json"
+        if not meta_p.exists():
+            print(f"  skip {handle}: no meta.json")
+            shutil.rmtree(dst)
+            continue
+        try:
+            m = json.loads(meta_p.read_text())
+        except Exception as e:
+            print(f"  skip {handle}: meta parse failed: {e}")
+            shutil.rmtree(dst)
+            continue
+        bid = m.get("bird_id") or f"legacy:{ref}"
+        if bid in quarantine:
+            print(f"  EXCLUDE {handle} (bird_id={bid[:8]}…) — quarantined")
+            excluded_log.append({"handle": handle, "bird_id": bid})
+            shutil.rmtree(dst)
+            continue
+        n_steps = m.get("n_total_steps")
+        if n_steps is None:
+            nr = m.get("n_rounds_trained")
+            rs = m.get("round_length_steps")
+            if isinstance(nr, (int, float)) and isinstance(rs, (int, float)):
+                n_steps = int(nr) * int(rs)
+        ctrl = m.get("final_ctrl_bpc")
+        direct_contribs.append({
+            "bird_id": bid, "handle": handle, "branch": ref,
+            "n_steps": n_steps,
+            "ctrl_bpc": float(ctrl) if ctrl is not None else None,
+        })
+        bird_dirs.append(dst)
+        print(f"  + {handle}  bid={bid[:8]}  ctrl={ctrl}  n_steps={n_steps}")
+
+    if not bird_dirs:
+        print(f"no foldable birds at r{round_n}")
+        shutil.rmtree(work_root)
+        return None
+
+    N = len(bird_dirs)
+    if out_dir is None:
+        out_dir = Path(DISPATCHER_DIR) / f"{FOLD_PREFIX}{N}way-r{round_n}"
+        if out_dir.exists():
+            i = 2
+            while Path(f"{out_dir}-v{i}").exists():
+                i += 1
+            out_dir = Path(f"{out_dir}-v{i}")
+    else:
+        out_dir = Path(out_dir)
+    if out_dir.exists():
+        raise SystemExit(f"refuse to overwrite existing {out_dir}")
+    out_round = out_dir / f"round-{round_n}"
+    out_round.mkdir(parents=True, exist_ok=False)
+
+    # Row-aware FedAvg of delta-sparse-net.
+    cmd = ["python3", "scripts/_delta_sparse_net.py", "fedavg", str(out_round)]
+    cmd.extend(str(d) for d in bird_dirs)
+    print(f"▶ row-aware FedAvg of {N} bird deltas")
+    subprocess.run(cmd, check=True)
+
+    # Per-element mean of dense.pt.
+    print(f"▶ averaging dense.pt across {N} birds")
+    denses = []
+    for d in bird_dirs:
+        p = d / "dense.pt"
+        if p.exists():
+            denses.append(torch.load(p, map_location="cpu", weights_only=False))
+    if not denses:
+        raise SystemExit("no dense.pt across inputs")
+    nten = len(denses[0])
+    if not all(len(dd) == nten for dd in denses):
+        raise SystemExit(f"dense.pt length mismatch: {[len(dd) for dd in denses]}")
+    avg = []
+    for i in range(nten):
+        vals = [dd[i] for dd in denses]
+        if isinstance(vals[0], torch.Tensor):
+            avg.append((sum(v.float() for v in vals) / len(vals)).to(vals[0].dtype))
+        else:
+            avg.append(vals[0])
+    torch.save(avg, out_round / "dense.pt")
+    print(f"  dense.pt → {out_round/'dense.pt'} "
+          f"({(out_round/'dense.pt').stat().st_size/1e6:.1f} MB)")
+
+    # ctrl_bpc summary from input birds.
+    bpcs = [c["ctrl_bpc"] for c in direct_contribs if c.get("ctrl_bpc") is not None]
+    mean_b = round(sum(bpcs)/len(bpcs), 4) if bpcs else None
+    best_b = round(min(bpcs), 4) if bpcs else None
+    own_ids = {c["bird_id"] for c in direct_contribs}
+    own_steps = sum((c.get("n_steps") or 0) for c in direct_contribs)
+
+    # Pick the previous mega-fold (or any harvest) at round < round_n as
+    # the lineage anchor. The picker on the existing harvester will use this.
+    prev_anc = None
+    for d in sorted(glob.glob(f"{DISPATCHER_DIR}/harvest-*-r*"),
+                    key=_picker_key, reverse=True):
+        r = _round_of(d)
+        if r < 0 or r >= round_n:
+            continue
+        if _try_load_meta(d) is None:
+            continue
+        prev_anc = d
+        break
+
+    ancestor_starts = [prev_anc] if prev_anc else []
+    anc_ids, anc_steps = _walk_ancestor_steps(ancestor_starts, own_ids)
+
+    workers_list = [{"handle": c["handle"], "branch": c["branch"],
+                     "ctrl_bpc": c.get("ctrl_bpc")} for c in direct_contribs]
+    meta_out = {
+        "spork_version": "0.9",
+        "target_round": round_n,
+        "n_workers": N,
+        "wave": f"fold-r{round_n}-rawbirds",
+        "workers": workers_list,
+        "worker_ctrl_bpc_mean": mean_b,
+        "worker_ctrl_bpc_best": best_b,
+        "previous_harvest": ({"round": _round_of(prev_anc), "dir": prev_anc}
+                             if prev_anc else None),
+        "direct_contributions": direct_contribs,
+        "ancestor_harvests": ancestor_starts,
+        "cumulative_total_steps": own_steps + anc_steps,
+        "cumulative_unique_birds": len(own_ids) + len(anc_ids),
+        "harvested_at": datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "harvester": "scripts/consolidate_siblings.py raw-birds (inclusive fold)",
+        "note": (
+            "Inclusive raw-bird fold: every origin/claude/train-* branch with "
+            f"chain-design-r{round_n}/ payload was discovered, fetched, and "
+            "FedAvg'd in. Replaces the cron's MAX_BIRDS=3-capped selection. "
+            "Honors workers/dispatcher/.bird_exclude.json quarantine list."
+        ),
+        "quarantine_excluded": excluded_log,
+    }
+    (out_dir / "harvest_meta.json").write_text(json.dumps(meta_out, indent=2))
+
+    lines = []
+    lines.append(f"# {out_dir.name} — raw-birds fold at round r{round_n}\n")
+    lines.append("## Folded birds\n")
+    lines.append("| handle | ctrl_bpc | n_steps | bird_id |")
+    lines.append("|--------|---------:|--------:|---------|")
+    for c in sorted(direct_contribs, key=lambda x: (x["ctrl_bpc"] is None, x["ctrl_bpc"])):
+        bpc = f"{c['ctrl_bpc']:.4f}" if c["ctrl_bpc"] is not None else "—"
+        lines.append(f"| {c['handle']} | {bpc} | "
+                     f"{c['n_steps'] if c['n_steps'] is not None else '—'} | "
+                     f"`{c['bird_id'][:16]}` |")
+    if mean_b is not None:
+        lines.append(f"| **mean** |  **{mean_b}**  | | |")
+        lines.append(f"| **best** |  **{best_b}**  | | |")
+    if excluded_log:
+        lines.append(f"\n## Quarantine-excluded\n")
+        for e in excluded_log:
+            lines.append(f"- {e['handle']} (`{e['bird_id'][:16]}`)")
+    lines.append(f"\n## Cumulative\n")
+    lines.append(f"- Birds folded here:  **{N}**")
+    lines.append(f"- Cumulative unique birds across full ancestry: "
+                 f"**{meta_out['cumulative_unique_birds']}**")
+    lines.append(f"- Cumulative steps: **{meta_out['cumulative_total_steps']}**")
+    if prev_anc:
+        lines.append(f"- Previous harvest: `{prev_anc}` (round {_round_of(prev_anc)})")
+    (out_dir / "results.md").write_text("\n".join(lines) + "\n")
+
+    # Spork manifest
+    manifest = {
+        "spork_version": "0.9", "round": round_n,
+        "harvested_at": meta_out["harvested_at"],
+        "n_workers": N,
+        "worker_ctrl_bpc_mean": mean_b,
+        "worker_ctrl_bpc_best": best_b,
+        "cumulative_total_steps": meta_out["cumulative_total_steps"],
+        "cumulative_unique_birds": meta_out["cumulative_unique_birds"],
+        "netbank_files": {
+            "dense": f"round-{round_n}/dense.pt",
+            "delta_sparse_net": [f"round-{round_n}/delta-sparse-net.{i}.pt"
+                                 for i in range(32)],
+            "delta_sparse_net_meta": f"round-{round_n}/delta-sparse-net.meta.pt",
+            "reference_anchor": f"{DISPATCHER_DIR}/harvest-5way-r10/round-10",
+        },
+        "ancestor_harvests": meta_out["ancestor_harvests"],
+        "harvester": meta_out["harvester"],
+    }
+    (out_dir / f"spork-0.9-r{round_n}.json").write_text(json.dumps(manifest, indent=2))
+
+    # Clean up working dir.
+    shutil.rmtree(work_root)
+
+    print()
+    print("=" * 60)
+    print(f"  RAW-BIRDS FOLD — {out_dir.name}")
+    print("=" * 60)
+    print(f"  birds folded:        {N}")
+    print(f"  cum_unique_birds:    {meta_out['cumulative_unique_birds']}")
+    print(f"  cum_total_steps:     {meta_out['cumulative_total_steps']}")
+    print(f"  ctrl_bpc mean/best:  {mean_b} / {best_b}")
+    if prev_anc:
+        print(f"  previous harvest:    {prev_anc}")
+    if excluded_log:
+        print(f"  quarantine excluded: {len(excluded_log)}")
+    print("=" * 60)
+    return out_dir
+
+
 def auto(dry_run=False):
     leaves = _find_leaves()
     if len(leaves) <= 1:
@@ -385,6 +781,24 @@ def main():
         sys.exit(auto(dry_run=dry))
     elif cmd == "merge" and len(sys.argv) >= 5:
         fold(sys.argv[2], sys.argv[3:])
+    elif cmd == "raw-birds" and len(sys.argv) >= 3:
+        try:
+            round_n = int(sys.argv[2])
+        except ValueError:
+            raise SystemExit(f"raw-birds: <round> must be an int, got {sys.argv[2]!r}")
+        args = sys.argv[3:]
+        out_dir = None
+        extra_refs = []
+        i = 0
+        while i < len(args):
+            a = args[i]
+            if a == "--out" and i + 1 < len(args):
+                out_dir = args[i + 1]; i += 2
+            elif a == "--extra-ref" and i + 1 < len(args):
+                extra_refs.append(args[i + 1]); i += 2
+            else:
+                raise SystemExit(f"raw-birds: unknown arg {a!r}")
+        fold_raw_birds(round_n, out_dir=out_dir, extra_refs=extra_refs)
     else:
         print(__doc__)
         sys.exit(2)

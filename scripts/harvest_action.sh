@@ -445,14 +445,20 @@ best_bpc = min(valid_bpcs) if valid_bpcs else None
 def _round_of(d):
     try: return int(d.rsplit("-r", 1)[-1])
     except: return -1
+import re as _re
+def _way_count(d):
+    m = _re.search(r"(\d+)way-r", d)
+    return int(m.group(1)) if m else 0
 prev = None
-# Tiebreak: when two harvest dirs share a round, prefer the fold (a
-# cross-arm consolidation done by consolidate_siblings.py) over the
-# raw sibling harvest dirs. The fold transitively includes its inputs'
-# bird-deltas; the raw siblings each contain only one arm.
+# Tiebreak when two harvest dirs share a round:
+#  (round, is_fold, way_count) — fold beats raw, more-birds-folded wins.
+# The fold transitively includes its inputs' bird-deltas; the raw
+# siblings each contain only one arm. Among folds, the one with more
+# birds folded in is the more complete state.
 for d in sorted(glob.glob("workers/dispatcher/harvest-*-r*"),
                 key=lambda x: (_round_of(x),
-                               1 if "/harvest-fold" in x else 0),
+                               1 if "/harvest-fold" in x else 0,
+                               _way_count(x)),
                 reverse=True):
     n = _round_of(d)
     if n < 0 or n >= target: continue
