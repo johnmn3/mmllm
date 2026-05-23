@@ -1,0 +1,73 @@
+{
+  "spork_version": "0.9",
+  "target_round": 76,
+  "n_workers": 4,
+  "wave": "fold-r76-rawbirds",
+  "workers": [
+    {
+      "handle": "aswkZ",
+      "branch": "fork-SeniorCareMarket-mmllm-claude-train-842f9c8a-aswkZ",
+      "ctrl_bpc": 0.9811
+    },
+    {
+      "handle": "10U2d",
+      "branch": "fork-joly-os-mmllm-claude-train-232cb928-10U2d",
+      "ctrl_bpc": 0.9654
+    },
+    {
+      "handle": "RdNcz",
+      "branch": "fork-SeniorCareMarket-com-mmllm-claude-train-275c1ec2-RdNcz",
+      "ctrl_bpc": 1.061
+    },
+    {
+      "handle": "Xag6Z",
+      "branch": "fork-davidwuchn-mmllm-claude-train-bad10eae-Xag6Z",
+      "ctrl_bpc": 0.9661
+    }
+  ],
+  "worker_ctrl_bpc_mean": 0.9934,
+  "worker_ctrl_bpc_best": 0.9654,
+  "previous_harvest": {
+    "round": 73,
+    "dir": "workers/dispatcher/harvest-1way-r73"
+  },
+  "direct_contributions": [
+    {
+      "bird_id": "842f9c8a46f441ba",
+      "handle": "aswkZ",
+      "branch": "fork-SeniorCareMarket-mmllm-claude-train-842f9c8a-aswkZ",
+      "n_steps": 35,
+      "ctrl_bpc": 0.9811
+    },
+    {
+      "bird_id": "232cb92876794fb6",
+      "handle": "10U2d",
+      "branch": "fork-joly-os-mmllm-claude-train-232cb928-10U2d",
+      "n_steps": 35,
+      "ctrl_bpc": 0.9654
+    },
+    {
+      "bird_id": "275c1ec250b5437c",
+      "handle": "RdNcz",
+      "branch": "fork-SeniorCareMarket-com-mmllm-claude-train-275c1ec2-RdNcz",
+      "n_steps": 35,
+      "ctrl_bpc": 1.061
+    },
+    {
+      "bird_id": "bad10eae1ed54dfc",
+      "handle": "Xag6Z",
+      "branch": "fork-davidwuchn-mmllm-claude-train-bad10eae-Xag6Z",
+      "n_steps": 35,
+      "ctrl_bpc": 0.9661
+    }
+  ],
+  "ancestor_harvests": [
+    "workers/dispatcher/harvest-1way-r73"
+  ],
+  "cumulative_total_steps": 539,
+  "cumulative_unique_birds": 18,
+  "harvested_at": "2026-05-23T08:26:38Z",
+  "harvester": "scripts/consolidate_siblings.py raw-birds (inclusive fold)",
+  "note": "Inclusive raw-bird fold: every origin/claude/train-* branch with chain-design-r76/ payload was discovered, fetched, and FedAvg'd in. Replaces the cron's MAX_BIRDS=3-capped selection. Honors workers/dispatcher/.bird_exclude.json quarantine list.",
+  "quarantine_excluded": []
+}
