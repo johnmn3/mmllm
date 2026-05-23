@@ -600,6 +600,25 @@ def fold_raw_birds(round_n, out_dir=None, extra_refs=()):
                 bird_specs.append((m.group(1), ref))
                 break
 
+    # Deduplicate by handle: forks of johnmn3/mmllm inherit upstream branches,
+    # so a train branch like claude/train-c1a4337b-rMAbc appears on BOTH
+    # origin (johnmn3) AND every fork that's synced. Without dedup we'd
+    # extract the same bird N times (overwriting the same dst dir but
+    # appending N copies to bird_specs → fedavg over-weights that bird).
+    # Keep first occurrence (origin wins over fork; gh-discovered after).
+    seen_handles = set()
+    deduped_specs = []
+    n_dup = 0
+    for handle, ref in bird_specs:
+        if handle in seen_handles:
+            n_dup += 1
+            continue
+        seen_handles.add(handle)
+        deduped_specs.append((handle, ref))
+    if n_dup:
+        print(f"  deduplicated {n_dup} bird spec(s) (same handle across origin+fork)")
+    bird_specs = deduped_specs
+
     bird_dirs = []
     direct_contribs = []
     excluded_log = []
