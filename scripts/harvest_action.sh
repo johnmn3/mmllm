@@ -172,12 +172,19 @@ if [ -z "$TARGET_ROUND" ]; then
     | grep -oE '(smoke|train)-r[0-9]+' | sed -E 's/^(smoke|train)-r//' || true)
   # Stable per-bird branches: claude/train-* that ISN'T the interim
   # claude/train-r<N>-* form. Peek into each tree for chain-design-r<N>.
-  # Cap to MMLLM_MAX_BIRDS_PER_HARVEST branches — each _rounds_in_branch
-  # does a `git fetch --depth=1` (~1 GB pack) and 15+ accumulated stable
-  # branches × 1 GB was OOMing the runner before bird extraction even
-  # started. The fork-scan below also contributes rounds, so we don't
-  # need every origin branch to find the latest unharvested round.
-  STABLE_BRANCH_SAMPLE="${MMLLM_MAX_BIRDS_PER_HARVEST:-3}"
+  #
+  # Original cap was MAX_BIRDS_PER_HARVEST=3 with a stale comment about
+  # 1 GB fetches OOMing. _rounds_in_branch uses --filter=blob:none so
+  # each probe is 1-5 MB, not 1 GB — and round-detection is a different
+  # operation than the per-fedavg bird cap. With the cap at 3, only 3
+  # origin branches got round-scanned; the 5 r78 birds (UIYOe, SRW00,
+  # 88JnQ, 1hnSa, MGDgS) weren't among them so auto-detect missed
+  # r78 entirely and "no unharvested rounds found" stuck the cron at
+  # r77 forever.
+  #
+  # Separate env var so auto-detect can scan widely while the fedavg
+  # path still respects MAX_BIRDS_PER_HARVEST for OOM-safety.
+  STABLE_BRANCH_SAMPLE="${MMLLM_AUTODETECT_BRANCH_SAMPLE:-50}"
   STABLE_BRANCHES=$( ( git ls-remote origin 'refs/heads/claude/train-*' 2>/dev/null \
     | awk '{print $2}' | sed 's|^refs/heads/||' \
     | grep -vE '^claude/train-r[0-9]+-' \
