@@ -1,0 +1,37 @@
+{
+  "spork_version": "0.9",
+  "target_round": 80,
+  "n_workers": 1,
+  "wave": "fold-r80-rawbirds",
+  "workers": [
+    {
+      "handle": "egrsQ",
+      "branch": "origin/claude/train-7328d425-egrsQ",
+      "ctrl_bpc": 1.0091
+    }
+  ],
+  "worker_ctrl_bpc_mean": 1.0091,
+  "worker_ctrl_bpc_best": 1.0091,
+  "previous_harvest": {
+    "round": 79,
+    "dir": "workers/dispatcher/harvest-1way-r79"
+  },
+  "direct_contributions": [
+    {
+      "bird_id": "7328d42566654fd0",
+      "handle": "egrsQ",
+      "branch": "origin/claude/train-7328d425-egrsQ",
+      "n_steps": 50,
+      "ctrl_bpc": 1.0091
+    }
+  ],
+  "ancestor_harvests": [
+    "workers/dispatcher/harvest-1way-r79"
+  ],
+  "cumulative_total_steps": 1739,
+  "cumulative_unique_birds": 42,
+  "harvested_at": "2026-05-23T23:36:18Z",
+  "harvester": "scripts/consolidate_siblings.py raw-birds (inclusive fold)",
+  "note": "Inclusive raw-bird fold: every origin/claude/train-* branch with chain-design-r80/ payload was discovered, fetched, and FedAvg'd in. Replaces the cron's MAX_BIRDS=3-capped selection. Honors workers/dispatcher/.bird_exclude.json quarantine list.",
+  "quarantine_excluded": []
+}
