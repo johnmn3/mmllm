@@ -121,6 +121,39 @@ if [ -z "${MMLLM_SKIP_FOLD:-}" ]; then
   python3 scripts/consolidate_siblings.py auto 2>&1 | sed 's/^/  /'
 fi
 
+# --- 0.5) Catchup pass: re-fold the last N rounds with current code -
+# The cron's auto-detect (step 1) only picks rounds with NO existing
+# harvest dir. That misses rounds whose harvest is now incomplete —
+# e.g., birds that published AFTER the round was first harvested
+# (fork birds, late origin birds, or rounds harvested before
+# raw-birds + gh fork discovery landed).
+#
+# This pass runs `consolidate_siblings.py raw-birds <r>` for the last
+# N rounds. The skip-if-not-bigger guard inside raw-birds makes this
+# idempotent: if no new birds are available since the existing
+# harvest, no new fold dir is created. When new birds DO arrive, a
+# fresh fold dir lands automatically.
+#
+# Opt-out: MMLLM_SKIP_CATCHUP=1. Cap: MMLLM_CATCHUP_DEPTH (default 5).
+if [ -z "${MMLLM_SKIP_CATCHUP:-}" ]; then
+  CATCHUP_DEPTH="${MMLLM_CATCHUP_DEPTH:-5}"
+  echo "▶ catchup pass: scanning last $CATCHUP_DEPTH rounds for new birds…"
+  # Get the highest harvested round, then iterate down.
+  HIGHEST_HARVESTED=$(ls -d workers/dispatcher/harvest-*-r*/ 2>/dev/null \
+    | grep -oE 'r[0-9]+/$' | grep -oE '[0-9]+' | sort -n | tail -1)
+  if [ -n "$HIGHEST_HARVESTED" ]; then
+    for delta in $(seq 0 $((CATCHUP_DEPTH - 1))); do
+      R=$((HIGHEST_HARVESTED - delta))
+      [ "$R" -le 0 ] && break
+      echo "▶ catchup raw-birds r$R…"
+      python3 scripts/consolidate_siblings.py raw-birds "$R" 2>&1 | sed 's/^/  /' || \
+        echo "  WARN: catchup raw-birds r$R failed; continuing"
+    done
+  else
+    echo "  (no harvested rounds yet — skipping catchup)"
+  fi
+fi
+
 # --- 1) Auto-detect target round if not specified --------------------
 # Branch flavors we accept:
 #   claude/smoke-r<N>-*           legacy, round in name

@@ -645,6 +645,27 @@ def fold_raw_birds(round_n, out_dir=None, extra_refs=()):
         return None
 
     N = len(bird_dirs)
+
+    # Skip-if-not-bigger: if there's already a harvest dir at this round
+    # that captured at least N direct contributors, this fold wouldn't
+    # add new content. Avoids bloat from idempotent catchup loops (cron
+    # firing raw-birds against past rounds where nothing's changed).
+    existing_max = 0
+    for hp in glob.glob(f"{DISPATCHER_DIR}/harvest-*-r{round_n}/harvest_meta.json"):
+        em = _try_load_meta(Path(hp).parent)
+        if em is None:
+            continue
+        existing_max = max(existing_max, len(em.get("direct_contributions") or []))
+    if N <= existing_max:
+        print(f"  skip: existing harvest at r{round_n} already has "
+              f"{existing_max} direct contributor(s) ≥ {N} discovered; "
+              f"no new fold needed")
+        shutil.rmtree(work_root)
+        return None
+    if existing_max > 0:
+        print(f"  ▶ existing max contributors at r{round_n} = {existing_max}; "
+              f"this fold has {N} → producing new fold dir")
+
     if out_dir is None:
         out_dir = Path(DISPATCHER_DIR) / f"{FOLD_PREFIX}{N}way-r{round_n}"
         if out_dir.exists():
