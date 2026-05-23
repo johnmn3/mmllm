@@ -272,13 +272,13 @@ while read -r line; do
   [ -n "$ref" ] && BIRD_REFS+=("$ref")
 done < <( git ls-remote origin "refs/heads/claude/smoke-r${TARGET_ROUND}-*" 2>/dev/null
           git ls-remote origin "refs/heads/claude/train-r${TARGET_ROUND}-*" 2>/dev/null )
-# Stable per-bird branches on origin — same cap as step 1 so we
-# inspect at most MMLLM_MAX_BIRDS_PER_HARVEST branches total. If step
-# 1 ran auto-detect, these are the same branches it already fetched
-# (so this loop's _rounds_in_branch fetches are no-ops). If
-# TARGET_ROUND was passed manually (step 1 skipped), these are fresh
-# fetches but still bounded.
-STABLE_BRANCH_SAMPLE="${MMLLM_MAX_BIRDS_PER_HARVEST:-3}"
+# Stable per-bird branches on origin — discovery uses the wider
+# AUTODETECT_BRANCH_SAMPLE cap (default 50) so step 2's bird-finding
+# matches step 1's round-detection scope. The actual fedavg-extraction
+# cap (MAX_BIRDS_PER_HARVEST=3 below) still trims to 3 birds — this
+# only widens DISCOVERY so we don't miss recent birds that didn't make
+# the first 3 in ls-remote order.
+STABLE_BRANCH_SAMPLE="${MMLLM_AUTODETECT_BRANCH_SAMPLE:-50}"
 STABLE_BRANCHES=$( ( git ls-remote origin 'refs/heads/claude/train-*' 2>/dev/null \
   | awk '{print $2}' | sed 's|^refs/heads/||' \
   | grep -vE '^claude/train-r[0-9]+-' \
