@@ -136,7 +136,13 @@ fi
 #
 # Opt-out: MMLLM_SKIP_CATCHUP=1. Cap: MMLLM_CATCHUP_DEPTH (default 5).
 if [ -z "${MMLLM_SKIP_CATCHUP:-}" ]; then
-  CATCHUP_DEPTH="${MMLLM_CATCHUP_DEPTH:-5}"
+  # CATCHUP_DEPTH=5 was the initial guess but each raw-birds call spans
+  # ~5 forks × ~20 branches × ~3s gh+fetch = 1-5 min/round. At depth=5
+  # the catchup pass could chew 25 min before step 1 even starts, with
+  # >0 risk of timing out the 120-min runner cap. Default reduced to 2
+  # (covers the latest round + 1 prior, where late birds most often
+  # arrive). Override via MMLLM_CATCHUP_DEPTH for one-shot deeper sweeps.
+  CATCHUP_DEPTH="${MMLLM_CATCHUP_DEPTH:-2}"
   echo "▶ catchup pass: scanning last $CATCHUP_DEPTH rounds for new birds…"
   # Get the highest harvested round, then iterate down.
   HIGHEST_HARVESTED=$(ls -d workers/dispatcher/harvest-*-r*/ 2>/dev/null \
