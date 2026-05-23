@@ -386,6 +386,76 @@ def _load_quarantine():
         return set()
 
 
+def _discover_fork_branches_at_round(round_n, upstream="johnmn3/mmllm"):
+    """Return [(handle, local_ref_name)] for fork train-* branches with payload
+    at round_n. Requires `gh` CLI in PATH (available in harvest_action.sh's
+    GH Actions runner; absent on most developer machines). Returns [] when
+    gh isn't available or auth fails.
+
+    Each matching fork branch is fetched into a `fork-<safe>` local ref
+    with --filter=blob:none so the rest of fold_raw_birds() can treat it
+    like any other extra-ref. Full blobs come later in _fetch_and_extract_bird.
+
+    Mirrors harvest_action.sh's `_list_fork_branches` helper so the cron
+    runner can discover the same fork birds the legacy path uses, instead
+    of leaving them stranded.
+    """
+    import shutil as _shutil
+    if not _shutil.which("gh"):
+        return []
+    try:
+        forks_out = subprocess.check_output(
+            ["gh", "api", f"repos/{upstream}/forks?per_page=100",
+             "--jq", ".[].full_name"],
+            text=True, stderr=subprocess.DEVNULL,
+        ).strip()
+    except subprocess.CalledProcessError:
+        return []
+    if not forks_out:
+        return []
+
+    result = []
+    for fork in forks_out.split("\n"):
+        if not fork:
+            continue
+        try:
+            branches_out = subprocess.check_output(
+                ["gh", "api", f"repos/{fork}/branches?per_page=100",
+                 "--jq", '.[] | select(.name | startswith("claude/train-")) | .name'],
+                text=True, stderr=subprocess.DEVNULL,
+            ).strip()
+        except subprocess.CalledProcessError:
+            continue
+        if not branches_out:
+            continue
+        for br in branches_out.split("\n"):
+            if not br:
+                continue
+            m = re.match(r"claude/train-[a-f0-9]+-(\w+)$", br)
+            if not m:
+                continue
+            handle = m.group(1)
+            safe = re.sub(r"[^a-zA-Z0-9-]", "-", f"{fork}-{br}")[:60]
+            local_ref = f"fork-{safe}"
+            try:
+                subprocess.run(
+                    ["git", "fetch", f"https://github.com/{fork}.git",
+                     f"{br}:refs/heads/{local_ref}",
+                     "--depth=1", "--filter=blob:none", "-q"],
+                    check=True, stderr=subprocess.DEVNULL,
+                )
+                ls = subprocess.check_output(
+                    ["git", "ls-tree", "-r", "--name-only", local_ref],
+                    text=True, stderr=subprocess.DEVNULL,
+                )
+            except subprocess.CalledProcessError:
+                continue
+            target = f"workers/{handle}/chain-design-r{round_n}/dense.pt"
+            if target in ls:
+                result.append((handle, local_ref))
+    return result
+
+
 def _discover_origin_branches_at_round(round_n):
     """Return [(handle, branch_name)] for origin/claude/train-* branches that
     contain workers/<handle>/chain-design-r<round_n>/dense.pt.
@@ -505,6 +575,16 @@ def fold_raw_birds(round_n, out_dir=None, extra_refs=()):
 
     # Also add extra_refs (fork branches the caller pre-fetched).
     bird_specs = [(handle, f"origin/{br}") for handle, br in branches]
+
+    # Auto-discover fork branches via gh CLI (CI-side path). When gh isn't
+    # available (most dev machines), this returns [] and only origin
+    # branches + caller-provided --extra-refs get folded. The harvest
+    # cron runner has gh installed and authenticated by the workflow.
+    print(f"▶ scanning fork branches via gh for r{round_n} payloads…")
+    fork_birds = _discover_fork_branches_at_round(round_n)
+    print(f"  found {len(fork_birds)} branch(es) on forks (via gh)")
+    bird_specs.extend(fork_birds)
+
     for ref in extra_refs:
         try:
             ls = subprocess.check_output(
