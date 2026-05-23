@@ -107,20 +107,6 @@ _fetch_fork_branch() {
   return 1
 }
 
-# --- 0) Fold any sibling harvest arms before this round's bird-merge -
-# scripts/_delta_sparse_net.py fedavg can merge multiple delta dirs in
-# the same format harvest dirs already use. consolidate_siblings.py
-# walks workers/dispatcher/, finds leaf harvest dirs (not yet an
-# ancestor of any other), and if there's more than one leaf within a
-# round of the top, folds them into a new harvest-fold<N>way-r<R>/
-# dir. The new round's bird-merge below will then pick the fold as
-# "previous harvest" (the heredoc picker prefers fold dirs on ties).
-# Opt-out: set MMLLM_SKIP_FOLD=1.
-if [ -z "${MMLLM_SKIP_FOLD:-}" ]; then
-  echo "▶ checking for sibling harvest arms to fold…"
-  python3 scripts/consolidate_siblings.py auto 2>&1 | sed 's/^/  /'
-fi
-
 # --- 0.5) Catchup pass: re-fold the last N rounds with current code -
 # The cron's auto-detect (step 1) only picks rounds with NO existing
 # harvest dir. That misses rounds whose harvest is now incomplete —
@@ -230,33 +216,6 @@ if [ -z "$TARGET_ROUND" ]; then
 fi
 echo "▶ target round: $TARGET_ROUND"
 
-# --- 1.5) Inclusive raw-birds fold for target round ------------------
-# consolidate_siblings.py raw-birds discovers every
-# origin/claude/train-* branch with chain-design-r<TARGET_ROUND>/
-# payload and FedAvgs all of them using streaming row-aware FedAvg
-# (verified at 17 birds, peak RSS ~615 MB — fits the 120-min cron's
-# memory budget). Output: harvest-fold<N>way-r<TARGET_ROUND>/.
-#
-# This runs ALONGSIDE the legacy step 2-5 path below (which still
-# produces harvest-<M>way-r<TARGET_ROUND>/ under the MAX_BIRDS=3 cap).
-# Both coexist. The "previous harvest" picker tiebreak prefers folds
-# with higher way counts, so future workers extend from the inclusive
-# fold automatically.
-#
-# Limitations: raw-birds discovers origin branches only — fork birds
-# still go through the legacy path's gh-CLI fork scan. If a round has
-# only fork-bird contributions, the legacy path is what produces a
-# harvest. Most rounds have multiple origin contributors, so the fold
-# typically captures the bulk.
-#
-# Set MMLLM_SKIP_RAW_BIRDS=1 to skip (e.g. for fork-only rounds where
-# the legacy path is the only producer).
-if [ -z "${MMLLM_SKIP_RAW_BIRDS:-}" ]; then
-  echo "▶ raw-birds inclusive fold for r${TARGET_ROUND}…"
-  if ! python3 scripts/consolidate_siblings.py raw-birds "$TARGET_ROUND" 2>&1 | sed 's/^/  /'; then
-    echo "  WARN: raw-birds fold failed; continuing with legacy capped path"
-  fi
-fi
 
 # --- 2) Discover bird branches for this round ------------------------
 # Four sources:
@@ -318,19 +277,45 @@ for ref in "${EXTRA_REFS[@]}"; do
   BIRD_REFS+=("$ref")
 done
 
+# Dedupe BIRD_REFS by handle. Forks of johnmn3/mmllm inherit upstream
+# branches, so the same bird (e.g., 5KVHI) appears in BOTH the origin
+# scan AND every fork that's synced. Without dedup, step 3 would extract
+# the same handle multiple times (each overwriting the same dst dir
+# but appending duplicate paths to BIRD_DIRS) and fedavg would
+# disproportionately weight overlap birds. Keep first occurrence per
+# handle — earlier scans (origin first) win over later (forks).
+declare -A SEEN_HANDLE
+DEDUPED_BIRD_REFS=()
+N_DUP=0
+for ref in "${BIRD_REFS[@]}"; do
+  # handle is the trailing token of the branch name: claude/train-<id>-<HANDLE>
+  handle=$(echo "$ref" | awk -F- '{print $NF}')
+  if [ -n "${SEEN_HANDLE[$handle]:-}" ]; then
+    N_DUP=$((N_DUP + 1))
+    continue
+  fi
+  SEEN_HANDLE[$handle]=1
+  DEDUPED_BIRD_REFS+=("$ref")
+done
+if [ "$N_DUP" -gt 0 ]; then
+  echo "▶ deduplicated $N_DUP bird ref(s) (same handle across origin+fork scans)"
+fi
+BIRD_REFS=("${DEDUPED_BIRD_REFS[@]}")
+
 N=${#BIRD_REFS[@]}
 if [ $N -eq 0 ]; then
   echo "ERROR: no birds found for round $TARGET_ROUND" >&2
   exit 1
 fi
 
-# Cap N birds per harvest run. Without a cap, each accumulated origin
-# bird branch triggers a ~1 GB pack fetch via _rounds_in_branch and
-# the runner OOMs. The MAX_BIRDS=3 setting matches the historical
-# 3-way harvests (r20, r22) that pushed clean. Override via
-# MMLLM_MAX_BIRDS_PER_HARVEST. Unharvested birds at the same round
-# are picked up on a subsequent run (cron retries hourly).
-MAX_BIRDS="${MMLLM_MAX_BIRDS_PER_HARVEST:-3}"
+# Bird cap. fedavg in scripts/_delta_sparse_net.py is streaming (loads
+# each worker's payload one at a time per PID, drops + gc's between),
+# so memory is bounded regardless of bird count. Probes use
+# --filter=blob:none so per-branch fetch is 1-5 MB, not 1 GB. The
+# original MAX_BIRDS=3 cap was OOM-mitigation that no longer applies.
+# Default raised to 100 to absorb every published bird at the target
+# round; still capped to avoid pathological cases.
+MAX_BIRDS="${MMLLM_MAX_BIRDS_PER_HARVEST:-100}"
 if [ $N -gt $MAX_BIRDS ]; then
   echo "▶ found $N birds — capping at $MAX_BIRDS for this run"
   echo "  keeping:"
