@@ -138,16 +138,27 @@ export MMLLM_LR_WARMUP=$((STEPS * 70 / 100))
 : ${MMLLM_REPLAY_THRESHOLD:=0.5} ; export MMLLM_REPLAY_THRESHOLD
 : ${MMLLM_ABLATE_EVERY:=0}       ; export MMLLM_ABLATE_EVERY
 : ${MMLLM_SKIP_NETBANK_WARMSTART:=true}; export MMLLM_SKIP_NETBANK_WARMSTART     # extending — V_net is carried forward; don't re-warm
-# One-shot K_a/K_b realignment knobs. Defaults OFF — operator turns on
-# explicitly for a single bird run to break the random-K_a/K_b cycle.
+# One-shot K_a/K_b realignment knobs. TEMPORARILY DEFAULT-ON to break
+# the wave-2 random-K_a/K_b cycle (Net's keys started random at chain
+# genesis; gate-suppression has kept them from realigning; Δ_net stays
+# at +0.005-+0.012 per round regardless of STEPS depth). The harvest
+# cycle will spread the realigned keys across every fork's next round.
+#
+# Plan: leave default-on for ~1-3 cron ticks, watch Δ_net on the
+# resulting birds. If Δ_net jumps to >+0.04 the hypothesis is
+# confirmed; consider keeping K_ALIGN_COEF on (>0) for ongoing
+# pressure but flip REWARM_NETBANK_KEYS back to false (one-shot kick
+# done, don't re-clobber each round).
+#
 # REWARM_NETBANK_KEYS=true copies Local's K_a/K_b into Net's first
 #   sqrt_local rows at run start, leaving V_net's harvested content
-#   untouched. Pair with K_ALIGN_COEF (below) to keep the realignment
-#   from drifting back through gate suppression.
-# K_ALIGN_COEF>0 adds an ongoing MSE alignment loss between Net and
-#   Local K_a/K_b every step. Typical value 1e-3 to 1e-2.
-: ${MMLLM_REWARM_NETBANK_KEYS:=false}; export MMLLM_REWARM_NETBANK_KEYS
-: ${MMLLM_K_ALIGN_COEF:=0.0}         ; export MMLLM_K_ALIGN_COEF
+#   untouched (verified locally: ||net.K_a - local.K_a||₂ goes
+#   0.6279 → 0.000000; V_net max|val| stays at Gaussian-init scale).
+# K_ALIGN_COEF=0.005 adds an ongoing MSE alignment loss between Net
+#   and Local K_a/K_b every step. Returns a real Tensor (gradients
+#   flow into Net's keys, not Local's).
+: ${MMLLM_REWARM_NETBANK_KEYS:=true}  ; export MMLLM_REWARM_NETBANK_KEYS
+: ${MMLLM_K_ALIGN_COEF:=0.005}        ; export MMLLM_K_ALIGN_COEF
 # Per-block gradient checkpointing: drops each block's intermediates
 # (NetBank latent, Local-PKM combined_scores, SDPA scratch) after the
 # block returns and recomputes them during backward. ~30% wall hit,
