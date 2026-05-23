@@ -30,11 +30,11 @@ on:
         description: "One-shot copy Local's K_a/K_b into Net's first sqrt_local rows at run start (V untouched). Use to break the random-K_a/K_b cycle."
         required: false
         type: boolean
-        default: false
+        default: true
       k_align_coef:
-        description: "Ongoing MSE alignment loss coef between Net and Local K_a/K_b. 0=off (default). Try 0.001-0.01 to keep keys pulled toward Local's after rewarm."
+        description: "Ongoing MSE alignment loss coef between Net and Local K_a/K_b. 0=off. 0.005 default keeps keys pulled toward Local's after rewarm."
         required: false
-        default: "0.0"
+        default: "0.005"
   # Cron auto-train: every hour. Workflow inputs aren't available
   # from the schedule trigger — we use the defaults baked into the
   # script (n_rounds=5, steps=7, random corpus, random handle). Each
