@@ -185,14 +185,29 @@ jobs:
             | grep -oE 'workers/dispatcher/harvest-(fold)?[0-9]+way-r[0-9]+' \
             | sort -u | head -1)
           git commit -m "harvest: $NEW_DIR (auto, via harvest.yml workflow)"
-          # Retry push with exponential backoff — proxy disconnects on
-          # large pushes (HTTP 408) are transient; the chunked pack
-          # transfer succeeds on retry.
+          # Retry push with exponential backoff. Two failure modes:
+          #   (a) transient network — proxy disconnects on large pushes
+          #       (HTTP 408, RPC failed) → resolved by retry.
+          #   (b) non-fast-forward — another workflow merged to main
+          #       during this run (e.g. a PR landed while we were in
+          #       step 0.5 catchup). Detected via "rejected" /
+          #       "fast-forward" in the push output. Resolved by
+          #       `git pull --rebase origin main` to replay our harvest
+          #       commit on top of remote main, then retrying push.
+          #       The harvest commit only ADDS new harvest-*-r*/ dirs,
+          #       so rebase is conflict-free unless two runs happened
+          #       to produce identical dir names — vanishingly rare
+          #       because Nway counts differ per run.
           for i in 1 2 3 4 5; do
             if git push origin HEAD:main 2>&1 | tee /tmp/push.out | tail -3; then
-              if ! grep -qE 'rejected|hung|408|disconnect|RPC failed' /tmp/push.out; then
+              if ! grep -qE 'rejected|hung|408|disconnect|RPC failed|fast-forward' /tmp/push.out; then
                 break
               fi
+            fi
+            if grep -qE 'rejected|fast-forward|non-fast-forward' /tmp/push.out; then
+              echo "▶ push attempt $i: remote moved (concurrent merge); rebasing onto origin/main…"
+              git pull --rebase origin main 2>&1 | tail -5 || \
+                echo "  WARN: rebase failed; continuing to retry"
             fi
             echo "▶ push attempt $i failed; retrying in $((i * 8))s…"
             sleep $((i * 8))
