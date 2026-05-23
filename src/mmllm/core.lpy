@@ -4161,7 +4161,33 @@
       (when log-path
         (append-jsonl! log-path
                        (format "{\"event\":\"manifest\",\"ts\":\"%s\",\"git_sha\":\"%s\",\"total_steps\":%d}"
-                               ts-str sha total-steps))))
+                               ts-str sha total-steps))
+        ;; Also emit a 'config' event with the key recipe knobs so the
+        ;; published log.jsonl proves what env vars the bird ran with.
+        ;; Without this, the rewarm/k_align/etc println output lives only
+        ;; in stdout (GH Actions runner log), inaccessible from the bird's
+        ;; published payload.
+        (let [recipe-keys ["MMLLM_REWARM_NETBANK_KEYS"
+                           "MMLLM_K_ALIGN_COEF"
+                           "MMLLM_SKIP_NETBANK_WARMSTART"
+                           "MMLLM_STEPS_PER_ROUND"
+                           "MMLLM_N_ROUNDS"
+                           "MMLLM_LR"
+                           "MMLLM_LR_NET_MULT_END"
+                           "MMLLM_DISTILL_COEF_END"
+                           "MMLLM_DISTILL_MAGNITUDE_COEF"
+                           "MMLLM_NETBANK_ENABLED"]
+              env-pairs (->> recipe-keys
+                             (map (fn [k]
+                                    (let [v (.get (.- (python/__import__ "os") environ) k)]
+                                      (if v
+                                        (format "\"%s\":\"%s\"" k v)
+                                        (format "\"%s\":null" k)))))
+                             (interpose ",")
+                             (apply str))]
+          (append-jsonl! log-path
+                         (format "{\"event\":\"config\",\"ts\":\"%s\",\"recipe\":{%s}}"
+                                 ts-str env-pairs)))))
     (catch python/Exception e
       (println (format "  WARN: write-run-manifest! failed: %s" e)))))
 
