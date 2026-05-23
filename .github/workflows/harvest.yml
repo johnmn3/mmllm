@@ -12,6 +12,10 @@ on:
         description: "Comma-separated PR numbers from forks to merge in (e.g., '12,13'). Optional."
         required: false
         default: ""
+      catchup_depth:
+        description: "How many recent rounds the catchup pass scans for late-arriving birds. Default 2 (steady-state). Set to e.g. 50 for a one-shot deep sweep that absorbs older strays."
+        required: false
+        default: ""
   # Cron auto-harvest: every hour. With no inputs, harvest_action.sh
   # auto-detects the highest unharvested round (across legacy smoke-r*,
   # interim train-r<N>-*, stable per-bird train-<id>-* branches on
@@ -136,6 +140,11 @@ jobs:
           PR_REFS: ${{ env.PR_REFS || '' }}
           # gh CLI auth (for enumerating forks of upstream).
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Catchup pass depth: how many recent rounds to re-scan for
+          # late-arriving birds. Empty (cron default) → harvest_action.sh
+          # uses MMLLM_CATCHUP_DEPTH:-2. Set via workflow_dispatch input
+          # for one-shot deep sweeps (e.g. 50 to absorb r29..r78 strays).
+          MMLLM_CATCHUP_DEPTH: ${{ inputs.catchup_depth }}
         run: |
           bash scripts/harvest_action.sh "$TARGET_ROUND" $PR_REFS
           # Pull the new harvest dir name out so the artifact step
