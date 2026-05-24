@@ -1,0 +1,73 @@
+{
+  "spork_version": "0.9",
+  "target_round": 113,
+  "n_workers": 4,
+  "wave": "fold-r113-rawbirds",
+  "workers": [
+    {
+      "handle": "LXmd2",
+      "branch": "origin/claude/train-c45b2f86-LXmd2",
+      "ctrl_bpc": 1.0187
+    },
+    {
+      "handle": "D1eg0",
+      "branch": "fork-SeniorCareMarket-mmllm-claude-train-ca469458-D1eg0",
+      "ctrl_bpc": 0.9869
+    },
+    {
+      "handle": "cMQ3g",
+      "branch": "fork-joly-os-mmllm-claude-train-4e187189-cMQ3g",
+      "ctrl_bpc": 1.0032
+    },
+    {
+      "handle": "PhZcF",
+      "branch": "fork-slaa-us-mmllm-claude-train-91b8f79f-PhZcF",
+      "ctrl_bpc": 1.0779
+    }
+  ],
+  "worker_ctrl_bpc_mean": 1.0217,
+  "worker_ctrl_bpc_best": 0.9869,
+  "previous_harvest": {
+    "round": 111,
+    "dir": "workers/dispatcher/harvest-1way-r111"
+  },
+  "direct_contributions": [
+    {
+      "bird_id": "c45b2f8620464aed",
+      "handle": "LXmd2",
+      "branch": "origin/claude/train-c45b2f86-LXmd2",
+      "n_steps": 35,
+      "ctrl_bpc": 1.0187
+    },
+    {
+      "bird_id": "ca469458cd1c473b",
+      "handle": "D1eg0",
+      "branch": "fork-SeniorCareMarket-mmllm-claude-train-ca469458-D1eg0",
+      "n_steps": 35,
+      "ctrl_bpc": 0.9869
+    },
+    {
+      "bird_id": "4e1871891a6d4d35",
+      "handle": "cMQ3g",
+      "branch": "fork-joly-os-mmllm-claude-train-4e187189-cMQ3g",
+      "n_steps": 35,
+      "ctrl_bpc": 1.0032
+    },
+    {
+      "bird_id": "91b8f79f5b424703",
+      "handle": "PhZcF",
+      "branch": "fork-slaa-us-mmllm-claude-train-91b8f79f-PhZcF",
+      "n_steps": 35,
+      "ctrl_bpc": 1.0779
+    }
+  ],
+  "ancestor_harvests": [
+    "workers/dispatcher/harvest-1way-r111"
+  ],
+  "cumulative_total_steps": 2571,
+  "cumulative_unique_birds": 66,
+  "harvested_at": "2026-05-24T22:44:41Z",
+  "harvester": "scripts/consolidate_siblings.py raw-birds (inclusive fold)",
+  "note": "Inclusive raw-bird fold: every origin/claude/train-* branch with chain-design-r113/ payload was discovered, fetched, and FedAvg'd in. Replaces the cron's MAX_BIRDS=3-capped selection. Honors workers/dispatcher/.bird_exclude.json quarantine list.",
+  "quarantine_excluded": []
+}
