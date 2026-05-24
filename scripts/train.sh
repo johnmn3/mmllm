@@ -227,6 +227,45 @@ for ((step = 1; step <= N_ROUNDS; step++)); do
   # run_chain_diverse.sh extends the highest staged round by 1 each call
   bash scripts/run_chain_diverse.sh 1 "$STEPS"
 
+  # V_net displacement diagnostic — measure how much V_net actually moved
+  # this round, independent of Δ_net ablation (which is contaminated by
+  # K_a/K_b + gates contributions per CLAUDE.md "Δ-ablation is NOT proof
+  # V learned anything"). Appends a v_net_displacement event to this
+  # round's log.jsonl. moved% > ~1% + cos < 1.0 means V_net actually
+  # trained; cos ≈ 1.0 means it didn't (false-positive Δ_net).
+  python3 - "$ARCHIVE" "$CUR_ROUND" <<'PY' || true
+import sys, os, glob, json
+import numpy as np
+archive, cur = sys.argv[1], int(sys.argv[2])
+before_dir = f"{archive}/round-{cur - 1}"
+after_dir  = f"{archive}/round-{cur}"
+log_path   = f"{after_dir}/log.jsonl"
+moved, cos = [], []
+for after_f in sorted(glob.glob(f"{after_dir}/V_net.*.bin")):
+    layer = os.path.basename(after_f)
+    before_f = f"{before_dir}/{layer}"
+    if not os.path.exists(before_f):
+        continue
+    b = np.memmap(before_f, dtype=np.float32, mode="r")
+    a = np.memmap(after_f,  dtype=np.float32, mode="r")
+    if b.shape != a.shape or b.size == 0:
+        continue
+    nb = float(np.linalg.norm(b))
+    na = float(np.linalg.norm(a))
+    if nb == 0 or na == 0:
+        continue
+    moved.append(float(np.linalg.norm(a - b)) / nb)
+    cos.append(float(np.dot(a, b)) / (na * nb))
+if moved and os.path.exists(log_path):
+    ev = {"event":"v_net_displacement","round":cur,"n_layers":len(moved),
+          "moved_pct_mean":float(np.mean(moved)),"moved_pct_min":float(np.min(moved)),
+          "moved_pct_max":float(np.max(moved)),"cos_mean":float(np.mean(cos)),
+          "cos_min":float(np.min(cos))}
+    with open(log_path, "a") as fh:
+        fh.write(json.dumps(ev) + "\n")
+    print(f"  V_net moved% = {ev['moved_pct_mean']:.4%} (min {ev['moved_pct_min']:.4%}, max {ev['moved_pct_max']:.4%})  cos = {ev['cos_mean']:.6f}")
+PY
+
   # Build this round's publish dir
   DEST="workers/$HANDLE/chain-design-r$CUR_ROUND"
   mkdir -p "$DEST"
