@@ -1,0 +1,74 @@
+{
+  "spork_version": "0.9",
+  "target_round": 104,
+  "n_workers": 4,
+  "wave": "train-r104",
+  "workers": [
+    {
+      "handle": "tf3bC",
+      "branch": "origin/claude/train-2d405f97-tf3bC",
+      "ctrl_bpc": 1.1027
+    },
+    {
+      "handle": "DXgxJ",
+      "branch": "fork-SeniorCareMarket-mmllm-claude-train-23f12a03-DXgxJ",
+      "ctrl_bpc": 0.997
+    },
+    {
+      "handle": "YuZUz",
+      "branch": "fork-joly-os-mmllm-claude-train-60b4e06a-YuZUz",
+      "ctrl_bpc": 1.0961
+    },
+    {
+      "handle": "a7Usb",
+      "branch": "fork-slaa-us-mmllm-claude-train-84ac876f-a7Usb",
+      "ctrl_bpc": 1.1617
+    }
+  ],
+  "worker_ctrl_bpc_mean": 1.0894,
+  "worker_ctrl_bpc_best": 0.997,
+  "previous_harvest": {
+    "round": 103,
+    "dir": "workers/dispatcher/harvest-1way-r103",
+    "mean": 1.0209,
+    "best": 1.0209
+  },
+  "direct_contributions": [
+    {
+      "bird_id": "2d405f97b5954328",
+      "handle": "tf3bC",
+      "branch": "origin/claude/train-2d405f97-tf3bC",
+      "n_steps": 35,
+      "ctrl_bpc": 1.1027
+    },
+    {
+      "bird_id": "23f12a03abb64a5b",
+      "handle": "DXgxJ",
+      "branch": "fork-SeniorCareMarket-mmllm-claude-train-23f12a03-DXgxJ",
+      "n_steps": 35,
+      "ctrl_bpc": 0.997
+    },
+    {
+      "bird_id": "60b4e06a94d54062",
+      "handle": "YuZUz",
+      "branch": "fork-joly-os-mmllm-claude-train-60b4e06a-YuZUz",
+      "n_steps": 35,
+      "ctrl_bpc": 1.0961
+    },
+    {
+      "bird_id": "84ac876fe03743fd",
+      "handle": "a7Usb",
+      "branch": "fork-slaa-us-mmllm-claude-train-84ac876f-a7Usb",
+      "n_steps": 35,
+      "ctrl_bpc": 1.1617
+    }
+  ],
+  "ancestor_harvests": [
+    "workers/dispatcher/harvest-1way-r99"
+  ],
+  "cumulative_total_steps": 2298,
+  "cumulative_unique_birds": 58,
+  "harvested_at": "2026-05-24T18:44:50Z",
+  "harvester": "scripts/harvest_action.sh (GH Action)",
+  "note": "Lean harvest \u2014 sparse deltas + averaged dense only, no opt-state."
+}
