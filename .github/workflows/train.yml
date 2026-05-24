@@ -35,6 +35,14 @@ on:
         description: "Ongoing MSE alignment loss coef between Net and Local K_a/K_b. DEFAULT 0 (off). Non-zero values keep K_a/K_b moving so V_net can never stabilize on chain extensions (regression vector)."
         required: false
         default: "0"
+      lr:
+        description: "MMLLM_LR override (base LR). Default empty = uses extend_chain.sh script default (3e-2 = stack-3e-2-5.0). Set to 1e-1 to spike-test the stack-1e-1-5.0 chain-consolidation recipe per CLAUDE.md."
+        required: false
+        default: ""
+      lr_min:
+        description: "MMLLM_LR_MIN override. Default empty = uses script default. Typically set to match lr (e.g. 1e-1 with lr=1e-1) so cosine decay stays at the consolidation peak."
+        required: false
+        default: ""
   # Cron auto-train: every hour. Workflow inputs aren't available
   # from the schedule trigger — we use the defaults baked into the
   # script (n_rounds=5, steps=7, random corpus, random handle). Each
@@ -104,6 +112,8 @@ jobs:
           MMLLM_CORPUS: ${{ inputs.corpus }}
           MMLLM_REWARM_NETBANK_KEYS: ${{ inputs.rewarm_netbank_keys }}
           MMLLM_K_ALIGN_COEF: ${{ inputs.k_align_coef }}
+          MMLLM_LR: ${{ inputs.lr }}
+          MMLLM_LR_MIN: ${{ inputs.lr_min }}
         run: |
           bash scripts/train.sh
 
