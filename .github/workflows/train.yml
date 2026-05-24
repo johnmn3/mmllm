@@ -27,14 +27,14 @@ on:
           - clojure-general
           - clojure-fim
       rewarm_netbank_keys:
-        description: "One-shot copy Local's K_a/K_b into Net's first sqrt_local rows at run start (V untouched). Use to break the random-K_a/K_b cycle."
+        description: "One-shot copy Local's K_a/K_b into Net's first sqrt_local rows at run start. DEFAULT OFF — on chain extensions this orphans V_net's learned content and flips Δ_net negative (verified sweep 2026-05-24, smoke #4). Enable only at chain genesis."
         required: false
         type: boolean
-        default: true
+        default: false
       k_align_coef:
-        description: "Ongoing MSE alignment loss coef between Net and Local K_a/K_b. 0=off. 0.005 default keeps keys pulled toward Local's after rewarm."
+        description: "Ongoing MSE alignment loss coef between Net and Local K_a/K_b. DEFAULT 0 (off). Non-zero values keep K_a/K_b moving so V_net can never stabilize on chain extensions (regression vector)."
         required: false
-        default: "0.005"
+        default: "0"
   # Cron auto-train: every hour. Workflow inputs aren't available
   # from the schedule trigger — we use the defaults baked into the
   # script (n_rounds=5, steps=7, random corpus, random handle). Each

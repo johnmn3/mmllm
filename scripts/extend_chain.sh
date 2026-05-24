@@ -150,15 +150,20 @@ export MMLLM_LR_WARMUP=$((STEPS * 70 / 100))
 # pressure but flip REWARM_NETBANK_KEYS back to false (one-shot kick
 # done, don't re-clobber each round).
 #
-# REWARM_NETBANK_KEYS=true copies Local's K_a/K_b into Net's first
-#   sqrt_local rows at run start, leaving V_net's harvested content
-#   untouched (verified locally: ||net.K_a - local.K_a||₂ goes
-#   0.6279 → 0.000000; V_net max|val| stays at Gaussian-init scale).
-# K_ALIGN_COEF=0.005 adds an ongoing MSE alignment loss between Net
-#   and Local K_a/K_b every step. Returns a real Tensor (gradients
-#   flow into Net's keys, not Local's).
-: ${MMLLM_REWARM_NETBANK_KEYS:=true}  ; export MMLLM_REWARM_NETBANK_KEYS
-: ${MMLLM_K_ALIGN_COEF:=0.005}        ; export MMLLM_K_ALIGN_COEF
+# REWARM_NETBANK_KEYS / K_ALIGN_COEF: BOTH DEFAULT OFF.
+#   Verified regression vector (sweep 2026-05-24): when chain rounds
+#   give Net time to train into its K_a/K_b commitments (STEPS≥7 ×
+#   N_ROUNDS≥5), the per-round K_a/K_b rewarm shocks orphan V_net's
+#   learned content (rows are now indexed at addresses that don't
+#   match), and the k_align MSE pressure keeps pulling keys around
+#   so V_net can never stabilize. Result: Δ_net flips NEGATIVE
+#   (smoke #4 5×7 r88: −0.0067; Net actively harming output).
+#   With both off, smoke #5 5×7 hit Δ_net = +0.0195, matching /
+#   exceeding the pre-PR-#11 Jz1HH r66 era baseline (+0.0137).
+#   Set true / 0.005 only at chain GENESIS when K_a/K_b legitimately
+#   need aligning, never on extensions.
+: ${MMLLM_REWARM_NETBANK_KEYS:=false} ; export MMLLM_REWARM_NETBANK_KEYS
+: ${MMLLM_K_ALIGN_COEF:=0}            ; export MMLLM_K_ALIGN_COEF
 # Per-block gradient checkpointing: drops each block's intermediates
 # (NetBank latent, Local-PKM combined_scores, SDPA scratch) after the
 # block returns and recomputes them during backward. ~30% wall hit,
