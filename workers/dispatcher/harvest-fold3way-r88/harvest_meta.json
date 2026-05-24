@@ -1,0 +1,61 @@
+{
+  "spork_version": "0.9",
+  "target_round": 88,
+  "n_workers": 3,
+  "wave": "fold-r88-rawbirds",
+  "workers": [
+    {
+      "handle": "M1oy4",
+      "branch": "origin/claude/train-264b5f6f-M1oy4",
+      "ctrl_bpc": 0.9218
+    },
+    {
+      "handle": "g7Ozf",
+      "branch": "origin/claude/train-c054d398-g7Ozf",
+      "ctrl_bpc": 0.9888
+    },
+    {
+      "handle": "hVfcL",
+      "branch": "origin/claude/train-e120e9df-hVfcL",
+      "ctrl_bpc": 1.0788
+    }
+  ],
+  "worker_ctrl_bpc_mean": 0.9965,
+  "worker_ctrl_bpc_best": 0.9218,
+  "previous_harvest": {
+    "round": 83,
+    "dir": "workers/dispatcher/harvest-2way-r83"
+  },
+  "direct_contributions": [
+    {
+      "bird_id": "264b5f6f309749a0",
+      "handle": "M1oy4",
+      "branch": "origin/claude/train-264b5f6f-M1oy4",
+      "n_steps": 35,
+      "ctrl_bpc": 0.9218
+    },
+    {
+      "bird_id": "c054d3986f084c9c",
+      "handle": "g7Ozf",
+      "branch": "origin/claude/train-c054d398-g7Ozf",
+      "n_steps": 35,
+      "ctrl_bpc": 0.9888
+    },
+    {
+      "bird_id": "e120e9dff5ae44d6",
+      "handle": "hVfcL",
+      "branch": "origin/claude/train-e120e9df-hVfcL",
+      "n_steps": 15,
+      "ctrl_bpc": 1.0788
+    }
+  ],
+  "ancestor_harvests": [
+    "workers/dispatcher/harvest-2way-r83"
+  ],
+  "cumulative_total_steps": 1883,
+  "cumulative_unique_birds": 47,
+  "harvested_at": "2026-05-24T07:28:43Z",
+  "harvester": "scripts/consolidate_siblings.py raw-birds (inclusive fold)",
+  "note": "Inclusive raw-bird fold: every origin/claude/train-* branch with chain-design-r88/ payload was discovered, fetched, and FedAvg'd in. Replaces the cron's MAX_BIRDS=3-capped selection. Honors workers/dispatcher/.bird_exclude.json quarantine list.",
+  "quarantine_excluded": []
+}
