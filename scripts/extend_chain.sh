@@ -204,7 +204,20 @@ unset MMLLM_MAX_STEPS
 FIM_BASE=/tmp/mmllm-cpu/fim-chain-stack
 BANK_BASE=/tmp/mmllm-cpu/fim-bank-chain-stack
 
-LOCAL_LAYERS=(0 1 2 12 20 29 30 31)
+# SPIKE 2 — Local Bank layer positions. Default is the asymmetric 8 (CLAUDE.md
+# "8 local banks in training"). Override via MMLLM_LOCAL_BANK_LAYERS env var
+# (comma-separated layer indices, e.g. "0,1,2,...,31" for symmetric all-32).
+# When overridden:
+#   - the bash LOCAL_LAYERS array drives V_local.bin file generation here
+#   - MMLLM_LOCAL_BANK_LAYERS is passed through to core.lpy's
+#     pick-local-bank-layers, which honors the same env var
+if [ -n "${MMLLM_LOCAL_BANK_LAYERS:-}" ]; then
+  IFS=',' read -ra LOCAL_LAYERS <<< "$MMLLM_LOCAL_BANK_LAYERS"
+  export MMLLM_LOCAL_BANK_LAYERS   # already set, but ensure it's exported
+  echo "  SPIKE-2: MMLLM_LOCAL_BANK_LAYERS override active — ${#LOCAL_LAYERS[@]} layers: ${LOCAL_LAYERS[*]}"
+else
+  LOCAL_LAYERS=(0 1 2 12 20 29 30 31)
+fi
 NET_LAYERS=$(seq 0 31)
 SQRT_LOCAL=128;  Q_DIM=16
 SQRT_NET=1024;   C_NET=8
@@ -246,12 +259,16 @@ run_round() {
     python3 -c "import torch; torch.save({}, '${FIM_BASE}.ckpts/step-1/opt-sparse-net.pt')"
   fi
 
+  # Pass the LOCAL_LAYERS bash array to the python heredoc via a
+  # space-separated env var so spike-2's override propagates cleanly.
+  export MMLLM_BASH_LOCAL_LAYERS="${LOCAL_LAYERS[*]}"
   python3 - "${BANK_BASE}" "16" <<PY
-import numpy as np, sys
+import numpy as np, sys, os
 bank_base = sys.argv[1]
 n_trunks  = int(sys.argv[2])
 SQRT_LOCAL = $SQRT_LOCAL;  Q_DIM = $Q_DIM
-LOCAL_LAYERS = [0, 1, 2, 12, 20, 29, 30, 31]
+LOCAL_LAYERS = [int(x) for x in os.environ.get("MMLLM_BASH_LOCAL_LAYERS",
+                                               "0 1 2 12 20 29 30 31").split()]
 INIT_SCALE = $INIT_SCALE
 rng = np.random.default_rng(42 + ${round_num})
 n_per_trunk = SQRT_LOCAL * SQRT_LOCAL
@@ -264,7 +281,7 @@ for i in LOCAL_LAYERS:
         a[s:e] = (rng.standard_normal((e - s, Q_DIM)) * INIT_SCALE).astype(np.float32)
     a.flush()
 PY
-  echo "  V_local: Gaussian σ=$INIT_SCALE fresh"
+  echo "  V_local: Gaussian σ=$INIT_SCALE fresh (${#LOCAL_LAYERS[@]} layers)"
 
   for i in $NET_LAYERS; do
     cp "${resume_v_net}.${i}.bin" "${BANK_BASE}-net.${i}.bin"

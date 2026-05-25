@@ -331,6 +331,26 @@
       (when (and bank-path (not (zero? (count bank-path))))
         (str bank-path "-net"))))
 
+(defn pick-netbank-shared?
+  "SPIKE 3 — MMLLM_NETBANK_SHARED — when 'true', all 32 blocks share a
+   single NetBank V tensor (and expander) via weight-tying after
+   construction. Each block keeps its own K_a / K_b (so per-layer
+   queries each have their own retrieval geometry) but reads/writes
+   the SAME V table.
+
+   Rationale: the current per-layer NetBank has 32 separate V tensors
+   each receiving gradient only from its own layer's queries. With
+   8 of 32 layers having a Local target, 24 V tensors get no
+   distillation signal and only train from main loss. Sharing V means
+   gradients accumulate from all 32 layers per step — a 32× boost in
+   gradient signal per row — and the 'single NB' framing of the
+   triune-brain doc maps cleanly to the implementation.
+
+   Reads MMLLM_NETBANK_SHARED (default 'false')."
+  []
+  (let [v (.lower (.get (.- os environ) "MMLLM_NETBANK_SHARED" "false"))]
+    (.__contains__ #{"1" "true" "yes"} v)))
+
 (defn pick-lr-kab-mult
   "Multiplier on K_a/K_b's lr (the bank's 'addressing' weights). Reads
    MMLLM_LR_KAB_MULT (default = MMLLM_LR_DENSE_MULT, i.e. K_a/K_b live
@@ -1248,6 +1268,33 @@
   (let [v (.lower (.get (.- os environ) "MMLLM_DISTILL_TARGET" "residual"))]
     (if (.__contains__ #{"residual" "local"} v) v "residual")))
 
+(defn pick-distill-mode
+  "MMLLM_DISTILL_MODE — distillation aggregation mode.
+
+   'per-layer' (default): per-block 1:1 distill. Each block's Net output
+                          is distilled toward that block's own Local
+                          output. Only fires at the 8 Local-bank layers;
+                          the 24 Net-only layers receive zero distill
+                          pressure.
+
+   'aggregate-local' (SPIKE 1): collect the 8 Local outputs (across the
+                          layers where Local Bank exists), aggregate via
+                          element-wise mean into one (B, H, T, head_dim)
+                          target tensor, and distill ALL 32 Net layers
+                          against that aggregate. Gives the 24 Net-only
+                          layers a target instead of zero pressure.
+                          Mutually exclusive with gate-weights /
+                          gate-indices (those are per-layer concepts).
+
+   Why aggregate exists: at 32 layers the per-layer 1:1 distill leaves
+   24/32 Net banks with no consolidation target, which Agent 2's analysis
+   correlates with Δ_net stuck near 0 across the post-LR=1e-1 chain. The
+   aggregate variant is the spike for 'one shared NetBank tier sees the
+   Local tier as a unified signal.'"
+  []
+  (let [v (.lower (.get (.- os environ) "MMLLM_DISTILL_MODE" "per-layer"))]
+    (if (.__contains__ #{"per-layer" "aggregate-local"} v) v "per-layer")))
+
 (defn pick-distill-magnitude-coef
   "Weight on the magnitude component of distill (default 0.0).
 
@@ -1342,9 +1389,81 @@
         gate-weights (when metrics (.get metrics "distill_gate_weights" nil))
         gate         (when (and metrics (nil? gate-weights))
                        (.get metrics "distill_gate_indices" nil))
-        eps      1e-6]
-    (if (zero? coef)
-      0.0
+        eps      1e-6
+        mode     (pick-distill-mode)]
+    (cond
+      (zero? coef) 0.0
+
+      ;; SPIKE 1 — aggregate-local mode.
+      ;;
+      ;; Collect last_local_out from every block that has a Local Bank
+      ;; (typically 8 of 32 in cpu-tiny / cpu-mini asymmetric layout).
+      ;; Stack to (n_local, B, H, T, D), mean over n_local to get a single
+      ;; (B, H, T, D) target. In residual mode, do the same aggregation on
+      ;; the matched last_sdpa_out so the residual subtracts mean(sdpa) at
+      ;; the SAME 8 layers (mean(lo - so) = mean(lo) - mean(so) by
+      ;; linearity). Then walk ALL blocks and distill each block's
+      ;; last_net_out against the aggregate target. Net-only layers (24 of
+      ;; 32) get a target instead of being filtered out.
+      ;;
+      ;; gate-weights / gate-indices are per-layer concepts; aggregate mode
+      ;; ignores them (documented in pick-distill-mode docstring).
+      (= mode "aggregate-local")
+      (let [local-blocks (filter (fn [b] (some? (:memory b))) (:blocks m))
+            los (->> local-blocks
+                     (map (fn [b]
+                            (let [g (:long-gate b)]
+                              (python/getattr g "last_local_out" nil))))
+                     (filter some?))
+            sos-at-local (->> local-blocks
+                              (map (fn [b]
+                                     (let [g (:long-gate b)]
+                                       (python/getattr g "last_sdpa_out" nil))))
+                              (filter some?))]
+        (if (empty? los)
+          0.0
+          (let [mean-lo (-> (torch/stack (vec los) ** :dim 0)
+                            (.mean ** :dim 0)
+                            (.detach))
+                mean-so (when (and (= target-kind "residual") (seq sos-at-local))
+                          (-> (torch/stack (vec sos-at-local) ** :dim 0)
+                              (.mean ** :dim 0)
+                              (.detach)))
+                tgt (if mean-so (.sub mean-lo mean-so) mean-lo)
+                ;; ALL 32 blocks contribute one MSE term against the aggregate.
+                losses (->> (:blocks m)
+                            (map (fn [b]
+                                   (let [g  (:long-gate b)
+                                         no (python/getattr g "last_net_out" nil)]
+                                     (when no
+                                       (if dir-only
+                                         (let [tgt-n   (.add (.norm tgt ** :dim -1 :keepdim true) eps)
+                                               no-n    (.add (.norm no  ** :dim -1 :keepdim true) eps)
+                                               dir-mse (F/mse_loss (.div no no-n)
+                                                                   (.div tgt tgt-n))]
+                                           (if (pos? mag-coef)
+                                             (let [tgt-mag (if (pos? mag-clamp)
+                                                             (.clamp tgt-n ** :max mag-clamp)
+                                                             tgt-n)
+                                                   mag-mse (F/mse_loss no-n (.detach tgt-mag))]
+                                               (+ (* (- 1.0 mag-coef) dir-mse)
+                                                  (* mag-coef         mag-mse)))
+                                             dir-mse))
+                                         (F/mse_loss no tgt))))))
+                            (filter some?))]
+            (if (empty? losses)
+              0.0
+              (let [raw-mse (/ (reduce + losses) (python/float (count losses)))]
+                (when metrics
+                  (.__setitem__ metrics "distill_loss_raw"
+                                (if (number? raw-mse)
+                                  (python/float raw-mse)
+                                  (.item (.detach raw-mse))))
+                  (.__setitem__ metrics "distill_n_blocks" (python/int (count losses)))
+                  (.__setitem__ metrics "distill_mode" "aggregate-local"))
+                (* coef raw-mse))))))
+
+      :else
       ;; Three paths:
       ;;   gate-weights set: continuous per-layer weighting (each block's
       ;;     MSE multiplied by its weight before averaging).
@@ -1956,12 +2075,39 @@
                        (with [_ (torch/no_grad)]
                          (.zero_ (.- (.- h weight) data))
                          (.zero_ (.- (.- h bias)   data)))
-                       (.to h device)))]
+                       (.to h device)))
+        blocks     (vec (map #(block-to-device! (build-block config %) device)
+                             (range n-layers)))]
+    ;; SPIKE 3 — MMLLM_NETBANK_SHARED=true weight-ties NetBank's V and
+    ;; expander across all blocks. K_a / K_b stay per-layer so each
+    ;; layer learns its own retrieval geometry, but every layer reads /
+    ;; writes the SAME V table. Gradient accumulates from all n_layers
+    ;; forwards per step — the 'one shared NetBank tier' interpretation
+    ;; of the triune-brain doc made literal.
+    ;;
+    ;; Mechanism: each block's NetBank module was constructed by
+    ;; build-block with its own V (mmap) and expander (Linear). After
+    ;; building, we point every block.netbank.V and .expander at the
+    ;; first block's instance. PyTorch parameter-tying handles the
+    ;; gradient accumulation across forward call sites. The K_a / K_b
+    ;; stay per-block so per-layer queries each learn their own routing.
+    ;;
+    ;; Caveat: this leaves the other (n_layers-1) mmap files allocated
+    ;; but unused. That's ~1 GB of orphaned disk at default sizes.
+    ;; Spike-only; production sharing would skip allocation entirely.
+    (when (pick-netbank-shared?)
+      (let [first-nb (:netbank (first blocks))]
+        (when first-nb
+          (doseq [b (rest blocks)]
+            (when-let [nb (:netbank b)]
+              (.__setattr__ nb "V"        (.- first-nb V))
+              (.__setattr__ nb "expander" (.- first-nb expander))))
+          (println (format "  SPIKE-3: NetBank shared — V + expander tied across %d blocks"
+                           (count blocks))))))
     {:config          config
      :device          device
      :tok-emb         (.to (nn/Embedding vocab-size d-model) device)
-     :blocks          (vec (map #(block-to-device! (build-block config %) device)
-                                (range n-layers)))
+     :blocks          blocks
      :norm-final      (.to (nn/RMSNorm d-model) device)
      :rope-cos        (.to cos device)
      :rope-sin        (.to sin device)
