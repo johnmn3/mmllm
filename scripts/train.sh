@@ -337,13 +337,30 @@ EOF
 
   git commit -m "train-r$CUR_ROUND $HANDLE — step $step/$N_ROUNDS, final_ctrl=$FINAL_CTRL" --quiet
 
+  # Push the round. Capture output AND exit code — the prior version
+  # piped to `tail -1 | grep -q` which suppressed all output AND only
+  # detected a narrow set of error strings, so genuine permission
+  # failures (workflow_dispatch from non-default ref) would silently
+  # "succeed" while the branch never reached origin. Now: show the
+  # tail of git's output, check actual exit code, and only print the
+  # "pushed" line if the push actually landed.
+  pushed=0
   for i in 1 2 3 4; do
-    if git push -u origin "$BR" 2>&1 | tail -1 | grep -q -E "rejected|hung|error"; then
-      sleep $((i * 4)); continue
+    PUSH_OUT=$(git push -u origin "$BR" 2>&1)
+    PUSH_RC=$?
+    echo "$PUSH_OUT" | tail -3 | sed 's/^/    git: /'
+    if [ "$PUSH_RC" -eq 0 ]; then
+      pushed=1
+      break
     fi
-    break
+    echo "    git push attempt $i failed (rc=$PUSH_RC); retrying in $((i * 4))s…"
+    sleep $((i * 4))
   done
-  echo "    pushed r$CUR_ROUND to origin/$BR"
+  if [ "$pushed" -eq 1 ]; then
+    echo "    pushed r$CUR_ROUND to origin/$BR"
+  else
+    echo "    ERROR: failed to push r$CUR_ROUND after 4 attempts. Branch is NOT on origin." >&2
+  fi
 
   # Open the PR on first successful round (draft); subsequent rounds
   # auto-update the PR via push. We never need to rebind HEAD.
