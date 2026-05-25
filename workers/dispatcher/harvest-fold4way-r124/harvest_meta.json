@@ -1,0 +1,73 @@
+{
+  "spork_version": "0.9",
+  "target_round": 124,
+  "n_workers": 4,
+  "wave": "fold-r124-rawbirds",
+  "workers": [
+    {
+      "handle": "Pngcc",
+      "branch": "origin/claude/train-3b9ccbc0-Pngcc",
+      "ctrl_bpc": 1.3377
+    },
+    {
+      "handle": "uQ3hc",
+      "branch": "origin/claude/train-f040586f-uQ3hc",
+      "ctrl_bpc": 1.5793
+    },
+    {
+      "handle": "d1pBC",
+      "branch": "fork-joly-os-mmllm-claude-train-98bfd8ea-d1pBC",
+      "ctrl_bpc": 1.6199
+    },
+    {
+      "handle": "oyG8V",
+      "branch": "fork-slaa-us-mmllm-claude-train-0b9941e7-oyG8V",
+      "ctrl_bpc": 1.6337
+    }
+  ],
+  "worker_ctrl_bpc_mean": 1.5426,
+  "worker_ctrl_bpc_best": 1.3377,
+  "previous_harvest": {
+    "round": 121,
+    "dir": "workers/dispatcher/harvest-7way-r121"
+  },
+  "direct_contributions": [
+    {
+      "bird_id": "3b9ccbc0aa2e410b",
+      "handle": "Pngcc",
+      "branch": "origin/claude/train-3b9ccbc0-Pngcc",
+      "n_steps": 35,
+      "ctrl_bpc": 1.3377
+    },
+    {
+      "bird_id": "f040586fcb6c43c9",
+      "handle": "uQ3hc",
+      "branch": "origin/claude/train-f040586f-uQ3hc",
+      "n_steps": 35,
+      "ctrl_bpc": 1.5793
+    },
+    {
+      "bird_id": "98bfd8ea1c5e405e",
+      "handle": "d1pBC",
+      "branch": "fork-joly-os-mmllm-claude-train-98bfd8ea-d1pBC",
+      "n_steps": 35,
+      "ctrl_bpc": 1.6199
+    },
+    {
+      "bird_id": "0b9941e7e2af426f",
+      "handle": "oyG8V",
+      "branch": "fork-slaa-us-mmllm-claude-train-0b9941e7-oyG8V",
+      "n_steps": 35,
+      "ctrl_bpc": 1.6337
+    }
+  ],
+  "ancestor_harvests": [
+    "workers/dispatcher/harvest-7way-r121"
+  ],
+  "cumulative_total_steps": 3173,
+  "cumulative_unique_birds": 84,
+  "harvested_at": "2026-05-25T03:36:49Z",
+  "harvester": "scripts/consolidate_siblings.py raw-birds (inclusive fold)",
+  "note": "Inclusive raw-bird fold: every origin/claude/train-* branch with chain-design-r124/ payload was discovered, fetched, and FedAvg'd in. Replaces the cron's MAX_BIRDS=3-capped selection. Honors workers/dispatcher/.bird_exclude.json quarantine list.",
+  "quarantine_excluded": []
+}
