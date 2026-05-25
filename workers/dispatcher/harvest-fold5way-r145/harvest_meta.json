@@ -1,0 +1,85 @@
+{
+  "spork_version": "0.9",
+  "target_round": 145,
+  "n_workers": 5,
+  "wave": "fold-r145-rawbirds",
+  "workers": [
+    {
+      "handle": "WYmUx",
+      "branch": "origin/claude/train-759bba7c-WYmUx",
+      "ctrl_bpc": 1.0533
+    },
+    {
+      "handle": "5j4Tr",
+      "branch": "fork-SeniorCareMarket-mmllm-claude-train-4e2e1e9e-5j4Tr",
+      "ctrl_bpc": 1.0524
+    },
+    {
+      "handle": "SPNQi",
+      "branch": "fork-joly-os-mmllm-claude-train-ecdfb6bd-SPNQi",
+      "ctrl_bpc": 1.1108
+    },
+    {
+      "handle": "sKlAD",
+      "branch": "fork-SeniorCareMarket-com-mmllm-claude-train-0219ec53-sKlAD",
+      "ctrl_bpc": 1.0624
+    },
+    {
+      "handle": "GTvi5",
+      "branch": "fork-slaa-us-mmllm-claude-train-f76423b4-GTvi5",
+      "ctrl_bpc": 1.0555
+    }
+  ],
+  "worker_ctrl_bpc_mean": 1.0669,
+  "worker_ctrl_bpc_best": 1.0524,
+  "previous_harvest": {
+    "round": 140,
+    "dir": "workers/dispatcher/harvest-7way-r140"
+  },
+  "direct_contributions": [
+    {
+      "bird_id": "759bba7c0dd04faf",
+      "handle": "WYmUx",
+      "branch": "origin/claude/train-759bba7c-WYmUx",
+      "n_steps": 35,
+      "ctrl_bpc": 1.0533
+    },
+    {
+      "bird_id": "4e2e1e9e7a83463d",
+      "handle": "5j4Tr",
+      "branch": "fork-SeniorCareMarket-mmllm-claude-train-4e2e1e9e-5j4Tr",
+      "n_steps": 35,
+      "ctrl_bpc": 1.0524
+    },
+    {
+      "bird_id": "ecdfb6bd47114f7a",
+      "handle": "SPNQi",
+      "branch": "fork-joly-os-mmllm-claude-train-ecdfb6bd-SPNQi",
+      "n_steps": 35,
+      "ctrl_bpc": 1.1108
+    },
+    {
+      "bird_id": "0219ec53ee154cec",
+      "handle": "sKlAD",
+      "branch": "fork-SeniorCareMarket-com-mmllm-claude-train-0219ec53-sKlAD",
+      "n_steps": 35,
+      "ctrl_bpc": 1.0624
+    },
+    {
+      "bird_id": "f76423b4d66249c2",
+      "handle": "GTvi5",
+      "branch": "fork-slaa-us-mmllm-claude-train-f76423b4-GTvi5",
+      "n_steps": 35,
+      "ctrl_bpc": 1.0555
+    }
+  ],
+  "ancestor_harvests": [
+    "workers/dispatcher/harvest-7way-r140"
+  ],
+  "cumulative_total_steps": 3397,
+  "cumulative_unique_birds": 92,
+  "harvested_at": "2026-05-25T17:14:58Z",
+  "harvester": "scripts/consolidate_siblings.py raw-birds (inclusive fold)",
+  "note": "Inclusive raw-bird fold: every origin/claude/train-* branch with chain-design-r145/ payload was discovered, fetched, and FedAvg'd in. Replaces the cron's MAX_BIRDS=3-capped selection. Honors workers/dispatcher/.bird_exclude.json quarantine list.",
+  "quarantine_excluded": []
+}
