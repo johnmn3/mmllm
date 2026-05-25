@@ -130,19 +130,33 @@ export MMLLM_NET_BANK_ON_GPU=false
 : ${MMLLM_LR_NET_MULT_END:=5.0}  ; export MMLLM_LR_NET_MULT_END
 : ${MMLLM_LR_DENSE_MULT:=0.05}   ; export MMLLM_LR_DENSE_MULT
 : ${MMLLM_LR_DENSE_MULT_END:=0.005}; export MMLLM_LR_DENSE_MULT_END
-# Base LR for chain extensions. CLAUDE.md "Winning bank-engagement
-# recipes" tags stack-1e-1-5.0 (LR=1e-1, NETMULT_END=5.0) as the
-# "chain-round seed / peak Net consolidation" recipe, vs stack-3e-2-5.0
-# (LR=3e-2) which is "end-of-spork model / best raw bpc". Chain rounds
-# are by definition consolidation rounds — V_local resets to fresh
-# Gaussian each round, V_net carries forward; the chain only works if
-# Net actually absorbs Local's per-round content. Verified spike on
-# 2026-05-24/25 (run 26374657617, bird U59yk r115-r119): mean Δ_net
-# = +0.0159, V_net moved% = 6.66%/round, no NaN blow-up at lr_n=0.5.
-# Both are 2-3.3× the cron baseline at LR=3e-2. ctrl_bpc is ~40%
-# worse (1.37 vs 0.97) — that's the documented cost of consolidation.
-: ${MMLLM_LR:=1e-1}              ; export MMLLM_LR
-: ${MMLLM_LR_MIN:=1e-1}          ; export MMLLM_LR_MIN
+# Base LR for chain extensions. Stays at 3e-2 (stack-3e-2-5.0).
+#
+# History (2026-05-25): commit 5c5f9b7 flipped this to 1e-1 based on
+# a SINGLE-bird spike (U59yk r115-r119) that showed mean Δ_net=+0.0159
+# while running OFF an LR=3e-2 chain head. Once the prod cron ran a
+# full harvest at 1e-1, the dynamics inverted:
+#
+#   harvest | LR    | best ctrl_bpc | mean Δ_net/round
+#   r119    | 3e-2  | 0.9135        | +0.0098
+#   r121    | 3e-2  | 0.9290        | +0.0117
+#   r124    | 1e-1  | 1.3377        | +0.0025    ← regression
+#
+# ctrl_bpc jumped +0.40 (44%) and Δ_net dropped 4-5× vs the prior
+# LR=3e-2 wave. The spike's "consolidation cost is ~40% ctrl_bpc"
+# claim was the warning the prod data confirmed — but the spike's
+# *Δ_net gain* didn't carry over to multi-bird FedAvg. Best read:
+# at the higher LR each bird drifts further from the harvested basis
+# faster than distillation can re-anchor V_net, so the row-aware
+# FedAvg sees per-row variance that destroys Net's accumulated signal.
+#
+# The CLAUDE.md "stack-1e-1-5.0" recipe is still valid for SINGLE-bird
+# consolidation rounds (e.g. the very last spork before packaging an
+# inference checkpoint). It is NOT the cron-prod default for an
+# ongoing federated chain. Workers can opt into it manually via the
+# train.yml `lr` workflow_dispatch input.
+: ${MMLLM_LR:=3e-2}              ; export MMLLM_LR
+: ${MMLLM_LR_MIN:=3e-2}          ; export MMLLM_LR_MIN
 export MMLLM_LR_WARMUP=$((STEPS * 70 / 100))
 : ${MMLLM_REPLAY_EVERY:=10}      ; export MMLLM_REPLAY_EVERY
 : ${MMLLM_REPLAY_BUFFER_SIZE:=256}; export MMLLM_REPLAY_BUFFER_SIZE
