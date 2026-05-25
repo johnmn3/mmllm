@@ -243,7 +243,14 @@
      MMLLM_LOCAL_BANK_LAYERS=\"0,1,2,12,20,29,30,31\"   ; 8 of 32 layers
      MMLLM_LOCAL_BANK_LAYERS=\"\"                       ; no Local anywhere"
   [config]
-  (let [env-val (.get (.- os environ) "MMLLM_LOCAL_BANK_LAYERS")]
+  (let [raw     (.get (.- os environ) "MMLLM_LOCAL_BANK_LAYERS")
+        ;; Treat empty string / whitespace-only the same as unset.
+        ;; GitHub Actions' workflow env passthrough sets the var to ""
+        ;; when the corresponding input is blank, so without this guard
+        ;; an empty input → empty layer set → no Local Bank anywhere →
+        ;; sparse-parameters returns [] → optimizer construction errors
+        ;; with "got an empty parameter list".
+        env-val (when (and raw (not (zero? (count (.strip raw))))) raw)]
     (cond
       env-val
       (python/set (filter #(not (nil? %))
