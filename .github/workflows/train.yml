@@ -43,6 +43,27 @@ on:
         description: "MMLLM_LR_MIN override. Default empty = uses script default. Typically set to match lr (e.g. 1e-1 with lr=1e-1) so cosine decay stays at the consolidation peak."
         required: false
         default: ""
+      distill_mode:
+        description: "SPIKE 1 — MMLLM_DISTILL_MODE. Empty/per-layer (default) = current per-block 1:1 distill (8 layers, 24 layers get no signal). 'aggregate-local' = mean the 8 Local outputs into one target, distill all 32 Net layers against it."
+        required: false
+        type: choice
+        default: ""
+        options:
+          - ""
+          - "per-layer"
+          - "aggregate-local"
+      local_bank_layers:
+        description: "SPIKE 2 — MMLLM_LOCAL_BANK_LAYERS. Empty (default) = asymmetric 8 layers [0,1,2,12,20,29,30,31]. Set '0,1,2,3,...,31' (comma-separated, all 32 indices) for symmetric Local at every layer."
+        required: false
+        default: ""
+      netbank_shared:
+        description: "SPIKE 3 — MMLLM_NETBANK_SHARED. 'false' (default) = 32 independent NetBanks. 'true' = weight-tie V + expander across all 32 blocks (K_a/K_b stay per-layer). The 'single NB' interpretation."
+        required: false
+        type: choice
+        default: "false"
+        options:
+          - "false"
+          - "true"
   # Cron auto-train: every hour. Workflow inputs aren't available
   # from the schedule trigger — we use the defaults baked into the
   # script (n_rounds=5, steps=7, random corpus, random handle). Each
@@ -119,6 +140,12 @@ jobs:
           MMLLM_K_ALIGN_COEF: ${{ inputs.k_align_coef }}
           MMLLM_LR: ${{ inputs.lr }}
           MMLLM_LR_MIN: ${{ inputs.lr_min }}
+          # Spike triggers — each independently gated. Empty / default = OFF
+          # so cron path is unaffected; workflow_dispatch can opt one bird
+          # into a spike for comparison vs the baseline trajectory.
+          MMLLM_DISTILL_MODE: ${{ inputs.distill_mode }}
+          MMLLM_LOCAL_BANK_LAYERS: ${{ inputs.local_bank_layers }}
+          MMLLM_NETBANK_SHARED: ${{ inputs.netbank_shared }}
         run: |
           bash scripts/train.sh
 
