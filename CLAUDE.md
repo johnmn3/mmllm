@@ -226,6 +226,47 @@ durable carrier of features across rounds. The slightly higher ctrl
 bpc (2.80 vs 2.59) is the cost of consolidation; we eat that locally
 to gain durability across rounds.
 
+**FedAvg caveat — these sweep numbers are at N=1 single bird.** They do
+NOT predict multi-bird federated dynamics. See "Cron-prod default" below.
+
+### Cron-prod default: stack-3e-2-5.0
+
+The hourly federated cron (scripts/train.sh → extend_chain.sh) extends
+the chain by N_ROUNDS × STEPS, FedAvg-merged across origin + 4 forks
+per harvest tick. **The cron-prod default is LR=3e-2**, NOT LR=1e-1.
+Despite stack-1e-1-5.0's "chain-round seed" framing above, the
+empirical prod evidence is that LR=3e-2 wins for the multi-bird FedAvg
+path.
+
+Comparison (post-PR-#11-revert, design-sized banks, 9-corpus mix):
+
+  harvest | LR    | best ctrl_bpc | mean Δ_net/round
+  r119    | 3e-2  | 0.9135        | +0.0098
+  r121    | 3e-2  | 0.9290        | +0.0117
+  r124    | 1e-1  | 1.3377        | +0.0025     ← regression (5c5f9b7)
+  r127*   | 3e-2  | 1.0038        | +0.0041     ← recovery (PR #24)
+
+  *bird 7Vo9E, single-bird first round after the LR=3e-2 revert.
+
+When commit 5c5f9b7 flipped the cron default to LR=1e-1, ctrl_bpc
+jumped +0.40 (44%) and per-round Δ_net dropped 4-5× in a single
+harvest cycle. Reverted by PR #24.
+
+Best read: at LR=1e-1 each bird drifts further from the harvested basis
+faster than distillation can re-anchor V_net, so the row-aware FedAvg
+sees per-row variance that destroys Net's accumulated signal. The
+sweep_distill numbers in this section were measured at N=1 single-bird;
+multi-bird FedAvg dynamics are different and LR=3e-2 is the right
+operating point there.
+
+stack-1e-1-5.0 stays a valid recipe for a SINGLE-bird consolidation
+run — workflow_dispatch on train.yml with explicit `lr=1e-1, lr_min=1e-1`
+inputs. It is NOT the cron-prod default. **Do not flip MMLLM_LR /
+MMLLM_LR_MIN defaults in extend_chain.sh without first re-running the
+cron-prod sweep and confirming Δ_net + ctrl_bpc trajectory across
+≥ 3 consecutive harvests (~9 rounds).** A single-bird spike is not
+sufficient evidence — that's how the r124 regression got shipped.
+
 ### Future inference model
 When we eventually package an inference checkpoint, we want
 stack-3e-2-5.0 settings for the FINAL spork (best raw bpc), preceded
