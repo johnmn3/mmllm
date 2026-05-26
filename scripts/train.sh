@@ -216,6 +216,25 @@ echo "▶ training round-by-round (push + PR-update after each round)…"
 # resuming), fast-forward; otherwise create fresh.
 git checkout -b "$BR" 2>/dev/null || git checkout "$BR"
 
+# Memory observability — sample RSS / sys-mem every 3 sec into mem.log
+# so OOMs (sym-Local-N, shared NetBank, etc.) are diagnosable from the
+# uploaded artifact. The poller dies with the bash EXIT trap on normal
+# completion AND inherits SIGTERM from the runner on OOM (line-buffered
+# writes flush to disk so the last visible state before kill is captured).
+MEM_LOG="$ARCHIVE/mem.log"
+(
+  while sleep 3; do
+    ts=$(date -u +%H:%M:%SZ)
+    free_mb=$(awk '/MemFree:/ {print int($2/1024)}' /proc/meminfo)
+    avail_mb=$(awk '/MemAvailable:/ {print int($2/1024)}' /proc/meminfo)
+    py_rss_mb=$(ps -eo rss,comm | awk '$2 ~ /python/ {s+=$1} END {print int(s/1024)}')
+    top3=$(ps -eo rss,comm --sort=-rss --no-headers 2>/dev/null | awk 'NR<=3 {printf "%s=%dMB ", $2, $1/1024}')
+    echo "[$ts] free=${free_mb}MB avail=${avail_mb}MB py_rss=${py_rss_mb}MB ${top3}"
+  done
+) > "$MEM_LOG" 2>&1 &
+MEM_PID=$!
+trap "kill $MEM_PID 2>/dev/null || true" EXIT
+
 PR_NUM=""
 PREV_DEST=""
 FINAL_CTRL="unknown"
@@ -272,12 +291,14 @@ PY
   python3 scripts/_delta_sparse_net.py encode \
     workers/dispatcher/harvest-5way-r10/round-10 \
     "$ARCHIVE/round-$CUR_ROUND" "$DEST" 2>&1 | tail -2
+  echo "    [$(date -u +%H:%M:%S)] trace: post-encode, cp dense.pt"
   cp "$ARCHIVE/round-$CUR_ROUND/dense.pt"            "$DEST/"
   cp "$ARCHIVE/round-$CUR_ROUND"/opt-sparse-net.*.pt "$DEST/" 2>/dev/null || true
   for r in $(seq $((START_ROUND + 1)) "$CUR_ROUND"); do
     cp "$ARCHIVE/round-$r/log.jsonl" "$DEST/round-$r.log.jsonl" 2>/dev/null || true
   done
   cp "$ARCHIVE/wall.tsv" "$DEST/" 2>/dev/null || true
+  echo "    [$(date -u +%H:%M:%S)] trace: post-cp, computing FINAL_CTRL"
 
   # ctrl_bpc from THIS round's ablation
   FINAL_CTRL=$(python3 -c "
@@ -289,6 +310,7 @@ try:
             print(f\"{e.get('control_bpc'):.4f}\")
 except: print('unknown')
 " | tail -1)
+  echo "    [$(date -u +%H:%M:%S)] trace: FINAL_CTRL=$FINAL_CTRL"
 
   cat > "$DEST/meta.json" <<EOF
 {
@@ -335,7 +357,9 @@ EOF
     exit 1
   fi
 
+  echo "    [$(date -u +%H:%M:%S)] trace: pre-commit"
   git commit -m "train-r$CUR_ROUND $HANDLE — step $step/$N_ROUNDS, final_ctrl=$FINAL_CTRL" --quiet
+  echo "    [$(date -u +%H:%M:%S)] trace: post-commit, starting push retries"
 
   # Push the round. Capture output AND exit code — the prior version
   # piped to `tail -1 | grep -q` which suppressed all output AND only
@@ -346,8 +370,10 @@ EOF
   # "pushed" line if the push actually landed.
   pushed=0
   for i in 1 2 3 4; do
+    echo "    [$(date -u +%H:%M:%S)] trace: push attempt $i starting"
     PUSH_OUT=$(git push -u origin "$BR" 2>&1)
     PUSH_RC=$?
+    echo "    [$(date -u +%H:%M:%S)] trace: push attempt $i rc=$PUSH_RC"
     echo "$PUSH_OUT" | tail -3 | sed 's/^/    git: /'
     if [ "$PUSH_RC" -eq 0 ]; then
       pushed=1

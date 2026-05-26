@@ -163,5 +163,6 @@ jobs:
             /tmp/mmllm-cpu/chain-diverse/round-*.train.log
             /tmp/mmllm-cpu/chain-diverse/round-*/log.jsonl
             /tmp/mmllm-cpu/chain-diverse/wall.tsv
+            /tmp/mmllm-cpu/chain-diverse/mem.log
           if-no-files-found: ignore
           retention-days: 7
