@@ -53,12 +53,16 @@ echo "▶ syncing branch state from upstream…"
 UPSTREAM=https://github.com/johnmn3/mmllm.git
 git fetch "$UPSTREAM" main --depth=1 2>&1 | tail -1
 
-# Chain selection. MMLLM_CHAIN_PREFIX empty (cron default) selects the
-# original chain (`harvest-Nway-rN`); set to e.g. `sym24` to extend the
-# parallel sym24 chain (`harvest-Nway-rN_sym24`). The chain's genesis dir
-# is the delta-encoding REFERENCE for that chain (r10 for original,
-# r0_<prefix> for prefixed chains).
-CHAIN_PREFIX="${MMLLM_CHAIN_PREFIX:-}"
+# Chain selection. MMLLM_CHAIN_PREFIX defaults to `sym24` (the current
+# production chain: symmetric Local at 24 layers). Set to `orig` (or
+# `legacy`) to target the original pre-sym24 chain (`harvest-Nway-rN`,
+# no suffix). The chain's genesis dir is the delta-encoding REFERENCE
+# (r10 for original, r0_<prefix> for prefixed chains).
+CHAIN_PREFIX="${MMLLM_CHAIN_PREFIX:-sym24}"
+# Escape hatch back to the original (unsuffixed) chain.
+if [ "$CHAIN_PREFIX" = "orig" ] || [ "$CHAIN_PREFIX" = "legacy" ]; then
+  CHAIN_PREFIX=""
+fi
 if [ -n "$CHAIN_PREFIX" ]; then
   REF_HARVEST_DIR="workers/dispatcher/harvest-0way-r0_${CHAIN_PREFIX}"
   REF_DIR="$REF_HARVEST_DIR/round-0"
@@ -197,8 +201,11 @@ export MMLLM_BWD_SKIP_FRAC_NET_ONLY=0.5
 export MMLLM_BWD_SKIP_FRAC_LOCAL=0.0
 export MMLLM_ABLATION_QUICK=true
 export MMLLM_PRINT_EVERY=1
-N_ROUNDS="${MMLLM_N_ROUNDS:-5}"
-STEPS="${MMLLM_STEPS_PER_ROUND:-7}"
+# sym24 chain default: 2 rounds × 10 steps fits the ~1h CI window at the
+# 24-sym-Local pace (~154 s/step). The original chain used 5×7; sym24's
+# heavier per-step cost forces the smaller per-bird budget.
+N_ROUNDS="${MMLLM_N_ROUNDS:-2}"
+STEPS="${MMLLM_STEPS_PER_ROUND:-10}"
 # START_ROUND was set in step (1) from the auto-detected chain head.
 END_ROUND=$((START_ROUND + N_ROUNDS))
 
