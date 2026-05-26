@@ -16,6 +16,10 @@ on:
         description: "How many recent rounds the catchup pass scans for late-arriving birds. Default 2 (steady-state). Set to e.g. 50 for a one-shot deep sweep that absorbs older strays."
         required: false
         default: ""
+      chain_prefix:
+        description: "MMLLM_CHAIN_PREFIX — which chain to harvest. Blank = script default (sym24, the production chain). 'orig'/'legacy' = original unsuffixed chain."
+        required: false
+        default: ""
   # Cron auto-harvest: every hour. With no inputs, harvest_action.sh
   # auto-detects the highest unharvested round (across legacy smoke-r*,
   # interim train-r<N>-*, stable per-bird train-<id>-* branches on
@@ -145,6 +149,8 @@ jobs:
           # uses MMLLM_CATCHUP_DEPTH:-2. Set via workflow_dispatch input
           # for one-shot deep sweeps (e.g. 50 to absorb r29..r78 strays).
           MMLLM_CATCHUP_DEPTH: ${{ inputs.catchup_depth }}
+          # Blank from cron → harvest_action.sh defaults to sym24.
+          MMLLM_CHAIN_PREFIX: ${{ inputs.chain_prefix }}
         run: |
           bash scripts/harvest_action.sh "$TARGET_ROUND" $PR_REFS
           # Pull the new harvest dir name out so the artifact step
@@ -175,14 +181,14 @@ jobs:
           # (cron output) and harvest-fold<N>way-r<R>/ (raw-birds /
           # cross-arm fold output from consolidate_siblings.py).
           STAGED_OUTSIDE=$(git diff --cached --name-only \
-            | grep -vE '^workers/dispatcher/harvest-(fold)?[0-9]+way-r[0-9]+/' || true)
+            | grep -vE '^workers/dispatcher/harvest-(fold)?[0-9]+way-r[0-9]+(_[A-Za-z0-9]+)?/' || true)
           if [ -n "$STAGED_OUTSIDE" ]; then
             echo "ERROR: $(echo "$STAGED_OUTSIDE" | wc -l) files staged outside harvest dirs:" >&2
             echo "$STAGED_OUTSIDE" | head -10 >&2
             exit 1
           fi
           NEW_DIR=$(git diff --cached --name-only \
-            | grep -oE 'workers/dispatcher/harvest-(fold)?[0-9]+way-r[0-9]+' \
+            | grep -oE 'workers/dispatcher/harvest-(fold)?[0-9]+way-r[0-9]+(_[A-Za-z0-9]+)?' \
             | sort -u | head -1)
           git commit -m "harvest: $NEW_DIR (auto, via harvest.yml workflow)"
           # Retry push with exponential backoff. Two failure modes:
