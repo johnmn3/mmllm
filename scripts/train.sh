@@ -216,11 +216,11 @@ echo "▶ training round-by-round (push + PR-update after each round)…"
 # resuming), fast-forward; otherwise create fresh.
 git checkout -b "$BR" 2>/dev/null || git checkout "$BR"
 
-# Memory observability — sample RSS / sys-mem every 3 sec into mem.log
-# so OOMs (sym-Local-N, shared NetBank, etc.) are diagnosable from the
-# uploaded artifact. The poller dies with the bash EXIT trap on normal
-# completion AND inherits SIGTERM from the runner on OOM (line-buffered
-# writes flush to disk so the last visible state before kill is captured).
+# Memory observability — sample RSS / sys-mem every 3 sec, write to
+# BOTH stdout (workflow log) AND mem.log artifact. Stdout lines survive
+# runner-SIGTERM-on-OOM (GH retains the workflow log even if the runner
+# is killed; the artifact path's filesystem dies with the runner). Tag
+# each line with "[MEM" prefix so it's grep-able from the workflow log.
 MEM_LOG="$ARCHIVE/mem.log"
 (
   while sleep 3; do
@@ -229,9 +229,12 @@ MEM_LOG="$ARCHIVE/mem.log"
     avail_mb=$(awk '/MemAvailable:/ {print int($2/1024)}' /proc/meminfo)
     py_rss_mb=$(ps -eo rss,comm | awk '$2 ~ /python/ {s+=$1} END {print int(s/1024)}')
     top3=$(ps -eo rss,comm --sort=-rss --no-headers 2>/dev/null | awk 'NR<=3 {printf "%s=%dMB ", $2, $1/1024}')
-    echo "[$ts] free=${free_mb}MB avail=${avail_mb}MB py_rss=${py_rss_mb}MB ${top3}"
+    line="[MEM $ts] free=${free_mb}MB avail=${avail_mb}MB py_rss=${py_rss_mb}MB ${top3}"
+    # Stdout for workflow log durability; file for artifact post-mortem.
+    echo "$line"
+    echo "$line" >> "$MEM_LOG" 2>/dev/null || true
   done
-) > "$MEM_LOG" 2>&1 &
+) &
 MEM_PID=$!
 trap "kill $MEM_PID 2>/dev/null || true" EXIT
 
