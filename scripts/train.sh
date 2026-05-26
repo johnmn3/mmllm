@@ -415,6 +415,15 @@ EOF
   git commit -m "train-r$CUR_ROUND $HANDLE — step $step/$N_ROUNDS, final_ctrl=$FINAL_CTRL" --quiet
   echo "    [$(date -u +%H:%M:%S)] trace: post-commit, starting push retries"
 
+  # Cap git's pack-objects RAM. The repo has ~63 GB of accumulated
+  # blob history (~95 harvests × 170 MB + 1 GB references). At default
+  # settings pack-objects considers a huge delta-base window and can
+  # mmap >10 GB, then gets OOM-killed (sym24bird1 hit this). Capping
+  # windowMemory + deltaCacheSize trades a few % pack-size for
+  # predictable memory.
+  git config pack.windowMemory 256m
+  git config pack.deltaCacheSize  64m
+
   # Push the round. Capture output AND exit code — the prior version
   # piped to `tail -1 | grep -q` which suppressed all output AND only
   # detected a narrow set of error strings, so genuine permission
