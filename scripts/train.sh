@@ -415,14 +415,22 @@ EOF
   git commit -m "train-r$CUR_ROUND $HANDLE — step $step/$N_ROUNDS, final_ctrl=$FINAL_CTRL" --quiet
   echo "    [$(date -u +%H:%M:%S)] trace: post-commit, starting push retries"
 
-  # Cap git's pack-objects RAM. The repo has ~63 GB of accumulated
-  # blob history (~95 harvests × 170 MB + 1 GB references). At default
-  # settings pack-objects considers a huge delta-base window and can
-  # mmap >10 GB, then gets OOM-killed (sym24bird1 hit this). Capping
-  # windowMemory + deltaCacheSize trades a few % pack-size for
-  # predictable memory.
+  # Cap git's pack-objects memory + skip reference-object mmap. The repo
+  # has ~63 GB of accumulated blob history and pack-objects on push can
+  # mmap multiple GB of nearby pack files for delta-base candidates.
+  # sym24bird1 + sym24bird2 both hit ~10 GB git RSS during push and got
+  # OOM-killed by the runner's cgroup. Mitigations:
+  #   pack.windowMemory / deltaCacheSize — cap delta-search RAM
+  #   pack.threads=1                     — single-threaded packing
+  #   pack.useBitmaps=false              — skip bitmap index loading
+  #   gc.auto=0                          — no opportunistic gc
+  # And the push itself: --no-thin skips thin-pack delta search entirely
+  # (server gets a self-contained pack, slightly bigger, no ref-mmap).
   git config pack.windowMemory 256m
   git config pack.deltaCacheSize  64m
+  git config pack.threads         1
+  git config pack.useBitmaps      false
+  git config gc.auto              0
 
   # Push the round. Capture output AND exit code — the prior version
   # piped to `tail -1 | grep -q` which suppressed all output AND only
@@ -434,7 +442,7 @@ EOF
   pushed=0
   for i in 1 2 3 4; do
     echo "    [$(date -u +%H:%M:%S)] trace: push attempt $i starting"
-    PUSH_OUT=$(git push -u origin "$BR" 2>&1)
+    PUSH_OUT=$(git push --no-thin -u origin "$BR" 2>&1)
     PUSH_RC=$?
     echo "    [$(date -u +%H:%M:%S)] trace: push attempt $i rc=$PUSH_RC"
     echo "$PUSH_OUT" | tail -3 | sed 's/^/    git: /'
