@@ -9,13 +9,13 @@ on:
         required: false
         default: ""
       n_rounds:
-        description: "Rounds to train"
+        description: "Rounds to train (sym24 chain default: 2)"
         required: false
-        default: "5"
+        default: "2"
       steps_per_round:
-        description: "Steps per round"
+        description: "Steps per round (sym24 chain default: 10; ~154s/step at 24-sym Local fits 2x10 in ~1h)"
         required: false
-        default: "7"
+        default: "10"
       corpus:
         description: "Training corpus"
         required: false
@@ -69,7 +69,7 @@ on:
         required: false
         default: ""
       chain_prefix:
-        description: "MMLLM_CHAIN_PREFIX — select chain. Empty (default) = original cron chain (harvest-Nway-rN). Set to e.g. 'sym24' to extend the parallel sym24 chain (harvest-Nway-rN_sym24). The chain's arch knobs are read from its genesis chain_meta.json and re-exported automatically, so the bird's dense.pt + V_net match what's saved on the chain head."
+        description: "MMLLM_CHAIN_PREFIX — select chain. Empty (default) = sym24 production chain (harvest-Nway-rN_sym24). Set 'orig'/'legacy' for the original unsuffixed chain. The chain's arch knobs are read from its genesis chain_meta.json and re-exported automatically, so the bird's dense.pt + V_net match what's saved on the chain head."
         required: false
         default: ""
   # Cron auto-train: every hour. Workflow inputs aren't available
