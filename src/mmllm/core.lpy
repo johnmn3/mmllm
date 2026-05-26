@@ -5548,22 +5548,25 @@
                                                        (.detach (.clone (.- p data)))))]
                             (torch/save params (str target-dir "/dense.pt"))
                             ;; Persist arch knobs alongside the ckpt so resumers can
-                            ;; re-export the same env before build-model.
-                            (let [meta {"chain_genesis" true
-                                        "config_name" "cpu-mini"
-                                        "MMLLM_LOCAL_BANK_LAYERS"
-                                          (or (.get (.- os environ) "MMLLM_LOCAL_BANK_LAYERS") "")
-                                        "MMLLM_NETBANK_SHARED"
-                                          (or (.get (.- os environ) "MMLLM_NETBANK_SHARED") "false")
-                                        "MMLLM_NET_SQRT_N" (str sqrt-n)
-                                        "MMLLM_NET_C_NET"  (str c-net)
-                                        "MMLLM_SQRT_N"
-                                          (or (.get (.- os environ) "MMLLM_SQRT_N") "")
-                                        "n_layers" n-layers}
-                                  json    (python/__import__ "json")
-                                  f       (python/open (str target-dir "/chain_meta.json") "w")]
-                              (.write f (.dumps json meta ** :indent 2))
-                              (.close f))
+                            ;; re-export the same env before build-model. json.dumps
+                            ;; doesn't know how to serialize basilisp PersistentMap,
+                            ;; so build a python dict directly.
+                            (let [meta (python/dict)]
+                              (.__setitem__ meta "chain_genesis" true)
+                              (.__setitem__ meta "config_name" "cpu-mini")
+                              (.__setitem__ meta "MMLLM_LOCAL_BANK_LAYERS"
+                                            (or (.get (.- os environ) "MMLLM_LOCAL_BANK_LAYERS") ""))
+                              (.__setitem__ meta "MMLLM_NETBANK_SHARED"
+                                            (or (.get (.- os environ) "MMLLM_NETBANK_SHARED") "false"))
+                              (.__setitem__ meta "MMLLM_NET_SQRT_N" (str sqrt-n))
+                              (.__setitem__ meta "MMLLM_NET_C_NET"  (str c-net))
+                              (.__setitem__ meta "MMLLM_SQRT_N"
+                                            (or (.get (.- os environ) "MMLLM_SQRT_N") ""))
+                              (.__setitem__ meta "n_layers" n-layers)
+                              (let [json (python/__import__ "json")
+                                    f    (python/open (str target-dir "/chain_meta.json") "w")]
+                                (.write f (.dumps json meta ** :indent 2))
+                                (.close f)))
                             (println (format "bootstrap-chain: wrote dense.pt + V_net.{0..%d}.bin + chain_meta.json to %s"
                                              (- n-layers 1) target-dir))))
       "train-fim-mini" (let [base       (or (second args) "/tmp/mmllm-cpu/fim-corpus")
