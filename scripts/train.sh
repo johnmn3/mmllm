@@ -53,20 +53,42 @@ echo "▶ syncing branch state from upstream…"
 UPSTREAM=https://github.com/johnmn3/mmllm.git
 git fetch "$UPSTREAM" main --depth=1 2>&1 | tail -1
 
+# Chain selection. MMLLM_CHAIN_PREFIX empty (cron default) selects the
+# original chain (`harvest-Nway-rN`); set to e.g. `sym24` to extend the
+# parallel sym24 chain (`harvest-Nway-rN_sym24`). The chain's genesis dir
+# is the delta-encoding REFERENCE for that chain (r10 for original,
+# r0_<prefix> for prefixed chains).
+CHAIN_PREFIX="${MMLLM_CHAIN_PREFIX:-}"
+if [ -n "$CHAIN_PREFIX" ]; then
+  REF_HARVEST_DIR="workers/dispatcher/harvest-0way-r0_${CHAIN_PREFIX}"
+  REF_DIR="$REF_HARVEST_DIR/round-0"
+  HEAD_REGEX="workers/dispatcher/harvest-(fold)?[0-9]+way-r[0-9]+_${CHAIN_PREFIX}\$"
+  EXTRACT_ROUND_RE="[0-9]+(?=_${CHAIN_PREFIX}\$)"
+  echo "▶ chain selection: prefix=${CHAIN_PREFIX}, reference=${REF_DIR}"
+else
+  REF_HARVEST_DIR="workers/dispatcher/harvest-5way-r10"
+  REF_DIR="$REF_HARVEST_DIR/round-10"
+  HEAD_REGEX='workers/dispatcher/harvest-(fold)?[0-9]+way-r[0-9]+$'
+  EXTRACT_ROUND_RE='[0-9]+$'
+fi
+
 # Auto-detect the chain head — highest workers/dispatcher/harvest-*-r<N>
-# dir on upstream main. Forks will automatically pick up the latest
-# harvest each time the workflow runs.
+# dir on upstream main matching the selected chain's regex. Forks will
+# automatically pick up the latest harvest each time the workflow runs.
 #
 # Regex accepts both legacy `harvest-<N>way-r<R>` (cron output) and
 # `harvest-fold<N>way-r<R>` (inclusive raw-birds fold output). When
 # both exist at the same R, the fold has more bird contributions
 # folded in — we prefer it via the secondary sort below.
 CHAIN_HEAD_PATH=$(git ls-tree -d --name-only FETCH_HEAD workers/dispatcher/ 2>/dev/null \
-  | grep -oE 'workers/dispatcher/harvest-(fold)?[0-9]+way-r[0-9]+$' \
+  | grep -E "$HEAD_REGEX" \
   | awk -F'-r' '{
-      n_r = $NF
+      # Extract round number (strip trailing _<prefix> if present)
+      rest = $NF
+      sub(/_[A-Za-z0-9]+$/, "", rest)
+      n_r = rest
       # parse "<prefix>way-r<n_r>" — extract way count + "fold?" flag
-      pre = $0; sub(/-r[0-9]+$/, "", pre)
+      pre = $0; sub(/-r[0-9]+(_[A-Za-z0-9]+)?$/, "", pre)
       is_fold = (pre ~ /-fold[0-9]+way$/) ? 1 : 0
       way = pre; sub(/.*-(fold)?/, "", way); sub(/way$/, "", way)
       # sort key: round, then is_fold (prefer fold), then way count
@@ -74,15 +96,16 @@ CHAIN_HEAD_PATH=$(git ls-tree -d --name-only FETCH_HEAD workers/dispatcher/ 2>/d
     }' \
   | sort -k1,1n -k2,2n -k3,3n | tail -1 | awk '{print $4}')
 if [ -z "$CHAIN_HEAD_PATH" ]; then
-  echo "ERROR: no harvest-*-r<N> dirs found on upstream main" >&2
+  echo "ERROR: no chain head matching $HEAD_REGEX found on upstream main" >&2
   exit 2
 fi
-START_ROUND=$(echo "$CHAIN_HEAD_PATH" | grep -oE '[0-9]+$')
+START_ROUND=$(echo "$CHAIN_HEAD_PATH" | grep -oP "$EXTRACT_ROUND_RE")
 echo "  chain head: $CHAIN_HEAD_PATH (round $START_ROUND)"
 
+# Pull both the reference dir and the chain head's tree.
 git checkout FETCH_HEAD -- \
   src/ scripts/ tests/ CLAUDE.md docs/ \
-  workers/dispatcher/harvest-5way-r10/ \
+  "$REF_HARVEST_DIR/" \
   "$CHAIN_HEAD_PATH/" \
   workers/dispatcher/corpora/ \
   workers/dispatcher/deps/ 2>&1 | tail -1
@@ -129,15 +152,42 @@ for prefix in "$CORPORA"/battery/*.part-00; do
 done
 echo "  staged $(ls /tmp/mmllm-cpu/*.bin /tmp/mmllm-cpu/battery/*.bin 2>/dev/null | wc -l) corpus files"
 
-# 4) Reconstruct round-$START_ROUND full V_net from r10 anchor + that
-#    round's sparse delta (chain head auto-detected above).
+# 4a) For prefixed chains (e.g. sym24), re-export the arch knobs from the
+#     genesis chain_meta.json so model build matches the saved dense.pt.
+META_FILE="$REF_DIR/chain_meta.json"
+if [ -n "$CHAIN_PREFIX" ] && [ -f "$META_FILE" ]; then
+  echo "▶ re-exporting chain arch from $META_FILE"
+  while IFS='=' read -r k v; do
+    [ -z "$k" ] && continue
+    export "$k=$v"
+    echo "    $k=$v"
+  done < <(python3 -c "
+import json
+m = json.load(open('$META_FILE'))
+for k, v in m.items():
+    if k.startswith('MMLLM_') and v:
+        print(f'{k}={v}')
+")
+fi
+
+# 4b) Reconstruct round-$START_ROUND full V_net from the chain's reference
+#     + that round's sparse delta. Genesis-case fallback: if the chain
+#     head has no delta files yet (we're starting from r0_<prefix>), copy
+#     the reference V_net.{0..31}.bin directly — it IS the round-0 state.
 echo "▶ staging round-$START_ROUND…"
 ARCHIVE=/tmp/mmllm-cpu/chain-diverse
 mkdir -p "$ARCHIVE/round-$START_ROUND"
-python3 scripts/_delta_sparse_net.py apply \
-  workers/dispatcher/harvest-5way-r10/round-10 \
-  "$CHAIN_HEAD_PATH/round-$START_ROUND" \
-  "$ARCHIVE/round-$START_ROUND" 2>&1 | tail -2
+DELTA_META="$CHAIN_HEAD_PATH/round-$START_ROUND/delta-sparse-net.meta.pt"
+if [ -f "$DELTA_META" ]; then
+  python3 scripts/_delta_sparse_net.py apply \
+    "$REF_DIR" \
+    "$CHAIN_HEAD_PATH/round-$START_ROUND" \
+    "$ARCHIVE/round-$START_ROUND" 2>&1 | tail -2
+else
+  # Genesis: chain head dir contains full V_net.bin (no deltas yet).
+  cp "$CHAIN_HEAD_PATH/round-$START_ROUND"/V_net.*.bin "$ARCHIVE/round-$START_ROUND/" 2>/dev/null
+  echo "  staged r$START_ROUND (genesis copy from $CHAIN_HEAD_PATH/round-$START_ROUND)"
+fi
 cp "$CHAIN_HEAD_PATH/round-$START_ROUND/dense.pt"            "$ARCHIVE/round-$START_ROUND/"
 cp "$CHAIN_HEAD_PATH/round-$START_ROUND"/opt-sparse-net.*.pt "$ARCHIVE/round-$START_ROUND/" 2>/dev/null || true
 
@@ -292,7 +342,7 @@ PY
   DEST="workers/$HANDLE/chain-design-r$CUR_ROUND"
   mkdir -p "$DEST"
   python3 scripts/_delta_sparse_net.py encode \
-    workers/dispatcher/harvest-5way-r10/round-10 \
+    "$REF_DIR" \
     "$ARCHIVE/round-$CUR_ROUND" "$DEST" 2>&1 | tail -2
   echo "    [$(date -u +%H:%M:%S)] trace: post-encode, cp dense.pt"
   cp "$ARCHIVE/round-$CUR_ROUND/dense.pt"            "$DEST/"
@@ -321,8 +371,9 @@ except: print('unknown')
   "handle": "$HANDLE",
   "bird_id": "$BIRD_ID",
   "wave": "train-r$CUR_ROUND",
-  "extended_from": "$CHAIN_HEAD_PATH/round-$START_ROUND (sparse-delta vs harvest-5way-r10/round-10)",
+  "extended_from": "$CHAIN_HEAD_PATH/round-$START_ROUND (sparse-delta vs $REF_DIR)",
   "extended_from_harvest": "$CHAIN_HEAD_PATH",
+  "chain_prefix": "$CHAIN_PREFIX",
   "start_round": $START_ROUND,
   "end_round": $CUR_ROUND,
   "round_length_steps": $STEPS,
