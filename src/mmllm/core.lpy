@@ -5508,6 +5508,64 @@
                           (train-long cfg2 train-path val-path ckpt-dir log-path
                                       total eval-every ckpt-every)
                           (println "done.")))
+      "bootstrap-chain" (let [target-dir (or (second args)
+                                             (.get (.- os environ) "MMLLM_BOOTSTRAP_DIR"))]
+                          ;; Genesis ckpt builder for a fresh chain at a non-default
+                          ;; architecture (e.g. symmetric Local at 24 layers). Reads
+                          ;; arch overrides from env vars at model-build time
+                          ;; (MMLLM_LOCAL_BANK_LAYERS, MMLLM_NETBANK_SHARED, etc.),
+                          ;; builds the model with random init, and writes:
+                          ;;   <target-dir>/V_net.{0..N-1}.bin   — mmap'd Gaussian
+                          ;;   <target-dir>/dense.pt             — torch list of params
+                          ;;   <target-dir>/chain_meta.json      — locked arch knobs
+                          ;; so subsequent birds that resume from this dir rebuild
+                          ;; the model with the SAME arch (otherwise dense.pt's
+                          ;; param-count won't match and load fails).
+                          (when (nil? target-dir)
+                            (println "ERROR: bootstrap-chain needs a target dir (arg or MMLLM_BOOTSTRAP_DIR)")
+                            (python/exit 2))
+                          (.__setitem__ (.- os environ) "MMLLM_DEVICE" "cpu")
+                          (when (nil? (.get (.- os environ) "MMLLM_BANK_ON_GPU"))
+                            (.__setitem__ (.- os environ) "MMLLM_BANK_ON_GPU" "false"))
+                          (os/makedirs target-dir ** :exist_ok true)
+                          ;; Pre-allocate NetBank V_net.{i}.bin files with random
+                          ;; Gaussian init — pure-python helper in mmllm.netbank.
+                          (let [netb (python/__import__ "mmllm.netbank"
+                                                        ** :fromlist (python/list ["prepare_netbank_files"]))
+                                n-layers (:n-layers default-config-cpu-mini)
+                                sqrt-n   (python/int (or (.get (.- os environ) "MMLLM_NET_SQRT_N") "1024"))
+                                c-net    (python/int (or (.get (.- os environ) "MMLLM_NET_C_NET") "8"))
+                                _ (.prepare_netbank_files netb
+                                                          (str target-dir "/V_net")
+                                                          n-layers sqrt-n c-net)
+                                ;; Point the build at the freshly-allocated mmaps.
+                                _ (.__setitem__ (.- os environ) "MMLLM_NET_BANK_PATH"
+                                                (str target-dir "/V_net"))
+                                cfg     (assoc default-config-cpu-mini
+                                               :memory-mmap-path (str target-dir "/local"))
+                                m       (build-model cfg)
+                                params  (python/list (for [p (parameters m)]
+                                                       (.detach (.clone (.- p data)))))]
+                            (torch/save params (str target-dir "/dense.pt"))
+                            ;; Persist arch knobs alongside the ckpt so resumers can
+                            ;; re-export the same env before build-model.
+                            (let [meta {"chain_genesis" true
+                                        "config_name" "cpu-mini"
+                                        "MMLLM_LOCAL_BANK_LAYERS"
+                                          (or (.get (.- os environ) "MMLLM_LOCAL_BANK_LAYERS") "")
+                                        "MMLLM_NETBANK_SHARED"
+                                          (or (.get (.- os environ) "MMLLM_NETBANK_SHARED") "false")
+                                        "MMLLM_NET_SQRT_N" (str sqrt-n)
+                                        "MMLLM_NET_C_NET"  (str c-net)
+                                        "MMLLM_SQRT_N"
+                                          (or (.get (.- os environ) "MMLLM_SQRT_N") "")
+                                        "n_layers" n-layers}
+                                  json    (python/__import__ "json")
+                                  f       (python/open (str target-dir "/chain_meta.json") "w")]
+                              (.write f (.dumps json meta ** :indent 2))
+                              (.close f))
+                            (println (format "bootstrap-chain: wrote dense.pt + V_net.{0..%d}.bin + chain_meta.json to %s"
+                                             (- n-layers 1) target-dir))))
       "train-fim-mini" (let [base       (or (second args) "/tmp/mmllm-cpu/fim-corpus")
                              mpath      (or (nth args 2 nil) "/tmp/mmllm-cpu/fim-bank")
                              total      (python/int (or (nth args 3 nil) 5000))
