@@ -47,8 +47,20 @@ jobs:
 
       - name: Install mmllm deps (offline wheels)
         run: |
-          pip install --no-index --find-links=workers/dispatcher/deps/wheels \
-            $(ls workers/dispatcher/deps/wheels/*.whl 2>/dev/null | head -200)
+          # Mirror scripts/train.sh's wheel-staging: copy whl files +
+          # reassemble multi-part wheels (torch chunked as .part-NN due
+          # to GH's 100 MB per-file cap), then let pip resolve deps via
+          # --find-links with mmllm as the install anchor.
+          WHEELS=workers/dispatcher/deps/wheels
+          STAGE=/tmp/wheels-staged
+          mkdir -p "$STAGE"
+          cp "$WHEELS"/*.whl "$STAGE"/ 2>/dev/null || true
+          for prefix in "$WHEELS"/*.part-00; do
+            [ -f "$prefix" ] || continue
+            base=$(basename "${prefix%.part-00}")
+            cat "$WHEELS/${base}".part-?? > "$STAGE/$base"
+          done
+          pip install --no-index --find-links="$STAGE" -e . --quiet
 
       - name: Configure git identity
         run: |
