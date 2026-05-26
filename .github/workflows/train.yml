@@ -64,6 +64,10 @@ on:
         options:
           - "false"
           - "true"
+      sqrt_n:
+        description: "MMLLM_SQRT_N — override Local Bank sqrt_n (V_local size). Empty = config default (cpu-mini = 128 → 16384 entries × q_dim × 4B per layer). Set to '64' (4096 entries, ~4× smaller) to fit S2sym (symmetric Local at all 32 layers) on the 7GB free runner without OOMing on adam-cpu state. Does NOT affect NetBank V_net (that has its own sqrt_n config)."
+        required: false
+        default: ""
   # Cron auto-train: every hour. Workflow inputs aren't available
   # from the schedule trigger — we use the defaults baked into the
   # script (n_rounds=5, steps=7, random corpus, random handle). Each
@@ -146,6 +150,7 @@ jobs:
           MMLLM_DISTILL_MODE: ${{ inputs.distill_mode }}
           MMLLM_LOCAL_BANK_LAYERS: ${{ inputs.local_bank_layers }}
           MMLLM_NETBANK_SHARED: ${{ inputs.netbank_shared }}
+          MMLLM_SQRT_N: ${{ inputs.sqrt_n }}
         run: |
           bash scripts/train.sh
 
