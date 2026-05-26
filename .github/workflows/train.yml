@@ -68,6 +68,10 @@ on:
         description: "MMLLM_SQRT_N — override Local Bank sqrt_n (V_local size). Empty = config default (cpu-mini = 128 → 16384 entries × q_dim × 4B per layer). Set to '64' (4096 entries, ~4× smaller) to fit S2sym (symmetric Local at all 32 layers) on the 7GB free runner without OOMing on adam-cpu state. Does NOT affect NetBank V_net (that has its own sqrt_n config)."
         required: false
         default: ""
+      chain_prefix:
+        description: "MMLLM_CHAIN_PREFIX — select chain. Empty (default) = original cron chain (harvest-Nway-rN). Set to e.g. 'sym24' to extend the parallel sym24 chain (harvest-Nway-rN_sym24). The chain's arch knobs are read from its genesis chain_meta.json and re-exported automatically, so the bird's dense.pt + V_net match what's saved on the chain head."
+        required: false
+        default: ""
   # Cron auto-train: every hour. Workflow inputs aren't available
   # from the schedule trigger — we use the defaults baked into the
   # script (n_rounds=5, steps=7, random corpus, random handle). Each
@@ -151,6 +155,7 @@ jobs:
           MMLLM_LOCAL_BANK_LAYERS: ${{ inputs.local_bank_layers }}
           MMLLM_NETBANK_SHARED: ${{ inputs.netbank_shared }}
           MMLLM_SQRT_N: ${{ inputs.sqrt_n }}
+          MMLLM_CHAIN_PREFIX: ${{ inputs.chain_prefix }}
         run: |
           bash scripts/train.sh
 
