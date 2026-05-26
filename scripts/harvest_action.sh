@@ -32,6 +32,40 @@ TARGET_ROUND="${1:-}"
 shift || true
 EXTRA_REFS=("$@")
 
+# Chain selection — mirrors scripts/train.sh. Defaults to the sym24
+# production chain. `orig`/`legacy` → original unsuffixed chain.
+CHAIN_PREFIX="${MMLLM_CHAIN_PREFIX:-sym24}"
+if [ "$CHAIN_PREFIX" = "orig" ] || [ "$CHAIN_PREFIX" = "legacy" ]; then
+  CHAIN_PREFIX=""
+fi
+if [ -n "$CHAIN_PREFIX" ]; then
+  CHAIN_SUFFIX="_${CHAIN_PREFIX}"
+  REF_DIR="workers/dispatcher/harvest-0way-r0_${CHAIN_PREFIX}/round-0"
+else
+  CHAIN_SUFFIX=""
+  REF_DIR="workers/dispatcher/harvest-5way-r10/round-10"
+fi
+# Exported for the inline python heredocs (meta/results progression).
+export CHAIN_PREFIX CHAIN_SUFFIX REF_DIR
+echo "▶ harvest chain: prefix='${CHAIN_PREFIX}' suffix='${CHAIN_SUFFIX}' reference=${REF_DIR}"
+
+# Read a bird ref's chain_prefix from its meta.json at the target round.
+# Emits the prefix string (empty for original chain). Returns the value
+# so the caller can filter birds to the chain being harvested — without
+# this, sym24 birds (delta vs r0_sym24) and original birds (delta vs r10)
+# would be FedAvg-merged against mismatched references and corrupt V_net.
+_bird_chain_prefix() {
+  local ref="$1" round="$2" handle meta
+  handle=$(git ls-tree -r --name-only "$ref" 2>/dev/null \
+    | grep -oE "^workers/[^/]+/chain-design-r${round}/" | head -1 \
+    | sed 's|^workers/||;s|/.*||' || true)
+  [ -z "$handle" ] && return 0
+  meta=$(git show "$ref:workers/$handle/chain-design-r${round}/meta.json" 2>/dev/null) || return 0
+  printf '%s' "$meta" | python3 -c "import json,sys
+try: print(json.load(sys.stdin).get('chain_prefix',''))
+except: print('')" 2>/dev/null || true
+}
+
 # Helper: peek at a remote branch tree (fetches if not local) and emit
 # every chain-design-r<N>/ round number present at the
 # workers/<HANDLE>/chain-design-r<N>/ canonical bird-payload path.
@@ -43,9 +77,18 @@ _rounds_in_branch() {
   # contents — `git ls-tree --name-only` works fine with blob:none.
   # Cuts the per-branch fetch from ~1 GB to ~1-5 MB.
   git fetch origin "$br" --depth=1 --filter=blob:none >/dev/null 2>&1 || return 0
-  git ls-tree -r --name-only "origin/$br" 2>/dev/null \
+  local rounds
+  rounds=$(git ls-tree -r --name-only "origin/$br" 2>/dev/null \
     | sed -nE 's|^workers/[^/]+/chain-design-r([0-9]+)/.*|\1|p' \
-    | sort -un
+    | sort -un)
+  [ -z "$rounds" ] && return 0
+  # Only return rounds if this bird is on the chain being harvested.
+  # _bird_chain_prefix lazily fetches just the meta.json blob (partial
+  # clone on-demand). Checking one round's meta is enough — a bird trains
+  # one chain per branch.
+  local bp
+  bp=$(_bird_chain_prefix "origin/$br" "$(echo "$rounds" | head -1)")
+  [ "$bp" = "$CHAIN_PREFIX" ] && echo "$rounds"
 }
 
 # Helper: list (fork/full_name, branch_name) pairs across forks of the
@@ -121,7 +164,10 @@ _fetch_fork_branch() {
 # fresh fold dir lands automatically.
 #
 # Opt-out: MMLLM_SKIP_CATCHUP=1. Cap: MMLLM_CATCHUP_DEPTH (default 5).
-if [ -z "${MMLLM_SKIP_CATCHUP:-}" ]; then
+# Skip catchup for prefixed chains (e.g. sym24): consolidate_siblings.py
+# raw-birds path is not yet chain-aware and would re-harvest against the
+# wrong (r10) reference. The primary harvest path below handles sym24.
+if [ -z "${MMLLM_SKIP_CATCHUP:-}" ] && [ -z "$CHAIN_PREFIX" ]; then
   # CATCHUP_DEPTH=5 was the initial guess but each raw-birds call spans
   # ~5 forks × ~20 branches × ~3s gh+fetch = 1-5 min/round. At depth=5
   # the catchup pass could chew 25 min before step 1 even starts, with
@@ -192,9 +238,15 @@ if [ -z "$TARGET_ROUND" ]; then
     rs=$(git ls-tree -r --name-only "$local_ref" 2>/dev/null \
       | sed -nE 's|^workers/[^/]+/chain-design-r([0-9]+)/.*|\1|p' \
       | sort -un)
+    # Chain filter: only count fork rounds whose bird is on this chain.
     if [ -n "$rs" ]; then
-      ROUNDS_FROM_FORKS="$ROUNDS_FROM_FORKS $rs"
-      echo "  [fork-scan] $fork/$br → rounds: $(echo "$rs" | tr '\n' ' ')"
+      fbp=$(_bird_chain_prefix "$local_ref" "$(echo "$rs" | head -1)")
+      if [ "$fbp" = "$CHAIN_PREFIX" ]; then
+        ROUNDS_FROM_FORKS="$ROUNDS_FROM_FORKS $rs"
+        echo "  [fork-scan] $fork/$br → rounds: $(echo "$rs" | tr '\n' ' ') (chain=$fbp)"
+      else
+        echo "  [fork-scan] $fork/$br → skipped (chain=$fbp != $CHAIN_PREFIX)"
+      fi
     fi
   done < <(_list_fork_branches)
   ALL_ROUNDS=$( ( ( echo "$ROUNDS_FROM_NAME"
@@ -202,8 +254,12 @@ if [ -z "$TARGET_ROUND" ]; then
                     echo "$ROUNDS_FROM_FORKS" ) \
     | tr ' ' '\n' | grep -E '^[0-9]+$' | sort -un ) || true)
   echo "  rounds visible (origin + forks): $(echo "$ALL_ROUNDS" | tr '\n' ' ')"
+  # NOTE: ALL_ROUNDS is filtered to THIS chain during the scan below
+  # (ROUNDS_FROM_TREE / ROUNDS_FROM_FORKS only count rounds from birds
+  # whose meta.json chain_prefix matches), so the round numbers here are
+  # already chain-scoped. We just pick the highest not-yet-harvested one.
   for R in $(echo "$ALL_ROUNDS" | tac); do
-    if ! compgen -G "workers/dispatcher/harvest-*-r${R}" > /dev/null 2>&1; then
+    if ! compgen -G "workers/dispatcher/harvest-*-r${R}${CHAIN_SUFFIX}" > /dev/null 2>&1; then
       TARGET_ROUND=$R
       break
     fi
@@ -385,6 +441,19 @@ for ref in "${BIRD_REFS[@]}"; do
     continue
   fi
   echo "    extracted $N_FILES files"
+  # Chain filter (correctness-critical): only merge birds belonging to
+  # THIS chain. sym24 birds delta-encode vs r0_sym24; original birds vs
+  # r10. FedAvg-merging across chains would average deltas against
+  # mismatched references → corrupt V_net. The bird's meta.json records
+  # its chain_prefix (written by train.sh).
+  BIRD_PREFIX=$(python3 -c "import json,sys
+try: print(json.load(open('$WORK/$HANDLE/meta.json')).get('chain_prefix',''))
+except: print('')" 2>/dev/null || true)
+  if [ "$BIRD_PREFIX" != "$CHAIN_PREFIX" ]; then
+    echo "  SKIP: bird chain_prefix='$BIRD_PREFIX' != harvest chain '$CHAIN_PREFIX'"
+    rm -rf "$WORK/$HANDLE"
+    continue
+  fi
   HANDLES+=("$HANDLE")
   BIRD_DIRS+=("$WORK/$HANDLE")
   KEPT_REFS+=("$ref")
@@ -398,7 +467,7 @@ fi
 
 # --- 4) FedAvg merge -------------------------------------------------
 WAYS="${N}way"
-OUT="workers/dispatcher/harvest-${WAYS}-r${TARGET_ROUND}/round-${TARGET_ROUND}"
+OUT="workers/dispatcher/harvest-${WAYS}-r${TARGET_ROUND}${CHAIN_SUFFIX}/round-${TARGET_ROUND}"
 mkdir -p "$OUT"
 
 echo "▶ FedAvg merging delta-sparse-net across $N birds…"
@@ -433,7 +502,7 @@ print(f"  dense.pt averaged from {len(denses)}/{len(birds)} birds → {out}/dens
 PYEOF
 
 # --- 5) Harvest meta + results.md -----------------------------------
-HARVEST_DIR="workers/dispatcher/harvest-${WAYS}-r${TARGET_ROUND}"
+HARVEST_DIR="workers/dispatcher/harvest-${WAYS}-r${TARGET_ROUND}${CHAIN_SUFFIX}"
 
 # Build meta + results.md via Python: pull each bird's ctrl_bpc + the
 # previous harvest's ctrl_bpc, compute mean/best/Δ, print + write.
@@ -501,10 +570,18 @@ best_bpc = min(valid_bpcs) if valid_bpcs else None
 # Find the previous harvest (highest harvest-*-r<N> with N < target).
 # Sort by extracted round number, not lexicographically — otherwise
 # harvest-5way-r10 sorts before harvest-3way-r22 in string order.
+import os as _os, re as _re
+_chain_suffix = _os.environ.get("CHAIN_SUFFIX", "")
 def _round_of(d):
-    try: return int(d.rsplit("-r", 1)[-1])
+    # Strip the chain suffix (e.g. "_sym24") before parsing the round int.
+    try: return int(d.rsplit("-r", 1)[-1].split("_")[0])
     except: return -1
-import re as _re
+def _is_this_chain(d):
+    # Only consider harvest dirs of the chain currently being harvested.
+    base = d.rstrip("/").rsplit("-r", 1)[-1]
+    has_suffix = "_" in base
+    want_suffix = _chain_suffix != ""
+    return has_suffix == want_suffix and (not want_suffix or d.rstrip("/").endswith(_chain_suffix))
 def _way_count(d):
     m = _re.search(r"(\d+)way-r", d)
     return int(m.group(1)) if m else 0
@@ -521,6 +598,7 @@ for d in sorted(glob.glob("workers/dispatcher/harvest-*-r*"),
                 reverse=True):
     n = _round_of(d)
     if n < 0 or n >= target: continue
+    if not _is_this_chain(d): continue
     meta = f"{d}/harvest_meta.json"
     if not os.path.exists(meta): continue
     try:
@@ -641,7 +719,7 @@ spork_manifest = {
         "dense":  f"round-{target}/dense.pt",
         "delta_sparse_net": [f"round-{target}/delta-sparse-net.{i}.pt" for i in range(32)],
         "delta_sparse_net_meta": f"round-{target}/delta-sparse-net.meta.pt",
-        "reference_anchor": "workers/dispatcher/harvest-5way-r10/round-10",
+        "reference_anchor": os.environ.get("REF_DIR", "workers/dispatcher/harvest-5way-r10/round-10"),
     },
     "ancestor_harvests": ancestor_harvests,
     "harvester": meta_out["harvester"],
@@ -697,7 +775,7 @@ lines.append(f"\n## Output\n")
 lines.append(f"`{harvest_dir}/round-{target}/`:")
 lines.append(f"- `delta-sparse-net.{{0..31}}.pt` (row-aware FedAvg merge of {n_workers} workers)")
 lines.append(f"- `dense.pt` (averaged across {n_workers} birds)")
-lines.append(f"- Reference for delta encoding: `workers/dispatcher/harvest-5way-r10/round-10`\n")
+lines.append(f"- Reference for delta encoding: `{os.environ.get('REF_DIR', 'workers/dispatcher/harvest-5way-r10/round-10')}`\n")
 
 with open(f"{harvest_dir}/results.md", "w") as f:
     f.write("\n".join(lines) + "\n")
