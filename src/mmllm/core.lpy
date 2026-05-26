@@ -2130,6 +2130,22 @@
                                     "replay_buf_n" 0
                                     "delim_loss"   0.0})}))
 
+(defn- dedupe-by-py-id
+  "Filter a seq of Python objects to remove duplicates by id().
+   No-op when no duplicates exist (the default cron path). Needed
+   when weight-tying (MMLLM_NETBANK_SHARED=true, spike-3) causes the
+   same nn.Parameter to appear in multiple per-block param lists —
+   without dedupe, optimizers receive the same Parameter N times and
+   apply each update N times per step (effective LR × N, fast NaN)."
+  [xs]
+  (let [seen-id (python/set)]
+    (filter (fn [x]
+              (let [pid (python/id x)]
+                (if (.__contains__ seen-id pid)
+                  false
+                  (do (.add seen-id pid) true))))
+            xs)))
+
 (defn parameters
   "DENSE learnable parameters — these route to AdamW. Excludes the
    memory bank V.weight per block (sparse — see sparse-parameters).
@@ -2220,7 +2236,11 @@
             ;; positional ckpt-load from a ckpt without these stays aligned
             (mapcat memory-q-norm blocks)
             (mapcat gate-params blocks)
-            (mapcat netbank-params blocks)
+            ;; Dedupe by Python id: when MMLLM_NETBANK_SHARED=true,
+            ;; each block's nb.expander.weight refers to the same
+            ;; Parameter, so the per-block walk would emit it 32×.
+            ;; No-op in the default (un-shared) path.
+            (dedupe-by-py-id (mapcat netbank-params blocks))
             ;; router-smarts additions go at the very end so a ckpt
             ;; saved before these features can still load positionally.
             (when importance-head
@@ -2287,10 +2307,17 @@
   "NetBank V.weight per block — route to opt-sparse-net (third
    SparseAdam) with its own lr (pick-lr-net). Empty list when NetBank
    is disabled, so the caller can skip optimizer construction without
-   special-casing."
+   special-casing.
+
+   When MMLLM_NETBANK_SHARED=true (spike-3), all blocks' nb.V point at
+   the same nn.Embedding. We dedupe by Python id so the optimizer
+   doesn't see duplicate Parameters — SparseAdam would apply the same
+   update once per duplicate, multiplying the effective LR by N and
+   driving V to NaN within a few steps. No-op in the default path."
   [m]
-  (mapcat (fn [b] (when-let [nb (:netbank b)] (.sparse_parameters nb)))
-          (:blocks m)))
+  (dedupe-by-py-id
+    (mapcat (fn [b] (when-let [nb (:netbank b)] (.sparse_parameters nb)))
+            (:blocks m))))
 
 (defn warm-start-netbanks-from-local!
   "Per-block, copy Local Bank's K_a/K_b into the corresponding NetBank's
