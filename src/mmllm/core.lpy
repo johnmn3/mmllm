@@ -2668,18 +2668,16 @@
                                (or (number? z-total) (= 0 z-total)))
                         0.0
                         (* z-coef z-total))
-         d-coef       (let [metrics (:metrics m)
-                            step    (when metrics (.get metrics "current_step" nil))
-                            total   (when metrics (.get metrics "total_steps"  nil))]
-                        (if (and step total (pos? (python/int total)))
-                          (pick-distill-coef (python/int step) (python/int total))
-                          (pick-distill-coef)))
-         n-distill-layers 8 ;; number of 3-way gate (= local-bank) layers
-         distill-loss (if (or (zero? d-coef)
-                              (number? distill-total)
-                              (= 0 distill-total))
-                        0.0
-                        (* d-coef (/ distill-total (python/float n-distill-layers))))
+         ;; PORT (port-distill-24layer): route distill through collect-distill-loss
+         ;; — the round-9 working path that provably consolidated. It honors
+         ;; MMLLM_DISTILL_MODE=aggregate-local (distills ALL Net layers against the
+         ;; mean Local residual, not just the 8 3-way layers), schedules the coef
+         ;; internally, and divides by the TRUE contributing-block count. This
+         ;; bypasses the forward's per-layer `distill-total` (which covered only
+         ;; 8/32 layers AND carried the `(= 0 <tensor>)` basilisp-truthiness bug
+         ;; that zeroed distill every step). Requires MMLLM_GRAD_CHECKPOINT=false
+         ;; so the gate's last_*_out stashes survive the forward for the collector.
+         distill-loss (collect-distill-loss m)
          mtp-loss     (collect-mtp-loss aux-logits y T)
          delim-loss   (collect-delim-loss m final-x y)
          ;; K_a/K_b alignment between Net and Local — no-op when

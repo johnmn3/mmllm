@@ -157,7 +157,7 @@ export MMLLM_NET_BANK_ON_GPU=false
 # train.yml `lr` workflow_dispatch input.
 : ${MMLLM_LR:=3e-2}              ; export MMLLM_LR
 : ${MMLLM_LR_MIN:=3e-2}          ; export MMLLM_LR_MIN
-export MMLLM_LR_WARMUP=$((STEPS * 70 / 100))
+: ${MMLLM_LR_WARMUP:=$((STEPS * 70 / 100))} ; export MMLLM_LR_WARMUP
 : ${MMLLM_REPLAY_EVERY:=10}      ; export MMLLM_REPLAY_EVERY
 : ${MMLLM_REPLAY_BUFFER_SIZE:=256}; export MMLLM_REPLAY_BUFFER_SIZE
 : ${MMLLM_REPLAY_THRESHOLD:=0.5} ; export MMLLM_REPLAY_THRESHOLD
@@ -291,7 +291,7 @@ PY
   echo "  → training $STEPS steps (LR=$MMLLM_LR, LR_NET_MULT_END=$MMLLM_LR_NET_MULT_END, mag_coef=$MMLLM_DISTILL_MAGNITUDE_COEF)…"
   local TRAIN_LOG="$ARCHIVE_ROOT/round-${round_num}.train.log"
   mmllm train-fim-mini "$FIM_BASE" "$BANK_BASE" \
-        $((STEPS + 1)) $((STEPS + 1)) $((STEPS + 10)) > "$TRAIN_LOG" 2>&1 || true
+        $((STEPS + 1)) "${MMLLM_EVAL_EVERY:-$((STEPS + 1))}" $((STEPS + 10)) > "$TRAIN_LOG" 2>&1 || true
 
   local elapsed=$(($(date +%s) - t0))
 

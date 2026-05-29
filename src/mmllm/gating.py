@@ -147,6 +147,15 @@ class SwitchGate(nn.Module):
             if self.alpha_net is not None:
                 alpha = self.alpha_net.view(1, -1, 1, 1)
                 net_out = alpha * net_out
+            # PORT (port-distill-24layer): stash Net (and sdpa) so aggregate-local
+            # distill can reach these Net-only layers. last_local_out stays None
+            # (no Local Bank here); the collector uses the mean Local residual from
+            # the 3-way layers as the shared target for every block's last_net_out.
+            # Without this, 24/32 NetBanks were invisible to distill → Δ_net≈0.
+            if self.training:
+                self.last_local_out = None
+                self.last_net_out   = net_out
+                self.last_sdpa_out  = sdpa_out
             return gate.unsqueeze(-1) * sdpa_out + (1.0 - gate).unsqueeze(-1) * net_out
         if net_out is None:
             # q_long: (B, H, T, D); gate_proj: (H, D); logits: (B, H, T)

@@ -404,7 +404,14 @@ def attention(
         distill_term = None
         z_term       = None
     else:
-        distill_term = _compute_block_distill_inline(long_gate) if long_gate is not None else None
+        # PORT (port-distill-24layer): do NOT compute/clear distill inline here.
+        # _compute_block_distill_inline reads AND immediately nulls the gate's
+        # last_*_out stashes, which starves the post-forward collect-distill-loss
+        # (round-9's working path, now wired into train-step). Leaving the stashes
+        # intact lets the collector read every 3-way layer's (local, net, sdpa)
+        # after the forward — covering all 24 Local↔Net pairs, with the proper
+        # divisor and no tensor-truthiness guard bug.
+        distill_term = None
         z_term = None
         if memory is not None:
             zlz = getattr(memory, "last_z_loss", None)
