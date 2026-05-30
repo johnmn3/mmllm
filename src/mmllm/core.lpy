@@ -1429,11 +1429,11 @@
                               (filter some?))]
         (if (empty? los)
           0.0
-          (let [mean-lo (-> (torch/stack (vec los) ** :dim 0)
+          (let [mean-lo (-> (torch/stack (python/list los) ** :dim 0)
                             (.mean ** :dim 0)
                             (.detach))
                 mean-so (when (and (= target-kind "residual") (seq sos-at-local))
-                          (-> (torch/stack (vec sos-at-local) ** :dim 0)
+                          (-> (torch/stack (python/list sos-at-local) ** :dim 0)
                               (.mean ** :dim 0)
                               (.detach)))
                 tgt (if mean-so (.sub mean-lo mean-so) mean-lo)
