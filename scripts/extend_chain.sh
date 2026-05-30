@@ -120,9 +120,15 @@ echo "════════════════════════�
 : ${MMLLM_DISTILL_COEF:=0.5}     ; export MMLLM_DISTILL_COEF
 : ${MMLLM_DISTILL_COEF_END:=5.0} ; export MMLLM_DISTILL_COEF_END
 : ${MMLLM_DISTILL_TARGET:=residual}      ; export MMLLM_DISTILL_TARGET
-: ${MMLLM_DISTILL_DIRECTION_ONLY:=true}  ; export MMLLM_DISTILL_DIRECTION_ONLY
-: ${MMLLM_DISTILL_MAGNITUDE_COEF:=1.0}   ; export MMLLM_DISTILL_MAGNITUDE_COEF
-: ${MMLLM_DISTILL_MAGNITUDE_COEF_END:=1.0}; export MMLLM_DISTILL_MAGNITUDE_COEF_END
+# Distill loss FORM: full magnitude-aware MSE (round-9's proven-consolidating
+# form). Was direction-only + magnitude_coef=1.0, which zeroes the direction
+# term (the docstring itself notes it "broke the consolidation transfer") — a
+# key reason birds stopped consolidating. Per-layer full-MSE raw is small
+# (~0.09 ÷ live 3-way-layer count), so coef 0.5->5.0 stays stable. Still
+# overridable for experiments.
+: ${MMLLM_DISTILL_DIRECTION_ONLY:=false} ; export MMLLM_DISTILL_DIRECTION_ONLY
+: ${MMLLM_DISTILL_MAGNITUDE_COEF:=0.0}   ; export MMLLM_DISTILL_MAGNITUDE_COEF
+: ${MMLLM_DISTILL_MAGNITUDE_COEF_END:=0.0}; export MMLLM_DISTILL_MAGNITUDE_COEF_END
 : ${MMLLM_DISTILL_MAGNITUDE_CLAMP:=10.0} ; export MMLLM_DISTILL_MAGNITUDE_CLAMP
 : ${MMLLM_LR_BANK_MULT:=3.0}     ; export MMLLM_LR_BANK_MULT
 : ${MMLLM_LR_BANK_MULT_END:=0.001}; export MMLLM_LR_BANK_MULT_END
