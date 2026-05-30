@@ -121,14 +121,19 @@ echo "════════════════════════�
 : ${MMLLM_DISTILL_COEF_END:=5.0} ; export MMLLM_DISTILL_COEF_END
 : ${MMLLM_DISTILL_TARGET:=residual}      ; export MMLLM_DISTILL_TARGET
 # Distill loss FORM: full magnitude-aware MSE (round-9's proven-consolidating
-# form). Was direction-only + magnitude_coef=1.0, which zeroes the direction
-# term (the docstring itself notes it "broke the consolidation transfer") — a
-# key reason birds stopped consolidating. Per-layer full-MSE raw is small
-# (~0.09 ÷ live 3-way-layer count), so coef 0.5->5.0 stays stable. Still
-# overridable for experiments.
-: ${MMLLM_DISTILL_DIRECTION_ONLY:=false} ; export MMLLM_DISTILL_DIRECTION_ONLY
-: ${MMLLM_DISTILL_MAGNITUDE_COEF:=0.0}   ; export MMLLM_DISTILL_MAGNITUDE_COEF
-: ${MMLLM_DISTILL_MAGNITUDE_COEF_END:=0.0}; export MMLLM_DISTILL_MAGNITUDE_COEF_END
+# form). The broken form was direction-only + magnitude_coef=1.0, which zeroes
+# the direction term (the docstring itself notes it "broke the consolidation
+# transfer") — a key reason birds stopped consolidating.
+#
+# FORCED (=, not :=) on the prod cron path so a stray runner/Actions env var
+# cannot silently flip the chain back to the broken magnitude-only form and
+# de-consolidate every fork. DIRECTION_ONLY is the decisive knob: when false,
+# the distill is plain MSE(net, target) and MAGNITUDE_COEF is ignored entirely
+# (attention_kernel._compute_block_distill_inline / collect-distill-loss).
+# Experiment scripts set these directly and don't route through extend_chain.
+export MMLLM_DISTILL_DIRECTION_ONLY=false
+export MMLLM_DISTILL_MAGNITUDE_COEF=0.0
+export MMLLM_DISTILL_MAGNITUDE_COEF_END=0.0
 : ${MMLLM_DISTILL_MAGNITUDE_CLAMP:=10.0} ; export MMLLM_DISTILL_MAGNITUDE_CLAMP
 : ${MMLLM_LR_BANK_MULT:=3.0}     ; export MMLLM_LR_BANK_MULT
 : ${MMLLM_LR_BANK_MULT_END:=0.001}; export MMLLM_LR_BANK_MULT_END

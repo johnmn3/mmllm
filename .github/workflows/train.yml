@@ -115,7 +115,7 @@ jobs:
           # Always read from upstream johnmn3/mmllm so a fresh fork
           # doesn't need to mirror the branch state.
           repository: johnmn3/mmllm
-          ref: ${{ github.ref_name }}   # TEMP(smoke): run the dispatched branch's code, not main
+          ref: main
           # Don't persist upstream credentials — we re-point origin to
           # the running repo below so the bird push lands there.
           persist-credentials: false
