@@ -392,32 +392,22 @@ def attention(
     # therefore disabled when MMLLM_GRAD_CHECKPOINT=true. Always clear
     # the module-side stashes so they don't pin autograd alive past
     # this block.
-    grad_ckpt = os.environ.get("MMLLM_GRAD_CHECKPOINT", "false").lower() in ("1", "true", "yes")
-    if grad_ckpt:
-        # Clear stashes only — don't carry their autograd graphs out.
-        if long_gate is not None:
-            long_gate.last_local_out = None
-            long_gate.last_net_out   = None
-            long_gate.last_sdpa_out  = None
-        if memory is not None:
-            memory.last_z_loss = None
-        distill_term = None
-        z_term       = None
-    else:
-        # PORT (port-distill-24layer): do NOT compute/clear distill inline here.
-        # _compute_block_distill_inline reads AND immediately nulls the gate's
-        # last_*_out stashes, which starves the post-forward collect-distill-loss
-        # (round-9's working path, now wired into train-step). Leaving the stashes
-        # intact lets the collector read every 3-way layer's (local, net, sdpa)
-        # after the forward — covering all 24 Local↔Net pairs, with the proper
-        # divisor and no tensor-truthiness guard bug.
-        distill_term = None
-        z_term = None
-        if memory is not None:
-            zlz = getattr(memory, "last_z_loss", None)
-            memory.last_z_loss = None
-            if zlz is not None:
-                z_term = zlz
+    # PORT (port-distill-24layer): ALWAYS compute the per-layer distill term
+    # inline, so it threads out through the (possibly checkpointed) block return
+    # as `distill_term`. This is what makes distillation work under
+    # MMLLM_GRAD_CHECKPOINT=true — which the 7GB CI runner requires. Inside a
+    # checkpointed block the gate's last_*_out stashes are set by long_gate(...)
+    # earlier in THIS same forward, so reading them here (and clearing them) is
+    # valid both with and without checkpointing. Per-layer distill is round-9's
+    # proven mechanism and is per-block, so it survives checkpointing (unlike the
+    # cross-block aggregate-local collector, which needs grad-checkpoint OFF).
+    distill_term = _compute_block_distill_inline(long_gate) if long_gate is not None else None
+    z_term = None
+    if memory is not None:
+        zlz = getattr(memory, "last_z_loss", None)
+        memory.last_z_loss = None
+        if zlz is not None:
+            z_term = zlz
 
     # Concat short + long head outputs, project
     attn = torch.cat([attn_s, attn_l], dim=1)
@@ -563,7 +553,7 @@ def checkpointed_block_forward(
     import torch.utils.checkpoint as _ckpt
 
     def _fn(x_arg):
-        x_out, _s, _l, _d, _z = block_forward(
+        x_out, _s, _l, distill_term, z_term = block_forward(
             norm1, norm2,
             q_proj, k_proj_s, v_proj_s, k_proj_l, v_proj_l, o_proj,
             memory, long_gate, bank_query, bank_feedback,
@@ -574,8 +564,18 @@ def checkpointed_block_forward(
             x_arg, cos, sin, short_cache, long_cache,
             skip_bank=skip_bank, netbank=netbank, trunk_ids=trunk_ids,
         )
-        return x_out
+        # PORT (port-distill-24layer): thread the per-block aux losses out as
+        # checkpoint OUTPUTS so their gradients flow via recompute. With
+        # use_reentrant=False, torch.utils.checkpoint supports multiple outputs
+        # and still recomputes (not retains) the block's intermediates, so the
+        # memory win is preserved — this is what lets distillation work under
+        # MMLLM_GRAD_CHECKPOINT=true on the 7GB CI runner. checkpoint can't carry
+        # None outputs, so substitute a 0-d zero (caller treats it as "no term").
+        if distill_term is None:
+            distill_term = x_out.new_zeros(())
+        if z_term is None:
+            z_term = x_out.new_zeros(())
+        return x_out, distill_term, z_term
 
-    x_ckpt = _ckpt.checkpoint(_fn, x, use_reentrant=False)
-    # Match the 3-tuple shape callers expect.
-    return x_ckpt, None, None
+    x_ckpt, distill_term, z_term = _ckpt.checkpoint(_fn, x, use_reentrant=False)
+    return x_ckpt, distill_term, z_term

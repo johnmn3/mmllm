@@ -43,9 +43,9 @@ echo "════════════════════════�
 # │  Net > Local. Net is the DURABLE long-term memory.       │
 # │  Anything that shrinks Net below 1 GB is a regression.   │
 # └──────────────────────────────────────────────────────────┘
-export MMLLM_DEVICE=cpu
-export MMLLM_BANK_ON_GPU=false
-export MMLLM_NET_BANK_ON_GPU=false
+: ${MMLLM_DEVICE:=cpu} ; export MMLLM_DEVICE              # honor a pre-set device (e.g. mps)
+: ${MMLLM_BANK_ON_GPU:=false} ; export MMLLM_BANK_ON_GPU  # on GPU, set true to keep bank V
+: ${MMLLM_NET_BANK_ON_GPU:=false} ; export MMLLM_NET_BANK_ON_GPU  # on-device (avoid CPU↔GPU hop)
 # Knobs below are wave defaults but can be overridden by passing the env
 # var BEFORE invoking this script. Birds with constrained RAM (15-16 GB
 # containers) typically lower MMLLM_BATCH and SUB_TOP_K to fit; see

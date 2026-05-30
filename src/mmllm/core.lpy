@@ -2668,16 +2668,27 @@
                                (or (number? z-total) (= 0 z-total)))
                         0.0
                         (* z-coef z-total))
-         ;; PORT (port-distill-24layer): route distill through collect-distill-loss
-         ;; — the round-9 working path that provably consolidated. It honors
-         ;; MMLLM_DISTILL_MODE=aggregate-local (distills ALL Net layers against the
-         ;; mean Local residual, not just the 8 3-way layers), schedules the coef
-         ;; internally, and divides by the TRUE contributing-block count. This
-         ;; bypasses the forward's per-layer `distill-total` (which covered only
-         ;; 8/32 layers AND carried the `(= 0 <tensor>)` basilisp-truthiness bug
-         ;; that zeroed distill every step). Requires MMLLM_GRAD_CHECKPOINT=false
-         ;; so the gate's last_*_out stashes survive the forward for the collector.
-         distill-loss (collect-distill-loss m)
+         ;; CI fix (port-distill-24layer): distill rides the per-block
+         ;; `distill-total` threaded out of the (checkpointed) forward, so it
+         ;; works with MMLLM_GRAD_CHECKPOINT=true — which the 7GB CI runner
+         ;; requires. (The aggregate-local collector needs all blocks' Local
+         ;; outputs at once → cross-block → incompatible with per-block
+         ;; checkpointing; it's only viable grad-checkpoint OFF.) Per-layer
+         ;; distill is round-9's proven mechanism and threads cleanly.
+         ;; Guard ONLY on the scalar coef + the "no tensor produced" sentinel;
+         ;; the old `(= 0 distill-total)` clause was a torch scalar → truthy
+         ;; tensor in basilisp → zeroed distill every step. Divide by the true
+         ;; local-bank-layer count (3-way layers), not a hardcoded 8.
+         d-coef       (let [metrics (:metrics m)
+                            step    (when metrics (.get metrics "current_step" nil))
+                            total   (when metrics (.get metrics "total_steps"  nil))]
+                        (if (and step total (pos? (python/int total)))
+                          (pick-distill-coef (python/int step) (python/int total))
+                          (pick-distill-coef)))
+         n-distill-layers (max 1 (count (filter (fn [b] (some? (:memory b))) (:blocks m))))
+         distill-loss (if (or (zero? d-coef) (number? distill-total))
+                        0.0
+                        (* d-coef (/ distill-total (python/float n-distill-layers))))
          mtp-loss     (collect-mtp-loss aux-logits y T)
          delim-loss   (collect-delim-loss m final-x y)
          ;; K_a/K_b alignment between Net and Local — no-op when
@@ -5432,7 +5443,7 @@
                             ;; Build a fresh CPU model with cpu-tiny config + load the ckpt
                             cfg2      (assoc default-config-cpu-tiny
                                              :memory-mmap-path "/tmp/mmllm-cpu/fim-eval-bank")]
-                        (.__setitem__ (.- os environ) "MMLLM_DEVICE" "cpu")
+                        (when (nil? (.get (.- os environ) "MMLLM_DEVICE")) (.__setitem__ (.- os environ) "MMLLM_DEVICE" "cpu"))
                         (.__setitem__ (.- os environ) "MMLLM_BANK_ON_GPU" "false")
                         (let [m            (build-model cfg2)
                               opt-dense    (optim/AdamW (python/list (parameters m)) ** :lr 1e-3)
@@ -5498,7 +5509,7 @@
                               log-path   (str base ".log.jsonl")
                               cfg2       (assoc default-config-cpu-tiny
                                                 :memory-mmap-path mpath)]
-                          (.__setitem__ (.- os environ) "MMLLM_DEVICE" "cpu")
+                          (when (nil? (.get (.- os environ) "MMLLM_DEVICE")) (.__setitem__ (.- os environ) "MMLLM_DEVICE" "cpu"))
                           (when (nil? (.get (.- os environ) "MMLLM_BATCH"))
                             (.__setitem__ (.- os environ) "MMLLM_BATCH" "4"))
                           (when (nil? (.get (.- os environ) "MMLLM_BANK_ON_GPU"))
@@ -5522,7 +5533,7 @@
                           (when (nil? target-dir)
                             (println "ERROR: bootstrap-chain needs a target dir (arg or MMLLM_BOOTSTRAP_DIR)")
                             (python/exit 2))
-                          (.__setitem__ (.- os environ) "MMLLM_DEVICE" "cpu")
+                          (when (nil? (.get (.- os environ) "MMLLM_DEVICE")) (.__setitem__ (.- os environ) "MMLLM_DEVICE" "cpu"))
                           (when (nil? (.get (.- os environ) "MMLLM_BANK_ON_GPU"))
                             (.__setitem__ (.- os environ) "MMLLM_BANK_ON_GPU" "false"))
                           (os/makedirs target-dir ** :exist_ok true)
@@ -5587,7 +5598,7 @@
                                log-path   (str base ".log.jsonl")
                                cfg2       (assoc default-config-cpu-mini
                                                  :memory-mmap-path mpath)]
-                           (.__setitem__ (.- os environ) "MMLLM_DEVICE" "cpu")
+                           (when (nil? (.get (.- os environ) "MMLLM_DEVICE")) (.__setitem__ (.- os environ) "MMLLM_DEVICE" "cpu"))
                            (when (nil? (.get (.- os environ) "MMLLM_BATCH"))
                              (.__setitem__ (.- os environ) "MMLLM_BATCH" "4"))
                            (when (nil? (.get (.- os environ) "MMLLM_BANK_ON_GPU"))
@@ -5610,7 +5621,7 @@
                         ;; the operator doesn't have to remember to set
                         ;; MMLLM_DEVICE / MMLLM_BATCH. Other knobs
                         ;; (focal, IH, carry, etc.) still respected via env.
-                        (.__setitem__ (.- os environ) "MMLLM_DEVICE" "cpu")
+                        (when (nil? (.get (.- os environ) "MMLLM_DEVICE")) (.__setitem__ (.- os environ) "MMLLM_DEVICE" "cpu"))
                         (when (nil? (.get (.- os environ) "MMLLM_BATCH"))
                           (.__setitem__ (.- os environ) "MMLLM_BATCH" "4"))
                         ;; Force the bank V to mmap-backed CPUPinnedEmbedding
@@ -5771,7 +5782,7 @@
                            eval-path  (or (nth args 4 nil) (str base ".val.bin"))
                            cfg2       (assoc default-config-cpu-mini
                                              :memory-mmap-path bank)]
-                       (.__setitem__ (.- os environ) "MMLLM_DEVICE" "cpu")
+                       (when (nil? (.get (.- os environ) "MMLLM_DEVICE")) (.__setitem__ (.- os environ) "MMLLM_DEVICE" "cpu"))
                        (when (nil? (.get (.- os environ) "MMLLM_BATCH"))
                          (.__setitem__ (.- os environ) "MMLLM_BATCH" "4"))
                        (when (nil? (.get (.- os environ) "MMLLM_BANK_ON_GPU"))

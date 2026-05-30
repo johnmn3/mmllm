@@ -38,32 +38,39 @@ python3 scripts/_delta_sparse_net.py apply "$REF" "$HEAD" "$ARCHIVE/round-44" 2>
 cp "$HEAD/dense.pt" "$ARCHIVE/round-44/"
 cp "$HEAD"/opt-sparse-net.* "$ARCHIVE/round-44/" 2>/dev/null || true
 
-# 3) ── DISTILLATION BUG-FIXES ONLY (the wake/sleep design is left to extend_chain) ──
-# (a) aggregate-local: the 8 Local Banks' mean residual is the distill target for
-#     ALL NetBank layers — the "8 LB flow into NB" mechanism. Was dead on the hot path.
-export MMLLM_DISTILL_MODE=aggregate-local
-# (b) grad-checkpoint=true hard-disables distill (distill_term=None). Off so the
-#     gate stashes survive and the collector runs. (Production needs distill
-#     threaded through the checkpoint instead; tracked separately.)
-export MMLLM_GRAD_CHECKPOINT=false
+# 3) ── CI-COMPATIBLE distill fix (works under grad-checkpoint=true) ──
+# (a) Topology: restore the genesis 24 Local Banks (the live default regressed
+#     to 8 -> [0 1 2 12 20 29 30 31]). Per-layer distill then covers 24/32
+#     NetBanks (the 8 net-only layers 24-31 stay carriers).
+export MMLLM_LOCAL_BANK_LAYERS="0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23"
+# (b) grad-checkpoint ON — the 7GB CI runner requires it. Distill now threads
+#     per-block through the checkpoint (block_forward -> checkpointed_block_forward
+#     return), so it is NO LONGER disabled by checkpointing. Per-layer (default
+#     DISTILL_MODE) is per-block => checkpoint-compatible; aggregate-local is
+#     cross-block and only works grad-checkpoint OFF.
+export MMLLM_GRAD_CHECKPOINT=true
 # (c) Working loss form (round-9): full magnitude-aware MSE, NOT the
 #     direction-only + magnitude_coef=1.0 that zeroed the direction term.
 export MMLLM_DISTILL_DIRECTION_ONLY=false
 export MMLLM_DISTILL_MAGNITUDE_COEF=0.0
 export MMLLM_DISTILL_MAGNITUDE_COEF_END=0.0
-# (d) Rescale the distill coef for the full-MSE loss FORM. The design's
-#     0.5->5.0 was tuned for the BOUNDED direction-only loss (~1); full-MSE
-#     aggregate raw is ~32, so 5.0 would dwarf CE and destabilize. Floor=0 so
-#     distill is genuinely OFF during the wake phase (it should flow only in
-#     sleep) and protects Local accumulation + the dense trunk; ramps to 0.1
-#     in sleep (distill ~CE-scale, dropping as Net converges).
-export MMLLM_DISTILL_COEF=0.0
-export MMLLM_DISTILL_COEF_END=0.1
+# (d) Distill coef: left at the design default (0.5->5.0). Per-layer raw MSE is
+#     small (~0.09, divided by the live 3-way-layer count), so unlike the
+#     unbounded aggregate (~32) it does NOT need rescaling and is stable.
 
-# CPU tractability only (NOT architecture — top-k is not a bank dim):
-export MMLLM_MEMORY_TOP_K=16 MMLLM_MEMORY_SUB_TOP_K=16
-export MMLLM_NET_TOP_K=64    MMLLM_NET_SUB_TOP_K=8
-export MMLLM_ENABLE_PKM_CPP=false
+# Retrieval bandwidth: FULL (design defaults from extend_chain) on GPU; reduced
+# on CPU only for tractability (top-k is not a bank dim, so this loads the same
+# checkpoint either way). The M5 GPU handles full bandwidth on this small model.
+if [ "${MMLLM_DEVICE:-cpu}" = "mps" ] || [ "${MMLLM_DEVICE:-cpu}" = "cuda" ]; then
+  export PYTORCH_ENABLE_MPS_FALLBACK=1   # unsupported ops fall back to CPU
+  export MMLLM_ENABLE_PKM_CPP=false      # C++ PKM kernel is CPU-only; GPU uses torch ops
+  echo "  device=$MMLLM_DEVICE — FULL retrieval bandwidth (design defaults)"
+else
+  export MMLLM_MEMORY_TOP_K=16 MMLLM_MEMORY_SUB_TOP_K=16
+  export MMLLM_NET_TOP_K=64    MMLLM_NET_SUB_TOP_K=8
+  export MMLLM_ENABLE_PKM_CPP=false
+  echo "  device=cpu — REDUCED bandwidth for tractability"
+fi
 export MMLLM_PRINT_EVERY=25
 export MMLLM_ABLATE_EVERY="${MMLLM_ABLATE_EVERY:-100}"
 export MMLLM_NUM_THREADS="${MMLLM_NUM_THREADS:-8}"
