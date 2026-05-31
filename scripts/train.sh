@@ -266,11 +266,14 @@ if [ "${MMLLM_DISTILL_GATE:-false}" = "true" ]; then
   export MMLLM_DISTILL_GATE_WEIGHTED=true
   echo "▶ distill-gate ENABLED (movement signal, soft weighted) — VALIDATION run; cron default unchanged"
 fi
-# sym24 chain default: 2 rounds × 10 steps fits the ~1h CI window at the
+# sym24 chain default: 1 round × 50 steps (~2.1h at ~154s/step, within the
+# 6h cap). 50 steps with 70% warmup = ~15 sleep-phase steps where distill
+# flows (vs ~3 at 2×10) — 5x the distill dose/round for real NetBank
+# consolidation. Was 2 rounds × 10 steps, which fit ~1h but at the
 # 24-sym-Local pace (~154 s/step). The original chain used 5×7; sym24's
 # heavier per-step cost forces the smaller per-bird budget.
-N_ROUNDS="${MMLLM_N_ROUNDS:-2}"
-STEPS="${MMLLM_STEPS_PER_ROUND:-10}"
+N_ROUNDS="${MMLLM_N_ROUNDS:-1}"
+STEPS="${MMLLM_STEPS_PER_ROUND:-50}"
 # START_ROUND was set in step (1) from the auto-detected chain head.
 END_ROUND=$((START_ROUND + N_ROUNDS))
 
