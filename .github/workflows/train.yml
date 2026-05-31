@@ -9,13 +9,13 @@ on:
         required: false
         default: ""
       n_rounds:
-        description: "Rounds to train (sym24 chain default: 2)"
+        description: "Rounds to train (sym24 chain default: 1)"
         required: false
-        default: "2"
+        default: "1"
       steps_per_round:
-        description: "Steps per round (sym24 chain default: 10; ~154s/step at 24-sym Local fits 2x10 in ~1h)"
+        description: "Steps per round (sym24 chain default: 50; ~15 sleep-phase steps/round for NetBank consolidation; ~2.1h at ~154s/step)"
         required: false
-        default: "10"
+        default: "50"
       corpus:
         description: "Training corpus. Leave blank (default) = random pick across all four per run — identical to the hourly cron birds. Pick a specific corpus to pin it."
         required: false
