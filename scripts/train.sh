@@ -503,14 +503,21 @@ EOF
   # 1 before meta lands, so the harvest sees a meta-less (incomplete) dir
   # and skips it rather than folding a partial round.
   _push_with_retries() {
-    local pushed=0 i PUSH_OUT PUSH_RC
-    for i in 1 2 3 4 5 6; do
-      if PUSH_OUT=$(git push -u origin "$BR" 2>&1); then PUSH_RC=0; else PUSH_RC=$?; fi
-      echo "    [$(date -u +%H:%M:%S)] push attempt $i rc=$PUSH_RC"
-      echo "$PUSH_OUT" | tail -6 | sed 's/^/    git: /'
+    # GitHub's receive-pack intermittently 500s on this large repo for ANY
+    # push (a 12MB chunk fails as readily as a 290MB one), in windows that
+    # last several minutes. The old 6-attempt/~75s loop gave up inside the
+    # window. Be genuinely persistent: ~18 attempts, exponential backoff
+    # capped at 120s (~25min total budget), and a per-attempt `timeout` so a
+    # HUNG push (not just a 500) is killed and retried instead of stalling.
+    local pushed=0 i PUSH_OUT PUSH_RC wait
+    for i in $(seq 1 18); do
+      if PUSH_OUT=$(timeout 300 git push -u origin "$BR" 2>&1); then PUSH_RC=0; else PUSH_RC=$?; fi
+      echo "    [$(date -u +%H:%M:%S)] push attempt $i/18 rc=$PUSH_RC"
+      echo "$PUSH_OUT" | tail -4 | sed 's/^/    git: /'
       [ "$PUSH_RC" -eq 0 ] && { pushed=1; break; }
-      echo "    push attempt $i failed; retrying in $((i * 5))s…"
-      sleep $((i * 5))
+      wait=$(( 10 * i )); [ "$wait" -gt 120 ] && wait=120
+      echo "    push attempt $i/18 failed (rc=$PUSH_RC); retrying in ${wait}s…"
+      sleep "$wait"
     done
     [ "$pushed" -eq 1 ]
   }
