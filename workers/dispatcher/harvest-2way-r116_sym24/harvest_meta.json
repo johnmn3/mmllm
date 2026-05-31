@@ -39,7 +39,7 @@
   ],
   "cumulative_total_steps": 40,
   "cumulative_unique_birds": 2,
-  "harvested_at": "2026-05-31T15:36:18Z",
+  "harvested_at": "2026-05-31T16:34:35Z",
   "harvester": "scripts/harvest_action.sh (GH Action)",
   "note": "Lean harvest \u2014 sparse deltas + averaged dense only, no opt-state."
 }
