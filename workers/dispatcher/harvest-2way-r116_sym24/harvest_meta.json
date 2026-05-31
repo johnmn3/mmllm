@@ -1,0 +1,45 @@
+{
+  "spork_version": "0.9",
+  "target_round": 116,
+  "n_workers": 2,
+  "wave": "train-r116",
+  "workers": [
+    {
+      "handle": "yYtvm",
+      "branch": "fork-joly-os-mmllm-claude-train-sym24-b058972d-yYtvm",
+      "ctrl_bpc": 2.8642
+    },
+    {
+      "handle": "Lwnd7",
+      "branch": "fork-davidwuchn-mmllm-claude-train-sym24-4ee73387-Lwnd7",
+      "ctrl_bpc": 3.1643
+    }
+  ],
+  "worker_ctrl_bpc_mean": 3.0142,
+  "worker_ctrl_bpc_best": 2.8642,
+  "previous_harvest": null,
+  "direct_contributions": [
+    {
+      "bird_id": "b058972d946949dd",
+      "handle": "yYtvm",
+      "branch": "fork-joly-os-mmllm-claude-train-sym24-b058972d-yYtvm",
+      "n_steps": 20,
+      "ctrl_bpc": 2.8642
+    },
+    {
+      "bird_id": "4ee73387912b4a97",
+      "handle": "Lwnd7",
+      "branch": "fork-davidwuchn-mmllm-claude-train-sym24-4ee73387-Lwnd7",
+      "n_steps": 20,
+      "ctrl_bpc": 3.1643
+    }
+  ],
+  "ancestor_harvests": [
+    "workers/dispatcher/harvest-2way-r114_sym24"
+  ],
+  "cumulative_total_steps": 40,
+  "cumulative_unique_birds": 2,
+  "harvested_at": "2026-05-31T14:41:13Z",
+  "harvester": "scripts/harvest_action.sh (GH Action)",
+  "note": "Lean harvest \u2014 sparse deltas + averaged dense only, no opt-state."
+}
