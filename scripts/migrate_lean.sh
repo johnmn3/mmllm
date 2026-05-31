@@ -103,15 +103,19 @@ if [ "$DRY" = "true" ]; then
   exit 0
 fi
 
-# --- 5) Commit the lean tree, then orphan-squash + force-push -------------- #
-git -c user.name="lean-migrate" -c user.email="lean@github-actions.local" \
-    commit -q -m "lean-migrate: statics + chain blobs → release assets" || echo "  (nothing new to commit)"
+# --- 5) Orphan-squash the staged lean tree + force-push -------------------- #
+# git identity (the lean-migrate workflow configures none; commit-tree needs it).
+git config user.email "lean@github-actions.local"
+git config user.name  "lean-migrate"
 
-# Safety: the production-chain genesis manifest must exist in the new tree
+# Safety: the production-chain genesis manifest must exist in the staged tree
 # (proves chain_assets ran + wrote manifests before we drop the blobs).
 GENESIS="workers/dispatcher/harvest-0way-r0_${CHAIN}/round-0"
 test -f "$GENESIS/manifest.json" || { echo "ABORT: genesis manifest missing ($GENESIS) — refusing to squash" >&2; exit 1; }
 
+# `git add -A` above already staged the manifests + blob removals. Orphan-commit
+# that index tree (no parent → history dropped) and force-push it as main; no
+# intermediate commit needed.
 NEWTREE=$(git write-tree)
 STAMP=$(date -u +%Y-%m-%dT%H:%M:%SZ)
 ORPHAN=$(git commit-tree "$NEWTREE" -m "lean repo (assets in releases) — migrated $STAMP")
