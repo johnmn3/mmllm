@@ -51,30 +51,43 @@ publish_static wheels          workers/dispatcher/deps/wheels    assets-wheels-v
 publish_static baseline-round6 core/round-6                      assets-baseline-round6-v1
 
 # --- 2) Chain blobs → per-round releases (genesis + every harvest head) ---- #
-GENESIS="workers/dispatcher/harvest-0way-r0_${CHAIN}/round-0"
-echo "▶ publishing chain blobs (genesis + harvest heads) via chain_assets.py…"
-while IFS=$'\t' read -r d rnd; do
+# Handles EVERY chain present in the tree, not just $CHAIN: sym24 (suffixed,
+# anchor harvest-0way-r0_sym24) AND the legacy/orig chain (no suffix, anchor
+# harvest-5way-r10). An anchor dir carries full V_net.*.bin → publish with no
+# reference; a delta dir carries delta-sparse-net.*.pt → reference its chain's
+# anchor. chain_assets.py git-rm's whatever it uploads.
+echo "▶ publishing chain blobs (all chains: anchors + harvest heads) via chain_assets.py…"
+while IFS=$'\t' read -r d rnd chain; do
   [ -z "$d" ] && continue
-  if [ "$rnd" = "0" ]; then
-    python3 scripts/chain_assets.py publish "$d" --round 0 --chain "$CHAIN" --repo "$REPO"
+  if ls "$d"/V_net.*.bin >/dev/null 2>&1; then
+    # anchor (full V_net) — no reference
+    python3 scripts/chain_assets.py publish "$d" --round "$rnd" --chain "$chain" --repo "$REPO"
   else
-    python3 scripts/chain_assets.py publish "$d" --round "$rnd" --chain "$CHAIN" \
-      --repo "$REPO" --reference-anchor "$GENESIS" --reference-round 0
+    if [ -n "$chain" ]; then
+      ANCHOR="workers/dispatcher/harvest-0way-r0_${chain}/round-0"; ANCHOR_R=0
+    else
+      ANCHOR="workers/dispatcher/harvest-5way-r10/round-10"; ANCHOR_R=10
+    fi
+    python3 scripts/chain_assets.py publish "$d" --round "$rnd" --chain "$chain" \
+      --repo "$REPO" --reference-anchor "$ANCHOR" --reference-round "$ANCHOR_R"
   fi
-done < <(python3 - "$CHAIN" <<'PYEOF'
-import glob, os, re, sys
-chain = sys.argv[1]
-for d in sorted(glob.glob(f"workers/dispatcher/harvest-*-r*_{chain}/round-*")):
-    m = re.search(rf"harvest-(?:fold)?\d+way-r(\d+)_{re.escape(chain)}/round-(\d+)$", d)
+done < <(python3 - <<'PYEOF'
+import glob, re
+for d in sorted(glob.glob("workers/dispatcher/harvest-*-r*/round-*")):
+    m = re.search(r"harvest-(?:fold)?\d+way-r(\d+)(?:_([A-Za-z0-9]+))?/round-(\d+)$", d)
     if not m:
         continue
-    print(f"{d}\t{int(m.group(2))}")
+    rnd, chain = int(m.group(3)), (m.group(2) or "")
+    print(f"{d}\t{rnd}\t{chain}")
 PYEOF
 )
 
 # --- 3) Untrack the static big files (now in release tarballs) ------------- #
+# corpora / wheels / round-6 baseline, PLUS a safety-net for any harvest blob
+# the chain loop above didn't already git-rm (V_net / delta / opt under any
+# harvest dir). manifest.json + small meta stay committed.
 mapfile -t BIG < <(git ls-files | grep -E \
-  '^(workers/dispatcher/corpora/.*\.(bin|part-[0-9]+)|workers/dispatcher/deps/wheels/.*\.(whl|part-[0-9]+)|core/round-6/.*\.(bin|pt))$' || true)
+  '^(workers/dispatcher/corpora/.*\.(bin|part-[0-9]+)|workers/dispatcher/deps/wheels/.*\.(whl|part-[0-9]+)|core/round-6/.*\.(bin|pt)|workers/dispatcher/harvest-.*/(V_net\.[0-9]+\.bin|delta-sparse-net\..*\.pt|opt-sparse-net\..*\.pt|dense\.pt))$' || true)
 if [ "${#BIG[@]}" -gt 0 ]; then
   git rm --cached -q "${BIG[@]}"
   echo "  untracked ${#BIG[@]} static big file(s)"
