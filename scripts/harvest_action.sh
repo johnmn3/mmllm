@@ -187,6 +187,43 @@ _fetch_fork_branch() {
   return 1
 }
 
+# --- Prune consumed bird branches (runs EVERY invocation) ------------
+# A stable per-bird branch (claude/train-<tag>-<id>-<HANDLE>) is force-
+# updated each round its bird runs. Discovery only ever scans the CURRENT
+# target round, so once the chain head advances past a bird's latest round
+# that branch is consumed (its delta was folded) or permanently un-foldable
+# -- it just pins ~140 MB + old deltas alive, storage the history-squash
+# can't reclaim while the branch tip exists. Delete origin branches whose
+# latest round < the chain head. SAFE: never deletes a branch at/after the
+# head (still foldable); origin-only (forks self-manage their own); the
+# round filter already prevents re-folding so this only reclaims storage,
+# never affects accumulation. Disable with MMLLM_PRUNE_BIRD_BRANCHES=false.
+prune_consumed_bird_branches() {
+  [ "${MMLLM_PRUNE_BIRD_BRANCHES:-true}" = "true" ] || return 0
+  command -v gh >/dev/null 2>&1 || return 0
+  local head_round
+  head_round=$(ls -d workers/dispatcher/harvest-*-r*"${CHAIN_SUFFIX}" 2>/dev/null \
+    | sed -nE "s|.*-r([0-9]+)${CHAIN_SUFFIX}\$|\1|p" | sort -n | tail -1)
+  [ -z "$head_round" ] && return 0
+  local repo="${GITHUB_REPOSITORY:-${UPSTREAM_REPO:-johnmn3/mmllm}}"
+  echo "+ pruning consumed bird branches on $repo (latest round < head r${head_round})..."
+  local br maxr n=0
+  while IFS= read -r br; do
+    [ -z "$br" ] && continue
+    maxr=$(_rounds_in_branch "$br" | sort -n | tail -1)
+    [ -z "$maxr" ] && continue
+    if [ "$maxr" -lt "$head_round" ]; then
+      if gh api -X DELETE "repos/${repo}/git/refs/heads/${br}" >/dev/null 2>&1; then
+        echo "    deleted consumed bird branch (r${maxr} < r${head_round}): ${br}"
+        n=$((n + 1))
+      fi
+    fi
+  done < <(git ls-remote origin "refs/heads/${TRAIN_PREFIX}*" 2>/dev/null \
+             | awk '{print $2}' | sed 's|^refs/heads/||')
+  echo "    pruned ${n} consumed bird branch(es)"
+}
+prune_consumed_bird_branches
+
 # --- 0.5) Catchup pass: re-fold the last N rounds with current code -
 # The cron's auto-detect (step 1) only picks rounds with NO existing
 # harvest dir. That misses rounds whose harvest is now incomplete —
