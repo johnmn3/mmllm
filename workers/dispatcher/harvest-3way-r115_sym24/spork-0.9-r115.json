@@ -1,7 +1,7 @@
 {
   "spork_version": "0.9",
   "round": 115,
-  "harvested_at": "2026-05-31T11:42:40Z",
+  "harvested_at": "2026-05-31T12:34:22Z",
   "n_workers": 3,
   "worker_ctrl_bpc_mean": 3.0755,
   "worker_ctrl_bpc_best": 2.8368,
