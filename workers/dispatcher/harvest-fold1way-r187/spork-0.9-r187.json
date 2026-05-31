@@ -1,0 +1,53 @@
+{
+  "spork_version": "0.9",
+  "round": 187,
+  "harvested_at": "2026-05-26T20:14:45Z",
+  "n_workers": 1,
+  "worker_ctrl_bpc_mean": 1.2093,
+  "worker_ctrl_bpc_best": 1.2093,
+  "cumulative_total_steps": 3691,
+  "cumulative_unique_birds": 101,
+  "netbank_files": {
+    "dense": "round-187/dense.pt",
+    "delta_sparse_net": [
+      "round-187/delta-sparse-net.0.pt",
+      "round-187/delta-sparse-net.1.pt",
+      "round-187/delta-sparse-net.2.pt",
+      "round-187/delta-sparse-net.3.pt",
+      "round-187/delta-sparse-net.4.pt",
+      "round-187/delta-sparse-net.5.pt",
+      "round-187/delta-sparse-net.6.pt",
+      "round-187/delta-sparse-net.7.pt",
+      "round-187/delta-sparse-net.8.pt",
+      "round-187/delta-sparse-net.9.pt",
+      "round-187/delta-sparse-net.10.pt",
+      "round-187/delta-sparse-net.11.pt",
+      "round-187/delta-sparse-net.12.pt",
+      "round-187/delta-sparse-net.13.pt",
+      "round-187/delta-sparse-net.14.pt",
+      "round-187/delta-sparse-net.15.pt",
+      "round-187/delta-sparse-net.16.pt",
+      "round-187/delta-sparse-net.17.pt",
+      "round-187/delta-sparse-net.18.pt",
+      "round-187/delta-sparse-net.19.pt",
+      "round-187/delta-sparse-net.20.pt",
+      "round-187/delta-sparse-net.21.pt",
+      "round-187/delta-sparse-net.22.pt",
+      "round-187/delta-sparse-net.23.pt",
+      "round-187/delta-sparse-net.24.pt",
+      "round-187/delta-sparse-net.25.pt",
+      "round-187/delta-sparse-net.26.pt",
+      "round-187/delta-sparse-net.27.pt",
+      "round-187/delta-sparse-net.28.pt",
+      "round-187/delta-sparse-net.29.pt",
+      "round-187/delta-sparse-net.30.pt",
+      "round-187/delta-sparse-net.31.pt"
+    ],
+    "delta_sparse_net_meta": "round-187/delta-sparse-net.meta.pt",
+    "reference_anchor": "workers/dispatcher/harvest-5way-r10/round-10"
+  },
+  "ancestor_harvests": [
+    "workers/dispatcher/harvest-2way-r183"
+  ],
+  "harvester": "scripts/consolidate_siblings.py raw-birds (inclusive fold)"
+}

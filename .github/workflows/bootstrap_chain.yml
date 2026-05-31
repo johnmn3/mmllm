@@ -1,0 +1,116 @@
+name: bootstrap chain
+# One-off genesis builder for a new chain at a non-default architecture
+# (e.g. symmetric Local at all 32 layers). Builds the cpu-mini model
+# with arch overrides from the dispatch inputs, saves a fresh random
+# ckpt to workers/dispatcher/harvest-0way-r0_<suffix>/round-0/, commits
+# + pushes to main. Subsequent birds dispatched with chain_prefix point
+# at this dir as their start state.
+
+on:
+  workflow_dispatch:
+    inputs:
+      chain_suffix:
+        description: "Suffix for chain name (e.g. 'sym24' → harvest-0way-r0_sym24)"
+        required: true
+        default: "sym24"
+      local_bank_layers:
+        description: "MMLLM_LOCAL_BANK_LAYERS — comma-sep layer indices (e.g. '0,1,...,23' for sym24)"
+        required: false
+        default: "0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23"
+      netbank_shared:
+        description: "MMLLM_NETBANK_SHARED — 'true' to weight-tie V across layers"
+        required: false
+        type: choice
+        default: "false"
+        options:
+          - "false"
+          - "true"
+
+permissions:
+  contents: write
+
+jobs:
+  bootstrap:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install mmllm deps (offline wheels)
+        run: |
+          # Mirror scripts/train.sh's wheel-staging: copy whl files +
+          # reassemble multi-part wheels (torch chunked as .part-NN due
+          # to GH's 100 MB per-file cap), then let pip resolve deps via
+          # --find-links with mmllm as the install anchor.
+          WHEELS=workers/dispatcher/deps/wheels
+          STAGE=/tmp/wheels-staged
+          mkdir -p "$STAGE"
+          cp "$WHEELS"/*.whl "$STAGE"/ 2>/dev/null || true
+          for prefix in "$WHEELS"/*.part-00; do
+            [ -f "$prefix" ] || continue
+            base=$(basename "${prefix%.part-00}")
+            cat "$WHEELS/${base}".part-?? > "$STAGE/$base"
+          done
+          pip install --no-index --find-links="$STAGE" -e . --quiet
+
+      - name: Configure git identity
+        run: |
+          git config user.name  "bootstrap CI"
+          git config user.email "bootstrap@github-actions.local"
+
+      - name: Run bootstrap
+        env:
+          MMLLM_LOCAL_BANK_LAYERS: ${{ inputs.local_bank_layers }}
+          MMLLM_NETBANK_SHARED: ${{ inputs.netbank_shared }}
+          MMLLM_DEVICE: cpu
+          MMLLM_BANK_ON_GPU: "false"
+          MMLLM_NET_BANK_ON_GPU: "false"
+        run: |
+          set -e
+          SUFFIX="${{ inputs.chain_suffix }}"
+          TARGET="workers/dispatcher/harvest-0way-r0_${SUFFIX}/round-0"
+          mkdir -p "$TARGET"
+          echo "▶ bootstrap target: $TARGET"
+          echo "▶ MMLLM_LOCAL_BANK_LAYERS=${MMLLM_LOCAL_BANK_LAYERS}"
+          echo "▶ MMLLM_NETBANK_SHARED=${MMLLM_NETBANK_SHARED}"
+          mmllm bootstrap-chain "$TARGET"
+          echo "▶ tree:"
+          ls -lh "$TARGET" | head -40
+
+      - name: Commit genesis + push
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -e
+          SUFFIX="${{ inputs.chain_suffix }}"
+          TARGET="workers/dispatcher/harvest-0way-r0_${SUFFIX}/round-0"
+          git remote set-url origin \
+            "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git"
+          git add "$TARGET"
+          git commit -m "bootstrap chain: harvest-0way-r0_${SUFFIX}/round-0 (genesis)"
+          for i in 1 2 3 4; do
+            if git push origin main; then
+              echo "    pushed genesis to main"
+              break
+            fi
+            echo "    push attempt $i failed; retrying in $((i * 4))s"
+            sleep $((i * 4))
+          done
+
+      - name: Upload bootstrap artifact (debug only)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bootstrap-${{ inputs.chain_suffix }}-${{ github.run_id }}
+          path: workers/dispatcher/harvest-0way-r0_${{ inputs.chain_suffix }}/round-0/chain_meta.json
+          if-no-files-found: ignore
+          retention-days: 7

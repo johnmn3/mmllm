@@ -1,0 +1,50 @@
+name: history squash
+
+# Reclaim main's commit-history bloat (per-round harvest deltas retained in
+# history even after the HEAD-prune; ~290MB/round → tens of GB). Rewrites main
+# to a single orphan commit of the CURRENT tree (working tree byte-identical;
+# the orphan reuses existing blobs so the push is tiny — no large-pack 500).
+# Complements branch-janitor (which prunes stale branches): this prunes dead
+# HISTORY. Forks re-sync via train.sh's post-squash fallbacks.
+#
+# MANUAL ONLY by design: a history rewrite + force-push of `main` is a
+# deliberate, destructive op, so it's gated behind workflow_dispatch (run
+# dry_run=true first to preview). To make it autonomous, add a `schedule:`
+# trigger — but that's an explicit decision to auto-force-push main daily.
+#   schedule:
+#     - cron: "47 4 * * *"   # daily 04:47 UTC
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Preview only — print what would happen, force-push nothing"
+        type: choice
+        default: "true"
+        options: ["true", "false"]
+      threshold_gb:
+        description: "Only squash if the repo exceeds N GB"
+        required: false
+        default: "8"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: history-squash
+  cancel-in-progress: false
+
+jobs:
+  squash:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1        # current tree only; orphan reuses blobs → tiny push
+      - name: squash main history
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SQUASH_DRY_RUN: ${{ inputs.dry_run }}
+          SQUASH_THRESHOLD_GB: ${{ inputs.threshold_gb }}
+        run: bash scripts/squash_main.sh

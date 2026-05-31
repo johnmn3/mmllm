@@ -1,0 +1,52 @@
+name: branch janitor
+
+# Auto-prune stale claude/* branches so the repo never re-accumulates the
+# hundreds of bird-harvest + session branches that bloated it to 64 GB.
+# Safe: only touches claude/*, skips open-PR branches, age-gated retention.
+# Dispatch with dry_run=true to preview.
+
+on:
+  schedule:
+    - cron: "17 3 * * *"   # daily 03:17 UTC
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Preview only — print what would be deleted, delete nothing"
+        type: choice
+        default: "false"
+        options:
+          - "false"
+          - "true"
+      train_retention_days:
+        description: "Delete claude/train-* branches whose tip is older than N days"
+        required: false
+        default: "1"
+      other_retention_days:
+        description: "Delete other claude/* branches whose tip is older than N days"
+        required: false
+        default: "7"
+
+permissions:
+  contents: write
+  pull-requests: read
+
+concurrency:
+  group: branch-janitor
+  cancel-in-progress: false
+
+jobs:
+  janitor:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: scripts/branch_janitor.sh
+          sparse-checkout-cone-mode: false
+          filter: blob:none
+      - name: prune stale claude/* branches
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          JANITOR_DRY_RUN: ${{ inputs.dry_run }}
+          JANITOR_TRAIN_RETENTION_DAYS: ${{ inputs.train_retention_days }}
+          JANITOR_OTHER_RETENTION_DAYS: ${{ inputs.other_retention_days }}
+        run: bash scripts/branch_janitor.sh

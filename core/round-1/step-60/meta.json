@@ -1,0 +1,37 @@
+{
+  "ts": "2026-05-10T23:22:46Z",
+  "n_workers": 3,
+  "output_step": 60,
+  "weighted_by": "tokens_trained",
+  "netbank_merged": false,
+  "fim": null,
+  "sources": [
+    {
+      "worker_id": "worker-1",
+      "step": 60,
+      "meta": {
+        "tokens_trained": 30720,
+        "steps": 60,
+        "label": "worker-1"
+      }
+    },
+    {
+      "worker_id": "worker-2",
+      "step": 60,
+      "meta": {
+        "tokens_trained": 30720,
+        "steps": 60,
+        "label": "worker-2"
+      }
+    },
+    {
+      "worker_id": "worker-3",
+      "step": 60,
+      "meta": {
+        "tokens_trained": 30720,
+        "steps": 60,
+        "label": "worker-3"
+      }
+    }
+  ]
+}

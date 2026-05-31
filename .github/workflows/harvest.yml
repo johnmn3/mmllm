@@ -1,0 +1,259 @@
+name: harvest sporks
+
+on:
+  # Manual: pick a round + optional fork PRs to merge in.
+  workflow_dispatch:
+    inputs:
+      target_round:
+        description: "Round to harvest. Leave blank to auto-detect latest unharvested train-r<N> wave."
+        required: false
+        default: ""
+      pr_numbers:
+        description: "Comma-separated PR numbers from forks to merge in (e.g., '12,13'). Optional."
+        required: false
+        default: ""
+      catchup_depth:
+        description: "How many recent rounds the catchup pass scans for late-arriving birds. Default 2 (steady-state). Set to e.g. 50 for a one-shot deep sweep that absorbs older strays."
+        required: false
+        default: ""
+      chain_prefix:
+        description: "MMLLM_CHAIN_PREFIX — which chain to harvest. Blank = script default (sym24, the production chain). 'orig'/'legacy' = original unsuffixed chain."
+        required: false
+        default: ""
+      prune_only:
+        description: "MMLLM_PRUNE_ONLY — 'true' to ONLY prune stale harvest dirs (skip discovery/merge). Fast cleanup of the working-tree backlog."
+        required: false
+        type: choice
+        default: "false"
+        options:
+          - "false"
+          - "true"
+  # Cron auto-harvest: every hour. With no inputs, harvest_action.sh
+  # auto-detects the highest unharvested round (across legacy smoke-r*,
+  # interim train-r<N>-*, stable per-bird train-<id>-* branches on
+  # origin, and every public fork's train-* branches) and merges every
+  # bird currently at that round. If nothing's unharvested, the script
+  # exits 0 quietly.
+  #
+  # Guard at the job level: scheduled triggers only run on the upstream
+  # johnmn3/mmllm repo. Forks that enable the workflow can still trigger
+  # it manually via workflow_dispatch, but they won't waste compute on
+  # hourly auto-runs that would just duplicate upstream's harvest.
+  schedule:
+    - cron: "0 * * * *"
+
+# Serialize harvests — never run two at once. A delayed cron tick overlapping
+# the prior run (or a manual dispatch racing the cron) can produce the
+# IDENTICAL harvest-<N>way-r<R> dir and then collide on the push to main
+# (non-fast-forward + an unresolvable rebase). Queue (don't cancel) so no
+# harvest tick is silently dropped.
+concurrency:
+  group: harvest-${{ github.repository }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  harvest:
+    runs-on: ubuntu-latest
+    # Harvest needs ~10 min just for the upstream checkout (1140+ files)
+    # + ~5 min for fork enumeration/fetches + ~30s per bird. Set a
+    # comfortable budget so we never get cancelled mid-merge.
+    timeout-minutes: 120
+    # Compose an explicit "is_active_run" expression once; every
+    # downstream step gates on it. We DON'T use a job-level `if:`
+    # because that's correlated with GH's scheduler-cache going
+    # stale after YAML changes.
+    env:
+      UPSTREAM_REPO: "johnmn3/mmllm"
+
+    steps:
+      - name: Banner
+        run: |
+          echo "event=${{ github.event_name }}  repo=${{ github.repository }}"
+          if [ "${{ github.event_name }}" = "schedule" ] && \
+             [ "${{ github.repository }}" != "${{ env.UPSTREAM_REPO }}" ]; then
+            echo "→ scheduled trigger on a fork — will skip the actual harvest step."
+          fi
+
+      - name: Checkout upstream main (works on forks too)
+        uses: actions/checkout@v4
+        with:
+          repository: johnmn3/mmllm
+          ref: main
+          persist-credentials: false
+          fetch-depth: 1
+
+      - name: Point origin at the running repo (fork or upstream)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git remote set-url origin \
+            "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          # No pip cache — install offline from on-branch wheels.
+
+      - name: Configure git identity
+        run: |
+          git config user.name  "harvest CI"
+          git config user.email "harvest@github-actions.local"
+          # The harvest-dir push to main is large (~135 MB+); GitHub 500s on
+          # the chunked HTTP/2 upload (same wall train.sh hit). Buffer the
+          # whole pack into one Content-Length body + pin HTTP/1.1 so the
+          # commit+push step below lands reliably.
+          git config http.postBuffer 1073741824
+          git config http.version    HTTP/1.1
+
+      - name: Free disk (drop unused pre-installed tool caches)
+        # ubuntu-latest comes with ~30+ GB of pre-installed runtimes
+        # (Android SDK, .NET, Java, Haskell, etc.). We don't use any
+        # of them; freeing them gives us comfortable headroom for
+        # 10+ bird extracts.
+        if: ${{ github.event_name != 'schedule' || github.repository == env.UPSTREAM_REPO }}
+        run: |
+          echo "▶ before free:"
+          df -h /
+          sudo rm -rf /usr/share/dotnet /usr/share/swift \
+                      /usr/local/lib/android /opt/ghc \
+                      /opt/hostedtoolcache/CodeQL \
+                      /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk \
+                      /opt/hostedtoolcache/Ruby \
+                      /opt/hostedtoolcache/go 2>/dev/null || true
+          echo "▶ after free:"
+          df -h /
+
+      - name: Install deps from on-branch wheels (offline)
+        if: ${{ github.event_name != 'schedule' || github.repository == env.UPSTREAM_REPO }}
+        run: |
+          # Reassemble split wheels into /tmp (NOT the worktree, which
+          # would let `git add` pick them up). pip install reads from
+          # the combined --find-links directory.
+          WHEELS=workers/dispatcher/deps/wheels
+          STAGE=/tmp/wheels-staged
+          mkdir -p "$STAGE"
+          cp "$WHEELS"/*.whl "$STAGE"/ 2>/dev/null || true
+          for prefix in "$WHEELS"/*.part-00; do
+            [ -f "$prefix" ] || continue
+            base=$(basename "${prefix%.part-00}")
+            cat "$WHEELS/${base}".part-?? > "$STAGE/$base"
+          done
+          pip install --no-index --find-links="$STAGE" -e . --quiet
+
+      - name: Fetch fork PRs (if any)
+        if: ${{ inputs.pr_numbers != '' }}
+        run: |
+          PR_REFS=""
+          for PR in $(echo "${{ inputs.pr_numbers }}" | tr ',' ' '); do
+            echo "▶ fetching PR #$PR"
+            # fetch the PR head into a local pr-<N> ref
+            git fetch origin "pull/$PR/head:pr-$PR" 2>&1 | tail -1
+            PR_REFS="$PR_REFS pr-$PR"
+          done
+          echo "PR_REFS=$PR_REFS" >> $GITHUB_ENV
+
+      - name: Run harvest
+        id: harvest
+        # Skip on scheduled triggers from forks — cron auto-harvest is
+        # upstream-only. workflow_dispatch always runs.
+        if: ${{ github.event_name != 'schedule' || github.repository == env.UPSTREAM_REPO }}
+        env:
+          TARGET_ROUND: ${{ inputs.target_round }}
+          # PR_REFS is unset (empty) if the fork-PR step was skipped.
+          PR_REFS: ${{ env.PR_REFS || '' }}
+          # gh CLI auth (for enumerating forks of upstream).
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Catchup pass depth: how many recent rounds to re-scan for
+          # late-arriving birds. Empty (cron default) → harvest_action.sh
+          # uses MMLLM_CATCHUP_DEPTH:-2. Set via workflow_dispatch input
+          # for one-shot deep sweeps (e.g. 50 to absorb r29..r78 strays).
+          MMLLM_CATCHUP_DEPTH: ${{ inputs.catchup_depth }}
+          # Blank from cron → harvest_action.sh defaults to sym24.
+          MMLLM_CHAIN_PREFIX: ${{ inputs.chain_prefix }}
+          MMLLM_PRUNE_ONLY: ${{ inputs.prune_only }}
+        run: |
+          bash scripts/harvest_action.sh "$TARGET_ROUND" $PR_REFS
+          # Pull the new harvest dir name out so the artifact step
+          # uploads ONLY that, not every prior harvest dir on the branch.
+          NEW_DIR=$(ls -d workers/dispatcher/harvest-*-r*/ 2>/dev/null \
+            | xargs -n1 -I {} bash -c 'echo "$(git log -1 --format=%ct -- {}) {}"' \
+            | sort -rn | head -1 | awk '{print $2}')
+          echo "new_dir=$NEW_DIR" >> $GITHUB_OUTPUT
+
+      - name: Commit + push harvest
+        if: ${{ github.event_name != 'schedule' || github.repository == env.UPSTREAM_REPO }}
+        run: |
+          # Tight scope: only add harvest dirs. -A so any superseded
+          # harvest-*-r<R>/ dirs (the re-harvest path) get staged as
+          # deletions too. Do NOT `git add workers/dispatcher/` — that
+          # picks up unrelated worktree pollution (e.g. the reassembled
+          # torch wheel that pip install leaves behind in deps/wheels).
+          # Deletions of superseded harvest dirs are already staged by
+          # harvest_action.sh's `git rm -rf`.
+          git add -A workers/dispatcher/harvest-*-r*/ 2>/dev/null || true
+          if git diff --cached --quiet; then
+            echo "▶ no harvest changes to commit (already up to date?)"
+            exit 0
+          fi
+          # Sanity check: nothing outside workers/dispatcher/harvest-*-r*/
+          # should be staged. If it is, bail loudly instead of pushing
+          # a ballooned commit. Accepts both legacy harvest-<N>way-r<R>/
+          # (cron output) and harvest-fold<N>way-r<R>/ (raw-birds /
+          # cross-arm fold output from consolidate_siblings.py).
+          STAGED_OUTSIDE=$(git diff --cached --name-only \
+            | grep -vE '^workers/dispatcher/harvest-(fold)?[0-9]+way-r[0-9]+(_[A-Za-z0-9]+)?/' || true)
+          if [ -n "$STAGED_OUTSIDE" ]; then
+            echo "ERROR: $(echo "$STAGED_OUTSIDE" | wc -l) files staged outside harvest dirs:" >&2
+            echo "$STAGED_OUTSIDE" | head -10 >&2
+            exit 1
+          fi
+          NEW_DIR=$(git diff --cached --name-only \
+            | grep -oE 'workers/dispatcher/harvest-(fold)?[0-9]+way-r[0-9]+(_[A-Za-z0-9]+)?' \
+            | sort -u | head -1)
+          git commit -m "harvest: $NEW_DIR (auto, via harvest.yml workflow)"
+          # Retry push with exponential backoff. Two failure modes:
+          #   (a) transient network — proxy disconnects on large pushes
+          #       (HTTP 408, RPC failed) → resolved by retry.
+          #   (b) non-fast-forward — another workflow merged to main
+          #       during this run (e.g. a PR landed while we were in
+          #       step 0.5 catchup). Detected via "rejected" /
+          #       "fast-forward" in the push output. Resolved by
+          #       `git pull --rebase origin main` to replay our harvest
+          #       commit on top of remote main, then retrying push.
+          #       The harvest commit only ADDS new harvest-*-r*/ dirs,
+          #       so rebase is conflict-free unless two runs happened
+          #       to produce identical dir names — vanishingly rare
+          #       because Nway counts differ per run.
+          pushed=0
+          for i in 1 2 3 4 5; do
+            if git push origin HEAD:main 2>&1 | tee /tmp/push.out | tail -3; then
+              if ! grep -qE 'rejected|hung|408|disconnect|RPC failed|fast-forward' /tmp/push.out; then
+                pushed=1; break
+              fi
+            fi
+            if grep -qE 'rejected|fast-forward|non-fast-forward' /tmp/push.out; then
+              echo "▶ push attempt $i: remote moved (concurrent merge); rebasing onto origin/main…"
+              # Clear any half-finished rebase from a prior attempt before retrying.
+              git rebase --abort 2>/dev/null || true
+              git pull --rebase origin main 2>&1 | tail -5 || \
+                echo "  WARN: rebase failed; continuing to retry"
+            fi
+            echo "▶ push attempt $i failed; retrying in $((i * 8))s…"
+            sleep $((i * 8))
+          done
+          # Never report success on a harvest that never reached main — that
+          # silently stalls the chain (the loop used to just exhaust + exit 0).
+          [ "$pushed" = 1 ] || { echo "ERROR: harvest push failed after 5 attempts — NOT on main." >&2; exit 1; }
+
+      - name: Upload only the new harvest dir as artifact
+        if: always() && steps.harvest.outputs.new_dir != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: harvest-${{ github.run_id }}
+          path: ${{ steps.harvest.outputs.new_dir }}
+          if-no-files-found: ignore
+          retention-days: 14

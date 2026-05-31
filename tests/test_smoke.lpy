@@ -1,0 +1,84 @@
+(ns tests.test-smoke
+  "Smoke test — just enough to know the wiring works.
+   Run with: `basilisp test tests/`"
+  (:require [basilisp.test :as t :refer [deftest is]]
+            [mmllm.core :as v])
+  (:import torch))
+
+(deftest forward-pass-shape
+  (let [m       (v/build-model v/default-config)
+        x       (torch/zeros (python/tuple [2 16]) ** :dtype torch/long)
+        [y _ _] (v/forward m x)
+        shape   (vec (python/list (.- y shape)))]
+    (is (= [2 16 v/vocab-size] shape))))
+
+(deftest tokenizer-roundtrip
+  (let [s "she sells seashells"]
+    (is (= s (v/decode (v/encode s))))))
+
+(deftest forward-with-short-cache
+  ;; Phase-1c: cache is now a 3-tuple [k-buf v-buf pos] where k-buf and
+  ;; v-buf are pre-alloc'd to (B, n_kv, MAX_T, head_dim). Length-of-
+  ;; populated-cache lives in element 2, not in the buffer's dim-2 size.
+  (let [m              (v/build-model v/default-config)
+        prompt         (torch/zeros (python/tuple [1 8]) ** :dtype torch/long)
+        new-tok        (torch/zeros (python/tuple [1 1]) ** :dtype torch/long)
+        [y1 sc1 lc1]   (v/forward m prompt)
+        [y2 sc2 lc2]   (v/forward m new-tok sc1 lc1)
+        shape1         (vec (python/list (.- y1 shape)))
+        shape2         (vec (python/list (.- y2 shape)))
+        sc-pos-1       (nth (nth sc1 0) 2)
+        sc-pos-2       (nth (nth sc2 0) 2)
+        lc-pos-1       (nth (nth lc1 0) 2)
+        lc-pos-2       (nth (nth lc2 0) 2)]
+    (is (= [1 8 v/vocab-size] shape1))
+    (is (= [1 1 v/vocab-size] shape2))
+    (is (= 8 sc-pos-1))
+    (is (= 9 sc-pos-2))
+    (is (= 8 lc-pos-1))
+    (is (= 9 lc-pos-2))))
+
+(deftest both-configs-build
+  (let [m-short (v/build-model v/default-config)
+        m-long  (v/build-model v/long-leaning-config)]
+    (is (= 5 (-> m-short :blocks first :n-short-heads)))
+    (is (= 2 (-> m-long  :blocks first :n-short-heads)))))
+
+(deftest long-tier-mix-modes
+  (doseq [kind ["sum" "scalar" "switch"]]
+    (let [cfg     (assoc v/default-config :long-tier-mix kind)
+          m       (v/build-model cfg)
+          x       (torch/zeros (python/tuple [2 16]) ** :dtype torch/long)
+          [y _ _] (v/forward m x)
+          shape   (vec (python/list (.- y shape)))]
+      (is (= [2 16 v/vocab-size] shape)
+          (str "forward shape for long-tier-mix=" kind))
+      (let [n-params (count (python/list (v/parameters m)))]
+        (is (pos? n-params) (str "model has dense params for " kind))))))
+
+(deftest sliding-window-eviction
+  ;; Phase-1c: with pre-alloc cache, cache.pos grows monotonically
+  ;; with the full token stream; sliding-window only narrows the
+  ;; SDPA view, not the buffer position. This test now verifies that
+  ;; pos tracks tokens-seen correctly while the window is in effect
+  ;; (verifying the window's effect on attention requires probing
+  ;; attention internals, deferred to BPC-level eval).
+  (let [cfg            (assoc v/default-config :short-window 8 :long-window 8)
+        m              (v/build-model cfg)
+        prompt         (torch/zeros (python/tuple [1 4]) ** :dtype torch/long)
+        [_ sc1 lc1]    (v/forward m prompt)]
+    (is (= 4 (nth (nth sc1 0) 2))
+        "first forward T=4 → sc-pos=4")
+    (is (= 4 (nth (nth lc1 0) 2))
+        "first forward T=4 → lc-pos=4")
+    ;; Step forward 8 more times (cumulative pos=12).
+    (loop [i 0 sc sc1 lc lc1]
+      (if (= i 8)
+        (do
+          (is (= 12 (nth (nth sc 0) 2))
+              "after 8 incremental steps short pos=12 (under MAX_T)")
+          (is (= 12 (nth (nth lc 0) 2))
+              "after 8 incremental steps long pos=12 (under MAX_T)"))
+        (let [tok          (torch/zeros (python/tuple [1 1]) ** :dtype torch/long)
+              [_ sc' lc']  (v/forward m tok sc lc)]
+          (recur (inc i) sc' lc'))))))

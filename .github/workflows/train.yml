@@ -1,0 +1,184 @@
+name: train spork
+
+on:
+  # Manual trigger via the Actions tab. Inputs are the per-bird knobs.
+  workflow_dispatch:
+    inputs:
+      handle:
+        description: "Worker handle (5-char). Leave blank for random."
+        required: false
+        default: ""
+      n_rounds:
+        description: "Rounds to train (sym24 chain default: 1)"
+        required: false
+        default: "1"
+      steps_per_round:
+        description: "Steps per round (sym24 chain default: 50; ~15 sleep-phase steps/round for NetBank consolidation; ~2.1h at ~154s/step)"
+        required: false
+        default: "50"
+      corpus:
+        description: "Training corpus. Leave blank (default) = random pick across all four per run — identical to the hourly cron birds. Pick a specific corpus to pin it."
+        required: false
+        type: choice
+        default: ""
+        options:
+          - ""
+          - fim
+          - general
+          - clojure-general
+          - clojure-fim
+      rewarm_netbank_keys:
+        description: "One-shot copy Local's K_a/K_b into Net's first sqrt_local rows at run start. DEFAULT OFF — on chain extensions this orphans V_net's learned content and flips Δ_net negative (verified sweep 2026-05-24, smoke #4). Enable only at chain genesis."
+        required: false
+        type: boolean
+        default: false
+      k_align_coef:
+        description: "Ongoing MSE alignment loss coef between Net and Local K_a/K_b. DEFAULT 0 (off). Non-zero values keep K_a/K_b moving so V_net can never stabilize on chain extensions (regression vector)."
+        required: false
+        default: "0"
+      lr:
+        description: "MMLLM_LR override (base LR). Default empty = uses extend_chain.sh script default (3e-2 = stack-3e-2-5.0). Set to 1e-1 to spike-test the stack-1e-1-5.0 chain-consolidation recipe per CLAUDE.md."
+        required: false
+        default: ""
+      lr_min:
+        description: "MMLLM_LR_MIN override. Default empty = uses script default. Typically set to match lr (e.g. 1e-1 with lr=1e-1) so cosine decay stays at the consolidation peak."
+        required: false
+        default: ""
+      distill_mode:
+        description: "SPIKE 1 — MMLLM_DISTILL_MODE. Empty/per-layer (default) = current per-block 1:1 distill (8 layers, 24 layers get no signal). 'aggregate-local' = mean the 8 Local outputs into one target, distill all 32 Net layers against it."
+        required: false
+        type: choice
+        default: ""
+        options:
+          - ""
+          - "per-layer"
+          - "aggregate-local"
+      local_bank_layers:
+        description: "SPIKE 2 — MMLLM_LOCAL_BANK_LAYERS. Empty (default) = asymmetric 8 layers [0,1,2,12,20,29,30,31]. Set '0,1,2,3,...,31' (comma-separated, all 32 indices) for symmetric Local at every layer."
+        required: false
+        default: ""
+      netbank_shared:
+        description: "SPIKE 3 — MMLLM_NETBANK_SHARED. 'false' (default) = 32 independent NetBanks. 'true' = weight-tie V + expander across all 32 blocks (K_a/K_b stay per-layer). The 'single NB' interpretation."
+        required: false
+        type: choice
+        default: "false"
+        options:
+          - "false"
+          - "true"
+      sqrt_n:
+        description: "MMLLM_SQRT_N — override Local Bank sqrt_n (V_local size). Empty = config default (cpu-mini = 128 → 16384 entries × q_dim × 4B per layer). Set to '64' (4096 entries, ~4× smaller) to fit S2sym (symmetric Local at all 32 layers) on the 7GB free runner without OOMing on adam-cpu state. Does NOT affect NetBank V_net (that has its own sqrt_n config)."
+        required: false
+        default: ""
+      chain_prefix:
+        description: "MMLLM_CHAIN_PREFIX — select chain. Empty (default) = sym24 production chain (harvest-Nway-rN_sym24). Set 'orig'/'legacy' for the original unsuffixed chain. The chain's arch knobs are read from its genesis chain_meta.json and re-exported automatically, so the bird's dense.pt + V_net match what's saved on the chain head."
+        required: false
+        default: ""
+      distill_gate:
+        description: "VALIDATION (opt-in) — MMLLM_DISTILL_GATE. 'true' enables the per-Local-Bank distill gate at the wake→sleep transition (movement signal, soft weighted down-weight): LBs whose V barely moved during the wake phase get their distill contribution down-weighted, keeping weak signal out of NetBank. DEFAULT 'false' (cron unaffected). Opt-in to validate Δ_net/ctrl_bpc vs baseline before any default flip."
+        required: false
+        type: choice
+        default: "false"
+        options:
+          - "false"
+          - "true"
+  # Cron auto-train: every hour. Workflow inputs aren't available
+  # from the schedule trigger — we use the defaults baked into the
+  # script (n_rounds=5, steps=7, random corpus, random handle). Each
+  # tick auto-detects the latest harvest on origin/main as the chain
+  # head so the bird always starts from the freshest available state.
+  # Hourly is faster than the bird wall (~75 min), so runs overlap —
+  # that's intentional, they FedAvg-merge at harvest time.
+  schedule:
+    # Every hour at minute 0 UTC.
+    - cron: "0 * * * *"
+
+# GITHUB_TOKEN needs contents:write to push the bird branch and
+# pull-requests:write to open + update the per-bird PR.
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  train:
+    runs-on: ubuntu-latest
+    # GH free-tier cap is 6 hours per job; we use the full window so
+    # birds with longer N_ROUNDS don't time out partway through.
+    # Combined with the incremental per-round push in train.sh, even
+    # if the runner is killed at the timeout the latest completed
+    # round is already on origin.
+    timeout-minutes: 360
+
+    steps:
+      - name: Checkout upstream main (works on forks too)
+        uses: actions/checkout@v4
+        with:
+          # Always read from upstream johnmn3/mmllm so a fresh fork
+          # doesn't need to mirror the branch state.
+          repository: johnmn3/mmllm
+          ref: main
+          # Don't persist upstream credentials — we re-point origin to
+          # the running repo below so the bird push lands there.
+          persist-credentials: false
+          fetch-depth: 1
+
+      - name: Point origin at the running repo (fork or upstream)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # The default GITHUB_TOKEN has contents:write on whatever
+          # repo is running the workflow. Push the bird there.
+          git remote set-url origin \
+            "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          # No pip cache — train.sh installs offline from wheels checked
+          # into workers/dispatcher/deps/wheels on the branch.
+
+      - name: Configure git identity
+        run: |
+          git config user.name  "train CI"
+          git config user.email "train@github-actions.local"
+
+      - name: Run train worker
+        env:
+          # gh CLI inside train.sh needs this to open the per-bird draft
+          # PR. Without it, gh prints "GH_TOKEN: ${{ github.token }}"
+          # (template not substituted because nothing else exports it
+          # to bash) and the PR step is skipped silently.
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          MMLLM_HANDLE: ${{ inputs.handle }}
+          MMLLM_N_ROUNDS: ${{ inputs.n_rounds }}
+          MMLLM_STEPS_PER_ROUND: ${{ inputs.steps_per_round }}
+          MMLLM_CORPUS: ${{ inputs.corpus }}
+          MMLLM_REWARM_NETBANK_KEYS: ${{ inputs.rewarm_netbank_keys }}
+          MMLLM_K_ALIGN_COEF: ${{ inputs.k_align_coef }}
+          MMLLM_LR: ${{ inputs.lr }}
+          MMLLM_LR_MIN: ${{ inputs.lr_min }}
+          # Spike triggers — each independently gated. Empty / default = OFF
+          # so cron path is unaffected; workflow_dispatch can opt one bird
+          # into a spike for comparison vs the baseline trajectory.
+          MMLLM_DISTILL_MODE: ${{ inputs.distill_mode }}
+          MMLLM_LOCAL_BANK_LAYERS: ${{ inputs.local_bank_layers }}
+          MMLLM_NETBANK_SHARED: ${{ inputs.netbank_shared }}
+          MMLLM_SQRT_N: ${{ inputs.sqrt_n }}
+          MMLLM_CHAIN_PREFIX: ${{ inputs.chain_prefix }}
+          # VALIDATION opt-in — empty on cron (schedule has no inputs) → gate stays OFF.
+          MMLLM_DISTILL_GATE: ${{ inputs.distill_gate }}
+        run: |
+          bash scripts/train.sh
+
+      - name: Upload training logs as artifact (always — even on failure)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: training-logs-${{ github.run_id }}
+          path: |
+            /tmp/mmllm-cpu/chain-diverse/round-*.train.log
+            /tmp/mmllm-cpu/chain-diverse/round-*/log.jsonl
+            /tmp/mmllm-cpu/chain-diverse/wall.tsv
+            /tmp/mmllm-cpu/chain-diverse/mem.log
+          if-no-files-found: ignore
+          retention-days: 7

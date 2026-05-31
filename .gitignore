@@ -1,0 +1,24 @@
+__pycache__/
+*.pyc
+.venv/
+*.egg-info/
+dist/
+build/
+.basilisp_cache/
+.DS_Store
+
+# editor / tooling caches
+.clj-kondo/.cache/
+.lsp/
+.portal/
+
+# accidental relative-path mmap artifacts (from a smoke run that resolved
+# bank-path="" to "" prefixes in cwd). Real banks live under /data on Modal.
+/.[0-9].bin
+/-net.[0-9].bin
+
+# opt-sparse-net.pt at design-sized V_net is ~230 MB (over GitHub's 100 MB
+# per-file limit). Workers keep it locally for resume across rounds within
+# a wave; published starting state is V_net + dense only. extend_chain.sh
+# initializes an empty one on missing-resume.
+workers/**/opt-sparse-net.pt

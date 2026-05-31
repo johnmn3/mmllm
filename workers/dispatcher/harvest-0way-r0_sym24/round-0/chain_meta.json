@@ -1,0 +1,10 @@
+{
+  "chain_genesis": true,
+  "config_name": "cpu-mini",
+  "MMLLM_LOCAL_BANK_LAYERS": "0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23",
+  "MMLLM_NETBANK_SHARED": "false",
+  "MMLLM_NET_SQRT_N": "1024",
+  "MMLLM_NET_C_NET": "8",
+  "MMLLM_SQRT_N": "",
+  "n_layers": 32
+}
