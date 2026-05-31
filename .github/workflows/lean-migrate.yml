@@ -1,0 +1,49 @@
+name: lean migrate
+
+# ONE-TIME migration to the lean repo: move every large in-tree blob (corpora,
+# wheels, core/round-6 baseline, chain V_net/dense) out to GitHub Release assets,
+# then rewrite main to a single orphan commit of the lean tree. Tree 5.2 GB →
+# tens of MB, so shallow-clone bird pushes stop shipping ~1 GB packs (no more
+# HTTP-500s) and per-round growth is gone. Runs on a runner (fast network, big
+# disk) so no multi-GB clone lands on a dev box.
+#
+# MANUAL ONLY (history rewrite + force-push of main is deliberate). Run
+# dry_run=true first: it uploads the assets (idempotent) and prints the projected
+# lean tree size WITHOUT force-pushing. Then dry_run=false to rewrite main.
+# Requires the read-path code (chain_assets.py + fetch_static_assets.sh) to
+# already be on main — i.e. run AFTER the prevent-bloat PR is merged.
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Preview: upload assets + print projected size, force-push nothing"
+        type: choice
+        default: "true"
+        options: ["true", "false"]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: lean-migrate
+  cancel-in-progress: false
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1        # current tree only (~5 GB); orphan reuses nothing here
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: migrate to lean repo
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SQUASH_DRY_RUN: ${{ inputs.dry_run }}
+        run: bash scripts/migrate_lean.sh
