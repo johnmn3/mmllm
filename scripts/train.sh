@@ -158,19 +158,20 @@ fi
 START_ROUND=$(echo "$CHAIN_HEAD_PATH" | grep -oP "$EXTRACT_ROUND_RE")
 echo "  chain head: $CHAIN_HEAD_PATH (round $START_ROUND)"
 
-# Pull both the reference dir and the chain head's tree.
+# Pull both the reference dir and the chain head's tree. Corpora + wheels are
+# NO LONGER in git (they bloated the tree → fat push packs); they come from
+# release tarballs via fetch_static_assets.sh below.
 git checkout FETCH_HEAD -- \
   src/ scripts/ tests/ CLAUDE.md docs/ \
   "$REF_HARVEST_DIR/" \
-  "$CHAIN_HEAD_PATH/" \
-  workers/dispatcher/corpora/ \
-  workers/dispatcher/deps/ 2>&1 | tail -1
+  "$CHAIN_HEAD_PATH/" 2>&1 | tail -1
 
-# 2) Deps — install from pre-built wheels on the branch (no PyPI fetch).
-#    The torch wheel is committed as 95 MB .part-NN chunks (GH 100 MB
-#    file limit); reassemble it into /tmp before install so the
-#    worktree stays clean (otherwise the reassembled wheel ends up
-#    getting picked up by any future `git add workers/dispatcher/`).
+# 2) Deps — install from pre-built wheels (no PyPI fetch). The wheels live as a
+#    release tarball (NOT in git); fetch + extract them into the dir the
+#    reassembly below expects. torch is still chunked as .part-NN inside the
+#    tarball (the reassembly handles it); release assets have no 100 MB limit so
+#    this could be unsplit later, but keeping the chunks needs zero code change.
+bash scripts/fetch_static_assets.sh wheels
 echo "▶ installing deps from workers/dispatcher/deps/wheels (offline)…"
 WHEELS=workers/dispatcher/deps/wheels
 STAGE=/tmp/wheels-staged
@@ -183,10 +184,12 @@ for prefix in "$WHEELS"/*.part-00; do
 done
 pip install --no-index --find-links="$STAGE" -e . --quiet
 
-# 3) Corpora are pre-staged on the branch (no HF download, no prep step).
-# Bins over GitHub's 100 MB per-file limit are committed as 95 MB
-# .part-NN chunks; cat them back together at /tmp.
-echo "▶ staging corpora from branch (no download)…"
+# 3) Corpora come from a release tarball (NOT in git — they bloated the tree).
+# fetch + extract into workers/dispatcher/corpora/, then stage to /tmp exactly
+# as before. Bins are still chunked as .part-NN inside the tarball; the
+# reassembly below cats them back together at /tmp.
+bash scripts/fetch_static_assets.sh corpora
+echo "▶ staging corpora (release tarball, no HF download)…"
 CORPORA=workers/dispatcher/corpora
 mkdir -p /tmp/mmllm-cpu/battery
 for f in "$CORPORA"/*.bin; do
