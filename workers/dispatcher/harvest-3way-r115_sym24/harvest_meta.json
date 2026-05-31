@@ -22,12 +22,7 @@
   ],
   "worker_ctrl_bpc_mean": 3.0755,
   "worker_ctrl_bpc_best": 2.8368,
-  "previous_harvest": {
-    "round": 114,
-    "dir": "workers/dispatcher/harvest-2way-r114_sym24",
-    "mean": 3.2036,
-    "best": 3.1696
-  },
+  "previous_harvest": null,
   "direct_contributions": [
     {
       "bird_id": "3dcd10ceede44561",
@@ -54,9 +49,9 @@
   "ancestor_harvests": [
     "workers/dispatcher/harvest-2way-r114_sym24"
   ],
-  "cumulative_total_steps": 190,
-  "cumulative_unique_birds": 5,
-  "harvested_at": "2026-05-31T09:11:01Z",
+  "cumulative_total_steps": 150,
+  "cumulative_unique_birds": 3,
+  "harvested_at": "2026-05-31T10:54:37Z",
   "harvester": "scripts/harvest_action.sh (GH Action)",
   "note": "Lean harvest \u2014 sparse deltas + averaged dense only, no opt-state."
 }

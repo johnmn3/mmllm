@@ -10,15 +10,6 @@
 | **mean** | | **3.0755** |
 | **best** | | **2.8368** |
 
-## Chain progression R114 → R115
-
-Previous harvest: `workers/dispatcher/harvest-2way-r114_sym24`
-
-| metric         | prior          | this           | Δ        |
-|----------------|---------------:|---------------:|---------:|
-| ctrl_bpc mean  | 3.2036         | 3.0755         | -0.1281 |
-| ctrl_bpc best  | 3.1696         | 2.8368         | -0.3328 |
-
 ## Per-round trajectory (best bird: LfYq6)
 
 | round | wall_s | ctrl_bpc | Δ_net   |
@@ -28,7 +19,7 @@ Previous harvest: `workers/dispatcher/harvest-2way-r114_sym24`
 ## Cumulative training contribution
 
 - This harvest: **150 steps** from 3 bird(s)
-- Across full ancestry (deduped by bird_id): **190 steps** from 5 unique bird(s)
+- Across full ancestry (deduped by bird_id): **150 steps** from 3 unique bird(s)
 - Ancestor harvest(s):
   - `workers/dispatcher/harvest-2way-r114_sym24`
 
