@@ -482,80 +482,80 @@ EOF
     git rm -rf "$PREV_DEST" > /dev/null 2>&1 || rm -rf "$PREV_DEST"
     git add -u "$PREV_DEST" 2>/dev/null || true
   fi
-  git add "$DEST"/delta-sparse-net.*.pt "$DEST"/dense.pt \
-          "$DEST"/meta.json \
-          "$DEST"/round-*.log.jsonl "$DEST"/wall.tsv 2>/dev/null
-
-  # Tripwire — only the worker's own dir tree may be staged.
-  STAGED_OUTSIDE=$(git diff --cached --name-only | grep -v "^workers/$HANDLE/" || true)
-  if [ -n "$STAGED_OUTSIDE" ]; then
-    echo "ERROR: files staged outside workers/$HANDLE/ — refusing." >&2
-    echo "$STAGED_OUTSIDE" | head -10 >&2
-    exit 1
-  fi
-
-  echo "    [$(date -u +%H:%M:%S)] trace: pre-commit"
-  git commit -m "train-r$CUR_ROUND $HANDLE — step $step/$N_ROUNDS, final_ctrl=$FINAL_CTRL" --quiet
-  echo "    [$(date -u +%H:%M:%S)] trace: post-commit, starting push retries"
-
-  # Cap git's pack-objects memory + disable delta search entirely. The repo
-  # has ~63 GB of accumulated blob history. For sym24 birds, the chain head
-  # is the bootstrap genesis (1.18 GB of 32 × V_net.<i>.bin files with
-  # IDENTICAL suffixes — these name-hash-collide into a single delta-search
-  # bucket, triggering O(N²) delta search on 32-MB high-entropy fp32 blobs).
-  # sym24bird1/2/3 all hit ~10 GB git RSS and got OOM-killed before push
-  # could complete. Setting pack.window=0 disables delta search entirely.
-  # Trade-off: slightly bigger pack on the wire; predictable memory.
-  #
-  # NOTE: --no-thin (used previously) is COUNTERPRODUCTIVE with a shallow
-  # clone — it forces the client to defensively pack shared blobs it can't
-  # prove are on the server. Removed below.
+# Pack/transport config (preserved from the single-push path): pack.window=0
+  # disables delta search to avoid the O(N^2) OOM on the genesis V_net blobs;
+  # postBuffer + HTTP/1.1 make each (now small) chunk push robust.
   git config pack.window         0
   git config pack.windowMemory   256m
   git config pack.deltaCacheSize 64m
   git config pack.threads        1
   git config pack.useBitmaps     false
   git config gc.auto             0
-
-  # The harvest pack is ~232 MB+ (delta-sparse V_net + dense.pt). GitHub's
-  # smart-HTTP endpoint intermittently 500s on a large CHUNKED push over
-  # HTTP/2 — "RPC failed; HTTP 500", "send-pack: unexpected disconnect",
-  # "the remote end hung up unexpectedly" — even with plenty of RAM free.
-  # Buffer the whole pack into a single Content-Length body (postBuffer >
-  # pack size, NOT chunked) and pin HTTP/1.1 to dodge HTTP/2 framing flake.
   git config http.postBuffer     1073741824
   git config http.version        HTTP/1.1
 
-  # Push the round. Capture output AND exit code — the prior version
-  # piped to `tail -1 | grep -q` which suppressed all output AND only
-  # detected a narrow set of error strings, so genuine permission
-  # failures (workflow_dispatch from non-default ref) would silently
-  # "succeed" while the branch never reached origin. Now: show the
-  # tail of git's output, check actual exit code, and only print the
-  # "pushed" line if the push actually landed.
-  pushed=0
-  for i in 1 2 3 4; do
-    echo "    [$(date -u +%H:%M:%S)] trace: push attempt $i starting"
-    # NB: capture rc inside an `if` — a bare `VAR=$(cmd)` assignment trips
-    # `set -e` the instant the substitution fails, which previously aborted
-    # the script before the rc/error were ever printed and made this retry
-    # loop dead code on failure (the git error was swallowed into PUSH_OUT).
-    if PUSH_OUT=$(git push -u origin "$BR" 2>&1); then PUSH_RC=0; else PUSH_RC=$?; fi
-    echo "    [$(date -u +%H:%M:%S)] trace: push attempt $i rc=$PUSH_RC"
-    echo "$PUSH_OUT" | tail -15 | sed 's/^/    git: /'
-    if [ "$PUSH_RC" -eq 0 ]; then
-      pushed=1
-      break
+  # --- Chunked publish (every push <= ~50MB) --------------------------
+  # GitHub's smart-HTTP push intermittently 500s on the full ~290MB
+  # delta-sparse-net pack (and it grows as the NetBank consolidates), even
+  # with postBuffer/HTTP1.1/retries. So we commit+push the payload in
+  # size-capped chunks well under the flaky threshold, and push meta.json
+  # LAST as the completion marker: if any chunk fails after retries we exit
+  # 1 before meta lands, so the harvest sees a meta-less (incomplete) dir
+  # and skips it rather than folding a partial round.
+  _push_with_retries() {
+    local pushed=0 i PUSH_OUT PUSH_RC
+    for i in 1 2 3 4 5 6; do
+      if PUSH_OUT=$(git push -u origin "$BR" 2>&1); then PUSH_RC=0; else PUSH_RC=$?; fi
+      echo "    [$(date -u +%H:%M:%S)] push attempt $i rc=$PUSH_RC"
+      echo "$PUSH_OUT" | tail -6 | sed 's/^/    git: /'
+      [ "$PUSH_RC" -eq 0 ] && { pushed=1; break; }
+      echo "    push attempt $i failed; retrying in $((i * 5))s…"
+      sleep $((i * 5))
+    done
+    [ "$pushed" -eq 1 ]
+  }
+  _commit_push() {  # $1 = commit message; caller has already `git add`-ed
+    # Tripwire: only the worker's own dir tree may ever be staged.
+    local outside
+    outside=$(git diff --cached --name-only | grep -v "^workers/$HANDLE/" || true)
+    if [ -n "$outside" ]; then
+      echo "ERROR: files staged outside workers/$HANDLE/ — refusing." >&2
+      echo "$outside" | head -10 >&2; exit 1
     fi
-    echo "    git push attempt $i failed (rc=$PUSH_RC); retrying in $((i * 4))s…"
-    sleep $((i * 4))
+    git diff --cached --quiet && return 0   # nothing staged → skip this chunk
+    git commit -m "$1" --quiet
+    if ! _push_with_retries; then
+      echo "    ERROR: chunk push failed after retries: $1 — branch NOT fully on origin." >&2
+      exit 1
+    fi
+  }
+
+  # Chunk 1: previous round's deletion (staged above) + dense + logs (small).
+  git add "$DEST/dense.pt" "$DEST"/round-*.log.jsonl "$DEST/wall.tsv" 2>/dev/null
+  _commit_push "train-r$CUR_ROUND $HANDLE — dense+logs (step $step/$N_ROUNDS)"
+
+  # Chunks 2..N: delta-sparse-net layers, accumulated up to ~50MB per push.
+  CHUNK_CAP=$((50 * 1024 * 1024))
+  acc=0; batch=()
+  for f in "$DEST"/delta-sparse-net.*.pt; do
+    [ -f "$f" ] || continue
+    sz=$(wc -c < "$f" 2>/dev/null || echo 0)
+    if [ "${#batch[@]}" -gt 0 ] && [ $((acc + sz)) -gt "$CHUNK_CAP" ]; then
+      git add "${batch[@]}"
+      _commit_push "train-r$CUR_ROUND $HANDLE — V_net delta (${#batch[@]} layers)"
+      batch=(); acc=0
+    fi
+    batch+=("$f"); acc=$((acc + sz))
   done
-  if [ "$pushed" -eq 1 ]; then
-    echo "    pushed r$CUR_ROUND to origin/$BR"
-  else
-    echo "    ERROR: failed to push r$CUR_ROUND after 4 attempts. Branch is NOT on origin." >&2
-    exit 1
+  if [ "${#batch[@]}" -gt 0 ]; then
+    git add "${batch[@]}"
+    _commit_push "train-r$CUR_ROUND $HANDLE — V_net delta (${#batch[@]} layers)"
   fi
+
+  # Final chunk: meta.json = the completion marker (pushed LAST).
+  git add "$DEST/meta.json"
+  _commit_push "train-r$CUR_ROUND $HANDLE — meta (final_ctrl=$FINAL_CTRL)"
+  echo "    pushed r$CUR_ROUND to origin/$BR (chunked, all green)"
 
   # Open the PR on first successful round (draft); subsequent rounds
   # auto-update the PR via push. We never need to rebind HEAD.
