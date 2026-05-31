@@ -107,8 +107,10 @@ fi
 git -c user.name="lean-migrate" -c user.email="lean@github-actions.local" \
     commit -q -m "lean-migrate: statics + chain blobs → release assets" || echo "  (nothing new to commit)"
 
-# Safety: genesis manifest + chain manifests must exist in the new tree.
-test -f "$GENESIS/manifest.json" || { echo "ABORT: genesis manifest missing — refusing to squash" >&2; exit 1; }
+# Safety: the production-chain genesis manifest must exist in the new tree
+# (proves chain_assets ran + wrote manifests before we drop the blobs).
+GENESIS="workers/dispatcher/harvest-0way-r0_${CHAIN}/round-0"
+test -f "$GENESIS/manifest.json" || { echo "ABORT: genesis manifest missing ($GENESIS) — refusing to squash" >&2; exit 1; }
 
 NEWTREE=$(git write-tree)
 STAMP=$(date -u +%Y-%m-%dT%H:%M:%SZ)
