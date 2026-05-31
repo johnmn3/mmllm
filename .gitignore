@@ -32,3 +32,18 @@ workers/dispatcher/harvest-*/round-*/delta-sparse-net.*.pt
 workers/dispatcher/harvest-*/round-*/V_net.*.bin
 workers/dispatcher/harvest-*/round-*/dense.pt
 workers/dispatcher/harvest-*/round-*/opt-sparse-net.*.pt
+
+# Static assets also live as GitHub Release tarballs (NOT in git — they made the
+# tree 5.2 GB → fat shallow-clone push packs → HTTP-500s). scripts/
+# fetch_static_assets.sh downloads + extracts these on demand into the dirs
+# below; never re-commit them. Training corpora:
+workers/dispatcher/corpora/**/*.bin
+workers/dispatcher/corpora/**/*.part-*
+# Dependency wheels (torch chunked as .part-NN inside the tarball):
+workers/dispatcher/deps/wheels/*.whl
+workers/dispatcher/deps/wheels/*.part-*
+# round-6 warm-start baseline (read by the local experiment scripts):
+core/round-6/**/*.bin
+core/round-6/**/*.pt
+# fetch_static_assets extraction markers:
+.asset-*.ok
