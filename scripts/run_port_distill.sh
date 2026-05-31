@@ -33,6 +33,11 @@ cp -n workers/dispatcher/corpora/fim-json-v3.val.bin  "$STAGE/" 2>/dev/null || t
 cp -n workers/dispatcher/corpora/fim-json-v3.test.bin "$STAGE/" 2>/dev/null || true
 
 # 2) Reconstruct r44 full V_net (sparse delta → full) + dense + opt.
+#    Materialize the head + reference blobs from release assets (the big
+#    V_net/dense binaries live as GitHub Release assets, not in git history —
+#    see scripts/chain_assets.py). No-op if the blobs are still in-tree.
+[ -f scripts/chain_assets.py ] && python3 scripts/chain_assets.py fetch "$HEAD" 2>/dev/null || true
+[ -f scripts/chain_assets.py ] && python3 scripts/chain_assets.py fetch "$REF"  2>/dev/null || true
 rm -rf "$ARCHIVE"; mkdir -p "$ARCHIVE/round-44"
 python3 scripts/_delta_sparse_net.py apply "$REF" "$HEAD" "$ARCHIVE/round-44" 2>&1 | tail -2
 cp "$HEAD/dense.pt" "$ARCHIVE/round-44/"
