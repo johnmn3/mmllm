@@ -509,9 +509,10 @@ EOF
     # window. Be genuinely persistent: ~18 attempts, exponential backoff
     # capped at 120s (~25min total budget), and a per-attempt `timeout` so a
     # HUNG push (not just a 500) is killed and retried instead of stalling.
-    local pushed=0 i PUSH_OUT PUSH_RC wait
+    local pushed=0 i PUSH_OUT PUSH_RC wait TO=""
+    command -v timeout >/dev/null 2>&1 && TO="timeout 300"   # kill a hung push; no-op if timeout absent
     for i in $(seq 1 18); do
-      if PUSH_OUT=$(timeout 300 git push -u origin "$BR" 2>&1); then PUSH_RC=0; else PUSH_RC=$?; fi
+      if PUSH_OUT=$($TO git push -u origin "$BR" 2>&1); then PUSH_RC=0; else PUSH_RC=$?; fi
       echo "    [$(date -u +%H:%M:%S)] push attempt $i/18 rc=$PUSH_RC"
       echo "$PUSH_OUT" | tail -4 | sed 's/^/    git: /'
       [ "$PUSH_RC" -eq 0 ] && { pushed=1; break; }
