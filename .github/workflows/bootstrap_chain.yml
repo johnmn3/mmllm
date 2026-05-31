@@ -46,11 +46,14 @@ jobs:
           python-version: "3.11"
 
       - name: Install mmllm deps (offline wheels)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Mirror scripts/train.sh's wheel-staging: copy whl files +
-          # reassemble multi-part wheels (torch chunked as .part-NN due
-          # to GH's 100 MB per-file cap), then let pip resolve deps via
-          # --find-links with mmllm as the install anchor.
+          # Wheels come from a release tarball (NOT in git). Mirror train.sh:
+          # fetch + reassemble multi-part wheels (torch chunked as .part-NN
+          # inside the tarball), then pip resolves via --find-links with mmllm
+          # as the install anchor.
+          bash scripts/fetch_static_assets.sh wheels
           WHEELS=workers/dispatcher/deps/wheels
           STAGE=/tmp/wheels-staged
           mkdir -p "$STAGE"
