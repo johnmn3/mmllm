@@ -22,3 +22,13 @@ build/
 # a wave; published starting state is V_net + dense only. extend_chain.sh
 # initializes an empty one on missing-resume.
 workers/**/opt-sparse-net.pt
+
+# Chain-head big binaries live as GitHub Release assets, NOT in git history
+# (committing ~135 MB/round ballooned main to tens of GB). Only manifest.json
+# is committed per harvest dir; scripts/chain_assets.py fetches these on demand.
+# Scoped to dispatcher harvest dirs so bird dirs (workers/<HANDLE>/...) are
+# unaffected — bird branches still carry their own deltas (they're pruned).
+workers/dispatcher/harvest-*/round-*/delta-sparse-net.*.pt
+workers/dispatcher/harvest-*/round-*/V_net.*.bin
+workers/dispatcher/harvest-*/round-*/dense.pt
+workers/dispatcher/harvest-*/round-*/opt-sparse-net.*.pt

@@ -893,6 +893,21 @@ if ancestor_harvests:
 print("═" * 60)
 PYEOF
 
+# --- 6) Publish big binaries to a GitHub Release; the commit stays
+#        manifest-only. Previously ~135 MB of delta-sparse-net.*.pt + dense.pt
+#        was committed to main EVERY round and retained in git history forever
+#        (the working-tree prune only trims HEAD) → main ballooned ~135 MB/rnd.
+#        chain_assets.py uploads the blobs as release assets keyed by round,
+#        writes manifest.json (per-asset sha256), and drops the local blobs so
+#        `git add` below stages only the tiny manifest. Then prune old releases
+#        (keep last 5 by round + anything <24h + genesis r0).
+REPO="${GITHUB_REPOSITORY:-johnmn3/mmllm}"
+REF_ROUND=$(echo "$REF_DIR" | grep -oE 'round-[0-9]+' | head -1 | grep -oE '[0-9]+')
+python3 scripts/chain_assets.py publish "$OUT" \
+  --round "$TARGET_ROUND" --chain "$CHAIN_PREFIX" --repo "$REPO" \
+  --reference-anchor "$REF_DIR" --reference-round "${REF_ROUND:-0}"
+python3 scripts/chain_assets.py prune --chain "$CHAIN_PREFIX" --repo "$REPO" --keep 5 --hours 24 || true
+
 echo "▶ harvest done:"
 echo "  dir: $HARVEST_DIR"
 echo "  files: $(ls "$OUT" | wc -l)"

@@ -226,6 +226,19 @@ for k, v in m.items():
 ")
 fi
 
+# 4a2) Materialize the chain head + reference blobs from GitHub Release
+#      assets. The large V_net/dense binaries are NOT in git history (only a
+#      tiny manifest.json is committed — see scripts/chain_assets.py); fetch
+#      pulls them from the release recorded in each manifest. MUST run before
+#      the delta-sparse-net.meta.pt existence check below (post-migration that
+#      file is a release asset, not in-tree). Forks read upstream's releases
+#      (manifest carries the upstream repo). No-op for pre-migration dirs that
+#      still carry the blobs in-tree, or local runs.
+if [ -f scripts/chain_assets.py ]; then
+  python3 scripts/chain_assets.py fetch "$CHAIN_HEAD_PATH/round-$START_ROUND"
+  python3 scripts/chain_assets.py fetch "$REF_DIR"
+fi
+
 # 4b) Reconstruct round-$START_ROUND full V_net from the chain's reference
 #     + that round's sparse delta. Genesis-case fallback: if the chain
 #     head has no delta files yet (we're starting from r0_<prefix>), copy
