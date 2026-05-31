@@ -66,6 +66,27 @@ When a test or training run is in flight:
 - **chain** = N sporks back-to-back, V_local zero-init each round, V_net
   and dense.pt carried forward across rounds.
 
+## Repo assets (release tarballs, NOT in git)
+
+Large STATIC files live as GitHub Release tarballs, not committed — they made
+the git tree 5.2 GB, which fattened every shallow-clone bird push into a
+multi-hundred-MB pack and tripped GitHub's HTTP-500 large-pack wall. Fetched on
+demand via `scripts/fetch_static_assets.sh <bundle>`:
+
+- **corpora** (`assets-corpora-v1`) → `workers/dispatcher/corpora/`. Fetched
+  automatically by `train.sh` / harvest before staging to `/tmp`.
+- **wheels** (`assets-wheels-v1`) → `workers/dispatcher/deps/wheels/`. Fetched
+  automatically by `train.sh` / `harvest.yml` / `bootstrap_chain.yml` before the
+  offline pip install.
+- **baseline-round6** (`assets-baseline-round6-v1`) → `core/round-6/`. Used by
+  the local experiment scripts (`run_round*`, `run_bench_*`, `run_spoon_*`, …).
+  It's static, so run **`scripts/fetch_static_assets.sh baseline-round6` once per
+  clone** to populate `core/round-6/` before using those scripts.
+
+Per-round chain blobs (V_net deltas + dense) are handled separately by
+`scripts/chain_assets.py` (per-harvest release + manifest). See the
+prevent-bloat work. To refresh a static bundle, bump its `-vN` tag.
+
 ## TERMINOLOGY — DO NOT CONFUSE
 
 The N=16 entities within each Local layer are **routers**, not "trunks".

@@ -26,8 +26,10 @@ REF=workers/dispatcher/harvest-0way-r0_sym24/round-0
 
 echo "▶ PORT DISTILL (new-version design, distill fixed): resume r44 → +1 round × $STEPS steps  ($(date -u +%H:%M:%SZ))"
 
-# 1) Stage FIM corpus from in-repo parts (no network).
+# 1) Stage FIM corpus. Corpora live as a release tarball (not in git); fetch +
+#    extract into workers/dispatcher/corpora/, then reassemble the FIM parts.
 mkdir -p "$STAGE"
+[ -f scripts/fetch_static_assets.sh ] && bash scripts/fetch_static_assets.sh corpora 2>/dev/null || true
 [ -s "$STAGE/fim-json-v3.train.bin" ] || cat workers/dispatcher/corpora/fim-json-v3.train.bin.part-* > "$STAGE/fim-json-v3.train.bin"
 cp -n workers/dispatcher/corpora/fim-json-v3.val.bin  "$STAGE/" 2>/dev/null || true
 cp -n workers/dispatcher/corpora/fim-json-v3.test.bin "$STAGE/" 2>/dev/null || true

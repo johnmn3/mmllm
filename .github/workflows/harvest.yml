@@ -127,12 +127,15 @@ jobs:
           echo "▶ after free:"
           df -h /
 
-      - name: Install deps from on-branch wheels (offline)
+      - name: Install deps from release wheels (offline)
         if: ${{ github.event_name != 'schedule' || github.repository == env.UPSTREAM_REPO }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Reassemble split wheels into /tmp (NOT the worktree, which
-          # would let `git add` pick them up). pip install reads from
-          # the combined --find-links directory.
+          # Wheels come from a release tarball (NOT in git — they bloated the
+          # tree). fetch + reassemble into /tmp (NOT the worktree, which would
+          # let `git add` pick them up). pip reads the combined --find-links dir.
+          bash scripts/fetch_static_assets.sh wheels
           WHEELS=workers/dispatcher/deps/wheels
           STAGE=/tmp/wheels-staged
           mkdir -p "$STAGE"
