@@ -155,7 +155,7 @@ if [ -z "$CHAIN_HEAD_PATH" ]; then
   echo "ERROR: no chain head matching $HEAD_REGEX found on upstream main" >&2
   exit 2
 fi
-START_ROUND=$(echo "$CHAIN_HEAD_PATH" | grep -oP "$EXTRACT_ROUND_RE")
+START_ROUND=$(echo "$CHAIN_HEAD_PATH" | sed -E 's/.*-r([0-9]+)(_[A-Za-z0-9]+)?$/\1/')  # portable (BSD/GNU); grep -oP lookahead is GNU-only
 echo "  chain head: $CHAIN_HEAD_PATH (round $START_ROUND)"
 
 # Pull both the reference dir and the chain head's tree. Corpora + wheels are
