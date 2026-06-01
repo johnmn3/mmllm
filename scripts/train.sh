@@ -171,18 +171,26 @@ git checkout FETCH_HEAD -- \
 #    reassembly below expects. torch is still chunked as .part-NN inside the
 #    tarball (the reassembly handles it); release assets have no 100 MB limit so
 #    this could be unsplit later, but keeping the chunks needs zero code change.
-bash scripts/fetch_static_assets.sh wheels
-echo "▶ installing deps from workers/dispatcher/deps/wheels (offline)…"
-WHEELS=workers/dispatcher/deps/wheels
-STAGE=/tmp/wheels-staged
-mkdir -p "$STAGE"
-cp "$WHEELS"/*.whl "$STAGE"/ 2>/dev/null || true
-for prefix in "$WHEELS"/*.part-00; do
-  [ -f "$prefix" ] || continue
-  base=$(basename "${prefix%.part-00}")
-  cat "$WHEELS/${base}".part-?? > "$STAGE/$base"
-done
-pip install --no-index --find-links="$STAGE" -e . --quiet
+# Local birds (MMLLM_LOCAL_BIRD=1) run on their own silicon (e.g. arm64 macOS)
+# with deps in an active venv — the committed wheels are linux_x86_64, so the
+# offline install would be wrong-platform. Skip it and use the venv. CI leaves
+# the flag unset → identical behavior.
+if [ "${MMLLM_LOCAL_BIRD:-}" != 1 ]; then
+  bash scripts/fetch_static_assets.sh wheels
+  echo "▶ installing deps from workers/dispatcher/deps/wheels (offline)…"
+  WHEELS=workers/dispatcher/deps/wheels
+  STAGE=/tmp/wheels-staged
+  mkdir -p "$STAGE"
+  cp "$WHEELS"/*.whl "$STAGE"/ 2>/dev/null || true
+  for prefix in "$WHEELS"/*.part-00; do
+    [ -f "$prefix" ] || continue
+    base=$(basename "${prefix%.part-00}")
+    cat "$WHEELS/${base}".part-?? > "$STAGE/$base"
+  done
+  pip install --no-index --find-links="$STAGE" -e . --quiet
+else
+  echo "▶ local bird: using active venv (skipping linux offline wheels)"
+fi
 
 # 3) Corpora come from a release tarball (NOT in git — they bloated the tree).
 # fetch + extract into workers/dispatcher/corpora/, then stage to /tmp exactly
@@ -368,6 +376,9 @@ git checkout -b "$BR" 2>/dev/null || git checkout "$BR"
 MEM_LOG="$ARCHIVE/mem.log"
 (
   while sleep 3; do
+    # Linux-only sampler (procfs + GNU ps). Skip on macOS/local birds — no
+    # /proc, and BSD ps lacks --sort/--no-headers. Avoids garbage MEM lines.
+    [ -r /proc/meminfo ] || continue
     ts=$(date -u +%H:%M:%SZ)
     free_mb=$(awk '/MemFree:/ {print int($2/1024)}' /proc/meminfo)
     avail_mb=$(awk '/MemAvailable:/ {print int($2/1024)}' /proc/meminfo)
