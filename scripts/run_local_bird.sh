@@ -17,6 +17,12 @@
 #   bash scripts/run_local_bird.sh [N_ROUNDS]     # default 5 rounds × 50 steps
 #   MMLLM_DEVICE=cpu bash scripts/run_local_bird.sh 3   # force CPU, 3 rounds
 set -euo pipefail
+# macOS system bash (3.2) folds a multibyte char that immediately follows "$VAR"
+# (scripts print unicode like ▶/…) into the variable name under a UTF-8 LC_CTYPE
+# → "unbound variable". Force C locale for byte-wise parsing (output unaffected);
+# PYTHONUTF8 keeps Python on UTF-8 for file I/O.
+export LC_ALL=C
+export PYTHONUTF8=1
 
 UPSTREAM="johnmn3/mmllm"
 ROOT=$(git rev-parse --show-toplevel 2>/dev/null) || { echo "✗ not in a git repo — clone your fork of $UPSTREAM first."; exit 1; }
@@ -67,7 +73,18 @@ export MMLLM_DEVICE
 if [ "$MMLLM_DEVICE" = mps ] || [ "$MMLLM_DEVICE" = cuda ]; then
   export PYTORCH_ENABLE_MPS_FALLBACK=1     # unsupported ops fall back to CPU (never blocks)
   export MMLLM_ENABLE_PKM_CPP=false        # C++ PKM kernel is CPU-only; GPU uses torch ops
-  echo "  device=$MMLLM_DEVICE — full retrieval bandwidth (design defaults)"
+  if [ "$MMLLM_DEVICE" = mps ]; then
+    # Bank V on-device → no per-layer CPU↔GPU sync (the big MPS speedup; torch
+    # 2.12 supports the bank's index_add_/scatter_add_ on MPS, so the old
+    # "bank must stay on CPU" constraint is gone). And lift the over-conservative
+    # MPS high-watermark (it refuses allocs with real unified memory still free).
+    export MMLLM_BANK_ON_GPU="${MMLLM_BANK_ON_GPU:-true}"
+    export MMLLM_NET_BANK_ON_GPU="${MMLLM_NET_BANK_ON_GPU:-true}"
+    export PYTORCH_MPS_HIGH_WATERMARK_RATIO="${PYTORCH_MPS_HIGH_WATERMARK_RATIO:-0.0}"
+    echo "  device=mps — bank on GPU, watermark lifted, full retrieval bandwidth"
+  else
+    echo "  device=$MMLLM_DEVICE — full retrieval bandwidth (design defaults)"
+  fi
 else
   # Reduced bandwidth on CPU for tractability (top-k is not a bank dim — same
   # checkpoint either way). Mirrors scripts/run_port_distill.sh.
