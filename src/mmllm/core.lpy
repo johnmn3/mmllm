@@ -3230,6 +3230,25 @@
                 ten   (corp/load-as-tensor path ** :use_mmap true)]
             [ten (python/float w-str)]))))))
 
+(defn pick-mix-val
+  "Deterministic held-out validation tensor for the diverse mix: the last
+   MMLLM_MIX_VAL_PER_CORPUS (default 4096) tokens of EACH MMLLM_MIX corpus,
+   concatenated in MMLLM_MIX order. Same bytes on every bird (torch train-long
+   AND the MLX trainer both call this), so ctrl_bpc / ablation Δ are
+   mix-representative AND comparable across the federation — instead of each path
+   evaling a single fixed corpus (fim-json) while training the mix. Held-out
+   (the tail) so it's not the exact windows training samples. nil when MMLLM_MIX
+   is unset (caller falls back to val-path)."
+  []
+  (when-let [mix (pick-mix)]
+    (let [per    (python/int (.get (.- os environ) "MMLLM_MIX_VAL_PER_CORPUS" "4096"))
+          chunks (for [pair mix
+                       :let [ten (nth pair 0)
+                             n   (.size ten 0)
+                             k   (min n per)]]
+                   (.narrow ten 0 (- n k) k))]
+      (torch/cat (python/list chunks)))))
+
 
 (defn make-corpus-tracker
   "Per-corpus rolling loss tracker. Returns a Python dict whose values
@@ -4452,7 +4471,12 @@
         ;; over fixed windows doesn't repeatedly cast.
         train-data (when (nil? mix)
                      (corp/load-as-tensor train-path ** :use_mmap true))
-        val-data   (corp/load-as-tensor val-path)
+        ;; Eval on the deterministic held-out MIX (tail of every MMLLM_MIX
+        ;; corpus) when training the mix, so ctrl_bpc / ablation Δ reflect what
+        ;; we actually train AND are byte-identical across the federation — the
+        ;; MLX trainer calls this same pick-mix-val. Falls back to the single
+        ;; val-path when MMLLM_MIX is unset (genesis / single-corpus runs).
+        val-data   (or (pick-mix-val) (corp/load-as-tensor val-path))
         ;; opt-dense: single-group AdamW unless MMLLM_LR_KAB_MULT differs
         ;; from MMLLM_LR_DENSE_MULT, in which case K_a/K_b move to a
         ;; separate group with its own lr (#3 spike). See make-opt-dense.

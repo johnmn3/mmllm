@@ -495,12 +495,13 @@ def train_round(cfg, train_path, val_path, ckpt_dir, log_path,
         eval_b = int(os.environ.get("MMLLM_EVAL_BATCH", "16"))   # torch evals at 16
         eval_mode = os.environ.get("MMLLM_MLX_EVAL_MODE", "mix" if _mix else "val")
         if eval_mode == "mix" and _mix:
-            per = int(os.environ.get("MMLLM_MLX_EVAL_PER_CORPUS", "4096"))
-            chunks = []
-            for _p, _w in ents:
-                a = np.asarray(load_corpus(_p)).astype(np.int64).reshape(-1)
-                chunks.append(a[-per:] if a.size > per else a)   # held-out tail
-            vdata = torch.from_numpy(np.concatenate(chunks))
+            # Same builder the torch train-long calls (core.lpy:pick-mix-val):
+            # held-out tail of EACH MMLLM_MIX corpus, in MMLLM_MIX order, sized by
+            # MMLLM_MIX_VAL_PER_CORPUS. Calling it (rather than rebuilding inline)
+            # is what guarantees MLX and fork birds eval byte-identical tokens, so
+            # the harvest's cross-bird ctrl_bpc comparison stays valid.
+            vdata = bvar("pick-mix-val")()
+            per = int(os.environ.get("MMLLM_MIX_VAL_PER_CORPUS", "4096"))
             print(f"  [mlx] eval corpus: mix held-out ({len(ents)} corpora × {per} tok)")
         elif eval_mode == "round":
             vdata = load_corpus(corpus_path)
