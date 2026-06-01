@@ -264,26 +264,41 @@ def train_round(cfg, train_path, val_path, ckpt_dir, log_path,
     params_fn = bvar("parameters")
     vocab = m.get(K("tok-emb")).weight.shape[0]
 
-    # Chain resume: load the prior round's dense.pt positionally. V_net carries
-    # across rounds via its stable mmap path (bank_on_gpu=false); V_local resets
-    # to build-time init — standard chain semantics (dense+V_net forward, V_local
-    # zero each round).
-    resume = os.path.join(ckpt_dir, "dense.pt")
+    # Chain resume: load the LATEST ckpt_dir/step-<N>/dense.pt — the layout
+    # extend_chain.sh uses (it seeds the chain head at step-1/dense.pt and reads
+    # the bird's output from the highest step-N dir). Loading from ckpt_dir
+    # directly would MISS the head and train from scratch, regressing the chain.
+    # V_net carries across rounds via its stable mmap path (bank_on_gpu=false);
+    # V_local resets to build-time init — standard chain semantics.
+    import glob as _glob, re as _re
+    resume_step = 0
+    _cands = []
+    for _p in _glob.glob(os.path.join(ckpt_dir, "step-*")):
+        _mo = _re.match(r".*step-(\d+)$", _p)
+        if _mo and os.path.exists(os.path.join(_p, "dense.pt")):
+            _cands.append((int(_mo.group(1)), _p))
+    _cands.sort()
     if (os.environ.get("MMLLM_MLX_RESUME", "true").lower() in ("1", "true")
-            and os.path.exists(resume)):
+            and _cands):
+        resume_step, resume_dir = _cands[-1]
+        resume = os.path.join(resume_dir, "dense.pt")
         saved = list(torch.load(resume, map_location="cpu", weights_only=False))
         ps = list(params_fn(m))
         nload = 0
         for p, s in zip(ps, saved):
             if tuple(p.shape) == tuple(s.shape):
                 p.data.copy_(s.to(p.dtype)); nload += 1
-        print(f"  [mlx] resumed {nload}/{len(ps)} dense params from {resume}")
+        print(f"  [mlx] resumed {nload}/{len(ps)} dense params from {resume} (step {resume_step})")
         # chain semantics: V_local zero-inits each round (V_net carries via mmap).
         if os.environ.get("MMLLM_MLX_RESET_LOCAL", "true").lower() in ("1", "true"):
             for blk in m.get(K("blocks")):
                 mem = blk.get(K("memory"))
                 if mem is not None:
                     mem.V.weight.data.zero_()
+
+    # steps this round = train from the resumed step toward `total` (extend_chain
+    # passes total=STEPS+1 and seeds step-1, i.e. STEPS training steps).
+    n_steps = min(max(1, total - resume_step), cap)
 
     # corpus -> flat int token array (host)
     data = load_corpus(train_path)
@@ -378,10 +393,16 @@ def train_round(cfg, train_path, val_path, ckpt_dir, log_path,
 
     # write trained weights back into the torch model + save (harvest-compatible)
     _write_back(trainable, m, K)
-    os.makedirs(ckpt_dir, exist_ok=True)
-    dense_path = os.path.join(ckpt_dir, "dense.pt")
-    params_fn = bvar("parameters")
+    # Save dense.pt into a step-<total> dir (the layout extend_chain.sh reads:
+    # it copies the highest step-N/dense.pt out for delta-encode + push). Bank
+    # bins stay at ckpt_dir level (matches save-checkpoint!).
+    target_step = total
+    step_dir = os.path.join(ckpt_dir, f"step-{target_step}")
+    os.makedirs(step_dir, exist_ok=True)
+    dense_path = os.path.join(step_dir, "dense.pt")
     torch.save([p.detach().clone() for p in params_fn(m)], dense_path)
+    with open(os.path.join(step_dir, "step.txt"), "w") as _sf:
+        _sf.write(str(target_step))
     # bank V -> per-layer bins (the harvest reads these; same path as
     # save-checkpoint!'s mem.save_to_mmap). NetBank V is mmap-backed and the
     # write-back .copy_ writes through; Local needs an explicit save_to_mmap.
