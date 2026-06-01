@@ -618,6 +618,16 @@ if [ -n "$PR_NUM" ] && command -v gh > /dev/null 2>&1; then
     2>&1 | tail -1 || true
 fi
 
+# Prune THIS repo's consumed bird branches (latest round < chain head r$START_ROUND).
+# The bird path runs ON the fork with a write-capable token, so it reclaims
+# consumed FORK branches that the upstream harvest (no fork perms) and the
+# schedule-only branch-janitor (cron doesn't fire on forks) never reach. Same
+# safe criterion as harvest_action.sh's prune; gated + non-fatal.
+if [ "${MMLLM_PRUNE_BIRD_BRANCHES:-true}" = "true" ] && [ -f scripts/prune_consumed_birds.sh ]; then
+  PCB_TRAIN_PREFIX="claude/train-${CHAIN_TAG}-" PCB_HEAD_ROUND="$START_ROUND" \
+    bash scripts/prune_consumed_birds.sh || true
+fi
+
 echo "✓ DONE: $N_ROUNDS rounds complete. branch=$BR  PR=#${PR_NUM:-none}  final_ctrl=$FINAL_CTRL"
 
 # ── Celebration sequence ─────────────────────────────────────────────
