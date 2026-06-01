@@ -52,7 +52,10 @@
            [mmllm.spec_decode :as spec]
            [mmllm.optim :as vbopt]
            [mmllm.evals :as ev]
-           [mmllm.datasets :as ds]))
+           [mmllm.datasets :as ds]
+           ;; Optional MLX backend (Apple Silicon). __init__ guards the mlx.core
+           ;; import, so this is always safe to import — HAS_MLX is False on CI.
+           [mmllm.mlx :as mlxbk]))
 
 (defn- mps-available? []
   (try
@@ -5603,8 +5606,16 @@
                              (.__setitem__ (.- os environ) "MMLLM_BATCH" "4"))
                            (when (nil? (.get (.- os environ) "MMLLM_BANK_ON_GPU"))
                              (.__setitem__ (.- os environ) "MMLLM_BANK_ON_GPU" "false"))
-                           (train-long cfg2 train-path val-path ckpt-dir log-path
-                                       total eval-every ckpt-every)
+                           ;; MLX backend seam: when MMLLM_BACKEND=mlx and mlx is
+                           ;; importable (Apple Silicon), run the round in MLX;
+                           ;; otherwise fall through to the canonical torch path.
+                           ;; CI (no mlx) always takes train-long.
+                           (if (mlxbk/active)
+                             (do (println "  backend=mlx (Apple-Silicon MLX trainer)")
+                                 (mlxbk/run_round cfg2 train-path val-path ckpt-dir log-path
+                                                  total eval-every ckpt-every))
+                             (train-long cfg2 train-path val-path ckpt-dir log-path
+                                         total eval-every ckpt-every))
                            (println "done.")))
       "train-cpu"     (let [base       (or (second args) "/tmp/mmllm-cpu/corpus.bin")
                             mpath      (or (nth args 2 nil) "/tmp/mmllm-cpu/bank")
