@@ -596,7 +596,13 @@ EOF
   }
 
   # Chunk 1: previous round's deletion (staged above) + dense + logs (small).
-  git add "$DEST/dense.pt" "$DEST"/round-*.log.jsonl "$DEST/wall.tsv" 2>/dev/null
+  # dense.pt is the required payload (fail loudly if absent); wall.tsv + the
+  # round-*.log.jsonl glob are optional — a short / eval-less round may have no
+  # log, and an UNMATCHED glob makes `git add` fatal (exit 128). Guard with -e.
+  git add "$DEST/dense.pt"
+  [ -e "$DEST/wall.tsv" ] && git add "$DEST/wall.tsv"
+  for _lf in "$DEST"/round-*.log.jsonl; do [ -e "$_lf" ] && git add "$_lf"; done
+  true
   _commit_push "train-r$CUR_ROUND $HANDLE — dense+logs (step $step/$N_ROUNDS)"
 
   # Chunks 2..N: delta-sparse-net layers, accumulated up to ~50MB per push.
