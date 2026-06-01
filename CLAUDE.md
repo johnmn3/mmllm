@@ -87,6 +87,27 @@ Per-round chain blobs (V_net deltas + dense) are handled separately by
 `scripts/chain_assets.py` (per-harvest release + manifest). See the
 prevent-bloat work. To refresh a static bundle, bump its `-vN` tag.
 
+## Local birds (run a bird on your own silicon)
+
+Any local box can be a first-class bird — train a few 50-step rounds on local
+hardware (Apple-Silicon MPS / CUDA / CPU) and push the minimal changeset to your
+fork, exactly like a GitHub-Actions fork bird. Upstream's hourly harvest scans
+forks and FedAvg-merges it into the chain.
+
+Runbook:
+1. Fork `github.com/johnmn3/mmllm`; clone **your fork**; `cd` in.
+2. `gh auth login` (push access to your fork) and install `uv`.
+3. `bash scripts/run_local_bird.sh [N_ROUNDS]`  (default 5 × 50 steps).
+
+`run_local_bird.sh` auto-bootstraps the venv (uv), detects the device/threads,
+sets a stable per-host handle, then routes through **`scripts/train.sh`** with
+`MMLLM_LOCAL_BIRD=1`. So a local bird is byte-identical to a fork bird — same
+release-asset fetch of the chain head + corpora, same `extend_chain` training,
+same chunked push + re-root-on-fork-main + self-prune. `MMLLM_LOCAL_BIRD=1` only
+skips the linux-x86 offline-wheel install (uses your venv) and the
+Linux-only `/proc/meminfo` sampler; the CI path is unchanged. Force CPU with
+`MMLLM_DEVICE=cpu`. MPS never blocks consolidation (`PYTORCH_ENABLE_MPS_FALLBACK=1`).
+
 ## TERMINOLOGY — DO NOT CONFUSE
 
 The N=16 entities within each Local layer are **routers**, not "trunks".
