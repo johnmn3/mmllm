@@ -104,6 +104,22 @@ if [ "${MMLLM_PRUNE_ONLY:-}" = "true" ]; then
   exit 0
 fi
 
+# --- 0.45) Merge divergent leaf heads (option-3) BEFORE the per-round harvest ---
+# When a fast bird outpaces the federation (e.g. an MLX bird doing 10 rounds vs
+# fork birds doing 1), the chain forks into divergent tips off a common base.
+# Average them into ONE head (FedAvg: V_net row-aware + dense mean) rather than
+# highest-round-wins orphaning the lower tip and stranding contributors' compute.
+# We only DROP a head when a corpus-comparable eval can name a winner (cross-corpus
+# birds have none → always average). Idempotent: no-op when the chain is linear
+# (a merged head records merged_from, so its consumed tips don't re-trigger).
+if [ -n "$CHAIN_PREFIX" ] && [ "${MMLLM_SKIP_MERGE_DIVERGENT:-}" != "true" ] \
+   && python3 scripts/detect_divergent_heads.py "$CHAIN_PREFIX" --dirs 2>/dev/null | grep -q .; then
+  echo "▶ divergent tips detected — averaging into one head (option-3) before harvest…"
+  MMLLM_REPO="${GITHUB_REPOSITORY:-johnmn3/mmllm}" MMLLM_MERGE_PUBLISH=true \
+    bash scripts/merge_divergent_heads.sh "$CHAIN_PREFIX" 2>&1 | sed 's/^/    /' \
+    || echo "    ▶ divergent-head merge failed (non-fatal) — continuing to per-round harvest"
+fi
+
 # Helper: peek at a remote branch tree (fetches if not local) and emit
 # every chain-design-r<N>/ round number present at the
 # workers/<HANDLE>/chain-design-r<N>/ canonical bird-payload path.
