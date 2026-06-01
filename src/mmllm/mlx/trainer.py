@@ -249,16 +249,18 @@ def train_round(cfg, train_path, val_path, ckpt_dir, log_path,
     build_model = bvar("build-model")
     from mmllm.corpus import load_as_tensor as load_corpus  # plain Python module
 
-    B = int(os.environ.get("MMLLM_BATCH", "4"))
+    B = int(os.environ.get("MMLLM_BATCH", str(bvar("pick-batch")())))  # match torch's pick-batch
     T = int(cfg.get(K("seq-len")) or 256)
-    lr_dense = float(os.environ.get("MMLLM_LR_DENSE", "1e-3"))
-    lr_bank = float(os.environ.get("MMLLM_LR", "3e-2"))
-    lr_net = float(os.environ.get("MMLLM_LR_NET", "1e-4"))
     cap = int(os.environ.get("MMLLM_MLX_MAX_STEPS", str(total)))
     n_steps = min(total, cap)
+    # LRs are NOT fixed here — they're computed per step by the recipe schedule
+    # (lr-at-step × pick-lr-{bank,net,dense}-mult; see `schedule` below). The bank
+    # SparseAdam / dense AdamW are seeded with the recipe base and overwritten each
+    # step, so there are no standalone lr_dense/lr_bank/lr_net knobs to drift.
+    lr_base = float(bvar("pick-lr")())
 
     print(f"  [mlx] train_round: B={B} T={T} steps={n_steps} "
-          f"lr_dense={lr_dense} lr_bank={lr_bank} lr_net={lr_net}")
+          f"lr_base={lr_base} (per-step schedule: pick-lr × {{bank,net,dense}}-mult)")
 
     m = build_model(cfg)
     params_fn = bvar("parameters")
@@ -349,11 +351,11 @@ def train_round(cfg, train_path, val_path, ckpt_dir, log_path,
     for bi, tb in enumerate(trainable["blocks"]):
         if "V_local" in tb:
             sparse[(bi, "V_local")] = SparseAdam(tb["V_local"].shape[0],
-                                                 tb["V_local"].shape[1], lr=lr_bank)
+                                                 tb["V_local"].shape[1], lr=lr_base)
         if "V_net" in tb:
             sparse[(bi, "V_net")] = SparseAdam(tb["V_net"].shape[0],
-                                               tb["V_net"].shape[1], lr=lr_net)
-    dense_opt = _DenseAdam(lr=lr_dense)
+                                               tb["V_net"].shape[1], lr=lr_base)
+    dense_opt = _DenseAdam(lr=lr_base)  # overwritten per-step by the schedule
     sparse_keys = {f".blocks.{bi}.{name}" for (bi, name) in sparse}
     # snapshot V tables at init for the consolidation/moved% check (CLAUDE.md
     # false-positive guard: real training -> moved% >> 1% AND cos(V,init) < 1).
@@ -474,13 +476,39 @@ def train_round(cfg, train_path, val_path, ckpt_dir, log_path,
         result[f"{name}_b{bi}_moved%"] = round(moved * 100, 3)
         print(f"  [mlx] V_net block{bi}: moved%={moved*100:.3f}  cos(V,init)={cos:.4f}")
 
-    # eval ctrl_bpc on val (torch forward of the MLX-trained, written-back model
-    # — also cross-validates the write-back). Best-effort.
+    # eval ctrl_bpc (torch forward of the MLX-trained, written-back model — also
+    # cross-validates the write-back). Best-effort.
+    #
+    # Eval corpus must REFLECT the training distribution, not a fixed single corpus
+    # — otherwise ctrl_bpc measures drift away from that corpus rather than quality
+    # (the chain-wide default evals val_path=fim-json even while training the diverse
+    # MMLLM_MIX). MMLLM_MLX_EVAL_MODE:
+    #   mix   (default when MMLLM_MIX set) — held-out tail of EACH mix corpus,
+    #          concatenated: mix-representative AND identical across birds (so the
+    #          harvest's cross-bird ctrl_bpc comparison stays valid).
+    #   round — this round's trained corpus (reflects the round; not cross-comparable)
+    #   val   — legacy fixed val_path (fim-json)
+    # Eval cap + B mirror the torch path (pick-ablation-eval-cap, B=16).
     try:
         eval_bpc = bvar("eval-bpc")
-        vdata = load_corpus(val_path)
-        ev = int(os.environ.get("MMLLM_EVAL_MAX_TOKENS", "20000"))
-        r = eval_bpc(m, vdata, T, B, ev)
+        ev = int(bvar("pick-ablation-eval-cap")(25000))          # = torch's cap (recipe-driven)
+        eval_b = int(os.environ.get("MMLLM_EVAL_BATCH", "16"))   # torch evals at 16
+        eval_mode = os.environ.get("MMLLM_MLX_EVAL_MODE", "mix" if _mix else "val")
+        if eval_mode == "mix" and _mix:
+            per = int(os.environ.get("MMLLM_MLX_EVAL_PER_CORPUS", "4096"))
+            chunks = []
+            for _p, _w in ents:
+                a = np.asarray(load_corpus(_p)).astype(np.int64).reshape(-1)
+                chunks.append(a[-per:] if a.size > per else a)   # held-out tail
+            vdata = torch.from_numpy(np.concatenate(chunks))
+            print(f"  [mlx] eval corpus: mix held-out ({len(ents)} corpora × {per} tok)")
+        elif eval_mode == "round":
+            vdata = load_corpus(corpus_path)
+            print(f"  [mlx] eval corpus: {os.path.basename(corpus_path)} (this round's)")
+        else:
+            vdata = load_corpus(val_path)
+            print(f"  [mlx] eval corpus: {os.path.basename(val_path)} (fixed val)")
+        r = eval_bpc(m, vdata, T, eval_b, ev)
         bpc = float(r.get(kw.keyword("bpc")))
         result["ctrl_bpc"] = bpc
         print(f"  [mlx] eval ctrl_bpc={bpc:.4f}")
@@ -493,7 +521,7 @@ def train_round(cfg, train_path, val_path, ckpt_dir, log_path,
             # Δ_net only per round (the headline consolidation signal). Δ_local /
             # Δ_both are extra eval-bpc passes — expensive on the 24-layer CPU
             # eval — so we skip them per round (extend_chain tolerates null).
-            _n = bvar("ablation-step-net!")(m, vdata, T, B, ev)
+            _n = bvar("ablation-step-net!")(m, vdata, T, eval_b, ev)
             dn = (float(_n) - bpc) if _n is not None else None
             if dn is not None:
                 result["delta_net"] = dn
