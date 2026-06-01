@@ -300,15 +300,37 @@ def train_round(cfg, train_path, val_path, ckpt_dir, log_path,
     # passes total=STEPS+1 and seeds step-1, i.e. STEPS training steps).
     n_steps = min(max(1, total - resume_step), cap)
 
-    # corpus -> flat int token array (host)
-    data = load_corpus(train_path)
+    # Per-ROUND random corpus selection (the recipe: each round draws ONE corpus
+    # from the staged weighted mix — diversity across rounds that averages out in
+    # the federation — rather than per-step mixing). CI stages MMLLM_MIX as
+    # "path:w,path:w,..." (pick-mix). Entropy-seeded so each round's process picks
+    # a different corpus + different windows (the old fixed RandomState(0) trained
+    # the identical windows of a single corpus every round). Falls back to
+    # train_path when MMLLM_MIX is unset.
+    _rng = np.random.default_rng()                       # OS-entropy -> varies per round
+    _mix = os.environ.get("MMLLM_MIX", "").strip()
+    if _mix:
+        ents = []
+        for e in _mix.split(","):
+            e = e.strip()
+            if not e:
+                continue
+            c = e.rfind(":")
+            ents.append((e[:c].strip(), float(e[c + 1:].strip())))
+        paths = [p for p, _ in ents]
+        ws = np.array([w for _, w in ents], dtype=float)
+        corpus_path = paths[int(_rng.choice(len(paths), p=ws / ws.sum()))]
+        print(f"  [mlx] round corpus: {os.path.basename(corpus_path)} "
+              f"(random draw from {len(paths)}-way mix)")
+    else:
+        corpus_path = train_path
+    data = load_corpus(corpus_path)
     toks_np = np.asarray(data).astype(np.int64).reshape(-1)
     n_tok = toks_np.size
-    rng = np.random.RandomState(0)
 
     def batch():
         # random-window LM batching: xb=[off:off+T], yb=[off+1:off+T+1]
-        offs = rng.randint(0, n_tok - T - 1, size=B)
+        offs = _rng.integers(0, n_tok - T - 1, size=B)
         xb = np.stack([toks_np[o:o + T] for o in offs])
         yb = np.stack([toks_np[o + 1:o + 1 + T] for o in offs])
         return mx.array(xb), mx.array(yb)
@@ -468,17 +490,14 @@ def train_round(cfg, train_path, val_path, ckpt_dir, log_path,
         # the bird reported FINAL_CTRL=unknown).
         dl = dn = db = None
         try:
-            a_loc = bvar("ablation-step!"); a_net = bvar("ablation-step-net!")
-            a_both = bvar("ablation-step-both!")
-            _l = a_loc(m, vdata, T, B, ev)
-            dl = (float(_l) - bpc) if _l is not None else None
-            _n = a_net(m, vdata, T, B, ev)
+            # Δ_net only per round (the headline consolidation signal). Δ_local /
+            # Δ_both are extra eval-bpc passes — expensive on the 24-layer CPU
+            # eval — so we skip them per round (extend_chain tolerates null).
+            _n = bvar("ablation-step-net!")(m, vdata, T, B, ev)
             dn = (float(_n) - bpc) if _n is not None else None
-            _b = a_both(m, vdata, T, B, ev)
-            db = (float(_b) - bpc) if _b is not None else None
             if dn is not None:
                 result["delta_net"] = dn
-            print(f"  [mlx] Δ_local={dl}  Δ_net={dn}  Δ_both={db}")
+            print(f"  [mlx] Δ_net={dn}  (ablated_bpc={_n})")
         except Exception as e:
             print(f"  [mlx] ablation skipped: {e}")
         # emit the harvest/summary event (extend_chain reads control_bpc/delta_*).
