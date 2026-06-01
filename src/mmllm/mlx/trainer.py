@@ -338,8 +338,7 @@ def train_round(cfg, train_path, val_path, ckpt_dir, log_path,
     v_init = {k: np.array(trainable["blocks"][bi][name])
               for k in sparse for (bi, name) in [k]}
 
-    z_coef = float(os.environ.get("MMLLM_Z_LOSS_COEF", "1e-5"))
-    distill_end = float(os.environ.get("MMLLM_DISTILL_COEF_END", "1.0"))
+    z_coef = float(bvar("pick-z-loss-coef")())
 
     def loss_fn(tr):
         xb, yb = static["_xb"], static["_yb"]
@@ -356,21 +355,31 @@ def train_round(cfg, train_path, val_path, ckpt_dir, log_path,
             loss = loss + dc * (distill_total / max(1, n_distill))
         return loss
 
-    def schedule(step):
-        """Wake/sleep: Local phase (0-50%) fills V_local (bank hot, net~0, no
-        distill); Net phase (50-100%) cosines bank down, ramps net up + distill
-        in — Local's content flows to Net via the distill MSE (CLAUDE.md)."""
-        frac = step / max(1, n_steps)
-        if frac < 0.5:
-            return lr_bank, lr_net * 0.01, 0.0
-        p = (frac - 0.5) / 0.5
-        lb = lr_bank * 0.5 * (1.0 + math.cos(math.pi * p))   # cosine 1->0
-        return lb, lr_net * p, distill_end * p
+    # Per-step LR + distill schedule — call the SAME basilisp functions train-long
+    # uses (core.lpy:4783-4789) so the recipe is byte-identical: cur_lr =
+    # lr-at-step(cosine from pick-lr to LR_MIN); lr_bank/lr_net/lr_dense = cur_lr ×
+    # the per-tier mult ramps (lr_net ramps to pick-lr × LR_NET_MULT_END — the
+    # wake/sleep consolidation the prod recipe needs; my old hardcoded lr_net=1e-4
+    # was the bug that left V_net frozen). The round trains the [resume_step+1,
+    # total] slice of the global schedule.
+    _lr_at_step = bvar("lr-at-step"); _pick_lr = bvar("pick-lr")
+    _pick_lr_min = bvar("pick-lr-min"); _warmup = bvar("pick-lr-warmup")()
+    _bank_mult = bvar("pick-lr-bank-mult"); _net_mult = bvar("pick-lr-net-mult")
+    _dense_mult = bvar("pick-lr-dense-mult"); _distill = bvar("pick-distill-coef")
+
+    def schedule(local_step):
+        g = resume_step + local_step                       # global step in schedule
+        cur = float(_lr_at_step(g, total, _pick_lr(), _warmup, _pick_lr_min()))
+        return (cur * float(_bank_mult(g, total)),         # lr_bank (V_local)
+                cur * float(_net_mult(g, total)),          # lr_net  (V_net)
+                cur * float(_dense_mult(g, total)),        # lr_dense
+                float(_distill(g, total)))                 # distill coef
 
     losses = []
     for step in range(1, n_steps + 1):
-        lb, ln, dc = schedule(step)
+        lb, ln, ld, dc = schedule(step)
         static["_distill_coef"] = dc
+        dense_opt.lr = ld
         for (bi, name), opt in sparse.items():
             opt.lr = lb if name == "V_local" else ln
         xb, yb = batch()
@@ -389,7 +398,7 @@ def train_round(cfg, train_path, val_path, ckpt_dir, log_path,
         losses.append(float(loss))
         if step % max(1, eval_every) == 0 or step == n_steps:
             print(f"  [mlx] step {step}/{n_steps}  loss={losses[-1]:.4f}  "
-                  f"lr_b={lb:.2e} lr_n={ln:.2e} distill_c={dc:.2f}")
+                  f"lr_b={lb:.2e} lr_n={ln:.2e} lr_d={ld:.2e} distill_c={dc:.2f}")
 
     # write trained weights back into the torch model + save (harvest-compatible)
     _write_back(trainable, m, K)
@@ -432,11 +441,16 @@ def train_round(cfg, train_path, val_path, ckpt_dir, log_path,
     result = {"steps": len(losses), "loss_start": losses[0], "loss_end": losses[-1]}
     for (bi, name), opt in sparse.items():
         cur = np.array(trainable["blocks"][bi][name]); init = v_init[(bi, name)]
+        if name == "V_local":
+            # V_local zero-inits each round — moved%-from-zero is undefined; report
+            # the filled norm (how much Local accumulated this round) instead.
+            print(f"  [mlx] V_local block{bi}: ||V||={np.linalg.norm(cur):.3f} (filled from 0)")
+            continue
         moved = float(np.linalg.norm(cur - init) / (np.linalg.norm(init) + 1e-9))
         cos = float((cur.ravel() @ init.ravel()) /
                     (np.linalg.norm(cur) * np.linalg.norm(init) + 1e-9))
         result[f"{name}_b{bi}_moved%"] = round(moved * 100, 3)
-        print(f"  [mlx] {name} block{bi}: moved%={moved*100:.2f}  cos(V,init)={cos:.4f}")
+        print(f"  [mlx] V_net block{bi}: moved%={moved*100:.3f}  cos(V,init)={cos:.4f}")
 
     # eval ctrl_bpc on val (torch forward of the MLX-trained, written-back model
     # — also cross-validates the write-back). Best-effort.
@@ -448,17 +462,35 @@ def train_round(cfg, train_path, val_path, ckpt_dir, log_path,
         bpc = float(r.get(kw.keyword("bpc")))
         result["ctrl_bpc"] = bpc
         print(f"  [mlx] eval ctrl_bpc={bpc:.4f}")
-        # ablation Δ_net: zero V_net -> re-eval -> restore. The headline
-        # consolidation metric a bird reports (Δ_net = ablated - ctrl).
+        # ablations: Δ_local, Δ_net, Δ_both (zero the bank V -> re-eval -> restore).
+        # Then write the {"event":"ablation",...} JSON line extend_chain.sh parses
+        # for FINAL_CTRL + the round summary (control_bpc/delta_* keys; without it
+        # the bird reported FINAL_CTRL=unknown).
+        dl = dn = db = None
         try:
-            abl = bvar("ablation-step-net!")
-            ablated = abl(m, vdata, T, B, ev)
-            if ablated is not None:
-                dnet = float(ablated) - bpc
-                result["delta_net"] = dnet
-                print(f"  [mlx] Δ_net={dnet:+.5f}  (ablated_bpc={float(ablated):.4f})")
+            a_loc = bvar("ablation-step!"); a_net = bvar("ablation-step-net!")
+            a_both = bvar("ablation-step-both!")
+            _l = a_loc(m, vdata, T, B, ev)
+            dl = (float(_l) - bpc) if _l is not None else None
+            _n = a_net(m, vdata, T, B, ev)
+            dn = (float(_n) - bpc) if _n is not None else None
+            _b = a_both(m, vdata, T, B, ev)
+            db = (float(_b) - bpc) if _b is not None else None
+            if dn is not None:
+                result["delta_net"] = dn
+            print(f"  [mlx] Δ_local={dl}  Δ_net={dn}  Δ_both={db}")
         except Exception as e:
             print(f"  [mlx] ablation skipped: {e}")
+        # emit the harvest/summary event (extend_chain reads control_bpc/delta_*).
+        try:
+            import json as _json
+            with open(log_path, "a") as _lf:
+                _lf.write(_json.dumps({
+                    "event": "ablation", "control_bpc": bpc,
+                    "delta_local": dl, "delta_net": dn, "delta_both": db,
+                }) + "\n")
+        except Exception as e:
+            print(f"  [mlx] log-event write skipped: {e}")
     except Exception as e:
         print(f"  [mlx] eval skipped: {e}")
     return result
