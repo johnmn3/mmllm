@@ -118,13 +118,16 @@ fi
 if [ -n "$CHAIN_PREFIX" ]; then
   REF_HARVEST_DIR="workers/dispatcher/harvest-0way-r0_${CHAIN_PREFIX}"
   REF_DIR="$REF_HARVEST_DIR/round-0"
-  HEAD_REGEX="workers/dispatcher/harvest-(fold)?[0-9]+way-r[0-9]+_${CHAIN_PREFIX}\$"
+  # (-merge)? matches divergent-head merge dirs (harvest-2way-merge-r140_<prefix>)
+  # produced by merge_divergent_heads.sh — without it those merged heads are
+  # invisible to selection and birds build on the pre-merge tip instead.
+  HEAD_REGEX="workers/dispatcher/harvest-(fold)?[0-9]+way(-merge)?-r[0-9]+_${CHAIN_PREFIX}\$"
   EXTRACT_ROUND_RE="[0-9]+(?=_${CHAIN_PREFIX}\$)"
   echo "▶ chain selection: prefix=${CHAIN_PREFIX}, reference=${REF_DIR}"
 else
   REF_HARVEST_DIR="workers/dispatcher/harvest-5way-r10"
   REF_DIR="$REF_HARVEST_DIR/round-10"
-  HEAD_REGEX='workers/dispatcher/harvest-(fold)?[0-9]+way-r[0-9]+$'
+  HEAD_REGEX='workers/dispatcher/harvest-(fold)?[0-9]+way(-merge)?-r[0-9]+$'
   EXTRACT_ROUND_RE='[0-9]+$'
 fi
 
