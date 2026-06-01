@@ -518,6 +518,28 @@ EOF
   # LAST as the completion marker: if any chunk fails after retries we exit
   # 1 before meta lands, so the harvest sees a meta-less (incomplete) dir
   # and skips it rather than folding a partial round.
+  _reroot_on_fork_main() {
+    # A fork whose main lags upstream can't push its bird branch: the branch is
+    # rooted at upstream main, so it carries upstream's .github/workflows edits,
+    # and GITHUB_TOKEN may not create/update workflow files (no grantable
+    # `workflows` perm). Re-root the payload on the FORK's OWN main — which the
+    # fork already has — so the push carries only workers/$HANDLE/ (no .github
+    # diff). Training already finished, so the full payload is on disk; one
+    # re-root pushes everything. Returns 0 on a successful force-push.
+    local fm tmpidx nt nc
+    git fetch origin main --depth=1 --filter=blob:none >/dev/null 2>&1 || return 1
+    fm=$(git rev-parse FETCH_HEAD 2>/dev/null) || return 1
+    [ -n "$fm" ] || return 1
+    tmpidx=$(mktemp)
+    GIT_INDEX_FILE="$tmpidx" git read-tree "$fm" 2>/dev/null || { rm -f "$tmpidx"; return 1; }
+    GIT_INDEX_FILE="$tmpidx" git add -A "workers/$HANDLE" 2>/dev/null
+    nt=$(GIT_INDEX_FILE="$tmpidx" git write-tree 2>/dev/null) || { rm -f "$tmpidx"; return 1; }
+    rm -f "$tmpidx"
+    nc=$(git commit-tree "$nt" -p "$fm" -m "bird payload r$CUR_ROUND $HANDLE (re-rooted on fork main)" 2>/dev/null) || return 1
+    echo "    workflow-perm reject → re-rooting payload on fork main ($fm) and force-pushing $BR"
+    git push -f origin "$nc:refs/heads/$BR" 2>&1 | sed 's/^/    git: /'
+    return "${PIPESTATUS[0]}"
+  }
   _push_with_retries() {
     # GitHub's receive-pack intermittently 500s on this large repo for ANY
     # push (a 12MB chunk fails as readily as a 290MB one), in windows that
@@ -532,6 +554,11 @@ EOF
       echo "    [$(date -u +%H:%M:%S)] push attempt $i/18 rc=$PUSH_RC"
       echo "$PUSH_OUT" | tail -4 | sed 's/^/    git: /'
       [ "$PUSH_RC" -eq 0 ] && { pushed=1; break; }
+      # Permanent rejection (stale-fork workflow-perm): don't burn 18 retries —
+      # re-root the payload on the fork's own main and stop.
+      if echo "$PUSH_OUT" | grep -q "create or update workflow"; then
+        if _reroot_on_fork_main; then REROOTED=1; pushed=1; break; fi
+      fi
       wait=$(( 10 * i )); [ "$wait" -gt 120 ] && wait=120
       echo "    push attempt $i/18 failed (rc=$PUSH_RC); retrying in ${wait}s…"
       sleep "$wait"
@@ -548,6 +575,9 @@ EOF
     fi
     git diff --cached --quiet && return 0   # nothing staged → skip this chunk
     git commit -m "$1" --quiet
+    # Once a re-root happened, the full payload is already on origin/$BR (rooted
+    # on fork main); later chunks only commit locally — no push needed.
+    [ "${REROOTED:-0}" = 1 ] && return 0
     if ! _push_with_retries; then
       echo "    ERROR: chunk push failed after retries: $1 — branch NOT fully on origin." >&2
       exit 1
