@@ -61,6 +61,51 @@ torch.save(avg, f"{out}/dense.pt")
 print(f"  dense.pt = mean of {len(ds)} heads → {out}/dense.pt ({os.path.getsize(out+'/dense.pt')/1e6:.1f} MB)")
 PYEOF
 
+# 4b) harvest_meta.json — record the merge so the chain recognizes r<TARGET> as a
+#     proper head and future divergence-detection sees both inputs consumed
+#     (merged_from) and the common base (previous_harvest). Without merged_from the
+#     consumed tips would re-trigger as divergent forever.
+HDIR="workers/dispatcher/harvest-${WAYS}-r${TARGET}_${CHAIN}"
+python3 - "$HDIR" "$TARGET" "$CHAIN" "${TIPS[@]}" <<'PYEOF'
+import json, os, sys, datetime
+hdir, target, chain = sys.argv[1], int(sys.argv[2]), sys.argv[3]
+tips = sys.argv[4:]
+workers, merged_from, ctrls = [], [], []
+base = None
+for t in tips:
+    hm = os.path.join(os.path.dirname(t), "harvest_meta.json")
+    r = int(t.rstrip("/").rsplit("-r", 1)[-1].split("_")[0].split("/")[0])
+    best = mean = None; ways = "?"
+    try:
+        m = json.load(open(hm))
+        best = m.get("worker_ctrl_bpc_best"); mean = m.get("worker_ctrl_bpc_mean")
+        base = base if base is not None else (m.get("previous_harvest") or {}).get("round")
+        ways = m.get("n_workers")
+    except Exception: pass
+    merged_from.append(r)
+    if best is not None: ctrls.append(best)
+    workers.append({"handle": f"r{r}-head", "branch": os.path.dirname(t),
+                    "ctrl_bpc": best, "n_workers": ways})
+meta = {
+    "spork_version": "0.9", "target_round": target, "n_workers": len(tips),
+    "wave": f"merge-r{target}", "merge": True,
+    "merged_from": sorted(merged_from),
+    "workers": workers,
+    "worker_ctrl_bpc_mean": (sum(ctrls)/len(ctrls)) if ctrls else None,
+    "worker_ctrl_bpc_best": (min(ctrls)) if ctrls else None,
+    "previous_harvest": {"round": base},
+    "harvested_at": datetime.datetime.utcnow().isoformat() + "Z",
+    "harvester": "scripts/merge_divergent_heads.sh (option-3: average divergent tips)",
+    "note": ("Divergent-head merge: FedAvg of the listed tips (V_net row-aware + "
+             "dense mean) into one head, so no contributor's compute is orphaned. "
+             "Tips averaged (not dropped) — no corpus-comparable eval to pick a winner."),
+}
+os.makedirs(hdir, exist_ok=True)
+json.dump(meta, open(os.path.join(hdir, "harvest_meta.json"), "w"), indent=2)
+print(f"  harvest_meta.json written: r{target} merged_from={sorted(merged_from)} "
+      f"base=r{base} ctrl_best={meta['worker_ctrl_bpc_best']}")
+PYEOF
+
 # 5) publish — gated. Dry-run by default so this never mutates the live chain
 #    without an explicit opt-in (verify the FedAvg output first, then re-run with
 #    MMLLM_MERGE_PUBLISH=true, or wire this into the harvest cron once trusted).

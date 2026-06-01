@@ -39,17 +39,26 @@ def divergent_sets(chain):
     """Return {base_round: [harvest_dir, ...]} for each set of >1 tip sharing a base."""
     dirs = [d for d in glob.glob(f"{ROOT}/harvest-*-r*_{chain}") if os.path.isdir(d)]
     info = {}
+    referenced = set()        # rounds that some other harvest builds on / consumed
     for d in dirs:
         base = None
+        merged_from = []
         mp = os.path.join(d, "harvest_meta.json")
         if os.path.exists(mp):
             try:
-                base = (json.load(open(mp)).get("previous_harvest") or {}).get("round")
+                m = json.load(open(mp))
+                base = (m.get("previous_harvest") or {}).get("round")
+                # a merge head records the rounds it consumed; those are no longer
+                # tips (else the merged head + a consumed tip re-trigger forever).
+                merged_from = m.get("merged_from") or []
             except Exception:
                 pass
         info[_round(d)] = {"dir": d, "base": base}
+        if base is not None:
+            referenced.add(base)
+        referenced.update(int(x) for x in merged_from)
     bases = {v["base"] for v in info.values() if v["base"] is not None}
-    tips = [r for r in info if r not in bases]            # not extended by any other
+    tips = [r for r in info if r not in referenced]       # not extended/consumed by any other
     byb = defaultdict(list)
     for r in tips:
         byb[info[r]["base"]].append(r)
