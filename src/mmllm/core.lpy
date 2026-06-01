@@ -3247,7 +3247,10 @@
                              n   (.size ten 0)
                              k   (min n per)]]
                    (.narrow ten 0 (- n k) k))]
-      (torch/cat (python/list chunks)))))
+      ;; corpora load mmap'd as uint8; eval-bpc feeds these straight into the
+      ;; token embedding, which requires Long/Int (uint8 → MPSByteType errors).
+      ;; Cast once here so both the torch and MLX eval paths get int64 ids.
+      (.long (torch/cat (python/list chunks))))))
 
 
 (defn make-corpus-tracker
