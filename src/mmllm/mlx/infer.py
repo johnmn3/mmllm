@@ -119,6 +119,81 @@ def generate(params, prompt_ids, n_new, greedy=True):
     return out
 
 
+def make_compiled_decoder(params, B, max_t):
+    """Build an mx.compile'd single-token decode step over a PREALLOCATED
+    (B, H, max_t, hd) KV cache. Fixed shapes + `pos` as a runtime array → compiles
+    once and replays, collapsing the 56-bank × 32-layer per-token Python
+    orchestration into one graph (the measured ~2x over eager; compile traces
+    through the bank gather/topk fine). Cache writes are functional (mask-blend)
+    so they're compile-safe. Returns (step_fn, fresh_cache_fn)."""
+    cos, sin = params["rope_cos"], params["rope_sin"]
+
+    def _proj(x, W, nkv, hd):
+        return mx.transpose((x @ W.T).reshape(B, 1, nkv, hd), (0, 2, 1, 3))
+
+    def step(token, kc, pos):
+        oh = (mx.arange(max_t) == pos).reshape(1, 1, max_t, 1).astype(mx.float32)
+        am = mx.where(mx.arange(max_t) <= pos, 0.0, -1e9).reshape(1, 1, 1, max_t)
+        cp = mx.take(cos, pos, axis=0).reshape(1, 1, 1, -1)
+        sp = mx.take(sin, pos, axis=0).reshape(1, 1, 1, -1)
+        x = params["tok_emb"][token]
+        new_kc = []
+        for b, (ks, vs, kl, vl) in zip(params["blocks"], kc):
+            H, Hs, Hl = b["n_heads"], b["n_short_heads"], b["n_long_heads"]
+            Hskv, Hlkv, hd = b["n_short_kv"], b["n_long_kv"], b["head_dim"]
+            xn = blocks._rms_norm(x, b["norm1_w"], b["norm1_eps"])
+            qf = (xn @ b["q_proj"].T).reshape(B, 1, H, hd)
+            qsh = mx.transpose(qf[:, :, :Hs], (0, 2, 1, 3))
+            qlo = mx.transpose(qf[:, :, Hs:Hs + Hl], (0, 2, 1, 3))
+            nks = _proj(xn, b["k_proj_s"], Hskv, hd); nvs = _proj(xn, b["v_proj_s"], Hskv, hd)
+            nkl = _proj(xn, b["k_proj_l"], Hlkv, hd); nvl = _proj(xn, b["v_proj_l"], Hlkv, hd)
+            qsh = blocks._apply_rope(qsh, cp, sp); nks = blocks._apply_rope(nks, cp, sp)
+            ks = ks * (1 - oh) + nks * oh; vs = vs * (1 - oh) + nvs * oh
+            kl = kl * (1 - oh) + nkl * oh; vl = vl * (1 - oh) + nvl * oh
+            sc = 1.0 / math.sqrt(hd)
+            a_s = mx.fast.scaled_dot_product_attention(
+                qsh, blocks._gqa(ks, Hs // Hskv), blocks._gqa(vs, Hs // Hskv), scale=sc, mask=am)
+            a_l = mx.fast.scaled_dot_product_attention(
+                qlo, blocks._gqa(kl, Hl // Hlkv), blocks._gqa(vl, Hl // Hlkv), scale=sc, mask=am)
+            if b.get("memory") or b.get("netbank"):
+                bq = mx.transpose(qlo, (0, 2, 1, 3)).reshape(B, 1, Hl * hd)
+                mo = lo = None
+                if b.get("memory"):
+                    mo = mx.transpose(banks.local_forward(b["memory"], bq, b.get("trunk_ids")).reshape(B, 1, Hl, hd), (0, 2, 1, 3))
+                if b.get("netbank"):
+                    lo = mx.transpose(banks.netbank_forward(b["netbank"], bq).reshape(B, 1, Hl, hd), (0, 2, 1, 3))
+                a_l = b["gate"](qlo, a_l, mo, lo)
+            o = mx.transpose(mx.concatenate([a_s, a_l], axis=1), (0, 2, 1, 3)).reshape(B, 1, H * hd) @ b["o_proj"].T
+            x = x + o
+            h = blocks._rms_norm(x, b["norm2_w"], b["norm2_eps"]); g = h @ b["gate_proj"].T
+            x = x + ((g * mx.sigmoid(g)) * (h @ b["up_proj"].T)) @ b["down_proj"].T
+            new_kc.append((ks, vs, kl, vl))
+        return x @ params["tok_emb"].T, new_kc
+
+    def fresh_cache():
+        return [[mx.zeros((B, b["n_short_kv"], max_t, b["head_dim"])),
+                 mx.zeros((B, b["n_short_kv"], max_t, b["head_dim"])),
+                 mx.zeros((B, b["n_long_kv"], max_t, b["head_dim"])),
+                 mx.zeros((B, b["n_long_kv"], max_t, b["head_dim"]))]
+                for b in params["blocks"]]
+    return mx.compile(step), fresh_cache
+
+
+def bench_compiled(params, n_new=128, B=1, max_t=224, warmup=8):
+    """tok/s for the compiled fixed-cache decoder (~2x the eager path)."""
+    step, fresh = make_compiled_decoder(params, B, max_t)
+    def run(n):
+        kc = fresh()
+        lg = None
+        for i in range(n):
+            lg, kc = step(mx.zeros((B, 1), dtype=mx.int32), kc, mx.array(i, dtype=mx.int32))
+        mx.eval(lg, kc[-1][0])
+    run(warmup); mx.synchronize()
+    t0 = time.time(); run(n_new); mx.synchronize()
+    dt = time.time() - t0
+    return (n_new * B) / dt, 1000.0 * dt / n_new
+
+
 def bench(params, prompt_len=128, n_new=128, B=1, warmup=16):
     """tok/s for B-stream decode. Returns (tok_per_s, ms_per_tok)."""
     prompt = mx.zeros((B, prompt_len), dtype=mx.int32)
