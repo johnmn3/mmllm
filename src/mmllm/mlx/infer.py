@@ -119,6 +119,45 @@ def generate(params, prompt_ids, n_new, greedy=True):
     return out
 
 
+def offload_netbank_to_disk(params, cache_dir):
+    """MODE 2 (gpu/disk-netbank): move each NetBank V table from a GPU mx.array to
+    an on-disk numpy memmap, freeing ~1 GB of unified memory. The decode then
+    host-gathers only the top-k rows per step (banks.netbank_forward's V_mmap
+    path). Use the EAGER `generate()` with these params — the host gather can't be
+    mx.compile'd, so this mode doesn't use make_compiled_decoder.
+
+    For Apple-Silicon boxes where the full NetBank won't fit in unified memory
+    alongside the model + KV cache. Slower than mode 1 (per-layer GPU<->host sync)
+    — a memory fallback, not a speed mode. Returns the mutated params."""
+    import os
+    import numpy as np
+    os.makedirs(cache_dir, exist_ok=True)
+    for i, b in enumerate(params["blocks"]):
+        nb = b.get("netbank")
+        if nb is not None and "V" in nb:
+            V = np.asarray(nb["V"]).astype(np.float32)
+            path = os.path.join(cache_dir, f"vnet.{i}.bin")
+            V.tofile(path)
+            nb["V_mmap"] = np.memmap(path, dtype=np.float32, mode="r", shape=V.shape)
+            del nb["V"]
+    return params
+
+
+# ── Three local-inference modes (a FIM agent picks one by hardware) ───────────
+#   MODE 1  gpu/gpu      : MLX, NetBank V on GPU. make_compiled_decoder + the
+#                          compiled decode. Fastest (~134 tok/s on M5). Apple
+#                          Silicon with enough unified memory (default).
+#   MODE 2  gpu/disk-net : MLX, dense+Local on GPU, NetBank V mmap'd via
+#                          offload_netbank_to_disk(); EAGER generate(). Saves
+#                          ~1 GB; slower (~55 tok/s, host sync). Tight-VRAM Apple
+#                          Silicon — a memory fallback, NOT a speed mode (on the
+#                          M5 it's slower than mode 3 because of the sync).
+#   MODE 3  cpu/disk-net : the TORCH CPU path (core.lpy bench-inference / sample,
+#                          MMLLM_BANK_ON_GPU=false). The only mode that runs on
+#                          non-Apple-Silicon (e.g. a 2018 Intel Mac). ~93 tok/s M5.
+# All three run on an M-series box; modes 1-2 require Apple Silicon (MLX).
+
+
 def make_compiled_decoder(params, B, max_t):
     """Build an mx.compile'd single-token decode step over a PREALLOCATED
     (B, H, max_t, hd) KV cache. Fixed shapes + `pos` as a runtime array → compiles

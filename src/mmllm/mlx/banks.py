@@ -64,7 +64,17 @@ def netbank_forward(p, q):
     top_scores, top_global = _pkm_select(
         q_a, q_b, p["K_a"], p["K_b"], p["sqrt_n"], p["sub_top_k"], p["top_k"]
     )
-    latent = mx.take(p["V"], top_global, axis=0).astype(mx.float32)  # [B,T,top_k,c_net]
+    if "V_mmap" in p:                                   # mode 2: NetBank V on disk
+        # The V table stays mmap'd on disk; gather only the (small) top-k rows on
+        # host and upload that payload. Trades the full-V VRAM (1+ GB) for one
+        # GPU->host sync per layer per step. p["V_mmap"] is a numpy memmap (N,c).
+        import numpy as np
+        Vm = p["V_mmap"]
+        idx = np.asarray(top_global).reshape(-1)        # GPU->host (top_k int ids)
+        rows = np.asarray(Vm[idx], dtype=np.float32)
+        latent = mx.array(rows).reshape(*top_global.shape, Vm.shape[1])
+    else:                                               # mode 1: V resident on GPU
+        latent = mx.take(p["V"], top_global, axis=0).astype(mx.float32)
     weights = mx.softmax(top_scores, axis=-1)
     weighted_latent = mx.einsum("btkc,btk->btc", latent, weights)
     return weighted_latent @ p["expander_w"].T          # expander Linear (bias=False)
