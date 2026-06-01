@@ -236,7 +236,9 @@ INIT_SCALE=0.02
 
 mkdir -p "$(dirname $FIM_BASE)"
 for split in train val test; do
-  ln -sf "/tmp/mmllm-cpu/fim-json-v3.${split}.bin"  # already absolute; readlink -f is GNU-only \
+  # source path is already absolute; dropped GNU-only `readlink -f` (BSD/macOS
+  # has no -f). Keep the ln command intact across the line continuation.
+  ln -sf "/tmp/mmllm-cpu/fim-json-v3.${split}.bin" \
          "${FIM_BASE}.${split}.bin" 2>/dev/null || true
 done
 
