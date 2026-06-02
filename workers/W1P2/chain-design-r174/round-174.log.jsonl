@@ -1,0 +1,2 @@
+{"event": "ablation", "control_bpc": 3.079018927698731, "delta_local": null, "delta_net": -0.026906571072386143, "delta_both": null}
+{"event": "v_net_displacement", "round": 174, "n_layers": 32, "moved_pct_mean": 1.8196044803010487, "moved_pct_min": 1.6863735082626836, "moved_pct_max": 2.0206353100067864, "cos_mean": 0.03548956789537416, "cos_min": -0.03847237634042473}
