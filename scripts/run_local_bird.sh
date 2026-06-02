@@ -47,6 +47,18 @@ if [ "${_orphans:-0}" -gt 0 ]; then
   find "$GITDIR/objects/pack" -name 'tmp_pack_*' -delete 2>/dev/null || true
   echo "▶ git hygiene: swept ${_orphans} orphaned temp pack(s) (${_sz:-?}) left by a prior interrupted run"
 fi
+# Consolidate accumulated packs. Disabling auto-gc (above) stops the mid-push
+# repacks that spawned the giant temp packs — but it also means shallow-fetch
+# packs never coalesce on their own, so they pile up (once: 18 packs / 52 GB, vs
+# a fresh shallow clone's single ~1 GB pack). Run a CONTROLLED, memory-bounded gc
+# here at startup — no push is in flight, so it's safe — whenever packs have
+# accumulated. Keeps a long-lived local clone at ~1-2 GB instead of unbounded.
+_npacks=$(ls "$GITDIR"/objects/pack/*.pack 2>/dev/null | wc -l | tr -d ' ')
+if [ "${_npacks:-0}" -gt 4 ]; then
+  echo "▶ git hygiene: ${_npacks} packs accumulated — consolidating (controlled gc, memory-capped)…"
+  git -c pack.windowMemory=256m -c pack.threads=2 gc --prune=now --quiet 2>/dev/null || true
+  echo "  → $(ls "$GITDIR"/objects/pack/*.pack 2>/dev/null | wc -l | tr -d ' ') pack(s), .git now $(du -sh "$GITDIR" 2>/dev/null | cut -f1)"
+fi
 FREE_GB=$(df -k "$ROOT" 2>/dev/null | awk 'NR==2{print int($4/1048576)}')
 echo "▶ free disk: ${FREE_GB:-?}GB"
 if [ "${FREE_GB:-999}" -lt 20 ]; then

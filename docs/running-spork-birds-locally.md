@@ -134,14 +134,24 @@ them (~659 GB), filling the disk and thrashing swap (symptom: machine lag with
 *no* GPU fans, since it's I/O, not compute).
 
 `run_local_bird.sh` now defuses this automatically on every run: it disables
-git auto-gc/maintenance in the clone, sweeps orphaned `tmp_pack_*`, and refuses
-to start with under 20 GB free; `train.sh` also sweeps on exit. If you ever see
-the lag symptom mid-run, the manual fix is:
+git auto-gc/maintenance in the clone, sweeps orphaned `tmp_pack_*`, **consolidates
+accumulated packs with a controlled memory-capped `gc` when they pile up**, and
+refuses to start with under 20 GB free; `train.sh` also sweeps on exit. If you
+ever see the lag symptom mid-run, the manual fix is:
 
 ```bash
 rm -f .git/objects/pack/tmp_pack_*     # orphaned temp packs — safe to delete
 git config maintenance.auto false      # stop the auto-repack that creates them
+git -c pack.windowMemory=256m gc --prune=now   # consolidate accumulated packs
 ```
+
+**Use a shallow, single-branch clone** for a bird box —
+`git clone --depth=1 --single-branch --branch main …`. A bird needs only the
+code + the current chain-head manifest (real weights come from Release assets),
+not git history or other birds' branches. A fresh shallow clone is ~1 GB of
+`.git`; with the controlled `gc` above it stays ~1–2 GB indefinitely. A full
+clone needlessly drags a multi-GB history pack around (disabling auto-gc alone
+won't shrink it — only a fresh shallow clone or a manual `gc` will).
 
 ---
 
