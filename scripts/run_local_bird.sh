@@ -29,6 +29,31 @@ ROOT=$(git rev-parse --show-toplevel 2>/dev/null) || { echo "✗ not in a git re
 cd "$ROOT"
 N_ROUNDS="${1:-5}"
 
+# ── git hygiene + disk preflight (persistent local clones) ───────────────────
+# CI runners get a fresh clone each run, but a local clone is reused across many
+# bird runs and accumulates .git bloat: the bird force-pushes its branch every
+# round, then git's auto-maintenance repacks the whole history into ~16 GB temp
+# packs — and any interruption (a killed push, a racing repack) orphans one.
+# They pile up fast: once, 75 × ~16 GB = 659 GB orphaned, filling the disk and
+# thrashing swap. Defuse at the source — disable auto gc/maintenance, sweep
+# orphaned temp packs, and refuse to start without headroom.
+git config maintenance.auto false
+git config gc.auto 0
+git config gc.autoDetach false
+GITDIR=$(git rev-parse --git-dir 2>/dev/null || echo .git)
+_orphans=$(find "$GITDIR/objects/pack" -name 'tmp_pack_*' 2>/dev/null | wc -l | tr -d ' ')
+if [ "${_orphans:-0}" -gt 0 ]; then
+  _sz=$(du -ch "$GITDIR"/objects/pack/tmp_pack_* 2>/dev/null | tail -1 | cut -f1)
+  find "$GITDIR/objects/pack" -name 'tmp_pack_*' -delete 2>/dev/null || true
+  echo "▶ git hygiene: swept ${_orphans} orphaned temp pack(s) (${_sz:-?}) left by a prior interrupted run"
+fi
+FREE_GB=$(df -k "$ROOT" 2>/dev/null | awk 'NR==2{print int($4/1048576)}')
+echo "▶ free disk: ${FREE_GB:-?}GB"
+if [ "${FREE_GB:-999}" -lt 20 ]; then
+  echo "✗ ABORT: only ${FREE_GB:-?}GB free — refusing to run; bird pushes would risk filling the disk." >&2
+  exit 3
+fi
+
 # ── 1) Python env — auto-bootstrap with uv ──────────────────────────────────
 [ -z "${VIRTUAL_ENV:-}" ] && [ -f .venv/bin/activate ] && source .venv/bin/activate
 if ! python3 -c 'import mmllm' >/dev/null 2>&1; then

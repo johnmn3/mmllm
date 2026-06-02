@@ -394,7 +394,10 @@ MEM_LOG="$ARCHIVE/mem.log"
   done
 ) &
 MEM_PID=$!
-trap "kill $MEM_PID 2>/dev/null || true" EXIT
+# On exit, stop the mem sampler AND sweep any temp pack left by an interrupted
+# push this run (orphaned tmp_pack_* are what filled the disk before — they're
+# only valid mid-operation, so any that survive our exit are garbage).
+trap 'kill $MEM_PID 2>/dev/null || true; find "$(git rev-parse --git-dir 2>/dev/null || echo .git)/objects/pack" -name "tmp_pack_*" -delete 2>/dev/null || true' EXIT
 
 PR_NUM=""
 PREV_DEST=""

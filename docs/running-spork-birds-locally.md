@@ -123,6 +123,26 @@ watermark automatically for full retrieval bandwidth.
 - Nothing on upstream's `main` is touched by your run — you contribute via the
   fork + harvest path, exactly like a CI bird.
 
+### Disk hygiene (persistent local clones)
+
+Unlike ephemeral CI runners, a local clone is reused across many bird runs and
+its `.git` can bloat. The bird force-pushes its branch every round; left to its
+own devices git's **auto-maintenance repacks the whole history into ~16 GB temp
+packs**, and any interruption (a killed push, a racing repack) orphans one.
+These `tmp_pack_*` files pile up fast — a single bad afternoon orphaned 75 of
+them (~659 GB), filling the disk and thrashing swap (symptom: machine lag with
+*no* GPU fans, since it's I/O, not compute).
+
+`run_local_bird.sh` now defuses this automatically on every run: it disables
+git auto-gc/maintenance in the clone, sweeps orphaned `tmp_pack_*`, and refuses
+to start with under 20 GB free; `train.sh` also sweeps on exit. If you ever see
+the lag symptom mid-run, the manual fix is:
+
+```bash
+rm -f .git/objects/pack/tmp_pack_*     # orphaned temp packs — safe to delete
+git config maintenance.auto false      # stop the auto-repack that creates them
+```
+
 ---
 
 ## Verifying it worked
