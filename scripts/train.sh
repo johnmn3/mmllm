@@ -34,6 +34,13 @@ set -euo pipefail
 # chain.
 SPORK_VERSION="0.9"
 
+# Train-only mode: when MMLLM_SKIP_PUBLISH=true, train + stage every round into
+# the local archive (round-N/ with dense.pt + V_net.*.bin) but skip the per-round
+# encode/push/PR. Used by the local-FedAvg wave driver, which combines the birds
+# locally and publishes ONLY the one merged head — instead of every bird pushing
+# every round. Default false → unchanged behavior for CI/fork birds.
+SKIP_PUBLISH="${MMLLM_SKIP_PUBLISH:-false}"
+
 HANDLE="${MMLLM_HANDLE:-$(python3 -c 'import random,string; print("".join(random.choices(string.ascii_letters+string.digits, k=5)))')}"
 # Unique per-bird identity — survives handle collisions, lets the
 # harvester dedupe a bird that shows up across multiple ancestor trees.
@@ -453,6 +460,14 @@ if moved and os.path.exists(log_path):
         fh.write(json.dumps(ev) + "\n")
     print(f"  V_net moved% = {ev['moved_pct_mean']:.4%} (min {ev['moved_pct_min']:.4%}, max {ev['moved_pct_max']:.4%})  cos = {ev['cos_mean']:.6f}")
 PY
+
+  # SKIP_PUBLISH: train-only — the round dir (dense.pt + V_net.*.bin) is already
+  # produced above; skip the per-round encode/push/PR. The wave driver FedAvgs the
+  # birds locally and publishes only the combined head.
+  if [ "$SKIP_PUBLISH" = "true" ]; then
+    echo "    [skip-publish] r$CUR_ROUND trained + staged locally; no push"
+    PREV_DEST=""; continue
+  fi
 
   # Build this round's publish dir
   DEST="workers/$HANDLE/chain-design-r$CUR_ROUND"
