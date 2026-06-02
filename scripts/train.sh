@@ -201,26 +201,31 @@ fi
 # reassembly below cats them back together at /tmp.
 bash scripts/fetch_static_assets.sh corpora
 echo "▶ staging corpora (release tarball, no HF download)…"
-CORPORA=workers/dispatcher/corpora
-mkdir -p /tmp/mmllm-cpu/battery
+CORPORA="${MMLLM_CORPORA:-workers/dispatcher/corpora}"
+# Scratch base (staged corpora + chain archive). Parameterized so multiple birds
+# can run in parallel on one box, each with an isolated working dir + distinct
+# MMLLM_SCRATCH. Defaults preserve single-bird behavior. run_chain_diverse.sh and
+# extend_chain.sh honor the same var (all inherit it from this process's env).
+SCRATCH="${MMLLM_SCRATCH:-/tmp/mmllm-cpu}"
+mkdir -p $SCRATCH/battery
 for f in "$CORPORA"/*.bin; do
-  [ -f "$f" ] && cp "$f" "/tmp/mmllm-cpu/$(basename "$f")"
+  [ -f "$f" ] && cp "$f" "$SCRATCH/$(basename "$f")"
 done
 for f in "$CORPORA"/battery/*.bin; do
-  [ -f "$f" ] && cp "$f" "/tmp/mmllm-cpu/battery/$(basename "$f")"
+  [ -f "$f" ] && cp "$f" "$SCRATCH/battery/$(basename "$f")"
 done
 # Reassemble split bins from .part-?? chunks.
 for prefix in "$CORPORA"/*.part-00; do
   [ -f "$prefix" ] || continue
   base="${prefix%.part-00}"
-  cat "${base}".part-?? > "/tmp/mmllm-cpu/$(basename "$base")"
+  cat "${base}".part-?? > "$SCRATCH/$(basename "$base")"
 done
 for prefix in "$CORPORA"/battery/*.part-00; do
   [ -f "$prefix" ] || continue
   base="${prefix%.part-00}"
-  cat "${base}".part-?? > "/tmp/mmllm-cpu/battery/$(basename "$base")"
+  cat "${base}".part-?? > "$SCRATCH/battery/$(basename "$base")"
 done
-echo "  staged $(ls /tmp/mmllm-cpu/*.bin /tmp/mmllm-cpu/battery/*.bin 2>/dev/null | wc -l) corpus files"
+echo "  staged $(ls $SCRATCH/*.bin $SCRATCH/battery/*.bin 2>/dev/null | wc -l) corpus files"
 
 # 4a) For prefixed chains (e.g. sym24), re-export the arch knobs from the
 #     genesis chain_meta.json so model build matches the saved dense.pt.
@@ -258,7 +263,7 @@ fi
 #     head has no delta files yet (we're starting from r0_<prefix>), copy
 #     the reference V_net.{0..31}.bin directly — it IS the round-0 state.
 echo "▶ staging round-$START_ROUND…"
-ARCHIVE=/tmp/mmllm-cpu/chain-diverse
+ARCHIVE=$SCRATCH/chain-diverse
 mkdir -p "$ARCHIVE/round-$START_ROUND"
 DELTA_META="$CHAIN_HEAD_PATH/round-$START_ROUND/delta-sparse-net.meta.pt"
 if [ -f "$DELTA_META" ]; then
@@ -320,8 +325,8 @@ else
   CORPUS=$(python3 -c "import random; print(random.choice(['fim','general','clojure-general','clojure-fim']))")
   echo "▶ corpus auto-selected at random: $CORPUS"
 fi
-B=/tmp/mmllm-cpu/battery
-G=/tmp/mmllm-cpu/fim-json-v3.train.bin
+B=$SCRATCH/battery
+G=$SCRATCH/fim-json-v3.train.bin
 case "$CORPUS" in
   fim)
     # 9-corpus FIM-heavy: 25% glaive-fim-v3 + 8 batteries

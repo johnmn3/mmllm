@@ -36,7 +36,8 @@
 set -e
 ROOT=$(git rev-parse --show-toplevel); cd "$ROOT"
 
-ARCHIVE=/tmp/mmllm-cpu/chain-diverse
+SCRATCH="${MMLLM_SCRATCH:-/tmp/mmllm-cpu}"   # parallel birds: isolate scratch via MMLLM_SCRATCH
+ARCHIVE=$SCRATCH/chain-diverse
 N_MORE="${1:-10}"
 STEPS="${2:-100}"
 
@@ -49,8 +50,8 @@ fi
 echo "Starting from $ARCHIVE/round-${HIGHEST}"
 
 # ── Default 9-corpus FIM mix (callers can override MMLLM_MIX) ──
-B=/tmp/mmllm-cpu/battery
-G=/tmp/mmllm-cpu/fim-json-v3.train.bin
+B=$SCRATCH/battery
+G=$SCRATCH/fim-json-v3.train.bin
 : "${MMLLM_MIX:=${G}:25,${B}/cosmopedia.train.bin:10,${B}/fineweb-edu.train.bin:10,${B}/magicoder.train.bin:10,${B}/hermes-funcall.train.bin:10,${B}/toolace.train.bin:10,${B}/aesop-fables.bin.train.bin:10,${B}/open-web-math.train.bin:10,${B}/tiny-stories.train.bin:5}"
 export MMLLM_MIX
 

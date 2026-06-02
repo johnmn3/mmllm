@@ -8,6 +8,7 @@
 set -e
 ROOT=$(git rev-parse --show-toplevel); cd "$ROOT"
 
+SCRATCH="${MMLLM_SCRATCH:-/tmp/mmllm-cpu}"   # parallel birds: isolate scratch via MMLLM_SCRATCH
 ARCHIVE_ROOT="${1:?archive dir required}"
 N_MORE="${2:-2}"
 STEPS="${3:-100}"
@@ -212,8 +213,8 @@ export MMLLM_ABLATION_EVAL_CAP="${MMLLM_ABLATION_EVAL_CAP:-25000}"
 unset MMLLM_LITE_CKPT
 unset MMLLM_MAX_STEPS
 
-FIM_BASE=/tmp/mmllm-cpu/fim-chain-stack
-BANK_BASE=/tmp/mmllm-cpu/fim-bank-chain-stack
+FIM_BASE=$SCRATCH/fim-chain-stack
+BANK_BASE=$SCRATCH/fim-bank-chain-stack
 
 # SPIKE 2 — Local Bank layer positions. Default is the asymmetric 8 (CLAUDE.md
 # "8 local banks in training"). Override via MMLLM_LOCAL_BANK_LAYERS env var
@@ -238,7 +239,7 @@ mkdir -p "$(dirname $FIM_BASE)"
 for split in train val test; do
   # source path is already absolute; dropped GNU-only `readlink -f` (BSD/macOS
   # has no -f). Keep the ln command intact across the line continuation.
-  ln -sf "/tmp/mmllm-cpu/fim-json-v3.${split}.bin" \
+  ln -sf "$SCRATCH/fim-json-v3.${split}.bin" \
          "${FIM_BASE}.${split}.bin" 2>/dev/null || true
 done
 
@@ -334,7 +335,7 @@ PY
   # but keep log.jsonl so the per-round table stays intact.
   #
   # At design banks, each round dir is ~1.4 GB. Without this prune, a
-  # 10-round wave peaks at ~14 GB under /tmp/mmllm-cpu/chain-diverse/.
+  # 10-round wave peaks at ~14 GB under $SCRATCH/chain-diverse/.
   # With it, peak is ~3 GB (round-(N-1) + round-N live) plus ~0.1 GB
   # of trailing logs+dense_skeletons across all completed rounds.
   local stale=$((round_num - 2))
