@@ -302,14 +302,17 @@ def train_round(cfg, train_path, val_path, ckpt_dir, log_path,
     # passes total=STEPS+1 and seeds step-1, i.e. STEPS training steps).
     n_steps = min(max(1, total - resume_step), cap)
 
-    # Per-ROUND random corpus selection (the recipe: each round draws ONE corpus
-    # from the staged weighted mix — diversity across rounds that averages out in
-    # the federation — rather than per-step mixing). CI stages MMLLM_MIX as
-    # "path:w,path:w,..." (pick-mix). Entropy-seeded so each round's process picks
-    # a different corpus + different windows (the old fixed RandomState(0) trained
-    # the identical windows of a single corpus every round). Falls back to
-    # train_path when MMLLM_MIX is unset.
-    _rng = np.random.default_rng()                       # OS-entropy -> varies per round
+    # PER-STEP MIX: each batch draws its windows from corpora sampled per-window
+    # (weighted), so EVERY step trains on the diverse mix and the NetBank
+    # consolidates GENERAL memory. The prior per-ROUND single-corpus draw (#64)
+    # broke consolidation: each round baked one corpus into V_net, then the
+    # diverse mix-val eval scored that corpus-specific content as harmful → Δ_net
+    # went corpus-dependent (positive on centered corpora, negative on off-center
+    # like aesop), and 1-way harvests had no averaging to wash it out. Smoke:
+    # per-round-single gave Δ_net −0.11/−0.19 on aesop rounds; per-step mix keeps
+    # the netbank general. MMLLM_MIX="path:w,path:w,..."; mmap'd uint8 so memory is
+    # bounded regardless of mix size (windows cast to int64 at batch time).
+    _rng = np.random.default_rng()
     _mix = os.environ.get("MMLLM_MIX", "").strip()
     if _mix:
         ents = []
@@ -319,22 +322,21 @@ def train_round(cfg, train_path, val_path, ckpt_dir, log_path,
                 continue
             c = e.rfind(":")
             ents.append((e[:c].strip(), float(e[c + 1:].strip())))
-        paths = [p for p, _ in ents]
-        ws = np.array([w for _, w in ents], dtype=float)
-        corpus_path = paths[int(_rng.choice(len(paths), p=ws / ws.sum()))]
-        print(f"  [mlx] round corpus: {os.path.basename(corpus_path)} "
-              f"(random draw from {len(paths)}-way mix)")
+        corpora = [np.asarray(load_corpus(p, use_mmap=True)).reshape(-1) for p, _ in ents]
+        ws = np.array([w for _, w in ents], dtype=float); ws = ws / ws.sum()
+        corpus_path = ents[0][0]                          # for the "round" eval-mode fallback
+        print(f"  [mlx] per-step mix: {len(corpora)} corpora (weighted), windows drawn per-sample")
     else:
-        corpus_path = train_path
-    data = load_corpus(corpus_path)
-    toks_np = np.asarray(data).astype(np.int64).reshape(-1)
-    n_tok = toks_np.size
+        corpora = [np.asarray(load_corpus(train_path, use_mmap=True)).reshape(-1)]
+        ws = np.array([1.0]); corpus_path = train_path
 
     def batch():
-        # random-window LM batching: xb=[off:off+T], yb=[off+1:off+T+1]
-        offs = _rng.integers(0, n_tok - T - 1, size=B)
-        xb = np.stack([toks_np[o:o + T] for o in offs])
-        yb = np.stack([toks_np[o + 1:o + 1 + T] for o in offs])
+        # each of B samples: draw a corpus (weighted) + a random window → diverse batch
+        cis = _rng.choice(len(corpora), size=B, p=ws)
+        xb = np.empty((B, T), dtype=np.int64); yb = np.empty((B, T), dtype=np.int64)
+        for j in range(B):
+            c = corpora[int(cis[j])]; o = int(_rng.integers(0, c.size - T - 1))
+            xb[j] = c[o:o + T]; yb[j] = c[o + 1:o + 1 + T]
         return mx.array(xb), mx.array(yb)
 
     n_trunks = 1
@@ -421,8 +423,20 @@ def train_round(cfg, train_path, val_path, ckpt_dir, log_path,
         mx.eval(tree_map(lambda a: a, trainable))
         losses.append(float(loss))
         if step % max(1, eval_every) == 0 or step == n_steps:
+            # DISTILL DIAGNOSTIC (smoke): separate forward outside the grad trace —
+            # is distill firing? raw magnitude, layer coverage (24 vs 8 = topology
+            # regression), per-layer, coef×contribution vs CE (over/under-firing).
+            try:
+                _lg, _dt, _zt, _nd = _model.forward(_reassemble(trainable, static, meta), xb, collect_aux=True)
+                _dtv = float(_dt); _ndv = int(_nd)
+                _lr2 = _lg.reshape(-1, vocab); _lp2 = _lr2 - mx.logsumexp(_lr2, axis=-1, keepdims=True)
+                _ce = float(-mx.take_along_axis(_lp2, yb.reshape(-1)[:, None], axis=-1).mean())
+                _dbg = (f"  [DISTILL] raw_total={_dtv:.4f} n_layers={_ndv} "
+                        f"per_layer={_dtv/max(1,_ndv):.4f} coef×contrib={dc*_dtv/max(1,_ndv):.4f} vs CE={_ce:.4f}")
+            except Exception as _e:
+                _dbg = f"  [DISTILL] diag-failed: {_e}"
             print(f"  [mlx] step {step}/{n_steps}  loss={losses[-1]:.4f}  "
-                  f"lr_b={lb:.2e} lr_n={ln:.2e} lr_d={ld:.2e} distill_c={dc:.2f}")
+                  f"lr_b={lb:.2e} lr_n={ln:.2e} lr_d={ld:.2e} distill_c={dc:.2f}{_dbg}")
 
     # write trained weights back into the torch model + save (harvest-compatible)
     _write_back(trainable, m, K)
