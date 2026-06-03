@@ -167,8 +167,16 @@ export MMLLM_DISTILL_MAGNITUDE_COEF_END=0.0
 # inference checkpoint). It is NOT the cron-prod default for an
 # ongoing federated chain. Workers can opt into it manually via the
 # train.yml `lr` workflow_dispatch input.
-: ${MMLLM_LR:=3e-2}              ; export MMLLM_LR
-: ${MMLLM_LR_MIN:=3e-2}          ; export MMLLM_LR_MIN
+# UPDATE 2026-06-03: lowered 3e-2 -> 3e-3. The (start,end) net_mult ramps to 5.0
+# in sleep; by the deep chain rounds (r200+) the global schedule is pegged at
+# net_mult=5.0, so LR=3e-2 gives lr_net=0.15 and V_net THRASHES (moved%≈92/round,
+# cos→0.6, flat ctrl_bpc, Δ_net negative). A/B at r241 (LR 3e-2 vs 3e-3, narrow
+# eval): 3e-3 cuts moved% 92→12, ctrl_bpc resumes monotonic ↓, and Δ_net goes
+# POSITIVE (+0.004..0.005, matching the r119 healthy level). 3e-3 == round-9
+# proven base. The r119 "3e-2 worked" note holds for SHALLOW rounds (net_mult not
+# yet pegged); it stopped holding once the schedule saturated.
+: ${MMLLM_LR:=3e-3}              ; export MMLLM_LR
+: ${MMLLM_LR_MIN:=3e-3}          ; export MMLLM_LR_MIN
 : ${MMLLM_LR_WARMUP:=$((STEPS * 70 / 100))} ; export MMLLM_LR_WARMUP
 : ${MMLLM_REPLAY_EVERY:=10}      ; export MMLLM_REPLAY_EVERY
 : ${MMLLM_REPLAY_BUFFER_SIZE:=256}; export MMLLM_REPLAY_BUFFER_SIZE
