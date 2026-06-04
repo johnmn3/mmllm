@@ -1,0 +1,33 @@
+{
+  "spork_version": "0.9",
+  "target_round": 607,
+  "n_workers": 2,
+  "wave": "merge-r607",
+  "merge": true,
+  "merged_from": [
+    602,
+    606
+  ],
+  "workers": [
+    {
+      "handle": "r602-head",
+      "branch": "workers/dispatcher/harvest-4way-r602_sym24",
+      "ctrl_bpc": 2.1266,
+      "n_workers": 4
+    },
+    {
+      "handle": "r606-head",
+      "branch": "workers/dispatcher/harvest-2way-r606_sym24",
+      "ctrl_bpc": 2.1725,
+      "n_workers": 2
+    }
+  ],
+  "worker_ctrl_bpc_mean": 2.1495499999999996,
+  "worker_ctrl_bpc_best": 2.1266,
+  "previous_harvest": {
+    "round": 601
+  },
+  "harvested_at": "2026-06-04T17:54:07.146617Z",
+  "harvester": "scripts/merge_divergent_heads.sh (option-3: average divergent tips)",
+  "note": "Divergent-head merge: FedAvg of the listed tips (V_net row-aware + dense mean) into one head, so no contributor's compute is orphaned. Tips averaged (not dropped) \u2014 no corpus-comparable eval to pick a winner."
+}
