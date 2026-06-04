@@ -204,18 +204,19 @@ jobs:
           fi
           # Sanity check: nothing outside workers/dispatcher/harvest-*-r*/
           # should be staged. If it is, bail loudly instead of pushing
-          # a ballooned commit. Accepts both legacy harvest-<N>way-r<R>/
-          # (cron output) and harvest-fold<N>way-r<R>/ (raw-birds /
-          # cross-arm fold output from consolidate_siblings.py).
+          # a ballooned commit. Accepts harvest-<N>way-r<R>/ (cron),
+          # harvest-fold<N>way-r<R>/ (cross-arm fold from consolidate_siblings.py),
+          # and harvest-<N>way-<tag>-r<R>/ (e.g. -merge- when a wave merges
+          # multiple sources). The optional ([a-z]+-) tag covers all three.
           STAGED_OUTSIDE=$(git diff --cached --name-only \
-            | grep -vE '^workers/dispatcher/harvest-(fold)?[0-9]+way-r[0-9]+(_[A-Za-z0-9]+)?/' || true)
+            | grep -vE '^workers/dispatcher/harvest-(fold)?[0-9]+way-([a-z]+-)?r[0-9]+(_[A-Za-z0-9]+)?/' || true)
           if [ -n "$STAGED_OUTSIDE" ]; then
             echo "ERROR: $(echo "$STAGED_OUTSIDE" | wc -l) files staged outside harvest dirs:" >&2
             echo "$STAGED_OUTSIDE" | head -10 >&2
             exit 1
           fi
           NEW_DIR=$(git diff --cached --name-only \
-            | grep -oE 'workers/dispatcher/harvest-(fold)?[0-9]+way-r[0-9]+(_[A-Za-z0-9]+)?' \
+            | grep -oE 'workers/dispatcher/harvest-(fold)?[0-9]+way-([a-z]+-)?r[0-9]+(_[A-Za-z0-9]+)?' \
             | sort -u | head -1)
           git commit -m "harvest: $NEW_DIR (auto, via harvest.yml workflow)"
           # Retry push with exponential backoff. Two failure modes:
