@@ -96,7 +96,18 @@ def cmd_publish(a):
     if not files:
         log(f"no big binaries in {d} — nothing to publish (manifest-only already?)")
         return 0
-    tag = tag_for(a.round, a.chain)
+    # Per-HEAD-dir release tag, NOT per-round. The cron's N-way head and a local
+    # drive-run's 2-way head for the SAME round are DIFFERENT dirs; with a per-round
+    # tag + --clobber + concurrent publishers (local `chain_assets publish` runs
+    # outside harvest.yml's concurrency group), one publisher's asset upload and the
+    # other's manifest commit desync -> committed manifest sha != uploaded Release
+    # asset -> corrupt, un-resumable heads (the r608/r609 incident). The head-dir
+    # basename (harvest-<N>way[-merge]-r<R>_<chain>) is unique per head, so distinct
+    # heads never share a tag to clobber. Fetch reads m["release_tag"], so old
+    # round-tagged heads keep working.
+    _b = os.path.basename(d)
+    _head = _b if _b.startswith("harvest-") else os.path.basename(os.path.dirname(d))
+    tag = _head if (_head.startswith("harvest-") and "way" in _head) else tag_for(a.round, a.chain)
     log(f"publish {len(files)} asset(s) → release {tag} on {a.repo}")
 
     # 1) Ensure the release exists (idempotent — re-runs/overlapping harvests).
