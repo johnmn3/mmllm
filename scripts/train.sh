@@ -322,6 +322,20 @@ if [ "${MMLLM_LOCAL_BIRD:-}" = 1 ]; then
 else
   STEPS="${MMLLM_STEPS_PER_ROUND:-80}"
 fi
+# CI torch OOM fix. Every scheduled bird OOM-killed (exit 143) on the first step
+# since the wave-2 high-bandwidth recipe (NET_TOP_K=512) landed: the NetBank
+# retrieval dominates the per-block BACKWARD recompute, peaking ~16GB at effective
+# batch 16 — over the ~15GB runner. grad-checkpoint frees the forward but not the
+# backward recompute here (verified: use_reentrant=True, SDPA-checkpoint, and the
+# logitkd split-backward each fail to bring it under). The retrieval bandwidth is
+# the lever: NET_TOP_K=128 (1/4 of 512) cuts the recompute to ~12GB peak (measured
+# locally, CPU full-bandwidth repro). CHAIN-SAFE — V_net is unchanged; the bird just
+# retrieves fewer rows per query. NET_SUB_TOP_K=12 (12²=144≥128) matches. Local MLX
+# birds keep extend_chain's full 512 (unified memory has the headroom). Explicit wins.
+if [ "${MMLLM_LOCAL_BIRD:-}" != 1 ]; then
+  export MMLLM_NET_TOP_K="${MMLLM_NET_TOP_K:-128}"
+  export MMLLM_NET_SUB_TOP_K="${MMLLM_NET_SUB_TOP_K:-12}"
+fi
 # START_ROUND was set in step (1) from the auto-detected chain head.
 END_ROUND=$((START_ROUND + N_ROUNDS))
 
