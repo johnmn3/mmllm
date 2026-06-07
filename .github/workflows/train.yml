@@ -13,9 +13,9 @@ on:
         required: false
         default: "1"
       steps_per_round:
-        description: "Steps per round (sym24 chain default: 300 = ~210 wake / ~90 sleep; longer wake = stronger Local teacher for logitkd consolidation)"
+        description: "Steps per round. Blank → per-backend default (CI torch: 80, to fit the 6h cap; local MLX birds: 300). Set explicitly to override."
         required: false
-        default: "300"
+        default: ""
       corpus:
         description: "Training corpus. Leave blank (default) = random pick across all four per run — identical to the hourly cron birds. Pick a specific corpus to pin it."
         required: false

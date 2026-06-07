@@ -2785,14 +2785,18 @@
                         (not (number? mtp-loss))       (+ mtp-loss)
                         (not (number? distill-loss))   (+ distill-loss)
                         (not (number? delim-loss))     (+ delim-loss)
-                        (not (number? k-align-loss))   (+ k-align-loss)
-                        (not (number? kd-loss))        (+ kd-loss))]
+                        (not (number? k-align-loss))   (+ k-align-loss))]
+         ;; NOTE: kd-loss is deliberately NOT summed into `loss` here — it is
+         ;; back-propagated SEPARATELY below so the student forward's autograd
+         ;; graph never co-resides with the main graph (see the split backward).
      ;; Hard-abort on NaN/Inf loss before backward — a degenerate step
      ;; would propagate NaN into all params, opt state, and bank V; the
      ;; ckpt-save next event would then persist a poisoned model. Raising
      ;; here gives `train-long`'s try/finally a chance to checkpoint
      ;; pre-poisoning and exit non-zero so the operator notices.
-     (when (or (.item (.isnan loss)) (.item (.isinf loss)))
+     (when (or (.item (.isnan loss)) (.item (.isinf loss))
+               (and (not (number? kd-loss))
+                    (or (.item (.isnan kd-loss)) (.item (.isinf kd-loss)))))
        (throw (python/RuntimeError
                 (format "train-step aborted: loss=%s (ce=%s plain=%s) is NaN or Inf — model may be poisoned"
                         (.item loss) (.item ce-loss) (.item plain-ce)))))
@@ -2800,6 +2804,15 @@
      (.zero_grad opt-sparse)
      (when opt-sparse-net (.zero_grad opt-sparse-net))
      (.backward loss)
+     ;; logitkd: backprop the KD term in a SEPARATE backward so the student
+     ;; forward's autograd graph never co-resides with the main graph. With
+     ;; grad-checkpoint on (CI default), activation recompute happens during
+     ;; backward, so one-graph-at-a-time halves peak RAM (~15GB→~8GB, fitting
+     ;; the ~15GB CI runner that OOM-killed the combined backward). Grads
+     ;; accumulate into the same .grad buffers (single zero_grad above), so the
+     ;; result is identical to summing kd-loss into `loss`. No-op when kd-loss
+     ;; is a plain number (non-logitkd, or a KD_EVERY skip step).
+     (when (not (number? kd-loss)) (.backward kd-loss))
      ;; #1 spike: cold-row gradient boost on Local Bank V. No-op when
      ;; MMLLM_BANK_COLD_BOOST=0. Applied after backward, before opt step,
      ;; so SparseAdam's update sees the rescaled gradient.
