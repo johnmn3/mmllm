@@ -312,7 +312,7 @@ fi
 # 24-sym-Local pace (~154 s/step). The original chain used 5×7; sym24's
 # heavier per-step cost forces the smaller per-bird budget.
 N_ROUNDS="${MMLLM_N_ROUNDS:-1}"
-STEPS="${MMLLM_STEPS_PER_ROUND:-50}"
+STEPS="${MMLLM_STEPS_PER_ROUND:-300}"   # logitkd: longer wake = stronger Local teacher
 # START_ROUND was set in step (1) from the auto-detected chain head.
 END_ROUND=$((START_ROUND + N_ROUNDS))
 

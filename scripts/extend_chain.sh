@@ -136,6 +136,21 @@ export MMLLM_DISTILL_DIRECTION_ONLY=false
 export MMLLM_DISTILL_MAGNITUDE_COEF=0.0
 export MMLLM_DISTILL_MAGNITUDE_COEF_END=0.0
 : ${MMLLM_DISTILL_MAGNITUDE_CLAMP:=10.0} ; export MMLLM_DISTILL_MAGNITUDE_CLAMP
+# REAL output-distillation (logitkd) — the consolidation fix. Teacher = Local-only
+# forward, student = net-only forward, loss += KD_COEF·KL(teacher_softT‖student_softT)·T²,
+# with KD_FREEZE=trunk routing the KD gradient into the NETBANK ONLY (dense trunk
+# detached in the student forward). Proven in MLX to flip Δ_net negative→POSITIVE (the
+# netbank finally consolidates) with ctrl_bpc preserved, where feature-MSE never did.
+# When logitkd is on, train-step SKIPS the feature-MSE distill above. Works on BOTH the
+# torch and MLX backends (same env contract → both contribute consolidated netbank).
+# FORCED on the prod path so a stray env var can't revert to non-consolidating
+# feature-MSE. KD_EVERY amortizes the KD's 3-forwards/step cost (consolidation
+# accumulates fine across steps).
+export MMLLM_DISTILL_OBJECTIVE=logitkd
+export MMLLM_KD_TEMP=2.0
+export MMLLM_KD_COEF=1.0
+export MMLLM_KD_FREEZE=trunk
+: ${MMLLM_KD_EVERY:=2} ; export MMLLM_KD_EVERY
 : ${MMLLM_LR_BANK_MULT:=3.0}     ; export MMLLM_LR_BANK_MULT
 : ${MMLLM_LR_BANK_MULT_END:=0.001}; export MMLLM_LR_BANK_MULT_END
 : ${MMLLM_LR_NET_MULT:=0.001}    ; export MMLLM_LR_NET_MULT

@@ -13,9 +13,9 @@ on:
         required: false
         default: "1"
       steps_per_round:
-        description: "Steps per round (sym24 chain default: 50; ~15 sleep-phase steps/round for NetBank consolidation; ~2.1h at ~154s/step)"
+        description: "Steps per round (sym24 chain default: 300 = ~210 wake / ~90 sleep; longer wake = stronger Local teacher for logitkd consolidation)"
         required: false
-        default: "50"
+        default: "300"
       corpus:
         description: "Training corpus. Leave blank (default) = random pick across all four per run — identical to the hourly cron birds. Pick a specific corpus to pin it."
         required: false

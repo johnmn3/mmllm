@@ -144,7 +144,7 @@ export MMLLM_NUM_THREADS
 HOST_TAG=$(python3 -c "import hashlib,socket; print('L'+hashlib.sha1(socket.gethostname().encode()).hexdigest()[:4])")
 export MMLLM_HANDLE="${MMLLM_HANDLE:-$HOST_TAG}"
 export MMLLM_N_ROUNDS="$N_ROUNDS"
-export MMLLM_STEPS_PER_ROUND="${MMLLM_STEPS_PER_ROUND:-50}"
+export MMLLM_STEPS_PER_ROUND="${MMLLM_STEPS_PER_ROUND:-300}"
 export MMLLM_CHAIN_PREFIX="${MMLLM_CHAIN_PREFIX:-sym24}"
 export MMLLM_LOCAL_BIRD=1     # train.sh: skip linux offline wheels (use this venv)
 

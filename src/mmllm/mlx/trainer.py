@@ -94,6 +94,13 @@ def _extract(m, K, trunk_ids_mx):
                 tb["sw_local_active_proj"] = _mxa(gate.local_active_proj)
                 tb["sw_local_active_bias"] = _mxa(gate.local_active_bias)
 
+        # ctx-add bank query: CtxAddBankQuery has a .proj Linear (W_ctx); PlainBankQuery
+        # does not. W_ctx makes the bank query content-discriminative (bank_q += W_ctx·x)
+        # — the missing ingredient that de-collapses retrieval. Trained as a dense param.
+        bq = g("bank-query")
+        if bq is not None and getattr(bq, "proj", None) is not None:
+            tb["bank_query_w"] = _mxa(bq.proj.weight)        # [q_dim, d_model]
+
         mem = g("memory")
         if mem is not None:
             bmeta["memory"] = True
@@ -110,6 +117,19 @@ def _extract(m, K, trunk_ids_mx):
             tb["net_K_a"] = _mxa(nb.K_a); tb["net_K_b"] = _mxa(nb.K_b)
             tb["net_expander_w"] = _mxa(nb.expander.weight)
             tb["V_net"] = _mxa(nb.V.weight)
+            # MMLLM_NET_WIDEN=C: widen netbank code dim c_net -> C (8->16=q_dim,
+            # removing the expander-rank bottleneck so the net can represent the
+            # FULL local feature space). V_net new cols=0 (empty); expander new
+            # cols=small random (zero-on-both deadlocks the gradient). Output
+            # unchanged at start; distill can then populate the new capacity.
+            _widen = int(os.environ.get("MMLLM_NET_WIDEN", "0"))
+            if _widen > tb["V_net"].shape[1]:
+                _pad = _widen - tb["V_net"].shape[1]; _N = tb["V_net"].shape[0]
+                tb["V_net"] = mx.concatenate(
+                    [tb["V_net"], mx.zeros((_N, _pad), dtype=tb["V_net"].dtype)], axis=1)
+                _ew = tb["net_expander_w"]
+                tb["net_expander_w"] = mx.concatenate(
+                    [_ew, (0.02 * mx.random.normal((_ew.shape[0], _pad))).astype(_ew.dtype)], axis=1)
             sb["net"] = {"eps": _eps(nb.q_norm), "sub_dim": nb.sub_dim,
                          "sqrt_n": nb.sqrt_n, "sub_top_k": nb.sub_top_k, "top_k": nb.top_k}
 
@@ -120,46 +140,64 @@ def _extract(m, K, trunk_ids_mx):
     return trainable, static, meta
 
 
-def _reassemble(trainable, static, meta):
+def _reassemble(trainable, static, meta, student=False, drop_net=False):
     """trainable + static -> the param dict model.forward consumes. Gate params
-    come from `trainable` (via closures) so gradients flow to them."""
+    come from `trainable` (via closures) so gradients flow to them.
+
+    student names the OUTPUT-KD student forward's freeze level (all LOCAL banks
+    off in every case — the future state when locals reset):
+      "off"   -> not a student forward (locals ON, nothing frozen): the teacher/CE path.
+      "none"  -> locals off, nothing frozen (gate+net+trunk all adapt to locals-off).
+      "trunk" -> locals off, freeze the DENSE TRUNK + embeddings; gate + netbank
+                 adapt. Honours "the trunk freezes over time" while letting routing
+                 and consolidation (where learning belongs) adapt. [default]
+      "all"   -> locals off, freeze everything except V_net (over-froze: V_net through
+                 frozen keys can't absorb the gap → distorts. kept for ablation)."""
+    sg = mx.stop_gradient
+    lvl = student if isinstance(student, str) else ("all" if student else "off")
+    Ft = (lambda t: sg(t)) if lvl in ("trunk", "all") else (lambda t: t)   # dense trunk + emb
+    Fa = (lambda t: sg(t)) if lvl == "all" else (lambda t: t)              # gate + net keys
+    Fo = (lambda t: None if t is None else Fa(t))                          # optional gate tensor
+    locals_off = (lvl != "off")
     P = {
-        "tok_emb": trainable["tok_emb"],
-        "norm_final_w": trainable["norm_final_w"],
+        "tok_emb": Ft(trainable["tok_emb"]),
+        "norm_final_w": Ft(trainable["norm_final_w"]),
         "norm_final_eps": static["norm_final_eps"],
         "rope_cos": static["rope_cos"], "rope_sin": static["rope_sin"],
         "blocks": [],
     }
     for tb, sb, bm in zip(trainable["blocks"], static["blocks"], meta["blocks"]):
-        b = {k: tb[k] for k in ("norm1_w", "norm2_w", "q_proj", "k_proj_s",
-                                "v_proj_s", "k_proj_l", "v_proj_l", "o_proj",
-                                "gate_proj", "up_proj", "down_proj")}
+        b = {k: Ft(tb[k]) for k in ("norm1_w", "norm2_w", "q_proj", "k_proj_s",
+                                    "v_proj_s", "k_proj_l", "v_proj_l", "o_proj",
+                                    "gate_proj", "up_proj", "down_proj")}
         b.update(n_heads=sb["n_heads"], n_short_heads=sb["n_short_heads"],
                  n_long_heads=sb["n_long_heads"], n_short_kv=sb["n_short_kv"],
                  n_long_kv=sb["n_long_kv"], head_dim=sb["head_dim"],
                  norm1_eps=sb["norm1_eps"], norm2_eps=sb["norm2_eps"],
                  trunk_ids=static["trunk_ids"], memory=None, netbank=None)
+        b["bank_query_w"] = Ft(tb["bank_query_w"]) if "bank_query_w" in tb else None
         if bm["gate_kind"] == "SumGate":
             b["gate"] = _blocks.sum_gate
-        else:  # SwitchGate — close over this block's (trainable) gate params
-            gp = {"gate_proj": tb["sw_gate_proj"], "gate_proj_3": tb["sw_gate_proj_3"],
-                  "alpha_net": tb.get("sw_alpha_net"),
-                  "local_active_proj": tb.get("sw_local_active_proj"),
-                  "local_active_bias": tb.get("sw_local_active_bias")}
+        else:  # SwitchGate — close over this block's gate params (frozen in student)
+            gp = {"gate_proj": Fa(tb["sw_gate_proj"]), "gate_proj_3": Fa(tb["sw_gate_proj_3"]),
+                  "alpha_net": Fo(tb.get("sw_alpha_net")),
+                  "local_active_proj": Fo(tb.get("sw_local_active_proj")),
+                  "local_active_bias": Fo(tb.get("sw_local_active_bias"))}
             b["gate"] = (lambda gp: (lambda ql, s, mo, no=None, collect_distill=False:
                                      _blocks.switch_gate_eval(gp, ql, s, mo, no, collect_distill)))(gp)
-        if bm["memory"]:
+        if bm["memory"] and not locals_off:                     # locals OFF in student
             mm = sb["mem"]
             b["memory"] = {"q_norm_w": tb["mem_q_norm_w"], "eps": mm["eps"],
                            "K_a": tb["mem_K_a"], "K_b": tb["mem_K_b"], "V": tb["V_local"],
                            "sub_dim": mm["sub_dim"], "sqrt_n": mm["sqrt_n"],
                            "sub_top_k": mm["sub_top_k"], "top_k": mm["top_k"],
                            "n_trunks": mm["n_trunks"]}
-        if bm["netbank"]:
+        if bm["netbank"] and not drop_net:              # drop_net=True -> LOCAL-only teacher
             nn_ = sb["net"]
-            b["netbank"] = {"q_norm_w": tb["net_q_norm_w"], "eps": nn_["eps"],
-                            "K_a": tb["net_K_a"], "K_b": tb["net_K_b"], "V": tb["V_net"],
-                            "expander_w": tb["net_expander_w"], "sub_dim": nn_["sub_dim"],
+            b["netbank"] = {"q_norm_w": Fa(tb["net_q_norm_w"]), "eps": nn_["eps"],
+                            "K_a": Fa(tb["net_K_a"]), "K_b": Fa(tb["net_K_b"]),
+                            "V": tb["V_net"],                    # V_net stays LIVE
+                            "expander_w": Fa(tb["net_expander_w"]), "sub_dim": nn_["sub_dim"],
                             "sqrt_n": nn_["sqrt_n"], "sub_top_k": nn_["sub_top_k"],
                             "top_k": nn_["top_k"]}
         P["blocks"].append(b)
@@ -235,6 +273,57 @@ def _map_with_path(params, grads, fn, prefix=""):
 
 
 # ───────────────────────── the round ─────────────────────────
+def _run_pkm_diag(P, load_corpus, T):
+    """PKM key-collapse diagnostic. For each MMLLM_PKM_DIAG corpus, capture which
+    V_net rows the NETBANK retrieves (per layer), then report per-corpus row spread
+    and PAIRWISE overlap (averaged over layers). HIGH Jaccard = corpora share rows
+    -> each round overwrites the last -> no retention (collapse IS the blocker).
+    LOW Jaccard = distinct allocation -> collapse is NOT the blocker (look elsewhere)."""
+    import mmllm.mlx.banks as _bk
+    DIAG_B = 8
+    paths = [p.strip() for p in os.environ["MMLLM_PKM_DIAG"].split(",") if p.strip()]
+    cap = {}
+    cur = [None]
+    orig = _bk.netbank_forward
+    def cap_nb(p, q, want_z=False):                     # capture this layer's top rows
+        qn = _bk._rms_norm(q, p["q_norm_w"], p["eps"])
+        qa = qn[..., : p["sub_dim"]]; qb = qn[..., p["sub_dim"]:]
+        _, tg = _bk._pkm_select(qa, qb, p["K_a"], p["K_b"], p["sqrt_n"], p["sub_top_k"], p["top_k"])
+        cap[cur[0]].append(np.asarray(tg).reshape(-1))
+        return orig(p, q, want_z=want_z)
+    _bk.netbank_forward = cap_nb
+    _rng = np.random.default_rng(0)
+    try:
+        for path in paths:
+            name = os.path.basename(path); cap[name] = []; cur[0] = name
+            data = np.asarray(load_corpus(path, use_mmap=True)).reshape(-1)
+            xb = np.empty((DIAG_B, T), dtype=np.int64)
+            for j in range(DIAG_B):
+                o = int(_rng.integers(0, max(1, data.size - T - 1)))
+                xb[j] = data[o:o + T]
+            mx.eval(_model.forward(P, mx.array(xb)))
+    finally:
+        _bk.netbank_forward = orig
+    names = [os.path.basename(p) for p in paths]
+    Vn = next((b["netbank"]["V"].shape[0] for b in P["blocks"] if b.get("netbank") is not None), None)
+    nL = len(cap[names[0]])
+    setsL = {n: [set(np.unique(cap[n][L]).tolist()) for L in range(nL)] for n in names}
+    print("\n===== PKM KEY-COLLAPSE DIAGNOSTIC =====")
+    print(f"  V_net rows={Vn}, netbank layers={nL}, tokens/corpus={DIAG_B*T}")
+    for n in names:
+        ur = np.mean([len(setsL[n][L]) for L in range(nL)])
+        pd = np.mean([len(setsL[n][L]) / max(1, cap[n][L].size) for L in range(nL)])
+        print(f"   {n}: avg {ur:.0f} unique rows/layer ({100*pd:.1f}% distinct of hits)")
+    print("  pairwise Jaccard of retrieved-row sets, mean over layers (1.0=identical, 0=disjoint):")
+    for i in range(len(names)):
+        for j in range(i + 1, len(names)):
+            jac = np.mean([len(setsL[names[i]][L] & setsL[names[j]][L]) /
+                           max(1, len(setsL[names[i]][L] | setsL[names[j]][L])) for L in range(nL)])
+            print(f"   {names[i]} vs {names[j]}: meanJaccard={jac:.3f}")
+    print("  READ: high Jaccard = KEY COLLAPSE (corpora overwrite each other). low = distinct alloc.")
+    print("=======================================\n")
+
+
 def train_round(cfg, train_path, val_path, ckpt_dir, log_path,
                 total, eval_every, ckpt_every):
     """Run one bird round in MLX. Builds via basilisp, trains in MLX, writes
@@ -263,6 +352,13 @@ def train_round(cfg, train_path, val_path, ckpt_dir, log_path,
           f"lr_base={lr_base} (per-step schedule: pick-lr × {{bank,net,dense}}-mult)")
 
     m = build_model(cfg)
+    # REWARM: one-shot realign the NetBank K_a/K_b from the (healthy, content-aligned)
+    # Local Bank keys — the purpose-built lever (core.lpy rewarm-netbank-keys-only!)
+    # for breaking the collapsed-keys / gate-suppresses-Net feedback loop. train-long
+    # calls this on the torch path; the MLX path bypasses train-long, so do it here.
+    if os.environ.get("MMLLM_REWARM_NETBANK_KEYS", "").lower() == "true":
+        bvar("rewarm-netbank-keys-only!")(m)
+        print("  [mlx] REWARM_NETBANK_KEYS: realigned net K_a/K_b from Local (V untouched)")
     params_fn = bvar("parameters")
     vocab = m.get(K("tok-emb")).weight.shape[0]
 
@@ -313,7 +409,26 @@ def train_round(cfg, train_path, val_path, ckpt_dir, log_path,
     # the netbank general. MMLLM_MIX="path:w,path:w,..."; mmap'd uint8 so memory is
     # bounded regardless of mix size (windows cast to int64 at batch time).
     _rng = np.random.default_rng()
-    _mix = os.environ.get("MMLLM_MIX", "").strip()
+    # RETENTION test phase switch: train MMLLM_MIX_P1 (the probe corpus) for the
+    # first MMLLM_PHASE1_STEPS cumulative steps, then MMLLM_MIX_P2 (other corpora)
+    # — locals reset each round, V_net carries. With MMLLM_PROBE fixed on the probe
+    # corpus, Δ_net over the P2 rounds measures how much of P1 the net RETAINS.
+    _p1_rounds = int(os.environ.get("MMLLM_PHASE1_ROUNDS", "0"))
+    if _p1_rounds:
+        # Phase by a per-arm FILE COUNTER (neither resume_step nor log_path carry a
+        # usable round index — resume_step is pinned at 1, log_path is a generic
+        # name). train_round runs once per round, so increment-per-call IS the round
+        # count: train MMLLM_MIX_P1 (the probe) for the first _p1_rounds rounds, then
+        # MMLLM_MIX_P2 (others). The driver clears the marker before each run.
+        _marker = os.environ.get("MMLLM_PHASE_MARKER", "/tmp/ret-phase-start")
+        _n = int(open(_marker).read().strip()) if os.path.exists(_marker) else 0
+        with open(_marker, "w") as _f:
+            _f.write(str(_n + 1))
+        _mix = os.environ.get("MMLLM_MIX_P1" if _n < _p1_rounds else "MMLLM_MIX_P2", "").strip()
+        print(f"  [mlx] retention phase: {'P1(probe)' if _n < _p1_rounds else 'P2(other)'} "
+              f"round_count={_n} (P1 rounds={_p1_rounds})")
+    else:
+        _mix = os.environ.get("MMLLM_MIX", "").strip()
     if _mix:
         ents = []
         for e in _mix.split(","):
@@ -346,7 +461,56 @@ def train_round(cfg, train_path, val_path, ckpt_dir, log_path,
             n_trunks = max(n_trunks, getattr(mem, "n_trunks", 1))
     trunk_ids = mx.array((np.arange(B) % n_trunks).astype(np.int64))
 
+    # MMLLM_NET_WIDEN=C: widen the torch NetBank code dim c_net -> C (8->16=q_dim),
+    # AFTER the head is loaded, so the FULL pipeline (extract/train/eval/write-back)
+    # runs at C — the expander rank (c_net) is the netbank's functional bottleneck.
+    # V new cols=0 (empty memory); expander new cols=small random (zero-on-both
+    # deadlocks the gradient). Output unchanged at start; distill can then populate
+    # the new capacity. Smoke-only (the chain V_net.bin stays c_net=8).
+    _wide = int(os.environ.get("MMLLM_NET_WIDEN", "0"))
+    if _wide:
+        import torch
+        import torch.nn as nn
+        _did = 0
+        for blk in m.get(K("blocks")):
+            nb = blk.get(K("netbank"))
+            if nb is None or not hasattr(getattr(nb, "V", None), "weight"):
+                continue
+            if getattr(nb, "c_net", _wide) >= _wide:
+                continue
+            with torch.no_grad():
+                Vw = nb.V.weight; dev, dt = Vw.device, Vw.dtype; pad = _wide - Vw.shape[1]
+                newV = torch.cat([Vw, torch.zeros(Vw.shape[0], pad, device=dev, dtype=dt)], dim=1)
+                nb.V = nn.Embedding(newV.shape[0], _wide, _weight=newV).to(dev)
+                Ew = nb.expander.weight
+                newE = torch.cat([Ew, 0.02 * torch.randn(Ew.shape[0], pad, device=dev, dtype=dt)], dim=1)
+                exp = nn.Linear(_wide, Ew.shape[0], bias=False).to(dev); exp.weight = nn.Parameter(newE)
+                nb.expander = exp; nb.c_net = _wide
+                _did += 1
+        print(f"  [mlx] NET_WIDEN: widened {_did} netbanks to c_net={_wide} (torch model)")
+
     trainable, static, meta = _extract(m, K, trunk_ids)
+
+    # CTXADD inject: add a zero W_ctx (ctx-add bank query) at the MLX-trainable level
+    # AFTER the (positional) resume, so resume stays clean. W_ctx trains as a dense
+    # param toward content-discriminative queries → de-collapses retrieval. Single-run
+    # test (not persisted — for genesis/chain it must live in the torch model).
+    if os.environ.get("MMLLM_CTXADD_INJECT") == "true":
+        _dm = trainable["tok_emb"].shape[1]; _n = 0; _loaded = 0
+        for _bi, (tb, sb) in enumerate(zip(trainable["blocks"], static["blocks"])):
+            if "bank_query_w" not in tb:
+                _wp = os.path.join(os.environ.get("MMLLM_SCRATCH") or ckpt_dir, f"wctx.{_bi}.npy")
+                if os.path.exists(_wp):
+                    tb["bank_query_w"] = mx.array(np.load(_wp)); _loaded += 1
+                else:
+                    _qd = sb["n_long_heads"] * sb["head_dim"]
+                    tb["bank_query_w"] = mx.zeros((_qd, _dm))
+                _n += 1
+        print(f"  [mlx] CTXADD_INJECT: W_ctx on {_n} blocks ({_loaded} loaded from persisted, rest zero)")
+
+    if os.environ.get("MMLLM_PKM_DIAG") and not os.environ.get("MMLLM_POST_DIAG"):
+        _run_pkm_diag(_reassemble(trainable, static, meta), load_corpus, T)
+        return {"pkm_diag": True}
 
     # sparse optimizers per bank (keyed by block index + which table)
     sparse = {}
@@ -365,20 +529,55 @@ def train_round(cfg, train_path, val_path, ckpt_dir, log_path,
               for k in sparse for (bi, name) in [k]}
 
     z_coef = float(bvar("pick-z-loss-coef")())
+    # OUTPUT-KD: real Hinton distillation instead of feature-MSE. The model WITH
+    # the local banks (just trained on this round's data) is the teacher; the
+    # model with all locals OFF (net banks only — the FUTURE state, when locals
+    # reset) is the student. The net learns to reproduce the local-augmented
+    # model's SOFT LOGITS on its own → it absorbs the locals' learned function.
+    _kd_obj = os.environ.get("MMLLM_DISTILL_OBJECTIVE", "mse") == "logitkd"
+    _kd_temp = float(os.environ.get("MMLLM_KD_TEMP", "2.0"))
+    _kd_coef = float(os.environ.get("MMLLM_KD_COEF", "1.0"))
+    _kd_freeze = os.environ.get("MMLLM_KD_FREEZE", "trunk")     # off/none/trunk/all
+    # NetBank anti-collapse: its own router-entropy z-loss coef (the local bank's is
+    # pick-z-loss-coef). The netbank historically had NO such term -> keys collapsed
+    # (corpora share ~1% hot rows). Crank this to de-collapse: spread net routing so
+    # corpora get distinct V_net rows. Default 0 = old (collapsed) behaviour.
+    _net_z_coef = float(os.environ.get("MMLLM_NET_Z_COEF", "0"))
 
     def loss_fn(tr):
         xb, yb = static["_xb"], static["_yb"]
-        logits, distill_total, z_total, n_distill = _model.forward(
-            _reassemble(tr, static, meta), xb, collect_aux=True)
+        P = _reassemble(tr, static, meta)
+        logits, distill_total, z_total, net_z_total, n_distill = _model.forward(
+            P, xb, collect_aux=True)
         lg = logits.reshape(-1, vocab)
         logp = lg - mx.logsumexp(lg, axis=-1, keepdims=True)
         ce = -mx.take_along_axis(logp, yb.reshape(-1)[:, None], axis=-1).mean()
         loss = ce
         if z_coef:
             loss = loss + z_coef * z_total
-        dc = static["_distill_coef"]
-        if dc and n_distill:
-            loss = loss + dc * (distill_total / max(1, n_distill))
+        if _net_z_coef:
+            loss = loss + _net_z_coef * net_z_total
+        if _kd_obj:
+            # REAL LB->NB output distillation (Hinton soft-target KD):
+            #   TEACHER = Local-only forward (sdpa+local, net OFF), the good/stable
+            #     teacher (local just trained this round's data). Detached (stop_grad).
+            #   STUDENT = net-only forward (sdpa+net, local OFF) — the future state.
+            #   loss = KL(teacher_softT || student_softT) * T^2  (dark knowledge).
+            # The net LEARNS to reproduce the local's OUTPUT DISTRIBUTION. Success is
+            # this KL FALLING (net matches local) — not Δ_net.
+            Ploc = _reassemble(tr, static, meta, drop_net=True)        # local-only teacher
+            t_lg = _model.forward(Ploc, xb).reshape(-1, vocab) / _kd_temp
+            t_logp = mx.stop_gradient(t_lg - mx.logsumexp(t_lg, axis=-1, keepdims=True))
+            t_p = mx.exp(t_logp)
+            Pnet = _reassemble(tr, static, meta, student=_kd_freeze)   # net-only student (locals off)
+            s_lg = _model.forward(Pnet, xb).reshape(-1, vocab) / _kd_temp
+            s_logp = s_lg - mx.logsumexp(s_lg, axis=-1, keepdims=True)
+            kd = (t_p * (t_logp - s_logp)).sum(-1).mean() * (_kd_temp * _kd_temp)
+            loss = loss + _kd_coef * kd
+        else:
+            dc = static["_distill_coef"]
+            if dc and n_distill:
+                loss = loss + dc * (distill_total / max(1, n_distill))
         return loss
 
     # Per-step LR + distill schedule — call the SAME basilisp functions train-long
@@ -427,16 +626,41 @@ def train_round(cfg, train_path, val_path, ckpt_dir, log_path,
             # is distill firing? raw magnitude, layer coverage (24 vs 8 = topology
             # regression), per-layer, coef×contribution vs CE (over/under-firing).
             try:
-                _lg, _dt, _zt, _nd = _model.forward(_reassemble(trainable, static, meta), xb, collect_aux=True)
+                _lg, _dt, _zt, _nzt, _nd = _model.forward(_reassemble(trainable, static, meta), xb, collect_aux=True)
                 _dtv = float(_dt); _ndv = int(_nd)
                 _lr2 = _lg.reshape(-1, vocab); _lp2 = _lr2 - mx.logsumexp(_lr2, axis=-1, keepdims=True)
                 _ce = float(-mx.take_along_axis(_lp2, yb.reshape(-1)[:, None], axis=-1).mean())
                 _dbg = (f"  [DISTILL] raw_total={_dtv:.4f} n_layers={_ndv} "
-                        f"per_layer={_dtv/max(1,_ndv):.4f} coef×contrib={dc*_dtv/max(1,_ndv):.4f} vs CE={_ce:.4f}")
+                        f"per_layer={_dtv/max(1,_ndv):.4f} coef×contrib={dc*_dtv/max(1,_ndv):.4f} vs CE={_ce:.4f}"
+                        f" | net_z={float(_nzt):.3f} (collapse proxy: falling=spreading)")
+                if _kd_obj:
+                    # THE distillation success metric: KL(local-only teacher || net-only
+                    # student). FALLING = the net is learning to reproduce the local
+                    # (distillation actually working) — independent of Δ_net.
+                    _Pl = _reassemble(trainable, static, meta, drop_net=True)
+                    _tl = _model.forward(_Pl, xb).reshape(-1, vocab) / _kd_temp
+                    _tlp = _tl - mx.logsumexp(_tl, axis=-1, keepdims=True); _tp = mx.exp(_tlp)
+                    _Pn = _reassemble(trainable, static, meta, student=_kd_freeze)
+                    _sl = _model.forward(_Pn, xb).reshape(-1, vocab) / _kd_temp
+                    _slp = _sl - mx.logsumexp(_sl, axis=-1, keepdims=True)
+                    _kdv = float((_tp * (_tlp - _slp)).sum(-1).mean())
+                    # teacher (local-only) and student (net-only) standalone bpc on this batch
+                    _tbpc = float(-mx.take_along_axis(_tl * _kd_temp - mx.logsumexp(_tl * _kd_temp, axis=-1, keepdims=True),
+                                  yb.reshape(-1)[:, None], axis=-1).mean()) / math.log(2)
+                    _sbpc = float(-mx.take_along_axis(_sl * _kd_temp - mx.logsumexp(_sl * _kd_temp, axis=-1, keepdims=True),
+                                  yb.reshape(-1)[:, None], axis=-1).mean()) / math.log(2)
+                    _dbg += (f" | KD(local→net)={_kdv:.4f} (FALLING=net learning local) "
+                             f"teacher_bpc={_tbpc:.3f} student_bpc={_sbpc:.3f}")
             except Exception as _e:
                 _dbg = f"  [DISTILL] diag-failed: {_e}"
             print(f"  [mlx] step {step}/{n_steps}  loss={losses[-1]:.4f}  "
                   f"lr_b={lb:.2e} lr_n={ln:.2e} lr_d={ld:.2e} distill_c={dc:.2f}{_dbg}")
+
+    # POST-TRAINING diag: run the key-collapse diagnostic on the TRAINED trainable
+    # (with the now-trained W_ctx if ctx-add was injected). Tests whether learned
+    # content-discriminative queries de-collapsed retrieval, in-process (no resume).
+    if os.environ.get("MMLLM_POST_DIAG"):
+        _run_pkm_diag(_reassemble(trainable, static, meta), load_corpus, T)
 
     # write trained weights back into the torch model + save (harvest-compatible)
     _write_back(trainable, m, K)
@@ -472,6 +696,16 @@ def train_round(cfg, train_path, val_path, ckpt_dir, log_path,
                     _np(nb.V.weight).astype(np.float32).tofile(mp)
                 except Exception as e:
                     print(f"  [mlx] WARN netbank V save layer {i}: {e}")
+    # persist W_ctx (ctx-add bank query) across rounds — separate from dense.pt so the
+    # positional harvest format is untouched. Loaded by the CTXADD_INJECT block.
+    if os.environ.get("MMLLM_CTXADD_INJECT") == "true":
+        _have = [_bi for _bi, tb in enumerate(trainable["blocks"]) if "bank_query_w" in tb]
+        _norm = (float(np.linalg.norm(np.array(trainable["blocks"][_have[0]]["bank_query_w"])))
+                 if _have else -1.0)
+        print(f"  [mlx] wctx-save: {len(_have)} blocks have W_ctx; ||W_ctx[0]||={_norm:.4f}; ckpt_dir={ckpt_dir}")
+        _wdir = os.environ.get("MMLLM_SCRATCH") or ckpt_dir
+        for _bi in _have:
+            np.save(os.path.join(_wdir, f"wctx.{_bi}.npy"), np.array(trainable["blocks"][_bi]["bank_query_w"]))
     print(f"  [mlx] wrote {dense_path} ({len(losses)} steps, "
           f"loss {losses[0]:.4f}->{losses[-1]:.4f})")
 
@@ -508,7 +742,15 @@ def train_round(cfg, train_path, val_path, ckpt_dir, log_path,
         ev = int(bvar("pick-ablation-eval-cap")(25000))          # = torch's cap (recipe-driven)
         eval_b = int(os.environ.get("MMLLM_EVAL_BATCH", "16"))   # torch evals at 16
         eval_mode = os.environ.get("MMLLM_MLX_EVAL_MODE", "mix" if _mix else "val")
-        if eval_mode == "mix" and _mix:
+        _probe = os.environ.get("MMLLM_PROBE", "").strip()
+        if _probe:
+            # RETENTION test: eval on a FIXED probe corpus, DECOUPLED from the train
+            # mix. Train the net on the probe early, then train on OTHER corpora
+            # (locals reset, net carries); Δ_net on the probe each round = how much
+            # of the probe the net still retains (true cross-round consolidation).
+            vdata = load_corpus(_probe)
+            print(f"  [mlx] eval corpus: PROBE {os.path.basename(_probe)} (retention test)")
+        elif eval_mode == "mix" and _mix:
             # Same builder the torch train-long calls (core.lpy:pick-mix-val):
             # held-out tail of EACH MMLLM_MIX corpus, in MMLLM_MIX order, sized by
             # MMLLM_MIX_VAL_PER_CORPUS. Calling it (rather than rebuilding inline)
@@ -543,6 +785,20 @@ def train_round(cfg, train_path, val_path, ckpt_dir, log_path,
             print(f"  [mlx] Δ_net={dn}  (ablated_bpc={_n})")
         except Exception as e:
             print(f"  [mlx] ablation skipped: {e}")
+        # CONSOLIDATION metric: locals-off bpc (zero LOCAL V -> model on net+trunk
+        # only = the future state when locals reset). LOWER = the net carries more.
+        # This is the signal same-round Δ_net can't see (locals present mask the
+        # net). env-gated — it's an extra eval pass, skip in production.
+        if os.environ.get("MMLLM_ABLATE_LOCAL"):
+            try:
+                _l = bvar("ablation-step!")(m, vdata, T, eval_b, ev)
+                dl = (float(_l) - bpc) if _l is not None else None
+                if dl is not None:
+                    result["delta_local"] = dl
+                print(f"  [mlx] locals_off_bpc={_l} (Δ_local={dl}) "
+                      f"← consolidation: lower locals_off = net carries more")
+            except Exception as e:
+                print(f"  [mlx] local-ablation skipped: {e}")
         # emit the harvest/summary event (extend_chain reads control_bpc/delta_*).
         try:
             import json as _json
