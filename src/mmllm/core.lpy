@@ -1180,6 +1180,25 @@
         (when-let [g (.- p grad)]
           (.zero_ g))))))
 
+(defn pick-distill-objective-logitkd?
+  "True when MMLLM_DISTILL_OBJECTIVE=logitkd — real output-KD (Hinton): Local-only
+   forward is the teacher, net-only forward is the student, loss += KD_COEF·KL(
+   teacher_softT‖student_softT)·T². Default 'mse' (feature distill) → inert by default."
+  []
+  (= "logitkd" (.lower (.get (.- os environ) "MMLLM_DISTILL_OBJECTIVE" "mse"))))
+
+(defn pick-kd-temp [] (python/float (.get (.- os environ) "MMLLM_KD_TEMP" "2.0")))
+(defn pick-kd-coef [] (python/float (.get (.- os environ) "MMLLM_KD_COEF" "1.0")))
+(defn pick-kd-freeze
+  "MMLLM_KD_FREEZE — which params the KD gradient may reach via the student forward:
+   'none' (all adapt) | 'trunk' (freeze dense trunk+emb, KD→netbank+gate only)."
+  [] (.lower (.get (.- os environ) "MMLLM_KD_FREEZE" "trunk")))
+
+(defn pick-kd-every
+  "MMLLM_KD_EVERY — run the (3-forward) logitkd term every N steps to amortize its
+   cost; consolidation accumulates fine. Default 1 (every step)."
+  [] (max 1 (python/int (.get (.- os environ) "MMLLM_KD_EVERY" "1"))))
+
 (defn pick-distill-coef
   "Coefficient on the Net→Local distillation aux loss.
 
@@ -1729,6 +1748,10 @@
   ([block x cos sin short-cache long-cache skip-bank?]
    (block-forward block x cos sin short-cache long-cache skip-bank? nil))
   ([block x cos sin short-cache long-cache skip-bank? trunk-ids]
+   (block-forward block x cos sin short-cache long-cache skip-bank? trunk-ids nil))
+  ;; kd: nil OR {:local-only? :net-only? :freeze-trunk?} — null a bank per-forward
+  ;; for the logitkd teacher (Net off) / student (Local off).
+  ([block x cos sin short-cache long-cache skip-bank? trunk-ids kd]
    (let [{:keys [norm1 norm2
                  q-proj k-proj-s v-proj-s k-proj-l v-proj-l o-proj
                  memory netbank long-gate bank-query bank-feedback
@@ -1736,6 +1759,9 @@
                  n-heads n-short-heads n-long-heads
                  n-short-kv-heads n-long-kv-heads head-dim max-t
                  short-window long-window]} block
+         memory   (if (and kd (:net-only?   kd)) nil memory)
+         netbank  (if (and kd (:local-only? kd)) nil netbank)
+         frz      (boolean (and kd (:freeze-trunk? kd)))  ;; KD_FREEZE=trunk: detach dense trunk
          ;; Gradient checkpointing branch: when MMLLM_GRAD_CHECKPOINT
          ;; is true AND grad is enabled (training, not eval), route
          ;; through kernel/checkpointed_block_forward. That helper is
@@ -1766,6 +1792,7 @@
          ;; SwitchGate + distill always-on while skipping the cheaper
          ;; net-only blocks.
          skip-bwd?  (and (torch/is_grad_enabled)
+                         (nil? kd)              ;; never stochastic-skip the KD forwards
                          (if (nil? memory)
                            (< (random/random) (pick-bwd-skip-frac-net-only))
                            (< (random/random) (pick-bwd-skip-frac-local))))]
@@ -1783,7 +1810,8 @@
                       ** :skip_bank skip-bank?
                       :netbank netbank
                       :trunk_ids trunk-ids
-                      :skip_bwd skip-bwd?)
+                      :skip_bwd skip-bwd?
+                      :freeze_trunk frz)
              ;; Carry applied OUTSIDE checkpoint — it's cheap and we
              ;; don't need its tiny intermediates re-materialized.
              x'     (if carry (carry x-ckpt) x-ckpt)]
@@ -1801,7 +1829,8 @@
                           ** :skip_bank skip-bank?
                           :netbank netbank
                           :trunk_ids trunk-ids
-                          :skip_bwd skip-bwd?)]
+                          :skip_bwd skip-bwd?
+                          :freeze_trunk frz)]
          ;; Multi-timescale carry as a post-block residual delta.
          ;; Carry's gate is zero-init so at step 0 this is identity
          ;; (no behavior change vs no-carry); training pushes the
@@ -2394,12 +2423,18 @@
   ([m tokens short-caches long-caches] (forward m tokens short-caches long-caches false nil))
   ([m tokens short-caches long-caches skip-bank?] (forward m tokens short-caches long-caches skip-bank? nil))
   ([m tokens short-caches long-caches skip-bank? trunk-ids]
+   (forward m tokens short-caches long-caches skip-bank? trunk-ids nil))
+  ;; kd: nil (normal) or a map {:local-only? :net-only? :freeze-trunk?} for the
+  ;; logitkd teacher/student forwards (Local-only / net-only, optional trunk freeze).
+  ([m tokens short-caches long-caches skip-bank? trunk-ids kd]
    (let [{:keys [tok-emb blocks norm-final rope-cos rope-sin mtp-head]} m
+         frz?         (boolean (and kd (:freeze-trunk? kd)))   ;; KD_FREEZE=trunk: detach tok-emb
+         emb-w        (if frz? (.detach (.- tok-emb weight)) (.- tok-emb weight))
          n-layers     (count blocks)
          short-caches (or short-caches (vec (repeat n-layers nil)))
          long-caches  (or long-caches  (vec (repeat n-layers nil)))
          guard?       (pick-nan-guard?)
-         x0           (tok-emb tokens)]
+         x0           (if frz? (F/embedding tokens emb-w) (tok-emb tokens))]
      (when guard? (nan-guard! "tok-emb" x0))
      (loop [i         0
             x         x0
@@ -2420,7 +2455,7 @@
        (if (= i n-layers)
          (let [x'         (norm-final x)
                _          (when guard? (nan-guard! "norm-final" x'))
-               logits     (torch/matmul x' (.t (.- tok-emb weight)))
+               logits     (torch/matmul x' (.t emb-w))
                _          (when guard? (nan-guard! "logits" logits))
                ;; Multi-token-prediction aux logits: independent linear
                ;; head from the same final hidden state. Used by
@@ -2441,7 +2476,7 @@
                sc         (nth short-caches i)
                lc         (nth long-caches  i)
                [x' s' l' distill-term z-term]
-                          (block-forward block x rope-cos rope-sin sc lc skip-bank? trunk-ids)]
+                          (block-forward block x rope-cos rope-sin sc lc skip-bank? trunk-ids kd)]
            (when guard? (nan-guard! (format "block-%d-out" i) x'))
            (recur (inc i) x' (conj out-short s') (conj out-long l')
                   (if distill-term (+ distill-acc distill-term) distill-acc)
@@ -2689,9 +2724,38 @@
                           (pick-distill-coef (python/int step) (python/int total))
                           (pick-distill-coef)))
          n-distill-layers (max 1 (count (filter (fn [b] (some? (:memory b))) (:blocks m))))
-         distill-loss (if (or (zero? d-coef) (number? distill-total))
-                        0.0
+         distill-loss (if (or (pick-distill-objective-logitkd?) (zero? d-coef) (number? distill-total))
+                        0.0                       ;; logitkd replaces feature-MSE
                         (* d-coef (/ distill-total (python/float n-distill-layers))))
+         ;; logitkd output-KD: TEACHER = Local-only forward (Net off, under no_grad =
+         ;; detached + auto-non-checkpointed); STUDENT = net-only forward (Local off).
+         ;; loss += KD_COEF · KL(teacher_softT ‖ student_softT) · T². The net learns to
+         ;; reproduce the Local's output distribution. Success = KD(local→net) FALLING
+         ;; + student_bpc→teacher_bpc (stashed for the printer), not Δ_net.
+         kd-loss      (if-not (and (pick-distill-objective-logitkd?)
+                                   (let [ev (pick-kd-every)
+                                         st (if-let [mm (:metrics m)] (python/int (or (.get mm "current_step" 0) 0)) 0)]
+                                     (or (<= ev 1) (zero? (mod st ev)))))
+                        0.0
+                        (let [kd-temp  (pick-kd-temp)
+                              kd-coef  (pick-kd-coef)
+                              t-logits (with [_ (torch/no_grad)]
+                                         (nth (forward m x nil nil false trunk-ids {:local-only? true}) 0))
+                              t-lg     (.div (.reshape t-logits -1 vocab-size) kd-temp)
+                              t-logp   (.detach (.sub t-lg (torch/logsumexp t-lg ** :dim -1 :keepdim true)))
+                              t-p      (torch/exp t-logp)
+                              s-logits (nth (forward m x nil nil false trunk-ids
+                                              {:net-only? true :freeze-trunk? (= (pick-kd-freeze) "trunk")}) 0)
+                              s-lg     (.div (.reshape s-logits -1 vocab-size) kd-temp)
+                              s-logp   (.sub s-lg (torch/logsumexp s-lg ** :dim -1 :keepdim true))
+                              kl       (.mean (.sum (.mul t-p (.sub t-logp s-logp)) ** :dim -1))]
+                          (when-let [metrics (:metrics m)]
+                            (.__setitem__ metrics "kd_local_net" (.item kl))
+                            (.__setitem__ metrics "teacher_bpc"
+                                          (/ (.item (F/cross_entropy (.reshape t-logits -1 vocab-size) y-flat)) 0.6931471805599453))
+                            (.__setitem__ metrics "student_bpc"
+                                          (/ (.item (F/cross_entropy (.reshape s-logits -1 vocab-size) y-flat)) 0.6931471805599453)))
+                          (* kd-coef (* kl (* kd-temp kd-temp)))))
          mtp-loss     (collect-mtp-loss aux-logits y T)
          delim-loss   (collect-delim-loss m final-x y)
          ;; K_a/K_b alignment between Net and Local — no-op when
@@ -2721,7 +2785,8 @@
                         (not (number? mtp-loss))       (+ mtp-loss)
                         (not (number? distill-loss))   (+ distill-loss)
                         (not (number? delim-loss))     (+ delim-loss)
-                        (not (number? k-align-loss))   (+ k-align-loss))]
+                        (not (number? k-align-loss))   (+ k-align-loss)
+                        (not (number? kd-loss))        (+ kd-loss))]
      ;; Hard-abort on NaN/Inf loss before backward — a degenerate step
      ;; would propagate NaN into all params, opt state, and bank V; the
      ;; ckpt-save next event would then persist a poisoned model. Raising

@@ -52,15 +52,31 @@ def _pkm_select(q_a, q_b, K_a, K_b, sqrt_n, sub_top_k, top_k):
     return top_scores, top_global
 
 
-def netbank_forward(p, q):
+def netbank_forward(p, q, want_z=False):
     """MLX NetBank eval forward.
 
     p: dict of mx.array params {q_norm_w, K_a, K_b, V, expander_w} + ints/floats
        {sub_dim, sqrt_n, sub_top_k, top_k, eps}. q: [B,T,q_dim] -> [B,T,q_dim].
+
+    When want_z, also returns a LOAD-BALANCING loss on the sub-keys (CV² of per-key
+    routing importance, summed over the K_a and K_b axes). The NetBank historically
+    had NO anti-collapse term, so its keys collapsed (all corpora retrieve a shared
+    ~1% hot row set, Jaccard ~0.7). The router-entropy z-loss (logsumexp²) was tried
+    and FAILED: it flattens score peaks but top-k is argmax, so it never reorders the
+    winners. CV²(importance) penalizes keys that ACCUMULATE soft routing mass, pushing
+    that mass toward uniform → under-used keys win the top-k → product rows spread →
+    corpora get distinct V_net storage (a prerequisite for cross-round consolidation).
     """
     q = _rms_norm(q, p["q_norm_w"], p["eps"])
     q_a = q[..., : p["sub_dim"]]
     q_b = q[..., p["sub_dim"]:]
+    z = None
+    if want_z:
+        def _cv2(s):                                    # coeff-of-variation² of key importance
+            P = mx.softmax(s, axis=-1)                  # [...,sqrt_n] soft routing prob
+            imp = P.mean(axis=tuple(range(P.ndim - 1)))  # [sqrt_n] mean mass per key
+            return imp.var() / (imp.mean() ** 2 + 1e-9)
+        z = _cv2(q_a @ p["K_a"].T) + _cv2(q_b @ p["K_b"].T)
     top_scores, top_global = _pkm_select(
         q_a, q_b, p["K_a"], p["K_b"], p["sqrt_n"], p["sub_top_k"], p["top_k"]
     )
@@ -77,7 +93,8 @@ def netbank_forward(p, q):
         latent = mx.take(p["V"], top_global, axis=0).astype(mx.float32)
     weights = mx.softmax(top_scores, axis=-1)
     weighted_latent = mx.einsum("btkc,btk->btc", latent, weights)
-    return weighted_latent @ p["expander_w"].T          # expander Linear (bias=False)
+    out = weighted_latent @ p["expander_w"].T           # expander Linear (bias=False)
+    return (out, z) if want_z else out
 
 
 def local_forward(p, q, trunk_ids=None, want_z=False):

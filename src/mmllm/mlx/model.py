@@ -26,13 +26,16 @@ def forward(params, tokens, collect_aux=False):
             x = blocks.block_forward(b, x, cos, sin)
         x = blocks._rms_norm(x, params["norm_final_w"], params["norm_final_eps"])
         return x @ params["tok_emb"].T
-    distill_total = mx.array(0.0); z_total = mx.array(0.0); n_distill = 0
+    distill_total = mx.array(0.0); z_total = mx.array(0.0)
+    net_z_total = mx.array(0.0); n_distill = 0
     for b in params["blocks"]:
-        x, distill, z = blocks.block_forward(b, x, cos, sin, collect_aux=True)
+        x, distill, z, net_z = blocks.block_forward(b, x, cos, sin, collect_aux=True)
         if distill is not None:
             distill_total = distill_total + distill; n_distill += 1
         if z is not None:
             z_total = z_total + z
+        if net_z is not None:
+            net_z_total = net_z_total + net_z
     x = blocks._rms_norm(x, params["norm_final_w"], params["norm_final_eps"])
     logits = x @ params["tok_emb"].T
-    return logits, distill_total, z_total, n_distill
+    return logits, distill_total, z_total, net_z_total, n_distill

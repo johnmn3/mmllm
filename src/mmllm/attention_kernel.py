@@ -107,6 +107,18 @@ import torch.nn.functional as F
 import torch.utils.checkpoint as _torch_checkpoint
 
 
+def _flin(mod, x, frz):
+    """nn.Linear, optionally with DETACHED weight (KD_FREEZE=trunk: freeze the dense
+    trunk in the student forward so the KD gradient reaches only the netbank). All
+    trunk projections are bias=False."""
+    return F.linear(x, mod.weight.detach(), None) if frz else mod(x)
+
+
+def _fnorm(mod, x, frz):
+    """RMSNorm, optionally with DETACHED weight (see _flin)."""
+    return F.rms_norm(x, mod.normalized_shape, mod.weight.detach(), mod.eps) if frz else mod(x)
+
+
 # ── RoPE helpers (Python copy of the basilisp ones) ──
 
 def _rotate_half(x: torch.Tensor) -> torch.Tensor:
@@ -198,6 +210,7 @@ def attention(
     skip_bank: bool = False,
     netbank=None,
     trunk_ids: Optional[torch.Tensor] = None,
+    freeze_trunk: bool = False,
 ) -> tuple:
     """Three-tier attention with hard-split Q heads.
 
@@ -240,15 +253,15 @@ def attention(
     x_for_q = x + fb_delta if fb_delta is not None else x
 
     # Q projection split into short/long groups
-    q_full = q_proj(x_for_q).reshape(B, T, n_heads, head_dim)
+    q_full = _flin(q_proj, x_for_q, freeze_trunk).reshape(B, T, n_heads, head_dim)
     q_short = q_full.narrow(2, 0, n_short_heads).transpose(1, 2)
     q_long = q_full.narrow(2, n_short_heads, n_long_heads).transpose(1, 2)
 
     # K, V projections per tier
-    k_s = k_proj_s(x).reshape(B, T, n_short_kv_heads, head_dim).transpose(1, 2)
-    v_s = v_proj_s(x).reshape(B, T, n_short_kv_heads, head_dim).transpose(1, 2)
-    k_l = k_proj_l(x).reshape(B, T, n_long_kv_heads,  head_dim).transpose(1, 2)
-    v_l = v_proj_l(x).reshape(B, T, n_long_kv_heads,  head_dim).transpose(1, 2)
+    k_s = _flin(k_proj_s, x, freeze_trunk).reshape(B, T, n_short_kv_heads, head_dim).transpose(1, 2)
+    v_s = _flin(v_proj_s, x, freeze_trunk).reshape(B, T, n_short_kv_heads, head_dim).transpose(1, 2)
+    k_l = _flin(k_proj_l, x, freeze_trunk).reshape(B, T, n_long_kv_heads,  head_dim).transpose(1, 2)
+    v_l = _flin(v_proj_l, x, freeze_trunk).reshape(B, T, n_long_kv_heads,  head_dim).transpose(1, 2)
 
     # SHORT tier: RoPE on Q+K, append to cache, GQA expand, causal SDPA
     prev_short = short_cache[2] if short_cache is not None else 0
@@ -412,7 +425,7 @@ def attention(
     # Concat short + long head outputs, project
     attn = torch.cat([attn_s, attn_l], dim=1)
     out = attn.transpose(1, 2).contiguous().reshape(B, T, n_heads * head_dim)
-    out = o_proj(out)
+    out = _flin(o_proj, out, freeze_trunk)
 
     return out, new_short_cache, new_long_cache, distill_term, z_term
 
@@ -434,6 +447,7 @@ def block_forward(
     netbank=None,
     trunk_ids: Optional[torch.Tensor] = None,
     skip_bwd: bool = False,
+    freeze_trunk: bool = False,
 ) -> tuple:
     """Pre-norm decoder block with three-tier attention + SwiGLU FFN.
 
@@ -477,14 +491,17 @@ def block_forward(
         n_heads, n_short_heads, n_long_heads,
         n_short_kv_heads, n_long_kv_heads, head_dim, max_t,
         short_window, long_window,
-        norm1(x), cos, sin, short_cache, long_cache,
+        _fnorm(norm1, x, freeze_trunk), cos, sin, short_cache, long_cache,
         skip_bank=skip_bank,
         netbank=netbank,
         trunk_ids=trunk_ids,
+        freeze_trunk=freeze_trunk,
     )
     x = x + attn_out
-    x_norm = norm2(x)
-    ffn_out = down_proj(F.silu(gate_proj(x_norm)) * up_proj(x_norm))
+    x_norm = _fnorm(norm2, x, freeze_trunk)
+    ffn_out = _flin(down_proj,
+                    F.silu(_flin(gate_proj, x_norm, freeze_trunk)) * _flin(up_proj, x_norm, freeze_trunk),
+                    freeze_trunk)
     x = x + ffn_out
     # Per-block aux losses returned alongside x so their autograd
     # graphs flow through the (potentially checkpointed) block_forward
@@ -504,6 +521,7 @@ def checkpointed_block_forward(
     x, cos, sin, short_cache, long_cache,
     skip_bank=False, netbank=None, trunk_ids=None,
     skip_bwd: bool = False,
+    freeze_trunk: bool = False,
 ):
     """Gradient-checkpoint wrapper around `block_forward`.
 
@@ -547,7 +565,7 @@ def checkpointed_block_forward(
             head_dim, max_t, short_window, long_window,
             x, cos, sin, short_cache, long_cache,
             skip_bank=skip_bank, netbank=netbank, trunk_ids=trunk_ids,
-            skip_bwd=True,
+            skip_bwd=True, freeze_trunk=freeze_trunk,
         )
         return x_out, None, None
     import torch.utils.checkpoint as _ckpt
@@ -563,6 +581,7 @@ def checkpointed_block_forward(
             head_dim, max_t, short_window, long_window,
             x_arg, cos, sin, short_cache, long_cache,
             skip_bank=skip_bank, netbank=netbank, trunk_ids=trunk_ids,
+            freeze_trunk=freeze_trunk,
         )
         # PORT (port-distill-24layer): thread the per-block aux losses out as
         # checkpoint OUTPUTS so their gradients flow via recompute. With

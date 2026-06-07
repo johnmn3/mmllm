@@ -9,6 +9,7 @@ can be wrapped in mx.value_and_grad later (Stage 2).
 from __future__ import annotations
 
 import math
+import os
 import mlx.core as mx
 
 from mmllm.mlx import banks
@@ -98,10 +99,20 @@ def switch_gate_eval(p, q_long, sdpa_out, mem_out, net_out=None, collect_distill
             out = (w_sdpa[..., None] / total * sdpa_out
                    + w_local[..., None] / total * mem_out
                    + w_net[..., None] / total * net_out)
-        if collect_distill:                            # net vs detached (local - sdpa)
-            tgt = mx.stop_gradient(mem_out - sdpa_out)
-            diff = net_out - tgt
-            distill = (diff * diff).mean()
+        if collect_distill:
+            obj = os.environ.get("MMLLM_DISTILL_OBJECTIVE", "mse")
+            if obj == "funccos" and p.get("local_active_proj") is not None:
+                # 3-knob: (2) OUTPUT-LEVEL — match gated contributions; (1) DIRECTION
+                # via cosine (scale-invariant); (3) PROTECT — only where cos>=0.
+                nc = (w_net[..., None] / total) * net_out
+                lc = mx.stop_gradient((w_local[..., None] / total) * mem_out)
+                dot = (nc * lc).sum(axis=-1)
+                cosv = dot / (mx.sqrt((nc * nc).sum(axis=-1)) * mx.sqrt((lc * lc).sum(axis=-1)) + 1e-6)
+                distill = ((cosv >= 0.0) * (1.0 - cosv)).mean()
+            else:                                          # MSE: net vs detached (local - sdpa)
+                tgt = mx.stop_gradient(mem_out - sdpa_out)
+                diff = net_out - tgt
+                distill = (diff * diff).mean()
     return (out, distill) if collect_distill else out
 
 
@@ -133,11 +144,13 @@ def attention(b, x, cos, sin, collect_aux=False):
 
     # LONG tier (b/c): PKM retrieval. bank_query is PlainBankQuery (None) by
     # default -> bank_q = q_long flattened across the long heads.
-    distill = z = None
+    distill = z = net_z = None
     if b.get("memory") is None and b.get("netbank") is None:
         attn_l = attn_l_sdpa
     else:
         bank_q = mx.transpose(q_long, (0, 2, 1, 3)).reshape(B, T, Hl * hd)
+        if b.get("bank_query_w") is not None:            # ctx-add: content-discriminative query
+            bank_q = bank_q + (x @ b["bank_query_w"].T)  # W_ctx·x (x = post-norm residual)
         attn_l_mem = None
         if b.get("memory") is not None:
             r = banks.local_forward(b["memory"], bank_q, b.get("trunk_ids"), want_z=collect_aux)
@@ -145,7 +158,8 @@ def attention(b, x, cos, sin, collect_aux=False):
             attn_l_mem = mx.transpose(mem_out.reshape(B, T, Hl, hd), (0, 2, 1, 3))
         attn_l_net = None
         if b.get("netbank") is not None:
-            net_out = banks.netbank_forward(b["netbank"], bank_q)
+            nr = banks.netbank_forward(b["netbank"], bank_q, want_z=collect_aux)
+            net_out, net_z = nr if collect_aux else (nr, None)
             attn_l_net = mx.transpose(net_out.reshape(B, T, Hl, hd), (0, 2, 1, 3))
         if collect_aux:
             attn_l, distill = b["gate"](q_long, attn_l_sdpa, attn_l_mem, attn_l_net,
@@ -156,17 +170,17 @@ def attention(b, x, cos, sin, collect_aux=False):
     attn = mx.concatenate([attn_s, attn_l], axis=1)                  # (B,H,T,hd)
     out = mx.transpose(attn, (0, 2, 1, 3)).reshape(B, T, H * hd)
     out = out @ b["o_proj"].T
-    return (out, distill, z) if collect_aux else out
+    return (out, distill, z, net_z) if collect_aux else out
 
 
 def block_forward(b, x, cos, sin, collect_aux=False):
     """Pre-norm attention + SwiGLU FFN, both residual. Mirrors block_forward.
     When collect_aux, returns (x, distill_term, z_term)."""
     r = attention(b, _rms_norm(x, b["norm1_w"], b["norm1_eps"]), cos, sin, collect_aux)
-    attn_out, distill, z = r if collect_aux else (r, None, None)
+    attn_out, distill, z, net_z = r if collect_aux else (r, None, None, None)
     x = x + attn_out
     h = _rms_norm(x, b["norm2_w"], b["norm2_eps"])
     g = h @ b["gate_proj"].T
     ffn = ((g * mx.sigmoid(g)) * (h @ b["up_proj"].T)) @ b["down_proj"].T  # SwiGLU
     x = x + ffn
-    return (x, distill, z) if collect_aux else x
+    return (x, distill, z, net_z) if collect_aux else x
