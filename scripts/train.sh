@@ -312,7 +312,16 @@ fi
 # 24-sym-Local pace (~154 s/step). The original chain used 5×7; sym24's
 # heavier per-step cost forces the smaller per-bird budget.
 N_ROUNDS="${MMLLM_N_ROUNDS:-1}"
-STEPS="${MMLLM_STEPS_PER_ROUND:-300}"   # logitkd: longer wake = stronger Local teacher
+# Per-backend STEPS default. Local birds (MLX/M5, MMLLM_LOCAL_BIRD=1) run 300 —
+# longer wake = stronger Local teacher for logitkd, and MLX is fast enough.
+# CI torch birds run on the ~15GB / 6h-cap runner where 300×~154s/step ≈ 13h
+# would TIME OUT, so they default to 80 (still ~56 wake / 24 sleep at 70% warmup
+# = ample distill dose). Explicit MMLLM_STEPS_PER_ROUND always wins.
+if [ "${MMLLM_LOCAL_BIRD:-}" = 1 ]; then
+  STEPS="${MMLLM_STEPS_PER_ROUND:-300}"
+else
+  STEPS="${MMLLM_STEPS_PER_ROUND:-80}"
+fi
 # START_ROUND was set in step (1) from the auto-detected chain head.
 END_ROUND=$((START_ROUND + N_ROUNDS))
 
