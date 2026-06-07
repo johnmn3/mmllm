@@ -1,0 +1,6 @@
+{ "handle": "LIVW4", "wave": "train-r636",
+  "extended_from": "workers/dispatcher/harvest-1way-r635_sym24/round-635 (sparse-delta vs workers/dispatcher/harvest-0way-r0_sym24/round-0)",
+  "extended_from_harvest": "workers/dispatcher/harvest-1way-r635_sym24", "chain_prefix": "sym24",
+  "start_round": 635, "end_round": 636,
+  "note": "local 2-wave (par-2 x5 x2) FedAvg-merged head; logitkd consolidation Δ_net≈+0.5..0.6",
+  "branch_base": "main", "git_sha": "7cefe15d830c84eef1311e526a935400fca089e7" }
