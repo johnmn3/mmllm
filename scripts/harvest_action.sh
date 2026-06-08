@@ -19,6 +19,11 @@
 # warmstarting. Total harvest size: ~135 MB regardless of bird count.
 
 set -euo pipefail
+# Byte-wise parsing (macOS bash multibyte fold) + per-network-op timeouts so a
+# hung fork-branch git fetch can't stall the harvest into the 120min job timeout
+# (observed: runs killed at 120min w/ a live git-remote-https orphan, chain stuck).
+export LC_ALL=C LANG=C PYTHONUTF8=1
+NETTO=""; NETTO_BIG=""; command -v timeout >/dev/null 2>&1 && { NETTO="timeout 90"; NETTO_BIG="timeout 600"; }
 
 # Spork variant version — should match train.sh's SPORK_VERSION. The
 # harvested netbank artifact carries this in a `spork-<ver>-r<round>.json`
@@ -196,7 +201,7 @@ _fetch_fork_branch() {
   # If this fork bird is later picked for extraction in step 3, git
   # archive will lazy-fetch the needed blobs on demand (partial-clone
   # promisor remote semantics — set automatically by --filter).
-  if git fetch "https://github.com/${fork}.git" "${br}:refs/heads/${local_ref}" --depth=1 --filter=blob:none >/dev/null 2>&1; then
+  if $NETTO git fetch "https://github.com/${fork}.git" "${br}:refs/heads/${local_ref}" --depth=1 --filter=blob:none >/dev/null 2>&1; then
     echo "$local_ref"
     return 0
   fi
@@ -499,7 +504,7 @@ for ref in "${BIRD_REFS[@]}"; do
     origin/claude/*)
       BRANCH="${ref#origin/}"
       echo "    fetching $BRANCH…"
-      git fetch origin "$BRANCH" --depth=1 2>&1 | tail -1 || true
+      $NETTO_BIG git fetch origin "$BRANCH" --depth=1 2>&1 | tail -1 || true
       ;;
   esac
   # Resolve ref → tree. If ls-tree fails (PR fetch went sideways,
