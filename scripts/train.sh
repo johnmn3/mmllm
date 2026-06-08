@@ -323,20 +323,20 @@ else
   STEPS="${MMLLM_STEPS_PER_ROUND:-80}"
 fi
 # CI torch OOM fix. Every scheduled bird OOM-killed (exit 143) on the first step
-# since the wave-2 high-bandwidth recipe: the NetBank retrieval (top_k=512)
+# since the wave-2 high-bandwidth recipe (NET_TOP_K=512): the NetBank retrieval
 # dominates the per-block BACKWARD recompute, ~16GB at effective batch 16 — over
 # the ~15GB runner. grad-checkpoint frees the forward but NOT this backward
 # recompute (verified: use_reentrant=True, SDPA-checkpoint, logitkd split-backward
-# all insufficient). Rather than lower the retrieval bandwidth (which would make
-# CI's harvested NetBank regime differ from the MLX birds' top_k=512), cut the
-# EFFECTIVE BATCH: N_TRUNKS 16->4. This keeps top_k=512 UNIFORM across all birds
-# (coherent NetBank) and is a pure data-parallel reduction FedAvg handles natively
-# (weighted by tokens_trained). It only shrinks the per-round V_local — which is
-# PERSONAL, re-initialized fresh each round, and NEVER harvested; the shared NetBank
-# (V_net) is N_TRUNKS-independent. Measured ~9.6GB peak (CPU full-bandwidth repro),
-# fits with margin. Local MLX birds keep extend_chain's full 16. Explicit wins.
+# all insufficient). Lever = retrieval bandwidth: NET_TOP_K=128 cuts it to ~12GB
+# peak — VERIFIED on the real runner (a top_k=128 dispatch completed at 12.1GB).
+# (256 measured ~15.7GB, at/over the ceiling, so 128 is the value that fits.)
+# NET_SUB_TOP_K=12 (12²=144≥128) matches. This is a training-time RETRIEVAL knob,
+# NOT chain structure — V_net shapes are unchanged; the bird just reads fewer rows
+# per query (CI's NetBank regime differs from MLX's 512 — a known, accepted trade).
+# Local MLX birds keep extend_chain's full 512. Explicit MMLLM_NET_TOP_K wins.
 if [ "${MMLLM_LOCAL_BIRD:-}" != 1 ]; then
-  export MMLLM_N_TRUNKS="${MMLLM_N_TRUNKS:-4}"
+  export MMLLM_NET_TOP_K="${MMLLM_NET_TOP_K:-128}"
+  export MMLLM_NET_SUB_TOP_K="${MMLLM_NET_SUB_TOP_K:-12}"
 fi
 # START_ROUND was set in step (1) from the auto-detected chain head.
 END_ROUND=$((START_ROUND + N_ROUNDS))
