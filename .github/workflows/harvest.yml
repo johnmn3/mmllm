@@ -232,9 +232,14 @@ jobs:
           #       so rebase is conflict-free unless two runs happened
           #       to produce identical dir names — vanishingly rare
           #       because Nway counts differ per run.
+          # A HUNG push (not just a failed one) would otherwise consume the
+          # whole 120min job budget (observed: 120min timeouts with a live
+          # git-remote-https orphan). Wrap each attempt in `timeout 300` so a
+          # stuck push is killed + retried, like the bird push (train.sh).
+          TO=""; command -v timeout >/dev/null 2>&1 && TO="timeout 300"
           pushed=0
           for i in $(seq 1 15); do
-            if git push origin HEAD:main 2>&1 | tee /tmp/push.out | tail -3; then
+            if $TO git push origin HEAD:main 2>&1 | tee /tmp/push.out | tail -3; then
               if ! grep -qE 'rejected|hung|408|disconnect|RPC failed|fast-forward' /tmp/push.out; then
                 pushed=1; break
               fi
