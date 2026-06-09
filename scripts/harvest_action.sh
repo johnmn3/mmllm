@@ -476,12 +476,17 @@ fi
 # of 100 a backlog merge blew the 120-min job timeout and NEVER landed —
 # which let every fork's hourly cron pile on MORE birds, compounding the
 # stall (observed: a 29-bird backlog merged for 119 min then got killed,
-# head stuck at r637). Cap at 8 so each run reliably FITS the budget and
-# LANDS; the head advances, consumes those birds, and the backlog drains
-# over the next few hourly runs instead of growing. Steady-state (no
-# backlog) is a few birds/round, well under 8. Raise via env for a
-# one-shot deep sweep once the dense-delta reference is re-baselined.
-MAX_BIRDS="${MMLLM_MAX_BIRDS_PER_HARVEST:-8}"
+# head stuck at r637). A LOW cap (tried 8) drops the rest — but the round
+# is only harvested once (auto-detect skips rounds with a harvest dir, and
+# catchup is off for sym24), so dropped birds are STRANDED and then pruned
+# when the head advances. So DON'T drop: keep a high cap that absorbs the
+# whole backlog equal-weight in one run (the only correct row-aware merge —
+# fedavg has no per-input weighting, so incremental head-accumulation would
+# under-weight earlier birds). 50 covers the realistic backlog with margin;
+# it's a runaway guard, not a budget cap (the 330min job timeout gives room:
+# the 29-bird merge completed in 117min). TRUE root fix = re-baseline the
+# dense-delta reference so birds shrink and any count folds fast.
+MAX_BIRDS="${MMLLM_MAX_BIRDS_PER_HARVEST:-50}"
 if [ $N -gt $MAX_BIRDS ]; then
   echo "▶ found $N birds — capping at $MAX_BIRDS for this run"
   echo "  keeping:"
