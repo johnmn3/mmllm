@@ -607,8 +607,20 @@ if not denses:
     print("  WARN: no dense.pt found across birds")
     sys.exit(0)
 
-n = len(denses[0])
-assert all(len(d) == n for d in denses), f"len mismatch: {[len(d) for d in denses]}"
+# Positional averaging needs matching tensor counts. A bird on a different
+# arch/spork variant (observed: a 618-tensor local-merge bird among 28 fork
+# birds at the modal 698) would otherwise crash the WHOLE harvest via a hard
+# assert, stalling the chain. Drop off-modal birds + warn — one nonconforming
+# bird must never block everyone else (mirrors the V_net fedavg's tolerance).
+from collections import Counter
+counts = [len(d) for d in denses]
+modal_n = Counter(counts).most_common(1)[0][0]
+_off = [c for c in counts if c != modal_n]
+if _off:
+    print(f"  WARN: dropping {len(_off)} bird(s) with off-modal dense tensor count "
+          f"{_off} (keeping {counts.count(modal_n)} at {modal_n})")
+denses = [d for d in denses if len(d) == modal_n]
+n = modal_n
 avg = []
 for i in range(n):
     vals = [d[i] for d in denses]
