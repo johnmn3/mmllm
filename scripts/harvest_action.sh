@@ -469,14 +469,19 @@ if [ $N -eq 0 ]; then
   exit 1
 fi
 
-# Bird cap. fedavg in scripts/_delta_sparse_net.py is streaming (loads
-# each worker's payload one at a time per PID, drops + gc's between),
-# so memory is bounded regardless of bird count. Probes use
-# --filter=blob:none so per-branch fetch is 1-5 MB, not 1 GB. The
-# original MAX_BIRDS=3 cap was OOM-mitigation that no longer applies.
-# Default raised to 100 to absorb every published bird at the target
-# round; still capped to avoid pathological cases.
-MAX_BIRDS="${MMLLM_MAX_BIRDS_PER_HARVEST:-100}"
+# Bird cap. fedavg in _delta_sparse_net.py is streaming (memory bounded
+# regardless of bird count). The cap is now a WALL-CLOCK guard, not OOM:
+# each bird's payload is a ~1.3 GB dense-delta (the V_net-dense-vs-r0
+# degeneracy), so fetch+extract+fold is ~4 min/bird. At the old default
+# of 100 a backlog merge blew the 120-min job timeout and NEVER landed —
+# which let every fork's hourly cron pile on MORE birds, compounding the
+# stall (observed: a 29-bird backlog merged for 119 min then got killed,
+# head stuck at r637). Cap at 8 so each run reliably FITS the budget and
+# LANDS; the head advances, consumes those birds, and the backlog drains
+# over the next few hourly runs instead of growing. Steady-state (no
+# backlog) is a few birds/round, well under 8. Raise via env for a
+# one-shot deep sweep once the dense-delta reference is re-baselined.
+MAX_BIRDS="${MMLLM_MAX_BIRDS_PER_HARVEST:-8}"
 if [ $N -gt $MAX_BIRDS ]; then
   echo "▶ found $N birds — capping at $MAX_BIRDS for this run"
   echo "  keeping:"
