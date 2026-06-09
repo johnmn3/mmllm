@@ -60,7 +60,13 @@ jobs:
     # Harvest needs ~10 min just for the upstream checkout (1140+ files)
     # + ~5 min for fork enumeration/fetches + ~30s per bird. Set a
     # comfortable budget so we never get cancelled mid-merge.
-    timeout-minutes: 120
+    # 330 (under GH's 360 free-tier cap): the full backlog must fold +
+    # eval + upload + push in ONE run, or it never lands and birds pile up.
+    # The 29-bird merge alone took 117min; 120 killed it 7s after the merge
+    # finished. Headroom for ~50 birds (the MAX_BIRDS guard). Once the
+    # backlog drains, steady-state runs are minutes. Real fix = dense-delta
+    # re-baseline (birds shrink → any count folds fast → drop this back down).
+    timeout-minutes: 330
     # Compose an explicit "is_active_run" expression once; every
     # downstream step gates on it. We DON'T use a job-level `if:`
     # because that's correlated with GH's scheduler-cache going
