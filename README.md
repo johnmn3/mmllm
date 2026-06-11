@@ -312,6 +312,27 @@ product-key retrieval only earns its keep when N is large enough that top-K << N
 No cross-attention, no RAG seam — all three sources are computed inside the
 same attention call and summed at the output.
 
+### Production chain config (`sym24`)
+
+The live federated chain is **`sym24`**. Its architecture is defined once, in the
+genesis `chain_meta.json` (`workers/dispatcher/harvest-0way-r0_sym24/round-0/`),
+and is **authoritative** — `scripts/train.sh` and `scripts/extend_chain.sh`
+re-export it so every bird builds the identical model. A bird on a different arch
+produces an off-shape `dense.pt` that the harvest drops, so its work never lands.
+
+| | sym24 (current) |
+|---|---|
+| base config | `cpu-mini` — d_model 32, 32 layers, seq-len 1024 |
+| **Local Bank layers** | **24 symmetric** — `LOCAL_BANK_LAYERS=0…23` (NOT the cpu-mini default of 8 asymmetric layers) |
+| NetBank | 32 independent (`NETBANK_SHARED=false`), `sqrt_n=1024`, `c_net=8` (≈1 GB) |
+| consolidation | **logitkd** output distillation — a net-only *student* is trained (KL on softened logits, T=2, gradient frozen to the NetBank) to reproduce a local-only *teacher*. The success metric is **Δ_net > 0** (ablating V_net costs bpc → the NetBank is load-bearing). This replaced the older feature-MSE distill, which left Δ_net ≈ 0. |
+| effective batch | `N_TRUNKS=16 × BATCH=1` = 16 |
+| retrieval bandwidth | `NET_TOP_K=512` (full) on capable hardware; **128** on the 15 GB CI runner (a runtime knob — V_net shape is unchanged, so it stays harvest-compatible) |
+| steps/round | 300 (local Apple-Silicon / MLX) · 80 (CI torch, to fit the 6 h job cap) |
+
+See `CLAUDE.md` § *CANONICAL CONFIG* for the full knob list and the rationale
+behind each backend-specific split.
+
 ### Product-key memory bank
 
 Two sub-key matrices `K_a`, `K_b` each of size `sqrt_n × (q_dim/2)` factor

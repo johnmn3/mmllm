@@ -116,7 +116,7 @@ Don't call them trunks. Ever. 16 routers per local bank.
 ## DESIGNED BANK SIZES — STAMPED HERE
 
   NetBank (V_net):  1 GB total
-  Local Bank:       100 MB total      (8 local banks in training)
+  Local Bank:       100 MB total      (24 local banks — sym24, layers 0–23)
   Routers:          1 MB each × 16    = 16 MB
 
 Net > Local. Net is the durable, expansive long-term tier; Local is the
@@ -125,6 +125,42 @@ or grows Local above 100 MB is an architectural regression.
 
 History: shrinking V_net to 4 MB stub in extend_chain.sh@c1dac9f9
 silently wasted 9 harvests of compute (R20-R90). Don't.
+
+## CANONICAL CONFIG — sym24 (the production chain). DO NOT DIVERGE.
+
+The chain's ARCH is defined in the genesis `chain_meta.json`
+(`workers/dispatcher/harvest-0way-r0_sym24/round-0/`) and is AUTHORITATIVE:
+a bird MUST build this exact arch or its dense.pt has the wrong tensor count
+and the harvest DROPS it (it keeps the modal-count majority). `train.sh` and
+`extend_chain.sh` (arch guard) re-export these from chain_meta — never hardcode
+or skip them.
+
+  ARCH (must match chain_meta; non-negotiable for contributing):
+    config            = cpu-mini (d_model=32, 32 layers, seq-len 1024)
+    LOCAL_BANK_LAYERS = 0..23  (24 SYMMETRIC local-bank layers) ← 698-tensor dense
+                        NOT the cpu-mini default [0,1,2,12,20,29,30,31] (8 layers,
+                        618-tensor dense → DROPPED at harvest)
+    NETBANK_SHARED    = false  (32 independent netbanks)
+    NET_SQRT_N=1024, NET_C_NET=8         (V_net = 1 GB)
+
+  TRAINING RECIPE (forced in extend_chain.sh; logitkd consolidation):
+    DISTILL_OBJECTIVE = logitkd   (real output-KD: net-only STUDENT distilled to
+                        reproduce the local-only TEACHER; NOT feature-MSE)
+    KD_FREEZE=trunk, KD_TEMP=2, KD_COEF=1, KD_EVERY=2
+    LR=3e-3, LR_MIN=3e-3, LR_WARMUP=70%
+    LR_NET_MULT 0.001→5.0, LR_BANK_MULT 3.0→0.001, LR_DENSE_MULT 0.05→0.005 (cosine)
+    GRAD_CHECKPOINT=true, N_TRUNKS=16, BATCH=1  (effective batch = 16)
+
+  BACKEND-SPECIFIC (the ONLY knobs that legitimately differ per bird):
+    NET_TOP_K   : 512 (local MLX / full bandwidth) | 128 on CI torch (15 GB OOM fit)
+    NET_SUB_TOP_K: 24 (512) | 12 (128)
+    STEPS/round : 300 (local MLX) | 80 (CI torch, for the 6 h job cap)
+    These are gated in train.sh by MMLLM_LOCAL_BIRD. Retrieval top_k is a runtime
+    knob (V_net shape unchanged), so it does NOT affect harvest compatibility.
+
+  Δ_net (consolidation) is the success metric: ablate V_net, eval, Δ = ablated −
+  ctrl bpc. POSITIVE = netbank load-bearing (logitkd working). Live chain runs
+  ~+0.05–0.08/round. The OLD feature-MSE gave ~−0.02 (netbank dead weight).
 
 ## What to watch in a 100-step run — and when
 
@@ -139,9 +175,10 @@ bank "mute" because you looked at the wrong tier at the wrong time.
   design, not a problem.
 
 - **Steps ~70 → 100 (Distillation / Net phase).** lr_b cosines down to
-  0.001× (Local freezes). lr_n ramps up to 0.1× (Net wakes). Distill
-  coef rises toward DISTILL_COEF_END. Whatever Local accumulated in
-  phase 1 should now flow into Net via the MSE distillation loss.
+  0.001× (Local freezes). lr_n ramps up to 5.0× (Net wakes). KD
+  coef rises toward its end value. Whatever Local accumulated in
+  phase 1 should now flow into Net via **logitkd output-KD** (net-only
+  student → local-only teacher; NOT the old feature-MSE loss).
   → **Δ_net is the signal.** A successful run shows Δ_net rising from
   ~0 toward Δ_local during this window. The end-of-train summary's
   Δ_net is the headline number.

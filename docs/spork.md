@@ -25,29 +25,33 @@ exceeds what any individual contributor could train.
                               │
                               ▼
    ┌──────────────────────────────────────────────────┐
-   │  8 Local Banks   (different LR multipliers)      │
-   │  ┌──────┐ ┌──────┐ ┌──────┐ ┌──────┐             │
-   │  │ 7.0× │ │ 3.0× │ │ 1.0× │ │ 0.5× │             │  the fast
-   │  └──────┘ └──────┘ └──────┘ └──────┘             │  hill climber
-   │  ┌──────┐ ┌──────┐ ┌──────┐ ┌──────┐             │  (steep→shallow LR)
-   │  │ 0.3× │ │ 0.7× │ │ 2.0× │ │ 5.0× │             │
-   │  └──────┘ └──────┘ └──────┘ └──────┘             │
-   │  16 routers × 1 MB each per bank                 │
+   │  24 Local Banks  (sym24: layers 0–23)            │
+   │  [L0][L1][L2] … [L21][L22][L23]                  │  the fast
+   │  16 routers × 1 MB each per bank                 │  hill climber
    └──────────────────┬───────────────────────────────┘
-                      │ distill (last 30% of training)
+                      │ logitkd output-KD (last ~30% of training)
                       ▼
    ┌──────────────────────────────────────────────────┐
    │  Net Bank  (1 GB, durable cortex)                │
-   │  receives distilled features during sleep phase  │
+   │  net-only STUDENT distilled to reproduce the     │
+   │  local-only TEACHER (KL on softened logits)      │
    └──────────────────────────────────────────────────┘
 ```
+
+> **Config note (sym24, current).** The production chain is **sym24**: a
+> **24-symmetric** Local-Bank layout (`MMLLM_LOCAL_BANK_LAYERS=0…23`), defined in
+> the genesis `chain_meta.json` and enforced by `train.sh` / `extend_chain.sh`.
+> The older asymmetric **8-layer** layout `[0,1,2,12,20,29,30,31]` is the cpu-mini
+> *default* but is NOT the chain — a bird built on it produces an off-shape dense
+> the harvest drops. Distillation is **logitkd** (real output-KD: net-only student
+> reproduces the local-only teacher), NOT the older feature-MSE.
 
 **Tiers:**
 
 | tier      | size       | role                              | lifetime          |
 |-----------|-----------:|-----------------------------------|-------------------|
 | Dense router | small    | per-token routing                 | trained always    |
-| Local Bank   | 100 MB ×8 | fast hill-climber                 | reset each round  |
+| Local Bank   | 100 MB ×24 | fast hill-climber (sym24 layers 0–23) | reset each round |
 | Net Bank     | 1 GB     | durable cortex / community memory | carries forward   |
 
 ## Training rhythm
@@ -57,16 +61,21 @@ Each spork training run is split into two **phases**, transitioning at
 
 1. **Wake / hill-climbing (steps 0 → ~70% of round).**
    Local-bank LR is at its wake plateau (~30× the base LR), Net LR is
-   essentially zero, distill coefficient is at floor. The 8 Local Banks
-   compete for the day's data with their asymmetric LR multipliers
-   (`MMLLM_LR_LAYER_MULTS=7,3,1,0.5,0.3,0.7,2,5`). Δ_local is the
-   signal here; Δ_net is expected ≈ 0.
+   essentially zero, KD coefficient is at floor. The 24 Local Banks
+   hill-climb on the day's data. `MMLLM_LR_LAYER_MULTS=7,3,1,0.5,0.3,0.7,2,5`
+   is an 8-value per-layer LR pattern **tiled (modulo) across the 24 layers**
+   — a leftover shape from the old 8-bank era, applied uniformly to all birds.
+   Δ_local is the signal here; Δ_net is expected ≈ 0.
 
 2. **Sleep / distill (steps ~70% → 100%).**
-   Local-bank LR cosines down to 0.001×; Net LR ramps to 0.1×. The
-   distill coefficient rises toward its end value. Whatever Local
-   accumulated in phase 1 flows into Net via the MSE distillation
-   loss. **Δ_net is the signal now**, with Δ_net rising toward Δ_local
+   Local-bank LR cosines down to 0.001×; Net LR ramps to 5.0×. The
+   KD coefficient rises toward its end value. Whatever Local accumulated in
+   phase 1 flows into Net via **logitkd output distillation** — a net-only
+   STUDENT forward is trained (KL on softened logits, T=2) to reproduce a
+   local-only TEACHER forward, with the gradient frozen to the NetBank (trunk
+   detached, `MMLLM_KD_FREEZE=trunk`). This is real Hinton output-KD, NOT the
+   older feature-MSE on intermediate vectors. **Δ_net is the signal now**, with
+   Δ_net rising toward Δ_local
    by end-of-run. This is the "potentially continuous" property — Net
    carries the chain's collective memory across rounds and across
    sporks.
@@ -74,7 +83,9 @@ Each spork training run is split into two **phases**, transitioning at
 ## Federated chain
 
 Many sporks train independently on top of the same chain head. Each
-publishes a sparse-delta of V_net (encoded against the r10 anchor for
+publishes a sparse-delta of V_net (encoded against the chain's genesis
+anchor — `harvest-0way-r0_<prefix>/round-0` for prefixed chains like sym24,
+the legacy r10 anchor for the original chain — for
 git-friendly transit, ~50-100 MB per spork instead of the 1 GB full
 state). The **harvest** workflow row-aware-FedAvg-merges every spork
 at a given round and advances the chain head.
