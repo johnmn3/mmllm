@@ -55,7 +55,14 @@ G=$SCRATCH/fim-json-v3.train.bin
 : "${MMLLM_MIX:=${G}:25,${B}/cosmopedia.train.bin:10,${B}/fineweb-edu.train.bin:10,${B}/magicoder.train.bin:10,${B}/hermes-funcall.train.bin:10,${B}/toolace.train.bin:10,${B}/aesop-fables.bin.train.bin:10,${B}/open-web-math.train.bin:10,${B}/tiny-stories.train.bin:5}"
 export MMLLM_MIX
 
-# ── Asymmetric V per-layer V_local LR multipliers ──
+# ── Per-layer V_local LR multipliers (8-value pattern, TILED across 24) ──
+# NOTE (sym24): this is an 8-value LR pattern from the old 8-bank era. The
+# production chain is sym24 = 24 SYMMETRIC Local-Bank layers (LOCAL_BANK_LAYERS=
+# 0..23, set from chain_meta by train.sh / extend_chain's arch guard). optim.py
+# TILES these 8 values modulo across all 24 layers (L0/L8/L16→7×, L4/L12/L20→0.3×,
+# …) — harmless (doesn't crash; applied identically to ALL birds so no divergence),
+# but the asymmetric shape no longer maps to a meaningful per-layer role. Revisit
+# if tuning per-layer LR for the 24-layer layout. Original 8-bank intent below:
 # Mults 7,3,1,0.5,0.3,0.7,2,5 — asymmetric V (steep on the front, shallow
 # on the back), trough at layer 4 (0.3×), peaks at layer 0 (7×) and layer
 # 7 (5×). Mean 2.4375, span 0.3×–7×.

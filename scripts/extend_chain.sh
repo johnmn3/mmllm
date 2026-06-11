@@ -34,6 +34,44 @@ echo "  continuing from round $START_FROM → $END_AT  (N_MORE=$N_MORE)"
 echo "  steps/round=$STEPS"
 echo "═══════════════════════════════════════════════════════════════"
 
+# ── Canonical ARCH enforcement (footgun guard) ───────────────────────────
+# Re-export the chain's ARCHITECTURE knobs from the genesis chain_meta.json so
+# the model BUILD matches the chain's saved dense.pt — exactly like train.sh's
+# step 4a does. WITHOUT this, a bird that invokes extend_chain DIRECTLY (the
+# local par-2 wave path: run_chain_diverse.sh → here, bypassing train.sh's
+# re-export) silently builds the cpu-mini DEFAULT arch — 8 ASYMMETRIC local-bank
+# layers [0,1,2,12,20,29,30,31] — instead of the chain's sym24 24-SYMMETRIC
+# layout. That produces a 618-tensor dense.pt; the harvest's dense average keeps
+# the modal 698-tensor (24-layer) majority and DROPS the 618 bird, so the work
+# never lands in the chain (diagnosed 2026-06-09). Arch is AUTHORITATIVE — you
+# cannot contribute to a chain on a different arch — so this HARD-exports
+# (overrides any stale/absent env). Recipe knobs (LR / KD / STEPS / retrieval)
+# are NOT touched here and remain overridable below. Idempotent for the train.sh
+# path (which already exported the same values).
+CHAIN_PREFIX="${MMLLM_CHAIN_PREFIX:-sym24}"
+if [ "$CHAIN_PREFIX" = "orig" ] || [ "$CHAIN_PREFIX" = "legacy" ]; then CHAIN_PREFIX=""; fi
+if [ -n "$CHAIN_PREFIX" ]; then
+  _REPO_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || echo .)
+  _META="$_REPO_ROOT/workers/dispatcher/harvest-0way-r0_${CHAIN_PREFIX}/round-0/chain_meta.json"
+  if [ -f "$_META" ]; then
+    echo "  ▶ enforcing chain arch from $_META"
+    while IFS='=' read -r _k _v; do
+      [ -z "$_k" ] && continue
+      export "$_k=$_v"; echo "      $_k=$_v"
+    done < <(python3 -c "
+import json
+m = json.load(open('$_META'))
+for k, v in m.items():
+    if k.startswith('MMLLM_') and v:
+        print(f'{k}={v}')
+")
+  else
+    echo "  ⚠ chain_meta not found at $_META — arch NOT enforced; bird may build the"
+    echo "    wrong local-bank-layer count and get dropped at harvest. Pass"
+    echo "    MMLLM_LOCAL_BANK_LAYERS explicitly, or run from a repo with the genesis dir."
+  fi
+fi
+
 # Recipe — must match the original chain.
 #
 # ┌──────────────────────────────────────────────────────────┐
