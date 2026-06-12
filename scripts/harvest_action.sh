@@ -357,19 +357,37 @@ if [ -z "$TARGET_ROUND" ]; then
                     echo "$ROUNDS_FROM_TREE"
                     echo "$ROUNDS_FROM_FORKS" ) \
     | tr ' ' '\n' | grep -E '^[0-9]+$' | sort -un ) || true)
+  ALL_ROUNDS_RAW=$( ( echo "$ROUNDS_FROM_NAME"; echo "$ROUNDS_FROM_TREE"; echo "$ROUNDS_FROM_FORKS" ) \
+    | tr ' ' '\n' | grep -E '^[0-9]+$' || true)
   echo "  rounds visible (origin + forks): $(echo "$ALL_ROUNDS" | tr '\n' ' ')"
-  # NOTE: ALL_ROUNDS is filtered to THIS chain during the scan below
-  # (ROUNDS_FROM_TREE / ROUNDS_FROM_FORKS only count rounds from birds
-  # whose meta.json chain_prefix matches), so the round numbers here are
-  # already chain-scoped. We just pick the highest not-yet-harvested one.
+  # Re-fold a round that was ALREADY harvested but now has MORE birds available
+  # than were folded (a late bird that published after the round's first harvest).
+  # Without this such a bird STRANDS: auto-detect skipped harvested rounds and the
+  # bird's branch is pruned once the head moves past its round (observed 2026-06-12:
+  # a complete local bird that raced the harvest never landed). Re-fold uses the
+  # normal chain-correct path; mkdir -p makes it idempotent (stops once avail==folded).
+  _folded_ways() {
+    local r="$1" maxw=0 d n
+    for d in workers/dispatcher/harvest-*-r"${r}${CHAIN_SUFFIX}"; do
+      [ -d "$d" ] || continue
+      n=$(basename "$d" | sed -nE 's/^harvest-(fold)?([0-9]+)way.*/\2/p')
+      [ -n "$n" ] && [ "$n" -gt "$maxw" ] && maxw="$n"
+    done
+    echo "$maxw"
+  }
+  # ALL_ROUNDS is chain-scoped. Highest round needing (more) folding: avail>folded.
+  # UNHARVESTED rounds have folded=0 → reduces to the old behavior (unchanged).
   for R in $(echo "$ALL_ROUNDS" | tac); do
-    if ! compgen -G "workers/dispatcher/harvest-*-r${R}${CHAIN_SUFFIX}" > /dev/null 2>&1; then
+    avail=$(echo "$ALL_ROUNDS_RAW" | grep -cxF "$R" || true)
+    folded=$(_folded_ways "$R")
+    if [ "${avail:-0}" -gt "${folded:-0}" ]; then
       TARGET_ROUND=$R
+      [ "${folded:-0}" -gt 0 ] && echo "  ▶ round r$R UNDER-folded: $avail avail > $folded folded — re-harvesting to absorb late bird(s)"
       break
     fi
   done
   if [ -z "$TARGET_ROUND" ]; then
-    echo "▶ no unharvested rounds found. Already-harvested dirs:"
+    echo "▶ no unharvested or under-folded rounds found. Already-harvested dirs:"
     ls -d workers/dispatcher/harvest-*-r*/ 2>/dev/null | head -10
     exit 0
   fi
