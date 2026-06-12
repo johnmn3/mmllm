@@ -1,0 +1,7 @@
+{ "handle": "LIVW16", "wave": "train-r653",
+  "extended_from": "workers/dispatcher/harvest-1way-r652_sym24/round-652 (sparse-delta vs workers/dispatcher/harvest-0way-r0_sym24/round-0)",
+  "extended_from_harvest": "workers/dispatcher/harvest-1way-r652_sym24", "chain_prefix": "sym24",
+  "start_round": 652, "end_round": 653,
+  "final_ctrl_bpc": "unknown",
+  "note": "local 2-wave (par-2 x5 x2) FedAvg-merged head; best-bird ctrl_bpc + ablation log captured for harvest",
+  "branch_base": "main", "git_sha": "12de1521b9a65fcb27ce6cea8c37bbd6ca3593ac" }
