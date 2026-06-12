@@ -569,6 +569,16 @@ except: print('')" 2>/dev/null || true)
     rm -rf "$WORK/$HANDLE"
     continue
   fi
+  # V_net delta completeness: fedavg requires delta-sparse-net.meta.pt. A bird that
+  # published dense+meta but NO delta (e.g. its encode crashed) would otherwise crash
+  # the WHOLE harvest with FileNotFoundError, stalling the chain (observed 2026-06-12:
+  # a delta-less local-merge bird jammed every r653 harvest). Skip it — one incomplete
+  # bird must never block the rest (cf. the dense modal-filter).
+  if [ ! -f "$WORK/$HANDLE/delta-sparse-net.meta.pt" ]; then
+    echo "  SKIP: $HANDLE has no delta-sparse-net.meta.pt (incomplete publish — no V_net delta)"
+    rm -rf "$WORK/$HANDLE"
+    continue
+  fi
   HANDLES+=("$HANDLE")
   BIRD_DIRS+=("$WORK/$HANDLE")
   KEPT_REFS+=("$ref")
