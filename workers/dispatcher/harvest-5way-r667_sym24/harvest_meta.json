@@ -1,0 +1,86 @@
+{
+  "spork_version": "0.9",
+  "target_round": 667,
+  "n_workers": 5,
+  "wave": "train-r667",
+  "workers": [
+    {
+      "handle": "8z1fK",
+      "branch": "fork-slaa-us-mmllm-claude-train-sym24-c0016dcf-8z1fK",
+      "ctrl_bpc": 3.9171
+    },
+    {
+      "handle": "X1pev",
+      "branch": "fork-SeniorCareMarket-com-mmllm-claude-train-sym24-1418df83-X1pev",
+      "ctrl_bpc": 3.973
+    },
+    {
+      "handle": "YPVdo",
+      "branch": "fork-SeniorCareMarket-mmllm-claude-train-sym24-c5a41e1d-YPVdo",
+      "ctrl_bpc": 3.8934
+    },
+    {
+      "handle": "7AJ6a",
+      "branch": "fork-joly-os-mmllm-claude-train-sym24-eb63477a-7AJ6a",
+      "ctrl_bpc": 4.011
+    },
+    {
+      "handle": "K8Xxg",
+      "branch": "fork-davidwuchn-mmllm-claude-train-sym24-46b34628-K8Xxg",
+      "ctrl_bpc": 3.9189
+    }
+  ],
+  "worker_ctrl_bpc_mean": 3.9427,
+  "worker_ctrl_bpc_best": 3.8934,
+  "previous_harvest": {
+    "round": 666,
+    "dir": "workers/dispatcher/harvest-15way-r666_sym24",
+    "mean": 4.0267,
+    "best": 3.9071
+  },
+  "direct_contributions": [
+    {
+      "bird_id": "c0016dcf666e4cc1",
+      "handle": "8z1fK",
+      "branch": "fork-slaa-us-mmllm-claude-train-sym24-c0016dcf-8z1fK",
+      "n_steps": 80,
+      "ctrl_bpc": 3.9171
+    },
+    {
+      "bird_id": "1418df83f88a4be3",
+      "handle": "X1pev",
+      "branch": "fork-SeniorCareMarket-com-mmllm-claude-train-sym24-1418df83-X1pev",
+      "n_steps": 80,
+      "ctrl_bpc": 3.973
+    },
+    {
+      "bird_id": "c5a41e1d09c34180",
+      "handle": "YPVdo",
+      "branch": "fork-SeniorCareMarket-mmllm-claude-train-sym24-c5a41e1d-YPVdo",
+      "n_steps": 80,
+      "ctrl_bpc": 3.8934
+    },
+    {
+      "bird_id": "eb63477a27e6431d",
+      "handle": "7AJ6a",
+      "branch": "fork-joly-os-mmllm-claude-train-sym24-eb63477a-7AJ6a",
+      "n_steps": 80,
+      "ctrl_bpc": 4.011
+    },
+    {
+      "bird_id": "46b3462833f74501",
+      "handle": "K8Xxg",
+      "branch": "fork-davidwuchn-mmllm-claude-train-sym24-46b34628-K8Xxg",
+      "n_steps": 80,
+      "ctrl_bpc": 3.9189
+    }
+  ],
+  "ancestor_harvests": [
+    "workers/dispatcher/harvest-3way-r666_sym24"
+  ],
+  "cumulative_total_steps": 640,
+  "cumulative_unique_birds": 8,
+  "harvested_at": "2026-06-13T20:49:30Z",
+  "harvester": "scripts/harvest_action.sh (GH Action)",
+  "note": "Lean harvest \u2014 sparse deltas + averaged dense only, no opt-state."
+}
