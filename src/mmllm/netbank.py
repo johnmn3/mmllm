@@ -470,3 +470,132 @@ class NetBank(nn.Module):
         """Zero V_net (ablation utility, mirrors ProductKeyMemory)."""
         with torch.no_grad():
             self.V.weight.zero_()
+
+
+# ════════════════════════ ModularNetBank ════════════════════════
+#
+# Skill-module partition of the NetBank. Instead of one monolithic bank
+# shared by every skill (which causes cross-skill interference — training
+# one skill drifts another skill's rows, the ctrl_bpc-regression failure
+# mode), hold ONE independent NetBank per skill module. Each module owns its
+# K_a/K_b/V_net/expander and its own per-layer mmap file, so a cooled
+# (frozen) module's rows literally cannot move — cross-skill forgetting
+# becomes structurally impossible rather than merely discouraged.
+#
+# Drop-in for NetBank: forward(q) -> (B, T, q_dim); attention_kernel's
+# `netbank(bank_q)` call is unchanged. Routing (which module(s) a forward
+# consults) is set out-of-band via set_active() BEFORE the forward — by the
+# corpus tag during genesis, by the learned skill-router later — so the
+# attention-kernel signature stays untouched.
+#
+# Staged-cooling support:
+#   * per-module optimizer groups via module_{dense,sparse}_parameters(name)
+#     → each bank gets its own LR multiplier / cosine schedule, so mastered
+#     banks sit at ~0 while the newest bank is hot.
+#   * freeze_module(name) hard-stops a mastered module (requires_grad=False)
+#     → optimizer steps are no-ops and its V_net moved% -> 0 by construction.
+
+class ModularNetBank(nn.Module):
+    """A dict of independent per-skill NetBank modules sharing the NetBank
+    forward interface. See module comment above."""
+
+    def __init__(self, q_dim: int, module_names, *,
+                 sqrt_n: int = 8192, c_net: int = 64,
+                 top_k: int = 64, sub_top_k: int = 64,
+                 mmap_dir: "str | None" = None, mmap_layer: "int | None" = None,
+                 delay_ms_min: float = 1.0, delay_ms_max: float = 10.0,
+                 dtype: str = "fp32", bank_on_gpu: bool = False):
+        super().__init__()
+        module_names = list(module_names)
+        if not module_names:
+            raise ValueError("ModularNetBank needs at least one module name")
+        self.module_names = module_names
+        self.q_dim = q_dim
+        self.banks = nn.ModuleDict()
+        for name in module_names:
+            mp = None
+            if mmap_dir is not None:
+                lyr = "" if mmap_layer is None else f".{mmap_layer}"
+                mp = f"{mmap_dir.rstrip('/')}/netbank.{name}{lyr}.bin"
+            self.banks[name] = NetBank(
+                q_dim, sqrt_n=sqrt_n, c_net=c_net, top_k=top_k,
+                sub_top_k=sub_top_k, mmap_path=mp,
+                delay_ms_min=delay_ms_min, delay_ms_max=delay_ms_max,
+                dtype=dtype, bank_on_gpu=bank_on_gpu,
+            )
+        # Routing: which module(s) the next forward consults. None = all.
+        self._active = None
+        # Telemetry parity with NetBank (the block forward reads last_z_loss).
+        self.last_z_loss = None
+
+    # ─────────────────── routing ───────────────────
+
+    def set_active(self, names) -> None:
+        """Restrict the next forward(s) to module name(s). Set by the corpus
+        tag during genesis, by the learned router later. None = all modules
+        (composition)."""
+        if names is None:
+            self._active = None
+            return
+        if isinstance(names, str):
+            names = [names]
+        names = list(names)
+        for n in names:
+            if n not in self.banks:
+                raise KeyError(f"unknown netbank module {n!r}; have {self.module_names}")
+        self._active = names
+
+    def active_names(self):
+        return list(self._active) if self._active is not None else list(self.module_names)
+
+    # ─────────────────── forward (drop-in for NetBank) ───────────────────
+
+    def forward(self, q: torch.Tensor) -> torch.Tensor:
+        names = self.active_names()
+        if len(names) == 1:
+            out = self.banks[names[0]](q)
+            self.last_z_loss = self.banks[names[0]].last_z_loss
+            return out
+        # composition: sum active module outputs (a learned gate can replace
+        # the plain sum once we move past genesis tag-routing).
+        out = None
+        z = None
+        for n in names:
+            o = self.banks[n](q)
+            out = o if out is None else out + o
+            lz = self.banks[n].last_z_loss
+            if lz is not None:
+                z = lz if z is None else z + lz
+        self.last_z_loss = z
+        return out
+
+    # ───────────── per-module parameter access (per-module LR) ─────────────
+
+    def module_dense_parameters(self, name):
+        return self.banks[name].dense_parameters()
+
+    def module_sparse_parameters(self, name):
+        return self.banks[name].sparse_parameters()
+
+    # aggregate access — back-compat with the single-bank optimizer setup
+    def dense_parameters(self):
+        return [p for n in self.module_names for p in self.banks[n].dense_parameters()]
+
+    def sparse_parameters(self):
+        return [p for n in self.module_names for p in self.banks[n].sparse_parameters()]
+
+    # ─────────────────── cooling ───────────────────
+
+    def freeze_module(self, name: str, frozen: bool = True) -> None:
+        """Cooling: stop a mastered module's params updating (requires_grad
+        off) so optimizer steps are no-ops and its V_net moved% -> 0. The
+        structural isolation guarantee — a cooled skill cannot drift."""
+        b = self.banks[name]
+        for p in list(b.dense_parameters()) + list(b.sparse_parameters()):
+            p.requires_grad_(not frozen)
+
+    def is_frozen(self, name: str) -> bool:
+        return not any(p.requires_grad for p in self.banks[name].dense_parameters())
+
+    def warm_start_module(self, name, local_K_a, local_K_b, local_V=None):
+        self.banks[name].warm_start_from(local_K_a, local_K_b, local_V)
