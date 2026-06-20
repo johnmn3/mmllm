@@ -837,9 +837,66 @@ def fmt_code_contests(rec: dict, tpl: ChatTemplate = DEFAULT_TEMPLATE,
     return "\n".join(accepted + rejected)
 
 
+# ─────────── skill-module "basics" formatters (genesis 3) ───────────
+# Each is a clean-provenance atom (tier-1/2). The system message is the
+# routing hint the skill-router learns to emit, so the byte distribution
+# already encodes which module a record belongs to.
+
+def fmt_gutenberg_prose(rec: dict, tpl: ChatTemplate = DEFAULT_TEMPLATE) -> "str | None":
+    """OLC pd_books — public-domain Gutenberg books. Language/grammar/
+    reading foundation (tier-1 PD). Plain text envelope."""
+    txt = rec.get("text")
+    if not txt:
+        return None
+    return tpl.system("You are a writer producing well-formed literary prose.") + tpl.assistant(txt)
+
+
+def fmt_amps_math(rec: dict, tpl: ChatTemplate = DEFAULT_TEMPLATE) -> "str | None":
+    """OLC sw_amps_math — arithmetic & math problems/solutions
+    (tier-2 Apache/SW). Plain text envelope."""
+    txt = rec.get("text")
+    if not txt:
+        return None
+    return tpl.system("You are a math tutor. Solve problems step by step.") + tpl.assistant(txt)
+
+
+def fmt_stackexchange_dialogue(rec: dict, tpl: ChatTemplate = DEFAULT_TEMPLATE) -> "str | None":
+    """OLC ccby_stackexchange — Q&A / natural dialogue ("talking")
+    (tier-2 CC-BY-SA). Plain text envelope."""
+    txt = rec.get("text")
+    if not txt:
+        return None
+    return tpl.system("You are answering a question in a helpful discussion.") + tpl.assistant(txt)
+
+
 # Registry: dataset key → (HF name, config, split, formatter)
 # Add more here as we expand the mix.
 DATASET_REGISTRY = {
+    # ── skill-module "basics" genesis (prep_basics_genesis.sh; tier-1/2) ──
+    "gutenberg-prose": {
+        "hf_name":   "kernelmachine/open-license-corpus",
+        "hf_config": "pd_books",
+        "split":     "train",
+        "formatter": fmt_gutenberg_prose,
+        "kind":      "pretrain",
+        "notes":     "OLC public-domain Gutenberg books — language/grammar/reading atom (tier-1 PD)",
+    },
+    "amps-math": {
+        "hf_name":   "kernelmachine/open-license-corpus",
+        "hf_config": "sw_amps_math",
+        "split":     "train",
+        "formatter": fmt_amps_math,
+        "kind":      "pretrain",
+        "notes":     "OLC AMPS math — basic arithmetic/math atom (tier-2 Apache/SW)",
+    },
+    "stackexchange-dialogue": {
+        "hf_name":   "kernelmachine/open-license-corpus",
+        "hf_config": "ccby_stackexchange",
+        "split":     "train",
+        "formatter": fmt_stackexchange_dialogue,
+        "kind":      "pretrain",
+        "notes":     "OLC CC-BY StackExchange — natural dialogue/'talking' atom (tier-2 CC-BY-SA)",
+    },
     # SFT-style (chat-template wrapped)
     #
     # CommitPackFT ships as a per-language dataset script — `load_dataset
