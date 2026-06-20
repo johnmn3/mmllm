@@ -2925,6 +2925,17 @@
   (when-let [mh (:mtp-head m)] (.eval mh))
   (when-let [ih (:importance-head m)] (.eval ih)))
 
+(defn- route-netbank-active!
+  "Skill-module routing: set the active module on every block's ModularNetBank
+   for this batch's corpus, so only that skill's bank trains/serves this step.
+   No-op for the legacy single NetBank (no .set_active) and when `module` is
+   nil (consult all modules)."
+  [m module]
+  (doseq [b (:blocks m)]
+    (when-let [nb (:netbank b)]
+      (when (python/hasattr nb "set_active")
+        (.set_active nb module)))))
+
 (defn- set-train-mode! [m]
   "Inverse of set-eval-mode!. Call before every train step so the
    model's training-mode flags get restored after any intermediate
@@ -4563,6 +4574,15 @@
                                            ".bin" "")
                                    parts (.split base "/")]
                                (.__getitem__ parts (- (count parts) 1)))))))
+        ;; Skill-module routing: per-mix-index active module (or nil), same
+        ;; order as mix-tensors/mix-labels. Derived from the corpus basename
+        ;; via the shared contract; all-nil when MMLLM_NET_MODULES is unset
+        ;; (→ route-netbank-active! is a no-op = legacy single bank).
+        mix-modules  (when mix
+                       (let [modules (pick-netbank-modules)]
+                         (python/list
+                           (map (fn [lbl] (skm/module-for-corpus lbl modules))
+                                mix-labels))))
         corpus-tracker (when mix (make-corpus-tracker (count mix)))
         ;; Mutable cell for "wall-s at last 50-step print" — used to
         ;; compute rolling tokens/sec. Python list = 1-element ref.
@@ -4964,6 +4984,11 @@
                       :else
                         (let [[x y] (batch train-data B-cur T)]
                           [x y nil nil]))
+                ;; Skill-module routing: point every block's ModularNetBank at
+                ;; THIS batch's corpus module before the forward, so only that
+                ;; skill's bank trains this step (no-op unless MMLLM_NET_MODULES).
+                _     (when (and mix corpus-idx mix-modules)
+                        (route-netbank-active! m (nth mix-modules corpus-idx)))
                 ;; #9 spike: with probability `pause-prob`, replace
                 ;; the first `pause-n` bytes of x with the pause byte.
                 ;; In-place mutation; y untouched.
