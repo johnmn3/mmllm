@@ -113,25 +113,37 @@ def _extract(m, K, trunk_ids_mx):
         nb = g("netbank")
         if nb is not None:
             bmeta["netbank"] = True
-            tb["net_q_norm_w"] = _mxa(nb.q_norm.weight)
-            tb["net_K_a"] = _mxa(nb.K_a); tb["net_K_b"] = _mxa(nb.K_b)
-            tb["net_expander_w"] = _mxa(nb.expander.weight)
-            tb["V_net"] = _mxa(nb.V.weight)
-            # MMLLM_NET_WIDEN=C: widen netbank code dim c_net -> C (8->16=q_dim,
-            # removing the expander-rank bottleneck so the net can represent the
-            # FULL local feature space). V_net new cols=0 (empty); expander new
-            # cols=small random (zero-on-both deadlocks the gradient). Output
-            # unchanged at start; distill can then populate the new capacity.
+            # MMLLM_NET_WIDEN=C: widen netbank code dim c_net -> C (8->16=q_dim),
+            # removing the expander-rank bottleneck. V_net new cols=0; expander
+            # new cols=small random (zero-on-both deadlocks the gradient).
             _widen = int(os.environ.get("MMLLM_NET_WIDEN", "0"))
-            if _widen > tb["V_net"].shape[1]:
-                _pad = _widen - tb["V_net"].shape[1]; _N = tb["V_net"].shape[0]
-                tb["V_net"] = mx.concatenate(
-                    [tb["V_net"], mx.zeros((_N, _pad), dtype=tb["V_net"].dtype)], axis=1)
-                _ew = tb["net_expander_w"]
-                tb["net_expander_w"] = mx.concatenate(
-                    [_ew, (0.02 * mx.random.normal((_ew.shape[0], _pad))).astype(_ew.dtype)], axis=1)
-            sb["net"] = {"eps": _eps(nb.q_norm), "sub_dim": nb.sub_dim,
-                         "sqrt_n": nb.sqrt_n, "sub_top_k": nb.sub_top_k, "top_k": nb.top_k}
+            def _emit_net(bank):
+                d = {"net_q_norm_w": _mxa(bank.q_norm.weight),
+                     "net_K_a": _mxa(bank.K_a), "net_K_b": _mxa(bank.K_b),
+                     "net_expander_w": _mxa(bank.expander.weight),
+                     "V_net": _mxa(bank.V.weight)}
+                if _widen > d["V_net"].shape[1]:
+                    _pad = _widen - d["V_net"].shape[1]; _N = d["V_net"].shape[0]
+                    d["V_net"] = mx.concatenate(
+                        [d["V_net"], mx.zeros((_N, _pad), dtype=d["V_net"].dtype)], axis=1)
+                    _ew = d["net_expander_w"]
+                    d["net_expander_w"] = mx.concatenate(
+                        [_ew, (0.02 * mx.random.normal((_ew.shape[0], _pad))).astype(_ew.dtype)], axis=1)
+                return d
+            if hasattr(nb, "banks"):                 # ModularNetBank (skill-module partition)
+                bmeta["net_modular"] = True
+                bmeta["net_modules"] = list(nb.module_names)
+                tb["netbanks"] = {name: _emit_net(nb.banks[name]) for name in nb.module_names}
+                ref = nb.banks[nb.module_names[0]]
+                sb["net"] = {"eps": _eps(ref.q_norm), "sub_dim": ref.sub_dim,
+                             "sqrt_n": ref.sqrt_n, "sub_top_k": ref.sub_top_k, "top_k": ref.top_k}
+            else:                                    # legacy single NetBank (keys unchanged)
+                d = _emit_net(nb)
+                tb["net_q_norm_w"] = d["net_q_norm_w"]
+                tb["net_K_a"] = d["net_K_a"]; tb["net_K_b"] = d["net_K_b"]
+                tb["net_expander_w"] = d["net_expander_w"]; tb["V_net"] = d["V_net"]
+                sb["net"] = {"eps": _eps(nb.q_norm), "sub_dim": nb.sub_dim,
+                             "sqrt_n": nb.sqrt_n, "sub_top_k": nb.sub_top_k, "top_k": nb.top_k}
 
         trainable["blocks"].append(tb)
         static["blocks"].append(sb)
@@ -192,6 +204,18 @@ def _reassemble(trainable, static, meta, student=False, drop_net=False):
                            "sub_dim": mm["sub_dim"], "sqrt_n": mm["sqrt_n"],
                            "sub_top_k": mm["sub_top_k"], "top_k": mm["top_k"],
                            "n_trunks": mm["n_trunks"]}
+        if bm.get("net_modular"):
+            # ModularNetBank (skill-module partition): _extract emits per-module
+            # params into tb["netbanks"], but the MLX forward/optimizer/routing
+            # for the modular path is NOT yet wired. Per-batch skill-module
+            # routing also conflicts with this trainer's per-WINDOW mix sampling
+            # (one batch blends all corpora) and needs a per-batch-single-corpus
+            # mode. Fail loudly rather than silently dropping the netbank — use
+            # the torch backend for the skill-module genesis until this lands.
+            raise NotImplementedError(
+                "MLX modular NetBank not yet wired (extract done; reassemble/"
+                "route/optimizer/writeback + per-batch-single-corpus sampling "
+                "remain). Run the skill-module genesis on the torch backend.")
         if bm["netbank"] and not drop_net:              # drop_net=True -> LOCAL-only teacher
             nn_ = sb["net"]
             b["netbank"] = {"q_norm_w": Fa(tb["net_q_norm_w"]), "eps": nn_["eps"],
