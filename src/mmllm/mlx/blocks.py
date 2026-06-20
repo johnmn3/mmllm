@@ -157,7 +157,12 @@ def attention(b, x, cos, sin, collect_aux=False):
             mem_out, z = r if collect_aux else (r, None)
             attn_l_mem = mx.transpose(mem_out.reshape(B, T, Hl, hd), (0, 2, 1, 3))
         attn_l_net = None
-        if b.get("netbank") is not None:
+        if b.get("netbanks") is not None:        # ModularNetBank: route to active module(s)
+            nr = banks.netbank_forward_modular(b["netbanks"], b.get("net_active"),
+                                               bank_q, want_z=collect_aux)
+            net_out, net_z = nr if collect_aux else (nr, None)
+            attn_l_net = mx.transpose(net_out.reshape(B, T, Hl, hd), (0, 2, 1, 3))
+        elif b.get("netbank") is not None:
             nr = banks.netbank_forward(b["netbank"], bank_q, want_z=collect_aux)
             net_out, net_z = nr if collect_aux else (nr, None)
             attn_l_net = mx.transpose(net_out.reshape(B, T, Hl, hd), (0, 2, 1, 3))

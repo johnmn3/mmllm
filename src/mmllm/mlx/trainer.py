@@ -204,19 +204,19 @@ def _reassemble(trainable, static, meta, student=False, drop_net=False):
                            "sub_dim": mm["sub_dim"], "sqrt_n": mm["sqrt_n"],
                            "sub_top_k": mm["sub_top_k"], "top_k": mm["top_k"],
                            "n_trunks": mm["n_trunks"]}
-        if bm.get("net_modular"):
-            # ModularNetBank (skill-module partition): _extract emits per-module
-            # params into tb["netbanks"], but the MLX forward/optimizer/routing
-            # for the modular path is NOT yet wired. Per-batch skill-module
-            # routing also conflicts with this trainer's per-WINDOW mix sampling
-            # (one batch blends all corpora) and needs a per-batch-single-corpus
-            # mode. Fail loudly rather than silently dropping the netbank — use
-            # the torch backend for the skill-module genesis until this lands.
-            raise NotImplementedError(
-                "MLX modular NetBank not yet wired (extract done; reassemble/"
-                "route/optimizer/writeback + per-batch-single-corpus sampling "
-                "remain). Run the skill-module genesis on the torch backend.")
-        if bm["netbank"] and not drop_net:              # drop_net=True -> LOCAL-only teacher
+        if bm.get("net_modular") and not drop_net:     # ModularNetBank (skill-module partition)
+            nn_ = sb["net"]
+            b["netbanks"] = {name: {"q_norm_w": Fa(d["net_q_norm_w"]), "eps": nn_["eps"],
+                                    "K_a": Fa(d["net_K_a"]), "K_b": Fa(d["net_K_b"]),
+                                    "V": d["V_net"],                    # V_net stays LIVE
+                                    "expander_w": Fa(d["net_expander_w"]),
+                                    "sub_dim": nn_["sub_dim"], "sqrt_n": nn_["sqrt_n"],
+                                    "sub_top_k": nn_["sub_top_k"], "top_k": nn_["top_k"]}
+                             for name, d in tb["netbanks"].items()}
+            # per-batch skill routing: active module(s) set on `static` by the
+            # train loop from the batch's corpus (None = all → composition).
+            b["net_active"] = static.get("_net_active")
+        elif bm["netbank"] and not drop_net:            # drop_net=True -> LOCAL-only teacher
             nn_ = sb["net"]
             b["netbank"] = {"q_norm_w": Fa(tb["net_q_norm_w"]), "eps": nn_["eps"],
                             "K_a": Fa(tb["net_K_a"]), "K_b": Fa(tb["net_K_b"]),
@@ -256,12 +256,35 @@ def _write_back(trainable, m, K):
             cp(mem.K_b, tb["mem_K_b"]); cp(mem.V.weight, tb["V_local"])
         nb = g("netbank")
         if nb is not None:
-            cp(nb.q_norm.weight, tb["net_q_norm_w"]); cp(nb.K_a, tb["net_K_a"])
-            cp(nb.K_b, tb["net_K_b"]); cp(nb.expander.weight, tb["net_expander_w"])
-            cp(nb.V.weight, tb["V_net"])
+            if hasattr(nb, "banks"):                  # ModularNetBank: per-module write-back
+                for name, d in tb["netbanks"].items():
+                    bank = nb.banks[name]
+                    cp(bank.q_norm.weight, d["net_q_norm_w"]); cp(bank.K_a, d["net_K_a"])
+                    cp(bank.K_b, d["net_K_b"]); cp(bank.expander.weight, d["net_expander_w"])
+                    cp(bank.V.weight, d["V_net"])
+            else:
+                cp(nb.q_norm.weight, tb["net_q_norm_w"]); cp(nb.K_a, tb["net_K_a"])
+                cp(nb.K_b, tb["net_K_b"]); cp(nb.expander.weight, tb["net_expander_w"])
+                cp(nb.V.weight, tb["V_net"])
 
 
 # ───────────────────────── optimizers ─────────────────────────
+def _blk_get(block, path):
+    """Navigate a per-block trainable subtree by a path tuple. Sparse-V keys are
+    ('V_local',)/('V_net',) (legacy) or ('netbanks', <module>, 'V_net') (modular)."""
+    node = block
+    for p in path:
+        node = node[p]
+    return node
+
+
+def _blk_set(block, path, val):
+    node = block
+    for p in path[:-1]:
+        node = node[p]
+    node[path[-1]] = val
+
+
 class _DenseAdam:
     """Adam over the dense subtree (everything except the V tables). Operates on
     a flat name->array view so SparseAdam can own V_local/V_net separately."""
@@ -464,13 +487,41 @@ def train_round(cfg, train_path, val_path, ckpt_dir, log_path,
         corpora = [np.asarray(load_corpus(p, use_mmap=True)).reshape(-1) for p, _ in ents]
         ws = np.array([w for _, w in ents], dtype=float); ws = ws / ws.sum()
         corpus_path = ents[0][0]                          # for the "round" eval-mode fallback
+        _mix_paths = [p for p, _ in ents]
         print(f"  [mlx] per-step mix: {len(corpora)} corpora (weighted), windows drawn per-sample")
     else:
         corpora = [np.asarray(load_corpus(train_path, use_mmap=True)).reshape(-1)]
-        ws = np.array([1.0]); corpus_path = train_path
+        ws = np.array([1.0]); corpus_path = train_path; _mix_paths = [train_path]
+
+    # Skill-module routing: per-corpus module name (None unless MMLLM_NET_MODULES).
+    # When modular, sample ONE corpus per batch (not per-window) so the batch maps
+    # to a single module — partitioning obviates the per-window-mix consolidation
+    # fix (that was for the SHARED net; modules don't cross-contaminate).
+    from mmllm.skill_modules import parse_modules as _pm, module_for_corpus as _m4c
+    _net_modules = _pm()
+    def _corp_base(p):
+        b = os.path.basename(p)
+        for suf in (".train.bin", ".bin"):
+            if b.endswith(suf):
+                b = b[:-len(suf)]
+        return b
+    corpus_modules = ([_m4c(_corp_base(p), _net_modules) for p in _mix_paths]
+                      if _net_modules else None)
+    if corpus_modules is not None:
+        print(f"  [mlx] skill-module routing: corpus→module {dict(zip([_corp_base(p) for p in _mix_paths], corpus_modules))}")
 
     def batch():
-        # each of B samples: draw a corpus (weighted) + a random window → diverse batch
+        if corpus_modules is not None:
+            # MODULAR: one corpus for the whole batch → route all windows to its module.
+            ci = int(_rng.choice(len(corpora), p=ws))
+            static["_net_active"] = corpus_modules[ci]
+            c = corpora[ci]
+            xb = np.empty((B, T), dtype=np.int64); yb = np.empty((B, T), dtype=np.int64)
+            for j in range(B):
+                o = int(_rng.integers(0, c.size - T - 1))
+                xb[j] = c[o:o + T]; yb[j] = c[o + 1:o + 1 + T]
+            return mx.array(xb), mx.array(yb)
+        # per-window mix (monolithic net): each of B samples its own corpus + window
         cis = _rng.choice(len(corpora), size=B, p=ws)
         xb = np.empty((B, T), dtype=np.int64); yb = np.empty((B, T), dtype=np.int64)
         for j in range(B):
@@ -537,20 +588,24 @@ def train_round(cfg, train_path, val_path, ckpt_dir, log_path,
         return {"pkm_diag": True}
 
     # sparse optimizers per bank (keyed by block index + which table)
-    sparse = {}
+    sparse = {}   # (bi, path_tuple) -> SparseAdam; path navigates trainable["blocks"][bi]
     for bi, tb in enumerate(trainable["blocks"]):
         if "V_local" in tb:
-            sparse[(bi, "V_local")] = SparseAdam(tb["V_local"].shape[0],
-                                                 tb["V_local"].shape[1], lr=lr_base)
-        if "V_net" in tb:
-            sparse[(bi, "V_net")] = SparseAdam(tb["V_net"].shape[0],
-                                               tb["V_net"].shape[1], lr=lr_base)
+            sparse[(bi, ("V_local",))] = SparseAdam(tb["V_local"].shape[0],
+                                                    tb["V_local"].shape[1], lr=lr_base)
+        if "netbanks" in tb:                          # ModularNetBank: one SparseAdam per module
+            for name, d in tb["netbanks"].items():
+                sparse[(bi, ("netbanks", name, "V_net"))] = SparseAdam(
+                    d["V_net"].shape[0], d["V_net"].shape[1], lr=lr_base)
+        elif "V_net" in tb:
+            sparse[(bi, ("V_net",))] = SparseAdam(tb["V_net"].shape[0],
+                                                  tb["V_net"].shape[1], lr=lr_base)
     dense_opt = _DenseAdam(lr=lr_base)  # overwritten per-step by the schedule
-    sparse_keys = {f".blocks.{bi}.{name}" for (bi, name) in sparse}
+    sparse_keys = {f".blocks.{bi}." + ".".join(path) for (bi, path) in sparse}
     # snapshot V tables at init for the consolidation/moved% check (CLAUDE.md
     # false-positive guard: real training -> moved% >> 1% AND cos(V,init) < 1).
-    v_init = {k: np.array(trainable["blocks"][bi][name])
-              for k in sparse for (bi, name) in [k]}
+    v_init = {(bi, path): np.array(_blk_get(trainable["blocks"][bi], path))
+              for (bi, path) in sparse}
 
     z_coef = float(bvar("pick-z-loss-coef")())
     # OUTPUT-KD: real Hinton distillation instead of feature-MSE. The model WITH
@@ -629,19 +684,20 @@ def train_round(cfg, train_path, val_path, ckpt_dir, log_path,
         lb, ln, ld, dc = schedule(step)
         static["_distill_coef"] = dc
         dense_opt.lr = ld
-        for (bi, name), opt in sparse.items():
-            opt.lr = lb if name == "V_local" else ln
+        for (bi, path), opt in sparse.items():
+            opt.lr = lb if path[-1] == "V_local" else ln
         xb, yb = batch()
         static["_xb"], static["_yb"] = xb, yb
         loss, grads = mx.value_and_grad(loss_fn)(trainable)
         mx.eval(loss)
         # sparse banks first (read grads before dense update rewrites the tree)
-        for (bi, name), opt in sparse.items():
-            gV = np.array(grads["blocks"][bi][name])
+        for (bi, path), opt in sparse.items():
+            gV = np.array(_blk_get(grads["blocks"][bi], path))
             rows = np.nonzero(np.abs(gV).sum(1) > 0)[0]
             if len(rows):
-                trainable["blocks"][bi][name] = opt.step(
-                    trainable["blocks"][bi][name], mx.array(rows), mx.array(gV[rows]))
+                _blk_set(trainable["blocks"][bi], path,
+                         opt.step(_blk_get(trainable["blocks"][bi], path),
+                                  mx.array(rows), mx.array(gV[rows])))
         trainable = dense_opt.step(trainable, grads, sparse_keys)
         mx.eval(tree_map(lambda a: a, trainable))
         losses.append(float(loss))
@@ -735,9 +791,11 @@ def train_round(cfg, train_path, val_path, ckpt_dir, log_path,
 
     # consolidation check: how far did each V table move from init?
     result = {"steps": len(losses), "loss_start": losses[0], "loss_end": losses[-1]}
-    for (bi, name), opt in sparse.items():
-        cur = np.array(trainable["blocks"][bi][name]); init = v_init[(bi, name)]
-        if name == "V_local":
+    for (bi, path), opt in sparse.items():
+        cur = np.array(_blk_get(trainable["blocks"][bi], path)); init = v_init[(bi, path)]
+        # label: "V_local" / "V_net" (legacy) or "V_net.<module>" (modular)
+        label = "V_net." + path[1] if path[0] == "netbanks" else path[-1]
+        if path[-1] == "V_local":
             # V_local zero-inits each round — moved%-from-zero is undefined; report
             # the filled norm (how much Local accumulated this round) instead.
             print(f"  [mlx] V_local block{bi}: ||V||={np.linalg.norm(cur):.3f} (filled from 0)")
@@ -745,8 +803,8 @@ def train_round(cfg, train_path, val_path, ckpt_dir, log_path,
         moved = float(np.linalg.norm(cur - init) / (np.linalg.norm(init) + 1e-9))
         cos = float((cur.ravel() @ init.ravel()) /
                     (np.linalg.norm(cur) * np.linalg.norm(init) + 1e-9))
-        result[f"{name}_b{bi}_moved%"] = round(moved * 100, 3)
-        print(f"  [mlx] V_net block{bi}: moved%={moved*100:.3f}  cos(V,init)={cos:.4f}")
+        result[f"{label}_b{bi}_moved%"] = round(moved * 100, 3)
+        print(f"  [mlx] {label} block{bi}: moved%={moved*100:.3f}  cos(V,init)={cos:.4f}")
 
     # eval ctrl_bpc (torch forward of the MLX-trained, written-back model — also
     # cross-validates the write-back). Best-effort.
