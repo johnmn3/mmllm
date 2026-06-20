@@ -3873,9 +3873,15 @@
    Caller is responsible for unlinking on cleanup."
   [bank tag]
   (let [uuid-mod (python/__import__ "uuid")
-        path (str "/tmp/mmllm-cpu/abl-" tag "-" (.- (.uuid4 uuid-mod) hex) ".pt")
-        w (.- (.- bank V) weight)]
-    (torch/save (.detach w) path)
+        path (str "/tmp/mmllm-cpu/abl-" tag "-" (.- (.uuid4 uuid-mod) hex) ".pt")]
+    (if (python/hasattr bank "banks")
+      ;; ModularNetBank: save {module: V} so the whole net ablates at once.
+      (let [d (python/dict)]
+        (doseq [name (.- bank module_names)]
+          (.__setitem__ d name
+            (.detach (.- (.- (.__getitem__ (.- bank banks) name) V) weight))))
+        (torch/save d path))
+      (torch/save (.detach (.- (.- bank V) weight)) path))
     path))
 
 (defn- restore-v-from-disk!
@@ -3884,7 +3890,11 @@
   [bank path]
   (let [backup (torch/load path)]
     (with [_ (torch/no_grad)]
-      (.copy_ (.- (.- bank V) weight) backup))))
+      (if (python/hasattr bank "banks")
+        (doseq [name (.- bank module_names)]
+          (.copy_ (.- (.- (.__getitem__ (.- bank banks) name) V) weight)
+                  (.__getitem__ backup name)))
+        (.copy_ (.- (.- bank V) weight) backup)))))
 
 (defn- unlink-paths! [paths]
   (let [os-mod (python/__import__ "os")]

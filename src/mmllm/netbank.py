@@ -600,3 +600,17 @@ class ModularNetBank(nn.Module):
 
     def warm_start_module(self, name, local_K_a, local_K_b, local_V=None):
         self.banks[name].warm_start_from(local_K_a, local_K_b, local_V)
+
+    def zero_bank(self) -> None:
+        """Drop-in for NetBank.zero_bank: zero EVERY module's V (full net
+        ablation — used by ablation-step-net! to measure Δ_net)."""
+        for b in self.banks.values():
+            b.zero_bank()
+
+    def warm_start_from(self, local_K_a, local_K_b, local_V=None):
+        """Drop-in for NetBank.warm_start_from: warm-start EVERY module's bank
+        from the Local bank (each module gets the same retrieval-geometry
+        bootstrap, then diverges as it trains on its corpus). Lets the existing
+        warm_start_netbanks_from_local! path work unchanged on the modular bank."""
+        for b in self.banks.values():
+            b.warm_start_from(local_K_a, local_K_b, local_V)
