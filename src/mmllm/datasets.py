@@ -869,6 +869,28 @@ def fmt_stackexchange_dialogue(rec: dict, tpl: ChatTemplate = DEFAULT_TEMPLATE) 
     return tpl.system("You are answering a question in a helpful discussion.") + tpl.assistant(txt)
 
 
+def fmt_gsm8k(rec: dict, tpl: ChatTemplate = DEFAULT_TEMPLATE) -> "str | None":
+    """openai/gsm8k (main) — grade-school arithmetic word problems (MIT,
+    Parquet). question → answer (answer keeps the <<calc>> steps + '#### N')."""
+    q, a = rec.get("question"), rec.get("answer")
+    if not q or not a:
+        return None
+    return (tpl.system("You are a math tutor. Solve word problems step by step.")
+            + tpl.user(q) + tpl.assistant(a))
+
+
+def fmt_dolly(rec: dict, tpl: ChatTemplate = DEFAULT_TEMPLATE) -> "str | None":
+    """databricks-dolly-15k — human instruction/dialogue (CC-BY-SA-3.0,
+    Parquet). instruction (+ optional context) → response."""
+    instr, resp = rec.get("instruction"), rec.get("response")
+    if not instr or not resp:
+        return None
+    ctx = (rec.get("context") or "").strip()
+    user = f"{instr}\n\n{ctx}" if ctx else instr
+    return (tpl.system("You are a helpful assistant. Follow the instruction.")
+            + tpl.user(user) + tpl.assistant(resp))
+
+
 # Registry: dataset key → (HF name, config, split, formatter)
 # Add more here as we expand the mix.
 DATASET_REGISTRY = {
@@ -896,6 +918,26 @@ DATASET_REGISTRY = {
         "formatter": fmt_stackexchange_dialogue,
         "kind":      "pretrain",
         "notes":     "OLC CC-BY StackExchange — natural dialogue/'talking' atom (tier-2 CC-BY-SA)",
+    },
+    # NOTE: the three OLC slices above are script-based on HF and FAIL to load
+    # with current `datasets` ("Dataset scripts are no longer supported"). The
+    # LOADABLE (Parquet) genesis-3 actually used: tiny-stories (language, already
+    # registered below) + gsm8k + dolly-instruct.
+    "gsm8k": {
+        "hf_name":   "openai/gsm8k",
+        "hf_config": "main",
+        "split":     "train",
+        "formatter": fmt_gsm8k,
+        "kind":      "sft",
+        "notes":     "GSM8K grade-school arithmetic word problems (MIT, Parquet) — math atom (tier-2)",
+    },
+    "dolly-instruct": {
+        "hf_name":   "databricks/databricks-dolly-15k",
+        "hf_config": "default",
+        "split":     "train",
+        "formatter": fmt_dolly,
+        "kind":      "sft",
+        "notes":     "Dolly-15k human instruction/dialogue (CC-BY-SA-3.0, Parquet) — dialogue atom (tier-2)",
     },
     # SFT-style (chat-template wrapped)
     #

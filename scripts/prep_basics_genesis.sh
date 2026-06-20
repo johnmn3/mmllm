@@ -14,10 +14,13 @@ VAL=4000000       # 4 MB held-out val  (the per-corpus mastery metric)
 TEST=4000000      # 4 MB held-out test
 
 # genesis 3:  key  ->  skill
+# NOTE: the OLC slices (gutenberg-prose/amps-math/stackexchange-dialogue) are
+# script-based on HF and FAIL to load with current `datasets`. The LOADABLE
+# (Parquet) genesis-3 below covers the same skills:
 MODULES=(
-  "gutenberg-prose"          # language / grammar / reading   (tier-1 PD)
-  "amps-math"                # basic arithmetic / math        (tier-2 Apache/SW)
-  "stackexchange-dialogue"   # basic talking / Q&A            (tier-2 CC-BY-SA)
+  "tiny-stories"     # language / grammar foundation   (Parquet; TinyStories)
+  "gsm8k"            # basic arithmetic / math          (Parquet, MIT)
+  "dolly-instruct"   # basic talking / instruction      (Parquet, CC-BY-SA-3.0)
 )
 
 for key in "${MODULES[@]}"; do
