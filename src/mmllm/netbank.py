@@ -515,8 +515,9 @@ class ModularNetBank(nn.Module):
         for name in module_names:
             mp = None
             if mmap_dir is not None:
-                lyr = "" if mmap_layer is None else f".{mmap_layer}"
-                mp = f"{mmap_dir.rstrip('/')}/netbank.{name}{lyr}.bin"
+                # shared cross-backend naming (torch + MLX + harvester agree)
+                from mmllm.skill_modules import netbank_v_path
+                mp = netbank_v_path(mmap_dir, name, 0 if mmap_layer is None else mmap_layer)
             self.banks[name] = NetBank(
                 q_dim, sqrt_n=sqrt_n, c_net=c_net, top_k=top_k,
                 sub_top_k=sub_top_k, mmap_path=mp,

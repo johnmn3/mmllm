@@ -97,6 +97,37 @@ def netbank_forward(p, q, want_z=False):
     return (out, z) if want_z else out
 
 
+def netbank_forward_modular(banks, active, q, want_z=False):
+    """Modular MLX NetBank — Apple-Silicon-local-bird counterpart of the torch
+    ModularNetBank (mmllm.netbank).
+
+    `banks`:  {module_name: netbank_params_dict} — each dict is exactly what
+              netbank_forward() consumes (q_norm_w/K_a/K_b/V|V_mmap/expander_w/…).
+    `active`: list of module names to consult (corpus tag at genesis via
+              mmllm.skill_modules.module_for_corpus; learned router later);
+              None → all modules (composition).
+
+    Single active → route to that module; multiple → sum outputs (a learned
+    gate can replace the plain sum past genesis), matching ModularNetBank.
+    Cooling is handled upstream by the trainer: a frozen module's V_net is
+    excluded from the SparseAdam trainable set (the Ft freeze path), so its
+    rows cannot move — the same structural isolation torch freeze_module()
+    gives via requires_grad=False.
+    """
+    names = list(banks) if active is None else [a for a in active if a in banks]
+    if not names:                       # routed to nothing present → consult all
+        names = list(banks)
+    out = None
+    z = None
+    for n in names:
+        r = netbank_forward(banks[n], q, want_z=want_z)
+        o = r[0] if want_z else r
+        out = o if out is None else out + o
+        if want_z and r[1] is not None:
+            z = r[1] if z is None else z + r[1]
+    return (out, z) if want_z else out
+
+
 def local_forward(p, q, trunk_ids=None, want_z=False):
     """MLX Local PKM eval forward. Like NetBank but V rows are q_dim (no
     expander) and an optional per-router (trunk) row offset selects the
