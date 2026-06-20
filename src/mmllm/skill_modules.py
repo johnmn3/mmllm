@@ -53,10 +53,13 @@ def module_for_corpus(corpus_key: str, modules: "list[str]") -> "str | None":
     return m if m in modules else None
 
 
-def netbank_v_path(bank_dir: str, module: str, layer: int) -> str:
+def netbank_v_path(prefix: str, module: str, layer: int) -> str:
     """THE per-module per-layer V_net mmap path — ONE convention for torch,
-    MLX, and the harvester. Extends the legacy single-bank `V_net.<layer>.bin`
-    with a module segment: `V_net.<module>.<layer>.bin`.
+    MLX, and the harvester.
 
-    Keep this the single definition; both backends and harvester glob on it."""
-    return f"{bank_dir.rstrip('/')}/V_net.{module}.{layer}.bin"
+    `prefix` is the SAME path prefix the single-bank path uses (e.g.
+    `<dir>/V_net`). The legacy single bank writes `<prefix>.<layer>.bin`; a
+    module just inserts its name → `<prefix>.<module>.<layer>.bin`. So with
+    prefix=`<dir>/V_net` this yields `<dir>/V_net.<module>.<layer>.bin`, which
+    the harvester globs per-module across torch + MLX birds alike."""
+    return f"{prefix}.{module}.{layer}.bin"

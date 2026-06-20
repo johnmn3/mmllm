@@ -37,6 +37,7 @@
            [torch.optim :as optim]
            [mmllm.memory :as mem]
            [mmllm.netbank :as netb]
+           [mmllm.skill-modules :as skm]
            [mmllm.corpus :as corp]
            [mmllm.artifacts :as art]
            [mmllm.gating :as gate]
@@ -232,6 +233,14 @@
    MMLLM_NET_SUB_TOP_K (default 64). Capped to sqrt_n inside NetBank."
   []
   (python/int (.get (.- os environ) "MMLLM_NET_SUB_TOP_K" "64")))
+
+(defn pick-netbank-modules
+  "Skill-module names for the partitioned NetBank. Reads MMLLM_NET_MODULES
+   ('a,b,c') via the backend-agnostic contract in mmllm.skill_modules.
+   Empty/unset → [] = single monolithic NetBank (pre-fork; zero behavior
+   change when unset). Genesis-3: gutenberg-prose,amps-math,stackexchange-dialogue."
+  []
+  (skm/parse-modules))
 
 (defn pick-local-bank-layers
   "Set of transformer-layer indices that get a Local Bank attached.
@@ -1928,17 +1937,35 @@
                               :mmap_path path
                               :n_trunks  (pick-n-trunks)))
      :netbank   (when (pick-netbank-enabled?)
-                  (netb/NetBank q-dim
-                                ** :sqrt_n       (pick-netbank-sqrt-n)
-                                :c_net           (pick-netbank-c-net)
-                                :top_k           (pick-netbank-top-k)
-                                :sub_top_k       (pick-netbank-sub-top-k)
-                                :mmap_path       (when-let [base (pick-netbank-path memory-mmap-path)]
-                                                   (str base "." block-idx ".bin"))
-                                :delay_ms_min    (pick-netbank-delay-min)
-                                :delay_ms_max    (pick-netbank-delay-max)
-                                :dtype           (pick-netbank-dtype)
-                                :bank_on_gpu     (pick-netbank-on-gpu?)))
+                  (let [modules (pick-netbank-modules)]
+                    (if (seq modules)
+                      ;; partitioned: one NetBank per skill module. Per-module
+                      ;; mmap files via the shared <prefix>.<module>.<block>.bin
+                      ;; naming (mmllm.skill_modules) so the harvester merges
+                      ;; torch + MLX banks per-module. Default-off: unset
+                      ;; MMLLM_NET_MODULES → [] → the legacy single bank below.
+                      (netb/ModularNetBank q-dim modules
+                                           ** :sqrt_n       (pick-netbank-sqrt-n)
+                                           :c_net           (pick-netbank-c-net)
+                                           :top_k           (pick-netbank-top-k)
+                                           :sub_top_k       (pick-netbank-sub-top-k)
+                                           :mmap_prefix     (pick-netbank-path memory-mmap-path)
+                                           :mmap_layer      block-idx
+                                           :delay_ms_min    (pick-netbank-delay-min)
+                                           :delay_ms_max    (pick-netbank-delay-max)
+                                           :dtype           (pick-netbank-dtype)
+                                           :bank_on_gpu     (pick-netbank-on-gpu?))
+                      (netb/NetBank q-dim
+                                    ** :sqrt_n       (pick-netbank-sqrt-n)
+                                    :c_net           (pick-netbank-c-net)
+                                    :top_k           (pick-netbank-top-k)
+                                    :sub_top_k       (pick-netbank-sub-top-k)
+                                    :mmap_path       (when-let [base (pick-netbank-path memory-mmap-path)]
+                                                       (str base "." block-idx ".bin"))
+                                    :delay_ms_min    (pick-netbank-delay-min)
+                                    :delay_ms_max    (pick-netbank-delay-max)
+                                    :dtype           (pick-netbank-dtype)
+                                    :bank_on_gpu     (pick-netbank-on-gpu?)))))
      ;; Optional MultiTimescaleCarry — per-block "brain-stem clocks"
      ;; residual at log-uniform decay rates. Zero-init gate → identity at
      ;; step 0 so adding to an existing ckpt is behavior-preserving;
@@ -2134,15 +2161,22 @@
     ;; Caveat: this leaves the other (n_layers-1) mmap files allocated
     ;; but unused. That's ~1 GB of orphaned disk at default sizes.
     ;; Spike-only; production sharing would skip allocation entirely.
+    ;; ModularNetBank has no top-level .V/.expander (those live per-module on
+    ;; .banks[name]); the cross-block V-tying only applies to the legacy single
+    ;; NetBank. Skip for the partitioned bank — each module's V is per-block by
+    ;; default (cross-block per-module tying is a separate future enhancement),
+    ;; and genesis runs with MMLLM_NETBANK_SHARED=false regardless.
     (when (pick-netbank-shared?)
       (let [first-nb (:netbank (first blocks))]
-        (when first-nb
+        (when (and first-nb (python/hasattr first-nb "V"))
           (doseq [b (rest blocks)]
             (when-let [nb (:netbank b)]
               (.__setattr__ nb "V"        (.- first-nb V))
               (.__setattr__ nb "expander" (.- first-nb expander))))
           (println (format "  SPIKE-3: NetBank shared — V + expander tied across %d blocks"
-                           (count blocks))))))
+                           (count blocks))))
+        (when (and first-nb (not (python/hasattr first-nb "V")))
+          (println "  NOTE: MMLLM_NETBANK_SHARED ignored for ModularNetBank (per-module V is per-block)"))))
     {:config          config
      :device          device
      :tok-emb         (.to (nn/Embedding vocab-size d-model) device)

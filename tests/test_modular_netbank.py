@@ -16,7 +16,7 @@ def _mk(names=("lang", "math", "talk")):
     return ModularNetBank(
         q_dim=8, module_names=names,
         sqrt_n=16, c_net=4, top_k=4, sub_top_k=4,
-        mmap_dir=None, delay_ms_min=0.0, delay_ms_max=0.0,
+        mmap_prefix=None, delay_ms_min=0.0, delay_ms_max=0.0,
     )
 
 

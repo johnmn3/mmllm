@@ -502,7 +502,7 @@ class ModularNetBank(nn.Module):
     def __init__(self, q_dim: int, module_names, *,
                  sqrt_n: int = 8192, c_net: int = 64,
                  top_k: int = 64, sub_top_k: int = 64,
-                 mmap_dir: "str | None" = None, mmap_layer: "int | None" = None,
+                 mmap_prefix: "str | None" = None, mmap_layer: "int | None" = None,
                  delay_ms_min: float = 1.0, delay_ms_max: float = 10.0,
                  dtype: str = "fp32", bank_on_gpu: bool = False):
         super().__init__()
@@ -514,10 +514,10 @@ class ModularNetBank(nn.Module):
         self.banks = nn.ModuleDict()
         for name in module_names:
             mp = None
-            if mmap_dir is not None:
+            if mmap_prefix is not None:
                 # shared cross-backend naming (torch + MLX + harvester agree)
                 from mmllm.skill_modules import netbank_v_path
-                mp = netbank_v_path(mmap_dir, name, 0 if mmap_layer is None else mmap_layer)
+                mp = netbank_v_path(mmap_prefix, name, 0 if mmap_layer is None else mmap_layer)
             self.banks[name] = NetBank(
                 q_dim, sqrt_n=sqrt_n, c_net=c_net, top_k=top_k,
                 sub_top_k=sub_top_k, mmap_path=mp,
