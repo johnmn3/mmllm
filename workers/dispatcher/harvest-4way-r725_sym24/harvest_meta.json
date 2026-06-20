@@ -1,0 +1,74 @@
+{
+  "spork_version": "0.9",
+  "target_round": 725,
+  "n_workers": 4,
+  "wave": "train-r725",
+  "workers": [
+    {
+      "handle": "Pbs1t",
+      "branch": "origin/claude/train-sym24-507548de-Pbs1t",
+      "ctrl_bpc": 3.5345
+    },
+    {
+      "handle": "51Um8",
+      "branch": "fork-SeniorCareMarket-mmllm-claude-train-sym24-979a5129-51Um8",
+      "ctrl_bpc": 3.5284
+    },
+    {
+      "handle": "CXoEP",
+      "branch": "fork-joly-os-mmllm-claude-train-sym24-f54f23ab-CXoEP",
+      "ctrl_bpc": 3.5083
+    },
+    {
+      "handle": "anxsN",
+      "branch": "fork-davidwuchn-mmllm-claude-train-sym24-5c926a1a-anxsN",
+      "ctrl_bpc": 3.5329
+    }
+  ],
+  "worker_ctrl_bpc_mean": 3.526,
+  "worker_ctrl_bpc_best": 3.5083,
+  "previous_harvest": {
+    "round": 724,
+    "dir": "workers/dispatcher/harvest-11way-r724_sym24",
+    "mean": 3.5764,
+    "best": 3.4694
+  },
+  "direct_contributions": [
+    {
+      "bird_id": "507548de35ad4ef4",
+      "handle": "Pbs1t",
+      "branch": "origin/claude/train-sym24-507548de-Pbs1t",
+      "n_steps": 80,
+      "ctrl_bpc": 3.5345
+    },
+    {
+      "bird_id": "979a5129898a4935",
+      "handle": "51Um8",
+      "branch": "fork-SeniorCareMarket-mmllm-claude-train-sym24-979a5129-51Um8",
+      "n_steps": 80,
+      "ctrl_bpc": 3.5284
+    },
+    {
+      "bird_id": "f54f23abd3bd42c0",
+      "handle": "CXoEP",
+      "branch": "fork-joly-os-mmllm-claude-train-sym24-f54f23ab-CXoEP",
+      "n_steps": 80,
+      "ctrl_bpc": 3.5083
+    },
+    {
+      "bird_id": "5c926a1a3e4b4c47",
+      "handle": "anxsN",
+      "branch": "fork-davidwuchn-mmllm-claude-train-sym24-5c926a1a-anxsN",
+      "n_steps": 80,
+      "ctrl_bpc": 3.5329
+    }
+  ],
+  "ancestor_harvests": [
+    "workers/dispatcher/harvest-2way-r724_sym24"
+  ],
+  "cumulative_total_steps": 480,
+  "cumulative_unique_birds": 6,
+  "harvested_at": "2026-06-20T20:37:12Z",
+  "harvester": "scripts/harvest_action.sh (GH Action)",
+  "note": "Lean harvest \u2014 sparse deltas + averaged dense only, no opt-state."
+}
