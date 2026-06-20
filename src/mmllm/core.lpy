@@ -242,6 +242,24 @@
   []
   (skm/parse-modules))
 
+(defn pick-net-cooled-modules
+  "Set of skill-module names whose NetBank is FROZEN/cooled this round (lr→0
+   on opt-sparse-net's per-module group). Reads MMLLM_NET_COOL_MODULES ('a,b').
+   Empty = all hot (genesis phase 0). Staged cooling: as new modules are added,
+   list the mastered ones here so their banks stop moving (structural isolation)."
+  []
+  (python/set (skm/parse-modules (.get (.- os environ) "MMLLM_NET_COOL_MODULES" ""))))
+
+(defn net-module-lrs
+  "Per-module lr list in pick-netbank-modules order (matching opt-sparse-net's
+   per-module groups built by netbank-sparse-parameter-groups): `base` for hot
+   modules, 0.0 for cooled ones."
+  [base]
+  (let [cooled (pick-net-cooled-modules)]
+    (python/list
+      (map (fn [mname] (if (.__contains__ cooled mname) 0.0 base))
+           (pick-netbank-modules)))))
+
 (defn pick-local-bank-layers
   "Set of transformer-layer indices that get a Local Bank attached.
    Other layers run with `:memory = None` and the long-tier mix degrades
@@ -2384,6 +2402,27 @@
   (dedupe-by-py-id
     (mapcat (fn [b] (when-let [nb (:netbank b)] (.sparse_parameters nb)))
             (:blocks m))))
+
+(defn netbank-sparse-parameter-groups
+  "Per-module V_net param GROUPS for opt-sparse-net, so each skill module's lr
+   cools independently (staged cooling via set-opt-lrs!). One group per module
+   in pick-netbank-modules order; each group = that module's V across all
+   blocks (deduped by py-id for cross-block sharing). Returns nil when the
+   netbank is NOT modular (caller falls back to one flat group = legacy).
+   NOTE: requires a param-group-aware sparse optimizer (default SparseAdam is)."
+  [m]
+  (let [first-nb (some (fn [b] (:netbank b)) (:blocks m))]
+    (when (and first-nb (python/hasattr first-nb "module_names"))
+      (python/list
+        (for [name (.- first-nb module_names)]
+          (python/dict
+            {"params"
+             (python/list
+               (dedupe-by-py-id
+                 (mapcat (fn [b]
+                           (when-let [nb (:netbank b)]
+                             (.module_sparse_parameters nb name)))
+                         (:blocks m))))}))))))
 
 (defn warm-start-netbanks-from-local!
   "Per-block, copy Local Bank's K_a/K_b into the corresponding NetBank's
@@ -4623,6 +4662,9 @@
         ;; cooled independently from opt-sparse on the same cosine
         ;; schedule with its own multiplier.
         net-sparse-params (python/list (netbank-sparse-parameters m))
+        ;; Per-module groups (nil unless ModularNetBank) → each skill module's
+        ;; lr cools independently via set-opt-lrs! in the loop (staged cooling).
+        net-sparse-groups (netbank-sparse-parameter-groups m)
         ;; MMLLM_SKIP_OPT_NET=true skips initializing opt-sparse-net.
         ;; SparseAdam (and CPUOffloadSparseAdam) allocate dense state
         ;; (m, v moments) at V.weight's shape on first step — for
@@ -4636,7 +4678,8 @@
                                               "false")))
         opt-sparse-net (when (and (not skip-opt-net?)
                                   (pos? (count net-sparse-params)))
-                         ((pick-sparse-optimizer) net-sparse-params
+                         ((pick-sparse-optimizer)
+                          (if net-sparse-groups net-sparse-groups net-sparse-params)
                           ** :lr (pick-lr-net)))
         T          (:seq-len config)
         sqrt-n     (pick-sqrt-n config)
@@ -4955,7 +4998,11 @@
                                 (set-opt-lr!  opt-dense (* cur-lr d-mult)))
                               (set-opt-lr! opt-sparse (* cur-lr b-mult))
                               (when opt-sparse-net
-                                (set-opt-lr! opt-sparse-net (* cur-lr n-mult))))
+                                ;; >1 group = per-module (ModularNetBank): cool a
+                                ;; module → lr 0 via set-opt-lrs!; else uniform.
+                                (if (> (count (.- opt-sparse-net param_groups)) 1)
+                                  (set-opt-lrs! opt-sparse-net (net-module-lrs (* cur-lr n-mult)))
+                                  (set-opt-lr! opt-sparse-net (* cur-lr n-mult)))))
                 ;; Restore training-mode flags. eval-bpc and ablation-step!
                 ;; flip submodules to eval mode but never flip them back —
                 ;; without this call, Local Bank's `if self.training:`
