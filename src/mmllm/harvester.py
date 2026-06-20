@@ -212,52 +212,76 @@ def merge_netbank_files(workers: list[dict], output_dir: Path,
     cerebellum — averaging it across workers IS the consolidation step.
     Local Bank V is NOT merged (per-worker cortex).
 
-    Recognizes two file conventions:
-      bank-net-latest.{i}.bin       — fp32 (legacy, ~128 MB at sqrt_n=1024)
-      bank-net-latest.{i}.fp16.bin  — fp16 (round-5+, ~64 MB, fits in
-                                            GitHub's 100 MB blob limit)
-    Detected by filename suffix. Output preserves whichever the inputs
-    used (all-fp16 → fp16 out; mixed or all-fp32 → fp32 out).
+    Recognizes three file conventions (keyed by (module, layer)):
+      bank-net-latest.{i}.bin             — legacy per-layer fp32 (module='')
+      bank-net-latest.{i}.fp16.bin        — legacy per-layer fp16
+      bank-net-latest.{module}.{i}.bin    — SKILL-MODULE per-(module,layer)
+      bank-net-latest.{module}.{i}.fp16.bin
+    Each (module, layer) merges INDEPENDENTLY across only the workers that
+    carry it — so a skill module consolidates across the birds that trained
+    it, with no cross-skill averaging. Output preserves the input dtype
+    (all-fp16 → fp16 out; mixed/all-fp32 → fp32 out).
 
     Returns True if any files were merged."""
     import numpy as np
 
-    # Scan for NetBank files in each worker's latest step-N dir
-    per_layer_files: dict[int, list[tuple[Path, float, str]]] = {}
+    def _parse(name: str):
+        """bank-net-latest.<rest>.bin|.fp16.bin → (module, layer, dtype) | None.
+        <rest> is '<layer>' (legacy → module='') or '<module>.<layer>'."""
+        if not name.startswith("bank-net-latest."):
+            return None
+        if name.endswith(".fp16.bin"):
+            dt, core = "fp16", name[len("bank-net-latest."):-len(".fp16.bin")]
+        elif name.endswith(".bin"):
+            dt, core = "fp32", name[len("bank-net-latest."):-len(".bin")]
+        else:
+            return None
+        parts = core.split(".")
+        try:
+            layer = int(parts[-1])
+        except ValueError:
+            return None
+        return ".".join(parts[:-1]), layer, dt   # module='' for legacy
+
+    # Scan for NetBank files in each worker's latest step-N dir, keyed by (module, layer)
+    per_key_files: dict[tuple[str, int], list[tuple[Path, float, str]]] = {}
     for w in workers:
         wt = _weight_for(w["meta"], weighted_by)
         if wt <= 0:
             continue
         step_dir = w["dense_path"].parent
-        # Prefer .fp16.bin if present (newer convention); fall back to .bin.
-        # Don't double-count: if both exist for the same layer, pick fp16.
-        fp16_layers = set()
+        # Prefer .fp16.bin if present; don't double-count the same (module,layer).
+        fp16_keys = set()
         for f in step_dir.glob("bank-net-latest.*.fp16.bin"):
-            try:    layer = int(f.name.split(".")[1])
-            except: continue
-            per_layer_files.setdefault(layer, []).append((f, wt, "fp16"))
-            fp16_layers.add(layer)
+            p = _parse(f.name)
+            if not p: continue
+            module, layer, _ = p
+            per_key_files.setdefault((module, layer), []).append((f, wt, "fp16"))
+            fp16_keys.add((module, layer))
         for f in step_dir.glob("bank-net-latest.*.bin"):
             if ".fp16.bin" in f.name: continue   # already handled
-            try:    layer = int(f.name.split(".")[1])
-            except: continue
-            if layer in fp16_layers: continue    # prefer the fp16 we already grabbed
-            per_layer_files.setdefault(layer, []).append((f, wt, "fp32"))
+            p = _parse(f.name)
+            if not p: continue
+            module, layer, _ = p
+            if (module, layer) in fp16_keys: continue
+            per_key_files.setdefault((module, layer), []).append((f, wt, "fp32"))
 
-    if not per_layer_files:
+    if not per_key_files:
         return False
 
     output_dir.mkdir(parents=True, exist_ok=True)
-    for layer, entries in sorted(per_layer_files.items()):
+    for (module, layer), entries in sorted(per_key_files.items()):
         # All inputs for a given layer must have matching element-count
         # (different bytes-per-element is fine — fp16 vs fp32 distinguish).
         def _n_elems(path: Path, dt: str) -> int:
             bpe = 2 if dt == "fp16" else 4
             return path.stat().st_size // bpe
+        seg = f"{module}." if module else ""   # skill-module segment ('' = legacy)
+        label = f"{module} layer {layer}" if module else f"layer {layer}"
         n_set = {_n_elems(f, dt) for f, _, dt in entries}
         if len(n_set) > 1:
             first_path, _, _ = entries[0]
-            print(f"  WARN: layer {layer} NetBank element-counts differ {n_set} — using worker[0] unchanged")
+            print(f"  WARN: {label} NetBank element-counts differ {n_set} — using worker[0] unchanged")
             (output_dir / first_path.name).write_bytes(first_path.read_bytes())
             continue
         n_elems = n_set.pop()
@@ -271,13 +295,13 @@ def merge_netbank_files(workers: list[dict], output_dir: Path,
         # Output dtype: if ALL inputs were fp16, write fp16; otherwise fp32.
         all_fp16 = all(dt == "fp16" for _, _, dt in entries)
         if all_fp16:
-            out_path = output_dir / f"bank-net-latest.{layer}.fp16.bin"
+            out_path = output_dir / f"bank-net-latest.{seg}{layer}.fp16.bin"
             acc.astype(np.float16).tofile(out_path)
         else:
-            out_path = output_dir / f"bank-net-latest.{layer}.bin"
+            out_path = output_dir / f"bank-net-latest.{seg}{layer}.bin"
             acc.tofile(out_path)
         size_mb = out_path.stat().st_size / 1024**2
-        print(f"  NetBank layer {layer}: {len(entries)} workers → {out_path.name} "
+        print(f"  NetBank {label}: {len(entries)} workers → {out_path.name} "
               f"({size_mb:.1f} MB)")
     return True
 
