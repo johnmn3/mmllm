@@ -1,0 +1,146 @@
+{
+  "spork_version": "0.9",
+  "target_round": 731,
+  "n_workers": 10,
+  "wave": "train-r731",
+  "workers": [
+    {
+      "handle": "Zj4pL",
+      "branch": "origin/claude/train-sym24-4e301467-Zj4pL",
+      "ctrl_bpc": 3.4628
+    },
+    {
+      "handle": "Vu50r",
+      "branch": "origin/claude/train-sym24-c64c0078-Vu50r",
+      "ctrl_bpc": 3.4277
+    },
+    {
+      "handle": "dpw3Q",
+      "branch": "fork-slaa-us-mmllm-claude-train-sym24-42fbc0e0-dpw3Q",
+      "ctrl_bpc": 3.4782
+    },
+    {
+      "handle": "BYQQ3",
+      "branch": "fork-slaa-us-mmllm-claude-train-sym24-43f9cc78-BYQQ3",
+      "ctrl_bpc": 3.501
+    },
+    {
+      "handle": "dsjDl",
+      "branch": "fork-SeniorCareMarket-com-mmllm-claude-train-sym24-079b7b67-dsjDl",
+      "ctrl_bpc": 3.7991
+    },
+    {
+      "handle": "JXJPb",
+      "branch": "fork-SeniorCareMarket-com-mmllm-claude-train-sym24-aee8c95e-JXJPb",
+      "ctrl_bpc": 3.4225
+    },
+    {
+      "handle": "70TZm",
+      "branch": "fork-SeniorCareMarket-mmllm-claude-train-sym24-a8b85487-70TZm",
+      "ctrl_bpc": 3.4904
+    },
+    {
+      "handle": "Uapab",
+      "branch": "fork-joly-os-mmllm-claude-train-sym24-14a677c6-Uapab",
+      "ctrl_bpc": 3.4283
+    },
+    {
+      "handle": "C911m",
+      "branch": "fork-davidwuchn-mmllm-claude-train-sym24-01258871-C911m",
+      "ctrl_bpc": 3.8195
+    },
+    {
+      "handle": "55xpk",
+      "branch": "fork-davidwuchn-mmllm-claude-train-sym24-bd51ffd3-55xpk",
+      "ctrl_bpc": 3.7926
+    }
+  ],
+  "worker_ctrl_bpc_mean": 3.5622,
+  "worker_ctrl_bpc_best": 3.4225,
+  "previous_harvest": {
+    "round": 730,
+    "dir": "workers/dispatcher/harvest-6way-r730_sym24",
+    "mean": 3.5244,
+    "best": 3.427
+  },
+  "direct_contributions": [
+    {
+      "bird_id": "4e3014678ce34581",
+      "handle": "Zj4pL",
+      "branch": "origin/claude/train-sym24-4e301467-Zj4pL",
+      "n_steps": 80,
+      "ctrl_bpc": 3.4628
+    },
+    {
+      "bird_id": "c64c00784f9740f0",
+      "handle": "Vu50r",
+      "branch": "origin/claude/train-sym24-c64c0078-Vu50r",
+      "n_steps": 80,
+      "ctrl_bpc": 3.4277
+    },
+    {
+      "bird_id": "42fbc0e06a1045af",
+      "handle": "dpw3Q",
+      "branch": "fork-slaa-us-mmllm-claude-train-sym24-42fbc0e0-dpw3Q",
+      "n_steps": 80,
+      "ctrl_bpc": 3.4782
+    },
+    {
+      "bird_id": "43f9cc78a6964004",
+      "handle": "BYQQ3",
+      "branch": "fork-slaa-us-mmllm-claude-train-sym24-43f9cc78-BYQQ3",
+      "n_steps": 80,
+      "ctrl_bpc": 3.501
+    },
+    {
+      "bird_id": "079b7b67b0d645c2",
+      "handle": "dsjDl",
+      "branch": "fork-SeniorCareMarket-com-mmllm-claude-train-sym24-079b7b67-dsjDl",
+      "n_steps": 80,
+      "ctrl_bpc": 3.7991
+    },
+    {
+      "bird_id": "aee8c95ea1254b53",
+      "handle": "JXJPb",
+      "branch": "fork-SeniorCareMarket-com-mmllm-claude-train-sym24-aee8c95e-JXJPb",
+      "n_steps": 80,
+      "ctrl_bpc": 3.4225
+    },
+    {
+      "bird_id": "a8b8548781cd4c90",
+      "handle": "70TZm",
+      "branch": "fork-SeniorCareMarket-mmllm-claude-train-sym24-a8b85487-70TZm",
+      "n_steps": 80,
+      "ctrl_bpc": 3.4904
+    },
+    {
+      "bird_id": "14a677c6ec184b3c",
+      "handle": "Uapab",
+      "branch": "fork-joly-os-mmllm-claude-train-sym24-14a677c6-Uapab",
+      "n_steps": 80,
+      "ctrl_bpc": 3.4283
+    },
+    {
+      "bird_id": "01258871f37c4742",
+      "handle": "C911m",
+      "branch": "fork-davidwuchn-mmllm-claude-train-sym24-01258871-C911m",
+      "n_steps": 80,
+      "ctrl_bpc": 3.8195
+    },
+    {
+      "bird_id": "bd51ffd362ae4f21",
+      "handle": "55xpk",
+      "branch": "fork-davidwuchn-mmllm-claude-train-sym24-bd51ffd3-55xpk",
+      "n_steps": 80,
+      "ctrl_bpc": 3.7926
+    }
+  ],
+  "ancestor_harvests": [
+    "workers/dispatcher/harvest-1way-r730_sym24"
+  ],
+  "cumulative_total_steps": 880,
+  "cumulative_unique_birds": 11,
+  "harvested_at": "2026-06-21T15:54:53Z",
+  "harvester": "scripts/harvest_action.sh (GH Action)",
+  "note": "Lean harvest \u2014 sparse deltas + averaged dense only, no opt-state."
+}
