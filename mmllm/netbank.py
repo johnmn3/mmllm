@@ -529,3 +529,25 @@ class ModularNetBank(nn.Module):
             o = self.banks[n](*args, **kw)
             out = o if out is None else out + o
         return out
+
+    def dense_parameters(self):
+        """Dense-grad params (AdamW) aggregated across modules + the router keys
+        (router keys are dense → FedAvg-able via dense.pt)."""
+        ps = []
+        for n in self.module_names:
+            ps.extend(self.banks[n].dense_parameters())
+        if self.router is not None:
+            ps.append(self.router.module_keys)
+        return ps
+
+    def sparse_parameters(self):
+        """Each module's V_net.weight → its own SparseAdam group, aggregated."""
+        ps = []
+        for n in self.module_names:
+            ps.extend(self.banks[n].sparse_parameters())
+        return ps
+
+    def zero_bank(self) -> None:
+        """Zero every module's V_net (Δ_net ablation across the partition)."""
+        for n in self.module_names:
+            self.banks[n].zero_bank()

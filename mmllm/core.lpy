@@ -3698,22 +3698,32 @@
 ;;; the temp files.
 
 (defn- save-v-to-disk
-  "Serialize a bank's V.weight to a temp file path. Returns the path.
-   Caller is responsible for unlinking on cleanup."
+  "Serialize a bank's V.weight to a temp file path. Returns the path. For a
+   ModularNetBank, serializes every module's V (module-name order) as a list.
+   Stable dir (never /tmp). Caller is responsible for unlinking on cleanup."
   [bank tag]
-  (let [uuid-mod (python/__import__ "uuid")
-        path (str "/tmp/mmllm-cpu/abl-" tag "-" (.- (.uuid4 uuid-mod) hex) ".pt")
-        w (.- (.- bank V) weight)]
-    (torch/save (.detach w) path)
+  (let [os-mod   (python/__import__ "os")
+        uuid-mod (python/__import__ "uuid")
+        dir      (.expanduser (.- os-mod path) "~/models/genesis/_recovered/abl")
+        _        (.makedirs os-mod dir ** :exist_ok true)
+        path     (str dir "/" tag "-" (.- (.uuid4 uuid-mod) hex) ".pt")
+        payload  (if (python/hasattr bank "banks")
+                   (python/list (map (fn [n] (.detach (.- (.- (.__getitem__ (.- bank banks) n) V) weight)))
+                                     (.- bank module_names)))
+                   (.detach (.- (.- bank V) weight)))]
+    (torch/save payload path)
     path))
 
 (defn- restore-v-from-disk!
-  "Load a backup .pt file and copy_ its contents into bank.V.weight.
-   The loaded tensor goes out of scope immediately so RAM is freed."
+  "Load a backup .pt file and copy_ its contents into bank.V.weight (per-module
+   for a ModularNetBank). The loaded tensor goes out of scope immediately."
   [bank path]
   (let [backup (torch/load path)]
     (with [_ (torch/no_grad)]
-      (.copy_ (.- (.- bank V) weight) backup))))
+      (if (python/hasattr bank "banks")
+        (doseq [[n w] (map vector (.- bank module_names) backup)]
+          (.copy_ (.- (.- (.__getitem__ (.- bank banks) n) V) weight) w))
+        (.copy_ (.- (.- bank V) weight) backup)))))
 
 (defn- unlink-paths! [paths]
   (let [os-mod (python/__import__ "os")]
