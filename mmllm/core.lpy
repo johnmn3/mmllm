@@ -37,6 +37,7 @@
            [torch.optim :as optim]
            [mmllm.memory :as mem]
            [mmllm.netbank :as netb]
+           [mmllm.skill-modules :as skm]
            [mmllm.corpus :as corp]
            [mmllm.artifacts :as art]
            [mmllm.gating :as gate]
@@ -232,6 +233,73 @@
    MMLLM_NET_SUB_TOP_K (default 64). Capped to sqrt_n inside NetBank."
   []
   (python/int (.get (.- os environ) "MMLLM_NET_SUB_TOP_K" "64")))
+
+(defn pick-netbank-modules
+  "Skill-module names for the partitioned NetBank. Reads MMLLM_NET_MODULES
+   ('a,b,c') via the backend-agnostic contract in mmllm.skill_modules.
+   Empty/unset → [] = single monolithic NetBank (pre-fork; zero behavior
+   change when unset). Genesis-3: gutenberg-prose,amps-math,stackexchange-dialogue."
+  []
+  (skm/parse-modules))
+
+(defn pick-netbank-router?
+  "Build the learned two-level skill router on the ModularNetBank. Reads
+   MMLLM_NET_ROUTER (default off → plain-sum composition, zero behavior change)."
+  []
+  (.__contains__ #{"1" "true" "yes"}
+                 (.lower (.get (.- os environ) "MMLLM_NET_ROUTER" "false"))))
+
+(defn pick-netbank-router-k-load
+  "Level-1 hot-set size (modules run/paged-in per forward). Reads
+   MMLLM_NET_ROUTER_K_LOAD; default 0 → all loaded modules (small-N genesis)."
+  []
+  (let [v (python/int (.get (.- os environ) "MMLLM_NET_ROUTER_K_LOAD" "0"))]
+    (if (<= v 0) nil v)))
+
+(defn pick-netbank-router-k-tok
+  "Level-2 top-k modules weighted per token. Reads MMLLM_NET_ROUTER_K_TOK
+   (default 2)."
+  []
+  (python/int (.get (.- os environ) "MMLLM_NET_ROUTER_K_TOK" "2")))
+
+(defn pick-netbank-router-drive?
+  "Let the router pick the active module set (Level 1) when no corpus tag is set
+   = inference composition. Reads MMLLM_NET_ROUTER_DRIVE (default off). During
+   genesis the corpus tag drives and the router only LEARNS via the aux loss."
+  []
+  (.__contains__ #{"1" "true" "yes"}
+                 (.lower (.get (.- os environ) "MMLLM_NET_ROUTER_DRIVE" "false"))))
+
+(defn pick-netbank-router-gate
+  "Level-2 weighting mode. Reads MMLLM_NET_ROUTER_GATE: 'softmax' (default,
+   convex top-k_tok) or 'sigmoid' (per-module independent gate → variable
+   effective-k so OVERLAPPING skills co-fire/self-suppress instead of competing)."
+  []
+  (.lower (.get (.- os environ) "MMLLM_NET_ROUTER_GATE" "softmax")))
+
+(defn pick-netbank-router-aux-coef
+  "Coefficient of the genesis router aux CE loss (corpus→module supervision).
+   Reads MMLLM_NET_ROUTER_AUX_COEF (default 0.1; 0 disables)."
+  []
+  (python/float (.get (.- os environ) "MMLLM_NET_ROUTER_AUX_COEF" "0.1")))
+
+(defn pick-net-cooled-modules
+  "Set of skill-module names whose NetBank is FROZEN/cooled this round (lr→0
+   on opt-sparse-net's per-module group). Reads MMLLM_NET_COOL_MODULES ('a,b').
+   Empty = all hot (genesis phase 0). Staged cooling: as new modules are added,
+   list the mastered ones here so their banks stop moving (structural isolation)."
+  []
+  (python/set (skm/parse-modules (.get (.- os environ) "MMLLM_NET_COOL_MODULES" ""))))
+
+(defn net-module-lrs
+  "Per-module lr list in pick-netbank-modules order (matching opt-sparse-net's
+   per-module groups built by netbank-sparse-parameter-groups): `base` for hot
+   modules, 0.0 for cooled ones."
+  [base]
+  (let [cooled (pick-net-cooled-modules)]
+    (python/list
+      (map (fn [mname] (if (.__contains__ cooled mname) 0.0 base))
+           (pick-netbank-modules)))))
 
 (defn pick-local-bank-layers
   "Set of transformer-layer indices that get a Local Bank attached.
@@ -1180,6 +1248,25 @@
         (when-let [g (.- p grad)]
           (.zero_ g))))))
 
+(defn pick-distill-objective-logitkd?
+  "True when MMLLM_DISTILL_OBJECTIVE=logitkd — real output-KD (Hinton): Local-only
+   forward is the teacher, net-only forward is the student, loss += KD_COEF·KL(
+   teacher_softT‖student_softT)·T². Default 'mse' (feature distill) → inert by default."
+  []
+  (= "logitkd" (.lower (.get (.- os environ) "MMLLM_DISTILL_OBJECTIVE" "mse"))))
+
+(defn pick-kd-temp [] (python/float (.get (.- os environ) "MMLLM_KD_TEMP" "2.0")))
+(defn pick-kd-coef [] (python/float (.get (.- os environ) "MMLLM_KD_COEF" "1.0")))
+(defn pick-kd-freeze
+  "MMLLM_KD_FREEZE — which params the KD gradient may reach via the student forward:
+   'none' (all adapt) | 'trunk' (freeze dense trunk+emb, KD→netbank+gate only)."
+  [] (.lower (.get (.- os environ) "MMLLM_KD_FREEZE" "trunk")))
+
+(defn pick-kd-every
+  "MMLLM_KD_EVERY — run the (3-forward) logitkd term every N steps to amortize its
+   cost; consolidation accumulates fine. Default 1 (every step)."
+  [] (max 1 (python/int (.get (.- os environ) "MMLLM_KD_EVERY" "1"))))
+
 (defn pick-distill-coef
   "Coefficient on the Net→Local distillation aux loss.
 
@@ -1432,11 +1519,11 @@
                               (filter some?))]
         (if (empty? los)
           0.0
-          (let [mean-lo (-> (torch/stack (vec los) ** :dim 0)
+          (let [mean-lo (-> (torch/stack (python/list los) ** :dim 0)
                             (.mean ** :dim 0)
                             (.detach))
                 mean-so (when (and (= target-kind "residual") (seq sos-at-local))
-                          (-> (torch/stack (vec sos-at-local) ** :dim 0)
+                          (-> (torch/stack (python/list sos-at-local) ** :dim 0)
                               (.mean ** :dim 0)
                               (.detach)))
                 tgt (if mean-so (.sub mean-lo mean-so) mean-lo)
@@ -1729,6 +1816,10 @@
   ([block x cos sin short-cache long-cache skip-bank?]
    (block-forward block x cos sin short-cache long-cache skip-bank? nil))
   ([block x cos sin short-cache long-cache skip-bank? trunk-ids]
+   (block-forward block x cos sin short-cache long-cache skip-bank? trunk-ids nil))
+  ;; kd: nil OR {:local-only? :net-only? :freeze-trunk?} — null a bank per-forward
+  ;; for the logitkd teacher (Net off) / student (Local off).
+  ([block x cos sin short-cache long-cache skip-bank? trunk-ids kd]
    (let [{:keys [norm1 norm2
                  q-proj k-proj-s v-proj-s k-proj-l v-proj-l o-proj
                  memory netbank long-gate bank-query bank-feedback
@@ -1736,6 +1827,9 @@
                  n-heads n-short-heads n-long-heads
                  n-short-kv-heads n-long-kv-heads head-dim max-t
                  short-window long-window]} block
+         memory   (if (and kd (:net-only?   kd)) nil memory)
+         netbank  (if (and kd (:local-only? kd)) nil netbank)
+         frz      (boolean (and kd (:freeze-trunk? kd)))  ;; KD_FREEZE=trunk: detach dense trunk
          ;; Gradient checkpointing branch: when MMLLM_GRAD_CHECKPOINT
          ;; is true AND grad is enabled (training, not eval), route
          ;; through kernel/checkpointed_block_forward. That helper is
@@ -1766,6 +1860,7 @@
          ;; SwitchGate + distill always-on while skipping the cheaper
          ;; net-only blocks.
          skip-bwd?  (and (torch/is_grad_enabled)
+                         (nil? kd)              ;; never stochastic-skip the KD forwards
                          (if (nil? memory)
                            (< (random/random) (pick-bwd-skip-frac-net-only))
                            (< (random/random) (pick-bwd-skip-frac-local))))]
@@ -1783,7 +1878,8 @@
                       ** :skip_bank skip-bank?
                       :netbank netbank
                       :trunk_ids trunk-ids
-                      :skip_bwd skip-bwd?)
+                      :skip_bwd skip-bwd?
+                      :freeze_trunk frz)
              ;; Carry applied OUTSIDE checkpoint — it's cheap and we
              ;; don't need its tiny intermediates re-materialized.
              x'     (if carry (carry x-ckpt) x-ckpt)]
@@ -1801,7 +1897,8 @@
                           ** :skip_bank skip-bank?
                           :netbank netbank
                           :trunk_ids trunk-ids
-                          :skip_bwd skip-bwd?)]
+                          :skip_bwd skip-bwd?
+                          :freeze_trunk frz)]
          ;; Multi-timescale carry as a post-block residual delta.
          ;; Carry's gate is zero-init so at step 0 this is identity
          ;; (no behavior change vs no-carry); training pushes the
@@ -1899,28 +1996,29 @@
                               :mmap_path path
                               :n_trunks  (pick-n-trunks)))
      :netbank   (when (pick-netbank-enabled?)
-                  (let [mod-str (.get (.- os environ) "MMLLM_NET_MODULES" "")
-                        modules (vec (filter seq (.split mod-str ",")))
-                        mbase   (pick-netbank-path memory-mmap-path)]
-                    (if (> (count modules) 1)
-                      ;; MODULAR (reconstructed 2026-06-27): skill-module partition +
-                      ;; learned router. Per-module V file = <base>-net.<module>.<block>.bin.
-                      (netb/ModularNetBank (python/list modules) q-dim
-                                           ** :sqrt_n        (pick-netbank-sqrt-n)
-                                           :c_net            (pick-netbank-c-net)
-                                           :top_k            (pick-netbank-top-k)
-                                           :sub_top_k        (pick-netbank-sub-top-k)
-                                           :mmap_path_fn     (when mbase
-                                                               (fn [nm] (str mbase "-net." nm "." block-idx ".bin")))
-                                           :delay_ms_min     (pick-netbank-delay-min)
-                                           :delay_ms_max     (pick-netbank-delay-max)
-                                           :dtype            (pick-netbank-dtype)
-                                           :bank_on_gpu      (pick-netbank-on-gpu?)
-                                           :router           (= "true" (.lower (.get (.- os environ) "MMLLM_NET_ROUTER" "false")))
-                                           :router_k_load    (python/int (.get (.- os environ) "MMLLM_NET_ROUTER_K_LOAD" "0"))
-                                           :router_k_tok     (python/int (.get (.- os environ) "MMLLM_NET_ROUTER_K_TOK" "2"))
-                                           :router_drive     (= "true" (.lower (.get (.- os environ) "MMLLM_NET_ROUTER_DRIVE" "false"))))
-                      ;; SINGLE (legacy) — unchanged
+                  (let [modules (pick-netbank-modules)]
+                    (if (seq modules)
+                      ;; partitioned: one NetBank per skill module. Per-module
+                      ;; mmap files via the shared <prefix>.<module>.<block>.bin
+                      ;; naming (mmllm.skill_modules) so the harvester merges
+                      ;; torch + MLX banks per-module. Default-off: unset
+                      ;; MMLLM_NET_MODULES → [] → the legacy single bank below.
+                      (netb/ModularNetBank q-dim modules
+                                           ** :sqrt_n       (pick-netbank-sqrt-n)
+                                           :c_net           (pick-netbank-c-net)
+                                           :top_k           (pick-netbank-top-k)
+                                           :sub_top_k       (pick-netbank-sub-top-k)
+                                           :mmap_prefix     (pick-netbank-path memory-mmap-path)
+                                           :mmap_layer      block-idx
+                                           :delay_ms_min    (pick-netbank-delay-min)
+                                           :delay_ms_max    (pick-netbank-delay-max)
+                                           :dtype           (pick-netbank-dtype)
+                                           :bank_on_gpu     (pick-netbank-on-gpu?)
+                                           :router          (pick-netbank-router?)
+                                           :router_k_load   (pick-netbank-router-k-load)
+                                           :router_k_tok    (pick-netbank-router-k-tok)
+                                           :router_drive    (pick-netbank-router-drive?)
+                                           :router_gate     (pick-netbank-router-gate))
                       (netb/NetBank q-dim
                                     ** :sqrt_n       (pick-netbank-sqrt-n)
                                     :c_net           (pick-netbank-c-net)
@@ -2127,15 +2225,22 @@
     ;; Caveat: this leaves the other (n_layers-1) mmap files allocated
     ;; but unused. That's ~1 GB of orphaned disk at default sizes.
     ;; Spike-only; production sharing would skip allocation entirely.
+    ;; ModularNetBank has no top-level .V/.expander (those live per-module on
+    ;; .banks[name]); the cross-block V-tying only applies to the legacy single
+    ;; NetBank. Skip for the partitioned bank — each module's V is per-block by
+    ;; default (cross-block per-module tying is a separate future enhancement),
+    ;; and genesis runs with MMLLM_NETBANK_SHARED=false regardless.
     (when (pick-netbank-shared?)
       (let [first-nb (:netbank (first blocks))]
-        (when first-nb
+        (when (and first-nb (python/hasattr first-nb "V"))
           (doseq [b (rest blocks)]
             (when-let [nb (:netbank b)]
               (.__setattr__ nb "V"        (.- first-nb V))
               (.__setattr__ nb "expander" (.- first-nb expander))))
           (println (format "  SPIKE-3: NetBank shared — V + expander tied across %d blocks"
-                           (count blocks))))))
+                           (count blocks))))
+        (when (and first-nb (not (python/hasattr first-nb "V")))
+          (println "  NOTE: MMLLM_NETBANK_SHARED ignored for ModularNetBank (per-module V is per-block)"))))
     {:config          config
      :device          device
      :tok-emb         (.to (nn/Embedding vocab-size d-model) device)
@@ -2344,6 +2449,27 @@
     (mapcat (fn [b] (when-let [nb (:netbank b)] (.sparse_parameters nb)))
             (:blocks m))))
 
+(defn netbank-sparse-parameter-groups
+  "Per-module V_net param GROUPS for opt-sparse-net, so each skill module's lr
+   cools independently (staged cooling via set-opt-lrs!). One group per module
+   in pick-netbank-modules order; each group = that module's V across all
+   blocks (deduped by py-id for cross-block sharing). Returns nil when the
+   netbank is NOT modular (caller falls back to one flat group = legacy).
+   NOTE: requires a param-group-aware sparse optimizer (default SparseAdam is)."
+  [m]
+  (let [first-nb (some (fn [b] (:netbank b)) (:blocks m))]
+    (when (and first-nb (python/hasattr first-nb "module_names"))
+      (python/list
+        (for [name (.- first-nb module_names)]
+          (python/dict
+            {"params"
+             (python/list
+               (dedupe-by-py-id
+                 (mapcat (fn [b]
+                           (when-let [nb (:netbank b)]
+                             (.module_sparse_parameters nb name)))
+                         (:blocks m))))}))))))
+
 (defn warm-start-netbanks-from-local!
   "Per-block, copy Local Bank's K_a/K_b into the corresponding NetBank's
    first `local.sqrt_n` rows. Bootstraps NetBank's retrieval geometry
@@ -2416,12 +2542,18 @@
   ([m tokens short-caches long-caches] (forward m tokens short-caches long-caches false nil))
   ([m tokens short-caches long-caches skip-bank?] (forward m tokens short-caches long-caches skip-bank? nil))
   ([m tokens short-caches long-caches skip-bank? trunk-ids]
+   (forward m tokens short-caches long-caches skip-bank? trunk-ids nil))
+  ;; kd: nil (normal) or a map {:local-only? :net-only? :freeze-trunk?} for the
+  ;; logitkd teacher/student forwards (Local-only / net-only, optional trunk freeze).
+  ([m tokens short-caches long-caches skip-bank? trunk-ids kd]
    (let [{:keys [tok-emb blocks norm-final rope-cos rope-sin mtp-head]} m
+         frz?         (boolean (and kd (:freeze-trunk? kd)))   ;; KD_FREEZE=trunk: detach tok-emb
+         emb-w        (if frz? (.detach (.- tok-emb weight)) (.- tok-emb weight))
          n-layers     (count blocks)
          short-caches (or short-caches (vec (repeat n-layers nil)))
          long-caches  (or long-caches  (vec (repeat n-layers nil)))
          guard?       (pick-nan-guard?)
-         x0           (tok-emb tokens)]
+         x0           (if frz? (F/embedding tokens emb-w) (tok-emb tokens))]
      (when guard? (nan-guard! "tok-emb" x0))
      (loop [i         0
             x         x0
@@ -2442,7 +2574,7 @@
        (if (= i n-layers)
          (let [x'         (norm-final x)
                _          (when guard? (nan-guard! "norm-final" x'))
-               logits     (torch/matmul x' (.t (.- tok-emb weight)))
+               logits     (torch/matmul x' (.t emb-w))
                _          (when guard? (nan-guard! "logits" logits))
                ;; Multi-token-prediction aux logits: independent linear
                ;; head from the same final hidden state. Used by
@@ -2463,7 +2595,7 @@
                sc         (nth short-caches i)
                lc         (nth long-caches  i)
                [x' s' l' distill-term z-term]
-                          (block-forward block x rope-cos rope-sin sc lc skip-bank? trunk-ids)]
+                          (block-forward block x rope-cos rope-sin sc lc skip-bank? trunk-ids kd)]
            (when guard? (nan-guard! (format "block-%d-out" i) x'))
            (recur (inc i) x' (conj out-short s') (conj out-long l')
                   (if distill-term (+ distill-acc distill-term) distill-acc)
@@ -2693,18 +2825,56 @@
                                (or (number? z-total) (= 0 z-total)))
                         0.0
                         (* z-coef z-total))
+         ;; CI fix (port-distill-24layer): distill rides the per-block
+         ;; `distill-total` threaded out of the (checkpointed) forward, so it
+         ;; works with MMLLM_GRAD_CHECKPOINT=true — which the 7GB CI runner
+         ;; requires. (The aggregate-local collector needs all blocks' Local
+         ;; outputs at once → cross-block → incompatible with per-block
+         ;; checkpointing; it's only viable grad-checkpoint OFF.) Per-layer
+         ;; distill is round-9's proven mechanism and threads cleanly.
+         ;; Guard ONLY on the scalar coef + the "no tensor produced" sentinel;
+         ;; the old `(= 0 distill-total)` clause was a torch scalar → truthy
+         ;; tensor in basilisp → zeroed distill every step. Divide by the true
+         ;; local-bank-layer count (3-way layers), not a hardcoded 8.
          d-coef       (let [metrics (:metrics m)
                             step    (when metrics (.get metrics "current_step" nil))
                             total   (when metrics (.get metrics "total_steps"  nil))]
                         (if (and step total (pos? (python/int total)))
                           (pick-distill-coef (python/int step) (python/int total))
                           (pick-distill-coef)))
-         n-distill-layers 8 ;; number of 3-way gate (= local-bank) layers
-         distill-loss (if (or (zero? d-coef)
-                              (number? distill-total)
-                              (= 0 distill-total))
-                        0.0
+         n-distill-layers (max 1 (count (filter (fn [b] (some? (:memory b))) (:blocks m))))
+         distill-loss (if (or (pick-distill-objective-logitkd?) (zero? d-coef) (number? distill-total))
+                        0.0                       ;; logitkd replaces feature-MSE
                         (* d-coef (/ distill-total (python/float n-distill-layers))))
+         ;; logitkd output-KD: TEACHER = Local-only forward (Net off, under no_grad =
+         ;; detached + auto-non-checkpointed); STUDENT = net-only forward (Local off).
+         ;; loss += KD_COEF · KL(teacher_softT ‖ student_softT) · T². The net learns to
+         ;; reproduce the Local's output distribution. Success = KD(local→net) FALLING
+         ;; + student_bpc→teacher_bpc (stashed for the printer), not Δ_net.
+         kd-loss      (if-not (and (pick-distill-objective-logitkd?)
+                                   (let [ev (pick-kd-every)
+                                         st (if-let [mm (:metrics m)] (python/int (or (.get mm "current_step" 0) 0)) 0)]
+                                     (or (<= ev 1) (zero? (mod st ev)))))
+                        0.0
+                        (let [kd-temp  (pick-kd-temp)
+                              kd-coef  (pick-kd-coef)
+                              t-logits (with [_ (torch/no_grad)]
+                                         (nth (forward m x nil nil false trunk-ids {:local-only? true}) 0))
+                              t-lg     (.div (.reshape t-logits -1 vocab-size) kd-temp)
+                              t-logp   (.detach (.sub t-lg (torch/logsumexp t-lg ** :dim -1 :keepdim true)))
+                              t-p      (torch/exp t-logp)
+                              s-logits (nth (forward m x nil nil false trunk-ids
+                                              {:net-only? true :freeze-trunk? (= (pick-kd-freeze) "trunk")}) 0)
+                              s-lg     (.div (.reshape s-logits -1 vocab-size) kd-temp)
+                              s-logp   (.sub s-lg (torch/logsumexp s-lg ** :dim -1 :keepdim true))
+                              kl       (.mean (.sum (.mul t-p (.sub t-logp s-logp)) ** :dim -1))]
+                          (when-let [metrics (:metrics m)]
+                            (.__setitem__ metrics "kd_local_net" (.item kl))
+                            (.__setitem__ metrics "teacher_bpc"
+                                          (/ (.item (F/cross_entropy (.reshape t-logits -1 vocab-size) y-flat)) 0.6931471805599453))
+                            (.__setitem__ metrics "student_bpc"
+                                          (/ (.item (F/cross_entropy (.reshape s-logits -1 vocab-size) y-flat)) 0.6931471805599453)))
+                          (* kd-coef (* kl (* kd-temp kd-temp)))))
          mtp-loss     (collect-mtp-loss aux-logits y T)
          delim-loss   (collect-delim-loss m final-x y)
          ;; K_a/K_b alignment between Net and Local — no-op when
@@ -2735,12 +2905,17 @@
                         (not (number? distill-loss))   (+ distill-loss)
                         (not (number? delim-loss))     (+ delim-loss)
                         (not (number? k-align-loss))   (+ k-align-loss))]
+         ;; NOTE: kd-loss is deliberately NOT summed into `loss` here — it is
+         ;; back-propagated SEPARATELY below so the student forward's autograd
+         ;; graph never co-resides with the main graph (see the split backward).
      ;; Hard-abort on NaN/Inf loss before backward — a degenerate step
      ;; would propagate NaN into all params, opt state, and bank V; the
      ;; ckpt-save next event would then persist a poisoned model. Raising
      ;; here gives `train-long`'s try/finally a chance to checkpoint
      ;; pre-poisoning and exit non-zero so the operator notices.
-     (when (or (.item (.isnan loss)) (.item (.isinf loss)))
+     (when (or (.item (.isnan loss)) (.item (.isinf loss))
+               (and (not (number? kd-loss))
+                    (or (.item (.isnan kd-loss)) (.item (.isinf kd-loss)))))
        (throw (python/RuntimeError
                 (format "train-step aborted: loss=%s (ce=%s plain=%s) is NaN or Inf — model may be poisoned"
                         (.item loss) (.item ce-loss) (.item plain-ce)))))
@@ -2748,6 +2923,15 @@
      (.zero_grad opt-sparse)
      (when opt-sparse-net (.zero_grad opt-sparse-net))
      (.backward loss)
+     ;; logitkd: backprop the KD term in a SEPARATE backward so the student
+     ;; forward's autograd graph never co-resides with the main graph. With
+     ;; grad-checkpoint on (CI default), activation recompute happens during
+     ;; backward, so one-graph-at-a-time halves peak RAM (~15GB→~8GB, fitting
+     ;; the ~15GB CI runner that OOM-killed the combined backward). Grads
+     ;; accumulate into the same .grad buffers (single zero_grad above), so the
+     ;; result is identical to summing kd-loss into `loss`. No-op when kd-loss
+     ;; is a plain number (non-logitkd, or a KD_EVERY skip step).
+     (when (not (number? kd-loss)) (.backward kd-loss))
      ;; #1 spike: cold-row gradient boost on Local Bank V. No-op when
      ;; MMLLM_BANK_COLD_BOOST=0. Applied after backward, before opt step,
      ;; so SparseAdam's update sees the rescaled gradient.
@@ -2825,6 +3009,17 @@
     (when-let [c (:carry b)] (.eval c)))
   (when-let [mh (:mtp-head m)] (.eval mh))
   (when-let [ih (:importance-head m)] (.eval ih)))
+
+(defn- route-netbank-active!
+  "Skill-module routing: set the active module on every block's ModularNetBank
+   for this batch's corpus, so only that skill's bank trains/serves this step.
+   No-op for the legacy single NetBank (no .set_active) and when `module` is
+   nil (consult all modules)."
+  [m module]
+  (doseq [b (:blocks m)]
+    (when-let [nb (:netbank b)]
+      (when (python/hasattr nb "set_active")
+        (.set_active nb module)))))
 
 (defn- set-train-mode! [m]
   "Inverse of set-eval-mode!. Call before every train step so the
@@ -3242,6 +3437,28 @@
                 w-str (.strip (subs entry (inc colon)))
                 ten   (corp/load-as-tensor path ** :use_mmap true)]
             [ten (python/float w-str)]))))))
+
+(defn pick-mix-val
+  "Deterministic held-out validation tensor for the diverse mix: the last
+   MMLLM_MIX_VAL_PER_CORPUS (default 4096) tokens of EACH MMLLM_MIX corpus,
+   concatenated in MMLLM_MIX order. Same bytes on every bird (torch train-long
+   AND the MLX trainer both call this), so ctrl_bpc / ablation Δ are
+   mix-representative AND comparable across the federation — instead of each path
+   evaling a single fixed corpus (fim-json) while training the mix. Held-out
+   (the tail) so it's not the exact windows training samples. nil when MMLLM_MIX
+   is unset (caller falls back to val-path)."
+  []
+  (when-let [mix (pick-mix)]
+    (let [per    (python/int (.get (.- os environ) "MMLLM_MIX_VAL_PER_CORPUS" "4096"))
+          chunks (for [pair mix
+                       :let [ten (nth pair 0)
+                             n   (.size ten 0)
+                             k   (min n per)]]
+                   (.narrow ten 0 (- n k) k))]
+      ;; corpora load mmap'd as uint8; eval-bpc feeds these straight into the
+      ;; token embedding, which requires Long/Int (uint8 → MPSByteType errors).
+      ;; Cast once here so both the torch and MLX eval paths get int64 ids.
+      (.long (torch/cat (python/list chunks))))))
 
 
 (defn make-corpus-tracker
@@ -3698,31 +3915,31 @@
 ;;; the temp files.
 
 (defn- save-v-to-disk
-  "Serialize a bank's V.weight to a temp file path. Returns the path. For a
-   ModularNetBank, serializes every module's V (module-name order) as a list.
-   Stable dir (never /tmp). Caller is responsible for unlinking on cleanup."
+  "Serialize a bank's V.weight to a temp file path. Returns the path.
+   Caller is responsible for unlinking on cleanup."
   [bank tag]
-  (let [os-mod   (python/__import__ "os")
-        uuid-mod (python/__import__ "uuid")
-        dir      (.expanduser (.- os-mod path) "~/models/genesis/_recovered/abl")
-        _        (.makedirs os-mod dir ** :exist_ok true)
-        path     (str dir "/" tag "-" (.- (.uuid4 uuid-mod) hex) ".pt")
-        payload  (if (python/hasattr bank "banks")
-                   (python/list (map (fn [n] (.detach (.- (.- (.__getitem__ (.- bank banks) n) V) weight)))
-                                     (.- bank module_names)))
-                   (.detach (.- (.- bank V) weight)))]
-    (torch/save payload path)
+  (let [uuid-mod (python/__import__ "uuid")
+        path (str "/tmp/mmllm-cpu/abl-" tag "-" (.- (.uuid4 uuid-mod) hex) ".pt")]
+    (if (python/hasattr bank "banks")
+      ;; ModularNetBank: save {module: V} so the whole net ablates at once.
+      (let [d (python/dict)]
+        (doseq [name (.- bank module_names)]
+          (.__setitem__ d name
+            (.detach (.- (.- (.__getitem__ (.- bank banks) name) V) weight))))
+        (torch/save d path))
+      (torch/save (.detach (.- (.- bank V) weight)) path))
     path))
 
 (defn- restore-v-from-disk!
-  "Load a backup .pt file and copy_ its contents into bank.V.weight (per-module
-   for a ModularNetBank). The loaded tensor goes out of scope immediately."
+  "Load a backup .pt file and copy_ its contents into bank.V.weight.
+   The loaded tensor goes out of scope immediately so RAM is freed."
   [bank path]
   (let [backup (torch/load path)]
     (with [_ (torch/no_grad)]
       (if (python/hasattr bank "banks")
-        (doseq [[n w] (map vector (.- bank module_names) backup)]
-          (.copy_ (.- (.- (.__getitem__ (.- bank banks) n) V) weight) w))
+        (doseq [name (.- bank module_names)]
+          (.copy_ (.- (.- (.__getitem__ (.- bank banks) name) V) weight)
+                  (.__getitem__ backup name)))
         (.copy_ (.- (.- bank V) weight) backup)))))
 
 (defn- unlink-paths! [paths]
@@ -4452,6 +4669,15 @@
                                            ".bin" "")
                                    parts (.split base "/")]
                                (.__getitem__ parts (- (count parts) 1)))))))
+        ;; Skill-module routing: per-mix-index active module (or nil), same
+        ;; order as mix-tensors/mix-labels. Derived from the corpus basename
+        ;; via the shared contract; all-nil when MMLLM_NET_MODULES is unset
+        ;; (→ route-netbank-active! is a no-op = legacy single bank).
+        mix-modules  (when mix
+                       (let [modules (pick-netbank-modules)]
+                         (python/list
+                           (map (fn [lbl] (skm/module-for-corpus lbl modules))
+                                mix-labels))))
         corpus-tracker (when mix (make-corpus-tracker (count mix)))
         ;; Mutable cell for "wall-s at last 50-step print" — used to
         ;; compute rolling tokens/sec. Python list = 1-element ref.
@@ -4475,7 +4701,12 @@
         ;; over fixed windows doesn't repeatedly cast.
         train-data (when (nil? mix)
                      (corp/load-as-tensor train-path ** :use_mmap true))
-        val-data   (corp/load-as-tensor val-path)
+        ;; Eval on the deterministic held-out MIX (tail of every MMLLM_MIX
+        ;; corpus) when training the mix, so ctrl_bpc / ablation Δ reflect what
+        ;; we actually train AND are byte-identical across the federation — the
+        ;; MLX trainer calls this same pick-mix-val. Falls back to the single
+        ;; val-path when MMLLM_MIX is unset (genesis / single-corpus runs).
+        val-data   (or (pick-mix-val) (corp/load-as-tensor val-path))
         ;; opt-dense: single-group AdamW unless MMLLM_LR_KAB_MULT differs
         ;; from MMLLM_LR_DENSE_MULT, in which case K_a/K_b move to a
         ;; separate group with its own lr (#3 spike). See make-opt-dense.
@@ -4487,6 +4718,9 @@
         ;; cooled independently from opt-sparse on the same cosine
         ;; schedule with its own multiplier.
         net-sparse-params (python/list (netbank-sparse-parameters m))
+        ;; Per-module groups (nil unless ModularNetBank) → each skill module's
+        ;; lr cools independently via set-opt-lrs! in the loop (staged cooling).
+        net-sparse-groups (netbank-sparse-parameter-groups m)
         ;; MMLLM_SKIP_OPT_NET=true skips initializing opt-sparse-net.
         ;; SparseAdam (and CPUOffloadSparseAdam) allocate dense state
         ;; (m, v moments) at V.weight's shape on first step — for
@@ -4500,7 +4734,8 @@
                                               "false")))
         opt-sparse-net (when (and (not skip-opt-net?)
                                   (pos? (count net-sparse-params)))
-                         ((pick-sparse-optimizer) net-sparse-params
+                         ((pick-sparse-optimizer)
+                          (if net-sparse-groups net-sparse-groups net-sparse-params)
                           ** :lr (pick-lr-net)))
         T          (:seq-len config)
         sqrt-n     (pick-sqrt-n config)
@@ -4819,7 +5054,11 @@
                                 (set-opt-lr!  opt-dense (* cur-lr d-mult)))
                               (set-opt-lr! opt-sparse (* cur-lr b-mult))
                               (when opt-sparse-net
-                                (set-opt-lr! opt-sparse-net (* cur-lr n-mult))))
+                                ;; >1 group = per-module (ModularNetBank): cool a
+                                ;; module → lr 0 via set-opt-lrs!; else uniform.
+                                (if (> (count (.- opt-sparse-net param_groups)) 1)
+                                  (set-opt-lrs! opt-sparse-net (net-module-lrs (* cur-lr n-mult)))
+                                  (set-opt-lr! opt-sparse-net (* cur-lr n-mult)))))
                 ;; Restore training-mode flags. eval-bpc and ablation-step!
                 ;; flip submodules to eval mode but never flip them back —
                 ;; without this call, Local Bank's `if self.training:`
@@ -4848,6 +5087,11 @@
                       :else
                         (let [[x y] (batch train-data B-cur T)]
                           [x y nil nil]))
+                ;; Skill-module routing: point every block's ModularNetBank at
+                ;; THIS batch's corpus module before the forward, so only that
+                ;; skill's bank trains this step (no-op unless MMLLM_NET_MODULES).
+                _     (when (and mix corpus-idx mix-modules)
+                        (route-netbank-active! m (nth mix-modules corpus-idx)))
                 ;; #9 spike: with probability `pause-prob`, replace
                 ;; the first `pause-n` bytes of x with the pause byte.
                 ;; In-place mutation; y untouched.
@@ -5469,7 +5713,7 @@
                             ;; Build a fresh CPU model with cpu-tiny config + load the ckpt
                             cfg2      (assoc default-config-cpu-tiny
                                              :memory-mmap-path "/tmp/mmllm-cpu/fim-eval-bank")]
-                        (.__setitem__ (.- os environ) "MMLLM_DEVICE" "cpu")
+                        (when (nil? (.get (.- os environ) "MMLLM_DEVICE")) (.__setitem__ (.- os environ) "MMLLM_DEVICE" "cpu"))
                         (.__setitem__ (.- os environ) "MMLLM_BANK_ON_GPU" "false")
                         (let [m            (build-model cfg2)
                               opt-dense    (optim/AdamW (python/list (parameters m)) ** :lr 1e-3)
@@ -5535,7 +5779,7 @@
                               log-path   (str base ".log.jsonl")
                               cfg2       (assoc default-config-cpu-tiny
                                                 :memory-mmap-path mpath)]
-                          (.__setitem__ (.- os environ) "MMLLM_DEVICE" "cpu")
+                          (when (nil? (.get (.- os environ) "MMLLM_DEVICE")) (.__setitem__ (.- os environ) "MMLLM_DEVICE" "cpu"))
                           (when (nil? (.get (.- os environ) "MMLLM_BATCH"))
                             (.__setitem__ (.- os environ) "MMLLM_BATCH" "4"))
                           (when (nil? (.get (.- os environ) "MMLLM_BANK_ON_GPU"))
@@ -5559,7 +5803,7 @@
                           (when (nil? target-dir)
                             (println "ERROR: bootstrap-chain needs a target dir (arg or MMLLM_BOOTSTRAP_DIR)")
                             (python/exit 2))
-                          (.__setitem__ (.- os environ) "MMLLM_DEVICE" "cpu")
+                          (when (nil? (.get (.- os environ) "MMLLM_DEVICE")) (.__setitem__ (.- os environ) "MMLLM_DEVICE" "cpu"))
                           (when (nil? (.get (.- os environ) "MMLLM_BANK_ON_GPU"))
                             (.__setitem__ (.- os environ) "MMLLM_BANK_ON_GPU" "false"))
                           (os/makedirs target-dir ** :exist_ok true)
@@ -5624,7 +5868,7 @@
                                log-path   (str base ".log.jsonl")
                                cfg2       (assoc default-config-cpu-mini
                                                  :memory-mmap-path mpath)]
-                           (.__setitem__ (.- os environ) "MMLLM_DEVICE" "cpu")
+                           (when (nil? (.get (.- os environ) "MMLLM_DEVICE")) (.__setitem__ (.- os environ) "MMLLM_DEVICE" "cpu"))
                            (when (nil? (.get (.- os environ) "MMLLM_BATCH"))
                              (.__setitem__ (.- os environ) "MMLLM_BATCH" "4"))
                            (when (nil? (.get (.- os environ) "MMLLM_BANK_ON_GPU"))
@@ -5655,7 +5899,7 @@
                         ;; the operator doesn't have to remember to set
                         ;; MMLLM_DEVICE / MMLLM_BATCH. Other knobs
                         ;; (focal, IH, carry, etc.) still respected via env.
-                        (.__setitem__ (.- os environ) "MMLLM_DEVICE" "cpu")
+                        (when (nil? (.get (.- os environ) "MMLLM_DEVICE")) (.__setitem__ (.- os environ) "MMLLM_DEVICE" "cpu"))
                         (when (nil? (.get (.- os environ) "MMLLM_BATCH"))
                           (.__setitem__ (.- os environ) "MMLLM_BATCH" "4"))
                         ;; Force the bank V to mmap-backed CPUPinnedEmbedding
@@ -5816,7 +6060,7 @@
                            eval-path  (or (nth args 4 nil) (str base ".val.bin"))
                            cfg2       (assoc default-config-cpu-mini
                                              :memory-mmap-path bank)]
-                       (.__setitem__ (.- os environ) "MMLLM_DEVICE" "cpu")
+                       (when (nil? (.get (.- os environ) "MMLLM_DEVICE")) (.__setitem__ (.- os environ) "MMLLM_DEVICE" "cpu"))
                        (when (nil? (.get (.- os environ) "MMLLM_BATCH"))
                          (.__setitem__ (.- os environ) "MMLLM_BATCH" "4"))
                        (when (nil? (.get (.- os environ) "MMLLM_BANK_ON_GPU"))

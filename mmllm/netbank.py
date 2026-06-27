@@ -82,9 +82,10 @@ def prepare_netbank_files(bank_path_prefix: str, n_layers: int,
                           sqrt_n: int, c_net: int,
                           dtype_str: str = "fp32",
                           init_scale: float = 0.02,
-                          chunk_rows: int = 4096) -> dict:
+                          chunk_rows: int = 4096,
+                          n_blocks: int = 1) -> dict:
     """Pre-allocate NetBank V mmap files, one per layer. Idempotent."""
-    n = sqrt_n * sqrt_n
+    n = n_blocks * sqrt_n * sqrt_n
     bytes_per = _DTYPE_MAP[dtype_str][2]
     expected_bytes = n * c_net * bytes_per
     out = []
@@ -135,7 +136,11 @@ class NetBank(nn.Module):
                  delay_ms_min: float = 1.0,
                  delay_ms_max: float = 10.0,
                  dtype: str = "fp32",
-                 bank_on_gpu: bool = False):
+                 bank_on_gpu: bool = False,
+                 n_blocks: int = 1,
+                 vq_route: bool = False,
+                 n_coarse: int = 1,
+                 n_coarse2: int = 1):
         super().__init__()
         assert q_dim % 2 == 0, "q_dim must be even"
         assert c_net <= q_dim, "c_net (bottleneck dim) must be <= q_dim"
@@ -144,7 +149,8 @@ class NetBank(nn.Module):
         self.q_dim = q_dim
         self.sub_dim = q_dim // 2
         self.sqrt_n = sqrt_n
-        self.n = sqrt_n * sqrt_n
+        self.n_blocks = int(n_blocks)
+        self.n = self.n_blocks * sqrt_n * sqrt_n
         self.c_net = c_net
         self.top_k = top_k
         self.sub_top_k = min(sub_top_k, sqrt_n)
@@ -171,6 +177,45 @@ class NetBank(nn.Module):
         self.expander = nn.Linear(c_net, q_dim, bias=False)
         nn.init.normal_(self.expander.weight, mean=0.0, std=1.0 / (c_net ** 0.5))
 
+        self.vq_route = bool(vq_route)
+        self.n_coarse = int(n_coarse)
+        if self.n_blocks > 1:
+            _g = torch.Generator().manual_seed(0x5EED)
+            self.register_buffer(
+                "block_proj",
+                (torch.randn(q_dim, self.n_blocks, generator=_g) / (q_dim ** 0.5)),
+                persistent=True,
+            )
+            if self.vq_route:
+                # Stage 1: LEARNED VQ codebook (centroids in q-space). Routing
+                # blk = argmax(q@C.T) (cosine; q rms-normed), trained by the VQ
+                # commitment+codebook loss so blocks become real semantic clusters
+                # instead of random LSH cones. Init at block_proj scale.
+                self.block_codebook = nn.Parameter(
+                    torch.randn(self.n_blocks, q_dim, generator=_g) / (q_dim ** 0.5))
+                if self.n_coarse > 1:
+                    # Stage 2/3: RESIDUAL-VQ PATH-SUM. n_coarse coarse clusters (+ optional
+                    # n_coarse2 second coarse level → depth-3). codeN from the running
+                    # residual; each level's coarse_value[path] is a SHARED contribution
+                    # added to every retrieval under that path (the "ancestor"). leaf block
+                    # = path*fpc + fine. Similar q share coarse codes → share upper-level
+                    # contributions, diverge only at the leaf. value tables zero-init = no-op
+                    # until learned. (Applied in the MLX forward; torch uses block 0.)
+                    self.n_coarse2 = int(n_coarse2)
+                    n_levels = self.n_coarse * (self.n_coarse2 if self.n_coarse2 > 1 else 1)
+                    assert self.n_blocks % n_levels == 0, "n_blocks must be divisible by n_coarse*n_coarse2"
+                    # RECOVERY NOTE (best-inference): the depth-3 coarse-value table
+                    # allocations past this point were NOT captured verbatim in the
+                    # transcript (read #11 / blob 13503 cut off at the assert above;
+                    # blob 13246 cut off at `fpc = self.n_blocks`). The lines below
+                    # follow the captured depth-2 pattern (blob 13121). torch ignores
+                    # these (uses block 0); they matter only for the MLX forward.
+                    fpc = self.n_blocks // n_levels
+                    self.coarse_codebook = nn.Parameter(
+                        torch.randn(self.n_coarse, q_dim, generator=_g) / (q_dim ** 0.5))
+                    self.coarse_value = nn.Parameter(torch.zeros(self.n_coarse, q_dim))
+                    self.fine_codebook = nn.Parameter(
+                        torch.randn(fpc, q_dim, generator=_g) / (q_dim ** 0.5))
         # V_net storage. Three modes:
         #
         #   bank_on_gpu=True (training-fast path): plain nn.Embedding,
@@ -221,7 +266,6 @@ class NetBank(nn.Module):
         # equivalent grows, the gate / V / routing is collapsing the
         # NetBank path regardless of how V was initialized.
         self.last_output_norm: float = 0.0
-
     # ─────────────────────── parameter routing ───────────────────────
 
     def dense_parameters(self):
@@ -472,82 +516,220 @@ class NetBank(nn.Module):
             self.V.weight.zero_()
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# RECONSTRUCTED (2026-06-27): the skill-module partition + router that the trend
-# lineage built but whose source was lost with the /tmp working copy. Rebuilt to
-# the EXACT interface the surviving consumers require:
-#   • mmllm.mlx.trainer._extract  → reads .banks / .module_names / .router /
-#       .router_drive, and router.module_keys / .k_load / .k_tok
-#   • mmllm.mlx.banks.netbank_forward_modular / _router_*  → per-module emitted
-#       param dicts + {"keys","names","k_load","k_tok","drive"}.
-# ─────────────────────────────────────────────────────────────────────────────
+# ════════════════════════ ModularNetBank ════════════════════════
+#
+# Skill-module partition of the NetBank. Instead of one monolithic bank
+# shared by every skill (which causes cross-skill interference — training
+# one skill drifts another skill's rows, the ctrl_bpc-regression failure
+# mode), hold ONE independent NetBank per skill module. Each module owns its
+# K_a/K_b/V_net/expander and its own per-layer mmap file, so a cooled
+# (frozen) module's rows literally cannot move — cross-skill forgetting
+# becomes structurally impossible rather than merely discouraged.
+#
+# Drop-in for NetBank: forward(q) -> (B, T, q_dim); attention_kernel's
+# `netbank(bank_q)` call is unchanged. Routing (which module(s) a forward
+# consults) is set out-of-band via set_active() BEFORE the forward — by the
+# corpus tag during genesis, by the learned skill-router later — so the
+# attention-kernel signature stays untouched.
+#
+# Staged-cooling support:
+#   * per-module optimizer groups via module_{dense,sparse}_parameters(name)
+#     → each bank gets its own LR multiplier / cosine schedule, so mastered
+#     banks sit at ~0 while the newest bank is hot.
+#   * freeze_module(name) hard-stops a mastered module (requires_grad=False)
+#     → optimizer steps are no-ops and its V_net moved% -> 0 by construction.
+
+
 class ModuleRouter(nn.Module):
-    """Two-level learned skill router over the modular netbank's per-module banks.
-    `module_keys` [N, q_dim] = one learned key per module. Level-1 preselects the
-    top-`k_load` modules per sequence (the hot-set); Level-2 weights the loaded
-    modules per token over the top-`k_tok`. k_load=0 → all modules live (no
-    preselect). Matches mmllm.mlx.banks._router_preselect / _router_weights."""
-    def __init__(self, module_names, q_dim, k_load: int = 0, k_tok: int = 2):
+    """Learned two-level skill router over a ModularNetBank's per-module banks.
+
+    Scores the bank query q against one learned key vector per module:
+      Level 1 — preselect(q): mean-pool q over T, score ALL N modules, take
+        top-`k_load`. These are the modules RUN (and mmap-paged-in) this forward
+        = the LRU hot-set admission policy. Cheap (a [B,N] matmul; no bank fwd
+        for the unselected).
+      Level 2 — weights(q, names): per-token score over the loaded set, keep
+        top-`k_tok`, softmax → per-token convex weights for the weighted sum.
+        Off-domain modules get ≈0 weight per token → no interference; the summed
+        magnitude is bounded (weights sum to 1) regardless of how many are loaded.
+      logits(q): per-token scores over ALL modules — used for the genesis
+        aux cross-entropy loss (supervised by the corpus→module tag).
+
+    `module_keys` is ZERO-init: an untrained router gives uniform weights (a
+    convex combination = mean of the active modules), which is well-behaved and
+    bounded; it trains toward sharp per-skill routing. (Router OFF — not built —
+    leaves the plain-sum forward byte-identical; see ModularNetBank.)"""
+
+    def __init__(self, q_dim: int, module_names, *, k_load=None, k_tok: int = 2,
+                 gate: str = "softmax"):
         super().__init__()
         self.module_names = list(module_names)
-        self.k_load = int(k_load)
-        self.k_tok = int(k_tok)
-        self.module_keys = nn.Parameter(torch.randn(len(self.module_names), q_dim) * 0.02)
+        n = len(self.module_names)
+        self._idx = {name: i for i, name in enumerate(self.module_names)}
+        self.module_keys = nn.Parameter(torch.zeros(n, q_dim))
+        self.k_load = n if k_load is None else max(1, min(int(k_load), n))
+        self.k_tok = max(1, min(int(k_tok), n))
+        self.gate = gate                  # "softmax" (convex top-k) | "sigmoid" (per-module)
+
+    def logits(self, q: torch.Tensor) -> torch.Tensor:
+        """q (B,T,q_dim) → per-token module logits (B,T,N)."""
+        return q @ self.module_keys.t()
+
+    def preselect(self, q: torch.Tensor):
+        """Level 1 → list of module names to run (union of per-sequence top-k_load)."""
+        if self.k_load >= len(self.module_names):
+            return list(self.module_names)
+        qbar = q.mean(dim=1)                          # (B, q_dim)
+        sel = (qbar @ self.module_keys.t()).topk(self.k_load, dim=-1).indices  # (B, k_load)
+        keep = sorted(set(int(i) for i in sel.flatten().tolist()))            # union across batch
+        return [self.module_names[i] for i in keep]
+
+    def weights(self, q: torch.Tensor, names) -> torch.Tensor:
+        """Level 2 → per-token module weights over `names` (B,T,len(names)).
+        softmax: convex top-k_tok (sums to 1, forces a fixed-k choice).
+        sigmoid: independent per-module gate in [0,1] — variable effective-k, so
+        OVERLAPPING skills can co-fire (both ≈1) or self-suppress (≈0) instead of
+        competing in a softmax (fixes the overlapping-skill routing tax)."""
+        idx = torch.tensor([self._idx[n] for n in names], device=q.device)
+        logits = q @ self.module_keys[idx].t()        # (B,T,m)
+        if self.gate == "sigmoid":
+            return torch.sigmoid(logits)
+        m = len(names)
+        k = min(self.k_tok, m)
+        if k < m:                                     # keep top-k per token, mask rest
+            topv, topi = logits.topk(k, dim=-1)
+            masked = torch.full_like(logits, float("-inf"))
+            logits = masked.scatter(-1, topi, topv)
+        return torch.softmax(logits, dim=-1)
 
 
 class ModularNetBank(nn.Module):
-    """Skill-module partition: one independent NetBank per module + an optional
-    learned ModuleRouter. The MLX trainer detects the modular path via
-    `hasattr(nb, "banks")`; `mmap_path_fn(name)` gives each module its own V file
-    prefix so a layer writes distinct {prefix}-net.{name}.{layer}.bin files."""
-    def __init__(self, module_names, q_dim, sqrt_n: int = 8192, c_net: int = 64,
-                 top_k: int = 64, sub_top_k: int = 64, mmap_path_fn=None,
+    """A dict of independent per-skill NetBank modules sharing the NetBank
+    forward interface. See module comment above."""
+
+    def __init__(self, q_dim: int, module_names, *,
+                 sqrt_n: int = 8192, c_net: int = 64,
+                 top_k: int = 64, sub_top_k: int = 64,
+                 mmap_prefix: "str | None" = None, mmap_layer: "int | None" = None,
+                 delay_ms_min: float = 1.0, delay_ms_max: float = 10.0,
                  dtype: str = "fp32", bank_on_gpu: bool = False,
-                 delay_ms_min: float = 0.0, delay_ms_max: float = 0.0,
-                 router: bool = False, router_k_load: int = 0,
-                 router_k_tok: int = 2, router_drive: bool = False):
+                 router: bool = False, router_k_load=None, router_k_tok: int = 2,
+                 router_drive: bool = False, router_gate: str = "softmax",
+                 n_blocks: int = 1, vq_route: bool = False, n_coarse: int = 1,
+                 n_coarse2: int = 1):
         super().__init__()
-        self.module_names = list(module_names)
-        self.banks = nn.ModuleDict({
-            name: NetBank(q_dim, sqrt_n=sqrt_n, c_net=c_net, top_k=top_k,
-                          sub_top_k=sub_top_k,
-                          mmap_path=(mmap_path_fn(name) if mmap_path_fn else None),
-                          dtype=dtype, bank_on_gpu=bank_on_gpu,
-                          delay_ms_min=delay_ms_min, delay_ms_max=delay_ms_max)
-            for name in self.module_names})
-        self.router = (ModuleRouter(self.module_names, q_dim, router_k_load, router_k_tok)
+        module_names = list(module_names)
+        if not module_names:
+            raise ValueError("ModularNetBank needs at least one module name")
+        self.module_names = module_names
+        self.q_dim = q_dim
+        self.banks = nn.ModuleDict()
+        for name in module_names:
+            mp = None
+            if mmap_prefix is not None:
+                # shared cross-backend naming (torch + MLX + harvester agree)
+                from mmllm.skill_modules import netbank_v_path
+                mp = netbank_v_path(mmap_prefix, name, 0 if mmap_layer is None else mmap_layer)
+            self.banks[name] = NetBank(
+                q_dim, sqrt_n=sqrt_n, c_net=c_net, top_k=top_k,
+                sub_top_k=sub_top_k, mmap_path=mp,
+                delay_ms_min=delay_ms_min, delay_ms_max=delay_ms_max,
+                dtype=dtype, bank_on_gpu=bank_on_gpu, n_blocks=n_blocks,
+                vq_route=vq_route, n_coarse=n_coarse, n_coarse2=n_coarse2,
+            )
+        # Routing: which module(s) the next forward consults. None = all.
+        self._active = None
+        # Learned two-level skill router (default OFF → plain-sum behavior intact).
+        # router_drive lets it pick the active set when _active is None (inference);
+        # during genesis _active is the corpus tag, so the router only LEARNS.
+        self.router = (ModuleRouter(q_dim, module_names, k_load=router_k_load,
+                                    k_tok=router_k_tok, gate=router_gate)
                        if router else None)
         self.router_drive = bool(router_drive)
+        self.router_logits = None          # stashed per forward for the aux loss
+        # Telemetry parity with NetBank (the block forward reads last_z_loss).
+        self.last_z_loss = None
 
-    def forward(self, *args, active=None, **kw):
-        """Torch eval/inference convenience — sum the active modules' outputs.
-        (MLX training consumes the emitted per-module param dicts via
-        banks.netbank_forward_modular, not this path.)"""
-        names = [a for a in (active or self.module_names) if a in self.banks] or self.module_names
-        out = None
+    # ─────────────────── routing ───────────────────
+
+    def set_active(self, names) -> None:
+        """Restrict the next forward(s) to module name(s). Set by the corpus
+        tag during genesis, by the learned router later. None = all modules
+        (composition)."""
+        if names is None:
+            self._active = None
+            return
+        if isinstance(names, str):
+            names = [names]
+        names = list(names)
         for n in names:
-            o = self.banks[n](*args, **kw)
+            if n not in self.banks:
+                raise KeyError(f"unknown netbank module {n!r}; have {self.module_names}")
+        self._active = names
+
+    def active_names(self):
+        return list(self._active) if self._active is not None else list(self.module_names)
+
+    # ─────────────────── forward (drop-in for NetBank) ───────────────────
+
+    def forward(self, q: torch.Tensor) -> torch.Tensor:
+        # Stash per-token logits over ALL modules for the genesis aux loss
+        # (computed even when the corpus tag drives, so the router learns).
+        self.router_logits = self.router.logits(q) if self.router is not None else None
+        # Level 1: router picks the active set only at inference (router_drive
+        # AND no corpus tag set); during genesis _active is the tag → unchanged.
+        if self.router is not None and self.router_drive and self._active is None:
+            names = self.router.preselect(q)
+        else:
+            names = self.active_names()
+        if len(names) == 1:
+            out = self.banks[names[0]](q)
+            self.last_z_loss = self.banks[names[0]].last_z_loss
+            return out
+        # Composition. With a DRIVING router: per-token convex weights (Level 2)
+        # bound the magnitude and zero off-domain modules. Otherwise the plain sum
+        # (so drive=False is byte-comparable to the no-router baseline).
+        w = self.router.weights(q, names) if (self.router is not None and self.router_drive) else None
+        out = None
+        z = None
+        for i, n in enumerate(names):
+            o = self.banks[n](q)
+            if w is not None:
+                o = o * w[..., i:i + 1]
             out = o if out is None else out + o
+            lz = self.banks[n].last_z_loss
+            if lz is not None:
+                z = lz if z is None else z + lz
+        self.last_z_loss = z
         return out
 
+    # ───────────── per-module parameter access (per-module LR) ─────────────
+
+    def module_dense_parameters(self, name):
+        return self.banks[name].dense_parameters()
+
+    def module_sparse_parameters(self, name):
+        return self.banks[name].sparse_parameters()
+
+    # aggregate access — back-compat with the single-bank optimizer setup
     def dense_parameters(self):
-        """Dense-grad params (AdamW) aggregated across modules + the router keys
-        (router keys are dense → FedAvg-able via dense.pt)."""
-        ps = []
-        for n in self.module_names:
-            ps.extend(self.banks[n].dense_parameters())
-        if self.router is not None:
-            ps.append(self.router.module_keys)
-        return ps
+        return [p for n in self.module_names for p in self.banks[n].dense_parameters()]
 
     def sparse_parameters(self):
-        """Each module's V_net.weight → its own SparseAdam group, aggregated."""
-        ps = []
-        for n in self.module_names:
-            ps.extend(self.banks[n].sparse_parameters())
-        return ps
+        return [p for n in self.module_names for p in self.banks[n].sparse_parameters()]
 
-    def zero_bank(self) -> None:
-        """Zero every module's V_net (Δ_net ablation across the partition)."""
-        for n in self.module_names:
-            self.banks[n].zero_bank()
+    # ─────────────────── cooling ───────────────────
+
+    def freeze_module(self, name: str, frozen: bool = True) -> None:
+        """Cooling: stop a mastered module's params updating (requires_grad
+        off) so optimizer steps are no-ops and its V_net moved% -> 0. The
+        structural isolation guarantee — a cooled skill cannot drift."""
+        b = self.banks[name]
+        for p in list(b.dense_parameters()) + list(b.sparse_parameters()):
+            p.requires_grad_(not frozen)
+
+    def is_frozen(self, name: str) -> bool:
+        return not any(p.requires_grad for p in self.banks[name].dense_parameters())
+
+    def warm_start_module(self, name, local_K_a, local_K_b, local_V=None):
+        self.banks[name].warm_start_from(local_K_a, local_K_b, local_V)
