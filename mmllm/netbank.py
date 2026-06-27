@@ -470,3 +470,62 @@ class NetBank(nn.Module):
         """Zero V_net (ablation utility, mirrors ProductKeyMemory)."""
         with torch.no_grad():
             self.V.weight.zero_()
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# RECONSTRUCTED (2026-06-27): the skill-module partition + router that the trend
+# lineage built but whose source was lost with the /tmp working copy. Rebuilt to
+# the EXACT interface the surviving consumers require:
+#   • mmllm.mlx.trainer._extract  → reads .banks / .module_names / .router /
+#       .router_drive, and router.module_keys / .k_load / .k_tok
+#   • mmllm.mlx.banks.netbank_forward_modular / _router_*  → per-module emitted
+#       param dicts + {"keys","names","k_load","k_tok","drive"}.
+# ─────────────────────────────────────────────────────────────────────────────
+class ModuleRouter(nn.Module):
+    """Two-level learned skill router over the modular netbank's per-module banks.
+    `module_keys` [N, q_dim] = one learned key per module. Level-1 preselects the
+    top-`k_load` modules per sequence (the hot-set); Level-2 weights the loaded
+    modules per token over the top-`k_tok`. k_load=0 → all modules live (no
+    preselect). Matches mmllm.mlx.banks._router_preselect / _router_weights."""
+    def __init__(self, module_names, q_dim, k_load: int = 0, k_tok: int = 2):
+        super().__init__()
+        self.module_names = list(module_names)
+        self.k_load = int(k_load)
+        self.k_tok = int(k_tok)
+        self.module_keys = nn.Parameter(torch.randn(len(self.module_names), q_dim) * 0.02)
+
+
+class ModularNetBank(nn.Module):
+    """Skill-module partition: one independent NetBank per module + an optional
+    learned ModuleRouter. The MLX trainer detects the modular path via
+    `hasattr(nb, "banks")`; `mmap_path_fn(name)` gives each module its own V file
+    prefix so a layer writes distinct {prefix}-net.{name}.{layer}.bin files."""
+    def __init__(self, module_names, q_dim, sqrt_n: int = 8192, c_net: int = 64,
+                 top_k: int = 64, sub_top_k: int = 64, mmap_path_fn=None,
+                 dtype: str = "fp32", bank_on_gpu: bool = False,
+                 delay_ms_min: float = 0.0, delay_ms_max: float = 0.0,
+                 router: bool = False, router_k_load: int = 0,
+                 router_k_tok: int = 2, router_drive: bool = False):
+        super().__init__()
+        self.module_names = list(module_names)
+        self.banks = nn.ModuleDict({
+            name: NetBank(q_dim, sqrt_n=sqrt_n, c_net=c_net, top_k=top_k,
+                          sub_top_k=sub_top_k,
+                          mmap_path=(mmap_path_fn(name) if mmap_path_fn else None),
+                          dtype=dtype, bank_on_gpu=bank_on_gpu,
+                          delay_ms_min=delay_ms_min, delay_ms_max=delay_ms_max)
+            for name in self.module_names})
+        self.router = (ModuleRouter(self.module_names, q_dim, router_k_load, router_k_tok)
+                       if router else None)
+        self.router_drive = bool(router_drive)
+
+    def forward(self, *args, active=None, **kw):
+        """Torch eval/inference convenience — sum the active modules' outputs.
+        (MLX training consumes the emitted per-module param dicts via
+        banks.netbank_forward_modular, not this path.)"""
+        names = [a for a in (active or self.module_names) if a in self.banks] or self.module_names
+        out = None
+        for n in names:
+            o = self.banks[n](*args, **kw)
+            out = o if out is None else out + o
+        return out
