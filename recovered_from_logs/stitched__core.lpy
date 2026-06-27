@@ -1,0 +1,5826 @@
+<<<MISSING line 1>>>
+<<<MISSING line 2>>>
+<<<MISSING line 3>>>
+<<<MISSING line 4>>>
+<<<MISSING line 5>>>
+<<<MISSING line 6>>>
+<<<MISSING line 7>>>
+<<<MISSING line 8>>>
+<<<MISSING line 9>>>
+<<<MISSING line 10>>>
+<<<MISSING line 11>>>
+<<<MISSING line 12>>>
+<<<MISSING line 13>>>
+<<<MISSING line 14>>>
+<<<MISSING line 15>>>
+<<<MISSING line 16>>>
+<<<MISSING line 17>>>
+<<<MISSING line 18>>>
+<<<MISSING line 19>>>
+<<<MISSING line 20>>>
+<<<MISSING line 21>>>
+<<<MISSING line 22>>>
+<<<MISSING line 23>>>
+<<<MISSING line 24>>>
+<<<MISSING line 25>>>
+<<<MISSING line 26>>>
+<<<MISSING line 27>>>
+<<<MISSING line 28>>>
+<<<MISSING line 29>>>
+<<<MISSING line 30>>>
+<<<MISSING line 31>>>
+<<<MISSING line 32>>>
+<<<MISSING line 33>>>
+<<<MISSING line 34>>>
+<<<MISSING line 35>>>
+<<<MISSING line 36>>>
+<<<MISSING line 37>>>
+           [mmllm.memory :as mem]
+           [mmllm.netbank :as netb]
+           [mmllm.corpus :as corp]
+           [mmllm.artifacts :as art]
+<<<MISSING line 42>>>
+<<<MISSING line 43>>>
+<<<MISSING line 44>>>
+<<<MISSING line 45>>>
+<<<MISSING line 46>>>
+<<<MISSING line 47>>>
+<<<MISSING line 48>>>
+<<<MISSING line 49>>>
+<<<MISSING line 50>>>
+<<<MISSING line 51>>>
+<<<MISSING line 52>>>
+<<<MISSING line 53>>>
+<<<MISSING line 54>>>
+<<<MISSING line 55>>>
+<<<MISSING line 56>>>
+<<<MISSING line 57>>>
+<<<MISSING line 58>>>
+<<<MISSING line 59>>>
+<<<MISSING line 60>>>
+<<<MISSING line 61>>>
+<<<MISSING line 62>>>
+<<<MISSING line 63>>>
+<<<MISSING line 64>>>
+<<<MISSING line 65>>>
+<<<MISSING line 66>>>
+<<<MISSING line 67>>>
+<<<MISSING line 68>>>
+<<<MISSING line 69>>>
+<<<MISSING line 70>>>
+<<<MISSING line 71>>>
+<<<MISSING line 72>>>
+<<<MISSING line 73>>>
+<<<MISSING line 74>>>
+<<<MISSING line 75>>>
+<<<MISSING line 76>>>
+<<<MISSING line 77>>>
+<<<MISSING line 78>>>
+<<<MISSING line 79>>>
+<<<MISSING line 80>>>
+<<<MISSING line 81>>>
+<<<MISSING line 82>>>
+<<<MISSING line 83>>>
+<<<MISSING line 84>>>
+<<<MISSING line 85>>>
+<<<MISSING line 86>>>
+<<<MISSING line 87>>>
+<<<MISSING line 88>>>
+<<<MISSING line 89>>>
+<<<MISSING line 90>>>
+<<<MISSING line 91>>>
+<<<MISSING line 92>>>
+<<<MISSING line 93>>>
+<<<MISSING line 94>>>
+<<<MISSING line 95>>>
+<<<MISSING line 96>>>
+<<<MISSING line 97>>>
+<<<MISSING line 98>>>
+<<<MISSING line 99>>>
+<<<MISSING line 100>>>
+<<<MISSING line 101>>>
+<<<MISSING line 102>>>
+<<<MISSING line 103>>>
+<<<MISSING line 104>>>
+<<<MISSING line 105>>>
+<<<MISSING line 106>>>
+<<<MISSING line 107>>>
+<<<MISSING line 108>>>
+<<<MISSING line 109>>>
+<<<MISSING line 110>>>
+<<<MISSING line 111>>>
+<<<MISSING line 112>>>
+<<<MISSING line 113>>>
+<<<MISSING line 114>>>
+<<<MISSING line 115>>>
+<<<MISSING line 116>>>
+<<<MISSING line 117>>>
+<<<MISSING line 118>>>
+<<<MISSING line 119>>>
+<<<MISSING line 120>>>
+<<<MISSING line 121>>>
+<<<MISSING line 122>>>
+<<<MISSING line 123>>>
+<<<MISSING line 124>>>
+<<<MISSING line 125>>>
+<<<MISSING line 126>>>
+<<<MISSING line 127>>>
+<<<MISSING line 128>>>
+<<<MISSING line 129>>>
+<<<MISSING line 130>>>
+<<<MISSING line 131>>>
+<<<MISSING line 132>>>
+<<<MISSING line 133>>>
+<<<MISSING line 134>>>
+<<<MISSING line 135>>>
+<<<MISSING line 136>>>
+<<<MISSING line 137>>>
+<<<MISSING line 138>>>
+<<<MISSING line 139>>>
+<<<MISSING line 140>>>
+<<<MISSING line 141>>>
+<<<MISSING line 142>>>
+<<<MISSING line 143>>>
+<<<MISSING line 144>>>
+<<<MISSING line 145>>>
+<<<MISSING line 146>>>
+<<<MISSING line 147>>>
+<<<MISSING line 148>>>
+<<<MISSING line 149>>>
+<<<MISSING line 150>>>
+<<<MISSING line 151>>>
+<<<MISSING line 152>>>
+<<<MISSING line 153>>>
+<<<MISSING line 154>>>
+<<<MISSING line 155>>>
+<<<MISSING line 156>>>
+<<<MISSING line 157>>>
+<<<MISSING line 158>>>
+<<<MISSING line 159>>>
+<<<MISSING line 160>>>
+<<<MISSING line 161>>>
+<<<MISSING line 162>>>
+<<<MISSING line 163>>>
+<<<MISSING line 164>>>
+<<<MISSING line 165>>>
+<<<MISSING line 166>>>
+<<<MISSING line 167>>>
+<<<MISSING line 168>>>
+<<<MISSING line 169>>>
+<<<MISSING line 170>>>
+<<<MISSING line 171>>>
+<<<MISSING line 172>>>
+<<<MISSING line 173>>>
+<<<MISSING line 174>>>
+<<<MISSING line 175>>>
+<<<MISSING line 176>>>
+<<<MISSING line 177>>>
+<<<MISSING line 178>>>
+<<<MISSING line 179>>>
+<<<MISSING line 180>>>
+<<<MISSING line 181>>>
+<<<MISSING line 182>>>
+<<<MISSING line 183>>>
+<<<MISSING line 184>>>
+<<<MISSING line 185>>>
+<<<MISSING line 186>>>
+<<<MISSING line 187>>>
+<<<MISSING line 188>>>
+<<<MISSING line 189>>>
+<<<MISSING line 190>>>
+<<<MISSING line 191>>>
+<<<MISSING line 192>>>
+<<<MISSING line 193>>>
+<<<MISSING line 194>>>
+<<<MISSING line 195>>>
+<<<MISSING line 196>>>
+<<<MISSING line 197>>>
+<<<MISSING line 198>>>
+<<<MISSING line 199>>>
+<<<MISSING line 200>>>
+<<<MISSING line 201>>>
+<<<MISSING line 202>>>
+<<<MISSING line 203>>>
+<<<MISSING line 204>>>
+<<<MISSING line 205>>>
+<<<MISSING line 206>>>
+<<<MISSING line 207>>>
+<<<MISSING line 208>>>
+<<<MISSING line 209>>>
+<<<MISSING line 210>>>
+<<<MISSING line 211>>>
+<<<MISSING line 212>>>
+<<<MISSING line 213>>>
+<<<MISSING line 214>>>
+<<<MISSING line 215>>>
+<<<MISSING line 216>>>
+<<<MISSING line 217>>>
+<<<MISSING line 218>>>
+<<<MISSING line 219>>>
+<<<MISSING line 220>>>
+<<<MISSING line 221>>>
+<<<MISSING line 222>>>
+<<<MISSING line 223>>>
+<<<MISSING line 224>>>
+<<<MISSING line 225>>>
+<<<MISSING line 226>>>
+<<<MISSING line 227>>>
+<<<MISSING line 228>>>
+<<<MISSING line 229>>>
+<<<MISSING line 230>>>
+(defn pick-netbank-sub-top-k
+  "Sub-keys retained per K_a/K_b half before re-rank. Reads
+   MMLLM_NET_SUB_TOP_K (default 64). Capped to sqrt_n inside NetBank."
+  []
+  (python/int (.get (.- os environ) "MMLLM_NET_SUB_TOP_K" "64")))
+
+(defn pick-netbank-router?
+  "Build the learned two-level skill router on the ModularNetBank. Reads
+   ('a,b,c') via the backend-agnostic contract in mmllm.skill_modules.
+   Empty/unset → [] = single monolithic NetBank (pre-fork; zero behavior
+   change when unset). Genesis-3: gutenberg-prose,amps-math,stackexchange-dialogue."
+  []
+  (skm/parse-modules))
+
+(defn pick-net-cooled-modules
+  "Set of skill-module names whose NetBank is FROZEN/cooled this round (lr→0
+   on opt-sparse-net's per-module group). Reads MMLLM_NET_COOL_MODULES ('a,b').
+   Empty = all hot (genesis phase 0). Staged cooling: as new modules are added,
+   list the mastered ones here so their banks stop moving (structural isolation)."
+  []
+  (python/set (skm/parse-modules (.get (.- os environ) "MMLLM_NET_COOL_MODULES" ""))))
+
+(defn net-module-lrs
+  "Per-module lr list in pick-netbank-modules order (matching opt-sparse-net's
+   per-module groups built by netbank-sparse-parameter-groups): `base` for hot
+   modules, 0.0 for cooled ones."
+  [base]
+  (let [cooled (pick-net-cooled-modules)]
+    (python/list
+      (map (fn [mname] (if (.__contains__ cooled mname) 0.0 base))
+           (pick-netbank-modules)))))
+
+(defn pick-local-bank-layers
+  "Set of transformer-layer indices that get a Local Bank attached.
+<<<MISSING line 265>>>
+<<<MISSING line 266>>>
+<<<MISSING line 267>>>
+<<<MISSING line 268>>>
+<<<MISSING line 269>>>
+<<<MISSING line 270>>>
+<<<MISSING line 271>>>
+<<<MISSING line 272>>>
+<<<MISSING line 273>>>
+<<<MISSING line 274>>>
+<<<MISSING line 275>>>
+<<<MISSING line 276>>>
+<<<MISSING line 277>>>
+<<<MISSING line 278>>>
+<<<MISSING line 279>>>
+<<<MISSING line 280>>>
+<<<MISSING line 281>>>
+<<<MISSING line 282>>>
+<<<MISSING line 283>>>
+<<<MISSING line 284>>>
+<<<MISSING line 285>>>
+<<<MISSING line 286>>>
+<<<MISSING line 287>>>
+<<<MISSING line 288>>>
+<<<MISSING line 289>>>
+<<<MISSING line 290>>>
+<<<MISSING line 291>>>
+<<<MISSING line 292>>>
+<<<MISSING line 293>>>
+<<<MISSING line 294>>>
+<<<MISSING line 295>>>
+<<<MISSING line 296>>>
+<<<MISSING line 297>>>
+<<<MISSING line 298>>>
+<<<MISSING line 299>>>
+<<<MISSING line 300>>>
+<<<MISSING line 301>>>
+<<<MISSING line 302>>>
+<<<MISSING line 303>>>
+(defn pick-local-bank-layers
+  "Set of transformer-layer indices that get a Local Bank attached.
+   Other layers run with `:memory = None` and the long-tier mix degrades
+   to 2-way (sdpa + Net) at those layers.
+
+   Reads MMLLM_LOCAL_BANK_LAYERS as a comma-separated int list. If unset,
+   falls back to the config's :local-bank-layers. If neither is provided,
+   defaults to ALL layers (preserves pre-asymmetric behavior).
+
+   Usage examples:
+     MMLLM_LOCAL_BANK_LAYERS=\"0,1,2,12,20,29,30,31\"   ; 8 of 32 layers
+     MMLLM_LOCAL_BANK_LAYERS=\"\"                       ; no Local anywhere"
+  [config]
+  (let [raw     (.get (.- os environ) "MMLLM_LOCAL_BANK_LAYERS")
+        ;; Treat empty string / whitespace-only the same as unset.
+        ;; GitHub Actions' workflow env passthrough sets the var to ""
+        ;; when the corresponding input is blank, so without this guard
+        ;; an empty input → empty layer set → no Local Bank anywhere →
+        ;; sparse-parameters returns [] → optimizer construction errors
+        ;; with "got an empty parameter list".
+        env-val (when (and raw (not (zero? (count (.strip raw))))) raw)]
+    (cond
+      env-val
+      (python/set (filter #(not (nil? %))
+                          (map (fn [s] (try (python/int (.strip s))
+                                            (catch python/Exception _ nil)))
+                               (.split env-val ","))))
+      (:local-bank-layers config)
+      (python/set (:local-bank-layers config))
+      :else
+<<<MISSING line 334>>>
+<<<MISSING line 335>>>
+<<<MISSING line 336>>>
+<<<MISSING line 337>>>
+<<<MISSING line 338>>>
+<<<MISSING line 339>>>
+<<<MISSING line 340>>>
+<<<MISSING line 341>>>
+<<<MISSING line 342>>>
+<<<MISSING line 343>>>
+<<<MISSING line 344>>>
+<<<MISSING line 345>>>
+<<<MISSING line 346>>>
+<<<MISSING line 347>>>
+<<<MISSING line 348>>>
+<<<MISSING line 349>>>
+<<<MISSING line 350>>>
+<<<MISSING line 351>>>
+<<<MISSING line 352>>>
+<<<MISSING line 353>>>
+<<<MISSING line 354>>>
+<<<MISSING line 355>>>
+<<<MISSING line 356>>>
+<<<MISSING line 357>>>
+<<<MISSING line 358>>>
+<<<MISSING line 359>>>
+<<<MISSING line 360>>>
+<<<MISSING line 361>>>
+<<<MISSING line 362>>>
+<<<MISSING line 363>>>
+<<<MISSING line 364>>>
+<<<MISSING line 365>>>
+<<<MISSING line 366>>>
+<<<MISSING line 367>>>
+<<<MISSING line 368>>>
+<<<MISSING line 369>>>
+<<<MISSING line 370>>>
+<<<MISSING line 371>>>
+<<<MISSING line 372>>>
+<<<MISSING line 373>>>
+<<<MISSING line 374>>>
+<<<MISSING line 375>>>
+<<<MISSING line 376>>>
+<<<MISSING line 377>>>
+<<<MISSING line 378>>>
+<<<MISSING line 379>>>
+<<<MISSING line 380>>>
+<<<MISSING line 381>>>
+<<<MISSING line 382>>>
+<<<MISSING line 383>>>
+<<<MISSING line 384>>>
+<<<MISSING line 385>>>
+<<<MISSING line 386>>>
+<<<MISSING line 387>>>
+<<<MISSING line 388>>>
+<<<MISSING line 389>>>
+<<<MISSING line 390>>>
+<<<MISSING line 391>>>
+<<<MISSING line 392>>>
+<<<MISSING line 393>>>
+<<<MISSING line 394>>>
+<<<MISSING line 395>>>
+<<<MISSING line 396>>>
+<<<MISSING line 397>>>
+<<<MISSING line 398>>>
+<<<MISSING line 399>>>
+<<<MISSING line 400>>>
+<<<MISSING line 401>>>
+<<<MISSING line 402>>>
+<<<MISSING line 403>>>
+<<<MISSING line 404>>>
+<<<MISSING line 405>>>
+<<<MISSING line 406>>>
+<<<MISSING line 407>>>
+<<<MISSING line 408>>>
+<<<MISSING line 409>>>
+<<<MISSING line 410>>>
+<<<MISSING line 411>>>
+<<<MISSING line 412>>>
+<<<MISSING line 413>>>
+<<<MISSING line 414>>>
+<<<MISSING line 415>>>
+<<<MISSING line 416>>>
+<<<MISSING line 417>>>
+<<<MISSING line 418>>>
+<<<MISSING line 419>>>
+<<<MISSING line 420>>>
+<<<MISSING line 421>>>
+<<<MISSING line 422>>>
+<<<MISSING line 423>>>
+<<<MISSING line 424>>>
+<<<MISSING line 425>>>
+<<<MISSING line 426>>>
+<<<MISSING line 427>>>
+<<<MISSING line 428>>>
+<<<MISSING line 429>>>
+<<<MISSING line 430>>>
+<<<MISSING line 431>>>
+<<<MISSING line 432>>>
+<<<MISSING line 433>>>
+<<<MISSING line 434>>>
+<<<MISSING line 435>>>
+<<<MISSING line 436>>>
+<<<MISSING line 437>>>
+<<<MISSING line 438>>>
+<<<MISSING line 439>>>
+<<<MISSING line 440>>>
+<<<MISSING line 441>>>
+<<<MISSING line 442>>>
+<<<MISSING line 443>>>
+<<<MISSING line 444>>>
+<<<MISSING line 445>>>
+<<<MISSING line 446>>>
+<<<MISSING line 447>>>
+<<<MISSING line 448>>>
+<<<MISSING line 449>>>
+<<<MISSING line 450>>>
+<<<MISSING line 451>>>
+<<<MISSING line 452>>>
+<<<MISSING line 453>>>
+<<<MISSING line 454>>>
+<<<MISSING line 455>>>
+<<<MISSING line 456>>>
+<<<MISSING line 457>>>
+<<<MISSING line 458>>>
+<<<MISSING line 459>>>
+<<<MISSING line 460>>>
+<<<MISSING line 461>>>
+<<<MISSING line 462>>>
+<<<MISSING line 463>>>
+<<<MISSING line 464>>>
+<<<MISSING line 465>>>
+<<<MISSING line 466>>>
+<<<MISSING line 467>>>
+<<<MISSING line 468>>>
+<<<MISSING line 469>>>
+<<<MISSING line 470>>>
+<<<MISSING line 471>>>
+<<<MISSING line 472>>>
+<<<MISSING line 473>>>
+<<<MISSING line 474>>>
+<<<MISSING line 475>>>
+<<<MISSING line 476>>>
+<<<MISSING line 477>>>
+<<<MISSING line 478>>>
+<<<MISSING line 479>>>
+<<<MISSING line 480>>>
+<<<MISSING line 481>>>
+<<<MISSING line 482>>>
+<<<MISSING line 483>>>
+(defn lr-at-step
+  "Linear warmup + cosine decay. Returns the lr to use at step s.
+   When warmup == 0 returns max-lr (constant — backward compat).
+
+   Schedule shape (relative to MMLLM_LR_ROUND_BASE, default 0):
+     round_base ≤ s < warmup : linearly ramp floor → max-lr
+     warmup     ≤ s < total  : cosine decay max-lr → min-lr
+     s ≥ total               : min-lr (defensive; loop should have exited)
+
+   MMLLM_LR_ROUND_BASE: absolute step at which the current chain round
+   started. Subtracted from `s` and `warmup` before the ramp math so
+   each round gets a fresh linear warmup over its first
+   (warmup - round_base) steps. Without this, resuming from step N ≫ 0
+   makes `s/warmup` ≈ 1.0 on every step and the ramp is degenerate.
+   Default 0 = legacy behavior (ramp uses absolute step).
+
+   MMLLM_LR_RAMP_FLOOR: fraction of max-lr to use as the minimum of
+   the linear-warmup ramp (default 0.0 = ramp from zero, the textbook
+   transformer warmup). 0.1 means step 0 of a round starts at 10% of
+   peak — useful for very short chain rounds where a from-zero ramp
+   wastes the first step entirely."
+  [s total max-lr warmup min-lr]
+  (let [round-base (python/int
+                     (.get (.- os environ) "MMLLM_LR_ROUND_BASE" "0"))
+        floor      (try (python/float
+                          (.get (.- os environ) "MMLLM_LR_RAMP_FLOOR" "0.0"))
+                        (catch python/ValueError _ 0.0))
+        s-eff      (max 0 (- s round-base))
+        warmup-eff (max 0 (- warmup round-base))]
+    (cond
+      (zero? warmup-eff) max-lr
+      (< s-eff warmup-eff) (let [progress (/ (python/float s-eff)
+                                             (python/float warmup-eff))]
+                             (* max-lr (max floor progress)))
+      (>= s total) min-lr
+      :else (let [progress (/ (python/float (- s warmup))
+                              (python/float (- total warmup)))
+                  cos-half (* 0.5 (+ 1.0 (math/cos (* (.- math pi) progress))))]
+              (+ min-lr (* (- max-lr min-lr) cos-half))))))
+
+(defn set-opt-lr!
+  "Mutate every param group of `opt` to have lr=`lr`. Used inside
+   the train loop to apply lr-at-step results.
+
+   torch.optim.Optimizer.param_groups is a list of plain Python
+   dicts (not attribute-objects), so we use __setitem__ rather than
+   setattr."
+  [opt lr]
+  (doseq [pg (.- opt param_groups)]
+    (.__setitem__ pg "lr" lr)))
+
+(defn set-opt-lrs!
+  "Set lr per param group. `lrs` is a list of floats, one per group
+   (in declaration order). Used when the optimizer has multiple groups
+   with independent schedules (e.g. core dense + K_a/K_b)."
+  [opt lrs]
+  (let [pgs (python/list (.- opt param_groups))]
+    (doseq [i (range (count pgs))]
+      (when (< i (count lrs))
+        (.__setitem__ (.__getitem__ pgs i) "lr" (nth lrs i))))))
+
+(defn pick-sync-every
+<<<MISSING line 546>>>
+<<<MISSING line 547>>>
+<<<MISSING line 548>>>
+<<<MISSING line 549>>>
+<<<MISSING line 550>>>
+<<<MISSING line 551>>>
+<<<MISSING line 552>>>
+<<<MISSING line 553>>>
+<<<MISSING line 554>>>
+<<<MISSING line 555>>>
+<<<MISSING line 556>>>
+<<<MISSING line 557>>>
+<<<MISSING line 558>>>
+<<<MISSING line 559>>>
+<<<MISSING line 560>>>
+<<<MISSING line 561>>>
+<<<MISSING line 562>>>
+<<<MISSING line 563>>>
+<<<MISSING line 564>>>
+<<<MISSING line 565>>>
+<<<MISSING line 566>>>
+<<<MISSING line 567>>>
+<<<MISSING line 568>>>
+<<<MISSING line 569>>>
+<<<MISSING line 570>>>
+<<<MISSING line 571>>>
+<<<MISSING line 572>>>
+<<<MISSING line 573>>>
+<<<MISSING line 574>>>
+<<<MISSING line 575>>>
+<<<MISSING line 576>>>
+<<<MISSING line 577>>>
+<<<MISSING line 578>>>
+<<<MISSING line 579>>>
+<<<MISSING line 580>>>
+<<<MISSING line 581>>>
+<<<MISSING line 582>>>
+<<<MISSING line 583>>>
+<<<MISSING line 584>>>
+<<<MISSING line 585>>>
+<<<MISSING line 586>>>
+<<<MISSING line 587>>>
+<<<MISSING line 588>>>
+<<<MISSING line 589>>>
+<<<MISSING line 590>>>
+<<<MISSING line 591>>>
+<<<MISSING line 592>>>
+<<<MISSING line 593>>>
+<<<MISSING line 594>>>
+<<<MISSING line 595>>>
+<<<MISSING line 596>>>
+<<<MISSING line 597>>>
+<<<MISSING line 598>>>
+<<<MISSING line 599>>>
+<<<MISSING line 600>>>
+<<<MISSING line 601>>>
+<<<MISSING line 602>>>
+<<<MISSING line 603>>>
+<<<MISSING line 604>>>
+<<<MISSING line 605>>>
+<<<MISSING line 606>>>
+<<<MISSING line 607>>>
+<<<MISSING line 608>>>
+<<<MISSING line 609>>>
+<<<MISSING line 610>>>
+<<<MISSING line 611>>>
+<<<MISSING line 612>>>
+<<<MISSING line 613>>>
+<<<MISSING line 614>>>
+<<<MISSING line 615>>>
+<<<MISSING line 616>>>
+<<<MISSING line 617>>>
+<<<MISSING line 618>>>
+<<<MISSING line 619>>>
+<<<MISSING line 620>>>
+<<<MISSING line 621>>>
+<<<MISSING line 622>>>
+<<<MISSING line 623>>>
+<<<MISSING line 624>>>
+<<<MISSING line 625>>>
+<<<MISSING line 626>>>
+<<<MISSING line 627>>>
+<<<MISSING line 628>>>
+<<<MISSING line 629>>>
+<<<MISSING line 630>>>
+<<<MISSING line 631>>>
+<<<MISSING line 632>>>
+<<<MISSING line 633>>>
+<<<MISSING line 634>>>
+<<<MISSING line 635>>>
+<<<MISSING line 636>>>
+<<<MISSING line 637>>>
+<<<MISSING line 638>>>
+<<<MISSING line 639>>>
+<<<MISSING line 640>>>
+<<<MISSING line 641>>>
+<<<MISSING line 642>>>
+<<<MISSING line 643>>>
+<<<MISSING line 644>>>
+<<<MISSING line 645>>>
+<<<MISSING line 646>>>
+<<<MISSING line 647>>>
+<<<MISSING line 648>>>
+<<<MISSING line 649>>>
+<<<MISSING line 650>>>
+<<<MISSING line 651>>>
+<<<MISSING line 652>>>
+<<<MISSING line 653>>>
+<<<MISSING line 654>>>
+<<<MISSING line 655>>>
+<<<MISSING line 656>>>
+<<<MISSING line 657>>>
+<<<MISSING line 658>>>
+<<<MISSING line 659>>>
+<<<MISSING line 660>>>
+<<<MISSING line 661>>>
+<<<MISSING line 662>>>
+<<<MISSING line 663>>>
+<<<MISSING line 664>>>
+<<<MISSING line 665>>>
+<<<MISSING line 666>>>
+<<<MISSING line 667>>>
+<<<MISSING line 668>>>
+<<<MISSING line 669>>>
+<<<MISSING line 670>>>
+<<<MISSING line 671>>>
+<<<MISSING line 672>>>
+<<<MISSING line 673>>>
+<<<MISSING line 674>>>
+<<<MISSING line 675>>>
+<<<MISSING line 676>>>
+<<<MISSING line 677>>>
+<<<MISSING line 678>>>
+<<<MISSING line 679>>>
+<<<MISSING line 680>>>
+<<<MISSING line 681>>>
+<<<MISSING line 682>>>
+<<<MISSING line 683>>>
+<<<MISSING line 684>>>
+<<<MISSING line 685>>>
+<<<MISSING line 686>>>
+<<<MISSING line 687>>>
+<<<MISSING line 688>>>
+<<<MISSING line 689>>>
+<<<MISSING line 690>>>
+<<<MISSING line 691>>>
+<<<MISSING line 692>>>
+<<<MISSING line 693>>>
+<<<MISSING line 694>>>
+<<<MISSING line 695>>>
+<<<MISSING line 696>>>
+<<<MISSING line 697>>>
+<<<MISSING line 698>>>
+<<<MISSING line 699>>>
+<<<MISSING line 700>>>
+<<<MISSING line 701>>>
+<<<MISSING line 702>>>
+<<<MISSING line 703>>>
+<<<MISSING line 704>>>
+<<<MISSING line 705>>>
+<<<MISSING line 706>>>
+<<<MISSING line 707>>>
+<<<MISSING line 708>>>
+<<<MISSING line 709>>>
+<<<MISSING line 710>>>
+<<<MISSING line 711>>>
+<<<MISSING line 712>>>
+<<<MISSING line 713>>>
+<<<MISSING line 714>>>
+<<<MISSING line 715>>>
+<<<MISSING line 716>>>
+<<<MISSING line 717>>>
+<<<MISSING line 718>>>
+<<<MISSING line 719>>>
+<<<MISSING line 720>>>
+<<<MISSING line 721>>>
+<<<MISSING line 722>>>
+<<<MISSING line 723>>>
+<<<MISSING line 724>>>
+<<<MISSING line 725>>>
+<<<MISSING line 726>>>
+<<<MISSING line 727>>>
+<<<MISSING line 728>>>
+<<<MISSING line 729>>>
+<<<MISSING line 730>>>
+<<<MISSING line 731>>>
+<<<MISSING line 732>>>
+<<<MISSING line 733>>>
+<<<MISSING line 734>>>
+<<<MISSING line 735>>>
+<<<MISSING line 736>>>
+<<<MISSING line 737>>>
+<<<MISSING line 738>>>
+<<<MISSING line 739>>>
+<<<MISSING line 740>>>
+<<<MISSING line 741>>>
+<<<MISSING line 742>>>
+<<<MISSING line 743>>>
+<<<MISSING line 744>>>
+<<<MISSING line 745>>>
+<<<MISSING line 746>>>
+<<<MISSING line 747>>>
+<<<MISSING line 748>>>
+<<<MISSING line 749>>>
+<<<MISSING line 750>>>
+<<<MISSING line 751>>>
+<<<MISSING line 752>>>
+<<<MISSING line 753>>>
+<<<MISSING line 754>>>
+<<<MISSING line 755>>>
+<<<MISSING line 756>>>
+<<<MISSING line 757>>>
+<<<MISSING line 758>>>
+<<<MISSING line 759>>>
+<<<MISSING line 760>>>
+<<<MISSING line 761>>>
+<<<MISSING line 762>>>
+<<<MISSING line 763>>>
+<<<MISSING line 764>>>
+<<<MISSING line 765>>>
+<<<MISSING line 766>>>
+<<<MISSING line 767>>>
+<<<MISSING line 768>>>
+<<<MISSING line 769>>>
+<<<MISSING line 770>>>
+<<<MISSING line 771>>>
+<<<MISSING line 772>>>
+<<<MISSING line 773>>>
+<<<MISSING line 774>>>
+<<<MISSING line 775>>>
+<<<MISSING line 776>>>
+<<<MISSING line 777>>>
+<<<MISSING line 778>>>
+<<<MISSING line 779>>>
+<<<MISSING line 780>>>
+<<<MISSING line 781>>>
+<<<MISSING line 782>>>
+<<<MISSING line 783>>>
+<<<MISSING line 784>>>
+<<<MISSING line 785>>>
+<<<MISSING line 786>>>
+<<<MISSING line 787>>>
+<<<MISSING line 788>>>
+<<<MISSING line 789>>>
+<<<MISSING line 790>>>
+<<<MISSING line 791>>>
+<<<MISSING line 792>>>
+<<<MISSING line 793>>>
+<<<MISSING line 794>>>
+<<<MISSING line 795>>>
+<<<MISSING line 796>>>
+<<<MISSING line 797>>>
+<<<MISSING line 798>>>
+<<<MISSING line 799>>>
+<<<MISSING line 800>>>
+<<<MISSING line 801>>>
+<<<MISSING line 802>>>
+<<<MISSING line 803>>>
+<<<MISSING line 804>>>
+<<<MISSING line 805>>>
+<<<MISSING line 806>>>
+<<<MISSING line 807>>>
+<<<MISSING line 808>>>
+<<<MISSING line 809>>>
+<<<MISSING line 810>>>
+<<<MISSING line 811>>>
+<<<MISSING line 812>>>
+<<<MISSING line 813>>>
+<<<MISSING line 814>>>
+<<<MISSING line 815>>>
+<<<MISSING line 816>>>
+<<<MISSING line 817>>>
+<<<MISSING line 818>>>
+<<<MISSING line 819>>>
+<<<MISSING line 820>>>
+<<<MISSING line 821>>>
+<<<MISSING line 822>>>
+<<<MISSING line 823>>>
+<<<MISSING line 824>>>
+<<<MISSING line 825>>>
+<<<MISSING line 826>>>
+<<<MISSING line 827>>>
+<<<MISSING line 828>>>
+<<<MISSING line 829>>>
+<<<MISSING line 830>>>
+<<<MISSING line 831>>>
+<<<MISSING line 832>>>
+<<<MISSING line 833>>>
+<<<MISSING line 834>>>
+<<<MISSING line 835>>>
+<<<MISSING line 836>>>
+<<<MISSING line 837>>>
+<<<MISSING line 838>>>
+<<<MISSING line 839>>>
+<<<MISSING line 840>>>
+<<<MISSING line 841>>>
+<<<MISSING line 842>>>
+<<<MISSING line 843>>>
+<<<MISSING line 844>>>
+<<<MISSING line 845>>>
+<<<MISSING line 846>>>
+<<<MISSING line 847>>>
+<<<MISSING line 848>>>
+<<<MISSING line 849>>>
+<<<MISSING line 850>>>
+<<<MISSING line 851>>>
+<<<MISSING line 852>>>
+<<<MISSING line 853>>>
+<<<MISSING line 854>>>
+<<<MISSING line 855>>>
+<<<MISSING line 856>>>
+<<<MISSING line 857>>>
+<<<MISSING line 858>>>
+<<<MISSING line 859>>>
+<<<MISSING line 860>>>
+<<<MISSING line 861>>>
+<<<MISSING line 862>>>
+<<<MISSING line 863>>>
+<<<MISSING line 864>>>
+<<<MISSING line 865>>>
+<<<MISSING line 866>>>
+<<<MISSING line 867>>>
+<<<MISSING line 868>>>
+<<<MISSING line 869>>>
+<<<MISSING line 870>>>
+<<<MISSING line 871>>>
+   (q/k/v/o + SwiGLU(384→1408→384) + 2 RMSNorm + K_a/K_b);
+   tok-emb 256×384 + final RMSNorm. 5 × 1.97 M + 0.1 M ≈ 10.0 M.
+
+   Bank: GQA 5:1 in the short tier (5 short Q-heads → 1 short
+   KV-head), leaving 7 long heads. q-dim into the bank is
+   7 × 32 = 224 fp32 per slot. Per-layer V is sqrt-n² × q-dim × 4
+   = 512² × 224 × 4 ≈ 234 MB; 5 layers ≈ 1.17 GB. Pass
+   :memory-mmap-path (or use the train-mmap CLI verb) to back V
+   on disk — sparse-grad means only touched rows page in/out."
+  {:d-model            384
+   :n-heads            12        ; total Q heads = n-short-heads + n-long-heads
+   :n-short-heads      5
+   :n-long-heads       7
+   :n-short-kv-heads   1         ; GQA 5:1 within short tier
+   :n-long-kv-heads    1         ; MQA 7:1 within long tier — minimal K/V proj cost
+   :n-layers           5
+   :seq-len            128       ; training window
+   :max-pos            1024      ; RoPE cache size
+   :d-ff               1408
+   :rope-theta         10000.0
+   ;; Long heads have TWO sources at attention time, summed:
+   ;;  (1) SDPA over the per-conversation long-tier K/V cache
+   ;;      (set-style attention; populated from k-proj-l/v-proj-l;
+   ;;      grows unbounded — paged via mmllm.longcache mmap at inference).
+   ;;  (2) Product-key retrieval from the learned bank V (below).
+   ;; (1) handles per-conversation episodic context. (2) handles
+   ;; cross-corpus learned semantic memory. Two independent pathways.
+   ;; Product-key memory bank (per-block, learned semantic memory)
+   :memory-sqrt-n      512       ; sqrt of bank entries; bank holds sqrt-n^2 = 262 144
+   :memory-top-k       16        ; final retrieved entries per query
+<<<MISSING line 902>>>
+<<<MISSING line 903>>>
+<<<MISSING line 904>>>
+<<<MISSING line 905>>>
+<<<MISSING line 906>>>
+<<<MISSING line 907>>>
+<<<MISSING line 908>>>
+<<<MISSING line 909>>>
+<<<MISSING line 910>>>
+<<<MISSING line 911>>>
+<<<MISSING line 912>>>
+<<<MISSING line 913>>>
+<<<MISSING line 914>>>
+<<<MISSING line 915>>>
+<<<MISSING line 916>>>
+<<<MISSING line 917>>>
+<<<MISSING line 918>>>
+<<<MISSING line 919>>>
+<<<MISSING line 920>>>
+<<<MISSING line 921>>>
+<<<MISSING line 922>>>
+<<<MISSING line 923>>>
+<<<MISSING line 924>>>
+<<<MISSING line 925>>>
+<<<MISSING line 926>>>
+<<<MISSING line 927>>>
+<<<MISSING line 928>>>
+<<<MISSING line 929>>>
+<<<MISSING line 930>>>
+<<<MISSING line 931>>>
+<<<MISSING line 932>>>
+<<<MISSING line 933>>>
+<<<MISSING line 934>>>
+<<<MISSING line 935>>>
+<<<MISSING line 936>>>
+<<<MISSING line 937>>>
+<<<MISSING line 938>>>
+<<<MISSING line 939>>>
+<<<MISSING line 940>>>
+<<<MISSING line 941>>>
+<<<MISSING line 942>>>
+<<<MISSING line 943>>>
+<<<MISSING line 944>>>
+<<<MISSING line 945>>>
+<<<MISSING line 946>>>
+<<<MISSING line 947>>>
+<<<MISSING line 948>>>
+<<<MISSING line 949>>>
+<<<MISSING line 950>>>
+<<<MISSING line 951>>>
+<<<MISSING line 952>>>
+<<<MISSING line 953>>>
+<<<MISSING line 954>>>
+<<<MISSING line 955>>>
+<<<MISSING line 956>>>
+<<<MISSING line 957>>>
+<<<MISSING line 958>>>
+<<<MISSING line 959>>>
+<<<MISSING line 960>>>
+<<<MISSING line 961>>>
+<<<MISSING line 962>>>
+<<<MISSING line 963>>>
+<<<MISSING line 964>>>
+<<<MISSING line 965>>>
+<<<MISSING line 966>>>
+<<<MISSING line 967>>>
+<<<MISSING line 968>>>
+<<<MISSING line 969>>>
+<<<MISSING line 970>>>
+<<<MISSING line 971>>>
+<<<MISSING line 972>>>
+<<<MISSING line 973>>>
+<<<MISSING line 974>>>
+<<<MISSING line 975>>>
+<<<MISSING line 976>>>
+<<<MISSING line 977>>>
+<<<MISSING line 978>>>
+<<<MISSING line 979>>>
+<<<MISSING line 980>>>
+<<<MISSING line 981>>>
+<<<MISSING line 982>>>
+<<<MISSING line 983>>>
+<<<MISSING line 984>>>
+<<<MISSING line 985>>>
+<<<MISSING line 986>>>
+<<<MISSING line 987>>>
+<<<MISSING line 988>>>
+<<<MISSING line 989>>>
+<<<MISSING line 990>>>
+<<<MISSING line 991>>>
+<<<MISSING line 992>>>
+<<<MISSING line 993>>>
+<<<MISSING line 994>>>
+<<<MISSING line 995>>>
+<<<MISSING line 996>>>
+<<<MISSING line 997>>>
+<<<MISSING line 998>>>
+<<<MISSING line 999>>>
+<<<MISSING line 1000>>>
+<<<MISSING line 1001>>>
+<<<MISSING line 1002>>>
+<<<MISSING line 1003>>>
+<<<MISSING line 1004>>>
+<<<MISSING line 1005>>>
+<<<MISSING line 1006>>>
+<<<MISSING line 1007>>>
+<<<MISSING line 1008>>>
+<<<MISSING line 1009>>>
+<<<MISSING line 1010>>>
+(def default-config-cpu-mini
+  "Mini-trunk variant of cpu-tiny: same 32-layer asymmetric Local/Net
+   architecture, but with the dense backbone shrunk ~10× to test
+   whether a smaller trunk forces the bank tier to actually get adopted.
+
+   Sizing math:
+     d-model = 32, d-ff = 128, head-dim = 8
+     n-heads = 4 = 2 short + 2 long
+     q-dim   = 2 long heads × 8 head-dim = 16 (vs cpu-tiny's 128 — 8× smaller)
+
+   Per-block dense:
+     Q + O proj          : 32² × 2 = 2,048
+     K_s + V_s + K_l + V_l (head_dim=8 each): 32 × 8 × 4 = 1,024
+     FFN (gate + up + down at d_ff=128)     : 32 × 128 × 3 = 12,288
+     norms + small heads                    : ~200
+                                              ─────────
+     per-block                                ≈ 15.5 k
+   × 32 blocks                               ≈ 500 k dense params
+   = ~2 MB at fp32 (vs cpu-tiny's ~17.5 M ≈ 70 MB — 35× reduction)
+
+   The asymmetric Local-Bank layer set is unchanged so existing trunks
+   and the chain runner still slot in cleanly. The bank-side shape (V
+   per row × q-dim) shrinks proportionally with q-dim: V_local per
+   layer × trunk at sqrt_n=226 is 226² × 16 × 4 = 3.3 MB (vs 26 MB at
+   cpu-tiny's q-dim=128)."
+  {:d-model            32
+   ;; n-heads = 4 (split 2 short + 2 long) at head-dim=8. The original
+   ;; cpu-mini layout (commit 0530af6). DON'T reshuffle this without
+   ;; resetting the chain — head_dim governs K/V proj shape via
+   ;; (d_model × n_kv_heads × head_dim), and saved dense.pt checkpoints
+   ;; have head_dim=8-shaped K/V tensors. Reshuffling to head_dim=4 or 2
+   ;; broke 240/618 dense params on resume in commits 414ea97 / 7e45963
+   ;; (caught 2026-05-15; reverted here). The "wider routing" argument
+   ;; for reshuffling was wrong — bandwidth lives in TOP_K env vars,
+   ;; not in n_heads geometry. q-dim = n-long-heads × head-dim = 2 × 8 = 16.
+   :n-heads            4
+   :n-short-heads      2
+   :n-long-heads       2
+   :n-short-kv-heads   1
+   :n-long-kv-heads    1
+   :n-layers           32
+   :local-bank-layers  [0 1 2 12 20 29 30 31]
+   ;; seq-len 1024 = 8× original 128, supports realistic conversation /
+   ;; document training contexts. max-pos 8192 = 16× original 512, giving
+   ;; ample RoPE cache for inference prompts up to 8K tokens. Compute is
+   ;; O(seq-len²) in attention so per-step wall scales 64× from the
+   ;; original 128 — counterbalanced by batch=16 increasing tokens/step.
+   :seq-len            1024
+   :max-pos            8192
+   :d-ff               128
+   ;; rope-theta = 500000 (was 10000). Llama 3's base-training choice.
+   ;; Larger theta makes the high-freq RoPE dims have longer periods,
+   ;; so the model trained at this base can later extend to long
+   ;; context (128K-1M) via continued pretraining without YARN-style
+   ;; rescaling. Short-context performance is unchanged at this value
+   ;; (Llama 3 demonstrated). One-line prep for the 1M-context goal.
+   :rope-theta         500000.0
+   :memory-sqrt-n      256
+   ;; Retrieval bandwidth defaults (extend_chain.sh env vars override
+   ;; these to 128/128/512/64 for production chain training). Widened
+   ;; so per-query info pulled from each tier matches bank capacity at
+   ;; design size. Local: 128 × q_dim(16) = 2048 fp32 per query. Net
+   ;; defaults stay smaller here since the config-only path uses smaller
+   ;; banks; production chain uses MMLLM_NET_TOP_K=512.
+   :memory-top-k       128
+   :memory-sub-top-k   128
+   :memory-mmap-path   nil
+   :bank-query-mode    nil
+   :bank-feedback-mode nil
+   :long-tier-mix      nil
+   :short-window       nil
+   :long-window        nil})
+
+;;; ─────────────────────── RoPE (used only on the short tier) ───────────────────────
+
+<<<MISSING line 1086>>>
+<<<MISSING line 1087>>>
+<<<MISSING line 1088>>>
+<<<MISSING line 1089>>>
+<<<MISSING line 1090>>>
+<<<MISSING line 1091>>>
+<<<MISSING line 1092>>>
+<<<MISSING line 1093>>>
+<<<MISSING line 1094>>>
+<<<MISSING line 1095>>>
+<<<MISSING line 1096>>>
+<<<MISSING line 1097>>>
+<<<MISSING line 1098>>>
+<<<MISSING line 1099>>>
+<<<MISSING line 1100>>>
+<<<MISSING line 1101>>>
+<<<MISSING line 1102>>>
+<<<MISSING line 1103>>>
+<<<MISSING line 1104>>>
+<<<MISSING line 1105>>>
+<<<MISSING line 1106>>>
+<<<MISSING line 1107>>>
+<<<MISSING line 1108>>>
+<<<MISSING line 1109>>>
+<<<MISSING line 1110>>>
+<<<MISSING line 1111>>>
+<<<MISSING line 1112>>>
+<<<MISSING line 1113>>>
+<<<MISSING line 1114>>>
+<<<MISSING line 1115>>>
+<<<MISSING line 1116>>>
+<<<MISSING line 1117>>>
+<<<MISSING line 1118>>>
+<<<MISSING line 1119>>>
+<<<MISSING line 1120>>>
+<<<MISSING line 1121>>>
+<<<MISSING line 1122>>>
+<<<MISSING line 1123>>>
+<<<MISSING line 1124>>>
+<<<MISSING line 1125>>>
+<<<MISSING line 1126>>>
+<<<MISSING line 1127>>>
+<<<MISSING line 1128>>>
+<<<MISSING line 1129>>>
+<<<MISSING line 1130>>>
+<<<MISSING line 1131>>>
+<<<MISSING line 1132>>>
+<<<MISSING line 1133>>>
+<<<MISSING line 1134>>>
+<<<MISSING line 1135>>>
+<<<MISSING line 1136>>>
+<<<MISSING line 1137>>>
+<<<MISSING line 1138>>>
+<<<MISSING line 1139>>>
+<<<MISSING line 1140>>>
+<<<MISSING line 1141>>>
+<<<MISSING line 1142>>>
+<<<MISSING line 1143>>>
+<<<MISSING line 1144>>>
+<<<MISSING line 1145>>>
+<<<MISSING line 1146>>>
+<<<MISSING line 1147>>>
+<<<MISSING line 1148>>>
+<<<MISSING line 1149>>>
+<<<MISSING line 1150>>>
+<<<MISSING line 1151>>>
+<<<MISSING line 1152>>>
+<<<MISSING line 1153>>>
+<<<MISSING line 1154>>>
+<<<MISSING line 1155>>>
+<<<MISSING line 1156>>>
+<<<MISSING line 1157>>>
+<<<MISSING line 1158>>>
+<<<MISSING line 1159>>>
+<<<MISSING line 1160>>>
+<<<MISSING line 1161>>>
+<<<MISSING line 1162>>>
+<<<MISSING line 1163>>>
+<<<MISSING line 1164>>>
+<<<MISSING line 1165>>>
+<<<MISSING line 1166>>>
+<<<MISSING line 1167>>>
+<<<MISSING line 1168>>>
+<<<MISSING line 1169>>>
+<<<MISSING line 1170>>>
+<<<MISSING line 1171>>>
+<<<MISSING line 1172>>>
+<<<MISSING line 1173>>>
+<<<MISSING line 1174>>>
+<<<MISSING line 1175>>>
+<<<MISSING line 1176>>>
+<<<MISSING line 1177>>>
+<<<MISSING line 1178>>>
+<<<MISSING line 1179>>>
+<<<MISSING line 1180>>>
+<<<MISSING line 1181>>>
+<<<MISSING line 1182>>>
+<<<MISSING line 1183>>>
+<<<MISSING line 1184>>>
+<<<MISSING line 1185>>>
+<<<MISSING line 1186>>>
+<<<MISSING line 1187>>>
+<<<MISSING line 1188>>>
+<<<MISSING line 1189>>>
+<<<MISSING line 1190>>>
+<<<MISSING line 1191>>>
+<<<MISSING line 1192>>>
+<<<MISSING line 1193>>>
+<<<MISSING line 1194>>>
+<<<MISSING line 1195>>>
+<<<MISSING line 1196>>>
+<<<MISSING line 1197>>>
+<<<MISSING line 1198>>>
+<<<MISSING line 1199>>>
+<<<MISSING line 1200>>>
+<<<MISSING line 1201>>>
+<<<MISSING line 1202>>>
+<<<MISSING line 1203>>>
+<<<MISSING line 1204>>>
+<<<MISSING line 1205>>>
+<<<MISSING line 1206>>>
+<<<MISSING line 1207>>>
+<<<MISSING line 1208>>>
+<<<MISSING line 1209>>>
+<<<MISSING line 1210>>>
+<<<MISSING line 1211>>>
+<<<MISSING line 1212>>>
+<<<MISSING line 1213>>>
+<<<MISSING line 1214>>>
+<<<MISSING line 1215>>>
+<<<MISSING line 1216>>>
+<<<MISSING line 1217>>>
+<<<MISSING line 1218>>>
+<<<MISSING line 1219>>>
+<<<MISSING line 1220>>>
+<<<MISSING line 1221>>>
+<<<MISSING line 1222>>>
+<<<MISSING line 1223>>>
+<<<MISSING line 1224>>>
+<<<MISSING line 1225>>>
+<<<MISSING line 1226>>>
+<<<MISSING line 1227>>>
+<<<MISSING line 1228>>>
+<<<MISSING line 1229>>>
+<<<MISSING line 1230>>>
+<<<MISSING line 1231>>>
+<<<MISSING line 1232>>>
+<<<MISSING line 1233>>>
+<<<MISSING line 1234>>>
+<<<MISSING line 1235>>>
+<<<MISSING line 1236>>>
+<<<MISSING line 1237>>>
+<<<MISSING line 1238>>>
+<<<MISSING line 1239>>>
+<<<MISSING line 1240>>>
+<<<MISSING line 1241>>>
+<<<MISSING line 1242>>>
+<<<MISSING line 1243>>>
+<<<MISSING line 1244>>>
+<<<MISSING line 1245>>>
+<<<MISSING line 1246>>>
+<<<MISSING line 1247>>>
+<<<MISSING line 1248>>>
+<<<MISSING line 1249>>>
+<<<MISSING line 1250>>>
+<<<MISSING line 1251>>>
+<<<MISSING line 1252>>>
+<<<MISSING line 1253>>>
+<<<MISSING line 1254>>>
+<<<MISSING line 1255>>>
+<<<MISSING line 1256>>>
+<<<MISSING line 1257>>>
+<<<MISSING line 1258>>>
+<<<MISSING line 1259>>>
+<<<MISSING line 1260>>>
+<<<MISSING line 1261>>>
+<<<MISSING line 1262>>>
+<<<MISSING line 1263>>>
+<<<MISSING line 1264>>>
+<<<MISSING line 1265>>>
+<<<MISSING line 1266>>>
+<<<MISSING line 1267>>>
+<<<MISSING line 1268>>>
+<<<MISSING line 1269>>>
+<<<MISSING line 1270>>>
+<<<MISSING line 1271>>>
+<<<MISSING line 1272>>>
+<<<MISSING line 1273>>>
+<<<MISSING line 1274>>>
+<<<MISSING line 1275>>>
+<<<MISSING line 1276>>>
+<<<MISSING line 1277>>>
+<<<MISSING line 1278>>>
+<<<MISSING line 1279>>>
+<<<MISSING line 1280>>>
+<<<MISSING line 1281>>>
+<<<MISSING line 1282>>>
+<<<MISSING line 1283>>>
+<<<MISSING line 1284>>>
+<<<MISSING line 1285>>>
+<<<MISSING line 1286>>>
+<<<MISSING line 1287>>>
+<<<MISSING line 1288>>>
+<<<MISSING line 1289>>>
+<<<MISSING line 1290>>>
+<<<MISSING line 1291>>>
+<<<MISSING line 1292>>>
+<<<MISSING line 1293>>>
+<<<MISSING line 1294>>>
+<<<MISSING line 1295>>>
+<<<MISSING line 1296>>>
+<<<MISSING line 1297>>>
+<<<MISSING line 1298>>>
+<<<MISSING line 1299>>>
+<<<MISSING line 1300>>>
+<<<MISSING line 1301>>>
+<<<MISSING line 1302>>>
+<<<MISSING line 1303>>>
+<<<MISSING line 1304>>>
+<<<MISSING line 1305>>>
+<<<MISSING line 1306>>>
+<<<MISSING line 1307>>>
+<<<MISSING line 1308>>>
+<<<MISSING line 1309>>>
+<<<MISSING line 1310>>>
+<<<MISSING line 1311>>>
+<<<MISSING line 1312>>>
+<<<MISSING line 1313>>>
+<<<MISSING line 1314>>>
+<<<MISSING line 1315>>>
+<<<MISSING line 1316>>>
+<<<MISSING line 1317>>>
+<<<MISSING line 1318>>>
+<<<MISSING line 1319>>>
+<<<MISSING line 1320>>>
+<<<MISSING line 1321>>>
+<<<MISSING line 1322>>>
+<<<MISSING line 1323>>>
+<<<MISSING line 1324>>>
+<<<MISSING line 1325>>>
+<<<MISSING line 1326>>>
+<<<MISSING line 1327>>>
+<<<MISSING line 1328>>>
+<<<MISSING line 1329>>>
+<<<MISSING line 1330>>>
+<<<MISSING line 1331>>>
+<<<MISSING line 1332>>>
+<<<MISSING line 1333>>>
+<<<MISSING line 1334>>>
+<<<MISSING line 1335>>>
+<<<MISSING line 1336>>>
+<<<MISSING line 1337>>>
+<<<MISSING line 1338>>>
+<<<MISSING line 1339>>>
+<<<MISSING line 1340>>>
+<<<MISSING line 1341>>>
+<<<MISSING line 1342>>>
+<<<MISSING line 1343>>>
+<<<MISSING line 1344>>>
+<<<MISSING line 1345>>>
+<<<MISSING line 1346>>>
+<<<MISSING line 1347>>>
+<<<MISSING line 1348>>>
+<<<MISSING line 1349>>>
+<<<MISSING line 1350>>>
+<<<MISSING line 1351>>>
+<<<MISSING line 1352>>>
+<<<MISSING line 1353>>>
+<<<MISSING line 1354>>>
+<<<MISSING line 1355>>>
+<<<MISSING line 1356>>>
+<<<MISSING line 1357>>>
+<<<MISSING line 1358>>>
+<<<MISSING line 1359>>>
+<<<MISSING line 1360>>>
+<<<MISSING line 1361>>>
+<<<MISSING line 1362>>>
+<<<MISSING line 1363>>>
+<<<MISSING line 1364>>>
+<<<MISSING line 1365>>>
+<<<MISSING line 1366>>>
+<<<MISSING line 1367>>>
+<<<MISSING line 1368>>>
+<<<MISSING line 1369>>>
+<<<MISSING line 1370>>>
+<<<MISSING line 1371>>>
+<<<MISSING line 1372>>>
+<<<MISSING line 1373>>>
+<<<MISSING line 1374>>>
+<<<MISSING line 1375>>>
+<<<MISSING line 1376>>>
+<<<MISSING line 1377>>>
+<<<MISSING line 1378>>>
+<<<MISSING line 1379>>>
+<<<MISSING line 1380>>>
+<<<MISSING line 1381>>>
+<<<MISSING line 1382>>>
+<<<MISSING line 1383>>>
+<<<MISSING line 1384>>>
+<<<MISSING line 1385>>>
+<<<MISSING line 1386>>>
+<<<MISSING line 1387>>>
+<<<MISSING line 1388>>>
+<<<MISSING line 1389>>>
+<<<MISSING line 1390>>>
+<<<MISSING line 1391>>>
+<<<MISSING line 1392>>>
+<<<MISSING line 1393>>>
+<<<MISSING line 1394>>>
+<<<MISSING line 1395>>>
+<<<MISSING line 1396>>>
+<<<MISSING line 1397>>>
+<<<MISSING line 1398>>>
+<<<MISSING line 1399>>>
+<<<MISSING line 1400>>>
+<<<MISSING line 1401>>>
+<<<MISSING line 1402>>>
+<<<MISSING line 1403>>>
+<<<MISSING line 1404>>>
+<<<MISSING line 1405>>>
+<<<MISSING line 1406>>>
+<<<MISSING line 1407>>>
+<<<MISSING line 1408>>>
+<<<MISSING line 1409>>>
+<<<MISSING line 1410>>>
+<<<MISSING line 1411>>>
+<<<MISSING line 1412>>>
+<<<MISSING line 1413>>>
+<<<MISSING line 1414>>>
+<<<MISSING line 1415>>>
+<<<MISSING line 1416>>>
+<<<MISSING line 1417>>>
+<<<MISSING line 1418>>>
+<<<MISSING line 1419>>>
+<<<MISSING line 1420>>>
+<<<MISSING line 1421>>>
+<<<MISSING line 1422>>>
+<<<MISSING line 1423>>>
+<<<MISSING line 1424>>>
+<<<MISSING line 1425>>>
+<<<MISSING line 1426>>>
+<<<MISSING line 1427>>>
+<<<MISSING line 1428>>>
+<<<MISSING line 1429>>>
+<<<MISSING line 1430>>>
+<<<MISSING line 1431>>>
+<<<MISSING line 1432>>>
+<<<MISSING line 1433>>>
+<<<MISSING line 1434>>>
+<<<MISSING line 1435>>>
+<<<MISSING line 1436>>>
+<<<MISSING line 1437>>>
+<<<MISSING line 1438>>>
+<<<MISSING line 1439>>>
+<<<MISSING line 1440>>>
+<<<MISSING line 1441>>>
+<<<MISSING line 1442>>>
+<<<MISSING line 1443>>>
+<<<MISSING line 1444>>>
+<<<MISSING line 1445>>>
+<<<MISSING line 1446>>>
+<<<MISSING line 1447>>>
+<<<MISSING line 1448>>>
+<<<MISSING line 1449>>>
+<<<MISSING line 1450>>>
+<<<MISSING line 1451>>>
+<<<MISSING line 1452>>>
+<<<MISSING line 1453>>>
+<<<MISSING line 1454>>>
+<<<MISSING line 1455>>>
+<<<MISSING line 1456>>>
+<<<MISSING line 1457>>>
+<<<MISSING line 1458>>>
+<<<MISSING line 1459>>>
+<<<MISSING line 1460>>>
+<<<MISSING line 1461>>>
+<<<MISSING line 1462>>>
+<<<MISSING line 1463>>>
+<<<MISSING line 1464>>>
+<<<MISSING line 1465>>>
+<<<MISSING line 1466>>>
+<<<MISSING line 1467>>>
+<<<MISSING line 1468>>>
+<<<MISSING line 1469>>>
+<<<MISSING line 1470>>>
+<<<MISSING line 1471>>>
+<<<MISSING line 1472>>>
+<<<MISSING line 1473>>>
+<<<MISSING line 1474>>>
+<<<MISSING line 1475>>>
+<<<MISSING line 1476>>>
+<<<MISSING line 1477>>>
+<<<MISSING line 1478>>>
+<<<MISSING line 1479>>>
+<<<MISSING line 1480>>>
+<<<MISSING line 1481>>>
+<<<MISSING line 1482>>>
+<<<MISSING line 1483>>>
+<<<MISSING line 1484>>>
+<<<MISSING line 1485>>>
+<<<MISSING line 1486>>>
+<<<MISSING line 1487>>>
+<<<MISSING line 1488>>>
+<<<MISSING line 1489>>>
+<<<MISSING line 1490>>>
+<<<MISSING line 1491>>>
+<<<MISSING line 1492>>>
+<<<MISSING line 1493>>>
+<<<MISSING line 1494>>>
+<<<MISSING line 1495>>>
+<<<MISSING line 1496>>>
+<<<MISSING line 1497>>>
+<<<MISSING line 1498>>>
+<<<MISSING line 1499>>>
+<<<MISSING line 1500>>>
+<<<MISSING line 1501>>>
+<<<MISSING line 1502>>>
+<<<MISSING line 1503>>>
+<<<MISSING line 1504>>>
+<<<MISSING line 1505>>>
+<<<MISSING line 1506>>>
+<<<MISSING line 1507>>>
+<<<MISSING line 1508>>>
+<<<MISSING line 1509>>>
+<<<MISSING line 1510>>>
+<<<MISSING line 1511>>>
+<<<MISSING line 1512>>>
+<<<MISSING line 1513>>>
+<<<MISSING line 1514>>>
+<<<MISSING line 1515>>>
+<<<MISSING line 1516>>>
+<<<MISSING line 1517>>>
+<<<MISSING line 1518>>>
+<<<MISSING line 1519>>>
+<<<MISSING line 1520>>>
+<<<MISSING line 1521>>>
+<<<MISSING line 1522>>>
+<<<MISSING line 1523>>>
+<<<MISSING line 1524>>>
+<<<MISSING line 1525>>>
+<<<MISSING line 1526>>>
+<<<MISSING line 1527>>>
+<<<MISSING line 1528>>>
+<<<MISSING line 1529>>>
+<<<MISSING line 1530>>>
+<<<MISSING line 1531>>>
+<<<MISSING line 1532>>>
+<<<MISSING line 1533>>>
+<<<MISSING line 1534>>>
+<<<MISSING line 1535>>>
+<<<MISSING line 1536>>>
+<<<MISSING line 1537>>>
+<<<MISSING line 1538>>>
+<<<MISSING line 1539>>>
+<<<MISSING line 1540>>>
+<<<MISSING line 1541>>>
+<<<MISSING line 1542>>>
+<<<MISSING line 1543>>>
+<<<MISSING line 1544>>>
+<<<MISSING line 1545>>>
+<<<MISSING line 1546>>>
+<<<MISSING line 1547>>>
+<<<MISSING line 1548>>>
+<<<MISSING line 1549>>>
+<<<MISSING line 1550>>>
+<<<MISSING line 1551>>>
+<<<MISSING line 1552>>>
+<<<MISSING line 1553>>>
+<<<MISSING line 1554>>>
+<<<MISSING line 1555>>>
+<<<MISSING line 1556>>>
+<<<MISSING line 1557>>>
+<<<MISSING line 1558>>>
+<<<MISSING line 1559>>>
+<<<MISSING line 1560>>>
+<<<MISSING line 1561>>>
+<<<MISSING line 1562>>>
+<<<MISSING line 1563>>>
+<<<MISSING line 1564>>>
+<<<MISSING line 1565>>>
+<<<MISSING line 1566>>>
+<<<MISSING line 1567>>>
+<<<MISSING line 1568>>>
+<<<MISSING line 1569>>>
+<<<MISSING line 1570>>>
+<<<MISSING line 1571>>>
+<<<MISSING line 1572>>>
+<<<MISSING line 1573>>>
+<<<MISSING line 1574>>>
+<<<MISSING line 1575>>>
+<<<MISSING line 1576>>>
+<<<MISSING line 1577>>>
+<<<MISSING line 1578>>>
+<<<MISSING line 1579>>>
+<<<MISSING line 1580>>>
+<<<MISSING line 1581>>>
+<<<MISSING line 1582>>>
+<<<MISSING line 1583>>>
+<<<MISSING line 1584>>>
+<<<MISSING line 1585>>>
+<<<MISSING line 1586>>>
+<<<MISSING line 1587>>>
+<<<MISSING line 1588>>>
+<<<MISSING line 1589>>>
+<<<MISSING line 1590>>>
+<<<MISSING line 1591>>>
+<<<MISSING line 1592>>>
+<<<MISSING line 1593>>>
+<<<MISSING line 1594>>>
+<<<MISSING line 1595>>>
+<<<MISSING line 1596>>>
+<<<MISSING line 1597>>>
+<<<MISSING line 1598>>>
+<<<MISSING line 1599>>>
+<<<MISSING line 1600>>>
+<<<MISSING line 1601>>>
+<<<MISSING line 1602>>>
+<<<MISSING line 1603>>>
+<<<MISSING line 1604>>>
+<<<MISSING line 1605>>>
+<<<MISSING line 1606>>>
+<<<MISSING line 1607>>>
+<<<MISSING line 1608>>>
+<<<MISSING line 1609>>>
+<<<MISSING line 1610>>>
+<<<MISSING line 1611>>>
+<<<MISSING line 1612>>>
+<<<MISSING line 1613>>>
+<<<MISSING line 1614>>>
+<<<MISSING line 1615>>>
+<<<MISSING line 1616>>>
+<<<MISSING line 1617>>>
+<<<MISSING line 1618>>>
+<<<MISSING line 1619>>>
+<<<MISSING line 1620>>>
+<<<MISSING line 1621>>>
+<<<MISSING line 1622>>>
+<<<MISSING line 1623>>>
+<<<MISSING line 1624>>>
+<<<MISSING line 1625>>>
+<<<MISSING line 1626>>>
+<<<MISSING line 1627>>>
+<<<MISSING line 1628>>>
+<<<MISSING line 1629>>>
+<<<MISSING line 1630>>>
+<<<MISSING line 1631>>>
+<<<MISSING line 1632>>>
+<<<MISSING line 1633>>>
+<<<MISSING line 1634>>>
+<<<MISSING line 1635>>>
+<<<MISSING line 1636>>>
+<<<MISSING line 1637>>>
+<<<MISSING line 1638>>>
+<<<MISSING line 1639>>>
+<<<MISSING line 1640>>>
+<<<MISSING line 1641>>>
+<<<MISSING line 1642>>>
+<<<MISSING line 1643>>>
+<<<MISSING line 1644>>>
+<<<MISSING line 1645>>>
+<<<MISSING line 1646>>>
+<<<MISSING line 1647>>>
+<<<MISSING line 1648>>>
+<<<MISSING line 1649>>>
+<<<MISSING line 1650>>>
+<<<MISSING line 1651>>>
+<<<MISSING line 1652>>>
+<<<MISSING line 1653>>>
+<<<MISSING line 1654>>>
+<<<MISSING line 1655>>>
+<<<MISSING line 1656>>>
+<<<MISSING line 1657>>>
+<<<MISSING line 1658>>>
+<<<MISSING line 1659>>>
+<<<MISSING line 1660>>>
+<<<MISSING line 1661>>>
+<<<MISSING line 1662>>>
+<<<MISSING line 1663>>>
+<<<MISSING line 1664>>>
+<<<MISSING line 1665>>>
+<<<MISSING line 1666>>>
+<<<MISSING line 1667>>>
+<<<MISSING line 1668>>>
+<<<MISSING line 1669>>>
+<<<MISSING line 1670>>>
+<<<MISSING line 1671>>>
+<<<MISSING line 1672>>>
+<<<MISSING line 1673>>>
+<<<MISSING line 1674>>>
+<<<MISSING line 1675>>>
+<<<MISSING line 1676>>>
+<<<MISSING line 1677>>>
+<<<MISSING line 1678>>>
+<<<MISSING line 1679>>>
+<<<MISSING line 1680>>>
+<<<MISSING line 1681>>>
+<<<MISSING line 1682>>>
+<<<MISSING line 1683>>>
+<<<MISSING line 1684>>>
+<<<MISSING line 1685>>>
+<<<MISSING line 1686>>>
+<<<MISSING line 1687>>>
+<<<MISSING line 1688>>>
+<<<MISSING line 1689>>>
+<<<MISSING line 1690>>>
+<<<MISSING line 1691>>>
+<<<MISSING line 1692>>>
+<<<MISSING line 1693>>>
+<<<MISSING line 1694>>>
+<<<MISSING line 1695>>>
+<<<MISSING line 1696>>>
+<<<MISSING line 1697>>>
+<<<MISSING line 1698>>>
+<<<MISSING line 1699>>>
+<<<MISSING line 1700>>>
+<<<MISSING line 1701>>>
+<<<MISSING line 1702>>>
+<<<MISSING line 1703>>>
+<<<MISSING line 1704>>>
+<<<MISSING line 1705>>>
+<<<MISSING line 1706>>>
+<<<MISSING line 1707>>>
+<<<MISSING line 1708>>>
+<<<MISSING line 1709>>>
+<<<MISSING line 1710>>>
+<<<MISSING line 1711>>>
+<<<MISSING line 1712>>>
+<<<MISSING line 1713>>>
+<<<MISSING line 1714>>>
+<<<MISSING line 1715>>>
+<<<MISSING line 1716>>>
+<<<MISSING line 1717>>>
+<<<MISSING line 1718>>>
+<<<MISSING line 1719>>>
+<<<MISSING line 1720>>>
+<<<MISSING line 1721>>>
+<<<MISSING line 1722>>>
+<<<MISSING line 1723>>>
+<<<MISSING line 1724>>>
+<<<MISSING line 1725>>>
+<<<MISSING line 1726>>>
+<<<MISSING line 1727>>>
+<<<MISSING line 1728>>>
+<<<MISSING line 1729>>>
+<<<MISSING line 1730>>>
+<<<MISSING line 1731>>>
+<<<MISSING line 1732>>>
+<<<MISSING line 1733>>>
+<<<MISSING line 1734>>>
+<<<MISSING line 1735>>>
+<<<MISSING line 1736>>>
+<<<MISSING line 1737>>>
+<<<MISSING line 1738>>>
+<<<MISSING line 1739>>>
+<<<MISSING line 1740>>>
+<<<MISSING line 1741>>>
+<<<MISSING line 1742>>>
+<<<MISSING line 1743>>>
+<<<MISSING line 1744>>>
+<<<MISSING line 1745>>>
+<<<MISSING line 1746>>>
+<<<MISSING line 1747>>>
+<<<MISSING line 1748>>>
+<<<MISSING line 1749>>>
+<<<MISSING line 1750>>>
+<<<MISSING line 1751>>>
+<<<MISSING line 1752>>>
+<<<MISSING line 1753>>>
+<<<MISSING line 1754>>>
+<<<MISSING line 1755>>>
+<<<MISSING line 1756>>>
+<<<MISSING line 1757>>>
+<<<MISSING line 1758>>>
+<<<MISSING line 1759>>>
+<<<MISSING line 1760>>>
+<<<MISSING line 1761>>>
+<<<MISSING line 1762>>>
+<<<MISSING line 1763>>>
+<<<MISSING line 1764>>>
+<<<MISSING line 1765>>>
+<<<MISSING line 1766>>>
+<<<MISSING line 1767>>>
+<<<MISSING line 1768>>>
+<<<MISSING line 1769>>>
+<<<MISSING line 1770>>>
+<<<MISSING line 1771>>>
+<<<MISSING line 1772>>>
+<<<MISSING line 1773>>>
+<<<MISSING line 1774>>>
+<<<MISSING line 1775>>>
+<<<MISSING line 1776>>>
+<<<MISSING line 1777>>>
+<<<MISSING line 1778>>>
+<<<MISSING line 1779>>>
+<<<MISSING line 1780>>>
+<<<MISSING line 1781>>>
+<<<MISSING line 1782>>>
+<<<MISSING line 1783>>>
+<<<MISSING line 1784>>>
+<<<MISSING line 1785>>>
+<<<MISSING line 1786>>>
+<<<MISSING line 1787>>>
+<<<MISSING line 1788>>>
+<<<MISSING line 1789>>>
+<<<MISSING line 1790>>>
+<<<MISSING line 1791>>>
+<<<MISSING line 1792>>>
+<<<MISSING line 1793>>>
+<<<MISSING line 1794>>>
+<<<MISSING line 1795>>>
+<<<MISSING line 1796>>>
+<<<MISSING line 1797>>>
+<<<MISSING line 1798>>>
+<<<MISSING line 1799>>>
+<<<MISSING line 1800>>>
+<<<MISSING line 1801>>>
+<<<MISSING line 1802>>>
+<<<MISSING line 1803>>>
+<<<MISSING line 1804>>>
+<<<MISSING line 1805>>>
+<<<MISSING line 1806>>>
+<<<MISSING line 1807>>>
+<<<MISSING line 1808>>>
+<<<MISSING line 1809>>>
+<<<MISSING line 1810>>>
+<<<MISSING line 1811>>>
+<<<MISSING line 1812>>>
+<<<MISSING line 1813>>>
+<<<MISSING line 1814>>>
+<<<MISSING line 1815>>>
+<<<MISSING line 1816>>>
+<<<MISSING line 1817>>>
+<<<MISSING line 1818>>>
+<<<MISSING line 1819>>>
+<<<MISSING line 1820>>>
+<<<MISSING line 1821>>>
+<<<MISSING line 1822>>>
+<<<MISSING line 1823>>>
+<<<MISSING line 1824>>>
+<<<MISSING line 1825>>>
+<<<MISSING line 1826>>>
+<<<MISSING line 1827>>>
+<<<MISSING line 1828>>>
+<<<MISSING line 1829>>>
+<<<MISSING line 1830>>>
+<<<MISSING line 1831>>>
+<<<MISSING line 1832>>>
+<<<MISSING line 1833>>>
+<<<MISSING line 1834>>>
+<<<MISSING line 1835>>>
+<<<MISSING line 1836>>>
+<<<MISSING line 1837>>>
+<<<MISSING line 1838>>>
+<<<MISSING line 1839>>>
+<<<MISSING line 1840>>>
+<<<MISSING line 1841>>>
+<<<MISSING line 1842>>>
+<<<MISSING line 1843>>>
+<<<MISSING line 1844>>>
+<<<MISSING line 1845>>>
+<<<MISSING line 1846>>>
+<<<MISSING line 1847>>>
+<<<MISSING line 1848>>>
+<<<MISSING line 1849>>>
+<<<MISSING line 1850>>>
+<<<MISSING line 1851>>>
+<<<MISSING line 1852>>>
+<<<MISSING line 1853>>>
+<<<MISSING line 1854>>>
+<<<MISSING line 1855>>>
+<<<MISSING line 1856>>>
+<<<MISSING line 1857>>>
+<<<MISSING line 1858>>>
+<<<MISSING line 1859>>>
+<<<MISSING line 1860>>>
+<<<MISSING line 1861>>>
+<<<MISSING line 1862>>>
+<<<MISSING line 1863>>>
+<<<MISSING line 1864>>>
+<<<MISSING line 1865>>>
+<<<MISSING line 1866>>>
+<<<MISSING line 1867>>>
+<<<MISSING line 1868>>>
+<<<MISSING line 1869>>>
+<<<MISSING line 1870>>>
+<<<MISSING line 1871>>>
+<<<MISSING line 1872>>>
+<<<MISSING line 1873>>>
+<<<MISSING line 1874>>>
+<<<MISSING line 1875>>>
+<<<MISSING line 1876>>>
+<<<MISSING line 1877>>>
+<<<MISSING line 1878>>>
+<<<MISSING line 1879>>>
+<<<MISSING line 1880>>>
+<<<MISSING line 1881>>>
+<<<MISSING line 1882>>>
+<<<MISSING line 1883>>>
+<<<MISSING line 1884>>>
+<<<MISSING line 1885>>>
+<<<MISSING line 1886>>>
+<<<MISSING line 1887>>>
+<<<MISSING line 1888>>>
+<<<MISSING line 1889>>>
+<<<MISSING line 1890>>>
+<<<MISSING line 1891>>>
+<<<MISSING line 1892>>>
+<<<MISSING line 1893>>>
+<<<MISSING line 1894>>>
+<<<MISSING line 1895>>>
+<<<MISSING line 1896>>>
+<<<MISSING line 1897>>>
+<<<MISSING line 1898>>>
+<<<MISSING line 1899>>>
+<<<MISSING line 1900>>>
+<<<MISSING line 1901>>>
+<<<MISSING line 1902>>>
+<<<MISSING line 1903>>>
+<<<MISSING line 1904>>>
+<<<MISSING line 1905>>>
+<<<MISSING line 1906>>>
+<<<MISSING line 1907>>>
+<<<MISSING line 1908>>>
+<<<MISSING line 1909>>>
+<<<MISSING line 1910>>>
+<<<MISSING line 1911>>>
+<<<MISSING line 1912>>>
+<<<MISSING line 1913>>>
+<<<MISSING line 1914>>>
+<<<MISSING line 1915>>>
+<<<MISSING line 1916>>>
+<<<MISSING line 1917>>>
+<<<MISSING line 1918>>>
+<<<MISSING line 1919>>>
+<<<MISSING line 1920>>>
+<<<MISSING line 1921>>>
+<<<MISSING line 1922>>>
+<<<MISSING line 1923>>>
+     :memory    (when (.__contains__ (pick-local-bank-layers config) block-idx)
+                  (memory-cls q-dim sqrt-n
+                              ** :top_k     (pick-memory-top-k memory-top-k)
+                              :sub_top_k (pick-memory-sub-top-k memory-sub-top-k)
+                              :mmap_path path
+                              :n_trunks  (pick-n-trunks)))
+     :netbank   (when (pick-netbank-enabled?)
+                  (netb/NetBank q-dim
+                                ** :sqrt_n       (pick-netbank-sqrt-n)
+                                :c_net           (pick-netbank-c-net)
+                                :top_k           (pick-netbank-top-k)
+                                :sub_top_k       (pick-netbank-sub-top-k)
+                                :mmap_path       (when-let [base (pick-netbank-path memory-mmap-path)]
+                                                   (str base "." block-idx ".bin"))
+                                :delay_ms_min    (pick-netbank-delay-min)
+                                :delay_ms_max    (pick-netbank-delay-max)
+                                :dtype           (pick-netbank-dtype)
+                                :bank_on_gpu     (pick-netbank-on-gpu?)))
+     ;; Optional MultiTimescaleCarry — per-block "brain-stem clocks"
+     ;; residual at log-uniform decay rates. Zero-init gate → identity at
+     ;; step 0 so adding to an existing ckpt is behavior-preserving;
+     ;; gradient differentiates over training. nil when disabled.
+     :carry     (when (pick-carry-enabled?)
+                  (rs/MultiTimescaleCarry d-model (pick-carry-n-clocks)))}))
+
+;;; ─────────────────────── model ───────────────────────
+
+(defn- block-to-device!
+  "Move every nn.Module child of a block to `device`. ProductKeyMemory and
+   NetBank both wrap their V tensors in CPUPinnedEmbedding-style modules
+   whose `_apply` no-ops; the parent module's recursive .to() walks into
+   K_a/K_b/q_norm/expander but skips V, leaving the mmap on CPU."
+  [block device]
+  (doseq [k [:norm1 :norm2 :q-proj :k-proj-s :v-proj-s :k-proj-l :v-proj-l
+             :o-proj :gate-proj :up-proj :down-proj
+             :long-gate :bank-query :bank-feedback]]
+    (.to (get block k) device))
+  ;; :memory is conditional under the asymmetric :local-bank-layers config.
+  (when-let [mem (:memory block)] (.to mem device))
+  (when-let [nb (:netbank block)]
+    (.to nb device))
+  (when-let [c (:carry block)]
+<<<MISSING line 1966>>>
+<<<MISSING line 1967>>>
+<<<MISSING line 1968>>>
+<<<MISSING line 1969>>>
+<<<MISSING line 1970>>>
+<<<MISSING line 1971>>>
+<<<MISSING line 1972>>>
+<<<MISSING line 1973>>>
+<<<MISSING line 1974>>>
+<<<MISSING line 1975>>>
+<<<MISSING line 1976>>>
+<<<MISSING line 1977>>>
+<<<MISSING line 1978>>>
+<<<MISSING line 1979>>>
+<<<MISSING line 1980>>>
+<<<MISSING line 1981>>>
+<<<MISSING line 1982>>>
+<<<MISSING line 1983>>>
+<<<MISSING line 1984>>>
+<<<MISSING line 1985>>>
+<<<MISSING line 1986>>>
+<<<MISSING line 1987>>>
+<<<MISSING line 1988>>>
+<<<MISSING line 1989>>>
+<<<MISSING line 1990>>>
+<<<MISSING line 1991>>>
+<<<MISSING line 1992>>>
+<<<MISSING line 1993>>>
+<<<MISSING line 1994>>>
+<<<MISSING line 1995>>>
+<<<MISSING line 1996>>>
+<<<MISSING line 1997>>>
+<<<MISSING line 1998>>>
+<<<MISSING line 1999>>>
+                    (if (seq modules)
+                      ;; partitioned: one NetBank per skill module. Per-module
+                      ;; mmap files via the shared <prefix>.<module>.<block>.bin
+                      ;; naming (mmllm.skill_modules) so the harvester merges
+                      ;; torch + MLX banks per-module. Default-off: unset
+                      ;; MMLLM_NET_MODULES → [] → the legacy single bank below.
+                      (netb/ModularNetBank q-dim modules
+                                           ** :sqrt_n       (pick-netbank-sqrt-n)
+                                           :c_net           (pick-netbank-c-net)
+                                           :top_k           (pick-netbank-top-k)
+                                           :sub_top_k       (pick-netbank-sub-top-k)
+                                           :mmap_prefix     (pick-netbank-path memory-mmap-path)
+                                           :mmap_layer      block-idx
+                                           :delay_ms_min    (pick-netbank-delay-min)
+                                           :delay_ms_max    (pick-netbank-delay-max)
+                                           :dtype           (pick-netbank-dtype)
+                                           :bank_on_gpu     (pick-netbank-on-gpu?)
+                                           :router          (pick-netbank-router?)
+                                           :router_k_load   (pick-netbank-router-k-load)
+                                           :router_k_tok    (pick-netbank-router-k-tok)
+                                           :router_drive    (pick-netbank-router-drive?)
+                                           :router_gate     (pick-netbank-router-gate))
+<<<MISSING line 2022>>>
+<<<MISSING line 2023>>>
+<<<MISSING line 2024>>>
+<<<MISSING line 2025>>>
+<<<MISSING line 2026>>>
+<<<MISSING line 2027>>>
+<<<MISSING line 2028>>>
+<<<MISSING line 2029>>>
+<<<MISSING line 2030>>>
+<<<MISSING line 2031>>>
+<<<MISSING line 2032>>>
+<<<MISSING line 2033>>>
+<<<MISSING line 2034>>>
+<<<MISSING line 2035>>>
+<<<MISSING line 2036>>>
+<<<MISSING line 2037>>>
+<<<MISSING line 2038>>>
+<<<MISSING line 2039>>>
+<<<MISSING line 2040>>>
+<<<MISSING line 2041>>>
+<<<MISSING line 2042>>>
+<<<MISSING line 2043>>>
+<<<MISSING line 2044>>>
+<<<MISSING line 2045>>>
+<<<MISSING line 2046>>>
+<<<MISSING line 2047>>>
+<<<MISSING line 2048>>>
+<<<MISSING line 2049>>>
+<<<MISSING line 2050>>>
+<<<MISSING line 2051>>>
+<<<MISSING line 2052>>>
+<<<MISSING line 2053>>>
+<<<MISSING line 2054>>>
+<<<MISSING line 2055>>>
+<<<MISSING line 2056>>>
+<<<MISSING line 2057>>>
+<<<MISSING line 2058>>>
+<<<MISSING line 2059>>>
+<<<MISSING line 2060>>>
+<<<MISSING line 2061>>>
+<<<MISSING line 2062>>>
+<<<MISSING line 2063>>>
+<<<MISSING line 2064>>>
+<<<MISSING line 2065>>>
+<<<MISSING line 2066>>>
+<<<MISSING line 2067>>>
+<<<MISSING line 2068>>>
+<<<MISSING line 2069>>>
+<<<MISSING line 2070>>>
+<<<MISSING line 2071>>>
+<<<MISSING line 2072>>>
+<<<MISSING line 2073>>>
+<<<MISSING line 2074>>>
+<<<MISSING line 2075>>>
+<<<MISSING line 2076>>>
+<<<MISSING line 2077>>>
+<<<MISSING line 2078>>>
+<<<MISSING line 2079>>>
+<<<MISSING line 2080>>>
+<<<MISSING line 2081>>>
+<<<MISSING line 2082>>>
+<<<MISSING line 2083>>>
+<<<MISSING line 2084>>>
+<<<MISSING line 2085>>>
+<<<MISSING line 2086>>>
+<<<MISSING line 2087>>>
+<<<MISSING line 2088>>>
+<<<MISSING line 2089>>>
+<<<MISSING line 2090>>>
+<<<MISSING line 2091>>>
+<<<MISSING line 2092>>>
+<<<MISSING line 2093>>>
+<<<MISSING line 2094>>>
+<<<MISSING line 2095>>>
+<<<MISSING line 2096>>>
+<<<MISSING line 2097>>>
+<<<MISSING line 2098>>>
+<<<MISSING line 2099>>>
+<<<MISSING line 2100>>>
+<<<MISSING line 2101>>>
+<<<MISSING line 2102>>>
+<<<MISSING line 2103>>>
+<<<MISSING line 2104>>>
+<<<MISSING line 2105>>>
+<<<MISSING line 2106>>>
+<<<MISSING line 2107>>>
+<<<MISSING line 2108>>>
+<<<MISSING line 2109>>>
+<<<MISSING line 2110>>>
+<<<MISSING line 2111>>>
+<<<MISSING line 2112>>>
+<<<MISSING line 2113>>>
+<<<MISSING line 2114>>>
+<<<MISSING line 2115>>>
+<<<MISSING line 2116>>>
+<<<MISSING line 2117>>>
+<<<MISSING line 2118>>>
+<<<MISSING line 2119>>>
+<<<MISSING line 2120>>>
+<<<MISSING line 2121>>>
+<<<MISSING line 2122>>>
+<<<MISSING line 2123>>>
+<<<MISSING line 2124>>>
+    ;; of the triune-brain doc made literal.
+    ;;
+    ;; Mechanism: each block's NetBank module was constructed by
+    ;; build-block with its own V (mmap) and expander (Linear). After
+    ;; building, we point every block.netbank.V and .expander at the
+    ;; first block's instance. PyTorch parameter-tying handles the
+    ;; gradient accumulation across forward call sites. The K_a / K_b
+    ;; stay per-block so per-layer queries each learn their own routing.
+    ;;
+    ;; Caveat: this leaves the other (n_layers-1) mmap files allocated
+    ;; but unused. That's ~1 GB of orphaned disk at default sizes.
+    ;; Spike-only; production sharing would skip allocation entirely.
+    (when (pick-netbank-shared?)
+      (let [first-nb (:netbank (first blocks))]
+        (when first-nb
+          (doseq [b (rest blocks)]
+            (when-let [nb (:netbank b)]
+              (.__setattr__ nb "V"        (.- first-nb V))
+              (.__setattr__ nb "expander" (.- first-nb expander))))
+          (println (format "  SPIKE-3: NetBank shared — V + expander tied across %d blocks"
+                           (count blocks))))))
+    {:config          config
+     :device          device
+     :tok-emb         (.to (nn/Embedding vocab-size d-model) device)
+     :blocks          blocks
+<<<MISSING line 2150>>>
+<<<MISSING line 2151>>>
+<<<MISSING line 2152>>>
+<<<MISSING line 2153>>>
+<<<MISSING line 2154>>>
+<<<MISSING line 2155>>>
+<<<MISSING line 2156>>>
+<<<MISSING line 2157>>>
+<<<MISSING line 2158>>>
+<<<MISSING line 2159>>>
+<<<MISSING line 2160>>>
+<<<MISSING line 2161>>>
+<<<MISSING line 2162>>>
+<<<MISSING line 2163>>>
+<<<MISSING line 2164>>>
+<<<MISSING line 2165>>>
+<<<MISSING line 2166>>>
+<<<MISSING line 2167>>>
+<<<MISSING line 2168>>>
+<<<MISSING line 2169>>>
+<<<MISSING line 2170>>>
+<<<MISSING line 2171>>>
+<<<MISSING line 2172>>>
+<<<MISSING line 2173>>>
+<<<MISSING line 2174>>>
+<<<MISSING line 2175>>>
+<<<MISSING line 2176>>>
+<<<MISSING line 2177>>>
+<<<MISSING line 2178>>>
+<<<MISSING line 2179>>>
+<<<MISSING line 2180>>>
+<<<MISSING line 2181>>>
+<<<MISSING line 2182>>>
+<<<MISSING line 2183>>>
+<<<MISSING line 2184>>>
+<<<MISSING line 2185>>>
+<<<MISSING line 2186>>>
+<<<MISSING line 2187>>>
+<<<MISSING line 2188>>>
+<<<MISSING line 2189>>>
+<<<MISSING line 2190>>>
+<<<MISSING line 2191>>>
+<<<MISSING line 2192>>>
+<<<MISSING line 2193>>>
+<<<MISSING line 2194>>>
+<<<MISSING line 2195>>>
+<<<MISSING line 2196>>>
+<<<MISSING line 2197>>>
+<<<MISSING line 2198>>>
+<<<MISSING line 2199>>>
+<<<MISSING line 2200>>>
+<<<MISSING line 2201>>>
+<<<MISSING line 2202>>>
+<<<MISSING line 2203>>>
+<<<MISSING line 2204>>>
+<<<MISSING line 2205>>>
+<<<MISSING line 2206>>>
+<<<MISSING line 2207>>>
+<<<MISSING line 2208>>>
+<<<MISSING line 2209>>>
+<<<MISSING line 2210>>>
+<<<MISSING line 2211>>>
+<<<MISSING line 2212>>>
+<<<MISSING line 2213>>>
+<<<MISSING line 2214>>>
+<<<MISSING line 2215>>>
+<<<MISSING line 2216>>>
+<<<MISSING line 2217>>>
+<<<MISSING line 2218>>>
+<<<MISSING line 2219>>>
+<<<MISSING line 2220>>>
+<<<MISSING line 2221>>>
+<<<MISSING line 2222>>>
+<<<MISSING line 2223>>>
+<<<MISSING line 2224>>>
+<<<MISSING line 2225>>>
+<<<MISSING line 2226>>>
+<<<MISSING line 2227>>>
+<<<MISSING line 2228>>>
+<<<MISSING line 2229>>>
+<<<MISSING line 2230>>>
+<<<MISSING line 2231>>>
+<<<MISSING line 2232>>>
+<<<MISSING line 2233>>>
+<<<MISSING line 2234>>>
+<<<MISSING line 2235>>>
+<<<MISSING line 2236>>>
+<<<MISSING line 2237>>>
+<<<MISSING line 2238>>>
+<<<MISSING line 2239>>>
+<<<MISSING line 2240>>>
+<<<MISSING line 2241>>>
+<<<MISSING line 2242>>>
+<<<MISSING line 2243>>>
+<<<MISSING line 2244>>>
+<<<MISSING line 2245>>>
+<<<MISSING line 2246>>>
+<<<MISSING line 2247>>>
+<<<MISSING line 2248>>>
+<<<MISSING line 2249>>>
+<<<MISSING line 2250>>>
+<<<MISSING line 2251>>>
+<<<MISSING line 2252>>>
+                       (when-let [mem (:memory b)] (.dense_parameters mem))))
+        memory-q-norm (fn [b]
+                        (when-let [mem (:memory b)]
+                          (.q_norm_parameters mem)))
+        gate-params (fn [b]
+                      ;; Exclude alpha_net, local_active_proj, local_active_bias
+                      ;; (all added later as SwitchGate attributes) from this
+                      ;; position so position-aligned ckpt-load doesn't shift.
+                      ;; They surface at the END of (parameters m) via the
+                      ;; corresponding "added later" collectors below.
+                      (->> (.named_parameters (:long-gate b))
+                           python/list
+                           (filter (fn [t]
+                                     (not (.__contains__
+                                            #{"alpha_net"
+                                              "local_active_proj"
+                                              "local_active_bias"}
+                                            (.__getitem__ t 0)))))
+                           (map (fn [t] (.__getitem__ t 1)))
+                           python/list))
+        netbank-params (fn [b]
+                         (when-let [nb (:netbank b)]
+                           (.dense_parameters nb)))
+        carry-params (fn [b]
+                       (when-let [c (:carry b)]
+                         (python/list (.parameters c))))
+        alpha-net-params (fn [b]
+                           ;; SwitchGate.alpha_net (per-block, optional).
+                           ;; nil/None when not enabled or not a SwitchGate.
+                           (let [g (:long-gate b)
+                                 a (python/getattr g "alpha_net" nil)]
+                             (when (and a (python/isinstance a nn/Parameter))
+                               [a])))
+        local-gate-params (fn [b]
+                            ;; SwitchGate.local_active_proj + local_active_bias
+                            ;; (per-block, optional — present when
+                            ;; MMLLM_GATE_NET_DEFAULT=true). Appended at the
+                            ;; very end so pre-Net-default ckpts load cleanly.
+                            (let [g  (:long-gate b)
+                                  lp (python/getattr g "local_active_proj" nil)
+     2. per-block CORE (norm1, norm2, q/k/s/v/l-projs, FFN, bank-query,
+        bank-feedback, memory's dense params)
+     3. norm-final
+     4. mtp-head (optional, at END so pre-MTP ckpts load cleanly)
+     5. per-block long-gate (at END for the same reason — SumGate→
+        SwitchGate transition would otherwise misalign)
+     6. per-block netbank dense (at END so a pre-NetBank ckpt loads
+        cleanly into a NetBank-enabled model)
+     7. importance-head (at END — added in router-smarts work)
+     8. per-block carry gate (at END — added in router-smarts work)"
+  [m]
+  (let [{:keys [tok-emb blocks norm-final mtp-head importance-head delim-head]} m
+        ;; CORE block params (K_a/K_b only from memory — q_norm goes at end)
+        core-params (fn [b]
+                      (concat
+                       (mapcat #(python/list (.parameters (get b %)))
+                               [:norm1 :norm2 :q-proj
+                                :k-proj-s :v-proj-s
+                                :k-proj-l :v-proj-l
+                                :o-proj :gate-proj :up-proj :down-proj
+                                :bank-query :bank-feedback])
+                       ;; memory's K_a, K_b only; q_norm at END below.
+                       ;; Skip when this block has no Local Bank attached
+                       ;; (asymmetric :local-bank-layers config).
+                       (when-let [mem (:memory b)] (.dense_parameters mem))))
+        memory-q-norm (fn [b]
+                        (when-let [mem (:memory b)]
+                          (.q_norm_parameters mem)))
+        gate-params (fn [b]
+                      ;; Exclude alpha_net, local_active_proj, local_active_bias
+                      ;; (all added later as SwitchGate attributes) from this
+                      ;; position so position-aligned ckpt-load doesn't shift.
+                      ;; They surface at the END of (parameters m) via the
+                      ;; corresponding "added later" collectors below.
+                      (->> (.named_parameters (:long-gate b))
+                           python/list
+                           (filter (fn [t]
+                                     (not (.__contains__
+                                            #{"alpha_net"
+                                              "local_active_proj"
+                                              "local_active_bias"}
+                                            (.__getitem__ t 0)))))
+                           (map (fn [t] (.__getitem__ t 1)))
+                           python/list))
+        netbank-params (fn [b]
+                         (when-let [nb (:netbank b)]
+                           (.dense_parameters nb)))
+        carry-params (fn [b]
+                       (when-let [c (:carry b)]
+                         (python/list (.parameters c))))
+        alpha-net-params (fn [b]
+                           ;; SwitchGate.alpha_net (per-block, optional).
+                           ;; nil/None when not enabled or not a SwitchGate.
+                           (let [g (:long-gate b)
+                                 a (python/getattr g "alpha_net" nil)]
+                             (when (and a (python/isinstance a nn/Parameter))
+                               [a])))
+        local-gate-params (fn [b]
+                            ;; SwitchGate.local_active_proj + local_active_bias
+                            ;; (per-block, optional — present when
+<<<MISSING line 2353>>>
+<<<MISSING line 2354>>>
+<<<MISSING line 2355>>>
+<<<MISSING line 2356>>>
+<<<MISSING line 2357>>>
+<<<MISSING line 2358>>>
+<<<MISSING line 2359>>>
+<<<MISSING line 2360>>>
+<<<MISSING line 2361>>>
+<<<MISSING line 2362>>>
+<<<MISSING line 2363>>>
+<<<MISSING line 2364>>>
+<<<MISSING line 2365>>>
+<<<MISSING line 2366>>>
+<<<MISSING line 2367>>>
+<<<MISSING line 2368>>>
+<<<MISSING line 2369>>>
+<<<MISSING line 2370>>>
+<<<MISSING line 2371>>>
+(defn netbank-sparse-parameters
+  "NetBank V.weight per block — route to opt-sparse-net (third
+   SparseAdam) with its own lr (pick-lr-net). Empty list when NetBank
+   is disabled, so the caller can skip optimizer construction without
+   special-casing.
+
+   When MMLLM_NETBANK_SHARED=true (spike-3), all blocks' nb.V point at
+   the same nn.Embedding. We dedupe by Python id so the optimizer
+   doesn't see duplicate Parameters — SparseAdam would apply the same
+   update once per duplicate, multiplying the effective LR by N and
+   driving V to NaN within a few steps. No-op in the default path."
+  [m]
+  (dedupe-by-py-id
+    (mapcat (fn [b] (when-let [nb (:netbank b)] (.sparse_parameters nb)))
+            (:blocks m))))
+
+(defn warm-start-netbanks-from-local!
+  "Per-block, copy Local Bank's K_a/K_b into the corresponding NetBank's
+   first `local.sqrt_n` rows. Bootstraps NetBank's retrieval geometry
+   from Local's so queries that score highly against Local also score
+   highly against the corresponding NetBank rows from step 0.
+
+   When MMLLM_NET_V_WARMSTART_FROM_LOCAL=true, also project Local's V
+   tensor through the NetBank expander's pseudo-inverse and copy into
+   NetBank's V[:n_copy]. Gives NetBank trained CONTENT at step 0, not
+   just trained addressing — addresses round-2's finding that Δ_net
+   stays at the noise floor because V starts random.
+
+   No-op when NetBank is disabled. Called by train-long when the resume
+   path detects a missing opt-sparse-net.pt (i.e. NetBank just turned on
+   for an existing dense-only run)."
+  [m]
+  (let [warm-V? (= "true" (.lower (.get (.- os environ)
+                                        "MMLLM_NET_V_WARMSTART_FROM_LOCAL"
+                                        "false")))]
+<<<MISSING line 2407>>>
+<<<MISSING line 2408>>>
+<<<MISSING line 2409>>>
+<<<MISSING line 2410>>>
+<<<MISSING line 2411>>>
+<<<MISSING line 2412>>>
+<<<MISSING line 2413>>>
+<<<MISSING line 2414>>>
+<<<MISSING line 2415>>>
+<<<MISSING line 2416>>>
+<<<MISSING line 2417>>>
+<<<MISSING line 2418>>>
+<<<MISSING line 2419>>>
+<<<MISSING line 2420>>>
+<<<MISSING line 2421>>>
+<<<MISSING line 2422>>>
+<<<MISSING line 2423>>>
+<<<MISSING line 2424>>>
+<<<MISSING line 2425>>>
+<<<MISSING line 2426>>>
+<<<MISSING line 2427>>>
+<<<MISSING line 2428>>>
+<<<MISSING line 2429>>>
+<<<MISSING line 2430>>>
+<<<MISSING line 2431>>>
+<<<MISSING line 2432>>>
+<<<MISSING line 2433>>>
+<<<MISSING line 2434>>>
+<<<MISSING line 2435>>>
+<<<MISSING line 2436>>>
+<<<MISSING line 2437>>>
+<<<MISSING line 2438>>>
+<<<MISSING line 2439>>>
+<<<MISSING line 2440>>>
+<<<MISSING line 2441>>>
+<<<MISSING line 2442>>>
+<<<MISSING line 2443>>>
+<<<MISSING line 2444>>>
+<<<MISSING line 2445>>>
+<<<MISSING line 2446>>>
+<<<MISSING line 2447>>>
+<<<MISSING line 2448>>>
+<<<MISSING line 2449>>>
+<<<MISSING line 2450>>>
+<<<MISSING line 2451>>>
+<<<MISSING line 2452>>>
+<<<MISSING line 2453>>>
+<<<MISSING line 2454>>>
+<<<MISSING line 2455>>>
+<<<MISSING line 2456>>>
+<<<MISSING line 2457>>>
+<<<MISSING line 2458>>>
+<<<MISSING line 2459>>>
+<<<MISSING line 2460>>>
+<<<MISSING line 2461>>>
+<<<MISSING line 2462>>>
+<<<MISSING line 2463>>>
+<<<MISSING line 2464>>>
+<<<MISSING line 2465>>>
+<<<MISSING line 2466>>>
+<<<MISSING line 2467>>>
+<<<MISSING line 2468>>>
+<<<MISSING line 2469>>>
+<<<MISSING line 2470>>>
+<<<MISSING line 2471>>>
+<<<MISSING line 2472>>>
+<<<MISSING line 2473>>>
+<<<MISSING line 2474>>>
+<<<MISSING line 2475>>>
+<<<MISSING line 2476>>>
+<<<MISSING line 2477>>>
+<<<MISSING line 2478>>>
+<<<MISSING line 2479>>>
+<<<MISSING line 2480>>>
+<<<MISSING line 2481>>>
+<<<MISSING line 2482>>>
+<<<MISSING line 2483>>>
+<<<MISSING line 2484>>>
+<<<MISSING line 2485>>>
+<<<MISSING line 2486>>>
+<<<MISSING line 2487>>>
+<<<MISSING line 2488>>>
+<<<MISSING line 2489>>>
+<<<MISSING line 2490>>>
+<<<MISSING line 2491>>>
+<<<MISSING line 2492>>>
+<<<MISSING line 2493>>>
+<<<MISSING line 2494>>>
+<<<MISSING line 2495>>>
+<<<MISSING line 2496>>>
+<<<MISSING line 2497>>>
+<<<MISSING line 2498>>>
+<<<MISSING line 2499>>>
+<<<MISSING line 2500>>>
+<<<MISSING line 2501>>>
+<<<MISSING line 2502>>>
+<<<MISSING line 2503>>>
+<<<MISSING line 2504>>>
+<<<MISSING line 2505>>>
+<<<MISSING line 2506>>>
+<<<MISSING line 2507>>>
+<<<MISSING line 2508>>>
+<<<MISSING line 2509>>>
+<<<MISSING line 2510>>>
+<<<MISSING line 2511>>>
+<<<MISSING line 2512>>>
+<<<MISSING line 2513>>>
+<<<MISSING line 2514>>>
+<<<MISSING line 2515>>>
+<<<MISSING line 2516>>>
+<<<MISSING line 2517>>>
+<<<MISSING line 2518>>>
+<<<MISSING line 2519>>>
+<<<MISSING line 2520>>>
+<<<MISSING line 2521>>>
+<<<MISSING line 2522>>>
+<<<MISSING line 2523>>>
+<<<MISSING line 2524>>>
+<<<MISSING line 2525>>>
+<<<MISSING line 2526>>>
+<<<MISSING line 2527>>>
+<<<MISSING line 2528>>>
+<<<MISSING line 2529>>>
+<<<MISSING line 2530>>>
+<<<MISSING line 2531>>>
+<<<MISSING line 2532>>>
+<<<MISSING line 2533>>>
+<<<MISSING line 2534>>>
+<<<MISSING line 2535>>>
+<<<MISSING line 2536>>>
+<<<MISSING line 2537>>>
+<<<MISSING line 2538>>>
+<<<MISSING line 2539>>>
+<<<MISSING line 2540>>>
+<<<MISSING line 2541>>>
+<<<MISSING line 2542>>>
+<<<MISSING line 2543>>>
+<<<MISSING line 2544>>>
+<<<MISSING line 2545>>>
+<<<MISSING line 2546>>>
+<<<MISSING line 2547>>>
+<<<MISSING line 2548>>>
+<<<MISSING line 2549>>>
+<<<MISSING line 2550>>>
+<<<MISSING line 2551>>>
+<<<MISSING line 2552>>>
+<<<MISSING line 2553>>>
+<<<MISSING line 2554>>>
+<<<MISSING line 2555>>>
+<<<MISSING line 2556>>>
+<<<MISSING line 2557>>>
+<<<MISSING line 2558>>>
+<<<MISSING line 2559>>>
+<<<MISSING line 2560>>>
+<<<MISSING line 2561>>>
+<<<MISSING line 2562>>>
+<<<MISSING line 2563>>>
+<<<MISSING line 2564>>>
+<<<MISSING line 2565>>>
+<<<MISSING line 2566>>>
+<<<MISSING line 2567>>>
+<<<MISSING line 2568>>>
+<<<MISSING line 2569>>>
+<<<MISSING line 2570>>>
+<<<MISSING line 2571>>>
+<<<MISSING line 2572>>>
+<<<MISSING line 2573>>>
+<<<MISSING line 2574>>>
+<<<MISSING line 2575>>>
+<<<MISSING line 2576>>>
+<<<MISSING line 2577>>>
+<<<MISSING line 2578>>>
+<<<MISSING line 2579>>>
+<<<MISSING line 2580>>>
+<<<MISSING line 2581>>>
+<<<MISSING line 2582>>>
+<<<MISSING line 2583>>>
+<<<MISSING line 2584>>>
+<<<MISSING line 2585>>>
+<<<MISSING line 2586>>>
+<<<MISSING line 2587>>>
+<<<MISSING line 2588>>>
+<<<MISSING line 2589>>>
+<<<MISSING line 2590>>>
+<<<MISSING line 2591>>>
+<<<MISSING line 2592>>>
+<<<MISSING line 2593>>>
+<<<MISSING line 2594>>>
+<<<MISSING line 2595>>>
+<<<MISSING line 2596>>>
+<<<MISSING line 2597>>>
+<<<MISSING line 2598>>>
+<<<MISSING line 2599>>>
+<<<MISSING line 2600>>>
+<<<MISSING line 2601>>>
+<<<MISSING line 2602>>>
+<<<MISSING line 2603>>>
+<<<MISSING line 2604>>>
+<<<MISSING line 2605>>>
+<<<MISSING line 2606>>>
+<<<MISSING line 2607>>>
+<<<MISSING line 2608>>>
+<<<MISSING line 2609>>>
+<<<MISSING line 2610>>>
+<<<MISSING line 2611>>>
+<<<MISSING line 2612>>>
+<<<MISSING line 2613>>>
+<<<MISSING line 2614>>>
+<<<MISSING line 2615>>>
+<<<MISSING line 2616>>>
+<<<MISSING line 2617>>>
+<<<MISSING line 2618>>>
+<<<MISSING line 2619>>>
+<<<MISSING line 2620>>>
+<<<MISSING line 2621>>>
+<<<MISSING line 2622>>>
+<<<MISSING line 2623>>>
+<<<MISSING line 2624>>>
+<<<MISSING line 2625>>>
+<<<MISSING line 2626>>>
+<<<MISSING line 2627>>>
+<<<MISSING line 2628>>>
+<<<MISSING line 2629>>>
+<<<MISSING line 2630>>>
+<<<MISSING line 2631>>>
+<<<MISSING line 2632>>>
+<<<MISSING line 2633>>>
+<<<MISSING line 2634>>>
+<<<MISSING line 2635>>>
+<<<MISSING line 2636>>>
+<<<MISSING line 2637>>>
+<<<MISSING line 2638>>>
+<<<MISSING line 2639>>>
+<<<MISSING line 2640>>>
+<<<MISSING line 2641>>>
+<<<MISSING line 2642>>>
+<<<MISSING line 2643>>>
+<<<MISSING line 2644>>>
+<<<MISSING line 2645>>>
+<<<MISSING line 2646>>>
+<<<MISSING line 2647>>>
+<<<MISSING line 2648>>>
+<<<MISSING line 2649>>>
+<<<MISSING line 2650>>>
+<<<MISSING line 2651>>>
+<<<MISSING line 2652>>>
+<<<MISSING line 2653>>>
+<<<MISSING line 2654>>>
+<<<MISSING line 2655>>>
+<<<MISSING line 2656>>>
+<<<MISSING line 2657>>>
+<<<MISSING line 2658>>>
+<<<MISSING line 2659>>>
+<<<MISSING line 2660>>>
+<<<MISSING line 2661>>>
+<<<MISSING line 2662>>>
+<<<MISSING line 2663>>>
+<<<MISSING line 2664>>>
+<<<MISSING line 2665>>>
+<<<MISSING line 2666>>>
+<<<MISSING line 2667>>>
+<<<MISSING line 2668>>>
+<<<MISSING line 2669>>>
+<<<MISSING line 2670>>>
+<<<MISSING line 2671>>>
+<<<MISSING line 2672>>>
+<<<MISSING line 2673>>>
+<<<MISSING line 2674>>>
+<<<MISSING line 2675>>>
+<<<MISSING line 2676>>>
+<<<MISSING line 2677>>>
+<<<MISSING line 2678>>>
+<<<MISSING line 2679>>>
+<<<MISSING line 2680>>>
+<<<MISSING line 2681>>>
+<<<MISSING line 2682>>>
+<<<MISSING line 2683>>>
+<<<MISSING line 2684>>>
+<<<MISSING line 2685>>>
+<<<MISSING line 2686>>>
+<<<MISSING line 2687>>>
+<<<MISSING line 2688>>>
+<<<MISSING line 2689>>>
+<<<MISSING line 2690>>>
+<<<MISSING line 2691>>>
+<<<MISSING line 2692>>>
+<<<MISSING line 2693>>>
+<<<MISSING line 2694>>>
+<<<MISSING line 2695>>>
+<<<MISSING line 2696>>>
+<<<MISSING line 2697>>>
+<<<MISSING line 2698>>>
+<<<MISSING line 2699>>>
+<<<MISSING line 2700>>>
+<<<MISSING line 2701>>>
+<<<MISSING line 2702>>>
+<<<MISSING line 2703>>>
+<<<MISSING line 2704>>>
+<<<MISSING line 2705>>>
+<<<MISSING line 2706>>>
+<<<MISSING line 2707>>>
+<<<MISSING line 2708>>>
+<<<MISSING line 2709>>>
+<<<MISSING line 2710>>>
+<<<MISSING line 2711>>>
+<<<MISSING line 2712>>>
+<<<MISSING line 2713>>>
+<<<MISSING line 2714>>>
+<<<MISSING line 2715>>>
+<<<MISSING line 2716>>>
+<<<MISSING line 2717>>>
+<<<MISSING line 2718>>>
+<<<MISSING line 2719>>>
+<<<MISSING line 2720>>>
+<<<MISSING line 2721>>>
+<<<MISSING line 2722>>>
+<<<MISSING line 2723>>>
+<<<MISSING line 2724>>>
+<<<MISSING line 2725>>>
+<<<MISSING line 2726>>>
+<<<MISSING line 2727>>>
+<<<MISSING line 2728>>>
+<<<MISSING line 2729>>>
+<<<MISSING line 2730>>>
+<<<MISSING line 2731>>>
+<<<MISSING line 2732>>>
+<<<MISSING line 2733>>>
+<<<MISSING line 2734>>>
+<<<MISSING line 2735>>>
+<<<MISSING line 2736>>>
+<<<MISSING line 2737>>>
+<<<MISSING line 2738>>>
+<<<MISSING line 2739>>>
+<<<MISSING line 2740>>>
+<<<MISSING line 2741>>>
+<<<MISSING line 2742>>>
+<<<MISSING line 2743>>>
+<<<MISSING line 2744>>>
+<<<MISSING line 2745>>>
+<<<MISSING line 2746>>>
+<<<MISSING line 2747>>>
+<<<MISSING line 2748>>>
+<<<MISSING line 2749>>>
+<<<MISSING line 2750>>>
+<<<MISSING line 2751>>>
+<<<MISSING line 2752>>>
+<<<MISSING line 2753>>>
+<<<MISSING line 2754>>>
+<<<MISSING line 2755>>>
+<<<MISSING line 2756>>>
+<<<MISSING line 2757>>>
+<<<MISSING line 2758>>>
+<<<MISSING line 2759>>>
+<<<MISSING line 2760>>>
+<<<MISSING line 2761>>>
+<<<MISSING line 2762>>>
+<<<MISSING line 2763>>>
+<<<MISSING line 2764>>>
+<<<MISSING line 2765>>>
+<<<MISSING line 2766>>>
+<<<MISSING line 2767>>>
+<<<MISSING line 2768>>>
+<<<MISSING line 2769>>>
+<<<MISSING line 2770>>>
+<<<MISSING line 2771>>>
+<<<MISSING line 2772>>>
+<<<MISSING line 2773>>>
+<<<MISSING line 2774>>>
+<<<MISSING line 2775>>>
+<<<MISSING line 2776>>>
+<<<MISSING line 2777>>>
+<<<MISSING line 2778>>>
+<<<MISSING line 2779>>>
+<<<MISSING line 2780>>>
+<<<MISSING line 2781>>>
+<<<MISSING line 2782>>>
+<<<MISSING line 2783>>>
+<<<MISSING line 2784>>>
+<<<MISSING line 2785>>>
+<<<MISSING line 2786>>>
+<<<MISSING line 2787>>>
+<<<MISSING line 2788>>>
+<<<MISSING line 2789>>>
+<<<MISSING line 2790>>>
+<<<MISSING line 2791>>>
+<<<MISSING line 2792>>>
+<<<MISSING line 2793>>>
+<<<MISSING line 2794>>>
+<<<MISSING line 2795>>>
+<<<MISSING line 2796>>>
+<<<MISSING line 2797>>>
+<<<MISSING line 2798>>>
+<<<MISSING line 2799>>>
+<<<MISSING line 2800>>>
+<<<MISSING line 2801>>>
+<<<MISSING line 2802>>>
+<<<MISSING line 2803>>>
+<<<MISSING line 2804>>>
+<<<MISSING line 2805>>>
+<<<MISSING line 2806>>>
+<<<MISSING line 2807>>>
+<<<MISSING line 2808>>>
+<<<MISSING line 2809>>>
+<<<MISSING line 2810>>>
+<<<MISSING line 2811>>>
+<<<MISSING line 2812>>>
+<<<MISSING line 2813>>>
+<<<MISSING line 2814>>>
+<<<MISSING line 2815>>>
+<<<MISSING line 2816>>>
+<<<MISSING line 2817>>>
+<<<MISSING line 2818>>>
+<<<MISSING line 2819>>>
+<<<MISSING line 2820>>>
+<<<MISSING line 2821>>>
+<<<MISSING line 2822>>>
+<<<MISSING line 2823>>>
+<<<MISSING line 2824>>>
+<<<MISSING line 2825>>>
+<<<MISSING line 2826>>>
+<<<MISSING line 2827>>>
+<<<MISSING line 2828>>>
+<<<MISSING line 2829>>>
+<<<MISSING line 2830>>>
+<<<MISSING line 2831>>>
+<<<MISSING line 2832>>>
+<<<MISSING line 2833>>>
+<<<MISSING line 2834>>>
+<<<MISSING line 2835>>>
+<<<MISSING line 2836>>>
+<<<MISSING line 2837>>>
+<<<MISSING line 2838>>>
+<<<MISSING line 2839>>>
+<<<MISSING line 2840>>>
+<<<MISSING line 2841>>>
+<<<MISSING line 2842>>>
+<<<MISSING line 2843>>>
+<<<MISSING line 2844>>>
+<<<MISSING line 2845>>>
+<<<MISSING line 2846>>>
+<<<MISSING line 2847>>>
+<<<MISSING line 2848>>>
+<<<MISSING line 2849>>>
+<<<MISSING line 2850>>>
+<<<MISSING line 2851>>>
+<<<MISSING line 2852>>>
+<<<MISSING line 2853>>>
+<<<MISSING line 2854>>>
+<<<MISSING line 2855>>>
+<<<MISSING line 2856>>>
+<<<MISSING line 2857>>>
+<<<MISSING line 2858>>>
+<<<MISSING line 2859>>>
+<<<MISSING line 2860>>>
+<<<MISSING line 2861>>>
+<<<MISSING line 2862>>>
+<<<MISSING line 2863>>>
+<<<MISSING line 2864>>>
+<<<MISSING line 2865>>>
+<<<MISSING line 2866>>>
+<<<MISSING line 2867>>>
+<<<MISSING line 2868>>>
+<<<MISSING line 2869>>>
+<<<MISSING line 2870>>>
+<<<MISSING line 2871>>>
+<<<MISSING line 2872>>>
+<<<MISSING line 2873>>>
+<<<MISSING line 2874>>>
+<<<MISSING line 2875>>>
+<<<MISSING line 2876>>>
+<<<MISSING line 2877>>>
+<<<MISSING line 2878>>>
+<<<MISSING line 2879>>>
+<<<MISSING line 2880>>>
+<<<MISSING line 2881>>>
+<<<MISSING line 2882>>>
+<<<MISSING line 2883>>>
+<<<MISSING line 2884>>>
+<<<MISSING line 2885>>>
+<<<MISSING line 2886>>>
+<<<MISSING line 2887>>>
+<<<MISSING line 2888>>>
+<<<MISSING line 2889>>>
+<<<MISSING line 2890>>>
+<<<MISSING line 2891>>>
+<<<MISSING line 2892>>>
+<<<MISSING line 2893>>>
+<<<MISSING line 2894>>>
+<<<MISSING line 2895>>>
+<<<MISSING line 2896>>>
+<<<MISSING line 2897>>>
+<<<MISSING line 2898>>>
+<<<MISSING line 2899>>>
+<<<MISSING line 2900>>>
+<<<MISSING line 2901>>>
+<<<MISSING line 2902>>>
+<<<MISSING line 2903>>>
+<<<MISSING line 2904>>>
+<<<MISSING line 2905>>>
+<<<MISSING line 2906>>>
+<<<MISSING line 2907>>>
+<<<MISSING line 2908>>>
+<<<MISSING line 2909>>>
+<<<MISSING line 2910>>>
+<<<MISSING line 2911>>>
+<<<MISSING line 2912>>>
+<<<MISSING line 2913>>>
+<<<MISSING line 2914>>>
+<<<MISSING line 2915>>>
+<<<MISSING line 2916>>>
+<<<MISSING line 2917>>>
+<<<MISSING line 2918>>>
+<<<MISSING line 2919>>>
+<<<MISSING line 2920>>>
+<<<MISSING line 2921>>>
+<<<MISSING line 2922>>>
+<<<MISSING line 2923>>>
+<<<MISSING line 2924>>>
+<<<MISSING line 2925>>>
+<<<MISSING line 2926>>>
+<<<MISSING line 2927>>>
+(defn- set-train-mode! [m]
+  "Inverse of set-eval-mode!. Call before every train step so the
+   model's training-mode flags get restored after any intermediate
+   eval-bpc / ablation / sample call. Without this, Local Bank's
+   `if self.training:` guards (slot tracking, z-loss accumulator)
+   silently disable themselves after the first eval and the bank
+   trains with no regularizer + zero diagnostics."
+  (.train (:tok-emb m))
+  (.train (:norm-final m))
+  (doseq [b (:blocks m)]
+    (doseq [k [:norm1 :norm2 :q-proj
+<<<MISSING line 2939>>>
+<<<MISSING line 2940>>>
+<<<MISSING line 2941>>>
+<<<MISSING line 2942>>>
+<<<MISSING line 2943>>>
+<<<MISSING line 2944>>>
+<<<MISSING line 2945>>>
+<<<MISSING line 2946>>>
+<<<MISSING line 2947>>>
+<<<MISSING line 2948>>>
+<<<MISSING line 2949>>>
+<<<MISSING line 2950>>>
+<<<MISSING line 2951>>>
+<<<MISSING line 2952>>>
+<<<MISSING line 2953>>>
+<<<MISSING line 2954>>>
+<<<MISSING line 2955>>>
+<<<MISSING line 2956>>>
+<<<MISSING line 2957>>>
+<<<MISSING line 2958>>>
+<<<MISSING line 2959>>>
+<<<MISSING line 2960>>>
+<<<MISSING line 2961>>>
+<<<MISSING line 2962>>>
+<<<MISSING line 2963>>>
+<<<MISSING line 2964>>>
+<<<MISSING line 2965>>>
+<<<MISSING line 2966>>>
+<<<MISSING line 2967>>>
+<<<MISSING line 2968>>>
+<<<MISSING line 2969>>>
+<<<MISSING line 2970>>>
+<<<MISSING line 2971>>>
+<<<MISSING line 2972>>>
+<<<MISSING line 2973>>>
+<<<MISSING line 2974>>>
+<<<MISSING line 2975>>>
+<<<MISSING line 2976>>>
+<<<MISSING line 2977>>>
+<<<MISSING line 2978>>>
+<<<MISSING line 2979>>>
+<<<MISSING line 2980>>>
+<<<MISSING line 2981>>>
+<<<MISSING line 2982>>>
+<<<MISSING line 2983>>>
+<<<MISSING line 2984>>>
+<<<MISSING line 2985>>>
+<<<MISSING line 2986>>>
+<<<MISSING line 2987>>>
+<<<MISSING line 2988>>>
+<<<MISSING line 2989>>>
+<<<MISSING line 2990>>>
+<<<MISSING line 2991>>>
+<<<MISSING line 2992>>>
+<<<MISSING line 2993>>>
+<<<MISSING line 2994>>>
+<<<MISSING line 2995>>>
+<<<MISSING line 2996>>>
+<<<MISSING line 2997>>>
+<<<MISSING line 2998>>>
+<<<MISSING line 2999>>>
+<<<MISSING line 3000>>>
+<<<MISSING line 3001>>>
+<<<MISSING line 3002>>>
+<<<MISSING line 3003>>>
+<<<MISSING line 3004>>>
+<<<MISSING line 3005>>>
+<<<MISSING line 3006>>>
+<<<MISSING line 3007>>>
+<<<MISSING line 3008>>>
+<<<MISSING line 3009>>>
+<<<MISSING line 3010>>>
+<<<MISSING line 3011>>>
+<<<MISSING line 3012>>>
+<<<MISSING line 3013>>>
+<<<MISSING line 3014>>>
+<<<MISSING line 3015>>>
+<<<MISSING line 3016>>>
+<<<MISSING line 3017>>>
+<<<MISSING line 3018>>>
+<<<MISSING line 3019>>>
+<<<MISSING line 3020>>>
+<<<MISSING line 3021>>>
+<<<MISSING line 3022>>>
+<<<MISSING line 3023>>>
+<<<MISSING line 3024>>>
+<<<MISSING line 3025>>>
+<<<MISSING line 3026>>>
+<<<MISSING line 3027>>>
+<<<MISSING line 3028>>>
+<<<MISSING line 3029>>>
+<<<MISSING line 3030>>>
+<<<MISSING line 3031>>>
+<<<MISSING line 3032>>>
+<<<MISSING line 3033>>>
+<<<MISSING line 3034>>>
+<<<MISSING line 3035>>>
+<<<MISSING line 3036>>>
+<<<MISSING line 3037>>>
+<<<MISSING line 3038>>>
+<<<MISSING line 3039>>>
+<<<MISSING line 3040>>>
+<<<MISSING line 3041>>>
+<<<MISSING line 3042>>>
+<<<MISSING line 3043>>>
+<<<MISSING line 3044>>>
+<<<MISSING line 3045>>>
+<<<MISSING line 3046>>>
+<<<MISSING line 3047>>>
+<<<MISSING line 3048>>>
+<<<MISSING line 3049>>>
+<<<MISSING line 3050>>>
+<<<MISSING line 3051>>>
+<<<MISSING line 3052>>>
+<<<MISSING line 3053>>>
+<<<MISSING line 3054>>>
+<<<MISSING line 3055>>>
+<<<MISSING line 3056>>>
+<<<MISSING line 3057>>>
+<<<MISSING line 3058>>>
+<<<MISSING line 3059>>>
+<<<MISSING line 3060>>>
+<<<MISSING line 3061>>>
+<<<MISSING line 3062>>>
+<<<MISSING line 3063>>>
+<<<MISSING line 3064>>>
+<<<MISSING line 3065>>>
+<<<MISSING line 3066>>>
+<<<MISSING line 3067>>>
+<<<MISSING line 3068>>>
+<<<MISSING line 3069>>>
+<<<MISSING line 3070>>>
+<<<MISSING line 3071>>>
+<<<MISSING line 3072>>>
+<<<MISSING line 3073>>>
+<<<MISSING line 3074>>>
+<<<MISSING line 3075>>>
+<<<MISSING line 3076>>>
+<<<MISSING line 3077>>>
+<<<MISSING line 3078>>>
+<<<MISSING line 3079>>>
+<<<MISSING line 3080>>>
+<<<MISSING line 3081>>>
+<<<MISSING line 3082>>>
+<<<MISSING line 3083>>>
+<<<MISSING line 3084>>>
+<<<MISSING line 3085>>>
+<<<MISSING line 3086>>>
+<<<MISSING line 3087>>>
+<<<MISSING line 3088>>>
+<<<MISSING line 3089>>>
+<<<MISSING line 3090>>>
+<<<MISSING line 3091>>>
+<<<MISSING line 3092>>>
+<<<MISSING line 3093>>>
+<<<MISSING line 3094>>>
+<<<MISSING line 3095>>>
+<<<MISSING line 3096>>>
+<<<MISSING line 3097>>>
+<<<MISSING line 3098>>>
+<<<MISSING line 3099>>>
+<<<MISSING line 3100>>>
+<<<MISSING line 3101>>>
+<<<MISSING line 3102>>>
+<<<MISSING line 3103>>>
+<<<MISSING line 3104>>>
+<<<MISSING line 3105>>>
+<<<MISSING line 3106>>>
+<<<MISSING line 3107>>>
+<<<MISSING line 3108>>>
+<<<MISSING line 3109>>>
+<<<MISSING line 3110>>>
+<<<MISSING line 3111>>>
+<<<MISSING line 3112>>>
+<<<MISSING line 3113>>>
+<<<MISSING line 3114>>>
+<<<MISSING line 3115>>>
+<<<MISSING line 3116>>>
+<<<MISSING line 3117>>>
+<<<MISSING line 3118>>>
+<<<MISSING line 3119>>>
+<<<MISSING line 3120>>>
+<<<MISSING line 3121>>>
+<<<MISSING line 3122>>>
+<<<MISSING line 3123>>>
+<<<MISSING line 3124>>>
+<<<MISSING line 3125>>>
+<<<MISSING line 3126>>>
+<<<MISSING line 3127>>>
+<<<MISSING line 3128>>>
+<<<MISSING line 3129>>>
+<<<MISSING line 3130>>>
+<<<MISSING line 3131>>>
+<<<MISSING line 3132>>>
+<<<MISSING line 3133>>>
+<<<MISSING line 3134>>>
+<<<MISSING line 3135>>>
+<<<MISSING line 3136>>>
+<<<MISSING line 3137>>>
+<<<MISSING line 3138>>>
+<<<MISSING line 3139>>>
+<<<MISSING line 3140>>>
+<<<MISSING line 3141>>>
+<<<MISSING line 3142>>>
+<<<MISSING line 3143>>>
+<<<MISSING line 3144>>>
+<<<MISSING line 3145>>>
+<<<MISSING line 3146>>>
+<<<MISSING line 3147>>>
+<<<MISSING line 3148>>>
+<<<MISSING line 3149>>>
+<<<MISSING line 3150>>>
+<<<MISSING line 3151>>>
+<<<MISSING line 3152>>>
+<<<MISSING line 3153>>>
+<<<MISSING line 3154>>>
+<<<MISSING line 3155>>>
+<<<MISSING line 3156>>>
+<<<MISSING line 3157>>>
+<<<MISSING line 3158>>>
+<<<MISSING line 3159>>>
+<<<MISSING line 3160>>>
+<<<MISSING line 3161>>>
+<<<MISSING line 3162>>>
+<<<MISSING line 3163>>>
+<<<MISSING line 3164>>>
+<<<MISSING line 3165>>>
+<<<MISSING line 3166>>>
+<<<MISSING line 3167>>>
+<<<MISSING line 3168>>>
+<<<MISSING line 3169>>>
+<<<MISSING line 3170>>>
+<<<MISSING line 3171>>>
+<<<MISSING line 3172>>>
+<<<MISSING line 3173>>>
+<<<MISSING line 3174>>>
+<<<MISSING line 3175>>>
+<<<MISSING line 3176>>>
+<<<MISSING line 3177>>>
+<<<MISSING line 3178>>>
+<<<MISSING line 3179>>>
+<<<MISSING line 3180>>>
+<<<MISSING line 3181>>>
+<<<MISSING line 3182>>>
+<<<MISSING line 3183>>>
+<<<MISSING line 3184>>>
+<<<MISSING line 3185>>>
+<<<MISSING line 3186>>>
+<<<MISSING line 3187>>>
+<<<MISSING line 3188>>>
+<<<MISSING line 3189>>>
+<<<MISSING line 3190>>>
+<<<MISSING line 3191>>>
+<<<MISSING line 3192>>>
+<<<MISSING line 3193>>>
+<<<MISSING line 3194>>>
+<<<MISSING line 3195>>>
+<<<MISSING line 3196>>>
+<<<MISSING line 3197>>>
+<<<MISSING line 3198>>>
+<<<MISSING line 3199>>>
+<<<MISSING line 3200>>>
+<<<MISSING line 3201>>>
+<<<MISSING line 3202>>>
+<<<MISSING line 3203>>>
+<<<MISSING line 3204>>>
+<<<MISSING line 3205>>>
+<<<MISSING line 3206>>>
+<<<MISSING line 3207>>>
+<<<MISSING line 3208>>>
+<<<MISSING line 3209>>>
+<<<MISSING line 3210>>>
+<<<MISSING line 3211>>>
+<<<MISSING line 3212>>>
+<<<MISSING line 3213>>>
+<<<MISSING line 3214>>>
+<<<MISSING line 3215>>>
+<<<MISSING line 3216>>>
+<<<MISSING line 3217>>>
+<<<MISSING line 3218>>>
+<<<MISSING line 3219>>>
+<<<MISSING line 3220>>>
+<<<MISSING line 3221>>>
+<<<MISSING line 3222>>>
+<<<MISSING line 3223>>>
+<<<MISSING line 3224>>>
+<<<MISSING line 3225>>>
+<<<MISSING line 3226>>>
+<<<MISSING line 3227>>>
+<<<MISSING line 3228>>>
+<<<MISSING line 3229>>>
+<<<MISSING line 3230>>>
+<<<MISSING line 3231>>>
+<<<MISSING line 3232>>>
+<<<MISSING line 3233>>>
+<<<MISSING line 3234>>>
+<<<MISSING line 3235>>>
+<<<MISSING line 3236>>>
+<<<MISSING line 3237>>>
+<<<MISSING line 3238>>>
+<<<MISSING line 3239>>>
+<<<MISSING line 3240>>>
+<<<MISSING line 3241>>>
+<<<MISSING line 3242>>>
+<<<MISSING line 3243>>>
+<<<MISSING line 3244>>>
+<<<MISSING line 3245>>>
+<<<MISSING line 3246>>>
+<<<MISSING line 3247>>>
+<<<MISSING line 3248>>>
+<<<MISSING line 3249>>>
+<<<MISSING line 3250>>>
+<<<MISSING line 3251>>>
+<<<MISSING line 3252>>>
+<<<MISSING line 3253>>>
+<<<MISSING line 3254>>>
+<<<MISSING line 3255>>>
+<<<MISSING line 3256>>>
+<<<MISSING line 3257>>>
+<<<MISSING line 3258>>>
+<<<MISSING line 3259>>>
+<<<MISSING line 3260>>>
+<<<MISSING line 3261>>>
+<<<MISSING line 3262>>>
+<<<MISSING line 3263>>>
+<<<MISSING line 3264>>>
+<<<MISSING line 3265>>>
+<<<MISSING line 3266>>>
+<<<MISSING line 3267>>>
+<<<MISSING line 3268>>>
+<<<MISSING line 3269>>>
+<<<MISSING line 3270>>>
+<<<MISSING line 3271>>>
+<<<MISSING line 3272>>>
+<<<MISSING line 3273>>>
+<<<MISSING line 3274>>>
+<<<MISSING line 3275>>>
+<<<MISSING line 3276>>>
+<<<MISSING line 3277>>>
+<<<MISSING line 3278>>>
+<<<MISSING line 3279>>>
+<<<MISSING line 3280>>>
+<<<MISSING line 3281>>>
+<<<MISSING line 3282>>>
+<<<MISSING line 3283>>>
+<<<MISSING line 3284>>>
+<<<MISSING line 3285>>>
+<<<MISSING line 3286>>>
+<<<MISSING line 3287>>>
+<<<MISSING line 3288>>>
+<<<MISSING line 3289>>>
+<<<MISSING line 3290>>>
+<<<MISSING line 3291>>>
+<<<MISSING line 3292>>>
+<<<MISSING line 3293>>>
+<<<MISSING line 3294>>>
+<<<MISSING line 3295>>>
+<<<MISSING line 3296>>>
+<<<MISSING line 3297>>>
+<<<MISSING line 3298>>>
+<<<MISSING line 3299>>>
+<<<MISSING line 3300>>>
+<<<MISSING line 3301>>>
+<<<MISSING line 3302>>>
+<<<MISSING line 3303>>>
+<<<MISSING line 3304>>>
+<<<MISSING line 3305>>>
+<<<MISSING line 3306>>>
+<<<MISSING line 3307>>>
+<<<MISSING line 3308>>>
+<<<MISSING line 3309>>>
+<<<MISSING line 3310>>>
+<<<MISSING line 3311>>>
+<<<MISSING line 3312>>>
+<<<MISSING line 3313>>>
+<<<MISSING line 3314>>>
+<<<MISSING line 3315>>>
+<<<MISSING line 3316>>>
+<<<MISSING line 3317>>>
+<<<MISSING line 3318>>>
+<<<MISSING line 3319>>>
+<<<MISSING line 3320>>>
+<<<MISSING line 3321>>>
+<<<MISSING line 3322>>>
+<<<MISSING line 3323>>>
+<<<MISSING line 3324>>>
+<<<MISSING line 3325>>>
+<<<MISSING line 3326>>>
+<<<MISSING line 3327>>>
+<<<MISSING line 3328>>>
+<<<MISSING line 3329>>>
+<<<MISSING line 3330>>>
+<<<MISSING line 3331>>>
+<<<MISSING line 3332>>>
+<<<MISSING line 3333>>>
+<<<MISSING line 3334>>>
+<<<MISSING line 3335>>>
+<<<MISSING line 3336>>>
+<<<MISSING line 3337>>>
+<<<MISSING line 3338>>>
+<<<MISSING line 3339>>>
+<<<MISSING line 3340>>>
+<<<MISSING line 3341>>>
+<<<MISSING line 3342>>>
+<<<MISSING line 3343>>>
+<<<MISSING line 3344>>>
+<<<MISSING line 3345>>>
+<<<MISSING line 3346>>>
+<<<MISSING line 3347>>>
+<<<MISSING line 3348>>>
+<<<MISSING line 3349>>>
+<<<MISSING line 3350>>>
+<<<MISSING line 3351>>>
+<<<MISSING line 3352>>>
+<<<MISSING line 3353>>>
+<<<MISSING line 3354>>>
+<<<MISSING line 3355>>>
+<<<MISSING line 3356>>>
+<<<MISSING line 3357>>>
+<<<MISSING line 3358>>>
+<<<MISSING line 3359>>>
+<<<MISSING line 3360>>>
+<<<MISSING line 3361>>>
+<<<MISSING line 3362>>>
+<<<MISSING line 3363>>>
+<<<MISSING line 3364>>>
+<<<MISSING line 3365>>>
+<<<MISSING line 3366>>>
+<<<MISSING line 3367>>>
+<<<MISSING line 3368>>>
+<<<MISSING line 3369>>>
+<<<MISSING line 3370>>>
+<<<MISSING line 3371>>>
+<<<MISSING line 3372>>>
+<<<MISSING line 3373>>>
+<<<MISSING line 3374>>>
+<<<MISSING line 3375>>>
+<<<MISSING line 3376>>>
+<<<MISSING line 3377>>>
+<<<MISSING line 3378>>>
+<<<MISSING line 3379>>>
+<<<MISSING line 3380>>>
+<<<MISSING line 3381>>>
+<<<MISSING line 3382>>>
+<<<MISSING line 3383>>>
+<<<MISSING line 3384>>>
+<<<MISSING line 3385>>>
+<<<MISSING line 3386>>>
+<<<MISSING line 3387>>>
+<<<MISSING line 3388>>>
+<<<MISSING line 3389>>>
+<<<MISSING line 3390>>>
+<<<MISSING line 3391>>>
+<<<MISSING line 3392>>>
+<<<MISSING line 3393>>>
+<<<MISSING line 3394>>>
+<<<MISSING line 3395>>>
+<<<MISSING line 3396>>>
+<<<MISSING line 3397>>>
+<<<MISSING line 3398>>>
+<<<MISSING line 3399>>>
+<<<MISSING line 3400>>>
+(defn mix-batch
+  "One (x y) batch drawn from the weighted mix. Picks ONE corpus per
+   batch (chunky mixing — proportions hold across many batches).
+
+   `mix-tensors`: list of 1-D byte tensors (mmap'd).
+   `mix-weights-t`: 1-D fp32 tensor of weights, same length as
+   mix-tensors. Pre-built once at train-long startup so the hot
+   loop only does the multinomial draw.
+
+   Returns [x y idx] — `idx` is the corpus index this batch came from,
+   used by the trainer to attribute loss back to a specific corpus
+   (rolling per-corpus loss window in step prints)."
+  [mix-tensors mix-weights-t B T]
+  (let [idx     (.item (torch/multinomial mix-weights-t 1))
+        ten     (nth mix-tensors idx)
+        [x y]   (batch ten B T)]
+    [x y idx]))
+
+(defn mix-batch-multi-trunk
+  "Multi-trunk variant of `mix-batch`. Picks ONE corpus per batch
+   (preserves chunky-mix semantics + per-corpus loss attribution), then
+   content-shards that corpus into N contiguous byte ranges and samples
+   B-per-trunk windows from each.
+
+   Returns [x y idx trunk-ids] where:
+     x, y       : (N * B-per-trunk, T)
+     idx        : single corpus index for the whole batch
+     trunk-ids  : (N * B-per-trunk,) long, with value = trunk row owner.
+
+   The compound semantic: each step's batch contains rows from one corpus
+   (so per-corpus loss tracking still works) AND the N trunks specialize
+   on disjoint slices of that corpus (so hill-climbing diversity is
+   preserved). Across many batches, each trunk sees the full mix weighted
+   the same way as the single-trunk path."
+  [mix-tensors mix-weights-t n-trunks B-per-trunk T]
+  (let [idx           (.item (torch/multinomial mix-weights-t 1))
+        ten           (nth mix-tensors idx)
+        [x y tids]    (batch-multi-trunk ten n-trunks B-per-trunk T)]
+    [x y idx tids]))
+
+;;; ─────────────────────── train on a real corpus ───────────────────────
+
+(defn train-corpus
+  "Train on a binary corpus file. The file is byte tokens (each
+   octet is one token in our 256-vocab byte tokenizer). Random
+<<<MISSING line 3446>>>
+<<<MISSING line 3447>>>
+<<<MISSING line 3448>>>
+<<<MISSING line 3449>>>
+<<<MISSING line 3450>>>
+<<<MISSING line 3451>>>
+<<<MISSING line 3452>>>
+<<<MISSING line 3453>>>
+<<<MISSING line 3454>>>
+<<<MISSING line 3455>>>
+<<<MISSING line 3456>>>
+<<<MISSING line 3457>>>
+<<<MISSING line 3458>>>
+<<<MISSING line 3459>>>
+<<<MISSING line 3460>>>
+<<<MISSING line 3461>>>
+<<<MISSING line 3462>>>
+<<<MISSING line 3463>>>
+<<<MISSING line 3464>>>
+<<<MISSING line 3465>>>
+<<<MISSING line 3466>>>
+<<<MISSING line 3467>>>
+<<<MISSING line 3468>>>
+<<<MISSING line 3469>>>
+<<<MISSING line 3470>>>
+<<<MISSING line 3471>>>
+<<<MISSING line 3472>>>
+<<<MISSING line 3473>>>
+<<<MISSING line 3474>>>
+<<<MISSING line 3475>>>
+<<<MISSING line 3476>>>
+<<<MISSING line 3477>>>
+<<<MISSING line 3478>>>
+<<<MISSING line 3479>>>
+<<<MISSING line 3480>>>
+<<<MISSING line 3481>>>
+<<<MISSING line 3482>>>
+<<<MISSING line 3483>>>
+<<<MISSING line 3484>>>
+<<<MISSING line 3485>>>
+<<<MISSING line 3486>>>
+<<<MISSING line 3487>>>
+<<<MISSING line 3488>>>
+<<<MISSING line 3489>>>
+<<<MISSING line 3490>>>
+<<<MISSING line 3491>>>
+<<<MISSING line 3492>>>
+<<<MISSING line 3493>>>
+<<<MISSING line 3494>>>
+<<<MISSING line 3495>>>
+<<<MISSING line 3496>>>
+<<<MISSING line 3497>>>
+<<<MISSING line 3498>>>
+<<<MISSING line 3499>>>
+<<<MISSING line 3500>>>
+<<<MISSING line 3501>>>
+<<<MISSING line 3502>>>
+<<<MISSING line 3503>>>
+<<<MISSING line 3504>>>
+<<<MISSING line 3505>>>
+<<<MISSING line 3506>>>
+<<<MISSING line 3507>>>
+<<<MISSING line 3508>>>
+<<<MISSING line 3509>>>
+<<<MISSING line 3510>>>
+<<<MISSING line 3511>>>
+<<<MISSING line 3512>>>
+<<<MISSING line 3513>>>
+<<<MISSING line 3514>>>
+<<<MISSING line 3515>>>
+<<<MISSING line 3516>>>
+<<<MISSING line 3517>>>
+<<<MISSING line 3518>>>
+<<<MISSING line 3519>>>
+<<<MISSING line 3520>>>
+<<<MISSING line 3521>>>
+<<<MISSING line 3522>>>
+<<<MISSING line 3523>>>
+<<<MISSING line 3524>>>
+<<<MISSING line 3525>>>
+<<<MISSING line 3526>>>
+<<<MISSING line 3527>>>
+<<<MISSING line 3528>>>
+<<<MISSING line 3529>>>
+<<<MISSING line 3530>>>
+<<<MISSING line 3531>>>
+<<<MISSING line 3532>>>
+<<<MISSING line 3533>>>
+<<<MISSING line 3534>>>
+<<<MISSING line 3535>>>
+<<<MISSING line 3536>>>
+<<<MISSING line 3537>>>
+<<<MISSING line 3538>>>
+<<<MISSING line 3539>>>
+<<<MISSING line 3540>>>
+<<<MISSING line 3541>>>
+<<<MISSING line 3542>>>
+<<<MISSING line 3543>>>
+<<<MISSING line 3544>>>
+<<<MISSING line 3545>>>
+<<<MISSING line 3546>>>
+<<<MISSING line 3547>>>
+<<<MISSING line 3548>>>
+<<<MISSING line 3549>>>
+<<<MISSING line 3550>>>
+<<<MISSING line 3551>>>
+<<<MISSING line 3552>>>
+<<<MISSING line 3553>>>
+<<<MISSING line 3554>>>
+<<<MISSING line 3555>>>
+<<<MISSING line 3556>>>
+<<<MISSING line 3557>>>
+<<<MISSING line 3558>>>
+<<<MISSING line 3559>>>
+<<<MISSING line 3560>>>
+<<<MISSING line 3561>>>
+<<<MISSING line 3562>>>
+<<<MISSING line 3563>>>
+<<<MISSING line 3564>>>
+<<<MISSING line 3565>>>
+<<<MISSING line 3566>>>
+<<<MISSING line 3567>>>
+<<<MISSING line 3568>>>
+<<<MISSING line 3569>>>
+<<<MISSING line 3570>>>
+<<<MISSING line 3571>>>
+<<<MISSING line 3572>>>
+<<<MISSING line 3573>>>
+<<<MISSING line 3574>>>
+<<<MISSING line 3575>>>
+<<<MISSING line 3576>>>
+<<<MISSING line 3577>>>
+<<<MISSING line 3578>>>
+<<<MISSING line 3579>>>
+<<<MISSING line 3580>>>
+<<<MISSING line 3581>>>
+<<<MISSING line 3582>>>
+<<<MISSING line 3583>>>
+<<<MISSING line 3584>>>
+<<<MISSING line 3585>>>
+<<<MISSING line 3586>>>
+<<<MISSING line 3587>>>
+<<<MISSING line 3588>>>
+<<<MISSING line 3589>>>
+<<<MISSING line 3590>>>
+<<<MISSING line 3591>>>
+<<<MISSING line 3592>>>
+<<<MISSING line 3593>>>
+<<<MISSING line 3594>>>
+<<<MISSING line 3595>>>
+<<<MISSING line 3596>>>
+<<<MISSING line 3597>>>
+<<<MISSING line 3598>>>
+<<<MISSING line 3599>>>
+<<<MISSING line 3600>>>
+<<<MISSING line 3601>>>
+<<<MISSING line 3602>>>
+<<<MISSING line 3603>>>
+<<<MISSING line 3604>>>
+<<<MISSING line 3605>>>
+<<<MISSING line 3606>>>
+<<<MISSING line 3607>>>
+<<<MISSING line 3608>>>
+<<<MISSING line 3609>>>
+<<<MISSING line 3610>>>
+<<<MISSING line 3611>>>
+<<<MISSING line 3612>>>
+<<<MISSING line 3613>>>
+<<<MISSING line 3614>>>
+<<<MISSING line 3615>>>
+<<<MISSING line 3616>>>
+<<<MISSING line 3617>>>
+<<<MISSING line 3618>>>
+<<<MISSING line 3619>>>
+<<<MISSING line 3620>>>
+<<<MISSING line 3621>>>
+<<<MISSING line 3622>>>
+<<<MISSING line 3623>>>
+<<<MISSING line 3624>>>
+<<<MISSING line 3625>>>
+<<<MISSING line 3626>>>
+<<<MISSING line 3627>>>
+<<<MISSING line 3628>>>
+<<<MISSING line 3629>>>
+<<<MISSING line 3630>>>
+<<<MISSING line 3631>>>
+<<<MISSING line 3632>>>
+<<<MISSING line 3633>>>
+<<<MISSING line 3634>>>
+<<<MISSING line 3635>>>
+<<<MISSING line 3636>>>
+<<<MISSING line 3637>>>
+<<<MISSING line 3638>>>
+<<<MISSING line 3639>>>
+<<<MISSING line 3640>>>
+<<<MISSING line 3641>>>
+<<<MISSING line 3642>>>
+<<<MISSING line 3643>>>
+<<<MISSING line 3644>>>
+<<<MISSING line 3645>>>
+<<<MISSING line 3646>>>
+<<<MISSING line 3647>>>
+<<<MISSING line 3648>>>
+<<<MISSING line 3649>>>
+<<<MISSING line 3650>>>
+<<<MISSING line 3651>>>
+<<<MISSING line 3652>>>
+<<<MISSING line 3653>>>
+<<<MISSING line 3654>>>
+<<<MISSING line 3655>>>
+<<<MISSING line 3656>>>
+<<<MISSING line 3657>>>
+<<<MISSING line 3658>>>
+<<<MISSING line 3659>>>
+<<<MISSING line 3660>>>
+<<<MISSING line 3661>>>
+<<<MISSING line 3662>>>
+<<<MISSING line 3663>>>
+<<<MISSING line 3664>>>
+<<<MISSING line 3665>>>
+<<<MISSING line 3666>>>
+<<<MISSING line 3667>>>
+<<<MISSING line 3668>>>
+<<<MISSING line 3669>>>
+<<<MISSING line 3670>>>
+<<<MISSING line 3671>>>
+<<<MISSING line 3672>>>
+<<<MISSING line 3673>>>
+<<<MISSING line 3674>>>
+<<<MISSING line 3675>>>
+<<<MISSING line 3676>>>
+<<<MISSING line 3677>>>
+<<<MISSING line 3678>>>
+<<<MISSING line 3679>>>
+<<<MISSING line 3680>>>
+<<<MISSING line 3681>>>
+<<<MISSING line 3682>>>
+<<<MISSING line 3683>>>
+<<<MISSING line 3684>>>
+<<<MISSING line 3685>>>
+<<<MISSING line 3686>>>
+<<<MISSING line 3687>>>
+<<<MISSING line 3688>>>
+<<<MISSING line 3689>>>
+<<<MISSING line 3690>>>
+<<<MISSING line 3691>>>
+<<<MISSING line 3692>>>
+<<<MISSING line 3693>>>
+<<<MISSING line 3694>>>
+<<<MISSING line 3695>>>
+<<<MISSING line 3696>>>
+<<<MISSING line 3697>>>
+<<<MISSING line 3698>>>
+<<<MISSING line 3699>>>
+<<<MISSING line 3700>>>
+<<<MISSING line 3701>>>
+<<<MISSING line 3702>>>
+<<<MISSING line 3703>>>
+<<<MISSING line 3704>>>
+<<<MISSING line 3705>>>
+<<<MISSING line 3706>>>
+<<<MISSING line 3707>>>
+<<<MISSING line 3708>>>
+<<<MISSING line 3709>>>
+<<<MISSING line 3710>>>
+<<<MISSING line 3711>>>
+<<<MISSING line 3712>>>
+<<<MISSING line 3713>>>
+<<<MISSING line 3714>>>
+<<<MISSING line 3715>>>
+<<<MISSING line 3716>>>
+<<<MISSING line 3717>>>
+<<<MISSING line 3718>>>
+<<<MISSING line 3719>>>
+<<<MISSING line 3720>>>
+<<<MISSING line 3721>>>
+<<<MISSING line 3722>>>
+<<<MISSING line 3723>>>
+<<<MISSING line 3724>>>
+<<<MISSING line 3725>>>
+<<<MISSING line 3726>>>
+<<<MISSING line 3727>>>
+<<<MISSING line 3728>>>
+<<<MISSING line 3729>>>
+<<<MISSING line 3730>>>
+<<<MISSING line 3731>>>
+<<<MISSING line 3732>>>
+<<<MISSING line 3733>>>
+<<<MISSING line 3734>>>
+<<<MISSING line 3735>>>
+<<<MISSING line 3736>>>
+<<<MISSING line 3737>>>
+<<<MISSING line 3738>>>
+<<<MISSING line 3739>>>
+<<<MISSING line 3740>>>
+<<<MISSING line 3741>>>
+<<<MISSING line 3742>>>
+<<<MISSING line 3743>>>
+<<<MISSING line 3744>>>
+<<<MISSING line 3745>>>
+<<<MISSING line 3746>>>
+<<<MISSING line 3747>>>
+<<<MISSING line 3748>>>
+<<<MISSING line 3749>>>
+<<<MISSING line 3750>>>
+<<<MISSING line 3751>>>
+<<<MISSING line 3752>>>
+<<<MISSING line 3753>>>
+<<<MISSING line 3754>>>
+<<<MISSING line 3755>>>
+<<<MISSING line 3756>>>
+<<<MISSING line 3757>>>
+<<<MISSING line 3758>>>
+<<<MISSING line 3759>>>
+<<<MISSING line 3760>>>
+<<<MISSING line 3761>>>
+<<<MISSING line 3762>>>
+<<<MISSING line 3763>>>
+<<<MISSING line 3764>>>
+<<<MISSING line 3765>>>
+<<<MISSING line 3766>>>
+<<<MISSING line 3767>>>
+<<<MISSING line 3768>>>
+<<<MISSING line 3769>>>
+<<<MISSING line 3770>>>
+<<<MISSING line 3771>>>
+<<<MISSING line 3772>>>
+<<<MISSING line 3773>>>
+<<<MISSING line 3774>>>
+<<<MISSING line 3775>>>
+<<<MISSING line 3776>>>
+<<<MISSING line 3777>>>
+<<<MISSING line 3778>>>
+<<<MISSING line 3779>>>
+<<<MISSING line 3780>>>
+<<<MISSING line 3781>>>
+<<<MISSING line 3782>>>
+<<<MISSING line 3783>>>
+<<<MISSING line 3784>>>
+<<<MISSING line 3785>>>
+<<<MISSING line 3786>>>
+<<<MISSING line 3787>>>
+<<<MISSING line 3788>>>
+<<<MISSING line 3789>>>
+<<<MISSING line 3790>>>
+<<<MISSING line 3791>>>
+<<<MISSING line 3792>>>
+<<<MISSING line 3793>>>
+<<<MISSING line 3794>>>
+<<<MISSING line 3795>>>
+<<<MISSING line 3796>>>
+<<<MISSING line 3797>>>
+<<<MISSING line 3798>>>
+<<<MISSING line 3799>>>
+<<<MISSING line 3800>>>
+<<<MISSING line 3801>>>
+<<<MISSING line 3802>>>
+<<<MISSING line 3803>>>
+<<<MISSING line 3804>>>
+<<<MISSING line 3805>>>
+<<<MISSING line 3806>>>
+<<<MISSING line 3807>>>
+<<<MISSING line 3808>>>
+<<<MISSING line 3809>>>
+<<<MISSING line 3810>>>
+<<<MISSING line 3811>>>
+<<<MISSING line 3812>>>
+<<<MISSING line 3813>>>
+<<<MISSING line 3814>>>
+<<<MISSING line 3815>>>
+<<<MISSING line 3816>>>
+<<<MISSING line 3817>>>
+<<<MISSING line 3818>>>
+<<<MISSING line 3819>>>
+<<<MISSING line 3820>>>
+<<<MISSING line 3821>>>
+<<<MISSING line 3822>>>
+<<<MISSING line 3823>>>
+<<<MISSING line 3824>>>
+<<<MISSING line 3825>>>
+<<<MISSING line 3826>>>
+<<<MISSING line 3827>>>
+<<<MISSING line 3828>>>
+<<<MISSING line 3829>>>
+<<<MISSING line 3830>>>
+<<<MISSING line 3831>>>
+<<<MISSING line 3832>>>
+<<<MISSING line 3833>>>
+<<<MISSING line 3834>>>
+<<<MISSING line 3835>>>
+<<<MISSING line 3836>>>
+<<<MISSING line 3837>>>
+<<<MISSING line 3838>>>
+<<<MISSING line 3839>>>
+<<<MISSING line 3840>>>
+<<<MISSING line 3841>>>
+<<<MISSING line 3842>>>
+<<<MISSING line 3843>>>
+<<<MISSING line 3844>>>
+<<<MISSING line 3845>>>
+<<<MISSING line 3846>>>
+<<<MISSING line 3847>>>
+<<<MISSING line 3848>>>
+<<<MISSING line 3849>>>
+<<<MISSING line 3850>>>
+<<<MISSING line 3851>>>
+<<<MISSING line 3852>>>
+<<<MISSING line 3853>>>
+<<<MISSING line 3854>>>
+<<<MISSING line 3855>>>
+<<<MISSING line 3856>>>
+<<<MISSING line 3857>>>
+<<<MISSING line 3858>>>
+<<<MISSING line 3859>>>
+<<<MISSING line 3860>>>
+<<<MISSING line 3861>>>
+<<<MISSING line 3862>>>
+<<<MISSING line 3863>>>
+<<<MISSING line 3864>>>
+<<<MISSING line 3865>>>
+<<<MISSING line 3866>>>
+<<<MISSING line 3867>>>
+<<<MISSING line 3868>>>
+<<<MISSING line 3869>>>
+<<<MISSING line 3870>>>
+<<<MISSING line 3871>>>
+<<<MISSING line 3872>>>
+<<<MISSING line 3873>>>
+<<<MISSING line 3874>>>
+<<<MISSING line 3875>>>
+<<<MISSING line 3876>>>
+<<<MISSING line 3877>>>
+<<<MISSING line 3878>>>
+<<<MISSING line 3879>>>
+<<<MISSING line 3880>>>
+<<<MISSING line 3881>>>
+<<<MISSING line 3882>>>
+<<<MISSING line 3883>>>
+<<<MISSING line 3884>>>
+<<<MISSING line 3885>>>
+<<<MISSING line 3886>>>
+<<<MISSING line 3887>>>
+<<<MISSING line 3888>>>
+<<<MISSING line 3889>>>
+<<<MISSING line 3890>>>
+<<<MISSING line 3891>>>
+<<<MISSING line 3892>>>
+<<<MISSING line 3893>>>
+<<<MISSING line 3894>>>
+<<<MISSING line 3895>>>
+<<<MISSING line 3896>>>
+<<<MISSING line 3897>>>
+<<<MISSING line 3898>>>
+<<<MISSING line 3899>>>
+<<<MISSING line 3900>>>
+<<<MISSING line 3901>>>
+<<<MISSING line 3902>>>
+<<<MISSING line 3903>>>
+<<<MISSING line 3904>>>
+<<<MISSING line 3905>>>
+<<<MISSING line 3906>>>
+<<<MISSING line 3907>>>
+<<<MISSING line 3908>>>
+<<<MISSING line 3909>>>
+<<<MISSING line 3910>>>
+<<<MISSING line 3911>>>
+<<<MISSING line 3912>>>
+<<<MISSING line 3913>>>
+<<<MISSING line 3914>>>
+<<<MISSING line 3915>>>
+<<<MISSING line 3916>>>
+<<<MISSING line 3917>>>
+
+(defn ablation-step-net!
+  "Same pattern as ablation-step! but zeros NetBank V (not Local Bank).
+   No-op (returns nil) when NetBank is disabled. Returns ablated bpc.
+
+   Together with ablation-step! this gives Δ_local and Δ_net as separate
+   metrics — answers 'how much is short-term memory carrying' vs 'how
+   much is long-term memory carrying' independently."
+  [m val-data T B max-toks]
+  (let [blocks-with-net (filter :netbank (:blocks m))]
+    (when (seq blocks-with-net)
+      (let [backup-paths (mapv (fn [b]
+                                 (let [p (save-v-to-disk (:netbank b) "net")]
+                                   (.zero_bank (:netbank b))
+                                   p))
+                               blocks-with-net)]
+        (try
+          (let [r (eval-bpc m val-data T B max-toks)]
+            (:bpc r))
+          (finally
+            (doseq [[b p] (map vector blocks-with-net backup-paths)]
+              (restore-v-from-disk! (:netbank b) p))
+            (unlink-paths! backup-paths)))))))
+
+(defn ablation-step-both!
+  "Zero BOTH Local V and NetBank V across all blocks, run eval-bpc,
+   restore both. Returns ablated bpc when at least one tier is present.
+
+   Δ_both vs Δ_local + Δ_net tells us about interaction between the two
+   tiers — superadditive Δ means the tiers carry overlapping signal
+   (one can compensate for the other); subadditive means complementary
+   (each carries unique signal that the other can't replace)."
+<<<MISSING line 3950>>>
+<<<MISSING line 3951>>>
+<<<MISSING line 3952>>>
+<<<MISSING line 3953>>>
+<<<MISSING line 3954>>>
+<<<MISSING line 3955>>>
+<<<MISSING line 3956>>>
+<<<MISSING line 3957>>>
+<<<MISSING line 3958>>>
+<<<MISSING line 3959>>>
+<<<MISSING line 3960>>>
+<<<MISSING line 3961>>>
+<<<MISSING line 3962>>>
+<<<MISSING line 3963>>>
+<<<MISSING line 3964>>>
+<<<MISSING line 3965>>>
+<<<MISSING line 3966>>>
+<<<MISSING line 3967>>>
+<<<MISSING line 3968>>>
+<<<MISSING line 3969>>>
+<<<MISSING line 3970>>>
+<<<MISSING line 3971>>>
+<<<MISSING line 3972>>>
+<<<MISSING line 3973>>>
+<<<MISSING line 3974>>>
+<<<MISSING line 3975>>>
+<<<MISSING line 3976>>>
+<<<MISSING line 3977>>>
+<<<MISSING line 3978>>>
+<<<MISSING line 3979>>>
+<<<MISSING line 3980>>>
+<<<MISSING line 3981>>>
+<<<MISSING line 3982>>>
+<<<MISSING line 3983>>>
+<<<MISSING line 3984>>>
+<<<MISSING line 3985>>>
+<<<MISSING line 3986>>>
+<<<MISSING line 3987>>>
+<<<MISSING line 3988>>>
+<<<MISSING line 3989>>>
+<<<MISSING line 3990>>>
+<<<MISSING line 3991>>>
+<<<MISSING line 3992>>>
+<<<MISSING line 3993>>>
+<<<MISSING line 3994>>>
+<<<MISSING line 3995>>>
+<<<MISSING line 3996>>>
+<<<MISSING line 3997>>>
+<<<MISSING line 3998>>>
+<<<MISSING line 3999>>>
+<<<MISSING line 4000>>>
+<<<MISSING line 4001>>>
+<<<MISSING line 4002>>>
+<<<MISSING line 4003>>>
+<<<MISSING line 4004>>>
+<<<MISSING line 4005>>>
+<<<MISSING line 4006>>>
+<<<MISSING line 4007>>>
+<<<MISSING line 4008>>>
+<<<MISSING line 4009>>>
+<<<MISSING line 4010>>>
+<<<MISSING line 4011>>>
+<<<MISSING line 4012>>>
+<<<MISSING line 4013>>>
+<<<MISSING line 4014>>>
+<<<MISSING line 4015>>>
+<<<MISSING line 4016>>>
+<<<MISSING line 4017>>>
+<<<MISSING line 4018>>>
+<<<MISSING line 4019>>>
+<<<MISSING line 4020>>>
+<<<MISSING line 4021>>>
+<<<MISSING line 4022>>>
+<<<MISSING line 4023>>>
+<<<MISSING line 4024>>>
+<<<MISSING line 4025>>>
+<<<MISSING line 4026>>>
+<<<MISSING line 4027>>>
+<<<MISSING line 4028>>>
+<<<MISSING line 4029>>>
+<<<MISSING line 4030>>>
+<<<MISSING line 4031>>>
+<<<MISSING line 4032>>>
+<<<MISSING line 4033>>>
+<<<MISSING line 4034>>>
+<<<MISSING line 4035>>>
+<<<MISSING line 4036>>>
+<<<MISSING line 4037>>>
+<<<MISSING line 4038>>>
+<<<MISSING line 4039>>>
+<<<MISSING line 4040>>>
+<<<MISSING line 4041>>>
+<<<MISSING line 4042>>>
+<<<MISSING line 4043>>>
+<<<MISSING line 4044>>>
+<<<MISSING line 4045>>>
+<<<MISSING line 4046>>>
+<<<MISSING line 4047>>>
+<<<MISSING line 4048>>>
+<<<MISSING line 4049>>>
+<<<MISSING line 4050>>>
+<<<MISSING line 4051>>>
+<<<MISSING line 4052>>>
+<<<MISSING line 4053>>>
+<<<MISSING line 4054>>>
+<<<MISSING line 4055>>>
+<<<MISSING line 4056>>>
+<<<MISSING line 4057>>>
+<<<MISSING line 4058>>>
+<<<MISSING line 4059>>>
+<<<MISSING line 4060>>>
+<<<MISSING line 4061>>>
+<<<MISSING line 4062>>>
+<<<MISSING line 4063>>>
+<<<MISSING line 4064>>>
+<<<MISSING line 4065>>>
+<<<MISSING line 4066>>>
+<<<MISSING line 4067>>>
+<<<MISSING line 4068>>>
+<<<MISSING line 4069>>>
+<<<MISSING line 4070>>>
+<<<MISSING line 4071>>>
+<<<MISSING line 4072>>>
+<<<MISSING line 4073>>>
+<<<MISSING line 4074>>>
+<<<MISSING line 4075>>>
+<<<MISSING line 4076>>>
+<<<MISSING line 4077>>>
+<<<MISSING line 4078>>>
+<<<MISSING line 4079>>>
+<<<MISSING line 4080>>>
+<<<MISSING line 4081>>>
+<<<MISSING line 4082>>>
+<<<MISSING line 4083>>>
+<<<MISSING line 4084>>>
+<<<MISSING line 4085>>>
+<<<MISSING line 4086>>>
+<<<MISSING line 4087>>>
+<<<MISSING line 4088>>>
+<<<MISSING line 4089>>>
+<<<MISSING line 4090>>>
+<<<MISSING line 4091>>>
+<<<MISSING line 4092>>>
+<<<MISSING line 4093>>>
+<<<MISSING line 4094>>>
+<<<MISSING line 4095>>>
+<<<MISSING line 4096>>>
+<<<MISSING line 4097>>>
+<<<MISSING line 4098>>>
+<<<MISSING line 4099>>>
+<<<MISSING line 4100>>>
+<<<MISSING line 4101>>>
+<<<MISSING line 4102>>>
+<<<MISSING line 4103>>>
+<<<MISSING line 4104>>>
+<<<MISSING line 4105>>>
+<<<MISSING line 4106>>>
+<<<MISSING line 4107>>>
+<<<MISSING line 4108>>>
+<<<MISSING line 4109>>>
+<<<MISSING line 4110>>>
+<<<MISSING line 4111>>>
+<<<MISSING line 4112>>>
+<<<MISSING line 4113>>>
+<<<MISSING line 4114>>>
+<<<MISSING line 4115>>>
+<<<MISSING line 4116>>>
+<<<MISSING line 4117>>>
+<<<MISSING line 4118>>>
+<<<MISSING line 4119>>>
+<<<MISSING line 4120>>>
+<<<MISSING line 4121>>>
+<<<MISSING line 4122>>>
+<<<MISSING line 4123>>>
+<<<MISSING line 4124>>>
+<<<MISSING line 4125>>>
+<<<MISSING line 4126>>>
+<<<MISSING line 4127>>>
+<<<MISSING line 4128>>>
+<<<MISSING line 4129>>>
+<<<MISSING line 4130>>>
+<<<MISSING line 4131>>>
+<<<MISSING line 4132>>>
+<<<MISSING line 4133>>>
+<<<MISSING line 4134>>>
+<<<MISSING line 4135>>>
+<<<MISSING line 4136>>>
+<<<MISSING line 4137>>>
+<<<MISSING line 4138>>>
+<<<MISSING line 4139>>>
+<<<MISSING line 4140>>>
+<<<MISSING line 4141>>>
+<<<MISSING line 4142>>>
+<<<MISSING line 4143>>>
+<<<MISSING line 4144>>>
+<<<MISSING line 4145>>>
+<<<MISSING line 4146>>>
+<<<MISSING line 4147>>>
+<<<MISSING line 4148>>>
+<<<MISSING line 4149>>>
+<<<MISSING line 4150>>>
+<<<MISSING line 4151>>>
+<<<MISSING line 4152>>>
+<<<MISSING line 4153>>>
+<<<MISSING line 4154>>>
+<<<MISSING line 4155>>>
+<<<MISSING line 4156>>>
+<<<MISSING line 4157>>>
+<<<MISSING line 4158>>>
+<<<MISSING line 4159>>>
+<<<MISSING line 4160>>>
+<<<MISSING line 4161>>>
+<<<MISSING line 4162>>>
+<<<MISSING line 4163>>>
+<<<MISSING line 4164>>>
+<<<MISSING line 4165>>>
+<<<MISSING line 4166>>>
+<<<MISSING line 4167>>>
+<<<MISSING line 4168>>>
+<<<MISSING line 4169>>>
+<<<MISSING line 4170>>>
+<<<MISSING line 4171>>>
+<<<MISSING line 4172>>>
+<<<MISSING line 4173>>>
+<<<MISSING line 4174>>>
+<<<MISSING line 4175>>>
+<<<MISSING line 4176>>>
+<<<MISSING line 4177>>>
+<<<MISSING line 4178>>>
+<<<MISSING line 4179>>>
+<<<MISSING line 4180>>>
+<<<MISSING line 4181>>>
+<<<MISSING line 4182>>>
+<<<MISSING line 4183>>>
+<<<MISSING line 4184>>>
+<<<MISSING line 4185>>>
+<<<MISSING line 4186>>>
+<<<MISSING line 4187>>>
+<<<MISSING line 4188>>>
+<<<MISSING line 4189>>>
+<<<MISSING line 4190>>>
+<<<MISSING line 4191>>>
+<<<MISSING line 4192>>>
+<<<MISSING line 4193>>>
+<<<MISSING line 4194>>>
+<<<MISSING line 4195>>>
+<<<MISSING line 4196>>>
+<<<MISSING line 4197>>>
+<<<MISSING line 4198>>>
+<<<MISSING line 4199>>>
+<<<MISSING line 4200>>>
+<<<MISSING line 4201>>>
+<<<MISSING line 4202>>>
+<<<MISSING line 4203>>>
+<<<MISSING line 4204>>>
+<<<MISSING line 4205>>>
+<<<MISSING line 4206>>>
+<<<MISSING line 4207>>>
+<<<MISSING line 4208>>>
+<<<MISSING line 4209>>>
+<<<MISSING line 4210>>>
+<<<MISSING line 4211>>>
+<<<MISSING line 4212>>>
+<<<MISSING line 4213>>>
+<<<MISSING line 4214>>>
+<<<MISSING line 4215>>>
+<<<MISSING line 4216>>>
+<<<MISSING line 4217>>>
+<<<MISSING line 4218>>>
+<<<MISSING line 4219>>>
+<<<MISSING line 4220>>>
+<<<MISSING line 4221>>>
+<<<MISSING line 4222>>>
+<<<MISSING line 4223>>>
+<<<MISSING line 4224>>>
+<<<MISSING line 4225>>>
+<<<MISSING line 4226>>>
+<<<MISSING line 4227>>>
+<<<MISSING line 4228>>>
+<<<MISSING line 4229>>>
+<<<MISSING line 4230>>>
+<<<MISSING line 4231>>>
+<<<MISSING line 4232>>>
+<<<MISSING line 4233>>>
+<<<MISSING line 4234>>>
+<<<MISSING line 4235>>>
+<<<MISSING line 4236>>>
+<<<MISSING line 4237>>>
+<<<MISSING line 4238>>>
+<<<MISSING line 4239>>>
+<<<MISSING line 4240>>>
+<<<MISSING line 4241>>>
+<<<MISSING line 4242>>>
+<<<MISSING line 4243>>>
+<<<MISSING line 4244>>>
+<<<MISSING line 4245>>>
+<<<MISSING line 4246>>>
+<<<MISSING line 4247>>>
+<<<MISSING line 4248>>>
+<<<MISSING line 4249>>>
+<<<MISSING line 4250>>>
+<<<MISSING line 4251>>>
+<<<MISSING line 4252>>>
+<<<MISSING line 4253>>>
+<<<MISSING line 4254>>>
+<<<MISSING line 4255>>>
+<<<MISSING line 4256>>>
+<<<MISSING line 4257>>>
+<<<MISSING line 4258>>>
+<<<MISSING line 4259>>>
+<<<MISSING line 4260>>>
+<<<MISSING line 4261>>>
+<<<MISSING line 4262>>>
+<<<MISSING line 4263>>>
+<<<MISSING line 4264>>>
+<<<MISSING line 4265>>>
+<<<MISSING line 4266>>>
+<<<MISSING line 4267>>>
+<<<MISSING line 4268>>>
+<<<MISSING line 4269>>>
+<<<MISSING line 4270>>>
+<<<MISSING line 4271>>>
+<<<MISSING line 4272>>>
+<<<MISSING line 4273>>>
+<<<MISSING line 4274>>>
+<<<MISSING line 4275>>>
+<<<MISSING line 4276>>>
+<<<MISSING line 4277>>>
+<<<MISSING line 4278>>>
+<<<MISSING line 4279>>>
+<<<MISSING line 4280>>>
+<<<MISSING line 4281>>>
+<<<MISSING line 4282>>>
+<<<MISSING line 4283>>>
+<<<MISSING line 4284>>>
+<<<MISSING line 4285>>>
+<<<MISSING line 4286>>>
+<<<MISSING line 4287>>>
+<<<MISSING line 4288>>>
+<<<MISSING line 4289>>>
+<<<MISSING line 4290>>>
+<<<MISSING line 4291>>>
+<<<MISSING line 4292>>>
+<<<MISSING line 4293>>>
+<<<MISSING line 4294>>>
+<<<MISSING line 4295>>>
+<<<MISSING line 4296>>>
+<<<MISSING line 4297>>>
+<<<MISSING line 4298>>>
+<<<MISSING line 4299>>>
+<<<MISSING line 4300>>>
+<<<MISSING line 4301>>>
+<<<MISSING line 4302>>>
+<<<MISSING line 4303>>>
+<<<MISSING line 4304>>>
+<<<MISSING line 4305>>>
+<<<MISSING line 4306>>>
+<<<MISSING line 4307>>>
+<<<MISSING line 4308>>>
+<<<MISSING line 4309>>>
+<<<MISSING line 4310>>>
+<<<MISSING line 4311>>>
+<<<MISSING line 4312>>>
+<<<MISSING line 4313>>>
+<<<MISSING line 4314>>>
+<<<MISSING line 4315>>>
+<<<MISSING line 4316>>>
+<<<MISSING line 4317>>>
+<<<MISSING line 4318>>>
+<<<MISSING line 4319>>>
+<<<MISSING line 4320>>>
+<<<MISSING line 4321>>>
+<<<MISSING line 4322>>>
+<<<MISSING line 4323>>>
+<<<MISSING line 4324>>>
+<<<MISSING line 4325>>>
+<<<MISSING line 4326>>>
+<<<MISSING line 4327>>>
+<<<MISSING line 4328>>>
+<<<MISSING line 4329>>>
+<<<MISSING line 4330>>>
+<<<MISSING line 4331>>>
+<<<MISSING line 4332>>>
+<<<MISSING line 4333>>>
+<<<MISSING line 4334>>>
+<<<MISSING line 4335>>>
+<<<MISSING line 4336>>>
+<<<MISSING line 4337>>>
+<<<MISSING line 4338>>>
+<<<MISSING line 4339>>>
+<<<MISSING line 4340>>>
+<<<MISSING line 4341>>>
+<<<MISSING line 4342>>>
+<<<MISSING line 4343>>>
+<<<MISSING line 4344>>>
+<<<MISSING line 4345>>>
+<<<MISSING line 4346>>>
+<<<MISSING line 4347>>>
+<<<MISSING line 4348>>>
+<<<MISSING line 4349>>>
+<<<MISSING line 4350>>>
+<<<MISSING line 4351>>>
+<<<MISSING line 4352>>>
+<<<MISSING line 4353>>>
+<<<MISSING line 4354>>>
+<<<MISSING line 4355>>>
+<<<MISSING line 4356>>>
+<<<MISSING line 4357>>>
+<<<MISSING line 4358>>>
+<<<MISSING line 4359>>>
+<<<MISSING line 4360>>>
+<<<MISSING line 4361>>>
+<<<MISSING line 4362>>>
+<<<MISSING line 4363>>>
+<<<MISSING line 4364>>>
+<<<MISSING line 4365>>>
+<<<MISSING line 4366>>>
+<<<MISSING line 4367>>>
+<<<MISSING line 4368>>>
+<<<MISSING line 4369>>>
+<<<MISSING line 4370>>>
+<<<MISSING line 4371>>>
+<<<MISSING line 4372>>>
+<<<MISSING line 4373>>>
+<<<MISSING line 4374>>>
+<<<MISSING line 4375>>>
+<<<MISSING line 4376>>>
+<<<MISSING line 4377>>>
+<<<MISSING line 4378>>>
+<<<MISSING line 4379>>>
+<<<MISSING line 4380>>>
+<<<MISSING line 4381>>>
+<<<MISSING line 4382>>>
+<<<MISSING line 4383>>>
+<<<MISSING line 4384>>>
+<<<MISSING line 4385>>>
+<<<MISSING line 4386>>>
+<<<MISSING line 4387>>>
+<<<MISSING line 4388>>>
+<<<MISSING line 4389>>>
+<<<MISSING line 4390>>>
+<<<MISSING line 4391>>>
+<<<MISSING line 4392>>>
+<<<MISSING line 4393>>>
+<<<MISSING line 4394>>>
+<<<MISSING line 4395>>>
+<<<MISSING line 4396>>>
+<<<MISSING line 4397>>>
+<<<MISSING line 4398>>>
+<<<MISSING line 4399>>>
+<<<MISSING line 4400>>>
+<<<MISSING line 4401>>>
+<<<MISSING line 4402>>>
+<<<MISSING line 4403>>>
+<<<MISSING line 4404>>>
+<<<MISSING line 4405>>>
+<<<MISSING line 4406>>>
+<<<MISSING line 4407>>>
+<<<MISSING line 4408>>>
+<<<MISSING line 4409>>>
+<<<MISSING line 4410>>>
+<<<MISSING line 4411>>>
+<<<MISSING line 4412>>>
+<<<MISSING line 4413>>>
+<<<MISSING line 4414>>>
+<<<MISSING line 4415>>>
+<<<MISSING line 4416>>>
+<<<MISSING line 4417>>>
+<<<MISSING line 4418>>>
+<<<MISSING line 4419>>>
+<<<MISSING line 4420>>>
+<<<MISSING line 4421>>>
+<<<MISSING line 4422>>>
+<<<MISSING line 4423>>>
+<<<MISSING line 4424>>>
+<<<MISSING line 4425>>>
+<<<MISSING line 4426>>>
+<<<MISSING line 4427>>>
+<<<MISSING line 4428>>>
+<<<MISSING line 4429>>>
+<<<MISSING line 4430>>>
+<<<MISSING line 4431>>>
+<<<MISSING line 4432>>>
+<<<MISSING line 4433>>>
+<<<MISSING line 4434>>>
+<<<MISSING line 4435>>>
+<<<MISSING line 4436>>>
+<<<MISSING line 4437>>>
+<<<MISSING line 4438>>>
+<<<MISSING line 4439>>>
+<<<MISSING line 4440>>>
+<<<MISSING line 4441>>>
+<<<MISSING line 4442>>>
+<<<MISSING line 4443>>>
+<<<MISSING line 4444>>>
+<<<MISSING line 4445>>>
+<<<MISSING line 4446>>>
+<<<MISSING line 4447>>>
+<<<MISSING line 4448>>>
+<<<MISSING line 4449>>>
+<<<MISSING line 4450>>>
+<<<MISSING line 4451>>>
+<<<MISSING line 4452>>>
+<<<MISSING line 4453>>>
+<<<MISSING line 4454>>>
+<<<MISSING line 4455>>>
+<<<MISSING line 4456>>>
+<<<MISSING line 4457>>>
+<<<MISSING line 4458>>>
+<<<MISSING line 4459>>>
+<<<MISSING line 4460>>>
+<<<MISSING line 4461>>>
+<<<MISSING line 4462>>>
+<<<MISSING line 4463>>>
+<<<MISSING line 4464>>>
+<<<MISSING line 4465>>>
+<<<MISSING line 4466>>>
+<<<MISSING line 4467>>>
+<<<MISSING line 4468>>>
+<<<MISSING line 4469>>>
+<<<MISSING line 4470>>>
+<<<MISSING line 4471>>>
+<<<MISSING line 4472>>>
+<<<MISSING line 4473>>>
+<<<MISSING line 4474>>>
+<<<MISSING line 4475>>>
+<<<MISSING line 4476>>>
+<<<MISSING line 4477>>>
+<<<MISSING line 4478>>>
+<<<MISSING line 4479>>>
+<<<MISSING line 4480>>>
+<<<MISSING line 4481>>>
+<<<MISSING line 4482>>>
+<<<MISSING line 4483>>>
+<<<MISSING line 4484>>>
+<<<MISSING line 4485>>>
+<<<MISSING line 4486>>>
+<<<MISSING line 4487>>>
+<<<MISSING line 4488>>>
+<<<MISSING line 4489>>>
+<<<MISSING line 4490>>>
+<<<MISSING line 4491>>>
+<<<MISSING line 4492>>>
+<<<MISSING line 4493>>>
+<<<MISSING line 4494>>>
+<<<MISSING line 4495>>>
+<<<MISSING line 4496>>>
+<<<MISSING line 4497>>>
+<<<MISSING line 4498>>>
+<<<MISSING line 4499>>>
+<<<MISSING line 4500>>>
+<<<MISSING line 4501>>>
+<<<MISSING line 4502>>>
+<<<MISSING line 4503>>>
+<<<MISSING line 4504>>>
+<<<MISSING line 4505>>>
+<<<MISSING line 4506>>>
+<<<MISSING line 4507>>>
+<<<MISSING line 4508>>>
+<<<MISSING line 4509>>>
+<<<MISSING line 4510>>>
+<<<MISSING line 4511>>>
+<<<MISSING line 4512>>>
+<<<MISSING line 4513>>>
+<<<MISSING line 4514>>>
+<<<MISSING line 4515>>>
+<<<MISSING line 4516>>>
+<<<MISSING line 4517>>>
+<<<MISSING line 4518>>>
+<<<MISSING line 4519>>>
+<<<MISSING line 4520>>>
+<<<MISSING line 4521>>>
+<<<MISSING line 4522>>>
+<<<MISSING line 4523>>>
+<<<MISSING line 4524>>>
+<<<MISSING line 4525>>>
+<<<MISSING line 4526>>>
+<<<MISSING line 4527>>>
+<<<MISSING line 4528>>>
+<<<MISSING line 4529>>>
+<<<MISSING line 4530>>>
+<<<MISSING line 4531>>>
+<<<MISSING line 4532>>>
+<<<MISSING line 4533>>>
+<<<MISSING line 4534>>>
+<<<MISSING line 4535>>>
+<<<MISSING line 4536>>>
+<<<MISSING line 4537>>>
+<<<MISSING line 4538>>>
+<<<MISSING line 4539>>>
+<<<MISSING line 4540>>>
+<<<MISSING line 4541>>>
+        mix          (pick-mix)
+        mix-tensors  (when mix (python/list (map first  mix)))
+        mix-weights-t (when mix
+                         (torch/tensor (python/list (map second mix))
+                                       ** :dtype torch/float))
+        ;; Short label per corpus for the per-corpus loss line in step
+        ;; prints. pick-mix has already loaded the tensors so we can't
+        ;; extract paths from `mix` (the [tensor weight] pairs); re-parse
+        ;; MMLLM_MIX from env to get the path strings, then derive a
+        ;; short label by basename. E.g. /data/agent-corpus-v2/xlam.bin
+        ;; .train.bin → "xlam".
+        mix-labels   (when mix
+                       (let [raw (.strip (.get (.- os environ) "MMLLM_MIX" ""))]
+                         (python/list
+                           (for [entry (.split raw ",")
+                                 :let  [entry (.strip entry)]
+                                 :when (pos? (count entry))]
+                             (let [colon (.rfind entry ":")
+                                   path  (.strip (subs entry 0 colon))
+                                   base  (.replace
+                                           (.replace path ".train.bin" "")
+                                           ".bin" "")
+                                   parts (.split base "/")]
+                               (.__getitem__ parts (- (count parts) 1)))))))
+        corpus-tracker (when mix (make-corpus-tracker (count mix)))
+        ;; Mutable cell for "wall-s at last 50-step print" — used to
+        ;; compute rolling tokens/sec. Python list = 1-element ref.
+<<<MISSING line 4569>>>
+<<<MISSING line 4570>>>
+<<<MISSING line 4571>>>
+<<<MISSING line 4572>>>
+<<<MISSING line 4573>>>
+<<<MISSING line 4574>>>
+<<<MISSING line 4575>>>
+<<<MISSING line 4576>>>
+<<<MISSING line 4577>>>
+<<<MISSING line 4578>>>
+<<<MISSING line 4579>>>
+<<<MISSING line 4580>>>
+<<<MISSING line 4581>>>
+<<<MISSING line 4582>>>
+<<<MISSING line 4583>>>
+<<<MISSING line 4584>>>
+<<<MISSING line 4585>>>
+<<<MISSING line 4586>>>
+<<<MISSING line 4587>>>
+<<<MISSING line 4588>>>
+<<<MISSING line 4589>>>
+<<<MISSING line 4590>>>
+<<<MISSING line 4591>>>
+<<<MISSING line 4592>>>
+<<<MISSING line 4593>>>
+<<<MISSING line 4594>>>
+<<<MISSING line 4595>>>
+<<<MISSING line 4596>>>
+<<<MISSING line 4597>>>
+<<<MISSING line 4598>>>
+<<<MISSING line 4599>>>
+<<<MISSING line 4600>>>
+<<<MISSING line 4601>>>
+<<<MISSING line 4602>>>
+<<<MISSING line 4603>>>
+<<<MISSING line 4604>>>
+<<<MISSING line 4605>>>
+<<<MISSING line 4606>>>
+<<<MISSING line 4607>>>
+<<<MISSING line 4608>>>
+<<<MISSING line 4609>>>
+<<<MISSING line 4610>>>
+<<<MISSING line 4611>>>
+<<<MISSING line 4612>>>
+<<<MISSING line 4613>>>
+<<<MISSING line 4614>>>
+<<<MISSING line 4615>>>
+<<<MISSING line 4616>>>
+<<<MISSING line 4617>>>
+<<<MISSING line 4618>>>
+<<<MISSING line 4619>>>
+        ;; Third optimizer: NetBank's V_net. Constructed only when
+        ;; NetBank is enabled AND has sparse params (otherwise SparseAdam
+        ;; on an empty list errors). Tracks pick-lr-net for its peak lr,
+        ;; cooled independently from opt-sparse on the same cosine
+        ;; schedule with its own multiplier.
+        net-sparse-params (python/list (netbank-sparse-parameters m))
+        ;; MMLLM_SKIP_OPT_NET=true skips initializing opt-sparse-net.
+        ;; SparseAdam (and CPUOffloadSparseAdam) allocate dense state
+        ;; (m, v moments) at V.weight's shape on first step — for
+        ;; V_net at sqrt_n=5600/c_net=32 that's 16 GB × 2 = 32 GB anon
+        ;; RAM, OOMs a 15 GiB sandbox. Useful when running train-fim
+        ;; ONLY to materialize a fresh-shape dense.pt for bench/eval —
+        ;; V_net just stays where it is (mmap'd to disk) and won't
+        ;; receive gradients during the materialization run.
+        skip-opt-net? (= "true" (.lower (.get (.- os environ)
+                                              "MMLLM_SKIP_OPT_NET"
+                                              "false")))
+        opt-sparse-net (when (and (not skip-opt-net?)
+                                  (pos? (count net-sparse-params)))
+                         ((pick-sparse-optimizer) net-sparse-params
+                          ** :lr (pick-lr-net)))
+        T          (:seq-len config)
+<<<MISSING line 4642>>>
+<<<MISSING line 4643>>>
+<<<MISSING line 4644>>>
+<<<MISSING line 4645>>>
+<<<MISSING line 4646>>>
+<<<MISSING line 4647>>>
+<<<MISSING line 4648>>>
+<<<MISSING line 4649>>>
+<<<MISSING line 4650>>>
+<<<MISSING line 4651>>>
+<<<MISSING line 4652>>>
+<<<MISSING line 4653>>>
+<<<MISSING line 4654>>>
+<<<MISSING line 4655>>>
+<<<MISSING line 4656>>>
+<<<MISSING line 4657>>>
+<<<MISSING line 4658>>>
+<<<MISSING line 4659>>>
+<<<MISSING line 4660>>>
+<<<MISSING line 4661>>>
+<<<MISSING line 4662>>>
+<<<MISSING line 4663>>>
+<<<MISSING line 4664>>>
+<<<MISSING line 4665>>>
+<<<MISSING line 4666>>>
+<<<MISSING line 4667>>>
+<<<MISSING line 4668>>>
+<<<MISSING line 4669>>>
+<<<MISSING line 4670>>>
+<<<MISSING line 4671>>>
+<<<MISSING line 4672>>>
+<<<MISSING line 4673>>>
+<<<MISSING line 4674>>>
+<<<MISSING line 4675>>>
+<<<MISSING line 4676>>>
+<<<MISSING line 4677>>>
+<<<MISSING line 4678>>>
+<<<MISSING line 4679>>>
+<<<MISSING line 4680>>>
+<<<MISSING line 4681>>>
+<<<MISSING line 4682>>>
+<<<MISSING line 4683>>>
+<<<MISSING line 4684>>>
+<<<MISSING line 4685>>>
+<<<MISSING line 4686>>>
+<<<MISSING line 4687>>>
+<<<MISSING line 4688>>>
+<<<MISSING line 4689>>>
+<<<MISSING line 4690>>>
+<<<MISSING line 4691>>>
+<<<MISSING line 4692>>>
+<<<MISSING line 4693>>>
+<<<MISSING line 4694>>>
+<<<MISSING line 4695>>>
+<<<MISSING line 4696>>>
+<<<MISSING line 4697>>>
+<<<MISSING line 4698>>>
+<<<MISSING line 4699>>>
+<<<MISSING line 4700>>>
+<<<MISSING line 4701>>>
+<<<MISSING line 4702>>>
+<<<MISSING line 4703>>>
+<<<MISSING line 4704>>>
+<<<MISSING line 4705>>>
+<<<MISSING line 4706>>>
+<<<MISSING line 4707>>>
+<<<MISSING line 4708>>>
+<<<MISSING line 4709>>>
+<<<MISSING line 4710>>>
+<<<MISSING line 4711>>>
+<<<MISSING line 4712>>>
+<<<MISSING line 4713>>>
+<<<MISSING line 4714>>>
+<<<MISSING line 4715>>>
+<<<MISSING line 4716>>>
+<<<MISSING line 4717>>>
+<<<MISSING line 4718>>>
+<<<MISSING line 4719>>>
+<<<MISSING line 4720>>>
+<<<MISSING line 4721>>>
+<<<MISSING line 4722>>>
+<<<MISSING line 4723>>>
+<<<MISSING line 4724>>>
+<<<MISSING line 4725>>>
+<<<MISSING line 4726>>>
+<<<MISSING line 4727>>>
+<<<MISSING line 4728>>>
+<<<MISSING line 4729>>>
+<<<MISSING line 4730>>>
+<<<MISSING line 4731>>>
+<<<MISSING line 4732>>>
+<<<MISSING line 4733>>>
+<<<MISSING line 4734>>>
+<<<MISSING line 4735>>>
+<<<MISSING line 4736>>>
+<<<MISSING line 4737>>>
+<<<MISSING line 4738>>>
+<<<MISSING line 4739>>>
+<<<MISSING line 4740>>>
+<<<MISSING line 4741>>>
+<<<MISSING line 4742>>>
+<<<MISSING line 4743>>>
+<<<MISSING line 4744>>>
+<<<MISSING line 4745>>>
+<<<MISSING line 4746>>>
+<<<MISSING line 4747>>>
+<<<MISSING line 4748>>>
+<<<MISSING line 4749>>>
+<<<MISSING line 4750>>>
+<<<MISSING line 4751>>>
+<<<MISSING line 4752>>>
+<<<MISSING line 4753>>>
+<<<MISSING line 4754>>>
+<<<MISSING line 4755>>>
+<<<MISSING line 4756>>>
+<<<MISSING line 4757>>>
+<<<MISSING line 4758>>>
+<<<MISSING line 4759>>>
+<<<MISSING line 4760>>>
+<<<MISSING line 4761>>>
+<<<MISSING line 4762>>>
+<<<MISSING line 4763>>>
+<<<MISSING line 4764>>>
+<<<MISSING line 4765>>>
+<<<MISSING line 4766>>>
+<<<MISSING line 4767>>>
+<<<MISSING line 4768>>>
+<<<MISSING line 4769>>>
+<<<MISSING line 4770>>>
+<<<MISSING line 4771>>>
+<<<MISSING line 4772>>>
+<<<MISSING line 4773>>>
+<<<MISSING line 4774>>>
+<<<MISSING line 4775>>>
+<<<MISSING line 4776>>>
+<<<MISSING line 4777>>>
+<<<MISSING line 4778>>>
+<<<MISSING line 4779>>>
+<<<MISSING line 4780>>>
+<<<MISSING line 4781>>>
+<<<MISSING line 4782>>>
+<<<MISSING line 4783>>>
+<<<MISSING line 4784>>>
+<<<MISSING line 4785>>>
+<<<MISSING line 4786>>>
+<<<MISSING line 4787>>>
+<<<MISSING line 4788>>>
+<<<MISSING line 4789>>>
+<<<MISSING line 4790>>>
+<<<MISSING line 4791>>>
+<<<MISSING line 4792>>>
+<<<MISSING line 4793>>>
+<<<MISSING line 4794>>>
+<<<MISSING line 4795>>>
+<<<MISSING line 4796>>>
+<<<MISSING line 4797>>>
+<<<MISSING line 4798>>>
+<<<MISSING line 4799>>>
+<<<MISSING line 4800>>>
+<<<MISSING line 4801>>>
+<<<MISSING line 4802>>>
+<<<MISSING line 4803>>>
+<<<MISSING line 4804>>>
+<<<MISSING line 4805>>>
+<<<MISSING line 4806>>>
+<<<MISSING line 4807>>>
+<<<MISSING line 4808>>>
+<<<MISSING line 4809>>>
+<<<MISSING line 4810>>>
+<<<MISSING line 4811>>>
+<<<MISSING line 4812>>>
+<<<MISSING line 4813>>>
+<<<MISSING line 4814>>>
+<<<MISSING line 4815>>>
+<<<MISSING line 4816>>>
+<<<MISSING line 4817>>>
+<<<MISSING line 4818>>>
+<<<MISSING line 4819>>>
+<<<MISSING line 4820>>>
+<<<MISSING line 4821>>>
+<<<MISSING line 4822>>>
+<<<MISSING line 4823>>>
+<<<MISSING line 4824>>>
+<<<MISSING line 4825>>>
+<<<MISSING line 4826>>>
+<<<MISSING line 4827>>>
+<<<MISSING line 4828>>>
+<<<MISSING line 4829>>>
+<<<MISSING line 4830>>>
+<<<MISSING line 4831>>>
+<<<MISSING line 4832>>>
+<<<MISSING line 4833>>>
+<<<MISSING line 4834>>>
+<<<MISSING line 4835>>>
+<<<MISSING line 4836>>>
+<<<MISSING line 4837>>>
+<<<MISSING line 4838>>>
+<<<MISSING line 4839>>>
+<<<MISSING line 4840>>>
+<<<MISSING line 4841>>>
+<<<MISSING line 4842>>>
+<<<MISSING line 4843>>>
+<<<MISSING line 4844>>>
+<<<MISSING line 4845>>>
+<<<MISSING line 4846>>>
+<<<MISSING line 4847>>>
+<<<MISSING line 4848>>>
+<<<MISSING line 4849>>>
+<<<MISSING line 4850>>>
+<<<MISSING line 4851>>>
+<<<MISSING line 4852>>>
+<<<MISSING line 4853>>>
+<<<MISSING line 4854>>>
+<<<MISSING line 4855>>>
+<<<MISSING line 4856>>>
+<<<MISSING line 4857>>>
+<<<MISSING line 4858>>>
+<<<MISSING line 4859>>>
+<<<MISSING line 4860>>>
+<<<MISSING line 4861>>>
+<<<MISSING line 4862>>>
+<<<MISSING line 4863>>>
+<<<MISSING line 4864>>>
+<<<MISSING line 4865>>>
+<<<MISSING line 4866>>>
+<<<MISSING line 4867>>>
+<<<MISSING line 4868>>>
+<<<MISSING line 4869>>>
+<<<MISSING line 4870>>>
+<<<MISSING line 4871>>>
+<<<MISSING line 4872>>>
+<<<MISSING line 4873>>>
+<<<MISSING line 4874>>>
+<<<MISSING line 4875>>>
+<<<MISSING line 4876>>>
+<<<MISSING line 4877>>>
+<<<MISSING line 4878>>>
+<<<MISSING line 4879>>>
+<<<MISSING line 4880>>>
+<<<MISSING line 4881>>>
+<<<MISSING line 4882>>>
+<<<MISSING line 4883>>>
+<<<MISSING line 4884>>>
+<<<MISSING line 4885>>>
+<<<MISSING line 4886>>>
+<<<MISSING line 4887>>>
+<<<MISSING line 4888>>>
+<<<MISSING line 4889>>>
+<<<MISSING line 4890>>>
+<<<MISSING line 4891>>>
+<<<MISSING line 4892>>>
+<<<MISSING line 4893>>>
+<<<MISSING line 4894>>>
+<<<MISSING line 4895>>>
+<<<MISSING line 4896>>>
+<<<MISSING line 4897>>>
+<<<MISSING line 4898>>>
+<<<MISSING line 4899>>>
+<<<MISSING line 4900>>>
+<<<MISSING line 4901>>>
+<<<MISSING line 4902>>>
+<<<MISSING line 4903>>>
+<<<MISSING line 4904>>>
+<<<MISSING line 4905>>>
+<<<MISSING line 4906>>>
+<<<MISSING line 4907>>>
+<<<MISSING line 4908>>>
+<<<MISSING line 4909>>>
+<<<MISSING line 4910>>>
+<<<MISSING line 4911>>>
+<<<MISSING line 4912>>>
+<<<MISSING line 4913>>>
+<<<MISSING line 4914>>>
+<<<MISSING line 4915>>>
+<<<MISSING line 4916>>>
+<<<MISSING line 4917>>>
+<<<MISSING line 4918>>>
+<<<MISSING line 4919>>>
+<<<MISSING line 4920>>>
+<<<MISSING line 4921>>>
+<<<MISSING line 4922>>>
+<<<MISSING line 4923>>>
+<<<MISSING line 4924>>>
+<<<MISSING line 4925>>>
+<<<MISSING line 4926>>>
+<<<MISSING line 4927>>>
+<<<MISSING line 4928>>>
+<<<MISSING line 4929>>>
+<<<MISSING line 4930>>>
+<<<MISSING line 4931>>>
+<<<MISSING line 4932>>>
+<<<MISSING line 4933>>>
+<<<MISSING line 4934>>>
+<<<MISSING line 4935>>>
+<<<MISSING line 4936>>>
+<<<MISSING line 4937>>>
+<<<MISSING line 4938>>>
+<<<MISSING line 4939>>>
+                ;; flip submodules to eval mode but never flip them back —
+                ;; without this call, Local Bank's `if self.training:`
+                ;; guards (slot tracking, z-loss) silently disable after
+                ;; the first eval. Cheap (~5µs).
+                                                    (pick-lr-min))
+                                  d-mult (pick-lr-dense-mult step total-steps)
+                                  k-mult (pick-lr-kab-mult   step total-steps)
+                                  b-mult (pick-lr-bank-mult  step total-steps)
+                                  n-mult (pick-lr-net-mult   step total-steps)]
+                              ;; If opt-dense has 2 groups (K_a/K_b separated
+                              ;; via make-opt-dense), use the grouped setter;
+                              ;; otherwise the single-lr setter (back-compat).
+                              (if (= 2 (count (.- opt-dense param_groups)))
+                                (set-opt-lrs! opt-dense
+                                              [(* cur-lr d-mult) (* cur-lr k-mult)])
+                                (set-opt-lr!  opt-dense (* cur-lr d-mult)))
+                              (set-opt-lr! opt-sparse (* cur-lr b-mult))
+                              (when opt-sparse-net
+                                (set-opt-lr! opt-sparse-net (* cur-lr n-mult))))
+                ;; Restore training-mode flags. eval-bpc and ablation-step!
+                ;; flip submodules to eval mode but never flip them back —
+                ;; without this call, Local Bank's `if self.training:`
+                        (let [[x y tids] (batch-multi-trunk train-data n-trunks B-cur T)]
+                          [x y nil tids])
+                      :else
+                        (let [[x y] (batch train-data B-cur T)]
+                          [x y nil nil]))
+                ;; #9 spike: with probability `pause-prob`, replace
+                ;; the first `pause-n` bytes of x with the pause byte.
+                ;; In-place mutation; y untouched.
+                _     (when (pos? (pick-pause-bytes))
+                        (maybe-inject-pause-prefix!
+                          x (pick-pause-bytes) (pick-pause-prob) (pick-pause-byte-val)))
+                ;; Stash current step + total on metrics so collect-distill-loss
+                ;; can read the cosine-scheduled coefficient. Avoids threading
+                ;; step/total through train-step's signature. `step'` (inc step)
+                ;; is bound later in this let; use `step` (loop var) which is
+                ;; in scope here.
+                _     (when-let [metrics (:metrics m)]
+                        (.__setitem__ metrics "current_step" step)
+<<<MISSING line 4980>>>
+<<<MISSING line 4981>>>
+<<<MISSING line 4982>>>
+<<<MISSING line 4983>>>
+                      :else
+                        (let [[x y] (batch train-data B-cur T)]
+                          [x y nil nil]))
+                ;; #9 spike: with probability `pause-prob`, replace
+                ;; the first `pause-n` bytes of x with the pause byte.
+                ;; In-place mutation; y untouched.
+                _     (when (pos? (pick-pause-bytes))
+                        (maybe-inject-pause-prefix!
+                          x (pick-pause-bytes) (pick-pause-prob) (pick-pause-byte-val)))
+<<<MISSING line 4993>>>
+<<<MISSING line 4994>>>
+<<<MISSING line 4995>>>
+<<<MISSING line 4996>>>
+<<<MISSING line 4997>>>
+<<<MISSING line 4998>>>
+<<<MISSING line 4999>>>
+<<<MISSING line 5000>>>
+<<<MISSING line 5001>>>
+<<<MISSING line 5002>>>
+<<<MISSING line 5003>>>
+<<<MISSING line 5004>>>
+<<<MISSING line 5005>>>
+<<<MISSING line 5006>>>
+<<<MISSING line 5007>>>
+<<<MISSING line 5008>>>
+<<<MISSING line 5009>>>
+<<<MISSING line 5010>>>
+<<<MISSING line 5011>>>
+<<<MISSING line 5012>>>
+<<<MISSING line 5013>>>
+<<<MISSING line 5014>>>
+<<<MISSING line 5015>>>
+<<<MISSING line 5016>>>
+<<<MISSING line 5017>>>
+<<<MISSING line 5018>>>
+<<<MISSING line 5019>>>
+<<<MISSING line 5020>>>
+<<<MISSING line 5021>>>
+<<<MISSING line 5022>>>
+<<<MISSING line 5023>>>
+<<<MISSING line 5024>>>
+<<<MISSING line 5025>>>
+<<<MISSING line 5026>>>
+<<<MISSING line 5027>>>
+<<<MISSING line 5028>>>
+<<<MISSING line 5029>>>
+<<<MISSING line 5030>>>
+<<<MISSING line 5031>>>
+<<<MISSING line 5032>>>
+<<<MISSING line 5033>>>
+<<<MISSING line 5034>>>
+<<<MISSING line 5035>>>
+<<<MISSING line 5036>>>
+<<<MISSING line 5037>>>
+<<<MISSING line 5038>>>
+<<<MISSING line 5039>>>
+<<<MISSING line 5040>>>
+<<<MISSING line 5041>>>
+<<<MISSING line 5042>>>
+<<<MISSING line 5043>>>
+<<<MISSING line 5044>>>
+<<<MISSING line 5045>>>
+<<<MISSING line 5046>>>
+<<<MISSING line 5047>>>
+<<<MISSING line 5048>>>
+<<<MISSING line 5049>>>
+<<<MISSING line 5050>>>
+<<<MISSING line 5051>>>
+<<<MISSING line 5052>>>
+<<<MISSING line 5053>>>
+<<<MISSING line 5054>>>
+<<<MISSING line 5055>>>
+<<<MISSING line 5056>>>
+<<<MISSING line 5057>>>
+<<<MISSING line 5058>>>
+<<<MISSING line 5059>>>
+<<<MISSING line 5060>>>
+<<<MISSING line 5061>>>
+<<<MISSING line 5062>>>
+<<<MISSING line 5063>>>
+<<<MISSING line 5064>>>
+<<<MISSING line 5065>>>
+<<<MISSING line 5066>>>
+<<<MISSING line 5067>>>
+<<<MISSING line 5068>>>
+<<<MISSING line 5069>>>
+<<<MISSING line 5070>>>
+<<<MISSING line 5071>>>
+<<<MISSING line 5072>>>
+<<<MISSING line 5073>>>
+<<<MISSING line 5074>>>
+<<<MISSING line 5075>>>
+<<<MISSING line 5076>>>
+<<<MISSING line 5077>>>
+<<<MISSING line 5078>>>
+<<<MISSING line 5079>>>
+<<<MISSING line 5080>>>
+<<<MISSING line 5081>>>
+<<<MISSING line 5082>>>
+<<<MISSING line 5083>>>
+<<<MISSING line 5084>>>
+<<<MISSING line 5085>>>
+<<<MISSING line 5086>>>
+<<<MISSING line 5087>>>
+<<<MISSING line 5088>>>
+<<<MISSING line 5089>>>
+<<<MISSING line 5090>>>
+<<<MISSING line 5091>>>
+<<<MISSING line 5092>>>
+<<<MISSING line 5093>>>
+<<<MISSING line 5094>>>
+<<<MISSING line 5095>>>
+<<<MISSING line 5096>>>
+<<<MISSING line 5097>>>
+<<<MISSING line 5098>>>
+<<<MISSING line 5099>>>
+<<<MISSING line 5100>>>
+<<<MISSING line 5101>>>
+<<<MISSING line 5102>>>
+<<<MISSING line 5103>>>
+<<<MISSING line 5104>>>
+<<<MISSING line 5105>>>
+<<<MISSING line 5106>>>
+<<<MISSING line 5107>>>
+<<<MISSING line 5108>>>
+<<<MISSING line 5109>>>
+<<<MISSING line 5110>>>
+<<<MISSING line 5111>>>
+<<<MISSING line 5112>>>
+<<<MISSING line 5113>>>
+<<<MISSING line 5114>>>
+<<<MISSING line 5115>>>
+<<<MISSING line 5116>>>
+<<<MISSING line 5117>>>
+<<<MISSING line 5118>>>
+<<<MISSING line 5119>>>
+<<<MISSING line 5120>>>
+<<<MISSING line 5121>>>
+<<<MISSING line 5122>>>
+<<<MISSING line 5123>>>
+<<<MISSING line 5124>>>
+<<<MISSING line 5125>>>
+<<<MISSING line 5126>>>
+<<<MISSING line 5127>>>
+<<<MISSING line 5128>>>
+<<<MISSING line 5129>>>
+<<<MISSING line 5130>>>
+<<<MISSING line 5131>>>
+<<<MISSING line 5132>>>
+<<<MISSING line 5133>>>
+<<<MISSING line 5134>>>
+<<<MISSING line 5135>>>
+<<<MISSING line 5136>>>
+<<<MISSING line 5137>>>
+<<<MISSING line 5138>>>
+<<<MISSING line 5139>>>
+<<<MISSING line 5140>>>
+<<<MISSING line 5141>>>
+<<<MISSING line 5142>>>
+<<<MISSING line 5143>>>
+<<<MISSING line 5144>>>
+<<<MISSING line 5145>>>
+<<<MISSING line 5146>>>
+<<<MISSING line 5147>>>
+<<<MISSING line 5148>>>
+<<<MISSING line 5149>>>
+<<<MISSING line 5150>>>
+<<<MISSING line 5151>>>
+<<<MISSING line 5152>>>
+<<<MISSING line 5153>>>
+<<<MISSING line 5154>>>
+<<<MISSING line 5155>>>
+<<<MISSING line 5156>>>
+<<<MISSING line 5157>>>
+<<<MISSING line 5158>>>
+<<<MISSING line 5159>>>
+<<<MISSING line 5160>>>
+<<<MISSING line 5161>>>
+<<<MISSING line 5162>>>
+<<<MISSING line 5163>>>
+<<<MISSING line 5164>>>
+<<<MISSING line 5165>>>
+<<<MISSING line 5166>>>
+<<<MISSING line 5167>>>
+<<<MISSING line 5168>>>
+<<<MISSING line 5169>>>
+<<<MISSING line 5170>>>
+<<<MISSING line 5171>>>
+<<<MISSING line 5172>>>
+<<<MISSING line 5173>>>
+<<<MISSING line 5174>>>
+<<<MISSING line 5175>>>
+<<<MISSING line 5176>>>
+<<<MISSING line 5177>>>
+<<<MISSING line 5178>>>
+<<<MISSING line 5179>>>
+<<<MISSING line 5180>>>
+<<<MISSING line 5181>>>
+<<<MISSING line 5182>>>
+<<<MISSING line 5183>>>
+<<<MISSING line 5184>>>
+<<<MISSING line 5185>>>
+<<<MISSING line 5186>>>
+<<<MISSING line 5187>>>
+<<<MISSING line 5188>>>
+<<<MISSING line 5189>>>
+<<<MISSING line 5190>>>
+<<<MISSING line 5191>>>
+<<<MISSING line 5192>>>
+<<<MISSING line 5193>>>
+<<<MISSING line 5194>>>
+<<<MISSING line 5195>>>
+<<<MISSING line 5196>>>
+<<<MISSING line 5197>>>
+<<<MISSING line 5198>>>
+<<<MISSING line 5199>>>
+<<<MISSING line 5200>>>
+<<<MISSING line 5201>>>
+<<<MISSING line 5202>>>
+<<<MISSING line 5203>>>
+<<<MISSING line 5204>>>
+<<<MISSING line 5205>>>
+<<<MISSING line 5206>>>
+<<<MISSING line 5207>>>
+<<<MISSING line 5208>>>
+<<<MISSING line 5209>>>
+<<<MISSING line 5210>>>
+<<<MISSING line 5211>>>
+<<<MISSING line 5212>>>
+<<<MISSING line 5213>>>
+<<<MISSING line 5214>>>
+<<<MISSING line 5215>>>
+<<<MISSING line 5216>>>
+<<<MISSING line 5217>>>
+<<<MISSING line 5218>>>
+<<<MISSING line 5219>>>
+<<<MISSING line 5220>>>
+<<<MISSING line 5221>>>
+<<<MISSING line 5222>>>
+<<<MISSING line 5223>>>
+<<<MISSING line 5224>>>
+<<<MISSING line 5225>>>
+<<<MISSING line 5226>>>
+<<<MISSING line 5227>>>
+<<<MISSING line 5228>>>
+<<<MISSING line 5229>>>
+<<<MISSING line 5230>>>
+<<<MISSING line 5231>>>
+<<<MISSING line 5232>>>
+<<<MISSING line 5233>>>
+<<<MISSING line 5234>>>
+<<<MISSING line 5235>>>
+<<<MISSING line 5236>>>
+<<<MISSING line 5237>>>
+<<<MISSING line 5238>>>
+<<<MISSING line 5239>>>
+<<<MISSING line 5240>>>
+<<<MISSING line 5241>>>
+<<<MISSING line 5242>>>
+<<<MISSING line 5243>>>
+<<<MISSING line 5244>>>
+<<<MISSING line 5245>>>
+<<<MISSING line 5246>>>
+<<<MISSING line 5247>>>
+<<<MISSING line 5248>>>
+<<<MISSING line 5249>>>
+<<<MISSING line 5250>>>
+<<<MISSING line 5251>>>
+<<<MISSING line 5252>>>
+<<<MISSING line 5253>>>
+<<<MISSING line 5254>>>
+<<<MISSING line 5255>>>
+<<<MISSING line 5256>>>
+<<<MISSING line 5257>>>
+<<<MISSING line 5258>>>
+<<<MISSING line 5259>>>
+<<<MISSING line 5260>>>
+<<<MISSING line 5261>>>
+<<<MISSING line 5262>>>
+<<<MISSING line 5263>>>
+<<<MISSING line 5264>>>
+<<<MISSING line 5265>>>
+<<<MISSING line 5266>>>
+<<<MISSING line 5267>>>
+<<<MISSING line 5268>>>
+<<<MISSING line 5269>>>
+<<<MISSING line 5270>>>
+<<<MISSING line 5271>>>
+<<<MISSING line 5272>>>
+<<<MISSING line 5273>>>
+<<<MISSING line 5274>>>
+<<<MISSING line 5275>>>
+<<<MISSING line 5276>>>
+<<<MISSING line 5277>>>
+<<<MISSING line 5278>>>
+<<<MISSING line 5279>>>
+<<<MISSING line 5280>>>
+<<<MISSING line 5281>>>
+<<<MISSING line 5282>>>
+<<<MISSING line 5283>>>
+<<<MISSING line 5284>>>
+<<<MISSING line 5285>>>
+<<<MISSING line 5286>>>
+<<<MISSING line 5287>>>
+<<<MISSING line 5288>>>
+<<<MISSING line 5289>>>
+<<<MISSING line 5290>>>
+<<<MISSING line 5291>>>
+<<<MISSING line 5292>>>
+<<<MISSING line 5293>>>
+<<<MISSING line 5294>>>
+<<<MISSING line 5295>>>
+<<<MISSING line 5296>>>
+<<<MISSING line 5297>>>
+<<<MISSING line 5298>>>
+<<<MISSING line 5299>>>
+<<<MISSING line 5300>>>
+<<<MISSING line 5301>>>
+<<<MISSING line 5302>>>
+<<<MISSING line 5303>>>
+<<<MISSING line 5304>>>
+<<<MISSING line 5305>>>
+<<<MISSING line 5306>>>
+<<<MISSING line 5307>>>
+<<<MISSING line 5308>>>
+<<<MISSING line 5309>>>
+<<<MISSING line 5310>>>
+<<<MISSING line 5311>>>
+<<<MISSING line 5312>>>
+<<<MISSING line 5313>>>
+<<<MISSING line 5314>>>
+<<<MISSING line 5315>>>
+<<<MISSING line 5316>>>
+<<<MISSING line 5317>>>
+<<<MISSING line 5318>>>
+<<<MISSING line 5319>>>
+<<<MISSING line 5320>>>
+<<<MISSING line 5321>>>
+<<<MISSING line 5322>>>
+<<<MISSING line 5323>>>
+<<<MISSING line 5324>>>
+<<<MISSING line 5325>>>
+<<<MISSING line 5326>>>
+<<<MISSING line 5327>>>
+<<<MISSING line 5328>>>
+<<<MISSING line 5329>>>
+<<<MISSING line 5330>>>
+<<<MISSING line 5331>>>
+<<<MISSING line 5332>>>
+<<<MISSING line 5333>>>
+<<<MISSING line 5334>>>
+<<<MISSING line 5335>>>
+<<<MISSING line 5336>>>
+<<<MISSING line 5337>>>
+<<<MISSING line 5338>>>
+<<<MISSING line 5339>>>
+<<<MISSING line 5340>>>
+<<<MISSING line 5341>>>
+<<<MISSING line 5342>>>
+<<<MISSING line 5343>>>
+<<<MISSING line 5344>>>
+<<<MISSING line 5345>>>
+<<<MISSING line 5346>>>
+<<<MISSING line 5347>>>
+<<<MISSING line 5348>>>
+<<<MISSING line 5349>>>
+<<<MISSING line 5350>>>
+<<<MISSING line 5351>>>
+<<<MISSING line 5352>>>
+<<<MISSING line 5353>>>
+<<<MISSING line 5354>>>
+<<<MISSING line 5355>>>
+<<<MISSING line 5356>>>
+<<<MISSING line 5357>>>
+<<<MISSING line 5358>>>
+<<<MISSING line 5359>>>
+<<<MISSING line 5360>>>
+<<<MISSING line 5361>>>
+<<<MISSING line 5362>>>
+<<<MISSING line 5363>>>
+<<<MISSING line 5364>>>
+<<<MISSING line 5365>>>
+<<<MISSING line 5366>>>
+<<<MISSING line 5367>>>
+<<<MISSING line 5368>>>
+<<<MISSING line 5369>>>
+<<<MISSING line 5370>>>
+<<<MISSING line 5371>>>
+<<<MISSING line 5372>>>
+<<<MISSING line 5373>>>
+<<<MISSING line 5374>>>
+<<<MISSING line 5375>>>
+<<<MISSING line 5376>>>
+<<<MISSING line 5377>>>
+<<<MISSING line 5378>>>
+<<<MISSING line 5379>>>
+<<<MISSING line 5380>>>
+<<<MISSING line 5381>>>
+<<<MISSING line 5382>>>
+<<<MISSING line 5383>>>
+<<<MISSING line 5384>>>
+<<<MISSING line 5385>>>
+<<<MISSING line 5386>>>
+<<<MISSING line 5387>>>
+<<<MISSING line 5388>>>
+<<<MISSING line 5389>>>
+<<<MISSING line 5390>>>
+<<<MISSING line 5391>>>
+<<<MISSING line 5392>>>
+<<<MISSING line 5393>>>
+<<<MISSING line 5394>>>
+<<<MISSING line 5395>>>
+<<<MISSING line 5396>>>
+<<<MISSING line 5397>>>
+<<<MISSING line 5398>>>
+<<<MISSING line 5399>>>
+<<<MISSING line 5400>>>
+<<<MISSING line 5401>>>
+<<<MISSING line 5402>>>
+<<<MISSING line 5403>>>
+<<<MISSING line 5404>>>
+<<<MISSING line 5405>>>
+<<<MISSING line 5406>>>
+<<<MISSING line 5407>>>
+<<<MISSING line 5408>>>
+<<<MISSING line 5409>>>
+<<<MISSING line 5410>>>
+<<<MISSING line 5411>>>
+<<<MISSING line 5412>>>
+<<<MISSING line 5413>>>
+<<<MISSING line 5414>>>
+<<<MISSING line 5415>>>
+<<<MISSING line 5416>>>
+<<<MISSING line 5417>>>
+<<<MISSING line 5418>>>
+<<<MISSING line 5419>>>
+<<<MISSING line 5420>>>
+<<<MISSING line 5421>>>
+<<<MISSING line 5422>>>
+<<<MISSING line 5423>>>
+<<<MISSING line 5424>>>
+<<<MISSING line 5425>>>
+<<<MISSING line 5426>>>
+<<<MISSING line 5427>>>
+<<<MISSING line 5428>>>
+<<<MISSING line 5429>>>
+<<<MISSING line 5430>>>
+<<<MISSING line 5431>>>
+<<<MISSING line 5432>>>
+<<<MISSING line 5433>>>
+<<<MISSING line 5434>>>
+<<<MISSING line 5435>>>
+<<<MISSING line 5436>>>
+<<<MISSING line 5437>>>
+<<<MISSING line 5438>>>
+<<<MISSING line 5439>>>
+<<<MISSING line 5440>>>
+<<<MISSING line 5441>>>
+<<<MISSING line 5442>>>
+<<<MISSING line 5443>>>
+<<<MISSING line 5444>>>
+<<<MISSING line 5445>>>
+<<<MISSING line 5446>>>
+<<<MISSING line 5447>>>
+<<<MISSING line 5448>>>
+<<<MISSING line 5449>>>
+<<<MISSING line 5450>>>
+<<<MISSING line 5451>>>
+<<<MISSING line 5452>>>
+<<<MISSING line 5453>>>
+<<<MISSING line 5454>>>
+<<<MISSING line 5455>>>
+<<<MISSING line 5456>>>
+<<<MISSING line 5457>>>
+<<<MISSING line 5458>>>
+<<<MISSING line 5459>>>
+<<<MISSING line 5460>>>
+<<<MISSING line 5461>>>
+<<<MISSING line 5462>>>
+<<<MISSING line 5463>>>
+<<<MISSING line 5464>>>
+<<<MISSING line 5465>>>
+<<<MISSING line 5466>>>
+<<<MISSING line 5467>>>
+<<<MISSING line 5468>>>
+<<<MISSING line 5469>>>
+<<<MISSING line 5470>>>
+<<<MISSING line 5471>>>
+<<<MISSING line 5472>>>
+<<<MISSING line 5473>>>
+<<<MISSING line 5474>>>
+<<<MISSING line 5475>>>
+<<<MISSING line 5476>>>
+<<<MISSING line 5477>>>
+<<<MISSING line 5478>>>
+<<<MISSING line 5479>>>
+<<<MISSING line 5480>>>
+<<<MISSING line 5481>>>
+<<<MISSING line 5482>>>
+<<<MISSING line 5483>>>
+<<<MISSING line 5484>>>
+<<<MISSING line 5485>>>
+<<<MISSING line 5486>>>
+<<<MISSING line 5487>>>
+<<<MISSING line 5488>>>
+<<<MISSING line 5489>>>
+<<<MISSING line 5490>>>
+<<<MISSING line 5491>>>
+<<<MISSING line 5492>>>
+<<<MISSING line 5493>>>
+<<<MISSING line 5494>>>
+<<<MISSING line 5495>>>
+<<<MISSING line 5496>>>
+<<<MISSING line 5497>>>
+<<<MISSING line 5498>>>
+<<<MISSING line 5499>>>
+<<<MISSING line 5500>>>
+<<<MISSING line 5501>>>
+<<<MISSING line 5502>>>
+<<<MISSING line 5503>>>
+<<<MISSING line 5504>>>
+<<<MISSING line 5505>>>
+<<<MISSING line 5506>>>
+<<<MISSING line 5507>>>
+<<<MISSING line 5508>>>
+<<<MISSING line 5509>>>
+<<<MISSING line 5510>>>
+<<<MISSING line 5511>>>
+<<<MISSING line 5512>>>
+<<<MISSING line 5513>>>
+<<<MISSING line 5514>>>
+<<<MISSING line 5515>>>
+<<<MISSING line 5516>>>
+<<<MISSING line 5517>>>
+<<<MISSING line 5518>>>
+<<<MISSING line 5519>>>
+<<<MISSING line 5520>>>
+<<<MISSING line 5521>>>
+<<<MISSING line 5522>>>
+<<<MISSING line 5523>>>
+<<<MISSING line 5524>>>
+<<<MISSING line 5525>>>
+<<<MISSING line 5526>>>
+<<<MISSING line 5527>>>
+<<<MISSING line 5528>>>
+<<<MISSING line 5529>>>
+<<<MISSING line 5530>>>
+<<<MISSING line 5531>>>
+<<<MISSING line 5532>>>
+<<<MISSING line 5533>>>
+<<<MISSING line 5534>>>
+<<<MISSING line 5535>>>
+<<<MISSING line 5536>>>
+<<<MISSING line 5537>>>
+<<<MISSING line 5538>>>
+<<<MISSING line 5539>>>
+<<<MISSING line 5540>>>
+<<<MISSING line 5541>>>
+<<<MISSING line 5542>>>
+<<<MISSING line 5543>>>
+<<<MISSING line 5544>>>
+(defn- pick-config [arg]
+  (case arg
+    "long" long-leaning-config
+    default-config))
+
+(defn cli-main []
+  ;; Tune CPU thread counts before any torch op runs (set_num_interop_threads
+  ;; is one-shot per process). Wrapped in try because it raises if any
+  ;; parallel torch work has already happened — e.g., on basilisp re-bootstrap.
+  (try
+    (let [r (setup-threads!)]
+      (println (format "  threads: %d intra-op / %d inter-op (set MMLLM_NUM_THREADS to override)"
+                       (:n-threads r) (:n-interop r))))
+    (catch python/Exception e
+      (println (format "  threads: setup skipped (%s)" e))))
+  (let [args (vec (rest sys/argv))
+        cmd  (first args)
+<<<MISSING line 5562>>>
+<<<MISSING line 5563>>>
+<<<MISSING line 5564>>>
+<<<MISSING line 5565>>>
+<<<MISSING line 5566>>>
+<<<MISSING line 5567>>>
+<<<MISSING line 5568>>>
+<<<MISSING line 5569>>>
+<<<MISSING line 5570>>>
+<<<MISSING line 5571>>>
+<<<MISSING line 5572>>>
+<<<MISSING line 5573>>>
+<<<MISSING line 5574>>>
+<<<MISSING line 5575>>>
+<<<MISSING line 5576>>>
+<<<MISSING line 5577>>>
+<<<MISSING line 5578>>>
+<<<MISSING line 5579>>>
+<<<MISSING line 5580>>>
+<<<MISSING line 5581>>>
+<<<MISSING line 5582>>>
+<<<MISSING line 5583>>>
+<<<MISSING line 5584>>>
+<<<MISSING line 5585>>>
+<<<MISSING line 5586>>>
+<<<MISSING line 5587>>>
+<<<MISSING line 5588>>>
+<<<MISSING line 5589>>>
+<<<MISSING line 5590>>>
+<<<MISSING line 5591>>>
+<<<MISSING line 5592>>>
+<<<MISSING line 5593>>>
+<<<MISSING line 5594>>>
+<<<MISSING line 5595>>>
+<<<MISSING line 5596>>>
+<<<MISSING line 5597>>>
+<<<MISSING line 5598>>>
+<<<MISSING line 5599>>>
+<<<MISSING line 5600>>>
+<<<MISSING line 5601>>>
+<<<MISSING line 5602>>>
+<<<MISSING line 5603>>>
+<<<MISSING line 5604>>>
+<<<MISSING line 5605>>>
+<<<MISSING line 5606>>>
+<<<MISSING line 5607>>>
+<<<MISSING line 5608>>>
+<<<MISSING line 5609>>>
+<<<MISSING line 5610>>>
+<<<MISSING line 5611>>>
+<<<MISSING line 5612>>>
+<<<MISSING line 5613>>>
+<<<MISSING line 5614>>>
+<<<MISSING line 5615>>>
+<<<MISSING line 5616>>>
+<<<MISSING line 5617>>>
+<<<MISSING line 5618>>>
+<<<MISSING line 5619>>>
+<<<MISSING line 5620>>>
+<<<MISSING line 5621>>>
+<<<MISSING line 5622>>>
+<<<MISSING line 5623>>>
+<<<MISSING line 5624>>>
+<<<MISSING line 5625>>>
+<<<MISSING line 5626>>>
+<<<MISSING line 5627>>>
+<<<MISSING line 5628>>>
+<<<MISSING line 5629>>>
+<<<MISSING line 5630>>>
+<<<MISSING line 5631>>>
+<<<MISSING line 5632>>>
+<<<MISSING line 5633>>>
+<<<MISSING line 5634>>>
+<<<MISSING line 5635>>>
+<<<MISSING line 5636>>>
+<<<MISSING line 5637>>>
+<<<MISSING line 5638>>>
+      "train-long"    (let [base       (or (second args) "/tmp/text8")
+                            mpath      (nth args 2 nil)
+                            total      (python/int (or (nth args 3 nil) 10000))
+                            eval-every (python/int (or (nth args 4 nil) 1000))
+                            ckpt-every (python/int (or (nth args 5 nil) 5000))
+                            train-path (str base ".train.bin")
+                            val-path   (str base ".val.bin")
+                            ckpt-dir   (str base ".ckpts")
+                            log-path   (str base ".log.jsonl")
+                            cfg2       (if mpath (assoc cfg :memory-mmap-path mpath) cfg)]
+                        (train-long cfg2 train-path val-path ckpt-dir log-path
+                                    total eval-every ckpt-every)
+                        (println "done."))
+      "fim-eval"      (let [ckpt-dir  (or (second args) "/tmp/mmllm-cpu/fim-corpus.ckpts")
+                            eval-path (or (nth args 2 nil) "/tmp/mmllm-cpu/fim-eval.jsonl")
+                            ckpt-step (when (nth args 3 nil)
+                                        (python/int (nth args 3 nil)))
+                            fim-eval  (python/__import__ "mmllm.fim.eval" ** :fromlist (python/list ["run_fim_eval" "print_summary"]))
+                            ;; Build a fresh CPU model with cpu-tiny config + load the ckpt
+                            cfg2      (assoc default-config-cpu-tiny
+                                             :memory-mmap-path "/tmp/mmllm-cpu/fim-eval-bank")]
+                        (when (nil? (.get (.- os environ) "MMLLM_DEVICE")) (.__setitem__ (.- os environ) "MMLLM_DEVICE" "cpu"))
+                        (.__setitem__ (.- os environ) "MMLLM_BANK_ON_GPU" "false")
+                        (let [m            (build-model cfg2)
+                              opt-dense    (optim/AdamW (python/list (parameters m)) ** :lr 1e-3)
+                              opt-sparse   (optim/SparseAdam (python/list (sparse-parameters m)) ** :lr 1e-3)
+                              ckpt-dir-py  (python/str ckpt-dir)
+                              ;; Resolve ckpt step (latest if not specified)
+                              actual-step  (or ckpt-step
+                                               (let [os-py    (python/__import__ "os")
+                                                     re-py    (python/__import__ "re")
+                                                     entries  (python/list (.listdir os-py ckpt-dir-py))
+                                                     step-dirs (python/list (filter (fn [n] (.startswith n "step-")) entries))
+                                                     steps    (python/list (map (fn [n] (python/int (.replace n "step-" ""))) step-dirs))]
+                                                 (if (zero? (count steps))
+                                                   (do (println "no ckpts found at " ckpt-dir-py) (sys/exit 1))
+                                                   (apply max steps))))]
+                          (println (format "  fim-eval: ckpt=%s/step-%d  eval=%s"
+                                           ckpt-dir actual-step eval-path))
+                          (load-checkpoint! m opt-dense opt-sparse ckpt-dir actual-step)
+<<<MISSING line 5679>>>
+<<<MISSING line 5680>>>
+<<<MISSING line 5681>>>
+<<<MISSING line 5682>>>
+<<<MISSING line 5683>>>
+<<<MISSING line 5684>>>
+<<<MISSING line 5685>>>
+<<<MISSING line 5686>>>
+<<<MISSING line 5687>>>
+<<<MISSING line 5688>>>
+<<<MISSING line 5689>>>
+<<<MISSING line 5690>>>
+<<<MISSING line 5691>>>
+<<<MISSING line 5692>>>
+<<<MISSING line 5693>>>
+<<<MISSING line 5694>>>
+<<<MISSING line 5695>>>
+<<<MISSING line 5696>>>
+<<<MISSING line 5697>>>
+<<<MISSING line 5698>>>
+<<<MISSING line 5699>>>
+<<<MISSING line 5700>>>
+<<<MISSING line 5701>>>
+<<<MISSING line 5702>>>
+<<<MISSING line 5703>>>
+<<<MISSING line 5704>>>
+<<<MISSING line 5705>>>
+<<<MISSING line 5706>>>
+<<<MISSING line 5707>>>
+<<<MISSING line 5708>>>
+<<<MISSING line 5709>>>
+<<<MISSING line 5710>>>
+<<<MISSING line 5711>>>
+<<<MISSING line 5712>>>
+<<<MISSING line 5713>>>
+<<<MISSING line 5714>>>
+<<<MISSING line 5715>>>
+<<<MISSING line 5716>>>
+<<<MISSING line 5717>>>
+<<<MISSING line 5718>>>
+<<<MISSING line 5719>>>
+<<<MISSING line 5720>>>
+<<<MISSING line 5721>>>
+<<<MISSING line 5722>>>
+<<<MISSING line 5723>>>
+<<<MISSING line 5724>>>
+<<<MISSING line 5725>>>
+<<<MISSING line 5726>>>
+<<<MISSING line 5727>>>
+<<<MISSING line 5728>>>
+<<<MISSING line 5729>>>
+<<<MISSING line 5730>>>
+<<<MISSING line 5731>>>
+<<<MISSING line 5732>>>
+<<<MISSING line 5733>>>
+<<<MISSING line 5734>>>
+<<<MISSING line 5735>>>
+<<<MISSING line 5736>>>
+<<<MISSING line 5737>>>
+<<<MISSING line 5738>>>
+<<<MISSING line 5739>>>
+<<<MISSING line 5740>>>
+<<<MISSING line 5741>>>
+<<<MISSING line 5742>>>
+<<<MISSING line 5743>>>
+<<<MISSING line 5744>>>
+<<<MISSING line 5745>>>
+<<<MISSING line 5746>>>
+<<<MISSING line 5747>>>
+<<<MISSING line 5748>>>
+<<<MISSING line 5749>>>
+<<<MISSING line 5750>>>
+<<<MISSING line 5751>>>
+<<<MISSING line 5752>>>
+<<<MISSING line 5753>>>
+<<<MISSING line 5754>>>
+<<<MISSING line 5755>>>
+<<<MISSING line 5756>>>
+<<<MISSING line 5757>>>
+<<<MISSING line 5758>>>
+<<<MISSING line 5759>>>
+<<<MISSING line 5760>>>
+<<<MISSING line 5761>>>
+<<<MISSING line 5762>>>
+<<<MISSING line 5763>>>
+<<<MISSING line 5764>>>
+<<<MISSING line 5765>>>
+<<<MISSING line 5766>>>
+<<<MISSING line 5767>>>
+<<<MISSING line 5768>>>
+<<<MISSING line 5769>>>
+<<<MISSING line 5770>>>
+<<<MISSING line 5771>>>
+<<<MISSING line 5772>>>
+<<<MISSING line 5773>>>
+<<<MISSING line 5774>>>
+<<<MISSING line 5775>>>
+<<<MISSING line 5776>>>
+<<<MISSING line 5777>>>
+<<<MISSING line 5778>>>
+<<<MISSING line 5779>>>
+<<<MISSING line 5780>>>
+<<<MISSING line 5781>>>
+<<<MISSING line 5782>>>
+<<<MISSING line 5783>>>
+<<<MISSING line 5784>>>
+<<<MISSING line 5785>>>
+<<<MISSING line 5786>>>
+<<<MISSING line 5787>>>
+<<<MISSING line 5788>>>
+<<<MISSING line 5789>>>
+<<<MISSING line 5790>>>
+<<<MISSING line 5791>>>
+<<<MISSING line 5792>>>
+<<<MISSING line 5793>>>
+<<<MISSING line 5794>>>
+<<<MISSING line 5795>>>
+<<<MISSING line 5796>>>
+<<<MISSING line 5797>>>
+<<<MISSING line 5798>>>
+<<<MISSING line 5799>>>
+<<<MISSING line 5800>>>
+<<<MISSING line 5801>>>
+<<<MISSING line 5802>>>
+<<<MISSING line 5803>>>
+<<<MISSING line 5804>>>
+                            (python/exit 2))
+                          (when (nil? (.get (.- os environ) "MMLLM_DEVICE")) (.__setitem__ (.- os environ) "MMLLM_DEVICE" "cpu"))
+                          (when (nil? (.get (.- os environ) "MMLLM_BANK_ON_GPU"))
+                            (.__setitem__ (.- os environ) "MMLLM_BANK_ON_GPU" "false"))
+                          (os/makedirs target-dir ** :exist_ok true)
+                          ;; Pre-allocate NetBank V_net.{i}.bin files with random
+                          ;; Gaussian init — pure-python helper in mmllm.netbank.
+                          (let [netb (python/__import__ "mmllm.netbank"
+                                                        ** :fromlist (python/list ["prepare_netbank_files"]))
+                                n-layers (:n-layers default-config-cpu-mini)
+                                sqrt-n   (python/int (or (.get (.- os environ) "MMLLM_NET_SQRT_N") "1024"))
+                                c-net    (python/int (or (.get (.- os environ) "MMLLM_NET_C_NET") "8"))
+                                _ (.prepare_netbank_files netb
+                                                          (str target-dir "/V_net")
+                                                          n-layers sqrt-n c-net)
+                                ;; Point the build at the freshly-allocated mmaps.
+                                _ (.__setitem__ (.- os environ) "MMLLM_NET_BANK_PATH"
+                                                (str target-dir "/V_net"))
+                                cfg     (assoc default-config-cpu-mini
+                                               :memory-mmap-path (str target-dir "/local"))
+                                m       (build-model cfg)
+                                params  (python/list (for [p (parameters m)]
