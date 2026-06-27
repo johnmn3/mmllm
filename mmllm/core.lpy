@@ -283,6 +283,38 @@
   []
   (python/float (.get (.- os environ) "MMLLM_NET_ROUTER_AUX_COEF" "0.1")))
 
+(defn pick-netbank-n-blocks
+  "Content-addressed hard partition: V_net is split into n_blocks contiguous
+   sqrt_n² slices and q is routed to one via a fixed LSH (argmax q@R), so
+   distinct content gets distinct physical rows (de-collapses retrieval the
+   soft CV² z-loss cannot). Reads MMLLM_NET_N_BLOCKS (default 1 = single block,
+   legacy/byte-identical). Total V rows = n_blocks * sqrt_n²."
+  []
+  (python/int (.get (.- os environ) "MMLLM_NET_N_BLOCKS" "1")))
+
+(defn pick-netbank-vq?
+  "Stage-1 learned VQ routing: replace the fixed random block LSH with a trained
+   codebook (blk = argmax q@C.T) so blocks become semantic clusters rather than
+   random cones. Reads MMLLM_NET_VQ (default off → fixed-LSH). No-op if n_blocks=1."
+  []
+  (= "true" (.lower (.get (.- os environ) "MMLLM_NET_VQ" "false"))))
+
+(defn pick-netbank-coarse
+  "Stage-2 residual-VQ path-sum: number of COARSE clusters m (n_blocks must be
+   divisible by m). code0 = argmax(q@C0.T) picks a SHARED coarse value added to
+   every retrieval in that cluster; residual r1 = q−C0[code0] picks the fine code;
+   leaf block = code0*fpc + fine. Similar q share code0 → share the coarse
+   contribution. Reads MMLLM_NET_COARSE (default 1 = off = Stage 1). Needs MMLLM_NET_VQ."
+  []
+  (python/int (.get (.- os environ) "MMLLM_NET_COARSE" "1")))
+
+(defn pick-netbank-coarse2
+  "Stage-3 (depth-3): branching m1 of a SECOND coarse level (n_blocks must be
+   divisible by n_coarse*m1). code1 from residual r1; coarse2_value indexed by
+   the path code0*m1+code1. Reads MMLLM_NET_COARSE2 (default 1 = off = depth-2)."
+  []
+  (python/int (.get (.- os environ) "MMLLM_NET_COARSE2" "1")))
+
 (defn pick-net-cooled-modules
   "Set of skill-module names whose NetBank is FROZEN/cooled this round (lr→0
    on opt-sparse-net's per-module group). Reads MMLLM_NET_COOL_MODULES ('a,b').
@@ -2018,7 +2050,11 @@
                                            :router_k_load   (pick-netbank-router-k-load)
                                            :router_k_tok    (pick-netbank-router-k-tok)
                                            :router_drive    (pick-netbank-router-drive?)
-                                           :router_gate     (pick-netbank-router-gate))
+                                           :router_gate     (pick-netbank-router-gate)
+                                           :vq_route        (pick-netbank-vq?)
+                                           :n_blocks        (pick-netbank-n-blocks)
+                                           :n_coarse        (pick-netbank-coarse)
+                                           :n_coarse2       (pick-netbank-coarse2))
                       (netb/NetBank q-dim
                                     ** :sqrt_n       (pick-netbank-sqrt-n)
                                     :c_net           (pick-netbank-c-net)
