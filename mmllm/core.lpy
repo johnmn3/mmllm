@@ -1899,17 +1899,39 @@
                               :mmap_path path
                               :n_trunks  (pick-n-trunks)))
      :netbank   (when (pick-netbank-enabled?)
-                  (netb/NetBank q-dim
-                                ** :sqrt_n       (pick-netbank-sqrt-n)
-                                :c_net           (pick-netbank-c-net)
-                                :top_k           (pick-netbank-top-k)
-                                :sub_top_k       (pick-netbank-sub-top-k)
-                                :mmap_path       (when-let [base (pick-netbank-path memory-mmap-path)]
-                                                   (str base "." block-idx ".bin"))
-                                :delay_ms_min    (pick-netbank-delay-min)
-                                :delay_ms_max    (pick-netbank-delay-max)
-                                :dtype           (pick-netbank-dtype)
-                                :bank_on_gpu     (pick-netbank-on-gpu?)))
+                  (let [mod-str (.get (.- os environ) "MMLLM_NET_MODULES" "")
+                        modules (vec (filter seq (.split mod-str ",")))
+                        mbase   (pick-netbank-path memory-mmap-path)]
+                    (if (> (count modules) 1)
+                      ;; MODULAR (reconstructed 2026-06-27): skill-module partition +
+                      ;; learned router. Per-module V file = <base>-net.<module>.<block>.bin.
+                      (netb/ModularNetBank (python/list modules) q-dim
+                                           ** :sqrt_n        (pick-netbank-sqrt-n)
+                                           :c_net            (pick-netbank-c-net)
+                                           :top_k            (pick-netbank-top-k)
+                                           :sub_top_k        (pick-netbank-sub-top-k)
+                                           :mmap_path_fn     (when mbase
+                                                               (fn [nm] (str mbase "-net." nm "." block-idx ".bin")))
+                                           :delay_ms_min     (pick-netbank-delay-min)
+                                           :delay_ms_max     (pick-netbank-delay-max)
+                                           :dtype            (pick-netbank-dtype)
+                                           :bank_on_gpu      (pick-netbank-on-gpu?)
+                                           :router           (= "true" (.lower (.get (.- os environ) "MMLLM_NET_ROUTER" "false")))
+                                           :router_k_load    (python/int (.get (.- os environ) "MMLLM_NET_ROUTER_K_LOAD" "0"))
+                                           :router_k_tok     (python/int (.get (.- os environ) "MMLLM_NET_ROUTER_K_TOK" "2"))
+                                           :router_drive     (= "true" (.lower (.get (.- os environ) "MMLLM_NET_ROUTER_DRIVE" "false"))))
+                      ;; SINGLE (legacy) — unchanged
+                      (netb/NetBank q-dim
+                                    ** :sqrt_n       (pick-netbank-sqrt-n)
+                                    :c_net           (pick-netbank-c-net)
+                                    :top_k           (pick-netbank-top-k)
+                                    :sub_top_k       (pick-netbank-sub-top-k)
+                                    :mmap_path       (when-let [base (pick-netbank-path memory-mmap-path)]
+                                                       (str base "." block-idx ".bin"))
+                                    :delay_ms_min    (pick-netbank-delay-min)
+                                    :delay_ms_max    (pick-netbank-delay-max)
+                                    :dtype           (pick-netbank-dtype)
+                                    :bank_on_gpu     (pick-netbank-on-gpu?)))))
      ;; Optional MultiTimescaleCarry — per-block "brain-stem clocks"
      ;; residual at log-uniform decay rates. Zero-init gate → identity at
      ;; step 0 so adding to an existing ckpt is behavior-preserving;
