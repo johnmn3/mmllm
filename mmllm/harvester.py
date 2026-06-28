@@ -282,6 +282,104 @@ def merge_netbank_files(workers: list[dict], output_dir: Path,
     return True
 
 
+# ─────────────────── versioned (structural-sharing) NetBank merge ───────────────────
+
+
+def _find_base_bin(entry_dirs: list[Path], output_dir: Path,
+                   bi: str, module: str, c: int):
+    """Locate the shared round-start base bin for module key <bi>.<module>.
+
+    ANY bird's published base bin is a valid base: it differs from the true
+    round-start base ONLY on rows that bird touched, and every touched row is in
+    the merge's union (so it gets overwritten by the FedAvg value). Untouched
+    rows are byte-identical to the true base across all birds. We therefore take
+    the first bin we find. Recognised names (newest-first):
+      <prefix>.<module>.<bi>.bin   — live StreamV.materialize() base (fp32)
+      bank-net-latest.<bi>.<module>.bin / output_dir prior harvest (fp32)
+    Returns (base_path: Path|None, N: int|None). N is derived from file size."""
+    cands: list[Path] = []
+    # prior harvest output (the literal "prior-round base"), if a previous round wrote it
+    cands.append(output_dir / f"bank-net-latest.{bi}.{module}.bin")
+    # each worker's published base bin (live modular naming, prefix-agnostic)
+    for d in entry_dirs:
+        cands.extend(sorted(d.rglob(f"*.{module}.{bi}.bin")))
+        cands.append(d / f"bank-net-latest.{bi}.{module}.bin")
+    for p in cands:
+        if p.exists() and p.stat().st_size % (c * 4) == 0 and p.stat().st_size > 0:
+            return p, p.stat().st_size // (c * 4)
+    return None, None
+
+
+def merge_netbank_versioned(workers: list[dict], output_dir: Path,
+                            weighted_by: str = "tokens_trained") -> bool:
+    """MMLLM_NET_VERSIONING harvest: structural-sharing delta merge.
+
+    Instead of averaging whole per-bird NetBank bins, consume the sparse
+    `netver-delta.<bi>.<module>.npz` sidecars each bird emits (the rows it changed
+    vs the round-start base — from StreamV.version_delta) and FedAvg ONLY the union
+    of touched rows onto the shared base, via stream_v.merge_version_deltas.
+    Untouched rows stay == base (shared, never re-averaged) — this is exactly what
+    fixes the dense-delta degeneracy (a mature chain's full V_net is dense vs r0, so
+    full-bin averaging re-touches every row; the sparse path touches only what moved).
+
+    The merged bank is written to output_dir under the base bin's own basename (the
+    same raw-fp32 .bin the round produced and the next round reseeds from). Returns
+    True if any module was merged."""
+    import numpy as np
+    from mmllm.mlx.stream_v import merge_version_deltas
+
+    # 1. discover per-bird delta sidecars, grouped by module key "<bi>.<module>"
+    groups: dict[str, list[dict]] = {}            # key -> [ {rowid -> vec}, ... ] (per bird)
+    group_dirs: dict[str, list[Path]] = {}        # key -> [worker dirs that emitted it]
+    for w in workers:
+        wdir = w["worker_dir"]
+        for f in sorted(wdir.rglob("netver-delta.*.npz")):
+            key = f.name[len("netver-delta."):-len(".npz")]   # "<bi>.<module>"
+            try:
+                npz = np.load(f)
+                rows = np.asarray(npz["rows"]).astype(np.int64).reshape(-1)
+                vals = np.asarray(npz["vals"]).astype(np.float32)
+            except Exception as e:
+                print(f"  WARN: bad delta sidecar {f}: {e}")
+                continue
+            delta = {int(r): vals[i] for i, r in enumerate(rows)}
+            groups.setdefault(key, []).append(delta)
+            group_dirs.setdefault(key, []).append(wdir)
+
+    if not groups:
+        print("  NetBank versioning: no netver-delta.*.npz sidecars found — "
+              "nothing to delta-merge")
+        return False
+
+    output_dir.mkdir(parents=True, exist_ok=True)
+    merged_any = False
+    for key, deltas in sorted(groups.items()):
+        bi, _, module = key.partition(".")
+        # c (latent width) from any non-empty delta
+        c = next((int(np.asarray(v).shape[-1]) for d in deltas for v in d.values()), None)
+        if c is None:
+            print(f"  NetBank versioning: module {key}: all deltas empty — skipped")
+            continue
+        base_path, N = _find_base_bin(group_dirs[key], output_dir, bi, module, c)
+        if N is None:
+            # No base on disk → cold start: base is implicitly zeros. Size N from the
+            # highest touched row (+1) across all birds so untouched rows stay zero.
+            N = 1 + max(int(r) for d in deltas for r in d)
+            base_arg = "<absent-zero-base>"      # merge_version_deltas → zeros base
+        else:
+            base_arg = str(base_path)
+        merged, touched = merge_version_deltas(base_arg, N, c, deltas)   # sparse FedAvg(mean)
+        out_name = base_path.name if base_path is not None else f"bank-net-latest.{bi}.{module}.bin"
+        out_path = output_dir / out_name
+        merged.astype(np.float32).tofile(out_path)
+        n_birds = len(deltas)
+        size_mb = out_path.stat().st_size / 1024**2
+        print(f"  NetBank[v] module {key}: {n_birds} birds, {len(touched)} touched rows "
+              f"(of N={N}) → {out_name} ({size_mb:.1f} MB; untouched rows shared from base)")
+        merged_any = True
+    return merged_any
+
+
 # ─────────────────── main ───────────────────
 
 
@@ -307,8 +405,14 @@ def harvest(workers_dir: Path, output_dir: Path,
     torch.save(averaged, out_dense)
     print(f"  wrote merged dense → {out_dense} ({out_dense.stat().st_size / 1024**2:.1f} MB)")
 
-    # NetBank merge (if any worker carries it)
-    netbank_merged = merge_netbank_files(workers, output_dir, weighted_by=weighted_by)
+    # NetBank merge (if any worker carries it). PHASE D: when MMLLM_NET_VERSIONING is
+    # on, take the structural-sharing delta-merge path (consume per-bird netver-delta
+    # sidecars, FedAvg only touched rows onto the shared base — untouched rows stay
+    # shared). Unset → EXACTLY the current full-bin averaging path, untouched.
+    if os.environ.get("MMLLM_NET_VERSIONING", "").lower() in ("1", "true", "yes"):
+        netbank_merged = merge_netbank_versioned(workers, output_dir, weighted_by=weighted_by)
+    else:
+        netbank_merged = merge_netbank_files(workers, output_dir, weighted_by=weighted_by)
 
     # Aggregate FIM stats across workers (if any reported)
     fim_workers = [w for w in workers
