@@ -484,3 +484,20 @@ in the first week and independently valuable.
 - build-block / build-model / pickers / mtp-head: `mmllm/core.lpy:1943-2065`, `2210-2289`, `286-318`, `2225`, `2729-2762`
 - skill-module path naming: `mmllm/skill_modules.py:63`
 - parity harness: `mmllm/mlx/parity.py`
+
+---
+
+## Roadmap beyond MVP (banked 2026-06-28)
+
+**Key reframe (logical vs structural nesting):** "deep nesting" is what we want *logically* (token⊂line⊂fn⊂module), and that depth comes from the **H-Net stage stack**, NOT the trie. A shallow trie (depth-1/2) is fine as the per-stage *addresser*; deepening the structural trie only buys capacity, not richer recall. So: stack H-Net, keep the trie shallow.
+
+### Phase E — multi-stage H-Net (LOGICAL nesting) — the real "deep nesting"
+- Phase B shipped 1-stage. Stack to 2–3 stages: byte → chunk → super-chunk(→…). Each stage = one logical abstraction level; the super-chunk key *is* a higher-order concept. Avg logical depth 6+ = a few stacked stages, not a 6-deep tree.
+- Each stage's chunk key hits its own shallow trie NetBank (the addresser at that abstraction level) → hierarchical content-addressed memory.
+- Reuses everything: the cosine chunker (Phase B), the trie addresser (Phase A), versioning (Phase D). Mainly: generalize the spine to recurse stages + per-stage netbanks; the ratio loss per stage pins each stage's compression.
+- This is the lever for the user's "6+ deep on average" recall. SPIKE: 2-stage on tiny config, measure whether stage-2 super-chunk keys carry coarser/more-abstract retrieval than stage-1.
+
+### Phase F — lazy-grow sparse StreamV (STRUCTURAL capacity) — DEFERRED
+- The MVP trie is capped at ≤160 leaves because StreamV is a fixed clone of the seed's 160-block bin (`_read_row` preads by raw offset, no EOF guard → crash past 160). This is a *capacity* ceiling, not a depth one.
+- eve-proper: V file sparse + grows KB→TB on demand; only touched leaves materialize; upper nodes resident, leaves LRU-paged (the eve trick). Removes the leaf ceiling → branch-32 structural tries, ~10^9 slots, mostly cold on disk.
+- NOT a prerequisite for logical depth (Phase E delivers that). Do this when capacity (not abstraction depth) is the bottleneck. Pairs with smaller per-leaf V.
