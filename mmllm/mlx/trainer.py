@@ -38,6 +38,36 @@ def _mxa(t):
     return mx.array(_np(t))
 
 
+# ───────────────────────── VQ dead-code revive (shared) ─────────────────────────
+# Standard VQ dead-code split, factored out so the flat block_codebook revive and
+# the Phase-A per-level trie revive (trie_C/trie_A) share ONE implementation.
+def _vq_dead_live(_h, _dead_thresh):
+    """Split a usage histogram into (dead, live-busiest-first) code-index arrays."""
+    _dead = np.nonzero(_h <= _dead_thresh)[0]
+    _live = np.argsort(-_h)
+    _live = _live[_h[_live] > _dead_thresh]               # donors = codes with usage
+    return _dead, _live
+
+
+def _vq_apply_split(_Ck, _dead, _live, _eps):
+    """Reset _Ck[dead] to a perturbed copy of a busy donor (cycled busiest-first),
+    perturbation scaled to the codebook's own std. Mutates and returns _Ck."""
+    _std = float(_Ck.std()) or 1.0
+    for _j, _d in enumerate(_dead):
+        _donor = int(_live[_j % len(_live)])              # cycle over busy codes → split
+        _Ck[_d] = _Ck[_donor] + (np.random.standard_normal(_Ck.shape[1])
+                                 * (_eps * _std)).astype(_Ck.dtype)
+    return _Ck
+
+
+def _zero_adam_moments(_opt, _pth, _rows):
+    """Zero the dense-Adam m/v moments for the given rows of a param (post-revive)
+    so stale momentum doesn't drag the freshly-split centroids back."""
+    for _state in (_opt.m, _opt.v):
+        if _pth in _state:
+            _mm = np.array(_state[_pth]); _mm[_rows] = 0.0; _state[_pth] = mx.array(_mm)
+
+
 def _eps(mod):
     e = getattr(mod, "eps", None)
     return e if e is not None else 1e-6
@@ -1230,10 +1260,11 @@ def train_round(cfg, train_path, val_path, ckpt_dir, log_path,
     _vq_dead_thresh = int(os.environ.get("MMLLM_NET_VQ_REVIVE_DEAD", "0"))
     _vq_eps = float(os.environ.get("MMLLM_NET_VQ_REVIVE_EPS", "0.01"))
     _vq_counts = {}                              # (bi,name) -> np histogram over the window
+    _trie_counts = {}                            # (bi,name) -> [per-level B^L histograms]
     if _vq_revive:
         static["_vq_usage"] = {}                 # _reassemble fills per (bi,name) capture lists
         print(f"  [mlx] VQ dead-code REVIVE on: every {_vq_every} steps, "
-              f"dead<= {_vq_dead_thresh}, eps={_vq_eps}", flush=True)
+              f"dead<= {_vq_dead_thresh}, eps={_vq_eps} (block_codebook + trie_C/trie_A)", flush=True)
     # PHASE A: per-level leaf-fill % logging for the depth-D trie NetBank. On
     # whenever MMLLM_NET_TRIE_DEPTH>0; captures leaf ids in the forward and reports
     # distinct-node fraction per level every _trie_log_every steps.
@@ -1308,34 +1339,79 @@ def train_round(cfg, train_path, val_path, ckpt_dir, log_path,
                 for _b in _lst:
                     _h += np.bincount(np.array(_b).reshape(-1), minlength=_nb_codes)
                 _lst.clear()
+            # 1b) drain captured trie leaf ids into PER-LEVEL node-usage histograms.
+            #    The leaf id IS the full base-B path, so the chosen node at level
+            #    L (heap base[L]=(B^L−1)/(B−1)) has within-level index
+            #    floor(leaf / B^(D−L)); no extra forward capture needed.
+            for (_bi, _nm), _lst in (static.get("_trie_usage") or {}).items():
+                if not _lst:
+                    continue
+                _net = static["blocks"][_bi]["net"]
+                _B = int(_net["net_trie_branch"]); _D = int(_net["net_trie_depth"])
+                _hl = _trie_counts.get((_bi, _nm))
+                if _hl is None:
+                    _hl = [np.zeros(_B ** _L, dtype=np.int64) for _L in range(1, _D + 1)]
+                    _trie_counts[(_bi, _nm)] = _hl
+                for _b in _lst:                          # read-only: trie-logging block clears it
+                    _leaf = np.array(_b).reshape(-1)
+                    for _Li in range(_D):                # level L = _Li+1
+                        _within = _leaf // (_B ** (_D - 1 - _Li))
+                        _hl[_Li] += np.bincount(_within, minlength=_B ** (_Li + 1))
             # 2) every _vq_every steps: split busy centroids onto the dead codes.
             if step % _vq_every == 0:
                 _revived = 0
                 for (_bi, _nm), _h in _vq_counts.items():
-                    _dead = np.nonzero(_h <= _vq_dead_thresh)[0]
-                    _live = np.argsort(-_h)                      # busiest first
-                    _live = _live[_h[_live] > _vq_dead_thresh]   # donors (codes with usage)
+                    _dead, _live = _vq_dead_live(_h, _vq_dead_thresh)
                     if len(_dead) == 0 or len(_live) == 0:
                         _h[:] = 0
                         continue
                     _Ck = np.array(trainable["blocks"][_bi]["netbanks"][_nm]["net_block_codebook"])
-                    _std = float(_Ck.std()) or 1.0
-                    for _j, _d in enumerate(_dead):
-                        _donor = int(_live[_j % len(_live)])     # cycle over busy codes → split
-                        _Ck[_d] = _Ck[_donor] + (np.random.standard_normal(_Ck.shape[1])
-                                                 * (_vq_eps * _std)).astype(_Ck.dtype)
+                    _vq_apply_split(_Ck, _dead, _live, _vq_eps)
                     trainable["blocks"][_bi]["netbanks"][_nm]["net_block_codebook"] = mx.array(_Ck)
-                    # reset the dense-Adam moments for the revived rows (best-effort) so
-                    # stale momentum doesn't drag the fresh centroids back.
-                    _pth = f".blocks.{_bi}.netbanks.{_nm}.net_block_codebook"
-                    for _state in (dense_opt.m, dense_opt.v):
-                        if _pth in _state:
-                            _mm = np.array(_state[_pth]); _mm[_dead] = 0.0; _state[_pth] = mx.array(_mm)
+                    _zero_adam_moments(dense_opt,
+                                       f".blocks.{_bi}.netbanks.{_nm}.net_block_codebook", _dead)
                     _revived += len(_dead)
                     _h[:] = 0
                 if _revived:
                     print(f"  [mlx] VQ revive step {step}: split {_revived} dead codes "
                           f"across {len(_vq_counts)} codebooks", flush=True)
+                # 2b) PER-LEVEL trie revive: split each level's dead nodes (usage<=thresh)
+                #     onto a busy donor at the SAME level (residual-VQ levels live in
+                #     different residual spaces, so donors must match level). trie_A
+                #     (shared ancestor) gets the same dead/live split as trie_C.
+                _trie_revived = 0
+                for (_bi, _nm), _hl in _trie_counts.items():
+                    _B = int(static["blocks"][_bi]["net"]["net_trie_branch"])
+                    _slot = trainable["blocks"][_bi]["netbanks"][_nm]
+                    _Cfull = np.array(_slot["net_trie_C"])
+                    _Afull = np.array(_slot["net_trie_A"])
+                    _heap_dead = []
+                    for _Li, _h in enumerate(_hl):
+                        _L = _Li + 1
+                        _base = (_B ** _L - 1) // (_B - 1)     # heap base of level L
+                        _n = _h.shape[0]                       # = B^L nodes at level L
+                        _dead, _live = _vq_dead_live(_h, _vq_dead_thresh)
+                        if len(_dead) == 0 or len(_live) == 0:
+                            _h[:] = 0
+                            continue
+                        _Csl = _Cfull[_base:_base + _n]
+                        _Asl = _Afull[_base:_base + _n]
+                        _vq_apply_split(_Csl, _dead, _live, _vq_eps)
+                        _vq_apply_split(_Asl, _dead, _live, _vq_eps)
+                        _Cfull[_base:_base + _n] = _Csl
+                        _Afull[_base:_base + _n] = _Asl
+                        _heap_dead.append(_base + _dead)       # heap-indexed dead rows
+                        _trie_revived += len(_dead)
+                        _h[:] = 0
+                    if _heap_dead:
+                        _rows = np.concatenate(_heap_dead)
+                        _slot["net_trie_C"] = mx.array(_Cfull)
+                        _slot["net_trie_A"] = mx.array(_Afull)
+                        for _k in ("net_trie_C", "net_trie_A"):
+                            _zero_adam_moments(dense_opt, f".blocks.{_bi}.netbanks.{_nm}.{_k}", _rows)
+                if _trie_revived:
+                    print(f"  [mlx] TRIE revive step {step}: split {_trie_revived} dead nodes "
+                          f"across {len(_trie_counts)} trie codebooks", flush=True)
         if _trie_depth_env > 0 and static.get("_trie_usage"):
             # drain captured leaf ids → per-level distinct-node fill %. The leaf id
             # is the full base-B path, so node-local at level m = leaf // B^(D-m);
@@ -1447,6 +1523,36 @@ def train_round(cfg, train_path, val_path, ckpt_dir, log_path,
             except Exception as _e: print(f"  [mlx] StreamV flush failed: {_e}")
     if _flushed:
         print(f"  [mlx] StreamV persisted {_flushed} dirty rows to disk (cross-round netbank memory)")
+    # PHASE D: copy-path-on-write versioning publish. Default OFF (env unset) → the
+    # block is skipped entirely, in-place StreamV behaviour is byte-identical. When ON,
+    # flush() above already SEALED this round's touched rows into a new immutable
+    # version; here we (a) emit the sparse version-delta sidecar (rows the bird changed
+    # vs the base snapshot — the harvest-as-delta-merge hook, consumed by
+    # stream_v.merge_version_deltas) and (b) materialize the head into the V .bin so the
+    # existing positional harvest path reads the latest snapshot. The base inode was
+    # immutable for the whole round → any cold-share birth reading it was corruption-safe.
+    if os.environ.get("MMLLM_NET_VERSIONING", "").lower() in ("1", "true", "yes"):
+        _vdir = os.environ.get("MMLLM_SCRATCH") or ckpt_dir
+        _npub = _nrows = 0
+        for _bi, _sb in enumerate(static.get("blocks", [])):
+            for _name, _sv in (_sb.get("net", {}).get("stream") or {}).items():
+                if not getattr(_sv, "versioning", False):
+                    continue
+                try:
+                    _delta = _sv.version_delta()              # {rowid -> vec}, sparse
+                    if _delta:
+                        _rows = np.array(sorted(_delta), np.int64)
+                        _vals = np.stack([_delta[int(r)] for r in _rows]).astype(np.float32)
+                        np.savez(os.path.join(_vdir, f"netver-delta.{_bi}.{_name}.npz"),
+                                 rows=_rows, vals=_vals)
+                        _nrows += len(_rows)
+                    _sv.materialize()                         # publish head → base .bin (harvest-compat)
+                    _npub += 1
+                except Exception as _e:
+                    print(f"  [mlx] StreamV version publish failed ({_bi}/{_name}): {_e}")
+        if _npub:
+            print(f"  [mlx] StreamV versioning: published {_npub} module snapshots, "
+                  f"{_nrows} delta rows → netver-delta.*.npz (structural-sharing harvest)")
     # Save dense.pt into a step-<total> dir (the layout extend_chain.sh reads:
     # it copies the highest step-N/dense.pt out for delta-encode + push). Bank
     # bins stay at ckpt_dir level (matches save-checkpoint!).

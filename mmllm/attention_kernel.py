@@ -181,6 +181,34 @@ def append_kv_to_buffer(
     return (k_buf, v_buf, T_new)
 
 
+# ── trunk-freeze helpers (KD_FREEZE=trunk) ──
+#
+# During the logitkd net-only STUDENT forward, the KD gradient must reach
+# only the bank (NetBank) + long-tier gate — NOT the shared dense trunk
+# (QKV/O projections, SwiGLU FFN, norms) whose drift IS forgetting. We
+# freeze the trunk by running each dense module with a DETACHED weight:
+# F.linear / F.rms_norm with `weight.detach()` keep the activation graph
+# intact (so grad still flows THROUGH to the bank's params downstream)
+# while contributing no gradient to the trunk weights themselves. This is
+# graph-intrinsic, so it survives grad-checkpoint recompute (the same
+# `freeze` flag is re-applied on the backward recompute), unlike a
+# requires_grad toggle which the recompute would not see. When freeze is
+# False the module is called normally — byte-identical to before.
+
+def _trunk_linear(mod, x, freeze):
+    if not freeze:
+        return mod(x)
+    bias = getattr(mod, "bias", None)
+    return F.linear(x, mod.weight.detach(),
+                    bias.detach() if bias is not None else None)
+
+
+def _trunk_rmsnorm(mod, x, freeze):
+    if not freeze:
+        return mod(x)
+    return F.rms_norm(x, mod.normalized_shape, mod.weight.detach(), mod.eps)
+
+
 # ── attention kernel ──
 
 def attention(
@@ -198,6 +226,7 @@ def attention(
     skip_bank: bool = False,
     netbank=None,
     trunk_ids: Optional[torch.Tensor] = None,
+    freeze_trunk: bool = False,
 ) -> tuple:
     """Three-tier attention with hard-split Q heads.
 
@@ -240,15 +269,15 @@ def attention(
     x_for_q = x + fb_delta if fb_delta is not None else x
 
     # Q projection split into short/long groups
-    q_full = q_proj(x_for_q).reshape(B, T, n_heads, head_dim)
+    q_full = _trunk_linear(q_proj, x_for_q, freeze_trunk).reshape(B, T, n_heads, head_dim)
     q_short = q_full.narrow(2, 0, n_short_heads).transpose(1, 2)
     q_long = q_full.narrow(2, n_short_heads, n_long_heads).transpose(1, 2)
 
     # K, V projections per tier
-    k_s = k_proj_s(x).reshape(B, T, n_short_kv_heads, head_dim).transpose(1, 2)
-    v_s = v_proj_s(x).reshape(B, T, n_short_kv_heads, head_dim).transpose(1, 2)
-    k_l = k_proj_l(x).reshape(B, T, n_long_kv_heads,  head_dim).transpose(1, 2)
-    v_l = v_proj_l(x).reshape(B, T, n_long_kv_heads,  head_dim).transpose(1, 2)
+    k_s = _trunk_linear(k_proj_s, x, freeze_trunk).reshape(B, T, n_short_kv_heads, head_dim).transpose(1, 2)
+    v_s = _trunk_linear(v_proj_s, x, freeze_trunk).reshape(B, T, n_short_kv_heads, head_dim).transpose(1, 2)
+    k_l = _trunk_linear(k_proj_l, x, freeze_trunk).reshape(B, T, n_long_kv_heads,  head_dim).transpose(1, 2)
+    v_l = _trunk_linear(v_proj_l, x, freeze_trunk).reshape(B, T, n_long_kv_heads,  head_dim).transpose(1, 2)
 
     # SHORT tier: RoPE on Q+K, append to cache, GQA expand, causal SDPA
     prev_short = short_cache[2] if short_cache is not None else 0
@@ -415,7 +444,7 @@ def attention(
     # Concat short + long head outputs, project
     attn = torch.cat([attn_s, attn_l], dim=1)
     out = attn.transpose(1, 2).contiguous().reshape(B, T, n_heads * head_dim)
-    out = o_proj(out)
+    out = _trunk_linear(o_proj, out, freeze_trunk)
 
     return out, new_short_cache, new_long_cache, distill_term, z_term
 
@@ -437,8 +466,14 @@ def block_forward(
     netbank=None,
     trunk_ids: Optional[torch.Tensor] = None,
     skip_bwd: bool = False,
+    freeze_trunk: bool = False,
 ) -> tuple:
     """Pre-norm decoder block with three-tier attention + SwiGLU FFN.
+
+    `freeze_trunk=True` (KD_FREEZE=trunk student forward) runs the dense
+    trunk modules (norms, QKV/O projections, SwiGLU FFN) with detached
+    weights so the KD gradient trains only the bank + gate, not the
+    shared backbone. See the `_trunk_*` helpers above.
 
     `skip_bank=True` (Phase-5 draft mode) routes through to the
     attention kernel; bank PKM lookup is skipped.
@@ -459,14 +494,15 @@ def block_forward(
                 n_heads, n_short_heads, n_long_heads,
                 n_short_kv_heads, n_long_kv_heads, head_dim, max_t,
                 short_window, long_window,
-                norm1(x), cos, sin, short_cache, long_cache,
+                _trunk_rmsnorm(norm1, x, freeze_trunk), cos, sin, short_cache, long_cache,
                 skip_bank=skip_bank,
                 netbank=netbank,
                 trunk_ids=trunk_ids,
+                freeze_trunk=freeze_trunk,
             )
             x_tmp = x + attn_out
-            x_norm = norm2(x_tmp)
-            ffn_out = down_proj(F.silu(gate_proj(x_norm)) * up_proj(x_norm))
+            x_norm = _trunk_rmsnorm(norm2, x_tmp, freeze_trunk)
+            ffn_out = _trunk_linear(down_proj, F.silu(_trunk_linear(gate_proj, x_norm, freeze_trunk)) * _trunk_linear(up_proj, x_norm, freeze_trunk), freeze_trunk)
             combined = attn_out + ffn_out
         # Outside no_grad — `combined` is a no-grad tensor (leaf); `x`
         # still has its grad_fn. The addition produces an output whose
@@ -480,14 +516,15 @@ def block_forward(
         n_heads, n_short_heads, n_long_heads,
         n_short_kv_heads, n_long_kv_heads, head_dim, max_t,
         short_window, long_window,
-        norm1(x), cos, sin, short_cache, long_cache,
+        _trunk_rmsnorm(norm1, x, freeze_trunk), cos, sin, short_cache, long_cache,
         skip_bank=skip_bank,
         netbank=netbank,
         trunk_ids=trunk_ids,
+        freeze_trunk=freeze_trunk,
     )
     x = x + attn_out
-    x_norm = norm2(x)
-    ffn_out = down_proj(F.silu(gate_proj(x_norm)) * up_proj(x_norm))
+    x_norm = _trunk_rmsnorm(norm2, x, freeze_trunk)
+    ffn_out = _trunk_linear(down_proj, F.silu(_trunk_linear(gate_proj, x_norm, freeze_trunk)) * _trunk_linear(up_proj, x_norm, freeze_trunk), freeze_trunk)
     x = x + ffn_out
     # Per-block aux losses returned alongside x so their autograd
     # graphs flow through the (potentially checkpointed) block_forward
@@ -507,6 +544,7 @@ def checkpointed_block_forward(
     x, cos, sin, short_cache, long_cache,
     skip_bank=False, netbank=None, trunk_ids=None,
     skip_bwd: bool = False,
+    freeze_trunk: bool = False,
 ):
     """Gradient-checkpoint wrapper around `block_forward`.
 
@@ -551,6 +589,7 @@ def checkpointed_block_forward(
             x, cos, sin, short_cache, long_cache,
             skip_bank=skip_bank, netbank=netbank, trunk_ids=trunk_ids,
             skip_bwd=True,
+            freeze_trunk=freeze_trunk,
         )
         return x_out, None, None
     import torch.utils.checkpoint as _ckpt
@@ -566,6 +605,7 @@ def checkpointed_block_forward(
             head_dim, max_t, short_window, long_window,
             x_arg, cos, sin, short_cache, long_cache,
             skip_bank=skip_bank, netbank=netbank, trunk_ids=trunk_ids,
+            freeze_trunk=freeze_trunk,
         )
         return x_out
 

@@ -31,12 +31,22 @@ class StreamV:
     is the correct bounded LRU (the earlier memmap/page-cache version had no bound
     and thrashed). cap defaults to hold a full step's touched set + margin."""
 
-    def __init__(self, path, N, c, lr, cap=None, b1=0.9, b2=0.999, eps=1e-8, readonly=False):
+    def __init__(self, path, N, c, lr, cap=None, b1=0.9, b2=0.999, eps=1e-8, readonly=False,
+                 versioning=None):
         self.N, self.c, self.rb = int(N), int(c), int(c) * 4
         self.lr, self.b1, self.b2, self.eps, self.t = float(lr), b1, b2, eps, 0
         self.cap = int(cap or int(os.environ.get("MMLLM_NET_CACHE_ROWS", "65536")))
         self._dbgpath = path
         self.readonly = bool(readonly)
+        # PHASE D: copy-path-on-write versioning. Default OFF (env unset) → every
+        # branch below takes the original in-place pwrite path (byte-identical). When
+        # ON, writes never mutate the base V file: touched rows are APPENDED to a
+        # per-version overlay (.ver) and published via an atomic root index (.vidx);
+        # the base inode stays immutable within a round → cold readers sharing it are
+        # corruption-safe. Cold-share readonly handles are never versioned writers.
+        if versioning is None:
+            versioning = os.environ.get("MMLLM_NET_VERSIONING", "").lower() in ("1", "true", "yes")
+        self.versioning = bool(versioning) and not self.readonly
         if self.readonly:
             # COLD-SHARE read-only mode: this is a FROZEN cold module read by EVERY
             # bird from the SAME round-bank inode. mmap MAP_SHARED + PROT_READ
@@ -63,6 +73,45 @@ class StreamV:
         self.dirty = np.zeros(self.cap, bool)
         self.order = OrderedDict()                          # rowid -> None (LRU; oldest first)
         self.free = list(range(self.cap))
+        if self.versioning:
+            self._ver_init(path)
+
+    # ───────────────────────── PHASE D versioning ─────────────────────────
+    def _ver_init(self, path):
+        """Set up the append-only overlay store + version index. Resumes from a
+        prior .vidx if present (module-growth-safe: missing → fresh empty chain)."""
+        self._ver_path = path + ".ver"          # append-only fp32 overlay rows
+        self._vidx_path = path + ".vidx"        # version index (atomic root)
+        self.overlays = []                       # [ {rowid -> ver_slot} ] newest last
+        self._work = {}                          # uncommitted (this-round) rowid -> ver_slot
+        self._ver_size = 0                       # bytes used in .ver
+        self._ver_keep = max(1, int(os.environ.get(
+            "MMLLM_NET_VERSION_KEEP", os.environ.get("MMLLM_CKPT_KEEP", "2"))))
+        if os.path.exists(self._vidx_path):
+            try:
+                import json
+                with open(self._vidx_path) as f:
+                    meta = json.load(f)
+                self.overlays = [{int(k): int(v) for k, v in ov.items()}
+                                 for ov in meta.get("overlays", [])]
+                self._ver_size = int(meta.get("ver_size", 0)) * self.rb
+            except Exception:
+                self.overlays = []; self._ver_size = 0
+        self.fd_ver = os.open(self._ver_path, os.O_RDWR | os.O_CREAT, 0o644)
+        if os.path.getsize(self._ver_path) < self._ver_size:
+            os.ftruncate(self.fd_ver, self._ver_size)      # heal a truncated overlay file
+        if fcntl is not None and _F_NOCACHE is not None:
+            try: fcntl.fcntl(self.fd_ver, _F_NOCACHE, 1)
+            except OSError: pass
+
+    def _ver_src(self, rowid):                              # newest .ver slot holding rowid, or None (→ base)
+        rowid = int(rowid)
+        if rowid in self._work:
+            return self._work[rowid]
+        for ov in reversed(self.overlays):                  # newest version wins
+            if rowid in ov:
+                return ov[rowid]
+        return None
 
     def _open_state(self, p):
         need = self.N * self.rb
@@ -73,13 +122,25 @@ class StreamV:
 
     def _read_row(self, rowid, slot):                       # F_NOCACHE pread V,m,v → slot
         off = int(rowid) * self.rb
-        self.Vb[slot] = np.frombuffer(os.pread(self.fdV, self.rb, off), np.float32)
-        self.mb[slot] = np.frombuffer(os.pread(self.fdm, self.rb, off), np.float32)
+        if self.versioning:                                 # V from newest overlay slot, else immutable base
+            vs = self._ver_src(rowid)
+            if vs is not None:
+                self.Vb[slot] = np.frombuffer(os.pread(self.fd_ver, self.rb, vs * self.rb), np.float32)
+            else:
+                self.Vb[slot] = np.frombuffer(os.pread(self.fdV, self.rb, off), np.float32)
+        else:
+            self.Vb[slot] = np.frombuffer(os.pread(self.fdV, self.rb, off), np.float32)
+        self.mb[slot] = np.frombuffer(os.pread(self.fdm, self.rb, off), np.float32)   # Adam state stays writer-private/in-place
         self.vb[slot] = np.frombuffer(os.pread(self.fdv, self.rb, off), np.float32)
 
     def _write_row(self, rowid, slot):                      # F_NOCACHE pwrite V,m,v
         off = int(rowid) * self.rb
-        os.pwrite(self.fdV, self.Vb[slot].tobytes(), off)
+        if self.versioning:                                 # COW: append the new V row to .ver; base untouched (immutable)
+            os.pwrite(self.fd_ver, self.Vb[slot].tobytes(), self._ver_size)
+            self._work[int(rowid)] = self._ver_size // self.rb
+            self._ver_size += self.rb
+        else:
+            os.pwrite(self.fdV, self.Vb[slot].tobytes(), off)
         os.pwrite(self.fdm, self.mb[slot].tobytes(), off)
         os.pwrite(self.fdv, self.vb[slot].tobytes(), off)
 
@@ -138,6 +199,8 @@ class StreamV:
         for r, slot in list(self.slot.items()):
             if self.dirty[slot]:
                 self._write_row(r, slot); self.dirty[slot] = False; n += 1
+        if self.versioning:                                 # seal this round's touched rows into a new immutable version
+            self._seal()
         if os.environ.get("MMLLM_STREAM_DEBUG"):
             with open("/tmp/adam_calls.log", "a") as _f:
                 _f.write(f"FLUSH id={id(self)} path={os.path.basename(self._dbgpath)} "
@@ -149,9 +212,138 @@ class StreamV:
             self._mm = None
             return
         self.flush()
-        for fd in (self.fdV, self.fdm, self.fdv):
+        fds = [self.fdV, self.fdm, self.fdv]
+        if self.versioning:
+            fds.append(self.fd_ver)
+        for fd in fds:
             try: os.close(fd)
             except OSError: pass
+
+    # ───────────────────────── PHASE D version ops ─────────────────────────
+    def _seal(self):
+        """Publish this round's _work overlay as a new immutable version, atomically
+        advancing the root. No-op if no rows changed (head unchanged)."""
+        if self._work:
+            self.overlays.append(dict(self._work))
+            self._work = {}
+            self._gc()                                      # bound retained versions
+        self._persist_vidx()                                # atomic root index update
+
+    def _gc(self):
+        """Version-store growth GC: keep at most _ver_keep sealed versions. Oldest
+        beyond the cap are FOLDED FORWARD into the next-kept version (newest value per
+        row preserved) — the base inode is NEVER mutated here, so concurrent base
+        readers stay safe. Then compact .ver to only still-referenced slots."""
+        squashed = False
+        while len(self.overlays) > self._ver_keep:
+            old = self.overlays.pop(0)
+            nxt = self.overlays[0]                          # new oldest kept (strictly newer than `old`)
+            for rowid, vs in old.items():
+                if rowid not in nxt:                        # nxt is newer → it already wins where present
+                    nxt[rowid] = vs
+            squashed = True
+        if squashed:
+            self._compact_ver()
+
+    def _compact_ver(self):
+        """Rewrite .ver to hold only slots referenced by live overlays/_work, remap
+        the indices. Bounds overlay-file growth (drops dead/overridden rows)."""
+        live = sorted({vs for ov in self.overlays for vs in ov.values()} | set(self._work.values()))
+        if not live:
+            self._ver_size = 0
+            try: os.ftruncate(self.fd_ver, 0)
+            except OSError: pass
+            return
+        remap = {old: i for i, old in enumerate(live)}
+        buf = bytearray()
+        for old in live:
+            buf += os.pread(self.fd_ver, self.rb, old * self.rb)
+        os.ftruncate(self.fd_ver, 0)
+        os.pwrite(self.fd_ver, bytes(buf), 0)
+        self._ver_size = len(buf)
+        for ov in self.overlays:
+            for k in list(ov.keys()):
+                ov[k] = remap[ov[k]]
+        for k in list(self._work.keys()):
+            self._work[k] = remap[self._work[k]]
+
+    def _persist_vidx(self):
+        """Atomically publish the version index (the root). os.replace is atomic on
+        POSIX → a reader either sees the old root or the new one, never a torn one."""
+        import json, tempfile
+        meta = {"head": len(self.overlays) - 1, "ver_size": self._ver_size // self.rb,
+                "overlays": [{str(k): int(v) for k, v in ov.items()} for ov in self.overlays]}
+        d = os.path.dirname(self._vidx_path) or "."
+        fd, tmp = tempfile.mkstemp(dir=d, prefix=".vidx.")
+        try:
+            with os.fdopen(fd, "w") as f:
+                json.dump(meta, f)
+            os.replace(tmp, self._vidx_path)
+        except Exception:
+            try: os.unlink(tmp)
+            except OSError: pass
+
+    def version_delta(self):
+        """Harvest hook: {rowid -> np.float32[c]} of rows changed vs the base snapshot
+        (union of sealed overlays + uncommitted _work, newest value per row). Sparse —
+        size == touched rows, not N → fixes the dense-delta degeneracy."""
+        if not self.versioning:
+            return {}
+        src = {}
+        for ov in self.overlays:
+            src.update(ov)
+        src.update(self._work)
+        out = {}
+        for rowid, vs in src.items():
+            out[int(rowid)] = np.frombuffer(os.pread(self.fd_ver, self.rb, vs * self.rb), np.float32).copy()
+        return out
+
+    def materialize(self, target=None):
+        """Publish the head version: write every touched row into the base V file so
+        the existing harvest path (which reads the .bin) sees the latest snapshot, then
+        reset the .ver scratch (base == head). Call at ROUND END, after the concurrent
+        cold-read window — this is the only sanctioned base mutation."""
+        if self.readonly or not self.versioning:
+            return 0
+        fd = self.fdV if target is None else os.open(target, os.O_RDWR | os.O_CREAT, 0o644)
+        touched = {}
+        for ov in self.overlays:
+            touched.update(ov)
+        touched.update(self._work)
+        n = 0
+        for rowid, vs in touched.items():
+            os.pwrite(fd, os.pread(self.fd_ver, self.rb, vs * self.rb), int(rowid) * self.rb)
+            n += 1
+        if target is not None:
+            os.close(fd)
+        else:                                               # base is now the published snapshot → reset scratch
+            self.overlays = []; self._work = {}; self._ver_size = 0
+            try: os.ftruncate(self.fd_ver, 0)
+            except OSError: pass
+            self._persist_vidx()
+        return n
+
+
+def merge_version_deltas(base_path, N, c, deltas, reduce="mean"):
+    """Harvest-as-version-delta-merge primitive. Given a base [N,c] snapshot and a
+    list of per-bird version deltas (each {rowid -> vec} from StreamV.version_delta),
+    combine ONLY the touched rows (structural sharing: untouched rows keep base). FedAvg
+    semantics — 'mean' averages over the birds that touched each row, 'last' overwrites.
+    Returns (merged [N,c] ndarray, sorted touched-row list)."""
+    if os.path.exists(base_path):
+        base = np.fromfile(base_path, np.float32, count=N * c).reshape(N, c).copy()
+    else:
+        base = np.zeros((N, c), np.float32)
+    acc, cnt = {}, {}
+    for d in deltas:
+        for rowid, vec in d.items():
+            rowid = int(rowid)
+            acc[rowid] = acc.get(rowid, 0.0) + np.asarray(vec, np.float32)
+            cnt[rowid] = cnt.get(rowid, 0) + 1
+    touched = sorted(acc)
+    for rowid in touched:
+        base[rowid] = acc[rowid] / cnt[rowid] if reduce == "mean" else acc[rowid]
+    return base, touched
 
 
 def stream_combine(sv: StreamV, top_global, top_scores):
