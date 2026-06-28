@@ -63,6 +63,36 @@ def _extract(m, K, trunk_ids_mx):
         "norm_final_w": _mxa(m.get(K("norm-final")).weight),
         "blocks": [],
     }
+    # Phase C: MTP byte heads (one Linear(d, n*vocab)). Present only when
+    # MMLLM_MTP_COEF>0. Lives at END of the param order (positional ckpt compat).
+    _mtp = m.get(K("mtp-head"))
+    if _mtp is not None:
+        trainable["mtp_head_w"] = _mxa(_mtp.weight)              # (n*vocab, d_model)
+        static["mtp_heads"] = int(_mtp.weight.shape[0]) // int(m.get(K("tok-emb")).weight.shape[0])
+    # Phase C: n-gram hash tables. Present only when MMLLM_NGRAM_HASH set.
+    _ng = m.get(K("ngram-emb"))
+    if _ng is not None:
+        trainable["ngram_tables"] = [_mxa(t.weight) for t in _ng.tables]
+        static["ngram_specs"] = [(int(g), int(h)) for (g, h) in _ng.specs]
+    # Phase B: H-Net spine (Mamba enc/dec + cosine chunker). Present only when
+    # MMLLM_HNET set. Arrays -> trainable (dense Adam), scalar config -> static.
+    _hn = m.get(K("hnet"))
+    if _hn is not None:
+        def _emit_mamba(blk):
+            return {"in_proj_w": _mxa(blk.in_proj_w), "conv_w": _mxa(blk.conv_w),
+                    "conv_b": _mxa(blk.conv_b), "x_proj_w": _mxa(blk.x_proj_w),
+                    "dt_proj_w": _mxa(blk.dt_proj_w), "dt_proj_b": _mxa(blk.dt_proj_b),
+                    "A_log": _mxa(blk.A_log), "D": _mxa(blk.D),
+                    "out_proj_w": _mxa(blk.out_proj_w), "norm_w": _mxa(blk.norm_w)}
+        trainable["hnet"] = {
+            "enc": [_emit_mamba(b) for b in _hn.enc],
+            "dec": [_emit_mamba(b) for b in _hn.dec],
+            "W_q": _mxa(_hn.W_q.weight), "W_k": _mxa(_hn.W_k.weight)}
+        static["hnet"] = {
+            "enc_eps": [float(b.norm_eps) for b in _hn.enc],
+            "dec_eps": [float(b.norm_eps) for b in _hn.dec],
+            "target_n": float(_hn.target_n), "conf_gate": bool(_hn.conf_gate),
+            "smooth": bool(_hn.smooth)}
     meta = {"blocks": []}
     for blk in blocks:
         g = lambda n: blk.get(K(n))
@@ -124,6 +154,8 @@ def _extract(m, K, trunk_ids_mx):
                      "net_expander_w": _mxa(bank.expander.weight)}
                 if not _vstream:                          # disk-stream: V stays on disk (StreamV), not resident
                     d["V_net"] = _mxa(bank.V.weight)
+                if getattr(bank, "trie_depth", 0) > 0:                    # PHASE A: depth-D trie codebooks/ancestors (trainable, dense Adam)
+                    d["net_trie_C"] = _mxa(bank.trie_C); d["net_trie_A"] = _mxa(bank.trie_A)
                 if getattr(bank, "block_codebook", None) is not None:
                     d["net_block_codebook"] = _mxa(bank.block_codebook)   # learned VQ centroids (trainable)
                 for _nm in ("coarse_codebook", "coarse_value", "coarse2_codebook", "coarse2_value", "fine_codebook"):   # Stage 2 path-sum
@@ -144,13 +176,23 @@ def _extract(m, K, trunk_ids_mx):
                 ref = nb.banks[nb.module_names[0]]
                 sb["net"] = {"eps": _eps(ref.q_norm), "sub_dim": ref.sub_dim,
                              "sqrt_n": ref.sqrt_n, "sub_top_k": ref.sub_top_k, "top_k": ref.top_k,
-                             "n_blocks": getattr(ref, "n_blocks", 1)}
+                             "n_blocks": getattr(ref, "n_blocks", 1),
+                             "net_trie_depth": getattr(ref, "trie_depth", 0),
+                             "net_trie_branch": getattr(ref, "trie_branch", 32)}
                 if _vstream:                              # disk-stream: V on disk via StreamV handles (per module)
                     from mmllm.mlx.stream_v import StreamV
                     _slr = float(os.environ.get("MMLLM_NET_STREAM_LR", "0.003"))
-                    sb["net"]["stream"] = {name: StreamV(nb.banks[name].mmap_path,
-                                                         nb.banks[name].n, nb.banks[name].c_net, lr=_slr)
-                                           for name in nb.module_names}
+                    # COLD-SHARE: cold (cooled) modules open the shared round-bank
+                    # inode read-only (MAP_SHARED, page-cache shared across births);
+                    # the hot module keeps the writable F_NOCACHE slab. Off → every
+                    # module is the writable slab (byte-identical to pre-cold-share).
+                    _cold_share = os.environ.get("MMLLM_NET_COLD_SHARE", "").lower() in ("1", "true", "yes")
+                    _hotmod = os.environ.get("MMLLM_NET_HOT_MODULE", "")
+                    sb["net"]["stream"] = {
+                        name: StreamV(nb.banks[name].mmap_path,
+                                      nb.banks[name].n, nb.banks[name].c_net, lr=_slr,
+                                      readonly=(_cold_share and bool(_hotmod) and name != _hotmod))
+                        for name in nb.module_names}
                 if getattr(ref, "n_blocks", 1) > 1 and hasattr(ref, "block_proj"):
                     # fixed LSH [q_dim, n_blocks] — CONSTANT, lives in static (not
                     # trainable, so no spurious grad / optimizer corruption). Same R
@@ -168,7 +210,9 @@ def _extract(m, K, trunk_ids_mx):
                 tb["net_K_a"] = d["net_K_a"]; tb["net_K_b"] = d["net_K_b"]
                 tb["net_expander_w"] = d["net_expander_w"]; tb["V_net"] = d["V_net"]
                 sb["net"] = {"eps": _eps(nb.q_norm), "sub_dim": nb.sub_dim,
-                             "sqrt_n": nb.sqrt_n, "sub_top_k": nb.sub_top_k, "top_k": nb.top_k}
+                             "sqrt_n": nb.sqrt_n, "sub_top_k": nb.sub_top_k, "top_k": nb.top_k,
+                             "net_trie_depth": getattr(nb, "trie_depth", 0),
+                             "net_trie_branch": getattr(nb, "trie_branch", 32)}
 
         trainable["blocks"].append(tb)
         static["blocks"].append(sb)
@@ -223,6 +267,13 @@ def _reassemble(trainable, static, meta, student=False, drop_net=False):
     Fa = (lambda t: sg(t)) if lvl == "all" else (lambda t: t)              # gate + net keys
     Fo = (lambda t: None if t is None else Fa(t))                          # optional gate tensor
     locals_off = (lvl != "off")
+    # VQ dead-code revive capture slots (per (bi,name) list). Present only when the
+    # trainer enabled MMLLM_NET_VQ_REVIVE → static carries "_vq_usage". None = OFF →
+    # no "vq_usage" key is attached to any bank dict → netbank_forward is unchanged.
+    _vq_usage = static.get("_vq_usage")
+    # PHASE A trie leaf-fill capture (per (bi,name) list of leaf ids). Present only
+    # when the trainer enabled MMLLM_NET_TRIE_DEPTH logging → static["_trie_usage"].
+    _trie_usage = static.get("_trie_usage")
     P = {
         "tok_emb": Ft(trainable["tok_emb"]),
         "norm_final_w": Ft(trainable["norm_final_w"]),
@@ -230,6 +281,26 @@ def _reassemble(trainable, static, meta, student=False, drop_net=False):
         "rope_cos": static["rope_cos"], "rope_sin": static["rope_sin"],
         "blocks": [],
     }
+    # Phase C: MTP head + n-gram tables are dense trunk params (frozen with the
+    # trunk in a KD student via Ft). Absent keys -> absent in P -> inert forward.
+    if "mtp_head_w" in trainable:
+        P["mtp_head_w"] = Ft(trainable["mtp_head_w"])
+    if "ngram_tables" in trainable:
+        P["ngram"] = {"tables": [Ft(t) for t in trainable["ngram_tables"]],
+                      "specs": static["ngram_specs"]}
+    # Phase B: H-Net spine. enc/dec/W_q/W_k are dense trunk params (Ft-frozen with
+    # the trunk in a KD student). norm_eps comes from static; the rest are arrays.
+    # Absent key -> no "hnet" in P -> model.forward bypass (byte-identical).
+    if "hnet" in trainable:
+        _hs = static["hnet"]; _ht = trainable["hnet"]
+        def _mamba_p(d, eps):
+            q = {k: Ft(v) for k, v in d.items()}; q["norm_eps"] = eps; return q
+        P["hnet"] = {
+            "enc": [_mamba_p(d, e) for d, e in zip(_ht["enc"], _hs["enc_eps"])],
+            "dec": [_mamba_p(d, e) for d, e in zip(_ht["dec"], _hs["dec_eps"])],
+            "W_q": Ft(_ht["W_q"]), "W_k": Ft(_ht["W_k"]),
+            "target_n": _hs["target_n"], "conf_gate": _hs["conf_gate"],
+            "smooth": _hs["smooth"]}
     for bi, (tb, sb, bm) in enumerate(zip(trainable["blocks"], static["blocks"], meta["blocks"])):
         b = {k: Ft(tb[k]) for k in ("norm1_w", "norm2_w", "q_proj", "k_proj_s",
                                     "v_proj_s", "k_proj_l", "v_proj_l", "o_proj",
@@ -279,7 +350,18 @@ def _reassemble(trainable, static, meta, student=False, drop_net=False):
                                        if "net_block_codebook" in d else {}),
                                     **{k: Fa(d["net_" + k]) for k in
                                        ("coarse_codebook", "coarse_value", "coarse2_codebook", "coarse2_value", "fine_codebook")
-                                       if "net_" + k in d}}
+                                       if "net_" + k in d},
+                                    **({"net_trie_depth": nn_["net_trie_depth"],
+                                        "net_trie_branch": nn_["net_trie_branch"],
+                                        "net_trie_C": Fa(d["net_trie_C"]),
+                                        "net_trie_A": Fa(d["net_trie_A"])}
+                                       if "net_trie_C" in d else {}),
+                                    **({"trie_usage": _trie_usage.setdefault((bi, name), [])}
+                                       if (_trie_usage is not None and lvl == "off"
+                                           and not drop_net and "net_trie_C" in d) else {}),
+                                    **({"vq_usage": _vq_usage.setdefault((bi, name), [])}
+                                       if (_vq_usage is not None and lvl == "off"
+                                           and not drop_net and "net_block_codebook" in d) else {})}
                              for name, d in tb["netbanks"].items()}
             # per-batch skill routing: active module(s) set on `static` by the
             # train loop from the batch's corpus (None = all → composition).
@@ -316,6 +398,22 @@ def _write_back(trainable, m, K):
         param.data.copy_(torch.from_numpy(np.array(arr)).to(param.dtype))
     cp(m.get(K("tok-emb")).weight, trainable["tok_emb"])
     cp(m.get(K("norm-final")).weight, trainable["norm_final_w"])
+    # Phase C: persist trained MTP head + n-gram tables back to torch.
+    if "mtp_head_w" in trainable:
+        cp(m.get(K("mtp-head")).weight, trainable["mtp_head_w"])
+    if "ngram_tables" in trainable:
+        for t, arr in zip(m.get(K("ngram-emb")).tables, trainable["ngram_tables"]):
+            cp(t.weight, arr)
+    # Phase B: persist trained H-Net spine (Mamba enc/dec + chunker) back to torch.
+    if "hnet" in trainable:
+        _hn = m.get(K("hnet")); _ht = trainable["hnet"]
+        def _cp_mamba(blk, d):
+            for nm in ("in_proj_w", "conv_w", "conv_b", "x_proj_w", "dt_proj_w",
+                       "dt_proj_b", "A_log", "D", "out_proj_w", "norm_w"):
+                cp(getattr(blk, nm), d[nm])
+        for blk, d in zip(_hn.enc, _ht["enc"]): _cp_mamba(blk, d)
+        for blk, d in zip(_hn.dec, _ht["dec"]): _cp_mamba(blk, d)
+        cp(_hn.W_q.weight, _ht["W_q"]); cp(_hn.W_k.weight, _ht["W_k"])
     for tb, blk in zip(trainable["blocks"], m.get(K("blocks"))):
         g = lambda n: blk.get(K(n))
         for role, key in (("norm1_w", "norm1"), ("norm2_w", "norm2"), ("q_proj", "q-proj"),
@@ -344,6 +442,8 @@ def _write_back(trainable, m, K):
                     cp(bank.K_b, d["net_K_b"]); cp(bank.expander.weight, d["net_expander_w"])
                     if "V_net" in d:                      # streaming: V already updated on disk by StreamV
                         cp(bank.V.weight, d["V_net"])
+                    if "net_trie_C" in d and getattr(bank, "trie_depth", 0) > 0:
+                        cp(bank.trie_C, d["net_trie_C"]); cp(bank.trie_A, d["net_trie_A"])   # Phase A trie (ckpt/harvest parity)
                     if "net_block_codebook" in d and getattr(bank, "block_codebook", None) is not None:
                         cp(bank.block_codebook, d["net_block_codebook"])   # learned VQ centroids (Stage 1)
                     for _nm in ("coarse_codebook", "coarse_value", "coarse2_codebook", "coarse2_value", "fine_codebook"):   # Stage 2 path-sum
@@ -411,7 +511,7 @@ def _named_params(m, K):
     init while existing params load by name. Used by the module-growth-safe
     name-keyed dense_named.pt save/resume."""
     out = {}
-    for tk in ("tok-emb", "norm-final", "mtp-head", "importance-head", "delim-head"):
+    for tk in ("tok-emb", "norm-final", "mtp-head", "ngram-emb", "importance-head", "delim-head"):
         c = m.get(K(tk))
         if c is None:
             continue
@@ -934,6 +1034,12 @@ def train_round(cfg, train_path, val_path, ckpt_dir, log_path,
               for (bi, path) in sparse}
 
     z_coef = float(bvar("pick-z-loss-coef")())
+    # Phase C: MTP byte-head loss config (read once). _mtp_coef==0 (default) ->
+    # term skipped even if a head somehow exists. _mtp_heads matches the built
+    # head's n (head weight is n*vocab wide).
+    _mtp_coef = float(bvar("pick-mtp-coef")())
+    _mtp_heads = int(bvar("pick-mtp-heads")())
+    _mtp_decay = float(bvar("pick-mtp-decay")())
     # OUTPUT-KD: real Hinton distillation instead of feature-MSE. The model WITH
     # the local banks (just trained on this round's data) is the teacher; the
     # model with all locals OFF (net banks only — the FUTURE state, when locals
@@ -948,6 +1054,11 @@ def train_round(cfg, train_path, val_path, ckpt_dir, log_path,
     # (corpora share ~1% hot rows). Crank this to de-collapse: spread net routing so
     # corpora get distinct V_net rows. Default 0 = old (collapsed) behaviour.
     _net_z_coef = float(os.environ.get("MMLLM_NET_Z_COEF", "0"))
+    # Phase B: H-Net chunk-ratio loss coefficient α (pins avg-chunk → N). The
+    # ratio loss itself is computed inside model.forward and stashed on P["hnet"]
+    # ("ratio_loss"); we add α·ratio_loss here. Default 0 → no contribution even
+    # when the spine is built (the spine still chunks; the ratio is just untuned).
+    _hnet_ratio_coef = float(os.environ.get("MMLLM_HNET_RATIO_COEF", "0"))
     # Skill-router aux CE: supervise the per-block module router with the known
     # corpus→module label so its keys become discriminative during genesis (the
     # router then drives Level-1/2 at inference). 0 disables.
@@ -968,7 +1079,7 @@ def train_round(cfg, train_path, val_path, ckpt_dir, log_path,
         xb, yb = static["_xb"], static["_yb"]
         tr = _cast_bf16(tr)                        # mixed precision: bf16 forward, fp32 loss/optimizer
         P = _reassemble(tr, static, meta)
-        logits, distill_total, z_total, net_z_total, router_logits, n_distill = _model.forward(
+        logits, distill_total, z_total, net_z_total, router_logits, n_distill, mtp_logits = _model.forward(
             P, xb, collect_aux=True)
         lg = logits.reshape(-1, vocab).astype(mx.float32)
         logp = lg - mx.logsumexp(lg, axis=-1, keepdims=True)
@@ -980,10 +1091,17 @@ def train_round(cfg, train_path, val_path, ckpt_dir, log_path,
         else:
             ce = ce_tok.mean()
         loss = ce
+        if mtp_logits is not None and _mtp_coef:               # Phase C: MTP byte heads
+            loss = loss + _model.mtp_loss(mtp_logits, yb, _mtp_heads, _mtp_coef,
+                                          _mtp_decay, vocab, _lm)
         if z_coef:
             loss = loss + z_coef * z_total
         if _net_z_coef:
             loss = loss + _net_z_coef * net_z_total
+        if "hnet" in P and "ratio_loss" in P["hnet"]:                        # Phase B chunk-ratio
+            static["_hnet_diag"] = (P["hnet"]["ratio_loss"], P["hnet"]["cut_rate"])   # telemetry
+            if _hnet_ratio_coef:
+                loss = loss + _hnet_ratio_coef * P["hnet"]["ratio_loss"]
         if _router_aux_coef and router_logits is not None and static.get("_router_target") is not None:
             rl = router_logits.reshape(-1, router_logits.shape[-1]).astype(mx.float32)   # (B*T, N) summed over blocks
             rlogp = rl - mx.logsumexp(rl, axis=-1, keepdims=True)
@@ -1088,10 +1206,44 @@ def train_round(cfg, train_path, val_path, ckpt_dir, log_path,
     _memprof("post-build+extract")
 
     losses = []
+    # HIGH-RES held-out mini-eval: a small fixed slice of the HELD-OUT val, eval'd every
+    # eval_every steps → REAL held-out bpc at step resolution (not the optimistic per-batch
+    # training loss). MMLLM_MINIEVAL_TOKS=0 disables. ~1% overhead.
+    _mev_toks = int(os.environ.get("MMLLM_MINIEVAL_TOKS", str(16 * T)))
+    try:
+        _mev_data = load_corpus(val_path)[:_mev_toks] if _mev_toks > 0 else None
+    except Exception:
+        _mev_data = None
     # AUX-FREE bias telemetry: per-router-block cumulative selection counts (smoke).
     _rb_counts = ({_bi: np.zeros(int(tb["router_keys"].shape[0]))
                    for _bi, tb in enumerate(trainable["blocks"]) if "router_keys" in tb}
                   if _router_bias_u else {})
+    # ── VQ DEAD-CODE REVIVE (MMLLM_NET_VQ_REVIVE, default OFF) ────────────────
+    # The learned VQ block-router (banks.py block_codebook) routes each query to
+    # one of n_blocks codes; codes that win ~no queries over a window leave their
+    # V slices empty (only ~61/160 blocks fill). Periodically reset dead codes to a
+    # perturbed copy of a busy centroid (standard VQ dead-code split) so coverage
+    # spreads. Entirely gradient-free surgery on the codebook param (like the
+    # router sel_bias path); OFF → static["_vq_usage"] absent → forward unchanged.
+    _vq_revive = os.environ.get("MMLLM_NET_VQ_REVIVE", "").lower() in ("1", "true", "yes")
+    _vq_every = max(1, int(os.environ.get("MMLLM_NET_VQ_REVIVE_EVERY", "200")))
+    _vq_dead_thresh = int(os.environ.get("MMLLM_NET_VQ_REVIVE_DEAD", "0"))
+    _vq_eps = float(os.environ.get("MMLLM_NET_VQ_REVIVE_EPS", "0.01"))
+    _vq_counts = {}                              # (bi,name) -> np histogram over the window
+    if _vq_revive:
+        static["_vq_usage"] = {}                 # _reassemble fills per (bi,name) capture lists
+        print(f"  [mlx] VQ dead-code REVIVE on: every {_vq_every} steps, "
+              f"dead<= {_vq_dead_thresh}, eps={_vq_eps}", flush=True)
+    # PHASE A: per-level leaf-fill % logging for the depth-D trie NetBank. On
+    # whenever MMLLM_NET_TRIE_DEPTH>0; captures leaf ids in the forward and reports
+    # distinct-node fraction per level every _trie_log_every steps.
+    _trie_depth_env = int(os.environ.get("MMLLM_NET_TRIE_DEPTH", "0"))
+    _trie_log_every = max(1, int(os.environ.get("MMLLM_NET_TRIE_LOG_EVERY", "50")))
+    if _trie_depth_env > 0:
+        static["_trie_usage"] = {}               # _reassemble fills per (bi,name) leaf-id lists
+        _tb = int(os.environ.get("MMLLM_NET_TRIE_BRANCH", "32"))
+        print(f"  [mlx] PHASE-A trie NetBank: branch={_tb} depth={_trie_depth_env} "
+              f"leaves={_tb**_trie_depth_env}, leaf-fill logged every {_trie_log_every} steps", flush=True)
     for step in range(1, n_steps + 1):
         lb, ln, ld, dc, cur = schedule(step)
         static["_distill_coef"] = dc
@@ -1144,6 +1296,67 @@ def train_round(cfg, train_path, val_path, ckpt_dir, log_path,
         trainable = dense_opt.step(trainable, grads, sparse_keys)
         mx.eval(tree_map(lambda a: a, trainable))
         losses.append(float(loss))
+        if _vq_revive:
+            # 1) drain this step's captured block assignments into per-codebook
+            #    histograms (gradient-free; the lists were stashed in the forward).
+            for (_bi, _nm), _lst in static.get("_vq_usage", {}).items():
+                if not _lst:
+                    continue
+                _C = trainable["blocks"][_bi]["netbanks"][_nm]["net_block_codebook"]
+                _nb_codes = int(_C.shape[0])
+                _h = _vq_counts.setdefault((_bi, _nm), np.zeros(_nb_codes, dtype=np.int64))
+                for _b in _lst:
+                    _h += np.bincount(np.array(_b).reshape(-1), minlength=_nb_codes)
+                _lst.clear()
+            # 2) every _vq_every steps: split busy centroids onto the dead codes.
+            if step % _vq_every == 0:
+                _revived = 0
+                for (_bi, _nm), _h in _vq_counts.items():
+                    _dead = np.nonzero(_h <= _vq_dead_thresh)[0]
+                    _live = np.argsort(-_h)                      # busiest first
+                    _live = _live[_h[_live] > _vq_dead_thresh]   # donors (codes with usage)
+                    if len(_dead) == 0 or len(_live) == 0:
+                        _h[:] = 0
+                        continue
+                    _Ck = np.array(trainable["blocks"][_bi]["netbanks"][_nm]["net_block_codebook"])
+                    _std = float(_Ck.std()) or 1.0
+                    for _j, _d in enumerate(_dead):
+                        _donor = int(_live[_j % len(_live)])     # cycle over busy codes → split
+                        _Ck[_d] = _Ck[_donor] + (np.random.standard_normal(_Ck.shape[1])
+                                                 * (_vq_eps * _std)).astype(_Ck.dtype)
+                    trainable["blocks"][_bi]["netbanks"][_nm]["net_block_codebook"] = mx.array(_Ck)
+                    # reset the dense-Adam moments for the revived rows (best-effort) so
+                    # stale momentum doesn't drag the fresh centroids back.
+                    _pth = f".blocks.{_bi}.netbanks.{_nm}.net_block_codebook"
+                    for _state in (dense_opt.m, dense_opt.v):
+                        if _pth in _state:
+                            _mm = np.array(_state[_pth]); _mm[_dead] = 0.0; _state[_pth] = mx.array(_mm)
+                    _revived += len(_dead)
+                    _h[:] = 0
+                if _revived:
+                    print(f"  [mlx] VQ revive step {step}: split {_revived} dead codes "
+                          f"across {len(_vq_counts)} codebooks", flush=True)
+        if _trie_depth_env > 0 and static.get("_trie_usage"):
+            # drain captured leaf ids → per-level distinct-node fill %. The leaf id
+            # is the full base-B path, so node-local at level m = leaf // B^(D-m);
+            # fill_m = distinct(that) / B^m. Logged for the first captured module.
+            for (_bi, _nm), _lst in static["_trie_usage"].items():
+                if _lst and step % _trie_log_every == 0:
+                    _leaf = np.concatenate([np.array(x).reshape(-1) for x in _lst])
+                    _net = static["blocks"][_bi]["net"]
+                    _B = int(_net["net_trie_branch"]); _D = int(_net["net_trie_depth"])
+                    _parts = []
+                    for _m in range(1, _D + 1):
+                        _nodes = len(np.unique(_leaf // (_B ** (_D - _m))))
+                        _parts.append(f"L{_m}:{100.0 * _nodes / (_B ** _m):.1f}%")
+                    print(f"  [TRIE] step {step} blk{_bi}/{_nm} leaf-fill {' '.join(_parts)} "
+                          f"(distinct_leaf={len(np.unique(_leaf))}/{_B ** _D}, n={_leaf.size})", flush=True)
+                _lst.clear()
+        if "_hnet_diag" in static and step % _trie_log_every == 0:   # Phase B chunk-ratio telemetry
+            _rl, _cr = static["_hnet_diag"]; _cr = float(_cr)
+            print(f"  [HNET] step {step} ratio_loss={float(_rl):.4f} (α={_hnet_ratio_coef}) "
+                  f"cut_rate={_cr:.3f} avg_chunk={1.0/max(_cr,1e-6):.2f} (target N={static['hnet']['target_n']:.0f})",
+                  flush=True)
         if _router_bias_u:
             # AUX-LOSS-FREE load-balancing bias update (DeepSeek-V3 style). Entirely
             # gradient-free: recompute Level-1 selection from the qbar captured during
@@ -1179,7 +1392,7 @@ def train_round(cfg, train_path, val_path, ckpt_dir, log_path,
             # is distill firing? raw magnitude, layer coverage (24 vs 8 = topology
             # regression), per-layer, coef×contribution vs CE (over/under-firing).
             try:
-                _lg, _dt, _zt, _nzt, _rl, _nd = _model.forward(_reassemble(trainable, static, meta), xb, collect_aux=True)
+                _lg, _dt, _zt, _nzt, _rl, _nd, _mtp = _model.forward(_reassemble(trainable, static, meta), xb, collect_aux=True)
                 _dtv = float(_dt); _ndv = int(_nd)
                 _lr2 = _lg.reshape(-1, vocab); _lp2 = _lr2 - mx.logsumexp(_lr2, axis=-1, keepdims=True)
                 _ce = float(-mx.take_along_axis(_lp2, yb.reshape(-1)[:, None], axis=-1).mean())
@@ -1206,8 +1419,13 @@ def train_round(cfg, train_path, val_path, ckpt_dir, log_path,
                              f"teacher_bpc={_tbpc:.3f} student_bpc={_sbpc:.3f}")
             except Exception as _e:
                 _dbg = f"  [DISTILL] diag-failed: {_e}"
+            _mevb = None                                   # REAL held-out bpc at step resolution
+            if _mev_data is not None:
+                try: _mevb = _mlx_eval_bpc(trainable, static, meta, _mev_data, T, 4, 8 * T, None, vocab)
+                except Exception: _mevb = None
             print(f"  [mlx] step {step}/{n_steps}  loss={losses[-1]:.4f}  "
-                  f"lr_b={lb:.2e} lr_n={ln:.2e} lr_d={ld:.2e} distill_c={dc:.2f}{_dbg}")
+                  + (f"minieval_bpc={_mevb:.4f}  " if _mevb is not None else "")
+                  + f"lr_b={lb:.2e} lr_n={ln:.2e} lr_d={ld:.2e} distill_c={dc:.2f}{_dbg}")
 
     # POST-TRAINING diag: run the key-collapse diagnostic on the TRAINED trainable
     # (with the now-trained W_ctx if ctx-add was injected). Tests whether learned

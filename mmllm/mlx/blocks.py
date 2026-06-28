@@ -175,7 +175,15 @@ def attention(b, x, cos, sin, collect_aux=False):
     # LONG tier (b/c): PKM retrieval. bank_query is PlainBankQuery (None) by
     # default -> bank_q = q_long flattened across the long heads.
     distill = z = net_z = net_rlogits = None
-    if b.get("memory") is None and b.get("netbank") is None:
+    # FIX (32-layer locals-off): also recognise the MODULAR netbank ("netbanks").
+    # Original checked only memory + singular "netbank", so a modular-net layer with
+    # NO local bank (memory=None) silently fell through to sdpa-only — skipping the
+    # net entirely. With locals ON the net rode along (memory present); with locals
+    # OFF the net was never consulted at ANY layer. Gated behind MMLLM_NET_USE_ALL32.
+    _use_all32 = os.environ.get("MMLLM_NET_USE_ALL32", "").lower() in ("1", "true", "yes")
+    _bank_present = (b.get("memory") is not None or b.get("netbank") is not None
+                     or (_use_all32 and b.get("netbanks") is not None))
+    if not _bank_present:
         attn_l = attn_l_sdpa
     else:
         bank_q = banks._mt("attn.bank_q", mx.transpose(q_long, (0, 2, 1, 3)).reshape(B, T, Hl * hd))

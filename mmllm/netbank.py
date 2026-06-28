@@ -140,7 +140,10 @@ class NetBank(nn.Module):
                  n_blocks: int = 1,
                  vq_route: bool = False,
                  n_coarse: int = 1,
-                 n_coarse2: int = 1):
+                 n_coarse2: int = 1,
+                 trie_depth: int = 0,
+                 trie_branch: int = 32,
+                 trie_resident_levels: int = 2):
         super().__init__()
         assert q_dim % 2 == 0, "q_dim must be even"
         assert c_net <= q_dim, "c_net (bottleneck dim) must be <= q_dim"
@@ -149,6 +152,15 @@ class NetBank(nn.Module):
         self.q_dim = q_dim
         self.sub_dim = q_dim // 2
         self.sqrt_n = sqrt_n
+        # Phase A trie (MMLLM_NET_TRIE_DEPTH): when on, the leaf count B^D drives
+        # n_blocks (each leaf is a contiguous sqrt_n² V slab, exactly like the
+        # legacy block partition); a depth-D 32-way descent replaces the LSH/VQ
+        # block router. Default depth 0 → unchanged (byte-identical).
+        self.trie_depth = int(trie_depth)
+        self.trie_branch = int(trie_branch)
+        self.trie_resident_levels = int(trie_resident_levels)
+        if self.trie_depth > 0:
+            n_blocks = self.trie_branch ** self.trie_depth
         self.n_blocks = int(n_blocks)
         self.n = self.n_blocks * sqrt_n * sqrt_n
         self.c_net = c_net
@@ -179,7 +191,19 @@ class NetBank(nn.Module):
 
         self.vq_route = bool(vq_route)
         self.n_coarse = int(n_coarse)
-        if self.n_blocks > 1:
+        if self.trie_depth > 0:
+            # PHASE A: depth-D, B-way residual-VQ trie. Flat heap-indexed C/A over
+            # all nodes (levels 0..D): (B^{D+1}−1)/(B−1) rows. C = per-node child
+            # centroids, A = per-node shared "ancestor" value. Both zero-init →
+            # acc=0 and argmax ties→leaf 0 until the per-level VQ loss + dead-code
+            # revive train them (like coarse_value). Leaves live in V (n_blocks=B^D
+            # slabs). No block_proj/block_codebook in trie mode. (MLX forward path;
+            # torch forward uses leaf 0, same convention as the coarse path.)
+            B, D = self.trie_branch, self.trie_depth
+            n_nodes = (B ** (D + 1) - 1) // (B - 1)
+            self.trie_C = nn.Parameter(torch.zeros(n_nodes, q_dim))
+            self.trie_A = nn.Parameter(torch.zeros(n_nodes, q_dim))
+        elif self.n_blocks > 1:
             _g = torch.Generator().manual_seed(0x5EED)
             self.register_buffer(
                 "block_proj",
@@ -616,7 +640,8 @@ class ModularNetBank(nn.Module):
                  router: bool = False, router_k_load=None, router_k_tok: int = 2,
                  router_drive: bool = False, router_gate: str = "softmax",
                  n_blocks: int = 1, vq_route: bool = False, n_coarse: int = 1,
-                 n_coarse2: int = 1):
+                 n_coarse2: int = 1, trie_depth: int = 0, trie_branch: int = 32,
+                 trie_resident_levels: int = 2):
         super().__init__()
         module_names = list(module_names)
         if not module_names:
@@ -624,18 +649,31 @@ class ModularNetBank(nn.Module):
         self.module_names = module_names
         self.q_dim = q_dim
         self.banks = nn.ModuleDict()
+        # COLD-SHARE (default off): a "bird" trains its HOT module and freezes the
+        # rest. When on, the cold (frozen) modules are NOT CoW-cloned per bird;
+        # they point at the SHARED round-bank prefix instead, so torch's V mmap and
+        # the MLX StreamV both open the SAME inode across all PAR births → one copy
+        # via the OS page cache. Off → mmap_prefix for every module (unchanged).
+        _cold_share = os.environ.get("MMLLM_NET_COLD_SHARE", "").lower() in ("1", "true", "yes")
+        _hot = os.environ.get("MMLLM_NET_HOT_MODULE", "")
+        _rb_prefix = os.environ.get("MMLLM_NET_COLD_SHARE_RB_PREFIX", "")
         for name in module_names:
             mp = None
             if mmap_prefix is not None:
                 # shared cross-backend naming (torch + MLX + harvester agree)
                 from mmllm.skill_modules import netbank_v_path
-                mp = netbank_v_path(mmap_prefix, name, 0 if mmap_layer is None else mmap_layer)
+                _prefix = mmap_prefix
+                if _cold_share and _rb_prefix and _hot and name != _hot:
+                    _prefix = _rb_prefix                    # cold module → shared round-bank inode
+                mp = netbank_v_path(_prefix, name, 0 if mmap_layer is None else mmap_layer)
             self.banks[name] = NetBank(
                 q_dim, sqrt_n=sqrt_n, c_net=c_net, top_k=top_k,
                 sub_top_k=sub_top_k, mmap_path=mp,
                 delay_ms_min=delay_ms_min, delay_ms_max=delay_ms_max,
                 dtype=dtype, bank_on_gpu=bank_on_gpu, n_blocks=n_blocks,
                 vq_route=vq_route, n_coarse=n_coarse, n_coarse2=n_coarse2,
+                trie_depth=trie_depth, trie_branch=trie_branch,
+                trie_resident_levels=trie_resident_levels,
             )
         # Routing: which module(s) the next forward consults. None = all.
         self._active = None

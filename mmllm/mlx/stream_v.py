@@ -31,11 +31,23 @@ class StreamV:
     is the correct bounded LRU (the earlier memmap/page-cache version had no bound
     and thrashed). cap defaults to hold a full step's touched set + margin."""
 
-    def __init__(self, path, N, c, lr, cap=None, b1=0.9, b2=0.999, eps=1e-8):
+    def __init__(self, path, N, c, lr, cap=None, b1=0.9, b2=0.999, eps=1e-8, readonly=False):
         self.N, self.c, self.rb = int(N), int(c), int(c) * 4
         self.lr, self.b1, self.b2, self.eps, self.t = float(lr), b1, b2, eps, 0
         self.cap = int(cap or int(os.environ.get("MMLLM_NET_CACHE_ROWS", "65536")))
         self._dbgpath = path
+        self.readonly = bool(readonly)
+        if self.readonly:
+            # COLD-SHARE read-only mode: this is a FROZEN cold module read by EVERY
+            # bird from the SAME round-bank inode. mmap MAP_SHARED + PROT_READ
+            # (np.memmap mode='r') → the OS page cache holds ONE shared copy across
+            # the PAR births; deliberately NO F_NOCACHE (we WANT the shared cache),
+            # no Adam state files, no pwrite. Hot module keeps the F_NOCACHE
+            # pread+pwrite slab path below. See genesis_composed_bird cold-share.
+            self.fdV = self.fdm = self.fdv = None
+            self._mm = np.memmap(path, dtype=np.float32, mode="r", shape=(self.N, self.c))
+            return
+        self._mm = None
         self.fdV = os.open(path, os.O_RDWR)
         self.fdm = self._open_state(path + ".adm")
         self.fdv = self._open_state(path + ".adv")
@@ -93,10 +105,14 @@ class StreamV:
         return np.fromiter((self.slot[int(r)] for r in rows), np.int64, len(rows))
 
     def read_rows(self, rows):                              # forward gather (cache hits free; misses pread)
+        if self.readonly:                                  # cold-share: gather straight from the MAP_SHARED mmap
+            return np.asarray(self._mm[np.asarray(rows, np.int64)], dtype=np.float32)
         self._ensure(rows)
         return self.Vb[self._slots(rows)].copy()
 
     def adam_step(self, rows, g):                           # sparse Adam on the cached (hot) rows
+        if self.readonly:                                  # cold-share: frozen module, never updated
+            return
         if os.environ.get("MMLLM_STREAM_DEBUG"):
             with open("/tmp/adam_calls.log", "a") as _f:
                 _f.write(f"adam id={id(self)} path={os.path.basename(self._dbgpath)} rows={len(rows)} mean|g|={float(np.abs(g).mean()):.3e}\n")
@@ -112,6 +128,8 @@ class StreamV:
         self.dirty[s] = True
 
     def flush(self):                                        # persist all dirty cached rows to disk
+        if self.readonly:                                  # cold-share: nothing to persist (read-only)
+            return 0
         # Without this the cache only reaches disk on eviction (cap full). Touched
         # rows/step (≈10²-10³) are far below cap, so eviction never fires and the
         # round's learning is lost when the next round recreates StreamV from the
@@ -127,6 +145,9 @@ class StreamV:
         return n
 
     def close(self):                                        # flush + close fds
+        if self.readonly:                                  # cold-share: just drop the shared mmap
+            self._mm = None
+            return
         self.flush()
         for fd in (self.fdV, self.fdm, self.fdv):
             try: os.close(fd)

@@ -44,6 +44,52 @@ def _topk_idx(a, k):
     return mx.take_along_axis(a, idx, axis=-1), idx
 
 
+def _trie_descend(p, q, want_z=False):
+    """Phase A — depth-D, B-way residual-VQ trie descent. Generalizes the
+    depth-2/3 `coarse_codebook` path-sum above to arbitrary depth over a single
+    heap-indexed C/A pair (`MMLLM_NET_TRIE_DEPTH`).
+
+    Per level ℓ: code = argmax(r·C_childrenᵀ); descend to that child;
+    acc += A[child] (shared "ancestor" value); r -= C[child] (residual VQ).
+    Returns (leaf [B,T] int32 in 0..B^D, acc [B,T,q_dim] ancestor sum,
+    z per-level VQ loss or None).
+
+    Heap layout (implicit/pointerless): the node at level ℓ with within-level
+    index `local` has its B children occupying
+    `C[base[ℓ+1] + local·B : base[ℓ+1] + local·B + B]`, where
+    base[ℓ] = (B^ℓ − 1)/(B − 1). The leaf id is the final `local` (= the base-B
+    path), which offsets the StreamV V slab exactly like `n_blocks` (=B^D)."""
+    B = int(p["net_trie_branch"]); D = int(p["net_trie_depth"])
+    C = p["net_trie_C"]; A = p["net_trie_A"]          # [Σ_ℓ B^ℓ, q_dim] heap-indexed
+    arangeB = mx.arange(B)
+    r = q
+    local = mx.zeros(q.shape[:-1], dtype=mx.int32)    # [B,T] within-level node index
+    acc = mx.zeros_like(q)
+    z = None
+    base_l = 0                                        # base[0] = 0 (root)
+    for l in range(D):
+        base_next = base_l + B ** l                   # base[ℓ+1]
+        first = base_next + local * B                 # [B,T] first child heap id
+        cand_idx = first[..., None] + arangeB         # [B,T,B] the B sibling heap ids
+        Cand = mx.take(C, cand_idx, axis=0)           # [B,T,B,q_dim] child centroids
+        scores = mx.einsum("btkd,btd->btk", Cand, r)  # [B,T,B] nearest-centroid (cosine; q rms-normed)
+        code = mx.argmax(scores, axis=-1).astype(mx.int32)   # [B,T]
+        chosen = first + code                         # [B,T] chosen child heap id
+        cc = mx.take(C, chosen, axis=0)               # [B,T,q_dim] chosen centroid
+        acc = acc + mx.take(A, chosen, axis=0)        # + shared ancestor (path-sum)
+        if want_z:                                    # per-level commitment+codebook VQ loss
+            zl = (mx.mean((mx.stop_gradient(r) - cc) ** 2)
+                  + 0.25 * mx.mean((r - mx.stop_gradient(cc)) ** 2))
+            z = zl if z is None else z + zl
+        r = r - cc                                    # running residual
+        local = local * B + code                      # descend (base-B path accumulate)
+        base_l = base_next
+    _tu = p.get("trie_usage")                         # leaf-fill telemetry (no-op when absent)
+    if _tu is not None:
+        _tu.append(mx.stop_gradient(local))
+    return local, acc, z
+
+
 def _pkm_select(q_a, q_b, K_a, K_b, sqrt_n, sub_top_k, top_k):
     """Shared score -> sub-topk -> outer-sum -> topk -> global-index decode.
     Returns (top_scores [B,T,top_k], top_global [B,T,top_k] int32)."""
@@ -83,7 +129,7 @@ def netbank_forward(p, q, want_z=False):
     q_a = q[..., : p["sub_dim"]]
     q_b = q[..., p["sub_dim"]:]
     z = None
-    if want_z and "block_codebook" not in p:            # CV² (skipped in VQ mode; z carries the VQ loss)
+    if want_z and "block_codebook" not in p and not p.get("net_trie_depth"):  # CV² (skipped in VQ/trie mode; z carries the VQ loss)
         def _cv2(s):                                    # coeff-of-variation² of key importance
             P = mx.softmax(s, axis=-1)                  # [...,sqrt_n] soft routing prob
             imp = P.mean(axis=tuple(range(P.ndim - 1)))  # [sqrt_n] mean mass per key
@@ -103,7 +149,11 @@ def netbank_forward(p, q, want_z=False):
     # not a per-sequence data-shard trunk id. No-op when block_proj absent.
     coarse_out = None
     if p.get("n_blocks", 1) > 1:
-        if "coarse_codebook" in p:              # RESIDUAL-VQ PATH-SUM (depth 2 or 3)
+        if p.get("net_trie_depth"):             # PHASE A: depth-D B-way residual-VQ trie
+            blk, coarse_out, _zt = _trie_descend(p, q, want_z)
+            if want_z:
+                z = _zt
+        elif "coarse_codebook" in p:            # RESIDUAL-VQ PATH-SUM (depth 2 or 3)
             def _vq(a, b):                       # VQ codebook + commitment loss
                 return mx.mean((mx.stop_gradient(a) - b) ** 2) + 0.25 * mx.mean((a - mx.stop_gradient(b)) ** 2)
             C0 = p["coarse_codebook"]; T0 = p["coarse_value"]
@@ -130,6 +180,13 @@ def netbank_forward(p, q, want_z=False):
         elif "block_codebook" in p:             # Stage-1 LEARNED VQ routing
             C = p["block_codebook"]             # [n_blocks, q_dim] trained centroids
             blk = mx.argmax(q @ C.T, axis=-1)   # [B,T] nearest centroid (cosine; q rms-normed)
+            # VQ dead-code REVIVE (MMLLM_NET_VQ_REVIVE): when the trainer attaches a
+            # capture list (vq_usage), stash this layer's per-token block assignments
+            # so the step loop can bincount them and reset codes that win ~no queries.
+            # No-op when absent (key only present when the gate is on) → byte-identical.
+            _vu = p.get("vq_usage")
+            if _vu is not None:
+                _vu.append(mx.stop_gradient(blk))
             if want_z:                          # VQ loss on the net_z channel (weight = MMLLM_NET_Z_COEF)
                 cb = mx.take(C, blk, axis=0)    # [B,T,q_dim] assigned centroid
                 z = (mx.mean((mx.stop_gradient(q) - cb) ** 2)            # codebook term: pull C → q

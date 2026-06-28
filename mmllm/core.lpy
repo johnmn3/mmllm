@@ -44,6 +44,8 @@
            [mmllm.bank_query :as bq]
            [mmllm.bank_feedback :as bfb]
            [mmllm.router_smarts :as rs]
+           [mmllm.ngram :as ngram]
+           [mmllm.mamba :as mamba]
            [mmllm.sparse_per_row :as spr]
            [mmllm.fim :as fim]
            [mmllm.fim.generator :as fim-gen]
@@ -314,6 +316,28 @@
    the path code0*m1+code1. Reads MMLLM_NET_COARSE2 (default 1 = off = depth-2)."
   []
   (python/int (.get (.- os environ) "MMLLM_NET_COARSE2" "1")))
+
+(defn pick-netbank-trie-depth
+  "PHASE A: depth-D, 32-way residual-VQ trie NetBank. Generalizes the depth-2/3
+   coarse path-sum into a recursive log-32 trie: per level code=argmax(r·C_ℓᵀ),
+   r-=C[code], acc+=A[code]; the leaf path (B^D leaves) offsets the StreamV V slab
+   like n_blocks. Reads MMLLM_NET_TRIE_DEPTH (default 0 = off → byte-identical;
+   sets n_blocks=branch^depth when >0). C/A zero-init (no-op until learned)."
+  []
+  (python/int (.get (.- os environ) "MMLLM_NET_TRIE_DEPTH" "0")))
+
+(defn pick-netbank-trie-branch
+  "Branching factor B of the Phase-A trie (children per node). Reads
+   MMLLM_NET_TRIE_BRANCH (default 32 = eve log-32). Leaf count = B^depth."
+  []
+  (python/int (.get (.- os environ) "MMLLM_NET_TRIE_BRANCH" "32")))
+
+(defn pick-netbank-trie-resident-levels
+  "Upper R levels of the trie C/A kept fully resident; deeper levels would page
+   via StreamV (MVP keeps all resident). Reads MMLLM_NET_TRIE_RESIDENT_LEVELS
+   (default 2)."
+  []
+  (python/int (.get (.- os environ) "MMLLM_NET_TRIE_RESIDENT_LEVELS" "2")))
 
 (defn pick-net-cooled-modules
   "Set of skill-module names whose NetBank is FROZEN/cooled this round (lr→0
@@ -2054,7 +2078,10 @@
                                            :vq_route        (pick-netbank-vq?)
                                            :n_blocks        (pick-netbank-n-blocks)
                                            :n_coarse        (pick-netbank-coarse)
-                                           :n_coarse2       (pick-netbank-coarse2))
+                                           :n_coarse2       (pick-netbank-coarse2)
+                                           :trie_depth      (pick-netbank-trie-depth)
+                                           :trie_branch     (pick-netbank-trie-branch)
+                                           :trie_resident_levels (pick-netbank-trie-resident-levels))
                       (netb/NetBank q-dim
                                     ** :sqrt_n       (pick-netbank-sqrt-n)
                                     :c_net           (pick-netbank-c-net)
@@ -2065,7 +2092,10 @@
                                     :delay_ms_min    (pick-netbank-delay-min)
                                     :delay_ms_max    (pick-netbank-delay-max)
                                     :dtype           (pick-netbank-dtype)
-                                    :bank_on_gpu     (pick-netbank-on-gpu?)))))
+                                    :bank_on_gpu     (pick-netbank-on-gpu?)
+                                    :trie_depth      (pick-netbank-trie-depth)
+                                    :trie_branch     (pick-netbank-trie-branch)
+                                    :trie_resident_levels (pick-netbank-trie-resident-levels)))))
      ;; Optional MultiTimescaleCarry — per-block "brain-stem clocks"
      ;; residual at log-uniform decay rates. Zero-init gate → identity at
      ;; step 0 so adding to an existing ckpt is behavior-preserving;
@@ -2207,6 +2237,72 @@
   []
   (python/float (.get (.- os environ) "MMLLM_MTP_COEF" "0.0")))
 
+(defn pick-mtp-heads
+  "Number of multi-token-prediction byte heads (Phase C). Reads
+   MMLLM_MTP_HEADS (default 1 = current single-head behaviour). Head k
+   (k=0..n-1) predicts the byte at offset t+(k+2) from the post-decoder
+   hidden state; with n=1 this is exactly the legacy single t+2 head, so
+   defaults stay byte-identical. The head is one Linear(d_model, n*vocab)
+   (reshaped to (B,T,n,vocab) by collect-mtp-loss) so it is a single
+   weight tensor at the END of (parameters) — positional-ckpt compat with
+   the pre-generalization single-head ckpts when n=1 (same shape)."
+  []
+  (max 1 (python/int (.get (.- os environ) "MMLLM_MTP_HEADS" "1"))))
+
+(defn pick-mtp-decay
+  "Per-head geometric decay γ on the MTP loss: head k is weighted
+   MMLLM_MTP_COEF × γ^k. Reads MMLLM_MTP_DECAY (default 0.7). Nearer
+   offsets (easier, denser signal) weigh more. γ=1 → equal weight."
+  []
+  (python/float (.get (.- os environ) "MMLLM_MTP_DECAY" "0.7")))
+
+(defn pick-hnet?
+  "PHASE B: enable the 1-stage H-Net spine (Mamba byte enc/dec + cosine dynamic
+   chunker wrapping the transformer, which then runs on ~N-byte chunks). Reads
+   MMLLM_HNET (default off → byte-identical: no enc/dec/chunker built, the model
+   map + (parameters) are unchanged and the MLX forward sees no :hnet key)."
+  []
+  (#{"1" "true" "yes"} (.lower (.get (.- os environ) "MMLLM_HNET" ""))))
+
+(defn pick-hnet-enc-layers []
+  (max 1 (python/int (.get (.- os environ) "MMLLM_HNET_ENC_LAYERS" "2"))))
+
+(defn pick-hnet-dec-layers []
+  (max 1 (python/int (.get (.- os environ) "MMLLM_HNET_DEC_LAYERS" "2"))))
+
+(defn pick-hnet-d-state []
+  (max 1 (python/int (.get (.- os environ) "MMLLM_HNET_D_STATE" "16"))))
+
+(defn pick-hnet-target-n
+  "Target average chunk size N for the ratio loss (avg-chunk → N, cut-rate →
+   1/N). Reads MMLLM_HNET_TARGET_N (default 6, per the doc)."
+  []
+  (python/float (.get (.- os environ) "MMLLM_HNET_TARGET_N" "6")))
+
+(defn pick-hnet-conf-gate?
+  "When true, the chunker confidence c_t down-weights low-confidence chunks fed
+   to the transformer (incl. its netbank read). Reads MMLLM_HNET_CONF_GATE
+   (default off)."
+  []
+  (#{"1" "true" "yes"} (.lower (.get (.- os environ) "MMLLM_HNET_CONF_GATE" ""))))
+
+(defn pick-ngram-hash
+  "Parse MMLLM_NGRAM_HASH (Phase C n-gram hash input features). Format
+   is a comma list of `g:H` pairs, e.g. \"2:65536,3:262144\" → two hashed
+   byte-g-gram tables: a 2-gram table with 65536 buckets and a 3-gram
+   table with 262144 buckets. Each table's vectors are summed into the
+   byte input embedding. Default \"\" (empty) → returns nil = disabled →
+   model stays byte-identical to the pre-Phase-C path. Returns a vector of
+   [g H] integer pairs or nil."
+  []
+  (let [spec (.strip (.get (.- os environ) "MMLLM_NGRAM_HASH" ""))]
+    (when (pos? (count spec))
+      (vec (for [pair (.split spec ",")
+                 :let [pair (.strip pair)]
+                 :when (pos? (count pair))]
+             (let [[g h] (.split pair ":")]
+               [(python/int (.strip g)) (python/int (.strip h))]))))))
+
 (defn build-model
   [{:keys [d-model n-heads n-short-heads n-long-heads
            n-short-kv-heads
@@ -2222,8 +2318,28 @@
         ;; default models stay parameter-identical to pre-MTP code and
         ;; old ckpts load cleanly. Goes AT THE END of (parameters m)
         ;; for positional-ckpt-load compatibility.
+        ;; Phase C: generalize the single t+2 MTP head to n byte heads
+        ;; (t+2..t+(n+1)). One Linear(d, n*vocab) — a single weight tensor so
+        ;; positional-ckpt compat holds at n=1 (shape == legacy Linear(d,vocab)).
         mtp-head   (when (pos? (pick-mtp-coef))
-                     (.to (nn/Linear d-model vocab-size ** :bias false) device))
+                     (.to (nn/Linear d-model (* (pick-mtp-heads) vocab-size) ** :bias false) device))
+        ;; Phase C: n-gram hash input features. Built only when
+        ;; MMLLM_NGRAM_HASH is set; zero-init tables → inert add at step 0.
+        ;; Goes at END of (parameters m) for positional-ckpt compat.
+        ngram-emb  (when-let [specs (pick-ngram-hash)]
+                     (.to (ngram/NgramHashEmb specs d-model) device))
+        ;; Phase B: 1-stage H-Net spine (Mamba enc/dec + cosine chunker). Built
+        ;; only when MMLLM_HNET is set; nil otherwise → model map + (parameters)
+        ;; byte-unchanged and the MLX forward sees no :hnet key (full bypass).
+        ;; Goes at END of (parameters m) for positional-ckpt compat.
+        hnet       (when (pick-hnet?)
+                     (.to (mamba/HNet d-model
+                                      ** :enc_layers (pick-hnet-enc-layers)
+                                      :dec_layers (pick-hnet-dec-layers)
+                                      :d_state    (pick-hnet-d-state)
+                                      :target_n   (pick-hnet-target-n)
+                                      :conf_gate  (pick-hnet-conf-gate?))
+                          device))
         ;; Optional LearnedImportanceHead — Linear(d_model, 1) over the
         ;; final hidden state, softplus-transformed → per-position loss
         ;; multiplier. Self-supervised by the loss itself (regularized to
@@ -2285,6 +2401,8 @@
      :rope-cos        (.to cos device)
      :rope-sin        (.to sin device)
      :mtp-head        mtp-head
+     :ngram-emb       ngram-emb
+     :hnet            hnet
      :importance-head importance-head
      :delim-head      delim-head
      ;; Mutable metrics stash for visibility into router-smarts /
@@ -2337,7 +2455,7 @@
      7. importance-head (at END — added in router-smarts work)
      8. per-block carry gate (at END — added in router-smarts work)"
   [m]
-  (let [{:keys [tok-emb blocks norm-final mtp-head importance-head delim-head]} m
+  (let [{:keys [tok-emb blocks norm-final mtp-head ngram-emb hnet importance-head delim-head]} m
         ;; CORE block params (K_a/K_b only from memory — q_norm goes at end)
         core-params (fn [b]
                       (concat
@@ -2420,7 +2538,13 @@
             ;; default ckpts (round-2..7) still load cleanly.
             (mapcat local-gate-params blocks)
             ;; JSON-delimiter aux head — at END for back-compat.
-            (when delim-head (python/list (.parameters delim-head))))))
+            (when delim-head (python/list (.parameters delim-head)))
+            ;; Phase C: n-gram hash tables — at the very END for positional
+            ;; ckpt compat (a pre-Phase-C ckpt loads cleanly; these stay at init).
+            (when ngram-emb (python/list (.parameters ngram-emb)))
+            ;; Phase B: H-Net spine (Mamba enc/dec + chunker W_q/W_k) — at the
+            ;; VERY END so a pre-Phase-B ckpt loads cleanly (these stay at init).
+            (when hnet (python/list (.parameters hnet))))))
 
 (defn- kab-parameters
   "Per-block K_a / K_b parameters. Returned as a flat Python list for
@@ -2582,14 +2706,17 @@
   ;; kd: nil (normal) or a map {:local-only? :net-only? :freeze-trunk?} for the
   ;; logitkd teacher/student forwards (Local-only / net-only, optional trunk freeze).
   ([m tokens short-caches long-caches skip-bank? trunk-ids kd]
-   (let [{:keys [tok-emb blocks norm-final rope-cos rope-sin mtp-head]} m
+   (let [{:keys [tok-emb blocks norm-final rope-cos rope-sin mtp-head ngram-emb]} m
          frz?         (boolean (and kd (:freeze-trunk? kd)))   ;; KD_FREEZE=trunk: detach tok-emb
          emb-w        (if frz? (.detach (.- tok-emb weight)) (.- tok-emb weight))
          n-layers     (count blocks)
          short-caches (or short-caches (vec (repeat n-layers nil)))
          long-caches  (or long-caches  (vec (repeat n-layers nil)))
          guard?       (pick-nan-guard?)
-         x0           (if frz? (F/embedding tokens emb-w) (tok-emb tokens))]
+         x-tok        (if frz? (F/embedding tokens emb-w) (tok-emb tokens))
+         ;; Phase C: n-gram hash features summed into the byte embedding.
+         ;; nil head (MMLLM_NGRAM_HASH unset) → x0 == x-tok (byte-identical).
+         x0           (if ngram-emb (+ x-tok (ngram-emb tokens)) x-tok)]
      (when guard? (nan-guard! "tok-emb" x0))
      (loop [i         0
             x         x0
@@ -2727,22 +2854,36 @@
           (* coef (reduce + terms)))))))
 
 (defn collect-mtp-loss
-  "Compute the multi-token-prediction (t+2) auxiliary CE loss when
-   `aux-logits` is non-nil, scaled by MMLLM_MTP_COEF. The aux head
-   at position p predicts byte at p+2; we score the inner T-1
-   positions (positions [0..T-2] of aux logits paired with y[1..T-1])
-   since the t+2 target for position T-1 is outside the window.
+  "Compute the multi-token-prediction auxiliary CE loss when `aux-logits`
+   is non-nil. Phase C generalization: `aux-logits` is (B, T, n*vocab) for
+   n MTP heads; head k (k=0..n-1) predicts the byte at offset t+(k+2). The
+   per-head loss is summed with geometric decay weight coef × γ^k:
+       Σ_k  coef·γ^k · CE( aux[:, 0..T-2-k, k, :] ,  y[:, k+1 .. T-1] )
+   At n=1 this reduces EXACTLY to the legacy single t+2 head (γ^0 = 1,
+   the same [0..T-2]×y[1..T-1] window).
 
-   Returns a scalar tensor when active, 0.0 otherwise."
+   n is inferred from aux-logits' last dim / vocab-size, so the signature
+   is unchanged. Returns a scalar tensor when active, 0.0 otherwise."
   [aux-logits y T]
   (if (nil? aux-logits)
     0.0
-    (let [coef            (pick-mtp-coef)
-          aux-logits-trim (.narrow aux-logits 1 0 (- T 1))
-          y-trim          (.narrow y 1 1 (- T 1))]
-      (* coef (F/cross_entropy
-               (.reshape aux-logits-trim -1 vocab-size)
-               (.reshape y-trim -1))))))
+    (let [coef  (pick-mtp-coef)
+          gamma (pick-mtp-decay)
+          n     (python/int (/ (.size aux-logits -1) vocab-size))
+          ;; (B,T,n*vocab) -> (B,T,n,vocab)
+          aux   (.reshape aux-logits (.size aux-logits 0) T n vocab-size)]
+      (loop [k 0, total 0.0]
+        (if (or (>= k n) (>= (+ k 2) T))
+          total
+          (let [win    (- (- T 1) k)                ;; valid positions 0..T-2-k
+                ;; head k logits over valid positions: (B, win, vocab)
+                a-k    (.narrow (.select aux 2 k) 1 0 win)
+                ;; target = byte at offset t+(k+2): y[:, k+1 .. T-1]
+                y-k    (.narrow y 1 (+ k 1) win)
+                ce-k   (F/cross_entropy (.reshape a-k -1 vocab-size)
+                                        (.reshape y-k -1))
+                w-k    (* coef (python/pow gamma k))]
+            (recur (inc k) (+ total (* w-k ce-k)))))))))
 
 (defn ^:private delim-mask-for
   "y: (B, T) int64 byte tokens → (B, T) float bool mask: 1.0 where the
@@ -3044,6 +3185,8 @@
     (when-let [nb (:netbank b)] (.eval nb))
     (when-let [c (:carry b)] (.eval c)))
   (when-let [mh (:mtp-head m)] (.eval mh))
+  (when-let [ng (:ngram-emb m)] (.eval ng))
+  (when-let [hn (:hnet m)] (.eval hn))
   (when-let [ih (:importance-head m)] (.eval ih)))
 
 (defn- route-netbank-active!
@@ -3077,6 +3220,8 @@
     (when-let [nb (:netbank b)] (.train nb))
     (when-let [c (:carry b)] (.train c)))
   (when-let [mh (:mtp-head m)] (.train mh))
+  (when-let [ng (:ngram-emb m)] (.train ng))
+  (when-let [hn (:hnet m)] (.train hn))
   (when-let [ih (:importance-head m)] (.train ih)))
 
 (defn sample
