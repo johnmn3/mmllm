@@ -21,6 +21,15 @@ basilisp build-model phase doesn't run concurrently (only the training overlaps)
 import os, glob, shutil, time, threading
 import mlx.core as mx
 mx.set_cache_limit(int(os.environ.get("MLX_CACHE_MB", "512")) << 20)
+# HETEROGENEOUS COMPUTE (CPU/GPU split, SINGLE process): WB_CPU_BIRTHS=N routes the
+# FIRST N births (WB_MODULES order) to their own mx.cpu streams; the rest run on the GPU
+# (default stream). CPU and GPU are separate units on shared unified memory → they run in
+# PARALLEL within ONE runtime. (Two SEPARATE cohort processes blow the 32GB box — ~11GB
+# runtime each; one process shares it.) mx.stream is per-thread (verified), so concurrent
+# cpu-stream + gpu-stream births compute correctly + independently. N=0 → all GPU
+# (byte-identical to the proven path). Measured CPU side plateaus ~1.5-2.2x a single CPU
+# birth by N~6 (cores already used per-op + shared memory bandwidth) → target ~6 on CPU.
+_N_CPU = int(os.environ.get("WB_CPU_BIRTHS", "0"))
 _T0 = time.monotonic()
 G = os.path.expanduser("~/models/genesis")
 W = int(os.environ["WB_W"]); K = int(os.environ.get("WB_K", "0"))
@@ -86,7 +95,7 @@ import mmllm.mlx.trainer as _TR          # for owner-safe build-lock release on 
 import basilisp.lang.keyword as kw
 
 _results = {}; _errs = {}
-def worker(SPEC):
+def worker(SPEC, DEV="gpu"):
     # SPEC is "module" or "module:K" — the K suffix lets us run SEVERAL births of the
     # SAME module concurrently (distinct K → distinct scratch paths → no collision), so
     # PAR can exceed the module count (4 modules × N births = an ensemble per module,
@@ -138,8 +147,13 @@ def worker(SPEC):
         if _real_get("WB_D_FF"):    cfg = cfg.assoc(kw.keyword("d-ff"), int(os.environ["WB_D_FF"]))
         base = f"{G}/{CORPUS}.bin"
         _EVAL_EVERY = int(_real_get("MMLLM_EVAL_EVERY", "50"))
-        r = mlxbk.run_round(cfg, f"{base}.train.bin", f"{base}.val.bin", ck,
-                            f"{G}/{TAG}b{W}-{MODULE}-{Kv}.log.jsonl", _total_m, _EVAL_EVERY, 1000000)
+        _rr = lambda: mlxbk.run_round(cfg, f"{base}.train.bin", f"{base}.val.bin", ck,
+                                      f"{G}/{TAG}b{W}-{MODULE}-{Kv}.log.jsonl", _total_m, _EVAL_EVERY, 1000000)
+        if DEV == "cpu":
+            with mx.stream(mx.new_stream(mx.cpu)):   # own CPU stream → runs parallel to the GPU cohort
+                r = _rr()
+        else:
+            r = _rr()                                # default GPU stream (proven path)
         _results[SPEC] = r.get('ctrl_bpc')
         print(f"@@@BIRD w{W} {MODULE}.k{Kv}: composed_bpc={r.get('ctrl_bpc'):.4f} (threaded)", flush=True)
     except Exception as e:
@@ -191,6 +205,8 @@ threading.Thread(target=_poller, daemon=True).start()
 # So we just stagger the starts for clean ordering, with a light RAM-backpressure
 # valve so accumulating TRAINING residents can't pile past the floor before the
 # poller trips. The lock — not this gate — prevents the build spike.
+if _N_CPU:
+    print(f"  [threaded-wave] heterogeneous: first {_N_CPU}/{len(MODULES)} births on CPU streams, rest on GPU", flush=True)
 threads = []
 for i, SPEC in enumerate(MODULES):
     if i > 0:
@@ -198,9 +214,10 @@ for i, SPEC in enumerate(MODULES):
         _t0 = time.monotonic()
         while _mem_level() < _GATE_PCT and time.monotonic() - _t0 < 300 and not _abort.is_set():
             time.sleep(3)
-    t = threading.Thread(target=worker, args=(SPEC,), name=f"birth-{SPEC}")
+    _dev = "cpu" if i < _N_CPU else "gpu"
+    t = threading.Thread(target=worker, args=(SPEC, _dev), name=f"birth-{SPEC}-{_dev}")
     t.start(); threads.append(t)
-    print(f"  [threaded-wave] +{SPEC} ({i+1}/{len(MODULES)} live, level={_mem_level()}% free={_free_gb():.1f}GB)", flush=True)
+    print(f"  [threaded-wave] +{SPEC}[{_dev}] ({i+1}/{len(MODULES)} live, level={_mem_level()}% free={_free_gb():.1f}GB)", flush=True)
 for t in threads: t.join()
 _abort.set()
 print(f"@@@THREADED-WAVE w{W} done in {time.monotonic()-_T0:.0f}s: ok={list(_results)} err={list(_errs)}", flush=True)

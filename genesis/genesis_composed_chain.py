@@ -363,18 +363,20 @@ def run_wave(specs):
     return done
 
 def run_wave_threaded(specs):
-    """Phase-G: run ALL of `specs` as THREADS in ONE genesis_threaded_wave.py process
-    (shared runtime + shared cold-share cache) instead of N bird processes. It writes
-    the SAME per-module files spawn() does ({TAG}b{w}-{m}-{k}-bank/.ckpts), so harvest()
-    is byte-unchanged. Per-module steps/total/trunk-LR ride in maps so ODM + the
-    saturation-aware trunk_controller stay faithful. All births share ONE proc, so a
-    single birth error → rc=1 → WAVE ABORT, exactly like the per-process any(rc!=0)."""
+    """Phase-G: run `specs` as THREADS in ONE genesis_threaded_wave.py process. The first
+    WAVE_CPU_BIRTHS births run on their own mx.cpu streams, the rest on the GPU — CPU and
+    GPU are separate units on shared unified memory, run in PARALLEL within ONE runtime
+    (two separate cohort PROCESSES blow the 32GB box at ~11GB runtime each; one process
+    shares it). Writes the SAME per-module files spawn() does → harvest() byte-unchanged.
+    One proc → rc!=0 → WAVE ABORT, like the per-process any(rc!=0). ODM/trunk-LR via maps."""
     import subprocess
-    w, k = specs[0][0], specs[0][2]
+    w = specs[0][0]
+    n_cpu = max(0, min(int(os.environ.get("WAVE_CPU_BIRTHS", "0")), len(specs)))
     env = {**os.environ, **LIVE_ENV}
     env.update({
-        "MMLLM_THREADED_BIRTHS":"1", "WB_W":str(w), "WB_K":str(k), "WAVE_TAG":TAG,
-        "WB_ALLMODS":ALLMODS, "WB_MODULES":",".join(s[1] for s in specs),
+        "MMLLM_THREADED_BIRTHS":"1", "WB_CPU_BIRTHS":str(n_cpu),
+        "WB_W":str(w), "WB_K":"0", "WAVE_TAG":TAG, "WB_ALLMODS":ALLMODS,
+        "WB_MODULES":",".join(f"{s[1]}:{s[2]}" for s in specs),
         "WB_TOTAL":str(max(s[3] for s in specs)), "WB_STEPS":str(STEPS),
         "WB_STEPS_MAP":",".join(f"{s[1]}:{s[4]}" for s in specs),
         "WB_TOTAL_MAP":",".join(f"{s[1]}:{s[3]}" for s in specs),
@@ -383,16 +385,16 @@ def run_wave_threaded(specs):
     log = open(f"{G}/{TAG}b{w}-threaded.out", "w")
     p = subprocess.Popen([PY, f"{G}/scripts/genesis_threaded_wave.py"], env=env,
                          stdout=log, stderr=subprocess.STDOUT)
-    print(f"  [wave] threaded: 1 process, {len(specs)} births ({','.join(s[1] for s in specs)})", flush=True)
+    print(f"  [wave] threaded: 1 process, {len(specs)} births ({n_cpu} CPU + {len(specs)-n_cpu} GPU)", flush=True)
     last_rep = 0.0
     while p.poll() is None:
         time.sleep(2); now = time.time()
         if now - last_rep >= REPORT:
             last_rep = now
             try:
-                ndone = sum(1 for L in open(log.name) if "@@@BIRD w" in L)
+                nd = sum(1 for L in open(log.name) if "@@@BIRD w" in L)
                 lvl = subprocess.run(["sysctl","-n","kern.memorystatus_level"], capture_output=True, text=True).stdout.strip()
-                print(f"  [progress] threaded {ndone}/{len(specs)} births done (mem level={lvl}%)", flush=True)
+                print(f"  [progress] threaded {nd}/{len(specs)} births done (mem={lvl}%)", flush=True)
             except Exception: pass
     birds = []
     for (ww, m, kk, total, steps) in specs:
@@ -404,7 +406,7 @@ def run_wave_threaded(specs):
         except Exception: pass
         birds.append({"proc":p, "module":m, "k":kk, "log":log.name,
                       "pfx":f"{G}/{TAG}b{w}-{m}-{kk}-bank", "ck":f"{G}/{TAG}b{w}-{m}-{kk}.ckpts", "bpc":bpc})
-    print(f"  [wave] threaded done rc={p.returncode}: bpc={ {b['module']: b['bpc'] for b in birds} }", flush=True)
+    print(f"  [wave] threaded done rc={p.returncode}", flush=True)
     return birds
 
 def harvest(birds, w):
@@ -525,7 +527,11 @@ steps_mult = {m: 1.0 for m in MODS}           # ODM per-module step re-allocatio
 for w in range(done + 1, WAVES+1):
     _load_live(w)                             # MID-RUN: pick up {TAG}_live.json edits before this wave
     steps_by_mod = {m: max(1, int(STEPS * steps_mult[m])) for m in MODS}
-    specs = [(w, m, 0, (total := total + STEPS), steps_by_mod[m]) for m in MODS]
+    # WAVE_BIRTHS_PER_MODULE>1 → ENSEMBLE: K births per module (distinct k → distinct
+    # scratch), FedAvg-harvested per module for gradient diversity. =1 → today's 1/module.
+    # This is what feeds a high PAR (4 modules × K) for the threaded CPU/GPU split.
+    BPM = max(1, int(os.environ.get("WAVE_BIRTHS_PER_MODULE", "1")))
+    specs = [(w, m, k, (total := total + STEPS), steps_by_mod[m]) for m in MODS for k in range(BPM)]
     print(f"=== {TAG} WAVE {w}/{WAVES}: {len(specs)} composed births (HOT each, B=1, "
           f"{'THREADED 1-proc' if THREADED else f'PAR={PAR}'}) "
           f"trunk-LR={ {m: round(trunk_mult[m],5) for m in MODS} } ===", flush=True)

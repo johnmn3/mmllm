@@ -31,7 +31,7 @@ PROC = "genesis_composed_chain.py"           # the working 10GB composed chain
 SCRIPT = G + "/scripts/genesis_composed_chain.py"
 # Start button → the teed-up launcher (RAM-gated pre-flight; Tier-1/2 features +
 # structural sweep ON; continues off f256round100). Edit knobs in scripts/run_next.sh.
-LAUNCH = f"zsh {G}/scripts/run_next.sh"
+LAUNCH = f"zsh {G}/scripts/" + os.environ.get("WIDGET_SCRIPT", "run_next.sh")  # threaded run sets WIDGET_SCRIPT=run_next_threaded.sh
 
 def is_running():
     # absolute pgrep path + try/except: a bare "pgrep" depends on PATH, which is
@@ -118,6 +118,51 @@ def refresh(frame):
                 for sm in re.finditer(r"\[MTP\] step (\d+).*?mtp_loss=([0-9.]+)", t):
                     mp[mod].append((w, int(sm.group(1)), float(sm.group(2))))
             except Exception: pass
+        # ── THREADED PATH (MMLLM_THREADED_BIRTHS) ────────────────────────────────────
+        # Births run as threads in ONE process → NO per-bird .out files. Instead:
+        #  • per-birth wave-end control_bpc + Δ_net live in {TAG}b{w}-{mod}-{k}.log.jsonl
+        #    (the "ablation" record) — clean per birth; ensemble k's averaged per (mod,wave).
+        #  • per-step + H-Net mechanics + the CPU/GPU split + mem-pressure level are in the
+        #    interleaved {TAG}b{w}-threaded.out. H-Net mechanics can't be split per module
+        #    (interleaved threads), so they feed an AGGREGATE curve on the first module's lane.
+        # Additive + default-safe: globs are empty on a per-process run → no effect.
+        import json as _json
+        _cbk = {m: {} for m in MODS_O}; _thr = {"ncpu": None, "ngpu": None, "minlvl": None, "wt": {}}
+        for jf in glob.glob(os.path.join(G, f"{TAG}b*-*.log.jsonl")):
+            mj = re.match(rf"{TAG}b(\d+)-(.+)-(\d+)\.log\.jsonl", os.path.basename(jf))
+            if not mj or mj.group(2) not in bm: continue
+            w = int(mj.group(1)); mod = mj.group(2)
+            try:
+                for line in open(jf):
+                    r = _json.loads(line)
+                    if r.get("event") == "ablation":
+                        _cbk[mod].setdefault(w, []).append(float(r["control_bpc"]))
+                        if r.get("delta_net") is not None: dm[mod][w] = float(r["delta_net"])
+            except Exception: pass
+        for m in MODS_O:
+            for w, vals in _cbk[m].items():
+                cb[m][w] = sum(vals) / len(vals)         # ensemble-averaged composed bpc
+        for tf in glob.glob(os.path.join(G, f"{TAG}b*-threaded.out")):
+            mtt = re.match(rf"{TAG}b(\d+)-threaded\.out", os.path.basename(tf))
+            if not mtt: continue
+            w = int(mtt.group(1)); a0 = MODS_O[0]
+            try:
+                t = open(tf).read()
+                for sm in re.finditer(r"\[HNET\] step (\d+).*?avg_chunk=([0-9.]+)", t):
+                    hn[a0].append((w, int(sm.group(1)), float(sm.group(2))))
+                for sm in re.finditer(r"\[TRIE\] step (\d+).*?leaf-fill L1:([0-9.]+)%", t):
+                    tr[a0].append((w, int(sm.group(1)), float(sm.group(2))))
+                for sm in re.finditer(r"\[MTP\] step (\d+).*?mtp_loss=([0-9.]+)", t):
+                    mp[a0].append((w, int(sm.group(1)), float(sm.group(2))))
+                hh = re.search(r"heterogeneous: first (\d+)/(\d+) births on CPU", t)
+                if hh: _thr["ncpu"] = int(hh.group(1)); _thr["ngpu"] = int(hh.group(2)) - int(hh.group(1))
+                lvls = [int(x) for x in re.findall(r"level=(\d+)%", t)]
+                if lvls: _thr["minlvl"] = min(lvls) if _thr["minlvl"] is None else min(_thr["minlvl"], min(lvls))
+                wt = re.search(r"@@@THREADED-WAVE w\d+ done in (\d+)s", t)
+                if wt: _thr["wt"][w] = int(wt.group(1))
+            except Exception: pass
+        _cache["thr"] = _thr if (_thr["ncpu"] is not None) else None
+
         PER = 500   # steps/wave. ONE bpc line per module on a global-step axis: per-wave
         bpc_m = {}  # composed_bpc for early waves (no mini-eval) + per-step mini-eval for recent
         for m in MODS_O:                                       # waves → low-res early, hi-res recent, WHOLE history.
@@ -159,6 +204,7 @@ def start():
 def stop():
     subprocess.run(["pkill", "-f", PROC])
     subprocess.run(["pkill", "-f", "genesis_composed_bird.py"])   # birds run detached — Stop must kill them too, else they keep training/writing
+    subprocess.run(["pkill", "-f", "genesis_threaded_wave.py"])   # threaded path: kill the in-process births launcher too
 
 # ── GUI ──────────────────────────────────────────────────────────────
 W, H = 440, 560                # taller canvas: stacked panels grew 2 → 5 (bpc, Δ_net, HNET, TRIE, MTP)
@@ -242,6 +288,15 @@ def draw():
     cv.create_text(CX, CY+20, text=f"step {_cache['gstep']}/{_cache['gtot']}", fill="#e8e8e8",
                    font=("Helvetica Neue", 10))
     cv.create_text(CX, 165, text=hint, fill="#888", font=("Helvetica Neue", 9))
+    # THREADED mode badge: CPU/GPU split + the new mem-pressure health + last wave wall-clock.
+    _thr = _cache.get("thr")
+    if _thr:
+        _lvl = _thr.get("minlvl"); _wts = _thr.get("wt") or {}
+        _lw = _wts.get(max(_wts)) if _wts else None
+        _txt = f"⇄ threaded  {_thr['ncpu']}cpu+{_thr['ngpu']}gpu"
+        if _lvl is not None: _txt += f"  mem≥{_lvl}%"
+        if _lw is not None:  _txt += f"  {_lw}s/wave"
+        cv.create_text(CX, 178, text=_txt, fill="#6cc0e8", font=("Helvetica Neue", 8))
     # ── stacked graph panels (each its own y-scale; ALL share one xdom so a vertical
     #    slice correlates bpc ↔ Δ_net ↔ chunk-size ↔ trie-fill ↔ mtp across the run) ──
     # First two are the original panels (unchanged); the last three stream the H-Net
