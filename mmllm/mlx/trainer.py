@@ -224,6 +224,14 @@ def _extract(m, K, trunk_ids_mx):
                                       nb.banks[name].n, nb.banks[name].c_net, lr=_slr,
                                       readonly=(_cold_share and bool(_hotmod) and name != _hotmod))
                         for name in nb.module_names}
+                    if getattr(ref, "trie_stream", False):    # STREAMED-NODE trie: C/A handles per module (cold-share like V)
+                        _qd = ref.q_dim; _nn = ref.n_trie_nodes
+                        sb["net"]["trie_stream"] = {
+                            name: {"C": StreamV(nb.banks[name].trie_C_path, _nn, _qd, lr=_slr,
+                                                readonly=(_cold_share and bool(_hotmod) and name != _hotmod)),
+                                   "A": StreamV(nb.banks[name].trie_A_path, _nn, _qd, lr=_slr,
+                                                readonly=(_cold_share and bool(_hotmod) and name != _hotmod))}
+                            for name in nb.module_names}
                 if getattr(ref, "n_blocks", 1) > 1 and hasattr(ref, "block_proj"):
                     # fixed LSH [q_dim, n_blocks] — CONSTANT, lives in static (not
                     # trainable, so no spurious grad / optimizer corruption). Same R
@@ -383,12 +391,17 @@ def _reassemble(trainable, static, meta, student=False, drop_net=False):
                                     **{k: Fa(d["net_" + k]) for k in
                                        ("coarse_codebook", "coarse_value", "coarse2_codebook", "coarse2_value", "fine_codebook")
                                        if "net_" + k in d},
-                                    **({"net_trie_depth": nn_["net_trie_depth"],
-                                        "net_trie_branch": nn_["net_trie_branch"],
-                                        "net_trie_stop_tau": nn_.get("net_trie_stop_tau", 0.0),
-                                        "net_trie_C": Fa(d["net_trie_C"]),
-                                        "net_trie_A": Fa(d["net_trie_A"])}
-                                       if "net_trie_C" in d else {}),
+                                    **(({"net_trie_depth": nn_["net_trie_depth"],
+                                         "net_trie_branch": nn_["net_trie_branch"],
+                                         "net_trie_stop_tau": nn_.get("net_trie_stop_tau", 0.0),
+                                         # STREAMED-NODE trie → disk handles (grad scatters via stream_node_read);
+                                         # else the dense C/A params.
+                                         **({"net_trie_C_stream": nn_["trie_stream"][name]["C"],
+                                             "net_trie_A_stream": nn_["trie_stream"][name]["A"]}
+                                            if nn_.get("trie_stream") else
+                                            {"net_trie_C": Fa(d["net_trie_C"]),
+                                             "net_trie_A": Fa(d["net_trie_A"])})}
+                                        if "net_trie_C" in d else {})),
                                     **({"trie_usage": _trie_usage.setdefault((bi, name), [])}
                                        if (_trie_usage is not None and lvl == "off"
                                            and not drop_net and "net_trie_C" in d) else {}),
@@ -1578,6 +1591,10 @@ def train_round(cfg, train_path, val_path, ckpt_dir, log_path,
         for _sv in (_sb.get("net", {}).get("stream") or {}).values():
             try: _flushed += _sv.flush()
             except Exception as _e: print(f"  [mlx] StreamV flush failed: {_e}")
+        for _ts in (_sb.get("net", {}).get("trie_stream") or {}).values():   # STREAMED trie nodes persist too
+            for _sv in (_ts.get("C"), _ts.get("A")):
+                try: _flushed += _sv.flush() if _sv is not None else 0
+                except Exception as _e: print(f"  [mlx] trie StreamV flush failed: {_e}")
     if _flushed:
         print(f"  [mlx] StreamV persisted {_flushed} dirty rows to disk (cross-round netbank memory)")
     # PHASE D: copy-path-on-write versioning publish. Default OFF (env unset) → the
