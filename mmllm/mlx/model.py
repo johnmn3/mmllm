@@ -76,6 +76,19 @@ def _hnet_encode(params, x):
     N = float(hnet.get("target_n", 6))
     hnet["ratio_loss"] = _chunker.ratio_loss(p, b, N)
     hnet["cut_rate"] = mx.mean(b)
+    # Static-bound bookkeeping: #rows whose real boundary count exceeded the
+    # static max_chunks bound (clamped+masked gracefully in the chunker). Stashed
+    # as a LAZY scalar (no host-sync in the trace). Only float()'d when the
+    # MMLLM_HNET_DEBUG diagnostic is explicitly enabled — default path stays
+    # sync-free and byte-identical to the old dynamic gather.
+    hnet["chunk_overflow"] = _chunker.overflow_count(b)
+    import os as _os
+    if _os.environ.get("MMLLM_HNET_DEBUG", "").lower() in ("1", "true", "yes"):
+        _ov = int(hnet["chunk_overflow"].item())
+        if _ov:
+            print(f"  [HNET] chunk overflow: {_ov} row(s) exceeded static "
+                  f"max_chunks={_chunker.max_chunks_bound(xhat.shape[1])} "
+                  f"(clamped+masked)", flush=True)
     return z, hn
 
 
