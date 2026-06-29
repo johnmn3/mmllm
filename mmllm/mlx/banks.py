@@ -61,8 +61,15 @@ def _trie_descend(p, q, want_z=False):
     acc += A[child]; r -= C[child]; then stop the token if ||r|| < stop_tau.
     Returns (leaf [B,T] heap-id, acc [B,T,q_dim] path-sum, z VQ loss or None)."""
     B = int(p["net_trie_branch"]); D = int(p["net_trie_depth"])
-    C = p["net_trie_C"]; A = p["net_trie_A"]          # [n_nodes, q_dim] heap-indexed
     tau = float(p.get("net_trie_stop_tau", 0.0))      # residual-norm early-stop threshold (0 = full depth)
+    # STREAMED-NODE mode: C/A live on disk (StreamV), read via stream_node_read whose VJP
+    # scatters node grads to disk (bit-exact to dense). Else dense params via mx.take.
+    _Cs = p.get("net_trie_C_stream"); _As = p.get("net_trie_A_stream")
+    _streamed = _Cs is not None and _As is not None
+    if _streamed:
+        from mmllm.mlx.stream_v import stream_node_read
+    else:
+        C = p["net_trie_C"]; A = p["net_trie_A"]       # [n_nodes, q_dim] heap-indexed dense
     arangeB = mx.arange(B)
     r = q
     local = mx.zeros(q.shape[:-1], dtype=mx.int32)     # within-level path index (base-B)
@@ -76,13 +83,16 @@ def _trie_descend(p, q, want_z=False):
         base_next = base_l + B ** l                    # base[ℓ+1]
         first = base_next + local * B                  # [B,T] first child heap id
         cand_idx = first[..., None] + arangeB          # [B,T,B] sibling heap ids
-        Cand = mx.take(C, cand_idx, axis=0)            # [B,T,B,q_dim]
+        Cand = (stream_node_read(_Cs, cand_idx, r) if _streamed   # streamed: VJP scatters C grad to disk
+                else mx.take(C, cand_idx, axis=0))     # [B,T,B,q_dim]
         scores = mx.einsum("btkd,btd->btk", Cand, r)   # [B,T,B] nearest-centroid
         code = mx.argmax(scores, axis=-1).astype(mx.int32)
         chosen = first + code                          # [B,T] chosen child heap id
-        cc = mx.take(C, chosen, axis=0)                # [B,T,q_dim]
+        cc = mx.take_along_axis(Cand, code[..., None, None], axis=-2)[..., 0, :]  # = C[chosen]; grad flows via the Cand read
         am = alive[..., None]
-        acc = acc + am * mx.take(A, chosen, axis=0)    # path-sum — only contributes while alive
+        A_chosen = (stream_node_read(_As, chosen, r) if _streamed  # streamed: VJP scatters A grad to disk
+                    else mx.take(A, chosen, axis=0))
+        acc = acc + am * A_chosen                      # path-sum — only contributes while alive
         leaf = mx.where(alive > 0.5, chosen, leaf)     # leaf = deepest node reached before stopping
         depth = depth + alive
         if want_z:                                     # masked per-level commitment+codebook VQ loss
