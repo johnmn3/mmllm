@@ -307,6 +307,14 @@ def seed_round0():
     shutil.copytree(src, f"{RC(0)}/{os.path.basename(src)}")
     print(f"round0 (old-4) seeded from {SEED}: {len(glob.glob(RB(0)+'*net*'))} slices + frozen trunk/router", flush=True)
 
+# CPU/GPU SPLIT (per-process): the first WAVE_CPU_BIRDS modules (by MODS order) run their
+# bird with MMLLM_MLX_DEVICE=cpu; the rest on the GPU. Each bird is its own process → its
+# own Metal context (no shared-context buffer limit), same memory as today's PAR=2, but a
+# CPU bird and a GPU bird run on SEPARATE compute units in PARALLEL. cpu indices are spread
+# so a PAR window mixes devices (1 cpu + 1 gpu). Default 0 → all-GPU (unchanged).
+_N_CPU_BIRDS = max(0, min(int(os.environ.get("WAVE_CPU_BIRDS", "0")), len(MODS)))
+_CPU_MODS = {MODS[int(round(j * len(MODS) / _N_CPU_BIRDS))] for j in range(_N_CPU_BIRDS)} if _N_CPU_BIRDS else set()
+
 def spawn(w, module, k, total, steps=STEPS):
     base = {**os.environ, **LIVE_ENV}            # live overrides win over launch-time env; derived MMLLM_* read from base
     env = dict(base)
@@ -314,13 +322,14 @@ def spawn(w, module, k, total, steps=STEPS):
                 "WB_DENSE_MULT":f"{trunk_mult[module]:.5f}",   # per-module saturation-aware trunk LR (see trunk_controller)
                 "WB_STEPS":str(steps),"WB_ALLMODS":ALLMODS,"WAVE_TAG":TAG,"PYTHONPATH":SRC,
                 "PYTHONUNBUFFERED":"1","MMLLM_BATCH":base.get("WB_BATCH","1"),"MMLLM_GRAD_CKPT":"false",
+                "MMLLM_MLX_DEVICE":("cpu" if module in _CPU_MODS else "gpu"),   # heterogeneous per-process split
                 "MLX_CACHE_MB":base.get("MLX_CACHE_MB","512"),
                 "MMLLM_EVAL_EVERY":base.get("MMLLM_EVAL_EVERY","10"),
                 "MMLLM_ABLATION_EVAL_CAP":base.get("MMLLM_ABLATION_EVAL_CAP","8192")})
     log = open(f"{G}/{TAG}b{w}-{module}-{k}.out", "w")
     import subprocess
     p = subprocess.Popen([PY, f"{G}/scripts/genesis_composed_bird.py"], env=env, stdout=log, stderr=subprocess.STDOUT)
-    return {"proc":p, "module":module, "k":k, "log":log.name,
+    return {"proc":p, "module":module, "k":k, "log":log.name, "dev":("cpu" if module in _CPU_MODS else "gpu"),
             "pfx":f"{G}/{TAG}b{w}-{module}-{k}-bank", "ck":f"{G}/{TAG}b{w}-{module}-{k}.ckpts"}
 
 def run_wave(specs):
@@ -329,7 +338,7 @@ def run_wave(specs):
         now = time.time()
         if i < len(specs) and len(running) < PAR and now - last_spawn >= STAG:
             running.append(spawn(*specs[i])); i += 1; last_spawn = now
-            print(f"  [wave] +{running[-1]['module']} ({len(running)} live)", flush=True)
+            print(f"  [wave] +{running[-1]['module']}[{running[-1]['dev']}] ({len(running)} live)", flush=True)
         time.sleep(2)
         if running and now - last_rep >= REPORT:
             last_rep = now

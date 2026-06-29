@@ -1,6 +1,13 @@
 import os, glob, shutil, time
 import mlx.core as mx
 mx.set_cache_limit(int(os.environ.get("MLX_CACHE_MB", "512")) << 20)   # cap the MLX buffer cache (was unbounded → 8GB hoard)
+# HETEROGENEOUS COMPUTE (CPU/GPU split, PER-PROCESS): MMLLM_MLX_DEVICE=cpu routes THIS
+# bird's MLX compute to the CPU; the GPU is left for the sibling GPU-bird. Each bird is
+# its OWN process → its OWN Metal context (no shared-context buffer limit) → same memory
+# as today's PAR=2, but CPU and GPU births run on SEPARATE units in PARALLEL. Default gpu.
+if os.environ.get("MMLLM_MLX_DEVICE", "gpu").strip().lower() == "cpu":
+    mx.set_default_device(mx.cpu)
+    print("  [bird] MLX device = CPU (heterogeneous per-process cohort)", flush=True)
 _T0 = time.monotonic()
 G = os.path.expanduser("~/models/genesis")
 W = int(os.environ["WB_W"]); MODULE = os.environ["WB_MODULE"]; K = int(os.environ["WB_K"])
@@ -21,10 +28,20 @@ for p in (pfx, ck):
 # COMPOSED regime: seed ALL module slices (router needs them present) + trunk/router ckpt.
 # NOT V_local (re-init = sleep reset). Cold modules are frozen (cool) AND stop-grad'd (HOT_MODULE).
 rb = RB(W-1); rbn = os.path.basename(rb)
-for f in glob.glob(f"{rb}-net.*.bin"):
+# COLD-SHARE (MMLLM_NET_COLD_SHARE, default off): clone ONLY the hot module this
+# bird trains; cold modules are read in-place from the SHARED round-bank inode (no
+# clone), so PAR=N births share ONE cold copy via the OS page cache (4 hot + 4
+# shared-cold = 8) instead of N×4 = 16. Off → clone ALL modules (byte-identical).
+_COLD_SHARE = os.environ.get("MMLLM_NET_COLD_SHARE", "").lower() in ("1", "true", "yes")
+_clone_glob = f"{rb}-net.{MODULE}.*.bin" if _COLD_SHARE else f"{rb}-net.*.bin"
+for f in glob.glob(_clone_glob):
     # APFS clone (cp -c): copy-on-write so cloning a 10GB SPARSE bank is instant +
     # uses ~no extra disk (shutil.copy would de-sparse → 10GB/module/bird blowup).
     os.system(f"cp -c {f!r} {pfx}{os.path.basename(f)[len(rbn):]!r}")
+if _COLD_SHARE:
+    # Point the netbank (torch V mmap + MLX StreamV) at the shared round-bank
+    # prefix for the cold modules. Same inode across births → page-cache shared.
+    os.environ["MMLLM_NET_COLD_SHARE_RB_PREFIX"] = f"{rb}-net"
 latest = max(glob.glob(f"{RC(W-1)}/step-*"), key=lambda d:int(d.split('-')[-1]))
 os.makedirs(ck, exist_ok=True); shutil.copytree(latest, f"{ck}/{os.path.basename(latest)}")
 cool = ",".join(m for m in ALLMODS.split(",") if m != MODULE)
@@ -67,7 +84,7 @@ os.environ.update({
     "MMLLM_LR_ROUND_BASE":str(TOTAL-STEPS),"MMLLM_MLX_MAX_STEPS":str(STEPS),
     "MMLLM_MIX":f"{G}/{CORPUS}.bin.train.bin:10","MMLLM_PROBE":f"{G}/{CORPUS}.bin.val.bin",
     "MEMCAP_PRESSURE_KILL":"5","MMLLM_CKPT_KEEP":"2",
-    "MMLLM_LR_LOCAL_MULT":"0.05","MMLLM_LR_LAYER_MULTS":"2.0,1.0,0.5,1.0,2.0",
+    "MMLLM_LR_LOCAL_MULT":os.environ.get("WB_LOCAL_MULT","0.05"),"MMLLM_LR_LAYER_MULTS":"2.0,1.0,0.5,1.0,2.0",
     "MMLLM_LOCAL_NOISE_FRAC":"0.5","MMLLM_LOCAL_LR_WAKE":"20.0","MMLLM_LOCAL_LR_SLEEP":"1.0",
 })
 import basilisp.main; basilisp.main.init()

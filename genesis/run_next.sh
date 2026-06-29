@@ -29,7 +29,7 @@ PAR=${WAVE_PAR:-2}                        # PAR=2: H-Net smoke (hnsmoke2, 2026-0
 #   mmap mode=r + StreamV readonly), made corruption-safe by VERSIONING's immutable base snapshot. Cold
 #   modules emit no deltas / never write. MEASURED collapse (cswith vs cswithout, real 4-bird wave):
 #   per-wave peak disk 39GB WITH vs ~145GB WITHOUT (~4x); harvest + versioned netver-delta sidecars fire.
-WAVE_N=${WAVE_N:-2}                        # kept LOW for now (smoke). Disk blocker fixed → safe to set 100 for the long run.
+WAVE_N=${WAVE_N:-100}                      # LONG RUN (100 waves). Disk blocker FIXED (cold-share 39GB/wave); PAR=2/T=384 memory-validated (hnsmoke2/cswith). Override WAVE_N=2 for a smoke.
 
 echo "── pre-flight (correctness only — NO RAM gate) ──"
 ls $G/$SEED.ckpts/step-*/dense_named.pt >/dev/null 2>&1 || { echo "ABORT: seed ckpt $SEED missing"; exit 1; }
@@ -53,6 +53,11 @@ JSON
 echo "── launching $TAG ──"
 caffeinate -i nohup env \
   `# ===== f256-EXACT BASE =====` \
+  `# CPU/GPU SPLIT (per-process): WAVE_CPU_BIRDS=2 → 2 of the 4 modules (spread: text,agentic) run` \
+  `# their bird on the CPU, the other 2 on the GPU. At PAR=2 each concurrent pair is 1 CPU + 1 GPU` \
+  `# bird on SEPARATE compute units in parallel — each its own process/Metal context (no 499000 wall),` \
+  `# same memory as plain PAR=2. Set WAVE_CPU_BIRDS=0 for the old all-GPU behaviour.` \
+  WAVE_CPU_BIRDS=${WAVE_CPU_BIRDS:-2} \
   WAVE_MODULES="text,math,agentic,code" WAVE_N=${WAVE_N:-100} WAVE_PAR=$PAR WAVE_STEPS=${WAVE_STEPS:-500} \
   WAVE_STAGGER=3 WAVE_REPORT=15 WAVE_KEEP=3 WAVE_SEED=$SEED WAVE_TAG=$TAG WAVE_BASE_STEP=$SEED_STEP \
   WB_BATCH=1 WB_D_MODEL=256 WB_D_FF=768 WB_N_BLOCKS=160 WB_DENSE_MULT=1.0 WB_DENSE_WD=5e-5 \
@@ -84,6 +89,12 @@ caffeinate -i nohup env \
   `#  keeps EVERY leaf in-bounds of the cloned bin, = ~90% of today's V (memory "~=160"), no resize, no` \
   `#  crash. WB_N_BLOCKS=144 here OVERRIDES the base 160 so the bird's declared n_blocks matches the trie.` \
   MMLLM_HNET=1 MMLLM_NET_USE_ALL32=1 MMLLM_NET_MODULES=text,math,agentic,code \
+  `# ARCH LOCK: 32 Local Banks (all layers). The good chain (waves 1-52) ran 32-bank; this` \
+  `# stanza was dropped earlier → an 8-bank build silently mismatched the 32-bank chain at` \
+  `# resume → corruption (net_z 0.28→31.9, bpc 2.5→4.6). The trainer ARCH-MISMATCH GUARD now` \
+  `# refuses any resume where build arch ≠ seed arch; this keeps the build AT 32-bank so it` \
+  `# matches. (A fresh 8-bank seed → 32-bank needs MMLLM_ALLOW_ARCH_GROWTH=1 for wave 1 only.)` \
+  MMLLM_LOCAL_BANK_LAYERS=0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31 \
   MMLLM_NET_TRIE_DEPTH=2 MMLLM_NET_TRIE_BRANCH=12 WB_N_BLOCKS=144 \
   MMLLM_NET_VQ_REVIVE=true MMLLM_NET_VQ_REVIVE_EVERY=50 \
   MMLLM_MTP_COEF=0.1 MMLLM_MTP_HEADS=8 MMLLM_NGRAM_HASH=2:4096,3:8192 \

@@ -734,15 +734,35 @@ def train_round(cfg, train_path, val_path, ckpt_dir, log_path,
         _named_path = os.path.join(resume_dir, "dense_named.pt")
         if os.path.exists(_named_path):
             _named = torch.load(_named_path, map_location="cpu", weights_only=False)
-            _new = 0
+            _new = 0; _build_names = set()
             for n, p in _named_params(m, K).items():
+                _build_names.add(n)
                 s = _named.get(n)
                 if s is not None and tuple(p.shape) == tuple(s.shape):
                     p.data.copy_(s.to(p.dtype)); nload += 1
                 elif s is None:
-                    _new += 1                       # new param (e.g. a cold-added module) → init
+                    _new += 1                       # build param the seed lacks → init (arch GREW)
+            _dropped = sum(1 for k in _named if k not in _build_names)   # seed param the build lacks → trained weights LOST (arch SHRANK)
             print(f"  [mlx] resumed {nload} dense params BY NAME from {_named_path} "
-                  f"(module-growth safe; {_new} new params at init)")
+                  f"(module-growth safe; {_new} new at init, {_dropped} seed params dropped)")
+            # ── ARCH-MISMATCH GUARD ──────────────────────────────────────────────────
+            # A clean chain resume loads EVERY built param from the seed AND leaves no
+            # seed param behind → _new == _dropped == 0. Nonzero means the build's
+            # architecture differs from the chain (local-bank count, H-Net stack on/off,
+            # netbank/router shape, …): mismatched params silently fall back to random
+            # INIT and/or trained weights get dropped → the model is half-reset and the
+            # chain corrupts. THIS IS EXACTLY what wrecked f256x at wave 53 (259 to init,
+            # net_z 0.28→31.9, bpc 2.5→4.6). Refuse, unless the growth is intentional
+            # (e.g. cold-adding a module) via MMLLM_ALLOW_ARCH_GROWTH=1.
+            _arch_max = int(os.environ.get("MMLLM_ARCH_MISMATCH_MAX", "0"))
+            if ((_new + _dropped) > _arch_max
+                    and os.environ.get("MMLLM_ALLOW_ARCH_GROWTH", "").lower() not in ("1", "true", "yes")):
+                raise SystemExit(
+                    f"@@@ARCH-MISMATCH refusing to resume {_named_path}: build arch ≠ chain arch "
+                    f"({_new} built params would load at random INIT, {_dropped} trained seed params would be "
+                    f"DROPPED). Resuming would half-reset the model and corrupt the chain (this is the wave-53 "
+                    f"f256x failure). Match the build config to the chain's arch (local-bank count, H-Net flags, "
+                    f"etc.), or set MMLLM_ALLOW_ARCH_GROWTH=1 if this growth is deliberate.")
         else:
             saved = list(torch.load(resume, map_location="cpu", weights_only=False))
             for p, s in zip(ps, saved):
