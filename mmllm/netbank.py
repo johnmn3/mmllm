@@ -254,9 +254,26 @@ class NetBank(nn.Module):
             #      commitment) and A[chosen] (path-sum) carry gradient.
             # Then the deep trie's nodes are ONE shared, bounded, LRU-cached copy on unified
             # memory — not dense per bird — and the 10GB fills as it trains.
-            self.trie_stream = os.environ.get("MMLLM_NET_TRIE_STREAM", "").lower() in ("1", "true", "yes")
-            self.trie_C = nn.Parameter(torch.zeros(n_nodes, q_dim))
-            self.trie_A = nn.Parameter(torch.zeros(n_nodes, q_dim))
+            self.trie_stream = (os.environ.get("MMLLM_NET_TRIE_STREAM", "").lower() in ("1", "true", "yes")
+                                and mmap_path is not None)
+            if self.trie_stream:
+                # STREAMED nodes: C/A live on disk (zero-init → sparse truncate, no write),
+                # read/trained via StreamV (handles built in trainer._extract). Torch holds
+                # 1-row dummies so the dense param list / harvest stay valid; the real
+                # [n_nodes, q_dim] data is on disk and shared via cold-share like V.
+                self.trie_C_path = mmap_path + ".trieC"
+                self.trie_A_path = mmap_path + ".trieA"
+                _need = n_nodes * q_dim * _DTYPE_MAP[dtype][2]
+                if not self.readonly:                              # cold readers don't create
+                    for _p in (self.trie_C_path, self.trie_A_path):
+                        if not (os.path.exists(_p) and os.path.getsize(_p) == _need):
+                            with open(_p, "wb") as _f:
+                                _f.truncate(_need)                 # zero-init, sparse
+                self.trie_C = nn.Parameter(torch.zeros(1, q_dim))  # dummy (real data on disk)
+                self.trie_A = nn.Parameter(torch.zeros(1, q_dim))
+            else:
+                self.trie_C = nn.Parameter(torch.zeros(n_nodes, q_dim))
+                self.trie_A = nn.Parameter(torch.zeros(n_nodes, q_dim))
         elif self.n_blocks > 1:
             _g = torch.Generator().manual_seed(0x5EED)
             self.register_buffer(
