@@ -630,6 +630,31 @@ def _run_pkm_diag(P, load_corpus, T):
     print("=======================================\n")
 
 
+# THREADED BIRTHS (Phase G): when a wave's births run as THREADS in one process
+# (genesis_threaded_wave.py sets MMLLM_THREADED_BUILD_LOCK=1) they share the ~10GB
+# runtime but each builds its OWN small torch model (trunk dense params are tiny; V
+# is a 1-row disk dummy under VSTREAM) and runs the UNMODIFIED train loop in full
+# isolation — no shared mutable state, so no writeback race / recipe drift. The ONLY
+# hazard is overlapping build_model spikes (what OOM-hangs the box), so this lock
+# serializes the build_model→_extract span: one model build resident at a time;
+# steady-state training overlaps freely. Default (env unset) → never acquired →
+# byte-identical to the per-process path.
+import threading as _threading
+_BUILD_LOCK = _threading.Lock()
+_build_lock_held = _threading.local()   # per-thread "I own the build lock" flag
+
+
+def _release_build_lock_if_held():
+    """Owner-safe release: a threaded birth whose build RAISED calls this from its
+    except (same thread that acquired) so the lock can't deadlock its siblings."""
+    if getattr(_build_lock_held, "v", False):
+        try:
+            _BUILD_LOCK.release()
+        except RuntimeError:
+            pass
+        _build_lock_held.v = False
+
+
 def train_round(cfg, train_path, val_path, ckpt_dir, log_path,
                 total, eval_every, ckpt_every):
     """Run one bird round in MLX. Builds via basilisp, trains in MLX, writes
@@ -665,6 +690,11 @@ def train_round(cfg, train_path, val_path, ckpt_dir, log_path,
     print(f"  [mlx] train_round: B={B} T={T} steps={n_steps} "
           f"lr_base={lr_base} (per-step schedule: pick-lr × {{bank,net,dense}}-mult)")
 
+    # Serialize the build spike across threaded births (no-op unless threaded).
+    _bl = _BUILD_LOCK if os.environ.get("MMLLM_THREADED_BUILD_LOCK", "").lower() in ("1", "true", "yes") else None
+    if _bl is not None:
+        _bl.acquire(); _build_lock_held.v = True
+        print(f"  [mlx] threaded-build: acquired build lock (module={os.environ.get('MMLLM_NET_HOT_MODULE','?')})", flush=True)
     m = build_model(cfg)
     # REWARM: one-shot realign the NetBank K_a/K_b from the (healthy, content-aligned)
     # Local Bank keys — the purpose-built lever (core.lpy rewarm-netbank-keys-only!)
@@ -972,6 +1002,10 @@ def train_round(cfg, train_path, val_path, ckpt_dir, log_path,
         print(f"  [mlx] NET_WIDEN: widened {_did} netbanks to c_net={_wide} (torch model)")
 
     trainable, static, meta = _extract(m, K, trunk_ids)
+    # Build span done — let the next threaded birth build. Training below overlaps.
+    if _bl is not None:
+        _bl.release(); _build_lock_held.v = False; _bl = None
+        print(f"  [mlx] threaded-build: released build lock (module={os.environ.get('MMLLM_NET_HOT_MODULE','?')})", flush=True)
 
     # CTXADD inject: add a zero W_ctx (ctx-add bank query) at the MLX-trainable level
     # AFTER the (positional) resume, so resume stays clean. W_ctx trains as a dense
