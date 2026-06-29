@@ -226,10 +226,14 @@ def _extract(m, K, trunk_ids_mx):
                         for name in nb.module_names}
                     if getattr(ref, "trie_stream", False):    # STREAMED-NODE trie: C/A handles per module (cold-share like V)
                         _qd = ref.q_dim; _nn = ref.n_trie_nodes
+                        # Trie cache cap is SMALL: nodes are q_dim-wide and the touched set per
+                        # step is a few thousand (shared hot paths). The V default cap (262144)
+                        # ×(C+A)×layers×modules would be ~13GB of idle slabs — the build hog.
+                        _tcap = min(_nn, int(os.environ.get("MMLLM_NET_TRIE_CACHE_ROWS", "16384")))
                         sb["net"]["trie_stream"] = {
-                            name: {"C": StreamV(nb.banks[name].trie_C_path, _nn, _qd, lr=_slr,
+                            name: {"C": StreamV(nb.banks[name].trie_C_path, _nn, _qd, lr=_slr, cap=_tcap,
                                                 readonly=(_cold_share and bool(_hotmod) and name != _hotmod)),
-                                   "A": StreamV(nb.banks[name].trie_A_path, _nn, _qd, lr=_slr,
+                                   "A": StreamV(nb.banks[name].trie_A_path, _nn, _qd, lr=_slr, cap=_tcap,
                                                 readonly=(_cold_share and bool(_hotmod) and name != _hotmod))}
                             for name in nb.module_names}
                 if getattr(ref, "n_blocks", 1) > 1 and hasattr(ref, "block_proj"):
