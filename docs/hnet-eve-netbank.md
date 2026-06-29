@@ -501,3 +501,16 @@ in the first week and independently valuable.
 - The MVP trie is capped at ≤160 leaves because StreamV is a fixed clone of the seed's 160-block bin (`_read_row` preads by raw offset, no EOF guard → crash past 160). This is a *capacity* ceiling, not a depth one.
 - eve-proper: V file sparse + grows KB→TB on demand; only touched leaves materialize; upper nodes resident, leaves LRU-paged (the eve trick). Removes the leaf ceiling → branch-32 structural tries, ~10^9 slots, mostly cold on disk.
 - NOT a prerequisite for logical depth (Phase E delivers that). Do this when capacity (not abstraction depth) is the bottleneck. Pairs with smaller per-leaf V.
+
+### Phase G — threaded births (spiked 2026-06-28): REFRAME to memory-density, NOT compute-throughput
+**Verdict: viable as a memory play, BLOCKED as a throughput play by the single GPU.**
+
+- **Probe 1 (does MLX thread-parallelize compute?): NO.** MLX *does* release the GIL during `eval` (dispatch-bound threaded/sequential ratio 0.79–0.80 — Python dispatch overlaps), but there is ONE GPU so compute-bound kernels SERIALIZE (D=512 ratio 1.03, D=1024 ratio 1.10 — a slight scheduler-contention penalty). **Threaded births give zero compute speedup.** "Super-parallel = more throughput" is a hardware (1-GPU) wall, not a software one.
+- **Probe 2 (shared versioned banks across threads): HOLDS.** N threads on one MAP_SHARED readonly base (50× concurrent reads, base bytes untouched); each thread its own `.ver` overlay with overlapping rows → no bleed, base immutable; `merge_version_deltas` harvest correct. The versioned-CoW infra is genuinely thread-safe — the data side is ready.
+- **Probe 3 (memory): the actual win, size unknown.** Threading collapses to 1× the read-only shared portion (MLX runtime + frozen trunk/dense params + MLX pool). Cold banks are ALREADY process-shared via cold-share page-cache (no extra gain). Still scales with N: per-worker hot module + Adam + activations + autograd graph. **If the ~24 GB/process is mostly frozen-trunk/dense → big win (fit more births per RAM); if mostly activations → modest.** Unknown which dominates.
+
+**So the real prize:** threaded births let you fit MORE concurrent births in 32 GB (push past the PAR=2 memory wall), NOT run them faster. Memory-density, not speed.
+
+**Design:** `genesis_composed_bird` per-process `main()` → `worker(tid)` thread pool sharing one loaded model (frozen trunk/dense + cold `StreamV(readonly)` 1×); per-thread owns hot module + `StreamV(versioning)` (own `.ver/.vidx/.adm/.adv` — per-thread paths MANDATORY) + optimizer + `value_and_grad` closure + its own `mx.Stream` (cuts scheduler contention). Barrier at round end → collect each thread's `version_delta()` → merge → one `materialize` writer.
+**Gotchas:** single-GPU serialization; give each thread its own `mx.Stream`; MLX autograd thread-safety UNPROVEN at real scale; per-thread paths mandatory (shared path = corruption).
+**Next experiment (decisive):** a real 2-thread births run (actual model, not toy) measuring **peak RSS vs 2 separate processes** + round wall-time → quantifies the true memory saving (does frozen-trunk sharing dominate the 24 GB?) and confirms MLX autograd survives concurrent real graphs.
