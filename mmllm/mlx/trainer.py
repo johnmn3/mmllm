@@ -208,7 +208,8 @@ def _extract(m, K, trunk_ids_mx):
                              "sqrt_n": ref.sqrt_n, "sub_top_k": ref.sub_top_k, "top_k": ref.top_k,
                              "n_blocks": getattr(ref, "n_blocks", 1),
                              "net_trie_depth": getattr(ref, "trie_depth", 0),
-                             "net_trie_branch": getattr(ref, "trie_branch", 32)}
+                             "net_trie_branch": getattr(ref, "trie_branch", 32),
+                             "net_trie_stop_tau": getattr(ref, "trie_stop_tau", 0.0)}
                 if _vstream:                              # disk-stream: V on disk via StreamV handles (per module)
                     from mmllm.mlx.stream_v import StreamV
                     _slr = float(os.environ.get("MMLLM_NET_STREAM_LR", "0.003"))
@@ -242,7 +243,8 @@ def _extract(m, K, trunk_ids_mx):
                 sb["net"] = {"eps": _eps(nb.q_norm), "sub_dim": nb.sub_dim,
                              "sqrt_n": nb.sqrt_n, "sub_top_k": nb.sub_top_k, "top_k": nb.top_k,
                              "net_trie_depth": getattr(nb, "trie_depth", 0),
-                             "net_trie_branch": getattr(nb, "trie_branch", 32)}
+                             "net_trie_branch": getattr(nb, "trie_branch", 32),
+                             "net_trie_stop_tau": getattr(nb, "trie_stop_tau", 0.0)}
 
         trainable["blocks"].append(tb)
         static["blocks"].append(sb)
@@ -383,6 +385,7 @@ def _reassemble(trainable, static, meta, student=False, drop_net=False):
                                        if "net_" + k in d},
                                     **({"net_trie_depth": nn_["net_trie_depth"],
                                         "net_trie_branch": nn_["net_trie_branch"],
+                                        "net_trie_stop_tau": nn_.get("net_trie_stop_tau", 0.0),
                                         "net_trie_C": Fa(d["net_trie_C"]),
                                         "net_trie_A": Fa(d["net_trie_A"])}
                                        if "net_trie_C" in d else {}),

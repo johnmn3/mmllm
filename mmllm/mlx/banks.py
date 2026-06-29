@@ -45,49 +45,63 @@ def _topk_idx(a, k):
 
 
 def _trie_descend(p, q, want_z=False):
-    """Phase A — depth-D, B-way residual-VQ trie descent. Generalizes the
-    depth-2/3 `coarse_codebook` path-sum above to arbitrary depth over a single
-    heap-indexed C/A pair (`MMLLM_NET_TRIE_DEPTH`).
+    """DYNAMIC-DEPTH, B-way residual-VQ trie descent over a heap-indexed C/A pair.
 
-    Per level ℓ: code = argmax(r·C_childrenᵀ); descend to that child;
-    acc += A[child] (shared "ancestor" value); r -= C[child] (residual VQ).
-    Returns (leaf [B,T] int32 in 0..B^D, acc [B,T,q_dim] ancestor sum,
-    z per-level VQ loss or None).
+    A balanced max-depth-D heap, but each token TERMINATES EARLY when its running
+    residual is already well-explained (||r|| < stop_tau) — so the EFFECTIVE depth
+    is PER-TOKEN VARIABLE: complex / dense content keeps descending (fine resolution),
+    simple / sparse content stops shallow (coarse). The query value = path-sum of the
+    ancestor A's down to its STOP node; the V leaf slab is the STOP node's heap id (so
+    every node is a potential leaf, V is sized to n_nodes, not just B^D bottom leaves).
+    stop_tau (MMLLM_NET_TRIE_STOP_TAU) tunes the average depth toward the target; 0 →
+    never stops early (= the old fixed full-depth behaviour, but leaf is now the bottom
+    node's heap id rather than its within-level index).
 
-    Heap layout (implicit/pointerless): the node at level ℓ with within-level
-    index `local` has its B children occupying
-    `C[base[ℓ+1] + local·B : base[ℓ+1] + local·B + B]`, where
-    base[ℓ] = (B^ℓ − 1)/(B − 1). The leaf id is the final `local` (= the base-B
-    path), which offsets the StreamV V slab exactly like `n_blocks` (=B^D)."""
+    Per level ℓ (while alive): code = argmax(r·C_childrenᵀ); descend to that child;
+    acc += A[child]; r -= C[child]; then stop the token if ||r|| < stop_tau.
+    Returns (leaf [B,T] heap-id, acc [B,T,q_dim] path-sum, z VQ loss or None)."""
     B = int(p["net_trie_branch"]); D = int(p["net_trie_depth"])
-    C = p["net_trie_C"]; A = p["net_trie_A"]          # [Σ_ℓ B^ℓ, q_dim] heap-indexed
+    C = p["net_trie_C"]; A = p["net_trie_A"]          # [n_nodes, q_dim] heap-indexed
+    tau = float(p.get("net_trie_stop_tau", 0.0))      # residual-norm early-stop threshold (0 = full depth)
     arangeB = mx.arange(B)
     r = q
-    local = mx.zeros(q.shape[:-1], dtype=mx.int32)    # [B,T] within-level node index
+    local = mx.zeros(q.shape[:-1], dtype=mx.int32)     # within-level path index (base-B)
+    leaf = mx.zeros(q.shape[:-1], dtype=mx.int32)      # STOP-node heap id (root=0 default)
     acc = mx.zeros_like(q)
+    alive = mx.ones(q.shape[:-1], dtype=q.dtype)       # 1.0 while still descending, → 0 once stopped
+    depth = mx.zeros(q.shape[:-1], dtype=q.dtype)      # effective per-token depth (telemetry)
     z = None
-    base_l = 0                                        # base[0] = 0 (root)
+    base_l = 0                                         # base[0] = 0 (root)
     for l in range(D):
-        base_next = base_l + B ** l                   # base[ℓ+1]
-        first = base_next + local * B                 # [B,T] first child heap id
-        cand_idx = first[..., None] + arangeB         # [B,T,B] the B sibling heap ids
-        Cand = mx.take(C, cand_idx, axis=0)           # [B,T,B,q_dim] child centroids
-        scores = mx.einsum("btkd,btd->btk", Cand, r)  # [B,T,B] nearest-centroid (cosine; q rms-normed)
-        code = mx.argmax(scores, axis=-1).astype(mx.int32)   # [B,T]
-        chosen = first + code                         # [B,T] chosen child heap id
-        cc = mx.take(C, chosen, axis=0)               # [B,T,q_dim] chosen centroid
-        acc = acc + mx.take(A, chosen, axis=0)        # + shared ancestor (path-sum)
-        if want_z:                                    # per-level commitment+codebook VQ loss
-            zl = (mx.mean((mx.stop_gradient(r) - cc) ** 2)
-                  + 0.25 * mx.mean((r - mx.stop_gradient(cc)) ** 2))
+        base_next = base_l + B ** l                    # base[ℓ+1]
+        first = base_next + local * B                  # [B,T] first child heap id
+        cand_idx = first[..., None] + arangeB          # [B,T,B] sibling heap ids
+        Cand = mx.take(C, cand_idx, axis=0)            # [B,T,B,q_dim]
+        scores = mx.einsum("btkd,btd->btk", Cand, r)   # [B,T,B] nearest-centroid
+        code = mx.argmax(scores, axis=-1).astype(mx.int32)
+        chosen = first + code                          # [B,T] chosen child heap id
+        cc = mx.take(C, chosen, axis=0)                # [B,T,q_dim]
+        am = alive[..., None]
+        acc = acc + am * mx.take(A, chosen, axis=0)    # path-sum — only contributes while alive
+        leaf = mx.where(alive > 0.5, chosen, leaf)     # leaf = deepest node reached before stopping
+        depth = depth + alive
+        if want_z:                                     # masked per-level commitment+codebook VQ loss
+            zl = (mx.mean(alive * mx.sum((mx.stop_gradient(r) - cc) ** 2, axis=-1))
+                  + 0.25 * mx.mean(alive * mx.sum((r - mx.stop_gradient(cc)) ** 2, axis=-1)))
             z = zl if z is None else z + zl
-        r = r - cc                                    # running residual
-        local = local * B + code                      # descend (base-B path accumulate)
+        r = r - am * cc                                # residual shrinks only while alive
+        local = mx.where(alive > 0.5, local * B + code, local)
         base_l = base_next
-    _tu = p.get("trie_usage")                         # leaf-fill telemetry (no-op when absent)
+        if tau > 0.0:                                  # DYNAMIC STOP: terminate where the residual is explained
+            rn = mx.sqrt(mx.sum(r * r, axis=-1) + 1e-12)
+            alive = alive * (rn > tau).astype(alive.dtype)
+    _tu = p.get("trie_usage")                          # leaf-fill telemetry (no-op when absent)
     if _tu is not None:
-        _tu.append(mx.stop_gradient(local))
-    return local, acc, z
+        _tu.append(mx.stop_gradient(leaf))
+    _td = p.get("trie_depth_acc")                      # effective-depth telemetry (avg-depth tuning)
+    if _td is not None:
+        _td.append(mx.stop_gradient(depth))
+    return leaf, acc, z
 
 
 def _pkm_select(q_a, q_b, K_a, K_b, sqrt_n, sub_top_k, top_k):

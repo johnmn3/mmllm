@@ -8,7 +8,7 @@ no trainer two-pass needed. I/O follows ds4 (ds4-cold-expert-streaming-pread mem
 explicit pread/pwrite with F_NOCACHE to bypass the page cache (avoids the wired/
 compressor thrash that file-mmap caused).
 """
-import os, numpy as np
+import os, numpy as np, mmap as _mmap
 from collections import OrderedDict
 import mlx.core as mx
 
@@ -48,14 +48,27 @@ class StreamV:
             versioning = os.environ.get("MMLLM_NET_VERSIONING", "").lower() in ("1", "true", "yes")
         self.versioning = bool(versioning) and not self.readonly
         if self.readonly:
-            # COLD-SHARE read-only mode: this is a FROZEN cold module read by EVERY
-            # bird from the SAME round-bank inode. mmap MAP_SHARED + PROT_READ
-            # (np.memmap mode='r') → the OS page cache holds ONE shared copy across
-            # the PAR births; deliberately NO F_NOCACHE (we WANT the shared cache),
-            # no Adam state files, no pwrite. Hot module keeps the F_NOCACHE
-            # pread+pwrite slab path below. See genesis_composed_bird cold-share.
-            self.fdV = self.fdm = self.fdv = None
-            self._mm = np.memmap(path, dtype=np.float32, mode="r", shape=(self.N, self.c))
+            # COLD-SHARE: a FROZEN cold module read by every PAR bird. We want the cache
+            # SHARED across births (one copy, not per-bird) AND BOUNDED (it can't balloon
+            # the box). So: mmap MAP_SHARED|PROT_READ → all births read ONE OS page-cache
+            # copy of the bank; then a touched-PAGE LRU madvise(MADV_DONTNEED)s pages that
+            # fall out of it, so the resident set stays ≈ the trie's HOT working set. The
+            # trie is hierarchical (eve): every birth's queries converge on the same hot
+            # nodes + a small leaf set, so the UNION of all births' signal is still small
+            # → the shared cache stays bounded even as births scale. The old mmap had no
+            # such bound and thrashed; per-bird pread bounded but UN-shared. This is both.
+            self.fdm = self.fdv = None
+            self.fdV = os.open(path, os.O_RDONLY)
+            _len = self.N * self.rb
+            self._mm = _mmap.mmap(self.fdV, _len, _mmap.MAP_SHARED, _mmap.PROT_READ)
+            try: self._mm.madvise(_mmap.MADV_RANDOM)             # bank access is trie-scattered, not sequential
+            except (AttributeError, OSError): pass
+            self._buf = np.frombuffer(self._mm, np.float32, self.N * self.c).reshape(self.N, self.c)
+            self._PS = _mmap.PAGESIZE
+            self._rpp = max(1, self._PS // self.rb)              # rows per page
+            _cap_rows = int(os.environ.get("MMLLM_NET_COLD_CACHE_ROWS", "65536"))
+            self._cap_pages = max(8, _cap_rows // self._rpp)     # resident pages cap (shared working set)
+            self._pages = OrderedDict()                          # page_idx -> None (LRU; oldest first)
             return
         self._mm = None
         self.fdV = os.open(path, os.O_RDWR)
@@ -166,10 +179,22 @@ class StreamV:
         return np.fromiter((self.slot[int(r)] for r in rows), np.int64, len(rows))
 
     def read_rows(self, rows):                              # forward gather (cache hits free; misses pread)
-        if self.readonly:                                  # cold-share: gather straight from the MAP_SHARED mmap
-            return np.asarray(self._mm[np.asarray(rows, np.int64)], dtype=np.float32)
+        if self.readonly:                                  # cold-share: gather from the SHARED mmap, then bound its page cache
+            ri = np.asarray(rows, np.int64)
+            out = np.asarray(self._buf[ri], dtype=np.float32)   # faults the touched (hot) pages into the shared page cache
+            self._bound_pages(ri)
+            return out
         self._ensure(rows)
         return self.Vb[self._slots(rows)].copy()
+
+    def _bound_pages(self, rows):                           # touched-page LRU → madvise(DONTNEED) cold pages out of the SHARED cache
+        P = self._pages; PS = self._PS
+        for pg in np.unique((rows * self.rb) // PS):        # pages these rows live on → mark most-recently-used
+            pg = int(pg); P.pop(pg, None); P[pg] = None
+        while len(P) > self._cap_pages:                     # over the bound → drop the coldest pages (re-fault if touched again)
+            old, _ = P.popitem(last=False)
+            try: self._mm.madvise(_mmap.MADV_DONTNEED, old * PS, PS)
+            except (OSError, ValueError): pass
 
     def adam_step(self, rows, g):                           # sparse Adam on the cached (hot) rows
         if self.readonly:                                  # cold-share: frozen module, never updated
@@ -208,7 +233,12 @@ class StreamV:
         return n
 
     def close(self):                                        # flush + close fds
-        if self.readonly:                                  # cold-share: just drop the shared mmap
+        if self.readonly:                                  # cold-share: release the shared mmap + read fd (no flush)
+            self._buf = None
+            try: self._mm.close()
+            except Exception: pass
+            try: os.close(self.fdV)
+            except (OSError, TypeError, AttributeError): pass
             self._mm = None
             return
         self.flush()

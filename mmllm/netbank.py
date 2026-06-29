@@ -182,8 +182,18 @@ class NetBank(nn.Module):
         self.trie_depth = int(trie_depth)
         self.trie_branch = int(trie_branch)
         self.trie_resident_levels = int(trie_resident_levels)
+        # DYNAMIC DEPTH: a token stops descending once its residual norm < trie_stop_tau.
+        # 0 → never stops early (fixed full depth). Higher → shallower average depth. Tune
+        # toward the target avg (e.g. ~3.0 → ~6 levels at D_max=8 in the validated heap).
+        self.trie_stop_tau = float(os.environ.get("MMLLM_NET_TRIE_STOP_TAU", "0.0"))
         if self.trie_depth > 0:
-            n_blocks = self.trie_branch ** self.trie_depth
+            # DYNAMIC DEPTH: a token can terminate at ANY node (not only the bottom
+            # leaves), so EVERY heap node owns a V slab — n_blocks = the full node count
+            # (B^{D+1}−1)/(B−1), not just B^D bottom leaves. The descent returns the stop
+            # node's heap id, which offsets V exactly like the old leaf id did. (Stop is
+            # data-driven by residual norm — MMLLM_NET_TRIE_STOP_TAU; 0 ⇒ full depth.)
+            B, D = self.trie_branch, self.trie_depth
+            n_blocks = (B ** (D + 1) - 1) // (B - 1)
         self.n_blocks = int(n_blocks)
         self.n = self.n_blocks * sqrt_n * sqrt_n
         self.c_net = c_net

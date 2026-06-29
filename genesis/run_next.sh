@@ -16,8 +16,11 @@ SRC=$G/mmllm-src
 VENV=/Users/john/src/mmllm/.venv/bin/python3
 TAG=${WAVE_TAG:-f256x}
 SEED=${WAVE_SEED:-f256round100}
-PAR=${WAVE_PAR:-2}                        # PAR=2: H-Net smoke (hnsmoke2, 2026-06-28) showed avail troughs
-                                          # to ~3.5GB free at PAR=2/T=384 → PAR=4 would OOM-hang the 32GB box.
+PAR=${WAVE_PAR:-4}                        # PAR=4: all 4 births run AT ONCE (2 CPU + 2 GPU concurrent) — true
+                                          # 4-way parallelism, not 2-at-a-time. PAR=2 used to OOM-hang the box,
+                                          # but the bounded cold-share LRU (stream_v) caps resident memory so
+                                          # 4 concurrent now fits. The CPU/GPU split spreads the load across both
+                                          # units. (Override WAVE_PAR=2 to fall back to serialized 2-at-a-time.)
 # ── LONG-RUN GUARD (H-Net smoke hnsmoke2 FAILED on DISK — now FIXED via cold-share) ───────────────────
 #   hnsmoke2 (PAR=2,T=384): H-Net mechanics all GREEN (build, chunking, trie leaf-fill+revive, per-bird
 #   harvest+reseed, versioning .ver/.vidx deltas, bpc) — but wave 1 died at the 4th bird (code) with
