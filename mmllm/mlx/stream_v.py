@@ -410,3 +410,36 @@ def stream_combine(sv: StreamV, top_global, top_scores):
         return (d_ts,)
 
     return _combine(top_scores)
+
+
+def stream_node_read(sv: StreamV, rows, carrier):
+    """Gather disk-resident node rows (trie C/A) by id; the gathered VALUES are
+    differentiable — their gradient is scattered back to disk via sparse Adam, so the
+    STREAMED trie nodes learn exactly like dense params. `rows`: int ids (any shape).
+    `carrier`: a differentiable value already in the graph (the residual r) passed ONLY
+    so MLX descends into this op's VJP (an int-id-only op has no differentiable input to
+    backprop through). The forward ignores carrier; the VJP receives the gathered output's
+    cotangent (the real value-gradient), scatter-accumulates it per unique node row, and
+    pwrites the Adam update to disk. Returns mx float `rows.shape + (c,)`."""
+    idx = np.asarray(rows).astype(np.int64).reshape(-1)
+    uniq, inv = np.unique(idx, return_inverse=True)            # touched node rows + remap
+    shape = tuple(rows.shape)
+    local = inv.reshape(shape)
+    Vrows = mx.array(sv.read_rows(uniq))                       # [U,c] disk read (bounded LRU), constant
+    _localmx = mx.array(local)
+
+    @mx.custom_function
+    def _gather(carrier_in):                                  # carrier_in keeps the op in the graph
+        return mx.take(Vrows, _localmx, axis=0)               # output = the gather (independent of carrier)
+
+    @_gather.vjp
+    def _gather_vjp(primals, cotangent, output):
+        d_out = cotangent[0] if isinstance(cotangent, (tuple, list)) else cotangent
+        d_flat = np.asarray(d_out, dtype=np.float32).reshape(-1, sv.c)
+        d_uniq = np.zeros((len(uniq), sv.c), np.float32)
+        np.add.at(d_uniq, local.reshape(-1), d_flat)          # accumulate grad per unique node row
+        sv.adam_step(uniq, d_uniq)                            # pwrite Adam update to disk
+        cin = primals[0] if isinstance(primals, (tuple, list)) else primals
+        return (mx.zeros_like(cin),)                          # carrier gets no gradient
+
+    return _gather(carrier)
