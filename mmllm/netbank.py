@@ -58,14 +58,36 @@ _DTYPE_MAP = {
 def _mmap_value_tensor_typed(path: str, n: int, dim: int,
                              dtype_str: str = "fp32",
                              init_scale: float = 0.02,
-                             chunk_rows: int = 4096) -> torch.Tensor:
+                             chunk_rows: int = 4096,
+                             readonly: bool = False) -> torch.Tensor:
     """Open or create an (n, dim) memmap of the given dtype, return a
     torch tensor sharing the mmap storage. fp32 default for SparseAdam
     numerical stability (fp16 SparseAdam state can underflow / overflow);
     fp16 available behind MMLLM_NET_DTYPE=fp16 once we add a mixed-
-    precision optimizer."""
+    precision optimizer.
+
+    readonly=True (COLD-SHARE): the file is a FROZEN cold module read from the
+    SHARED round-bank inode by every PAR birth. Open MAP_SHARED PROT_READ
+    (np.memmap mode='r') so a stray torch write cannot corrupt the shared file —
+    torch.from_numpy on the non-writable mmap yields a non-writable tensor that
+    raises on any in-place write. Pairs with StreamV(readonly=True) on the MLX
+    side; both backends now open the shared inode read-only."""
     np_dt, _torch_dt, bytes_per = _DTYPE_MAP[dtype_str]
     expected_bytes = n * dim * bytes_per
+    if readonly:
+        # COLD-SHARE: NEVER write/recreate the shared inode. Open mode='r' over the
+        # first n rows. The shared file may be LARGER than expected_bytes (e.g. a
+        # 160-block seed bin viewed as a 144-block trie) — that's fine, we map the
+        # leading n rows (every in-trie leaf is in-bounds). Smaller → hard error
+        # (a real cold module must exist; we must not fall through to a w+ that
+        # would de-sparsify + randomize the file every PAR birth shares).
+        if not (os.path.exists(path) and os.path.getsize(path) >= expected_bytes):
+            raise FileNotFoundError(
+                f"cold-share readonly bank missing or too small: {path} "
+                f"(have {os.path.getsize(path) if os.path.exists(path) else 0}, "
+                f"need >= {expected_bytes})")
+        arr = np.memmap(path, dtype=np_dt, mode="r", shape=(n, dim))
+        return torch.from_numpy(arr)
     if os.path.exists(path) and os.path.getsize(path) == expected_bytes:
         arr = np.memmap(path, dtype=np_dt, mode="r+", shape=(n, dim))
     else:
@@ -143,7 +165,8 @@ class NetBank(nn.Module):
                  n_coarse2: int = 1,
                  trie_depth: int = 0,
                  trie_branch: int = 32,
-                 trie_resident_levels: int = 2):
+                 trie_resident_levels: int = 2,
+                 readonly: bool = False):
         super().__init__()
         assert q_dim % 2 == 0, "q_dim must be even"
         assert c_net <= q_dim, "c_net (bottleneck dim) must be <= q_dim"
@@ -167,6 +190,7 @@ class NetBank(nn.Module):
         self.top_k = top_k
         self.sub_top_k = min(sub_top_k, sqrt_n)
         self.mmap_path = mmap_path
+        self.readonly = bool(readonly)   # COLD-SHARE: shared inode opened read-only
         self.delay_ms_min = float(delay_ms_min)
         self.delay_ms_max = float(delay_ms_max)
         self.dtype_str = dtype
@@ -263,9 +287,12 @@ class NetBank(nn.Module):
             with torch.no_grad():
                 self.V.weight.normal_(0, 0.02)
         elif mmap_path is not None:
-            v_tensor = _mmap_value_tensor_typed(mmap_path, self.n, c_net, dtype)
+            v_tensor = _mmap_value_tensor_typed(mmap_path, self.n, c_net, dtype,
+                                                readonly=self.readonly)
+            # COLD-SHARE: freeze a read-only (shared-inode) cold module so no
+            # optimizer/grad ever targets the shared file. Hot module unchanged.
             self.V = CPUPinnedEmbedding.from_pretrained(
-                v_tensor, freeze=False, sparse=True,
+                v_tensor, freeze=self.readonly, sparse=True,
             )
         else:
             # Unit-test path: no mmap, no CPU-pinning, plain nn.Embedding.
@@ -659,12 +686,14 @@ class ModularNetBank(nn.Module):
         _rb_prefix = os.environ.get("MMLLM_NET_COLD_SHARE_RB_PREFIX", "")
         for name in module_names:
             mp = None
+            _ro = False
             if mmap_prefix is not None:
                 # shared cross-backend naming (torch + MLX + harvester agree)
                 from mmllm.skill_modules import netbank_v_path
                 _prefix = mmap_prefix
                 if _cold_share and _rb_prefix and _hot and name != _hot:
                     _prefix = _rb_prefix                    # cold module → shared round-bank inode
+                    _ro = True                              # ...opened read-only (no stray write → no shared-file corruption)
                 mp = netbank_v_path(_prefix, name, 0 if mmap_layer is None else mmap_layer)
             self.banks[name] = NetBank(
                 q_dim, sqrt_n=sqrt_n, c_net=c_net, top_k=top_k,
@@ -673,7 +702,7 @@ class ModularNetBank(nn.Module):
                 dtype=dtype, bank_on_gpu=bank_on_gpu, n_blocks=n_blocks,
                 vq_route=vq_route, n_coarse=n_coarse, n_coarse2=n_coarse2,
                 trie_depth=trie_depth, trie_branch=trie_branch,
-                trie_resident_levels=trie_resident_levels,
+                trie_resident_levels=trie_resident_levels, readonly=_ro,
             )
         # Routing: which module(s) the next forward consults. None = all.
         self._active = None
