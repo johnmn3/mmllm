@@ -1349,6 +1349,11 @@ def train_round(cfg, train_path, val_path, ckpt_dir, log_path,
         _tb = int(os.environ.get("MMLLM_NET_TRIE_BRANCH", "32"))
         print(f"  [mlx] PHASE-A trie NetBank: branch={_tb} depth={_trie_depth_env} "
               f"leaves={_tb**_trie_depth_env}, leaf-fill logged every {_trie_log_every} steps", flush=True)
+    # Mid-wave trie-stream flush: the trie cache (cap ≥ per-step touched set) NEVER evicts
+    # during a wave, so streamed nodes only reach disk at the wave-end flush — a killed/OOM'd
+    # wave would silently lose ALL trie learning (0B bins). Flush periodically so progress
+    # survives, mirroring V's incremental eviction. 0 disables.
+    _trie_flush_every = int(os.environ.get("MMLLM_NET_TRIE_FLUSH_EVERY", "100"))
     for step in range(1, n_steps + 1):
         lb, ln, ld, dc, cur = schedule(step)
         static["_distill_coef"] = dc
@@ -1537,6 +1542,15 @@ def train_round(cfg, train_path, val_path, ckpt_dir, log_path,
                     _bn = float(np.linalg.norm(np.array(static["_router_sel_bias"][_bi])))
                     print(f"  [mlx] router-load bi={_bi}: counts={_ct.astype(int).tolist()} "
                           f"CV2={_cv2:.4f} ||sel_bias||={_bn:.4f}", flush=True)
+        if _trie_flush_every and step % _trie_flush_every == 0 and step != n_steps:
+            _tf = 0                                            # mid-wave persist of streamed trie nodes
+            for _sb in static.get("blocks", []):
+                for _ts in (_sb.get("net", {}).get("trie_stream") or {}).values():
+                    for _sv in (_ts.get("C"), _ts.get("A")):
+                        if _sv is not None:
+                            try: _tf += _sv.flush()
+                            except Exception: pass
+            if _tf: print(f"  [mlx] trie mid-wave flush @step {step}: {_tf} dirty node rows → disk", flush=True)
         if step % max(1, eval_every) == 0 or step == n_steps:
             # DISTILL DIAGNOSTIC (smoke): separate forward outside the grad trace —
             # is distill firing? raw magnitude, layer coverage (24 vs 8 = topology
