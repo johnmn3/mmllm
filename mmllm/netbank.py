@@ -235,6 +235,26 @@ class NetBank(nn.Module):
             # torch forward uses leaf 0, same convention as the coarse path.)
             B, D = self.trie_branch, self.trie_depth
             n_nodes = (B ** (D + 1) - 1) // (B - 1)
+            self.n_trie_nodes = n_nodes
+            # STREAMED-NODE TRIE (MMLLM_NET_TRIE_STREAM) — the deep/eve build. Default OFF
+            # → C/A are DENSE params below (byte-identical; fine while n_nodes is small).
+            # At real depth n_nodes·q_dim·layers·modules·2 dwarfs RAM, so the nodes must
+            # stream like V. WHEN ON, the next-session build is (mirror the V path exactly):
+            #   1. netbank: trie_C/A become mmap-backed 1-row torch dummies here (like self.V
+            #      at mmap_path+".trieC"/".trieA"); prepare_netbank_files() also lays out
+            #      those two [n_nodes, q_dim] bins. cold-share opens them readonly (shared).
+            #   2. trainer._extract: build StreamV handles for C and A (lr=stream_lr) next to
+            #      the V handle → sb["net"]["stream"]["C"/"A"]; _reassemble passes C_stream/
+            #      A_stream into the forward p.
+            #   3. banks._trie_descend: read C-siblings + C/A[chosen] per level via a
+            #      stream_combine-ANALOG custom op (forward = pread the touched node rows;
+            #      VJP = scatter the residual-VQ grad to C and the path-sum grad to A via
+            #      StreamV.adam_step — exactly how stream_combine scatters V's grad). The
+            #      argmax routing read is non-diff (plain read_rows); only C[chosen] (VQ
+            #      commitment) and A[chosen] (path-sum) carry gradient.
+            # Then the deep trie's nodes are ONE shared, bounded, LRU-cached copy on unified
+            # memory — not dense per bird — and the 10GB fills as it trains.
+            self.trie_stream = os.environ.get("MMLLM_NET_TRIE_STREAM", "").lower() in ("1", "true", "yes")
             self.trie_C = nn.Parameter(torch.zeros(n_nodes, q_dim))
             self.trie_A = nn.Parameter(torch.zeros(n_nodes, q_dim))
         elif self.n_blocks > 1:
