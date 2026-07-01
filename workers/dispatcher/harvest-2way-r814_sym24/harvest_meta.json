@@ -1,0 +1,50 @@
+{
+  "spork_version": "0.9",
+  "target_round": 814,
+  "n_workers": 2,
+  "wave": "train-r814",
+  "workers": [
+    {
+      "handle": "MMF7T",
+      "branch": "origin/claude/train-sym24-077c2902-MMF7T",
+      "ctrl_bpc": 3.1852
+    },
+    {
+      "handle": "4Jdn1",
+      "branch": "fork-SeniorCareMarket-com-mmllm-claude-train-sym24-fcc7f02d-4Jdn1",
+      "ctrl_bpc": 3.059
+    }
+  ],
+  "worker_ctrl_bpc_mean": 3.1221,
+  "worker_ctrl_bpc_best": 3.059,
+  "previous_harvest": {
+    "round": 813,
+    "dir": "workers/dispatcher/harvest-5way-r813_sym24",
+    "mean": 3.212,
+    "best": 3.0582
+  },
+  "direct_contributions": [
+    {
+      "bird_id": "077c29024f554efd",
+      "handle": "MMF7T",
+      "branch": "origin/claude/train-sym24-077c2902-MMF7T",
+      "n_steps": 80,
+      "ctrl_bpc": 3.1852
+    },
+    {
+      "bird_id": "fcc7f02d52914bab",
+      "handle": "4Jdn1",
+      "branch": "fork-SeniorCareMarket-com-mmllm-claude-train-sym24-fcc7f02d-4Jdn1",
+      "n_steps": 80,
+      "ctrl_bpc": 3.059
+    }
+  ],
+  "ancestor_harvests": [
+    "workers/dispatcher/harvest-5way-r813_sym24"
+  ],
+  "cumulative_total_steps": 1040,
+  "cumulative_unique_birds": 13,
+  "harvested_at": "2026-07-01T05:36:29Z",
+  "harvester": "scripts/harvest_action.sh (GH Action)",
+  "note": "Lean harvest \u2014 sparse deltas + averaged dense only, no opt-state."
+}
