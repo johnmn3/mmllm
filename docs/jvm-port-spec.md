@@ -416,6 +416,33 @@ before any training work).
   file a deviation note, change nothing without sign-off (CLAUDE.md
   rule 7).
 
+## 14b. Reference-semantics findings and dispositions (2026-07-03)
+
+Surfaced by the M5a optimizer-parity work; dispositions set by the user:
+
+1. **Dense AdamW trains with decoupled `weight_decay=1e-2`** (torch
+   default; `make-opt-dense` passes only `lr`). Disposition: replicate
+   as-is on the JVM (done, bit-exact); **replace only if it
+   demonstrably hurts** — tracked as a watch item.
+2. **`MMLLM_LR_KAB_MULT` was inert in prod** (unset → K_a/K_b silently
+   rode the dense schedule; the two-group mechanism in `make-opt-dense`
+   + `set-opt-lrs!` was fully plumbed but never activated).
+   Disposition: **activated per original #3-spike intent** —
+   `extend_chain.sh` now defaults `KAB_MULT=0.15 → KAB_MULT_END=0.001`:
+   addressing hill-climbs during wake, freezes during sleep so logitkd
+   distills against stable Local addresses. Initial operating point
+   only; cron-prod sweep discipline (≥3 harvests) applies before
+   trusting. JVM mirror + golden regen tracked as a follow-up task.
+3. **`lr-at-step` mixes reference frames** (ROUND_BASE-relative warmup,
+   absolute-step cosine). Disposition: **intentional** — part of the
+   deliberate curve shaping across overlapping chain rounds. Replicate
+   exactly; do not "fix".
+4. **Sparse Adam bias correction is per-param, not per-row** (a row
+   first touched at step k gets step-k correction with zero moments),
+   plus the `v_local_counter` grad-less-param tile-shift quirk.
+   Disposition: replicate exactly (done, goldens cover both); **watch**
+   for late-touched-row update spikes, replace only if a problem.
+
 ## 15. Non-goals (v1)
 
 GPU/MPS execution; torch.compile-style fusion; the aesop curriculum
