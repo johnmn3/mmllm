@@ -108,8 +108,9 @@
 
 ;; ── product-key retrieval core (shared by Local PKM and NetBank) ──
 
-(defn- rms-row!
-  "RMSNorm a d-float row in place against weight w."
+(defn rms-row!
+  "RMSNorm a d-float row in place against weight w. (Public: grad.clj
+   reuses it for the q_norm recompute in the backward passes.)"
   [^floats x ^long off ^floats w ^long d]
   (let [ss (loop [i 0 s 0.0]
              (if (< i d)
