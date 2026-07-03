@@ -39,9 +39,35 @@ Determinism choices (mirror on the JVM side):
     z-loss/telemetry side effects.
   - NetBank simulated delay env'd to 0 (it wouldn't affect values, only wall).
 
+--optim mode (M5a, spec §2 recipe / gate G4 optimizer-delta half) writes the
+LR-schedule + optimizer goldens (self-contained; no model build needed):
+
+  schedule.npz         per-step (base, dense, kab, bank, net) lr table for
+                       steps 0..99 at the prod recipe env (LR=3e-3,
+                       LR_MIN=3e-3, warmup=70, extend_chain.sh group mults),
+                       computed by CALLING the core.lpy vars (lr-at-step +
+                       pick-lr-*-mult arity-2), plus an rb_* variant with
+                       MMLLM_LR_ROUND_BASE=40 / MMLLM_LR_RAMP_FLOOR=0.1 /
+                       warmup=68 to pin the chain-round-resume semantics
+  adamw.npz            8x4 param + 5 fixed dense grads through torch AdamW
+                       exactly as make-opt-dense builds it (prod: KAB_MULT
+                       unset == DENSE_MULT -> single group, lr=pick-lr-dense,
+                       torch defaults incl. weight_decay=1e-2); param dumped
+                       after each step
+  sparse_adam.npz      optim.py CPUOffloadSparseAdam trajectories, 5 steps of
+                       hand-built sparse grads with overlapping/duplicate/
+                       unsorted rows: (a) 64x4 non-V_local param at prod
+                       MMLLM_SQRT_N=128, (b) 48x4 V_local-shaped param (3
+                       trunks of sqrt_local²=16 at MMLLM_SQRT_N=4) covering
+                       the LOCAL_MULT=0.05 rule, (c) three 32x4 V_local
+                       params with MMLLM_LR_LAYER_MULTS=2.0,0.5 and grad-less
+                       steps, covering layer-mult tiling + the per-param step
+                       counter + the counter-skips-gradless-params quirk
+
 Run:  .venv/bin/python scripts/dump_goldens.py [--out jvm/goldens]
       .venv/bin/python scripts/dump_goldens.py --grads   (forward goldens
       must exist first: grads_ce reads full_forward.npz)
+      .venv/bin/python scripts/dump_goldens.py --optim
 """
 from __future__ import annotations
 
@@ -249,17 +275,224 @@ def dump_grads(out_dir):
     print(f"grad goldens written to {out_dir}/ (seed_inputs=20260703)")
 
 
+# ── M5a: LR schedule + optimizer goldens ──
+
+# The prod-recipe schedule env (extend_chain.sh:192-233 at STEPS=100).
+# MMLLM_LR_KAB_MULT is deliberately NOT set: extend_chain.sh doesn't set it,
+# so pick-lr-kab-mult defaults to pick-lr-dense-mult's START (0.05) and its
+# _END defaults to that same start — i.e. kab stays CONSTANT 0.05 while
+# dense cosines 0.05 -> 0.005 (and make-opt-dense stays single-group).
+SCHED_PROD_ENV = {
+    "MMLLM_LR": "3e-3",
+    "MMLLM_LR_MIN": "3e-3",
+    "MMLLM_LR_WARMUP": "70",           # 70% of 100 steps
+    "MMLLM_LR_DENSE_MULT": "0.05",
+    "MMLLM_LR_DENSE_MULT_END": "0.005",
+    "MMLLM_LR_BANK_MULT": "3.0",
+    "MMLLM_LR_BANK_MULT_END": "0.001",
+    "MMLLM_LR_NET_MULT": "0.001",
+    "MMLLM_LR_NET_MULT_END": "5.0",
+}
+
+
+def _core_vars():
+    """Bootstrap basilisp + mmllm.core WITHOUT building the model (the
+    pick-lr-*/lr-at-step vars are pure env readers) — same rt.Var.find
+    pattern as jvm_bridge.build_model / mlx/parity.py."""
+    for k, v in SYM24_ENV.items():
+        os.environ.setdefault(k, v)
+    import basilisp.main
+    basilisp.main.init()
+    import mmllm.core  # noqa: F401 — registers the namespace
+    import basilisp.lang.runtime as rt
+    from basilisp.lang import symbol as sym
+
+    def var(n):
+        return rt.Var.find(sym.symbol(n, ns="mmllm.core")).value
+    return var
+
+
+def dump_optim(out_dir):
+    """Schedule + optimizer goldens (M5a). Schedule values come from CALLING
+    the core.lpy vars; optimizer trajectories from torch.optim.AdamW and
+    optim.py's CPUOffloadSparseAdam run for 5 steps on fixed grads."""
+    import numpy as np
+    import torch
+
+    for k, v in SCHED_PROD_ENV.items():
+        os.environ[k] = v
+    var = _core_vars()
+
+    # ── schedule.npz ──
+    total = 100
+    lr_at_step = var("lr-at-step")
+    pick_lr, pick_lr_min = var("pick-lr"), var("pick-lr-min")
+    pick_warmup = var("pick-lr-warmup")
+    mult = {g: var(f"pick-lr-{g}-mult") for g in ("dense", "kab", "bank", "net")}
+    arrs = {}
+
+    def sched_table(prefix):
+        warmup = int(pick_warmup())
+        base = np.array(
+            [float(lr_at_step(s, total, pick_lr(), warmup, pick_lr_min()))
+             for s in range(total)], dtype=np.float64)
+        arrs[prefix + "base"] = base
+        # per-group lr exactly as the train loop composes it
+        # (core.lpy:4888-4904): cur-lr × pick-lr-*-mult(step, total).
+        for gname, fn in mult.items():
+            arrs[prefix + gname] = base * np.array(
+                [float(fn(s, total)) for s in range(total)], dtype=np.float64)
+        arrs[prefix + "warmup"] = np.int64(warmup)
+
+    sched_table("")
+    arrs["total"] = np.int64(total)
+    arrs["lr"] = np.float64(pick_lr())
+    arrs["lr_min"] = np.float64(pick_lr_min())
+    for gname, fn in mult.items():
+        # arity-0 = start; arity-2 at step>=total = end (captures the
+        # kab-defaults-to-dense-start semantics as data).
+        arrs[gname + "_start"] = np.float64(fn())
+        arrs[gname + "_end"] = np.float64(fn(total, total))
+
+    # Chain-round-resume variant: ROUND_BASE shifts the ramp (s-eff /
+    # warmup-eff), RAMP_FLOOR lifts its minimum — while the cosine phase
+    # keeps using ABSOLUTE s/warmup (reference quirk, replicated as-is).
+    os.environ["MMLLM_LR_ROUND_BASE"] = "40"
+    os.environ["MMLLM_LR_RAMP_FLOOR"] = "0.1"
+    os.environ["MMLLM_LR_WARMUP"] = "68"
+    sched_table("rb_")
+    arrs["rb_round_base"] = np.int64(40)
+    arrs["rb_ramp_floor"] = np.float64(0.1)
+    del os.environ["MMLLM_LR_ROUND_BASE"]
+    del os.environ["MMLLM_LR_RAMP_FLOOR"]
+    os.environ["MMLLM_LR_WARMUP"] = SCHED_PROD_ENV["MMLLM_LR_WARMUP"]
+    np.savez(os.path.join(out_dir, "schedule.npz"), **arrs)
+    print(f"schedule.npz: base lr step0={arrs['base'][0]:.3e} "
+          f"step69={arrs['base'][69]:.6e} step99={arrs['base'][99]:.6e}; "
+          f"net lr step99={arrs['net'][99]:.6e}")
+
+    g = torch.Generator().manual_seed(20260705)
+
+    # ── adamw.npz ──
+    p = torch.nn.Parameter(torch.randn(8, 4, generator=g))
+    grads = torch.randn(5, 8, 4, generator=g)
+    # Exactly make-opt-dense (core.lpy:2303): prod env has KAB_MULT unset ==
+    # DENSE_MULT, so the single-group branch: AdamW(params, lr=pick-lr-dense)
+    # with torch defaults betas=(0.9,0.999), eps=1e-8, weight_decay=1e-2.
+    opt = torch.optim.AdamW([p], lr=float(var("pick-lr-dense")()))
+    pg = opt.param_groups[0]
+    aw = {"p_init": _np(p).copy(), "grads": _np(grads),
+          "lr": np.float64(pg["lr"]),
+          "beta1": np.float64(pg["betas"][0]),
+          "beta2": np.float64(pg["betas"][1]),
+          "eps": np.float64(pg["eps"]),
+          "weight_decay": np.float64(pg["weight_decay"])}
+    outs = []
+    for i in range(5):
+        p.grad = grads[i].clone()
+        opt.step()
+        outs.append(_np(p).copy())
+    aw["p_steps"] = np.stack(outs)
+    np.savez(os.path.join(out_dir, "adamw.npz"), **aw)
+    print(f"adamw.npz: lr={float(aw['lr']):.2e} wd={float(aw['weight_decay'])} "
+          f"|Δp| after 5 steps={float(np.abs(aw['p_steps'][-1] - aw['p_init']).max()):.3e}")
+
+    # ── sparse_adam.npz ──
+    import mmllm.optim as vbopt
+
+    def reset_optim_caches():
+        # _get_local_default_mult / _get_layer_mults cache per-process;
+        # we flip MMLLM_SQRT_N / MMLLM_LR_LAYER_MULTS between variants.
+        for f in (vbopt._get_layer_mults, vbopt._get_local_default_mult):
+            if hasattr(f, "_cache"):
+                delattr(f, "_cache")
+
+    lr_bank = float(pick_lr()) * float(mult["bank"]())   # 3e-3 × 3.0
+    sa = {"beta1": np.float64(0.9), "beta2": np.float64(0.999),
+          "eps": np.float64(1e-8), "local_mult": np.float64(0.05)}
+
+    def run_sparse(prefix, params, step_rows):
+        opt = vbopt.CPUOffloadSparseAdam(list(params), lr=lr_bank)
+        for j, pp in enumerate(params):
+            sa[f"{prefix}_p{j}_init"] = _np(pp).copy()
+        for s, per_param in enumerate(step_rows):
+            for j, (pp, rows) in enumerate(zip(params, per_param)):
+                if rows is None:
+                    pp.grad = None
+                    continue
+                vals = torch.randn(len(rows), pp.shape[1], generator=g)
+                idx = torch.tensor([rows], dtype=torch.long)
+                pp.grad = torch.sparse_coo_tensor(idx, vals, tuple(pp.shape))
+                sa[f"{prefix}_g{s}_p{j}_idx"] = np.asarray(rows, dtype=np.int64)
+                sa[f"{prefix}_g{s}_p{j}_val"] = _np(vals).copy()
+            opt.step()
+            for j, pp in enumerate(params):
+                sa[f"{prefix}_p{j}_step{s}"] = _np(pp).copy()
+
+    sa["lr"] = np.float64(lr_bank)
+
+    # (a) non-V_local (V_net-analog) at prod MMLLM_SQRT_N=128: 64 rows don't
+    # divide into trunks of 128² -> layer_mult 1.0. Overlapping rows across
+    # steps + a duplicate (12,12) + unsorted rows exercise coalesce and the
+    # touched-row m/v buffer growth against the ONE-per-param step counter.
+    reset_optim_caches()
+    sa["a_sqrt_local"] = np.int64(int(os.environ["MMLLM_SQRT_N"]))
+    run_sparse("a", [torch.nn.Parameter(torch.randn(64, 4, generator=g))],
+               [[[3, 7, 12, 12]], [[7, 20]], [[3, 20, 40]],
+                [[12, 63, 7]], [[0, 3]]])
+
+    # (b) V_local-shaped: sqrt_local=4 -> rows_per_trunk=16; 48 rows = 3
+    # trunks >= 2 -> _is_v_local -> lr × LOCAL_MULT (default 0.05).
+    os.environ["MMLLM_SQRT_N"] = "4"
+    reset_optim_caches()
+    sa["b_sqrt_local"] = np.int64(4)
+    run_sparse("b", [torch.nn.Parameter(torch.randn(48, 4, generator=g))],
+               [[[5, 17, 17, 40]], [[5, 47]], [[0, 17, 40]],
+                [[47]], [[5, 0]]])
+
+    # (c) three V_local params (32 rows = 2 trunks each) with LAYER_MULTS
+    # tiling "2.0,0.5" and grad-less steps: replicates optim.py's
+    # v_local_counter, which only counts v-local params WITH grads that
+    # step (a grad-less param shifts later params' tile index).
+    os.environ["MMLLM_LR_LAYER_MULTS"] = "2.0,0.5"
+    reset_optim_caches()
+    sa["c_sqrt_local"] = np.int64(4)
+    sa["c_layer_mults"] = np.array([2.0, 0.5], dtype=np.float64)
+    run_sparse("c", [torch.nn.Parameter(torch.randn(32, 4, generator=g))
+                     for _ in range(3)],
+               [[[1, 9], [2, 2, 30], [4]],
+                [[9, 31], None, [4, 20]],
+                [[1], [30, 5], None],
+                [None, [2], [20, 4, 31]],
+                [[9, 1, 31], [5], [0]]])
+    del os.environ["MMLLM_LR_LAYER_MULTS"]
+    os.environ["MMLLM_SQRT_N"] = SYM24_ENV["MMLLM_SQRT_N"]
+    reset_optim_caches()
+
+    np.savez(os.path.join(out_dir, "sparse_adam.npz"), **sa)
+    print(f"sparse_adam.npz: lr={lr_bank:.2e}, variants a(64x4 mult=1.0) "
+          f"b(48x4 mult=0.05) c(3x32x4 tiled 2.0,0.5)")
+    print(f"optim goldens written to {out_dir}/ (seed_inputs=20260705)")
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--out", default="jvm/goldens")
     ap.add_argument("--grads", action="store_true",
                     help="dump gradient goldens (train mode) instead of "
                          "the forward goldens")
+    ap.add_argument("--optim", action="store_true",
+                    help="dump LR-schedule + optimizer goldens (M5a)")
     args = ap.parse_args()
 
     if args.grads:
         os.makedirs(args.out, exist_ok=True)
         dump_grads(args.out)
+        return
+
+    if args.optim:
+        os.makedirs(args.out, exist_ok=True)
+        dump_optim(args.out)
         return
 
     import numpy as np
