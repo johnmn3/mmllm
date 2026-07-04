@@ -188,7 +188,11 @@
 
 ;; ── product-key retrieval backward (shared: Local PKM + NetBank) ──
 
-(defn- dv-acc ^floats [^java.util.HashMap dV ^long row ^long dim]
+;; dV maps are hinted java.util.Map (not HashMap): the sequential step
+;; passes HashMaps; the M6 parallel step (parallel_step.clj) passes a
+;; shared ConcurrentHashMap for V_local, whose row keys are disjoint
+;; across router threads (per-trunk slices), so lock-free get/put is safe.
+(defn- dv-acc ^floats [^java.util.Map dV ^long row ^long dim]
   (or (.get dV row)
       (let [a (float-array dim)] (.put dV row a) a)))
 
@@ -200,7 +204,7 @@
    Accumulates dKa/dKb (dense), dV (HashMap global-row → float[vdim]) and
    the query grad into dqn at qn-off."
   [^floats qn qn-off mem trunk-off ^floats dval vdim
-   ^floats dKa ^floats dKb ^java.util.HashMap dV ^floats dqn]
+   ^floats dKa ^floats dKb ^java.util.Map dV ^floats dqn]
   (let [qn-off (long qn-off) trunk-off (long trunk-off) vdim (long vdim)
         {:keys [^floats Ka ^floats Kb bank]} mem
         sqrt-n (long (:sqrt-n mem)) sub-dim (long (:sub-dim mem))
@@ -213,7 +217,10 @@
       (let [grow (+ trunk-off (aget idx k))]
         (p/bank-row! bank grow row 0)
         (aset dw k (float (dot-at dval 0 row 0 vdim)))
-        (let [acc (dv-acc dV grow vdim)]
+        ;; ^floats at the call site: dv-acc's primitive-long args drop the
+        ;; return tag (the repo's >4-args/primitive-hint gotcha), and this
+        ;; aset loop is the hottest scatter in the backward.
+        (let [^floats acc (dv-acc dV grow vdim)]
           (dotimes [c vdim]
             (aset acc c (float (+ (aget acc c) (* (aget w k) (aget dval c)))))))))
     ;; softmax bwd over the selected scores, scatter into ds_a / ds_b
@@ -261,7 +268,7 @@
          sqrt-n (long (:sqrt-n mem)) sub-dim (long (:sub-dim mem))
          ^floats dKa (or (:dKa acc) (float-array (* sqrt-n sub-dim)))
          ^floats dKb (or (:dKb acc) (float-array (* sqrt-n sub-dim)))
-         ^java.util.HashMap dV (or (:dV acc) (java.util.HashMap.))
+         ^java.util.Map dV (or (:dV acc) (java.util.HashMap.))
          ^floats dqnw (or (:dqnorm-w acc) (float-array q-dim))
          qn (java.util.Arrays/copyOf q (alength q))
          dqn (float-array (* T q-dim))

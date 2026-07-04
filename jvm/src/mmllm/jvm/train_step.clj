@@ -129,11 +129,12 @@
 
 ;; ── touched-row sparse Adam against bank overlays ──
 
-(defn- dv->sorted
-  "HashMap<row → float[dim]> (already coalesced by construction) →
+(defn dv->sorted
+  "Map<row → float[dim]> (already coalesced by construction) →
    {:idx ^longs (ascending) :val ^floats (nnz×dim)} — torch
-   grad.coalesce() order."
-  [^HashMap dv ^long dim]
+   grad.coalesce() order. Public + Map-hinted: the M6 parallel step
+   (parallel_step.clj) reuses it, incl. on ConcurrentHashMaps."
+  [^java.util.Map dv ^long dim]
   (let [rows (long-array (map long (keys dv)))]
     (java.util.Arrays/sort rows)
     (let [nnz (alength rows)

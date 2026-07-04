@@ -47,8 +47,11 @@
         (let [a (float-array n)] (.put h name a) a))))
 
 (defn dv-map
-  "Get-or-create the sparse dV HashMap for (:dv-local|:dv-net, layer)."
-  ^HashMap [grads kind ^long layer]
+  "Get-or-create the sparse dV map for (:dv-local|:dv-net, layer).
+   Returns java.util.Map: a HashMap here by default; the M6 parallel step
+   pre-populates :dv-local with shared ConcurrentHashMaps (disjoint
+   per-trunk rows), which this get path returns untouched."
+  ^java.util.Map [grads kind ^long layer]
   (let [^HashMap h (kind grads)]
     (or (.get h layer)
         (let [mm (HashMap.)] (.put h layer mm) mm))))
@@ -164,7 +167,7 @@
         q-dim (long (:q-dim mem)) n-per-trunk (long (:n-per-trunk mem))
         sqrt-n (long (:sqrt-n mem)) sub-dim (long (:sub-dim mem))
         ^floats dKa (:dKa acc) ^floats dKb (:dKb acc)
-        ^floats dqnw (:dqnorm-w acc) ^HashMap dV (:dV acc)
+        ^floats dqnw (:dqnorm-w acc) ^java.util.Map dV (:dV acc)
         qn (java.util.Arrays/copyOf q (alength q))
         dqn (float-array (* T q-dim))
         off (* trunk-id n-per-trunk)]
