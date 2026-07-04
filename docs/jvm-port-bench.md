@@ -107,9 +107,11 @@ torch reference (single process, one B=16 tensor, MKL intra-op):
   ~2-3× denser than the boxed rows, and the hogwild V_local container
   is per-trunk-sharded instead of a ConcurrentHashMap). All five parity
   gates stayed green across the swap (bit-identical semantics);
-  thread-parity now fits in -Xmx6g (was 11g) and the G5 spoon
-  (mmllm.jvm.spoon) trains T=256 × B=16 × 100 steps inside the 15 GB
-  box — see the spoon summary in that namespace's docstring lineage.
+  thread-parity now fits in -Xmx6g (was 11g). The G5 spoon
+  (mmllm.jvm.spoon) trains T=128 × B=16 × 100 steps in ~12 GB peak RSS
+  on the 15 GB box — memory no longer forces T=64. On THIS 4-core box
+  the binding constraint at T=256 is now wall clock (~3 h for 100
+  steps, extrapolated from ~37 s/step measured at T=128), not RAM.
 - Same-T comparison is preserved: torch was measured at T=64 too, with
   `MMLLM_GRAD_CHECKPOINT=false` — the honest equivalent, since the JVM
   backward never materializes (T,T) attention and never pays torch's
