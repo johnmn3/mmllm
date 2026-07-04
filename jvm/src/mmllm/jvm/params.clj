@@ -54,11 +54,27 @@
        :fb (.asFloatBuffer buf) :channel ch})))
 
 (defn bank-row!
-  "Copy row i of a mapped bank into out (float[dim]) at out-off."
-  [{:keys [^java.nio.FloatBuffer fb ^long dim]} ^long i ^floats out ^long out-off]
-  (let [fb (.duplicate fb)]
-    (.position fb (* i dim))
-    (.get fb out (int out-off) (int dim))))
+  "Copy row i of a mapped bank into out (float[dim]) at out-off.
+
+   Banks may carry an OVERLAY (:overlay, a java.util.HashMap of row →
+   float[dim]) holding in-RAM updates that shadow the mmap'd file. The
+   training replay (mmllm.jvm.train-step) writes its optimizer updates
+   there so the golden .bin files are never mutated; eval paths that
+   load banks without an overlay are unaffected."
+  [{:keys [^java.nio.FloatBuffer fb ^long dim overlay]} ^long i ^floats out ^long out-off]
+  (if-let [^floats row (when overlay (.get ^java.util.HashMap overlay i))]
+    (System/arraycopy row 0 out (int out-off) (int dim))
+    (let [fb (.duplicate fb)]
+      (.position fb (* i dim))
+      (.get fb out (int out-off) (int dim)))))
+
+(defn bank-put-row!
+  "Write row i into the bank's overlay (row values copied). The mmap'd
+   file itself is never written — see bank-row!'s overlay note."
+  [{:keys [^long dim overlay]} ^long i ^floats row]
+  (assert overlay "bank-put-row! needs a bank opened with an :overlay")
+  (.put ^java.util.HashMap overlay i
+        (java.util.Arrays/copyOf row (int dim))))
 
 (defn load-banks
   "Open every bank listed in the manifest's :sparse from `dir`

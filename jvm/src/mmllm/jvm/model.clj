@@ -98,13 +98,33 @@
 ;; ── top-k (descending, torch semantics on distinct floats) ──
 
 (defn topk
-  "Return long-array of the k indices with largest vals, descending."
+  "Return long-array of the k indices with largest vals, descending;
+   ties broken by LOWER index first (same order the original stable
+   boxed sort-by produced, and what torch.topk yields on CPU).
+
+   Encoding trick for speed (the train-step replay calls this ~10⁴×
+   per step): map each float to its order-preserving unsigned-int image
+   (sign-flip for non-negatives, bit-not for negatives), pack
+   (~image << 32) | index into a long, and primitive-sort ascending —
+   value-descending, index-ascending, no boxing. (+0.0 vs -0.0 would
+   order by sign instead of index; sub-key scores are sums of products,
+   where a signed-zero tie is not a real case.)"
   ^longs [^floats vals ^long n ^long k]
-  (let [idx (long-array n)]
-    (dotimes [i n] (aset idx i i))
-    ;; simple selection via boxed sort — n ≤ 1024 here, parity > speed
-    (let [order (sort-by #(- (double (aget vals (int %)))) (vec idx))]
-      (long-array (take k order)))))
+  (let [keys (long-array n)]
+    (dotimes [i n]
+      (let [bits (Float/floatToRawIntBits (aget vals i))
+            sortable (if (neg? bits)
+                       (bit-not bits)
+                       (bit-or bits (unchecked-int 0x80000000)))
+            inv (bit-and (bit-not (bit-and (long sortable) 0xFFFFFFFF))
+                         0xFFFFFFFF)]
+        ;; flip bit 63 so signed long sort == unsigned key sort
+        (aset keys i (bit-xor (bit-or (bit-shift-left inv 32) (long i))
+                              Long/MIN_VALUE))))
+    (java.util.Arrays/sort keys)
+    (let [out (long-array k)]
+      (dotimes [j k] (aset out j (bit-and (aget keys j) 0xFFFFFFFF)))
+      out)))
 
 ;; ── product-key retrieval core (shared by Local PKM and NetBank) ──
 
@@ -120,8 +140,9 @@
     (dotimes [i d]
       (aset x (+ off i) (float (* (aget x (+ off i)) inv (aget w i)))))))
 
-(defn- sub-scores
-  "q-half (8) · Kᵀ (sqrt-n, 8) -> float[sqrt-n]."
+(defn sub-scores
+  "q-half (8) · Kᵀ (sqrt-n, 8) -> float[sqrt-n]. (Public: the train-mode
+   forward reuses it for the Local-PKM z-loss logsumexp.)"
   ^floats [^floats q q-off ^floats K sqrt-n sub-dim]
   (let [q-off (long q-off) sqrt-n (long sqrt-n) sub-dim (long sub-dim)
         out (float-array sqrt-n)]
@@ -143,8 +164,11 @@
            ^long sub-top-k ^long top-k]}]
   (let [sa (sub-scores q q-off Ka sqrt-n sub-dim)
         sb (sub-scores q (+ q-off sub-dim) Kb sqrt-n sub-dim)
-        ia (topk sa sqrt-n sub-top-k)
-        ib (topk sb sqrt-n sub-top-k)
+        ;; ^longs hints: topk's return hint is lost through the
+        ;; primitive-interface call; without these every aget below is
+        ;; a Reflector.invokeStaticMethod (the pk-retrieve hot loop).
+        ^longs ia (topk sa sqrt-n sub-top-k)
+        ^longs ib (topk sb sqrt-n sub-top-k)
         ncand (* sub-top-k sub-top-k)
         cs (float-array ncand)
         ci (long-array ncand)]
@@ -154,7 +178,7 @@
           (aset cs p (float (+ (aget sa (int (aget ia a)))
                                (aget sb (int (aget ib b))))))
           (aset ci p (+ (* (aget ia a) sqrt-n) (aget ib b))))))
-    (let [sel (topk cs ncand top-k)
+    (let [^longs sel (topk cs ncand top-k)
           idx (long-array top-k)
           w (float-array top-k)]
       (dotimes [k top-k]

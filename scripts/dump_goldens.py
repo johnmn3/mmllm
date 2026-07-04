@@ -64,10 +64,39 @@ LR-schedule + optimizer goldens (self-contained; no model build needed):
                        steps, covering layer-mult tiling + the per-param step
                        counter + the counter-skips-gradless-params quirk
 
+--step mode (M5b, spec §8 / gate G4 full-step half) writes step.npz: THREE
+replayed torch train-steps at the prod sym24 recipe env on a REPLAY-friendly
+batch (B=2 rows exercising routers 0 and 3 via trunk_ids, T=32,
+MMLLM_GRAD_CHECKPOINT=false so aux losses ride the forward return,
+KD_EVERY=2 with metrics current_step=10,11,12 so KD fires on steps 10+12,
+NetBank delay 0, PKM C++ off). The steps are run by CALLING the core.lpy
+`train-step` var directly on the same fresh seed-0 model that dense.npz /
+banks/*.bin capture, with the three optimizers built exactly as train-long
+builds them and per-step lrs applied exactly as the train loop composes
+them. Recorded per step via additive monkeypatches (no reference change):
+
+  torch.rand_like       → deterministic recorded stream (the SwitchGate
+                          net-default ST-Bernoulli draws: 24 local layers
+                          × (B, H, T) per main forward; teacher/student
+                          take 2-way branches and draw nothing)
+  ProductKeyMemory.forward → per-layer Local z-loss scalars (first 24 per
+                          step = the main forward's; teacher re-runs them
+                          under no_grad, sliced off)
+  rs.focal_ce           → ce_loss scalar (mean of per-pos CE, γ=0)
+  torch.Tensor.backward → loss_total (CE + z) and kd_loss scalars
+  opt.step wrappers     → all-698 dense grad L2 norms (NaN = grad None),
+                          block-0 local + net sparse dV (coalesced idx+val)
+
+plus post-step FULL values of all 698 dense tensors and the post-step V
+rows actually touched (block-0 local + net), and the initial 698 tensors
+(asserted identical to dense.npz — same seed-0 build).
+
 Run:  .venv/bin/python scripts/dump_goldens.py [--out jvm/goldens]
       .venv/bin/python scripts/dump_goldens.py --grads   (forward goldens
       must exist first: grads_ce reads full_forward.npz)
       .venv/bin/python scripts/dump_goldens.py --optim
+      .venv/bin/python scripts/dump_goldens.py --step    (forward goldens
+      must exist first: initial state is asserted against dense.npz)
 """
 from __future__ import annotations
 
@@ -475,6 +504,247 @@ def dump_optim(out_dir):
     print(f"optim goldens written to {out_dir}/ (seed_inputs=20260705)")
 
 
+# ── M5b: full train-step goldens (gate G4) ──
+
+# Prod sym24 recipe env on top of SYM24_ENV + SCHED_PROD_ENV: the logitkd
+# KD recipe (extend_chain.sh:187-191) + explicit z coef + grad-checkpoint
+# OFF (replay-friendly: aux losses thread through the forward return and
+# no torch.utils.checkpoint recompute in the graph) + adam-cpu sparse opt.
+STEP_ENV = {
+    "MMLLM_DISTILL_OBJECTIVE": "logitkd",
+    "MMLLM_KD_TEMP": "2.0",
+    "MMLLM_KD_COEF": "1.0",
+    "MMLLM_KD_FREEZE": "trunk",
+    "MMLLM_KD_EVERY": "2",
+    "MMLLM_Z_LOSS_COEF": "1e-5",
+    "MMLLM_GRAD_CHECKPOINT": "false",
+    "MMLLM_SPARSE_OPT": "adam-cpu",
+    "MMLLM_GRAD_CLIP": "0.0",
+}
+
+# metrics current_step for the three replayed steps. Mid-warmup so every
+# lr is non-zero (step 0's warmup lr is 0.0 — a degenerate parity point)
+# and KD_EVERY=2 fires on the 1st and 3rd (10, 12) but not the 2nd.
+STEP_STEPS = [10, 11, 12]
+STEP_TOTAL = 100
+STEP_B, STEP_T = 2, 32
+
+
+def dump_step(out_dir):
+    import numpy as np
+    import torch
+
+    for k, v in SCHED_PROD_ENV.items():
+        os.environ[k] = v
+    for k, v in STEP_ENV.items():
+        os.environ[k] = v
+
+    m, K, var = build_model()          # seed-0 fresh — same as dense.npz
+    blocks = list(m.get(K("blocks")))
+
+    # positional param names, verified against (parameters m) by identity
+    from jvm_bridge import named_dense_walk
+    named = named_dense_walk(m, K)
+    params = list(var("parameters")(m))
+    assert len(named) == len(params) == 698
+    for (nm, q), p in zip(named, params):
+        assert q is p, f"positional walk drift at {nm}"
+
+    # initial state must be the dense.npz the JVM already loads
+    dz_path = os.path.join(out_dir, "dense.npz")
+    if not os.path.exists(dz_path):
+        raise SystemExit("dense.npz missing — run without --step first")
+    dz = np.load(dz_path)
+    for i, p in enumerate(params):
+        if not np.array_equal(dz[f"d{i:05d}"], _np(p)):
+            raise SystemExit(f"param {i} ({named[i][0]}) != dense.npz — "
+                             "model build drifted; regen forward goldens")
+
+    mem0 = blocks[0].get(K("memory"))
+    nb0 = blocks[0].get(K("netbank"))
+
+    # optimizers exactly as train-long builds them (core.lpy:4565-4586)
+    opt_dense = var("make-opt-dense")(m)
+    assert len(opt_dense.param_groups) == 1   # prod: KAB_MULT unset
+    sparse_cls = var("pick-sparse-optimizer")()
+    opt_sparse = sparse_cls(list(var("sparse-parameters")(m)),
+                            lr=float(var("pick-lr-bank")()))
+    opt_sparse_net = sparse_cls(list(var("netbank-sparse-parameters")(m)),
+                                lr=float(var("pick-lr-net")()))
+
+    # batch: two rows (routers 0 and 3), y = next-byte windows of x
+    g = torch.Generator().manual_seed(20260707)
+    win = torch.randint(0, 256, (STEP_B, STEP_T + 1), generator=g)
+    x, y = win[:, :STEP_T].clone(), win[:, 1:].clone()
+    trunk_ids = torch.tensor([0, 3], dtype=torch.long)
+
+    out = {"x": _np(x), "y": _np(y), "trunk_ids": _np(trunk_ids),
+           "steps": np.asarray(STEP_STEPS, dtype=np.int64),
+           "total": np.int64(STEP_TOTAL),
+           "z_coef": np.float64(1e-5), "kd_temp": np.float64(2.0),
+           "kd_coef": np.float64(1.0), "kd_every": np.int64(2),
+           "local_mult": np.float64(0.05),
+           "sqrt_local": np.int64(int(os.environ["MMLLM_SQRT_N"]))}
+    # (param names come from the JVM side's manifest — same positional walk)
+
+    # ── recorders (all additive monkeypatches) ──
+    rand_rng = torch.Generator().manual_seed(20260711)
+    rand_rec = []
+    orig_rand_like = torch.rand_like
+
+    def fake_rand_like(t, **kw):
+        r = torch.rand(tuple(t.shape), generator=rand_rng,
+                       dtype=torch.float32)
+        rand_rec.append(_np(r).copy())
+        return r.to(t.dtype)
+
+    import mmllm.memory as memmod
+    z_rec = []
+    orig_mem_fwd = memmod.ProductKeyMemory.forward
+
+    def rec_mem_fwd(self, q, trunk_ids=None):
+        o = orig_mem_fwd(self, q, trunk_ids=trunk_ids)
+        z = getattr(self, "last_z_loss", None)
+        z_rec.append(float(z.item()) if z is not None else float("nan"))
+        return o
+
+    import mmllm.router_smarts as rs_mod
+    ce_rec = []
+    orig_focal = rs_mod.focal_ce
+
+    def rec_focal(*a, **kw):
+        r = orig_focal(*a, **kw)
+        with torch.no_grad():
+            ce_rec.append(float(r.mean().item()))
+        return r
+
+    bwd_rec = []
+    orig_bwd = torch.Tensor.backward
+
+    def rec_bwd(self, *a, **kw):
+        if self.numel() == 1:
+            bwd_rec.append(float(self.detach().item()))
+        return orig_bwd(self, *a, **kw)
+
+    grad_rec = []          # per opt-dense.step: (698,) L2 norms, NaN=None
+
+    def rec_dense_grads():
+        norms = np.full(len(params), np.nan, dtype=np.float64)
+        for i, p in enumerate(params):
+            if p.grad is not None:
+                norms[i] = float(p.grad.detach().norm().item())
+        grad_rec.append(norms)
+
+    sparse_rec = []        # per opt-sparse.step: block-0 local (idx, val)
+    sparse_net_rec = []
+
+    def rec_sparse(module, sink):
+        def cb():
+            gv = module.V.weight.grad
+            assert gv is not None and gv.is_sparse
+            gv = gv.coalesce()
+            sink.append((_np(gv.indices()[0]).copy(),
+                         _np(gv.values()).copy()))
+        return cb
+
+    def wrap_step(opt, cb):
+        orig = opt.step
+
+        def step(*a, **kw):
+            cb()
+            return orig(*a, **kw)
+        opt.step = step
+
+    wrap_step(opt_dense, rec_dense_grads)
+    wrap_step(opt_sparse, rec_sparse(mem0, sparse_rec))
+    wrap_step(opt_sparse_net, rec_sparse(nb0, sparse_net_rec))
+
+    # per-step lr application, composed exactly like the train loop
+    # (core.lpy:4888-4904) via the same core vars M5a's schedule.npz pins.
+    lr_at_step = var("lr-at-step")
+    pick_lr, pick_lr_min = var("pick-lr"), var("pick-lr-min")
+    warmup = int(var("pick-lr-warmup")())
+    mult = {gname: var(f"pick-lr-{gname}-mult")
+            for gname in ("dense", "bank", "net")}
+    train_step = var("train-step")
+    metrics = m.get(K("metrics"))
+
+    torch.rand_like = fake_rand_like
+    memmod.ProductKeyMemory.forward = rec_mem_fwd
+    rs_mod.focal_ce = rec_focal
+    torch.Tensor.backward = rec_bwd
+    try:
+        for si, step in enumerate(STEP_STEPS):
+            cur = float(lr_at_step(step, STEP_TOTAL, pick_lr(), warmup,
+                                   pick_lr_min()))
+            lrs = {gname: cur * float(fn(step, STEP_TOTAL))
+                   for gname, fn in mult.items()}
+            opt_dense.param_groups[0]["lr"] = lrs["dense"]
+            opt_sparse.param_groups[0]["lr"] = lrs["bank"]
+            opt_sparse_net.param_groups[0]["lr"] = lrs["net"]
+            metrics["current_step"] = step
+            metrics["total_steps"] = STEP_TOTAL
+
+            n_rand0, n_z0, n_bwd0, n_ce0 = (len(rand_rec), len(z_rec),
+                                            len(bwd_rec), len(ce_rec))
+            plain_ce = float(train_step(m, opt_dense, opt_sparse,
+                                        opt_sparse_net, x, y, False,
+                                        trunk_ids))
+
+            kd_fires = step % 2 == 0
+            n_rand = len(rand_rec) - n_rand0
+            assert n_rand == 24, f"step {step}: {n_rand} rand draws != 24"
+            for r in rand_rec[n_rand0:]:
+                assert r.shape == (STEP_B, 2, STEP_T), r.shape
+            n_z = len(z_rec) - n_z0
+            assert n_z == (48 if kd_fires else 24), (step, n_z)
+            n_bwd = len(bwd_rec) - n_bwd0
+            assert n_bwd == (2 if kd_fires else 1), (step, n_bwd)
+            assert len(ce_rec) - n_ce0 == 1
+
+            p = f"s{si}_"
+            out[p + "lr_dense"] = np.float64(lrs["dense"])
+            out[p + "lr_bank"] = np.float64(lrs["bank"])
+            out[p + "lr_net"] = np.float64(lrs["net"])
+            out[p + "R"] = np.stack(rand_rec[n_rand0:])   # (24, B, H, T)
+            out[p + "z_layers"] = np.asarray(z_rec[n_z0:n_z0 + 24])
+            out[p + "ce"] = np.float64(ce_rec[n_ce0])
+            out[p + "plain_ce"] = np.float64(plain_ce)
+            out[p + "loss_total"] = np.float64(bwd_rec[n_bwd0])
+            out[p + "kd"] = np.float64(bwd_rec[n_bwd0 + 1] if kd_fires
+                                       else 0.0)
+            if kd_fires:
+                out[p + "kd_kl"] = np.float64(metrics["kd_local_net"])
+                out[p + "teacher_bpc"] = np.float64(metrics["teacher_bpc"])
+                out[p + "student_bpc"] = np.float64(metrics["student_bpc"])
+            out[p + "grad_norms"] = grad_rec[si]
+            li, lv = sparse_rec[si]
+            ni, nv = sparse_net_rec[si]
+            out[p + "local0_gidx"], out[p + "local0_gval"] = li, lv
+            out[p + "net0_gidx"], out[p + "net0_gval"] = ni, nv
+            with torch.no_grad():
+                out[p + "local0_post"] = _np(
+                    mem0.V.weight[torch.from_numpy(li)]).copy()
+                out[p + "net0_post"] = _np(
+                    nb0.V.weight[torch.from_numpy(ni)]).copy()
+            for i, pp in enumerate(params):
+                out[f"{p}d{i:05d}"] = _np(pp).copy()
+            print(f"step {step}: plain_ce={plain_ce:.6f} "
+                  f"loss={out[p + 'loss_total']:.6f} "
+                  f"kd={float(out[p + 'kd']):.6f} "
+                  f"z_sum={float(np.sum(out[p + 'z_layers'])):.4f} "
+                  f"local0_nnz={len(li)} net0_nnz={len(ni)}")
+    finally:
+        torch.rand_like = orig_rand_like
+        memmod.ProductKeyMemory.forward = orig_mem_fwd
+        rs_mod.focal_ce = orig_focal
+        torch.Tensor.backward = orig_bwd
+
+    np.savez(os.path.join(out_dir, "step.npz"), **out)
+    print(f"step goldens written to {out_dir}/step.npz "
+          f"(steps={STEP_STEPS}, B={STEP_B}, T={STEP_T})")
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--out", default="jvm/goldens")
@@ -483,6 +753,8 @@ def main():
                          "the forward goldens")
     ap.add_argument("--optim", action="store_true",
                     help="dump LR-schedule + optimizer goldens (M5a)")
+    ap.add_argument("--step", action="store_true",
+                    help="dump full train-step goldens (M5b, gate G4)")
     args = ap.parse_args()
 
     if args.grads:
@@ -493,6 +765,11 @@ def main():
     if args.optim:
         os.makedirs(args.out, exist_ok=True)
         dump_optim(args.out)
+        return
+
+    if args.step:
+        os.makedirs(args.out, exist_ok=True)
+        dump_step(args.out)
         return
 
     import numpy as np
