@@ -31,8 +31,10 @@
             [mmllm.jvm.grad :as g]
             [mmllm.jvm.optim :as o]
             [mmllm.jvm.params :as p]
+            [mmllm.jvm.rowstore :as rs]
             [mmllm.jvm.train-forward :as tf])
-  (:import [java.util HashMap]))
+  (:import [java.util HashMap]
+           [mmllm.jvm.rowstore IRowStore]))
 
 (set! *warn-on-reflection* true)
 
@@ -130,18 +132,30 @@
 ;; ── touched-row sparse Adam against bank overlays ──
 
 (defn dv->sorted
-  "Map<row → float[dim]> (already coalesced by construction) →
+  "Row store (already coalesced by construction) →
    {:idx ^longs (ascending) :val ^floats (nnz×dim)} — torch
-   grad.coalesce() order. Public + Map-hinted: the M6 parallel step
-   (parallel_step.clj) reuses it, incl. on ConcurrentHashMaps."
-  [^java.util.Map dv ^long dim]
-  (let [rows (long-array (map long (keys dv)))]
-    (java.util.Arrays/sort rows)
-    (let [nnz (alength rows)
+   grad.coalesce() order. Accepts the packed IRowStore (incl. the
+   parallel step's sharded hogwild store) or, back-compat, a
+   java.util.Map<row, float[dim]>."
+  [dv ^long dim]
+  (if (instance? IRowStore dv)
+    (let [^IRowStore dv dv
+          ^longs rows (.rsSortedRows dv)
+          nnz (alength rows)
           val (float-array (* nnz dim))]
       (dotimes [i nnz]
-        (System/arraycopy ^floats (.get dv (aget rows i)) 0 val (* i dim) dim))
-      {:idx rows :val val})))
+        (let [slot (.rsSlot dv (aget rows i))]
+          (System/arraycopy ^floats (.rsChunkOf dv slot) (int (.rsOffsetOf dv slot))
+                            val (* i dim) (int dim))))
+      {:idx rows :val val})
+    (let [^java.util.Map dv dv
+          rows (long-array (map long (keys dv)))]
+      (java.util.Arrays/sort rows)
+      (let [nnz (alength rows)
+            val (float-array (* nnz dim))]
+        (dotimes [i nnz]
+          (System/arraycopy ^floats (.get dv (aget rows i)) 0 val (* i dim) dim))
+        {:idx rows :val val}))))
 
 (defn bank-sparse-adam-step!
   "One CPUOffloadSparseAdam step over bank-backed params, writing the
@@ -174,8 +188,10 @@
                   layer-mult (if vloc? (* local-mult per-layer) 1.0)
                   state (nth states i)
                   ^longs stepa (:step state)
-                  ^HashMap mm (:m state)
-                  ^HashMap vv (:v state)
+                  ;; packed m+v moments: one store of 2·dim-wide rows
+                  ;; (m at [0,dim), v at [dim,2·dim)) — zero on first
+                  ;; touch, exactly like the old per-map float[] rows
+                  ^IRowStore mv (o/state-mv state (* 2 dim))
                   _ (aset stepa 0 (inc (aget stepa 0)))
                   step (aget stepa 0)
                   b1f (float beta1)
@@ -191,23 +207,22 @@
                   prow (float-array dim)]
               (dotimes [k (alength cidx)]
                 (let [row (aget cidx k)
-                      ^floats mrow (or (.get mm row)
-                                       (let [a (float-array dim)] (.put mm row a) a))
-                      ^floats vrow (or (.get vv row)
-                                       (let [a (float-array dim)] (.put vv row a) a))]
+                      slot (.rsEnsureSlot mv row)
+                      ^floats mvch (.rsChunkOf mv slot)
+                      mvoff (.rsOffsetOf mv slot)]
                   (p/bank-row! bank row prow 0)
                   (dotimes [j dim]
                     (let [gj (aget cval (+ (* k dim) j))
-                          mj' (float (+ (float (* (aget mrow j) b1f))
+                          mj' (float (+ (float (* (aget mvch (+ mvoff j)) b1f))
                                         (float (* a1f gj))))
-                          vj' (float (+ (float (* (aget vrow j) b2f))
+                          vj' (float (+ (float (* (aget mvch (+ mvoff dim j)) b2f))
                                         (float (* (float (* c2f gj)) gj))))
                           mh (float (/ mj' bc1f))
                           vh (float (/ vj' bc2f))
                           den (float (+ (float (Math/sqrt (double vh))) epsf))
                           dlt (float (/ (float (* negf mh)) den))]
-                      (aset mrow j mj')
-                      (aset vrow j vj')
+                      (aset mvch (+ mvoff j) mj')
+                      (aset mvch (+ mvoff dim j) vj')
                       (aset prow j (float (+ (aget prow j) dlt)))))
                   (p/bank-put-row! bank row prow)))
               (recur (inc i) (if vloc? (inc vc) vc)))))))
@@ -313,10 +328,10 @@
                 kab? (or (.endsWith ^String name ".memory.K_a")
                          (.endsWith ^String name ".memory.K_b"))]
             (o/adamw-step! st pd gr {:lr (if kab? lr-kab lr-dense)})))))
-    (let [sl-grads (mapv (fn [l] (when-let [^HashMap dv (.get ^HashMap (:dv-local grads) l)]
+    (let [sl-grads (mapv (fn [l] (when-let [dv (.get ^HashMap (:dv-local grads) l)]
                                    (dv->sorted dv 16)))
                          (range (count local-params)))
-          sn-grads (mapv (fn [l] (when-let [^HashMap dv (.get ^HashMap (:dv-net grads) l)]
+          sn-grads (mapv (fn [l] (when-let [dv (.get ^HashMap (:dv-net grads) l)]
                                    (dv->sorted dv 8)))
                          (range (count net-params)))
           sopts {:sqrt-local (:sqrt-local env) :local-mult (:local-mult env)}]

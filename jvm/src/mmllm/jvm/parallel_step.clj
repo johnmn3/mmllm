@@ -29,12 +29,13 @@
      (trunk_id·sqrt_n² offset), so when the batch's trunk-ids are
      pairwise distinct (the production 16-router step) the scatter
      writes are DISJOINT by construction and go hogwild-style straight
-     into one shared per-layer ConcurrentHashMap — no locks, no merge
-     phase. Rows written by exactly one task are a pure function of that
+     into one shared per-layer rowstore, sharded per trunk slice (each
+     shard has exactly one writer thread) — no locks, no merge phase.
+     Rows written by exactly one task are a pure function of that
      task's inputs, so this stays bit-deterministic at any thread count.
      If trunk-ids repeat (a row pair CAN share rows) the code falls back
-     to per-task maps + fixed-order merge.
-   - V_net: rows CAN collide across routers, so always per-task maps +
+     to per-task stores + fixed-order merge.
+   - V_net: rows CAN collide across routers, so always per-task stores +
      fixed-order merge.
 
    Determinism: the result is bit-identical for any thread count by
@@ -56,10 +57,11 @@
    thread-parity checks those against the sequential path with a small
    relative tolerance instead of bit equality."
   (:require [mmllm.jvm.optim :as o]
+            [mmllm.jvm.rowstore :as rs]
             [mmllm.jvm.train-forward :as tf]
             [mmllm.jvm.train-step :as ts])
   (:import [java.util HashMap]
-           [java.util.concurrent Callable ConcurrentHashMap ExecutorService
+           [java.util.concurrent Callable ExecutorService
             Executors Future]))
 
 (set! *warn-on-reflection* true)
@@ -182,8 +184,9 @@
 
 (defn- task-grads
   "Per-task grads container. shared-local non-nil (hogwild mode) makes
-   :dv-local the SHARED layer→ConcurrentHashMap outer map — safe because
-   each task's V_local rows live in its own trunk slice."
+   :dv-local the SHARED layer→ShardedRowMap outer map — safe because
+   each task's V_local rows live in its own trunk slice = its own shard
+   (single writer per shard)."
   [shared-local]
   (cond-> (tf/make-grads)
     shared-local (assoc :dv-local shared-local)))
@@ -230,9 +233,14 @@
         n-local (count local-params)
         hogwild? (boolean (and (:hogwild-local? env true)
                                (apply distinct? trunk-ids)))
+        ;; hogwild shard geometry: one shard per trunk slice, so each
+        ;; task writes only its own shard (rows-per-shard = sqrt_n²)
+        n-per-trunk (long (:n-per-trunk (some :memory (:blocks model))))
+        n-shards (quot (long (:rows (first local-params))) n-per-trunk)
         shared-local (when hogwild?
                        (let [h (HashMap.)]
-                         (dotimes [l n-local] (.put h (long l) (ConcurrentHashMap.)))
+                         (dotimes [l n-local]
+                           (.put h (long l) (rs/sharded-row-map n-shards n-per-trunk 16)))
                          h))
         ;; ── tasks (submission order: main → teacher → student; FIFO) ──
         main-task
@@ -337,10 +345,17 @@
             (o/adamw-step! st pd gr {:lr (if kab? lr-kab lr-dense)})))))
     (let [^HashMap outer-l (:dv-local grads)
           ^HashMap outer-n (:dv-net grads)
+          ;; sort each layer's merged store then DROP it from the outer
+          ;; map — the sorted {:idx :val} copy is all the optimizer (and
+          ;; the parity checks) need, and releasing the store here keeps
+          ;; the step's peak from holding both representations of every
+          ;; layer at once.
           sorted-of (fn [^HashMap outer l dim]
-                      (let [^java.util.Map dv (.get outer l)]
-                        (when (and dv (not (.isEmpty dv)))
-                          (ts/dv->sorted dv (long dim)))))
+                      (let [dv (.get outer l)]
+                        (when (and dv (pos? (rs/store-size dv)))
+                          (let [r (ts/dv->sorted dv (long dim))]
+                            (.remove outer l)
+                            r))))
           sl-grads (mapv #(sorted-of outer-l % 16) (range (count local-params)))
           sn-grads (mapv #(sorted-of outer-n % 8) (range (count net-params)))
           sopts {:sqrt-local (:sqrt-local env) :local-mult (:local-mult env)}]

@@ -8,10 +8,12 @@
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
             [mmllm.jvm.npy :as npy]
+            [mmllm.jvm.rowstore]
             [mmllm.jvm.tensor :as t])
   (:import [java.nio ByteOrder]
            [java.nio.channels FileChannel FileChannel$MapMode]
-           [java.nio.file Paths StandardOpenOption]))
+           [java.nio.file Paths StandardOpenOption]
+           [mmllm.jvm.rowstore IRowStore]))
 
 (set! *warn-on-reflection* true)
 
@@ -51,30 +53,53 @@
     (let [buf (.map ch FileChannel$MapMode/READ_WRITE 0 size)]
       (.order buf ByteOrder/LITTLE_ENDIAN)
       {:path (str path) :rows (long rows) :dim (long dim)
-       :fb (.asFloatBuffer buf) :channel ch})))
+       :fb (.asFloatBuffer buf) :mbb buf :channel ch})))
 
 (defn bank-row!
   "Copy row i of a mapped bank into out (float[dim]) at out-off.
 
-   Banks may carry an OVERLAY (:overlay, a java.util.HashMap of row →
-   float[dim]) holding in-RAM updates that shadow the mmap'd file. The
-   training replay (mmllm.jvm.train-step) writes its optimizer updates
-   there so the golden .bin files are never mutated; eval paths that
-   load banks without an overlay are unaffected."
-  [{:keys [^java.nio.FloatBuffer fb ^long dim overlay]} ^long i ^floats out ^long out-off]
-  (if-let [^floats row (when overlay (.get ^java.util.HashMap overlay i))]
-    (System/arraycopy row 0 out (int out-off) (int dim))
-    (let [fb (.duplicate fb)]
-      (.position fb (* i dim))
-      (.get fb out (int out-off) (int dim)))))
+   Banks may carry an OVERLAY (:overlay — a packed IRowStore, or
+   back-compat a java.util.Map of row → float[dim]) holding in-RAM
+   updates that shadow the mmap'd file. The parity gates' training
+   replays write their optimizer updates there so the golden .bin files
+   are never mutated. The spoon trainer instead mmaps SCRATCH COPIES of
+   the banks with :writable? true and no overlay (bank-put-row! writes
+   the file mapping directly). A bank marked :zero? reads as all-zero
+   rows — the ablation-eval hook (evals.clj); the file is untouched."
+  [{:keys [^java.nio.FloatBuffer fb ^long dim overlay zero?]} ^long i ^floats out ^long out-off]
+  (if zero?
+    (java.util.Arrays/fill out (int out-off) (int (+ out-off dim)) (float 0.0))
+    (let [hit (cond
+                (nil? overlay) false
+                (instance? IRowStore overlay)
+                (.rsCopyRow ^IRowStore overlay i out out-off)
+                :else
+                (if-let [^floats row (.get ^java.util.Map overlay i)]
+                  (do (System/arraycopy row 0 out (int out-off) (int dim)) true)
+                  false))]
+      (when-not hit
+        (let [fb (.duplicate fb)]
+          (.position fb (* i dim))
+          (.get fb out (int out-off) (int dim)))))))
 
 (defn bank-put-row!
-  "Write row i into the bank's overlay (row values copied). The mmap'd
-   file itself is never written — see bank-row!'s overlay note."
-  [{:keys [^long dim overlay]} ^long i ^floats row]
-  (assert overlay "bank-put-row! needs a bank opened with an :overlay")
-  (.put ^java.util.HashMap overlay i
-        (java.util.Arrays/copyOf row (int dim))))
+  "Write row i: into the bank's overlay when it has one (values copied;
+   the mmap'd file is never written — the parity-gate mode), or straight
+   into the file mapping when the bank was opened :writable? (the spoon
+   trainer's scratch-copy mode)."
+  [{:keys [^java.nio.FloatBuffer fb ^long dim overlay writable?]} ^long i ^floats row]
+  (cond
+    overlay
+    (if (instance? IRowStore overlay)
+      (.rsPutRow ^IRowStore overlay i row 0)
+      (.put ^java.util.Map overlay i (java.util.Arrays/copyOf row (int dim))))
+    writable?
+    (let [b (.duplicate fb)]
+      (.position b (int (* i dim)))
+      (.put b row 0 (int dim)))
+    :else
+    (throw (IllegalStateException.
+            "bank-put-row! needs a bank opened with an :overlay or :writable?"))))
 
 (defn load-banks
   "Open every bank listed in the manifest's :sparse from `dir`

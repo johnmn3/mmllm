@@ -24,8 +24,10 @@
   (:require [mmllm.jvm.model :as m]
             [mmllm.jvm.grad :as g]
             [mmllm.jvm.params :as p]
+            [mmllm.jvm.rowstore :as rs]
             [mmllm.jvm.tensor :as t])
-  (:import [java.util HashMap]))
+  (:import [java.util HashMap]
+           [mmllm.jvm.rowstore IRowStore]))
 
 (set! *warn-on-reflection* true)
 
@@ -34,8 +36,10 @@
 (defn make-grads
   "Accumulator for one train-step's backward(s).
    :dense    name → float[] (manifest names, torch .grad equivalents)
-   :dv-local layer → HashMap<row, float[16]>  (sparse V_local grads)
-   :dv-net   layer → HashMap<row, float[8]>   (sparse V_net grads)"
+   :dv-local layer → IRowStore of float[16] rows (sparse V_local grads)
+   :dv-net   layer → IRowStore of float[8] rows  (sparse V_net grads)
+   The outer layer maps stay tiny boxed HashMaps; the per-row storage is
+   the packed rowstore (the M7 accumulator swap — see rowstore.clj)."
   []
   {:dense (HashMap.) :dv-local (HashMap.) :dv-net (HashMap.)})
 
@@ -47,14 +51,15 @@
         (let [a (float-array n)] (.put h name a) a))))
 
 (defn dv-map
-  "Get-or-create the sparse dV map for (:dv-local|:dv-net, layer).
-   Returns java.util.Map: a HashMap here by default; the M6 parallel step
-   pre-populates :dv-local with shared ConcurrentHashMaps (disjoint
+  "Get-or-create the sparse dV store for (:dv-local|:dv-net, layer).
+   Returns an IRowStore: a PackedRowMap here by default; the M6 parallel
+   step pre-populates :dv-local with shared ShardedRowMaps (disjoint
    per-trunk rows), which this get path returns untouched."
-  ^java.util.Map [grads kind ^long layer]
+  ^mmllm.jvm.rowstore.IRowStore [grads kind ^long layer]
   (let [^HashMap h (kind grads)]
     (or (.get h layer)
-        (let [mm (HashMap.)] (.put h layer mm) mm))))
+        (let [mm (rs/packed-row-map (if (= kind :dv-local) 16 8))]
+          (.put h layer mm) mm))))
 
 (defn add-into!
   "dst[i] += src[i] elementwise (f32)."
@@ -63,15 +68,11 @@
     (aset dst i (float (+ (aget dst i) (aget src i))))))
 
 (defn merge-dv!
-  "Merge a per-call dV HashMap (row → float[dim]) into the layer's."
-  [^HashMap dst ^HashMap src]
-  (doseq [e src]
-    (let [^java.util.Map$Entry e e
-          row (.getKey e)
-          ^floats v (.getValue e)]
-      (if-let [^floats acc (.get dst row)]
-        (add-into! acc v)
-        (.put dst row (java.util.Arrays/copyOf v (alength v)))))))
+  "Merge a per-call dV store (row → float[dim] rows) into the layer's.
+   Both are packed IRowStores now; add-into-zero on first touch is
+   bit-identical to the old copy-on-first-touch."
+  [^IRowStore dst ^IRowStore src]
+  (rs/merge-into! dst src))
 
 ;; ── layout helpers: (T, H*8) column-major-by-head ↔ head-major (H, T, 8) ──
 
@@ -402,7 +403,11 @@
             (let [nb (:netbank blk)
                   sqrt-n (long (:sqrt-n nb)) sub-dim (long (:sub-dim nb))
                   c-net (long (:c-net nb))
-                  r (g/netbank-bwd bank-q T nb (:dnet gate-res))]
+                  ;; fresh per-call packed store, merged below — same
+                  ;; accumulate-then-merge association as the old boxed
+                  ;; HashMap (bit-identical merged values)
+                  r (g/netbank-bwd bank-q T nb (:dnet gate-res)
+                                   (rs/packed-row-map 8))]
               (add-into! (gacc grads (str pre "netbank.K_a") (* sqrt-n sub-dim)) (:dKa r))
               (add-into! (gacc grads (str pre "netbank.K_b") (* sqrt-n sub-dim)) (:dKb r))
               (add-into! (gacc grads (str pre "netbank.q_norm.weight") 16) (:dqnorm-w r))

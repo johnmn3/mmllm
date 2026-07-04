@@ -24,7 +24,8 @@
      step — optim.py `continue`s on grad-less params BEFORE bumping the
      counter, so a grad-less v-local param shifts later tile indices.
      That quirk is replicated, not fixed."
-  (:import [java.util HashMap]))
+  (:require [mmllm.jvm.rowstore :as rs])
+  (:import [mmllm.jvm.rowstore IRowStore]))
 
 (set! *warn-on-reflection* true)
 
@@ -120,10 +121,24 @@
       {:idx out-idx :val out-val})))
 
 (defn sparse-adam-init
-  "Mutable per-param state: one step counter + touched-row m/v maps
-   (row -> float[dim]; rows start at zero moments on first touch)."
+  "Mutable per-param state: one step counter + a lazily-created packed
+   m+v moment store (one 2·dim-wide row per touched bank row; m at
+   [0,dim), v at [dim,2·dim); rows start at zero moments on first
+   touch — identical semantics to the old per-row float[] maps, packed
+   per the M7 accumulator swap). The store is lazy because dim isn't
+   known until the first grad arrives."
   []
-  {:step (long-array 1) :m (HashMap.) :v (HashMap.)})
+  {:step (long-array 1) :mv (object-array 1)})
+
+(defn state-mv
+  "Get-or-create the packed m+v store of a sparse-adam state for rows of
+   `width` (= 2·dim) floats."
+  ^mmllm.jvm.rowstore.IRowStore [state ^long width]
+  (let [^objects holder (:mv state)]
+    (or (aget holder 0)
+        (let [s (rs/packed-row-map width)]
+          (aset holder 0 s)
+          s))))
 
 (defn- sparse-param-step!
   "Adam update on the coalesced touched rows of one param."
@@ -135,8 +150,7 @@
         beta1 (double (:beta1 opts 0.9))
         beta2 (double (:beta2 opts 0.999))
         ^longs stepa (:step state)
-        ^HashMap mm (:m state)
-        ^HashMap vv (:v state)
+        ^IRowStore mv (state-mv state (* 2 dim))
         _     (aset stepa 0 (inc (aget stepa 0)))
         step  (aget stepa 0)
         b1f   (float beta1)
@@ -149,23 +163,22 @@
         epsf  (float (:eps opts 1e-8))]
     (dotimes [i (alength cidx)]
       (let [row (aget cidx i)
-            ^floats mrow (or (.get mm row)
-                             (let [a (float-array dim)] (.put mm row a) a))
-            ^floats vrow (or (.get vv row)
-                             (let [a (float-array dim)] (.put vv row a) a))]
+            slot (.rsEnsureSlot mv row)
+            ^floats mvch (.rsChunkOf mv slot)
+            mvoff (.rsOffsetOf mv slot)]
         (dotimes [j dim]
           (let [gj  (aget cval (+ (* i dim) j))
-                mj' (float (+ (float (* (aget mrow j) b1f))
+                mj' (float (+ (float (* (aget mvch (+ mvoff j)) b1f))
                               (float (* a1f gj))))
-                vj' (float (+ (float (* (aget vrow j) b2f))
+                vj' (float (+ (float (* (aget mvch (+ mvoff dim j)) b2f))
                               (float (* (float (* c2f gj)) gj))))
                 mh  (float (/ mj' bc1f))
                 vh  (float (/ vj' bc2f))
                 den (float (+ (float (Math/sqrt (double vh))) epsf))
                 dlt (float (/ (float (* negf mh)) den))
                 pj  (+ (* row dim) j)]
-            (aset mrow j mj')
-            (aset vrow j vj')
+            (aset mvch (+ mvoff j) mj')
+            (aset mvch (+ mvoff dim j) vj')
             (aset pdata pj (float (+ (aget pdata pj) dlt)))))))
     state))
 

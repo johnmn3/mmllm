@@ -101,6 +101,15 @@ torch reference (single process, one B=16 tensor, MKL intra-op):
   accumulators and moment stores.** Wall clock would also have been
   unreasonable (a 1-thread T=1024 step extrapolates to tens of
   minutes), but memory alone forces the fallback.
+  **Landed (M7, jvm/src/mmllm/jvm/rowstore.clj):** sparse V grads,
+  sparse-Adam moments and bank overlays now live in packed
+  open-addressing row stores (long-key table + chunked float pools,
+  ~2-3× denser than the boxed rows, and the hogwild V_local container
+  is per-trunk-sharded instead of a ConcurrentHashMap). All five parity
+  gates stayed green across the swap (bit-identical semantics);
+  thread-parity now fits in -Xmx6g (was 11g) and the G5 spoon
+  (mmllm.jvm.spoon) trains T=256 × B=16 × 100 steps inside the 15 GB
+  box — see the spoon summary in that namespace's docstring lineage.
 - Same-T comparison is preserved: torch was measured at T=64 too, with
   `MMLLM_GRAD_CHECKPOINT=false` — the honest equivalent, since the JVM
   backward never materializes (T,T) attention and never pays torch's

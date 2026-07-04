@@ -9,7 +9,9 @@
    dims; module goldens' loss is (out · r) so dL/dout = r."
   (:require [mmllm.jvm.model :as m]
             [mmllm.jvm.params :as p]
-            [mmllm.jvm.tensor :as t]))
+            [mmllm.jvm.rowstore]
+            [mmllm.jvm.tensor :as t])
+  (:import [mmllm.jvm.rowstore IRowStore]))
 
 (set! *warn-on-reflection* true)
 
@@ -188,10 +190,14 @@
 
 ;; ── product-key retrieval backward (shared: Local PKM + NetBank) ──
 
-;; dV maps are hinted java.util.Map (not HashMap): the sequential step
-;; passes HashMaps; the M6 parallel step (parallel_step.clj) passes a
-;; shared ConcurrentHashMap for V_local, whose row keys are disjoint
-;; across router threads (per-trunk slices), so lock-free get/put is safe.
+;; dV containers come in two flavors, branched per row below:
+;; - java.util.Map<Long, float[]> — the original boxed shape, still what
+;;   the module-level bwd fns default to (grad-parity inspects it);
+;; - mmllm.jvm.rowstore.IRowStore — the packed store the train step
+;;   passes (per-task PackedRowMap, or the parallel step's hogwild
+;;   ShardedRowMap whose per-trunk shards each have a single writer
+;;   thread). rsAxpyRow does the exact f32 arithmetic of the Map path:
+;;   acc[c] = (float)(acc[c] + (double)w · (double)dval[c]).
 (defn- dv-acc ^floats [^java.util.Map dV ^long row ^long dim]
   (or (.get dV row)
       (let [a (float-array dim)] (.put dV row a) a)))
@@ -201,10 +207,10 @@
    qn is the q_norm'd query (row at qn-off, 16 wide); dval (vdim) is the
    grad wrt the weighted V sum. Scatters dscores to the selected sub-key
    indices only (top-k choice itself is piecewise-constant — no grad).
-   Accumulates dKa/dKb (dense), dV (HashMap global-row → float[vdim]) and
-   the query grad into dqn at qn-off."
+   Accumulates dKa/dKb (dense), dV (Map or IRowStore, global-row →
+   float[vdim] — see dv-acc note) and the query grad into dqn at qn-off."
   [^floats qn qn-off mem trunk-off ^floats dval vdim
-   ^floats dKa ^floats dKb ^java.util.Map dV ^floats dqn]
+   ^floats dKa ^floats dKb dV ^floats dqn]
   (let [qn-off (long qn-off) trunk-off (long trunk-off) vdim (long vdim)
         {:keys [^floats Ka ^floats Kb bank]} mem
         sqrt-n (long (:sqrt-n mem)) sub-dim (long (:sub-dim mem))
@@ -213,16 +219,23 @@
         row (float-array vdim)
         dw (float-array top-k)]
     ;; dV[row] += w_k·dval ; dw_k = dval·V_row
-    (dotimes [k top-k]
-      (let [grow (+ trunk-off (aget idx k))]
-        (p/bank-row! bank grow row 0)
-        (aset dw k (float (dot-at dval 0 row 0 vdim)))
-        ;; ^floats at the call site: dv-acc's primitive-long args drop the
-        ;; return tag (the repo's >4-args/primitive-hint gotcha), and this
-        ;; aset loop is the hottest scatter in the backward.
-        (let [^floats acc (dv-acc dV grow vdim)]
-          (dotimes [c vdim]
-            (aset acc c (float (+ (aget acc c) (* (aget w k) (aget dval c)))))))))
+    (if (instance? IRowStore dV)
+      (let [^IRowStore dV dV]
+        (dotimes [k top-k]
+          (let [grow (+ trunk-off (aget idx k))]
+            (p/bank-row! bank grow row 0)
+            (aset dw k (float (dot-at dval 0 row 0 vdim)))
+            (.rsAxpyRow dV grow (double (aget w k)) dval 0))))
+      (dotimes [k top-k]
+        (let [grow (+ trunk-off (aget idx k))]
+          (p/bank-row! bank grow row 0)
+          (aset dw k (float (dot-at dval 0 row 0 vdim)))
+          ;; ^floats at the call site: dv-acc's primitive-long args drop the
+          ;; return tag (the repo's >4-args/primitive-hint gotcha), and this
+          ;; aset loop is the hottest scatter in the backward.
+          (let [^floats acc (dv-acc dV grow vdim)]
+            (dotimes [c vdim]
+              (aset acc c (float (+ (aget acc c) (* (aget w k) (aget dval c))))))))))
     ;; softmax bwd over the selected scores, scatter into ds_a / ds_b
     (let [sd (loop [k 0 s 0.0]
                (if (< k top-k)
@@ -285,8 +298,13 @@
 (defn netbank-bwd
   "NetBank backward: q (T,16), dout (T,16). Adds the expander backward
    (out = expander(Σ w_k·latent_k), latents fp32 c_net-dim) before the
-   shared pk scatter. Returns {:dq :dKa :dKb :dqnorm-w :dexp :dV}."
-  [^floats q T nb ^floats dout]
+   shared pk scatter. Returns {:dq :dKa :dKb :dqnorm-w :dexp :dV}.
+   4-arity keeps the original boxed HashMap dV (grad-parity inspects
+   it); the train step passes its own fresh container (a packed
+   IRowStore) via the 5-arity — same values either way."
+  ([^floats q T nb ^floats dout]
+   (netbank-bwd q T nb dout (java.util.HashMap.)))
+  ([^floats q T nb ^floats dout dV]
   (let [T (long T)
         {:keys [^floats qnorm-w ^floats expander-w bank]} nb
         q-dim (long (:q-dim nb)) c-net (long (:c-net nb))
@@ -294,7 +312,6 @@
         top-k (long (:top-k nb))
         dKa (float-array (* sqrt-n sub-dim))
         dKb (float-array (* sqrt-n sub-dim))
-        dV (java.util.HashMap.)
         dexp (float-array (* q-dim c-net))
         qn (java.util.Arrays/copyOf q (alength q))
         dqn (float-array (* T q-dim))
@@ -323,7 +340,7 @@
               (aset dlat c (float acc)))))
         (pk-bwd-token! qn (* ti q-dim) nb 0 dlat c-net dKa dKb dV dqn)))
     (let [{:keys [dx dw]} (rmsnorm-bwd q qnorm-w dqn T q-dim m/eps)]
-      {:dq dx :dKa dKa :dKb dKb :dqnorm-w dw :dexp dexp :dV dV})))
+      {:dq dx :dKa dKa :dKb dKb :dqnorm-w dw :dexp dexp :dV dV}))))
 
 ;; ── SwitchGate 3-way + alpha_net + net-default, TRAIN branch ──
 
