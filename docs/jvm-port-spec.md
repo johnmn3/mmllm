@@ -432,7 +432,10 @@ Surfaced by the M5a optimizer-parity work; dispositions set by the user:
    addressing hill-climbs during wake, freezes during sleep so logitkd
    distills against stable Local addresses. Initial operating point
    only; cron-prod sweep discipline (≥3 harvests) applies before
-   trusting. JVM mirror + golden regen tracked as a follow-up task.
+   trusting. JVM mirror + golden regen: **done** — SYM24_ENV carries
+   KAB_MULT 0.15→0.001, step.npz pins per-step lr_kab, train-step's
+   AdamW is two-group (memory.K_a/K_b at lr-kab; single-group
+   back-compat when kab==dense), all four gates re-verified.
 3. **`lr-at-step` mixes reference frames** (ROUND_BASE-relative warmup,
    absolute-step cosine). Disposition: **intentional** — part of the
    deliberate curve shaping across overlapping chain rounds. Replicate

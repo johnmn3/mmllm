@@ -52,6 +52,12 @@ SYM24_ENV = {
     "MMLLM_LOCAL_BANK_LAYERS": ",".join(str(i) for i in range(24)),
     "MMLLM_NETBANK_DELAY_MS_MIN": "0",
     "MMLLM_NETBANK_DELAY_MS_MAX": "0",
+    # K_a/K_b two-group dense optimizer (c0449a3: extend_chain.sh prod
+    # defaults) — kab-mult != dense-mult makes make-opt-dense put every
+    # block's memory.K_a/K_b into AdamW group 1 with its own lr schedule.
+    # Optimizer grouping only; does NOT affect arch/tensor count (698).
+    "MMLLM_LR_KAB_MULT": "0.15",
+    "MMLLM_LR_KAB_MULT_END": "0.001",
     # keep the manifest build off any mmap files / GPU
     "MMLLM_BANK_ON_GPU": "true",
 }

@@ -6,9 +6,9 @@
      {:lr 3e-3 :lr-min 3e-3 :warmup 70 :total 100
       :round-base 0 :ramp-floor 0.0            ; optional, default 0
       :dense-mult 0.05 :dense-mult-end 0.005
-      :kab-mult   0.05 :kab-mult-end   0.05    ; prod: kab defaults to
-      :bank-mult  3.0  :bank-mult-end  0.001   ;  dense's START, constant
-      :net-mult   0.001 :net-mult-end  5.0}
+      :kab-mult   0.15 :kab-mult-end   0.001   ; prod since c0449a3 (unset
+      :bank-mult  3.0  :bank-mult-end  0.001   ;  kab defaults to dense's
+      :net-mult   0.001 :net-mult-end  5.0}    ;  START, constant)
 
    Reference quirks kept ON PURPOSE (parity over cleanliness):
    - lr-at-step's linear ramp uses round-base-relative s-eff/warmup-eff

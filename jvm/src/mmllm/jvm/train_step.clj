@@ -9,9 +9,13 @@
              student = net-only forward, freeze-trunk
 
    Backward runs through all 32 blocks via mmllm.jvm.train-forward /
-   grad.clj; grads for the 698 dense tensors flow to AdamW (single
-   group — prod's make-opt-dense; torch defaults incl. wd=1e-2, params
-   without grads skipped), Local V and V_net sparse grads to two
+   grad.clj; grads for the 698 dense tensors flow to AdamW (TWO groups
+   since c0449a3's prod make-opt-dense: group 0 = core dense at
+   lr-dense, group 1 = every block's memory.K_a/K_b at lr-kab; when
+   (:kab lrs) is absent or equal it degenerates to the single-group
+   back-compat path exactly like the reference's kab==dense branch;
+   torch defaults incl. wd=1e-2, params without grads skipped), Local
+   V and V_net sparse grads to two
    touched-row sparse-Adam instances (optim.py semantics — the Adam
    arithmetic below mirrors mmllm.jvm.optim/sparse-param-step! f32
    op-for-op, re-stated here against bank OVERLAYS because bank V lives
@@ -225,7 +229,7 @@
    env: {:model :manifest :dense (p/load-dense result) :local-params
          :net-params :opt-states :z-coef :kd-temp :kd-coef
          :sqrt-local :local-mult}
-   step-cfg: {:kd? bool :lrs {:dense :bank :net} :x-rows [B × [T longs]]
+   step-cfg: {:kd? bool :lrs {:dense :kab :bank :net} :x-rows [B × [T longs]]
               :y-rows :trunk-ids [B longs] :R-rows [B × [24 × float[H*T]]]}
 
    Returns {:plain-ce :ce :z-layers double[24] :loss-total :kd :kd-kl
@@ -292,15 +296,22 @@
     ;; ── optimizers ──
     (let [^HashMap gdense (:dense grads)
           ^HashMap adamw-states (:adamw opt-states)
-          lr-dense (double (:dense lrs))]
+          lr-dense (double (:dense lrs))
+          ;; group 1 (make-opt-dense's kab-parameters: each block's
+          ;; memory.K_a/K_b — NOT netbank.K_a/K_b) steps at lr-kab.
+          ;; Defaulting :kab to :dense keeps the single-group back-compat
+          ;; path (reference kab==dense branch) byte-identical.
+          lr-kab (double (:kab lrs lr-dense))]
       ;; AdamW over the positional manifest order; params w/o grads skipped
       (doseq [{:keys [name]} (:dense manifest)]
         (when-let [^floats gr (.get gdense name)]
           (let [^floats pd (:data (get (:by-name dense) name))
                 st (or (.get adamw-states name)
                        (let [s (o/adamw-init (alength pd))]
-                         (.put adamw-states name s) s))]
-            (o/adamw-step! st pd gr {:lr lr-dense})))))
+                         (.put adamw-states name s) s))
+                kab? (or (.endsWith ^String name ".memory.K_a")
+                         (.endsWith ^String name ".memory.K_b"))]
+            (o/adamw-step! st pd gr {:lr (if kab? lr-kab lr-dense)})))))
     (let [sl-grads (mapv (fn [l] (when-let [^HashMap dv (.get ^HashMap (:dv-local grads) l)]
                                    (dv->sorted dv 16)))
                          (range (count local-params)))

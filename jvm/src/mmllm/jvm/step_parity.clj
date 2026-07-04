@@ -105,6 +105,7 @@
             res (ts/train-step!
                  env {:kd? kd?
                       :lrs {:dense (d0 z (str pf "lr_dense"))
+                            :kab (d0 z (str pf "lr_kab"))
                             :bank (d0 z (str pf "lr_bank"))
                             :net (d0 z (str pf "lr_net"))}
                       :x-rows x-rows :y-rows y-rows :trunk-ids trunk-ids
@@ -199,8 +200,11 @@
         ;; most ~2·Σ lr_dense (one full step each way); any REAL bug
         ;; (wrong lr/group, missing weight decay, mis-routed grads)
         ;; moves whole tensors, not ≤8 isolated elements, and is also
-        ;; caught by the grad-norm + loss checks above.
-        (let [_ (swap! cum-lr + (d0 z (str pf "lr_dense")))
+        ;; caught by the grad-norm + loss checks above. The bound
+        ;; accumulates the LARGEST dense-optimizer group lr (kab runs
+        ;; 3× dense during warmup) so ties in either group are covered.
+        (let [_ (swap! cum-lr + (max (d0 z (str pf "lr_dense"))
+                                     (d0 z (str pf "lr_kab"))))
               tie-bound (* 2.5 (double @cum-lr))
               ^HashMap gdense (:dense (:grads res))
               [mx worst n-out]

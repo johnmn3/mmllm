@@ -50,9 +50,10 @@ LR-schedule + optimizer goldens (self-contained; no model build needed):
                        MMLLM_LR_ROUND_BASE=40 / MMLLM_LR_RAMP_FLOOR=0.1 /
                        warmup=68 to pin the chain-round-resume semantics
   adamw.npz            8x4 param + 5 fixed dense grads through torch AdamW
-                       exactly as make-opt-dense builds it (prod: KAB_MULT
-                       unset == DENSE_MULT -> single group, lr=pick-lr-dense,
-                       torch defaults incl. weight_decay=1e-2); param dumped
+                       at make-opt-dense's per-group settings (lr=
+                       pick-lr-dense, torch defaults incl. weight_decay=1e-2;
+                       prod is TWO-group since c0449a3 — groups differ only
+                       in lr, pinned per-step by step.npz); param dumped
                        after each step
   sparse_adam.npz      optim.py CPUOffloadSparseAdam trajectories, 5 steps of
                        hand-built sparse grads with overlapping/duplicate/
@@ -307,10 +308,10 @@ def dump_grads(out_dir):
 # ── M5a: LR schedule + optimizer goldens ──
 
 # The prod-recipe schedule env (extend_chain.sh:192-233 at STEPS=100).
-# MMLLM_LR_KAB_MULT is deliberately NOT set: extend_chain.sh doesn't set it,
-# so pick-lr-kab-mult defaults to pick-lr-dense-mult's START (0.05) and its
-# _END defaults to that same start — i.e. kab stays CONSTANT 0.05 while
-# dense cosines 0.05 -> 0.005 (and make-opt-dense stays single-group).
+# MMLLM_LR_KAB_MULT / _END come from SYM24_ENV (0.15 -> 0.001, activated by
+# c0449a3): kab cosines 0.15 -> 0.001 while dense cosines 0.05 -> 0.005,
+# and make-opt-dense builds TWO groups (group 1 = every block's memory
+# K_a/K_b at lr × kab-mult).
 SCHED_PROD_ENV = {
     "MMLLM_LR": "3e-3",
     "MMLLM_LR_MIN": "3e-3",
@@ -405,9 +406,10 @@ def dump_optim(out_dir):
     # ── adamw.npz ──
     p = torch.nn.Parameter(torch.randn(8, 4, generator=g))
     grads = torch.randn(5, 8, 4, generator=g)
-    # Exactly make-opt-dense (core.lpy:2303): prod env has KAB_MULT unset ==
-    # DENSE_MULT, so the single-group branch: AdamW(params, lr=pick-lr-dense)
-    # with torch defaults betas=(0.9,0.999), eps=1e-8, weight_decay=1e-2.
+    # The AdamW arithmetic golden: one param at lr=pick-lr-dense with torch
+    # defaults betas=(0.9,0.999), eps=1e-8, weight_decay=1e-2 — exactly what
+    # make-opt-dense (core.lpy:2303) gives each group (groups differ only in
+    # lr, which step.npz pins per-group via s*_lr_dense / s*_lr_kab).
     opt = torch.optim.AdamW([p], lr=float(var("pick-lr-dense")()))
     pg = opt.param_groups[0]
     aw = {"p_init": _np(p).copy(), "grads": _np(grads),
@@ -565,7 +567,10 @@ def dump_step(out_dir):
 
     # optimizers exactly as train-long builds them (core.lpy:4565-4586)
     opt_dense = var("make-opt-dense")(m)
-    assert len(opt_dense.param_groups) == 1   # prod: KAB_MULT unset
+    # prod since c0449a3: KAB_MULT=0.15 != DENSE_MULT=0.05 -> two groups,
+    # group 1 = 24 local-bank blocks × (K_a, K_b)
+    assert len(opt_dense.param_groups) == 2
+    assert len(opt_dense.param_groups[1]["params"]) == 48
     sparse_cls = var("pick-sparse-optimizer")()
     opt_sparse = sparse_cls(list(var("sparse-parameters")(m)),
                             lr=float(var("pick-lr-bank")()))
@@ -665,7 +670,7 @@ def dump_step(out_dir):
     pick_lr, pick_lr_min = var("pick-lr"), var("pick-lr-min")
     warmup = int(var("pick-lr-warmup")())
     mult = {gname: var(f"pick-lr-{gname}-mult")
-            for gname in ("dense", "bank", "net")}
+            for gname in ("dense", "kab", "bank", "net")}
     train_step = var("train-step")
     metrics = m.get(K("metrics"))
 
@@ -679,7 +684,9 @@ def dump_step(out_dir):
                                    pick_lr_min()))
             lrs = {gname: cur * float(fn(step, STEP_TOTAL))
                    for gname, fn in mult.items()}
+            # set-opt-lrs! on the two-group opt-dense (core.lpy:4898-4901)
             opt_dense.param_groups[0]["lr"] = lrs["dense"]
+            opt_dense.param_groups[1]["lr"] = lrs["kab"]
             opt_sparse.param_groups[0]["lr"] = lrs["bank"]
             opt_sparse_net.param_groups[0]["lr"] = lrs["net"]
             metrics["current_step"] = step
@@ -704,6 +711,7 @@ def dump_step(out_dir):
 
             p = f"s{si}_"
             out[p + "lr_dense"] = np.float64(lrs["dense"])
+            out[p + "lr_kab"] = np.float64(lrs["kab"])
             out[p + "lr_bank"] = np.float64(lrs["bank"])
             out[p + "lr_net"] = np.float64(lrs["net"])
             out[p + "R"] = np.stack(rand_rec[n_rand0:])   # (24, B, H, T)
