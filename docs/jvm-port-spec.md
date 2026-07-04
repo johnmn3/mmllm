@@ -1,6 +1,10 @@
 # JVM Port Spec — hand-rolled Neanderthal training + inference
 
-Status: DRAFT for review. Nothing in this document is implemented yet.
+Status: M0–M7 IMPLEMENTED and gate-verified (G1–G6 + G5 spoon all green;
+see git log for per-milestone commits and docs/jvm-port-bench.md for the
+threading benchmark). M8 (harvest integration) remains gated on explicit
+user sign-off. §13's estimates were written pre-implementation and are
+kept for the record.
 
 This specs the "option 3" port: reimplement mmLLM's **training and
 inference** on the JVM in Clojure, hand-rolling the model math on
