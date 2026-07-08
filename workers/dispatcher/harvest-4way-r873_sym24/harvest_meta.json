@@ -1,0 +1,75 @@
+{
+  "spork_version": "0.9",
+  "target_round": 873,
+  "n_workers": 4,
+  "wave": "train-r873",
+  "workers": [
+    {
+      "handle": "YvyZm",
+      "branch": "origin/claude/train-sym24-6215feae-YvyZm",
+      "ctrl_bpc": 2.8706
+    },
+    {
+      "handle": "aTfFl",
+      "branch": "fork-slaa-us-mmllm-claude-train-sym24-63049111-aTfFl",
+      "ctrl_bpc": 2.8652
+    },
+    {
+      "handle": "r9O1J",
+      "branch": "fork-SeniorCareMarket-com-mmllm-claude-train-sym24-633bf0c0-r9O1J",
+      "ctrl_bpc": 3.2574
+    },
+    {
+      "handle": "0fm4c",
+      "branch": "fork-SeniorCareMarket-mmllm-claude-train-sym24-5683ae8b-0fm4c",
+      "ctrl_bpc": 2.8543
+    }
+  ],
+  "worker_ctrl_bpc_mean": 2.9619,
+  "worker_ctrl_bpc_best": 2.8543,
+  "previous_harvest": {
+    "round": 872,
+    "dir": "workers/dispatcher/harvest-10way-r872_sym24",
+    "mean": 2.9612,
+    "best": 2.8667
+  },
+  "direct_contributions": [
+    {
+      "bird_id": "6215feae399f44ac",
+      "handle": "YvyZm",
+      "branch": "origin/claude/train-sym24-6215feae-YvyZm",
+      "n_steps": 80,
+      "ctrl_bpc": 2.8706
+    },
+    {
+      "bird_id": "6304911109a744c4",
+      "handle": "aTfFl",
+      "branch": "fork-slaa-us-mmllm-claude-train-sym24-63049111-aTfFl",
+      "n_steps": 80,
+      "ctrl_bpc": 2.8652
+    },
+    {
+      "bird_id": "633bf0c0b2d94751",
+      "handle": "r9O1J",
+      "branch": "fork-SeniorCareMarket-com-mmllm-claude-train-sym24-633bf0c0-r9O1J",
+      "n_steps": 80,
+      "ctrl_bpc": 3.2574
+    },
+    {
+      "bird_id": "5683ae8b4c8c45a1",
+      "handle": "0fm4c",
+      "branch": "fork-SeniorCareMarket-mmllm-claude-train-sym24-5683ae8b-0fm4c",
+      "n_steps": 80,
+      "ctrl_bpc": 2.8543
+    }
+  ],
+  "ancestor_harvests": [
+    "workers/dispatcher/harvest-4way-r872_sym24",
+    "workers/dispatcher/harvest-7way-r872_sym24"
+  ],
+  "cumulative_total_steps": 880,
+  "cumulative_unique_birds": 11,
+  "harvested_at": "2026-07-08T23:32:54Z",
+  "harvester": "scripts/harvest_action.sh (GH Action)",
+  "note": "Lean harvest \u2014 sparse deltas + averaged dense only, no opt-state."
+}
