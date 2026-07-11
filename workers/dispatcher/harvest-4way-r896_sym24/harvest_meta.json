@@ -1,0 +1,74 @@
+{
+  "spork_version": "0.9",
+  "target_round": 896,
+  "n_workers": 4,
+  "wave": "train-r896",
+  "workers": [
+    {
+      "handle": "EdfKL",
+      "branch": "origin/claude/train-sym24-974f5abe-EdfKL",
+      "ctrl_bpc": 2.839
+    },
+    {
+      "handle": "WC69D",
+      "branch": "fork-slaa-us-mmllm-claude-train-sym24-833bbbfe-WC69D",
+      "ctrl_bpc": 2.8317
+    },
+    {
+      "handle": "Az6lx",
+      "branch": "fork-SeniorCareMarket-mmllm-claude-train-sym24-232ff8ce-Az6lx",
+      "ctrl_bpc": 3.1943
+    },
+    {
+      "handle": "HulMN",
+      "branch": "fork-joly-os-mmllm-claude-train-sym24-93f7af40-HulMN",
+      "ctrl_bpc": 2.8282
+    }
+  ],
+  "worker_ctrl_bpc_mean": 2.9233,
+  "worker_ctrl_bpc_best": 2.8282,
+  "previous_harvest": {
+    "round": 895,
+    "dir": "workers/dispatcher/harvest-12way-r895_sym24",
+    "mean": 2.9473,
+    "best": 2.7892
+  },
+  "direct_contributions": [
+    {
+      "bird_id": "974f5abea6ca4cbb",
+      "handle": "EdfKL",
+      "branch": "origin/claude/train-sym24-974f5abe-EdfKL",
+      "n_steps": 80,
+      "ctrl_bpc": 2.839
+    },
+    {
+      "bird_id": "833bbbfe88f147f5",
+      "handle": "WC69D",
+      "branch": "fork-slaa-us-mmllm-claude-train-sym24-833bbbfe-WC69D",
+      "n_steps": 80,
+      "ctrl_bpc": 2.8317
+    },
+    {
+      "bird_id": "232ff8cef4ca4d0e",
+      "handle": "Az6lx",
+      "branch": "fork-SeniorCareMarket-mmllm-claude-train-sym24-232ff8ce-Az6lx",
+      "n_steps": 80,
+      "ctrl_bpc": 3.1943
+    },
+    {
+      "bird_id": "93f7af4058024c05",
+      "handle": "HulMN",
+      "branch": "fork-joly-os-mmllm-claude-train-sym24-93f7af40-HulMN",
+      "n_steps": 80,
+      "ctrl_bpc": 2.8282
+    }
+  ],
+  "ancestor_harvests": [
+    "workers/dispatcher/harvest-5way-r895_sym24"
+  ],
+  "cumulative_total_steps": 720,
+  "cumulative_unique_birds": 9,
+  "harvested_at": "2026-07-11T20:34:28Z",
+  "harvester": "scripts/harvest_action.sh (GH Action)",
+  "note": "Lean harvest \u2014 sparse deltas + averaged dense only, no opt-state."
+}
