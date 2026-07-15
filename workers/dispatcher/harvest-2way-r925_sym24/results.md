@@ -27,7 +27,7 @@ Previous harvest: `workers/dispatcher/harvest-9way-r924_sym24`
 ## Cumulative training contribution
 
 - This harvest: **160 steps** from 2 bird(s)
-- Across full ancestry (deduped by bird_id): **1040 steps** from 13 unique bird(s)
+- Across full ancestry (deduped by bird_id): **560 steps** from 7 unique bird(s)
 - Ancestor harvest(s):
   - `workers/dispatcher/harvest-5way-r924_sym24`
 
