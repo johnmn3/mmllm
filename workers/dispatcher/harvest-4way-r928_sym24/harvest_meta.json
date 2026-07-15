@@ -1,0 +1,75 @@
+{
+  "spork_version": "0.9",
+  "target_round": 928,
+  "n_workers": 4,
+  "wave": "train-r928",
+  "workers": [
+    {
+      "handle": "syFMa",
+      "branch": "origin/claude/train-sym24-0d47e4e1-syFMa",
+      "ctrl_bpc": 2.9135
+    },
+    {
+      "handle": "FFISx",
+      "branch": "origin/claude/train-sym24-e5a66d12-FFISx",
+      "ctrl_bpc": 2.911
+    },
+    {
+      "handle": "yKUTs",
+      "branch": "fork-SeniorCareMarket-mmllm-claude-train-sym24-ba7dfd2e-yKUTs",
+      "ctrl_bpc": 2.7654
+    },
+    {
+      "handle": "qFpOU",
+      "branch": "fork-joly-os-mmllm-claude-train-sym24-c11dfb23-qFpOU",
+      "ctrl_bpc": 2.7143
+    }
+  ],
+  "worker_ctrl_bpc_mean": 2.826,
+  "worker_ctrl_bpc_best": 2.7143,
+  "previous_harvest": {
+    "round": 927,
+    "dir": "workers/dispatcher/harvest-5way-r927_sym24",
+    "mean": 2.9218,
+    "best": 2.731
+  },
+  "direct_contributions": [
+    {
+      "bird_id": "0d47e4e1a0e94c71",
+      "handle": "syFMa",
+      "branch": "origin/claude/train-sym24-0d47e4e1-syFMa",
+      "n_steps": 80,
+      "ctrl_bpc": 2.9135
+    },
+    {
+      "bird_id": "e5a66d123e804549",
+      "handle": "FFISx",
+      "branch": "origin/claude/train-sym24-e5a66d12-FFISx",
+      "n_steps": 80,
+      "ctrl_bpc": 2.911
+    },
+    {
+      "bird_id": "ba7dfd2efe244d62",
+      "handle": "yKUTs",
+      "branch": "fork-SeniorCareMarket-mmllm-claude-train-sym24-ba7dfd2e-yKUTs",
+      "n_steps": 80,
+      "ctrl_bpc": 2.7654
+    },
+    {
+      "bird_id": "c11dfb2325094dbf",
+      "handle": "qFpOU",
+      "branch": "fork-joly-os-mmllm-claude-train-sym24-c11dfb23-qFpOU",
+      "n_steps": 80,
+      "ctrl_bpc": 2.7143
+    }
+  ],
+  "ancestor_harvests": [
+    "workers/dispatcher/harvest-1way-r927_sym24",
+    "workers/dispatcher/harvest-5way-r927_sym24"
+  ],
+  "cumulative_total_steps": 720,
+  "cumulative_unique_birds": 9,
+  "harvested_at": "2026-07-15T12:44:00Z",
+  "harvester": "scripts/harvest_action.sh (GH Action)",
+  "note": "Lean harvest \u2014 sparse deltas + averaged dense only, no opt-state."
+}
