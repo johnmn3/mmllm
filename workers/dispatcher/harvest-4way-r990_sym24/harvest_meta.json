@@ -1,0 +1,75 @@
+{
+  "spork_version": "0.9",
+  "target_round": 990,
+  "n_workers": 4,
+  "wave": "train-r990",
+  "workers": [
+    {
+      "handle": "PyWEG",
+      "branch": "origin/claude/train-sym24-1af20b06-PyWEG",
+      "ctrl_bpc": 2.7902
+    },
+    {
+      "handle": "1VoVQ",
+      "branch": "fork-SeniorCareMarket-com-mmllm-claude-train-sym24-fe195af6-1VoVQ",
+      "ctrl_bpc": 2.5864
+    },
+    {
+      "handle": "UwkH0",
+      "branch": "fork-SeniorCareMarket-mmllm-claude-train-sym24-4449f39a-UwkH0",
+      "ctrl_bpc": 2.6003
+    },
+    {
+      "handle": "Q3mJO",
+      "branch": "fork-joly-os-mmllm-claude-train-sym24-c315b417-Q3mJO",
+      "ctrl_bpc": 2.6091
+    }
+  ],
+  "worker_ctrl_bpc_mean": 2.6465,
+  "worker_ctrl_bpc_best": 2.5864,
+  "previous_harvest": {
+    "round": 989,
+    "dir": "workers/dispatcher/harvest-4way-r989_sym24",
+    "mean": 2.6795,
+    "best": 2.5785
+  },
+  "direct_contributions": [
+    {
+      "bird_id": "1af20b066d854411",
+      "handle": "PyWEG",
+      "branch": "origin/claude/train-sym24-1af20b06-PyWEG",
+      "n_steps": 80,
+      "ctrl_bpc": 2.7902
+    },
+    {
+      "bird_id": "fe195af6841d4435",
+      "handle": "1VoVQ",
+      "branch": "fork-SeniorCareMarket-com-mmllm-claude-train-sym24-fe195af6-1VoVQ",
+      "n_steps": 80,
+      "ctrl_bpc": 2.5864
+    },
+    {
+      "bird_id": "4449f39ad7294293",
+      "handle": "UwkH0",
+      "branch": "fork-SeniorCareMarket-mmllm-claude-train-sym24-4449f39a-UwkH0",
+      "n_steps": 80,
+      "ctrl_bpc": 2.6003
+    },
+    {
+      "bird_id": "c315b417391a4d57",
+      "handle": "Q3mJO",
+      "branch": "fork-joly-os-mmllm-claude-train-sym24-c315b417-Q3mJO",
+      "n_steps": 80,
+      "ctrl_bpc": 2.6091
+    }
+  ],
+  "ancestor_harvests": [
+    "workers/dispatcher/harvest-1way-r989_sym24",
+    "workers/dispatcher/harvest-4way-r989_sym24"
+  ],
+  "cumulative_total_steps": 640,
+  "cumulative_unique_birds": 8,
+  "harvested_at": "2026-07-22T07:16:09Z",
+  "harvester": "scripts/harvest_action.sh (GH Action)",
+  "note": "Lean harvest \u2014 sparse deltas + averaged dense only, no opt-state."
+}
