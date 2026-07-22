@@ -1,0 +1,74 @@
+{
+  "spork_version": "0.9",
+  "target_round": 994,
+  "n_workers": 4,
+  "wave": "train-r994",
+  "workers": [
+    {
+      "handle": "SH2a2",
+      "branch": "origin/claude/train-sym24-92608b89-SH2a2",
+      "ctrl_bpc": 2.7645
+    },
+    {
+      "handle": "ItBMM",
+      "branch": "origin/claude/train-sym24-ec2511a0-ItBMM",
+      "ctrl_bpc": 2.5717
+    },
+    {
+      "handle": "JyIr8",
+      "branch": "fork-slaa-us-mmllm-claude-train-sym24-58284148-JyIr8",
+      "ctrl_bpc": 2.9816
+    },
+    {
+      "handle": "kNkzA",
+      "branch": "fork-SeniorCareMarket-mmllm-claude-train-sym24-75f81a4e-kNkzA",
+      "ctrl_bpc": 2.7659
+    }
+  ],
+  "worker_ctrl_bpc_mean": 2.7709,
+  "worker_ctrl_bpc_best": 2.5717,
+  "previous_harvest": {
+    "round": 993,
+    "dir": "workers/dispatcher/harvest-5way-r993_sym24",
+    "mean": 2.7819,
+    "best": 2.5936
+  },
+  "direct_contributions": [
+    {
+      "bird_id": "92608b892f1a448c",
+      "handle": "SH2a2",
+      "branch": "origin/claude/train-sym24-92608b89-SH2a2",
+      "n_steps": 80,
+      "ctrl_bpc": 2.7645
+    },
+    {
+      "bird_id": "ec2511a0bb3b40aa",
+      "handle": "ItBMM",
+      "branch": "origin/claude/train-sym24-ec2511a0-ItBMM",
+      "n_steps": 80,
+      "ctrl_bpc": 2.5717
+    },
+    {
+      "bird_id": "5828414859734f4a",
+      "handle": "JyIr8",
+      "branch": "fork-slaa-us-mmllm-claude-train-sym24-58284148-JyIr8",
+      "n_steps": 80,
+      "ctrl_bpc": 2.9816
+    },
+    {
+      "bird_id": "75f81a4ecfd344d6",
+      "handle": "kNkzA",
+      "branch": "fork-SeniorCareMarket-mmllm-claude-train-sym24-75f81a4e-kNkzA",
+      "n_steps": 80,
+      "ctrl_bpc": 2.7659
+    }
+  ],
+  "ancestor_harvests": [
+    "workers/dispatcher/harvest-1way-r993_sym24"
+  ],
+  "cumulative_total_steps": 400,
+  "cumulative_unique_birds": 5,
+  "harvested_at": "2026-07-22T16:42:44Z",
+  "harvester": "scripts/harvest_action.sh (GH Action)",
+  "note": "Lean harvest \u2014 sparse deltas + averaged dense only, no opt-state."
+}
