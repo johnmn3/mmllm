@@ -1,12 +1,12 @@
 {
   "spork_version": "0.9",
   "round": 1013,
-  "harvested_at": "2026-07-24T17:47:06Z",
+  "harvested_at": "2026-07-24T18:42:28Z",
   "n_workers": 4,
   "worker_ctrl_bpc_mean": 2.781,
   "worker_ctrl_bpc_best": 2.5322,
-  "cumulative_total_steps": 560,
-  "cumulative_unique_birds": 7,
+  "cumulative_total_steps": 320,
+  "cumulative_unique_birds": 4,
   "netbank_files": {
     "dense": "round-1013/dense.pt",
     "delta_sparse_net": [
