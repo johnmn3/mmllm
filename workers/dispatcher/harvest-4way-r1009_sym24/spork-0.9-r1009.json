@@ -1,12 +1,12 @@
 {
   "spork_version": "0.9",
   "round": 1009,
-  "harvested_at": "2026-07-24T07:15:23Z",
-  "n_workers": 6,
-  "worker_ctrl_bpc_mean": 2.7386,
-  "worker_ctrl_bpc_best": 2.5354,
-  "cumulative_total_steps": 720,
-  "cumulative_unique_birds": 9,
+  "harvested_at": "2026-07-24T10:48:22Z",
+  "n_workers": 4,
+  "worker_ctrl_bpc_mean": 2.7422,
+  "worker_ctrl_bpc_best": 2.5378,
+  "cumulative_total_steps": 320,
+  "cumulative_unique_birds": 4,
   "netbank_files": {
     "dense": "round-1009/dense.pt",
     "delta_sparse_net": [
