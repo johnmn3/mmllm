@@ -66,9 +66,9 @@
   "ancestor_harvests": [
     "workers/dispatcher/harvest-1way-r1026_sym24"
   ],
-  "cumulative_total_steps": 560,
-  "cumulative_unique_birds": 7,
-  "harvested_at": "2026-07-26T06:15:57Z",
+  "cumulative_total_steps": 400,
+  "cumulative_unique_birds": 5,
+  "harvested_at": "2026-07-26T07:22:54Z",
   "harvester": "scripts/harvest_action.sh (GH Action)",
   "note": "Lean harvest \u2014 sparse deltas + averaged dense only, no opt-state."
 }
