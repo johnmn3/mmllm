@@ -1,0 +1,75 @@
+{
+  "spork_version": "0.9",
+  "target_round": 1089,
+  "n_workers": 4,
+  "wave": "train-r1089",
+  "workers": [
+    {
+      "handle": "i495Y",
+      "branch": "origin/claude/train-sym24-c775c671-i495Y",
+      "ctrl_bpc": 2.4381
+    },
+    {
+      "handle": "03XTM",
+      "branch": "fork-slaa-us-mmllm-claude-train-sym24-66e82bc0-03XTM",
+      "ctrl_bpc": 2.404
+    },
+    {
+      "handle": "nooPR",
+      "branch": "fork-SeniorCareMarket-mmllm-claude-train-sym24-0d7593a3-nooPR",
+      "ctrl_bpc": 2.4177
+    },
+    {
+      "handle": "16FTE",
+      "branch": "fork-joly-os-mmllm-claude-train-sym24-5105c8d4-16FTE",
+      "ctrl_bpc": 2.4261
+    }
+  ],
+  "worker_ctrl_bpc_mean": 2.4215,
+  "worker_ctrl_bpc_best": 2.404,
+  "previous_harvest": {
+    "round": 1088,
+    "dir": "workers/dispatcher/harvest-11way-r1088_sym24",
+    "mean": 2.4762,
+    "best": 2.4082
+  },
+  "direct_contributions": [
+    {
+      "bird_id": "c775c6713afe4315",
+      "handle": "i495Y",
+      "branch": "origin/claude/train-sym24-c775c671-i495Y",
+      "n_steps": 80,
+      "ctrl_bpc": 2.4381
+    },
+    {
+      "bird_id": "66e82bc0acc3488b",
+      "handle": "03XTM",
+      "branch": "fork-slaa-us-mmllm-claude-train-sym24-66e82bc0-03XTM",
+      "n_steps": 80,
+      "ctrl_bpc": 2.404
+    },
+    {
+      "bird_id": "0d7593a3638a4b5a",
+      "handle": "nooPR",
+      "branch": "fork-SeniorCareMarket-mmllm-claude-train-sym24-0d7593a3-nooPR",
+      "n_steps": 80,
+      "ctrl_bpc": 2.4177
+    },
+    {
+      "bird_id": "5105c8d442bb44e5",
+      "handle": "16FTE",
+      "branch": "fork-joly-os-mmllm-claude-train-sym24-5105c8d4-16FTE",
+      "n_steps": 80,
+      "ctrl_bpc": 2.4261
+    }
+  ],
+  "ancestor_harvests": [
+    "workers/dispatcher/harvest-11way-r1088_sym24",
+    "workers/dispatcher/harvest-5way-r1088_sym24"
+  ],
+  "cumulative_total_steps": 1200,
+  "cumulative_unique_birds": 15,
+  "harvested_at": "2026-08-02T03:08:51Z",
+  "harvester": "scripts/harvest_action.sh (GH Action)",
+  "note": "Lean harvest \u2014 sparse deltas + averaged dense only, no opt-state."
+}
