@@ -1,0 +1,74 @@
+{
+  "spork_version": "0.9",
+  "target_round": 1131,
+  "n_workers": 4,
+  "wave": "train-r1131",
+  "workers": [
+    {
+      "handle": "tQLWr",
+      "branch": "origin/claude/train-sym24-b9403777-tQLWr",
+      "ctrl_bpc": 2.351
+    },
+    {
+      "handle": "WFKsd",
+      "branch": "origin/claude/train-sym24-d1b364a6-WFKsd",
+      "ctrl_bpc": 2.555
+    },
+    {
+      "handle": "bMpzk",
+      "branch": "fork-slaa-us-mmllm-claude-train-sym24-739f22e5-bMpzk",
+      "ctrl_bpc": 2.7558
+    },
+    {
+      "handle": "myiYB",
+      "branch": "fork-joly-os-mmllm-claude-train-sym24-75c26605-myiYB",
+      "ctrl_bpc": 2.3769
+    }
+  ],
+  "worker_ctrl_bpc_mean": 2.5097,
+  "worker_ctrl_bpc_best": 2.351,
+  "previous_harvest": {
+    "round": 1130,
+    "dir": "workers/dispatcher/harvest-2way-r1130_sym24",
+    "mean": 2.5551,
+    "best": 2.5534
+  },
+  "direct_contributions": [
+    {
+      "bird_id": "b9403777127d4740",
+      "handle": "tQLWr",
+      "branch": "origin/claude/train-sym24-b9403777-tQLWr",
+      "n_steps": 80,
+      "ctrl_bpc": 2.351
+    },
+    {
+      "bird_id": "d1b364a6f9cb4fb7",
+      "handle": "WFKsd",
+      "branch": "origin/claude/train-sym24-d1b364a6-WFKsd",
+      "n_steps": 80,
+      "ctrl_bpc": 2.555
+    },
+    {
+      "bird_id": "739f22e58e2c4059",
+      "handle": "bMpzk",
+      "branch": "fork-slaa-us-mmllm-claude-train-sym24-739f22e5-bMpzk",
+      "n_steps": 80,
+      "ctrl_bpc": 2.7558
+    },
+    {
+      "bird_id": "75c2660580684515",
+      "handle": "myiYB",
+      "branch": "fork-joly-os-mmllm-claude-train-sym24-75c26605-myiYB",
+      "n_steps": 80,
+      "ctrl_bpc": 2.3769
+    }
+  ],
+  "ancestor_harvests": [
+    "workers/dispatcher/harvest-1way-r1130_sym24"
+  ],
+  "cumulative_total_steps": 400,
+  "cumulative_unique_birds": 5,
+  "harvested_at": "2026-08-07T07:40:12Z",
+  "harvester": "scripts/harvest_action.sh (GH Action)",
+  "note": "Lean harvest \u2014 sparse deltas + averaged dense only, no opt-state."
+}
