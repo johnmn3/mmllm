@@ -1,0 +1,38 @@
+{
+  "spork_version": "0.9",
+  "target_round": 1131,
+  "n_workers": 1,
+  "wave": "train-r1131",
+  "workers": [
+    {
+      "handle": "myiYB",
+      "branch": "fork-joly-os-mmllm-claude-train-sym24-75c26605-myiYB",
+      "ctrl_bpc": 2.3769
+    }
+  ],
+  "worker_ctrl_bpc_mean": 2.3769,
+  "worker_ctrl_bpc_best": 2.3769,
+  "previous_harvest": {
+    "round": 1130,
+    "dir": "workers/dispatcher/harvest-2way-r1130_sym24",
+    "mean": 2.5551,
+    "best": 2.5534
+  },
+  "direct_contributions": [
+    {
+      "bird_id": "75c2660580684515",
+      "handle": "myiYB",
+      "branch": "fork-joly-os-mmllm-claude-train-sym24-75c26605-myiYB",
+      "n_steps": 80,
+      "ctrl_bpc": 2.3769
+    }
+  ],
+  "ancestor_harvests": [
+    "workers/dispatcher/harvest-1way-r1130_sym24"
+  ],
+  "cumulative_total_steps": 160,
+  "cumulative_unique_birds": 2,
+  "harvested_at": "2026-08-07T06:26:21Z",
+  "harvester": "scripts/harvest_action.sh (GH Action)",
+  "note": "Lean harvest \u2014 sparse deltas + averaged dense only, no opt-state."
+}
