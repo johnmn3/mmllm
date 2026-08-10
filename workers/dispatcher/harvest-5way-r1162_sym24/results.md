@@ -1,0 +1,44 @@
+# harvest-5way-r1162 — sparse-delta merge of 5 birds
+
+## Worker endpoints
+
+| handle | branch | R1162 ctrl_bpc |
+|--------|--------|--------------:|
+| LHsbQ | origin/claude/train-sym24-6109681a-LHsbQ | 2.3319 |
+| Taas1 | fork-SeniorCareMarket-com-mmllm-claude-train-sym24-64464f63-Taas1 | 2.3486 |
+| dColN | fork-slaa-us-mmllm-claude-train-sym24-ab2110e3-dColN | 2.5163 |
+| cNZxD | origin/claude/train-sym24-1b71ef79-cNZxD | 2.5196 |
+| qACKn | fork-joly-os-mmllm-claude-train-sym24-2c311650-qACKn | 2.7094 |
+| **mean** | | **2.4852** |
+| **best** | | **2.3319** |
+
+## Chain progression R1161 → R1162
+
+Previous harvest: `workers/dispatcher/harvest-6way-r1161_sym24`
+
+| metric         | prior          | this           | Δ        |
+|----------------|---------------:|---------------:|---------:|
+| ctrl_bpc mean  | 2.6199         | 2.4852         | -0.1347 |
+| ctrl_bpc best  | 2.3258         | 2.3319         | +0.0061 |
+
+## Per-round trajectory (best bird: LHsbQ)
+
+| round | wall_s | ctrl_bpc | Δ_net   |
+|-------|-------:|---------:|--------:|
+| 1162 | 6674 | 2.3319 | +0.2620 |
+
+## Cumulative training contribution
+
+- This harvest: **400 steps** from 5 bird(s)
+- Across full ancestry (deduped by bird_id): **880 steps** from 11 unique bird(s)
+- Ancestor harvest(s):
+  - `workers/dispatcher/harvest-1way-r1161_sym24`
+  - `workers/dispatcher/harvest-6way-r1161_sym24`
+
+## Output
+
+`workers/dispatcher/harvest-5way-r1162_sym24/round-1162/`:
+- `delta-sparse-net.{0..31}.pt` (row-aware FedAvg merge of 5 workers)
+- `dense.pt` (averaged across 5 birds)
+- Reference for delta encoding: `workers/dispatcher/harvest-0way-r0_sym24/round-0`
+
