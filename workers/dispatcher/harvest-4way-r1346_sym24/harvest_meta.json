@@ -1,0 +1,75 @@
+{
+  "spork_version": "0.9",
+  "target_round": 1346,
+  "n_workers": 4,
+  "wave": "train-r1346",
+  "workers": [
+    {
+      "handle": "7WTkw",
+      "branch": "origin/claude/train-sym24-41c87a37-7WTkw",
+      "ctrl_bpc": 3.2713
+    },
+    {
+      "handle": "Zbrek",
+      "branch": "origin/claude/train-sym24-6cf7ace1-Zbrek",
+      "ctrl_bpc": 3.3066
+    },
+    {
+      "handle": "HxpkC",
+      "branch": "origin/claude/train-sym24-b62ee0c4-HxpkC",
+      "ctrl_bpc": 3.3317
+    },
+    {
+      "handle": "VOW3Q",
+      "branch": "fork-joly-os-mmllm-claude-train-sym24-18c9d8c1-VOW3Q",
+      "ctrl_bpc": 3.2506
+    }
+  ],
+  "worker_ctrl_bpc_mean": 3.29,
+  "worker_ctrl_bpc_best": 3.2506,
+  "previous_harvest": {
+    "round": 1345,
+    "dir": "workers/dispatcher/harvest-4way-r1345_sym24",
+    "mean": 3.4771,
+    "best": 3.2448
+  },
+  "direct_contributions": [
+    {
+      "bird_id": "41c87a3722524f79",
+      "handle": "7WTkw",
+      "branch": "origin/claude/train-sym24-41c87a37-7WTkw",
+      "n_steps": 80,
+      "ctrl_bpc": 3.2713
+    },
+    {
+      "bird_id": "6cf7ace1ea0b4484",
+      "handle": "Zbrek",
+      "branch": "origin/claude/train-sym24-6cf7ace1-Zbrek",
+      "n_steps": 80,
+      "ctrl_bpc": 3.3066
+    },
+    {
+      "bird_id": "b62ee0c435494fac",
+      "handle": "HxpkC",
+      "branch": "origin/claude/train-sym24-b62ee0c4-HxpkC",
+      "n_steps": 80,
+      "ctrl_bpc": 3.3317
+    },
+    {
+      "bird_id": "18c9d8c1bd8e442f",
+      "handle": "VOW3Q",
+      "branch": "fork-joly-os-mmllm-claude-train-sym24-18c9d8c1-VOW3Q",
+      "n_steps": 80,
+      "ctrl_bpc": 3.2506
+    }
+  ],
+  "ancestor_harvests": [
+    "workers/dispatcher/harvest-1way-r1345_sym24",
+    "workers/dispatcher/harvest-4way-r1345_sym24"
+  ],
+  "cumulative_total_steps": 640,
+  "cumulative_unique_birds": 8,
+  "harvested_at": "2026-08-29T04:18:22Z",
+  "harvester": "scripts/harvest_action.sh (GH Action)",
+  "note": "Lean harvest \u2014 sparse deltas + averaged dense only, no opt-state."
+}
