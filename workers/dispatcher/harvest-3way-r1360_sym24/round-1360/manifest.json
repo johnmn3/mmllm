@@ -1,0 +1,147 @@
+{
+  "assets": {
+    "delta-sparse-net.0.pt": {
+      "bytes": 43780947,
+      "sha256": "25b7862eea92e7d19d19d134cd49b06beda42bca14a709396a0e4abc8e1a37f3"
+    },
+    "delta-sparse-net.1.pt": {
+      "bytes": 43780947,
+      "sha256": "6089951147c3b4c611161691fc0a659332f291d321ea323a56be6edffc5424aa"
+    },
+    "delta-sparse-net.10.pt": {
+      "bytes": 43780952,
+      "sha256": "0ce13c850e0fe97ab106dda3b512a0110142a47538e90c46c3d38d820978a339"
+    },
+    "delta-sparse-net.11.pt": {
+      "bytes": 43780952,
+      "sha256": "65ecded30d3a3ae88acfc3978651b53c4488e9d1738bab93fd71888f6c544d3b"
+    },
+    "delta-sparse-net.12.pt": {
+      "bytes": 43780952,
+      "sha256": "4bc1e37c0d29ce0c63839c2e7683400dc6648dcfaf63415708d8d290a8b66a56"
+    },
+    "delta-sparse-net.13.pt": {
+      "bytes": 43780952,
+      "sha256": "9c868b2e770bf1ac731e34ae31a4294df4ad4699bd657e836f1a82b635e2f42e"
+    },
+    "delta-sparse-net.14.pt": {
+      "bytes": 43780952,
+      "sha256": "bbaed0e191e0c270a23944fa9f11b03417f560de3531307cfde14621354d34fb"
+    },
+    "delta-sparse-net.15.pt": {
+      "bytes": 43780952,
+      "sha256": "65a8f2e712a9c503bca750c26c4957bb212082a8018b596d18a6946b5fd9be43"
+    },
+    "delta-sparse-net.16.pt": {
+      "bytes": 43780952,
+      "sha256": "5ad0ee929b882f0c9327dfd6e6bacd46b92cb96c75fe31a585aabac6572ff861"
+    },
+    "delta-sparse-net.17.pt": {
+      "bytes": 43780952,
+      "sha256": "ca55fa7beae659c189d1ec0ef566212bec925b72d798df00ca6f03c5207d983d"
+    },
+    "delta-sparse-net.18.pt": {
+      "bytes": 43780952,
+      "sha256": "21261ac09bec9dc75584fe9d1255611c142cf3417616caffcd70d1f89270fc34"
+    },
+    "delta-sparse-net.19.pt": {
+      "bytes": 43780952,
+      "sha256": "7db4327ed0b9d0414fc51a0211b795b4dbee648b1167d51ed688188a253074ec"
+    },
+    "delta-sparse-net.2.pt": {
+      "bytes": 43780947,
+      "sha256": "428af92c5509a1298ba45cf0823cddd77e52cdb1abd858ae54851e3f3635f77a"
+    },
+    "delta-sparse-net.20.pt": {
+      "bytes": 43780952,
+      "sha256": "67d65e9fa022efd573e1cdeb4ae68aff5e271a9d440364fcfe924174f605ca0d"
+    },
+    "delta-sparse-net.21.pt": {
+      "bytes": 43780952,
+      "sha256": "7c4ff7be78a90267274dd3c70857c091d2313b11a121bdd23cf6bd70770a9712"
+    },
+    "delta-sparse-net.22.pt": {
+      "bytes": 43780952,
+      "sha256": "22ac581f477bd88a4f231f7d437768de88c4d536a167833355a17aef0e69aeff"
+    },
+    "delta-sparse-net.23.pt": {
+      "bytes": 43780952,
+      "sha256": "2efa124ddd433dce23c509dad0646e5fe2abc7b5b10c0a329e84c084dc7b2a7e"
+    },
+    "delta-sparse-net.24.pt": {
+      "bytes": 43780952,
+      "sha256": "261e6dd54b4b8c4ecd7471efbb422de5201dc605dce8eaa5f14ec2203f23671b"
+    },
+    "delta-sparse-net.25.pt": {
+      "bytes": 43780952,
+      "sha256": "ef8d1ee292f24751b26146d0e3067456f738c64da3af8ca67944a5efc1311970"
+    },
+    "delta-sparse-net.26.pt": {
+      "bytes": 43780952,
+      "sha256": "3b9f924070cd4342f113a57502d6709d753a379881557dca74cde5074bce2680"
+    },
+    "delta-sparse-net.27.pt": {
+      "bytes": 43780952,
+      "sha256": "6238b63f76ab77fd1484b80ba6f3ae624a5a0f42e142f92d4ffd206e45d42e98"
+    },
+    "delta-sparse-net.28.pt": {
+      "bytes": 43780952,
+      "sha256": "3e4ada78822fd0a9d6e14f93918345986a3f9854dcd1410d7d081b7069e63cb3"
+    },
+    "delta-sparse-net.29.pt": {
+      "bytes": 43780952,
+      "sha256": "af607afee430e8622ce903aabe362cd5d55310e54aa0dd444dca2882cfd00473"
+    },
+    "delta-sparse-net.3.pt": {
+      "bytes": 43780947,
+      "sha256": "ee9dbb71893b808b42ff65f51c168ab7c4de4b22232bdad6321f6c12a222532a"
+    },
+    "delta-sparse-net.30.pt": {
+      "bytes": 43780952,
+      "sha256": "f54d9bbdbd986ee47130e00d5638fd6b001aa3f4995ca175dde5a1c2c1c2a01d"
+    },
+    "delta-sparse-net.31.pt": {
+      "bytes": 43780952,
+      "sha256": "a9e3944f52527ec0071f51ff13e318090e6c9214d851f846a48a528c56da114d"
+    },
+    "delta-sparse-net.4.pt": {
+      "bytes": 43780947,
+      "sha256": "80692a9fb5e4cb1f6e9628095fb70f359c99109f291c7de3414d9d1eb262db80"
+    },
+    "delta-sparse-net.5.pt": {
+      "bytes": 43780947,
+      "sha256": "ccb2239cd1dcad94b3f5b382520a18f3c110850d02104a51b146ab9ad0f1a72c"
+    },
+    "delta-sparse-net.6.pt": {
+      "bytes": 43780947,
+      "sha256": "201f4809337beec73ca93b4d4c832578f638b17e068571bf8ef5dfc5009b2482"
+    },
+    "delta-sparse-net.7.pt": {
+      "bytes": 43780947,
+      "sha256": "7ac4b1680535b1a045499af8ac5c8e1e834a9787e59c7de20a70c2ff5147f43f"
+    },
+    "delta-sparse-net.8.pt": {
+      "bytes": 43780947,
+      "sha256": "b2e9f9dc525c022b40dabf094188509b44eb6feff2f66e2a51cb0c6bb583f58b"
+    },
+    "delta-sparse-net.9.pt": {
+      "bytes": 43780947,
+      "sha256": "6ecf1cb499751edfbee9d72cc5970b13e4f10294dfab5b5f6282f7a0f92cfefc"
+    },
+    "delta-sparse-net.meta.pt": {
+      "bytes": 1112,
+      "sha256": "0df79fa80f789d2b38e849277488bf085f482ca402cb3c1c6963ee7ba0c626d6"
+    },
+    "dense.pt": {
+      "bytes": 4473666,
+      "sha256": "42ce0256c8101e38d8dffcd7096648cbcb41d4fb497bbf907fd46d9fabf2a2ce"
+    }
+  },
+  "chain": "sym24",
+  "reference_anchor": "workers/dispatcher/harvest-0way-r0_sym24/round-0",
+  "reference_release_tag": "harvest-r0_sym24",
+  "release_tag": "harvest-3way-r1360_sym24",
+  "repo": "johnmn3/mmllm",
+  "round": 1360,
+  "schema": 1
+}
