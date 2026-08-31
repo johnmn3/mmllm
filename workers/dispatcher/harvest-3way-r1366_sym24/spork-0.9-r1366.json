@@ -1,12 +1,12 @@
 {
   "spork_version": "0.9",
   "round": 1366,
-  "harvested_at": "2026-08-31T12:22:58Z",
-  "n_workers": 6,
-  "worker_ctrl_bpc_mean": 3.2853,
+  "harvested_at": "2026-08-31T16:08:54Z",
+  "n_workers": 3,
+  "worker_ctrl_bpc_mean": 3.1837,
   "worker_ctrl_bpc_best": 3.1281,
-  "cumulative_total_steps": 720,
-  "cumulative_unique_birds": 9,
+  "cumulative_total_steps": 240,
+  "cumulative_unique_birds": 3,
   "netbank_files": {
     "dense": "round-1366/dense.pt",
     "delta_sparse_net": [
@@ -48,8 +48,7 @@
   },
   "ancestor_harvests": [
     "workers/dispatcher/harvest-1way-r1365_sym24",
-    "workers/dispatcher/harvest-2way-r1365_sym24",
-    "workers/dispatcher/harvest-3way-r1365_sym24"
+    "workers/dispatcher/harvest-2way-r1365_sym24"
   ],
   "harvester": "scripts/harvest_action.sh (GH Action)"
 }
