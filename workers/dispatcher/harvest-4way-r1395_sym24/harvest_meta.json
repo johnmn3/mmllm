@@ -1,0 +1,74 @@
+{
+  "spork_version": "0.9",
+  "target_round": 1395,
+  "n_workers": 4,
+  "wave": "train-r1395",
+  "workers": [
+    {
+      "handle": "iirNn",
+      "branch": "origin/claude/train-sym24-2a57d71d-iirNn",
+      "ctrl_bpc": 4.0269
+    },
+    {
+      "handle": "NH45n",
+      "branch": "fork-SeniorCareMarket-com-mmllm-claude-train-sym24-69fa3b8f-NH45n",
+      "ctrl_bpc": 3.6512
+    },
+    {
+      "handle": "8h2Yy",
+      "branch": "fork-SeniorCareMarket-mmllm-claude-train-sym24-ebf5313a-8h2Yy",
+      "ctrl_bpc": 3.5131
+    },
+    {
+      "handle": "sLxXr",
+      "branch": "fork-joly-os-mmllm-claude-train-sym24-5d6549a2-sLxXr",
+      "ctrl_bpc": 3.6488
+    }
+  ],
+  "worker_ctrl_bpc_mean": 3.71,
+  "worker_ctrl_bpc_best": 3.5131,
+  "previous_harvest": {
+    "round": 1394,
+    "dir": "workers/dispatcher/harvest-4way-r1394_sym24",
+    "mean": 3.7251,
+    "best": 3.6153
+  },
+  "direct_contributions": [
+    {
+      "bird_id": "2a57d71d33f542c8",
+      "handle": "iirNn",
+      "branch": "origin/claude/train-sym24-2a57d71d-iirNn",
+      "n_steps": 80,
+      "ctrl_bpc": 4.0269
+    },
+    {
+      "bird_id": "69fa3b8f869749de",
+      "handle": "NH45n",
+      "branch": "fork-SeniorCareMarket-com-mmllm-claude-train-sym24-69fa3b8f-NH45n",
+      "n_steps": 80,
+      "ctrl_bpc": 3.6512
+    },
+    {
+      "bird_id": "ebf5313a83294107",
+      "handle": "8h2Yy",
+      "branch": "fork-SeniorCareMarket-mmllm-claude-train-sym24-ebf5313a-8h2Yy",
+      "n_steps": 80,
+      "ctrl_bpc": 3.5131
+    },
+    {
+      "bird_id": "5d6549a2f0da48c8",
+      "handle": "sLxXr",
+      "branch": "fork-joly-os-mmllm-claude-train-sym24-5d6549a2-sLxXr",
+      "n_steps": 80,
+      "ctrl_bpc": 3.6488
+    }
+  ],
+  "ancestor_harvests": [
+    "workers/dispatcher/harvest-1way-r1394_sym24"
+  ],
+  "cumulative_total_steps": 560,
+  "cumulative_unique_birds": 7,
+  "harvested_at": "2026-09-04T23:41:27Z",
+  "harvester": "scripts/harvest_action.sh (GH Action)",
+  "note": "Lean harvest \u2014 sparse deltas + averaged dense only, no opt-state."
+}
