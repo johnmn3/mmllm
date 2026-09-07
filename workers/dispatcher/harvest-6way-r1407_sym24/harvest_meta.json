@@ -1,0 +1,99 @@
+{
+  "spork_version": "0.9",
+  "target_round": 1407,
+  "n_workers": 6,
+  "wave": "train-r1407",
+  "workers": [
+    {
+      "handle": "HDRIp",
+      "branch": "origin/claude/train-sym24-871f85ec-HDRIp",
+      "ctrl_bpc": 3.218
+    },
+    {
+      "handle": "Xjpsr",
+      "branch": "fork-SeniorCareMarket-com-mmllm-claude-train-sym24-85edbe8d-Xjpsr",
+      "ctrl_bpc": 3.328
+    },
+    {
+      "handle": "f7dTJ",
+      "branch": "fork-SeniorCareMarket-com-mmllm-claude-train-sym24-dd351127-f7dTJ",
+      "ctrl_bpc": 3.6191
+    },
+    {
+      "handle": "br5Cl",
+      "branch": "fork-SeniorCareMarket-mmllm-claude-train-sym24-63e5cd21-br5Cl",
+      "ctrl_bpc": 3.355
+    },
+    {
+      "handle": "Qi6m4",
+      "branch": "fork-SeniorCareMarket-mmllm-claude-train-sym24-354ab9b5-Qi6m4",
+      "ctrl_bpc": 3.5304
+    },
+    {
+      "handle": "MhRvK",
+      "branch": "fork-joly-os-mmllm-claude-train-sym24-97fb8abb-MhRvK",
+      "ctrl_bpc": 3.2006
+    }
+  ],
+  "worker_ctrl_bpc_mean": 3.3752,
+  "worker_ctrl_bpc_best": 3.2006,
+  "previous_harvest": {
+    "round": 1406,
+    "dir": "workers/dispatcher/harvest-4way-r1406_sym24",
+    "mean": 3.3332,
+    "best": 3.2151
+  },
+  "direct_contributions": [
+    {
+      "bird_id": "871f85ec265b4a51",
+      "handle": "HDRIp",
+      "branch": "origin/claude/train-sym24-871f85ec-HDRIp",
+      "n_steps": 80,
+      "ctrl_bpc": 3.218
+    },
+    {
+      "bird_id": "85edbe8d35b0475a",
+      "handle": "Xjpsr",
+      "branch": "fork-SeniorCareMarket-com-mmllm-claude-train-sym24-85edbe8d-Xjpsr",
+      "n_steps": 80,
+      "ctrl_bpc": 3.328
+    },
+    {
+      "bird_id": "dd3511278c924bad",
+      "handle": "f7dTJ",
+      "branch": "fork-SeniorCareMarket-com-mmllm-claude-train-sym24-dd351127-f7dTJ",
+      "n_steps": 80,
+      "ctrl_bpc": 3.6191
+    },
+    {
+      "bird_id": "63e5cd218c0042b0",
+      "handle": "br5Cl",
+      "branch": "fork-SeniorCareMarket-mmllm-claude-train-sym24-63e5cd21-br5Cl",
+      "n_steps": 80,
+      "ctrl_bpc": 3.355
+    },
+    {
+      "bird_id": "354ab9b5f5594c9f",
+      "handle": "Qi6m4",
+      "branch": "fork-SeniorCareMarket-mmllm-claude-train-sym24-354ab9b5-Qi6m4",
+      "n_steps": 80,
+      "ctrl_bpc": 3.5304
+    },
+    {
+      "bird_id": "97fb8abb0df6434b",
+      "handle": "MhRvK",
+      "branch": "fork-joly-os-mmllm-claude-train-sym24-97fb8abb-MhRvK",
+      "n_steps": 80,
+      "ctrl_bpc": 3.2006
+    }
+  ],
+  "ancestor_harvests": [
+    "workers/dispatcher/harvest-2way-r1406_sym24",
+    "workers/dispatcher/harvest-4way-r1406_sym24"
+  ],
+  "cumulative_total_steps": 1040,
+  "cumulative_unique_birds": 13,
+  "harvested_at": "2026-09-07T05:35:35Z",
+  "harvester": "scripts/harvest_action.sh (GH Action)",
+  "note": "Lean harvest \u2014 sparse deltas + averaged dense only, no opt-state."
+}
