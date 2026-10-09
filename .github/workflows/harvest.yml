@@ -39,8 +39,10 @@ on:
   # johnmn3/mmllm repo. Forks that enable the workflow can still trigger
   # it manually via workflow_dispatch, but they won't waste compute on
   # hourly auto-runs that would just duplicate upstream's harvest.
-  schedule:
-    - cron: "0 * * * *"
+  # schedule: PARKED 2026-10-09 — spork experiment spun down, cron disabled.
+  # Manual dispatch via workflow_dispatch still works.
+  # schedule:
+  #   - cron: "0 * * * *"
 
 # Serialize harvests — never run two at once. A delayed cron tick overlapping
 # the prior run (or a manual dispatch racing the cron) can produce the
