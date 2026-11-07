@@ -1,0 +1,11 @@
+{;; JVM port of mmLLM (docs/jvm-port-spec.md). Parity milestones (M1-M5)
+ ;; run on pure Clojure + java.nio — no native deps — so gradient/forward
+ ;; correctness is auditable in isolation. Neanderthal (MKL/Accelerate)
+ ;; backs tensor.clj's same API from M6 (the performance milestone).
+ :paths ["src" "resources"]
+ :deps {org.clojure/clojure {:mvn/version "1.12.0"}}
+ :aliases
+ {:test {:extra-paths ["test"]}
+  ;; M6+: uncomment to swap tensor.clj's matmul onto MKL.
+  ;; :neanderthal {:extra-deps {uncomplicate/neanderthal {:mvn/version "0.60.0"}}}
+  }}

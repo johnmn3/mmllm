@@ -195,6 +195,18 @@ export MMLLM_KD_FREEZE=trunk
 : ${MMLLM_LR_NET_MULT_END:=5.0}  ; export MMLLM_LR_NET_MULT_END
 : ${MMLLM_LR_DENSE_MULT:=0.05}   ; export MMLLM_LR_DENSE_MULT
 : ${MMLLM_LR_DENSE_MULT_END:=0.005}; export MMLLM_LR_DENSE_MULT_END
+# K_a/K_b addressing on their own AdamW group (#3-spike intent, activated
+# 2026-07-03 per user direction — the mechanism in make-opt-dense was fully
+# plumbed but inert because these were never set, so K_a/K_b silently rode
+# the dense schedule). Wake phase: 3× dense peak so routing structure
+# hill-climbs while the banks fill. Sleep phase: cosine to 0.001 (= bank
+# end) so Local's addressing is FROZEN while logitkd consolidates — distill
+# then pushes V_net at stable addresses (the K-alignment issue documented
+# in CLAUDE.md). Values are an initial operating point: per CLAUDE.md
+# recipe discipline, confirm Δ_net + ctrl_bpc across ≥3 consecutive
+# harvests before trusting; revert to inert by setting both to 0.05.
+: ${MMLLM_LR_KAB_MULT:=0.15}     ; export MMLLM_LR_KAB_MULT
+: ${MMLLM_LR_KAB_MULT_END:=0.001}; export MMLLM_LR_KAB_MULT_END
 # Base LR for chain extensions. Stays at 3e-2 (stack-3e-2-5.0).
 #
 # History (2026-05-25): commit 5c5f9b7 flipped this to 1e-1 based on

@@ -47,3 +47,4 @@ core/round-6/**/*.bin
 core/round-6/**/*.pt
 # fetch_static_assets extraction markers:
 .asset-*.ok
+jvm/goldens/
